@@ -2,120 +2,150 @@ Return-Path: <SRS0=SgEP=CU=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49268C43461
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Sep 2020 05:24:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAC22C433E2
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Sep 2020 06:00:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0973321D81
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Sep 2020 05:24:32 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fCLVR08K"
+	by mail.kernel.org (Postfix) with ESMTP id 7549E221E5
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Sep 2020 06:00:52 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1599804052;
+	bh=WESK6UKUjRSkP/TKSKzcEG4kxiuhjNV3m+bUJP3+ZXk=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=oDwlUlTLeZQVgEts8N9zGd/x6dF6D114kJfVjOuoHm/N/KsHLiPpeOeanRQ7aREWH
+	 i4ydFDf7g41ooWgqmFioIC+He+3k1G5ZTLzPZ+lMroNCP3ODxZ5wKu8edUghlRGs/6
+	 HKxFWJlVqxHN94gWH6mz9TR4dHD11NXuqy0LJ428=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725535AbgIKFY0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Sep 2020 01:24:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53708 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725446AbgIKFYY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Sep 2020 01:24:24 -0400
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D9B1C061573;
-        Thu, 10 Sep 2020 22:24:24 -0700 (PDT)
-Received: by mail-pj1-x1044.google.com with SMTP id md22so2146970pjb.0;
-        Thu, 10 Sep 2020 22:24:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=gLYlz5zLcstFedwvUClCeYbR/tSrAZj+4PU7wzkVOas=;
-        b=fCLVR08KDBVeiJJu3p2i6wWsugA8HUdtUDks1LreChxEVx9bdI3uJILexCMPEUYXww
-         pjlyzp3KmFmz3Xnpoo/3d++yKfsFtsBCajGceY3oAJIP1XV/Uh0xOT45JcLhj6+62gF3
-         P/0UvESSsVtXq7wmMCY4QsaT6wVA9+wKqeD2Na8qlekBcmoLwDZqW/gKbseGoXflIFpR
-         0TbKO1pCdYSZv78HEvB1Xx6YEoWGWJ2e+cy9+Djkuw7pheFSTpBgb3Hikb3CYK8xMb7V
-         gIF15KzuPYpeYvWUvkMWpRPmhsB8bqiU6/NNR8AHSHfwJCagKSKn6MT3zuz5DDXaa2oF
-         iyog==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=gLYlz5zLcstFedwvUClCeYbR/tSrAZj+4PU7wzkVOas=;
-        b=l86g/WRpP9CltIuy9b3fxFk9y3xZ+wr43dUMJVZkrBodEJAjvS36DNKRtck0IxoHyP
-         zxBM8ZF47kc12Gq5ajnIgKDSm5mAO6oyjuiEhxAk7GXoREh0W95bVJBnlJGp9Di+sUVC
-         l++80++CNrHXNwOsBfEIWA4f0+1A5ANqPuojwKtIBXnLxeRMMFBbCDrDsTdJCFkabvDE
-         waxH0PGgiOg96KxCi2VKx7tt+zZcfXfaBkOXdPgsRf0d2WlU6SSorblT/DtIxqr2Mjpd
-         zP7DWmKVaQgo+l6mWscLWcbVEAmXpxEF8KDZvQ1bfHC72lmn7VIWQqdpPUw21gdMHk3k
-         LsXA==
-X-Gm-Message-State: AOAM5332VIYTAfEz2BrygqV/GS6UK2zrdmlXdqTEUQZe4XvQNspdjoqn
-        xVoywAWOM6FBPpyjjf5ED2Q=
-X-Google-Smtp-Source: ABdhPJyceqivRMTy4mDYSvkVL8mFz/VM9onT7wXxfOJXuYJzbh0iUprANZyNqhDqO8yi8ts8gFWXBg==
-X-Received: by 2002:a17:90a:ebd7:: with SMTP id cf23mr674812pjb.126.1599801863606;
-        Thu, 10 Sep 2020 22:24:23 -0700 (PDT)
-Received: from amit-ThinkPad-X230.domain.name ([106.215.94.244])
-        by smtp.gmail.com with ESMTPSA id ga3sm698886pjb.18.2020.09.10.22.24.19
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 10 Sep 2020 22:24:22 -0700 (PDT)
-From:   Amit Singh Tomar <amittomer25@gmail.com>
-To:     andre.przywara@arm.com, afaerber@suse.de,
-        manivannan.sadhasivam@linaro.org, robh+dt@kernel.org
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        cristian.ciocaltea@gmail.com, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-actions@lists.infradead.org, devicetree@vger.kernel.org
-Subject: [PATCH v7 08/10] dt-bindings: mmc: owl: add compatible string actions,s700-mmc
-Date:   Fri, 11 Sep 2020 10:54:09 +0530
-Message-Id: <1599801849-6071-1-git-send-email-amittomer25@gmail.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1595180527-11320-9-git-send-email-amittomer25@gmail.com>
-References: <1595180527-11320-9-git-send-email-amittomer25@gmail.com>
+        id S1725550AbgIKGAr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Sep 2020 02:00:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59580 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725468AbgIKGAr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 11 Sep 2020 02:00:47 -0400
+Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E3315221E5;
+        Fri, 11 Sep 2020 06:00:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1599804046;
+        bh=WESK6UKUjRSkP/TKSKzcEG4kxiuhjNV3m+bUJP3+ZXk=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=LC7DGZ8rQekxgJUgL7zxJ0LSh8Y/78j+NhruI5QfUcNvg1Qnnm5Qz3wO0/okaaFUA
+         WVguyWmjY1UBQ9GxUMisqY9kXRKh70rJ39UFlNetdPSqcs6RJ0mLNogVJ4Op3PRi+h
+         kmmKZWyIKgr1QkKcWDHBRWULkVuo4+FNDgWkBwkM=
+Received: by mail-ed1-f50.google.com with SMTP id g4so8768450edk.0;
+        Thu, 10 Sep 2020 23:00:45 -0700 (PDT)
+X-Gm-Message-State: AOAM532K56wgC580HP5gHKHNUMIZAb1K5Fp9G7cHX0cde1ITsE5oZQqe
+        8Hhegfvdk2kMKVYmfjuCFrkjgVHpY+PH1wVNihg=
+X-Google-Smtp-Source: ABdhPJymE4+rHgjSFNYuvs+iwJGMjk8bYNxuRzgTr6WbXwAWTZAX5N+hRh1+ebmhCBeiPPYGzNLG50rUvrXYcNeA9YU=
+X-Received: by 2002:a05:6402:515:: with SMTP id m21mr346459edv.348.1599804044455;
+ Thu, 10 Sep 2020 23:00:44 -0700 (PDT)
+MIME-Version: 1.0
+References: <20200902193658.20539-1-krzk@kernel.org> <CAPDyKFqBS-ws6fkirDQL8EEqh9At88K2vrG5fc8K5_JiXsmfyg@mail.gmail.com>
+ <CAL_Jsq+ajm5aiAJfQdS2+2DO1ynBDHWha_7TsA4u-2qwd87y6g@mail.gmail.com>
+In-Reply-To: <CAL_Jsq+ajm5aiAJfQdS2+2DO1ynBDHWha_7TsA4u-2qwd87y6g@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+Date:   Fri, 11 Sep 2020 08:00:32 +0200
+X-Gmail-Original-Message-ID: <CAJKOXPf8cNDGaXGkYpgc-LEEPSoF2JxwzQp7fwVQB3kLJWNKXw@mail.gmail.com>
+Message-ID: <CAJKOXPf8cNDGaXGkYpgc-LEEPSoF2JxwzQp7fwVQB3kLJWNKXw@mail.gmail.com>
+Subject: Re: [PATCH 00/11] mmc: Minor cleanups and compile test
+To:     Rob Herring <robh@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Paul Cercueil <paul@crapouillou.net>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        "moderated list:BROADCOM BCM2835 ARM ARCHITECTURE" 
+        <linux-rpi-kernel@lists.infradead.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Microchip Linux Driver Support <UNGLinuxDriver@microchip.com>,
+        Jun Nie <jun.nie@linaro.org>, Shawn Guo <shawnguo@kernel.org>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The commit adds a new SoC specific compatible string "actions,s700-mmc"
-in combination with more generic string "actions,owl-mmc".
+On Fri, 11 Sep 2020 at 00:55, Rob Herring <robh@kernel.org> wrote:
+>
+> On Thu, Sep 3, 2020 at 2:40 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Wed, 2 Sep 2020 at 21:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+> > >
+> > > Hi,
+> > >
+> > > Set of minor cleanups.  Patches requiring more attention:
+> > >  - 6/11: Testing and review would be appreciated,
+> > >  - 11/11: I build tested multiple architectures but not all and
+> > >    definitely no all possible configs. This one could sit on the lists
+> > >    for few days so 0-day would try it.
+> > >
+> > > Best regards,
+> > > Krzysztof
+> > >
+> > > Krzysztof Kozlowski (11):
+> > >   mmc: bcm2835: Simplify with dev_err_probe()
+> > >   mmc: davinci: Simplify with dev_err_probe()
+> > >   mmc: dw_mmc-zx: Simplify with dev_err_probe()
+> > >   mmc: jz4740: Simplify with dev_err_probe()
+> > >   mmc: meson: Simplify with dev_err_probe()
+> > >   mmc: sdhci-brcmstb: Simplify with optional clock and dev_err_probe()
+> > >   mmc: sdhci-of-arasan: Simplify with dev_err_probe()
+> > >   mmc: sdhci-tegra: Simplify with dev_err_probe()
+> > >   mmc: dw_mmc: Simplify with dev_err_probe()
+> > >   mmc: sdhci-of-sparx5: Use proper printk format for dma_addr_t
+> > >   mmc: host: Enable compile testing of multiple drivers
+> > >
+> > >  drivers/mmc/host/Kconfig           | 42 ++++++++++++++++--------------
+> > >  drivers/mmc/host/bcm2835.c         |  4 +--
+> > >  drivers/mmc/host/davinci_mmc.c     |  5 ++--
+> > >  drivers/mmc/host/dw_mmc-zx.c       | 11 +++-----
+> > >  drivers/mmc/host/dw_mmc.c          |  9 +++----
+> > >  drivers/mmc/host/jz4740_mmc.c      |  5 ++--
+> > >  drivers/mmc/host/meson-gx-mmc.c    | 16 ++++--------
+> > >  drivers/mmc/host/sdhci-brcmstb.c   | 12 ++++-----
+> > >  drivers/mmc/host/sdhci-of-arasan.c |  7 +++--
+> > >  drivers/mmc/host/sdhci-of-sparx5.c |  4 +--
+> > >  drivers/mmc/host/sdhci-tegra.c     |  7 ++---
+> > >  11 files changed, 51 insertions(+), 71 deletions(-)
+> > >
+> > > --
+> > > 2.17.1
+> > >
+> >
+> > Series applied for next, except 11, thanks!
+>
+> I see there's a bunch of these already, but I think we can do better
+> here than dev_err_probe. We have _optional variants for the case not
+> getting a resource is not an error. So the called functions like
+> devm_clk_get can print an error. We already have this for
+> platform_get_irq along with a coccinelle script to fix cases. I have a
+> WIP branch[1] doing this.
 
-Placement order of these strings should abide by the principle of
-"from most specific to most general".
+That's quite good idea.
 
-Reviewed-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Reviewed-by: Rob Herring <robh@kernel.org>
-Signed-off-by: Amit Singh Tomar <amittomer25@gmail.com>
----
-Changes since v6:
-	* No change.
-Changes since v5:
-        * Added Mani's Reviewed-by: tag.
-Changes since v4:
-        * No change.
-Changes since v3:
-        * No change.
-Changes since v2:
-        * Added Rob's Reviewed-by tag
----
- Documentation/devicetree/bindings/mmc/owl-mmc.yaml | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-index 1380501fb8f0..5eab25ccf7ae 100644
---- a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-@@ -14,7 +14,11 @@ maintainers:
- 
- properties:
-   compatible:
--    const: actions,owl-mmc
-+    oneOf:
-+      - const: actions,owl-mmc
-+      - items:
-+          - const: actions,s700-mmc
-+          - const: actions,owl-mmc
- 
-   reg:
-     maxItems: 1
--- 
-2.7.4
-
+Best regards,
+Krzysztof
