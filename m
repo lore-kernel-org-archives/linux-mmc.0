@@ -2,112 +2,112 @@ Return-Path: <SRS0=0j+4=CX=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 870F4C43461
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Sep 2020 08:10:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11ED7C433E2
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Sep 2020 09:42:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3F19620719
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Sep 2020 08:10:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC2F220759
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Sep 2020 09:42:12 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="r1HydzdJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726232AbgINIKW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Sep 2020 04:10:22 -0400
-Received: from mga18.intel.com ([134.134.136.126]:26862 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726193AbgINIJF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 14 Sep 2020 04:09:05 -0400
-IronPort-SDR: HHVcVZbpZy0ZOCJyWvkMk6D6xXm7mzqD8erW1fhBcCpQZmeqy7vc2v1QLSrTtFRPbb2DbreGxo
- 4hxP/WfMZk0g==
-X-IronPort-AV: E=McAfee;i="6000,8403,9743"; a="146780957"
-X-IronPort-AV: E=Sophos;i="5.76,425,1592895600"; 
-   d="scan'208";a="146780957"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Sep 2020 01:08:42 -0700
-IronPort-SDR: ibFpH2XMJyKrwM93Dd8zZBRyDTabJLqYves4nwbbb4NnK4QnfUgU0Y+vj60iG4uU9gltQs46Zw
- Wc4RxdFivM8Q==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.76,425,1592895600"; 
-   d="scan'208";a="408790526"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
-  by fmsmga001.fm.intel.com with ESMTP; 14 Sep 2020 01:08:40 -0700
-Subject: Re: [RFC PATCH V3 13/21] mmc: sdhci: UHS-II support, skip
- signal_voltage_switch()
-To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-References: <20200710111104.29616-1-benchuanggli@gmail.com>
- <9ab64a9d-cd78-785c-b48f-561048cfe2ed@intel.com>
- <20200914064001.GA2743583@laputa>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <a0000661-a0e1-8813-0672-c0eb73184079@intel.com>
-Date:   Mon, 14 Sep 2020 11:08:14 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1726250AbgINJmM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Sep 2020 05:42:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49688 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726123AbgINJmL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Sep 2020 05:42:11 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52E57C06174A
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2020 02:42:11 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id c25so3983367vkm.1
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Sep 2020 02:42:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=lofEGpAOdv9VKLTBFkELALaBiwoZZBeLnDfQKfPnGWc=;
+        b=r1HydzdJaFGX/Wb2URqDIrAkORnKcuoIiBtihscyt9IXv5tn4J2YrwHp+Rlk5HLuLw
+         jwDWgVgS4bG41AOBYzYEDqepuTN8P2g3vDbhv/NL+cUfsCfR7z+oE0R1lcYCwYsyhg3Z
+         7HjF36WMlpdrkg+/WSAANh6aQj4e08wewbAL/U/u7ROXnoRTwoifkIDoO6J62RIkZkH8
+         7e6A6VuRBGROTx51N6UOg/1WbMPZyXvUzGGXzIkdUhb8mYM8Jay2M4DcRZlc37fqm+28
+         LuiPi8YeREfkidcriQ91HOPlxxroUQ86ubQ7N0M/iO5on0nGKJIvPIiHzQolD+GXr0vk
+         AHaw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=lofEGpAOdv9VKLTBFkELALaBiwoZZBeLnDfQKfPnGWc=;
+        b=ctaGvQytR2u012olKH8sNwwLp1QuLpVvpfbPtBEV1IK7B5jQFWqO6DdF1sdnnS0XcA
+         WfFFT20Go4bVSjZYB3lVQiLMsBWsY5FCj+/Af4fVbrgLer5Dc5lzQWglTbyT1pk2cRz/
+         thzdK4RrQgFSElXx4pIA1AiP/uwZhC6pT3V8suDu/vLg4aPHUF6R0dtLa+KbDkL9bAgb
+         5nXZsLJggn9eRZ0okQDdWVhRumDBxBqgp32woMJ8EcqcOTL1dtVBONxJ9K376pJdDqkS
+         nUMhD+Tlmaq2+2HU2Q1qkHQ/30SeyypEL1oH+J4UfMabQVeSHRx9eUAI9DmQBsG6hARx
+         XqnA==
+X-Gm-Message-State: AOAM531Dquk6XCbebiEAvNIRsoj2aoD+9EjwNHlq5lfL4hQho6YQT9o8
+        lalMSsYkJit10vzwAVuGoNF61SrpdXpKmIovtycuCA==
+X-Google-Smtp-Source: ABdhPJy5sfsoQdr+vGacO0I5WzNvlvQDDeaFC3FaJejFIceTY+cEeosM+E+6TqgF2xJnpawCwl17UKP8W1fypUrPlhE=
+X-Received: by 2002:a1f:1dcf:: with SMTP id d198mr694666vkd.30.1600076530291;
+ Mon, 14 Sep 2020 02:42:10 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20200914064001.GA2743583@laputa>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200910105440.3087723-1-andrew@aj.id.au> <20200910105440.3087723-2-andrew@aj.id.au>
+In-Reply-To: <20200910105440.3087723-2-andrew@aj.id.au>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 14 Sep 2020 11:41:34 +0200
+Message-ID: <CAPDyKFq+QYzJNT94eFt2EsQBVqQciUoqnMDdrr3DbbkpnHRpCw@mail.gmail.com>
+Subject: Re: [PATCH 1/3] dt: bindings: mmc: Add phase control properties for
+ the Aspeed SDHCI
+To:     Andrew Jeffery <andrew@aj.id.au>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Joel Stanley <joel@jms.id.au>,
+        Rob Herring <robh+dt@kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/09/20 9:40 am, AKASHI Takahiro wrote:
-> Adrian,
-> 
-> On Fri, Aug 21, 2020 at 05:09:01PM +0300, Adrian Hunter wrote:
->> On 10/07/20 2:11 pm, Ben Chuang wrote:
->>> From: AKASHI Takahiro <takahiro.akashi@linaro.org>
->>>
->>> sdhci_start_signal_voltage_switch() should be called only in UHS-I mode,
->>> and not for UHS-II mode.
->>>
->>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 7 ++++++-
->>>  1 file changed, 6 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index 5511649946b9..7f2537648a08 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -2623,8 +2623,13 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
->>>  	/*
->>>  	 * Signal Voltage Switching is only applicable for Host Controllers
->>>  	 * v3.00 and above.
->>> +	 * But for UHS2, the signal voltage is supplied by vdd2 which is
->>> +	 * already 1.8v so no voltage switch required.
->>>  	 */
->>> -	if (host->version < SDHCI_SPEC_300)
->>> +	if (host->version < SDHCI_SPEC_300 ||
->>> +	    (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
->>> +	     host->version >= SDHCI_SPEC_400 &&
->>> +	     host->mmc->flags & MMC_UHS2_SUPPORT))
->>
->> Please look at hooking ->start_signal_voltage_switch() instead
-> 
-> Do you mean that you want every platform driver who wants to support UHS-II
-> to set NULL to start_signal_voltage_switch hook even if this hack is
-> platform agnostic?
+On Thu, 10 Sep 2020 at 12:54, Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+> Add properties to control the phase delay for input and output data
+> sampling.
+>
+> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> ---
+>  Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> index 987b287f3bff..75effd411554 100644
+> --- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> @@ -61,6 +61,14 @@ patternProperties:
+>        sdhci,auto-cmd12:
+>          type: boolean
+>          description: Specifies that controller should use auto CMD12
+> +      "aspeed,input-phase":
+> +        $ref: '/schemas/types.yaml#/definitions/uint32'
+> +        description:
+> +          The input clock phase delay value.
+> +      "aspeed,output-phase":
+> +        $ref: '/schemas/types.yaml#/definitions/uint32'
+> +        description:
+> +          The output clock phase delay value.
 
-No, I see UHS-II as a separate layer i.e.
+We already have a common mmc clk-phase* binding, see
+mmc-controller.yaml. As matter of fact, there is one binding per speed
+mode.
 
- UHS-II host controller driver
-  |   |
-  |   v
-  |   sdhci-uhs2 e.g. sdhci_uhs2_start_signal_voltage_switch
-  |   |
-  v   v
-  sdhci e.g. sdhci_start_signal_voltage_switch
+Could that work for this case as well?
 
-Most things should go through sdhci-uhs2 but not nessarily everything.
+Kind regards
+Uffe
