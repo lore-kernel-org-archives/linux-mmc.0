@@ -2,119 +2,202 @@ Return-Path: <SRS0=q7gx=CZ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72CF4C43461
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 09:07:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A53ABC433E2
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 09:42:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2195B208E4
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 09:07:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 67D5D21974
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 09:42:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Z7I6N1Xx"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="u2yo9llC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726528AbgIPJHB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Sep 2020 05:07:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38496 "EHLO
+        id S1726726AbgIPJmX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Sep 2020 05:42:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43964 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726129AbgIPJGv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2020 05:06:51 -0400
-Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34221C06174A
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 02:06:51 -0700 (PDT)
-Received: by mail-pg1-x534.google.com with SMTP id y1so3524178pgk.8
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 02:06:51 -0700 (PDT)
+        with ESMTP id S1726302AbgIPJmV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2020 05:42:21 -0400
+Received: from mail-yb1-xb41.google.com (mail-yb1-xb41.google.com [IPv6:2607:f8b0:4864:20::b41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46F6FC06174A;
+        Wed, 16 Sep 2020 02:42:20 -0700 (PDT)
+Received: by mail-yb1-xb41.google.com with SMTP id x20so1215074ybs.8;
+        Wed, 16 Sep 2020 02:42:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=ttZkZx1LzxLGYFhW4zTKYKYiQwvfjDiSjvWqnbF0vHk=;
-        b=Z7I6N1XxqCqBifMW2RwOmCjaR7e0Mnw+2vjVnacAqGC0CEBgiJkfWus2y6dGywgVUe
-         FYeiY2d+d+2KX0av8QlogjDPyiewesxjJSLdXGSr29TuUi22NJ3sYmq6f1kJQDfY7woi
-         hwSCxoweIjXUcOEBxQOScVoueGh+uTb7HP/7scp5C7Sesz3XbyHXBjoHfRfHL54l4xYT
-         gDsv6VCSw2SFx7xD84WpA64KYk1/bLFrSMHtZNNg2NfXby9cFK4yspALSuY+DzByxaFo
-         dXKWkfjfCfHM3ZI5px5ISyExcyo49ojgI62wdWNIe5JGJ5twMDHayuXR60h4zFHB8VSo
-         X6VA==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=KCrbMUpJ2Qf49dXcgo9riCizwHx0h8gjW0oDcFnBlWw=;
+        b=u2yo9llCIFZqBYxZkBFamjlr31frdVhppl/IllupDOTmr9g5ti79RtEjGZTsckvt78
+         J0AjETaDsdEV8h+E4Q6Ei1lfd4dMbezQQf2/sjOiGvqN5CZidLafVHc8H7vWklPsX4JR
+         we0mCJRvwpKwzEsxdPBqi2ivCKIy0/lXjCl/XGEvoAqHUoXoYcsxbQQ290uWeXYMMw3G
+         nzJRq2RxysAEcDfmWASPbeEWrcNMnhA6IBqMT5L/uN1HJhvW6b+S7R+8+0Z7yXuSyC4u
+         AEqHnyqPAihGroWkaS5Sjliw+rWiy6+/v/L1rmjDryVz0N3/gnYn2G1yhyXoclrBFBYG
+         ULSw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=ttZkZx1LzxLGYFhW4zTKYKYiQwvfjDiSjvWqnbF0vHk=;
-        b=ATUBN5rC14blycAN2Qar/oXiG4Wgj3sdndmL2qsxEFvAXnSvR3opR2sFmcBmHiDd1P
-         tqU+3F4j3Vycuw/KK2CXqxK51OOu+iBVelHgMe9eE9HHtLhsB1KpWOGYBT84FsoIN53o
-         OukMvjAeerxf0ZEnpKNXdQKZvkgj98K1jK/EssFYmSM0o2wU4LmnyhbJOWPtSpnBqatf
-         Cw4kSZD1um/ksPYvoY8l3/Onht+J55o7y5Bq58PTtDQvq2MIEeUMNU5AVSnhVbDqTZFf
-         yn3fFiprAbYLyAkaJTR92pH58zTveEy6H8oQtQ5y13SSKk5GJrz8MaIhcrvVqltv8y9e
-         gFvg==
-X-Gm-Message-State: AOAM533seCc5YH9g7EyhK83RJDa6vZPAcaAU4+wHCkKJOqWOBu40VprV
-        tfSlrPpvwVzHsiiVpbP1XwmeyQ==
-X-Google-Smtp-Source: ABdhPJxaex4WXIf49yTDWeyTvhfkQ16nkldb65p5CHOJKBKiFPs1J1w8fAlogBZCbdj68MzDmDyP2w==
-X-Received: by 2002:a62:7c82:0:b029:13c:1611:6525 with SMTP id x124-20020a627c820000b029013c16116525mr22021122pfc.5.1600247210609;
-        Wed, 16 Sep 2020 02:06:50 -0700 (PDT)
-Received: from localhost ([122.181.54.133])
-        by smtp.gmail.com with ESMTPSA id z1sm11903216pfq.102.2020.09.16.02.06.49
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 16 Sep 2020 02:06:49 -0700 (PDT)
-Date:   Wed, 16 Sep 2020 14:36:37 +0530
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        lkft-triage@lists.linaro.org,
-        linux-clk <linux-clk@vger.kernel.org>,
-        Anders Roxell <anders.roxell@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Rajendra Nayak <rnayak@codeaurora.org>,
-        John Stultz <john.stultz@linaro.org>
-Subject: Re: Unable to handle kernel paging request at virtual address dead -
- __clk_put
-Message-ID: <20200916090637.fvyangrcc7ao4gye@vireshk-i7>
-References: <CA+G9fYvYEsxjU_cnm6oWFgOrU4x0T1CMoN-L2SHLGeJC6MF54Q@mail.gmail.com>
- <CAPDyKFqVB_hgDghaYU1B1BbWUuL6GHhWMbZEYM-cXDQ8T8ThfQ@mail.gmail.com>
- <20200916052239.7c5z4wqqrdpauti4@vireshk-i7>
- <CAPDyKFrxrKRuJec0pDLooovV3BJBVvmDizoL6N4eb+hv1D0NgA@mail.gmail.com>
- <20200916080728.ajqzw75spcmbbwsc@vireshk-i7>
- <20200916082042.ejzaje62k4bl2hhy@vireshk-i7>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=KCrbMUpJ2Qf49dXcgo9riCizwHx0h8gjW0oDcFnBlWw=;
+        b=Yr665zdyxRZPVg4JW5ZPTGPMT9tbUkEl2PG6VVK4lZNW5gWnpJ4iWgr+yNh593HTzU
+         HeZaIU9fyXPWBn8JnhhZtX6OnxWg4ZjXDSrGY4kH9cZnwFD014W10Re5aCi18FKY/W8G
+         VW7t7eDrRL9AL9mJiA13SVy9oRNXkZM+SI6xai2Z2BBFYLdR8BHifzxXrRfm1Lhu4SDK
+         2MBNxXO2SrSKZZZH7UJSMtet41L8z+mlSQalhQs12W6dSsmrJgoD6GX2y6hKeIDkdwGM
+         ++Gm36W6pzaK+9kH78QYB/WZOEhZtpXOV9o//0eIvkv3HhQqS7GoLzMhrUGyUMqmZc/n
+         rEUQ==
+X-Gm-Message-State: AOAM531Vc4AFH5aB302cvx6LfcQftP/hWe7M/JPlGgX/2WDZMH7GPqGi
+        FlwCinwB52yH8vUm5NCpGWIzN2tLbckfp/DcDzA=
+X-Google-Smtp-Source: ABdhPJw8z7Q9PcOiw8oeoQv3jKmPJ/iMwzJ1NrVQY6ZfYXLkzUC1as/OfRoMPlGpefvbstwvi+AvWA1Y0fK2KpxojBo=
+X-Received: by 2002:a25:afd0:: with SMTP id d16mr35366396ybj.177.1600249338919;
+ Wed, 16 Sep 2020 02:42:18 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200916082042.ejzaje62k4bl2hhy@vireshk-i7>
-User-Agent: NeoMutt/20180716-391-311a52
+References: <20200710111104.29616-1-benchuanggli@gmail.com>
+ <9ab64a9d-cd78-785c-b48f-561048cfe2ed@intel.com> <20200914064001.GA2743583@laputa>
+ <a0000661-a0e1-8813-0672-c0eb73184079@intel.com> <20200915060306.GA2860208@laputa>
+ <CACT4zj-sZaKxyPGL=wm28Bdwq5G7R8-XfDnd=U7=vrNXnXAQVA@mail.gmail.com> <20200916005213.GA2942982@laputa>
+In-Reply-To: <20200916005213.GA2942982@laputa>
+From:   Ben Chuang <benchuanggli@gmail.com>
+Date:   Wed, 16 Sep 2020 17:42:07 +0800
+Message-ID: <CACT4zj8QH2wPRL8=zDTWyAvzCRtqqqSQp4X-b83COxY6yB4bXg@mail.gmail.com>
+Subject: Re: [RFC PATCH V3 13/21] mmc: sdhci: UHS-II support, skip signal_voltage_switch()
+To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Ben Chuang <benchuanggli@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        greg.tu@genesyslogic.com.tw
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16-09-20, 13:50, Viresh Kumar wrote:
-> On 16-09-20, 13:37, Viresh Kumar wrote:
-> > On 16-09-20, 09:37, Ulf Hansson wrote:
-> > > I have the board as well. If you need some help with testing, just let me know.
-> > > 
-> > > In any case, I will try the revert and see how that changes things.
-> > 
-> > I am testing this with help of Naresh currently, will try to update
-> > back today itself.
-> 
-> I think I have found the issue and it is with a new patch from the opp
-> tree (which isn't merged upstream yet):
-> 
-> commit 99f1c7ff37b0 ("opp: Handle multiple calls for same OPP table in
-> _of_add_opp_table_v1()")
-> 
-> I have asked Naresh to run it again, lets see.
+On Wed, Sep 16, 2020 at 8:52 AM AKASHI Takahiro
+<takahiro.akashi@linaro.org> wrote:
+>
+> On Tue, Sep 15, 2020 at 07:36:14PM +0800, Ben Chuang wrote:
+> > Hi Takahiro,
+> >
+> > On Tue, Sep 15, 2020 at 2:03 PM AKASHI Takahiro
+> > <takahiro.akashi@linaro.org> wrote:
+> > >
+> > > Ben, Adrian,
+> > >
+> > > On Mon, Sep 14, 2020 at 11:08:14AM +0300, Adrian Hunter wrote:
+> > > > On 14/09/20 9:40 am, AKASHI Takahiro wrote:
+> > > > > Adrian,
+> > > > >
+> > > > > On Fri, Aug 21, 2020 at 05:09:01PM +0300, Adrian Hunter wrote:
+> > > > >> On 10/07/20 2:11 pm, Ben Chuang wrote:
+> > > > >>> From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > > > >>>
+> > > > >>> sdhci_start_signal_voltage_switch() should be called only in UHS-I mode,
+> > > > >>> and not for UHS-II mode.
+> > > > >>>
+> > > > >>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > > > >>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > > > >>> ---
+> > > > >>>  drivers/mmc/host/sdhci.c | 7 ++++++-
+> > > > >>>  1 file changed, 6 insertions(+), 1 deletion(-)
+> > > > >>>
+> > > > >>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > > > >>> index 5511649946b9..7f2537648a08 100644
+> > > > >>> --- a/drivers/mmc/host/sdhci.c
+> > > > >>> +++ b/drivers/mmc/host/sdhci.c
+> > > > >>> @@ -2623,8 +2623,13 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+> > > > >>>   /*
+> > > > >>>    * Signal Voltage Switching is only applicable for Host Controllers
+> > > > >>>    * v3.00 and above.
+> > > > >>> +  * But for UHS2, the signal voltage is supplied by vdd2 which is
+> > > > >>> +  * already 1.8v so no voltage switch required.
+> > >
+> > > I have been confused with this comment.
+> > > (I know it came from the original Intel code, not from Ben.)
+> > >
+> > > If this comment is true,
+> > >
+> > > > >>>    */
+> > > > >>> - if (host->version < SDHCI_SPEC_300)
+> > > > >>> + if (host->version < SDHCI_SPEC_300 ||
+> > > > >>> +     (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+> > > > >>> +      host->version >= SDHCI_SPEC_400 &&
+> > > > >>> +      host->mmc->flags & MMC_UHS2_SUPPORT))
+> > >
+> > > the condition above must be wrong since 'flags & MMC_UHS2_SUPPORT'
+> > > is one of capabilities for a host controller, not a card
+> > > while the selection of voltage depends on a card type.
+> >
+> > The flag MMC_UHS2_SUPPORT is set at the beginning of mmc_uhs2_rescan_try_freq().
+> > In UHS-II flow, it stays set.
+> > If the attempt to UHS-II fails finally, it will be unset.
+>
+> Right, but MMC_UHS2_SUPPORT is also set, at least initially,
+> in sdhci_uhs2_add_host(). It is confusing, isn't it?
 
-https://lkft.validation.linaro.org/scheduler/job/1770973
+I think it can be removed from sdhci_uhs2_add_host() to avoid making confusion.
 
-Got fixed.
-
-I will update my branch and push it.
-
-Ulf, you don't need to do anything.
-
-Naresh, Thanks a lot for testing this stuff out.
-
--- 
-viresh
+>
+> As we discussed before, any card-specific properties, like UHS-II mode,
+> should be placed in a card structure, not a host structure.
+>
+> > >
+> > > So I wonder why this code still works.
+> > > I guess that it is because set_signal_voltage(), or other variant functions,
+> > > will never be called for UHS-II cards under the current implementation.
+> > >
+> > > Looking at mmc_sd_init_card(), we have added some hack:
+> > > mmc_sd_init_card()
+> > > {
+> > >         ...
+> > >         /* For UHS2, skip the UHS-I initialization. */
+> > >         if ((host->flags & MMC_UHS2_SUPPORT) &&
+> > >             (host->flags & MMC_UHS2_INITIALIZED))
+> > >                 goto done;
+> > >         ...
+> > >                 if (mmc_sd_card_using_v18(card)) {
+> > >                         if (mmc_host_set_uhs_voltage(host) ||
+> > >                             mmc_sd_init_uhs_card(card)) {
+> > >                 ...
+> > > }
+> > >
+> > > Ben, can you confirm this?
+> > > (There is another callsite of mmc_host_set_uhs_voltage() though.)
+> >
+> > UHS-II cards use differential signals and don't need to signal voltage switch.
+> > But the main task is to set the parameters of UHS-II card interface.
+>
+> Whoever sets MMC_UHS2_SUPPORT (and MMC_UHS2_INITIALIZED), my assertion above
+> (mmc_host_set_uhs_voltage, and hence [sdhci_]start_signal_voltage_switch(), is
+> never called for UHS-II cards) will be valid, isn't it?
+>
+> -Takahiro Akashi
+>
+> > >
+> > > > >> Please look at hooking ->start_signal_voltage_switch() instead
+> > > > >
+> > > > > Do you mean that you want every platform driver who wants to support UHS-II
+> > > > > to set NULL to start_signal_voltage_switch hook even if this hack is
+> > > > > platform agnostic?
+> > > >
+> > > > No, I see UHS-II as a separate layer i.e.
+> > > >
+> > > >  UHS-II host controller driver
+> > > >   |   |
+> > > >   |   v
+> > > >   |   sdhci-uhs2 e.g. sdhci_uhs2_start_signal_voltage_switch
+> > > >   |   |
+> > > >   v   v
+> > > >   sdhci e.g. sdhci_start_signal_voltage_switch
+> > > >
+> > > > Most things should go through sdhci-uhs2 but not nessarily everything.
+> > >
+> > > What I meant by my previous comment is that we don't have to
+> > > call any function, sdhci_uhs2_start_signal_voltage_switch in above example,
+> > > for UHS-II cards in any case since it is always simply empty.
+> > >
+> > > -Takahiro Akashi
