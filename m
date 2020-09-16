@@ -2,128 +2,188 @@ Return-Path: <SRS0=q7gx=CZ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10735C43461
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 09:48:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89FC6C43461
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 10:01:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C4A9B22247
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 09:48:05 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="JjoWgMgp"
+	by mail.kernel.org (Postfix) with ESMTP id 5C84A2076B
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 10:01:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726823AbgIPJrw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Sep 2020 05:47:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44806 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726570AbgIPJrs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2020 05:47:48 -0400
-Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B83E7C061788
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 02:47:47 -0700 (PDT)
-Received: by mail-vs1-xe44.google.com with SMTP id j185so3656345vsc.3
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 02:47:47 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=7P+jxsvFFS3Yki3uqfybz90Ph0CsUCCdpMR0ItdA0M4=;
-        b=JjoWgMgpDD9SG5nHIqJY7WvFokPSY7qNVS8OVH++a5tOkk//5ocqvTyVIZGOIGM8s8
-         EHWBumFRAtJB8cqIIIkgoXGLYkuWS2kKP/WRvY4xt+U16bhMAeAGaGE5YD7JsZeMfrUd
-         V5yLLz5opo+ZZShW9raXtu16Xmv1JJAEv11QNwYT+G7zcxuTNaNtof/dlGjHSnFP+tdS
-         vUfUBnCUlhxwXADo+GbCpvH/kXdVwMnOseuT4ZYm0YpqXEXdWqKjWKK+11jgV/Z8Zko5
-         zyP0An524zzpyOrKdFg5Wy12EVdzZsnewt4grkqyjmfw4OL/dVgrH4FIw+1Pasut5nep
-         ayzQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=7P+jxsvFFS3Yki3uqfybz90Ph0CsUCCdpMR0ItdA0M4=;
-        b=Uk/gEg8/tIpysSjQQ+zntpJ7/bT+i1rr8LUq9WZdlIX+Q528L0DL7ctZ0MNAs4vKIf
-         OeB4AECpik1czQDcauA6zHuhMjekeb8nBKI5Af2f6rU1uVaDvrDVEKYEqrRWAX3uzdG2
-         Ru3FY3bQjv2ZFnuLAq14eolGujzoIfdinubAX+2PIS4ttuMEIPhIEWY30BUnyXeUejH9
-         N6AKzdJBoxZ2soZRCO5fGHbtyt5osX1rrZtFXqNzfPxd+PnYE+NLHBNgwmtFI4ScCc36
-         FRKg6bzI8UE6BxKFIJfmP2HcT1nOmXYRVmVi62P3AgUH1yKq833G1XyggimL6AwJChIi
-         yvdw==
-X-Gm-Message-State: AOAM532B3Fe+K30WHftfxXxB7CmRlVf9naNaqQBwBFS6hzf/kIRCQOhN
-        amEGV4fFpmtEM4XjisgJxRvqzQRkNgFXDoq0Jzezy8szc2kzD1ib
-X-Google-Smtp-Source: ABdhPJyVcCEiMQDaexRK+LutCz+LjLsEHzITROaqIPVXoSGFJnvdTG0NSHDwRbOsM+uzjK4J1N6+XwBiQ/BLf5RtqlQ=
-X-Received: by 2002:a05:6102:910:: with SMTP id x16mr3957492vsh.42.1600249666784;
- Wed, 16 Sep 2020 02:47:46 -0700 (PDT)
+        id S1726769AbgIPKBS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Sep 2020 06:01:18 -0400
+Received: from mga09.intel.com ([134.134.136.24]:25979 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726735AbgIPKBI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 16 Sep 2020 06:01:08 -0400
+IronPort-SDR: vHJz5K+ZBv8hs8keMAPKafVwrpSZQn9iKs/fCgTu3yKEiWs9f7iVrHIRXTtdCMHQ3BeOwhFVLy
+ 5ytbSjwzz/DQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9745"; a="160364657"
+X-IronPort-AV: E=Sophos;i="5.76,432,1592895600"; 
+   d="scan'208";a="160364657"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Sep 2020 03:01:04 -0700
+IronPort-SDR: luZr4p0iUmS6jSHCuQLN6dShhBsLeklsLj/YP4EgPrNwrzGdciC2nnU6Ja7cgN4FZqrKefv4i3
+ hAJTxEkM6xTA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.76,432,1592895600"; 
+   d="scan'208";a="319785131"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
+  by orsmga002.jf.intel.com with ESMTP; 16 Sep 2020 03:01:02 -0700
+Subject: Re: [RFC PATCH V3 12/21] mmc: sdhci: UHS-II support, add hooks for
+ additional operations
+To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
+References: <20200710111054.29562-1-benchuanggli@gmail.com>
+ <9fa17d60-a540-d0d8-7b2c-0016c3b5c532@intel.com>
+ <20200916080558.GA2978867@laputa>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <6bf86b26-391a-0699-1818-d070357b9ddc@intel.com>
+Date:   Wed, 16 Sep 2020 13:00:35 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-References: <20200916090121.2350-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20200916090121.2350-1-wsa+renesas@sang-engineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Sep 2020 11:47:10 +0200
-Message-ID: <CAPDyKFoUw=xkPbCORSJ2io7Gs34dbbXQaGXdTsuzUqd+WEdR=A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: document mmc_hw_reset
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20200916080558.GA2978867@laputa>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 16 Sep 2020 at 11:01, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> Add documentation for mmc_hw_reset to make sure the intended use case is
-> clear.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->
-> While working on this, I get the feeling this function should be renamed
-> to 'mmc_card_reset' or something similar. 'hw' is still confusing
-> because it could easily be the host controller, too. I volunteer to
-> prepare a patch if we can agree on a better name.
+On 16/09/20 11:05 am, AKASHI Takahiro wrote:
+> Adrian,
+> 
+> Your comments are scattered over various functions, and so
+> I would like to address them in separate replies.
+> 
+> First, I'd like to discuss sdhci_[add|remove]_host().
+> 
+> On Fri, Aug 21, 2020 at 05:08:32PM +0300, Adrian Hunter wrote:
+>> On 10/07/20 2:10 pm, Ben Chuang wrote:
+>>> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>>>
+>>> In this commit, UHS-II related operations will be called via a function
+>>> pointer array, sdhci_uhs2_ops, in order to make UHS-II support as
+>>> a kernel module.
+>>> This array will be initialized only if CONFIG_MMC_SDHCI_UHS2 is enabled
+>>> and when the UHS-II module is loaded. Otherwise, all the functions
+>>> stay void.
+>>>
+>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+>>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+>>> ---
+> 
+>  (snip)
+> 
+>>>  		if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+>>>  			u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+>>>  				      SDHCI_CARD_PRESENT;
+>>> @@ -4717,6 +4812,14 @@ int sdhci_setup_host(struct sdhci_host *host)
+>>>  		/* This may alter mmc->*_blk_* parameters */
+>>>  		sdhci_allocate_bounce_buffer(host);
+>>>  
+>>> +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+>>> +	    host->version >= SDHCI_SPEC_400 &&
+>>> +	    sdhci_uhs2_ops.add_host) {
+>>> +		ret = sdhci_uhs2_ops.add_host(host, host->caps1);
+>>> +		if (ret)
+>>> +			goto unreg;
+>>> +	}
+>>> +
+>>
+>> I think you should look at creating uhs2_add_host() instead
+>>
+>>>  	return 0;
+>>>  
+>>>  unreg:
+>>> @@ -4738,6 +4841,8 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+>>>  {
+>>>  	struct mmc_host *mmc = host->mmc;
+>>>  
+>>> +	/* FIXME: Do we have to do some cleanup for UHS2 here? */
+>>> +
+>>>  	if (!IS_ERR(mmc->supply.vqmmc))
+>>>  		regulator_disable(mmc->supply.vqmmc);
+>>>  
+>>> @@ -4766,6 +4871,14 @@ int __sdhci_add_host(struct sdhci_host *host)
+>>>  		mmc->cqe_ops = NULL;
+>>>  	}
+>>>  
+>>> +	if ((mmc->caps & MMC_CAP_UHS2) && !host->v4_mode) {
+>>> +		/* host doesn't want to enable UHS2 support */
+>>> +		mmc->caps &= ~MMC_CAP_UHS2;
+>>> +		mmc->flags &= ~MMC_UHS2_SUPPORT;
+>>> +
+>>> +		/* FIXME: Do we have to do some cleanup here? */
+>>> +	}
+>>> +
+>>>  	host->complete_wq = alloc_workqueue("sdhci", flags, 0);
+>>>  	if (!host->complete_wq)
+>>>  		return -ENOMEM;
+>>> @@ -4812,6 +4925,9 @@ int __sdhci_add_host(struct sdhci_host *host)
+>>>  unled:
+>>>  	sdhci_led_unregister(host);
+>>>  unirq:
+>>> +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+>>> +	    sdhci_uhs2_ops.remove_host)
+>>> +		sdhci_uhs2_ops.remove_host(host, 0);
+>>>  	sdhci_do_reset(host, SDHCI_RESET_ALL);
+>>>  	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+>>>  	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+>>> @@ -4869,6 +4985,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+>>>  
+>>>  	sdhci_led_unregister(host);
+>>>  
+>>> +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+>>> +	    sdhci_uhs2_ops.remove_host)
+>>> +		sdhci_uhs2_ops.remove_host(host, dead);
+>>> +
+>>
+>> I think you should look at creating uhs2_remove_host() instead
+> 
+> You suggest that we will have separate sdhci_uhs2_[add|remove]_host(),
+> but I don't think it's always convenient.
+> 
+> UHS-II capable host will be set to call sdhci_uhs2_add_host() explicitly,
+> but we can't do that in case of pci and pltfm based drivers as they utilize
+> common helper functions, sdhci_pci_probe() and sdhci_pltfm_register(),
+> respectively.
 
-You have a point. Although we also have mmc_sw_reset().
+sdhci-pci has an add_host op
 
-Another thing that I would like to change is to make both of these
-functions take a struct mmc_card* as in-parameter, rather than the
-current struct mmc_host*.
+sdhci_pltfm_init can be used instead of sdhci_pltfm_register
 
-Not sure that it would completely solve the confusion, but at least it
-would be a little more clear.
 
->
->  drivers/mmc/core/core.c | 10 ++++++++++
->  1 file changed, 10 insertions(+)
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 8ccae6452b9c..a9ad72a18d1b 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2063,6 +2063,16 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
->         host->ops->hw_reset(host);
->  }
->
-> +/**
-> + * mmc_hw_reset - reset the card
-> + * @host: MMC host to which the card is attached
-> + *
-> + * Reset the remote card. This function is only for upper layers, like the
+> Therefore, we inevitably have to call sdhci_uhs2_add_host() there.
+> 
+> If so, why should we distinguish sdhci_uhs2_add_host from sdhci_uhs_add_host?
+> I don't see any good reason.
+> Moreover, as a result, there exists a mixed usage of sdhci_ interfaces
+> and sdhci_uhs2_ interfaces in sdhci-pci-core.c and sdhci-pltfm.c.
+> 
+> It sounds odd to me.
 
-Perhaps make it clear that it's a full (or hw) reset, not just a reset
-(as it could also be a soft reset). Moreover, I think you can skip
-"remote".
+It is already done that way for cqhci.
 
-> + * block layer or card drivers. You cannot use it in host drivers (struct
-> + * mmc_card might be gone then).
-> + *
-> + * Return: 0 on success, -errno on failure
-> + */
->  int mmc_hw_reset(struct mmc_host *host)
->  {
->         int ret;
-> --
-> 2.28.0
->
+> 
+> -Takahiro Akashi
+> 
+> 
+>>
+>>>  	if (!dead)
+>>>  		sdhci_do_reset(host, SDHCI_RESET_ALL);
+>>>  
+>>>
+>>
 
-Kind regards
-Uffe
