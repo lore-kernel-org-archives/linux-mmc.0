@@ -2,161 +2,200 @@ Return-Path: <SRS0=q7gx=CZ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9ED69C43461
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 06:24:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4375DC43461
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 06:43:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 59A452067C
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 06:24:25 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hvqULrDz"
+	by mail.kernel.org (Postfix) with ESMTP id 0A384208E4
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 06:43:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726155AbgIPGYY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Sep 2020 02:24:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41650 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726140AbgIPGYS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2020 02:24:18 -0400
-Received: from mail-pg1-x542.google.com (mail-pg1-x542.google.com [IPv6:2607:f8b0:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04351C06174A
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2020 23:24:18 -0700 (PDT)
-Received: by mail-pg1-x542.google.com with SMTP id j34so3310486pgi.7
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Sep 2020 23:24:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:mail-followup-to:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=e/rie8zyej25CbUTYCdPK5j8vwc82yIBnMTMl6LA2cg=;
-        b=hvqULrDzJgs3+S0aooJPntAUUTdb7qS0wXqh6JH/i3Q/oT+uxIkisvHUgEloogcuRS
-         I8jOXjkVFy073MPIgmd78q1L01Oo08RwX8aiWtAnI99pN1o6dg8IcitHgZN7Fps4xh/Z
-         nUpMkEEnQKnFxdqAPI9MMsCPuMf4ll/zFhhgIBGcc3SBLD453gGuWsRermU4Rsfh/qZo
-         B63D1scuSqfycQPi08MY/syE65dzagDY9/zq4oVwAaaoftMWrdeF/MVm5pWjnXbCq2De
-         HGd2WgvXTaJLJUfZtBdz1qh8+j5cGZArVW7vf/OG8/d+K9J03C1AUavVLDiJ+HNHriLI
-         ExlA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id
-         :mail-followup-to:references:mime-version:content-disposition
-         :in-reply-to;
-        bh=e/rie8zyej25CbUTYCdPK5j8vwc82yIBnMTMl6LA2cg=;
-        b=QZ/Dc7thDWrZR19A9Pc6YqfIF78E8wq0t6pb1n7gcCUwhKR3dHsGsHa8ThGR/0V26G
-         84FWf/uhUyXNZvqi3FQo3Klf9KbVcdGa+b2LRx4f2aN/YzCZ04s0BURT52otpN2GLlmT
-         yUX1GsjsA3otancmr4lwVkrU5Ej2uqxDPnWDFNFzWi/8fIqdUTLNpA5B+8z6WG5D6YmE
-         C6kewgKFKp6Thhso+p4ekLffhBFKbNenZFAZKVzns6jv1DdQD7yPGqyYWMu4i3Xyrakw
-         LvUOSLqoZ1dIwFM/kwBKD7mJFud0AhUS9XVi2UUoRJA8+HfNQLAPR+l/aWjntLdM7KT7
-         U8zg==
-X-Gm-Message-State: AOAM530XMfn7X2l7S27NOahi0slOHlvkXzt3mz/elDB2Sd+Q2kJHEdDF
-        8MAOWoNo8pRPdXnDQ9t0ouER6g==
-X-Google-Smtp-Source: ABdhPJx80lZ+ebjCtowHmPJHVbcebgd7ex72HmIYT0DYhenEKqlJMTnmKk39aYGv+3sTgnHhPlPZbg==
-X-Received: by 2002:a63:d506:: with SMTP id c6mr17104277pgg.396.1600237457446;
-        Tue, 15 Sep 2020 23:24:17 -0700 (PDT)
-Received: from laputa (p784a66b9.tkyea130.ap.so-net.ne.jp. [120.74.102.185])
-        by smtp.gmail.com with ESMTPSA id l5sm12885088pgm.80.2020.09.15.23.24.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Sep 2020 23:24:16 -0700 (PDT)
-Date:   Wed, 16 Sep 2020 15:24:12 +0900
-From:   AKASHI Takahiro <takahiro.akashi@linaro.org>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-Subject: Re: [RFC PATCH V3 13/21] mmc: sdhci: UHS-II support, skip
- signal_voltage_switch()
-Message-ID: <20200916062412.GA2972302@laputa>
-Mail-Followup-To: AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        id S1726281AbgIPGm7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Sep 2020 02:42:59 -0400
+Received: from mga18.intel.com ([134.134.136.126]:30202 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726279AbgIPGm7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 16 Sep 2020 02:42:59 -0400
+IronPort-SDR: NBgssxAuhlGYZYgR1UR5iwSSJRlEPRJSlvWywd0g1Cam/sjWMBgiO52TUCVFC+gSGtkQmPfGQj
+ UEw3cVP9PLrw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9745"; a="147163234"
+X-IronPort-AV: E=Sophos;i="5.76,431,1592895600"; 
+   d="scan'208";a="147163234"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Sep 2020 23:42:57 -0700
+IronPort-SDR: PpHmEUn8pkqBkhBNvyeaWiBzg3+Eeq/8Rtfdr0W/M6o7Wd+XSlWJ5mZzWZVcvUgy4QdWKO0kqi
+ JYFrmrhiKCSw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.76,431,1592895600"; 
+   d="scan'208";a="319734179"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
+  by orsmga002.jf.intel.com with ESMTP; 15 Sep 2020 23:42:55 -0700
+Subject: Re: [RFC PATCH V3 15/21] mmc: sdhci: UHS-II support, modify
+ set_power() to handle vdd2
+To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
         Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-References: <20200710111104.29616-1-benchuanggli@gmail.com>
- <9ab64a9d-cd78-785c-b48f-561048cfe2ed@intel.com>
- <20200914064001.GA2743583@laputa>
- <a0000661-a0e1-8813-0672-c0eb73184079@intel.com>
- <20200915060306.GA2860208@laputa>
- <bd394015-abb7-f134-c883-ec28b42f1fc5@intel.com>
+References: <20200710111140.29725-1-benchuanggli@gmail.com>
+ <97c43596-a18f-4c7a-c226-5209772d91d1@intel.com>
+ <20200914054537.GA2738017@laputa>
+ <f0ff6c0a-4029-72a9-559c-8930ef0ea8bb@intel.com>
+ <20200915062443.GB2860208@laputa>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <0c11a3cb-fe7c-978d-7608-c98453899b5f@intel.com>
+Date:   Wed, 16 Sep 2020 09:42:28 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bd394015-abb7-f134-c883-ec28b42f1fc5@intel.com>
+In-Reply-To: <20200915062443.GB2860208@laputa>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 16, 2020 at 09:01:20AM +0300, Adrian Hunter wrote:
-> On 15/09/20 9:03 am, AKASHI Takahiro wrote:
-> > Ben, Adrian,
-> > 
-> > On Mon, Sep 14, 2020 at 11:08:14AM +0300, Adrian Hunter wrote:
-> >> On 14/09/20 9:40 am, AKASHI Takahiro wrote:
-> >>> Adrian,
-> >>>
-> >>> On Fri, Aug 21, 2020 at 05:09:01PM +0300, Adrian Hunter wrote:
-> >>>> On 10/07/20 2:11 pm, Ben Chuang wrote:
-> >>>>> From: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> >>>>>
-> >>>>> sdhci_start_signal_voltage_switch() should be called only in UHS-I mode,
-> >>>>> and not for UHS-II mode.
-> >>>>>
-> >>>>> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >>>>> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> >>>>> ---
-> >>>>>  drivers/mmc/host/sdhci.c | 7 ++++++-
-> >>>>>  1 file changed, 6 insertions(+), 1 deletion(-)
-> >>>>>
-> >>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >>>>> index 5511649946b9..7f2537648a08 100644
-> >>>>> --- a/drivers/mmc/host/sdhci.c
-> >>>>> +++ b/drivers/mmc/host/sdhci.c
-> >>>>> @@ -2623,8 +2623,13 @@ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> >>>>>  	/*
-> >>>>>  	 * Signal Voltage Switching is only applicable for Host Controllers
-> >>>>>  	 * v3.00 and above.
-> >>>>> +	 * But for UHS2, the signal voltage is supplied by vdd2 which is
-> >>>>> +	 * already 1.8v so no voltage switch required.
-> >>>>>  	 */
-> >>>>> -	if (host->version < SDHCI_SPEC_300)
-> >>>>> +	if (host->version < SDHCI_SPEC_300 ||
-> >>>>> +	    (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
-> >>>>> +	     host->version >= SDHCI_SPEC_400 &&
-> >>>>> +	     host->mmc->flags & MMC_UHS2_SUPPORT))
-> >>>> Please look at hooking ->start_signal_voltage_switch() instead
-> >>>
-> >>> Do you mean that you want every platform driver who wants to support UHS-II
-> >>> to set NULL to start_signal_voltage_switch hook even if this hack is
-> >>> platform agnostic?
-> >>
-> >> No, I see UHS-II as a separate layer i.e.
-> >>
-> >>  UHS-II host controller driver
-> >>   |   |
-> >>   |   v
-> >>   |   sdhci-uhs2 e.g. sdhci_uhs2_start_signal_voltage_switch
-> >>   |   |
-> >>   v   v
-> >>   sdhci e.g. sdhci_start_signal_voltage_switch
-> >>
-> >> Most things should go through sdhci-uhs2 but not nessarily everything.
-> > 
-> > What I meant by my previous comment is that we don't have to
-> > call any function, sdhci_uhs2_start_signal_voltage_switch in above example,
-> > for UHS-II cards in any case since it is always simply empty.
+On 15/09/20 9:24 am, AKASHI Takahiro wrote:
+> Adrain,
 > 
-> Please treat the sdhci_uhs2_... host ops as functions for a UHS-II host
-> controller in either UHS-II or legacy mode. i.e. it is up to sdhci-uhs2.c to
-> call through to sdhci.c not the other way around.  e.g.
->
-> int sdhci_uhs2_start_signal_voltage_switch(blah)
-> {
-> 	if (sdhci_uhs2_mode(host))
-> 		return 0;
-> 	return sdhci_start_signal_valtage_switch(blah);
-> }
+> On Mon, Sep 14, 2020 at 09:36:02AM +0300, Adrian Hunter wrote:
+>> On 14/09/20 8:45 am, AKASHI Takahiro wrote:
+>>> Adrian,
+>>>
+>>> On Fri, Aug 21, 2020 at 05:11:18PM +0300, Adrian Hunter wrote:
+>>>> On 10/07/20 2:11 pm, Ben Chuang wrote:
+>>>>> From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+>>>>>
+>>>>> VDD2 is used for powering UHS-II interface.
+>>>>> Modify sdhci_set_power_and_bus_voltage(), sdhci_set_power_noreg()
+>>>>> and sdhci_set_power_noreg() to handle VDD2.
+>>>>
+>>>> vdd2 is always 1.8 V and I suspect there may never be support for anything
+>>>> else, so we should start with 1.8 V only.
+>>>
+>>> What do you mean here?
+>>> You don't want to add an extra argument, vdd2, to sdhci_set_power().
+>>> Correct?
+>>
+>> Yes
+>>
+>>>
+>>>> Also can we create uhs2_set_power_reg() and uhs2_set_power_noreg() and use
+>>>> the existing ->set_power() callback
+>>>
+>>> Again what do you expect here?
+>>>
+>>> Do you want to see any platform-specific mmc driver who supports UHS-II
+>>> to implement its own call back like:
+>>
+>> Not exactly.  I expect there to be a common implementation in sdhci-uhs2.c
+>> called sdhci_uhs2_set_power() for example, that drivers can use by setting
+>> their .set_power = sdhci_uhs2_set_power.  If they need platform-specific
+>> code as well then their platform-specific code can call
+>> sdhci_uhs2_set_power() if desired.
+>>
+>>>
+>>> void sdhci_foo_set_power(struct sdhci_host *host, unsigned char mode,
+>>>                                   unsigned short vdd)
+>>> {
+>>>         sdhci_set_power(host, mode,vdd);
+>>>
+>>>         /* in case that sdhci_uhs2 module is not inserted */
+>>>         if (!(mmc->caps & MMC_CAP_UHS2))
+>>>                 return;
+>>>
+>>>         /* vdd2 specific operation */
+>>>         if (IS_ERR_OR_NULL(host->mmc->supply.vmmc2))
+>>>                 sdhci_uhs2_set_power_noreg(host, mode);
+>>>         else
+>>>                 sdhci_uhs2_set_power_reg(host, mode);
+>>>
+>>>         /* maybe more platform-specific initialization */
+>>> }
+>>>
+>>> struct sdhci_ops sdhci_foo_ops = {
+>>>         .set_power = sdhci_foo_set_power,
+>>>         ...
+>>> }
+> 
+> What do you think about this logic in general?
+> (If necessary, read it replacing "foo" to "uhs2".)
+> 
+> What I'm concerned about is SDHCI_POWER_CONTROL register.
+> Vdd and vdd2 are controlled with corresponding bits in this register.
+> It seems to be "natural" to me that vdd and vdd2 are enabled
+> in a single function rather than putting them in separate ones.
+> 
+> In particular, in the case of sdhci_set_power_noreg(), there exist a couple
+> of "quirks" around writing the bits to SDHCI_POWER_CONTROL register.
 
-Okay, the remaining issue is to clarify the meaning of MMC_UHS2_SUPPORT.
+We can treat UHS-II support as being for new hardware and therefore
+we don't necessarily need to support old quirks.  Just make sure if
+a quirk is not being supported, to add a comment to that effect.
 
--Takhiro Akashi
+> I don't know how we should handle them if we have a separate function,
+> say, sdhci_uhs2_set_power_noreg().
+> Do you want to see a copy of the same logic in sdhci_uhs2_set_power_noreg()? 
+
+I would probably consider making another function that non-UHS-II
+drivers do not need to care about e.g. existing drivers can keep using
+sdhci_set_power_noreg() and sdhci_uhs2 can call __sdhci_set_power_noreg()
+
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 592a55a34b58..ffe54f06fe38 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2013,8 +2013,8 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+ }
+ 
+-void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+-			   unsigned short vdd)
++void __sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
++			   unsigned short vdd, u8 vdd2)
+ {
+ 	u8 pwr = 0;
+ 
+@@ -2048,7 +2048,7 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ 	if (host->pwr == pwr)
+ 		return;
+ 
+-	host->pwr = pwr;
++	host->pwr = pwr | vdd2;
+ 
+ 	if (pwr == 0) {
+ 		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+@@ -2085,6 +2085,13 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
+ 			mdelay(10);
+ 	}
+ }
++EXPORT_SYMBOL_GPL(__sdhci_set_power_noreg);
++
++void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
++			   unsigned short vdd)
++{
++	__sdhci_set_power_noreg(host, mode, vdd, 0);
++}
+ EXPORT_SYMBOL_GPL(sdhci_set_power_noreg);
+ 
+ void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
+
+> 
+> -Takahiro Akashi
+> 
+> 
+>>>
+>>> Is this what you mean?
+>>> (I'm not quite sure yet that sdhci_ush2_set_power_noreg() can be split off
+>>> from sdhci_set_power_noreg().)
+>>>
+>>> -Takahiro Akashi
+
