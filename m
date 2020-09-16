@@ -3,85 +3,81 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60C21C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 07:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA4BBC43461
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 08:06:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F185E2080C
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 07:46:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 842C82087D
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Sep 2020 08:06:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fNnVPdvl"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EPTptsUb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726243AbgIPHqT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Sep 2020 03:46:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54340 "EHLO
+        id S1726509AbgIPIGH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Sep 2020 04:06:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726068AbgIPHqS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2020 03:46:18 -0400
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A654AC06174A
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 00:46:17 -0700 (PDT)
-Received: by mail-pf1-x444.google.com with SMTP id z18so944797pfg.0
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 00:46:17 -0700 (PDT)
+        with ESMTP id S1726425AbgIPIGE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Sep 2020 04:06:04 -0400
+Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7887BC061788
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 01:06:04 -0700 (PDT)
+Received: by mail-pl1-x642.google.com with SMTP id f1so2768218plo.13
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Sep 2020 01:06:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=date:from:to:cc:subject:message-id:mail-followup-to:references
          :mime-version:content-disposition:in-reply-to;
-        bh=YBGqaQ7Mhk39pbTnXIi+xyhZDjqG6D7yXDA2Zk5NuOk=;
-        b=fNnVPdvlgD65xX2UEg1tGvdK16fHWLa5Nd42tfy9sUti5Sg14mSUtFwX5FXwSyH+nG
-         GnMA57A5Uqc5q3bxhB3j83YvblFWIWlOjgPbAxTwDN4zdw17XQ+fXDo2lHvbqblnaZVZ
-         1NlFiEdUFwDgoC842rEtlbSWFcXY1fOKHh+ByLbt+a56NsfGyJ0gfHg5SFwLt5dnCmr4
-         2BPOPq6qjCTs8e+EVli+UYDUF1wRd9jD200yzRV4dA+KTW/shSAH7V34esazV/PGg1OC
-         ynBaUoyKl7CVWIMdPREQ/hRgRrldST2yyfgMCCLkMXQeru3J8O4EcUlcXguq0SeN4Ske
-         64Jw==
+        bh=Fi/Zb4ASsQ4HPm5PG4mw/XDLk977mbPHCLVZgMYV2fA=;
+        b=EPTptsUb6QNgC+Dl6kF2Qx4AO4gHIlEzO88zINkgseZk8iqY3BLuMT2uKcFAwtm+g0
+         Ml6hGPHwJRSLrgxYPNyzRPoYMgzPhYS8jmHhWeH/SAihUnGsCyV9UF3/5g4g022U3hJ5
+         Mxp3izxSWluBtUz9EjkHaTwTRC7ZnKw59Ahz7nN6C2j6A/z8tPUbtWNnna3Ubts3VtVA
+         Qc16LASJtt5b2KQzLDi+C1M9Vw35x2kL7Ga9gmyySvUynlWXaDZF9WWo6W6jXj+JcPBZ
+         H9w1Y7rx63ln/YxYfSkHkECxk42LEzcq5FgLeBpCL28kPHMXK9LcsEWbQpTLxw9zei9y
+         b2nQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id
          :mail-followup-to:references:mime-version:content-disposition
          :in-reply-to;
-        bh=YBGqaQ7Mhk39pbTnXIi+xyhZDjqG6D7yXDA2Zk5NuOk=;
-        b=C7JAMoW+KneSoY0X0IkRRU/kytDzv2BzeOz5aqWunyjhmqGx+oh6Up3vYBk4R7IbUP
-         A84vVBEkkLs4acNk9o2SWsqpbMTVRcJiBklUCzM4OcpgK+7QY+f4bKTfbV5PME5GuLJy
-         oGFj7sm7WRAVU+s4S9aHZYEQvqkom+DSvAU8AGx1pu3bJitdvbVFHvBjxv6sb73IyQke
-         lNIPxDSxqQ2+8g5l+QAaVuv4GiS2MWy+zlwZxAgQnDLArNG8mY1BZHaxYDE4Ti7xJGzB
-         MMnPItzkC9bEDvu1Jir47b9nD8++BL45+GcSRJSAhV+GxhP7iDA3RNwMKeaPkDMYuJJ6
-         ZmTQ==
-X-Gm-Message-State: AOAM532eU2sa9oEKq+xJ14je6tDb5oeuqITRYktPINgRgsHs+42rQrw8
-        TvOSoapV55GmlqJmEA94Trj9cQ==
-X-Google-Smtp-Source: ABdhPJycyrhUihV5cTTqsmGs9Uo4RSf7rHRSbwZkMvxGeJXQbUwb7C8IPdGdNwDkBRmFsOEcI+9A9Q==
-X-Received: by 2002:a63:f441:: with SMTP id p1mr7413405pgk.453.1600242377052;
-        Wed, 16 Sep 2020 00:46:17 -0700 (PDT)
+        bh=Fi/Zb4ASsQ4HPm5PG4mw/XDLk977mbPHCLVZgMYV2fA=;
+        b=OVBcIJ7gbdmS78GJ2QOwM6aLb6Laa956EENTyatYgT4LLRwRDM+zqMrHIsZ6ndFx9R
+         msyTrJBfTPCzRtoTITBT9AijYbQGbyYGgDa8XNR0T8R7IFtuziPZ/KOsPl4lgK2ryE24
+         8qMrg9Hnt+Hn87GZHKUyAtmbLENitihcwXvPgNwTmua7s/ieBDBhafvyH2ZomZfqXSDa
+         keEoxprdjAoai4tXd9bWronkgryMeOUcQbyMVdPeUQFoJ7hjEQcAO6K8bSvb9ci7bzGB
+         BWCWTmkGPoXCX+AxbmIAuo5NrYhFj4u/IbfDFX0VzuEgB4EdIuIo55eqgCCraLaJ42BT
+         t9MA==
+X-Gm-Message-State: AOAM5322gKj+zjztsNheoPf7mt98KDfFL7FZAyjgNU7wkqUyOTOWcjgk
+        0zc6KdS42i3C/t+jTuIll3DwdQ==
+X-Google-Smtp-Source: ABdhPJzsP763NSSrjSXgw1uBCV6aabWeEcFbkzoPZJGP13irdmUDbte81s6uBBRgzKIYWudjPWCZ/w==
+X-Received: by 2002:a17:90a:ae12:: with SMTP id t18mr3000310pjq.147.1600243563186;
+        Wed, 16 Sep 2020 01:06:03 -0700 (PDT)
 Received: from laputa (p784a66b9.tkyea130.ap.so-net.ne.jp. [120.74.102.185])
-        by smtp.gmail.com with ESMTPSA id q16sm16782125pfj.117.2020.09.16.00.46.14
+        by smtp.gmail.com with ESMTPSA id y6sm1803111pji.1.2020.09.16.01.06.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Sep 2020 00:46:16 -0700 (PDT)
-Date:   Wed, 16 Sep 2020 16:46:12 +0900
+        Wed, 16 Sep 2020 01:06:02 -0700 (PDT)
+Date:   Wed, 16 Sep 2020 17:05:58 +0900
 From:   AKASHI Takahiro <takahiro.akashi@linaro.org>
 To:     Adrian Hunter <adrian.hunter@intel.com>
 Cc:     Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-Subject: Re: [RFC PATCH V3 15/21] mmc: sdhci: UHS-II support, modify
- set_power() to handle vdd2
-Message-ID: <20200916074612.GA2977734@laputa>
+Subject: Re: [RFC PATCH V3 12/21] mmc: sdhci: UHS-II support, add hooks for
+ additional operations
+Message-ID: <20200916080558.GA2978867@laputa>
 Mail-Followup-To: AKASHI Takahiro <takahiro.akashi@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-References: <20200710111140.29725-1-benchuanggli@gmail.com>
- <97c43596-a18f-4c7a-c226-5209772d91d1@intel.com>
- <20200914054537.GA2738017@laputa>
- <f0ff6c0a-4029-72a9-559c-8930ef0ea8bb@intel.com>
- <20200915062443.GB2860208@laputa>
- <0c11a3cb-fe7c-978d-7608-c98453899b5f@intel.com>
+References: <20200710111054.29562-1-benchuanggli@gmail.com>
+ <9fa17d60-a540-d0d8-7b2c-0016c3b5c532@intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <0c11a3cb-fe7c-978d-7608-c98453899b5f@intel.com>
+In-Reply-To: <9fa17d60-a540-d0d8-7b2c-0016c3b5c532@intel.com>
 Sender: linux-mmc-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -89,158 +85,116 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Adrian,
 
-On Wed, Sep 16, 2020 at 09:42:28AM +0300, Adrian Hunter wrote:
-> On 15/09/20 9:24 am, AKASHI Takahiro wrote:
-> > Adrain,
+Your comments are scattered over various functions, and so
+I would like to address them in separate replies.
+
+First, I'd like to discuss sdhci_[add|remove]_host().
+
+On Fri, Aug 21, 2020 at 05:08:32PM +0300, Adrian Hunter wrote:
+> On 10/07/20 2:10 pm, Ben Chuang wrote:
+> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 > > 
-> > On Mon, Sep 14, 2020 at 09:36:02AM +0300, Adrian Hunter wrote:
-> >> On 14/09/20 8:45 am, AKASHI Takahiro wrote:
-> >>> Adrian,
-> >>>
-> >>> On Fri, Aug 21, 2020 at 05:11:18PM +0300, Adrian Hunter wrote:
-> >>>> On 10/07/20 2:11 pm, Ben Chuang wrote:
-> >>>>> From: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> >>>>>
-> >>>>> VDD2 is used for powering UHS-II interface.
-> >>>>> Modify sdhci_set_power_and_bus_voltage(), sdhci_set_power_noreg()
-> >>>>> and sdhci_set_power_noreg() to handle VDD2.
-> >>>>
-> >>>> vdd2 is always 1.8 V and I suspect there may never be support for anything
-> >>>> else, so we should start with 1.8 V only.
-> >>>
-> >>> What do you mean here?
-> >>> You don't want to add an extra argument, vdd2, to sdhci_set_power().
-> >>> Correct?
-> >>
-> >> Yes
-> >>
-> >>>
-> >>>> Also can we create uhs2_set_power_reg() and uhs2_set_power_noreg() and use
-> >>>> the existing ->set_power() callback
-> >>>
-> >>> Again what do you expect here?
-> >>>
-> >>> Do you want to see any platform-specific mmc driver who supports UHS-II
-> >>> to implement its own call back like:
-> >>
-> >> Not exactly.  I expect there to be a common implementation in sdhci-uhs2.c
-> >> called sdhci_uhs2_set_power() for example, that drivers can use by setting
-> >> their .set_power = sdhci_uhs2_set_power.  If they need platform-specific
-> >> code as well then their platform-specific code can call
-> >> sdhci_uhs2_set_power() if desired.
-> >>
-> >>>
-> >>> void sdhci_foo_set_power(struct sdhci_host *host, unsigned char mode,
-> >>>                                   unsigned short vdd)
-> >>> {
-> >>>         sdhci_set_power(host, mode,vdd);
-> >>>
-> >>>         /* in case that sdhci_uhs2 module is not inserted */
-> >>>         if (!(mmc->caps & MMC_CAP_UHS2))
-> >>>                 return;
-> >>>
-> >>>         /* vdd2 specific operation */
-> >>>         if (IS_ERR_OR_NULL(host->mmc->supply.vmmc2))
-> >>>                 sdhci_uhs2_set_power_noreg(host, mode);
-> >>>         else
-> >>>                 sdhci_uhs2_set_power_reg(host, mode);
-> >>>
-> >>>         /* maybe more platform-specific initialization */
-> >>> }
-> >>>
-> >>> struct sdhci_ops sdhci_foo_ops = {
-> >>>         .set_power = sdhci_foo_set_power,
-> >>>         ...
-> >>> }
+> > In this commit, UHS-II related operations will be called via a function
+> > pointer array, sdhci_uhs2_ops, in order to make UHS-II support as
+> > a kernel module.
+> > This array will be initialized only if CONFIG_MMC_SDHCI_UHS2 is enabled
+> > and when the UHS-II module is loaded. Otherwise, all the functions
+> > stay void.
 > > 
-> > What do you think about this logic in general?
-> > (If necessary, read it replacing "foo" to "uhs2".)
-> > 
-> > What I'm concerned about is SDHCI_POWER_CONTROL register.
-> > Vdd and vdd2 are controlled with corresponding bits in this register.
-> > It seems to be "natural" to me that vdd and vdd2 are enabled
-> > in a single function rather than putting them in separate ones.
-> > 
-> > In particular, in the case of sdhci_set_power_noreg(), there exist a couple
-> > of "quirks" around writing the bits to SDHCI_POWER_CONTROL register.
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > ---
+
+ (snip)
+
+> >  		if (intmask & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
+> >  			u32 present = sdhci_readl(host, SDHCI_PRESENT_STATE) &
+> >  				      SDHCI_CARD_PRESENT;
+> > @@ -4717,6 +4812,14 @@ int sdhci_setup_host(struct sdhci_host *host)
+> >  		/* This may alter mmc->*_blk_* parameters */
+> >  		sdhci_allocate_bounce_buffer(host);
+> >  
+> > +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+> > +	    host->version >= SDHCI_SPEC_400 &&
+> > +	    sdhci_uhs2_ops.add_host) {
+> > +		ret = sdhci_uhs2_ops.add_host(host, host->caps1);
+> > +		if (ret)
+> > +			goto unreg;
+> > +	}
+> > +
 > 
-> We can treat UHS-II support as being for new hardware and therefore
-> we don't necessarily need to support old quirks.  Just make sure if
-> a quirk is not being supported, to add a comment to that effect.
+> I think you should look at creating uhs2_add_host() instead
 > 
-> > I don't know how we should handle them if we have a separate function,
-> > say, sdhci_uhs2_set_power_noreg().
-> > Do you want to see a copy of the same logic in sdhci_uhs2_set_power_noreg()? 
+> >  	return 0;
+> >  
+> >  unreg:
+> > @@ -4738,6 +4841,8 @@ void sdhci_cleanup_host(struct sdhci_host *host)
+> >  {
+> >  	struct mmc_host *mmc = host->mmc;
+> >  
+> > +	/* FIXME: Do we have to do some cleanup for UHS2 here? */
+> > +
+> >  	if (!IS_ERR(mmc->supply.vqmmc))
+> >  		regulator_disable(mmc->supply.vqmmc);
+> >  
+> > @@ -4766,6 +4871,14 @@ int __sdhci_add_host(struct sdhci_host *host)
+> >  		mmc->cqe_ops = NULL;
+> >  	}
+> >  
+> > +	if ((mmc->caps & MMC_CAP_UHS2) && !host->v4_mode) {
+> > +		/* host doesn't want to enable UHS2 support */
+> > +		mmc->caps &= ~MMC_CAP_UHS2;
+> > +		mmc->flags &= ~MMC_UHS2_SUPPORT;
+> > +
+> > +		/* FIXME: Do we have to do some cleanup here? */
+> > +	}
+> > +
+> >  	host->complete_wq = alloc_workqueue("sdhci", flags, 0);
+> >  	if (!host->complete_wq)
+> >  		return -ENOMEM;
+> > @@ -4812,6 +4925,9 @@ int __sdhci_add_host(struct sdhci_host *host)
+> >  unled:
+> >  	sdhci_led_unregister(host);
+> >  unirq:
+> > +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+> > +	    sdhci_uhs2_ops.remove_host)
+> > +		sdhci_uhs2_ops.remove_host(host, 0);
+> >  	sdhci_do_reset(host, SDHCI_RESET_ALL);
+> >  	sdhci_writel(host, 0, SDHCI_INT_ENABLE);
+> >  	sdhci_writel(host, 0, SDHCI_SIGNAL_ENABLE);
+> > @@ -4869,6 +4985,10 @@ void sdhci_remove_host(struct sdhci_host *host, int dead)
+> >  
+> >  	sdhci_led_unregister(host);
+> >  
+> > +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
+> > +	    sdhci_uhs2_ops.remove_host)
+> > +		sdhci_uhs2_ops.remove_host(host, dead);
+> > +
 > 
-> I would probably consider making another function that non-UHS-II
-> drivers do not need to care about e.g. existing drivers can keep using
-> sdhci_set_power_noreg() and sdhci_uhs2 can call __sdhci_set_power_noreg()
+> I think you should look at creating uhs2_remove_host() instead
 
-Well, but
+You suggest that we will have separate sdhci_uhs2_[add|remove]_host(),
+but I don't think it's always convenient.
 
+UHS-II capable host will be set to call sdhci_uhs2_add_host() explicitly,
+but we can't do that in case of pci and pltfm based drivers as they utilize
+common helper functions, sdhci_pci_probe() and sdhci_pltfm_register(),
+respectively.
+Therefore, we inevitably have to call sdhci_uhs2_add_host() there.
 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 592a55a34b58..ffe54f06fe38 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2013,8 +2013,8 @@ static void sdhci_set_power_reg(struct sdhci_host *host, unsigned char mode,
->  		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
->  }
->  
-> -void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
-> -			   unsigned short vdd)
-> +void __sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
-> +			   unsigned short vdd, u8 vdd2)
->  {
->  	u8 pwr = 0;
->  
-> @@ -2048,7 +2048,7 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->  	if (host->pwr == pwr)
->  		return;
->  
-> -	host->pwr = pwr;
-> +	host->pwr = pwr | vdd2;
+If so, why should we distinguish sdhci_uhs2_add_host from sdhci_uhs_add_host?
+I don't see any good reason.
+Moreover, as a result, there exists a mixed usage of sdhci_ interfaces
+and sdhci_uhs2_ interfaces in sdhci-pci-core.c and sdhci-pltfm.c.
 
-(the line above is wrong, but anyway)
-
-we must also set
-        if (vdd2)
-                pwr |= SDHCI_VDD2_POWER_ON;
-
-As a result, this new function is the almost exact same as the corresponding one
-in our v3 patch, except its name.
-
-Now do you allow such a small piece of UHS-II specific code to be
-placed in sdhci.c?
+It sounds odd to me.
 
 -Takahiro Akashi
 
 
->  	if (pwr == 0) {
->  		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> @@ -2085,6 +2085,13 @@ void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
->  			mdelay(10);
->  	}
->  }
-> +EXPORT_SYMBOL_GPL(__sdhci_set_power_noreg);
-> +
-> +void sdhci_set_power_noreg(struct sdhci_host *host, unsigned char mode,
-> +			   unsigned short vdd)
-> +{
-> +	__sdhci_set_power_noreg(host, mode, vdd, 0);
-> +}
->  EXPORT_SYMBOL_GPL(sdhci_set_power_noreg);
->  
->  void sdhci_set_power(struct sdhci_host *host, unsigned char mode,
 > 
+> >  	if (!dead)
+> >  		sdhci_do_reset(host, SDHCI_RESET_ALL);
+> >  
 > > 
-> > -Takahiro Akashi
-> > 
-> > 
-> >>>
-> >>> Is this what you mean?
-> >>> (I'm not quite sure yet that sdhci_ush2_set_power_noreg() can be split off
-> >>> from sdhci_set_power_noreg().)
-> >>>
-> >>> -Takahiro Akashi
 > 
