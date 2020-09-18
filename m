@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D1DBC43467
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 02:37:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9CF4C43465
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 02:50:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E6E4323770
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 02:37:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 873FF23772
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 02:50:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600396639;
-	bh=jUtQX6nZHKTwIyA2f40aoFnLm/DrVK0Fk+Q6WWSm8So=;
+	s=default; t=1600397428;
+	bh=RZEDZn5yhqikV8MmM00cB4OMsJcIOe9ajD/0Lno2pkk=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=CdFlOljKTgqwjbtlgJYjtsVcYp0uIh9mmeFdchi8+EjtAuvDM9QFwtE6Znp6wEXDw
-	 tgFyiJKGw2CGhBywSXzWw10WomshZ5dTndHSno0N3xWHFxRPpgzTpikDhlOmJZOOxl
-	 dtEoLpFLhIWwf/c+LGEFmn1oXrEBKlwMOYXNdK1M=
+	b=ILXWAVuKS92Va2dyoKm76yp6ixU1YAhA/JDIV+HH0Pf706oYNZOfRs3vciTWPFbM4
+	 aSlUdslDFX3xNNceGrLV9IFXamism028BMvT1Z5+ylECN3aBbyh/zpfjd3rduzE920
+	 KWoWeVnXbK8ijP1cZhFwparL6yShhYxEKNdHKZQc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727557AbgIRChF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Sep 2020 22:37:05 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39332 "EHLO mail.kernel.org"
+        id S1728041AbgIRCu0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Sep 2020 22:50:26 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60228 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728820AbgIRCMn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Sep 2020 22:12:43 -0400
+        id S1728107AbgIRCIn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 17 Sep 2020 22:08:43 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 54DEA2376E;
-        Fri, 18 Sep 2020 02:12:41 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id E1722238E3;
+        Fri, 18 Sep 2020 02:08:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600395162;
-        bh=jUtQX6nZHKTwIyA2f40aoFnLm/DrVK0Fk+Q6WWSm8So=;
+        s=default; t=1600394922;
+        bh=RZEDZn5yhqikV8MmM00cB4OMsJcIOe9ajD/0Lno2pkk=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=hDnOB+Hj1rhy2KylupBe9YWQiGluM4KJ8uiP/TAxfOQbWTKbrAR+iwJPk76w/GL93
-         RGInkteIoIyx+rxOiSNaRiTf3urbGVPOmPKyaBbokO5W67QLZoirN2rYUaV7h7lTSG
-         Iy+9IpTpypqgdKk6evaftuBwnMBq1E46Ov1mydBE=
+        b=wcCoGYYNBOqWRh0lKBvpTHVhaxZheVpr2fZqJmRxC0Gt7bvhNHrQDjTffKH3iwYCa
+         uxuGW9cKCE9YE2Z7XtOt8vf7CuB5t4GOdX3BuLD16zFaL2PhF3NlZZAf6E8avIAryT
+         M4+F0n+hP58ZlvluB1XtX6liOs2eXiJKmr2ja8+0=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Bradley Bolen <bradleybolen@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 019/127] mmc: core: Fix size overflow for mmc partitions
-Date:   Thu, 17 Sep 2020 22:10:32 -0400
-Message-Id: <20200918021220.2066485-19-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 034/206] mmc: core: Fix size overflow for mmc partitions
+Date:   Thu, 17 Sep 2020 22:05:10 -0400
+Message-Id: <20200918020802.2065198-34-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200918021220.2066485-1-sashal@kernel.org>
-References: <20200918021220.2066485-1-sashal@kernel.org>
+In-Reply-To: <20200918020802.2065198-1-sashal@kernel.org>
+References: <20200918020802.2065198-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -75,7 +75,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 5 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 814a04e8fdd77..2be2313f5950a 100644
+index 5ca53e225382d..4b18034537f53 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
 @@ -300,7 +300,7 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
@@ -116,10 +116,10 @@ index 814a04e8fdd77..2be2313f5950a 100644
  	bool broken_hpi = false;
  
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 279b39008a33b..de81ed857ea37 100644
+index 8ef330027b134..3f8e84a80b4ad 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -226,7 +226,7 @@ struct mmc_queue_req;
+@@ -227,7 +227,7 @@ struct mmc_queue_req;
   * MMC Physical partitions
   */
  struct mmc_part {
