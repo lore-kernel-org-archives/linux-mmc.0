@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9CF4C43465
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 02:50:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81DE8C43463
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 03:12:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 873FF23772
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 02:50:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 422AA20678
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 03:12:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600397428;
-	bh=RZEDZn5yhqikV8MmM00cB4OMsJcIOe9ajD/0Lno2pkk=;
+	s=default; t=1600398720;
+	bh=C38Pw512GiRJJmiYpDblaE9vHIMrSG1yDZ7v6tJDsU0=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=ILXWAVuKS92Va2dyoKm76yp6ixU1YAhA/JDIV+HH0Pf706oYNZOfRs3vciTWPFbM4
-	 aSlUdslDFX3xNNceGrLV9IFXamism028BMvT1Z5+ylECN3aBbyh/zpfjd3rduzE920
-	 KWoWeVnXbK8ijP1cZhFwparL6yShhYxEKNdHKZQc=
+	b=w9XIigS4TF2vZwKhTvObI0E4MsBtvGcO3Qw9IHKJ2zoNclhp3IrwM3T8Hehoz1etK
+	 DVHl2l4KzYvIsok7G+tVKN1YgkN3T6SmAyQ9InIY6COoMPT5esBNQlz9kq6gfBUkti
+	 WMRMhmlU7LybWgysVkPoXdQ4bdkemvw+Jcml4n7w=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728041AbgIRCu0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Sep 2020 22:50:26 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60228 "EHLO mail.kernel.org"
+        id S1726308AbgIRDLp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Sep 2020 23:11:45 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47314 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728107AbgIRCIn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Sep 2020 22:08:43 -0400
+        id S1726713AbgIRCCR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 17 Sep 2020 22:02:17 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id E1722238E3;
-        Fri, 18 Sep 2020 02:08:41 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id E6AC72344C;
+        Fri, 18 Sep 2020 02:02:15 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1600394922;
-        bh=RZEDZn5yhqikV8MmM00cB4OMsJcIOe9ajD/0Lno2pkk=;
+        s=default; t=1600394536;
+        bh=C38Pw512GiRJJmiYpDblaE9vHIMrSG1yDZ7v6tJDsU0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=wcCoGYYNBOqWRh0lKBvpTHVhaxZheVpr2fZqJmRxC0Gt7bvhNHrQDjTffKH3iwYCa
-         uxuGW9cKCE9YE2Z7XtOt8vf7CuB5t4GOdX3BuLD16zFaL2PhF3NlZZAf6E8avIAryT
-         M4+F0n+hP58ZlvluB1XtX6liOs2eXiJKmr2ja8+0=
+        b=dWFQ1Z+pP2Ga5y5/JzDQla4q/lW+5xJApKIgVSINGmEikpfl9ULw/0OPc2sKXwAuO
+         GLvQJ85l8PGdBOANE6QkI1u1u6CfdWjgaKNX5KJFQJ10by+iP/cT+u221x1Vjl+VJJ
+         hu24/ioJer3q1+FLWGWAMGVdgj3lyRfy2B+KNNEM=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Bradley Bolen <bradleybolen@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 034/206] mmc: core: Fix size overflow for mmc partitions
-Date:   Thu, 17 Sep 2020 22:05:10 -0400
-Message-Id: <20200918020802.2065198-34-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 055/330] mmc: core: Fix size overflow for mmc partitions
+Date:   Thu, 17 Sep 2020 21:56:35 -0400
+Message-Id: <20200918020110.2063155-55-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200918020802.2065198-1-sashal@kernel.org>
-References: <20200918020802.2065198-1-sashal@kernel.org>
+In-Reply-To: <20200918020110.2063155-1-sashal@kernel.org>
+References: <20200918020110.2063155-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -75,10 +75,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  2 files changed, 5 insertions(+), 6 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 5ca53e225382d..4b18034537f53 100644
+index b7159e243323b..de14b5845f525 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -300,7 +300,7 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
+@@ -297,7 +297,7 @@ static void mmc_manage_enhanced_area(struct mmc_card *card, u8 *ext_csd)
  	}
  }
  
@@ -87,7 +87,7 @@ index 5ca53e225382d..4b18034537f53 100644
  			 unsigned int part_cfg, char *name, int idx, bool ro,
  			 int area_type)
  {
-@@ -316,7 +316,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
+@@ -313,7 +313,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
  {
  	int idx;
  	u8 hc_erase_grp_sz, hc_wp_grp_sz;
@@ -96,7 +96,7 @@ index 5ca53e225382d..4b18034537f53 100644
  
  	/*
  	 * General purpose partition feature support --
-@@ -346,8 +346,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
+@@ -343,8 +343,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
  				(ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3 + 1]
  				<< 8) +
  				ext_csd[EXT_CSD_GP_SIZE_MULT + idx * 3];
@@ -106,7 +106,7 @@ index 5ca53e225382d..4b18034537f53 100644
  			mmc_part_add(card, part_size << 19,
  				EXT_CSD_PART_CONFIG_ACC_GP0 + idx,
  				"gp%d", idx, false,
-@@ -365,7 +364,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
+@@ -362,7 +361,7 @@ static void mmc_manage_gp_partitions(struct mmc_card *card, u8 *ext_csd)
  static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
  {
  	int err = 0, idx;
@@ -116,10 +116,10 @@ index 5ca53e225382d..4b18034537f53 100644
  	bool broken_hpi = false;
  
 diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 8ef330027b134..3f8e84a80b4ad 100644
+index e459b38ef33cc..cf3780a6ccc4b 100644
 --- a/include/linux/mmc/card.h
 +++ b/include/linux/mmc/card.h
-@@ -227,7 +227,7 @@ struct mmc_queue_req;
+@@ -226,7 +226,7 @@ struct mmc_queue_req;
   * MMC Physical partitions
   */
  struct mmc_part {
