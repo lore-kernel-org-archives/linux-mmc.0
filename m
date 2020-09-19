@@ -1,83 +1,120 @@
-Return-Path: <SRS0=X25L=C3=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=aUf1=C4=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2872CC43464
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 21:54:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90A6AC43464
+	for <linux-mmc@archiver.kernel.org>; Sat, 19 Sep 2020 10:36:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1110B21707
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Sep 2020 21:54:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5181721D42
+	for <linux-mmc@archiver.kernel.org>; Sat, 19 Sep 2020 10:36:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="uplJwOav"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IXQfF2kl"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726064AbgIRVyy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Sep 2020 17:54:54 -0400
-Received: from www.zeus03.de ([194.117.254.33]:60666 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726174AbgIRVyy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Sep 2020 17:54:54 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=jk7fPuKY5hSB9cDfqkG3ZcdckkV
-        xhJDEcEH1RscvAls=; b=uplJwOavBBXplR90PTRYq8rgVytPXGWVaO4ycTNU6X8
-        NVJOjQcUtARavfaU/Ccp1J3rspVw0Prr4a0GW55lwvqSOTFL9AYXUMAhl2sElTFi
-        yriGLDiqbf9jb3wIM8EGfB1NPFkLMl+3yB/J6eagErU8cSOfxqDxJYAd6sWY/lo8
-        =
-Received: (qmail 3465932 invoked from network); 18 Sep 2020 23:54:51 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Sep 2020 23:54:51 +0200
-X-UD-Smtp-Session: l3s3148p1@k97TjJ2vSIdQT+F6
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2] mmc: core: document mmc_hw_reset()
-Date:   Fri, 18 Sep 2020 23:54:46 +0200
-Message-Id: <20200918215446.65654-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.28.0
+        id S1726280AbgISKgG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 19 Sep 2020 06:36:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44338 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726129AbgISKgG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Sep 2020 06:36:06 -0400
+Received: from mail-yb1-xb41.google.com (mail-yb1-xb41.google.com [IPv6:2607:f8b0:4864:20::b41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FFD3C0613CE;
+        Sat, 19 Sep 2020 03:36:06 -0700 (PDT)
+Received: by mail-yb1-xb41.google.com with SMTP id e11so6348048ybk.1;
+        Sat, 19 Sep 2020 03:36:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=cM+6Iew97/QqDqeXRj5V+Is6MS5zyX9aM3BXZUUe5wE=;
+        b=IXQfF2kltTHbcQb7UNIdT1TpBhi1Ed8dkT+pYOoW85J2Ll3apFkgT8ADs6BuFtjl6k
+         vdq5XPcoDtJFExhARXOPhcp6WCYwS7eR3sbNnuP3RrHKs8bQAz2at+E+1Kk9lFtpZCwF
+         qz7QjEKBVk0WsxkO5D9etP//3KFi+SSJ8q84+SNHwJ4SvkgCCyJ7vfGiUrmGvqihuVCs
+         U3JbbtehjmNTYCrJt7fWSmTXHB9SzxvbV0xukIUcMsSSgt0HpNmGfRvm6+P04XjIKnWU
+         FEdMsHDuT7N9OrvsikwsDf5f4FPZk0u77slPR069Ud6/SXaj1GqIhFe7n3/yUfu4Xu+Y
+         DGXg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=cM+6Iew97/QqDqeXRj5V+Is6MS5zyX9aM3BXZUUe5wE=;
+        b=rY6NomqeXcOzsDS3oCqP1s6F0ss05CZh6oK9uHy8KoHivb6pUhaFnThEIv7TGzpRC/
+         KgDeZTOwDB1L1Y5iYd7am6Nzw0xqKOxOmtBdJoWEsPHJrqiVMBoZ7qdpAB2FjDRYtdDK
+         OunxwINLXt/uY/q37ZXGxSucihKhTE5twRimDLlx4xFTywetsNTJ7rrdj4PJrVISv/TW
+         HIl4gOVWZvUD5CDsyzJK2WEUFSWwUCi8KbSpA5SYK6oklJOtUzPxokUma+d//M9355Hi
+         KNJHdlfMDb395GDq4nvDaimzh4Z0ijj2xZQ7vmgKp9dtpVYNCN8U4oxsmyiKeeX7Wh/Y
+         sDkw==
+X-Gm-Message-State: AOAM5321n7wNN3OtKnEFtd/j3bVamqJWtp2Rgr6B2ISjkfmrFz+4DBkD
+        PvOup+GU5yiTsqPe9J0cJZyNtl9fI2cCPmCBkTg=
+X-Google-Smtp-Source: ABdhPJxUk0dSH8RxFxWJjokwPtUzMQWUJ+6RdJKvBH8RL+C+jC12QmJoiJ7lu6MnA2bxFMbjRTEOQ6vknjpBOnQ89+4=
+X-Received: by 2002:a25:aba1:: with SMTP id v30mr37784618ybi.518.1600511765740;
+ Sat, 19 Sep 2020 03:36:05 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <1594230511-24790-1-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+ <1594230511-24790-2-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+In-Reply-To: <1594230511-24790-2-git-send-email-prabhakar.mahadev-lad.rj@bp.renesas.com>
+From:   "Lad, Prabhakar" <prabhakar.csengg@gmail.com>
+Date:   Sat, 19 Sep 2020 11:35:39 +0100
+Message-ID: <CA+V-a8tTSo4bp8bdQnf1KA9z7d+AjxfC5Abk0iuV4L_r20PwPQ@mail.gmail.com>
+Subject: Re: [PATCH 1/8] dt-bindings: serial: renesas,scif: Document r8a774e1 bindings
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jason Cooper <jason@lakedaemon.net>,
+        Marc Zyngier <maz@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Will Deacon <will@kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        LAK <linux-arm-kernel@lists.infradead.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add documentation for mmc_hw_reset to make sure the intended use case is
-clear.
+Hi Greg,
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+On Wed, Jul 8, 2020 at 6:48 PM Lad Prabhakar
+<prabhakar.mahadev-lad.rj@bp.renesas.com> wrote:
+>
+> RZ/G2H (R8A774E1) SoC also has the R-Car gen3 compatible SCIF ports,
+> so document the SoC specific bindings.
+>
+> Signed-off-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> ---
+>  Documentation/devicetree/bindings/serial/renesas,scif.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>
+Could you please pick this patch.
 
-Changes since v1:
-* make clear it is a full reset
-* don't say "remote card"
+Cheers,
+Prabhakar
 
- drivers/mmc/core/core.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8ccae6452b9c..d42037f0f10d 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2063,6 +2063,16 @@ static void mmc_hw_reset_for_init(struct mmc_host *host)
- 	host->ops->hw_reset(host);
- }
- 
-+/**
-+ * mmc_hw_reset - reset the card in hardware
-+ * @host: MMC host to which the card is attached
-+ *
-+ * Hard reset the card. This function is only for upper layers, like the
-+ * block layer or card drivers. You cannot use it in host drivers (struct
-+ * mmc_card might be gone then).
-+ *
-+ * Return: 0 on success, -errno on failure
-+ */
- int mmc_hw_reset(struct mmc_host *host)
- {
- 	int ret;
--- 
-2.28.0
-
+> diff --git a/Documentation/devicetree/bindings/serial/renesas,scif.yaml b/Documentation/devicetree/bindings/serial/renesas,scif.yaml
+> index 570b379f9f19..f589ac7577ae 100644
+> --- a/Documentation/devicetree/bindings/serial/renesas,scif.yaml
+> +++ b/Documentation/devicetree/bindings/serial/renesas,scif.yaml
+> @@ -51,6 +51,7 @@ properties:
+>                - renesas,scif-r8a774a1     # RZ/G2M
+>                - renesas,scif-r8a774b1     # RZ/G2N
+>                - renesas,scif-r8a774c0     # RZ/G2E
+> +              - renesas,scif-r8a774e1     # RZ/G2H
+>                - renesas,scif-r8a7795      # R-Car H3
+>                - renesas,scif-r8a7796      # R-Car M3-W
+>                - renesas,scif-r8a77961     # R-Car M3-W+
+> --
+> 2.17.1
+>
