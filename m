@@ -1,84 +1,82 @@
-Return-Path: <SRS0=6BIs=C7=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=GgYk=DA=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D01C2C4363D
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Sep 2020 18:38:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E62AC2D0A8
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 06:19:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 71C2D20756
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Sep 2020 18:38:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0612421D43
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 06:19:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=intel.onmicrosoft.com header.i=@intel.onmicrosoft.com header.b="ABuuJDn5"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="WVHk/jWs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726573AbgIVSiT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Sep 2020 14:38:19 -0400
-Received: from mga09.intel.com ([134.134.136.24]:61030 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726526AbgIVSiT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 22 Sep 2020 14:38:19 -0400
-IronPort-SDR: kmUbQKNOgHsnEMVpm3wE7cajXuQDe/tNp8vc3JyYjBxydfxw8QooN2wAolcfnXO9C8cHTQCJb9
- yTTbgWFP5/jA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9752"; a="161619179"
-X-IronPort-AV: E=Sophos;i="5.77,291,1596524400"; 
-   d="scan'208";a="161619179"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Sep 2020 11:38:12 -0700
-IronPort-SDR: M5SLIaOHVbo/6wrjMniNorhJ5cia50B2kvz8c45/vccR3U+9dlccN9kAo15qg6+XZh+WHuJGBh
- BGQ+xNnp8RqQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,291,1596524400"; 
-   d="scan'208";a="290490219"
-Received: from orsmsx601.amr.corp.intel.com ([10.22.229.14])
-  by fmsmga007.fm.intel.com with ESMTP; 22 Sep 2020 11:38:11 -0700
-Received: from orsmsx608.amr.corp.intel.com (10.22.229.21) by
- ORSMSX601.amr.corp.intel.com (10.22.229.14) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1713.5; Tue, 22 Sep 2020 11:38:11 -0700
-Received: from orsmsx601.amr.corp.intel.com (10.22.229.14) by
- ORSMSX608.amr.corp.intel.com (10.22.229.21) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1713.5; Tue, 22 Sep 2020 11:38:10 -0700
-Received: from ORSEDG602.ED.cps.intel.com (10.7.248.7) by
- orsmsx601.amr.corp.intel.com (10.22.229.14) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5
- via Frontend Transport; Tue, 22 Sep 2020 11:38:10 -0700
-Received: from NAM10-MW2-obe.outbound.protection.outlook.com (104.47.55.103)
- by edgegateway.intel.com (134.134.137.103) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.1713.5; Tue, 22 Sep 2020 11:38:09 -0700
+        id S1726746AbgIWGTo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Sep 2020 02:19:44 -0400
+Received: from mail-dm6nam11on2087.outbound.protection.outlook.com ([40.107.223.87]:21985
+        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726550AbgIWGTo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Sep 2020 02:19:44 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=CDhdQ6+WkSzgUK2yHEVPFOoIQHxqy2UBGgKdpa1Sh4CdyDvHrZ49HvePuAZuqUJKFQFLLMYsDR2xElqJ/D2gVq7J5ogr4ezkpAmB9g2wmfJQi9hzsVbUuNItYm45qELlP9GjA7QRVrBL2m12xUXkYH4oc4KNYcAYTk9U5dAZ81V1yj3vjjTqkGtl+FDaDAndNp6rQzswJS1QiLoQ510DTyPeYtFZoi7BqEnOmc+yOTcbKymyFgTjP/lRyYY6xwvdHQiGX0jCchZGfJcL+P5M5p+tm54vTsZUEVdEAhxra/c7NhXhfI4676GqLt9Yuav6V/yeyfVfdKogB+aC6Z00hw==
+ b=GpMExMN4pW6h86XlirlNhNJV52PjdC7M8JxGiuJ3cZFjzoHs35wKuY07EZiBqS8ERL6uuzz++b4P1+UhZH+6N/vZtHJ9Jh0A+KZzJ3wcTCzZYEWT1teP6tHdl0xA13/OWyLVZ+FdfAoFH3u5OsgDeyFCE1Ld3BD5llCJDV9siZ6ha76KmDKTfsTD/UT3QjwxJ02w2m3Ze1XCVlchrDdTPyktBd0qvXtfsCthID5XU09JbH4315p8WMTFaGY4dNM00aV3Zphe8QVcT9UzCtROlkdvtPxJHHaUFAZtYL7bwtTw7Nm/yIRqN3whO6T+pWgBveidSzprpwCCSM6t1AQmIA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=46OZO4lyCi0KcdIRFiRIa94+w3HlIzXKqwy4jDtRdRE=;
- b=Kbp+Ikira8gkNMzsAon2UKJofgMuAD8V68/oUJFKgeslwanS3F1K4z5vu0I78qbq8O0G63KWWD2S2MX8xKu3XbcyVgyMKetLWPEbKd2t+OKNHx+/yHN8y0RgJ4lPkKFCI+M5OM52+wUBhSj5FevDCgWb+Dta7XzlHw4iKgjHsWGNiVJvtQttO2zWQVsGw9ZyFt40syN+X92H+VveKZ9EN4aLj7T8Du9SPE8YydC73fBgNSmGhngxJEj84MjdN0H+29krzjQCd/42Ol2EvCPCRySvoWsj9Mx+FFXRreGOwQkb7nS0TBxgKfHXM2cNA0sY1m2swkkeYccVxkxDpC5Zuw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=intel.onmicrosoft.com;
- s=selector2-intel-onmicrosoft-com;
+ bh=qTELXZ7Z0lD9xuB1A6iYQ/JhJyGOGdtz66furTbVVrQ=;
+ b=TLzMwlfw5w1ID1lHQX9WQeNkx+PJaRNFByetN19gmmM+b0cZXjG5pxFbA8KZiptMSeO4ONCdekKbRR1mdWvZB6LWixHT81m1+6XgWKQeooTLHtqoCCoT3CzAvOPs8K0Q52dyAvwI1ZlDkyZxjD773/9ytkR8+QnUeQIbCwlhstlFAbcVriEeANsL/Y6QqGAluUFAUngd5GKVMaYPPDrqH5dV7kMPxpt5IiwyQAz1lZXRdMRuYNTE/ysG4PoJuPfkgM3Mhxj2dtVIvU4ijffW6tB1HQ7dmMxb+rOOj2yVHkckiT3a+K5UzRbix3OS+90Wi7re7vwypf7RDT18JGdcLQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=temperror (sender ip
+ is 149.199.60.83) smtp.rcpttodomain=intel.com smtp.mailfrom=xilinx.com;
+ dmarc=none action=none header.from=xilinx.com; dkim=none (message not
+ signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=46OZO4lyCi0KcdIRFiRIa94+w3HlIzXKqwy4jDtRdRE=;
- b=ABuuJDn594gJ1OUNDBzZEIVXeJY4nAZC1nx9bufTych4Sx1dJ6eyz4g3fOfKYiSZP2CceBlWMPTp9YR6KSA1KdhVBUldncold8pXNmlgWB8SiS8ZS4sQwGQlTzh30CEWDdfq37Jo8DgA6u5+Pji1fK40P2EOfRqUBpIvo9ABsKQ=
-Received: from BYAPR11MB3015.namprd11.prod.outlook.com (2603:10b6:a03:86::14)
- by BYAPR11MB2981.namprd11.prod.outlook.com (2603:10b6:a03:83::33) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3391.11; Tue, 22 Sep
- 2020 18:38:08 +0000
-Received: from BYAPR11MB3015.namprd11.prod.outlook.com
- ([fe80::c180:fe9a:f947:4ca0]) by BYAPR11MB3015.namprd11.prod.outlook.com
- ([fe80::c180:fe9a:f947:4ca0%7]) with mapi id 15.20.3391.024; Tue, 22 Sep 2020
- 18:38:08 +0000
-From:   "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-To:     Michal Simek <michal.simek@xilinx.com>,
+ bh=qTELXZ7Z0lD9xuB1A6iYQ/JhJyGOGdtz66furTbVVrQ=;
+ b=WVHk/jWs0I1WXjnDW3K3aoCvuGLPWFy0CMIcSZ3V+CRj+CavsYLyLloYjUDmXGURr1VsGJ05A+R3ayILCs0F6jCrvM64tSwGNmdXOJYFlNLerdpVsBxAm0hGoioke1Zuse6CdMfXP+SwTmp5iAgGI6ipb0hOL2X9Jm9cPIWS6AU=
+Received: from SN4PR0501CA0064.namprd05.prod.outlook.com
+ (2603:10b6:803:41::41) by DM6PR02MB5659.namprd02.prod.outlook.com
+ (2603:10b6:5:7c::18) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3412.20; Wed, 23 Sep
+ 2020 06:19:38 +0000
+Received: from SN1NAM02FT015.eop-nam02.prod.protection.outlook.com
+ (2603:10b6:803:41:cafe::7d) by SN4PR0501CA0064.outlook.office365.com
+ (2603:10b6:803:41::41) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3412.11 via Frontend
+ Transport; Wed, 23 Sep 2020 06:19:38 +0000
+X-MS-Exchange-Authentication-Results: spf=temperror (sender IP is
+ 149.199.60.83) smtp.mailfrom=xilinx.com; intel.com; dkim=none (message not
+ signed) header.d=none;intel.com; dmarc=none action=none
+ header.from=xilinx.com;
+Received-SPF: TempError (protection.outlook.com: error in processing during
+ lookup of xilinx.com: DNS Timeout)
+Received: from xsj-pvapsmtpgw01 (149.199.60.83) by
+ SN1NAM02FT015.mail.protection.outlook.com (10.152.72.109) with Microsoft SMTP
+ Server id 15.20.3412.21 via Frontend Transport; Wed, 23 Sep 2020 06:19:38
+ +0000
+Received: from [149.199.38.66] (port=38109 helo=smtp.xilinx.com)
+        by xsj-pvapsmtpgw01 with esmtp (Exim 4.90)
+        (envelope-from <michal.simek@xilinx.com>)
+        id 1kKy7e-00083L-H1; Tue, 22 Sep 2020 23:19:22 -0700
+Received: from [127.0.0.1] (helo=localhost)
+        by smtp.xilinx.com with smtp (Exim 4.63)
+        (envelope-from <michal.simek@xilinx.com>)
+        id 1kKy7t-0001Ie-Ok; Tue, 22 Sep 2020 23:19:37 -0700
+Received: from xsj-pvapsmtp01 (xsj-mail.xilinx.com [149.199.38.66])
+        by xsj-smtp-dlp2.xlnx.xilinx.com (8.13.8/8.13.1) with ESMTP id 08N6JZ78009197;
+        Tue, 22 Sep 2020 23:19:35 -0700
+Received: from [172.30.17.109]
+        by xsj-pvapsmtp01 with esmtp (Exim 4.63)
+        (envelope-from <michals@xilinx.com>)
+        id 1kKy7q-0001IB-K8; Tue, 22 Sep 2020 23:19:35 -0700
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Enable UHS-1 support for
+ Keem Bay SOC
+To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>,
+        Michal Simek <michal.simek@xilinx.com>,
         "Hunter, Adrian" <adrian.hunter@intel.com>,
         "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
@@ -86,17 +84,10 @@ To:     Michal Simek <michal.simek@xilinx.com>,
         <linux-arm-kernel@lists.infradead.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         Arnd Bergmann <arnd@arndb.de>
-CC:     "Raja Subramanian, Lakshmi Bai" 
+Cc:     "Raja Subramanian, Lakshmi Bai" 
         <lakshmi.bai.raja.subramanian@intel.com>,
         "Wan Mohamad, Wan Ahmad Zainie" 
         <wan.ahmad.zainie.wan.mohamad@intel.com>
-Subject: RE: [PATCH v1 1/1] mmc: sdhci-of-arasan: Enable UHS-1 support for
- Keem Bay SOC
-Thread-Topic: [PATCH v1 1/1] mmc: sdhci-of-arasan: Enable UHS-1 support for
- Keem Bay SOC
-Thread-Index: AQHWimLCf5qN36I7DEm2Cbc0P5ffRKloHlGggAAF+4CACp6YAIABhGoAgADAOmA=
-Date:   Tue, 22 Sep 2020 18:38:07 +0000
-Message-ID: <BYAPR11MB30151C13242E75088537AA61B83B0@BYAPR11MB3015.namprd11.prod.outlook.com>
 References: <20200914051214.13918-1-muhammad.husaini.zulkifli@intel.com>
  <20200914051214.13918-2-muhammad.husaini.zulkifli@intel.com>
  <21d34b75-5947-e115-7c9a-6d068375bbdd@xilinx.com>
@@ -104,198 +95,286 @@ References: <20200914051214.13918-1-muhammad.husaini.zulkifli@intel.com>
  <452d5580-a1d6-c509-2760-80bde1f84ef9@xilinx.com>
  <BYAPR11MB3015BD6F223ADB5C45C1435CB83B0@BYAPR11MB3015.namprd11.prod.outlook.com>
  <6b1c9c71-ca10-47b0-895c-adafc6881063@xilinx.com>
-In-Reply-To: <6b1c9c71-ca10-47b0-895c-adafc6881063@xilinx.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-dlp-version: 11.5.1.3
-dlp-product: dlpe-windows
-dlp-reaction: no-action
-authentication-results: xilinx.com; dkim=none (message not signed)
- header.d=none;xilinx.com; dmarc=none action=none header.from=intel.com;
-x-originating-ip: [42.189.182.175]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 777d412e-9f7b-4851-139e-08d85f26a688
-x-ms-traffictypediagnostic: BYAPR11MB2981:
-x-ld-processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <BYAPR11MB29812AB9FA5A699D3A5065DFB83B0@BYAPR11MB2981.namprd11.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 9+WTKFeZXhSrT+5+dfSiNmRKSqz9rKiK1Rtibi5u+ifA1QptvoCfuxh9AsFzq2YRPotEJ/nG1PRbaWS30qcEKmGwUnDvnqeE/E7jxRi1tGc4eyVB0ALUmUcRCbJzsXkEput08BaZKFxInpzEkv4lCSA5EN+rDJOdVp/00U6+UHDRVbsENg75MYp39owe00ZqL+WV/oJnTaTbKwNmUSlBptgP1sFUcUjNAMsvSTbp437qMkobvyuYKIfbT55oKwJtRpRNx3wVbcGB32BXydt7xEI/J6AeM5/DpVPRM8tn392l3OPAjUt5HXQ3ih2+bM/vWJ/de8wkxdYqYyMOszeBug==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR11MB3015.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(39860400002)(376002)(396003)(346002)(366004)(76116006)(66446008)(64756008)(26005)(66476007)(66556008)(55016002)(66946007)(316002)(7696005)(2906002)(8676002)(8936002)(186003)(6506007)(53546011)(9686003)(83380400001)(5660300002)(71200400001)(52536014)(33656002)(478600001)(107886003)(86362001)(4326008)(54906003)(110136005);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: kRme/TLieTMFE34TcejA6BXEg/YF07pBdVsE/lY7vNeyY7HqzW5jM+ocqtsFur4XpaAmPlLpw9skffMXQAUwf0ha/npZr02rRXIVJywbPcvQkCnuFWbXc0yTW+nEizhm36rfE6AFeJotyI2zp2AHLEqMpa9s+IjGSuo2Lxvl48SOpNMvd6HgEpMEH3bivK+JoHKmknqrejdP/ZANQwNS3N4xqn0GJzA8aKuq3YhWcTtPzbii6coYviEQ6h3XJkJVew9Gn36VkdpqqxjLvKKma4wtMrdWRvrXm7aSm+WNBaAcesqvyJ9ml1viaRB3hwZmywM6tzc18MkJnA1OhJw8pIwuRN3ioOm7oLJoISINDPBHd1qKWcQ/y0GZ2nmxoRgoyHN3Icy4geXoDRoqaV6l3zqaHiIqB96JcqF3Y/nebEHRTxJYdmk293v+IV1J/9AJ6DG/wuIUrxvMhKhnfzZ3O0k8o//O9njoD550s/zIE03JIdz/yVM8nPfOENb/ggGKDvlOzrokm5n5T8XiDRzZwVRyigRpvtmv0sKKXopHEmk7LQX4QqI9081mo0AMb3XBNXQ8ZkKNTW8vz0kWtrXdFjcfZgguNmTnTqLHT4BYYYOt+zDSNTjqDnkm5lehyXHuyB9DsGL2AyKiFlGxgt6ebQ==
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ <BYAPR11MB30151C13242E75088537AA61B83B0@BYAPR11MB3015.namprd11.prod.outlook.com>
+From:   Michal Simek <michal.simek@xilinx.com>
+Autocrypt: addr=michals@xilinx.com; keydata=
+ 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
+ 0Z1MQlmNcq2bhOMzTxuXX2NDzUZs4aqEyZQ=
+Message-ID: <2b7abd82-84f9-64e3-58cb-8a65cc66c0d0@xilinx.com>
+Date:   Wed, 23 Sep 2020 08:19:31 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: BYAPR11MB3015.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 777d412e-9f7b-4851-139e-08d85f26a688
-X-MS-Exchange-CrossTenant-originalarrivaltime: 22 Sep 2020 18:38:07.7898
+In-Reply-To: <BYAPR11MB30151C13242E75088537AA61B83B0@BYAPR11MB3015.namprd11.prod.outlook.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-RCIS-Action: ALLOW
+X-TM-AS-Product-Ver: IMSS-7.1.0.1224-8.2.0.1013-23620.005
+X-TM-AS-User-Approved-Sender: Yes;Yes
+X-EOPAttributedMessage: 0
+X-MS-Office365-Filtering-HT: Tenant
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ced8a373-67f9-4b00-6091-08d85f88a62b
+X-MS-TrafficTypeDiagnostic: DM6PR02MB5659:
+X-Microsoft-Antispam-PRVS: <DM6PR02MB565924FA2E46471914A7660CC6380@DM6PR02MB5659.namprd02.prod.outlook.com>
+X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
+X-MS-Oob-TLC-OOBClassifiers: OLM:7691;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: Ipi9YAJjJhksvzgW7xJlX60e1k3vaKhY/V6bIQx0Xe0Tr8SzU5drsW+XrXeaOqqw7yOjKttG0zDHBksZmnkfpeHWrGfHRJgaadgIxBEWDIex4x5xP01NboNkAjcMBg6r2IX4VPt/XXqncMrn/cQS6WDeToFa7E3lPKEp3uOcy7hLpfX1SW5hvFWSVSeZXy6RZGSc4xBdDfSHwbiLzakbg5xf95AGBGJsGNWE0mARHZB6dv6npMhXh5rXFbCpGx81Y9Y2VZi9t3VkqtvaHQpUM04KLCdIp9xpsVhUzya0j97dnP5S3iGUOU33pNT1u/bthsN+g1KfMmVfNW/OqGXtZZ1DxmBUsIBx0cwxkcbaz+Xt3E7VwJ3sSk+ExeEaGwe4DZXpQtNJcaqeAWgQk/dbaPGZzh5UYB/sWMBJiRgs84ZrrL2iL8rHBwfWDmK9MGDr2DPc+t6IdkZlzH+EXUJKJqJIM5c2Qdi/rlHYTlY/tqfNJ7M/8P1KM/as6Gd0PoLg
+X-Forefront-Antispam-Report: CIP:149.199.60.83;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapsmtpgw01;PTR:unknown-60-83.xilinx.com;CAT:NONE;SFS:(136003)(396003)(376002)(346002)(39860400002)(46966005)(83380400001)(26005)(44832011)(8936002)(478600001)(6666004)(186003)(70206006)(4326008)(5660300002)(356005)(2616005)(53546011)(8676002)(81166007)(2906002)(70586007)(47076004)(9786002)(82310400003)(63350400001)(426003)(31686004)(336012)(36756003)(31696002)(110136005)(82740400003)(316002)(54906003)(921003)(43740500002);DIR:OUT;SFP:1101;
+X-OriginatorOrg: xilinx.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Sep 2020 06:19:38.0866
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: lpJ8y+M5hJ+fT1zxJVLKzoQoBJxFbarmBJqpIW3xkzhMy48K0ZbvH/1xJIr2JdDfbYE9BEBEUOxwCk5QW98MWuTZkLnD9SKaaUMBv4SGYsMabBXg1vgWQpknpN7KfPAi
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR11MB2981
-X-OriginatorOrg: intel.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ced8a373-67f9-4b00-6091-08d85f88a62b
+X-MS-Exchange-CrossTenant-Id: 657af505-d5df-48d0-8300-c31994686c5c
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=657af505-d5df-48d0-8300-c31994686c5c;Ip=[149.199.60.83];Helo=[xsj-pvapsmtpgw01]
+X-MS-Exchange-CrossTenant-AuthSource: SN1NAM02FT015.eop-nam02.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR02MB5659
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGksDQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBNaWNoYWwgU2ltZWsgPG1p
-Y2hhbC5zaW1la0B4aWxpbnguY29tPiANClNlbnQ6IFR1ZXNkYXksIFNlcHRlbWJlciAyMiwgMjAy
-MCAzOjAwIFBNDQpUbzogWnVsa2lmbGksIE11aGFtbWFkIEh1c2FpbmkgPG11aGFtbWFkLmh1c2Fp
-bmkuenVsa2lmbGlAaW50ZWwuY29tPjsgTWljaGFsIFNpbWVrIDxtaWNoYWwuc2ltZWtAeGlsaW54
-LmNvbT47IEh1bnRlciwgQWRyaWFuIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47IHVsZi5oYW5z
-c29uQGxpbmFyby5vcmc7IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWFybS1rZXJu
-ZWxAbGlzdHMuaW5mcmFkZWFkLm9yZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsgQXJu
-ZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4NCkNjOiBSYWphIFN1YnJhbWFuaWFuLCBMYWtzaG1p
-IEJhaSA8bGFrc2htaS5iYWkucmFqYS5zdWJyYW1hbmlhbkBpbnRlbC5jb20+OyBXYW4gTW9oYW1h
-ZCwgV2FuIEFobWFkIFphaW5pZSA8d2FuLmFobWFkLnphaW5pZS53YW4ubW9oYW1hZEBpbnRlbC5j
-b20+DQpTdWJqZWN0OiBSZTogW1BBVENIIHYxIDEvMV0gbW1jOiBzZGhjaS1vZi1hcmFzYW46IEVu
-YWJsZSBVSFMtMSBzdXBwb3J0IGZvciBLZWVtIEJheSBTT0MNCg0KSGksDQoNCk9uIDIyLiAwOS4g
-MjAgMjo0NywgWnVsa2lmbGksIE11aGFtbWFkIEh1c2Fpbmkgd3JvdGU6DQo+IA0KPiAtLS0tLU9y
-aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNaWNoYWwgU2ltZWsgPG1pY2hhbC5zaW1la0B4
-aWxpbnguY29tPg0KPiBTZW50OiBNb25kYXksIFNlcHRlbWJlciAxNCwgMjAyMCA5OjQwIFBNDQo+
-IFRvOiBadWxraWZsaSwgTXVoYW1tYWQgSHVzYWluaSA8bXVoYW1tYWQuaHVzYWluaS56dWxraWZs
-aUBpbnRlbC5jb20+OyANCj4gTWljaGFsIFNpbWVrIDxtaWNoYWwuc2ltZWtAeGlsaW54LmNvbT47
-IEh1bnRlciwgQWRyaWFuIA0KPiA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+OyB1bGYuaGFuc3Nv
-bkBsaW5hcm8ub3JnOyANCj4gbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgtYXJtLWtl
-cm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyANCj4gbGludXgta2VybmVsQHZnZXIua2VybmVsLm9y
-ZzsgQXJuZCBCZXJnbWFubiA8YXJuZEBhcm5kYi5kZT4NCj4gQ2M6IFJhamEgU3VicmFtYW5pYW4s
-IExha3NobWkgQmFpIA0KPiA8bGFrc2htaS5iYWkucmFqYS5zdWJyYW1hbmlhbkBpbnRlbC5jb20+
-OyBXYW4gTW9oYW1hZCwgV2FuIEFobWFkIA0KPiBaYWluaWUgPHdhbi5haG1hZC56YWluaWUud2Fu
-Lm1vaGFtYWRAaW50ZWwuY29tPg0KPiBTdWJqZWN0OiBSZTogW1BBVENIIHYxIDEvMV0gbW1jOiBz
-ZGhjaS1vZi1hcmFzYW46IEVuYWJsZSBVSFMtMSBzdXBwb3J0IA0KPiBmb3IgS2VlbSBCYXkgU09D
-DQo+IA0KPiBIaSwNCj4gDQo+IE9uIDE0LiAwOS4gMjAgMTU6MjYsIFp1bGtpZmxpLCBNdWhhbW1h
-ZCBIdXNhaW5pIHdyb3RlOg0KPj4gSEkgTWljaGFsLA0KPj4NCj4+IFRoYW5rcyBmb3IgdGhlIGNv
-bW1lbnRzLg0KPj4gSSByZXBsaWVkIGlubGluZQ0KPj4NCj4+IC0tLS0tT3JpZ2luYWwgTWVzc2Fn
-ZS0tLS0tDQo+PiBGcm9tOiBNaWNoYWwgU2ltZWsgPG1pY2hhbC5zaW1la0B4aWxpbnguY29tPg0K
-Pj4gU2VudDogTW9uZGF5LCBTZXB0ZW1iZXIgMTQsIDIwMjAgMjo0NiBQTQ0KPj4gVG86IFp1bGtp
-ZmxpLCBNdWhhbW1hZCBIdXNhaW5pIDxtdWhhbW1hZC5odXNhaW5pLnp1bGtpZmxpQGludGVsLmNv
-bT47DQo+PiBIdW50ZXIsIEFkcmlhbiA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+OyBtaWNoYWwu
-c2ltZWtAeGlsaW54LmNvbTsgDQo+PiB1bGYuaGFuc3NvbkBsaW5hcm8ub3JnOyBsaW51eC1tbWNA
-dmdlci5rZXJuZWwub3JnOyANCj4+IGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9y
-ZzsgbGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZzsgDQo+PiBBcm5kIEJlcmdtYW5uIDxhcm5k
-QGFybmRiLmRlPg0KPj4gQ2M6IFJhamEgU3VicmFtYW5pYW4sIExha3NobWkgQmFpDQo+PiA8bGFr
-c2htaS5iYWkucmFqYS5zdWJyYW1hbmlhbkBpbnRlbC5jb20+DQo+PiBTdWJqZWN0OiBSZTogW1BB
-VENIIHYxIDEvMV0gbW1jOiBzZGhjaS1vZi1hcmFzYW46IEVuYWJsZSBVSFMtMSANCj4+IHN1cHBv
-cnQgZm9yIEtlZW0gQmF5IFNPQw0KPj4NCj4+IEhpLCArQXJuZCwNCj4+DQo+PiBPbiAxNC4gMDku
-IDIwIDc6MTIsIG11aGFtbWFkLmh1c2FpbmkuenVsa2lmbGlAaW50ZWwuY29tIHdyb3RlOg0KPj4+
-IEZyb206IE11aGFtbWFkIEh1c2FpbmkgWnVsa2lmbGkgDQo+Pj4gPG11aGFtbWFkLmh1c2Fpbmku
-enVsa2lmbGlAaW50ZWwuY29tPg0KPj4+DQo+Pj4gVm9sdGFnZSBzd2l0Y2hpbmcgc2VxdWVuY2Ug
-aXMgbmVlZGVkIHRvIHN1cHBvcnQgVUhTLTEgaW50ZXJmYWNlIGFzIA0KPj4+IEtlZW0gQmF5IEVW
-TSBpcyB1c2luZyBleHRlcm5hbCB2b2x0YWdlIHJlZ3VsYXRvciB0byBzd2l0Y2ggYmV0d2VlbiAN
-Cj4+PiAxLjhWIGFuZCAzLjNWLg0KPj4+DQo+Pj4gU2lnbmVkLW9mZi1ieTogTXVoYW1tYWQgSHVz
-YWluaSBadWxraWZsaSANCj4+PiA8bXVoYW1tYWQuaHVzYWluaS56dWxraWZsaUBpbnRlbC5jb20+
-DQo+Pj4gUmV2aWV3ZWQtYnk6IEFuZHkgU2hldmNoZW5rbyA8YW5kcml5LnNoZXZjaGVua29AaW50
-ZWwuY29tPg0KPj4+IFJldmlld2VkLWJ5OiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGlu
-dGVsLmNvbT4NCj4+PiAtLS0NCj4+PiAgZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4u
-YyB8IDE0MA0KPj4+ICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+Pj4gIDEgZmlsZSBj
-aGFuZ2VkLCAxNDAgaW5zZXJ0aW9ucygrKQ0KPj4+DQo+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMv
-bW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMNCj4+PiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2kt
-b2YtYXJhc2FuLmMNCj4+PiBpbmRleCBmMTg2ZmJkMDE2YjEuLmMxMzM0MDhkMGM3NCAxMDA2NDQN
-Cj4+PiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+Pj4gKysrIGIv
-ZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYw0KPj4+IEBAIC0xNiw3ICsxNiw5IEBA
-DQo+Pj4gICAqLw0KPj4+ICANCj4+PiAgI2luY2x1ZGUgPGxpbnV4L2Nsay1wcm92aWRlci5oPg0K
-Pj4+ICsjaW5jbHVkZSA8bGludXgvZ3Bpby9jb25zdW1lci5oPg0KPj4+ICAjaW5jbHVkZSA8bGlu
-dXgvbWZkL3N5c2Nvbi5oPg0KPj4+ICsjaW5jbHVkZSA8bGludXgvYXJtLXNtY2NjLmg+DQo+Pj4g
-ICNpbmNsdWRlIDxsaW51eC9tb2R1bGUuaD4NCj4+PiAgI2luY2x1ZGUgPGxpbnV4L29mX2Rldmlj
-ZS5oPg0KPj4+ICAjaW5jbHVkZSA8bGludXgvcGh5L3BoeS5oPg0KPj4+IEBAIC00MSw2ICs0Mywx
-MSBAQA0KPj4+ICAjZGVmaW5lIFNESENJX0lUQVBETFlfRU5BQkxFCQkweDEwMA0KPj4+ICAjZGVm
-aW5lIFNESENJX09UQVBETFlfRU5BQkxFCQkweDQwDQo+Pj4gIA0KPj4+ICsvKiBTZXR0aW5nIGZv
-ciBLZWVtIEJheSBJTyBQYWQgMS44IFZvbHRhZ2UgU2VsZWN0aW9uICovDQo+Pj4gKyNkZWZpbmUg
-S0VFTUJBWV9BT05fU0lQX0ZVTkNfSUQJCTB4ODIwMGZmMjYNCj4+PiArI2RlZmluZSBLRUVNQkFZ
-X0FPTl9TRVRfMVY4X1ZPTFQJMHgwMQ0KPj4+ICsjZGVmaW5lIEtFRU1CQVlfQU9OX1NFVF8zVjNf
-Vk9MVAkweDAwDQo+Pj4gKw0KPj4+ICAvKiBEZWZhdWx0IHNldHRpbmdzIGZvciBaeW5xTVAgQ2xv
-Y2sgUGhhc2VzICovDQo+Pj4gICNkZWZpbmUgWllOUU1QX0lDTEtfUEhBU0UgezAsIDYzLCA2Mywg
-MCwgNjMsICAwLCAgIDAsIDE4MywgNTQsICAwLCAwfQ0KPj4+ICAjZGVmaW5lIFpZTlFNUF9PQ0xL
-X1BIQVNFIHswLCA3MiwgNjAsIDAsIDYwLCA3MiwgMTM1LCA0OCwgNzIsIDEzNSwgDQo+Pj4gMH0g
-QEAgLTE1MCw2ICsxNTcsNyBAQCBzdHJ1Y3Qgc2RoY2lfYXJhc2FuX2RhdGEgew0KPj4+ICAJc3Ry
-dWN0IHJlZ21hcAkqc29jX2N0bF9iYXNlOw0KPj4+ICAJY29uc3Qgc3RydWN0IHNkaGNpX2FyYXNh
-bl9zb2NfY3RsX21hcCAqc29jX2N0bF9tYXA7DQo+Pj4gIAl1bnNpZ25lZCBpbnQJcXVpcmtzOw0K
-Pj4+ICsJc3RydWN0IGdwaW9fZGVzYyAqdWhzX2dwaW87DQo+Pj4gIA0KPj4+ICAvKiBDb250cm9s
-bGVyIGRvZXMgbm90IGhhdmUgQ0Qgd2lyZWQgYW5kIHdpbGwgbm90IGZ1bmN0aW9uIG5vcm1hbGx5
-IHdpdGhvdXQgKi8NCj4+PiAgI2RlZmluZSBTREhDSV9BUkFTQU5fUVVJUktfRk9SQ0VfQ0RURVNU
-CUJJVCgwKQ0KPj4+IEBAIC0zNjEsNiArMzY5LDEyMSBAQCBzdGF0aWMgaW50IHNkaGNpX2FyYXNh
-bl92b2x0YWdlX3N3aXRjaChzdHJ1Y3QgbW1jX2hvc3QgKm1tYywNCj4+PiAgCXJldHVybiAtRUlO
-VkFMOw0KPj4+ICB9DQo+Pj4gIA0KPj4+ICtzdGF0aWMgaW50IHNkaGNpX2FyYXNhbl9rZWVtYmF5
-X3NldF92b2x0YWdlKGludCB2b2x0KSB7ICNpZg0KPj4+ICtJU19FTkFCTEVEKENPTkZJR19IQVZF
-X0FSTV9TTUNDQykNCj4+PiArCXN0cnVjdCBhcm1fc21jY2NfcmVzIHJlczsNCj4+PiArDQo+Pj4g
-Kwlhcm1fc21jY2Nfc21jKEtFRU1CQVlfQU9OX1NJUF9GVU5DX0lELCB2b2x0LCAwLCAwLCAwLCAw
-LCAwLCAwLCAmcmVzKTsNCj4+PiArCWlmIChyZXMuYTApDQo+Pj4gKwkJcmV0dXJuIC1FSU5WQUw7
-DQo+Pj4gKwlyZXR1cm4gMDsNCj4+DQo+PiBJIGFtIGp1c3QgY3VyaW91cyBhYm91dCBjYWxsaW5n
-IHRoaXMgc21jIGRpcmVjdGx5IGZyb20gZGV2aWNlIGRyaXZlci4gSSBzZWUgdGhhdCBzZXZlcmFs
-IGRyaXZlcnMgYXJlIGRvaW5nIHRoaXMgYnV0IGlzbid0IGl0IGJldHRlciB0byBoaWRlIHRoZXNl
-IGluIGZpcm13YXJlIGRyaXZlcj8NCj4+IFtIdXNhaW5pXSBJbiBvcmRlciB0byBjaGFuZ2UgdGhl
-IHZvbHRhZ2Ugc2VsZWN0aW9uIGZvciBJTyBQYWRzIHZvbHRhZ2Ugc3dpdGNoaW5nIGxldmVsIGNv
-bnRyb2wsIEkgbmVlZCB0byBhY2Nlc3Mvd3JpdGUgdG8gQU9OIHJlZ2lzdGVyLiANCj4+IER1ZSB0
-byBzZWN1cml0eSBjb25jZXJuLCBVLUJvb3QgVGVhbSBwcm92aWRlZCBhbiBpbnRlcmZhY2UgdXNp
-bmcgdGhpcyBTSVAgU2VydmljZSBmb3IgbWUgdG8gY2FsbCBkdXJpbmcga2VybmVsIGRyaXZlciB2
-b2x0YWdlIHN3aXRjaGluZyBvcGVyYXRpb24uIA0KPiANCj4gSSBleHBlY3QgVS1Cb290IHRlYW0g
-aXMgYW55IGludGVybmFsIHRlYW0gbm90IFUtQm9vdCB1cHN0cmVhbSBmb2xrcy4NCj4gW0h1c2Fp
-bmldIEkgcmVxdW90ZSBteSBzdGF0ZW1lbnQuIEl0IGlzIEFURiB0aGF0IHByb3ZpZGVkIHRoZSBz
-ZXJ2aWNlcy4gVGhleSBhcmUgaW4gdGhlIHByb2Nlc3Mgb2YgdXBzdHJlYW1pbmcgdGhlIGNvZGUg
-YXMgd2VsbC4gDQo+IFRoYXQgaXMgYSBncmVhdCBpZGVhIHRvIGhpZGUgdGhlc2UgaW4gZmlybXdh
-cmUgZHJpdmVyLg0KPiBJIGNyZWF0ZWQgb25lIGZpcm13YXJlIGRyaXZlciB1bmRlciAvZHJpdmVy
-cy9maXJtd2FyZS4gVGhpcyBmaXJtd2FyZSBkcml2ZXIgcHJvdmlkZSBhbiBhcGkgZm9yIGRldmlj
-ZSBkcml2ZXIgdG8gY2FsbCBmb3IgdGhlIG9wZXJhdGlvbnMuDQo+IA0KPiANCj4+IEFsc28gdGhl
-IHBhcnQgb2YgRlVOQ19JRCBpcyBzbWMzMiwgc2lwIHNlcnZpY2UgY2FsbCAoMHg4MjAwMDAwMCkg
-ZnVuY3Rpb24gaWRlbnRpZmllciB3aGljaCBpcyBsaWtlbHkgc29tZXRoaW5nIHdoYXQgc2hvdWxk
-IGJlIHVzZWQgYXMgbWFjcm8gaW4gc2hhcmVkIGxvY2F0aW9uIHRoYXQgb3RoZXJzIGNhbiB1c2Ug
-aXQgdG9vLg0KPj4gW0h1c2FpbmldIFRoZSBvbmx5IHRoaW5nIHByb3ZpZGVkIHdhcyB0aGUgRlVO
-Q19JRCB2YWx1ZSBhbmQgYXJndW1lbnQuDQo+Pg0KPj4gQW5vdGhlciBwYXJ0IGlzIHRoYXQgYmFz
-ZWQgb24gZGVzY3JpcHRpb24geW91IGFyZSB0YWxraW5nIHRvIGV4dGVybmFsIHZvbHRhZ2UgcmVn
-dWxhdG9yIHdpdGhvdXQgdXNpbmcgcmVndWxhdG9yIGZyYW1ld29yayBhdCBhbGwuIElzbid0IGl0
-IGJldHRlciBqdXN0IHRvIGNyZWF0ZSBmaXJtd2FyZSBiYXNlZCByZWd1bGF0b3IgZm9yIHRoaXMg
-cHVycG9zZT8NCj4+IFtIdXNhaW5pXSBUaGlzIGlzIGZvciBLZWVtYmF5IHNwZWNpZmljIGFuZCB3
-ZSBkaWQgbm90IHVzZSByZWd1bGF0b3IgZnJhbWV3b3JrLiANCj4+IER1cmluZyB0aGUgdm9sdGFn
-ZSBzd2l0Y2hpbmcsIHRoaXMgU0lQIGZ1bmN0aW9uIG5lZWQgdG8gYmUgZXhlY3V0ZWQgdG8gY2hh
-bmdlIHRoZSBLZWVtIEJheSBJTyBQYWQgU3dpdGNoaW5nIExldmVsIENvbnRyb2wgdG8gMS44ViBm
-b3IgVUhTIG9yIDMuM3YgZm9yIGRlZmF1bHQgbW9kZS4NCj4+IFRvIGJlIHNwZWNpZmljLCBiZWxv
-dyBsaW5lIG9mIGNvZGUgbXVzdCBjb21lIHRvZ2V0aGVyIGR1cmluZyB0aGUgdm9sdGFnZSBzd2l0
-Y2hpbmcgb3BlcmF0aW9uLg0KPj4NCj4+IEZvciAxLjhWDQo+PiArCQkvKiBTZXQgVkRESU9fQiB2
-b2x0YWdlIHRvIExvdyBmb3IgMS44ViAqLw0KPj4gKwkJZ3Bpb2Rfc2V0X3ZhbHVlX2NhbnNsZWVw
-KHNkaGNpX2FyYXNhbi0+dWhzX2dwaW8sIDApOw0KPj4gKw0KPj4gKwkJcmV0ID0gc2RoY2lfYXJh
-c2FuX2tlZW1iYXlfc2V0X3ZvbHRhZ2UoS0VFTUJBWV9BT05fU0VUXzFWOF9WT0xUKTsNCj4+ICsJ
-CWlmIChyZXQpDQo+PiArCQkJcmV0dXJuIHJldDsNCj4+DQo+PiBGb3IgMy4zVg0KPj4gCQkvKiBT
-ZXQgVkRESU9fQiB2b2x0YWdlIHRvIEhpZ2ggZm9yIDMuM1YgKi8NCj4+ICsJCWdwaW9kX3NldF92
-YWx1ZV9jYW5zbGVlcChzZGhjaV9hcmFzYW4tPnVoc19ncGlvLCAxKTsNCj4+ICsNCj4+ICsJCXJl
-dCA9IHNkaGNpX2FyYXNhbl9rZWVtYmF5X3NldF92b2x0YWdlKEtFRU1CQVlfQU9OX1NFVF8zVjNf
-Vk9MVCk7DQo+PiArCQlpZiAocmV0KQ0KPj4gKwkJCXJldHVybiByZXQ7DQo+IA0KPiANCj4gSSB1
-bmRlcnN0YW5kIHRoYXQgeW91IG5lZWQgdG8gY2hhbmdlIHZvbHRhZ2UgaGVyZSBidXQgSSBkb24n
-dCB0aGluayB0aGUgY29kZSB5b3UgaGF2ZSB3cml0dGVuIGlzIGhvdyB0aGlzIHNob3VsZCBiZSBk
-b25lLiBJIHVuZGVyc3RhbmQgdGhhdCB0aGlzIGlzIHRoZSBxdWlja2VzdCBhbmQgZGlyZWN0IHdh
-eSBob3cgdG8gZG8gaXQgYnV0IEkgZG9uJ3QgdGhpbmsgdGhpcyBpcyBkb25lIHZpYSBwcm9wZXIg
-aW50ZXJmYWNlLiBJIHByZXR0eSBtdWNoIGRpc2xpa2UgdGhhdCB5b3UgYXJlIHB1dHRpbmcgRnVu
-YyBJRHMgdG8gZHJpdmVycyBpbnN0ZWFkIG9mIGFkZGluZyB0aGVtIHRvIGNlbnRyYWwgcGxhY2Ug
-dGhhdCBpdCBpcyB2aXNpYmxlIHdoYXQgeW91ciBwbGF0Zm9ybSBuZWVkcy4NCj4gW0h1c2Fpbmld
-IGxldCBtZSByZXBoYXNlIG15IHNlbnRlbmNlcyAuIEkgbWFrZSBzb21lIGNvbmZ1c2lvbiBoZXJl
-IGFuZCBpbiBjb21taXQgbWVzc2FnZS4gVG8gc3VtbWFyaXplIHRoZXJlIGFyZSAyIHBsYWNlcyB0
-byBmaW5hbCBnZW5lcmF0ZSB0aGUgSU8gVm9sdGFnZS4NCj4gDQo+IDEpIFNldHRpbmcgdGhlIFZf
-VkRESU9fQiAuIEFPTiBSZWdpc3RlciBmb3IgSU8gUEFEUyBWb2x0YWdlIFN3aXRjaGluZyBMZXZl
-bCBDb250cm9sLg0KPiBUaGlzIHJlZ2lzdGVyIGRlZmluZXMgdGhlIElPIFZvbHRhZ2UgZm9yIHBh
-cnRpY3VsYXIgR1BJT3MgcGluIGZvciBjbGssY21kLGRhdGExLTIuDQo+IA0KPiAyKSBTZXR0aW5n
-IHRoZSBHUElPIGV4cGFuZGVyIHBpbiB2YWx1ZSB0byBkcml2ZSBlaXRoZXIgMS44ViBvciAzLjNW
-Lg0KPiBTRCBjYXJkIElPIGNhbiBvcGVyYXRlIGF0IDMuM1YgKGRlZmF1bHQpIG9yIDEuOFYuIA0K
-PiBLZWVtIEJheSBoYXMgYSBiYW5rIG9mIElPIHRoYXQgY2FuIGJlIHN3aXRjaGVkIGJldHdlZW4g
-My4zViBvciAxLjhWIGZvciB0aGlzIHJlYXNvbi4NCj4gVGhlIG91dHB1dCBWX1ZERElPX0JfTUFJ
-TiBiZSBlaXRoZXIgMy4zdiAoaW4pIG9yIDEuOHYoaW4pLCBkZXBlbmRpbmcgb24gdGhlIHN0YXRl
-IG9mIEdQSU8gZXhwYW5kZXIgUElOIHZhbHVlLiANCj4gDQo+IFRoZSBmaW5hbCBJTyB2b2x0YWdl
-IGlzIHNldCBieSBWX1ZERElPX0IgKD0gVl9WRERJT19CX01BSU4gYWZ0ZXIgcGFzc2luZyB0aHJv
-dWdoIHZvbHRhZ2Ugc2Vuc2UgcmVzaXN0b3IpLg0KPiBJIHdpbGwgdXNlIHRoZSBncGlvIGNvbnN1
-bWVyIGludGVyZmFjZSB0byBzcGVjaWZ5IGEgZGlyZWN0aW9uIGFuZCB2YWx1ZSBmb3IgdGhlIGdw
-aW8gZXhwYW5kZXIgcGluLg0KPiBJcyB0aGlzIE9LIHdpdGggdGhlc2UgMiBpbXBsZW1lbnRhdGlv
-bj8NCg0KT2suIFRoaXMgbW9yZSBzb3VuZHMgbGlrZSBjaGFuZ2luZyBJTyBzdGF0ZSB3aGljaCB0
-YXJnZXRzIHBpbiBjb250cm9sIGRyaXZlci4gVGFrZSBhIGxvb2sgYXQgc2RoY2ktdGVncmEuYyBh
-bmQgdHJhY2UgcGluY3RybF9zdGF0ZV8zdjMgYW5kDQpwaW5jdHJsX3N0YXRlXzF2OCBhbmQgcGlu
-Y3RybF9zZWxlY3Rfc3RhdGUgYW5kIGNvcnJlc3BvbmRpbmcgRFQgYmluZGluZy4NCg0KSU1ITyB5
-b3Ugc2hvdWxkIGNyZWF0ZSBwaW4gY29udHJvbCBkcml2ZXIgd2hpY2ggd2lsbCBjYWxsIGZpcm13
-YXJlIGRyaXZlciB0byBjaGFuZ2Ugdm9sdGFnZS4NCltIdXNhaW5pXSBUaGFuayB5b3UgZm9yIHN1
-Z2dlc3RpbmcgdGhhdC4gSXMgaXQgT2sgdG8gbW92ZSB3aXRoIGN1cnJlbnQgaW1wbGVtZW50YXRp
-b24gZmlyc3Qgd2l0aG91dCB0aGUgcGluY3RybCBkcml2ZXIuDQpUaGF0IG9uZSBjb25zaWRlciBh
-bm90aGVyIG5leHQgaW1wbGVtZW50YXRpb24uDQoNCklmIG9rLCBJIHdpbGwgc2VuZCBvdXQgdGhl
-IG5leHQgcGF0Y2ggdmVyc2lvbi4NCg0KVGhhbmtzDQoNClRoYW5rcywNCk1pY2hhbA0KDQo=
+Hi,
+
+On 22. 09. 20 20:38, Zulkifli, Muhammad Husaini wrote:
+> Hi,
+> 
+> -----Original Message-----
+> From: Michal Simek <michal.simek@xilinx.com> 
+> Sent: Tuesday, September 22, 2020 3:00 PM
+> To: Zulkifli, Muhammad Husaini <muhammad.husaini.zulkifli@intel.com>; Michal Simek <michal.simek@xilinx.com>; Hunter, Adrian <adrian.hunter@intel.com>; ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org; linux-kernel@vger.kernel.org; Arnd Bergmann <arnd@arndb.de>
+> Cc: Raja Subramanian, Lakshmi Bai <lakshmi.bai.raja.subramanian@intel.com>; Wan Mohamad, Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
+> Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Enable UHS-1 support for Keem Bay SOC
+> 
+> Hi,
+> 
+> On 22. 09. 20 2:47, Zulkifli, Muhammad Husaini wrote:
+>>
+>> -----Original Message-----
+>> From: Michal Simek <michal.simek@xilinx.com>
+>> Sent: Monday, September 14, 2020 9:40 PM
+>> To: Zulkifli, Muhammad Husaini <muhammad.husaini.zulkifli@intel.com>; 
+>> Michal Simek <michal.simek@xilinx.com>; Hunter, Adrian 
+>> <adrian.hunter@intel.com>; ulf.hansson@linaro.org; 
+>> linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org; 
+>> linux-kernel@vger.kernel.org; Arnd Bergmann <arnd@arndb.de>
+>> Cc: Raja Subramanian, Lakshmi Bai 
+>> <lakshmi.bai.raja.subramanian@intel.com>; Wan Mohamad, Wan Ahmad 
+>> Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
+>> Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Enable UHS-1 support 
+>> for Keem Bay SOC
+>>
+>> Hi,
+>>
+>> On 14. 09. 20 15:26, Zulkifli, Muhammad Husaini wrote:
+>>> HI Michal,
+>>>
+>>> Thanks for the comments.
+>>> I replied inline
+>>>
+>>> -----Original Message-----
+>>> From: Michal Simek <michal.simek@xilinx.com>
+>>> Sent: Monday, September 14, 2020 2:46 PM
+>>> To: Zulkifli, Muhammad Husaini <muhammad.husaini.zulkifli@intel.com>;
+>>> Hunter, Adrian <adrian.hunter@intel.com>; michal.simek@xilinx.com; 
+>>> ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; 
+>>> linux-arm-kernel@lists.infradead.org; linux-kernel@vger.kernel.org; 
+>>> Arnd Bergmann <arnd@arndb.de>
+>>> Cc: Raja Subramanian, Lakshmi Bai
+>>> <lakshmi.bai.raja.subramanian@intel.com>
+>>> Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Enable UHS-1 
+>>> support for Keem Bay SOC
+>>>
+>>> Hi, +Arnd,
+>>>
+>>> On 14. 09. 20 7:12, muhammad.husaini.zulkifli@intel.com wrote:
+>>>> From: Muhammad Husaini Zulkifli 
+>>>> <muhammad.husaini.zulkifli@intel.com>
+>>>>
+>>>> Voltage switching sequence is needed to support UHS-1 interface as 
+>>>> Keem Bay EVM is using external voltage regulator to switch between 
+>>>> 1.8V and 3.3V.
+>>>>
+>>>> Signed-off-by: Muhammad Husaini Zulkifli 
+>>>> <muhammad.husaini.zulkifli@intel.com>
+>>>> Reviewed-by: Andy Shevchenko <andriy.shevchenko@intel.com>
+>>>> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci-of-arasan.c | 140
+>>>> +++++++++++++++++++++++++++++
+>>>>  1 file changed, 140 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
+>>>> b/drivers/mmc/host/sdhci-of-arasan.c
+>>>> index f186fbd016b1..c133408d0c74 100644
+>>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>>>> @@ -16,7 +16,9 @@
+>>>>   */
+>>>>  
+>>>>  #include <linux/clk-provider.h>
+>>>> +#include <linux/gpio/consumer.h>
+>>>>  #include <linux/mfd/syscon.h>
+>>>> +#include <linux/arm-smccc.h>
+>>>>  #include <linux/module.h>
+>>>>  #include <linux/of_device.h>
+>>>>  #include <linux/phy/phy.h>
+>>>> @@ -41,6 +43,11 @@
+>>>>  #define SDHCI_ITAPDLY_ENABLE		0x100
+>>>>  #define SDHCI_OTAPDLY_ENABLE		0x40
+>>>>  
+>>>> +/* Setting for Keem Bay IO Pad 1.8 Voltage Selection */
+>>>> +#define KEEMBAY_AON_SIP_FUNC_ID		0x8200ff26
+>>>> +#define KEEMBAY_AON_SET_1V8_VOLT	0x01
+>>>> +#define KEEMBAY_AON_SET_3V3_VOLT	0x00
+>>>> +
+>>>>  /* Default settings for ZynqMP Clock Phases */
+>>>>  #define ZYNQMP_ICLK_PHASE {0, 63, 63, 0, 63,  0,   0, 183, 54,  0, 0}
+>>>>  #define ZYNQMP_OCLK_PHASE {0, 72, 60, 0, 60, 72, 135, 48, 72, 135, 
+>>>> 0} @@ -150,6 +157,7 @@ struct sdhci_arasan_data {
+>>>>  	struct regmap	*soc_ctl_base;
+>>>>  	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+>>>>  	unsigned int	quirks;
+>>>> +	struct gpio_desc *uhs_gpio;
+>>>>  
+>>>>  /* Controller does not have CD wired and will not function normally without */
+>>>>  #define SDHCI_ARASAN_QUIRK_FORCE_CDTEST	BIT(0)
+>>>> @@ -361,6 +369,121 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
+>>>>  	return -EINVAL;
+>>>>  }
+>>>>  
+>>>> +static int sdhci_arasan_keembay_set_voltage(int volt) { #if
+>>>> +IS_ENABLED(CONFIG_HAVE_ARM_SMCCC)
+>>>> +	struct arm_smccc_res res;
+>>>> +
+>>>> +	arm_smccc_smc(KEEMBAY_AON_SIP_FUNC_ID, volt, 0, 0, 0, 0, 0, 0, &res);
+>>>> +	if (res.a0)
+>>>> +		return -EINVAL;
+>>>> +	return 0;
+>>>
+>>> I am just curious about calling this smc directly from device driver. I see that several drivers are doing this but isn't it better to hide these in firmware driver?
+>>> [Husaini] In order to change the voltage selection for IO Pads voltage switching level control, I need to access/write to AON register. 
+>>> Due to security concern, U-Boot Team provided an interface using this SIP Service for me to call during kernel driver voltage switching operation. 
+>>
+>> I expect U-Boot team is any internal team not U-Boot upstream folks.
+>> [Husaini] I requote my statement. It is ATF that provided the services. They are in the process of upstreaming the code as well. 
+>> That is a great idea to hide these in firmware driver.
+>> I created one firmware driver under /drivers/firmware. This firmware driver provide an api for device driver to call for the operations.
+>>
+>>
+>>> Also the part of FUNC_ID is smc32, sip service call (0x82000000) function identifier which is likely something what should be used as macro in shared location that others can use it too.
+>>> [Husaini] The only thing provided was the FUNC_ID value and argument.
+>>>
+>>> Another part is that based on description you are talking to external voltage regulator without using regulator framework at all. Isn't it better just to create firmware based regulator for this purpose?
+>>> [Husaini] This is for Keembay specific and we did not use regulator framework. 
+>>> During the voltage switching, this SIP function need to be executed to change the Keem Bay IO Pad Switching Level Control to 1.8V for UHS or 3.3v for default mode.
+>>> To be specific, below line of code must come together during the voltage switching operation.
+>>>
+>>> For 1.8V
+>>> +		/* Set VDDIO_B voltage to Low for 1.8V */
+>>> +		gpiod_set_value_cansleep(sdhci_arasan->uhs_gpio, 0);
+>>> +
+>>> +		ret = sdhci_arasan_keembay_set_voltage(KEEMBAY_AON_SET_1V8_VOLT);
+>>> +		if (ret)
+>>> +			return ret;
+>>>
+>>> For 3.3V
+>>> 		/* Set VDDIO_B voltage to High for 3.3V */
+>>> +		gpiod_set_value_cansleep(sdhci_arasan->uhs_gpio, 1);
+>>> +
+>>> +		ret = sdhci_arasan_keembay_set_voltage(KEEMBAY_AON_SET_3V3_VOLT);
+>>> +		if (ret)
+>>> +			return ret;
+>>
+>>
+>> I understand that you need to change voltage here but I don't think the code you have written is how this should be done. I understand that this is the quickest and direct way how to do it but I don't think this is done via proper interface. I pretty much dislike that you are putting Func IDs to drivers instead of adding them to central place that it is visible what your platform needs.
+>> [Husaini] let me rephase my sentences . I make some confusion here and in commit message. To summarize there are 2 places to final generate the IO Voltage.
+>>
+>> 1) Setting the V_VDDIO_B . AON Register for IO PADS Voltage Switching Level Control.
+>> This register defines the IO Voltage for particular GPIOs pin for clk,cmd,data1-2.
+>>
+>> 2) Setting the GPIO expander pin value to drive either 1.8V or 3.3V.
+>> SD card IO can operate at 3.3V (default) or 1.8V. 
+>> Keem Bay has a bank of IO that can be switched between 3.3V or 1.8V for this reason.
+>> The output V_VDDIO_B_MAIN be either 3.3v (in) or 1.8v(in), depending on the state of GPIO expander PIN value. 
+>>
+>> The final IO voltage is set by V_VDDIO_B (= V_VDDIO_B_MAIN after passing through voltage sense resistor).
+>> I will use the gpio consumer interface to specify a direction and value for the gpio expander pin.
+>> Is this OK with these 2 implementation?
+> 
+> Ok. This more sounds like changing IO state which targets pin control driver. Take a look at sdhci-tegra.c and trace pinctrl_state_3v3 and
+> pinctrl_state_1v8 and pinctrl_select_state and corresponding DT binding.
+> 
+> IMHO you should create pin control driver which will call firmware driver to change voltage.
+> [Husaini] Thank you for suggesting that. Is it Ok to move with current implementation first without the pinctrl driver.
+> That one consider another next implementation.
+
+I don't think we are working in this mode. Hack something first and fix
+it later which won't happen any time soon. Please do it properly directly.
+
+Thanks,
+Michal
+
