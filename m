@@ -2,126 +2,203 @@ Return-Path: <SRS0=GgYk=DA=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F654C4727E
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 12:17:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B3DCC2D0A8
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 13:04:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A532221EB
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 12:17:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC6F5221E7
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 13:04:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="r1z7QPHd"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mKMuc6O8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726332AbgIWMRO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Sep 2020 08:17:14 -0400
-Received: from mail-eopbgr1400114.outbound.protection.outlook.com ([40.107.140.114]:19520
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726130AbgIWMRO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 23 Sep 2020 08:17:14 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=RmVtOxkl4jzArGNVjAYKUen6Z9HH4ah0YpO2XZfPq2CAufPNZSJ6dUnMs1ckhc3lT4jznTp6lpQ33MPKVN6dPmqCNj0aic9NnRyO1r5Gwv3ztKs1QtwTYIUSw3VV3P/2mWcTQeMpI0ODrzMhWqDd+kRhyd4wIB8laNr7CHSbngjzz6XPJWUlE13aW0NYD7Bw7FtpCEUWXONJyfo8WdlcrHw+H/kPgWgb/pXpfZecKikXpUMmxDKYHk9qevSMy4qJNdqAR567RIiBWsYE3HRTLZ3BaaDecK+wQMSo8BynuVnvabUrgT7vzmB7Nhcz9E1BAn+DUkJHUUOSfqyd8//26w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=v71v6FdvABqAfVMTWCFLoBHaTQh6JNKQMeegnM0gdx0=;
- b=atfowldtgMU1KIdMy1cgLwccLjCI5T3pUZ7Kpej1QOGjmGNfP96w9OsXoTBFjoOuEwC5OS0rMIWsrQ3mwWQZNeUAI0oMuuQp1qiebUyf04NGYQqFR04mm2CuF64i5yfdZTTQPdT13vIwEtEO7IrVmE+OiDc6/2yrHLUgzwtJfKZchcuk8oAU8smZ8aUAXGE99tdUozp4tgew73CH0CEXkKrg1svtrcGZkakKOXtN4/NXyK67h2zddr3r26u8Mg0Zoayp/78Cep3JkDQRLIl0okDh97IAUM6rd+zdNHOzei8dnY8xpgspdPyDTqkClVeWHtm1xyL5NUUL5V79WxuDnQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1726582AbgIWNEX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Sep 2020 09:04:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48520 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726332AbgIWNEX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2020 09:04:23 -0400
+Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 105C1C0613CE;
+        Wed, 23 Sep 2020 06:04:23 -0700 (PDT)
+Received: by mail-pj1-x1044.google.com with SMTP id u3so3134578pjr.3;
+        Wed, 23 Sep 2020 06:04:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=v71v6FdvABqAfVMTWCFLoBHaTQh6JNKQMeegnM0gdx0=;
- b=r1z7QPHdNGB/dkePZeXhM+0xzXD2Mejd16WrKP90W2pYQRZTqDRSkL2tSpnXkmGIz5EfMEijEC1ZwooJeA5F0NNhklG8Tdc9ALY9b79yyWLIcLS2Ql3Ibpk7Q/1ycUfPNuy906PQmx6Digm+h+4RteaI1i8+wi8uFUtNHrNSwjg=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYXPR01MB1549.jpnprd01.prod.outlook.com (2603:1096:403:c::23) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3412.20; Wed, 23 Sep
- 2020 12:17:11 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9055:525d:2d64:b625]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::9055:525d:2d64:b625%5]) with mapi id 15.20.3391.027; Wed, 23 Sep 2020
- 12:17:11 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa@kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: RE: [PATCH RFT] mmc: renesas_sdhi: drop local flag for tuning
-Thread-Topic: [PATCH RFT] mmc: renesas_sdhi: drop local flag for tuning
-Thread-Index: AQHWkQUHBRdMid7yB0aKz627HwVWEal2Ij8w
-Date:   Wed, 23 Sep 2020 12:17:11 +0000
-Message-ID: <TY2PR01MB3692E6499F510DA2949E2EA5D8380@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20200922172253.4458-1-wsa@kernel.org>
-In-Reply-To: <20200922172253.4458-1-wsa@kernel.org>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: e145a3f4-f283-4ac0-36b8-08d85fba99a9
-x-ms-traffictypediagnostic: TYXPR01MB1549:
-x-microsoft-antispam-prvs: <TYXPR01MB1549CDE8849B47672EF3A7EFD8380@TYXPR01MB1549.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8273;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: vfuuWfNdHnATIrk40HWLmUBHqFhjrJTolPaWBuSDrbjTWj6GlfIcrOrQZS6n0X+Xtksvm5BKpjX4Ilz98nGJC1Y0EGEr8XCvh76gtpJTimi6E5f4Sa9asPuIG+tVC33IBYByZiyEFzuuzG0GnL8NBDc/kEzw9UKczw7zYdoUSReEJnAmWbC1yolx4z49nCSk9xhZaJgA3kQHOoHgPtyZqlkvk/PwQrp3g7K3iYTaJlejY83713O8CabhwOl5Pk11uAS6bNy1wKOEt2/KbWLQAyLWzl0ZlQaD2TgvLxm92YrkCNZBLOJwBHFxksEHEdDGazd5EaU9n/5lArbEZNG3Qg==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(396003)(376002)(136003)(39860400002)(346002)(8936002)(5660300002)(7696005)(8676002)(186003)(54906003)(66446008)(66946007)(478600001)(66476007)(66556008)(64756008)(6506007)(4326008)(86362001)(76116006)(55016002)(52536014)(2906002)(110136005)(4744005)(33656002)(55236004)(316002)(9686003)(26005)(71200400001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: T/U8JZJY5NmmIFdneXRBgRNPqyqt56xqXpcGHtovJjN90Qqavex8uGpVAk93nl0gHBVjiJX31ANCGBd4vcJasPH8jFhLyXZWZCgeK54wOwwqcYIQgytbo4kfPuM2/078/dKXIHKdcYoXaYRn/poV3Gr+gOY+7V3raJRhm6p7hXvM5gq1iMkJmDuUM5Ny0XuJBYFQMbFyZQvMKwN1oJUeNWe4bJwfSWT6qbINmDfg+ukibzfdFWKT2sipVN0ugdymcELoKnSm577hRb+0przyTQW9L1EkdRI8VmF11GTK/44DfHH0Q/db05U5vppogBkFyJGnxHixWeZKr5Bht+dsiEYkyHsy4zVwZ8+MIVVn+S5xmqODcrXmJyBM78BECk0H8ulsDfXEJigYaV2ux2/Y882wggTELLaSkrFDfwcTJXFuXT7pspvk0stdMwW7dvHvvStd+VZPdbjDLR4Y0EVM3iBTmOV2K6qVLXTsGFOX/7yndowBjKrumO3A9hCVPaNb+i1ZrSYC+VwOJg7axa30L0bFX6mt8BG6eQgPcGKjm6vv5Msm3/jRZoxS06IoRq4hKT1jyqNB+3xyQMBJAE+x8FwXDuw0fmnQQtoFEaH4YxegIk4hhj3DSvZsxvPmHS27F2hytYBNAOr1fvH0Kap5Wg==
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=gmail.com; s=20161025;
+        h=to:from:cc:subject:message-id:date:user-agent:mime-version
+         :content-transfer-encoding:content-language;
+        bh=7E+MYfBlV9Majnt8yvu7cDkaRWAr8/bGpIJBzwX7WYw=;
+        b=mKMuc6O8gjCmz2Kc66iuSpeA0HohDxNJR9EJta0vlbQBvxj4zqYabTrWXkafBfHCEo
+         YToSCYgVByZXT+NOfChF2RiZhHoFjCOmFDSXmSIwYdCLCaQSSdwde/1w+56X1HvwfD2/
+         KLeCUAzL33U1ABgJQRhC4/AWNCTYXq6kE8dD1pl5ib6nN4+lRFtqu2c2Mx8brBHaSqu4
+         affvSU/DTNks8dO+r8JYZW0lEUldSY/usuVUqiwrbRYASbt/1F4zp7YQM+9Ov/exjtML
+         KdHqyTrjQqerce/1/vLIYMtmghj+tzW8pIbiNFOSDkXSRZ4k4kHFGFQM747vQS4OHJDW
+         0Wlw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:to:from:cc:subject:message-id:date:user-agent
+         :mime-version:content-transfer-encoding:content-language;
+        bh=7E+MYfBlV9Majnt8yvu7cDkaRWAr8/bGpIJBzwX7WYw=;
+        b=o0QHuv6oUMnHarD9R66xUpInxVgjM1jk/tdrShtYQ5n4ijGj4GtrPRCN28sNUqWSCS
+         H3WdP0h1eRxC/H7cpPWyimbYbSQ999Z8c5vMi9QeB1wxc7N3xhMzWOkHZ3+NHSkZ30Az
+         Uwfc7IYrXrtHtfrK7QmfKnowXD33n54DdIN0Rg/l7o4eK8o2PJB3/FJ7wYuYo8oSGEi4
+         UFoPsJSeJ9DgWGDqKCAZH0pHD5htCSPvALCzVmMseSy7Rt8p6uXpmKGNCCxL8vw4hHCq
+         Xa+1AA4WHMaNx1xlLv+H8CrQHSy4NSx+h/pDCx4m0nLliaXuz9GBpHrS4SYWrI0WyrnG
+         vJ8Q==
+X-Gm-Message-State: AOAM533UaOEBxqqFD7W/xNIEOS7Fa7uogyAmqXZEPKuoH/QgsCZ6M25o
+        c1WznOz9Yxa3nmvkt+V1K3c=
+X-Google-Smtp-Source: ABdhPJyXE9GR7fNWyB9zmWzWOpjev0FYltYlM1N0FAkvxD4rC4b7N9BuI14xkSaFqjbhiGIaCzGahA==
+X-Received: by 2002:a17:90b:f83:: with SMTP id ft3mr8090904pjb.234.1600866262366;
+        Wed, 23 Sep 2020 06:04:22 -0700 (PDT)
+Received: from ?IPv6:2402:b801:2840:8200:e4f7:baaa:ff2a:bf24? ([2402:b801:2840:8200:e4f7:baaa:ff2a:bf24])
+        by smtp.gmail.com with ESMTPSA id e2sm17777231pgl.38.2020.09.23.06.04.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 23 Sep 2020 06:04:21 -0700 (PDT)
+To:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
+From:   Brad Harper <bjharper@gmail.com>
+Cc:     linux-rt-users@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: [PATCH] mmc: host: meson-gx-mmc: fix possible deadlock condition for
+ preempt_rt
+Message-ID: <24a844c3-c2e0-c735-ccb7-83736218b548@gmail.com>
+Date:   Wed, 23 Sep 2020 23:04:15 +1000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.2.2
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e145a3f4-f283-4ac0-36b8-08d85fba99a9
-X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Sep 2020 12:17:11.7895
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: sbUt1BnaWCx2YrUvJ1uV1vF3sZuy/aRfByYiSjePgXZqW/6EfBqqO/5KbEkdkkWf2WEiUcYNXX6bj49hNWZUrNtHhf7ksEaCq/f0DK70pe/TxTCSyuwxrEhve9G6dQ9d
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYXPR01MB1549
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+Force threaded interrupts for meson_mmc_irq to prevent possible deadlock 
+condition
+during mmc operations when using preempt_rt with 5.9.0-rc3-rt3 patches 
+on arm64.
 
-> From: Wolfram Sang, Sent: Wednesday, September 23, 2020 2:23 AM
->=20
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
->=20
-> The MMC core has now a generic check if some tuning is in progress. Its
-> protected area is a bit larger than the custom one in this driver but we
-> concluded that this works equally well for the intended case. So, drop
-> the local flag and switch to the generic one.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->=20
-> I had this patch applied while working on other SDHI topics and
-> experienced no regressions. But I'd like to give Shimoda-san and the BSP
-> team some time for testing. We agreed on the approach already.
+Using meson-gx-mmc with an emmc device on Hardkernel Odroid N2+ 
+configured with
+preempt_rt resulted in the soc becoming unresponsive.  With lock 
+checking enabled
+the below inconsistent lock state was observed during boot.
 
-Thank you for the patch!
+After some discussions with tglx in IRC #linux-rt the attached patch was 
+suggested
+to remove IRQF_ONESHOT from request_threaded_irq.
+This has been tested and confirmed by me to resolve both the 
+unresponsive soc and
+the inconsistent lock state warning when using 5.9.0-rc3-rt3 on arm64 
+Odroid N2+.
 
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Further review and testing is required to ensure there are no adverse 
+impacts or
+concerns and that is the correct method to resolve the problem.  I will 
+continue
+to test on various amlogic devices with both standard mainline low 
+latency kernel
+and preempt_rt kernel with -rt patches.
 
-And, I tested on r8a779[56]1-salvator-xs. So,
+[ 7.858446] ================================
+[ 7.858448] WARNING: inconsistent lock state
+[ 7.858450] 5.9.0-rc3-rt3+ #33 Not tainted
+[ 7.858453] --------------------------------
+[ 7.858456] inconsistent {IN-HARDIRQ-R} -> {HARDIRQ-ON-W} usage.
+[ 7.858459] swapper/0/1 [HC0[0]:SC0[0]:HE1:SE1] takes:
+[ 7.858465] ffff80001219f4d8 (&trig->leddev_list_lock){+?.+}-{0:0}, at: 
+led_trigger_set+0x104/0x270
+[ 7.858482] {IN-HARDIRQ-R} state was registered at:
+[ 7.858484] lock_acquire+0xec/0x468
+[ 7.858491] rt_read_lock+0xb0/0x108
+[ 7.858497] led_trigger_event+0x34/0x88
+[ 7.858501] mmc_request_done+0x3f0/0x450
+[ 7.858505] meson_mmc_irq+0x284/0x378
+[ 7.858511] __handle_irq_event_percpu+0xcc/0x4a8
+[ 7.858515] handle_irq_event_percpu+0x60/0xb0
+[ 7.858519] handle_irq_event+0x50/0x108
+[ 7.858522] handle_fasteoi_irq+0xd0/0x180
+[ 7.858527] generic_handle_irq+0x38/0x50
+[ 7.858530] __handle_domain_irq+0x6c/0xc8
+[ 7.858533] gic_handle_irq+0x5c/0xb8
+[ 7.858537] el1_irq+0xbc/0x180
+[ 7.858540] arch_cpu_idle+0x28/0x38
+[ 7.858544] default_idle_call+0x90/0x3f0
+[ 7.858547] do_idle+0x250/0x268
+[ 7.858551] cpu_startup_entry+0x2c/0x78
+[ 7.858554] rest_init+0x1b0/0x284
+[ 7.858559] arch_call_rest_init+0x18/0x24
+[ 7.858565] start_kernel+0x550/0x588
+[ 7.858569] irq event stamp: 1925495
+[ 7.858571] hardirqs last enabled at (1925495): [<ffff8000111e3ba4>] 
+_raw_spin_unlock_irqrestore+0xa4/0xb0
+[ 7.858576] hardirqs last disabled at (1925494): [<ffff8000111e3c58>] 
+_raw_spin_lock_irqsave+0xa8/0xb8
+[ 7.858580] softirqs last enabled at (1857856): [<ffff80001024705c>] 
+bdi_register_va+0x114/0x368
+[ 7.858586] softirqs last disabled at (1857849): [<ffff80001024705c>] 
+bdi_register_va+0x114/0x368
+[ 7.858590]
+other info that might help us debug this:
+[ 7.858592] Possible unsafe locking scenario:
+[ 7.858594] CPU0
+[ 7.858595] ----
+[ 7.858597] lock(&trig->leddev_list_lock);
+[ 7.858600] <Interrupt>
+[ 7.858602] lock(&trig->leddev_list_lock);
+[ 7.858604]
+*** DEADLOCK ***
+[ 7.858606] 3 locks held by swapper/0/1:
+[ 7.858609] #0: ffff80001219eb30 (leds_list_lock){++++}-{0:0}, at: 
+led_trigger_register+0xf4/0x1c0
+[ 7.858619] #1: ffff0000b0696a70 (&led_cdev->trigger_lock){+.+.}-{0:0}, 
+at: led_trigger_register+0x134/0x1c0
+[ 7.858629] #2: ffff800011fb83d0 (rcu_read_lock){....}-{1:2}, at: 
+rt_write_lock+0x8/0x108
+[ 7.858637]
+stack backtrace:
+[ 7.858640] CPU: 5 PID: 1 Comm: swapper/0 Not tainted 5.9.0-rc3-rt3+ #33
+[ 7.858643] Hardware name: Hardkernel ODROID-N2Plus (DT)
+[ 7.858646] Call trace:
+[ 7.858647] dump_backtrace+0x0/0x1e8
+[ 7.858650] show_stack+0x20/0x30
+[ 7.858653] dump_stack+0xf0/0x164
+[ 7.858659] print_usage_bug+0x2b4/0x2c0
+[ 7.858662] mark_lock+0x2e8/0x360
+[ 7.858665] __lock_acquire+0x238/0x1858
+[ 7.858669] lock_acquire+0xec/0x468
+[ 7.858672] rt_write_lock+0xb0/0x108
+[ 7.858675] led_trigger_set+0x104/0x270
+[ 7.858678] led_trigger_register+0x180/0x1c0
+[ 7.858681] heartbeat_trig_init+0x28/0x5c
+[ 7.858686] do_one_initcall+0x90/0x4bc
+[ 7.858690] kernel_init_freeable+0x2cc/0x338
+[ 7.858694] kernel_init+0x1c/0x11c
+[ 7.858697] ret_from_fork+0x10/0x34
 
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Brad Harper <bjharper@gmail.com>
+---
+  drivers/mmc/host/meson-gx-mmc.c | 2 +-
+  1 file changed, 1 insertion(+), 1 deletion(-)
 
-Best regards,
-Yoshihiro Shimoda
+diff --git a/drivers/mmc/host/meson-gx-mmc.c 
+b/drivers/mmc/host/meson-gx-mmc.c
+index 08a3b1c05..130ac134d 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1139,7 +1139,7 @@ static int meson_mmc_probe(struct platform_device 
+*pdev)
+                host->regs + SD_EMMC_IRQ_EN);
+
+         ret = request_threaded_irq(host->irq, meson_mmc_irq,
+-                                  meson_mmc_irq_thread, IRQF_ONESHOT,
++                                  meson_mmc_irq_thread, 0,
+                                    dev_name(&pdev->dev), host);
+         if (ret)
+                 goto err_init_clk;
+--
+2.20.1
 
