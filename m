@@ -2,149 +2,126 @@ Return-Path: <SRS0=GgYk=DA=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70343C4741F
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F654C4727E
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 12:17:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2BEF523787
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 11:52:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9A532221EB
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Sep 2020 12:17:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ODmaWdLB"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="r1z7QPHd"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726593AbgIWLwK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Sep 2020 07:52:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37462 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726610AbgIWLwG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Sep 2020 07:52:06 -0400
-Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42F21C0613CE;
-        Wed, 23 Sep 2020 04:52:06 -0700 (PDT)
-Received: by mail-wm1-x341.google.com with SMTP id d4so6844356wmd.5;
-        Wed, 23 Sep 2020 04:52:06 -0700 (PDT)
+        id S1726332AbgIWMRO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Sep 2020 08:17:14 -0400
+Received: from mail-eopbgr1400114.outbound.protection.outlook.com ([40.107.140.114]:19520
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726130AbgIWMRO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Sep 2020 08:17:14 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=RmVtOxkl4jzArGNVjAYKUen6Z9HH4ah0YpO2XZfPq2CAufPNZSJ6dUnMs1ckhc3lT4jznTp6lpQ33MPKVN6dPmqCNj0aic9NnRyO1r5Gwv3ztKs1QtwTYIUSw3VV3P/2mWcTQeMpI0ODrzMhWqDd+kRhyd4wIB8laNr7CHSbngjzz6XPJWUlE13aW0NYD7Bw7FtpCEUWXONJyfo8WdlcrHw+H/kPgWgb/pXpfZecKikXpUMmxDKYHk9qevSMy4qJNdqAR567RIiBWsYE3HRTLZ3BaaDecK+wQMSo8BynuVnvabUrgT7vzmB7Nhcz9E1BAn+DUkJHUUOSfqyd8//26w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=v71v6FdvABqAfVMTWCFLoBHaTQh6JNKQMeegnM0gdx0=;
+ b=atfowldtgMU1KIdMy1cgLwccLjCI5T3pUZ7Kpej1QOGjmGNfP96w9OsXoTBFjoOuEwC5OS0rMIWsrQ3mwWQZNeUAI0oMuuQp1qiebUyf04NGYQqFR04mm2CuF64i5yfdZTTQPdT13vIwEtEO7IrVmE+OiDc6/2yrHLUgzwtJfKZchcuk8oAU8smZ8aUAXGE99tdUozp4tgew73CH0CEXkKrg1svtrcGZkakKOXtN4/NXyK67h2zddr3r26u8Mg0Zoayp/78Cep3JkDQRLIl0okDh97IAUM6rd+zdNHOzei8dnY8xpgspdPyDTqkClVeWHtm1xyL5NUUL5V79WxuDnQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=62leXxkn6lfQBk0pj9IGOMm88gpEkBUQrcCqhx44WHI=;
-        b=ODmaWdLBKOeSP1ZafWzo21vjJrHlk3UG4jvO8+g6WMM1BFtTLmzx1IjbGjRouQUa+7
-         nAMc2SENwtPelG8pH3qifpRoFvyXIyHkkSpyttxOBSllpGFUWNDTbc7RWWZwDXiubVzz
-         DId3At1uwFhl8QdtjFs9TEb9pLJUGmoMWNZljWBiFG6YHY/D5eEaVWfYRHdsGOT1LmMl
-         WPXOjkI7LdOyCKmm8KnbDvvqWylTGVG9rccvd2qnBAegNKT8R9zR8wUu35rVANaWTR32
-         pzLd85pgC4hOTjPoqQYRZACHbmH3e+lrH/elvTuoGpBsCqkzId/E+uobn2wcVgIWij43
-         kdgw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=62leXxkn6lfQBk0pj9IGOMm88gpEkBUQrcCqhx44WHI=;
-        b=aEDvazGiZZMyoy6AXGp62tjWh21f7xsDLSFNdZpCd4GNFK8Ui99xX7YzlaCjok6CxM
-         mWqCq+t/2xBhrkhjME5QISNdot7YR5oj18rgsBv/ikDhFdVhxiDujUTLqETd6D6qylDj
-         5ovcorP+p8Mub/S2ip0eVH5X5/fjAkZyzhYwND+xIszCLBGWqBIycGP0pK4XkT+LAHkR
-         vUoHxjRnv4PWlOFJkPs3KF2tzPQDLZqyr+NqFX6DBQyw2Y4rPI1X3xSfxB4nbcmxAleK
-         yRIs6VCmXnjicd1swB8bcRww2a4DnRlGR8xQOKbwGs8/W8xt8MRyHrIyXMvp4PoA2lhQ
-         KErg==
-X-Gm-Message-State: AOAM531H4PvE36xZxr0r95w3y5DeIAdA14Ta3yxLzxhaNttHrVTVUUrz
-        QQ0fkiVGTv3Hf3zPwCRfcIY=
-X-Google-Smtp-Source: ABdhPJwuky5Ub23hg9gD1yy7ZPW4fTKq0bW7//cbGIq+DmdbAGJe7JBSRBqC41QuYp6pi5kgGRRJBA==
-X-Received: by 2002:a05:600c:2159:: with SMTP id v25mr5266287wml.180.1600861924874;
-        Wed, 23 Sep 2020 04:52:04 -0700 (PDT)
-Received: from localhost ([217.111.27.204])
-        by smtp.gmail.com with ESMTPSA id a20sm7785703wmm.40.2020.09.23.04.52.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 23 Sep 2020 04:52:03 -0700 (PDT)
-Date:   Wed, 23 Sep 2020 13:52:01 +0200
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Anson Huang <Anson.Huang@nxp.com>,
-        Li Yang <leoyang.li@nxp.com>, Han Xu <han.xu@nxp.com>,
-        Frank Li <frank.li@nxp.com>, Fugang Duan <fugang.duan@nxp.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH v3 06/19] dt-bindings: pwm: imx-pwm: Add i.MX 8M
- compatibles
-Message-ID: <20200923115201.GD1846003@ulmo>
-References: <20200825193536.7332-1-krzk@kernel.org>
- <20200825193536.7332-7-krzk@kernel.org>
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=v71v6FdvABqAfVMTWCFLoBHaTQh6JNKQMeegnM0gdx0=;
+ b=r1z7QPHdNGB/dkePZeXhM+0xzXD2Mejd16WrKP90W2pYQRZTqDRSkL2tSpnXkmGIz5EfMEijEC1ZwooJeA5F0NNhklG8Tdc9ALY9b79yyWLIcLS2Ql3Ibpk7Q/1ycUfPNuy906PQmx6Digm+h+4RteaI1i8+wi8uFUtNHrNSwjg=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYXPR01MB1549.jpnprd01.prod.outlook.com (2603:1096:403:c::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3412.20; Wed, 23 Sep
+ 2020 12:17:11 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9055:525d:2d64:b625]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::9055:525d:2d64:b625%5]) with mapi id 15.20.3391.027; Wed, 23 Sep 2020
+ 12:17:11 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa@kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: RE: [PATCH RFT] mmc: renesas_sdhi: drop local flag for tuning
+Thread-Topic: [PATCH RFT] mmc: renesas_sdhi: drop local flag for tuning
+Thread-Index: AQHWkQUHBRdMid7yB0aKz627HwVWEal2Ij8w
+Date:   Wed, 23 Sep 2020 12:17:11 +0000
+Message-ID: <TY2PR01MB3692E6499F510DA2949E2EA5D8380@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20200922172253.4458-1-wsa@kernel.org>
+In-Reply-To: <20200922172253.4458-1-wsa@kernel.org>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: e145a3f4-f283-4ac0-36b8-08d85fba99a9
+x-ms-traffictypediagnostic: TYXPR01MB1549:
+x-microsoft-antispam-prvs: <TYXPR01MB1549CDE8849B47672EF3A7EFD8380@TYXPR01MB1549.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8273;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: vfuuWfNdHnATIrk40HWLmUBHqFhjrJTolPaWBuSDrbjTWj6GlfIcrOrQZS6n0X+Xtksvm5BKpjX4Ilz98nGJC1Y0EGEr8XCvh76gtpJTimi6E5f4Sa9asPuIG+tVC33IBYByZiyEFzuuzG0GnL8NBDc/kEzw9UKczw7zYdoUSReEJnAmWbC1yolx4z49nCSk9xhZaJgA3kQHOoHgPtyZqlkvk/PwQrp3g7K3iYTaJlejY83713O8CabhwOl5Pk11uAS6bNy1wKOEt2/KbWLQAyLWzl0ZlQaD2TgvLxm92YrkCNZBLOJwBHFxksEHEdDGazd5EaU9n/5lArbEZNG3Qg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(396003)(376002)(136003)(39860400002)(346002)(8936002)(5660300002)(7696005)(8676002)(186003)(54906003)(66446008)(66946007)(478600001)(66476007)(66556008)(64756008)(6506007)(4326008)(86362001)(76116006)(55016002)(52536014)(2906002)(110136005)(4744005)(33656002)(55236004)(316002)(9686003)(26005)(71200400001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: T/U8JZJY5NmmIFdneXRBgRNPqyqt56xqXpcGHtovJjN90Qqavex8uGpVAk93nl0gHBVjiJX31ANCGBd4vcJasPH8jFhLyXZWZCgeK54wOwwqcYIQgytbo4kfPuM2/078/dKXIHKdcYoXaYRn/poV3Gr+gOY+7V3raJRhm6p7hXvM5gq1iMkJmDuUM5Ny0XuJBYFQMbFyZQvMKwN1oJUeNWe4bJwfSWT6qbINmDfg+ukibzfdFWKT2sipVN0ugdymcELoKnSm577hRb+0przyTQW9L1EkdRI8VmF11GTK/44DfHH0Q/db05U5vppogBkFyJGnxHixWeZKr5Bht+dsiEYkyHsy4zVwZ8+MIVVn+S5xmqODcrXmJyBM78BECk0H8ulsDfXEJigYaV2ux2/Y882wggTELLaSkrFDfwcTJXFuXT7pspvk0stdMwW7dvHvvStd+VZPdbjDLR4Y0EVM3iBTmOV2K6qVLXTsGFOX/7yndowBjKrumO3A9hCVPaNb+i1ZrSYC+VwOJg7axa30L0bFX6mt8BG6eQgPcGKjm6vv5Msm3/jRZoxS06IoRq4hKT1jyqNB+3xyQMBJAE+x8FwXDuw0fmnQQtoFEaH4YxegIk4hhj3DSvZsxvPmHS27F2hytYBNAOr1fvH0Kap5Wg==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="/unnNtmY43mpUSKx"
-Content-Disposition: inline
-In-Reply-To: <20200825193536.7332-7-krzk@kernel.org>
-User-Agent: Mutt/1.14.7 (2020-08-29)
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: e145a3f4-f283-4ac0-36b8-08d85fba99a9
+X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Sep 2020 12:17:11.7895
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: sbUt1BnaWCx2YrUvJ1uV1vF3sZuy/aRfByYiSjePgXZqW/6EfBqqO/5KbEkdkkWf2WEiUcYNXX6bj49hNWZUrNtHhf7ksEaCq/f0DK70pe/TxTCSyuwxrEhve9G6dQ9d
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYXPR01MB1549
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram-san,
 
---/unnNtmY43mpUSKx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Aug 25, 2020 at 09:35:23PM +0200, Krzysztof Kozlowski wrote:
-> DTSes with new i.MX 8M SoCs introduce their own compatibles so add them
-> to fix dtbs_check warnings like:
+> From: Wolfram Sang, Sent: Wednesday, September 23, 2020 2:23 AM
 >=20
->   arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: pwm@30660000:
->     compatible:0: 'fsl,imx8mm-pwm' is not one of ['fsl,imx1-pwm', 'fsl,im=
-x27-pwm']
->     From schema: Documentation/devicetree/bindings/pwm/imx-pwm.yaml
+> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
 >=20
->   arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: pwm@30660000:
->     compatible: ['fsl,imx8mm-pwm', 'fsl,imx27-pwm'] is too long
+> The MMC core has now a generic check if some tuning is in progress. Its
+> protected area is a bit larger than the custom one in this driver but we
+> concluded that this works equally well for the intended case. So, drop
+> the local flag and switch to the generic one.
 >=20
->   arch/arm64/boot/dts/freescale/imx8mm-evk.dt.yaml: pwm@30660000:
->     compatible: Additional items are not allowed ('fsl,imx27-pwm' was une=
-xpected)
->=20
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
-> Reviewed-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 > ---
->  Documentation/devicetree/bindings/pwm/imx-pwm.yaml | 14 +++++++++++---
->  1 file changed, 11 insertions(+), 3 deletions(-)
+>=20
+> I had this patch applied while working on other SDHI topics and
+> experienced no regressions. But I'd like to give Shimoda-san and the BSP
+> team some time for testing. We agreed on the approach already.
 
-Applied, thanks.
+Thank you for the patch!
 
-Thierry
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
---/unnNtmY43mpUSKx
-Content-Type: application/pgp-signature; name="signature.asc"
+And, I tested on r8a779[56]1-salvator-xs. So,
 
------BEGIN PGP SIGNATURE-----
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAl9rNuEACgkQ3SOs138+
-s6GvDg/+Nro4jTSFhaaEb45wLg7Wg5AT70Vw7JpMwqEfIe5L3+HCzsAZX08eoriW
-TwsrzDYwi1mA2E8LXgnab5e3AAgrQJO5HprXoQ0736DAqPzLovczCCUfBnS72FTM
-gtWR/H60vrI/6jPUT+YqqvgtH1SQZIDSC0Sr936omELFXZ7N7kgTW1gTMR9jeMGj
-eoEUbgMKztiNGZpCm/kRLffCONoKpyz/3luja+KXkB07rPVluMjwhaFBNYxr6oB2
-K48rLlPN3B/3u+qD03bB4fBdycLNO0IjVepdM21pBsGyKAT4uYfl0wG86/ww99EB
-1v9/vWoSmwnxVBuPDDj4ecj7iD3VExSDZ7x2vvID5NmhK3ndjisf8C979I48hvMo
-maBVSISDlvaIs2KbzJt9JoqHYaBNJ4LUdTwnFfcVo0vT9EY0H9KvLbfw93I/0VjU
-r9WMPCRYtEOiS5riua25jp9pSxcnQE92v5NyNEMg+sdJ9uyLPYo0NBFbhTskEjnC
-7evLkq5xpYJywh6bQvhVOhnbCoVGAOdqOIJ25xSC2wF5vaCWWRhjDtsS7d/EbXql
-tRX3gA2RlNUKlF1MlGp7TUtnWkl/EWtaWI26qm0/zuvyAnxGKBY5Eo4HUMGNtVWH
-BgQsfOviGCcDALYVPWC6foLtzrsz8BMYVVi+7u2hD0FMOa29oas=
-=09l4
------END PGP SIGNATURE-----
+Best regards,
+Yoshihiro Shimoda
 
---/unnNtmY43mpUSKx--
