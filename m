@@ -7,59 +7,59 @@ X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AEB3C2D0E2
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 374F0C4727D
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5739D235FD
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9D7B21D24
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zF3/JgWh"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RmvdLcHq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727974AbgIXMuh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1727895AbgIXMuh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Thu, 24 Sep 2020 08:50:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42602 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727965AbgIXMu2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 08:50:28 -0400
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C395C0613CE
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:28 -0700 (PDT)
-Received: by mail-vs1-xe41.google.com with SMTP id e23so2060867vsk.2
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:28 -0700 (PDT)
+        with ESMTP id S1727944AbgIXMuc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 08:50:32 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F5E5C0613D3
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:32 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id c25so868953vkm.1
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=8O9S18BmdJFglyzpqWfTJgy5KWbRC61OD9TxaLl45wM=;
-        b=zF3/JgWhr3T7u9qVnY5zJf9q7dvZyGHki7ZDpaPfQsWzAGDgOcWd6eOXPczYyBShXX
-         syeAR8/NHp0YmgC7QSAr72vXkcrb7Vqk7jTbuKtSqHXA+OMqn6kJWK8caQdfMiAaWdiV
-         7pYnOO498NzJWbBkjiqwvaizTUrdCuUkbzS+slucU36Z1dVA2q6kRWOpkH5pXBdu9HIS
-         WnI1NIyD/R5fDQnzF1S1fbbxL+5OBYP9cNwHYIeatbQpOeKh4prKHWY8PiVwDsnoXXmS
-         F6n6z2QLzHwCqLb/YWUMVrqG7vRzwUzZ4yRJOy+N/ctU5ieNSWRml3cT8aby92qgttbB
-         jiRQ==
+        bh=FV+W9qCfwLlahXA9uVHzI8exYIRdq3lpUWqEdGTM0BM=;
+        b=RmvdLcHq3Gllm1JRWrmjcRNf0L0d40Et/6As1CJqJuYzhqBbH+eSiCK0x/k6s2O5By
+         S8BfPjvtzN38uDOIUNsS1dCKTloVtvMQdxZocRFYbS9C+gGoLZf6aETjK6gdL+lau1TP
+         bECl2GY2P9ovBmDxvbZdYNGLsgyvs3IbY9Xyoo7pG6aGervos3ES889uLnEb7SjQdqB8
+         c04oQSB+PnAtVssLohRqVsNTxxpZEXMlYEYZPaIQawRcqWXpoMMCB+Ij+QaUvFXaWX+9
+         EkwQURLaFTPtw3uOe88PQxDRiEQbFWGdtkez6eYqA5ZmRd2ICq0f8B5PwzMC/2IfXMJV
+         3HrA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=8O9S18BmdJFglyzpqWfTJgy5KWbRC61OD9TxaLl45wM=;
-        b=inNj0PBAo1XO/yfDZ5XWCjLseXHBWI5brFTvrh9At9J6tRwpaTFdZ9uWyUH2JEewwr
-         GJXSG2PC4DRuGHdho6EU52qxpRE4andcyPGaok9QmRqemOEve/zGI0zvnzkr188AIFO3
-         FAVdreY/L0WxZSEmprlZZmnIfy6Q3iOOHoGngnQFHUnL2y5RTQopOutdWtA69J+nDgL3
-         xYfI8EMYh4PvjCU80CoxjqefuTQqsVxdLbGn/qTg5y9lbJlB+fT60aDX5gIbwpxbd9DA
-         U+8v5cGiVgW/ow8mDZFeQO3ZmQlyMHbz6KzltoJ0SZklQdTKF3xCUZUqbvpH5YhM3VzK
-         xaFg==
-X-Gm-Message-State: AOAM532mhlo6eqq7sgf0t5t221fWewssrBfrqT8IvG2MZvPLDv4VxBwT
-        6V3MhuchwxWgpy6GITEGOwLmAAGXKH78uXEphNbQ6w==
-X-Google-Smtp-Source: ABdhPJy4aKAQQ51I36KuK7OvwPpTbyx587Cdf+GXkXYtjvaCei8zPTcqIpsMGepkbhmGGRnR4igGjkdH0tYtOOzbu2Y=
-X-Received: by 2002:a05:6102:910:: with SMTP id x16mr3398197vsh.42.1600951827698;
- Thu, 24 Sep 2020 05:50:27 -0700 (PDT)
+        bh=FV+W9qCfwLlahXA9uVHzI8exYIRdq3lpUWqEdGTM0BM=;
+        b=egj2htVTZkmMebeO3Dzyg0mhw8mUTMSE+Fa4e0rpaczIbs3zH5o/pOnY4+zVkxo+68
+         vr717r4epKi1ucrzjOrAfPLDv42+KT7mkWMFQ2JqD+yz+4al8kKxQr7MAFLzzw7M/dZW
+         JhnZ4qqFzuPTLUmy41X9y1vfCgfT4whafnM4vI0dmfzunSbkO+F1/NAEi3kYrDk2YQXa
+         GYGXgUtUjIPeE/8X4x7BxMa59/TxOLvUwkuIiVug/1yWhBh++KNPOd75XsrNHZeUZQ8T
+         Sk4RfmfSrDAL00cN/Uw469/AUHOB4uZeLu8Fh5tN07q3Q8bq4e/H327q84pjkdZy6maL
+         k45g==
+X-Gm-Message-State: AOAM533Q0y/9Cz6QCHbUSGgKjSKiRmF6BHoAzmbZ5KTD6MG9O7MLjCt5
+        bmeQQsT13a89Ll6MxzhdZ9JNdUVllRcoQ5ZPsPAy/w==
+X-Google-Smtp-Source: ABdhPJy1E77lXHw7zxYl3yAzOBYjjsrq0taGD22v7OOK8eJ5f2Oi5l3FQezUUXPcsOCVonCdRcIouLG27uOu052PqAQ=
+X-Received: by 2002:a1f:1f46:: with SMTP id f67mr3562226vkf.6.1600951831604;
+ Thu, 24 Sep 2020 05:50:31 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200923153739.30327-1-krzk@kernel.org>
-In-Reply-To: <20200923153739.30327-1-krzk@kernel.org>
+References: <20200923153739.30327-1-krzk@kernel.org> <20200923153739.30327-2-krzk@kernel.org>
+In-Reply-To: <20200923153739.30327-2-krzk@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 24 Sep 2020 14:49:48 +0200
-Message-ID: <CAPDyKFpWhMqXKbOMXCmR-SmQgfCEN=5bqWXGTJxcMfeMrs60Kw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: moxart: remove unneeded check for drvdata
+Date:   Thu, 24 Sep 2020 14:49:51 +0200
+Message-ID: <CAPDyKFqFrpMotaiLwj=Q1cUqVc1S-Oeqhq3kt6QqyW=A0T1Y9w@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci: fix indentation mistakes
 To:     Krzysztof Kozlowski <krzk@kernel.org>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Shawn Guo <shawnguo@kernel.org>,
@@ -78,13 +78,12 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 23 Sep 2020 at 17:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Wed, 23 Sep 2020 at 17:38, Krzysztof Kozlowski <krzk@kernel.org> wrote:
 >
-> The 'struct mmc_host *mmc' comes from drvdata set at the end of probe,
-> so it cannot be NULL.  The code already dereferences it few lines before
-> the check with mmc_priv().  This also fixes smatch warning:
+> Fix inconsistent indenting, reported by Smatch:
 >
->   drivers/mmc/host/moxart-mmc.c:692 moxart_remove() warn: variable dereferenced before check 'mmc' (see line 688)
+>   drivers/mmc/host/sdhci-esdhc-imx.c:1380 sdhci_esdhc_imx_hwinit() warn: inconsistent indenting
+>   drivers/mmc/host/sdhci-sprd.c:390 sdhci_sprd_request_done() warn: inconsistent indenting
 >
 > Reported-by: kernel test robot <lkp@intel.com>
 > Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
@@ -97,43 +96,44 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/moxart-mmc.c | 23 +++++++++++------------
->  1 file changed, 11 insertions(+), 12 deletions(-)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+>  drivers/mmc/host/sdhci-sprd.c      | 4 ++--
+>  2 files changed, 3 insertions(+), 3 deletions(-)
 >
-> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
-> index 2bfb376fddc4..f25079ba3bca 100644
-> --- a/drivers/mmc/host/moxart-mmc.c
-> +++ b/drivers/mmc/host/moxart-mmc.c
-> @@ -689,19 +689,18 @@ static int moxart_remove(struct platform_device *pdev)
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 62b3d4767916..fce8fa7e6b30 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1377,7 +1377,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+>                          * response, block the tuning procedure or the first command
+>                          * after the whole tuning procedure always can't get any response.
+>                          */
+> -                        tmp |= ESDHC_TUNING_CMD_CRC_CHECK_DISABLE;
+> +                       tmp |= ESDHC_TUNING_CMD_CRC_CHECK_DISABLE;
+>                         writel(tmp, host->ioaddr + ESDHC_TUNING_CTRL);
+>                 } else if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+>                         /*
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 1efaf602c206..58109c5b53e2 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -387,7 +387,7 @@ static void sdhci_sprd_request_done(struct sdhci_host *host,
+>         if (mmc_hsq_finalize_request(host->mmc, mrq))
+>                 return;
 >
->         dev_set_drvdata(&pdev->dev, NULL);
->
-> -       if (mmc) {
-> -               if (!IS_ERR(host->dma_chan_tx))
-> -                       dma_release_channel(host->dma_chan_tx);
-> -               if (!IS_ERR(host->dma_chan_rx))
-> -                       dma_release_channel(host->dma_chan_rx);
-> -               mmc_remove_host(mmc);
-> -               mmc_free_host(mmc);
-> +       if (!IS_ERR(host->dma_chan_tx))
-> +               dma_release_channel(host->dma_chan_tx);
-> +       if (!IS_ERR(host->dma_chan_rx))
-> +               dma_release_channel(host->dma_chan_rx);
-> +       mmc_remove_host(mmc);
-> +       mmc_free_host(mmc);
-> +
-> +       writel(0, host->base + REG_INTERRUPT_MASK);
-> +       writel(0, host->base + REG_POWER_CONTROL);
-> +       writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
-> +              host->base + REG_CLOCK_CONTROL);
->
-> -               writel(0, host->base + REG_INTERRUPT_MASK);
-> -               writel(0, host->base + REG_POWER_CONTROL);
-> -               writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
-> -                      host->base + REG_CLOCK_CONTROL);
-> -       }
->         return 0;
+> -        mmc_request_done(host->mmc, mrq);
+> +       mmc_request_done(host->mmc, mrq);
 >  }
+>
+>  static struct sdhci_ops sdhci_sprd_ops = {
+> @@ -433,7 +433,7 @@ static void sdhci_sprd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  }
+>
+>  static int sdhci_sprd_request_atomic(struct mmc_host *mmc,
+> -                                     struct mmc_request *mrq)
+> +                                    struct mmc_request *mrq)
+>  {
+>         sdhci_sprd_check_auto_cmd23(mmc, mrq);
 >
 > --
 > 2.17.1
