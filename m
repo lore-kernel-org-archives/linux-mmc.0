@@ -5,81 +5,90 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E92ADC4363D
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AEB3C2D0E2
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A9E2020BED
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5739D235FD
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 12:50:47 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="mH/Z53Qr"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zF3/JgWh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727976AbgIXMui (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Sep 2020 08:50:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42588 "EHLO
+        id S1727974AbgIXMuh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Sep 2020 08:50:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42602 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727960AbgIXMuZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 08:50:25 -0400
-Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49F23C0613CE
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:25 -0700 (PDT)
-Received: by mail-vk1-xa41.google.com with SMTP id q124so860697vkb.8
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:25 -0700 (PDT)
+        with ESMTP id S1727965AbgIXMu2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 08:50:28 -0400
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C395C0613CE
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:28 -0700 (PDT)
+Received: by mail-vs1-xe41.google.com with SMTP id e23so2060867vsk.2
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 05:50:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=A50fDOOKNyv2Ev8Swfae1dGr9M1g0YMVi9mWla00hDU=;
-        b=mH/Z53QrMi2Xxfu7rCBEG6DOGtq2gtzu9Xn0Hx+4OL9nQx6uwaYCgiHXjfYK90Ykg/
-         J8YUH4CIMYujQkPNcAXlbaF/6+naibYcfpzjyElE48ZF6n+gxIXDZFi1wAyVKqWUOSKU
-         4unnizW7zqZtWZYTZ4GQFi9ruDFR5SZ5el40dikPUlB3Vitq2o0Pc5E34itX8N0ozD12
-         lCw+VSVaZEJ3bPzXofaU+a031VPfa6wE6OF2Id7qtCU0WuMmKO1QqkO/3lGg1Xhm+v3k
-         vZip/y1gRqCA1T03Kz8DvJfIC+CbznA5s31kf9raarwVM4MPPRLGJzu7N8rnPDDJMOLN
-         aJ4w==
+        bh=8O9S18BmdJFglyzpqWfTJgy5KWbRC61OD9TxaLl45wM=;
+        b=zF3/JgWhr3T7u9qVnY5zJf9q7dvZyGHki7ZDpaPfQsWzAGDgOcWd6eOXPczYyBShXX
+         syeAR8/NHp0YmgC7QSAr72vXkcrb7Vqk7jTbuKtSqHXA+OMqn6kJWK8caQdfMiAaWdiV
+         7pYnOO498NzJWbBkjiqwvaizTUrdCuUkbzS+slucU36Z1dVA2q6kRWOpkH5pXBdu9HIS
+         WnI1NIyD/R5fDQnzF1S1fbbxL+5OBYP9cNwHYIeatbQpOeKh4prKHWY8PiVwDsnoXXmS
+         F6n6z2QLzHwCqLb/YWUMVrqG7vRzwUzZ4yRJOy+N/ctU5ieNSWRml3cT8aby92qgttbB
+         jiRQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=A50fDOOKNyv2Ev8Swfae1dGr9M1g0YMVi9mWla00hDU=;
-        b=fQBuFs+7w/7zDlf0qn11lD+7yK5Mq2qAQi+25LF2x9ZCySmbtUaFU2p7xsdRcpBd9t
-         VJ8SeYP76ykv4nZsR1f9Br3r6MOAw/THI0MG5RnULSqjsoRMM+faK1PO65d0lNKQVRRI
-         BopN6QZW1DKCCMm8wFcO5x0ZE6jxWfoJEPfqHCGt+JbGRed2CDzOcj+1vlEKpUf/aTWF
-         dzDANNzo1kK3palCUyxYZ+anWw11Ki7q1GeNgKQcI3i9ZjFTJPqSXEoLG494KEflcWY/
-         vj93RktZvEFubBqRa4tLzELF+ojqRllWRADe+74xDR7DZ+D5PMlIJcM8/i1qMtSdPrpP
-         n1Dg==
-X-Gm-Message-State: AOAM530xAlslPjLEbdyAuub3broD9g6svinwE2PMkCaeSlAlk+eypv9+
-        EVBr3LZrDcI+My5c4tBkM9s5DGr5U4Demn2IEQuvtA==
-X-Google-Smtp-Source: ABdhPJzBZQnxDcw00NSOe5PSltkjWOUHMAqt22WMd4hPdzgfhIVbjk6GXULijUmodg8Oj8sULI8TLw7M3coSTsqSS7E=
-X-Received: by 2002:a1f:6ec4:: with SMTP id j187mr3431849vkc.15.1600951824397;
- Thu, 24 Sep 2020 05:50:24 -0700 (PDT)
+        bh=8O9S18BmdJFglyzpqWfTJgy5KWbRC61OD9TxaLl45wM=;
+        b=inNj0PBAo1XO/yfDZ5XWCjLseXHBWI5brFTvrh9At9J6tRwpaTFdZ9uWyUH2JEewwr
+         GJXSG2PC4DRuGHdho6EU52qxpRE4andcyPGaok9QmRqemOEve/zGI0zvnzkr188AIFO3
+         FAVdreY/L0WxZSEmprlZZmnIfy6Q3iOOHoGngnQFHUnL2y5RTQopOutdWtA69J+nDgL3
+         xYfI8EMYh4PvjCU80CoxjqefuTQqsVxdLbGn/qTg5y9lbJlB+fT60aDX5gIbwpxbd9DA
+         U+8v5cGiVgW/ow8mDZFeQO3ZmQlyMHbz6KzltoJ0SZklQdTKF3xCUZUqbvpH5YhM3VzK
+         xaFg==
+X-Gm-Message-State: AOAM532mhlo6eqq7sgf0t5t221fWewssrBfrqT8IvG2MZvPLDv4VxBwT
+        6V3MhuchwxWgpy6GITEGOwLmAAGXKH78uXEphNbQ6w==
+X-Google-Smtp-Source: ABdhPJy4aKAQQ51I36KuK7OvwPpTbyx587Cdf+GXkXYtjvaCei8zPTcqIpsMGepkbhmGGRnR4igGjkdH0tYtOOzbu2Y=
+X-Received: by 2002:a05:6102:910:: with SMTP id x16mr3398197vsh.42.1600951827698;
+ Thu, 24 Sep 2020 05:50:27 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200922172253.4458-1-wsa@kernel.org>
-In-Reply-To: <20200922172253.4458-1-wsa@kernel.org>
+References: <20200923153739.30327-1-krzk@kernel.org>
+In-Reply-To: <20200923153739.30327-1-krzk@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 24 Sep 2020 14:49:45 +0200
-Message-ID: <CAPDyKFpdvHt06awMy2FQzd2Lk81ZwsmW1AXVTdf2F7BX=iAfMA@mail.gmail.com>
-Subject: Re: [PATCH RFT] mmc: renesas_sdhi: drop local flag for tuning
-To:     Wolfram Sang <wsa@kernel.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Date:   Thu, 24 Sep 2020 14:49:48 +0200
+Message-ID: <CAPDyKFpWhMqXKbOMXCmR-SmQgfCEN=5bqWXGTJxcMfeMrs60Kw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: moxart: remove unneeded check for drvdata
+To:     Krzysztof Kozlowski <krzk@kernel.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 22 Sep 2020 at 19:23, Wolfram Sang <wsa@kernel.org> wrote:
+On Wed, 23 Sep 2020 at 17:37, Krzysztof Kozlowski <krzk@kernel.org> wrote:
 >
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> The 'struct mmc_host *mmc' comes from drvdata set at the end of probe,
+> so it cannot be NULL.  The code already dereferences it few lines before
+> the check with mmc_priv().  This also fixes smatch warning:
 >
-> The MMC core has now a generic check if some tuning is in progress. Its
-> protected area is a bit larger than the custom one in this driver but we
-> concluded that this works equally well for the intended case. So, drop
-> the local flag and switch to the generic one.
+>   drivers/mmc/host/moxart-mmc.c:692 moxart_remove() warn: variable dereferenced before check 'mmc' (see line 688)
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Reported-by: kernel test robot <lkp@intel.com>
+> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 
 Applied for next, thanks!
 
@@ -88,56 +97,44 @@ Uffe
 
 
 > ---
+>  drivers/mmc/host/moxart-mmc.c | 23 +++++++++++------------
+>  1 file changed, 11 insertions(+), 12 deletions(-)
 >
-> I had this patch applied while working on other SDHI topics and
-> experienced no regressions. But I'd like to give Shimoda-san and the BSP
-> team some time for testing. We agreed on the approach already.
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index 2bfb376fddc4..f25079ba3bca 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -689,19 +689,18 @@ static int moxart_remove(struct platform_device *pdev)
 >
->  drivers/mmc/host/renesas_sdhi.h      | 1 -
->  drivers/mmc/host/renesas_sdhi_core.c | 4 +---
->  2 files changed, 1 insertion(+), 4 deletions(-)
+>         dev_set_drvdata(&pdev->dev, NULL);
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-> index 24958de274c1..cb962c7883dc 100644
-> --- a/drivers/mmc/host/renesas_sdhi.h
-> +++ b/drivers/mmc/host/renesas_sdhi.h
-> @@ -63,7 +63,6 @@ struct renesas_sdhi {
->         u32 scc_tappos_hs400;
->         const u8 *adjust_hs400_calib_table;
->         bool needs_adjust_hs400;
-> -       bool doing_tune;
+> -       if (mmc) {
+> -               if (!IS_ERR(host->dma_chan_tx))
+> -                       dma_release_channel(host->dma_chan_tx);
+> -               if (!IS_ERR(host->dma_chan_rx))
+> -                       dma_release_channel(host->dma_chan_rx);
+> -               mmc_remove_host(mmc);
+> -               mmc_free_host(mmc);
+> +       if (!IS_ERR(host->dma_chan_tx))
+> +               dma_release_channel(host->dma_chan_tx);
+> +       if (!IS_ERR(host->dma_chan_rx))
+> +               dma_release_channel(host->dma_chan_rx);
+> +       mmc_remove_host(mmc);
+> +       mmc_free_host(mmc);
+> +
+> +       writel(0, host->base + REG_INTERRUPT_MASK);
+> +       writel(0, host->base + REG_POWER_CONTROL);
+> +       writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+> +              host->base + REG_CLOCK_CONTROL);
 >
->         /* Tuning values: 1 for success, 0 for failure */
->         DECLARE_BITMAP(taps, BITS_PER_LONG);
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index d621a4af8e87..20e5eb63caf8 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -581,7 +581,6 @@ static int renesas_sdhi_select_tuning(struct tmio_mmc_host *host)
->         unsigned int taps_size = priv->tap_num * 2, min_tap_row;
->         unsigned long *bitmap;
+> -               writel(0, host->base + REG_INTERRUPT_MASK);
+> -               writel(0, host->base + REG_POWER_CONTROL);
+> -               writel(readl(host->base + REG_CLOCK_CONTROL) | CLK_OFF,
+> -                      host->base + REG_CLOCK_CONTROL);
+> -       }
+>         return 0;
+>  }
 >
-> -       priv->doing_tune = false;
->         sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSREQ, 0);
->
->         /*
-> @@ -656,7 +655,6 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 return -EINVAL;
->         }
->
-> -       priv->doing_tune = true;
->         bitmap_zero(priv->taps, priv->tap_num * 2);
->         bitmap_zero(priv->smpcmp, priv->tap_num * 2);
->
-> @@ -765,7 +763,7 @@ static bool renesas_sdhi_check_scc_error(struct tmio_mmc_host *host)
->             !(host->mmc->ios.timing == MMC_TIMING_MMC_HS400 && !use_4tap))
->                 return false;
->
-> -       if (mmc_doing_retune(host->mmc) || priv->doing_tune)
-> +       if (mmc_doing_tune(host->mmc))
->                 return false;
->
->         if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL) &
 > --
-> 2.20.1
+> 2.17.1
 >
