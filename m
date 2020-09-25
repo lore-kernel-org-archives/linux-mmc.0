@@ -2,94 +2,117 @@ Return-Path: <SRS0=CvS5=DC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2159C4727D
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 14:19:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 854CEC4727D
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 15:05:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7442C20936
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 14:19:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1922422B2D
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 15:05:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=kernel-dk.20150623.gappssmtp.com header.i=@kernel-dk.20150623.gappssmtp.com header.b="QZx7q7gI"
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="MJOGbF86";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="Yeohw/JX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728466AbgIYOTP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Sep 2020 10:19:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52112 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728333AbgIYOTL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 10:19:11 -0400
-Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E532C0613D3
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Sep 2020 07:19:11 -0700 (PDT)
-Received: by mail-pg1-x533.google.com with SMTP id 197so2700125pge.8
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Sep 2020 07:19:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=Izvn14aXCOd8rlHi8gt8/prckjwG/92/E8+p6vMMqzM=;
-        b=QZx7q7gI1poaxI+iNpfTHOEPysawBMN6ILpWj8VDRHvig1MWbXDH9Q/Ejh/VGdMY6V
-         XhsSRSgLJ3vyBUW4G6v5lGczlnBrfrfGUTY6Io4kTHSOwwPeeq67+GUlO0pvSbpcSc8G
-         UQSaYijRBt6BeZMDv8AdtAKiNqO1VevLatKGi1HCrNW5g8jU/dNWe2se7vKcQ5smC1Kh
-         pE6mdkVNLv/zO4pT+cJM9rz/VL4qgjegnLWF0CSvnNA3YX8nzt9KdJQrxarNDFpNgyxb
-         mdM7GAKDG1dsnTN8AV+yDCM9QF/vXMl36U6209JvGiLAPdEQelB4a/A4/bJ7gb2XykBg
-         PFCQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=Izvn14aXCOd8rlHi8gt8/prckjwG/92/E8+p6vMMqzM=;
-        b=KJHsjbWytkUKbBmrj63wRdmrlXmTzESuoqCAyLrXmBuLS+aAsAWsU8D1SRbrXKFRHG
-         /pwa0PvKUEdtRg6nm03KLDcXafj6mvxDZBblpDbLnMaJFr/bveQ9OFemS07FE7OteOMJ
-         vRT2EVfs30KenkSMfkJE10lgLQqO+4lQvGlXIj6lyDdVW9g4Y7HFm5iOXwtpqGqr8xyo
-         kpGcU8YsaFlrU2PiBCqHsigOvIXkVmtOUZ1W0t8qdva5i/VWR0c+qYPWSjRwZklw0V0Z
-         p78Hjw8utVy7XEz1imbm6ukXXtSgycCyLG2KtewjSY+JPrUF3URKhTVLMfJ+Wp3aD1PX
-         rEJQ==
-X-Gm-Message-State: AOAM533+169FOzJL2gCnUM/sS4ncmD1RxTCLZNmeetOzPTHsek1aFXSd
-        Ipmz40xDJ8USnPh1VIW1WOIjcw==
-X-Google-Smtp-Source: ABdhPJwRr/FwQpe7dKk8pmg8H/cUjDmWIFuRPHGSosKhPuxMlj+z/HBIhpQTLB9cSGSc+hfMahv5og==
-X-Received: by 2002:a63:e057:: with SMTP id n23mr213338pgj.87.1601043550492;
-        Fri, 25 Sep 2020 07:19:10 -0700 (PDT)
-Received: from [192.168.1.30] ([65.144.74.34])
-        by smtp.gmail.com with ESMTPSA id j19sm2930829pfe.108.2020.09.25.07.19.08
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 25 Sep 2020 07:19:09 -0700 (PDT)
-Subject: Re: clean up is partition checks
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     dm-devel@redhat.com, linux-doc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
-        drbd-dev@lists.linbit.com, linux-ide@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        target-devel@vger.kernel.org
-References: <20200903054104.228829-1-hch@lst.de>
-From:   Jens Axboe <axboe@kernel.dk>
-Message-ID: <7a0600d8-d886-c546-378c-5298a16e979c@kernel.dk>
-Date:   Fri, 25 Sep 2020 08:19:08 -0600
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1728487AbgIYPFX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Sep 2020 11:05:23 -0400
+Received: from Galois.linutronix.de ([193.142.43.55]:56864 "EHLO
+        galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727749AbgIYPFX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 11:05:23 -0400
+Date:   Fri, 25 Sep 2020 17:05:19 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020; t=1601046320;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=W7es1yDj9/zjzMxs06+Vww2hrDHmTr8lqczgB9WnfFc=;
+        b=MJOGbF86s4ulg2dwLhyiFpUwrUbKsXPpOgobXLou3xqdRJeQXF7Q5OF6REbbYec3Vqu7nG
+        L4riyBPLz5XB1Ozl7X5ifiwO+7PCNFDaRPoXdXhrWEZIPM1QR2O7oB2AV93Dyv4rY8X8WC
+        UoPw1uv74YznaDnkKwaMc2NdHO58KjnpX+VlC6Frp34l8Z1DYxMj36zhLz0624go36UEcc
+        KXlNrxkFJhNhBAVAd9BaYatyUJakQdhnr8gObRGNN75Amz+I1EQ9tNZM+Uye1drKCANkgj
+        LJ8/BpTX4Tod1gIMvXsCaPQku0HUM0YfkPYr8Ez5y/7n9Oo2xtQkuRvtGNcQeA==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020e; t=1601046320;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=W7es1yDj9/zjzMxs06+Vww2hrDHmTr8lqczgB9WnfFc=;
+        b=Yeohw/JXSR/26e4gGcNvnZlx7fiU8zt28HJO4pvel3a9b/BmscppNEfuRvko8R4VPwr27D
+        GqUr3aC7ybFLnQBw==
+From:   Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+To:     Jerome Brunet <jbrunet@baylibre.com>
+Cc:     Kevin Hilman <khilman@baylibre.com>,
+        Brad Harper <bjharper@gmail.com>,
+        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-rt-users@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: host: meson-gx-mmc: fix possible deadlock condition
+ for preempt_rt
+Message-ID: <20200925150519.sbzq57qphvzrdro3@linutronix.de>
+References: <24a844c3-c2e0-c735-ccb7-83736218b548@gmail.com>
+ <7hk0wj9ki2.fsf@baylibre.com>
+ <1jzh5e8bld.fsf@starbuckisacylon.baylibre.com>
+ <20200925134445.rk366jip5ne4x7em@linutronix.de>
+ <1jh7rmj64u.fsf@starbuckisacylon.baylibre.com>
 MIME-Version: 1.0
-In-Reply-To: <20200903054104.228829-1-hch@lst.de>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+In-Reply-To: <1jh7rmj64u.fsf@starbuckisacylon.baylibre.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/2/20 11:40 PM, Christoph Hellwig wrote:
-> Hi Jens,
+On 2020-09-25 16:14:09 [+0200], Jerome Brunet wrote:
+> Looks like we need to do manually what IRQF_ONESHOT was doing for us :(
+
+IRQF_ONESHOT disables the IRQ at the irqchip level. You must ensure that
+the device keeps quite. Usually you mast the interrupt source at the
+device lee.
+
+> This brings a few questions:
 > 
-> this series add a new helepr to check if a struct block_device represents
-> a parition, and removes most direct access to ->bd_contained from
-> drivers.
+> * The consideration you described is not mentioned near the description
+>   of IRQF_ONESHOT. Maybe it should so other drivers with same intent
+>   don't end up in the same pitfall ?
 
-Applied, thanks.
+From request_threaded_irq() ->
+|  *      If you want to set up a threaded irq handler for your device
+|  *      then you need to supply @handler and @thread_fn. @handler is
+|  *      still called in hard interrupt context and has to check
+|  *      whether the interrupt originates from the device. If yes it
+|  *      needs to disable the interrupt on the device and return
+|  *      IRQ_WAKE_THREAD which will wake up the handler thread and run
+|  *      @thread_fn. This split handler design is necessary to support
+|  *      shared interrupts.
 
--- 
-Jens Axboe
+Just the line that saying what needs to be done before returning
+IRQ_WAKE_THREAD.
 
+> * Why doesn't RT move the IRQ with this flag ? Seems completly unrelated
+>   to RT (maybe it is the same documentation problem) 
+
+It is unrelated to RT. Mostly. You end up with the same problem booting
+with `threadirqs'. RT has the additional restrictions that you may not
+acquire any sleeping locks in hardirq context. This you can see with
+addinional lockdep magic.
+
+> * Can't we have flag doing the irq disable in the same way while still
+>   allowing to RT to do its magic ? seems better than open coding it in
+>   the driver ?
+
+Puh. That should be forwarded the IRQ department.
+So we have IRQF_NO_THREAD to avoid force threading. This is documented
+as such. Then we have IRQF_TIMER and IRQF_PERCPU which are also not
+force threaded and it is not documented as such. However it is used for
+the timer-IRQ, IPI, perf and such - things you obviously don't want to
+thread and need to run in hard-IRQ context.
+
+What you have ist a primary and secondary and IRQF_ONESHOT and don't
+want the primary handler to be force-threaded. I can't answer why we
+don't.
+However, drivers usually disable the source themself if they providing
+both handler.
+
+Sebastian
