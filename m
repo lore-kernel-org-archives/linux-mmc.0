@@ -1,161 +1,166 @@
-Return-Path: <SRS0=/Wn+=DB=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=CvS5=DC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EEF9C2D0E2
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 17:01:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E89E2C4346E
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 02:08:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BBA2A2311A
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Sep 2020 17:01:46 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="OGaeaq59"
+	by mail.kernel.org (Postfix) with ESMTP id ABA4120BED
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 02:08:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727962AbgIXRBn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Sep 2020 13:01:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53250 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726477AbgIXRBn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 13:01:43 -0400
-Received: from mail-pl1-x642.google.com (mail-pl1-x642.google.com [IPv6:2607:f8b0:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19F57C0613D4
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 10:01:43 -0700 (PDT)
-Received: by mail-pl1-x642.google.com with SMTP id j7so37406plk.11
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Sep 2020 10:01:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:in-reply-to:references:date:message-id
-         :mime-version:content-transfer-encoding;
-        bh=wai6nrMcHMtaGESKTBMiyp6BzMJao/GERxFZZ1c+mrw=;
-        b=OGaeaq59Tt/XijT63cFNXsWFUc7pRwS0n/R2QRbOGJnV7bvG3CXlKdq5J2kzaa78ME
-         jbn6h+cKePv+nZUfj0dYZ/naRD1fpMeky67EjyNkTg//e+k2ICFEfpU8OpvLHodqmlsc
-         e6Ly9/IjuYRLIh38hb9NRmaTWGZNwKnUqdSJcvhAoqJ+bkDsOq9MIKX2VARxrCjwg0q4
-         3ou7RuM3Gjr8Xlz90Nu7tGCgohzhEADNN4nastiusrywUCf0Vc2eGX41ssiAock84bPQ
-         FN7QmWmVC1S0RrKu5AL4uq0oDrScIks1DNrv6FZkIz5O5Zw4cWRsea78whS2daP/WxbN
-         ZByA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:in-reply-to:references:date
-         :message-id:mime-version:content-transfer-encoding;
-        bh=wai6nrMcHMtaGESKTBMiyp6BzMJao/GERxFZZ1c+mrw=;
-        b=CHm+ejvjvuYOfY1693Wlzk4iQK6l7bpjHjs7T5fmVon+m8nIuHMRZ9PcKag5teyopS
-         RrF7ZrZcT44nSTzwUlnYiorjTAnT8NRK3WSHFnyBXW0wmrMqlWqnbqdEPDArUoZmaNeo
-         6v3/WQ0i5+D3WI0alJR0kARc5X2OIjTe7kQoMfFIGykjHO40zbIAdaJL59Z8ItdYZ/31
-         L5owHBqiWaUUyA5bOmldxxM/BRIgQoaTBgfCxjGbY+2WXlSPTsxBMleoUwXQTosyr0ic
-         CIDzP/biaiuLh2K97SUWoubjbJuJH6nM3jTAnyTitiNfkQ7wf5wEwLmTKVvqLsWxtRT3
-         xjuQ==
-X-Gm-Message-State: AOAM530saCD+mMm+gJLDtZIu2xFWVVVgwIRS7qDHaZVYWJIiY85dKTpm
-        IZA+CLC+ARDRm+to0PXgpd+s9w==
-X-Google-Smtp-Source: ABdhPJyB4E6oTZ+1qw0qVBGbrUxEy2hRIRjCoD2OsburrUv+ugcG2SoS9sHIe6Pl0ettoc5fKwLfFg==
-X-Received: by 2002:a17:90a:c20f:: with SMTP id e15mr102859pjt.163.1600966902382;
-        Thu, 24 Sep 2020 10:01:42 -0700 (PDT)
-Received: from localhost (c-71-197-186-152.hsd1.wa.comcast.net. [71.197.186.152])
-        by smtp.gmail.com with ESMTPSA id y13sm51996pfr.141.2020.09.24.10.01.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 24 Sep 2020 10:01:41 -0700 (PDT)
-From:   Kevin Hilman <khilman@baylibre.com>
-To:     Brad Harper <bjharper@gmail.com>,
-        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc:     linux-rt-users@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH] mmc: host: meson-gx-mmc: fix possible deadlock condition for preempt_rt
-In-Reply-To: <24a844c3-c2e0-c735-ccb7-83736218b548@gmail.com>
-References: <24a844c3-c2e0-c735-ccb7-83736218b548@gmail.com>
-Date:   Thu, 24 Sep 2020 10:01:41 -0700
-Message-ID: <7hk0wj9ki2.fsf@baylibre.com>
+        id S1726718AbgIYCIB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Sep 2020 22:08:01 -0400
+Received: from rtits2.realtek.com ([211.75.126.72]:59024 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726694AbgIYCIA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 22:08:00 -0400
+X-Greylist: delayed 665 seconds by postgrey-1.27 at vger.kernel.org; Thu, 24 Sep 2020 22:08:00 EDT
+X-SpamFilter-By: ArmorX SpamTrap 5.69 with qID 08P1vhAfB002096, This message is accepted by code: ctloc85258
+Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
+        by rtits2.realtek.com.tw (8.15.2/2.66/5.86) with ESMTPS id 08P1vhAfB002096
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
+        Fri, 25 Sep 2020 09:57:43 +0800
+Received: from localhost (172.29.40.150) by RSEXMBS01.realsil.com.cn
+ (172.29.17.195) with Microsoft SMTP Server id 15.1.2044.4; Fri, 25 Sep 2020
+ 09:57:42 +0800
+From:   <rui_feng@realsil.com.cn>
+To:     <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
+        <ulf.hansson@linaro.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        Rui Feng <rui_feng@realsil.com.cn>
+Subject: [PATCH 3/3] mmc: rtsx: Add SD Express mode support for RTS5261
+Date:   Fri, 25 Sep 2020 09:57:41 +0800
+Message-ID: <1600999061-13669-1-git-send-email-rui_feng@realsil.com.cn>
+X-Mailer: git-send-email 1.9.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
+X-Originating-IP: [172.29.40.150]
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brad,
+From: Rui Feng <rui_feng@realsil.com.cn>
 
-Brad Harper <bjharper@gmail.com> writes:
+RTS5261 support legacy SD mode and SD Express mode.
+In SD7.x, SD association introduce SD Express as a new mode.
+This patch makes RTS5261 support SD Express mode.
 
-> Force threaded interrupts for meson_mmc_irq to prevent possible deadlock=
-=20
-> condition
-> during mmc operations when using preempt_rt with 5.9.0-rc3-rt3 patches=20
-> on arm64.
->
-> Using meson-gx-mmc with an emmc device on Hardkernel Odroid N2+=20
-> configured with
-> preempt_rt resulted in the soc becoming unresponsive.=C2=A0 With lock=20
-> checking enabled
-> the below inconsistent lock state was observed during boot.
->
-> After some discussions with tglx in IRC #linux-rt the attached patch was=
-=20
-> suggested
-> to remove IRQF_ONESHOT from request_threaded_irq.
-> This has been tested and confirmed by me to resolve both the=20
-> unresponsive soc and
-> the inconsistent lock state warning when using 5.9.0-rc3-rt3 on arm64=20
-> Odroid N2+.
->
-> Further review and testing is required to ensure there are no adverse=20
-> impacts or
-> concerns and that is the correct method to resolve the problem.=C2=A0 I w=
-ill=20
-> continue
-> to test on various amlogic devices with both standard mainline low=20
-> latency kernel
-> and preempt_rt kernel with -rt patches.
+Signed-off-by: Rui Feng <rui_feng@realsil.com.cn>
+---
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 59 +++++++++++++++++++++++++++++++
+ 1 file changed, 59 insertions(+)
 
-This looks right to me, thanks for sending a fix.
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index 2763a376b054..efde374a4a5e 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -895,7 +895,9 @@ static int sd_set_bus_width(struct realtek_pci_sdmmc *host,
+ static int sd_power_on(struct realtek_pci_sdmmc *host)
+ {
+ 	struct rtsx_pcr *pcr = host->pcr;
++	struct mmc_host *mmc = host->mmc;
+ 	int err;
++	u32 val;
+ 
+ 	if (host->power_state == SDMMC_POWER_ON)
+ 		return 0;
+@@ -922,6 +924,14 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
+ 	if (err < 0)
+ 		return err;
+ 
++	if (PCI_PID(pcr) == PID_5261) {
++		val = rtsx_pci_readl(pcr, RTSX_BIPR);
++		if (val & SD_WRITE_PROTECT) {
++			pcr->extra_caps &= ~EXTRA_CAPS_SD_EXPRESS;
++			mmc->caps2 &= ~(MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V);
++		}
++	}
++
+ 	host->power_state = SDMMC_POWER_ON;
+ 	return 0;
+ }
+@@ -1127,6 +1137,8 @@ static int sdmmc_get_cd(struct mmc_host *mmc)
+ 	if (val & SD_EXIST)
+ 		cd = 1;
+ 
++	if (pcr->extra_caps & EXTRA_CAPS_SD_EXPRESS)
++		mmc->caps2 |= MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
+ 	mutex_unlock(&pcr->pcr_mutex);
+ 
+ 	return cd;
+@@ -1308,6 +1320,50 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	return err;
+ }
+ 
++static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
++{
++	u32 relink_time, val;
++	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
++	struct rtsx_pcr *pcr = host->pcr;
++
++	/*
++	 * If card has PCIe availability and WP if off,
++	 * reader switch to PCIe mode.
++	 */
++	val = rtsx_pci_readl(pcr, RTSX_BIPR);
++	if (!(val & SD_WRITE_PROTECT)) {
++		/* Set relink_time for changing to PCIe card */
++		relink_time = 0x8FFF;
++
++		rtsx_pci_write_register(pcr, 0xFF01, 0xFF, relink_time);
++		rtsx_pci_write_register(pcr, 0xFF02, 0xFF, relink_time >> 8);
++		rtsx_pci_write_register(pcr, 0xFF03, 0x01, relink_time >> 16);
++
++		rtsx_pci_write_register(pcr, PETXCFG, 0x80, 0x80);
++		rtsx_pci_write_register(pcr, LDO_VCC_CFG0,
++			RTS5261_LDO1_OCP_THD_MASK,
++			pcr->option.sd_800mA_ocp_thd);
++
++		if (pcr->ops->disable_auto_blink)
++			pcr->ops->disable_auto_blink(pcr);
++
++		/* For PCIe/NVMe mode can't enter delink issue */
++		pcr->hw_param.interrupt_en &= ~(SD_INT_EN);
++		rtsx_pci_writel(pcr, RTSX_BIER, pcr->hw_param.interrupt_en);
++
++		rtsx_pci_write_register(pcr, RTS5260_AUTOLOAD_CFG4,
++			RTS5261_AUX_CLK_16M_EN, RTS5261_AUX_CLK_16M_EN);
++		rtsx_pci_write_register(pcr, RTS5261_FW_CFG0,
++			RTS5261_FW_ENTER_EXPRESS, RTS5261_FW_ENTER_EXPRESS);
++		rtsx_pci_write_register(pcr, RTS5261_FW_CFG1,
++			RTS5261_MCU_BUS_SEL_MASK | RTS5261_MCU_CLOCK_SEL_MASK
++			| RTS5261_MCU_CLOCK_GATING | RTS5261_DRIVER_ENABLE_FW,
++			RTS5261_MCU_CLOCK_SEL_16M | RTS5261_MCU_CLOCK_GATING
++			| RTS5261_DRIVER_ENABLE_FW);
++	}
++	return 0;
++}
++
+ static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
+ 	.pre_req = sdmmc_pre_req,
+ 	.post_req = sdmmc_post_req,
+@@ -1317,6 +1373,7 @@ static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
+ 	.get_cd = sdmmc_get_cd,
+ 	.start_signal_voltage_switch = sdmmc_switch_voltage,
+ 	.execute_tuning = sdmmc_execute_tuning,
++	.init_sd_express = sdmmc_init_sd_express,
+ };
+ 
+ static void init_extra_caps(struct realtek_pci_sdmmc *host)
+@@ -1338,6 +1395,8 @@ static void init_extra_caps(struct realtek_pci_sdmmc *host)
+ 		mmc->caps |= MMC_CAP_8_BIT_DATA;
+ 	if (pcr->extra_caps & EXTRA_CAPS_NO_MMC)
+ 		mmc->caps2 |= MMC_CAP2_NO_MMC;
++	if (pcr->extra_caps & EXTRA_CAPS_SD_EXPRESS)
++		mmc->caps2 |= MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
+ }
+ 
+ static void realtek_init_host(struct realtek_pci_sdmmc *host)
+-- 
+2.17.1
 
-For broader testing, I can add this to my testing branch so it gets
-booted on a bunch more platform in KernelCI also.
-
-However...
-
-[...]
-
-> Signed-off-by: Brad Harper <bjharper@gmail.com>
-> ---
->  =C2=A0drivers/mmc/host/meson-gx-mmc.c | 2 +-
->  =C2=A01 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c=20
-> b/drivers/mmc/host/meson-gx-mmc.c
-> index 08a3b1c05..130ac134d 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -1139,7 +1139,7 @@ static int meson_mmc_probe(struct platform_device=20
-> *pdev)
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0 host->regs + SD_EMMC_IRQ_EN);
->
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ret =3D request_threaded_irq(=
-host->irq, meson_mmc_irq,
-> -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 meson_mmc_irq_thread, I=
-RQF_ONESHOT,
-> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 meson_mmc_irq_thread, 0,
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 dev_name(&pdev->d=
-ev), host);
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (ret)
->  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0 goto err_init_clk;
-
-This patch has been mangled by your mailer, so it doesn't apply cleanly.
-If you're using the gmail web UI, this is a common problem.
-
-I strongly recommend using git-send-email to send directly via gmail
-SMTP.  The git-send-email docs[1] give some examples on how to set this
-up.
-
-Kevin
-
-[1] https://git-scm.com/docs/git-send-email#_examples
