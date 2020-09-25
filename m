@@ -2,95 +2,96 @@ Return-Path: <SRS0=CvS5=DC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DC8DC4363D
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 09:32:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB459C4363D
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 11:32:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DDB53206BE
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 09:32:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6E6EA21741
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 11:32:37 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="idF0RM6F"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727679AbgIYJc0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Sep 2020 05:32:26 -0400
-Received: from mga04.intel.com ([192.55.52.120]:55446 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727440AbgIYJcZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 25 Sep 2020 05:32:25 -0400
-IronPort-SDR: 5TCn5bchaZvhMeGF4Ajl5ai2RDYyqk5C1NVcNjbUzDpYEgNYJRFCN5nFSVYo4pduAHlaktrjeR
- It5fMFAj2sSg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9754"; a="158868442"
-X-IronPort-AV: E=Sophos;i="5.77,301,1596524400"; 
-   d="scan'208";a="158868442"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Sep 2020 02:32:25 -0700
-IronPort-SDR: Ctg8seOvVT0giCxwqDVdUONMnNbwYOZSZlr2XSUfes904IuJYr24Jo82tfjeHEudbJEDsy7AzP
- PPByKyr2yGYw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,301,1596524400"; 
-   d="scan'208";a="310751878"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
-  by orsmga006.jf.intel.com with ESMTP; 25 Sep 2020 02:32:20 -0700
-Subject: Re: [PATCH v2] mmc: sdhci: Don't enable presets while tuning
-To:     Raul Rangel <rrangel@chromium.org>
-Cc:     "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>,
-        "Wang, Chris" <chris.wang@amd.com>,
-        Akshu Agrawal <Akshu.Agrawal@amd.com>,
-        Jisheng Zhang <jszhang@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        clang-built-linux@googlegroups.com,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org
-References: <20200824122131.v2.1.Id6f3c92fecf4acc60c3b7f57d5f4e4c854ace765@changeid>
- <873b0786-a088-54af-80ad-96d2b041945d@intel.com>
- <CAHQZ30DXUuWKo1n50aX3a86QfLCD4Z3W4CVescRDFcvQrEk3Ww@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <c4a886d8-8389-2c50-a40b-e2965ef6c393@intel.com>
-Date:   Fri, 25 Sep 2020 12:31:50 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1728173AbgIYLcP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Sep 2020 07:32:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54592 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728147AbgIYLcM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 07:32:12 -0400
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63E78C0613D3
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Sep 2020 04:32:10 -0700 (PDT)
+Received: by mail-vs1-xe43.google.com with SMTP id 5so1183226vsu.5
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Sep 2020 04:32:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=AK2xKBf38jIncqQXUOXzr0Q8nKbCDFfcVqsOZ+AQjKg=;
+        b=idF0RM6FwWTHjL2Ru7MruW/e3XuePPBoSAnUfI4a9V8Wp4GpJvFwSdpyGWpT+ezNFY
+         tYkNpv7jSxYZT+Dd4l/z7o5X5aMHWYN/V3lWY/VyDbXgusLr58p/hb8fq65Lyeua085B
+         uX2udX5vudKVA98Bj6wqJJxfjsI9NOOCBqh4cKZI3N7FqizofE+JtFUR3Wz1me1TsYIo
+         GqWyatlyxM7OmULaHYA+RnTc2gsulG7VjqoWZI0g4AIltaCXCpvLQ8xNnPve6eJkXVIM
+         V+P8eq9OAh6gbdiuAN5/NSkpsNScN2j2qwE2IukOWAqNbrWFKYmd5hob3scEMb4Aj4t9
+         UGpA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=AK2xKBf38jIncqQXUOXzr0Q8nKbCDFfcVqsOZ+AQjKg=;
+        b=ktF4a3GbVWrBmMhARGSnU07w/1ZpxFL3ojR3YmGmJmyjhKS72hpAXskdF35gNGfXnE
+         2xzFQTww7EA0Gu/iONglq8K7SsavdLc1kLPJPXMEmdY3F8EgAfMrTOgCPvuxhrNk3TH9
+         Ri5OghXEhD1cDJXBQj4cOxjiAjdaVjZU5L6TG34/BJJpcqMu/SNlUMlRaIPHeCaWRPF6
+         Aw+pOACziOa1FxFK2ouJsCFTbj2rBzhgJoHaIy3be2O+kjbe0/hLAFbM78T/nGqYK2A9
+         wzlk3U4cVhjVxNRJ7CS2EXlg9iV6UbUHVHP4189sruCii2Un4646ZeugGLtkLIOCgnli
+         Hmrw==
+X-Gm-Message-State: AOAM533iREYkB7ZjdcXh++aoQqGLJhqv9BezKvMYtzXiGv3u7KAKLqqX
+        o0cFwPvwdVMQjsZ7Ay7o1jVgam9nMiyFHWVkuvRq8w==
+X-Google-Smtp-Source: ABdhPJzORGOUPeovrlLq8j/6gekYRvr8WIFO0ittDHW239GvqKPogB4tMqMM/C6nkXvUbLm/1SwTcy+FqOClu3SIAF8=
+X-Received: by 2002:a67:2e54:: with SMTP id u81mr2304621vsu.55.1601033529627;
+ Fri, 25 Sep 2020 04:32:09 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAHQZ30DXUuWKo1n50aX3a86QfLCD4Z3W4CVescRDFcvQrEk3Ww@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20200920204907.225287-1-ameynarkhede03@gmail.com> <CAPDyKFo7TeKFXLcNJFPoJqWsBsNySjeQrbb2+KRjO=jib+1jJA@mail.gmail.com>
+In-Reply-To: <CAPDyKFo7TeKFXLcNJFPoJqWsBsNySjeQrbb2+KRjO=jib+1jJA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 25 Sep 2020 13:31:32 +0200
+Message-ID: <CAPDyKFo-FHGs7Po5naNwhe9xEGfxfdJo2gnddpfOJ73YzTFTyA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: davinci: Drop pointer to mmc_host from mmc_davinci_host
+To:     Amey Narkhede <ameynarkhede03@gmail.com>
+Cc:     "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/09/20 8:57 pm, Raul Rangel wrote:
-> On Tue, Sep 1, 2020 at 4:54 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 24/08/20 9:21 pm, Raul E Rangel wrote:
->>> SDHCI presets are not currently used for eMMC HS/HS200/HS400, but are
->>> used for DDR52. The HS400 retuning sequence is:
->>>
->>>     HS400->DDR52->HS->HS200->Perform Tuning->HS->HS400
->>>
->>> This means that when HS400 tuning happens, we transition through DDR52
->>> for a very brief period. This causes presets to be enabled
->>> unintentionally and stay enabled when transitioning back to HS200 or
->>> HS400.
->>>
->>> This patch prevents enabling presets while tuning is in progress.
->>
->> Preset value should not generally have to depend on tuning, so this
->> seems less than ideal.  Also I am not sure you can say some controllers
->> are not accidentally benefiting from the current situation.
->>
->> What about just letting drivers choose the timing modes that support
->> preset values?  e.g. using the change below, a driver could alter
->> host->preset_value_support as needed
-> 
-> Sorry for the late reply, I'm just getting back to this. I like the
-> patch. I have a few other patches I'm
-> going to push up soon. Do you want me to include this in the chain, or
-> do you want to push it up?
+On Thu, 24 Sep 2020 at 14:49, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> On Sun, 20 Sep 2020 at 22:51, Amey Narkhede <ameynarkhede03@gmail.com> wrote:
+> >
+> > The TI DaVinci MMC host driver uses a pointer to get from
+> > the private mmc_davinci_host structure to generic mmc_host
+> > structure. However mmc_host always immediately precedes
+> > mmc_davinci_host in memory hence get the address of that
+> > mmc_host structure using mmc_from_priv() which performs
+> > subtraction(which is cheaper than a dereference) and drop
+> > the unnecessary pointer.
+> >
+> > Signed-off-by: Amey Narkhede <ameynarkhede03@gmail.com>
+>
+> Applied for next, thanks!
 
-I'm snowed.  You will have to do it I am afraid.
+Turned out that this one did cause build errors, so I have dropped it
+from my next branch.
+
+Please re-spin a v2 and make sure to run a build test before you submit again.
+
+[...]
+
+Kind regards
+Uffe
