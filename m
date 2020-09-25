@@ -2,117 +2,86 @@ Return-Path: <SRS0=CvS5=DC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 854CEC4727D
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 15:05:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C335AC4727E
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 16:43:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1922422B2D
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 15:05:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 46ED322B2D
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 16:43:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="MJOGbF86";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="Yeohw/JX"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="ORB843ns"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728487AbgIYPFX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Sep 2020 11:05:23 -0400
-Received: from Galois.linutronix.de ([193.142.43.55]:56864 "EHLO
-        galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727749AbgIYPFX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 11:05:23 -0400
-Date:   Fri, 25 Sep 2020 17:05:19 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020; t=1601046320;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=W7es1yDj9/zjzMxs06+Vww2hrDHmTr8lqczgB9WnfFc=;
-        b=MJOGbF86s4ulg2dwLhyiFpUwrUbKsXPpOgobXLou3xqdRJeQXF7Q5OF6REbbYec3Vqu7nG
-        L4riyBPLz5XB1Ozl7X5ifiwO+7PCNFDaRPoXdXhrWEZIPM1QR2O7oB2AV93Dyv4rY8X8WC
-        UoPw1uv74YznaDnkKwaMc2NdHO58KjnpX+VlC6Frp34l8Z1DYxMj36zhLz0624go36UEcc
-        KXlNrxkFJhNhBAVAd9BaYatyUJakQdhnr8gObRGNN75Amz+I1EQ9tNZM+Uye1drKCANkgj
-        LJ8/BpTX4Tod1gIMvXsCaPQku0HUM0YfkPYr8Ez5y/7n9Oo2xtQkuRvtGNcQeA==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020e; t=1601046320;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=W7es1yDj9/zjzMxs06+Vww2hrDHmTr8lqczgB9WnfFc=;
-        b=Yeohw/JXSR/26e4gGcNvnZlx7fiU8zt28HJO4pvel3a9b/BmscppNEfuRvko8R4VPwr27D
-        GqUr3aC7ybFLnQBw==
-From:   Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-To:     Jerome Brunet <jbrunet@baylibre.com>
-Cc:     Kevin Hilman <khilman@baylibre.com>,
-        Brad Harper <bjharper@gmail.com>,
-        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-rt-users@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: host: meson-gx-mmc: fix possible deadlock condition
- for preempt_rt
-Message-ID: <20200925150519.sbzq57qphvzrdro3@linutronix.de>
-References: <24a844c3-c2e0-c735-ccb7-83736218b548@gmail.com>
- <7hk0wj9ki2.fsf@baylibre.com>
- <1jzh5e8bld.fsf@starbuckisacylon.baylibre.com>
- <20200925134445.rk366jip5ne4x7em@linutronix.de>
- <1jh7rmj64u.fsf@starbuckisacylon.baylibre.com>
+        id S1729392AbgIYQnb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Sep 2020 12:43:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46456 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728212AbgIYQnb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 12:43:31 -0400
+Received: from merlin.infradead.org (merlin.infradead.org [IPv6:2001:8b0:10b:1231::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39F70C0613CE;
+        Fri, 25 Sep 2020 09:43:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=merlin.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=bkS+waRwerACov79/m/rcNqbMgeSjcgfK2jH3Ym5UJE=; b=ORB843nsDvTeeyde3VZBJBU8c0
+        fowWSFjNYhEAqeFwfhfzfqHiR8Pr8pfFyLdkUaaKNZj79bxsIxDC/k+qGg+VnIiCdWEV2iVbGiNo8
+        qcu9gEV+FpcT8MZ3BNoUdJijDw+BeNz7ljZ6olsP+AxFjmxYFGcRLjWaPxfItw+WO4vjHI9tUi9jR
+        U6Lgo1CHdWQfsTrbUDDWjlI+s+eOmp+cUcRXO37boMTt4mPWQGO+N2IFfGB/Ri4dJfpdebDpHsBfP
+        wXKq1RODOTEiF5lIow66SosN17zrCm0oIPbCk1hNZh7Oh4U+RZFRtfyEJ2KDH29jUASK2Gi2Vz6aM
+        EjbubAig==;
+Received: from [2601:1c0:6280:3f0::19c2] (helo=smtpauth.infradead.org)
+        by merlin.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kLqoi-0005LP-D0; Fri, 25 Sep 2020 16:43:28 +0000
+From:   Randy Dunlap <rdunlap@infradead.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     Randy Dunlap <rdunlap@infradead.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        linux-amlogic@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, Krzysztof Kozlowski <krzk@kernel.org>
+Subject: [PATCH] mmc: host: fix depends for MMC_MESON_GX w/ COMPILE_TEST
+Date:   Fri, 25 Sep 2020 09:43:23 -0700
+Message-Id: <20200925164323.29843-1-rdunlap@infradead.org>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <1jh7rmj64u.fsf@starbuckisacylon.baylibre.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020-09-25 16:14:09 [+0200], Jerome Brunet wrote:
-> Looks like we need to do manually what IRQF_ONESHOT was doing for us :(
+Fix build errors for meson-gx-mmc.c when CONFIG_COMMON_CLK is not
+set/enabled. This can happen when COMPILE_TEST is set/enabled.
 
-IRQF_ONESHOT disables the IRQ at the irqchip level. You must ensure that
-the device keeps quite. Usually you mast the interrupt source at the
-device lee.
+ERROR: modpost: "clk_divider_ops" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
+ERROR: modpost: "devm_clk_register" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
+ERROR: modpost: "clk_mux_ops" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
+ERROR: modpost: "__clk_get_name" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
 
-> This brings a few questions:
-> 
-> * The consideration you described is not mentioned near the description
->   of IRQF_ONESHOT. Maybe it should so other drivers with same intent
->   don't end up in the same pitfall ?
+Fixes: 54d8454436a2 ("mmc: host: Enable compile testing of multiple drivers")
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Cc: Kevin Hilman <khilman@baylibre.com>
+Cc: linux-amlogic@lists.infradead.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-mmc@vger.kernel.org
+Cc: Krzysztof Kozlowski <krzk@kernel.org>
+---
+ drivers/mmc/host/Kconfig |    1 +
+ 1 file changed, 1 insertion(+)
 
-From request_threaded_irq() ->
-|  *      If you want to set up a threaded irq handler for your device
-|  *      then you need to supply @handler and @thread_fn. @handler is
-|  *      still called in hard interrupt context and has to check
-|  *      whether the interrupt originates from the device. If yes it
-|  *      needs to disable the interrupt on the device and return
-|  *      IRQ_WAKE_THREAD which will wake up the handler thread and run
-|  *      @thread_fn. This split handler design is necessary to support
-|  *      shared interrupts.
-
-Just the line that saying what needs to be done before returning
-IRQ_WAKE_THREAD.
-
-> * Why doesn't RT move the IRQ with this flag ? Seems completly unrelated
->   to RT (maybe it is the same documentation problem) 
-
-It is unrelated to RT. Mostly. You end up with the same problem booting
-with `threadirqs'. RT has the additional restrictions that you may not
-acquire any sleeping locks in hardirq context. This you can see with
-addinional lockdep magic.
-
-> * Can't we have flag doing the irq disable in the same way while still
->   allowing to RT to do its magic ? seems better than open coding it in
->   the driver ?
-
-Puh. That should be forwarded the IRQ department.
-So we have IRQF_NO_THREAD to avoid force threading. This is documented
-as such. Then we have IRQF_TIMER and IRQF_PERCPU which are also not
-force threaded and it is not documented as such. However it is used for
-the timer-IRQ, IPI, perf and such - things you obviously don't want to
-thread and need to run in hard-IRQ context.
-
-What you have ist a primary and secondary and IRQF_ONESHOT and don't
-want the primary handler to be force-threaded. I can't answer why we
-don't.
-However, drivers usually disable the source themself if they providing
-both handler.
-
-Sebastian
+--- linux-next-20200925.orig/drivers/mmc/host/Kconfig
++++ linux-next-20200925/drivers/mmc/host/Kconfig
+@@ -425,6 +425,7 @@ config MMC_SDHCI_IPROC
+ config MMC_MESON_GX
+ 	tristate "Amlogic S905/GX*/AXG SD/MMC Host Controller support"
+ 	depends on ARCH_MESON|| COMPILE_TEST
++	depends on COMMON_CLK
+ 	help
+ 	  This selects support for the Amlogic SD/MMC Host Controller
+ 	  found on the S905/GX*/AXG family of SoCs.  This controller is
