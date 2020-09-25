@@ -2,166 +2,179 @@ Return-Path: <SRS0=CvS5=DC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4C82C4363D
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 09:03:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 068E5C4727F
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 09:11:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 70EA020717
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 09:03:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A22862075E
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 09:11:46 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="DvuhcIhN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727402AbgIYJDF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Sep 2020 05:03:05 -0400
-Received: from mga11.intel.com ([192.55.52.93]:46349 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727346AbgIYJDF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 25 Sep 2020 05:03:05 -0400
-IronPort-SDR: xKH1SJMtEssAGfWPe1tbjXdO+XdZItYxcz4Mucd0pAg+qWV6ZE5zpS2y4YeCo8gytcA1TyY12s
- 4yzzRvjkgFlg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9754"; a="158827905"
-X-IronPort-AV: E=Sophos;i="5.77,301,1596524400"; 
-   d="scan'208";a="158827905"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Sep 2020 02:03:05 -0700
-IronPort-SDR: n41CJjIRD3xQYZiPWc8XiZFmQm7Zs/hQW3FWh1MQC5nPjTKpjzEhzRdF9d/j6aaIfpOQrTz7le
- DKCWnmEvImZw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,301,1596524400"; 
-   d="scan'208";a="310745537"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
-  by orsmga006.jf.intel.com with ESMTP; 25 Sep 2020 02:03:01 -0700
-Subject: Re: [RFC PATCH V3 12/21] mmc: sdhci: UHS-II support, add hooks for
- additional operations
-To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Ben Chuang <benchuanggli@gmail.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
-References: <20200710111054.29562-1-benchuanggli@gmail.com>
- <9fa17d60-a540-d0d8-7b2c-0016c3b5c532@intel.com>
- <20200924093538.GA35720@laputa>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <14c80da3-5ef5-fba3-8b98-3c50f6241475@intel.com>
-Date:   Fri, 25 Sep 2020 12:02:29 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1727782AbgIYJLq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Sep 2020 05:11:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32934 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727521AbgIYJLp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 05:11:45 -0400
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FE63C0613CE
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Sep 2020 02:11:45 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id o8so2614766ejb.10
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Sep 2020 02:11:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
+        h=references:user-agent:from:to:cc:subject:in-reply-to:date
+         :message-id:mime-version;
+        bh=EINwdvc62tASjwpRJVndiLCvvVKWaOgZRLx0lxHJGdk=;
+        b=DvuhcIhNXBHXC334WLX00vfEFn96hpowAqa9NMof2QJfUe1SjYf+qgDyay7PihvEfa
+         +Ne60c2JdxHEx5vqRl3r8SXZ9SOvXQzSVKMMhih9rabjBs26Sb4XOLQW6bt8H80rGIhD
+         wN/oNtgtQmBbkOOca7lNc11ukpfbBjB7uImCLFIL5GZGNdx3aUQyTR02VsquFHzkWEJG
+         Zbwl8jE8WNVSRBSWFDs6ZBmW/VfGORc5dEdx00GxT5CwrsUQEgZEn4Bhcxeg16tAX5oQ
+         V3FmKPR8u6FAHm8DlAZCPQNXFw9xcQUOagHEgiOmEEp2ijY/riZUv3lFs9Z8KzHydV86
+         CcWg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject
+         :in-reply-to:date:message-id:mime-version;
+        bh=EINwdvc62tASjwpRJVndiLCvvVKWaOgZRLx0lxHJGdk=;
+        b=Mx4YWtw/ETaMtRMBhwEnnowVKDXhjw5LIhA7NYJB6jiGb1W+bbW9TCCz+abU6cKOtn
+         ZQ2L47PeIPM2lKo1m0ZWJcr8ZWxJhJptXOPQp9tHt5GRG2qlyyiMoosWbNMYweusiU69
+         V2ESCWa32k2SGJ+8YL4p9HasFPBFsy5iBZdZ1qcW9gJJgPohp7vPUhybHPvradc85oOJ
+         wKtHQdbcntz/Gawz1bCAwFpcZ2QXq2/DymdM5KtIQHWCf32ggxs1dSCLl4X02aUQwqaf
+         ckLl1l6GlzNWLgO3/YXPmGkgBRijz/ScmaFIWM/QdUf3Za3a8V4cS8H0+XnR8oL5zLz3
+         A2WQ==
+X-Gm-Message-State: AOAM530GFjmuj589CPpzzpMJvCeDmnOYN8Ct76+aM8R0zIL0BUpCiC6y
+        xBmT3SaBYOKPgFzTtbnxtYOioA==
+X-Google-Smtp-Source: ABdhPJx+uUP+3B9UO5TLURje87PEsrajL8+BhL6bIsWz0W4R6TpnWfp0fNyJq9eces+bJbQ4EicB1w==
+X-Received: by 2002:a17:906:abc5:: with SMTP id kq5mr1707113ejb.284.1601025104165;
+        Fri, 25 Sep 2020 02:11:44 -0700 (PDT)
+Received: from localhost (cag06-3-82-243-161-21.fbx.proxad.net. [82.243.161.21])
+        by smtp.gmail.com with ESMTPSA id i26sm1371709edq.47.2020.09.25.02.11.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 25 Sep 2020 02:11:43 -0700 (PDT)
+References: <24a844c3-c2e0-c735-ccb7-83736218b548@gmail.com> <7hk0wj9ki2.fsf@baylibre.com>
+User-agent: mu4e 1.3.3; emacs 26.3
+From:   Jerome Brunet <jbrunet@baylibre.com>
+To:     Kevin Hilman <khilman@baylibre.com>,
+        Brad Harper <bjharper@gmail.com>,
+        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc:     linux-rt-users@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: host: meson-gx-mmc: fix possible deadlock condition for preempt_rt
+In-reply-to: <7hk0wj9ki2.fsf@baylibre.com>
+Date:   Fri, 25 Sep 2020 11:11:42 +0200
+Message-ID: <1jzh5e8bld.fsf@starbuckisacylon.baylibre.com>
 MIME-Version: 1.0
-In-Reply-To: <20200924093538.GA35720@laputa>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/09/20 12:35 pm, AKASHI Takahiro wrote:
-> Adrian,
-> 
-> This is, hopefully, my last reply to your comments on this patch#12.
-> 
-> Regarding _request() and _send_command() (and more),
-> 
-> On Fri, Aug 21, 2020 at 05:08:32PM +0300, Adrian Hunter wrote:
->> On 10/07/20 2:10 pm, Ben Chuang wrote:
->>> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->>>
->>> In this commit, UHS-II related operations will be called via a function
->>> pointer array, sdhci_uhs2_ops, in order to make UHS-II support as
->>> a kernel module.
->>> This array will be initialized only if CONFIG_MMC_SDHCI_UHS2 is enabled
->>> and when the UHS-II module is loaded. Otherwise, all the functions
->>> stay void.
->>>
->   (snip)
-> 
->> Again, this is what I want to avoid.  I would like to have 3 kinds of functions:
->> 	- SD mode only
->> 	- UHS-II only
->> 	- SD functions with no UHS-II code, that can also be used by UHS-II
->> i.e. I don't want to mix UHS-II code and SD mode code in the same function.
->>
->> I think sdhci-uhs2.c should provide a request function and a send_command function.
->> I would start by removing everything you may not need, and then see if you have any problems.
->> e.g.
->>
->> void uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
->> {
->> 	struct sdhci_host *host = mmc_priv(mmc);
->> 	struct mmc_command *cmd;
->> 	unsigned long flags;
->>
->> 	if (!host->uhs2_mode) {
->> 		sdhci_request(mmc, mrq);
->> 		return;
->> 	}
->>
->> 	spin_lock_irqsave(&host->lock, flags);
->> 	uhs2_send_command(host, cmd);
->> 	spin_unlock_irqrestore(&host->lock, flags);
->> }
->> EXPORT_SYMBOL_GPL(uhs2_request);
->>
->> For sdhci_prepare_data(), I would factor out the dma part, so
->>
->> static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->> {
->> 	struct mmc_data *data = cmd->data;
->>
->> 	sdhci_initialize_data(host, data);
->>
->> 	sdhci_prepare_dma(host, data);
->>
->> 	sdhci_set_block_info(host, data);
->> }
->>
->> The you could export sdhci_initialize_data() and sdhci_prepare_dma() for uhs2.
->>
->>>  }
->>>  
->>>  #if IS_ENABLED(CONFIG_MMC_SDHCI_EXTERNAL_DMA)
->>> @@ -1439,6 +1463,13 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->>>  	u16 mode = 0;
->>>  	struct mmc_data *data = cmd->data;
->>>  
->>> +	if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
->>> +	    host->mmc->flags & MMC_UHS2_SUPPORT) {
->>> +		if (sdhci_uhs2_ops.set_transfer_mode)
->>> +			sdhci_uhs2_ops.set_transfer_mode(host, cmd);
->>> +		return;
->>> +	}
->>> +
->>
->> Once you provide uhs2_request() and uhs2_send_command(), the transfer mode setting can be done in sdhci-uhs2.c
-> 
-> If I try to make changes as you suggested above, a lot of other uhs2-flavored
-> functions will also be created due to calling dependency/sequences
-> and for "completeness" compared to uhs counterparts.
-> They probably include
->     sdhci_uhs2_prepare_data()
->     sdhci_uhs2_external_dma_prepare_data()
->     sdhci_uhs2_send_command()
->     sdhci_uhs2_send_command_try()
->     sdhci_uhs2_send_tuning()
->     sdhci_uhs2_request()
->     sdhci_uhs2_request_atomic()
->     sdhci_uhs2_thread_irq()
->     sdhci_uhs2_irq()
->     sdhci_uhs2_cmd_irq()
->     sdhci_uhs2_finish_command()
->     sdhci_uhs2_resume_host()
->     __sdhci_uhs2_add_host()
->     sdhci_uhs2_add_host()
-> (Some may not be used under the current drivers.)
-> 
-> In addition, a bunch of functions in sdhci.c will also have to be exported
-> to uhs2 as "global" functions instead of "static."
-> 
-> Is this all that you expect to see?
 
-Yes.  Add what you need.
+On Thu 24 Sep 2020 at 19:01, Kevin Hilman <khilman@baylibre.com> wrote:
+
+> Hi Brad,
+>
+> Brad Harper <bjharper@gmail.com> writes:
+>
+>> Force threaded interrupts for meson_mmc_irq to prevent possible deadlock 
+>> condition
+>> during mmc operations when using preempt_rt with 5.9.0-rc3-rt3 patches 
+>> on arm64.
+>>
+>> Using meson-gx-mmc with an emmc device on Hardkernel Odroid N2+ 
+>> configured with
+>> preempt_rt resulted in the soc becoming unresponsive.  With lock 
+>> checking enabled
+>> the below inconsistent lock state was observed during boot.
+>>
+>> After some discussions with tglx in IRC #linux-rt the attached patch was 
+>> suggested
+>> to remove IRQF_ONESHOT from request_threaded_irq.
+>> This has been tested and confirmed by me to resolve both the 
+>> unresponsive soc and
+>> the inconsistent lock state warning when using 5.9.0-rc3-rt3 on arm64 
+>> Odroid N2+.
+>>
+>> Further review and testing is required to ensure there are no adverse 
+>> impacts or
+>> concerns and that is the correct method to resolve the problem.  I will 
+>> continue
+>> to test on various amlogic devices with both standard mainline low 
+>> latency kernel
+>> and preempt_rt kernel with -rt patches.
+>
+> This looks right to me, thanks for sending a fix.
+>
+> For broader testing, I can add this to my testing branch so it gets
+> booted on a bunch more platform in KernelCI also.
+>
+> However...
+>
+> [...]
+>
+>> Signed-off-by: Brad Harper <bjharper@gmail.com>
+>> ---
+>>   drivers/mmc/host/meson-gx-mmc.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/meson-gx-mmc.c 
+>> b/drivers/mmc/host/meson-gx-mmc.c
+>> index 08a3b1c05..130ac134d 100644
+>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>> @@ -1139,7 +1139,7 @@ static int meson_mmc_probe(struct platform_device 
+>> *pdev)
+>>                 host->regs + SD_EMMC_IRQ_EN);
+>>
+>>          ret = request_threaded_irq(host->irq, meson_mmc_irq,
+>> -                                  meson_mmc_irq_thread, IRQF_ONESHOT,
+>> +                                  meson_mmc_irq_thread, 0,
+>>                                     dev_name(&pdev->dev), host);
+
+I'm not sure about this.
+As you have explained on IRC, I understand that IRQF_ONESHOT is causing
+trouble with RT as the hard IRQ part of the thread will not be migrated
+to a thread. That was certainly not the intent when putting this flag.
+
+As described in include/linux/interrupt.h:
+ * IRQF_ONESHOT - Interrupt is not reenabled after the hardirq handler finished.
+ *                Used by threaded interrupts which need to keep the
+ *                irq line disabled until the threaded handler has been run.
+
+The intent was only that, making sure the irq is not re-enabled until
+the threaded part is done. AFAIU, removing this flag would allow the
+hard irq handler to fire again while we are not done handling the
+previous IRQ in threaded part.
+
+This seems pretty unsafe to me. Maybe we could improve the driver so it
+copes with this case gracefully. ATM, I don't think it would.
+
+Maybe I missed something and I am happy to be enlightened if that is the
+case :)
+
+
+>>          if (ret)
+>>                  goto err_init_clk;
+>
+> This patch has been mangled by your mailer, so it doesn't apply cleanly.
+> If you're using the gmail web UI, this is a common problem.
+>
+> I strongly recommend using git-send-email to send directly via gmail
+> SMTP.  The git-send-email docs[1] give some examples on how to set this
+> up.
+>
+> Kevin
+>
+> [1] https://git-scm.com/docs/git-send-email#_examples
+>
+> _______________________________________________
+> linux-amlogic mailing list
+> linux-amlogic@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-amlogic
+
