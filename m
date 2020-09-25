@@ -2,266 +2,159 @@ Return-Path: <SRS0=CvS5=DC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44F0FC4346E
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 02:08:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C08C2C4727F
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 04:49:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 086D320888
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 02:08:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7E4C92311B
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Sep 2020 04:49:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="cCErxzvX"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726738AbgIYCIE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Sep 2020 22:08:04 -0400
-Received: from rtits2.realtek.com ([211.75.126.72]:59056 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726694AbgIYCIE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Sep 2020 22:08:04 -0400
-X-SpamFilter-By: ArmorX SpamTrap 5.69 with qID 08P1uSsnD001620, This message is accepted by code: ctloc85258
-Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
-        by rtits2.realtek.com.tw (8.15.2/2.66/5.86) with ESMTPS id 08P1uSsnD001620
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Fri, 25 Sep 2020 09:56:28 +0800
-Received: from localhost (172.29.40.150) by RSEXMBS01.realsil.com.cn
- (172.29.17.195) with Microsoft SMTP Server id 15.1.2044.4; Fri, 25 Sep 2020
- 09:56:27 +0800
-From:   <rui_feng@realsil.com.cn>
-To:     <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
+        id S1726908AbgIYEtw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Sep 2020 00:49:52 -0400
+Received: from fllv0016.ext.ti.com ([198.47.19.142]:43092 "EHLO
+        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726738AbgIYEtw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Sep 2020 00:49:52 -0400
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 08P4nbFZ105368;
+        Thu, 24 Sep 2020 23:49:37 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1601009377;
+        bh=ACHLjhJJRa8dK07lqvRCS2u2C8SQ3vgKW2GNyQDj8AA=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=cCErxzvXaSnmski9xjcFJKhPH2bG9jEicIGZ7fxcl8Qe01K1BQWVmwwafD9utAYvV
+         3p1UAdq6K8pdOLrkd0ribsUYyEdZ7ssyprFJNg/2itdAtd2M/whQs+rPf913brRmyC
+         iZrGJmhaY3ODz57A1KMb9EImOvorFUrdOCa9+1Zc=
+Received: from DLEE109.ent.ti.com (dlee109.ent.ti.com [157.170.170.41])
+        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTP id 08P4nb2g047209;
+        Thu, 24 Sep 2020 23:49:37 -0500
+Received: from DLEE109.ent.ti.com (157.170.170.41) by DLEE109.ent.ti.com
+ (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Thu, 24
+ Sep 2020 23:49:37 -0500
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE109.ent.ti.com
+ (157.170.170.41) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
+ Frontend Transport; Thu, 24 Sep 2020 23:49:37 -0500
+Received: from [10.250.232.147] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 08P4nX2t013994;
+        Thu, 24 Sep 2020 23:49:34 -0500
+Subject: Re: [PATCH 5/6] mmc: sdhci_am654: Add support for software tuning
+To:     Faiz Abbas <faiz_abbas@ti.com>, <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>
+CC:     <adrian.hunter@intel.com>, <robh+dt@kernel.org>,
         <ulf.hansson@linaro.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        Christoph Hellwig <hch@lst.de>,
-        Rui Feng <rui_feng@realsil.com.cn>
-Subject: [PATCH 1/3] mmc: core: Initial support for SD express card/host
-Date:   Fri, 25 Sep 2020 09:56:26 +0800
-Message-ID: <1600998986-13575-1-git-send-email-rui_feng@realsil.com.cn>
-X-Mailer: git-send-email 1.9.1
+References: <20200923105206.7988-1-faiz_abbas@ti.com>
+ <20200923105206.7988-6-faiz_abbas@ti.com>
+From:   Kishon Vijay Abraham I <kishon@ti.com>
+Message-ID: <7a105ee5-ac4e-53b7-5434-30a6261f298e@ti.com>
+Date:   Fri, 25 Sep 2020 10:19:32 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [172.29.40.150]
+In-Reply-To: <20200923105206.7988-6-faiz_abbas@ti.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
 
-In the SD specification v7.10 the SD express card has been added. This new
-type of removable SD card, can be managed via a PCIe/NVMe based interface,
-while also allowing backwards compatibility towards the legacy SD
-interface.
 
-To keep the backwards compatibility, it's required to start the
-initialization through the legacy SD interface. If it turns out that the
-mmc host and the SD card, both supports the PCIe/NVMe interface, then a
-switch should be allowed.
+On 23/09/20 4:22 pm, Faiz Abbas wrote:
+> With the new SW tuning App note[1], a custom tuning algorithm is
+> required for eMMC HS200, HS400 and SD card UHS modes. The algorithm
+> involves running through the 32 possible input tap delay values and
+> sending the appropriate tuning command (CMD19/21) for each of them
+> to get a fail or pass result for each of the values. Typically, the
+> range will have a small contiguous failing window. Considering the
+> tuning range as a circular buffer, the algorithm then sets a final
+> tuned value directly opposite to the failing window.
+> 
+> [1] https://www.ti.com/lit/pdf/spract9
+> 
+> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
 
-Therefore, let's introduce some basic support for this type of SD cards to
-the mmc core. The mmc host, should set MMC_CAP2_SD_EXP if it supports this
-interface and MMC_CAP2_SD_EXP_1_2V, if also 1.2V is supported, as to inform
-the core about it.
-
-To deal with the switch to the PCIe/NVMe interface, the mmc host is
-required to implement a new host ops, ->init_sd_express(). Based on the
-initial communication between the host and the card, host->ios.timing is
-set to either MMC_TIMING_SD_EXP or MMC_TIMING_SD_EXP_1_2V, depending on if
-1.2V is supported or not. In this way, the mmc host can check these values
-in its ->init_sd_express() ops, to know how to proceed with the handover.
-
-Note that, to manage card insert/removal, the mmc core sticks with using
-the ->get_cd() callback, which means it's the host's responsibility to make
-sure it provides valid data, even if the card may be managed by PCIe/NVMe
-at the moment. As long as the card seems to be present, the mmc core keeps
-the card powered on.
-
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Christoph Hellwig <hch@lst.de>
-Cc: Rui Feng <rui_feng@realsil.com.cn>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- drivers/mmc/core/core.c   | 15 ++++++++++--
- drivers/mmc/core/host.h   |  6 +++++
- drivers/mmc/core/sd_ops.c | 49 +++++++++++++++++++++++++++++++++++++--
- drivers/mmc/core/sd_ops.h |  1 +
- include/linux/mmc/host.h  |  7 ++++++
- 5 files changed, 74 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 8ccae6452b9c..6673c0f33cc7 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2137,8 +2137,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- 
- 	mmc_go_idle(host);
- 
--	if (!(host->caps2 & MMC_CAP2_NO_SD))
--		mmc_send_if_cond(host, host->ocr_avail);
-+	if (!(host->caps2 & MMC_CAP2_NO_SD)) {
-+		if (mmc_send_if_cond_pcie(host, host->ocr_avail))
-+			goto out;
-+		if (mmc_card_sd_express(host))
-+			return 0;
-+	}
- 
- 	/* Order's important: probe SDIO, then SD, then MMC */
- 	if (!(host->caps2 & MMC_CAP2_NO_SDIO))
-@@ -2153,6 +2157,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
- 		if (!mmc_attach_mmc(host))
- 			return 0;
- 
-+out:
- 	mmc_power_off(host);
- 	return -EIO;
- }
-@@ -2280,6 +2285,12 @@ void mmc_rescan(struct work_struct *work)
- 		goto out;
- 	}
- 
-+	/* If an SD express card is present, then leave it as is. */
-+	if (mmc_card_sd_express(host)) {
-+		mmc_release_host(host);
-+		goto out;
-+	}
-+
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
- 		unsigned int freq = freqs[i];
- 		if (freq > host->f_max) {
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index 5e3b9534ffb2..ba407617ed23 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -77,5 +77,11 @@ static inline bool mmc_card_hs400es(struct mmc_card *card)
- 	return card->host->ios.enhanced_strobe;
- }
- 
-+static inline bool mmc_card_sd_express(struct mmc_host *host)
-+{
-+	return host->ios.timing == MMC_TIMING_SD_EXP ||
-+		host->ios.timing == MMC_TIMING_SD_EXP_1_2V;
-+}
-+
- #endif
- 
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index 22bf528294b9..d61ff811218c 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -158,7 +158,8 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 	return err;
- }
- 
--int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
-+static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bits,
-+			      u32 *resp)
- {
- 	struct mmc_command cmd = {};
- 	int err;
-@@ -171,7 +172,7 @@ int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
- 	 * SD 1.0 cards.
- 	 */
- 	cmd.opcode = SD_SEND_IF_COND;
--	cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | test_pattern;
-+	cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | pcie_bits << 8 | test_pattern;
- 	cmd.flags = MMC_RSP_SPI_R7 | MMC_RSP_R7 | MMC_CMD_BCR;
- 
- 	err = mmc_wait_for_cmd(host, &cmd, 0);
-@@ -186,6 +187,50 @@ int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
- 	if (result_pattern != test_pattern)
- 		return -EIO;
- 
-+	if (resp)
-+		*resp = cmd.resp[0];
-+
-+	return 0;
-+}
-+
-+int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
-+{
-+	return __mmc_send_if_cond(host, ocr, 0, NULL);
-+}
-+
-+int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr)
-+{
-+	u32 resp = 0;
-+	u8 pcie_bits = 0;
-+	int ret;
-+
-+	if (host->caps2 & MMC_CAP2_SD_EXP) {
-+		/* Probe card for SD express support via PCIe. */
-+		pcie_bits = 0x10;
-+		if (host->caps2 & MMC_CAP2_SD_EXP_1_2V)
-+			/* Probe also for 1.2V support. */
-+			pcie_bits = 0x30;
-+	}
-+
-+	ret = __mmc_send_if_cond(host, ocr, pcie_bits, &resp);
-+	if (ret)
-+		return 0;
-+
-+	/* Continue with the SD express init, if the card supports it. */
-+	resp &= 0x3000;
-+	if (pcie_bits && resp) {
-+		if (resp == 0x3000)
-+			host->ios.timing = MMC_TIMING_SD_EXP_1_2V;
-+		else
-+			host->ios.timing = MMC_TIMING_SD_EXP;
-+
-+		/*
-+		 * According to the spec the clock shall also be gated, but
-+		 * let's leave this to the host driver for more flexibility.
-+		 */
-+		return host->ops->init_sd_express(host, &host->ios);
-+	}
-+
- 	return 0;
- }
- 
-diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
-index 2194cabfcfc5..3ba7b3cf4652 100644
---- a/drivers/mmc/core/sd_ops.h
-+++ b/drivers/mmc/core/sd_ops.h
-@@ -16,6 +16,7 @@ struct mmc_host;
- int mmc_app_set_bus_width(struct mmc_card *card, int width);
- int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
- int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
-+int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr);
- int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
- int mmc_app_send_scr(struct mmc_card *card);
- int mmc_sd_switch(struct mmc_card *card, int mode, int group,
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c5b6e97cb21a..905cddc5e6f3 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -60,6 +60,8 @@ struct mmc_ios {
- #define MMC_TIMING_MMC_DDR52	8
- #define MMC_TIMING_MMC_HS200	9
- #define MMC_TIMING_MMC_HS400	10
-+#define MMC_TIMING_SD_EXP	11
-+#define MMC_TIMING_SD_EXP_1_2V	12
- 
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
- 
-@@ -172,6 +174,9 @@ struct mmc_host_ops {
- 	 */
- 	int	(*multi_io_quirk)(struct mmc_card *card,
- 				  unsigned int direction, int blk_size);
-+
-+	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
-+	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
- };
- 
- struct mmc_cqe_ops {
-@@ -357,6 +362,8 @@ struct mmc_host {
- #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
- #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
- 				 MMC_CAP2_HS200_1_2V_SDR)
-+#define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
-+#define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
- #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
--- 
-2.17.1
-
+Reviewed-by: Kishon Vijay Abraham I <kishon@ti.com>
+> ---
+>  drivers/mmc/host/sdhci_am654.c | 41 ++++++++++++++++++++++++++++++++++
+>  1 file changed, 41 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 1213b711e60a..5af7638ad606 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -396,7 +396,46 @@ static u32 sdhci_am654_cqhci_irq(struct sdhci_host *host, u32 intmask)
+>  	return 0;
+>  }
+>  
+> +#define ITAP_MAX	32
+> +static int sdhci_am654_platform_execute_tuning(struct sdhci_host *host,
+> +					       u32 opcode)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> +	int cur_val, prev_val = 1, fail_len = 0, pass_window = 0, pass_len;
+> +	u32 itap;
+> +
+> +	/* Enable ITAPDLY */
+> +	regmap_update_bits(sdhci_am654->base, PHY_CTRL4, ITAPDLYENA_MASK,
+> +			   1 << ITAPDLYENA_SHIFT);
+> +
+> +	for (itap = 0; itap < ITAP_MAX; itap++) {
+> +		sdhci_am654_write_itapdly(sdhci_am654, itap);
+> +
+> +		cur_val = !mmc_send_tuning(host->mmc, opcode, NULL);
+> +		if (cur_val && !prev_val)
+> +			pass_window = itap;
+> +
+> +		if (!cur_val)
+> +			fail_len++;
+> +
+> +		prev_val = cur_val;
+> +	}
+> +	/*
+> +	 * Having determined the length of the failing window and start of
+> +	 * the passing window calculate the length of the passing window and
+> +	 * set the final value halfway through it considering the range as a
+> +	 * circular buffer
+> +	 */
+> +	pass_len = ITAP_MAX - fail_len;
+> +	itap = (pass_window + (pass_len >> 1)) % ITAP_MAX;
+> +	sdhci_am654_write_itapdly(sdhci_am654, itap);
+> +
+> +	return 0;
+> +}
+> +
+>  static struct sdhci_ops sdhci_am654_ops = {
+> +	.platform_execute_tuning = sdhci_am654_platform_execute_tuning,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> @@ -426,6 +465,7 @@ static const struct sdhci_am654_driver_data sdhci_am654_drvdata = {
+>  };
+>  
+>  static struct sdhci_ops sdhci_j721e_8bit_ops = {
+> +	.platform_execute_tuning = sdhci_am654_platform_execute_tuning,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> @@ -449,6 +489,7 @@ static const struct sdhci_am654_driver_data sdhci_j721e_8bit_drvdata = {
+>  };
+>  
+>  static struct sdhci_ops sdhci_j721e_4bit_ops = {
+> +	.platform_execute_tuning = sdhci_am654_platform_execute_tuning,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.get_timeout_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+> 
