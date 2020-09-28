@@ -2,113 +2,112 @@ Return-Path: <SRS0=Afy4=DF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3D19C2D0A8
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1EF0C2D0A8
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8A261206F4
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 52512206F4
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Yk69XaUh"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AUh5Xapa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726380AbgI1Ke3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Sep 2020 06:34:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60106 "EHLO
+        id S1726614AbgI1Kej (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Sep 2020 06:34:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60134 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726328AbgI1Ke3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2020 06:34:29 -0400
-Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69F2EC061755
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:29 -0700 (PDT)
-Received: by mail-ua1-x943.google.com with SMTP id f15so2000800uaq.9
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:29 -0700 (PDT)
+        with ESMTP id S1726328AbgI1Kej (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2020 06:34:39 -0400
+Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C7FCC061755
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:39 -0700 (PDT)
+Received: by mail-vk1-xa43.google.com with SMTP id n193so1429281vkf.12
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=7sQW1HUOunmbKPB18wQEeOgvroegKy9HPkbYg+JXmnw=;
-        b=Yk69XaUhn97ETU43S5BSUq3Cke/3pXyBufwltBiK0o8Ar5zK8tEaDI6EM3NFqEDa35
-         lq/TBv5V6s2Hpxm6zB6a0zEiLsTSCyVO4XngoYqlr83f6YNAJciqcRkh3G6SpRRz4thg
-         /IEFzGTy9ZgOhJXfYmwqRNDpJa+D7BGnHkaf3HGDQDf9i8RaG3Uq6yPL8zt1OGwuZ8T2
-         JoKh6j2OLvBYLUiPXqXffsxrG8Ew3lQqL1grdVcY30gd35sJt/Zu0A5WErpzzKqz0awo
-         sh3LbqtXqPnvQs10E+J6A6CRIomG8zgdFurusyIH2994yQK7mYUkcQjiESPrXvpN0/hX
-         YfQA==
+        bh=kCHYzzH+i6txI0brWFnBDLXKpVALX+5QwAw/VNoWNk8=;
+        b=AUh5XapavrB6EGo5rdwT5udLEu+YwBMaOwZgoWWXd6Pqx9CltFokFdjkgKYye4+9vY
+         AHJ3AABLLQ9v0/Cl5LJdUj86j9wXiNHFqyEmAPEFJvfwgEqHGlaZBAhJDsQu7M84sRlN
+         37L1CJJF2+S6zbmft1LYfATSRm4kHvsu03IMo9DDjMGDy5mmbJ6gxsQjjOJihqA+Y1/v
+         8D1rNjgMo6sDpkUVmoYNI8ZPlVIXroK41m25qwBYamG0EFIqA4ELMU/JgRoexFPe/QCm
+         Mfd651S/aWUTU3/yCh3hlGIua7jLKLZIYrQayF2DHPJnMsK3EhIKK29Ll5+WJ9Lba7FJ
+         5HnQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=7sQW1HUOunmbKPB18wQEeOgvroegKy9HPkbYg+JXmnw=;
-        b=FNw+8zOcYdx1t+dtn+GM3fkp6LLfhyNERhkyZYS11htN4lmhdr0fYfyLzc0xLixpjf
-         /AsMhd+ClM5gfkORZp1ot4Bydkj51H6oufXm6xjgclhwLdOMfKIT5jnHf59gzkTabDpn
-         zF0MGDoEkbKgZOQYhPE6Z+qJOTCmrHlDZ0Mz6eY/5FsshTGT4ybCTOF6eJ1uPFE68Lpy
-         BADEZya7MnSAA85FvewCtX6hXAfpYrhLJGwYCO7uMUj615lyvgiBhC8NLIwYF+5PGfZQ
-         hwkyYpG9WU75URkrUsShUrU60GmWyDuvByAkZNXFQBGx++2Bh0Ow+31AEOYq7msbrRPa
-         CPdA==
-X-Gm-Message-State: AOAM533wpHuJrIuWc0Tu8LGa/gQzuhHPpdswURnvJlSMWKtCQDsZtWpX
-        NFPMf8MbNorhurFRjAB+e6Zwilc/BLGCW7w59OsTSCWAP20mZw==
-X-Google-Smtp-Source: ABdhPJzCzJoMIXrevdJ3Il/z22DKFLjZ7LEY5ae0LawwEeOjiTNjdIahlC/UDTD2eJq0VMZAE0fA0dAdBjRQ6ST+zeE=
-X-Received: by 2002:ab0:130a:: with SMTP id g10mr236564uae.100.1601289267589;
- Mon, 28 Sep 2020 03:34:27 -0700 (PDT)
+        bh=kCHYzzH+i6txI0brWFnBDLXKpVALX+5QwAw/VNoWNk8=;
+        b=b3P5WI+yfKUogrM1RgV4PNOs/YtnVGm9YmuLs038jB0ywg1HcdK7jEt16+CXD65i6j
+         AS5A8mVl2ICH7uTL0E/Qugk7B3DisheEbEBAq4A5lhqebrRvLO+KrWzRP4qB6csKib38
+         ghugCdUV/9wl3MI7eApXlhaulrDQpCzpGr/JicnGifknOWjc18F8JFOBq0ifUFGEwkup
+         BZQ12KQ20UrxzK3H7Q1SumO5c4B45dBjgLw9zNln/cpm8jMmfTn6iqKt8xCqr4VSGThB
+         ju6QvK1JXvQiSvtNIgQ5yaKLk5Vh2xUtJiLhTmM2/g+ZAXinXmWrobCLM03WMrGZZ9JT
+         WPFg==
+X-Gm-Message-State: AOAM53274DzG921h9QBe0iTVELx0cq3jq8FRLt4eWrJmNfPTQj/A1x1J
+        SZLr8thL8ffAcpVOWlyTRXQnwINR4Gmt1BjICUltWQ==
+X-Google-Smtp-Source: ABdhPJzVU+3l6V26RnGTk8PQ5DqzqBEXIyhs++xSEtv4+7R85m9ghPPjrHP2K8KQzSydrbU/jiC25XfDfjoajCcPLto=
+X-Received: by 2002:ac5:cced:: with SMTP id k13mr4462650vkn.7.1601289278713;
+ Mon, 28 Sep 2020 03:34:38 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200927104821.5676-1-hdegoede@redhat.com>
-In-Reply-To: <20200927104821.5676-1-hdegoede@redhat.com>
+References: <20200925164323.29843-1-rdunlap@infradead.org>
+In-Reply-To: <20200925164323.29843-1-rdunlap@infradead.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Sep 2020 12:33:51 +0200
-Message-ID: <CAPDyKFo8309qtoE7xqTWvRczNRim9WW0wcU3D7wSajCpuU=MMg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: Workaround broken command queuing on Intel
- GLK based IRBIS models
-To:     Hans de Goede <hdegoede@redhat.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        RussianNeuroMancer <russianneuromancer@ya.ru>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date:   Mon, 28 Sep 2020 12:34:02 +0200
+Message-ID: <CAPDyKFrT5S_0bfr0rnUU4V6kPHpfziCbUnGS8m-HK2cAaDJHcQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: host: fix depends for MMC_MESON_GX w/ COMPILE_TEST
+To:     Randy Dunlap <rdunlap@infradead.org>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 27 Sep 2020 at 12:48, Hans de Goede <hdegoede@redhat.com> wrote:
+On Fri, 25 Sep 2020 at 18:43, Randy Dunlap <rdunlap@infradead.org> wrote:
 >
-> Commit bedf9fc01ff1 ("mmc: sdhci: Workaround broken command queuing on
-> Intel GLK"), disabled command-queuing on Intel GLK based LENOVO models
-> because of it being broken due to what is believed to be a bug in
-> the BIOS.
+> Fix build errors for meson-gx-mmc.c when CONFIG_COMMON_CLK is not
+> set/enabled. This can happen when COMPILE_TEST is set/enabled.
 >
-> It seems that the BIOS of some IRBIS models, including the IRBIS NB111
-> model has the same issue, so disable command queuing there too.
+> ERROR: modpost: "clk_divider_ops" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
+> ERROR: modpost: "devm_clk_register" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
+> ERROR: modpost: "clk_mux_ops" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
+> ERROR: modpost: "__clk_get_name" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
 >
-> Fixes: bedf9fc01ff1 ("mmc: sdhci: Workaround broken command queuing on Intel GLK")
-> BugLink: https://bugzilla.kernel.org/show_bug.cgi?id=209397
-> Reported-and-tested-by: RussianNeuroMancer <russianneuromancer@ya.ru>
-> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
+> Fixes: 54d8454436a2 ("mmc: host: Enable compile testing of multiple drivers")
+> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+> Cc: Kevin Hilman <khilman@baylibre.com>
+> Cc: linux-amlogic@lists.infradead.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: Krzysztof Kozlowski <krzk@kernel.org>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/Kconfig |    1 +
+>  1 file changed, 1 insertion(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index af413805bbf1..914f5184295f 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -794,7 +794,8 @@ static int byt_emmc_probe_slot(struct sdhci_pci_slot *slot)
->  static bool glk_broken_cqhci(struct sdhci_pci_slot *slot)
->  {
->         return slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_GLK_EMMC &&
-> -              dmi_match(DMI_BIOS_VENDOR, "LENOVO");
-> +              (dmi_match(DMI_BIOS_VENDOR, "LENOVO") ||
-> +               dmi_match(DMI_SYS_VENDOR, "IRBIS"));
->  }
->
->  static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
-> --
-> 2.28.0
->
+> --- linux-next-20200925.orig/drivers/mmc/host/Kconfig
+> +++ linux-next-20200925/drivers/mmc/host/Kconfig
+> @@ -425,6 +425,7 @@ config MMC_SDHCI_IPROC
+>  config MMC_MESON_GX
+>         tristate "Amlogic S905/GX*/AXG SD/MMC Host Controller support"
+>         depends on ARCH_MESON|| COMPILE_TEST
+> +       depends on COMMON_CLK
+>         help
+>           This selects support for the Amlogic SD/MMC Host Controller
+>           found on the S905/GX*/AXG family of SoCs.  This controller is
