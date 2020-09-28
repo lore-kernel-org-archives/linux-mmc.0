@@ -2,94 +2,80 @@ Return-Path: <SRS0=Afy4=DF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1EF0C2D0A8
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41278C2D0A8
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 52512206F4
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 032712073A
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Sep 2020 10:34:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AUh5Xapa"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xb4qmE+g"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726614AbgI1Kej (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Sep 2020 06:34:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60134 "EHLO
+        id S1726652AbgI1Keo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Sep 2020 06:34:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60148 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726328AbgI1Kej (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2020 06:34:39 -0400
-Received: from mail-vk1-xa43.google.com (mail-vk1-xa43.google.com [IPv6:2607:f8b0:4864:20::a43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C7FCC061755
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:39 -0700 (PDT)
-Received: by mail-vk1-xa43.google.com with SMTP id n193so1429281vkf.12
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:39 -0700 (PDT)
+        with ESMTP id S1726578AbgI1Ken (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Sep 2020 06:34:43 -0400
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5AFFC061755
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:43 -0700 (PDT)
+Received: by mail-vs1-xe43.google.com with SMTP id e23so453992vsk.2
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Sep 2020 03:34:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=kCHYzzH+i6txI0brWFnBDLXKpVALX+5QwAw/VNoWNk8=;
-        b=AUh5XapavrB6EGo5rdwT5udLEu+YwBMaOwZgoWWXd6Pqx9CltFokFdjkgKYye4+9vY
-         AHJ3AABLLQ9v0/Cl5LJdUj86j9wXiNHFqyEmAPEFJvfwgEqHGlaZBAhJDsQu7M84sRlN
-         37L1CJJF2+S6zbmft1LYfATSRm4kHvsu03IMo9DDjMGDy5mmbJ6gxsQjjOJihqA+Y1/v
-         8D1rNjgMo6sDpkUVmoYNI8ZPlVIXroK41m25qwBYamG0EFIqA4ELMU/JgRoexFPe/QCm
-         Mfd651S/aWUTU3/yCh3hlGIua7jLKLZIYrQayF2DHPJnMsK3EhIKK29Ll5+WJ9Lba7FJ
-         5HnQ==
+        bh=wJ51wOq3NNuRGHW/HzevqRgjJxD2w7qQkV91Bjp5Nz4=;
+        b=xb4qmE+g/pCVILBD5P1m0t8IVE14mqFd43QMR8644S34N9EMlVs/OrE0/p90OvRmg0
+         BVyJZFqeLa/ZZhQgymlBmhXt5X6qWofl/FyYZ6FMQ6UN/EYvnYPnA1fY/u4Y1wpEWxcd
+         ybSm2iKg9VzvWbPahvHMdvGf5vw3jrlEav1tEe7KYXdHEBxVbDFy+hEIRUcJEQsQ6/Ki
+         w5NLz4aQGlo1s/NCnPxRzPlB9vzPw/NRGyl+tVZpfCW6za78u6dHJY7hCudnU1OmIby9
+         yPYthyBhoI7vumgF2YLR0H65eL061BsECjccxgOScXR3xyAe7yxrtwD/Y6kgU8j2v+/g
+         eOpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=kCHYzzH+i6txI0brWFnBDLXKpVALX+5QwAw/VNoWNk8=;
-        b=b3P5WI+yfKUogrM1RgV4PNOs/YtnVGm9YmuLs038jB0ywg1HcdK7jEt16+CXD65i6j
-         AS5A8mVl2ICH7uTL0E/Qugk7B3DisheEbEBAq4A5lhqebrRvLO+KrWzRP4qB6csKib38
-         ghugCdUV/9wl3MI7eApXlhaulrDQpCzpGr/JicnGifknOWjc18F8JFOBq0ifUFGEwkup
-         BZQ12KQ20UrxzK3H7Q1SumO5c4B45dBjgLw9zNln/cpm8jMmfTn6iqKt8xCqr4VSGThB
-         ju6QvK1JXvQiSvtNIgQ5yaKLk5Vh2xUtJiLhTmM2/g+ZAXinXmWrobCLM03WMrGZZ9JT
-         WPFg==
-X-Gm-Message-State: AOAM53274DzG921h9QBe0iTVELx0cq3jq8FRLt4eWrJmNfPTQj/A1x1J
-        SZLr8thL8ffAcpVOWlyTRXQnwINR4Gmt1BjICUltWQ==
-X-Google-Smtp-Source: ABdhPJzVU+3l6V26RnGTk8PQ5DqzqBEXIyhs++xSEtv4+7R85m9ghPPjrHP2K8KQzSydrbU/jiC25XfDfjoajCcPLto=
-X-Received: by 2002:ac5:cced:: with SMTP id k13mr4462650vkn.7.1601289278713;
- Mon, 28 Sep 2020 03:34:38 -0700 (PDT)
+        bh=wJ51wOq3NNuRGHW/HzevqRgjJxD2w7qQkV91Bjp5Nz4=;
+        b=LAMyp4hiMInkdk8nlrzjifb2aaEKpAO1MCNscZruoGNFMhU0Q5CPr3DQqrY2iE+N7J
+         v4XH+G7AN8hWRi9/4zX0poKkmlqOSvAzoyq+zepdhy8/hLHSXcOvrlWjVwuZjaBKJjDz
+         ABro5NWRDdSbJ/h35Ji6J9R6DUeaUf94QXZsfjZD/o7ZQEKsA8ieAo1zgHcHpQgmx26F
+         EvzooPwt94i5N+OFPmIs5PYrbl1ttwTUrYaZjBWil/RBirtK/D7MpvyCe2RUb9iEENib
+         Pne4XRQM+B0+/1vM/Pd/NO98oSK2F5e8+4dK7JEST/E4Xs8sr/4JIXofRP1E4jk7MzGX
+         jWDw==
+X-Gm-Message-State: AOAM531fQTQYxOnC8dPI2t8H+cqj2xvuAHTjBWZhL7mDLr9YJi9kpr5B
+        Pm6ygb/z9RKCK/YpXzXUZKVZnEbuoPEnv97OUEik1Q==
+X-Google-Smtp-Source: ABdhPJynhvOvVVIeiPlVhosFz0t5/+ZzI0TAwVH+ZLT5F1inRZ7fMgMOu9aYdq6mXC4eAobtCixHkeu9o9iTuALD7PY=
+X-Received: by 2002:a67:2e54:: with SMTP id u81mr4828870vsu.55.1601289282947;
+ Mon, 28 Sep 2020 03:34:42 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200925164323.29843-1-rdunlap@infradead.org>
-In-Reply-To: <20200925164323.29843-1-rdunlap@infradead.org>
+References: <20200927082304.9232-1-yangbo.lu@nxp.com>
+In-Reply-To: <20200927082304.9232-1-yangbo.lu@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 28 Sep 2020 12:34:02 +0200
-Message-ID: <CAPDyKFrT5S_0bfr0rnUU4V6kPHpfziCbUnGS8m-HK2cAaDJHcQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: fix depends for MMC_MESON_GX w/ COMPILE_TEST
-To:     Randy Dunlap <rdunlap@infradead.org>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>
+Date:   Mon, 28 Sep 2020 12:34:06 +0200
+Message-ID: <CAPDyKFo9vnrrJ2KdyCkrrMchYKiR1t0_vkj_BRK5OVTjvRAdmg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: fix reference clock source selection
+To:     Yangbo Lu <yangbo.lu@nxp.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 25 Sep 2020 at 18:43, Randy Dunlap <rdunlap@infradead.org> wrote:
+On Sun, 27 Sep 2020 at 10:31, Yangbo Lu <yangbo.lu@nxp.com> wrote:
 >
-> Fix build errors for meson-gx-mmc.c when CONFIG_COMMON_CLK is not
-> set/enabled. This can happen when COMPILE_TEST is set/enabled.
+> The bit ESDHC_PERIPHERAL_CLK_SEL to select using peripheral clock
+> or platform clock is not able to be reset by SDHCI_RESET_ALL.
+> So driver needs to initialize it as 1 or 0 once, to override the
+> different value which may be configured in bootloader.
 >
-> ERROR: modpost: "clk_divider_ops" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
-> ERROR: modpost: "devm_clk_register" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
-> ERROR: modpost: "clk_mux_ops" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
-> ERROR: modpost: "__clk_get_name" [drivers/mmc/host/meson-gx-mmc.ko] undefined!
->
-> Fixes: 54d8454436a2 ("mmc: host: Enable compile testing of multiple drivers")
-> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-> Cc: Kevin Hilman <khilman@baylibre.com>
-> Cc: linux-amlogic@lists.infradead.org
-> Cc: linux-arm-kernel@lists.infradead.org
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Krzysztof Kozlowski <krzk@kernel.org>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
 Applied for next, thanks!
 
@@ -98,16 +84,39 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/Kconfig |    1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/sdhci-of-esdhc.c | 18 ++++++++++++------
+>  1 file changed, 12 insertions(+), 6 deletions(-)
 >
-> --- linux-next-20200925.orig/drivers/mmc/host/Kconfig
-> +++ linux-next-20200925/drivers/mmc/host/Kconfig
-> @@ -425,6 +425,7 @@ config MMC_SDHCI_IPROC
->  config MMC_MESON_GX
->         tristate "Amlogic S905/GX*/AXG SD/MMC Host Controller support"
->         depends on ARCH_MESON|| COMPILE_TEST
-> +       depends on COMMON_CLK
->         help
->           This selects support for the Amlogic SD/MMC Host Controller
->           found on the S905/GX*/AXG family of SoCs.  This controller is
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 3a3340c..0b45eff 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -1360,13 +1360,19 @@ static void esdhc_init(struct platform_device *pdev, struct sdhci_host *host)
+>                 clk_put(clk);
+>         }
+>
+> -       if (esdhc->peripheral_clock) {
+> -               esdhc_clock_enable(host, false);
+> -               val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+> +       esdhc_clock_enable(host, false);
+> +       val = sdhci_readl(host, ESDHC_DMA_SYSCTL);
+> +       /*
+> +        * This bit is not able to be reset by SDHCI_RESET_ALL. Need to
+> +        * initialize it as 1 or 0 once, to override the different value
+> +        * which may be configured in bootloader.
+> +        */
+> +       if (esdhc->peripheral_clock)
+>                 val |= ESDHC_PERIPHERAL_CLK_SEL;
+> -               sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
+> -               esdhc_clock_enable(host, true);
+> -       }
+> +       else
+> +               val &= ~ESDHC_PERIPHERAL_CLK_SEL;
+> +       sdhci_writel(host, val, ESDHC_DMA_SYSCTL);
+> +       esdhc_clock_enable(host, true);
+>  }
+>
+>  static int esdhc_hs400_prepare_ddr(struct mmc_host *mmc)
+> --
+> 2.7.4
+>
