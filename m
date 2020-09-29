@@ -2,143 +2,287 @@ Return-Path: <SRS0=RpB2=DG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C960DC4346E
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Sep 2020 08:32:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21D7BC4727C
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Sep 2020 20:05:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7370420759
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Sep 2020 08:32:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="FeWdKp0c"
+	by mail.kernel.org (Postfix) with ESMTP id 9A7E920774
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Sep 2020 20:05:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1601409944;
+	bh=Oe+nOvmp2DKUd/UwCX10LCZiem8qzh1HVDWlWGvZu3k=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=kqhHXJu+cb13akRevu4gWhhUIB/rmGo2rT7dJVY4oavdLLeZt38EbJxZ95zneGej7
+	 MglcPEviVK8FqERuMPAiC2XE/qpsKNfK2xrejQY+kDZGYkGR4xLOBM/3lfxxbI3d/k
+	 gDu5+nj95kKXuLJ2YZSrlzTtntr+/0aXTkQLQRNw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727697AbgI2Icb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Sep 2020 04:32:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37474 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725554AbgI2Ica (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2020 04:32:30 -0400
-Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBF52C061755;
-        Tue, 29 Sep 2020 01:32:30 -0700 (PDT)
-Received: by mail-pf1-x444.google.com with SMTP id d6so3793061pfn.9;
-        Tue, 29 Sep 2020 01:32:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-transfer-encoding:content-language;
-        bh=DYjZtwFq2L9ODgZVruIDHZD1toUiu3MKxRUMakYMWRU=;
-        b=FeWdKp0cQSjJN/b3lNofZspZaUqJ1xmZBCJeFWNVxJK5m1jFEWKLosAu+xzSYXaXls
-         KsAyM70BbFfxL/t8kG4vNnfIcVTBJcT8H1yXoWaNWSry/ANWA1tDgGX6Qv9tOO/NnWIb
-         AftK/Br/DTPtTMgcNJGwERcEQU1JAj+Us3f3JNg6hCYauFca444Er8KnADs6e58ppwBv
-         +n1eBdHmo+IZY7/XqbNPahtqvImr5u5d9f4iwWd2arv4Bi11HaMUzrjQUXaAhPMbaVTc
-         PZOrjholSfG83IPmUP+ve7USkuxIrQE3ccqNkvu1OmrWH+xnzO9++NvaM+G1JPLiTktc
-         eV/g==
+        id S1728367AbgI2UFo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Sep 2020 16:05:44 -0400
+Received: from mail-ot1-f66.google.com ([209.85.210.66]:38157 "EHLO
+        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727700AbgI2UFn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2020 16:05:43 -0400
+Received: by mail-ot1-f66.google.com with SMTP id y5so5720845otg.5;
+        Tue, 29 Sep 2020 13:05:42 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-transfer-encoding
-         :content-language;
-        bh=DYjZtwFq2L9ODgZVruIDHZD1toUiu3MKxRUMakYMWRU=;
-        b=kZGrXl91xQcxekaG3He4dsLCHAgn5SSXpJIu9B9crg69o6YG2g62gTjnMazC+Ot0jl
-         Yozo0si6IXzw/9VwgMT8+Y5wt10MPrLy+Vc/4HG2XP45YqagJg1njeyHxYtKrzo6Qm1g
-         hTcPO1CuxsOd3QhhsOLRMWSPg0Z87CzFgs7dpMFBWKM5yqX1FMj3kuxW0vaoVwNG2o53
-         YGurZ76RjEh9HnK1bPlA2ah27Blxx4GJS+Yj3SKLz10tl/+6MN08v0Zu6f+VF9F5gdlq
-         fF+S7yPJoBR3iGWhtNARy3k6t29t7a+awDzVQ6aXXaKDaeZ2E+jQYBBrVrLawjDsvFjb
-         iGnA==
-X-Gm-Message-State: AOAM533rc15HCOCdonFyGTPvDBS3NP/1t4ewFuJMuoUcTSoDF1M1aFC+
-        6qi5zgX4wm6/92Bjk1tBr+o=
-X-Google-Smtp-Source: ABdhPJw2nceW5g+34FtHTjROn02MB3Gw+F0Nr3MztE6s2E9M+UpdsMe5B99y7mflzmBMfmU4S8/COA==
-X-Received: by 2002:a65:410c:: with SMTP id w12mr2390169pgp.411.1601368350179;
-        Tue, 29 Sep 2020 01:32:30 -0700 (PDT)
-Received: from ?IPv6:2402:b801:2840:8200:cc15:dbc:89f1:a9a5? ([2402:b801:2840:8200:cc15:dbc:89f1:a9a5])
-        by smtp.gmail.com with ESMTPSA id 22sm4425686pfw.17.2020.09.29.01.32.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 29 Sep 2020 01:32:29 -0700 (PDT)
-Subject: Re: [PATCH v2 1/1] mmc: host: meson-gx-mmc: fix possible deadlock
- condition for preempt_rt
-To:     Kevin Hilman <khilman@baylibre.com>,
-        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc:     linux-rt-users@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, bigeasy@linutronix.de
-References: <20200927025418.12382-1-bjharper@gmail.com>
- <20200927025418.12382-2-bjharper@gmail.com> <7hwo0dmnbt.fsf@baylibre.com>
-From:   Brad Harper <bjharper@gmail.com>
-Message-ID: <aaf796cc-7e6e-2831-5b13-9654f8e6fc77@gmail.com>
-Date:   Tue, 29 Sep 2020 18:32:24 +1000
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.2.2
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=5O6/yiKa9W0am9X4z8PvdhY0AeOo2G7Nxi3IcgMPrLY=;
+        b=OxHo/fSsoUbHghjgnAYx+1rlJlmwNtfCMnFFH/fJ0LUTJqSKlTeAIgChEqr9hQ8Btw
+         EbBp1A/7EjWXN6nFNKi4Fd4b9Xdug/Rpb83PaH9lQBVcawSK1opFsouoUsmxnljdy9gk
+         HY5bSooRJVfsTELWMNqwnSFhxtOy4KJt1gIjXl5OXPS+9qvFPjQiMDnl6ezn7VXWp0MI
+         W4UZFdC1bSuG8+ehyxFjfhfzqLu0f96lNK0Ym7FQiNehX1D/PRcX1oos1U1Orx4HUojT
+         Ny0/Re5nX2bU0cY1L8b4I/EqF+bCj6+GkMImUnHiClZcuwkkMsoSYkDg0FsE0kWGIDjT
+         j2FA==
+X-Gm-Message-State: AOAM530ebpm4JgAPSyVl3Xs+ti4fPJ8kOx1kgohGwx/CnA7Oteev6WUY
+        YtOoY2aIiMlgtCzqiwiWw0MKXXwIEZ+z
+X-Google-Smtp-Source: ABdhPJztlT0j0a0jN6wipAi/qH4SpcVId83VVM6XK0PrviV73T9QkjU0nkO3vjApRAX8/kAkuw79xQ==
+X-Received: by 2002:a05:6830:196:: with SMTP id q22mr3762671ota.221.1601409942312;
+        Tue, 29 Sep 2020 13:05:42 -0700 (PDT)
+Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id w125sm1222799oia.57.2020.09.29.13.05.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 29 Sep 2020 13:05:41 -0700 (PDT)
+Received: (nullmailer pid 1073610 invoked by uid 1000);
+        Tue, 29 Sep 2020 20:05:40 -0000
+Date:   Tue, 29 Sep 2020 15:05:40 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
+        srv_heupstream@mediatek.com
+Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: Convert mtk-sd to json-schema
+Message-ID: <20200929200540.GA1051185@bogus>
+References: <20200928130918.32326-1-wenbin.mei@mediatek.com>
+ <20200928130918.32326-2-wenbin.mei@mediatek.com>
 MIME-Version: 1.0
-In-Reply-To: <7hwo0dmnbt.fsf@baylibre.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20200928130918.32326-2-wenbin.mei@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Kevin,
+On Mon, Sep 28, 2020 at 09:09:15PM +0800, Wenbin Mei wrote:
+> Convert the mtk-sd binding to DT schema format using json-schema.
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  .../devicetree/bindings/mmc/mtk-sd.txt        |  75 --------
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 165 ++++++++++++++++++
+>  2 files changed, 165 insertions(+), 75 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.yaml
 
-     I think you are right,  I don't have a good enough understanding to 
-make this work so please disregard the patch.  I will take on 
-Sebastian's advice and do some testing with 'threadirqs' parameter 
-enabled in standard kernel to see if I can reproduce my original issue 
-there.  I'm hoping Jerome might also be able to help with some time to 
-find proper solution.
 
-Many Thanks,
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> new file mode 100644
+> index 000000000000..2d5ab1411cd5
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -0,0 +1,165 @@
+> +# MTK-License-Identifier: GPL-2.0
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/mtk-sd.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: MTK MSDC Storage Host Controller Binding
+> +
+> +maintainers:
+> +  - Ulf Hansson <ulf.hansson@linaro.org>
 
-Brad.
+Usually this is the h/w block owner, not a subsystem maintainer.
 
-On 29/09/2020 10:35 am, Kevin Hilman wrote:
-> Brad Harper <bjharper@gmail.com> writes:
->
->> ---
->>   drivers/mmc/host/meson-gx-mmc.c | 4 +++-
->>   1 file changed, 3 insertions(+), 1 deletion(-)
->
-> This patch still needs changelog summarizing the problem and what is
-> being fixed by the patch.  Most of what's in the cover letter belongs
-> here.
->
-> The cover letter can be used to describe the history/background that you
-> don't want in the patch itself.  Alternatviely, you could include that
-> information in the a single patch email also because everything after
-> the "---" line does not end up in git history.
->
->> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->> index 08a3b1c05..3ba8f988d 100644
->> --- a/drivers/mmc/host/meson-gx-mmc.c
->> +++ b/drivers/mmc/host/meson-gx-mmc.c
->> @@ -146,6 +146,7 @@ struct sd_emmc_desc {
->>   };
->>   
->>   struct meson_host {
->> +	spinlock_t		lock;
->>   	struct	device		*dev;
->>   	struct	meson_mmc_data *data;
->>   	struct	mmc_host	*mmc;
->> @@ -1051,6 +1052,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
->>   	host->mmc = mmc;
->>   	host->dev = &pdev->dev;
->>   	dev_set_drvdata(&pdev->dev, host);
->> +	spin_lock_init(&host->lock);
-> I'm confused about what this lock is intended to do.  You init it here,
-> but it's never used anywhere.
->
->>   	/* The G12A SDIO Controller needs an SRAM bounce buffer */
->>   	host->dram_access_quirk = device_property_read_bool(&pdev->dev,
->> @@ -1139,7 +1141,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
->>   	       host->regs + SD_EMMC_IRQ_EN);
->>   
->>   	ret = request_threaded_irq(host->irq, meson_mmc_irq,
->> -				   meson_mmc_irq_thread, IRQF_ONESHOT,
->> +				   meson_mmc_irq_thread, 0,
->>   				   dev_name(&pdev->dev), host);
->>   	if (ret)
->>   		goto err_init_clk;
-> Kevin
+> +
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    oneOf:
+> +      - const: mediatek,mt8135-mmc
+> +      - const: mediatek,mt8173-mmc
+> +      - const: mediatek,mt8183-mmc
+> +      - const: mediatek,mt8516-mmc
+> +      - const: mediatek,mt6779-mmc
+> +      - const: mediatek,mt2701-mmc
+> +      - const: mediatek,mt2712-mmc
+> +      - const: mediatek,mt7622-mmc
+
+All these can be an enum. And sort please.
+
+> +      - items:
+> +        - const: mediatek,mt7623-mmc
+> +        - const: mediatek,mt2701-mmc
+> +      - const: mediatek,mt7620-mmc
+> +
+> +  reg:
+> +    description:
+> +      physical base address of the controller and length.
+
+Drop this.
+
+> +    minItems: 1
+> +    maxItems: 2
+
+If more than 1, need to say what each entry is:
+
+items:
+  - description: ...
+  - description: ...
+
+> +
+> +  interrupts:
+> +    description:
+> +      Should contain MSDC interrupt number.
+
+Drop.
+
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    description:
+> +      Should contain phandle for the clock feeding the MMC controller.
+> +    minItems: 2
+> +    maxItems: 4
+> +    items:
+> +      - description: source clock (required).
+> +      - description: HCLK which used for host (required).
+> +      - description: independent source clock gate (required for MT2712).
+> +      - description: bus clock used for internal register access (required for MT2712 MSDC0/3).
+> +
+> +  clock-names:
+> +    minItems: 2
+> +    maxItems: 4
+> +    items:
+> +      - const: source
+> +      - const: hclk
+> +      - const: source_cg
+> +      - const: bus_clk
+> +
+> +  pinctrl-names:
+> +    items:
+> +      - const: default
+> +      - const: state_uhs
+> +
+> +  pinctrl-0:
+> +    description:
+> +      should contain default/high speed pin ctrl.
+> +    maxItems: 1
+> +
+> +  pinctrl-1:
+> +    description:
+> +      should contain uhs mode pin ctrl.
+> +    maxItems: 1
+> +
+> +  vmmc-supply:
+> +    description:
+> +      power to the Core.
+> +
+> +  vqmmc-supply:
+> +    description:
+> +      power to the IO.
+> +
+> +  assigned-clocks:
+> +    description:
+> +      PLL of the source clock.
+
+How many (maxItems)?
+
+> +
+> +  assigned-clock-parents:
+> +    description:
+> +      parent of source clock, used for HS400 mode to get 400Mhz source clock.
+> +
+> +  hs400-ds-delay:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description:
+> +      HS400 DS delay setting.
+> +
+> +  mediatek,hs200-cmd-int-delay:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description:
+> +      HS200 command internal delay setting.
+> +      This field has total 32 stages.
+> +      The value is an integer from 0 to 31.
+
+minimum: 0
+maximum: 31
+
+Add any constraints on other properties too.
+
+> +
+> +  mediatek,hs400-cmd-int-delay:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description:
+> +      HS400 command internal delay setting.
+> +      This field has total 32 stages.
+> +      The value is an integer from 0 to 31.
+> +
+> +  mediatek,hs400-cmd-resp-sel-rising:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      HS400 command response sample selection.
+> +      If present, HS400 command responses are sampled on rising edges.
+> +      If not present, HS400 command responses are sampled on falling edges.
+> +
+> +  mediatek,latch-ck:
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    description:
+> +      Some SoCs do not support enhance_rx, need set correct latch-ck to avoid
+> +      data crc error caused by stop clock(fifo full) Valid range = [0:0x7].
+> +      if not present, default value is 0.
+> +      applied to compatible "mediatek,mt2701-mmc".
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  reset-names:
+> +    const: hrst
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - clock-names
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    #include <dt-bindings/clock/mt8173-clk.h>
+> +    mmc0: mmc@11230000 {
+> +        compatible = "mediatek,mt8173-mmc";
+> +        reg = <0x11230000 0x1000>;
+> +        interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
+> +        vmmc-supply = <&mt6397_vemc_3v3_reg>;
+> +        vqmmc-supply = <&mt6397_vio18_reg>;
+> +        clocks = <&pericfg CLK_PERI_MSDC30_0>,
+> +                 <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
+> +        clock-names = "source", "hclk";
+> +        pinctrl-names = "default", "state_uhs";
+> +        pinctrl-0 = <&mmc0_pins_default>;
+> +        pinctrl-1 = <&mmc0_pins_uhs>;
+> +        assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
+> +        assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
+> +        hs400-ds-delay = <0x14015>;
+> +        mediatek,hs200-cmd-int-delay = <26>;
+> +        mediatek,hs400-cmd-int-delay = <14>;
+> +        mediatek,hs400-cmd-resp-sel-rising;
+> +    };
+> +
+> +...
+> -- 
+> 2.18.0
