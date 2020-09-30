@@ -1,288 +1,186 @@
-Return-Path: <SRS0=RpB2=DG=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=cOhd=DH=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21D7BC4727C
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Sep 2020 20:05:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3A3CC4727C
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Sep 2020 02:55:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A7E920774
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Sep 2020 20:05:44 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601409944;
-	bh=Oe+nOvmp2DKUd/UwCX10LCZiem8qzh1HVDWlWGvZu3k=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=kqhHXJu+cb13akRevu4gWhhUIB/rmGo2rT7dJVY4oavdLLeZt38EbJxZ95zneGej7
-	 MglcPEviVK8FqERuMPAiC2XE/qpsKNfK2xrejQY+kDZGYkGR4xLOBM/3lfxxbI3d/k
-	 gDu5+nj95kKXuLJ2YZSrlzTtntr+/0aXTkQLQRNw=
+	by mail.kernel.org (Postfix) with ESMTP id 4DCF320773
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Sep 2020 02:55:12 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Smuamo/e"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728367AbgI2UFo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Sep 2020 16:05:44 -0400
-Received: from mail-ot1-f66.google.com ([209.85.210.66]:38157 "EHLO
-        mail-ot1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727700AbgI2UFn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2020 16:05:43 -0400
-Received: by mail-ot1-f66.google.com with SMTP id y5so5720845otg.5;
-        Tue, 29 Sep 2020 13:05:42 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=5O6/yiKa9W0am9X4z8PvdhY0AeOo2G7Nxi3IcgMPrLY=;
-        b=OxHo/fSsoUbHghjgnAYx+1rlJlmwNtfCMnFFH/fJ0LUTJqSKlTeAIgChEqr9hQ8Btw
-         EbBp1A/7EjWXN6nFNKi4Fd4b9Xdug/Rpb83PaH9lQBVcawSK1opFsouoUsmxnljdy9gk
-         HY5bSooRJVfsTELWMNqwnSFhxtOy4KJt1gIjXl5OXPS+9qvFPjQiMDnl6ezn7VXWp0MI
-         W4UZFdC1bSuG8+ehyxFjfhfzqLu0f96lNK0Ym7FQiNehX1D/PRcX1oos1U1Orx4HUojT
-         Ny0/Re5nX2bU0cY1L8b4I/EqF+bCj6+GkMImUnHiClZcuwkkMsoSYkDg0FsE0kWGIDjT
-         j2FA==
-X-Gm-Message-State: AOAM530ebpm4JgAPSyVl3Xs+ti4fPJ8kOx1kgohGwx/CnA7Oteev6WUY
-        YtOoY2aIiMlgtCzqiwiWw0MKXXwIEZ+z
-X-Google-Smtp-Source: ABdhPJztlT0j0a0jN6wipAi/qH4SpcVId83VVM6XK0PrviV73T9QkjU0nkO3vjApRAX8/kAkuw79xQ==
-X-Received: by 2002:a05:6830:196:: with SMTP id q22mr3762671ota.221.1601409942312;
-        Tue, 29 Sep 2020 13:05:42 -0700 (PDT)
-Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id w125sm1222799oia.57.2020.09.29.13.05.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 29 Sep 2020 13:05:41 -0700 (PDT)
-Received: (nullmailer pid 1073610 invoked by uid 1000);
-        Tue, 29 Sep 2020 20:05:40 -0000
-Date:   Tue, 29 Sep 2020 15:05:40 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        id S1729678AbgI3CzL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Sep 2020 22:55:11 -0400
+Received: from mailgw02.mediatek.com ([1.203.163.81]:3158 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729446AbgI3CzL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2020 22:55:11 -0400
+X-UUID: e999b5bc72704bb993bd3466f57666d2-20200930
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=r6D23t2kKeZfahrk09DXea8q73XExsy/Y4j3R6PaCYg=;
+        b=Smuamo/e55iGy5soxvjgh/l5DKT3Ltb1Ub6334COCoPKZI94nTw9QT/WzUWRbaXEBjMLzsdHEaJilQ9vKHKrw8bRWbBGkwaPY2p9x8QfhoaM46ZN3WB7EzRNbolYV8awCfSSQtrPonKUw6G352D/5AMI+vMZV5ELcCm9ZVQkeLU=;
+X-UUID: e999b5bc72704bb993bd3466f57666d2-20200930
+Received: from mtkcas36.mediatek.inc [(172.27.4.253)] by mailgw02.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 268266405; Wed, 30 Sep 2020 10:55:03 +0800
+Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31N1.mediatek.inc
+ (172.27.4.69) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 30 Sep
+ 2020 10:55:01 +0800
+Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
+ (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Wed, 30 Sep 2020 10:55:00 +0800
+Message-ID: <1601434501.3226.2.camel@mhfsdcap03>
+Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: Convert mtk-sd to json-schema
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Rob Herring <robh@kernel.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        srv_heupstream@mediatek.com
-Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: Convert mtk-sd to json-schema
-Message-ID: <20200929200540.GA1051185@bogus>
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>
+Date:   Wed, 30 Sep 2020 10:55:01 +0800
+In-Reply-To: <20200929200540.GA1051185@bogus>
 References: <20200928130918.32326-1-wenbin.mei@mediatek.com>
- <20200928130918.32326-2-wenbin.mei@mediatek.com>
+         <20200928130918.32326-2-wenbin.mei@mediatek.com>
+         <20200929200540.GA1051185@bogus>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.10.4-0ubuntu2 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20200928130918.32326-2-wenbin.mei@mediatek.com>
+X-TM-SNTS-SMTP: 778E435C9DC8413E23989109D0D2332ED0DAC1269C3F4610514279F083402CAC2000:8
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Sep 28, 2020 at 09:09:15PM +0800, Wenbin Mei wrote:
-> Convert the mtk-sd binding to DT schema format using json-schema.
-> 
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.txt        |  75 --------
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 165 ++++++++++++++++++
->  2 files changed, 165 insertions(+), 75 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+VGhhbmtzIGZvciB5b3VyIHJlcGx5IQ0KSSB3aWxsIGNoYW5nZSB0aGUgZm9sbG93aW5nIHByb2Js
+ZW1zIGluIHRoZSBuZXh0IHZlcnNpb24uDQoNCk9uIFR1ZSwgMjAyMC0wOS0yOSBhdCAxNTowNSAt
+MDUwMCwgUm9iIEhlcnJpbmcgd3JvdGU6DQo+IE9uIE1vbiwgU2VwIDI4LCAyMDIwIGF0IDA5OjA5
+OjE1UE0gKzA4MDAsIFdlbmJpbiBNZWkgd3JvdGU6DQo+ID4gQ29udmVydCB0aGUgbXRrLXNkIGJp
+bmRpbmcgdG8gRFQgc2NoZW1hIGZvcm1hdCB1c2luZyBqc29uLXNjaGVtYS4NCj4gPiANCj4gPiBT
+aWduZWQtb2ZmLWJ5OiBXZW5iaW4gTWVpIDx3ZW5iaW4ubWVpQG1lZGlhdGVrLmNvbT4NCj4gPiBS
+ZXZpZXdlZC1ieTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+ID4gLS0t
+DQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0ICAgICAgICB8ICA3
+NSAtLS0tLS0tLQ0KPiA+ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbXRrLXNkLnlhbWwg
+ICAgICAgfCAxNjUgKysrKysrKysrKysrKysrKysrDQo+ID4gIDIgZmlsZXMgY2hhbmdlZCwgMTY1
+IGluc2VydGlvbnMoKyksIDc1IGRlbGV0aW9ucygtKQ0KPiA+ICBkZWxldGUgbW9kZSAxMDA2NDQg
+RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0DQo+ID4gIGNy
+ZWF0ZSBtb2RlIDEwMDY0NCBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL210
+ay1zZC55YW1sDQo+IA0KPiANCj4gPiBkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
+cmVlL2JpbmRpbmdzL21tYy9tdGstc2QueWFtbCBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9i
+aW5kaW5ncy9tbWMvbXRrLXNkLnlhbWwNCj4gPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0KPiA+IGlu
+ZGV4IDAwMDAwMDAwMDAwMC4uMmQ1YWIxNDExY2Q1DQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsr
+KyBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbXRrLXNkLnlhbWwNCj4g
+PiBAQCAtMCwwICsxLDE2NSBAQA0KPiA+ICsjIE1USy1MaWNlbnNlLUlkZW50aWZpZXI6IEdQTC0y
+LjANCj4gPiArJVlBTUwgMS4yDQo+ID4gKy0tLQ0KPiA+ICskaWQ6IGh0dHA6Ly9kZXZpY2V0cmVl
+Lm9yZy9zY2hlbWFzL21tYy9tdGstc2QueWFtbCMNCj4gPiArJHNjaGVtYTogaHR0cDovL2Rldmlj
+ZXRyZWUub3JnL21ldGEtc2NoZW1hcy9jb3JlLnlhbWwjDQo+ID4gKw0KPiA+ICt0aXRsZTogTVRL
+IE1TREMgU3RvcmFnZSBIb3N0IENvbnRyb2xsZXIgQmluZGluZw0KPiA+ICsNCj4gPiArbWFpbnRh
+aW5lcnM6DQo+ID4gKyAgLSBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4g
+DQo+IFVzdWFsbHkgdGhpcyBpcyB0aGUgaC93IGJsb2NrIG93bmVyLCBub3QgYSBzdWJzeXN0ZW0g
+bWFpbnRhaW5lci4NCj4gDQo+ID4gKw0KPiA+ICthbGxPZjoNCj4gPiArICAtICRyZWY6IG1tYy1j
+b250cm9sbGVyLnlhbWwjDQo+ID4gKw0KPiA+ICtwcm9wZXJ0aWVzOg0KPiA+ICsgIGNvbXBhdGli
+bGU6DQo+ID4gKyAgICBvbmVPZjoNCj4gPiArICAgICAgLSBjb25zdDogbWVkaWF0ZWssbXQ4MTM1
+LW1tYw0KPiA+ICsgICAgICAtIGNvbnN0OiBtZWRpYXRlayxtdDgxNzMtbW1jDQo+ID4gKyAgICAg
+IC0gY29uc3Q6IG1lZGlhdGVrLG10ODE4My1tbWMNCj4gPiArICAgICAgLSBjb25zdDogbWVkaWF0
+ZWssbXQ4NTE2LW1tYw0KPiA+ICsgICAgICAtIGNvbnN0OiBtZWRpYXRlayxtdDY3NzktbW1jDQo+
+ID4gKyAgICAgIC0gY29uc3Q6IG1lZGlhdGVrLG10MjcwMS1tbWMNCj4gPiArICAgICAgLSBjb25z
+dDogbWVkaWF0ZWssbXQyNzEyLW1tYw0KPiA+ICsgICAgICAtIGNvbnN0OiBtZWRpYXRlayxtdDc2
+MjItbW1jDQo+IA0KPiBBbGwgdGhlc2UgY2FuIGJlIGFuIGVudW0uIEFuZCBzb3J0IHBsZWFzZS4N
+Cj4gDQo+ID4gKyAgICAgIC0gaXRlbXM6DQo+ID4gKyAgICAgICAgLSBjb25zdDogbWVkaWF0ZWss
+bXQ3NjIzLW1tYw0KPiA+ICsgICAgICAgIC0gY29uc3Q6IG1lZGlhdGVrLG10MjcwMS1tbWMNCj4g
+PiArICAgICAgLSBjb25zdDogbWVkaWF0ZWssbXQ3NjIwLW1tYw0KPiA+ICsNCj4gPiArICByZWc6
+DQo+ID4gKyAgICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAgcGh5c2ljYWwgYmFzZSBhZGRyZXNz
+IG9mIHRoZSBjb250cm9sbGVyIGFuZCBsZW5ndGguDQo+IA0KPiBEcm9wIHRoaXMuDQo+IA0KPiA+
+ICsgICAgbWluSXRlbXM6IDENCj4gPiArICAgIG1heEl0ZW1zOiAyDQo+IA0KPiBJZiBtb3JlIHRo
+YW4gMSwgbmVlZCB0byBzYXkgd2hhdCBlYWNoIGVudHJ5IGlzOg0KPiANCj4gaXRlbXM6DQo+ICAg
+LSBkZXNjcmlwdGlvbjogLi4uDQo+ICAgLSBkZXNjcmlwdGlvbjogLi4uDQo+IA0KPiA+ICsNCj4g
+PiArICBpbnRlcnJ1cHRzOg0KPiA+ICsgICAgZGVzY3JpcHRpb246DQo+ID4gKyAgICAgIFNob3Vs
+ZCBjb250YWluIE1TREMgaW50ZXJydXB0IG51bWJlci4NCj4gDQo+IERyb3AuDQo+IA0KPiA+ICsg
+ICAgbWF4SXRlbXM6IDENCj4gPiArDQo+ID4gKyAgY2xvY2tzOg0KPiA+ICsgICAgZGVzY3JpcHRp
+b246DQo+ID4gKyAgICAgIFNob3VsZCBjb250YWluIHBoYW5kbGUgZm9yIHRoZSBjbG9jayBmZWVk
+aW5nIHRoZSBNTUMgY29udHJvbGxlci4NCj4gPiArICAgIG1pbkl0ZW1zOiAyDQo+ID4gKyAgICBt
+YXhJdGVtczogNA0KPiA+ICsgICAgaXRlbXM6DQo+ID4gKyAgICAgIC0gZGVzY3JpcHRpb246IHNv
+dXJjZSBjbG9jayAocmVxdWlyZWQpLg0KPiA+ICsgICAgICAtIGRlc2NyaXB0aW9uOiBIQ0xLIHdo
+aWNoIHVzZWQgZm9yIGhvc3QgKHJlcXVpcmVkKS4NCj4gPiArICAgICAgLSBkZXNjcmlwdGlvbjog
+aW5kZXBlbmRlbnQgc291cmNlIGNsb2NrIGdhdGUgKHJlcXVpcmVkIGZvciBNVDI3MTIpLg0KPiA+
+ICsgICAgICAtIGRlc2NyaXB0aW9uOiBidXMgY2xvY2sgdXNlZCBmb3IgaW50ZXJuYWwgcmVnaXN0
+ZXIgYWNjZXNzIChyZXF1aXJlZCBmb3IgTVQyNzEyIE1TREMwLzMpLg0KPiA+ICsNCj4gPiArICBj
+bG9jay1uYW1lczoNCj4gPiArICAgIG1pbkl0ZW1zOiAyDQo+ID4gKyAgICBtYXhJdGVtczogNA0K
+PiA+ICsgICAgaXRlbXM6DQo+ID4gKyAgICAgIC0gY29uc3Q6IHNvdXJjZQ0KPiA+ICsgICAgICAt
+IGNvbnN0OiBoY2xrDQo+ID4gKyAgICAgIC0gY29uc3Q6IHNvdXJjZV9jZw0KPiA+ICsgICAgICAt
+IGNvbnN0OiBidXNfY2xrDQo+ID4gKw0KPiA+ICsgIHBpbmN0cmwtbmFtZXM6DQo+ID4gKyAgICBp
+dGVtczoNCj4gPiArICAgICAgLSBjb25zdDogZGVmYXVsdA0KPiA+ICsgICAgICAtIGNvbnN0OiBz
+dGF0ZV91aHMNCj4gPiArDQo+ID4gKyAgcGluY3RybC0wOg0KPiA+ICsgICAgZGVzY3JpcHRpb246
+DQo+ID4gKyAgICAgIHNob3VsZCBjb250YWluIGRlZmF1bHQvaGlnaCBzcGVlZCBwaW4gY3RybC4N
+Cj4gPiArICAgIG1heEl0ZW1zOiAxDQo+ID4gKw0KPiA+ICsgIHBpbmN0cmwtMToNCj4gPiArICAg
+IGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBzaG91bGQgY29udGFpbiB1aHMgbW9kZSBwaW4gY3Ry
+bC4NCj4gPiArICAgIG1heEl0ZW1zOiAxDQo+ID4gKw0KPiA+ICsgIHZtbWMtc3VwcGx5Og0KPiA+
+ICsgICAgZGVzY3JpcHRpb246DQo+ID4gKyAgICAgIHBvd2VyIHRvIHRoZSBDb3JlLg0KPiA+ICsN
+Cj4gPiArICB2cW1tYy1zdXBwbHk6DQo+ID4gKyAgICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAg
+cG93ZXIgdG8gdGhlIElPLg0KPiA+ICsNCj4gPiArICBhc3NpZ25lZC1jbG9ja3M6DQo+ID4gKyAg
+ICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAgUExMIG9mIHRoZSBzb3VyY2UgY2xvY2suDQo+IA0K
+PiBIb3cgbWFueSAobWF4SXRlbXMpPw0KPiANCj4gPiArDQo+ID4gKyAgYXNzaWduZWQtY2xvY2st
+cGFyZW50czoNCj4gPiArICAgIGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBwYXJlbnQgb2Ygc291
+cmNlIGNsb2NrLCB1c2VkIGZvciBIUzQwMCBtb2RlIHRvIGdldCA0MDBNaHogc291cmNlIGNsb2Nr
+Lg0KPiA+ICsNCj4gPiArICBoczQwMC1kcy1kZWxheToNCj4gPiArICAgICRyZWY6IC9zY2hlbWFz
+L3R5cGVzLnlhbWwjL2RlZmluaXRpb25zL3VpbnQzMg0KPiA+ICsgICAgZGVzY3JpcHRpb246DQo+
+ID4gKyAgICAgIEhTNDAwIERTIGRlbGF5IHNldHRpbmcuDQo+ID4gKw0KPiA+ICsgIG1lZGlhdGVr
+LGhzMjAwLWNtZC1pbnQtZGVsYXk6DQo+ID4gKyAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55YW1s
+Iy9kZWZpbml0aW9ucy91aW50MzINCj4gPiArICAgIGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBI
+UzIwMCBjb21tYW5kIGludGVybmFsIGRlbGF5IHNldHRpbmcuDQo+ID4gKyAgICAgIFRoaXMgZmll
+bGQgaGFzIHRvdGFsIDMyIHN0YWdlcy4NCj4gPiArICAgICAgVGhlIHZhbHVlIGlzIGFuIGludGVn
+ZXIgZnJvbSAwIHRvIDMxLg0KPiANCj4gbWluaW11bTogMA0KPiBtYXhpbXVtOiAzMQ0KPiANCj4g
+QWRkIGFueSBjb25zdHJhaW50cyBvbiBvdGhlciBwcm9wZXJ0aWVzIHRvby4NCj4gDQo+ID4gKw0K
+PiA+ICsgIG1lZGlhdGVrLGhzNDAwLWNtZC1pbnQtZGVsYXk6DQo+ID4gKyAgICAkcmVmOiAvc2No
+ZW1hcy90eXBlcy55YW1sIy9kZWZpbml0aW9ucy91aW50MzINCj4gPiArICAgIGRlc2NyaXB0aW9u
+Og0KPiA+ICsgICAgICBIUzQwMCBjb21tYW5kIGludGVybmFsIGRlbGF5IHNldHRpbmcuDQo+ID4g
+KyAgICAgIFRoaXMgZmllbGQgaGFzIHRvdGFsIDMyIHN0YWdlcy4NCj4gPiArICAgICAgVGhlIHZh
+bHVlIGlzIGFuIGludGVnZXIgZnJvbSAwIHRvIDMxLg0KPiA+ICsNCj4gPiArICBtZWRpYXRlayxo
+czQwMC1jbWQtcmVzcC1zZWwtcmlzaW5nOg0KPiA+ICsgICAgJHJlZjogL3NjaGVtYXMvdHlwZXMu
+eWFtbCMvZGVmaW5pdGlvbnMvZmxhZw0KPiA+ICsgICAgZGVzY3JpcHRpb246DQo+ID4gKyAgICAg
+IEhTNDAwIGNvbW1hbmQgcmVzcG9uc2Ugc2FtcGxlIHNlbGVjdGlvbi4NCj4gPiArICAgICAgSWYg
+cHJlc2VudCwgSFM0MDAgY29tbWFuZCByZXNwb25zZXMgYXJlIHNhbXBsZWQgb24gcmlzaW5nIGVk
+Z2VzLg0KPiA+ICsgICAgICBJZiBub3QgcHJlc2VudCwgSFM0MDAgY29tbWFuZCByZXNwb25zZXMg
+YXJlIHNhbXBsZWQgb24gZmFsbGluZyBlZGdlcy4NCj4gPiArDQo+ID4gKyAgbWVkaWF0ZWssbGF0
+Y2gtY2s6DQo+ID4gKyAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55YW1sIy9kZWZpbml0aW9ucy91
+aW50MzINCj4gPiArICAgIGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBTb21lIFNvQ3MgZG8gbm90
+IHN1cHBvcnQgZW5oYW5jZV9yeCwgbmVlZCBzZXQgY29ycmVjdCBsYXRjaC1jayB0byBhdm9pZA0K
+PiA+ICsgICAgICBkYXRhIGNyYyBlcnJvciBjYXVzZWQgYnkgc3RvcCBjbG9jayhmaWZvIGZ1bGwp
+IFZhbGlkIHJhbmdlID0gWzA6MHg3XS4NCj4gPiArICAgICAgaWYgbm90IHByZXNlbnQsIGRlZmF1
+bHQgdmFsdWUgaXMgMC4NCj4gPiArICAgICAgYXBwbGllZCB0byBjb21wYXRpYmxlICJtZWRpYXRl
+ayxtdDI3MDEtbW1jIi4NCj4gPiArDQo+ID4gKyAgcmVzZXRzOg0KPiA+ICsgICAgbWF4SXRlbXM6
+IDENCj4gPiArDQo+ID4gKyAgcmVzZXQtbmFtZXM6DQo+ID4gKyAgICBjb25zdDogaHJzdA0KPiA+
+ICsNCj4gPiArcmVxdWlyZWQ6DQo+ID4gKyAgLSBjb21wYXRpYmxlDQo+ID4gKyAgLSByZWcNCj4g
+PiArICAtIGludGVycnVwdHMNCj4gPiArICAtIGNsb2Nrcw0KPiA+ICsgIC0gY2xvY2stbmFtZXMN
+Cj4gPiArDQo+ID4gK2V4YW1wbGVzOg0KPiA+ICsgIC0gfA0KPiA+ICsgICAgI2luY2x1ZGUgPGR0
+LWJpbmRpbmdzL2ludGVycnVwdC1jb250cm9sbGVyL2lycS5oPg0KPiA+ICsgICAgI2luY2x1ZGUg
+PGR0LWJpbmRpbmdzL2ludGVycnVwdC1jb250cm9sbGVyL2FybS1naWMuaD4NCj4gPiArICAgICNp
+bmNsdWRlIDxkdC1iaW5kaW5ncy9jbG9jay9tdDgxNzMtY2xrLmg+DQo+ID4gKyAgICBtbWMwOiBt
+bWNAMTEyMzAwMDAgew0KPiA+ICsgICAgICAgIGNvbXBhdGlibGUgPSAibWVkaWF0ZWssbXQ4MTcz
+LW1tYyI7DQo+ID4gKyAgICAgICAgcmVnID0gPDB4MTEyMzAwMDAgMHgxMDAwPjsNCj4gPiArICAg
+ICAgICBpbnRlcnJ1cHRzID0gPEdJQ19TUEkgMzkgSVJRX1RZUEVfTEVWRUxfTE9XPjsNCj4gPiAr
+ICAgICAgICB2bW1jLXN1cHBseSA9IDwmbXQ2Mzk3X3ZlbWNfM3YzX3JlZz47DQo+ID4gKyAgICAg
+ICAgdnFtbWMtc3VwcGx5ID0gPCZtdDYzOTdfdmlvMThfcmVnPjsNCj4gPiArICAgICAgICBjbG9j
+a3MgPSA8JnBlcmljZmcgQ0xLX1BFUklfTVNEQzMwXzA+LA0KPiA+ICsgICAgICAgICAgICAgICAg
+IDwmdG9wY2tnZW4gQ0xLX1RPUF9NU0RDNTBfMF9IX1NFTD47DQo+ID4gKyAgICAgICAgY2xvY2st
+bmFtZXMgPSAic291cmNlIiwgImhjbGsiOw0KPiA+ICsgICAgICAgIHBpbmN0cmwtbmFtZXMgPSAi
+ZGVmYXVsdCIsICJzdGF0ZV91aHMiOw0KPiA+ICsgICAgICAgIHBpbmN0cmwtMCA9IDwmbW1jMF9w
+aW5zX2RlZmF1bHQ+Ow0KPiA+ICsgICAgICAgIHBpbmN0cmwtMSA9IDwmbW1jMF9waW5zX3Vocz47
+DQo+ID4gKyAgICAgICAgYXNzaWduZWQtY2xvY2tzID0gPCZ0b3Bja2dlbiBDTEtfVE9QX01TREM1
+MF8wX1NFTD47DQo+ID4gKyAgICAgICAgYXNzaWduZWQtY2xvY2stcGFyZW50cyA9IDwmdG9wY2tn
+ZW4gQ0xLX1RPUF9NU0RDUExMX0QyPjsNCj4gPiArICAgICAgICBoczQwMC1kcy1kZWxheSA9IDww
+eDE0MDE1PjsNCj4gPiArICAgICAgICBtZWRpYXRlayxoczIwMC1jbWQtaW50LWRlbGF5ID0gPDI2
+PjsNCj4gPiArICAgICAgICBtZWRpYXRlayxoczQwMC1jbWQtaW50LWRlbGF5ID0gPDE0PjsNCj4g
+PiArICAgICAgICBtZWRpYXRlayxoczQwMC1jbWQtcmVzcC1zZWwtcmlzaW5nOw0KPiA+ICsgICAg
+fTsNCj4gPiArDQo+ID4gKy4uLg0KPiA+IC0tIA0KPiA+IDIuMTguMA0KDQo=
 
-
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> new file mode 100644
-> index 000000000000..2d5ab1411cd5
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -0,0 +1,165 @@
-> +# MTK-License-Identifier: GPL-2.0
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/mtk-sd.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: MTK MSDC Storage Host Controller Binding
-> +
-> +maintainers:
-> +  - Ulf Hansson <ulf.hansson@linaro.org>
-
-Usually this is the h/w block owner, not a subsystem maintainer.
-
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - const: mediatek,mt8135-mmc
-> +      - const: mediatek,mt8173-mmc
-> +      - const: mediatek,mt8183-mmc
-> +      - const: mediatek,mt8516-mmc
-> +      - const: mediatek,mt6779-mmc
-> +      - const: mediatek,mt2701-mmc
-> +      - const: mediatek,mt2712-mmc
-> +      - const: mediatek,mt7622-mmc
-
-All these can be an enum. And sort please.
-
-> +      - items:
-> +        - const: mediatek,mt7623-mmc
-> +        - const: mediatek,mt2701-mmc
-> +      - const: mediatek,mt7620-mmc
-> +
-> +  reg:
-> +    description:
-> +      physical base address of the controller and length.
-
-Drop this.
-
-> +    minItems: 1
-> +    maxItems: 2
-
-If more than 1, need to say what each entry is:
-
-items:
-  - description: ...
-  - description: ...
-
-> +
-> +  interrupts:
-> +    description:
-> +      Should contain MSDC interrupt number.
-
-Drop.
-
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    description:
-> +      Should contain phandle for the clock feeding the MMC controller.
-> +    minItems: 2
-> +    maxItems: 4
-> +    items:
-> +      - description: source clock (required).
-> +      - description: HCLK which used for host (required).
-> +      - description: independent source clock gate (required for MT2712).
-> +      - description: bus clock used for internal register access (required for MT2712 MSDC0/3).
-> +
-> +  clock-names:
-> +    minItems: 2
-> +    maxItems: 4
-> +    items:
-> +      - const: source
-> +      - const: hclk
-> +      - const: source_cg
-> +      - const: bus_clk
-> +
-> +  pinctrl-names:
-> +    items:
-> +      - const: default
-> +      - const: state_uhs
-> +
-> +  pinctrl-0:
-> +    description:
-> +      should contain default/high speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-1:
-> +    description:
-> +      should contain uhs mode pin ctrl.
-> +    maxItems: 1
-> +
-> +  vmmc-supply:
-> +    description:
-> +      power to the Core.
-> +
-> +  vqmmc-supply:
-> +    description:
-> +      power to the IO.
-> +
-> +  assigned-clocks:
-> +    description:
-> +      PLL of the source clock.
-
-How many (maxItems)?
-
-> +
-> +  assigned-clock-parents:
-> +    description:
-> +      parent of source clock, used for HS400 mode to get 400Mhz source clock.
-> +
-> +  hs400-ds-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      HS400 DS delay setting.
-> +
-> +  mediatek,hs200-cmd-int-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      HS200 command internal delay setting.
-> +      This field has total 32 stages.
-> +      The value is an integer from 0 to 31.
-
-minimum: 0
-maximum: 31
-
-Add any constraints on other properties too.
-
-> +
-> +  mediatek,hs400-cmd-int-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      HS400 command internal delay setting.
-> +      This field has total 32 stages.
-> +      The value is an integer from 0 to 31.
-> +
-> +  mediatek,hs400-cmd-resp-sel-rising:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      HS400 command response sample selection.
-> +      If present, HS400 command responses are sampled on rising edges.
-> +      If not present, HS400 command responses are sampled on falling edges.
-> +
-> +  mediatek,latch-ck:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      Some SoCs do not support enhance_rx, need set correct latch-ck to avoid
-> +      data crc error caused by stop clock(fifo full) Valid range = [0:0x7].
-> +      if not present, default value is 0.
-> +      applied to compatible "mediatek,mt2701-mmc".
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +  reset-names:
-> +    const: hrst
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/clock/mt8173-clk.h>
-> +    mmc0: mmc@11230000 {
-> +        compatible = "mediatek,mt8173-mmc";
-> +        reg = <0x11230000 0x1000>;
-> +        interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-> +        vmmc-supply = <&mt6397_vemc_3v3_reg>;
-> +        vqmmc-supply = <&mt6397_vio18_reg>;
-> +        clocks = <&pericfg CLK_PERI_MSDC30_0>,
-> +                 <&topckgen CLK_TOP_MSDC50_0_H_SEL>;
-> +        clock-names = "source", "hclk";
-> +        pinctrl-names = "default", "state_uhs";
-> +        pinctrl-0 = <&mmc0_pins_default>;
-> +        pinctrl-1 = <&mmc0_pins_uhs>;
-> +        assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
-> +        assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL_D2>;
-> +        hs400-ds-delay = <0x14015>;
-> +        mediatek,hs200-cmd-int-delay = <26>;
-> +        mediatek,hs400-cmd-int-delay = <14>;
-> +        mediatek,hs400-cmd-resp-sel-rising;
-> +    };
-> +
-> +...
-> -- 
-> 2.18.0
