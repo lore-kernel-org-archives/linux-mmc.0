@@ -2,185 +2,144 @@ Return-Path: <SRS0=cOhd=DH=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3A3CC4727C
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Sep 2020 02:55:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06C53C2D0A8
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Sep 2020 07:26:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4DCF320773
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Sep 2020 02:55:12 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Smuamo/e"
+	by mail.kernel.org (Postfix) with ESMTP id C879B2075F
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Sep 2020 07:26:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729678AbgI3CzL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Sep 2020 22:55:11 -0400
-Received: from mailgw02.mediatek.com ([1.203.163.81]:3158 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1729446AbgI3CzL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Sep 2020 22:55:11 -0400
-X-UUID: e999b5bc72704bb993bd3466f57666d2-20200930
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=r6D23t2kKeZfahrk09DXea8q73XExsy/Y4j3R6PaCYg=;
-        b=Smuamo/e55iGy5soxvjgh/l5DKT3Ltb1Ub6334COCoPKZI94nTw9QT/WzUWRbaXEBjMLzsdHEaJilQ9vKHKrw8bRWbBGkwaPY2p9x8QfhoaM46ZN3WB7EzRNbolYV8awCfSSQtrPonKUw6G352D/5AMI+vMZV5ELcCm9ZVQkeLU=;
-X-UUID: e999b5bc72704bb993bd3466f57666d2-20200930
-Received: from mtkcas36.mediatek.inc [(172.27.4.253)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 268266405; Wed, 30 Sep 2020 10:55:03 +0800
-Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31N1.mediatek.inc
- (172.27.4.69) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 30 Sep
- 2020 10:55:01 +0800
-Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
- (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 30 Sep 2020 10:55:00 +0800
-Message-ID: <1601434501.3226.2.camel@mhfsdcap03>
-Subject: Re: [PATCH v2 1/4] dt-bindings: mmc: Convert mtk-sd to json-schema
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>
-Date:   Wed, 30 Sep 2020 10:55:01 +0800
-In-Reply-To: <20200929200540.GA1051185@bogus>
-References: <20200928130918.32326-1-wenbin.mei@mediatek.com>
-         <20200928130918.32326-2-wenbin.mei@mediatek.com>
-         <20200929200540.GA1051185@bogus>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.10.4-0ubuntu2 
+        id S1725535AbgI3H0Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Sep 2020 03:26:25 -0400
+Received: from mga01.intel.com ([192.55.52.88]:12016 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725440AbgI3H0Z (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 30 Sep 2020 03:26:25 -0400
+IronPort-SDR: eHQb5E+wkBym6MQo1n/1FZ5MwXP1M1ZFlIFBO2yfv7Bh+OAP9mNoooxY05tHrR35Uzq7HkvNQo
+ Grb87LHiMcqQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9759"; a="180539113"
+X-IronPort-AV: E=Sophos;i="5.77,321,1596524400"; 
+   d="scan'208";a="180539113"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Sep 2020 00:26:23 -0700
+IronPort-SDR: gv7aeCEP2U8IHDXCg30udvRgJTs+JWm+5IGsLBUxCrvR5up3NMNDd0kIETVu628S/ixK9WA40E
+ iQ3gluPfMgkA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.77,321,1596524400"; 
+   d="scan'208";a="457557859"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
+  by orsmga004.jf.intel.com with ESMTP; 30 Sep 2020 00:26:18 -0700
+Subject: Re: [PATCH 1/2] mmc: sdhci-acpi: AMDI0040: Set
+ SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+To:     Raul E Rangel <rrangel@chromium.org>, linux-mmc@vger.kernel.org
+Cc:     Shirish.S@amd.com, Akshu.Agrawal@amd.com,
+        Nehal-bakulchandra.Shah@amd.com, chris.wang@amd.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
+References: <20200928154718.1.Icc21d4b2f354e83e26e57e270dc952f5fe0b0a40@changeid>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <5094f730-ab5c-b0e4-677d-e53d3e42b52e@intel.com>
+Date:   Wed, 30 Sep 2020 10:25:46 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-X-TM-SNTS-SMTP: 778E435C9DC8413E23989109D0D2332ED0DAC1269C3F4610514279F083402CAC2000:8
-X-MTK:  N
-Content-Transfer-Encoding: base64
+In-Reply-To: <20200928154718.1.Icc21d4b2f354e83e26e57e270dc952f5fe0b0a40@changeid>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGhhbmtzIGZvciB5b3VyIHJlcGx5IQ0KSSB3aWxsIGNoYW5nZSB0aGUgZm9sbG93aW5nIHByb2Js
-ZW1zIGluIHRoZSBuZXh0IHZlcnNpb24uDQoNCk9uIFR1ZSwgMjAyMC0wOS0yOSBhdCAxNTowNSAt
-MDUwMCwgUm9iIEhlcnJpbmcgd3JvdGU6DQo+IE9uIE1vbiwgU2VwIDI4LCAyMDIwIGF0IDA5OjA5
-OjE1UE0gKzA4MDAsIFdlbmJpbiBNZWkgd3JvdGU6DQo+ID4gQ29udmVydCB0aGUgbXRrLXNkIGJp
-bmRpbmcgdG8gRFQgc2NoZW1hIGZvcm1hdCB1c2luZyBqc29uLXNjaGVtYS4NCj4gPiANCj4gPiBT
-aWduZWQtb2ZmLWJ5OiBXZW5iaW4gTWVpIDx3ZW5iaW4ubWVpQG1lZGlhdGVrLmNvbT4NCj4gPiBS
-ZXZpZXdlZC1ieTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+ID4gLS0t
-DQo+ID4gIC4uLi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0ICAgICAgICB8ICA3
-NSAtLS0tLS0tLQ0KPiA+ICAuLi4vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbXRrLXNkLnlhbWwg
-ICAgICAgfCAxNjUgKysrKysrKysrKysrKysrKysrDQo+ID4gIDIgZmlsZXMgY2hhbmdlZCwgMTY1
-IGluc2VydGlvbnMoKyksIDc1IGRlbGV0aW9ucygtKQ0KPiA+ICBkZWxldGUgbW9kZSAxMDA2NDQg
-RG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tdGstc2QudHh0DQo+ID4gIGNy
-ZWF0ZSBtb2RlIDEwMDY0NCBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL210
-ay1zZC55YW1sDQo+IA0KPiANCj4gPiBkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
-cmVlL2JpbmRpbmdzL21tYy9tdGstc2QueWFtbCBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9i
-aW5kaW5ncy9tbWMvbXRrLXNkLnlhbWwNCj4gPiBuZXcgZmlsZSBtb2RlIDEwMDY0NA0KPiA+IGlu
-ZGV4IDAwMDAwMDAwMDAwMC4uMmQ1YWIxNDExY2Q1DQo+ID4gLS0tIC9kZXYvbnVsbA0KPiA+ICsr
-KyBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tbWMvbXRrLXNkLnlhbWwNCj4g
-PiBAQCAtMCwwICsxLDE2NSBAQA0KPiA+ICsjIE1USy1MaWNlbnNlLUlkZW50aWZpZXI6IEdQTC0y
-LjANCj4gPiArJVlBTUwgMS4yDQo+ID4gKy0tLQ0KPiA+ICskaWQ6IGh0dHA6Ly9kZXZpY2V0cmVl
-Lm9yZy9zY2hlbWFzL21tYy9tdGstc2QueWFtbCMNCj4gPiArJHNjaGVtYTogaHR0cDovL2Rldmlj
-ZXRyZWUub3JnL21ldGEtc2NoZW1hcy9jb3JlLnlhbWwjDQo+ID4gKw0KPiA+ICt0aXRsZTogTVRL
-IE1TREMgU3RvcmFnZSBIb3N0IENvbnRyb2xsZXIgQmluZGluZw0KPiA+ICsNCj4gPiArbWFpbnRh
-aW5lcnM6DQo+ID4gKyAgLSBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj4g
-DQo+IFVzdWFsbHkgdGhpcyBpcyB0aGUgaC93IGJsb2NrIG93bmVyLCBub3QgYSBzdWJzeXN0ZW0g
-bWFpbnRhaW5lci4NCj4gDQo+ID4gKw0KPiA+ICthbGxPZjoNCj4gPiArICAtICRyZWY6IG1tYy1j
-b250cm9sbGVyLnlhbWwjDQo+ID4gKw0KPiA+ICtwcm9wZXJ0aWVzOg0KPiA+ICsgIGNvbXBhdGli
-bGU6DQo+ID4gKyAgICBvbmVPZjoNCj4gPiArICAgICAgLSBjb25zdDogbWVkaWF0ZWssbXQ4MTM1
-LW1tYw0KPiA+ICsgICAgICAtIGNvbnN0OiBtZWRpYXRlayxtdDgxNzMtbW1jDQo+ID4gKyAgICAg
-IC0gY29uc3Q6IG1lZGlhdGVrLG10ODE4My1tbWMNCj4gPiArICAgICAgLSBjb25zdDogbWVkaWF0
-ZWssbXQ4NTE2LW1tYw0KPiA+ICsgICAgICAtIGNvbnN0OiBtZWRpYXRlayxtdDY3NzktbW1jDQo+
-ID4gKyAgICAgIC0gY29uc3Q6IG1lZGlhdGVrLG10MjcwMS1tbWMNCj4gPiArICAgICAgLSBjb25z
-dDogbWVkaWF0ZWssbXQyNzEyLW1tYw0KPiA+ICsgICAgICAtIGNvbnN0OiBtZWRpYXRlayxtdDc2
-MjItbW1jDQo+IA0KPiBBbGwgdGhlc2UgY2FuIGJlIGFuIGVudW0uIEFuZCBzb3J0IHBsZWFzZS4N
-Cj4gDQo+ID4gKyAgICAgIC0gaXRlbXM6DQo+ID4gKyAgICAgICAgLSBjb25zdDogbWVkaWF0ZWss
-bXQ3NjIzLW1tYw0KPiA+ICsgICAgICAgIC0gY29uc3Q6IG1lZGlhdGVrLG10MjcwMS1tbWMNCj4g
-PiArICAgICAgLSBjb25zdDogbWVkaWF0ZWssbXQ3NjIwLW1tYw0KPiA+ICsNCj4gPiArICByZWc6
-DQo+ID4gKyAgICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAgcGh5c2ljYWwgYmFzZSBhZGRyZXNz
-IG9mIHRoZSBjb250cm9sbGVyIGFuZCBsZW5ndGguDQo+IA0KPiBEcm9wIHRoaXMuDQo+IA0KPiA+
-ICsgICAgbWluSXRlbXM6IDENCj4gPiArICAgIG1heEl0ZW1zOiAyDQo+IA0KPiBJZiBtb3JlIHRo
-YW4gMSwgbmVlZCB0byBzYXkgd2hhdCBlYWNoIGVudHJ5IGlzOg0KPiANCj4gaXRlbXM6DQo+ICAg
-LSBkZXNjcmlwdGlvbjogLi4uDQo+ICAgLSBkZXNjcmlwdGlvbjogLi4uDQo+IA0KPiA+ICsNCj4g
-PiArICBpbnRlcnJ1cHRzOg0KPiA+ICsgICAgZGVzY3JpcHRpb246DQo+ID4gKyAgICAgIFNob3Vs
-ZCBjb250YWluIE1TREMgaW50ZXJydXB0IG51bWJlci4NCj4gDQo+IERyb3AuDQo+IA0KPiA+ICsg
-ICAgbWF4SXRlbXM6IDENCj4gPiArDQo+ID4gKyAgY2xvY2tzOg0KPiA+ICsgICAgZGVzY3JpcHRp
-b246DQo+ID4gKyAgICAgIFNob3VsZCBjb250YWluIHBoYW5kbGUgZm9yIHRoZSBjbG9jayBmZWVk
-aW5nIHRoZSBNTUMgY29udHJvbGxlci4NCj4gPiArICAgIG1pbkl0ZW1zOiAyDQo+ID4gKyAgICBt
-YXhJdGVtczogNA0KPiA+ICsgICAgaXRlbXM6DQo+ID4gKyAgICAgIC0gZGVzY3JpcHRpb246IHNv
-dXJjZSBjbG9jayAocmVxdWlyZWQpLg0KPiA+ICsgICAgICAtIGRlc2NyaXB0aW9uOiBIQ0xLIHdo
-aWNoIHVzZWQgZm9yIGhvc3QgKHJlcXVpcmVkKS4NCj4gPiArICAgICAgLSBkZXNjcmlwdGlvbjog
-aW5kZXBlbmRlbnQgc291cmNlIGNsb2NrIGdhdGUgKHJlcXVpcmVkIGZvciBNVDI3MTIpLg0KPiA+
-ICsgICAgICAtIGRlc2NyaXB0aW9uOiBidXMgY2xvY2sgdXNlZCBmb3IgaW50ZXJuYWwgcmVnaXN0
-ZXIgYWNjZXNzIChyZXF1aXJlZCBmb3IgTVQyNzEyIE1TREMwLzMpLg0KPiA+ICsNCj4gPiArICBj
-bG9jay1uYW1lczoNCj4gPiArICAgIG1pbkl0ZW1zOiAyDQo+ID4gKyAgICBtYXhJdGVtczogNA0K
-PiA+ICsgICAgaXRlbXM6DQo+ID4gKyAgICAgIC0gY29uc3Q6IHNvdXJjZQ0KPiA+ICsgICAgICAt
-IGNvbnN0OiBoY2xrDQo+ID4gKyAgICAgIC0gY29uc3Q6IHNvdXJjZV9jZw0KPiA+ICsgICAgICAt
-IGNvbnN0OiBidXNfY2xrDQo+ID4gKw0KPiA+ICsgIHBpbmN0cmwtbmFtZXM6DQo+ID4gKyAgICBp
-dGVtczoNCj4gPiArICAgICAgLSBjb25zdDogZGVmYXVsdA0KPiA+ICsgICAgICAtIGNvbnN0OiBz
-dGF0ZV91aHMNCj4gPiArDQo+ID4gKyAgcGluY3RybC0wOg0KPiA+ICsgICAgZGVzY3JpcHRpb246
-DQo+ID4gKyAgICAgIHNob3VsZCBjb250YWluIGRlZmF1bHQvaGlnaCBzcGVlZCBwaW4gY3RybC4N
-Cj4gPiArICAgIG1heEl0ZW1zOiAxDQo+ID4gKw0KPiA+ICsgIHBpbmN0cmwtMToNCj4gPiArICAg
-IGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBzaG91bGQgY29udGFpbiB1aHMgbW9kZSBwaW4gY3Ry
-bC4NCj4gPiArICAgIG1heEl0ZW1zOiAxDQo+ID4gKw0KPiA+ICsgIHZtbWMtc3VwcGx5Og0KPiA+
-ICsgICAgZGVzY3JpcHRpb246DQo+ID4gKyAgICAgIHBvd2VyIHRvIHRoZSBDb3JlLg0KPiA+ICsN
-Cj4gPiArICB2cW1tYy1zdXBwbHk6DQo+ID4gKyAgICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAg
-cG93ZXIgdG8gdGhlIElPLg0KPiA+ICsNCj4gPiArICBhc3NpZ25lZC1jbG9ja3M6DQo+ID4gKyAg
-ICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAgUExMIG9mIHRoZSBzb3VyY2UgY2xvY2suDQo+IA0K
-PiBIb3cgbWFueSAobWF4SXRlbXMpPw0KPiANCj4gPiArDQo+ID4gKyAgYXNzaWduZWQtY2xvY2st
-cGFyZW50czoNCj4gPiArICAgIGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBwYXJlbnQgb2Ygc291
-cmNlIGNsb2NrLCB1c2VkIGZvciBIUzQwMCBtb2RlIHRvIGdldCA0MDBNaHogc291cmNlIGNsb2Nr
-Lg0KPiA+ICsNCj4gPiArICBoczQwMC1kcy1kZWxheToNCj4gPiArICAgICRyZWY6IC9zY2hlbWFz
-L3R5cGVzLnlhbWwjL2RlZmluaXRpb25zL3VpbnQzMg0KPiA+ICsgICAgZGVzY3JpcHRpb246DQo+
-ID4gKyAgICAgIEhTNDAwIERTIGRlbGF5IHNldHRpbmcuDQo+ID4gKw0KPiA+ICsgIG1lZGlhdGVr
-LGhzMjAwLWNtZC1pbnQtZGVsYXk6DQo+ID4gKyAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55YW1s
-Iy9kZWZpbml0aW9ucy91aW50MzINCj4gPiArICAgIGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBI
-UzIwMCBjb21tYW5kIGludGVybmFsIGRlbGF5IHNldHRpbmcuDQo+ID4gKyAgICAgIFRoaXMgZmll
-bGQgaGFzIHRvdGFsIDMyIHN0YWdlcy4NCj4gPiArICAgICAgVGhlIHZhbHVlIGlzIGFuIGludGVn
-ZXIgZnJvbSAwIHRvIDMxLg0KPiANCj4gbWluaW11bTogMA0KPiBtYXhpbXVtOiAzMQ0KPiANCj4g
-QWRkIGFueSBjb25zdHJhaW50cyBvbiBvdGhlciBwcm9wZXJ0aWVzIHRvby4NCj4gDQo+ID4gKw0K
-PiA+ICsgIG1lZGlhdGVrLGhzNDAwLWNtZC1pbnQtZGVsYXk6DQo+ID4gKyAgICAkcmVmOiAvc2No
-ZW1hcy90eXBlcy55YW1sIy9kZWZpbml0aW9ucy91aW50MzINCj4gPiArICAgIGRlc2NyaXB0aW9u
-Og0KPiA+ICsgICAgICBIUzQwMCBjb21tYW5kIGludGVybmFsIGRlbGF5IHNldHRpbmcuDQo+ID4g
-KyAgICAgIFRoaXMgZmllbGQgaGFzIHRvdGFsIDMyIHN0YWdlcy4NCj4gPiArICAgICAgVGhlIHZh
-bHVlIGlzIGFuIGludGVnZXIgZnJvbSAwIHRvIDMxLg0KPiA+ICsNCj4gPiArICBtZWRpYXRlayxo
-czQwMC1jbWQtcmVzcC1zZWwtcmlzaW5nOg0KPiA+ICsgICAgJHJlZjogL3NjaGVtYXMvdHlwZXMu
-eWFtbCMvZGVmaW5pdGlvbnMvZmxhZw0KPiA+ICsgICAgZGVzY3JpcHRpb246DQo+ID4gKyAgICAg
-IEhTNDAwIGNvbW1hbmQgcmVzcG9uc2Ugc2FtcGxlIHNlbGVjdGlvbi4NCj4gPiArICAgICAgSWYg
-cHJlc2VudCwgSFM0MDAgY29tbWFuZCByZXNwb25zZXMgYXJlIHNhbXBsZWQgb24gcmlzaW5nIGVk
-Z2VzLg0KPiA+ICsgICAgICBJZiBub3QgcHJlc2VudCwgSFM0MDAgY29tbWFuZCByZXNwb25zZXMg
-YXJlIHNhbXBsZWQgb24gZmFsbGluZyBlZGdlcy4NCj4gPiArDQo+ID4gKyAgbWVkaWF0ZWssbGF0
-Y2gtY2s6DQo+ID4gKyAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55YW1sIy9kZWZpbml0aW9ucy91
-aW50MzINCj4gPiArICAgIGRlc2NyaXB0aW9uOg0KPiA+ICsgICAgICBTb21lIFNvQ3MgZG8gbm90
-IHN1cHBvcnQgZW5oYW5jZV9yeCwgbmVlZCBzZXQgY29ycmVjdCBsYXRjaC1jayB0byBhdm9pZA0K
-PiA+ICsgICAgICBkYXRhIGNyYyBlcnJvciBjYXVzZWQgYnkgc3RvcCBjbG9jayhmaWZvIGZ1bGwp
-IFZhbGlkIHJhbmdlID0gWzA6MHg3XS4NCj4gPiArICAgICAgaWYgbm90IHByZXNlbnQsIGRlZmF1
-bHQgdmFsdWUgaXMgMC4NCj4gPiArICAgICAgYXBwbGllZCB0byBjb21wYXRpYmxlICJtZWRpYXRl
-ayxtdDI3MDEtbW1jIi4NCj4gPiArDQo+ID4gKyAgcmVzZXRzOg0KPiA+ICsgICAgbWF4SXRlbXM6
-IDENCj4gPiArDQo+ID4gKyAgcmVzZXQtbmFtZXM6DQo+ID4gKyAgICBjb25zdDogaHJzdA0KPiA+
-ICsNCj4gPiArcmVxdWlyZWQ6DQo+ID4gKyAgLSBjb21wYXRpYmxlDQo+ID4gKyAgLSByZWcNCj4g
-PiArICAtIGludGVycnVwdHMNCj4gPiArICAtIGNsb2Nrcw0KPiA+ICsgIC0gY2xvY2stbmFtZXMN
-Cj4gPiArDQo+ID4gK2V4YW1wbGVzOg0KPiA+ICsgIC0gfA0KPiA+ICsgICAgI2luY2x1ZGUgPGR0
-LWJpbmRpbmdzL2ludGVycnVwdC1jb250cm9sbGVyL2lycS5oPg0KPiA+ICsgICAgI2luY2x1ZGUg
-PGR0LWJpbmRpbmdzL2ludGVycnVwdC1jb250cm9sbGVyL2FybS1naWMuaD4NCj4gPiArICAgICNp
-bmNsdWRlIDxkdC1iaW5kaW5ncy9jbG9jay9tdDgxNzMtY2xrLmg+DQo+ID4gKyAgICBtbWMwOiBt
-bWNAMTEyMzAwMDAgew0KPiA+ICsgICAgICAgIGNvbXBhdGlibGUgPSAibWVkaWF0ZWssbXQ4MTcz
-LW1tYyI7DQo+ID4gKyAgICAgICAgcmVnID0gPDB4MTEyMzAwMDAgMHgxMDAwPjsNCj4gPiArICAg
-ICAgICBpbnRlcnJ1cHRzID0gPEdJQ19TUEkgMzkgSVJRX1RZUEVfTEVWRUxfTE9XPjsNCj4gPiAr
-ICAgICAgICB2bW1jLXN1cHBseSA9IDwmbXQ2Mzk3X3ZlbWNfM3YzX3JlZz47DQo+ID4gKyAgICAg
-ICAgdnFtbWMtc3VwcGx5ID0gPCZtdDYzOTdfdmlvMThfcmVnPjsNCj4gPiArICAgICAgICBjbG9j
-a3MgPSA8JnBlcmljZmcgQ0xLX1BFUklfTVNEQzMwXzA+LA0KPiA+ICsgICAgICAgICAgICAgICAg
-IDwmdG9wY2tnZW4gQ0xLX1RPUF9NU0RDNTBfMF9IX1NFTD47DQo+ID4gKyAgICAgICAgY2xvY2st
-bmFtZXMgPSAic291cmNlIiwgImhjbGsiOw0KPiA+ICsgICAgICAgIHBpbmN0cmwtbmFtZXMgPSAi
-ZGVmYXVsdCIsICJzdGF0ZV91aHMiOw0KPiA+ICsgICAgICAgIHBpbmN0cmwtMCA9IDwmbW1jMF9w
-aW5zX2RlZmF1bHQ+Ow0KPiA+ICsgICAgICAgIHBpbmN0cmwtMSA9IDwmbW1jMF9waW5zX3Vocz47
-DQo+ID4gKyAgICAgICAgYXNzaWduZWQtY2xvY2tzID0gPCZ0b3Bja2dlbiBDTEtfVE9QX01TREM1
-MF8wX1NFTD47DQo+ID4gKyAgICAgICAgYXNzaWduZWQtY2xvY2stcGFyZW50cyA9IDwmdG9wY2tn
-ZW4gQ0xLX1RPUF9NU0RDUExMX0QyPjsNCj4gPiArICAgICAgICBoczQwMC1kcy1kZWxheSA9IDww
-eDE0MDE1PjsNCj4gPiArICAgICAgICBtZWRpYXRlayxoczIwMC1jbWQtaW50LWRlbGF5ID0gPDI2
-PjsNCj4gPiArICAgICAgICBtZWRpYXRlayxoczQwMC1jbWQtaW50LWRlbGF5ID0gPDE0PjsNCj4g
-PiArICAgICAgICBtZWRpYXRlayxoczQwMC1jbWQtcmVzcC1zZWwtcmlzaW5nOw0KPiA+ICsgICAg
-fTsNCj4gPiArDQo+ID4gKy4uLg0KPiA+IC0tIA0KPiA+IDIuMTguMA0KDQo=
+On 29/09/20 12:59 am, Raul E Rangel wrote:
+> This change fixes HS400 tuning for devices with invalid presets.
+> 
+> SDHCI presets are not currently used for eMMC HS/HS200/HS400, but are
+> used for DDR52. The HS400 retuning sequence is:
+> 
+>     HS400->DDR52->HS->HS200->Perform Tuning->HS->HS400
+> 
+> This means that when HS400 tuning happens, we transition through DDR52
+> for a very brief period. This causes presets to be enabled
+> unintentionally and stay enabled when transitioning back to HS200 or
+> HS400. Some firmware has invalid presets, so we end up with driver
+> strengths that can cause I/O problems.
+> 
+> Fixes: 34597a3f60b1 ("mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400")
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> I decided to abandon adding the preset_value_support for now. Enabling
+> presets for the AMD controller currently results in using invalid
+> presets for HS400. This is because sdhci_get_preset_value is using a
+> non-standard HS400 register that the AMD controller does not support.
+> 
+> I think preset_value_support also needs more thought. Since HS400
+> re-tuning requires switching to HS, DDR52, and HS200, if one of those
+> timings is not in the list, we would need to disable presets.
+> 
+> I chose this approach to avoid any additional complexity.
+> 
+>  drivers/mmc/host/sdhci-acpi.c | 37 +++++++++++++++++++++++++++++++++++
+>  1 file changed, 37 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 284cba11e2795..d335a34ad05b3 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -662,6 +662,43 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+>  	    (host->mmc->caps & MMC_CAP_1_8V_DDR))
+>  		host->mmc->caps2 = MMC_CAP2_HS400_1_8V;
+>  
+> +	/*
+> +	 * There are two types of presets out in the wild:
+> +	 * 1) Default/broken presets.
+> +	 *    These presets have two sets of problems:
+> +	 *    a) The clock divisor for SDR12, SDR25, and SDR50 is too small.
+> +	 *       This results in clock frequencies that are 2x higher than
+> +	 *       acceptable. i.e., SDR12 = 25 MHz, SDR25 = 50 MHz, SDR50 =
+> +	 *       100 MHz.x
+> +	 *    b) The HS200 and HS400 driver strengths don't match.
+> +	 *       By default, the SDR104 preset register has a driver strength of
+> +	 *       A, but the (internal) HS400 preset register has a driver
+> +	 *       strength of B. As part of initializing HS400, HS200 tuning
+> +	 *       needs to be performed. Having different driver strengths
+> +	 *       between tuning and operation is wrong. It results in different
+> +	 *       rise/fall times that lead to incorrect sampling.
+> +	 * 2) Firmware with properly initialized presets.
+> +	 *    These presets have proper clock divisors. i.e., SDR12 => 12MHz,
+> +	 *    SDR25 => 25 MHz, SDR50 => 50 MHz. Additionally the HS200 and
+> +	 *    HS400 preset driver strengths match.
+> +	 *
+> +	 *    Enabling presets for HS400 doesn't work for the following reasons:
+> +	 *    1) sdhci_set_ios has a hard coded list of timings that are used
+> +	 *       to determine if presets should be enabled.
+> +	 *    2) sdhci_get_preset_value is using a non-standard register to
+> +	 *       read out HS400 presets. The AMD controller doesn't support this
+> +	 *       non-standard register. In fact, it doesn't expose the HS400
+> +	 *       preset register anywhere in the SDHCI memory map. This results
+> +	 *       in reading a garbage value and using the wrong presets.
+> +	 *
+> +	 *       Since HS400 and HS200 presets must be identical, we could
+> +	 *       instead use the the SDR104 preset register.
+> +	 *
+> +	 *    If the above issues are resolved we could remove this quirk for
+> +	 *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
+> +	 */
+> +	host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+> +
+>  	host->mmc_host_ops.select_drive_strength = amd_select_drive_strength;
+>  	host->mmc_host_ops.set_ios = amd_set_ios;
+>  	host->mmc_host_ops.execute_tuning = amd_sdhci_execute_tuning;
+> 
 
