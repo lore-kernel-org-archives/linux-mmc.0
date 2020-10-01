@@ -2,177 +2,230 @@ Return-Path: <SRS0=Kjhy=DI=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE67EC4727C
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 04:36:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22594C4727C
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 06:14:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6086621D46
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 04:36:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD4E321D80
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 06:14:27 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="nsKh9Smy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725878AbgJAEgb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Oct 2020 00:36:31 -0400
-Received: from mx2.suse.de ([195.135.220.15]:40170 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725876AbgJAEgb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Oct 2020 00:36:31 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 9F878AF40;
-        Thu,  1 Oct 2020 04:36:29 +0000 (UTC)
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-block@vger.kernel.org, Vicente Bergas <vicencb@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>
-References: <20200930160854.65710-1-colyli@suse.de>
- <5178b9e0-6b95-45ef-80f1-862de554e625@intel.com>
-From:   Coly Li <colyli@suse.de>
-Autocrypt: addr=colyli@suse.de; keydata=
- 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
-Subject: Re: [PATCH] mmc: core: don't set limits.discard_granularity as 0
-Message-ID: <026e4bab-5d1d-50b9-29c4-e871fcd27b8b@suse.de>
-Date:   Thu, 1 Oct 2020 12:36:25 +0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:68.0)
- Gecko/20100101 Thunderbird/68.12.0
+        id S1725975AbgJAGO1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Oct 2020 02:14:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37990 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725878AbgJAGO0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Oct 2020 02:14:26 -0400
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 117E9C0613D1
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2020 23:14:13 -0700 (PDT)
+Received: by mail-vs1-xe43.google.com with SMTP id e62so783521vsc.10
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Sep 2020 23:14:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=VlK25AeCqL3jo7oZoKivx7ZKCZnGaTWNtqH24P3Rx58=;
+        b=nsKh9SmyYr6dFqhw75fYDL7n5mG3UUdgFMIuakzzITavWvq6EHjqF1X9nWwIt2r+wX
+         ojx5yjM71XwFhwhBRKWEodxX/dyhQeHrEI6fO/7tXmPZCrQuvRAeuMTU8UkiYbAfYgfV
+         y257KdPrMIfZeX9eyDP+cp0PpHAtvE9Vqtfko=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=VlK25AeCqL3jo7oZoKivx7ZKCZnGaTWNtqH24P3Rx58=;
+        b=c8Lr/YoRDiaYRukcSfvAgq54pUsYnuH07iWVP2T8aE/qv3pumPDdfqMEvTI/uoOQ3K
+         jeQCV9xcwz7leGWdPgSMeg6xy+1QcPEWJE9KB4g3ICjzToO8KR4FbRbOrHdzFK0P0rFq
+         cs29wKrxJ1P4L13eyDbJJoQGvSLaTW5JPVzShj3RTWARqjC8SQ8O3+rxOIVSfApBqF3O
+         It+7aTw+HfPCfVsxBKVWu2fZ53yo3sp3zMm1eIvvFemZWOuwQEEhdgvL7dFsDhF+wjKJ
+         4E9xC4b5qHS1qedkE140ytHJbn4kcgLHGirXpeSR3EOdM/9aglLrxX2ga5vyzZz3RAdL
+         Tzmw==
+X-Gm-Message-State: AOAM531xL+GwIGxebJ024YEO0MsZYoTprkGcxwfu+BWsZd8yZ4CALp/J
+        xHWdjZ6eXgUqwGuFq5xiKKi9YL83aTiOZ5QYmiI3YA==
+X-Google-Smtp-Source: ABdhPJxLXQQGLRLzY6RFBL5DI0m1HQoOFsQi0w8LIWHFTIqUlUJYtSC0vKE7KVqUO73TNfZ8033bmhNJ5nUfTYZXppE=
+X-Received: by 2002:a67:be08:: with SMTP id x8mr4072437vsq.47.1601532853052;
+ Wed, 30 Sep 2020 23:14:13 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <5178b9e0-6b95-45ef-80f1-862de554e625@intel.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20200930083120.11971-1-wenbin.mei@mediatek.com> <20200930083120.11971-5-wenbin.mei@mediatek.com>
+In-Reply-To: <20200930083120.11971-5-wenbin.mei@mediatek.com>
+From:   Nicolas Boichat <drinkcat@chromium.org>
+Date:   Thu, 1 Oct 2020 14:14:02 +0800
+Message-ID: <CANMq1KCQ9x1kgME3dAQmGzjUoqkNLuWGS4dG07qhNKQ3N=o_dw@mail.gmail.com>
+Subject: Re: [PATCH v3 4/4] mmc: mediatek: Add subsys clock control for MT8192 msdc
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org,
+        Devicetree List <devicetree@vger.kernel.org>,
+        linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        lkml <linux-kernel@vger.kernel.org>,
+        srv_heupstream <srv_heupstream@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2020/10/1 01:23, Adrian Hunter wrote:
-> On 30/09/20 7:08 pm, Coly Li wrote:
->> In mmc_queue_setup_discard() the mmc driver queue's discard_granularity
->> might be set as 0 (when card->pref_erase > max_discard) while the mmc
->> device still declares to support discard operation. This is buggy and
->> triggered the following kernel warning message,
->>
->> WARNING: CPU: 0 PID: 135 at __blkdev_issue_discard+0x200/0x294
->> CPU: 0 PID: 135 Comm: f2fs_discard-17 Not tainted 5.9.0-rc6 #1
->> Hardware name: Google Kevin (DT)
->> pstate: 00000005 (nzcv daif -PAN -UAO BTYPE=--)
->> pc : __blkdev_issue_discard+0x200/0x294
->> lr : __blkdev_issue_discard+0x54/0x294
->> sp : ffff800011dd3b10
->> x29: ffff800011dd3b10 x28: 0000000000000000 x27: ffff800011dd3cc4 x26: ffff800011dd3e18 x25: 000000000004e69b x24: 0000000000000c40 x23: ffff0000f1deaaf0 x22: ffff0000f2849200 x21: 00000000002734d8 x20: 0000000000000008 x19: 0000000000000000 x18: 0000000000000000 x17: 0000000000000000 x16: 0000000000000000 x15: 0000000000000000 x14: 0000000000000394 x13: 0000000000000000 x12: 0000000000000000 x11: 0000000000000000 x10: 00000000000008b0 x9 : ffff800011dd3cb0 x8 : 000000000004e69b x7 : 0000000000000000 x6 : ffff0000f1926400 x5 : ffff0000f1940800 x4 : 0000000000000000 x3 : 0000000000000c40 x2 : 0000000000000008 x1 : 00000000002734d8 x0 : 0000000000000000 Call trace:
->> __blkdev_issue_discard+0x200/0x294
->> __submit_discard_cmd+0x128/0x374
->> __issue_discard_cmd_orderly+0x188/0x244
->> __issue_discard_cmd+0x2e8/0x33c
->> issue_discard_thread+0xe8/0x2f0
->> kthread+0x11c/0x120
->> ret_from_fork+0x10/0x1c
->> ---[ end trace e4c8023d33dfe77a ]---
->>
->> This patch fixes the issue by setting discard_granularity as SECTOR_SIZE
->> instead of 0 when (card->pref_erase > max_discard) is true. Now no more
->> complain from __blkdev_issue_discard() for the improper value of discard
->> granularity.
->>
->> Fixes: commit e056a1b5b67b ("mmc: queue: let host controllers specify maximum discard timeout")
-> 
-> That "Fixes" tag is a bit misleading.  For some time, the block layer had
-> no problem with discard_granularity of zero, and blk_bio_discard_split()
-> still doesn't (see below).
-> 
-> static struct bio *blk_bio_discard_split(struct request_queue *q,
-> 					 struct bio *bio,
-> 					 struct bio_set *bs,
-> 					 unsigned *nsegs)
-> {
-> 	unsigned int max_discard_sectors, granularity;
-> 	int alignment;
-> 	sector_t tmp;
-> 	unsigned split_sectors;
-> 
-> 	*nsegs = 1;
-> 
-> 	/* Zero-sector (unknown) and one-sector granularities are the same.  */
-> 	granularity = max(q->limits.discard_granularity >> 9, 1U);
-> 
+On Wed, Sep 30, 2020 at 4:31 PM Wenbin Mei <wenbin.mei@mediatek.com> wrote:
+>
+> MT8192 msdc is an independent sub system, we need control more bus
+> clocks for it.
+> Add support for the additional subsys clocks to allow it to be
+> configured appropriately.
+>
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 77 ++++++++++++++++++++++++++++++---------
+>  1 file changed, 59 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index a704745e5882..9a1422955593 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -425,6 +425,8 @@ struct msdc_host {
+>         struct clk *h_clk;      /* msdc h_clk */
+>         struct clk *bus_clk;    /* bus clock which used to access register */
+>         struct clk *src_clk_cg; /* msdc source clock control gate */
+> +       struct clk *sys_clk_cg; /* msdc subsys clock control gate */
+> +       struct clk_bulk_data bulk_clks[3];      /* pclk, axi, ahb clock control gate */
+>         u32 mclk;               /* mmc subsystem clock frequency */
+>         u32 src_clk_freq;       /* source clock frequency */
+>         unsigned char timing;
+> @@ -784,6 +786,8 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
+>
+>  static void msdc_gate_clock(struct msdc_host *host)
+>  {
+> +       clk_bulk_disable_unprepare(ARRAY_SIZE(host->bulk_clks),
+> +                                  host->bulk_clks);
+>         clk_disable_unprepare(host->src_clk_cg);
+>         clk_disable_unprepare(host->src_clk);
+>         clk_disable_unprepare(host->bus_clk);
+> @@ -792,10 +796,17 @@ static void msdc_gate_clock(struct msdc_host *host)
+>
+>  static void msdc_ungate_clock(struct msdc_host *host)
+>  {
+> +       int ret;
+> +
+>         clk_prepare_enable(host->h_clk);
+>         clk_prepare_enable(host->bus_clk);
+>         clk_prepare_enable(host->src_clk);
+>         clk_prepare_enable(host->src_clk_cg);
+> +       ret = clk_bulk_prepare_enable(ARRAY_SIZE(host->bulk_clks),
+> +                                     host->bulk_clks);
+> +       if (ret)
+> +               dev_dbg(host->dev, "enable clks failed!\n");
 
-From Documentation/block/queue-sysfs.rst, the discard_granularity is
-described as,
+dev_err looks a lot more appropriate. Also, don't you want to exit the
+function in that case, rather than going to the while loop below where
+you may get stuck?
 
-discard_granularity (RO)
-------------------------
-This shows the size of internal allocation of the device in bytes, if
-reported by the device. A value of '0' means device does not support
-the discard functionality.
+> +
+>         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+>                 cpu_relax();
+>  }
+> @@ -2366,6 +2377,52 @@ static void msdc_of_property_parse(struct platform_device *pdev,
+>                 host->cqhci = false;
+>  }
+>
+> +static int msdc_of_clock_parse(struct platform_device *pdev,
+> +                              struct msdc_host *host)
+> +{
+> +       struct clk *clk;
+> +
+> +       host->src_clk = devm_clk_get(&pdev->dev, "source");
+> +       if (IS_ERR(host->src_clk))
+> +               return PTR_ERR(host->src_clk);
+> +
+> +       host->h_clk = devm_clk_get(&pdev->dev, "hclk");
+> +       if (IS_ERR(host->h_clk))
+> +               return PTR_ERR(host->h_clk);
+> +
+> +       host->bus_clk = devm_clk_get(&pdev->dev, "bus_clk");
+> +       if (IS_ERR(host->bus_clk))
+> +               host->bus_clk = NULL;
 
+Use devm_clk_get_optional instead (ditto for the next 2).
 
-And from Documentation/ABI/testing/sysfs-block, the discard_granularity
-is described as,
+> +
+> +       /*source clock control gate is optional clock*/
+> +       host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
+> +       if (IS_ERR(host->src_clk_cg))
+> +               host->src_clk_cg = NULL;
+> +
+> +       host->sys_clk_cg = devm_clk_get(&pdev->dev, "sys_cg");
+> +       if (IS_ERR(host->sys_clk_cg))
+> +               host->sys_clk_cg = NULL;
+> +       else
+> +               clk_prepare_enable(host->sys_clk_cg);
 
-What:           /sys/block/<disk>/queue/discard_granularity
-Date:           May 2011
-Contact:        Martin K. Petersen <martin.petersen@oracle.com>
-Description:
-                Devices that support discard functionality may
-                internally allocate space using units that are bigger
-                than the logical block size. The discard_granularity
-                parameter indicates the size of the internal allocation
-                unit in bytes if reported by the device. Otherwise the
-                discard_granularity will be set to match the device's
-                physical block size. A discard_granularity of 0 means
-                that the device does not support discard functionality.
+This doesn't need to be in an else branch, calling clk_prepare_enable
+on a NULL clock is fine.
 
+However, is it expected that this clock is turned on forever after
+probe?! At the very least, the clock should be disabled in
+msdc_drv_remove, but, really, I think it should be enabled as needed,
+like the other clocks, in msdc_gate_clock?
 
-Therefore I took it as a bug when a driver sets its queue
-discard_granularity as 0 but still announces to support discard operation.
+> +
+> +       clk = devm_clk_get(&pdev->dev, "pclk_cg");
+> +       if (IS_ERR(clk))
+> +               clk = NULL;
+> +       host->bulk_clks[0].clk = clk;
+> +
+> +       clk = devm_clk_get(&pdev->dev, "axi_cg");
+> +       if (IS_ERR(clk))
+> +               clk = NULL;
+> +       host->bulk_clks[1].clk = clk;
+> +
+> +       clk = devm_clk_get(&pdev->dev, "ahb_cg");
+> +       if (IS_ERR(clk))
+> +               clk = NULL;
+> +       host->bulk_clks[2].clk = clk;
 
-But if you don't like the Fixes: tag, it is OK for me to remove it in
-next version.
+Use devm_clk_bulk_get_optional for these 3.
 
-(CC Martin because he is the origin of the above information)
-
-Thanks.
-
-Coly Li
+> +
+> +       return 0;
+> +}
+> +
+>  static int msdc_drv_probe(struct platform_device *pdev)
+>  {
+>         struct mmc_host *mmc;
+> @@ -2405,25 +2462,9 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto host_free;
+>
+> -       host->src_clk = devm_clk_get(&pdev->dev, "source");
+> -       if (IS_ERR(host->src_clk)) {
+> -               ret = PTR_ERR(host->src_clk);
+> -               goto host_free;
+> -       }
+> -
+> -       host->h_clk = devm_clk_get(&pdev->dev, "hclk");
+> -       if (IS_ERR(host->h_clk)) {
+> -               ret = PTR_ERR(host->h_clk);
+> +       ret = msdc_of_clock_parse(pdev, host);
+> +       if (ret)
+>                 goto host_free;
+> -       }
+> -
+> -       host->bus_clk = devm_clk_get(&pdev->dev, "bus_clk");
+> -       if (IS_ERR(host->bus_clk))
+> -               host->bus_clk = NULL;
+> -       /*source clock control gate is optional clock*/
+> -       host->src_clk_cg = devm_clk_get(&pdev->dev, "source_cg");
+> -       if (IS_ERR(host->src_clk_cg))
+> -               host->src_clk_cg = NULL;
+>
+>         host->reset = devm_reset_control_get_optional_exclusive(&pdev->dev,
+>                                                                 "hrst");
+> --
+> 2.18.0
