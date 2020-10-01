@@ -2,155 +2,283 @@ Return-Path: <SRS0=Kjhy=DI=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 386E8C4727F
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 10:07:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1745C4727C
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 14:25:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE48E21531
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 10:07:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC44C20B1F
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Oct 2020 14:25:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731670AbgJAKHn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Oct 2020 06:07:43 -0400
-Received: from mga05.intel.com ([192.55.52.43]:21670 "EHLO mga05.intel.com"
+        id S1732450AbgJAOZG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Oct 2020 10:25:06 -0400
+Received: from mga14.intel.com ([192.55.52.115]:5353 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726992AbgJAKHn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Oct 2020 06:07:43 -0400
-IronPort-SDR: aOQHOsikE8tTA1WFJvkYCXlXoEonQ+UpGVrzQbHAdLF+9e2x5a9B90w1DU99gEbgCgSEtvYWOn
- yi1Odd5T50Ig==
-X-IronPort-AV: E=McAfee;i="6000,8403,9760"; a="247416530"
+        id S1732096AbgJAOZF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Oct 2020 10:25:05 -0400
+IronPort-SDR: 9pn/hEP4bk+q1RZVO0gApyye7bqwCK9IhJV0D05Fqwnu1XaABnptJmoe8GvgFGRC1VY83KilXQ
+ KWa7COFYwDHA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9760"; a="161975965"
 X-IronPort-AV: E=Sophos;i="5.77,323,1596524400"; 
-   d="scan'208";a="247416530"
+   d="scan'208";a="161975965"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Oct 2020 03:07:42 -0700
-IronPort-SDR: ELmxoiAWqs6VJu5Sj/96ul7/1Y+rpS17ZaleLu0024S4B72oiEhVr1wZUxTxYLlVQ6mR7rV60G
- XPMS+04cVvJg==
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Oct 2020 07:24:59 -0700
+IronPort-SDR: RlCVCnM2Hi8yLl1EO7S8zFBbKgaRn/68oIAIPjhK0nRWZKRATwoCnf948k7KMCj1ofBqToaQli
+ fv9AB5y5Df0w==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.77,323,1596524400"; 
-   d="scan'208";a="458060743"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.190]) ([10.237.72.190])
-  by orsmga004.jf.intel.com with ESMTP; 01 Oct 2020 03:07:38 -0700
-Subject: Re: [PATCH v3] mmc: core: don't set limits.discard_granularity as 0
-To:     Vicente Bergas <vicencb@gmail.com>
-Cc:     Coly Li <colyli@suse.de>, linux-mmc@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-block@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-References: <20201001071824.24995-1-colyli@suse.de>
- <CAAMcf8Ao8Go7GdB2XFXAHsWrcxb0VqtDRpHReOGTsjegq2XP0Q@mail.gmail.com>
- <ebd42dfe-d39c-5c13-bbd9-1c6463d73ff0@intel.com>
- <CAAMcf8AXUx8UwJvGyBaSvuMaN8u0i1CTbz=WvC+snvLBe=mtLQ@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <cc3f4f18-7332-3dc9-d058-6aba62542b38@intel.com>
-Date:   Thu, 1 Oct 2020 13:07:05 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
-MIME-Version: 1.0
-In-Reply-To: <CAAMcf8AXUx8UwJvGyBaSvuMaN8u0i1CTbz=WvC+snvLBe=mtLQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+   d="scan'208";a="294992512"
+Received: from zulkifl3-ilbpg0.png.intel.com ([10.88.229.114])
+  by fmsmga008.fm.intel.com with ESMTP; 01 Oct 2020 07:24:56 -0700
+From:   muhammad.husaini.zulkifli@intel.com
+To:     adrian.hunter@intel.com, michal.simek@xilinx.com,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc:     lakshmi.bai.raja.subramanian@intel.com,
+        wan.ahmad.zainie.wan.mohamad@intel.com,
+        muhammad.husaini.zulkifli@intel.com, arnd@arndb.de
+Subject: [PATCH v2 2/3] firmware: Keem Bay: Add support for Arm Trusted Firmware Service call
+Date:   Thu,  1 Oct 2020 22:21:48 +0800
+Message-Id: <20201001142149.23445-3-muhammad.husaini.zulkifli@intel.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20201001142149.23445-1-muhammad.husaini.zulkifli@intel.com>
+References: <20201001142149.23445-1-muhammad.husaini.zulkifli@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/10/20 12:27 pm, Vicente Bergas wrote:
-> On Thu, Oct 1, 2020 at 11:07 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 1/10/20 11:38 am, Vicente Bergas wrote:
->>> On Thu, Oct 1, 2020 at 9:18 AM Coly Li <colyli@suse.de> wrote:
->>>>
->>>> In mmc_queue_setup_discard() the mmc driver queue's discard_granularity
->>>> might be set as 0 (when card->pref_erase > max_discard) while the mmc
->>>> device still declares to support discard operation. This is buggy and
->>>> triggered the following kernel warning message,
->>>>
->>>> WARNING: CPU: 0 PID: 135 at __blkdev_issue_discard+0x200/0x294
->>>> CPU: 0 PID: 135 Comm: f2fs_discard-17 Not tainted 5.9.0-rc6 #1
->>>> Hardware name: Google Kevin (DT)
->>>> pstate: 00000005 (nzcv daif -PAN -UAO BTYPE=--)
->>>> pc : __blkdev_issue_discard+0x200/0x294
->>>> lr : __blkdev_issue_discard+0x54/0x294
->>>> sp : ffff800011dd3b10
->>>> x29: ffff800011dd3b10 x28: 0000000000000000 x27: ffff800011dd3cc4 x26: ffff800011dd3e18 x25: 000000000004e69b x24: 0000000000000c40 x23: ffff0000f1deaaf0 x22: ffff0000f2849200 x21: 00000000002734d8 x20: 0000000000000008 x19: 0000000000000000 x18: 0000000000000000 x17: 0000000000000000 x16: 0000000000000000 x15: 0000000000000000 x14: 0000000000000394 x13: 0000000000000000 x12: 0000000000000000 x11: 0000000000000000 x10: 00000000000008b0 x9 : ffff800011dd3cb0 x8 : 000000000004e69b x7 : 0000000000000000 x6 : ffff0000f1926400 x5 : ffff0000f1940800 x4 : 0000000000000000 x3 : 0000000000000c40 x2 : 0000000000000008 x1 : 00000000002734d8 x0 : 0000000000000000 Call trace:
->>>> __blkdev_issue_discard+0x200/0x294
->>>> __submit_discard_cmd+0x128/0x374
->>>> __issue_discard_cmd_orderly+0x188/0x244
->>>> __issue_discard_cmd+0x2e8/0x33c
->>>> issue_discard_thread+0xe8/0x2f0
->>>> kthread+0x11c/0x120
->>>> ret_from_fork+0x10/0x1c
->>>> ---[ end trace e4c8023d33dfe77a ]---
->>>>
->>>> This patch fixes the issue by setting discard_granularity as SECTOR_SIZE
->>>> instead of 0 when (card->pref_erase > max_discard) is true. Now no more
->>>> complain from __blkdev_issue_discard() for the improper value of discard
->>>> granularity.
->>>>
->>>> This issue is exposed after commit b35fd7422c2f ("block: check queue's
->>>> limits.discard_granularity in __blkdev_issue_discard()"), a "Fixes:" tag
->>>> is also added for the commit to make sure people won't miss this patch
->>>> after applying the change of __blkdev_issue_discard().
->>>>
->>>> Fixes: e056a1b5b67b ("mmc: queue: let host controllers specify maximum discard timeout")
->>>> Fixes: b35fd7422c2f ("block: check queue's limits.discard_granularity in __blkdev_issue_discard()").
->>>> Reported-by: Vicente Bergas <vicencb@gmail.com>
->>>
->>> Hi Coly, Adrian,
->>> would you like me to reply with a tested-by?
->>> before testing it: what are the chances of losing data?
->>
->> Very low I would hope, but that is no reason not to have backups :-)
-> 
-> I do have backup, it is for the hassle of reinstalling the OS and
-> restoring the backup.
-> I'll test it later, maybe today.
-> 
->>> Regards,
->>>   Vicente.
->>>
->>>> Signed-off-by: Coly Li <colyli@suse.de>
->>>> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>>> ---
->>>> Changelog,
->>>> v3, add Fixes tag for both commits.
->>>> v2, change commit id of the Fixes tag.
->>>> v1, initial version.
->>>>
->>>>  drivers/mmc/core/queue.c | 2 +-
->>>>  1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
->>>> index 6c022ef0f84d..350d0cc4ee62 100644
->>>> --- a/drivers/mmc/core/queue.c
->>>> +++ b/drivers/mmc/core/queue.c
->>>> @@ -190,7 +190,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
->>>>         q->limits.discard_granularity = card->pref_erase << 9;
->>>>         /* granularity must not be greater than max. discard */
-> 
-> Just out of curiosity, wouldn't it be more performant something like:
-> q->limits.discard_granularity = minimum(card->pref_erase, max_discard) << 9;
-> or is just that SECTOR_SIZE is a number guaranteed to work?
+From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 
-SECTOR_SIZE is guaranteed to work.  It is preferable, but not necessary, to
-align to the devices internal erase block size.
+Add generic firmware driver for Keem Bay SOC to support
+Arm Trusted Firmware Services call.
 
-> 
->>>>         if (card->pref_erase > max_discard)
->>>> -               q->limits.discard_granularity = 0;
->>>> +               q->limits.discard_granularity = SECTOR_SIZE;
->>>>         if (mmc_can_secure_erase_trim(card))
->>>>                 blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
->>>>  }
->>>> --
->>>> 2.26.2
->>>>
->>
+Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+---
+ drivers/firmware/Kconfig                   |   1 +
+ drivers/firmware/Makefile                  |   1 +
+ drivers/firmware/intel/Kconfig             |  14 +++
+ drivers/firmware/intel/Makefile            |   4 +
+ drivers/firmware/intel/keembay_smc.c       | 119 +++++++++++++++++++++
+ include/linux/firmware/intel/keembay_smc.h |  27 +++++
+ 6 files changed, 166 insertions(+)
+ create mode 100644 drivers/firmware/intel/Kconfig
+ create mode 100644 drivers/firmware/intel/Makefile
+ create mode 100644 drivers/firmware/intel/keembay_smc.c
+ create mode 100644 include/linux/firmware/intel/keembay_smc.h
+
+diff --git a/drivers/firmware/Kconfig b/drivers/firmware/Kconfig
+index fbd785dd0513..41de77d2720e 100644
+--- a/drivers/firmware/Kconfig
++++ b/drivers/firmware/Kconfig
+@@ -305,5 +305,6 @@ source "drivers/firmware/psci/Kconfig"
+ source "drivers/firmware/smccc/Kconfig"
+ source "drivers/firmware/tegra/Kconfig"
+ source "drivers/firmware/xilinx/Kconfig"
++source "drivers/firmware/intel/Kconfig"
+ 
+ endmenu
+diff --git a/drivers/firmware/Makefile b/drivers/firmware/Makefile
+index 99510be9f5ed..00f295ab9860 100644
+--- a/drivers/firmware/Makefile
++++ b/drivers/firmware/Makefile
+@@ -33,3 +33,4 @@ obj-y				+= psci/
+ obj-y				+= smccc/
+ obj-y				+= tegra/
+ obj-y				+= xilinx/
++obj-y				+= intel/
+diff --git a/drivers/firmware/intel/Kconfig b/drivers/firmware/intel/Kconfig
+new file mode 100644
+index 000000000000..b2b7a4e5410b
+--- /dev/null
++++ b/drivers/firmware/intel/Kconfig
+@@ -0,0 +1,14 @@
++# SPDX-License-Identifier: GPL-2.0-only
++menu "Intel Firmware Drivers"
++
++config KEEMBAY_FIRMWARE
++	bool "Enable Keem Bay firmware interface support"
++	depends on HAVE_ARM_SMCCC
++	default n
++	help
++	  Firmware interface driver is used by device drivers
++	  to communicate with the arm-trusted-firmware
++	  for platform management services.
++	  If in doubt, say "N".
++
++endmenu
+diff --git a/drivers/firmware/intel/Makefile b/drivers/firmware/intel/Makefile
+new file mode 100644
+index 000000000000..e6d2e1ea69a7
+--- /dev/null
++++ b/drivers/firmware/intel/Makefile
+@@ -0,0 +1,4 @@
++# SPDX-License-Identifier: GPL-2.0
++# Makefile for Intel firmwares
++
++obj-$(CONFIG_KEEMBAY_FIRMWARE) = keembay_smc.o
+diff --git a/drivers/firmware/intel/keembay_smc.c b/drivers/firmware/intel/keembay_smc.c
+new file mode 100644
+index 000000000000..24013cd1f5da
+--- /dev/null
++++ b/drivers/firmware/intel/keembay_smc.c
+@@ -0,0 +1,119 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ *  Copyright (C) 2020-2021, Intel Corporation
++ */
++
++#include <linux/arm-smccc.h>
++#include <linux/init.h>
++#include <linux/module.h>
++#include <linux/of_platform.h>
++
++#include <linux/firmware/intel/keembay_smc.h>
++
++static noinline int do_fw_call_fail(u64 arg0, u64 arg1)
++{
++	return -ENODEV;
++}
++
++/**
++ * Simple wrapper functions to be able to use a function pointer
++ * Invoke do_fw_call_smc or others in future, depending on the configuration
++ */
++static int (*do_fw_call)(u64, u64) = do_fw_call_fail;
++
++/**
++ * do_fw_call_smc() - Call system-level platform management layer (SMC)
++ * @arg0:		Argument 0 to SMC call
++ * @arg1:		Argument 1 to SMC call
++ *
++ * Invoke platform management function via SMC call.
++ *
++ * Return: Returns status, either success or error
++ */
++static noinline int do_fw_call_smc(u64 arg0, u64 arg1)
++{
++	struct arm_smccc_res res;
++
++	arm_smccc_smc(arg0, arg1, 0, 0, 0, 0, 0, 0, &res);
++
++	return res.a0;
++}
++
++/**
++ * keembay_sd_voltage_selection() - Set the IO Pad voltage
++ * @volt: voltage selection either 1.8V or 3.3V
++ *
++ * This function is used to set the IO Line Voltage
++ *
++ * Return: 0 for success, Invalid for failure
++ */
++int keembay_sd_voltage_selection(int volt)
++{
++	return do_fw_call(KEEMBAY_SIP_FUNC_ID, volt);
++}
++EXPORT_SYMBOL_GPL(keembay_sd_voltage_selection);
++
++/**
++ * keembay_get_invoke_func() - method of call
++ * @np:	Pointer to the device_node structure
++ *
++ * Return: Returns 0 on success or error code
++ */
++static int keembay_get_invoke_func(struct device_node *np)
++{
++	const char *method;
++
++	if (of_property_read_string(np, "method", &method)) {
++		pr_warn("%s missing \"method\" property\n", __func__);
++		return -ENXIO;
++	}
++
++	if (!strcmp("smc", method)) {
++		do_fw_call = do_fw_call_smc;
++	} else {
++		pr_warn("%s Invalid \"method\" property: %s\n",
++			__func__, method);
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int keembay_firmware_probe(struct platform_device *pdev)
++{
++	struct device *dev = &pdev->dev;
++	int ret;
++
++	ret = keembay_get_invoke_func(dev->of_node);
++	if (ret) {
++		dev_err(&pdev->dev, "Failed to get method of call\n");
++		return ret;
++	}
++
++	return 0;
++}
++
++static int keembay_firmware_remove(struct platform_device *pdev)
++{
++	return 0;
++}
++
++static const struct of_device_id keembay_firmware_of_match[] = {
++	{.compatible = "keembay,firmware"},
++	{},
++};
++MODULE_DEVICE_TABLE(of, keembay_firmware_of_match);
++
++static struct platform_driver keembay_firmware_driver = {
++	.driver = {
++		.name = "keembay_firmware",
++		.of_match_table = keembay_firmware_of_match,
++	},
++	.probe = keembay_firmware_probe,
++	.remove = keembay_firmware_remove,
++};
++module_platform_driver(keembay_firmware_driver);
++
++MODULE_LICENSE("GPL v2");
++MODULE_DESCRIPTION("Intel Keembay SOC Firmware Layer");
++MODULE_AUTHOR("Muhammad Husaini Zulkifli <Muhammad.Husaini.Zulkifli@intel.com>");
+diff --git a/include/linux/firmware/intel/keembay_smc.h b/include/linux/firmware/intel/keembay_smc.h
+new file mode 100644
+index 000000000000..87b1417f7e4e
+--- /dev/null
++++ b/include/linux/firmware/intel/keembay_smc.h
+@@ -0,0 +1,27 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ *  Intel Keembay SOC Firmware Layer
++ *
++ *  Copyright (C) 2020-2021, Intel Corporation
++ *
++ *  Muhammad Husaini Zulkifli <Muhammad.Husaini.Zulkifli@intel.com>
++ */
++
++#ifndef __FIRMWARE_KEEMBAY_SMC_H__
++#define __FIRMWARE_KEEMBAY_SMC_H__
++
++/* Setting for Keem Bay IO Pad Line Voltage Selection */
++#define KEEMBAY_SIP_FUNC_ID	0x8200ff26
++#define KEEMBAY_SET_1V8_VOLT	0x01
++#define KEEMBAY_SET_3V3_VOLT	0x00
++
++#if IS_ENABLED(CONFIG_KEEMBAY_FIRMWARE)
++int keembay_sd_voltage_selection(int volt);
++#else
++static inline int keembay_sd_voltage_selection(int volt)
++{
++	return -ENODEV;
++}
++#endif
++
++#endif /* __FIRMWARE_KEEMBAY_SMC_H__ */
+-- 
+2.17.1
 
