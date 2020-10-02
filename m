@@ -2,104 +2,113 @@ Return-Path: <SRS0=YnZp=DJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD7BEC4741F
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 01:39:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E6A15C4363D
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 07:55:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 79A29207F7
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 01:39:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A22552072E
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 07:55:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HWGOV3fz"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387484AbgJBBj3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Oct 2020 21:39:29 -0400
-Received: from mx2.suse.de ([195.135.220.15]:55694 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387483AbgJBBj3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Oct 2020 21:39:29 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 11E18B225;
-        Fri,  2 Oct 2020 01:39:28 +0000 (UTC)
-From:   Coly Li <colyli@suse.de>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, linux-block@vger.kernel.org,
-        Coly Li <colyli@suse.de>, Vicente Bergas <vicencb@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v4] mmc: core: don't set limits.discard_granularity as 0
-Date:   Fri,  2 Oct 2020 09:38:52 +0800
-Message-Id: <20201002013852.51968-1-colyli@suse.de>
-X-Mailer: git-send-email 2.26.2
+        id S1726251AbgJBHzH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Oct 2020 03:55:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50398 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725993AbgJBHzH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2020 03:55:07 -0400
+Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADDB6C0613E2
+        for <linux-mmc@vger.kernel.org>; Fri,  2 Oct 2020 00:55:06 -0700 (PDT)
+Received: by mail-lj1-x243.google.com with SMTP id v23so455454ljd.1
+        for <linux-mmc@vger.kernel.org>; Fri, 02 Oct 2020 00:55:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=mdWy51JUAJLNrewH/4Ct0ieYg+BQ1cOIElTbSQvUR0g=;
+        b=HWGOV3fzMv5hq0ajSUX6MufczLspk6B0S1qY6UPQRO38qwpPu70HCwWy8/qSz51u/v
+         Obcn842ENpChlgM8mUnJS6NOwsCHOIMOCUMJ1ZlydIDEa1C+yQ05kRp8bbQs2dh+QDI7
+         /KwwJzlFiUUrQCInSlm7gLhjq2caGg6baDRl9wG5VpYgE/FzDbz60Wx/0mtzkdpH2DIi
+         b8Y3b31yM87htO1Fhzm7G9pB/VuJmc0LIvCD4+adCjLKLweAK1to29AxmbZidHitQcP8
+         z3Ztj+nM/iD8GFTJjByh2mugOFWW8hmp61JolBFeR8nwqOWJslp4w7BhUf1Qib3TS6is
+         z+qw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=mdWy51JUAJLNrewH/4Ct0ieYg+BQ1cOIElTbSQvUR0g=;
+        b=iJJfHsIeGYVp1gb24m+FdDvqlCjrGe1p6p1ei+i0v9xzPAo9TO3dVrwqXjoRgcsmtB
+         I9r+FUMyvmLZEcIujT3LIcVUDjl1W0PR66Ccv8TWFehbDvaKsGkh6k3XYu/9n+jg1DWi
+         dAnbQtvjaFZw0Y6R/PWoVYXbfArpPrMu+FUa9ywIpS7MTm0Dy4P/rPk8oxcuDGjuIQOA
+         5yZ8AuKrZ8VSm85xFFy0XKlRO8YNhVUi5FhwV8gLkxEPu1uBd7DRGI6bewwBi+LOGj2/
+         x50AfyF4MY771dKLQ0KN+cvDGZ5x+TV4cuhp5A1zK8/ACyAiKgeb5zzNuM5kWgfivGrv
+         wQ8w==
+X-Gm-Message-State: AOAM532Io186dDxye4XkHS1WPZ5fAgKukbDIln27DMOELEr23KLwhMKW
+        axFjIA8Vj7DhdNYITco3dqkOreYugcbJxTnv
+X-Google-Smtp-Source: ABdhPJw7zZP5KFEI9ROLR7SsICqR8YmYUY2Q43lah1ObGtbmhfNWChCCfHzfSPs1jB5+OPiOCa/ySA==
+X-Received: by 2002:a2e:98cf:: with SMTP id s15mr387045ljj.446.1601625305093;
+        Fri, 02 Oct 2020 00:55:05 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-133-169.NA.cust.bahnhof.se. [155.4.133.169])
+        by smtp.gmail.com with ESMTPSA id y80sm147200lff.254.2020.10.02.00.55.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 02 Oct 2020 00:55:03 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC/MEMSTICK fixes for v5.9-rc8
+Date:   Fri,  2 Oct 2020 09:55:02 +0200
+Message-Id: <20201002075502.130199-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In mmc_queue_setup_discard() the mmc driver queue's discard_granularity
-might be set as 0 (when card->pref_erase > max_discard) while the mmc
-device still declares to support discard operation. This is buggy and
-triggered the following kernel warning message,
+Hi Linus,
 
-WARNING: CPU: 0 PID: 135 at __blkdev_issue_discard+0x200/0x294
-CPU: 0 PID: 135 Comm: f2fs_discard-17 Not tainted 5.9.0-rc6 #1
-Hardware name: Google Kevin (DT)
-pstate: 00000005 (nzcv daif -PAN -UAO BTYPE=--)
-pc : __blkdev_issue_discard+0x200/0x294
-lr : __blkdev_issue_discard+0x54/0x294
-sp : ffff800011dd3b10
-x29: ffff800011dd3b10 x28: 0000000000000000 x27: ffff800011dd3cc4 x26: ffff800011dd3e18 x25: 000000000004e69b x24: 0000000000000c40 x23: ffff0000f1deaaf0 x22: ffff0000f2849200 x21: 00000000002734d8 x20: 0000000000000008 x19: 0000000000000000 x18: 0000000000000000 x17: 0000000000000000 x16: 0000000000000000 x15: 0000000000000000 x14: 0000000000000394 x13: 0000000000000000 x12: 0000000000000000 x11: 0000000000000000 x10: 00000000000008b0 x9 : ffff800011dd3cb0 x8 : 000000000004e69b x7 : 0000000000000000 x6 : ffff0000f1926400 x5 : ffff0000f1940800 x4 : 0000000000000000 x3 : 0000000000000c40 x2 : 0000000000000008 x1 : 00000000002734d8 x0 : 0000000000000000 Call trace:
-__blkdev_issue_discard+0x200/0x294
-__submit_discard_cmd+0x128/0x374
-__issue_discard_cmd_orderly+0x188/0x244
-__issue_discard_cmd+0x2e8/0x33c
-issue_discard_thread+0xe8/0x2f0
-kthread+0x11c/0x120
-ret_from_fork+0x10/0x1c
----[ end trace e4c8023d33dfe77a ]---
+Here's a PR with an MMC and a MEMSTICK fix, intended for v5.9-rc7. Details about
+the highlights are as usual found in the signed tag.
 
-This patch fixes the issue by setting discard_granularity as SECTOR_SIZE
-instead of 0 when (card->pref_erase > max_discard) is true. Now no more
-complain from __blkdev_issue_discard() for the improper value of discard
-granularity.
+Please pull this in!
 
-This issue is exposed after commit b35fd7422c2f ("block: check queue's
-limits.discard_granularity in __blkdev_issue_discard()"), a "Fixes:" tag
-is also added for the commit to make sure people won't miss this patch
-after applying the change of __blkdev_issue_discard().
+Kind regards
+Ulf Hansson
 
-Fixes: e056a1b5b67b ("mmc: queue: let host controllers specify maximum discard timeout")
-Fixes: b35fd7422c2f ("block: check queue's limits.discard_granularity in __blkdev_issue_discard()").
-Reported-and-tested-by: Vicente Bergas <vicencb@gmail.com>
-Signed-off-by: Coly Li <colyli@suse.de>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
----
-Changelog,
-v4, update to Reported-and-tested-by tag for Vicente Bergas.
-v3, add Fixes tag for both commits.
-v2, change commit id of the Fixes tag.
-v1, initial version.
 
- drivers/mmc/core/queue.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+The following changes since commit 14801c624066a55139c2c57963eb1b859d0a316a:
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 6c022ef0f84d..350d0cc4ee62 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -190,7 +190,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
- 	q->limits.discard_granularity = card->pref_erase << 9;
- 	/* granularity must not be greater than max. discard */
- 	if (card->pref_erase > max_discard)
--		q->limits.discard_granularity = 0;
-+		q->limits.discard_granularity = SECTOR_SIZE;
- 	if (mmc_can_secure_erase_trim(card))
- 		blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
- }
--- 
-2.26.2
+  mmc: mmc_spi: Fix mmc_spi_dma_alloc() return type for !HAS_DMA (2020-09-14 11:46:16 +0200)
 
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.9-rc4-3
+
+for you to fetch changes up to afd7f30886b0b445a4240a99020458a9772f2b89:
+
+  mmc: sdhci: Workaround broken command queuing on Intel GLK based IRBIS models (2020-09-28 12:16:47 +0200)
+
+----------------------------------------------------------------
+MEMSTICK core:
+ - Fix deadlock when removing the host
+
+MMC host:
+ - sdhci-pci: Workaround broken CMDQ on Intel GLK based IRBIS models
+
+----------------------------------------------------------------
+Hans de Goede (1):
+      mmc: sdhci: Workaround broken command queuing on Intel GLK based IRBIS models
+
+Kai-Heng Feng (1):
+      memstick: Skip allocating card when removing host
+
+ drivers/memstick/core/memstick.c  | 4 ++++
+ drivers/mmc/host/sdhci-pci-core.c | 3 ++-
+ include/linux/memstick.h          | 1 +
+ 3 files changed, 7 insertions(+), 1 deletion(-)
