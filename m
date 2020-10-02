@@ -2,150 +2,105 @@ Return-Path: <SRS0=YnZp=DJ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F3C9C4363D
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 11:01:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6523CC4363D
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 12:57:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C496D20719
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 11:01:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2A9EE20708
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Oct 2020 12:57:21 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="N6+ZDP0R"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725920AbgJBLBE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 2 Oct 2020 07:01:04 -0400
-Received: from foss.arm.com ([217.140.110.172]:60560 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725953AbgJBLBE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 2 Oct 2020 07:01:04 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 2386E1042;
-        Fri,  2 Oct 2020 04:01:03 -0700 (PDT)
-Received: from bogus (unknown [10.57.48.110])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id B05B83F73B;
-        Fri,  2 Oct 2020 04:01:00 -0700 (PDT)
-Date:   Fri, 2 Oct 2020 12:00:57 +0100
-From:   Sudeep Holla <sudeep.holla@arm.com>
-To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
-        "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        "Wan Mohamad, Wan Ahmad Zainie" 
-        <wan.ahmad.zainie.wan.mohamad@intel.com>
-Subject: Re: [PATCH v2 2/3] firmware: Keem Bay: Add support for Arm Trusted
- Firmware Service call
-Message-ID: <20201002110057.GF906@bogus>
-References: <20201001142149.23445-1-muhammad.husaini.zulkifli@intel.com>
- <20201001142149.23445-3-muhammad.husaini.zulkifli@intel.com>
- <20201001153526.GD906@bogus>
- <ce2bcac9-8341-d7c1-0652-309ca4e9413c@xilinx.com>
- <BYAPR11MB301522E94B9516558A23F758B8310@BYAPR11MB3015.namprd11.prod.outlook.com>
+        id S2387862AbgJBM5U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Oct 2020 08:57:20 -0400
+Received: from aserp2130.oracle.com ([141.146.126.79]:50426 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726017AbgJBM5U (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Oct 2020 08:57:20 -0400
+Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
+        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 092CeFiN068695;
+        Fri, 2 Oct 2020 12:57:14 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=to : cc : subject :
+ from : message-id : references : date : in-reply-to : mime-version :
+ content-type; s=corp-2020-01-29;
+ bh=Yz+Q6OE1DXZBCUdtHcDuHW69uia55WS2ndwEbX+ut20=;
+ b=N6+ZDP0R6cAyerDaiKg41K5byE5nc4auXRnESlnhLPd2osbRrAE7QflgU+Clbl0q2N9E
+ WjdEbHhSqp6IX/KxluBzL8LMYL9hrHRLfzUw7i7B9oKA4xdeFZ1ohpwlEAJ72qlwSmvh
+ oBFk1mGosAaJZWF2Jep8NElDM8D+YyHxg5ytInqnkweRSfYSnqKItdvCgh2dh6arqUE4
+ 8jTadlvtxsT0zNDrap93w8lVKg2KpqNvjMqs0Uc2nRZkv3kKz0+H3XHIv0/jjQcrXII2
+ jFaYPU+sHYhOEt0op8QEDux6s3EEq+4okEIs6uw7d0Oyv8NHqMy3MCrkn+/bpNL8jRoG cw== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2130.oracle.com with ESMTP id 33wupg1q61-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 02 Oct 2020 12:57:14 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 092CuZbI176214;
+        Fri, 2 Oct 2020 12:57:13 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by aserp3020.oracle.com with ESMTP id 33tfj3226b-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 02 Oct 2020 12:57:13 +0000
+Received: from abhmp0012.oracle.com (abhmp0012.oracle.com [141.146.116.18])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 092CvCuS027221;
+        Fri, 2 Oct 2020 12:57:12 GMT
+Received: from ca-mkp.ca.oracle.com (/10.159.214.123)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Fri, 02 Oct 2020 05:57:11 -0700
+To:     Coly Li <colyli@suse.de>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-block@vger.kernel.org, Vicente Bergas <vicencb@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v4] mmc: core: don't set limits.discard_granularity as 0
+From:   "Martin K. Petersen" <martin.petersen@oracle.com>
+Organization: Oracle Corporation
+Message-ID: <yq1pn60g5r4.fsf@ca-mkp.ca.oracle.com>
+References: <20201002013852.51968-1-colyli@suse.de>
+Date:   Fri, 02 Oct 2020 08:57:09 -0400
+In-Reply-To: <20201002013852.51968-1-colyli@suse.de> (Coly Li's message of
+        "Fri, 2 Oct 2020 09:38:52 +0800")
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <BYAPR11MB301522E94B9516558A23F758B8310@BYAPR11MB3015.namprd11.prod.outlook.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+Content-Type: text/plain
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9761 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxlogscore=999 bulkscore=0
+ phishscore=0 malwarescore=0 adultscore=0 suspectscore=1 mlxscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2010020100
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9761 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 malwarescore=0
+ lowpriorityscore=0 impostorscore=0 priorityscore=1501 clxscore=1011
+ phishscore=0 mlxscore=0 bulkscore=0 spamscore=0 mlxlogscore=999
+ suspectscore=1 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2010020099
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 02, 2020 at 10:22:46AM +0000, Zulkifli, Muhammad Husaini wrote:
-> Hi Sudeep,
-> 
-> >-----Original Message-----
-> >From: Michal Simek <michal.simek@xilinx.com>
-> >Sent: Friday, October 2, 2020 4:23 PM
-> >To: Sudeep Holla <sudeep.holla@arm.com>; Zulkifli, Muhammad Husaini
-> ><muhammad.husaini.zulkifli@intel.com>
-> >Cc: Hunter, Adrian <adrian.hunter@intel.com>; michal.simek@xilinx.com;
-> >ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-arm-
-> >kernel@lists.infradead.org; linux-kernel@vger.kernel.org; Raja Subramanian,
-> >Lakshmi Bai <lakshmi.bai.raja.subramanian@intel.com>; arnd@arndb.de; Wan
-> >Mohamad, Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>
-> >Subject: Re: [PATCH v2 2/3] firmware: Keem Bay: Add support for Arm Trusted
-> >Firmware Service call
-> >
-> >Hi Sudeep,
-> >
-> >On 01. 10. 20 17:35, Sudeep Holla wrote:
-> >> On Thu, Oct 01, 2020 at 10:21:48PM +0800,
-> >muhammad.husaini.zulkifli@intel.com wrote:
-> >>> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-> >>>
-> >>> Add generic firmware driver for Keem Bay SOC to support Arm Trusted
-> >>> Firmware Services call.
-> >>>
-> >>> Signed-off-by: Muhammad Husaini Zulkifli
-> >>> <muhammad.husaini.zulkifli@intel.com>
-> >>> ---
-> >>>  drivers/firmware/Kconfig                   |   1 +
-> >>>  drivers/firmware/Makefile                  |   1 +
-> >>>  drivers/firmware/intel/Kconfig             |  14 +++
-> >>>  drivers/firmware/intel/Makefile            |   4 +
-> >>>  drivers/firmware/intel/keembay_smc.c       | 119 +++++++++++++++++++++
-> >>>  include/linux/firmware/intel/keembay_smc.h |  27 +++++
-> >>>  6 files changed, 166 insertions(+)
-> >>>  create mode 100644 drivers/firmware/intel/Kconfig  create mode
-> >>> 100644 drivers/firmware/intel/Makefile  create mode 100644
-> >>> drivers/firmware/intel/keembay_smc.c
-> >>>  create mode 100644 include/linux/firmware/intel/keembay_smc.h
-> >>>
-> >>> diff --git a/drivers/firmware/Kconfig b/drivers/firmware/Kconfig
-> >>> index fbd785dd0513..41de77d2720e 100644
-> >>> --- a/drivers/firmware/Kconfig
-> >>> +++ b/drivers/firmware/Kconfig
-> >>> @@ -305,5 +305,6 @@ source "drivers/firmware/psci/Kconfig"
-> >>>  source "drivers/firmware/smccc/Kconfig"
-> >>>  source "drivers/firmware/tegra/Kconfig"
-> >>>  source "drivers/firmware/xilinx/Kconfig"
-> >>> +source "drivers/firmware/intel/Kconfig"
-> >>>
-> >>>  endmenu
-> >>> diff --git a/drivers/firmware/Makefile b/drivers/firmware/Makefile
-> >>> index 99510be9f5ed..00f295ab9860 100644
-> >>> --- a/drivers/firmware/Makefile
-> >>> +++ b/drivers/firmware/Makefile
-> >>> @@ -33,3 +33,4 @@ obj-y				+= psci/
-> >>>  obj-y				+= smccc/
-> >>>  obj-y				+= tegra/
-> >>>  obj-y				+= xilinx/
-> >>> +obj-y				+= intel/
-> >>> diff --git a/drivers/firmware/intel/Kconfig
-> >>> b/drivers/firmware/intel/Kconfig new file mode 100644 index
-> >>> 000000000000..b2b7a4e5410b
-> >>> --- /dev/null
-> >>> +++ b/drivers/firmware/intel/Kconfig
-> >>> @@ -0,0 +1,14 @@
-> >>> +# SPDX-License-Identifier: GPL-2.0-only menu "Intel Firmware
-> >>> +Drivers"
-> >>> +
-> >>> +config KEEMBAY_FIRMWARE
-> >>> +	bool "Enable Keem Bay firmware interface support"
-> >>> +	depends on HAVE_ARM_SMCCC
-> >>
-> >> What is the version of SMCCC implemented ?
-> Our current Arm Trusted Firmware framework supports v1.1.
-> Does it mean I should use HAVE_ARM_SMCCC_DISCOVERY?
 
-Yes, HAVE_ARM_SMCCC_DISCOVERY is right dependency and allows you to
-get smccc version via arm_smccc_get_version which may be useful in
-future.
+Coly,
 
-> Not really clear about this. As for HAVE_ARM_SMCCC will include 
-> support for the SMC and HVC.
->
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 6c022ef0f84d..350d0cc4ee62 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -190,7 +190,7 @@ static void mmc_queue_setup_discard(struct request_queue *q,
+>  	q->limits.discard_granularity = card->pref_erase << 9;
+>  	/* granularity must not be greater than max. discard */
+>  	if (card->pref_erase > max_discard)
+> -		q->limits.discard_granularity = 0;
+> +		q->limits.discard_granularity = SECTOR_SIZE;
+>  	if (mmc_can_secure_erase_trim(card))
+>  		blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
+>  }
 
-Yes, but for sake of correctness I prefer HAVE_ARM_SMCCC_DISCOVERY.
+The granularity should probably be set to the logical block size instead
+of SECTOR_SIZE. However, looking at mmc_setup_queue() it doesn't appear
+the logical block size is read from the CSD until after discard has been
+configured. So that will require a bit of code shuffling.
 
 -- 
-Regards,
-Sudeep
+Martin K. Petersen	Oracle Linux Engineering
