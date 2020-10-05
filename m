@@ -2,101 +2,178 @@ Return-Path: <SRS0=j7Ik=DM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22B72C4363A
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 08:55:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 146A0C47425
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 09:36:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D7A412078D
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 08:55:57 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="1bVjaYXP";
-	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="Nn+A19Q+"
+	by mail.kernel.org (Postfix) with ESMTP id CB5932074F
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 09:36:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725905AbgJEIz5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 04:55:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44218 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725885AbgJEIz4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 04:55:56 -0400
-Received: from galois.linutronix.de (Galois.linutronix.de [IPv6:2a0a:51c0:0:12e:550::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1320C0613CE;
-        Mon,  5 Oct 2020 01:55:56 -0700 (PDT)
-From:   Thomas Gleixner <tglx@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020; t=1601888154;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=tIhP0FuIGl8w6hVtstWYo1miB0t+IY3lSNHO1NwBAUg=;
-        b=1bVjaYXPTOWxPjjCZXbGOhko1pl72m1MMxVgnEKe/Z72kbb9a8fAxnZ7B+EGasuIXh3BW6
-        0Uxci4nPv8Drste3gRfkwbq4oOe3hhNIiUcCtKXEeLfyTrKIEWUYX2ZI6ZTqYzu6JHz7bj
-        wk0Qt1WFy96m4OPF87gOw0oa/DYY3cnKi21RacudiD4S/POjFaBFaZXXmZ69QQdYb+FniR
-        gGNjxcGOZ8fZZcm7ficHllUgV2lccAwnU7FCb5drk4Rs9XgTPEngyLbOzQbZd+OJos+ekc
-        VQPZ4jDBfT2JwbnPVjI55zcZORLi2YTWEtueqYvD6+lJGRYH6Tze8AItfGMdNA==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020e; t=1601888154;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=tIhP0FuIGl8w6hVtstWYo1miB0t+IY3lSNHO1NwBAUg=;
-        b=Nn+A19Q+Lozpu8w7R4t0zbn+T9kc7/1vuZQhI5Wg6N3F0nR0r8evtwNibaf602A4ecMxS9
-        m5hTCF8F9bbSbtAg==
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Jerome Brunet <jbrunet@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        "open list\:ARM\/Amlogic Meson..." 
-        <linux-amlogic@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Brad Harper <bjharper@gmail.com>,
-        Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Subject: Re: [PATCH] mmc: meson-gx: remove IRQF_ONESHOT
-In-Reply-To: <CAPDyKFo6T_P+TQQZSzFgHwLeE08f146KxKBpAutv209MXq0mjA@mail.gmail.com>
-References: <20201002164915.938217-1-jbrunet@baylibre.com> <CAPDyKFo6T_P+TQQZSzFgHwLeE08f146KxKBpAutv209MXq0mjA@mail.gmail.com>
-Date:   Mon, 05 Oct 2020 10:55:54 +0200
-Message-ID: <87wo052grp.fsf@nanos.tec.linutronix.de>
+        id S1726070AbgJEJg3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 05:36:29 -0400
+Received: from lhrrgout.huawei.com ([185.176.76.210]:2954 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725919AbgJEJg1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 5 Oct 2020 05:36:27 -0400
+Received: from lhreml710-chm.china.huawei.com (unknown [172.18.7.107])
+        by Forcepoint Email with ESMTP id 094B3ABD20918B3B41D5;
+        Mon,  5 Oct 2020 10:36:23 +0100 (IST)
+Received: from localhost (10.52.124.175) by lhreml710-chm.china.huawei.com
+ (10.201.108.61) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1913.5; Mon, 5 Oct 2020
+ 10:36:21 +0100
+Date:   Mon, 5 Oct 2020 10:34:36 +0100
+From:   Jonathan Cameron <Jonathan.Cameron@Huawei.com>
+To:     Rob Herring <robh@kernel.org>
+CC:     <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        "Thierry Reding" <thierry.reding@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        "Baolin Wang" <baolin.wang7@gmail.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        "Vinod Koul" <vkoul@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        <linux-clk@vger.kernel.org>, <dri-devel@lists.freedesktop.org>,
+        <linux-spi@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
+        <linux-hwmon@vger.kernel.org>, <linux-iio@vger.kernel.org>,
+        <openipmi-developer@lists.sourceforge.net>,
+        <linux-leds@vger.kernel.org>, <linux-media@vger.kernel.org>,
+        <linux-rockchip@lists.infradead.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-mips@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <netdev@vger.kernel.org>, <linux-pci@vger.kernel.org>,
+        <linux-pm@vger.kernel.org>, <linux-remoteproc@vger.kernel.org>,
+        <linux-serial@vger.kernel.org>, <alsa-devel@alsa-project.org>,
+        <linux-usb@vger.kernel.org>
+Subject: Re: [PATCH] dt-bindings: Another round of adding missing
+ 'additionalProperties'
+Message-ID: <20201005093436.00004913@Huawei.com>
+In-Reply-To: <20201002234143.3570746-1-robh@kernel.org>
+References: <20201002234143.3570746-1-robh@kernel.org>
+Organization: Huawei Technologies Research and Development (UK) Ltd.
+X-Mailer: Claws Mail 3.17.4 (GTK+ 2.24.32; i686-w64-mingw32)
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="US-ASCII"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.52.124.175]
+X-ClientProxiedBy: lhreml730-chm.china.huawei.com (10.201.108.81) To
+ lhreml710-chm.china.huawei.com (10.201.108.61)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Oct 05 2020 at 10:22, Ulf Hansson wrote:
-> On Fri, 2 Oct 2020 at 18:49, Jerome Brunet <jbrunet@baylibre.com> wrote:
->>
->> IRQF_ONESHOT was added to this driver to make sure the irq was not enabled
->> again until the thread part of the irq had finished doing its job.
->>
->> Doing so upsets RT because, under RT, the hardirq part of the irq handler
->> is not migrated to a thread if the irq is claimed with IRQF_ONESHOT.
->> In this case, it has been reported to eventually trigger a deadlock with
->> the led subsystem.
->>
->> Preventing RT from doing this migration was certainly not the intent, the
->> description of IRQF_ONESHOT does not really reflect this constraint:
->>
->>  > IRQF_ONESHOT - Interrupt is not reenabled after the hardirq handler finished.
->>  >              Used by threaded interrupts which need to keep the
->>  >              irq line disabled until the threaded handler has been run.
->>
->> This is exactly what this driver was trying to acheive so I'm still a bit
->> confused whether this is a driver or an RT issue.
->>
->> Anyway, this can be solved driver side by manually disabling the IRQs
->> instead of the relying on the IRQF_ONESHOT. IRQF_ONESHOT may then be removed
->> while still making sure the irq won't trigger until the threaded part of
->> the handler is done.
->
-> Thomas, may I have your opinion on this one.
->
-> I have no problem to apply $subject patch, but as Jerome also
-> highlights above - this kind of makes me wonder if this is an RT
-> issue, that perhaps deserves to be solved in a generic way.
->
-> What do you think?
+On Fri, 2 Oct 2020 18:41:43 -0500
+Rob Herring <robh@kernel.org> wrote:
 
-Let me stare at the core code. Something smells fishy.
+> Another round of wack-a-mole. The json-schema default is additional
+> unknown properties are allowed, but for DT all properties should be
+> defined.
+> 
+> Cc: Thierry Reding <thierry.reding@gmail.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Stephen Boyd <sboyd@kernel.org>
+> Cc: Shawn Guo <shawnguo@kernel.org>
+> Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+> Cc: Baolin Wang <baolin.wang7@gmail.com>
+> Cc: Guenter Roeck <linux@roeck-us.net>
+> Cc: Jonathan Cameron <jic23@kernel.org>
+> Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
+> Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
+> Cc: Lee Jones <lee.jones@linaro.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Bjorn Helgaas <bhelgaas@google.com>
+> Cc: Vinod Koul <vkoul@kernel.org>
+> Cc: Liam Girdwood <lgirdwood@gmail.com>
+> Cc: Mark Brown <broonie@kernel.org>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
+> Cc: linux-clk@vger.kernel.org
+> Cc: dri-devel@lists.freedesktop.org
+> Cc: linux-spi@vger.kernel.org
+> Cc: linux-gpio@vger.kernel.org
+> Cc: linux-hwmon@vger.kernel.org
+> Cc: linux-iio@vger.kernel.org
+> Cc: openipmi-developer@lists.sourceforge.net
+> Cc: linux-leds@vger.kernel.org
+> Cc: linux-media@vger.kernel.org
+> Cc: linux-rockchip@lists.infradead.org
+> Cc: linux-stm32@st-md-mailman.stormreply.com
+> Cc: linux-mips@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: netdev@vger.kernel.org
+> Cc: linux-pci@vger.kernel.org
+> Cc: linux-pm@vger.kernel.org
+> Cc: linux-remoteproc@vger.kernel.org
+> Cc: linux-serial@vger.kernel.org
+> Cc: alsa-devel@alsa-project.org
+> Cc: linux-usb@vger.kernel.org
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+
+Hi Rob,
+
+Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com> # for iio
+
+
+However, one of these made me wonder if the binding was simply wrong...
+(definitely highlights why we should have additionalProperties: false
+where ever possible).
+
+...
+
+
+> diff --git a/Documentation/devicetree/bindings/iio/imu/invensense,icm42600.yaml b/Documentation/devicetree/bindings/iio/imu/invensense,icm42600.yaml
+> index abd8d25e1136..4c1c083d0e92 100644
+> --- a/Documentation/devicetree/bindings/iio/imu/invensense,icm42600.yaml
+> +++ b/Documentation/devicetree/bindings/iio/imu/invensense,icm42600.yaml
+> @@ -47,11 +47,17 @@ properties:
+>    vddio-supply:
+>      description: Regulator that provides power to the bus
+>  
+> +  spi-max-frequency: true
+> +  spi-cpha: true
+> +  spi-cpol: true
+
+It isn't completely unheard of for a device to operate in multiple SPI modes, but
+it does seem to be fairly unusual.  I took a look at the datasheet and at least
+from the provided timing diagrams, these are both required in SPI mode.
+
+http://invensense.tdk.com/wp-content/uploads/2020/09/DS-000292-ICM-42605-v1.5.pdf
+
+That doesn't make the binding wrong as such, but we could be tighter in checking this!
+
+I'll add this to my list to take a closer look at sometime soonish.
+
+Thanks.
+
+Jonathan
+
+> +
+>  required:
+>    - compatible
+>    - reg
+>    - interrupts
+>  
+> +additionalProperties: false
+> +
+>  examples:
+>    - |
+
