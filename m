@@ -2,238 +2,157 @@ Return-Path: <SRS0=j7Ik=DM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4690BC4363A
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 12:41:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34B91C4727E
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 13:04:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D13CB20665
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 12:41:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DF41120848
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 13:04:13 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="w4lwZr5a"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MJJUt8Vw"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725994AbgJEMlq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 08:41:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50932 "EHLO
+        id S1726248AbgJENEM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 09:04:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54466 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725983AbgJEMlp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 08:41:45 -0400
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACB70C0613A8
-        for <linux-mmc@vger.kernel.org>; Mon,  5 Oct 2020 05:41:45 -0700 (PDT)
-Received: by mail-vs1-xe43.google.com with SMTP id u74so1573067vsc.2
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2020 05:41:45 -0700 (PDT)
+        with ESMTP id S1726747AbgJENEL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 09:04:11 -0400
+Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F13EBC0613AB
+        for <linux-mmc@vger.kernel.org>; Mon,  5 Oct 2020 05:51:34 -0700 (PDT)
+Received: by mail-ua1-x941.google.com with SMTP id d18so2457402uav.4
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2020 05:51:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=QE8OHLLcshoqgjao9rxTR2B1cn1gmKyp5nFcvuAzyYM=;
-        b=w4lwZr5ahf5vTfr/Sla6b9a6dJJrqMnNnrGCPpE0A2wgptS0+tqhygVB/9v5pdY9tq
-         EPJSfiiRWtTDaHXg5QxfgPtgsr6eVXsd5vY8SOM3X5IOjGHhZrbuIQXyyPKjaUX8dLa6
-         UIoQYFdsNUiMnVM5DsdprGSSd3qR6RJ7OMFeNT+N43JBkBWzthRqYPGIRMA6MfnhUjDG
-         0c+wWti7GTA7T4jaI9by9FdHpfMknlUb+dG2dUAfXt7RPnbPhVm6V1vOTEwrce449Fsz
-         03LBUC4NbemiPguroR9bJNjOWUXBqcX7Nrb/AGC+7ptNcprwfJQqzkoBibsti/lCJmrA
-         tZPw==
+        bh=L/LfR7NJhI/H8i1pAKdmMvy4/cqEVQbECiWw0Fq0bpc=;
+        b=MJJUt8VwaOPdbm4HjQXuthgVqUomQWYNK1q8/Z1X+NK+vFPBhzvXU4X82HhL+PEX51
+         EMY2VN0zm9t47yr0V8DHbbl8K1I6+W4jfo360sxhwNam4im3Y8xZw+k+3x1mZP8dlNlL
+         N7rm12o4IGF2Dv++YtJC+FVealjFOqidUo6gJJXg+s6o9Z/bmxKab9oFVBJinl+CEvAP
+         kBFxGzFZRJ0JL9RbtB7G9JCUm2n2hMGhcxLIh1V6+mzh0Tx7PhuqGbM0iAG+h2BAhMU7
+         QDY00Dr2xXBKrC5qzAElIjExQUyO+Kl4N4J7wnIQZ3iDU7CwmzWgwikOoHqdqE676YV4
+         Ut0w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=QE8OHLLcshoqgjao9rxTR2B1cn1gmKyp5nFcvuAzyYM=;
-        b=aidVnps7nqin0VxpYOzqYZpg+NfjFsb7dHgVdUrb/6eAFa8maWwDT9zy1K1BcYxxKM
-         paeWCn1KC9+lISSwpmt621R6exNHooNnlFu4XQDlTpU56h82uvFkNqg0CbX6x92s2yBS
-         mloKBC6EheIiJZKASdkA5bw3Jr653nK25IHRnKejwFXqMa93v/EOHU5ONH5Wv45wip4U
-         803R2LIiRAbtmf1x958vYOlLrIsLMdSRPrdosWomm3w+l8xRd2IqOgUKdRqjb7wB8EvZ
-         aDf1PifhCVpcs7c6Fdc6QlCOsSSA66d+BsP8iVYEmQQma0jUdhEqNmAg52ial/qQ9m7Y
-         kjyQ==
-X-Gm-Message-State: AOAM530acS2IRF+O9axvbklN2y/+wADCyr29JyjD9va9u2VFLhO0M+AB
-        UUAkIr0iNTeic37km3hjTPKCSL5agCHpSOyjuIxXqQ==
-X-Google-Smtp-Source: ABdhPJxW3PRcgihH+QhiZOdYzkdNBQPK1MQvkyo/5kU829snF+RDUnnYIRaeoeosnQLf5x/uy3/9W6WqD+wG+F7Wjt8=
-X-Received: by 2002:a67:ec9a:: with SMTP id h26mr7259024vsp.34.1601901704719;
- Mon, 05 Oct 2020 05:41:44 -0700 (PDT)
+        bh=L/LfR7NJhI/H8i1pAKdmMvy4/cqEVQbECiWw0Fq0bpc=;
+        b=Pks+uVqy5TEbWUVyRQsHcpjeoD9Fx1jHoeiUxBDbDileMedshLOEcc8kFN+mybLeJj
+         1DXQ8fxS5IpKdJFCZf83EpUSkK6lVcnKcdWu04/9MxxDawA6x8Ry/ndQWqSSV9R6JTbT
+         +51QMwCnI8HTuQuLafBm9zeaSGVGGw2P4qmMoTDJmnBVZPAvrYVhN2t4RalC0l6u3Z+B
+         2ztdSs6RxWaZPdqMk2K7lpMK42RFthOXCdVrc9OgCnIwOQQz9ShpVCogayFgRBJWFkfj
+         0omBTZdGnfSspq0PR6YkragxZPdo0AUFs/bjU9iK1Sc9L3bluNsITF1uoMRv3MnJugwu
+         5qGQ==
+X-Gm-Message-State: AOAM533YrdBEbKX3P+ALfGOvwW3gJ9VmjVdk95xQ0DFPIzqFV6dRIx18
+        1RUkBYcAm3HLabjEo39ZuKXYnYn9x1Sgqth02IkLlg==
+X-Google-Smtp-Source: ABdhPJzPIU3rO0XQQWE8ktzHhBsePAKbz9xMOVOvI0oS3ypXApmhEF0SLXDb+F/ccePvQwO13Y1JEdc5rrt/NN8PPQw=
+X-Received: by 2002:ab0:6f91:: with SMTP id f17mr7047512uav.129.1601902294152;
+ Mon, 05 Oct 2020 05:51:34 -0700 (PDT)
 MIME-Version: 1.0
-References: <20200930083120.11971-1-wenbin.mei@mediatek.com> <20200930083120.11971-2-wenbin.mei@mediatek.com>
-In-Reply-To: <20200930083120.11971-2-wenbin.mei@mediatek.com>
+References: <20200928154718.1.Icc21d4b2f354e83e26e57e270dc952f5fe0b0a40@changeid>
+ <20200928154718.2.Ic6b6031366f090393d00a53fd69e1ada31ceb29e@changeid>
+In-Reply-To: <20200928154718.2.Ic6b6031366f090393d00a53fd69e1ada31ceb29e@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 5 Oct 2020 14:41:08 +0200
-Message-ID: <CAPDyKFrM9o7DjBstQXEnKcLsAt0uNh7xKTYEYrz=JTBM9TKgpQ@mail.gmail.com>
-Subject: Re: [PATCH v3 1/4] dt-bindings: mmc: Convert mtk-sd to json-schema
-To:     Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        srv_heupstream <srv_heupstream@mediatek.com>
+Date:   Mon, 5 Oct 2020 14:50:58 +0200
+Message-ID: <CAPDyKFrVtz29w=gONGO8_sGDQU-ZSXH2NyMuwRL7-27ae=jt_A@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-acpi: AMDI0040: Allow changing HS200/HS400
+ driver strength
+To:     Raul E Rangel <rrangel@chromium.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>, Shirish.S@amd.com,
+        Akshu Agrawal <Akshu.Agrawal@amd.com>,
+        "Shah, Nehal-bakulchandra" <Nehal-bakulchandra.Shah@amd.com>,
+        "Wang, Chris" <chris.wang@amd.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+On Mon, 28 Sep 2020 at 23:59, Raul E Rangel <rrangel@chromium.org> wrote:
+>
+> This change will allow platform designers better control over signal
+> integrity by allowing them to tune the HS200 and HS400 driver strengths.
+>
+> The driver strength was previously hard coded to A to solve boot
+> problems with certain platforms. This driver strength does not
+> universally apply to all platforms so we need a knob to adjust it.
+>
+> All older platforms currently have the SDR104 preset hard coded to A in
+> the firmware. This means that switching from the hard coded value in
+> the kernel to reading the SDR104 preset is a no-op for these platforms.
+> Newer platforms will have properly set presets. So this change will
+> support both new and old platforms.
+>
+> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> new file mode 100644
-> index 000000000000..7f89cbdc52a5
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -0,0 +1,168 @@
-> +# SPDX-License-Identifier: GPL-2.0
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/mtk-sd.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: MTK MSDC Storage Host Controller Binding
-> +
-> +maintainers:
-> +  - Chaotian Jing <chaotian.jing@mediatek.com>
-> +  - Wenbin Mei <wenbin.mei@mediatek.com>
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - enum:
-> +        - mediatek,mt2701-mmc
-> +        - mediatek,mt2712-mmc
-> +        - mediatek,mt6779-mmc
-> +        - mediatek,mt7620-mmc
-> +        - mediatek,mt7622-mmc
-> +        - mediatek,mt8135-mmc
-> +        - mediatek,mt8173-mmc
-> +        - mediatek,mt8183-mmc
-> +        - mediatek,mt8516-mmc
-> +      - items:
-> +        - const: mediatek,mt7623-mmc
-> +        - const: mediatek,mt2701-mmc
-> +
-> +  clocks:
-> +    description:
-> +      Should contain phandle for the clock feeding the MMC controller.
-> +    minItems: 2
-> +    maxItems: 4
-> +    items:
-> +      - description: source clock (required).
-> +      - description: HCLK which used for host (required).
-> +      - description: independent source clock gate (required for MT2712).
-> +      - description: bus clock used for internal register access (required for MT2712 MSDC0/3).
-> +
-> +  clock-names:
-> +    minItems: 2
-> +    maxItems: 4
-> +    items:
-> +      - const: source
-> +      - const: hclk
-> +      - const: source_cg
-> +      - const: bus_clk
-> +
-> +  pinctrl-names:
-> +    items:
-> +      - const: default
-> +      - const: state_uhs
-> +
-> +  pinctrl-0:
-> +    description:
-> +      should contain default/high speed pin ctrl.
-> +    maxItems: 1
-> +
-> +  pinctrl-1:
-> +    description:
-> +      should contain uhs mode pin ctrl.
-> +    maxItems: 1
-> +
-> +  vmmc-supply:
-> +    description:
-> +      power to the Core.
-> +    maxItems: 1
-> +
-> +  vqmmc-supply:
-> +    description:
-> +      power to the IO.
-> +    maxItems: 1
-
-The vmmc and vqmmc are described in the mmc-controller.yaml, so
-shouldn't be needed here.
-
-> +
-> +  assigned-clocks:
-> +    description:
-> +      PLL of the source clock.
-> +    maxItems: 1
-> +
-> +  assigned-clock-parents:
-> +    description:
-> +      parent of source clock, used for HS400 mode to get 400Mhz source clock.
-> +    maxItems: 1
-> +
-> +  hs400-ds-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      HS400 DS delay setting.
-> +    minimum: 0
-> +    maximum: 0xffffffff
-> +
-> +  mediatek,hs200-cmd-int-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      HS200 command internal delay setting.
-> +      This field has total 32 stages.
-> +      The value is an integer from 0 to 31.
-> +    minimum: 0
-> +    maximum: 31
-> +
-> +  mediatek,hs400-cmd-int-delay:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      HS400 command internal delay setting.
-> +      This field has total 32 stages.
-> +      The value is an integer from 0 to 31.
-> +    minimum: 0
-> +    maximum: 31
-> +
-> +  mediatek,hs400-cmd-resp-sel-rising:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      HS400 command response sample selection.
-> +      If present, HS400 command responses are sampled on rising edges.
-> +      If not present, HS400 command responses are sampled on falling edges.
-> +
-> +  mediatek,latch-ck:
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    description:
-> +      Some SoCs do not support enhance_rx, need set correct latch-ck to avoid
-> +      data crc error caused by stop clock(fifo full) Valid range = [0:0x7].
-> +      if not present, default value is 0.
-> +      applied to compatible "mediatek,mt2701-mmc".
-> +    minimum: 0
-> +    maximum: 7
-> +
-> +  resets:
-> +    maxItems: 1
-> +
-> +  reset-names:
-> +    const: hrst
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-
-According to the current bindings, the vmmc/vqmmc supplies and the
-pinctrls are required as well. I assume you should add them here too!?
-
-[...]
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>
+>  drivers/mmc/host/sdhci-acpi.c | 39 ++++++++++++++++++++++++++++++++---
+>  1 file changed, 36 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index d335a34ad05b3..5c9a041af5b4b 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -545,10 +545,43 @@ struct amd_sdhci_host {
+>
+>  static int amd_select_drive_strength(struct mmc_card *card,
+>                                      unsigned int max_dtr, int host_drv,
+> -                                    int card_drv, int *drv_type)
+> +                                    int card_drv, int *host_driver_strength)
+>  {
+> -       *drv_type = MMC_SET_DRIVER_TYPE_A;
+> -       return MMC_SET_DRIVER_TYPE_A;
+> +       struct sdhci_host *host = mmc_priv(card->host);
+> +       u16 preset, preset_driver_strength;
+> +
+> +       /*
+> +        * This method is only called by mmc_select_hs200 so we only need to
+> +        * read from the HS200 (SDR104) preset register.
+> +        *
+> +        * Firmware that has "invalid/default" presets return a driver strength
+> +        * of A. This matches the previously hard coded value.
+> +        */
+> +       preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
+> +       preset_driver_strength =
+> +               (preset & SDHCI_PRESET_DRV_MASK) >> SDHCI_PRESET_DRV_SHIFT;
+> +
+> +       /*
+> +        * We want the controller driver strength to match the card's driver
+> +        * strength so they have similar rise/fall times.
+> +        *
+> +        * The controller driver strength set by this method is sticky for all
+> +        * timings after this method is called. This unfortunately means that
+> +        * while HS400 tuning is in progress we end up with mismatched driver
+> +        * strengths between the controller and the card. HS400 tuning requires
+> +        * switching from HS400->DDR52->HS->HS200->HS400. So the driver mismatch
+> +        * happens while in DDR52 and HS modes. This has not been observed to
+> +        * cause problems. Enabling presets would fix this issue.
+> +        */
+> +       *host_driver_strength = preset_driver_strength;
+> +
+> +       /*
+> +        * The resulting card driver strength is only set when switching the
+> +        * card's timing to HS200 or HS400. The card will use the default driver
+> +        * strength (B) for any other mode.
+> +        */
+> +       return preset_driver_strength;
+> +
+>  }
+>
+>  static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
+> --
+> 2.28.0.709.gb0816b6eb0-goog
+>
