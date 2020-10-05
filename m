@@ -5,63 +5,61 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34B91C4727E
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 13:04:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCB16C4727E
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 13:04:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DF41120848
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 13:04:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A411920848
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 13:04:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="MJJUt8Vw"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="W0kTDSNY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726248AbgJENEM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 09:04:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54466 "EHLO
+        id S1726727AbgJENE3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 09:04:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726747AbgJENEL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 09:04:11 -0400
-Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F13EBC0613AB
-        for <linux-mmc@vger.kernel.org>; Mon,  5 Oct 2020 05:51:34 -0700 (PDT)
-Received: by mail-ua1-x941.google.com with SMTP id d18so2457402uav.4
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2020 05:51:34 -0700 (PDT)
+        with ESMTP id S1726721AbgJENEK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 09:04:10 -0400
+Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48A50C0613A9
+        for <linux-mmc@vger.kernel.org>; Mon,  5 Oct 2020 05:51:32 -0700 (PDT)
+Received: by mail-vs1-xe42.google.com with SMTP id y194so4163074vsc.4
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2020 05:51:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=L/LfR7NJhI/H8i1pAKdmMvy4/cqEVQbECiWw0Fq0bpc=;
-        b=MJJUt8VwaOPdbm4HjQXuthgVqUomQWYNK1q8/Z1X+NK+vFPBhzvXU4X82HhL+PEX51
-         EMY2VN0zm9t47yr0V8DHbbl8K1I6+W4jfo360sxhwNam4im3Y8xZw+k+3x1mZP8dlNlL
-         N7rm12o4IGF2Dv++YtJC+FVealjFOqidUo6gJJXg+s6o9Z/bmxKab9oFVBJinl+CEvAP
-         kBFxGzFZRJ0JL9RbtB7G9JCUm2n2hMGhcxLIh1V6+mzh0Tx7PhuqGbM0iAG+h2BAhMU7
-         QDY00Dr2xXBKrC5qzAElIjExQUyO+Kl4N4J7wnIQZ3iDU7CwmzWgwikOoHqdqE676YV4
-         Ut0w==
+        bh=o06J1+Od5Vgxwuast3aD7MfhDeyMcGmESv1mnKw18yM=;
+        b=W0kTDSNY8VQOfr1noiJ4/53xraarP75EXCNRTdt+kuU5QX/z7peWWSdAS3LpPmInlU
+         aCyKqN1xURSs9WNZ/MFbYHb4dHin45hUSHfkwHJtndAUP7TSZ47SLetzYE8Xwp0QSH6+
+         pNLvi0QJxiMWW+bQK5T7dwp3SwQ87ik8KkbvE+3q8197apYC1wRTl35WtUdEhVGqvkR5
+         FG3Vzofbw03Nr3Qr1BjpjzcgdupqYQuIuAvJzvhGSzr1Bmu3lBVRN3QsCQlfWquRT0uz
+         rFmYSV22tgOwv1LHwG5q5bILkyQUu/++IiAoicdijniMagarUm0mFf7Rh5AohJDKpzf7
+         wP1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=L/LfR7NJhI/H8i1pAKdmMvy4/cqEVQbECiWw0Fq0bpc=;
-        b=Pks+uVqy5TEbWUVyRQsHcpjeoD9Fx1jHoeiUxBDbDileMedshLOEcc8kFN+mybLeJj
-         1DXQ8fxS5IpKdJFCZf83EpUSkK6lVcnKcdWu04/9MxxDawA6x8Ry/ndQWqSSV9R6JTbT
-         +51QMwCnI8HTuQuLafBm9zeaSGVGGw2P4qmMoTDJmnBVZPAvrYVhN2t4RalC0l6u3Z+B
-         2ztdSs6RxWaZPdqMk2K7lpMK42RFthOXCdVrc9OgCnIwOQQz9ShpVCogayFgRBJWFkfj
-         0omBTZdGnfSspq0PR6YkragxZPdo0AUFs/bjU9iK1Sc9L3bluNsITF1uoMRv3MnJugwu
-         5qGQ==
-X-Gm-Message-State: AOAM533YrdBEbKX3P+ALfGOvwW3gJ9VmjVdk95xQ0DFPIzqFV6dRIx18
-        1RUkBYcAm3HLabjEo39ZuKXYnYn9x1Sgqth02IkLlg==
-X-Google-Smtp-Source: ABdhPJzPIU3rO0XQQWE8ktzHhBsePAKbz9xMOVOvI0oS3ypXApmhEF0SLXDb+F/ccePvQwO13Y1JEdc5rrt/NN8PPQw=
-X-Received: by 2002:ab0:6f91:: with SMTP id f17mr7047512uav.129.1601902294152;
- Mon, 05 Oct 2020 05:51:34 -0700 (PDT)
+        bh=o06J1+Od5Vgxwuast3aD7MfhDeyMcGmESv1mnKw18yM=;
+        b=jMza/9nMJyqJ4ewwMxtGvB9/x1BxbPRD0AG497YCXzhVY/5kg49ccw3pVcnXHKg595
+         glDMSz2LDqXE0SI+v4NsOzEVV+AaXLk9fQ58YiWnySE5Fev4gs7hd+22QNTlReehu/5j
+         aRTwD/snP+AyxifBQOV/YQs0q2VKOhchpUb2cIRComo9mR/7z91ZwbdFVvCWZGXHm5g9
+         xFVXkyJ6BPbquOVoXuSC+YiEm7YSD38LezjIDQUUJ9obg+uevECiyG9e7Nc6pzzATAW6
+         XcliaksS/eI/aZ89nwEQcKz7k0xChZrt8YbT4g8fre9mUnXNokL5AVx4L69qqAiF2NEB
+         JQkA==
+X-Gm-Message-State: AOAM533QUG94Bk4BHO9noGRavhGK3M0FLRf6/z0OUZ4UDlxEJZ5Gvz1y
+        CMbO6pm5Mk6XwDZyDbUnmSxbM80YDj/caio6c6S6fdGMWBhQwA==
+X-Google-Smtp-Source: ABdhPJzDjjafmkBjirzc0t6dbSaI9fKF+lsw5l6xf3VR7Zt9Iqx/t8sX7S+187oQDcnOUN+C435YsoN1I68UQhIZkpI=
+X-Received: by 2002:a05:6102:910:: with SMTP id x16mr2725173vsh.42.1601902291431;
+ Mon, 05 Oct 2020 05:51:31 -0700 (PDT)
 MIME-Version: 1.0
 References: <20200928154718.1.Icc21d4b2f354e83e26e57e270dc952f5fe0b0a40@changeid>
- <20200928154718.2.Ic6b6031366f090393d00a53fd69e1ada31ceb29e@changeid>
-In-Reply-To: <20200928154718.2.Ic6b6031366f090393d00a53fd69e1ada31ceb29e@changeid>
+In-Reply-To: <20200928154718.1.Icc21d4b2f354e83e26e57e270dc952f5fe0b0a40@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 5 Oct 2020 14:50:58 +0200
-Message-ID: <CAPDyKFrVtz29w=gONGO8_sGDQU-ZSXH2NyMuwRL7-27ae=jt_A@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-acpi: AMDI0040: Allow changing HS200/HS400
- driver strength
+Date:   Mon, 5 Oct 2020 14:50:54 +0200
+Message-ID: <CAPDyKFrCMWtKQOrTaFtmsWsQ1x0dHHmV3SvXuGFcYE-PgeoB6w@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: sdhci-acpi: AMDI0040: Set SDHCI_QUIRK2_PRESET_VALUE_BROKEN
 To:     Raul E Rangel <rrangel@chromium.org>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>, Shirish.S@amd.com,
@@ -76,83 +74,91 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Mon, 28 Sep 2020 at 23:59, Raul E Rangel <rrangel@chromium.org> wrote:
 >
-> This change will allow platform designers better control over signal
-> integrity by allowing them to tune the HS200 and HS400 driver strengths.
+> This change fixes HS400 tuning for devices with invalid presets.
 >
-> The driver strength was previously hard coded to A to solve boot
-> problems with certain platforms. This driver strength does not
-> universally apply to all platforms so we need a knob to adjust it.
+> SDHCI presets are not currently used for eMMC HS/HS200/HS400, but are
+> used for DDR52. The HS400 retuning sequence is:
 >
-> All older platforms currently have the SDR104 preset hard coded to A in
-> the firmware. This means that switching from the hard coded value in
-> the kernel to reading the SDR104 preset is a no-op for these platforms.
-> Newer platforms will have properly set presets. So this change will
-> support both new and old platforms.
+>     HS400->DDR52->HS->HS200->Perform Tuning->HS->HS400
 >
+> This means that when HS400 tuning happens, we transition through DDR52
+> for a very brief period. This causes presets to be enabled
+> unintentionally and stay enabled when transitioning back to HS200 or
+> HS400. Some firmware has invalid presets, so we end up with driver
+> strengths that can cause I/O problems.
+>
+> Fixes: 34597a3f60b1 ("mmc: sdhci-acpi: Add support for ACPI HID of AMD Controller with HS400")
 > Signed-off-by: Raul E Rangel <rrangel@chromium.org>
 
-Applied for next, thanks!
+Applied for next and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
+> I decided to abandon adding the preset_value_support for now. Enabling
+> presets for the AMD controller currently results in using invalid
+> presets for HS400. This is because sdhci_get_preset_value is using a
+> non-standard HS400 register that the AMD controller does not support.
 >
->  drivers/mmc/host/sdhci-acpi.c | 39 ++++++++++++++++++++++++++++++++---
->  1 file changed, 36 insertions(+), 3 deletions(-)
+> I think preset_value_support also needs more thought. Since HS400
+> re-tuning requires switching to HS, DDR52, and HS200, if one of those
+> timings is not in the list, we would need to disable presets.
+>
+> I chose this approach to avoid any additional complexity.
+>
+>  drivers/mmc/host/sdhci-acpi.c | 37 +++++++++++++++++++++++++++++++++++
+>  1 file changed, 37 insertions(+)
 >
 > diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index d335a34ad05b3..5c9a041af5b4b 100644
+> index 284cba11e2795..d335a34ad05b3 100644
 > --- a/drivers/mmc/host/sdhci-acpi.c
 > +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -545,10 +545,43 @@ struct amd_sdhci_host {
+> @@ -662,6 +662,43 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+>             (host->mmc->caps & MMC_CAP_1_8V_DDR))
+>                 host->mmc->caps2 = MMC_CAP2_HS400_1_8V;
 >
->  static int amd_select_drive_strength(struct mmc_card *card,
->                                      unsigned int max_dtr, int host_drv,
-> -                                    int card_drv, int *drv_type)
-> +                                    int card_drv, int *host_driver_strength)
->  {
-> -       *drv_type = MMC_SET_DRIVER_TYPE_A;
-> -       return MMC_SET_DRIVER_TYPE_A;
-> +       struct sdhci_host *host = mmc_priv(card->host);
-> +       u16 preset, preset_driver_strength;
-> +
 > +       /*
-> +        * This method is only called by mmc_select_hs200 so we only need to
-> +        * read from the HS200 (SDR104) preset register.
+> +        * There are two types of presets out in the wild:
+> +        * 1) Default/broken presets.
+> +        *    These presets have two sets of problems:
+> +        *    a) The clock divisor for SDR12, SDR25, and SDR50 is too small.
+> +        *       This results in clock frequencies that are 2x higher than
+> +        *       acceptable. i.e., SDR12 = 25 MHz, SDR25 = 50 MHz, SDR50 =
+> +        *       100 MHz.x
+> +        *    b) The HS200 and HS400 driver strengths don't match.
+> +        *       By default, the SDR104 preset register has a driver strength of
+> +        *       A, but the (internal) HS400 preset register has a driver
+> +        *       strength of B. As part of initializing HS400, HS200 tuning
+> +        *       needs to be performed. Having different driver strengths
+> +        *       between tuning and operation is wrong. It results in different
+> +        *       rise/fall times that lead to incorrect sampling.
+> +        * 2) Firmware with properly initialized presets.
+> +        *    These presets have proper clock divisors. i.e., SDR12 => 12MHz,
+> +        *    SDR25 => 25 MHz, SDR50 => 50 MHz. Additionally the HS200 and
+> +        *    HS400 preset driver strengths match.
 > +        *
-> +        * Firmware that has "invalid/default" presets return a driver strength
-> +        * of A. This matches the previously hard coded value.
-> +        */
-> +       preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
-> +       preset_driver_strength =
-> +               (preset & SDHCI_PRESET_DRV_MASK) >> SDHCI_PRESET_DRV_SHIFT;
-> +
-> +       /*
-> +        * We want the controller driver strength to match the card's driver
-> +        * strength so they have similar rise/fall times.
+> +        *    Enabling presets for HS400 doesn't work for the following reasons:
+> +        *    1) sdhci_set_ios has a hard coded list of timings that are used
+> +        *       to determine if presets should be enabled.
+> +        *    2) sdhci_get_preset_value is using a non-standard register to
+> +        *       read out HS400 presets. The AMD controller doesn't support this
+> +        *       non-standard register. In fact, it doesn't expose the HS400
+> +        *       preset register anywhere in the SDHCI memory map. This results
+> +        *       in reading a garbage value and using the wrong presets.
 > +        *
-> +        * The controller driver strength set by this method is sticky for all
-> +        * timings after this method is called. This unfortunately means that
-> +        * while HS400 tuning is in progress we end up with mismatched driver
-> +        * strengths between the controller and the card. HS400 tuning requires
-> +        * switching from HS400->DDR52->HS->HS200->HS400. So the driver mismatch
-> +        * happens while in DDR52 and HS modes. This has not been observed to
-> +        * cause problems. Enabling presets would fix this issue.
+> +        *       Since HS400 and HS200 presets must be identical, we could
+> +        *       instead use the the SDR104 preset register.
+> +        *
+> +        *    If the above issues are resolved we could remove this quirk for
+> +        *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
 > +        */
-> +       *host_driver_strength = preset_driver_strength;
+> +       host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
 > +
-> +       /*
-> +        * The resulting card driver strength is only set when switching the
-> +        * card's timing to HS200 or HS400. The card will use the default driver
-> +        * strength (B) for any other mode.
-> +        */
-> +       return preset_driver_strength;
-> +
->  }
->
->  static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
+>         host->mmc_host_ops.select_drive_strength = amd_select_drive_strength;
+>         host->mmc_host_ops.set_ios = amd_set_ios;
+>         host->mmc_host_ops.execute_tuning = amd_sdhci_execute_tuning;
 > --
 > 2.28.0.709.gb0816b6eb0-goog
 >
