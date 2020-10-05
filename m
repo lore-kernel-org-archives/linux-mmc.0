@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-9.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF7C4C47423
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 20:34:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7289EC47423
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 20:36:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9E18D21527
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 20:34:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2B51521534
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 20:36:04 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601930069;
-	bh=V6FGZB7RQrNK9Jc2TRpa0YoUL2a1+M5Dh62LwXWNBkk=;
+	s=default; t=1601930164;
+	bh=iemv3mWZs+XwGcPcpQaq0B4WUczRQ4kTBhdGQPY6UAs=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=cDw1rB+Tayo5MS3h4tTbmaJsCiRoFBgY3Fb4Y5rczkocwARSh6zwEn4ygR6qnK8wU
-	 fPmzz5SZQ+5C+dsgNcSNuXEoVerTcGIL7eXUMpZG40knnx1dWSxZJWheAYDSZIgS8M
-	 tOICWZiQHKH+rTcNW3CkVPuwugTfs6X6biIPCOZM=
+	b=ByBrVkANSHbSCPh1Nvxfni06+col0eajApTO8OIdMWx0iXLIV+SjRtfHhf20o704H
+	 rB/LSx2gKmHfXmE78pBpB5MsRdKPxod5hDPIgH5qcyEG6CegeZMJbihXHs82VYJXZ0
+	 wJk2iFy0nHbDw3EHrSHN4NCtmuVQBVhJAhh3kd1M=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729784AbgJEUe2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 16:34:28 -0400
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:34827 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726935AbgJEUeY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 16:34:24 -0400
-Received: by mail-wr1-f66.google.com with SMTP id n15so5296976wrq.2;
-        Mon, 05 Oct 2020 13:34:19 -0700 (PDT)
+        id S1729353AbgJEUf5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 16:35:57 -0400
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:38967 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725864AbgJEUf4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 16:35:56 -0400
+Received: by mail-wm1-f68.google.com with SMTP id d3so840440wma.4;
+        Mon, 05 Oct 2020 13:35:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=M4VHJO7NZXzhdbY1PrU7kRksiXBWJAga7ZRKvTmHhdY=;
-        b=n3Mf2RY23M8mYkTF3/u+jtGKqwng7/Asl+N8rEUYCgXx6Z/lGC+Mp9ZuaUIZlSXoWK
-         nprpsmNbfYP+1gp0H0W1yho/Be0+0abcWoHW4E5mChbSbdW4lBO7xzHs/GOHJaKFSamM
-         A0BnNRNkh+fFTx0b7IqYMuMSx1okJWfW3+aP7Srhab05Z2MRfOUMqscirdDG0uDyMONW
-         bOeNKLHhkufizEFFR4LC1bU/Gm4Omue+ry3mY7hrpWMmJNrwfTumOnvWEpZRwcR0Zi/l
-         j1rD5P3efnQNB0G+i6HBv7Py+8zb5bKcqc9Z0FmuK6PbI+zf3eC/Oa/TDDqmoXcvECz5
-         +7eA==
-X-Gm-Message-State: AOAM532bOuy96i9neV55UhyjyC1ZDpKdrnkCvgmJXzUXC9oH84Hn5gPh
-        KqrwNHohSLR1r/J/bM0ROOE=
-X-Google-Smtp-Source: ABdhPJxCxtgn6aaeKulLwuz8wKsCo89p4EM2tZybvC7kIZ+95SJyA3hC3jBlEekC53H0JnM4JTmd2Q==
-X-Received: by 2002:a5d:480a:: with SMTP id l10mr1120451wrq.238.1601930058858;
-        Mon, 05 Oct 2020 13:34:18 -0700 (PDT)
+        bh=Q5iceblLTPLNAqCbEFyOg5x/SMGcxOoUyYeFBZajQxA=;
+        b=foDi3ukWfhIXBNcp5QQtGEV3cKtFKMW8Y6/7/sAVChxavwzYQE+/8au8hxHm31C0Wp
+         IMJaglp2LFmFZHeHSJ3p6JbYVMsQ1k8eoyyHjo3Ypd3ntATlB5udFYtjJOFadp+CIb8z
+         hkQiCLEpHjQYqsP59nsqGMa49WWOvSpklE89ap7ksjEJpUl3u177OGylMZ5mGs4a+LSP
+         Bhfyt5v9IFBbfxNZnHxMLICSQuz/qoN1+qACij3jFGIgDGQmBAl2QCfhOwwnk2ofVKRD
+         F8CNq5/Ji41fLjBfvY5uaiij1Xwb17Dn8PqPNK0cCj0kPVGUK/iVAo4BbSLtPD8+70zo
+         TZbA==
+X-Gm-Message-State: AOAM530cU4ZqYIFpZe9WbA5WEtjq97IESAwGzVqtJ5ClhXDYFTN0pyKb
+        /BnMfxs3eXrdtKTjsL/gEH8=
+X-Google-Smtp-Source: ABdhPJybS6GmuQGaGKAgw2oZTDndQ8lnfNHzVvN45dT21OuWH7lzG5fHAPseKBE0Hl5nmJW71d+taQ==
+X-Received: by 2002:a1c:2d94:: with SMTP id t142mr1128839wmt.74.1601930150569;
+        Mon, 05 Oct 2020 13:35:50 -0700 (PDT)
 Received: from kozik-lap ([194.230.155.194])
-        by smtp.googlemail.com with ESMTPSA id a127sm907143wmh.13.2020.10.05.13.34.14
+        by smtp.googlemail.com with ESMTPSA id j134sm985707wmj.7.2020.10.05.13.35.46
         (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Mon, 05 Oct 2020 13:34:17 -0700 (PDT)
-Date:   Mon, 5 Oct 2020 22:34:12 +0200
+        Mon, 05 Oct 2020 13:35:49 -0700 (PDT)
+Date:   Mon, 5 Oct 2020 22:35:44 +0200
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Rob Herring <robh@kernel.org>
 Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -110,25 +110,25 @@ Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH 3/4] dt-bindings: Explicitly allow additional properties
- in board/SoC schemas
-Message-ID: <20201005203412.GC23742@kozik-lap>
+Subject: Re: [PATCH 4/4] dt-bindings: Explicitly allow additional properties
+ in common schemas
+Message-ID: <20201005203544.GD23742@kozik-lap>
 References: <20201005183830.486085-1-robh@kernel.org>
- <20201005183830.486085-4-robh@kernel.org>
+ <20201005183830.486085-5-robh@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20201005183830.486085-4-robh@kernel.org>
+In-Reply-To: <20201005183830.486085-5-robh@kernel.org>
 User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Oct 05, 2020 at 01:38:29PM -0500, Rob Herring wrote:
+On Mon, Oct 05, 2020 at 01:38:30PM -0500, Rob Herring wrote:
 > In order to add meta-schema checks for additional/unevaluatedProperties
-> being present, all schema need to make this explicit. As the top-level
-> board/SoC schemas always have additional properties, add
-> 'additionalProperties: true'.
+> being present, all schema need to make this explicit. As common/shared
+> schema are included by other schemas, they should always allow for
+> additionalProperties.
 > 
 > Signed-off-by: Rob Herring <robh@kernel.org>
 
