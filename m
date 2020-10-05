@@ -2,52 +2,51 @@ Return-Path: <SRS0=j7Ik=DM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DDADC4743E
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:39:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39673C52D13
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:39:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9B4620B80
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:39:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0E0862100A
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:39:39 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601923170;
-	bh=JzO05mw3+wnvmKi7IFdlnE5yIjZofUJ0HBOMrymJ4sU=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=BY6ZrMj3NR2rV2OI5bc7Q6jpvnJTM6UPy+i8zxeyV70dzypNbvTltn9tlhb5uHtAN
-	 iqk/9sjAA/vURfLW1+0/kHSXHKH242+9eRxjPqb4KW0wpcXG/xXa+t83tcfJ9sG2fe
-	 c30GWhDuMuDzs1ki1UaYPOKyLbAnARmReHSovR4g=
+	s=default; t=1601923179;
+	bh=e/H5OM1Kgb96wWg+sXU8irWdRIPHP+Tm8rfMRY7B90Y=;
+	h=From:To:Cc:Subject:Date:List-ID:From;
+	b=t0rVZcyAhoCTeAGNM7IDSgUqRFbYBPadRhZHioi2Bv4kbyDqgsXoaI1XH9htd/yfs
+	 7CdatDZ1tFPW8Eyy/QcZrd5dSCGC6BKGPsIk6Nj8fyz8tGOFksvhV1xIuPCZLQ+g8e
+	 kWnYwsU7VvNkZsSFB+EaT4rl7QFDYH3tBpcZQlbA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728947AbgJESiw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 14:38:52 -0400
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:34418 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725940AbgJESir (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 14:38:47 -0400
-Received: by mail-ot1-f67.google.com with SMTP id d28so3356626ote.1;
-        Mon, 05 Oct 2020 11:38:43 -0700 (PDT)
+        id S1728676AbgJESil (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 14:38:41 -0400
+Received: from mail-oi1-f193.google.com ([209.85.167.193]:35257 "EHLO
+        mail-oi1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725940AbgJESik (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 14:38:40 -0400
+Received: by mail-oi1-f193.google.com with SMTP id w141so9706420oia.2;
+        Mon, 05 Oct 2020 11:38:36 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=HgBGLe+m/aV/vr0rp0zFhsTmonQBhufRwEBdhetDqcw=;
-        b=BZYozgjXcH4J3nDlBixQs+Uu+LZVWr0tOPQQnZoa7AvzdNme7c6RzwDmU1vQGzR+jQ
-         wykbkbENZb/kXnDxxH2ZXiE33fFrNY509y008ihLZ9f7I3xIxzwz9xMbHHjvOIlalbKL
-         +c7bf6vyGMwQlDtMMfsHQd0phw8tUAwdoima+eDt2KJP1G1QdbWAbvveruLGuvqIiQCu
-         /3oKOj0+60JfNTUgx1PyRXi7IumwLLGLrxEQalJrap6U0PLeXz7OkZWsJIUCDO5mu5Hf
-         jENcFv+FeBtc4TJaWWtX/xkguUUdPOqQ+SP4JlPi95fyNCkVqpeOaI/DnN8vIOTwDZTm
-         n4pQ==
-X-Gm-Message-State: AOAM531ymz4G3bVRw+WxZywC9sYRG3vm96RN3HDqWFetx/Xxl68+BZKi
-        SdpzM8CjLtJk6XFoGc9FaCP2ICbzfBg9
-X-Google-Smtp-Source: ABdhPJzZIQ2L2euOiEQv4z7zspdWuCivaLyqEa0Y93oVjOHxIzGE/ENDxOiN9rMWrODa2Igy3kjqdA==
-X-Received: by 2002:a9d:4e1a:: with SMTP id p26mr458391otf.197.1601923122929;
-        Mon, 05 Oct 2020 11:38:42 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=FKBuvtLQAdMRryG6abzok93hEZkfxfk1NvbdtZDThTc=;
+        b=bDK75CryujMO76IjbGfXVn3NMjUDRV7I4OLzQAONqY7A1asItWuGsGw1ge1m3Wl+tH
+         mdm8Vr+7+odoC8NpnKJKmMTRcS9JWvP4c4MFz8HnmqY54UGwUmm7dbSO5DZTVpExMxsd
+         ihuo4hUM+0nSKwDlJwZI0TrJmhvY8iVajwhlgNqMd2AG+H7AYpqFq+dJbMnYhezJt37r
+         8EaMuOrmOTnyM4NrsmRee0eX7DF24KMgRRhN6PUb0J2tPGOPf0A1QCGHJZZWNy6EyxFs
+         3hVssrxSxJ+V7+R+464rXfqvVkG4r0OFuDZ9RBHOEr2HluU8Y0qcSxk+5i6p2+uVJw3I
+         4SFQ==
+X-Gm-Message-State: AOAM532Z6hwvunkSQ1ckEkZp2o3GvhXNL76YTzTSxp3kYXv2R/csYiSF
+        0LActFl2druxp4twqBkV04nTJDUQDGbZ
+X-Google-Smtp-Source: ABdhPJwtSa8Y/I6DT15kFb+c+yKVzbdUj3v7XcBfx5+TPJ0mpN3ESYoYQunOScJs66Yn+dcB/iKTAA==
+X-Received: by 2002:aca:50d2:: with SMTP id e201mr416333oib.31.1601923115204;
+        Mon, 05 Oct 2020 11:38:35 -0700 (PDT)
 Received: from xps15.herring.priv (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.googlemail.com with ESMTPSA id z25sm143140otq.31.2020.10.05.11.38.39
+        by smtp.googlemail.com with ESMTPSA id z25sm143140otq.31.2020.10.05.11.38.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Oct 2020 11:38:42 -0700 (PDT)
+        Mon, 05 Oct 2020 11:38:34 -0700 (PDT)
 From:   Rob Herring <robh@kernel.org>
 To:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Cc:     Albert Ou <aou@eecs.berkeley.edu>,
@@ -109,567 +108,291 @@ Cc:     Albert Ou <aou@eecs.berkeley.edu>,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-watchdog@vger.kernel.org
-Subject: [PATCH 2/4] dt-bindings: Use 'additionalProperties' instead of 'unevaluatedProperties'
-Date:   Mon,  5 Oct 2020 13:38:28 -0500
-Message-Id: <20201005183830.486085-3-robh@kernel.org>
+Subject: [PATCH 0/4] dt-bindings: additional/unevaluatedProperties clean-ups
+Date:   Mon,  5 Oct 2020 13:38:26 -0500
+Message-Id: <20201005183830.486085-1-robh@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20201005183830.486085-1-robh@kernel.org>
-References: <20201005183830.486085-1-robh@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In cases where we don't reference another schema, 'additionalProperties'
-can be used instead. This is preferred for now as 'unevaluatedProperties'
-support isn't implemented yet.
+The default behavior for json-schema is any unknown property is allowed.
+That is generally not the behavior we want for DT. In order to disallow
+extra properties, schemas need to define 'additionalProperties: false'
+typically. Ideally, we'd just add that automatically with the tools, but
+there are some exceptions so only making things explicit everywhere
+really works. Missing 'additionalProperties' or 'unevaluatedProperties'
+has been a constant source of review comments, so a meta-schema check is
+really needed here.
 
-In a few cases, this means adding some missing property definitions of
-which most are for SPI bus properties. 'unevaluatedProperties' is not going
-to work for the SPI bus properties anyways as they are evaluated from the
-parent node, not the SPI child node.
+Once this series is in place, the meta-schema can be updated with a
+check. The rule is if there's a $ref to another schema, then either
+'additionalProperties' or 'unevaluatedProperties' is required. If not,
+then 'additionalProperties' is required.
 
-Signed-off-by: Rob Herring <robh@kernel.org>
----
+Rob
+
+
+Rob Herring (4):
+  dt-bindings: Add missing 'unevaluatedProperties'
+  dt-bindings: Use 'additionalProperties' instead of
+    'unevaluatedProperties'
+  dt-bindings: Explicitly allow additional properties in board/SoC
+    schemas
+  dt-bindings: Explicitly allow additional properties in common schemas
+
+ Documentation/devicetree/bindings/arm/actions.yaml     |  2 ++
+ Documentation/devicetree/bindings/arm/altera.yaml      |  3 +++
+ Documentation/devicetree/bindings/arm/amazon,al.yaml   |  2 ++
+ Documentation/devicetree/bindings/arm/amlogic.yaml     |  3 +++
+ .../devicetree/bindings/arm/arm,integrator.yaml        |  2 ++
+ .../devicetree/bindings/arm/arm,realview.yaml          |  2 ++
+ .../devicetree/bindings/arm/arm,versatile.yaml         |  2 ++
+ .../devicetree/bindings/arm/arm,vexpress-juno.yaml     |  2 ++
+ Documentation/devicetree/bindings/arm/atmel-at91.yaml  |  2 ++
+ Documentation/devicetree/bindings/arm/axxia.yaml       |  2 ++
+ Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,bcm11351.yaml     |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,bcm21664.yaml     |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,bcm23550.yaml     |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,bcm4708.yaml      |  3 +++
+ .../devicetree/bindings/arm/bcm/brcm,cygnus.yaml       |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,hr2.yaml          |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,ns2.yaml          |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,nsp.yaml          |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,stingray.yaml     |  2 ++
+ .../devicetree/bindings/arm/bcm/brcm,vulcan-soc.yaml   |  2 ++
+ Documentation/devicetree/bindings/arm/bitmain.yaml     |  3 +++
+ Documentation/devicetree/bindings/arm/calxeda.yaml     |  2 ++
+ .../devicetree/bindings/arm/coresight-cti.yaml         |  2 ++
+ Documentation/devicetree/bindings/arm/cpus.yaml        |  2 ++
+ Documentation/devicetree/bindings/arm/digicolor.yaml   |  2 ++
+ Documentation/devicetree/bindings/arm/fsl.yaml         |  2 ++
+ .../devicetree/bindings/arm/hisilicon/hisilicon.yaml   |  3 +++
+ .../devicetree/bindings/arm/intel,keembay.yaml         |  3 +++
+ .../devicetree/bindings/arm/intel-ixp4xx.yaml          |  2 ++
+ .../bindings/arm/keystone/ti,k3-sci-common.yaml        |  2 ++
+ .../devicetree/bindings/arm/marvell/armada-7k-8k.yaml  |  2 ++
+ Documentation/devicetree/bindings/arm/mediatek.yaml    |  3 +++
+ .../devicetree/bindings/arm/microchip,sparx5.yaml      |  2 ++
+ Documentation/devicetree/bindings/arm/moxart.yaml      |  1 +
+ Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml   |  3 +++
+ Documentation/devicetree/bindings/arm/mstar/mstar.yaml |  2 ++
+ .../bindings/arm/nvidia,tegra194-ccplex.yaml           |  2 ++
+ Documentation/devicetree/bindings/arm/nxp/lpc32xx.yaml |  2 ++
+ Documentation/devicetree/bindings/arm/qcom.yaml        |  2 ++
+ Documentation/devicetree/bindings/arm/rda.yaml         |  2 ++
+ Documentation/devicetree/bindings/arm/realtek.yaml     |  3 +++
+ Documentation/devicetree/bindings/arm/renesas.yaml     |  2 ++
+ Documentation/devicetree/bindings/arm/rockchip.yaml    |  3 +++
+ .../bindings/arm/samsung/samsung-boards.yaml           |  2 ++
+ Documentation/devicetree/bindings/arm/sirf.yaml        |  3 +++
+ .../devicetree/bindings/arm/socionext/milbeaut.yaml    |  3 +++
+ .../devicetree/bindings/arm/socionext/uniphier.yaml    |  2 ++
+ Documentation/devicetree/bindings/arm/spear.yaml       |  3 +++
+ Documentation/devicetree/bindings/arm/sprd/sprd.yaml   |  2 ++
+ Documentation/devicetree/bindings/arm/sti.yaml         |  3 +++
+ .../devicetree/bindings/arm/stm32/st,mlahb.yaml        |  2 ++
+ Documentation/devicetree/bindings/arm/stm32/stm32.yaml |  3 +++
+ Documentation/devicetree/bindings/arm/sunxi.yaml       |  2 ++
+ Documentation/devicetree/bindings/arm/tegra.yaml       |  2 ++
+ Documentation/devicetree/bindings/arm/ti/nspire.yaml   |  3 +++
+ .../devicetree/bindings/arm/ti/ti,davinci.yaml         |  3 +++
+ Documentation/devicetree/bindings/arm/ux500.yaml       |  2 ++
+ Documentation/devicetree/bindings/arm/vt8500.yaml      |  3 +++
+ Documentation/devicetree/bindings/arm/xilinx.yaml      |  2 ++
+ Documentation/devicetree/bindings/arm/zte.yaml         |  2 ++
+ .../devicetree/bindings/ata/faraday,ftide010.yaml      |  2 ++
+ Documentation/devicetree/bindings/ata/pata-common.yaml |  2 ++
+ Documentation/devicetree/bindings/ata/sata-common.yaml |  2 ++
+ Documentation/devicetree/bindings/bus/renesas,bsc.yaml |  2 ++
+ .../devicetree/bindings/bus/simple-pm-bus.yaml         |  2 ++
+ .../bindings/chrome/google,cros-ec-typec.yaml          |  2 ++
  .../devicetree/bindings/clock/baikal,bt1-ccu-div.yaml  |  6 +++++-
  .../devicetree/bindings/clock/baikal,bt1-ccu-pll.yaml  |  2 +-
  .../devicetree/bindings/clock/imx8m-clock.yaml         |  2 +-
+ .../devicetree/bindings/connector/usb-connector.yaml   |  2 ++
+ .../bindings/display/bridge/snps,dw-mipi-dsi.yaml      |  2 ++
+ .../devicetree/bindings/display/dsi-controller.yaml    |  2 ++
+ .../devicetree/bindings/display/panel/lvds.yaml        |  2 ++
+ .../bindings/display/panel/panel-common.yaml           |  2 ++
+ .../devicetree/bindings/display/panel/tpo,tpg110.yaml  |  2 ++
+ Documentation/devicetree/bindings/dma/dma-common.yaml  |  2 ++
+ .../devicetree/bindings/dma/dma-controller.yaml        |  2 ++
+ Documentation/devicetree/bindings/dma/dma-router.yaml  |  2 ++
+ Documentation/devicetree/bindings/dma/ingenic,dma.yaml |  2 ++
+ .../devicetree/bindings/dma/st,stm32-dma.yaml          |  2 ++
+ .../devicetree/bindings/dma/st,stm32-dmamux.yaml       |  2 ++
+ .../devicetree/bindings/dma/st,stm32-mdma.yaml         |  2 ++
+ Documentation/devicetree/bindings/dma/ti/k3-udma.yaml  |  2 ++
+ .../devicetree/bindings/extcon/wlf,arizona.yaml        |  2 ++
  .../devicetree/bindings/hwmon/baikal,bt1-pvt.yaml      |  4 ++--
- .../devicetree/bindings/iio/accel/adi,adis16240.yaml   |  4 +++-
- .../devicetree/bindings/iio/accel/adi,adxl345.yaml     |  4 +++-
- .../devicetree/bindings/iio/accel/adi,adxl372.yaml     |  4 +++-
- .../devicetree/bindings/iio/adc/adi,ad7124.yaml        |  4 +++-
- .../devicetree/bindings/iio/adc/adi,ad7192.yaml        |  4 +++-
- .../devicetree/bindings/iio/adc/adi,ad7292.yaml        |  4 +++-
- .../devicetree/bindings/iio/adc/adi,ad7606.yaml        |  6 +++++-
- .../devicetree/bindings/iio/adc/adi,ad7923.yaml        |  4 +++-
- .../devicetree/bindings/iio/adc/maxim,max1241.yaml     |  4 +++-
- .../devicetree/bindings/iio/dac/adi,ad5770r.yaml       | 10 +++++++++-
- .../devicetree/bindings/iio/frequency/adf4371.yaml     |  4 +++-
- .../devicetree/bindings/iio/imu/adi,adis16460.yaml     |  4 +++-
- .../devicetree/bindings/iio/imu/adi,adis16475.yaml     |  2 +-
- .../devicetree/bindings/iio/imu/bosch,bmi160.yaml      |  4 +++-
- .../devicetree/bindings/iio/imu/nxp,fxos8700.yaml      |  4 +++-
+ .../devicetree/bindings/i2c/amlogic,meson6-i2c.yaml    |  2 ++
+ .../devicetree/bindings/i2c/cdns,i2c-r1p10.yaml        |  2 ++
+ Documentation/devicetree/bindings/i2c/i2c-gpio.yaml    |  2 ++
+ Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml    |  2 ++
+ .../bindings/i2c/socionext,uniphier-fi2c.yaml          |  2 ++
+ .../bindings/i2c/socionext,uniphier-i2c.yaml           |  2 ++
+ .../devicetree/bindings/i2c/st,stm32-i2c.yaml          |  2 ++
+ .../devicetree/bindings/i2c/xlnx,xps-iic-2.00.a.yaml   |  2 ++
+ .../devicetree/bindings/iio/accel/adi,adis16240.yaml   |  4 ++++
+ .../devicetree/bindings/iio/accel/adi,adxl345.yaml     |  4 ++++
+ .../devicetree/bindings/iio/accel/adi,adxl372.yaml     |  4 ++++
+ .../devicetree/bindings/iio/adc/adi,ad7124.yaml        |  4 ++++
+ .../devicetree/bindings/iio/adc/adi,ad7192.yaml        |  4 ++++
+ .../devicetree/bindings/iio/adc/adi,ad7292.yaml        |  4 ++++
+ .../devicetree/bindings/iio/adc/adi,ad7606.yaml        |  6 ++++++
+ .../devicetree/bindings/iio/adc/adi,ad7923.yaml        |  4 ++++
+ .../devicetree/bindings/iio/adc/maxim,max1241.yaml     |  4 ++++
+ .../bindings/iio/adc/samsung,exynos-adc.yaml           |  5 ++++-
+ Documentation/devicetree/bindings/iio/common.yaml      |  2 ++
+ .../devicetree/bindings/iio/dac/adi,ad5770r.yaml       | 10 ++++++++++
+ .../devicetree/bindings/iio/frequency/adf4371.yaml     |  4 ++++
+ .../devicetree/bindings/iio/imu/adi,adis16460.yaml     |  4 ++++
+ .../devicetree/bindings/iio/imu/adi,adis16475.yaml     |  2 ++
+ .../devicetree/bindings/iio/imu/bosch,bmi160.yaml      |  4 ++++
+ .../devicetree/bindings/iio/imu/nxp,fxos8700.yaml      |  4 ++++
+ .../devicetree/bindings/input/fsl,mpr121-touchkey.yaml |  2 ++
+ Documentation/devicetree/bindings/input/input.yaml     |  2 ++
+ .../devicetree/bindings/input/matrix-keymap.yaml       |  2 ++
+ .../bindings/input/touchscreen/touchscreen.yaml        |  2 ++
+ .../bindings/interrupt-controller/loongson,htpic.yaml  |  2 ++
+ .../interrupt-controller/loongson,liointc.yaml         |  2 ++
  .../bindings/interrupt-controller/mti,gic.yaml         |  2 +-
+ Documentation/devicetree/bindings/leds/common.yaml     |  2 ++
+ .../bindings/leds/leds-class-multicolor.yaml           |  3 +++
+ .../devicetree/bindings/leds/trigger-source.yaml       |  2 ++
+ Documentation/devicetree/bindings/media/rc.yaml        |  2 ++
+ .../bindings/memory-controllers/renesas,rpc-if.yaml    |  2 ++
  .../devicetree/bindings/mfd/cirrus,lochnagar.yaml      | 10 +++++++++-
+ Documentation/devicetree/bindings/mfd/syscon.yaml      |  2 +-
  .../bindings/mfd/ti,j721e-system-controller.yaml       |  5 ++++-
+ .../devicetree/bindings/mips/ingenic/devices.yaml      |  3 +++
+ .../devicetree/bindings/mips/loongson/devices.yaml     |  3 +++
  .../devicetree/bindings/misc/olpc,xo1.75-ec.yaml       |  4 +++-
+ .../devicetree/bindings/mmc/amlogic,meson-mx-sdhc.yaml |  2 ++
+ Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml  |  2 ++
+ Documentation/devicetree/bindings/mmc/ingenic,mmc.yaml |  2 ++
+ .../devicetree/bindings/mmc/mmc-controller.yaml        |  2 ++
+ Documentation/devicetree/bindings/mmc/owl-mmc.yaml     |  2 ++
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml      |  2 ++
+ Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml   |  2 ++
+ .../devicetree/bindings/mmc/socionext,uniphier-sd.yaml |  2 ++
+ .../bindings/mmc/synopsys-dw-mshc-common.yaml          |  2 ++
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.yaml      |  2 ++
+ Documentation/devicetree/bindings/mtd/denali,nand.yaml |  2 ++
+ .../devicetree/bindings/mtd/ingenic,nand.yaml          |  2 ++
+ .../devicetree/bindings/mtd/nand-controller.yaml       |  2 ++
+ .../devicetree/bindings/mtd/st,stm32-fmc2-nand.yaml    |  2 ++
+ Documentation/devicetree/bindings/net/adi,adin.yaml    |  2 ++
+ .../devicetree/bindings/net/amlogic,meson-dwmac.yaml   |  2 ++
+ .../devicetree/bindings/net/aspeed,ast2600-mdio.yaml   |  2 ++
+ .../devicetree/bindings/net/can/can-transceiver.yaml   |  2 ++
+ Documentation/devicetree/bindings/net/dsa/dsa.yaml     |  2 ++
+ .../devicetree/bindings/net/ethernet-controller.yaml   |  2 ++
+ .../devicetree/bindings/net/ethernet-phy.yaml          |  2 ++
+ .../devicetree/bindings/net/marvell,mvusb.yaml         |  2 ++
+ Documentation/devicetree/bindings/net/mdio.yaml        |  2 ++
+ .../devicetree/bindings/net/mediatek,star-emac.yaml    |  2 ++
+ Documentation/devicetree/bindings/net/nxp,tja11xx.yaml |  2 ++
+ Documentation/devicetree/bindings/net/qca,ar71xx.yaml  |  2 ++
+ Documentation/devicetree/bindings/net/qca,ar803x.yaml  |  2 ++
+ .../devicetree/bindings/net/qcom,ipq4019-mdio.yaml     |  2 ++
+ .../devicetree/bindings/net/qcom,ipq8064-mdio.yaml     |  2 ++
+ .../devicetree/bindings/net/renesas,ether.yaml         |  2 ++
+ Documentation/devicetree/bindings/net/snps,dwmac.yaml  |  2 ++
+ Documentation/devicetree/bindings/net/stm32-dwmac.yaml |  2 ++
+ .../devicetree/bindings/net/ti,davinci-mdio.yaml       |  2 ++
+ Documentation/devicetree/bindings/net/ti,dp83867.yaml  |  2 ++
+ Documentation/devicetree/bindings/net/ti,dp83869.yaml  |  2 ++
+ Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml |  2 ++
+ .../devicetree/bindings/nvmem/nvmem-consumer.yaml      |  2 ++
+ Documentation/devicetree/bindings/nvmem/nvmem.yaml     |  2 ++
+ .../devicetree/bindings/nvmem/qcom,qfprom.yaml         |  2 ++
+ .../devicetree/bindings/nvmem/qcom,spmi-sdam.yaml      |  2 ++
+ .../devicetree/bindings/nvmem/rockchip-efuse.yaml      |  2 ++
+ .../devicetree/bindings/nvmem/st,stm32-romem.yaml      |  2 ++
  .../opp/allwinner,sun50i-h6-operating-points.yaml      |  4 +++-
+ .../devicetree/bindings/pci/cdns,cdns-pcie-ep.yaml     |  2 ++
+ .../devicetree/bindings/pci/cdns,cdns-pcie-host.yaml   |  2 ++
+ .../devicetree/bindings/pci/cdns-pcie-ep.yaml          |  2 ++
+ .../devicetree/bindings/pci/cdns-pcie-host.yaml        |  2 ++
+ Documentation/devicetree/bindings/pci/cdns-pcie.yaml   |  2 ++
+ .../devicetree/bindings/pci/host-generic-pci.yaml      |  2 ++
+ Documentation/devicetree/bindings/pci/loongson.yaml    |  2 ++
+ Documentation/devicetree/bindings/pci/pci-ep.yaml      |  2 ++
+ .../devicetree/bindings/pci/ti,j721e-pci-ep.yaml       |  2 ++
+ .../devicetree/bindings/pci/ti,j721e-pci-host.yaml     |  2 ++
+ Documentation/devicetree/bindings/pci/versatile.yaml   |  2 ++
+ .../devicetree/bindings/pinctrl/cirrus,madera.yaml     |  2 ++
+ .../devicetree/bindings/pinctrl/pincfg-node.yaml       |  2 ++
+ .../devicetree/bindings/pinctrl/pinmux-node.yaml       |  2 ++
+ .../devicetree/bindings/power/pd-samsung.yaml          |  2 ++
+ .../devicetree/bindings/power/power-domain.yaml        |  2 ++
+ .../devicetree/bindings/power/supply/power-supply.yaml |  2 ++
+ Documentation/devicetree/bindings/pwm/pwm.yaml         |  2 ++
+ .../devicetree/bindings/regulator/fixed-regulator.yaml |  2 ++
+ .../bindings/regulator/google,cros-ec-regulator.yaml   |  2 ++
+ .../devicetree/bindings/regulator/gpio-regulator.yaml  |  2 ++
  .../bindings/regulator/qcom-labibb-regulator.yaml      |  2 +-
+ .../devicetree/bindings/regulator/regulator.yaml       |  2 ++
+ .../bindings/regulator/st,stm32-booster.yaml           |  2 ++
+ .../bindings/regulator/st,stm32-vrefbuf.yaml           |  2 ++
+ .../bindings/regulator/vqmmc-ipq4019-regulator.yaml    |  2 ++
+ .../devicetree/bindings/regulator/wlf,arizona.yaml     |  2 ++
+ Documentation/devicetree/bindings/riscv/cpus.yaml      |  2 ++
+ Documentation/devicetree/bindings/riscv/sifive.yaml    |  3 +++
+ Documentation/devicetree/bindings/rtc/ingenic,rtc.yaml |  2 ++
+ Documentation/devicetree/bindings/rtc/rtc.yaml         |  2 ++
+ Documentation/devicetree/bindings/rtc/s3c-rtc.yaml     |  2 ++
+ .../devicetree/bindings/serial/ingenic,uart.yaml       |  5 +++++
+ .../devicetree/bindings/serial/renesas,hscif.yaml      |  2 ++
+ .../devicetree/bindings/serial/renesas,sci.yaml        |  2 ++
+ .../devicetree/bindings/serial/renesas,scif.yaml       |  2 ++
+ .../devicetree/bindings/serial/renesas,scifa.yaml      |  2 ++
+ .../devicetree/bindings/serial/renesas,scifb.yaml      |  2 ++
+ Documentation/devicetree/bindings/serial/rs485.yaml    |  3 +++
+ Documentation/devicetree/bindings/serial/serial.yaml   |  2 ++
+ .../devicetree/bindings/serial/snps-dw-apb-uart.yaml   |  2 ++
+ .../devicetree/bindings/soc/imx/fsl,aips-bus.yaml      |  2 ++
+ .../devicetree/bindings/sound/amlogic,aiu.yaml         |  2 ++
+ .../devicetree/bindings/sound/cirrus,madera.yaml       |  2 ++
+ .../bindings/sound/nvidia,tegra210-ahub.yaml           |  3 +++
+ .../devicetree/bindings/sound/wlf,arizona.yaml         |  2 ++
+ .../bindings/soundwire/soundwire-controller.yaml       |  2 ++
+ .../bindings/spi/amlogic,meson-gx-spicc.yaml           |  2 ++
+ .../devicetree/bindings/spi/amlogic,meson6-spifc.yaml  |  2 ++
+ .../devicetree/bindings/spi/mikrotik,rb4xx-spi.yaml    |  2 ++
+ .../devicetree/bindings/spi/qca,ar934x-spi.yaml        |  2 ++
+ .../devicetree/bindings/spi/qcom,spi-qcom-qspi.yaml    |  2 ++
+ .../devicetree/bindings/spi/renesas,hspi.yaml          |  2 ++
+ .../devicetree/bindings/spi/renesas,rspi.yaml          |  2 ++
+ .../devicetree/bindings/spi/renesas,sh-msiof.yaml      |  2 ++
+ .../bindings/spi/socionext,uniphier-spi.yaml           |  2 ++
+ .../devicetree/bindings/spi/spi-controller.yaml        |  2 ++
+ Documentation/devicetree/bindings/spi/spi-gpio.yaml    |  2 ++
+ Documentation/devicetree/bindings/spi/spi-mux.yaml     |  2 ++
+ Documentation/devicetree/bindings/spi/spi-pl022.yaml   |  2 ++
+ .../devicetree/bindings/spi/spi-rockchip.yaml          |  2 ++
+ Documentation/devicetree/bindings/spi/spi-sifive.yaml  |  2 ++
+ .../devicetree/bindings/spi/st,stm32-qspi.yaml         |  2 ++
+ .../devicetree/bindings/spi/st,stm32-spi.yaml          |  2 ++
+ Documentation/devicetree/bindings/spmi/spmi.yaml       |  2 ++
+ .../bindings/thermal/thermal-cooling-devices.yaml      |  2 ++
+ .../devicetree/bindings/thermal/thermal-sensor.yaml    |  2 ++
  .../devicetree/bindings/timer/snps,dw-apb-timer.yaml   |  2 +-
- 26 files changed, 82 insertions(+), 27 deletions(-)
+ Documentation/devicetree/bindings/usb/ti,tps6598x.yaml |  2 ++
+ Documentation/devicetree/bindings/usb/usb-hcd.yaml     |  2 ++
+ .../bindings/watchdog/amlogic,meson-gxbb-wdt.yaml      |  2 ++
+ .../devicetree/bindings/watchdog/arm-smc-wdt.yaml      |  2 ++
+ .../devicetree/bindings/watchdog/qcom-wdt.yaml         |  2 ++
+ .../devicetree/bindings/watchdog/samsung-wdt.yaml      |  2 ++
+ .../devicetree/bindings/watchdog/st,stm32-iwdg.yaml    |  2 ++
+ .../devicetree/bindings/watchdog/ti,rti-wdt.yaml       |  2 ++
+ .../devicetree/bindings/watchdog/watchdog.yaml         |  2 ++
+ 249 files changed, 570 insertions(+), 14 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-div.yaml b/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-div.yaml
-index 2821425ee445..bd4cefbb1244 100644
---- a/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-div.yaml
-+++ b/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-div.yaml
-@@ -134,7 +134,11 @@ properties:
-   "#reset-cells":
-     const: 1
- 
--unevaluatedProperties: false
-+  clocks: true
-+
-+  clock-names: true
-+
-+additionalProperties: false
- 
- required:
-   - compatible
-diff --git a/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-pll.yaml b/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-pll.yaml
-index 97131bfa6f87..624984d51c10 100644
---- a/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-pll.yaml
-+++ b/Documentation/devicetree/bindings/clock/baikal,bt1-ccu-pll.yaml
-@@ -101,7 +101,7 @@ properties:
-   clock-names:
-     const: ref_clk
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- required:
-   - compatible
-diff --git a/Documentation/devicetree/bindings/clock/imx8m-clock.yaml b/Documentation/devicetree/bindings/clock/imx8m-clock.yaml
-index 31e7cc9693c3..625f573a7b90 100644
---- a/Documentation/devicetree/bindings/clock/imx8m-clock.yaml
-+++ b/Documentation/devicetree/bindings/clock/imx8m-clock.yaml
-@@ -96,7 +96,7 @@ allOf:
-             - const: clk_ext3
-             - const: clk_ext4
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   # Clock Control Module node:
-diff --git a/Documentation/devicetree/bindings/hwmon/baikal,bt1-pvt.yaml b/Documentation/devicetree/bindings/hwmon/baikal,bt1-pvt.yaml
-index 84ae4cdd08ed..00a6511354e6 100644
---- a/Documentation/devicetree/bindings/hwmon/baikal,bt1-pvt.yaml
-+++ b/Documentation/devicetree/bindings/hwmon/baikal,bt1-pvt.yaml
-@@ -79,7 +79,7 @@ properties:
-       minimum: 0
-       maximum: 7130
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- required:
-   - compatible
-@@ -99,7 +99,7 @@ examples:
- 
-       interrupts = <GIC_SHARED 31 IRQ_TYPE_LEVEL_HIGH>;
- 
--      baikal,pvt-temp-trim-millicelsius = <1000>;
-+      baikal,pvt-temp-offset-millicelsius = <1000>;
- 
-       clocks = <&ccu_sys>, <&ccu_sys>;
-       clock-names = "ref", "pclk";
-diff --git a/Documentation/devicetree/bindings/iio/accel/adi,adis16240.yaml b/Documentation/devicetree/bindings/iio/accel/adi,adis16240.yaml
-index 8589b722028d..4fcbfd93e218 100644
---- a/Documentation/devicetree/bindings/iio/accel/adi,adis16240.yaml
-+++ b/Documentation/devicetree/bindings/iio/accel/adi,adis16240.yaml
-@@ -25,12 +25,14 @@ properties:
-   interrupts:
-     maxItems: 1
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
-   - interrupts
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/accel/adi,adxl345.yaml b/Documentation/devicetree/bindings/iio/accel/adi,adxl345.yaml
-index 591ca32181b0..11d32a288535 100644
---- a/Documentation/devicetree/bindings/iio/accel/adi,adxl345.yaml
-+++ b/Documentation/devicetree/bindings/iio/accel/adi,adxl345.yaml
-@@ -32,6 +32,8 @@ properties:
- 
-   spi-cpol: true
- 
-+  spi-max-frequency: true
-+
-   interrupts:
-     maxItems: 1
- 
-@@ -40,7 +42,7 @@ required:
-   - reg
-   - interrupts
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/accel/adi,adxl372.yaml b/Documentation/devicetree/bindings/iio/accel/adi,adxl372.yaml
-index 64f275c8e2d9..38b59b6454ce 100644
---- a/Documentation/devicetree/bindings/iio/accel/adi,adxl372.yaml
-+++ b/Documentation/devicetree/bindings/iio/accel/adi,adxl372.yaml
-@@ -25,12 +25,14 @@ properties:
-   interrupts:
-     maxItems: 1
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
-   - interrupts
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml b/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml
-index d0d2880626c2..f1c574c896cb 100644
---- a/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml
-+++ b/Documentation/devicetree/bindings/iio/adc/adi,ad7124.yaml
-@@ -52,6 +52,8 @@ properties:
-   avdd-supply:
-     description: avdd supply can be used as reference for conversion.
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
-@@ -108,7 +110,7 @@ patternProperties:
-       - reg
-       - diff-channels
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/adc/adi,ad7192.yaml b/Documentation/devicetree/bindings/iio/adc/adi,ad7192.yaml
-index ed363a796e50..e0cc3b2e8957 100644
---- a/Documentation/devicetree/bindings/iio/adc/adi,ad7192.yaml
-+++ b/Documentation/devicetree/bindings/iio/adc/adi,ad7192.yaml
-@@ -30,6 +30,8 @@ properties:
- 
-   spi-cpha: true
- 
-+  spi-max-frequency: true
-+
-   clocks:
-     maxItems: 1
-     description: phandle to the master clock (mclk)
-@@ -92,7 +94,7 @@ required:
-   - spi-cpol
-   - spi-cpha
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/adc/adi,ad7292.yaml b/Documentation/devicetree/bindings/iio/adc/adi,ad7292.yaml
-index 55e973c6449c..108d202b288f 100644
---- a/Documentation/devicetree/bindings/iio/adc/adi,ad7292.yaml
-+++ b/Documentation/devicetree/bindings/iio/adc/adi,ad7292.yaml
-@@ -30,6 +30,8 @@ properties:
- 
-   spi-cpha: true
- 
-+  spi-max-frequency: true
-+
-   '#address-cells':
-     const: 1
- 
-@@ -63,7 +65,7 @@ patternProperties:
-     required:
-       - reg
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/adc/adi,ad7606.yaml b/Documentation/devicetree/bindings/iio/adc/adi,ad7606.yaml
-index 014b020ed0c2..73775174cf57 100644
---- a/Documentation/devicetree/bindings/iio/adc/adi,ad7606.yaml
-+++ b/Documentation/devicetree/bindings/iio/adc/adi,ad7606.yaml
-@@ -31,6 +31,10 @@ properties:
- 
-   spi-cpha: true
- 
-+  spi-cpol: true
-+
-+  spi-max-frequency: true
-+
-   avcc-supply: true
- 
-   interrupts:
-@@ -102,7 +106,7 @@ required:
-   - interrupts
-   - adi,conversion-start-gpios
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/adc/adi,ad7923.yaml b/Documentation/devicetree/bindings/iio/adc/adi,ad7923.yaml
-index 2a17641faed5..e82194974eea 100644
---- a/Documentation/devicetree/bindings/iio/adc/adi,ad7923.yaml
-+++ b/Documentation/devicetree/bindings/iio/adc/adi,ad7923.yaml
-@@ -43,11 +43,13 @@ properties:
-   '#size-cells':
-     const: 0
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/adc/maxim,max1241.yaml b/Documentation/devicetree/bindings/iio/adc/maxim,max1241.yaml
-index 181213b862db..4c7e0d94bff1 100644
---- a/Documentation/devicetree/bindings/iio/adc/maxim,max1241.yaml
-+++ b/Documentation/devicetree/bindings/iio/adc/maxim,max1241.yaml
-@@ -39,13 +39,15 @@ properties:
-       thus enabling power-down mode.
-     maxItems: 1
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
-   - vdd-supply
-   - vref-supply
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/dac/adi,ad5770r.yaml b/Documentation/devicetree/bindings/iio/dac/adi,ad5770r.yaml
-index faef288b7148..fb2c48fc7ce4 100644
---- a/Documentation/devicetree/bindings/iio/dac/adi,ad5770r.yaml
-+++ b/Documentation/devicetree/bindings/iio/dac/adi,ad5770r.yaml
-@@ -49,6 +49,14 @@ properties:
-       asserted during driver probe.
-     maxItems: 1
- 
-+  spi-max-frequency: true
-+
-+  '#address-cells':
-+    const: 1
-+
-+  '#size-cells':
-+    const: 0
-+
-   channel@0:
-     description: Represents an external channel which are
-       connected to the DAC. Channel 0 can act both as a current
-@@ -130,7 +138,7 @@ required:
-   - channel@4
-   - channel@5
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/frequency/adf4371.yaml b/Documentation/devicetree/bindings/iio/frequency/adf4371.yaml
-index 11d445f7010e..6b3a611e1cf1 100644
---- a/Documentation/devicetree/bindings/iio/frequency/adf4371.yaml
-+++ b/Documentation/devicetree/bindings/iio/frequency/adf4371.yaml
-@@ -40,13 +40,15 @@ properties:
-       output stage will shut down until the ADF4371/ADF4372 achieves lock as
-       measured by the digital lock detect circuitry.
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
-   - clocks
-   - clock-names
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/imu/adi,adis16460.yaml b/Documentation/devicetree/bindings/iio/imu/adi,adis16460.yaml
-index 07c8ed4ee0f1..340be256f283 100644
---- a/Documentation/devicetree/bindings/iio/imu/adi,adis16460.yaml
-+++ b/Documentation/devicetree/bindings/iio/imu/adi,adis16460.yaml
-@@ -25,6 +25,8 @@ properties:
- 
-   spi-cpol: true
- 
-+  spi-max-frequency: true
-+
-   interrupts:
-     maxItems: 1
- 
-@@ -33,7 +35,7 @@ required:
-   - reg
-   - interrupts
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/imu/adi,adis16475.yaml b/Documentation/devicetree/bindings/iio/imu/adi,adis16475.yaml
-index c29385697bbf..79fba1508e89 100644
---- a/Documentation/devicetree/bindings/iio/imu/adi,adis16475.yaml
-+++ b/Documentation/devicetree/bindings/iio/imu/adi,adis16475.yaml
-@@ -116,7 +116,7 @@ allOf:
-       dependencies:
-         adi,sync-mode: [ clocks ]
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/imu/bosch,bmi160.yaml b/Documentation/devicetree/bindings/iio/imu/bosch,bmi160.yaml
-index 4f215399c8df..6e73cd889b5c 100644
---- a/Documentation/devicetree/bindings/iio/imu/bosch,bmi160.yaml
-+++ b/Documentation/devicetree/bindings/iio/imu/bosch,bmi160.yaml
-@@ -46,11 +46,13 @@ properties:
-   mount-matrix:
-     description: an optional 3x3 mounting rotation matrix
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/iio/imu/nxp,fxos8700.yaml b/Documentation/devicetree/bindings/iio/imu/nxp,fxos8700.yaml
-index 716731c2b794..479e7065d4eb 100644
---- a/Documentation/devicetree/bindings/iio/imu/nxp,fxos8700.yaml
-+++ b/Documentation/devicetree/bindings/iio/imu/nxp,fxos8700.yaml
-@@ -36,11 +36,13 @@ properties:
-   drive-open-drain:
-     type: boolean
- 
-+  spi-max-frequency: true
-+
- required:
-   - compatible
-   - reg
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/interrupt-controller/mti,gic.yaml b/Documentation/devicetree/bindings/interrupt-controller/mti,gic.yaml
-index ce6aaff15214..039e08af98bb 100644
---- a/Documentation/devicetree/bindings/interrupt-controller/mti,gic.yaml
-+++ b/Documentation/devicetree/bindings/interrupt-controller/mti,gic.yaml
-@@ -95,7 +95,7 @@ properties:
- 
-     additionalProperties: false
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- required:
-   - compatible
-diff --git a/Documentation/devicetree/bindings/mfd/cirrus,lochnagar.yaml b/Documentation/devicetree/bindings/mfd/cirrus,lochnagar.yaml
-index 7a616577ac63..c00ad3e21c21 100644
---- a/Documentation/devicetree/bindings/mfd/cirrus,lochnagar.yaml
-+++ b/Documentation/devicetree/bindings/mfd/cirrus,lochnagar.yaml
-@@ -130,6 +130,14 @@ properties:
-     type: object
-     $ref: /schemas/pinctrl/cirrus,lochnagar.yaml#
- 
-+  lochnagar-hwmon:
-+    type: object
-+    $ref: /schemas/hwmon/cirrus,lochnagar.yaml#
-+
-+  lochnagar-sc:
-+    type: object
-+    $ref: /schemas/sound/cirrus,lochnagar.yaml#
-+
-   VDDCORE:
-     description:
-       Initialisation data for the VDDCORE regulator, which supplies the
-@@ -249,7 +257,7 @@ required:
-   - lochnagar-clk
-   - lochnagar-pinctrl
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/mfd/ti,j721e-system-controller.yaml b/Documentation/devicetree/bindings/mfd/ti,j721e-system-controller.yaml
-index da3d9ab758b9..19fcf59fd2fe 100644
---- a/Documentation/devicetree/bindings/mfd/ti,j721e-system-controller.yaml
-+++ b/Documentation/devicetree/bindings/mfd/ti,j721e-system-controller.yaml
-@@ -30,6 +30,9 @@ properties:
-       - const: syscon
-       - const: simple-mfd
- 
-+  reg:
-+    maxItems: 1
-+
-   "#address-cells":
-     const: 1
- 
-@@ -54,7 +57,7 @@ required:
-   - "#size-cells"
-   - ranges
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/misc/olpc,xo1.75-ec.yaml b/Documentation/devicetree/bindings/misc/olpc,xo1.75-ec.yaml
-index e75d77beec6a..ade733cd60f7 100644
---- a/Documentation/devicetree/bindings/misc/olpc,xo1.75-ec.yaml
-+++ b/Documentation/devicetree/bindings/misc/olpc,xo1.75-ec.yaml
-@@ -28,11 +28,13 @@ properties:
-     description: GPIO uspecifier of the CMD pin
-     maxItems: 1
- 
-+  spi-cpha: true
-+
- required:
-   - compatible
-   - cmd-gpios
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/opp/allwinner,sun50i-h6-operating-points.yaml b/Documentation/devicetree/bindings/opp/allwinner,sun50i-h6-operating-points.yaml
-index aef87a33a7c9..aeff2bd774dd 100644
---- a/Documentation/devicetree/bindings/opp/allwinner,sun50i-h6-operating-points.yaml
-+++ b/Documentation/devicetree/bindings/opp/allwinner,sun50i-h6-operating-points.yaml
-@@ -31,6 +31,8 @@ properties:
-       Documentation/devicetree/bindings/nvmem/nvmem.txt and also
-       examples below.
- 
-+  opp-shared: true
-+
- required:
-   - compatible
-   - nvmem-cells
-@@ -53,7 +55,7 @@ patternProperties:
- 
-     unevaluatedProperties: false
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/regulator/qcom-labibb-regulator.yaml b/Documentation/devicetree/bindings/regulator/qcom-labibb-regulator.yaml
-index fb111e2d5b99..53853ec20fe2 100644
---- a/Documentation/devicetree/bindings/regulator/qcom-labibb-regulator.yaml
-+++ b/Documentation/devicetree/bindings/regulator/qcom-labibb-regulator.yaml
-@@ -47,7 +47,7 @@ properties:
- required:
-   - compatible
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- examples:
-   - |
-diff --git a/Documentation/devicetree/bindings/timer/snps,dw-apb-timer.yaml b/Documentation/devicetree/bindings/timer/snps,dw-apb-timer.yaml
-index 7b39e3204fb3..2fc617377e2c 100644
---- a/Documentation/devicetree/bindings/timer/snps,dw-apb-timer.yaml
-+++ b/Documentation/devicetree/bindings/timer/snps,dw-apb-timer.yaml
-@@ -45,7 +45,7 @@ properties:
-       frequency in HZ, but is defined only for the backwards compatibility
-       with the picoxcell platform.
- 
--unevaluatedProperties: false
-+additionalProperties: false
- 
- required:
-   - compatible
--- 
+--
 2.25.1
-
