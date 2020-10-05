@@ -2,168 +2,241 @@ Return-Path: <SRS0=j7Ik=DM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEF28C47423
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 08:04:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53351C4363A
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 08:23:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B82A120796
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 08:04:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0E22720776
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 08:23:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="QT2sz2z2"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gyoWLoyN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725939AbgJEIEz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 04:04:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36242 "EHLO
+        id S1725981AbgJEIXV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 04:23:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39134 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725915AbgJEIEy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 04:04:54 -0400
-Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F4071C0613CE
-        for <linux-mmc@vger.kernel.org>; Mon,  5 Oct 2020 01:04:53 -0700 (PDT)
-Received: by mail-wr1-x441.google.com with SMTP id h7so4782767wre.4
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2020 01:04:53 -0700 (PDT)
+        with ESMTP id S1725885AbgJEIXS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 04:23:18 -0400
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13323C0613CE
+        for <linux-mmc@vger.kernel.org>; Mon,  5 Oct 2020 01:23:17 -0700 (PDT)
+Received: by mail-vk1-xa44.google.com with SMTP id u204so1185233vkb.8
+        for <linux-mmc@vger.kernel.org>; Mon, 05 Oct 2020 01:23:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=IeiNTBeAySgxF765tOCATEDwXLrm3RiAjoTBQHN6wK0=;
-        b=QT2sz2z2T2ObbOF9cBuqPj/xMs2V2JkpGaC1yQPewHnLjCK6KfpJxnFBd52Yg4AGmP
-         VJxRGRPxaRQLhLWf/cJj+4TFWIvc5S6rpMyihLW8guAo+UvNRqZKoELqvBpOePuA/Etp
-         z293SdQf8ZGebrwCEz1gY7IlvwFjzz13UZb9UEwJiawxT5K21aKdmv/U8ZWx8aU8cdsz
-         g1EJ2lezQTBEJzLkUS6vaHwbRc5HEANA2MQBDDgPE/harsOdRDrcIYwSmq3urQxn7+oQ
-         VI6XlJwzca0RWlRBNRLXanZ5iKvZaicHTe2BxzY/5qO5xvvbJ/G2d1fmd5VfFwE503zT
-         3Stw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PAtojNlzxsPSd/oxSbWU6AgTlxaiRO+YzHrraKa81XU=;
+        b=gyoWLoyN2VqKSQUGjaeXiikTJWtx72t3wYzZbXZx182qcx3MgphEc/i7bNxdWUt4JR
+         p6iHceJFvUI4O16eyMMM3reWwuwyMYAufz523LgXdBtppTniJ495/oCKjHGComZeh8LW
+         +uJT3KfVpno2D13HeTPcBG+PQQfVJ3q4YdJBwRQNc+FW706nYXyWMK396mRP1z1mgCJ5
+         /oe6sjNivB8jf+syiAa2H1rtnkE0D1VmKX4rJwzgZuct8DiXn96wHWXUoMAgP7nuz/cd
+         HHmrmQHXkDKXZEgkhdFCqJ4ZlaMdpbVlQINusmhpAkU+BQBH5hrjus6bU9QzdnJVA2Bk
+         ZyAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=IeiNTBeAySgxF765tOCATEDwXLrm3RiAjoTBQHN6wK0=;
-        b=oab/g32QifjOAfeRE7BH17WVpSXt/dqiplUDrk1bmeUFkePr1NzjT2FpYS2d81OBRt
-         goQbFDpc4aQPU0dRYEAfPjg84Neqwu5/aN0xekxnEG0OB/J7SvnIVqx0cgjTotF3WChQ
-         Hg4F/uE84KRrdCSccLeWU3moesAiiHsL5FyulBT67qZULqy5wBHkqcEQZ9rYSWGYgCNf
-         twlJMg/MI/tUQuC22gk6mwmr1urK+NV87jcO+miAyaJePBSc/UHKWmDwJajuBP40sRZR
-         sWTG+kjB9QZnW5ojV46v5oBxd9HHozv0hp+7q8fTKcI4iZcVOh251CG05iTp0a/WDxa6
-         /7bw==
-X-Gm-Message-State: AOAM532vn8gQfGjj/a1Vg0WO1N8aHlHqe2VVhu0sT+KSFrtGM7oOwOmk
-        +WcQLs+NvmjTPcutoEcTkxujnw==
-X-Google-Smtp-Source: ABdhPJxB5n46P+iT3QRjzewwc6VgfO5oWkwQMA51B+oAEZSgUCF8P3GFXLcjkKteouHQRqUkrIZvVQ==
-X-Received: by 2002:adf:f10e:: with SMTP id r14mr9419051wro.337.1601885092289;
-        Mon, 05 Oct 2020 01:04:52 -0700 (PDT)
-Received: from dell ([91.110.221.236])
-        by smtp.gmail.com with ESMTPSA id x2sm11899009wrl.13.2020.10.05.01.04.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Oct 2020 01:04:51 -0700 (PDT)
-Date:   Mon, 5 Oct 2020 09:04:48 +0100
-From:   Lee Jones <lee.jones@linaro.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Baolin Wang <baolin.wang7@gmail.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-spi@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-iio@vger.kernel.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux-leds@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-rockchip@lists.infradead.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, linux-pci@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-remoteproc@vger.kernel.org,
-        linux-serial@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-usb@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Another round of adding missing
- 'additionalProperties'
-Message-ID: <20201005080448.GT6148@dell>
-References: <20201002234143.3570746-1-robh@kernel.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PAtojNlzxsPSd/oxSbWU6AgTlxaiRO+YzHrraKa81XU=;
+        b=B6BfCNIiPVk/eq7eFx4iKiQCvamQv152qUFf1GL8oV2R7j3I+oB7NVhhvzdeXZ+FSH
+         F3DkYh82qpfG2D4/EbV2C/Ilz9krb76TvxjetN2kXSgxAJFba9pT4zmxNukwe/As2Fuu
+         keVu4oZYxEDyXceIHGZ3Yjy6sFHJ5kYRV2wr3deycLCqCaRc8yXnOjxcayMBakmDoNfA
+         i4145SdGwpa/+bmUtNB7IVL5EgDN/UuPzFn8/FO/gLY8ZpePtc28Hwio6n16zp/QPIf3
+         XzHlissCPCgAZGmgk98ZuaZxv3ANVrTriu+pEB54cBkVukoBtRq9N7z65ToQvMWBt7ws
+         El2g==
+X-Gm-Message-State: AOAM530KxIVgdXcgrseEwNL1ttR109cZL7PqN+ijdyekcVAcpOKs98r6
+        nEfyajBg0c/pxeybAMfOE0Q/5EU+sMTo7mR5YbIAlw==
+X-Google-Smtp-Source: ABdhPJwGZ6eccEIM+OsJP2XgVXqZ+kYGEJi5PQ/SV4uGTlX8apsmqUeuDGFG8ICx3DEANTyofZmeyrlumVW4clNVEGE=
+X-Received: by 2002:a1f:1f46:: with SMTP id f67mr2216453vkf.6.1601886196064;
+ Mon, 05 Oct 2020 01:23:16 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201002234143.3570746-1-robh@kernel.org>
+References: <20201002164915.938217-1-jbrunet@baylibre.com>
+In-Reply-To: <20201002164915.938217-1-jbrunet@baylibre.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 5 Oct 2020 10:22:40 +0200
+Message-ID: <CAPDyKFo6T_P+TQQZSzFgHwLeE08f146KxKBpAutv209MXq0mjA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: remove IRQF_ONESHOT
+To:     Thomas Gleixner <tglx@linutronix.de>
+Cc:     Jerome Brunet <jbrunet@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Brad Harper <bjharper@gmail.com>,
+        Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 02 Oct 2020, Rob Herring wrote:
++ Tglx
 
-> Another round of wack-a-mole. The json-schema default is additional
-> unknown properties are allowed, but for DT all properties should be
-> defined.
-> 
-> Cc: Thierry Reding <thierry.reding@gmail.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Stephen Boyd <sboyd@kernel.org>
-> Cc: Shawn Guo <shawnguo@kernel.org>
-> Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-> Cc: Baolin Wang <baolin.wang7@gmail.com>
-> Cc: Guenter Roeck <linux@roeck-us.net>
-> Cc: Jonathan Cameron <jic23@kernel.org>
-> Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
-> Cc: Laurent Pinchart <laurent.pinchart+renesas@ideasonboard.com>
-> Cc: Lee Jones <lee.jones@linaro.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: "David S. Miller" <davem@davemloft.net>
-> Cc: Bjorn Helgaas <bhelgaas@google.com>
-> Cc: Vinod Koul <vkoul@kernel.org>
-> Cc: Liam Girdwood <lgirdwood@gmail.com>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
-> Cc: linux-clk@vger.kernel.org
-> Cc: dri-devel@lists.freedesktop.org
-> Cc: linux-spi@vger.kernel.org
-> Cc: linux-gpio@vger.kernel.org
-> Cc: linux-hwmon@vger.kernel.org
-> Cc: linux-iio@vger.kernel.org
-> Cc: openipmi-developer@lists.sourceforge.net
-> Cc: linux-leds@vger.kernel.org
-> Cc: linux-media@vger.kernel.org
-> Cc: linux-rockchip@lists.infradead.org
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> Cc: linux-mips@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: netdev@vger.kernel.org
-> Cc: linux-pci@vger.kernel.org
-> Cc: linux-pm@vger.kernel.org
-> Cc: linux-remoteproc@vger.kernel.org
-> Cc: linux-serial@vger.kernel.org
-> Cc: alsa-devel@alsa-project.org
-> Cc: linux-usb@vger.kernel.org
-> Signed-off-by: Rob Herring <robh@kernel.org>
+On Fri, 2 Oct 2020 at 18:49, Jerome Brunet <jbrunet@baylibre.com> wrote:
+>
+> IRQF_ONESHOT was added to this driver to make sure the irq was not enabled
+> again until the thread part of the irq had finished doing its job.
+>
+> Doing so upsets RT because, under RT, the hardirq part of the irq handler
+> is not migrated to a thread if the irq is claimed with IRQF_ONESHOT.
+> In this case, it has been reported to eventually trigger a deadlock with
+> the led subsystem.
+>
+> Preventing RT from doing this migration was certainly not the intent, the
+> description of IRQF_ONESHOT does not really reflect this constraint:
+>
+>  > IRQF_ONESHOT - Interrupt is not reenabled after the hardirq handler finished.
+>  >              Used by threaded interrupts which need to keep the
+>  >              irq line disabled until the threaded handler has been run.
+>
+> This is exactly what this driver was trying to acheive so I'm still a bit
+> confused whether this is a driver or an RT issue.
+>
+> Anyway, this can be solved driver side by manually disabling the IRQs
+> instead of the relying on the IRQF_ONESHOT. IRQF_ONESHOT may then be removed
+> while still making sure the irq won't trigger until the threaded part of
+> the handler is done.
+
+Thomas, may I have your opinion on this one.
+
+I have no problem to apply $subject patch, but as Jerome also
+highlights above - this kind of makes me wonder if this is an RT
+issue, that perhaps deserves to be solved in a generic way.
+
+What do you think?
+
+Kind regards
+Uffe
+
+>
+> Fixes: eb4d81127746 ("mmc: meson-gx: correct irq flag")
+> Reported-by: Brad Harper <bjharper@gmail.com>
+> Cc: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+> Signed-off-by: Jerome Brunet <jbrunet@baylibre.com>
 > ---
-> 
-> I'll take this thru the DT tree.
-
-[...]
-
->  .../bindings/mfd/gateworks-gsc.yaml           |  2 ++
->  .../bindings/mfd/xylon,logicvc.yaml           | 14 +++++++++++--
-
-Acked-by: Lee Jones <lee.jones@linaro.org>
-
--- 
-Lee Jones [李琼斯]
-Senior Technical Lead - Developer Services
-Linaro.org │ Open source software for Arm SoCs
-Follow Linaro: Facebook | Twitter | Blog
+>  drivers/mmc/host/meson-gx-mmc.c | 47 ++++++++++++++++++++-------------
+>  1 file changed, 29 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 08a3b1c05acb..effc356db904 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -101,8 +101,7 @@
+>  #define   IRQ_RESP_STATUS BIT(14)
+>  #define   IRQ_SDIO BIT(15)
+>  #define   IRQ_EN_MASK \
+> -       (IRQ_CRC_ERR | IRQ_TIMEOUTS | IRQ_END_OF_CHAIN | IRQ_RESP_STATUS |\
+> -        IRQ_SDIO)
+> +       (IRQ_CRC_ERR | IRQ_TIMEOUTS | IRQ_END_OF_CHAIN)
+>
+>  #define SD_EMMC_CMD_CFG 0x50
+>  #define SD_EMMC_CMD_ARG 0x54
+> @@ -170,6 +169,7 @@ struct meson_host {
+>         dma_addr_t descs_dma_addr;
+>
+>         int irq;
+> +       u32 irq_en;
+>
+>         bool vqmmc_enabled;
+>  };
+> @@ -842,22 +842,24 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         struct meson_host *host = dev_id;
+>         struct mmc_command *cmd;
+>         struct mmc_data *data;
+> -       u32 irq_en, status, raw_status;
+> +       u32  status, raw_status;
+>         irqreturn_t ret = IRQ_NONE;
+>
+> -       irq_en = readl(host->regs + SD_EMMC_IRQ_EN);
+> +       /* Disable irqs */
+> +       writel(0, host->regs + SD_EMMC_IRQ_EN);
+> +
+>         raw_status = readl(host->regs + SD_EMMC_STATUS);
+> -       status = raw_status & irq_en;
+> +       status = raw_status & host->irq_en;
+>
+>         if (!status) {
+>                 dev_dbg(host->dev,
+>                         "Unexpected IRQ! irq_en 0x%08x - status 0x%08x\n",
+> -                        irq_en, raw_status);
+> -               return IRQ_NONE;
+> +                        host->irq_en, raw_status);
+> +               goto none;
+>         }
+>
+>         if (WARN_ON(!host) || WARN_ON(!host->cmd))
+> -               return IRQ_NONE;
+> +               goto none;
+>
+>         /* ack all raised interrupts */
+>         writel(status, host->regs + SD_EMMC_STATUS);
+> @@ -908,6 +910,11 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         if (ret == IRQ_HANDLED)
+>                 meson_mmc_request_done(host->mmc, cmd->mrq);
+>
+> +none:
+> +       /* Enable the irq again if the thread will not run */
+> +       if (ret != IRQ_WAKE_THREAD)
+> +               writel(host->irq_en, host->regs + SD_EMMC_IRQ_EN);
+> +
+>         return ret;
+>  }
+>
+> @@ -934,15 +941,17 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>         struct mmc_command *next_cmd, *cmd = host->cmd;
+>         struct mmc_data *data;
+>         unsigned int xfer_bytes;
+> +       int ret = IRQ_HANDLED;
+>
+> -       if (WARN_ON(!cmd))
+> -               return IRQ_NONE;
+> +       if (WARN_ON(!cmd)) {
+> +               ret = IRQ_NONE;
+> +               goto out;
+> +       }
+>
+>         if (cmd->error) {
+>                 meson_mmc_wait_desc_stop(host);
+>                 meson_mmc_request_done(host->mmc, cmd->mrq);
+> -
+> -               return IRQ_HANDLED;
+> +               goto out;
+>         }
+>
+>         data = cmd->data;
+> @@ -959,7 +968,10 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>         else
+>                 meson_mmc_request_done(host->mmc, cmd->mrq);
+>
+> -       return IRQ_HANDLED;
+> +out:
+> +       /* Re-enable the irqs */
+> +       writel(host->irq_en, host->regs + SD_EMMC_IRQ_EN);
+> +       return ret;
+>  }
+>
+>  /*
+> @@ -1133,13 +1145,12 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>
+>         /* clear, ack and enable interrupts */
+>         writel(0, host->regs + SD_EMMC_IRQ_EN);
+> -       writel(IRQ_CRC_ERR | IRQ_TIMEOUTS | IRQ_END_OF_CHAIN,
+> -              host->regs + SD_EMMC_STATUS);
+> -       writel(IRQ_CRC_ERR | IRQ_TIMEOUTS | IRQ_END_OF_CHAIN,
+> -              host->regs + SD_EMMC_IRQ_EN);
+> +       host->irq_en = IRQ_EN_MASK;
+> +       writel(host->irq_en, host->regs + SD_EMMC_STATUS);
+> +       writel(host->irq_en, host->regs + SD_EMMC_IRQ_EN);
+>
+>         ret = request_threaded_irq(host->irq, meson_mmc_irq,
+> -                                  meson_mmc_irq_thread, IRQF_ONESHOT,
+> +                                  meson_mmc_irq_thread, 0,
+>                                    dev_name(&pdev->dev), host);
+>         if (ret)
+>                 goto err_init_clk;
+> --
+> 2.25.4
+>
