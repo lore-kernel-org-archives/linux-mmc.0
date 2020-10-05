@@ -2,397 +2,252 @@ Return-Path: <SRS0=j7Ik=DM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39673C52D13
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:39:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B617C4363A
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:54:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E0862100A
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:39:39 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601923179;
-	bh=e/H5OM1Kgb96wWg+sXU8irWdRIPHP+Tm8rfMRY7B90Y=;
-	h=From:To:Cc:Subject:Date:List-ID:From;
-	b=t0rVZcyAhoCTeAGNM7IDSgUqRFbYBPadRhZHioi2Bv4kbyDqgsXoaI1XH9htd/yfs
-	 7CdatDZ1tFPW8Eyy/QcZrd5dSCGC6BKGPsIk6Nj8fyz8tGOFksvhV1xIuPCZLQ+g8e
-	 kWnYwsU7VvNkZsSFB+EaT4rl7QFDYH3tBpcZQlbA=
+	by mail.kernel.org (Postfix) with ESMTP id ABB6C20853
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Oct 2020 18:54:46 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=intel.onmicrosoft.com header.i=@intel.onmicrosoft.com header.b="Zspce4Uo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728676AbgJESil (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Oct 2020 14:38:41 -0400
-Received: from mail-oi1-f193.google.com ([209.85.167.193]:35257 "EHLO
-        mail-oi1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725940AbgJESik (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Oct 2020 14:38:40 -0400
-Received: by mail-oi1-f193.google.com with SMTP id w141so9706420oia.2;
-        Mon, 05 Oct 2020 11:38:36 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=FKBuvtLQAdMRryG6abzok93hEZkfxfk1NvbdtZDThTc=;
-        b=bDK75CryujMO76IjbGfXVn3NMjUDRV7I4OLzQAONqY7A1asItWuGsGw1ge1m3Wl+tH
-         mdm8Vr+7+odoC8NpnKJKmMTRcS9JWvP4c4MFz8HnmqY54UGwUmm7dbSO5DZTVpExMxsd
-         ihuo4hUM+0nSKwDlJwZI0TrJmhvY8iVajwhlgNqMd2AG+H7AYpqFq+dJbMnYhezJt37r
-         8EaMuOrmOTnyM4NrsmRee0eX7DF24KMgRRhN6PUb0J2tPGOPf0A1QCGHJZZWNy6EyxFs
-         3hVssrxSxJ+V7+R+464rXfqvVkG4r0OFuDZ9RBHOEr2HluU8Y0qcSxk+5i6p2+uVJw3I
-         4SFQ==
-X-Gm-Message-State: AOAM532Z6hwvunkSQ1ckEkZp2o3GvhXNL76YTzTSxp3kYXv2R/csYiSF
-        0LActFl2druxp4twqBkV04nTJDUQDGbZ
-X-Google-Smtp-Source: ABdhPJwtSa8Y/I6DT15kFb+c+yKVzbdUj3v7XcBfx5+TPJ0mpN3ESYoYQunOScJs66Yn+dcB/iKTAA==
-X-Received: by 2002:aca:50d2:: with SMTP id e201mr416333oib.31.1601923115204;
-        Mon, 05 Oct 2020 11:38:35 -0700 (PDT)
-Received: from xps15.herring.priv (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.googlemail.com with ESMTPSA id z25sm143140otq.31.2020.10.05.11.38.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Oct 2020 11:38:34 -0700 (PDT)
-From:   Rob Herring <robh@kernel.org>
-To:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Albert Ou <aou@eecs.berkeley.edu>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        "David S. Miller" <davem@davemloft.net>, dmaengine@vger.kernel.org,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        dri-devel@lists.freedesktop.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Jason Cooper <jason@lakedaemon.net>,
-        Jens Axboe <axboe@kernel.dk>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Lee Jones <lee.jones@linaro.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Marc Kleine-Budde <mkl@pengutronix.de>,
-        Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        MyungJoo Ham <myungjoo.ham@samsung.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Pavel Machek <pavel@ucw.cz>,
-        Peter Meerwald-Stadler <pmeerw@pmeerw.net>,
-        Richard Weinberger <richard@nod.at>,
-        Sam Ravnborg <sam@ravnborg.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Vivien Didelot <vivien.didelot@gmail.com>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Wolfgang Grandegger <wg@grandegger.com>,
-        Zhang Rui <rui.zhang@intel.com>,
-        linux-arm-kernel@lists.infradead.org, linux-can@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-ide@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-pci@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-watchdog@vger.kernel.org
-Subject: [PATCH 0/4] dt-bindings: additional/unevaluatedProperties clean-ups
-Date:   Mon,  5 Oct 2020 13:38:26 -0500
-Message-Id: <20201005183830.486085-1-robh@kernel.org>
-X-Mailer: git-send-email 2.25.1
+        id S1729226AbgJESyq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Oct 2020 14:54:46 -0400
+Received: from mga07.intel.com ([134.134.136.100]:54840 "EHLO mga07.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729221AbgJESyp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 5 Oct 2020 14:54:45 -0400
+IronPort-SDR: 8xZJwIUdAidONk86Yfw07FTi1s8KQAyJolbYblkvkJMs0n7JiCXK0TmUNTc0knopKlENXZPBzL
+ 7h0TpWFGsJXQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9765"; a="227980024"
+X-IronPort-AV: E=Sophos;i="5.77,340,1596524400"; 
+   d="scan'208";a="227980024"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2020 11:54:21 -0700
+IronPort-SDR: LZw9gjrr745dxkbXVYuVHe5iZ9Cm7Ryq8rLT1O2y4gl2tSdglcXjKMpZhdYPQGcTwRSTC4/ajT
+ sDRCJhha0c+w==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.77,340,1596524400"; 
+   d="scan'208";a="295951429"
+Received: from fmsmsx606.amr.corp.intel.com ([10.18.126.86])
+  by fmsmga007.fm.intel.com with ESMTP; 05 Oct 2020 11:54:18 -0700
+Received: from fmsmsx612.amr.corp.intel.com (10.18.126.92) by
+ fmsmsx606.amr.corp.intel.com (10.18.126.86) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1713.5; Mon, 5 Oct 2020 10:04:15 -0700
+Received: from fmsmsx603.amr.corp.intel.com (10.18.126.83) by
+ fmsmsx612.amr.corp.intel.com (10.18.126.92) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1713.5; Mon, 5 Oct 2020 10:04:15 -0700
+Received: from fmsedg602.ED.cps.intel.com (10.1.192.136) by
+ fmsmsx603.amr.corp.intel.com (10.18.126.83) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5
+ via Frontend Transport; Mon, 5 Oct 2020 10:04:12 -0700
+Received: from NAM02-SN1-obe.outbound.protection.outlook.com (104.47.36.56) by
+ edgegateway.intel.com (192.55.55.71) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.1713.5; Mon, 5 Oct 2020 10:04:12 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VhgGe3fQ9TtXIh4cp60JtohS4w4s+00ztSMqzokjYklIaDr2lFfkbtcmO8vjowCWfa+MclKZpPbEqUqAr0khSaDJvP48xIfgk7JPVhmVreex1pMrmsAj9Kwdo7Tb51SfTK0+uYJdMzicxqYFGvl8Wt9dRGerLz4MNGm5LdFg2C7/5keM6dokAkTCoL35xj2HxQDOOlsn/2hIzJ1xmyt4dnqTZbOW+BWw1CfRKtj02XZUc7V4WNGGlSmn+86DZy69efVKsjBufGmNGEvFOm4KO+X0HEMm5uLsWlvsMht/qHwfPRQ3kVLOZffUdMiSyCWohlsx9UrVE3h3jOwlZAYkzQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=N0Mwi2WcvK20TiqOC0grKX+TpP3NhH+WGi/nwvkDWNo=;
+ b=RGSo20S0gvBx3yYeQ7Nfm4Q8y6PsFSgrhYevZnw1qfg06JyaqTyQLVFOoiOWNJ8a9mpgqURlSdNbHqpkbOPBE2Nf1wcJ8zff0LL9lBqqipeihpDyo76lrEkIvnMBozMHq0DQJOQioXiJx9yh++4+rldGKWHtSobRHuYkdMUIZF12BD4p+3DlCX6vQxwh8Pdj8MatxcuwOgrUSBX8YDqTB1mhr100SWVdMoaGNLtOg7bpmUDEpPYu6ZGXC/SSYGWyq7Ft4Uhspdvp3sLFYiygxAmlMSm0zi/bAD54mgyrMBCH6vr7uVeqLV7l7PIbXNfb2KQOpTwOPywKmWwgNiJuig==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=intel.onmicrosoft.com;
+ s=selector2-intel-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=N0Mwi2WcvK20TiqOC0grKX+TpP3NhH+WGi/nwvkDWNo=;
+ b=Zspce4Uo6Ouolkk4l0OncC8E3Ll1f31TSJbIRzMsES9V9DYFOkvp5TJZU9rhpnTH5x/iF2FCChZqVRvYnVkjKUXiyog/RT1WhO9+AteJtPfx+7BDkwpzfeiKDGHkowk2kAMMkA+VL9JqVloKmE/mfsv/QN6IQ+GArFziC2jWy8I=
+Received: from BYAPR11MB3015.namprd11.prod.outlook.com (2603:10b6:a03:86::14)
+ by SJ0PR11MB5086.namprd11.prod.outlook.com (2603:10b6:a03:2d1::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3433.34; Mon, 5 Oct
+ 2020 17:04:10 +0000
+Received: from BYAPR11MB3015.namprd11.prod.outlook.com
+ ([fe80::e1af:b9b8:7e60:e77c]) by BYAPR11MB3015.namprd11.prod.outlook.com
+ ([fe80::e1af:b9b8:7e60:e77c%4]) with mapi id 15.20.3433.043; Mon, 5 Oct 2020
+ 17:04:10 +0000
+From:   "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
+To:     Sudeep Holla <sudeep.holla@arm.com>
+CC:     Michal Simek <michal.simek@xilinx.com>,
+        "Hunter, Adrian" <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "Raja Subramanian, Lakshmi Bai" 
+        <lakshmi.bai.raja.subramanian@intel.com>,
+        "arnd@arndb.de" <arnd@arndb.de>,
+        "Wan Mohamad, Wan Ahmad Zainie" 
+        <wan.ahmad.zainie.wan.mohamad@intel.com>
+Subject: RE: [PATCH v2 2/3] firmware: Keem Bay: Add support for Arm Trusted
+ Firmware Service call
+Thread-Topic: [PATCH v2 2/3] firmware: Keem Bay: Add support for Arm Trusted
+ Firmware Service call
+Thread-Index: AQHWl/61fFIKn6YDxkK/M5PRzKZE1amC4PoAgAEZhQCAACt8AIAAMNyAgAAQH4CABEzPQIAAA8WAgACDndA=
+Date:   Mon, 5 Oct 2020 17:04:10 +0000
+Message-ID: <BYAPR11MB3015F4E8FDF3CB1273A35EFAB80C0@BYAPR11MB3015.namprd11.prod.outlook.com>
+References: <20201001142149.23445-1-muhammad.husaini.zulkifli@intel.com>
+ <20201001142149.23445-3-muhammad.husaini.zulkifli@intel.com>
+ <20201001153526.GD906@bogus>
+ <ce2bcac9-8341-d7c1-0652-309ca4e9413c@xilinx.com>
+ <20201002105840.GE906@bogus>
+ <1b714566-d6dd-ead1-322e-f92847b923f3@xilinx.com>
+ <20201002145115.GA6520@bogus>
+ <BYAPR11MB30151480E71BBA232E9B0ADEB80C0@BYAPR11MB3015.namprd11.prod.outlook.com>
+ <20201005084441.znou7licvvtomva4@bogus>
+In-Reply-To: <20201005084441.znou7licvvtomva4@bogus>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+dlp-version: 11.5.1.3
+dlp-product: dlpe-windows
+dlp-reaction: no-action
+authentication-results: arm.com; dkim=none (message not signed)
+ header.d=none;arm.com; dmarc=none action=none header.from=intel.com;
+x-originating-ip: [42.189.177.181]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: d66f5317-6b3f-4255-cdf1-08d86950ad8e
+x-ms-traffictypediagnostic: SJ0PR11MB5086:
+x-ld-processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <SJ0PR11MB5086002A6DC2A2CF34B3BF8CB80C0@SJ0PR11MB5086.namprd11.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:9508;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: v8b30d1caZI0eW++LNYSl5PrKKxa9BI3zEz7FFJg89xmZm60y+X3Ru3CTKzGpN4T8OO61oWvfpECUdR50R9Ratf4b/1Wpxj/JxjQ9ObIe2kwoKi2yXK/MMlBYm3dTCkkHXfZLv2uZyxdjWS25v/r0AcwqucL1NwxAN05S3RztjYeIhARs77m7SrkMRbQQLuiv5gB11typlaCjtDReg7cnIhsASVr78H9DuqKG1NuUhG+2hf3eHKMryaB6x433MH2tbJu9h3Les2Lge969KjnMznFRFBiFsfX3guEeLPo+ZgXudEi78rUxy3pQGBwGGMB0zpr5mbVI5QP7aQbxrv0Tw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR11MB3015.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(346002)(396003)(39860400002)(376002)(366004)(64756008)(66446008)(26005)(2906002)(7696005)(66556008)(6506007)(66476007)(33656002)(5660300002)(66946007)(52536014)(6916009)(186003)(71200400001)(76116006)(55016002)(8936002)(107886003)(316002)(9686003)(478600001)(8676002)(86362001)(83380400001)(54906003)(4326008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: VbOU30v38VxFdZexj3OYgXcpQz2Ms5O/suYc2x0fxRw4bACIzicBdS3abd/qaaKDZfyfxv9H38SCmWaoAUqWUuxa6ygjgIju8yv5VlbHksrd87rxmbz+dOqtDUtCOVKS9ixTiGhLQiqZUAJnFIeQSPaM5hxd77Px5LpwcOAnmC/dNDvyTSILt88bCnnO1WTAgJK3EI7vlkhgNO18OQlxPqmOnkLOYLSRUPISnAQshmWgDDzedAebXUXWKFA9GItnUMAAH/JD161kJchYmwzMd9icf9TXSRvyvafCZqBkabicn2MZnjtKlo584tiUJA2Xgut2b5qh8O1P2kbtPMn0k3l7yYlE2kdSMptRX+8jrxz2FCazyuUcG5s/L35Lec+hOr4jEbNvJT/Ec7Qj95ZdAGbnBwwm+lFygpPfHmd3WA1/psmP4Abid8Kc8/1fkjdIeoxDvL4kEkdRG8YVSFxKRekFTYVHyKYbwK9dZ00XDO5gx9ZDvPQtUb/yTIUFhRD6cuB4x2Ey5WMMpbSyjNOD28UoFVBTsI9CGYM1f4xMtVRtQE1O7/iSLH/gdVGRlf1w8k9W/H7METkEBruAAxuX2akVNkyKc1QduuYQqatZNO//ichMbBdtw4FSAZ7UHBfjqdAylTbk+IYaatOcBaEqmA==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: BYAPR11MB3015.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d66f5317-6b3f-4255-cdf1-08d86950ad8e
+X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Oct 2020 17:04:10.1453
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: rDrpXcigLUJJ4De3HA+EZUjOC5NqE66ehRm/mLlTiephbadSVE4T14xqeIU1/B6VUVDPQf+QC6YYRAs+U6OFy3Q2x9FJqBx1qUU1LASXayX9oc+msDv0ZEkI6u3BneEd
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR11MB5086
+X-OriginatorOrg: intel.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The default behavior for json-schema is any unknown property is allowed.
-That is generally not the behavior we want for DT. In order to disallow
-extra properties, schemas need to define 'additionalProperties: false'
-typically. Ideally, we'd just add that automatically with the tools, but
-there are some exceptions so only making things explicit everywhere
-really works. Missing 'additionalProperties' or 'unevaluatedProperties'
-has been a constant source of review comments, so a meta-schema check is
-really needed here.
-
-Once this series is in place, the meta-schema can be updated with a
-check. The rule is if there's a $ref to another schema, then either
-'additionalProperties' or 'unevaluatedProperties' is required. If not,
-then 'additionalProperties' is required.
-
-Rob
-
-
-Rob Herring (4):
-  dt-bindings: Add missing 'unevaluatedProperties'
-  dt-bindings: Use 'additionalProperties' instead of
-    'unevaluatedProperties'
-  dt-bindings: Explicitly allow additional properties in board/SoC
-    schemas
-  dt-bindings: Explicitly allow additional properties in common schemas
-
- Documentation/devicetree/bindings/arm/actions.yaml     |  2 ++
- Documentation/devicetree/bindings/arm/altera.yaml      |  3 +++
- Documentation/devicetree/bindings/arm/amazon,al.yaml   |  2 ++
- Documentation/devicetree/bindings/arm/amlogic.yaml     |  3 +++
- .../devicetree/bindings/arm/arm,integrator.yaml        |  2 ++
- .../devicetree/bindings/arm/arm,realview.yaml          |  2 ++
- .../devicetree/bindings/arm/arm,versatile.yaml         |  2 ++
- .../devicetree/bindings/arm/arm,vexpress-juno.yaml     |  2 ++
- Documentation/devicetree/bindings/arm/atmel-at91.yaml  |  2 ++
- Documentation/devicetree/bindings/arm/axxia.yaml       |  2 ++
- Documentation/devicetree/bindings/arm/bcm/bcm2835.yaml |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,bcm11351.yaml     |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,bcm21664.yaml     |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,bcm23550.yaml     |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,bcm4708.yaml      |  3 +++
- .../devicetree/bindings/arm/bcm/brcm,cygnus.yaml       |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,hr2.yaml          |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,ns2.yaml          |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,nsp.yaml          |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,stingray.yaml     |  2 ++
- .../devicetree/bindings/arm/bcm/brcm,vulcan-soc.yaml   |  2 ++
- Documentation/devicetree/bindings/arm/bitmain.yaml     |  3 +++
- Documentation/devicetree/bindings/arm/calxeda.yaml     |  2 ++
- .../devicetree/bindings/arm/coresight-cti.yaml         |  2 ++
- Documentation/devicetree/bindings/arm/cpus.yaml        |  2 ++
- Documentation/devicetree/bindings/arm/digicolor.yaml   |  2 ++
- Documentation/devicetree/bindings/arm/fsl.yaml         |  2 ++
- .../devicetree/bindings/arm/hisilicon/hisilicon.yaml   |  3 +++
- .../devicetree/bindings/arm/intel,keembay.yaml         |  3 +++
- .../devicetree/bindings/arm/intel-ixp4xx.yaml          |  2 ++
- .../bindings/arm/keystone/ti,k3-sci-common.yaml        |  2 ++
- .../devicetree/bindings/arm/marvell/armada-7k-8k.yaml  |  2 ++
- Documentation/devicetree/bindings/arm/mediatek.yaml    |  3 +++
- .../devicetree/bindings/arm/microchip,sparx5.yaml      |  2 ++
- Documentation/devicetree/bindings/arm/moxart.yaml      |  1 +
- Documentation/devicetree/bindings/arm/mrvl/mrvl.yaml   |  3 +++
- Documentation/devicetree/bindings/arm/mstar/mstar.yaml |  2 ++
- .../bindings/arm/nvidia,tegra194-ccplex.yaml           |  2 ++
- Documentation/devicetree/bindings/arm/nxp/lpc32xx.yaml |  2 ++
- Documentation/devicetree/bindings/arm/qcom.yaml        |  2 ++
- Documentation/devicetree/bindings/arm/rda.yaml         |  2 ++
- Documentation/devicetree/bindings/arm/realtek.yaml     |  3 +++
- Documentation/devicetree/bindings/arm/renesas.yaml     |  2 ++
- Documentation/devicetree/bindings/arm/rockchip.yaml    |  3 +++
- .../bindings/arm/samsung/samsung-boards.yaml           |  2 ++
- Documentation/devicetree/bindings/arm/sirf.yaml        |  3 +++
- .../devicetree/bindings/arm/socionext/milbeaut.yaml    |  3 +++
- .../devicetree/bindings/arm/socionext/uniphier.yaml    |  2 ++
- Documentation/devicetree/bindings/arm/spear.yaml       |  3 +++
- Documentation/devicetree/bindings/arm/sprd/sprd.yaml   |  2 ++
- Documentation/devicetree/bindings/arm/sti.yaml         |  3 +++
- .../devicetree/bindings/arm/stm32/st,mlahb.yaml        |  2 ++
- Documentation/devicetree/bindings/arm/stm32/stm32.yaml |  3 +++
- Documentation/devicetree/bindings/arm/sunxi.yaml       |  2 ++
- Documentation/devicetree/bindings/arm/tegra.yaml       |  2 ++
- Documentation/devicetree/bindings/arm/ti/nspire.yaml   |  3 +++
- .../devicetree/bindings/arm/ti/ti,davinci.yaml         |  3 +++
- Documentation/devicetree/bindings/arm/ux500.yaml       |  2 ++
- Documentation/devicetree/bindings/arm/vt8500.yaml      |  3 +++
- Documentation/devicetree/bindings/arm/xilinx.yaml      |  2 ++
- Documentation/devicetree/bindings/arm/zte.yaml         |  2 ++
- .../devicetree/bindings/ata/faraday,ftide010.yaml      |  2 ++
- Documentation/devicetree/bindings/ata/pata-common.yaml |  2 ++
- Documentation/devicetree/bindings/ata/sata-common.yaml |  2 ++
- Documentation/devicetree/bindings/bus/renesas,bsc.yaml |  2 ++
- .../devicetree/bindings/bus/simple-pm-bus.yaml         |  2 ++
- .../bindings/chrome/google,cros-ec-typec.yaml          |  2 ++
- .../devicetree/bindings/clock/baikal,bt1-ccu-div.yaml  |  6 +++++-
- .../devicetree/bindings/clock/baikal,bt1-ccu-pll.yaml  |  2 +-
- .../devicetree/bindings/clock/imx8m-clock.yaml         |  2 +-
- .../devicetree/bindings/connector/usb-connector.yaml   |  2 ++
- .../bindings/display/bridge/snps,dw-mipi-dsi.yaml      |  2 ++
- .../devicetree/bindings/display/dsi-controller.yaml    |  2 ++
- .../devicetree/bindings/display/panel/lvds.yaml        |  2 ++
- .../bindings/display/panel/panel-common.yaml           |  2 ++
- .../devicetree/bindings/display/panel/tpo,tpg110.yaml  |  2 ++
- Documentation/devicetree/bindings/dma/dma-common.yaml  |  2 ++
- .../devicetree/bindings/dma/dma-controller.yaml        |  2 ++
- Documentation/devicetree/bindings/dma/dma-router.yaml  |  2 ++
- Documentation/devicetree/bindings/dma/ingenic,dma.yaml |  2 ++
- .../devicetree/bindings/dma/st,stm32-dma.yaml          |  2 ++
- .../devicetree/bindings/dma/st,stm32-dmamux.yaml       |  2 ++
- .../devicetree/bindings/dma/st,stm32-mdma.yaml         |  2 ++
- Documentation/devicetree/bindings/dma/ti/k3-udma.yaml  |  2 ++
- .../devicetree/bindings/extcon/wlf,arizona.yaml        |  2 ++
- .../devicetree/bindings/hwmon/baikal,bt1-pvt.yaml      |  4 ++--
- .../devicetree/bindings/i2c/amlogic,meson6-i2c.yaml    |  2 ++
- .../devicetree/bindings/i2c/cdns,i2c-r1p10.yaml        |  2 ++
- Documentation/devicetree/bindings/i2c/i2c-gpio.yaml    |  2 ++
- Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml    |  2 ++
- .../bindings/i2c/socionext,uniphier-fi2c.yaml          |  2 ++
- .../bindings/i2c/socionext,uniphier-i2c.yaml           |  2 ++
- .../devicetree/bindings/i2c/st,stm32-i2c.yaml          |  2 ++
- .../devicetree/bindings/i2c/xlnx,xps-iic-2.00.a.yaml   |  2 ++
- .../devicetree/bindings/iio/accel/adi,adis16240.yaml   |  4 ++++
- .../devicetree/bindings/iio/accel/adi,adxl345.yaml     |  4 ++++
- .../devicetree/bindings/iio/accel/adi,adxl372.yaml     |  4 ++++
- .../devicetree/bindings/iio/adc/adi,ad7124.yaml        |  4 ++++
- .../devicetree/bindings/iio/adc/adi,ad7192.yaml        |  4 ++++
- .../devicetree/bindings/iio/adc/adi,ad7292.yaml        |  4 ++++
- .../devicetree/bindings/iio/adc/adi,ad7606.yaml        |  6 ++++++
- .../devicetree/bindings/iio/adc/adi,ad7923.yaml        |  4 ++++
- .../devicetree/bindings/iio/adc/maxim,max1241.yaml     |  4 ++++
- .../bindings/iio/adc/samsung,exynos-adc.yaml           |  5 ++++-
- Documentation/devicetree/bindings/iio/common.yaml      |  2 ++
- .../devicetree/bindings/iio/dac/adi,ad5770r.yaml       | 10 ++++++++++
- .../devicetree/bindings/iio/frequency/adf4371.yaml     |  4 ++++
- .../devicetree/bindings/iio/imu/adi,adis16460.yaml     |  4 ++++
- .../devicetree/bindings/iio/imu/adi,adis16475.yaml     |  2 ++
- .../devicetree/bindings/iio/imu/bosch,bmi160.yaml      |  4 ++++
- .../devicetree/bindings/iio/imu/nxp,fxos8700.yaml      |  4 ++++
- .../devicetree/bindings/input/fsl,mpr121-touchkey.yaml |  2 ++
- Documentation/devicetree/bindings/input/input.yaml     |  2 ++
- .../devicetree/bindings/input/matrix-keymap.yaml       |  2 ++
- .../bindings/input/touchscreen/touchscreen.yaml        |  2 ++
- .../bindings/interrupt-controller/loongson,htpic.yaml  |  2 ++
- .../interrupt-controller/loongson,liointc.yaml         |  2 ++
- .../bindings/interrupt-controller/mti,gic.yaml         |  2 +-
- Documentation/devicetree/bindings/leds/common.yaml     |  2 ++
- .../bindings/leds/leds-class-multicolor.yaml           |  3 +++
- .../devicetree/bindings/leds/trigger-source.yaml       |  2 ++
- Documentation/devicetree/bindings/media/rc.yaml        |  2 ++
- .../bindings/memory-controllers/renesas,rpc-if.yaml    |  2 ++
- .../devicetree/bindings/mfd/cirrus,lochnagar.yaml      | 10 +++++++++-
- Documentation/devicetree/bindings/mfd/syscon.yaml      |  2 +-
- .../bindings/mfd/ti,j721e-system-controller.yaml       |  5 ++++-
- .../devicetree/bindings/mips/ingenic/devices.yaml      |  3 +++
- .../devicetree/bindings/mips/loongson/devices.yaml     |  3 +++
- .../devicetree/bindings/misc/olpc,xo1.75-ec.yaml       |  4 +++-
- .../devicetree/bindings/mmc/amlogic,meson-mx-sdhc.yaml |  2 ++
- Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml  |  2 ++
- Documentation/devicetree/bindings/mmc/ingenic,mmc.yaml |  2 ++
- .../devicetree/bindings/mmc/mmc-controller.yaml        |  2 ++
- Documentation/devicetree/bindings/mmc/owl-mmc.yaml     |  2 ++
- .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml      |  2 ++
- Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml   |  2 ++
- .../devicetree/bindings/mmc/socionext,uniphier-sd.yaml |  2 ++
- .../bindings/mmc/synopsys-dw-mshc-common.yaml          |  2 ++
- .../devicetree/bindings/mmc/synopsys-dw-mshc.yaml      |  2 ++
- Documentation/devicetree/bindings/mtd/denali,nand.yaml |  2 ++
- .../devicetree/bindings/mtd/ingenic,nand.yaml          |  2 ++
- .../devicetree/bindings/mtd/nand-controller.yaml       |  2 ++
- .../devicetree/bindings/mtd/st,stm32-fmc2-nand.yaml    |  2 ++
- Documentation/devicetree/bindings/net/adi,adin.yaml    |  2 ++
- .../devicetree/bindings/net/amlogic,meson-dwmac.yaml   |  2 ++
- .../devicetree/bindings/net/aspeed,ast2600-mdio.yaml   |  2 ++
- .../devicetree/bindings/net/can/can-transceiver.yaml   |  2 ++
- Documentation/devicetree/bindings/net/dsa/dsa.yaml     |  2 ++
- .../devicetree/bindings/net/ethernet-controller.yaml   |  2 ++
- .../devicetree/bindings/net/ethernet-phy.yaml          |  2 ++
- .../devicetree/bindings/net/marvell,mvusb.yaml         |  2 ++
- Documentation/devicetree/bindings/net/mdio.yaml        |  2 ++
- .../devicetree/bindings/net/mediatek,star-emac.yaml    |  2 ++
- Documentation/devicetree/bindings/net/nxp,tja11xx.yaml |  2 ++
- Documentation/devicetree/bindings/net/qca,ar71xx.yaml  |  2 ++
- Documentation/devicetree/bindings/net/qca,ar803x.yaml  |  2 ++
- .../devicetree/bindings/net/qcom,ipq4019-mdio.yaml     |  2 ++
- .../devicetree/bindings/net/qcom,ipq8064-mdio.yaml     |  2 ++
- .../devicetree/bindings/net/renesas,ether.yaml         |  2 ++
- Documentation/devicetree/bindings/net/snps,dwmac.yaml  |  2 ++
- Documentation/devicetree/bindings/net/stm32-dwmac.yaml |  2 ++
- .../devicetree/bindings/net/ti,davinci-mdio.yaml       |  2 ++
- Documentation/devicetree/bindings/net/ti,dp83867.yaml  |  2 ++
- Documentation/devicetree/bindings/net/ti,dp83869.yaml  |  2 ++
- Documentation/devicetree/bindings/nvmem/imx-ocotp.yaml |  2 ++
- .../devicetree/bindings/nvmem/nvmem-consumer.yaml      |  2 ++
- Documentation/devicetree/bindings/nvmem/nvmem.yaml     |  2 ++
- .../devicetree/bindings/nvmem/qcom,qfprom.yaml         |  2 ++
- .../devicetree/bindings/nvmem/qcom,spmi-sdam.yaml      |  2 ++
- .../devicetree/bindings/nvmem/rockchip-efuse.yaml      |  2 ++
- .../devicetree/bindings/nvmem/st,stm32-romem.yaml      |  2 ++
- .../opp/allwinner,sun50i-h6-operating-points.yaml      |  4 +++-
- .../devicetree/bindings/pci/cdns,cdns-pcie-ep.yaml     |  2 ++
- .../devicetree/bindings/pci/cdns,cdns-pcie-host.yaml   |  2 ++
- .../devicetree/bindings/pci/cdns-pcie-ep.yaml          |  2 ++
- .../devicetree/bindings/pci/cdns-pcie-host.yaml        |  2 ++
- Documentation/devicetree/bindings/pci/cdns-pcie.yaml   |  2 ++
- .../devicetree/bindings/pci/host-generic-pci.yaml      |  2 ++
- Documentation/devicetree/bindings/pci/loongson.yaml    |  2 ++
- Documentation/devicetree/bindings/pci/pci-ep.yaml      |  2 ++
- .../devicetree/bindings/pci/ti,j721e-pci-ep.yaml       |  2 ++
- .../devicetree/bindings/pci/ti,j721e-pci-host.yaml     |  2 ++
- Documentation/devicetree/bindings/pci/versatile.yaml   |  2 ++
- .../devicetree/bindings/pinctrl/cirrus,madera.yaml     |  2 ++
- .../devicetree/bindings/pinctrl/pincfg-node.yaml       |  2 ++
- .../devicetree/bindings/pinctrl/pinmux-node.yaml       |  2 ++
- .../devicetree/bindings/power/pd-samsung.yaml          |  2 ++
- .../devicetree/bindings/power/power-domain.yaml        |  2 ++
- .../devicetree/bindings/power/supply/power-supply.yaml |  2 ++
- Documentation/devicetree/bindings/pwm/pwm.yaml         |  2 ++
- .../devicetree/bindings/regulator/fixed-regulator.yaml |  2 ++
- .../bindings/regulator/google,cros-ec-regulator.yaml   |  2 ++
- .../devicetree/bindings/regulator/gpio-regulator.yaml  |  2 ++
- .../bindings/regulator/qcom-labibb-regulator.yaml      |  2 +-
- .../devicetree/bindings/regulator/regulator.yaml       |  2 ++
- .../bindings/regulator/st,stm32-booster.yaml           |  2 ++
- .../bindings/regulator/st,stm32-vrefbuf.yaml           |  2 ++
- .../bindings/regulator/vqmmc-ipq4019-regulator.yaml    |  2 ++
- .../devicetree/bindings/regulator/wlf,arizona.yaml     |  2 ++
- Documentation/devicetree/bindings/riscv/cpus.yaml      |  2 ++
- Documentation/devicetree/bindings/riscv/sifive.yaml    |  3 +++
- Documentation/devicetree/bindings/rtc/ingenic,rtc.yaml |  2 ++
- Documentation/devicetree/bindings/rtc/rtc.yaml         |  2 ++
- Documentation/devicetree/bindings/rtc/s3c-rtc.yaml     |  2 ++
- .../devicetree/bindings/serial/ingenic,uart.yaml       |  5 +++++
- .../devicetree/bindings/serial/renesas,hscif.yaml      |  2 ++
- .../devicetree/bindings/serial/renesas,sci.yaml        |  2 ++
- .../devicetree/bindings/serial/renesas,scif.yaml       |  2 ++
- .../devicetree/bindings/serial/renesas,scifa.yaml      |  2 ++
- .../devicetree/bindings/serial/renesas,scifb.yaml      |  2 ++
- Documentation/devicetree/bindings/serial/rs485.yaml    |  3 +++
- Documentation/devicetree/bindings/serial/serial.yaml   |  2 ++
- .../devicetree/bindings/serial/snps-dw-apb-uart.yaml   |  2 ++
- .../devicetree/bindings/soc/imx/fsl,aips-bus.yaml      |  2 ++
- .../devicetree/bindings/sound/amlogic,aiu.yaml         |  2 ++
- .../devicetree/bindings/sound/cirrus,madera.yaml       |  2 ++
- .../bindings/sound/nvidia,tegra210-ahub.yaml           |  3 +++
- .../devicetree/bindings/sound/wlf,arizona.yaml         |  2 ++
- .../bindings/soundwire/soundwire-controller.yaml       |  2 ++
- .../bindings/spi/amlogic,meson-gx-spicc.yaml           |  2 ++
- .../devicetree/bindings/spi/amlogic,meson6-spifc.yaml  |  2 ++
- .../devicetree/bindings/spi/mikrotik,rb4xx-spi.yaml    |  2 ++
- .../devicetree/bindings/spi/qca,ar934x-spi.yaml        |  2 ++
- .../devicetree/bindings/spi/qcom,spi-qcom-qspi.yaml    |  2 ++
- .../devicetree/bindings/spi/renesas,hspi.yaml          |  2 ++
- .../devicetree/bindings/spi/renesas,rspi.yaml          |  2 ++
- .../devicetree/bindings/spi/renesas,sh-msiof.yaml      |  2 ++
- .../bindings/spi/socionext,uniphier-spi.yaml           |  2 ++
- .../devicetree/bindings/spi/spi-controller.yaml        |  2 ++
- Documentation/devicetree/bindings/spi/spi-gpio.yaml    |  2 ++
- Documentation/devicetree/bindings/spi/spi-mux.yaml     |  2 ++
- Documentation/devicetree/bindings/spi/spi-pl022.yaml   |  2 ++
- .../devicetree/bindings/spi/spi-rockchip.yaml          |  2 ++
- Documentation/devicetree/bindings/spi/spi-sifive.yaml  |  2 ++
- .../devicetree/bindings/spi/st,stm32-qspi.yaml         |  2 ++
- .../devicetree/bindings/spi/st,stm32-spi.yaml          |  2 ++
- Documentation/devicetree/bindings/spmi/spmi.yaml       |  2 ++
- .../bindings/thermal/thermal-cooling-devices.yaml      |  2 ++
- .../devicetree/bindings/thermal/thermal-sensor.yaml    |  2 ++
- .../devicetree/bindings/timer/snps,dw-apb-timer.yaml   |  2 +-
- Documentation/devicetree/bindings/usb/ti,tps6598x.yaml |  2 ++
- Documentation/devicetree/bindings/usb/usb-hcd.yaml     |  2 ++
- .../bindings/watchdog/amlogic,meson-gxbb-wdt.yaml      |  2 ++
- .../devicetree/bindings/watchdog/arm-smc-wdt.yaml      |  2 ++
- .../devicetree/bindings/watchdog/qcom-wdt.yaml         |  2 ++
- .../devicetree/bindings/watchdog/samsung-wdt.yaml      |  2 ++
- .../devicetree/bindings/watchdog/st,stm32-iwdg.yaml    |  2 ++
- .../devicetree/bindings/watchdog/ti,rti-wdt.yaml       |  2 ++
- .../devicetree/bindings/watchdog/watchdog.yaml         |  2 ++
- 249 files changed, 570 insertions(+), 14 deletions(-)
-
---
-2.25.1
+DQoNCj4tLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPkZyb206IFN1ZGVlcCBIb2xsYSA8c3Vk
+ZWVwLmhvbGxhQGFybS5jb20+DQo+U2VudDogTW9uZGF5LCBPY3RvYmVyIDUsIDIwMjAgNDo0NSBQ
+TQ0KPlRvOiBadWxraWZsaSwgTXVoYW1tYWQgSHVzYWluaSA8bXVoYW1tYWQuaHVzYWluaS56dWxr
+aWZsaUBpbnRlbC5jb20+DQo+Q2M6IE1pY2hhbCBTaW1layA8bWljaGFsLnNpbWVrQHhpbGlueC5j
+b20+OyBIdW50ZXIsIEFkcmlhbg0KPjxhZHJpYW4uaHVudGVyQGludGVsLmNvbT47IHVsZi5oYW5z
+c29uQGxpbmFyby5vcmc7IGxpbnV4LQ0KPm1tY0B2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LWFybS1r
+ZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZzsgbGludXgtDQo+a2VybmVsQHZnZXIua2VybmVsLm9y
+ZzsgUmFqYSBTdWJyYW1hbmlhbiwgTGFrc2htaSBCYWkNCj48bGFrc2htaS5iYWkucmFqYS5zdWJy
+YW1hbmlhbkBpbnRlbC5jb20+OyBhcm5kQGFybmRiLmRlOyBXYW4gTW9oYW1hZCwNCj5XYW4gQWht
+YWQgWmFpbmllIDx3YW4uYWhtYWQuemFpbmllLndhbi5tb2hhbWFkQGludGVsLmNvbT4NCj5TdWJq
+ZWN0OiBSZTogW1BBVENIIHYyIDIvM10gZmlybXdhcmU6IEtlZW0gQmF5OiBBZGQgc3VwcG9ydCBm
+b3IgQXJtIFRydXN0ZWQNCj5GaXJtd2FyZSBTZXJ2aWNlIGNhbGwNCj4NCj5PbiBNb24sIE9jdCAw
+NSwgMjAyMCBhdCAwODozNzoxM0FNICswMDAwLCBadWxraWZsaSwgTXVoYW1tYWQgSHVzYWluaSB3
+cm90ZToNCj4+IEhpIFN1ZGVlcCwNCj4+DQo+PiBJIGFtIGZhY2luZyBhbiBlcnJvciBkdXJpbmcg
+c2VuZGluZyB5ZXN0ZXJkYXkuDQo+PiBJIHJlc3BvbnNlIGFnYWluIHRvIHlvdXIgZmVlZGJhY2sg
+YXMgYmVsb3cNCj4+DQo+PiA+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4+ID5Gcm9tOiBT
+dWRlZXAgSG9sbGEgPHN1ZGVlcC5ob2xsYUBhcm0uY29tPg0KPj4gPlNlbnQ6IEZyaWRheSwgT2N0
+b2JlciAyLCAyMDIwIDEwOjUxIFBNDQo+PiA+VG86IE1pY2hhbCBTaW1layA8bWljaGFsLnNpbWVr
+QHhpbGlueC5jb20+DQo+PiA+Q2M6IFp1bGtpZmxpLCBNdWhhbW1hZCBIdXNhaW5pIDxtdWhhbW1h
+ZC5odXNhaW5pLnp1bGtpZmxpQGludGVsLmNvbT47DQo+PiA+SHVudGVyLCBBZHJpYW4gPGFkcmlh
+bi5odW50ZXJAaW50ZWwuY29tPjsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsNCj4+ID5saW51eC0g
+bW1jQHZnZXIua2VybmVsLm9yZzsgbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3Jn
+Ow0KPj4gPmxpbnV4LSBrZXJuZWxAdmdlci5rZXJuZWwub3JnOyBSYWphIFN1YnJhbWFuaWFuLCBM
+YWtzaG1pIEJhaQ0KPj4gPjxsYWtzaG1pLmJhaS5yYWphLnN1YnJhbWFuaWFuQGludGVsLmNvbT47
+IGFybmRAYXJuZGIuZGU7IFN1ZGVlcCBIb2xsYQ0KPj4gPjxzdWRlZXAuaG9sbGFAYXJtLmNvbT47
+IFdhbiBNb2hhbWFkLCBXYW4gQWhtYWQgWmFpbmllDQo+PiA+PHdhbi5haG1hZC56YWluaWUud2Fu
+Lm1vaGFtYWRAaW50ZWwuY29tPg0KPj4gPlN1YmplY3Q6IFJlOiBbUEFUQ0ggdjIgMi8zXSBmaXJt
+d2FyZTogS2VlbSBCYXk6IEFkZCBzdXBwb3J0IGZvciBBcm0NCj4+ID5UcnVzdGVkIEZpcm13YXJl
+IFNlcnZpY2UgY2FsbA0KPj4gPg0KPj4gPkhpIE1pY2hhbCwNCj4+ID4NCj4+ID5PbiBGcmksIE9j
+dCAwMiwgMjAyMCBhdCAwMzo1MzozM1BNICswMjAwLCBNaWNoYWwgU2ltZWsgd3JvdGU6DQo+PiA+
+PiBIaSBTdWRlZXAsDQo+PiA+Pg0KPj4gPj4gT24gMDIuIDEwLiAyMCAxMjo1OCwgU3VkZWVwIEhv
+bGxhIHdyb3RlOg0KPj4gPj4gPiBIaSBNaWNoYWwsDQo+PiA+PiA+DQo+PiA+PiA+IE9uIEZyaSwg
+T2N0IDAyLCAyMDIwIGF0IDEwOjIzOjAyQU0gKzAyMDAsIE1pY2hhbCBTaW1layB3cm90ZToNCj4+
+ID4+ID4+IEhpIFN1ZGVlcCwNCj4+ID4+ID4+DQo+PiA+PiA+PiBPbiAwMS4gMTAuIDIwIDE3OjM1
+LCBTdWRlZXAgSG9sbGEgd3JvdGU6DQo+PiA+PiA+DQo+PiA+PiA+IFsuLi5dDQo+PiA+PiA+DQo+
+PiA+PiA+Pj4NCj4+ID4+ID4+PiBXaGF0IGFyZSB0aGUgb3RoZXIgdXNlcyBvZiB0aGlzIEtFRU1C
+QVlfU0lQXyogPw0KPj4gPj4gPj4+IEZvciBub3cgSSB0ZW5kIHRvIG1vdmUgdGhpcyB0byB0aGUg
+ZHJpdmVyIG1ha2luZyB1c2Ugb2YgaXQNCj4+ID4+ID4+PiB1c2luZyBhcm1fc21jY2NfMV8xX2lu
+dm9rZSBkaXJlY3RseSBpZiBwb3NzaWJsZS4gSSBkb24ndCBzZWUNCj4+ID4+ID4+PiB0aGUgbmVl
+ZCBmb3IgdGhpcyB0byBiZSBzZXBhcmF0ZSBkcml2ZXIuIEJ1dCBkbyBsZXQgdXMga25vdyB0aGUN
+Cj4+ID4+ID4+PiBmZWF0dXJlcyBpbXBsZW1lbnRlZCBpbiB0aGUgZmlybXdhcmUuIElmIGl0IGlz
+IG5vdCB2MS4xKywNCj4+ID4+ID4+PiByZWFzb25zIGZvciBub3QgdXBncmFkaW5nIGFzIHlvdSBu
+ZWVkIHYxLjEgZm9yIHNvbWUgQ1BVIGVycmF0YQ0KPmltcGxlbWVudGF0aW9uLg0KPj4gPj4gPj4N
+Cj4+ID4+ID4+IFRoaXMgZHJpdmVyIGhhcyBiZWVuIGNyZWF0ZWQgYmFzZWQgb24gbXkgcmVxdWVz
+dCB0byBtb3ZlIGl0IG91dA0KPj4gPj4gPj4gdGhlIG1tYyBkcml2ZXIuIEl0IGxvb2tzIHF1aXRl
+IGhhY2t5IHRvIGhhdmUgYXJtX3NtY2NjX3JlcyBhbmQNCj4+ID4+ID4+IGNhbGwNCj4+ID4+ID4+
+IGFybV9zbWNjY19zbWMoKSBhbHNvIHdpdGggc29tZSBJRHMgd2hlcmUgaXQgaXMgdmlzaWJsZSB0
+aGF0IHRoZQ0KPj4gPj4gPj4gcGFydCBvZiBJRCBpcyBqdXN0IGJhc2VkIG9uIGFueSBzcGVjLg0K
+Pj4gPj4gPg0KPj4gPj4gPiBPSywgZHJpdmVyIGlzIGZpbmUgYnV0IG5vIGR0LWJpbmRpbmdzIGFz
+IGl0IGlzIGRpc2NvdmVyYWJsZS4gSXQNCj4+ID4+ID4gY2FuIGFsc28gYmUganVzdCBhIHdyYXBw
+ZXIgbGlicmFyeSBpbnN0ZWFkIGFzIGl0IG5lZWRzIG5vDQo+PiA+PiA+IGV4cGxpY2l0IGluaXRp
+YWxpc2F0aW9uIGxpa2UgZHJpdmVycyB0byBzZXR1cC4NCj4+ID4+DQo+PiA+PiBJIGFtIGZpbmUg
+d2l0aCBpdC4gRG8gd2UgaGF2ZSBhbnkgZXhhbXBsZSB3aGljaCB3ZSBjYW4gcG9pbnQgaGltIHRv
+Pw0KPj4gPj4NCj4+ID4NCj4+ID5Zb3Ugc2VlbSB0byBoYXZlIGZpZ3VyZWQgdGhhdCBvdXQgYWxy
+ZWFkeSB3aXRoIFNPQ19JRCBleGFtcGxlLg0KPj4gPlRoYXQgd2FzIHF1aWNrIEkgbXVzdCBzYXkg
+8J+YhC4NCj4+ID4NCj4+ID4+DQo+PiA+PiA+DQo+PiA+PiA+PiBBbHNvIGluIHYxIGhlIGlzIGp1
+c3QgY2FsbGluZyBTTUMuIEJ1dCBtYXliZSB0aGVyZSBpcyBnb2luZyBhDQo+PiA+PiA+PiBuZWVk
+IHRvIGNhbGwgSFZDIGluc3RlYWQgd2hpY2ggaXMgc29tZXRoaW5nIHdoYXQgZGV2aWNlIGRyaXZl
+cg0KPj4gPj4gPj4gc2hvdWxkbid0IGRlY2lkZSB0aGF0J3Mgd2h5IElNSE8gZG9pbmcgc3RlcCB2
+aWEgZmlybXdhcmUgZHJpdmVyDQo+PiA+PiA+PiBpcyBtdWNoIGJldHRlcg0KPj4gPmFwcHJvYWNo
+Lg0KPj4gPj4gPg0KPj4gPj4gPiBBZ3JlZWQgYW5kIG9uZSBtdXN0IHVzZSBhcm1fc21jY2NfZ2V0
+X2NvbmR1aXQgb3Igc29tZXRoaW5nIHNpbWlsYXIuDQo+PiA+PiA+IE5vIGFkZGl0aW9uYWwgYmlu
+ZGluZ3MgZm9yIGVhY2ggYW5kIGV2ZXIgcGxhdGZvcm0gYW5kIGRyaXZlciB0aGF0DQo+PiA+PiA+
+IHVzZXMgU01DQ0MgcGxlYXNlLg0KPj4gPj4gPg0KPj4gPj4gPj4gT2YgY291cnNlIGlmIHRoZXJl
+IGlzIGEgYmV0dGVyL2NsZWFuZXIgd2F5IGhvdyB0aGlzIHNob3VsZCBiZQ0KPj4gPj4gPj4gZG9u
+ZSBJIGFtIGhhcHB5IHRvIGdldCBtb3JlIGluZm9ybWF0aW9uIGFib3V0IGl0Lg0KPj4gPj4gPj4N
+Cj4+ID4+ID4NCj4+ID4+ID4gTGV0IG1lIGtub3cgd2hhdCB5b3UgdGhpbmsgYWJvdXQgbXkgdGhv
+dWdodHMgc3RhdGVkIGFib3ZlLg0KPj4gPj4NCj4+ID4+DQo+PiA+PiBJIGFtIGZpbmUgd2l0aCBp
+dC4gVGhlIGtleSBwb2ludCBpcyB0byBoYXZlIHRoZXNlIHNvcnQgaXQgb3V0DQo+PiA+PiBiZWNh
+dXNlIEkgc2VlIHRoYXQgYSBsb3Qgb2YgZHJpdmVycyBqdXN0IHNpbXBseSBjYWxsIHRoYXQgU01D
+cyBmcm9tDQo+PiA+PiBkcml2ZXJzIHdoaWNoIGlzIElNSE8gd3JvbmcuDQo+PiA+Pg0KPj4gPg0K
+Pj4gPlN1cmUsIHNvcnJ5IEkgZGlkbid0IGV4cHJlc3MgbXkgY29uY2VybiBwcm9wZXJseS4gSSB3
+YW50IHRvIGF2b2lkIGR0DQo+PiA+YmluZGluZ3MgZm9yIHRoZXNlIGFuZCB1c2UgdGhlIFNNQ0ND
+IGRpc2NvdmVyeSB3ZSBoYXZlIGluIHBsYWNlIGFscmVhZHkgaWYNCj5wb3NzaWJsZS4NCj4+ID4N
+Cj4+ID5JZiB0aGlzIGRyaXZlciBoYWQgY29uc3VtZXJzIGluIHRoZSBEVCBhbmQgaXQgbmVlZHMg
+dG8gYmUgcmVwcmVzZW50ZWQNCj4+ID5pbiBEVCwgaXQgaXMgYSBkaWZmZXJlbnQgc3RvcnkgYW5k
+IEkgYWdyZWUgZm9yIG5lZWQgZm9yIGEgZHJpdmVyIHRoZXJlLg0KPj4gPkJ1dCBJIGRvbid0IHNl
+ZSBvbmUgaW4gdGhpcyB1c2VjYXNlLg0KPj4NCj4+DQo+PiBEb2VzIGl0IG9rIGlmIEkgZG8gc29t
+ZSBjaGVja2luZyBpbiBhcmFzYW4gY29udHJvbGxlciBkcml2ZXIgYXMgYmVsb3cgYW5kDQo+cmVw
+cmVzZW50ZWQgaXQgaW4gdGhlIERUIG9mIGFyYXNhbixzZGhjaS55YW1sOg0KPj4gVGhpcyBpcyB0
+byBlbnN1cmUgdGhhdCBmb3IgS2VlbSBCYXkgU09DIHNwZWNpZmljLCB0aGUgZmlybXdhcmUgZHJp
+dmVyIG11c3QgYmUNCj5jb25zdW1lLg0KPj4NCj4+IAlpZiAob2ZfZGV2aWNlX2lzX2NvbXBhdGli
+bGUobnAsICJpbnRlbCxrZWVtYmF5LXNkaGNpLTUuMS1zZCIpKSB7DQo+PiAJCXN0cnVjdCBkZXZp
+Y2Vfbm9kZSAqZG47DQo+PiAJCXN0cnVjdCBncGlvX2Rlc2MgKnVoczsNCj4+DQo+PiAJCWRuID0g
+b2ZfZmluZF9ub2RlX2J5X25hbWUoTlVMTCwgImtlZW1iYXlfZmlybXdhcmUiKTsNCj4NCj5Zb3Ug
+aGF2ZSBrZWVtYmF5X3NkX3ZvbHRhZ2Vfc2VsZWN0aW9uIGZ1bmN0aW9uIGFzIE1pY2hhbCBwcmVm
+ZXJzLCBJIGhhdmUgbm8NCj5vYmplY3Rpb25zIGZvciB0aGF0LiBCdXQgcGxlYXNlIG5vIGtlZW1i
+YXlfZmlybXdhcmUgbm9kZSBpbiBEVC4NCj5Zb3UgY2FuIGltcGxlbWVudCB0aGlzIGFzIGEgZHJp
+dmVyIG9yIHNpbXBsZSBzbWNjYyBiYXNlZCBmdW5jdGlvbiBsaWJyYXJ5DQo+d2l0aG91dCBEVCBu
+b2RlIHVzaW5nIFNNQ0NDIGdldF92ZXJzaW9uLiBJIGhvcGUgdGhlIGZpcm13YXJlIGdpdmVzIGVy
+cm9yIGZvcg0KPnVuaW1wbGVtZW50ZWQgRklEcywgdGhlcmVieSBlbGltaW5hdGluZyB0aGUgbmVl
+ZCBmb3IgYW55IERUIG5vZGUgb3IgY29uZmlnDQo+b3B0aW9uLg0KVG8gYmUgY2xhcmlmeSBrZWVt
+YmF5X3NkX3ZvbHRhZ2Vfc2VsZWN0aW9uIGZ1bmN0aW9uIGFzIE1pY2hhbCdzIHByZWZlcnMgaXMg
+YWN0dWFsbHkgdXNpbmcgdGhlIGZpcm13YXJlIGRyaXZlci4gVGhpcyBmdW5jdGlvbiBsb2NhdGVk
+IGluIGZpcm13YXJlIGRyaXZlci4gDQpJIHdpbGwgY2FsbCB0aGlzIGZ1bmMgZHVyaW5nIHZvbHRh
+Z2Ugc3dpdGNoaW5nIGZyb20gYXJhc2FuIGNvbnRyb2xsZXIuIEkgYmVsaWV2ZSB0aGlzIGltcGxl
+bWVudGF0aW9uIHJlcXVpcmUgRFQgdG8gc3BlY2lmeSB0aGUgY29tcGF0aWJsZSBuYW1lIGFuZCBt
+ZXRob2QgdXNlIGVpdGhlciBzbWMvaHZjLg0KDQpBcmUgeW91IHNheWluZyB0aGF0IGJ5IHVzaW5n
+IHNpbXBsZSBzbWNjIGJhc2VkIGZ1bmN0aW9uIGxpYnJhcnkgSSBzaG91bGQgY2FsbCBiZWxvdyBm
+dW5jKCkgaW4gYXJhc2FuIGNvbnRyb2xsZXIuIEZvciBleGFtcGxlDQoxKSBhcm1fc21jY2NfZ2V0
+X3ZlcnNpb24odm9pZCkNCjIpIGFybV9zbWNjY192ZXJzaW9uX2luaXQoYXJtX3NtY2NjX2dldF92
+ZXJzaW9uKCksIFNNQ0NDX0NPTkRVSVRfU01DKTsNCjMpIGFybV9zbWNjY18xXzFfaW52b2tlKEtF
+RU1CQVlfU0VUX1NEX1ZPTFRBR0VfRlVOQ19JRCwgdm9sdGFnZV92YWx1ZSAsICAmcmVzKTsNCg0K
+UGxlYXNlIGFkdmljZXMuDQpUaGFua3MNCg0KPg0KPi0tDQo+UmVnYXJkcywNCj5TdWRlZXANCg==
