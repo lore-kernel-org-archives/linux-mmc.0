@@ -6,38 +6,38 @@ X-Spam-Status: No, score=-4.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A533C46466
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 05:29:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96B51C41604
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 05:30:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4AB9D208E4
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 05:29:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4686220B80
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 05:30:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1601962195;
-	bh=IqVDArZkdO/B6tbx3G9IqtpqMW94z4IPv/01HlGFHyY=;
+	s=default; t=1601962228;
+	bh=/MHJmlDNIk0zmKN48coH15OT8JF/0mkBH1HqI0doB1I=;
 	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=CAsFhKcwUF+Du7TSWphFY0956NlC+P2gcXzqTNlGzNtjC5lbwPcOtIYFnIH7KU3dp
-	 1eO1xL02vu8pcPoZYBL7JlBGADU88eAwINPnvaQnDD7zrkJkGrGrqIMJB+gxtB4L+x
-	 8v5rMZTQnY8nfmL5e4IAkca6+x2/caabpZ2azois=
+	b=YKh4bYssy9GF3lIIM0ZzxKtJpofg+hj/TwRn6Yg5RxV5Drp5ctae03V/u3+BQyC4H
+	 xcGipkFMfwkY8UZKxHsOsTogULvUAvIsb6wTiEq+f0v27psSq6I+sFwfel7T+csXdc
+	 PmMh6dxzWWmBBuz+fEU5t3XULRvUo+Sur/MH8SEA=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726118AbgJFF3s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Oct 2020 01:29:48 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50050 "EHLO mail.kernel.org"
+        id S1727052AbgJFFa1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Oct 2020 01:30:27 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50526 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725912AbgJFF3q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 6 Oct 2020 01:29:46 -0400
+        id S1725912AbgJFFaZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 6 Oct 2020 01:30:25 -0400
 Received: from localhost (unknown [122.167.144.92])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 1C34120870;
-        Tue,  6 Oct 2020 05:29:44 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 2836120870;
+        Tue,  6 Oct 2020 05:30:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1601962185;
-        bh=IqVDArZkdO/B6tbx3G9IqtpqMW94z4IPv/01HlGFHyY=;
+        s=default; t=1601962224;
+        bh=/MHJmlDNIk0zmKN48coH15OT8JF/0mkBH1HqI0doB1I=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=XJYtCNTyvx3ozaL1aRMYZGV+bTbvDa3P+1vHmIpIZkmMpy/W3RdFSo1VlEtqd2ZwS
-         VXm0e3hsDFIgJyUblJEaSpP3cJaPtrtrYpgunMrPuk68lEyTmKEkfZetm3/aycx6/+
-         f5jbT6MC2Pw1++qOdAXkqzyJva8aLdhWHo97xSwA=
-Date:   Tue, 6 Oct 2020 10:59:40 +0530
+        b=YGPJhsayA3KJ0CGNVBMigIHzGRd5zPVP8je1HulLIWPKBHlXBlGAcwusUKcd0u2vw
+         gsDVYBCG7OsZvqnfd25XCapc7xM0rV1jhiQ4hcBEyR5ORDJR3ih/+Nx7/tqqJExanH
+         kpAfe+tjO47MqB+lPncSnphsT7dwWJ8xAVZEVt4c=
+Date:   Tue, 6 Oct 2020 11:00:19 +0530
 From:   Vinod Koul <vkoul@kernel.org>
 To:     Rob Herring <robh@kernel.org>
 Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -99,30 +99,24 @@ Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH 1/4] dt-bindings: Add missing 'unevaluatedProperties'
-Message-ID: <20201006052940.GO2968@vkoul-mobl>
+Subject: Re: [PATCH 4/4] dt-bindings: Explicitly allow additional properties
+ in common schemas
+Message-ID: <20201006053019.GP2968@vkoul-mobl>
 References: <20201005183830.486085-1-robh@kernel.org>
- <20201005183830.486085-2-robh@kernel.org>
+ <20201005183830.486085-5-robh@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201005183830.486085-2-robh@kernel.org>
+In-Reply-To: <20201005183830.486085-5-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 05-10-20, 13:38, Rob Herring wrote:
-> This doesn't yet do anything in the tools, but make it explicit so we can
-> check either 'unevaluatedProperties' or 'additionalProperties' is present
-> in schemas.
-> 
-> 'unevaluatedProperties' is appropriate when including another schema (via
-> '$ref') and all possible properties and/or child nodes are not
-> explicitly listed in the schema with the '$ref'.
-> 
-> This is in preparation to add a meta-schema to check for missing
-> 'unevaluatedProperties' or 'additionalProperties'. This has been a
-> constant source of review issues.
+> In order to add meta-schema checks for additional/unevaluatedProperties
+> being present, all schema need to make this explicit. As common/shared
+> schema are included by other schemas, they should always allow for
+> additionalProperties.
 
 Acked-By: Vinod Koul <vkoul@kernel.org>
 
