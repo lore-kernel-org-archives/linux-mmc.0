@@ -2,64 +2,64 @@ Return-Path: <SRS0=uM1y=DN=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2E7CC47095
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 08:22:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C33FC47423
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 08:25:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 80AD620853
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 08:22:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 509C82083B
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 08:25:21 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zz0oXuy8"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qHporHfA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726127AbgJFIWy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Oct 2020 04:22:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35624 "EHLO
+        id S1726681AbgJFIZM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Oct 2020 04:25:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36000 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725931AbgJFIWy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2020 04:22:54 -0400
-Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10586C0613D1
-        for <linux-mmc@vger.kernel.org>; Tue,  6 Oct 2020 01:22:54 -0700 (PDT)
-Received: by mail-wr1-x441.google.com with SMTP id e17so3696653wru.12
-        for <linux-mmc@vger.kernel.org>; Tue, 06 Oct 2020 01:22:53 -0700 (PDT)
+        with ESMTP id S1726181AbgJFIZM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Oct 2020 04:25:12 -0400
+Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4B66C0613D8
+        for <linux-mmc@vger.kernel.org>; Tue,  6 Oct 2020 01:25:11 -0700 (PDT)
+Received: by mail-wr1-x443.google.com with SMTP id n15so6653498wrq.2
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Oct 2020 01:25:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=subject:to:cc:references:from:message-id:date:user-agent
          :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=gQZ92N8EMr7LGVwcFgd0mzk1VK6749oG4otqf+GLMOc=;
-        b=zz0oXuy8DvLu/oqK9eyLFeY6GHKr0NNTLe+2Dc/x+LalYxQQw6uANkSbT/JLx0kvFw
-         JsFeeLTos6PMTBn+7hMGtQhoLWEqq+QuVUSBlZUX0ftSWK1YjyFRCOSMOBqz5D6MKAf1
-         trjhFyJHYmtSCLJ5XHzS7cF0NIB/qannWZC+J0hX6vMT6mPQvXUmjZ455nksyYjcFU+P
-         Sjl2xSWKvUjPg0CnAC82f7nU5/tWpx/auKHYNX85Ug+b+OjV7o89Jn5KftNigXVWbulQ
-         oiixrU7pMYnJfnHsL1qk6QIXkuIzWdHeWBqffLu7TxlUGZ9S3im+iPRnZpD+Am2dPSXN
-         L+mA==
+        bh=YdhpNKlTW8M5AEVFobND3IcWnRcYsnTU1ylxUOoxLOQ=;
+        b=qHporHfANLglN4o1QtjGAQRWNnN7asjRL3cjazvXjsHh09RfWeLWPhNLVvwSLhWTRD
+         dq9W25RBebcUYOBXWtFq8Xg4Jpr5iwt1eXNmqsekvon7Xl48K0UpprSPFSz88KD7f3X5
+         mVcgrKZ1Q+07rFYOZ6TaIw9SiDE9zLlxqZ10OzeIv3M1P2sRohlLAogcHVmvgwhtbxWh
+         aDv0+4vxSuOdMGAP1BZwP0BlcnNmUE37U3q6XBhiOW2IywzQSNU0oPIf35dwBbDiZGem
+         YyfEcoZuw1vq+eSTNb3BPCippk6TyfUXDjeg7Imo0qPxxzlaz4AKfZHvUV+rJldsOuzH
+         6yMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=gQZ92N8EMr7LGVwcFgd0mzk1VK6749oG4otqf+GLMOc=;
-        b=IgGN/nCo9r8qxIpv6+0ICPv38MqgrKEqGDrJz1pKvWQdN5ap6AK4Rw32EcuEc86Zpi
-         xEUeNa0inlNXnj6QVrZXBFRxqN9kdh8zqY0Lv30BO6bl1iqH79uNELgnTHEGwf035QL2
-         rnNLA5phdFdPNZAm/ixFN2xa/ocFu74PvuM2BfyK7oty94QLEn6n/KDZFQKNl01zqT8+
-         3+2LUo+DuFtocaKP40XQ+fWdP3M7Qm8OeWdjrRt83r0/1aJ5QE0pWGzejhjZXLkKtNMQ
-         O7P8VOSROvc3bozbFf6hFYSEEOk1KnOcoi4qidIYwhnQezYYf/V1DgXsWcgO+u8SFs5u
-         QkNw==
-X-Gm-Message-State: AOAM532WXDQ3VxihyOj9pm2Fo1q2IANYMLoeDE8lHZEO/1axxh9Pwgvw
-        Ff4qDSBuI71myavtgsmphxF4Jg==
-X-Google-Smtp-Source: ABdhPJxneCP/XHEIGTuaYnepMY95XJGJWgT/9+OwKrX8AbsmbSuGbQwcSXMgWa3UoshUsl19yJaa5g==
-X-Received: by 2002:adf:fa52:: with SMTP id y18mr3564855wrr.264.1601972572464;
-        Tue, 06 Oct 2020 01:22:52 -0700 (PDT)
+        bh=YdhpNKlTW8M5AEVFobND3IcWnRcYsnTU1ylxUOoxLOQ=;
+        b=D3yxHGpA7nzncx78yENJ9ALxNDGo07cooj8/7YYdzNfEoyTG9vz5LPLwwaLDke97dF
+         nzddmFcVadWMa9IOfFWZrYw6tTWlEt5M7/uHKNx97BzCNA6oaI/iOVXX1heN2pVCqyL4
+         fXEW8r4lkCFDF7+7xJyQnKA61+AojylsTUM2EQdVNCoRA/RSuAfj5Kt1OkXodbtUWcg7
+         KtlaA7lHauoJZeD1kQnxg2UyFf7pACJ0jluXum8zGZaBTh28D6WP/BZQknR+ayOu54vX
+         YkROpUlruZmdse7Mxk3ZDs7neOWbcdIetReO2IHmYY5qw4GbCu7Vb/PhclLYZRjCL1/F
+         BnAw==
+X-Gm-Message-State: AOAM530ZTUI/rehiMo+bKMnexAGsmorNf3B79NLQ/CWmst7hFeE/b9Om
+        BzM28ua5cBocNXCm17R6iHMuNg==
+X-Google-Smtp-Source: ABdhPJxsjuEumsaEtaU67N9vbg2cBftfsc/wZW21wnFzsv2BjeMFHC1JmQFLaFRJtrvHxARri2Z8Zg==
+X-Received: by 2002:a5d:6409:: with SMTP id z9mr120080wru.391.1601972710164;
+        Tue, 06 Oct 2020 01:25:10 -0700 (PDT)
 Received: from [192.168.86.34] (cpc86377-aztw32-2-0-cust226.18-1.cable.virginm.net. [92.233.226.227])
-        by smtp.googlemail.com with ESMTPSA id v17sm3056116wrc.23.2020.10.06.01.22.49
+        by smtp.googlemail.com with ESMTPSA id y11sm3353486wrs.16.2020.10.06.01.25.07
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Tue, 06 Oct 2020 01:22:51 -0700 (PDT)
-Subject: Re: [PATCH 4/4] dt-bindings: Explicitly allow additional properties
- in common schemas
+        Tue, 06 Oct 2020 01:25:09 -0700 (PDT)
+Subject: Re: [PATCH 0/4] dt-bindings: additional/unevaluatedProperties
+ clean-ups
 To:     Rob Herring <robh@kernel.org>, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org
 Cc:     Albert Ou <aou@eecs.berkeley.edu>,
@@ -121,14 +121,13 @@ Cc:     Albert Ou <aou@eecs.berkeley.edu>,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-watchdog@vger.kernel.org
 References: <20201005183830.486085-1-robh@kernel.org>
- <20201005183830.486085-5-robh@kernel.org>
 From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-Message-ID: <9d2a9da4-d28d-dcf0-2b43-66e28b6b8dec@linaro.org>
-Date:   Tue, 6 Oct 2020 09:22:48 +0100
+Message-ID: <d04c47dd-6e37-a7ac-f3c4-d6e6c308dbcd@linaro.org>
+Date:   Tue, 6 Oct 2020 09:25:06 +0100
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
  Thunderbird/60.8.0
 MIME-Version: 1.0
-In-Reply-To: <20201005183830.486085-5-robh@kernel.org>
+In-Reply-To: <20201005183830.486085-1-robh@kernel.org>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -139,19 +138,24 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 On 05/10/2020 19:38, Rob Herring wrote:
-> In order to add meta-schema checks for additional/unevaluatedProperties
-> being present, all schema need to make this explicit. As common/shared
-> schema are included by other schemas, they should always allow for
-> additionalProperties.
+> The default behavior for json-schema is any unknown property is allowed.
+> T
 > 
-> Signed-off-by: Rob Herring<robh@kernel.org>
+> hat is generally not the behavior we want for DT. In order to disallow
+> extra properties, schemas need to define 'additionalProperties: false'
+> typically. Ideally, we'd just add that automatically with the tools, but
+> there are some exceptions so only making things explicit everywhere
+> really works. Missing 'additionalProperties' or 'unevaluatedProperties'
+> has been a constant source of review comments, so a meta-schema check is
+> really needed here.
 > 
->   Documentation/devicetree/bindings/nvmem/nvmem-consumer.yaml  | 2 ++
->   Documentation/devicetree/bindings/nvmem/nvmem.yaml           | 2 ++
+>   Documentation/devicetree/bindings/nvmem/nvmem.yaml     |  2 ++
+>   .../devicetree/bindings/nvmem/qcom,qfprom.yaml         |  2 ++
 
 for nvmem parts,
 
 Acked-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
 
+
 thanks,
-srini
+--srini
