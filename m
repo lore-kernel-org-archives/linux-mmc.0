@@ -7,28 +7,28 @@ X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01228C4363D
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 11:47:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C16D8C41604
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 12:08:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 916732083B
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 11:47:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 666282083B
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Oct 2020 12:08:55 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="VqCP6kJ5"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="PpfZL9Z6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726258AbgJFLrD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Oct 2020 07:47:03 -0400
-Received: from mail-eopbgr750083.outbound.protection.outlook.com ([40.107.75.83]:10670
-        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
+        id S1726391AbgJFMIv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Oct 2020 08:08:51 -0400
+Received: from mail-bn8nam08on2061.outbound.protection.outlook.com ([40.107.100.61]:33953
+        "EHLO NAM04-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725947AbgJFLrC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 6 Oct 2020 07:47:02 -0400
+        id S1726128AbgJFMIv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 6 Oct 2020 08:08:51 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=F2WURcaMpDno0RPa+jumFEsV3ECRWYMfVuNY/zYyXfvOMLzDRRcHadvIuGkF62gCNrEO/Bznz/GfzqTUd1rGrWjU7rDobcTut/095CcLUKcqpCB9FcPzy18H6FGbGNIPUOf8ItjYDj/pNXl3O6m9Ccbz0lwmX9fZ66o58jRCY/w4Bsmm4PNPSnsT05vSKXHCJbVhmaNaqCxR02J4eIfccXTZejZZZXqRReO+hB/fonmdq1HyKnWo8Vkk5ZDxcaQmbkRyDLexjUaUFywC0QIsgYCZYnyRqcGXL4ql6aYS4mrLtvRcNI1x2WmW3J4O5qjlqVZnwEZY2DidI1/KXxdp/g==
+ b=ErOBcRolR3NsmM2rUIoL/ays0PUQaNybgVZWTztzAvPhjlEb2C/RhJQ3DwyBfvZTUVJXMJd+0Y402RBQJ3KlnsEZ96R/Pt9TTKp4dSUhnwJ4mZpaTKvYS84dFhYw/GLljzMygxEF57r0j8xz43jKO0YFbil2AFz47tYmcFGzd3MXF+EEf7Cg5OoAXGLQmfckWar3Lo+X86ELUpyoA2BwWWnl9WCRUoWTe99fTn5E2wQRXJIlXo86o8yuVVioVaEGFJhaFwaTNRjbaZYDaPyL8bOqN5HUr/HdfO9Qwupbb4Kvr11dEV/jtygKML+Nhjhnak/8xcBYvS0okwxEyTj9oA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YU8zyPUuGsvy99MxeGZ06YZI+g/je75rSmja0HkPYeM=;
- b=SOakETQ6qqbLtU2LqDZ0Q6KFgMu51dlFPEV+IXg9lS/dsq43Mt9W6TllbH4eZFewfjzPO8HBChrIsjwhpu3lfQW7FEhvnx3HoE704kldiKTHCYb00+ylmuxLow1RV7UmwMYdHCIXCZOaqp/jLNzvGbB0aSWrJStbXRTz61pNhGP6+ALGEeXALehji1FApPOh/8xEJPOPSNknuoVIMxHLuWuR1iTlY40KLsSyQDUqGqrXKGnvPnvPidUeQLyssuJng8Hnyrt4x/UKa/iaN2x18Bi/fUDCcGSymmipjGJ50qhktoTt1HDGgR7m6YuKo/eCmjchvpLRPMbDvcZ/BVE8fw==
+ bh=wxWluHHnQeWySvl6kITsXiPi+3vMOtrI10yiGVERHXk=;
+ b=BDg/4r2VPdRia8yDOYFmTU6wkVt8I8eYiNS26D6eYCI92yhPb0Awzveo7eAvUKPMVfy4JhjNqmyfcRUaG4BusZ7cOSLWoY3nff3VNoo3QhFo/kAaP4Pgfb7TupHrBHyzO4KM/vynrsgWzlgCg3y0bUGScCF0teXY4EkNAw5xo7TFJ1irdtgN2e4qgl02ofvE7/hlAXICBcjzqm/DFPlQiJpE6TejtX2Pg5BA6r7lLwBKZXnBQQFrE9Y0hoAnB7sJt7WTFJkH5pvLVZtOVXHewaCTddCz2WDZfeS05EvV/fwxeSDxjsGnISaHxHbTAZu4DDqAT5d62T2v6IPMRAz3Gw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  149.199.60.83) smtp.rcpttodomain=arm.com smtp.mailfrom=xilinx.com;
  dmarc=bestguesspass action=none header.from=xilinx.com; dkim=none (message
@@ -36,18 +36,18 @@ ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YU8zyPUuGsvy99MxeGZ06YZI+g/je75rSmja0HkPYeM=;
- b=VqCP6kJ5kCJQrgDljqq/a6FR3wQ3EMk9i4P2mQ348Dljf9/gv/qHOSApOLfJifOtLDFh5Xgmtr6ijBHBEpJBj5zXiP2nOk35S/wqMyg5ZnTQKrL4mbYxCqcw51sWj5XqpLwZ58sulEBPsv0jXWNgh2q4A9GyPlinQv/t7iQbGAo=
-Received: from CY4PR08CA0027.namprd08.prod.outlook.com (2603:10b6:903:151::13)
- by DM5PR02MB2332.namprd02.prod.outlook.com (2603:10b6:3:59::13) with
- Microsoft SMTP Server (version=TLS1_2,
+ bh=wxWluHHnQeWySvl6kITsXiPi+3vMOtrI10yiGVERHXk=;
+ b=PpfZL9Z60DR2iN6QPcEIB3pxot8Ow4rUy2ZW/3B1X/wbt4OFr62Ib+rwJ8CdsJ+WEltqnkJnqJzin2AUYqRfjW6NnUlC+7B4Xh6mCq/o3+Pzqn3CVZb/Z4uLehsO6uIWF+FV9OcDomgSiAXwb0xKK07Y2TeOM0Vxp82kbrpypIQ=
+Received: from SN4PR0701CA0031.namprd07.prod.outlook.com
+ (2603:10b6:803:2d::34) by DM6PR02MB5578.namprd02.prod.outlook.com
+ (2603:10b6:5:79::13) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3433.37; Tue, 6 Oct
- 2020 11:46:23 +0000
-Received: from CY1NAM02FT042.eop-nam02.prod.protection.outlook.com
- (2603:10b6:903:151:cafe::9c) by CY4PR08CA0027.outlook.office365.com
- (2603:10b6:903:151::13) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3433.37 via Frontend
- Transport; Tue, 6 Oct 2020 11:46:23 +0000
+ 2020 12:08:47 +0000
+Received: from SN1NAM02FT004.eop-nam02.prod.protection.outlook.com
+ (2603:10b6:803:2d:cafe::62) by SN4PR0701CA0031.outlook.office365.com
+ (2603:10b6:803:2d::34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3433.35 via Frontend
+ Transport; Tue, 6 Oct 2020 12:08:47 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 149.199.60.83)
  smtp.mailfrom=xilinx.com; arm.com; dkim=none (message not signed)
  header.d=none;arm.com; dmarc=bestguesspass action=none
@@ -56,51 +56,40 @@ Received-SPF: Pass (protection.outlook.com: domain of xilinx.com designates
  149.199.60.83 as permitted sender) receiver=protection.outlook.com;
  client-ip=149.199.60.83; helo=xsj-pvapsmtpgw01;
 Received: from xsj-pvapsmtpgw01 (149.199.60.83) by
- CY1NAM02FT042.mail.protection.outlook.com (10.152.75.136) with Microsoft SMTP
- Server id 15.20.3433.39 via Frontend Transport; Tue, 6 Oct 2020 11:46:23
+ SN1NAM02FT004.mail.protection.outlook.com (10.152.72.175) with Microsoft SMTP
+ Server id 15.20.3433.39 via Frontend Transport; Tue, 6 Oct 2020 12:08:46
  +0000
-Received: from [149.199.38.66] (port=57691 helo=smtp.xilinx.com)
+Received: from [149.199.38.66] (port=37828 helo=smtp.xilinx.com)
         by xsj-pvapsmtpgw01 with esmtp (Exim 4.90)
         (envelope-from <michal.simek@xilinx.com>)
-        id 1kPlPg-0004An-N1; Tue, 06 Oct 2020 04:45:48 -0700
+        id 1kPllM-0004W9-2A; Tue, 06 Oct 2020 05:08:12 -0700
 Received: from [127.0.0.1] (helo=localhost)
         by smtp.xilinx.com with smtp (Exim 4.63)
         (envelope-from <michal.simek@xilinx.com>)
-        id 1kPlQF-0000t2-5p; Tue, 06 Oct 2020 04:46:23 -0700
-Received: from xsj-pvapsmtp01 (maildrop.xilinx.com [149.199.38.66])
-        by xsj-smtp-dlp1.xlnx.xilinx.com (8.13.8/8.13.1) with ESMTP id 096BkGnd016228;
-        Tue, 6 Oct 2020 04:46:16 -0700
+        id 1kPllu-00008C-Hj; Tue, 06 Oct 2020 05:08:46 -0700
+Received: from xsj-pvapsmtp01 (xsj-pvapsmtp01.xilinx.com [149.199.38.66])
+        by xsj-smtp-dlp1.xlnx.xilinx.com (8.13.8/8.13.1) with ESMTP id 096C8fai024903;
+        Tue, 6 Oct 2020 05:08:41 -0700
 Received: from [172.30.17.110]
         by xsj-pvapsmtp01 with esmtp (Exim 4.63)
         (envelope-from <michals@xilinx.com>)
-        id 1kPlQ8-0000sQ-8x; Tue, 06 Oct 2020 04:46:16 -0700
+        id 1kPllo-0008Sv-HC; Tue, 06 Oct 2020 05:08:41 -0700
 Subject: Re: [PATCH v2 2/3] firmware: Keem Bay: Add support for Arm Trusted
  Firmware Service call
 To:     Sudeep Holla <sudeep.holla@arm.com>,
-        "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
-        "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "Wan Mohamad, Wan Ahmad Zainie" 
-        <wan.ahmad.zainie.wan.mohamad@intel.com>
-References: <20201001153526.GD906@bogus>
+        Michal Simek <michal.simek@xilinx.com>
+Cc:     muhammad.husaini.zulkifli@intel.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        lakshmi.bai.raja.subramanian@intel.com, arnd@arndb.de,
+        wan.ahmad.zainie.wan.mohamad@intel.com
+References: <20201001142149.23445-1-muhammad.husaini.zulkifli@intel.com>
+ <20201001142149.23445-3-muhammad.husaini.zulkifli@intel.com>
+ <20201001153526.GD906@bogus>
  <ce2bcac9-8341-d7c1-0652-309ca4e9413c@xilinx.com>
  <20201002105840.GE906@bogus>
  <1b714566-d6dd-ead1-322e-f92847b923f3@xilinx.com>
  <20201002145115.GA6520@bogus>
- <BYAPR11MB30151480E71BBA232E9B0ADEB80C0@BYAPR11MB3015.namprd11.prod.outlook.com>
- <20201005084441.znou7licvvtomva4@bogus>
- <BYAPR11MB3015F4E8FDF3CB1273A35EFAB80C0@BYAPR11MB3015.namprd11.prod.outlook.com>
- <20201005200744.robd42nkt6ahg52x@bogus>
- <BYAPR11MB301505B60397A083050E962EB80D0@BYAPR11MB3015.namprd11.prod.outlook.com>
- <20201006111346.fhowlesbi4hfaquf@bogus>
 From:   Michal Simek <michal.simek@xilinx.com>
 Autocrypt: addr=michals@xilinx.com; keydata=
  xsFNBFFuvDEBEAC9Amu3nk79+J+4xBOuM5XmDmljuukOc6mKB5bBYOa4SrWJZTjeGRf52VMc
@@ -164,61 +153,130 @@ Autocrypt: addr=michals@xilinx.com; keydata=
  oa0OZXydlVP7wrnJdi3m8DnljxyInPxbxdKGN5XnMq/r9Y70uRVyeqwp97sKLXd9GsxuaSg7
  QJKUaltvN/i7ng1UOT/xsKeVdfXuqDIIElZ+dyEVTweDM011Zv0NN3OWFz6oD+GzyBetuBwD
  0Z1MQlmNcq2bhOMzTxuXX2NDzUZs4aqEyZQ=
-Message-ID: <97d46614-94a9-c900-dd46-c461bc50512a@xilinx.com>
-Date:   Tue, 6 Oct 2020 13:46:12 +0200
+Message-ID: <eef40baa-fee9-0386-ad94-95ac994084b2@xilinx.com>
+Date:   Tue, 6 Oct 2020 14:08:36 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.12.1
 MIME-Version: 1.0
-In-Reply-To: <20201006111346.fhowlesbi4hfaquf@bogus>
+In-Reply-To: <20201002145115.GA6520@bogus>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 X-RCIS-Action: ALLOW
 X-TM-AS-Product-Ver: IMSS-7.1.0.1224-8.2.0.1013-23620.005
 X-TM-AS-User-Approved-Sender: Yes;Yes
 X-EOPAttributedMessage: 0
 X-MS-Office365-Filtering-HT: Tenant
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 847d2040-268f-42df-55ac-08d869ed733b
-X-MS-TrafficTypeDiagnostic: DM5PR02MB2332:
-X-Microsoft-Antispam-PRVS: <DM5PR02MB2332711EBF4A1D1889A08B15C60D0@DM5PR02MB2332.namprd02.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: e3b352e5-c606-4cef-65ff-08d869f093f9
+X-MS-TrafficTypeDiagnostic: DM6PR02MB5578:
+X-Microsoft-Antispam-PRVS: <DM6PR02MB557824430ED5F59FD1FFE175C60D0@DM6PR02MB5578.namprd02.prod.outlook.com>
 X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
-X-MS-Oob-TLC-OOBClassifiers: OLM:4303;
+X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 9EhjiIhoiCtdaqYyalbTmWzVsim/oKDN+YqBdX43C82NsFuYEct2GAjyI3CT85eHC+PYwZsq5JV3rSr4F4khoa6l4oNdS3WQe3lqKgvH6eoL27D/gfSIPXm0twtFJI6SODSqEtAl+dX2AWhmM98ZkjJwnyqLRRpwNkoxsM/qazzooM7L7YrDvtz+LpzBEzxmWKYmlKL4ib8UJ4GuFbsI3JPzE7A6YLhgqQSSPw+BQOH9SIUZktBzMzsHQdJ+q6IvbboMZGp5ssHzW9j7gssk2C90UJ4eeBp6p9O4MPvAIhghZRMmDiJ/UgCK/XHF+WEGUPXBnjgZyXgatFoSLYLzlHgZont8lDqZpbkK8m7iIZV/saqbzCQCd1xopMgabKP16VQEkTrVbsjFG/5EVH6aTr/KB1jodAnti1UbmM24EV6O8Te65JivEd4UNDcW5esw
-X-Forefront-Antispam-Report: CIP:149.199.60.83;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapsmtpgw01;PTR:unknown-60-83.xilinx.com;CAT:NONE;SFS:(346002)(376002)(136003)(396003)(39860400002)(46966005)(6666004)(36756003)(31696002)(8676002)(70586007)(7416002)(426003)(356005)(9786002)(5660300002)(82310400003)(336012)(2906002)(81166007)(26005)(4326008)(47076004)(478600001)(110136005)(54906003)(8936002)(31686004)(44832011)(2616005)(316002)(82740400003)(70206006)(186003)(4744005)(43740500002);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 3dUE2UMXn5Tm7ncCGjw5xhaRzCj2nY6jfJYo07pFsE7iNhwCUtstfGATClkKe1Sd0upJjuE9/zTiXCorA6AR29WnrNF2NwP7Lu9TUq3sJqY8e+9u2zk10Io6B01JaaIleWyh1LqrDozcs2ZGCScjTLtEXZ2BF0PX+sXfIPlFZ9mDMO0+DhZcGqzNRFIPIdeWf1qjgso1KUmjnP3Xg/tHLZoalboOKzqBfe51DX00nNSNEX04QtJXl0NJtIUd+D8+3Vqzu+vPdMKbIhduij5amJlWmMJvjBEIrdq6ubHTpwoFkQ/vOf8iXI1W8emkFz/VScS5i5yPATb6UK7dKEygQQHJQxHg5YJ90e3MdwZuUq7UXuuiyt/+LovbcyjhOCSXo8+8NrXwu6L2cy7IsZOuCufUz01E1kyoQ1aqJDYVPkKIL+49b+buYHo6XGzu7Ulj
+X-Forefront-Antispam-Report: CIP:149.199.60.83;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapsmtpgw01;PTR:unknown-60-83.xilinx.com;CAT:NONE;SFS:(136003)(396003)(346002)(376002)(39860400002)(46966005)(316002)(2616005)(4326008)(6666004)(478600001)(426003)(186003)(336012)(70206006)(70586007)(26005)(7416002)(2906002)(9786002)(31686004)(5660300002)(8676002)(31696002)(44832011)(8936002)(82740400003)(110136005)(81166007)(47076004)(82310400003)(356005)(83380400001)(36756003)(43740500002);DIR:OUT;SFP:1101;
 X-OriginatorOrg: xilinx.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2020 11:46:23.4229
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2020 12:08:46.8443
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 847d2040-268f-42df-55ac-08d869ed733b
+X-MS-Exchange-CrossTenant-Network-Message-Id: e3b352e5-c606-4cef-65ff-08d869f093f9
 X-MS-Exchange-CrossTenant-Id: 657af505-d5df-48d0-8300-c31994686c5c
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=657af505-d5df-48d0-8300-c31994686c5c;Ip=[149.199.60.83];Helo=[xsj-pvapsmtpgw01]
-X-MS-Exchange-CrossTenant-AuthSource: CY1NAM02FT042.eop-nam02.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: SN1NAM02FT004.eop-nam02.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR02MB2332
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR02MB5578
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi,
 
-On 06. 10. 20 13:13, Sudeep Holla wrote:
-> On Tue, Oct 06, 2020 at 01:22:31AM +0000, Zulkifli, Muhammad Husaini wrote:
->> HI Sudeep and Michal,
+On 02. 10. 20 16:51, Sudeep Holla wrote:
+> Hi Michal,
+> 
+> On Fri, Oct 02, 2020 at 03:53:33PM +0200, Michal Simek wrote:
+>> Hi Sudeep,
 >>
->> Yeah I believe it can work. I will create one header file in include/linux/firmware/intel/Keembay_firmware.h
->> To handle this func and arasan controller can call this func.
->> Are you guys ok with this?
+>> On 02. 10. 20 12:58, Sudeep Holla wrote:
+>>> Hi Michal,
+>>>
+>>> On Fri, Oct 02, 2020 at 10:23:02AM +0200, Michal Simek wrote:
+>>>> Hi Sudeep,
+>>>>
+>>>> On 01. 10. 20 17:35, Sudeep Holla wrote:
+>>>
+>>> [...]
+>>>
+>>>>>
+>>>>> What are the other uses of this KEEMBAY_SIP_* ?
+>>>>> For now I tend to move this to the driver making use of it using
+>>>>> arm_smccc_1_1_invoke directly if possible. I don't see the need for this
+>>>>> to be separate driver. But do let us know the features implemented in the
+>>>>> firmware. If it is not v1.1+, reasons for not upgrading as you need v1.1
+>>>>> for some CPU errata implementation.
+>>>>
+>>>> This driver has been created based on my request to move it out the mmc
+>>>> driver. It looks quite hacky to have arm_smccc_res and call
+>>>> arm_smccc_smc() also with some IDs where it is visible that the part of
+>>>> ID is just based on any spec.
+>>>
+>>> OK, driver is fine but no dt-bindings as it is discoverable. It can
+>>> also be just a wrapper library instead as it needs no explicit
+>>> initialisation like drivers to setup.
+>>
+>> I am fine with it. Do we have any example which we can point him to?
 >>
 > 
-> Sounds good to me. No change w.r.t arasan controller as it still needs
-> to call the same api(keembay_sd_voltage_selection), just w/o a firmware
-> driver for it.
+> You seem to have figured that out already with SOC_ID example.
+> That was quick I must say 😄.
 
-I am also fine with it. Just please make sure that driver can be
-compiled also on non ARM platforms.
+I would expect that instead of of
+
+	if (arm_smccc_get_version() < ARM_SMCCC_VERSION_1_2)
+		return 0;
+
+	if (arm_smccc_1_1_get_conduit() == SMCCC_CONDUIT_NONE) {
+		pr_err("%s: invalid SMCCC conduit\n", __func__);
+		return -EOPNOTSUPP;
+	}
+
+	arm_smccc_1_1_invoke(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+			     ARM_SMCCC_ARCH_SOC_ID, &res);
+
+
+you will simply call
+
+	arm_smccc_1_2_invoke(ARM_SMCCC_ARCH_FEATURES_FUNC_ID,
+			     ARM_SMCCC_ARCH_SOC_ID, &res);
+	...(check ret)
+
+	arm_smccc_1_2_invoke(ARM_SMCCC_ARCH_SOC_ID, 0, &res);
+	...(check ret)
+
+
+where it is clear from 1_2 that it has to be at least 1.2 version.
+
+<snip>
+
+> 
+>>
+>> BTW: I see you have added soc id reading which you are saying is the
+>> part of smcc v1.2 but I can't see any implementation in TF-A. Is this
+>> spec publicly available?
+>>
+> 
+> Spec is out[1], include/linux/arm-smccc.h points to the latest spec.
+> TF-A does have implementation as I tested with it and even reported
+> bug that I discovered when I tested with my patches that are now merged
+> upstream. Are you referring to master of TF-A or last release version ?
+> If latter, it had bug and may not be working. I may be wrong though, as
+> I am just telling what was told to me couple of months back and things
+> might have changed in TF-A land.
+
+I will read it and take a look when I have time.
 
 Thanks,
 Michal
+
