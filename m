@@ -2,120 +2,117 @@ Return-Path: <SRS0=fQuC=DO=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50B9AC4363C
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Oct 2020 10:10:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3CB8C4363D
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Oct 2020 11:32:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 05D3220B1F
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Oct 2020 10:10:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9576520870
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Oct 2020 11:32:54 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="risRhOIo"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727476AbgJGKKs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Oct 2020 06:10:48 -0400
-Received: from foss.arm.com ([217.140.110.172]:41250 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727014AbgJGKKs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 7 Oct 2020 06:10:48 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 37806113E;
-        Wed,  7 Oct 2020 03:10:47 -0700 (PDT)
-Received: from bogus (unknown [10.57.54.133])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 938913F71F;
-        Wed,  7 Oct 2020 03:10:44 -0700 (PDT)
-Date:   Wed, 7 Oct 2020 11:10:38 +0100
-From:   Sudeep Holla <sudeep.holla@arm.com>
-To:     Michal Simek <michal.simek@xilinx.com>
-Cc:     muhammad.husaini.zulkifli@intel.com, adrian.hunter@intel.com,
-        Sudeep Holla <sudeep.holla@arm.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        lakshmi.bai.raja.subramanian@intel.com,
-        wan.ahmad.zainie.wan.mohamad@intel.com, arnd@arndb.de
-Subject: Re: [PATCH v3 2/2] firmware: Keem Bay: Add support for Arm Trusted
- Firmware Service call
-Message-ID: <20201007101038.ec7ymdhiaf7rhyrm@bogus>
-References: <20201006155549.3595-1-muhammad.husaini.zulkifli@intel.com>
- <20201006155549.3595-3-muhammad.husaini.zulkifli@intel.com>
- <4677c614-ac00-fb69-d22c-54f9015249f4@xilinx.com>
+        id S1727253AbgJGLcx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Oct 2020 07:32:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60738 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726129AbgJGLcx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Oct 2020 07:32:53 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88252C0613D2
+        for <linux-mmc@vger.kernel.org>; Wed,  7 Oct 2020 04:32:52 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id lw21so2437538ejb.6
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Oct 2020 04:32:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
+        h=references:user-agent:from:to:cc:subject:in-reply-to:date
+         :message-id:mime-version;
+        bh=UUAtMhUEk/jz98adLLh/kvHWU+87rtZfg/cfL1Bdfv4=;
+        b=risRhOIo118pkONLYVu23luhqGeB5jDgqxnxSf8q8nSEGVRzYNHLnpk2xI4o3/akUU
+         9iJ6UYN7xRVB6xO1iGDKwIVdnFC9+YmYxobpCvE1XSqJ+cvYrf+pTLuXxhKmXlWLlprA
+         TTdRdlIfq520FIItzRxnEZWOQCMPmdw3K35VxMPxnCsDuXYDb9YGLQZhanD4WxwvJdHi
+         mA7xkitMJo0Y4VP220+O5aYm7egOe1ATbMWxcjquK+uIBEYsd1S/wc51/Svfj0MgD2Ha
+         fsebz/VLQU6nBgdx+OaKjCQScS41zAuJ2om5xUSZAOts9h6bfEIXRCCN+qU9UifNURbj
+         aI5A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject
+         :in-reply-to:date:message-id:mime-version;
+        bh=UUAtMhUEk/jz98adLLh/kvHWU+87rtZfg/cfL1Bdfv4=;
+        b=npufGbusgsO/vdgRGAkibxxcNgFzD3/Q/UJOlQK/ethu3t/IYBiAlGyaEt5CeZYwLd
+         D60pCTyXT+/y5g6+5F3fIsWUGzMbQYNgIO5AtPQNRFtwUUiaIaDFH5L2dYVuZEYeE+Sj
+         JNsaG7+T49BEUCRtnNPx98R3NIw6VhKpAnwJOgj2rrEECzKIcx0ic1uBbuq59KsPUils
+         1jYdRcu7HfCY4IYlabnjbTH9o6099Sa/s91W+zcLxKdDih2jd/Lkh/FboKOzjyYsWP8t
+         y7+7FtIVE3J7HHoVwZF45Ru0/juYQE4ivGpl3l66HtuHZoK2BqwtOdiST18EVKvz4qIg
+         EEVw==
+X-Gm-Message-State: AOAM531xoEVOUsW68KBedZfdGCiPDLE1avxlqEPrOClxHZRIDWR6G4fp
+        ZZPLCFbmKU3acvV9FyprOUfj/Q==
+X-Google-Smtp-Source: ABdhPJwevDhhFb3fbE81queKzB5zgztjuRr7Aq9efuwPUXqmp2hDPvc+PUbX3Xnkw0p65sb/EPunjQ==
+X-Received: by 2002:a17:906:c1d4:: with SMTP id bw20mr2859064ejb.91.1602070370261;
+        Wed, 07 Oct 2020 04:32:50 -0700 (PDT)
+Received: from localhost (cag06-3-82-243-161-21.fbx.proxad.net. [82.243.161.21])
+        by smtp.gmail.com with ESMTPSA id d59sm1247111edd.74.2020.10.07.04.32.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Oct 2020 04:32:49 -0700 (PDT)
+References: <e4e6cc45-bc18-40ec-035e-fdb45b9a8f46@gmail.com> <87o8lf74j5.fsf@nanos.tec.linutronix.de>
+User-agent: mu4e 1.3.3; emacs 26.3
+From:   Jerome Brunet <jbrunet@baylibre.com>
+To:     Thomas Gleixner <tglx@linutronix.de>,
+        Brad Harper <bjharper@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Kevin Hilman <khilman@baylibre.com>,
+        "open list\:ARM\/Amlogic Meson..." 
+        <linux-amlogic@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>
+Subject: Re: [PATCH] mmc: meson-gx: remove IRQF_ONESHOT
+In-reply-to: <87o8lf74j5.fsf@nanos.tec.linutronix.de>
+Date:   Wed, 07 Oct 2020 13:32:47 +0200
+Message-ID: <1jy2ki1db4.fsf@starbuckisacylon.baylibre.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4677c614-ac00-fb69-d22c-54f9015249f4@xilinx.com>
-User-Agent: NeoMutt/20171215
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 07, 2020 at 10:20:21AM +0200, Michal Simek wrote:
-> Hi,
-> 
-> 1. Keem Bay: in subject is wrong. Tools are working with it and you
-> should just use keembay: instead.
-> 
-> 2. This should come first before actual change to keep the tree bisectable.
-> 
-> On 06. 10. 20 17:55, muhammad.husaini.zulkifli@intel.com wrote:
-> > From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-> > 
-> > Add header file to handle API function for device driver to communicate
-> > with Arm Trusted Firmware.
-> > 
-> > Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-> > ---
-> >  .../linux/firmware/intel/keembay_firmware.h   | 46 +++++++++++++++++++
-> >  1 file changed, 46 insertions(+)
-> >  create mode 100644 include/linux/firmware/intel/keembay_firmware.h
-> > 
-> > diff --git a/include/linux/firmware/intel/keembay_firmware.h b/include/linux/firmware/intel/keembay_firmware.h
-> > new file mode 100644
-> > index 000000000000..9adb8c87b788
-> > --- /dev/null
-> > +++ b/include/linux/firmware/intel/keembay_firmware.h
-> > @@ -0,0 +1,46 @@
-> > +/* SPDX-License-Identifier: GPL-2.0 */
-> > +/*
-> > + *  Intel Keembay SOC Firmware API Layer
-> > + *
-> > + *  Copyright (C) 2020-2021, Intel Corporation
-> > + *
-> > + *  Muhammad Husaini Zulkifli <Muhammad.Husaini.Zulkifli@intel.com>
-> > + */
-> > +
-> > +#ifndef __FIRMWARE_KEEMBAY_SMC_H__
-> > +#define __FIRMWARE_KEEMBAY_SMC_H__
-> > +
-> > +#include <linux/arm-smccc.h>
-> > +
-> > +/**
-> 
-> This is not a kernel doc comment. Just use /*
-> 
-> > + * This file defines API function that can be called by device driver in order to
-> > + * communicate with Arm Trusted Firmware.
-> > + */
-> > +
-> > +/* Setting for Keem Bay IO Pad Line Voltage Selection */
-> > +#define KEEMBAY_SET_SD_VOLTAGE_FUNC_ID	0x8200ff26
-> 
-> Sudeep: Don't we have any macros for composing these IDs?
-> nit: IMHO composing these IDs from macros would make more sense to me.
-> 
 
-Yes we do. Refer include/linux/arm-smccc.h
-I expect something like below, which also indicated you are using wrong
-OWNER space. You can't be 0 which is reserved for CPU ARCH. You need to
-be SIP(0x2)
+On Tue 06 Oct 2020 at 17:33, Thomas Gleixner <tglx@linutronix.de> wrote:
 
-#define ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE          \
-        ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL,       \
-                           ARM_SMCCC_SMC_32,          \
-                           ARM_SMCCC_OWNER_SIP,       \
-                           0xFF26)
+> Brad,
+>
+> On Wed, Oct 07 2020 at 00:45, Brad Harper wrote:
+>> I'm happy to test anything on a range of amlogic hardware with standard 
+>> / rt and  multiple mmc devices.  Ill test Jerome's patch in next 24 
+>> hours to report the results.
+>
+> please do not top-post and trim your replies.
+>
+>> On 6/10/2020 11:43 pm, Thomas Gleixner wrote:
+>>>       We rather should make interrupts which need to have their primary
+>>>       handler in hard interrupt context to set IRQF_NO_THREAD. That
+>>>       should at the same time confirm that the primary handler is RT
+>>>       safe.
+>>>
+>>>       Let me stare at the core code and the actual usage sites some more.
+>
+> So there are a few nasties in there and I faintly remember that there
+> was an assumption that interrupts which are requested with both a
+> primary and a secondary handler should quiesce the device interrupt in
+> the primary handler if needed. OTOH, this also enforces that the primary
+> handler is RT safe, which is after a quick scan of all the usage sites
+> not a given and quite some of the users rely on IRQF_ONESHOT.
+>
+> The below untested patch should cure the problem and keep the interrupt
+> line masked if requested with IRQF_ONESHOT.
+>
 
+With arm64 defconfig on Khadas vim3, no obvious regression. Looks good.
 
--- 
-Regards,
-Sudeep
+Tested-by: Jerome Brunet <jbrunet@baylibre.com>
+
+I did not test with RT. Brad, Could you let us know is Thomas's patch
+works for you ? Thx
