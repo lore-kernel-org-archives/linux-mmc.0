@@ -7,72 +7,75 @@ X-Spam-Status: No, score=-11.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECBC4C433E7
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 07:34:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 210D2C433E7
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 07:35:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6420621897
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 07:34:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9668721924
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 07:35:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="OJTLZ/4+"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="Pj106iTE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725899AbgJHHeu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Oct 2020 03:34:50 -0400
-Received: from mail-mw2nam12on2074.outbound.protection.outlook.com ([40.107.244.74]:65152
-        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        id S1727172AbgJHHft (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Oct 2020 03:35:49 -0400
+Received: from mail-co1nam11on2078.outbound.protection.outlook.com ([40.107.220.78]:22529
+        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725888AbgJHHeu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Oct 2020 03:34:50 -0400
+        id S1725888AbgJHHft (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 8 Oct 2020 03:35:49 -0400
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bmEyT1yv213HGO6zn7YttNPtiyfAvQ8zMNvudKuUA4tOkIkzCTxTBGQWoOkt6Nwp9wv7QL5hQNoPh/LwNuXJKfyrPh0lEXmPDAsqMKYXtB4lm07eyt5C+3kny0ZghkT1+ZhSEobVZpfjxNPvnNU6uFaDLktoU34ya2azVuqRQOvfPXqmD8UE/qGWOcZYz5dcJgJsmevygGZQUeEAKop3Re4HSm0QkZfLq7INH4hE803MHq1ewH3sY3BS6iq/WK9nyk8SQLIgqyyOqkXbbjufuDUSyMjzPUBuIsMISs2/eepOK87w1DhJpmkb5FVuZ8cHNUCnKIRrK4lSpkxCASt7gg==
+ b=EPvLK4iPNQzEhR2JWt4oIKi1wP32Fw/UIzamjTr5Hbg6haJdemNvVGmu+778XBAeC+CEdN22pFTLWWio3JcsuZZzPfbd7tL0WgiRpEW9h2SLUvrARMKjaHAAqcSYPYaMl3VmRmvO+gFqFpr9t2FoSp6U3XnGZEDPK4d1rdEn/lNSObLL4jemv0/sTrLxogpRlo4D5jpxQJdNSEHYVzB+pJ97v/1mgqtIq8xTc9p69kcrbuNSKtUjs+6NRkdorJHjr3M6NmQuXa39skzO2HTZAKjTUw4gh/bFnLB2fYAEPea7nHFtxbqLz3ipEUBfEjHsZ8K54CwFr2vYQROyBUL88g==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=7P1X7lgR2FWupa/YB35WfIf2bcST245MPFyGn+kJ4E0=;
- b=WTZHihRNWyT7taYAyi8d+n1nC/3VdV+It7yB/hSnp3KQWE0wINdAwcDeHpbTqShYQitguG8GN9wOtdekC2eewqTYXvkEWdEGcOAxjhIbait9ztlJEoSDg3RSw82g2IoWJErryR49xMENp1MLFdonWQeBONh6AqiOjsgI2mykMvzkM4NzSG07cThGn52iPE5olFGO0uPo6TmZgXom/soDQ7De2Y0RNNCRbSgAUH657WY0DPTMC/bLTg08fIUWeGgz72oFA4gnmwHAAEiFcO1vSREDSLlhnJe4LXIqNSYPh1IIvCDocoU79bFnqFEYz8DoCpCMGCplangG/tH8L5vUxA==
+ bh=A5HeZ/+YCmJL7sBu7KdAKqzI8MRpIDCh204Q9mO9gtQ=;
+ b=ldeM/sTOSzYC2MicMuIwT6jc1F49IgxsLVgO+HJEdoGQL1Qi0vjCarWh3oEQ4jolrIkU++8S+R54dz+ZrThwe/HiBesdJt5Xc4BQjq8T2kRMkojupzCoVVtDXqFoYQFvSKksEpgbuyr7hbNdVYjMxXxE8GJ8NB1EoYg3jYSQDpMxDDbdaRObGQ0xnhSgi3X284NdHRC8JxFs1eE66BA7slNOc4Qq123oJK/YUxPknGdcIAB31zGZqCsAUht8YzuA+XIEvx0y4zxgZAP6nHPj9xxjHU8Ta1xrVbPCWXQoz+9n17ThXStoPqC0Fe+Ascoaz7PhqMjFDpBVZ9JoEcc6eA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 149.199.60.83) smtp.rcpttodomain=arndb.de smtp.mailfrom=xilinx.com;
+ 149.199.60.83) smtp.rcpttodomain=intel.com smtp.mailfrom=xilinx.com;
  dmarc=bestguesspass action=none header.from=xilinx.com; dkim=none (message
  not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=7P1X7lgR2FWupa/YB35WfIf2bcST245MPFyGn+kJ4E0=;
- b=OJTLZ/4+g9BlYCZjipZJbTTzAhBZnlq9wZevyMX9fRyRaw8UztXRYaE+kPopg34U+X+rdDHgLbSCpc8iIvUpHGTR8FZzRBwg94JzONa43Ua4HPI2+k89iodoPWd87Yn2E6i6cCZcbpAFH4QSTS65HHn/kdI3RfKpSUfG/5HZycA=
-Received: from SA9PR11CA0014.namprd11.prod.outlook.com (2603:10b6:806:6e::19)
- by MN2PR02MB6269.namprd02.prod.outlook.com (2603:10b6:208:182::16) with
- Microsoft SMTP Server (version=TLS1_2,
+ bh=A5HeZ/+YCmJL7sBu7KdAKqzI8MRpIDCh204Q9mO9gtQ=;
+ b=Pj106iTElOSnJ/Gg2szP2GLMFZ2C2L7io8KhR/j0zzD6ZmeiiOFHQNuZXLIX4emB/6xtY3ig+ulaJipMReBVa7Tepmt4B0YU6mvDOrqeJinIm3hJ+s0qqQtIAQDkZijArvZdcMWkYrs7ZZgT5GTEc4vIZnGKX5Mq18LAZpMeyDU=
+Received: from SN4PR0501CA0022.namprd05.prod.outlook.com
+ (2603:10b6:803:40::35) by DM6PR02MB4890.namprd02.prod.outlook.com
+ (2603:10b6:5:fa::22) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3455.22; Thu, 8 Oct
- 2020 07:34:46 +0000
-Received: from SN1NAM02FT030.eop-nam02.prod.protection.outlook.com
- (2603:10b6:806:6e:cafe::93) by SA9PR11CA0014.outlook.office365.com
- (2603:10b6:806:6e::19) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3455.23 via Frontend
- Transport; Thu, 8 Oct 2020 07:34:45 +0000
+ 2020 07:35:46 +0000
+Received: from SN1NAM02FT049.eop-nam02.prod.protection.outlook.com
+ (2603:10b6:803:40:cafe::bc) by SN4PR0501CA0022.outlook.office365.com
+ (2603:10b6:803:40::35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3477.11 via Frontend
+ Transport; Thu, 8 Oct 2020 07:35:46 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 149.199.60.83)
- smtp.mailfrom=xilinx.com; arndb.de; dkim=none (message not signed)
- header.d=none;arndb.de; dmarc=bestguesspass action=none
+ smtp.mailfrom=xilinx.com; intel.com; dkim=none (message not signed)
+ header.d=none;intel.com; dmarc=bestguesspass action=none
  header.from=xilinx.com;
 Received-SPF: Pass (protection.outlook.com: domain of xilinx.com designates
  149.199.60.83 as permitted sender) receiver=protection.outlook.com;
  client-ip=149.199.60.83; helo=xsj-pvapsmtpgw01;
 Received: from xsj-pvapsmtpgw01 (149.199.60.83) by
- SN1NAM02FT030.mail.protection.outlook.com (10.152.72.114) with Microsoft SMTP
- Server id 15.20.3433.39 via Frontend Transport; Thu, 8 Oct 2020 07:34:45
+ SN1NAM02FT049.mail.protection.outlook.com (10.152.72.166) with Microsoft SMTP
+ Server id 15.20.3433.39 via Frontend Transport; Thu, 8 Oct 2020 07:35:45
  +0000
-Received: from [149.199.38.66] (port=52222 helo=smtp.xilinx.com)
+Received: from [149.199.38.66] (port=54024 helo=smtp.xilinx.com)
         by xsj-pvapsmtpgw01 with esmtp (Exim 4.90)
         (envelope-from <michal.simek@xilinx.com>)
-        id 1kQQRE-000569-4n; Thu, 08 Oct 2020 00:34:08 -0700
+        id 1kQQSC-00057y-Ef; Thu, 08 Oct 2020 00:35:08 -0700
 Received: from [127.0.0.1] (helo=localhost)
         by smtp.xilinx.com with smtp (Exim 4.63)
         (envelope-from <michal.simek@xilinx.com>)
-        id 1kQQRp-0005dA-93; Thu, 08 Oct 2020 00:34:45 -0700
+        id 1kQQSn-00063u-Il; Thu, 08 Oct 2020 00:35:45 -0700
+Received: from xsj-pvapsmtp01 (xsj-smtp.xilinx.com [149.199.38.66])
+        by xsj-smtp-dlp1.xlnx.xilinx.com (8.13.8/8.13.1) with ESMTP id 0987ZbnQ009350;
+        Thu, 8 Oct 2020 00:35:37 -0700
 Received: from [172.30.17.110]
         by xsj-pvapsmtp01 with esmtp (Exim 4.63)
         (envelope-from <michals@xilinx.com>)
-        id 1kQQRm-0005cE-U5; Thu, 08 Oct 2020 00:34:43 -0700
-Subject: Re: [PATCH v4 3/4] mmc: sdhci-of-arasan: Add structure device pointer
- in probe
+        id 1kQQSe-00061e-JN; Thu, 08 Oct 2020 00:35:37 -0700
+Subject: Re: [PATCH v4 1/4] firmware: keembay: Add support for Arm Trusted
+ Firmware Service call
 To:     muhammad.husaini.zulkifli@intel.com, adrian.hunter@intel.com,
         michal.simek@xilinx.com, andriy.shevchenko@intel.com,
         ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
@@ -80,7 +83,7 @@ To:     muhammad.husaini.zulkifli@intel.com, adrian.hunter@intel.com,
 Cc:     lakshmi.bai.raja.subramanian@intel.com,
         wan.ahmad.zainie.wan.mohamad@intel.com, arnd@arndb.de
 References: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
- <20201008020936.19894-4-muhammad.husaini.zulkifli@intel.com>
+ <20201008020936.19894-2-muhammad.husaini.zulkifli@intel.com>
 From:   Michal Simek <michal.simek@xilinx.com>
 Autocrypt: addr=michals@xilinx.com; keydata=
  xsFNBFFuvDEBEAC9Amu3nk79+J+4xBOuM5XmDmljuukOc6mKB5bBYOa4SrWJZTjeGRf52VMc
@@ -144,39 +147,40 @@ Autocrypt: addr=michals@xilinx.com; keydata=
  oa0OZXydlVP7wrnJdi3m8DnljxyInPxbxdKGN5XnMq/r9Y70uRVyeqwp97sKLXd9GsxuaSg7
  QJKUaltvN/i7ng1UOT/xsKeVdfXuqDIIElZ+dyEVTweDM011Zv0NN3OWFz6oD+GzyBetuBwD
  0Z1MQlmNcq2bhOMzTxuXX2NDzUZs4aqEyZQ=
-Message-ID: <9deff9d8-b8da-7cc2-19f3-e5baab010d92@xilinx.com>
-Date:   Thu, 8 Oct 2020 09:34:39 +0200
+Message-ID: <f268c578-69f4-3ee4-f5b2-f8b00dd21265@xilinx.com>
+Date:   Thu, 8 Oct 2020 09:35:33 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.12.1
 MIME-Version: 1.0
-In-Reply-To: <20201008020936.19894-4-muhammad.husaini.zulkifli@intel.com>
+In-Reply-To: <20201008020936.19894-2-muhammad.husaini.zulkifli@intel.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
+X-RCIS-Action: ALLOW
 X-TM-AS-Product-Ver: IMSS-7.1.0.1224-8.2.0.1013-23620.005
 X-TM-AS-User-Approved-Sender: Yes;Yes
 X-EOPAttributedMessage: 0
 X-MS-Office365-Filtering-HT: Tenant
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 123398a2-5cf5-4c81-c923-08d86b5ca10f
-X-MS-TrafficTypeDiagnostic: MN2PR02MB6269:
-X-Microsoft-Antispam-PRVS: <MN2PR02MB62695F0C31C5FA3EE9D4B608C60B0@MN2PR02MB6269.namprd02.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: cab17ba3-dd75-4d02-9176-08d86b5cc4fa
+X-MS-TrafficTypeDiagnostic: DM6PR02MB4890:
+X-Microsoft-Antispam-PRVS: <DM6PR02MB48909DE36760F67995C12BCEC60B0@DM6PR02MB4890.namprd02.prod.outlook.com>
 X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
-X-MS-Oob-TLC-OOBClassifiers: OLM:1388;
+X-MS-Oob-TLC-OOBClassifiers: OLM:2512;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: lIRBsqhbab5h98ZBM5wb2CpTSWzMjePuEpIealZRp1eZMTrIvmns8LIMj6egOiSTIej18GzBBcEgYOQ+qhTRHmiLE9dzINYTni6PLKivLzTqOwF2uLf8/nVaY/LdmGkUWJ/lWD1o+dGMrFL5HOvp4DWH6KOSocRX2fAh38J3OohaWaK9fFvLww+qOmyfo92ZdJ/o+03l97SmnyxM6D30sJLgkVEG3zd5TM+CIOiFw/OGqGkQNhcqL3sVLkxMdVbJ3GJKqEXjMzRK9oLMasg4HlD+6YwhCb/TPHs+ZSmsTbe7rblFLf5VL5UgV/8aPEL+10sQNZyPRBtgfBBO3t4iBNPctLcyl+TKBIBh+UCSmjE8gT+7zlhZw8RwXN1AeNgzpYImkR8PR4Zx4Aj4qZ35Vh/8v3QSLXVkIUn5d0sF1iP21zuy7zPEciIYJujJx3Kx
-X-Forefront-Antispam-Report: CIP:149.199.60.83;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapsmtpgw01;PTR:unknown-60-83.xilinx.com;CAT:NONE;SFS:(396003)(346002)(39860400002)(136003)(376002)(46966005)(9786002)(82740400003)(316002)(81166007)(336012)(2906002)(426003)(5660300002)(2616005)(47076004)(4326008)(44832011)(8676002)(8936002)(70586007)(7416002)(82310400003)(356005)(36756003)(6666004)(478600001)(31696002)(186003)(26005)(31686004)(70206006)(43740500002);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: FNSUmEG0CfUWhDJIMbHe5Fm6qKqER5IWGobywoUH03VTcwMVd56+IVyG6DnmKcn1ixFAD6vAyUEWreoWgboQQDpsakSM4z5ryQXFAOVreostNlwfCWZKO62N8i0MK8PUP3/gDOrEFx/FQ1rvLQ2WC7InDPEIsEx2V8IeP5lvyXXQok79n8M5H2BL3wziB5u2GjIpmelNhAyqQAZTMrEMPA61uJ7AdT6MEAm92pAl6rYqFHRxlc8rMIaMHyuH6o5IHpGcg+PJTad+wOkH12us9f6uxc4uL/anMAhhvpjJFIy/DkR/4IxH0Cq7UK1adyx4+2PIFlny6oKhNG2P05EwSF1MAd94P1Jkmjby2b2Z7hH+IG50U2n+xCPY+HnD7Dl9123LMNlSYophQkd6yUw+2BxOKaVaKyafJV7+4Ij2swQJIXe9NazJXB9eyB/n1iqg
+X-Forefront-Antispam-Report: CIP:149.199.60.83;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapsmtpgw01;PTR:unknown-60-83.xilinx.com;CAT:NONE;SFS:(39860400002)(376002)(396003)(136003)(346002)(46966005)(316002)(31686004)(9786002)(31696002)(356005)(7416002)(70206006)(2906002)(5660300002)(8936002)(36756003)(8676002)(81166007)(44832011)(82740400003)(47076004)(336012)(2616005)(26005)(6666004)(82310400003)(70586007)(186003)(426003)(83380400001)(478600001)(4326008)(43740500002);DIR:OUT;SFP:1101;
 X-OriginatorOrg: xilinx.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2020 07:34:45.6124
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Oct 2020 07:35:45.8714
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 123398a2-5cf5-4c81-c923-08d86b5ca10f
+X-MS-Exchange-CrossTenant-Network-Message-Id: cab17ba3-dd75-4d02-9176-08d86b5cc4fa
 X-MS-Exchange-CrossTenant-Id: 657af505-d5df-48d0-8300-c31994686c5c
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=657af505-d5df-48d0-8300-c31994686c5c;Ip=[149.199.60.83];Helo=[xsj-pvapsmtpgw01]
-X-MS-Exchange-CrossTenant-AuthSource: SN1NAM02FT030.eop-nam02.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: SN1NAM02FT049.eop-nam02.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR02MB6269
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR02MB4890
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -186,32 +190,73 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On 08. 10. 20 4:09, muhammad.husaini.zulkifli@intel.com wrote:
 > From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 > 
-> Add struct device *dev in probe func() so that it can widely use in
-> probe to make code more readable.
+> Add header file to handle API function for device driver to communicate
+> with Arm Trusted Firmware.
 > 
 > Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 1 +
->  1 file changed, 1 insertion(+)
+>  .../linux/firmware/intel/keembay_firmware.h   | 47 +++++++++++++++++++
+>  1 file changed, 47 insertions(+)
+>  create mode 100644 include/linux/firmware/intel/keembay_firmware.h
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index f186fbd016b1..46aea6516133 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1521,6 +1521,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_arasan_data *sdhci_arasan;
->  	struct device_node *np = pdev->dev.of_node;
-> +	struct device *dev = &pdev->dev;
->  	const struct sdhci_arasan_of_data *data;
->  
->  	match = of_match_node(sdhci_arasan_of_match, pdev->dev.of_node);
+> diff --git a/include/linux/firmware/intel/keembay_firmware.h b/include/linux/firmware/intel/keembay_firmware.h
+> new file mode 100644
+> index 000000000000..8a62abcdfead
+> --- /dev/null
+> +++ b/include/linux/firmware/intel/keembay_firmware.h
+> @@ -0,0 +1,47 @@
+> +/* SPDX-License-Identifier: GPL-2.0 */
+> +/*
+> + *  Intel Keembay SOC Firmware API Layer
+> + *
+> + *  Copyright (C) 2020-2021, Intel Corporation
+> + *
+> + *  Muhammad Husaini Zulkifli <Muhammad.Husaini.Zulkifli@intel.com>
+> + */
+> +
+> +#ifndef __FIRMWARE_KEEMBAY_SMC_H__
+> +#define __FIRMWARE_KEEMBAY_SMC_H__
+> +
+> +#include <linux/arm-smccc.h>
+> +
+> +/*
+> + * This file defines API function that can be called by device driver in order to
+> + * communicate with Arm Trusted Firmware.
+> + */
+> +
+> +/* Setting for Keem Bay IO Pad Line Voltage Selection */
+> +#define ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE		\
+> +	ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL,		\
+> +			   ARM_SMCCC_SMC_32,		\
+> +			   ARM_SMCCC_OWNER_SIP,		\
+> +			   0xFF26)
+> +
+> +#define KEEMBAY_SET_1V8_VOLT	1
+> +#define KEEMBAY_SET_3V3_VOLT	0
+> +
+> +#if IS_ENABLED(CONFIG_HAVE_ARM_SMCCC_DISCOVERY)
+> +static inline int keembay_sd_voltage_selection(int volt)
+> +{
+> +	struct arm_smccc_res res;
+> +
+> +	arm_smccc_1_1_invoke(ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE, volt, &res);
+> +	if ((int)res.a0 < 0)
+> +		return -EINVAL;
+> +
+> +	return 0;
+> +}
+> +#else
+> +static inline int keembay_sd_voltage_selection(int volt)
+> +{
+> +	return -ENODEV;
+> +}
+> +#endif
+> +#endif /* __FIRMWARE_KEEMBAY_SMC_H__ */
 > 
 
-This is not what we discussed. You create new variable and you should
-just use it in that function.
+This looks good to me.
 
-s/pdev->dev\./dev->/g
+Acked-by: Michal Simek <michal.simek@xilinx.com>
 
 Thanks,
 Michal
