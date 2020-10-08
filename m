@@ -2,69 +2,85 @@ Return-Path: <SRS0=iGfF=DP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A44EEC43467
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 09:45:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99E96C43467
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 10:01:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4C668217BA
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 09:45:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 38BEA20714
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 10:01:40 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=ti.com header.i=@ti.com header.b="gCaPcTV6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725887AbgJHJpG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Oct 2020 05:45:06 -0400
-Received: from foss.arm.com ([217.140.110.172]:47110 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725849AbgJHJpG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Oct 2020 05:45:06 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E92521042;
-        Thu,  8 Oct 2020 02:45:05 -0700 (PDT)
-Received: from bogus (unknown [10.57.53.233])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 44CF63F70D;
-        Thu,  8 Oct 2020 02:45:04 -0700 (PDT)
-Date:   Thu, 8 Oct 2020 10:45:01 +0100
-From:   Sudeep Holla <sudeep.holla@arm.com>
-To:     muhammad.husaini.zulkifli@intel.com
-Cc:     adrian.hunter@intel.com, michal.simek@xilinx.com,
-        andriy.shevchenko@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        lakshmi.bai.raja.subramanian@intel.com, arnd@arndb.de,
-        wan.ahmad.zainie.wan.mohamad@intel.com
-Subject: Re: [PATCH v4 1/4] firmware: keembay: Add support for Arm Trusted
- Firmware Service call
-Message-ID: <20201008094501.ix2sdxorwhxchy5w@bogus>
-References: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
- <20201008020936.19894-2-muhammad.husaini.zulkifli@intel.com>
+        id S1728996AbgJHKBj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Oct 2020 06:01:39 -0400
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:32820 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725916AbgJHKBj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2020 06:01:39 -0400
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 098A1aCH116484;
+        Thu, 8 Oct 2020 05:01:36 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1602151296;
+        bh=q3MUyFjvN7mBX7FMCNBzHIOy27ICQpde7XSIoKizfFA=;
+        h=From:To:CC:Subject:Date;
+        b=gCaPcTV6P+9BK2VMk0sgSF3wIwQrLPu6YWEIffv9DTvLkfO0ygOLoxpcXKHea3tcB
+         NmxIFHp1qRmBRRFs3FoapODz74roc/HqiftTkuu/RU/JPSWGbdxvaAE3P6anmxezl3
+         KrUnZZvFRcvWOh+v9hvZW4B2sEA5PyWt06HdOnX0=
+Received: from DFLE110.ent.ti.com (dfle110.ent.ti.com [10.64.6.31])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 098A1aAh051533
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Thu, 8 Oct 2020 05:01:36 -0500
+Received: from DFLE108.ent.ti.com (10.64.6.29) by DFLE110.ent.ti.com
+ (10.64.6.31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Thu, 8 Oct
+ 2020 05:01:36 -0500
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE108.ent.ti.com
+ (10.64.6.29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
+ Frontend Transport; Thu, 8 Oct 2020 05:01:36 -0500
+Received: from a0230074-Latitude-E7470.ent.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 098A1UUS111551;
+        Thu, 8 Oct 2020 05:01:32 -0500
+From:   Faiz Abbas <faiz_abbas@ti.com>
+To:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>
+CC:     <ulf.hansson@linaro.org>, <adrian.hunter@intel.com>,
+        <faiz_abbas@ti.com>
+Subject: [PATCH] mmc: sdhci_am654: Fix module autoload
+Date:   Thu, 8 Oct 2020 15:31:29 +0530
+Message-ID: <20201008100129.13917-1-faiz_abbas@ti.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201008020936.19894-2-muhammad.husaini.zulkifli@intel.com>
-User-Agent: NeoMutt/20171215
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 08, 2020 at 10:09:33AM +0800, muhammad.husaini.zulkifli@intel.com wrote:
-> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
->
-> Add header file to handle API function for device driver to communicate
-> with Arm Trusted Firmware.
+Add a MODULE_DEVICE_TABLE() entry so that the driver is autoloaded
+when built as a module.
 
-[nit] Since it moved to trusted-firmware.org, it is no longer "Arm"
-Trusted Firmware. It is now called Trusted Firmware - A profile(TF-A)
-or Trusted Firmware - M profile (TF-M). Please update the subject and
-the text above. I know it is silly but I am being asked to get this
-fixed as it may create "confusion"(I don't know details, please don't
-ask 😁)
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+---
+ drivers/mmc/host/sdhci_am654.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Apart from various minor things Andy already pointed out, this looks
-good. You can add by Ack once the above naming and all things pointed
-by Andy are fixed.
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 2bce962bf7e4..a64ea143d185 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -739,6 +739,7 @@ static const struct of_device_id sdhci_am654_of_match[] = {
+ 	},
+ 	{ /* sentinel */ }
+ };
++MODULE_DEVICE_TABLE(of, sdhci_am654_of_match);
+ 
+ static int sdhci_am654_probe(struct platform_device *pdev)
+ {
+-- 
+2.17.1
 
---
-Regards,
-Sudeep
