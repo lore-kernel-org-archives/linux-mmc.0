@@ -4,37 +4,37 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BFA4C433E7
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:12:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FD52C4363D
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:13:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE8C72085B
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:12:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2460520B1F
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:13:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728062AbgJHCMz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Oct 2020 22:12:55 -0400
+        id S1727933AbgJHCM5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Oct 2020 22:12:57 -0400
 Received: from mga02.intel.com ([134.134.136.20]:31771 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727345AbgJHCMy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 7 Oct 2020 22:12:54 -0400
-IronPort-SDR: U/xZOmv43itVUDtR12sIRQSWPD/0yMVupjbzuxChMh7Kazf6ydJSCRZyQyrAnmOcub5rgdzwLn
- KT789X5Al8OQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9767"; a="152154704"
+        id S1727345AbgJHCM4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 7 Oct 2020 22:12:56 -0400
+IronPort-SDR: iCbmh9GzXCOO+PLif5q0kHKPNyJVb7nNh5WmMKychErznAkwsANKRtHXeetcbHk1eAUImp7Gsd
+ e/pVLmHD9LOA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9767"; a="152154717"
 X-IronPort-AV: E=Sophos;i="5.77,349,1596524400"; 
-   d="scan'208";a="152154704"
+   d="scan'208";a="152154717"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Oct 2020 19:12:53 -0700
-IronPort-SDR: +8u5tLhidznlV/PYy90DzgZG8sUR2WkaTwogTL+L2tj4DbD4GQ626dhy8RacSMWHBFUNzFzfjH
- 2MYT8niVjX1Q==
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Oct 2020 19:12:56 -0700
+IronPort-SDR: CVEkUxXk4t4xZt6HtFCn0L+/Kx1c5zZdCcX8gmyGU2guYajpappKm4KW1x/R8qF/q5MgOumg4S
+ E7FGUVuCZ8Zw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.77,349,1596524400"; 
-   d="scan'208";a="355211196"
+   d="scan'208";a="355211218"
 Received: from zulkifl3-ilbpg0.png.intel.com ([10.88.229.114])
-  by orsmga007.jf.intel.com with ESMTP; 07 Oct 2020 19:12:50 -0700
+  by orsmga007.jf.intel.com with ESMTP; 07 Oct 2020 19:12:53 -0700
 From:   muhammad.husaini.zulkifli@intel.com
 To:     adrian.hunter@intel.com, michal.simek@xilinx.com,
         andriy.shevchenko@intel.com, ulf.hansson@linaro.org,
@@ -43,9 +43,9 @@ To:     adrian.hunter@intel.com, michal.simek@xilinx.com,
 Cc:     lakshmi.bai.raja.subramanian@intel.com,
         wan.ahmad.zainie.wan.mohamad@intel.com,
         muhammad.husaini.zulkifli@intel.com, arnd@arndb.de
-Subject: [PATCH v4 2/4] dt-bindings: mmc: Add uhs-gpio for Keem Bay UHS-1 Support
-Date:   Thu,  8 Oct 2020 10:09:34 +0800
-Message-Id: <20201008020936.19894-3-muhammad.husaini.zulkifli@intel.com>
+Subject: [PATCH v4 3/4] mmc: sdhci-of-arasan: Add structure device pointer in probe
+Date:   Thu,  8 Oct 2020 10:09:35 +0800
+Message-Id: <20201008020936.19894-4-muhammad.husaini.zulkifli@intel.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
 References: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
@@ -55,44 +55,26 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 
-Add DT bindings of uhs-gpio for Keem Bay SOC UHS Mode Support
+Add struct device *dev in probe func() so that it can widely use in
+probe to make code more readable.
 
 Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 ---
- Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-index 58fe9d02a781..320566a673f0 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-@@ -83,7 +83,7 @@ properties:
-       - const: intel,keembay-sdhci-5.1-sd       # Intel Keem Bay SD controller
-         description:
-           For this device it is strongly suggested to include
--          arasan,soc-ctl-syscon.
-+          arasan,soc-ctl-syscon and uhs-gpio.
-       - const: intel,keembay-sdhci-5.1-sdio     # Intel Keem Bay SDIO controller
-         description:
-           For this device it is strongly suggested to include
-@@ -152,6 +152,11 @@ properties:
-     description:
-       The MIO bank number in which the command and data lines are configured.
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index f186fbd016b1..46aea6516133 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -1521,6 +1521,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_arasan_data *sdhci_arasan;
+ 	struct device_node *np = pdev->dev.of_node;
++	struct device *dev = &pdev->dev;
+ 	const struct sdhci_arasan_of_data *data;
  
-+  uhs-gpio:
-+    description:
-+      The power mux input will be configure using the GPIO provided
-+      to generate either 1.8v or 3.3v output.
-+
- dependencies:
-   clock-output-names: [ '#clock-cells' ]
-   '#clock-cells': [ clock-output-names ]
-@@ -300,4 +305,5 @@ examples:
-           clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD0>,
-                    <&scmi_clk KEEM_BAY_PSS_SD0>;
-           arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
-+          uhs-gpio = <&pca0 17 0>;
-     };
+ 	match = of_match_node(sdhci_arasan_of_match, pdev->dev.of_node);
 -- 
 2.17.1
 
