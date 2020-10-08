@@ -7,34 +7,34 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CA08C4363D
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:12:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BFA4C433E7
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:12:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D695E207C3
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:12:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE8C72085B
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 02:12:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728000AbgJHCMv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Oct 2020 22:12:51 -0400
+        id S1728062AbgJHCMz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Oct 2020 22:12:55 -0400
 Received: from mga02.intel.com ([134.134.136.20]:31771 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727345AbgJHCMu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 7 Oct 2020 22:12:50 -0400
-IronPort-SDR: CVggJL8xD0YKojGyN7vrQEN9QYDD0aKliuwjKM3PrIVw9OkHbT9Av+8SNftZChGyyELJWnY/9L
- TgD+ebHqD++Q==
-X-IronPort-AV: E=McAfee;i="6000,8403,9767"; a="152154696"
+        id S1727345AbgJHCMy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 7 Oct 2020 22:12:54 -0400
+IronPort-SDR: U/xZOmv43itVUDtR12sIRQSWPD/0yMVupjbzuxChMh7Kazf6ydJSCRZyQyrAnmOcub5rgdzwLn
+ KT789X5Al8OQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9767"; a="152154704"
 X-IronPort-AV: E=Sophos;i="5.77,349,1596524400"; 
-   d="scan'208";a="152154696"
+   d="scan'208";a="152154704"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Oct 2020 19:12:50 -0700
-IronPort-SDR: RI3H4YlVez3FTpUwAKN5Ree7BlzDKmNaSBkf7Qfd9k9NTu646p9CpSVkANAieLYhYCwC820XE5
- N+MHdsGTdQLA==
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Oct 2020 19:12:53 -0700
+IronPort-SDR: +8u5tLhidznlV/PYy90DzgZG8sUR2WkaTwogTL+L2tj4DbD4GQ626dhy8RacSMWHBFUNzFzfjH
+ 2MYT8niVjX1Q==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.77,349,1596524400"; 
-   d="scan'208";a="355211184"
+   d="scan'208";a="355211196"
 Received: from zulkifl3-ilbpg0.png.intel.com ([10.88.229.114])
-  by orsmga007.jf.intel.com with ESMTP; 07 Oct 2020 19:12:47 -0700
+  by orsmga007.jf.intel.com with ESMTP; 07 Oct 2020 19:12:50 -0700
 From:   muhammad.husaini.zulkifli@intel.com
 To:     adrian.hunter@intel.com, michal.simek@xilinx.com,
         andriy.shevchenko@intel.com, ulf.hansson@linaro.org,
@@ -43,9 +43,9 @@ To:     adrian.hunter@intel.com, michal.simek@xilinx.com,
 Cc:     lakshmi.bai.raja.subramanian@intel.com,
         wan.ahmad.zainie.wan.mohamad@intel.com,
         muhammad.husaini.zulkifli@intel.com, arnd@arndb.de
-Subject: [PATCH v4 1/4] firmware: keembay: Add support for Arm Trusted Firmware Service call
-Date:   Thu,  8 Oct 2020 10:09:33 +0800
-Message-Id: <20201008020936.19894-2-muhammad.husaini.zulkifli@intel.com>
+Subject: [PATCH v4 2/4] dt-bindings: mmc: Add uhs-gpio for Keem Bay UHS-1 Support
+Date:   Thu,  8 Oct 2020 10:09:34 +0800
+Message-Id: <20201008020936.19894-3-muhammad.husaini.zulkifli@intel.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
 References: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
@@ -55,68 +55,44 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 
-Add header file to handle API function for device driver to communicate
-with Arm Trusted Firmware.
+Add DT bindings of uhs-gpio for Keem Bay SOC UHS Mode Support
 
 Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
 ---
- .../linux/firmware/intel/keembay_firmware.h   | 47 +++++++++++++++++++
- 1 file changed, 47 insertions(+)
- create mode 100644 include/linux/firmware/intel/keembay_firmware.h
+ Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/firmware/intel/keembay_firmware.h b/include/linux/firmware/intel/keembay_firmware.h
-new file mode 100644
-index 000000000000..8a62abcdfead
---- /dev/null
-+++ b/include/linux/firmware/intel/keembay_firmware.h
-@@ -0,0 +1,47 @@
-+/* SPDX-License-Identifier: GPL-2.0 */
-+/*
-+ *  Intel Keembay SOC Firmware API Layer
-+ *
-+ *  Copyright (C) 2020-2021, Intel Corporation
-+ *
-+ *  Muhammad Husaini Zulkifli <Muhammad.Husaini.Zulkifli@intel.com>
-+ */
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+index 58fe9d02a781..320566a673f0 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+@@ -83,7 +83,7 @@ properties:
+       - const: intel,keembay-sdhci-5.1-sd       # Intel Keem Bay SD controller
+         description:
+           For this device it is strongly suggested to include
+-          arasan,soc-ctl-syscon.
++          arasan,soc-ctl-syscon and uhs-gpio.
+       - const: intel,keembay-sdhci-5.1-sdio     # Intel Keem Bay SDIO controller
+         description:
+           For this device it is strongly suggested to include
+@@ -152,6 +152,11 @@ properties:
+     description:
+       The MIO bank number in which the command and data lines are configured.
+ 
++  uhs-gpio:
++    description:
++      The power mux input will be configure using the GPIO provided
++      to generate either 1.8v or 3.3v output.
 +
-+#ifndef __FIRMWARE_KEEMBAY_SMC_H__
-+#define __FIRMWARE_KEEMBAY_SMC_H__
-+
-+#include <linux/arm-smccc.h>
-+
-+/*
-+ * This file defines API function that can be called by device driver in order to
-+ * communicate with Arm Trusted Firmware.
-+ */
-+
-+/* Setting for Keem Bay IO Pad Line Voltage Selection */
-+#define ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE		\
-+	ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL,		\
-+			   ARM_SMCCC_SMC_32,		\
-+			   ARM_SMCCC_OWNER_SIP,		\
-+			   0xFF26)
-+
-+#define KEEMBAY_SET_1V8_VOLT	1
-+#define KEEMBAY_SET_3V3_VOLT	0
-+
-+#if IS_ENABLED(CONFIG_HAVE_ARM_SMCCC_DISCOVERY)
-+static inline int keembay_sd_voltage_selection(int volt)
-+{
-+	struct arm_smccc_res res;
-+
-+	arm_smccc_1_1_invoke(ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE, volt, &res);
-+	if ((int)res.a0 < 0)
-+		return -EINVAL;
-+
-+	return 0;
-+}
-+#else
-+static inline int keembay_sd_voltage_selection(int volt)
-+{
-+	return -ENODEV;
-+}
-+#endif
-+#endif /* __FIRMWARE_KEEMBAY_SMC_H__ */
+ dependencies:
+   clock-output-names: [ '#clock-cells' ]
+   '#clock-cells': [ clock-output-names ]
+@@ -300,4 +305,5 @@ examples:
+           clocks = <&scmi_clk KEEM_BAY_PSS_AUX_SD0>,
+                    <&scmi_clk KEEM_BAY_PSS_SD0>;
+           arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
++          uhs-gpio = <&pca0 17 0>;
+     };
 -- 
 2.17.1
 
