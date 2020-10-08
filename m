@@ -2,166 +2,202 @@ Return-Path: <SRS0=iGfF=DP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45FBAC43467
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 12:34:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8D5AC04EBE
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 15:13:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C63592083B
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 12:34:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6000F20782
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 15:13:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=intel.onmicrosoft.com header.i=@intel.onmicrosoft.com header.b="bcwmm04E"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="s3+iGaEs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729787AbgJHMe2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Oct 2020 08:34:28 -0400
-Received: from mga14.intel.com ([192.55.52.115]:4131 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729769AbgJHMe2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Oct 2020 08:34:28 -0400
-IronPort-SDR: z9GsF1S6aFz7eMQTfaoIGR0Gz3ERsMzL8FwT60ifkiy0W19A+e6wRm5HrBoxjKuUPyFsLfav9t
- kULoN5dXtIzQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9767"; a="164537479"
-X-IronPort-AV: E=Sophos;i="5.77,350,1596524400"; 
-   d="scan'208";a="164537479"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2020 05:34:26 -0700
-IronPort-SDR: ligmpwV0BagK40ry99Rukkx3+OCh81c9ggIhT5hjGxlacp4ZBVk36gowXOhWlNu0R4dOCwfdcp
- 9cEz7hie/pZQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,350,1596524400"; 
-   d="scan'208";a="312196464"
-Received: from fmsmsx604.amr.corp.intel.com ([10.18.126.84])
-  by orsmga003.jf.intel.com with ESMTP; 08 Oct 2020 05:34:26 -0700
-Received: from fmsmsx603.amr.corp.intel.com (10.18.126.83) by
- fmsmsx604.amr.corp.intel.com (10.18.126.84) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1713.5; Thu, 8 Oct 2020 05:34:25 -0700
-Received: from fmsedg602.ED.cps.intel.com (10.1.192.136) by
- fmsmsx603.amr.corp.intel.com (10.18.126.83) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5
- via Frontend Transport; Thu, 8 Oct 2020 05:34:25 -0700
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (104.47.66.46) by
- edgegateway.intel.com (192.55.55.71) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.1713.5; Thu, 8 Oct 2020 05:34:25 -0700
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=aWmQO8HVOb9gmzj1nyWi0BhVbWizOwCwbCwsycj7BrzJC7llQV4zopp9iEEif2EnZxdoFnhfHY6HGtknykt1d5STtbJ1KH3FRPCtREnU+HCNjTQz1mHigjMhCdvlloEm0yyIIhKUcQ9enAhTCEPtSs6CswQCH4zmQwDZSc5lreQONdOCogudSb/e3ndUbQVJnU6WGnFZtglIAC+Z9jTBvDDVFGE9FAP9rkz6JYb15meUJmOksb408f1xOCVvglHo9ETjp9ib1gGyfwGEfF2R/pcaSJhJtTwS/77s9W7ft8BYUjHGOPSEidgQy2ZaVJq3in03vDD2gbvgrxX3/Hg8Ow==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Tn8OKo4aUkwDGwvB0WequMufuwUOlqEjhyjGP2Wt3Pk=;
- b=XqpGHPFxa4+HZa8EOYuwIQLQSg5LAwKw7AEs8TDn8Ao0PUtmDmDqTvIYqwc7Ye4k+f9W/ICAtgNPmuweyW9NqUw/8o+959WfpKjgKaedDxNY1HgqYUPsAdzZ8Mw07F0jkRjavam/QtqJQLFRa9mqRSEiT2L7s+HSPCFxzFfdcFf8LRf8U6Tiqu+Q1A4sw8QO987I6EQXciRpg9AfkH2e9h7xhT57y9oVDKtWbMmAVwh+eAyxuMZo04Z29AoYgbiNOri8M+hFDrchKSPXojh+2NqGv8+vXW7Z81Z/WHnPqsOqNGwvBl5IOvl2bhVbGwgMmV7QwDE1R42SPY6VJoqjlA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=intel.onmicrosoft.com;
- s=selector2-intel-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Tn8OKo4aUkwDGwvB0WequMufuwUOlqEjhyjGP2Wt3Pk=;
- b=bcwmm04EitiwjAs+QkSj2dVoKZjmGkR23fkgoAMHg3yEzemiMBA2YToH2SL98IV4OCMesZFT9K8JMCCbOK17EVoTJVJ2dgIILCR8wPleFjqFyKguEi7hPtpMDdVWx1l+AQeoIkkFqGBtJojoafckjoSa+aM1DKUTUHgqGwIVV5E=
-Received: from DM6PR11MB2876.namprd11.prod.outlook.com (2603:10b6:5:c1::16) by
- DM6PR11MB2970.namprd11.prod.outlook.com (2603:10b6:5:65::23) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.3455.21; Thu, 8 Oct 2020 12:34:23 +0000
-Received: from DM6PR11MB2876.namprd11.prod.outlook.com
- ([fe80::c85a:d98e:fbf3:9f8c]) by DM6PR11MB2876.namprd11.prod.outlook.com
- ([fe80::c85a:d98e:fbf3:9f8c%5]) with mapi id 15.20.3433.045; Thu, 8 Oct 2020
- 12:34:23 +0000
-From:   "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-To:     Sudeep Holla <sudeep.holla@arm.com>
-CC:     "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "michal.simek@xilinx.com" <michal.simek@xilinx.com>,
-        "Shevchenko, Andriy" <andriy.shevchenko@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "Wan Mohamad, Wan Ahmad Zainie" 
-        <wan.ahmad.zainie.wan.mohamad@intel.com>
-Subject: RE: [PATCH v4 1/4] firmware: keembay: Add support for Arm Trusted
- Firmware Service call
-Thread-Topic: [PATCH v4 1/4] firmware: keembay: Add support for Arm Trusted
- Firmware Service call
-Thread-Index: AQHWnRiLN25HboG/ekeLrjyiLBrMxamNdTCAgAAvMnA=
-Date:   Thu, 8 Oct 2020 12:34:23 +0000
-Message-ID: <DM6PR11MB287670AD449A9B8B12EF9219B80B0@DM6PR11MB2876.namprd11.prod.outlook.com>
-References: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
- <20201008020936.19894-2-muhammad.husaini.zulkifli@intel.com>
- <20201008094501.ix2sdxorwhxchy5w@bogus>
-In-Reply-To: <20201008094501.ix2sdxorwhxchy5w@bogus>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-dlp-version: 11.5.1.3
-dlp-product: dlpe-windows
-dlp-reaction: no-action
-authentication-results: arm.com; dkim=none (message not signed)
- header.d=none;arm.com; dmarc=none action=none header.from=intel.com;
-x-originating-ip: [42.189.177.181]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: cf48d2dc-edff-4c49-fe97-08d86b867cc7
-x-ms-traffictypediagnostic: DM6PR11MB2970:
-x-ld-processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <DM6PR11MB2970FA2A9DC6E1C2863BAFACB80B0@DM6PR11MB2970.namprd11.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: AnLc1jy8mFJRtFJIKrdhoQjeiy9bQ2J9UO0foJ4yj5eEZRn3MTVYhqGjdYQlMnkazgYgNMiRXg0ro63pYvl3uiNBKgHgcKPdwtrwJK+X9Ccg9ZwOAvAZaXVDykZYcmuEhqEc95wiz48NZwHev/DuiphwXiEHpoq8SioVS/xDcA+M+djXxLt/4Xwga8gGpcOuK1tC1bx4Y0yFjGix5BPtpyxxFcQjdubPv662zIMt8y/vcOTr5/Lvfog+HgUslPFFg+Msr2pKv9Wimcgw2gabIe5PSDyDjkX6UT15MS6pHEOVRfAOL5e1DYYx867rYqp6o+e01gULJ32/fal/AImxmQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR11MB2876.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(366004)(346002)(39860400002)(136003)(396003)(66556008)(66446008)(54906003)(186003)(6506007)(26005)(107886003)(64756008)(52536014)(8676002)(7696005)(4326008)(86362001)(9686003)(66476007)(66946007)(83380400001)(316002)(8936002)(5660300002)(478600001)(33656002)(6916009)(55016002)(76116006)(71200400001)(2906002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: CYP4pWh+2EYmNYHK+UXUM70uB1VmlQb2kA0qOkrJebNxIsSNSq8/vaMAl139UAVFVOy25ovdFWlnIZfgmy5phEzcdzE3ifF590zUi9+L6hDhIeQyM3dS6PC764ZgnMb1pdJ7VjT9IL/K03Qao/D/yQuQ+0YdJOZj8b9Z+uDLVXav1zDWz1ChA55VXfeHHbsmrG+vGVtkXIsw5mRWRMCvoQBwNxLvsAAFrKa2/OwsczzmVqqzECXrYCHTUUqx9FaM0xf6hX9Xcz5TACXXq2zTrfws1DrAI4RZfYoVZBjK8wNoaSumXEn1B2HWe9OIrTOjI7NnXSXwCvMSAUDKlQXGVHShv3W4uduPNhdiNBj5aPpYzNTKpd/7Ev7QoVAqE/JwjJwTrFeNgQc/HzZMvZmih1PtOPFQsIC2i06GZAqnWqmAB4/gk/RM7ZURvB0g65RMc8oyPw2uzdaNVgIoBtP5Ac9b4d13QQJoXlnuOjfbKtMs2taVP96U8/0Y/CIsFXzyoIsMm2n6O/FhU53kQ2B/5hMbj8kGiGLHJDd8DmbJe2PLgqeme3A3C9PHoJY2I1TjWqMqOX+3Y4NnEvVi60+Vn0bPq99pLdCZLBHrtWa7d5l+ksKb2dCQqparauvSK2NHefKiZpwTvBFGm8HsucdZiQ==
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S1730943AbgJHPNE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Oct 2020 11:13:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35144 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730950AbgJHPNE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2020 11:13:04 -0400
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBACAC061755
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Oct 2020 08:13:03 -0700 (PDT)
+Received: by mail-vk1-xa44.google.com with SMTP id e5so1399400vkm.2
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2020 08:13:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=wsPwsTl/hAvDoxdVSq6VH5qAHlyEl+VKWN+4G8Q2WOQ=;
+        b=s3+iGaEsVITyDA7YZovcQvYscw4EjPjWOCEJT6rKSq1KDPf+ha55v3LiLzlgk3arv3
+         f1t4gMJ1jg1x8B8c2TjMHfn6n98VLEiDa4W0kR175b3mrUz/3u+jS6Y11ta9gFMmZun4
+         uI/4ljpbnWGXI7aGQCKMOaujD8rnXq4yQTrvenvACQ49VN6X/fwVY+7OUi87dyauylOW
+         JFVG/gaaoLasrA541feJDtIv9X+uS8PXYIUw+MRowHzzA4vrj80/G2Bg+ootk3eJ/jBN
+         JEunId1ia3jNICZ6G9I2rookeL5+xZG7ere0myXr68+Eo1bxrU6rW3a8X3IHaqMzEG33
+         X5lg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=wsPwsTl/hAvDoxdVSq6VH5qAHlyEl+VKWN+4G8Q2WOQ=;
+        b=spd0F+f2AdPC+NywtykKF9+wsibr3+5H4F94m5vvcW9fu3zpWUrS8XYlk4HDv8KXQd
+         tkuzeAOOAlvCwrX/m0aENPVWy+Eggppxew+BL7VYIailXZXfMv5B68oBuUHjfEQ8fpuP
+         Rre+mwGwri7FoxCrhd7Kw1qUUnvNhXy64zIR8GUqvD+AVAS11qD+VW7950iUMQ6ktPp9
+         YOIodusqnSdthMManZss40JIEmwPCz0jAiDXrIwQNRwQI/qbEd9dR/IZ7xtuwFEyRQw/
+         3/VYLN2zW+qHU/frfTbdfuOA6M11hs5HLHunI6h/a3Zt+khhNqRV1sS+CStYfSDAeL10
+         CBqg==
+X-Gm-Message-State: AOAM533Sk3ITu2THyKrf9NSDS2VtkcJvUjt/ILuhDIS2QqTcric+BmyC
+        GEAD/0Ihwh+oB55cqRHwjG02WJfML5znzuyRxQHbjQ==
+X-Google-Smtp-Source: ABdhPJwEjGnJf7ZCkTSVlSm0STvrBQYCiSWeuqvCe29hXNIC4YsoSyZw/x3HwLnhyDvaFcM5tgClpCqZEqy/KFuvln0=
+X-Received: by 2002:a1f:ae85:: with SMTP id x127mr1703271vke.8.1602169983032;
+ Thu, 08 Oct 2020 08:13:03 -0700 (PDT)
 MIME-Version: 1.0
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR11MB2876.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: cf48d2dc-edff-4c49-fe97-08d86b867cc7
-X-MS-Exchange-CrossTenant-originalarrivaltime: 08 Oct 2020 12:34:23.5566
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: mEdCRsPTcip+t+JvhB4awcjbMFjQRgDoGvfUjl5WmivmKGtNoXasD461JLqsK+gEpxuvirhxZZfL3QAbHGczcw4PhqMkw/RnQ1SdngR8foXxvdUwfOSvpvegWxBu9y2s
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR11MB2970
-X-OriginatorOrg: intel.com
+References: <20201008020936.19894-1-muhammad.husaini.zulkifli@intel.com>
+ <20201008020936.19894-5-muhammad.husaini.zulkifli@intel.com>
+ <CAPDyKFpUv8yeVrWVLRKvz4eKsSDdk0y4dKY2mYs07zpA2UqNdw@mail.gmail.com> <35692f1c-62a4-6c71-d67a-2a216e97e7d5@intel.com>
+In-Reply-To: <35692f1c-62a4-6c71-d67a-2a216e97e7d5@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 8 Oct 2020 17:12:26 +0200
+Message-ID: <CAPDyKFqy5jhbRWmcc-rMSzendMnkj2MQ-MQYu+=fVAZufTWbOQ@mail.gmail.com>
+Subject: Re: [PATCH v4 4/4] mmc: sdhci-of-arasan: Enable UHS-1 support for
+ Keem Bay SOC
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     muhammad.husaini.zulkifli@intel.com,
+        Michal Simek <michal.simek@xilinx.com>,
+        andriy.shevchenko@intel.com,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        lakshmi.bai.raja.subramanian@intel.com,
+        Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgU3VkZWVwLA0KDQo+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj5Gcm9tOiBTdWRlZXAg
-SG9sbGEgPHN1ZGVlcC5ob2xsYUBhcm0uY29tPg0KPlNlbnQ6IFRodXJzZGF5LCBPY3RvYmVyIDgs
-IDIwMjAgNTo0NSBQTQ0KPlRvOiBadWxraWZsaSwgTXVoYW1tYWQgSHVzYWluaSA8bXVoYW1tYWQu
-aHVzYWluaS56dWxraWZsaUBpbnRlbC5jb20+DQo+Q2M6IEh1bnRlciwgQWRyaWFuIDxhZHJpYW4u
-aHVudGVyQGludGVsLmNvbT47IG1pY2hhbC5zaW1la0B4aWxpbnguY29tOw0KPlNoZXZjaGVua28s
-IEFuZHJpeSA8YW5kcml5LnNoZXZjaGVua29AaW50ZWwuY29tPjsgdWxmLmhhbnNzb25AbGluYXJv
-Lm9yZzsNCj5saW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1hcm0ta2VybmVsQGxpc3Rz
-LmluZnJhZGVhZC5vcmc7IGxpbnV4LQ0KPmtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc7IFJhamEgU3Vi
-cmFtYW5pYW4sIExha3NobWkgQmFpDQo+PGxha3NobWkuYmFpLnJhamEuc3VicmFtYW5pYW5AaW50
-ZWwuY29tPjsgYXJuZEBhcm5kYi5kZTsgV2FuIE1vaGFtYWQsDQo+V2FuIEFobWFkIFphaW5pZSA8
-d2FuLmFobWFkLnphaW5pZS53YW4ubW9oYW1hZEBpbnRlbC5jb20+DQo+U3ViamVjdDogUmU6IFtQ
-QVRDSCB2NCAxLzRdIGZpcm13YXJlOiBrZWVtYmF5OiBBZGQgc3VwcG9ydCBmb3IgQXJtIFRydXN0
-ZWQNCj5GaXJtd2FyZSBTZXJ2aWNlIGNhbGwNCj4NCj5PbiBUaHUsIE9jdCAwOCwgMjAyMCBhdCAx
-MDowOTozM0FNICswODAwLA0KPm11aGFtbWFkLmh1c2FpbmkuenVsa2lmbGlAaW50ZWwuY29tIHdy
-b3RlOg0KPj4gRnJvbTogTXVoYW1tYWQgSHVzYWluaSBadWxraWZsaSA8bXVoYW1tYWQuaHVzYWlu
-aS56dWxraWZsaUBpbnRlbC5jb20+DQo+Pg0KPj4gQWRkIGhlYWRlciBmaWxlIHRvIGhhbmRsZSBB
-UEkgZnVuY3Rpb24gZm9yIGRldmljZSBkcml2ZXIgdG8NCj4+IGNvbW11bmljYXRlIHdpdGggQXJt
-IFRydXN0ZWQgRmlybXdhcmUuDQo+DQo+W25pdF0gU2luY2UgaXQgbW92ZWQgdG8gdHJ1c3RlZC1m
-aXJtd2FyZS5vcmcsIGl0IGlzIG5vIGxvbmdlciAiQXJtIg0KPlRydXN0ZWQgRmlybXdhcmUuIEl0
-IGlzIG5vdyBjYWxsZWQgVHJ1c3RlZCBGaXJtd2FyZSAtIEEgcHJvZmlsZShURi1BKSBvcg0KPlRy
-dXN0ZWQgRmlybXdhcmUgLSBNIHByb2ZpbGUgKFRGLU0pLiBQbGVhc2UgdXBkYXRlIHRoZSBzdWJq
-ZWN0IGFuZCB0aGUgdGV4dA0KPmFib3ZlLiBJIGtub3cgaXQgaXMgc2lsbHkgYnV0IEkgYW0gYmVp
-bmcgYXNrZWQgdG8gZ2V0IHRoaXMgZml4ZWQgYXMgaXQgbWF5IGNyZWF0ZQ0KPiJjb25mdXNpb24i
-KEkgZG9uJ3Qga25vdyBkZXRhaWxzLCBwbGVhc2UgZG9uJ3QgYXNrIPCfmIEpDQo+DQo+QXBhcnQg
-ZnJvbSB2YXJpb3VzIG1pbm9yIHRoaW5ncyBBbmR5IGFscmVhZHkgcG9pbnRlZCBvdXQsIHRoaXMg
-bG9va3MgZ29vZC4NCj5Zb3UgY2FuIGFkZCBieSBBY2sgb25jZSB0aGUgYWJvdmUgbmFtaW5nIGFu
-ZCBhbGwgdGhpbmdzIHBvaW50ZWQgYnkgQW5keSBhcmUNCj5maXhlZC4NCg0KTm90ZWQuIFRoYW5r
-cyBTdWRlZXAg8J+Yig0KPg0KPi0tDQo+UmVnYXJkcywNCj5TdWRlZXANCg==
+On Thu, 8 Oct 2020 at 12:58, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 8/10/20 12:27 pm, Ulf Hansson wrote:
+> > On Thu, 8 Oct 2020 at 04:12, <muhammad.husaini.zulkifli@intel.com> wrote:
+> >>
+> >> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+> >>
+> >> Voltage switching sequence is needed to support UHS-1 interface.
+> >> There are 2 places to control the voltage.
+> >> 1) By setting the AON register using firmware driver calling
+> >> system-level platform management layer (SMC) to set the register.
+> >> 2) By controlling the GPIO expander value to drive either 1.8V or 3.3V
+> >> for power mux input.
+> >>
+> >> Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+> >> Reviewed-by: Andy Shevchenko <andriy.shevchenko@intel.com>
+> >> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci-of-arasan.c | 126 +++++++++++++++++++++++++++++
+> >>  1 file changed, 126 insertions(+)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> >> index 46aea6516133..ea2467b0073d 100644
+> >> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> >> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> >> @@ -16,6 +16,7 @@
+> >>   */
+> >>
+> >>  #include <linux/clk-provider.h>
+> >> +#include <linux/gpio/consumer.h>
+> >>  #include <linux/mfd/syscon.h>
+> >>  #include <linux/module.h>
+> >>  #include <linux/of_device.h>
+> >> @@ -23,6 +24,7 @@
+> >>  #include <linux/regmap.h>
+> >>  #include <linux/of.h>
+> >>  #include <linux/firmware/xlnx-zynqmp.h>
+> >> +#include <linux/firmware/intel/keembay_firmware.h>
+> >>
+> >>  #include "cqhci.h"
+> >>  #include "sdhci-pltfm.h"
+> >> @@ -136,6 +138,7 @@ struct sdhci_arasan_clk_data {
+> >>   * @soc_ctl_base:      Pointer to regmap for syscon for soc_ctl registers.
+> >>   * @soc_ctl_map:       Map to get offsets into soc_ctl registers.
+> >>   * @quirks:            Arasan deviations from spec.
+> >> + * @uhs_gpio:          Pointer to the uhs gpio.
+> >>   */
+> >>  struct sdhci_arasan_data {
+> >>         struct sdhci_host *host;
+> >> @@ -150,6 +153,7 @@ struct sdhci_arasan_data {
+> >>         struct regmap   *soc_ctl_base;
+> >>         const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+> >>         unsigned int    quirks;
+> >> +       struct gpio_desc *uhs_gpio;
+> >>
+> >>  /* Controller does not have CD wired and will not function normally without */
+> >>  #define SDHCI_ARASAN_QUIRK_FORCE_CDTEST        BIT(0)
+> >> @@ -361,6 +365,112 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
+> >>         return -EINVAL;
+> >>  }
+> >>
+> >> +static int sdhci_arasan_keembay_voltage_switch(struct mmc_host *mmc,
+> >> +                                      struct mmc_ios *ios)
+> >> +{
+> >> +       struct sdhci_host *host = mmc_priv(mmc);
+> >> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >> +       struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+> >> +       u16 ctrl_2, clk;
+> >> +       int ret;
+> >> +
+> >> +       switch (ios->signal_voltage) {
+> >> +       case MMC_SIGNAL_VOLTAGE_180:
+> >> +               clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> >> +               clk &= ~SDHCI_CLOCK_CARD_EN;
+> >> +               sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> >> +
+> >> +               clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> >> +               if (clk & SDHCI_CLOCK_CARD_EN)
+> >> +                       return -EAGAIN;
+> >> +
+> >> +               sdhci_writeb(host, SDHCI_POWER_ON | SDHCI_POWER_180,
+> >> +                                  SDHCI_POWER_CONTROL);
+> >> +
+> >> +               /*
+> >> +                * Set VDDIO_B voltage to Low for 1.8V
+> >> +                * which is controlling by GPIO Expander.
+> >> +                */
+> >> +               gpiod_set_value_cansleep(sdhci_arasan->uhs_gpio, 0);
+> >> +
+> >> +               /*
+> >> +                * This is like a final gatekeeper. Need to ensure changed voltage
+> >> +                * is settled before and after turn on this bit.
+> >> +                */
+> >> +               usleep_range(1000, 1100);
+> >> +
+> >> +               ret = keembay_sd_voltage_selection(KEEMBAY_SET_1V8_VOLT);
+> >> +               if (ret)
+> >> +                       return ret;
+> >> +
+> >> +               usleep_range(1000, 1100);
+> >
+> > No, sorry, but I don't like this.
+> >
+> > This looks like a GPIO regulator with an extension of using the
+> > keembay_sd_voltage_selection() thingy. I think you can model these
+> > things behind a regulator and hook it up as a vqmmc supply in DT
+> > instead. BTW, this is the common way we deal with these things for mmc
+> > host drivers.
+>
+> It seemed to me that would just result in calling regulator API instead of
+> GPIO API but the flow above would otherwise be unchanged i.e. no benefit
+>
+
+To me, the benefit is about avoiding platform specific code in drivers
+- but also about consistency. For I/O signal voltage, the common
+method here, is to model this as a GPIO regulator. This means we can
+use these available helpers from the core:
+
+mmc_regulator_set_vqmmc()
+mmc_regulator_get_supply()
+
+Kind regards
+Uffe
