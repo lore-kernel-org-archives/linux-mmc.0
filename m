@@ -2,82 +2,65 @@ Return-Path: <SRS0=zmAv=DQ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BE8DC433E7
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Oct 2020 13:05:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F11A8C433DF
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Oct 2020 17:12:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3437622248
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Oct 2020 13:05:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A312E2226B
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Oct 2020 17:12:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1602263566;
+	bh=wqVRVHfVBx8as7yckw4Vsnz7oI5aWIDQMZ5+lxCq2Is=;
+	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
+	b=z2UfMuwcb4EIQIiU9CsGpXvtxx/FOOMmM9Y3R9kpCyNbScxURfAEIdP+sgp8Z2Gdy
+	 ldMdZ0llu8Gu9StVPMdVq02EBFByhAyCzy2rlDx/TPLW9VBLfxb7sW6CGDx9z2Yajq
+	 ohuqaSjvJqexoO3/TF1ClRE8C5lUpWoOQoR+gjFw=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388089AbgJINFh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Oct 2020 09:05:37 -0400
-Received: from mga17.intel.com ([192.55.52.151]:62871 "EHLO mga17.intel.com"
+        id S2389952AbgJIRMq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Oct 2020 13:12:46 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51128 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732468AbgJINFh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Oct 2020 09:05:37 -0400
-IronPort-SDR: XkOFjyLQN8NM+QQ4chjYDo3FuGLdsVAPgTlO3E1qDiYshX45/M8jxmYoJsMkCPx4vYF2I/lMn3
- jo5aRg2HBamw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9768"; a="145345673"
-X-IronPort-AV: E=Sophos;i="5.77,355,1596524400"; 
-   d="scan'208";a="145345673"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2020 06:05:37 -0700
-IronPort-SDR: zVJQaCc7NA/YeA6y7T0hCEToccYWtFdUjFmmxuOBQKfVpiXlrIlo6tpUsTyeLhZl3G2Px8Ev9P
- mFCkISKUAbYA==
-X-IronPort-AV: E=Sophos;i="5.77,355,1596524400"; 
-   d="scan'208";a="317025050"
-Received: from smile.fi.intel.com (HELO smile) ([10.237.68.40])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Oct 2020 06:05:34 -0700
-Received: from andy by smile with local (Exim 4.94)
-        (envelope-from <andriy.shevchenko@intel.com>)
-        id 1kQs6X-002cS3-1G; Fri, 09 Oct 2020 16:06:37 +0300
-Date:   Fri, 9 Oct 2020 16:06:37 +0300
-From:   Andy Shevchenko <andriy.shevchenko@intel.com>
-To:     muhammad.husaini.zulkifli@intel.com
-Cc:     adrian.hunter@intel.com, michal.simek@xilinx.com,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        lakshmi.bai.raja.subramanian@intel.com,
-        wan.ahmad.zainie.wan.mohamad@intel.com, arnd@arndb.de
-Subject: Re: [PATCH v5 0/4] mmc: sdhci-of-arasan: Enable UHS-1 support for
- Keem Bay SOC
-Message-ID: <20201009130637.GE4077@smile.fi.intel.com>
-References: <20201008181844.27947-1-muhammad.husaini.zulkifli@intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201008181844.27947-1-muhammad.husaini.zulkifli@intel.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+        id S2389944AbgJIRMn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Oct 2020 13:12:43 -0400
+Subject: Re: [GIT PULL] MMC fixes for v5.9-rc9 (final)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1602263563;
+        bh=wqVRVHfVBx8as7yckw4Vsnz7oI5aWIDQMZ5+lxCq2Is=;
+        h=From:In-Reply-To:References:Date:To:Cc:From;
+        b=qiVbiCajvLKS0DIRD+7Vyn2UpZqkLlTuD2v23WyA7tzXd/Qe5R2353OplwF1BvB4x
+         FsEszA4LuQ+K7PUWYs4VHSpgWm/LnWaZFvDCtJLje9B6Zt+GVaxRBAm3sE4zZYpcXH
+         w0ZiJmg05Hc2ILjP0uapBucY/KaTLJAmJUAoIdyY=
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20201009064600.335065-1-ulf.hansson@linaro.org>
+References: <20201009064600.335065-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20201009064600.335065-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.9-rc4-4
+X-PR-Tracked-Commit-Id: 4243219141b67d7c2fdb2d8073c17c539b9263eb
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: f318052ef2f07da2cd0c535d0d2900d5080a47e1
+Message-Id: <160226356339.20000.13693655619234458614.pr-tracker-bot@kernel.org>
+Date:   Fri, 09 Oct 2020 17:12:43 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 09, 2020 at 02:18:40AM +0800, muhammad.husaini.zulkifli@intel.com wrote:
-> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-> 
-> Hi.
-> 
-> The first patch is the header file to handle ATF call.
-> 
-> The second patch is DT binding for arasan controller for uhs support.
-> 
-> The third patch is to introduce the structure device pointer in arasan controller probe.
-> 
-> The fourth patch is to enable UHS-1 Support for Keem Bay EVM.
-> 
-> All of these patches was tested with Keem Bay evaluation module board.
-> 
-> Kindly help to review this patch set.
+The pull request you sent on Fri,  9 Oct 2020 08:46:00 +0200:
 
-It seems that this is no go for Ulf until you switch to vqmmc GPIO regulators.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.9-rc4-4
+
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/f318052ef2f07da2cd0c535d0d2900d5080a47e1
+
+Thank you!
 
 -- 
-With Best Regards,
-Andy Shevchenko
-
-
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
