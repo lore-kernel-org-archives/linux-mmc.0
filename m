@@ -1,117 +1,161 @@
-Return-Path: <SRS0=iGfF=DP=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=zmAv=DQ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88B94C433E7
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 20:40:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E8CFC433E7
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Oct 2020 06:29:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 170B521D7D
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Oct 2020 20:40:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D72122255
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Oct 2020 06:29:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="pHBHNWDQ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="tU0Jj/Mp"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727026AbgJHUkx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Oct 2020 16:40:53 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:53716 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726022AbgJHUkx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Oct 2020 16:40:53 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 098Kdfkl057454;
-        Thu, 8 Oct 2020 20:40:30 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=to : cc : subject :
- from : message-id : references : date : in-reply-to : mime-version :
- content-type; s=corp-2020-01-29;
- bh=wpJwDablKFFDfkEM7eTe80cS7DPSS3zt2y0g1uxH/c0=;
- b=pHBHNWDQiXPkCjzVDbq5ZOdeHmqPVoVjcnCxLE0pMvEKptiDiGX7lTYaIdtr/3olS6yi
- YfCLR7xfuiwWA7e3lyL+p6m0VHuO9yaD6jO3uMcFZPFiAX78l2l3Y2JyCllq/S6UjAGG
- Xl0K7me6rfX+cIknnni3FKElw5CgE+k1JNnRvAEnkS0ZDMa492wXz+AXMQ+9r+mIbkQv
- jAvQfCXOLA8wcMpgbgDJZ8MWubJy2aaPHQzm9bv0oZqRQOATa9pYtR40KY0XlfNnd0iS
- x5h6/xPm4em9FFlqOQb8ZFBB4faRxnYyiWWFaToE8ftabG4pwUYDPKvBQT7+ASWjDOX9 Mw== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by userp2120.oracle.com with ESMTP id 3429jmg5ab-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Thu, 08 Oct 2020 20:40:30 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 098KYtwb087014;
-        Thu, 8 Oct 2020 20:40:30 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by aserp3020.oracle.com with ESMTP id 3429kagsre-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Thu, 08 Oct 2020 20:40:29 +0000
-Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 098KeMso009103;
-        Thu, 8 Oct 2020 20:40:22 GMT
-Received: from ca-mkp.ca.oracle.com (/10.159.214.123)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Thu, 08 Oct 2020 13:40:21 -0700
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Naresh Kamboju <naresh.kamboju@linaro.org>,
-        dm-devel@redhat.com, open list <linux-kernel@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        drbd-dev@tron.linbit.com,
-        "open list:LIBATA SUBSYSTEM (Serial and Parallel ATA drivers)" 
-        <linux-ide@vger.kernel.org>, linux-raid@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Next Mailing List <linux-next@vger.kernel.org>,
-        lkft-triage@lists.linaro.org, Song Liu <song@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Stephen Rothwell <sfr@canb.auug.org.au>,
-        martin.petersen@oracle.com, Hannes Reinecke <hare@suse.de>
-Subject: Re: [ Regressions ] linux next 20201008: blk_update_request: I/O
- error, dev sda, sector 0 op 0x1:(WRITE) flags 0x800 phys_seg 0 prio class
- 0
-From:   "Martin K. Petersen" <martin.petersen@oracle.com>
-Organization: Oracle Corporation
-Message-ID: <yq1zh4w1mrq.fsf@ca-mkp.ca.oracle.com>
-References: <CA+G9fYtwisRJtN4ht=ApeWc1jWssDok-7y2wee6Z0kzMP-atKg@mail.gmail.com>
-        <CA+G9fYseTYRWoHUNZ=j4mjFs9dDJ-KOD8hDy+RnyDPx75HcVWw@mail.gmail.com>
-        <24c8ee4d-d5f7-e49f-cd0c-7cf50a5fd885@kernel.dk>
-        <20201008203058.GA27821@lst.de>
-Date:   Thu, 08 Oct 2020 16:40:18 -0400
-In-Reply-To: <20201008203058.GA27821@lst.de> (Christoph Hellwig's message of
-        "Thu, 8 Oct 2020 22:30:58 +0200")
+        id S1726501AbgJIG30 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Oct 2020 02:29:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35470 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731012AbgJIG30 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Oct 2020 02:29:26 -0400
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BA8FC0613D4
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Oct 2020 23:29:26 -0700 (PDT)
+Received: by mail-vk1-xa44.google.com with SMTP id z10so1904169vkn.0
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Oct 2020 23:29:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=29TPjXHq/BNLabnsJW1LaxXDiuG1x9tYewU9pgUGQT8=;
+        b=tU0Jj/MpM4lhRIpYC1RoltT97ueOKcw7JWL+loQCcDXb63XC+Z/78WcXODBBv4Gvlj
+         6nh4DWjTmeBV0P4SKBeUla0Q88NfJQg1PSP7KDZgQNcMDViwnDrf5WhG2+KmRz/OVcQC
+         KV6o4yJOr6OCbAzQxXlglR5WxOCXkTNeSx8Rb76wQv6NXS5kuWga4lvHyk8qogRpRqT3
+         DpC7NMcQtcMDMh5sarPw0p2UG1wxzXuLWMJk1sD56L1ZOgNA1+txN0lU1w7TqnG4wHYQ
+         nqNAPzSm/tbUVjRb2sqlOHEAEJwZlMH8IXrC2uhoQFqlolDwMoeablnCy5g8NEKBCKyE
+         LnYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=29TPjXHq/BNLabnsJW1LaxXDiuG1x9tYewU9pgUGQT8=;
+        b=H2MqT7MUCOfLzU4e+Etnezdxn7SHlFtBTygQzIlzZWIZjbZhAGf9+44cRGEly3X9Yk
+         0ty3lWBPhL3t4JT0+9R2oH5pJzQoQdkfVLNgSSfWJGuQE7ErgnmreuNiAs+9Wn17zhEd
+         14gU7K+3JKX0Vy2Q5jOGK6uoC+7zVhzXvjzfyRK88CwHI/36HY+cUdPRqyuzEkY3NGVW
+         U0y4/jgHGyvZGi8KRWUbUcWkanjHn//5yyc14FPrcToBiY+Gea74/N9e3sclpvNQKYnM
+         zyhiPKAnA8riNaPw0i7L1UVBrSj7J5jyhPntz6N1epfeRt+qCfPAtcN/0bofGXQZV/I1
+         eLKg==
+X-Gm-Message-State: AOAM5306FQZFHaUW8URgZCcoRJkcR2HwNY3mGOQZ9CdnloRRHfOxZ5OV
+        Rf3gs3z5dAXYLfHi3FE1VaHlRL/r3yNAm3BHMV32XA==
+X-Google-Smtp-Source: ABdhPJz4n+U9vseqM4gSLaEt+c3jl3buZB4FQyIUsFMpR8FQOqAC7YdrEYODHprc5waifmsL8d13qRiLVsjacE3ee3I=
+X-Received: by 2002:a1f:1c2:: with SMTP id 185mr6748118vkb.15.1602224965129;
+ Thu, 08 Oct 2020 23:29:25 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9768 signatures=668681
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=1 adultscore=0
- phishscore=0 spamscore=0 mlxscore=0 malwarescore=0 bulkscore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2010080145
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9768 signatures=668681
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 spamscore=0 suspectscore=1
- clxscore=1011 phishscore=0 lowpriorityscore=0 impostorscore=0
- malwarescore=0 mlxlogscore=999 priorityscore=1501 mlxscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2010080146
+References: <20201002013852.51968-1-colyli@suse.de>
+In-Reply-To: <20201002013852.51968-1-colyli@suse.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 9 Oct 2020 08:28:47 +0200
+Message-ID: <CAPDyKFokxaKxaDqip-ZTxBSAZ_EK=9EjuWQUw+1nwoPmoP88Zw@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc: core: don't set limits.discard_granularity as 0
+To:     Coly Li <colyli@suse.de>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Vicente Bergas <vicencb@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-Christoph,
-
-> On Thu, Oct 08, 2020 at 02:17:41PM -0600, Jens Axboe wrote:
->> Just for everyones edification, that would be these 9 patches from the
->> SCSI tree:
+On Fri, 2 Oct 2020 at 03:39, Coly Li <colyli@suse.de> wrote:
 >
-> I sent the fixes out a bit ago and Cced the reporters..
+> In mmc_queue_setup_discard() the mmc driver queue's discard_granularity
+> might be set as 0 (when card->pref_erase > max_discard) while the mmc
+> device still declares to support discard operation. This is buggy and
+> triggered the following kernel warning message,
+>
+> WARNING: CPU: 0 PID: 135 at __blkdev_issue_discard+0x200/0x294
+> CPU: 0 PID: 135 Comm: f2fs_discard-17 Not tainted 5.9.0-rc6 #1
+> Hardware name: Google Kevin (DT)
+> pstate: 00000005 (nzcv daif -PAN -UAO BTYPE=3D--)
+> pc : __blkdev_issue_discard+0x200/0x294
+> lr : __blkdev_issue_discard+0x54/0x294
+> sp : ffff800011dd3b10
+> x29: ffff800011dd3b10 x28: 0000000000000000 x27: ffff800011dd3cc4 x26: ff=
+ff800011dd3e18 x25: 000000000004e69b x24: 0000000000000c40 x23: ffff0000f1d=
+eaaf0 x22: ffff0000f2849200 x21: 00000000002734d8 x20: 0000000000000008 x19=
+: 0000000000000000 x18: 0000000000000000 x17: 0000000000000000 x16: 0000000=
+000000000 x15: 0000000000000000 x14: 0000000000000394 x13: 0000000000000000=
+ x12: 0000000000000000 x11: 0000000000000000 x10: 00000000000008b0 x9 : fff=
+f800011dd3cb0 x8 : 000000000004e69b x7 : 0000000000000000 x6 : ffff0000f192=
+6400 x5 : ffff0000f1940800 x4 : 0000000000000000 x3 : 0000000000000c40 x2 :=
+ 0000000000000008 x1 : 00000000002734d8 x0 : 0000000000000000 Call trace:
+> __blkdev_issue_discard+0x200/0x294
+> __submit_discard_cmd+0x128/0x374
+> __issue_discard_cmd_orderly+0x188/0x244
+> __issue_discard_cmd+0x2e8/0x33c
+> issue_discard_thread+0xe8/0x2f0
+> kthread+0x11c/0x120
+> ret_from_fork+0x10/0x1c
+> ---[ end trace e4c8023d33dfe77a ]---
+>
+> This patch fixes the issue by setting discard_granularity as SECTOR_SIZE
+> instead of 0 when (card->pref_erase > max_discard) is true. Now no more
+> complain from __blkdev_issue_discard() for the improper value of discard
+> granularity.
+>
+> This issue is exposed after commit b35fd7422c2f ("block: check queue's
+> limits.discard_granularity in __blkdev_issue_discard()"), a "Fixes:" tag
+> is also added for the commit to make sure people won't miss this patch
+> after applying the change of __blkdev_issue_discard().
+>
+> Fixes: e056a1b5b67b ("mmc: queue: let host controllers specify maximum di=
+scard timeout")
+> Fixes: b35fd7422c2f ("block: check queue's limits.discard_granularity in =
+__blkdev_issue_discard()").
+> Reported-and-tested-by: Vicente Bergas <vicencb@gmail.com>
+> Signed-off-by: Coly Li <colyli@suse.de>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
 
-I do not have any libata-connected devices in the SCSI test setup so
-things worked fine for me yesterday. I have a retired Nehalem server in
-the rack which has a couple of ATA 500GB disk drives in it. I'll try to
-see if I can add that to my test pool. Just for good measure.
+While waiting for a new version that uses the logical block size, I
+instead decided to apply this for fixes as is, thanks!
 
-In any case the fixes are now in my for-next branch:
+Please base the new version on top of this one instead.
 
-b6ba9b0e201a scsi: core: Set sc_data_direction to DMA_NONE for no-transfer commands
-9120ac54cce6 scsi: sr: Initialize ->cmd_len
+Kind regards
+Uffe
 
--- 
-Martin K. Petersen	Oracle Linux Engineering
+
+> ---
+> Changelog,
+> v4, update to Reported-and-tested-by tag for Vicente Bergas.
+> v3, add Fixes tag for both commits.
+> v2, change commit id of the Fixes tag.
+> v1, initial version.
+>
+>  drivers/mmc/core/queue.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 6c022ef0f84d..350d0cc4ee62 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -190,7 +190,7 @@ static void mmc_queue_setup_discard(struct request_qu=
+eue *q,
+>         q->limits.discard_granularity =3D card->pref_erase << 9;
+>         /* granularity must not be greater than max. discard */
+>         if (card->pref_erase > max_discard)
+> -               q->limits.discard_granularity =3D 0;
+> +               q->limits.discard_granularity =3D SECTOR_SIZE;
+>         if (mmc_can_secure_erase_trim(card))
+>                 blk_queue_flag_set(QUEUE_FLAG_SECERASE, q);
+>  }
+> --
+> 2.26.2
+>
