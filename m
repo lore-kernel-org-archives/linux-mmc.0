@@ -2,139 +2,185 @@ Return-Path: <SRS0=X1f/=DR=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24DD2C433E7
-	for <linux-mmc@archiver.kernel.org>; Sat, 10 Oct 2020 04:49:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 998A2C433E7
+	for <linux-mmc@archiver.kernel.org>; Sat, 10 Oct 2020 10:06:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E50B32072D
-	for <linux-mmc@archiver.kernel.org>; Sat, 10 Oct 2020 04:49:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABEFB21655
+	for <linux-mmc@archiver.kernel.org>; Sat, 10 Oct 2020 10:06:34 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="TMP0Xzqg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729592AbgJJEqq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 10 Oct 2020 00:46:46 -0400
-Received: from out01.mta.xmission.com ([166.70.13.231]:59176 "EHLO
-        out01.mta.xmission.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726886AbgJJEn7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Oct 2020 00:43:59 -0400
-X-Greylist: delayed 3548 seconds by postgrey-1.27 at vger.kernel.org; Sat, 10 Oct 2020 00:43:28 EDT
-Received: from in02.mta.xmission.com ([166.70.13.52])
-        by out01.mta.xmission.com with esmtps  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-        (Exim 4.93)
-        (envelope-from <ebiederm@xmission.com>)
-        id 1kR5ma-003qSe-1R; Fri, 09 Oct 2020 21:42:56 -0600
-Received: from ip68-227-160-95.om.om.cox.net ([68.227.160.95] helo=x220.xmission.com)
-        by in02.mta.xmission.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.87)
-        (envelope-from <ebiederm@xmission.com>)
-        id 1kR5mZ-0002tO-03; Fri, 09 Oct 2020 21:42:55 -0600
-From:   ebiederm@xmission.com (Eric W. Biederman)
-To:     ira.weiny@intel.com
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
-        Andy Lutomirski <luto@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>, x86@kernel.org,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Fenghua Yu <fenghua.yu@intel.com>, linux-doc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-nvdimm@lists.01.org,
-        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
-        linux-kselftest@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        kvm@vger.kernel.org, netdev@vger.kernel.org, bpf@vger.kernel.org,
-        kexec@lists.infradead.org, linux-bcache@vger.kernel.org,
-        linux-mtd@lists.infradead.org, devel@driverdev.osuosl.org,
-        linux-efi@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, target-devel@vger.kernel.org,
-        linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
-        linux-ext4@vger.kernel.org, linux-aio@kvack.org,
-        io-uring@vger.kernel.org, linux-erofs@lists.ozlabs.org,
-        linux-um@lists.infradead.org, linux-ntfs-dev@lists.sourceforge.net,
-        reiserfs-devel@vger.kernel.org,
-        linux-f2fs-devel@lists.sourceforge.net,
-        linux-nilfs@vger.kernel.org, cluster-devel@redhat.com,
-        ecryptfs@vger.kernel.org, linux-cifs@vger.kernel.org,
-        linux-btrfs@vger.kernel.org, linux-afs@lists.infradead.org,
-        linux-rdma@vger.kernel.org, amd-gfx@lists.freedesktop.org,
-        dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
-        drbd-dev@lists.linbit.com, linux-block@vger.kernel.org,
-        xen-devel@lists.xenproject.org, linux-cachefs@redhat.com,
-        samba-technical@lists.samba.org, intel-wired-lan@lists.osuosl.org
-References: <20201009195033.3208459-1-ira.weiny@intel.com>
-        <20201009195033.3208459-52-ira.weiny@intel.com>
-Date:   Fri, 09 Oct 2020 22:43:15 -0500
-In-Reply-To: <20201009195033.3208459-52-ira.weiny@intel.com> (ira weiny's
-        message of "Fri, 9 Oct 2020 12:50:26 -0700")
-Message-ID: <87k0vysq3w.fsf@x220.int.ebiederm.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        id S1726461AbgJJKFn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 10 Oct 2020 06:05:43 -0400
+Received: from Mailgw01.mediatek.com ([1.203.163.78]:31154 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726720AbgJJJva (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Oct 2020 05:51:30 -0400
+X-UUID: 57ab3f1bf93346f1a6dffb2710ec11ac-20201010
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=H+ln7qIH6WhzfS8WeSevzwzddMMkN7urwrkqmKBrJkk=;
+        b=TMP0Xzqg0/AlemBSuJbg5oKE+XfYCJoLmsNfSo+jgOzTpRQQwdADzJwvVzI5vUU/BNmlkuMmT2Zov6Z/thCmhCmCm1cafqEZktorabDhtHuC80/Kd3+yFTAigynxbwcztn+ZgEcSOUDxCG+bx4AiOHgZj6wuoG34NGZZ37sON3k=;
+X-UUID: 57ab3f1bf93346f1a6dffb2710ec11ac-20201010
+Received: from mtkcas35.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 1974926838; Sat, 10 Oct 2020 17:18:20 +0800
+Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31N2.mediatek.inc
+ (172.27.4.87) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Sat, 10 Oct
+ 2020 17:18:18 +0800
+Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
+ (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Sat, 10 Oct 2020 17:18:18 +0800
+Message-ID: <1602321500.11947.6.camel@mhfsdcap03>
+Subject: Re: [PATCH v3 4/4] mmc: mediatek: Add subsys clock control for
+ MT8192 msdc
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Nicolas Boichat <drinkcat@chromium.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        <linux-mmc@vger.kernel.org>,
+        Devicetree List <devicetree@vger.kernel.org>,
+        linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        lkml <linux-kernel@vger.kernel.org>,
+        srv_heupstream <srv_heupstream@mediatek.com>
+Date:   Sat, 10 Oct 2020 17:18:20 +0800
+In-Reply-To: <CANMq1KCQ9x1kgME3dAQmGzjUoqkNLuWGS4dG07qhNKQ3N=o_dw@mail.gmail.com>
+References: <20200930083120.11971-1-wenbin.mei@mediatek.com>
+         <20200930083120.11971-5-wenbin.mei@mediatek.com>
+         <CANMq1KCQ9x1kgME3dAQmGzjUoqkNLuWGS4dG07qhNKQ3N=o_dw@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.10.4-0ubuntu2 
 MIME-Version: 1.0
-Content-Type: text/plain
-X-XM-SPF: eid=1kR5mZ-0002tO-03;;;mid=<87k0vysq3w.fsf@x220.int.ebiederm.org>;;;hst=in02.mta.xmission.com;;;ip=68.227.160.95;;;frm=ebiederm@xmission.com;;;spf=neutral
-X-XM-AID: U2FsdGVkX1+M6Nwc1eevosTTnX6IxBw6BnHTGm05YjI=
-X-SA-Exim-Connect-IP: 68.227.160.95
-X-SA-Exim-Mail-From: ebiederm@xmission.com
-Subject: Re: [PATCH RFC PKS/PMEM 51/58] kernel: Utilize new kmap_thread()
-X-SA-Exim-Version: 4.2.1 (built Thu, 05 May 2016 13:38:54 -0600)
-X-SA-Exim-Scanned: Yes (on in02.mta.xmission.com)
+X-TM-SNTS-SMTP: 28E61ED4929A78886AAEC66E902D7BDF49F75B5965520A77CC1E21997464EA852000:8
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-ira.weiny@intel.com writes:
+T24gVGh1LCAyMDIwLTEwLTAxIGF0IDE0OjE0ICswODAwLCBOaWNvbGFzIEJvaWNoYXQgd3JvdGU6
+DQo+IE9uIFdlZCwgU2VwIDMwLCAyMDIwIGF0IDQ6MzEgUE0gV2VuYmluIE1laSA8d2VuYmluLm1l
+aUBtZWRpYXRlay5jb20+IHdyb3RlOg0KPiA+DQo+ID4gTVQ4MTkyIG1zZGMgaXMgYW4gaW5kZXBl
+bmRlbnQgc3ViIHN5c3RlbSwgd2UgbmVlZCBjb250cm9sIG1vcmUgYnVzDQo+ID4gY2xvY2tzIGZv
+ciBpdC4NCj4gPiBBZGQgc3VwcG9ydCBmb3IgdGhlIGFkZGl0aW9uYWwgc3Vic3lzIGNsb2NrcyB0
+byBhbGxvdyBpdCB0byBiZQ0KPiA+IGNvbmZpZ3VyZWQgYXBwcm9wcmlhdGVseS4NCj4gPg0KPiA+
+IFNpZ25lZC1vZmYtYnk6IFdlbmJpbiBNZWkgPHdlbmJpbi5tZWlAbWVkaWF0ZWsuY29tPg0KPiA+
+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIHwgNzcgKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrLS0tLS0tLS0tDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA1OSBpbnNlcnRp
+b25zKCspLCAxOCBkZWxldGlvbnMoLSkNCj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21t
+Yy9ob3N0L210ay1zZC5jIGIvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYw0KPiA+IGluZGV4IGE3
+MDQ3NDVlNTg4Mi4uOWExNDIyOTU1NTkzIDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hv
+c3QvbXRrLXNkLmMNCj4gPiArKysgYi9kcml2ZXJzL21tYy9ob3N0L210ay1zZC5jDQo+ID4gQEAg
+LTQyNSw2ICs0MjUsOCBAQCBzdHJ1Y3QgbXNkY19ob3N0IHsNCj4gPiAgICAgICAgIHN0cnVjdCBj
+bGsgKmhfY2xrOyAgICAgIC8qIG1zZGMgaF9jbGsgKi8NCj4gPiAgICAgICAgIHN0cnVjdCBjbGsg
+KmJ1c19jbGs7ICAgIC8qIGJ1cyBjbG9jayB3aGljaCB1c2VkIHRvIGFjY2VzcyByZWdpc3RlciAq
+Lw0KPiA+ICAgICAgICAgc3RydWN0IGNsayAqc3JjX2Nsa19jZzsgLyogbXNkYyBzb3VyY2UgY2xv
+Y2sgY29udHJvbCBnYXRlICovDQo+ID4gKyAgICAgICBzdHJ1Y3QgY2xrICpzeXNfY2xrX2NnOyAv
+KiBtc2RjIHN1YnN5cyBjbG9jayBjb250cm9sIGdhdGUgKi8NCj4gPiArICAgICAgIHN0cnVjdCBj
+bGtfYnVsa19kYXRhIGJ1bGtfY2xrc1szXTsgICAgICAvKiBwY2xrLCBheGksIGFoYiBjbG9jayBj
+b250cm9sIGdhdGUgKi8NCj4gPiAgICAgICAgIHUzMiBtY2xrOyAgICAgICAgICAgICAgIC8qIG1t
+YyBzdWJzeXN0ZW0gY2xvY2sgZnJlcXVlbmN5ICovDQo+ID4gICAgICAgICB1MzIgc3JjX2Nsa19m
+cmVxOyAgICAgICAvKiBzb3VyY2UgY2xvY2sgZnJlcXVlbmN5ICovDQo+ID4gICAgICAgICB1bnNp
+Z25lZCBjaGFyIHRpbWluZzsNCj4gPiBAQCAtNzg0LDYgKzc4Niw4IEBAIHN0YXRpYyB2b2lkIG1z
+ZGNfc2V0X2J1c3lfdGltZW91dChzdHJ1Y3QgbXNkY19ob3N0ICpob3N0LCB1NjQgbnMsIHU2NCBj
+bGtzKQ0KPiA+DQo+ID4gIHN0YXRpYyB2b2lkIG1zZGNfZ2F0ZV9jbG9jayhzdHJ1Y3QgbXNkY19o
+b3N0ICpob3N0KQ0KPiA+ICB7DQo+ID4gKyAgICAgICBjbGtfYnVsa19kaXNhYmxlX3VucHJlcGFy
+ZShBUlJBWV9TSVpFKGhvc3QtPmJ1bGtfY2xrcyksDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICBob3N0LT5idWxrX2Nsa3MpOw0KPiA+ICAgICAgICAgY2xrX2Rpc2FibGVf
+dW5wcmVwYXJlKGhvc3QtPnNyY19jbGtfY2cpOw0KPiA+ICAgICAgICAgY2xrX2Rpc2FibGVfdW5w
+cmVwYXJlKGhvc3QtPnNyY19jbGspOw0KPiA+ICAgICAgICAgY2xrX2Rpc2FibGVfdW5wcmVwYXJl
+KGhvc3QtPmJ1c19jbGspOw0KPiA+IEBAIC03OTIsMTAgKzc5NiwxNyBAQCBzdGF0aWMgdm9pZCBt
+c2RjX2dhdGVfY2xvY2soc3RydWN0IG1zZGNfaG9zdCAqaG9zdCkNCj4gPg0KPiA+ICBzdGF0aWMg
+dm9pZCBtc2RjX3VuZ2F0ZV9jbG9jayhzdHJ1Y3QgbXNkY19ob3N0ICpob3N0KQ0KPiA+ICB7DQo+
+ID4gKyAgICAgICBpbnQgcmV0Ow0KPiA+ICsNCj4gPiAgICAgICAgIGNsa19wcmVwYXJlX2VuYWJs
+ZShob3N0LT5oX2Nsayk7DQo+ID4gICAgICAgICBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+YnVz
+X2Nsayk7DQo+ID4gICAgICAgICBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+c3JjX2Nsayk7DQo+
+ID4gICAgICAgICBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+c3JjX2Nsa19jZyk7DQo+ID4gKyAg
+ICAgICByZXQgPSBjbGtfYnVsa19wcmVwYXJlX2VuYWJsZShBUlJBWV9TSVpFKGhvc3QtPmJ1bGtf
+Y2xrcyksDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBob3N0LT5i
+dWxrX2Nsa3MpOw0KPiA+ICsgICAgICAgaWYgKHJldCkNCj4gPiArICAgICAgICAgICAgICAgZGV2
+X2RiZyhob3N0LT5kZXYsICJlbmFibGUgY2xrcyBmYWlsZWQhXG4iKTsNCj4gDQo+IGRldl9lcnIg
+bG9va3MgYSBsb3QgbW9yZSBhcHByb3ByaWF0ZS4gQWxzbywgZG9uJ3QgeW91IHdhbnQgdG8gZXhp
+dCB0aGUNCj4gZnVuY3Rpb24gaW4gdGhhdCBjYXNlLCByYXRoZXIgdGhhbiBnb2luZyB0byB0aGUg
+d2hpbGUgbG9vcCBiZWxvdyB3aGVyZQ0KPiB5b3UgbWF5IGdldCBzdHVjaz8NCj4gDQpJIHdpbGwg
+Y2hhbmdlIGl0IGluIHRoZSBuZXh0IHZlcnNpb24uDQo+ID4gKw0KPiA+ICAgICAgICAgd2hpbGUg
+KCEocmVhZGwoaG9zdC0+YmFzZSArIE1TRENfQ0ZHKSAmIE1TRENfQ0ZHX0NLU1RCKSkNCj4gPiAg
+ICAgICAgICAgICAgICAgY3B1X3JlbGF4KCk7DQo+ID4gIH0NCj4gPiBAQCAtMjM2Niw2ICsyMzc3
+LDUyIEBAIHN0YXRpYyB2b2lkIG1zZGNfb2ZfcHJvcGVydHlfcGFyc2Uoc3RydWN0IHBsYXRmb3Jt
+X2RldmljZSAqcGRldiwNCj4gPiAgICAgICAgICAgICAgICAgaG9zdC0+Y3FoY2kgPSBmYWxzZTsN
+Cj4gPiAgfQ0KPiA+DQo+ID4gK3N0YXRpYyBpbnQgbXNkY19vZl9jbG9ja19wYXJzZShzdHJ1Y3Qg
+cGxhdGZvcm1fZGV2aWNlICpwZGV2LA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICBzdHJ1Y3QgbXNkY19ob3N0ICpob3N0KQ0KPiA+ICt7DQo+ID4gKyAgICAgICBzdHJ1Y3QgY2xr
+ICpjbGs7DQo+ID4gKw0KPiA+ICsgICAgICAgaG9zdC0+c3JjX2NsayA9IGRldm1fY2xrX2dldCgm
+cGRldi0+ZGV2LCAic291cmNlIik7DQo+ID4gKyAgICAgICBpZiAoSVNfRVJSKGhvc3QtPnNyY19j
+bGspKQ0KPiA+ICsgICAgICAgICAgICAgICByZXR1cm4gUFRSX0VSUihob3N0LT5zcmNfY2xrKTsN
+Cj4gPiArDQo+ID4gKyAgICAgICBob3N0LT5oX2NsayA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2
+LCAiaGNsayIpOw0KPiA+ICsgICAgICAgaWYgKElTX0VSUihob3N0LT5oX2NsaykpDQo+ID4gKyAg
+ICAgICAgICAgICAgIHJldHVybiBQVFJfRVJSKGhvc3QtPmhfY2xrKTsNCj4gPiArDQo+ID4gKyAg
+ICAgICBob3N0LT5idXNfY2xrID0gZGV2bV9jbGtfZ2V0KCZwZGV2LT5kZXYsICJidXNfY2xrIik7
+DQo+ID4gKyAgICAgICBpZiAoSVNfRVJSKGhvc3QtPmJ1c19jbGspKQ0KPiA+ICsgICAgICAgICAg
+ICAgICBob3N0LT5idXNfY2xrID0gTlVMTDsNCj4gDQo+IFVzZSBkZXZtX2Nsa19nZXRfb3B0aW9u
+YWwgaW5zdGVhZCAoZGl0dG8gZm9yIHRoZSBuZXh0IDIpLg0KPiANCj4gPiArDQo+ID4gKyAgICAg
+ICAvKnNvdXJjZSBjbG9jayBjb250cm9sIGdhdGUgaXMgb3B0aW9uYWwgY2xvY2sqLw0KPiA+ICsg
+ICAgICAgaG9zdC0+c3JjX2Nsa19jZyA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2LCAic291cmNl
+X2NnIik7DQo+ID4gKyAgICAgICBpZiAoSVNfRVJSKGhvc3QtPnNyY19jbGtfY2cpKQ0KPiA+ICsg
+ICAgICAgICAgICAgICBob3N0LT5zcmNfY2xrX2NnID0gTlVMTDsNCj4gPiArDQo+ID4gKyAgICAg
+ICBob3N0LT5zeXNfY2xrX2NnID0gZGV2bV9jbGtfZ2V0KCZwZGV2LT5kZXYsICJzeXNfY2ciKTsN
+Cj4gPiArICAgICAgIGlmIChJU19FUlIoaG9zdC0+c3lzX2Nsa19jZykpDQo+ID4gKyAgICAgICAg
+ICAgICAgIGhvc3QtPnN5c19jbGtfY2cgPSBOVUxMOw0KPiA+ICsgICAgICAgZWxzZQ0KPiA+ICsg
+ICAgICAgICAgICAgICBjbGtfcHJlcGFyZV9lbmFibGUoaG9zdC0+c3lzX2Nsa19jZyk7DQo+IA0K
+PiBUaGlzIGRvZXNuJ3QgbmVlZCB0byBiZSBpbiBhbiBlbHNlIGJyYW5jaCwgY2FsbGluZyBjbGtf
+cHJlcGFyZV9lbmFibGUNCj4gb24gYSBOVUxMIGNsb2NrIGlzIGZpbmUuDQpJIHdpbGwgY2hhbmdl
+IGl0IGluIHRoZSBuZXh0IHZlcnNpb24uDQo+IA0KPiBIb3dldmVyLCBpcyBpdCBleHBlY3RlZCB0
+aGF0IHRoaXMgY2xvY2sgaXMgdHVybmVkIG9uIGZvcmV2ZXIgYWZ0ZXINCj4gcHJvYmU/ISBBdCB0
+aGUgdmVyeSBsZWFzdCwgdGhlIGNsb2NrIHNob3VsZCBiZSBkaXNhYmxlZCBpbg0KPiBtc2RjX2Ry
+dl9yZW1vdmUsIGJ1dCwgcmVhbGx5LCBJIHRoaW5rIGl0IHNob3VsZCBiZSBlbmFibGVkIGFzIG5l
+ZWRlZCwNCj4gbGlrZSB0aGUgb3RoZXIgY2xvY2tzLCBpbiBtc2RjX2dhdGVfY2xvY2s/DQo+IA0K
+VGhpcyBjbG9jayBnYXRlIGNhbiBub3QgYmUgY2xvc2VkLCBpZiBpdCBpcyBjbG9zZWQsIGl0IGNh
+biBub3QgYmUNCmFjY2Vzc2VkIGFuZCBjYW4gbm90IGJlIG9wZW5lZCBhZ2Fpbi4NClNvIGl0IGlz
+IGV4cGVjdGVkIHRoYXQgdGhpcyBjbG9jayBpcyB0dXJuZWQgb24gZm9yZXZlciBhZnRlciBwcm9i
+ZS4NCj4gPiArDQo+ID4gKyAgICAgICBjbGsgPSBkZXZtX2Nsa19nZXQoJnBkZXYtPmRldiwgInBj
+bGtfY2ciKTsNCj4gPiArICAgICAgIGlmIChJU19FUlIoY2xrKSkNCj4gPiArICAgICAgICAgICAg
+ICAgY2xrID0gTlVMTDsNCj4gPiArICAgICAgIGhvc3QtPmJ1bGtfY2xrc1swXS5jbGsgPSBjbGs7
+DQo+ID4gKw0KPiA+ICsgICAgICAgY2xrID0gZGV2bV9jbGtfZ2V0KCZwZGV2LT5kZXYsICJheGlf
+Y2ciKTsNCj4gPiArICAgICAgIGlmIChJU19FUlIoY2xrKSkNCj4gPiArICAgICAgICAgICAgICAg
+Y2xrID0gTlVMTDsNCj4gPiArICAgICAgIGhvc3QtPmJ1bGtfY2xrc1sxXS5jbGsgPSBjbGs7DQo+
+ID4gKw0KPiA+ICsgICAgICAgY2xrID0gZGV2bV9jbGtfZ2V0KCZwZGV2LT5kZXYsICJhaGJfY2ci
+KTsNCj4gPiArICAgICAgIGlmIChJU19FUlIoY2xrKSkNCj4gPiArICAgICAgICAgICAgICAgY2xr
+ID0gTlVMTDsNCj4gPiArICAgICAgIGhvc3QtPmJ1bGtfY2xrc1syXS5jbGsgPSBjbGs7DQo+IA0K
+PiBVc2UgZGV2bV9jbGtfYnVsa19nZXRfb3B0aW9uYWwgZm9yIHRoZXNlIDMuDQo+IA0KSSB3aWxs
+IGNoYW5nZSBpdCBpbiB0aGUgbmV4dCB2ZXJzaW9uLg0KPiA+ICsNCj4gPiArICAgICAgIHJldHVy
+biAwOw0KPiA+ICt9DQo+ID4gKw0KPiA+ICBzdGF0aWMgaW50IG1zZGNfZHJ2X3Byb2JlKHN0cnVj
+dCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYpDQo+ID4gIHsNCj4gPiAgICAgICAgIHN0cnVjdCBtbWNf
+aG9zdCAqbW1jOw0KPiA+IEBAIC0yNDA1LDI1ICsyNDYyLDkgQEAgc3RhdGljIGludCBtc2RjX2Ry
+dl9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2KQ0KPiA+ICAgICAgICAgaWYgKHJl
+dCkNCj4gPiAgICAgICAgICAgICAgICAgZ290byBob3N0X2ZyZWU7DQo+ID4NCj4gPiAtICAgICAg
+IGhvc3QtPnNyY19jbGsgPSBkZXZtX2Nsa19nZXQoJnBkZXYtPmRldiwgInNvdXJjZSIpOw0KPiA+
+IC0gICAgICAgaWYgKElTX0VSUihob3N0LT5zcmNfY2xrKSkgew0KPiA+IC0gICAgICAgICAgICAg
+ICByZXQgPSBQVFJfRVJSKGhvc3QtPnNyY19jbGspOw0KPiA+IC0gICAgICAgICAgICAgICBnb3Rv
+IGhvc3RfZnJlZTsNCj4gPiAtICAgICAgIH0NCj4gPiAtDQo+ID4gLSAgICAgICBob3N0LT5oX2Ns
+ayA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2LCAiaGNsayIpOw0KPiA+IC0gICAgICAgaWYgKElT
+X0VSUihob3N0LT5oX2NsaykpIHsNCj4gPiAtICAgICAgICAgICAgICAgcmV0ID0gUFRSX0VSUiho
+b3N0LT5oX2Nsayk7DQo+ID4gKyAgICAgICByZXQgPSBtc2RjX29mX2Nsb2NrX3BhcnNlKHBkZXYs
+IGhvc3QpOw0KPiA+ICsgICAgICAgaWYgKHJldCkNCj4gPiAgICAgICAgICAgICAgICAgZ290byBo
+b3N0X2ZyZWU7DQo+ID4gLSAgICAgICB9DQo+ID4gLQ0KPiA+IC0gICAgICAgaG9zdC0+YnVzX2Ns
+ayA9IGRldm1fY2xrX2dldCgmcGRldi0+ZGV2LCAiYnVzX2NsayIpOw0KPiA+IC0gICAgICAgaWYg
+KElTX0VSUihob3N0LT5idXNfY2xrKSkNCj4gPiAtICAgICAgICAgICAgICAgaG9zdC0+YnVzX2Ns
+ayA9IE5VTEw7DQo+ID4gLSAgICAgICAvKnNvdXJjZSBjbG9jayBjb250cm9sIGdhdGUgaXMgb3B0
+aW9uYWwgY2xvY2sqLw0KPiA+IC0gICAgICAgaG9zdC0+c3JjX2Nsa19jZyA9IGRldm1fY2xrX2dl
+dCgmcGRldi0+ZGV2LCAic291cmNlX2NnIik7DQo+ID4gLSAgICAgICBpZiAoSVNfRVJSKGhvc3Qt
+PnNyY19jbGtfY2cpKQ0KPiA+IC0gICAgICAgICAgICAgICBob3N0LT5zcmNfY2xrX2NnID0gTlVM
+TDsNCj4gPg0KPiA+ICAgICAgICAgaG9zdC0+cmVzZXQgPSBkZXZtX3Jlc2V0X2NvbnRyb2xfZ2V0
+X29wdGlvbmFsX2V4Y2x1c2l2ZSgmcGRldi0+ZGV2LA0KPiA+ICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAiaHJzdCIpOw0KPiA+
+IC0tDQo+ID4gMi4xOC4wDQoNCg==
 
-> From: Ira Weiny <ira.weiny@intel.com>
->
-> This kmap() call is localized to a single thread.  To avoid the over
-> head of global PKRS updates use the new kmap_thread() call.
-
-Acked-by: "Eric W. Biederman" <ebiederm@xmission.com>
-
->
-> Cc: Eric Biederman <ebiederm@xmission.com>
-> Signed-off-by: Ira Weiny <ira.weiny@intel.com>
-> ---
->  kernel/kexec_core.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/kernel/kexec_core.c b/kernel/kexec_core.c
-> index c19c0dad1ebe..272a9920c0d6 100644
-> --- a/kernel/kexec_core.c
-> +++ b/kernel/kexec_core.c
-> @@ -815,7 +815,7 @@ static int kimage_load_normal_segment(struct kimage *image,
->  		if (result < 0)
->  			goto out;
->  
-> -		ptr = kmap(page);
-> +		ptr = kmap_thread(page);
->  		/* Start with a clear page */
->  		clear_page(ptr);
->  		ptr += maddr & ~PAGE_MASK;
-> @@ -828,7 +828,7 @@ static int kimage_load_normal_segment(struct kimage *image,
->  			memcpy(ptr, kbuf, uchunk);
->  		else
->  			result = copy_from_user(ptr, buf, uchunk);
-> -		kunmap(page);
-> +		kunmap_thread(page);
->  		if (result) {
->  			result = -EFAULT;
->  			goto out;
-> @@ -879,7 +879,7 @@ static int kimage_load_crash_segment(struct kimage *image,
->  			goto out;
->  		}
->  		arch_kexec_post_alloc_pages(page_address(page), 1, 0);
-> -		ptr = kmap(page);
-> +		ptr = kmap_thread(page);
->  		ptr += maddr & ~PAGE_MASK;
->  		mchunk = min_t(size_t, mbytes,
->  				PAGE_SIZE - (maddr & ~PAGE_MASK));
-> @@ -895,7 +895,7 @@ static int kimage_load_crash_segment(struct kimage *image,
->  		else
->  			result = copy_from_user(ptr, buf, uchunk);
->  		kexec_flush_icache_page(page);
-> -		kunmap(page);
-> +		kunmap_thread(page);
->  		arch_kexec_pre_free_pages(page_address(page), 1);
->  		if (result) {
->  			result = -EFAULT;
