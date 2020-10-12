@@ -2,107 +2,95 @@ Return-Path: <SRS0=rM9+=DT=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MIME_BASE64_TEXT,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF153C433DF
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 10:42:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49731C433E7
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 12:45:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77EBB208FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 10:42:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E808F2076E
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 12:45:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="itNWfjEq"
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="Tc+JPjkZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387594AbgJLKmP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Oct 2020 06:42:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59902 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387463AbgJLKmO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2020 06:42:14 -0400
-Received: from mail-yb1-xb43.google.com (mail-yb1-xb43.google.com [IPv6:2607:f8b0:4864:20::b43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99DB8C0613CE;
-        Mon, 12 Oct 2020 03:42:14 -0700 (PDT)
-Received: by mail-yb1-xb43.google.com with SMTP id h6so13026785ybi.11;
-        Mon, 12 Oct 2020 03:42:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=76yOKpDkY6SohdWqBReb2Fv42/fYarjNUXw7oodg76M=;
-        b=itNWfjEqO/BaS0tjo/KOv/XHvKupudt+e6o9uDHN1CoX8wfgGNuW4yrLPwddstExTP
-         Fjw14JJiin/Ua5oMYhjg4zNYWfNkfcWsdb6BHdg01RVLmlJaxYg/5riS+tf3KY8NDS5h
-         2k8wH+kmn5xNROrBmfMJ49HkQFjodFjnDW9Fgz0TSfa6VadewYIcLsdFH8ZAj1N50bdd
-         sCB6jUh3BjaWizWoi8AEWaZ6VqpDaox5FY1V3YqU1G9pJmmnsh3VuFeNCv8A39HcuUQZ
-         M1k98lFJKgFWGPC+tiTetB/qseqns7CMkcI4B7G2yt7CIDyv1NFZc7ZX5VAHxlQqVMR8
-         b9mQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=76yOKpDkY6SohdWqBReb2Fv42/fYarjNUXw7oodg76M=;
-        b=n5yHKF8UdUMX6P7S4zOnar7w0KMXOa4PAWG+ybeFJ5nOJNu07LQPR/CAxFEWNomOHV
-         SlfHWstKJZOfdM1ACbf7X2vxsiaHy3j+vwiWGp5EmBXN+SOLg+mzUBNbJA+c8kfKs5E1
-         YQ80z0AKTaWFaFL45ByAGfC87c/esfSwKT5tfgqDKByyzM38YzrjQ4IVBNmQCSdhN/h0
-         3gSX8EJIIRsWYCmS6xULLEzJLxl25r/hKTMv5ais+UymTlQjHAzXsCPT9Kkz+c9DisSS
-         g6LZoJAER6df0lxMBKS1SVDNLLdR9GZYlKCbF5tE+BbLWvjtWNTn+uPKo8wmHrQ0lUiL
-         h1Zw==
-X-Gm-Message-State: AOAM533YfDgyzHdU7ke3R31eb9zPkoG80ZuT7X9tRMTDravDJN0L2nyR
-        rkezOguKtYRjRBDiaKx7A2gnUB3YrkdGDI0hDyrSp5ZCu5f6/g==
-X-Google-Smtp-Source: ABdhPJx6yMMXbEmNmhY5yrzcuCxsT22YJ4xZVrkRDDG7gfnR/4ouIkkBHZjYadL8Yqx0pIaUdJPI+davp1VqKCnCGTM=
-X-Received: by 2002:a25:3cc4:: with SMTP id j187mr29096132yba.48.1602499333899;
- Mon, 12 Oct 2020 03:42:13 -0700 (PDT)
+        id S1729683AbgJLMp5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Oct 2020 08:45:57 -0400
+Received: from mailgw02.mediatek.com ([210.61.82.184]:46657 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1729701AbgJLMp5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2020 08:45:57 -0400
+X-UUID: a402835f0c4148a2b15007347d92969c-20201012
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:Content-Type:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=AAnU5PlJeTlT3eOu0s04k2n54q0uEvfmgyB1oE18Bvs=;
+        b=Tc+JPjkZM56FiLKbWe+Mc36G4k0wVmTG1GDkwFcWdDzeX/xwRnEzn9SkBoe0XIUYeUIfbgzDYyOGErWg50EjyzoogRHqcNbuf2vEJ104R2oLSGKHqPLMJetlihQj7dTxr3hmvbk6viPt/bXQUbnpD5m98x3OtKddCq37v/dyxSM=;
+X-UUID: a402835f0c4148a2b15007347d92969c-20201012
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw02.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (Cellopoint E-mail Firewall v4.1.14 Build 0819 with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 957241628; Mon, 12 Oct 2020 20:45:52 +0800
+Received: from mtkcas07.mediatek.inc (172.21.101.84) by
+ mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Mon, 12 Oct 2020 20:45:50 +0800
+Received: from localhost.localdomain (10.17.3.153) by mtkcas07.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Mon, 12 Oct 2020 20:45:49 +0800
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>
+Subject: [PATCH v6 2/4] mmc: dt-bindings: add support for MT8192 SoC
+Date:   Mon, 12 Oct 2020 20:45:45 +0800
+Message-ID: <20201012124547.16649-3-wenbin.mei@mediatek.com>
+X-Mailer: git-send-email 2.18.0
+In-Reply-To: <20201012124547.16649-1-wenbin.mei@mediatek.com>
+References: <20201012124547.16649-1-wenbin.mei@mediatek.com>
 MIME-Version: 1.0
-References: <20200717033350.13006-1-benchuanggli@gmail.com>
- <CAPDyKFpp54tNRiQ+or-3o9dUJ=CB+PpsRc=fkxc10dAUY-x_SQ@mail.gmail.com>
- <CACT4zj-Z0yiuYF9KVyvTM+0nvk__YnBh=c7MHuB1XOFVpTtmHw@mail.gmail.com> <CAPDyKFrWO_x2wBjKRaoS9ypEszuQ+RWMr5Vej0uBOVV3=AAD-w@mail.gmail.com>
-In-Reply-To: <CAPDyKFrWO_x2wBjKRaoS9ypEszuQ+RWMr5Vej0uBOVV3=AAD-w@mail.gmail.com>
-From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Mon, 12 Oct 2020 18:42:03 +0800
-Message-ID: <CACT4zj-TxNAFKzPoBE8C3702qz1=Pg2tboMwUHd+nd2BuTF5WA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and
- enable SSC for GL975x
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        greg.tu@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+TVQ4MTkyIG1tYyBob3N0IGlwIGlzIGNvbXBhdGlibGUgd2l0aCBNVDgxODMuDQpBZGQgc3VwcG9y
+dCBmb3IgdGhpcy4NCg0KU2lnbmVkLW9mZi1ieTogV2VuYmluIE1laSA8d2VuYmluLm1laUBtZWRp
+YXRlay5jb20+DQotLS0NCiBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL210
+ay1zZC55YW1sIHwgMTUgKysrKysrKysrKysrKy0tDQogMSBmaWxlIGNoYW5nZWQsIDEzIGluc2Vy
+dGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQoNCmRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL2Rl
+dmljZXRyZWUvYmluZGluZ3MvbW1jL210ay1zZC55YW1sIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0
+cmVlL2JpbmRpbmdzL21tYy9tdGstc2QueWFtbA0KaW5kZXggMjFhMmZjZTViN2JhLi4wOTNkYjFj
+MzM2NTMgMTAwNjQ0DQotLS0gYS9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1j
+L210ay1zZC55YW1sDQorKysgYi9Eb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbW1j
+L210ay1zZC55YW1sDQpAQCAtMjksMjYgKzI5LDM3IEBAIHByb3BlcnRpZXM6DQogICAgICAgLSBp
+dGVtczoNCiAgICAgICAgIC0gY29uc3Q6IG1lZGlhdGVrLG10NzYyMy1tbWMNCiAgICAgICAgIC0g
+Y29uc3Q6IG1lZGlhdGVrLG10MjcwMS1tbWMNCisgICAgICAtIGl0ZW1zOg0KKyAgICAgICAgLSBj
+b25zdDogbWVkaWF0ZWssbXQ4MTkyLW1tYw0KKyAgICAgICAgLSBjb25zdDogbWVkaWF0ZWssbXQ4
+MTgzLW1tYw0KIA0KICAgY2xvY2tzOg0KICAgICBkZXNjcmlwdGlvbjoNCiAgICAgICBTaG91bGQg
+Y29udGFpbiBwaGFuZGxlIGZvciB0aGUgY2xvY2sgZmVlZGluZyB0aGUgTU1DIGNvbnRyb2xsZXIu
+DQogICAgIG1pbkl0ZW1zOiAyDQotICAgIG1heEl0ZW1zOiA0DQorICAgIG1heEl0ZW1zOiA4DQog
+ICAgIGl0ZW1zOg0KICAgICAgIC0gZGVzY3JpcHRpb246IHNvdXJjZSBjbG9jayAocmVxdWlyZWQp
+Lg0KICAgICAgIC0gZGVzY3JpcHRpb246IEhDTEsgd2hpY2ggdXNlZCBmb3IgaG9zdCAocmVxdWly
+ZWQpLg0KICAgICAgIC0gZGVzY3JpcHRpb246IGluZGVwZW5kZW50IHNvdXJjZSBjbG9jayBnYXRl
+IChyZXF1aXJlZCBmb3IgTVQyNzEyKS4NCiAgICAgICAtIGRlc2NyaXB0aW9uOiBidXMgY2xvY2sg
+dXNlZCBmb3IgaW50ZXJuYWwgcmVnaXN0ZXIgYWNjZXNzIChyZXF1aXJlZCBmb3IgTVQyNzEyIE1T
+REMwLzMpLg0KKyAgICAgIC0gZGVzY3JpcHRpb246IG1zZGMgc3Vic3lzIGNsb2NrIGdhdGUgKHJl
+cXVpcmVkIGZvciBNVDgxOTIpLg0KKyAgICAgIC0gZGVzY3JpcHRpb246IHBlcmlwaGVyYWwgYnVz
+IGNsb2NrIGdhdGUgKHJlcXVpcmVkIGZvciBNVDgxOTIpLg0KKyAgICAgIC0gZGVzY3JpcHRpb246
+IEFYSSBidXMgY2xvY2sgZ2F0ZSAocmVxdWlyZWQgZm9yIE1UODE5MikuDQorICAgICAgLSBkZXNj
+cmlwdGlvbjogQUhCIGJ1cyBjbG9jayBnYXRlIChyZXF1aXJlZCBmb3IgTVQ4MTkyKS4NCiANCiAg
+IGNsb2NrLW5hbWVzOg0KICAgICBtaW5JdGVtczogMg0KLSAgICBtYXhJdGVtczogNA0KKyAgICBt
+YXhJdGVtczogOA0KICAgICBpdGVtczoNCiAgICAgICAtIGNvbnN0OiBzb3VyY2UNCiAgICAgICAt
+IGNvbnN0OiBoY2xrDQogICAgICAgLSBjb25zdDogc291cmNlX2NnDQogICAgICAgLSBjb25zdDog
+YnVzX2Nsaw0KKyAgICAgIC0gY29uc3Q6IHN5c19jZw0KKyAgICAgIC0gY29uc3Q6IHBjbGtfY2cN
+CisgICAgICAtIGNvbnN0OiBheGlfY2cNCisgICAgICAtIGNvbnN0OiBhaGJfY2cNCiANCiAgIHBp
+bmN0cmwtbmFtZXM6DQogICAgIGl0ZW1zOg0KLS0gDQoyLjE4LjANCg==
 
-On Mon, Oct 12, 2020 at 6:25 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 12 Oct 2020 at 10:41, Ben Chuang <benchuanggli@gmail.com> wrote:
-> >
-> > Hi Ulf,
-> >
-> > Regarding this patch, we also want to fix the EMI of one hardware
-> > using the old version(such as v5.4).
-> > Is there a chance to append a Fixes tag on this patch ?
->
-> Unfortunately no. $subject patch is a part of the pull request with
-> mmc updates for v5.10, that I just sent to Linus.
->
-> > Or what should I do ?
->
-> If you think that $subject patch should be included into an LTS
-> kernel, please send a manual backport to stable@vger.kernel.org. For
-> more information about the process, please have a look at
-> Documentation/process/stable-kernel-rules.rst
->
-> [...]
-
-I got it. Thanks for your answer.
-
-Best regards,
-Ben
-
->
-> Kind regards
-> Uffe
