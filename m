@@ -2,377 +2,392 @@ Return-Path: <SRS0=rM9+=DT=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A00C433E7
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 08:41:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86BC6C433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 10:01:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0390B2074F
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 08:41:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 184AB20E65
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Oct 2020 10:01:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="fxz8iya0"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="IxRp7sMb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726680AbgJLIl2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Oct 2020 04:41:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41334 "EHLO
+        id S1729474AbgJLKBd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Oct 2020 06:01:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726335AbgJLIl2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2020 04:41:28 -0400
-Received: from mail-yb1-xb42.google.com (mail-yb1-xb42.google.com [IPv6:2607:f8b0:4864:20::b42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB237C0613CE;
-        Mon, 12 Oct 2020 01:41:27 -0700 (PDT)
-Received: by mail-yb1-xb42.google.com with SMTP id x20so12803086ybs.8;
-        Mon, 12 Oct 2020 01:41:27 -0700 (PDT)
+        with ESMTP id S1729464AbgJLKBc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Oct 2020 06:01:32 -0400
+Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58743C0613CE
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2020 03:01:32 -0700 (PDT)
+Received: by mail-lj1-x233.google.com with SMTP id h20so16354138lji.9
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Oct 2020 03:01:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=QFM3OiH0jnEOLWaI2UvpXZsCixIw9PA6Cp1fgzGRjYY=;
-        b=fxz8iya0ByOgySuxsA7kLDAVc3P40gME0I/7uHfQqWyr35HuPYJSSi2EnL8rB4AafR
-         8S/kUqiW7+wpnGxHiixWAEE/bAXeGQEf9G0zfsDzSez1wZbNQOvTglSA6NdcDt+W8rTV
-         FDjLejuHarpObYulnYMXd/HOfNwYW81h6ne2AW09Pes32MtnJ0dqXwXmMQcPb0wiq1Dm
-         ct3zw2fDOLvjAuQUV0nUTjld+Q38YaIuRsf51C6kyMRD9jcXZj229P2TOtpZZnocFYXn
-         ZliypdG3/++PI1AGekOHZ1Zk8Qfv3LNMwob4d74RyxxIGYwkrSXTOVeUhVk4T+8qXHN7
-         r+BA==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ieamwB3zmGvy19m/eNlB/InMbH7St08rAsEJKQn2jbA=;
+        b=IxRp7sMb1lbVC6r6isklV6piCUJ/DGW1tsaZRw98CINL/2d0FQh+71ix5iFDf46o4w
+         Bh8tTXaNr5sXIFcBHB+4XZktgVoRe5C9HNnQecCTg0Y5/88Nd/wXYaPYyxM6DwFdzaLw
+         0WIbA7TI9L14DAuoGaudsU1XG00qfvbOKequnKzwjJAewsb8e0NTHxzSmtMaWMGAEyb9
+         heHQe2Qs38C2Vc7eaP5S/Ol0G5BgSLO2kDkBrt7vhN0v4qZSTC4goi0apFuAarWe1i/D
+         gvXy//LjXD7UoAJ5LM4uexiMR4/rKgjK6kQG+ASOHrd30nk7mKePQY2czSjh5cQFCfrw
+         KTCw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=QFM3OiH0jnEOLWaI2UvpXZsCixIw9PA6Cp1fgzGRjYY=;
-        b=IN92zgv51vIhhEhDPB2qc+uzxeHNE/kUQfD5JSXw96w9HZ9/0ZCCx1dRbfNaDLBnrI
-         ixcLwor9pF9ChJVB9UA68TfzaMb/4jLLHcGocP/Bi0HKyXLj8IJbdfusqyPbuEoDAn+n
-         limgK3OQl/E10tOIZHUxaZIHQLYATQRqOsih1lSKgsUhjbK63PSHYAk2zdhAd71rfH56
-         VJukpT41Gci1prsD2TP43tEYkZIJxjysrzMVEsH59puoppe17Wieg/YSbcVGEyVDFKbS
-         hi921LRcvsuxywoEsaPsk1cIxcfoyOQj99m6+RXm+7gAMD5ex+TznULtb3w2SmSBIO/B
-         vVOg==
-X-Gm-Message-State: AOAM533ek/hWwKoO3myVjLGrPZktkiLMKG1aZgqCzdNxbr8E62Ybo1Z1
-        INByDO/tPdLCgQquqvz/YKZv2UlE4ec1Hy3cQ20=
-X-Google-Smtp-Source: ABdhPJzYafTSujy3Qs5r/o4AimfkVf6thEI2m75SC0EgUoOm2AFrxueU/sx9J0x6jEbeUM4Ll+F226qex1dkqoi0Qj8=
-X-Received: by 2002:a25:e688:: with SMTP id d130mr33032381ybh.177.1602492086425;
- Mon, 12 Oct 2020 01:41:26 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ieamwB3zmGvy19m/eNlB/InMbH7St08rAsEJKQn2jbA=;
+        b=EF5uhPmk8IjdieEkWcIZ4wXh7iWFmmPQuFrEHSwrCPlIfCjnLYyA2ZpCmeoTGwZAU1
+         fFwUpQPRBwlYFBAvPn4R/w5tSWnZf/LZxMSTEcP7qiahql+GgJINiLB/kIfOBgPeRnNY
+         jjhwZIAZM0Ilb7KHR6xflpH3Reiy+9VCELQ5/R7w36RBv7iTaaA2gsBwA2x4Fq2Co8rs
+         BHtCFRyA6AvstQEeEA0z6fvqCilBK+/g/zueJtEtoGeuNWX31Y0LmVwbdf0eqKDM0Ea4
+         IwC+goZsoYStn9WBOo+umVi/0LfWBVHzbiNXOIJpvchYV0jZsw9QvBryr70+H5+1sKSB
+         OW4g==
+X-Gm-Message-State: AOAM533ThbcNUxRDV2pQdSdehW0LEoMinhSIpyYdTzcbiktScZcQtt0R
+        OSLqmg4RqKhtzmqCgx5RU9HyBA==
+X-Google-Smtp-Source: ABdhPJxlLuO9/bXJHvkTF1GOZaZ6FpIQ3RCZ0qxAz7rUpS6RSdRWMjqCAYbfaNszAu/8LPaN7cG5pQ==
+X-Received: by 2002:a2e:8e83:: with SMTP id z3mr9722522ljk.165.1602496890399;
+        Mon, 12 Oct 2020 03:01:30 -0700 (PDT)
+Received: from localhost.localdomain (h-98-128-180-91.NA.cust.bahnhof.se. [98.128.180.91])
+        by smtp.gmail.com with ESMTPSA id u10sm3864879lja.110.2020.10.12.03.01.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 12 Oct 2020 03:01:29 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC updates for v5.10
+Date:   Mon, 12 Oct 2020 12:01:27 +0200
+Message-Id: <20201012100127.339152-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20200717033350.13006-1-benchuanggli@gmail.com> <CAPDyKFpp54tNRiQ+or-3o9dUJ=CB+PpsRc=fkxc10dAUY-x_SQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFpp54tNRiQ+or-3o9dUJ=CB+PpsRc=fkxc10dAUY-x_SQ@mail.gmail.com>
-From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Mon, 12 Oct 2020 16:41:15 +0800
-Message-ID: <CACT4zj-Z0yiuYF9KVyvTM+0nvk__YnBh=c7MHuB1XOFVpTtmHw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and
- enable SSC for GL975x
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        greg.tu@genesyslogic.com.tw, SeanHY.Chen@genesyslogic.com.tw
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Hi Linus,
 
-Regarding this patch, we also want to fix the EMI of one hardware
-using the old version(such as v5.4).
-Is there a chance to append a Fixes tag on this patch ?
-Or what should I do ?
+Here's the PR with the updates for MMC for v5.10. Details about the highlights
+are as usual found in the signed tag.
 
-Best Regards,
-Ben
+Please pull this in!
 
-On Wed, Aug 5, 2020 at 2:34 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 17 Jul 2020 at 05:33, Ben Chuang <benchuanggli@gmail.com> wrote:
-> >
-> > From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> >
-> > Set SDR104's clock to 205MHz and enable SSC for GL9750 and GL9755
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
->
-> Applied for next (a while ago), thanks!
->
-> Kind regards
-> Uffe
->
->
-> > ---
-> >  drivers/mmc/host/sdhci-pci-gli.c | 220 ++++++++++++++++++++++++++++++-
-> >  1 file changed, 218 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> > index ca0166d9bf82..5da2b06d84ae 100644
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -31,10 +31,18 @@
-> >  #define   SDHCI_GLI_9750_ALL_RST      (BIT(24)|BIT(25)|BIT(28)|BIT(30))
-> >
-> >  #define SDHCI_GLI_9750_PLL           0x864
-> > +#define   SDHCI_GLI_9750_PLL_LDIV       GENMASK(9, 0)
-> > +#define   SDHCI_GLI_9750_PLL_PDIV       GENMASK(14, 12)
-> > +#define   SDHCI_GLI_9750_PLL_DIR        BIT(15)
-> >  #define   SDHCI_GLI_9750_PLL_TX2_INV    BIT(23)
-> >  #define   SDHCI_GLI_9750_PLL_TX2_DLY    GENMASK(22, 20)
-> >  #define   GLI_9750_PLL_TX2_INV_VALUE    0x1
-> >  #define   GLI_9750_PLL_TX2_DLY_VALUE    0x0
-> > +#define   SDHCI_GLI_9750_PLLSSC_STEP    GENMASK(28, 24)
-> > +#define   SDHCI_GLI_9750_PLLSSC_EN      BIT(31)
-> > +
-> > +#define SDHCI_GLI_9750_PLLSSC        0x86C
-> > +#define   SDHCI_GLI_9750_PLLSSC_PPM    GENMASK(31, 16)
-> >
-> >  #define SDHCI_GLI_9750_SW_CTRL      0x874
-> >  #define   SDHCI_GLI_9750_SW_CTRL_4    GENMASK(7, 6)
-> > @@ -76,6 +84,21 @@
-> >  #define PCIE_GLI_9763E_SCR      0x8E0
-> >  #define   GLI_9763E_SCR_AXI_REQ           BIT(9)
-> >
-> > +#define PCI_GLI_9755_WT       0x800
-> > +#define   PCI_GLI_9755_WT_EN    BIT(0)
-> > +#define   GLI_9755_WT_EN_ON     0x1
-> > +#define   GLI_9755_WT_EN_OFF    0x0
-> > +
-> > +#define PCI_GLI_9755_PLL            0x64
-> > +#define   PCI_GLI_9755_PLL_LDIV       GENMASK(9, 0)
-> > +#define   PCI_GLI_9755_PLL_PDIV       GENMASK(14, 12)
-> > +#define   PCI_GLI_9755_PLL_DIR        BIT(15)
-> > +#define   PCI_GLI_9755_PLLSSC_STEP    GENMASK(28, 24)
-> > +#define   PCI_GLI_9755_PLLSSC_EN      BIT(31)
-> > +
-> > +#define PCI_GLI_9755_PLLSSC        0x68
-> > +#define   PCI_GLI_9755_PLLSSC_PPM    GENMASK(15, 0)
-> > +
-> >  #define GLI_MAX_TUNING_LOOP 40
-> >
-> >  /* Genesys Logic chipset */
-> > @@ -280,6 +303,84 @@ static int gl9750_execute_tuning(struct sdhci_host *host, u32 opcode)
-> >         return 0;
-> >  }
-> >
-> > +static void gl9750_disable_ssc_pll(struct sdhci_host *host)
-> > +{
-> > +       u32 pll;
-> > +
-> > +       gl9750_wt_on(host);
-> > +       pll = sdhci_readl(host, SDHCI_GLI_9750_PLL);
-> > +       pll &= ~(SDHCI_GLI_9750_PLL_DIR | SDHCI_GLI_9750_PLLSSC_EN);
-> > +       sdhci_writel(host, pll, SDHCI_GLI_9750_PLL);
-> > +       gl9750_wt_off(host);
-> > +}
-> > +
-> > +static void gl9750_set_pll(struct sdhci_host *host, u8 dir, u16 ldiv, u8 pdiv)
-> > +{
-> > +       u32 pll;
-> > +
-> > +       gl9750_wt_on(host);
-> > +       pll = sdhci_readl(host, SDHCI_GLI_9750_PLL);
-> > +       pll &= ~(SDHCI_GLI_9750_PLL_LDIV |
-> > +                SDHCI_GLI_9750_PLL_PDIV |
-> > +                SDHCI_GLI_9750_PLL_DIR);
-> > +       pll |= FIELD_PREP(SDHCI_GLI_9750_PLL_LDIV, ldiv) |
-> > +              FIELD_PREP(SDHCI_GLI_9750_PLL_PDIV, pdiv) |
-> > +              FIELD_PREP(SDHCI_GLI_9750_PLL_DIR, dir);
-> > +       sdhci_writel(host, pll, SDHCI_GLI_9750_PLL);
-> > +       gl9750_wt_off(host);
-> > +
-> > +       /* wait for pll stable */
-> > +       mdelay(1);
-> > +}
-> > +
-> > +static void gl9750_set_ssc(struct sdhci_host *host, u8 enable, u8 step, u16 ppm)
-> > +{
-> > +       u32 pll;
-> > +       u32 ssc;
-> > +
-> > +       gl9750_wt_on(host);
-> > +       pll = sdhci_readl(host, SDHCI_GLI_9750_PLL);
-> > +       ssc = sdhci_readl(host, SDHCI_GLI_9750_PLLSSC);
-> > +       pll &= ~(SDHCI_GLI_9750_PLLSSC_STEP |
-> > +                SDHCI_GLI_9750_PLLSSC_EN);
-> > +       ssc &= ~SDHCI_GLI_9750_PLLSSC_PPM;
-> > +       pll |= FIELD_PREP(SDHCI_GLI_9750_PLLSSC_STEP, step) |
-> > +              FIELD_PREP(SDHCI_GLI_9750_PLLSSC_EN, enable);
-> > +       ssc |= FIELD_PREP(SDHCI_GLI_9750_PLLSSC_PPM, ppm);
-> > +       sdhci_writel(host, ssc, SDHCI_GLI_9750_PLLSSC);
-> > +       sdhci_writel(host, pll, SDHCI_GLI_9750_PLL);
-> > +       gl9750_wt_off(host);
-> > +}
-> > +
-> > +static void gl9750_set_ssc_pll_205mhz(struct sdhci_host *host)
-> > +{
-> > +       /* set pll to 205MHz and enable ssc */
-> > +       gl9750_set_ssc(host, 0x1, 0x1F, 0xFFE7);
-> > +       gl9750_set_pll(host, 0x1, 0x246, 0x0);
-> > +}
-> > +
-> > +static void sdhci_gl9750_set_clock(struct sdhci_host *host, unsigned int clock)
-> > +{
-> > +       struct mmc_ios *ios = &host->mmc->ios;
-> > +       u16 clk;
-> > +
-> > +       host->mmc->actual_clock = 0;
-> > +
-> > +       gl9750_disable_ssc_pll(host);
-> > +       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> > +
-> > +       if (clock == 0)
-> > +               return;
-> > +
-> > +       clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
-> > +       if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
-> > +               host->mmc->actual_clock = 205000000;
-> > +               gl9750_set_ssc_pll_205mhz(host);
-> > +       }
-> > +
-> > +       sdhci_enable_clk(host, clk);
-> > +}
-> > +
-> >  static void gli_pcie_enable_msi(struct sdhci_pci_slot *slot)
-> >  {
-> >         int ret;
-> > @@ -295,6 +396,121 @@ static void gli_pcie_enable_msi(struct sdhci_pci_slot *slot)
-> >         slot->host->irq = pci_irq_vector(slot->chip->pdev, 0);
-> >  }
-> >
-> > +static inline void gl9755_wt_on(struct pci_dev *pdev)
-> > +{
-> > +       u32 wt_value;
-> > +       u32 wt_enable;
-> > +
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_WT, &wt_value);
-> > +       wt_enable = FIELD_GET(PCI_GLI_9755_WT_EN, wt_value);
-> > +
-> > +       if (wt_enable == GLI_9755_WT_EN_ON)
-> > +               return;
-> > +
-> > +       wt_value &= ~PCI_GLI_9755_WT_EN;
-> > +       wt_value |= FIELD_PREP(PCI_GLI_9755_WT_EN, GLI_9755_WT_EN_ON);
-> > +
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_WT, wt_value);
-> > +}
-> > +
-> > +static inline void gl9755_wt_off(struct pci_dev *pdev)
-> > +{
-> > +       u32 wt_value;
-> > +       u32 wt_enable;
-> > +
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_WT, &wt_value);
-> > +       wt_enable = FIELD_GET(PCI_GLI_9755_WT_EN, wt_value);
-> > +
-> > +       if (wt_enable == GLI_9755_WT_EN_OFF)
-> > +               return;
-> > +
-> > +       wt_value &= ~PCI_GLI_9755_WT_EN;
-> > +       wt_value |= FIELD_PREP(PCI_GLI_9755_WT_EN, GLI_9755_WT_EN_OFF);
-> > +
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_WT, wt_value);
-> > +}
-> > +
-> > +static void gl9755_disable_ssc_pll(struct pci_dev *pdev)
-> > +{
-> > +       u32 pll;
-> > +
-> > +       gl9755_wt_on(pdev);
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_PLL, &pll);
-> > +       pll &= ~(PCI_GLI_9755_PLL_DIR | PCI_GLI_9755_PLLSSC_EN);
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PLL, pll);
-> > +       gl9755_wt_off(pdev);
-> > +}
-> > +
-> > +static void gl9755_set_pll(struct pci_dev *pdev, u8 dir, u16 ldiv, u8 pdiv)
-> > +{
-> > +       u32 pll;
-> > +
-> > +       gl9755_wt_on(pdev);
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_PLL, &pll);
-> > +       pll &= ~(PCI_GLI_9755_PLL_LDIV |
-> > +                PCI_GLI_9755_PLL_PDIV |
-> > +                PCI_GLI_9755_PLL_DIR);
-> > +       pll |= FIELD_PREP(PCI_GLI_9755_PLL_LDIV, ldiv) |
-> > +              FIELD_PREP(PCI_GLI_9755_PLL_PDIV, pdiv) |
-> > +              FIELD_PREP(PCI_GLI_9755_PLL_DIR, dir);
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PLL, pll);
-> > +       gl9755_wt_off(pdev);
-> > +
-> > +       /* wait for pll stable */
-> > +       mdelay(1);
-> > +}
-> > +
-> > +static void gl9755_set_ssc(struct pci_dev *pdev, u8 enable, u8 step, u16 ppm)
-> > +{
-> > +       u32 pll;
-> > +       u32 ssc;
-> > +
-> > +       gl9755_wt_on(pdev);
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_PLL, &pll);
-> > +       pci_read_config_dword(pdev, PCI_GLI_9755_PLLSSC, &ssc);
-> > +       pll &= ~(PCI_GLI_9755_PLLSSC_STEP |
-> > +                PCI_GLI_9755_PLLSSC_EN);
-> > +       ssc &= ~PCI_GLI_9755_PLLSSC_PPM;
-> > +       pll |= FIELD_PREP(PCI_GLI_9755_PLLSSC_STEP, step) |
-> > +              FIELD_PREP(PCI_GLI_9755_PLLSSC_EN, enable);
-> > +       ssc |= FIELD_PREP(PCI_GLI_9755_PLLSSC_PPM, ppm);
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PLLSSC, ssc);
-> > +       pci_write_config_dword(pdev, PCI_GLI_9755_PLL, pll);
-> > +       gl9755_wt_off(pdev);
-> > +}
-> > +
-> > +static void gl9755_set_ssc_pll_205mhz(struct pci_dev *pdev)
-> > +{
-> > +       /* set pll to 205MHz and enable ssc */
-> > +       gl9755_set_ssc(pdev, 0x1, 0x1F, 0xFFE7);
-> > +       gl9755_set_pll(pdev, 0x1, 0x246, 0x0);
-> > +}
-> > +
-> > +static void sdhci_gl9755_set_clock(struct sdhci_host *host, unsigned int clock)
-> > +{
-> > +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> > +       struct mmc_ios *ios = &host->mmc->ios;
-> > +       struct pci_dev *pdev;
-> > +       u16 clk;
-> > +
-> > +       pdev = slot->chip->pdev;
-> > +       host->mmc->actual_clock = 0;
-> > +
-> > +       gl9755_disable_ssc_pll(pdev);
-> > +       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> > +
-> > +       if (clock == 0)
-> > +               return;
-> > +
-> > +       clk = sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
-> > +       if (clock == 200000000 && ios->timing == MMC_TIMING_UHS_SDR104) {
-> > +               host->mmc->actual_clock = 205000000;
-> > +               gl9755_set_ssc_pll_205mhz(pdev);
-> > +       }
-> > +
-> > +       sdhci_enable_clk(host, clk);
-> > +}
-> > +
-> >  static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
-> >  {
-> >         struct sdhci_host *host = slot->host;
-> > @@ -440,7 +656,7 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
-> >  }
-> >
-> >  static const struct sdhci_ops sdhci_gl9755_ops = {
-> > -       .set_clock              = sdhci_set_clock,
-> > +       .set_clock              = sdhci_gl9755_set_clock,
-> >         .enable_dma             = sdhci_pci_enable_dma,
-> >         .set_bus_width          = sdhci_set_bus_width,
-> >         .reset                  = sdhci_reset,
-> > @@ -460,7 +676,7 @@ const struct sdhci_pci_fixes sdhci_gl9755 = {
-> >
-> >  static const struct sdhci_ops sdhci_gl9750_ops = {
-> >         .read_l                 = sdhci_gl9750_readl,
-> > -       .set_clock              = sdhci_set_clock,
-> > +       .set_clock              = sdhci_gl9750_set_clock,
-> >         .enable_dma             = sdhci_pci_enable_dma,
-> >         .set_bus_width          = sdhci_set_bus_width,
-> >         .reset                  = sdhci_gl9750_reset,
-> > --
-> > 2.27.0
-> >
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 4243219141b67d7c2fdb2d8073c17c539b9263eb:
+
+  mmc: core: don't set limits.discard_granularity as 0 (2020-10-09 08:26:09 +0200)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.10
+
+for you to fetch changes up to 1e23400f1a7342a2805cc647e6314cd12bfb5526:
+
+  mmc: sdhci_am654: Fix module autoload (2020-10-09 08:58:58 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Export SDIO revision and info strings to userspace
+ - Add support for specifying mmc/mmcblk index via mmc aliases in DT
+
+MMC host:
+ - Enable support for async probe for all mmc host drivers
+ - Enable compile testing of multiple host drivers
+ - dw_mmc: Enable the Synopsys DesignWare driver for RISCV and CSKY
+ - mtk-sd: Fixup support for CQHCI
+ - owl-mmc: Add support for the actions,s700-mmc variant
+ - renesas_sdhi: Fix regression (temporary) for re-insertion of SD cards
+ - renesas_sdhi: Add support for the r8a774e1 variant
+ - renesas_sdhi/tmio: Improvements for tunings
+ - renesas_sdhi/tmio: Rework support for reset of controller
+ - sdhci-acpi: Fix HS400 tuning for devices with invalid presets on AMDI0040
+ - sdhci_am654: Improve support for tunings
+ - sdhci_am654: Add support for input tap delays
+ - sdhci_am654: Add workaround for card detect debounce timer
+ - sdhci-am654: Add support for the TI's J7200 variants
+ - sdhci-esdhc-imx: Fix support for manual tuning
+ - sdhci-iproc: Enable support for eMMC DDR 3.3V for bcm2711
+ - sdhci-msm: Fix stability issues with HS400 for sc7180
+ - sdhci-of-sparx5: Add Sparx5 SoC eMMC driver
+ - sdhci-of-esdhc: Fixup reference clock source selection
+ - sdhci-pci: Add LTR support for some Intel BYT controllers
+ - sdhci-pci-gli: Add CQHCI Support for GL9763E
+
+----------------------------------------------------------------
+Adrian Hunter (1):
+      mmc: sdhci: Add LTR support for some Intel BYT based controllers
+
+Alex Dewar (1):
+      mmc: sdhci-msm: enable compile-testing on !ARM
+
+Alexander A. Klimov (1):
+      mmc: sdhci_am654: Replace HTTP links with HTTPS ones
+
+Amey Narkhede (1):
+      mmc: mediatek: Drop pointer to mmc_host from msdc_host
+
+Amit Singh Tomar (1):
+      dt-bindings: mmc: owl: add compatible string actions,s700-mmc
+
+Ben Chuang (1):
+      mmc: sdhci-pci-gli: Add CQHCI Support for GL9763E
+
+Chun-Hung Wu (2):
+      mmc: cqhci: add new cqhci_host_ops pre_enable() and post_disable()
+      mmc: mediatek: add pre_enable() and post_disable() hook function
+
+Colin Ian King (1):
+      ms_block: fix spelling mistake "doesn'" -> "doesn't"
+
+Douglas Anderson (7):
+      mmc: sdhci-msm: Prefer asynchronous probe
+      mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4
+      mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.9
+      mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.14
+      mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.19
+      mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v5.4
+      mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that are newer than 5.4
+
+Faiz Abbas (9):
+      dt-bindings: mmc: sdhci-am654: Document bindings for the host controllers on TI's J7200 devices
+      mmc: sdhci_am654: Add workaround for card detect debounce timer
+      dt-bindings: mmc: sdhci-am654: Convert sdhci-am654 controller documentation to json schema
+      dt-bindings: mmc: sdhci-am654: Add documentation for input tap delay
+      mmc: sdhci_am654: Fix hard coded otap delay array size
+      mmc: sdhci_am654: Add support for input tap delay
+      mmc: sdhci_am654: Add support for software tuning
+      mmc: sdhci_am654: Enable tuning for SDR50
+      mmc: sdhci_am654: Fix module autoload
+
+Guo Ren (1):
+      mmc: Kconfig: Add RISCV and CSKY for MMC_DW
+
+Haibo Chen (2):
+      mmc: sdhci-esdhc-imx: Reset before sending tuning command for manual tuning
+      mmc: sdhci-esdhc-imx: remove unused code
+
+Krzysztof Kozlowski (22):
+      mmc: s3cmci: remove empty kerneldoc comment
+      dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8 compatible matching
+      dt-bindings: mmc: mmc-pwreq-simple: Accept more than one reset GPIO
+      mmc: bcm2835: Simplify with dev_err_probe()
+      mmc: davinci: Simplify with dev_err_probe()
+      mmc: dw_mmc-zx: Simplify with dev_err_probe()
+      mmc: jz4740: Simplify with dev_err_probe()
+      mmc: meson: Simplify with dev_err_probe()
+      mmc: sdhci-of-arasan: Simplify with dev_err_probe()
+      mmc: sdhci-tegra: Simplify with dev_err_probe()
+      mmc: dw_mmc: Simplify with dev_err_probe()
+      mmc: sdhci-of-sparx5: Use proper printk format for dma_addr_t
+      mmc: sdhci-brcmstb: Simplify with optional clock and dev_err_probe()
+      mmc: davinci: Fix -Wpointer-to-int-cast on compile test
+      mmc: s3cmci: Use proper printk format for iomem pointer
+      mmc: s3cmci: Cast driver data through long
+      mmc: s3cmci: Drop unused variables in dbg_dumpregs
+      mmc: host: Drop unneeded MMC dependency in Kconfig
+      mmc: host: Enable compile testing of multiple drivers
+      mmc: moxart: remove unneeded check for drvdata
+      mmc: sdhci: fix indentation mistakes
+      mmc: sdhci-s3c: hide forward declaration of of_device_id behind CONFIG_OF
+
+Lad Prabhakar (1):
+      dt-bindings: mmc: renesas,sdhi: Add r8a774e1 support
+
+Lars Povlsen (2):
+      dt-bindings: mmc: Add Sparx5 SDHCI controller bindings
+      mmc: sdhci-of-sparx5: Add Sparx5 SoC eMMC driver
+
+Madhuparna Bhowmik (1):
+      mmc: via-sdmmc: Fix data race bug
+
+Matthias Schiffer (2):
+      dt-bindings: mmc: document alias support
+      mmc: core: Allow setting slot index via device tree alias
+
+Pali Rohár (4):
+      mmc: sdio: Check for CISTPL_VERS_1 buffer size
+      mmc: sdio: Parse CISTPL_VERS_1 major and minor revision numbers
+      mmc: sdio: Extend sdio_config_attr macro and use it also for modalias
+      mmc: sdio: Export SDIO revision and info strings to userspace
+
+Qinglang Miao (1):
+      mmc: rtsx_usb_sdmmc: simplify the return expression of sd_change_phase()
+
+Randy Dunlap (1):
+      mmc: host: fix depends for MMC_MESON_GX w/ COMPILE_TEST
+
+Raul E Rangel (1):
+      mmc: sdhci-acpi: AMDI0040: Set SDHCI_QUIRK2_PRESET_VALUE_BROKEN
+
+Robin Murphy (1):
+      mmc: renesas_sdhi: Drop local dma_parms
+
+Stefan Wahren (1):
+      mmc: sdhci-iproc: Enable eMMC DDR 3.3V support for bcm2711
+
+Tian Tao (1):
+      mmc: sd: Use kobj_to_dev() instead of container_of()
+
+Tobias Schramm (1):
+      mmc: mmc_spi: fix timeout calculation
+
+Ulf Hansson (5):
+      Merge branch 'fixes' into next
+      mmc: Drop COMPILE_TEST Kconfig option for MMC_S3C
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+
+Veerabhadrarao Badiganti (1):
+      mmc: sdhci-msm: Enable restore_dll_config flag for sc7180 target
+
+Viresh Kumar (1):
+      mmc: sdhci-msm: Unconditionally call dev_pm_opp_of_remove_table()
+
+Wolfram Sang (19):
+      mmc: test: remove ambiguity in test description
+      mmc: core: Improve documentation of MMC_CAP_HW_RESET
+      mmc: renesas_sdhi: move wrong 'hw_reset' to 'reset'
+      Revert "mmc: tmio: fix reset operation"
+      mmc: tmio: remove indirection of 'hw_reset' callback
+      mmc: tmio: factor out common parts of the reset routine
+      mmc: tmio: don't reset whole IP core when tuning fails
+      mmc: tmio: remove indirection of 'execute_tuning' callback
+      mmc: meson-gx: use wrapper to avoid accessing internal vars
+      mmc: core: when downgrading HS400, callback into drivers earlier
+      mmc: core: add a 'doing_init_tune' flag and a 'mmc_doing_tune' helper
+      mmc: renesas_sdhi: keep SCC clock active when tuning
+      mmc: core: simplify an expression
+      mmc: tmio: add generic hook to fixup after a completed request
+      mmc: renesas_sdhi: support manual calibration
+      mmc: core: clear 'doing_init_tune' also after failures
+      mmc: core: document mmc_hw_reset()
+      mmc: renesas_sdhi: drop local flag for tuning
+      mmc: renesas_sdhi: workaround a regression when reinserting SD cards
+
+Xu Wang (1):
+      mmc: omap-hsmmc: remove redundant null check
+
+Yangbo Lu (1):
+      mmc: sdhci-of-esdhc: fix reference clock source selection
+
+ .../devicetree/bindings/clock/imx8qxp-lpcg.yaml    |   2 +-
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |  37 +--
+ .../bindings/mmc/microchip,dw-sparx5-sdhci.yaml    |  65 +++++
+ .../devicetree/bindings/mmc/mmc-controller.yaml    |   4 +
+ .../devicetree/bindings/mmc/mmc-pwrseq-simple.yaml |   2 +
+ Documentation/devicetree/bindings/mmc/owl-mmc.yaml |   6 +-
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   1 +
+ .../devicetree/bindings/mmc/sdhci-am654.txt        |  61 -----
+ .../devicetree/bindings/mmc/sdhci-am654.yaml       | 218 +++++++++++++++++
+ drivers/memstick/core/ms_block.c                   |   2 +-
+ drivers/mmc/core/bus.c                             |  12 +
+ drivers/mmc/core/core.c                            |  10 +
+ drivers/mmc/core/host.c                            |  26 +-
+ drivers/mmc/core/mmc.c                             |  22 +-
+ drivers/mmc/core/mmc_test.c                        |   8 +-
+ drivers/mmc/core/sd.c                              |  38 ++-
+ drivers/mmc/core/sdio.c                            |  24 ++
+ drivers/mmc/core/sdio_bus.c                        |  54 +++--
+ drivers/mmc/core/sdio_cis.c                        |  11 +
+ drivers/mmc/host/Kconfig                           |  53 ++--
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/alcor.c                           |   1 +
+ drivers/mmc/host/android-goldfish.c                |   1 +
+ drivers/mmc/host/atmel-mci.c                       |   1 +
+ drivers/mmc/host/au1xmmc.c                         |   1 +
+ drivers/mmc/host/bcm2835.c                         |   5 +-
+ drivers/mmc/host/cavium-octeon.c                   |   1 +
+ drivers/mmc/host/cqhci.c                           |   6 +
+ drivers/mmc/host/cqhci.h                           |   2 +
+ drivers/mmc/host/davinci_mmc.c                     |   8 +-
+ drivers/mmc/host/dw_mmc-bluefield.c                |   1 +
+ drivers/mmc/host/dw_mmc-exynos.c                   |   1 +
+ drivers/mmc/host/dw_mmc-hi3798cv200.c              |   1 +
+ drivers/mmc/host/dw_mmc-k3.c                       |   1 +
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   1 +
+ drivers/mmc/host/dw_mmc-rockchip.c                 |   1 +
+ drivers/mmc/host/dw_mmc-zx.c                       |  12 +-
+ drivers/mmc/host/dw_mmc.c                          |   9 +-
+ drivers/mmc/host/jz4740_mmc.c                      |   5 +-
+ drivers/mmc/host/meson-gx-mmc.c                    |  19 +-
+ drivers/mmc/host/meson-mx-sdhc-mmc.c               |   1 +
+ drivers/mmc/host/meson-mx-sdio.c                   |   1 +
+ drivers/mmc/host/mmc_spi.c                         |   4 +-
+ drivers/mmc/host/moxart-mmc.c                      |  24 +-
+ drivers/mmc/host/mtk-sd.c                          |  68 ++++--
+ drivers/mmc/host/mvsdio.c                          |   1 +
+ drivers/mmc/host/mxcmmc.c                          |   1 +
+ drivers/mmc/host/mxs-mmc.c                         |   1 +
+ drivers/mmc/host/omap.c                            |   1 +
+ drivers/mmc/host/omap_hsmmc.c                      |  19 +-
+ drivers/mmc/host/owl-mmc.c                         |   1 +
+ drivers/mmc/host/pxamci.c                          |   1 +
+ drivers/mmc/host/renesas_sdhi.h                    |   6 +-
+ drivers/mmc/host/renesas_sdhi_core.c               | 233 +++++++++++++++---
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   5 +-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   1 +
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |   1 +
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |   8 +-
+ drivers/mmc/host/s3cmci.c                          |  14 +-
+ drivers/mmc/host/sdhci-acpi.c                      |  38 +++
+ drivers/mmc/host/sdhci-bcm-kona.c                  |   1 +
+ drivers/mmc/host/sdhci-brcmstb.c                   |  13 +-
+ drivers/mmc/host/sdhci-cadence.c                   |   1 +
+ drivers/mmc/host/sdhci-cns3xxx.c                   |   1 +
+ drivers/mmc/host/sdhci-dove.c                      |   1 +
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |  17 +-
+ drivers/mmc/host/sdhci-esdhc-mcf.c                 |   1 +
+ drivers/mmc/host/sdhci-iproc.c                     |   2 +
+ drivers/mmc/host/sdhci-milbeaut.c                  |   1 +
+ drivers/mmc/host/sdhci-msm.c                       |  16 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |   8 +-
+ drivers/mmc/host/sdhci-of-aspeed.c                 |   2 +
+ drivers/mmc/host/sdhci-of-at91.c                   |   1 +
+ drivers/mmc/host/sdhci-of-dwcmshc.c                |   1 +
+ drivers/mmc/host/sdhci-of-esdhc.c                  |  19 +-
+ drivers/mmc/host/sdhci-of-hlwd.c                   |   1 +
+ drivers/mmc/host/sdhci-of-sparx5.c                 | 270 +++++++++++++++++++++
+ drivers/mmc/host/sdhci-omap.c                      |   1 +
+ drivers/mmc/host/sdhci-pci-core.c                  | 154 ++++++++++++
+ drivers/mmc/host/sdhci-pci-gli.c                   | 150 +++++++++++-
+ drivers/mmc/host/sdhci-pic32.c                     |   1 +
+ drivers/mmc/host/sdhci-pxav2.c                     |   1 +
+ drivers/mmc/host/sdhci-pxav3.c                     |   1 +
+ drivers/mmc/host/sdhci-s3c.c                       |   3 +
+ drivers/mmc/host/sdhci-sirf.c                      |   1 +
+ drivers/mmc/host/sdhci-spear.c                     |   1 +
+ drivers/mmc/host/sdhci-sprd.c                      |   5 +-
+ drivers/mmc/host/sdhci-st.c                        |   1 +
+ drivers/mmc/host/sdhci-tegra.c                     |   8 +-
+ drivers/mmc/host/sdhci-xenon.c                     |   1 +
+ drivers/mmc/host/sdhci_am654.c                     | 207 +++++++++++++---
+ drivers/mmc/host/sdhci_f_sdh30.c                   |   1 +
+ drivers/mmc/host/sh_mmcif.c                        |   1 +
+ drivers/mmc/host/sunxi-mmc.c                       |   1 +
+ drivers/mmc/host/tmio_mmc.c                        |   9 +-
+ drivers/mmc/host/tmio_mmc.h                        |   8 +-
+ drivers/mmc/host/tmio_mmc_core.c                   |  48 +---
+ drivers/mmc/host/uniphier-sd.c                     |   6 +-
+ drivers/mmc/host/usdhi6rol0.c                      |   1 +
+ drivers/mmc/host/via-sdmmc.c                       |   3 +
+ drivers/mmc/host/wbsd.c                            |   1 +
+ drivers/mmc/host/wmt-sdmmc.c                       |   1 +
+ include/linux/mmc/card.h                           |   2 +
+ include/linux/mmc/host.h                           |   9 +-
+ include/linux/mmc/sdio_func.h                      |   2 +
+ 105 files changed, 1743 insertions(+), 404 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/microchip,dw-sparx5-sdhci.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-am654.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+ create mode 100644 drivers/mmc/host/sdhci-of-sparx5.c
