@@ -2,105 +2,97 @@ Return-Path: <SRS0=f1/V=DU=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5800C433E7
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Oct 2020 11:09:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F967C43457
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Oct 2020 11:26:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 804C120659
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Oct 2020 11:09:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ED54D21D40
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Oct 2020 11:26:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=Synaptics.onmicrosoft.com header.i=@Synaptics.onmicrosoft.com header.b="XlYZyCMR"
+	dkim=pass (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="a/Sp1GZZ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730667AbgJMLJF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Oct 2020 07:09:05 -0400
-Received: from mail-dm6nam11on2071.outbound.protection.outlook.com ([40.107.223.71]:52320
-        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1730454AbgJMLJF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 13 Oct 2020 07:09:05 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=CFv/uCSZXYMfRkxQCLQPrH9R3ic534BC+cRz859oML5FRp3AavImmKLPFgwUUf9sUzSwbgQ9UusjAvSAdq5u5ps3MIONiySJRC2GM0jFXcj9D9qMuepi0/eB3erBUy2l+g6EICt7mmq7w2ftzDJhj7dqQc0T02cix0ym6L/ySMQQ7rn2j0Ru+HuccIdX13VemTOGSapm00kITDIsIEWExRtrvJh1mBxj3HuYdBsuKWJX+nXiEJcyWTjx1Khl/HFzrwo6Yy2A/lVK4GTdWBMBkbDArRzZnnreMHHIe3xXOF5tXH8n9ePIC/agIwXW/qE+UsTCX83mJzHRT2IonBZ/tw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=rknFU0zIBb7Y8VQoBVnMwc0LuMAsbhqBgKIE1uTzxx4=;
- b=EK0eEa4r16Abe1nfibwaTXuxChey44rGpVFG7SdVjHvwSC/wge0+UXdUSiByKjfbtU1adxZ9TbqBlGOo5WGSGAt7bFuR/zKkPaP6ASbtI8tArHgXPqz15GH57ISinwdrvUc/0xKEtAHpvSPvnqao9B0a5DRJ7pjKtWiTBxB7+GBO8qTF1Wd8nbp4W77GCYwnJ757x8xvT4LXgttiljQj/gBIgiYK4Hapzyzhw9FH+65UzVOBgkrNZwkVRDVMk9VbvFsUoMHRUmq3soV5Q1nl07HMgBoLF7Ek/0/KuTjxqTCK7wQp/2doxa/VGuI6Q0YFt7aeNCB8W4lWX7FC+76qAA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=synaptics.com; dmarc=pass action=none
- header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=rknFU0zIBb7Y8VQoBVnMwc0LuMAsbhqBgKIE1uTzxx4=;
- b=XlYZyCMRZOM1nQJ/6HYZOXIkxd4v2YV82nUhikKKOs9CSuVZs3I9dfwro9kCqHV1+XzUDwS0iHvQEStXxUAD0SMr3dH3mwgLtTaHgIcvcrIMSfT+m0pa1fxtZs0aD97Ag+zKvpxR1xfJ2g64+NDLolawHCwLF+lw1RaS8LSIDg4=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none
- header.from=synaptics.com;
-Received: from DM6PR03MB4555.namprd03.prod.outlook.com (2603:10b6:5:102::17)
- by DM5PR03MB2906.namprd03.prod.outlook.com (2603:10b6:3:11c::16) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3455.23; Tue, 13 Oct
- 2020 11:09:03 +0000
-Received: from DM6PR03MB4555.namprd03.prod.outlook.com
- ([fe80::e494:740f:155:4a38]) by DM6PR03MB4555.namprd03.prod.outlook.com
- ([fe80::e494:740f:155:4a38%7]) with mapi id 15.20.3477.020; Tue, 13 Oct 2020
- 11:09:03 +0000
-Date:   Tue, 13 Oct 2020 19:08:50 +0800
-From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-To:     linux-mmc@vger.kernel.org
-Subject: eMMC performance regression caused by 427b6514d0953bf
-Message-ID: <20201013190851.715df9ad@xhacker.debian>
-X-Mailer: Claws Mail 3.17.6 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-Originating-IP: [192.147.44.15]
-X-ClientProxiedBy: BY5PR04CA0022.namprd04.prod.outlook.com
- (2603:10b6:a03:1d0::32) To DM6PR03MB4555.namprd03.prod.outlook.com
- (2603:10b6:5:102::17)
+        id S1726948AbgJML0I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Oct 2020 07:26:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35930 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726575AbgJML0F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Oct 2020 07:26:05 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BDA2C0613D0;
+        Tue, 13 Oct 2020 04:26:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=ap+vugPRXoOSJhloW5EJc9FGxy9ZwiLwbnG+7+pEMhA=; b=a/Sp1GZZiVtkIrsbDZFKKgQTkQ
+        FS+JHTt9pp+5vCrBdk0ac5b7U8ZgZGFScrKiULCJv4PZD4wWqOSzzq06ZoGh/8vFLI33VuvYYBdii
+        wZ4VlXJvl5fnmlD+q4pIJJmvrTs/0jX/FIDmEAYUX2+Mt6vIwB3sAbRYRgWIA8hB4i4EWyZuWPFOQ
+        rIaV+GwSaVBgBLKvO/SsFSj7I46VHFxg38PLmJQ+Oh1DkRIQcIx5NIWLGcWnDXshQ14JMdlpURiF2
+        LxyBxRGv+1Wkfh31jf6dzRr+U4xHgvz3PsshAxeZoaF0OQPY6Fl5VA2XZOxLonra6CTBCfgsfUBp/
+        6eTYHzgA==;
+Received: from hch by casper.infradead.org with local (Exim 4.92.3 #3 (Red Hat Linux))
+        id 1kSIR6-0001VK-7P; Tue, 13 Oct 2020 11:25:44 +0000
+Date:   Tue, 13 Oct 2020 12:25:44 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     ira.weiny@intel.com
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Christoph Hellwig <hch@infradead.org>, x86@kernel.org,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Fenghua Yu <fenghua.yu@intel.com>, linux-doc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-nvdimm@lists.01.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        linux-kselftest@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        kvm@vger.kernel.org, netdev@vger.kernel.org, bpf@vger.kernel.org,
+        kexec@lists.infradead.org, linux-bcache@vger.kernel.org,
+        linux-mtd@lists.infradead.org, devel@driverdev.osuosl.org,
+        linux-efi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-scsi@vger.kernel.org, target-devel@vger.kernel.org,
+        linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-aio@kvack.org,
+        io-uring@vger.kernel.org, linux-erofs@lists.ozlabs.org,
+        linux-um@lists.infradead.org, linux-ntfs-dev@lists.sourceforge.net,
+        reiserfs-devel@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net,
+        linux-nilfs@vger.kernel.org, cluster-devel@redhat.com,
+        ecryptfs@vger.kernel.org, linux-cifs@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, linux-afs@lists.infradead.org,
+        linux-rdma@vger.kernel.org, amd-gfx@lists.freedesktop.org,
+        dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+        drbd-dev@lists.linbit.com, linux-block@vger.kernel.org,
+        xen-devel@lists.xenproject.org, linux-cachefs@redhat.com,
+        samba-technical@lists.samba.org, intel-wired-lan@lists.osuosl.org
+Subject: Re: [PATCH RFC PKS/PMEM 24/58] fs/freevxfs: Utilize new kmap_thread()
+Message-ID: <20201013112544.GA5249@infradead.org>
+References: <20201009195033.3208459-1-ira.weiny@intel.com>
+ <20201009195033.3208459-25-ira.weiny@intel.com>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from xhacker.debian (192.147.44.15) by BY5PR04CA0022.namprd04.prod.outlook.com (2603:10b6:a03:1d0::32) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3477.20 via Frontend Transport; Tue, 13 Oct 2020 11:09:01 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: ab0ac925-0529-4351-3564-08d86f686475
-X-MS-TrafficTypeDiagnostic: DM5PR03MB2906:
-X-Microsoft-Antispam-PRVS: <DM5PR03MB2906F988A05D093FACF7E1A3ED040@DM5PR03MB2906.namprd03.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:1284;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: qoW4Qdo9P9vtD3vS60dt9fbkHXhdRgnE8ZHw7dHbm8g7D5LUTtjUEJrbLPQqJF+MxwPuU9ZVmY/6ZAMr/vjrqE8O2CYJsxjGNNJAsK1MBCDrtSVjxTbW8OJa68T9wNs0jmmNn4/peYq8QxoR2HgJTAJie/fnRU9lrf/P9VZtc6b+IKadIAc8mqFtkw+HcGiEcRWdB1U6p9Zij/ZZSNS3x4DdVatRxI3TwXceXd7+H/QWtvdePxpjVkBjWSjJnNZMKY9qJSsxvGawJ/ViEUSHgThrIkORNr+IiZoRO21PpWM+u/l3dwZAHCeswBgv3ZEq
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR03MB4555.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(366004)(136003)(39860400002)(396003)(346002)(26005)(186003)(16526019)(55016002)(6666004)(8676002)(956004)(6916009)(9686003)(86362001)(8936002)(2906002)(5660300002)(1076003)(478600001)(66946007)(316002)(52116002)(7696005)(6506007)(66556008)(66476007)(4744005);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: 5Lq74lCMtxuQdUVS2xHyp8x3PLGzsJp3dFbMjkeg/RsGKieltjgeTMSRDbGDsuU48DtIYgjbNJd8tSNKoyIIxugwIr66+oVSNPuygI/pwF3TG3EMghQzS7yZ4+j2CyRpw76Gh9oiHvVqyf+dzU9EJxHDerPoP9lCAFXYVVhGWYPdx0HmGj3Z/lyIAYENyFbPlvE9UOfP/ct6yg9h3ZCNcLNY8Kk622mgmy656MHe4BycI1rP8t+3hhLBSXsxZq/LVkg5okFnS4jVAP3JZi/wB0TbbclUF5T2kBD2EuQfThFhMJz65w5t7OVvdusbOdnQEs9JzQbbAAtewL8RYT7iIQsCHa4ZgT4R+QYhE+4Xbq/FHh96nE/apWLzCaWHPn9LmEevFClrf1bYRtIbxwHGKmyjCCA6ExFdEIM0+J6luxIVEw8BKWIRXbqvSkb0UkC8qrewIKDDRNOWfkjygJ8QCe7RHt5oblInywrC+fuxwqXOVurs25I5pvRzT+s38s5LqF8yx1vstBQwOt3R3tRkv00Xr+j3uBmwOAX6WK084BJ0i8EfkV8MRQTl8XTt0HdUhTanfBH0lUDJOCYABPlsGPpf4XOCuI3/rSnGreGiwPPUaSZXwvM9FjR9npr1Pch17a5HNatZJ6aO+2ZUiABFpg==
-X-OriginatorOrg: synaptics.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ab0ac925-0529-4351-3564-08d86f686475
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR03MB4555.namprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Oct 2020 11:09:03.0767
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: mROnRb51FXcqJa/tJ+UTk6U7byFjhh9P0MS2MWVBj4al50rmwh9iDPgOh09BY7cnuF48dYjbP/5v8qH1D2syFQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR03MB2906
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201009195033.3208459-25-ira.weiny@intel.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+> -	kaddr = kmap(pp);
+> +	kaddr = kmap_thread(pp);
+>  	memcpy(kaddr, vip->vii_immed.vi_immed + offset, PAGE_SIZE);
+> -	kunmap(pp);
+> +	kunmap_thread(pp);
 
-I found an emmc performance regression with below simple benchmark cmd:
+You only Cced me on this particular patch, which means I have absolutely
+no idea what kmap_thread and kunmap_thread actually do, and thus can't
+provide an informed review.
 
-dd if=3D/dev/mmcblk0 of=3D/dev/null bs=3D8192 count=3D100000
-
-This regression has been bisected to commit
-427b6514d0953bf (=E2=80=9Cmmc: sdhci: Add Auto CMD Auto Select support=E2=
-=80=9D)
-
-If I revert this commit, the performance is good now.
-
-I=E2=80=99m not sure whether this is common issue or not.
-
-Thanks
+That being said I think your life would be a lot easier if you add
+helpers for the above code sequence and its counterpart that copies
+to a potential hughmem page first, as that hides the implementation
+details from most users.
