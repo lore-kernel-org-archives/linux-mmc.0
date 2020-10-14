@@ -2,140 +2,92 @@ Return-Path: <SRS0=DFdp=DV=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22056C4363D
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Oct 2020 12:43:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD63DC433DF
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Oct 2020 19:45:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C26C720878
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Oct 2020 12:43:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1602679420;
-	bh=jW0i/QQSQbgHdq+AcCmwrK02JHOb8iHkGsSyJ9m/xxE=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=t7dUlVySXkQTN9FgHz8PD49SKyhyaBJrS9tax+gDS1neEVj50GR+KrtHFxV6SEgJx
-	 mPrsx0bbH4//SIppGUWon4BpafepwJ7PyFJYk+geYg0+SQKlh2MwZzJ9ukMG6/FFRZ
-	 NV7EK9Zfq6lbvTA0H4YAXVwJMW9VZlY42QjeIXiE=
+	by mail.kernel.org (Postfix) with ESMTP id 7556E2222C
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Oct 2020 19:45:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730870AbgJNMnk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Oct 2020 08:43:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44574 "EHLO mail.kernel.org"
+        id S1727152AbgJNTpT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Oct 2020 15:45:19 -0400
+Received: from mga17.intel.com ([192.55.52.151]:38684 "EHLO mga17.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727061AbgJNMni (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 14 Oct 2020 08:43:38 -0400
-Received: from pali.im (pali.im [31.31.79.79])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8447720848;
-        Wed, 14 Oct 2020 12:43:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1602679417;
-        bh=jW0i/QQSQbgHdq+AcCmwrK02JHOb8iHkGsSyJ9m/xxE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=D56R7MepUimHoXTW8BAKEcxBCdmFAGZZt2vGgj8O0TSMzweDfN+v2d/7pi1G2qKXs
-         EpH1ZWCUEhPzupaupQcWTnSQDXehpQ+tXteOJSA7dNuJNnf0OIJkbNasyMa/7KTgmH
-         b9SjangPukrd+RMj2fT+KfjxZzl9V8ekOr+Fy5gA=
-Received: by pali.im (Postfix)
-        id 190F66EE; Wed, 14 Oct 2020 14:43:35 +0200 (CEST)
-Date:   Wed, 14 Oct 2020 14:43:34 +0200
-From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
-To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 07/23] wfx: add bus_sdio.c
-Message-ID: <20201014124334.lgx53qvtgkmfkepc@pali>
-References: <20201012104648.985256-1-Jerome.Pouiller@silabs.com>
- <20201012104648.985256-8-Jerome.Pouiller@silabs.com>
- <20201013201156.g27gynu5bhvaubul@pali>
- <2628294.9EgBEFZmRI@pc-42>
+        id S1727071AbgJNTpS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 14 Oct 2020 15:45:18 -0400
+IronPort-SDR: eMrJCRk1W6QZ77Pv4I/vS2RUZZlgIVjqV2USH0JkAG7ztWHh5q3fKYt8VONT69g2w5B8OtdjK+
+ 7FqzinPx7DfA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9774"; a="146046956"
+X-IronPort-AV: E=Sophos;i="5.77,375,1596524400"; 
+   d="scan'208";a="146046956"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Oct 2020 12:45:12 -0700
+IronPort-SDR: hprZGBEUZftwTDrfJtuECyazvnCwR48TpuhQXEehRGPIsRu0V4xDkMYMUCUJi1ySG4p0d8fhYW
+ MvppxDhwOQmw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.77,375,1596524400"; 
+   d="scan'208";a="314270085"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
+  by orsmga003.jf.intel.com with ESMTP; 14 Oct 2020 12:45:09 -0700
+Subject: Re: [PATCH] mmc: sdhci: Use Auto CMD Auto Select only when v4_mode is
+ true
+To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, zhang.chunyan@linaro.org
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <20201013190851.715df9ad@xhacker.debian>
+ <CAPDyKFo-Q-+wK1RjtTyoC42_M7UL-HteKwzLmWR-ctD6oKc=rA@mail.gmail.com>
+ <87a39115-5843-a6a3-7564-e36ae1f16903@intel.com>
+ <20201014183212.475a789d@xhacker.debian>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <2c958ccd-e21f-c660-2259-e7051d95c205@intel.com>
+Date:   Wed, 14 Oct 2020 22:44:50 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
+In-Reply-To: <20201014183212.475a789d@xhacker.debian>
 Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <2628294.9EgBEFZmRI@pc-42>
-User-Agent: NeoMutt/20180716
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wednesday 14 October 2020 13:52:15 Jérôme Pouiller wrote:
-> Hello Pali,
++ Chunyan
+
+On 14/10/20 1:32 pm, Jisheng Zhang wrote:
+> Auto CMD Auto Select can only be used when v4_mode is enabled.
+
+The SDHCI spec. doesn't seem to say that.  AFAICS it refers only to v4.1 not
+v4 mode.
+
 > 
-> On Tuesday 13 October 2020 22:11:56 CEST Pali Rohár wrote:
-> > Hello!
-> > 
-> > On Monday 12 October 2020 12:46:32 Jerome Pouiller wrote:
-> > > +#define SDIO_VENDOR_ID_SILABS        0x0000
-> > > +#define SDIO_DEVICE_ID_SILABS_WF200  0x1000
-> > > +static const struct sdio_device_id wfx_sdio_ids[] = {
-> > > +     { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILABS_WF200) },
-> > 
-> > Please move ids into common include file include/linux/mmc/sdio_ids.h
-> > where are all SDIO ids. Now all drivers have ids defined in that file.
-> > 
-> > > +     // FIXME: ignore VID/PID and only rely on device tree
-> > > +     // { SDIO_DEVICE(SDIO_ANY_ID, SDIO_ANY_ID) },
-> > 
-> > What is the reason for ignoring vendor and device ids?
+> Fixes: 427b6514d095 ("mmc: sdhci: Add Auto CMD Auto Select support")
+> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> The device has a particularity, its VID/PID is 0000:1000 (as you can see
-> above). This value is weird. The risk of collision with another device is
-> high.
-
-Those ids looks strange. You are from Silabs, can you check internally
-in Silabs if ids are really correct? And which sdio vendor id you in
-Silabs got assigned for your products?
-
-I know that sdio devices with multiple functions may have different sdio
-vendor/device id particular function and in common CIS (function 0).
-
-Could not be a problem that on one place is vendor/device id correct and
-on other place is that strange value?
-
-I have sent following patch (now part of upstream kernel) which exports
-these ids to userspace:
-https://lore.kernel.org/linux-mmc/20200527110858.17504-2-pali@kernel.org/T/#u
-
-Also for debugging ids and information about sdio cards, I sent another
-patch which export additional data:
-https://lore.kernel.org/linux-mmc/20200727133837.19086-1-pali@kernel.org/T/#u
-
-Could you try them and look at /sys/class/mmc_host/ attribute outputs?
-
-> So, maybe the device should be probed only if it appears in the DT. Since
-> WF200 targets embedded platforms, I don't think it is a problem to rely on
-> DT. You will find another FIXME further in the code about that:
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 592a55a34b58..5e0ec5df4074 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1386,7 +1386,8 @@ static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
+>  	 * Select' is recommended rather than use of 'Auto CMD12
+>  	 * Enable' or 'Auto CMD23 Enable'.
+>  	 */
+> -	if (host->version >= SDHCI_SPEC_410 && (use_cmd12 || use_cmd23)) {
+> +	if (host->version >= SDHCI_SPEC_410 && host->v4_mode &&
+> +	    (use_cmd12 || use_cmd23)) {
+>  		*mode |= SDHCI_TRNS_AUTO_SEL;
+>  
+>  		ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
 > 
-> +               dev_warn(&func->dev,
-> +                        "device is not declared in DT, features will be limited\n");
-> +               // FIXME: ignore VID/PID and only rely on device tree
-> +               // return -ENODEV;
-> 
-> However, it wouldn't be usual way to manage SDIO devices (and it is the
-> reason why the code is commented out).
-> 
-> Anyway, if we choose to rely on the DT, should we also check the VID/PID?
-> 
-> Personally, I am in favor to probe the device only if VID/PID match and if
-> a DT node is found, even if it is not the usual way.
 
-Normally all sdio devices are hotplugged in linux kernel based on sdio
-device and vendor ids. And these ids are unique identifiers of sdio
-devices. So should be enough for detection.
-
-Months ago I have checked it and moved all SDIO device and vendor ids
-into common include/linux/mmc/sdio_ids.h file. I would like to not have
-this "mess" again, which was basically fully cleaned.
-
-I'm adding linux-mmc mailing list and Ulf Hansson to loop.
-
-Ulf, can you look at this "problem"? What do you think about those
-"strange" sdio ids?
