@@ -2,126 +2,207 @@ Return-Path: <SRS0=8+sB=DW=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5141EC433E7
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Oct 2020 10:32:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02B93C43467
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Oct 2020 14:04:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E10902224A
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Oct 2020 10:32:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B4632225B
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Oct 2020 14:04:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EH8oOIvP"
+	dkim=pass (1024-bit key) header.d=silabs.onmicrosoft.com header.i=@silabs.onmicrosoft.com header.b="SZ8XTQf7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731200AbgJOKcG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Oct 2020 06:32:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48588 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726311AbgJOKcG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Oct 2020 06:32:06 -0400
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF3F9C0613D2
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Oct 2020 03:32:05 -0700 (PDT)
-Received: by mail-vs1-xe41.google.com with SMTP id v23so1190393vsp.6
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Oct 2020 03:32:05 -0700 (PDT)
+        id S1730423AbgJOOD4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Oct 2020 10:03:56 -0400
+Received: from mail-mw2nam10on2070.outbound.protection.outlook.com ([40.107.94.70]:35969
+        "EHLO NAM10-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1729930AbgJOOD4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 15 Oct 2020 10:03:56 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VBkYeljQXrWAFVPF0oCUtuO619CTckA3uxz1r0Hbg5tFXdt/Ra+vqYHCfpxd27RnhwYQIguIDEfgRdDw02M1QofwlJAutnp/ThkRYgoQkOItZZFu7myDRnyO1vTEvpD/+eS4Yp+TGzYN+3Fsxh+iGllETWeQc8P8Vio9vzAik95xBqiotDn36Ga7oeObYHTD59zPdhZQeyM10hnDBwMpSx4KALa8p+4SAuxmj6Y59W+I//FrPRRa0O6rScraXAPV6zJwMyFVkS9lMDwMvIihEAbt6mTN18kBjF4bOM1iV9+SMHsbioJZtIOsKq2sFruG1Jg71N6DoVDEDIiPtym1oA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=nx6IB7/tt02OcOIdIlS/b97xUsavB7+2pzYxL/IbOEM=;
+ b=hZS4anu/1p2FBI5uf0gIqQp/NyVaZukuNBLOWC8t4xRsYe2FTbMyBkH27kK483Rj62/Ghy7wlKPO1LVtCu3JS57zR8Ai/yZCRryHaRe4OKYEbqGa0l8zLU/JT2Hj3zWCyb56fYB1X6YtSkjxqsu0am6338Ok0aACO2ZSxvmR8tjzRaRSmSg0QIkKhuCddeifDYVskwUmov+wQtOB1+/Xm3WGy47A63xQd5QeX90htxwlPvmF6VzxgLRgUeMmdRTNLLWWnzv9Q2Zq2GsuJ1p8vzF3yNlYqP75ChJEzlSoli0ZhtESZ30EbfHjHx8jcTB4r6mXeJUUOMX3F6yVfpkYvg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
+ dkim=pass header.d=silabs.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/SatyKykuj6+wusU+fkldlSz6zvf7g6aQpEzSmisHQo=;
-        b=EH8oOIvPDHGmcjJEUjI+FbC0PcyeU8y82EV3e6ObXVFcyRPXGjcgvogHfmr2Ok5yrl
-         VAsQv36g7PijaMu3KlNS9XkgUaDprdHdPjXAoNf5zA+hg1FNGsphd4kE1DRnBCDM0+SM
-         WbCmAMjfZPZIVg33dLGDvErXvGinMN8eQj8YPifuuVDJVz/u6tfNcheNyt/XYqZPYB2V
-         vmENhjjHg8NgqUlYVkGLikIKl18GbZ7qBlsjuVX0Vw5js71va2Y2MiTvI95yK+6E07MW
-         F9A0RD1751G/JW3JJHamGi4iCrbHYq3iYxW6o2Vv3uigGMeG+kjt3MxW+jfwwI4Vq3cu
-         W+3A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/SatyKykuj6+wusU+fkldlSz6zvf7g6aQpEzSmisHQo=;
-        b=Zgi27usqlgRH9+MBhSwcxTZFbWvMcDCRif7quT4uV39wrnjizfOx3XXeC+w+zjMGJ3
-         gXuMv/THTHntqm4PRDDQGHBaezGR4T0YKgR2XxbIiuu8q4VJSukAt+dgisVfIDtu14Dn
-         TpdxgP+2Xss4+4829Z8hwG8byxLJZPJ8lJ4P+t7alYIQvU7Sr8sAd4x48n04G+djVAMO
-         F+6pakys/PNXvgqXiIjm/AQYkVmGw79n7i1fBr8Nsv3iNkqUFE0u8PprSThNZn/r6QXa
-         BL/pF3DzQvHO6F39ylmc3zoqsNyLC2YyGl1m3KkpYb+kJ1/zcZNtaFDwWrQSPVlRqYsY
-         pbMw==
-X-Gm-Message-State: AOAM5302zDtGS34hJHsUea2aHXqbBnAm1xtz2iqjIFE+7/hUuQUTGWHM
-        IKFSCVmx+s7A86rcrdoivkpKc+s9ezEJsDFE5ub1fA==
-X-Google-Smtp-Source: ABdhPJxuM0JbleJ7I2fLfYg5p+bT/r6vgA7Gd3CFnq+uGIUxv5tWvw3VJ52PgtnsBx/zvJdTZtCOVrdTZ0ZsD3tuGVs=
-X-Received: by 2002:a67:f24e:: with SMTP id y14mr1940388vsm.55.1602757925004;
- Thu, 15 Oct 2020 03:32:05 -0700 (PDT)
+ d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=nx6IB7/tt02OcOIdIlS/b97xUsavB7+2pzYxL/IbOEM=;
+ b=SZ8XTQf7vyDtg5+NKiBDNYMlVbqItUZqKaKgQnDyin78BRnclm7EHSyFSMlRXr0sLNrowdjMtlQFHxzzGnpo8lrHJSzumup//Oyx6WFqTj2LWB4hujwRvQc9umrcIyBLLuzkgmBPLpZ9bufTDhefshy/i6uEic8A1UQ18CN390I=
+Authentication-Results: linaro.org; dkim=none (message not signed)
+ header.d=none;linaro.org; dmarc=none action=none header.from=silabs.com;
+Received: from SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18)
+ by SA2PR11MB4825.namprd11.prod.outlook.com (2603:10b6:806:111::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3477.21; Thu, 15 Oct
+ 2020 14:03:53 +0000
+Received: from SN6PR11MB2718.namprd11.prod.outlook.com
+ ([fe80::4f5:fbe5:44a7:cb8a]) by SN6PR11MB2718.namprd11.prod.outlook.com
+ ([fe80::4f5:fbe5:44a7:cb8a%5]) with mapi id 15.20.3455.031; Thu, 15 Oct 2020
+ 14:03:53 +0000
+From:   =?ISO-8859-1?Q?J=E9r=F4me?= Pouiller <jerome.pouiller@silabs.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Pali =?ISO-8859-1?Q?Roh=E1r?= <pali@kernel.org>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 07/23] wfx: add bus_sdio.c
+Date:   Thu, 15 Oct 2020 16:03:47 +0200
+Message-ID: <2444203.ROLCPKctRj@pc-42>
+Organization: Silicon Labs
+In-Reply-To: <20201014124334.lgx53qvtgkmfkepc@pali>
+References: <20201012104648.985256-1-Jerome.Pouiller@silabs.com> <2628294.9EgBEFZmRI@pc-42> <20201014124334.lgx53qvtgkmfkepc@pali>
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
+X-Originating-IP: [82.67.86.106]
+X-ClientProxiedBy: SN4PR0401CA0040.namprd04.prod.outlook.com
+ (2603:10b6:803:2a::26) To SN6PR11MB2718.namprd11.prod.outlook.com
+ (2603:10b6:805:63::18)
 MIME-Version: 1.0
-References: <20201015174115.4cf2c19a@xhacker.debian>
-In-Reply-To: <20201015174115.4cf2c19a@xhacker.debian>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 15 Oct 2020 12:31:29 +0200
-Message-ID: <CAPDyKFrmYO-Y8kxdzz=XLDJPWCv0mwUL374N=RDGvFS-uPTaLA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci: Use Auto CMD Auto Select only when v4_mode
- is true
-To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from pc-42.localnet (82.67.86.106) by SN4PR0401CA0040.namprd04.prod.outlook.com (2603:10b6:803:2a::26) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3477.21 via Frontend Transport; Thu, 15 Oct 2020 14:03:50 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ebefc732-f4d2-4968-6c15-08d8711325d2
+X-MS-TrafficTypeDiagnostic: SA2PR11MB4825:
+X-Microsoft-Antispam-PRVS: <SA2PR11MB4825ACF79958D1CE60B2C04493020@SA2PR11MB4825.namprd11.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: TyCZTLNQjtrhT3cY7A3TXZHlzLAAf877Gp3g3XLXOQPgoNN+58cVIvOpB9KZ4F35IomoOKlZ2BJBgfmF5OuSr5TUgGkToLhO9ccQbMPeqQihn2ul4Hv6Uzw9dTS6O5a233+4+frj7RCKXU7bHxe48OWyKBQzEymiW8r4zY+aOcyoMfPsB3hpzIIw8zYQJnt8aZESwyenAgxGC9unF2G5I1GGv7OqUc6b9lOokUsfDGcfuGe/KcRhZtX6a9hfCYENZSQD13JGO+lE6cbyiUVoqbkfbeBB1/scfJBv6wJJtMPk91uwFKlkcZsfl3FTHP6KTUXQNfsdI4XdAR0W/saxW/XGNGKIRUPne5ka7Uu7joHuzcjNujFRUvD0gvuQzZXA6+EzlbrZo65f3cj4jQDy/Kdf/pg1z/yCCwqkX1IHhatannd5bI4N3NOLz8B1KHxNFpOr3YJTnWF23/F77qkwhg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR11MB2718.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(136003)(396003)(346002)(39850400004)(366004)(376002)(54906003)(33716001)(110136005)(26005)(66556008)(16526019)(66946007)(316002)(66476007)(8936002)(478600001)(83080400001)(186003)(6512007)(8676002)(9686003)(6666004)(36916002)(7416002)(5660300002)(4326008)(66574015)(2906002)(6506007)(6486002)(956004)(86362001)(52116002)(83380400001)(966005)(403724002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: frk1a4J5TsdRGuoUC4CzU91q8rgx0MD/KH7ZEBciNO3c+usGH4DDYs+KZje/iyBsJhPo2hFjK+cFGckEgEV58g+W1A+wOrDYeqCAJTC5orsuSVvl/K4EbJw2OZv6NMWrNSi29vBG+JzmYcABZe+d6QoIUyw9gxFDFn/c9/v96jxDVc1uW7ME/H3xeWylfRjlzXluMHMisX+Jj/NW8xtt8PkTncvgkZ3gbXg51FtQxYVn96PIrDQf0nDqM++9VI7sDHWw1+5tZqGb/vCe9KsTnAljzV1Ussa1lxTBkGI7OOmEc05g3vHzlCzgR+/BEm78XEHaQRcZ3czJXLmrhRZbZ4JGXhUu5/2KcaKCAMx2c8ObCvVbKV2C/1MDmh+SO6o624rquFQohGawYJEDiPhGQw//NeoTuS/jQ/7I/tVzakWoUj4qB6AMZA+oR3LG2erOMjZLY9GVt6vROVeEqI4eM643LU759CrrAc6hp3mBEXnxYyD21XmERHMVHpmD7EfrKJ5rCRz2qcFZFSInpnac/A7hlLqFPpokvpB3M2+2QuxuNpmRHIrV2SmA9oO6KNYrdaT3EHXysUWdoGh0iHxdkn5skOzJUSycDFZ14vP0iJjj6BnkcmDC14OqiPpTpC3I0P25+wqZErzsFJS09goh7Q==
+X-OriginatorOrg: silabs.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ebefc732-f4d2-4968-6c15-08d8711325d2
+X-MS-Exchange-CrossTenant-AuthSource: SN6PR11MB2718.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 Oct 2020 14:03:52.8578
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: iI1NxQQOUHbjaXXbA8+94xkhbKHepOXvdadagz9BF2lbVvlwUWYJI4tu3VVlaLrVxRcHkcJFC2ED5mJWVvZctw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA2PR11MB4825
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 15 Oct 2020 at 11:41, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
->
-> sdhci-of-dwcmshc meets an eMMC read performance regression with below
-> command after commit 427b6514d095 ("mmc: sdhci: Add Auto CMD Auto
-> Select support"):
->
-> dd if=/dev/mmcblk0 of=/dev/null bs=8192 count=100000
->
-> Before the commit, the above command gives 120MB/s
-> After the commit, the above command gives 51.3 MB/s
->
-> So it looks like sdhci-of-dwcmshc expects Version 4 Mode for Auto
-> CMD Auto Select. Fix the performance degradation by ensuring v4_mode
-> is true to use Auto CMD Auto Select.
->
-> Fixes: 427b6514d095 ("mmc: sdhci: Add Auto CMD Auto Select support")
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+On Wednesday 14 October 2020 14:43:34 CEST Pali Roh=E1r wrote:
+> On Wednesday 14 October 2020 13:52:15 J=E9r=F4me Pouiller wrote:
+> > On Tuesday 13 October 2020 22:11:56 CEST Pali Roh=E1r wrote:
+> > > On Monday 12 October 2020 12:46:32 Jerome Pouiller wrote:
+> > > > +#define SDIO_VENDOR_ID_SILABS        0x0000
+> > > > +#define SDIO_DEVICE_ID_SILABS_WF200  0x1000
+> > > > +static const struct sdio_device_id wfx_sdio_ids[] =3D {
+> > > > +     { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILABS_WF=
+200) },
+> > >
+> > > Please move ids into common include file include/linux/mmc/sdio_ids.h
+> > > where are all SDIO ids. Now all drivers have ids defined in that file=
+.
+> > >
+> > > > +     // FIXME: ignore VID/PID and only rely on device tree
+> > > > +     // { SDIO_DEVICE(SDIO_ANY_ID, SDIO_ANY_ID) },
+> > >
+> > > What is the reason for ignoring vendor and device ids?
+> >
+> > The device has a particularity, its VID/PID is 0000:1000 (as you can se=
+e
+> > above). This value is weird. The risk of collision with another device =
+is
+> > high.
+>=20
+> Those ids looks strange. You are from Silabs, can you check internally
+> in Silabs if ids are really correct? And which sdio vendor id you in
+> Silabs got assigned for your products?
 
-Applied for fixes and by adding a stable tag, thanks!
+I confirm these ids are the ones burned in the WF200. We have to deal with
+that :( .
 
-Kind regards
-Uffe
 
-> ---
-> Since v1:
->   - add the performance degradation on sdhci-of-dwcmshc explanation in
->     commit msg
->   - add a comment in the code explaining we require Version 4 Mode because some
->     controllers(e.g sdhci-of-dwcmshc) expect it that way.
->
->  drivers/mmc/host/sdhci.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 592a55a34b58..3561ae8a481a 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1384,9 +1384,11 @@ static inline void sdhci_auto_cmd_select(struct sdhci_host *host,
->         /*
->          * In case of Version 4.10 or later, use of 'Auto CMD Auto
->          * Select' is recommended rather than use of 'Auto CMD12
-> -        * Enable' or 'Auto CMD23 Enable'.
-> +        * Enable' or 'Auto CMD23 Enable'. We require Version 4 Mode
-> +        * here because some controllers (e.g sdhci-of-dwmshc) expect it.
->          */
-> -       if (host->version >= SDHCI_SPEC_410 && (use_cmd12 || use_cmd23)) {
-> +       if (host->version >= SDHCI_SPEC_410 && host->v4_mode &&
-> +           (use_cmd12 || use_cmd23)) {
->                 *mode |= SDHCI_TRNS_AUTO_SEL;
->
->                 ctrl2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> --
-> 2.28.0
->
+> I know that sdio devices with multiple functions may have different sdio
+> vendor/device id particular function and in common CIS (function 0).
+>=20
+> Could not be a problem that on one place is vendor/device id correct and
+> on other place is that strange value?
+>=20
+> I have sent following patch (now part of upstream kernel) which exports
+> these ids to userspace:
+> https://lore.kernel.org/linux-mmc/20200527110858.17504-2-pali@kernel.org/=
+T/#u
+>=20
+> Also for debugging ids and information about sdio cards, I sent another
+> patch which export additional data:
+> https://lore.kernel.org/linux-mmc/20200727133837.19086-1-pali@kernel.org/=
+T/#u
+>=20
+> Could you try them and look at /sys/class/mmc_host/ attribute outputs?
+
+Here is:
+
+    # cd /sys/class/mmc_host/ && grep -r . mmc1/
+    mmc1/power/runtime_suspended_time:0
+    grep: mmc1/power/autosuspend_delay_ms: Input/output error
+    mmc1/power/runtime_active_time:0
+    mmc1/power/control:auto
+    mmc1/power/runtime_status:unsupported
+    mmc1/mmc1:0001/vendor:0x0000
+    mmc1/mmc1:0001/rca:0x0001
+    mmc1/mmc1:0001/device:0x1000
+    mmc1/mmc1:0001/mmc1:0001:1/vendor:0x0000
+    mmc1/mmc1:0001/mmc1:0001:1/device:0x1000
+    grep: mmc1/mmc1:0001/mmc1:0001:1/info4: No data available
+    mmc1/mmc1:0001/mmc1:0001:1/power/runtime_suspended_time:0
+    grep: mmc1/mmc1:0001/mmc1:0001:1/power/autosuspend_delay_ms: Input/outp=
+ut error
+    mmc1/mmc1:0001/mmc1:0001:1/power/runtime_active_time:0
+    mmc1/mmc1:0001/mmc1:0001:1/power/control:auto
+    mmc1/mmc1:0001/mmc1:0001:1/power/runtime_status:unsupported
+    mmc1/mmc1:0001/mmc1:0001:1/class:0x00
+    grep: mmc1/mmc1:0001/mmc1:0001:1/info2: No data available
+    mmc1/mmc1:0001/mmc1:0001:1/modalias:sdio:c00v0000d1000
+    mmc1/mmc1:0001/mmc1:0001:1/revision:0.0
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_NAME=3Dmmc
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_FULLNAME=3D/soc/sdhci@7e300000/mmc=
+@1
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_COMPATIBLE_0=3Dsilabs,wfx-sdio
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_COMPATIBLE_N=3D1
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:SDIO_CLASS=3D00
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:SDIO_ID=3D0000:1000
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:SDIO_REVISION=3D0.0
+    mmc1/mmc1:0001/mmc1:0001:1/uevent:MODALIAS=3Dsdio:c00v0000d1000
+    grep: mmc1/mmc1:0001/mmc1:0001:1/info3: No data available
+    grep: mmc1/mmc1:0001/mmc1:0001:1/info1: No data available
+    mmc1/mmc1:0001/ocr:0x00200000
+    grep: mmc1/mmc1:0001/info4: No data available
+    mmc1/mmc1:0001/power/runtime_suspended_time:0
+    grep: mmc1/mmc1:0001/power/autosuspend_delay_ms: Input/output error
+    mmc1/mmc1:0001/power/runtime_active_time:0
+    mmc1/mmc1:0001/power/control:auto
+    mmc1/mmc1:0001/power/runtime_status:unsupported
+    grep: mmc1/mmc1:0001/info2: No data available
+    mmc1/mmc1:0001/type:SDIO
+    mmc1/mmc1:0001/revision:0.0
+    mmc1/mmc1:0001/uevent:MMC_TYPE=3DSDIO
+    mmc1/mmc1:0001/uevent:SDIO_ID=3D0000:1000
+    mmc1/mmc1:0001/uevent:SDIO_REVISION=3D0.0
+    grep: mmc1/mmc1:0001/info3: No data available
+    grep: mmc1/mmc1:0001/info1: No data available
+
+
+
+--=20
+J=E9r=F4me Pouiller
+
+
