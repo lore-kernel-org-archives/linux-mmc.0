@@ -4,51 +4,51 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA85C433DF
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 19:18:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 842FFC388CE
+	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 19:21:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C7A5222314
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 19:18:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4A0C022363
+	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 19:21:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1603048723;
+	s=default; t=1603048866;
 	bh=H4z9I9lFOofqBONBWteLXxjLefx9H4vflLddRM0CAnY=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=mQDRc+5+eS/OkkrwIqbse2TCuqztmB3sIyUddLWWU3rHefCKXbnsgZKA6AAzkXrE6
-	 +jzp5ft/XiNZfuKsjgLczpCfzRIcVNfrHrDNyK/woJTqKyODRZDN1tUfysnIOFKegU
-	 JDciuF0OV5S5C7qAZXkoFXMeQLoNwIlEBOr9SP98=
+	b=xAfxcph7BOh2znYvlTCseRxTINfabL7DDaGLmPmGT0Wd4Gd/jf/G1IbcRoy4HKBox
+	 sbXPxL28n+P46FnN/DhuBRxVDBDp1z+PYDQyx+iyOGDrr11cZ6+E7VqVFRJQ8ruwPf
+	 VLG9veQGPl1L9iBrhiqFhGJ6ilP7uk4HzYAposqc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727770AbgJRTSm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 18 Oct 2020 15:18:42 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56818 "EHLO mail.kernel.org"
+        id S1729207AbgJRTVE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 18 Oct 2020 15:21:04 -0400
+Received: from mail.kernel.org ([198.145.29.99]:32776 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727763AbgJRTSl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 18 Oct 2020 15:18:41 -0400
+        id S1729135AbgJRTU7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 18 Oct 2020 15:20:59 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 80CC1222E7;
-        Sun, 18 Oct 2020 19:18:40 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 8C03822363;
+        Sun, 18 Oct 2020 19:20:58 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1603048721;
+        s=default; t=1603048859;
         bh=H4z9I9lFOofqBONBWteLXxjLefx9H4vflLddRM0CAnY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=qXmW//N5nvMwEbw/38533mgUB2MA7iBiZsh5qyFwp07UqmaikpTuPs+6SladnIlbo
-         ckNv0qAIB+rCje0Tjq3kROBxbWzutZz+fcHHMvb5s4w9Xyets3YdmwHcRSyaTV/4Za
-         RLlPDUWcBNrnPDzx0oqpLRFQl7jjtc173z8Ay5dc=
+        b=noig04eWICcopF5dithlOTR3oI1da6WPhDE7YF4AMO4uxjYx8kEKadzgQXpPgAinM
+         /9Uj/PlXlj7aGPL1s+zIRkWdCSehk3FEeL7nkbZy1BBN6shTzo2VsuXlXHCwScu4Wl
+         N/4jQpNVV+f0hSBx45ZMLuRNQV4UbeBZ93adcRYw=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.9 027/111] mmc: sdio: Check for CISTPL_VERS_1 buffer size
-Date:   Sun, 18 Oct 2020 15:16:43 -0400
-Message-Id: <20201018191807.4052726-27-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.8 026/101] mmc: sdio: Check for CISTPL_VERS_1 buffer size
+Date:   Sun, 18 Oct 2020 15:19:11 -0400
+Message-Id: <20201018192026.4053674-26-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20201018191807.4052726-1-sashal@kernel.org>
-References: <20201018191807.4052726-1-sashal@kernel.org>
+In-Reply-To: <20201018192026.4053674-1-sashal@kernel.org>
+References: <20201018192026.4053674-1-sashal@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 X-stable: review
