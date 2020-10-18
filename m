@@ -1,91 +1,92 @@
-Return-Path: <SRS0=abg9=DX=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=vWfI=DZ=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFC17C433DF
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Oct 2020 16:18:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA85C433DF
+	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 19:18:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8701920848
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Oct 2020 16:18:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C7A5222314
+	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 19:18:43 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1602865111;
-	bh=Xb7Uaiy7eEHw3kMmpD515qhsljHRz5tgSIRBIfmrlZc=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=vPi4JUFxxyfTkLQev6lJk3sRnZL1O8ZdOUadoYm8ASUdk3tfzrBx1K8A5dxwy+rpY
-	 hSmT25xIMwddiswkWIcI1VsiJN1Zt+zgxmID5rMTawME2IVCMzciN0P5HxapMfNQqn
-	 H9igepxNYgnYoWELgWDHJx+OKAtCipudWmkoauWo=
+	s=default; t=1603048723;
+	bh=H4z9I9lFOofqBONBWteLXxjLefx9H4vflLddRM0CAnY=;
+	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
+	b=mQDRc+5+eS/OkkrwIqbse2TCuqztmB3sIyUddLWWU3rHefCKXbnsgZKA6AAzkXrE6
+	 +jzp5ft/XiNZfuKsjgLczpCfzRIcVNfrHrDNyK/woJTqKyODRZDN1tUfysnIOFKegU
+	 JDciuF0OV5S5C7qAZXkoFXMeQLoNwIlEBOr9SP98=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2409908AbgJPQSb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Oct 2020 12:18:31 -0400
-Received: from mail-oi1-f195.google.com ([209.85.167.195]:36158 "EHLO
-        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2409855AbgJPQSa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Oct 2020 12:18:30 -0400
-Received: by mail-oi1-f195.google.com with SMTP id u17so3037400oie.3;
-        Fri, 16 Oct 2020 09:18:30 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=uISo57yfUZpTzroMJhAVgeLo1/yelMiKsufW7Z+pWqo=;
-        b=m/FHxZAjzDw6+iURm5HXzRFnzv/1zD5JWvP2f4eMso4nTlQ4MTQKWoKUCdQnwaC5Bp
-         kdn4Q215XDh2i4xVHqfNXVvYX3ydimglgp9yUpPBAJ0wnr9bH05fftUrdLQ3toyJ0cnp
-         mleZ0bejFAOo0B/xSoTP47Kz60gOAjtzZEDsbnPBOp+Jh/W98/LvSlDBT7bSYZIOeR70
-         i0FneXckXDOR3H8BJDp4F9t4RZc1ntPMvSOtnF904dQNcuOTiaWCnV05bzHzYTXogUuS
-         fK4aflHqG2sGP0ExNU/rPI+A2n8YuhDZD8LQVIDbpNoqlr+qCWMDsjkTb0Bh1mGdDqoK
-         ZObw==
-X-Gm-Message-State: AOAM5314dMmyG5lv4Lnj+YgMVaB3cRqpU5GaUHwD5c8KuYXtMzlioHyp
-        DOe4/Lx1oGbYrkbrYmVcsg==
-X-Google-Smtp-Source: ABdhPJxXWV44wqWW/P4G+jW/m/jxEn6yv6aGQSaC4SmYzaJjQxINSxxLka7EviDs9inU1aAGasqeyA==
-X-Received: by 2002:aca:aa08:: with SMTP id t8mr3126702oie.129.1602865110271;
-        Fri, 16 Oct 2020 09:18:30 -0700 (PDT)
-Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id u22sm1266354oor.13.2020.10.16.09.18.29
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Oct 2020 09:18:29 -0700 (PDT)
-Received: (nullmailer pid 1517766 invoked by uid 1000);
-        Fri, 16 Oct 2020 16:18:28 -0000
-Date:   Fri, 16 Oct 2020 11:18:28 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mediatek@lists.infradead.org,
-        Rob Herring <robh+dt@kernel.org>, linux-kernel@vger.kernel.org,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        srv_heupstream@mediatek.com, devicetree@vger.kernel.org,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH v7 2/4] mmc: dt-bindings: add support for MT8192 SoC
-Message-ID: <20201016161828.GA1517686@bogus>
-References: <20201014030846.12428-1-wenbin.mei@mediatek.com>
- <20201014030846.12428-3-wenbin.mei@mediatek.com>
+        id S1727770AbgJRTSm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 18 Oct 2020 15:18:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56818 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727763AbgJRTSl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 18 Oct 2020 15:18:41 -0400
+Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 80CC1222E7;
+        Sun, 18 Oct 2020 19:18:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1603048721;
+        bh=H4z9I9lFOofqBONBWteLXxjLefx9H4vflLddRM0CAnY=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=qXmW//N5nvMwEbw/38533mgUB2MA7iBiZsh5qyFwp07UqmaikpTuPs+6SladnIlbo
+         ckNv0qAIB+rCje0Tjq3kROBxbWzutZz+fcHHMvb5s4w9Xyets3YdmwHcRSyaTV/4Za
+         RLlPDUWcBNrnPDzx0oqpLRFQl7jjtc173z8Ay5dc=
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.9 027/111] mmc: sdio: Check for CISTPL_VERS_1 buffer size
+Date:   Sun, 18 Oct 2020 15:16:43 -0400
+Message-Id: <20201018191807.4052726-27-sashal@kernel.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20201018191807.4052726-1-sashal@kernel.org>
+References: <20201018191807.4052726-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201014030846.12428-3-wenbin.mei@mediatek.com>
+Content-Type: text/plain; charset=UTF-8
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 14 Oct 2020 11:08:44 +0800, Wenbin Mei wrote:
-> MT8192 mmc host ip is compatible with MT8183.
-> Add support for this.
-> 
-> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 15 +++++++++++++--
->  1 file changed, 13 insertions(+), 2 deletions(-)
-> 
+From: Pali Rohár <pali@kernel.org>
 
+[ Upstream commit 8ebe2607965d3e2dc02029e8c7dd35fbe508ffd0 ]
 
-Please add Acked-by/Reviewed-by tags when posting new versions. However,
-there's no need to repost patches *only* to add the tags. The upstream
-maintainer will do that for acks received on the version they apply.
+Before parsing CISTPL_VERS_1 structure check that its size is at least two
+bytes to prevent buffer overflow.
 
-If a tag was not added on purpose, please state why and what changed.
+Signed-off-by: Pali Rohár <pali@kernel.org>
+Link: https://lore.kernel.org/r/20200727133837.19086-2-pali@kernel.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/mmc/core/sdio_cis.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index e0655278c5c32..3efaa9534a777 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -26,6 +26,9 @@ static int cistpl_vers_1(struct mmc_card *card, struct sdio_func *func,
+ 	unsigned i, nr_strings;
+ 	char **buffer, *string;
+ 
++	if (size < 2)
++		return 0;
++
+ 	/* Find all null-terminated (including zero length) strings in
+ 	   the TPLLV1_INFO field. Trailing garbage is ignored. */
+ 	buf += 2;
+-- 
+2.25.1
 
