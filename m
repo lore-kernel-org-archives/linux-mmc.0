@@ -1,121 +1,84 @@
-Return-Path: <SRS0=vWfI=DZ=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=rHuV=D2=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7DF4C43457
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 21:50:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 594AAC433DF
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Oct 2020 00:42:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFD1622280
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Oct 2020 21:50:20 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BT6sX70H"
+	by mail.kernel.org (Postfix) with ESMTP id 1C22622272
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Oct 2020 00:42:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728597AbgJRVuP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 18 Oct 2020 17:50:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55738 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726249AbgJRVuO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Oct 2020 17:50:14 -0400
-Received: from mail-qt1-x844.google.com (mail-qt1-x844.google.com [IPv6:2607:f8b0:4864:20::844])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 797D3C061755;
-        Sun, 18 Oct 2020 14:50:14 -0700 (PDT)
-Received: by mail-qt1-x844.google.com with SMTP id m65so4983425qte.11;
-        Sun, 18 Oct 2020 14:50:14 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=LW7NtPMGJ2R8VOhKgzw6sjc10vh2YbY8kQEEkfju8fA=;
-        b=BT6sX70H+s8KhgIkqlKxOTyt7nLW9Zkkp/pWMqwoIwpRPwASphI99ISJJY/DrRq4YB
-         tuxxuQta89p2LltScao7kwUamcV10d6qq0/0GsMri9Y5uCbzF0DQIPVBZym6oh2w8IRp
-         jGv4FzahYM8UB3UvXODpIfq1ilK2uqq9Xd/9k1Vp0D25EYeZvsrsLMiSOVKbh0jHo8ly
-         ZwpyiDfjYzQI7omWM6lYTXWC4WxC4zXCwovEKbG2sVh0lXA3kgHlfvQ9kncK/jS7lzXB
-         WtZ4PQbPMGBo2Fvzsm14b4aTThFD0/Vsyl0CynTIq6qQwMl+W5yJA342KaaYBMt5xICG
-         NkkQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=LW7NtPMGJ2R8VOhKgzw6sjc10vh2YbY8kQEEkfju8fA=;
-        b=A54fIiuMEzcWU81kWizVMjWexILYSifLNSzkHPsvY2YrLg8OawjexicsjeQJnFnBDX
-         lFgMcBFXA82PdWXGIIPhsA9feRYqx1SsNLbcJ/ziaN4LYnD1cKUMCksOLHy3lFXz5KLL
-         mu9EmHYogFvkDCXUl8CHzXsYLO+k6XJR5vHxIizc57xHGVrJllBoAsjDznA1f3vEv4gq
-         7r/cDjJ56/USRGuhaG/HGaCbsUTFN5E6xSa5feLVxVzOgJvtHqkKZCTYXCcsqR5D9EDP
-         B2OZD0jdfFS8VVd8PckfIcCDEueSt7zf1C/eHHzfQ2kzEXzjmS452U49hb5WZ726v4sf
-         2NGA==
-X-Gm-Message-State: AOAM533U1Tx5J8OhD7nMqzqK4J++qB+CTP2+s6UHp1PSbvAYT+XXA4Gn
-        4VQzZkhSxbqT6YowujhmHWmAgdDYog4L64/VD5A=
-X-Google-Smtp-Source: ABdhPJw59Z9ZSI7YkUnrDX/NzYUwLZIQMERPV41io/elXdvNyA/Ph+eIMdFGNAEYy/TP8jUOuq9oIUb3paHWMlURueE=
-X-Received: by 2002:aed:2983:: with SMTP id o3mr12423656qtd.285.1603057812125;
- Sun, 18 Oct 2020 14:50:12 -0700 (PDT)
+        id S1730025AbgJSAmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 18 Oct 2020 20:42:35 -0400
+Received: from szxga06-in.huawei.com ([45.249.212.32]:41496 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726219AbgJSAmf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 18 Oct 2020 20:42:35 -0400
+Received: from DGGEMS407-HUB.china.huawei.com (unknown [172.30.72.60])
+        by Forcepoint Email with ESMTP id 7656D88266D34F4C0099;
+        Mon, 19 Oct 2020 08:42:32 +0800 (CST)
+Received: from localhost.localdomain (10.69.192.56) by
+ DGGEMS407-HUB.china.huawei.com (10.3.19.207) with Microsoft SMTP Server id
+ 14.3.487.0; Mon, 19 Oct 2020 08:42:28 +0800
+From:   Tian Tao <tiantao6@hisilicon.com>
+To:     <haotian.jing@mediatek.com>, <ulf.hansson@linaro.org>,
+        <matthias.bgg@gmail.com>, <p.zabel@pengutronix.de>,
+        <linux-mmc@vger.kernel.org>, <linux-arm-kernel@lists.infradead.or>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: mediatek: replace spin_lock_irqsave by spin_lock in hard IRQ
+Date:   Mon, 19 Oct 2020 08:43:13 +0800
+Message-ID: <1603068193-44688-1-git-send-email-tiantao6@hisilicon.com>
+X-Mailer: git-send-email 2.7.4
 MIME-Version: 1.0
-References: <20200817091617.28119-1-allen.cryptic@gmail.com>
-In-Reply-To: <20200817091617.28119-1-allen.cryptic@gmail.com>
-From:   Richard Weinberger <richard.weinberger@gmail.com>
-Date:   Sun, 18 Oct 2020 23:50:00 +0200
-Message-ID: <CAFLxGvxsHD6zvTJSHeo2gaoRQfjUPZ6M=5BirOObHFjGqnzfew@mail.gmail.com>
-Subject: Re: [PATCH] arch: um: convert tasklets to use new tasklet_setup() API
-To:     Allen Pais <allen.cryptic@gmail.com>
-Cc:     Jeff Dike <jdike@addtoit.com>, Richard Weinberger <richard@nod.at>,
-        Anton Ivanov <anton.ivanov@cambridgegreys.com>,
-        3chas3@gmail.com, Jens Axboe <axboe@kernel.dk>,
-        stefanr@s5r6.in-berlin.de, Dave Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Sebastian Reichel <sre@kernel.org>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        "K. Y. Srinivasan" <kys@microsoft.com>,
-        Helge Deller <deller@gmx.de>, dmitry.torokhov@gmail.com,
-        jassisinghbrar@gmail.com, Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        mporter@kernel.crashing.org, alex.bou9@gmail.com,
-        Mark Brown <broonie@kernel.org>, martyn@welchs.me.uk,
-        manohar.vanga@gmail.com, mitch@sfgoth.com,
-        "David S. Miller" <davem@davemloft.net>, kuba@kernel.org,
-        Kees Cook <keescook@chromium.org>,
-        linux-um <linux-um@lists.infradead.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        openipmi-developer@lists.sourceforge.net,
-        linux1394-devel@lists.sourceforge.net,
-        intel-gfx@lists.freedesktop.org,
-        DRI mailing list <dri-devel@lists.freedesktop.org>,
-        linux-hyperv@vger.kernel.org, linux-parisc@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-ntb@googlegroups.com, linux-s390@vger.kernel.org,
-        "open list:SPI SUBSYSTEM" <linux-spi@vger.kernel.org>,
-        devel@driverdev.osuosl.org, Allen Pais <allen.lkml@gmail.com>,
-        Romain Perier <romain.perier@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-Originating-IP: [10.69.192.56]
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 17, 2020 at 11:17 AM Allen Pais <allen.cryptic@gmail.com> wrote:
->
-> From: Allen Pais <allen.lkml@gmail.com>
->
-> In preparation for unconditionally passing the
-> struct tasklet_struct pointer to all tasklet
-> callbacks, switch to using the new tasklet_setup()
-> and from_tasklet() to pass the tasklet pointer explicitly.
->
-> Signed-off-by: Romain Perier <romain.perier@gmail.com>
-> Signed-off-by: Allen Pais <allen.lkml@gmail.com>
-> ---
->  arch/um/drivers/vector_kern.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+The code has been in a irq-disabled context since it is hard IRQ. There
+is no necessity to do it again.
 
-Anton, can you please review this patch?
+Signed-off-by: Tian Tao <tiantao6@hisilicon.com>
+---
+ drivers/mmc/host/mtk-sd.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index a704745..fb3e419 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1536,13 +1536,12 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
+ 	struct mmc_host *mmc = mmc_from_priv(host);
+ 
+ 	while (true) {
+-		unsigned long flags;
+ 		struct mmc_request *mrq;
+ 		struct mmc_command *cmd;
+ 		struct mmc_data *data;
+ 		u32 events, event_mask;
+ 
+-		spin_lock_irqsave(&host->lock, flags);
++		spin_lock(&host->lock);
+ 		events = readl(host->base + MSDC_INT);
+ 		event_mask = readl(host->base + MSDC_INTEN);
+ 		if ((events & event_mask) & MSDC_INT_SDIOIRQ)
+@@ -1553,7 +1552,7 @@ static irqreturn_t msdc_irq(int irq, void *dev_id)
+ 		mrq = host->mrq;
+ 		cmd = host->cmd;
+ 		data = host->data;
+-		spin_unlock_irqrestore(&host->lock, flags);
++		spin_unlock(&host->lock);
+ 
+ 		if ((events & event_mask) & MSDC_INT_SDIOIRQ)
+ 			sdio_signal_irq(mmc);
 -- 
-Thanks,
-//richard
+2.7.4
+
