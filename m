@@ -2,159 +2,126 @@ Return-Path: <SRS0=TbaS=D5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4951DC4363A
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 08:04:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46D80C4363A
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 09:09:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0ABAA223BF
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 08:04:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5D9612415A
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 09:09:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2509232AbgJVIEc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Oct 2020 04:04:32 -0400
-Received: from rtits2.realtek.com ([211.75.126.72]:48323 "EHLO
-        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2509231AbgJVIEc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 04:04:32 -0400
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.69 with qID 09M84MEJ0021931, This message is accepted by code: ctloc85258
-Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
-        by rtits2.realtek.com.tw (8.15.2/2.66/5.86) with ESMTPS id 09M84MEJ0021931
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Thu, 22 Oct 2020 16:04:22 +0800
-Received: from localhost (172.29.40.150) by RSEXMBS01.realsil.com.cn
- (172.29.17.195) with Microsoft SMTP Server id 15.1.2044.4; Thu, 22 Oct 2020
- 16:04:21 +0800
-From:   <rui_feng@realsil.com.cn>
-To:     <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
-        <ulf.hansson@linaro.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        Rui Feng <rui_feng@realsil.com.cn>
-Subject: [PATCH v2 3/3] mmc: rtsx: Add SD Express mode support for RTS5261
-Date:   Thu, 22 Oct 2020 16:04:18 +0800
-Message-ID: <1603353858-3389-1-git-send-email-rui_feng@realsil.com.cn>
-X-Mailer: git-send-email 1.9.1
+        id S2895780AbgJVJJs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Oct 2020 05:09:48 -0400
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:33307 "EHLO
+        out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2502677AbgJVJJp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 05:09:45 -0400
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.46])
+        by mailout.nyi.internal (Postfix) with ESMTP id F3C555C0041;
+        Thu, 22 Oct 2020 05:09:43 -0400 (EDT)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute6.internal (MEProxy); Thu, 22 Oct 2020 05:09:43 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=fm1; bh=8jfWJXL45oSWtMhGajV9DknwPlR
+        xYHd0bFTEduuTNKI=; b=XUY1FbveFQib6ceRvyAzzgtqr5I73FSTh7tJCiZBi8m
+        xqvHjXKI3K+z2kGeWj/oPyNeIO6FDAgV0LiVScQIgbbTignyuuGk4dNKByv5VFt3
+        3jJSiYGv10CAb45qOacCxBiPrrKuFCH0ruzfy2EZRi2ZcJmTsWgVp+lWTm4OV4f+
+        TG2QXZJITd7EmxSX6NNsOMFZZ/gr1JbBW0pSogfJQEI2oCqxWqh1BfM0US4+DlkA
+        MzIg33UuG7lLlD7L/3az9kYt48vheCZTwXeV9Byq9IFUMLPo0QaWmFxtOoqKmU6k
+        PWig3J5a3eC0ZzOzpLoZD3XXiAIWWhOJvwHI5nOVo3A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=8jfWJX
+        L45oSWtMhGajV9DknwPlRxYHd0bFTEduuTNKI=; b=g2nDceojZSw/wmbH2cIdpR
+        IkDtS24LGsjVljv1/tr24XZmxEdWpi9EpvnzaqTV+MIXraGJ7mN2YosGhmwDp5v6
+        X98lrcMVdGBqBdHchIjw7tgpn8mpxldNdsYZ+VMWm9FVW0nX+TlB+JkctwM5wPZ+
+        Sk8rtt8vUNqDNQ9k99rCUwclVLkwf758S1NSOetEX+birDCD13iAl7IJoUhQAO+4
+        5QKPEdrNk36TNvjYvt3MhDMzBNv6sjDFlFo2TLbY3RfeQKJcCOdXHIRKJ+Q5I19X
+        /v0iY+LG6+h6Y3/P5rNMPwnt+zgqkKUwGiaBZCDaEBFFeqxsabk1620gkbH0n/iQ
+        ==
+X-ME-Sender: <xms:VEyRX8hqH2squY5OMYFhLXUA1BRmPpDAxsnNRyzMIGInazf4SUFjtg>
+    <xme:VEyRX1BDpv7k8es_-svqbwuQM-akG2d008olJaKi6mNRRFApD758Wxp9393rkrC6j
+    nCnEeL8TE5QmeHY154>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrjeejgdduvdcutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpeffhffvuffkfhggtggujgesghdtreertddtvdenucfhrhhomhepofgrgihimhgv
+    ucftihhprghrugcuoehmrgigihhmvgestggvrhhnohdrthgvtghhqeenucggtffrrghtth
+    gvrhhnpeevgeduteektefhtefggfdtkeekgfehhffffeegudelheegheeiueevfeegvdei
+    geenucffohhmrghinhepghhithhhuhgsrdgtohhmnecukfhppeeltddrkeelrdeikedrje
+    einecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepmhgr
+    gihimhgvsegtvghrnhhordhtvggthh
+X-ME-Proxy: <xmx:VEyRX0HhZDKRipVbcltBBb2AOdhbY44ceBVYaolhwDEktOXjJMRY_g>
+    <xmx:VEyRX9S6I2K1QT7M5FBCXEulpXiU3n41PdfPxnuWBdgAFAlgyj0npQ>
+    <xmx:VEyRX5zIxDJX3hadaVRDjGA8C_dq0bc2QgFRDei2wzAuCtqDPD-2gg>
+    <xmx:V0yRXx9uaATy4v8z6yt8fNoT3ebqOaAwW6hR3UJsH8AuoFpbxRBIVQ>
+Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
+        by mail.messagingengine.com (Postfix) with ESMTPA id 90BF43280059;
+        Thu, 22 Oct 2020 05:09:40 -0400 (EDT)
+Date:   Thu, 22 Oct 2020 11:09:38 +0200
+From:   Maxime Ripard <maxime@cerno.tech>
+To:     Philip Rinn <rinni@inventati.org>
+Cc:     ulf.hansson@linaro.org, wens@csie.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@googlegroups.com
+Subject: Re: [PATCH] Disable HS-DDR mode for Olimex A64-OLinuXino variants
+ with eMMC
+Message-ID: <20201022090938.ukfn52hfil6xi6us@gilmour.lan>
+References: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [172.29.40.150]
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="34niqqyzl3favo4v"
+Content-Disposition: inline
+In-Reply-To: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Rui Feng <rui_feng@realsil.com.cn>
 
-RTS5261 support SD mode and PCIe/NVMe mode. The workflow is as follows.
-1.RTS5261 work in SD mode and set MMC_CAPS2_SD_EXP flag.
-2.If card is plugged in, Host send CMD8 to ask card's PCIe availability.
-3.If the card has PCIe availability and WP is not set, init_sd_express() will be invoked,
-RTS5261 switch to PCIe/NVMe mode.
-4.Mmc driver handover it to NVMe driver.
-5.If card is unplugged, RTS5261 will switch to SD mode.
+--34niqqyzl3favo4v
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Rui Feng <rui_feng@realsil.com.cn>
----
-v2:
-1.re-enable mmc caps in sd_power_on()
-2.don't check write protect bit in init_sd_express()
----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 52 +++++++++++++++++++++++++++++++
- 1 file changed, 52 insertions(+)
+Hi,
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 2763a376b054..a6c89f739035 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -895,7 +895,9 @@ static int sd_set_bus_width(struct realtek_pci_sdmmc *host,
- static int sd_power_on(struct realtek_pci_sdmmc *host)
- {
- 	struct rtsx_pcr *pcr = host->pcr;
-+	struct mmc_host *mmc = host->mmc;
- 	int err;
-+	u32 val;
- 
- 	if (host->power_state == SDMMC_POWER_ON)
- 		return 0;
-@@ -922,6 +924,16 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
- 	if (err < 0)
- 		return err;
- 
-+	if (PCI_PID(pcr) == PID_5261) {
-+		if (pcr->extra_caps & EXTRA_CAPS_SD_EXPRESS)
-+			mmc->caps2 |= MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
-+		val = rtsx_pci_readl(pcr, RTSX_BIPR);
-+		if (val & SD_WRITE_PROTECT) {
-+			pcr->extra_caps &= ~EXTRA_CAPS_SD_EXPRESS;
-+			mmc->caps2 &= ~(MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V);
-+		}
-+	}
-+
- 	host->power_state = SDMMC_POWER_ON;
- 	return 0;
- }
-@@ -1308,6 +1320,43 @@ static int sdmmc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	return err;
- }
- 
-+static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	u32 relink_time;
-+	struct realtek_pci_sdmmc *host = mmc_priv(mmc);
-+	struct rtsx_pcr *pcr = host->pcr;
-+
-+	/* Set relink_time for changing to PCIe card */
-+	relink_time = 0x8FFF;
-+
-+	rtsx_pci_write_register(pcr, 0xFF01, 0xFF, relink_time);
-+	rtsx_pci_write_register(pcr, 0xFF02, 0xFF, relink_time >> 8);
-+	rtsx_pci_write_register(pcr, 0xFF03, 0x01, relink_time >> 16);
-+
-+	rtsx_pci_write_register(pcr, PETXCFG, 0x80, 0x80);
-+	rtsx_pci_write_register(pcr, LDO_VCC_CFG0,
-+		RTS5261_LDO1_OCP_THD_MASK,
-+		pcr->option.sd_800mA_ocp_thd);
-+
-+	if (pcr->ops->disable_auto_blink)
-+		pcr->ops->disable_auto_blink(pcr);
-+
-+	/* For PCIe/NVMe mode can't enter delink issue */
-+	pcr->hw_param.interrupt_en &= ~(SD_INT_EN);
-+	rtsx_pci_writel(pcr, RTSX_BIER, pcr->hw_param.interrupt_en);
-+
-+	rtsx_pci_write_register(pcr, RTS5260_AUTOLOAD_CFG4,
-+		RTS5261_AUX_CLK_16M_EN, RTS5261_AUX_CLK_16M_EN);
-+	rtsx_pci_write_register(pcr, RTS5261_FW_CFG0,
-+		RTS5261_FW_ENTER_EXPRESS, RTS5261_FW_ENTER_EXPRESS);
-+	rtsx_pci_write_register(pcr, RTS5261_FW_CFG1,
-+		RTS5261_MCU_BUS_SEL_MASK | RTS5261_MCU_CLOCK_SEL_MASK
-+		| RTS5261_MCU_CLOCK_GATING | RTS5261_DRIVER_ENABLE_FW,
-+		RTS5261_MCU_CLOCK_SEL_16M | RTS5261_MCU_CLOCK_GATING
-+		| RTS5261_DRIVER_ENABLE_FW);
-+	return 0;
-+}
-+
- static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
- 	.pre_req = sdmmc_pre_req,
- 	.post_req = sdmmc_post_req,
-@@ -1317,6 +1366,7 @@ static const struct mmc_host_ops realtek_pci_sdmmc_ops = {
- 	.get_cd = sdmmc_get_cd,
- 	.start_signal_voltage_switch = sdmmc_switch_voltage,
- 	.execute_tuning = sdmmc_execute_tuning,
-+	.init_sd_express = sdmmc_init_sd_express,
- };
- 
- static void init_extra_caps(struct realtek_pci_sdmmc *host)
-@@ -1338,6 +1388,8 @@ static void init_extra_caps(struct realtek_pci_sdmmc *host)
- 		mmc->caps |= MMC_CAP_8_BIT_DATA;
- 	if (pcr->extra_caps & EXTRA_CAPS_NO_MMC)
- 		mmc->caps2 |= MMC_CAP2_NO_MMC;
-+	if (pcr->extra_caps & EXTRA_CAPS_SD_EXPRESS)
-+		mmc->caps2 |= MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
- }
- 
- static void realtek_init_host(struct realtek_pci_sdmmc *host)
--- 
-2.17.1
+On Thu, Oct 22, 2020 at 12:10:45AM +0200, Philip Rinn wrote:
+> Hi,
 
+The commit log is going to end up in the git history, so the hi should
+be dropped :)
+
+> the Olimex A64-OLinuXino board comes in various variants, three with eMMC.
+> While MMC HS-DDR mode works fine on one of them (A64-OLinuXino-1Ge4GW) it
+> doesn't work on the A64-OLinuXino-2Ge8G-IND variant (I don't have the
+> third variant so I can't check if it works there).
+
+Why is it not working? That flag is just setting what the controller is
+capable of, if the eMMC wasn't supporting that mode it wouldn't even
+try.
+
+> Disabling MMC HS-DDR mode fixes the problem. This is also what Olimex does
+> for their kernel:
+>=20
+> https://github.com/OLIMEX/linux-olimex/commit/eef0e814e74f.patch
+
+Again, there's no context there
+
+Maxime
+
+--34niqqyzl3favo4v
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCX5FMUgAKCRDj7w1vZxhR
+xWdrAQDPVErjtYzTLW27+SbSgqaHrIJRwyfIOhUk6/RThcMZUwD+Lq/s3n10EJfj
+NIxNjNxpue/aSKjK4r+mSNh8ydQOEwA=
+=/ovm
+-----END PGP SIGNATURE-----
+
+--34niqqyzl3favo4v--
