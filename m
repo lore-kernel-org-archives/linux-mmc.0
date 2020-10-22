@@ -2,151 +2,267 @@ Return-Path: <SRS0=TbaS=D5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 049C7C388F7
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 07:52:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02B13C4363A
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 08:03:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9EC53223C7
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 07:52:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pMKNSfRd"
+	by mail.kernel.org (Postfix) with ESMTP id 8EE1322267
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 08:03:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2508948AbgJVHwn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Oct 2020 03:52:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56684 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2508943AbgJVHwm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 03:52:42 -0400
-Received: from mail-io1-xd44.google.com (mail-io1-xd44.google.com [IPv6:2607:f8b0:4864:20::d44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D580EC0613CE
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2020 00:52:41 -0700 (PDT)
-Received: by mail-io1-xd44.google.com with SMTP id p15so623229ioh.0
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2020 00:52:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ZYn9tKEOHWCOI5QlOI1vKYZ0f+sa9erXGuyhcchLPF8=;
-        b=pMKNSfRd9oKXN0ERKQKM5OdKp864maGZx2xZ6mVK9eCFUDTStlvluAG/U4oX7vio1h
-         kDbA69ZC0qB3zehJ9W63FZ0NFtAb0WYdGBvgbMeTpttC9+iomFqmMCxHFlEhIEEawFjA
-         gsdaYHCxYF9pIN5FhoMLRD1zX4qUw1sjeOcvonE/mZdpPUOzclUwzPUP/IYY919ns61P
-         xESjAFOxLFLmGWg0FRsOcmC9kvnpa5DimMJdFXREc6nmMLwWgv0+gBtPBsCc/m8ZQKsJ
-         yWdq8USm1NeGmLmwwK6FJpNGPsuzv9iHfppC/NITkvAWAJLVYWZHW3ULAqoAMwwFLwJX
-         aqtg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ZYn9tKEOHWCOI5QlOI1vKYZ0f+sa9erXGuyhcchLPF8=;
-        b=F2dzVFUFvJc2ypbo665tk/TDReGGwQ0hLqhKYJTd91I4HOnI78LCFaqsC2VIzMmEMp
-         MtS7t3pHnioOeplOXrpDioTe1GzJGR9Y7U8xpLaoatOEy/KAot7zS/yTKWjYibUN8Yyr
-         Hz9QVl+1WhVx5Xe4qlHdUM2Zn8PPDYsemMZaXYBQ4Q5R9Ss5fm2miogqdx26dnlsfK2a
-         msAzVnq1QbYJCcZeDyiIbruQyRmCsxxbGL2P1bULyKxwiHZ0RGiirI7y85r0e610SK8a
-         gD7rqFlA1x3sq+yRiEvzTL2cmWbTHaQ1oHTAjqEzqhiCiKsXZ88NqtnibyVRNf5rV+HJ
-         gZGA==
-X-Gm-Message-State: AOAM530U7NEiC7BMblhnV1VllAB5AwdxxOC0IAaM1XDZgncIOVdDyL5i
-        LvxpWXdahR5fIl+4q184fO2FR6XIK+D60rjUYJY=
-X-Google-Smtp-Source: ABdhPJw4a7d9TAyu1UTKDC0kFu6hvXZsWN/q2IiKIhU9H2XWhMiaaIf7H9rQFV53LgLxpKUXo9xezIEeRVJPvAS2NLY=
-X-Received: by 2002:a02:7b08:: with SMTP id q8mr810164jac.120.1603353161026;
- Thu, 22 Oct 2020 00:52:41 -0700 (PDT)
+        id S2509199AbgJVIDR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Oct 2020 04:03:17 -0400
+Received: from rtits2.realtek.com ([211.75.126.72]:48197 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2509197AbgJVIDQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 04:03:16 -0400
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.69 with qID 09M82wK42021626, This message is accepted by code: ctloc85258
+Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
+        by rtits2.realtek.com.tw (8.15.2/2.66/5.86) with ESMTPS id 09M82wK42021626
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
+        Thu, 22 Oct 2020 16:02:59 +0800
+Received: from localhost (172.29.40.150) by RSEXMBS01.realsil.com.cn
+ (172.29.17.195) with Microsoft SMTP Server id 15.1.2044.4; Thu, 22 Oct 2020
+ 16:02:58 +0800
+From:   <rui_feng@realsil.com.cn>
+To:     <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
+        <ulf.hansson@linaro.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>,
+        Rui Feng <rui_feng@realsil.com.cn>
+Subject: [PATCH v2 1/3] mmc: core: Initial support for SD express card/host
+Date:   Thu, 22 Oct 2020 16:02:48 +0800
+Message-ID: <1603353768-3298-1-git-send-email-rui_feng@realsil.com.cn>
+X-Mailer: git-send-email 1.9.1
 MIME-Version: 1.0
-References: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
-In-Reply-To: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
-From:   =?UTF-8?B?Q2zDqW1lbnQgUMOpcm9u?= <peron.clem@gmail.com>
-Date:   Thu, 22 Oct 2020 09:52:29 +0200
-Message-ID: <CAJiuCceLR_zfyA0zHyRrqZ46DoQ6Ju-xVaa2Rf_PkjDkPOR8JA@mail.gmail.com>
-Subject: Re: [linux-sunxi] [PATCH] Disable HS-DDR mode for Olimex
- A64-OLinuXino variants with eMMC
-To:     rinni@inventati.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-sunxi <linux-sunxi@googlegroups.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-Originating-IP: [172.29.40.150]
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Philipp,
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-On Thu, 22 Oct 2020 at 00:10, Philip Rinn <rinni@inventati.org> wrote:
->
-> Hi,
->
-> the Olimex A64-OLinuXino board comes in various variants, three with eMMC.
-> While MMC HS-DDR mode works fine on one of them (A64-OLinuXino-1Ge4GW) it
-> doesn't work on the A64-OLinuXino-2Ge8G-IND variant (I don't have the
-> third variant so I can't check if it works there).
+In the SD specification v7.10 the SD express card has been added. This new
+type of removable SD card, can be managed via a PCIe/NVMe based interface,
+while also allowing backwards compatibility towards the legacy SD
+interface.
 
-We got similar situations for Allwinner H6 (Beelink GS1 and Tanix TX6).
+To keep the backwards compatibility, it's required to start the
+initialization through the legacy SD interface. If it turns out that the
+mmc host and the SD card, both supports the PCIe/NVMe interface, then a
+switch should be allowed.
 
-There is definitely an issue in the MMC sunxi driver with HS-DDR mode
-and it's not limited to "olimex,a64-olinuxino-emmc".
+Therefore, let's introduce some basic support for this type of SD cards to
+the mmc core. The mmc host, should set MMC_CAP2_SD_EXP if it supports this
+interface and MMC_CAP2_SD_EXP_1_2V, if also 1.2V is supported, as to inform
+the core about it.
 
-Have a look at this this message posted by Jernej:
-https://www.spinics.net/lists/arm-kernel/msg846093.html
+To deal with the switch to the PCIe/NVMe interface, the mmc host is
+required to implement a new host ops, ->init_sd_express(). Based on the
+initial communication between the host and the card, host->ios.timing is
+set to either MMC_TIMING_SD_EXP or MMC_TIMING_SD_EXP_1_2V, depending on if
+1.2V is supported or not. In this way, the mmc host can check these values
+in its ->init_sd_express() ops, to know how to proceed with the handover.
 
-I think we should disable the HS-DDR mode for A64 / H6 like it's done
-for H5 and not disable board per board until the issue is resolved.
-If you want to disable only for your board you can set in your device-tree:
-mmc-hs200-1_8v;
+Note that, to manage card insert/removal, the mmc core sticks with using
+the ->get_cd() callback, which means it's the host's responsibility to make
+sure it provides valid data, even if the card may be managed by PCIe/NVMe
+at the moment. As long as the card seems to be present, the mmc core keeps
+the card powered on.
 
-This will switch to HS200 mode without using the HS-DDR mode.
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Rui Feng <rui_feng@realsil.com.cn>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/mmc/core/core.c   | 15 ++++++++++--
+ drivers/mmc/core/host.h   |  6 +++++
+ drivers/mmc/core/sd_ops.c | 49 +++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/core/sd_ops.h |  1 +
+ include/linux/mmc/host.h  |  7 ++++++
+ 5 files changed, 74 insertions(+), 4 deletions(-)
 
-Regards,
-Clement
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8ccae6452b9c..6673c0f33cc7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2137,8 +2137,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 
+ 	mmc_go_idle(host);
+ 
+-	if (!(host->caps2 & MMC_CAP2_NO_SD))
+-		mmc_send_if_cond(host, host->ocr_avail);
++	if (!(host->caps2 & MMC_CAP2_NO_SD)) {
++		if (mmc_send_if_cond_pcie(host, host->ocr_avail))
++			goto out;
++		if (mmc_card_sd_express(host))
++			return 0;
++	}
+ 
+ 	/* Order's important: probe SDIO, then SD, then MMC */
+ 	if (!(host->caps2 & MMC_CAP2_NO_SDIO))
+@@ -2153,6 +2157,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 		if (!mmc_attach_mmc(host))
+ 			return 0;
+ 
++out:
+ 	mmc_power_off(host);
+ 	return -EIO;
+ }
+@@ -2280,6 +2285,12 @@ void mmc_rescan(struct work_struct *work)
+ 		goto out;
+ 	}
+ 
++	/* If an SD express card is present, then leave it as is. */
++	if (mmc_card_sd_express(host)) {
++		mmc_release_host(host);
++		goto out;
++	}
++
+ 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+ 		unsigned int freq = freqs[i];
+ 		if (freq > host->f_max) {
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 5e3b9534ffb2..ba407617ed23 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -77,5 +77,11 @@ static inline bool mmc_card_hs400es(struct mmc_card *card)
+ 	return card->host->ios.enhanced_strobe;
+ }
+ 
++static inline bool mmc_card_sd_express(struct mmc_host *host)
++{
++	return host->ios.timing == MMC_TIMING_SD_EXP ||
++		host->ios.timing == MMC_TIMING_SD_EXP_1_2V;
++}
++
+ #endif
+ 
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 22bf528294b9..d61ff811218c 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -158,7 +158,8 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	return err;
+ }
+ 
+-int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
++static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bits,
++			      u32 *resp)
+ {
+ 	struct mmc_command cmd = {};
+ 	int err;
+@@ -171,7 +172,7 @@ int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
+ 	 * SD 1.0 cards.
+ 	 */
+ 	cmd.opcode = SD_SEND_IF_COND;
+-	cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | test_pattern;
++	cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | pcie_bits << 8 | test_pattern;
+ 	cmd.flags = MMC_RSP_SPI_R7 | MMC_RSP_R7 | MMC_CMD_BCR;
+ 
+ 	err = mmc_wait_for_cmd(host, &cmd, 0);
+@@ -186,6 +187,50 @@ int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
+ 	if (result_pattern != test_pattern)
+ 		return -EIO;
+ 
++	if (resp)
++		*resp = cmd.resp[0];
++
++	return 0;
++}
++
++int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
++{
++	return __mmc_send_if_cond(host, ocr, 0, NULL);
++}
++
++int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr)
++{
++	u32 resp = 0;
++	u8 pcie_bits = 0;
++	int ret;
++
++	if (host->caps2 & MMC_CAP2_SD_EXP) {
++		/* Probe card for SD express support via PCIe. */
++		pcie_bits = 0x10;
++		if (host->caps2 & MMC_CAP2_SD_EXP_1_2V)
++			/* Probe also for 1.2V support. */
++			pcie_bits = 0x30;
++	}
++
++	ret = __mmc_send_if_cond(host, ocr, pcie_bits, &resp);
++	if (ret)
++		return 0;
++
++	/* Continue with the SD express init, if the card supports it. */
++	resp &= 0x3000;
++	if (pcie_bits && resp) {
++		if (resp == 0x3000)
++			host->ios.timing = MMC_TIMING_SD_EXP_1_2V;
++		else
++			host->ios.timing = MMC_TIMING_SD_EXP;
++
++		/*
++		 * According to the spec the clock shall also be gated, but
++		 * let's leave this to the host driver for more flexibility.
++		 */
++		return host->ops->init_sd_express(host, &host->ios);
++	}
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index 2194cabfcfc5..3ba7b3cf4652 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -16,6 +16,7 @@ struct mmc_host;
+ int mmc_app_set_bus_width(struct mmc_card *card, int width);
+ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
++int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr);
+ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
+ int mmc_app_send_scr(struct mmc_card *card);
+ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index c5b6e97cb21a..905cddc5e6f3 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -60,6 +60,8 @@ struct mmc_ios {
+ #define MMC_TIMING_MMC_DDR52	8
+ #define MMC_TIMING_MMC_HS200	9
+ #define MMC_TIMING_MMC_HS400	10
++#define MMC_TIMING_SD_EXP	11
++#define MMC_TIMING_SD_EXP_1_2V	12
+ 
+ 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
+ 
+@@ -172,6 +174,9 @@ struct mmc_host_ops {
+ 	 */
+ 	int	(*multi_io_quirk)(struct mmc_card *card,
+ 				  unsigned int direction, int blk_size);
++
++	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
++	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
+ };
+ 
+ struct mmc_cqe_ops {
+@@ -357,6 +362,8 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
++#define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
++#define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+ #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
+-- 
+2.17.1
 
->
-> Disabling MMC HS-DDR mode fixes the problem. This is also what Olimex does
-> for their kernel:
->
-> https://github.com/OLIMEX/linux-olimex/commit/eef0e814e74f.patch
->
-> Mainline kernel doesn't differentiate between the different variants with
-> eMMC so I'm disabling HS-DDR mode for all of them as done for the H5 eMMC
-> controller.
->
-> Disable HS-DDR mode for Olimex A64-OLinuXino variants with eMMC
->
-> Signed-off-by: Philip Rinn <rinni@inventati.org>
->
-> ---
-> drivers/mmc/host/sunxi-mmc.c | 5 +++--
-> 1 file changed, 3 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index fc62773602ec..240d3803b8b9 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1397,7 +1397,7 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->                                   MMC_CAP_SDIO_IRQ;
->
->         /*
-> -        * Some H5 devices do not have signal traces precise enough to
-> +        * Some devices do not have signal traces precise enough to
->          * use HS DDR mode for their eMMC chips.
->          *
->          * We still enable HS DDR modes for all the other controller
-> @@ -1405,7 +1405,8 @@ static int sunxi_mmc_probe(struct platform_device *pdev)
->          */
->         if ((host->cfg->clk_delays || host->use_new_timings) &&
->             !of_device_is_compatible(pdev->dev.of_node,
-> -                                    "allwinner,sun50i-h5-emmc"))
-> +                                    "allwinner,sun50i-h5-emmc") &&
-> +                       !of_machine_is_compatible("olimex,a64-olinuxino-emmc"))
->                 mmc->caps      |= MMC_CAP_1_8V_DDR | MMC_CAP_3_3V_DDR;
->
->         ret = mmc_of_parse(mmc);
-> --
-> 2.28.0
->
-> --
-> You received this message because you are subscribed to the Google Groups "linux-sunxi" group.
-> To unsubscribe from this group and stop receiving emails from it, send an email to linux-sunxi+unsubscribe@googlegroups.com.
-> To view this discussion on the web, visit https://groups.google.com/d/msgid/linux-sunxi/0d590f91-5d7a-697a-5644-710d14e3ea75%40inventati.org.
