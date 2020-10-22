@@ -2,126 +2,144 @@ Return-Path: <SRS0=TbaS=D5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46D80C4363A
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 09:09:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90223C4363A
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 09:13:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5D9612415A
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 09:09:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 38918223FB
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 09:13:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2895780AbgJVJJs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Oct 2020 05:09:48 -0400
-Received: from out2-smtp.messagingengine.com ([66.111.4.26]:33307 "EHLO
+        id S2509411AbgJVJNk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Oct 2020 05:13:40 -0400
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:58847 "EHLO
         out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2502677AbgJVJJp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 05:09:45 -0400
+        by vger.kernel.org with ESMTP id S2509404AbgJVJNk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 05:13:40 -0400
 Received: from compute6.internal (compute6.nyi.internal [10.202.2.46])
-        by mailout.nyi.internal (Postfix) with ESMTP id F3C555C0041;
-        Thu, 22 Oct 2020 05:09:43 -0400 (EDT)
+        by mailout.nyi.internal (Postfix) with ESMTP id 62CC25C0102;
+        Thu, 22 Oct 2020 05:13:39 -0400 (EDT)
 Received: from mailfrontend1 ([10.202.2.162])
-  by compute6.internal (MEProxy); Thu, 22 Oct 2020 05:09:43 -0400
+  by compute6.internal (MEProxy); Thu, 22 Oct 2020 05:13:39 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
         date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=fm1; bh=8jfWJXL45oSWtMhGajV9DknwPlR
-        xYHd0bFTEduuTNKI=; b=XUY1FbveFQib6ceRvyAzzgtqr5I73FSTh7tJCiZBi8m
-        xqvHjXKI3K+z2kGeWj/oPyNeIO6FDAgV0LiVScQIgbbTignyuuGk4dNKByv5VFt3
-        3jJSiYGv10CAb45qOacCxBiPrrKuFCH0ruzfy2EZRi2ZcJmTsWgVp+lWTm4OV4f+
-        TG2QXZJITd7EmxSX6NNsOMFZZ/gr1JbBW0pSogfJQEI2oCqxWqh1BfM0US4+DlkA
-        MzIg33UuG7lLlD7L/3az9kYt48vheCZTwXeV9Byq9IFUMLPo0QaWmFxtOoqKmU6k
-        PWig3J5a3eC0ZzOzpLoZD3XXiAIWWhOJvwHI5nOVo3A==
+        :content-type:in-reply-to; s=fm1; bh=k1kXJts1XVZPl4f0UrQscBYspND
+        kM06UcM5jB0NwT0o=; b=m93cgHaGcNC1DOVsz3Z2ILvco4KxzKB4HCgh4DNsS3+
+        LqqzjNkfS9+FmNeB4PSPfqXrDAenqM39Cz6UWG0SLmEGaqBqCaSaYSSc6CB+xqPT
+        LTOPFlgb8BrIyRM3NZlQg0LDtzmiemWkZFTaYmzXo9N+GbW2O80a3wWEnfiHYq6o
+        9/ktbUDplohbkQ1qjqZ+s/ezpDQrkLR18U9oh4G13cotxxz7JBHyFjMdIkqgmrr7
+        /tCE5edxYW12U18HSZHoS62OVizdDX/cU4c0LDyX5VLj+pN7C9Xdeyd9NU2Alk65
+        8Ln9dkyMWd9TWxOiVKGIbHXaMxJ5tV2k0zKCMSb4bbQ==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
         messagingengine.com; h=cc:content-type:date:from:in-reply-to
         :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=8jfWJX
-        L45oSWtMhGajV9DknwPlRxYHd0bFTEduuTNKI=; b=g2nDceojZSw/wmbH2cIdpR
-        IkDtS24LGsjVljv1/tr24XZmxEdWpi9EpvnzaqTV+MIXraGJ7mN2YosGhmwDp5v6
-        X98lrcMVdGBqBdHchIjw7tgpn8mpxldNdsYZ+VMWm9FVW0nX+TlB+JkctwM5wPZ+
-        Sk8rtt8vUNqDNQ9k99rCUwclVLkwf758S1NSOetEX+birDCD13iAl7IJoUhQAO+4
-        5QKPEdrNk36TNvjYvt3MhDMzBNv6sjDFlFo2TLbY3RfeQKJcCOdXHIRKJ+Q5I19X
-        /v0iY+LG6+h6Y3/P5rNMPwnt+zgqkKUwGiaBZCDaEBFFeqxsabk1620gkbH0n/iQ
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=k1kXJt
+        s1XVZPl4f0UrQscBYspNDkM06UcM5jB0NwT0o=; b=A1tWVkswb81KbcQDSFTpDG
+        rSarZhOZV1rHnoNpvW9GwUdGfnfWXbM2iNiS5C8C88rRkUGLZeRHumaCkGRxHj/2
+        gVFw67035hLUtylk3s3HBHnYSLcEYjJMT2ZBue9DrB6K2so95striYvjfXtKQPCn
+        9CtIc1EZ1Zej3HzNYornuW5QygEWaeXDGT7C50RrIK8i/ZgWePD/5Mi90cXejuys
+        cvl6zKX3891klevJ4d6Fooj+MA1IuTlqVEB2s8WitQD3AT91oNyTCUqClktlJGWA
+        cJFcG34PkYSuqgvO8wZdK1ESqz+Vn2m4JRBYKN0iP8MJPdJuY4B9qdsiXrnqDLnA
         ==
-X-ME-Sender: <xms:VEyRX8hqH2squY5OMYFhLXUA1BRmPpDAxsnNRyzMIGInazf4SUFjtg>
-    <xme:VEyRX1BDpv7k8es_-svqbwuQM-akG2d008olJaKi6mNRRFApD758Wxp9393rkrC6j
-    nCnEeL8TE5QmeHY154>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrjeejgdduvdcutefuodetggdotefrodftvf
+X-ME-Sender: <xms:Qk2RX_WWPsgz1BEENDm59YjZ5dpM-3-4j_bizvsaGmzA4TgIjXxSpQ>
+    <xme:Qk2RX3mAGGZGONdCMJH46qXbICF_E73OycZcZ5VSFmHSVoO07dWEvUx2dfGSCtR95
+    1pX_A_6upoS1WH8u2k>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrjeejgddufecutefuodetggdotefrodftvf
     curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
     uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpeffhffvuffkfhggtggujgesghdtreertddtvdenucfhrhhomhepofgrgihimhgv
+    fjughrpeffhffvuffkfhggtggujgesghdtreertddtudenucfhrhhomhepofgrgihimhgv
     ucftihhprghrugcuoehmrgigihhmvgestggvrhhnohdrthgvtghhqeenucggtffrrghtth
-    gvrhhnpeevgeduteektefhtefggfdtkeekgfehhffffeegudelheegheeiueevfeegvdei
-    geenucffohhmrghinhepghhithhhuhgsrdgtohhmnecukfhppeeltddrkeelrdeikedrje
-    einecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepmhgr
-    gihimhgvsegtvghrnhhordhtvggthh
-X-ME-Proxy: <xmx:VEyRX0HhZDKRipVbcltBBb2AOdhbY44ceBVYaolhwDEktOXjJMRY_g>
-    <xmx:VEyRX9S6I2K1QT7M5FBCXEulpXiU3n41PdfPxnuWBdgAFAlgyj0npQ>
-    <xmx:VEyRX5zIxDJX3hadaVRDjGA8C_dq0bc2QgFRDei2wzAuCtqDPD-2gg>
-    <xmx:V0yRXx9uaATy4v8z6yt8fNoT3ebqOaAwW6hR3UJsH8AuoFpbxRBIVQ>
+    gvrhhnpeegffejfeetkefhffehfedugfdtgeejuddtudfhieevieeigeeujeevleekhfej
+    geenucffohhmrghinhepshhpihhnihgtshdrnhgvthenucfkphepledtrdekledrieekrd
+    ejieenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehm
+    rgigihhmvgestggvrhhnohdrthgvtghh
+X-ME-Proxy: <xmx:Qk2RX7bBx9CsVAiOj1CR0fcFCokJW8cln4bLMMJbgJKtfP891VvUhQ>
+    <xmx:Qk2RX6VqwgnPNEz9SXG9Lb1ZveEtKvOGbBGcSTnYF9vyPj0__piSbQ>
+    <xmx:Qk2RX5lq93XHHlZC8-GE8OpMS5q0bBph7kFP2Hzi0MDcA-5jCSY7Iw>
+    <xmx:Q02RXyBjcktEmO1lsRqWaZDkJqTaoOKQY41qIvzQuhQ21BqVdLZTrQ>
 Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 90BF43280059;
-        Thu, 22 Oct 2020 05:09:40 -0400 (EDT)
-Date:   Thu, 22 Oct 2020 11:09:38 +0200
+        by mail.messagingengine.com (Postfix) with ESMTPA id 247EB3280059;
+        Thu, 22 Oct 2020 05:13:38 -0400 (EDT)
+Date:   Thu, 22 Oct 2020 11:13:37 +0200
 From:   Maxime Ripard <maxime@cerno.tech>
-To:     Philip Rinn <rinni@inventati.org>
-Cc:     ulf.hansson@linaro.org, wens@csie.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-sunxi@googlegroups.com
-Subject: Re: [PATCH] Disable HS-DDR mode for Olimex A64-OLinuXino variants
- with eMMC
-Message-ID: <20201022090938.ukfn52hfil6xi6us@gilmour.lan>
+To:     =?utf-8?B?Q2zDqW1lbnQgUMOpcm9u?= <peron.clem@gmail.com>
+Cc:     rinni@inventati.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-sunxi <linux-sunxi@googlegroups.com>
+Subject: Re: [linux-sunxi] [PATCH] Disable HS-DDR mode for Olimex
+ A64-OLinuXino variants with eMMC
+Message-ID: <20201022091337.3u5ya3jouhmaukcj@gilmour.lan>
 References: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
+ <CAJiuCceLR_zfyA0zHyRrqZ46DoQ6Ju-xVaa2Rf_PkjDkPOR8JA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="34niqqyzl3favo4v"
+        protocol="application/pgp-signature"; boundary="j7uerhezri4g3gp5"
 Content-Disposition: inline
-In-Reply-To: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
+In-Reply-To: <CAJiuCceLR_zfyA0zHyRrqZ46DoQ6Ju-xVaa2Rf_PkjDkPOR8JA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---34niqqyzl3favo4v
-Content-Type: text/plain; charset=us-ascii
+--j7uerhezri4g3gp5
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
 Hi,
 
-On Thu, Oct 22, 2020 at 12:10:45AM +0200, Philip Rinn wrote:
-> Hi,
-
-The commit log is going to end up in the git history, so the hi should
-be dropped :)
-
-> the Olimex A64-OLinuXino board comes in various variants, three with eMMC.
-> While MMC HS-DDR mode works fine on one of them (A64-OLinuXino-1Ge4GW) it
-> doesn't work on the A64-OLinuXino-2Ge8G-IND variant (I don't have the
-> third variant so I can't check if it works there).
-
-Why is it not working? That flag is just setting what the controller is
-capable of, if the eMMC wasn't supporting that mode it wouldn't even
-try.
-
-> Disabling MMC HS-DDR mode fixes the problem. This is also what Olimex does
-> for their kernel:
+On Thu, Oct 22, 2020 at 09:52:29AM +0200, Cl=E9ment P=E9ron wrote:
+> Hi Philipp,
 >=20
-> https://github.com/OLIMEX/linux-olimex/commit/eef0e814e74f.patch
+> On Thu, 22 Oct 2020 at 00:10, Philip Rinn <rinni@inventati.org> wrote:
+> >
+> > Hi,
+> >
+> > the Olimex A64-OLinuXino board comes in various variants, three with eM=
+MC.
+> > While MMC HS-DDR mode works fine on one of them (A64-OLinuXino-1Ge4GW) =
+it
+> > doesn't work on the A64-OLinuXino-2Ge8G-IND variant (I don't have the
+> > third variant so I can't check if it works there).
+>=20
+> We got similar situations for Allwinner H6 (Beelink GS1 and Tanix TX6).
+>=20
+> There is definitely an issue in the MMC sunxi driver with HS-DDR mode
+> and it's not limited to "olimex,a64-olinuxino-emmc".
+>=20
+> Have a look at this this message posted by Jernej:
+> https://www.spinics.net/lists/arm-kernel/msg846093.html
+>=20
+> I think we should disable the HS-DDR mode for A64 / H6 like it's done
+> for H5 and not disable board per board until the issue is resolved.
 
-Again, there's no context there
+I'm not opposed to that on principle, but "it doesn't work on some
+board" is not a proper justification to do so. It does on some others,
+so surely there's more to it and this would just paper over whatever
+issue we have instead of properly fixing it.
+
+> If you want to disable only for your board you can set in your
+> device-tree: mmc-hs200-1_8v; This will switch to HS200 mode without
+> using the HS-DDR mode.
+
+Sigh. Can we at least work on a fix instead of providing terrible
+workarounds?
 
 Maxime
 
---34niqqyzl3favo4v
+--j7uerhezri4g3gp5
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCX5FMUgAKCRDj7w1vZxhR
-xWdrAQDPVErjtYzTLW27+SbSgqaHrIJRwyfIOhUk6/RThcMZUwD+Lq/s3n10EJfj
-NIxNjNxpue/aSKjK4r+mSNh8ydQOEwA=
-=/ovm
+iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCX5FNQQAKCRDj7w1vZxhR
+xaJcAP4+0n84pLwTbYHVpqnYTq2kb8+APRRXylHYfKL7/6oOkgD/dsxJf8ryuXFV
+5fxEDJAZPqS3aiVkuff2CSYVwVn5Zw4=
+=2emh
 -----END PGP SIGNATURE-----
 
---34niqqyzl3favo4v--
+--j7uerhezri4g3gp5--
