@@ -2,132 +2,108 @@ Return-Path: <SRS0=TbaS=D5=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 267A0C55179
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 15:39:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAA93C388F7
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 22:24:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BD0822463D
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 15:39:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5F50124650
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Oct 2020 22:24:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Uwx2uXhS"
+	dkim=pass (1024-bit key) header.d=walle.cc header.i=@walle.cc header.b="XOi0x38w"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S368679AbgJVPje (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Oct 2020 11:39:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44218 "EHLO
+        id S370540AbgJVWYP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Oct 2020 18:24:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S368656AbgJVPje (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 11:39:34 -0400
-Received: from mail-io1-xd44.google.com (mail-io1-xd44.google.com [IPv6:2607:f8b0:4864:20::d44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94796C0613CE
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2020 08:39:32 -0700 (PDT)
-Received: by mail-io1-xd44.google.com with SMTP id k21so2081224ioa.9
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2020 08:39:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=F+r40Kqruwio7+oi3Sj5j+LP99aq74QK22UjEzJKS20=;
-        b=Uwx2uXhSQ1TyqfTKd0Dy24HZ08+T9gXhkPLfzbkvkB3mVPoOST6rZcd83GQmcHTb/q
-         04NDqNrPDa20fZxU7dnT3HZD6eeY80cBoLgKLvMu4VhhpVhX7ijL81dtdliuPwmKok69
-         3O5w2iu2CxYnyGn8OusITT/E35Fag2HTjqw9I0L+sH97/CwzEyIGCgUMieBYT/1IyJ0w
-         AcO8Vo0nwzESYq102XbEXo4qrm1Oo3OlS5VAu5A5RXEaksg+vHyFdPgI9EOGONUEeoiq
-         PuFYF651m+8xMSkgnwyutV0qIy9zW8qHQAHoW5toUF74QDj4XXinRjFszaCt0OaAdObF
-         cRyg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=F+r40Kqruwio7+oi3Sj5j+LP99aq74QK22UjEzJKS20=;
-        b=FOfQor7FunV4ewFksoWNSfY5a33heCYR4vrmIb8e65dxv8gGnzo9gh7G8Ax/CFTeQM
-         8vFxlzQZFyTv5FlTCscyKDpSQ8C3zRfeSvylsDAiQ9xAYxk1ck/QnmDwIp250+GOnxiY
-         JFciQsoPte+bVAXlD93zkFhbQ7x3Wcw/yXTWPUTf/WKIaUxbgjD35m7s6bTJNdkEveiw
-         fwzwhd4qrcOX50ztG9hqjSnkYK8/zsrO2MK3/I01vL4+4bFKqOLQ1SCWogNYg4OPIMyp
-         aJ6nMVN09oIm0vaS5sDpag7Mtskjllc/5XM4YMHhBBCeD50loaNhFJD2ot94QsfLVqES
-         LDFA==
-X-Gm-Message-State: AOAM532qkG5ZZ187OuuDOhAZjmKD9W1bBLrt3UZHf/tGkrqgxbE5ptGR
-        cDf4+Dyd1ebxT8syx2K+PdKT4QqUfgFxFZeJs4o=
-X-Google-Smtp-Source: ABdhPJyYIxIbYSyy0usd+l3f7T5dLH+AF6w6RYlvR9vaLXLjxDXT1gTOgk65L9Z52EgMDOKqfRFtvy7jzqzhX66/Hxk=
-X-Received: by 2002:a6b:5019:: with SMTP id e25mr2342998iob.123.1603381171722;
- Thu, 22 Oct 2020 08:39:31 -0700 (PDT)
+        with ESMTP id S369632AbgJVWYO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Oct 2020 18:24:14 -0400
+Received: from ssl.serverraum.org (ssl.serverraum.org [IPv6:2a01:4f8:151:8464::1:2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BEA0C0613CE
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Oct 2020 15:24:14 -0700 (PDT)
+Received: from apollo.fritz.box (unknown [IPv6:2a02:810c:c200:2e91:6257:18ff:fec4:ca34])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-384) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by ssl.serverraum.org (Postfix) with ESMTPSA id E189322F00;
+        Fri, 23 Oct 2020 00:24:07 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=walle.cc; s=mail2016061301;
+        t=1603405448;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=cdCHaJkQW9rShLRXxj7ElU/lrunlyUEAtdDvcabUG2w=;
+        b=XOi0x38w8s2x0F5DnnWfqaJ7NvNOk3w5LH4ZGac8IQsDEGRT3Vz9UJUTOK6O+38DAdlw1G
+        SlEb6ObsC6stYC64Duv7YwDpUURY96cQ1SBqm09hjM5bil2iC2bBdjpyx77r9v67Jo3rqI
+        2PwZhur5vZ8t31c8iGMjGPUguYBC2AM=
+From:   Michael Walle <michael@walle.cc>
+To:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     Yangbo Lu <yangbo.lu@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Michael Walle <michael@walle.cc>
+Subject: [PATCH v2] mmc: sdhci-of-esdhc: set timeout to max before tuning
+Date:   Fri, 23 Oct 2020 00:23:37 +0200
+Message-Id: <20201022222337.19857-1-michael@walle.cc>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-References: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
- <CAJiuCceLR_zfyA0zHyRrqZ46DoQ6Ju-xVaa2Rf_PkjDkPOR8JA@mail.gmail.com> <20201022091337.3u5ya3jouhmaukcj@gilmour.lan>
-In-Reply-To: <20201022091337.3u5ya3jouhmaukcj@gilmour.lan>
-From:   =?UTF-8?B?Q2zDqW1lbnQgUMOpcm9u?= <peron.clem@gmail.com>
-Date:   Thu, 22 Oct 2020 17:39:20 +0200
-Message-ID: <CAJiuCcfyx734fo52VU4t5jF6pZ7vcg4VR1HhWMzg_UW9Xfaj8A@mail.gmail.com>
-Subject: Re: [linux-sunxi] [PATCH] Disable HS-DDR mode for Olimex
- A64-OLinuXino variants with eMMC
-To:     Maxime Ripard <maxime@cerno.tech>
-Cc:     rinni@inventati.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Chen-Yu Tsai <wens@csie.org>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-sunxi <linux-sunxi@googlegroups.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Maxime,
+On rare occations there is the following error:
 
-On Thu, 22 Oct 2020 at 11:13, Maxime Ripard <maxime@cerno.tech> wrote:
->
-> Hi,
->
-> On Thu, Oct 22, 2020 at 09:52:29AM +0200, Cl=C3=A9ment P=C3=A9ron wrote:
-> > Hi Philipp,
-> >
-> > On Thu, 22 Oct 2020 at 00:10, Philip Rinn <rinni@inventati.org> wrote:
-> > >
-> > > Hi,
-> > >
-> > > the Olimex A64-OLinuXino board comes in various variants, three with =
-eMMC.
-> > > While MMC HS-DDR mode works fine on one of them (A64-OLinuXino-1Ge4GW=
-) it
-> > > doesn't work on the A64-OLinuXino-2Ge8G-IND variant (I don't have the
-> > > third variant so I can't check if it works there).
-> >
-> > We got similar situations for Allwinner H6 (Beelink GS1 and Tanix TX6).
-> >
-> > There is definitely an issue in the MMC sunxi driver with HS-DDR mode
-> > and it's not limited to "olimex,a64-olinuxino-emmc".
-> >
-> > Have a look at this this message posted by Jernej:
-> > https://www.spinics.net/lists/arm-kernel/msg846093.html
-> >
-> > I think we should disable the HS-DDR mode for A64 / H6 like it's done
-> > for H5 and not disable board per board until the issue is resolved.
->
-> I'm not opposed to that on principle, but "it doesn't work on some
-> board" is not a proper justification to do so. It does on some others,
-> so surely there's more to it and this would just paper over whatever
-> issue we have instead of properly fixing it.
+  mmc0: Tuning timeout, falling back to fixed sampling clock
 
-Maybe the term board is not correct, maybe it's the eMMC chip which is
-different.
-I don't know if all Beelink GS1/Tanix TX6 use the same eMMC chip for
-all the boards.
+There are SD cards which takes a significant longer time to reply to the
+first CMD19 command. The eSDHC takes the data timeout value into account
+during the tuning period. The SDHCI core doesn't explicitly set this
+timeout for the tuning procedure. Thus on the slow cards, there might be
+a spurious "Buffer Read Ready" interrupt, which in turn triggers a wrong
+sequence of events. In the end this will lead to an unsuccessful tuning
+procedure and to the above error.
 
->
-> > If you want to disable only for your board you can set in your
-> > device-tree: mmc-hs200-1_8v; This will switch to HS200 mode without
-> > using the HS-DDR mode.
->
-> Sigh. Can we at least work on a fix instead of providing terrible
-> workarounds?
+To workaround this, set the timeout to the maximum value (which is the
+best we can do) and the SDHCI core will take care of the proper timeout
+handling.
 
-I agree with you on this, but my board doesn't have this issue and I
-tried to read the vendor kernel and spot a difference but didn't find
-anything relevant.
+Fixes: ba49cbd0936e ("mmc: sdhci-of-esdhc: add tuning support")
+Signed-off-by: Michael Walle <michael@walle.cc>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Regards,
-Clement
+---
+Changes since v1:
+ - Added fixes tag. Suggested by Ulf Hansson.
 
->
-> Maxime
+ drivers/mmc/host/sdhci-of-esdhc.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 0b45eff6fed4..baf7801a1804 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -1052,6 +1052,17 @@ static int esdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 
+ 	esdhc_tuning_block_enable(host, true);
+ 
++	/*
++	 * The eSDHC controller takes the data timeout value into account
++	 * during tuning. If the SD card is too slow sending the response, the
++	 * timer will expire and a "Buffer Read Ready" interrupt without data
++	 * is triggered. This leads to tuning errors.
++	 *
++	 * Just set the timeout to the maximum value because the core will
++	 * already take care of it in sdhci_send_tuning().
++	 */
++	sdhci_writeb(host, 0xe, SDHCI_TIMEOUT_CONTROL);
++
+ 	hs400_tuning = host->flags & SDHCI_HS400_TUNING;
+ 
+ 	do {
+-- 
+2.20.1
+
