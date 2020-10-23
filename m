@@ -2,135 +2,98 @@ Return-Path: <SRS0=9HeC=D6=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73083C4363A
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Oct 2020 12:26:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83E3CC55179
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Oct 2020 12:30:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 018B624248
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Oct 2020 12:26:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1322A2465A
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Oct 2020 12:29:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ROZCwsIR"
+	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="1sfZ/A80"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S370489AbgJWM0M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Oct 2020 08:26:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38562 "EHLO
+        id S463832AbgJWM37 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Oct 2020 08:29:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39144 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2898406AbgJWM0L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Oct 2020 08:26:11 -0400
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE96AC0613CE
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Oct 2020 05:26:11 -0700 (PDT)
-Received: by mail-vs1-xe42.google.com with SMTP id s15so756609vsm.0
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Oct 2020 05:26:11 -0700 (PDT)
+        with ESMTP id S372608AbgJWM36 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Oct 2020 08:29:58 -0400
+Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F39FBC0613CE
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Oct 2020 05:29:56 -0700 (PDT)
+Received: by mail-wm1-x341.google.com with SMTP id c16so1325367wmd.2
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Oct 2020 05:29:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SbiM058sppBM2ejB0BKsLTyfit1usvLgD9lTKm1udBQ=;
-        b=ROZCwsIRP2IVMu9iOTAMvfqGoXLdd4eDrvuamqNxCT7kMI1yF2ub3ixtnQ2y/MS79R
-         d8s6eDXGU4X/PXaPwHuWSq5j+WXU9aExYxJp9eby/IYOmGbI80nYUBr1tVLefYOeciNV
-         L9v5hKp1+BWlZFTA8UJGITaIM+7D6NPRl5V+fOsLIm4O8/i1GpytSCVonKaQyFXF7eot
-         9zmBawTgHsdb9dEoWzzA896vnMLKqccUd/+udRPFp9Kq3eJxhASbVctIDw+6TP/k/vTb
-         Tv2b7vvTwehg7ExRWLoO5VQEPxfwrIyxEg1HFRrR1bGznWIRM9Q5IPU45oRwrUun+aH1
-         8DEA==
+        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=7rIF8N/i8VFiSPcWy7t2VnCvFrWFZsMucLJqXY/Ky6I=;
+        b=1sfZ/A80DOJRkuDn+aMTJEqRnTd7jlDaBzl/CTej9gD9qfX1ZXXwxvI9nL7Mhm2zCy
+         ppp30/JsZrruqfWCbWJvNoRaBZqiukoFqxkMsDnWCvp3OOvc8RXTvrYb4BM+JnII9wtx
+         vuu8zwt4MUCheX8x2ne4bex/JPdNTKobo4TXdbwrB2OkXP1PTIPGeUdA5qxC6TEgw/2H
+         io/sCFvCAYFZj3Nvg8qIEhdXdn4scXwM0VjR2jviSTN4KdxZXtJiSwPSp6T9HPcA0GSX
+         cq9+t8tjpmvOZQz5iYSwz2ArAQ6dTVS3ILRv0D67dVDYJqX+xgfOIBbSY3KgeA6k35I2
+         vY/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SbiM058sppBM2ejB0BKsLTyfit1usvLgD9lTKm1udBQ=;
-        b=p6Gs657wx3pWLUvfYc45jqqvTj1kwrwcbRXE0ZaEknAjwdj1dGEzfrBszBklL3tuqx
-         4uksVGFUX5f1FmMEludnQT5mbkCyXKAmVYQbvY9xh7H9RVAz6zTPJA5iyx/6rO7WE83I
-         Y0cI0wEYh6zeA/0LdV8V+ACxRzH/r62bq8graX0q9/AkV10qBC+fjXvJpk1ouJq5cuUT
-         2qb08k+ZjcYfXySuIY0n9nx3jHyRISFhgox3NHw+DJVzhuIGvxEoKSwJYrzKd6Ev2mhw
-         Aw8IMoxZQKymZOxygMdOvxV1o7+4VDNgRppY7IMIYKlkwcSGFl1w7pFIqvOyofT7/lzG
-         1q9Q==
-X-Gm-Message-State: AOAM532+TtKbiq6ec78QSab2eAQQWG2J9E9tHecMwFDbuUX8gz9sH6pF
-        vfZ3IdywvUxXjwxC/ss6m7//RYv7H1sOkZyyQMdPTg==
-X-Google-Smtp-Source: ABdhPJwCWRGvbGLHU8VapiWEJeresFqhayakEx40w5ZiKSNlLE07YGg25rKi83MAt/isEEkTOm5D8TzAOtGuWwOF22A=
-X-Received: by 2002:a67:6c86:: with SMTP id h128mr1072002vsc.42.1603455970903;
- Fri, 23 Oct 2020 05:26:10 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=7rIF8N/i8VFiSPcWy7t2VnCvFrWFZsMucLJqXY/Ky6I=;
+        b=NcSFz+RuMVfgQHWU1T3MKLmohBeyFVEoGUtQQ15Fx9aiqRzXpLBf7MUvkMNhISj1q9
+         LNeoQa5K8Pyp9eePhrGWkBD3GHCkSfi3Ph0tV4HaqFLW/1sLcYBoxfRyCBlfNjgOprwY
+         fjvPbh9RyAyfqtjupsVKxhurtZ1Ga7BukEiuLwIz4Aw7SQSprYVWP7YFtxkDlEU9PEhp
+         Z7kkk4n9rwASFWIVbN+1zvz74Ivru012WnBUuSbFMBMLHnohWbPFJtzZ8mmRa+U71wHS
+         7Xu+gDGDshjfHt2qOkUvGV9KGtKjrQ9GhMTYs+HvlxGRTngiYU6DLWyq7ZsEgoV688vl
+         MMaw==
+X-Gm-Message-State: AOAM532aYTArnutAo5Ep44GtzZ6rBGr6LQrZLVRSEEKef4OIuyrTmXni
+        mFEDhGyfHuI4PJGh0YMY2t7+sg==
+X-Google-Smtp-Source: ABdhPJy8hebC8ysED7iakQTxAZEuNSTOYysF1RdKWxwQs5f/GemG//s/NvSNRjFXup1EEZ3JM+edIw==
+X-Received: by 2002:a1c:2905:: with SMTP id p5mr2116034wmp.187.1603456195733;
+        Fri, 23 Oct 2020 05:29:55 -0700 (PDT)
+Received: from localhost.localdomain (211.160.185.81.rev.sfr.net. [81.185.160.211])
+        by smtp.gmail.com with ESMTPSA id z15sm3138527wrq.24.2020.10.23.05.29.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 23 Oct 2020 05:29:54 -0700 (PDT)
+From:   Fabien Parent <fparent@baylibre.com>
+To:     linux-kernel@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc:     matthias.bgg@gmail.com, ulf.hansson@linaro.org,
+        chaotian.jing@mediatek.com, Fabien Parent <fparent@baylibre.com>
+Subject: [PATCH] mmc: host: mtk-sd: enable recheck_sdio_irq for MT8516 SoC
+Date:   Fri, 23 Oct 2020 14:29:50 +0200
+Message-Id: <20201023122950.60903-1-fparent@baylibre.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-References: <20201022222337.19857-1-michael@walle.cc>
-In-Reply-To: <20201022222337.19857-1-michael@walle.cc>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 23 Oct 2020 14:25:34 +0200
-Message-ID: <CAPDyKFrH=G58fSMExb+QA794BhAXk-NFV2djNRObyHTH9R7W3w@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-of-esdhc: set timeout to max before tuning
-To:     Michael Walle <michael@walle.cc>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Yangbo Lu <yangbo.lu@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 23 Oct 2020 at 00:24, Michael Walle <michael@walle.cc> wrote:
->
-> On rare occations there is the following error:
->
->   mmc0: Tuning timeout, falling back to fixed sampling clock
->
-> There are SD cards which takes a significant longer time to reply to the
-> first CMD19 command. The eSDHC takes the data timeout value into account
-> during the tuning period. The SDHCI core doesn't explicitly set this
-> timeout for the tuning procedure. Thus on the slow cards, there might be
-> a spurious "Buffer Read Ready" interrupt, which in turn triggers a wrong
-> sequence of events. In the end this will lead to an unsuccessful tuning
-> procedure and to the above error.
->
-> To workaround this, set the timeout to the maximum value (which is the
-> best we can do) and the SDHCI core will take care of the proper timeout
-> handling.
->
-> Fixes: ba49cbd0936e ("mmc: sdhci-of-esdhc: add tuning support")
-> Signed-off-by: Michael Walle <michael@walle.cc>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+MT8516 SoC suffers from sometimes losing SDIO IRQs, this makes SDIO
+devices sometimes unstable. Make use of the new property
+recheck_sdio_irq to fix the SDIO stability issues on MT8516.
 
-Applied for fixes and by adding a stable tag, thanks!
+Signed-off-by: Fabien Parent <fparent@baylibre.com>
+---
+ drivers/mmc/host/mtk-sd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I am not sure for what stable kernel this applies to, but I guess we
-will get notified about that, sooner or later.
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index a704745e5882..3dc102eefe49 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -524,7 +524,7 @@ static const struct mtk_mmc_compatible mt7622_compat = {
+ 
+ static const struct mtk_mmc_compatible mt8516_compat = {
+ 	.clk_div_bits = 12,
+-	.recheck_sdio_irq = false,
++	.recheck_sdio_irq = true,
+ 	.hs400_tune = false,
+ 	.pad_tune_reg = MSDC_PAD_TUNE0,
+ 	.async_fifo = true,
+-- 
+2.28.0
 
-Kind regards
-Uffe
-
-
->
-> ---
-> Changes since v1:
->  - Added fixes tag. Suggested by Ulf Hansson.
->
->  drivers/mmc/host/sdhci-of-esdhc.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 0b45eff6fed4..baf7801a1804 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -1052,6 +1052,17 @@ static int esdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
->
->         esdhc_tuning_block_enable(host, true);
->
-> +       /*
-> +        * The eSDHC controller takes the data timeout value into account
-> +        * during tuning. If the SD card is too slow sending the response, the
-> +        * timer will expire and a "Buffer Read Ready" interrupt without data
-> +        * is triggered. This leads to tuning errors.
-> +        *
-> +        * Just set the timeout to the maximum value because the core will
-> +        * already take care of it in sdhci_send_tuning().
-> +        */
-> +       sdhci_writeb(host, 0xe, SDHCI_TIMEOUT_CONTROL);
-> +
->         hs400_tuning = host->flags & SDHCI_HS400_TUNING;
->
->         do {
-> --
-> 2.20.1
->
