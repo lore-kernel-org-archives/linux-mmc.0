@@ -7,48 +7,48 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 138F1C2D0A3
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 00:22:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02B77C4363A
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 00:26:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BCC9E20882
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 00:21:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A6BA220780
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 00:26:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1603758119;
-	bh=aIiTGYggak3CM+beeinXqt9y0SWPQVk1XwmAovTDKd0=;
+	s=default; t=1603758398;
+	bh=KtzzKKCGYmr9El+IBRY+/Sr7uWkDvWGNi0pS5NNNzrg=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=QmzJ8/WNsEEqxjbEHR5hUlicpU6mYljRZ6dphoRcQoPNF52pD2YlMTA2PRDb+gXaN
-	 etYg6J9q6jDE8m71BzJk5AsZUlzX2X7cBRHEI5mntZ+VGyMTrgQn0r93JgZosXyf+k
-	 H9k14xjvWGtV+odKImh1NF9XCxNMKdiZN1j0kAro=
+	b=n8hkjXj1WSgxogXeE6ESV8nYLQXn9Tqyt/TdGA9Hvp6a1bdNfO1IhJdx2nXzDnxNw
+	 NLrO4OsEl6lNMwGz0cC/f9BIo3o2TKdKTguwC4Phu5ZtERgLSYG66/wS0suk/RJULJ
+	 T/X+yuInL/njUBwdyg4wkZSJE9sQo5PDl5XdsBUk=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2441245AbgJ0AVy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Oct 2020 20:21:54 -0400
-Received: from mail.kernel.org ([198.145.29.99]:33688 "EHLO mail.kernel.org"
+        id S2409940AbgJZXxC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Oct 2020 19:53:02 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56626 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2410974AbgJZXzt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 26 Oct 2020 19:55:49 -0400
+        id S2409930AbgJZXxB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 26 Oct 2020 19:53:01 -0400
 Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 7E1D320B1F;
-        Mon, 26 Oct 2020 23:55:48 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 14272223AB;
+        Mon, 26 Oct 2020 23:52:59 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1603756549;
-        bh=aIiTGYggak3CM+beeinXqt9y0SWPQVk1XwmAovTDKd0=;
+        s=default; t=1603756380;
+        bh=KtzzKKCGYmr9El+IBRY+/Sr7uWkDvWGNi0pS5NNNzrg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ZmGY3bSVixfCbpnj/Z4L7WfGMEMzHLtcTleejhFVVdICO2iO7lH02i4sJzi4vYQDp
-         J1zcOOpJ4KPsURf6cFPDBTFBIdhIll1X0TRoUGqrw6Y/khqu1enfzQeQ9rh8lDhUct
-         LIVlvcXghxLYBFHH/htx3SxLg7lm/r3Rv9aJylHQ=
+        b=Pzfj0pF6l6xkoKfZMVBnB1QbnCJPOyAidYZypC4tiHiSdp7aaKiIuwxN+Fb6s4mKk
+         F6W0gozt7sdRZb9L5W9v3G9MpWRu6qz1BnLVzywyZr8zae4T3rMUwQD9Wh8L/y0Jr/
+         pNk4UI/MRj9/xKQJjyHtN0CflSqjJZ9u8hawAke0=
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 26/80] mmc: via-sdmmc: Fix data race bug
-Date:   Mon, 26 Oct 2020 19:54:22 -0400
-Message-Id: <20201026235516.1025100-26-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.8 045/132] mmc: via-sdmmc: Fix data race bug
+Date:   Mon, 26 Oct 2020 19:50:37 -0400
+Message-Id: <20201026235205.1023962-45-sashal@kernel.org>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20201026235516.1025100-1-sashal@kernel.org>
-References: <20201026235516.1025100-1-sashal@kernel.org>
+In-Reply-To: <20201026235205.1023962-1-sashal@kernel.org>
+References: <20201026235205.1023962-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -79,7 +79,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index 8d96ecba1b553..d12a068b0f9ed 100644
+index ef95bce508890..e4d8126cd4e5b 100644
 --- a/drivers/mmc/host/via-sdmmc.c
 +++ b/drivers/mmc/host/via-sdmmc.c
 @@ -1259,11 +1259,14 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
