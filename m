@@ -1,192 +1,152 @@
-Return-Path: <SRS0=0cVg=D7=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=obPU=EB=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3836BC2D0A3
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Oct 2020 21:55:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 580A0C2D0A3
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Oct 2020 08:22:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8A9362098B
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Oct 2020 21:55:02 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=inventati.org header.i=@inventati.org header.b="nVeIacZD"
+	by mail.kernel.org (Postfix) with ESMTP id F0735223AE
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Oct 2020 08:22:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1764849AbgJXVzB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 24 Oct 2020 17:55:01 -0400
-Received: from confino.investici.org ([212.103.72.250]:60721 "EHLO
-        confino.investici.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1764841AbgJXVzB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Oct 2020 17:55:01 -0400
-Received: from mx1.investici.org (unknown [127.0.0.1])
-        by confino.investici.org (Postfix) with ESMTP id 4CJZdV3XYZz12bf;
-        Sat, 24 Oct 2020 21:54:54 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=inventati.org;
-        s=stigmate; t=1603576494;
-        bh=kAZ4og6OYL1coY0e1LlAtF7Q1hNVq4HVhP7A76mEIws=;
-        h=To:Cc:References:From:Subject:Date:In-Reply-To:From;
-        b=nVeIacZDPdYParjywnhGaA9WuExFwmYduymd0EaDJiMColZCrwM6vrBNfDXRBZP0Q
-         2zGvIiGjCPRHNo6Drrqv93y2qf8jODIaxlCHvTUcnbK3fYZ4imBv33ht7ybFu9Hp/u
-         x9OOBPDVQbCG91h5qKDyfSuaXqUfZfxpTfTisQH0=
-Received: from [212.103.72.250] (mx1.investici.org [212.103.72.250]) (Authenticated sender: rinni@inventati.org) by localhost (Postfix) with ESMTPSA id 4CJZdV1XRbz12bV;
-        Sat, 24 Oct 2020 21:54:54 +0000 (UTC)
-To:     =?UTF-8?B?Q2zDqW1lbnQgUMOpcm9u?= <peron.clem@gmail.com>
-Cc:     Chen-Yu Tsai <wens@csie.org>, Maxime Ripard <maxime@cerno.tech>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-sunxi <linux-sunxi@googlegroups.com>
-References: <0d590f91-5d7a-697a-5644-710d14e3ea75@inventati.org>
- <CAJiuCceLR_zfyA0zHyRrqZ46DoQ6Ju-xVaa2Rf_PkjDkPOR8JA@mail.gmail.com>
- <20201022091337.3u5ya3jouhmaukcj@gilmour.lan>
- <CAJiuCcfyx734fo52VU4t5jF6pZ7vcg4VR1HhWMzg_UW9Xfaj8A@mail.gmail.com>
- <CAJiuCcd1O0OVeJSmqa=srOOzwuKciqKbm4Xbh+dn4XCycSbLAg@mail.gmail.com>
- <f9cab2ce-1155-217c-bfa4-95f66d5cbfad@inventati.org>
- <CAJiuCcckhT8rP_RGub=RdpgtLfPbm_37JGgAywKzO9EVB6bk8w@mail.gmail.com>
-From:   Philip Rinn <rinni@inventati.org>
-Autocrypt: addr=rinni@inventati.org; prefer-encrypt=mutual; keydata=
- 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
- bA8HdppJKhaDOUdekpLdnVfd5A==
-Subject: Re: [linux-sunxi] [PATCH] Disable HS-DDR mode for Olimex
- A64-OLinuXino variants with eMMC
-Message-ID: <22c45ac3-5406-3f80-0521-325e0fb9cacb@inventati.org>
-Date:   Sat, 24 Oct 2020 23:54:53 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1769610AbgJZIWz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Oct 2020 04:22:55 -0400
+Received: from rtits2.realtek.com ([211.75.126.72]:35123 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1769480AbgJZIWz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Oct 2020 04:22:55 -0400
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 09Q8MXDc8027970, This message is accepted by code: ctloc85258
+Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
+        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 09Q8MXDc8027970
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
+        Mon, 26 Oct 2020 16:22:34 +0800
+Received: from RSEXMBS02.realsil.com.cn (172.29.17.196) by
+ RSEXMBS01.realsil.com.cn (172.29.17.195) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2044.4; Mon, 26 Oct 2020 16:22:33 +0800
+Received: from RSEXMBS02.realsil.com.cn ([fe80::f8fc:93be:88f4:52ef]) by
+ RSEXMBS02.realsil.com.cn ([fe80::f8fc:93be:88f4:52ef%7]) with mapi id
+ 15.01.2044.004; Mon, 26 Oct 2020 16:22:33 +0800
+From:   =?utf-8?B?5Yav6ZSQ?= <rui_feng@realsil.com.cn>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Christoph Hellwig <hch@lst.de>
+CC:     Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0ggMy8zXSBtbWM6IHJ0c3g6IEFkZCBTRCBFeHByZXNz?= =?utf-8?Q?_mode_support_for_RTS5261?=
+Thread-Topic: [PATCH 3/3] mmc: rtsx: Add SD Express mode support for RTS5261
+Thread-Index: AQHWkt9BwBVjFlHHd0at7hFkgpI9BamhuQuAgAGMm/CAATQjgIAAlwdA
+Date:   Mon, 26 Oct 2020 08:22:33 +0000
+Message-ID: <ba3c68fea4614434838a0a8cbc0e892a@realsil.com.cn>
+References: <1600999061-13669-1-git-send-email-rui_feng@realsil.com.cn>
+ <CAPDyKFrnkF3mU5PJsy0VtEjPSToktSsRRtyMvQF97vymc+rY5A@mail.gmail.com>
+ <dd210290eef6467cbffca8cbaddb8b84@realsil.com.cn>
+ <CAPDyKFqwsJaYrXMVabR7qui6yqr4FAHfYq1ghfsf0HtRSZpGGw@mail.gmail.com>
+In-Reply-To: <CAPDyKFqwsJaYrXMVabR7qui6yqr4FAHfYq1ghfsf0HtRSZpGGw@mail.gmail.com>
+Accept-Language: zh-CN, en-US
+Content-Language: zh-CN
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.29.40.150]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-In-Reply-To: <CAJiuCcckhT8rP_RGub=RdpgtLfPbm_37JGgAywKzO9EVB6bk8w@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Clément,
-
-On 24.10.20 at 15:00, Clément Péron wrote:
-> Hi Philip
-> 
-> <snip>
-> 
->>>
->>> I catched a slight difference between the mainline and vendor driver
->>> in DDR mode.
->>>
->>> the phase is set to 1
->>> case MMC_TIMING_UHS_DDR50:
->>> case MMC_TIMING_MMC_DDR52:
->>> dat_drv_ph = 1;
->>> speed_mod = SM2_HSDDR52_DDR50;
->>> break;
->>>
->>> Could you add a hack in DDR mode and see if it's working better ?
->>>
->>> Maybe line 738:
->>>
->>> #define SDXC_REG_DRV_DL (0x0140)
->>> #define SDXC_DAT_DRV_PH_SEL BIT(17)
->>>
->>> rval = mmc_readl(host, REG_DRV_DL);
->>> rval |= SDXC_DAT_DRV_PH_SEL;
->>> mmc_writel(host, REG_DRV_DL, rval);
->>
->> I tried with this patch but no luck, see log below
-
-<snip>
-
-> Sorry this will not work, as H6 uses new timing mode the function will
-> return before setting the DRV_PHASE.
-
-I'm actually testing on an A64 - but that shouldn't matter, right?
-
-> Could you retry with a patch like this :
-> https://github.com/clementperon/linux/commit/287a62a6e9ccda3ade9b407ce12ee7db0865b41b.patch
-
-Unfortunately that didn't work either:
-
-[...]
-[    3.755418] sunxi-mmc 1c0f000.mmc: initialized, max. request size: 16384 KB,
-uses new timings mode
-[    3.755432] sunxi-mmc 1c0f000.mmc: MMC version: 0.0.0
-[    3.758685] sunxi-mmc 1c10000.mmc: allocated mmc-pwrseq
-[    3.783369] sunxi-mmc 1c10000.mmc: initialized, max. request size: 16384 KB,
-uses new timings mode
-[    3.783382] sunxi-mmc 1c10000.mmc: MMC version: 0.0.0
-[    3.798267] mmc0: new high speed SDHC card at address aaaa
-[    3.799776] mmcblk0: mmc0:aaaa SC16G 14.8 GiB
-[    3.804248]  mmcblk0: p1
-[    3.811371] sunxi-mmc 1c11000.mmc: initialized, max. request size: 2048 KB,
-uses new timings mode
-[    3.811385] sunxi-mmc 1c11000.mmc: MMC version: 0.0.0
-[...]
-[    3.936574] sunxi-mmc 1c11000.mmc: Setting Phase delay
-[    3.936890] mmc2: new DDR MMC card at address 0001
-[    3.938617] mmcblk2: mmc2:0001 Q2J55L 7.09 GiB
-[    3.939692] mmcblk2boot0: mmc2:0001 Q2J55L partition 1 16.0 MiB
-[    3.940519] mmcblk2boot1: mmc2:0001 Q2J55L partition 2 16.0 MiB
-[    3.943067] sunxi-mmc 1c11000.mmc: data error, sending stop command
-[    3.943083] sunxi-mmc 1c11000.mmc: send stop command failed
-[...]
-[    4.009680] blk_update_request: I/O error, dev mmcblk2, sector 0 op 0x0:(READ)
-flags 0x0 phys_seg 1 prio class 0
-[    4.009692] Buffer I/O error on dev mmcblk2, logical block 0, async page read
-[    4.009817] sunxi-mmc 1c11000.mmc: data error, sending stop command
-[    4.009899] blk_update_request: I/O error, dev mmcblk2, sector 2 op 0x0:(READ)
-flags 0x0 phys_seg 6 prio class 0
-[    4.009906] Buffer I/O error on dev mmcblk2, logical block 2, async page read
-[    4.009914] Buffer I/O error on dev mmcblk2, logical block 3, async page read
-[    4.009920] Buffer I/O error on dev mmcblk2, logical block 4, async page read
-[    4.009926] Buffer I/O error on dev mmcblk2, logical block 5, async page read
-[    4.009931] Buffer I/O error on dev mmcblk2, logical block 6, async page read
-[    4.009937] Buffer I/O error on dev mmcblk2, logical block 7, async page read
-[...]
-
-> Thanks for your test,
-> Clement
-
-Thanks for trying to fix that :-)
-Philip
+PiANCj4gKyBDaHJpc3RvcGggKHRvIGhlbHAgdXMgdW5kZXJzdGFuZCBpZiBQQ0llL05WTWUgZGV2
+aWNlcyBjYW4gYmUgbWFya2VkDQo+ICsgcmVhZC1vbmx5KQ0KPiANCj4gT24gVGh1LCAyMiBPY3Qg
+MjAyMCBhdCAwODowNCwg5Yav6ZSQIDxydWlfZmVuZ0ByZWFsc2lsLmNvbS5jbj4gd3JvdGU6DQo+
+ID4NCj4gPiA+DQo+ID4gPiBPbiBGcmksIDI1IFNlcCAyMDIwIGF0IDAzOjU3LCA8cnVpX2ZlbmdA
+cmVhbHNpbC5jb20uY24+IHdyb3RlOg0KPiA+ID4gPg0KPiA+ID4gPiBGcm9tOiBSdWkgRmVuZyA8
+cnVpX2ZlbmdAcmVhbHNpbC5jb20uY24+DQo+ID4gPiA+DQo+ID4gPiA+IFJUUzUyNjEgc3VwcG9y
+dCBsZWdhY3kgU0QgbW9kZSBhbmQgU0QgRXhwcmVzcyBtb2RlLg0KPiA+ID4gPiBJbiBTRDcueCwg
+U0QgYXNzb2NpYXRpb24gaW50cm9kdWNlIFNEIEV4cHJlc3MgYXMgYSBuZXcgbW9kZS4NCj4gPiA+
+ID4gVGhpcyBwYXRjaCBtYWtlcyBSVFM1MjYxIHN1cHBvcnQgU0QgRXhwcmVzcyBtb2RlLg0KPiA+
+ID4NCj4gPiA+IEFzIHBlciBwYXRjaCAyLCBjYW4geW91IHBsZWFzZSBhZGQgc29tZSBtb3JlIGlu
+Zm9ybWF0aW9uIGFib3V0IHdoYXQNCj4gPiA+IGNoYW5nZXMgYXJlIG5lZWRlZCB0byBzdXBwb3J0
+IFNEIEV4cHJlc3M/IFRoaXMganVzdCBzdGF0ZXMgdGhhdCB0aGUNCj4gPiA+IHN1cHBvcnQgaXMg
+aW1wbGVtZW50ZWQsIGJ1dCBwbGVhc2UgZWxhYm9yYXRlIGhvdy4NCj4gPiA+DQo+ID4gPiA+DQo+
+ID4gPiA+IFNpZ25lZC1vZmYtYnk6IFJ1aSBGZW5nIDxydWlfZmVuZ0ByZWFsc2lsLmNvbS5jbj4N
+Cj4gPiA+ID4gLS0tDQo+ID4gPiA+ICBkcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMg
+fCA1OQ0KPiA+ID4gPiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrDQo+ID4gPiA+ICAx
+IGZpbGUgY2hhbmdlZCwgNTkgaW5zZXJ0aW9ucygrKQ0KPiA+ID4gPg0KPiA+ID4gPiBkaWZmIC0t
+Z2l0IGEvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jDQo+ID4gPiA+IGIvZHJpdmVy
+cy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1tYy5jDQo+ID4gPiA+IGluZGV4IDI3NjNhMzc2YjA1NC4u
+ZWZkZTM3NGE0YTVlIDEwMDY0NA0KPiA+ID4gPiAtLS0gYS9kcml2ZXJzL21tYy9ob3N0L3J0c3hf
+cGNpX3NkbW1jLmMNCj4gPiA+ID4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9zZG1t
+Yy5jDQo+ID4gPiA+IEBAIC04OTUsNyArODk1LDkgQEAgc3RhdGljIGludCBzZF9zZXRfYnVzX3dp
+ZHRoKHN0cnVjdA0KPiA+ID4gPiByZWFsdGVrX3BjaV9zZG1tYyAqaG9zdCwgIHN0YXRpYyBpbnQg
+c2RfcG93ZXJfb24oc3RydWN0DQo+ID4gPiA+IHJlYWx0ZWtfcGNpX3NkbW1jICpob3N0KSAgew0K
+PiA+ID4gPiAgICAgICAgIHN0cnVjdCBydHN4X3BjciAqcGNyID0gaG9zdC0+cGNyOw0KPiA+ID4g
+PiArICAgICAgIHN0cnVjdCBtbWNfaG9zdCAqbW1jID0gaG9zdC0+bW1jOw0KPiA+ID4gPiAgICAg
+ICAgIGludCBlcnI7DQo+ID4gPiA+ICsgICAgICAgdTMyIHZhbDsNCj4gPiA+ID4NCj4gPiA+ID4g
+ICAgICAgICBpZiAoaG9zdC0+cG93ZXJfc3RhdGUgPT0gU0RNTUNfUE9XRVJfT04pDQo+ID4gPiA+
+ICAgICAgICAgICAgICAgICByZXR1cm4gMDsNCj4gPiA+ID4gQEAgLTkyMiw2ICs5MjQsMTQgQEAg
+c3RhdGljIGludCBzZF9wb3dlcl9vbihzdHJ1Y3QNCj4gPiA+ID4gcmVhbHRla19wY2lfc2RtbWMN
+Cj4gPiA+ICpob3N0KQ0KPiA+ID4gPiAgICAgICAgIGlmIChlcnIgPCAwKQ0KPiA+ID4gPiAgICAg
+ICAgICAgICAgICAgcmV0dXJuIGVycjsNCj4gPiA+ID4NCj4gPiA+ID4gKyAgICAgICBpZiAoUENJ
+X1BJRChwY3IpID09IFBJRF81MjYxKSB7DQo+ID4gPiA+ICsgICAgICAgICAgICAgICB2YWwgPSBy
+dHN4X3BjaV9yZWFkbChwY3IsIFJUU1hfQklQUik7DQo+ID4gPiA+ICsgICAgICAgICAgICAgICBp
+ZiAodmFsICYgU0RfV1JJVEVfUFJPVEVDVCkgew0KPiA+ID4gPiArICAgICAgICAgICAgICAgICAg
+ICAgICBwY3ItPmV4dHJhX2NhcHMgJj0NCj4gPiA+IH5FWFRSQV9DQVBTX1NEX0VYUFJFU1M7DQo+
+ID4gPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIG1tYy0+Y2FwczIgJj0gfihNTUNfQ0FQMl9T
+RF9FWFAgfA0KPiA+ID4gPiArIE1NQ19DQVAyX1NEX0VYUF8xXzJWKTsNCj4gPiA+DQo+ID4gPiBU
+aGlzIGxvb2tzIGEgYml0IHdlaXJkIHRvIG1lLiBGb3IgYSB3cml0ZSBwcm90ZWN0ZWQgY2FyZCB5
+b3Ugd2FudCB0bw0KPiA+ID4gZGlzYWJsZSB0aGUgU0RfRVhQUkVTUyBzdXBwb3J0LCByaWdodD8N
+Cj4gPiA+DQo+ID4gUmlnaHQuIElmIGVuZCB1c2VyIGluc2VydCBhIHdyaXRlIHByb3RlY3RlZCBT
+RCBleHByZXNzIGNhcmQsIEkgd2lsbCBkaXNhYmxlDQo+IFNEX0VYUFJFU1Mgc3VwcG9ydC4NCj4g
+PiBJZiBob3N0IHN3aXRjaCB0byBTRCBFWFBSRVNTIG1vZGUsIHRoZSBjYXJkIHdpbGwgYmUgcmVj
+b2duaXplZCBhcyBhDQo+ID4gd3JpdGFibGUgUENJZS9OVk1lIGRldmljZSwgSSB0aGluayB0aGlz
+IGlzIG5vdCBlbmQgdXNlcidzIHB1cnBvc2UuDQo+IA0KPiBIbW0uDQo+IA0KPiBGYWxsaW5nIGJh
+Y2sgdG8gdXNlIHRoZSBsZWdhY3kgU0QgaW50ZXJmYWNlIGlzIHByb2JhYmx5IG5vdCB3aGF0IHRo
+ZSB1c2VyDQo+IGV4cGVjdHMgZWl0aGVyLg0KPiANCj4gTm90ZSB0aGF0IHRoZSBwaHlzaWNhbCB3
+cml0ZSBwcm90ZWN0IHN3aXRjaC9waW4gaXNuJ3QgbWFuZGF0b3J5IHRvIHN1cHBvcnQgYW5kDQo+
+IGl0IGRvZXNuJ3QgZXZlbiBleGlzdCBmb3IgYWxsIGZvcm1hdHMgb2YgU0QgY2FyZHMuIEluIHRo
+ZSBtbWMgY29yZSwgd2UgYXJlDQo+IGRlZmF1bHRpbmcgdG8gbWFrZSB0aGUgY2FyZCB3cml0ZSBl
+bmFibGVkLCBpZiB0aGUgc3dpdGNoIGlzbid0IHN1cHBvcnRlZCBieSB0aGUNCj4gaG9zdCBkcml2
+ZXIuIEFkZGl0aW9uYWxseSwgbm90aGluZyBwcmV2ZW50cyB0aGUgZW5kIHVzZXIgZnJvbSBtb3Vu
+dGluZyB0aGUNCj4gZmlsZXN5c3RlbSBpbiByZWFkLW9ubHkgbW9kZSwgaWYgdGhhdCBpcyBwcmVm
+ZXJyZWQuDQo+IA0KPiA+DQo+ID4gPiBJcyB0aGVyZSBubyBtZWNoYW5pc20gdG8gc3VwcG9ydCBy
+ZWFkLW9ubHkgUENJZS9OVk1lIGJhc2VkIHN0b3JhZ2UNCj4gZGV2aWNlcz8NCj4gPiA+IElmIHRo
+YXQgaXMgdGhlIGNhc2UsIG1heWJlIGl0J3Mgc2ltcGx5IGJldHRlciB0byBub3Qgc3VwcG9ydCB0
+aGUNCj4gPiA+IHJlYWRvbmx5IG9wdGlvbiBhdCBhbGwgZm9yIFNEIGV4cHJlc3MgY2FyZHM/DQo+
+ID4gPg0KPiA+IEkgdGhpbmsgdGhlcmUncyBubyBtZWNoYW5pc20gdG8gc3VwcG9ydCByZWFkLW9u
+bHkgUENJZS9OVk1lIGJhc2VkIHN0b3JhZ2UNCj4gZGV2aWNlcy4NCj4gDQo+IEkgaGF2ZSBsb29w
+ZWQgaW4gQ2hyaXN0b3BoLCBtYXliZSBoZSBjYW4gZ2l2ZSB1cyBoaXMgb3BpbmlvbiBvbiB0aGlz
+Lg0KPiANCj4gPiBCdXQgZGlmZmVyZW50IHZlbmRlcnMgbWF5IGhhdmUgZGlmZmVyZW50IG9waW5p
+b25zLiBUaGlzIGlzIG9ubHkgUmVhbHRlaydzDQo+IG9waW5pb24uDQo+IA0KPiBJIHVuZGVyc3Rh
+bmQuIEhvd2V2ZXIsIHRoZSBtb3N0IGltcG9ydGFudCBwb2ludCBmb3IgbWUsIGlzIHRoYXQgd2Ug
+ZG9uJ3QgZW5kDQo+IHVwIGluIGEgc2l0dWF0aW9uIHdoZXJlIGVhY2ggbW1jIGhvc3QgaGFuZGxl
+cyB0aGlzIGRpZmZlcmVudGx5LiBXZSBzaG91bGQgc3RyaXZlDQo+IHRvd2FyZHMgYSBjb25zaXN0
+ZW50IGJlaGF2aW9yLg0KPiANCj4gQXQgdGhpcyBwb2ludCBJIHRlbmQgdG8gcHJlZmVyIHRvIGRl
+ZmF1bHQgdG8gaWdub3JlIHRoZSB3cml0ZSBwcm90ZWN0IHN3aXRjaCBmb3IgU0QNCj4gZXhwcmVz
+cywgdW5sZXNzIHdlIGNhbiBmaW5kIGEgd2F5IHRvIHByb3Blcmx5IHN1cHBvcnQgaXQuDQo+IA0K
+Rm9yIGluZm9ybWF0aW9uIHNlY3VyaXR5IHB1cnBvc2UsIHNvbWUgY29tcGFuaWVzIG9yIGJ1c2lu
+ZXNzIHVzZXJzIHNldCB0aGVpciBub3RlYm9vayBTRCBhcyAicmVhZCBvbmx5Ii4NCkJlY2F1c2Ug
+YSBsb3Qgb2YgInJlYWQgb25seSIgcmVxdWlyZW1lbnRzIGZyb20gdGhvc2UgY29tcGFuaWVzIG9y
+IGJ1c2luZXNzIHVzZXJzLCBub3RlYm9vayB2ZW5kb3IgY29udHJvbHMgcmVhZGVyIHdyaXRlIHBy
+b3RlY3QgcGluIHRvIGFjaGlldmUgaXQuDQpOb3RlYm9vayBCSU9TIG1pZ2h0IGhhdmUgb3B0aW9u
+IHRvIGNob29zZSAicmVhZCBvbmx5IiBvciBub3QuDQpUaGlzIGlzIHdoeSB3ZSB0aGluayB3cml0
+ZSBwcm90ZWN0IGlzIG1vcmUgaW1wb3J0YW50IHRoYW4gc3BlZWQuDQpJZiB5b3UgcHJlZmVyIHRv
+IGNvbnNpc3RlbnQgYmVoYXZpb3IsIEkgY2FuIGlnbm9yZSB0aGUgd3JpdGUgcHJvdGVjdCBzd2l0
+Y2ggZm9yIFNEIGV4cHJlc3MuDQoNCj4gDQo+IEZyb20gdGhpcywgSSBhc3N1bWUgdGhhdCBteSBp
+bnRlcnByZXRhdGlvbnMgb2YgdGhlIGJlaGF2aW9yIHdhcyBjb3JyZWN0Lg0KPiANCj4gQWx0aG91
+Z2gsIGNhbiB5b3UgcGxlYXNlIGVsYWJvcmF0ZSBvbiB3aGF0IHlvdSBtZWFuIGJ5IHRoYXQgaXQg
+d2lsbCAibm90DQo+IHdvcmsiPw0KPiANCj4gRG8geW91IG1lYW4gdGhhdCBydHN4X3BjaV9jYXJk
+X2V4Y2x1c2l2ZV9jaGVjaygpIHRoYXQgaXMgY2FsbGVkIGVhcmx5IGluDQo+IHNkbW1jX3NldF9p
+b3MoKSB3aWxsIGZhaWwgYW5kIHRoZW4gbWFrZSBpdCBiYWlsIG91dD8gVGhlbiwgY291bGQgeW91
+IHBsZWFzZSBhZGQNCj4gYSBjb21tZW50IGFib3V0IHRoYXQgaW4gdGhlIGNvZGU/DQo+IA0KSW4g
+aW5pdF9zZF9leHByZXNzKCkgZHJpdmVyIHNldHMgMHhGRjU0IGJpdDA9MSBhbmQgMHhGRjU1IGJp
+dDQ9MCwgdGhlbiBSVFM1MjYxIHdpbGwgc3dpdGNoIE1DVSBhbmQgZW50ZXIgU0QgRVhQUkVTUyBt
+b2RlLg0KQWZ0ZXIgdGhhdCBSVFM1MjYxIGNhbid0IHJlY2VpdmUgYW55IENNRCBmcm9tIFBDSWUs
+IHNvIG1tY19wb3dlcl9vZmYoKSB3aWxsIG5vdCB3b3JrLg0KDQo+IEtpbmQgcmVnYXJkcw0KPiBV
+ZmZlDQo+IA0KPiAtLS0tLS1QbGVhc2UgY29uc2lkZXIgdGhlIGVudmlyb25tZW50IGJlZm9yZSBw
+cmludGluZyB0aGlzIGUtbWFpbC4NCg==
