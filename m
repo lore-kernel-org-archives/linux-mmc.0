@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 335AFC4363A
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Oct 2020 15:40:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D67DFC4363A
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Oct 2020 15:40:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F31AC22450
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Oct 2020 15:40:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A221922450
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Oct 2020 15:40:37 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1603726834;
-	bh=KAl+a17RKAP8KypIuISMNDf6rpG0mE1AHoSQdwN/75Y=;
+	s=default; t=1603726837;
+	bh=9ZA2eUlao+W2wjkHccyiO9YyGNF586SIGj+ZQg6YKD8=;
 	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=tCeCWoQZXQmETX0GoH1gySgH+EqAZHlDdAaiDCfJJiq4jp3mhAHwBOXqOSvw7cW2j
-	 GaSbBkHa47MhL65kq2Ssx0QpT7hUgWUIVLkP0ClpyGRNTkvqfCx8Edo5OW8Kw7UefJ
-	 BULYmVOIpSjK+QZtPsW1/cuNmoZvupyjpaYFU2sc=
+	b=OZQ8/rf8kRo7e+/6gYZ6WFYaSSl9VhmuE/JJl7YeUbeU3tXezr8Mq6WIBVIklNSx/
+	 1xUfYPy3hYC3USSXtJ8uuLAUztqLn/bhD7FDDVAiEoIGwDgdiRaLe+8GwMtrfz2qZT
+	 Ir2U1tz1NFMUHmLxB2ke0I7wUOWmr5wd6BUf0fp0=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1784252AbgJZPkd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Oct 2020 11:40:33 -0400
-Received: from mail.kernel.org ([198.145.29.99]:34876 "EHLO mail.kernel.org"
+        id S1784262AbgJZPkg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Oct 2020 11:40:36 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34946 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1773322AbgJZPkc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 26 Oct 2020 11:40:32 -0400
+        id S1784261AbgJZPkf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 26 Oct 2020 11:40:35 -0400
 Received: from kozik-lap.mshome.net (unknown [194.230.155.184])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 0391D2242A;
-        Mon, 26 Oct 2020 15:40:29 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id 4099E22400;
+        Mon, 26 Oct 2020 15:40:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1603726832;
-        bh=KAl+a17RKAP8KypIuISMNDf6rpG0mE1AHoSQdwN/75Y=;
+        s=default; t=1603726835;
+        bh=9ZA2eUlao+W2wjkHccyiO9YyGNF586SIGj+ZQg6YKD8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=I5Dou+5oBBQu9B6fpTptjbMUWmxlwzDlG9DHDH4lwDGqyPW5GbO+WLe62AnoSr6cW
-         fgBgANAJa1WwsZRr3EJTSYsgp4sDA2XbV5nRHA/n789N0HjdBUQCXq80as8CSF+xAg
-         /ePe9Z3S3ZwFBJFGrBt1UqibfZMSNiWWJn6T8rWc=
+        b=GjXnh3M0/liuMV7QyGMmlKiUKrc4da3ovQD6nsgOscWexQ1B3/1ZaXpLMAEH/Nupb
+         ZH+QHvTCcSUdS0J0xrRICdPfwI+gNeiIC9u5NQqb1ZUJmpQL6yGI3oyK4CovvTnX9I
+         fUEABGcBlM83g6o3JVrWVUybcjau9hiUfVcKf3GI=
 From:   Krzysztof Kozlowski <krzk@kernel.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Ben Dooks <ben-linux@fluff.org>,
@@ -46,41 +46,55 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
-Cc:     Krzysztof Kozlowski <krzk@kernel.org>
-Subject: [PATCH 2/3] mmc: s3cmci: enable compile testing
-Date:   Mon, 26 Oct 2020 16:38:09 +0100
-Message-Id: <20201026153810.89512-2-krzk@kernel.org>
+Cc:     Krzysztof Kozlowski <krzk@kernel.org>,
+        kernel test robot <lkp@intel.com>
+Subject: [PATCH 3/3] mmc: sunxi: drop of_match_ptr from of_device_id table
+Date:   Mon, 26 Oct 2020 16:38:10 +0100
+Message-Id: <20201026153810.89512-3-krzk@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20201026153810.89512-1-krzk@kernel.org>
 References: <20201026153810.89512-1-krzk@kernel.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The driver can be compile tested to increase build coverage.
+The driver can match only via DT table so it should be always used and
+the of_match_ptr does not have any sense (this also allows ACPI
+matching via PRP0001, even though it is not relevant for sunxi).  This
+fixes compile warning:
 
+    drivers/mmc/host/sunxi-mmc.c:1181:34: warning: ‘sunxi_mmc_of_match’ defined but not used [-Wunused-const-variable=]
+
+Reported-by: kernel test robot <lkp@intel.com>
 Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
 ---
- drivers/mmc/host/Kconfig | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sunxi-mmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 31481c9fcc2e..310e546e5898 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -631,8 +631,8 @@ config MMC_SPI
- 
- config MMC_S3C
- 	tristate "Samsung S3C SD/MMC Card Interface support"
--	depends on ARCH_S3C24XX
--	depends on S3C24XX_DMAC
-+	depends on ARCH_S3C24XX || COMPILE_TEST
-+	depends on S3C24XX_DMAC || COMPILE_TEST
- 	help
- 	  This selects a driver for the MCI interface found in
- 	  Samsung's S3C2410, S3C2412, S3C2440, S3C2442 CPUs.
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index fc62773602ec..6310693f2ac0 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -26,6 +26,7 @@
+ #include <linux/mmc/sdio.h>
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/module.h>
++#include <linux/mod_devicetable.h>
+ #include <linux/of_address.h>
+ #include <linux/of_platform.h>
+ #include <linux/platform_device.h>
+@@ -1515,7 +1516,7 @@ static struct platform_driver sunxi_mmc_driver = {
+ 	.driver = {
+ 		.name	= "sunxi-mmc",
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+-		.of_match_table = of_match_ptr(sunxi_mmc_of_match),
++		.of_match_table = sunxi_mmc_of_match,
+ 		.pm = &sunxi_mmc_pm_ops,
+ 	},
+ 	.probe		= sunxi_mmc_probe,
 -- 
 2.25.1
 
