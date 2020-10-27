@@ -2,173 +2,227 @@ Return-Path: <SRS0=lEQw=EC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 04143C5517A
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 13:42:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1990DC5517A
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 16:43:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B772B20732
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 13:42:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC57E21D24
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 16:43:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="D/SMN1X7"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="egzXGhf1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1752478AbgJ0Nmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Oct 2020 09:42:35 -0400
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:41045 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752474AbgJ0Nme (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 09:42:34 -0400
-Received: by mail-vs1-f68.google.com with SMTP id e3so870184vsr.8
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 06:42:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=lF1BfHar/r1OSmm5wTIr7B7jVJxijYAoAAWj/k6sxxs=;
-        b=D/SMN1X7nR5nWFZAQeWhWWV1yQwEqxe2HGp00zua+Yj59NYXyWmt0vZoH50qWxstwV
-         NYO6uSpDmtueEztLIK5s4eFnmgtsHhlxb0sDVTk1gwg/O8fn2hziUzx9TPHfc3KEDo7M
-         EKA0H8BkFgjEu26YGeQ3M1eAwm6Jsv0VG/pmRAuPAf2EtAA1GZNMM2Jt+GJldzP6T6rZ
-         +14hwq57kzzKqa4r92IHWqQM+J1PeqfISf3vJyAUeKviJNGptmMBS+SRp0pkcwHFP/9v
-         XnEceWw/uMojbP1kOR+ols/oFsO8QdBf3WABCTTvvBI1B1DEB7D29DO4QKo9VvRRtfXM
-         D6vg==
+        id S1811883AbgJ0QnW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Oct 2020 12:43:22 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:47760 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1811889AbgJ0QnW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 12:43:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1603817000;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc; bh=mj6uaiHROCag3uZJ/gHJroorYDnXKuN4EyYRFIYPu8Y=;
+        b=egzXGhf1HS2h3bVWLx5ElrLRq0kQIAYz+V5RF9LJf4toztmVmAsPKPItkrtpEtODYL3HOe
+        XJ3Wsap1PCnTLajLgOs1X+EAjBewP+olnvj3CeagB//tt6gyL0q1B2o7qhvEWZHVRZ7KpS
+        6KDLBnMeLqPfZ3OMKHNDbnpgfapy2oA=
+Received: from mail-oo1-f70.google.com (mail-oo1-f70.google.com
+ [209.85.161.70]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-355-OOqINrHrPdGpiGJYVOA2rQ-1; Tue, 27 Oct 2020 12:43:14 -0400
+X-MC-Unique: OOqINrHrPdGpiGJYVOA2rQ-1
+Received: by mail-oo1-f70.google.com with SMTP id m26so170543ooe.8
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 09:43:14 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=lF1BfHar/r1OSmm5wTIr7B7jVJxijYAoAAWj/k6sxxs=;
-        b=rkaU+bgk92cUVnZ89e0pg9SmcUz9wMBrez+NpGD2S7TMFszcNOZdPLWR9HdjU2bLWt
-         ZOXeN4kc6ZPqokp4TPiihydT10ftPn6GzXBcIdC62tBtTkxaXFf7i9L2YbfEx/QGhVgn
-         fu9KHWDyBT7CbL80RgeMEOFo8F+ECbfFbL2I9Tyz55jPGJvCGa8aG3vo9jWlflgf3lww
-         IWVcJZYxqtD8Ma+wUGS35bdGAF7wCAxXy/RoeHjzQk1/Sb8fzgQyxDFloqr/VXd3npBj
-         rhNXvcQmzpPvrAeasARYTxI3gUG8PuZd7n2p+ISjHV2ql/hTpFZNRmly6roke+4I9HSA
-         FQhA==
-X-Gm-Message-State: AOAM532x3WRk+BlWK0/aZVA89QG7ZOUeIBQZCWUG+9rVjC6U+vRre7M+
-        5jAW/7I8MpgIeDaYlumM9dbC4RUy5smaLz4kB4fwcA==
-X-Google-Smtp-Source: ABdhPJw6TmF4N27XLpQNt4o/nJ2l6gXkofBFfhmsHcwHenrVY1ehrbL+xJ8x9D2WfXn5JlknUmG/mupqI0JuKvY6tqk=
-X-Received: by 2002:a67:f24e:: with SMTP id y14mr1398541vsm.55.1603806153369;
- Tue, 27 Oct 2020 06:42:33 -0700 (PDT)
-MIME-Version: 1.0
-References: <20201027084612.528301-1-victording@google.com>
-In-Reply-To: <20201027084612.528301-1-victording@google.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 27 Oct 2020 14:41:56 +0100
-Message-ID: <CAPDyKFo=jA84Zr9AM7sXR_VxpGsi9n-aGJJMRcY7uFBcRWrf4g@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci-acpi: AMDI0040: Allow changing HS200/HS400
- driver strength
-To:     Victor Ding <victording@google.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Raul E Rangel <rrangel@chromium.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=mj6uaiHROCag3uZJ/gHJroorYDnXKuN4EyYRFIYPu8Y=;
+        b=ZT+UWwN3VS5aNP5dN78La6BhUdpNee1ApZmD0/IvG3cpYFHSI78TgZYFFy399QE0i0
+         +PJjIvLHFKQy04sHa+a1lbnKC1tvzhQTD/Ye7s6zGVN4TEvgeb41ajCs9VJ1VOHzEvp8
+         d9Ths5PgwDjxVE8C53OKfn/0zKeuSLytoGGJw9DPSnb6Di1IayKXZQb7V7LY2vsEG25t
+         UKNgoMY7lMLXnNN2PPO0WxIO+4k0Th/h8slzIFHPy+iaoFha+iaENKE4UpRsuM41hM4y
+         L3wjn7IzwPtMHKSFB/RAkuaeBR3VMVZVOpyqOhsUol5yaSfCfMQXUAFC7Yke6RPATAu1
+         maPw==
+X-Gm-Message-State: AOAM530V7Fk1kkrXQDvSWrE4FXNNGLhYupWMYP/PgyjP1Jl0/aJ9pYVg
+        Nbl9sPFh+fvphDlsJBKPU/WAl8H/LOLXqtGQrST9BscgpKoUYkDGoyQTNOVb406NywcZOyZJ3vM
+        w6uyQBerK97OwMKDjyZ2p
+X-Received: by 2002:aca:ef03:: with SMTP id n3mr2048466oih.67.1603816993830;
+        Tue, 27 Oct 2020 09:43:13 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJw7y1eCX7WfRNi9tkZnfLpiDio1qtG9FKTpwYlLMD9SlPYp6FIE57BquNUx5oTk2cs+UUc+WA==
+X-Received: by 2002:aca:ef03:: with SMTP id n3mr2048435oih.67.1603816993577;
+        Tue, 27 Oct 2020 09:43:13 -0700 (PDT)
+Received: from trix.remote.csb (075-142-250-213.res.spectrum.com. [75.142.250.213])
+        by smtp.gmail.com with ESMTPSA id l89sm90968otc.6.2020.10.27.09.43.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 27 Oct 2020 09:43:12 -0700 (PDT)
+From:   trix@redhat.com
+To:     linux-kernel@vger.kernel.org, clang-built-linux@googlegroups.com
+Cc:     linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        qat-linux@intel.com, amd-gfx@lists.freedesktop.org,
+        dri-devel@lists.freedesktop.org, linux-iio@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, linux-mediatek@lists.infradead.org,
+        linux-amlogic@lists.infradead.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-rtc@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, linux-samsung-soc@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, linux-nfs@vger.kernel.org,
+        tipc-discussion@lists.sourceforge.net, alsa-devel@alsa-project.org,
+        linux-rpi-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
+        =?UTF-8?q?=EF=BB=BFFrom=20=3A=20Tom=20Rix?= <trix@redhat.com>
+Subject: Subject: [RFC] clang tooling cleanups
+Date:   Tue, 27 Oct 2020 09:42:55 -0700
+Message-Id: <20201027164255.1573301-1-trix@redhat.com>
+X-Mailer: git-send-email 2.18.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 27 Oct 2020 at 09:46, Victor Ding <victording@google.com> wrote:
->
-> From: Raul E Rangel <rrangel@chromium.org>
->
-> This change will allow platform designers better control over signal
-> integrity by allowing them to tune the HS200 and HS400 driver strengths.
->
-> The driver strength was previously hard coded to A to solve boot
-> problems with certain platforms. This driver strength does not
-> universally apply to all platforms so we need a knob to adjust it.
->
-> All older platforms currently have the SDR104 preset hard coded to A in
-> the firmware. This means that switching from the hard coded value in
-> the kernel to reading the SDR104 preset is a no-op for these platforms.
-> Newer platforms will have properly set presets. So this change will
-> support both new and old platforms.
->
-> Signed-off-by: Raul E Rangel <rrangel@chromium.org>
-> Signed-off-by: Victor Ding <victording@google.com>
+This rfc will describe
+An upcoming treewide cleanup.
+How clang tooling was used to programatically do the clean up.
+Solicit opinions on how to generally use clang tooling.
 
-Applied for next, thanks!
+The clang warning -Wextra-semi-stmt produces about 10k warnings.
+Reviewing these, a subset of semicolon after a switch looks safe to
+fix all the time.  An example problem
 
-Note that I amended the patch to fix the white-space issue, as pointed
-out by Adrian.
+void foo(int a) {
+     switch(a) {
+     	       case 1:
+	       ...
+     }; <--- extra semicolon
+}
 
-Kind regards
-Uffe
+Treewide, there are about 100 problems in 50 files for x86_64 allyesconfig.
+These fixes will be the upcoming cleanup.
 
+clang already supports fixing this problem. Add to your command line
 
->
-> ---
->
-> Changes in v2:
-> By Victor Ding <victording@google.com>
->  - Rebased the patch by using FIELD_GET for preset value bit masks.
->  - (No functional changes).
->
-> The original patch was developed by Raul E Rangel.
-> https://patchwork.kernel.org/project/linux-mmc/patch/20200928154718.2.Ic6b6031366f090393d00a53fd69e1ada31ceb29e@changeid/
->
->  drivers/mmc/host/sdhci-acpi.c | 39 ++++++++++++++++++++++++++++++++---
->  1 file changed, 36 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 54205e3be9e8..225cb34cf1b9 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -5,6 +5,7 @@
->   * Copyright (c) 2012, Intel Corporation.
->   */
->
-> +#include <linux/bitfield.h>
->  #include <linux/init.h>
->  #include <linux/export.h>
->  #include <linux/module.h>
-> @@ -545,10 +546,42 @@ struct amd_sdhci_host {
->
->  static int amd_select_drive_strength(struct mmc_card *card,
->                                      unsigned int max_dtr, int host_drv,
-> -                                    int card_drv, int *drv_type)
-> +                                    int card_drv, int *host_driver_strength)
->  {
-> -       *drv_type = MMC_SET_DRIVER_TYPE_A;
-> -       return MMC_SET_DRIVER_TYPE_A;
-> +       struct sdhci_host *host = mmc_priv(card->host);
-> +       u16 preset, preset_driver_strength;
-> +
-> +       /*
-> +        * This method is only called by mmc_select_hs200 so we only need to
-> +        * read from the HS200 (SDR104) preset register.
-> +        *
-> +        * Firmware that has "invalid/default" presets return a driver strength
-> +        * of A. This matches the previously hard coded value.
-> +        */
-> +       preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
-> +       preset_driver_strength = FIELD_GET(SDHCI_PRESET_DRV_MASK, preset);
-> +
-> +       /*
-> +        * We want the controller driver strength to match the card's driver
-> +        * strength so they have similar rise/fall times.
-> +        *
-> +        * The controller driver strength set by this method is sticky for all
-> +        * timings after this method is called. This unfortunately means that
-> +        * while HS400 tuning is in progress we end up with mismatched driver
-> +        * strengths between the controller and the card. HS400 tuning requires
-> +        * switching from HS400->DDR52->HS->HS200->HS400. So the driver mismatch
-> +        * happens while in DDR52 and HS modes. This has not been observed to
-> +        * cause problems. Enabling presets would fix this issue.
-> +        */
-> +       *host_driver_strength = preset_driver_strength;
-> +
-> +       /*
-> +        * The resulting card driver strength is only set when switching the
-> +        * card's timing to HS200 or HS400. The card will use the default driver
-> +        * strength (B) for any other mode.
-> +        */
-> +       return preset_driver_strength;
-> +
->  }
->
->  static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
-> --
-> 2.29.0.rc2.309.g374f81d7ae-goog
->
+  clang -c -Wextra-semi-stmt -Xclang -fixit foo.c
+
+  foo.c:8:3: warning: empty expression statement has no effect;
+    remove unnecessary ';' to silence this warning [-Wextra-semi-stmt]
+        };
+         ^
+  foo.c:8:3: note: FIX-IT applied suggested code changes
+  1 warning generated.
+
+The big problem is using this treewide is it will fix all 10k problems.
+10k changes to analyze and upstream is not practical.
+
+Another problem is the generic fixer only removes the semicolon.
+So empty lines with some tabs need to be manually cleaned.
+
+What is needed is a more precise fixer.
+
+Enter clang-tidy.
+https://clang.llvm.org/extra/clang-tidy/
+
+Already part of the static checker infrastructure, invoke on the clang
+build with
+  make clang-tidy
+
+It is only a matter of coding up a specific checker for the cleanup.
+Upstream this is review is happening here
+https://reviews.llvm.org/D90180
+
+The development of a checker/fixer is
+Start with a reproducer
+
+void foo (int a) {
+  switch (a) {};
+}
+
+Generate the abstract syntax tree (AST)
+
+  clang -Xclang -ast-dump foo.c
+
+`-FunctionDecl 
+  |-ParmVarDecl 
+  `-CompoundStmt 
+    |-SwitchStmt 
+    | |-ImplicitCastExpr
+    | | `-DeclRefExpr
+    | `-CompoundStmt
+    `-NullStmt
+
+Write a matcher to get you most of the way
+
+void SwitchSemiCheck::registerMatchers(MatchFinder *Finder) {
+  Finder->addMatcher(
+      compoundStmt(has(switchStmt().bind("switch"))).bind("comp"), this);
+}
+
+The 'bind' method is important, it allows a string to be associated
+with a node in the AST.  In this case these are
+
+`-FunctionDecl 
+  |-ParmVarDecl 
+  `-CompoundStmt <-------- comp
+    |-SwitchStmt <-------- switch
+    | |-ImplicitCastExpr
+    | | `-DeclRefExpr
+    | `-CompoundStmt
+    `-NullStmt
+
+When a match is made the 'check' method will be called.
+
+  void SwitchSemiCheck::check(const MatchFinder::MatchResult &Result) {
+    auto *C = Result.Nodes.getNodeAs<CompoundStmt>("comp");
+    auto *S = Result.Nodes.getNodeAs<SwitchStmt>("switch");
+
+This is where the string in the bind calls are changed to nodes
+
+`-FunctionDecl 
+  |-ParmVarDecl 
+  `-CompoundStmt <-------- comp, C
+    |-SwitchStmt <-------- switch, S
+    | |-ImplicitCastExpr
+    | | `-DeclRefExpr
+    | `-CompoundStmt
+    `-NullStmt <---------- looking for N
+
+And then more logic to find the NullStmt
+
+  auto Current = C->body_begin();
+  auto Next = Current;
+  Next++;
+  while (Next != C->body_end()) {
+    if (*Current == S) {
+      if (const auto *N = dyn_cast<NullStmt>(*Next)) {
+
+When it is found, a warning is printed and a FixItHint is proposed.
+
+  auto H = FixItHint::CreateReplacement(
+    SourceRange(S->getBody()->getEndLoc(), N->getSemiLoc()), "}");
+  diag(N->getSemiLoc(), "unneeded semicolon") << H;
+
+This fixit replaces from the end of switch to the semicolon with a
+'}'.  Because the end of the switch is '}' this has the effect of
+removing all the whitespace as well as the semicolon.
+
+Because of the checker's placement in clang-tidy existing linuxkernel
+checkers, all that was needed to fix the tree was to add a '-fix'to the
+build's clang-tidy call.
+
+I am looking for opinions on what we want to do specifically with
+cleanups and generally about other source-to-source programmatic
+changes to the code base.
+
+For cleanups, I think we need a new toplevel target
+
+clang-tidy-fix
+
+And an explicit list of fixers that have a very high (100%?) fix rate.
+
+Ideally a bot should make the changes, but a bot could also nag folks.
+Is there interest in a bot making the changes? Does one already exist?
+
+The general source-to-source is a bit blue sky.  Ex/ could automagicly
+refactor api, outline similar cut-n-pasted functions etc. Anything on
+someone's wishlist you want to try out ?
+
+Signed-off-by: Tom Rix <trix@redhat.com>
+
