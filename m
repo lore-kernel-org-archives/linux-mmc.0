@@ -3,135 +3,245 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14012C55179
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 12:44:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB6C1C55178
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 12:55:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A4CEF21D24
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 12:44:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5871922265
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 12:55:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="Ck9y9jNd"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kV+mB8j0"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2440592AbgJ0MoP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Oct 2020 08:44:15 -0400
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:40698 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2440548AbgJ0MoO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 08:44:14 -0400
-Received: by mail-wr1-f67.google.com with SMTP id h5so1734856wrv.7
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 05:44:12 -0700 (PDT)
+        id S2900347AbgJ0MzZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Oct 2020 08:55:25 -0400
+Received: from mail-ua1-f65.google.com ([209.85.222.65]:43938 "EHLO
+        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2900341AbgJ0MzZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 08:55:25 -0400
+Received: by mail-ua1-f65.google.com with SMTP id r21so430015uaw.10
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 05:55:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:in-reply-to:references:date:message-id
-         :mime-version;
-        bh=HBFttdYAiRM1KfFacsdZju3R8FEz52UG6psn2mn812k=;
-        b=Ck9y9jNdJH1H9KVu2owJyTBu42rV4XSWLdMUbByrEIQhakBN7YO3viBNE7ywGE3yJV
-         21nxkfIOqKJYmVR7phi6Mzl7xabBrqCSHVDvC6wQjQdXQwgh7fpBlxLd0spJm6TD1f/z
-         i8rfkkdL3rv1kNNzjwl5ccwoTqDMuUQz+sXBzzY6oWTJcr7pbtuUho/VDBaGCbA+JUFy
-         8rFIc0Mph/wTGNCdJiEdu+j+TUPeGOqq7vp55s9RrKz7oPhApmbGbRXD5yrp3Ko8tRiS
-         uvrWHwR+8dFXWShuf4c5KsxIDyJiXxw78K3ZGM/ChFHu1dDwpDKmBilfGofXcucVgkOj
-         pjKQ==
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=yCdvbFUyHpdrBv+0R3rldtDhPdmrVZHLD23aJiVdh28=;
+        b=kV+mB8j0VOZ6sdzWuyRHu5o/rQbvD38R4CoRrk5sn4u7xE2nsi10zI0wVCkklNAxeC
+         EL3RYgfDj+QR5mqQLDZJDfp4i0kuI3Vj2IAImQooxsRXFW2uqITcvN5eoJtH1T6dQkg+
+         o1TYP6x5+w18MZ/fc4o8Ve5cO57SSTix/gsMAZjxcKTLDOfiqH5+FGcFqq0dS6aBw0OK
+         7JSAcbsOsPQdZyf8JV6ruUlm6pB3sa3sL+m/jtUGopC5iq0+/yil4Kh8E0yeStSYrH88
+         iw3UcyhR7p2hKDVRSPv4hG5onTOAgaYHO+j6oAIZgE//JtPclFzyuF+iBNyrXYwjfAPm
+         autw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:in-reply-to:references:date
-         :message-id:mime-version;
-        bh=HBFttdYAiRM1KfFacsdZju3R8FEz52UG6psn2mn812k=;
-        b=pf62aOz+BNV6QuZWOm+fVwUFZxegbD7x9IOKllGpue6DpFaSUw/1xPEWaWJJ0q8qIR
-         XRuKqhgjPt6ZC5loVuFCG2sirgQfRC1ksk1spwMcIv6NxuinggDVpeJQBkBNLmvKB8Bt
-         G9QHyIJDk60WO6wLu+B0HgTuSWrn+j1pbgs9Y6xUi0A5olO4pZ4roKvW/4R2JUWnfmg7
-         fXHtXe9fbTn/kl/P5ZoI8L0Fu9ffCdrSY3y5DzLQJLUHoTLKBkx264GPNP2TiTuEiOGP
-         C8qC0NQdm2RK7L8N/xeyRI1HjSIjXFAlbFrFO3MgLE0bG9Vw7bwMDulxqv2tTblK3WhL
-         /o8w==
-X-Gm-Message-State: AOAM533wAKJ0iVWJ5/3kS0GxJGe+E9vwChzCU38bXX6BSYHR4O7A7Ah4
-        i6vzhTtI5g8+1y2/Ih64yWe3kQ==
-X-Google-Smtp-Source: ABdhPJxGIvXpfpZxv774x6oG+TdKSVGildynsy97gcSuNQ0khyKnhSHNQjEj6Ais+Xmhl4PIo0XW7A==
-X-Received: by 2002:adf:84a5:: with SMTP id 34mr2855003wrg.152.1603802651408;
-        Tue, 27 Oct 2020 05:44:11 -0700 (PDT)
-Received: from localhost ([2a01:cb19:8ae7:9d00:68a3:7a03:6c11:8947])
-        by smtp.gmail.com with ESMTPSA id m14sm1891082wro.43.2020.10.27.05.44.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Oct 2020 05:44:10 -0700 (PDT)
-From:   Mattijs Korpershoek <mkorpershoek@baylibre.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Fabien Parent <fparent@baylibre.com>,
-        Yong Mao <yong.mao@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>
-Cc:     Matthias Brugger <matthias.bgg@gmail.com>,
-        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "moderated list\:ARM\/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Subject: Re: [PATCH] mmc: host: mtk-sd: enable recheck_sdio_irq for MT8516 SoC
-In-Reply-To: <CAPDyKFrMwLeuQoFDgXYo_-T_e2AzfqM-rgp3-SgeuC6Qn6rxMA@mail.gmail.com>
-References: <20201023122950.60903-1-fparent@baylibre.com> <CAPDyKFrMwLeuQoFDgXYo_-T_e2AzfqM-rgp3-SgeuC6Qn6rxMA@mail.gmail.com>
-Date:   Tue, 27 Oct 2020 13:44:08 +0100
-Message-ID: <87wnzbg7on.fsf@baylibre.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=yCdvbFUyHpdrBv+0R3rldtDhPdmrVZHLD23aJiVdh28=;
+        b=es8a7psAWcuIVhhuv0EzWR0ZzWXtLa90XrI93esou63nZjHt3+TKuuQvfPIjmCZtp3
+         uXDzg46k9Q3G75Rkh3SBI8/oezY6sV7Yv8jXb5tfN6/WCB2n8rmebJPOgEVRiWt4ugrV
+         UjLkkJxEI+B1hXNH7zAEt+S3V3REV9TcYhSBZka/mCEZ5T71AxaJiIWMQKKGgqpLCPrU
+         igRDvYWJ9ud1z7HZk2XcnZQblMuAAcdjD5EhPtPtJRO4Qfd7dxwmZ1+NpZc5IZ3f3StU
+         utjupanbw2kPgj+hcUHRaIcW0GYNNB2WRnTLXwKwcKE1auCQnMX+Bgy1sHEGRQfnJZwx
+         qqJA==
+X-Gm-Message-State: AOAM531N8vtwPO7yd5IvDcPQ5EYtkh6rTA/jPHNaDYa+9OaEkcOYZUIy
+        pJP9axn+FS9gH78EC+pUzKgp128QIJnNZ+mFyvS1Qw==
+X-Google-Smtp-Source: ABdhPJyWjW26t5TTR/DEYePLqwOlhydrApT7doIzzlRUhPkuJQftY4h04dnXrE8obaHhA/UM6IYyeT6nOaJfQFfVJw8=
+X-Received: by 2002:a9f:2f15:: with SMTP id x21mr964922uaj.104.1603803322895;
+ Tue, 27 Oct 2020 05:55:22 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <1600999061-13669-1-git-send-email-rui_feng@realsil.com.cn>
+ <CAPDyKFrnkF3mU5PJsy0VtEjPSToktSsRRtyMvQF97vymc+rY5A@mail.gmail.com>
+ <dd210290eef6467cbffca8cbaddb8b84@realsil.com.cn> <CAPDyKFqwsJaYrXMVabR7qui6yqr4FAHfYq1ghfsf0HtRSZpGGw@mail.gmail.com>
+ <ba3c68fea4614434838a0a8cbc0e892a@realsil.com.cn>
+In-Reply-To: <ba3c68fea4614434838a0a8cbc0e892a@realsil.com.cn>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 27 Oct 2020 13:54:46 +0100
+Message-ID: <CAPDyKFrDLJtDkkWsSENLDu2xLqptkjDk94YxYfkfW7UPBoG+bg@mail.gmail.com>
+Subject: Re: [PATCH 3/3] mmc: rtsx: Add SD Express mode support for RTS5261
+To:     =?UTF-8?B?5Yav6ZSQ?= <rui_feng@realsil.com.cn>
+Cc:     Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+On Mon, 26 Oct 2020 at 09:22, =E5=86=AF=E9=94=90 <rui_feng@realsil.com.cn> =
+wrote:
+>
+> >
+> > + Christoph (to help us understand if PCIe/NVMe devices can be marked
+> > + read-only)
+> >
+> > On Thu, 22 Oct 2020 at 08:04, =E5=86=AF=E9=94=90 <rui_feng@realsil.com.=
+cn> wrote:
+> > >
+> > > >
+> > > > On Fri, 25 Sep 2020 at 03:57, <rui_feng@realsil.com.cn> wrote:
+> > > > >
+> > > > > From: Rui Feng <rui_feng@realsil.com.cn>
+> > > > >
+> > > > > RTS5261 support legacy SD mode and SD Express mode.
+> > > > > In SD7.x, SD association introduce SD Express as a new mode.
+> > > > > This patch makes RTS5261 support SD Express mode.
+> > > >
+> > > > As per patch 2, can you please add some more information about what
+> > > > changes are needed to support SD Express? This just states that the
+> > > > support is implemented, but please elaborate how.
+> > > >
+> > > > >
+> > > > > Signed-off-by: Rui Feng <rui_feng@realsil.com.cn>
+> > > > > ---
+> > > > >  drivers/mmc/host/rtsx_pci_sdmmc.c | 59
+> > > > > +++++++++++++++++++++++++++++++
+> > > > >  1 file changed, 59 insertions(+)
+> > > > >
+> > > > > diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > index 2763a376b054..efde374a4a5e 100644
+> > > > > --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> > > > > @@ -895,7 +895,9 @@ static int sd_set_bus_width(struct
+> > > > > realtek_pci_sdmmc *host,  static int sd_power_on(struct
+> > > > > realtek_pci_sdmmc *host)  {
+> > > > >         struct rtsx_pcr *pcr =3D host->pcr;
+> > > > > +       struct mmc_host *mmc =3D host->mmc;
+> > > > >         int err;
+> > > > > +       u32 val;
+> > > > >
+> > > > >         if (host->power_state =3D=3D SDMMC_POWER_ON)
+> > > > >                 return 0;
+> > > > > @@ -922,6 +924,14 @@ static int sd_power_on(struct
+> > > > > realtek_pci_sdmmc
+> > > > *host)
+> > > > >         if (err < 0)
+> > > > >                 return err;
+> > > > >
+> > > > > +       if (PCI_PID(pcr) =3D=3D PID_5261) {
+> > > > > +               val =3D rtsx_pci_readl(pcr, RTSX_BIPR);
+> > > > > +               if (val & SD_WRITE_PROTECT) {
+> > > > > +                       pcr->extra_caps &=3D
+> > > > ~EXTRA_CAPS_SD_EXPRESS;
+> > > > > +                       mmc->caps2 &=3D ~(MMC_CAP2_SD_EXP |
+> > > > > + MMC_CAP2_SD_EXP_1_2V);
+> > > >
+> > > > This looks a bit weird to me. For a write protected card you want t=
+o
+> > > > disable the SD_EXPRESS support, right?
+> > > >
+> > > Right. If end user insert a write protected SD express card, I will d=
+isable
+> > SD_EXPRESS support.
+> > > If host switch to SD EXPRESS mode, the card will be recognized as a
+> > > writable PCIe/NVMe device, I think this is not end user's purpose.
+> >
+> > Hmm.
+> >
+> > Falling back to use the legacy SD interface is probably not what the us=
+er
+> > expects either.
+> >
+> > Note that the physical write protect switch/pin isn't mandatory to supp=
+ort and
+> > it doesn't even exist for all formats of SD cards. In the mmc core, we =
+are
+> > defaulting to make the card write enabled, if the switch isn't supporte=
+d by the
+> > host driver. Additionally, nothing prevents the end user from mounting =
+the
+> > filesystem in read-only mode, if that is preferred.
+> >
+> > >
+> > > > Is there no mechanism to support read-only PCIe/NVMe based storage
+> > devices?
+> > > > If that is the case, maybe it's simply better to not support the
+> > > > readonly option at all for SD express cards?
+> > > >
+> > > I think there's no mechanism to support read-only PCIe/NVMe based sto=
+rage
+> > devices.
+> >
+> > I have looped in Christoph, maybe he can give us his opinion on this.
+> >
+> > > But different venders may have different opinions. This is only Realt=
+ek's
+> > opinion.
+> >
+> > I understand. However, the most important point for me, is that we don'=
+t end
+> > up in a situation where each mmc host handles this differently. We shou=
+ld strive
+> > towards a consistent behavior.
+> >
+> > At this point I tend to prefer to default to ignore the write protect s=
+witch for SD
+> > express, unless we can find a way to properly support it.
+> >
+> For information security purpose, some companies or business users set th=
+eir notebook SD as "read only".
+> Because a lot of "read only" requirements from those companies or busines=
+s users, notebook vendor controls reader write protect pin to achieve it.
+> Notebook BIOS might have option to choose "read only" or not.
+> This is why we think write protect is more important than speed.
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
+I understand that it may be used, in some way or the other to provide
+a hint to the operating system to mount it in read-only mode.
 
-> + Yong Mao, Chaotian Jing
->
-> On Fri, 23 Oct 2020 at 14:29, Fabien Parent <fparent@baylibre.com> wrote:
->>
->> MT8516 SoC suffers from sometimes losing SDIO IRQs, this makes SDIO
->> devices sometimes unstable. Make use of the new property
->> recheck_sdio_irq to fix the SDIO stability issues on MT8516.
->>
->> Signed-off-by: Fabien Parent <fparent@baylibre.com>
->
-> Maybe this is a common problem, thus I am thinking that potentially we
-> should enable the workaround for all variants?
-Not sure if this is of any help, but: we use the btmtksdio driver on a
-MT8183 soc with an Android kernel based on upstream.
+Although, if there were a real security feature involved, the internal
+FW of the SD card would also monitor the switch, to support read-only
+mode. As I understand it, that's not the common case.
 
-With that kernel, we did not to apply this work-around in order to
-have a stable bluetooth experience (pairing with a remote controller)
+> If you prefer to consistent behavior, I can ignore the write protect swit=
+ch for SD express.
 
-However, on the MT8516 SoC, it's impossible for us to use btmtksdio
-without Fabien's fix.
+At this point, I prefer if you would ignore the write protect switch
+in the SD controller driver.
+
+According to Christoph, it should be possible to support read-only
+mode via PCIe/NVMe. You may need to add some tweaks to support this in
+the PCIe controller driver, but I can't advise you how to exactly do
+this.
+
+Perhaps you need to read/store the state of SD write-protect pin
+before switching to SD express mode, because you may not be able to
+read it beyond some point?
 
 >
-> I have looped in Yong Mao (who invented the workaround) and Chaotian
-> Jing, to see if they can advise us how to proceed.
->
-> In any case, I think we should add a stable tag and a fixes tag.
->
-> Kind regards
-> Uffe
->
->> ---
->>  drivers/mmc/host/mtk-sd.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->> index a704745e5882..3dc102eefe49 100644
->> --- a/drivers/mmc/host/mtk-sd.c
->> +++ b/drivers/mmc/host/mtk-sd.c
->> @@ -524,7 +524,7 @@ static const struct mtk_mmc_compatible mt7622_compat = {
->>
->>  static const struct mtk_mmc_compatible mt8516_compat = {
->>         .clk_div_bits = 12,
->> -       .recheck_sdio_irq = false,
->> +       .recheck_sdio_irq = true,
->>         .hs400_tune = false,
->>         .pad_tune_reg = MSDC_PAD_TUNE0,
->>         .async_fifo = true,
->> --
->> 2.28.0
->>
->
-> _______________________________________________
-> Linux-mediatek mailing list
-> Linux-mediatek@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-mediatek
+> >
+> > From this, I assume that my interpretations of the behavior was correct=
+.
+> >
+> > Although, can you please elaborate on what you mean by that it will "no=
+t
+> > work"?
+> >
+> > Do you mean that rtsx_pci_card_exclusive_check() that is called early i=
+n
+> > sdmmc_set_ios() will fail and then make it bail out? Then, could you pl=
+ease add
+> > a comment about that in the code?
+> >
+> In init_sd_express() driver sets 0xFF54 bit0=3D1 and 0xFF55 bit4=3D0, the=
+n RTS5261 will switch MCU and enter SD EXPRESS mode.
+> After that RTS5261 can't receive any CMD from PCIe, so mmc_power_off() wi=
+ll not work.
+
+Thanks for trying to clarify.
+
+However, this still doesn't explain to me, what *exactly* will happen
+when rtsx_pci_card_exclusive_check() is called (or any other functions
+in ->set_ios()).
+
+In principle, "will not work" could mean that the calls to the
+rtsx_pci_* cardreader interface hangs - and that would not be okay (as
+it could lead to that the ->remove() callback hangs). So, either you
+need to put a well written comment in the code about what will happen
+- or add some kind of protection against potential problems for this.
+
+Kind regards
+Uffe
