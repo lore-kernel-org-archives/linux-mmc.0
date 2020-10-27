@@ -5,118 +5,158 @@ X-Spam-Level:
 X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC9E9C388F9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 13:42:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76407C55178
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 13:42:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9342E20732
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 13:42:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E42B2071A
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 13:42:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ff5RdpQJ"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="gwne/hsP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1752463AbgJ0Nm2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Oct 2020 09:42:28 -0400
-Received: from mail-ua1-f68.google.com ([209.85.222.68]:37088 "EHLO
-        mail-ua1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752455AbgJ0Nm1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 09:42:27 -0400
-Received: by mail-ua1-f68.google.com with SMTP id 52so479578uaj.4
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 06:42:27 -0700 (PDT)
+        id S1752473AbgJ0Nmd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Oct 2020 09:42:33 -0400
+Received: from mail-vs1-f47.google.com ([209.85.217.47]:40737 "EHLO
+        mail-vs1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752439AbgJ0Nmc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 09:42:32 -0400
+Received: by mail-vs1-f47.google.com with SMTP id f4so869478vsk.7
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 06:42:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=+IdqF2kWZIatsMkx1rqiXPdMLtc7lqC33V+nAVYFq2g=;
-        b=ff5RdpQJhaV4ad0Bhm5iTZaXGjMLJa3FTFpEVKmQVPt1yF0CAiJWvG1uTtz3dn8UtR
-         1MEwVbDSo5SIeWCSiiHh+H0rN5GwHuCvBfMJn9Lg3NY2PLyyip6lA4gIBGD7vAsqiV0F
-         JLBtIXbk5N/jrfVLZow9hdeN7bO/8/aM09TSVOOuhJ2v+QjqxNoUBSySyi8q0xW/6863
-         86L8AF5RvSOSn/LtJ+Aex1Cn7PMcMm2biTHJfBnmFRKCoMYlqcjva4l6N+tpO26vLFGY
-         EAh/p8X0Wb9MfVqOY/f5udHdQHFH+3RbcoharLIWefHnE/83sU2vK0NTI6uPGVPHUJ1I
-         Y+/Q==
+         :cc;
+        bh=G/27fN/8QK9Cg38sDbSPYXiTMyFhMrXj+q5HNlH7Q+A=;
+        b=gwne/hsPPX+RWNYCqmVz3rbhUz+kSVxwMgM7t8Oql1eipeSivQ/xFHL77kTggOHCLy
+         SjiktlF9YYetTu66A1Rksdb85zzesJu9cdch4ygnn8c+VpNW2lrKlr8+3rJhZvtyR/wb
+         wPISivylszDSgN9eYyV0gywU47A8sHSeGgLtQBMSK3RZKcgFHYPhnv038WUTZzyeoNKb
+         7gXlq25txziDvw5cpxMgm10qw77jfWCWyUH1WetY8+En++ALmJeF32LRvkPyDIda65tQ
+         pPmtNanBIMn0luWBiz2fA2hu+wP1dCtE554BNjKWQ+wACwsFbaQJtMlrqn5DHGIh85fW
+         3aTQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=+IdqF2kWZIatsMkx1rqiXPdMLtc7lqC33V+nAVYFq2g=;
-        b=qeRfVz6BscuKb942sXcuJ4OaumN/ntshzaZd46+T+TjnBCiZGn/vogB0JsVB0c18Rz
-         ow1MM6V2HD1UuPrFHTKTSiv4WHvxoJH3QEwS+HFSoY2C1SAqLXHE3WDh47G9PVFGY/jB
-         /HDClZ5VLQT1xwRSDO6cf1ZzmHQ9ojtH9Mv4RC/6Hd5mhnWNXSSwYbrHwa00mFiufXiM
-         p2IPQbQmJO9zBVBKcIXsxCTkFPi7Qp7qebzjqTbmVLgNWrYgMEApj/Ztxg9l1QMnrfQJ
-         VzKuWpOHQSZFD70enick9cO3OfY6v095H0s01NpIBdRaEh3YvrJzeIocsq5bZW8ToPEP
-         zFMA==
-X-Gm-Message-State: AOAM5319kvW7h4IeMNF3gl1ryz5fDamvQ3zBFCWivv0ws+mnOANtlm1+
-        leKJS/+lDceeEiOOew+B5GlaJvPX/oQdKWzgMXj3NA==
-X-Google-Smtp-Source: ABdhPJydS4TU6Ck4NDs6SP51ULZcsklQhQKBsqxjHnxoU9bm2tESho4QIrSHx4R+sjyHmElDzzy9KvfQ/sbozjW1+0w=
-X-Received: by 2002:ab0:8b:: with SMTP id 11mr1259317uaj.15.1603806146520;
- Tue, 27 Oct 2020 06:42:26 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=G/27fN/8QK9Cg38sDbSPYXiTMyFhMrXj+q5HNlH7Q+A=;
+        b=KAj9Q4nX0IoExKTcpXDPT1z+/AW9cevfhubbm3OVcZI1ueudHSANoVE6XLnm2IsPS4
+         yEYm9Ap/SS6tbGPEG4do+IvDRqjmj6jdMpmRB0uvRAv109XMvXVTr+b39vR8s6iIyICJ
+         2Ykn9mrPGWtXZBF3NvviKrGTH49FjpXZ4xBS7obfCP8wATCulXONt5z35YnS84gwVVkr
+         SjiuxC+IMSzzkQSkv+uqB59jqjyE8gnk0NmAgsqgDiJ0rkQI4TlfcThWAKTNTvAtZ6sX
+         PQdGxZg2OXIvwqWon00B9XyCZVRyuVovAFq0S5uv0NIUbi2I98MVNWgYmf+etZVFqDiG
+         qRZw==
+X-Gm-Message-State: AOAM533QAfWzEjt290Q6srDl5LlHZ0ErSX6epdc8w6cv6n75DWKB9Znu
+        pqWECSYAMTytObStMgxp2Apg/5Nav0PIi1nolVkcyhBknYb1jA==
+X-Google-Smtp-Source: ABdhPJyzjUAL2gsoAO4Lpk5bKMxQWGO2KC12q/ZxnDh2j8gnWbn1rswmAFPJ3hpZyGfoE5JR7SYACC3HEUdikEejxBA=
+X-Received: by 2002:a67:6c86:: with SMTP id h128mr1344059vsc.42.1603806150057;
+ Tue, 27 Oct 2020 06:42:30 -0700 (PDT)
 MIME-Version: 1.0
-References: <20201026153810.89512-1-krzk@kernel.org> <20201026153810.89512-3-krzk@kernel.org>
-In-Reply-To: <20201026153810.89512-3-krzk@kernel.org>
+References: <20201020081116.20918-1-yangbo.lu@nxp.com>
+In-Reply-To: <20201020081116.20918-1-yangbo.lu@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 27 Oct 2020 14:41:50 +0100
-Message-ID: <CAPDyKFo2DjMzozdr5PAr_A8=Oq_06_mmpTQAFd-sJ-=_=XHeOw@mail.gmail.com>
-Subject: Re: [PATCH 3/3] mmc: sunxi: drop of_match_ptr from of_device_id table
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Ben Dooks <ben-linux@fluff.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        kernel test robot <lkp@intel.com>
+Date:   Tue, 27 Oct 2020 14:41:53 +0100
+Message-ID: <CAPDyKFoOPmqPhk7+-kNo6WQejS-GFPvbJcap3fXeJknb6spWiA@mail.gmail.com>
+Subject: Re: [v3] mmc: sdhci-of-esdhc: make sure delay chain locked for HS400
+To:     Yangbo Lu <yangbo.lu@nxp.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 26 Oct 2020 at 16:40, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Tue, 20 Oct 2020 at 10:20, Yangbo Lu <yangbo.lu@nxp.com> wrote:
 >
-> The driver can match only via DT table so it should be always used and
-> the of_match_ptr does not have any sense (this also allows ACPI
-> matching via PRP0001, even though it is not relevant for sunxi).  This
-> fixes compile warning:
+> For eMMC HS400 mode initialization, the DLL reset is a required step
+> if DLL is enabled to use previously, like in bootloader.
+> This step has not been documented in reference manual, but the RM will
+> be fixed sooner or later.
 >
->     drivers/mmc/host/sunxi-mmc.c:1181:34: warning: =E2=80=98sunxi_mmc_of_=
-match=E2=80=99 defined but not used [-Wunused-const-variable=3D]
+> This patch is to add the step of DLL reset, and make sure delay chain
+> locked for HS400.
 >
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-Applied for next, thanks!
+Applied for next (please tell if you think this deserves to be tagged
+for stable), thanks!
 
 Kind regards
 Uffe
 
 
+
 > ---
->  drivers/mmc/host/sunxi-mmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+> Changes for v2:
+>         - Converted to use read_poll_timeout.
+> Changes for v3:
+>         - Included iopoll.h.
+> ---
+>  drivers/mmc/host/sdhci-esdhc.h    |  2 ++
+>  drivers/mmc/host/sdhci-of-esdhc.c | 17 +++++++++++++++++
+>  2 files changed, 19 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index fc62773602ec..6310693f2ac0 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -26,6 +26,7 @@
->  #include <linux/mmc/sdio.h>
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/module.h>
-> +#include <linux/mod_devicetable.h>
->  #include <linux/of_address.h>
->  #include <linux/of_platform.h>
->  #include <linux/platform_device.h>
-> @@ -1515,7 +1516,7 @@ static struct platform_driver sunxi_mmc_driver =3D =
-{
->         .driver =3D {
->                 .name   =3D "sunxi-mmc",
->                 .probe_type =3D PROBE_PREFER_ASYNCHRONOUS,
-> -               .of_match_table =3D of_match_ptr(sunxi_mmc_of_match),
-> +               .of_match_table =3D sunxi_mmc_of_match,
->                 .pm =3D &sunxi_mmc_pm_ops,
->         },
->         .probe          =3D sunxi_mmc_probe,
+> diff --git a/drivers/mmc/host/sdhci-esdhc.h b/drivers/mmc/host/sdhci-esdhc.h
+> index a30796e..6de02f0 100644
+> --- a/drivers/mmc/host/sdhci-esdhc.h
+> +++ b/drivers/mmc/host/sdhci-esdhc.h
+> @@ -5,6 +5,7 @@
+>   * Copyright (c) 2007 Freescale Semiconductor, Inc.
+>   * Copyright (c) 2009 MontaVista Software, Inc.
+>   * Copyright (c) 2010 Pengutronix e.K.
+> + * Copyright 2020 NXP
+>   *   Author: Wolfram Sang <kernel@pengutronix.de>
+>   */
+>
+> @@ -88,6 +89,7 @@
+>  /* DLL Config 0 Register */
+>  #define ESDHC_DLLCFG0                  0x160
+>  #define ESDHC_DLL_ENABLE               0x80000000
+> +#define ESDHC_DLL_RESET                        0x40000000
+>  #define ESDHC_DLL_FREQ_SEL             0x08000000
+>
+>  /* DLL Config 1 Register */
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index 0b45eff..90e6085 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -4,6 +4,7 @@
+>   *
+>   * Copyright (c) 2007, 2010, 2012 Freescale Semiconductor, Inc.
+>   * Copyright (c) 2009 MontaVista Software, Inc.
+> + * Copyright 2020 NXP
+>   *
+>   * Authors: Xiaobo Xie <X.Xie@freescale.com>
+>   *         Anton Vorontsov <avorontsov@ru.mvista.com>
+> @@ -19,6 +20,7 @@
+>  #include <linux/clk.h>
+>  #include <linux/ktime.h>
+>  #include <linux/dma-mapping.h>
+> +#include <linux/iopoll.h>
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+>  #include "sdhci-pltfm.h"
+> @@ -743,6 +745,21 @@ static void esdhc_of_set_clock(struct sdhci_host *host, unsigned int clock)
+>                 if (host->mmc->actual_clock == MMC_HS200_MAX_DTR)
+>                         temp |= ESDHC_DLL_FREQ_SEL;
+>                 sdhci_writel(host, temp, ESDHC_DLLCFG0);
+> +
+> +               temp |= ESDHC_DLL_RESET;
+> +               sdhci_writel(host, temp, ESDHC_DLLCFG0);
+> +               udelay(1);
+> +               temp &= ~ESDHC_DLL_RESET;
+> +               sdhci_writel(host, temp, ESDHC_DLLCFG0);
+> +
+> +               /* Wait max 20 ms */
+> +               if (read_poll_timeout(sdhci_readl, temp,
+> +                                     temp & ESDHC_DLL_STS_SLV_LOCK,
+> +                                     10, 20000, false,
+> +                                     host, ESDHC_DLLSTAT0))
+> +                       pr_err("%s: timeout for delay chain lock.\n",
+> +                              mmc_hostname(host->mmc));
+> +
+>                 temp = sdhci_readl(host, ESDHC_TBCTL);
+>                 sdhci_writel(host, temp | ESDHC_HS400_WNDW_ADJUST, ESDHC_TBCTL);
+>
 > --
-> 2.25.1
+> 2.7.4
 >
