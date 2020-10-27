@@ -2,101 +2,162 @@ Return-Path: <SRS0=lEQw=EC=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02B77C4363A
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 00:26:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AB54C4363A
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 08:46:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A6BA220780
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 00:26:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1603758398;
-	bh=KtzzKKCGYmr9El+IBRY+/Sr7uWkDvWGNi0pS5NNNzrg=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=n8hkjXj1WSgxogXeE6ESV8nYLQXn9Tqyt/TdGA9Hvp6a1bdNfO1IhJdx2nXzDnxNw
-	 NLrO4OsEl6lNMwGz0cC/f9BIo3o2TKdKTguwC4Phu5ZtERgLSYG66/wS0suk/RJULJ
-	 T/X+yuInL/njUBwdyg4wkZSJE9sQo5PDl5XdsBUk=
+	by mail.kernel.org (Postfix) with ESMTP id 1BEA22224E
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Oct 2020 08:46:36 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="m1iPMNbs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2409940AbgJZXxC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Oct 2020 19:53:02 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56626 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2409930AbgJZXxB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 26 Oct 2020 19:53:01 -0400
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 14272223AB;
-        Mon, 26 Oct 2020 23:52:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1603756380;
-        bh=KtzzKKCGYmr9El+IBRY+/Sr7uWkDvWGNi0pS5NNNzrg=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Pzfj0pF6l6xkoKfZMVBnB1QbnCJPOyAidYZypC4tiHiSdp7aaKiIuwxN+Fb6s4mKk
-         F6W0gozt7sdRZb9L5W9v3G9MpWRu6qz1BnLVzywyZr8zae4T3rMUwQD9Wh8L/y0Jr/
-         pNk4UI/MRj9/xKQJjyHtN0CflSqjJZ9u8hawAke0=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.8 045/132] mmc: via-sdmmc: Fix data race bug
-Date:   Mon, 26 Oct 2020 19:50:37 -0400
-Message-Id: <20201026235205.1023962-45-sashal@kernel.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20201026235205.1023962-1-sashal@kernel.org>
-References: <20201026235205.1023962-1-sashal@kernel.org>
-MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+        id S2444496AbgJ0Iqf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Oct 2020 04:46:35 -0400
+Received: from mail-yb1-f202.google.com ([209.85.219.202]:42980 "EHLO
+        mail-yb1-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2443776AbgJ0Iqf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Oct 2020 04:46:35 -0400
+Received: by mail-yb1-f202.google.com with SMTP id u13so650439ybk.9
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Oct 2020 01:46:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=sender:date:message-id:mime-version:subject:from:to:cc;
+        bh=PHSX1yllEEpVL2wWXaBXv4UsLFRKnniRVSM8yQzP6OY=;
+        b=m1iPMNbsZU6ojEjWigu9LT/5yPvJjM04VR/kS0RL5z9vq3o9VCW73xMXjIZ/z+Zxli
+         DRtbo1uHbLFT6+jCQTzU6htk6OOyzobJ0yKRlPfQ2VyJvKAFgMjlQ21gOn7feYQk+E9G
+         FLqmP/quCVYamrqTocJHlq5UbZQxySc/i+WOEF+DJ3iwVq6loaJd6rMyyBH7wvpf0HvY
+         oQHZQFDTcxIFCtjbm5DhdmDomnfyzKAQTBNL6tnF65JD8cKSCcVe/WyJHEgE8ISOpSiS
+         PR8QgJZjQTSgy0RNMrsXbBUvnVhe1zwkvASaOcgxkL70NcPqCeur/fSJKrA54JaNgBF1
+         f1kQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:date:message-id:mime-version:subject:from
+         :to:cc;
+        bh=PHSX1yllEEpVL2wWXaBXv4UsLFRKnniRVSM8yQzP6OY=;
+        b=KosPVarsRtt3zx51zCd29RzmP2JZjiMTSmuOq90txxkiYR34tLosRBTOexdd2kPSGB
+         Fr/lVebJtUjAmueDxANtnzbIkgglcTFzapZBMli4SVGyJ2hp6rongSkjlQP+fudmyIeu
+         SRToUT755IpBau6s9krR7eSZHhZJdDCj1KcuwcjbAgHbGg4/XYwysowrakzzHTi1D9KK
+         VlpkBgDD2q4lR9vJNNgWfjS4P279LMsS/Jd2ap0ZqrY46/FSrAUyUjboJBbzY8oafyLH
+         pKAEOF9v/5QMQLpgb096vNudvfeDrOhrfu2h0KPJhd8Z/DHanhKMBdRq7QwbGGFsQSQN
+         pStA==
+X-Gm-Message-State: AOAM530pkNLkSafBvrd/h/Uqf2VCGFBe+Oi8v0BBDRccX7ctKDe9PUMo
+        KHh59shbb9p4aJ7S8dGGPBKSDpOTY2iHt2gS
+X-Google-Smtp-Source: ABdhPJzPQYm2BKWiGbDrkKkG4U863wayoLMRNAjsIj9mJSWCQTlU+OiLZWyK3vb37VpvVRDOrl6kajVX0900EfL0
+Sender: "victording via sendgmr" <victording@victording.syd.corp.google.com>
+X-Received: from victording.syd.corp.google.com ([2401:fa00:9:14:f693:9fff:fef4:fa73])
+ (user=victording job=sendgmr) by 2002:a25:4e55:: with SMTP id
+ c82mr1622346ybb.416.1603788393692; Tue, 27 Oct 2020 01:46:33 -0700 (PDT)
+Date:   Tue, 27 Oct 2020 19:46:12 +1100
+Message-Id: <20201027084612.528301-1-victording@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.29.0.rc2.309.g374f81d7ae-goog
+Subject: [PATCH v2] mmc: sdhci-acpi: AMDI0040: Allow changing HS200/HS400
+ driver strength
+From:   Victor Ding <victording@google.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Raul E Rangel <rrangel@chromium.org>,
+        Victor Ding <victording@google.com>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
+From: Raul E Rangel <rrangel@chromium.org>
 
-[ Upstream commit 87d7ad089b318b4f319bf57f1daa64eb6d1d10ad ]
+This change will allow platform designers better control over signal
+integrity by allowing them to tune the HS200 and HS400 driver strengths.
 
-via_save_pcictrlreg() should be called with host->lock held
-as it writes to pm_pcictrl_reg, otherwise there can be a race
-condition between via_sd_suspend() and via_sdc_card_detect().
-The same pattern is used in the function via_reset_pcictrl()
-as well, where via_save_pcictrlreg() is called with host->lock
-held.
+The driver strength was previously hard coded to A to solve boot
+problems with certain platforms. This driver strength does not
+universally apply to all platforms so we need a knob to adjust it.
 
-Found by Linux Driver Verification project (linuxtesting.org).
+All older platforms currently have the SDR104 preset hard coded to A in
+the firmware. This means that switching from the hard coded value in
+the kernel to reading the SDR104 preset is a no-op for these platforms.
+Newer platforms will have properly set presets. So this change will
+support both new and old platforms.
 
-Signed-off-by: Madhuparna Bhowmik <madhuparnabhowmik10@gmail.com>
-Link: https://lore.kernel.org/r/20200822061528.7035-1-madhuparnabhowmik10@gmail.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Raul E Rangel <rrangel@chromium.org>
+Signed-off-by: Victor Ding <victording@google.com>
+
 ---
- drivers/mmc/host/via-sdmmc.c | 3 +++
- 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index ef95bce508890..e4d8126cd4e5b 100644
---- a/drivers/mmc/host/via-sdmmc.c
-+++ b/drivers/mmc/host/via-sdmmc.c
-@@ -1259,11 +1259,14 @@ static void via_init_sdc_pm(struct via_crdr_mmc_host *host)
- static int via_sd_suspend(struct pci_dev *pcidev, pm_message_t state)
+Changes in v2:
+By Victor Ding <victording@google.com>
+ - Rebased the patch by using FIELD_GET for preset value bit masks.
+ - (No functional changes).
+
+The original patch was developed by Raul E Rangel.
+https://patchwork.kernel.org/project/linux-mmc/patch/20200928154718.2.Ic6b6031366f090393d00a53fd69e1ada31ceb29e@changeid/
+
+ drivers/mmc/host/sdhci-acpi.c | 39 ++++++++++++++++++++++++++++++++---
+ 1 file changed, 36 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index 54205e3be9e8..225cb34cf1b9 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -5,6 +5,7 @@
+  * Copyright (c) 2012, Intel Corporation.
+  */
+ 
++#include <linux/bitfield.h>
+ #include <linux/init.h>
+ #include <linux/export.h>
+ #include <linux/module.h>
+@@ -545,10 +546,42 @@ struct amd_sdhci_host {
+ 
+ static int amd_select_drive_strength(struct mmc_card *card,
+ 				     unsigned int max_dtr, int host_drv,
+-				     int card_drv, int *drv_type)
++				     int card_drv, int *host_driver_strength)
  {
- 	struct via_crdr_mmc_host *host;
-+	unsigned long flags;
+-	*drv_type = MMC_SET_DRIVER_TYPE_A;
+-	return MMC_SET_DRIVER_TYPE_A;
++	struct sdhci_host *host = mmc_priv(card->host);
++	u16 preset, preset_driver_strength;
++
++	/*
++	 * This method is only called by mmc_select_hs200 so we only need to
++	 * read from the HS200 (SDR104) preset register.
++	 *
++	 * Firmware that has "invalid/default" presets return a driver strength
++	 * of A. This matches the previously hard coded value.
++	 */
++	preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR104);
++	preset_driver_strength = FIELD_GET(SDHCI_PRESET_DRV_MASK, preset);
++
++	/*
++	 * We want the controller driver strength to match the card's driver
++	 * strength so they have similar rise/fall times.
++	 *
++	 * The controller driver strength set by this method is sticky for all
++	 * timings after this method is called. This unfortunately means that
++	 * while HS400 tuning is in progress we end up with mismatched driver
++	 * strengths between the controller and the card. HS400 tuning requires
++	 * switching from HS400->DDR52->HS->HS200->HS400. So the driver mismatch
++	 * happens while in DDR52 and HS modes. This has not been observed to
++	 * cause problems. Enabling presets would fix this issue.
++	 */
++	*host_driver_strength = preset_driver_strength;
++
++	/*
++	 * The resulting card driver strength is only set when switching the
++	 * card's timing to HS200 or HS400. The card will use the default driver
++	 * strength (B) for any other mode.
++	 */
++	return preset_driver_strength;
++
+ }
  
- 	host = pci_get_drvdata(pcidev);
- 
-+	spin_lock_irqsave(&host->lock, flags);
- 	via_save_pcictrlreg(host);
- 	via_save_sdcreg(host);
-+	spin_unlock_irqrestore(&host->lock, flags);
- 
- 	pci_save_state(pcidev);
- 	pci_enable_wake(pcidev, pci_choose_state(pcidev, state), 0);
+ static void sdhci_acpi_amd_hs400_dll(struct sdhci_host *host, bool enable)
 -- 
-2.25.1
+2.29.0.rc2.309.g374f81d7ae-goog
 
