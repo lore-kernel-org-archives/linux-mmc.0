@@ -2,281 +2,230 @@ Return-Path: <SRS0=bNNl=ED=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DATE_IN_PAST_06_12,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 66BD9C63697
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Oct 2020 21:48:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BC1CC55179
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Oct 2020 21:55:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0370C24743
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Oct 2020 21:48:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="xxRyotoR"
+	by mail.kernel.org (Postfix) with ESMTP id 30641246CD
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Oct 2020 21:55:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727902AbgJ1Vsm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Oct 2020 17:48:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46518 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727012AbgJ1Vhl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Oct 2020 17:37:41 -0400
-Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD8B5C0613CF
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2020 14:37:39 -0700 (PDT)
-Received: by mail-pf1-x443.google.com with SMTP id y14so518627pfp.13
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Oct 2020 14:37:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=qbvAGH/+Gr6HsAx+cEfZRUqTu0GwIJPlNLOpAb2FoYM=;
-        b=xxRyotoRjKsBrbSG6Xuz0lPR5v2OwE30j1BpgwxF2EPvYQMWbhTbOjNDKTDJtiWVZt
-         s1HvR0O2DkSl6RbF//5DAC/nSymMDGUr1nDfDsIcP3dM1pSMoiIsn2P3D5RKJBQS4vWK
-         S1WKSFbt8MGGSJ1ReqnlUC/u+AaZWYri1a32JdKzG04D/7P4LWOly3JOK1ncMC0V2A4z
-         0BwiiYcARBgCgSNqzI3dnX1pd4wwoeEJjvL3Pu4NGHD6DWS/qtKR2F1gIDScJXOcHFND
-         IuyD+94PL8xrmHNLpp7Jh2QWjp77ZIKJcPrH9Yt8+6dOxgeBkAWtu4AryU9+vu5AZQTh
-         dZmA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=qbvAGH/+Gr6HsAx+cEfZRUqTu0GwIJPlNLOpAb2FoYM=;
-        b=WpO5X7sjX2bvv+IsIP7TpSwqhaTxg+RsuReXBK7LXOXry0AkEWkCrY4k/8zW8yIQjV
-         ocZlPDTQ2Lz4YZGX9AmnfwKRdwkijWLgq3KHpJecf1rRexSA9cKxuQRBjfKOqAJLrfV1
-         JqnvhGrdCDn6VnA4Vhqzq5WCNAVtRM9eEJIV1fW0cgVhL8UJDbryYjI6eF+2F5Hw7MCX
-         0/OM2OlShsaBisVE+s5qxtiFpg2y3I3UU7prWHlBQMSVN7zdOXRqs9NCKrBdjpy6S3cU
-         WMzZIDktUYu27QRe3P/r0kSOpQDSi1mtSaBoWGOaGaZ06xGxyaY+hX6+TAGWqragGMaD
-         j56Q==
-X-Gm-Message-State: AOAM533RSGs4cfy8GvIeezNYameqnL6Tg2FVBz1iC2Bq5aIpoxQfoZAB
-        x2/csrpnz3nXdlK/P+NQHlG/ljludRrsmHzzVPnxAiG9UVvLlQ==
-X-Google-Smtp-Source: ABdhPJz+D+K09j+kA/3msWckVaX/tsiMARRK498ZPG9YJfYQI/tM8nbDl+06SeQ1WVT7Affb3jnzh2kbtd6loobWy3I=
-X-Received: by 2002:a05:6102:41a:: with SMTP id d26mr4850463vsq.48.1603880318781;
- Wed, 28 Oct 2020 03:18:38 -0700 (PDT)
-MIME-Version: 1.0
-References: <1600999061-13669-1-git-send-email-rui_feng@realsil.com.cn>
- <CAPDyKFrnkF3mU5PJsy0VtEjPSToktSsRRtyMvQF97vymc+rY5A@mail.gmail.com>
- <dd210290eef6467cbffca8cbaddb8b84@realsil.com.cn> <CAPDyKFqwsJaYrXMVabR7qui6yqr4FAHfYq1ghfsf0HtRSZpGGw@mail.gmail.com>
- <ba3c68fea4614434838a0a8cbc0e892a@realsil.com.cn> <CAPDyKFrDLJtDkkWsSENLDu2xLqptkjDk94YxYfkfW7UPBoG+bg@mail.gmail.com>
- <dd3bb2880b3e4da1b601b7e2b21f55c1@realsil.com.cn>
-In-Reply-To: <dd3bb2880b3e4da1b601b7e2b21f55c1@realsil.com.cn>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 28 Oct 2020 11:18:02 +0100
-Message-ID: <CAPDyKFqA6Q9qvVu1gORLPed7iAn5JHTX7AWRO05D3GtsPA6tbg@mail.gmail.com>
-Subject: Re: [PATCH 3/3] mmc: rtsx: Add SD Express mode support for RTS5261
-To:     =?UTF-8?B?5Yav6ZSQ?= <rui_feng@realsil.com.cn>
-Cc:     Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        id S1728508AbgJ1Vzr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Oct 2020 17:55:47 -0400
+Received: from rtits2.realtek.com ([211.75.126.72]:39232 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728492AbgJ1Vzp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Oct 2020 17:55:45 -0400
+X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 09SA5d5yA015858, This message is accepted by code: ctloc85258
+Received: from RSEXMBS02.realsil.com.cn ([172.29.17.196])
+        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 09SA5d5yA015858
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
+        Wed, 28 Oct 2020 18:05:40 +0800
+Received: from RSEXMBS02.realsil.com.cn (172.29.17.196) by
+ RSEXMBS02.realsil.com.cn (172.29.17.196) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2044.4; Wed, 28 Oct 2020 18:05:39 +0800
+Received: from RSEXMBS02.realsil.com.cn ([fe80::f8fc:93be:88f4:52ef]) by
+ RSEXMBS02.realsil.com.cn ([fe80::f8fc:93be:88f4:52ef%7]) with mapi id
+ 15.01.2044.004; Wed, 28 Oct 2020 18:05:39 +0800
+From:   =?utf-8?B?5Yav6ZSQ?= <rui_feng@realsil.com.cn>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Christoph Hellwig <hch@lst.de>, Arnd Bergmann <arnd@arndb.de>,
+        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: =?utf-8?B?562U5aSNOiBbUEFUQ0ggMy8zXSBtbWM6IHJ0c3g6IEFkZCBTRCBFeHByZXNz?= =?utf-8?Q?_mode_support_for_RTS5261?=
+Thread-Topic: [PATCH 3/3] mmc: rtsx: Add SD Express mode support for RTS5261
+Thread-Index: AQHWkt9BwBVjFlHHd0at7hFkgpI9BamhuQuAgAGMm/CAATQjgIAAlwdAgAYEBgCAAV+VAIAAhqzA
+Date:   Wed, 28 Oct 2020 10:05:38 +0000
+Message-ID: <dd3bb2880b3e4da1b601b7e2b21f55c1@realsil.com.cn>
+References: <1600999061-13669-1-git-send-email-rui_feng@realsil.com.cn>
+ <CAPDyKFrnkF3mU5PJsy0VtEjPSToktSsRRtyMvQF97vymc+rY5A@mail.gmail.com>
+ <dd210290eef6467cbffca8cbaddb8b84@realsil.com.cn>
+ <CAPDyKFqwsJaYrXMVabR7qui6yqr4FAHfYq1ghfsf0HtRSZpGGw@mail.gmail.com>
+ <ba3c68fea4614434838a0a8cbc0e892a@realsil.com.cn>
+ <CAPDyKFrDLJtDkkWsSENLDu2xLqptkjDk94YxYfkfW7UPBoG+bg@mail.gmail.com> 
+Accept-Language: zh-CN, en-US
+Content-Language: zh-CN
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.29.40.150]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 28 Oct 2020 at 11:05, =E5=86=AF=E9=94=90 <rui_feng@realsil.com.cn> =
-wrote:
->
-> >
-> > >
-> > > On Mon, 26 Oct 2020 at 09:22, =E5=86=AF=E9=94=90 <rui_feng@realsil.co=
-m.cn> wrote:
-> > > >
-> > > > >
-> > > > > + Christoph (to help us understand if PCIe/NVMe devices can be
-> > > > > + marked
-> > > > > + read-only)
-> > > > >
-> > > > > On Thu, 22 Oct 2020 at 08:04, =E5=86=AF=E9=94=90 <rui_feng@realsi=
-l.com.cn> wrote:
-> > > > > >
-> > > > > > >
-> > > > > > > On Fri, 25 Sep 2020 at 03:57, <rui_feng@realsil.com.cn> wrote=
-:
-> > > > > > > >
-> > > > > > > > From: Rui Feng <rui_feng@realsil.com.cn>
-> > > > > > > >
-> > > > > > > > RTS5261 support legacy SD mode and SD Express mode.
-> > > > > > > > In SD7.x, SD association introduce SD Express as a new mode=
-.
-> > > > > > > > This patch makes RTS5261 support SD Express mode.
-> > > > > > >
-> > > > > > > As per patch 2, can you please add some more information abou=
-t
-> > > > > > > what changes are needed to support SD Express? This just
-> > > > > > > states that the support is implemented, but please elaborate =
-how.
-> > > > > > >
-> > > > > > > >
-> > > > > > > > Signed-off-by: Rui Feng <rui_feng@realsil.com.cn>
-> > > > > > > > ---
-> > > > > > > >  drivers/mmc/host/rtsx_pci_sdmmc.c | 59
-> > > > > > > > +++++++++++++++++++++++++++++++
-> > > > > > > >  1 file changed, 59 insertions(+)
-> > > > > > > >
-> > > > > > > > diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > > > > > > b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > > > > > > index 2763a376b054..efde374a4a5e 100644
-> > > > > > > > --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > > > > > > +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> > > > > > > > @@ -895,7 +895,9 @@ static int sd_set_bus_width(struct
-> > > > > > > > realtek_pci_sdmmc *host,  static int sd_power_on(struct
-> > > > > > > > realtek_pci_sdmmc *host)  {
-> > > > > > > >         struct rtsx_pcr *pcr =3D host->pcr;
-> > > > > > > > +       struct mmc_host *mmc =3D host->mmc;
-> > > > > > > >         int err;
-> > > > > > > > +       u32 val;
-> > > > > > > >
-> > > > > > > >         if (host->power_state =3D=3D SDMMC_POWER_ON)
-> > > > > > > >                 return 0;
-> > > > > > > > @@ -922,6 +924,14 @@ static int sd_power_on(struct
-> > > > > > > > realtek_pci_sdmmc
-> > > > > > > *host)
-> > > > > > > >         if (err < 0)
-> > > > > > > >                 return err;
-> > > > > > > >
-> > > > > > > > +       if (PCI_PID(pcr) =3D=3D PID_5261) {
-> > > > > > > > +               val =3D rtsx_pci_readl(pcr, RTSX_BIPR);
-> > > > > > > > +               if (val & SD_WRITE_PROTECT) {
-> > > > > > > > +                       pcr->extra_caps &=3D
-> > > > > > > ~EXTRA_CAPS_SD_EXPRESS;
-> > > > > > > > +                       mmc->caps2 &=3D
-> > ~(MMC_CAP2_SD_EXP
-> > > |
-> > > > > > > > + MMC_CAP2_SD_EXP_1_2V);
-> > > > > > >
-> > > > > > > This looks a bit weird to me. For a write protected card you
-> > > > > > > want to disable the SD_EXPRESS support, right?
-> > > > > > >
-> > > > > > Right. If end user insert a write protected SD express card, I
-> > > > > > will disable
-> > > > > SD_EXPRESS support.
-> > > > > > If host switch to SD EXPRESS mode, the card will be recognized
-> > > > > > as a writable PCIe/NVMe device, I think this is not end user's =
-purpose.
-> > > > >
-> > > > > Hmm.
-> > > > >
-> > > > > Falling back to use the legacy SD interface is probably not what
-> > > > > the user expects either.
-> > > > >
-> > > > > Note that the physical write protect switch/pin isn't mandatory t=
-o
-> > > > > support and it doesn't even exist for all formats of SD cards. In
-> > > > > the mmc core, we are defaulting to make the card write enabled, i=
-f
-> > > > > the switch isn't supported by the host driver. Additionally,
-> > > > > nothing prevents the end user from mounting the filesystem in
-> > > > > read-only mode, if
-> > > that is preferred.
-> > > > >
-> > > > > >
-> > > > > > > Is there no mechanism to support read-only PCIe/NVMe based
-> > > > > > > storage
-> > > > > devices?
-> > > > > > > If that is the case, maybe it's simply better to not support
-> > > > > > > the readonly option at all for SD express cards?
-> > > > > > >
-> > > > > > I think there's no mechanism to support read-only PCIe/NVMe
-> > > > > > based storage
-> > > > > devices.
-> > > > >
-> > > > > I have looped in Christoph, maybe he can give us his opinion on t=
-his.
-> > > > >
-> > > > > > But different venders may have different opinions. This is only
-> > > > > > Realtek's
-> > > > > opinion.
-> > > > >
-> > > > > I understand. However, the most important point for me, is that w=
-e
-> > > > > don't end up in a situation where each mmc host handles this
-> > > > > differently. We should strive towards a consistent behavior.
-> > > > >
-> > > > > At this point I tend to prefer to default to ignore the write
-> > > > > protect switch for SD express, unless we can find a way to
-> > > > > properly support
-> > > it.
-> > > > >
-> > > > For information security purpose, some companies or business users
-> > > > set their
-> > > notebook SD as "read only".
-> > > > Because a lot of "read only" requirements from those companies or
-> > > > business
-> > > users, notebook vendor controls reader write protect pin to achieve i=
-t.
-> > > > Notebook BIOS might have option to choose "read only" or not.
-> > > > This is why we think write protect is more important than speed.
-> > >
-> > > I understand that it may be used, in some way or the other to provide
-> > > a hint to the operating system to mount it in read-only mode.
-> > >
-> > > Although, if there were a real security feature involved, the interna=
-l
-> > > FW of the SD card would also monitor the switch, to support read-only
-> > > mode. As I understand it, that's not the common case.
-> > >
-> > > > If you prefer to consistent behavior, I can ignore the write protec=
-t
-> > > > switch for
-> > > SD express.
-> > >
-> > > At this point, I prefer if you would ignore the write protect switch
-> > > in the SD controller driver.
-> > >
-> > I will ignore write protect switch in V3.
-> >
-> Sorry I ignore the HW design.
-> The reader has two mechanism for mode selection (SD Legacy or SD Express)=
-. One is SW (MMC driver) and another is HW.
-> We use HW mechanism when system exit S3 or S4.
-> HW mechanism selects mode when chip is power on.
-> Here is an example for HW mechanism.
-> 1. Reader in SD Legacy mode ->
-> 2. SD Express card insert ->
-> 3. MMC driver selects the SD Express mode ->
-> 4. SD Express initial and use NVMe driver and NVMe disk mount ->
-> 5. system goes to S4 ->
-> 6. system exits S4 ->
-> 7. HW selects SD Express mode ->
-> 8. SD Express still uses NVMe driver and disk keeps the same
-> Therefore, after S4, disk is still keep the same.
->
-> Because of HW mechanism selects SD legacy mode when write protect.
-> If driver can't select SD legacy mode when write protect, disk might unmo=
-unt and than mount after S3/S4.
-> Here is an example for write protect.
-> 1. Reader in SD Legacy mode ->
-> 2. SD Express card insert with write protect ->
-> 3. MMC driver selects the SD Express mode ->
-> 4. SD Express initial and use NVMe driver and NVMe disk mount ->
-> 5. system goes to S4 ->
-> 6. system exits S4 ->
-> 7. Because write protect, HW selects SD legacy mode ->
-> 8. linux detect HW change, use MMC driver and NVMe disk unmount ->
-> 9. MMC driver selects the SD Express mode ->
-> 10. SD Express initial and use NVMe driver and NVMe disk mount
->
-> If driver can select SD legacy mode when write protect, disk can keep the=
- same after S3/S4.
-> Here is an example for write protect.
-> 1. Reader in SD Legacy mode ->
-> 2. SD Express card insert with write protect ->
-> 3. MMC driver selects the SD legacy mode and disk mount ->
-> 5. system goes to S4 ->
-> 6. system exits S4 ->
-> 7. Because write protect, HW selects SD legacy mode ->
-> 8. MMC driver selects the SD legacy mode and disk keeps the same.
-> If I ignore the write protect switch in mmc host driver, behavior of SW w=
-ill not be consistent with HW.
-
-Alright, let's keep the code monitoring the write protect switch then.
-However, please add a comment in the code that it's needed because the
-HW reads it when resuming from S3/S4 (and then picks SD legacy
-interface if it's set in read-only mode).
-
-[...]
-
-Kind regards
-Uffe
+PiANCj4gPg0KPiA+IE9uIE1vbiwgMjYgT2N0IDIwMjAgYXQgMDk6MjIsIOWGr+mUkCA8cnVpX2Zl
+bmdAcmVhbHNpbC5jb20uY24+IHdyb3RlOg0KPiA+ID4NCj4gPiA+ID4NCj4gPiA+ID4gKyBDaHJp
+c3RvcGggKHRvIGhlbHAgdXMgdW5kZXJzdGFuZCBpZiBQQ0llL05WTWUgZGV2aWNlcyBjYW4gYmUN
+Cj4gPiA+ID4gKyBtYXJrZWQNCj4gPiA+ID4gKyByZWFkLW9ubHkpDQo+ID4gPiA+DQo+ID4gPiA+
+IE9uIFRodSwgMjIgT2N0IDIwMjAgYXQgMDg6MDQsIOWGr+mUkCA8cnVpX2ZlbmdAcmVhbHNpbC5j
+b20uY24+IHdyb3RlOg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4gT24gRnJp
+LCAyNSBTZXAgMjAyMCBhdCAwMzo1NywgPHJ1aV9mZW5nQHJlYWxzaWwuY29tLmNuPiB3cm90ZToN
+Cj4gPiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+ID4gRnJvbTogUnVpIEZlbmcgPHJ1aV9mZW5nQHJl
+YWxzaWwuY29tLmNuPg0KPiA+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4gPiBSVFM1MjYxIHN1cHBv
+cnQgbGVnYWN5IFNEIG1vZGUgYW5kIFNEIEV4cHJlc3MgbW9kZS4NCj4gPiA+ID4gPiA+ID4gSW4g
+U0Q3LngsIFNEIGFzc29jaWF0aW9uIGludHJvZHVjZSBTRCBFeHByZXNzIGFzIGEgbmV3IG1vZGUu
+DQo+ID4gPiA+ID4gPiA+IFRoaXMgcGF0Y2ggbWFrZXMgUlRTNTI2MSBzdXBwb3J0IFNEIEV4cHJl
+c3MgbW9kZS4NCj4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiBBcyBwZXIgcGF0Y2ggMiwgY2FuIHlv
+dSBwbGVhc2UgYWRkIHNvbWUgbW9yZSBpbmZvcm1hdGlvbiBhYm91dA0KPiA+ID4gPiA+ID4gd2hh
+dCBjaGFuZ2VzIGFyZSBuZWVkZWQgdG8gc3VwcG9ydCBTRCBFeHByZXNzPyBUaGlzIGp1c3QNCj4g
+PiA+ID4gPiA+IHN0YXRlcyB0aGF0IHRoZSBzdXBwb3J0IGlzIGltcGxlbWVudGVkLCBidXQgcGxl
+YXNlIGVsYWJvcmF0ZSBob3cuDQo+ID4gPiA+ID4gPg0KPiA+ID4gPiA+ID4gPg0KPiA+ID4gPiA+
+ID4gPiBTaWduZWQtb2ZmLWJ5OiBSdWkgRmVuZyA8cnVpX2ZlbmdAcmVhbHNpbC5jb20uY24+DQo+
+ID4gPiA+ID4gPiA+IC0tLQ0KPiA+ID4gPiA+ID4gPiAgZHJpdmVycy9tbWMvaG9zdC9ydHN4X3Bj
+aV9zZG1tYy5jIHwgNTkNCj4gPiA+ID4gPiA+ID4gKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKw0KPiA+ID4gPiA+ID4gPiAgMSBmaWxlIGNoYW5nZWQsIDU5IGluc2VydGlvbnMoKykNCj4g
+PiA+ID4gPiA+ID4NCj4gPiA+ID4gPiA+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2hvc3Qv
+cnRzeF9wY2lfc2RtbWMuYw0KPiA+ID4gPiA+ID4gPiBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9w
+Y2lfc2RtbWMuYw0KPiA+ID4gPiA+ID4gPiBpbmRleCAyNzYzYTM3NmIwNTQuLmVmZGUzNzRhNGE1
+ZSAxMDA2NDQNCj4gPiA+ID4gPiA+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9ydHN4X3BjaV9z
+ZG1tYy5jDQo+ID4gPiA+ID4gPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2Rt
+bWMuYw0KPiA+ID4gPiA+ID4gPiBAQCAtODk1LDcgKzg5NSw5IEBAIHN0YXRpYyBpbnQgc2Rfc2V0
+X2J1c193aWR0aChzdHJ1Y3QNCj4gPiA+ID4gPiA+ID4gcmVhbHRla19wY2lfc2RtbWMgKmhvc3Qs
+ICBzdGF0aWMgaW50IHNkX3Bvd2VyX29uKHN0cnVjdA0KPiA+ID4gPiA+ID4gPiByZWFsdGVrX3Bj
+aV9zZG1tYyAqaG9zdCkgIHsNCj4gPiA+ID4gPiA+ID4gICAgICAgICBzdHJ1Y3QgcnRzeF9wY3Ig
+KnBjciA9IGhvc3QtPnBjcjsNCj4gPiA+ID4gPiA+ID4gKyAgICAgICBzdHJ1Y3QgbW1jX2hvc3Qg
+Km1tYyA9IGhvc3QtPm1tYzsNCj4gPiA+ID4gPiA+ID4gICAgICAgICBpbnQgZXJyOw0KPiA+ID4g
+PiA+ID4gPiArICAgICAgIHUzMiB2YWw7DQo+ID4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiA+ICAg
+ICAgICAgaWYgKGhvc3QtPnBvd2VyX3N0YXRlID09IFNETU1DX1BPV0VSX09OKQ0KPiA+ID4gPiA+
+ID4gPiAgICAgICAgICAgICAgICAgcmV0dXJuIDA7DQo+ID4gPiA+ID4gPiA+IEBAIC05MjIsNiAr
+OTI0LDE0IEBAIHN0YXRpYyBpbnQgc2RfcG93ZXJfb24oc3RydWN0DQo+ID4gPiA+ID4gPiA+IHJl
+YWx0ZWtfcGNpX3NkbW1jDQo+ID4gPiA+ID4gPiAqaG9zdCkNCj4gPiA+ID4gPiA+ID4gICAgICAg
+ICBpZiAoZXJyIDwgMCkNCj4gPiA+ID4gPiA+ID4gICAgICAgICAgICAgICAgIHJldHVybiBlcnI7
+DQo+ID4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiA+ICsgICAgICAgaWYgKFBDSV9QSUQocGNyKSA9
+PSBQSURfNTI2MSkgew0KPiA+ID4gPiA+ID4gPiArICAgICAgICAgICAgICAgdmFsID0gcnRzeF9w
+Y2lfcmVhZGwocGNyLCBSVFNYX0JJUFIpOw0KPiA+ID4gPiA+ID4gPiArICAgICAgICAgICAgICAg
+aWYgKHZhbCAmIFNEX1dSSVRFX1BST1RFQ1QpIHsNCj4gPiA+ID4gPiA+ID4gKyAgICAgICAgICAg
+ICAgICAgICAgICAgcGNyLT5leHRyYV9jYXBzICY9DQo+ID4gPiA+ID4gPiB+RVhUUkFfQ0FQU19T
+RF9FWFBSRVNTOw0KPiA+ID4gPiA+ID4gPiArICAgICAgICAgICAgICAgICAgICAgICBtbWMtPmNh
+cHMyICY9DQo+IH4oTU1DX0NBUDJfU0RfRVhQDQo+ID4gfA0KPiA+ID4gPiA+ID4gPiArIE1NQ19D
+QVAyX1NEX0VYUF8xXzJWKTsNCj4gPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiBUaGlzIGxvb2tzIGEg
+Yml0IHdlaXJkIHRvIG1lLiBGb3IgYSB3cml0ZSBwcm90ZWN0ZWQgY2FyZCB5b3UNCj4gPiA+ID4g
+PiA+IHdhbnQgdG8gZGlzYWJsZSB0aGUgU0RfRVhQUkVTUyBzdXBwb3J0LCByaWdodD8NCj4gPiA+
+ID4gPiA+DQo+ID4gPiA+ID4gUmlnaHQuIElmIGVuZCB1c2VyIGluc2VydCBhIHdyaXRlIHByb3Rl
+Y3RlZCBTRCBleHByZXNzIGNhcmQsIEkNCj4gPiA+ID4gPiB3aWxsIGRpc2FibGUNCj4gPiA+ID4g
+U0RfRVhQUkVTUyBzdXBwb3J0Lg0KPiA+ID4gPiA+IElmIGhvc3Qgc3dpdGNoIHRvIFNEIEVYUFJF
+U1MgbW9kZSwgdGhlIGNhcmQgd2lsbCBiZSByZWNvZ25pemVkDQo+ID4gPiA+ID4gYXMgYSB3cml0
+YWJsZSBQQ0llL05WTWUgZGV2aWNlLCBJIHRoaW5rIHRoaXMgaXMgbm90IGVuZCB1c2VyJ3MgcHVy
+cG9zZS4NCj4gPiA+ID4NCj4gPiA+ID4gSG1tLg0KPiA+ID4gPg0KPiA+ID4gPiBGYWxsaW5nIGJh
+Y2sgdG8gdXNlIHRoZSBsZWdhY3kgU0QgaW50ZXJmYWNlIGlzIHByb2JhYmx5IG5vdCB3aGF0DQo+
+ID4gPiA+IHRoZSB1c2VyIGV4cGVjdHMgZWl0aGVyLg0KPiA+ID4gPg0KPiA+ID4gPiBOb3RlIHRo
+YXQgdGhlIHBoeXNpY2FsIHdyaXRlIHByb3RlY3Qgc3dpdGNoL3BpbiBpc24ndCBtYW5kYXRvcnkg
+dG8NCj4gPiA+ID4gc3VwcG9ydCBhbmQgaXQgZG9lc24ndCBldmVuIGV4aXN0IGZvciBhbGwgZm9y
+bWF0cyBvZiBTRCBjYXJkcy4gSW4NCj4gPiA+ID4gdGhlIG1tYyBjb3JlLCB3ZSBhcmUgZGVmYXVs
+dGluZyB0byBtYWtlIHRoZSBjYXJkIHdyaXRlIGVuYWJsZWQsIGlmDQo+ID4gPiA+IHRoZSBzd2l0
+Y2ggaXNuJ3Qgc3VwcG9ydGVkIGJ5IHRoZSBob3N0IGRyaXZlci4gQWRkaXRpb25hbGx5LA0KPiA+
+ID4gPiBub3RoaW5nIHByZXZlbnRzIHRoZSBlbmQgdXNlciBmcm9tIG1vdW50aW5nIHRoZSBmaWxl
+c3lzdGVtIGluDQo+ID4gPiA+IHJlYWQtb25seSBtb2RlLCBpZg0KPiA+IHRoYXQgaXMgcHJlZmVy
+cmVkLg0KPiA+ID4gPg0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gPiBJcyB0aGVyZSBubyBtZWNoYW5p
+c20gdG8gc3VwcG9ydCByZWFkLW9ubHkgUENJZS9OVk1lIGJhc2VkDQo+ID4gPiA+ID4gPiBzdG9y
+YWdlDQo+ID4gPiA+IGRldmljZXM/DQo+ID4gPiA+ID4gPiBJZiB0aGF0IGlzIHRoZSBjYXNlLCBt
+YXliZSBpdCdzIHNpbXBseSBiZXR0ZXIgdG8gbm90IHN1cHBvcnQNCj4gPiA+ID4gPiA+IHRoZSBy
+ZWFkb25seSBvcHRpb24gYXQgYWxsIGZvciBTRCBleHByZXNzIGNhcmRzPw0KPiA+ID4gPiA+ID4N
+Cj4gPiA+ID4gPiBJIHRoaW5rIHRoZXJlJ3Mgbm8gbWVjaGFuaXNtIHRvIHN1cHBvcnQgcmVhZC1v
+bmx5IFBDSWUvTlZNZQ0KPiA+ID4gPiA+IGJhc2VkIHN0b3JhZ2UNCj4gPiA+ID4gZGV2aWNlcy4N
+Cj4gPiA+ID4NCj4gPiA+ID4gSSBoYXZlIGxvb3BlZCBpbiBDaHJpc3RvcGgsIG1heWJlIGhlIGNh
+biBnaXZlIHVzIGhpcyBvcGluaW9uIG9uIHRoaXMuDQo+ID4gPiA+DQo+ID4gPiA+ID4gQnV0IGRp
+ZmZlcmVudCB2ZW5kZXJzIG1heSBoYXZlIGRpZmZlcmVudCBvcGluaW9ucy4gVGhpcyBpcyBvbmx5
+DQo+ID4gPiA+ID4gUmVhbHRlaydzDQo+ID4gPiA+IG9waW5pb24uDQo+ID4gPiA+DQo+ID4gPiA+
+IEkgdW5kZXJzdGFuZC4gSG93ZXZlciwgdGhlIG1vc3QgaW1wb3J0YW50IHBvaW50IGZvciBtZSwg
+aXMgdGhhdCB3ZQ0KPiA+ID4gPiBkb24ndCBlbmQgdXAgaW4gYSBzaXR1YXRpb24gd2hlcmUgZWFj
+aCBtbWMgaG9zdCBoYW5kbGVzIHRoaXMNCj4gPiA+ID4gZGlmZmVyZW50bHkuIFdlIHNob3VsZCBz
+dHJpdmUgdG93YXJkcyBhIGNvbnNpc3RlbnQgYmVoYXZpb3IuDQo+ID4gPiA+DQo+ID4gPiA+IEF0
+IHRoaXMgcG9pbnQgSSB0ZW5kIHRvIHByZWZlciB0byBkZWZhdWx0IHRvIGlnbm9yZSB0aGUgd3Jp
+dGUNCj4gPiA+ID4gcHJvdGVjdCBzd2l0Y2ggZm9yIFNEIGV4cHJlc3MsIHVubGVzcyB3ZSBjYW4g
+ZmluZCBhIHdheSB0bw0KPiA+ID4gPiBwcm9wZXJseSBzdXBwb3J0DQo+ID4gaXQuDQo+ID4gPiA+
+DQo+ID4gPiBGb3IgaW5mb3JtYXRpb24gc2VjdXJpdHkgcHVycG9zZSwgc29tZSBjb21wYW5pZXMg
+b3IgYnVzaW5lc3MgdXNlcnMNCj4gPiA+IHNldCB0aGVpcg0KPiA+IG5vdGVib29rIFNEIGFzICJy
+ZWFkIG9ubHkiLg0KPiA+ID4gQmVjYXVzZSBhIGxvdCBvZiAicmVhZCBvbmx5IiByZXF1aXJlbWVu
+dHMgZnJvbSB0aG9zZSBjb21wYW5pZXMgb3INCj4gPiA+IGJ1c2luZXNzDQo+ID4gdXNlcnMsIG5v
+dGVib29rIHZlbmRvciBjb250cm9scyByZWFkZXIgd3JpdGUgcHJvdGVjdCBwaW4gdG8gYWNoaWV2
+ZSBpdC4NCj4gPiA+IE5vdGVib29rIEJJT1MgbWlnaHQgaGF2ZSBvcHRpb24gdG8gY2hvb3NlICJy
+ZWFkIG9ubHkiIG9yIG5vdC4NCj4gPiA+IFRoaXMgaXMgd2h5IHdlIHRoaW5rIHdyaXRlIHByb3Rl
+Y3QgaXMgbW9yZSBpbXBvcnRhbnQgdGhhbiBzcGVlZC4NCj4gPg0KPiA+IEkgdW5kZXJzdGFuZCB0
+aGF0IGl0IG1heSBiZSB1c2VkLCBpbiBzb21lIHdheSBvciB0aGUgb3RoZXIgdG8gcHJvdmlkZQ0K
+PiA+IGEgaGludCB0byB0aGUgb3BlcmF0aW5nIHN5c3RlbSB0byBtb3VudCBpdCBpbiByZWFkLW9u
+bHkgbW9kZS4NCj4gPg0KPiA+IEFsdGhvdWdoLCBpZiB0aGVyZSB3ZXJlIGEgcmVhbCBzZWN1cml0
+eSBmZWF0dXJlIGludm9sdmVkLCB0aGUgaW50ZXJuYWwNCj4gPiBGVyBvZiB0aGUgU0QgY2FyZCB3
+b3VsZCBhbHNvIG1vbml0b3IgdGhlIHN3aXRjaCwgdG8gc3VwcG9ydCByZWFkLW9ubHkNCj4gPiBt
+b2RlLiBBcyBJIHVuZGVyc3RhbmQgaXQsIHRoYXQncyBub3QgdGhlIGNvbW1vbiBjYXNlLg0KPiA+
+DQo+ID4gPiBJZiB5b3UgcHJlZmVyIHRvIGNvbnNpc3RlbnQgYmVoYXZpb3IsIEkgY2FuIGlnbm9y
+ZSB0aGUgd3JpdGUgcHJvdGVjdA0KPiA+ID4gc3dpdGNoIGZvcg0KPiA+IFNEIGV4cHJlc3MuDQo+
+ID4NCj4gPiBBdCB0aGlzIHBvaW50LCBJIHByZWZlciBpZiB5b3Ugd291bGQgaWdub3JlIHRoZSB3
+cml0ZSBwcm90ZWN0IHN3aXRjaA0KPiA+IGluIHRoZSBTRCBjb250cm9sbGVyIGRyaXZlci4NCj4g
+Pg0KPiBJIHdpbGwgaWdub3JlIHdyaXRlIHByb3RlY3Qgc3dpdGNoIGluIFYzLg0KPiANClNvcnJ5
+IEkgaWdub3JlIHRoZSBIVyBkZXNpZ24uDQpUaGUgcmVhZGVyIGhhcyB0d28gbWVjaGFuaXNtIGZv
+ciBtb2RlIHNlbGVjdGlvbiAoU0QgTGVnYWN5IG9yIFNEIEV4cHJlc3MpLiBPbmUgaXMgU1cgKE1N
+QyBkcml2ZXIpIGFuZCBhbm90aGVyIGlzIEhXLg0KV2UgdXNlIEhXIG1lY2hhbmlzbSB3aGVuIHN5
+c3RlbSBleGl0IFMzIG9yIFM0Lg0KSFcgbWVjaGFuaXNtIHNlbGVjdHMgbW9kZSB3aGVuIGNoaXAg
+aXMgcG93ZXIgb24uDQpIZXJlIGlzIGFuIGV4YW1wbGUgZm9yIEhXIG1lY2hhbmlzbS4NCjEuIFJl
+YWRlciBpbiBTRCBMZWdhY3kgbW9kZSAtPg0KMi4gU0QgRXhwcmVzcyBjYXJkIGluc2VydCAtPg0K
+My4gTU1DIGRyaXZlciBzZWxlY3RzIHRoZSBTRCBFeHByZXNzIG1vZGUgLT4NCjQuIFNEIEV4cHJl
+c3MgaW5pdGlhbCBhbmQgdXNlIE5WTWUgZHJpdmVyIGFuZCBOVk1lIGRpc2sgbW91bnQgLT4NCjUu
+IHN5c3RlbSBnb2VzIHRvIFM0IC0+DQo2LiBzeXN0ZW0gZXhpdHMgUzQgLT4NCjcuIEhXIHNlbGVj
+dHMgU0QgRXhwcmVzcyBtb2RlIC0+DQo4LiBTRCBFeHByZXNzIHN0aWxsIHVzZXMgTlZNZSBkcml2
+ZXIgYW5kIGRpc2sga2VlcHMgdGhlIHNhbWUNClRoZXJlZm9yZSwgYWZ0ZXIgUzQsIGRpc2sgaXMg
+c3RpbGwga2VlcCB0aGUgc2FtZS4NCg0KQmVjYXVzZSBvZiBIVyBtZWNoYW5pc20gc2VsZWN0cyBT
+RCBsZWdhY3kgbW9kZSB3aGVuIHdyaXRlIHByb3RlY3QuDQpJZiBkcml2ZXIgY2FuJ3Qgc2VsZWN0
+IFNEIGxlZ2FjeSBtb2RlIHdoZW4gd3JpdGUgcHJvdGVjdCwgZGlzayBtaWdodCB1bm1vdW50IGFu
+ZCB0aGFuIG1vdW50IGFmdGVyIFMzL1M0Lg0KSGVyZSBpcyBhbiBleGFtcGxlIGZvciB3cml0ZSBw
+cm90ZWN0Lg0KMS4gUmVhZGVyIGluIFNEIExlZ2FjeSBtb2RlIC0+DQoyLiBTRCBFeHByZXNzIGNh
+cmQgaW5zZXJ0IHdpdGggd3JpdGUgcHJvdGVjdCAtPg0KMy4gTU1DIGRyaXZlciBzZWxlY3RzIHRo
+ZSBTRCBFeHByZXNzIG1vZGUgLT4NCjQuIFNEIEV4cHJlc3MgaW5pdGlhbCBhbmQgdXNlIE5WTWUg
+ZHJpdmVyIGFuZCBOVk1lIGRpc2sgbW91bnQgLT4NCjUuIHN5c3RlbSBnb2VzIHRvIFM0IC0+DQo2
+LiBzeXN0ZW0gZXhpdHMgUzQgLT4NCjcuIEJlY2F1c2Ugd3JpdGUgcHJvdGVjdCwgSFcgc2VsZWN0
+cyBTRCBsZWdhY3kgbW9kZSAtPg0KOC4gbGludXggZGV0ZWN0IEhXIGNoYW5nZSwgdXNlIE1NQyBk
+cml2ZXIgYW5kIE5WTWUgZGlzayB1bm1vdW50IC0+DQo5LiBNTUMgZHJpdmVyIHNlbGVjdHMgdGhl
+IFNEIEV4cHJlc3MgbW9kZSAtPg0KMTAuIFNEIEV4cHJlc3MgaW5pdGlhbCBhbmQgdXNlIE5WTWUg
+ZHJpdmVyIGFuZCBOVk1lIGRpc2sgbW91bnQNCg0KSWYgZHJpdmVyIGNhbiBzZWxlY3QgU0QgbGVn
+YWN5IG1vZGUgd2hlbiB3cml0ZSBwcm90ZWN0LCBkaXNrIGNhbiBrZWVwIHRoZSBzYW1lIGFmdGVy
+IFMzL1M0Lg0KSGVyZSBpcyBhbiBleGFtcGxlIGZvciB3cml0ZSBwcm90ZWN0Lg0KMS4gUmVhZGVy
+IGluIFNEIExlZ2FjeSBtb2RlIC0+DQoyLiBTRCBFeHByZXNzIGNhcmQgaW5zZXJ0IHdpdGggd3Jp
+dGUgcHJvdGVjdCAtPg0KMy4gTU1DIGRyaXZlciBzZWxlY3RzIHRoZSBTRCBsZWdhY3kgbW9kZSBh
+bmQgZGlzayBtb3VudCAtPg0KNS4gc3lzdGVtIGdvZXMgdG8gUzQgLT4NCjYuIHN5c3RlbSBleGl0
+cyBTNCAtPg0KNy4gQmVjYXVzZSB3cml0ZSBwcm90ZWN0LCBIVyBzZWxlY3RzIFNEIGxlZ2FjeSBt
+b2RlIC0+DQo4LiBNTUMgZHJpdmVyIHNlbGVjdHMgdGhlIFNEIGxlZ2FjeSBtb2RlIGFuZCBkaXNr
+IGtlZXBzIHRoZSBzYW1lLg0KSWYgSSBpZ25vcmUgdGhlIHdyaXRlIHByb3RlY3Qgc3dpdGNoIGlu
+IG1tYyBob3N0IGRyaXZlciwgYmVoYXZpb3Igb2YgU1cgd2lsbCBub3QgYmUgY29uc2lzdGVudCB3
+aXRoIEhXLg0KDQo+ID4gQWNjb3JkaW5nIHRvIENocmlzdG9waCwgaXQgc2hvdWxkIGJlIHBvc3Np
+YmxlIHRvIHN1cHBvcnQgcmVhZC1vbmx5DQo+ID4gbW9kZSB2aWEgUENJZS9OVk1lLiBZb3UgbWF5
+IG5lZWQgdG8gYWRkIHNvbWUgdHdlYWtzIHRvIHN1cHBvcnQgdGhpcyBpbg0KPiA+IHRoZSBQQ0ll
+IGNvbnRyb2xsZXIgZHJpdmVyLCBidXQgSSBjYW4ndCBhZHZpc2UgeW91IGhvdyB0byBleGFjdGx5
+IGRvIHRoaXMuDQo+ID4NCj4gPiBQZXJoYXBzIHlvdSBuZWVkIHRvIHJlYWQvc3RvcmUgdGhlIHN0
+YXRlIG9mIFNEIHdyaXRlLXByb3RlY3QgcGluDQo+ID4gYmVmb3JlIHN3aXRjaGluZyB0byBTRCBl
+eHByZXNzIG1vZGUsIGJlY2F1c2UgeW91IG1heSBub3QgYmUgYWJsZSB0bw0KPiA+IHJlYWQgaXQg
+YmV5b25kIHNvbWUgcG9pbnQ/DQo+ID4NCj4gPiA+DQo+ID4gPiA+DQo+ID4gPiA+IEZyb20gdGhp
+cywgSSBhc3N1bWUgdGhhdCBteSBpbnRlcnByZXRhdGlvbnMgb2YgdGhlIGJlaGF2aW9yIHdhcyBj
+b3JyZWN0Lg0KPiA+ID4gPg0KPiA+ID4gPiBBbHRob3VnaCwgY2FuIHlvdSBwbGVhc2UgZWxhYm9y
+YXRlIG9uIHdoYXQgeW91IG1lYW4gYnkgdGhhdCBpdA0KPiA+ID4gPiB3aWxsICJub3Qgd29yayI/
+DQo+ID4gPiA+DQo+ID4gPiA+IERvIHlvdSBtZWFuIHRoYXQgcnRzeF9wY2lfY2FyZF9leGNsdXNp
+dmVfY2hlY2soKSB0aGF0IGlzIGNhbGxlZA0KPiA+ID4gPiBlYXJseSBpbg0KPiA+ID4gPiBzZG1t
+Y19zZXRfaW9zKCkgd2lsbCBmYWlsIGFuZCB0aGVuIG1ha2UgaXQgYmFpbCBvdXQ/IFRoZW4sIGNv
+dWxkDQo+ID4gPiA+IHlvdSBwbGVhc2UgYWRkIGEgY29tbWVudCBhYm91dCB0aGF0IGluIHRoZSBj
+b2RlPw0KPiA+ID4gPg0KPiA+ID4gSW4gaW5pdF9zZF9leHByZXNzKCkgZHJpdmVyIHNldHMgMHhG
+RjU0IGJpdDA9MSBhbmQgMHhGRjU1IGJpdDQ9MCwNCj4gPiA+IHRoZW4NCj4gPiBSVFM1MjYxIHdp
+bGwgc3dpdGNoIE1DVSBhbmQgZW50ZXIgU0QgRVhQUkVTUyBtb2RlLg0KPiA+ID4gQWZ0ZXIgdGhh
+dCBSVFM1MjYxIGNhbid0IHJlY2VpdmUgYW55IENNRCBmcm9tIFBDSWUsIHNvDQo+ID4gPiBtbWNf
+cG93ZXJfb2ZmKCkNCj4gPiB3aWxsIG5vdCB3b3JrLg0KPiA+DQo+ID4gVGhhbmtzIGZvciB0cnlp
+bmcgdG8gY2xhcmlmeS4NCj4gPg0KPiA+IEhvd2V2ZXIsIHRoaXMgc3RpbGwgZG9lc24ndCBleHBs
+YWluIHRvIG1lLCB3aGF0ICpleGFjdGx5KiB3aWxsIGhhcHBlbg0KPiA+IHdoZW4NCj4gPiBydHN4
+X3BjaV9jYXJkX2V4Y2x1c2l2ZV9jaGVjaygpIGlzIGNhbGxlZCAob3IgYW55IG90aGVyIGZ1bmN0
+aW9ucyBpbg0KPiAtPnNldF9pb3MoKSkuDQo+ID4NCj4gPiBJbiBwcmluY2lwbGUsICJ3aWxsIG5v
+dCB3b3JrIiBjb3VsZCBtZWFuIHRoYXQgdGhlIGNhbGxzIHRvIHRoZQ0KPiA+IHJ0c3hfcGNpXyog
+Y2FyZHJlYWRlciBpbnRlcmZhY2UgaGFuZ3MgLSBhbmQgdGhhdCB3b3VsZCBub3QgYmUgb2theSAo
+YXMNCj4gPiBpdCBjb3VsZCBsZWFkIHRvIHRoYXQgdGhlIC0+cmVtb3ZlKCkgY2FsbGJhY2sgaGFu
+Z3MpLiBTbywgZWl0aGVyIHlvdQ0KPiA+IG5lZWQgdG8gcHV0IGEgd2VsbCB3cml0dGVuIGNvbW1l
+bnQgaW4gdGhlIGNvZGUgYWJvdXQgd2hhdCB3aWxsIGhhcHBlbg0KPiA+IC0gb3IgYWRkIHNvbWUg
+a2luZCBvZiBwcm90ZWN0aW9uIGFnYWluc3QgcG90ZW50aWFsIHByb2JsZW1zIGZvciB0aGlzLg0K
+PiA+DQo+ICJ3aWxsIG5vdCB3b3JrIiBtZWFuIGZhaWwgYW5kIHdpbGwgbm90IGhhbmcgaW50ZXJm
+YWNlLiBJIHdpbGwgYWRkICJob3N0LT5lamVjdCA9DQo+IHRydWUiIGluIHRoZSBlbmQgb2YgaW5p
+dF9zZF9leHByZXNzKCksIHNvIHRoYXQgc2V0X2lvcygpIHdpbGwgZG8gbm90aGluZyBqdXN0DQo+
+IHJldHVybi4NCj4gDQo+ID4gS2luZCByZWdhcmRzDQo+ID4gVWZmZQ0KPiA+DQo+ID4gLS0tLS0t
+UGxlYXNlIGNvbnNpZGVyIHRoZSBlbnZpcm9ubWVudCBiZWZvcmUgcHJpbnRpbmcgdGhpcyBlLW1h
+aWwuDQo=
