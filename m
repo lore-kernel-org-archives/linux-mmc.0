@@ -7,35 +7,36 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCDA2C388F7
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAFE6C4363A
 	for <linux-mmc@archiver.kernel.org>; Thu, 29 Oct 2020 01:58:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5375F20782
+	by mail.kernel.org (Postfix) with ESMTP id 8357C20709
 	for <linux-mmc@archiver.kernel.org>; Thu, 29 Oct 2020 01:58:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728524AbgJ2B6H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1728954AbgJ2B6H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 28 Oct 2020 21:58:07 -0400
-Received: from rtits2.realtek.com ([211.75.126.72]:34940 "EHLO
+Received: from rtits2.realtek.com ([211.75.126.72]:34879 "EHLO
         rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728949AbgJ2B6B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Oct 2020 21:58:01 -0400
+        with ESMTP id S1728943AbgJ2B5i (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Oct 2020 21:57:38 -0400
 Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 09T1voID3002945, This message is accepted by code: ctloc85258
+X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 09T1vIE21002563, This message is accepted by code: ctloc85258
 Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
-        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 09T1voID3002945
+        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 09T1vIE21002563
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Thu, 29 Oct 2020 09:57:51 +0800
+        Thu, 29 Oct 2020 09:57:19 +0800
 Received: from localhost (172.29.40.150) by RSEXMBS01.realsil.com.cn
  (172.29.17.195) with Microsoft SMTP Server id 15.1.2044.4; Thu, 29 Oct 2020
- 09:57:50 +0800
+ 09:57:18 +0800
 From:   <rui_feng@realsil.com.cn>
 To:     <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
         <ulf.hansson@linaro.org>
 CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>,
         Rui Feng <rui_feng@realsil.com.cn>
-Subject: [PATCH v3 2/3] misc: rtsx: Add SD Express mode support for RTS5261
-Date:   Thu, 29 Oct 2020 09:57:48 +0800
-Message-ID: <1603936668-3363-1-git-send-email-rui_feng@realsil.com.cn>
+Subject: [PATCH v3 1/3] mmc: core: Initial support for SD express card/host
+Date:   Thu, 29 Oct 2020 09:57:16 +0800
+Message-ID: <1603936636-3126-1-git-send-email-rui_feng@realsil.com.cn>
 X-Mailer: git-send-email 1.9.1
 MIME-Version: 1.0
 Content-Type: text/plain
@@ -44,155 +45,224 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Rui Feng <rui_feng@realsil.com.cn>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-RTS5261 support SD mode and PCIe/NVMe mode. The workflow is as follows.
-1.RTS5261 work in SD mode and set MMC_CAPS2_SD_EXP flag.
-2.If card is plugged in, Host send CMD8 to ask card's PCIe availability.
-3.If the card has PCIe availability and WP is not set, init_sd_express() will be invoked,
-RTS5261 switch to PCIe/NVMe mode.
-4.Mmc driver handover it to NVMe driver.
-5.If card is unplugged, RTS5261 will switch to SD mode.
+In the SD specification v7.10 the SD express card has been added. This new
+type of removable SD card, can be managed via a PCIe/NVMe based interface,
+while also allowing backwards compatibility towards the legacy SD
+interface.
 
-Signed-off-by: Rui Feng <rui_feng@realsil.com.cn>
+To keep the backwards compatibility, it's required to start the
+initialization through the legacy SD interface. If it turns out that the
+mmc host and the SD card, both supports the PCIe/NVMe interface, then a
+switch should be allowed.
+
+Therefore, let's introduce some basic support for this type of SD cards to
+the mmc core. The mmc host, should set MMC_CAP2_SD_EXP if it supports this
+interface and MMC_CAP2_SD_EXP_1_2V, if also 1.2V is supported, as to inform
+the core about it.
+
+To deal with the switch to the PCIe/NVMe interface, the mmc host is
+required to implement a new host ops, ->init_sd_express(). Based on the
+initial communication between the host and the card, host->ios.timing is
+set to either MMC_TIMING_SD_EXP or MMC_TIMING_SD_EXP_1_2V, depending on if
+1.2V is supported or not. In this way, the mmc host can check these values
+in its ->init_sd_express() ops, to know how to proceed with the handover.
+
+Note that, to manage card insert/removal, the mmc core sticks with using
+the ->get_cd() callback, which means it's the host's responsibility to make
+sure it provides valid data, even if the card may be managed by PCIe/NVMe
+at the moment. As long as the card seems to be present, the mmc core keeps
+the card powered on.
+
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Christoph Hellwig <hch@lst.de>
+Cc: Rui Feng <rui_feng@realsil.com.cn>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
-v2:remove duplicate define
----
- drivers/misc/cardreader/rts5261.c  |  4 ++++
- drivers/misc/cardreader/rts5261.h  | 23 -----------------------
- drivers/misc/cardreader/rtsx_pcr.c |  5 +++++
- include/linux/rtsx_pci.h           | 23 +++++++++++++++++++++++
- 4 files changed, 32 insertions(+), 23 deletions(-)
+ drivers/mmc/core/core.c   | 15 ++++++++++--
+ drivers/mmc/core/host.h   |  6 +++++
+ drivers/mmc/core/sd_ops.c | 49 +++++++++++++++++++++++++++++++++++++--
+ drivers/mmc/core/sd_ops.h |  1 +
+ include/linux/mmc/host.h  |  7 ++++++
+ 5 files changed, 74 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/misc/cardreader/rts5261.c b/drivers/misc/cardreader/rts5261.c
-index 471961487ff8..536c90d4fd76 100644
---- a/drivers/misc/cardreader/rts5261.c
-+++ b/drivers/misc/cardreader/rts5261.c
-@@ -738,8 +738,12 @@ void rts5261_init_params(struct rtsx_pcr *pcr)
- {
- 	struct rtsx_cr_option *option = &pcr->option;
- 	struct rtsx_hw_param *hw_param = &pcr->hw_param;
-+	u8 val;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 8ccae6452b9c..6673c0f33cc7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2137,8 +2137,12 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
  
- 	pcr->extra_caps = EXTRA_CAPS_SD_SDR50 | EXTRA_CAPS_SD_SDR104;
-+	rtsx_pci_read_register(pcr, RTS5261_FW_STATUS, &val);
-+	if (!(val & RTS5261_EXPRESS_LINK_FAIL_MASK))
-+		pcr->extra_caps |= EXTRA_CAPS_SD_EXPRESS;
- 	pcr->num_slots = 1;
- 	pcr->ops = &rts5261_pcr_ops;
+ 	mmc_go_idle(host);
  
-diff --git a/drivers/misc/cardreader/rts5261.h b/drivers/misc/cardreader/rts5261.h
-index ebfdd236a553..8d80f0d5d5d6 100644
---- a/drivers/misc/cardreader/rts5261.h
-+++ b/drivers/misc/cardreader/rts5261.h
-@@ -65,23 +65,6 @@
- #define RTS5261_FW_EXPRESS_TEST_MASK	(0x01<<0)
- #define RTS5261_FW_EA_MODE_MASK		(0x01<<5)
+-	if (!(host->caps2 & MMC_CAP2_NO_SD))
+-		mmc_send_if_cond(host, host->ocr_avail);
++	if (!(host->caps2 & MMC_CAP2_NO_SD)) {
++		if (mmc_send_if_cond_pcie(host, host->ocr_avail))
++			goto out;
++		if (mmc_card_sd_express(host))
++			return 0;
++	}
  
--/* FW config register */
--#define RTS5261_FW_CFG0			0xFF54
--#define RTS5261_FW_ENTER_EXPRESS	(0x01<<0)
--
--#define RTS5261_FW_CFG1			0xFF55
--#define RTS5261_SYS_CLK_SEL_MCU_CLK	(0x01<<7)
--#define RTS5261_CRC_CLK_SEL_MCU_CLK	(0x01<<6)
--#define RTS5261_FAKE_MCU_CLOCK_GATING	(0x01<<5)
--/*MCU_bus_mode_sel: 0=real 8051 1=fake mcu*/
--#define RTS5261_MCU_BUS_SEL_MASK	(0x01<<4)
--/*MCU_clock_sel:VerA 00=aux16M 01=aux400K 1x=REFCLK100M*/
--/*MCU_clock_sel:VerB 00=aux400K 01=aux16M 10=REFCLK100M*/
--#define RTS5261_MCU_CLOCK_SEL_MASK	(0x03<<2)
--#define RTS5261_MCU_CLOCK_SEL_16M	(0x01<<2)
--#define RTS5261_MCU_CLOCK_GATING	(0x01<<1)
--#define RTS5261_DRIVER_ENABLE_FW	(0x01<<0)
--
- /* FW status register */
- #define RTS5261_FW_STATUS		0xFF56
- #define RTS5261_EXPRESS_LINK_FAIL_MASK	(0x01<<7)
-@@ -121,12 +104,6 @@
- #define RTS5261_DV3318_19		(0x04<<4)
- #define RTS5261_DV3318_33		(0x07<<4)
+ 	/* Order's important: probe SDIO, then SD, then MMC */
+ 	if (!(host->caps2 & MMC_CAP2_NO_SDIO))
+@@ -2153,6 +2157,7 @@ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ 		if (!mmc_attach_mmc(host))
+ 			return 0;
  
--#define RTS5261_LDO1_CFG0		0xFF72
--#define RTS5261_LDO1_OCP_THD_MASK	(0x07<<5)
--#define RTS5261_LDO1_OCP_EN		(0x01<<4)
--#define RTS5261_LDO1_OCP_LMT_THD_MASK	(0x03<<2)
--#define RTS5261_LDO1_OCP_LMT_EN		(0x01<<1)
--
- /* CRD6603-433 190319 request changed */
- #define RTS5261_LDO1_OCP_THD_740	(0x00<<5)
- #define RTS5261_LDO1_OCP_THD_800	(0x01<<5)
-diff --git a/drivers/misc/cardreader/rtsx_pcr.c b/drivers/misc/cardreader/rtsx_pcr.c
-index 37ccc67f4914..6e5c16b4b7d1 100644
---- a/drivers/misc/cardreader/rtsx_pcr.c
-+++ b/drivers/misc/cardreader/rtsx_pcr.c
-@@ -990,6 +990,11 @@ static irqreturn_t rtsx_pci_isr(int irq, void *dev_id)
- 		} else {
- 			pcr->card_removed |= SD_EXIST;
- 			pcr->card_inserted &= ~SD_EXIST;
-+			if (PCI_PID(pcr) == PID_5261) {
-+				rtsx_pci_write_register(pcr, RTS5261_FW_STATUS,
-+					RTS5261_EXPRESS_LINK_FAIL_MASK, 0);
-+				pcr->extra_caps |= EXTRA_CAPS_SD_EXPRESS;
-+			}
- 		}
- 		pcr->dma_error_count = 0;
++out:
+ 	mmc_power_off(host);
+ 	return -EIO;
+ }
+@@ -2280,6 +2285,12 @@ void mmc_rescan(struct work_struct *work)
+ 		goto out;
  	}
-diff --git a/include/linux/rtsx_pci.h b/include/linux/rtsx_pci.h
-index 745f5e73f99a..b47959f48ccd 100644
---- a/include/linux/rtsx_pci.h
-+++ b/include/linux/rtsx_pci.h
-@@ -658,6 +658,19 @@
- #define   PM_WAKE_EN			0x01
- #define PM_CTRL4			0xFF47
  
-+#define RTS5261_FW_CFG0			0xFF54
-+#define   RTS5261_FW_ENTER_EXPRESS	(0x01 << 0)
++	/* If an SD express card is present, then leave it as is. */
++	if (mmc_card_sd_express(host)) {
++		mmc_release_host(host);
++		goto out;
++	}
 +
-+#define RTS5261_FW_CFG1			0xFF55
-+#define   RTS5261_SYS_CLK_SEL_MCU_CLK	(0x01 << 7)
-+#define   RTS5261_CRC_CLK_SEL_MCU_CLK	(0x01 << 6)
-+#define   RTS5261_FAKE_MCU_CLOCK_GATING	(0x01 << 5)
-+#define   RTS5261_MCU_BUS_SEL_MASK	(0x01 << 4)
-+#define   RTS5261_MCU_CLOCK_SEL_MASK	(0x03 << 2)
-+#define   RTS5261_MCU_CLOCK_SEL_16M	(0x01 << 2)
-+#define   RTS5261_MCU_CLOCK_GATING	(0x01 << 1)
-+#define   RTS5261_DRIVER_ENABLE_FW	(0x01 << 0)
+ 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+ 		unsigned int freq = freqs[i];
+ 		if (freq > host->f_max) {
+diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
+index 5e3b9534ffb2..ba407617ed23 100644
+--- a/drivers/mmc/core/host.h
++++ b/drivers/mmc/core/host.h
+@@ -77,5 +77,11 @@ static inline bool mmc_card_hs400es(struct mmc_card *card)
+ 	return card->host->ios.enhanced_strobe;
+ }
+ 
++static inline bool mmc_card_sd_express(struct mmc_host *host)
++{
++	return host->ios.timing == MMC_TIMING_SD_EXP ||
++		host->ios.timing == MMC_TIMING_SD_EXP_1_2V;
++}
 +
- #define REG_CFG_OOBS_OFF_TIMER 0xFEA6
- #define REG_CFG_OOBS_ON_TIMER 0xFEA7
- #define REG_CFG_VCM_ON_TIMER 0xFEA8
-@@ -701,6 +714,13 @@
- #define   RTS5260_DVCC_TUNE_MASK	0x70
- #define   RTS5260_DVCC_33		0x70
+ #endif
  
-+/*RTS5261*/
-+#define RTS5261_LDO1_CFG0		0xFF72
-+#define   RTS5261_LDO1_OCP_THD_MASK	(0x07 << 5)
-+#define   RTS5261_LDO1_OCP_EN		(0x01 << 4)
-+#define   RTS5261_LDO1_OCP_LMT_THD_MASK	(0x03 << 2)
-+#define   RTS5261_LDO1_OCP_LMT_EN	(0x01 << 1)
+diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
+index 22bf528294b9..d61ff811218c 100644
+--- a/drivers/mmc/core/sd_ops.c
++++ b/drivers/mmc/core/sd_ops.c
+@@ -158,7 +158,8 @@ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
+ 	return err;
+ }
+ 
+-int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
++static int __mmc_send_if_cond(struct mmc_host *host, u32 ocr, u8 pcie_bits,
++			      u32 *resp)
+ {
+ 	struct mmc_command cmd = {};
+ 	int err;
+@@ -171,7 +172,7 @@ int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
+ 	 * SD 1.0 cards.
+ 	 */
+ 	cmd.opcode = SD_SEND_IF_COND;
+-	cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | test_pattern;
++	cmd.arg = ((ocr & 0xFF8000) != 0) << 8 | pcie_bits << 8 | test_pattern;
+ 	cmd.flags = MMC_RSP_SPI_R7 | MMC_RSP_R7 | MMC_CMD_BCR;
+ 
+ 	err = mmc_wait_for_cmd(host, &cmd, 0);
+@@ -186,6 +187,50 @@ int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
+ 	if (result_pattern != test_pattern)
+ 		return -EIO;
+ 
++	if (resp)
++		*resp = cmd.resp[0];
 +
- #define LDO_VCC_CFG1			0xFF73
- #define   LDO_VCC_REF_TUNE_MASK		0x30
- #define   LDO_VCC_REF_1V2		0x20
-@@ -741,6 +761,8 @@
++	return 0;
++}
++
++int mmc_send_if_cond(struct mmc_host *host, u32 ocr)
++{
++	return __mmc_send_if_cond(host, ocr, 0, NULL);
++}
++
++int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr)
++{
++	u32 resp = 0;
++	u8 pcie_bits = 0;
++	int ret;
++
++	if (host->caps2 & MMC_CAP2_SD_EXP) {
++		/* Probe card for SD express support via PCIe. */
++		pcie_bits = 0x10;
++		if (host->caps2 & MMC_CAP2_SD_EXP_1_2V)
++			/* Probe also for 1.2V support. */
++			pcie_bits = 0x30;
++	}
++
++	ret = __mmc_send_if_cond(host, ocr, pcie_bits, &resp);
++	if (ret)
++		return 0;
++
++	/* Continue with the SD express init, if the card supports it. */
++	resp &= 0x3000;
++	if (pcie_bits && resp) {
++		if (resp == 0x3000)
++			host->ios.timing = MMC_TIMING_SD_EXP_1_2V;
++		else
++			host->ios.timing = MMC_TIMING_SD_EXP;
++
++		/*
++		 * According to the spec the clock shall also be gated, but
++		 * let's leave this to the host driver for more flexibility.
++		 */
++		return host->ops->init_sd_express(host, &host->ios);
++	}
++
+ 	return 0;
+ }
  
- #define RTS5260_AUTOLOAD_CFG4		0xFF7F
- #define   RTS5260_MIMO_DISABLE		0x8A
-+/*RTS5261*/
-+#define   RTS5261_AUX_CLK_16M_EN		(1 << 5)
+diff --git a/drivers/mmc/core/sd_ops.h b/drivers/mmc/core/sd_ops.h
+index 2194cabfcfc5..3ba7b3cf4652 100644
+--- a/drivers/mmc/core/sd_ops.h
++++ b/drivers/mmc/core/sd_ops.h
+@@ -16,6 +16,7 @@ struct mmc_host;
+ int mmc_app_set_bus_width(struct mmc_card *card, int width);
+ int mmc_send_app_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr);
+ int mmc_send_if_cond(struct mmc_host *host, u32 ocr);
++int mmc_send_if_cond_pcie(struct mmc_host *host, u32 ocr);
+ int mmc_send_relative_addr(struct mmc_host *host, unsigned int *rca);
+ int mmc_app_send_scr(struct mmc_card *card);
+ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index c5b6e97cb21a..905cddc5e6f3 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -60,6 +60,8 @@ struct mmc_ios {
+ #define MMC_TIMING_MMC_DDR52	8
+ #define MMC_TIMING_MMC_HS200	9
+ #define MMC_TIMING_MMC_HS400	10
++#define MMC_TIMING_SD_EXP	11
++#define MMC_TIMING_SD_EXP_1_2V	12
  
- #define RTS5260_REG_GPIO_CTL0		0xFC1A
- #define   RTS5260_REG_GPIO_MASK		0x01
-@@ -1191,6 +1213,7 @@ struct rtsx_pcr {
- #define EXTRA_CAPS_MMC_HS200		(1 << 4)
- #define EXTRA_CAPS_MMC_8BIT		(1 << 5)
- #define EXTRA_CAPS_NO_MMC		(1 << 7)
-+#define EXTRA_CAPS_SD_EXPRESS		(1 << 8)
- 	u32				extra_caps;
+ 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
  
- #define IC_VER_A			0
+@@ -172,6 +174,9 @@ struct mmc_host_ops {
+ 	 */
+ 	int	(*multi_io_quirk)(struct mmc_card *card,
+ 				  unsigned int direction, int blk_size);
++
++	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
++	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
+ };
+ 
+ struct mmc_cqe_ops {
+@@ -357,6 +362,8 @@ struct mmc_host {
+ #define MMC_CAP2_HS200_1_2V_SDR	(1 << 6)        /* can support */
+ #define MMC_CAP2_HS200		(MMC_CAP2_HS200_1_8V_SDR | \
+ 				 MMC_CAP2_HS200_1_2V_SDR)
++#define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
++#define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+ #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
 -- 
 2.17.1
 
