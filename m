@@ -2,115 +2,123 @@ Return-Path: <SRS0=VXdQ=EF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PULL_REQUEST,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CC89C00A89
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 12:08:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 358E6C388F9
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 13:02:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 047CC2076E
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 12:08:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2C52206FA
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 13:02:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="By0SXtM4"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="LPZ1X8gr"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726325AbgJ3MIC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Oct 2020 08:08:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40774 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726413AbgJ3MH7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Oct 2020 08:07:59 -0400
-Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CED59C0613D4
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2020 05:07:57 -0700 (PDT)
-Received: by mail-lj1-x243.google.com with SMTP id x6so6623997ljd.3
-        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2020 05:07:57 -0700 (PDT)
+        id S1726336AbgJ3NCK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Oct 2020 09:02:10 -0400
+Received: from mail-eopbgr1310091.outbound.protection.outlook.com ([40.107.131.91]:27424
+        "EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726178AbgJ3NCJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 30 Oct 2020 09:02:09 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=GEXBCIxbLTbtHykdqshsZEvcqJmW9con1dFmpp3VQ7gjCQ8WwwJaOPNNv47aPeUATJy1MaWE74twrvcaC/e7AE4YNNDUGfd9NILdQ1ZO6xXVumqgT0rWh8smZatm5zVDXWAkBa38y1J19ITBCMwtvX7+4Zq8HZtajHWd9YM8Q74D0QkADVygTR9EoktStD4JghBEcWs5pHZmkD2jG+fOi/XNy2eN85OREdlx3pBtzZyHqdnxyKXjDV0NiYd1Q+63+2ChpcxsVgbEprcqZxjmypRRNCECNJWX14SDYu58vJNLk1dCog2BoE986QmFI8wPQCgTW0jUfk3bQHCjVZ1Ucw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=tuz6n2ay/uh3o5VgWKORPoVZzeA8bvUHNd1PNpmk5h8=;
+ b=ZKsbVOOh0KlWiNIQcu/T+P/T3v6j7yjqv4lSSthkzIvzwPG01+U9BwUfKt2DJwhDA+gJjdSMJ/4id8YcYRKAHgUBOnmipti7i4xAPFc8TkHzsImctbM7R7Fp3wJvHW5xb0pjUHbYKnFZ1CFEyVSvhjWFx7MvmE+x8VBnUwfaoEfzEQ5rXJkd/ZaVX5UNpDWhJ1T+Zk79eFdTeKUnN8KB10gyKo7NOfTF/Utfe5M1//AtHFE6FKP3O3L5AQHvtQkz6ws+Q+QYQxZEWZoar2+m45NcFksTRqzu0lAJ/ddGVZF9/XzKpxncXr0mUldyXkvwm0gVF+bjStHKnHLLtRzaBA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vWl6kkg5Q6VUV9xC9388CJRuaSl1dYHpzCndnob9kB4=;
-        b=By0SXtM4SXWxM2wU8asEz1qFRuwUiKgBv8vGy49bbCERVMAdtch2iRW6JJydatEryU
-         VoiGk06sr1rzNJD+QePlUkQ0lTbwVzoJsL2jDBgjlT5555GSEKNsZ1wB0FjTFk8g8nZI
-         1crvgs7RPEYf2mQuH61gDt1F76dUXCI6k4TbUn7JMRuKvZLvyJ1rGrKnXofltRLRGcK0
-         nxehGVP2eHV4qmkBO/dUDZfLDo9yuOClcs/Mg0M15lCLb3XFHciCauqsub5dxyAJTirh
-         wv2ViUXOzX5/h6RT+ckBGuoycOPpepWs9cQq9p3svkgo0R7XZMFcYCQroLICgjZB4gCM
-         XwCg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vWl6kkg5Q6VUV9xC9388CJRuaSl1dYHpzCndnob9kB4=;
-        b=juWHnk4BHy7DXsRdXr+QbsOJqtgLmQYu+Qh/c5d0bMTY5JfSmU2Q93KV12HoKQSh4Q
-         1BDTY84gD2NlUzEVefmR04UN6kxpQElwAIlf32UbP3rV2e96PbgfO7I82vmi+SrZ5Pam
-         QXBAANXWoE1B6WcKgiU1cN8PBarDMYmOaDYvzmCTLVnXJYeLP8kyJ93CzAUuJfAHO/vw
-         ASvMA1Lmx0tLB2nzAMLAo6BkGE9CzR6LQZVWZeyHavX3cZogIcOZlwyDxZG5tHeaHwBj
-         7NuRIPQocCW1LjQ8Xg4KdYf97rgrBnr6BEm96QOY0K8tf3MoASkjO4sfZhwbGa68/Mw3
-         vSbg==
-X-Gm-Message-State: AOAM531BpVhw8upjUdA3r/IFkD8WOG25aVf3je1fC7v+3ZPFNCERlMdf
-        KIh6lw+s+/yWY+TshYKusjjmAg==
-X-Google-Smtp-Source: ABdhPJy9IPZM1kQFdevcRyM6Ic+gWdL1WQ8ywwuUqOhgZS3tV4XXAG7nvD55YzfI4I97HhCTEQOuig==
-X-Received: by 2002:a2e:9dd1:: with SMTP id x17mr828972ljj.219.1604059676093;
-        Fri, 30 Oct 2020 05:07:56 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-131-134.NA.cust.bahnhof.se. [155.4.131.134])
-        by smtp.gmail.com with ESMTPSA id a6sm603780lfm.207.2020.10.30.05.07.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 30 Oct 2020 05:07:54 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.10-rc2
-Date:   Fri, 30 Oct 2020 13:07:52 +0100
-Message-Id: <20201030120752.100388-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=tuz6n2ay/uh3o5VgWKORPoVZzeA8bvUHNd1PNpmk5h8=;
+ b=LPZ1X8grX0KgI4WR75iOw07nOyVWtgTz0wK/v4sNj8Cu8IAcBxD2+zuJz3BDTnt0wj0NZnNnQRIG45wZFyHF3R1PPwsq6VyyDIOegMA0c5JuSp5CrJ09jAmUVbzFAlenNhbmq0dWdgDOpM4RhRr7HfUkuVdxtQfeb90ZqlDBIHc=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TY2PR01MB4025.jpnprd01.prod.outlook.com (2603:1096:404:d6::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3499.27; Fri, 30 Oct
+ 2020 13:02:02 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::bcba:dccf:7d4c:c883]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::bcba:dccf:7d4c:c883%4]) with mapi id 15.20.3477.028; Fri, 30 Oct 2020
+ 13:02:02 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH/RFC] mmc: core: disable power off notification when host
+ is removed
+Thread-Topic: [PATCH/RFC] mmc: core: disable power off notification when host
+ is removed
+Thread-Index: AQHWoUNC6tSZ/elwUUidYVOSVqoT96mwNceA
+Date:   Fri, 30 Oct 2020 13:02:02 +0000
+Message-ID: <TY2PR01MB3692EB14470C517E771746E0D8150@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <1602581312-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <1602581312-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: linaro.org; dkim=none (message not signed)
+ header.d=none;linaro.org; dmarc=none action=none header.from=renesas.com;
+x-originating-ip: [240f:60:5f3e:1:1d1:f583:fc3b:d64f]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: 5d73255a-39c3-4198-ea04-08d87cd3feaa
+x-ms-traffictypediagnostic: TY2PR01MB4025:
+x-microsoft-antispam-prvs: <TY2PR01MB4025AE62EB35B08731CDF7CDD8150@TY2PR01MB4025.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8882;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: kJ8t9u6j0C+vSTXzDgr2YdyCB0qhBA41KyKJLkE3Zr9kOVwaKazucOk36lykcpA0b6ewz8uBusuodQo4+v7ime+pHak/eSArm7q8OOEwWwKPcBhi/w2vmEITwAF+HK7G0dLou3GxrCtTGouoP13XvrwR7oek817z/014WEKWhYgyseMUQ4Hek9yZf9+pVNCCWxjACSyyDqm+vKHqh9ve54tH9TovTJrTgCrV3SXwDgB+6KrQveu/WCnzE6CfcXCaMjCXFrgc3ynIP/OpYO2+ytXe+j+mHW5xHraHCRBYdPdukLeATXFYwbst2/q2D+3Bo2ZgtYZv57gnAmBybMuyRA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(366004)(39860400002)(376002)(396003)(136003)(8676002)(52536014)(478600001)(316002)(8936002)(9686003)(66476007)(33656002)(76116006)(66556008)(54906003)(83380400001)(6506007)(15650500001)(64756008)(66446008)(6916009)(66946007)(71200400001)(86362001)(7696005)(5660300002)(55016002)(4744005)(186003)(2906002)(4326008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: tUhOk2p/8Rjclt0fEWbfH8msVLEOT/pwYMvqw5yQwpvaNT4BDOzlj4KbcI8oVbWxKtJX4lvTLkyuUBgfq0buTzoc6+znXnGhxERaz/PYzwab7zWIxDfoS8sLIR7HcH9NBH/gvTTrUU0ubjo2ek/GIGU6KDAfMmH0CpmsG5linshA7ZYZXkIbZRvW0aLanwWbIekoihRZm9NkhswRJOmRcqCvGjrRD4IcbfIStzudOXklB++zGe8peq1f4uxsZLiv/VwJfylt27TT/O95NevfAbZNzg89P/Wu9ttLohKkykYI9eshmiMc85096l1FyzUqHuADpGUT99g5xEgMfEWjybicbK9OvHAoz385c2yRmj4N5gYFzpM6aJct1+MBZeW/RdCLuoMDlInb3vDPTJN1pWCXpJVWhGW4Zveqo9PY49lg3J7CyX6yCCVkWr7QyOYfBWmAbDON55Ca5KF7Zh2fjP5dnFR5fKKiQwtDe9dwGIsCd+WTcTae0X4qPTNLGJkv/O7cJEh53F6L19e8fuIs1tCmxnpD7CLEm2adoiYJMt2t8qPwsqB5FdGA9bpxpgfTj5LjAmDu9wJ8nYAQjGEQ4fK+ZVbz3Y1hCvQda4S38vX87yAWcgBVX8MC4KOvkBBH+gXo/uIUlu0QU06INDBHvCnwY6RuxOZ9peVr+T+/evpKG9Juogc3yAOwmI6Hvr2LgrTcKhyvEM59UnEg/dpCSg==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5d73255a-39c3-4198-ea04-08d87cd3feaa
+X-MS-Exchange-CrossTenant-originalarrivaltime: 30 Oct 2020 13:02:02.4803
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: k3XI+7z3SEoICJ6s7O4n3y4D4C7LfkgNjR/dmDb8qFvo9TuViWZD81cVhl7z6vUI/sr3T/m4bqTVLxrMVkLmXBqiuFH4NZRgQrCH9Y4FQ0u2Z1qRXavoKV/AjbfC9JmI
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB4025
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+Hi Ulf,
 
-Here's a PR with a couple of MMC fixes intended for v5.10-rc2. Details about the
-highlights are as usual found in the signed tag.
+> From: Yoshihiro Shimoda, Sent: Tuesday, October 13, 2020 6:29 PM
+>=20
+> User is possible to turn the power off after a host was removed.
+> So, disable the power off notification when a host is removed.
+>=20
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> ---
+>  This topic was discussed in a few month ago [1], and now I could make
+>  a patch for unbinding the mmc host. I'm not sure this is a correct way
+>  so that I marked RFC.
 
-Please pull this in!
+I would like to drop this patch because my colleague found an issue after
+he applied this patch. The issue is the following timeout happened if
+we unbind a host controller right after system suspend because
+the _mmc_resume() was not called.
 
-Kind regards
-Ulf Hansson
+	mmc0: Power Off Notification timed out, 100
 
+I'll make v2 patch in next week.
 
-The following changes since commit 3e4fb4346c781068610d03c12b16c0cfb0fd24a3:
+Best regards,
+Yoshihiro Shimoda
 
-  Merge tag 'spdx-5.10-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/spdx (2020-10-14 16:19:42 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.10-2
-
-for you to fetch changes up to 011fde48394b7dc8dfd6660d1013b26a00157b80:
-
-  mmc: sdhci-of-esdhc: make sure delay chain locked for HS400 (2020-10-28 11:07:01 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - sdhci: Fix performance regression with auto CMD auto select
- - sdhci-of-esdhc: Fix initialization for eMMC HS400 mode
- - sdhci-of-esdhc: Fix timeout bug for tuning commands
-
-----------------------------------------------------------------
-Jisheng Zhang (1):
-      mmc: sdhci: Use Auto CMD Auto Select only when v4_mode is true
-
-Michael Walle (1):
-      mmc: sdhci-of-esdhc: set timeout to max before tuning
-
-Yangbo Lu (1):
-      mmc: sdhci-of-esdhc: make sure delay chain locked for HS400
-
- drivers/mmc/host/sdhci-esdhc.h    |  2 ++
- drivers/mmc/host/sdhci-of-esdhc.c | 28 ++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci.c          |  6 ++++--
- 3 files changed, 34 insertions(+), 2 deletions(-)
