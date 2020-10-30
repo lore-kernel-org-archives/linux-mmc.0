@@ -2,66 +2,90 @@ Return-Path: <SRS0=VXdQ=EF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14502C4741F
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 20:06:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCB23C00A89
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 22:04:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B6C802071A
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 20:06:21 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604088381;
-	bh=iXQjdIh1MiPFSjG4/3gJq09dt6b9c+eC698b1mRyDok=;
-	h=Subject:From:In-Reply-To:References:Date:To:Cc:List-ID:From;
-	b=1YznBuF3x6xBpahCa4aRB0RMrQRHJ7Oz2OpC1TEaHWwZzHmt2Yrc+RI/PeMC3YAhs
-	 5/fe/4z4RvWhH2ImqYiIuTcTZsW7WTx+T53E7Fmxs8EO4o46AYOfbS7x2XO9snorE9
-	 MZ7BDXHIBIVxDYgDGHRdg6OiG4HkzMABurgbVcas=
+	by mail.kernel.org (Postfix) with ESMTP id 4E12322245
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Oct 2020 22:04:14 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="u4upi2GG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727045AbgJ3UFu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Oct 2020 16:05:50 -0400
-Received: from mail.kernel.org ([198.145.29.99]:43030 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726297AbgJ3UFt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 30 Oct 2020 16:05:49 -0400
-Subject: Re: [GIT PULL] MMC fixes for v5.10-rc2
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604088349;
-        bh=iXQjdIh1MiPFSjG4/3gJq09dt6b9c+eC698b1mRyDok=;
-        h=From:In-Reply-To:References:Date:To:Cc:From;
-        b=Luh3/T+FvCKnr3qwrfVwfyWOGlxfGnVaj25VBXwWTixcuD3t3S0xNVAcdfpz1jOam
-         CqT6ZWcRPsS0aFJMCfhVo2TuxCSarTE88vxnvuxtOOnaHqJnUiDo7Hhx6qy44BijBw
-         JQQnGgFSE/uMJyf9uQCPyAswlp7NhYX6U9SBtJHA=
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20201030120752.100388-1-ulf.hansson@linaro.org>
-References: <20201030120752.100388-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20201030120752.100388-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.10-2
-X-PR-Tracked-Commit-Id: 011fde48394b7dc8dfd6660d1013b26a00157b80
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 88098fd61b7e52e1f78668b6f1f07d39ca67301f
-Message-Id: <160408834941.13990.11062361835301766189.pr-tracker-bot@kernel.org>
-Date:   Fri, 30 Oct 2020 20:05:49 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        id S1725805AbgJ3WEN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Oct 2020 18:04:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49378 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725797AbgJ3WEN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Oct 2020 18:04:13 -0400
+Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52D60C0613CF
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2020 15:04:13 -0700 (PDT)
+Received: by mail-wm1-x32d.google.com with SMTP id v5so4154907wmh.1
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Oct 2020 15:04:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:mime-version:message-id:user-agent
+         :content-transfer-encoding;
+        bh=iLoiu1GZPoeyLaOUIzIb7hrIHQg3p70W9JlIXcT64Iw=;
+        b=u4upi2GGkctVojzKJWhhmzuLuEk9c4NOvdcGJrKD3bR9DBWPc+qS8fhVlXh+Vgd/Ye
+         Q+iqfvlmTnyFyAXSzK1qy9iF4cpbYMh4k700ilzgvXwFAI3lYWy6eEU5gc+izbAaY82w
+         Hh2Zt6esPrOdBP3lR85355JmauaFefO9tVsridpeUvN15rXhPN0GdChNhEYbvXZIeTL/
+         H5Bat7+J3nQ/wVV8u0vJ5of2tmdPtOWnQXpm4mPnhoS2HzgtRUuT1qCuZJGTDUi5g+ze
+         HifW2Ys2LejDwCfboT8daxQKUeVys+lw1o7iZJFpGR8D1QS6UgDypkeohNQYizdznfbH
+         1LwQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:mime-version:message-id
+         :user-agent:content-transfer-encoding;
+        bh=iLoiu1GZPoeyLaOUIzIb7hrIHQg3p70W9JlIXcT64Iw=;
+        b=Q2BP/6QHFdGrp0t2rt5bq4+jr5akQPwTy2macoYXIlwKOFjiaFGBMP9E8WBhK2yqeC
+         l0JrvCCVP1vUuNZUyJg4oA1y73gZ0cXC2nYbnE92LlTT9Nq/dNNcOArFKxpbybowifdZ
+         bjicWR5v8cjpw+A9oqCmXj9zn1c4WnNxwhxh8xXuj3qlCno/VKg2e7ZpjA/1Q7U4Zn6u
+         0JkotBCrneDo160tgtTwMINu2wCAwc7z8RNf4drPYCZaOdLQMkhGHfvhZ1M7xmkDXYGQ
+         4HRFr39jmOg4sj4e8KS6zQpM9gECIAdj848MtUhw8Cc0v71Ro5mdf3ut50ByzB3vY70s
+         tpdw==
+X-Gm-Message-State: AOAM530knhlcQZZ2QHNQcE+hzLgakjdwINOVJ28kfbeuZzP2YJmz270D
+        biKsQRUbje1UlIv0mzd5qgQ=
+X-Google-Smtp-Source: ABdhPJxNx2FViMFM6B8GLTdqE1k/VawizE0D88MeDuYA2OSKK136g8CLaGR62/ZcUBpIJAHSS5VFuA==
+X-Received: by 2002:a1c:f405:: with SMTP id z5mr4846779wma.126.1604095451926;
+        Fri, 30 Oct 2020 15:04:11 -0700 (PDT)
+Received: from localhost ([170.253.46.69])
+        by smtp.gmail.com with ESMTPSA id y200sm1785428wmc.23.2020.10.30.15.04.10
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 30 Oct 2020 15:04:11 -0700 (PDT)
+From:   Vicente Bergas <vicencb@gmail.com>
+To:     Douglas Anderson <dianders@chromium.org>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Thierry Reding <treding@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Heiko Stuebner <heiko@sntech.de>, <linux-mmc@vger.kernel.org>,
+        <linux-rockchip@lists.infradead.org>,
+        Enric Balletbo i Serra <enric.balletbo@collabora.com>
+Subject: [regression, bisected] no MMC on rk3399-gru-kevin with 5.10-rc1
+Date:   Fri, 30 Oct 2020 23:04:09 +0100
+MIME-Version: 1.0
+Message-ID: <59a5676c-cbf7-4a8e-ace1-f079e09d21a8@gmail.com>
+User-Agent: Trojita
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 30 Oct 2020 13:07:52 +0100:
+Hi,
+commit 21b2cec61c04bd175f0860d9411a472d5a0e7ba1
+mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4
+broke booting rk3399-gru-kevin.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.10-2
+The kernel waits forever for the root device to appear on MMC.
+Removing the line containing PROBE_PREFER_ASYNCHRONOUS in
+drivers/mmc/host/dw_mmc-rockchip.c fixes the issue.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/88098fd61b7e52e1f78668b6f1f07d39ca67301f
+Regards,
+  Vicente.
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
