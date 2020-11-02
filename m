@@ -2,226 +2,143 @@ Return-Path: <SRS0=jIX3=EI=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67DF7C00A89
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Nov 2020 16:03:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49124C00A89
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Nov 2020 16:06:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1392D2225E
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Nov 2020 16:03:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 103B32231B
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Nov 2020 16:06:27 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="QYbPAAK4"
+	dkim=pass (2048-bit key) header.d=ibm.com header.i=@ibm.com header.b="fs18gg/D"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726456AbgKBQDL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Nov 2020 11:03:11 -0500
-Received: from z5.mailgun.us ([104.130.96.5]:11507 "EHLO z5.mailgun.us"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725837AbgKBQDL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 2 Nov 2020 11:03:11 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1604332989; h=Content-Transfer-Encoding: Content-Type:
- MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=xNCnI8IEieWgYDa9EFAGk4BnGJ1SylWmAUPiSZMRsUc=; b=QYbPAAK4a7LdPmUwpWO/Z40YTHNdJqb9n9dJM4Hc7peBbCqdbYPwGmyuIbSYAKcbR/czzHWh
- NnaHYfFKR3TqpkIUzGvx9Ik5a6a6+/I3oBZnxPSjZNKPDGHmAXH4EREyhSLZL7e7S1BImAJ4
- NfFVXXhhF/tyT6nmzdn4PhaIqmI=
-X-Mailgun-Sending-Ip: 104.130.96.5
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n06.prod.us-west-2.postgun.com with SMTP id
- 5fa02d94d981633da3206189 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 02 Nov 2020 16:02:28
- GMT
-Sender: kvalo=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 83A00C433FE; Mon,  2 Nov 2020 16:02:28 +0000 (UTC)
-Received: from x230.qca.qualcomm.com (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 8AB5DC433C6;
-        Mon,  2 Nov 2020 16:02:24 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 8AB5DC433C6
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=kvalo@codeaurora.org
-From:   Kalle Valo <kvalo@codeaurora.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>,
-        Pali =?utf-8?Q?Roh=C3=A1r?= <pali@kernel.org>,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        driverdevel <devel@driverdev.osuosl.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        DTML <devicetree@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "linux-mmc\@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH 07/23] wfx: add bus_sdio.c
-References: <20201012104648.985256-1-Jerome.Pouiller@silabs.com>
-        <2628294.9EgBEFZmRI@pc-42> <20201014124334.lgx53qvtgkmfkepc@pali>
-        <2444203.ROLCPKctRj@pc-42>
-        <CAPDyKFqCn386r4ecLDnMQmxrAZCvU9r=-eY71UUNpXWNxKOz2g@mail.gmail.com>
-Date:   Mon, 02 Nov 2020 18:02:22 +0200
-In-Reply-To: <CAPDyKFqCn386r4ecLDnMQmxrAZCvU9r=-eY71UUNpXWNxKOz2g@mail.gmail.com>
-        (Ulf Hansson's message of "Fri, 16 Oct 2020 13:54:48 +0200")
-Message-ID: <87eelbpx0x.fsf@codeaurora.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
+        id S1727167AbgKBQGV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Nov 2020 11:06:21 -0500
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:34612 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726710AbgKBQGU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Nov 2020 11:06:20 -0500
+Received: from pps.filterd (m0098396.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.42/8.16.0.42) with SMTP id 0A2FX1XQ114751;
+        Mon, 2 Nov 2020 11:06:19 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=yWeJd9b3uXAxEvXhZoVHeLC6L15Mg+AxKO0jZvm997A=;
+ b=fs18gg/DJMVLYrtMcdQUrSQ3gEXnboihP0TaCaZboxLCgxHwVRGxjXgXz9Pm1iaZRRt/
+ zmngIDJ90cpYzq2VU4CzT2uFXU8lq3gwKnlazqTDUZ18q+F/5lo52L9V71oX3qEmSmKH
+ Q653Thum6sobtq9PrUtqBS4WQUymyx9p04WxcapOxTfOpBxJjKsCbR7G0uNTOsFRd9iY
+ YaD1O4ahDrJ7Y5mwyQ00FehqiCjkuXR8NKhTe7Iu774e2BosLLFc3bPv+jb7zynCUL1j
+ juh3P+naG/8ci7oGuy+b5KHieJKYR3j/38Cw+S0jkK1LZg5Ql5NUgJjo2CCrAhFrOAaO ow== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 34jfg7bxy0-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 02 Nov 2020 11:06:19 -0500
+Received: from m0098396.ppops.net (m0098396.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.36/8.16.0.36) with SMTP id 0A2FX5EC115166;
+        Mon, 2 Nov 2020 11:06:18 -0500
+Received: from ppma05wdc.us.ibm.com (1b.90.2fa9.ip4.static.sl-reverse.com [169.47.144.27])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 34jfg7bxwj-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 02 Nov 2020 11:06:18 -0500
+Received: from pps.filterd (ppma05wdc.us.ibm.com [127.0.0.1])
+        by ppma05wdc.us.ibm.com (8.16.0.42/8.16.0.42) with SMTP id 0A2FqWMo006282;
+        Mon, 2 Nov 2020 16:06:16 GMT
+Received: from b03cxnp08026.gho.boulder.ibm.com (b03cxnp08026.gho.boulder.ibm.com [9.17.130.18])
+        by ppma05wdc.us.ibm.com with ESMTP id 34h09mp56d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 02 Nov 2020 16:06:16 +0000
+Received: from b03ledav002.gho.boulder.ibm.com (b03ledav002.gho.boulder.ibm.com [9.17.130.233])
+        by b03cxnp08026.gho.boulder.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 0A2G67bk12714722
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 2 Nov 2020 16:06:07 GMT
+Received: from b03ledav002.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id BC5EE13604F;
+        Mon,  2 Nov 2020 16:06:15 +0000 (GMT)
+Received: from b03ledav002.gho.boulder.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 96BCE136055;
+        Mon,  2 Nov 2020 16:06:13 +0000 (GMT)
+Received: from localhost.localdomain (unknown [9.85.87.246])
+        by b03ledav002.gho.boulder.ibm.com (Postfix) with ESMTP;
+        Mon,  2 Nov 2020 16:06:13 +0000 (GMT)
+Subject: Re: [PATCH] memstick: mspro_block: remove unneeded semicolon
+To:     Tom Rix <trix@redhat.com>, maximlevitsky@gmail.com,
+        oakad@yahoo.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20201031134818.2135446-1-trix@redhat.com>
+ <8566b27c-2f71-16f8-1b9a-b1b79015f4d2@linux.ibm.com>
+ <df2f3ead-8bf9-144d-8a8a-9d6356f8b389@redhat.com>
+From:   kajoljain <kjain@linux.ibm.com>
+Message-ID: <4ff202e1-1171-6ad1-5a5a-f384e987f77b@linux.ibm.com>
+Date:   Mon, 2 Nov 2020 21:36:11 +0530
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
+In-Reply-To: <df2f3ead-8bf9-144d-8a8a-9d6356f8b389@redhat.com>
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.312,18.0.737
+ definitions=2020-11-02_09:2020-11-02,2020-11-02 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 mlxscore=0
+ priorityscore=1501 bulkscore=0 clxscore=1015 spamscore=0 adultscore=0
+ impostorscore=0 phishscore=0 lowpriorityscore=0 mlxlogscore=999
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2011020123
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
 
-> On Thu, 15 Oct 2020 at 16:03, J=C3=A9r=C3=B4me Pouiller
-> <jerome.pouiller@silabs.com> wrote:
->>
->> On Wednesday 14 October 2020 14:43:34 CEST Pali Roh=C3=A1r wrote:
->> > On Wednesday 14 October 2020 13:52:15 J=C3=A9r=C3=B4me Pouiller wrote:
->> > > On Tuesday 13 October 2020 22:11:56 CEST Pali Roh=C3=A1r wrote:
->> > > > On Monday 12 October 2020 12:46:32 Jerome Pouiller wrote:
->> > > > > +#define SDIO_VENDOR_ID_SILABS        0x0000
->> > > > > +#define SDIO_DEVICE_ID_SILABS_WF200  0x1000
->> > > > > +static const struct sdio_device_id wfx_sdio_ids[] =3D {
->> > > > > +     { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILABS=
-_WF200) },
->> > > >
->> > > > Please move ids into common include file include/linux/mmc/sdio_id=
-s.h
->> > > > where are all SDIO ids. Now all drivers have ids defined in that f=
-ile.
->> > > >
->> > > > > +     // FIXME: ignore VID/PID and only rely on device tree
->> > > > > +     // { SDIO_DEVICE(SDIO_ANY_ID, SDIO_ANY_ID) },
->> > > >
->> > > > What is the reason for ignoring vendor and device ids?
->> > >
->> > > The device has a particularity, its VID/PID is 0000:1000 (as you can=
- see
->> > > above). This value is weird. The risk of collision with another devi=
-ce is
->> > > high.
->> >
->> > Those ids looks strange. You are from Silabs, can you check internally
->> > in Silabs if ids are really correct? And which sdio vendor id you in
->> > Silabs got assigned for your products?
->>
->> I confirm these ids are the ones burned in the WF200. We have to deal wi=
-th
->> that :( .
->
-> Yep. Unfortunately this isn't so uncommon when targeting the embedded
-> types of devices.
->
-> The good thing is, that we already have bindings allowing us to specify t=
-his.
->
->>
->>
->> > I know that sdio devices with multiple functions may have different sd=
-io
->> > vendor/device id particular function and in common CIS (function 0).
->> >
->> > Could not be a problem that on one place is vendor/device id correct a=
-nd
->> > on other place is that strange value?
->> >
->> > I have sent following patch (now part of upstream kernel) which exports
->> > these ids to userspace:
->> > https://lore.kernel.org/linux-mmc/20200527110858.17504-2-pali@kernel.o=
-rg/T/#u
->> >
->> > Also for debugging ids and information about sdio cards, I sent another
->> > patch which export additional data:
->> > https://lore.kernel.org/linux-mmc/20200727133837.19086-1-pali@kernel.o=
-rg/T/#u
->> >
->> > Could you try them and look at /sys/class/mmc_host/ attribute outputs?
->>
->> Here is:
->>
->>     # cd /sys/class/mmc_host/ && grep -r . mmc1/
->>     mmc1/power/runtime_suspended_time:0
->>     grep: mmc1/power/autosuspend_delay_ms: Input/output error
->>     mmc1/power/runtime_active_time:0
->>     mmc1/power/control:auto
->>     mmc1/power/runtime_status:unsupported
->>     mmc1/mmc1:0001/vendor:0x0000
->>     mmc1/mmc1:0001/rca:0x0001
->>     mmc1/mmc1:0001/device:0x1000
->>     mmc1/mmc1:0001/mmc1:0001:1/vendor:0x0000
->>     mmc1/mmc1:0001/mmc1:0001:1/device:0x1000
->>     grep: mmc1/mmc1:0001/mmc1:0001:1/info4: No data available
->>     mmc1/mmc1:0001/mmc1:0001:1/power/runtime_suspended_time:0
->>     grep: mmc1/mmc1:0001/mmc1:0001:1/power/autosuspend_delay_ms: Input/o=
-utput error
->>     mmc1/mmc1:0001/mmc1:0001:1/power/runtime_active_time:0
->>     mmc1/mmc1:0001/mmc1:0001:1/power/control:auto
->>     mmc1/mmc1:0001/mmc1:0001:1/power/runtime_status:unsupported
->>     mmc1/mmc1:0001/mmc1:0001:1/class:0x00
->>     grep: mmc1/mmc1:0001/mmc1:0001:1/info2: No data available
->>     mmc1/mmc1:0001/mmc1:0001:1/modalias:sdio:c00v0000d1000
->>     mmc1/mmc1:0001/mmc1:0001:1/revision:0.0
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_NAME=3Dmmc
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_FULLNAME=3D/soc/sdhci@7e300000/=
-mmc@1
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_COMPATIBLE_0=3Dsilabs,wfx-sdio
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:OF_COMPATIBLE_N=3D1
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:SDIO_CLASS=3D00
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:SDIO_ID=3D0000:1000
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:SDIO_REVISION=3D0.0
->>     mmc1/mmc1:0001/mmc1:0001:1/uevent:MODALIAS=3Dsdio:c00v0000d1000
->>     grep: mmc1/mmc1:0001/mmc1:0001:1/info3: No data available
->>     grep: mmc1/mmc1:0001/mmc1:0001:1/info1: No data available
->>     mmc1/mmc1:0001/ocr:0x00200000
->>     grep: mmc1/mmc1:0001/info4: No data available
->>     mmc1/mmc1:0001/power/runtime_suspended_time:0
->>     grep: mmc1/mmc1:0001/power/autosuspend_delay_ms: Input/output error
->>     mmc1/mmc1:0001/power/runtime_active_time:0
->>     mmc1/mmc1:0001/power/control:auto
->>     mmc1/mmc1:0001/power/runtime_status:unsupported
->>     grep: mmc1/mmc1:0001/info2: No data available
->>     mmc1/mmc1:0001/type:SDIO
->>     mmc1/mmc1:0001/revision:0.0
->>     mmc1/mmc1:0001/uevent:MMC_TYPE=3DSDIO
->>     mmc1/mmc1:0001/uevent:SDIO_ID=3D0000:1000
->>     mmc1/mmc1:0001/uevent:SDIO_REVISION=3D0.0
->>     grep: mmc1/mmc1:0001/info3: No data available
->>     grep: mmc1/mmc1:0001/info1: No data available
->>
->>
->
-> Please have a look at the
-> Documentation/devicetree/bindings/mmc/mmc-controller.yaml, there you
-> find that from a child node of the mmc host's node, we can specify an
-> embedded SDIO functional device.
->
-> In sdio_add_func(), which calls sdio_set_of_node() - we assign the
-> func->dev.of_node its corresponding child node for the SDIO func.
-> Allowing the sdio functional driver to be matched with the SDIO func
-> device.
->
-> Perhaps what is missing, is that we may want to avoid probing an
-> in-correct sdio driver, based upon buggy SDIO ids. I don't think we
-> take some actions in the mmc core to prevent this, but maybe it's not
-> a big problem anyway.
->
-> When it comes to documenting the buggy SDIO ids, please add some
-> information about this in the common SDIO headers. It's nice to have a
-> that information, if any issue comes up later on.
 
-And if there's some special setup (DT etc) needed to get the wireless
-driver working that should be documented in the driver side as well. The
-expectation is that an upstream driver is just plug and play, and if
-it's not there should be clear documentation how to enable the driver.
+On 11/2/20 7:12 PM, Tom Rix wrote:
+> 
+> On 11/1/20 10:51 PM, kajoljain wrote:
+>>
+>> On 10/31/20 7:18 PM, trix@redhat.com wrote:
+>>> From: Tom Rix <trix@redhat.com>
+>>>
+>>> A semicolon is not needed after a switch statement.
+>> Hi Tom,
+>>    I was checking this patch. Not sure if it will come under as fix patch. Since this is not fixing
+>> any logical issue do we still need to add fix tag?
+> 
+> My rule of thumb is a fix means the kernel needs to be recompiled.
 
---=20
-https://patchwork.kernel.org/project/linux-wireless/list/
+Yes make sense. Thanks for confirming.
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
-hes
+Thanks,
+Kajol Jain
+
+> 
+> This isn't a fix.
+> 
+> Tom
+> 
+>>
+>> Thanks,
+>> Kajol Jain
+>>> Signed-off-by: Tom Rix <trix@redhat.com>
+>>> ---
+>>>  drivers/memstick/core/mspro_block.c | 2 +-
+>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/memstick/core/mspro_block.c b/drivers/memstick/core/mspro_block.c
+>>> index cd6b8d4f2335..afb892e7ffc6 100644
+>>> --- a/drivers/memstick/core/mspro_block.c
+>>> +++ b/drivers/memstick/core/mspro_block.c
+>>> @@ -276,7 +276,7 @@ static const char *mspro_block_attr_name(unsigned char tag)
+>>>  		return "attr_devinfo";
+>>>  	default:
+>>>  		return NULL;
+>>> -	};
+>>> +	}
+>>>  }
+>>>  
+>>>  typedef ssize_t (*sysfs_show_t)(struct device *dev,
+>>>
+> 
