@@ -7,35 +7,35 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B6BBC2D0A3
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Nov 2020 09:54:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1011AC388F2
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Nov 2020 09:54:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B6F312080C
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Nov 2020 09:54:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B19DE2080C
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Nov 2020 09:54:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727385AbgKCJyo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Nov 2020 04:54:44 -0500
-Received: from rtits2.realtek.com ([211.75.126.72]:39260 "EHLO
+        id S1727716AbgKCJyu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Nov 2020 04:54:50 -0500
+Received: from rtits2.realtek.com ([211.75.126.72]:39269 "EHLO
         rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725988AbgKCJyn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2020 04:54:43 -0500
+        with ESMTP id S1727709AbgKCJyt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Nov 2020 04:54:49 -0500
 Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 0A39sVo75015308, This message is accepted by code: ctloc85258
+X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 0A39seWpB015332, This message is accepted by code: ctloc85258
 Received: from RSEXMBS01.realsil.com.cn ([172.29.17.195])
-        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 0A39sVo75015308
+        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 0A39seWpB015332
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Tue, 3 Nov 2020 17:54:31 +0800
+        Tue, 3 Nov 2020 17:54:40 +0800
 Received: from localhost (172.29.40.150) by RSEXMBS01.realsil.com.cn
  (172.29.17.195) with Microsoft SMTP Server id 15.1.2044.4; Tue, 3 Nov 2020
- 17:54:30 +0800
+ 17:54:40 +0800
 From:   <rui_feng@realsil.com.cn>
 To:     <arnd@arndb.de>, <gregkh@linuxfoundation.org>,
         <ulf.hansson@linaro.org>
 CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         Rui Feng <rui_feng@realsil.com.cn>
-Subject: [PATCH 1/8] mmc: rtsx: Add test mode for RTS5261
-Date:   Tue, 3 Nov 2020 17:54:29 +0800
-Message-ID: <1604397269-2780-1-git-send-email-rui_feng@realsil.com.cn>
+Subject: [PATCH 2/8] misc: rtsx: Fix OCP function for RTS5261
+Date:   Tue, 3 Nov 2020 17:54:38 +0800
+Message-ID: <1604397278-2815-1-git-send-email-rui_feng@realsil.com.cn>
 X-Mailer: git-send-email 1.9.1
 MIME-Version: 1.0
 Content-Type: text/plain
@@ -46,101 +46,56 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Rui Feng <rui_feng@realsil.com.cn>
 
-This patch add test mode for RTS5261.
-If test mode is set, reader will switch to SD Express mode
-mandatorily, and this mode is used by factory testing only.
+This patch fix the bug that when there is over current but
+reader can't enable OCP.
 
 Signed-off-by: Rui Feng <rui_feng@realsil.com.cn>
 ---
- drivers/misc/cardreader/rts5261.h |  5 -----
- drivers/mmc/host/rtsx_pci_sdmmc.c | 19 ++++++++++++++++---
- include/linux/rtsx_pci.h          |  4 ++++
- 3 files changed, 20 insertions(+), 8 deletions(-)
+ drivers/misc/cardreader/rts5261.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/misc/cardreader/rts5261.h b/drivers/misc/cardreader/rts5261.h
-index 8d80f0d5d5d6..80179353bc46 100644
---- a/drivers/misc/cardreader/rts5261.h
-+++ b/drivers/misc/cardreader/rts5261.h
-@@ -60,11 +60,6 @@
- /* DMACTL 0xFE2C */
- #define RTS5261_DMA_PACK_SIZE_MASK	0xF0
+diff --git a/drivers/misc/cardreader/rts5261.c b/drivers/misc/cardreader/rts5261.c
+index 536c90d4fd76..531bbaed7a12 100644
+--- a/drivers/misc/cardreader/rts5261.c
++++ b/drivers/misc/cardreader/rts5261.c
+@@ -272,6 +272,9 @@ static void rts5261_enable_ocp(struct rtsx_pcr *pcr)
+ 	u8 val = 0;
  
--/* FW config info register */
--#define RTS5261_FW_CFG_INFO0		0xFF50
--#define RTS5261_FW_EXPRESS_TEST_MASK	(0x01<<0)
--#define RTS5261_FW_EA_MODE_MASK		(0x01<<5)
--
- /* FW status register */
- #define RTS5261_FW_STATUS		0xFF56
- #define RTS5261_EXPRESS_LINK_FAIL_MASK	(0x01<<7)
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index c453ad403aa8..26be11a096cb 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -47,6 +47,8 @@ struct realtek_pci_sdmmc {
- 	bool			using_cookie;
- };
+ 	val = SD_OCP_INT_EN | SD_DETECT_EN;
++	rtsx_pci_write_register(pcr, RTS5261_LDO1_CFG0,
++			RTS5261_LDO1_OCP_EN | RTS5261_LDO1_OCP_LMT_EN,
++			RTS5261_LDO1_OCP_EN | RTS5261_LDO1_OCP_LMT_EN);
+ 	rtsx_pci_write_register(pcr, REG_OCPCTL, 0xFF, val);
  
-+static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios);
-+
- static inline struct device *sdmmc_dev(struct realtek_pci_sdmmc *host)
- {
- 	return &(host->pdev->dev);
-@@ -898,6 +900,7 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
- 	struct mmc_host *mmc = host->mmc;
- 	int err;
- 	u32 val;
-+	u8 test_mode;
- 
- 	if (host->power_state == SDMMC_POWER_ON)
- 		return 0;
-@@ -925,6 +928,15 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
- 		return err;
- 
- 	if (PCI_PID(pcr) == PID_5261) {
-+		/*
-+		 * If test mode is set switch to SD Express mandatorily,
-+		 * this is only for factory testing.
-+		 */
-+		rtsx_pci_read_register(pcr, RTS5261_FW_CFG_INFO0, &test_mode);
-+		if (test_mode & RTS5261_FW_EXPRESS_TEST_MASK) {
-+			sdmmc_init_sd_express(mmc, NULL);
-+			return 0;
-+		}
- 		if (pcr->extra_caps & EXTRA_CAPS_SD_EXPRESS)
- 			mmc->caps2 |= MMC_CAP2_SD_EXP | MMC_CAP2_SD_EXP_1_2V;
- 		/*
-@@ -1354,11 +1366,12 @@ static int sdmmc_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
- 		RTS5261_AUX_CLK_16M_EN, RTS5261_AUX_CLK_16M_EN);
- 	rtsx_pci_write_register(pcr, RTS5261_FW_CFG0,
- 		RTS5261_FW_ENTER_EXPRESS, RTS5261_FW_ENTER_EXPRESS);
-+	rtsx_pci_write_register(pcr, RTS5261_FW_CFG1,
-+		RTS5261_MCU_CLOCK_GATING, RTS5261_MCU_CLOCK_GATING);
- 	rtsx_pci_write_register(pcr, RTS5261_FW_CFG1,
- 		RTS5261_MCU_BUS_SEL_MASK | RTS5261_MCU_CLOCK_SEL_MASK
--		| RTS5261_MCU_CLOCK_GATING | RTS5261_DRIVER_ENABLE_FW,
--		RTS5261_MCU_CLOCK_SEL_16M | RTS5261_MCU_CLOCK_GATING
--		| RTS5261_DRIVER_ENABLE_FW);
-+		| RTS5261_DRIVER_ENABLE_FW,
-+		RTS5261_MCU_CLOCK_SEL_16M | RTS5261_DRIVER_ENABLE_FW);
- 	host->eject = true;
- 	return 0;
  }
-diff --git a/include/linux/rtsx_pci.h b/include/linux/rtsx_pci.h
-index b47959f48ccd..db249e8707f3 100644
---- a/include/linux/rtsx_pci.h
-+++ b/include/linux/rtsx_pci.h
-@@ -658,6 +658,10 @@
- #define   PM_WAKE_EN			0x01
- #define PM_CTRL4			0xFF47
+@@ -340,7 +343,7 @@ static void rts5261_clear_ocpstat(struct rtsx_pcr *pcr)
  
-+/* FW config info register */
-+#define RTS5261_FW_CFG_INFO0		0xFF50
-+#define   RTS5261_FW_EXPRESS_TEST_MASK	(0x01 << 0)
-+#define   RTS5261_FW_EA_MODE_MASK	(0x01 << 5)
- #define RTS5261_FW_CFG0			0xFF54
- #define   RTS5261_FW_ENTER_EXPRESS	(0x01 << 0)
+ 	rtsx_pci_write_register(pcr, REG_OCPCTL, mask, val);
  
+-	udelay(10);
++	udelay(1000);
+ 	rtsx_pci_write_register(pcr, REG_OCPCTL, mask, 0);
+ 
+ }
+@@ -353,9 +356,9 @@ static void rts5261_process_ocp(struct rtsx_pcr *pcr)
+ 	rtsx_pci_get_ocpstat(pcr, &pcr->ocp_stat);
+ 
+ 	if (pcr->ocp_stat & (SD_OC_NOW | SD_OC_EVER)) {
++		rts5261_clear_ocpstat(pcr);
+ 		rts5261_card_power_off(pcr, RTSX_SD_CARD);
+ 		rtsx_pci_write_register(pcr, CARD_OE, SD_OUTPUT_EN, 0);
+-		rts5261_clear_ocpstat(pcr);
+ 		pcr->ocp_stat = 0;
+ 	}
+ 
+@@ -513,6 +516,7 @@ static int rts5261_extra_init_hw(struct rtsx_pcr *pcr)
+ 		rtsx_pci_write_register(pcr, PETXCFG,
+ 				 FORCE_CLKREQ_DELINK_MASK, FORCE_CLKREQ_HIGH);
+ 
++	rtsx_pci_write_register(pcr, PWD_SUSPEND_EN, 0xFF, 0xFB);
+ 	rtsx_pci_write_register(pcr, pcr->reg_pm_ctrl3, 0x10, 0x00);
+ 	rtsx_pci_write_register(pcr, RTS5261_REG_PME_FORCE_CTL,
+ 			FORCE_PM_CONTROL | FORCE_PM_VALUE, FORCE_PM_CONTROL);
 -- 
 2.17.1
 
