@@ -8,56 +8,56 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E17EC6379F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:48:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAB24C388F7
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:48:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 57F2A20825
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:48:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8722B20867
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:48:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ghbtZSME"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nVoWtTN3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387563AbgKDXsK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Nov 2020 18:48:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48252 "EHLO
+        id S2387536AbgKDXsJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:48:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48270 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733117AbgKDXpQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:16 -0500
-Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8606C0613D2;
-        Wed,  4 Nov 2020 15:45:15 -0800 (PST)
-Received: by mail-lj1-x242.google.com with SMTP id 23so300630ljv.7;
-        Wed, 04 Nov 2020 15:45:15 -0800 (PST)
+        with ESMTP id S1733121AbgKDXpU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:20 -0500
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE12EC0613D2;
+        Wed,  4 Nov 2020 15:45:19 -0800 (PST)
+Received: by mail-lf1-x143.google.com with SMTP id 74so174090lfo.5;
+        Wed, 04 Nov 2020 15:45:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=DgpC9O7p/OAbvh12N5zLQDhJcy20uIqx4wfuP8pHu74=;
-        b=ghbtZSMEyXcmLVB3hLpNnX5/udQFezvG/2hSl1wmkaCE3ebcGcvcSojmt2uCoR5gkT
-         nXNSJesVEBCqcR7j9rDF/7IRD5BXGLxC6r6i0a9/l9IoCV78c6W9ahrYAQQaDq8AUKQ8
-         mSAA1G0RputJJmFKqqHTKOKFlyCGOx6zK5kcZehKi8tGvx87G59fw9no+H91R0P+WOsS
-         Dxg9Mm5ZtB9BVHzsE0hjR4RUN0Kuxjyu1hia/dVcDBx7jbnDgbEpVnXmLHTlHg5FKNED
-         zbXuhDkgiic8O6NBhvHxVT0SaHnKF/Jg6AcW9fYaOyOYtj6g2kx1C/d23xvmU2TogHgj
-         Psyg==
+        bh=qlwfzgS9XHjSWBbs0HLllCSVTbcvFduzW2+0sVnum3s=;
+        b=nVoWtTN3E27fw+e2vYrYyoK2YFjA4ez2wyReXTpMCOK05zlNCZYH9KU8VNTCldyh6L
+         KogjTtU+Km/dOlpcLQn2ooEhWlItxvclTz3HXEsbh7EjdGrc5RhyR37hDLuFw1JSc7eO
+         Gc9Or7OWnvqYLnm7WFCPqGQfanr0jdG2BVtlZFwMmXO6jmpVr4PrHyQblINNnM/kF/9n
+         iJXxQ5iCJkFHRBwC70e9LmMyCg0QAvq7vlcIeqMZec23TAjDiY/YN/8hNhXMopCsDLmq
+         tjpvSmY0HFn2Oiz+REgzPtZI/kle/4pnt7QEqGaWM6GRy0/oyF1peq7zQp8mGKIThoWY
+         QV+w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=DgpC9O7p/OAbvh12N5zLQDhJcy20uIqx4wfuP8pHu74=;
-        b=b2Q/ECb/4RERQBea8P7D7oTz8ozLjo1mSLjPTrOeSOu93LMvpovIKJDCoLt2j1JDe+
-         66RKCYSLDFc0VMmBObmjbFEd/Wa01SEHdTvJfDm7z+kBSvtK7WhwblPIQs7w0Xgsp57T
-         ENDHhwMNm+BDb408r31kBUYtl5HRsqX+l4xyf3mIpBXXwS2D+ambZ4tuLiXlgh1JiZTc
-         PJFzIIPBt6Mx/aX61+vW1OPTKnIwFFWAPjABD9wuWwpYuKz3HFtlLhSFl6xb64J158LS
-         OcBTnDNAEXqD5gd6sManJ/JTvxy+EzT5iwvBWB8Cz7pXaxWTNxREPnL6P9+nB9GAe2sC
-         20Pw==
-X-Gm-Message-State: AOAM531SoYwslfNiaDqHyWGtFwyKqEyYsHylGjpOP/xkj8xPE4SQsGe3
-        VMPf6xc+JkTFsw/kpWavRsF+i0wZw7I=
-X-Google-Smtp-Source: ABdhPJy08/f9Nhc8TmMhOuQfKj8d3M/5mqEeMTx5szZf2O3+2Ayf51uokSeK1yXKThLP7IivwNirNA==
-X-Received: by 2002:a2e:9a10:: with SMTP id o16mr126990lji.67.1604533514181;
-        Wed, 04 Nov 2020 15:45:14 -0800 (PST)
+        bh=qlwfzgS9XHjSWBbs0HLllCSVTbcvFduzW2+0sVnum3s=;
+        b=D/wfT5s62ftH1eJCZVwWF2VTifuEUh/J9ulCYaGuJ8fWNUjLzPs0OWsxzyM1Bf2CqI
+         HTDGez2AzzAFtjoaVa3E0wx5wDiW2P/l9f4e/sgOIKmI4AXFPUGJMUMWPHqf3NNDyetr
+         TNVEVoD3J5aNfmllFZD32lFRmtYxRFHsQRWgVvLm1b4hn61dke3Rz6p3V0l0sTHH5Pcw
+         iziLllMa5WN64ltnDOCPI2xh3/0k0puHq9dCSaGqluVD26lbwQsZYH5XdZ0p/ROwNQ7U
+         2ASNyuS+ctgnJh1s03a0TPU8CuFFa1+jTXBJ94vqtpo9tLF4/Zve2DW9WONwgbC0QIsu
+         x58A==
+X-Gm-Message-State: AOAM533uVtH45VEGMESm+ibHy+cRdUFKyGR+DMhtZEu9N+aGfOjIo6q8
+        OT9sBD674MhVbjpX+VkWGVc=
+X-Google-Smtp-Source: ABdhPJww/mH4JeZkOxyy6unI/bkZQkh23ChejAdpe/msVcgoHNZ7EjqsxaweoWsZLgt1vQhkJ6Bujw==
+X-Received: by 2002:a05:6512:32a1:: with SMTP id q1mr42540lfe.561.1604533518413;
+        Wed, 04 Nov 2020 15:45:18 -0800 (PST)
 Received: from localhost.localdomain (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
-        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.12
+        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Nov 2020 15:45:13 -0800 (PST)
+        Wed, 04 Nov 2020 15:45:17 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -82,9 +82,9 @@ Cc:     linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-Subject: [PATCH v1 13/30] drm/tegra: gr2d: Support OPP and SoC core voltage scaling
-Date:   Thu,  5 Nov 2020 02:44:10 +0300
-Message-Id: <20201104234427.26477-14-digetx@gmail.com>
+Subject: [PATCH v1 16/30] gpu: host1x: Support OPP and SoC core voltage scaling
+Date:   Thu,  5 Nov 2020 02:44:13 +0300
+Message-Id: <20201104234427.26477-17-digetx@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20201104234427.26477-1-digetx@gmail.com>
 References: <20201104234427.26477-1-digetx@gmail.com>
@@ -94,88 +94,48 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add OPP and SoC core voltage scaling support to the GR2D driver.
-This is required for enabling system-wide DVFS on Tegra SoCs.
+Add initial OPP and SoC core voltage scaling support to the Host1x driver.
+This is required for enabling system-wide DVFS on older Tegra SoCs.
 
 Tested-by: Peter Geis <pgwipeout@gmail.com>
 Tested-by: Nicolas Chauvet <kwizart@gmail.com>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/gpu/drm/tegra/gr2d.c | 136 +++++++++++++++++++++++++++++++++++
- 1 file changed, 136 insertions(+)
+ drivers/gpu/host1x/Kconfig |  1 +
+ drivers/gpu/host1x/dev.c   | 87 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 88 insertions(+)
 
-diff --git a/drivers/gpu/drm/tegra/gr2d.c b/drivers/gpu/drm/tegra/gr2d.c
-index f30aa86e4c9f..6d8f9419d908 100644
---- a/drivers/gpu/drm/tegra/gr2d.c
-+++ b/drivers/gpu/drm/tegra/gr2d.c
-@@ -7,6 +7,9 @@
- #include <linux/iommu.h>
- #include <linux/module.h>
+diff --git a/drivers/gpu/host1x/Kconfig b/drivers/gpu/host1x/Kconfig
+index 6dab94adf25e..fba4207c35a4 100644
+--- a/drivers/gpu/host1x/Kconfig
++++ b/drivers/gpu/host1x/Kconfig
+@@ -3,6 +3,7 @@ config TEGRA_HOST1X
+ 	tristate "NVIDIA Tegra host1x driver"
+ 	depends on ARCH_TEGRA || (ARM && COMPILE_TEST)
+ 	select IOMMU_IOVA
++	select PM_OPP
+ 	help
+ 	  Driver for the NVIDIA Tegra host1x hardware.
+ 
+diff --git a/drivers/gpu/host1x/dev.c b/drivers/gpu/host1x/dev.c
+index d0ebb70e2fdd..06e65dc1ab19 100644
+--- a/drivers/gpu/host1x/dev.c
++++ b/drivers/gpu/host1x/dev.c
+@@ -13,6 +13,9 @@
  #include <linux/of_device.h>
+ #include <linux/of.h>
+ #include <linux/slab.h>
 +#include <linux/pm_opp.h>
 +
 +#include <soc/tegra/fuse.h>
  
- #include "drm.h"
- #include "gem.h"
-@@ -185,6 +188,135 @@ static const u32 gr2d_addr_regs[] = {
- 	GR2D_VA_BASE_ADDR_SB,
- };
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/host1x.h>
+@@ -341,6 +344,85 @@ static void host1x_iommu_exit(struct host1x *host)
+ 	}
+ }
  
-+static int gr2d_init_opp_state(struct device *dev, struct gr2d *gr2d)
-+{
-+	struct dev_pm_opp *opp;
-+	unsigned long rate;
-+	int err;
-+
-+	/*
-+	 * If voltage regulator presents, then we could select the fastest
-+	 * clock rate, but driver doesn't support power management and
-+	 * frequency scaling yet, hence the top freq OPP will vote for a
-+	 * very high voltage that will produce lot's of heat.  Let's select
-+	 * OPP for the current/default rate for now.
-+	 *
-+	 * Clock rate should be pre-initialized (i.e. it's non-zero) either
-+	 * by clock driver or by assigned clocks in a device-tree.
-+	 */
-+	rate = clk_get_rate(gr2d->clk);
-+
-+	/* find suitable OPP for the clock rate supportable by SoC speedo ID */
-+	opp = dev_pm_opp_find_freq_ceil(dev, &rate);
-+
-+	/*
-+	 * dev_pm_opp_set_rate() doesn't search for a floor clock rate and it
-+	 * will error out if default clock rate is too high, i.e. unsupported
-+	 * by a SoC hardware version.  Hence will find floor rate by ourselves.
-+	 */
-+	if (opp == ERR_PTR(-ERANGE))
-+		opp = dev_pm_opp_find_freq_floor(dev, &rate);
-+
-+	err = PTR_ERR_OR_ZERO(opp);
-+	if (err) {
-+		dev_err(dev, "failed to get OPP for %ld Hz: %d\n",
-+			rate, err);
-+		return err;
-+	}
-+
-+	dev_pm_opp_put(opp);
-+
-+	/*
-+	 * First dummy rate-set initializes voltage vote by setting voltage
-+	 * in accordance to the clock rate.  We need to do this because GR2D
-+	 * currently doesn't support power management and clock is permanently
-+	 * enabled.
-+	 */
-+	err = dev_pm_opp_set_rate(dev, rate);
-+	if (err) {
-+		dev_err(dev, "failed to initialize OPP clock: %d\n", err);
-+		return err;
-+	}
-+
-+	return 0;
-+}
-+
-+static void gr2d_deinit_opp_table(void *data)
++static void host1x_deinit_opp_table(void *data)
 +{
 +	struct device *dev = data;
 +	struct opp_table *opp_table;
@@ -187,7 +147,7 @@ index f30aa86e4c9f..6d8f9419d908 100644
 +	dev_pm_opp_put_opp_table(opp_table);
 +}
 +
-+static int devm_gr2d_init_opp_table(struct device *dev, struct gr2d *gr2d)
++static int devm_host1x_init_opp_table(struct host1x *host)
 +{
 +	struct opp_table *opp_table, *hw_opp_table;
 +	const char *rname = "core";
@@ -195,24 +155,24 @@ index f30aa86e4c9f..6d8f9419d908 100644
 +	int err;
 +
 +	/* voltage scaling is optional */
-+	if (device_property_present(dev, "core-supply"))
-+		opp_table = dev_pm_opp_set_regulators(dev, &rname, 1);
++	if (device_property_present(host->dev, "core-supply"))
++		opp_table = dev_pm_opp_set_regulators(host->dev, &rname, 1);
 +	else
-+		opp_table = dev_pm_opp_get_opp_table(dev);
++		opp_table = dev_pm_opp_get_opp_table(host->dev);
 +
 +	if (IS_ERR(opp_table))
-+		return dev_err_probe(dev, PTR_ERR(opp_table),
++		return dev_err_probe(host->dev, PTR_ERR(opp_table),
 +				     "failed to prepare OPP table\n");
 +
-+	if (gr2d->soc->version == 0x20)
++	if (of_machine_is_compatible("nvidia,tegra20"))
 +		hw_version = BIT(tegra_sku_info.soc_process_id);
 +	else
 +		hw_version = BIT(tegra_sku_info.soc_speedo_id);
 +
-+	hw_opp_table = dev_pm_opp_set_supported_hw(dev, &hw_version, 1);
++	hw_opp_table = dev_pm_opp_set_supported_hw(host->dev, &hw_version, 1);
 +	err = PTR_ERR_OR_ZERO(hw_opp_table);
 +	if (err) {
-+		dev_err(dev, "failed to set supported HW: %d\n", err);
++		dev_err(host->dev, "failed to set supported HW: %d\n", err);
 +		goto put_table;
 +	}
 +
@@ -221,28 +181,31 @@ index f30aa86e4c9f..6d8f9419d908 100644
 +	 * API to work similarly to clk_set_rate() if table is missing in a
 +	 * device-tree.  The add_table() errors out if OPP is missing in DT.
 +	 */
-+	if (device_property_present(dev, "operating-points-v2")) {
-+		err = dev_pm_opp_of_add_table(dev);
++	if (device_property_present(host->dev, "operating-points-v2")) {
++		err = dev_pm_opp_of_add_table(host->dev);
 +		if (err) {
-+			dev_err(dev, "failed to add OPP table: %d\n", err);
++			dev_err(host->dev, "failed to add OPP table: %d\n", err);
 +			goto put_hw;
 +		}
-+
-+		err = gr2d_init_opp_state(dev, gr2d);
-+		if (err)
-+			goto remove_table;
 +	}
 +
-+	err = devm_add_action(dev, gr2d_deinit_opp_table, dev);
++	/* first dummy rate-set initializes voltage vote */
++	err = dev_pm_opp_set_rate(host->dev, clk_get_rate(host->clk));
++	if (err) {
++		dev_err(host->dev, "failed to initialize OPP clock: %d\n", err);
++		goto remove_table;
++	}
++
++	err = devm_add_action(host->dev, host1x_deinit_opp_table, host->dev);
 +	if (err)
 +		goto remove_table;
 +
-+	dev_info(dev, "OPP HW ver. 0x%x\n", hw_version);
++	dev_info(host->dev, "OPP HW ver. 0x%x\n", hw_version);
 +
 +	return 0;
 +
 +remove_table:
-+	dev_pm_opp_of_remove_table(dev);
++	dev_pm_opp_of_remove_table(host->dev);
 +put_hw:
 +	dev_pm_opp_put_supported_hw(opp_table);
 +put_table:
@@ -251,20 +214,21 @@ index f30aa86e4c9f..6d8f9419d908 100644
 +	return err;
 +}
 +
- static int gr2d_probe(struct platform_device *pdev)
+ static int host1x_probe(struct platform_device *pdev)
  {
- 	struct device *dev = &pdev->dev;
-@@ -209,6 +341,10 @@ static int gr2d_probe(struct platform_device *pdev)
- 		return PTR_ERR(gr2d->clk);
+ 	struct host1x *host;
+@@ -424,6 +506,11 @@ static int host1x_probe(struct platform_device *pdev)
+ 		return err;
  	}
  
-+	err = devm_gr2d_init_opp_table(dev, gr2d);
-+	if (err)
-+		return dev_err_probe(dev, err, "failed to initialize OPP\n");
++	err = devm_host1x_init_opp_table(host);
++	if (err < 0)
++		return dev_err_probe(&pdev->dev, err,
++				     "failed to initialize OPP\n");
 +
- 	err = clk_prepare_enable(gr2d->clk);
- 	if (err) {
- 		dev_err(dev, "cannot turn on clock\n");
+ 	err = host1x_iommu_init(host);
+ 	if (err < 0) {
+ 		dev_err(&pdev->dev, "failed to setup IOMMU: %d\n", err);
 -- 
 2.27.0
 
