@@ -5,59 +5,59 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A1ADC5517A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:50:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28644C56202
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:50:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4874920825
+	by mail.kernel.org (Postfix) with ESMTP id C495820867
 	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:50:41 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nqm2X6ZZ"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ERKSO83J"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387761AbgKDXtv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Nov 2020 18:49:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48206 "EHLO
+        id S2387754AbgKDXtu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:49:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733037AbgKDXpF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:05 -0500
+        with ESMTP id S1733075AbgKDXpG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:06 -0500
 Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F61AC0613CF;
-        Wed,  4 Nov 2020 15:45:04 -0800 (PST)
-Received: by mail-lj1-x241.google.com with SMTP id v19so311101lji.5;
-        Wed, 04 Nov 2020 15:45:04 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFAB2C0613CF;
+        Wed,  4 Nov 2020 15:45:05 -0800 (PST)
+Received: by mail-lj1-x241.google.com with SMTP id m16so307120ljo.6;
+        Wed, 04 Nov 2020 15:45:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=A6xeyw6ZqKT/K4JMygz/BmuhCT9ICHlbp1KBA4DEr4A=;
-        b=nqm2X6ZZJuj9sZgSTybdOUi83IBwYn9f7Zvfx06NhWRHbQaEo61dn0AWICDKuDsAzX
-         WcnvRncZgz7BZ9/CebWWEjbmvtTisywn31eZ4pmGs2UNS0RRtZfCOBhiTwow/n6mPe9r
-         7agAHRD0R2EELNcElIqennHlgH8OGOPHoFL2PRl+Ja/SdoRvkx4BsTmnP2gpWNQvarxG
-         SjryQPM6YqWLBzOv3L/jKhwY2mKEYxloqIA7EIeYrN+YlKNWbDi4sdhMPjwR1DWYKbqi
-         vxBJYm1aGkZ0x3sS+0lBKRX7ZCwqw3mmTLFKmuBg1cW60xhkD71EveU4NYFDyWJAnfX8
-         8m1g==
+        bh=yQimpkIRWNQnMpbdhCpUPNBZvo/GpufqvOqt4z0qAwA=;
+        b=ERKSO83J6tv0QUdt8vnWSOE1GpIwg7mIR1JUrs4PyfgPVzV1mH7mEpyAJOsSR12xY3
+         rsldAI/5QE2rxBoNdwYh3hxk/wzRAkSsKIoHuD22P4lN8jkkBxNCFgbBpKfwYVwMtiZk
+         hY1Z1gChPo7sDA1p9MxN+Mx1EdAo2nz8TwGsz+e38nVaIbWMWUcpVKqUAWxqflyFUc2z
+         zmVkx897k9/dL5uXgyLRVGwDyjmwfMJMHjINdfH3z7T1O6RmI6/62I+J/f3RaDIG1/F3
+         b5/NryfWaEyEXi653d2wn4BVQldGJhyt9pi+F4OHBx7bGp4zD1BVXptYQfB0SIoKU8RY
+         hraA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=A6xeyw6ZqKT/K4JMygz/BmuhCT9ICHlbp1KBA4DEr4A=;
-        b=Y4b+7OImCnBVlJ+Z663vsf/jYtMe9v/tOiwVp/RD907m/yEFEWjdwzcBvHOkKU6qUr
-         Qot8d90Bbt2sOH5rwtQLsqT49Hnlxj91zjWMKcLoraAzq/B4zDYInGcVO6qXbzDeY9ts
-         6UnmHpBAMcjF58JUg8II3ztnwhBAi5kXTgtXpwnDcb4YfiwvoZ1c9uy+CSDWZObRivQb
-         64P+S62TUDlYsaEw54JuCT6Aa8B+MEod5JzoSzhKFzCPwdjxB/lW10IxDniLYC4MMkTW
-         ads0Luv84kxEsVdb2cPOyokOsJbbGzRCZKyoYyCdHU4QPn/XDPB2TAehaSYr85M+HH62
-         etnA==
-X-Gm-Message-State: AOAM533/xtgzEhIAy07fa3Ds9wgK+ykUHzPZ1a28X44zvkliEo2QOMxP
-        aoflnOj8SFUyMJKjQ2rlh/A=
-X-Google-Smtp-Source: ABdhPJzDTd1dZ6QvpxBBESnqfpznl55p7ubyewQPaYA9itl922HIytqPgmIH/zsQSw8jZFmiQ9g1kA==
-X-Received: by 2002:a2e:b619:: with SMTP id r25mr134978ljn.465.1604533503104;
-        Wed, 04 Nov 2020 15:45:03 -0800 (PST)
+        bh=yQimpkIRWNQnMpbdhCpUPNBZvo/GpufqvOqt4z0qAwA=;
+        b=IwgLlblmv4oEz0X8GFhXSi1NawTXzJBOmCqbT24O4Z/uou33FoZn6A2xIc686i6Byy
+         AWVsI2bhBn7Q/PVQNox+kKh0hMina6igFUtwQ5LKa/9OqXHXELDeY96PqtfLJuBrXlfX
+         /uT+cS+5VkPufQ/D/cZGygUyH6brjSCD4tJiXvT8r7hX3jF3bgrVkDKbI9dOvv1FoqO3
+         44CpLq6KkynYXK2O4VybELiyhEqowTyMvGSQyv4/t4g3e3Hen2E6FWTLO2Ajm6WO+Dko
+         42DnU+/W4fcUKeHOQNrwSOJbrjd52FAmyRKVHE0StPaOZAb6w+FecGuzjpKU9NrDOnZg
+         p4kg==
+X-Gm-Message-State: AOAM531/WLVHSJg+Vgvx261wVKzzp4y+FyLZ1ASQl80C8tPaM8o8UP2y
+        2P0EvjAdgGRCLg5a/hkTs18=
+X-Google-Smtp-Source: ABdhPJzqZV2lUSiNvg9T7GHr724oG0dGwDbtok/GVt9MVRYZxSxIwkdsf2v5hnfIaDwbq85V2zwywA==
+X-Received: by 2002:a2e:b169:: with SMTP id a9mr156579ljm.84.1604533504504;
+        Wed, 04 Nov 2020 15:45:04 -0800 (PST)
 Received: from localhost.localdomain (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
-        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.01
+        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Nov 2020 15:45:02 -0800 (PST)
+        Wed, 04 Nov 2020 15:45:04 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -82,9 +82,9 @@ Cc:     linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-Subject: [PATCH v1 05/30] dt-binding: usb: ci-hdrc-usb2:  Document OPP and voltage regulator properties
-Date:   Thu,  5 Nov 2020 02:44:02 +0300
-Message-Id: <20201104234427.26477-6-digetx@gmail.com>
+Subject: [PATCH v1 06/30] dt-bindings: usb: tegra-ehci: Document OPP and voltage regulator properties
+Date:   Thu,  5 Nov 2020 02:44:03 +0300
+Message-Id: <20201104234427.26477-7-digetx@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20201104234427.26477-1-digetx@gmail.com>
 References: <20201104234427.26477-1-digetx@gmail.com>
@@ -94,36 +94,24 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document new OPP table and NVIDIA Tegra-specific voltage regulator
-properties.
+Document new DVFS OPP table and voltage regulator properties of the
+Tegra EHCI controller.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- Documentation/devicetree/bindings/usb/ci-hdrc-usb2.txt | 4 ++++
- 1 file changed, 4 insertions(+)
+ Documentation/devicetree/bindings/usb/nvidia,tegra20-ehci.txt | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/usb/ci-hdrc-usb2.txt b/Documentation/devicetree/bindings/usb/ci-hdrc-usb2.txt
-index a5c5db6a0b2d..f02a98201062 100644
---- a/Documentation/devicetree/bindings/usb/ci-hdrc-usb2.txt
-+++ b/Documentation/devicetree/bindings/usb/ci-hdrc-usb2.txt
-@@ -90,6 +90,7 @@ Optional properties:
-   case, the "idle" state needs to pull down the data and strobe pin
-   and the "active" state needs to pull up the strobe pin.
- - pinctrl-n: alternate pin modes
-+- operating-points-v2: See ../bindings/opp/opp.txt for details.
- 
- i.mx specific properties
- - fsl,usbmisc: phandler of non-core register device, with one
-@@ -110,6 +111,9 @@ i.mx specific properties
-   The range is from 0x0 to 0xf, the default value is 0x3.
-   Details can refer to TXVREFTUNE0 bits of USBNC_n_PHY_CFG1.
- 
-+Tegra specific properties
-+- core-supply: phandle of voltage regulator of the SoC "core" power domain
-+
- Example:
- 
- 	usb@f7ed0000 {
+diff --git a/Documentation/devicetree/bindings/usb/nvidia,tegra20-ehci.txt b/Documentation/devicetree/bindings/usb/nvidia,tegra20-ehci.txt
+index f60785f73d3d..e4070ae21fd9 100644
+--- a/Documentation/devicetree/bindings/usb/nvidia,tegra20-ehci.txt
++++ b/Documentation/devicetree/bindings/usb/nvidia,tegra20-ehci.txt
+@@ -21,3 +21,5 @@ Required properties :
+ Optional properties:
+  - nvidia,needs-double-reset : boolean is to be set for some of the Tegra20
+    USB ports, which need reset twice due to hardware issues.
++ - operating-points-v2: See ../bindings/opp/opp.txt for details.
++ - core-supply: Phandle of voltage regulator of the SoC "core" power domain.
 -- 
 2.27.0
 
