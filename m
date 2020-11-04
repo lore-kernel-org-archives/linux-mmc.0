@@ -2,111 +2,168 @@ Return-Path: <SRS0=0Sxg=EK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4946C4741F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 19:16:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98A49C55178
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:46:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9CB8C206ED
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 19:16:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1604517365;
-	bh=20J8ub7dVnArIKXL8uGIHThimHeid42p3JbhRxwQjGY=;
-	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
-	b=J/TotWFeHM//MsvsEl7QtbvRh7xvEJIReGunSk9LyYbmX9eMv9/IvcUoNvq48+b/w
-	 K/43QSXazmnqHRN2WtSDMDm4WapNGvOa8afQHnCY5MRzVI4hJNTb//XlMPbrOiB7hL
-	 iS82eQvhgGyeHOvco7XS7VUXikY8hgHhaQM5Ekow=
+	by mail.kernel.org (Postfix) with ESMTP id 4457F20684
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:46:30 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eN4h8wmK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731505AbgKDTP5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Nov 2020 14:15:57 -0500
-Received: from mail-ot1-f67.google.com ([209.85.210.67]:45408 "EHLO
-        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726564AbgKDTP5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 14:15:57 -0500
-Received: by mail-ot1-f67.google.com with SMTP id k3so8488354otp.12;
-        Wed, 04 Nov 2020 11:15:56 -0800 (PST)
+        id S1732898AbgKDXq3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:46:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48338 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1733168AbgKDXpi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:38 -0500
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5E74C0613D2;
+        Wed,  4 Nov 2020 15:45:37 -0800 (PST)
+Received: by mail-lf1-x134.google.com with SMTP id i6so197369lfd.1;
+        Wed, 04 Nov 2020 15:45:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=JWa430PVIqmJIbeD7KBt0TZCN2r4IZvUOeKukZUULSM=;
+        b=eN4h8wmKVmc98I8VpVQD05mgPsSKIV8roZRuvQUi3EOcizAEVMxhK4XcKenNODUP57
+         Rxze2zWAWjLCIfL2dNIRIGywZvC28Gu+MslIDgcQBiINpAIgA8ayEvdgAWeaNJS/UoUw
+         AF/ln6R+1zf+7IT8b1pPX6qDWo8FajvGF+vv4uuipo2sXIA3JUzx7p8u+ktEcwm1o1pg
+         8EzDhwuYDylAakt40bWirCp8sipi2Klh9G/IBYON5H8zDXGqS29eR/JqRCTc9dW4pVKR
+         y1mExIRa9//FQnuJ5e8gfTLqClqNg3UUpnvkCzqL0KLmGCs6gxB1ftFcHku0KNIwUxDo
+         VvhA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=xUeu7OjzCkWfl0q9Q0C25b2gAmYnfpfRf6sdmrxWckA=;
-        b=rRM4TTTc4LvENo1QxdeVaqhJBEYUiMMzLaGf/8Ex7eFnhAr1o8Vndeqetms8/n8UQn
-         8NO806T8W0IvwzeEQTMO1uO3z1E71vDcFtxZGJFrAiyLz3WxD+3KCwZiToQwLDLc/V4q
-         0/rVXl02ls7xivvjx9102Bhl2G3XW98WpxUnDLYJWvQeAD66AAqZyq5u0z6L6Ruhi39i
-         UhPGR6vVpkdG79F5C4oZiuSKXYJxwZnLosVUzwF4LGGLZSKS9zAnNjX+OsTAAe+AFiRE
-         8qSHAtakSgfzmYoZrphQ0SvvkcJWaczwEjtaXqjBQugFeEfoT0ZdYxvfRn8maAibphWe
-         znUQ==
-X-Gm-Message-State: AOAM532ovnEl3SOShAV1uAZImHcpsoDCC93Ruw36Vdi0NEB/7vwOR5MB
-        JvrMXBqx9sbAeaqQJZz9Fw==
-X-Google-Smtp-Source: ABdhPJwyVB6Vxpun9Hwox5/cSocl9xkTao6ENUk5Rm2F/NY+qCi/4EYMETnsGog5AJNAArHDE5FN3w==
-X-Received: by 2002:a9d:2283:: with SMTP id y3mr18865146ota.164.1604517355878;
-        Wed, 04 Nov 2020 11:15:55 -0800 (PST)
-Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id x21sm660177otk.39.2020.11.04.11.15.54
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=JWa430PVIqmJIbeD7KBt0TZCN2r4IZvUOeKukZUULSM=;
+        b=NJUutTGgR8RwypVHJLcSm5Y2Y48RPau6LXgiYq/Ov51mJ4IJYtz9/YMLf2bMebokUA
+         2+mE2hV6OOicjPedvV2xs/eMwzwkZGOhx9bRkhKVIX3skdvIQ6FB1wotTag11JeMI4Dh
+         n6b1YHYZaCkxe711w16iIcNt3K2nfkIHPPxRq2MNbnjlyPVZJ8lu4kFRZipHVjJgwLaS
+         I/3le7b7/2P5BtsA7FrUurg0OPkh35yi0iPBw5MI0JJDm+iJ+XyTRQpbzHHHa4f+Oxv+
+         5BKal+Due1LhQu2pxuZxGjyLaZV6V8JqVRCBlp8BcBvuHobq0WBa/z6iqqnVXnw5zy7N
+         pU6g==
+X-Gm-Message-State: AOAM5330L8GlKNXjfEpg8LfUsK6IuKAFJhdmbhP560/qqiA+n1koXEcR
+        7enXq0BOSzQ4nwcIcK8Pz2U=
+X-Google-Smtp-Source: ABdhPJz6df+Ge/OfH/yyY6XjwgEffIPjNRxtB5oKKiqUFuVW6jG9sorT54nuDmLv0xSqhkTx9fOGHg==
+X-Received: by 2002:a05:6512:3388:: with SMTP id h8mr60396lfg.318.1604533536417;
+        Wed, 04 Nov 2020 15:45:36 -0800 (PST)
+Received: from localhost.localdomain (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
+        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Nov 2020 11:15:55 -0800 (PST)
-Received: (nullmailer pid 3972960 invoked by uid 1000);
-        Wed, 04 Nov 2020 19:15:54 -0000
-Date:   Wed, 4 Nov 2020 13:15:54 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
-        linux-mmc@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>,
+        Wed, 04 Nov 2020 15:45:35 -0800 (PST)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-kernel@vger.kernel.org, devel@driverdev.osuosl.org,
-        devicetree@vger.kernel.org,
-        "David S . Miller" <davem@davemloft.net>
-Subject: Re: [PATCH v3 02/24] dt-bindings: introduce silabs,wfx.yaml
-Message-ID: <20201104191554.GA3972736@bogus>
-References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
- <20201104155207.128076-3-Jerome.Pouiller@silabs.com>
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>
+Cc:     linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
+        linux-usb@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
+Subject: [PATCH v1 29/30] ARM: tegra: cardhu-a04: Add voltage supplies to DVFS-capable devices
+Date:   Thu,  5 Nov 2020 02:44:26 +0300
+Message-Id: <20201104234427.26477-30-digetx@gmail.com>
+X-Mailer: git-send-email 2.27.0
+In-Reply-To: <20201104234427.26477-1-digetx@gmail.com>
+References: <20201104234427.26477-1-digetx@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201104155207.128076-3-Jerome.Pouiller@silabs.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 04 Nov 2020 16:51:45 +0100, Jerome Pouiller wrote:
-> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> 
-> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> ---
->  .../bindings/net/wireless/silabs,wfx.yaml     | 131 ++++++++++++++++++
->  1 file changed, 131 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
-> 
+Add voltage supplies to DVFS-capable devices in order to enable
+system-wide voltage scaling.
 
+Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+---
+ arch/arm/boot/dts/tegra30-cardhu-a04.dts | 44 ++++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
 
-My bot found errors running 'make dt_binding_check' on your patch:
-
-yamllint warnings/errors:
-
-dtschema/dtc warnings/errors:
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml: 'additionalProperties' is a required property
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml: ignoring, error in schema: 
-warning: no schema found in file: ./Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
-
-
-See https://patchwork.ozlabs.org/patch/1394182
-
-The base for the patch is generally the last rc1. Any dependencies
-should be noted.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit.
+diff --git a/arch/arm/boot/dts/tegra30-cardhu-a04.dts b/arch/arm/boot/dts/tegra30-cardhu-a04.dts
+index c1c0ca628af1..7149e5594537 100644
+--- a/arch/arm/boot/dts/tegra30-cardhu-a04.dts
++++ b/arch/arm/boot/dts/tegra30-cardhu-a04.dts
+@@ -93,6 +93,34 @@ vdd_bl2_reg: regulator@106 {
+ 		gpio = <&gpio TEGRA_GPIO(DD, 0) GPIO_ACTIVE_HIGH>;
+ 	};
+ 
++	host1x@50000000 {
++		core-supply = <&vddcore_reg>;
++
++		gr2d@54140000 {
++			core-supply = <&vddcore_reg>;
++		};
++
++		gr3d@54180000 {
++			core-supply = <&vddcore_reg>;
++		};
++
++		dc@54200000 {
++			core-supply = <&vddcore_reg>;
++		};
++
++		dc@54240000 {
++			core-supply = <&vddcore_reg>;
++		};
++	};
++
++	vde@6001a000 {
++		core-supply = <&vddcore_reg>;
++	};
++
++	pwm: pwm@7000a000 {
++		core-supply = <&vddcore_reg>;
++	};
++
+ 	i2c@7000d000 {
+ 		pmic: tps65911@2d {
+ 			regulators {
+@@ -117,6 +145,22 @@ vddcore_reg: tps62361@60 {
+ 		};
+ 	};
+ 
++	memory-controller@7000f400 {
++		core-supply = <&vddcore_reg>;
++	};
++
++	mmc@78000000 {
++		core-supply = <&vddcore_reg>;
++	};
++
++	mmc@78000600 {
++		core-supply = <&vddcore_reg>;
++	};
++
++	usb@7d008000 {
++		core-supply = <&vddcore_reg>;
++	};
++
+ 	cpus {
+ 		cpu0: cpu@0 {
+ 			cpu-supply = <&vddctrl_reg>;
+-- 
+2.27.0
 
