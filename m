@@ -8,56 +8,56 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67468C61DD8
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:48:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D8C8C5517A
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:49:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1125020BED
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:48:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0932720825
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:49:11 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KXuUE5At"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Fy4CNvg3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387532AbgKDXsI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Nov 2020 18:48:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48266 "EHLO
+        id S2387672AbgKDXtA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Nov 2020 18:49:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733130AbgKDXpU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:20 -0500
-Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D060C0613CF;
-        Wed,  4 Nov 2020 15:45:18 -0800 (PST)
-Received: by mail-lf1-x142.google.com with SMTP id 74so174021lfo.5;
-        Wed, 04 Nov 2020 15:45:18 -0800 (PST)
+        with ESMTP id S1733100AbgKDXpL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:45:11 -0500
+Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com [IPv6:2a00:1450:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 841EAC0613CF;
+        Wed,  4 Nov 2020 15:45:11 -0800 (PST)
+Received: by mail-lf1-x144.google.com with SMTP id b1so135117lfp.11;
+        Wed, 04 Nov 2020 15:45:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Y282nJfAvr8vVLZChpZFCfyyX/0tuj7y7Sv22IVncUE=;
-        b=KXuUE5AtEQQwD5Ono7VTFez03/G1JD8vBervS34kptx+rvhr1VPOJKtT7+tZonOL0D
-         LYiql4lEs4GqTEMjuWMjwLYpFTuzD7peQA5Vfi9aqIs9BSwW3kmudaZudkIjvD3GG/19
-         35ZO/3Ss9TqW3Pu9IqRkKZAi9/OgCAGJSxlUFuLZ1vwjqCl6LSiIk6U8zGc3Rpst7ZBU
-         tSb27R9TT1BfZzPv4RaCODS/OrnSceZlO7o7PafTCOUpsPYAQYjH7YwoeCSVAvnna70u
-         UMigQgwIBHl5gUp2Vf4C9Cl2fch5QY2p74zsV8dYlmESyGtGEyNrKFOuJIfx0oI4pYyz
-         6omQ==
+        bh=s2xq+lt/r2Mvqw9qSWZAnUmoqhbrNvrI4eJy0ZnOQ64=;
+        b=Fy4CNvg3obv1cUoJtvGJ21pgRv1s2vfQZ+17zG35XkFJhQGYivEOExVUbw2fEdaRGa
+         ++APIIMcHAGfK/1E9UJY24YPYHy4O2A9bQts/vv5m93fdQ9Ty43C78419zh7Bf2Vk6r9
+         eWJVZOlxAkZ9v7Ov0+UUojl1qFdIk+/oVtB43e+1brDo2GrOzQvvt5/leRClxlavjH+s
+         AAp/ILGa8GQVEJSYwfOTryVzVXbkOSIpE9V4g+GcD0T8TD4yXfHl7kDjwklc+guJZO9G
+         DEJIhAku8uEOKHuOLL0c0EpROBzWbTmnQkPSAJLtnb3obN2xwV8jKIKLXEQEzpvfiJ70
+         cqXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Y282nJfAvr8vVLZChpZFCfyyX/0tuj7y7Sv22IVncUE=;
-        b=jzwKErXFAH8BB4czzdZ1aIQy2NNfBiPzuJIJQbEkyekWSISckZ6czGLrXo7NfpTUPY
-         7BXU6UCDpI16VJvq00C1Sm1X19XeGbDcms98uNVtwnkDegufPspCM/HZkeaPgYRWKGeL
-         S8bpswk6dJOI+3YlkRCaTURc7vK3l6L3Q3xI9TVohRAHooLucfulN6Ke4xArfe0L2Rh1
-         4qIRMuzJrAOR7Jm1Vlf8M+JlKnb5spTj8DPJx4NQzzatbzZgFRG2JHxFtArkfKBtgbSm
-         38tizOsSB6SiTQxSHmjoLSfobTvePiw60SVMS+ALnhCGZ6YQngcddfT3nopG4pS+NU6q
-         kZaA==
-X-Gm-Message-State: AOAM532t2QGlqGmS6/IlSrJakmyDqQTY6tyIQYTN/QIBpU5oIgxBpfJy
-        16U07qKjCCMCgz3EjpZKDwY=
-X-Google-Smtp-Source: ABdhPJzT6zVFairbLiWCVf6U5lDlOHXMBLgiZgoTQaSae/l2568qpJolj1IwCGuZV8j/fEZhdbtdpA==
-X-Received: by 2002:a19:c6cc:: with SMTP id w195mr60492lff.24.1604533516983;
-        Wed, 04 Nov 2020 15:45:16 -0800 (PST)
+        bh=s2xq+lt/r2Mvqw9qSWZAnUmoqhbrNvrI4eJy0ZnOQ64=;
+        b=d952vZdnxbRQLFKsTzD3DeSuo1xhTZy9gJZdK3OibRSILvGexbP+MU+T+OD5Vng+Ry
+         c9iu1CGkvDiGdmf9UVzCeGN15JHLNDR3I8fWQlhw/wrlAJm5+MypxfSXE8385nfOGl6H
+         B3HOmcprZjIshfwRskfZ7cFas7ctuotTw5zlFtSBjdZSSsV9Deeumit2qgavuDcEy6B2
+         XuNZEujQ1lh9cc30x7oWWMvMiglgKkiV9ceo8Jumv0BdpwzI1IUfdvXkwicKb6Fc+9uj
+         j/fRmXivwHN0W2n6aU/X1IqBOhZVjStfgvQBb6QuGPw9pFG3RFJdtcz69ACqIiqBo9Yv
+         z1sA==
+X-Gm-Message-State: AOAM530Xr3YAPbomxR43P0oep++3IRsmYBA39SApzlNV5HjS5B08u72a
+        38vIYwrMpjWf6EiqGbkovVw=
+X-Google-Smtp-Source: ABdhPJwqoSMi1rb7vw1Ft82ab6MuGmnvmcXXmGI4LnfUQssU2WJfQ903eLKfiwjg+DKW6GcnoqGrow==
+X-Received: by 2002:a19:6a07:: with SMTP id u7mr52539lfu.220.1604533509991;
+        Wed, 04 Nov 2020 15:45:09 -0800 (PST)
 Received: from localhost.localdomain (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
-        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.15
+        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.45.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Nov 2020 15:45:16 -0800 (PST)
+        Wed, 04 Nov 2020 15:45:09 -0800 (PST)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -82,9 +82,9 @@ Cc:     linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-Subject: [PATCH v1 15/30] drm/tegra: hdmi: Support OPP and SoC core voltage scaling
-Date:   Thu,  5 Nov 2020 02:44:12 +0300
-Message-Id: <20201104234427.26477-16-digetx@gmail.com>
+Subject: [PATCH v1 10/30] regulator: Allow skipping disabled regulators in regulator_check_consumers()
+Date:   Thu,  5 Nov 2020 02:44:07 +0300
+Message-Id: <20201104234427.26477-11-digetx@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20201104234427.26477-1-digetx@gmail.com>
 References: <20201104234427.26477-1-digetx@gmail.com>
@@ -94,116 +94,172 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add OPP and SoC core voltage scaling support to the HDMI driver.
-This is required for enabling system-wide DVFS on older Tegra SoCs.
+Add option which allows regulator_check_consumers() to skip accounting of
+a disabled consumer regulators.
 
+This new option is needed for the NVIDIA Tegra voltage couplers in order
+to properly calculate a lowest possible voltage for the CORE regulator.
+The requirements of a disabled consumer regulators should not be accounted
+by the Tegra voltage balancers because disabled state means that hardware
+is inactive. In particular disabled state shouldn't be accounted for the
+consumers which belong to the CORE voltage domain, meanwhile CPU domain
+should continue to account the disabled state.
+
+Tested-by: Peter Geis <pgwipeout@gmail.com>
+Tested-by: Nicolas Chauvet <kwizart@gmail.com>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/gpu/drm/tegra/hdmi.c | 63 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 62 insertions(+), 1 deletion(-)
+ drivers/regulator/core.c                       | 12 ++++++++----
+ drivers/soc/samsung/exynos-regulator-coupler.c |  2 +-
+ drivers/soc/tegra/regulators-tegra20.c         |  6 +++---
+ drivers/soc/tegra/regulators-tegra30.c         |  6 +++---
+ include/linux/regulator/coupler.h              |  6 ++++--
+ 5 files changed, 19 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/gpu/drm/tegra/hdmi.c b/drivers/gpu/drm/tegra/hdmi.c
-index d09a24931c87..92e96990854b 100644
---- a/drivers/gpu/drm/tegra/hdmi.c
-+++ b/drivers/gpu/drm/tegra/hdmi.c
-@@ -11,6 +11,7 @@
- #include <linux/math64.h>
- #include <linux/module.h>
- #include <linux/of_device.h>
-+#include <linux/pm_opp.h>
- #include <linux/pm_runtime.h>
- #include <linux/regulator/consumer.h>
- #include <linux/reset.h>
-@@ -1195,7 +1196,7 @@ static void tegra_hdmi_encoder_enable(struct drm_encoder *encoder)
- 	h_back_porch = mode->htotal - mode->hsync_end;
- 	h_front_porch = mode->hsync_start - mode->hdisplay;
- 
--	err = clk_set_rate(hdmi->clk, hdmi->pixel_clock);
-+	err = dev_pm_opp_set_rate(hdmi->dev, hdmi->pixel_clock);
- 	if (err < 0) {
- 		dev_err(hdmi->dev, "failed to set HDMI clock frequency: %d\n",
- 			err);
-@@ -1499,6 +1500,7 @@ static int tegra_hdmi_runtime_suspend(struct host1x_client *client)
- 	usleep_range(1000, 2000);
- 
- 	clk_disable_unprepare(hdmi->clk);
-+	dev_pm_opp_set_rate(hdmi->dev, 0);
- 	pm_runtime_put_sync(dev);
- 
- 	return 0;
-@@ -1633,6 +1635,60 @@ static irqreturn_t tegra_hdmi_irq(int irq, void *data)
- 	return IRQ_HANDLED;
- }
- 
-+static void tegra_hdmi_deinit_opp_table(void *data)
-+{
-+	struct device *dev = data;
-+	struct opp_table *opp_table;
-+
-+	opp_table = dev_pm_opp_get_opp_table(dev);
-+	dev_pm_opp_of_remove_table(dev);
-+	dev_pm_opp_put_regulators(opp_table);
-+	dev_pm_opp_put_opp_table(opp_table);
-+}
-+
-+static int devm_tegra_hdmi_init_opp_table(struct device *dev)
-+{
-+	struct opp_table *opp_table;
-+	const char *rname = "core";
-+	int err;
-+
-+	/* voltage scaling is optional */
-+	if (device_property_present(dev, "core-supply"))
-+		opp_table = dev_pm_opp_set_regulators(dev, &rname, 1);
-+	else
-+		opp_table = dev_pm_opp_get_opp_table(dev);
-+
-+	if (IS_ERR(opp_table))
-+		return dev_err_probe(dev, PTR_ERR(opp_table),
-+				    "failed to prepare OPP table\n");
-+
-+	/*
-+	 * OPP table presence is optional and we want the set_rate() of OPP
-+	 * API to work similarly to clk_set_rate() if table is missing in a
-+	 * device-tree.  The add_table() errors out if OPP is missing in DT.
-+	 */
-+	if (device_property_present(dev, "operating-points-v2")) {
-+		err = dev_pm_opp_of_add_table(dev);
-+		if (err) {
-+			dev_err(dev, "failed to add OPP table: %d\n", err);
-+			goto put_table;
-+		}
-+	}
-+
-+	err = devm_add_action(dev, tegra_hdmi_deinit_opp_table, dev);
-+	if (err)
-+		goto remove_table;
-+
-+	return 0;
-+
-+remove_table:
-+	dev_pm_opp_of_remove_table(dev);
-+put_table:
-+	dev_pm_opp_put_regulators(opp_table);
-+
-+	return err;
-+}
-+
- static int tegra_hdmi_probe(struct platform_device *pdev)
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index f258ded39ce0..015dcd8408d9 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -462,7 +462,8 @@ static int regulator_check_states(suspend_state_t state)
+  */
+ int regulator_check_consumers(struct regulator_dev *rdev,
+ 			      int *min_uV, int *max_uV,
+-			      suspend_state_t state)
++			      suspend_state_t state,
++			      bool skip_disabled_regulators)
  {
- 	const char *level = KERN_ERR;
-@@ -1667,6 +1723,11 @@ static int tegra_hdmi_probe(struct platform_device *pdev)
- 	if (IS_ERR(hdmi->clk_parent))
- 		return PTR_ERR(hdmi->clk_parent);
+ 	struct regulator *regulator;
+ 	struct regulator_voltage *voltage;
+@@ -476,6 +477,9 @@ int regulator_check_consumers(struct regulator_dev *rdev,
+ 		if (!voltage->min_uV && !voltage->max_uV)
+ 			continue;
  
-+	err = devm_tegra_hdmi_init_opp_table(&pdev->dev);
-+	if (err)
-+		return dev_err_probe(&pdev->dev, err,
-+				     "failed to initialize OPP\n");
++		if (skip_disabled_regulators && !regulator->enable_count)
++			continue;
 +
- 	err = clk_set_parent(hdmi->clk, hdmi->clk_parent);
- 	if (err < 0) {
- 		dev_err(&pdev->dev, "failed to setup clocks: %d\n", err);
+ 		if (*max_uV > voltage->max_uV)
+ 			*max_uV = voltage->max_uV;
+ 		if (*min_uV < voltage->min_uV)
+@@ -3662,7 +3666,7 @@ static int regulator_get_optimal_voltage(struct regulator_dev *rdev,
+ 
+ 		ret = regulator_check_consumers(rdev,
+ 						&desired_min_uV,
+-						&desired_max_uV, state);
++						&desired_max_uV, state, false);
+ 		if (ret < 0)
+ 			return ret;
+ 
+@@ -3681,7 +3685,7 @@ static int regulator_get_optimal_voltage(struct regulator_dev *rdev,
+ 
+ 		ret = regulator_check_consumers(c_rdevs[i],
+ 						&tmp_min,
+-						&tmp_max, state);
++						&tmp_max, state, false);
+ 		if (ret < 0)
+ 			return ret;
+ 
+@@ -4119,7 +4123,7 @@ int regulator_sync_voltage(struct regulator *regulator)
+ 	if (ret < 0)
+ 		goto out;
+ 
+-	ret = regulator_check_consumers(rdev, &min_uV, &max_uV, 0);
++	ret = regulator_check_consumers(rdev, &min_uV, &max_uV, 0, false);
+ 	if (ret < 0)
+ 		goto out;
+ 
+diff --git a/drivers/soc/samsung/exynos-regulator-coupler.c b/drivers/soc/samsung/exynos-regulator-coupler.c
+index 61a156b44a48..9bd99a93e3e0 100644
+--- a/drivers/soc/samsung/exynos-regulator-coupler.c
++++ b/drivers/soc/samsung/exynos-regulator-coupler.c
+@@ -41,7 +41,7 @@ static int regulator_get_optimal_voltage(struct regulator_dev *rdev,
+ 
+ 		ret = regulator_check_consumers(c_rdevs[i],
+ 						&tmp_min,
+-						&tmp_max, state);
++						&tmp_max, state, false);
+ 		if (ret < 0)
+ 			return ret;
+ 
+diff --git a/drivers/soc/tegra/regulators-tegra20.c b/drivers/soc/tegra/regulators-tegra20.c
+index 8782e399a58c..8c31acb5fdc6 100644
+--- a/drivers/soc/tegra/regulators-tegra20.c
++++ b/drivers/soc/tegra/regulators-tegra20.c
+@@ -136,7 +136,7 @@ static int tegra20_core_rtc_update(struct tegra_regulator_coupler *tegra,
+ 		return err;
+ 
+ 	err = regulator_check_consumers(core_rdev, &core_min_uV, &core_max_uV,
+-					PM_SUSPEND_ON);
++					PM_SUSPEND_ON, true);
+ 	if (err)
+ 		return err;
+ 
+@@ -246,12 +246,12 @@ static int tegra20_cpu_voltage_update(struct tegra_regulator_coupler *tegra,
+ 		return err;
+ 
+ 	err = regulator_check_consumers(cpu_rdev, &cpu_min_uV, &cpu_max_uV,
+-					PM_SUSPEND_ON);
++					PM_SUSPEND_ON, false);
+ 	if (err)
+ 		return err;
+ 
+ 	err = regulator_check_consumers(cpu_rdev, &cpu_min_uV_consumers,
+-					&cpu_max_uV, PM_SUSPEND_ON);
++					&cpu_max_uV, PM_SUSPEND_ON, false);
+ 	if (err)
+ 		return err;
+ 
+diff --git a/drivers/soc/tegra/regulators-tegra30.c b/drivers/soc/tegra/regulators-tegra30.c
+index fcf824f73131..d92aafa736bc 100644
+--- a/drivers/soc/tegra/regulators-tegra30.c
++++ b/drivers/soc/tegra/regulators-tegra30.c
+@@ -164,7 +164,7 @@ static int tegra30_voltage_update(struct tegra_regulator_coupler *tegra,
+ 		return err;
+ 
+ 	err = regulator_check_consumers(core_rdev, &core_min_uV, &core_max_uV,
+-					PM_SUSPEND_ON);
++					PM_SUSPEND_ON, true);
+ 	if (err)
+ 		return err;
+ 
+@@ -175,12 +175,12 @@ static int tegra30_voltage_update(struct tegra_regulator_coupler *tegra,
+ 	cpu_min_uV = core_min_uV - max_spread;
+ 
+ 	err = regulator_check_consumers(cpu_rdev, &cpu_min_uV, &cpu_max_uV,
+-					PM_SUSPEND_ON);
++					PM_SUSPEND_ON, false);
+ 	if (err)
+ 		return err;
+ 
+ 	err = regulator_check_consumers(cpu_rdev, &cpu_min_uV_consumers,
+-					&cpu_max_uV, PM_SUSPEND_ON);
++					&cpu_max_uV, PM_SUSPEND_ON, false);
+ 	if (err)
+ 		return err;
+ 
+diff --git a/include/linux/regulator/coupler.h b/include/linux/regulator/coupler.h
+index 5f86824bd117..4e076567b823 100644
+--- a/include/linux/regulator/coupler.h
++++ b/include/linux/regulator/coupler.h
+@@ -55,7 +55,8 @@ int regulator_coupler_register(struct regulator_coupler *coupler);
+ const char *rdev_get_name(struct regulator_dev *rdev);
+ int regulator_check_consumers(struct regulator_dev *rdev,
+ 			      int *min_uV, int *max_uV,
+-			      suspend_state_t state);
++			      suspend_state_t state,
++			      bool skip_disabled_regulators);
+ int regulator_check_voltage(struct regulator_dev *rdev,
+ 			    int *min_uV, int *max_uV);
+ int regulator_get_voltage_rdev(struct regulator_dev *rdev);
+@@ -75,7 +76,8 @@ static inline const char *rdev_get_name(struct regulator_dev *rdev)
+ }
+ static inline int regulator_check_consumers(struct regulator_dev *rdev,
+ 					    int *min_uV, int *max_uV,
+-					    suspend_state_t state)
++					    suspend_state_t state,
++					    bool skip_disabled_regulators))
+ {
+ 	return -EINVAL;
+ }
 -- 
 2.27.0
 
