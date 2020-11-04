@@ -2,119 +2,111 @@ Return-Path: <SRS0=0Sxg=EK=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE538C388F9
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 15:56:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4946C4741F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 19:16:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 868C52236F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 15:56:52 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=silabs.onmicrosoft.com header.i=@silabs.onmicrosoft.com header.b="LZuwBgfr"
+	by mail.kernel.org (Postfix) with ESMTP id 9CB8C206ED
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 19:16:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1604517365;
+	bh=20J8ub7dVnArIKXL8uGIHThimHeid42p3JbhRxwQjGY=;
+	h=Date:From:To:Cc:Subject:References:In-Reply-To:List-ID:From;
+	b=J/TotWFeHM//MsvsEl7QtbvRh7xvEJIReGunSk9LyYbmX9eMv9/IvcUoNvq48+b/w
+	 K/43QSXazmnqHRN2WtSDMDm4WapNGvOa8afQHnCY5MRzVI4hJNTb//XlMPbrOiB7hL
+	 iS82eQvhgGyeHOvco7XS7VUXikY8hgHhaQM5Ekow=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730870AbgKDPwd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Nov 2020 10:52:33 -0500
-Received: from mail-eopbgr750080.outbound.protection.outlook.com ([40.107.75.80]:6126
-        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1730682AbgKDPwc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 4 Nov 2020 10:52:32 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=k0g+lpmtfnW3BYvsDk/02PmIgUpJUqU5c3MvB+TxDP54d8AI/NYcL0YweSvRZw4w3QFjHD/pE4hwsZVRvrNuSlP2wrkPChGWJLzHgebCag5xTe+bHPYDFo3BuRHDd9Y07nV9hjiGIR9Oo8GEUKkeHTkIUnGjESSpK3UQC+tvs01gMcvzDlw8MwybgqpVML0UjUhVXer8gCUuyjV7UmCIKS8KTSved4xYHMEZshtKGybwx7OeHjIJLpoF+N2/br46KoXywrVgFyv+ktxrcDSVh+8GZBsCXzHg3tLebhjtmCZ0+kQyVK2XzABfPxJtpP9eRzzEGu9nins+0/mGhnI3Lg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=asTSYqI/0VaupVnUwKr/Op8wQRhoedDfa4ZNrYWJ/VQ=;
- b=Exre3hKClMUSHxTF0IZWi2tQ3pc8UxmiboOJ0uWhoBl9BGyzdggIqKqGtIt6tjtE9k/PWHhhL7ONKI/KckJznXZVKrFWmAqlh3q+FMdAyqtdLIhyXkwCbNU55m60Hymh6IwpqN6abFsW1mQWK+f2hpOFey7dsbwNFnMTB2G3jtO063NOM0W+4nldcMWFNnHkmsUvLJJeTjz1xlIOGtV3UOzFfXd6f6RPoOWH/2CxwHXDZ4i0xbXpX8uuShEpDjfbwenmbvWzOu7ILgvXIhe9dONGIe7P5XZbSUzTg+XZoefQjh0WzWOxLLdTK/Y9S5sf80YltlJLdV/lFVmYLPtU1A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
- dkim=pass header.d=silabs.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=asTSYqI/0VaupVnUwKr/Op8wQRhoedDfa4ZNrYWJ/VQ=;
- b=LZuwBgfr9NyBKM4PRRQ60fqra3uAdBAmGYBxN9gbqllIbHurtyse426veNak4zaC4pYARLPrSsHRT9mfZS9GGYgt+1TfpaN1mo8SxcJzaBEbrrzznoM8OKVEALx0atpAYW2rh6JwL26aVBURe9iP2JDgaPNf5ntu8yV138U2Djc=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=silabs.com;
-Received: from SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18)
- by SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3499.32; Wed, 4 Nov
- 2020 15:52:24 +0000
-Received: from SN6PR11MB2718.namprd11.prod.outlook.com
- ([fe80::4f5:fbe5:44a7:cb8a]) by SN6PR11MB2718.namprd11.prod.outlook.com
- ([fe80::4f5:fbe5:44a7:cb8a%5]) with mapi id 15.20.3499.032; Wed, 4 Nov 2020
- 15:52:24 +0000
-From:   Jerome Pouiller <Jerome.Pouiller@silabs.com>
-To:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org
-Cc:     devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org,
-        =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
+        id S1731505AbgKDTP5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Nov 2020 14:15:57 -0500
+Received: from mail-ot1-f67.google.com ([209.85.210.67]:45408 "EHLO
+        mail-ot1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726564AbgKDTP5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 14:15:57 -0500
+Received: by mail-ot1-f67.google.com with SMTP id k3so8488354otp.12;
+        Wed, 04 Nov 2020 11:15:56 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=xUeu7OjzCkWfl0q9Q0C25b2gAmYnfpfRf6sdmrxWckA=;
+        b=rRM4TTTc4LvENo1QxdeVaqhJBEYUiMMzLaGf/8Ex7eFnhAr1o8Vndeqetms8/n8UQn
+         8NO806T8W0IvwzeEQTMO1uO3z1E71vDcFtxZGJFrAiyLz3WxD+3KCwZiToQwLDLc/V4q
+         0/rVXl02ls7xivvjx9102Bhl2G3XW98WpxUnDLYJWvQeAD66AAqZyq5u0z6L6Ruhi39i
+         UhPGR6vVpkdG79F5C4oZiuSKXYJxwZnLosVUzwF4LGGLZSKS9zAnNjX+OsTAAe+AFiRE
+         8qSHAtakSgfzmYoZrphQ0SvvkcJWaczwEjtaXqjBQugFeEfoT0ZdYxvfRn8maAibphWe
+         znUQ==
+X-Gm-Message-State: AOAM532ovnEl3SOShAV1uAZImHcpsoDCC93Ruw36Vdi0NEB/7vwOR5MB
+        JvrMXBqx9sbAeaqQJZz9Fw==
+X-Google-Smtp-Source: ABdhPJwyVB6Vxpun9Hwox5/cSocl9xkTao6ENUk5Rm2F/NY+qCi/4EYMETnsGog5AJNAArHDE5FN3w==
+X-Received: by 2002:a9d:2283:: with SMTP id y3mr18865146ota.164.1604517355878;
+        Wed, 04 Nov 2020 11:15:55 -0800 (PST)
+Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id x21sm660177otk.39.2020.11.04.11.15.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 04 Nov 2020 11:15:55 -0800 (PST)
+Received: (nullmailer pid 3972960 invoked by uid 1000);
+        Wed, 04 Nov 2020 19:15:54 -0000
+Date:   Wed, 4 Nov 2020 13:15:54 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        linux-mmc@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
-        <jerome.pouiller@silabs.com>
-Subject: [PATCH v3 01/24] mmc: sdio: add SDIO IDs for Silabs WF200 chip
-Date:   Wed,  4 Nov 2020 16:51:44 +0100
-Message-Id: <20201104155207.128076-2-Jerome.Pouiller@silabs.com>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-kernel@vger.kernel.org, devel@driverdev.osuosl.org,
+        devicetree@vger.kernel.org,
+        "David S . Miller" <davem@davemloft.net>
+Subject: Re: [PATCH v3 02/24] dt-bindings: introduce silabs,wfx.yaml
+Message-ID: <20201104191554.GA3972736@bogus>
 References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-X-Originating-IP: [82.67.86.106]
-X-ClientProxiedBy: SN6PR01CA0032.prod.exchangelabs.com (2603:10b6:805:b6::45)
- To SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18)
+ <20201104155207.128076-3-Jerome.Pouiller@silabs.com>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from pc-42.silabs.com (82.67.86.106) by SN6PR01CA0032.prod.exchangelabs.com (2603:10b6:805:b6::45) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3499.19 via Frontend Transport; Wed, 4 Nov 2020 15:52:22 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 372cd1df-19fa-4ad1-a09b-08d880d99f0c
-X-MS-TrafficTypeDiagnostic: SN6PR11MB2718:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <SN6PR11MB2718326C3396AC86C62830D493EF0@SN6PR11MB2718.namprd11.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6108;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: xIKH9IUVTODFAFgh3oelleksdcqQeKo4xQImAyFvFFOzuqz0TKdqrWLYse6kyHMtKumY0b4WNzakhForf/6c/zDNYRVOD8mb5J+D/AaOfQfLxArqHDH1tPaVKtzIRV4Z1Qcskbo91WPalqlg/8JVUjh30d6w5pNnJ8tAq6tU4BSo0bOUgsLZBafzPAPJFwbr954hWltJ1Kg0ijgsQdgthbP7DUNGa9KnAUC6GbUlxXsrbpEExw6VBk7CG9PjRzsN8s4HsF8Swnufihox3sY61Wssiku2DKhdFc5HsVquszyjviWU5Yf/98ykN2W4mrK+ezd3RtWfxfMBSklq3+4khg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR11MB2718.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(346002)(376002)(39850400004)(136003)(396003)(8936002)(478600001)(186003)(16526019)(956004)(2616005)(6486002)(8676002)(66476007)(66556008)(66946007)(316002)(7696005)(6666004)(26005)(54906003)(107886003)(36756003)(52116002)(7416002)(4326008)(5660300002)(4744005)(86362001)(1076003)(2906002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: E368F0cy8Bkyq1wkFanX6rfCG6GjzJSkJgQVzlTAOnfFEm1FRJA/YO+7UzjoaC+77unmBReNJfCFiLnMxNHk0tm7AsNIgJQ2Ki0CY2DzZKf9tP/YDT/ML6yjFuw3pEF0j05CNW9P2UVB8kntpGDBMeGHOneE+2eq9gx7bZ3rRYnVBM90QJOlZtga+K1OuTJGqznFLcrRUdPvArJ1xrOAdWy2Fo8TW5Mpi+RzGVLsteeTimoJv5hb9HOkVRlwKNijB9tXPZrWxXjsS6G3jsJprdqpmyYwrSrersnDHevNSrQGTvNOndt1I+2j1cERSVexBbojVzAy1YKKn4hWYlCv9u5W93xUsbqGs7s9NZu7JZSmTym9wzwo3WEaAN4yLpEiysTtmBFJegsOy3UJd93NSMVR3N/4zn+vBu5O2ivn3RJ34t0UqFyAahdwW7e6sCt/WWHuqcwX+b2+uMi44oS8jJwbL8wvXJgLwMWmVp2dJ6PwE5TpzB6PI2HtNOopbhgutndNxQnUOU/Ybtt0d510/WPfpHiDXju2d0PNqTY1PwoDVlRqLUifDbqs9+do414vLIcP4VrsqVmh8kFNje2xpzmc+EFaHjdB99g/D4bmmXwBi3xm80QSj/N2th0Ux6ltWueqGBBrlu/7daFUOz49qA==
-X-OriginatorOrg: silabs.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 372cd1df-19fa-4ad1-a09b-08d880d99f0c
-X-MS-Exchange-CrossTenant-AuthSource: SN6PR11MB2718.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Nov 2020 15:52:24.0197
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: sFp/cKO4kuIa6cE7twNI/cHeg4DfOT01kkx1XP/h4SsSWdrxUaW9MNw2JRjVu1loGDTLfxQHrIC7G32NogKuOQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR11MB2718
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20201104155207.128076-3-Jerome.Pouiller@silabs.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RnJvbTogSsOpcsO0bWUgUG91aWxsZXIgPGplcm9tZS5wb3VpbGxlckBzaWxhYnMuY29tPgoKQWRk
-IFNpbGFicyBTRElPIElEIHRvIHNkaW9faWRzLmguCgpOb3RlIHRoYXQgdGhlIHZhbHVlcyB1c2Vk
-IGJ5IFNpbGFicyBhcmUgdW5jb21tb24uIEEgZHJpdmVyIGNhbm5vdCBmdWxseQpyZWx5IG9uIHRo
-ZSBTRElPIFBuUC4gSXQgc2hvdWxkIGFsc28gY2hlY2sgaWYgdGhlIGRldmljZSBpcyBkZWNsYXJl
-ZCBpbgp0aGUgRFQuCgpTaWduZWQtb2ZmLWJ5OiBKw6lyw7RtZSBQb3VpbGxlciA8amVyb21lLnBv
-dWlsbGVyQHNpbGFicy5jb20+Ci0tLQogaW5jbHVkZS9saW51eC9tbWMvc2Rpb19pZHMuaCB8IDUg
-KysrKysKIDEgZmlsZSBjaGFuZ2VkLCA1IGluc2VydGlvbnMoKykKCmRpZmYgLS1naXQgYS9pbmNs
-dWRlL2xpbnV4L21tYy9zZGlvX2lkcy5oIGIvaW5jbHVkZS9saW51eC9tbWMvc2Rpb19pZHMuaApp
-bmRleCAxMjAzNjYxOTM0NmMuLjIwYTQ4MTYyZjdmYyAxMDA2NDQKLS0tIGEvaW5jbHVkZS9saW51
-eC9tbWMvc2Rpb19pZHMuaAorKysgYi9pbmNsdWRlL2xpbnV4L21tYy9zZGlvX2lkcy5oCkBAIC0y
-NSw2ICsyNSwxMSBAQAogICogVmVuZG9ycyBhbmQgZGV2aWNlcy4gIFNvcnQga2V5OiB2ZW5kb3Ig
-Zmlyc3QsIGRldmljZSBuZXh0LgogICovCiAKKy8vIFNpbGFicyBkb2VzIG5vdCB1c2UgYSByZWxp
-YWJsZSB2ZW5kb3IgSUQuIFRvIGF2b2lkIGNvbmZsaWN0cywgdGhlIGRyaXZlcgorLy8gd29uJ3Qg
-cHJvYmUgdGhlIGRldmljZSBpZiBpdCBpcyBub3QgYWxzbyBkZWNsYXJlZCBpbiB0aGUgRFQuCisj
-ZGVmaW5lIFNESU9fVkVORE9SX0lEX1NJTEFCUwkJCTB4MDAwMAorI2RlZmluZSBTRElPX0RFVklD
-RV9JRF9TSUxBQlNfV0YyMDAJCTB4MTAwMAorCiAjZGVmaW5lIFNESU9fVkVORE9SX0lEX1NURQkJ
-CTB4MDAyMAogI2RlZmluZSBTRElPX0RFVklDRV9JRF9TVEVfQ1cxMjAwCQkweDIyODAKIAotLSAK
-Mi4yOC4wCgo=
+On Wed, 04 Nov 2020 16:51:45 +0100, Jerome Pouiller wrote:
+> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> 
+> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> ---
+>  .../bindings/net/wireless/silabs,wfx.yaml     | 131 ++++++++++++++++++
+>  1 file changed, 131 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+> 
+
+
+My bot found errors running 'make dt_binding_check' on your patch:
+
+yamllint warnings/errors:
+
+dtschema/dtc warnings/errors:
+/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml: 'additionalProperties' is a required property
+/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml: ignoring, error in schema: 
+warning: no schema found in file: ./Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+
+
+See https://patchwork.ozlabs.org/patch/1394182
+
+The base for the patch is generally the last rc1. Any dependencies
+should be noted.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit.
+
