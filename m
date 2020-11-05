@@ -1,209 +1,196 @@
-Return-Path: <SRS0=0Sxg=EK=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=4qKy=EL=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02100C5517A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:50:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39580C388F7
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 00:39:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A06FD2075E
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Nov 2020 23:50:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E0B0F21527
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 00:39:26 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QtXKfweB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="c/y2SWWh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387414AbgKDXup (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Nov 2020 18:50:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48178 "EHLO
+        id S1732224AbgKEAj0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Nov 2020 19:39:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56668 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1733029AbgKDXo6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 18:44:58 -0500
-Received: from mail-lf1-x141.google.com (mail-lf1-x141.google.com [IPv6:2a00:1450:4864:20::141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F16BC0613CF;
-        Wed,  4 Nov 2020 15:44:57 -0800 (PST)
-Received: by mail-lf1-x141.google.com with SMTP id y184so132955lfa.12;
-        Wed, 04 Nov 2020 15:44:57 -0800 (PST)
+        with ESMTP id S2387455AbgKEAjW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Nov 2020 19:39:22 -0500
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91D3DC0613CF
+        for <linux-mmc@vger.kernel.org>; Wed,  4 Nov 2020 16:39:21 -0800 (PST)
+Received: by mail-ej1-x644.google.com with SMTP id o21so110600ejb.3
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Nov 2020 16:39:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=mSwbQjJ1cVy439QSgrXK9AcLY7148KkOFvsAqpIxmwg=;
-        b=QtXKfweBRlsbGOAlYxZXOz/lYCy8unSAvDGjjvWSh/sezRhvIb291EkMy/Az42Eo7e
-         TAfz8YALCyTQ46RYjcz1KHr1bxx3QIW42M38LghlqXeAJIOhgwnXDJ2w5PFdGxUrDaJa
-         CgbvRUnmn+hP+Q9Jgoz/cIcjn3sh+vTzr920aJr959sxIfklRYfD0wQYr1mK7xUjvoYi
-         X2ev0EAqFLOjT7G0Gaih9PQ6buZ2mt73AMYcrCt1Dn2Wa1sOYP2Wywby9BlcF6QCpkRM
-         Ts50hSUFzQvXaYS6FgwlN+Yz+9QeF79aJ602AxxMXZAJiSKQWJJzQ4tzPEnhrIo8A+OP
-         CRyg==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=/71ABBKcrmuk1YYEeoWw8BppObhxvcb+S+aM7wq/fSU=;
+        b=c/y2SWWhKYhSpwtv78mNH7n9jPMelncrQF0Hh/x8KoJM3fTZ5oALzNi312/6weAp0I
+         O4vwhGwcnmBQBtJps6OHUHsn+DysFEyhvN5WaQJXA2+xWVwb9fokuhNNzwidv1jLQKNW
+         rWtGdl5+74SEJLp7e0gsEJl8GyR0ThN4IUxD1D+jSUpwlhF8wOMIZ3g5hB7DrS7R4AnF
+         6m5SvcCJloOWgHuDPXotcidoxAvA9IjnP8hrnatHk47SvgXnYEmrZqd5YIodh3buwOxB
+         y+pclkog9PWo/yLJDiBVXNUmQqKI1CtAZ5/A6UEVQ2XuOEy1kJMv2s0tO0tuTKyvzr/8
+         q+NA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=mSwbQjJ1cVy439QSgrXK9AcLY7148KkOFvsAqpIxmwg=;
-        b=CHfmP0EBUT82N4MB+0o69Qlqbx8NL1aILsx3GkrJy7iQbCsEosJv9mx7ydBOPYIQpB
-         EQsJrXzANjE6AnkbLT+V1esVVC9CzARvTGylZWjup6fwYiySwfX/cyH/nVRJZduWiPd3
-         cubZfxp8//zXhcuOsZYcwhW46nyS+OXy3o+VsCUyS4r3x85ChORNkU+7OcsbYS0Vo3QP
-         +DdOAX4BMm3ZOBy6g4iXZ4M7no2deXiJMKXeZqwLk+KncOYmhXtwrXXqjsMywBlNXGjr
-         SCqB9qMKXq27qJ7ePul5o2TN1NhB+lTrjU2UZ4wt8us8NCKCxMeS/7PG5JFYn7ec+CYC
-         GhVA==
-X-Gm-Message-State: AOAM5338YjWVZgPbgkJnag5JvK6trQIK3AOuqSvQGGxXar+mSRXaBdvc
-        jI4ifJJ0BUHOWL5xESbGbfw=
-X-Google-Smtp-Source: ABdhPJyAnR4d+zZoZfcUMnF37/CdTyI5a7cshqFtJeUxmjjzKi7K0NU+QmIwz6qwfyOY2SPBqOSB8Q==
-X-Received: by 2002:a19:c8c1:: with SMTP id y184mr46637lff.598.1604533495960;
-        Wed, 04 Nov 2020 15:44:55 -0800 (PST)
-Received: from localhost.localdomain (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
-        by smtp.gmail.com with ESMTPSA id m6sm640725ljc.112.2020.11.04.15.44.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 04 Nov 2020 15:44:55 -0800 (PST)
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Peter Chen <Peter.Chen@nxp.com>,
-        Mark Brown <broonie@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>
-Cc:     linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
-        linux-usb@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-Subject: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA Tegra20/30 SoCs
-Date:   Thu,  5 Nov 2020 02:43:57 +0300
-Message-Id: <20201104234427.26477-1-digetx@gmail.com>
-X-Mailer: git-send-email 2.27.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=/71ABBKcrmuk1YYEeoWw8BppObhxvcb+S+aM7wq/fSU=;
+        b=R3okEyYFA5c4oGmuzLXHP4/ha0k7PYcKxagl+Iic1SVOkFtf763cHwuriyLsre9V9H
+         ipQJwEFj4r75JmWfxHBlaQA3gVumYEQask4BccjpV7vZZbd6uklSXd3Wt+9EexANpxAJ
+         e3lbA/Qvzjvu3HdFddeeNnZvhTpaVdJKFRQnQ2ZGodYRf30zLCdcUu0HdPDKJj3mDGB8
+         6Qbm8Y07wgwMth8gYs0ApSRGmXeNLA06NrBzi6N2GSiR1rJm4W9klTISijnmuaswbDlu
+         SjQRljS1yw0nJAHDz5ZL5vbSfIJBC9o40RQM6O1HQw6Pj1OSNRyBEuwM9fDfrgJVMF+E
+         vc8g==
+X-Gm-Message-State: AOAM531oyPXl1CzjmX5FVMbvA9+yutkFl/NcZcgf09Lusur3GlOmJfXp
+        Cn6Y2BjIaW8YceQMJahk2KtYd/vpzUBRLR86yDI=
+X-Google-Smtp-Source: ABdhPJzfPbpIYbLPWBMieCv7JNMFd9IjwR7oyst2heYkJBDFs00UU26HtUP/RTz8PRGfd/ojLJXK/7H9H9sSC7TGy1I=
+X-Received: by 2002:a17:906:c357:: with SMTP id ci23mr653766ejb.311.1604536759559;
+ Wed, 04 Nov 2020 16:39:19 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <fa7f3fc5-c37a-ac49-e14a-45a1d2e0a942@gmail.com>
+ <CAPDyKFq9vKOODDQEEE2W+Gsx69_R3XV_Hb-owMU-=qAMbv39kg@mail.gmail.com> <2ebdcb5c-1c52-08af-9233-16366c20820e@intel.com>
+In-Reply-To: <2ebdcb5c-1c52-08af-9233-16366c20820e@intel.com>
+From:   Peter Geis <pgwipeout@gmail.com>
+Date:   Wed, 4 Nov 2020 19:39:08 -0500
+Message-ID: <CAMdYzYoFCfVkz7zwbfQ=ZoirNTymRrRyg8FCabVVEQSKRnoOEA@mail.gmail.com>
+Subject: Re: [BUG] cqe unable to handle buggy cards
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        nuumiofi@gmail.com, Michal Simek <michal.simek@xilinx.com>,
+        Manish Narani <manish.narani@xilinx.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Introduce core voltage scaling for NVIDIA Tegra20/30 SoCs, which reduces
-power consumption and heating of the Tegra chips. Tegra SoC has multiple
-hardware units which belong to a core power domain of the SoC and share
-the core voltage. The voltage must be selected in accordance to a minimum
-requirement of every core hardware unit.
+On Mon, Nov 2, 2020 at 11:32 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 2/11/20 4:54 pm, Ulf Hansson wrote:
+> > + cqhci maintainers
+> >
+> > On Sat, 31 Oct 2020 at 13:54, Peter Geis <pgwipeout@gmail.com> wrote:
+> >>
+> >> Good Morning,
+> >>
+> >> We are seeing an issue on the rk3399 with certain Foresee emmc modules
+> >> where the module reports it supports command queuing but fails in actual
+> >> implementation.
+> >>
+> >> Unfortunately there doesn't seem to be any method for the mmc core code
+> >> to detect this situation and disable command queue automatically.
+> >> There also appears to be no way to disable it at runtime.
+>
+> Since v5.5, if you know how to use SDHCI debug quirks there is
+> SDHCI_QUIRK_BROKEN_CQE
+> e.g. kernel command line option sdhci.debug_quirks=0x0x2020000
 
-The minimum core voltage requirement depends on:
+Thank you, we will test this.
 
-  1. Clock enable state of a hardware unit.
-  2. Clock frequency.
-  3. Unit's internal idling/active state.
+>
+> >>
+> >> Certain modified kernels have added a patch to enable runtime disable of
+> >> command queue entirely, but this will affect mmc core as a whole and not
+> >> just the buggy card.
+> >>
+> >> Does anyone have any insight into this issue?
+> >> Thank you for your time.
+> >
+> > Unfortunate, not me personally. I assume the issue is either be card
+> > specific or host specific. Before looking at a disable option, we need
+> > to know more about what goes wrong, I think.
+> >
+> > Kind regards
+> > Uffe
+> >
+> >>
+> >> Very Respectfully,
+> >> Peter Geis
+> >>
+> >> [   64.472882] mmc2: cqhci: timeout for tag 2
+> >> [   64.473349] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+> >> [   64.474057] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+> >> [   64.474763] mmc2: cqhci: Config:    0x00000000 | Control:  0x00000000
+> >> [   64.475468] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000000
+> >> [   64.476172] mmc2: cqhci: Int sig:   0x00000000 | Int Coal: 0x00000000
+> >> [   64.476875] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+>
+> TDL base cannot be zero, so the register values have been lost.
+> Could be a reset issue like this one but for sdhci-of-arasan.c :
+>
+> https://lore.kernel.org/linux-mmc/20200819121848.16967-1-adrian.hunter@intel.com/
 
-This series is tested on Acer A500 (T20), AC100 (T20), Nexus 7 (T30) and
-Ouya (T30) devices. I also added voltage scaling to the Ventana (T20) and
-Cardhu (T30) boards which are tested by NVIDIA's CI farm. Tegra30 is now up
-to 5C cooler on Nexus 7 and stays cool on Ouya (instead of becoming burning
-hot) while system is idling. It should be possible to improve this further
-by implementing a more advanced power management features for the kernel
-drivers.
+Excellent, we will see if a similar implementation makes a difference
+here for us as well.
 
-The DVFS support is opt-in for all boards, meaning that older DTBs will
-continue to work like they did it before this series. It should be possible
-to easily add the core voltage scaling support for Tegra114+ SoCs based on
-this grounding work later on, if anyone will want to implement it.
-
-WARNING(!) This series is made on top of the memory interconnect patches
-           which are currently under review [1]. The Tegra EMC driver
-           and devicetree-related patches need to be applied on top of
-           the ICC series.
-
-[1] https://patchwork.ozlabs.org/project/linux-tegra/list/?series=212196
-
-Dmitry Osipenko (30):
-  dt-bindings: host1x: Document OPP and voltage regulator properties
-  dt-bindings: mmc: tegra: Document OPP and voltage regulator properties
-  dt-bindings: pwm: tegra: Document OPP and voltage regulator properties
-  media: dt: bindings: tegra-vde: Document OPP and voltage regulator
-    properties
-  dt-binding: usb: ci-hdrc-usb2:  Document OPP and voltage regulator
-    properties
-  dt-bindings: usb: tegra-ehci: Document OPP and voltage regulator
-    properties
-  soc/tegra: Add sync state API
-  soc/tegra: regulators: Support Tegra SoC device sync state API
-  soc/tegra: regulators: Fix lockup when voltage-spread is out of range
-  regulator: Allow skipping disabled regulators in
-    regulator_check_consumers()
-  drm/tegra: dc: Support OPP and SoC core voltage scaling
-  drm/tegra: gr2d: Correct swapped device-tree compatibles
-  drm/tegra: gr2d: Support OPP and SoC core voltage scaling
-  drm/tegra: gr3d: Support OPP and SoC core voltage scaling
-  drm/tegra: hdmi: Support OPP and SoC core voltage scaling
-  gpu: host1x: Support OPP and SoC core voltage scaling
-  mmc: sdhci-tegra: Support OPP and core voltage scaling
-  pwm: tegra: Support OPP and core voltage scaling
-  media: staging: tegra-vde: Support OPP and SoC core voltage scaling
-  usb: chipidea: tegra: Support OPP and SoC core voltage scaling
-  usb: host: ehci-tegra: Support OPP and SoC core voltage scaling
-  memory: tegra20-emc: Support Tegra SoC device state syncing
-  memory: tegra30-emc: Support Tegra SoC device state syncing
-  ARM: tegra: Add OPP tables for Tegra20 peripheral devices
-  ARM: tegra: Add OPP tables for Tegra30 peripheral devices
-  ARM: tegra: ventana: Add voltage supplies to DVFS-capable devices
-  ARM: tegra: paz00: Add voltage supplies to DVFS-capable devices
-  ARM: tegra: acer-a500: Add voltage supplies to DVFS-capable devices
-  ARM: tegra: cardhu-a04: Add voltage supplies to DVFS-capable devices
-  ARM: tegra: nexus7: Add voltage supplies to DVFS-capable devices
-
- .../display/tegra/nvidia,tegra20-host1x.txt   |  56 +++
- .../bindings/media/nvidia,tegra-vde.txt       |  12 +
- .../bindings/mmc/nvidia,tegra20-sdhci.txt     |  12 +
- .../bindings/pwm/nvidia,tegra20-pwm.txt       |  13 +
- .../devicetree/bindings/usb/ci-hdrc-usb2.txt  |   4 +
- .../bindings/usb/nvidia,tegra20-ehci.txt      |   2 +
- .../boot/dts/tegra20-acer-a500-picasso.dts    |  30 +-
- arch/arm/boot/dts/tegra20-paz00.dts           |  40 +-
- .../arm/boot/dts/tegra20-peripherals-opp.dtsi | 386 ++++++++++++++++
- arch/arm/boot/dts/tegra20-ventana.dts         |  65 ++-
- arch/arm/boot/dts/tegra20.dtsi                |  14 +
- .../tegra30-asus-nexus7-grouper-common.dtsi   |  23 +
- arch/arm/boot/dts/tegra30-cardhu-a04.dts      |  44 ++
- .../arm/boot/dts/tegra30-peripherals-opp.dtsi | 415 ++++++++++++++++++
- arch/arm/boot/dts/tegra30.dtsi                |  13 +
- drivers/gpu/drm/tegra/Kconfig                 |   1 +
- drivers/gpu/drm/tegra/dc.c                    | 138 +++++-
- drivers/gpu/drm/tegra/dc.h                    |   5 +
- drivers/gpu/drm/tegra/gr2d.c                  | 140 +++++-
- drivers/gpu/drm/tegra/gr3d.c                  | 136 ++++++
- drivers/gpu/drm/tegra/hdmi.c                  |  63 ++-
- drivers/gpu/host1x/Kconfig                    |   1 +
- drivers/gpu/host1x/dev.c                      |  87 ++++
- drivers/memory/tegra/tegra20-emc.c            |   8 +-
- drivers/memory/tegra/tegra30-emc.c            |   8 +-
- drivers/mmc/host/Kconfig                      |   1 +
- drivers/mmc/host/sdhci-tegra.c                |  70 ++-
- drivers/pwm/Kconfig                           |   1 +
- drivers/pwm/pwm-tegra.c                       |  84 +++-
- drivers/regulator/core.c                      |  12 +-
- .../soc/samsung/exynos-regulator-coupler.c    |   2 +-
- drivers/soc/tegra/common.c                    | 152 ++++++-
- drivers/soc/tegra/regulators-tegra20.c        |  25 +-
- drivers/soc/tegra/regulators-tegra30.c        |  30 +-
- drivers/staging/media/tegra-vde/Kconfig       |   1 +
- drivers/staging/media/tegra-vde/vde.c         | 127 ++++++
- drivers/staging/media/tegra-vde/vde.h         |   1 +
- drivers/usb/chipidea/Kconfig                  |   1 +
- drivers/usb/chipidea/ci_hdrc_tegra.c          |  79 ++++
- drivers/usb/host/Kconfig                      |   1 +
- drivers/usb/host/ehci-tegra.c                 |  79 ++++
- include/linux/regulator/coupler.h             |   6 +-
- include/soc/tegra/common.h                    |  22 +
- 43 files changed, 2360 insertions(+), 50 deletions(-)
-
--- 
-2.27.0
-
+>
+>
+> >> [   64.477578] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+> >> [   64.478281] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+> >> [   64.478984] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+> >> [   64.479687] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+> >> [   64.489785] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+> >> [   64.499774] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+> >> [   64.509687] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> >> [   64.519597] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+> >> [   64.529521] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+> >> [   64.539440] mmc2: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
+> >> [   64.549352] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+> >> [   64.559277] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> >> [   64.569214] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> >> [   64.579061] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> >> [   64.588842] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+> >> [   64.598671] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> >> [   64.608446] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+> >> [   64.618161] mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
+> >> [   64.627801] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x642017d7
+> >> [   64.637376] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+> >> [   64.646855] mmc2: sdhci: Host ctl2: 0x00000083
+> >> [   64.656080] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+> >> [   64.665445] mmc2: sdhci: ============================================
+> >> [   64.674998] mmc2: running CQE recovery
+> >>
+> >> [  125.912941] mmc2: cqhci: timeout for tag 3
+> >> [  125.921978] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+> >> [  125.931200] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+> >> [  125.940389] mmc2: cqhci: Config:    0x00000001 | Control:  0x00000000
+> >> [  125.949499] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
+> >> [  125.958527] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
+> >> [  125.967486] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+> >> [  125.976260] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+> >> [  125.985065] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+> >> [  125.993698] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+> >> [  126.002244] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+> >> [  126.010716] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+> >> [  126.019159] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+> >> [  126.027525] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> >> [  126.035955] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+> >> [  126.044258] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+> >> [  126.052396] mmc2: sdhci: Argument:  0x00000001 | Trn mode: 0x00000010
+> >> [  126.060370] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+> >> [  126.068241] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> >> [  126.075978] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> >> [  126.083552] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> >> [  126.090937] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+> >> [  126.098219] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> >> [  126.105403] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+> >> [  126.112649] mmc2: sdhci: Cmd:       0x00003013 | Max curr: 0x00000000
+> >> [  126.119700] mmc2: sdhci: Resp[0]:   0x00400800 | Resp[1]:  0x642017d7
+> >> [  126.126594] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+> >> [  126.133334] mmc2: sdhci: Host ctl2: 0x00000083
+> >> [  126.139652] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+> >> [  126.146008] mmc2: sdhci: ============================================
+> >> [  126.152361] mmc2: running CQE recovery
+> >>
+> >>
+>
