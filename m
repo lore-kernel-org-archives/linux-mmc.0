@@ -2,148 +2,235 @@ Return-Path: <SRS0=4qKy=EL=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87DBDC4741F
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 08:36:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A110C4741F
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 09:46:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3916E20782
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 08:36:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 023BA2080D
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 09:46:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=silabs.onmicrosoft.com header.i=@silabs.onmicrosoft.com header.b="RPa+5R/y"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="uufJzy4G"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729722AbgKEIgv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Nov 2020 03:36:51 -0500
-Received: from mail-eopbgr770055.outbound.protection.outlook.com ([40.107.77.55]:11366
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725287AbgKEIgv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 5 Nov 2020 03:36:51 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=dTJAYiERRAkTRKKeQfxtReVJPnPHUa/GtCqJAdm3RVUwSu5/W6wszWTfer4l4wweQ+uN2qQjn1YeXFUjWahrbSnUlmImj7F4uSgdVAta1Qn7VkJb5LhIO9kJTzKCEPqEYTw3oWZKJSgisSBd56SLgitBLMYtUWk9epDre+STFo0H2T7uNgTxTp7KOLVS0wjjCWR9Jb6UMwS3pOfbGpamqgzDMAVkNf7glpbDWe77kzAcsYR4sPER3FgTrWbeg3TOWyx79TlKUe/d2L0iSlUTc83/vohkKSvtjGrmFiIPCMaDxNXEU1dUjjxFT6uaBmYRIDTqcVkjjaoRi1/itraBLQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ka9fqgKnZlLcQ2R7Bt1gRQWCM8FHqzNeEcpxP6QCEfU=;
- b=ZphQEPv6YrlIEf06SSNKyQ4yuRnCNi1avqM2EuShtttWaOKK5lSlSnmhH77vzGvha2jaEVlPisGp8TEmVoadcZuU4360451KY8lkdR5Id5PHB6hQ9KEfXm16lkpym9tlqW8r9ShJoOvka9xBJVztiwjbEncZTKlVg9PZuHFQrboeM18DTnG3tcDP3rvno2quTc+AFkGTvF6kQ5jC3nExhGe2r6/L+WQniED9u1yk+bLMDpxlIVQ670LZtstzeWe2cNzSCZMai27PEpjb1rvwbcRxSWqg/o22wuEpwTYQJodABYKK8KSAXCFD2+iWJdlQmv8/oDpH/fUIyJ3k3I2a6w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
- dkim=pass header.d=silabs.com; arc=none
+        id S1726428AbgKEJqB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Nov 2020 04:46:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56628 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725862AbgKEJqA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 04:46:00 -0500
+Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63129C0613D4
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 01:46:00 -0800 (PST)
+Received: by mail-ua1-x942.google.com with SMTP id q20so334427uar.7
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 01:46:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ka9fqgKnZlLcQ2R7Bt1gRQWCM8FHqzNeEcpxP6QCEfU=;
- b=RPa+5R/yPATxt1msBirvBPZ03cxPtHr/rc3rae+2mob1IHXTlj73t2fJImv8G+nKMnBe7zMFCYOCaaqfI3DBE323y185qAIv0sr01hdwDvECRv3WKHwbNt8U7BwvjEU5ngK7azRH6IeJH+CP6UBKp50LwYaqlFIFvqHJMo6Ollw=
-Authentication-Results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=silabs.com;
-Received: from SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18)
- by SN6PR11MB3504.namprd11.prod.outlook.com (2603:10b6:805:d0::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3499.27; Thu, 5 Nov
- 2020 08:36:48 +0000
-Received: from SN6PR11MB2718.namprd11.prod.outlook.com
- ([fe80::4f5:fbe5:44a7:cb8a]) by SN6PR11MB2718.namprd11.prod.outlook.com
- ([fe80::4f5:fbe5:44a7:cb8a%5]) with mapi id 15.20.3499.032; Thu, 5 Nov 2020
- 08:36:47 +0000
-From:   =?ISO-8859-1?Q?J=E9r=F4me?= Pouiller <jerome.pouiller@silabs.com>
-To:     Rob Herring <robh@kernel.org>
-Cc:     Pali =?ISO-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
-        linux-mmc@vger.kernel.org, Kalle Valo <kvalo@codeaurora.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-kernel@vger.kernel.org, devel@driverdev.osuosl.org,
-        devicetree@vger.kernel.org,
-        "David S . Miller" <davem@davemloft.net>
-Subject: Re: [PATCH v3 02/24] dt-bindings: introduce silabs,wfx.yaml
-Date:   Thu, 05 Nov 2020 09:36:41 +0100
-Message-ID: <5127415.29KlJPOoH8@pc-42>
-Organization: Silicon Labs
-In-Reply-To: <20201104191554.GA3972736@bogus>
-References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com> <20201104155207.128076-3-Jerome.Pouiller@silabs.com> <20201104191554.GA3972736@bogus>
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
-X-Originating-IP: [82.67.86.106]
-X-ClientProxiedBy: DM3PR14CA0143.namprd14.prod.outlook.com
- (2603:10b6:0:53::27) To SN6PR11MB2718.namprd11.prod.outlook.com
- (2603:10b6:805:63::18)
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=BPeVC0/yyKKsuDCRa2ABd9prVUPUc34ioExCTRmKEHc=;
+        b=uufJzy4G7ts1PiE/L3wJVNCw2wP3NSOmawqIi/e2dVMD4Xd21IBA/Vm2yEuo3NRkIO
+         5RTFPkxoUZgZvRGL3uCJhgSw/HE6fmf+IDx190dCfUqR+JPH8zXGsd6gelceLKdsJg6T
+         W9tmGvZtl0GRilR/Tesuwpo7+anWJCeo6NBiNViKTK2V8/GqdsDZTq11ps7gJlbfeY+i
+         pSoDKrE7a3V1srakOPqPG22Jy7SHWsEgoGIWEGTN0Htlxp1Nhn/YPfKpypwxo8uOWeve
+         gx03c3qbD5se6hfduEKaO+xHmrhlxJQp6xOVJi1NkwG4/qLyzw5ZIE/FCeeFdhAUNOiH
+         Ddqg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=BPeVC0/yyKKsuDCRa2ABd9prVUPUc34ioExCTRmKEHc=;
+        b=fl6MXDl0vu7lV2xRWUoeS6AnarwUzhfNnDLvlk0ujJiujWzTmhYut8B7KJO52iYvzF
+         +QtYVK0Rsttt3SwAb1y+Pr1bA+SUlR3EdhsJekHAVrXqMSoH0BHWfhsEKpCfiYy8skXp
+         Hc5OrKxOqwAiAMYe13Tc6n6NvMNgUr5ToMjuhLmcYRACzneI3R+jhhw1bTRTvzWOw3Na
+         BjD4QDhF0aJecVTYgBWETRPz5Qxrc7PH1o1vRnpHogVLzjk4BjCHGFAz28jRK3laDlR+
+         xXSvvOOqT6wgZRPgJn1AM2RU36RbzxtrxNBnLyve5x+MX0LpUU6OhMlpcCIigyPAxfYe
+         +7XA==
+X-Gm-Message-State: AOAM533jTuD71O1o9W/bPxFacFrmaDOxxO5qiCduX1SwOixmT6lsfmU3
+        gEAcWKcVkpMmmUpWYkUstW7SO5aI+HvQt4YyvHbqkQ==
+X-Google-Smtp-Source: ABdhPJyQXmDq3VGXwDr0haDHSXpl4JtWo+uo7sQGY6XWLUZgE6Tj9Jyk5i5lU0labVUxd8mL5Fh6Hi6T+EuKK3uFWNY=
+X-Received: by 2002:ab0:23d5:: with SMTP id c21mr548021uan.129.1604569559528;
+ Thu, 05 Nov 2020 01:45:59 -0800 (PST)
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from pc-42.localnet (82.67.86.106) by DM3PR14CA0143.namprd14.prod.outlook.com (2603:10b6:0:53::27) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3541.21 via Frontend Transport; Thu, 5 Nov 2020 08:36:45 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 5dc5c54d-9b90-47e9-0615-08d88165ef21
-X-MS-TrafficTypeDiagnostic: SN6PR11MB3504:
-X-Microsoft-Antispam-PRVS: <SN6PR11MB35042F87CB2DDA07603EB79093EE0@SN6PR11MB3504.namprd11.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: wB9GE0zNxYgyj9KdBXlLtrpyVl5SylDl9dbIKxJuxTcsqAXGlP9PufE5uIvgPycZireG6AtQp6sWkP53LRH1g841UgX9J04SCKTPGmZ6omMv9/RvDxwehypJMf4vf1DeqP75VAzS6cwJiu0lVG0qh1bLbOishcS/QDWEYM14vNpvshHUkzjKxfqtsQoLfPUS5TTwtShbroBvnXHRah5p0jD+v4uvBn4wrCy7KjpVeu0roaFGGmhQT4PdF+HMMiEXJURU7mjOwZVoUtvoz7YWm8AGipav55d6spcgEGtD00zZHCyo6zhJioP4PwAWh85bDAQD0hIMnAD97rH7JDlvGVeoT2mKrK2xwJVtGga95QR7m+z8N9AlA1dNbgjikFn3S8R3dOfln4ELAusPyYe1c31hO6FsOHM3tVinFvColCMherZImycRn9pUglnXrGSnwibSHb+X9UgXpLv8vXn+0A==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR11MB2718.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(39850400004)(136003)(346002)(376002)(396003)(366004)(2906002)(6506007)(66946007)(16526019)(66556008)(66476007)(316002)(478600001)(6666004)(54906003)(186003)(83380400001)(7416002)(4326008)(6512007)(8676002)(956004)(36916002)(6486002)(8936002)(966005)(5660300002)(66574015)(26005)(52116002)(9686003)(6916009)(33716001)(86362001)(39026012);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: F4BoImazyIDegq/55pU33ZpGfdvUfIRX7imH1kxqklM6z5zMk7qE5DQH8vaFXQITrbgLFKlnu2KcNSDTzwLgwUqSNcFh4WKGxI/KaD6htVlUo5wVAZ23yaj2AcPuNBsYVrBAS4uduKZMEsKnfHAYEzoB0x8c7RziqEjLanWOe0sUGjb3ilGdUrKwRYClCIuOR49/A1yDTVNlZVB/b2LTfi09DBriG3YkTihzdSBOGEn9EmrVEHUvjSHGCmwbhZqGfi0v1Pja9TwoUFI4ygWh7IH1JjMAS2q3qyIL6PHWoMuEtD16a01rDrhfo40BpBqTfdUUVIma2soH1W0+38EF/eTYljN/3+QD6S460gJz/30PF1WX9vi3/3IveTJFIBjb0Fg5sN/5x4DP4vp1YT9AaZthD6mnpP9UXo2jtd0X9H1dDKqke0Ez3RNItDCw9O9ZGZA/YTRiu7vZnqJab00FJNPQOKFKQJJUsPjKRfUO5OVOqqDtnhxUg/XGAfnVChU/2HJ3fjKMukNvkxrbbYNexle06JKfTQac33CrZxNtUI71Ze5j8R5Nl+lwEruT4uQ0ofHMlsgBHQLvBZI/i6S6Nm1cz5DiCSTYgxSCdpx0Ve/XxsvaxjmkLkOePOnYZrqJFfdwULF07GCVC6KRHjnRxg==
-X-OriginatorOrg: silabs.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5dc5c54d-9b90-47e9-0615-08d88165ef21
-X-MS-Exchange-CrossTenant-AuthSource: SN6PR11MB2718.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Nov 2020 08:36:47.8682
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: +cFy1NJPq8YVTgRqPcdaL7PPjjDMjmel06pEGDb8AOXFD6WAR6ZZGUEGGRCCANYIFI9ep3WmggHzNTlX5ZRSmg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR11MB3504
+References: <20201104234427.26477-1-digetx@gmail.com>
+In-Reply-To: <20201104234427.26477-1-digetx@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 5 Nov 2020 10:45:23 +0100
+Message-ID: <CAPDyKFr7qTU2RPhA_ZrbCayoTTNUEno1zdmvmv+8HBe-Owrfeg@mail.gmail.com>
+Subject: Re: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA
+ Tegra20/30 SoCs
+To:     Dmitry Osipenko <digetx@gmail.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        driverdevel <devel@driverdev.osuosl.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-pwm@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wednesday 4 November 2020 20:15:54 CET Rob Herring wrote:
-> On Wed, 04 Nov 2020 16:51:45 +0100, Jerome Pouiller wrote:
-> > From: J=E9r=F4me Pouiller <jerome.pouiller@silabs.com>
-> >
-> > Signed-off-by: J=E9r=F4me Pouiller <jerome.pouiller@silabs.com>
-> > ---
-> >  .../bindings/net/wireless/silabs,wfx.yaml     | 131 ++++++++++++++++++
-> >  1 file changed, 131 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/net/wireless/sila=
-bs,wfx.yaml
-> >
->=20
->=20
-> My bot found errors running 'make dt_binding_check' on your patch:
->=20
-> yamllint warnings/errors:
->=20
-> dtschema/dtc warnings/errors:
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/=
-wireless/silabs,wfx.yaml: 'additionalProperties' is a required property
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/net/=
-wireless/silabs,wfx.yaml: ignoring, error in schema:
-> warning: no schema found in file: ./Documentation/devicetree/bindings/net=
-/wireless/silabs,wfx.yaml
->=20
->=20
-> See https://patchwork.ozlabs.org/patch/1394182
->=20
-> The base for the patch is generally the last rc1. Any dependencies
-> should be noted.
->=20
-> If you already ran 'make dt_binding_check' and didn't see the above
-> error(s), then make sure 'yamllint' is installed and dt-schema is up to
-> date:
->=20
-> pip3 install dtschema --upgrade
++ Viresh
 
-Weird, I don't have any error. Yet, yamllint is installed (1.24.2-1) and=20
-pip says that dts-schema is up-to-date (2020.8.2.dev2+gd63b653).
+On Thu, 5 Nov 2020 at 00:44, Dmitry Osipenko <digetx@gmail.com> wrote:
+>
+> Introduce core voltage scaling for NVIDIA Tegra20/30 SoCs, which reduces
+> power consumption and heating of the Tegra chips. Tegra SoC has multiple
+> hardware units which belong to a core power domain of the SoC and share
+> the core voltage. The voltage must be selected in accordance to a minimum
+> requirement of every core hardware unit.
+>
+> The minimum core voltage requirement depends on:
+>
+>   1. Clock enable state of a hardware unit.
+>   2. Clock frequency.
+>   3. Unit's internal idling/active state.
+>
+> This series is tested on Acer A500 (T20), AC100 (T20), Nexus 7 (T30) and
+> Ouya (T30) devices. I also added voltage scaling to the Ventana (T20) and
+> Cardhu (T30) boards which are tested by NVIDIA's CI farm. Tegra30 is now up
+> to 5C cooler on Nexus 7 and stays cool on Ouya (instead of becoming burning
+> hot) while system is idling. It should be possible to improve this further
+> by implementing a more advanced power management features for the kernel
+> drivers.
+>
+> The DVFS support is opt-in for all boards, meaning that older DTBs will
+> continue to work like they did it before this series. It should be possible
+> to easily add the core voltage scaling support for Tegra114+ SoCs based on
+> this grounding work later on, if anyone will want to implement it.
+>
+> WARNING(!) This series is made on top of the memory interconnect patches
+>            which are currently under review [1]. The Tegra EMC driver
+>            and devicetree-related patches need to be applied on top of
+>            the ICC series.
+>
+> [1] https://patchwork.ozlabs.org/project/linux-tegra/list/?series=212196
+>
+> Dmitry Osipenko (30):
+>   dt-bindings: host1x: Document OPP and voltage regulator properties
+>   dt-bindings: mmc: tegra: Document OPP and voltage regulator properties
+>   dt-bindings: pwm: tegra: Document OPP and voltage regulator properties
+>   media: dt: bindings: tegra-vde: Document OPP and voltage regulator
+>     properties
+>   dt-binding: usb: ci-hdrc-usb2:  Document OPP and voltage regulator
+>     properties
+>   dt-bindings: usb: tegra-ehci: Document OPP and voltage regulator
+>     properties
+>   soc/tegra: Add sync state API
+>   soc/tegra: regulators: Support Tegra SoC device sync state API
+>   soc/tegra: regulators: Fix lockup when voltage-spread is out of range
+>   regulator: Allow skipping disabled regulators in
+>     regulator_check_consumers()
+>   drm/tegra: dc: Support OPP and SoC core voltage scaling
+>   drm/tegra: gr2d: Correct swapped device-tree compatibles
+>   drm/tegra: gr2d: Support OPP and SoC core voltage scaling
+>   drm/tegra: gr3d: Support OPP and SoC core voltage scaling
+>   drm/tegra: hdmi: Support OPP and SoC core voltage scaling
+>   gpu: host1x: Support OPP and SoC core voltage scaling
+>   mmc: sdhci-tegra: Support OPP and core voltage scaling
+>   pwm: tegra: Support OPP and core voltage scaling
+>   media: staging: tegra-vde: Support OPP and SoC core voltage scaling
+>   usb: chipidea: tegra: Support OPP and SoC core voltage scaling
+>   usb: host: ehci-tegra: Support OPP and SoC core voltage scaling
+>   memory: tegra20-emc: Support Tegra SoC device state syncing
+>   memory: tegra30-emc: Support Tegra SoC device state syncing
+>   ARM: tegra: Add OPP tables for Tegra20 peripheral devices
+>   ARM: tegra: Add OPP tables for Tegra30 peripheral devices
+>   ARM: tegra: ventana: Add voltage supplies to DVFS-capable devices
+>   ARM: tegra: paz00: Add voltage supplies to DVFS-capable devices
+>   ARM: tegra: acer-a500: Add voltage supplies to DVFS-capable devices
+>   ARM: tegra: cardhu-a04: Add voltage supplies to DVFS-capable devices
+>   ARM: tegra: nexus7: Add voltage supplies to DVFS-capable devices
+>
+>  .../display/tegra/nvidia,tegra20-host1x.txt   |  56 +++
+>  .../bindings/media/nvidia,tegra-vde.txt       |  12 +
+>  .../bindings/mmc/nvidia,tegra20-sdhci.txt     |  12 +
+>  .../bindings/pwm/nvidia,tegra20-pwm.txt       |  13 +
+>  .../devicetree/bindings/usb/ci-hdrc-usb2.txt  |   4 +
+>  .../bindings/usb/nvidia,tegra20-ehci.txt      |   2 +
+>  .../boot/dts/tegra20-acer-a500-picasso.dts    |  30 +-
+>  arch/arm/boot/dts/tegra20-paz00.dts           |  40 +-
+>  .../arm/boot/dts/tegra20-peripherals-opp.dtsi | 386 ++++++++++++++++
+>  arch/arm/boot/dts/tegra20-ventana.dts         |  65 ++-
+>  arch/arm/boot/dts/tegra20.dtsi                |  14 +
+>  .../tegra30-asus-nexus7-grouper-common.dtsi   |  23 +
+>  arch/arm/boot/dts/tegra30-cardhu-a04.dts      |  44 ++
+>  .../arm/boot/dts/tegra30-peripherals-opp.dtsi | 415 ++++++++++++++++++
+>  arch/arm/boot/dts/tegra30.dtsi                |  13 +
+>  drivers/gpu/drm/tegra/Kconfig                 |   1 +
+>  drivers/gpu/drm/tegra/dc.c                    | 138 +++++-
+>  drivers/gpu/drm/tegra/dc.h                    |   5 +
+>  drivers/gpu/drm/tegra/gr2d.c                  | 140 +++++-
+>  drivers/gpu/drm/tegra/gr3d.c                  | 136 ++++++
+>  drivers/gpu/drm/tegra/hdmi.c                  |  63 ++-
+>  drivers/gpu/host1x/Kconfig                    |   1 +
+>  drivers/gpu/host1x/dev.c                      |  87 ++++
+>  drivers/memory/tegra/tegra20-emc.c            |   8 +-
+>  drivers/memory/tegra/tegra30-emc.c            |   8 +-
+>  drivers/mmc/host/Kconfig                      |   1 +
+>  drivers/mmc/host/sdhci-tegra.c                |  70 ++-
+>  drivers/pwm/Kconfig                           |   1 +
+>  drivers/pwm/pwm-tegra.c                       |  84 +++-
+>  drivers/regulator/core.c                      |  12 +-
+>  .../soc/samsung/exynos-regulator-coupler.c    |   2 +-
+>  drivers/soc/tegra/common.c                    | 152 ++++++-
+>  drivers/soc/tegra/regulators-tegra20.c        |  25 +-
+>  drivers/soc/tegra/regulators-tegra30.c        |  30 +-
+>  drivers/staging/media/tegra-vde/Kconfig       |   1 +
+>  drivers/staging/media/tegra-vde/vde.c         | 127 ++++++
+>  drivers/staging/media/tegra-vde/vde.h         |   1 +
+>  drivers/usb/chipidea/Kconfig                  |   1 +
+>  drivers/usb/chipidea/ci_hdrc_tegra.c          |  79 ++++
+>  drivers/usb/host/Kconfig                      |   1 +
+>  drivers/usb/host/ehci-tegra.c                 |  79 ++++
+>  include/linux/regulator/coupler.h             |   6 +-
+>  include/soc/tegra/common.h                    |  22 +
+>  43 files changed, 2360 insertions(+), 50 deletions(-)
+>
+> --
+> 2.27.0
+>
 
-I have also tried after rebased on v5.10-rc2, then on v5.10-rc1 without=20
-success.
+I need some more time to review this, but just a quick check found a
+few potential issues...
 
+The "core-supply", that you specify as a regulator for each
+controller's device node, is not the way we describe power domains.
+Instead, it seems like you should register a power-domain provider
+(with the help of genpd) and implement the ->set_performance_state()
+callback for it. Each device node should then be hooked up to this
+power-domain, rather than to a "core-supply". For DT bindings, please
+have a look at Documentation/devicetree/bindings/power/power-domain.yaml
+and Documentation/devicetree/bindings/power/power_domain.txt.
 
---=20
-J=E9r=F4me Pouiller
+In regards to the "sync state" problem (preventing to change
+performance states until all consumers have been attached), this can
+then be managed by the genpd provider driver instead.
 
-
+Kind regards
+Uffe
