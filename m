@@ -2,169 +2,187 @@ Return-Path: <SRS0=4qKy=EL=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6DBEC6379F
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 12:04:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F840C4741F
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 12:53:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6EBAF20BED
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 12:04:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C6C8220936
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 12:53:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="bX3PXF8w"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="y6DX4cMU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730595AbgKEMEz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Nov 2020 07:04:55 -0500
-Received: from mail-eopbgr1410098.outbound.protection.outlook.com ([40.107.141.98]:13981
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1730714AbgKEMEy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 5 Nov 2020 07:04:54 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=PjfZIYsFcKOH8mmMlvMnBv1vZo6MDZ2dtq0NLgqypkbN8XmZB/O0AmdOxpO6/JTMdpg9pTIefs8s32kdao/udjjr8tYLpCe9ChcKmfZOLDUCEgtUFgnU+8MK3jcuhIWQP+eOivTra25017Ppl1TRu+YqU0A3Mr0nP3Ytg7/shhANdQ4h8AZUdly/doXTybe3VNFUalnWtYZ2LNMXqrqqYZR9xxS/OZiVrF/jnaUg25Z7vvry93p0//T4PwIM4RjphwKyiombhZEgri85co98DSW3tSTQLTA5Mn1ZwkVQcn4MJ4gt/PPq0yXNZMttUA5KFBcSIpNxTOgwWwPM+ok1kQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=BUif+fmXOMW7N1t4gmiwaw02TwFltBsED8Z9TXuGAeI=;
- b=Inbu3JkmxEv6bOpivUOo9jX90WplY1zxRhyNzRUeChe69QnqJdh+JWqOlIvxkul2Kmhi8xEzO5J5Dgzz+e6st4QuwgAdlZlMaLpnw/NeY5rSo6BU5eqRYgB1MM9XH8N4es2ZQFtAQPOQkGqcjYSRK9kbJSAyacdMCQyg5xPDJWMgHl2n6G9FGMBWewwLdlctcawSRqy/B08zANXWCH4SUGD2YFfHfpfPwsfVjJBTEYKVmhZmYjnMRxZxxpuJoAerbdHU/4JZax/6L1TOJjlbEna5pe4ZAKSaQ2o0b3lIJql4gWEEKg+NzpXMVwvfa7N2uAw3rFC36ANyVubgA+raWQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S1730564AbgKEMxS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Nov 2020 07:53:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57602 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730461AbgKEMxS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 07:53:18 -0500
+Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9AE95C0613D6
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 04:53:16 -0800 (PST)
+Received: by mail-ua1-x943.google.com with SMTP id q20so474691uar.7
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 04:53:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=BUif+fmXOMW7N1t4gmiwaw02TwFltBsED8Z9TXuGAeI=;
- b=bX3PXF8w6hCd0GlHJcIwfmrMJ/nPMeJA9BI/iEjDRKemwA+sS0mlu+xFGE+Idxn/mSc5WRZnPyXUXflEtMB5xSffIOfKRTOFbQAVjEcfgAotcbhXgBwG88xvRF7ZNH9FMx+OgdlX0MKUvRCyNziz6KB7HHGvBzGZBOvM4bh0Mmw=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYAPR01MB3935.jpnprd01.prod.outlook.com (2603:1096:404:c2::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3499.28; Thu, 5 Nov
- 2020 12:04:50 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::bcba:dccf:7d4c:c883]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::bcba:dccf:7d4c:c883%4]) with mapi id 15.20.3499.032; Thu, 5 Nov 2020
- 12:04:49 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [PATCH v2] mmc: core: issue power off notification when host is
- removed
-Thread-Topic: [PATCH v2] mmc: core: issue power off notification when host is
- removed
-Thread-Index: AQHWsP+VkFFkkB7XykutJW/IbySArKm5cS8g
-Date:   Thu, 5 Nov 2020 12:04:49 +0000
-Message-ID: <TY2PR01MB36929777D82EAE9EA4FA499CD8EE0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <1604311475-15307-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <1604311475-15307-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=renesas.com;
-x-originating-ip: [240f:60:5f3e:1:d410:ae4c:fae8:5565]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: b4e1668f-8bb5-4c6e-7b3e-08d88182ff28
-x-ms-traffictypediagnostic: TYAPR01MB3935:
-x-microsoft-antispam-prvs: <TYAPR01MB3935F19E5DE63B80202FEF24D8EE0@TYAPR01MB3935.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: deFXyWXSIgWqSnYwwZlrNsnq/wCGaSkPxP8AgqsmKnMP47gSdHrkhRjwOs0tmaEJs7DSIWj3Pyfm1malj5ho3TdxGJ6uQZsxrtQCuMhZcaskzuJp61lGu326Hsa3hXww0Ngq1dbz/W9o1X6hTbYAAKbuApCo9jgQV9lnEuMQfOs7HEyQlCNtfEZB3qlICJBmEpIDMYGSCtBYlDwYH35H+h6y8CTJr2xZmxRzs45DyBwlyTxnWOOTBya1s3WhLny1xwycHsRi6HBmp+6s0NhERzij707a71mP3kLwTKa2FxnOqBY+e/fS0kk40dKHwCktj9nbRi6bLLidBRVVn4X+2g==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(376002)(396003)(39840400004)(136003)(366004)(8936002)(6916009)(52536014)(71200400001)(8676002)(86362001)(15650500001)(4326008)(186003)(6506007)(5660300002)(316002)(83380400001)(64756008)(54906003)(55016002)(66476007)(7696005)(76116006)(66946007)(66446008)(66556008)(9686003)(33656002)(2906002)(478600001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: afDCul7QmEZ+24aW2mYMnb3foYv7dxGijSUVB46wjQBhlsS3C8rnKLgrHmR6kS2HYQYFfIZfZa79pDIKdRUr7Ksb9StJ/nZA2dsm01JqlwqidL9QeY3QfWFO2rDFJVUfJbWHUh1Q+kqUt0JqXG7pA5GIwsxaR/XFMiuBuvfX4/LECVlp/CmetMSndjvtA3jF0VNpv2uvdnAM33zWwBJii3pyvWWpO6RQK/TYsSZfobgtfzgD7GwwF/JH3YBdvOpqU+bl/uG4GIyNGzNo7D9FIHyEj7Qm6+pJNfGadU5bbLV0iVZti14h0MTYWpUv1sDL5lv/Y2Kctkk6XD1w7CudAJLNpqga0ksia4+3QNU7I8rUK+554qWZXIW2TAC6A6n1xgh86qzNh7Sy4zLrWQilY0kBibsOH4+pem+jX1hQStOlOMLoWZSfiJCUl2qYmb5q3Xk2TCANKRraHOb+IogCCiFcf4LEmikuRcVFl0dXFgANpeqjbI8TORkpfOpJCQPnR8DX3OxWzBQy8TgXX2WL+zx76s9QuDbK8ObjczQcAtkKjy0ZqM3f0RDfeqa776g5RvKCjElT0R0wAMpOJR34xzzgTp3ELONhqeUswusTgsvA3iouYSIkKzK7KUxxwwkZ5HtGCrfceaO+zU2Bt3CUSEscfHasPhPUWTMFBdd9t82ztxEzsgkEloQYLTpZOT/6DfR2LxxY2GiKqOxOq8paHg==
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=L6TCLuc1aSDhvBsEh/oyOKoJFVXSTFCOXAYW2AUTtHo=;
+        b=y6DX4cMUVCgpxUKuGqoEligLjI7mP0FgyJ97c7sIUUHZxJlTwtRRakXekgH7YsuigB
+         Na2QU2xZN4x2PfpN6omerSdhzPwwGn9bDYKeR2k6MuBaUl4m5dH4WWWTdnhpeJeXb0wO
+         XSZFej4dNy5nb1iC9xr8tfwJeCBjFjlTzg4qI2DAs6FEDqJOv7dGIgx54zxdVZ6kpJNY
+         qEEM8136+KYXcHo4ba8akOcRfEEQa2WPh8DybrHFK+sabZgBhMR36tCVRG83K7vH1cW2
+         +tAvD7+11Tiw9WmdBdchM838Ksuv8W7UHq8LoeYHHVZz9EZWz0CY4hFIKH9bgfZDnoHM
+         MkFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=L6TCLuc1aSDhvBsEh/oyOKoJFVXSTFCOXAYW2AUTtHo=;
+        b=NsBsC6rcr4nGQ27PH/B9X7vObkn2zr3+XkmEA4z/nrGF0rwgRJ5zjEM4DzhwBwsvlL
+         POgftAfODh1nBuIq/iTJkvGH4YD7PKsotd7gyYSr41jMLTG8FouIVyUdNTKkcnBy74eD
+         g5YnlFX+w/Zxg22Vlgei6HQvf0t/t+g72FrM76zvt/NAL6cdSFXmVwrhz+2smsZsdhXJ
+         IsLu4sreYFXLm+gl7fNuz1Cfvhx7ZKZJ5svx6uEKKym/3g6SJaW1CmjiIonbnUbLnTm2
+         aCTJ9g5pWNwgYDXEvBnxHS/XHmDh9ROSJ1G9bKatEjR7kREjlxLEtBgEd0IUmXC57w8c
+         sN8w==
+X-Gm-Message-State: AOAM533tvrRxnzcjJSX6Uglf2cX9FaKrVRe56G02u8CAQ/uN/4NZgzyG
+        lSfMwoQV2U07sTmPr6QcgCW/GVXRRbfU0hkZGYvF+A==
+X-Google-Smtp-Source: ABdhPJycxdGkrda5dU9htxc/OSwm7s+GQAoBTPW1YXOO/bE03Yfcq+QBohkR+LMOwjYHynIUz7nEwPk/k/ZMFVtVBnc=
+X-Received: by 2002:a9f:2f15:: with SMTP id x21mr833961uaj.104.1604580795669;
+ Thu, 05 Nov 2020 04:53:15 -0800 (PST)
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b4e1668f-8bb5-4c6e-7b3e-08d88182ff28
-X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Nov 2020 12:04:49.8170
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Ad8TAzd6ULn1mkv0/Aqu+Ciz8cOEkslthqha6zm+IUTpYOHKKBlAV7bX9xLkLxnQVlUylmL5nUgtSGQP+lpgiretNINqtvAMFpMUqpW51o+sQa+JqS9uz3RHV9WMx39D
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB3935
+References: <20201104234427.26477-1-digetx@gmail.com> <CAPDyKFr7qTU2RPhA_ZrbCayoTTNUEno1zdmvmv+8HBe-Owrfeg@mail.gmail.com>
+ <20201105100603.skrirm7uke4s2xyl@vireshk-i7> <CAPDyKFoCJt5MBSKBJ8n1OAMdVsWHdwXTx0zFEcZw_F_gQ6Ug0w@mail.gmail.com>
+ <20201105104009.oo4dc6a2gdcwduhk@vireshk-i7> <CAPDyKFpQG98d6foc1U6fp3YEBdZ1vLqY9cmWxpUwXoKgDn+ojQ@mail.gmail.com>
+ <20201105111301.2hxfx2tnmf2saakp@vireshk-i7>
+In-Reply-To: <20201105111301.2hxfx2tnmf2saakp@vireshk-i7>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 5 Nov 2020 13:52:39 +0100
+Message-ID: <CAPDyKFr3LhrnK9mm=RzhZvcnfeAKez3Yzm6HU_oP1bnPokh9vg@mail.gmail.com>
+Subject: Re: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA
+ Tegra20/30 SoCs
+To:     Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Dmitry Osipenko <digetx@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        driverdevel <devel@driverdev.osuosl.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-pwm@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+On Thu, 5 Nov 2020 at 12:13, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+>
+> On 05-11-20, 11:56, Ulf Hansson wrote:
+> > On Thu, 5 Nov 2020 at 11:40, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+> > > Btw, how do we identify if it is a power domain or a regulator ?
+>
+> To be honest, I was a bit afraid and embarrassed to ask this question,
+> and was hoping people to make fun of me in return :)
+>
+> > Good question. It's not a crystal clear line in between them, I think.
+>
+> And I was relieved after reading this :)
+>
+> > A power domain to me, means that some part of a silicon (a group of
+> > controllers or just a single piece, for example) needs some kind of
+> > resource (typically a power rail) to be enabled to be functional, to
+> > start with.
+>
+> Isn't this what a part of regulator does as well ? i.e.
+> enabling/disabling of the regulator or power to a group of
+> controllers.
 
-> From: Yoshihiro Shimoda, Sent: Monday, November 2, 2020 7:05 PM
->=20
-> User is possible to turn the power off after a host was removed.
-> So, call _mmc_suspend() to issue the power off notification when
-> a host is removing. Note that, to prevent _mmc_resume() calling
-> in mmc_runtime_resume(), call mmc_card_clr_suspended() in
-> mmc_remove() before mmc_remove_card(). Otherwise, _mmc_resume()
-> call mmc_init_card() while removing the host.
->=20
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> ---
->  Changes from v1:
->  - Reuse _mmc_suspend() instead of direct mmc_poweroff_notify() calling
->   to check suspended flag while removing.
+It could, but it shouldn't.
 
-I'm afraid again, but I would like to drop this patch too because
-my colleague found an issue which the following timeout happened
-when we read a boot partition, and then unbind the controller.
+>
+> Over that the regulator does voltage/current scaling as well, which
+> normally the power domains don't do (though we did that in
+> performance-state case).
+>
+> > If there are operating points involved, that's also a
+> > clear indication to me, that it's not a regular regulator.
+>
+> Is there any example of that? I hope by OPP you meant both freq and
+> voltage here. I am not sure if I know of a case where a power domain
+> handles both of them.
 
-    [  463.073168] renesas_sdhi_internal_dmac ee140000.mmc: timeout waiting=
- for hardware interrupt (CMD6)
+It may be both voltage and frequency - but in some cases only voltage.
+From HW point of view, many ARM legacy platforms have power domains
+that work like this.
 
-The issue happened on the following mmc_blk_part_switch() calling.
-And the function was called after _mmc_suspend() in mmc_remove() called
-mmc_power_off(). So, perhaps, we should avoid mmc_power_off() calling
-in mmc_remove().
+As you know, the DVFS case has in many years not been solved in a
+generic way, but mostly via platform specific hacks.
 
-As another solution, we can stop to call mmc_blk_part_switch()
-in mmc_blk_remove(). However, in such case we need to modify
-mmc-test driver for switching the partition [1].
----
-static void mmc_blk_remove(struct mmc_card *card)
-{
-        struct mmc_blk_data *md =3D dev_get_drvdata(&card->dev);
+The worst ones are probably those hacking clock drivers (which myself
+also have contributed to). Have a look at clk_prcmu_opp_prepare(), for
+example, which is used by the UX500 platform. Another option has been
+to use the devfreq framework, but it has limitations in regards to
+this too.
 
-        mmc_blk_remove_debugfs(card, md);
-        mmc_blk_remove_parts(card, md);
-        pm_runtime_get_sync(&card->dev);
-        if (md->part_curr !=3D md->part_type) {
-                mmc_claim_host(card->host);
-                mmc_blk_part_switch(card, md->part_type);   // here
-                mmc_release_host(card->host);
-        }
-<snip>
----
+That said, I am hoping that people start moving towards the
+deploying/implementing DVFS through the power-domain approach,
+together with the OPPs. Maybe there are still some pieces missing from
+an infrastructure point of view, but that should become more evident
+as more starts using it.
 
-[1] According to the following commit, we need to switch the partition
-before we use mmc-test driver.
----
-commit ddd6fa7e794e62af3ec3eb4ffdc78489885701f2
-Author: Adrian Hunter <adrian.hunter@intel.com>
-Date:   Thu Jun 23 13:40:26 2011 +0300
+>
+> > Maybe we should try to specify this more exactly in some
+> > documentation, somewhere.
+>
+> I think yes, it is very much required. And in absence of that I think,
+> many (or most) of the platforms that also need to scale the voltage
+> would have modeled their hardware as a regulator and not a PM domain.
+>
+> What I always thought was:
+>
+> - Module that can just enable/disable power to a block of SoC is a
+>   power domain.
+>
+> - Module that can enable/disable as well as scale voltage is a
+>   regulator.
+>
+> And so I thought that this patchset has done the right thing. This
+> changed a bit with the qcom stuff where the IP to be configured was in
+> control of RPM and not Linux and so we couldn't add it as a regulator.
+> If it was controlled by Linux, it would have been a regulator in
+> kernel for sure :)
 
-    mmc: block: switch card to User Data Area when removing the block drive=
-r
+In my view, DT bindings have consistently been pushed back during the
+year, if they have tried to model power domains as regulator supplies
+from consumer device nodes. Hence, people have tried other things, as
+I mentioned above.
 
-    The MMC block driver and other drivers (e.g. mmc-test) will expect
-    the card to be switched to the User Data Area eMMC partition when
-    they start.  Hence the MMC block driver should ensure it is that
-    way when it is removed.
+I definitely agree that we need to update some documentations,
+explaining things more exactly. Additionally, it seems like a talk at
+some conferences should make sense, as a way to spread the word.
 
-    Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-    Cc: Andrei Warkentin <andreiw@motorola.com>
-    Signed-off-by: Chris Ball <cjb@laptop.org>
----
-
-Best regards,
-Yoshihiro Shimoda
-
+Kind regards
+Uffe
