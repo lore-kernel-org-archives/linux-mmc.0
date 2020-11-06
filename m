@@ -2,95 +2,195 @@ Return-Path: <SRS0=Gh8q=EM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,
-	DATE_IN_FUTURE_06_12,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 477CBC2D0A3
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 04:10:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87F50C56201
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 06:15:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 041732075A
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 04:10:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 30432208FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 06:15:45 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HzLmr6Ja"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726096AbgKFEJ4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Nov 2020 23:09:56 -0500
-Received: from mga04.intel.com ([192.55.52.120]:11272 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725815AbgKFEJ4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 5 Nov 2020 23:09:56 -0500
-IronPort-SDR: UikGDYcWiO8+XinSvtapjalX9cWmNIXL5lm+OEngz70zoPyjpdslD5zo++veb2cHxNrpj7R/a7
- 0m9d1JV9p+VQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9796"; a="166909027"
-X-IronPort-AV: E=Sophos;i="5.77,455,1596524400"; 
-   d="scan'208";a="166909027"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Nov 2020 20:09:55 -0800
-IronPort-SDR: MxCqS5DlBO6FG8aVKfKbxZ8aOdpl5wS3AJK6mFRvcBabB+dKNHWSNEthbVzPZuJzc5TF2NgHa9
- SKfLVDwlYAnA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,455,1596524400"; 
-   d="scan'208";a="354560667"
-Received: from zulkifl3-ilbpg0.png.intel.com ([10.88.229.114])
-  by fmsmga004.fm.intel.com with ESMTP; 05 Nov 2020 20:09:53 -0800
-From:   muhammad.husaini.zulkifli@intel.com
-To:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Cc:     adrian.hunter@intel.com, lakshmi.bai.raja.subramanian@intel.com,
-        wan.ahmad.zainie.wan.mohamad@intel.com,
-        muhammad.husaini.zulkifli@intel.com, david.e.box@linux.intel.com
-Subject: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem Bay SOC
-Date:   Fri,  6 Nov 2020 20:09:33 +0800
-Message-Id: <20201106120933.7190-2-muhammad.husaini.zulkifli@intel.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20201106120933.7190-1-muhammad.husaini.zulkifli@intel.com>
-References: <20201106120933.7190-1-muhammad.husaini.zulkifli@intel.com>
+        id S1726325AbgKFGPb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Nov 2020 01:15:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51066 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726302AbgKFGPS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2020 01:15:18 -0500
+Received: from mail-pl1-x643.google.com (mail-pl1-x643.google.com [IPv6:2607:f8b0:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00E94C061A4C
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 22:15:18 -0800 (PST)
+Received: by mail-pl1-x643.google.com with SMTP id k7so195445plk.3
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 22:15:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to
+         :user-agent;
+        bh=F6tmY/1EFEb7yGiRngVYTKYYAOLMtuHBKlHb/X3FBro=;
+        b=HzLmr6JaFIcMravMY3wIPry/F1073BkN3VM3cd8Gi2O7jw7et61EBNfNlEzqqyIEDr
+         O9QiSB84NaObwQzvoVVuxKeOGt8VndPGxRzphlfH+7cLMvRgCXLb/PtEMTpcP1H83oxY
+         b+191SXYF8ylE2gKUBgugVqSge7yMZjugqqrlBWgxtA673su21UfCt+IML3oDpN4vxti
+         8gs+7/IuMoCGcBYg+3V7fWv1iCZUsugnMa0A4fQsRR3hvDwRfUGjQ+Urs3m1MNcObuQw
+         SCG2Y8JOLZc95bYGIDT0kkK9vrovP4jkrz7oM7qStmXfzFjQgjgOi7MZJht8PgCtGzrM
+         RfPg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to:user-agent;
+        bh=F6tmY/1EFEb7yGiRngVYTKYYAOLMtuHBKlHb/X3FBro=;
+        b=ZYsTC4Pd7sMXANLCnFEq3mOjL+MGi2jGAWzTi7ivaFO/+F8knFmJKC4zFANXCQEIXz
+         o9UEZHNKKaVYRgsnRe1s8oKTNXLefsE7J5PIKErOEHaK5Sfu0E2F5r8U6b00vPXCWvHq
+         0NS6ULs0OV3v6ESqJQ8R2GT0yvnTK2LDzNUK7CnPKj8jnvfuluYAr4L7NPlbCEYT7JEs
+         GF2tCg5Kbz4AaKKmzE98TYW7VxU1VKt6E3gQqeIAQ8eKMjrOebwSb6Od4zwNne+hXYE+
+         PUdmEhIZO2As42fNSfyXSHbB+Dybf3Z3Wzgytm2xCL4TAVCjwaETPJnF1ZmyswlQJ/lA
+         qCNg==
+X-Gm-Message-State: AOAM533UrRsMoTA3GDQNo8ez0K21QHS3NBEhVlLV2qFIGD4z6CabXgld
+        QSEFi0d0grNl8CNCz+LlVquUpw==
+X-Google-Smtp-Source: ABdhPJxg63tT7kf2/vWsP55uyoDC2lQuTRCTVcejh0K/L0eGZvU7H1zdtru1IjirtMh06PtAF/i6Ug==
+X-Received: by 2002:a17:902:9a83:b029:d6:e05e:c7e9 with SMTP id w3-20020a1709029a83b02900d6e05ec7e9mr430546plp.49.1604643317224;
+        Thu, 05 Nov 2020 22:15:17 -0800 (PST)
+Received: from localhost ([122.172.12.172])
+        by smtp.gmail.com with ESMTPSA id h16sm703800pjz.10.2020.11.05.22.15.14
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 05 Nov 2020 22:15:15 -0800 (PST)
+Date:   Fri, 6 Nov 2020 11:45:13 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        driver-dev <devel@driverdev.osuosl.org>,
+        linux-pwm@vger.kernel.org,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-usb@vger.kernel.org,
+        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        linux-tegra@vger.kernel.org, linux-media@vger.kernel.org
+Subject: Re: [PATCH v1 17/30] mmc: sdhci-tegra: Support OPP and core voltage
+ scaling
+Message-ID: <20201106061513.uyys7njcqcdlah67@vireshk-i7>
+References: <20201104234427.26477-1-digetx@gmail.com>
+ <20201104234427.26477-18-digetx@gmail.com>
+ <CAOh2x==sy1w7_oEV8=toC6uQnSN44wyOixbP_X0BrMsnm1AUFg@mail.gmail.com>
+ <6fa54ce6-d5ae-d04f-7c77-b62c148d92b7@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <6fa54ce6-d5ae-d04f-7c77-b62c148d92b7@gmail.com>
+User-Agent: NeoMutt/20180716-391-311a52
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+On 05-11-20, 17:18, Dmitry Osipenko wrote:
+> 05.11.2020 12:58, Viresh Kumar пишет:
+> >> +static void sdhci_tegra_deinit_opp_table(void *data)
+> >> +{
+> >> +       struct device *dev = data;
+> >> +       struct opp_table *opp_table;
+> >> +
+> >> +       opp_table = dev_pm_opp_get_opp_table(dev);
+> > So you need to get an OPP table to put one :)
+> > You need to save the pointer returned by dev_pm_opp_set_regulators() instead.
+> 
+> This is intentional because why do we need to save the pointer if we're
+> not using it and we know that we could get this pointer using OPP API?
 
-Commit 16ada730a759 ("mmc: sdhci-of-arasan: Modify clock operations handling")
-introduces platform specific SDHCI clock operation.
+Because it is highly inefficient and it doesn't follow the rules set
+by the OPP core. Hypothetically speaking, the OPP core is free to
+allocate the OPP table structure as much as it wants, and if you don't
+use the value returned back to you earlier (think of it as a cookie
+assigned to your driver), then it will eventually lead to memory leak.
 
-This patch declares the clock operation for Keem Bay.
-Add clk_ops for SD, EMMC and SDIO operations.
+> This is exactly the same what I did for the CPUFreq driver [1] :)
 
-Fixes: 36c6aadaae86 ("mmc: sdhci-of-arasan: Add support for Intel Keem Bay")
+I will strongly suggest you to save the pointer here and do the same
+in the cpufreq driver as well.
 
-Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 3 +++
- 1 file changed, 3 insertions(+)
+> >> +static int devm_sdhci_tegra_init_opp_table(struct device *dev)
+> >> +{
+> >> +       struct opp_table *opp_table;
+> >> +       const char *rname = "core";
+> >> +       int err;
+> >> +
+> >> +       /* voltage scaling is optional */
+> >> +       if (device_property_present(dev, "core-supply"))
+> >> +               opp_table = dev_pm_opp_set_regulators(dev, &rname, 1);
+> >> +       else
+> > 
+> >> +               opp_table = dev_pm_opp_get_opp_table(dev);
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 829ccef87426..012d52e1abee 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -1199,16 +1199,19 @@ static struct sdhci_arasan_of_data sdhci_arasan_versal_data = {
- static struct sdhci_arasan_of_data intel_keembay_emmc_data = {
- 	.soc_ctl_map = &intel_keembay_soc_ctl_map,
- 	.pdata = &sdhci_keembay_emmc_pdata,
-+	.clk_ops = &arasan_clk_ops,
- };
- 
- static struct sdhci_arasan_of_data intel_keembay_sd_data = {
- 	.soc_ctl_map = &intel_keembay_soc_ctl_map,
- 	.pdata = &sdhci_keembay_sd_pdata,
-+	.clk_ops = &arasan_clk_ops,
- };
- 
- static struct sdhci_arasan_of_data intel_keembay_sdio_data = {
- 	.soc_ctl_map = &intel_keembay_soc_ctl_map,
- 	.pdata = &sdhci_keembay_sdio_pdata,
-+	.clk_ops = &arasan_clk_ops,
- };
- 
- static const struct of_device_id sdhci_arasan_of_match[] = {
+To make it further clear, this will end up allocating an OPP table for
+you, which it shouldn't have.
+
+> > Nice. I didn't think that someone will end up abusing this API and so made it
+> > available for all, but someone just did that. I will fix that in the OPP core.
+
+To be fair, I allowed the cpufreq-dt driver to abuse it too, which I
+am going to fix shortly.
+
+> The dev_pm_opp_put_regulators() handles the case where regulator is
+> missing by acting as dev_pm_opp_get_opp_table(), but the
+> dev_pm_opp_set_regulators() doesn't do it. Hence I don't think this is
+> an abuse, but the OPP API drawback.
+
+I am not sure what you meant here. Normally you are required to call
+dev_pm_opp_put_regulators() only if you have called
+dev_pm_opp_set_regulators() earlier. And the refcount stays in
+balance.
+
+> > Any idea why you are doing what you are doing here ?
+> 
+> Two reasons:
+> 
+> 1. Voltage regulator is optional, but dev_pm_opp_set_regulators()
+> doesn't support optional regulators.
+> 
+> 2. We need to balance the opp_table refcount in order to use OPP API
+> without polluting code with if(have_regulator), hence the
+> dev_pm_opp_get_opp_table() is needed for taking the opp_table reference
+> to have the same refcount as in the case of the dev_pm_opp_set_regulators().
+
+I am going to send a patchset shortly after which this call to
+dev_pm_opp_get_opp_table() will fail, if it is called before adding
+the OPP table.
+
+> I guess we could make dev_pm_opp_set_regulators(dev, count) to accept
+> regulators count=0 and then act as dev_pm_opp_get_opp_table(dev), will
+> it be acceptable?
+
+Setting regulators for count as 0 doesn't sound good to me.
+
+But, I understand that you don't want to have that if (have_regulator)
+check, and it is a fair request. What I will instead do is, allow all
+dev_pm_opp_put*() API to start accepting a NULL pointer for the OPP
+table and fail silently. And so you won't be required to have this
+unwanted check. But you will be required to save the pointer returned
+back by dev_pm_opp_set_regulators(), which is the right thing to do
+anyways.
+
 -- 
-2.17.1
-
+viresh
