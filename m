@@ -1,109 +1,127 @@
-Return-Path: <SRS0=4qKy=EL=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Gh8q=EM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8754EC5517A
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 18:02:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5507C388F7
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 01:56:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F5042087D
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Nov 2020 18:02:18 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ns839Vco"
+	by mail.kernel.org (Postfix) with ESMTP id 7485D206D9
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 01:56:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731758AbgKESCK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Nov 2020 13:02:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49862 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730246AbgKESCJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 13:02:09 -0500
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59854C0613CF;
-        Thu,  5 Nov 2020 10:02:07 -0800 (PST)
-Received: by mail-lj1-x244.google.com with SMTP id v18so691639ljc.3;
-        Thu, 05 Nov 2020 10:02:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=Al4h4rmGhqwiEGe133XHwebc8D8nOD3olrp8Vml5Ma4=;
-        b=ns839VcoCfQlmSawliO3BW+/1vwbWsC0SuMDgd2rWP8iV711Mqqtf4m0MCEmnLvl6U
-         3vb8CBUhCZHuLBbT/vy/0iMtjPX+V3C6uUIb2OPOXdjLYjIP6UI/e87eGPrrzJ+xbk0U
-         lPuFmuT1kZYJ9xA2IDMRS58fh3QHtxbqkhAxXI9q2n4iD1UkN9wCV6XZxUKCW+jG4fl1
-         bhur1vx8ueIhfdY8E1LoNLWhfnSqc8Cz4pG2mSMrLt8qiqsSVAo166ZZkzVsvdwhvofK
-         JB2HZrGV3JeU2U3FG6Z6xcUm8hK1QDD32JbxQ1HpcmJHxS8qabOilxvrGXG1/u5lCDmu
-         kXEw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=Al4h4rmGhqwiEGe133XHwebc8D8nOD3olrp8Vml5Ma4=;
-        b=kogleMfcIzCNRGSmtj2Mp4vuVz9hj/KZxXiPi3KwKdtUMTJ9cBrEPYkhZaOqsVlB+f
-         Iqus4nDIr7p0LeKRAwa0TJgf8lRaxP4Ya2c9LifYDYfFGCE6TEbnmjZ2f1YAlAveVNIP
-         H9I/IxuZ7Hg19SLdTK8O1FpAVe2t27aolQ6k5aOhsyO4x7CQxAYbSLOKM7E2nkb3ao08
-         FGWqd2VtGS6Ntqwbgzmu+rmjdZ0OGtOvurTiPTwTQ7WFUAIxDBZVun4OH4aFtl6oAarT
-         Gzy77dz0ksLbCsc5XtHcEb7Z12lG4Xd1pPX5DVDjt9QCa4yrbBoOxMkeAKDmiCOCRalw
-         sJkQ==
-X-Gm-Message-State: AOAM532CPsJwyMLw6SUhYB57bqVpvrs/rICa2rAQkJNaNWSl8s0Q3rex
-        vdzPEl8013fAOXJnbXDwAFnS5A/lpJk=
-X-Google-Smtp-Source: ABdhPJyGo1QPlqd8Bg9dlBjbnD5b7q3iSRiSvONPHwwdeYcMEjv8aISie0TROJMehCbGPKS7ntWyVA==
-X-Received: by 2002:a2e:5007:: with SMTP id e7mr1293766ljb.196.1604599324582;
-        Thu, 05 Nov 2020 10:02:04 -0800 (PST)
-Received: from [192.168.2.145] (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
-        by smtp.googlemail.com with ESMTPSA id q28sm251319lfn.7.2020.11.05.10.02.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 05 Nov 2020 10:02:03 -0800 (PST)
-Subject: Re: [PATCH v1 21/30] usb: host: ehci-tegra: Support OPP and SoC core
- voltage scaling
-To:     Alan Stern <stern@rowland.harvard.edu>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Peter Chen <Peter.Chen@nxp.com>,
-        Mark Brown <broonie@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
-        linux-usb@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-References: <20201104234427.26477-1-digetx@gmail.com>
- <20201104234427.26477-22-digetx@gmail.com>
- <20201105160743.GA1613614@rowland.harvard.edu>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <a6030abc-3727-01ca-91b6-faf02d8083fd@gmail.com>
-Date:   Thu, 5 Nov 2020 21:02:02 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1730895AbgKFB4Y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Nov 2020 20:56:24 -0500
+Received: from szxga04-in.huawei.com ([45.249.212.190]:7149 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730414AbgKFB4X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 20:56:23 -0500
+Received: from DGGEMS407-HUB.china.huawei.com (unknown [172.30.72.60])
+        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4CS3QT1NFcz15QQg;
+        Fri,  6 Nov 2020 09:56:17 +0800 (CST)
+Received: from localhost.localdomain (10.69.192.56) by
+ DGGEMS407-HUB.china.huawei.com (10.3.19.207) with Microsoft SMTP Server id
+ 14.3.487.0; Fri, 6 Nov 2020 09:56:19 +0800
+From:   Tian Tao <tiantao6@hisilicon.com>
+To:     <jh80.chung@samsung.com>, <ulf.hansson@linaro.org>,
+        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: dw_mmc: replace spin_lock_irqsave by spin_lock in hard IRQ
+Date:   Fri, 6 Nov 2020 09:56:53 +0800
+Message-ID: <1604627813-59785-1-git-send-email-tiantao6@hisilicon.com>
+X-Mailer: git-send-email 2.7.4
 MIME-Version: 1.0
-In-Reply-To: <20201105160743.GA1613614@rowland.harvard.edu>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.69.192.56]
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-05.11.2020 19:07, Alan Stern пишет:
->> +	err = devm_tegra_ehci_init_opp_table(&pdev->dev);
->> +	if (err)
->> +		return dev_err_probe(&pdev->dev, err,
->> +				     "Failed to initialize OPP\n");
-> Why log a second error message?  Just return err.
+The code has been in a irq-disabled context since it is hard IRQ. There
+is no necessity to do it again.
 
-Indeed, thanks.
+Signed-off-by: Tian Tao <tiantao6@hisilicon.com>
+---
+ drivers/mmc/host/dw_mmc.c | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 43c5795..a524443 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -2617,7 +2617,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 	struct dw_mci *host = dev_id;
+ 	u32 pending;
+ 	struct dw_mci_slot *slot = host->slot;
+-	unsigned long irqflags;
+ 
+ 	pending = mci_readl(host, MINTSTS); /* read-only mask reg */
+ 
+@@ -2632,15 +2631,15 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 			 * Hold the lock; we know cmd11_timer can't be kicked
+ 			 * off after the lock is released, so safe to delete.
+ 			 */
+-			spin_lock_irqsave(&host->irq_lock, irqflags);
++			spin_lock(&host->irq_lock);
+ 			dw_mci_cmd_interrupt(host, pending);
+-			spin_unlock_irqrestore(&host->irq_lock, irqflags);
++			spin_unlock(&host->irq_lock);
+ 
+ 			del_timer(&host->cmd11_timer);
+ 		}
+ 
+ 		if (pending & DW_MCI_CMD_ERROR_FLAGS) {
+-			spin_lock_irqsave(&host->irq_lock, irqflags);
++			spin_lock(&host->irq_lock);
+ 
+ 			del_timer(&host->cto_timer);
+ 			mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
+@@ -2648,7 +2647,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 			smp_wmb(); /* drain writebuffer */
+ 			set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
+ 
+-			spin_unlock_irqrestore(&host->irq_lock, irqflags);
++			spin_unlock(&host->irq_lock);
+ 		}
+ 
+ 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
+@@ -2661,7 +2660,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		}
+ 
+ 		if (pending & SDMMC_INT_DATA_OVER) {
+-			spin_lock_irqsave(&host->irq_lock, irqflags);
++			spin_lock(&host->irq_lock);
+ 
+ 			del_timer(&host->dto_timer);
+ 
+@@ -2676,7 +2675,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 			set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
+ 			tasklet_schedule(&host->tasklet);
+ 
+-			spin_unlock_irqrestore(&host->irq_lock, irqflags);
++			spin_unlock(&host->irq_lock);
+ 		}
+ 
+ 		if (pending & SDMMC_INT_RXDR) {
+@@ -2692,12 +2691,12 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		}
+ 
+ 		if (pending & SDMMC_INT_CMD_DONE) {
+-			spin_lock_irqsave(&host->irq_lock, irqflags);
++			spin_lock(&host->irq_lock);
+ 
+ 			mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
+ 			dw_mci_cmd_interrupt(host, pending);
+ 
+-			spin_unlock_irqrestore(&host->irq_lock, irqflags);
++			spin_unlock(&host->irq_lock);
+ 		}
+ 
+ 		if (pending & SDMMC_INT_CD) {
+-- 
+2.7.4
+
