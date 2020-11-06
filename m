@@ -2,118 +2,120 @@ Return-Path: <SRS0=Gh8q=EM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC76FC55179
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 12:02:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB481C55178
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 13:17:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 45FD020728
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 12:02:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 62EFA208B3
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 13:17:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="gcgXQGFg"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lg3hkZm7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726694AbgKFMCn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Nov 2020 07:02:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48900 "EHLO
+        id S1727363AbgKFNRT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Nov 2020 08:17:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726317AbgKFMCn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2020 07:02:43 -0500
+        with ESMTP id S1726939AbgKFNRR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2020 08:17:17 -0500
 Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07DC9C0613CF
-        for <linux-mmc@vger.kernel.org>; Fri,  6 Nov 2020 04:02:42 -0800 (PST)
-Received: by mail-lf1-x143.google.com with SMTP id z21so251044lfe.12
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2020 04:02:42 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38995C0613CF;
+        Fri,  6 Nov 2020 05:17:17 -0800 (PST)
+Received: by mail-lf1-x143.google.com with SMTP id 126so1860678lfi.8;
+        Fri, 06 Nov 2020 05:17:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=b1F1LfKOfetg9uh623ybdvZExTlhcif78+Me0dvbVmY=;
-        b=gcgXQGFgImykiGXTnDxK4yCNDWng9vdCZwbSPaLnilRudUvszC2MYCBGD35/iYwe9g
-         c/+eka2kmiZrjSwP2HRaHqNB6u8RNWVsKP1aQYwGaCZdEIPCM9ioazF66PbTh0bVAm1R
-         jTLoyUus0274jLH7+cv/busaLoWMcg/zUheTVoPMGA6gFWkSnEihzhYW1tQC9ubVf+/T
-         hqiPudO6v8E+DNotZhpEgBNv8xI7+p6kFS0Fd2OcKa8gfbHG51TIK90WDkANpU57Lwmv
-         OqZLnUg0mDkTPZlxHfBdFcYcAbCey9VCk4XRQBGjwGoYdgaKPOECR+JtEa4FfI8dHS2y
-         zYpw==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=PfeixKrzsL46qhVQbUUdb6DbSd1S0EMYRuybLQNU1/k=;
+        b=lg3hkZm7P25mT76/EiBZKMX9rM35SHKXFtDDMNMyuybG7pZ9GLdujDnb/snXEdZuOE
+         O1XEA9ClNNtaX5qSYh7ncrwbbztO4OLS1Tz0Whoh0CkglFXZtqLJZrGYf4qMX7xbO4N9
+         kP0OrdkSIWnmeqH9Syo0ZE91d0lbC13DJUCcVloa24tNriQ9PbAU1usA16wtQm2RaqeB
+         Q2Vze3+ENHkimZDRFaupbyfMF9A5/sjGDv24PaYkJkspH0+kyNRFWbP7C5sXzxYJK38b
+         RAOCNA6IR6HuCs4WSAyuab6Hb0IKVlIorOLMIzPq7sTruYyAKH9DW8JL59OaCl/toWXN
+         62hQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=b1F1LfKOfetg9uh623ybdvZExTlhcif78+Me0dvbVmY=;
-        b=cqRqQu6D9V1PzNNIAkOq17Qr2rW2kOnUoxBea/SP1hrE/4qZ9Rvtin17Jjujn6A0Z9
-         H7zxjdrdK621ZzOwb3LSf1A4tjdzfniwW7pRieX1mzPiOg5vnbcDBWXp0zaqBLxgEl/k
-         7x3uF5eq6czk1jPBwQS6Bxkxd39CkFWkdlmxWk07xGIv/ZxDejhWUDQ48T81RmKEqn60
-         wIqbdmi1hYjn8iDgXnFYSHzvFm6qYrZofOUqk0vQGYaq5nthXX4ZfG+TtenIausfEiob
-         9uVgSwPTzjSCjPgt2dA8236FW7ffJctDjj/eHus458k/Rnywd8lPNizSAFs62elnMcJf
-         1vzw==
-X-Gm-Message-State: AOAM5337SjWsOgBdwXB8zcUm3sjb7odNqW70WpI4C5inpctBlcJxpoQz
-        K/lhZLU+p7vnf+n7mlv93z6/mQ==
-X-Google-Smtp-Source: ABdhPJyUOQ0GxTaLN0PaARCfu4d8zkY3zTd32wF26unwcrjW/Zbgmo8yDdCWdnrVPodg+a28cC7Y0w==
-X-Received: by 2002:a05:6512:3af:: with SMTP id v15mr720205lfp.144.1604664160926;
-        Fri, 06 Nov 2020 04:02:40 -0800 (PST)
-Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
-        by smtp.gmail.com with ESMTPSA id u4sm120203lju.128.2020.11.06.04.02.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 06 Nov 2020 04:02:40 -0800 (PST)
-Date:   Fri, 6 Nov 2020 13:02:39 +0100
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH 0/3] tmio/sdhi: fix workaround for a regression
-Message-ID: <20201106120239.GB3195686@oden.dyn.berto.se>
-References: <20201106072549.1495-1-wsa+renesas@sang-engineering.com>
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=PfeixKrzsL46qhVQbUUdb6DbSd1S0EMYRuybLQNU1/k=;
+        b=Gk/3BEhWYHBYyuhetlW0n6fa7sO3UjNYkLB8/jGxYIMRBDVYIl2lB8BFPATBcXYqjQ
+         rcYm3AOICNrl8l3a44FQpD5R+DQiyHZzm+GrGk2Y6cGPb5G/ZNeTLHnqcfhgiKyx540g
+         2gNDJNRKbY82p/2iAZF6qJuq+SYpDIl5Q9AwhDnijGZpFfPG1lIgi6vnW/IfxjTboicl
+         0vCIXmXv2KAc2fkJM2L2T1czJhakuD0qVYaTzUxaS/A8W9WEzk6or596+T6Rj/+lN/8N
+         sevwbl4iU7x3n7Z98GM4jlkIHHsJDGoLXbfKpGH4qs7a7Zl/ZbITTE94w/faLEjXJkm9
+         HDyQ==
+X-Gm-Message-State: AOAM532D+EkPoYt8CEFxbN9QSbEGmnevZvz5MikjsbwhPH9O3CdslMR7
+        wT4Mu6ANtXLKWLRgQXtkBeIPCOGFiBY=
+X-Google-Smtp-Source: ABdhPJzECHN6OMSqEGY9TM6AG4zUXHGmlFcCs46h2OzcdpdI3/ezCJG0veXmwpdjSihGTDog0yaTzA==
+X-Received: by 2002:a19:f518:: with SMTP id j24mr830455lfb.307.1604668635552;
+        Fri, 06 Nov 2020 05:17:15 -0800 (PST)
+Received: from [192.168.2.145] (109-252-192-83.dynamic.spd-mgts.ru. [109.252.192.83])
+        by smtp.googlemail.com with ESMTPSA id 9sm159077lfy.251.2020.11.06.05.17.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 06 Nov 2020 05:17:14 -0800 (PST)
+Subject: Re: [PATCH v1 17/30] mmc: sdhci-tegra: Support OPP and core voltage
+ scaling
+To:     Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        driver-dev <devel@driverdev.osuosl.org>,
+        linux-pwm@vger.kernel.org,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-usb@vger.kernel.org,
+        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        linux-tegra@vger.kernel.org, linux-media@vger.kernel.org
+References: <20201104234427.26477-1-digetx@gmail.com>
+ <20201104234427.26477-18-digetx@gmail.com>
+ <CAOh2x==sy1w7_oEV8=toC6uQnSN44wyOixbP_X0BrMsnm1AUFg@mail.gmail.com>
+ <6fa54ce6-d5ae-d04f-7c77-b62c148d92b7@gmail.com>
+ <20201106061513.uyys7njcqcdlah67@vireshk-i7>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <a6926456-8bce-a438-bfaa-be334208f004@gmail.com>
+Date:   Fri, 6 Nov 2020 16:17:13 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+In-Reply-To: <20201106061513.uyys7njcqcdlah67@vireshk-i7>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201106072549.1495-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
-
-Thanks for your work.
-
-On 2020-11-06 08:25:46 +0100, Wolfram Sang wrote:
-> After some refactoring, I had to insert a workaround because a
-> regression was discovered when re-inserting SD cards. Now, this series
-> implements the proper fixes and finally reverts the workaround.
-
-Nice.
-
+06.11.2020 09:15, Viresh Kumar пишет:
+> Setting regulators for count as 0 doesn't sound good to me.
 > 
-> This has been tested on Salvator-XS (M3N and H3 ES2.0). These patches
-> were already discussed with Shimoda-san and the BSP team internally.
-> However, I'd appreciate Shimoda-san's tags be given here to make sure
-> the patches are exactly that what we discussed.
-> 
-> Thanks and happy hacking!
+> But, I understand that you don't want to have that if (have_regulator)
+> check, and it is a fair request. What I will instead do is, allow all
+> dev_pm_opp_put*() API to start accepting a NULL pointer for the OPP
+> table and fail silently. And so you won't be required to have this
+> unwanted check. But you will be required to save the pointer returned
+> back by dev_pm_opp_set_regulators(), which is the right thing to do
+> anyways.
 
-Tested on M3-N and for the whole series,
-
-Tested-by: Niklas S�derlund <niklas.soderlund+renesas@ragnatech.se>
-
-> 
-> 
-> Wolfram Sang (3):
->   mmc: tmio: when resetting, reset DMA controller, too
->   mmc: tmio: bring tuning HW to a sane state with MMC_POWER_OFF
->   Revert "mmc: renesas_sdhi: workaround a regression when reinserting SD
->     cards"
-> 
->  drivers/mmc/host/renesas_sdhi_core.c | 13 -------------
->  drivers/mmc/host/tmio_mmc_core.c     |  7 +++++--
->  2 files changed, 5 insertions(+), 15 deletions(-)
-> 
-> -- 
-> 2.28.0
-> 
-
--- 
-Regards,
-Niklas S�derlund
+Perhaps even a better variant could be to add a devm versions of the OPP
+API functions, then drivers won't need to care about storing the
+opp_table pointer if it's unused by drivers.
