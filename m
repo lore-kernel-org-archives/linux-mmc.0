@@ -7,64 +7,64 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 239B2C5517A
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:28:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B4F0C4742C
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:28:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF26A2075A
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:28:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AAA8620782
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:28:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="lDQpvOMh"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="RtjEQNH+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725933AbgKFC2F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Nov 2020 21:28:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44058 "EHLO
+        id S1725616AbgKFC2H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Nov 2020 21:28:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44068 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725925AbgKFC2E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 21:28:04 -0500
-Received: from mail-pg1-x541.google.com (mail-pg1-x541.google.com [IPv6:2607:f8b0:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85020C0613D2
-        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 18:28:03 -0800 (PST)
-Received: by mail-pg1-x541.google.com with SMTP id z24so2783394pgk.3
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 18:28:03 -0800 (PST)
+        with ESMTP id S1725924AbgKFC2G (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 21:28:06 -0500
+Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BD64C0613CF
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 18:28:06 -0800 (PST)
+Received: by mail-pl1-x644.google.com with SMTP id z1so1711712plo.12
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 18:28:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=EHuG0Jy6EGEK8AT49rN0FT6QR3rLE0SQJ7N5PHZrNUg=;
-        b=lDQpvOMhfEckH3aBCoY6dQHdQP0xQtt0xKcmT1nRLxjH7bXA8rS3lbs6NtH7dRNnL+
-         YA5TG/iE0b+21OXTzpOqdaZAry5qDp7DDN/Lc6B68/zzJVNSz+s84vNduVd+9dVbpCeb
-         ccIEnyX/3qdwHqHj9HD63ICzvuj07svIXfulJ2H3vKNG0OAG+tkEgVbh30Z8HBWsJWhs
-         n45BQqr1FlTFU25LfMuoA2Q/bRr8Tq9LmWktyJoBXVEETCQtjnOVKVJse67v3HvuTFsr
-         pinxLTapW7lBb9eQD37sgsJRokbw/mbIQYyE0+0nHp0ae2ZnPaFCMrXnTCmdjQNJZ/Fn
-         XQgg==
+        bh=Kxtn2tv4u7bnPJ1IBZRdbU16YLLAD3BvCHIEx+fGmCc=;
+        b=RtjEQNH+ub9yP3HG5/0wESf0GkMMsrWd5B9RNqMCieK5gQb7I/lJ1roDbJeqfFtQEs
+         jSiZR7s5D0LlvApzIULrfWNteZNka3Af6HF2iTHLSiwT2xK4cySGnza7N70fyy8amRjc
+         P9BfYpZpGobcBtRABvCTNTMHjgH2DLr8/4ekiLMEk5jwmGMdN2l231QpJYzaUe1idy8t
+         osXwYskw3ZTXkTLuVN2oEO0ACPXWjQ8ILvsCFftWtcWPVfIkL5Z2W9hH5fNRfldpqMXX
+         HtiIjRfGBJoaPJFoghqTZ/f9+X7+EiqsiEQjfTZmZ1jRZ8qc9pIK7+bO8e2L9Uh/oFv0
+         RlNQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=EHuG0Jy6EGEK8AT49rN0FT6QR3rLE0SQJ7N5PHZrNUg=;
-        b=aKuc66jNZVAJ1bKANYk/Sl+0PxKGrEQpSkNdwStoVvCXrhMHTzyjH+5i0K7h68edm+
-         6L+vBeco7znEGR0pWWMW5qB0x90n5WVnhmk+wzCJGEYarIuA+E8Gst6TWSUWQuXRNbr5
-         8ljyA9m7e78FWveIjN6RBQKQew/bkNaNfbiiJJvxdhYdyJNZYsN+bkQGB9+dU0zuS9tc
-         h3n5uT69wiWnXmZUO+qEV9Bu1c+QghUj9/cMX2okulpZzbm0oVq9eg8WzNWGZVnRzkau
-         zr6in4S5lXBL+lNKFK5SopX6tFEWFys5wdX7Jf9jrNz+sxTMk8v0pf5IITWFj6B9THim
-         LrkQ==
-X-Gm-Message-State: AOAM530rzdRu4kfRPuKWQlvLzuKB8dJmJo2ZPy/mPGfUluKw+Qhl1/VM
-        gRTSC3avDHFQ1bPhpEcQZ79BrQ==
-X-Google-Smtp-Source: ABdhPJyuAUYh9S8nNtqsyW6D2p9vq1O6UCtYHz2DUeavZTjWzEmAmN3e9YJz24uoDKohv6uE53fNOA==
-X-Received: by 2002:a63:fd08:: with SMTP id d8mr5270959pgh.406.1604629683072;
-        Thu, 05 Nov 2020 18:28:03 -0800 (PST)
+        bh=Kxtn2tv4u7bnPJ1IBZRdbU16YLLAD3BvCHIEx+fGmCc=;
+        b=Q5HDlx4vubBhfV2wnoMoJoBE4rI3LlIZrzHqjS68f5v+foqklfby7rtyVTYs6BRB41
+         HjE4W2vNag0zPxh0maeWBYjc/Wt57abLFA1GWuNsUxDKRln1UigU+rveD43E6r2QDmjS
+         xfml6Ea3tEmzoCUFOyz933+gHLlNFWCR2m3UakMoVsuQNNqGNFNgR/GxGOxOBliLZNNj
+         bNI1MzCsw1Vmh4CMYsPF3zRfx+hVIrtpPEXbZy0a71GkSTWIUzvUIfJa5UPaDDWOrZz9
+         s9w78yiGIJp49KfyvYUp9vL5QU3S/rJ7keq7aLymESq+TVFoPHJsoz/WbOAtBNltAdCH
+         5u3A==
+X-Gm-Message-State: AOAM531xvf8mCOZrMRb30Q6V0ZAtEND24L/J+WHHUuyJ2KCXqE5hxZ04
+        0rcSBg8jqpiR7nEqlpZpAonDwQ==
+X-Google-Smtp-Source: ABdhPJzh6FMka8y/xFkLHA4CPWwTsQ+mA0zVxRKA9lvNgc5K/xiYnUMj7ZPlLmdkpGArWPM03lPE2g==
+X-Received: by 2002:a17:902:aa47:b029:d6:ac0f:fe76 with SMTP id c7-20020a170902aa47b02900d6ac0ffe76mr7462plr.42.1604629686096;
+        Thu, 05 Nov 2020 18:28:06 -0800 (PST)
 Received: from localhost.localdomain (p784a66b9.tkyea130.ap.so-net.ne.jp. [120.74.102.185])
-        by smtp.gmail.com with ESMTPSA id m13sm3703040pjr.30.2020.11.05.18.28.00
+        by smtp.gmail.com with ESMTPSA id m13sm3703040pjr.30.2020.11.05.18.28.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Nov 2020 18:28:02 -0800 (PST)
+        Thu, 05 Nov 2020 18:28:05 -0800 (PST)
 From:   AKASHI Takahiro <takahiro.akashi@linaro.org>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: [RFC PATCH v3.1 02/27] mmc: core: UHS-II support, modify power-up sequence
-Date:   Fri,  6 Nov 2020 11:27:01 +0900
-Message-Id: <20201106022726.19831-3-takahiro.akashi@linaro.org>
+Subject: [RFC PATCH v3.1 03/27] mmc: core: UHS-II support, skip set_chip_select()
+Date:   Fri,  6 Nov 2020 11:27:02 +0900
+Message-Id: <20201106022726.19831-4-takahiro.akashi@linaro.org>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201106022726.19831-1-takahiro.akashi@linaro.org>
 References: <20201106022726.19831-1-takahiro.akashi@linaro.org>
@@ -74,137 +74,32 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-According to Fig. 3-35 in "SD Host Controller Simplified Spec. Ver4.20":
-- Prepare vdd1, vdd2 and ios.timing for using after/in step (2)
-- chip_select is not used in UHS-II, used to return to the legacy flow
+mmc_set_chip_select() should be called only in UHS-II mode,
+and not for UHS-II mode.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 ---
- drivers/mmc/core/core.c      | 61 +++++++++++++++++++++++++-----------
- drivers/mmc/core/regulator.c | 14 +++++++++
- 2 files changed, 56 insertions(+), 19 deletions(-)
+ drivers/mmc/core/core.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d42037f0f10d..5541ed956c4d 100644
+index 5541ed956c4d..4e12bd98fc08 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1315,33 +1315,52 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	if (host->ios.power_mode == MMC_POWER_ON)
- 		return;
- 
--	mmc_pwrseq_pre_power_on(host);
-+	if (host->flags & MMC_UHS2_SUPPORT) {
-+		/* TODO: handle 'ocr' parameter */
-+		host->ios.vdd = fls(host->ocr_avail) - 1;
-+		host->ios.vdd2 = fls(host->ocr_avail_uhs2) - 1;
-+		if (mmc_host_is_spi(host))
-+			host->ios.chip_select = MMC_CS_HIGH;
-+		else
-+			host->ios.chip_select = MMC_CS_DONTCARE;
-+		host->ios.timing = MMC_TIMING_UHS2;
-+	} else {
-+		mmc_pwrseq_pre_power_on(host);
- 
--	host->ios.vdd = fls(ocr) - 1;
--	host->ios.power_mode = MMC_POWER_UP;
--	/* Set initial state and call mmc_set_ios */
--	mmc_set_initial_state(host);
-+		host->ios.vdd = fls(ocr) - 1;
-+		host->ios.power_mode = MMC_POWER_UP;
-+		/* Set initial state and call mmc_set_ios */
-+		mmc_set_initial_state(host);
- 
--	mmc_set_initial_signal_voltage(host);
-+		mmc_set_initial_signal_voltage(host);
- 
--	/*
--	 * This delay should be sufficient to allow the power supply
--	 * to reach the minimum voltage.
--	 */
--	mmc_delay(host->ios.power_delay_ms);
-+		/*
-+		 * This delay should be sufficient to allow the power supply
-+		 * to reach the minimum voltage.
-+		 */
-+		mmc_delay(host->ios.power_delay_ms);
- 
--	mmc_pwrseq_post_power_on(host);
-+		mmc_pwrseq_post_power_on(host);
- 
+@@ -898,8 +898,10 @@ static inline void mmc_set_ios(struct mmc_host *host)
+  */
+ void mmc_set_chip_select(struct mmc_host *host, int mode)
+ {
+-	host->ios.chip_select = mode;
+-	mmc_set_ios(host);
++	if (!(host->flags & MMC_UHS2_INITIALIZED)) {
++		host->ios.chip_select = mode;
++		mmc_set_ios(host);
 +	}
- 	host->ios.clock = host->f_init;
--
- 	host->ios.power_mode = MMC_POWER_ON;
-+
- 	mmc_set_ios(host);
- 
--	/*
--	 * This delay must be at least 74 clock sizes, or 1 ms, or the
--	 * time required to reach a stable voltage.
--	 */
--	mmc_delay(host->ios.power_delay_ms);
-+	if (host->flags & MMC_UHS2_SUPPORT)
-+		/*
-+		 * This delay should be sufficient to allow the power supply
-+		 * to reach the minimum voltage.
-+		 */
-+		/*  TODO: avoid an immediate value */
-+		mmc_delay(10);
-+	else
-+		/*
-+		 * This delay must be at least 74 clock sizes, or 1 ms, or the
-+		 * time required to reach a stable voltage.
-+		 */
-+		mmc_delay(host->ios.power_delay_ms);
  }
  
- void mmc_power_off(struct mmc_host *host)
-@@ -2316,7 +2335,11 @@ void mmc_start_host(struct mmc_host *host)
- 
- 	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
- 		mmc_claim_host(host);
--		mmc_power_up(host, host->ocr_avail);
-+
-+		/* Power up here will make UHS2 init ugly. */
-+		if (!(host->caps & MMC_CAP_UHS2))
-+			mmc_power_up(host, host->ocr_avail);
-+
- 		mmc_release_host(host);
- 	}
- 
-diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
-index 609201a467ef..629e25bc8cb7 100644
---- a/drivers/mmc/core/regulator.c
-+++ b/drivers/mmc/core/regulator.c
-@@ -249,6 +249,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 
- 	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
- 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
-+	mmc->supply.vmmc2 = devm_regulator_get_optional(dev, "vmmc2");
- 
- 	if (IS_ERR(mmc->supply.vmmc)) {
- 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
-@@ -268,6 +269,19 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 		dev_dbg(dev, "No vqmmc regulator found\n");
- 	}
- 
-+	if (IS_ERR(mmc->supply.vmmc2)) {
-+		if (PTR_ERR(mmc->supply.vmmc2) == -EPROBE_DEFER)
-+			return -EPROBE_DEFER;
-+		dev_dbg(dev, "No vmmc2 regulator found\n");
-+	} else {
-+		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc2);
-+		if (ret > 0)
-+			mmc->ocr_avail_uhs2 = ret;
-+		else
-+			dev_warn(dev, "Failed getting UHS2 OCR mask: %d\n",
-+				 ret);
-+	}
-+
- 	return 0;
- }
- EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
+ /*
 -- 
 2.28.0
 
