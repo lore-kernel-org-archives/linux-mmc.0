@@ -2,66 +2,91 @@ Return-Path: <SRS0=Gh8q=EM=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBDEAC388F2
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 09:25:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F05FCC55178
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 10:52:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8C85520936
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 09:25:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1073021707
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 10:52:10 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="kI+AOGA5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726139AbgKFJZl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Nov 2020 04:25:41 -0500
-Received: from relmlor1.renesas.com ([210.160.252.171]:51853 "EHLO
-        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725924AbgKFJZl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2020 04:25:41 -0500
-X-IronPort-AV: E=Sophos;i="5.77,456,1596466800"; 
-   d="scan'208";a="61863766"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 06 Nov 2020 18:25:39 +0900
-Received: from localhost.localdomain (unknown [10.166.252.89])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id DE3DC400F797;
-        Fri,  6 Nov 2020 18:25:39 +0900 (JST)
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com
-Cc:     kuninori.morimoto.gx@renesas.com, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH] mmc: host: renesas_sdhi_core: Missing tmio_mmc_host_free() in renesas_sdhi_remove()
-Date:   Fri,  6 Nov 2020 18:25:30 +0900
-Message-Id: <1604654730-29914-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-X-Mailer: git-send-email 2.7.4
+        id S1727045AbgKFKwJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Nov 2020 05:52:09 -0500
+Received: from www.zeus03.de ([194.117.254.33]:42736 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726791AbgKFKwJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Nov 2020 05:52:09 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=kW7jcQSeh8KMLetp28cKRk+j585r
+        hCI11GvwBBmB3/8=; b=kI+AOGA5BUJRlVCx+d7p4EFmN4WRvYwAZPuMh7R1316K
+        F6jYFbBMld5rHCZADc6vL92zVdORiEK9D8hBGUySXF9mQW0lZmrzb5hr7LLpkxOj
+        E/s5pRO9wxv/vNJgn8ANvHC6M7lMavaHKqr/EsTR4woS5LbXmk6h+WEOOLjCH68=
+Received: (qmail 920005 invoked from network); 6 Nov 2020 11:52:07 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 6 Nov 2020 11:52:07 +0100
+X-UD-Smtp-Session: l3s3148p1@4wXvAG6zwO0gAwDPXwt7AM2DJu0qMDpA
+Date:   Fri, 6 Nov 2020 11:52:06 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     ulf.hansson@linaro.org, kuninori.morimoto.gx@renesas.com,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH] mmc: host: renesas_sdhi_core: Missing
+ tmio_mmc_host_free() in renesas_sdhi_remove()
+Message-ID: <20201106105206.GC3343@ninjato>
+References: <1604654730-29914-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="ZmUaFz6apKcXQszQ"
+Content-Disposition: inline
+In-Reply-To: <1604654730-29914-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The commit 94b110aff867 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
-added tmio_mmc_host_free(), but missed the function calling in
-the sh_mobile_sdhi_remove() at that time. So, fix it. Otherwise,
-we cannot rebind the sdhi/mmc devices when we use aliases of mmc.
 
-Fixes: 94b110aff867 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
----
- drivers/mmc/host/renesas_sdhi_core.c | 1 +
- 1 file changed, 1 insertion(+)
+--ZmUaFz6apKcXQszQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 4143141..03c905a 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -1160,6 +1160,7 @@ int renesas_sdhi_remove(struct platform_device *pdev)
- 
- 	tmio_mmc_host_remove(host);
- 	renesas_sdhi_clk_disable(host);
-+	tmio_mmc_host_free(host);
- 
- 	return 0;
- }
--- 
-2.7.4
+On Fri, Nov 06, 2020 at 06:25:30PM +0900, Yoshihiro Shimoda wrote:
+> The commit 94b110aff867 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
+> added tmio_mmc_host_free(), but missed the function calling in
+> the sh_mobile_sdhi_remove() at that time. So, fix it. Otherwise,
+> we cannot rebind the sdhi/mmc devices when we use aliases of mmc.
+>=20
+> Fixes: 94b110aff867 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
+Tested on my Salvator-XS (R-Car M3-N):
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--ZmUaFz6apKcXQszQ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl+lKtYACgkQFA3kzBSg
+KbZPag//e8nuRSqILARungh4l4ZRMFCV7MMWqtf5JYxhIUBLs9PWoSYOYlWxZfPx
+KQKlxDfDDIgAF208ljRQjvUohBhiq7/aozDbIZgWSMTyz8QP+EfzkyBX3I++YsGp
+eOYkTAvYNq5gEBxwvA5EquD+f0o5smoEoWKzAsDGE7Y0VLN//jAqajBK3L9Xw62H
+/oh2priwxKY3zGrSmUr5trgRw17E7fE7eJgL7ZfxDIPdCQUhikBYk3t6ki38AVH+
+P3GxxaSsoCmGfUf8jRQuVjgLyKyK8LFYLpB4HtPjguCFwBS/ktyTTm34x9DVEV/j
+ACpYwgGrW0Uh2+C84xN1hChhTDvAI/yIhJ3o6eqP9gip1qJzFEIFySwYd7WANUsG
+RIaPmAK8QZepeQdjT1YG4ZIGjFUuzZLtaC3DzJ2/Gc3XxpQ0jvBlAoBA6fM6YT9S
+Bw5qqXQiJMWM3x7GqzB0k42dTaVPyDp/o80iZovEr6fSnZHoZsb39AQME2ccmLkT
+XBrQ2Y7qc0OsQj+DMWiP4v6r46cK1A8WT5LNY5TPdAmrVak1X2Z7VUDetxEKz/SC
+2r3lBdnmQvoacpjq7y2vy0BXtOVjafrIY5PKjQVOue4qD9JDsGtz5GyaoYdFczv9
+Gq1kHAxUkGWmbfefhdEvLrtC78iguawLu6SeHTdypS3hN4l7Um4=
+=oZXa
+-----END PGP SIGNATURE-----
+
+--ZmUaFz6apKcXQszQ--
