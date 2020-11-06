@@ -7,64 +7,64 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B071CC4742C
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:29:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63EF6C4742C
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:29:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 593DD2075A
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:29:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0BAE22075A
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 02:29:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="oIjNDl0z"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="ooA1pST3"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725815AbgKFC3m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Nov 2020 21:29:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44160 "EHLO
+        id S1726050AbgKFC2S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Nov 2020 21:28:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726090AbgKFC2b (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 21:28:31 -0500
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76FD0C0613CF
-        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 18:28:31 -0800 (PST)
-Received: by mail-pf1-x441.google.com with SMTP id z3so2929682pfb.10
-        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 18:28:31 -0800 (PST)
+        with ESMTP id S1726007AbgKFC2R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Nov 2020 21:28:17 -0500
+Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FCC4C0613CF
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Nov 2020 18:28:16 -0800 (PST)
+Received: by mail-pf1-x442.google.com with SMTP id 10so2942323pfp.5
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Nov 2020 18:28:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=oZAw8U8D8vUHF1iKm82K3cyupIMt/ic4sf021LXENYE=;
-        b=oIjNDl0zi+tWdyTAiIsIrDRLeNt3wr6uCZ1wu4wnkQE8Ygsqv5rsDN5tFftVM35Rr4
-         ooaPFKla07r24s13egCTqRIdG+r4XgY44zSwbXH5puBugnDHXYxxczb0w4jp853uP77U
-         4Pkx0sRjAZkEsb2OUn08YsURqp/QNUSnJivegoY/+l22I+ItxIh20qYHiX2wnYRfy/o2
-         +qy6KLZ58Gxk+Ltb8oWH90f6FigFiKps4PdG3bTyf+hZgN50VjJpLoc2l5ORwsMsqqGa
-         0muwqdlkejVwvfOYiXd0Mf+TP0rHxnixehINf+zhnLBlXbypkiwDMb6fr5Eusq5UpnDT
-         FG8w==
+        bh=kNtXnwKCsgjnlMDm3C3sL4M5crM/sRzajvYLm7BnyWI=;
+        b=ooA1pST3WCb9ca/isQjXCxdBpxqer2SfhDXzYQCcf9XEf6JNRYzZBku1HVjfwGRQvO
+         iQuW6hey4urO33lUeeUH27o0c/ENEhW4740fCLE8SXJfPqbc5iDJR/bdTPmjnS2ir8KG
+         6IZ20Uv6XWvcrJOagMpovBeyVBI7MympuvfgpujR/UszxlwTvJuXQxDhsZJSHIH7Dkqr
+         pr7xXJA/WJrp7jPsd/TkKXkruDUay4J+WRHOyxNqXC6rAuqo27f/E3UnKAz0mwdQi7cr
+         eosEtqX1spdXReQ+O6oD5Us6ZIUWyHfg+EToIG56ZcUsgSaOQmyhZuYK/7JeXWXMznbG
+         Aurg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=oZAw8U8D8vUHF1iKm82K3cyupIMt/ic4sf021LXENYE=;
-        b=EDdi4KYgUlIb7HdJokXxZBjbQ2iuGb6T9tvWA7wXrR2Bcnm0ZuWJOld7RLSpAUtvFe
-         hMVaTrVs2D9ykdBysNUM5XLyWW6DizFAfphZ5E5xKh7WmxPoDUAPSgSsA9SwXGt1hJEr
-         6JoMXs4gpH0iseShIDaVZHkOO/hB6naIs0H9GB1T5WRPX8OnbMgRB00vtvnwfTrYHDeS
-         eZctmSVWHpJK2prB/2xijD3Al5LMG8pg61I5/qvaP2Xn1rccI3u0vD12j09EggbBHkRC
-         +EOpD/ZpihOTDWumJXae3zAypRRPgta2wqqBV1hMnqipwskh8FRPh0uBydaNibLS9Jp/
-         XG5g==
-X-Gm-Message-State: AOAM5318yc3HQbIuQzkBuvUb6QkmHjTpG8T6pucvBdBxFYrcw1NIvJ9t
-        N1reVgWqXNRXDfGL2iakUrRfIw==
-X-Google-Smtp-Source: ABdhPJzK378a95yCfn6eUIRq+vi+CZ1APkk+uYquqTfgUt0dC1DA1WZcm9dBq5RJjc8jWrWFLnUYlw==
-X-Received: by 2002:a17:90a:1b84:: with SMTP id w4mr352286pjc.65.1604629711046;
-        Thu, 05 Nov 2020 18:28:31 -0800 (PST)
+        bh=kNtXnwKCsgjnlMDm3C3sL4M5crM/sRzajvYLm7BnyWI=;
+        b=Rhz92lAz2zgpSqz4X+ZJ8U5KoYlpr6rWIsYlXfkqfT9cfMu/OuU+aSagqljp7ymCrA
+         /8MGaOuEYVbPO4d2qVnGM61iWOeNttnQ7mFr0bUoAUhQB+2ylruyGxw2nhHRcrYjV9N4
+         SoESHw8/K1HKMukZpy6XZsPMh2rGlmzkmTrxRKfsWvypuwJfIeoPMKnoqQG3oOGQfQXp
+         wXzrGLrTRuMbgBMUka8OzCSv2d9iaFJEPGW3mXpxWnyW6y3Ox8Hn+zGZEy/5APinA+zw
+         rREJ9XO0+gFllrrMMDU/uBKzNV47Yjb9s2HLe2rCSA1SR5Kdb/2am8kebjzwQeKMc6fm
+         OTnA==
+X-Gm-Message-State: AOAM532+lenBJBGjxpvGPqCFQakUEJvBXwG5RmoID9ZZC+GibxST2yN0
+        lsV7jnmLpiReYK9D+5Qt3EARQQ==
+X-Google-Smtp-Source: ABdhPJwiT+iUaQzdOp2J1B5Z7gvZzHPMj7ENBj4gEjhFEqJ1MgAdCBmuwLo+EkJ5wWfYa5sq4YpMSA==
+X-Received: by 2002:a63:cb51:: with SMTP id m17mr5025097pgi.337.1604629695765;
+        Thu, 05 Nov 2020 18:28:15 -0800 (PST)
 Received: from localhost.localdomain (p784a66b9.tkyea130.ap.so-net.ne.jp. [120.74.102.185])
-        by smtp.gmail.com with ESMTPSA id m13sm3703040pjr.30.2020.11.05.18.28.28
+        by smtp.gmail.com with ESMTPSA id m13sm3703040pjr.30.2020.11.05.18.28.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 05 Nov 2020 18:28:30 -0800 (PST)
+        Thu, 05 Nov 2020 18:28:15 -0800 (PST)
 From:   AKASHI Takahiro <takahiro.akashi@linaro.org>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: [RFC PATCH v3.1 11/27] mmc: sdhci-uhs2: dump UHS-II registers
-Date:   Fri,  6 Nov 2020 11:27:10 +0900
-Message-Id: <20201106022726.19831-12-takahiro.akashi@linaro.org>
+Subject: [RFC PATCH v3.1 06/27] mmc: core: UHS-II support, generate UHS-II SD command packet
+Date:   Fri,  6 Nov 2020 11:27:05 +0900
+Message-Id: <20201106022726.19831-7-takahiro.akashi@linaro.org>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201106022726.19831-1-takahiro.akashi@linaro.org>
 References: <20201106022726.19831-1-takahiro.akashi@linaro.org>
@@ -74,85 +74,157 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dump UHS-II specific registers, if available, in sdhci_dumpregs()
-for informative/debugging use.
+In SD-TRAN protocol, legacy SD commands should be "encapsulated" in SD
+packets as described in SD specification.
+Please see section 7.1 and 7.2.1 in "UHS-II Simplified Addendum."
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 ---
- drivers/mmc/host/sdhci-uhs2.c | 30 ++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h |  4 ++++
- drivers/mmc/host/sdhci.c      |  3 +++
- 3 files changed, 37 insertions(+)
+ drivers/mmc/core/core.c | 18 +++++++++++
+ drivers/mmc/core/uhs2.c | 70 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/uhs2.h |  1 +
+ 3 files changed, 89 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index f29d3a4ed43c..08905ed081fb 100644
---- a/drivers/mmc/host/sdhci-uhs2.c
-+++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -18,6 +18,36 @@
- #define DRIVER_NAME "sdhci_uhs2"
- #define DBG(f, x...) \
- 	pr_debug(DRIVER_NAME " [%s()]: " f, __func__, ## x)
-+#define SDHCI_UHS2_DUMP(f, x...) \
-+	pr_err("%s: " DRIVER_NAME ": " f, mmc_hostname(host->mmc), ## x)
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index a08cb1c0f6d2..ac43e93033e6 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -337,6 +337,8 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
+ 
+ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ {
++	struct uhs2_command uhs2_cmd;
++	u32 payload[4]; /* for maximum size */
+ 	int err;
+ 
+ 	init_completion(&mrq->cmd_completion);
+@@ -354,6 +356,13 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		return err;
+ 
++	if (host->flags & MMC_UHS2_SUPPORT &&
++	    host->flags & MMC_UHS2_INITIALIZED) {
++		uhs2_cmd.payload = payload;
++		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++		uhs2_prepare_sd_cmd(host, mrq);
++	}
 +
-+void sdhci_uhs2_dump_regs(struct sdhci_host *host)
+ 	led_trigger_event(host->led, LED_FULL);
+ 	__mmc_start_request(host, mrq);
+ 
+@@ -433,6 +442,8 @@ EXPORT_SYMBOL(mmc_wait_for_req_done);
+  */
+ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
++	struct uhs2_command uhs2_cmd;
++	u32 payload[4]; /* for maximum size */
+ 	int err;
+ 
+ 	/*
+@@ -453,6 +464,13 @@ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		goto out_err;
+ 
++	if (host->flags & MMC_UHS2_SUPPORT &&
++	    host->flags & MMC_UHS2_INITIALIZED) {
++		uhs2_cmd.payload = payload;
++		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++		uhs2_prepare_sd_cmd(host, mrq);
++	}
++
+ 	err = host->cqe_ops->cqe_request(host, mrq);
+ 	if (err)
+ 		goto out_err;
+diff --git a/drivers/mmc/core/uhs2.c b/drivers/mmc/core/uhs2.c
+index acb46b5b57ef..1f6d0e0cf355 100644
+--- a/drivers/mmc/core/uhs2.c
++++ b/drivers/mmc/core/uhs2.c
+@@ -807,3 +807,73 @@ int mmc_uhs2_rescan_try_freq(struct mmc_host *host, unsigned int freq)
+ 	return err;
+ }
+ EXPORT_SYMBOL_GPL(mmc_uhs2_rescan_try_freq);
++
++/**
++ * uhs2_prepare_sd_cmd - prepare for SD command packet
++ * @host:	MMC host
++ * @mrq:	MMC request
++ *
++ * Initialize and fill in a header and a payload of SD command packet.
++ * The caller should allocate uhs2_command in host->cmd->uhs2_cmd in
++ * advance.
++ *
++ * Return:	0 on success, non-zero error on failure
++ */
++int uhs2_prepare_sd_cmd(struct mmc_host *host, struct mmc_request *mrq)
 +{
-+	if (!host->mmc || !(host->mmc->flags & MMC_UHS2_SUPPORT))
-+		return;
++	struct mmc_command *cmd;
++	struct uhs2_command *uhs2_cmd;
++	u16 header = 0, arg = 0;
++	u32 *payload;
++	u8 plen = 0;
 +
-+	SDHCI_UHS2_DUMP("==================== UHS2 ==================\n");
-+	SDHCI_UHS2_DUMP("Blk Size:  0x%08x | Blk Cnt:  0x%08x\n",
-+			sdhci_readw(host, SDHCI_UHS2_BLOCK_SIZE),
-+			sdhci_readl(host, SDHCI_UHS2_BLOCK_COUNT));
-+	SDHCI_UHS2_DUMP("Cmd:       0x%08x | Trn mode: 0x%08x\n",
-+			sdhci_readw(host, SDHCI_UHS2_COMMAND),
-+			sdhci_readw(host, SDHCI_UHS2_TRANS_MODE));
-+	SDHCI_UHS2_DUMP("Int Stat:  0x%08x | Dev Sel : 0x%08x\n",
-+			sdhci_readw(host, SDHCI_UHS2_DEV_INT_STATUS),
-+			sdhci_readb(host, SDHCI_UHS2_DEV_SELECT));
-+	SDHCI_UHS2_DUMP("Dev Int Code:  0x%08x\n",
-+			sdhci_readb(host, SDHCI_UHS2_DEV_INT_CODE));
-+	SDHCI_UHS2_DUMP("Reset:     0x%08x | Timer:    0x%08x\n",
-+			sdhci_readw(host, SDHCI_UHS2_SW_RESET),
-+			sdhci_readw(host, SDHCI_UHS2_TIMER_CTRL));
-+	SDHCI_UHS2_DUMP("ErrInt:    0x%08x | ErrIntEn: 0x%08x\n",
-+			sdhci_readl(host, SDHCI_UHS2_ERR_INT_STATUS),
-+			sdhci_readl(host, SDHCI_UHS2_ERR_INT_STATUS_EN));
-+	SDHCI_UHS2_DUMP("ErrSigEn:  0x%08x\n",
-+			sdhci_readl(host, SDHCI_UHS2_ERR_INT_SIG_EN));
++	cmd = mrq->cmd;
++	header = host->uhs2_dev_prop.node_id;
++	if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC)
++		header |= UHS2_PACKET_TYPE_DCMD;
++	else
++		header |= UHS2_PACKET_TYPE_CCMD;
++
++	arg = cmd->opcode << UHS2_SD_CMD_INDEX_POS;
++
++	uhs2_cmd = cmd->uhs2_cmd;
++	payload = uhs2_cmd->payload;
++	plen = 2; /* at the maximum */
++
++	if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC &&
++	    !cmd->uhs2_tmode0_flag) {
++		if (host->flags & MMC_UHS2_2L_HD)
++			arg |= UHS2_DCMD_2L_HD_MODE;
++
++		arg |= UHS2_DCMD_LM_TLEN_EXIST;
++
++		if (cmd->data->blocks == 1 &&
++		    cmd->data->blksz != 512 &&
++		    cmd->opcode != MMC_READ_SINGLE_BLOCK &&
++		    cmd->opcode != MMC_WRITE_BLOCK) {
++			arg |= UHS2_DCMD_TLUM_BYTE_MODE;
++			payload[1] = uhs2_dcmd_convert_msb(cmd->data->blksz);
++		} else {
++			payload[1] = uhs2_dcmd_convert_msb(cmd->data->blocks);
++		}
++
++		if (cmd->opcode == SD_IO_RW_EXTENDED) {
++			arg &= ~(UHS2_DCMD_LM_TLEN_EXIST |
++				UHS2_DCMD_TLUM_BYTE_MODE |
++				UHS2_NATIVE_DCMD_DAM_IO);
++			payload[1] = 0;
++			plen = 1;
++		}
++	} else {
++		plen = 1;
++	}
++
++	payload[0] = uhs2_dcmd_convert_msb(cmd->arg);
++	pr_debug("%s: %s: sd_cmd->arg = 0x%x, payload[0]= 0x%x.\n",
++		 mmc_hostname(host), __func__, cmd->arg, payload[0]);
++
++	uhs2_cmd_assemble(cmd, uhs2_cmd, header, arg, payload, plen, NULL, 0);
++
++	return 0;
 +}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
++EXPORT_SYMBOL_GPL(uhs2_prepare_sd_cmd);
+diff --git a/drivers/mmc/core/uhs2.h b/drivers/mmc/core/uhs2.h
+index e3389d4dda3b..48486ba21062 100644
+--- a/drivers/mmc/core/uhs2.h
++++ b/drivers/mmc/core/uhs2.h
+@@ -16,5 +16,6 @@
+ #define UHS2_PHY_INIT_ERR	1
  
- /*****************************************************************************\
-  *                                                                           *
-diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-index 3b157df9c89c..b9529d32b58d 100644
---- a/drivers/mmc/host/sdhci-uhs2.h
-+++ b/drivers/mmc/host/sdhci-uhs2.h
-@@ -207,4 +207,8 @@
- #define SDHCI_UHS2_EMBED_CTRL	0xE6
- #define SDHCI_UHS2_VENDOR	0xE8
+ int mmc_uhs2_rescan_try_freq(struct mmc_host *host, unsigned int freq);
++int uhs2_prepare_sd_cmd(struct mmc_host *host, struct mmc_request *mrq);
  
-+struct sdhci_host;
-+
-+void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-+
- #endif /* __SDHCI_UHS2_H */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 592a55a34b58..d4a57e8c9bb8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -111,6 +111,9 @@ void sdhci_dumpregs(struct sdhci_host *host)
- 		}
- 	}
- 
-+	if (host->ops->dump_uhs2_regs)
-+		host->ops->dump_uhs2_regs(host);
-+
- 	if (host->ops->dump_vendor_regs)
- 		host->ops->dump_vendor_regs(host);
- 
+ #endif /* MMC_UHS2_H */
 -- 
 2.28.0
 
