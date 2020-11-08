@@ -1,210 +1,171 @@
-Return-Path: <SRS0=Gh8q=EM=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=bHgK=EO=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5823DC2D0A3
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 20:54:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E457C388F9
+	for <linux-mmc@archiver.kernel.org>; Sun,  8 Nov 2020 12:19:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E1A1620B1F
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Nov 2020 20:54:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F101D206ED
+	for <linux-mmc@archiver.kernel.org>; Sun,  8 Nov 2020 12:19:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Asy4yxME"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rFpONZz/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728475AbgKFUyj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Nov 2020 15:54:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48206 "EHLO
+        id S1728429AbgKHMTV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 8 Nov 2020 07:19:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728408AbgKFUyi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Nov 2020 15:54:38 -0500
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69D18C0613CF
-        for <linux-mmc@vger.kernel.org>; Fri,  6 Nov 2020 12:54:38 -0800 (PST)
-Received: by mail-ej1-x644.google.com with SMTP id cw8so3758524ejb.8
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Nov 2020 12:54:38 -0800 (PST)
+        with ESMTP id S1728197AbgKHMTV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 8 Nov 2020 07:19:21 -0500
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0198C0613CF;
+        Sun,  8 Nov 2020 04:19:20 -0800 (PST)
+Received: by mail-lf1-x142.google.com with SMTP id l2so8264578lfk.0;
+        Sun, 08 Nov 2020 04:19:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Uq+Se9A4U/9VrkR03NfJ0lqhku5hviFsGds5G4jqrCc=;
-        b=Asy4yxMEe1/08xUTccFmPDfnqP8hmpjsAzGUwm8RuJp+nrYiRkzy6EYU5Kp4WH73eG
-         lppa31YOPW3dI4wqHcjNC8tS78ov+/LFfgtqBto7p5zHYhqgRTzlQjPjwf0xeefYSIC7
-         szA3B3Eru2W+G+bdheAmn/OAAA1OTjRIrGk3O36VKdm5HCHQhpjtrknoPXhRLD/CIfMw
-         wM7zUELA+74+rbMcV+gijJLEVClM9wVAhXH8oqgU9ERilXyeckbiA4TqhplYbo/7GowD
-         5pTmCI61r71btSx1GXP/HO3k19KTIBf0aqZuXMfg16yq9KqSpBUEUr8GXsnJkVVZCAKA
-         c4aw==
+        h=subject:from:to:cc:references:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=2sZ4icayrxxDWpa2xJypEQHGIoro/hg/XjsXfIMVIO0=;
+        b=rFpONZz/Kl33uh/dizvuNJQR2av8Rv5uFlJ5DePIU/DxOtnlMkNpGoI3JXUj2MWsEF
+         ir6IGHMPuOz5Ha0JkEbKS4xflgVuaxejRvr3J7nUUQOCUdjtzTtB+/2LCSIwZ1YYD/TJ
+         lKE8uooAVEPA5V7sGNiXi7IF5izcclg1E7XOW+XQRLEz/SOzhIs5xZCH9hY7R371YhQJ
+         LdeTxesJm0/t9nWD/LlBWtdARIzCuiHjTsZN8sOpocViLXo7UpaGVp/CBzAK20Ddkauz
+         tbH9apGbBjlfs/0xTDfRayemP603Ij5uZuDJzOs53HjDllldmig65ToOUo4o93xa8AYC
+         tAvw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Uq+Se9A4U/9VrkR03NfJ0lqhku5hviFsGds5G4jqrCc=;
-        b=rxNOO/lQAIpdM1fHiy9ICv/WmzfPykwBkxqX7fr9tNhWSSVKAVhz0AAYlk5ufz16Jn
-         SKYmHFEnDTsJSY7BGKD2Mtc5msbuPVWUhTOrnTwa4Zoyiv7lJ2EH3A65/Fwz0JUjIwPJ
-         jw+f50IA42++8MDK8OgAx20INHZiXNpLaIlAInTebQXkhFNgcbfYb8sOUjXHcWv1420i
-         lJtPjS+4ooQ9FcyxNZCYRGk14aEQePRG73dnicqHc+6+IodhmJnjA753aNMxKPdQLrqd
-         3M97o+ltfDWRZGtjbfo9iU2673rE4g+3sXcZ9+7fbY5kVKA6wy4bTAlmh6XvuCVPaT0s
-         d7vA==
-X-Gm-Message-State: AOAM5314WsMka1VNB1IE62LC5tuU6qLZ9jy1/EKvvCTlNKVCtqzaJlvk
-        xIJ45x+YDB/6qKXYXhC4FmLH5RQrbLq9RZ67hvc=
-X-Google-Smtp-Source: ABdhPJzu6jlgcJwQxnRC0x0d3JSdeUzF1SRJinAVsnbMQozuzYicpbqqsW4tuioppT2NJi9dqBlYL/5e7cp/jE4/GfQ=
-X-Received: by 2002:a17:906:16d6:: with SMTP id t22mr4022871ejd.376.1604696077032;
- Fri, 06 Nov 2020 12:54:37 -0800 (PST)
-MIME-Version: 1.0
-References: <fa7f3fc5-c37a-ac49-e14a-45a1d2e0a942@gmail.com>
- <CAPDyKFq9vKOODDQEEE2W+Gsx69_R3XV_Hb-owMU-=qAMbv39kg@mail.gmail.com>
- <2ebdcb5c-1c52-08af-9233-16366c20820e@intel.com> <CAMdYzYoFCfVkz7zwbfQ=ZoirNTymRrRyg8FCabVVEQSKRnoOEA@mail.gmail.com>
-In-Reply-To: <CAMdYzYoFCfVkz7zwbfQ=ZoirNTymRrRyg8FCabVVEQSKRnoOEA@mail.gmail.com>
-From:   Peter Geis <pgwipeout@gmail.com>
-Date:   Fri, 6 Nov 2020 15:54:25 -0500
-Message-ID: <CAMdYzYqEhgO6q3iXNzzuZ3snW_Y1bYP8BOBkNC5=fCPc310BUA@mail.gmail.com>
-Subject: Re: [BUG] cqe unable to handle buggy cards
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
+        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=2sZ4icayrxxDWpa2xJypEQHGIoro/hg/XjsXfIMVIO0=;
+        b=a0VrwSjIo7DPx418VgQPnP7O7neTTCqu0icPt2WzwWobZaZX1emMwqLA2mUVDMX658
+         52FSjkV2QnBRR4J78NbYum7oKX0gTvu2Dw9twhUdkxnlfVUTX1rGhgpUELBgHg3qIL61
+         scNfR/wW9t5p1secyzgnGI8+dgkBPJNAdTJf+qVWH4ejy5/GudXp2ObX6C3QgYvdOrkU
+         PwIbCk/kDjaTc09rRblXGAqkasN4vEsF58vS5kOtsrc/wuiu8TCvVOMqcd/nBIefEvi0
+         7+d70o5zJ6ENSEwPttjK9P08P15Ds7UStyF7yq5yWzRZHYY8VnLsh+qMqDFtTtx86CBF
+         1JXg==
+X-Gm-Message-State: AOAM532WNQm7NkHr9PMosQY1fp/5mdNCTavtHa/F9S0seojw693xnAA6
+        eQg4GAvPsnQi0Y+/Emf2qficb/gmkfA=
+X-Google-Smtp-Source: ABdhPJx2JpfTMAfVNhGgqvUuTHG0na3AuqFBXgT3nmIXEBqvHyuzg1Il4cTfxq8l0jMElMVqEADDJg==
+X-Received: by 2002:a05:6512:3250:: with SMTP id c16mr469413lfr.404.1604837959047;
+        Sun, 08 Nov 2020 04:19:19 -0800 (PST)
+Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
+        by smtp.googlemail.com with ESMTPSA id d26sm1479402ljj.102.2020.11.08.04.19.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 08 Nov 2020 04:19:18 -0800 (PST)
+Subject: Re: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA
+ Tegra20/30 SoCs
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        driverdevel <devel@driverdev.osuosl.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-pwm@vger.kernel.org,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        nuumiofi@gmail.com, Michal Simek <michal.simek@xilinx.com>,
-        Manish Narani <manish.narani@xilinx.com>
-Content-Type: text/plain; charset="UTF-8"
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>
+References: <20201104234427.26477-1-digetx@gmail.com>
+ <CAPDyKFr7qTU2RPhA_ZrbCayoTTNUEno1zdmvmv+8HBe-Owrfeg@mail.gmail.com>
+ <cd147ab0-1304-a491-7a56-ee6199c02d32@gmail.com>
+Message-ID: <2716c195-083a-112f-f1e5-2f6b7152a4b5@gmail.com>
+Date:   Sun, 8 Nov 2020 15:19:16 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
+MIME-Version: 1.0
+In-Reply-To: <cd147ab0-1304-a491-7a56-ee6199c02d32@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 4, 2020 at 7:39 PM Peter Geis <pgwipeout@gmail.com> wrote:
->
-> On Mon, Nov 2, 2020 at 11:32 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >
-> > On 2/11/20 4:54 pm, Ulf Hansson wrote:
-> > > + cqhci maintainers
-> > >
-> > > On Sat, 31 Oct 2020 at 13:54, Peter Geis <pgwipeout@gmail.com> wrote:
-> > >>
-> > >> Good Morning,
-> > >>
-> > >> We are seeing an issue on the rk3399 with certain Foresee emmc modules
-> > >> where the module reports it supports command queuing but fails in actual
-> > >> implementation.
-> > >>
-> > >> Unfortunately there doesn't seem to be any method for the mmc core code
-> > >> to detect this situation and disable command queue automatically.
-> > >> There also appears to be no way to disable it at runtime.
-> >
-> > Since v5.5, if you know how to use SDHCI debug quirks there is
-> > SDHCI_QUIRK_BROKEN_CQE
-> > e.g. kernel command line option sdhci.debug_quirks=0x0x2020000
->
-> Thank you, we will test this.
+05.11.2020 18:22, Dmitry Osipenko пишет:
+> 05.11.2020 12:45, Ulf Hansson пишет:
+> ...
+>> I need some more time to review this, but just a quick check found a
+>> few potential issues...
+> 
+> Thank you for starting the review! I'm pretty sure it will take a couple
+> revisions until all the questions will be resolved :)
+> 
+>> The "core-supply", that you specify as a regulator for each
+>> controller's device node, is not the way we describe power domains.
+>> Instead, it seems like you should register a power-domain provider
+>> (with the help of genpd) and implement the ->set_performance_state()
+>> callback for it. Each device node should then be hooked up to this
+>> power-domain, rather than to a "core-supply". For DT bindings, please
+>> have a look at Documentation/devicetree/bindings/power/power-domain.yaml
+>> and Documentation/devicetree/bindings/power/power_domain.txt.
+>>
+>> In regards to the "sync state" problem (preventing to change
+>> performance states until all consumers have been attached), this can
+>> then be managed by the genpd provider driver instead.
+> 
+> I'll need to take a closer look at GENPD, thank you for the suggestion.
+> 
+> Sounds like a software GENPD driver which manages clocks and voltages
+> could be a good idea, but it also could be an unnecessary
+> over-engineering. Let's see..
+> 
 
-This does resolve the issue of disabling cqe entirely for debugging, thanks!
+Hello Ulf and all,
 
->
-> >
-> > >>
-> > >> Certain modified kernels have added a patch to enable runtime disable of
-> > >> command queue entirely, but this will affect mmc core as a whole and not
-> > >> just the buggy card.
-> > >>
-> > >> Does anyone have any insight into this issue?
-> > >> Thank you for your time.
-> > >
-> > > Unfortunate, not me personally. I assume the issue is either be card
-> > > specific or host specific. Before looking at a disable option, we need
-> > > to know more about what goes wrong, I think.
-> > >
-> > > Kind regards
-> > > Uffe
-> > >
-> > >>
-> > >> Very Respectfully,
-> > >> Peter Geis
-> > >>
-> > >> [   64.472882] mmc2: cqhci: timeout for tag 2
-> > >> [   64.473349] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-> > >> [   64.474057] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
-> > >> [   64.474763] mmc2: cqhci: Config:    0x00000000 | Control:  0x00000000
-> > >> [   64.475468] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000000
-> > >> [   64.476172] mmc2: cqhci: Int sig:   0x00000000 | Int Coal: 0x00000000
-> > >> [   64.476875] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
-> >
-> > TDL base cannot be zero, so the register values have been lost.
-> > Could be a reset issue like this one but for sdhci-of-arasan.c :
-> >
-> > https://lore.kernel.org/linux-mmc/20200819121848.16967-1-adrian.hunter@intel.com/
->
-> Excellent, we will see if a similar implementation makes a difference
-> here for us as well.
+I took a detailed look at the GENPD and tried to implement it. Here is
+what was found:
 
-I wrote a patch to implement this in the arasan driver.
-https://paste.ee/p/cl5SX
-Nuumiofi tested it with the buggy card.
+1. GENPD framework doesn't aggregate performance requests from the
+attached devices. This means that if deviceA requests performance state
+10 and then deviceB requests state 3, then framework will set domain's
+state to 3 instead of 10.
 
-The good news, it solves the register clearing issue.
-The bad news, the card still is broken, here is the kernel log:
-https://paste.ubuntu.com/p/sF2yMwxpcV/
+https://elixir.bootlin.com/linux/v5.10-rc2/source/drivers/base/power/domain.c#L376
 
->
-> >
-> >
-> > >> [   64.477578] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
-> > >> [   64.478281] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
-> > >> [   64.478984] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-> > >> [   64.479687] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
-> > >> [   64.489785] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-> > >> [   64.499774] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
-> > >> [   64.509687] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> > >> [   64.519597] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
-> > >> [   64.529521] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
-> > >> [   64.539440] mmc2: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
-> > >> [   64.549352] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
-> > >> [   64.559277] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
-> > >> [   64.569214] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
-> > >> [   64.579061] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
-> > >> [   64.588842] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
-> > >> [   64.598671] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> > >> [   64.608446] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
-> > >> [   64.618161] mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
-> > >> [   64.627801] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x642017d7
-> > >> [   64.637376] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
-> > >> [   64.646855] mmc2: sdhci: Host ctl2: 0x00000083
-> > >> [   64.656080] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
-> > >> [   64.665445] mmc2: sdhci: ============================================
-> > >> [   64.674998] mmc2: running CQE recovery
-> > >>
-> > >> [  125.912941] mmc2: cqhci: timeout for tag 3
-> > >> [  125.921978] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
-> > >> [  125.931200] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
-> > >> [  125.940389] mmc2: cqhci: Config:    0x00000001 | Control:  0x00000000
-> > >> [  125.949499] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
-> > >> [  125.958527] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
-> > >> [  125.967486] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
-> > >> [  125.976260] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
-> > >> [  125.985065] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
-> > >> [  125.993698] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
-> > >> [  126.002244] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
-> > >> [  126.010716] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
-> > >> [  126.019159] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
-> > >> [  126.027525] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> > >> [  126.035955] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
-> > >> [  126.044258] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
-> > >> [  126.052396] mmc2: sdhci: Argument:  0x00000001 | Trn mode: 0x00000010
-> > >> [  126.060370] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
-> > >> [  126.068241] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
-> > >> [  126.075978] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
-> > >> [  126.083552] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
-> > >> [  126.090937] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
-> > >> [  126.098219] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> > >> [  126.105403] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
-> > >> [  126.112649] mmc2: sdhci: Cmd:       0x00003013 | Max curr: 0x00000000
-> > >> [  126.119700] mmc2: sdhci: Resp[0]:   0x00400800 | Resp[1]:  0x642017d7
-> > >> [  126.126594] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
-> > >> [  126.133334] mmc2: sdhci: Host ctl2: 0x00000083
-> > >> [  126.139652] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
-> > >> [  126.146008] mmc2: sdhci: ============================================
-> > >> [  126.152361] mmc2: running CQE recovery
-> > >>
-> > >>
-> >
+2. GENPD framework has a sync() callback in the genpd.domain structure,
+but this callback isn't allowed to be used by the GENPD implementation.
+The GENPD framework always overrides that callback for its own needs.
+Hence GENPD doesn't allow to solve the bootstrapping
+state-synchronization problem in a nice way.
+
+https://elixir.bootlin.com/linux/v5.10-rc2/source/drivers/base/power/domain.c#L2606
+
+3. Tegra doesn't have a dedicated hardware power-controller for the core
+domain, instead there is only an external voltage regulator. Hence we
+will need to create a phony device-tree node for the virtual power
+domain, which is probably a wrong thing to do.
+
+===
+
+Perhaps it should be possible to create some hacks to work around
+bullets 2 and 3 in order to achieve what we need for DVFS on Tegra, but
+bullet 1 isn't solvable without changing how the GENPD core works.
+
+Altogether, the GENPD in its current form is a wrong abstraction for a
+system-wide DVFS in a case where multiple devices share power domain and
+this domain is a voltage regulator. The regulator framework is the
+correct abstraction in this case for today.
