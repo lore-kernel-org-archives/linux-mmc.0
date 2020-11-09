@@ -2,65 +2,64 @@ Return-Path: <SRS0=XCsL=EP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08B0DC2D0A3
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:19:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDB04C56201
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:35:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9CD2F21534
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:19:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABEC820E65
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:35:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="inFPxi2k"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="LstmlGWF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729413AbgKIFTg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Nov 2020 00:19:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33722 "EHLO
+        id S1729508AbgKIFfw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Nov 2020 00:35:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725865AbgKIFTg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 00:19:36 -0500
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA9A3C0613CF;
-        Sun,  8 Nov 2020 21:19:35 -0800 (PST)
-Received: by mail-lf1-x143.google.com with SMTP id j205so3287334lfj.6;
-        Sun, 08 Nov 2020 21:19:35 -0800 (PST)
+        with ESMTP id S1729505AbgKIFfv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 00:35:51 -0500
+Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 127D5C0613D3
+        for <linux-mmc@vger.kernel.org>; Sun,  8 Nov 2020 21:35:50 -0800 (PST)
+Received: by mail-pf1-x441.google.com with SMTP id x13so7030850pfa.9
+        for <linux-mmc@vger.kernel.org>; Sun, 08 Nov 2020 21:35:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=h/l9jqPPSOjokBpH3eFzqAnYzBy6HMjUXqOv94wxhaY=;
-        b=inFPxi2kOHf6eLWqksRlS/alpqIYuYJTEft79LSW5Fdx2HdQXVxspWY2rT6ZdVTO66
-         KRY+/Buftaeh00whsFi1kO9V6YYurmEXktex4+Y5EfP5Rn74NUMmF19uXEm0Se34qH0s
-         ObVJmVTP+gl/I0FWElQMq+uljKBtDDic3bdFBiy4C09CJjPj1MfbVopXK0JAbsWW49Vy
-         kkAHFPB66iO0K4JfZjyCEdqSLan09z0SQrBr/OOCKxYcpzED0fn8BL+DmCwTyXt7D7Oj
-         tGJRovB7xsVEn38URK5ePSwyMR2P3kGnVF1zZUdFAJCmBCTNgdc8KJALhnJRdnoqjjNN
-         a/mQ==
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=IJUnC1qet5XGxBxbk2JzSrwVUK3/0sjfx2cNNTG8d4M=;
+        b=LstmlGWFsa5jYxw8Vkksf7r52gSPeNdq2rFCsHGIk3c7l0AwqeEGR2gU2Hu2jp53nQ
+         Y9/SJc2XbWbXfLNrk3m8dwkMzOadrr18+gXJf6HMX70IUW4vYncHLxcCR110tbXhs55a
+         EQhxbUj76xTKdvrpBlPVjubbEjZl+Y5zbMCqwugKbJnzkoNSIiP+wDGvpyOw7QL37cSI
+         4aW76kahFRWDdxouicRCqdqVzxB3wv8Aa83PxGUToWRNF9HLbIG9/Gni9TZvQv8NC382
+         ydqorAlKhtADyq79PaRSMdNHK43d74XsaHTphlRarNe6XqB7vDtVzeq4Rj/iiWEks7Q4
+         L/ag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=h/l9jqPPSOjokBpH3eFzqAnYzBy6HMjUXqOv94wxhaY=;
-        b=BuWeqEOpx6X7Pa77vsD5jKMw049JFuXEThhnxPedug4MahfLWxrF2j/mlN0aAefYgP
-         /d6Xm/Q3SQkrlfsyiEiEcRqFBP9cvZgKU/t0+5SCHL/fFTP4GWLSB+nqINuZUKmWO4Vu
-         iLhCUWO+isC9nko3STajnBkgr21bijxAH2KHdIbVl+5azstvd+bu/z+3UYhGMvQkJah8
-         urStBkUQxiC0TOJXwXLRJ4fT0LBgMWytMpcBba5Gok8//3xI/9DHjEQ9zoYDfCRaS6Ed
-         +mejT5M9xRVzfXAgWMAg1LxdaTBmioW1oOL3IX5tveRhI0cQg9LgOovSACoZ4ZbvRBtX
-         D6lg==
-X-Gm-Message-State: AOAM530sIFhrYc8lS2DDJmrTkxe2suG0TfwlmiYg4mCV0H2E57nOcvgk
-        yvrHqJxCh/1QPvGD4meFPiDR1NuZy84=
-X-Google-Smtp-Source: ABdhPJyfn/mhowYUR13ODHWpjXAE1wRkP98MMhTHt8rjWBQX9NIzOaxLUnjfOjm6TyyarRwVp6OMEw==
-X-Received: by 2002:a19:c816:: with SMTP id y22mr4701106lff.509.1604899174061;
-        Sun, 08 Nov 2020 21:19:34 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
-        by smtp.googlemail.com with ESMTPSA id c125sm1572920lfd.31.2020.11.08.21.19.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 08 Nov 2020 21:19:33 -0800 (PST)
-Subject: Re: [PATCH v1 17/30] mmc: sdhci-tegra: Support OPP and core voltage
- scaling
-To:     Viresh Kumar <viresh.kumar@linaro.org>
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=IJUnC1qet5XGxBxbk2JzSrwVUK3/0sjfx2cNNTG8d4M=;
+        b=sAphIOSFBQ3SpOxsCQisJgu6YZc6ddvSyJVbyD7AhCkhhC/nLRLzTxCBay5ORre/bu
+         4DFvL25zrXbqvZqsLCtcaegU806j5PNZAPyYC0kkcBj45oezB1USF4kntcwPTiIZB66f
+         uMut2RuCbgmKNJLn948O3dToGmGvhlEMNKQgMpPJUL+aKbaZ/LG4to1zIwuuP3rgEHrh
+         1G7PecQGtV/OMlFjcwUbhmSLwu1tXt34jjCS4dle6MGQOCaZbojIIMToFRmYrIGV9MC6
+         D+lFM1lk2Q9E2TASA8iLNSUOsQuJzvmCMsWxFXdm7iYw0+2bipKwvaeOtIkrm3ozI1ba
+         0QNQ==
+X-Gm-Message-State: AOAM533zwzZkgPNdDLoforF9D6kl7o1G1I+mGSTf+uLbeWfe6B2mW4Bv
+        yc4P+bbhf1ZU3iRz1dasVQMDWQ==
+X-Google-Smtp-Source: ABdhPJyFGt53uc1RwZIWqNmOTufjNhL6TQqNB7dxd3bb+lEFg1bJQu36bKwaT5Mj2KBhPEtooXzYdQ==
+X-Received: by 2002:a65:4144:: with SMTP id x4mr11299072pgp.432.1604900149527;
+        Sun, 08 Nov 2020 21:35:49 -0800 (PST)
+Received: from localhost ([122.172.12.172])
+        by smtp.gmail.com with ESMTPSA id e10sm10531236pfl.162.2020.11.08.21.35.48
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 08 Nov 2020 21:35:48 -0800 (PST)
+Date:   Mon, 9 Nov 2020 11:05:46 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
 Cc:     Frank Lee <tiny.windzz@gmail.com>,
         Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -72,7 +71,8 @@ Cc:     Frank Lee <tiny.windzz@gmail.com>,
         Krzysztof Kozlowski <krzk@kernel.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -87,8 +87,10 @@ Cc:     Frank Lee <tiny.windzz@gmail.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         dri-devel <dri-devel@lists.freedesktop.org>,
         linux-tegra@vger.kernel.org, linux-media@vger.kernel.org
-References: <20201104234427.26477-1-digetx@gmail.com>
- <20201104234427.26477-18-digetx@gmail.com>
+Subject: Re: [PATCH v1 17/30] mmc: sdhci-tegra: Support OPP and core voltage
+ scaling
+Message-ID: <20201109053546.xupmmsx5qccn46tr@vireshk-i7>
+References: <20201104234427.26477-18-digetx@gmail.com>
  <CAOh2x==sy1w7_oEV8=toC6uQnSN44wyOixbP_X0BrMsnm1AUFg@mail.gmail.com>
  <6fa54ce6-d5ae-d04f-7c77-b62c148d92b7@gmail.com>
  <20201106061513.uyys7njcqcdlah67@vireshk-i7>
@@ -97,79 +99,42 @@ References: <20201104234427.26477-1-digetx@gmail.com>
  <20201109050010.g47zojh6wafvwqva@vireshk-i7>
  <c584b301-e052-7f01-335d-8f9160865198@gmail.com>
  <20201109051014.oa6bt4g3ctm2hnuy@vireshk-i7>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <4476fed9-a356-b7f1-32ee-935343e23038@gmail.com>
-Date:   Mon, 9 Nov 2020 08:19:32 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ <4476fed9-a356-b7f1-32ee-935343e23038@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20201109051014.oa6bt4g3ctm2hnuy@vireshk-i7>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4476fed9-a356-b7f1-32ee-935343e23038@gmail.com>
+User-Agent: NeoMutt/20180716-391-311a52
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-09.11.2020 08:10, Viresh Kumar пишет:
-> On 09-11-20, 08:08, Dmitry Osipenko wrote:
->> 09.11.2020 08:00, Viresh Kumar пишет:
->>> On 06-11-20, 21:41, Frank Lee wrote:
->>>> On Fri, Nov 6, 2020 at 9:18 PM Dmitry Osipenko <digetx@gmail.com> wrote:
->>>>>
->>>>> 06.11.2020 09:15, Viresh Kumar пишет:
->>>>>> Setting regulators for count as 0 doesn't sound good to me.
->>>>>>
->>>>>> But, I understand that you don't want to have that if (have_regulator)
->>>>>> check, and it is a fair request. What I will instead do is, allow all
->>>>>> dev_pm_opp_put*() API to start accepting a NULL pointer for the OPP
->>>>>> table and fail silently. And so you won't be required to have this
->>>>>> unwanted check. But you will be required to save the pointer returned
->>>>>> back by dev_pm_opp_set_regulators(), which is the right thing to do
->>>>>> anyways.
->>>>>
->>>>> Perhaps even a better variant could be to add a devm versions of the OPP
->>>>> API functions, then drivers won't need to care about storing the
->>>>> opp_table pointer if it's unused by drivers.
->>>>
->>>> I think so. The consumer may not be so concerned about the status of
->>>> these OPP tables.
->>>> If the driver needs to manage the release, it needs to add a pointer
->>>> to their driver global structure.
->>>>
->>>> Maybe it's worth having these devm interfaces for opp.
->>>
->>> Sure if there are enough users of this, I am all for it. I was fine
->>> with the patches you sent, just that there were not a lot of users of
->>> it and so I pushed them back. If we find that we have more users of it
->>> now, we can surely get that back.
->>>
->>
->> There was already attempt to add the devm? Could you please give me a
->> link to the patches?
->>
->> I already prepared a patch which adds the devm helpers. It helps to keep
->> code cleaner and readable.
+On 09-11-20, 08:19, Dmitry Osipenko wrote:
+> Thanks, I made it in a different way by simply adding helpers to the
+> pm_opp.h which use devm_add_action_or_reset(). This doesn't require to
+> add new kernel symbols.
+
+I will prefer to add it in core.c itself, and yes
+devm_add_action_or_reset() looks better. But I am still not sure for
+which helpers do we need the devm_*() variants, as this is only useful
+for non-CPU devices. But if we have users that we can add right now,
+why not.
+
+> static inline int devm_pm_opp_of_add_table(struct device *dev)
+> {
+> 	int err;
 > 
-> https://lore.kernel.org/lkml/20201012135517.19468-1-frank@allwinnertech.com/
+> 	err = dev_pm_opp_of_add_table(dev);
+> 	if (err)
+> 		return err;
 > 
+> 	err = devm_add_action_or_reset(dev, (void*)dev_pm_opp_remove_table,
+> 				       dev);
+> 	if (err)
+> 		return err;
+> 
+> 	return 0;
+> }
 
-Thanks, I made it in a different way by simply adding helpers to the
-pm_opp.h which use devm_add_action_or_reset(). This doesn't require to
-add new kernel symbols.
-
-static inline int devm_pm_opp_of_add_table(struct device *dev)
-{
-	int err;
-
-	err = dev_pm_opp_of_add_table(dev);
-	if (err)
-		return err;
-
-	err = devm_add_action_or_reset(dev, (void*)dev_pm_opp_remove_table,
-				       dev);
-	if (err)
-		return err;
-
-	return 0;
-}
+-- 
+viresh
