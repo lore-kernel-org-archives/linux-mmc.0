@@ -2,144 +2,120 @@ Return-Path: <SRS0=XCsL=EP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64AE0C55ABD
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:53:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38A14C4741F
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 11:04:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ECBFF221FC
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:53:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C604D20897
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 11:04:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="qCNPstD8"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="mwqjGUn5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729505AbgKIFxZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Nov 2020 00:53:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38888 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729192AbgKIFxY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 00:53:24 -0500
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91437C0613D6
-        for <linux-mmc@vger.kernel.org>; Sun,  8 Nov 2020 21:53:24 -0800 (PST)
-Received: by mail-pf1-x441.google.com with SMTP id q5so4102221pfk.6
-        for <linux-mmc@vger.kernel.org>; Sun, 08 Nov 2020 21:53:24 -0800 (PST)
+        id S1727311AbgKILEO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Nov 2020 06:04:14 -0500
+Received: from mail-eopbgr1410121.outbound.protection.outlook.com ([40.107.141.121]:10407
+        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726410AbgKILEN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 9 Nov 2020 06:04:13 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=mAwP+iAyYRyONjnqp64gTckQuEkoT6DA4Pcb3ki+XJxKhH6z8mAWA1fFk+l+sKhbW9pIA0IdLIeO+vvuLvBB2Ifk6Z4fYIt/M9uERLe7kqF7hxYgweVp6D+cv/hArdab+ovEC1VPdMTqdkEW8f2YFkyFkACXdzCowLAzPsgLUP+EJL4QD/zGwz207BPQxoUkg+4FDXJHNRPmfSgdf0rsKioGZTCsAmxydAIRukMrGMwU86VNX95NNcUnKhiqwr1mvZPfGS+LcW5jiV4K54sZg+qUaiADRDVlvsirXLop/UbHzv9dE4xYfC7t7VbkJq26+tHRBjOAUL5aFPcVundBKQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=zT/2UU/kI0hZo2JOJUuTng+C9/bJVGWCC6P36U0+MO0=;
+ b=gSOw6Wa4nYr4gOZcnSskUzifdVPk55/QibgbCD8jlLidIr/FxR0G//2HycyX9Vvq+ci57kpdGiwNrbbhIYyfbcGjYD5h2vhGhpd5lJLTovzSsY6RyiAyc3O77+RZpejlrBM+bXvLygOsCsArI4ja66oNIjKwCAs6z+T8aul8J6aUN7Pgn8X0V02ZTl/5mZpe3sNNBkZBEeEj6drGyfOdxTwKqE2BqP70AmEJqusOh5mn45el895bKZeOSJmrwujqyFB5GXF1TOrOC0ywlE/3p0zEZJ1EReZ9zvkm/If6ix9DbCHxxQNl+s35uTVJN2ExfEJDyBYVU5qAX8dFvOwEKA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to
-         :user-agent;
-        bh=I4CHDtUGbNIJQpM023wPiaWJqW6VgcrXTJggEv8wwSw=;
-        b=qCNPstD8wk3f6WVndWAivRv5cGLOIzilHxs0sV7MkBI8GDXwzWkbmt+V1Ae9lrpsMJ
-         B4t28mlabIok8WTUpK4tOZJhv14XX6QPx9rUN/5/7PjDOEIOF07vmO2pAN+fOFSCVQFs
-         N9tTa3VjUXqiHFZpYHNhvX9c+lshFtkGG4kTSo9LVtvbWKYZTAF10/IyRus+uU55LRBE
-         4k68uNqq+fkS72Id3gBgsPo8GFhIcdXrrqMldXmeqgNgvMOl+qXZJXb1YbEiT/aa1Etq
-         o30FSX7jLjx5MVrVA99VofHiE5IMFfg3o0pRw5sTKSTM5XBTSZbKnADSmkIOStFM24ld
-         zguw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to:user-agent;
-        bh=I4CHDtUGbNIJQpM023wPiaWJqW6VgcrXTJggEv8wwSw=;
-        b=DDI81BDaesbnJ/qyACinmBqoBom0f0JOEqFak+Mr5tpC4yOKwvoz1y42yR3iGDIoVa
-         Qu2vyAitYik3C0Nh9xKiGmcFRtz/CXYUg3MfstQ5BYa3R17xvy8ymk1o2QLEUuo+/F4q
-         uFy/CMPROVfKYB+hbn3CN4UhYEL1HiegMZIztWA0lp38H65LXP9MFJXAcsoyE0vLttTx
-         HrmrRGNgXPHPWTpTDE2JiJMRbhwEKcQCNjaUM6FSVnK3cKF25nPdePrysduY+UG5Ptsp
-         8gy6Qxn39Vb/lhAAjBQXu/aG3slHYIiJmkQIvUCtR/lvzrSbIWtknTyUnpxqoAmivs/7
-         ttrg==
-X-Gm-Message-State: AOAM531LvygesIQTAxS17QbLdXHO3yLtkfRNEiZ+Bi2HEkO3SRBRVlg/
-        YCNsSwxReSA0OumPEYCEsvh0QQ==
-X-Google-Smtp-Source: ABdhPJwcV7Uyws0t/xTffHxasXM2N+eWSdO5J/LaZj2Wqdrek/AXYoDsM1gv08im58tWUSJ8zIbVUg==
-X-Received: by 2002:a17:90a:e110:: with SMTP id c16mr11572525pjz.84.1604901203964;
-        Sun, 08 Nov 2020 21:53:23 -0800 (PST)
-Received: from localhost ([122.172.12.172])
-        by smtp.gmail.com with ESMTPSA id 12sm3592369pjn.19.2020.11.08.21.53.22
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sun, 08 Nov 2020 21:53:22 -0800 (PST)
-Date:   Mon, 9 Nov 2020 11:23:20 +0530
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Frank Lee <tiny.windzz@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Peter Chen <Peter.Chen@nxp.com>,
-        Mark Brown <broonie@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        driver-dev <devel@driverdev.osuosl.org>,
-        linux-pwm@vger.kernel.org,
-        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>, linux-usb@vger.kernel.org,
-        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        linux-tegra@vger.kernel.org, linux-media@vger.kernel.org
-Subject: Re: [PATCH v1 17/30] mmc: sdhci-tegra: Support OPP and core voltage
- scaling
-Message-ID: <20201109055320.5y5gf2whwast2mi4@vireshk-i7>
-References: <6fa54ce6-d5ae-d04f-7c77-b62c148d92b7@gmail.com>
- <20201106061513.uyys7njcqcdlah67@vireshk-i7>
- <a6926456-8bce-a438-bfaa-be334208f004@gmail.com>
- <CAEExFWsp0DWw1yO84e3vzr_YZkqkd+pyPfQQR3J2W6n3wTX4Jw@mail.gmail.com>
- <20201109050010.g47zojh6wafvwqva@vireshk-i7>
- <c584b301-e052-7f01-335d-8f9160865198@gmail.com>
- <20201109051014.oa6bt4g3ctm2hnuy@vireshk-i7>
- <4476fed9-a356-b7f1-32ee-935343e23038@gmail.com>
- <20201109053546.xupmmsx5qccn46tr@vireshk-i7>
- <33a7ad95-a8cf-7b88-0f78-09086c1a4adf@gmail.com>
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=zT/2UU/kI0hZo2JOJUuTng+C9/bJVGWCC6P36U0+MO0=;
+ b=mwqjGUn5afarimnqB1dSgWNqu4wbMomKUB2KYn3NdoMvJruDLmTrz/4MeuvaThOfZ7aWVd1bzrbkITPQqjwTKM8hP0D4kX8hLrtNhMBk6/J/Zvz3hL2Q58hTiy6opmyqm/OR3QTD1E8TNWO2mPo937z0EvG4xsZbpYyk/JRGeh8=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYXPR01MB1550.jpnprd01.prod.outlook.com (2603:1096:403:10::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3541.22; Mon, 9 Nov
+ 2020 11:04:10 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::bcba:dccf:7d4c:c883]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::bcba:dccf:7d4c:c883%4]) with mapi id 15.20.3541.025; Mon, 9 Nov 2020
+ 11:04:10 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH 0/3] tmio/sdhi: fix workaround for a regression
+Thread-Topic: [PATCH 0/3] tmio/sdhi: fix workaround for a regression
+Thread-Index: AQHWtA4TAWUl3m9Gd0eEGY6K6vgzEqm/p2Ow
+Date:   Mon, 9 Nov 2020 11:04:09 +0000
+Message-ID: <TY2PR01MB36920908759ABC8371448370D8EA0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20201106072549.1495-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20201106072549.1495-1-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: a6e52acb-6b61-4d20-7579-08d8849f2f46
+x-ms-traffictypediagnostic: TYXPR01MB1550:
+x-microsoft-antispam-prvs: <TYXPR01MB1550E865BB46EB0B8E907B6FD8EA0@TYXPR01MB1550.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:9508;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 1CBljZZ+CpZ9sLx22dINAPEexLaaH9Q6IIGPg8y96w3o7lGZwn6KIPeqw/7CpdK1AquOKjk7voh1/YQGLfOy16aHQhhUqr4VgDc5B7NMLepYUB1Ku3aut64F+lT3gWNzPhQlC0ky99MNnPtnO3j5RKOHPkTKkieAna7pC6otcWEp7eqAP2qDjPejG8B2fXtH1NGoRHPtJmrBuAtgCtssQYA8ms+t28n02M4xvm87cXwhiPvItCandAdGGnePwJ+6wo5hFU9Mdvs6JoGv+IRD+al0ybR8YJ0lwP7mKLajJCQj0Mbk6Qg8pNYR43KXLVKoClubT/RX0V3dCmHcoohzeA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(136003)(366004)(346002)(39860400002)(396003)(26005)(9686003)(110136005)(71200400001)(33656002)(4744005)(478600001)(7696005)(6506007)(2906002)(55236004)(316002)(66946007)(66446008)(8676002)(66556008)(5660300002)(64756008)(66476007)(76116006)(8936002)(52536014)(186003)(86362001)(55016002)(4326008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: lqjMVS/RCQUJ8GAHAjmqlvqzVLbkuigT9aRWWBLoqWdGIYP19+tekA/VHj3NhHsweJGK+AN69mjUNqNINdsTSVTL91CB15gYEQER96RHMgbziqu3qednRqj8xyJVWUdxvob2MKCzcK8QwvmmGzeAIWuFTX1Yo702iBpBYUoM3izLdXuiSWPidkE01LAO/nUCAuoiDZ1KwEnsqgbGoaL5pHSXPeIyh26913OMjIBjKNhfZyGfnu3YBgY7NWgQkNCr35tcibhzD1+EcQYykTDolojCparKBcMLhtK+Izc3M7UTY/aDGpHJ+ZluGmQJyPNua8aJs0TU9fIGFD85M+rYEt3MVr99R3rVlwHa8Yl7sHKtkpMhZGlf/pjSbovSAaBejw5paATyAO350XgbgV3ZcXDGnuJUrgGjq+FRJiIbRMMB/fcS/REkUNirJ23wrCa3EmagijAi8GBDA0hylpWGo6E6Q73CPVM0VsZMA1aEC1X/NhjPnX2JZJcSKosuB+Wnk6D7BLqdgeOwDACEYoci6NBRRAAiHGRy9DWKoN1yU8uewFKqSgC+O7OPsNzTC2dzjrmBBEj6PTIZdYTzzk2kpBWc6Efso7VKXdqT4QDheZZa7JEzPzRBbCIALvisDW8xokpFiEHGn2bQ21jtEzxK8g==
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <33a7ad95-a8cf-7b88-0f78-09086c1a4adf@gmail.com>
-User-Agent: NeoMutt/20180716-391-311a52
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: a6e52acb-6b61-4d20-7579-08d8849f2f46
+X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Nov 2020 11:04:09.9379
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: TQFtU/4vIK+TiNEpOSRo7oIqVpLLc3/R4nK2KwhgD930qFg8KewHJyWvn0gzdTeWqB05OgqLCKirMjJ1ZDukZCDht/vHuPkBvh6onxwD4bUxodfywZvLTB4SIcfebqpM
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYXPR01MB1550
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09-11-20, 08:44, Dmitry Osipenko wrote:
-> 09.11.2020 08:35, Viresh Kumar пишет:
-> > On 09-11-20, 08:19, Dmitry Osipenko wrote:
-> >> Thanks, I made it in a different way by simply adding helpers to the
-> >> pm_opp.h which use devm_add_action_or_reset(). This doesn't require to
-> >> add new kernel symbols.
-> > 
-> > I will prefer to add it in core.c itself, and yes
-> > devm_add_action_or_reset() looks better. But I am still not sure for
-> > which helpers do we need the devm_*() variants, as this is only useful
-> > for non-CPU devices. But if we have users that we can add right now,
-> > why not.
-> 
-> All current non-CPU drivers (devfreq, mmc, memory, etc) can benefit from it.
-> 
-> For Tegra drivers we need these variants:
-> 
-> devm_pm_opp_set_supported_hw()
-> devm_pm_opp_set_regulators() [if we won't use GENPD]
-> devm_pm_opp_set_clkname()
-> devm_pm_opp_of_add_table()
+Hi Wolfram-san,
 
-I tried to look earlier for the stuff already merged in and didn't
-find a lot of stuff where the devm_* could be used, maybe I missed
-some of it.
+> From: Wolfram Sang, Sent: Friday, November 6, 2020 4:26 PM
+>=20
+> After some refactoring, I had to insert a workaround because a
+> regression was discovered when re-inserting SD cards. Now, this series
+> implements the proper fixes and finally reverts the workaround.
+>=20
+> This has been tested on Salvator-XS (M3N and H3 ES2.0). These patches
+> were already discussed with Shimoda-san and the BSP team internally.
+> However, I'd appreciate Shimoda-san's tags be given here to make sure
+> the patches are exactly that what we discussed.
 
-Frank, would you like to refresh your series based on suggestions from
-Dmitry and make other drivers adapt to the new APIs ?
+Thank you for the patches!
 
--- 
-viresh
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+And, I tested on the R-Car H3 ES3.0 Salvator-XS. So,
+
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+Best regards,
+Yoshihiro Shimoda
+
