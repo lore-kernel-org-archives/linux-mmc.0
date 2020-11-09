@@ -2,67 +2,67 @@ Return-Path: <SRS0=XCsL=EP=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D412C63697
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:10:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89421C6379D
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:10:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3607E2084C
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:10:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4FBD62084C
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Nov 2020 05:10:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QYMCKqr7"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="HyJFeNy9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729427AbgKIFKU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1729446AbgKIFKU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 9 Nov 2020 00:10:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60504 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60490 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729436AbgKIFKU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 00:10:20 -0500
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A62CC0613CF;
-        Sun,  8 Nov 2020 21:10:19 -0800 (PST)
-Received: by mail-lj1-x244.google.com with SMTP id o24so2039314ljj.6;
-        Sun, 08 Nov 2020 21:10:19 -0800 (PST)
+        with ESMTP id S1729427AbgKIFKT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 00:10:19 -0500
+Received: from mail-pf1-x444.google.com (mail-pf1-x444.google.com [IPv6:2607:f8b0:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF914C0613D6
+        for <linux-mmc@vger.kernel.org>; Sun,  8 Nov 2020 21:10:17 -0800 (PST)
+Received: by mail-pf1-x444.google.com with SMTP id x13so6978970pfa.9
+        for <linux-mmc@vger.kernel.org>; Sun, 08 Nov 2020 21:10:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:from:to:cc:references:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=F8bnoTfMLfQuAGNjcxWowIscN/dz6R46GaHzllMg8J0=;
-        b=QYMCKqr7RGvgYQCWbQWS7P62qghK9GYhJHOPC6o3qWYxnmx01eOxLC3P9oE915gwvt
-         Fh3WypXWmqFr5JDzFvcPizJHaUlaojEYEUSbCYiCwkjs4V93aOmdN+Fgb69PJ6NqE2Gw
-         PU1tJC6S9ZO6C2E/cEJiZ7Ugx4M8B/quGev7CODiOs60KgtrPSL8dsbQi1bSJBrgItSj
-         sS++FruzLvRC0nDuMK2bw7Tv77TCae5RwbeUbWYjmokvQPKApEWrKpR+CACc3lpJArf0
-         NYbmiYM7C+3HAkDJKFrl7LPc7SxMra13YtbJE8XKMrd/eT1ThSFtS/0QhWfQ+88xkHzq
-         O9zA==
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to
+         :user-agent;
+        bh=XgmwVftW1h6VXvLFHyQ3D2f7dAvQEabg59R1W+Mex10=;
+        b=HyJFeNy9dRofz/VIB02kKnHQ0GZ5T+96JVvhYzk10jI5ctp9i7zGwjha0J9RvT7KoS
+         2pc97Wdrzsn3PyolfwPehIR6O2LtT+VwOUIxiVaNxCqFhlkx612Ci8AYFO6PcqbGvQrV
+         N6KFFNtsuGn9CFEnzWrff+eXgA4jRD0J1w1EFt+NwY3ZWJBjfZw9+PHLeLfm2io1Nn/V
+         Kh/3YaDQmTGBwyacSRhSPhXy6GHls0BoTJcsdaXKvYkli5kqPDght02p1aMejDD0uQXp
+         CmTemGtBgOzJfqUVfFZlkKFA7ogWF1ZmjSAhv8iADJbcpOm7EQ1TTBPscIh1rHcB20RM
+         nMww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=F8bnoTfMLfQuAGNjcxWowIscN/dz6R46GaHzllMg8J0=;
-        b=m/sgWz/85zYduSGwnru5nzGXWA1xTwhxwmzdy7/G75yfV95shvs9/0+lKYzRI3A+ig
-         xWeRqHHXg1F5q00D2GAFh++uK5rKiEyLizxOyXn2wuTHNQMQ2j3RUbve8pgMi4Wy6ZCZ
-         xe8peNRpN7wOQMMG3U486pxU3YzHOe634nSTQb5aPHQ5GiKqqudT8KLYmAhqIl8Xo9zY
-         hNYh6W6Lr/+t4niXtUbKGtV7FbwhJLVa7t8V/cz24RwdrngXlaXuG1eJIAz9vLT2xkWC
-         Le1ZZ0+Rm0N83AOQKbScaXLpYLmTML16SiI1oQIhhr+nzpuuahEoaLN+AAX7z7g1EmSc
-         xILg==
-X-Gm-Message-State: AOAM532S0XibXizrdjk2T9o320Gn3O4v86gDKtK5Op3bhwB2x2nCtjez
-        YUQiEW8QBJ7vfCT9p7/cwkseaWcnrnc=
-X-Google-Smtp-Source: ABdhPJzn+t/fz27158UyX7xdQtkSIJERw+NXYwjCpA/tjOndB+43X/qkcsxZZqHz/vcErD/wbcazTQ==
-X-Received: by 2002:a2e:6a0f:: with SMTP id f15mr272519ljc.375.1604898617889;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to:user-agent;
+        bh=XgmwVftW1h6VXvLFHyQ3D2f7dAvQEabg59R1W+Mex10=;
+        b=dQKGxCg+x+9GaM29GtN34ynY2pN3l/Y5XX92zfqZe2KXQ+E33znOalAXestrC5aS2e
+         JxQ2T2m4bC+XcQ76v5aTjW9FHYLFAEI7wBTNz82hWkJLL29dPUT4voUJ4lvVo/Aqdnmo
+         dc/70qVOen0YpxQ3eXuiPzz/WsNmqP/n2YKAl1lNZ3zpxxCzW4DifnqoGkMt4svxTB7k
+         VXtG+tEUKnqHKyTGLVBPYZpkadldzG8ZBCRFniXq7g+HHFiYFUmq2rxDk+wOu4nXr9Gq
+         XaQYrWjQhIoiChQAqoWn0qScnlsVPR0UgiYjHjFQZz5wUmo7rPv1gKxTyIrp7LVnnj/j
+         ixRQ==
+X-Gm-Message-State: AOAM530tF8K1G3ozEaq4sGh4P4YPHO4RUc2AvzB31+O4DMHWqVKYSaEl
+        HXa9tabG1NOxyI7uHPBOkZWGuZQ64AxKeg==
+X-Google-Smtp-Source: ABdhPJwnxG147TJFSih2GdY+A04gFXZv8tlsN8MpSlH/99hporLJc8G2uIV3/sv7vMfOI3DyYFWFvg==
+X-Received: by 2002:a63:380b:: with SMTP id f11mr11374932pga.198.1604898617255;
         Sun, 08 Nov 2020 21:10:17 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
-        by smtp.googlemail.com with ESMTPSA id r9sm1547587ljd.23.2020.11.08.21.10.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 08 Nov 2020 21:10:17 -0800 (PST)
-Subject: Re: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA
- Tegra20/30 SoCs
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Viresh Kumar <viresh.kumar@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+Received: from localhost ([122.172.12.172])
+        by smtp.gmail.com with ESMTPSA id s23sm8781212pgl.47.2020.11.08.21.10.15
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 08 Nov 2020 21:10:16 -0800 (PST)
+Date:   Mon, 9 Nov 2020 10:40:14 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Frank Lee <tiny.windzz@gmail.com>,
         Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
         Alan Stern <stern@rowland.harvard.edu>,
@@ -73,70 +73,84 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Krzysztof Kozlowski <krzk@kernel.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
         Marek Szyprowski <m.szyprowski@samsung.com>,
         Peter Geis <pgwipeout@gmail.com>,
         Nicolas Chauvet <kwizart@gmail.com>,
-        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
-        driverdevel <devel@driverdev.osuosl.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
+        driver-dev <devel@driverdev.osuosl.org>,
         linux-pwm@vger.kernel.org,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-usb@vger.kernel.org,
+        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
         dri-devel <dri-devel@lists.freedesktop.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>
+        linux-tegra@vger.kernel.org, linux-media@vger.kernel.org
+Subject: Re: [PATCH v1 17/30] mmc: sdhci-tegra: Support OPP and core voltage
+ scaling
+Message-ID: <20201109051014.oa6bt4g3ctm2hnuy@vireshk-i7>
 References: <20201104234427.26477-1-digetx@gmail.com>
- <CAPDyKFr7qTU2RPhA_ZrbCayoTTNUEno1zdmvmv+8HBe-Owrfeg@mail.gmail.com>
- <cd147ab0-1304-a491-7a56-ee6199c02d32@gmail.com>
- <2716c195-083a-112f-f1e5-2f6b7152a4b5@gmail.com>
- <20201109044354.ljd5pomhob6b7u5v@vireshk-i7>
- <713b319e-bb7b-4743-59f0-b9892c3da92d@gmail.com>
-Message-ID: <aba1fcac-74b8-f370-ab45-312975da66e6@gmail.com>
-Date:   Mon, 9 Nov 2020 08:10:16 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ <20201104234427.26477-18-digetx@gmail.com>
+ <CAOh2x==sy1w7_oEV8=toC6uQnSN44wyOixbP_X0BrMsnm1AUFg@mail.gmail.com>
+ <6fa54ce6-d5ae-d04f-7c77-b62c148d92b7@gmail.com>
+ <20201106061513.uyys7njcqcdlah67@vireshk-i7>
+ <a6926456-8bce-a438-bfaa-be334208f004@gmail.com>
+ <CAEExFWsp0DWw1yO84e3vzr_YZkqkd+pyPfQQR3J2W6n3wTX4Jw@mail.gmail.com>
+ <20201109050010.g47zojh6wafvwqva@vireshk-i7>
+ <c584b301-e052-7f01-335d-8f9160865198@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <713b319e-bb7b-4743-59f0-b9892c3da92d@gmail.com>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <c584b301-e052-7f01-335d-8f9160865198@gmail.com>
+User-Agent: NeoMutt/20180716-391-311a52
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-09.11.2020 07:47, Dmitry Osipenko пишет:
-> 09.11.2020 07:43, Viresh Kumar пишет:
->> On 08-11-20, 15:19, Dmitry Osipenko wrote:
->>> I took a detailed look at the GENPD and tried to implement it. Here is
->>> what was found:
->>>
->>> 1. GENPD framework doesn't aggregate performance requests from the
->>> attached devices. This means that if deviceA requests performance state
->>> 10 and then deviceB requests state 3, then framework will set domain's
->>> state to 3 instead of 10.
->>
->> It does. Look at _genpd_reeval_performance_state().
->>
+On 09-11-20, 08:08, Dmitry Osipenko wrote:
+> 09.11.2020 08:00, Viresh Kumar пишет:
+> > On 06-11-20, 21:41, Frank Lee wrote:
+> >> On Fri, Nov 6, 2020 at 9:18 PM Dmitry Osipenko <digetx@gmail.com> wrote:
+> >>>
+> >>> 06.11.2020 09:15, Viresh Kumar пишет:
+> >>>> Setting regulators for count as 0 doesn't sound good to me.
+> >>>>
+> >>>> But, I understand that you don't want to have that if (have_regulator)
+> >>>> check, and it is a fair request. What I will instead do is, allow all
+> >>>> dev_pm_opp_put*() API to start accepting a NULL pointer for the OPP
+> >>>> table and fail silently. And so you won't be required to have this
+> >>>> unwanted check. But you will be required to save the pointer returned
+> >>>> back by dev_pm_opp_set_regulators(), which is the right thing to do
+> >>>> anyways.
+> >>>
+> >>> Perhaps even a better variant could be to add a devm versions of the OPP
+> >>> API functions, then drivers won't need to care about storing the
+> >>> opp_table pointer if it's unused by drivers.
+> >>
+> >> I think so. The consumer may not be so concerned about the status of
+> >> these OPP tables.
+> >> If the driver needs to manage the release, it needs to add a pointer
+> >> to their driver global structure.
+> >>
+> >> Maybe it's worth having these devm interfaces for opp.
+> > 
+> > Sure if there are enough users of this, I am all for it. I was fine
+> > with the patches you sent, just that there were not a lot of users of
+> > it and so I pushed them back. If we find that we have more users of it
+> > now, we can surely get that back.
+> > 
 > 
-> Thanks, I probably had a bug in the quick prototype and then overlooked
-> that function.
+> There was already attempt to add the devm? Could you please give me a
+> link to the patches?
 > 
+> I already prepared a patch which adds the devm helpers. It helps to keep
+> code cleaner and readable.
 
-If a non-hardware device-tree node is okay to have for the domain, then
-I can try again.
+https://lore.kernel.org/lkml/20201012135517.19468-1-frank@allwinnertech.com/
 
-What I also haven't mentioned is that GENPD adds some extra complexity
-to some drivers (3d, video decoder) because we will need to handle both
-new GENPD and legacy Tegra specific pre-genpd era domains.
-
-I'm also not exactly sure how the topology of domains should look like
-because Tegra has a power-controller (PMC) which manages power rail of a
-few hardware units. Perhaps it should be
-
-  device -> PMC domain -> CORE domain
-
-but not exactly sure for now.
+-- 
+viresh
