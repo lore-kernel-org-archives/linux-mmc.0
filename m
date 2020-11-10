@@ -7,103 +7,98 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7AE4C388F7
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58E4EC4742C
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8692620731
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 03BD920731
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hI5Q10IH"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TWZvslnP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730108AbgKJM0u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 07:26:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41306 "EHLO
+        id S1730086AbgKJM0w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Nov 2020 07:26:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730086AbgKJM0t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:26:49 -0500
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75BCDC0613D1
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:49 -0800 (PST)
-Received: by mail-vs1-xe42.google.com with SMTP id l22so6929080vsa.4
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:49 -0800 (PST)
+        with ESMTP id S1730061AbgKJM0w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:26:52 -0500
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22D7BC0613CF
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:52 -0800 (PST)
+Received: by mail-vs1-xe41.google.com with SMTP id y78so6910890vsy.6
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=bg9l2seJVZ7O7doP72lzXqaBCKK3JjxmLYGn2ZaiXcE=;
-        b=hI5Q10IHntEe+TBd+uxnI0cuMODlj3zS83HMI5chgEqkVPHIvrZA5bajZ1jL3JQ62E
-         Bsz9VZmPIGh0/aVD8a7lc7ChkAuXhV+UMC3NNKI+7vntCiIbtw1xsTyKM5tnhBcGjw4X
-         v6cRCFQOusD/Xm8oS5l2vv9SEM02Ep+NJbFL7vRaZbItkjxk/5Io0+GoR92WoovFuVI+
-         GYnCKqesI8xHK8Qync1FzDZkQY4bR5Nlo9v9gMrrav+4JpW4qz4iLyW50CsU/Qnc6vDF
-         E+q9gOm9nK0uMJUy82EEWaTsBCMQ7gPd4Sq7XtBjseMCQaBT/v+FQ6ilZd3dKtRV6iZ0
-         j5gA==
+        bh=O4W8LktyG7onvhz7iuqk20AJIpUjKq3xMHse0pFWv98=;
+        b=TWZvslnPz8YySVGpsO5yzHiBZEPMJlE/BBkXCxiGhbSeIPfjeP5XBWnMRmL2b4HabH
+         ZwstAY4ZcX2J530b0eFNqRLCLxvE7ZbHrsMA8+puUlt98YqaqVGw1To1PCpF/RMYDSDF
+         G3bMw+3EfOn3mKzxQhhiD16wRgnsC4sbKq3xYxGnQlkzm3mXnMuJmnW+9ZRYZJM8TT1i
+         wcL/k6vF1LMF17OCgUeJ8S26T571vWGr5Jrby0GXWgti1diNpb9Juj2eNgR+CG8wlzI5
+         3v/yJ1jmW9rxO4lZgkNNMfrU06euwONRU0SttI87Hl8RiYw94YQZkUaT3MZd1LHI69xK
+         Iy6A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=bg9l2seJVZ7O7doP72lzXqaBCKK3JjxmLYGn2ZaiXcE=;
-        b=AYaF20yN9UIdwHWMgHk/kRJuxQXsnpPHENmAQc4Op7g5TNhT3NMjqnC2OKxI+Lweqa
-         L9AyJSfGtCQv/PGUrxgiIpYhqSY40jtNU22YwZQFHxvO3glojrLZVKmWFFMDxIwroWJc
-         HzleekDziF1T6k/FifkFyjnFbpHhvhJPNeB9dGxK2YG2q1UryUwKqhtS8kgQ+ml0lLsm
-         UtjL+jI8PJHPMZzVbDLEM2/Amfj19uoogVW3r6S4cSDl4r1JAWmmwAvBV3NIlGqgb+ir
-         TCgMcHT+QYHndMaZBBzas3C43nirZohtwdLAGP37c6b+LMY3TUQtySJ5p3lYSf4OmxCY
-         U3CA==
-X-Gm-Message-State: AOAM531dVTxVJMKki3hkgxukNPTo77W0i9IM5ZeipNkHCybZC94iILP8
-        ShxNk3EkErHrAJrEYKAm2YEFcnOhTtPPz6ctIUJBZw==
-X-Google-Smtp-Source: ABdhPJwCzDANDGShOXJKvk1oOOH5z9VQ/+FB3yhI81IbVRvxLSqK721kLxBv0lsbOd5pLzQRi5uOOBXcNbMG43NXCR8=
-X-Received: by 2002:a67:310d:: with SMTP id x13mr11578035vsx.19.1605011208686;
- Tue, 10 Nov 2020 04:26:48 -0800 (PST)
+        bh=O4W8LktyG7onvhz7iuqk20AJIpUjKq3xMHse0pFWv98=;
+        b=NG8CplganlKTBFTXXjrIxxh89pk2HGXk8BlJiC3bYEIPZoF0bSDXtVTN/XvBAtOFFI
+         YXA8tP+KiLVpf5FQbM8YjiYkgleEjkHtFeeMkfk85FWM1VQJf3X+dkUvwSKwFXZXMS93
+         dysIw4UMyhvkipQ028DHKop54IBhXkbkK02jkS22Sl3TkPF7sjbMsfkFLLEu0+Q+VCU3
+         6bVtlrXmpHpbjhMcvjt6in2PA6GH1hjgryNfS6m26UyF9gwav5thuU4PkQz72NawI9gd
+         dK0LcsZbJ/lJsgRodBTR5zKyhFPoTruXae4zBNUUraABbFrFWgDhpVElAYdhTgJ0QClr
+         iD2Q==
+X-Gm-Message-State: AOAM533XrtpL8IWK25DpA50Y5j3yDNxheOA9HuqYM1O/LG5cC9zPUfVE
+        nsr2vlQcDAMhtrpLCr6Vg82cPXeF9SHKmVy+Y1DZ3dEd5vvIeA==
+X-Google-Smtp-Source: ABdhPJwOtgGMkdEQpWz6ZNlbahnehJWyICu6l/4/2k23omLt6ERWrBy8Yzz/zp9nDVm7BLtyfPL9pegmupXDHLm9ro4=
+X-Received: by 2002:a67:ec9a:: with SMTP id h26mr11065383vsp.34.1605011211392;
+ Tue, 10 Nov 2020 04:26:51 -0800 (PST)
 MIME-Version: 1.0
-References: <1604654730-29914-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <1604654730-29914-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+References: <20201110071314.3868-1-yangbo.lu@nxp.com>
+In-Reply-To: <20201110071314.3868-1-yangbo.lu@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Nov 2020 13:26:11 +0100
-Message-ID: <CAPDyKFpNrX4SgXbOeUgniy0nBt3-LNCAEijm2EnYmEL-SsEEsA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: host: renesas_sdhi_core: Missing tmio_mmc_host_free()
- in renesas_sdhi_remove()
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Morimoto <kuninori.morimoto.gx@renesas.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Date:   Tue, 10 Nov 2020 13:26:14 +0100
+Message-ID: <CAPDyKFpS-ZT+XuLcW3xekwS+ZT1hh0hr8YRQpfKNw-wdAnhm2g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-esdhc: handle pulse width detection erratum
+ for more SoCs
+To:     Yangbo Lu <yangbo.lu@nxp.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 6 Nov 2020 at 10:25, Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
+On Tue, 10 Nov 2020 at 08:22, Yangbo Lu <yangbo.lu@nxp.com> wrote:
 >
-> The commit 94b110aff867 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
-> added tmio_mmc_host_free(), but missed the function calling in
-> the sh_mobile_sdhi_remove() at that time. So, fix it. Otherwise,
-> we cannot rebind the sdhi/mmc devices when we use aliases of mmc.
+> Apply erratum workaround of unreliable pulse width detection to
+> more affected platforms (LX2160A Rev2.0 and LS1028A Rev1.0).
 >
-> Fixes: 94b110aff867 ("mmc: tmio: add tmio_mmc_host_alloc/free()")
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for fixes, by adding a fixes+stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/renesas_sdhi_core.c | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/sdhci-of-esdhc.c | 2 ++
+>  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 4143141..03c905a 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -1160,6 +1160,7 @@ int renesas_sdhi_remove(struct platform_device *pdev)
+> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+> index bb09445..ab5ab96 100644
+> --- a/drivers/mmc/host/sdhci-of-esdhc.c
+> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
+> @@ -1324,6 +1324,8 @@ static struct soc_device_attribute soc_fixup_sdhc_clkdivs[] = {
 >
->         tmio_mmc_host_remove(host);
->         renesas_sdhi_clk_disable(host);
-> +       tmio_mmc_host_free(host);
+>  static struct soc_device_attribute soc_unreliable_pulse_detection[] = {
+>         { .family = "QorIQ LX2160A", .revision = "1.0", },
+> +       { .family = "QorIQ LX2160A", .revision = "2.0", },
+> +       { .family = "QorIQ LS1028A", .revision = "1.0", },
+>         { },
+>  };
 >
->         return 0;
->  }
 > --
 > 2.7.4
 >
