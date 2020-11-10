@@ -7,22 +7,22 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 818AFC388F7
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38E59C4742C
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D6D221D7F
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0262F206A1
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387613AbgKJEGg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Nov 2020 23:06:36 -0500
-Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:60098 "EHLO
+        id S2387558AbgKJEGa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Nov 2020 23:06:30 -0500
+Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:33742 "EHLO
         smtp2207-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2387574AbgKJEGf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:35 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07436289|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.019185-0.0136594-0.967156;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047193;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
+        by vger.kernel.org with ESMTP id S2387518AbgKJEGa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:30 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.3740237|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0519488-8.64106e-05-0.947965;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047207;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
 Received: from allwinnertech.com(mailfrom:frank@allwinnertech.com fp:SMTPD_---.IulFdj5_1604981159)
           by smtp.aliyun-inc.com(10.147.42.135);
-          Tue, 10 Nov 2020 12:06:29 +0800
+          Tue, 10 Nov 2020 12:06:19 +0800
 From:   Frank Lee <frank@allwinnertech.com>
 To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         wens@csie.org, ulf.hansson@linaro.org, kishon@ti.com,
@@ -37,9 +37,9 @@ To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         linux-watchdog@vger.kernel.org, linux-gpio@vger.kernel.org,
         tiny.windzz@gmail.com
 Cc:     Yangtao Li <frank@allwinnertech.com>
-Subject: [PATCH 09/19] phy: allwinner: Convert to devm_platform_ioremap_* API
-Date:   Tue, 10 Nov 2020 12:05:43 +0800
-Message-Id: <20201110040553.1381-10-frank@allwinnertech.com>
+Subject: [PATCH 05/19] dmaengine: sun6i: Add support for A100 DMA
+Date:   Tue, 10 Nov 2020 12:05:39 +0800
+Message-Id: <20201110040553.1381-6-frank@allwinnertech.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201110040553.1381-1-frank@allwinnertech.com>
 References: <20201110040553.1381-1-frank@allwinnertech.com>
@@ -51,116 +51,59 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yangtao Li <frank@allwinnertech.com>
 
-Use the devm_platform_ioremap_resource_byname() and
-devm_platform_ioremap_resource helper to simplify the code.
+The dma of a100 is similar to h6, with some minor changes to
+support greater addressing capabilities.
+
+Add support for it.
 
 Signed-off-by: Yangtao Li <frank@allwinnertech.com>
 ---
- drivers/phy/allwinner/phy-sun4i-usb.c       | 9 +++------
- drivers/phy/allwinner/phy-sun50i-usb3.c     | 4 +---
- drivers/phy/allwinner/phy-sun6i-mipi-dphy.c | 4 +---
- drivers/phy/allwinner/phy-sun9i-usb.c       | 4 +---
- 4 files changed, 6 insertions(+), 15 deletions(-)
+ drivers/dma/sun6i-dma.c | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
 
-diff --git a/drivers/phy/allwinner/phy-sun4i-usb.c b/drivers/phy/allwinner/phy-sun4i-usb.c
-index 0f1888b55dbd..a6900495baa5 100644
---- a/drivers/phy/allwinner/phy-sun4i-usb.c
-+++ b/drivers/phy/allwinner/phy-sun4i-usb.c
-@@ -686,7 +686,6 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
- 	struct device *dev = &pdev->dev;
- 	struct device_node *np = dev->of_node;
- 	struct phy_provider *phy_provider;
--	struct resource *res;
- 	int i, ret;
+diff --git a/drivers/dma/sun6i-dma.c b/drivers/dma/sun6i-dma.c
+index f5f9c86c50bc..5cadd4d2b824 100644
+--- a/drivers/dma/sun6i-dma.c
++++ b/drivers/dma/sun6i-dma.c
+@@ -1173,6 +1173,30 @@ static struct sun6i_dma_config sun50i_a64_dma_cfg = {
+ 			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
+ };
  
- 	data = devm_kzalloc(dev, sizeof(*data), GFP_KERNEL);
-@@ -700,8 +699,7 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
- 	if (!data->cfg)
- 		return -EINVAL;
- 
--	res = platform_get_resource_byname(pdev, IORESOURCE_MEM, "phy_ctrl");
--	data->base = devm_ioremap_resource(dev, res);
-+	data->base = devm_platform_ioremap_resource_byname(pdev, "phy_ctrl");
- 	if (IS_ERR(data->base))
- 		return PTR_ERR(data->base);
- 
-@@ -796,9 +794,8 @@ static int sun4i_usb_phy_probe(struct platform_device *pdev)
- 
- 		if (i || data->cfg->phy0_dual_route) { /* No pmu for musb */
- 			snprintf(name, sizeof(name), "pmu%d", i);
--			res = platform_get_resource_byname(pdev,
--							IORESOURCE_MEM, name);
--			phy->pmu = devm_ioremap_resource(dev, res);
-+			phy->pmu = devm_platform_ioremap_resource_byname(pdev,
-+									 name);
- 			if (IS_ERR(phy->pmu))
- 				return PTR_ERR(phy->pmu);
- 		}
-diff --git a/drivers/phy/allwinner/phy-sun50i-usb3.c b/drivers/phy/allwinner/phy-sun50i-usb3.c
-index b1c04f71a31d..84055b720016 100644
---- a/drivers/phy/allwinner/phy-sun50i-usb3.c
-+++ b/drivers/phy/allwinner/phy-sun50i-usb3.c
-@@ -134,7 +134,6 @@ static int sun50i_usb3_phy_probe(struct platform_device *pdev)
- 	struct sun50i_usb3_phy *phy;
- 	struct device *dev = &pdev->dev;
- 	struct phy_provider *phy_provider;
--	struct resource *res;
- 
- 	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
- 	if (!phy)
-@@ -153,8 +152,7 @@ static int sun50i_usb3_phy_probe(struct platform_device *pdev)
- 		return PTR_ERR(phy->reset);
- 	}
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	phy->regs = devm_ioremap_resource(dev, res);
-+	phy->regs = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(phy->regs))
- 		return PTR_ERR(phy->regs);
- 
-diff --git a/drivers/phy/allwinner/phy-sun6i-mipi-dphy.c b/drivers/phy/allwinner/phy-sun6i-mipi-dphy.c
-index 1fa761ba6cbb..f0bc87d654d4 100644
---- a/drivers/phy/allwinner/phy-sun6i-mipi-dphy.c
-+++ b/drivers/phy/allwinner/phy-sun6i-mipi-dphy.c
-@@ -253,15 +253,13 @@ static int sun6i_dphy_probe(struct platform_device *pdev)
- {
- 	struct phy_provider *phy_provider;
- 	struct sun6i_dphy *dphy;
--	struct resource *res;
- 	void __iomem *regs;
- 
- 	dphy = devm_kzalloc(&pdev->dev, sizeof(*dphy), GFP_KERNEL);
- 	if (!dphy)
- 		return -ENOMEM;
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	regs = devm_ioremap_resource(&pdev->dev, res);
-+	regs = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(regs)) {
- 		dev_err(&pdev->dev, "Couldn't map the DPHY encoder registers\n");
- 		return PTR_ERR(regs);
-diff --git a/drivers/phy/allwinner/phy-sun9i-usb.c b/drivers/phy/allwinner/phy-sun9i-usb.c
-index fc6784dd7fa0..2f9e60c188b8 100644
---- a/drivers/phy/allwinner/phy-sun9i-usb.c
-+++ b/drivers/phy/allwinner/phy-sun9i-usb.c
-@@ -117,7 +117,6 @@ static int sun9i_usb_phy_probe(struct platform_device *pdev)
- 	struct device *dev = &pdev->dev;
- 	struct device_node *np = dev->of_node;
- 	struct phy_provider *phy_provider;
--	struct resource *res;
- 
- 	phy = devm_kzalloc(dev, sizeof(*phy), GFP_KERNEL);
- 	if (!phy)
-@@ -156,8 +155,7 @@ static int sun9i_usb_phy_probe(struct platform_device *pdev)
- 		}
- 	}
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	phy->pmu = devm_ioremap_resource(dev, res);
-+	phy->pmu = devm_platform_ioremap_resource(pdev, 0);
- 	if (IS_ERR(phy->pmu))
- 		return PTR_ERR(phy->pmu);
- 
++/*
++ * TODO: Add support for more than 4g physical addressing.
++ *
++ * The A100 binding uses the number of dma channels from the
++ * device tree node.
++ */
++static struct sun6i_dma_config sun50i_a100_dma_cfg = {
++	.clock_autogate_enable = sun6i_enable_clock_autogate_h3,
++	.set_burst_length = sun6i_set_burst_length_h3,
++	.set_drq          = sun6i_set_drq_h6,
++	.set_mode         = sun6i_set_mode_h6,
++	.src_burst_lengths = BIT(1) | BIT(4) | BIT(8) | BIT(16),
++	.dst_burst_lengths = BIT(1) | BIT(4) | BIT(8) | BIT(16),
++	.src_addr_widths   = BIT(DMA_SLAVE_BUSWIDTH_1_BYTE) |
++			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
++			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
++			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
++	.dst_addr_widths   = BIT(DMA_SLAVE_BUSWIDTH_1_BYTE) |
++			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
++			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
++			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
++	.has_mbus_clk = true,
++};
++
+ /*
+  * The H6 binding uses the number of dma channels from the
+  * device tree node.
+@@ -1225,6 +1249,7 @@ static const struct of_device_id sun6i_dma_match[] = {
+ 	{ .compatible = "allwinner,sun8i-h3-dma", .data = &sun8i_h3_dma_cfg },
+ 	{ .compatible = "allwinner,sun8i-v3s-dma", .data = &sun8i_v3s_dma_cfg },
+ 	{ .compatible = "allwinner,sun50i-a64-dma", .data = &sun50i_a64_dma_cfg },
++	{ .compatible = "allwinner,sun50i-a100-dma", .data = &sun50i_a100_dma_cfg },
+ 	{ .compatible = "allwinner,sun50i-h6-dma", .data = &sun50i_h6_dma_cfg },
+ 	{ /* sentinel */ }
+ };
 -- 
 2.28.0
 
