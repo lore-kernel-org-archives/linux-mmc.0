@@ -2,67 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34B59C5517A
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 07:22:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17B73C56201
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 08:43:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E06AF206B6
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 07:22:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C6EA320829
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 08:43:54 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="X5o36w5E"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731404AbgKJHWz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 02:22:55 -0500
-Received: from inva020.nxp.com ([92.121.34.13]:59466 "EHLO inva020.nxp.com"
+        id S1728905AbgKJInu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Nov 2020 03:43:50 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34914 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726307AbgKJHWz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Nov 2020 02:22:55 -0500
-Received: from inva020.nxp.com (localhost [127.0.0.1])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 19C551A0277;
-        Tue, 10 Nov 2020 08:22:54 +0100 (CET)
-Received: from invc005.ap-rdc01.nxp.com (invc005.ap-rdc01.nxp.com [165.114.16.14])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 0F44A1A00E9;
-        Tue, 10 Nov 2020 08:22:52 +0100 (CET)
-Received: from localhost.localdomain (mega.ap.freescale.net [10.192.208.232])
-        by invc005.ap-rdc01.nxp.com (Postfix) with ESMTP id EACF7402B7;
-        Tue, 10 Nov 2020 08:22:48 +0100 (CET)
-From:   Yangbo Lu <yangbo.lu@nxp.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     Yangbo Lu <yangbo.lu@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH] mmc: sdhci-of-esdhc: handle pulse width detection erratum for more SoCs
-Date:   Tue, 10 Nov 2020 15:13:14 +0800
-Message-Id: <20201110071314.3868-1-yangbo.lu@nxp.com>
-X-Mailer: git-send-email 2.17.1
-X-Virus-Scanned: ClamAV using ClamSMTP
+        id S1726827AbgKJInu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Nov 2020 03:43:50 -0500
+Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 33D9021741;
+        Tue, 10 Nov 2020 08:43:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1604997829;
+        bh=yaWVdXd6nLPOSk+0s2hrEtVFAxLiuqNEZ8pX8casxSQ=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=X5o36w5ETEuwAzCMsQjNa+s5A0W9fO6Y3GTlhrTEcY9pxxjaW9bg2nWcvbkQn7PWI
+         iOupPoRDZM5tZP9RXfs2rD5zHVY86YfvzLq6r+ixm3m0Vwp/6lk6LJw4JOXOkiO+21
+         eq3dvzGjorqFd+KU4pTgywXtDO4ghjJrGl3ELMAA=
+Received: by mail-ej1-f49.google.com with SMTP id i19so16301482ejx.9;
+        Tue, 10 Nov 2020 00:43:49 -0800 (PST)
+X-Gm-Message-State: AOAM530Chr36X9X8MnRVLNj+JbrEJn1J84nlTU+SnknO9i9W0dHXd/y5
+        YAATue+HYflgWHOds0qUh98eGNveYP/QzDkvaiE=
+X-Google-Smtp-Source: ABdhPJxTmGEeLjxqKr3BhSdK+jRebEFMA7yi5bPu8JW67PaPhe8uq4h+C7/0J+rMmIR0IwUAXAYYAv3O0pr2PkP7ZFc=
+X-Received: by 2002:a17:906:5618:: with SMTP id f24mr18656980ejq.381.1604997827541;
+ Tue, 10 Nov 2020 00:43:47 -0800 (PST)
+MIME-Version: 1.0
+References: <20201110040553.1381-1-frank@allwinnertech.com> <CAEExFWsc4Rx2U+BVuqTJkL0wj-gdNcF=emJRcStQ2Uq=FQEx1g@mail.gmail.com>
+In-Reply-To: <CAEExFWsc4Rx2U+BVuqTJkL0wj-gdNcF=emJRcStQ2Uq=FQEx1g@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+Date:   Tue, 10 Nov 2020 09:43:35 +0100
+X-Gmail-Original-Message-ID: <CAJKOXPf4ARNnSnvDpn7vVC0kGNd+m_dkfgKkmH_bca2AZ_Osyg@mail.gmail.com>
+Message-ID: <CAJKOXPf4ARNnSnvDpn7vVC0kGNd+m_dkfgKkmH_bca2AZ_Osyg@mail.gmail.com>
+Subject: Re: [PATCH 00/19] Second step support for A100
+To:     Frank Lee <tiny.windzz@gmail.com>
+Cc:     Frank Lee <frank@allwinnertech.com>, vkoul@kernel.org,
+        Rob Herring <robh+dt@kernel.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kishon@ti.com,
+        wim@linux-watchdog.org, Guenter Roeck <linux@roeck-us.net>,
+        dan.j.williams@intel.com, Linus Walleij <linus.walleij@linaro.org>,
+        wsa+renesas@sang-engineering.com, dianders@chromium.org,
+        marex@denx.de, Colin King <colin.king@canonical.com>,
+        rdunlap@infradead.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?UTF-8?Q?Ond=C5=99ej_Jirman?= <megous@megous.com>,
+        rikard.falkeborn@gmail.com, dmaengine@vger.kernel.org,
+        devicetree <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
+        linux-watchdog@vger.kernel.org,
+        linux-gpio <linux-gpio@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Apply erratum workaround of unreliable pulse width detection to
-more affected platforms (LX2160A Rev2.0 and LS1028A Rev1.0).
+On Tue, 10 Nov 2020 at 07:00, Frank Lee <tiny.windzz@gmail.com> wrote:
+>
+> It seems that sending too many e-mails at one time will cause some
+> emails to fail to be sent out. I will try again.
 
-Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
----
- drivers/mmc/host/sdhci-of-esdhc.c | 2 ++
- 1 file changed, 2 insertions(+)
+Hi,
 
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index bb09445..ab5ab96 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -1324,6 +1324,8 @@ static struct soc_device_attribute soc_fixup_sdhc_clkdivs[] = {
- 
- static struct soc_device_attribute soc_unreliable_pulse_detection[] = {
- 	{ .family = "QorIQ LX2160A", .revision = "1.0", },
-+	{ .family = "QorIQ LX2160A", .revision = "2.0", },
-+	{ .family = "QorIQ LS1028A", .revision = "1.0", },
- 	{ },
- };
- 
--- 
-2.7.4
+Instead please reduce the address list to relevant people, as pointed
+out by scripts/get_maintainer.pl. Don't Cc irrelevant developers
+unless a file is abandoned and you need to get as much audience as
+possible... but sunxi is not abandoned.
 
+Best regards,
+Krzysztof
