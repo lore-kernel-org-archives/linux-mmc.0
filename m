@@ -2,87 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17B73C56201
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 08:43:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A45D3C5517A
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 08:48:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6EA320829
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 08:43:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3F84520870
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 08:48:43 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="X5o36w5E"
+	dkim=pass (2048-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="iuo8f+7v";
+	dkim=permerror (0-bit key) header.d=linutronix.de header.i=@linutronix.de header.b="y7osrUd/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728905AbgKJInu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 03:43:50 -0500
-Received: from mail.kernel.org ([198.145.29.99]:34914 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726827AbgKJInu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 10 Nov 2020 03:43:50 -0500
-Received: from mail-ej1-f49.google.com (mail-ej1-f49.google.com [209.85.218.49])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 33D9021741;
-        Tue, 10 Nov 2020 08:43:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1604997829;
-        bh=yaWVdXd6nLPOSk+0s2hrEtVFAxLiuqNEZ8pX8casxSQ=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=X5o36w5ETEuwAzCMsQjNa+s5A0W9fO6Y3GTlhrTEcY9pxxjaW9bg2nWcvbkQn7PWI
-         iOupPoRDZM5tZP9RXfs2rD5zHVY86YfvzLq6r+ixm3m0Vwp/6lk6LJw4JOXOkiO+21
-         eq3dvzGjorqFd+KU4pTgywXtDO4ghjJrGl3ELMAA=
-Received: by mail-ej1-f49.google.com with SMTP id i19so16301482ejx.9;
-        Tue, 10 Nov 2020 00:43:49 -0800 (PST)
-X-Gm-Message-State: AOAM530Chr36X9X8MnRVLNj+JbrEJn1J84nlTU+SnknO9i9W0dHXd/y5
-        YAATue+HYflgWHOds0qUh98eGNveYP/QzDkvaiE=
-X-Google-Smtp-Source: ABdhPJxTmGEeLjxqKr3BhSdK+jRebEFMA7yi5bPu8JW67PaPhe8uq4h+C7/0J+rMmIR0IwUAXAYYAv3O0pr2PkP7ZFc=
-X-Received: by 2002:a17:906:5618:: with SMTP id f24mr18656980ejq.381.1604997827541;
- Tue, 10 Nov 2020 00:43:47 -0800 (PST)
+        id S1729981AbgKJIsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Nov 2020 03:48:39 -0500
+Received: from Galois.linutronix.de ([193.142.43.55]:56904 "EHLO
+        galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726462AbgKJIsg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 03:48:36 -0500
+From:   Thomas Gleixner <tglx@linutronix.de>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020; t=1604998111;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=+lFM+Dy1hrzRRrrrA3qnbGkxEtyVqIh0g4peYrriLeU=;
+        b=iuo8f+7vFglLggVRQElkiZ2WEkqCMbTG8xoMGtVyBk3DBfZOlzK9bn4iYE9n5TJlXEeyiw
+        mK2AsUoeE727uJ+eyVgbEeyt2qz1CsngbkfMTC30zg6BSGbxrFxVJV/nTlcmtj9NHSMsJn
+        sU38ljGJ30NJ8ooIZ53QTax6dO6NfnLLpRxklxBphTMVejdacYZZqkmCK8e4gkxhfN2Hq9
+        zuGNw+h8VUH3NFZO14JlYgbkNPH833xVYFQ2lmqEAC35a4/baTqfi6uG7ey36+HQyygrEi
+        Jy4I41umlX4stejJrRBLu7awPrfWhbLcelHNMzqQQSqRZrKTpO34TDntXU+02A==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020e; t=1604998111;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=+lFM+Dy1hrzRRrrrA3qnbGkxEtyVqIh0g4peYrriLeU=;
+        b=y7osrUd/437dzM5/Hc5G9cQ/HuZ2jh7vgX8EDHSswmJuPLkHyLG6iEX8rrCl2sg3XohELe
+        1aQhUu8PTNjq+DAw==
+To:     Ira Weiny <ira.weiny@intel.com>
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>,
+        Andy Lutomirski <luto@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Randy Dunlap <rdunlap@infradead.org>, x86@kernel.org,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Fenghua Yu <fenghua.yu@intel.com>, linux-doc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-nvdimm@lists.01.org,
+        linux-fsdevel@vger.kernel.org, linux-mm@kvack.org,
+        linux-kselftest@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        kvm@vger.kernel.org, netdev@vger.kernel.org, bpf@vger.kernel.org,
+        kexec@lists.infradead.org, linux-bcache@vger.kernel.org,
+        linux-mtd@lists.infradead.org, devel@driverdev.osuosl.org,
+        linux-efi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-scsi@vger.kernel.org, target-devel@vger.kernel.org,
+        linux-nfs@vger.kernel.org, ceph-devel@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-aio@kvack.org,
+        io-uring@vger.kernel.org, linux-erofs@lists.ozlabs.org,
+        linux-um@lists.infradead.org, linux-ntfs-dev@lists.sourceforge.net,
+        reiserfs-devel@vger.kernel.org,
+        linux-f2fs-devel@lists.sourceforge.net,
+        linux-nilfs@vger.kernel.org, cluster-devel@redhat.com,
+        ecryptfs@vger.kernel.org, linux-cifs@vger.kernel.org,
+        linux-btrfs@vger.kernel.org, linux-afs@lists.infradead.org,
+        linux-rdma@vger.kernel.org, amd-gfx@lists.freedesktop.org,
+        dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+        drbd-dev@lists.linbit.com, linux-block@vger.kernel.org,
+        xen-devel@lists.xenproject.org, linux-cachefs@redhat.com,
+        samba-technical@lists.samba.org, intel-wired-lan@lists.osuosl.org
+Subject: Re: [PATCH RFC PKS/PMEM 05/58] kmap: Introduce k[un]map_thread
+In-Reply-To: <20201110045954.GL3976735@iweiny-DESK2.sc.intel.com>
+References: <20201009195033.3208459-1-ira.weiny@intel.com> <20201009195033.3208459-6-ira.weiny@intel.com> <87h7pyhv3f.fsf@nanos.tec.linutronix.de> <20201110045954.GL3976735@iweiny-DESK2.sc.intel.com>
+Date:   Tue, 10 Nov 2020 09:48:31 +0100
+Message-ID: <87eel1iom8.fsf@nanos.tec.linutronix.de>
 MIME-Version: 1.0
-References: <20201110040553.1381-1-frank@allwinnertech.com> <CAEExFWsc4Rx2U+BVuqTJkL0wj-gdNcF=emJRcStQ2Uq=FQEx1g@mail.gmail.com>
-In-Reply-To: <CAEExFWsc4Rx2U+BVuqTJkL0wj-gdNcF=emJRcStQ2Uq=FQEx1g@mail.gmail.com>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-Date:   Tue, 10 Nov 2020 09:43:35 +0100
-X-Gmail-Original-Message-ID: <CAJKOXPf4ARNnSnvDpn7vVC0kGNd+m_dkfgKkmH_bca2AZ_Osyg@mail.gmail.com>
-Message-ID: <CAJKOXPf4ARNnSnvDpn7vVC0kGNd+m_dkfgKkmH_bca2AZ_Osyg@mail.gmail.com>
-Subject: Re: [PATCH 00/19] Second step support for A100
-To:     Frank Lee <tiny.windzz@gmail.com>
-Cc:     Frank Lee <frank@allwinnertech.com>, vkoul@kernel.org,
-        Rob Herring <robh+dt@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>, kishon@ti.com,
-        wim@linux-watchdog.org, Guenter Roeck <linux@roeck-us.net>,
-        dan.j.williams@intel.com, Linus Walleij <linus.walleij@linaro.org>,
-        wsa+renesas@sang-engineering.com, dianders@chromium.org,
-        marex@denx.de, Colin King <colin.king@canonical.com>,
-        rdunlap@infradead.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?UTF-8?Q?Ond=C5=99ej_Jirman?= <megous@megous.com>,
-        rikard.falkeborn@gmail.com, dmaengine@vger.kernel.org,
-        devicetree <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
-        linux-watchdog@vger.kernel.org,
-        linux-gpio <linux-gpio@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 10 Nov 2020 at 07:00, Frank Lee <tiny.windzz@gmail.com> wrote:
+On Mon, Nov 09 2020 at 20:59, Ira Weiny wrote:
+> On Tue, Nov 10, 2020 at 02:13:56AM +0100, Thomas Gleixner wrote:
+> Also, we can convert the new memcpy_*_page() calls to kmap_local() as well.
+> [For now my patch just uses kmap_atomic().]
 >
-> It seems that sending too many e-mails at one time will cause some
-> emails to fail to be sent out. I will try again.
+> I've not looked at all of the patches in your latest version.  Have you
+> included converting any of the kmap() call sites?  I thought you were more
+> focused on converting the kmap_atomic() to kmap_local()?
 
-Hi,
+I did not touch any of those yet, but it's a logical consequence to
+convert all kmap() instances which are _not_ creating a global mapping
+over to it.
 
-Instead please reduce the address list to relevant people, as pointed
-out by scripts/get_maintainer.pl. Don't Cc irrelevant developers
-unless a file is abandoned and you need to get as much audience as
-possible... but sunxi is not abandoned.
+Thanks,
 
-Best regards,
-Krzysztof
+        tglx
+
