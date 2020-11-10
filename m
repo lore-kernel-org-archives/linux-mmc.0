@@ -5,41 +5,41 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92B2AC56202
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 16:22:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 855C9C6369E
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 16:22:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8AD620829
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 16:22:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 41DAD207D3
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 16:22:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="BVXXlAoL"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="vly0EXax"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726737AbgKJQWB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1728272AbgKJQWB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 10 Nov 2020 11:22:01 -0500
-Received: from www.zeus03.de ([194.117.254.33]:35250 "EHLO mail.zeus03.de"
+Received: from www.zeus03.de ([194.117.254.33]:35260 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727344AbgKJQWA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1728975AbgKJQWA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 10 Nov 2020 11:22:00 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=SSXs46EzPXYPx9
-        SGm1G0SOpukRkazKgNENaRTW8PUUk=; b=BVXXlAoLP93vJNbtn+SBL32VNdWh4f
-        NOyhdw1YoAh2ISWvQRsnxku03S7Jv6GvPm2K+4W7hcdZ0jD3FYtHhcpCNbMs16em
-        Edd+LpQLJyPfsdPTV8mtNqMpiqBQmfZjeCLcY7EknHkyeJUQmoen7V6/r03KDbDK
-        2s1/DfihUT8b8=
-Received: (qmail 2226069 invoked from network); 10 Nov 2020 17:21:58 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 10 Nov 2020 17:21:58 +0100
-X-UD-Smtp-Session: l3s3148p1@2Ab8E8OzTMsgAwDPXxAvAEQD26z+TKuA
+        :mime-version:content-transfer-encoding; s=k1; bh=E08gAQ9g7L2mVS
+        BW50SK/40b7jG9Lr4VHYgUpPCZVQs=; b=vly0EXaxDRCaJBq3EviN7v4YgCEViZ
+        0fFP+2n8qwfbnZNgQUpzD51hhDbrpnKrZqQ589zY3gdyJ3xxHTOuje5qF2Rti14T
+        PakZxZae0U9tDC3NiAETkDQLJoE3yw55pNBa4heyIELfUx7rb4TNxTSKYP3M5gje
+        6OYdrYBYorULM=
+Received: (qmail 2226100 invoked from network); 10 Nov 2020 17:21:59 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 10 Nov 2020 17:21:59 +0100
+X-UD-Smtp-Session: l3s3148p1@z20BFMOzTssgAwDPXxAvAEQD26z+TKuA
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         =?UTF-8?q?Niklas=20S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 2/3] mmc: renesas_sdhi: merge the SCC reset functions
-Date:   Tue, 10 Nov 2020 17:21:50 +0100
-Message-Id: <20201110162151.37622-3-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 3/3] mmc: renesas_sdhi: remove superfluous SCLKEN
+Date:   Tue, 10 Nov 2020 17:21:51 +0100
+Message-Id: <20201110162151.37622-4-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201110162151.37622-1-wsa+renesas@sang-engineering.com>
 References: <20201110162151.37622-1-wsa+renesas@sang-engineering.com>
@@ -49,49 +49,28 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-There is no user of renesas_sdhi_reset_scc() anymore, only
-renesas_sdhi_disable_scc() so merge these functions into one. I guess
-the seperation was cruft anyhow. The BSP doesn't have it anymore and I
-can't recall the reason we had it.
+All previously called functions handle SCLKEN on their own, no need to
+enable it again in sdhi_reset().
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 14 ++++----------
- 1 file changed, 4 insertions(+), 10 deletions(-)
+ drivers/mmc/host/renesas_sdhi_core.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 476a0c0198c6..a77dc9b46041 100644
+index a77dc9b46041..25c6a1993f8e 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -424,9 +424,11 @@ static void renesas_sdhi_hs400_complete(struct mmc_host *mmc)
- 		priv->needs_adjust_hs400 = true;
- }
+@@ -556,9 +556,6 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ 		renesas_sdhi_reset_hs400_mode(host, priv);
+ 		priv->needs_adjust_hs400 = false;
  
--static void renesas_sdhi_reset_scc(struct tmio_mmc_host *host,
--				   struct renesas_sdhi *priv)
-+static void renesas_sdhi_disable_scc(struct mmc_host *mmc)
- {
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct renesas_sdhi *priv = host_to_priv(host);
-+
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
- 			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
- 
-@@ -434,14 +436,6 @@ static void renesas_sdhi_reset_scc(struct tmio_mmc_host *host,
- 		       ~SH_MOBILE_SDHI_SCC_CKSEL_DTSEL &
- 		       sd_scc_read32(host, priv,
- 				     SH_MOBILE_SDHI_SCC_CKSEL));
--}
+-		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+-				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
 -
--static void renesas_sdhi_disable_scc(struct mmc_host *mmc)
--{
--	struct tmio_mmc_host *host = mmc_priv(mmc);
--	struct renesas_sdhi *priv = host_to_priv(host);
--
--	renesas_sdhi_reset_scc(host, priv);
- 
- 	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_DTCNTL,
- 		       ~SH_MOBILE_SDHI_SCC_DTCNTL_TAPEN &
+ 		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
+ 			       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
+ 			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
 -- 
 2.28.0
 
