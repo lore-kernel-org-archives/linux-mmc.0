@@ -5,24 +5,24 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0112C4742C
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B83BC4742C
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 64AA2206D8
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 189902068D
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387523AbgKJEG3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Nov 2020 23:06:29 -0500
-Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:48526 "EHLO
+        id S2387579AbgKJEGe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Nov 2020 23:06:34 -0500
+Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:58744 "EHLO
         smtp2207-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1733307AbgKJEGZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:25 -0500
-X-Alimail-AntiSpam: AC=SUSPECT;BC=0.6465102|-1;BR=01201311R861b1;CH=blue;DM=|SUSPECT|false|;DS=CONTINUE|ham_system_inform|0.0102791-0.00112627-0.988595;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047202;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
+        by vger.kernel.org with ESMTP id S2387554AbgKJEGd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:33 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.435386|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0424186-0.00157801-0.956003;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047206;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
 Received: from allwinnertech.com(mailfrom:frank@allwinnertech.com fp:SMTPD_---.IulFdj5_1604981159)
           by smtp.aliyun-inc.com(10.147.42.135);
-          Tue, 10 Nov 2020 12:06:17 +0800
+          Tue, 10 Nov 2020 12:06:26 +0800
 From:   Frank Lee <frank@allwinnertech.com>
 To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         wens@csie.org, ulf.hansson@linaro.org, kishon@ti.com,
@@ -37,9 +37,9 @@ To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         linux-watchdog@vger.kernel.org, linux-gpio@vger.kernel.org,
         tiny.windzz@gmail.com
 Cc:     Yangtao Li <frank@allwinnertech.com>
-Subject: [PATCH 04/19] dt-bindings: dma: allwinner,sun50i-a64-dma: Add A100 compatible
-Date:   Tue, 10 Nov 2020 12:05:38 +0800
-Message-Id: <20201110040553.1381-5-frank@allwinnertech.com>
+Subject: [PATCH 08/19] phy: sun4i-usb: remove enable_pmu_unk1 from sun50i_h6_cfg
+Date:   Tue, 10 Nov 2020 12:05:42 +0800
+Message-Id: <20201110040553.1381-9-frank@allwinnertech.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201110040553.1381-1-frank@allwinnertech.com>
 References: <20201110040553.1381-1-frank@allwinnertech.com>
@@ -51,36 +51,26 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yangtao Li <frank@allwinnertech.com>
 
-Add a binding for A100's dma controller.
+For the current code, enable_pmu_unk1 only works in non-a83t and non-h6
+types. So let's delete it from the sun50i_h6_cfg.
 
 Signed-off-by: Yangtao Li <frank@allwinnertech.com>
 ---
- .../devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml    | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/phy/allwinner/phy-sun4i-usb.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml b/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml
-index 372679dbd216..b6e1ebfaf366 100644
---- a/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml
-+++ b/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml
-@@ -21,6 +21,7 @@ properties:
-   compatible:
-     oneOf:
-       - const: allwinner,sun50i-a64-dma
-+      - const: allwinner,sun50i-a100-dma
-       - const: allwinner,sun50i-h6-dma
-       - items:
-           - const: allwinner,sun8i-r40-dma
-@@ -56,7 +57,9 @@ required:
- if:
-   properties:
-     compatible:
--      const: allwinner,sun50i-h6-dma
-+      enum:
-+        - allwinner,sun50i-a100-dma
-+        - allwinner,sun50i-h6-dma
- 
- then:
-   properties:
+diff --git a/drivers/phy/allwinner/phy-sun4i-usb.c b/drivers/phy/allwinner/phy-sun4i-usb.c
+index 651d5e2a25ce..0f1888b55dbd 100644
+--- a/drivers/phy/allwinner/phy-sun4i-usb.c
++++ b/drivers/phy/allwinner/phy-sun4i-usb.c
+@@ -969,7 +969,6 @@ static const struct sun4i_usb_phy_cfg sun50i_h6_cfg = {
+ 	.disc_thresh = 3,
+ 	.phyctl_offset = REG_PHYCTL_A33,
+ 	.dedicated_clocks = true,
+-	.enable_pmu_unk1 = true,
+ 	.phy0_dual_route = true,
+ 	.missing_phys = BIT(1) | BIT(2),
+ };
 -- 
 2.28.0
 
