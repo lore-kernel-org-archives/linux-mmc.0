@@ -7,98 +7,132 @@ X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 58E4EC4742C
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 928BFC388F7
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03BD920731
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3616120731
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="TWZvslnP"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zMlxFkj2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730086AbgKJM0w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 07:26:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41316 "EHLO
+        id S1727536AbgKJM05 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Nov 2020 07:26:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41328 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730061AbgKJM0w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:26:52 -0500
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22D7BC0613CF
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:52 -0800 (PST)
-Received: by mail-vs1-xe41.google.com with SMTP id y78so6910890vsy.6
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:52 -0800 (PST)
+        with ESMTP id S1730061AbgKJM05 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:26:57 -0500
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90F08C0613CF
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:55 -0800 (PST)
+Received: by mail-vs1-xe43.google.com with SMTP id m16so6908621vsl.8
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=O4W8LktyG7onvhz7iuqk20AJIpUjKq3xMHse0pFWv98=;
-        b=TWZvslnPz8YySVGpsO5yzHiBZEPMJlE/BBkXCxiGhbSeIPfjeP5XBWnMRmL2b4HabH
-         ZwstAY4ZcX2J530b0eFNqRLCLxvE7ZbHrsMA8+puUlt98YqaqVGw1To1PCpF/RMYDSDF
-         G3bMw+3EfOn3mKzxQhhiD16wRgnsC4sbKq3xYxGnQlkzm3mXnMuJmnW+9ZRYZJM8TT1i
-         wcL/k6vF1LMF17OCgUeJ8S26T571vWGr5Jrby0GXWgti1diNpb9Juj2eNgR+CG8wlzI5
-         3v/yJ1jmW9rxO4lZgkNNMfrU06euwONRU0SttI87Hl8RiYw94YQZkUaT3MZd1LHI69xK
-         Iy6A==
+        bh=p5rWcam3/Tj7i1qRqps//Nxp3iCwXN4YIqqlBccMrD4=;
+        b=zMlxFkj299IZ9zJoiSFMDil1GUKl8v5Q4TSgARJdeUpCc6nPDp+97cS8KfihiXzwX/
+         rSAUbGmqY6pgVJIfopwJBY5qgcNeiXXf/9FxKH1cWMNxMI1MKSTmYJ4ys1XxklcXJ/IG
+         HWJ7SA/bGp18rxs3fVJ1XbnEHaKvX1cBH17qsdMyYFtRpEs9dIK0Q91XJbvhPnzjRZV4
+         kmelbZd+QESjDGpvDVgPvLhuZrHtxFmvqj7v9ekAwDz/IhMd6EuyWeD9+2pgknJ6mruG
+         w7NMaJfYv36IYHlZQpP5sN7A73taarqKETc+c5m4HmdBrzsp4mNa13/cH/ADmkk77hWE
+         16Cg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=O4W8LktyG7onvhz7iuqk20AJIpUjKq3xMHse0pFWv98=;
-        b=NG8CplganlKTBFTXXjrIxxh89pk2HGXk8BlJiC3bYEIPZoF0bSDXtVTN/XvBAtOFFI
-         YXA8tP+KiLVpf5FQbM8YjiYkgleEjkHtFeeMkfk85FWM1VQJf3X+dkUvwSKwFXZXMS93
-         dysIw4UMyhvkipQ028DHKop54IBhXkbkK02jkS22Sl3TkPF7sjbMsfkFLLEu0+Q+VCU3
-         6bVtlrXmpHpbjhMcvjt6in2PA6GH1hjgryNfS6m26UyF9gwav5thuU4PkQz72NawI9gd
-         dK0LcsZbJ/lJsgRodBTR5zKyhFPoTruXae4zBNUUraABbFrFWgDhpVElAYdhTgJ0QClr
-         iD2Q==
-X-Gm-Message-State: AOAM533XrtpL8IWK25DpA50Y5j3yDNxheOA9HuqYM1O/LG5cC9zPUfVE
-        nsr2vlQcDAMhtrpLCr6Vg82cPXeF9SHKmVy+Y1DZ3dEd5vvIeA==
-X-Google-Smtp-Source: ABdhPJwOtgGMkdEQpWz6ZNlbahnehJWyICu6l/4/2k23omLt6ERWrBy8Yzz/zp9nDVm7BLtyfPL9pegmupXDHLm9ro4=
-X-Received: by 2002:a67:ec9a:: with SMTP id h26mr11065383vsp.34.1605011211392;
- Tue, 10 Nov 2020 04:26:51 -0800 (PST)
+        bh=p5rWcam3/Tj7i1qRqps//Nxp3iCwXN4YIqqlBccMrD4=;
+        b=VaCb5VSlqOfd9Vf6v+PLkZc9zSEaArz1m2kz9TvnpPk2wZxp41bNW1DHyvg3bQL2oP
+         kAXBYQyoQJE54/G6rSAiPdgrMQm1ukG1GaZLUx6fP93ZTqOsfjvUBLcuZRCWw1o9Hcrs
+         oql6nZ08aASk2Cu31TX6Z6XffomR9fRRAZ/ABs1NXuT9VPiAmMNGdQitbePPfFpRjj5O
+         gh3i6v+aAf0LMXcxGrg0rklU13D70pF09ZAREJrzti+JdOcCm/DOMYBOx1k0XpTT3Yp9
+         a5gc4bEX8XE78XVOUdYhe9i/BLjijIk1c5Z2AFJRa+cQwtzcF79a8/JvV9gXKm3wC3j3
+         5Wmw==
+X-Gm-Message-State: AOAM530qxER3SxNcLrCjR9POrxCXC8j680ZM47lv3But6ki+Tyycc/5x
+        vyQn40uZKJmO5smedmtoDXkcpGq1c0vV786utkgOsA==
+X-Google-Smtp-Source: ABdhPJzZlrbKKEs8EsQtHLavZLj70uwyIxmjfA+L+h5kIdcdqBLC0zZJ13Bz/pCWmbOHrPu0jY/+kRMr/eJT1wBwpZw=
+X-Received: by 2002:a67:3256:: with SMTP id y83mr11926671vsy.48.1605011214776;
+ Tue, 10 Nov 2020 04:26:54 -0800 (PST)
 MIME-Version: 1.0
-References: <20201110071314.3868-1-yangbo.lu@nxp.com>
-In-Reply-To: <20201110071314.3868-1-yangbo.lu@nxp.com>
+References: <1604847648-13036-1-git-send-email-kaixuxia@tencent.com>
+In-Reply-To: <1604847648-13036-1-git-send-email-kaixuxia@tencent.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Nov 2020 13:26:14 +0100
-Message-ID: <CAPDyKFpS-ZT+XuLcW3xekwS+ZT1hh0hr8YRQpfKNw-wdAnhm2g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: handle pulse width detection erratum
- for more SoCs
-To:     Yangbo Lu <yangbo.lu@nxp.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+Date:   Tue, 10 Nov 2020 13:26:18 +0100
+Message-ID: <CAPDyKFq-zhbxffORvi1hokFH-eMkoZdyTioFBmbOC1JEd=BDQA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Make pic32_sdhci_probe_platform() void
+To:     xiakaixu1987@gmail.com
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Kaixu Xia <kaixuxia@tencent.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 10 Nov 2020 at 08:22, Yangbo Lu <yangbo.lu@nxp.com> wrote:
+On Sun, 8 Nov 2020 at 16:00, <xiakaixu1987@gmail.com> wrote:
 >
-> Apply erratum workaround of unreliable pulse width detection to
-> more affected platforms (LX2160A Rev2.0 and LS1028A Rev1.0).
+> From: Kaixu Xia <kaixuxia@tencent.com>
 >
-> Signed-off-by: Yangbo Lu <yangbo.lu@nxp.com>
+> pic32_sdhci_probe_platform() always returned 0, so there's no reason for
+> a return value.  In addition, pic32_sdhci_probe() checked the return value
+> for possible error which is unnecessary.
+>
+> Convert pic32_sdhci_probe_platform() to a void function and remove the
+> return value check. Fix the following Coccinelle warning:
+>
+> ./drivers/mmc/host/sdhci-pic32.c:127:5-8: Unneeded variable: "ret". Return "0" on line 137
+>
+> Reported-by: Tosk Robot <tencent_os_robot@tencent.com>
+> Signed-off-by: Kaixu Xia <kaixuxia@tencent.com>
 
-Applied for fixes, by adding a fixes+stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 2 ++
->  1 file changed, 2 insertions(+)
+>  drivers/mmc/host/sdhci-pic32.c | 11 ++---------
+>  1 file changed, 2 insertions(+), 9 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index bb09445..ab5ab96 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -1324,6 +1324,8 @@ static struct soc_device_attribute soc_fixup_sdhc_clkdivs[] = {
+> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
+> index 6ce1519ae177..6696b6bdd88e 100644
+> --- a/drivers/mmc/host/sdhci-pic32.c
+> +++ b/drivers/mmc/host/sdhci-pic32.c
+> @@ -121,10 +121,9 @@ static void pic32_sdhci_shared_bus(struct platform_device *pdev)
+>         writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
+>  }
 >
->  static struct soc_device_attribute soc_unreliable_pulse_detection[] = {
->         { .family = "QorIQ LX2160A", .revision = "1.0", },
-> +       { .family = "QorIQ LX2160A", .revision = "2.0", },
-> +       { .family = "QorIQ LS1028A", .revision = "1.0", },
->         { },
->  };
+> -static int pic32_sdhci_probe_platform(struct platform_device *pdev,
+> +static void pic32_sdhci_probe_platform(struct platform_device *pdev,
+>                                       struct pic32_sdhci_priv *pdata)
+>  {
+> -       int ret = 0;
+>         u32 caps_slot_type;
+>         struct sdhci_host *host = platform_get_drvdata(pdev);
 >
+> @@ -133,8 +132,6 @@ static int pic32_sdhci_probe_platform(struct platform_device *pdev,
+>         caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
+>         if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
+>                 pic32_sdhci_shared_bus(pdev);
+> -
+> -       return ret;
+>  }
+>
+>  static int pic32_sdhci_probe(struct platform_device *pdev)
+> @@ -193,11 +190,7 @@ static int pic32_sdhci_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto err_base_clk;
+>
+> -       ret = pic32_sdhci_probe_platform(pdev, sdhci_pdata);
+> -       if (ret) {
+> -               dev_err(&pdev->dev, "failed to probe platform!\n");
+> -               goto err_base_clk;
+> -       }
+> +       pic32_sdhci_probe_platform(pdev, sdhci_pdata);
+>
+>         ret = sdhci_add_host(host);
+>         if (ret)
 > --
-> 2.7.4
+> 2.20.0
 >
