@@ -2,137 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 928BFC388F7
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F5CDC55ABD
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:40:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3616120731
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6D0F120795
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:40:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="zMlxFkj2"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="keBbEP+K"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727536AbgKJM05 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 07:26:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41328 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730061AbgKJM05 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:26:57 -0500
-Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90F08C0613CF
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:55 -0800 (PST)
-Received: by mail-vs1-xe43.google.com with SMTP id m16so6908621vsl.8
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=p5rWcam3/Tj7i1qRqps//Nxp3iCwXN4YIqqlBccMrD4=;
-        b=zMlxFkj299IZ9zJoiSFMDil1GUKl8v5Q4TSgARJdeUpCc6nPDp+97cS8KfihiXzwX/
-         rSAUbGmqY6pgVJIfopwJBY5qgcNeiXXf/9FxKH1cWMNxMI1MKSTmYJ4ys1XxklcXJ/IG
-         HWJ7SA/bGp18rxs3fVJ1XbnEHaKvX1cBH17qsdMyYFtRpEs9dIK0Q91XJbvhPnzjRZV4
-         kmelbZd+QESjDGpvDVgPvLhuZrHtxFmvqj7v9ekAwDz/IhMd6EuyWeD9+2pgknJ6mruG
-         w7NMaJfYv36IYHlZQpP5sN7A73taarqKETc+c5m4HmdBrzsp4mNa13/cH/ADmkk77hWE
-         16Cg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=p5rWcam3/Tj7i1qRqps//Nxp3iCwXN4YIqqlBccMrD4=;
-        b=VaCb5VSlqOfd9Vf6v+PLkZc9zSEaArz1m2kz9TvnpPk2wZxp41bNW1DHyvg3bQL2oP
-         kAXBYQyoQJE54/G6rSAiPdgrMQm1ukG1GaZLUx6fP93ZTqOsfjvUBLcuZRCWw1o9Hcrs
-         oql6nZ08aASk2Cu31TX6Z6XffomR9fRRAZ/ABs1NXuT9VPiAmMNGdQitbePPfFpRjj5O
-         gh3i6v+aAf0LMXcxGrg0rklU13D70pF09ZAREJrzti+JdOcCm/DOMYBOx1k0XpTT3Yp9
-         a5gc4bEX8XE78XVOUdYhe9i/BLjijIk1c5Z2AFJRa+cQwtzcF79a8/JvV9gXKm3wC3j3
-         5Wmw==
-X-Gm-Message-State: AOAM530qxER3SxNcLrCjR9POrxCXC8j680ZM47lv3But6ki+Tyycc/5x
-        vyQn40uZKJmO5smedmtoDXkcpGq1c0vV786utkgOsA==
-X-Google-Smtp-Source: ABdhPJzZlrbKKEs8EsQtHLavZLj70uwyIxmjfA+L+h5kIdcdqBLC0zZJ13Bz/pCWmbOHrPu0jY/+kRMr/eJT1wBwpZw=
-X-Received: by 2002:a67:3256:: with SMTP id y83mr11926671vsy.48.1605011214776;
- Tue, 10 Nov 2020 04:26:54 -0800 (PST)
+        id S1730099AbgKJMkd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Nov 2020 07:40:33 -0500
+Received: from www.zeus03.de ([194.117.254.33]:57146 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726462AbgKJMkd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 10 Nov 2020 07:40:33 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=pyVtQ0Obh2Q3P6ikIBydi4r4enjH
+        MjwO65sFvCdnVgw=; b=keBbEP+KNYeI2FAFTwELS1nvIwDcDkI9ZLH1TwoyX48i
+        PHW+C8IEIdoc8jkABm/9R6+EstPwIutHTRYUr5FVUigbBy7NL/3tRPkVTVcP6K+x
+        onHCbXWbaDmolskfutvf1cOqdnRCJg1tEp/gdkgz8HUFrxxzgZz5khy9A437dw0=
+Received: (qmail 2168012 invoked from network); 10 Nov 2020 13:40:31 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 10 Nov 2020 13:40:31 +0100
+X-UD-Smtp-Session: l3s3148p1@zIsC/L+zYMkgAwDPXxAvAEQD26z+TKuA
+Date:   Tue, 10 Nov 2020 13:40:18 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH 0/3] tmio/sdhi: fix workaround for a regression
+Message-ID: <20201110124018.GA3612@ninjato>
+References: <20201106072549.1495-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFpGX0HOQr4z4LEH9FLiqeRJzNiUpBLpCNquJGJnZNFycg@mail.gmail.com>
 MIME-Version: 1.0
-References: <1604847648-13036-1-git-send-email-kaixuxia@tencent.com>
-In-Reply-To: <1604847648-13036-1-git-send-email-kaixuxia@tencent.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Nov 2020 13:26:18 +0100
-Message-ID: <CAPDyKFq-zhbxffORvi1hokFH-eMkoZdyTioFBmbOC1JEd=BDQA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: Make pic32_sdhci_probe_platform() void
-To:     xiakaixu1987@gmail.com
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Kaixu Xia <kaixuxia@tencent.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="6c2NcOVqGQ03X4Wi"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFpGX0HOQr4z4LEH9FLiqeRJzNiUpBLpCNquJGJnZNFycg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 8 Nov 2020 at 16:00, <xiakaixu1987@gmail.com> wrote:
->
-> From: Kaixu Xia <kaixuxia@tencent.com>
->
-> pic32_sdhci_probe_platform() always returned 0, so there's no reason for
-> a return value.  In addition, pic32_sdhci_probe() checked the return value
-> for possible error which is unnecessary.
->
-> Convert pic32_sdhci_probe_platform() to a void function and remove the
-> return value check. Fix the following Coccinelle warning:
->
-> ./drivers/mmc/host/sdhci-pic32.c:127:5-8: Unneeded variable: "ret". Return "0" on line 137
->
-> Reported-by: Tosk Robot <tencent_os_robot@tencent.com>
-> Signed-off-by: Kaixu Xia <kaixuxia@tencent.com>
 
-Applied for next, thanks!
+--6c2NcOVqGQ03X4Wi
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Kind regards
-Uffe
+On Tue, Nov 10, 2020 at 01:26:08PM +0100, Ulf Hansson wrote:
+> On Fri, 6 Nov 2020 at 08:26, Wolfram Sang
+> <wsa+renesas@sang-engineering.com> wrote:
+> >
+> > After some refactoring, I had to insert a workaround because a
+> > regression was discovered when re-inserting SD cards. Now, this series
+> > implements the proper fixes and finally reverts the workaround.
+> >
+> > This has been tested on Salvator-XS (M3N and H3 ES2.0). These patches
+> > were already discussed with Shimoda-san and the BSP team internally.
+> > However, I'd appreciate Shimoda-san's tags be given here to make sure
+> > the patches are exactly that what we discussed.
+> >
+> > Thanks and happy hacking!
+> >
+> >
+> > Wolfram Sang (3):
+> >   mmc: tmio: when resetting, reset DMA controller, too
+> >   mmc: tmio: bring tuning HW to a sane state with MMC_POWER_OFF
+> >   Revert "mmc: renesas_sdhi: workaround a regression when reinserting SD
+> >     cards"
+> >
+> >  drivers/mmc/host/renesas_sdhi_core.c | 13 -------------
+> >  drivers/mmc/host/tmio_mmc_core.c     |  7 +++++--
+> >  2 files changed, 5 insertions(+), 15 deletions(-)
+> >
+>=20
+> Applied for next, thanks!
+
+Can we have this in 5.10, too?
 
 
-> ---
->  drivers/mmc/host/sdhci-pic32.c | 11 ++---------
->  1 file changed, 2 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pic32.c b/drivers/mmc/host/sdhci-pic32.c
-> index 6ce1519ae177..6696b6bdd88e 100644
-> --- a/drivers/mmc/host/sdhci-pic32.c
-> +++ b/drivers/mmc/host/sdhci-pic32.c
-> @@ -121,10 +121,9 @@ static void pic32_sdhci_shared_bus(struct platform_device *pdev)
->         writel(bus, host->ioaddr + SDH_SHARED_BUS_CTRL);
->  }
->
-> -static int pic32_sdhci_probe_platform(struct platform_device *pdev,
-> +static void pic32_sdhci_probe_platform(struct platform_device *pdev,
->                                       struct pic32_sdhci_priv *pdata)
->  {
-> -       int ret = 0;
->         u32 caps_slot_type;
->         struct sdhci_host *host = platform_get_drvdata(pdev);
->
-> @@ -133,8 +132,6 @@ static int pic32_sdhci_probe_platform(struct platform_device *pdev,
->         caps_slot_type = (host->caps & SDH_CAPS_SDH_SLOT_TYPE_MASK) >> 30;
->         if (caps_slot_type == SDH_SLOT_TYPE_SHARED_BUS)
->                 pic32_sdhci_shared_bus(pdev);
-> -
-> -       return ret;
->  }
->
->  static int pic32_sdhci_probe(struct platform_device *pdev)
-> @@ -193,11 +190,7 @@ static int pic32_sdhci_probe(struct platform_device *pdev)
->         if (ret)
->                 goto err_base_clk;
->
-> -       ret = pic32_sdhci_probe_platform(pdev, sdhci_pdata);
-> -       if (ret) {
-> -               dev_err(&pdev->dev, "failed to probe platform!\n");
-> -               goto err_base_clk;
-> -       }
-> +       pic32_sdhci_probe_platform(pdev, sdhci_pdata);
->
->         ret = sdhci_add_host(host);
->         if (ret)
-> --
-> 2.20.0
->
+--6c2NcOVqGQ03X4Wi
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl+qii4ACgkQFA3kzBSg
+KbZaMg/9FXv7Ki/XM6daV8bP43ekPc5wBSEeH48y6uA+jCU7xZuY2faBpTe70+Rq
+fc4zOqF4we+KnEzbu6VDTlzLBcRt0xI+4Xz1K/vVp3iA3gWBEJK5OgiGa/A/2lL3
+dL+aOXP6Xka7T5Gb7gfCP42BSlzYfofYXiOqGPBKBmspH3ofZPLpp0fOCevzxqOf
+8SquYEM2JWLolaiyw1TAJziIHUPqufrqfa4Mz6ura1EEk/JmAlVobdxLNppjwiL1
+d9Q4hIwmgqhatzEqc/IpY1llhZ3XIExJWpCafV4i9Gd1l1ssGHvYAVrIYwD6+uuz
+YpO/jEKU6v2eDpoJ22XzWFbUilhPVsARdnpYi2DLbE55LVXXnyysaNWkYr86j+or
+GU59ss0qDk1rT5xcf4BLL+GSwJv8LgA4iOCDgLRFgcu69LLNy5brYyl/yoWeEeja
+bZQNCQ84RytTQHFutwa21u4QmXYQsbdK1fMz3by/4/ioWrhKzH+UFs5QiHfo2jGq
+Rj0Cia6Ip1G2Z5Anr+Xs5h8J/9wGj4vXZiit4JscqvrTdLhfopK6LBus4cKTQbk7
+IorTtl44gcxLcGaWDHWn1YeEtXXlyTwoEConMKKWGWHfwe0LObGuDWuyjK4wJRxs
+6lirNpwOCY/jqKrrHMsNGlE0k7NuEbDpbT4w98oG4MKkksO8Dbk=
+=7yAt
+-----END PGP SIGNATURE-----
+
+--6c2NcOVqGQ03X4Wi--
