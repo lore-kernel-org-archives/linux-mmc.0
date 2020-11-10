@@ -7,22 +7,22 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38E59C4742C
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E7C0C388F7
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0262F206A1
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 79DBA2068D
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387558AbgKJEGa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Nov 2020 23:06:30 -0500
-Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:33742 "EHLO
+        id S2387644AbgKJEGq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Nov 2020 23:06:46 -0500
+Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:41716 "EHLO
         smtp2207-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2387518AbgKJEGa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:30 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.3740237|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.0519488-8.64106e-05-0.947965;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047207;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
+        by vger.kernel.org with ESMTP id S1733073AbgKJEGc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:32 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1456938|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.446168-0.0014012-0.552431;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047201;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
 Received: from allwinnertech.com(mailfrom:frank@allwinnertech.com fp:SMTPD_---.IulFdj5_1604981159)
           by smtp.aliyun-inc.com(10.147.42.135);
-          Tue, 10 Nov 2020 12:06:19 +0800
+          Tue, 10 Nov 2020 12:06:24 +0800
 From:   Frank Lee <frank@allwinnertech.com>
 To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         wens@csie.org, ulf.hansson@linaro.org, kishon@ti.com,
@@ -37,9 +37,9 @@ To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         linux-watchdog@vger.kernel.org, linux-gpio@vger.kernel.org,
         tiny.windzz@gmail.com
 Cc:     Yangtao Li <frank@allwinnertech.com>
-Subject: [PATCH 05/19] dmaengine: sun6i: Add support for A100 DMA
-Date:   Tue, 10 Nov 2020 12:05:39 +0800
-Message-Id: <20201110040553.1381-6-frank@allwinnertech.com>
+Subject: [PATCH 07/19] arm64: dts: allwinner: A100: Add PMU mode
+Date:   Tue, 10 Nov 2020 12:05:41 +0800
+Message-Id: <20201110040553.1381-8-frank@allwinnertech.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201110040553.1381-1-frank@allwinnertech.com>
 References: <20201110040553.1381-1-frank@allwinnertech.com>
@@ -51,59 +51,60 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yangtao Li <frank@allwinnertech.com>
 
-The dma of a100 is similar to h6, with some minor changes to
-support greater addressing capabilities.
-
-Add support for it.
+Add the Performance Monitoring Unit (PMU) device tree node to the A100
+.dtsi, which tells DT users which interrupts are triggered by PMU overflow
+events on each core.
 
 Signed-off-by: Yangtao Li <frank@allwinnertech.com>
 ---
- drivers/dma/sun6i-dma.c | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+ arch/arm64/boot/dts/allwinner/sun50i-a100.dtsi | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/dma/sun6i-dma.c b/drivers/dma/sun6i-dma.c
-index f5f9c86c50bc..5cadd4d2b824 100644
---- a/drivers/dma/sun6i-dma.c
-+++ b/drivers/dma/sun6i-dma.c
-@@ -1173,6 +1173,30 @@ static struct sun6i_dma_config sun50i_a64_dma_cfg = {
- 			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
- };
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a100.dtsi b/arch/arm64/boot/dts/allwinner/sun50i-a100.dtsi
+index c34ed8045363..01ff53b5a7a8 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a100.dtsi
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a100.dtsi
+@@ -25,21 +25,21 @@ cpu0: cpu@0 {
+ 			enable-method = "psci";
+ 		};
  
-+/*
-+ * TODO: Add support for more than 4g physical addressing.
-+ *
-+ * The A100 binding uses the number of dma channels from the
-+ * device tree node.
-+ */
-+static struct sun6i_dma_config sun50i_a100_dma_cfg = {
-+	.clock_autogate_enable = sun6i_enable_clock_autogate_h3,
-+	.set_burst_length = sun6i_set_burst_length_h3,
-+	.set_drq          = sun6i_set_drq_h6,
-+	.set_mode         = sun6i_set_mode_h6,
-+	.src_burst_lengths = BIT(1) | BIT(4) | BIT(8) | BIT(16),
-+	.dst_burst_lengths = BIT(1) | BIT(4) | BIT(8) | BIT(16),
-+	.src_addr_widths   = BIT(DMA_SLAVE_BUSWIDTH_1_BYTE) |
-+			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
-+			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
-+			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
-+	.dst_addr_widths   = BIT(DMA_SLAVE_BUSWIDTH_1_BYTE) |
-+			     BIT(DMA_SLAVE_BUSWIDTH_2_BYTES) |
-+			     BIT(DMA_SLAVE_BUSWIDTH_4_BYTES) |
-+			     BIT(DMA_SLAVE_BUSWIDTH_8_BYTES),
-+	.has_mbus_clk = true,
-+};
+-		cpu@1 {
++		cpu1: cpu@1 {
+ 			compatible = "arm,cortex-a53";
+ 			device_type = "cpu";
+ 			reg = <0x1>;
+ 			enable-method = "psci";
+ 		};
+ 
+-		cpu@2 {
++		cpu2: cpu@2 {
+ 			compatible = "arm,cortex-a53";
+ 			device_type = "cpu";
+ 			reg = <0x2>;
+ 			enable-method = "psci";
+ 		};
+ 
+-		cpu@3 {
++		cpu3: cpu@3 {
+ 			compatible = "arm,cortex-a53";
+ 			device_type = "cpu";
+ 			reg = <0x3>;
+@@ -47,6 +47,15 @@ cpu@3 {
+ 		};
+ 	};
+ 
++	pmu {
++		compatible = "arm,cortex-a53-pmu";
++		interrupts = <GIC_SPI 140 IRQ_TYPE_LEVEL_HIGH>,
++			     <GIC_SPI 141 IRQ_TYPE_LEVEL_HIGH>,
++			     <GIC_SPI 142 IRQ_TYPE_LEVEL_HIGH>,
++			     <GIC_SPI 143 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-affinity = <&cpu0>, <&cpu1>, <&cpu2>, <&cpu3>;
++	};
 +
- /*
-  * The H6 binding uses the number of dma channels from the
-  * device tree node.
-@@ -1225,6 +1249,7 @@ static const struct of_device_id sun6i_dma_match[] = {
- 	{ .compatible = "allwinner,sun8i-h3-dma", .data = &sun8i_h3_dma_cfg },
- 	{ .compatible = "allwinner,sun8i-v3s-dma", .data = &sun8i_v3s_dma_cfg },
- 	{ .compatible = "allwinner,sun50i-a64-dma", .data = &sun50i_a64_dma_cfg },
-+	{ .compatible = "allwinner,sun50i-a100-dma", .data = &sun50i_a100_dma_cfg },
- 	{ .compatible = "allwinner,sun50i-h6-dma", .data = &sun50i_h6_dma_cfg },
- 	{ /* sentinel */ }
- };
+ 	psci {
+ 		compatible = "arm,psci-1.0";
+ 		method = "smc";
 -- 
 2.28.0
 
