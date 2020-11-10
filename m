@@ -7,22 +7,22 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00E23C55ABD
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0112C4742C
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B2AE720731
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 64AA2206D8
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 04:06:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733308AbgKJEGS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Nov 2020 23:06:18 -0500
-Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:49383 "EHLO
+        id S2387523AbgKJEG3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Nov 2020 23:06:29 -0500
+Received: from smtp2207-205.mail.aliyun.com ([121.197.207.205]:48526 "EHLO
         smtp2207-205.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1731366AbgKJEGR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:17 -0500
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.7611352|0.8967155;CH=green;DM=|SPAM|false|;DS=CONTINUE|ham_system_inform|0.0234519-0.000501654-0.976046;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047188;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
+        by vger.kernel.org with ESMTP id S1733307AbgKJEGZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Nov 2020 23:06:25 -0500
+X-Alimail-AntiSpam: AC=SUSPECT;BC=0.6465102|-1;BR=01201311R861b1;CH=blue;DM=|SUSPECT|false|;DS=CONTINUE|ham_system_inform|0.0102791-0.00112627-0.988595;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047202;MF=frank@allwinnertech.com;NM=1;PH=DS;RN=28;RT=28;SR=0;TI=SMTPD_---.IulFdj5_1604981159;
 Received: from allwinnertech.com(mailfrom:frank@allwinnertech.com fp:SMTPD_---.IulFdj5_1604981159)
           by smtp.aliyun-inc.com(10.147.42.135);
-          Tue, 10 Nov 2020 12:06:10 +0800
+          Tue, 10 Nov 2020 12:06:17 +0800
 From:   Frank Lee <frank@allwinnertech.com>
 To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         wens@csie.org, ulf.hansson@linaro.org, kishon@ti.com,
@@ -37,9 +37,9 @@ To:     vkoul@kernel.org, robh+dt@kernel.org, mripard@kernel.org,
         linux-watchdog@vger.kernel.org, linux-gpio@vger.kernel.org,
         tiny.windzz@gmail.com
 Cc:     Yangtao Li <frank@allwinnertech.com>
-Subject: [PATCH 01/19] pinctrl: sunxi: fix irq bank map for the Allwinner A100 pin controller
-Date:   Tue, 10 Nov 2020 12:05:35 +0800
-Message-Id: <20201110040553.1381-2-frank@allwinnertech.com>
+Subject: [PATCH 04/19] dt-bindings: dma: allwinner,sun50i-a64-dma: Add A100 compatible
+Date:   Tue, 10 Nov 2020 12:05:38 +0800
+Message-Id: <20201110040553.1381-5-frank@allwinnertech.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201110040553.1381-1-frank@allwinnertech.com>
 References: <20201110040553.1381-1-frank@allwinnertech.com>
@@ -51,27 +51,36 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yangtao Li <frank@allwinnertech.com>
 
-A100's pin starts with PB, so it should start with 1.
+Add a binding for A100's dma controller.
 
-Fixes: 473436e7647d6 ("pinctrl: sunxi: add support for the Allwinner A100 pin controller")
 Signed-off-by: Yangtao Li <frank@allwinnertech.com>
 ---
- drivers/pinctrl/sunxi/pinctrl-sun50i-a100.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ .../devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml    | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/pinctrl/sunxi/pinctrl-sun50i-a100.c b/drivers/pinctrl/sunxi/pinctrl-sun50i-a100.c
-index 19cfd1e76ee2..e69f6da40dc0 100644
---- a/drivers/pinctrl/sunxi/pinctrl-sun50i-a100.c
-+++ b/drivers/pinctrl/sunxi/pinctrl-sun50i-a100.c
-@@ -677,7 +677,7 @@ static const struct sunxi_desc_pin a100_pins[] = {
- 		  SUNXI_FUNCTION_IRQ_BANK(0x6, 6, 19)),
- };
+diff --git a/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml b/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml
+index 372679dbd216..b6e1ebfaf366 100644
+--- a/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml
++++ b/Documentation/devicetree/bindings/dma/allwinner,sun50i-a64-dma.yaml
+@@ -21,6 +21,7 @@ properties:
+   compatible:
+     oneOf:
+       - const: allwinner,sun50i-a64-dma
++      - const: allwinner,sun50i-a100-dma
+       - const: allwinner,sun50i-h6-dma
+       - items:
+           - const: allwinner,sun8i-r40-dma
+@@ -56,7 +57,9 @@ required:
+ if:
+   properties:
+     compatible:
+-      const: allwinner,sun50i-h6-dma
++      enum:
++        - allwinner,sun50i-a100-dma
++        - allwinner,sun50i-h6-dma
  
--static const unsigned int a100_irq_bank_map[] = { 0, 1, 2, 3, 4, 5, 6};
-+static const unsigned int a100_irq_bank_map[] = { 1, 2, 3, 4, 5, 6, 7};
- 
- static const struct sunxi_pinctrl_desc a100_pinctrl_data = {
- 	.pins = a100_pins,
+ then:
+   properties:
 -- 
 2.28.0
 
