@@ -4,125 +4,163 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8239CC388F7
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:02:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF096C55ABD
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F8F220781
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:02:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8353620781
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 12:26:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="P5vD8gBV"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="AsreJSV5"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726721AbgKJMCJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 07:02:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37516 "EHLO
+        id S1729916AbgKJM0m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Nov 2020 07:26:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726706AbgKJMCJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:02:09 -0500
-Received: from mail-ua1-x941.google.com (mail-ua1-x941.google.com [IPv6:2607:f8b0:4864:20::941])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FE09C0613CF
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:02:09 -0800 (PST)
-Received: by mail-ua1-x941.google.com with SMTP id x13so3698869uar.4
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:02:09 -0800 (PST)
+        with ESMTP id S1726827AbgKJM0m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 07:26:42 -0500
+Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02A65C0613CF
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:42 -0800 (PST)
+Received: by mail-vk1-xa41.google.com with SMTP id m184so2669689vkb.9
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 04:26:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=BB248gLnwYNHBpDFiFxGTp4bjWlQGrGUEYTIiTTM4n0=;
-        b=P5vD8gBV0YaO/DixjeGeQVJhk1/L7eMwxuCIsiAvig3UdVPXqkCaRmCRSmBw3uAX4Y
-         TiX3eM0a9V+RhBtilqf4Wnnczw9k0ycRSuJ0PT/17V3tdFASRmRvb5mjnXyFGt2GMRcU
-         3wUcbEjPPtwaGdjoUhagSJVCHsFk7XytzggLfOK7sTDIcg3IWZ7ZSEYNfzcWieSvVwEo
-         nu84mT+3rq99HwIQ9n0tQQcZLP0ePsizkZH8OIWg/0Gtq3EvoiWXf4HnHsAY6VFtIOWJ
-         Ymn1R6kefWONTGLJ9MlGjDMCpMwRzzDkykIsxs1RUwq4NvMCCcU0tVZFNotf3fUpGC1r
-         /8NA==
+        bh=1gsnklr3mYZvBcAXWrQJZvljO/2f2xo3pLHWaomWfKM=;
+        b=AsreJSV5v2zViOmWEF5BArd1fuqP1AHcftElNgRdDEhKheqMyX+7CjEaNTVKlG7dSr
+         F0OWpyQkcM32nEJbiSC0zKvOAe4ICSU5qBw0u/tunZe/W50wSQtzZdMW4psl48Vd1Vtz
+         3jdLPN5kPtI30oaQtIKB9JzRK7scZUONYgRqPd7tkAYgQCvqp69/Q33ydZJkA47ctevM
+         6rGHhBFq4lnkoCjbwoCwZ/jWYCgkAjbDMCvc+Nv3zoJnJBNmIC2Asdl+QjqLe8eHPwWI
+         Nsc4MnkA9wXM5XM5HFCOXl29o1nVTGCLjGkRe5RB+eHtxvYlj5gE5dr49VQx0Treg5Z7
+         ROjA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=BB248gLnwYNHBpDFiFxGTp4bjWlQGrGUEYTIiTTM4n0=;
-        b=fgDQxiEAc9DKs1TdnZ3yZrMAWHrJxWNJRSznssKBuyTGrKzIWdAg4p2/Crg/ydnGa9
-         txMQjsXzfXB24PYV/8/zZb1jQxLyrE9s1PfYQqQmG3hy8AB+kXKtD2F9iK7ZsG3lhzsK
-         vMm2V0fYhOJwEuU/l7O0+O6r0+Zssgn6IKENjcamuEio1vGddOKf2d9Rqoha5RKivJdP
-         pe1Gsrh8JGLWGjMUiN06t9vAdzB2ZKRwWCyEKR3z6TM+MLhHjXKibp1k+XugLHoYxfF4
-         aH/HbVghn2hzrskXrAjKf8i2u5PmhFL2/cBH9m1SPu1X7LS+hg35a2wn7bOOVasqgiKI
-         1isg==
-X-Gm-Message-State: AOAM532+Hm3xRVVRL0PK6NlrEyAWuGu2rza1Son07eK49QfUzTKp01BD
-        /jcbTtEawk2ltIcgMBMsyz/W6vnoF7KFHfFRZZN0JzNmo2VwsA==
-X-Google-Smtp-Source: ABdhPJzS1RDqd2sK8B0WYlaSuB2m+KiuGtTjxpj3Qj9cDbq9dYIxpvtRHhvrHm/h3chUT7kfABepWkmNavpPP5hK3b4=
-X-Received: by 2002:a9f:2f15:: with SMTP id x21mr9486913uaj.104.1605009728503;
- Tue, 10 Nov 2020 04:02:08 -0800 (PST)
+        bh=1gsnklr3mYZvBcAXWrQJZvljO/2f2xo3pLHWaomWfKM=;
+        b=ipPI3W3buAps69fv2zTUB3uxgRxpCsWtwaVClBbViFPS98BVZ51hz0KsheDRY7hD7V
+         UMFGyQRn07wgGdcrKk9jh5e6Pg9Ori1MFagbF8GaMQjlAsnrqMJk8rqkDCbVTqKa4iS2
+         gwTH3/Kx4rT05tOUBsgafwglbiY62cgO95XoAKSFzQF5DEH8sO0QL0Vtr72Zbv6GobBL
+         Bryc+05KBDmxovZiyI9o0KTjL89U0poCt9wV5C4/ADywuWo/csP7/+4i/7amCxZkJ3r9
+         cMPdCO6m6plxh62g9kkgWrhPC7g6tQgij2QopqW5hesrInxam4KiURNIQC6ha/D5bXem
+         9svg==
+X-Gm-Message-State: AOAM532KbiIdtETzglJ3FONJ+fL0e6YlLxuXZfFrTV7kWid4nZ9CjEBt
+        rKV6Yj8anhVO39GPBXcLTP8gjL1LgzxN0qyHJcC95ZEbRaQytA==
+X-Google-Smtp-Source: ABdhPJzB9kvz6yueidsObBUdc09/7o92ArCp7CRCelWNrrBQmYUm/QnuqC58IiY1wIcUcV/RUs0ijAgYt83DMK6Yz7k=
+X-Received: by 2002:a05:6122:10eb:: with SMTP id m11mr10060860vko.8.1605011201227;
+ Tue, 10 Nov 2020 04:26:41 -0800 (PST)
 MIME-Version: 1.0
-References: <20201106134807.9076-1-adrian.hunter@intel.com>
-In-Reply-To: <20201106134807.9076-1-adrian.hunter@intel.com>
+References: <1604627813-59785-1-git-send-email-tiantao6@hisilicon.com>
+In-Reply-To: <1604627813-59785-1-git-send-email-tiantao6@hisilicon.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 10 Nov 2020 13:01:31 +0100
-Message-ID: <CAPDyKFrAZgj04=fToHBo3g+XQH6ABvOTp7=V9r8LLFiKFmNt8A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Prefer SDR25 timing for High Speed mode
- for BYT-based Intel controllers
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Date:   Tue, 10 Nov 2020 13:26:04 +0100
+Message-ID: <CAPDyKFpX9T6aKUmnVNLoo5+CW7h7HHGixT0wefDpV3CMyOJKTQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc: replace spin_lock_irqsave by spin_lock in
+ hard IRQ
+To:     Tian Tao <tiantao6@hisilicon.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 6 Nov 2020 at 14:48, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Fri, 6 Nov 2020 at 02:56, Tian Tao <tiantao6@hisilicon.com> wrote:
 >
-> A UHS setting of SDR25 can give better results for High Speed mode.
+> The code has been in a irq-disabled context since it is hard IRQ. There
+> is no necessity to do it again.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: stable@vger.kernel.org # v5.4+
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 13 +++++++++++--
->  1 file changed, 11 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 23da7f7fe093..9552708846ca 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -665,6 +665,15 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
->         }
->  }
->
-> +static void sdhci_intel_set_uhs_signaling(struct sdhci_host *host,
-> +                                         unsigned int timing)
-> +{
-> +       /* Set UHS timing to SDR25 for High Speed mode */
-> +       if (timing == MMC_TIMING_MMC_HS || timing == MMC_TIMING_SD_HS)
-> +               timing = MMC_TIMING_UHS_SDR25;
+> Signed-off-by: Tian Tao <tiantao6@hisilicon.com>
 
-I don't quite get this. If the mmc core requests high speed mode, you
-override this with timing settings corresponding to UHS_SDR25, right?
-
-> +       sdhci_set_uhs_signaling(host, timing);
-> +}
-> +
->  #define INTEL_HS400_ES_REG 0x78
->  #define INTEL_HS400_ES_BIT BIT(0)
->
-> @@ -721,7 +730,7 @@ static const struct sdhci_ops sdhci_intel_byt_ops = {
->         .enable_dma             = sdhci_pci_enable_dma,
->         .set_bus_width          = sdhci_set_bus_width,
->         .reset                  = sdhci_reset,
-> -       .set_uhs_signaling      = sdhci_set_uhs_signaling,
-> +       .set_uhs_signaling      = sdhci_intel_set_uhs_signaling,
->         .hw_reset               = sdhci_pci_hw_reset,
->  };
->
-> @@ -731,7 +740,7 @@ static const struct sdhci_ops sdhci_intel_glk_ops = {
->         .enable_dma             = sdhci_pci_enable_dma,
->         .set_bus_width          = sdhci_set_bus_width,
->         .reset                  = sdhci_cqhci_reset,
-> -       .set_uhs_signaling      = sdhci_set_uhs_signaling,
-> +       .set_uhs_signaling      = sdhci_intel_set_uhs_signaling,
->         .hw_reset               = sdhci_pci_hw_reset,
->         .irq                    = sdhci_cqhci_irq,
->  };
-> --
-> 2.17.1
->
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/dw_mmc.c | 17 ++++++++---------
+>  1 file changed, 8 insertions(+), 9 deletions(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+> index 43c5795..a524443 100644
+> --- a/drivers/mmc/host/dw_mmc.c
+> +++ b/drivers/mmc/host/dw_mmc.c
+> @@ -2617,7 +2617,6 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>         struct dw_mci *host = dev_id;
+>         u32 pending;
+>         struct dw_mci_slot *slot = host->slot;
+> -       unsigned long irqflags;
+>
+>         pending = mci_readl(host, MINTSTS); /* read-only mask reg */
+>
+> @@ -2632,15 +2631,15 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                          * Hold the lock; we know cmd11_timer can't be kicked
+>                          * off after the lock is released, so safe to delete.
+>                          */
+> -                       spin_lock_irqsave(&host->irq_lock, irqflags);
+> +                       spin_lock(&host->irq_lock);
+>                         dw_mci_cmd_interrupt(host, pending);
+> -                       spin_unlock_irqrestore(&host->irq_lock, irqflags);
+> +                       spin_unlock(&host->irq_lock);
+>
+>                         del_timer(&host->cmd11_timer);
+>                 }
+>
+>                 if (pending & DW_MCI_CMD_ERROR_FLAGS) {
+> -                       spin_lock_irqsave(&host->irq_lock, irqflags);
+> +                       spin_lock(&host->irq_lock);
+>
+>                         del_timer(&host->cto_timer);
+>                         mci_writel(host, RINTSTS, DW_MCI_CMD_ERROR_FLAGS);
+> @@ -2648,7 +2647,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                         smp_wmb(); /* drain writebuffer */
+>                         set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
+>
+> -                       spin_unlock_irqrestore(&host->irq_lock, irqflags);
+> +                       spin_unlock(&host->irq_lock);
+>                 }
+>
+>                 if (pending & DW_MCI_DATA_ERROR_FLAGS) {
+> @@ -2661,7 +2660,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                 }
+>
+>                 if (pending & SDMMC_INT_DATA_OVER) {
+> -                       spin_lock_irqsave(&host->irq_lock, irqflags);
+> +                       spin_lock(&host->irq_lock);
+>
+>                         del_timer(&host->dto_timer);
+>
+> @@ -2676,7 +2675,7 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                         set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
+>                         tasklet_schedule(&host->tasklet);
+>
+> -                       spin_unlock_irqrestore(&host->irq_lock, irqflags);
+> +                       spin_unlock(&host->irq_lock);
+>                 }
+>
+>                 if (pending & SDMMC_INT_RXDR) {
+> @@ -2692,12 +2691,12 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+>                 }
+>
+>                 if (pending & SDMMC_INT_CMD_DONE) {
+> -                       spin_lock_irqsave(&host->irq_lock, irqflags);
+> +                       spin_lock(&host->irq_lock);
+>
+>                         mci_writel(host, RINTSTS, SDMMC_INT_CMD_DONE);
+>                         dw_mci_cmd_interrupt(host, pending);
+>
+> -                       spin_unlock_irqrestore(&host->irq_lock, irqflags);
+> +                       spin_unlock(&host->irq_lock);
+>                 }
+>
+>                 if (pending & SDMMC_INT_CD) {
+> --
+> 2.7.4
+>
