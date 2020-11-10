@@ -2,132 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 443D4C55ABD
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 15:25:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AB8AC55ABD
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 15:36:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0108B22249
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 15:25:51 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=baylibre-com.20150623.gappssmtp.com header.i=@baylibre-com.20150623.gappssmtp.com header.b="s0sKGyNm"
+	by mail.kernel.org (Postfix) with ESMTP id E0D9822261
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 15:36:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726647AbgKMPZv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Nov 2020 10:25:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39610 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726526AbgKMPZu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Nov 2020 10:25:50 -0500
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28633C0617A6
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Nov 2020 07:25:50 -0800 (PST)
-Received: by mail-wr1-x444.google.com with SMTP id r17so10358977wrw.1
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Nov 2020 07:25:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:message-id
-         :date:mime-version;
-        bh=fh3sdYN4ySXdPD1FQVu1dC99IKskbJzhUsIZcKGht60=;
-        b=s0sKGyNmrJtRczni+Nu+OHhlp+MV89+jp4a4uDTvYiCXoFX/gKAryrs9SHnrzvKw/r
-         VxQ99Xuk8w4VDNr/7alL4kaXMyh7rPEQRsCslHv9on8T5EluVheEEAFzL5shdMbm+YQQ
-         QT8lLkDiYgokmKugcSJQQZoKBUj82R0cBLMYI6r54fvf64H35J2w+pee9qlxQ8ifXpvY
-         KkVksUXxX3JmkQjkgZXvQQbd7NIraiYvDhHEPSC5vo2Av+qV7c3NazQZLUEQureZ0o7H
-         2Fn5h0UsupUIl1eyiR6Fy2c+CXXy0OruErlsoZREyOgQFeqw0G096ePP2xAojI98jVI5
-         7fAg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:message-id:date:mime-version;
-        bh=fh3sdYN4ySXdPD1FQVu1dC99IKskbJzhUsIZcKGht60=;
-        b=ppErHObmjPZO3EIYVxiPOKErZw1XU7Wl1NE4E/xtFoFLNB0wRjh/NCEK0Wf8M6UCSt
-         HYIS178ZgnYH/L6Bip4vC62amzFIUrvo2x3GeMt3NgUgi6YulyMsL19LCQbY9kZidGTL
-         b6SgbIQAIV2YMCOdmkcCyUSZy+gweKvUPNGklIZ3m6w/QtCD3aaMv97GJfRHh1hP8Fwc
-         IbdXYTZUlj70LHtCD+AQ+jd0jP5i8GbZFYhsQ8VcTVtR7ClGCQOy6sV3XM0nV5N9EsTN
-         Hl0x+j/PDUBoTZmtCIlqU+RCBLS6/cn4EeglBGE8DUUthg/iMxK2XclANi+7+r+7dzTT
-         lciw==
-X-Gm-Message-State: AOAM530Wt9lgLRiWwhUtyv0UbbOy2sQH3cmmEqYGpHPIj5seJEmdYgXA
-        ThwPkFAdrtoX9gHFVXKKHoJlXw==
-X-Google-Smtp-Source: ABdhPJwxconarfbkZMVreTzCgPKy8Q++gyfX3htiuHqgomRWZqBVyLzWlq1KmyWIF2JU2EisYgCWrA==
-X-Received: by 2002:adf:eb4f:: with SMTP id u15mr4103486wrn.165.1605281143931;
-        Fri, 13 Nov 2020 07:25:43 -0800 (PST)
-Received: from localhost (253.35.17.109.rev.sfr.net. [109.17.35.253])
-        by smtp.gmail.com with ESMTPSA id f17sm10738795wmf.41.2020.11.13.07.25.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 13 Nov 2020 07:25:43 -0800 (PST)
-References: <e4e6cc45-bc18-40ec-035e-fdb45b9a8f46@gmail.com>
- <87o8lf74j5.fsf@nanos.tec.linutronix.de>
- <CAPDyKFosR2wd=jqADBF_dNd3kCMbM4oDAHyxiYC-5RF=SZ_E5A@mail.gmail.com>
- <1jzh3p9rs6.fsf@starbuckisacylon.baylibre.com>
- <CAPDyKFq8dM7Z48uUWHai83avwdhOOGU2NEefM7ifaOUcfW+BsA@mail.gmail.com>
-User-agent: mu4e 1.4.10; emacs 27.1
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Thomas Gleixner <tglx@linutronix.de>,
-        Brad Harper <bjharper@gmail.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        id S1726871AbgKMPcX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Nov 2020 10:32:23 -0500
+Received: from new2-smtp.messagingengine.com ([66.111.4.224]:39133 "EHLO
+        new2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726731AbgKMPcU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Nov 2020 10:32:20 -0500
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.46])
+        by mailnew.nyi.internal (Postfix) with ESMTP id E042F58032D;
+        Fri, 13 Nov 2020 10:32:18 -0500 (EST)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute6.internal (MEProxy); Fri, 13 Nov 2020 10:32:18 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
+        from:date:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=fm1; bh=iQvsGPPa0tYF2NuoRivcownR9ft
+        NLwLD3BYTJEqiN68=; b=lSysGwVB7uEO/OD640HhdDjd1HDZweo4kZul3xT9ZZb
+        0QhyoL6zjbLQenu11bkjQ56NKvcFI9Vin1bBd06Uud3+PwXKy6qKeCQcaCiX3Nix
+        TqBIn+WPVvZDm7sw6drhgyS+vbLOqc6pZ+KKyHPx4xGi3A/Y/+VcNYzG+y0uuovn
+        5rWeeiiqERqhOAyiEo9akMy8TUZX4MQSkLMPkTCjY8kgFtCV5ssoWbVnXJlGmYXc
+        FRSmpXdBhD0XhpoR69kEMXizqVKgjJafS27ff3o5CRM5X79G+ONZPXg3ydPFSfut
+        6UtqsHXrQkJ6k4VqqCW68LFZLZ8z6wNmqdC7s/dPBYg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=iQvsGP
+        Pa0tYF2NuoRivcownR9ftNLwLD3BYTJEqiN68=; b=EJEe7fiMO/W7hIRq1R4VkM
+        Zit5RF0UHiDUTx6SfZKALDBAWTFgnK20cOfruzgTloS29toHAzz9N+GEz7rq/zx8
+        yLPixecY5+AXwqbZ7sCzmo0LOcrfL29ODL89uzAJlA56HyssX9qrta4NPZnMoxbz
+        I5q3M4mPKf0MwE9V4tdYhZRPJEikPDzVC5fdpaacyloLcIJOJyoKpti/64rdTwAj
+        /Gv0s9sL1Qg5aK/CboQnGKNUvqEFnTN5B0fgsQHfGoUtsPl8nhnsBVKE6eQDVxXH
+        SQ2rJ3EJVfbLNEFd3b+oFJvyjudcxqFG0onlp35JDRt7IALKPWoEbWk3YjcrD3gg
+        ==
+X-ME-Sender: <xms:AKeuXzhp5yOZuzx_8jABAGLEMIARQ5xo40fJkpSR4FuyWLt-6jzgAw>
+    <xme:AKeuXwA5pgknbzpFZOXlJtT48gdkLWQj5Td8uDZtGkQWAl8sQgDry2t8w2V5qT_XX
+    Eeuk1BzA1nEqMDoPDA>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedruddvhedgjeejucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhephfffvffukfhfgggtuggjsehgtderredttddvnecuhfhrohhmpehmrgigihhm
+    vgestggvrhhnohdrthgvtghhnecuggftrfgrthhtvghrnhephffffffgteejgeeiteelue
+    dvkeffudekjeejheevleekgffggfekkedvhfeigefgnecukfhppeeltddrkeelrdeikedr
+    jeeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomhepmh
+    grgihimhgvsegtvghrnhhordhtvggthh
+X-ME-Proxy: <xmx:AKeuXzGdXPY-QZyakhb_12fR12Jd5ZHQl-EScwayMt7F4680Um_lDw>
+    <xmx:AKeuXwRguMbGG6BXUiUDFA9shhP9V3h4cjovwPpd_fCwkqtq-yjcbg>
+    <xmx:AKeuXww-uHpJSrMnSdsgyDrytpFfi7fDFWSH7WxmiJVs-U6ojPrIlw>
+    <xmx:AqeuX9jrNtkIa69VlNHt4vbw5TVITyxF4-jAagikg_6BBmBDNV88dA>
+Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
+        by mail.messagingengine.com (Postfix) with ESMTPA id BE0853064AAE;
+        Fri, 13 Nov 2020 10:32:15 -0500 (EST)
+From:   maxime@cerno.tech
+Date:   Tue, 10 Nov 2020 13:55:36 +0100
+To:     Vinod Koul <vkoul@kernel.org>
+Cc:     Frank Lee <tiny.windzz@gmail.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Frank Lee <frank@allwinnertech.com>,
+        Rob Herring <robh+dt@kernel.org>, Chen-Yu Tsai <wens@csie.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kishon@ti.com,
+        wim@linux-watchdog.org, Guenter Roeck <linux@roeck-us.net>,
+        dan.j.williams@intel.com, Linus Walleij <linus.walleij@linaro.org>,
+        wsa+renesas@sang-engineering.com, dianders@chromium.org,
+        marex@denx.de, Colin King <colin.king@canonical.com>,
+        rdunlap@infradead.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        =?utf-8?Q?Ond=C5=99ej?= Jirman <megous@megous.com>,
+        rikard.falkeborn@gmail.com, dmaengine@vger.kernel.org,
+        devicetree <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Sebastian Andrzej Siewior <bigeasy@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>
-Subject: Re: [PATCH] mmc: meson-gx: remove IRQF_ONESHOT
-In-reply-to: <CAPDyKFq8dM7Z48uUWHai83avwdhOOGU2NEefM7ifaOUcfW+BsA@mail.gmail.com>
-Message-ID: <1jft5d1doq.fsf@starbuckisacylon.baylibre.com>
-Date:   Fri, 13 Nov 2020 16:25:41 +0100
+        "open list:SECURE DIGITAL HO..." <linux-mmc@vger.kernel.org>,
+        linux-watchdog@vger.kernel.org,
+        linux-gpio <linux-gpio@vger.kernel.org>
+Subject: Re: [PATCH 00/19] Second step support for A100
+Message-ID: <20201110125536.gxxbgzkh3tlmn2ze@gilmour.lan>
+65;6201;1cFrom: Maxime Ripard <maxime@cerno.tech>
+References: <20201110040553.1381-1-frank@allwinnertech.com>
+ <CAEExFWsc4Rx2U+BVuqTJkL0wj-gdNcF=emJRcStQ2Uq=FQEx1g@mail.gmail.com>
+ <CAJKOXPf4ARNnSnvDpn7vVC0kGNd+m_dkfgKkmH_bca2AZ_Osyg@mail.gmail.com>
+ <CAEExFWv2o9aTfUVM5NzZz10kAO_Ya8VJvJrmyjh55=U_5G8RJw@mail.gmail.com>
+ <20201110124829.GB161013@vkoul-mobl>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="dakuxhxxqpi2fsmh"
+Content-Disposition: inline
+In-Reply-To: <20201110124829.GB161013@vkoul-mobl>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-On Wed 11 Nov 2020 at 11:47, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+--dakuxhxxqpi2fsmh
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> On Tue, 10 Nov 2020 at 16:05, Jerome Brunet <jbrunet@baylibre.com> wrote:
->>
->>
->> On Thu 08 Oct 2020 at 11:08, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->> >
->> > Thomas, thanks a lot for helping out and looking at this!
->> >
->> > It looks like the testing of the patch below went well. Are you
->> > intending to queue up the patch via your tip tree?
->> >
->> > If you need any help, just tell us!
->> >
->> > Kind regards
->> > Uffe
->> >
->>
->> Hi everyone,
->>
->> Do we have a plan for this issue ?
->> I've had Thomas's change in my tree for a month, so far, so good.
->
-> Instead of waiting for Thomas, perhaps you can pick up his patch and
-> re-submit it?
+On Tue, Nov 10, 2020 at 06:18:29PM +0530, Vinod Koul wrote:
+> On 10-11-20, 16:51, Frank Lee wrote:
+> > On Tue, Nov 10, 2020 at 4:43 PM Krzysztof Kozlowski <krzk@kernel.org> w=
+rote:
+> > >
+> > > On Tue, 10 Nov 2020 at 07:00, Frank Lee <tiny.windzz@gmail.com> wrote:
+> > > >
+> > > > It seems that sending too many e-mails at one time will cause some
+> > > > emails to fail to be sent out. I will try again.
+> > >
+> > > Hi,
+> > >
+> > > Instead please reduce the address list to relevant people, as pointed
+> > > out by scripts/get_maintainer.pl. Don't Cc irrelevant developers
+> > > unless a file is abandoned and you need to get as much audience as
+> > > possible... but sunxi is not abandoned.
+> >=20
+> > Thank you for the reminder. I resend the version in the afternoon,
+> > only CC the relevant people. I'm not sure. Should the cover be copied
+> > to everyone?
+>=20
+> Any reason why this should be a single series.. why not split it to
+> bunch of chunks, one per subsystem like pinctrl, phy, dmaengine, etc...
+> And then DTS parts and CC relevant list and maintainers. I do not think
+> there is any dependency, right?
 
-TBH, I'm not confortable signing off something when I have no idea about
-the implication, which is the case here.
+Yeah, I agree.
 
->
-> From my side, I can of course apply your original fix to the mmc
-> driver, as an intermediate step.
+One series should be about one topic, so you should have at least:
+  - One for the pinctrl fixes
+  - One for the DMA controller and related DT patches
+  - One for the MMC controller and related DT patches
+  - One for the USB controllers and related DT patches
+    * And for the PHY, the enable_pmu_unk1 and devm_* patches should be
+      sent independently as well
+  - One for the watchdog
+  - And the PMU patch should be sent independently too
 
-In Thomas first reply, I did not really understand if it was bad from
-the driver to use IRQF_ONESHOT. If it is OK, i'd prefer if things stayed
-as they are. Otherwise, feel free to apply it.
+Maxime
 
-> Is there a hurry?
->
+--dakuxhxxqpi2fsmh
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Absolutely no hurry, at least not for me.
+-----BEGIN PGP SIGNATURE-----
 
-I noticed I still had Thomas's patch on top of the last rc which means
-it had not been applied yet. Fishing for news, that's all.
+iHUEABYIAB0WIQRcEzekXsqa64kGDp7j7w1vZxhRxQUCX6qNyAAKCRDj7w1vZxhR
+xZhsAQDnDysv0PDMRF+pQ9Aae6T48f6wAJcVf1ozDJ6SaYxctQEAjoXFWWcwmX5u
+DkWVsDJgDp4anqqJj/n9YqMwDCBJ9Q0=
+=LbiZ
+-----END PGP SIGNATURE-----
 
-> Kind regards
-> Uffe
-
+--dakuxhxxqpi2fsmh--
