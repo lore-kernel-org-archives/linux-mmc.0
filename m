@@ -2,135 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D27C4C56201
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 21:18:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5000DC5517A
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 22:01:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5E160208CA
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 21:18:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DCAD62087D
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 22:01:29 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="ESLAH/2Z"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="GjflVxJ+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726108AbgKKVSO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Nov 2020 16:18:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41428 "EHLO
+        id S1726510AbgKKWB3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Nov 2020 17:01:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48076 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726203AbgKKVSO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2020 16:18:14 -0500
-Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69FCDC0613D4
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 13:18:14 -0800 (PST)
-Received: by mail-lf1-x142.google.com with SMTP id i6so5230822lfd.1
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 13:18:14 -0800 (PST)
+        with ESMTP id S1726459AbgKKWB3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2020 17:01:29 -0500
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 887CDC0613D1
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 14:01:27 -0800 (PST)
+Received: by mail-lj1-x244.google.com with SMTP id l10so3797090lji.4
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 14:01:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=c7mso2viC1SJS7AqlelAZfkI9SWQHNhnB5GpC2v39s0=;
-        b=ESLAH/2Z2s/u0Ojl3oWEsnpG2nDfFVsDUvFKZ5twHoBlg+tRYRyU5KNlxRxPq7q1yc
-         1meMoYwwx4h2nXgDcjHA2F/h4gifXhJu1c0gRaS9g/0x+QM3z2X9Vb4uJLniOEtB+K5B
-         wMshMnLSnqRdG11vum8OODzMU7VcWDtJMLRCt6x4U4UKFUYs26NvNTIH+s7+UWay3hiw
-         Rk1eOlbAvYQl/0R8/+/8rKEQWmBX5RCo0xUdWTfT6Df443jT/DMyJS7Cm094AEdx8IZV
-         LSQebTnH2uI/Std9V25sPBQeL1ZcYerpW3gZFrU5qmLuTt6cxBbFGy13Eesdnk5ZzCoy
-         8xYw==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=yf/AR5sXId7uyYNqyyFj8tO3BvI4jy2CUGJkVnPWaJw=;
+        b=GjflVxJ+JQaVQ9+812drTCjrhApz0M6QRtebsd+XvcceurpsoBL9DPMAe7p2I3R92a
+         QkQ7mbF3dRYKUXhGZXxIrP6JFSwCPmzEASaNq6wboJnSO2RHP4RFSsCfFTGJ2CroiM+l
+         XaK3Nc+h8B0632PFgStGt45KdIZ2DtMqZP4DA238wvAigM9DrtmBqO8+BkoKqTgRrTZ5
+         B24yzu0nfqywie21epH82rLeDhK3H0NhFIPcvoEHsK3t5sejdb5apmebNOwt6WAGOkDS
+         c30kGsbP/AXvWc+czKeyYcP4imTqGtNpDT+IkK5Hh6ainVnYMl5+U8UNP6nhQjrzfMS0
+         jBtg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=c7mso2viC1SJS7AqlelAZfkI9SWQHNhnB5GpC2v39s0=;
-        b=o3XWrBixxKGfrNH64ALdOSSZciGyQuCPqMIV+c+Zqq5bi2DXMBdCE+U7lMrfpt7Qwh
-         6A/1LTSHsdpPWo6apzpHhtGONGNYE+KtqME9K3dAzkw+MZfmcMU4QeeB3k669a0URt8l
-         Niiy01IukztPkdGMS4dfrZXidHSaytv/hmkOPYqz+vopwX+K5NenbQvev5zmtcmhPobu
-         /4B0qsdztB9S5U9P7hwm01Z9nkqJsE/zDE3Q7ddK7gjSfDOJw6OI2Gu2qtweNI3uNwni
-         kTQmaW9eQLcMkFVug0cmVEEYyTMo11FS3YS4j1inY27xFTyReQqkhPLK4rUGX+3f+x22
-         nDBA==
-X-Gm-Message-State: AOAM533bzBY/M19UnY6mZosSxWZaJ0wku/x2EI6bBrFFzoB+uVWuhSUJ
-        3HNX0kGUHyiz1gVAhF40gE5WyQ==
-X-Google-Smtp-Source: ABdhPJwZGoG0JdQlf3WLqCzOCCJ+eqSjf5trqrMFitG/xd1YNhF2kkmo29bY0w1RILvKyHZEL6vNvg==
-X-Received: by 2002:a05:6512:24d:: with SMTP id b13mr7344688lfo.544.1605129492745;
-        Wed, 11 Nov 2020 13:18:12 -0800 (PST)
-Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
-        by smtp.gmail.com with ESMTPSA id o3sm331170lfo.217.2020.11.11.13.18.11
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=yf/AR5sXId7uyYNqyyFj8tO3BvI4jy2CUGJkVnPWaJw=;
+        b=e9Nezn98VvmjmtvNGrttaMkhXI4SfzphlPsXBAztmBDCiQjQoU7SdkkVEVWXown1OP
+         FgeDaSvpVLD7XC0XLh2C0WKCZnNvAUPGphiex20FtA8Zn6VDrVxp4EMbkAkLDydsmzZT
+         tvjcZrFHGv/zZb0cmbHypG01/XN3+RQJQNet75eUTIsezFnrjhu/8J2BZiMBSc6Ydrwf
+         64Lj/aqW773TTuXcgUnaQP8e+7G5VPsPSLdhCb+PRlS8kZmYEj0dB5/YM4Zi/Ehjhqxn
+         ynxjset/9hAShKPi37yAC9hrABEUSJigyJ3VRLd7/RhZYZmF34ZWrsiyKFqca/THEhmg
+         /qlA==
+X-Gm-Message-State: AOAM532t6HuSWkNWJGhYYk0DRVm04Veq+iqSbaBZwt7mIAeInEhFR/SG
+        Nw/hNBkfbQSw2lHv/D8QpmeZNA==
+X-Google-Smtp-Source: ABdhPJwOApRIRBA9IwsaGlXPhwOPiH0SoIEODujbEeKOV9ng2jstr8d1NIRlflZJuDXvw0iwiEHbJw==
+X-Received: by 2002:a2e:88d0:: with SMTP id a16mr193151ljk.56.1605132085301;
+        Wed, 11 Nov 2020 14:01:25 -0800 (PST)
+Received: from eriador.lumag.spb.ru ([188.162.65.115])
+        by smtp.gmail.com with ESMTPSA id i19sm339756lfj.212.2020.11.11.14.01.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 11 Nov 2020 13:18:11 -0800 (PST)
-Date:   Wed, 11 Nov 2020 22:18:11 +0100
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [RFC PATCH 1/4] mmc: renesas_sdhi: only reset SCC when its
- pointer is populated
-Message-ID: <20201111211811.GC667473@oden.dyn.berto.se>
-References: <20201110142058.36393-1-wsa+renesas@sang-engineering.com>
- <20201110142058.36393-2-wsa+renesas@sang-engineering.com>
+        Wed, 11 Nov 2020 14:01:24 -0800 (PST)
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: [PATCH] mmc: sdhci-msm: detect if tassadar_dll is used by using core version
+Date:   Thu, 12 Nov 2020 01:01:22 +0300
+Message-Id: <20201111220122.2392823-1-dmitry.baryshkov@linaro.org>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201110142058.36393-2-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Detect if tassadar_dll is required by using core version rather than
+just specifying it in the sdhci_msm_variant_info.
 
-Thanks for your work.
+Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 15 +++++----------
+ 1 file changed, 5 insertions(+), 10 deletions(-)
 
-On 2020-11-10 15:20:55 +0100, Wolfram Sang wrote:
-> Only re-initialize SCC and tuning when an SCC was found during probe().
-> This is currently a noop because all R-Car Gen2+ are considered to have
-> an SCC. But this will change in a later patch, so we need this
-> preparation.
-> 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-
-> ---
->  drivers/mmc/host/renesas_sdhi_core.c | 18 ++++++++++--------
->  1 file changed, 10 insertions(+), 8 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index acb9c81a4e45..a395f835e836 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -556,16 +556,18 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
->  {
->  	struct renesas_sdhi *priv = host_to_priv(host);
->  
-> -	renesas_sdhi_reset_scc(host, priv);
-> -	renesas_sdhi_reset_hs400_mode(host, priv);
-> -	priv->needs_adjust_hs400 = false;
-> +	if (priv->scc_ctl) {
-> +		renesas_sdhi_reset_scc(host, priv);
-> +		renesas_sdhi_reset_hs400_mode(host, priv);
-> +		priv->needs_adjust_hs400 = false;
->  
-> -	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
-> -			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
-> +		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
-> +				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
->  
-> -	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
-> -		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
-> -		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
-> +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
-> +			       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
-> +			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
-> +	}
->  
->  	if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
->  		sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK,
-> -- 
-> 2.28.0
-> 
-
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3451eb325513..dd67acab1660 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -248,7 +248,6 @@ struct sdhci_msm_variant_ops {
+ struct sdhci_msm_variant_info {
+ 	bool mci_removed;
+ 	bool restore_dll_config;
+-	bool uses_tassadar_dll;
+ 	const struct sdhci_msm_variant_ops *var_ops;
+ 	const struct sdhci_msm_offset *offset;
+ };
+@@ -2154,18 +2153,11 @@ static const struct sdhci_msm_variant_info sdm845_sdhci_var = {
+ 	.offset = &sdhci_msm_v5_offset,
+ };
+ 
+-static const struct sdhci_msm_variant_info sm8250_sdhci_var = {
+-	.mci_removed = true,
+-	.uses_tassadar_dll = true,
+-	.var_ops = &v5_var_ops,
+-	.offset = &sdhci_msm_v5_offset,
+-};
+-
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
+ 	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
+ 	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
+-	{.compatible = "qcom,sm8250-sdhci", .data = &sm8250_sdhci_var},
++	{.compatible = "qcom,sm8250-sdhci", .data = &sdm845_sdhci_var},
+ 	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
+ 	{},
+ };
+@@ -2249,7 +2241,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	msm_host->restore_dll_config = var_info->restore_dll_config;
+ 	msm_host->var_ops = var_info->var_ops;
+ 	msm_host->offset = var_info->offset;
+-	msm_host->uses_tassadar_dll = var_info->uses_tassadar_dll;
+ 
+ 	msm_offset = msm_host->offset;
+ 
+@@ -2396,6 +2387,10 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	if (core_major == 1 && core_minor >= 0x49)
+ 		msm_host->updated_ddr_cfg = true;
+ 
++	if (core_major == 1 &&
++	    (core_minor == 0x6e || core_minor == 0x71 || core_minor == 0x72))
++		msm_host->uses_tassadar_dll = true;
++
+ 	ret = sdhci_msm_register_vreg(msm_host);
+ 	if (ret)
+ 		goto clk_disable;
 -- 
-Regards,
-Niklas Söderlund
+2.28.0
+
