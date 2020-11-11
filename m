@@ -2,108 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B4A3C56201
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 21:50:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 192A2C388F9
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 05:34:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36365207D3
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Nov 2020 21:50:47 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JajzXzj+"
+	by mail.kernel.org (Postfix) with ESMTP id AB9892053B
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 05:34:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730618AbgKJVun (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Nov 2020 16:50:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45048 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726688AbgKJVum (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Nov 2020 16:50:42 -0500
-Received: from mail-lj1-x243.google.com (mail-lj1-x243.google.com [IPv6:2a00:1450:4864:20::243])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56985C0613D1;
-        Tue, 10 Nov 2020 13:50:42 -0800 (PST)
-Received: by mail-lj1-x243.google.com with SMTP id v18so16546150ljc.3;
-        Tue, 10 Nov 2020 13:50:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=QumWPjldyhkIYYrKZybLDjf0NEcp9tE/cFj+ALYFR9A=;
-        b=JajzXzj+taW37LHKKk1rBUu2Z4ElUMNSSHS0K95OnI5UImwAIF74Qu+QTmiVzypvAS
-         gAQiDrdU4a2B6Z9A/XX/OOpJu3zamPLYGVpiOdVUDJw7ZsRpBauLkm/3QQp5PvJ2UM4A
-         LlfneuREhApeooZpB9lnnAX6U7j1XdRX88sCUzdxugTvIG1jP5PTHJPC3/8IUgW/bc/i
-         LWgLoXa7caMAbqITehUnmz/UH2tBulw/gQUU8Cd3shJtQ+zvYfoUG1N8jDZq2ZIllOe/
-         aCD81lT6Dj2NRU8sGRrZHHc26lsCxBQnWNgpAjWLB1z+6WE0AmdSq+A5dXHYbs0KDWUd
-         P/Cw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=QumWPjldyhkIYYrKZybLDjf0NEcp9tE/cFj+ALYFR9A=;
-        b=KtRbblHfKi1Ay5PEaAn1KZJFAZ3msWs02D6BzwC7cpXqRlnOnvOsDkoWebzQgSmqRn
-         D0/46SSJdZtmRc8TYtLDSTqBcdmtD/q0X84oyL6u/lKoxtv+nppRHfvWEano4m6qmEmi
-         rXQQvksoL6RzOfdbBrJHfSycz4On2/LJmHdR2XfZTqHuG++IzKFo82z+nNIQWQIJJ+gC
-         z54/p8NqoA0PQEl1qM9KDrr6k3p55B55fy5vJteEuIRfeWw9c+VaI4mYgd82bPDT/auF
-         QrpRkldWJXDRAM45Qad3pyoo7E/xRG8TWtB25rXPHZpkOFrL4IPkA2bBj06S5X6rNR1s
-         bjyg==
-X-Gm-Message-State: AOAM532fAQDNrGzkhk75e2G6DC7w9w8rVE8dImJHRYvrpFlR5L1Yu6V0
-        q6s7cZc8D4FtniHhyZAm0VzFtSlyNKo=
-X-Google-Smtp-Source: ABdhPJxca3fiSpZnzLwSSmf1STAmFU4WFUoLoBVs2ZCeEEkdDu9neVJtNB2ucZnGCMuP/Af+mNHRXw==
-X-Received: by 2002:a2e:9583:: with SMTP id w3mr9542353ljh.25.1605045040627;
-        Tue, 10 Nov 2020 13:50:40 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
-        by smtp.googlemail.com with ESMTPSA id x9sm12074lfg.93.2020.11.10.13.50.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 10 Nov 2020 13:50:39 -0800 (PST)
-Subject: Re: [PATCH v1 11/30] drm/tegra: dc: Support OPP and SoC core voltage
- scaling
-To:     Thierry Reding <thierry.reding@gmail.com>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Peter Chen <Peter.Chen@nxp.com>,
-        Mark Brown <broonie@kernel.org>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
-        linux-usb@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-References: <20201104234427.26477-1-digetx@gmail.com>
- <20201104234427.26477-12-digetx@gmail.com> <20201110202945.GF2375022@ulmo>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <7b0052e1-0ea7-b28f-ae46-52e669a980ac@gmail.com>
-Date:   Wed, 11 Nov 2020 00:50:38 +0300
+        id S1725828AbgKKFev (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Nov 2020 00:34:51 -0500
+Received: from mga06.intel.com ([134.134.136.31]:26289 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725468AbgKKFeu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 11 Nov 2020 00:34:50 -0500
+IronPort-SDR: TC8xEbfRKatS/jwx4GZkuJCg8QyIW8GTJjnKRHEtBVmhb2xTjKpLCs7CIm0c0954A5PD4PSbff
+ n48/gdyu4Lvg==
+X-IronPort-AV: E=McAfee;i="6000,8403,9801"; a="231722066"
+X-IronPort-AV: E=Sophos;i="5.77,468,1596524400"; 
+   d="scan'208";a="231722066"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Nov 2020 21:34:49 -0800
+IronPort-SDR: DZ4TLWgSSY7WnDICk25GOqVso2k94bciH3JrfWc6NWPSHje+U7NCBnK2EbhxC45GEUTcc6aBYl
+ IDDh87C8V1lA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.77,468,1596524400"; 
+   d="scan'208";a="398908537"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
+  by orsmga001.jf.intel.com with ESMTP; 10 Nov 2020 21:34:47 -0800
+Subject: Re: [PATCH] mmc: sdhci-pci: Prefer SDR25 timing for High Speed mode
+ for BYT-based Intel controllers
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+References: <20201106134807.9076-1-adrian.hunter@intel.com>
+ <CAPDyKFrAZgj04=fToHBo3g+XQH6ABvOTp7=V9r8LLFiKFmNt8A@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <19fb268c-dc24-b902-871b-a933da0cbdcb@intel.com>
+Date:   Wed, 11 Nov 2020 07:34:31 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-In-Reply-To: <20201110202945.GF2375022@ulmo>
+In-Reply-To: <CAPDyKFrAZgj04=fToHBo3g+XQH6ABvOTp7=V9r8LLFiKFmNt8A@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-10.11.2020 23:29, Thierry Reding пишет:
->> +	/* legacy device-trees don't have OPP table */
->> +	if (!device_property_present(dc->dev, "operating-points-v2"))
->> +		return 0;
-> "Legacy" is a bit confusing here. For one, no device trees currently
-> have these tables and secondly, for newer SoCs we may never need them.
+On 10/11/20 2:01 pm, Ulf Hansson wrote:
+> On Fri, 6 Nov 2020 at 14:48, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> A UHS setting of SDR25 can give better results for High Speed mode.
+>>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+>> Cc: stable@vger.kernel.org # v5.4+
+>> ---
+>>  drivers/mmc/host/sdhci-pci-core.c | 13 +++++++++++--
+>>  1 file changed, 11 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+>> index 23da7f7fe093..9552708846ca 100644
+>> --- a/drivers/mmc/host/sdhci-pci-core.c
+>> +++ b/drivers/mmc/host/sdhci-pci-core.c
+>> @@ -665,6 +665,15 @@ static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+>>         }
+>>  }
+>>
+>> +static void sdhci_intel_set_uhs_signaling(struct sdhci_host *host,
+>> +                                         unsigned int timing)
+>> +{
+>> +       /* Set UHS timing to SDR25 for High Speed mode */
+>> +       if (timing == MMC_TIMING_MMC_HS || timing == MMC_TIMING_SD_HS)
+>> +               timing = MMC_TIMING_UHS_SDR25;
+> 
+> I don't quite get this. If the mmc core requests high speed mode, you
+> override this with timing settings corresponding to UHS_SDR25, right?
+
+Yes.  There is no setting corresponding to high speed.  Currently SDHCI sets
+no value, which means zero which is also the setting for SDR12.  There was
+an attempt to change this in sdhci.c but it caused problems for some
+drivers, so it was reverted and the change was made to sdhci-brcmstb in
+commit 2fefc7c5f7d16e ("mmc: sdhci-brcmstb: Fix incorrect switch to HS
+mode").  Several other drivers also do this.
+
+> 
+>> +       sdhci_set_uhs_signaling(host, timing);
+>> +}
+>> +
+>>  #define INTEL_HS400_ES_REG 0x78
+>>  #define INTEL_HS400_ES_BIT BIT(0)
+>>
+>> @@ -721,7 +730,7 @@ static const struct sdhci_ops sdhci_intel_byt_ops = {
+>>         .enable_dma             = sdhci_pci_enable_dma,
+>>         .set_bus_width          = sdhci_set_bus_width,
+>>         .reset                  = sdhci_reset,
+>> -       .set_uhs_signaling      = sdhci_set_uhs_signaling,
+>> +       .set_uhs_signaling      = sdhci_intel_set_uhs_signaling,
+>>         .hw_reset               = sdhci_pci_hw_reset,
+>>  };
+>>
+>> @@ -731,7 +740,7 @@ static const struct sdhci_ops sdhci_intel_glk_ops = {
+>>         .enable_dma             = sdhci_pci_enable_dma,
+>>         .set_bus_width          = sdhci_set_bus_width,
+>>         .reset                  = sdhci_cqhci_reset,
+>> -       .set_uhs_signaling      = sdhci_set_uhs_signaling,
+>> +       .set_uhs_signaling      = sdhci_intel_set_uhs_signaling,
+>>         .hw_reset               = sdhci_pci_hw_reset,
+>>         .irq                    = sdhci_cqhci_irq,
+>>  };
+>> --
+>> 2.17.1
+>>
+> 
+> Kind regards
+> Uffe
 > 
 
-I had the same thought and already improved such comments a day ago.
