@@ -2,174 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81C84C5517A
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 16:37:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D27C4C56201
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 21:18:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 25A7120756
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 16:37:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E160208CA
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 21:18:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="PAWnVIyD"
+	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="ESLAH/2Z"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726595AbgKKQhr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Nov 2020 11:37:47 -0500
-Received: from m42-4.mailgun.net ([69.72.42.4]:38667 "EHLO m42-4.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726208AbgKKQhr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 11 Nov 2020 11:37:47 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1605112666; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=0MTZNm0gtvDrGwPQUJrq8djAu9H1QIhfhQ6Ri7dD6yI=; b=PAWnVIyDI4kOTkNSqi2Y1iCsbSXlOE1XtXpO8p17ZOEOnlrVEuEW/IFHIO5aM0ba0dr50wLv
- lWsyKclyvMvclztGoZfWCwN6xFyNzvfeOG1xJS2L1xsm045XSq/gsNon8VbSrzmxcpOUYPgZ
- ZrPZopw/yTosdEIJwOdi/oOEZQo=
-X-Mailgun-Sending-Ip: 69.72.42.4
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n07.prod.us-east-1.postgun.com with SMTP id
- 5fac0fe71b0f99048360dbf3 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 11 Nov 2020 16:22:48
- GMT
-Sender: vbadigan=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 2402AC43385; Wed, 11 Nov 2020 16:22:48 +0000 (UTC)
-Received: from [192.168.0.105] (unknown [49.205.245.25])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 34773C433C6;
-        Wed, 11 Nov 2020 16:22:43 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 34773C433C6
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH] mmc: block: Prevent new req entering queue while freeing
- up the queue
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Baolin Wang <baolin.wang@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Peng Hao <richard.peng@oppo.com>
-References: <1603883984-24333-1-git-send-email-vbadigan@codeaurora.org>
- <CAPDyKFq0zikjeps36=Mq-Y9MuyiOHZyGVELV+Eh56evu8b8D2A@mail.gmail.com>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <4f27eecd-3d10-796c-6b6c-594770502037@codeaurora.org>
-Date:   Wed, 11 Nov 2020 21:52:35 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.1
+        id S1726108AbgKKVSO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Nov 2020 16:18:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41428 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726203AbgKKVSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2020 16:18:14 -0500
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69FCDC0613D4
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 13:18:14 -0800 (PST)
+Received: by mail-lf1-x142.google.com with SMTP id i6so5230822lfd.1
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 13:18:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=c7mso2viC1SJS7AqlelAZfkI9SWQHNhnB5GpC2v39s0=;
+        b=ESLAH/2Z2s/u0Ojl3oWEsnpG2nDfFVsDUvFKZ5twHoBlg+tRYRyU5KNlxRxPq7q1yc
+         1meMoYwwx4h2nXgDcjHA2F/h4gifXhJu1c0gRaS9g/0x+QM3z2X9Vb4uJLniOEtB+K5B
+         wMshMnLSnqRdG11vum8OODzMU7VcWDtJMLRCt6x4U4UKFUYs26NvNTIH+s7+UWay3hiw
+         Rk1eOlbAvYQl/0R8/+/8rKEQWmBX5RCo0xUdWTfT6Df443jT/DMyJS7Cm094AEdx8IZV
+         LSQebTnH2uI/Std9V25sPBQeL1ZcYerpW3gZFrU5qmLuTt6cxBbFGy13Eesdnk5ZzCoy
+         8xYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=c7mso2viC1SJS7AqlelAZfkI9SWQHNhnB5GpC2v39s0=;
+        b=o3XWrBixxKGfrNH64ALdOSSZciGyQuCPqMIV+c+Zqq5bi2DXMBdCE+U7lMrfpt7Qwh
+         6A/1LTSHsdpPWo6apzpHhtGONGNYE+KtqME9K3dAzkw+MZfmcMU4QeeB3k669a0URt8l
+         Niiy01IukztPkdGMS4dfrZXidHSaytv/hmkOPYqz+vopwX+K5NenbQvev5zmtcmhPobu
+         /4B0qsdztB9S5U9P7hwm01Z9nkqJsE/zDE3Q7ddK7gjSfDOJw6OI2Gu2qtweNI3uNwni
+         kTQmaW9eQLcMkFVug0cmVEEYyTMo11FS3YS4j1inY27xFTyReQqkhPLK4rUGX+3f+x22
+         nDBA==
+X-Gm-Message-State: AOAM533bzBY/M19UnY6mZosSxWZaJ0wku/x2EI6bBrFFzoB+uVWuhSUJ
+        3HNX0kGUHyiz1gVAhF40gE5WyQ==
+X-Google-Smtp-Source: ABdhPJwZGoG0JdQlf3WLqCzOCCJ+eqSjf5trqrMFitG/xd1YNhF2kkmo29bY0w1RILvKyHZEL6vNvg==
+X-Received: by 2002:a05:6512:24d:: with SMTP id b13mr7344688lfo.544.1605129492745;
+        Wed, 11 Nov 2020 13:18:12 -0800 (PST)
+Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
+        by smtp.gmail.com with ESMTPSA id o3sm331170lfo.217.2020.11.11.13.18.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 11 Nov 2020 13:18:11 -0800 (PST)
+Date:   Wed, 11 Nov 2020 22:18:11 +0100
+From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [RFC PATCH 1/4] mmc: renesas_sdhi: only reset SCC when its
+ pointer is populated
+Message-ID: <20201111211811.GC667473@oden.dyn.berto.se>
+References: <20201110142058.36393-1-wsa+renesas@sang-engineering.com>
+ <20201110142058.36393-2-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFq0zikjeps36=Mq-Y9MuyiOHZyGVELV+Eh56evu8b8D2A@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20201110142058.36393-2-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram,
 
-On 11/3/2020 8:55 PM, Ulf Hansson wrote:
-> On Wed, 28 Oct 2020 at 12:20, Veerabhadrarao Badiganti
-> <vbadigan@codeaurora.org> wrote:
->> The commit bbdc74dc19e0 ("mmc: block: Prevent new req entering queue
->> after its cleanup") has introduced this change but it got moved after
->> del_gendisk() with commit 57678e5a3d51 ("mmc: block: Delete gendisk
->> before cleaning up the request queue").
-> This isn't the first time we have spotted errors in this path. Seems
-> like a difficult path to get correct. :-)
->
->> It is blocking reboot with below Call stack().
->>
->> INFO: task reboot:3086 blocked for more than 122 seconds.
->>       __schedule
->>       schedule
->>       schedule_timeout
->>       io_schedule_timeout
->>       do_wait_for_common
->>       wait_for_completion_io
->>       submit_bio_wait
->>       blkdev_issue_flush
->>       ext4_sync_fs
->>       __sync_filesystem
->>       sync_filesystem
->>       fsync_bdev
->>       invalidate_partition
->>       del_gendisk
->>       mmc_blk_remove_req
->>       mmc_blk_remove
->>       mmc_bus_remove
->>       device_release_driver_internal
->>       device_release_driver
->>       bus_remove_device
->>       device_del
->>       mmc_remove_card
->>       mmc_remove
->>       mmc_stop_host
->>       mmc_remove_host
->>       sdhci_remove_host
->>       sdhci_msm_remove
-> Why do you call sdhci_msm_remove() from the shutdown callback? What
-> specific operations do you need to run in the shutdown path for sdhci
-> msm?
-I was suggested to add shutdown callback by memory team to gracefully 
-de-register with smmu driver
-during reboot/shutdown. So tried adding it. Since SMMU team.
+Thanks for your work.
 
-I just need to ensure that controller is not active anymore and not 
-accessing memory related to any
-requests and de-register with smmu driver during shutdown.
->
-> The important part should be to do a graceful shutdown of the card
-> (and the block device) - is there anything else?
->
-> Or you are just using the shutdown callback as a simple way to trigger
-> this problem? Could unbinding the driver trigger the same issue?
->
->>       sdhci_msm_shutdown
->>       platform_drv_shutdown
->>       device_shutdown
->>       kernel_restart_prepare
->>       kernel_restart
->>
->> So bringing this change back.
->>
->> Signed-off-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->> ---
->>
->> I'm observing this issue 100% of the time with shutdown callback added to sdhci-msm driver.
->> I'm trying on 5.4 kernel with ChromeOS.
->>
->> Please let me know if this can be fixed in a better way.
-> I don't know yet, but I will have a closer look. Let's also see if
-> Adrian has some thoughts.
->
-> Kind regards
-> Uffe
->
->> ---
->>
->>   drivers/mmc/core/block.c | 1 +
->>   1 file changed, 1 insertion(+)
->>
->> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
->> index 8d3df0be0355..76dbb2b8a13b 100644
->> --- a/drivers/mmc/core/block.c
->> +++ b/drivers/mmc/core/block.c
->> @@ -2627,6 +2627,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
->>                   * from being accepted.
->>                   */
->>                  card = md->queue.card;
->> +               blk_set_queue_dying(md->queue.queue);
->>                  if (md->disk->flags & GENHD_FL_UP) {
->>                          device_remove_file(disk_to_dev(md->disk), &md->force_ro);
->>                          if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
->> --
->> Qualcomm India Private Limited, on behalf of Qualcomm Innovation Center, Inc., is a member of Code Aurora Forum, a Linux Foundation Collaborative Project
->>
+On 2020-11-10 15:20:55 +0100, Wolfram Sang wrote:
+> Only re-initialize SCC and tuning when an SCC was found during probe().
+> This is currently a noop because all R-Car Gen2+ are considered to have
+> an SCC. But this will change in a later patch, so we need this
+> preparation.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
+
+> ---
+>  drivers/mmc/host/renesas_sdhi_core.c | 18 ++++++++++--------
+>  1 file changed, 10 insertions(+), 8 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index acb9c81a4e45..a395f835e836 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -556,16 +556,18 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+>  {
+>  	struct renesas_sdhi *priv = host_to_priv(host);
+>  
+> -	renesas_sdhi_reset_scc(host, priv);
+> -	renesas_sdhi_reset_hs400_mode(host, priv);
+> -	priv->needs_adjust_hs400 = false;
+> +	if (priv->scc_ctl) {
+> +		renesas_sdhi_reset_scc(host, priv);
+> +		renesas_sdhi_reset_hs400_mode(host, priv);
+> +		priv->needs_adjust_hs400 = false;
+>  
+> -	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+> -			sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+> +		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
+> +				sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL));
+>  
+> -	sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
+> -		       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
+> -		       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+> +		sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL,
+> +			       ~SH_MOBILE_SDHI_SCC_RVSCNTL_RVSEN &
+> +			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+> +	}
+>  
+>  	if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
+>  		sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK,
+> -- 
+> 2.28.0
+> 
+
+-- 
+Regards,
+Niklas Söderlund
