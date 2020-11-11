@@ -2,69 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A895DC5517A
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 11:39:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84537C388F9
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 11:46:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4B41F20756
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 11:39:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 18A992074B
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Nov 2020 11:46:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="eHuOUIaS"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Rj4QLbP7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726384AbgKKLjF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Nov 2020 06:39:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36100 "EHLO
+        id S1726376AbgKKLp6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Nov 2020 06:45:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37180 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726316AbgKKLjC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2020 06:39:02 -0500
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B50EFC0613D4
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 03:39:01 -0800 (PST)
-Received: by mail-vs1-xe42.google.com with SMTP id t8so976937vsr.2
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 03:39:01 -0800 (PST)
+        with ESMTP id S1725961AbgKKLpn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Nov 2020 06:45:43 -0500
+Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DDFE1C061A04
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 03:45:39 -0800 (PST)
+Received: by mail-vk1-xa41.google.com with SMTP id d191so402946vka.13
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Nov 2020 03:45:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=T0V5oiWQkvHXwmhtDU+OoF9iMxPj6y0LTly2Lqt4DuE=;
-        b=eHuOUIaS6IQ/Oqu0OgOBN3unkL3XIi+Fk4dITGJA16P8o+NlqUHYybky26m5NVdFR3
-         nEj77IcCvuVVn+06U+bT8lGz7uajjKyyW7FwNmgKPtbnVhkVbc/cbaQN9K5iNZEDqwN8
-         nVQaDyp75O3xA21xpf2HF2/4nmB5ZZWZ4qIBAUAFOV005XJOvP7dFdsSa13fRian8kWs
-         nlTaeO+OWJaahsba2PoUYHfcaaNFyOAgkVI/2smnCnTClDA1XqlICigzABWFlOngodfE
-         4zfFtHsuUV8spOrU42OjsyzgiiWT7pqurb12j6T+fkPcno/GvbG0zKznsHZsamzHUppY
-         mnLA==
+         :cc;
+        bh=W2LROEDqwB/YAfpZuvnNBx/s/n4ussPUTp1SoV848WE=;
+        b=Rj4QLbP7hQUGidksqh3Sz+Mz1awLgghgywmgmq9iaGhu6djYI966xmN5JUcRmcYrq/
+         Woc2NSWg8j33913hx6Vmfrrzuym6+skblcbvL41IiQFacYFt1SjAs/nslFk+g3W36u4V
+         5Z4diCxFrS93BVrqJ7SDLPJfjdeswkTya8vvZmjaKgR3zhBTTE1EhWuFIHUSn9N1wPo1
+         iX4p8Jc2fBB3F1mpe8ZqM6XFLIoz2+OX+tvgiLg3x8tn5z0hkeUvi4fzbnv3qjZga/O9
+         dv9NoC5jp/yLI8jF8N3x1Yw2xoMv3ppOhpBWH3CIkWAXgT5hobFLAqPh/q8PjOiT3/Eo
+         yovw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=T0V5oiWQkvHXwmhtDU+OoF9iMxPj6y0LTly2Lqt4DuE=;
-        b=DvKwUKCYr80w2MzokokR7eI2g0cYs2rytCMCPyDi84vzbLDLMk5wdD9y8VxPk4Suha
-         vnqGitP+FNPrr/p4ILAjj99ON3+S65AaUCIKu5nUkY0gU1KN7UWxzdMmqMjjWJWha6Tq
-         FdLw+kBu1pQw2je6CrRl7WZIwZVoxfI8yA9IhuoeeFSafnct0xMOPulRJwKxsNzT7BXC
-         +pmsYn3HOzPp28rUy3XjOBWK3V2gUqWq04IAzj+ypykPHDFbDpwHjP0vQ8pBVewuoPf7
-         GLJwJfE1KE6H5jh8Rj4tnHPyU1fZH1C40r3kuOTWGPw7TadfZHdw9udA3eRiVQV40lAE
-         aFxw==
-X-Gm-Message-State: AOAM531NAQ2sq63p9AhTr9G7nONuSNArpwJTYMj4JHEoB0ocu5173M5H
-        tqo8bFZrktx+xOnkn5OMelSMusYsHSA6I5znpFE8vQ==
-X-Google-Smtp-Source: ABdhPJycXgZgkNrggh2D47nvGhRFVQi/de+PIfj6XhXa1n8Wfiv9NfQ9xufbyRB0WVwWMZQ6Ct+Whjrl/7D/IIfrgqM=
-X-Received: by 2002:a67:f417:: with SMTP id p23mr14435741vsn.42.1605094740774;
- Wed, 11 Nov 2020 03:39:00 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=W2LROEDqwB/YAfpZuvnNBx/s/n4ussPUTp1SoV848WE=;
+        b=Rgc/Z4swS8IJDTezgPBmXTtimQd7gM70MdGeEJjpvL3pe0XV3ojXDscC076bWXZeEX
+         uOVtYOHZ/wOUknDvukZdE8SVglwuQTsmYcxeJ7IYaIIWtG5j1OONuNLsGgbarxjFmAbQ
+         AfUJD7yQYunQrHNSA7bjoIiC/WEuUSeq3t5WkrpAaAEFjnwyJWdadagQAxkjDvgVlJ70
+         l8Eo1fKGZmd2qAEqR34o8b2GUJDQiYOp5BrR/wv+cUQmC8WfRyPqfbk5pWqY2+hQxvFm
+         fmVVpi4fnMx3uioM/KjiyydQj6KUIq4DS99FEQWjurlbzPashknUZCLB+45MBQC5BPPo
+         ezVA==
+X-Gm-Message-State: AOAM530XLfoW/VnALuxvTNAPCJ8ykv0MFuPeiSKeA11rXCwS11olXlJP
+        bvh2aqFjthCjuatLhOpI4IxHISZq8KUgWN6zf9iuTw==
+X-Google-Smtp-Source: ABdhPJy49vZO4pNDp6JtJUn+KdVv0aND0NyO3da5g+cVxXyOVmgGe9S4bf/F/v98cY0CP0i1NrbPCyiERv3WhWMkEBU=
+X-Received: by 2002:a1f:41cc:: with SMTP id o195mr13053486vka.15.1605095138861;
+ Wed, 11 Nov 2020 03:45:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20201104234427.26477-1-digetx@gmail.com> <CAPDyKFr7qTU2RPhA_ZrbCayoTTNUEno1zdmvmv+8HBe-Owrfeg@mail.gmail.com>
- <cd147ab0-1304-a491-7a56-ee6199c02d32@gmail.com> <2716c195-083a-112f-f1e5-2f6b7152a4b5@gmail.com>
-In-Reply-To: <2716c195-083a-112f-f1e5-2f6b7152a4b5@gmail.com>
+References: <20201104234427.26477-1-digetx@gmail.com> <20201104234427.26477-2-digetx@gmail.com>
+In-Reply-To: <20201104234427.26477-2-digetx@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 11 Nov 2020 12:38:23 +0100
-Message-ID: <CAPDyKFqUMsH9dCZ=OYqfdLt==+-8NjK9n=S5jGGNXZu6Y9q=2w@mail.gmail.com>
-Subject: Re: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA
- Tegra20/30 SoCs
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
+Date:   Wed, 11 Nov 2020 12:45:02 +0100
+Message-ID: <CAPDyKFpYeLjeYan74QdtWxtLhZZT-855Rd21sFHBkQXZg78D5g@mail.gmail.com>
+Subject: Re: [PATCH v1 01/30] dt-bindings: host1x: Document OPP and voltage
+ regulator properties
+To:     Dmitry Osipenko <digetx@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
         Alan Stern <stern@rowland.harvard.edu>,
         Peter Chen <Peter.Chen@nxp.com>,
@@ -77,7 +76,6 @@ Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
         =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
         <u.kleine-koenig@pengutronix.de>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
         Marek Szyprowski <m.szyprowski@samsung.com>,
         Peter Geis <pgwipeout@gmail.com>,
         Nicolas Chauvet <kwizart@gmail.com>,
@@ -92,122 +90,58 @@ Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
         Linux Media Mailing List <linux-media@vger.kernel.org>,
         linux-tegra <linux-tegra@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 8 Nov 2020 at 13:19, Dmitry Osipenko <digetx@gmail.com> wrote:
+On Thu, 5 Nov 2020 at 00:44, Dmitry Osipenko <digetx@gmail.com> wrote:
 >
-> 05.11.2020 18:22, Dmitry Osipenko =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> > 05.11.2020 12:45, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> > ...
-> >> I need some more time to review this, but just a quick check found a
-> >> few potential issues...
-> >
-> > Thank you for starting the review! I'm pretty sure it will take a coupl=
-e
-> > revisions until all the questions will be resolved :)
-> >
-> >> The "core-supply", that you specify as a regulator for each
-> >> controller's device node, is not the way we describe power domains.
-> >> Instead, it seems like you should register a power-domain provider
-> >> (with the help of genpd) and implement the ->set_performance_state()
-> >> callback for it. Each device node should then be hooked up to this
-> >> power-domain, rather than to a "core-supply". For DT bindings, please
-> >> have a look at Documentation/devicetree/bindings/power/power-domain.ya=
-ml
-> >> and Documentation/devicetree/bindings/power/power_domain.txt.
-> >>
-> >> In regards to the "sync state" problem (preventing to change
-> >> performance states until all consumers have been attached), this can
-> >> then be managed by the genpd provider driver instead.
-> >
-> > I'll need to take a closer look at GENPD, thank you for the suggestion.
-> >
-> > Sounds like a software GENPD driver which manages clocks and voltages
-> > could be a good idea, but it also could be an unnecessary
-> > over-engineering. Let's see..
-> >
+> Document new DVFS OPP table and voltage regulator properties of the
+> Host1x bus and devices sitting on the bus.
 >
-> Hello Ulf and all,
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  .../display/tegra/nvidia,tegra20-host1x.txt   | 56 +++++++++++++++++++
+>  1 file changed, 56 insertions(+)
 >
-> I took a detailed look at the GENPD and tried to implement it. Here is
-> what was found:
+> diff --git a/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt b/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
+> index 34d993338453..0593c8df70bb 100644
+> --- a/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
+> +++ b/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
+> @@ -20,6 +20,18 @@ Required properties:
+>  - reset-names: Must include the following entries:
+>    - host1x
 >
-> 1. GENPD framework doesn't aggregate performance requests from the
-> attached devices. This means that if deviceA requests performance state
-> 10 and then deviceB requests state 3, then framework will set domain's
-> state to 3 instead of 10.
+> +Optional properties:
+> +- operating-points-v2: See ../bindings/opp/opp.txt for details.
+> +- core-supply: Phandle of voltage regulator of the SoC "core" power domain.
+> +
+> +For each opp entry in 'operating-points-v2' table of host1x and its modules:
+> +- opp-supported-hw: One bitfield indicating:
+> +       On Tegra20: SoC process ID mask
+> +       On Tegra30+: SoC speedo ID mask
+> +
+> +       A bitwise AND is performed against the value and if any bit
+> +       matches, the OPP gets enabled.
+> +
+>  Each host1x client module having to perform DMA through the Memory Controller
+>  should have the interconnect endpoints set to the Memory Client and External
+>  Memory respectively.
+> @@ -45,6 +57,8 @@ of the following host1x client modules:
+>    - interconnect-names: Must include name of the interconnect path for each
+>      interconnect entry. Consult TRM documentation for information about
+>      available memory clients, see MEMORY CONTROLLER section.
+> +  - core-supply: Phandle of voltage regulator of the SoC "core" power domain.
+> +  - operating-points-v2: See ../bindings/opp/opp.txt for details.
 >
-> https://elixir.bootlin.com/linux/v5.10-rc2/source/drivers/base/power/doma=
-in.c#L376
 
-As Viresh also stated, genpd does aggregate the votes. It even
-performs aggregation hierarchy (a genpd is allowed to have parent(s)
-to model a topology).
+As discussed in the thread for the cover-letter.
 
->
-> 2. GENPD framework has a sync() callback in the genpd.domain structure,
-> but this callback isn't allowed to be used by the GENPD implementation.
-> The GENPD framework always overrides that callback for its own needs.
-> Hence GENPD doesn't allow to solve the bootstrapping
-> state-synchronization problem in a nice way.
->
-> https://elixir.bootlin.com/linux/v5.10-rc2/source/drivers/base/power/doma=
-in.c#L2606
+We already have DT bindings for power-domains (providers and
+consumers). Please use them instead of adding SoC specific bindings to
+each peripheral device.
 
-That ->sync() callback isn't the callback you are looking for, it's a
-PM domain specific callback - and has other purposes.
-
-To solve the problem you refer to, your genpd provider driver (a
-platform driver) should assign its ->sync_state() callback. The
-->sync_state() callback will be invoked, when all consumer devices
-have been attached (and probed) to their corresponding provider.
-
-You may have a look at drivers/cpuidle/cpuidle-psci-domain.c, to see
-an example of how this works. If there is anything unclear, just tell
-me and I will try to help.
-
->
-> 3. Tegra doesn't have a dedicated hardware power-controller for the core
-> domain, instead there is only an external voltage regulator. Hence we
-> will need to create a phony device-tree node for the virtual power
-> domain, which is probably a wrong thing to do.
-
-No, this is absolutely the correct thing to do.
-
-This isn't a virtual power domain, it's a real power domain. You only
-happen to model the control of it as a regulator, as it fits nicely
-with that for *this* SoC. Don't get me wrong, that's fine as long as
-the supply is specified only in the power-domain provider node.
-
-On another SoC, you might have a different FW interface for the power
-domain provider that doesn't fit well with the regulator. When that
-happens, all you need to do is to implement a new power domain
-provider and potentially re-define the power domain topology. More
-importantly, you don't need to re-invent yet another slew of device
-specific bindings - for each SoC.
-
->
-> =3D=3D=3D
->
-> Perhaps it should be possible to create some hacks to work around
-> bullets 2 and 3 in order to achieve what we need for DVFS on Tegra, but
-> bullet 1 isn't solvable without changing how the GENPD core works.
->
-> Altogether, the GENPD in its current form is a wrong abstraction for a
-> system-wide DVFS in a case where multiple devices share power domain and
-> this domain is a voltage regulator. The regulator framework is the
-> correct abstraction in this case for today.
-
-Well, I admit it's a bit complex. But it solves the problem in a
-nicely abstracted way that should work for everybody, at least in my
-opinion.
-
-Although, let's not exclude that there are pieces missing in genpd or
-the opp layer, as this DVFS feature is rather new - but then we should
-just extend/fix it.
+[...]
 
 Kind regards
 Uffe
