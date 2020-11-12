@@ -2,78 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87DACC2D0A3
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 08:52:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0280DC2D0A3
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 12:02:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15C242100A
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 08:52:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A3EE020872
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 12:02:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="PHPA9cF1"
+	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="t5Ae5vgE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725941AbgKLIwI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Nov 2020 03:52:08 -0500
-Received: from mailgw02.mediatek.com ([1.203.163.81]:20195 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725902AbgKLIwI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 03:52:08 -0500
-X-UUID: 180a56fed0c045148064dceba5a8562e-20201112
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=EL2xgh+f2w+QkXQYUlt8Af4ocrMSb0AMQTg9c+lCuOI=;
-        b=PHPA9cF1R/mwkmJYM09S4BrdyJlyEGQxujpqCRCIRkPxOOlKTheg0re+G4Z4fo/sLgIazlthjry120SOHUCSRzIQqMH8ThrLhCd77i0n3xjTZcIU+D4wrlJNu26b3r7IEF+iPhT/TfwKQcpXkGRV3a+CtlswHMFkLILA7T838xc=;
-X-UUID: 180a56fed0c045148064dceba5a8562e-20201112
-Received: from mtkcas34.mediatek.inc [(172.27.4.253)] by mailgw02.mediatek.com
-        (envelope-from <chaotian.jing@mediatek.com>)
-        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 882986302; Thu, 12 Nov 2020 16:52:01 +0800
-Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31DR.mediatek.inc
- (172.27.6.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 12 Nov
- 2020 16:52:00 +0800
-Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
- (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Thu, 12 Nov 2020 16:51:59 +0800
-Message-ID: <1605171119.29266.1.camel@mhfsdcap03>
-Subject: Re: [PATCH] mmc: mediatek: fix mem leak in msdc_drv_probe
-From:   Chaotian Jing <chaotian.jing@mediatek.com>
-To:     Zheng Liang <zhengliang6@huawei.com>
-CC:     <ulf.hansson@linaro.org>, <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>, <wangli74@huawei.com>,
-        <fangwei1@huawei.com>, <wenbin.mei@mediatek.com>
-Date:   Thu, 12 Nov 2020 16:51:59 +0800
-In-Reply-To: <20201112092530.32446-1-zhengliang6@huawei.com>
-References: <20201112092530.32446-1-zhengliang6@huawei.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.10.4-0ubuntu2 
+        id S1728235AbgKLMCL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Nov 2020 07:02:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36278 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728001AbgKLMCE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 07:02:04 -0500
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9170C0613D4
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2020 04:02:03 -0800 (PST)
+Received: by mail-lf1-x142.google.com with SMTP id d17so7968846lfq.10
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2020 04:02:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=14Jg7fRrUNjbh+scNrkVvkCbyMn1CNVg4Z+2y6X2BtY=;
+        b=t5Ae5vgEMQ6JnmH2rCQUblx68b3fBE7apqv1Mnw8O7XZ4FPZZT7rqrPnLNykqzkJG9
+         EndUEdWLmyee+ezylrBTb9T52dp2kSeyRvbAjD7qq6VhMNdXu4eAMbpkVYArAaoAbSmJ
+         di5S1oWaBR0SaywJlREGohzhZAEzbe2gluBsxGURVmwW1R6dad9+dIZjwmokn22lBj+H
+         mdkbs5ZafQXrUi4pv5iXm6TXhQOTqQddM7tMbzIDmgEEJojARMABnafF4tAiizdKeh8q
+         iwJo/ttrCktjf7JjQFeeB00B8SEXntjfkGRspjuVGDsYlGSTmlqtx5ZCcs/mMRKprDs3
+         +HBg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=14Jg7fRrUNjbh+scNrkVvkCbyMn1CNVg4Z+2y6X2BtY=;
+        b=IVv39CahcUXzy57jmt+71xI0gKqIuVObO6r1Q3hoJuUwhkfhgcRw0xVBQvHWQNBG8V
+         2AqeQyUVodudgycppxvLZsjXoOOitTapqM2y6jPxc8N4vtnghP/A7p3VLFrymQxYXfkG
+         OxnyIrL0BY+ADB0n0gDjlPhNxArKnkIGHSxWo5R2trFoeVDE6NwFYYCh7ElaSeTUf0gK
+         +oobM6H7JD1beyqCLUDoC7CyK0TVAV7rmk5y1ww1RC2nvsB1vl3M4W6oePRfFVhhgX3V
+         HELVjtPl6rZnR1fvR5b9rLFRovdO8adbpHy+Ov79kUFDRphH4GgWVh6mdBCvgiDjvfN/
+         qspQ==
+X-Gm-Message-State: AOAM530NrW71C2FXKUbcByLlHbhfGZ0X3D0JxIBhOS6OSftBHjo2at8J
+        LILzUrzUrEgkL5hYlPJmhBu+9HTKOscBwg==
+X-Google-Smtp-Source: ABdhPJz1mpmGtDKnFxBpeMtCpHVKA1s6nzVg/BcEYmJvQoGAzlRaLjD7u//vdhJNVRxj+W8qze7/Ig==
+X-Received: by 2002:a19:85c6:: with SMTP id h189mr7077308lfd.451.1605182522412;
+        Thu, 12 Nov 2020 04:02:02 -0800 (PST)
+Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
+        by smtp.gmail.com with ESMTPSA id g6sm533483lfb.291.2020.11.12.04.02.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Nov 2020 04:02:01 -0800 (PST)
+Date:   Thu, 12 Nov 2020 13:02:00 +0100
+From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH 0/3] mmc: renesas_sdhi: refactor SCC reset
+Message-ID: <20201112120200.GA1491229@oden.dyn.berto.se>
+References: <20201110162151.37622-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-X-TM-SNTS-SMTP: E42657F8F3062DD55A3CBA017D1041D894DA704C08F11EE61CD92F0F513239312000:8
-X-MTK:  N
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20201110162151.37622-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gVGh1LCAyMDIwLTExLTEyIGF0IDE3OjI1ICswODAwLCBaaGVuZyBMaWFuZyB3cm90ZToNCj4g
-SXQgc2hvdWxkIHVzZSBtbWNfZnJlZV9ob3N0IHRvIGZyZWUgbWVtIGluIGVycm9yIHBhdGNoIG9m
-DQo+IG1zZGNfZHJ2X3Byb2JlLg0KPiANCj4gUmVwb3J0ZWQtYnk6IEh1bGsgUm9ib3QgPGh1bGtj
-aUBodWF3ZWkuY29tPg0KPiBTaWduZWQtb2ZmLWJ5OiBaaGVuZyBMaWFuZyA8emhlbmdsaWFuZzZA
-aHVhd2VpLmNvbT4NClJldmlld2VkLWJ5OiBDaGFvdGlhbiBKaW5nIDxjaGFvdGlhbi5qaW5nQG1l
-ZGlhdGVrLmNvbT4NCj4gLS0tDQo+ICBkcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIHwgNiArKysr
-LS0NCj4gIDEgZmlsZSBjaGFuZ2VkLCA0IGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pDQo+
-IA0KPiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYyBiL2RyaXZlcnMvbW1j
-L2hvc3QvbXRrLXNkLmMNCj4gaW5kZXggZmM1ZWU1ZGY5MWFkLi5lYWM3ODM4ZTJkYWMgMTAwNjQ0
-DQo+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCj4gKysrIGIvZHJpdmVycy9tbWMv
-aG9zdC9tdGstc2QuYw0KPiBAQCAtMjUwNCw4ICsyNTA0LDEwIEBAIHN0YXRpYyBpbnQgbXNkY19k
-cnZfcHJvYmUoc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldikNCj4gIA0KPiAgCWhvc3QtPnJl
-c2V0ID0gZGV2bV9yZXNldF9jb250cm9sX2dldF9vcHRpb25hbF9leGNsdXNpdmUoJnBkZXYtPmRl
-diwNCj4gIAkJCQkJCQkJImhyc3QiKTsNCj4gLQlpZiAoSVNfRVJSKGhvc3QtPnJlc2V0KSkNCj4g
-LQkJcmV0dXJuIFBUUl9FUlIoaG9zdC0+cmVzZXQpOw0KPiArCWlmIChJU19FUlIoaG9zdC0+cmVz
-ZXQpKSB7DQo+ICsJCXJldCA9IFBUUl9FUlIoaG9zdC0+cmVzZXQpOw0KPiArCQlnb3RvIGhvc3Rf
-ZnJlZTsNCj4gKwl9DQo+ICANCj4gIAlob3N0LT5pcnEgPSBwbGF0Zm9ybV9nZXRfaXJxKHBkZXYs
-IDApOw0KPiAgCWlmIChob3N0LT5pcnEgPCAwKSB7DQoNCg==
+Hi Wolfram,
 
+Thanks for your work.
+
+On 2020-11-10 17:21:48 +0100, Wolfram Sang wrote:
+> So, after some preparations, we can take the next step and improve
+> resetting the SCC. Patch #1 is a fix requested by the BSP team to be
+> more robust in case the firmware did something unexpected before.
+> Patches #2 and #3 are cleanups made possible after patch #1.
+> 
+> Patches have been tested on a Renesas Salvator-XS (R-Car M3-N) and a
+> Renesas Lager (R-Car H2) board.
+> 
+> A note to Shimoda-san: I did not forget that the BSP team also suggested
+> to use the SRCR3 register for a reset in probe(). However, it appears
+> there is more to discuss there. This is why I decided to send out this
+> series first because we want to have it anyhow. I'll send the SRCR3
+> RFC-patch later this week.
+> 
+> This series depends on the just sent out series "[RFC PATCH 0/4] mmc:
+> renesas_sdhi: reset SCC only when available". A branch (with some more
+> extras) can be found here:
+> 
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/tap_en_v2
+
+For the whole series,
+
+Tested-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
+
+> 
+> All the best,
+> 
+>    Wolfram
+> 
+> 
+> Wolfram Sang (3):
+>   mmc: renesas_sdhi: clear TAPEN when resetting, too
+>   mmc: renesas_sdhi: merge the SCC reset functions
+>   mmc: renesas_sdhi: remove superfluous SCLKEN
+> 
+>  drivers/mmc/host/renesas_sdhi_core.c | 19 +++++--------------
+>  1 file changed, 5 insertions(+), 14 deletions(-)
+> 
+> -- 
+> 2.28.0
+> 
+
+-- 
+Regards,
+Niklas Söderlund
