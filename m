@@ -2,374 +2,237 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E98CDC83010
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DF8AC2D0E4
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:57:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 967B020B80
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C296620791
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:57:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="cQLTVJjj"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Vfp4HTDv"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726899AbgKLTlR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Nov 2020 14:41:17 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40982 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726633AbgKLTlP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 12 Nov 2020 14:41:15 -0500
-Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id C050722244;
-        Thu, 12 Nov 2020 19:41:13 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605210074;
-        bh=OZL2XMHY9elpJq4l/SrF52cPiz5PEthmTySYcd0ZqvA=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cQLTVJjj+JfCMU8JYOYULRMSjStnltyNon4PaCCjyHbAz0bs7z2JJPmThoU2zBexL
-         mMLc6LVldnz293BllRbOWXD2Im55IyxOjAL5L32a0LruRstjHEKhb44gK+MRq6sHoQ
-         COJpP3ksanZ3ms9g1z+RH33K5KBftytrevG1ODcs=
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        id S1726925AbgKLT5c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Nov 2020 14:57:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53750 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726702AbgKLT5b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 14:57:31 -0500
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEB4FC0613D1;
+        Thu, 12 Nov 2020 11:57:30 -0800 (PST)
+Received: by mail-lf1-x143.google.com with SMTP id w142so10250668lff.8;
+        Thu, 12 Nov 2020 11:57:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=l+LuZmtMkfC1n7/lE6H/SI0Mh1Ao1np2jN9R6QXqrls=;
+        b=Vfp4HTDvElJiGNz7xUATaYIB0Kf/mwtOmML2qqUG/J50tlFR5tGxj0224JRQCzivCv
+         ulm772+iaJuiLtROs/b8uk5/vQA3IPRSNmbCaHG7e/zwzGgzfdDFCXQVjOsz/2OzAj98
+         wmtD3ZpVrIRFkQm2ZyuBjOqILQ5VwslfmsUFgz95ERTTn5y+YasJEGAErk2Y0c/QB/90
+         oGc0l00u8obJBUXZzPwCdZ9MBc11lwToP3XEUiaHH2/TanhPrzbdU+D21A5vJmd77mmF
+         2U5W+k52Fs6mvPbZhFOLsrhNNLeCiVwZv2Tntv4g1m5P6jS8Tx3WHcMnsPh3Id7qYned
+         6kOQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=l+LuZmtMkfC1n7/lE6H/SI0Mh1Ao1np2jN9R6QXqrls=;
+        b=jceJCqVvYf7QggBYep1PGWP8zDBeehHtNkPHvonZPDMuz4d4W0S0bCsVZGVkIWDDkV
+         JgzvmCTcN5cQM03BZOcOmzlVVxY2/L/QbYRYTPoyVoJP2MD20JxSh/i/7ZAwRPsbEh1v
+         wkKk4/AT8FPVadrWyYfWZo18xKflnN+DP24SZlCmbGLQ77vwhnrMdrOKD5OM7996O1Ux
+         Ay/TRsDFK82qt7p2y+UF/IwPjZwGzWlzp26t8GMR1kKxyWoDG6P0qBM3OQCPF+FIG4zQ
+         /QDheHnzrgPo/+2IAo0tYb5m4Oc9BX9rjDDPkoX+hbGdw7pFeeHmTtPdZm+W+cmy1sue
+         w8gw==
+X-Gm-Message-State: AOAM532ljgPUl1qUCYq5XRwq24k/RzvuSwqiQC9K/7yekUUJW1fcpxx9
+        zqJ6vWqulmOO5EtDyWrg/FEQf7ppkZI=
+X-Google-Smtp-Source: ABdhPJwLlfap7vVw06tsOwrbyXWtHxJypoIY/5r/AmEyZ8iOyfm8iKxwmR6HX9kZNQ7Nvd0sVyxhmg==
+X-Received: by 2002:a19:7d8:: with SMTP id 207mr432803lfh.376.1605211049107;
+        Thu, 12 Nov 2020 11:57:29 -0800 (PST)
+Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
+        by smtp.googlemail.com with ESMTPSA id q27sm845579lfd.261.2020.11.12.11.57.27
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 12 Nov 2020 11:57:28 -0800 (PST)
+Subject: Re: [PATCH v1 00/30] Introduce core voltage scaling for NVIDIA
+ Tegra20/30 SoCs
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>
+Cc:     Viresh Kumar <viresh.kumar@linaro.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Peter Chen <Peter.Chen@nxp.com>,
+        Mark Brown <broonie@kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH 1/8] mmc: add basic support for inline encryption
-Date:   Thu, 12 Nov 2020 11:40:04 -0800
-Message-Id: <20201112194011.103774-2-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20201112194011.103774-1-ebiggers@kernel.org>
-References: <20201112194011.103774-1-ebiggers@kernel.org>
+        Marek Szyprowski <m.szyprowski@samsung.com>,
+        Peter Geis <pgwipeout@gmail.com>,
+        Nicolas Chauvet <kwizart@gmail.com>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        driverdevel <devel@driverdev.osuosl.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-pwm@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>
+References: <20201104234427.26477-1-digetx@gmail.com>
+ <CAPDyKFr7qTU2RPhA_ZrbCayoTTNUEno1zdmvmv+8HBe-Owrfeg@mail.gmail.com>
+ <cd147ab0-1304-a491-7a56-ee6199c02d32@gmail.com>
+ <2716c195-083a-112f-f1e5-2f6b7152a4b5@gmail.com>
+ <CAPDyKFqUMsH9dCZ=OYqfdLt==+-8NjK9n=S5jGGNXZu6Y9q=2w@mail.gmail.com>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <1f7e90c4-6134-2e2b-4869-5afbda18ead3@gmail.com>
+Date:   Thu, 12 Nov 2020 22:57:27 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.4.2
 MIME-Version: 1.0
+In-Reply-To: <CAPDyKFqUMsH9dCZ=OYqfdLt==+-8NjK9n=S5jGGNXZu6Y9q=2w@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+11.11.2020 14:38, Ulf Hansson пишет:
+> On Sun, 8 Nov 2020 at 13:19, Dmitry Osipenko <digetx@gmail.com> wrote:
+>>
+>> 05.11.2020 18:22, Dmitry Osipenko пишет:
+>>> 05.11.2020 12:45, Ulf Hansson пишет:
+>>> ...
+>>>> I need some more time to review this, but just a quick check found a
+>>>> few potential issues...
+>>>
+>>> Thank you for starting the review! I'm pretty sure it will take a couple
+>>> revisions until all the questions will be resolved :)
+>>>
+>>>> The "core-supply", that you specify as a regulator for each
+>>>> controller's device node, is not the way we describe power domains.
+>>>> Instead, it seems like you should register a power-domain provider
+>>>> (with the help of genpd) and implement the ->set_performance_state()
+>>>> callback for it. Each device node should then be hooked up to this
+>>>> power-domain, rather than to a "core-supply". For DT bindings, please
+>>>> have a look at Documentation/devicetree/bindings/power/power-domain.yaml
+>>>> and Documentation/devicetree/bindings/power/power_domain.txt.
+>>>>
+>>>> In regards to the "sync state" problem (preventing to change
+>>>> performance states until all consumers have been attached), this can
+>>>> then be managed by the genpd provider driver instead.
+>>>
+>>> I'll need to take a closer look at GENPD, thank you for the suggestion.
+>>>
+>>> Sounds like a software GENPD driver which manages clocks and voltages
+>>> could be a good idea, but it also could be an unnecessary
+>>> over-engineering. Let's see..
+>>>
+>>
+>> Hello Ulf and all,
+>>
+>> I took a detailed look at the GENPD and tried to implement it. Here is
+>> what was found:
+>>
+>> 1. GENPD framework doesn't aggregate performance requests from the
+>> attached devices. This means that if deviceA requests performance state
+>> 10 and then deviceB requests state 3, then framework will set domain's
+>> state to 3 instead of 10.
+>>
+>> https://elixir.bootlin.com/linux/v5.10-rc2/source/drivers/base/power/domain.c#L376
+> 
+> As Viresh also stated, genpd does aggregate the votes. It even
+> performs aggregation hierarchy (a genpd is allowed to have parent(s)
+> to model a topology).
 
-In preparation for adding CQHCI crypto engine (inline encryption)
-support, add the code required to make mmc_core and mmc_block aware of
-inline encryption.  Specifically:
+Yes, I already found and fixed the bug which confused me previously and
+it's working well now.
 
-- Add a capability flag MMC_CAP2_CRYPTO to struct mmc_host.  Drivers
-  will set this if the host and driver support inline encryption.
+>> 2. GENPD framework has a sync() callback in the genpd.domain structure,
+>> but this callback isn't allowed to be used by the GENPD implementation.
+>> The GENPD framework always overrides that callback for its own needs.
+>> Hence GENPD doesn't allow to solve the bootstrapping
+>> state-synchronization problem in a nice way.
+>>
+>> https://elixir.bootlin.com/linux/v5.10-rc2/source/drivers/base/power/domain.c#L2606
+> 
+> That ->sync() callback isn't the callback you are looking for, it's a
+> PM domain specific callback - and has other purposes.
+> 
+> To solve the problem you refer to, your genpd provider driver (a
+> platform driver) should assign its ->sync_state() callback. The
+> ->sync_state() callback will be invoked, when all consumer devices
+> have been attached (and probed) to their corresponding provider.
+> 
+> You may have a look at drivers/cpuidle/cpuidle-psci-domain.c, to see
+> an example of how this works. If there is anything unclear, just tell
+> me and I will try to help.
 
-- Embed a blk_keyslot_manager in struct mmc_host.  Drivers will
-  initialize this if the host and driver support inline encryption.
-  mmc_block registers this keyslot manager with the request_queue of any
-  MMC card attached to the host.  mmc_core destroys this keyslot manager
-  when freeing the mmc_host.
+Indeed, thank you for the clarification. This variant works well.
 
-- Make mmc_block copy the crypto keyslot and crypto data unit number
-  from struct request to struct mmc_request, so that drivers will have
-  access to them.
+>> 3. Tegra doesn't have a dedicated hardware power-controller for the core
+>> domain, instead there is only an external voltage regulator. Hence we
+>> will need to create a phony device-tree node for the virtual power
+>> domain, which is probably a wrong thing to do.
+> 
+> No, this is absolutely the correct thing to do.
+> 
+> This isn't a virtual power domain, it's a real power domain. You only
+> happen to model the control of it as a regulator, as it fits nicely
+> with that for *this* SoC. Don't get me wrong, that's fine as long as
+> the supply is specified only in the power-domain provider node.
+> 
+> On another SoC, you might have a different FW interface for the power
+> domain provider that doesn't fit well with the regulator. When that
+> happens, all you need to do is to implement a new power domain
+> provider and potentially re-define the power domain topology. More
+> importantly, you don't need to re-invent yet another slew of device
+> specific bindings - for each SoC.
+> 
+>>
+>> ===
+>>
+>> Perhaps it should be possible to create some hacks to work around
+>> bullets 2 and 3 in order to achieve what we need for DVFS on Tegra, but
+>> bullet 1 isn't solvable without changing how the GENPD core works.
+>>
+>> Altogether, the GENPD in its current form is a wrong abstraction for a
+>> system-wide DVFS in a case where multiple devices share power domain and
+>> this domain is a voltage regulator. The regulator framework is the
+>> correct abstraction in this case for today.
+> 
+> Well, I admit it's a bit complex. But it solves the problem in a
+> nicely abstracted way that should work for everybody, at least in my
+> opinion.
 
-- If the MMC host is reset, reprogram all the keyslots to ensure that
-  the software state stays in sync with the hardware state.
+The OPP framework supports both voltage regulator and power domain,
+hiding the implementation details from drivers. This means that OPP API
+usage will be the same regardless of what approach (regulator or power
+domain) is used for a particular SoC.
 
-Co-developed-by: Satya Tangirala <satyat@google.com>
-Signed-off-by: Satya Tangirala <satyat@google.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- drivers/mmc/core/Kconfig  |  8 ++++++
- drivers/mmc/core/Makefile |  1 +
- drivers/mmc/core/block.c  |  3 +++
- drivers/mmc/core/core.c   |  3 +++
- drivers/mmc/core/crypto.c | 54 +++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/crypto.h | 46 +++++++++++++++++++++++++++++++++
- drivers/mmc/core/host.c   |  2 ++
- drivers/mmc/core/queue.c  |  3 +++
- include/linux/mmc/core.h  |  6 +++++
- include/linux/mmc/host.h  |  7 +++++
- 10 files changed, 133 insertions(+)
- create mode 100644 drivers/mmc/core/crypto.c
- create mode 100644 drivers/mmc/core/crypto.h
+> Although, let's not exclude that there are pieces missing in genpd or
+> the opp layer, as this DVFS feature is rather new - but then we should
+> just extend/fix it.
 
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index c12fe13e4b147..ae8b69aee6190 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -81,3 +81,11 @@ config MMC_TEST
- 	  This driver is only of interest to those developing or
- 	  testing a host driver. Most people should say N here.
- 
-+config MMC_CRYPTO
-+	bool "MMC Crypto Engine Support"
-+	depends on BLK_INLINE_ENCRYPTION
-+	help
-+	  Enable Crypto Engine Support in MMC.
-+	  Enabling this makes it possible for the kernel to use the crypto
-+	  capabilities of the MMC device (if present) to perform crypto
-+	  operations on data being transferred to/from the device.
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 95ffe008ebdf8..6a907736cd7a5 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -18,3 +18,4 @@ obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
- mmc_block-objs			:= block.o queue.o
- obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
- obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
-+mmc_core-$(CONFIG_MMC_CRYPTO)	+= crypto.o
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 8d3df0be0355c..eaf2f10743260 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -51,6 +51,7 @@
- #include "block.h"
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "host.h"
- #include "bus.h"
- #include "mmc_ops.h"
-@@ -1247,6 +1248,8 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 
- 	memset(brq, 0, sizeof(struct mmc_blk_request));
- 
-+	mmc_crypto_prepare_req(mqrq);
-+
- 	brq->mrq.data = &brq->data;
- 	brq->mrq.tag = req->tag;
- 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d42037f0f10d7..275de270232b3 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -37,6 +37,7 @@
- 
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "bus.h"
- #include "host.h"
- #include "sdio_bus.h"
-@@ -992,6 +993,8 @@ void mmc_set_initial_state(struct mmc_host *host)
- 		host->ops->hs400_enhanced_strobe(host, &host->ios);
- 
- 	mmc_set_ios(host);
-+
-+	mmc_crypto_set_initial_state(host);
- }
- 
- /**
-diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
-new file mode 100644
-index 0000000000000..4f47eb4740db0
---- /dev/null
-+++ b/drivers/mmc/core/crypto.c
-@@ -0,0 +1,54 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * MMC crypto engine (inline encryption) support
-+ *
-+ * Copyright 2020 Google LLC
-+ */
-+
-+#include <linux/blk-crypto.h>
-+#include <linux/mmc/host.h>
-+
-+#include "core.h"
-+#include "crypto.h"
-+#include "queue.h"
-+
-+void mmc_crypto_set_initial_state(struct mmc_host *host)
-+{
-+	/* Reset might clear all keys, so reprogram all the keys. */
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_reprogram_all_keys(&host->ksm);
-+}
-+
-+void mmc_crypto_free_host(struct mmc_host *host)
-+{
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_destroy(&host->ksm);
-+}
-+
-+void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host)
-+{
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_register(&host->ksm, q);
-+}
-+EXPORT_SYMBOL_GPL(mmc_crypto_setup_queue);
-+
-+void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
-+{
-+	struct request *req = mmc_queue_req_to_req(mqrq);
-+	struct mmc_request *mrq = &mqrq->brq.mrq;
-+
-+	if (!req->crypt_keyslot)
-+		return;
-+
-+	mrq->crypto_enabled = true;
-+	mrq->crypto_key_slot = blk_ksm_get_slot_idx(req->crypt_keyslot);
-+
-+	/*
-+	 * For now we assume that all MMC drivers set max_dun_bytes_supported=4,
-+	 * which is the limit for CQHCI crypto.  So all DUNs should be 32-bit.
-+	 */
-+	WARN_ON_ONCE(req->crypt_ctx->bc_dun[0] > U32_MAX);
-+
-+	mrq->data_unit_num = req->crypt_ctx->bc_dun[0];
-+}
-+EXPORT_SYMBOL_GPL(mmc_crypto_prepare_req);
-diff --git a/drivers/mmc/core/crypto.h b/drivers/mmc/core/crypto.h
-new file mode 100644
-index 0000000000000..4780639b832f4
---- /dev/null
-+++ b/drivers/mmc/core/crypto.h
-@@ -0,0 +1,46 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * MMC crypto engine (inline encryption) support
-+ *
-+ * Copyright 2020 Google LLC
-+ */
-+
-+#ifndef _MMC_CORE_CRYPTO_H
-+#define _MMC_CORE_CRYPTO_H
-+
-+struct mmc_host;
-+struct mmc_queue_req;
-+struct request_queue;
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+
-+void mmc_crypto_set_initial_state(struct mmc_host *host);
-+
-+void mmc_crypto_free_host(struct mmc_host *host);
-+
-+void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host);
-+
-+void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq);
-+
-+#else /* CONFIG_MMC_CRYPTO */
-+
-+static inline void mmc_crypto_set_initial_state(struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_free_host(struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_setup_queue(struct request_queue *q,
-+					  struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
-+{
-+}
-+
-+#endif /* !CONFIG_MMC_CRYPTO */
-+
-+#endif /* _MMC_CORE_CRYPTO_H */
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 96b2ca1f1b06d..d962b9ca0e37a 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -25,6 +25,7 @@
- #include <linux/mmc/slot-gpio.h>
- 
- #include "core.h"
-+#include "crypto.h"
- #include "host.h"
- #include "slot-gpio.h"
- #include "pwrseq.h"
-@@ -532,6 +533,7 @@ EXPORT_SYMBOL(mmc_remove_host);
-  */
- void mmc_free_host(struct mmc_host *host)
- {
-+	mmc_crypto_free_host(host);
- 	mmc_pwrseq_free(host);
- 	put_device(&host->class_dev);
- }
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index de7cb0369c308..d96db852bb91a 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -19,6 +19,7 @@
- #include "block.h"
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "host.h"
- 
- #define MMC_DMA_MAP_MERGE_SEGMENTS	512
-@@ -405,6 +406,8 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
- 	mutex_init(&mq->complete_lock);
- 
- 	init_waitqueue_head(&mq->wait);
-+
-+	mmc_crypto_setup_queue(mq->queue, host);
- }
- 
- static inline bool mmc_merge_capable(struct mmc_host *host)
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 29aa507116261..ab19245e99451 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -162,6 +162,12 @@ struct mmc_request {
- 	bool			cap_cmd_during_tfr;
- 
- 	int			tag;
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+	bool			crypto_enabled;
-+	int			crypto_key_slot;
-+	u32			data_unit_num;
-+#endif
- };
- 
- struct mmc_card;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c079b932330f2..550460bf1b37c 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -15,6 +15,7 @@
- #include <linux/mmc/card.h>
- #include <linux/mmc/pm.h>
- #include <linux/dma-direction.h>
-+#include <linux/keyslot-manager.h>
- 
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
-@@ -377,6 +378,7 @@ struct mmc_host {
- #define MMC_CAP2_CQE_DCMD	(1 << 24)	/* CQE can issue a direct command */
- #define MMC_CAP2_AVOID_3_3V	(1 << 25)	/* Host must negotiate down from 3.3V */
- #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
-+#define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
- 
- 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
- 
-@@ -471,6 +473,11 @@ struct mmc_host {
- 	bool			cqe_enabled;
- 	bool			cqe_on;
- 
-+	/* Inline encryption support */
-+#ifdef CONFIG_MMC_CRYPTO
-+	struct blk_keyslot_manager ksm;
-+#endif
-+
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
- 
--- 
-2.29.2
+Will be nice to have a per-device GENPD performance stats.
 
+Thierry, could you please let me know what do you think about replacing
+regulator with the power domain? Do you think it's a worthwhile change?
+
+The difference in comparison to using voltage regulator directly is
+minimal, basically the core-supply phandle is replaced is replaced with
+a power-domain phandle in a device tree.
+
+The only thing which makes me feel a bit uncomfortable is that there is
+no real hardware node for the power domain node in a device-tree.
