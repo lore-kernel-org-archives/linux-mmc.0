@@ -2,153 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7836C5519F
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 17:16:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22FB1C5519F
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 17:36:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 932BC21D91
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 17:16:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 717EC22227
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 17:36:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="xe2x5M1t"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UgyeXiIa"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726063AbgKLRQS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Nov 2020 12:16:18 -0500
-Received: from mail.kernel.org ([198.145.29.99]:48292 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725972AbgKLRQS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 12 Nov 2020 12:16:18 -0500
-Received: from localhost (fw-tnat.cambridge.arm.com [217.140.96.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 666A9216FD;
-        Thu, 12 Nov 2020 17:16:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605201377;
-        bh=lxI2SWRNu/vNMf3oMbzXFnq0SSD1w9QmvZ1Ujav1o8I=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=xe2x5M1t18yJCKwVuL2NfQxj5Wr2gJMA2Gdc1O2AMfcZWsfxd8by8nRE2Mgl14ITQ
-         YMJY1x709L8eGOFJ9b4e5+b+CEIDYbpiAtu37j1IxdZcUfsYJ+JNEDrtHsgeAnKobT
-         hNNMtYZLOBGU52c9s3omM5ptGSNIrsuMJAWqI3q4=
-Date:   Thu, 12 Nov 2020 17:16:00 +0000
-From:   Mark Brown <broonie@kernel.org>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Peter Chen <Peter.Chen@nxp.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
+        id S1726275AbgKLRgn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Nov 2020 12:36:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59832 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726277AbgKLRgn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 12:36:43 -0500
+Received: from mail-lf1-x144.google.com (mail-lf1-x144.google.com [IPv6:2a00:1450:4864:20::144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9D07C0613D4
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2020 09:36:41 -0800 (PST)
+Received: by mail-lf1-x144.google.com with SMTP id a9so8625049lfh.2
+        for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2020 09:36:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=y2M/ICtrBydW1DMfoJDJlTMVxPe12uexJ4BgRTrbtQg=;
+        b=UgyeXiIaLyilt3N0scimbuWzuGtA0nc+gH8lbtx85ICrB+LpLUvHMDabOId8pIlKCK
+         S0FxifQ3ZRr/VYR5RKYsRCmENNmT6yrCLZkA82/54mAFwyr+j//XRW7iaMUCjgQaok8E
+         c9hvr6dvjufD5aGbx8rh3Ia07weANipc5sQ+eRCSdpn0Gc+D1ajqTVbN5J+Ls9pA2+Dn
+         996xKNDdbqAeaQvAEWrGQ7e5VrUmN84lac4Ab54UGwbq000cJ5RxDG90619BJVD2HDwC
+         jjTmuPiEtDOEtEYXF3pljhhpOH2c7mHORNzrkBYp4CCqTUMJYSlXPwiHu1HiFhQ8A0Hw
+         NZKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=y2M/ICtrBydW1DMfoJDJlTMVxPe12uexJ4BgRTrbtQg=;
+        b=VRDe1d9OyazV+0qHgY0tKvnkiNMLtaep0nFQVf/NYTaB1uVzPN+vOI4zCAINrj3qIa
+         ubSkSQJeDIzWDgFpkbVgdw+nxefo+Ci1pi7iMAwv0dsSxhsGIAqMMwh79QeX73KxRVgH
+         BUsV9+n6tQ6A/KUwcQ76+rZiSQiZMgt6wfRBBDijtjuKhJ37GNAKCjg7C2Nv/jD8VXCn
+         p9Dvkd2/21kpUs5RIoUfaVx99uLfGcE8lqHgVWGmmXkSyuG3dmTO70FciWhb4eVQ/+C9
+         F0hqcpQ/IiP5IlnAlS0k5+FdG/7VBEVMRIRNk2br5crtRX8g5gI4aopiIQLOfxhU0TUp
+         2psQ==
+X-Gm-Message-State: AOAM533RHga5ybKfIWjLq87lPHqUhFkeqKOg2ktKSxOZAtIWzZe0aXRg
+        kY67VrRyUlmT2m7ff8Dhs9TgCg==
+X-Google-Smtp-Source: ABdhPJxYaPOUz/UWCYyRd7zTRFEqF8uSJ6godxRwnNXypkXHAAgUjSHU9MaJU0VmIbQ0wBY457LrZw==
+X-Received: by 2002:a19:915c:: with SMTP id y28mr148928lfj.173.1605202600066;
+        Thu, 12 Nov 2020 09:36:40 -0800 (PST)
+Received: from eriador.lumag.spb.ru ([188.162.65.115])
+        by smtp.gmail.com with ESMTPSA id a16sm513488lfg.16.2020.11.12.09.36.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 12 Nov 2020 09:36:39 -0800 (PST)
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
-        linux-usb@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-Subject: Re: [PATCH v1 11/30] drm/tegra: dc: Support OPP and SoC core voltage
- scaling
-Message-ID: <20201112171600.GD4742@sirena.org.uk>
-References: <20201104234427.26477-1-digetx@gmail.com>
- <20201104234427.26477-12-digetx@gmail.com>
- <20201110202945.GF2375022@ulmo>
- <20201110203257.GC5957@sirena.org.uk>
- <72ae6462-13df-9fcb-510e-8e57eee0f035@gmail.com>
- <20201111115534.GA4847@sirena.org.uk>
- <dd26eb18-8ac4-22a6-29b0-dbbe5fa6075b@gmail.com>
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Subject: [PATCH v2] mmc: sdhci-msm: detect if tassadar_dll is used by using core version
+Date:   Thu, 12 Nov 2020 20:36:36 +0300
+Message-Id: <20201112173636.360186-1-dmitry.baryshkov@linaro.org>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="6WlEvdN9Dv0WHSBl"
-Content-Disposition: inline
-In-Reply-To: <dd26eb18-8ac4-22a6-29b0-dbbe5fa6075b@gmail.com>
-X-Cookie: Danger: do not shake.
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Detect if tassadar_dll is required by using core version rather than
+just specifying it in the sdhci_msm_variant_info.
 
---6WlEvdN9Dv0WHSBl
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
 
-On Thu, Nov 12, 2020 at 07:59:36PM +0300, Dmitry Osipenko wrote:
-> 11.11.2020 14:55, Mark Brown =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> > On Wed, Nov 11, 2020 at 12:23:41AM +0300, Dmitry Osipenko wrote:
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3451eb325513..9c7927b03253 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -248,7 +248,6 @@ struct sdhci_msm_variant_ops {
+ struct sdhci_msm_variant_info {
+ 	bool mci_removed;
+ 	bool restore_dll_config;
+-	bool uses_tassadar_dll;
+ 	const struct sdhci_msm_variant_ops *var_ops;
+ 	const struct sdhci_msm_offset *offset;
+ };
+@@ -2154,18 +2153,10 @@ static const struct sdhci_msm_variant_info sdm845_sdhci_var = {
+ 	.offset = &sdhci_msm_v5_offset,
+ };
+ 
+-static const struct sdhci_msm_variant_info sm8250_sdhci_var = {
+-	.mci_removed = true,
+-	.uses_tassadar_dll = true,
+-	.var_ops = &v5_var_ops,
+-	.offset = &sdhci_msm_v5_offset,
+-};
+-
+ static const struct of_device_id sdhci_msm_dt_match[] = {
+ 	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
+ 	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
+ 	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
+-	{.compatible = "qcom,sm8250-sdhci", .data = &sm8250_sdhci_var},
+ 	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
+ 	{},
+ };
+@@ -2249,7 +2240,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	msm_host->restore_dll_config = var_info->restore_dll_config;
+ 	msm_host->var_ops = var_info->var_ops;
+ 	msm_host->offset = var_info->offset;
+-	msm_host->uses_tassadar_dll = var_info->uses_tassadar_dll;
+ 
+ 	msm_offset = msm_host->offset;
+ 
+@@ -2396,6 +2386,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 	if (core_major == 1 && core_minor >= 0x49)
+ 		msm_host->updated_ddr_cfg = true;
+ 
++	if (core_major == 1 && core_minor >= 0x71)
++		msm_host->uses_tassadar_dll = true;
++
+ 	ret = sdhci_msm_register_vreg(msm_host);
+ 	if (ret)
+ 		goto clk_disable;
+-- 
+2.28.0
 
-> >> I already changed that code to use regulator_get_optional() for v2.
-
-> > That doesn't look entirely appropriate given that the core does most
-> > likely require some kind of power to operate.
-
-> We will need to do this because older DTBs won't have that regulator and
-> we want to keep them working.
-
-> Also, some device-trees won't have that regulator anyways because board
-> schematics isn't available, and thus, we can't fix them.
-
-This is what dummy supplies are for?
-
-> >> Regarding the enumerating supported voltage.. I think this should be
-> >> done by the OPP core, but regulator core doesn't work well if
-> >> regulator_get() is invoked more than one time for the same device, at
-> >> least there is a loud debugfs warning about an already existing
-
-> > I don't understand why this would be an issue - if nothing else the core
-> > could just offer an interface to trigger the check.
-
-> It's not an issue, I just described what happens when device driver
-> tries to get a regulator twice.
-
-> There was an issue once that check is added to the regulator core code.
-> But perhaps not worth to discuss it for now because I don't remember
-> details.
-
-So there's no known obstacle to putting enumeration of supported
-voltages into the OPP core then?  I'm a bit confused here.
-
-> >> directory for a regulator. It's easy to check whether the debug
-> >> directory exists before creating it, like thermal framework does it for
-> >> example, but then there were some other more difficult issues.. I don't
-> >> recall what they were right now. Perhaps will be easier to simply get a
-> >> error from regulator_set_voltage() for now because it shouldn't ever
-> >> happen in practice, unless device-tree has wrong constraints.
-
-> > The constraints might not be wrong, there might be some board which has
-> > a constraint somewhere for=20
-
-> In this case board's DT shouldn't specify unsupportable OPPs.
-
-Ah, so each board duplicates the OPP tables then, or there's an
-expectation that if there's some limit then they'll copy and modify the
-table?  If that's the case then it's a bit redundant to do filtering
-indeed.
-
---6WlEvdN9Dv0WHSBl
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl+tbc8ACgkQJNaLcl1U
-h9DMCwgAg/TVHTXmevYwD5s1Ajz8QKM96GSjHTvRKagWLF+y+O7/6SvbHmWmiMqD
-72lNxOyhMyrHsB/r2SJfYiZnTaxPvDwxTdU9CzTHTAPUdapJ6qyV0iuMkQHGTGKN
-SYqZvJhMfwBpvhvMDaUiOMYQ9uTqipBCfhqgXNhQaGfnIco6awkwlY3AKGp+50pg
-XKM7DBdL0naY0/Mog4jbOjAo3Np4dTsY/CPaIh/QPQe4p2lHaBmWLjobDZOlzEXI
-kZlYkHPdsANUEzVh7uuTgqYPs+WfxLW89lNjqL2/if0+KF5dNmcHORIOsJ5GQlQb
-J3JAZ0VQrlO7gydHgdEneannVwSdIg==
-=CmJu
------END PGP SIGNATURE-----
-
---6WlEvdN9Dv0WHSBl--
