@@ -5,32 +5,32 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
 	SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF71EC56202
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 07:52:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2207C2D0A3
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 07:52:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6E17A20709
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 07:52:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E7F3221FC
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 07:52:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726337AbgKLHwR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Nov 2020 02:52:17 -0500
-Received: from mailgw02.mediatek.com ([210.61.82.184]:53523 "EHLO
+        id S1726777AbgKLHw0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Nov 2020 02:52:26 -0500
+Received: from mailgw02.mediatek.com ([210.61.82.184]:53539 "EHLO
         mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725884AbgKLHwQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 02:52:16 -0500
-X-UUID: 2eb16f9831d14d61be48c783d632a78e-20201112
-X-UUID: 2eb16f9831d14d61be48c783d632a78e-20201112
+        with ESMTP id S1725860AbgKLHwT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 02:52:19 -0500
+X-UUID: ac6a2d402efa47e5a9c2886a796b2657-20201112
+X-UUID: ac6a2d402efa47e5a9c2886a796b2657-20201112
 Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
         (envelope-from <wenbin.mei@mediatek.com>)
         (Cellopoint E-mail Firewall v4.1.14 Build 0819 with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1472409551; Thu, 12 Nov 2020 15:52:13 +0800
+        with ESMTP id 128975411; Thu, 12 Nov 2020 15:52:13 +0800
 Received: from mtkcas10.mediatek.inc (172.21.101.39) by
  mtkmbs07n1.mediatek.inc (172.21.101.16) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Thu, 12 Nov 2020 15:52:12 +0800
+ 15.0.1497.2; Thu, 12 Nov 2020 15:52:11 +0800
 Received: from localhost.localdomain (10.17.3.153) by mtkcas10.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Thu, 12 Nov 2020 15:52:11 +0800
+ Transport; Thu, 12 Nov 2020 15:52:10 +0800
 From:   Wenbin Mei <wenbin.mei@mediatek.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>
@@ -47,9 +47,9 @@ CC:     Matthias Brugger <matthias.bgg@gmail.com>,
         <linux-kernel@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>, <srv_heupstream@mediatek.com>
-Subject: [PATCH v1 2/3] arm64: dts: mt8192: Add cqe off flag
-Date:   Thu, 12 Nov 2020 15:52:07 +0800
-Message-ID: <20201112075208.28183-3-wenbin.mei@mediatek.com>
+Subject: [PATCH v1 1/3] dt-bindings: mmc: Add optional cqe off properties
+Date:   Thu, 12 Nov 2020 15:52:06 +0800
+Message-ID: <20201112075208.28183-2-wenbin.mei@mediatek.com>
 X-Mailer: git-send-email 2.18.0
 In-Reply-To: <20201112075208.28183-1-wenbin.mei@mediatek.com>
 References: <20201112075208.28183-1-wenbin.mei@mediatek.com>
@@ -60,25 +60,32 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add cqe off flag for MT8192 mmc nodes.
+Add optional properties for cqe hosts which are used to set cqe off
+during suspend flow.
 
 Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
 ---
- arch/arm64/boot/dts/mediatek/mt8192-evb.dts | 1 +
- 1 file changed, 1 insertion(+)
+ Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt8192-evb.dts b/arch/arm64/boot/dts/mediatek/mt8192-evb.dts
-index a4279fa87c2b..0df78e4ea0d0 100644
---- a/arch/arm64/boot/dts/mediatek/mt8192-evb.dts
-+++ b/arch/arm64/boot/dts/mediatek/mt8192-evb.dts
-@@ -41,6 +41,7 @@
- 	mmc-hs400-1_8v;
- 	supports-cqe;
- 	cap-mmc-hw-reset;
-+	cqe-off-in-suspend;
- 	no-sdio;
- 	no-sd;
- 	hs400-ds-delay = <0x12814>;
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index b96da0c7f819..457c9a84b988 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -164,6 +164,13 @@ properties:
+     description:
+       enable SDIO IRQ signalling on this interface
+ 
++  cqe-off-in-suspend:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description:
++      After suspend, the mmc host is powered off by HW, and bring CQE register
++      to default state, so we add the flag to re-init CQE register after resume
++      back.
++
+   full-pwr-cycle:
+     $ref: /schemas/types.yaml#/definitions/flag
+     description:
 -- 
 2.18.0
 
