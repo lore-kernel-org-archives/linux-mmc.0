@@ -4,35 +4,35 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2617C2D0E4
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F860C6379D
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E4E82085B
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D427022201
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:20 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="RWEEuLDB"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="WVIPKiFL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726891AbgKLTlQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Nov 2020 14:41:16 -0500
-Received: from mail.kernel.org ([198.145.29.99]:41002 "EHLO mail.kernel.org"
+        id S1726942AbgKLTlT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Nov 2020 14:41:19 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41166 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726295AbgKLTlP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 12 Nov 2020 14:41:15 -0500
+        id S1726913AbgKLTlT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 12 Nov 2020 14:41:19 -0500
 Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 95DD42224A;
-        Thu, 12 Nov 2020 19:41:14 +0000 (UTC)
+        by mail.kernel.org (Postfix) with ESMTPSA id DDD1C2224D;
+        Thu, 12 Nov 2020 19:41:17 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1605210075;
-        bh=xd/Vc7WoIe125xQL70/5CKTN/z05rzC6msMBzUjogVA=;
+        s=default; t=1605210078;
+        bh=XuB23iO36k+GP1DHJGnD9nU9YqX6jZ1kEKmKKvY0hvs=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=RWEEuLDB+3WJv2jHtPxrxpq4uwR0di8woZ6b+F1xK1zVJPnmFY/kQ69iEZ2trJY4s
-         K35NYAfoXGj+vt6XbCKXu7VLuu6VJujVCLWNLA1OPBCu39fiBv8HE7cRiRFJGfxWpl
-         Tk+TC+tnjvi7JEWRGbImKIflrWyQFQ5sxOk+Q3NA=
+        b=WVIPKiFLCZOTwjlgTBkK0In1iil2wX43RblcbO2PKwalNWlzYOqmJdMs3hwiV6GsM
+         btd2fwWLtSkjAeBCFGZCva14hDZHkgvjI7V8q5wVqI86X9i4f/MpV3M2IF+tm7VNG6
+         rSSu9MBAR+fcEQ0sgftPmpMyIJZBnrwBzBk88C3I=
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
@@ -49,9 +49,9 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH 2/8] mmc: cqhci: rename cqhci.c to cqhci-core.c
-Date:   Thu, 12 Nov 2020 11:40:05 -0800
-Message-Id: <20201112194011.103774-3-ebiggers@kernel.org>
+Subject: [PATCH 6/8] dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+Date:   Thu, 12 Nov 2020 11:40:09 -0800
+Message-Id: <20201112194011.103774-7-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201112194011.103774-1-ebiggers@kernel.org>
 References: <20201112194011.103774-1-ebiggers@kernel.org>
@@ -63,32 +63,40 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Rename cqhci.c to cqhci-core.c so that another source file can be added
-to the cqhci module without having to rename the module.
+Document the bindings for the registers and clock for the MMC instance
+of the Inline Crypto Engine (ICE) on Snapdragon SoCs.  These bindings
+are needed in order for sdhci-msm to support inline encryption.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- drivers/mmc/host/Makefile                  | 1 +
- drivers/mmc/host/{cqhci.c => cqhci-core.c} | 0
- 2 files changed, 1 insertion(+)
- rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (100%)
+ Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 451c25fc2c692..20c2f9463d0dc 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -104,6 +104,7 @@ obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
- obj-$(CONFIG_MMC_SDHCI_OMAP)		+= sdhci-omap.o
- obj-$(CONFIG_MMC_SDHCI_SPRD)		+= sdhci-sprd.o
- obj-$(CONFIG_MMC_CQHCI)			+= cqhci.o
-+cqhci-y					+= cqhci-core.o
- obj-$(CONFIG_MMC_HSQ)			+= mmc_hsq.o
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+index 3b602fd6180bf..4f2e138439506 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+@@ -30,10 +30,12 @@ Required properties:
+ 	- SD Core register map (required for controllers earlier than msm-v5)
+ 	- CQE register map (Optional, CQE support is present on SDHC instance meant
+ 	                    for eMMC and version v4.2 and above)
++	- Inline Crypto Engine register map (optional)
+ - reg-names: When CQE register map is supplied, below reg-names are required
+ 	- "hc" for Host controller register map
+ 	- "core" for SD core register map
+ 	- "cqhci" for CQE register map
++	- "ice" for Inline Crypto Engine register map (optional)
+ - interrupts: Should contain an interrupt-specifiers for the interrupts:
+ 	- Host controller interrupt (required)
+ - pinctrl-names: Should contain only one value - "default".
+@@ -46,6 +48,7 @@ Required properties:
+ 	"xo"	- TCXO clock (optional)
+ 	"cal"	- reference clock for RCLK delay calibration (optional)
+ 	"sleep"	- sleep clock for RCLK delay calibration (optional)
++	"ice" - clock for Inline Crypto Engine (optional)
  
- ifeq ($(CONFIG_CB710_DEBUG),y)
-diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci-core.c
-similarity index 100%
-rename from drivers/mmc/host/cqhci.c
-rename to drivers/mmc/host/cqhci-core.c
+ - qcom,ddr-config: Certain chipsets and platforms require particular settings
+ 	for the DDR_CONFIG register. Use this field to specify the register
 -- 
 2.29.2
 
