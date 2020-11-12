@@ -2,172 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37910C56202
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:16:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7343C56202
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D59D821D7F
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:16:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6353622259
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Nov 2020 19:41:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JFNyFw3L"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="hgclmwFL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726473AbgKLTQS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Nov 2020 14:16:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47356 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726295AbgKLTQS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Nov 2020 14:16:18 -0500
-Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18AE6C0613D1;
-        Thu, 12 Nov 2020 11:16:18 -0800 (PST)
-Received: by mail-lj1-x241.google.com with SMTP id p12so7512741ljc.9;
-        Thu, 12 Nov 2020 11:16:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=jhfgYY14US6m4wxn2OreBeb6CQeVO8DRDGhHQIgAX+o=;
-        b=JFNyFw3LyyoB90fZPGzibsAizgKSOjs+HqVe40YhbRGey2zTAPm90qOBN8X1CJVzoO
-         M3SYYsbwVohly2d/++o0SchoujkkkZR3dQt9ALW0Nr5as8bdsOwP9tSGe6IWLUkjDbLQ
-         195IBsC4Go1c1FjWE4ifCXQMePRx9EASGLxk3zkSi25VwJ40hSyML0Ad1Owq7P06AL8m
-         dFmcJl1TYbfZeVB79l6ZTjRGThpjEH8gcPMSD2d7MgbQCdIrxVuQr31nNcK/3J9UPz8n
-         C+0AtkGaTIthUSxYky3m4HNI/HHnDyM1MWHC5gE8hZrjpfxfX3nJfxmyVs2Ix2MChWKO
-         Ve6Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=jhfgYY14US6m4wxn2OreBeb6CQeVO8DRDGhHQIgAX+o=;
-        b=Che0jVDu7B8pE34x8sdEtldRwr4yRFc9htl3oWuEdv5HFYW07SyEBbaUappE26lyq1
-         +KKTYbSqQT5UWBEyYgw+xV3etiqb8a9RTqbgNHnngJZz7wLvg+UXu4iRgP8Vv71EuYeP
-         DeKQk2cwl2TGcYpdtA5zzwIgYq6hhWk77uWf5lO54sJ5OB1PZhPoj0IohATBBJId8t0J
-         tYHKyB6OofjpvmopZE6RyLVL2YtxCIIQLyCwxRxxCwK67AEd/Lq15OWtt4vy2VV/eKMl
-         vzCMYfU0bAqAxu7m3qO7fxlqxkr8+IDNJQ4uH/v1tzUkGG+HQdT99NJxHx7yUgba4pEZ
-         pHHg==
-X-Gm-Message-State: AOAM532IXPzQwSn9E/XMsdGNfvsio7CJk8PepONetZi+QtmbgLx/uvx5
-        DbVq2lY3ms0UnvEvcxYM9U9c9RipKLk=
-X-Google-Smtp-Source: ABdhPJzE5qPV9KbGM96b/lBJNsGC5IOm8d97RUP9808EMVCjf5Dc6sywu66SXsgtyXC8GPiqUvektg==
-X-Received: by 2002:a05:651c:95:: with SMTP id 21mr428933ljq.307.1605208576330;
-        Thu, 12 Nov 2020 11:16:16 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
-        by smtp.googlemail.com with ESMTPSA id z19sm721401lfd.128.2020.11.12.11.16.14
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 12 Nov 2020 11:16:15 -0800 (PST)
-Subject: Re: [PATCH v1 11/30] drm/tegra: dc: Support OPP and SoC core voltage
- scaling
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Peter Chen <Peter.Chen@nxp.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        id S1726788AbgKLTlP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Nov 2020 14:41:15 -0500
+Received: from mail.kernel.org ([198.145.29.99]:40956 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726295AbgKLTlP (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 12 Nov 2020 14:41:15 -0500
+Received: from sol.attlocal.net (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E2C2D20B80;
+        Thu, 12 Nov 2020 19:41:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1605210073;
+        bh=POxMZUS5T48EAV5DntjG45pUfxQjt3f8urXPN27veH8=;
+        h=From:To:Cc:Subject:Date:From;
+        b=hgclmwFLQHe5wnHu5hYDNsm5HC87eCB2WdU3TWgRmzqfTJdxfcC0eWV3zq21eGp6S
+         DSDiMY5CK1uh0gsRqxn1Se+eT2x7BDlt2Py2hXN4aD2f61ac1vKFXVDPMVm1JSDBNi
+         +MSDib+/s3hKjI8uf4c78Sb6uayIvSMf09IWkv4g=
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>,
-        Peter Geis <pgwipeout@gmail.com>,
-        Nicolas Chauvet <kwizart@gmail.com>,
-        linux-samsung-soc@vger.kernel.org, devel@driverdev.osuosl.org,
-        linux-usb@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-References: <20201104234427.26477-1-digetx@gmail.com>
- <20201104234427.26477-12-digetx@gmail.com> <20201110202945.GF2375022@ulmo>
- <20201110203257.GC5957@sirena.org.uk>
- <72ae6462-13df-9fcb-510e-8e57eee0f035@gmail.com>
- <20201111115534.GA4847@sirena.org.uk>
- <dd26eb18-8ac4-22a6-29b0-dbbe5fa6075b@gmail.com>
- <20201112171600.GD4742@sirena.org.uk>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <b4b06c1d-c9d4-43b2-c6eb-93f8cb6c677d@gmail.com>
-Date:   Thu, 12 Nov 2020 22:16:14 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.4.2
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: [PATCH 0/8] eMMC inline encryption support
+Date:   Thu, 12 Nov 2020 11:40:03 -0800
+Message-Id: <20201112194011.103774-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-In-Reply-To: <20201112171600.GD4742@sirena.org.uk>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-12.11.2020 20:16, Mark Brown пишет:
-> On Thu, Nov 12, 2020 at 07:59:36PM +0300, Dmitry Osipenko wrote:
->> 11.11.2020 14:55, Mark Brown пишет:
->>> On Wed, Nov 11, 2020 at 12:23:41AM +0300, Dmitry Osipenko wrote:
-> 
->>>> I already changed that code to use regulator_get_optional() for v2.
-> 
->>> That doesn't look entirely appropriate given that the core does most
->>> likely require some kind of power to operate.
-> 
->> We will need to do this because older DTBs won't have that regulator and
->> we want to keep them working.
-> 
->> Also, some device-trees won't have that regulator anyways because board
->> schematics isn't available, and thus, we can't fix them.
-> 
-> This is what dummy supplies are for?
+Hello,
 
-But it's not allowed to change voltage of a dummy regulator, is it
-intentional?
+This patchset adds support for eMMC inline encryption, as specified by
+the upcoming version of the eMMC specification and as already
+implemented and used on many devices.  Building on that, it then adds
+Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
 
->>>> Regarding the enumerating supported voltage.. I think this should be
->>>> done by the OPP core, but regulator core doesn't work well if
->>>> regulator_get() is invoked more than one time for the same device, at
->>>> least there is a loud debugfs warning about an already existing
-> 
->>> I don't understand why this would be an issue - if nothing else the core
->>> could just offer an interface to trigger the check.
-> 
->> It's not an issue, I just described what happens when device driver
->> tries to get a regulator twice.
-> 
->> There was an issue once that check is added to the regulator core code.
->> But perhaps not worth to discuss it for now because I don't remember
->> details.
-> 
-> So there's no known obstacle to putting enumeration of supported
-> voltages into the OPP core then?  I'm a bit confused here.
+Inline encryption hardware improves the performance of storage
+encryption and reduces power usage.  See
+Documentation/block/inline-encryption.rst for more information about
+inline encryption and the blk-crypto framework (upstreamed in v5.8)
+which supports it.  Most mobile devices already use UFS or eMMC inline
+encryption hardware; UFS support was already upstreamed in v5.9.
 
-It's an obstacle if both OPP and device driver need to get the same
-regulator. Like in the case of this DRM driver, which need to control
-the voltage instead of allowing OPP core to do it.
+Patches 1-3 add support for the standard eMMC inline encryption.
 
-Please notice that devm_tegra_dc_opp_table_init() of this patch doesn't
-use dev_pm_opp_set_regulators(), which would allow OPP core to filter
-out unsupported OPPs. But then OPP core will need need to get an already
-requested regulator and this doesn't work well.
+However, as with UFS, host controller-specific patches are needed on top
+of the standard support.  Therefore, patches 4-8 add Qualcomm ICE
+(Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
 
->>>> directory for a regulator. It's easy to check whether the debug
->>>> directory exists before creating it, like thermal framework does it for
->>>> example, but then there were some other more difficult issues.. I don't
->>>> recall what they were right now. Perhaps will be easier to simply get a
->>>> error from regulator_set_voltage() for now because it shouldn't ever
->>>> happen in practice, unless device-tree has wrong constraints.
-> 
->>> The constraints might not be wrong, there might be some board which has
->>> a constraint somewhere for 
-> 
->> In this case board's DT shouldn't specify unsupportable OPPs.
-> 
-> Ah, so each board duplicates the OPP tables then, or there's an
-> expectation that if there's some limit then they'll copy and modify the
-> table?  If that's the case then it's a bit redundant to do filtering
-> indeed.
+To test this I took advantage of the recently upstreamed support for the
+Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
+project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
+particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
+a Debian chroot.  Among other things, these tests verified that the
+correct ciphertext is written to disk (the same as software encryption).
 
-I think this is not strictly defined. Either way will work, although
-perhaps it should be more preferred that unsupported OPPs aren't present
-in a device-tree.
+It will also be possible to add support for Mediatek eMMC inline
+encryption hardware in mtk-sd, and it should be easier than the Qualcomm
+hardware since the Mediatek hardware follows the standard more closely.
+I.e., patches 1-3 should be almost enough for the Mediatek hardware.
+However, I don't have the hardware to do this yet.
+
+This patchset is based on v5.10-rc3, and it can also be retrieved from
+tag "mmc-crypto-v1" of
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
+
+Note: the fscrypt inline encryption support is partially broken in
+v5.10-rc3, so for testing a fscrypt fix needs to be applied too:
+https://lkml.kernel.org/r/20201111015224.303073-1-ebiggers@kernel.org
+
+Eric Biggers (8):
+  mmc: add basic support for inline encryption
+  mmc: cqhci: rename cqhci.c to cqhci-core.c
+  mmc: cqhci: add support for inline encryption
+  mmc: cqhci: add cqhci_host_ops::program_key
+  firmware: qcom_scm: update comment for ICE-related functions
+  dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+  arm64: dts: qcom: sdm630: add ICE registers and clocks
+  mmc: sdhci-msm: add Inline Crypto Engine support
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt     |   3 +
+ arch/arm64/boot/dts/qcom/sdm630.dtsi          |  10 +-
+ drivers/firmware/qcom_scm.c                   |  16 +-
+ drivers/mmc/core/Kconfig                      |   8 +
+ drivers/mmc/core/Makefile                     |   1 +
+ drivers/mmc/core/block.c                      |   3 +
+ drivers/mmc/core/core.c                       |   3 +
+ drivers/mmc/core/crypto.c                     |  54 ++++
+ drivers/mmc/core/crypto.h                     |  46 +++
+ drivers/mmc/core/host.c                       |   2 +
+ drivers/mmc/core/queue.c                      |   3 +
+ drivers/mmc/host/Kconfig                      |   1 +
+ drivers/mmc/host/Makefile                     |   2 +
+ drivers/mmc/host/{cqhci.c => cqhci-core.c}    |  66 ++++-
+ drivers/mmc/host/cqhci-crypto.c               | 237 +++++++++++++++
+ drivers/mmc/host/cqhci-crypto.h               |  47 +++
+ drivers/mmc/host/cqhci.h                      |  85 +++++-
+ drivers/mmc/host/sdhci-msm.c                  | 270 +++++++++++++++++-
+ include/linux/mmc/core.h                      |   6 +
+ include/linux/mmc/host.h                      |   7 +
+ 20 files changed, 845 insertions(+), 25 deletions(-)
+ create mode 100644 drivers/mmc/core/crypto.c
+ create mode 100644 drivers/mmc/core/crypto.h
+ rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (94%)
+ create mode 100644 drivers/mmc/host/cqhci-crypto.c
+ create mode 100644 drivers/mmc/host/cqhci-crypto.h
+
+
+base-commit: f8394f232b1eab649ce2df5c5f15b0e528c92091
+-- 
+2.29.2
+
