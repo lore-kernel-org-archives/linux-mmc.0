@@ -2,66 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=0.6 required=3.0 tests=BAYES_50,DKIM_ADSP_CUSTOM_MED,
-	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,FREEMAIL_REPLYTO_END_DIGIT,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E5EAC388F7
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 12:19:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E168CC4742C
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 12:54:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F166022249
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 12:19:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D94072224D
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 12:54:07 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="OjGZid0a"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726290AbgKMMTJ convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Nov 2020 07:19:09 -0500
-Received: from tigeramira.ro ([88.158.78.30]:59611 "EHLO mail.tigeramira.ro"
-        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-        id S1726176AbgKMMTJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Nov 2020 07:19:09 -0500
-X-Greylist: delayed 4349 seconds by postgrey-1.27 at vger.kernel.org; Fri, 13 Nov 2020 07:19:08 EST
-Received: from localhost (localhost [127.0.0.1])
-        by mail.tigeramira.ro (Postfix) with ESMTP id 6B2C572F09C
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Nov 2020 10:15:22 +0200 (EET)
-Received: from mail.tigeramira.ro ([127.0.0.1])
-        by localhost (mail.tigeramira.ro [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id rVF8-_Lbp53p for <linux-mmc@vger.kernel.org>;
-        Thu, 12 Nov 2020 10:15:18 +0200 (EET)
-Received: from mail.tigeramira.ro (localhost [127.0.0.1])
-        by mail.tigeramira.ro (Postfix) with ESMTP id 53F14D60558
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 23:08:07 +0200 (EET)
-Received: from [156.96.44.214] (unknown [192.168.12.254])
-        by mail.tigeramira.ro (Postfix) with ESMTP id AFFF9D3FDBB
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Nov 2020 17:09:49 +0200 (EET)
-Content-Type: text/plain; charset="iso-8859-1"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8BIT
-Content-Description: Mail message body
-Subject: Corporate and Personal Loan/
+        id S1726753AbgKMMyG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Nov 2020 07:54:06 -0500
+Received: from www.zeus03.de ([194.117.254.33]:40624 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726456AbgKMMyG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 13 Nov 2020 07:54:06 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=2xaZcTNBmlwWE3gKC/8hs239KkH
+        hvb28luTKU+KZ9Mc=; b=OjGZid0aA4tVBz4B9HuDuvfkjWJ+pII9Vjkp6U4so6T
+        dBufAQtBoM4qb5L0bI0jXW5mmwi7mvgnr4OPkm+JmSCaHnw1JrIwadgIJdAf/iL+
+        YnAloGips4wkoTmDWOPmIOTNoXYJSaHHoaso4dfFwZYRhctvykw6vA3DRZedo0AM
+        =
+Received: (qmail 3160007 invoked from network); 13 Nov 2020 13:54:02 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 13 Nov 2020 13:54:02 +0100
+X-UD-Smtp-Session: l3s3148p1@+AbVhfyzjJAgAwDPXxaWAHZio88zPEfF
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
-From:   "Investment  Corporate" <financialcapability6@gmail.com>
-Date:   Tue, 10 Nov 2020 06:10:17 -0800
-Reply-To: hmurrah39@gmail.com
-Message-Id: <20201110150950.AFFF9D3FDBB@mail.tigeramira.ro>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        linux-tegra@vger.kernel.org
+Subject: [RFC PATCH] mmc: sdhci: tegra: fix wrong unit with busy_timeout
+Date:   Fri, 13 Nov 2020 13:53:30 +0100
+Message-Id: <20201113125354.3507-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.28.0
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello linux-mmc@vger.kernel.org
+'busy_timeout' is in msecs, not in jiffies. Use the correct factor.
 
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-We are Base Investment Company offering Corporate and Personal Loan at 3% Interest Rate for a duration of 10Years.
+Not tested. Found by code investigation about 'busy_timeout'. A quick
+grep showed no other problematic code within the MMC host drivers.
 
+ drivers/mmc/host/sdhci-tegra.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-We also pay 1% commission to brokers, who introduce project owners for finance or other opportunities.
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index ed12aacb1c73..ad0dc3adc7d1 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1272,7 +1272,7 @@ static void tegra_sdhci_set_timeout(struct sdhci_host *host,
+ 	 * busy wait mode.
+ 	 */
+ 	val = sdhci_readl(host, SDHCI_TEGRA_VENDOR_MISC_CTRL);
+-	if (cmd && cmd->busy_timeout >= 11 * HZ)
++	if (cmd && cmd->busy_timeout >= 11 * MSECS_PER_SEC)
+ 		val |= SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
+ 	else
+ 		val &= ~SDHCI_MISC_CTRL_ERASE_TIMEOUT_LIMIT;
+-- 
+2.28.0
 
-
-Please get back to me if you are interested for more
-
-details.
-
-
-Yours faithfully,
-
-Hashim Murrah
