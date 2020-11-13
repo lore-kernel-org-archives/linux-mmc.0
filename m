@@ -2,126 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC363C55ABD
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 06:00:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99A4BC55ABD
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 08:20:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5E23C221EB
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 06:00:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37D9C22244
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Nov 2020 08:20:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="WMRjeIYu"
+	dkim=pass (1024-bit key) header.d=mg.codeaurora.org header.i=@mg.codeaurora.org header.b="Ajx0MXdP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726101AbgKMGAz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Nov 2020 01:00:55 -0500
-Received: from mail-eopbgr1400135.outbound.protection.outlook.com ([40.107.140.135]:48153
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726083AbgKMGAz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Nov 2020 01:00:55 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=DPAjeAiFw27U5GYOyYnqZDuPth+NHCPIvIO2RSfx2CIY5BBpzWR1bkhujS+lA2byeY2j1lv4m5nC4lg9ABjNPJ+VsbHQig94slavDYu9/Vq104vN1UWavIpX/rCo3yxVXPEqP5GclJ11MpMk8jc3m2brFTgQlgECHl0n5EvqfN6TBCQ27NwTEV12ChmuCQ+geR1r3Ah4iSHDO/y4+MU4lEzPszY7JbWweCWPvsHXNspzfdILt83K507fOfvsvJXT8BLkQf2lRxE4ZKX6/0bO8eGv55b5GY0V70bT051QBt/6Z2dF/oMEZHDW54N85dtnPUB7mt+9KSBagYGvx26Meg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=fweZZQ+sj2IIP/GAXCC8mYqxBoBCoPBgPwUc3UrdBiM=;
- b=XvAfoNIelvH6x6CL8bkOAQGXw7IbLE95ECffg/VehnFFpxYXJi+FSAEC2li32gLED7nI1cd5uLKM6iVoRKuPXLwjRtg19Qj27hns/zKeY4fCpE4ZAGh7deNC0boQnu6cnfH/92HOAEVbDdiLZD8/axHAvhJ7Ihdc3Sn9A5apwn1GjrpXRAjtZzoNU1jao7FIOs6Cy22V+w47oCBST5JBHc57i60f3b+sqy7w9eVdMqOduDU2G5ql0hD7L40wYOwThXE7y1SEBkwi4SbY1pWeQVkYu6XTouWXDcdHstiAffcZEHMb2JiEMNzsgXyadfNDvdtFx1PdXEIDynp0/mkvfA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=fweZZQ+sj2IIP/GAXCC8mYqxBoBCoPBgPwUc3UrdBiM=;
- b=WMRjeIYu+z6piX5fimEOGL2e9d9pG6qmvIHo18g3fsKLefl/5VM9Bix2FW01oET3Pv9MmWnFQdFhrowHnyyB+VWJIPVfrWXdpg1J/NmQ6qHSYfxRd4Xyg7tFKarjR6n5+BYiQ7qngD3QXsCGMughC+pMDXjy/hXQeooPBKMUjgU=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYBPR01MB5391.jpnprd01.prod.outlook.com (2603:1096:404:8021::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3541.21; Fri, 13 Nov
- 2020 06:00:52 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::bcba:dccf:7d4c:c883]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::bcba:dccf:7d4c:c883%4]) with mapi id 15.20.3541.025; Fri, 13 Nov 2020
- 06:00:52 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        =?iso-8859-1?Q?Niklas_S=F6derlund?= <niklas.soderlund@ragnatech.se>
-Subject: RE: [PATCH 0/3] mmc: renesas_sdhi: generic cleanups
-Thread-Topic: [PATCH 0/3] mmc: renesas_sdhi: generic cleanups
-Thread-Index: AQHWuBHVyty+9HGMTEKdmTI7sOk32qnFkzQA
-Date:   Fri, 13 Nov 2020 06:00:52 +0000
-Message-ID: <TY2PR01MB3692C1080F2000A368FDECCED8E60@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20201111100244.15823-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20201111100244.15823-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [240f:60:5f3e:1:19d0:b06e:df1f:82b6]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: e07cb9fb-9ec7-4cf7-616f-08d887997a62
-x-ms-traffictypediagnostic: TYBPR01MB5391:
-x-microsoft-antispam-prvs: <TYBPR01MB5391EA5F4522C9A7EBBF2255D8E60@TYBPR01MB5391.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: gOkCJmg5nmc/egdKu1FwCNcM2NZqbg5sfBiytvjGejfo5aZ727PzUvIJyFwWMnorg+/uHrMjYLBpqAVS7wLgL/WQBNJOHZOc35gX0fZ+7lBWJwJ6yYSCo3cCqUMdom8C3HFNglKtQxUUPLDfwfGQNKlgoaKxsxWkuQXGn6LNQ/VCBRTLaCPhbxhhT4FiSuif3qDmjJhnVwTE9nUEnl38Og7IhpfGCOrhB4SV+i5EoVvAuJbM4/FJidSQ24zw3xMiP4XlvjI4LVcxcaXG1dtpmN+6pgUKZEf09Rq8rv5dTkhOt1LnUPWCJJpTknw1LNLX5wRE/mVj3psNdGVxGFzf9m1lCIJAoaHkI+o6UpLZUqYaeiHz+VbZeaxxEwoG5ZI0
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(376002)(366004)(39860400002)(136003)(346002)(9686003)(71200400001)(5660300002)(4326008)(55016002)(66446008)(86362001)(6506007)(52536014)(64756008)(186003)(478600001)(7696005)(2906002)(66946007)(66556008)(76116006)(316002)(54906003)(66476007)(33656002)(8936002)(4744005)(8676002)(110136005)(41533002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: 4TZqR59zlGMQNH9CGNcxRIafO5AaShVu3TpsKJ875yUmWP9LRToFJpKmbDMJxVz9qvy3AyJXDrzc48DMMCWy/pC0J0J3J707dCYnPWdWS4iGFM/fb/KoBWv+JO3vsRQBR/sgpyousCIEuv7wBuNB96wdkQrjZTIoSEJwVs/f/BpEuaxJU1bOLXBu9e3LGoEZzZkM+ESnZ7tLPASW4KdXRQcGJhUamthCTlHYmKIFZl6Q7oetsWSOqEPiTrQxTijr+VxETmx0iZjzTMDXL810gVVM7TTsz4mBbLBD0dnS6F/Y2X5z4TowrYkU+2r5BslP0Nz1eA7m3Pprnc75xHdHxrEzQtFK047wnTMus08zhOavIE4hWWsZ10nFpJiIgZnkUfVluEDlw5CFYQD8BYefhjjBH78EHtMFn/qUNDLhRpCY76VLRTMh3TC640XGejpty9LctSEfDKbGYOCJ4Bn321hxWlVh4QSZl4Lt57bZHsTQVq4DWr4MzJXSecKVeuA0xvylGA/8T33dDa8ot/1ehK4fhmisspt8Zowhfhxy78knUNMscUcNZ3iCm6H/8QWvlqkHODEQXz/Kqg5/C6mxfj/M3jZr58X8/RbNmJJcJ63eqZEbMAd/ieTaG7WQEAq30RFwcOoFKRdArmoC6ziTYtDjuvsHVdK0ZvYlSiIWPi8/EpnDMEtbi/EjXr8aYNL5rH99bVSxLy1oYpBEx4hvug==
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+        id S1726160AbgKMIUo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Nov 2020 03:20:44 -0500
+Received: from z5.mailgun.us ([104.130.96.5]:12969 "EHLO z5.mailgun.us"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726133AbgKMIUo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 13 Nov 2020 03:20:44 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1605255643; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=+CJu1zvzA+UktbWZOILdHLoHEn/zMmbZG2OSDOPgzzg=; b=Ajx0MXdPQdmaXlsKfMtBlw48ikWNdShxm4tIN8+5Ya6EstEgfVVD+ktaVHu+PRLFeTh2J1g1
+ I7aRJIurv5KHKDnXnA3bCBB5w4Lwkdcu2GtZoBseU9JoXHHeS9KnMQ3VdaHNGuH/WHfUKE1A
+ VELM5JJL6HD2COJB7dVQuIsRTxk=
+X-Mailgun-Sending-Ip: 104.130.96.5
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n05.prod.us-west-2.postgun.com with SMTP id
+ 5fae41dae9dd187f539b47b4 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 13 Nov 2020 08:20:42
+ GMT
+Sender: vbadigan=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 3FBBDC433CB; Fri, 13 Nov 2020 08:20:42 +0000 (UTC)
+Received: from [192.168.0.105] (unknown [49.205.245.25])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 9A0A4C433C6;
+        Fri, 13 Nov 2020 08:20:38 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 9A0A4C433C6
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH v2] mmc: sdhci-msm: detect if tassadar_dll is used by
+ using core version
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org
+References: <20201112173636.360186-1-dmitry.baryshkov@linaro.org>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <cec45d79-5900-3136-5208-44451daf68ec@codeaurora.org>
+Date:   Fri, 13 Nov 2020 13:50:35 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.1
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e07cb9fb-9ec7-4cf7-616f-08d887997a62
-X-MS-Exchange-CrossTenant-originalarrivaltime: 13 Nov 2020 06:00:52.4669
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: K65wmQCHZCQ+QPZebaW7nh4KSdSTr9W9CwRSAuQmKSoisazt6n0gi5R+HgxZYqffm0azfOF2jK4tHrinQEnYYdq47/AUgDCvpsHWa09YSJkpj/YhU1HWQI1La/kLVebc
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYBPR01MB5391
+In-Reply-To: <20201112173636.360186-1-dmitry.baryshkov@linaro.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
 
-> From: Wolfram Sang, Sent: Wednesday, November 11, 2020 7:03 PM
->=20
-> Here are a few patches fixing cosmetic issues which always annoyed me
-> when working on this driver. Patches #1+#2 improve naming and remove
-> hardcoded values. Patch #3 sorts the defines. The object files were
-> identical here before and after the patchset, as expected.
->=20
-> The patches depend on the series "[PATCH 0/3] mmc: renesas_sdhi:
-> refactor SCC reset" and are part of this branch:
->=20
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/=
-tap_en_v2
-
-Thank you for the patch!
-
-Since I intended to reply on the patch 2/3 with my comment,
-I sent my Reviewed-by on the patch 1/3. But, I realized the patch 2/3 was a=
-lso OK.
-
-So, I sent my Reviewed-by on the cover-letter:
-
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-Best regards,
-Yoshihiro Shimoda
-
+On 11/12/2020 11:06 PM, Dmitry Baryshkov wrote:
+> Detect if tassadar_dll is required by using core version rather than
+> just specifying it in the sdhci_msm_variant_info.
+>
+> Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+> Cc: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> ---
+Reviewed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+>   drivers/mmc/host/sdhci-msm.c | 13 +++----------
+>   1 file changed, 3 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 3451eb325513..9c7927b03253 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -248,7 +248,6 @@ struct sdhci_msm_variant_ops {
+>   struct sdhci_msm_variant_info {
+>   	bool mci_removed;
+>   	bool restore_dll_config;
+> -	bool uses_tassadar_dll;
+>   	const struct sdhci_msm_variant_ops *var_ops;
+>   	const struct sdhci_msm_offset *offset;
+>   };
+> @@ -2154,18 +2153,10 @@ static const struct sdhci_msm_variant_info sdm845_sdhci_var = {
+>   	.offset = &sdhci_msm_v5_offset,
+>   };
+>   
+> -static const struct sdhci_msm_variant_info sm8250_sdhci_var = {
+> -	.mci_removed = true,
+> -	.uses_tassadar_dll = true,
+> -	.var_ops = &v5_var_ops,
+> -	.offset = &sdhci_msm_v5_offset,
+> -};
+> -
+>   static const struct of_device_id sdhci_msm_dt_match[] = {
+>   	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
+>   	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
+>   	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
+> -	{.compatible = "qcom,sm8250-sdhci", .data = &sm8250_sdhci_var},
+>   	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
+>   	{},
+>   };
+> @@ -2249,7 +2240,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>   	msm_host->restore_dll_config = var_info->restore_dll_config;
+>   	msm_host->var_ops = var_info->var_ops;
+>   	msm_host->offset = var_info->offset;
+> -	msm_host->uses_tassadar_dll = var_info->uses_tassadar_dll;
+>   
+>   	msm_offset = msm_host->offset;
+>   
+> @@ -2396,6 +2386,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>   	if (core_major == 1 && core_minor >= 0x49)
+>   		msm_host->updated_ddr_cfg = true;
+>   
+> +	if (core_major == 1 && core_minor >= 0x71)
+> +		msm_host->uses_tassadar_dll = true;
+> +
+>   	ret = sdhci_msm_register_vreg(msm_host);
+>   	if (ret)
+>   		goto clk_disable;
