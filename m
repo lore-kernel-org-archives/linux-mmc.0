@@ -2,187 +2,233 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABBAAC61DD8
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 16:47:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17183C64EBC
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 18:31:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 79FD9221F8
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 16:47:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CA137206F9
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 18:31:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="UJWylnb8"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="txenuScA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731416AbgKPQrT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Nov 2020 11:47:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37890 "EHLO
+        id S2388368AbgKPSbD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Nov 2020 13:31:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730328AbgKPQrS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Nov 2020 11:47:18 -0500
-Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 375F2C0613CF
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2020 08:47:17 -0800 (PST)
-Received: by mail-vk1-xa44.google.com with SMTP id v5so3872732vkn.12
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2020 08:47:17 -0800 (PST)
+        with ESMTP id S2388612AbgKPSbC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Nov 2020 13:31:02 -0500
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BCCBC0613CF
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2020 10:31:02 -0800 (PST)
+Received: by mail-ej1-x642.google.com with SMTP id oq3so25808076ejb.7
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Nov 2020 10:31:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=sbTo3mgYFvbTARlRSygN/TcLDmrBnBcHt2mvwSR3LJM=;
-        b=UJWylnb8emsSP1WSmTZSSbeG5/KKPMt2egqsp0BZySKO3eXLbbH3RO7yLV56nvU8nx
-         9kdeqiBCXUQ9h2W9hckvcmhBWrflkDGddyvUGj6cLTv9xO60u1dE84RhtXhiLhxY+zn4
-         4ngibTT9G8DerRUCdWgWEzgVzv0UdVSWZQC3dKFMPSurwSlOnBLVT9sJGC1DyyA9uxPc
-         VbN8dg+GNgSoRCgqTNB86Wsk/KLOt5COjZByNDytbfaBn6/n/WkNyoUWyjItWW5HQKXU
-         0hdc7ztrQ70W1VgSjNHP8kIZ101FTs3GFTjTpJOrzVAEMrAZff462SDth4YjgYJ6H5Qf
-         qeiQ==
+        bh=LCH1nIC7VTswRhi900v2bnh7thQq8NL3fcYOUVOnRQY=;
+        b=txenuScA3n5aEQC8BSVOIwnLIDkWDtQ9Guqnuv+GtKy2sxd21g5If98hLKzE2jNKu6
+         hxdzZ0WVgZ89ZbAi199Ok14oKQlOlrK4UcOW6yo9zqy35ICnwb0jmmh8XU/UrbdPPFbh
+         mlNgVV50PSZxIFIW36eDct5iix3WeOG5NjMC33IU4mjhBpCsglttc0Yv+MBzrHSqr2UV
+         UyB/nSgPzTxZbgrNdGjm/80/vLl8p4E8kCbG4+VHV2b9+wDxGrUhNNn5o0E1KGjfp1Aa
+         EQhZoDDu7DLPqsavW4QoJHi0LVI9EloMSrJLcxsaGcZSgqbQgCkivQQUEva/AENPlRu3
+         Cbdw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=sbTo3mgYFvbTARlRSygN/TcLDmrBnBcHt2mvwSR3LJM=;
-        b=dtX4AKMW+XmU6EvVKY1MTOupVuw5lmELafXoxkYWSwrSZVwfjH/N69Tf+QGzwOhPaQ
-         0qXv58nI3ZGoB+Cr35SjK6dw6CRkbuefv89a6jwTcSIM21FK1yvo2mJv9zN7P+PZpqsT
-         GhrC3w6x3B/I1dAZ5uph1DfgLo1md9FJ4By9Fk1Z+o8BC47sy2y6SJh2SW+OW85UyT9E
-         YEO5N3w/26g10NUHF35VFf1t5p5cNq0D5HiVd6eFpwIlUGU3BZlTHvnEF5B6/a6oxYOa
-         omG5BtwSGGpLiZY79lV3iYTQuuCs3cp5CBQnPX4QC2aP9H9r8uMtEDxCSBmN5oid9mtF
-         71NA==
-X-Gm-Message-State: AOAM5333egPdJahZN14pLIPFUZ9Nf2fLNCSYBpChruMbL1BNS+RtoITX
-        rnhWTiSEB5WmWY3ROEnQ7O2Wa8b2KmASwE89XSOxkw==
-X-Google-Smtp-Source: ABdhPJwJaOStr8lGyXOgumEjMrG+8xRLMioKH2Gnqw+c2QFTCt7O0QJ7WjvA2MPv+sj4Tr17eo4YIXzwgAcMbofKLFw=
-X-Received: by 2002:a1f:41cc:: with SMTP id o195mr8085795vka.15.1605545236387;
- Mon, 16 Nov 2020 08:47:16 -0800 (PST)
+        bh=LCH1nIC7VTswRhi900v2bnh7thQq8NL3fcYOUVOnRQY=;
+        b=czOt6f+UdNedSZNHtXjvFkIuGAthq4mKRsqpn1/C1yyXtJazWfvPkYSmaOvECuiTkj
+         6vRzvVzYKBGOJruUCuz3eNH0VnGmTXujGw9sxfVJQ+UFIIionTEipKveBHZ6YXzLQdL9
+         NK59KLkJVV1SSxMSAvKBQyRsszTG8DTUQdr5LF745rjeYltFFEGrPcdlkjqPMNA/okzr
+         uGqo2dh99fK13uQeFSQ8dk80f+hIhEU7lwsvDBkt2sJYW7Wp5btcbvWXVdhhk7ymbBiy
+         qUDN5eKV/4Ob0ev/Z4FZLc+Bqwj88WbcsNHYLxGozZcEJ9waTh/ah8yrO/7L4m2ztFT8
+         QDFw==
+X-Gm-Message-State: AOAM530cv0yH/eI++b/Kx/UMJTglKXJHsZ3/ElIRXe7dz2UKJ8vC/rNK
+        0NsHJ8GCvzYOmGHmWyx2tkphF+LLFlwZ7rV+JU8=
+X-Google-Smtp-Source: ABdhPJyYCjK7R5f6gERK/UZNytQgQmXTqc45j27tw12jOLEKnKKRnR7oLAGRj59OaNbkuE6l0LSAElkw2SAQY6t4G6A=
+X-Received: by 2002:a17:907:42cf:: with SMTP id nz23mr16000018ejb.138.1605551460813;
+ Mon, 16 Nov 2020 10:31:00 -0800 (PST)
 MIME-Version: 1.0
-References: <1605005330-7178-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <1605005330-7178-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 16 Nov 2020 17:46:40 +0100
-Message-ID: <CAPDyKFoGNfn_9Zc-Q_0q+vRNnE=4Y0WH-Nm=cEyJeo1NiaGUxg@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: core: Issue power off notification in mmc_remove()
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+References: <fa7f3fc5-c37a-ac49-e14a-45a1d2e0a942@gmail.com>
+ <CAPDyKFq9vKOODDQEEE2W+Gsx69_R3XV_Hb-owMU-=qAMbv39kg@mail.gmail.com>
+ <2ebdcb5c-1c52-08af-9233-16366c20820e@intel.com> <CAMdYzYoFCfVkz7zwbfQ=ZoirNTymRrRyg8FCabVVEQSKRnoOEA@mail.gmail.com>
+ <CAMdYzYqEhgO6q3iXNzzuZ3snW_Y1bYP8BOBkNC5=fCPc310BUA@mail.gmail.com> <80572b62-2601-ff53-05ef-4d231f7450fa@intel.com>
+In-Reply-To: <80572b62-2601-ff53-05ef-4d231f7450fa@intel.com>
+From:   Peter Geis <pgwipeout@gmail.com>
+Date:   Mon, 16 Nov 2020 13:30:48 -0500
+Message-ID: <CAMdYzYrMJBs3=cwK404jQauN1OhntsVq3Ppcu=9-TwW_dsmqmw@mail.gmail.com>
+Subject: Re: [BUG] cqe unable to handle buggy cards
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        nuumiofi@gmail.com, Michal Simek <michal.simek@xilinx.com>,
+        Manish Narani <manish.narani@xilinx.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 10 Nov 2020 at 11:48, Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
+On Mon, Nov 16, 2020 at 3:22 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> User is possible to turn the power off after a host was removed.
-> So, call mmc_poweroff_notify(EXT_CSD_NO_POWER_NOTIFICATION)
-> in mmc_remove(). Note that the mmc and host driver will be
-> in the following modes when mmc_remove() is called:
+> On 6/11/20 10:54 pm, Peter Geis wrote:
+> > On Wed, Nov 4, 2020 at 7:39 PM Peter Geis <pgwipeout@gmail.com> wrote:
+> >>
+> >> On Mon, Nov 2, 2020 at 11:32 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>>
+> >>> On 2/11/20 4:54 pm, Ulf Hansson wrote:
+> >>>> + cqhci maintainers
+> >>>>
+> >>>> On Sat, 31 Oct 2020 at 13:54, Peter Geis <pgwipeout@gmail.com> wrote:
+> >>>>>
+> >>>>> Good Morning,
+> >>>>>
+> >>>>> We are seeing an issue on the rk3399 with certain Foresee emmc modules
+> >>>>> where the module reports it supports command queuing but fails in actual
+> >>>>> implementation.
+> >>>>>
+> >>>>> Unfortunately there doesn't seem to be any method for the mmc core code
+> >>>>> to detect this situation and disable command queue automatically.
+> >>>>> There also appears to be no way to disable it at runtime.
+> >>>
+> >>> Since v5.5, if you know how to use SDHCI debug quirks there is
+> >>> SDHCI_QUIRK_BROKEN_CQE
+> >>> e.g. kernel command line option sdhci.debug_quirks=0x0x2020000
+> >>
+> >> Thank you, we will test this.
+> >
+> > This does resolve the issue of disabling cqe entirely for debugging, thanks!
+> >
+> >>
+> >>>
+> >>>>>
+> >>>>> Certain modified kernels have added a patch to enable runtime disable of
+> >>>>> command queue entirely, but this will affect mmc core as a whole and not
+> >>>>> just the buggy card.
+> >>>>>
+> >>>>> Does anyone have any insight into this issue?
+> >>>>> Thank you for your time.
+> >>>>
+> >>>> Unfortunate, not me personally. I assume the issue is either be card
+> >>>> specific or host specific. Before looking at a disable option, we need
+> >>>> to know more about what goes wrong, I think.
+> >>>>
+> >>>> Kind regards
+> >>>> Uffe
+> >>>>
+> >>>>>
+> >>>>> Very Respectfully,
+> >>>>> Peter Geis
+> >>>>>
+> >>>>> [   64.472882] mmc2: cqhci: timeout for tag 2
+> >>>>> [   64.473349] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+> >>>>> [   64.474057] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+> >>>>> [   64.474763] mmc2: cqhci: Config:    0x00000000 | Control:  0x00000000
+> >>>>> [   64.475468] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000000
+> >>>>> [   64.476172] mmc2: cqhci: Int sig:   0x00000000 | Int Coal: 0x00000000
+> >>>>> [   64.476875] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+> >>>
+> >>> TDL base cannot be zero, so the register values have been lost.
+> >>> Could be a reset issue like this one but for sdhci-of-arasan.c :
+> >>>
+> >>> https://lore.kernel.org/linux-mmc/20200819121848.16967-1-adrian.hunter@intel.com/
+> >>
+> >> Excellent, we will see if a similar implementation makes a difference
+> >> here for us as well.
+> >
+> > I wrote a patch to implement this in the arasan driver.
+> > https://paste.ee/p/cl5SX
+> > Nuumiofi tested it with the buggy card.
+> >
+> > The good news, it solves the register clearing issue.
+> > The bad news, the card still is broken, here is the kernel log:
+> > https://paste.ubuntu.com/p/sF2yMwxpcV/
 >
->  1. mmc_card_suspended() == false &&
->     power_off_notification == EXT_CSD_POWER_ON
->  2. mmc_card_suspended() == true &&
->     power_off_notification == EXT_CSD_POWER_OFF_{SHORT,LONG}
->  3. mmc_card_suspended() == true && mmc_sleep() was called
+> You will need to enable dynamic debug to get more messages e.g.
+>         kernel config: CONFIG_DYNAMIC_DEBUG=y
+>         kernel command line:
+> dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
 >
-> So, mmc_remove() calls _mmc_resume() anyway for the cases.
-> Otherwise:
->
->  - _mmc_resume will be called via mmc_runtime_resume() and then
->    power_off_notification will be set to EXT_CSD_POWER_ON.
->  - timeout will happen in mmc_blk_part_switch() via mmc_blk_remove()
->    if "part_curr" of mmc block is not set to default.
->
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> ---
->  Changes from v2:
->  - Fix an issue which timeout happens if part_curr is not default.
->  https://patchwork.kernel.org/project/linux-renesas-soc/patch/1604311475-15307-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
->
->  Changes from v1:
->  - Reuse _mmc_suspend() instead of direct mmc_poweroff_notify() calling
->   to check suspended flag while removing.
->   https://patchwork.kernel.org/project/linux-renesas-soc/patch/1602581312-23607-1-git-send-email-yoshihiro.shimoda.uh@renesas.com/
->
->
->  drivers/mmc/core/mmc.c | 24 ++++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
->
-> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> index ff3063c..18413f2 100644
-> --- a/drivers/mmc/core/mmc.c
-> +++ b/drivers/mmc/core/mmc.c
-> @@ -1983,11 +1983,35 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
->         return err;
->  }
->
-> +static int _mmc_resume(struct mmc_host *host);
->  /*
->   * Host is being removed. Free up the current card.
->   */
->  static void mmc_remove(struct mmc_host *host)
->  {
-> +       /*
-> +        * The mmc and host driver will be in the following modes here:
-> +        *  1. mmc_card_suspended() == false &&
-> +        *     power_off_notification == EXT_CSD_POWER_ON
-> +        *  2. mmc_card_suspended() == true &&
-> +        *     power_off_notification == EXT_CSD_POWER_OFF_{SHORT,LONG}
-> +        *  3. mmc_card_suspended() == true && mmc_sleep() was called
-> +        *
-> +        * So, call _mmc_resume() here anyway for the cases. Otherwise:
-> +        *  - _mmc_resume will be called via mmc_runtime_resume() and then
-> +        *    power_off_notification will be set to EXT_CSD_POWER_ON.
-> +        *  - timeout will happen in mmc_blk_part_switch() via mmc_blk_remove()
-> +        *    if "part_curr" of mmc block is not set to default.
-> +        */
-> +       _mmc_resume(host);
-> +
-> +       /* Disable power_off_notification byte in the ext_csd register */
-> +       if (host->card->ext_csd.rev >= 6) {
-> +               mmc_claim_host(host);
-> +               mmc_poweroff_notify(host->card, EXT_CSD_NO_POWER_NOTIFICATION);
-> +               mmc_release_host(host);
-> +       }
+> If it can't be made to work, you can set SDHCI_QUIRK_BROKEN_CQE in the
+> driver as needed.
 
-Unfortunate, I think there is even more complexity involved here. I
-don't think the above work for all cases.
+nuumiofi has collected logs with dynamic debug enabled.
+He currently has four logs in a google drive folder:
+cqe disabled
+cqe enabled
+cqe disabled with reset patch applied
+cqe enabled with reset patch applied
 
-Let me try to elaborate - there are two scenarios of when mmc_remove()
-is called.
+https://drive.google.com/drive/folders/1m1DqzisxHH-6BiMkqR_ExLg9kgH1BDTy
 
-1)
-When the card becomes removed, likely not the case for eMMC but it may
-happen for a legacy MMC card, for example. In this case, there is not
-much we can do to fix the problem, as the card is already "dead".
-
-2)
-The card is working properly (it may be suspended though) while
-mmc_remove_host() gets called because the host driver is being
-unbinded.
-
-For 1)
-We should only clean up and remove the card structs, which the current
-code already does.
-
-For 2)
-We want to support a graceful power off sequence or the card (to
-prevent data corruption for example). However, depending on the
-platform and host, it may not be possible to power off both VCC and
-VCCQ. For example, it's quite common that VCCQ remains powered on,
-while only VCC can be power gated. Just disabling the power off
-notification of the eMMC card (as you suggest above), doesn't really
-help. In fact, it could mean that we may violate the eMMC spec when
-power gating VCC through mmc_power_off().
-
-I am thinking of a few possible solutions. Perhaps easier if I post a
-patch that you try - unless you have ideas yourself of how to fix
-this.
-
-> +
->         mmc_remove_card(host->card);
->         host->card = NULL;
->  }
-> --
-> 2.7.4
 >
-
-Kind regards
-Uffe
+> >
+> >>
+> >>>
+> >>>
+> >>>>> [   64.477578] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+> >>>>> [   64.478281] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+> >>>>> [   64.478984] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+> >>>>> [   64.479687] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+> >>>>> [   64.489785] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+> >>>>> [   64.499774] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+> >>>>> [   64.509687] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> >>>>> [   64.519597] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+> >>>>> [   64.529521] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+> >>>>> [   64.539440] mmc2: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
+> >>>>> [   64.549352] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+> >>>>> [   64.559277] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> >>>>> [   64.569214] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> >>>>> [   64.579061] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> >>>>> [   64.588842] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+> >>>>> [   64.598671] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> >>>>> [   64.608446] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+> >>>>> [   64.618161] mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
+> >>>>> [   64.627801] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x642017d7
+> >>>>> [   64.637376] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+> >>>>> [   64.646855] mmc2: sdhci: Host ctl2: 0x00000083
+> >>>>> [   64.656080] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+> >>>>> [   64.665445] mmc2: sdhci: ============================================
+> >>>>> [   64.674998] mmc2: running CQE recovery
+> >>>>>
+> >>>>> [  125.912941] mmc2: cqhci: timeout for tag 3
+> >>>>> [  125.921978] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+> >>>>> [  125.931200] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+> >>>>> [  125.940389] mmc2: cqhci: Config:    0x00000001 | Control:  0x00000000
+> >>>>> [  125.949499] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
+> >>>>> [  125.958527] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
+> >>>>> [  125.967486] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+> >>>>> [  125.976260] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+> >>>>> [  125.985065] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+> >>>>> [  125.993698] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+> >>>>> [  126.002244] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+> >>>>> [  126.010716] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+> >>>>> [  126.019159] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+> >>>>> [  126.027525] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> >>>>> [  126.035955] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+> >>>>> [  126.044258] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+> >>>>> [  126.052396] mmc2: sdhci: Argument:  0x00000001 | Trn mode: 0x00000010
+> >>>>> [  126.060370] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+> >>>>> [  126.068241] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> >>>>> [  126.075978] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> >>>>> [  126.083552] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> >>>>> [  126.090937] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+> >>>>> [  126.098219] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> >>>>> [  126.105403] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+> >>>>> [  126.112649] mmc2: sdhci: Cmd:       0x00003013 | Max curr: 0x00000000
+> >>>>> [  126.119700] mmc2: sdhci: Resp[0]:   0x00400800 | Resp[1]:  0x642017d7
+> >>>>> [  126.126594] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+> >>>>> [  126.133334] mmc2: sdhci: Host ctl2: 0x00000083
+> >>>>> [  126.139652] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+> >>>>> [  126.146008] mmc2: sdhci: ============================================
+> >>>>> [  126.152361] mmc2: running CQE recovery
+> >>>>>
+> >>>>>
+> >>>
+>
