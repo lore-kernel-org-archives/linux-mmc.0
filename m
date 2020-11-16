@@ -7,28 +7,28 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B02BC55ABD
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 08:51:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85E70C4742C
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 08:53:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1EB0F208C7
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 08:51:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 11D3C216C4
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 08:53:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="K4Bjixvs"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="abUK6fmb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726455AbgKPIdh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Nov 2020 03:33:37 -0500
-Received: from mail-dm6nam11on2066.outbound.protection.outlook.com ([40.107.223.66]:44353
-        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
+        id S1727206AbgKPId6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Nov 2020 03:33:58 -0500
+Received: from mail-bn7nam10on2041.outbound.protection.outlook.com ([40.107.92.41]:19296
+        "EHLO NAM10-BN7-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726558AbgKPIdc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Nov 2020 03:33:32 -0500
+        id S1726759AbgKPId4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 16 Nov 2020 03:33:56 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=lg0rmsr5gUiBko2uKpzL8g5ur1AppMsF2d/76uwBzFrGCoZ+hDg9iOsIPMMcHFcZiEpDjO186uBwFGruUiKGgKxZbO1wplWCYNgXebbg7JAZczXqQ7XjFfCh4Z45wfVht2pYBBLHu9NcsHEncKv+ykkVS2+bODUsKHxz+7sm1NA8h+cHqVIefUd9Lz2sdIoEUzBCi4Ju1mdUHcnsqcXj/Rd4O0hJSAyik+4/BM1RAStyQRpMK43XAFaJ0VjpeLXWzJUY99SR5CweWC41txs6o9pdkKPsVQPcxW35tw6hG9iH43SUjYiEr1AS3H83uxkEtLQ6d7Lkog8KAs4REPDlfA==
+ b=X8pCrG0cCvlIfnqCCKh54KDxZ1g3D6q3vQJLWqFrhM/0A7InssSuoH5EJegg/a41WuljpmWuh93CvqaderQGMG3MS8vGdjg8hyKxmdmrRp+AVzqh281wOc7Mya//AJr48MOjK/OTDBsl+1CSlj7Q3cg+S7VUmeXNkU+UX5oHn02e6Y33SOAnzxJ/VN7igrdDzr70YAOqsjyvSfVUtuRFgwGoabxDxFI29ym+7yxNWtDTlgWU/IJWbnABccGAYywKbdRI2VNakKDMZUa+hD5CuEfQKkWx706noBJ3bsVqvhWTUNWONsjxI6mRXRSqDertJixYYDzbr+bQdGo1agbedA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=nDlnLgqE+mpMh1k2o/if8A3nKkv8KASdChtlgJNAs/g=;
- b=k2vQ/Xzzmz9eRxOJ2kDXZqtyYfAMqCTYa380X6RXOLfT/IOheHkFT7pflXDJNcW13Jiv9fwfz+l8HiGhWe/32T527B+SZaR/goiuNO+gmI7IUQJvj7w4Zr1ctobPVgKcIfinlShVF5ctE1oIQYKlzf2OLm33BWEohCk83MPZZniLHUcbiA5oTfmZJekjU9OZmRSsefqMXIuvqDEA3ObMZCKd9AQruu7GB4PofwzFytjgSX4y2ZDwjxS9sD/s24qbWpZgbxcu34/OAYm2xM7UBnb2b93UMm9YnUWofzX29o4h4bwBC0GmmJxMXzASpmSMgiNm3mWgi03ob2DhMunI8Q==
+ bh=F3PC6HKJlnagsA+B4h6NfIPrw/IhvEB6/AcFQIbXXtQ=;
+ b=f5qvUQ3Nq+LzhpKDi2Z9/9Rm4aLy4IwPggLmi+vrlok5S/1PkIcaMfGeMlfxMo4zBKu3zLHm//hUpc6XjmEwsQ19skxLCT6sqbKbckNc7vgn61TrVGKkluCMK2J2Wvc1U6d0EyZdWJd2MiZm0AcZtdg4xB9DpMYkYbAtUKPfcb4PpWD3qfqvF52zsUXk3N8lDUpduyO83pSVlWTIiB4rta78JOGOAZTfpR/t3tbfgSCYK9UCaJdAdsLDoYIQ/9VrtXDGlF/friIeQ5yRjbNKOadgHf5QqLrWnwwqpot+qbRaqMt/+ISX+XPba1Rp0Vj5QDnGiCxOFN+ctkgamZLJpg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  149.199.62.198) smtp.rcpttodomain=intel.com smtp.mailfrom=xilinx.com;
  dmarc=bestguesspass action=none header.from=xilinx.com; dkim=none (message
@@ -36,18 +36,18 @@ ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=nDlnLgqE+mpMh1k2o/if8A3nKkv8KASdChtlgJNAs/g=;
- b=K4Bjixvstuk3kPWO9TRwHhj8QDmXFluN5HlPbvyRm2xAKdsJ+M1H0EH4yVVRJMX6H0u6UxFlBq4BWyhBbGfRTMCkRRmEarHjgg9vb9aw1oE4H9sQSfju0qGn6b2OpkHgqVWcUnuLehv6cc/m/slYwbzxC5olSuW3k0VLjSVE4CA=
-Received: from BL0PR02CA0100.namprd02.prod.outlook.com (2603:10b6:208:51::41)
- by DM5PR02MB3324.namprd02.prod.outlook.com (2603:10b6:4:66::20) with
+ bh=F3PC6HKJlnagsA+B4h6NfIPrw/IhvEB6/AcFQIbXXtQ=;
+ b=abUK6fmbxeMhCITknvB2Fm3jYoxlATM0hXNHnPognMCGk3g6oWIfOGtvPR5ZXcunL7Sv6FFV6iJLokp1OEEvywuWHm3qA7EgvdruPz5BRz3pOtiijEL1xJOpXrYKYsuNogcOdAeH2U6xuuLyef4cP35XY6pGaPuOZNEx5HDIyGc=
+Received: from BL1PR13CA0106.namprd13.prod.outlook.com (2603:10b6:208:2b9::21)
+ by MW2PR02MB3833.namprd02.prod.outlook.com (2603:10b6:907:4::10) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3499.19; Mon, 16 Nov
- 2020 08:33:27 +0000
-Received: from BL2NAM02FT020.eop-nam02.prod.protection.outlook.com
- (2603:10b6:208:51:cafe::c3) by BL0PR02CA0100.outlook.office365.com
- (2603:10b6:208:51::41) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3564.28 via Frontend
- Transport; Mon, 16 Nov 2020 08:33:27 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3541.24; Mon, 16 Nov
+ 2020 08:33:52 +0000
+Received: from BL2NAM02FT038.eop-nam02.prod.protection.outlook.com
+ (2603:10b6:208:2b9:cafe::67) by BL1PR13CA0106.outlook.office365.com
+ (2603:10b6:208:2b9::21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3564.21 via Frontend
+ Transport; Mon, 16 Nov 2020 08:33:52 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 149.199.62.198)
  smtp.mailfrom=xilinx.com; intel.com; dkim=none (message not signed)
  header.d=none;intel.com; dmarc=bestguesspass action=none
@@ -56,16 +56,16 @@ Received-SPF: Pass (protection.outlook.com: domain of xilinx.com designates
  149.199.62.198 as permitted sender) receiver=protection.outlook.com;
  client-ip=149.199.62.198; helo=xsj-pvapexch02.xlnx.xilinx.com;
 Received: from xsj-pvapexch02.xlnx.xilinx.com (149.199.62.198) by
- BL2NAM02FT020.mail.protection.outlook.com (10.152.77.162) with Microsoft SMTP
+ BL2NAM02FT038.mail.protection.outlook.com (10.152.77.25) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.3564.22 via Frontend Transport; Mon, 16 Nov 2020 08:33:27 +0000
-Received: from xsj-pvapexch01.xlnx.xilinx.com (172.19.86.40) by
+ 15.20.3564.22 via Frontend Transport; Mon, 16 Nov 2020 08:33:52 +0000
+Received: from xsj-pvapexch02.xlnx.xilinx.com (172.19.86.41) by
  xsj-pvapexch02.xlnx.xilinx.com (172.19.86.41) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1913.5; Mon, 16 Nov 2020 00:33:02 -0800
+ 15.1.1913.5; Mon, 16 Nov 2020 00:33:28 -0800
 Received: from smtp.xilinx.com (172.19.127.96) by
- xsj-pvapexch01.xlnx.xilinx.com (172.19.86.40) with Microsoft SMTP Server id
- 15.1.1913.5 via Frontend Transport; Mon, 16 Nov 2020 00:33:02 -0800
+ xsj-pvapexch02.xlnx.xilinx.com (172.19.86.41) with Microsoft SMTP Server id
+ 15.1.1913.5 via Frontend Transport; Mon, 16 Nov 2020 00:33:28 -0800
 Envelope-to: git@xilinx.com,
  michal.simek@xilinx.com,
  adrian.hunter@intel.com,
@@ -73,12 +73,12 @@ Envelope-to: git@xilinx.com,
  linux-arm-kernel@lists.infradead.org,
  linux-kernel@vger.kernel.org,
  linux-mmc@vger.kernel.org
-Received: from [172.23.64.106] (port=51138 helo=xhdvnc125.xilinx.com)
+Received: from [172.23.64.106] (port=51164 helo=xhdvnc125.xilinx.com)
         by smtp.xilinx.com with esmtp (Exim 4.90)
         (envelope-from <manish.narani@xilinx.com>)
-        id 1keZwb-0002UY-CR; Mon, 16 Nov 2020 00:33:01 -0800
+        id 1keZx1-0002WJ-Ma; Mon, 16 Nov 2020 00:33:27 -0800
 Received: by xhdvnc125.xilinx.com (Postfix, from userid 16987)
-        id 6B86A121067; Mon, 16 Nov 2020 14:02:47 +0530 (IST)
+        id 773CB1211EF; Mon, 16 Nov 2020 14:02:47 +0530 (IST)
 From:   Manish Narani <manish.narani@xilinx.com>
 To:     <michal.simek@xilinx.com>, <adrian.hunter@intel.com>,
         <ulf.hansson@linaro.org>
@@ -86,9 +86,9 @@ CC:     <linux-arm-kernel@lists.infradead.org>,
         <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         <git@xilinx.com>, Manish Narani <manish.narani@xilinx.com>,
         Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>
-Subject: [PATCH v2 1/3] mmc: sdhci-of-arasan: Allow configuring zero tap values
-Date:   Mon, 16 Nov 2020 14:02:43 +0530
-Message-ID: <1605515565-117562-2-git-send-email-manish.narani@xilinx.com>
+Subject: [PATCH v2 3/3] mmc: sdhci-of-arasan: Issue DLL reset explicitly
+Date:   Mon, 16 Nov 2020 14:02:45 +0530
+Message-ID: <1605515565-117562-4-git-send-email-manish.narani@xilinx.com>
 X-Mailer: git-send-email 2.1.1
 In-Reply-To: <1605515565-117562-1-git-send-email-manish.narani@xilinx.com>
 References: <1605515565-117562-1-git-send-email-manish.narani@xilinx.com>
@@ -97,112 +97,68 @@ Content-Type: text/plain
 X-EOPAttributedMessage: 0
 X-MS-Office365-Filtering-HT: Tenant
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 34249311-1c19-4c5d-b19a-08d88a0a4a33
-X-MS-TrafficTypeDiagnostic: DM5PR02MB3324:
-X-Microsoft-Antispam-PRVS: <DM5PR02MB3324EABE66988278ABEC211DC1E30@DM5PR02MB3324.namprd02.prod.outlook.com>
+X-MS-Office365-Filtering-Correlation-Id: cbd1a5bc-8152-4575-8a36-08d88a0a5931
+X-MS-TrafficTypeDiagnostic: MW2PR02MB3833:
+X-Microsoft-Antispam-PRVS: <MW2PR02MB3833B97203CFB2F8B9EFFBBBC1E30@MW2PR02MB3833.namprd02.prod.outlook.com>
 X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
-X-MS-Oob-TLC-OOBClassifiers: OLM:6430;
+X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 2p4H1H/XMNt0FH8bLgaASDGyGzkavBUB2CHcLUAvzz+rUbR/JDonMboFjwyNEcbmn5y1VYy9qmQFh9Uy4c7bX4tUK/aV6GQCOC+HMw6j8GD24fxnlrhr3zsE/ptdpLwbvDraiXUPH36/QXXt+JUNQc3t9KmvRefe2IYokoWbXsSvxv3Qv6FLq2Fqf9dPxm15eqmVdEZrveTABN0Bg54APcVUoaFdlqGl9+niEUnXZ1nrx4C7C0idSyBhxE6wicO/H9dspOJXwbJYRW1EF/8MZKivf+gImoTjw4GVzUcYn/CJCAUBIitp4QWLEGRi/YafSDSyVchczCO3lf7Ge9ZiNDrbBFidkAtARjtgXL8wv7kNex7oz5O7owArowQ9U6khvouFBy1ZiOZ6jnBFRp4dgpa7CfFvF9eSHy1vqKXDecU=
-X-Forefront-Antispam-Report: CIP:149.199.62.198;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapexch02.xlnx.xilinx.com;PTR:unknown-62-198.xilinx.com;CAT:NONE;SFS:(4636009)(396003)(39850400004)(346002)(376002)(136003)(46966005)(2616005)(82740400003)(4326008)(6266002)(70586007)(107886003)(426003)(44832011)(47076004)(7636003)(478600001)(83380400001)(82310400003)(356005)(2906002)(5660300002)(36906005)(8936002)(70206006)(186003)(26005)(54906003)(8676002)(110136005)(42186006)(316002)(336012)(6666004)(36756003)(102446001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 0HWSx/HTmocBoXhbam/OzeRQBXETrEMZ7Jv9B4KCuCwKqABpIo/9pd4j3u93l4SBlC1XU9aAjY0ecAPV4+Gax+NuXxxGmc1AMS3ahTAuFegg9H2PpmD3jTLxRBzaNrNaG5Uk9L7pjyW2BhCLy/YW7I78Xg9d6rAIQ5LMZtgz1lAfgNW0CbaGFx7ysshvVl8QrHhSvJ35ETqpjldjzo7PPe+G36LHUztBCTsUPy17jmG5NBnxqkw/qCSpmC8CiUT647p6m5Mx3qLQYfAoKcAIoHv4WEsTqxdOkGh9xuIX/PJo/C4C232iOkrZ/+kkpWwaszuhfhsgYMHCP581kcL8edRdFnzgvvAO3FMB4qqbKi5tWnhK181c+Wlos9G+uXkP4u5+q4WvoOmTtEN7z9mX9WjPJSJT7I29ELGx5Eaxjrs=
+X-Forefront-Antispam-Report: CIP:149.199.62.198;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapexch02.xlnx.xilinx.com;PTR:unknown-62-198.xilinx.com;CAT:NONE;SFS:(4636009)(39850400004)(396003)(376002)(346002)(136003)(46966005)(8676002)(110136005)(7636003)(8936002)(36756003)(83380400001)(316002)(26005)(4326008)(70586007)(82310400003)(82740400003)(54906003)(2906002)(47076004)(2616005)(44832011)(6266002)(107886003)(42186006)(186003)(336012)(356005)(478600001)(5660300002)(426003)(70206006)(36906005)(102446001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: xilinx.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 16 Nov 2020 08:33:27.0673
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 16 Nov 2020 08:33:52.2180
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 34249311-1c19-4c5d-b19a-08d88a0a4a33
+X-MS-Exchange-CrossTenant-Network-Message-Id: cbd1a5bc-8152-4575-8a36-08d88a0a5931
 X-MS-Exchange-CrossTenant-Id: 657af505-d5df-48d0-8300-c31994686c5c
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=657af505-d5df-48d0-8300-c31994686c5c;Ip=[149.199.62.198];Helo=[xsj-pvapexch02.xlnx.xilinx.com]
-X-MS-Exchange-CrossTenant-AuthSource: BL2NAM02FT020.eop-nam02.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: BL2NAM02FT038.eop-nam02.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR02MB3324
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW2PR02MB3833
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Allow configuring the Output and Input tap values with zero to avoid
-failures in some cases (one of them is SD boot mode) where the output
-and input tap values may be already set to non-zero.
+In the current implementation DLL reset will be issued for
+each ITAP and OTAP setting inside ATF, this is creating issues
+in some scenarios and this sequence is not inline with the TRM.
+To fix the issue, DLL reset should be removed from the ATF and
+host driver will request it explicitly.
+This patch update host driver to explicitly request for DLL reset
+before ITAP (assert DLL) and after OTAP (release DLL) settings.
 
 Fixes: a5c8b2ae2e51 ("mmc: sdhci-of-arasan: Add support for ZynqMP Platform Tap Delays Setup")
 Signed-off-by: Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.com>
 Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 40 ++++++------------------------
- 1 file changed, 8 insertions(+), 32 deletions(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 829ccef87426..100621e55427 100644
+index 3ec5ecad637c..d25a4b50c2f3 100644
 --- a/drivers/mmc/host/sdhci-of-arasan.c
 +++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -600,14 +600,8 @@ static int sdhci_zynqmp_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
- 	u8 tap_delay, tap_max = 0;
- 	int ret;
+@@ -635,6 +635,9 @@ static int sdhci_zynqmp_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
+ 	if (ret)
+ 		pr_err("Error setting Output Tap Delay\n");
  
--	/*
--	 * This is applicable for SDHCI_SPEC_300 and above
--	 * ZynqMP does not set phase for <=25MHz clock.
--	 * If degrees is zero, no need to do anything.
--	 */
--	if (host->version < SDHCI_SPEC_300 ||
--	    host->timing == MMC_TIMING_LEGACY ||
--	    host->timing == MMC_TIMING_UHS_SDR12 || !degrees)
-+	/* This is applicable for SDHCI_SPEC_300 and above */
-+	if (host->version < SDHCI_SPEC_300)
++	/* Release DLL Reset */
++	zynqmp_pm_sd_dll_reset(node_id, PM_DLL_RESET_RELEASE);
++
+ 	return ret;
+ }
+ 
+@@ -669,6 +672,9 @@ static int sdhci_zynqmp_sampleclk_set_phase(struct clk_hw *hw, int degrees)
+ 	if (host->version < SDHCI_SPEC_300)
  		return 0;
  
++	/* Assert DLL Reset */
++	zynqmp_pm_sd_dll_reset(node_id, PM_DLL_RESET_ASSERT);
++
  	switch (host->timing) {
-@@ -668,14 +662,8 @@ static int sdhci_zynqmp_sampleclk_set_phase(struct clk_hw *hw, int degrees)
- 	u8 tap_delay, tap_max = 0;
- 	int ret;
- 
--	/*
--	 * This is applicable for SDHCI_SPEC_300 and above
--	 * ZynqMP does not set phase for <=25MHz clock.
--	 * If degrees is zero, no need to do anything.
--	 */
--	if (host->version < SDHCI_SPEC_300 ||
--	    host->timing == MMC_TIMING_LEGACY ||
--	    host->timing == MMC_TIMING_UHS_SDR12 || !degrees)
-+	/* This is applicable for SDHCI_SPEC_300 and above */
-+	if (host->version < SDHCI_SPEC_300)
- 		return 0;
- 
- 	switch (host->timing) {
-@@ -733,14 +721,8 @@ static int sdhci_versal_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
- 	struct sdhci_host *host = sdhci_arasan->host;
- 	u8 tap_delay, tap_max = 0;
- 
--	/*
--	 * This is applicable for SDHCI_SPEC_300 and above
--	 * Versal does not set phase for <=25MHz clock.
--	 * If degrees is zero, no need to do anything.
--	 */
--	if (host->version < SDHCI_SPEC_300 ||
--	    host->timing == MMC_TIMING_LEGACY ||
--	    host->timing == MMC_TIMING_UHS_SDR12 || !degrees)
-+	/* This is applicable for SDHCI_SPEC_300 and above */
-+	if (host->version < SDHCI_SPEC_300)
- 		return 0;
- 
- 	switch (host->timing) {
-@@ -804,14 +786,8 @@ static int sdhci_versal_sampleclk_set_phase(struct clk_hw *hw, int degrees)
- 	struct sdhci_host *host = sdhci_arasan->host;
- 	u8 tap_delay, tap_max = 0;
- 
--	/*
--	 * This is applicable for SDHCI_SPEC_300 and above
--	 * Versal does not set phase for <=25MHz clock.
--	 * If degrees is zero, no need to do anything.
--	 */
--	if (host->version < SDHCI_SPEC_300 ||
--	    host->timing == MMC_TIMING_LEGACY ||
--	    host->timing == MMC_TIMING_UHS_SDR12 || !degrees)
-+	/* This is applicable for SDHCI_SPEC_300 and above */
-+	if (host->version < SDHCI_SPEC_300)
- 		return 0;
- 
- 	switch (host->timing) {
+ 	case MMC_TIMING_MMC_HS:
+ 	case MMC_TIMING_SD_HS:
 -- 
 2.17.1
 
