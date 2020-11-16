@@ -2,213 +2,210 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63AB5C4742C
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 07:53:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF963C55ABD
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 08:35:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E50DB2225E
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 07:53:26 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="qy0lk9yP"
+	by mail.kernel.org (Postfix) with ESMTP id 60262207BC
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Nov 2020 08:35:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727761AbgKPHuo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Nov 2020 02:50:44 -0500
-Received: from mail-dm6nam11on2067.outbound.protection.outlook.com ([40.107.223.67]:35168
-        "EHLO NAM11-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726524AbgKPHuo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Nov 2020 02:50:44 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=GOtnv5Fbec2/1qMjMtnUW47DSuITmYquMptoNxvpigfUNHg0Lss/V5Xb7GLMoeemXVMnDiZFC0XFa4d0OTEFHPeCioh4rKPaZl5DonhEXR0liwKxNxC9Tdpln+dA5HKL4CNeULWz1MTTZ//xs+1sz6zsGOT/Jr6iuiImenS6Bk+uxx/YD1Y5b84oYiTi1qpCpJalv7WGs6VekChZMJaETRk4kHPiYAIGAWh1qw+YYTKbbQqn+p4gOFb+xfSXFi62Yv0UMsbRDKrwG47VBGiQ0JJqKuSTEcz+bZa7ldI7dNfR4VwRV6y83S6olTBErSe78T+1EaQ31EcpkNv1kR5X/A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=knyI+qeakDG4U6QMYhzJpb2CVh7HJAAAMbESs4H0jD8=;
- b=AU3pywnw6YgekI0GDu/83UMwtY7kxry0k1VisUpPDahC7lD1goZuE6qskTZnDswjI9tmrSBRCRH0wugmopYqrdM5IoWVLgDgi3NQJdR97vDG6ejm5BFIFcFzDMVIg+JFAf26ySioH2MQMSnyVfIuteIhnLFm7IApQwAg6kw2dJ28rIkhe+jUvOncEMJSpDN5ezISo8zWT+acytLCRJfjdFuQ54/ZsPpVAsTRtXP9tLwLFlodmyYVu3lgAncRnRHMwbtudWD0GvcB39lz4L1ZATgXoqmxVMWZoAkXqZRg4TbqkJGnf1mOfaJ+ki0QfmH2+ja1w1uzfc0ukL8TvbgJ1Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=xilinx.com; dmarc=pass action=none header.from=xilinx.com;
- dkim=pass header.d=xilinx.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=knyI+qeakDG4U6QMYhzJpb2CVh7HJAAAMbESs4H0jD8=;
- b=qy0lk9yP4KQUoAsAFnyXo0OV7BDZyZY8dGI+V0/rmik2sq7qLt7TeG5ybpP0nod/4PsSvN8RZD3ZNSqb0KvOVTJNv8OK51spqSxZPTmM1fOApA/C4K38ANT9Cz5wuaotbff5ukN5yfDwYn8b2BIUeCxDdFqDR+FJpHOs7Z/nwi8=
-Received: from DM6PR02MB5898.namprd02.prod.outlook.com (2603:10b6:5:159::13)
- by DM5PR02MB2428.namprd02.prod.outlook.com (2603:10b6:3:3d::8) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.3564.25; Mon, 16 Nov 2020 07:50:38 +0000
-Received: from DM6PR02MB5898.namprd02.prod.outlook.com
- ([fe80::f1de:3d1c:bd8d:497f]) by DM6PR02MB5898.namprd02.prod.outlook.com
- ([fe80::f1de:3d1c:bd8d:497f%7]) with mapi id 15.20.3541.028; Mon, 16 Nov 2020
- 07:50:38 +0000
-From:   Manish Narani <MNARANI@xilinx.com>
-To:     Manish Narani <MNARANI@xilinx.com>,
-        Michal Simek <michals@xilinx.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-CC:     "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
+        id S1726598AbgKPIWA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Nov 2020 03:22:00 -0500
+Received: from mga06.intel.com ([134.134.136.31]:34791 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726158AbgKPIV7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 16 Nov 2020 03:21:59 -0500
+IronPort-SDR: kt7i2CO1+anpLUiLw3Z+M3+8VZUOpJY7rvznWjT+452OVGiDHj42IQUtiJ3mAXDRKfH/kWfrWy
+ QkpnATab0Yxw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9806"; a="232332597"
+X-IronPort-AV: E=Sophos;i="5.77,482,1596524400"; 
+   d="scan'208";a="232332597"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Nov 2020 00:21:58 -0800
+IronPort-SDR: YdD5WUqE8lELMdcSlgtjNorze81Oy+FNrd+yhx/uBN9tharLrW+JSNOmMV9fEK5N0nV5QvZqal
+ HPNs/wyWEwtw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.77,482,1596524400"; 
+   d="scan'208";a="340462287"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
+  by orsmga002.jf.intel.com with ESMTP; 16 Nov 2020 00:21:50 -0800
+Subject: Re: [BUG] cqe unable to handle buggy cards
+To:     Peter Geis <pgwipeout@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        git <git@xilinx.com>, Sai Krishna Potthuri <lakshmis@xilinx.com>
-Subject: RE: [PATCH] mmc: sdhci-of-arasan: Allow configuring zero tap values
-Thread-Topic: [PATCH] mmc: sdhci-of-arasan: Allow configuring zero tap values
-Thread-Index: AQHWt4jdqyLias1MGEyvXezJC++3FanKZ4ZA
-Date:   Mon, 16 Nov 2020 07:50:38 +0000
-Message-ID: <DM6PR02MB58986D442F923EF92F8FF7CDC1E30@DM6PR02MB5898.namprd02.prod.outlook.com>
-References: <1605030122-52196-1-git-send-email-manish.narani@xilinx.com>
-In-Reply-To: <1605030122-52196-1-git-send-email-manish.narani@xilinx.com>
-Accept-Language: en-IN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
-X-MS-TNEF-Correlator: 
-authentication-results: xilinx.com; dkim=none (message not signed)
- header.d=none;xilinx.com; dmarc=none action=none header.from=xilinx.com;
-x-ms-exchange-messagesentrepresentingtype: 1
-x-originating-ip: [149.199.50.128]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 7ee355e1-2c1f-4218-448b-08d88a044f36
-x-ms-traffictypediagnostic: DM5PR02MB2428:
-x-ld-processed: 657af505-d5df-48d0-8300-c31994686c5c,ExtAddr
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <DM5PR02MB2428003D8CC635E9CE00C011C1E30@DM5PR02MB2428.namprd02.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: aEAzE8v3hWENkWJYh+IZwYYcWqBlgF/EcAsIRNDMjzr23xCVPIDrzRQpoMna+ftV3A+aTmPGPH1GWV5pa0GETCRdMMTryLbgFC1ZLq7MJ9u7QaDa6cx7MhJqGfkJho9oE9EVfTjmBbgpIUB8rw/saBpRVIFhbmANcDfwN9hD/ET13+9Dp3p24VZvMN3wTtR0HR5jfq+V3Itk4FNSv1UEej0mFnX90fKiWtG+BwBC6/h1lVtwzJEDjOdFMDFO/MNFNgnuc4/I3nTevFAM3A9Wi9e9kPIUw9zcmiteftcMh4HnKeDa+NxN9fW+KxLcvxidF8HAven0Lx9yRjYb3PCzog==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR02MB5898.namprd02.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(39850400004)(396003)(376002)(136003)(346002)(8676002)(107886003)(71200400001)(52536014)(83380400001)(7696005)(478600001)(4326008)(54906003)(8936002)(33656002)(110136005)(6506007)(316002)(53546011)(9686003)(186003)(44832011)(64756008)(66476007)(66556008)(66446008)(55016002)(26005)(2906002)(66946007)(5660300002)(76116006);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata: 3pMAeLEF5HfAojHZoQ6DMW3QkbAN0Qo/xvvS8jTxfikBdnoT0qZi89GAZObcXpq9JsP8rrH3TRsuFZ6UiX12Gw7+IPqAF2QyZvd8IwwWTUjfuYhtG1O1oh6SfnHYW4SAI62q2BPXEKApawep4OhloyaqybqEMJNAH7VAn252q2oavgRiklOD+SH44040h5EDUwu7MUOxl4IVvNNx2zbDGeEyqf9Oiiam8AaDD0ECVJYjNJlDTw+PclHNOfdgju5JiV6SZXnuJZRTcXQ5Hxj3bqNJO+PMVIVQ4pWDOx0gJKoeLudr4IaPINiKKqN2ZdRJMtyXnWt4TJ2+xtmU5u9ga2fGtwjBz9u7ugaq+kE4WY8OlXpriT5u3uyAhyi05Ye7U7vnOzTVRHjn+7A+4YAjC7djoiAtIb5YugtIZNEXtWPDyVjoN4BMz7AvhI06Fqcy1NYJHEuTWewU6kWj49EAeFISkJEUvOGZf/FIbz1d4NImJu43ZIP2IoduN06yLNAbd97+QLvt4qGk41hVYdv+j8LeeshkTt5a/tZrOqOsWC7077quYUCHnm/ACKRC3Z5lWwcqwV+hFF5Y3Cq2HgmYVSoxV13LRi+I1vtjGWC85W5mQrm03gnQ7MI3vtKzgC+bzt+1dhPJt4XltYrMHYHtFWfXEDp1wPtEVPQWN6AyjPLz42wqx1hV61bhZFWbZRIa/PkrwK4etrkbm0OskazMh+RFxbIyLNIZ4zdrAtXEjLEwnZA5F5LD+8iJzAv+VX48SQ2JNssIyCyYN5MYBrmT+GhKSQdRMn1kdh7tQWg4FgHi9Wkeu4ck6gbnGhvP2qjumb6b9314MlyvJAiN+NktFAnzBhPd8G0ENCgIx9L+MXRgMqGtTm1XkomBiHA6n12WX2Plze7J5iEIlo3Nj7T1DA==
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        nuumiofi@gmail.com, Michal Simek <michal.simek@xilinx.com>,
+        Manish Narani <manish.narani@xilinx.com>
+References: <fa7f3fc5-c37a-ac49-e14a-45a1d2e0a942@gmail.com>
+ <CAPDyKFq9vKOODDQEEE2W+Gsx69_R3XV_Hb-owMU-=qAMbv39kg@mail.gmail.com>
+ <2ebdcb5c-1c52-08af-9233-16366c20820e@intel.com>
+ <CAMdYzYoFCfVkz7zwbfQ=ZoirNTymRrRyg8FCabVVEQSKRnoOEA@mail.gmail.com>
+ <CAMdYzYqEhgO6q3iXNzzuZ3snW_Y1bYP8BOBkNC5=fCPc310BUA@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <80572b62-2601-ff53-05ef-4d231f7450fa@intel.com>
+Date:   Mon, 16 Nov 2020 10:21:32 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-X-OriginatorOrg: xilinx.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR02MB5898.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7ee355e1-2c1f-4218-448b-08d88a044f36
-X-MS-Exchange-CrossTenant-originalarrivaltime: 16 Nov 2020 07:50:38.5414
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 657af505-d5df-48d0-8300-c31994686c5c
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: duiObmc80nQO2biCCUEZuoirVuwOLh7upoN0aOe4fWdMUik7pD8BEQMMprgUkfuLTFwP3yworbeFJ89YSQLyMA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR02MB2428
+In-Reply-To: <CAMdYzYqEhgO6q3iXNzzuZ3snW_Y1bYP8BOBkNC5=fCPc310BUA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On 6/11/20 10:54 pm, Peter Geis wrote:
+> On Wed, Nov 4, 2020 at 7:39 PM Peter Geis <pgwipeout@gmail.com> wrote:
+>>
+>> On Mon, Nov 2, 2020 at 11:32 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>
+>>> On 2/11/20 4:54 pm, Ulf Hansson wrote:
+>>>> + cqhci maintainers
+>>>>
+>>>> On Sat, 31 Oct 2020 at 13:54, Peter Geis <pgwipeout@gmail.com> wrote:
+>>>>>
+>>>>> Good Morning,
+>>>>>
+>>>>> We are seeing an issue on the rk3399 with certain Foresee emmc modules
+>>>>> where the module reports it supports command queuing but fails in actual
+>>>>> implementation.
+>>>>>
+>>>>> Unfortunately there doesn't seem to be any method for the mmc core code
+>>>>> to detect this situation and disable command queue automatically.
+>>>>> There also appears to be no way to disable it at runtime.
+>>>
+>>> Since v5.5, if you know how to use SDHCI debug quirks there is
+>>> SDHCI_QUIRK_BROKEN_CQE
+>>> e.g. kernel command line option sdhci.debug_quirks=0x0x2020000
+>>
+>> Thank you, we will test this.
+> 
+> This does resolve the issue of disabling cqe entirely for debugging, thanks!
+> 
+>>
+>>>
+>>>>>
+>>>>> Certain modified kernels have added a patch to enable runtime disable of
+>>>>> command queue entirely, but this will affect mmc core as a whole and not
+>>>>> just the buggy card.
+>>>>>
+>>>>> Does anyone have any insight into this issue?
+>>>>> Thank you for your time.
+>>>>
+>>>> Unfortunate, not me personally. I assume the issue is either be card
+>>>> specific or host specific. Before looking at a disable option, we need
+>>>> to know more about what goes wrong, I think.
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>>
+>>>>>
+>>>>> Very Respectfully,
+>>>>> Peter Geis
+>>>>>
+>>>>> [   64.472882] mmc2: cqhci: timeout for tag 2
+>>>>> [   64.473349] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+>>>>> [   64.474057] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+>>>>> [   64.474763] mmc2: cqhci: Config:    0x00000000 | Control:  0x00000000
+>>>>> [   64.475468] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000000
+>>>>> [   64.476172] mmc2: cqhci: Int sig:   0x00000000 | Int Coal: 0x00000000
+>>>>> [   64.476875] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+>>>
+>>> TDL base cannot be zero, so the register values have been lost.
+>>> Could be a reset issue like this one but for sdhci-of-arasan.c :
+>>>
+>>> https://lore.kernel.org/linux-mmc/20200819121848.16967-1-adrian.hunter@intel.com/
+>>
+>> Excellent, we will see if a similar implementation makes a difference
+>> here for us as well.
+> 
+> I wrote a patch to implement this in the arasan driver.
+> https://paste.ee/p/cl5SX
+> Nuumiofi tested it with the buggy card.
+> 
+> The good news, it solves the register clearing issue.
+> The bad news, the card still is broken, here is the kernel log:
+> https://paste.ubuntu.com/p/sF2yMwxpcV/
 
-> -----Original Message-----
-> From: Manish Narani <manish.narani@xilinx.com>
-> Sent: Tuesday, November 10, 2020 11:12 PM
-> To: Michal Simek <michals@xilinx.com>; adrian.hunter@intel.com;
-> ulf.hansson@linaro.org
-> Cc: linux-arm-kernel@lists.infradead.org; linux-mmc@vger.kernel.org; linu=
-x-
-> kernel@vger.kernel.org; git <git@xilinx.com>; Manish Narani
-> <MNARANI@xilinx.com>; Sai Krishna Potthuri <lakshmis@xilinx.com>
-> Subject: [PATCH] mmc: sdhci-of-arasan: Allow configuring zero tap values
->=20
-> Allow configuring the Output and Input tap values with zero to avoid
-> failures in some cases (one of them is SD boot mode) where the output
-> and input tap values may be already set to non-zero.
->=20
+You will need to enable dynamic debug to get more messages e.g.
+	kernel config: CONFIG_DYNAMIC_DEBUG=y
+	kernel command line:
+dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
 
-Fixes: a5c8b2ae2e51 ("mmc: sdhci-of-arasan: Add support for ZynqMP Platform=
- Tap Delays Setup")
+If it can't be made to work, you can set SDHCI_QUIRK_BROKEN_CQE in the
+driver as needed.
 
-> Signed-off-by: Sai Krishna Potthuri <lakshmi.sai.krishna.potthuri@xilinx.=
-com>
-> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 40 ++++++------------------------
->  1 file changed, 8 insertions(+), 32 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-
-> of-arasan.c
-> index 829ccef87426..100621e55427 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -600,14 +600,8 @@ static int sdhci_zynqmp_sdcardclk_set_phase(struct
-> clk_hw *hw, int degrees)
->  	u8 tap_delay, tap_max =3D 0;
->  	int ret;
->=20
-> -	/*
-> -	 * This is applicable for SDHCI_SPEC_300 and above
-> -	 * ZynqMP does not set phase for <=3D25MHz clock.
-> -	 * If degrees is zero, no need to do anything.
-> -	 */
-> -	if (host->version < SDHCI_SPEC_300 ||
-> -	    host->timing =3D=3D MMC_TIMING_LEGACY ||
-> -	    host->timing =3D=3D MMC_TIMING_UHS_SDR12 || !degrees)
-> +	/* This is applicable for SDHCI_SPEC_300 and above */
-> +	if (host->version < SDHCI_SPEC_300)
->  		return 0;
->=20
->  	switch (host->timing) {
-> @@ -668,14 +662,8 @@ static int
-> sdhci_zynqmp_sampleclk_set_phase(struct clk_hw *hw, int degrees)
->  	u8 tap_delay, tap_max =3D 0;
->  	int ret;
->=20
-> -	/*
-> -	 * This is applicable for SDHCI_SPEC_300 and above
-> -	 * ZynqMP does not set phase for <=3D25MHz clock.
-> -	 * If degrees is zero, no need to do anything.
-> -	 */
-> -	if (host->version < SDHCI_SPEC_300 ||
-> -	    host->timing =3D=3D MMC_TIMING_LEGACY ||
-> -	    host->timing =3D=3D MMC_TIMING_UHS_SDR12 || !degrees)
-> +	/* This is applicable for SDHCI_SPEC_300 and above */
-> +	if (host->version < SDHCI_SPEC_300)
->  		return 0;
->=20
->  	switch (host->timing) {
-> @@ -733,14 +721,8 @@ static int sdhci_versal_sdcardclk_set_phase(struct
-> clk_hw *hw, int degrees)
->  	struct sdhci_host *host =3D sdhci_arasan->host;
->  	u8 tap_delay, tap_max =3D 0;
->=20
-> -	/*
-> -	 * This is applicable for SDHCI_SPEC_300 and above
-> -	 * Versal does not set phase for <=3D25MHz clock.
-> -	 * If degrees is zero, no need to do anything.
-> -	 */
-> -	if (host->version < SDHCI_SPEC_300 ||
-> -	    host->timing =3D=3D MMC_TIMING_LEGACY ||
-> -	    host->timing =3D=3D MMC_TIMING_UHS_SDR12 || !degrees)
-> +	/* This is applicable for SDHCI_SPEC_300 and above */
-> +	if (host->version < SDHCI_SPEC_300)
->  		return 0;
->=20
->  	switch (host->timing) {
-> @@ -804,14 +786,8 @@ static int sdhci_versal_sampleclk_set_phase(struct
-> clk_hw *hw, int degrees)
->  	struct sdhci_host *host =3D sdhci_arasan->host;
->  	u8 tap_delay, tap_max =3D 0;
->=20
-> -	/*
-> -	 * This is applicable for SDHCI_SPEC_300 and above
-> -	 * Versal does not set phase for <=3D25MHz clock.
-> -	 * If degrees is zero, no need to do anything.
-> -	 */
-> -	if (host->version < SDHCI_SPEC_300 ||
-> -	    host->timing =3D=3D MMC_TIMING_LEGACY ||
-> -	    host->timing =3D=3D MMC_TIMING_UHS_SDR12 || !degrees)
-> +	/* This is applicable for SDHCI_SPEC_300 and above */
-> +	if (host->version < SDHCI_SPEC_300)
->  		return 0;
->=20
->  	switch (host->timing) {
-> --
-> 2.17.1
+> 
+>>
+>>>
+>>>
+>>>>> [   64.477578] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+>>>>> [   64.478281] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+>>>>> [   64.478984] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+>>>>> [   64.479687] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+>>>>> [   64.489785] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+>>>>> [   64.499774] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+>>>>> [   64.509687] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+>>>>> [   64.519597] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+>>>>> [   64.529521] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+>>>>> [   64.539440] mmc2: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
+>>>>> [   64.549352] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+>>>>> [   64.559277] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+>>>>> [   64.569214] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+>>>>> [   64.579061] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+>>>>> [   64.588842] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+>>>>> [   64.598671] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>>>>> [   64.608446] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+>>>>> [   64.618161] mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
+>>>>> [   64.627801] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x642017d7
+>>>>> [   64.637376] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+>>>>> [   64.646855] mmc2: sdhci: Host ctl2: 0x00000083
+>>>>> [   64.656080] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+>>>>> [   64.665445] mmc2: sdhci: ============================================
+>>>>> [   64.674998] mmc2: running CQE recovery
+>>>>>
+>>>>> [  125.912941] mmc2: cqhci: timeout for tag 3
+>>>>> [  125.921978] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+>>>>> [  125.931200] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+>>>>> [  125.940389] mmc2: cqhci: Config:    0x00000001 | Control:  0x00000000
+>>>>> [  125.949499] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
+>>>>> [  125.958527] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
+>>>>> [  125.967486] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+>>>>> [  125.976260] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+>>>>> [  125.985065] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+>>>>> [  125.993698] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+>>>>> [  126.002244] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+>>>>> [  126.010716] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+>>>>> [  126.019159] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+>>>>> [  126.027525] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+>>>>> [  126.035955] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+>>>>> [  126.044258] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+>>>>> [  126.052396] mmc2: sdhci: Argument:  0x00000001 | Trn mode: 0x00000010
+>>>>> [  126.060370] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+>>>>> [  126.068241] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+>>>>> [  126.075978] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+>>>>> [  126.083552] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+>>>>> [  126.090937] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+>>>>> [  126.098219] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>>>>> [  126.105403] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+>>>>> [  126.112649] mmc2: sdhci: Cmd:       0x00003013 | Max curr: 0x00000000
+>>>>> [  126.119700] mmc2: sdhci: Resp[0]:   0x00400800 | Resp[1]:  0x642017d7
+>>>>> [  126.126594] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+>>>>> [  126.133334] mmc2: sdhci: Host ctl2: 0x00000083
+>>>>> [  126.139652] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+>>>>> [  126.146008] mmc2: sdhci: ============================================
+>>>>> [  126.152361] mmc2: running CQE recovery
+>>>>>
+>>>>>
+>>>
 
-Thanks,
-Manish
