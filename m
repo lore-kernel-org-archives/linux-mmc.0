@@ -7,103 +7,134 @@ X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91254C2D0E4
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:19:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2BC1C56202
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:27:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2BB492222E
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:19:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5DA932222E
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:27:59 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="n+SVm0x7"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K36hufdy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727669AbgKQLTl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Nov 2020 06:19:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40710 "EHLO
+        id S1728010AbgKQL1j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Nov 2020 06:27:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725355AbgKQLTl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2020 06:19:41 -0500
-Received: from mail-vk1-xa41.google.com (mail-vk1-xa41.google.com [IPv6:2607:f8b0:4864:20::a41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36D6DC0613CF
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:19:41 -0800 (PST)
-Received: by mail-vk1-xa41.google.com with SMTP id s135so4434134vkh.6
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:19:41 -0800 (PST)
+        with ESMTP id S1725355AbgKQL1j (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2020 06:27:39 -0500
+Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B37D2C0617A6
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:27:37 -0800 (PST)
+Received: by mail-vs1-xe42.google.com with SMTP id z123so10864228vsb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:27:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=2kDaqJ8kkLrue4qmrknO4SrlCDqDyyEMKmp4J+D3apo=;
-        b=n+SVm0x75TPgEl2WJ1O3dWpu/BUOQS5USFeoa3EG/zbaKBr+qI0ZnoxygSJ0dCjR2l
-         kW3cj9kJATreCqari33Y3ZY+l2W1weHPjZHl5hfxYqwCoo7gdBOHXqooOUHctFYpX035
-         y8B3iIu1Ki0lbhDhC1Vrg8bC5Pwt8+dscWQqGnMdEfHuTmqAOftXPIPmss5z6n2o1424
-         XKI/2n+5QthVosjEqzYg5Ath8Cjt6q3/njU8ZFwEQSIIj9wcqVUvvPtK9hAm95NVrUOG
-         8rkW+THxSQmS9LpBA5Bw4p3CNZE86tJw8kO6yABFw7iNzwTKWHZ2zDSWXP38z4TXnchn
-         ucpQ==
+        bh=yJ6od9McrPMmdAw4AV7uEvRIjejlQ+vKJRvVg9MI4ko=;
+        b=K36hufdysbVWhCU4svS8Pc3+yb0iT4gKHBu5uOJokNvd6bDdJeWvsW7l33U1uIPh4a
+         ZGRaGsmbSN0/iZvaDH57KJUchoU6Ii5WDoP6RzUMRq6cycTP5d/dFqU0T4Y74jH5vFMH
+         EfvIpyeGcAVQjQcVXQ+Ci21MF962YwiYYRU88yn93KMHaw527KGXD0xEJfQ+1wKzi4ra
+         Tlbu7mGyYhwTuQCcXwTcbGwOtOMNtkzcwgpPKrhIKMcxkw11n67HPt+DbynsXiC5oec3
+         6l5sj2B571995pIrmsds6NzXl9sRSnkdEV1NqFW+k3eOavvkOBhjdbgkTw5/upeAlncd
+         Slgw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=2kDaqJ8kkLrue4qmrknO4SrlCDqDyyEMKmp4J+D3apo=;
-        b=NNdpV1MaCpKdleCQck9QeSxFV6/JuyITmbEyd/Un2HObrMFh26lElCHe/PBuuCZgYc
-         rZLv61/VtZV+A+eZqrAnXWtl0ywZqIk7yTgi0+oPsjEwcTWWx9Bc/YeY55JJsSROo0pQ
-         aLjWlwzPgDfke/A2CrCJXQLKj7Nkm1/HC2+hkEVAOl+IBB8HrfnJOb6NKaT1KtPxu6t+
-         p0/qhszaKBd3flmOcYk/rd0hbiTm4k8W7g8c7IYaLGJBn78JL2MmG2tnMWQOE9dFGRrF
-         2DNPICAtPlcWUGpmnpmG0JB5QIDi/58BvEskKwYLVfGN5Vhze56FPS15iKVedgTjv424
-         FN4w==
-X-Gm-Message-State: AOAM533+fRf9hpR1w4+DUZoYVYgmUnZj76yClBtu+EVKnqN+HYbp1fTC
-        eK/nGz1JBB73U85GleAsiG6i+wV5BWBO6Bh3Wg1c5Q==
-X-Google-Smtp-Source: ABdhPJzIMRhRV/yg9aqVSCFBpvXw/1oHcK5rRxYO0qunLo0aRYFkWT0zcVlHnzaGco4oS+K+Tg5KEGhGW3vwBUm5+YU=
-X-Received: by 2002:a1f:2ed2:: with SMTP id u201mr10351361vku.7.1605611980408;
- Tue, 17 Nov 2020 03:19:40 -0800 (PST)
+        bh=yJ6od9McrPMmdAw4AV7uEvRIjejlQ+vKJRvVg9MI4ko=;
+        b=rMqnqlO6nTcZlGMbk9KOJc5teYkYOo4dLC0kf3GRH9adMQhuAnXV/Nl2XLlfMd3Z6I
+         Yb3cKbSDHdKlZhV0Csqp6qYzx8BJdQHbd/cHcJM1H0b6O6Aie7hc8kKaXO50sb0Z0laT
+         AboQOOFxsCXpXAX2n96CSuN7otXm7PbMpA95czRJx/Ef9WhHYttCOXYQxPTtPe5u3n63
+         m/6pFteozEC9lfHJTdGCXC5kAQ5v7KdR00iqYPvTbaregSvNljAvgmQfZ6Bh1X8jW6v+
+         BJT0lqT97XPfIfMSmi/fXcYidoadtTtWu8+b6oZ17broRfsFaXR07qKLMEs8aRUP1928
+         nAVQ==
+X-Gm-Message-State: AOAM533FBhAXcWLWfe00og7fiz5IT/3tTBuQy1WinY0ayo4j+wZVkcwh
+        YQR/qq1g/jAoTHT/tblsiIPi+MWv78hW0kyKDQs1Ng==
+X-Google-Smtp-Source: ABdhPJxkXnes2p6YHECDrKrrBG2GDdqrp5ut8s6gultvQTB+ovgHt1SMWFt+SHDNj4iDrRQdHuskHjfUkly50tbEFQY=
+X-Received: by 2002:a67:8c44:: with SMTP id o65mr3329095vsd.55.1605612456743;
+ Tue, 17 Nov 2020 03:27:36 -0800 (PST)
 MIME-Version: 1.0
-References: <20201102071715.18057-1-yangbo.lu@nxp.com> <CAPDyKFp9se67D-R0ay+77n9yg93APjDMvNvJATLJ7sFXn7RvfQ@mail.gmail.com>
- <AM7PR04MB688529C142BD33F6F78DDCF9F8E20@AM7PR04MB6885.eurprd04.prod.outlook.com>
-In-Reply-To: <AM7PR04MB688529C142BD33F6F78DDCF9F8E20@AM7PR04MB6885.eurprd04.prod.outlook.com>
+References: <20201106120933.7190-1-muhammad.husaini.zulkifli@intel.com>
+ <20201106120933.7190-2-muhammad.husaini.zulkifli@intel.com>
+ <CAPDyKFrq0Wsc7bNS0QPMitNqpkzK87VAuTnjDqrqTrVDGCwxgg@mail.gmail.com> <DM6PR11MB2876BB714DF701E81866B13EB8E30@DM6PR11MB2876.namprd11.prod.outlook.com>
+In-Reply-To: <DM6PR11MB2876BB714DF701E81866B13EB8E30@DM6PR11MB2876.namprd11.prod.outlook.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 17 Nov 2020 12:19:04 +0100
-Message-ID: <CAPDyKFrWo-6BPaLcD3hJaU8-PAXXCriiBbTOR792=q=NxDE70A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: export sd3_bus_mode to user space
-To:     "Y.b. Lu" <yangbo.lu@nxp.com>
+Date:   Tue, 17 Nov 2020 12:27:00 +0100
+Message-ID: <CAPDyKFpVJ0jGkqa2j9W-Z-su3vT2eSKHkObYj1Z0C3MvRQrKwg@mail.gmail.com>
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem
+ Bay SOC
+To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "Hunter, Adrian" <adrian.hunter@intel.com>,
+        "Raja Subramanian, Lakshmi Bai" 
+        <lakshmi.bai.raja.subramanian@intel.com>,
+        "Wan Mohamad, Wan Ahmad Zainie" 
+        <wan.ahmad.zainie.wan.mohamad@intel.com>,
+        "David E. Box" <david.e.box@linux.intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 17 Nov 2020 at 03:44, Y.b. Lu <yangbo.lu@nxp.com> wrote:
+On Mon, 16 Nov 2020 at 15:22, Zulkifli, Muhammad Husaini
+<muhammad.husaini.zulkifli@intel.com> wrote:
 >
-> Hi Uffe,
+> Hi Ulf,
 >
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Monday, November 16, 2020 7:27 PM
-> > To: Y.b. Lu <yangbo.lu@nxp.com>
-> > Cc: linux-mmc@vger.kernel.org; Adrian Hunter <adrian.hunter@intel.com>
-> > Subject: Re: [PATCH] mmc: export sd3_bus_mode to user space
+> Thanks for your review comments. I replied inline
+>
+> >-----Original Message-----
+> >From: Ulf Hansson <ulf.hansson@linaro.org>
+> >Sent: Monday, November 16, 2020 7:41 PM
+> >To: Zulkifli, Muhammad Husaini <muhammad.husaini.zulkifli@intel.com>
+> >Cc: linux-mmc@vger.kernel.org; Linux ARM <linux-arm-
+> >kernel@lists.infradead.org>; Linux Kernel Mailing List <linux-
+> >kernel@vger.kernel.org>; Hunter, Adrian <adrian.hunter@intel.com>; Raja
+> >Subramanian, Lakshmi Bai <lakshmi.bai.raja.subramanian@intel.com>; Wan
+> >Mohamad, Wan Ahmad Zainie
+> ><wan.ahmad.zainie.wan.mohamad@intel.com>; David E. Box
+> ><david.e.box@linux.intel.com>
+> >Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem
+> >Bay SOC
 > >
-> > On Mon, 2 Nov 2020 at 08:26, Yangbo Lu <yangbo.lu@nxp.com> wrote:
-> > >
-> > > There was no way for user to know what UHS-I modes the SD card
-> > > supporting. We might not know, even the highest speed mode
-> > > failed to use and fell back to a lower speed mode.
-> > >
-> > > This patch is to export sd3_bus_mode to user space to check.
+> >On Fri, 6 Nov 2020 at 05:10, <muhammad.husaini.zulkifli@intel.com> wrote:
+> >>
+> >> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+> >>
+> >> Commit 16ada730a759 ("mmc: sdhci-of-arasan: Modify clock operations
+> >> handling") introduces platform specific SDHCI clock operation.
+> >>
+> >> This patch declares the clock operation for Keem Bay.
+> >> Add clk_ops for SD, EMMC and SDIO operations.
 > >
-> > Well, even if the user would know, what can it do about it?
+> >The above commit message doesn't really tell why or what goes on here.
+> >Can please try to clarify that.
 >
-> For user, they can check the card speed modes capability, if they want to know.
-> For developer, they can know whether card is working on highest speed mode as expect. If not, they know there is issue needed checking.
->
-> >
-> > Sound like you are looking for some debugging feature instead?
->
-> Yes. I think we may need a way to know whether SD card is working on the highest speed mode as expect.
-> Otherwise, we are not able to realize issue if card just fall back to a lower speed mode to work.
-> Any suggestion on this?
->
-> Thanks a lot.
+> We missed out the clock operation handling patch (Commit 16ada730a759)
+> and did not handle the clk_ops  for Keem Bay SOC devices.
+> These 2 patches (Commit 16ada730a759) and (Commit 36c6aadaae86)  are merged at around the same time.
+> We catch the issue later when trying to boot into v5.10-rc1 with Keem Bay EVM.
+> That is why I created this patch to handle the clk_ops for Keem Bay devices.
 
-Well, perhaps we should look into extending the debugfs node for the
-card. See mmc_add_card_debugfs().
+Alright, so the previous changes were simply not sufficient to
+complete the support.
+
+>
+> >
+> >>
+> >> Fixes: 36c6aadaae86 ("mmc: sdhci-of-arasan: Add support for Intel Keem
+> >> Bay")
+> >
+> >Is $subject patch fixing a bug/regression?
+>
+> This is to fix issue on previous commit. It is a bug fix.
+
+Has it ever worked?
+
+Did the commit you point to with the fixes tag, break some other
+existing functionality?
 
 [...]
 
