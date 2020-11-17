@@ -2,141 +2,211 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2BC1C56202
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:27:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9726C5519F
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:38:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DA932222E
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:27:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4CB7B222EC
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 11:38:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="K36hufdy"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="swGeYFPO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728010AbgKQL1j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Nov 2020 06:27:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41924 "EHLO
+        id S1726853AbgKQLiA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Nov 2020 06:38:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725355AbgKQL1j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2020 06:27:39 -0500
-Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B37D2C0617A6
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:27:37 -0800 (PST)
-Received: by mail-vs1-xe42.google.com with SMTP id z123so10864228vsb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:27:37 -0800 (PST)
+        with ESMTP id S1725355AbgKQLiA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2020 06:38:00 -0500
+Received: from mail-qk1-x741.google.com (mail-qk1-x741.google.com [IPv6:2607:f8b0:4864:20::741])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6159AC0613CF
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:38:00 -0800 (PST)
+Received: by mail-qk1-x741.google.com with SMTP id 199so19965302qkg.9
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Nov 2020 03:38:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=yJ6od9McrPMmdAw4AV7uEvRIjejlQ+vKJRvVg9MI4ko=;
-        b=K36hufdysbVWhCU4svS8Pc3+yb0iT4gKHBu5uOJokNvd6bDdJeWvsW7l33U1uIPh4a
-         ZGRaGsmbSN0/iZvaDH57KJUchoU6Ii5WDoP6RzUMRq6cycTP5d/dFqU0T4Y74jH5vFMH
-         EfvIpyeGcAVQjQcVXQ+Ci21MF962YwiYYRU88yn93KMHaw527KGXD0xEJfQ+1wKzi4ra
-         Tlbu7mGyYhwTuQCcXwTcbGwOtOMNtkzcwgpPKrhIKMcxkw11n67HPt+DbynsXiC5oec3
-         6l5sj2B571995pIrmsds6NzXl9sRSnkdEV1NqFW+k3eOavvkOBhjdbgkTw5/upeAlncd
-         Slgw==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=UYY2bJWrCgkwZmKE57ljePo4YXcsUm06TLKcQz+CVVQ=;
+        b=swGeYFPO5RADskeMbGBpqC7R/seNNnR5kVKa6gLJUnS/bLjhl2hfhyUSJxyFFrerIM
+         LJ3l3deTnEetEAWlqmCmBRlOQExcrmoTKdd9Avwiro9oe/13mBqDRufvIyf0F1kAz9Qr
+         QbHOm7iRXXaj17T8hWQ1Ddc5i35JOY/JnmH8otwYp9tq9QpBrc5TcUnMIjWta/nVE76c
+         wdNtYNk7rcmk8xZxbFeG3KsAYxMhkynHPCFH5t8cQPMSD2r4Z5Hyv2+Nie+esvUz/3Il
+         qUhOQ6H6GKa2uJorKooq17Qn4CVMRISchDpUuWJh6d/WQhlCaZESAhHa6NxwNCarTaBc
+         DExA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=yJ6od9McrPMmdAw4AV7uEvRIjejlQ+vKJRvVg9MI4ko=;
-        b=rMqnqlO6nTcZlGMbk9KOJc5teYkYOo4dLC0kf3GRH9adMQhuAnXV/Nl2XLlfMd3Z6I
-         Yb3cKbSDHdKlZhV0Csqp6qYzx8BJdQHbd/cHcJM1H0b6O6Aie7hc8kKaXO50sb0Z0laT
-         AboQOOFxsCXpXAX2n96CSuN7otXm7PbMpA95czRJx/Ef9WhHYttCOXYQxPTtPe5u3n63
-         m/6pFteozEC9lfHJTdGCXC5kAQ5v7KdR00iqYPvTbaregSvNljAvgmQfZ6Bh1X8jW6v+
-         BJT0lqT97XPfIfMSmi/fXcYidoadtTtWu8+b6oZ17broRfsFaXR07qKLMEs8aRUP1928
-         nAVQ==
-X-Gm-Message-State: AOAM533FBhAXcWLWfe00og7fiz5IT/3tTBuQy1WinY0ayo4j+wZVkcwh
-        YQR/qq1g/jAoTHT/tblsiIPi+MWv78hW0kyKDQs1Ng==
-X-Google-Smtp-Source: ABdhPJxkXnes2p6YHECDrKrrBG2GDdqrp5ut8s6gultvQTB+ovgHt1SMWFt+SHDNj4iDrRQdHuskHjfUkly50tbEFQY=
-X-Received: by 2002:a67:8c44:: with SMTP id o65mr3329095vsd.55.1605612456743;
- Tue, 17 Nov 2020 03:27:36 -0800 (PST)
-MIME-Version: 1.0
-References: <20201106120933.7190-1-muhammad.husaini.zulkifli@intel.com>
- <20201106120933.7190-2-muhammad.husaini.zulkifli@intel.com>
- <CAPDyKFrq0Wsc7bNS0QPMitNqpkzK87VAuTnjDqrqTrVDGCwxgg@mail.gmail.com> <DM6PR11MB2876BB714DF701E81866B13EB8E30@DM6PR11MB2876.namprd11.prod.outlook.com>
-In-Reply-To: <DM6PR11MB2876BB714DF701E81866B13EB8E30@DM6PR11MB2876.namprd11.prod.outlook.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 17 Nov 2020 12:27:00 +0100
-Message-ID: <CAPDyKFpVJ0jGkqa2j9W-Z-su3vT2eSKHkObYj1Z0C3MvRQrKwg@mail.gmail.com>
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem
- Bay SOC
-To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>,
-        "Wan Mohamad, Wan Ahmad Zainie" 
-        <wan.ahmad.zainie.wan.mohamad@intel.com>,
-        "David E. Box" <david.e.box@linux.intel.com>
-Content-Type: text/plain; charset="UTF-8"
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=UYY2bJWrCgkwZmKE57ljePo4YXcsUm06TLKcQz+CVVQ=;
+        b=IWCUk6Jh3GfaZ9w5ynitNXVhcZYVIhc4CYE9hja99uU6SXOxPHWSGAtJsbwVAaINuX
+         0YBE3XOn9/Y5VX14vwf9eKJhxbWRnPs694buY5xaDFYWjOl0izuf0ayhq+fVxDMc+Znv
+         HAiM20b72lfMQ2r6vPAQHZO6i47ZnyiXhukXhb60zRSmxV1kdE1v+Jbu6PAoHOyBT+qs
+         C7n/g0LQulFabRxbQP3CrhMObNE/2ImPI0EoOP03Gyi3MSO4YpAm70smDVTljBRlK3/w
+         PlbACFlFZgJFSJ2wpKcTo9DXqaNIfxR+wuasKvBylAljBCfhzFitfg1Kip6ZZ5aewoLg
+         7LkA==
+X-Gm-Message-State: AOAM531F1lJOqpDtT0QlxnEbX5D6QEmC2OvgF08zz79WH/VNPbw5I+cv
+        0l+FIiPmisjuMeDnqP9NASrrsQq2WR5/pg==
+X-Google-Smtp-Source: ABdhPJwCoFQMyITBlamIBYnEJqTs4ZQxexFZHRP3Bm2IhOoO9KalfVlAYhEb33gCjY/sP37bl/U7JA==
+X-Received: by 2002:a05:620a:211b:: with SMTP id l27mr19787189qkl.352.1605613079560;
+        Tue, 17 Nov 2020 03:37:59 -0800 (PST)
+Received: from localhost.localdomain ([2804:14c:482:997:213a:a240:fc07:36c8])
+        by smtp.gmail.com with ESMTPSA id a1sm13395695qtw.11.2020.11.17.03.37.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Nov 2020 03:37:58 -0800 (PST)
+From:   Fabio Estevam <festevam@gmail.com>
+To:     ulf.hansson@linaro.org
+Cc:     adrian.hunter@intel.com, shawnguo@kernel.org,
+        kernel@pengutronix.de, haibo.chen@nxp.com,
+        linux-mmc@vger.kernel.org, Fabio Estevam <festevam@gmail.com>
+Subject: [PATCH] mmc: sdhci-esdhc-imx: Convert the driver to DT-only
+Date:   Tue, 17 Nov 2020 08:37:50 -0300
+Message-Id: <20201117113750.25053-1-festevam@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 16 Nov 2020 at 15:22, Zulkifli, Muhammad Husaini
-<muhammad.husaini.zulkifli@intel.com> wrote:
->
-> Hi Ulf,
->
-> Thanks for your review comments. I replied inline
->
-> >-----Original Message-----
-> >From: Ulf Hansson <ulf.hansson@linaro.org>
-> >Sent: Monday, November 16, 2020 7:41 PM
-> >To: Zulkifli, Muhammad Husaini <muhammad.husaini.zulkifli@intel.com>
-> >Cc: linux-mmc@vger.kernel.org; Linux ARM <linux-arm-
-> >kernel@lists.infradead.org>; Linux Kernel Mailing List <linux-
-> >kernel@vger.kernel.org>; Hunter, Adrian <adrian.hunter@intel.com>; Raja
-> >Subramanian, Lakshmi Bai <lakshmi.bai.raja.subramanian@intel.com>; Wan
-> >Mohamad, Wan Ahmad Zainie
-> ><wan.ahmad.zainie.wan.mohamad@intel.com>; David E. Box
-> ><david.e.box@linux.intel.com>
-> >Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem
-> >Bay SOC
-> >
-> >On Fri, 6 Nov 2020 at 05:10, <muhammad.husaini.zulkifli@intel.com> wrote:
-> >>
-> >> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-> >>
-> >> Commit 16ada730a759 ("mmc: sdhci-of-arasan: Modify clock operations
-> >> handling") introduces platform specific SDHCI clock operation.
-> >>
-> >> This patch declares the clock operation for Keem Bay.
-> >> Add clk_ops for SD, EMMC and SDIO operations.
-> >
-> >The above commit message doesn't really tell why or what goes on here.
-> >Can please try to clarify that.
->
-> We missed out the clock operation handling patch (Commit 16ada730a759)
-> and did not handle the clk_ops  for Keem Bay SOC devices.
-> These 2 patches (Commit 16ada730a759) and (Commit 36c6aadaae86)  are merged at around the same time.
-> We catch the issue later when trying to boot into v5.10-rc1 with Keem Bay EVM.
-> That is why I created this patch to handle the clk_ops for Keem Bay devices.
+Since 5.10-rc1 i.MX is a devicetree-only platform, so simplify the code
+by removing the unused non-DT support.
 
-Alright, so the previous changes were simply not sufficient to
-complete the support.
+Signed-off-by: Fabio Estevam <festevam@gmail.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 91 +-----------------------------
+ 1 file changed, 2 insertions(+), 89 deletions(-)
 
->
-> >
-> >>
-> >> Fixes: 36c6aadaae86 ("mmc: sdhci-of-arasan: Add support for Intel Keem
-> >> Bay")
-> >
-> >Is $subject patch fixing a bug/regression?
->
-> This is to fix issue on previous commit. It is a bug fix.
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index fce8fa7e6b30..16ed19f47939 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -296,22 +296,6 @@ struct pltfm_imx_data {
+ 	struct pm_qos_request pm_qos_req;
+ };
+ 
+-static const struct platform_device_id imx_esdhc_devtype[] = {
+-	{
+-		.name = "sdhci-esdhc-imx25",
+-		.driver_data = (kernel_ulong_t) &esdhc_imx25_data,
+-	}, {
+-		.name = "sdhci-esdhc-imx35",
+-		.driver_data = (kernel_ulong_t) &esdhc_imx35_data,
+-	}, {
+-		.name = "sdhci-esdhc-imx51",
+-		.driver_data = (kernel_ulong_t) &esdhc_imx51_data,
+-	}, {
+-		/* sentinel */
+-	}
+-};
+-MODULE_DEVICE_TABLE(platform, imx_esdhc_devtype);
+-
+ static const struct of_device_id imx_esdhc_dt_ids[] = {
+ 	{ .compatible = "fsl,imx25-esdhc", .data = &esdhc_imx25_data, },
+ 	{ .compatible = "fsl,imx35-esdhc", .data = &esdhc_imx35_data, },
+@@ -1531,72 +1515,6 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ }
+ #endif
+ 
+-static int sdhci_esdhc_imx_probe_nondt(struct platform_device *pdev,
+-			 struct sdhci_host *host,
+-			 struct pltfm_imx_data *imx_data)
+-{
+-	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+-	int err;
+-
+-	if (!host->mmc->parent->platform_data) {
+-		dev_err(mmc_dev(host->mmc), "no board data!\n");
+-		return -EINVAL;
+-	}
+-
+-	imx_data->boarddata = *((struct esdhc_platform_data *)
+-				host->mmc->parent->platform_data);
+-	/* write_protect */
+-	if (boarddata->wp_type == ESDHC_WP_GPIO) {
+-		host->mmc->caps2 |= MMC_CAP2_RO_ACTIVE_HIGH;
+-
+-		err = mmc_gpiod_request_ro(host->mmc, "wp", 0, 0);
+-		if (err) {
+-			dev_err(mmc_dev(host->mmc),
+-				"failed to request write-protect gpio!\n");
+-			return err;
+-		}
+-	}
+-
+-	/* card_detect */
+-	switch (boarddata->cd_type) {
+-	case ESDHC_CD_GPIO:
+-		err = mmc_gpiod_request_cd(host->mmc, "cd", 0, false, 0);
+-		if (err) {
+-			dev_err(mmc_dev(host->mmc),
+-				"failed to request card-detect gpio!\n");
+-			return err;
+-		}
+-		fallthrough;
+-
+-	case ESDHC_CD_CONTROLLER:
+-		/* we have a working card_detect back */
+-		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+-		break;
+-
+-	case ESDHC_CD_PERMANENT:
+-		host->mmc->caps |= MMC_CAP_NONREMOVABLE;
+-		break;
+-
+-	case ESDHC_CD_NONE:
+-		break;
+-	}
+-
+-	switch (boarddata->max_bus_width) {
+-	case 8:
+-		host->mmc->caps |= MMC_CAP_8_BIT_DATA | MMC_CAP_4_BIT_DATA;
+-		break;
+-	case 4:
+-		host->mmc->caps |= MMC_CAP_4_BIT_DATA;
+-		break;
+-	case 1:
+-	default:
+-		host->quirks |= SDHCI_QUIRK_FORCE_1_BIT_DATA;
+-		break;
+-	}
+-
+-	return 0;
+-}
+-
+ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ {
+ 	const struct of_device_id *of_id =
+@@ -1616,8 +1534,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 
+ 	imx_data = sdhci_pltfm_priv(pltfm_host);
+ 
+-	imx_data->socdata = of_id ? of_id->data : (struct esdhc_soc_data *)
+-						  pdev->id_entry->driver_data;
++	imx_data->socdata = of_id->data;
+ 
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_PMQOS)
+ 		cpu_latency_qos_add_request(&imx_data->pm_qos_req, 0);
+@@ -1713,10 +1630,7 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 			goto disable_ahb_clk;
+ 	}
+ 
+-	if (of_id)
+-		err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+-	else
+-		err = sdhci_esdhc_imx_probe_nondt(pdev, host, imx_data);
++	err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+ 	if (err)
+ 		goto disable_ahb_clk;
+ 
+@@ -1929,7 +1843,6 @@ static struct platform_driver sdhci_esdhc_imx_driver = {
+ 		.of_match_table = imx_esdhc_dt_ids,
+ 		.pm	= &sdhci_esdhc_pmops,
+ 	},
+-	.id_table	= imx_esdhc_devtype,
+ 	.probe		= sdhci_esdhc_imx_probe,
+ 	.remove		= sdhci_esdhc_imx_remove,
+ };
+-- 
+2.17.1
 
-Has it ever worked?
-
-Did the commit you point to with the fixes tag, break some other
-existing functionality?
-
-[...]
-
-Kind regards
-Uffe
