@@ -2,193 +2,260 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71B36C5519F
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 13:49:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AB6DC63697
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 15:26:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 10E13221F8
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 13:49:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0A89824198
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Nov 2020 15:26:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=intel.onmicrosoft.com header.i=@intel.onmicrosoft.com header.b="xwPFPxvt"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="J+flaaOm"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1733230AbgKQNsb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Nov 2020 08:48:31 -0500
-Received: from mga05.intel.com ([192.55.52.43]:26718 "EHLO mga05.intel.com"
+        id S1730325AbgKQPZs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Nov 2020 10:25:48 -0500
+Received: from mail.kernel.org ([198.145.29.99]:40724 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387658AbgKQNqt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 17 Nov 2020 08:46:49 -0500
-IronPort-SDR: TK1M+gjX5lDp+GTn0ilOSHwVMCSl/gmwyTEtE6TAsCLBXC4Mkghh4vKDqYg7NQnPExI5y/M1uX
- jZ2BoLdhkLPg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9807"; a="255636343"
-X-IronPort-AV: E=Sophos;i="5.77,485,1596524400"; 
-   d="scan'208";a="255636343"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2020 05:46:48 -0800
-IronPort-SDR: PPgppw46BkNdpfthgF2OHoTVeatOUtzPm1CzRTpm4Cj0sH+sgiR8Oq+9XGyu2FYPHtRWqK37E1
- cSvRjRBNFUjQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.77,485,1596524400"; 
-   d="scan'208";a="325159984"
-Received: from orsmsx606.amr.corp.intel.com ([10.22.229.19])
-  by orsmga003.jf.intel.com with ESMTP; 17 Nov 2020 05:46:48 -0800
-Received: from orsmsx611.amr.corp.intel.com (10.22.229.24) by
- ORSMSX606.amr.corp.intel.com (10.22.229.19) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1713.5; Tue, 17 Nov 2020 05:46:48 -0800
-Received: from orsedg603.ED.cps.intel.com (10.7.248.4) by
- orsmsx611.amr.corp.intel.com (10.22.229.24) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1713.5
- via Frontend Transport; Tue, 17 Nov 2020 05:46:48 -0800
-Received: from NAM02-BL2-obe.outbound.protection.outlook.com (104.47.38.52) by
- edgegateway.intel.com (134.134.137.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.1.1713.5; Tue, 17 Nov 2020 05:46:47 -0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=HVO49z+PiRNLDyRn+AAtv4pPAmRL2O0702got/0spkmMZif8Ao2G0RD8L875dT2uZBlnpZ3+8cCxNVLStpnKIsbnme6m9FWsw+mnCTpjuHEIJa2AYS7s7vJFyDgvuexCfJHSQBm0tqCopUfhqh9r+2HJAS72zi5XF/LzlFD4i3hV8iYuCZIPOoWo/edK2YD1/4z3oTVXOCQ5QPUeJjKTyW4JP5GFE6JNH4/YxlfvIBA0wzHUxrmHM8nvgr2UZKdXcpX9qzjfG2Btjnmd0fsRmXKhGSgG/yL5yiihAcVRFohHudRJ5lAc/QDCXQQsL8GDLNUAYzmdFKcCmbiQ3uzOFg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=CNRnQPnyVR1loYHZEiljYq61WpNgneDSrVQ/iCJDbQw=;
- b=a2H3RQAEMJxelDymSIwYc5FvbhvcLk7IkFX04QMstC3cxh0v13PT03NxJzwYJ9gOBlCqXNeA6Ebwbb0u35/A88pIccpKKoPlV7mTbeOt9z8gV8fTHgp7ZhLeE3+J3+x9C/Trgq69wU2R5udYmXv4Up+vYIJkNGtQJ1gqCrLU/Ik/h5pvkrt7C97tRrSDqjXWGHkLAOHUPXvBS4gW420uHmXxAV0+aX4c+aluPCcFRB1oRxUbjQ7YxS1uviKPLIB+2Tl75vfNbpZL6gRQsSp/WLbkkw9og5V5IcHXt8uR/TiZRJsGq/FB4b7jgzPEFUiYnyjbmVkm40JcMge0WhC5nQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
- dkim=pass header.d=intel.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=intel.onmicrosoft.com;
- s=selector2-intel-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=CNRnQPnyVR1loYHZEiljYq61WpNgneDSrVQ/iCJDbQw=;
- b=xwPFPxvtWAdgeygrvJcQ0nDMJbN84JKgjvAHO5UN9f9e3OajtOwzAIh6Bs3WdiUYfR2kOX8RrqeYWEWsoWk9gv+523dwLic2UaBHzdeWs9QmyCvu0umcb2Wx5RFZA8RWT6YgAbG6IGydwV9q3qWzuvR9zXsCD4h5jFu31UqONQE=
-Received: from DM6PR11MB2876.namprd11.prod.outlook.com (2603:10b6:5:c1::16) by
- DM6PR11MB2938.namprd11.prod.outlook.com (2603:10b6:5:64::11) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.3499.32; Tue, 17 Nov 2020 13:46:42 +0000
-Received: from DM6PR11MB2876.namprd11.prod.outlook.com
- ([fe80::c85a:d98e:fbf3:9f8c]) by DM6PR11MB2876.namprd11.prod.outlook.com
- ([fe80::c85a:d98e:fbf3:9f8c%5]) with mapi id 15.20.3564.028; Tue, 17 Nov 2020
- 13:46:42 +0000
-From:   "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>,
-        "Wan Mohamad, Wan Ahmad Zainie" 
-        <wan.ahmad.zainie.wan.mohamad@intel.com>,
-        "David E. Box" <david.e.box@linux.intel.com>
-Subject: RE: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem
- Bay SOC
-Thread-Topic: [PATCH v1 1/1] mmc: sdhci-of-arasan: Specify .clk_ops for Keem
- Bay SOC
-Thread-Index: AQHWs/Kyv+f0bf2SO0CVLGdSxsJGq6nKstkAgAApWoCAAWUIAIAAJgbg
-Date:   Tue, 17 Nov 2020 13:46:42 +0000
-Message-ID: <DM6PR11MB2876A043535B8EDE5286FBB0B8E20@DM6PR11MB2876.namprd11.prod.outlook.com>
-References: <20201106120933.7190-1-muhammad.husaini.zulkifli@intel.com>
- <20201106120933.7190-2-muhammad.husaini.zulkifli@intel.com>
- <CAPDyKFrq0Wsc7bNS0QPMitNqpkzK87VAuTnjDqrqTrVDGCwxgg@mail.gmail.com>
- <DM6PR11MB2876BB714DF701E81866B13EB8E30@DM6PR11MB2876.namprd11.prod.outlook.com>
- <CAPDyKFpVJ0jGkqa2j9W-Z-su3vT2eSKHkObYj1Z0C3MvRQrKwg@mail.gmail.com>
-In-Reply-To: <CAPDyKFpVJ0jGkqa2j9W-Z-su3vT2eSKHkObYj1Z0C3MvRQrKwg@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-dlp-version: 11.5.1.3
-dlp-product: dlpe-windows
-dlp-reaction: no-action
-authentication-results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=intel.com;
-x-originating-ip: [42.189.188.113]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 8cd817b5-12ce-4d25-7339-08d88aff376d
-x-ms-traffictypediagnostic: DM6PR11MB2938:
-x-ld-processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <DM6PR11MB2938CC33BF09AA33B7842075B8E20@DM6PR11MB2938.namprd11.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: Ec+HTRoSg9IQ3fHzDcO+twMezeoudnjJR4QCDb5hDctk+r0NwSq6XJl9PadN4Lw+gFRWkR3ML1PtEq1WaZ4E6OoP4sQsNbZhLCcL1QfF4pGFTGgY9e8iC74ZdyFfS7Gr4mZ8smMbb1op6clBCPGdEVqc2dJPEGrXt7C0MFYjIbnwJTrQCWdUm6JRbVqAxhrp+UBZu7WPN615stcMyARy0ooLWcNjsGNryvdUBZ5ert5ex+lTbBH2bl7GaKyKejaFi8kpfH1Z0BmeKJsQhLsluxYKiwPwmhPF5nMFR4DbXrhVHxos73V0fKJz1hbkdgrN7x3kjY0qQtfCJflQek0/iaAJSeoAsl1lfyul8GBWLiLTd6nXO7kZeqf4bX6EG4kr
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR11MB2876.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(346002)(376002)(366004)(396003)(39860400002)(83380400001)(8936002)(8676002)(52536014)(33656002)(7696005)(478600001)(316002)(5660300002)(55016002)(9686003)(2906002)(76116006)(186003)(6506007)(86362001)(6916009)(66946007)(71200400001)(66476007)(66556008)(26005)(64756008)(66446008)(54906003)(4326008)(142923001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: R9ow3X+cDIPz6hODMHpe3Pp/iECL21zp07DErx4OR90wFRGdTPEK8eB68FlSFjMqNefiREk7Qm8tgPTMM5bJcasXgWKQuwV+H4aXkqptbQd53Nm49F0UpejOH1f4v+QhUHVO0EvJXj3jT+5g/iDADPRqo7uBzeVOAbNq7YzPGpOzm5Ie4Vj9VQj7znpdi3DmO/XFw7sgIUUSKfNFdS4HNzJ3HNCMpRMpdzymEO9Y58dXNFQKH8UNw9ORizfSJahIQ20x2x1/8VVhwQ9cRB1y1v6bei5Jo0Ia9TypNzx6KtDcPDDgZXd/0CStn3lSdZQe+B+R1wh2Qi0cpveKGTVwLlImpyUPNj6HIehpWteqfbG+VYOcGp/3eN1KhVJjugIK84nJf7hE5gbB+FbVxB689jCXPMvvLh7w3fcrH0TOl22cj9zz7QQEwyup/Ly1C9pAZhflNtLLsXm14beuSUl8Ap0QD3yVOZcus3xTbwUHtP9tHaJCEMnDBJEPcpEJZqPYJN1OD7EWA0RAs6mMuOrbX8Ll8jrpRmPCPAKYXiEedbGKhmtYcwhxbnI9sZVlmCORQ8Kk/ve/V6EDeK0AXs2yz2jtia+VR2pQxPsKOc1eeEvbBkOPnJ3vtyN1Bb5zkb2xSiH9A/KVzqLxLLDugwKGmsoKdXwkp++4/UqvQDMRz6TF4Utn1+HdzoWZDLfgqydy80QSencQsgDeQ+4fWzyX9XGKyHpHUfQlUBiWWap1DGPrpca1o7bHsEzhJVNi6iMd12a7J+WdiuZOzKMSVAX+bzp2Ao6Qv5CXyEbuLOdzNT9AiMZybUrYnpePvJCv7JnvPu99br+YmmCTxIAWKGh7hG57/gWC0SbyhbFy1pkJpdq9J9tE1zGCH4i8VmLQj1vPENRCIE0qEQXVzZYgj0ZmUQ==
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S1730357AbgKQPZs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 17 Nov 2020 10:25:48 -0500
+Received: from mail-oi1-f178.google.com (mail-oi1-f178.google.com [209.85.167.178])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E53D121D7E;
+        Tue, 17 Nov 2020 15:25:46 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1605626747;
+        bh=CVu5v9JWmsPdgzdRxPBbhTfTolFO1h9kmq6zvJbNsA4=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=J+flaaOm6VKiGyhaAiyG28jsiRK2MGr2u0xtlHBYxq9EFZFL/vZkRU2MuLjDAHpqR
+         l7T1iwlBEivDTD5ACSMnms0WmwziXkB3y6Jg1Tl3Lw7xZe79btO/4Qa9nDK0ugAF7m
+         G/PpzVaW8dJOpFqhNrp/qRCkITDi1GNQlS7mCyHs=
+Received: by mail-oi1-f178.google.com with SMTP id m13so22940158oih.8;
+        Tue, 17 Nov 2020 07:25:46 -0800 (PST)
+X-Gm-Message-State: AOAM533iaXY6F6GnSVR02/k72uJ/SaaJd79ZbzRFss37Miqwunrz38dH
+        xJ0aAGYAON9bMdzzlVN/f7gOFkQ1F00I5PBQqJ8=
+X-Google-Smtp-Source: ABdhPJxLUZ3Q/0MTwO5OAvlU6OhPmW7CEX/MHtkC1bhFJ5YyKOy1hu3Q+8GNonKUmEvz1gQd3hmtE7sTnxJK4rgZ2hw=
+X-Received: by 2002:aca:180a:: with SMTP id h10mr2585953oih.4.1605626746155;
+ Tue, 17 Nov 2020 07:25:46 -0800 (PST)
 MIME-Version: 1.0
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR11MB2876.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8cd817b5-12ce-4d25-7339-08d88aff376d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Nov 2020 13:46:42.2459
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: qszRH4RoEiWLMiTLpf9skA+ujWMmaUNnalh0uJLGcSMLUkdWL1U8Zkg9PdaV4gyuSjip6il5GWjazGr9/DPYnwOUwOmk7ZXf6otR27cqC4nl2mHNBAA/FIaDkqM/s46j
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR11MB2938
-X-OriginatorOrg: intel.com
+References: <CA+G9fYuk4imvhyCN7D7T6PMDH6oNp6HDCRiTUKMQ6QXXjBa4ag@mail.gmail.com>
+In-Reply-To: <CA+G9fYuk4imvhyCN7D7T6PMDH6oNp6HDCRiTUKMQ6QXXjBa4ag@mail.gmail.com>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Tue, 17 Nov 2020 16:25:30 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a2MmA257e486D2hj_qj9Wk0ybkfg9yk9f5hR=h-KWUHVg@mail.gmail.com>
+Message-ID: <CAK8P3a2MmA257e486D2hj_qj9Wk0ybkfg9yk9f5hR=h-KWUHVg@mail.gmail.com>
+Subject: Re: [arm] BUG: KASAN: slab-out-of-bounds in memcmp+0x30/0x5c
+To:     Naresh Kamboju <naresh.kamboju@linaro.org>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux-Next Mailing List <linux-next@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mm <linux-mm@kvack.org>, lkft-triage@lists.linaro.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        "Andrii.Tseglytskyi" <andrii.tseglytskyi@ti.com>,
+        Nishanth Menon <nm@ti.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgVWxmLA0KDQo+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj5Gcm9tOiBVbGYgSGFuc3Nv
-biA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NCj5TZW50OiBUdWVzZGF5LCBOb3ZlbWJlciAxNywg
-MjAyMCA3OjI3IFBNDQo+VG86IFp1bGtpZmxpLCBNdWhhbW1hZCBIdXNhaW5pIDxtdWhhbW1hZC5o
-dXNhaW5pLnp1bGtpZmxpQGludGVsLmNvbT4NCj5DYzogbGludXgtbW1jQHZnZXIua2VybmVsLm9y
-ZzsgTGludXggQVJNIDxsaW51eC1hcm0tDQo+a2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+OyBM
-aW51eCBLZXJuZWwgTWFpbGluZyBMaXN0IDxsaW51eC0NCj5rZXJuZWxAdmdlci5rZXJuZWwub3Jn
-PjsgSHVudGVyLCBBZHJpYW4gPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsgUmFqYQ0KPlN1YnJh
-bWFuaWFuLCBMYWtzaG1pIEJhaSA8bGFrc2htaS5iYWkucmFqYS5zdWJyYW1hbmlhbkBpbnRlbC5j
-b20+OyBXYW4NCj5Nb2hhbWFkLCBXYW4gQWhtYWQgWmFpbmllDQo+PHdhbi5haG1hZC56YWluaWUu
-d2FuLm1vaGFtYWRAaW50ZWwuY29tPjsgRGF2aWQgRS4gQm94DQo+PGRhdmlkLmUuYm94QGxpbnV4
-LmludGVsLmNvbT4NCj5TdWJqZWN0OiBSZTogW1BBVENIIHYxIDEvMV0gbW1jOiBzZGhjaS1vZi1h
-cmFzYW46IFNwZWNpZnkgLmNsa19vcHMgZm9yIEtlZW0gQmF5DQo+U09DDQo+DQo+T24gTW9uLCAx
-NiBOb3YgMjAyMCBhdCAxNToyMiwgWnVsa2lmbGksIE11aGFtbWFkIEh1c2FpbmkNCj48bXVoYW1t
-YWQuaHVzYWluaS56dWxraWZsaUBpbnRlbC5jb20+IHdyb3RlOg0KPj4NCj4+IEhpIFVsZiwNCj4+
-DQo+PiBUaGFua3MgZm9yIHlvdXIgcmV2aWV3IGNvbW1lbnRzLiBJIHJlcGxpZWQgaW5saW5lDQo+
-Pg0KPj4gPi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiA+RnJvbTogVWxmIEhhbnNzb24g
-PHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+PiA+U2VudDogTW9uZGF5LCBOb3ZlbWJlciAxNiwg
-MjAyMCA3OjQxIFBNDQo+PiA+VG86IFp1bGtpZmxpLCBNdWhhbW1hZCBIdXNhaW5pIDxtdWhhbW1h
-ZC5odXNhaW5pLnp1bGtpZmxpQGludGVsLmNvbT4NCj4+ID5DYzogbGludXgtbW1jQHZnZXIua2Vy
-bmVsLm9yZzsgTGludXggQVJNIDxsaW51eC1hcm0tDQo+PiA+a2VybmVsQGxpc3RzLmluZnJhZGVh
-ZC5vcmc+OyBMaW51eCBLZXJuZWwgTWFpbGluZyBMaXN0IDxsaW51eC0NCj4+ID5rZXJuZWxAdmdl
-ci5rZXJuZWwub3JnPjsgSHVudGVyLCBBZHJpYW4gPGFkcmlhbi5odW50ZXJAaW50ZWwuY29tPjsN
-Cj4+ID5SYWphIFN1YnJhbWFuaWFuLCBMYWtzaG1pIEJhaQ0KPj4gPjxsYWtzaG1pLmJhaS5yYWph
-LnN1YnJhbWFuaWFuQGludGVsLmNvbT47IFdhbiBNb2hhbWFkLCBXYW4gQWhtYWQNCj4+ID5aYWlu
-aWUgPHdhbi5haG1hZC56YWluaWUud2FuLm1vaGFtYWRAaW50ZWwuY29tPjsgRGF2aWQgRS4gQm94
-DQo+PiA+PGRhdmlkLmUuYm94QGxpbnV4LmludGVsLmNvbT4NCj4+ID5TdWJqZWN0OiBSZTogW1BB
-VENIIHYxIDEvMV0gbW1jOiBzZGhjaS1vZi1hcmFzYW46IFNwZWNpZnkgLmNsa19vcHMNCj4+ID5m
-b3IgS2VlbSBCYXkgU09DDQo+PiA+DQo+PiA+T24gRnJpLCA2IE5vdiAyMDIwIGF0IDA1OjEwLCA8
-bXVoYW1tYWQuaHVzYWluaS56dWxraWZsaUBpbnRlbC5jb20+IHdyb3RlOg0KPj4gPj4NCj4+ID4+
-IEZyb206IE11aGFtbWFkIEh1c2FpbmkgWnVsa2lmbGkNCj4+ID4+IDxtdWhhbW1hZC5odXNhaW5p
-Lnp1bGtpZmxpQGludGVsLmNvbT4NCj4+ID4+DQo+PiA+PiBDb21taXQgMTZhZGE3MzBhNzU5ICgi
-bW1jOiBzZGhjaS1vZi1hcmFzYW46IE1vZGlmeSBjbG9jayBvcGVyYXRpb25zDQo+PiA+PiBoYW5k
-bGluZyIpIGludHJvZHVjZXMgcGxhdGZvcm0gc3BlY2lmaWMgU0RIQ0kgY2xvY2sgb3BlcmF0aW9u
-Lg0KPj4gPj4NCj4+ID4+IFRoaXMgcGF0Y2ggZGVjbGFyZXMgdGhlIGNsb2NrIG9wZXJhdGlvbiBm
-b3IgS2VlbSBCYXkuDQo+PiA+PiBBZGQgY2xrX29wcyBmb3IgU0QsIEVNTUMgYW5kIFNESU8gb3Bl
-cmF0aW9ucy4NCj4+ID4NCj4+ID5UaGUgYWJvdmUgY29tbWl0IG1lc3NhZ2UgZG9lc24ndCByZWFs
-bHkgdGVsbCB3aHkgb3Igd2hhdCBnb2VzIG9uIGhlcmUuDQo+PiA+Q2FuIHBsZWFzZSB0cnkgdG8g
-Y2xhcmlmeSB0aGF0Lg0KPj4NCj4+IFdlIG1pc3NlZCBvdXQgdGhlIGNsb2NrIG9wZXJhdGlvbiBo
-YW5kbGluZyBwYXRjaCAoQ29tbWl0IDE2YWRhNzMwYTc1OSkNCj4+IGFuZCBkaWQgbm90IGhhbmRs
-ZSB0aGUgY2xrX29wcyAgZm9yIEtlZW0gQmF5IFNPQyBkZXZpY2VzLg0KPj4gVGhlc2UgMiBwYXRj
-aGVzIChDb21taXQgMTZhZGE3MzBhNzU5KSBhbmQgKENvbW1pdCAzNmM2YWFkYWFlODYpICBhcmUN
-Cj5tZXJnZWQgYXQgYXJvdW5kIHRoZSBzYW1lIHRpbWUuDQo+PiBXZSBjYXRjaCB0aGUgaXNzdWUg
-bGF0ZXIgd2hlbiB0cnlpbmcgdG8gYm9vdCBpbnRvIHY1LjEwLXJjMSB3aXRoIEtlZW0gQmF5DQo+
-RVZNLg0KPj4gVGhhdCBpcyB3aHkgSSBjcmVhdGVkIHRoaXMgcGF0Y2ggdG8gaGFuZGxlIHRoZSBj
-bGtfb3BzIGZvciBLZWVtIEJheSBkZXZpY2VzLg0KPg0KPkFscmlnaHQsIHNvIHRoZSBwcmV2aW91
-cyBjaGFuZ2VzIHdlcmUgc2ltcGx5IG5vdCBzdWZmaWNpZW50IHRvIGNvbXBsZXRlIHRoZQ0KPnN1
-cHBvcnQuDQo+DQo+Pg0KPj4gPg0KPj4gPj4NCj4+ID4+IEZpeGVzOiAzNmM2YWFkYWFlODYgKCJt
-bWM6IHNkaGNpLW9mLWFyYXNhbjogQWRkIHN1cHBvcnQgZm9yIEludGVsDQo+PiA+PiBLZWVtDQo+
-PiA+PiBCYXkiKQ0KPj4gPg0KPj4gPklzICRzdWJqZWN0IHBhdGNoIGZpeGluZyBhIGJ1Zy9yZWdy
-ZXNzaW9uPw0KPj4NCj4+IFRoaXMgaXMgdG8gZml4IGlzc3VlIG9uIHByZXZpb3VzIGNvbW1pdC4g
-SXQgaXMgYSBidWcgZml4Lg0KPg0KPkhhcyBpdCBldmVyIHdvcmtlZD8NCg0KWWVzIGl0IGlzIHdv
-cmtpbmcuIFRlc3RlZCB3aXRoIEtlZW0gQmF5IEVWTS4gDQpTRC9FTU1DL1NESU8gZGV2aWNlcyBy
-ZWdpc3RlcmVkIHN1Y2Nlc3NmdWxseSB3aXRoIHRoaXMgZml4LiAgDQoNCj4NCj5EaWQgdGhlIGNv
-bW1pdCB5b3UgcG9pbnQgdG8gd2l0aCB0aGUgZml4ZXMgdGFnLCBicmVhayBzb21lIG90aGVyIGV4
-aXN0aW5nDQo+ZnVuY3Rpb25hbGl0eT8NCg0KSXQgc2hvdWxkIG5vdCBicmVhayBvdGhlciBleGlz
-dGluZyBmdW5jdGlvbmFsaXR5LiANClRoaXMgaXMgc3BlY2lmaWMgZm9yIEtlZW0gQmF5IFNPQyBv
-bmx5Lg0KDQo+DQo+Wy4uLl0NCj4NCj5LaW5kIHJlZ2FyZHMNCj5VZmZlDQo=
+On Tue, Nov 17, 2020 at 3:44 PM Naresh Kamboju
+<naresh.kamboju@linaro.org> wrote:
+>
+> While booting arm KASAN config enabled kernel on TI x15 device
+> Linux version 5.10.0-rc3-next-20201116.
+>
+> The reported issue is not a regression since we have recently started testing
+> arm+kasan builds on LKFT.
+>
+> The boot was not successful on x15 and qemu_arm  for some other reason.
+> The kernel config and crash log attached to this email.
+
+Nice find!
+
+> [   13.071906] BUG: KASAN: slab-out-of-bounds in memcmp+0x30/0x5c
+> [   13.077526] Synopsys Designware Multimedia Card Interface Driver
+> [   13.077781] Read of size 1 at addr c5ae1d90 by task kworker/0:0/5
+> [   13.089918]
+> [   13.091433] CPU: 0 PID: 5 Comm: kworker/0:0 Not tainted
+> 5.10.0-rc3-next-20201116 #2
+> [   13.093605] sdhci-pltfm: SDHCI platform and OF driver helper
+> [   13.099135] Hardware name: Generic DRA74X (Flattened Device Tree)
+> [   13.110942] Workqueue: events dbs_work_handler
+> [   13.115442] [<c0315abc>] (unwind_backtrace) from [<c030ebf8>]
+> (show_stack+0x10/0x14)
+> [   13.123240] [<c030ebf8>] (show_stack) from [<c16c91cc>]
+> (dump_stack+0xc8/0xe0)
+> [   13.130518] [<c16c91cc>] (dump_stack) from [<c051b4ec>]
+> (print_address_description.constprop.0+0x34/0x2dc)
+> [   13.140238] [<c051b4ec>] (print_address_description.constprop.0)
+> from [<c051b9e0>] (kasan_report+0x1a8/0x1c4)
+> [   13.145871] omap_gpio 4805d000.gpio: Could not set line 27 debounce
+> to 200000 microseconds (-22)
+> [   13.150221] [<c051b9e0>] (kasan_report) from [<c0997704>] (memcmp+0x30/0x5c)
+> [   13.159064] sdhci-omap 4809c000.mmc: Got CD GPIO
+> [   13.166123] [<c0997704>] (memcmp) from [<c0c33694>]
+> (ti_abb_set_voltage_sel+0x94/0x58c)
+> [   13.166150] [<c0c33694>] (ti_abb_set_voltage_sel) from [<c0c0f0f8>]
+> (_regulator_call_set_voltage_sel+0xd8/0x12c)
+
+
+I see this code in ti_abb_set_voltage_sel():
+
+        if (sel >= desc->n_voltages) {
+                dev_err(dev, "%s: sel idx(%d) >= n_voltages(%d)\n", __func__,
+                        sel, desc->n_voltages);
+                return -EINVAL;
+        }
+
+        /* If we are in the same index as we were, nothing to do here! */
+        if (sel == abb->current_info_idx) {
+                dev_dbg(dev, "%s: Already at sel=%d\n", __func__, sel);
+                return ret;
+        }
+
+        /* If data is exactly the same, then just update index, no change */
+        info = &abb->info[sel];
+        oinfo = &abb->info[abb->current_info_idx];
+        if (!memcmp(info, oinfo, sizeof(*info))) {
+
+One of the two pointers overflows the abb->info array that is allocated
+with length 'desc->n_voltages'. The 'sel' argument is checked against
+that limit, so I assume it's abb->current_info_idx, and this is indeed
+initialized as
+
+        /* We do not know where the OPP voltage is at the moment */
+        abb->current_info_idx = -EINVAL;
+
+Using the negative '-EINVAL' as an array index would indeed cause
+an out-of-bounds access.
+
+Could you try adding this extra bounds check?
+
+index 3e60bff76194..c475a9461027 100644
+--- a/drivers/regulator/ti-abb-regulator.c
++++ b/drivers/regulator/ti-abb-regulator.c
+@@ -345,7 +345,8 @@ static int ti_abb_set_voltage_sel(struct
+regulator_dev *rdev, unsigned sel)
+        /* If data is exactly the same, then just update index, no change */
+        info = &abb->info[sel];
+        oinfo = &abb->info[abb->current_info_idx];
+-       if (!memcmp(info, oinfo, sizeof(*info))) {
++       if (abb->current_info_idx >= 0 &&
++           !memcmp(info, oinfo, sizeof(*info))) {
+                dev_dbg(dev, "%s: Same data new idx=%d, old idx=%d\n", __func__,
+                        sel, abb->current_info_idx);
+                goto out;
+
+      Arnd
+
+(rest of the report below)
+
+> [   13.173027] sdhci-omap 4809c000.mmc: supply vqmmc not found, using
+> dummy regulator
+> [   13.178825] [<c0c0f0f8>] (_regulator_call_set_voltage_sel) from
+> [<c0c0f654>] (_regulator_do_set_voltage+0x508/0x644)
+> [   13.207208] [<c0c0f654>] (_regulator_do_set_voltage) from
+> [<c0c18558>] (regulator_set_voltage_rdev+0xc4/0x2fc)
+> [   13.217276] [<c0c18558>] (regulator_set_voltage_rdev) from
+> [<c0c14928>] (regulator_do_balance_voltage+0x304/0x658)
+> [   13.227692] [<c0c14928>] (regulator_do_balance_voltage) from
+> [<c0c1839c>] (regulator_set_voltage_unlocked+0x1ac/0x2a4)
+> [   13.238455] [<c0c1839c>] (regulator_set_voltage_unlocked) from
+> [<c0c18834>] (regulator_set_voltage+0xa4/0xfc)
+> [   13.248437] [<c0c18834>] (regulator_set_voltage) from [<c1316458>]
+> (_opp_set_voltage+0x8c/0x13c)
+> [   13.257283] [<c1316458>] (_opp_set_voltage) from [<c13167ac>]
+> (ti_opp_supply_set_opp+0x2a4/0x330)
+> [   13.266216] [<c13167ac>] (ti_opp_supply_set_opp) from [<c1311a98>]
+> (dev_pm_opp_set_rate+0x274/0x7cc)
+> [   13.275411] [<c1311a98>] (dev_pm_opp_set_rate) from [<c13188b8>]
+> (__cpufreq_driver_target+0x2fc/0x8fc)
+> [   13.284779] [<c13188b8>] (__cpufreq_driver_target) from
+> [<c131dfac>] (od_dbs_update+0x22c/0x294)
+> [   13.293623] [<c131dfac>] (od_dbs_update) from [<c131f484>]
+> (dbs_work_handler+0x44/0x88)
+> [   13.301683] [<c131f484>] (dbs_work_handler) from [<c038159c>]
+> (process_one_work+0x410/0x7ac)
+> [   13.310174] [<c038159c>] (process_one_work) from [<c0381998>]
+> (worker_thread+0x60/0x8d0)
+> [   13.318320] [<c0381998>] (worker_thread) from [<c038c2d4>]
+> (kthread+0x258/0x268)
+> [   13.325769] [<c038c2d4>] (kthread) from [<c03001b0>]
+> (ret_from_fork+0x14/0x24)
+> [   13.333031] Exception stack(0xc3937fb0 to 0xc3937ff8)
+> [   13.338117] 7fa0:                                     00000000
+> 00000000 00000000 00000000
+> [   13.346346] 7fc0: 00000000 00000000 00000000 00000000 00000000
+> 00000000 00000000 00000000
+> [   13.354573] 7fe0: 00000000 00000000 00000000 00000000 00000013 00000000
+> [   13.361223]
+> [   13.362729] Allocated by task 1:
+> [   13.365987]  ____kasan_kmalloc.constprop.0+0x90/0xa4
+> [   13.370986]  __kmalloc_track_caller+0x184/0x5e0
+> [   13.375550]  devres_alloc_node+0x24/0x64
+> [   13.379507]  __devm_ioremap+0x2c/0xac
+> [   13.383194]  __devm_ioremap_resource+0xe8/0x1b8
+> [   13.387758]  ti_abb_probe+0x298/0xeb4
+> [   13.391447]  platform_drv_probe+0x60/0xb8
+> [   13.395490]  really_probe+0x170/0x70c
+> [   13.399182]  driver_probe_device+0x94/0x254
+> [   13.403394]  device_driver_attach+0x84/0x8c
+> [   13.407608]  __driver_attach+0xd4/0x18c
+> [   13.411471]  bus_for_each_dev+0xf0/0x144
+> [   13.415424]  bus_add_driver+0x248/0x2dc
+> [   13.419289]  driver_register+0xcc/0x1a0
+> [   13.423151]  do_one_initcall+0xb4/0x248
+> [   13.427019]  kernel_init_freeable+0x1ec/0x244
+> [   13.431409]  kernel_init+0x8/0x128
+> [   13.434836]  ret_from_fork+0x14/0x24
+> [   13.438434]  0x0
+> [   13.440286]
+> [   13.441793] The buggy address belongs to the object at c5ae1d00
+> [   13.441793]  which belongs to the cache kmalloc-128 of size 128
+> [   13.453682] The buggy address is located 16 bytes to the right of
+> [   13.453682]  128-byte region [c5ae1d00, c5ae1d80)
+> [   13.464516] The buggy address belongs to the page:
+> [   13.469343] page:52ce07bb refcount:1 mapcount:0 mapping:00000000
+> index:0x0 pfn:0x85ae1
+> [   13.477304] flags: 0x200(slab)
+> [   13.480392] raw: 00000200 00000100 00000122 c3801d00 00000000
+> 00100010 ffffffff 00000001
+> [   13.488526] raw: 00000000
+> [   13.491163] page dumped because: kasan: bad access detected
+> [   13.496764]
+> [   13.498266] Memory state around the buggy address:
+> [   13.503086]  c5ae1c80: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+> [   13.509652]  c5ae1d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> [   13.516218] >c5ae1d80: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+> [   13.522780]                  ^
+> [   13.525855]  c5ae1e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+> [   13.532422]  c5ae1e80: fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc fc
+> [   13.538983] ==================================================================
+> [   13.546242] Disabling lock debugging due to kernel taint
+>
+>
+> full test log link,
+> https://lkft.validation.linaro.org/scheduler/job/1944986#L2188
+>
+> metadata:
+>   git branch: master
+>   git repo: https://gitlab.com/Linaro/lkft/mirrors/next/linux-next
+>   git describe: next-20201116
+>   make_kernelversion: 5.10.0-rc3
+>   kernel-config: https://builds.tuxbuild.com/1kMYEMmo35DocMgHZ9AtJReL3rN/config
+>
+>
+> --
+> Linaro LKFT
+> https://lkft.linaro.org
