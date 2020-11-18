@@ -2,99 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5357BC56202
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 03:27:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6168FC56202
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 03:36:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 07DEB246AA
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 03:27:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0266724695
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 03:36:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="et+0wT+B"
+	dkim=pass (1024-bit key) header.d=pobox.com header.i=@pobox.com header.b="cudvYm/N"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726980AbgKRD1H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Nov 2020 22:27:07 -0500
-Received: from Mailgw01.mediatek.com ([1.203.163.78]:5729 "EHLO
-        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726494AbgKRD1G (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2020 22:27:06 -0500
-X-UUID: d4326302193e4e4c993d31cd1f36fc52-20201118
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=rVcqz6XUTMam5Rpds84b/f/9khQeZe+z1fGfOnsNnj0=;
-        b=et+0wT+BCKH6uuX9XiceZ1Dz9PNpIoYyEc0CFrcAFLekUMG738e8B9ViYtdO6txz0TjZuKkCEULG4fz1nTkZX32UpFsI924Jemk0knjZhZFSGIvuJkz8cEQ8uuIahflERnCEbBwTVsYpnU4GRd19pOkV6d5joLqRzp6+RtwTclM=;
-X-UUID: d4326302193e4e4c993d31cd1f36fc52-20201118
-Received: from mtkcas35.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 257648254; Wed, 18 Nov 2020 11:26:58 +0800
-Received: from MTKCAS32.mediatek.inc (172.27.4.184) by MTKMBS31N1.mediatek.inc
- (172.27.4.69) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 18 Nov
- 2020 11:26:55 +0800
-Received: from [10.17.3.153] (10.17.3.153) by MTKCAS32.mediatek.inc
- (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 18 Nov 2020 11:26:54 +0800
-Message-ID: <1605670015.11864.5.camel@mhfsdcap03>
-Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add optional cqe off properties
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        <irq-linux@rere.qmqm.pl>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Baolin Wang <baolin.wang@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Krishna Konda <kkonda@codeaurora.org>,
-        Bradley Bolen <bradleybolen@gmail.com>,
-        "Chaotian Jing" <chaotian.jing@mediatek.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>, <srv_heupstream@mediatek.com>
-Date:   Wed, 18 Nov 2020 11:26:55 +0800
-In-Reply-To: <20201116192801.GA1991505@bogus>
-References: <20201112075208.28183-1-wenbin.mei@mediatek.com>
-         <20201112075208.28183-2-wenbin.mei@mediatek.com>
-         <20201116192801.GA1991505@bogus>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.10.4-0ubuntu2 
+        id S1726498AbgKRDgJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Nov 2020 22:36:09 -0500
+Received: from pb-smtp20.pobox.com ([173.228.157.52]:54968 "EHLO
+        pb-smtp20.pobox.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725808AbgKRDgJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Nov 2020 22:36:09 -0500
+Received: from pb-smtp20.pobox.com (unknown [127.0.0.1])
+        by pb-smtp20.pobox.com (Postfix) with ESMTP id 4E3431017FE;
+        Tue, 17 Nov 2020 22:36:07 -0500 (EST)
+        (envelope-from daniel.santos@pobox.com)
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed; d=pobox.com; h=to:from
+        :subject:message-id:date:mime-version:content-type
+        :content-transfer-encoding; s=sasl; bh=y8l+KF7f0+0ASWZxoZ5hLgdJA
+        3c=; b=cudvYm/NffJyMpC2TRIag9B3JCaiGrev0nan8ozTbRKtEiZc7mETNY3it
+        Sa/kpP5SZJ/7JnDvbJmoztS8ZFrDlbdTi+19qPUI0Bbyw83CxiUhsaNtSgzFwTj7
+        nZbpl0J+oprJ83ixN+e3yYPo6+9Y/kTteYVgtlGDty3ODPYwkU=
+DomainKey-Signature: a=rsa-sha1; c=nofws; d=pobox.com; h=to:from:subject
+        :message-id:date:mime-version:content-type
+        :content-transfer-encoding; q=dns; s=sasl; b=rEd5gqV1E13+IjWxLy+
+        Q0BeAVsMwcdWyareWsnoQWGc/JNtUnIEzIipHkmCrMLlPk3yxp4cO9x0eZlhKbo7
+        SRfdWIcARCClDraDorTP6xN2YJ6UlO5ZkjZe/MYS9eNnvh5IRIJ2YR3keeT6SnUO
+        nZ57RSiPN/XEeSp12yDDU0Qs=
+Received: from pb-smtp20.sea.icgroup.com (unknown [127.0.0.1])
+        by pb-smtp20.pobox.com (Postfix) with ESMTP id 4770D1017FD;
+        Tue, 17 Nov 2020 22:36:07 -0500 (EST)
+        (envelope-from daniel.santos@pobox.com)
+Received: from [192.168.0.8] (unknown [76.183.130.197])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by pb-smtp20.pobox.com (Postfix) with ESMTPSA id A228E1017FA;
+        Tue, 17 Nov 2020 22:36:04 -0500 (EST)
+        (envelope-from daniel.santos@pobox.com)
+To:     Linux F2FS Dev Mailing List 
+        <linux-f2fs-devel@lists.sourceforge.net>,
+        Linux MMC <linux-mmc@vger.kernel.org>
+From:   Daniel Santos <daniel.santos@pobox.com>
+Subject: Write in-place w/o erase? (f2fs on microSD)
+Message-ID: <c407136e-6d71-1347-511b-b3d76ad0ab32@pobox.com>
+Date:   Tue, 17 Nov 2020 21:35:31 -0600
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.3.2
 MIME-Version: 1.0
-X-TM-SNTS-SMTP: E0983558C713B21671019A4B5CB7E2E62F2D4A278694AFAB10C6DD3BE75DF4EE2000:8
-X-MTK:  N
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+X-Pobox-Relay-ID: 2FEEB8BE-294F-11EB-A66A-E43E2BB96649-06139138!pb-smtp20.pobox.com
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gTW9uLCAyMDIwLTExLTE2IGF0IDEzOjI4IC0wNjAwLCBSb2IgSGVycmluZyB3cm90ZToNCj4g
-T24gVGh1LCBOb3YgMTIsIDIwMjAgYXQgMDM6NTI6MDZQTSArMDgwMCwgV2VuYmluIE1laSB3cm90
-ZToNCj4gPiBBZGQgb3B0aW9uYWwgcHJvcGVydGllcyBmb3IgY3FlIGhvc3RzIHdoaWNoIGFyZSB1
-c2VkIHRvIHNldCBjcWUgb2ZmDQo+ID4gZHVyaW5nIHN1c3BlbmQgZmxvdy4NCj4gPiANCj4gPiBT
-aWduZWQtb2ZmLWJ5OiBXZW5iaW4gTWVpIDx3ZW5iaW4ubWVpQG1lZGlhdGVrLmNvbT4NCj4gPiAt
-LS0NCj4gPiAgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tbWMtY29udHJv
-bGxlci55YW1sIHwgNyArKysrKysrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCA3IGluc2VydGlvbnMo
-KykNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRp
-bmdzL21tYy9tbWMtY29udHJvbGxlci55YW1sIGIvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2Jp
-bmRpbmdzL21tYy9tbWMtY29udHJvbGxlci55YW1sDQo+ID4gaW5kZXggYjk2ZGEwYzdmODE5Li40
-NTdjOWE4NGI5ODggMTAwNjQ0DQo+ID4gLS0tIGEvRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2Jp
-bmRpbmdzL21tYy9tbWMtY29udHJvbGxlci55YW1sDQo+ID4gKysrIGIvRG9jdW1lbnRhdGlvbi9k
-ZXZpY2V0cmVlL2JpbmRpbmdzL21tYy9tbWMtY29udHJvbGxlci55YW1sDQo+ID4gQEAgLTE2NCw2
-ICsxNjQsMTMgQEAgcHJvcGVydGllczoNCj4gPiAgICAgIGRlc2NyaXB0aW9uOg0KPiA+ICAgICAg
-ICBlbmFibGUgU0RJTyBJUlEgc2lnbmFsbGluZyBvbiB0aGlzIGludGVyZmFjZQ0KPiA+ICANCj4g
-PiArICBjcWUtb2ZmLWluLXN1c3BlbmQ6DQo+ID4gKyAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55
-YW1sIy9kZWZpbml0aW9ucy9mbGFnDQo+ID4gKyAgICBkZXNjcmlwdGlvbjoNCj4gPiArICAgICAg
-QWZ0ZXIgc3VzcGVuZCwgdGhlIG1tYyBob3N0IGlzIHBvd2VyZWQgb2ZmIGJ5IEhXLCBhbmQgYnJp
-bmcgQ1FFIHJlZ2lzdGVyDQo+ID4gKyAgICAgIHRvIGRlZmF1bHQgc3RhdGUsIHNvIHdlIGFkZCB0
-aGUgZmxhZyB0byByZS1pbml0IENRRSByZWdpc3RlciBhZnRlciByZXN1bWUNCj4gPiArICAgICAg
-YmFjay4NCj4gDQo+IFRoZSBkcml2ZXIgY2hhbmdlIGlzIGJlZm9yZSBzdXNwZW5kLCBidXQgdGhp
-cyBzYXlzIG9uIHJlc3VtZS4uLg0KPiANCj4gSW4gYW55IGNhc2UsIHRoaXMgc2hvdWxkIGJlIGlt
-cGxpZWQgYnkgdGhlIFNvQyBzcGVjaWZpYyBjb21wYXRpYmxlLg0KPiANClRoYW5rcyBmb3IgeW91
-ciByZXBseSwgSSB3aWxsIGRyb3AgdGhpcyBwYXRjaHNldCwgYW5kIHJlc2VuZCBhbm90aGVyDQpw
-YXRjaHNldCBmb3IgdGhpcyBpc3N1ZS4NCj4gPiArDQo+ID4gICAgZnVsbC1wd3ItY3ljbGU6DQo+
-ID4gICAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55YW1sIy9kZWZpbml0aW9ucy9mbGFnDQo+ID4g
-ICAgICBkZXNjcmlwdGlvbjoNCj4gPiAtLSANCj4gPiAyLjE4LjANCj4gPiANCg0K
+Hello!
 
+I'm designing an embedded program that has to log messages on a microSD
+card -- so I presume a simple FTL.=C2=A0 I'm wondering if I can initializ=
+e an
+erase erase_size portion of a file with 0xff and then make multiple
+writes that only clear bits, and get in-place writes (w/o an erase)
+instead of using out-of-place writes on a new block each time.=C2=A0 In t=
+his
+way, I could just write the message size for each message (always less
+than 255) and interpret an 0xff as "end of list".
+
+I've looked through the mmc sources a bit and I'm not even sure if this
+would be a function of f2fs, the mmc layer or the FTL.
+
+Is this possibly what F2FS_IOC_SET_PIN_FILE is for?
+
+I do realize that if I make writes that require erases that I'll likely
+break wear leveling, so I'll want to make sure I'm never triggering erase=
+s.
+
+Thanks!
+Daniel
