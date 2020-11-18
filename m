@@ -2,124 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6883DC5519F
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 06:34:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4489C63697
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 08:14:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0860D208B8
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 06:34:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B38D24248
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 08:14:42 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="cHMJGI8v"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726096AbgKRGeN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Nov 2020 01:34:13 -0500
-Received: from mailgw02.mediatek.com ([210.61.82.184]:50528 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725794AbgKRGeN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Nov 2020 01:34:13 -0500
-X-UUID: 92d89cdc1c634cf28d265d8639f7634b-20201118
-X-UUID: 92d89cdc1c634cf28d265d8639f7634b-20201118
-Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Cellopoint E-mail Firewall v4.1.14 Build 0819 with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 462278039; Wed, 18 Nov 2020 14:34:09 +0800
-Received: from mtkcas08.mediatek.inc (172.21.101.126) by
- mtkmbs07n2.mediatek.inc (172.21.101.141) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 18 Nov 2020 14:34:07 +0800
-Received: from localhost.localdomain (10.17.3.153) by mtkcas08.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 18 Nov 2020 14:34:07 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <srv_heupstream@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-Subject: [PATCH] mmc: mediatek: Add system suspend/resume interface
-Date:   Wed, 18 Nov 2020 14:34:05 +0800
-Message-ID: <20201118063405.24906-1-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 2.18.0
+        id S1726489AbgKRIOl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Nov 2020 03:14:41 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41862 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726181AbgKRIOl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Nov 2020 03:14:41 -0500
+Received: from mail-ot1-f49.google.com (mail-ot1-f49.google.com [209.85.210.49])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 36174241A5;
+        Wed, 18 Nov 2020 08:14:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1605687280;
+        bh=qJ5zHy+pCbs19PJJvVJMA3zNtj6fFyQGeZR+ojf8+qg=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=cHMJGI8v5BPFNXRQWeJ0JKJB0knfTBwt1aDU9wi6IE+cWaFR67uysOUaFXuynNxv3
+         L+f2pnfDgsMsbcM8mcGho2ThKnebwEFSCxc7llCUFg9B41a/EMmjno58VG+jA58qGB
+         L2p5pLsZR52sfdabMOrk4svM+HJ13cYEohUhYY0A=
+Received: by mail-ot1-f49.google.com with SMTP id n89so953047otn.3;
+        Wed, 18 Nov 2020 00:14:40 -0800 (PST)
+X-Gm-Message-State: AOAM531/YNxV2WtUBkV77nraD/8ATVwNtKwRvzUAN38V5OOBedmfCHAb
+        tpT7QYLU/THV3EtEWsooWoZgchQ1Cx9b/U6tTfs=
+X-Google-Smtp-Source: ABdhPJzf9aND79dMbS2oPlqGaDMX02ziUJv3AxQiefYLxvz2JZIIcPClzq5iJdToVHe28h+vHRKxV2a9AOBgyn30V3E=
+X-Received: by 2002:a05:6830:22d2:: with SMTP id q18mr5279342otc.305.1605687279412;
+ Wed, 18 Nov 2020 00:14:39 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-MTK:  N
+References: <CA+G9fYuk4imvhyCN7D7T6PMDH6oNp6HDCRiTUKMQ6QXXjBa4ag@mail.gmail.com>
+ <CAK8P3a2MmA257e486D2hj_qj9Wk0ybkfg9yk9f5hR=h-KWUHVg@mail.gmail.com> <20201117232343.rg37fkacw43matmh@revered>
+In-Reply-To: <20201117232343.rg37fkacw43matmh@revered>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Wed, 18 Nov 2020 09:14:23 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a0+RKdNj4q3GTh26jrwBkF-BgWiEUuFB4xbh8gZj4Q4-g@mail.gmail.com>
+Message-ID: <CAK8P3a0+RKdNj4q3GTh26jrwBkF-BgWiEUuFB4xbh8gZj4Q4-g@mail.gmail.com>
+Subject: Re: [arm] BUG: KASAN: slab-out-of-bounds in memcmp+0x30/0x5c
+To:     Nishanth Menon <nm@ti.com>
+Cc:     Naresh Kamboju <naresh.kamboju@linaro.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux-Next Mailing List <linux-next@vger.kernel.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-mm <linux-mm@kvack.org>, lkft-triage@lists.linaro.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Before we got these errors on MT8192 platform:
-[   59.153891] Restarting tasks ...
-[   59.154540] done.
-[   59.159175] PM: suspend exit
-[   59.218724] mtk-msdc 11f60000.mmc: phase: [map:fffffffe] [maxlen:31]
-[final:16]
-[  119.776083] mmc0: cqhci: timeout for tag 9
-[  119.780196] mmc0: cqhci: ============ CQHCI REGISTER DUMP ===========
-[  119.786709] mmc0: cqhci: Caps:      0x100020b6 | Version:  0x00000510
-[  119.793225] mmc0: cqhci: Config:    0x00000101 | Control:  0x00000000
-[  119.799706] mmc0: cqhci: Int stat:  0x00000000 | Int enab: 0x00000000
-[  119.806177] mmc0: cqhci: Int sig:   0x00000000 | Int Coal: 0x00000000
-[  119.812670] mmc0: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
-[  119.819149] mmc0: cqhci: Doorbell:  0x003ffc00 | TCN:      0x00000200
-[  119.825656] mmc0: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
-[  119.832155] mmc0: cqhci: Task clr:  0x00000000 | SSC1:     0x00001000
-[  119.838627] mmc0: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
-[  119.845174] mmc0: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x0000891c
-[  119.851654] mmc0: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
-[  119.865773] mmc0: cqhci: : ===========================================
-[  119.872358] mmc0: running CQE recovery
-From these logs, we found TDL base was back to the default value.
+On Wed, Nov 18, 2020 at 12:24 AM Nishanth Menon <nm@ti.com> wrote:
+> On 16:25-20201117, Arnd Bergmann wrote:
+>
+> Yes, this was indeed a bug that has been around for some time now :(
+>
+> I tested with a variant of the above (did'nt like that
+> oinfo was being assigned an invalid address)
+> Boot log: https://pastebin.ubuntu.com/p/nZfz3HF8N6/ (with the same
+> config as in the report): Would you prefer to me to send the following
+> as a formal patch?
 
-After suspend, the mmc host is powered off by HW, and bring CQE register
-to the default value, so we add system suspend/resume interface, then bring
-CQE to deactivated state before suspend, it will be enabled by CQE first
-request after resume.
+Awesome, thanks for the new patch and testing it!
 
-Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 22 ++++++++++++++++++++--
- 1 file changed, 20 insertions(+), 2 deletions(-)
+Yes, please send this as a proper patch to have it picked up
+into the regulator tree as a bugfix.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index fc5ee5df91ad..c5f9cd6fc951 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2758,11 +2758,29 @@ static int msdc_runtime_resume(struct device *dev)
- 	msdc_restore_reg(host);
- 	return 0;
- }
-+
-+static int msdc_sys_suspend(struct device *dev)
-+{
-+	struct mmc_host *mmc = dev_get_drvdata(dev);
-+	int ret;
-+
-+	if (mmc->caps2 & MMC_CAP2_CQE) {
-+		ret = cqhci_suspend(mmc);
-+		if (ret)
-+			return ret;
-+	}
-+
-+	return pm_runtime_force_suspend(dev);
-+}
-+
-+static int msdc_sys_resume(struct device *dev)
-+{
-+	return pm_runtime_force_resume(dev);
-+}
- #endif
- 
- static const struct dev_pm_ops msdc_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
--				pm_runtime_force_resume)
-+	SET_SYSTEM_SLEEP_PM_OPS(msdc_sys_suspend, msdc_sys_resume)
- 	SET_RUNTIME_PM_OPS(msdc_runtime_suspend, msdc_runtime_resume, NULL)
- };
- 
--- 
-2.18.0
+Reported-by: Naresh Kamboju <naresh.kamboju@linaro.org>
+Reviewed-by: Arnd Bergmann <arnd@arndb.de>
 
+> diff --git a/drivers/regulator/ti-abb-regulator.c b/drivers/regulator/ti-abb-regulator.c
+> index 3e60bff76194..9f0a4d50cead 100644
+> --- a/drivers/regulator/ti-abb-regulator.c
+> +++ b/drivers/regulator/ti-abb-regulator.c
+> @@ -342,8 +342,17 @@ static int ti_abb_set_voltage_sel(struct regulator_dev *rdev, unsigned sel)
+>                 return ret;
+>         }
+>
+> -       /* If data is exactly the same, then just update index, no change */
+>         info = &abb->info[sel];
+> +       /*
+> +        * When Linux kernel is starting up, we are'nt sure of the
+> +        * Bias configuration that bootloader has configured.
+> +        * So, we get to know the actual setting the first time
+> +        * we are asked to transition.
+> +        */
+> +       if (abb->current_info_idx == -EINVAL)
+> +               goto just_set_abb;
+> +
+> +       /* If data is exactly the same, then just update index, no change */
+>         oinfo = &abb->info[abb->current_info_idx];
+>         if (!memcmp(info, oinfo, sizeof(*info))) {
+>                 dev_dbg(dev, "%s: Same data new idx=%d, old idx=%d\n", __func__,
+> @@ -351,6 +360,7 @@ static int ti_abb_set_voltage_sel(struct regulator_dev *rdev, unsigned sel)
+>                 goto out;
+>         }
+>
+> +just_set_abb:
+>         ret = ti_abb_set_opp(rdev, abb, info);
+>
+>  out:
