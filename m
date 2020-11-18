@@ -2,136 +2,203 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5DCBC63697
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 11:32:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48FF4C63777
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 13:49:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4EED520872
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 11:32:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D07742469D
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Nov 2020 13:49:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=ragnatech-se.20150623.gappssmtp.com header.i=@ragnatech-se.20150623.gappssmtp.com header.b="zOqStgub"
+	dkim=pass (1024-bit key) header.d=xilinx.onmicrosoft.com header.i=@xilinx.onmicrosoft.com header.b="anQPbFtS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726696AbgKRLcK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Nov 2020 06:32:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39908 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726596AbgKRLcK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Nov 2020 06:32:10 -0500
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11641C0613D4
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Nov 2020 03:32:10 -0800 (PST)
-Received: by mail-lj1-x244.google.com with SMTP id s9so1927936ljo.11
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Nov 2020 03:32:09 -0800 (PST)
+        id S1726557AbgKRNtj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Nov 2020 08:49:39 -0500
+Received: from mail-mw2nam12on2074.outbound.protection.outlook.com ([40.107.244.74]:32672
+        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726209AbgKRNtj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Nov 2020 08:49:39 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=dTnej9t9yjq3ovuv/uV6qs5BfPyPi1amNKAC1IR7zJC2juQxM5vPVbZg7b10uGHqooCd+/aqblXlW/azyklpvhDdyW4MSK+APUtDPVdFeUndu7T7HUYmfdqftElAM7wMQDe/WsTtvaEYG5ATHa7UoYw7Kcwc6lOdBdBxShBaCiopp8ZfEEb+/C1+9kyNHZZLbJE/XADYn/NlTHDwlnwpR9EHZmNUDD1UAiBH1M/JElwBbiQvEdjU6UCZboXD5r399m/fUOY405TQU09hiCSPO9xpeekZWx8qNFPznxuuRuNZKpXCgCNEJj/yL4RryDrGF6alNrlGycskNB1jtVFXIg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=cuvQ9YW+jnvhAwwcPteXArsbPDDDo3q4tGw1VUYTf8M=;
+ b=fxGLBMG7VEc7BD0+1/fZ8E3pPs0A3gSctLKoRmUFCmOjJuZ/y5CIIBcV8MFe2lZppFiCQoxCWC1EYDhhOvZQ6nYIWunWjiU1DaWy1D1sShoQuQRcRYFKX1X5YJZdQzQxuCpygcERGylZKAhdTB4865F+XdEcWxLlhopVatwG+Hs0JH3zsnvo/a2aqyEJv64YJkX66IlSbd4jhQpVHa8q+UMhAPhuvZfr7efRU09VUCrcr/p3YwCtP6NeikTmej0ye+9W9wFwOsipIeSRxQA/weDVJ7JJMewpnMkYDayECkSwlWM+F/6Wxrm2gTQkiqSJlRWWupmNiiAkLpEJQkHiXQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 149.199.62.198) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=xilinx.com;
+ dmarc=bestguesspass action=none header.from=xilinx.com; dkim=none (message
+ not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=ROaaptIlFxoZPMh3eKEr9Wb/hsxjEjQvBKY/Z69few8=;
-        b=zOqStgubbQ3/8E2vL1xD/qXQpcrzaF8nB2WPdVr3OzCwzEZpHetRrcTOGlsTL+7N+0
-         b3TmGgSSooh4L74hOLtcdLPaANx7cCXLEqRAE7iZv6BT16ia3xbkf4ThjXnXuChFjtlX
-         SVOqvokV6Mg/LeLD2atnxJHeOdjmap5omPu8BG8wZCr6xi7dAz8aRNQhoqnUizyt7RP8
-         bD3YVDHrr1jyhfMHjwZKa4jiSN4QBvoWvheOjLvHNkhSR5/7nmZyoWAQa8WABvjmBfKf
-         xoJGj4nkfwdt2QlSmL62KQQgZI/JisXsdwOmGO328pzJRPkYQjTFlm4xxEP4cbVZkSTw
-         8lEw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=ROaaptIlFxoZPMh3eKEr9Wb/hsxjEjQvBKY/Z69few8=;
-        b=ErhAnfykYa8+ZUFoLIYHpoP9q8hbiDCxSqyrdgB4EyVgMd1yoE+I2qxHPP4f8xSzCr
-         BRD3PqICyLjPQfK7r/1YrLd2Ztcu0Qb6COFI0bdszjPe5OdTPQUEGa29HWgF0/AKxya4
-         Gtmqmi9TZRbHdU4HqMUUu+YktM/IarWTBbrJf4zZJfvaf/0HTxkfKis0ZiDmjY8BTNbD
-         lyzX9pjoLP7QiUosN5zLWblamOqKxCY046zmLb/a4hCyxAQVe04m3vQwG9LrjDlV4Mgo
-         /PPwP5cJuDkXKQFf9/fDiTgWVIpd3OPjX3UyQwsAloOCeXYleneedOCQFji0wTz1d8l1
-         bFyg==
-X-Gm-Message-State: AOAM533ZUBDB0e8kzVo1EINV1BAjFIqCkht9oXs6p5OhUj6TrHR81Imc
-        YqOOxc4bVWzVoPHan+dDyqXsJQ==
-X-Google-Smtp-Source: ABdhPJxJ9Q0RTB4m+hFWfIFhNjC99Bgbkj0I4lz1SLIe8idmirlmZuz2AmjpUJL0BNQj7tuPTPRYtQ==
-X-Received: by 2002:a2e:8641:: with SMTP id i1mr3876075ljj.134.1605699128567;
-        Wed, 18 Nov 2020 03:32:08 -0800 (PST)
-Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
-        by smtp.gmail.com with ESMTPSA id d12sm3231618lfa.22.2020.11.18.03.32.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Nov 2020 03:32:07 -0800 (PST)
-Date:   Wed, 18 Nov 2020 12:32:07 +0100
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>,
-        Takeshi Saito <takeshi.saito.xv@renesas.com>
-Subject: Re: [PATCH] mmc: tmio: Fix command error processing
-Message-ID: <20201118113207.GC3118893@oden.dyn.berto.se>
-References: <20201117131337.35307-1-wsa+renesas@sang-engineering.com>
+ d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=cuvQ9YW+jnvhAwwcPteXArsbPDDDo3q4tGw1VUYTf8M=;
+ b=anQPbFtSrehXlxErDkx8vx9UD2JBktFtrXVRomEqF5KFlgS9hqcW0+6sfzHmvJaKyRPslsb8Upo0CCnPpyrskWlWDYcCyjGI1bdFAL9s6ePDU4EPWK556Q9Z77H49WquTXnwP2Khqv+rkCqzTcQ9yUfaEWd401dSBT+ll8i4eQE=
+Received: from DM6PR12CA0004.namprd12.prod.outlook.com (2603:10b6:5:1c0::17)
+ by MWHPR0201MB3433.namprd02.prod.outlook.com (2603:10b6:301:7c::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3541.25; Wed, 18 Nov
+ 2020 13:49:35 +0000
+Received: from CY1NAM02FT008.eop-nam02.prod.protection.outlook.com
+ (2603:10b6:5:1c0:cafe::f6) by DM6PR12CA0004.outlook.office365.com
+ (2603:10b6:5:1c0::17) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3589.20 via Frontend
+ Transport; Wed, 18 Nov 2020 13:49:35 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 149.199.62.198)
+ smtp.mailfrom=xilinx.com; vger.kernel.org; dkim=none (message not signed)
+ header.d=none;vger.kernel.org; dmarc=bestguesspass action=none
+ header.from=xilinx.com;
+Received-SPF: Pass (protection.outlook.com: domain of xilinx.com designates
+ 149.199.62.198 as permitted sender) receiver=protection.outlook.com;
+ client-ip=149.199.62.198; helo=xsj-pvapexch02.xlnx.xilinx.com;
+Received: from xsj-pvapexch02.xlnx.xilinx.com (149.199.62.198) by
+ CY1NAM02FT008.mail.protection.outlook.com (10.152.75.59) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.3564.22 via Frontend Transport; Wed, 18 Nov 2020 13:49:34 +0000
+Received: from xsj-pvapexch02.xlnx.xilinx.com (172.19.86.41) by
+ xsj-pvapexch02.xlnx.xilinx.com (172.19.86.41) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.1913.5; Wed, 18 Nov 2020 05:49:04 -0800
+Received: from smtp.xilinx.com (172.19.127.96) by
+ xsj-pvapexch02.xlnx.xilinx.com (172.19.86.41) with Microsoft SMTP Server id
+ 15.1.1913.5 via Frontend Transport; Wed, 18 Nov 2020 05:49:04 -0800
+Envelope-to: git@xilinx.com,
+ michal.simek@xilinx.com,
+ linux-kernel@vger.kernel.org,
+ linux-mmc@vger.kernel.org,
+ linux-arm-kernel@lists.infradead.org,
+ ulf.hansson@linaro.org,
+ adrian.hunter@intel.com
+Received: from [172.30.17.110] (port=46740)
+        by smtp.xilinx.com with esmtp (Exim 4.90)
+        (envelope-from <michal.simek@xilinx.com>)
+        id 1kfNpX-0001Zm-Kc; Wed, 18 Nov 2020 05:49:03 -0800
+To:     Manish Narani <manish.narani@xilinx.com>,
+        <michal.simek@xilinx.com>, <adrian.hunter@intel.com>,
+        <ulf.hansson@linaro.org>
+CC:     <linux-arm-kernel@lists.infradead.org>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <git@xilinx.com>
+References: <1605680495-37483-1-git-send-email-manish.narani@xilinx.com>
+From:   Michal Simek <michal.simek@xilinx.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add pinctrl support to the driver
+Message-ID: <f3a6f0e5-6bca-d85f-9330-bf73151ee956@xilinx.com>
+Date:   Wed, 18 Nov 2020 14:49:00 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.4.3
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+In-Reply-To: <1605680495-37483-1-git-send-email-manish.narani@xilinx.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20201117131337.35307-1-wsa+renesas@sang-engineering.com>
+X-EOPAttributedMessage: 0
+X-MS-Office365-Filtering-HT: Tenant
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: e701800e-6924-4aef-3b5f-08d88bc8c8a5
+X-MS-TrafficTypeDiagnostic: MWHPR0201MB3433:
+X-Microsoft-Antispam-PRVS: <MWHPR0201MB34331BC966B0A33AF6557893C6E10@MWHPR0201MB3433.namprd02.prod.outlook.com>
+X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
+X-MS-Oob-TLC-OOBClassifiers: OLM:8273;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: A8ul6LPLDDNFFmiD9zV19r4WrybE+Z9Kc4gX8rX/GVT1NdACnC318pgJA4gPMLgq0RBXcXSv5Ln1fnXrCmRwjEHrqBu3PvHQplkDAdpwMmILQAVkOq/MzewV8SY/g2tQY1JFFgxQcjQvguMRg1n8+hvRqZnH1twPtaI3aCeDCBHKsekuieFy5PO0/TG+LmsCk5tuABNjcAZiYxl2qwJ0+kWAqh0eaq4hI2m1JIfJHYRgW8dhVgk5YwE4/LwuMiwJ9aCQE2U6OpoP6Z3+lYnZ3ATqvPAlGDKlIv4aMkcQ6NDplLll957PGd9l+sb9dxuctMVrrO9eQX8bhCpICNPteFjqpmbvKVrWgb9O97G4BLs0IzktUDA2Af8FyqHg4HHKOuSzJK0gzrymjomWW7mZ2Z1uDLYeQVSp4qU5DlYmdr2x09FVg6GISdV62m4feFMZRX5C3jausPxO3tHt5ody4g==
+X-Forefront-Antispam-Report: CIP:149.199.62.198;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:xsj-pvapexch02.xlnx.xilinx.com;PTR:unknown-62-198.xilinx.com;CAT:NONE;SFS:(4636009)(39860400002)(136003)(396003)(346002)(376002)(46966005)(83380400001)(54906003)(82740400003)(2906002)(9786002)(2616005)(478600001)(82310400003)(8936002)(7636003)(31686004)(31696002)(336012)(26005)(356005)(47076004)(44832011)(8676002)(426003)(316002)(70206006)(110136005)(70586007)(4326008)(186003)(36756003)(5660300002)(36906005)(107886003)(50156003)(43740500002);DIR:OUT;SFP:1101;
+X-OriginatorOrg: xilinx.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Nov 2020 13:49:34.8287
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: e701800e-6924-4aef-3b5f-08d88bc8c8a5
+X-MS-Exchange-CrossTenant-Id: 657af505-d5df-48d0-8300-c31994686c5c
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=657af505-d5df-48d0-8300-c31994686c5c;Ip=[149.199.62.198];Helo=[xsj-pvapexch02.xlnx.xilinx.com]
+X-MS-Exchange-CrossTenant-AuthSource: CY1NAM02FT008.eop-nam02.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR0201MB3433
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
 
-Thanks for your work.
 
-On 2020-11-17 14:13:37 +0100, Wolfram Sang wrote:
-> From: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
+On 18. 11. 20 7:21, Manish Narani wrote:
+> Driver should be able to handle optional pinctrl setting.
 > 
-> If some errors are detected at the same time as the access end
-> interrupt, the access end interrupt was not cleared. Especially with
-> DMA, because then the access end interrupt was never enabled and, thus,
-> never cleared. Clear the interrupt register always when a command error
-> occurs.
-> 
-> Signed-off-by: Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>
-> [saito: rebase to v5.4]
-> Signed-off-by: Takeshi Saito <takeshi.saito.xv@renesas.com>
-> [wsa: rebase and extension of the commit message]
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: Michal Simek <michal.simek@xilinx.com>
+> Signed-off-by: Manish Narani <manish.narani@xilinx.com>
 > ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 24 ++++++++++++++++++++++++
+>  1 file changed, 24 insertions(+)
 > 
-> Because the test case is hard to reproduce (lots of radio noise and
-> temperature changes), I trust the BSP team here. But the reasoning makes
-> a lot of sense to me. I verified that there are no regressions with the
-> test cases I usually do. The patch is based on mmc/next as of today,
-> i.e. with all previous series included.
-
-I agree the reasoning make sens and the patch looks good,
-
-Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-
-> 
->  drivers/mmc/host/tmio_mmc_core.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index cb4149fd12e0..7f4a28125010 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -796,8 +796,10 @@ static void tmio_mmc_finish_request(struct tmio_mmc_host *host)
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 829ccef87426..f788cc9d5914 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -23,6 +23,7 @@
+>  #include <linux/regmap.h>
+>  #include <linux/of.h>
+>  #include <linux/firmware/xlnx-zynqmp.h>
+> +#include <linux/pinctrl/consumer.h>
 >  
->  	spin_unlock_irqrestore(&host->lock, flags);
+>  #include "cqhci.h"
+>  #include "sdhci-pltfm.h"
+> @@ -135,6 +136,8 @@ struct sdhci_arasan_clk_data {
+>   * @clk_ops:		Struct for the Arasan Controller Clock Operations.
+>   * @soc_ctl_base:	Pointer to regmap for syscon for soc_ctl registers.
+>   * @soc_ctl_map:	Map to get offsets into soc_ctl registers.
+> + * @pinctrl:		Per-device pin control state holder.
+> + * @pins_default:	Pinctrl state for a device.
+>   * @quirks:		Arasan deviations from spec.
+>   */
+>  struct sdhci_arasan_data {
+> @@ -149,6 +152,8 @@ struct sdhci_arasan_data {
 >  
-> -	if (mrq->cmd->error || (mrq->data && mrq->data->error))
-> +	if (mrq->cmd->error || (mrq->data && mrq->data->error)) {
-> +		tmio_mmc_ack_mmc_irqs(host, TMIO_MASK_IRQ); /* Clear all */
->  		tmio_mmc_abort_dma(host);
+>  	struct regmap	*soc_ctl_base;
+>  	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map;
+> +	struct pinctrl	*pinctrl;
+> +	struct pinctrl_state *pins_default;
+>  	unsigned int	quirks;
+>  
+>  /* Controller does not have CD wired and will not function normally without */
+> @@ -1619,6 +1624,25 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  		goto unreg_clk;
+>  	}
+>  
+> +	sdhci_arasan->pinctrl = devm_pinctrl_get(&pdev->dev);
+> +	if (!IS_ERR(sdhci_arasan->pinctrl)) {
+> +		sdhci_arasan->pins_default =
+> +			pinctrl_lookup_state(sdhci_arasan->pinctrl,
+> +					     PINCTRL_STATE_DEFAULT);
+> +		if (IS_ERR(sdhci_arasan->pins_default)) {
+> +			dev_err(&pdev->dev, "Missing default pinctrl config\n");
+> +			ret = PTR_ERR(sdhci_arasan->pins_default);
+> +			goto unreg_clk;
+> +		}
+> +
+> +		ret = pinctrl_select_state(sdhci_arasan->pinctrl,
+> +					   sdhci_arasan->pins_default);
+> +		if (ret) {
+> +			dev_err(&pdev->dev, "could not select default state\n");
+> +			goto unreg_clk;
+> +		}
 > +	}
->  
->  	/* Error means retune, but executed command was still successful */
->  	if (host->check_retune && host->check_retune(host))
-> -- 
-> 2.28.0
+> +
+>  	sdhci_arasan->phy = ERR_PTR(-ENODEV);
+>  	if (of_device_is_compatible(pdev->dev.of_node,
+>  				    "arasan,sdhci-5.1")) {
 > 
 
--- 
-Regards,
-Niklas Söderlund
+Ulf: Is there any need to describe in binding doc? I mean all txt based
+binding have it described. But not quite sure if there is a need to
+describe it in yaml if only default option is supported.
+And when this is optional it should be fine also for others SOC.
+
+For patch itself.
+
+Acked-by: Michal Simek <michal.simek@xilinx.com>
+
+Thanks,
+Michal
+
