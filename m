@@ -2,105 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 459C7C64E8A
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 23:57:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA125C6379F
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 23:57:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E645D2222D
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 23:57:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 78DC822244
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 23:57:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hjsfJ1qJ"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EkbjJ9Go"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727409AbgKSX5B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Nov 2020 18:57:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38562 "EHLO
+        id S1726305AbgKSX4R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Nov 2020 18:56:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727187AbgKSX41 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2020 18:56:27 -0500
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52113C0613CF;
-        Thu, 19 Nov 2020 15:56:27 -0800 (PST)
-Received: by mail-ej1-x644.google.com with SMTP id y17so10370113ejh.11;
-        Thu, 19 Nov 2020 15:56:27 -0800 (PST)
+        with ESMTP id S1726172AbgKSX4R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2020 18:56:17 -0500
+Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1290C0613CF;
+        Thu, 19 Nov 2020 15:56:16 -0800 (PST)
+Received: by mail-ed1-x52a.google.com with SMTP id cf17so4134871edb.2;
+        Thu, 19 Nov 2020 15:56:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=A/kom7NijqsMwRJVpqdKHhmhpkXVyd91CqXAnZ7knhQ=;
-        b=hjsfJ1qJwWPEkq3pqY3/lcezS9BfVdTSxGeoYe+fR3pMjo117Ql2YvrcX8CWLWRbwJ
-         QcgQTJ0DB7VrSCxSAGjoNjro0kSkxhF9iEZtFy0jPRjy3qLRjX7VxgYC743MB3oaGAKk
-         /GPKnjEaNqIgKTRHiXcUSuP60AI8gHixIo0S+SviQGec+caR1hlhBEqCKT3o1OR2s5Xt
-         Yak41QcQw/L8Hk7oEwi/qNc1hH0/88lcqxrsBpJPlJlDjw9gaocX5i/ejGef9zn6wTLo
-         TXx5ssevijIuBIYTGeZIiWsiwZ3ablI4lYZHOtI3Oj4NAylsuZwygRqnNGsSsKx2EXVz
-         L6ew==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=pmDTWYXXAk9rfP2LbwV/8yIbCru45LKAEEkD+ofPX5E=;
+        b=EkbjJ9GokRz5usrPgW17OoisIs6dAWdNKJZU5o8gn2o0QHRgN7SskQcx4OjgOyUgFe
+         N4xiiLedBp0lL/rV9DNnSsDq6VWKCLfJqtFDt0Qqi+m2VHj5FX2B9NY2yBIHyvw9DsVn
+         jn5euztmRelV9WdCk767SGmEAUrV+5apj3e2MqDXrnlYPsuOKZ3DTkc8aPfim4LvwOfn
+         gEa+o6wCabkMUn2yqVD7jlPiSTxMZzbVNR4qb0C8LuyYjILzcL1Cb2EwVu2MPT0AwnD+
+         X3XcafbDdjIm135ofjkju8iU6y3i+NZQEZmtd9UVtrd2v7G8LpUSg31n9I6I9jaRA1sf
+         W11g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=A/kom7NijqsMwRJVpqdKHhmhpkXVyd91CqXAnZ7knhQ=;
-        b=nQ/B8UBhqgVWrYGQphcD3JZCByp30uK1PG4F61C+OR14hnKhS8+S+f/Xx1bOswGWK1
-         zQ+lQE8Pmu3vKJHXL68po1QBWLGMifw5sUBC1e5+89d6exJreUnmpU83SGgJWDLoWn8y
-         mYr7vQSkchDRpUDeIBGds4IGM2tYKe5w/qJjcFfmyOopVzQAJQLyPMxAxlJ8MMbVPoUk
-         5l3BeFerFsDCWPvIqu3KIB7p6dwQbpzgZ65ZakkzWDFKvlXA6LwRwq9+0DMhbcomN8oW
-         fyxbhs75ePTk4kiDGQs7KeGQxgTjTJohYt7sT0e0OCDXJJURF7oBL3eNXTduyoJQ/jRK
-         nWMg==
-X-Gm-Message-State: AOAM533kSTg1cGuNZqgUFCDVe1JkN52eNN3AR0GZiwrbW1/NTn+PHB1f
-        z4F2dY5kvDBTq+Il36GqfJ8=
-X-Google-Smtp-Source: ABdhPJxKEaj29J0PFKCynZb2N8TsEbOqaDyZgd+JmzRUpUUx5mbKaiKyBpcwzYgoRqjeDSyZKdvFMA==
-X-Received: by 2002:a17:906:4dd3:: with SMTP id f19mr28748547ejw.364.1605830186082;
-        Thu, 19 Nov 2020 15:56:26 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=pmDTWYXXAk9rfP2LbwV/8yIbCru45LKAEEkD+ofPX5E=;
+        b=IbpSYZKkgrs2zUq+lVkh567mbBHA/GAZ/Zq+RCZf3D7t9KjvlVTSomFAVXlDkU1VSA
+         le6842MjpA31rcfM4shiJ8NCrqOsfyvxMe6Xz2YzSr3IkllZmhcEWqQeLahLlix3JdJm
+         r2QVNZZyPd0eNxXKUNtrf8kIXEV/tmfgeJJhk68p/YbWPxeW25v+0WEVql9nnakcj1z2
+         q9BarM9+Li5dRaYCnVrUYH9LMMG4RsspAO/cZjiFBOQ86XIOg7Ew6DrRJdHodWhiGLJc
+         nmGapE3Y18U+7961BHiTiT5BCG5qEHKVtXj6T+s8YyURp589orCReAH8d5x3mKBtKRDN
+         o4cg==
+X-Gm-Message-State: AOAM5333zQjHJKWuOF8KIbIurdUi489QounVWvSaMGD8eryC8993dzFg
+        YurfuqEt0/n26Wr52PNRHTg=
+X-Google-Smtp-Source: ABdhPJxDHcZc79WpJHYk5EfMzTr4tT47zWZU5ploN70wNJfVhLr8bg0dD5Saqhv+hjpxXO2JqaiyHw==
+X-Received: by 2002:a05:6402:b8b:: with SMTP id cf11mr33095904edb.74.1605830175070;
+        Thu, 19 Nov 2020 15:56:15 -0800 (PST)
 Received: from localhost.localdomain ([188.24.159.61])
-        by smtp.gmail.com with ESMTPSA id i3sm452987ejh.80.2020.11.19.15.56.24
+        by smtp.gmail.com with ESMTPSA id i3sm452987ejh.80.2020.11.19.15.56.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Nov 2020 15:56:25 -0800 (PST)
+        Thu, 19 Nov 2020 15:56:14 -0800 (PST)
 From:   Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
 To:     Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
         =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
+        Vinod Koul <vkoul@kernel.org>, Wolfram Sang <wsa@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dan Williams <dan.j.williams@intel.com>
 Cc:     devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
         linux-mmc@vger.kernel.org
-Subject: [PATCH v2 08/18] dt-bindings: mmc: owl: Add compatible string for Actions Semi S500 SoC
-Date:   Fri, 20 Nov 2020 01:56:02 +0200
-Message-Id: <713f57f4a66fff9a50a8d93643a7987d6560becb.1605823502.git.cristian.ciocaltea@gmail.com>
+Subject: [PATCH v2 00/18] Add CMU/RMU/DMA/MMC/I2C support for Actions Semi S500 SoCs
+Date:   Fri, 20 Nov 2020 01:55:54 +0200
+Message-Id: <cover.1605823502.git.cristian.ciocaltea@gmail.com>
 X-Mailer: git-send-email 2.29.2
-In-Reply-To: <cover.1605823502.git.cristian.ciocaltea@gmail.com>
-References: <cover.1605823502.git.cristian.ciocaltea@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a new compatible string corresponding to the MMC controller found
-in the S500 variant of the Actions Semi Owl SoCs family.
+Hi,
 
-Signed-off-by: Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
----
- Documentation/devicetree/bindings/mmc/owl-mmc.yaml | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+This patchset brings a series of improvements for the Actions Semi S500
+SoCs family, by adding support for Clock & Reset Management Units, DMA,
+MMC, I2C & SIRQ controllers.
 
-diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-index b6ab527087d5..b0d81ebe0f6e 100644
---- a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-@@ -17,7 +17,9 @@ properties:
-     oneOf:
-       - const: actions,owl-mmc
-       - items:
--          - const: actions,s700-mmc
-+          - enum:
-+              - actions,s500-mmc
-+              - actions,s700-mmc
-           - const: actions,owl-mmc
- 
-   reg:
+Please note the patches consist mostly of DTS and bindings/compatibles
+changes, since all the work they depend on has been already merged,
+i.e. clock fixes/additions, pinctrl driver, sirq driver.
+
+For the moment, I have only enabled the features I could test on
+RoseapplePi SBC.
+
+Thanks,
+Cristi
+
+Changes in v2:
+- Added new bindings/compatibles for S500 DMA, MMC & I2C controllers
+- Added support for the SIRQ controller
+- Added new entries in MAINTAINERS
+- Updated naming of some patches in v1
+
+Cristian Ciocaltea (18):
+  arm: dts: owl-s500: Add Clock Management Unit
+  arm: dts: owl-s500: Set CMU clocks for UARTs
+  arm: dts: owl-s500: Add Reset controller
+  dt-bindings: dma: owl: Add compatible string for Actions Semi S500 SoC
+  dmaengine: owl: Add compatible for the Actions Semi S500 DMA
+    controller
+  arm: dts: owl-s500: Add DMA controller
+  arm: dts: owl-s500: Add pinctrl & GPIO support
+  dt-bindings: mmc: owl: Add compatible string for Actions Semi S500 SoC
+  arm: dts: owl-s500: Add MMC support
+  dt-bindings: i2c: owl: Convert Actions Semi Owl binding to a schema
+  MAINTAINERS: Update entry for Actions Semi Owl I2C binding
+  i2c: owl: Add compatible for the Actions Semi S500 I2C controller
+  arm: dts: owl-s500: Add I2C support
+  arm: dts: owl-s500: Add SIRQ controller
+  arm: dts: owl-s500-roseapplepi: Use UART clock from CMU
+  arm: dts: owl-s500-roseapplepi: Add uSD support
+  arm: dts: owl-s500-roseapplepi: Add I2C pinctrl configuration
+  MAINTAINERS: Add linux-actions ML for Actions Semi Arch
+
+ .../devicetree/bindings/dma/owl-dma.yaml      |   5 +-
+ .../devicetree/bindings/i2c/i2c-owl.txt       |  29 ----
+ .../devicetree/bindings/i2c/i2c-owl.yaml      |  62 ++++++++
+ .../devicetree/bindings/mmc/owl-mmc.yaml      |   4 +-
+ MAINTAINERS                                   |   3 +-
+ arch/arm/boot/dts/owl-s500-roseapplepi.dts    |  97 +++++++++++-
+ arch/arm/boot/dts/owl-s500.dtsi               | 140 ++++++++++++++++++
+ drivers/dma/owl-dma.c                         |   1 +
+ drivers/i2c/busses/i2c-owl.c                  |   1 +
+ 9 files changed, 304 insertions(+), 38 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/i2c/i2c-owl.txt
+ create mode 100644 Documentation/devicetree/bindings/i2c/i2c-owl.yaml
+
 -- 
 2.29.2
 
