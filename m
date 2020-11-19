@@ -2,65 +2,39 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+X-Spam-Status: No, score=-7.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA2CEC6369E
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 14:23:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C479C6369E
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 15:20:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 78C5222242
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 14:23:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EF2502467A
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Nov 2020 15:20:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Y21dZRMZ"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="MJc09AJA"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727151AbgKSOWt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Nov 2020 09:22:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34442 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727106AbgKSOWt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Nov 2020 09:22:49 -0500
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5A62C0613CF;
-        Thu, 19 Nov 2020 06:22:47 -0800 (PST)
-Received: by mail-lf1-x143.google.com with SMTP id e139so8515559lfd.1;
-        Thu, 19 Nov 2020 06:22:47 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=ZvOd3z2dVnB5SZQwK/dvDpMXJ4eITwmefRvuKa9tb0Q=;
-        b=Y21dZRMZ+kNYHUNLiNCHQoS5QxGFMKf7KaEd+6a06G/hQ1bejJXAcijD6xiDcBiBUn
-         JS4yWyB2+zZqqxEzarQ7y2NC3cKCRKUZ2CchFnZU6Kn5vLrutkvXtu+Lq1OFhxgn8Epp
-         UuLT88qmv67A3sWVg1l8Ws05tNM98wJWDlT1hgGfbwXfCiTxIVlprvN48xiVZLuFi3Cn
-         KI3oT4rlzLRHtD8EKwZRS29BsqsZh07SrjWWBHtLowX/toS83Dhlqd9OCn9mvofvfXic
-         DHhrzPVHyIWzxM0YW/p1ZFuzvZaox6YeG/KIcRnpB6NKJzCgXsklV6r9OCr7nnEUUhRd
-         hptw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=ZvOd3z2dVnB5SZQwK/dvDpMXJ4eITwmefRvuKa9tb0Q=;
-        b=i7ba6A/r1lx38CySMfQ+TDUl7Ug5P1w27iAO+JNLA3mdxNi6OJU0Dyqalbxsw01iB0
-         VAsNVwAXW1PqPUXXSjGz0epzuBBCbtyiUFWhin0O2XLXgQRzlY1akQvQtW/ko39PobAl
-         YqRKgEYYe3YFDLqG9cjS0d36YmKabjvOpUI6c76OKGdqYg3fS5LkGKk6O+yUnTz3eRHz
-         PWSciz9HMFkctnmfRE7e4I7307OLnlqaz8QPpkNVd/aym1Zj/CRTKjfv3D9eULG/nYuE
-         2fZ5e3RZt0B5qhOLiz610v07pBXK8W2tBlr9mbSx1CHjsYAJC6p0df7hm4FpmuX71rKU
-         978w==
-X-Gm-Message-State: AOAM530du4USguA/p3pLaUicqA2meLa3ozpjxZ7O2FXF+na2ZDg6G4DO
-        96bNH1Rf87fJcnpUjW52tmsWQdbw810=
-X-Google-Smtp-Source: ABdhPJyUwmqVByndGgJFiM7woqjbf8UJz72yW3W4B1Jv93hEMk1YatxireTGBSQxqAyLLyxkuXCkKw==
-X-Received: by 2002:a19:844a:: with SMTP id g71mr6446029lfd.414.1605795766096;
-        Thu, 19 Nov 2020 06:22:46 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-159.dynamic.spd-mgts.ru. [109.252.193.159])
-        by smtp.googlemail.com with ESMTPSA id m16sm3851652lfa.57.2020.11.19.06.22.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 19 Nov 2020 06:22:45 -0800 (PST)
-Subject: Re: [PATCH v1 11/30] drm/tegra: dc: Support OPP and SoC core voltage
- scaling
-To:     Mark Brown <broonie@kernel.org>
+        id S1728210AbgKSPTk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Nov 2020 10:19:40 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34222 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728062AbgKSPTk (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 19 Nov 2020 10:19:40 -0500
+Received: from localhost (fw-tnat.cambridge.arm.com [217.140.96.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E6E4F24654;
+        Thu, 19 Nov 2020 15:19:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1605799178;
+        bh=0W6X+yvUpSkdAAGKagVENpsqMNRqNF4X/9HGlBkWMgk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=MJc09AJAL2xk01qiS05ieRaCGIlLeUWY/cvod14/kBGzC1gFcG/mDtMvf8iSA9QUD
+         jSD4dFUuEnrjJi4GroCmvV7jayJepAbLbLZeNgzQ9BKU3QE60JUhIRrlYDwHw/JhIU
+         B+8st17jTJ6Z1DYEmUVIDvIfP/2L0eFW2zmF94NU=
+Date:   Thu, 19 Nov 2020 15:19:18 +0000
+From:   Mark Brown <broonie@kernel.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
         Alan Stern <stern@rowland.harvard.edu>,
@@ -70,7 +44,8 @@ Cc:     Thierry Reding <thierry.reding@gmail.com>,
         Krzysztof Kozlowski <krzk@kernel.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -82,9 +57,10 @@ Cc:     Thierry Reding <thierry.reding@gmail.com>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         devicetree@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-media@vger.kernel.org, linux-tegra@vger.kernel.org
-References: <20201112171600.GD4742@sirena.org.uk>
- <b4b06c1d-c9d4-43b2-c6eb-93f8cb6c677d@gmail.com>
- <20201112200123.GF4742@sirena.org.uk>
+Subject: Re: [PATCH v1 11/30] drm/tegra: dc: Support OPP and SoC core voltage
+ scaling
+Message-ID: <20201119151918.GA5554@sirena.org.uk>
+References: <20201112200123.GF4742@sirena.org.uk>
  <ce9e2d9f-917e-fb8a-7323-f3bf1a367e9d@gmail.com>
  <20201113142937.GB4828@sirena.org.uk>
  <7f066805-97d9-088f-e89d-a554fe478574@gmail.com>
@@ -93,72 +69,76 @@ References: <20201112171600.GD4742@sirena.org.uk>
  <20201113172859.GF4828@sirena.org.uk>
  <74cfc6a9-3f59-d679-14b7-51102a6f11b3@gmail.com>
  <20201116133311.GB4739@sirena.org.uk>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <332ab946-daee-bb83-24ab-0bda4fd8e1ef@gmail.com>
-Date:   Thu, 19 Nov 2020 17:22:43 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.4.2
+ <332ab946-daee-bb83-24ab-0bda4fd8e1ef@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20201116133311.GB4739@sirena.org.uk>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="G4iJoqBmSsgzjUCe"
+Content-Disposition: inline
+In-Reply-To: <332ab946-daee-bb83-24ab-0bda4fd8e1ef@gmail.com>
+X-Cookie: Chocolate chip.
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-16.11.2020 16:33, Mark Brown пишет:
-> On Sun, Nov 15, 2020 at 08:42:10PM +0300, Dmitry Osipenko wrote:
->> 13.11.2020 20:28, Mark Brown пишет:
-> 
->>>> What should we do?
-> 
->>> As I keep saying the consumer driver should be enumerating the voltages
->>> it can set, if it can't find any and wants to continue then it can just
->>> skip setting voltages later on.  If only some are unavailable then it
->>> probably wants to eliminate those specific OPPs instead.
-> 
->> I'm seeing a dummy regulator as a helper for consumer drivers which
->> removes burden of handling an absent (optional) regulator. Is this a
->> correct understanding of a dummy regulator?
-> 
->> Older DTBs don't have a regulator and we want to keep them working. This
->> is equal to a physically absent regulator and in this case it's an
->> optional regulator, IMO.
-> 
-> No, you are failing to understand the purpose of this code.  To
-> reiterate unless the device supports operating with the supply
-> physically absent then the driver should not be attempting to use
-> regulator_get_optional().  That exists specifically for the case where
-> the supply may be absent, nothing else.  The dummy regulator is there
-> precisely for the case where the system does not describe supplies that
-> we know are required for the device to function, it fixes up that
-> omission so we don't need to open code handling of this in every single
-> consumer driver.
 
-The original intention of regulator_get_optional() is clear to me, but
-nothing really stops drivers from slightly re-purposing this API, IMO.
+--G4iJoqBmSsgzjUCe
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Drivers should be free to assume that if regulator isn't defined by
-firmware, then it's physically absent if this doesn't break anything. Of
-course in some cases it's unsafe to make such assumptions. I think it's
-a bit unpractical to artificially limit API usage without a good reason,
-i.e. if nothing breaks underneath of a driver.
+On Thu, Nov 19, 2020 at 05:22:43PM +0300, Dmitry Osipenko wrote:
+> 16.11.2020 16:33, Mark Brown =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
 
-> Regulators that are present but not described by the firmware are a
-> clearly different case to regulators that are not physically there,
-> hardware with actually optional regulators will generally require some
-> configuration for this case.
-> 
+> > No, you are failing to understand the purpose of this code.  To
+> > reiterate unless the device supports operating with the supply
+> > physically absent then the driver should not be attempting to use
+> > regulator_get_optional().  That exists specifically for the case where
 
-I have good news. After spending some more time on trying out different
-things, I found that my previous assumption about the fixed-regulator
-was wrong, it actually accepts voltage changes, i.e. regulator consumer
-doesn't get a error on a voltage-change. This is exactly what is needed
-for the OPP core to work properly.
+> The original intention of regulator_get_optional() is clear to me, but
+> nothing really stops drivers from slightly re-purposing this API, IMO.
 
-This means that there is no need to add special quirks to work around
-absent regulators, we will just add a fixed regulator to the DTs which
-don't specify a real regulator. The OPP core will perform voltage
-checking and filter out unsupported OPPs. The older DTBs will continue
-to work as well.
+> Drivers should be free to assume that if regulator isn't defined by
+> firmware, then it's physically absent if this doesn't break anything. Of
+> course in some cases it's unsafe to make such assumptions. I think it's
+> a bit unpractical to artificially limit API usage without a good reason,
+> i.e. if nothing breaks underneath of a driver.
+
+If the supply can be physically absent without breaking anything then
+this is the intended use case for optional regulators.  This is a *very*
+uncommon.
+
+> > Regulators that are present but not described by the firmware are a
+> > clearly different case to regulators that are not physically there,
+> > hardware with actually optional regulators will generally require some
+> > configuration for this case.
+
+> I have good news. After spending some more time on trying out different
+> things, I found that my previous assumption about the fixed-regulator
+> was wrong, it actually accepts voltage changes, i.e. regulator consumer
+> doesn't get a error on a voltage-change. This is exactly what is needed
+> for the OPP core to work properly.
+
+To be clear when you set a voltage range you will get the minimum
+voltage that can be supported within that range on the system given all
+the other constraints the system has.  For fixed voltage regulators or
+regulators constraints to not change voltage this means that if whatever
+voltage they are fixed at is in the range requested then the API will
+report success.
+
+--G4iJoqBmSsgzjUCe
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl+2jPUACgkQJNaLcl1U
+h9Cg3Qf/ScTE8SCsHJLjKatjArehtbhKoUyG6aFABrEI/v3bjsqKt/Sq0WjEm255
+nKAu6jVgldwyJP7JR+NQvS2KTy6/Ai/3r+U/lyG8X0xthT14nzXhC6QSAIfukqgq
+JHderVdLXa+mc9bZ4vJ8AzG88ImFulrVA84t2cIuHOU27i4wVx5oQJZoRquB5JdJ
+jAPleN81AYXwTdcJkckY0QoHEFVz55g/4xI2cuh9onlNHbt8eVr7FGsswsNnATrv
+DlAATwOrW84BJnGHjaB0vfWLRx75q3bJ1z62kbdf0VqU5rYaVUppa5a+8eHY6i4V
+A1ZTgD1YjmUvJjo2cbBpm7mJsYOinA==
+=tj+B
+-----END PGP SIGNATURE-----
+
+--G4iJoqBmSsgzjUCe--
