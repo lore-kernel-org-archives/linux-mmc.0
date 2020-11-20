@@ -2,82 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F9FAC56201
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 14:51:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C18FC64E7C
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 15:07:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3404622253
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 14:51:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CAAE2221F8
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 15:07:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="zmhhMpBU"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="UmL0aLvY"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727709AbgKTOvO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Nov 2020 09:51:14 -0500
-Received: from www.zeus03.de ([194.117.254.33]:39078 "EHLO mail.zeus03.de"
+        id S1728759AbgKTPG5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Nov 2020 10:06:57 -0500
+Received: from www.zeus03.de ([194.117.254.33]:43432 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727215AbgKTOvO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Nov 2020 09:51:14 -0500
+        id S1728764AbgKTPG4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 20 Nov 2020 10:06:56 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=1rCGpsXgE6NUHy85wd86XpoNDlTq
-        HrGpHm9mYeyg5bM=; b=zmhhMpBUak7u4Td9EiKi9B2lriOeErSYA3v4ifxLj7Qa
-        icWgRd/0htvCSy3r0fGrU9kMFN2an/2plzWtJUKiFQ/K4FAP5Pwt8CBXFM9R033t
-        CmEf5NmjcVyCXhWhB3VO632sUEsIuDbjmzwI9nt4sRuWN/DHgTkPoo6Na6qwUL4=
-Received: (qmail 1516414 invoked from network); 20 Nov 2020 15:51:12 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 20 Nov 2020 15:51:12 +0100
-X-UD-Smtp-Session: l3s3148p1@b/m9+Yq0/NwgAwDPXwi7AEBAgYxIRHZX
-Date:   Fri, 20 Nov 2020 15:51:11 +0100
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=0YDYEEb1QJjPX6
+        RzZTagATEA25hUdBIWiOiE/NKSz1s=; b=UmL0aLvY23nLcs5Wzoctxl4C5Icy5B
+        m53Of7ETFEFFPtVAQQ3eR0TkxFYaP8Zj0vxbJ3amWn9pk4Q9X58QvPU3Xt7Ff9iG
+        HfJKux7dH5lqBpZIUUZ/XC0gAky0JzH1zFARm5AgXwO4EbZZSwWliHIazkSVOZhw
+        YAMI3fx2bGWLk=
+Received: (qmail 1520195 invoked from network); 20 Nov 2020 16:06:53 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 20 Nov 2020 16:06:53 +0100
+X-UD-Smtp-Session: l3s3148p1@hwjZMYu0Et0gAwDPXwi7AEBAgYxIRHZX
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Masahiro Yamada <masahiroy@kernel.org>
-Subject: Re: [PATCH RFT 1/3] mmc: tmio: set max_busy_timeout
-Message-ID: <20201120145111.GB2353@ninjato>
-References: <20201120142629.98222-1-wsa+renesas@sang-engineering.com>
- <20201120142629.98222-2-wsa+renesas@sang-engineering.com>
+        Masahiro Yamada <masahiroy@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH RFT v2 1/3] mmc: tmio: set max_busy_timeout
+Date:   Fri, 20 Nov 2020 16:06:45 +0100
+Message-Id: <20201120150647.123237-2-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201120150647.123237-1-wsa+renesas@sang-engineering.com>
+References: <20201120150647.123237-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="H+4ONPRPur6+Ovig"
-Content-Disposition: inline
-In-Reply-To: <20201120142629.98222-2-wsa+renesas@sang-engineering.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Set max_busy_timeouts for variants known to support the TOPxx bits in
+the SD_OPTION register. The timeout mechanism was running in the
+background but not yet properly handled in the driver. So, let the MMC
+core know when to not use R1B to avoid unhandled timeouts.
 
---H+4ONPRPur6+Ovig
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+My datasheets for older variants (tmio_mmc.c) suggest that they support
+it, too. However, actual bit descriptions are lacking, so I chose an
+opt-in approach.
 
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-> +	host->mmc->max_busy_timeout = cycles / (clk_rate * MSEC_PER_SEC);
+Change since v1:
+* fix wrong multiplication to correct division due to a bad merge
+  conflict resolution 
 
-This should be "/ MSEC_PER_SEC"! Sorry, it was a bad merge conflict
-resolution :(
+ drivers/mmc/host/renesas_sdhi_core.c |  3 +++
+ drivers/mmc/host/tmio_mmc.h          |  2 ++
+ drivers/mmc/host/tmio_mmc_core.c     | 15 +++++++++++++++
+ drivers/mmc/host/uniphier-sd.c       |  1 +
+ include/linux/mfd/tmio.h             |  7 ++++++-
+ 5 files changed, 27 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index bb937411c2ec..153767054c05 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -1041,6 +1041,9 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	/* All SDHI have SDIO status bits which must be 1 */
+ 	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_SETBITS;
+ 
++	/* All SDHI support HW busy detection */
++	mmc_data->flags |= TMIO_MMC_USE_BUSY_TIMEOUT;
++
+ 	dev_pm_domain_start(&pdev->dev);
+ 
+ 	ret = renesas_sdhi_clk_enable(host);
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 7ff41185896a..819198af17f4 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -80,6 +80,8 @@
+ #define	CLK_CTL_SCLKEN		BIT(8)
+ 
+ /* Definitions for values the CTL_SD_MEM_CARD_OPT register can take */
++#define CARD_OPT_TOP_MASK	0xf0
++#define CARD_OPT_TOP_SHIFT	4
+ #define CARD_OPT_WIDTH8		BIT(13)
+ #define CARD_OPT_WIDTH		BIT(15)
+ 
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 7f4a28125010..4727fcfdf95f 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -887,6 +887,18 @@ static void tmio_mmc_set_bus_width(struct tmio_mmc_host *host,
+ 	sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, reg);
+ }
+ 
++static void tmio_mmc_max_busy_timeout(struct tmio_mmc_host *host)
++{
++	u16 val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
++	unsigned int clk_rate = host->mmc->actual_clock ?: host->mmc->f_max;
++	unsigned int cycles;
++
++	val = (val & CARD_OPT_TOP_MASK) >> CARD_OPT_TOP_SHIFT;
++	cycles = 1 << (13  + val);
++
++	host->mmc->max_busy_timeout = cycles / (clk_rate / MSEC_PER_SEC);
++}
++
+ /* Set MMC clock / power.
+  * Note: This controller uses a simple divider scheme therefore it cannot
+  * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
+@@ -945,6 +957,9 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
+ 	}
+ 
++	if (host->pdata->flags & TMIO_MMC_USE_BUSY_TIMEOUT)
++		tmio_mmc_max_busy_timeout(host);
++
+ 	/* Let things settle. delay taken from winCE driver */
+ 	usleep_range(140, 200);
+ 	if (PTR_ERR(host->mrq) == -EINTR)
+diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+index 3092466a99ab..a6cd16771d4e 100644
+--- a/drivers/mmc/host/uniphier-sd.c
++++ b/drivers/mmc/host/uniphier-sd.c
+@@ -586,6 +586,7 @@ static int uniphier_sd_probe(struct platform_device *pdev)
+ 
+ 	tmio_data = &priv->tmio_data;
+ 	tmio_data->flags |= TMIO_MMC_32BIT_DATA_PORT;
++	tmio_data->flags |= TMIO_MMC_USE_BUSY_TIMEOUT;
+ 
+ 	host = tmio_mmc_host_alloc(pdev, tmio_data);
+ 	if (IS_ERR(host))
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 8ba042430d8e..27264fe4b3b9 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -55,7 +55,12 @@
+  */
+ #define TMIO_MMC_HAS_IDLE_WAIT		BIT(4)
+ 
+-/* BIT(5) is unused */
++/*
++ * Use the busy timeout feature. Probably all TMIO versions support it. Yet,
++ * we don't have documentation for old variants, so we enable only known good
++ * variants with this flag. Can be removed once all variants are known good.
++ */
++#define TMIO_MMC_USE_BUSY_TIMEOUT	BIT(5)
+ 
+ /*
+  * Some controllers have CMD12 automatically
+-- 
+2.28.0
 
---H+4ONPRPur6+Ovig
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl+319sACgkQFA3kzBSg
-KbYU3w//XWZHKpPEywjJw4Dq8HGSMxEWcnSFPpdBg51/vS5TuPiKPcGQSAX9AdCS
-dKkN8Xwf/89p0A+9Du7UfZy/gLcimKC9QcHvqezFfykT1ZX2J5T1BhW+WmgGunGx
-L+htmJs3qn+DZZh1Jx6sDd9wZ1dFtsMT8QNa+G7KnZJmlVzOCMLDMWuleBbe1Xp/
-/LJDGS9OOh8O89CKzmDHpAXh6iCuHLYqp9ysdGwzDS/Ozbb5bOWOK+u7OGbF4p7C
-VFMyz9P3ksTd2UHYMozBzN2JybouvmhG3Cv1JISDIlD6mwC0hqwADZo/nt79aaoX
-7jHewecNLm0CPvCgJxMZWtuCfu6fky3pWHzhhbL4Tqof5UEnIeObsQtEiYsp2Utq
-UIGMN7rtsBeAvEOILgvG5IZb9jBeSrOjqVOlv7/OMh4V69dF/6dW9IPYa9sePc8K
-bejvTxclkPWDUun2v1nTt+SnhyEM6HPPo2aX5sqHNU01wOkbfLGjGFnCBdLXRt1y
-rKVrmVaJs1GFpQKdNikL8jvzBx5V0W7rhaJ0mCEPfaWdvTyAfTlmak/MDyvJ4ugc
-+wVl0nfwcV1Ub/CuDxinVP25EqnQpVUJ9iyIvP+pWHVT7bUvDM3Zr4kUUWTn9a+z
-oOIuK1vuc5eI18370MOtgB/TyUDw3WgpmtGiRVp4LEGcUDtEhIc=
-=FvCM
------END PGP SIGNATURE-----
-
---H+4ONPRPur6+Ovig--
