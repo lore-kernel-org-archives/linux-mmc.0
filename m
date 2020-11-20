@@ -2,129 +2,149 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FAA8C64E7C
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 19:30:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76051C71155
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 19:31:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2CFA522254
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 19:30:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2014222240
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 19:31:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="GgFl3K9I"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732401AbgKTTa1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Nov 2020 14:30:27 -0500
-Received: from mga03.intel.com ([134.134.136.65]:23023 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729137AbgKTTa1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Nov 2020 14:30:27 -0500
-IronPort-SDR: 68spS8s2X16MqsMM/HIah9JwjqwkeKnexFXjDpPujhSYJZzTYWdbvky/yl5oYwFBSk0RJc4OXF
- oaEuD/B/JLOA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9811"; a="171628750"
-X-IronPort-AV: E=Sophos;i="5.78,357,1599548400"; 
-   d="scan'208";a="171628750"
-X-Amp-Result: SKIPPED(no attachment in message)
-X-Amp-File-Uploaded: False
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Nov 2020 11:30:26 -0800
-IronPort-SDR: 6F3m5G0UnmyqkEQSm+JWn+qVdmY/Up0r14PLs4LtOpPn9M24tZ6nPt+UC3vQD87+GQAREQI7pu
- uucMh9h8SuKA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,357,1599548400"; 
-   d="scan'208";a="312138648"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by fmsmga007.fm.intel.com with ESMTP; 20 Nov 2020 11:30:19 -0800
-Subject: Re: [PATCH 0/8] eMMC inline encryption support
-To:     Eric Biggers <ebiggers@kernel.org>, linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-References: <20201112194011.103774-1-ebiggers@kernel.org>
- <X7gQ9Y44iIgkiM64@sol.localdomain>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <ea904bcc-3f01-d968-2a16-f9ff9f012968@intel.com>
-Date:   Fri, 20 Nov 2020 21:29:59 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1732440AbgKTTar (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Nov 2020 14:30:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50760 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732425AbgKTTap (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Nov 2020 14:30:45 -0500
+Received: from mail-pg1-x544.google.com (mail-pg1-x544.google.com [IPv6:2607:f8b0:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB046C061A55
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2020 11:30:43 -0800 (PST)
+Received: by mail-pg1-x544.google.com with SMTP id v21so8162669pgi.2
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Nov 2020 11:30:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=3bv50j9tOMZCSWAChUvUk5K6TgooTRt3SRcQZBJ9fcA=;
+        b=GgFl3K9IS/lWsdMjkEVVAtTSDzsQ0sxEOabPKwuHzNJyTA7s1nVN/P5Py+wtAIOvbE
+         i43RryzoLL4QMDFVI6bDxTe0ngekUN0rycJ/u5dixn0o4ZWxiMdHtnF6M1zgV7bxdmjG
+         OxnZTS8PQwcd6ZCwnahaxVB8GYQEw6f4nxFx4=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=3bv50j9tOMZCSWAChUvUk5K6TgooTRt3SRcQZBJ9fcA=;
+        b=BfKdqESz2Dl+xz5IJxEdkS/+8AMNSlhkmyGY3EMdHDCke9eAL6qqRTvjD8FOLaatDU
+         x8tmBdZxb1Ymi+p7QnZLAJ1W5RxxS9r11/MqvdcAgTQopIh+oy4tVNCSuVs839RVpuwf
+         XUF1FYZBu8qoCd89LM/YA/3GubYOvWCjhJju08YC3051/FHyy61LyjmbhIWN200c1siV
+         8Sce0NgaG8OtjXe2Uhf2/u4j630Vfn/hvaL10eEx0Liv+gBgBx1tCcofPGKy+VNUutiX
+         4p1EClKjm2JqCIP5BwGCj9sBXkoHLaqv66dyGrQZErJIg7D8DaJiYucYgRicvKgs7/aQ
+         /NgQ==
+X-Gm-Message-State: AOAM530LUYrcYRmdNLRa1sbhIRgSbvdocGtx62mqnPl36naJP1J2L19T
+        UQq+078cEAo2hwI3w/1tjQBlDA==
+X-Google-Smtp-Source: ABdhPJwFn7oz/bfAp6J8E6Vk82WR2gtV/ls3AEWmwH/TblnvnVOa/FKFQXEYpz+4sj3KQLcuYCiPkA==
+X-Received: by 2002:a63:a84f:: with SMTP id i15mr19199286pgp.120.1605900643186;
+        Fri, 20 Nov 2020 11:30:43 -0800 (PST)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id s5sm4261271pfh.164.2020.11.20.11.30.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Nov 2020 11:30:41 -0800 (PST)
+Date:   Fri, 20 Nov 2020 11:30:40 -0800
+From:   Kees Cook <keescook@chromium.org>
+To:     Jakub Kicinski <kuba@kernel.org>
+Cc:     "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+        linux-kernel@vger.kernel.org, alsa-devel@alsa-project.org,
+        amd-gfx@lists.freedesktop.org, bridge@lists.linux-foundation.org,
+        ceph-devel@vger.kernel.org, cluster-devel@redhat.com,
+        coreteam@netfilter.org, devel@driverdev.osuosl.org,
+        dm-devel@redhat.com, drbd-dev@lists.linbit.com,
+        dri-devel@lists.freedesktop.org, GR-everest-linux-l2@marvell.com,
+        GR-Linux-NIC-Dev@marvell.com, intel-gfx@lists.freedesktop.org,
+        intel-wired-lan@lists.osuosl.org, keyrings@vger.kernel.org,
+        linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org,
+        linux-afs@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org,
+        linux-atm-general@lists.sourceforge.net,
+        linux-block@vger.kernel.org, linux-can@vger.kernel.org,
+        linux-cifs@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-decnet-user@lists.sourceforge.net,
+        linux-ext4@vger.kernel.org, linux-fbdev@vger.kernel.org,
+        linux-geode@lists.infradead.org, linux-gpio@vger.kernel.org,
+        linux-hams@vger.kernel.org, linux-hwmon@vger.kernel.org,
+        linux-i3c@lists.infradead.org, linux-ide@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-integrity@vger.kernel.org,
+        linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mm@kvack.org,
+        linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-sctp@vger.kernel.org,
+        linux-security-module@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        netfilter-devel@vger.kernel.org, nouveau@lists.freedesktop.org,
+        op-tee@lists.trustedfirmware.org, oss-drivers@netronome.com,
+        patches@opensource.cirrus.com, rds-devel@oss.oracle.com,
+        reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org,
+        selinux@vger.kernel.org, target-devel@vger.kernel.org,
+        tipc-discussion@lists.sourceforge.net,
+        usb-storage@lists.one-eyed-alien.net,
+        virtualization@lists.linux-foundation.org,
+        wcn36xx@lists.infradead.org, x86@kernel.org,
+        xen-devel@lists.xenproject.org, linux-hardening@vger.kernel.org,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Nathan Chancellor <natechancellor@gmail.com>,
+        Miguel Ojeda <ojeda@kernel.org>, Joe Perches <joe@perches.com>
+Subject: Re: [PATCH 000/141] Fix fall-through warnings for Clang
+Message-ID: <202011201129.B13FDB3C@keescook>
+References: <cover.1605896059.git.gustavoars@kernel.org>
+ <20201120105344.4345c14e@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
 MIME-Version: 1.0
-In-Reply-To: <X7gQ9Y44iIgkiM64@sol.localdomain>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201120105344.4345c14e@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/11/20 8:54 pm, Eric Biggers wrote:
-> On Thu, Nov 12, 2020 at 11:40:03AM -0800, Eric Biggers wrote:
->> Hello,
->>
->> This patchset adds support for eMMC inline encryption, as specified by
->> the upcoming version of the eMMC specification and as already
->> implemented and used on many devices.  Building on that, it then adds
->> Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
->>
->> Inline encryption hardware improves the performance of storage
->> encryption and reduces power usage.  See
->> Documentation/block/inline-encryption.rst for more information about
->> inline encryption and the blk-crypto framework (upstreamed in v5.8)
->> which supports it.  Most mobile devices already use UFS or eMMC inline
->> encryption hardware; UFS support was already upstreamed in v5.9.
->>
->> Patches 1-3 add support for the standard eMMC inline encryption.
->>
->> However, as with UFS, host controller-specific patches are needed on top
->> of the standard support.  Therefore, patches 4-8 add Qualcomm ICE
->> (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
->>
->> To test this I took advantage of the recently upstreamed support for the
->> Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
->> project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
->> particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
->> a Debian chroot.  Among other things, these tests verified that the
->> correct ciphertext is written to disk (the same as software encryption).
->>
->> It will also be possible to add support for Mediatek eMMC inline
->> encryption hardware in mtk-sd, and it should be easier than the Qualcomm
->> hardware since the Mediatek hardware follows the standard more closely.
->> I.e., patches 1-3 should be almost enough for the Mediatek hardware.
->> However, I don't have the hardware to do this yet.
->>
->> This patchset is based on v5.10-rc3, and it can also be retrieved from
->> tag "mmc-crypto-v1" of
->> https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
->>
->> Note: the fscrypt inline encryption support is partially broken in
->> v5.10-rc3, so for testing a fscrypt fix needs to be applied too:
->> https://lkml.kernel.org/r/20201111015224.303073-1-ebiggers@kernel.org
->>
->> Eric Biggers (8):
->>   mmc: add basic support for inline encryption
->>   mmc: cqhci: rename cqhci.c to cqhci-core.c
->>   mmc: cqhci: add support for inline encryption
->>   mmc: cqhci: add cqhci_host_ops::program_key
->>   firmware: qcom_scm: update comment for ICE-related functions
->>   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
->>   arm64: dts: qcom: sdm630: add ICE registers and clocks
->>   mmc: sdhci-msm: add Inline Crypto Engine support
+On Fri, Nov 20, 2020 at 10:53:44AM -0800, Jakub Kicinski wrote:
+> On Fri, 20 Nov 2020 12:21:39 -0600 Gustavo A. R. Silva wrote:
+> > This series aims to fix almost all remaining fall-through warnings in
+> > order to enable -Wimplicit-fallthrough for Clang.
+> > 
+> > In preparation to enable -Wimplicit-fallthrough for Clang, explicitly
+> > add multiple break/goto/return/fallthrough statements instead of just
+> > letting the code fall through to the next case.
+> > 
+> > Notice that in order to enable -Wimplicit-fallthrough for Clang, this
+> > change[1] is meant to be reverted at some point. So, this patch helps
+> > to move in that direction.
+> > 
+> > Something important to mention is that there is currently a discrepancy
+> > between GCC and Clang when dealing with switch fall-through to empty case
+> > statements or to cases that only contain a break/continue/return
+> > statement[2][3][4].
 > 
-> Any comments on this patchset?
+> Are we sure we want to make this change? Was it discussed before?
+> 
+> Are there any bugs Clangs puritanical definition of fallthrough helped
+> find?
+> 
+> IMVHO compiler warnings are supposed to warn about issues that could
+> be bugs. Falling through to default: break; can hardly be a bug?!
 
-I haven't had a chance to look at it properly, but I do have a couple of
-dumb questions.  How do you ensure the host controller is not runtime
-suspended when the key is programmed?  Are the keys lost when the host
-controller is reset, and then how do you know the host controller does not
-get reset after the key is programmed but before the I/O is submitted?
+It's certainly a place where the intent is not always clear. I think
+this makes all the cases unambiguous, and doesn't impact the machine
+code, since the compiler will happily optimize away any behavioral
+redundancy.
+
+
+-- 
+Kees Cook
