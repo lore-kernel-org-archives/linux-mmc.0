@@ -2,103 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2241C8300E
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 15:07:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87256C56201
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 16:24:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 322CF22226
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 15:07:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3303F22269
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Nov 2020 16:24:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="wlOLLAbY"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="qTqQL3vb"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728725AbgKTPHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Nov 2020 10:07:02 -0500
-Received: from www.zeus03.de ([194.117.254.33]:43426 "EHLO mail.zeus03.de"
+        id S1729704AbgKTQXv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Nov 2020 11:23:51 -0500
+Received: from mail.kernel.org ([198.145.29.99]:42400 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728765AbgKTPG4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Nov 2020 10:06:56 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=0cEj12D45/gnrPeg+tP43kdtsVz
-        0cBSJpjREvk5JLU0=; b=wlOLLAbY82PPydElgh91wNQI8r78myOnO8O0m1h7/n2
-        0sF/Q/molBhKXV0LHg5pqViuhv1bIkzeCkKx9ZnRffEcz2ajBBqcS0z+E9rd5/Nk
-        8SOeGpN7hucdQqAwEdWJYKm1FEW224iZVhAnnYZt0tNGKy7RSyLDH1z/KAIKtsSg
-        =
-Received: (qmail 1520170 invoked from network); 20 Nov 2020 16:06:53 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 20 Nov 2020 16:06:53 +0100
-X-UD-Smtp-Session: l3s3148p1@3/jRMYu0EN0gAwDPXwi7AEBAgYxIRHZX
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Masahiro Yamada <masahiroy@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH RFT v2 0/3] mmc: tmio: honor busy timeouts properly
-Date:   Fri, 20 Nov 2020 16:06:44 +0100
-Message-Id: <20201120150647.123237-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.28.0
+        id S1729539AbgKTQXv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 20 Nov 2020 11:23:51 -0500
+Received: from localhost.localdomain (adsl-84-226-167-205.adslplus.ch [84.226.167.205])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id E556B22269;
+        Fri, 20 Nov 2020 16:23:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1605889431;
+        bh=aSF6SATY94f3SCCfihTWZ93+pWsbZlyve0AT/9JM6Z0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=qTqQL3vbAEjG8Kws/X5afIQvgWuOZxzorslh51q/1/MPxbh9/brWBGMP/G1CaSbY/
+         0f5FdgV2lvlNj/3/R1Ei0KBEj9K47VjsFMMALHjq4qZr8wYDuSMnFcbNetVUk7Y+9f
+         Xb/7kFppSxglRNaRkTYyM6iLsrxggW3vWtuZRonc=
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Patrice Chotard <patrice.chotard@st.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Cc:     Krzysztof Kozlowski <krzk@kernel.org>,
+        kernel test robot <lkp@intel.com>
+Subject: [PATCH 1/2] mmc: sdhci-sprd: drop of_match_ptr from of_device_id table
+Date:   Fri, 20 Nov 2020 17:23:43 +0100
+Message-Id: <20201120162344.485921-1-krzk@kernel.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-(I fixed the typo in patch 1 and retested again. Sorry for the noise!)
+The driver can match only via the DT table so the table should be always
+used and the of_match_ptr does not have any sense (this also allows ACPI
+matching via PRP0001, even though it is not relevant here).  This fixes
+compile warning (!CONFIG_OF on x86_64):
 
-TMIO has a HW busy timeout detection which was always running but the
-driver did not handle it yet in a proper way. This series fixes that.
+    drivers/mmc/host/sdhci-sprd.c:723:34: warning:
+        ‘sdhci_sprd_of_match’ defined but not used [-Wunused-const-variable=]
 
-Patch 1 sets max_busy_timeout, so the MMC core will not use R1B when it
-is beyond the maximum HW timeout. Patch 2 adds proper handling of the
-timeout interrupt. After ensuring both, we can finally enable the
-WAIT_WHILE_BUSY capability to save the polling.
+Reported-by: kernel test robot <lkp@intel.com>
+Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+---
+ drivers/mmc/host/sdhci-sprd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-This was tested using my Renesas Salvator-XS (R-Car M3-N) and Lager
-(R-Car H2). However, more advanced testing from the BSP team and/or
-Shimoda-san would be much appreciated.
-
-The branch is based on mmc/next plus one patch "[PATCH RFT v2] mmc: tmio: Fix
-command error processing". A branch is available here:
-
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/busy_timeout
-
-Yamada-san: I enabled setting max_busy_timeout for Uniphier as well
-because I am quite sure this HW supports it and it will fix timeout
-issues with long erase timeouts. I did not enable WAIT_WHILE_BUSY
-because this is "only" an improvement and not a fix. I think opt-in
-after some testing is good for that case.
-
-I think all patches are 5.11 material to get enough testing. Patch 1
-is IMHO stable material, nonetheless. I am open for discussions, of
-course.
-
-Looking forward to comments, reviews, tags...
-
-Thanks and happy hacking,
-
-   Wolfram
-
-
-Masaharu Hayakawa (1):
-  mmc: tmio: Add data timeout error detection
-
-Wolfram Sang (2):
-  mmc: tmio: set max_busy_timeout
-  mmc: renesas_sdhi: enable WAIT_WHILE_BUSY
-
- drivers/mmc/host/renesas_sdhi_core.c          |  3 ++
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  4 +--
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      |  7 ++--
- drivers/mmc/host/tmio_mmc.h                   |  8 +++--
- drivers/mmc/host/tmio_mmc_core.c              | 32 +++++++++++++++----
- drivers/mmc/host/uniphier-sd.c                |  1 +
- include/linux/mfd/tmio.h                      |  7 +++-
- 7 files changed, 48 insertions(+), 14 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 58109c5b53e2..f85171edabeb 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -788,7 +788,7 @@ static struct platform_driver sdhci_sprd_driver = {
+ 	.driver = {
+ 		.name = "sdhci_sprd_r11",
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+-		.of_match_table = of_match_ptr(sdhci_sprd_of_match),
++		.of_match_table = sdhci_sprd_of_match,
+ 		.pm = &sdhci_sprd_pm_ops,
+ 	},
+ };
 -- 
-2.28.0
+2.25.1
 
