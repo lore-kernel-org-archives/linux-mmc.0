@@ -7,131 +7,153 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F9F8C6379F
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:06 +0000 (UTC)
-Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D15292076E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 74060C56202
 	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:05 +0000 (UTC)
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by mail.kernel.org (Postfix) with ESMTP id 077CF20782
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:04 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Vu16Ujmb"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Npylciof"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389888AbgKWQHk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Nov 2020 11:07:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33124 "EHLO
+        id S2389883AbgKWQHg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Nov 2020 11:07:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33112 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731765AbgKWQHk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 11:07:40 -0500
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D898C061A4D
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:38 -0800 (PST)
-Received: by mail-vk1-xa42.google.com with SMTP id e127so1586410vkb.5
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:38 -0800 (PST)
+        with ESMTP id S2389882AbgKWQHg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 11:07:36 -0500
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 236EFC061A4D
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:36 -0800 (PST)
+Received: by mail-vk1-xa44.google.com with SMTP id w67so4055720vke.10
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=O/ItqqpCB3WwrW1C+GCf4NN2Kjg8Qry/xoQUCv8LM1Y=;
-        b=Vu16UjmbO6sNa5108slHIduaE+yjbGtAc5ye7fxBJdvq7YygR0atRT57IkCM1X31+W
-         UUgiwq2aSFoFNzraUyzdqbwX8hu/fONCC6hXIeUo2tKabgHbyllDl5GZCKAda3EDH79N
-         Sxz/RslEJC7ZoEx5jpq1sTKXMJqn+pP2LeEKE4aZpdh5WE1o9n4Ju7m/Zpxuhjlqmpz6
-         sjeKBWZaKjxfh6ogWeSrHa+0N/ex2uJMz4wwi6UIzBlwI46NpSZgzY4PwGa8Vh5cz7ue
-         hnVoluFIbrAf2b0aY3dn74xoWNW4TFSK6ZHnThlMJuxyA1ynf97QfEm/rQ+ExtTj6/3n
-         HYaA==
+        bh=erW0XIM+2y9def48xOpIc4QdS/vND+3STJwJE9GzrvM=;
+        b=NpylciofEhMTaLNdbM9e1geQueViMrm5kQlxx0uBp9N20vNsPQ0MItUfE46rsSwk7u
+         8zw+2Daf22S1TPyrUA44QJskC0ltQVAadvRihxTvO2RS/jyJOdmwDEPQZlny1uARVT+o
+         JTjp6WxOiNcj53fPMYHi4ZUL+IqdrOV1xDDzF6ZWkPPG4y/5pnOnIhyNJ08z5juS3qxB
+         UiZqpb5KOm6S+FzbPVkF29sMKBfbSj8246AclN3e2BTpDxz0lUuI7/dkYZvj3cC2wp88
+         yg4mFV2ORDKYktD33FA/mgnUvMfD/W+kPHfOqYc93ARJL/Fz/WO8ZBMHOBp3fB9X6W5e
+         BwGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=O/ItqqpCB3WwrW1C+GCf4NN2Kjg8Qry/xoQUCv8LM1Y=;
-        b=CVLATCg6/n6ouFZ4FQtVjgzG18bEHVEUsZxvYttoFT+2wfwJ6QGlXFonUh3gfimSc+
-         8ii9LSeX2hMQzrWbP5mgrFeojZ1s8JCQSGCuLhU6euYctEsW7mbVi6OfpksI/9biXVve
-         6DgGVeMNKRcOGOsKMhz8mnwQQ5WLF8IciCRXjQz2Ylmxwx2jflhDIKDooVjGayWHAo7H
-         QN6qpINdKzhN9kdnW+3mdNKAA+IxRa/GpVQ7q/O8mktHLW4j7LMWO/N6eevMzdIdNyM3
-         acmqK1yd/+AyCmM86Dj2zaNe4zTVm1LV7MrFLvR2GEd5K017zFY9E/EcokDUOi8sW2S5
-         Z6Tw==
-X-Gm-Message-State: AOAM5308lWnyHrLJe3S2AClRYwNqkVOSG4Cwlr4AiFjwWvfEyt47eftg
-        aIiE+S0snk+irQYR0nDYugSXL0OcI6+rjQ5AF0lEeA==
-X-Google-Smtp-Source: ABdhPJyWnEErE/SiDA8LVPRNMejQR2+57MiKFEIdwOr/gU4OcMsQt0L5pBWLI+QK+wC55RYqTPUdmE3EersH0WdAUv4=
-X-Received: by 2002:a1f:2cd4:: with SMTP id s203mr524230vks.6.1606147657783;
- Mon, 23 Nov 2020 08:07:37 -0800 (PST)
+        bh=erW0XIM+2y9def48xOpIc4QdS/vND+3STJwJE9GzrvM=;
+        b=WbqObE28nkWw5FBPhSL3fWmQk2hl0SfrEajwkfwyI88RaQ/20dFIiEuENrROPmcHTA
+         jtJsk3gfOpOA1MteXqKnhtXu2TQDrkm86OJssNtPhITu6I/DTInS9ueaIQ8wWRGTGl/M
+         BZ03yOogB1Q+/SOHjTLxaUh4y0h98249aOFSfNJEzYCETJ9U+xzyR3RgoAf4zSBcuFsV
+         RIbRdMX8KMxZaLkyUbRDe0HYLSRg4uaf6xGiTMcAghEbyOuNCH8fcLE+oodL/zuH7oFi
+         683vMM7pwMSwD19qxQ+l2Ru52IxDOyn97UP2gHhaDHTlFRSFuB/+quXUqjm0p40JqevV
+         86Sw==
+X-Gm-Message-State: AOAM530ZjtFSrVqFkMcZY9IcI2npidLUQlTFYhjQssU2TtBxee7MISdO
+        R1yjNx3WXLbPvPJaXBoPHJhnlJgy4kPKZyHYPyaD22liYHM6WQ==
+X-Google-Smtp-Source: ABdhPJw11sLZpk2iJcw5H2+UztqwfIK1pCCTH30flHi05HVt6b1JKFFDYFDtFUO8SBtnEJgqK+HLHZ1Lkfe1gIXhdfs=
+X-Received: by 2002:a1f:8f48:: with SMTP id r69mr430105vkd.6.1606147655157;
+ Mon, 23 Nov 2020 08:07:35 -0800 (PST)
 MIME-Version: 1.0
-References: <20201118120120.24908-1-muhammad.husaini.zulkifli@intel.com> <20201118120120.24908-2-muhammad.husaini.zulkifli@intel.com>
-In-Reply-To: <20201118120120.24908-2-muhammad.husaini.zulkifli@intel.com>
+References: <20201119030237.9414-1-yong.mao@mediatek.com>
+In-Reply-To: <20201119030237.9414-1-yong.mao@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 23 Nov 2020 17:07:01 +0100
-Message-ID: <CAPDyKFp6ws4SKwBXF36CQ2-PiaJtETXupqRsPMCLyUvc9Ho7Kg@mail.gmail.com>
-Subject: Re: [PATCH v2 1/1] mmc: sdhci-of-arasan: Fix clock registration fail
- for Keem Bay SOC
-To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+Date:   Mon, 23 Nov 2020 17:06:57 +0100
+Message-ID: <CAPDyKFrqVoMQNDFhhqbiEJPtw28iOzMvZg6rRoyCEA6oTRq85A@mail.gmail.com>
+Subject: Re: [PATCH V1] mmc: mediatek: correct the setting of recheck_sdio_irq
+To:     Yong Mao <yong.mao@mediatek.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>,
-        Wan Ahmad Zainie <wan.ahmad.zainie.wan.mohamad@intel.com>,
-        "David E. Box" <david.e.box@linux.intel.com>
+        srv_heupstream <srv_heupstream@mediatek.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Mattijs Korpershoek <mkorpershoek@baylibre.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 18 Nov 2020 at 05:01, <muhammad.husaini.zulkifli@intel.com> wrote:
->
-> From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
->
-> Commit 16ada730a759 ("mmc: sdhci-of-arasan: Modify clock operations handling")
-> introduces platform specific SDHCI clock operation. Each platform should
-> specify clock operations handlers.
->
-> Commit 16ada730a759 ("mmc: sdhci-of-arasan: Modify clock operations handling")
-> and Commit 36c6aadaae86 ("mmc: sdhci-of-arasan: Add support for Intel Keem Bay")
-> are merged about the same time. When doing rebasing during the upstream process,
-> Commit 16ada730a759 ("mmc: sdhci-of-arasan: Modify clock operations handling")
-> was not included. This will result in sd clock registration failure for
-> Keem Bay SOC Devices as clock operations handlers are not defined.
->
-> This patch declares the clock operation for Keem Bay SOC Devices.
-> Add clk_ops for SD, EMMC and SDIO operations.
->
-> Fixes: 36c6aadaae86 ("mmc: sdhci-of-arasan: Add support for Intel Keem Bay")
->
-> Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
++ Fabien, Mattijs
 
-Applied for fixes and by adding a stable tag, thanks!
+On Thu, 19 Nov 2020 at 04:03, Yong Mao <yong.mao@mediatek.com> wrote:
+>
+> From: yong mao <yong.mao@mediatek.com>
+>
+> correct the setting of recheck_sdio_irq for each mediatek SoC.
+>
+> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+
+Applied for fixes, by adding a fixes+stable tags and reported-by tags
+from Fabien and Mattijs, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 3 +++
->  1 file changed, 3 insertions(+)
+>  drivers/mmc/host/mtk-sd.c | 11 ++++++-----
+>  1 file changed, 6 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 829ccef87426..012d52e1abee 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1199,16 +1199,19 @@ static struct sdhci_arasan_of_data sdhci_arasan_versal_data = {
->  static struct sdhci_arasan_of_data intel_keembay_emmc_data = {
->         .soc_ctl_map = &intel_keembay_soc_ctl_map,
->         .pdata = &sdhci_keembay_emmc_pdata,
-> +       .clk_ops = &arasan_clk_ops,
->  };
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index fc5ee5df91ad..d49e5ccfca9e 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -463,7 +463,7 @@ struct msdc_host {
 >
->  static struct sdhci_arasan_of_data intel_keembay_sd_data = {
->         .soc_ctl_map = &intel_keembay_soc_ctl_map,
->         .pdata = &sdhci_keembay_sd_pdata,
-> +       .clk_ops = &arasan_clk_ops,
->  };
+>  static const struct mtk_mmc_compatible mt8135_compat = {
+>         .clk_div_bits = 8,
+> -       .recheck_sdio_irq = false,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -502,7 +502,7 @@ static const struct mtk_mmc_compatible mt8183_compat = {
 >
->  static struct sdhci_arasan_of_data intel_keembay_sdio_data = {
->         .soc_ctl_map = &intel_keembay_soc_ctl_map,
->         .pdata = &sdhci_keembay_sdio_pdata,
-> +       .clk_ops = &arasan_clk_ops,
->  };
+>  static const struct mtk_mmc_compatible mt2701_compat = {
+>         .clk_div_bits = 12,
+> -       .recheck_sdio_irq = false,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -528,7 +528,7 @@ static const struct mtk_mmc_compatible mt2712_compat = {
 >
->  static const struct of_device_id sdhci_arasan_of_match[] = {
+>  static const struct mtk_mmc_compatible mt7622_compat = {
+>         .clk_div_bits = 12,
+> -       .recheck_sdio_irq = false,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -541,7 +541,7 @@ static const struct mtk_mmc_compatible mt7622_compat = {
+>
+>  static const struct mtk_mmc_compatible mt8516_compat = {
+>         .clk_div_bits = 12,
+> -       .recheck_sdio_irq = false,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
+> @@ -552,7 +552,7 @@ static const struct mtk_mmc_compatible mt8516_compat = {
+>
+>  static const struct mtk_mmc_compatible mt7620_compat = {
+>         .clk_div_bits = 8,
+> -       .recheck_sdio_irq = false,
+> +       .recheck_sdio_irq = true,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE,
+>         .async_fifo = false,
+> @@ -565,6 +565,7 @@ static const struct mtk_mmc_compatible mt7620_compat = {
+>
+>  static const struct mtk_mmc_compatible mt6779_compat = {
+>         .clk_div_bits = 12,
+> +       .recheck_sdio_irq = false,
+>         .hs400_tune = false,
+>         .pad_tune_reg = MSDC_PAD_TUNE0,
+>         .async_fifo = true,
 > --
-> 2.17.1
+> 2.18.0
 >
