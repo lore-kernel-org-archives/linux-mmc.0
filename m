@@ -5,90 +5,79 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69B39C6379D
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A290C2D0E4
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 14F1320782
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3B2812076E
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 16:08:07 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="X4/ndsvP"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Mq3/zrmu"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389901AbgKWQHr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Nov 2020 11:07:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33144 "EHLO
+        id S2389910AbgKWQHx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Nov 2020 11:07:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33168 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730956AbgKWQHr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 11:07:47 -0500
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90F43C061A4D
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:45 -0800 (PST)
-Received: by mail-vs1-xe41.google.com with SMTP id r14so9368758vsa.13
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:45 -0800 (PST)
+        with ESMTP id S2389907AbgKWQHx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 11:07:53 -0500
+Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0EA4C0613CF
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:52 -0800 (PST)
+Received: by mail-vk1-xa42.google.com with SMTP id e127so1586585vkb.5
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 08:07:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=neKh8lc/wWos/iNaP8WSL7zrCvHB4dIxwGX7kKDy85c=;
-        b=X4/ndsvPJR55zi/T+mrVut+IzMdLDitkajGBydN3gJteOBSqBgcIuZH9mF45Y67vaq
-         1gKccgOB62Z9XgsNCq/Ay2OvAOrOR6s/TcaHSuDNO7brAhgYvEHfd84S30mfqLArc4/E
-         8C+43j7OMYCOe0x+Au0GlRkL1kjSgSej0a7T6LCa2VKXxLW0CufbYDiblEGpC+VMIDqu
-         aejy2CYw9dx+irfcuMvUp2sC3aSknWuGzIJ8FhqUUrc7he4sltOqHUDmdPap8OuF1Eid
-         OpQwUzTZkaYjTbZ6U3ocwwE2jfCfJTLvV47TlnvZeG81gCuC8yb7BeVwfs3ismfeKx3k
-         jBxw==
+         :cc;
+        bh=THkIK27BZf78hxdnE1IQKA4fD1WbWFcexMw8JNVMB+U=;
+        b=Mq3/zrmuE0QTaYQrurBP5tIVw/v7Czw4g8COZlpPyu0SbgUqnf3cFJ977ctpwBj940
+         mlmuBJaSthMdE0j+Ltk2gWI+SyeAV7awrxrYGd3/2my8NYS2ZnWTbtNf5tcBagAexGok
+         lSnpnsSNAUkRFwoZQUD+tH+m/AgQDNdV3hDjAO/uQn3i1CzwDOY08m4dgBCInwEJI6KC
+         wNsTVBpnx+pd4cBvKKYSXcFJ0wW1wp/iYTeERUEynIDxVTP0JtpBovlBz73hCdSH0aNB
+         xOH8ib8Tcx2vwh+qz8wH1qyW7lkwYcvhcnDOqol2wj9270UOvptyuND1mxh2Os+zyotx
+         kcTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=neKh8lc/wWos/iNaP8WSL7zrCvHB4dIxwGX7kKDy85c=;
-        b=D2IwGnSN8FvaaKUhBRPeRs8YSr/c0/9/f4EPeKXdGL0XaQ+j9/vWXR+F5cemonI47X
-         0FuwbliVZ1YVB1Xi9/GKigxVQgOgNZvsI41qB17a1HORtDiWI2g/lCtzurCIsziyQzlu
-         6dI3buyerm8rIv5sy/VkxaYRaQAOSS70EYocDbUPbfjhq3FbNsl1UGmXkgHZFhdSpMcW
-         wCa41wAB/48rJ96J5IDqyJuTBaVnqUv++i6s1jiArKjM2ofrXMoQYf4qpGnBtDM+VVVF
-         kxe0DL2uu/NfVXvxW6qtw9WYKwWMdxh4IvyIqumJWJlo+qglXKPs+RzEROMqU5atyxBa
-         RNkA==
-X-Gm-Message-State: AOAM532HfV0eupHScqqllX1Iz3l38NyND2V8g5i1KVyhlrq7YIm2/s7H
-        ahg/N3iqVUrgSmLhvf1Jg61OO4sJsVBqvFVUxYCaBQ==
-X-Google-Smtp-Source: ABdhPJzFbhfleAS+9gkcRzDUsZi7EZdlN+F5L/n8QkIAsP4Pj4lw3JGZlZwy+vVUWrPBZ8jTWJW+IeLLgwIS3Iosfqw=
-X-Received: by 2002:a67:ce8e:: with SMTP id c14mr375404vse.42.1606147662757;
- Mon, 23 Nov 2020 08:07:42 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=THkIK27BZf78hxdnE1IQKA4fD1WbWFcexMw8JNVMB+U=;
+        b=R9KqdQzt2An05t2uTJKfHQdIwrkLOBoT7K5xJbh1GUa9xPMkGRq/WrO3It0b+aGlT+
+         PEMpQptPbnylLGMlAAHncntVgiipyTRbnJkkWffMiD+WHPGvV9c3Ws0VHwCNON8dbBtB
+         LvHxsohRcs6sKPJXq6dcZku5PX6U0pYhb/1tQiTm5t8Vw21f65g4k+rAlgURzmoRkhUJ
+         dd/DYVIK2Qi7F2pVhqJGdXb5aKJaIgOndV3+E3DicPdT6mJ53BsWCzgrKDpB8eN7bW1O
+         ajuUsEzgsky83o6OFu+4W+VnOZTsWvnEkgAHapHSWotyIAOLp++1zZGcvPggiqcUYEpb
+         5otQ==
+X-Gm-Message-State: AOAM530F0TlBJkmNnib/O5A5YVt3tPTzv6SXxpCYmQ7WioDOweTKNhtH
+        x3cmwFriIo0r9SipcOWUQxydycj1VcQGuzyfPLgZfg==
+X-Google-Smtp-Source: ABdhPJwoFa1ahODSdW+Pnsfz1C2W1aBbG8Aw+Fo43/+tE+Yo9G/GC3ZD0XghWPAGQxyXD//X+RjsmVovghxAVd/UyTI=
+X-Received: by 2002:a1f:5e0b:: with SMTP id s11mr533043vkb.8.1606147672185;
+ Mon, 23 Nov 2020 08:07:52 -0800 (PST)
 MIME-Version: 1.0
-References: <20201120162344.485921-1-krzk@kernel.org>
-In-Reply-To: <20201120162344.485921-1-krzk@kernel.org>
+References: <20201120074846.31322-1-miaoqinglang@huawei.com>
+In-Reply-To: <20201120074846.31322-1-miaoqinglang@huawei.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 23 Nov 2020 17:07:06 +0100
-Message-ID: <CAPDyKFoqpmSWh5-m0m_XB14w7w5RLCYZmYSkuNv1pCiQgYKWVQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: sdhci-sprd: drop of_match_ptr from of_device_id table
-To:     Krzysztof Kozlowski <krzk@kernel.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Baolin Wang <baolin.wang7@gmail.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Patrice Chotard <patrice.chotard@st.com>,
+Date:   Mon, 23 Nov 2020 17:07:15 +0100
+Message-ID: <CAPDyKFqnram9LrgtLP8k-HncBYXKR3HRprfMZPyxqrpZKztTSA@mail.gmail.com>
+Subject: Re: [PATCH] memstick: fix a double-free bug in memstick_check
+To:     Qinglang Miao <miaoqinglang@huawei.com>
+Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        kernel test robot <lkp@intel.com>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 20 Nov 2020 at 17:23, Krzysztof Kozlowski <krzk@kernel.org> wrote:
+On Fri, 20 Nov 2020 at 08:44, Qinglang Miao <miaoqinglang@huawei.com> wrote:
 >
-> The driver can match only via the DT table so the table should be always
-> used and the of_match_ptr does not have any sense (this also allows ACPI
-> matching via PRP0001, even though it is not relevant here).  This fixes
-> compile warning (!CONFIG_OF on x86_64):
+> kfree(host->card) has been called in put_device so that
+> another kfree would raise cause a double-free bug.
 >
->     drivers/mmc/host/sdhci-sprd.c:723:34: warning:
->         =E2=80=98sdhci_sprd_of_match=E2=80=99 defined but not used [-Wunu=
-sed-const-variable=3D]
->
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: Krzysztof Kozlowski <krzk@kernel.org>
+> Fixes: 0193383a5833 ("memstick: core: fix device_register() error handling")
+> Reported-by: Hulk Robot <hulkci@huawei.com>
+> Signed-off-by: Qinglang Miao <miaoqinglang@huawei.com>
 
 Applied for next, thanks!
 
@@ -97,23 +86,21 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/memstick/core/memstick.c | 1 -
+>  1 file changed, 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.=
-c
-> index 58109c5b53e2..f85171edabeb 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -788,7 +788,7 @@ static struct platform_driver sdhci_sprd_driver =3D {
->         .driver =3D {
->                 .name =3D "sdhci_sprd_r11",
->                 .probe_type =3D PROBE_PREFER_ASYNCHRONOUS,
-> -               .of_match_table =3D of_match_ptr(sdhci_sprd_of_match),
-> +               .of_match_table =3D sdhci_sprd_of_match,
->                 .pm =3D &sdhci_sprd_pm_ops,
->         },
->  };
+> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+> index ef03d6faf..12bc3f5a6 100644
+> --- a/drivers/memstick/core/memstick.c
+> +++ b/drivers/memstick/core/memstick.c
+> @@ -468,7 +468,6 @@ static void memstick_check(struct work_struct *work)
+>                         host->card = card;
+>                         if (device_register(&card->dev)) {
+>                                 put_device(&card->dev);
+> -                               kfree(host->card);
+>                                 host->card = NULL;
+>                         }
+>                 } else
 > --
-> 2.25.1
+> 2.23.0
 >
