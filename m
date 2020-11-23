@@ -2,135 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS autolearn=no
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 386AAC2D0E4
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 19:26:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49837C64E75
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 20:04:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CB88E206FA
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 19:26:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05E1B2137B
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Nov 2020 20:04:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AoKbnvxj"
+	dkim=pass (2048-bit key) header.d=nvidia.com header.i=@nvidia.com header.b="Zr1EZlr7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729940AbgKWT0d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Nov 2020 14:26:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35584 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729030AbgKWT0c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 14:26:32 -0500
-Received: from mail-qk1-x744.google.com (mail-qk1-x744.google.com [IPv6:2607:f8b0:4864:20::744])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADE15C0613CF
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 11:26:30 -0800 (PST)
-Received: by mail-qk1-x744.google.com with SMTP id v143so18113938qkb.2
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 11:26:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=TFu+/6vEUzlmWlhU6jgehUV0ei4xBT2kHFX6p38FCtE=;
-        b=AoKbnvxjZZTDcPuymRtVPfeIDSQyMy/W61TwJ/ObA1u+tSbmDCq8ecwPSjY9NLXN4P
-         zRtT7W8i6tAiGeDBY3IGckV0MzAiwQOwnA/nWOgIsxqzQHN9G5Xh9Lfuo1NQ1qgAF2H/
-         VlwuwIGtnyn3JALsSShkxT6GmskGU9ZF018XLcJXtl4fvBtOxOYMxGKLl5ay91dSrVDN
-         NHyV3LWyvBK/uSlhoXjf6zZCChMNj+ZB0GasRYcjS8Ujb/ToBe+CiqX8T6gSPkNAsuMH
-         51oJXstuRqPLJnu555o+X4JAmtRKnKzX08/e72Pj3pFDpOwZMvMtNMFv2ZoGhlNOOhZ7
-         XAtg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=TFu+/6vEUzlmWlhU6jgehUV0ei4xBT2kHFX6p38FCtE=;
-        b=tSfGOGEr9A45usB9DloVEssrw3biDEuQ4OjKbQO2VxRx1OawdLa/CJpC3HIrzAgDWD
-         9rbwcKne+2FVO19kmpEGQIdzZBwrYHijXHxwV0yFVkHQvhMhuq3+wR2hdkw2iZQeZ9c6
-         JsDxI4SYFdye8aAJzAE5Wa0H20gW3fxFdlJ33TJsGaUu5tu2DZxtkQN+/99H/xsXHkv1
-         rf3UBDx9A2WW+he2I4brfhKhx9HWa13FJmjXmd7Bp36UesjJYQLqMeiUgkHYxwq2Y63Y
-         9vgn04iya8bc8FO/TeCbDdEIxmjSovaDNIbXudU7DZiR7kUXh1T5y6RSjEgDxaTRcW5V
-         L/nA==
-X-Gm-Message-State: AOAM530LnY8Qh6EQpSOXlQKAPsA7UFiODroWvSomQj4YcgKN1PiGwNCD
-        E+wOl/P0k/2/vkDYMIeezNo=
-X-Google-Smtp-Source: ABdhPJzwBUiutOXvvUgP0g7ZNKt/1sg8CqofoNydOy1mi0nhMARze9+z1LksSBLK/qVoDpNRsZt2og==
-X-Received: by 2002:a05:620a:1475:: with SMTP id j21mr1029012qkl.87.1606159589910;
-        Mon, 23 Nov 2020 11:26:29 -0800 (PST)
-Received: from localhost.localdomain ([177.194.72.74])
-        by smtp.gmail.com with ESMTPSA id c6sm10997227qkg.54.2020.11.23.11.26.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Nov 2020 11:26:29 -0800 (PST)
-From:   Fabio Estevam <festevam@gmail.com>
-To:     ulf.hansson@linaro.org
-Cc:     kernel@pengutronix.de, linux-mmc@vger.kernel.org,
-        Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH] mmc: mxs: Remove the unused .id_table
-Date:   Mon, 23 Nov 2020 16:19:56 -0300
-Message-Id: <20201123191956.10542-1-festevam@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        id S1728951AbgKWUD4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Nov 2020 15:03:56 -0500
+Received: from hqnvemgate25.nvidia.com ([216.228.121.64]:17000 "EHLO
+        hqnvemgate25.nvidia.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726770AbgKWUDy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 15:03:54 -0500
+Received: from hqmail.nvidia.com (Not Verified[216.228.121.13]) by hqnvemgate25.nvidia.com (using TLS: TLSv1.2, AES256-SHA)
+        id <B5fbc15a70004>; Mon, 23 Nov 2020 12:03:51 -0800
+Received: from HQMAIL107.nvidia.com (172.20.187.13) by HQMAIL107.nvidia.com
+ (172.20.187.13) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Mon, 23 Nov
+ 2020 20:03:49 +0000
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (104.47.58.103)
+ by HQMAIL107.nvidia.com (172.20.187.13) with Microsoft SMTP Server (TLS) id
+ 15.0.1473.3 via Frontend Transport; Mon, 23 Nov 2020 20:03:49 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=gITd84wMHHzcOptjQRg1Bi4wKYLoloErjGXTzbxbsYYxXpRm6DfDjP1G8JsqPPruG8n8djHpWT3ChykgCoTQdTlPHkj05TPw7WZ4Y46HlI8bprZC3XuF3n009Te/qaTwPxc9ef3s3wxgnUStlvtZrJvP5WQhh3MIKLFTGEWjhLXWcgs1VmoV9q6ndrBwWgPhsRBIC9rKh9qqm9cf9Ujr9sks/ml2cZ4bW16uPSJVifE1ke5RuUikXPZ60YcpNVw15sbmeBPfJ8v059YAkVfr8AOpsBgi+OymMySTg/JYVNFtVJ2pGo3M9pC5txLp474ztgTCR2D9RfvqUQOXT+42RA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=QophqWBVIGhmInjMMmoN1JCz5yEuED07MVw87J8AVUY=;
+ b=dpOj+p56VpZQgFejSTc+TjZx9PpIbmIlWcJPfXyA8QiV6hyerQ1PNIg37pZm/OoPMM7dRNU+MPO2Sxmva5Z6iKtLQpQNkcM79tS52of8WjxHEmReB+Qc/VB0gzy26dU2FtXMoEzn5Rx6YHRp97uhlWeSk7Nsi1BUrieORD+G9yqkgKBmwQvC726s6EkJ0s32uNc7iMGffyCjKbyBtSLggJX9G9WEJ0m0GYQlYWRE7aVXL+Iy16bXoksvn7nW7YXP74v45GAqxPt7EElquzCZ4kXurFfWXXWM9ThsUobGLm/yb7wWVAmTEM+ttWZwc1mR7P3I+RsId2H9o2Xiqq+zAg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+Received: from DM6PR12MB3834.namprd12.prod.outlook.com (2603:10b6:5:14a::12)
+ by DM6PR12MB4338.namprd12.prod.outlook.com (2603:10b6:5:2a2::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3589.21; Mon, 23 Nov
+ 2020 20:03:48 +0000
+Received: from DM6PR12MB3834.namprd12.prod.outlook.com
+ ([fe80::e40c:730c:156c:2ef9]) by DM6PR12MB3834.namprd12.prod.outlook.com
+ ([fe80::e40c:730c:156c:2ef9%7]) with mapi id 15.20.3589.022; Mon, 23 Nov 2020
+ 20:03:48 +0000
+Date:   Mon, 23 Nov 2020 16:03:45 -0400
+From:   Jason Gunthorpe <jgg@nvidia.com>
+To:     "Gustavo A. R. Silva" <gustavoars@kernel.org>
+CC:     <linux-kernel@vger.kernel.org>, <alsa-devel@alsa-project.org>,
+        <amd-gfx@lists.freedesktop.org>,
+        <bridge@lists.linux-foundation.org>, <ceph-devel@vger.kernel.org>,
+        <cluster-devel@redhat.com>, <coreteam@netfilter.org>,
+        <devel@driverdev.osuosl.org>, <dm-devel@redhat.com>,
+        <drbd-dev@lists.linbit.com>, <dri-devel@lists.freedesktop.org>,
+        <GR-everest-linux-l2@marvell.com>, <GR-Linux-NIC-Dev@marvell.com>,
+        <intel-gfx@lists.freedesktop.org>,
+        <intel-wired-lan@lists.osuosl.org>, <keyrings@vger.kernel.org>,
+        <linux1394-devel@lists.sourceforge.net>,
+        <linux-acpi@vger.kernel.org>, <linux-afs@lists.infradead.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-arm-msm@vger.kernel.org>,
+        <linux-atm-general@lists.sourceforge.net>,
+        <linux-block@vger.kernel.org>, <linux-can@vger.kernel.org>,
+        <linux-cifs@vger.kernel.org>, <linux-crypto@vger.kernel.org>,
+        <linux-decnet-user@lists.sourceforge.net>,
+        <linux-ext4@vger.kernel.org>, <linux-fbdev@vger.kernel.org>,
+        <linux-geode@lists.infradead.org>, <linux-gpio@vger.kernel.org>,
+        <linux-hams@vger.kernel.org>, <linux-hwmon@vger.kernel.org>,
+        <linux-i3c@lists.infradead.org>, <linux-ide@vger.kernel.org>,
+        <linux-iio@vger.kernel.org>, <linux-input@vger.kernel.org>,
+        <linux-integrity@vger.kernel.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-media@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-mm@kvack.org>, <linux-mtd@lists.infradead.org>,
+        <linux-nfs@vger.kernel.org>, <linux-rdma@vger.kernel.org>,
+        <linux-renesas-soc@vger.kernel.org>, <linux-scsi@vger.kernel.org>,
+        <linux-sctp@vger.kernel.org>,
+        <linux-security-module@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-usb@vger.kernel.org>, <linux-watchdog@vger.kernel.org>,
+        <linux-wireless@vger.kernel.org>, <netdev@vger.kernel.org>,
+        <netfilter-devel@vger.kernel.org>, <nouveau@lists.freedesktop.org>,
+        <op-tee@lists.trustedfirmware.org>, <oss-drivers@netronome.com>,
+        <patches@opensource.cirrus.com>, <rds-devel@oss.oracle.com>,
+        <reiserfs-devel@vger.kernel.org>,
+        <samba-technical@lists.samba.org>, <selinux@vger.kernel.org>,
+        <target-devel@vger.kernel.org>,
+        <tipc-discussion@lists.sourceforge.net>,
+        <usb-storage@lists.one-eyed-alien.net>,
+        <virtualization@lists.linux-foundation.org>,
+        <wcn36xx@lists.infradead.org>, <x86@kernel.org>,
+        <xen-devel@lists.xenproject.org>,
+        <linux-hardening@vger.kernel.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Nathan Chancellor <natechancellor@gmail.com>,
+        Miguel Ojeda <ojeda@kernel.org>, Joe Perches <joe@perches.com>,
+        Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH 000/141] Fix fall-through warnings for Clang
+Message-ID: <20201123200345.GA38546@nvidia.com>
+References: <cover.1605896059.git.gustavoars@kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <cover.1605896059.git.gustavoars@kernel.org>
+X-ClientProxiedBy: MN2PR03CA0013.namprd03.prod.outlook.com
+ (2603:10b6:208:23a::18) To DM6PR12MB3834.namprd12.prod.outlook.com
+ (2603:10b6:5:14a::12)
+MIME-Version: 1.0
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from mlx.ziepe.ca (156.34.48.30) by MN2PR03CA0013.namprd03.prod.outlook.com (2603:10b6:208:23a::18) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3589.20 via Frontend Transport; Mon, 23 Nov 2020 20:03:47 +0000
+Received: from jgg by mlx with local (Exim 4.94)        (envelope-from <jgg@nvidia.com>)        id 1khI3t-000A35-Tb; Mon, 23 Nov 2020 16:03:45 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nvidia.com; s=n1;
+        t=1606161831; bh=QophqWBVIGhmInjMMmoN1JCz5yEuED07MVw87J8AVUY=;
+        h=ARC-Seal:ARC-Message-Signature:ARC-Authentication-Results:Date:
+         From:To:CC:Subject:Message-ID:References:Content-Type:
+         Content-Disposition:In-Reply-To:X-ClientProxiedBy:MIME-Version:
+         X-MS-Exchange-MessageSentRepresentingType;
+        b=Zr1EZlr7FGouweCXJ2A3YJZ8lxsTazMwmiIDkNNgeYuPc4M3hA0h9guNHLXrnnLeX
+         Dp0jtpGLpYuZZsYit0m8+Y/3Pgk+U78P2KDuhjfei0oh+kHbQnRfzB2jD1Wu7rVyZ8
+         A2iuCgvA8hhwNVx8Bo/l4LfRAECKvf8eJj6um7c8+wyJ6oFgyijvPixB8Xcq6YNTLj
+         o7o09Zdo2SkPJV9Ld82VvGAW1KENwGx8qxL8L4kHw5xGizl/kk/4FLfOCs8mx17bXD
+         N2PIS7AsaPoH2bHogxWrZ7vcH6YOCMGYKk/oZQ1BhSoaDoH96AMZAs9BCirfcyYEMq
+         3EMRDyReptNPA==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The mxs-mmc driver is only used by DT platforms and the .id_table
-is unused.
+On Fri, Nov 20, 2020 at 12:21:39PM -0600, Gustavo A. R. Silva wrote:
 
-Get rid of it to simplify the code.
+>   IB/hfi1: Fix fall-through warnings for Clang
+>   IB/mlx4: Fix fall-through warnings for Clang
+>   IB/qedr: Fix fall-through warnings for Clang
+>   RDMA/mlx5: Fix fall-through warnings for Clang
 
-While at it, use of_device_get_match_data() to retrieve the driver
-data.
+I picked these four to the rdma tree, thanks
 
-Signed-off-by: Fabio Estevam <festevam@gmail.com>
----
- drivers/mmc/host/mxs-mmc.c | 18 +-----------------
- 1 file changed, 1 insertion(+), 17 deletions(-)
-
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 75007f61df97..56bbc6cd9c84 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -545,19 +545,6 @@ static const struct mmc_host_ops mxs_mmc_ops = {
- 	.enable_sdio_irq = mxs_mmc_enable_sdio_irq,
- };
- 
--static const struct platform_device_id mxs_ssp_ids[] = {
--	{
--		.name = "imx23-mmc",
--		.driver_data = IMX23_SSP,
--	}, {
--		.name = "imx28-mmc",
--		.driver_data = IMX28_SSP,
--	}, {
--		/* sentinel */
--	}
--};
--MODULE_DEVICE_TABLE(platform, mxs_ssp_ids);
--
- static const struct of_device_id mxs_mmc_dt_ids[] = {
- 	{ .compatible = "fsl,imx23-mmc", .data = (void *) IMX23_SSP, },
- 	{ .compatible = "fsl,imx28-mmc", .data = (void *) IMX28_SSP, },
-@@ -567,8 +554,6 @@ MODULE_DEVICE_TABLE(of, mxs_mmc_dt_ids);
- 
- static int mxs_mmc_probe(struct platform_device *pdev)
- {
--	const struct of_device_id *of_id =
--			of_match_device(mxs_mmc_dt_ids, &pdev->dev);
- 	struct device_node *np = pdev->dev.of_node;
- 	struct mxs_mmc_host *host;
- 	struct mmc_host *mmc;
-@@ -593,7 +578,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 		goto out_mmc_free;
- 	}
- 
--	ssp->devid = (enum mxs_ssp_id) of_id->data;
-+	ssp->devid = (enum mxs_ssp_id)of_device_get_match_data(&pdev->dev);
- 
- 	host->mmc = mmc;
- 	host->sdio_irq_en = 0;
-@@ -723,7 +708,6 @@ static SIMPLE_DEV_PM_OPS(mxs_mmc_pm_ops, mxs_mmc_suspend, mxs_mmc_resume);
- static struct platform_driver mxs_mmc_driver = {
- 	.probe		= mxs_mmc_probe,
- 	.remove		= mxs_mmc_remove,
--	.id_table	= mxs_ssp_ids,
- 	.driver		= {
- 		.name	= DRIVER_NAME,
- 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--- 
-2.17.1
-
+Jason
