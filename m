@@ -2,117 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BCDDC83017
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:48:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2BE1C2D0E4
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:52:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3ED5A206F9
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:48:40 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="tWoPDQgv"
+	by mail.kernel.org (Postfix) with ESMTP id 93037206F9
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:52:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389360AbgKXOrv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Nov 2020 09:47:51 -0500
-Received: from mail.kernel.org ([198.145.29.99]:58484 "EHLO mail.kernel.org"
+        id S2388185AbgKXOv5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Nov 2020 09:51:57 -0500
+Received: from mga14.intel.com ([192.55.52.115]:34401 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388174AbgKXOrt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 24 Nov 2020 09:47:49 -0500
-Received: from embeddedor (187-162-31-110.static.axtel.net [187.162.31.110])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id A5073206F9;
-        Tue, 24 Nov 2020 14:47:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1606229266;
-        bh=KHWIOvsVxIgxzJ3ANvrXr+IcifXvCH3d9eC+5p4MJwo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=tWoPDQgvsKVPCfxibPNl9c0zBQ9NfBrnsDyv8UIAtPJxHLfF4o1CuP3vwUt19y/P8
-         Y66kkjj2Cim4kMyRQiiYzb1whNr+v/N+nMKfcHqv3RaX8mBnUDrFmNddDbw9/dIVnH
-         xirANyC4hb8bYXXRvxw8qG9eYp8JWf8UX9D38PQM=
-Date:   Tue, 24 Nov 2020 08:47:54 -0600
-From:   "Gustavo A. R. Silva" <gustavoars@kernel.org>
-To:     Mark Brown <broonie@kernel.org>
-Cc:     linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-sctp@vger.kernel.org,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        linux-hardening@vger.kernel.org,
-        usb-storage@lists.one-eyed-alien.net, linux-block@vger.kernel.org,
-        linux-security-module@vger.kernel.org,
-        bridge@lists.linux-foundation.org, GR-Linux-NIC-Dev@marvell.com,
-        rds-devel@oss.oracle.com, dri-devel@lists.freedesktop.org,
-        linux-media@vger.kernel.org, wcn36xx@lists.infradead.org,
-        linux-wireless@vger.kernel.org, linux-mediatek@lists.infradead.org,
-        reiserfs-devel@vger.kernel.org, oss-drivers@netronome.com,
-        linux-arm-kernel@lists.infradead.org, alsa-devel@alsa-project.org,
-        virtualization@lists.linux-foundation.org,
-        Joe Perches <joe@perches.com>, patches@opensource.cirrus.com,
-        linux-gpio@vger.kernel.org, linux-hwmon@vger.kernel.org,
-        linux-cifs@vger.kernel.org, coreteam@netfilter.org,
-        Kees Cook <keescook@chromium.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        linux-scsi@vger.kernel.org, linux-afs@lists.infradead.org,
-        netfilter-devel@vger.kernel.org, linux-geode@lists.infradead.org,
-        drbd-dev@lists.linbit.com, linux-ext4@vger.kernel.org,
-        linux-hams@vger.kernel.org, target-devel@vger.kernel.org,
-        samba-technical@lists.samba.org,
-        tipc-discussion@lists.sourceforge.net,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-renesas-soc@vger.kernel.org, linux-input@vger.kernel.org,
-        amd-gfx@lists.freedesktop.org, linux-nfs@vger.kernel.org,
-        devel@driverdev.osuosl.org, selinux@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net, linux-iio@vger.kernel.org,
-        linux-i3c@lists.infradead.org, Miguel Ojeda <ojeda@kernel.org>,
-        linux-can@vger.kernel.org, linux-integrity@vger.kernel.org,
-        GR-everest-linux-l2@marvell.com, keyrings@vger.kernel.org,
-        intel-wired-lan@lists.osuosl.org, linux-usb@vger.kernel.org,
-        nouveau@lists.freedesktop.org, x86@kernel.org,
-        xen-devel@lists.xenproject.org, linux-mm@kvack.org,
-        cluster-devel@redhat.com, linux1394-devel@lists.sourceforge.net,
-        linux-decnet-user@lists.sourceforge.net,
-        op-tee@lists.trustedfirmware.org, linux-ide@vger.kernel.org,
-        intel-gfx@lists.freedesktop.org, linux-acpi@vger.kernel.org,
-        dm-devel@redhat.com, linux-watchdog@vger.kernel.org,
-        linux-rdma@vger.kernel.org, linux-mtd@lists.infradead.org,
-        ceph-devel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-fbdev@vger.kernel.org,
-        netdev@vger.kernel.org
-Subject: Re: [PATCH 000/141] Fix fall-through warnings for Clang
-Message-ID: <20201124144754.GL16084@embeddedor>
-References: <cover.1605896059.git.gustavoars@kernel.org>
- <160616392671.21180.16517492185091399884.b4-ty@kernel.org>
+        id S2388162AbgKXOv4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 24 Nov 2020 09:51:56 -0500
+IronPort-SDR: vwC4ng6bvd+yOdMLdxOz4/LmXbHhXB432kawJtavfRF8CH0q+xRAjDOxd+AzwPV5pLiX3iDF2K
+ G5PsL1+zBbmQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9814"; a="171174706"
+X-IronPort-AV: E=Sophos;i="5.78,366,1599548400"; 
+   d="scan'208";a="171174706"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Nov 2020 06:51:56 -0800
+IronPort-SDR: BYyQROwMjLO5yJfRwUywUuN2ZM4/uJJKiihUPEbWxsMgpkNEjubavR+z5QyZKUmeMOeA6sZnua
+ VB7/rGD4qfpg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.78,366,1599548400"; 
+   d="scan'208";a="312598315"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
+  by fmsmga008.fm.intel.com with ESMTP; 24 Nov 2020 06:51:55 -0800
+Subject: Re: [PATCH] mmc: sdhci: Update firmware interface API
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jeremy Linton <jeremy.linton@arm.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20201120233831.447365-1-jeremy.linton@arm.com>
+ <CAPDyKFq-pMKAJdS8qPpkR_QZ_QLW70Y7PPGxA=d_HOBRd-Su=A@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <be00e2df-572b-2bdb-85c2-675ca16e5d01@intel.com>
+Date:   Tue, 24 Nov 2020 16:51:33 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <160616392671.21180.16517492185091399884.b4-ty@kernel.org>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+In-Reply-To: <CAPDyKFq-pMKAJdS8qPpkR_QZ_QLW70Y7PPGxA=d_HOBRd-Su=A@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Nov 23, 2020 at 08:38:46PM +0000, Mark Brown wrote:
-> On Fri, 20 Nov 2020 12:21:39 -0600, Gustavo A. R. Silva wrote:
-> > This series aims to fix almost all remaining fall-through warnings in
-> > order to enable -Wimplicit-fallthrough for Clang.
-> > 
-> > In preparation to enable -Wimplicit-fallthrough for Clang, explicitly
-> > add multiple break/goto/return/fallthrough statements instead of just
-> > letting the code fall through to the next case.
-> > 
-> > [...]
+On 24/11/20 4:25 pm, Ulf Hansson wrote:
+> On Sat, 21 Nov 2020 at 00:39, Jeremy Linton <jeremy.linton@arm.com> wrote:
+>>
+>> The device_* calls were added a few years ago to abstract
+>> DT/ACPI/fwnode firmware interfaces. Lets convert the two
+>> sdhci caps fields to use the generic calls rather than the OF
+>> specific ones. This has the side effect of allowing
+>> ACPI based devices to quirk themselves when the caps field
+>> is broken.
+>>
+>> Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
 > 
-> Applied to
+> Applied for next, thanks!
 > 
->    https://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git for-next
+> Kind regards
+> Uffe
 > 
-> Thanks!
 > 
-> [1/1] regulator: as3722: Fix fall-through warnings for Clang
->       commit: b52b417ccac4fae5b1f2ec4f1d46eb91e4493dc5
+>> ---
+>>  drivers/mmc/host/sdhci.c | 8 ++++----
+>>  1 file changed, 4 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>> index 592a55a34b58..feba64fbde16 100644
+>> --- a/drivers/mmc/host/sdhci.c
+>> +++ b/drivers/mmc/host/sdhci.c
+>> @@ -3992,10 +3992,10 @@ void __sdhci_read_caps(struct sdhci_host *host, const u16 *ver,
+>>         if (host->v4_mode)
+>>                 sdhci_do_enable_v4_mode(host);
+>>
+>> -       of_property_read_u64(mmc_dev(host->mmc)->of_node,
+>> -                            "sdhci-caps-mask", &dt_caps_mask);
+>> -       of_property_read_u64(mmc_dev(host->mmc)->of_node,
+>> -                            "sdhci-caps", &dt_caps);
+>> +       device_property_read_u64_array(mmc_dev(host->mmc),
+>> +                                      "sdhci-caps-mask", &dt_caps_mask, 1);
+>> +       device_property_read_u64_array(mmc_dev(host->mmc),
+>> +                                      "sdhci-caps", &dt_caps, 1);
 
-Thank you, Mark.
---
-Gustavo
+But why not use device_property_read_u64()?
+
+>>
+>>         v = ver ? *ver : sdhci_readw(host, SDHCI_HOST_VERSION);
+>>         host->version = (v & SDHCI_SPEC_VER_MASK) >> SDHCI_SPEC_VER_SHIFT;
+>> --
+>> 2.26.2
+>>
+
