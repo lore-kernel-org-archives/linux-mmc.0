@@ -2,173 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_IN_DEF_DKIM_WL
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E669CC8300A
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 01:33:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AF3DC6379D
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 02:01:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B3AB7206FA
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 01:33:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 290EA20756
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 02:01:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="mZ10EKN9"
+	dkim=pass (1024-bit key) header.d=kernel.org header.i=@kernel.org header.b="aAU5awco"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730192AbgKXBdU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Nov 2020 20:33:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36044 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729911AbgKXBdI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Nov 2020 20:33:08 -0500
-Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44AE3C08E864
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 17:33:05 -0800 (PST)
-Received: by mail-pf1-x442.google.com with SMTP id y7so16789908pfq.11
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Nov 2020 17:33:05 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=1Fpt+3NGNjcuXPoKd+YKzvfWCCI+i2QS11ln4xb/K2c=;
-        b=mZ10EKN9Q6HwSmECmmsUHbUHF/oTLT4c/YpQVGCE0gPLnlz6SgHQW3ieQ7zeUHJnUi
-         XUPs+F1GoZaFLBKWU3CvMTPUTS8a5+RdM3NBjgdsJpNB5L7Gee8a5rDblh6bnWIWT9TK
-         uir+AjWjaGJnRAA0K84IM0yu+WQnaSePUaJNJPiE7LfLBhB3Pd0A4gWblql3Lao7defI
-         n9Uw15itvZVSId22hyle+f6GM1M4THjCwMgL7v1hyU5f7oNm+YC3/Fk6KnTIGBq7Lgby
-         +eM5Ju8Jh9l5BxBe3HwjA5bt+bnUjVm7e9zM9zQUlIbVcSVLiqKYS2m+arIIzBAIXu/j
-         s+uw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=1Fpt+3NGNjcuXPoKd+YKzvfWCCI+i2QS11ln4xb/K2c=;
-        b=RXtkmtMcUIaqhRXJROu8yaMbzOsataK1spmHdFQxrpAQtnxkpnaWsLyei29HgwCfUM
-         8hrthlyquqaNwO6wzLTnV/shX+C0D7v7hHksF6XuJfD/fLpdFEZyWBTR5Wh3Br7vK8aX
-         mN+CiwQkrQLL5g6tSsXprmV3lntC50cHZ98VS85VSfKLDn+9jJgVEHh+z/9kZiVIvTbK
-         +HXF2Necm2el7n55fwAGl+glPOJDChL3aMM/7NHRxW12z10QWEmXrogakszMeUCujj9z
-         wlW+bG5KKSvqnGmeDfkifM6c2snqByuQ2FHDj1jQedS5V5ptTRQ5+gdAsFL/Q4c0cJ4o
-         P4OA==
-X-Gm-Message-State: AOAM531M1REcMGK1ym3R80bYv2MO8bLy0vyZHvBMB0tfwF/b2sdsoH4y
-        sIs4uhg1CCqibbRyfxcmnOHYyFD/DbsHFfqCPLXmfA==
-X-Google-Smtp-Source: ABdhPJwQDF2vxX46wbajF4ioOOwzM/J33jC4qlEIQ0nX0CJ8Ae2/iYNAtfiNkgC6UbM9BT3sKlieSNPFWrTquhIIwSk=
-X-Received: by 2002:a65:6a4e:: with SMTP id o14mr1859973pgu.263.1606181584110;
- Mon, 23 Nov 2020 17:33:04 -0800 (PST)
+        id S1727245AbgKXCBW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Nov 2020 21:01:22 -0500
+Received: from mail.kernel.org ([198.145.29.99]:57484 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726702AbgKXCBV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 23 Nov 2020 21:01:21 -0500
+Received: from sol.localdomain (172-10-235-113.lightspeed.sntcca.sbcglobal.net [172.10.235.113])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 248AE206B2;
+        Tue, 24 Nov 2020 02:01:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=default; t=1606183280;
+        bh=rvk4UvQelAz3FI2aatvLeb1xe7xw9k3Zha3PLJY/zXA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=aAU5awcoER7aVRCunR3lsNV1wyQ8Ekd1IF7YJK5aQAUcHYR/RT9PNUTiTkH277EtL
+         v5mKcf6NkcLgijRlgxzuBW6AfE85Eq9WEKiJy4nRSCKJeAAQKJu58gODS22hbNFhdX
+         KQbe0fWsyC5mXgIPJ2Nh966zbr3s7XBVraNEIAjU=
+Date:   Mon, 23 Nov 2020 18:01:16 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: Re: [PATCH 0/8] eMMC inline encryption support
+Message-ID: <X7xpbJf4gDcFdEc/@sol.localdomain>
+References: <20201112194011.103774-1-ebiggers@kernel.org>
+ <X7gQ9Y44iIgkiM64@sol.localdomain>
+ <ea904bcc-3f01-d968-2a16-f9ff9f012968@intel.com>
+ <X7gcsC6IS80sUy4K@sol.localdomain>
+ <9010afea-1075-8f72-99c7-c471840685db@intel.com>
 MIME-Version: 1.0
-References: <cover.1605896059.git.gustavoars@kernel.org> <20201120105344.4345c14e@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011201129.B13FDB3C@keescook> <20201120115142.292999b2@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011220816.8B6591A@keescook>
-In-Reply-To: <202011220816.8B6591A@keescook>
-From:   Nick Desaulniers <ndesaulniers@google.com>
-Date:   Mon, 23 Nov 2020 17:32:51 -0800
-Message-ID: <CAKwvOdntVfXj2WRR5n6Kw7BfG7FdKpTeHeh5nPu5AzwVMhOHTg@mail.gmail.com>
-Subject: Re: [PATCH 000/141] Fix fall-through warnings for Clang
-To:     Kees Cook <keescook@chromium.org>
-Cc:     Jakub Kicinski <kuba@kernel.org>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>, alsa-devel@alsa-project.org,
-        amd-gfx list <amd-gfx@lists.freedesktop.org>,
-        bridge@lists.linux-foundation.org, ceph-devel@vger.kernel.org,
-        cluster-devel@redhat.com, coreteam@netfilter.org,
-        devel@driverdev.osuosl.org, dm-devel@redhat.com,
-        drbd-dev@lists.linbit.com,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        GR-everest-linux-l2@marvell.com, GR-Linux-NIC-Dev@marvell.com,
-        intel-gfx@lists.freedesktop.org, intel-wired-lan@lists.osuosl.org,
-        keyrings@vger.kernel.org, linux1394-devel@lists.sourceforge.net,
-        linux-acpi@vger.kernel.org, linux-afs@lists.infradead.org,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        linux-atm-general@lists.sourceforge.net,
-        linux-block@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-cifs@vger.kernel.org,
-        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
-        <linux-crypto@vger.kernel.org>,
-        linux-decnet-user@lists.sourceforge.net,
-        linux-ext4@vger.kernel.org, linux-fbdev@vger.kernel.org,
-        linux-geode@lists.infradead.org, linux-gpio@vger.kernel.org,
-        linux-hams@vger.kernel.org, linux-hwmon@vger.kernel.org,
-        linux-i3c@lists.infradead.org, linux-ide@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-integrity@vger.kernel.org,
-        linux-mediatek@lists.infradead.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        Linux Memory Management List <linux-mm@kvack.org>,
-        linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org,
-        linux-rdma@vger.kernel.org,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        linux-scsi@vger.kernel.org, linux-sctp@vger.kernel.org,
-        linux-security-module@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        Network Development <netdev@vger.kernel.org>,
-        netfilter-devel@vger.kernel.org, nouveau@lists.freedesktop.org,
-        op-tee@lists.trustedfirmware.org, oss-drivers@netronome.com,
-        patches@opensource.cirrus.com, rds-devel@oss.oracle.com,
-        reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org,
-        selinux@vger.kernel.org, target-devel@vger.kernel.org,
-        tipc-discussion@lists.sourceforge.net,
-        usb-storage@lists.one-eyed-alien.net,
-        virtualization@lists.linux-foundation.org,
-        wcn36xx@lists.infradead.org,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        xen-devel@lists.xenproject.org, linux-hardening@vger.kernel.org,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        Miguel Ojeda <ojeda@kernel.org>, Joe Perches <joe@perches.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <9010afea-1075-8f72-99c7-c471840685db@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Nov 22, 2020 at 8:17 AM Kees Cook <keescook@chromium.org> wrote:
->
-> On Fri, Nov 20, 2020 at 11:51:42AM -0800, Jakub Kicinski wrote:
-> > If none of the 140 patches here fix a real bug, and there is no change
-> > to machine code then it sounds to me like a W=2 kind of a warning.
->
-> FWIW, this series has found at least one bug so far:
-> https://lore.kernel.org/lkml/CAFCwf11izHF=g1mGry1fE5kvFFFrxzhPSM6qKAO8gxSp=Kr_CQ@mail.gmail.com/
+Hi Adrian,
 
-So looks like the bulk of these are:
-switch (x) {
-  case 0:
-    ++x;
-  default:
-    break;
-}
+On Mon, Nov 23, 2020 at 09:04:12AM +0200, Adrian Hunter wrote:
+> On 20/11/20 9:44 pm, Eric Biggers wrote:
+> > Hi Adrian,
+> > 
+> > On Fri, Nov 20, 2020 at 09:29:59PM +0200, Adrian Hunter wrote:
+> >> I haven't had a chance to look at it properly, but I do have a couple of
+> >> dumb questions.  How do you ensure the host controller is not runtime
+> >> suspended when the key is programmed?
+> > 
+> > This is handled by the block layer, in block/keyslot-manager.c.  It ensures that
+> > the device is resumed before calling blk_ksm_ll_ops::keyslot_program() or
+> > blk_ksm_ll_ops::keyslot_evict().  See blk_ksm_hw_enter().
+> 
+> Cool, although cqhci is doing a lazy kind of resume, so maybe not be enabled
+> when a key is programmed?  Would that be a problem?
+> 
+> > 
+> >> Are the keys lost when the host controller is reset, and then how do you know
+> >> the host controller does not get reset after the key is programmed but before
+> >> the I/O is submitted?
+> > 
+> > As with UFS, keys might be lost when the host controller is reset, so we're
+> > reprogramming all the keys when that happens.  See patch 1:
+> > 
+> >     mmc_set_initial_state()
+> >         mmc_crypto_set_initial_state()
+> >             blk_ksm_reprogram_all_keys()
+> > 
+> > (That's the intent, at least.  For MMC, I'm not sure if resets were properly
+> > covered by the testing I've done so far.  But the code looks right to me.)
+> 
+> After reset, cqhci will not necessarily be enabled at this point.  Is that OK?
 
-I have a patch that fixes those up for clang:
-https://reviews.llvm.org/D91895
+The hardware that I have (sdm630) appears to allow programming and evicting keys
+even while CQHCI_CFG.CQHCI_ENABLE is clear, i.e. even when the CQE is "off".
+I tested it using the patch below.
 
-There's 3 other cases that don't quite match between GCC and Clang I
-observe in the kernel:
-switch (x) {
-  case 0:
-    ++x;
-  default:
-    goto y;
-}
-y:;
+The eMMC specification isn't clear about this point.  But I'm thinking that the
+crypto configuration registers (the keyslots) are probably supposed to work like
+most of the other CQHCI registers, which can be written to while CQHCI_ENABLE is
+clear.  Then setting CQHCI_ENABLE just enables the ability to actually issue
+requests.  Likewise, setting CQHCI_CRYPTO_GENERAL_ENABLE just allows using
+crypto in requests; it isn't needed to write to the crypto configurations.
 
-switch (x) {
-  case 0:
-    ++x;
-  default:
-    return;
-}
+For what it's worth, UFS crypto (which has been supported by upstream since
+v5.9) works similarly.  Keys can be programmed while the UFS host is powered on,
+even before it's "enabled".
 
-switch (x) {
-  case 0:
-    ++x;
-  default:
-    ;
-}
+But maybe someone interpreted the eMMC specification differently.  Hopefully
+Mediatek can give some insight into how they implemented it, and test this
+patchset on their hardware too.
 
-Based on your link, and Nathan's comment on my patch, maybe Clang
-should continue to warn for the above (at least the `default: return;`
-case) and GCC should change?  While the last case looks harmless,
-there were only 1 or 2 across the tree in my limited configuration
-testing; I really think we should just add `break`s for those.
--- 
-Thanks,
-~Nick Desaulniers
+Here's the patch I used to verify that sdm630 allows programming and evicting
+keys even while the CQE is off:
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index eaf2f1074326..eb2d88d0b3ba 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1406,6 +1406,9 @@ static void mmc_blk_cqe_complete_rq(struct mmc_queue *mq, struct request *req)
+ 
+ 	mmc_cqe_check_busy(mq);
+ 
++	if (mmc_tot_in_flight(mq) == 0 && host->cqe_on)
++		host->cqe_ops->cqe_off(host);
++
+ 	spin_unlock_irqrestore(&mq->lock, flags);
+ 
+ 	if (!mq->cqe_busy)
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 6ce21414d510..70d8dbc6515f 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -1971,6 +1971,12 @@ static int sdhci_msm_program_key(struct cqhci_host *cq_host,
+ 	int i;
+ 	int err;
+ 
++	if (!cq_host->mmc->cqe_on) {
++		pr_info("@@@ cqe is off for %s slot %d\n",
++			(cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE) ?
++			"program" : "evict", slot);
++	}
++
+ 	if (!(cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE))
+ 		return qcom_scm_ice_invalidate_key(slot);
