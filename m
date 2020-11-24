@@ -4,63 +4,62 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5562FC56201
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0B84C6379D
 	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:26:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB06020872
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:26:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6F13920872
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:26:12 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="EDgjj2+o"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="k0RKmm3+"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388782AbgKXOZu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Nov 2020 09:25:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42544 "EHLO
+        id S2388910AbgKXOZy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Nov 2020 09:25:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42560 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388682AbgKXOZu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2020 09:25:50 -0500
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4671AC0613D6
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:25:50 -0800 (PST)
-Received: by mail-vs1-xe41.google.com with SMTP id m16so11169223vsl.8
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:25:50 -0800 (PST)
+        with ESMTP id S2388682AbgKXOZx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2020 09:25:53 -0500
+Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C28BC061A4D
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:25:53 -0800 (PST)
+Received: by mail-vk1-xa44.google.com with SMTP id a186so519578vkh.9
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:25:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=N0bYsVH3nX2+OrWeKV+IhWPNW7SxLL8wfGpVZs1WpC4=;
-        b=EDgjj2+oAPA7Acji64+FmuVACR9K66q27TqlRkf8LTM2/hnbs4KTFVRq8v55KrYBdq
-         vwI7SxLUYPVLhi2EjzKvEWfEO4V2ZpxHHYEpW4rVQeG2PXS3X/NDzXY0CZEVhSd1S0g5
-         vpaeda9BQx3NJDhrFDGTuYRAu4BRmXHa1uSxzWBYyf3b0NErGFMiDgtSwy+SRNRrAJiK
-         7El+PAryir76UjhHOYvMCell+95Nvgjz5c9sTd0qjSwsYIU17yTc7h/Pd3SxRRP3OZu/
-         yhq5GTbzx8DkvOuotF9AIYMFo9rRH55YxSKW791CF7radC//clZc02ZJ41uvRV5n+5HL
-         peTg==
+        bh=pCesLYQPvcEflyfIUi3Jzcp8cmSSQAR6auenD/1XJUc=;
+        b=k0RKmm3+Avs9KAotfN8HlMi+V5Uf/OM7WwUHNctM5x/DwImooVJdkD8YnZTbbnbWUi
+         /UBIy53tGX7ZQHMKlDFWFJF95GBh2IoWCBz1cZIKUPXm1eukhDIv/kqKx++LRaOrRcrL
+         4qfXQkhqHknSpOqq2qXCwwFNuSP33id6GdRaqPhNinbm7TNrI60erMgKozIBGd7WXZ+j
+         Xrz/Frr2n2yUgn0SdpSmv9aH4sqg+YubtQK+M9HdU6h1YwjToRJKiNqZ5j/VWqyI079s
+         l+oUaN9ZwTYKaT4Euj5ZN6riIji3/cQGiiiAUFLnhxpDwGGXen8zRq7UZX/FejD7b6Rx
+         6d3A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=N0bYsVH3nX2+OrWeKV+IhWPNW7SxLL8wfGpVZs1WpC4=;
-        b=R4e5tiOFFkg7A0RCzgT2bfW62BNa15tIPgWmmWAvEO1SxiMYuAsEQM9p4cr604DD8o
-         lHjIBNlu4HxdMdYY6UEDIXxjNYkB0MVxP1R5z7Ebrkcb09TlQ2ltoTf06ThWIr/4yORS
-         NtMLH0wvJ2zdIxBv21b/y5xt2teJL+ordLt6wERlivxE74I8NKCNOxTDc1R6Sjp0ycM/
-         6ewQ/2Rg+wqyZNFO+GeAHz+zNEDICF3zriUlaAyi8XvZ4pLygXMnbg7zX7b5xwBV7ztW
-         JXva0bkPuIwHkO7CAciSkwTvDo+GYtLc5/FuYhpYEiq5vY4am5w8WKh+Xdx1ZkCGn7b2
-         wOkg==
-X-Gm-Message-State: AOAM531n+s63LRAB3ekLBi+1IHUlw3dH0v+6LY+WLYeHLvRSUaw49++Q
-        iuXRKXSihTbXrYfiZ34Wq6WAGAKyE6fq5k0YsN7PhQ==
-X-Google-Smtp-Source: ABdhPJzhZfHuOq5aKuFvvR01RfE3+t1reY1YiLArpVadOD1pJBErw+3edBrUDyCXjNqiRSg8zYmRuFcAc/c4n2DajhE=
-X-Received: by 2002:a67:ce8e:: with SMTP id c14mr3917991vse.42.1606227949488;
- Tue, 24 Nov 2020 06:25:49 -0800 (PST)
+        bh=pCesLYQPvcEflyfIUi3Jzcp8cmSSQAR6auenD/1XJUc=;
+        b=iDE6scNNTTGUf/JZ1Y1XRbF2z5E+FG8GUg29q+eq3QNYB/ov7dCA3rWNXYm64rLmTH
+         /Ou7dix7gC4cZSTNe2crKiEN7aEcjOa8ywo1hKyKL1ojD871/LOX42Q0QRoDV5e58xFn
+         x+kahRdg9qSbNuY/WmSiBFECWS74OT5sGtot7imW3laF1mJdhUXtejGXA+jF1ud8TcV0
+         bwq95/Hw+mDHkNKxgoOLHjFLTvKVni/+lY//9Ww0EO39gYsG2ww0teWVscLPpq8x57nv
+         2wGVfpcaV30qZxWlN5cN9pcSwl01QQxE0oaMmcQmekwUcio/Dhw810TgkFVBDNdnaky1
+         9xNA==
+X-Gm-Message-State: AOAM530pci6yI+3xDWVzcj4WMmvWfNeS5+FPPxiaPToINRCpvlHuEgiD
+        5F4zhlz9OwUDfoSBnLaFgDNJgWSALIuOnGxhOCKe1g==
+X-Google-Smtp-Source: ABdhPJzGbprwOOPsKb4waIjuvGsDDrtzIVrKJDs5hFpHm85kEr+oGt/ZWkeOKdeHSbO3ywPEKgrJU5kHBVxR8SJV9YU=
+X-Received: by 2002:a1f:9889:: with SMTP id a131mr3881342vke.15.1606227952297;
+ Tue, 24 Nov 2020 06:25:52 -0800 (PST)
 MIME-Version: 1.0
-References: <cover.1605823502.git.cristian.ciocaltea@gmail.com> <713f57f4a66fff9a50a8d93643a7987d6560becb.1605823502.git.cristian.ciocaltea@gmail.com>
-In-Reply-To: <713f57f4a66fff9a50a8d93643a7987d6560becb.1605823502.git.cristian.ciocaltea@gmail.com>
+References: <cover.1605823502.git.cristian.ciocaltea@gmail.com> <0556399f1ce8b1255d1f7961f04fcb95c96ab928.1605823502.git.cristian.ciocaltea@gmail.com>
+In-Reply-To: <0556399f1ce8b1255d1f7961f04fcb95c96ab928.1605823502.git.cristian.ciocaltea@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 24 Nov 2020 15:25:12 +0100
-Message-ID: <CAPDyKFrFp52NhNPtbOmoCRVVTMACcmAFNomJJM1whm8dCAP2hQ@mail.gmail.com>
-Subject: Re: [PATCH v2 08/18] dt-bindings: mmc: owl: Add compatible string for
- Actions Semi S500 SoC
+Date:   Tue, 24 Nov 2020 15:25:15 +0100
+Message-ID: <CAPDyKFrBaiqmHbx0MKTv0uusDdLeeAwQuN8NMiVKgaAQBK0x1w@mail.gmail.com>
+Subject: Re: [PATCH v2 09/18] arm: dts: owl-s500: Add MMC support
 To:     Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
 Cc:     Rob Herring <robh+dt@kernel.org>,
         =?UTF-8?Q?Andreas_F=C3=A4rber?= <afaerber@suse.de>,
@@ -78,36 +77,64 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On Fri, 20 Nov 2020 at 00:56, Cristian Ciocaltea
 <cristian.ciocaltea@gmail.com> wrote:
 >
-> Add a new compatible string corresponding to the MMC controller found
-> in the S500 variant of the Actions Semi Owl SoCs family.
+> Add MMC controller nodes for Actions Semi S500 SoC, in order to
+> facilitate access to SD/EMMC/SDIO cards.
 >
 > Signed-off-by: Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
 
-Applied for next, thanks!
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
 Kind regards
 Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/owl-mmc.yaml | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  arch/arm/boot/dts/owl-s500.dtsi | 33 +++++++++++++++++++++++++++++++++
+>  1 file changed, 33 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-> index b6ab527087d5..b0d81ebe0f6e 100644
-> --- a/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/owl-mmc.yaml
-> @@ -17,7 +17,9 @@ properties:
->      oneOf:
->        - const: actions,owl-mmc
->        - items:
-> -          - const: actions,s700-mmc
-> +          - enum:
-> +              - actions,s500-mmc
-> +              - actions,s700-mmc
->            - const: actions,owl-mmc
->
->    reg:
+> diff --git a/arch/arm/boot/dts/owl-s500.dtsi b/arch/arm/boot/dts/owl-s500.dtsi
+> index b16172615db0..7af7c9e1119d 100644
+> --- a/arch/arm/boot/dts/owl-s500.dtsi
+> +++ b/arch/arm/boot/dts/owl-s500.dtsi
+> @@ -241,5 +241,38 @@ dma: dma-controller@b0260000 {
+>                         clocks = <&cmu CLK_DMAC>;
+>                         power-domains = <&sps S500_PD_DMA>;
+>                 };
+> +
+> +               mmc0: mmc@b0230000 {
+> +                       compatible = "actions,s500-mmc", "actions,owl-mmc";
+> +                       reg = <0xb0230000 0x38>;
+> +                       interrupts = <GIC_SPI 42 IRQ_TYPE_LEVEL_HIGH>;
+> +                       clocks = <&cmu CLK_SD0>;
+> +                       resets = <&cmu RESET_SD0>;
+> +                       dmas = <&dma 2>;
+> +                       dma-names = "mmc";
+> +                       status = "disabled";
+> +               };
+> +
+> +               mmc1: mmc@b0234000 {
+> +                       compatible = "actions,s500-mmc", "actions,owl-mmc";
+> +                       reg = <0xb0234000 0x38>;
+> +                       interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+> +                       clocks = <&cmu CLK_SD1>;
+> +                       resets = <&cmu RESET_SD1>;
+> +                       dmas = <&dma 3>;
+> +                       dma-names = "mmc";
+> +                       status = "disabled";
+> +               };
+> +
+> +               mmc2: mmc@b0238000 {
+> +                       compatible = "actions,s500-mmc", "actions,owl-mmc";
+> +                       reg = <0xb0238000 0x38>;
+> +                       interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_HIGH>;
+> +                       clocks = <&cmu CLK_SD2>;
+> +                       resets = <&cmu RESET_SD2>;
+> +                       dmas = <&dma 4>;
+> +                       dma-names = "mmc";
+> +                       status = "disabled";
+> +               };
+>         };
+>  };
 > --
 > 2.29.2
 >
