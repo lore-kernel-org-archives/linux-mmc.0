@@ -4,73 +4,79 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6C52C63798
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:26:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30203C64E7C
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:26:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 677A620674
+	by mail.kernel.org (Postfix) with ESMTP id E537720674
 	for <linux-mmc@archiver.kernel.org>; Tue, 24 Nov 2020 14:26:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="wOx0yYMV"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="hRRwGoRE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388999AbgKXO0S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Nov 2020 09:26:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42644 "EHLO
+        id S2388809AbgKXO0W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Nov 2020 09:26:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42656 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388992AbgKXO0R (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2020 09:26:17 -0500
+        with ESMTP id S2388969AbgKXO0V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2020 09:26:21 -0500
 Received: from mail-ua1-x944.google.com (mail-ua1-x944.google.com [IPv6:2607:f8b0:4864:20::944])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58D75C0613D6
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:26:16 -0800 (PST)
-Received: by mail-ua1-x944.google.com with SMTP id r23so6877932uak.0
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:26:16 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA21EC0613D6
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:26:20 -0800 (PST)
+Received: by mail-ua1-x944.google.com with SMTP id t15so6883579ual.6
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Nov 2020 06:26:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=lB2MRxBJ8srzKD3MD7oOuEMNecl+boxLNvEowDgRVEE=;
-        b=wOx0yYMVkZywqxGALXE5D2GhhvTyAcByMgA5ykfDQaBzoLk0CCNEafyd//FvSOg12A
-         7XXp+bE/2bVW5MgA1gWpKfHBrOaJtvVrPSaQ6/jEjnq2kub5AAfv/ZeGL7lqk2zTOnDv
-         bWXei222YU5Bp9aw3lYkkUX6NVL5ADlWFqQL4vbs7aPb41dkY81QHq4mtt/Jk/fFxlLi
-         UqALvEo8W/U4vgKVUCuxxrhtm0X4rpKut98jDsTTsSxkdwGMQIN+9BEO2JeACkXq7Puv
-         NWEDtkUEInhLjldsoYHrQL+3WHfs0bAfi7dFjkDFKu+mYO3nYqTgrorVGoykdtQt3N8B
-         WJEQ==
+        bh=x6kP5uAmhVMOzDxA6JRa0F12t1u+ZcnAagQa2SKiwLA=;
+        b=hRRwGoRElSR2T9ojKPNq6hH87KWAabEVIok8dYnucsnQBbb8tpOF1wGTz6sOdto7eq
+         1nsXjkoSgBGwRCYPa4lZup1Cm3gOsSRzukH59LLcmjF1qReOty3Q4HQki8Z4BFndm3z9
+         gF3HdHzFom+zLJq+NERYeE8hqrLblVnyd/Z7Iz7B6gFOFypbROnwFi8uUO6FaxvWvsPC
+         u75y6ok6hJI70LncHTiuJgGS7QsBPDLetnPesTzwZbgcIhuvRZ5UZlX9IgTU4oYAGHy1
+         aiOAo/TXzFg7GWXwcRsFlFVXx2+5HuiNYTrDm+OnsAuWlZFVaKcBFTkYpkcnLsVaVvIF
+         r8iQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=lB2MRxBJ8srzKD3MD7oOuEMNecl+boxLNvEowDgRVEE=;
-        b=jHjqFWswJUH3h8PZLAI8iB5aVij1iwGS5aIQjEQuCQ/TWKk0Izj+VlHrePl+6LfgR+
-         YUqbsvfpIO9NiI+ojcNZRZc1+qzNNnBzQtHYHjqLtyHoOIJ9lJ5Ljbsb2orC+tt2UXo9
-         3q1ffzGf1loFhiNS8Wj3PZdkLyzkZDvla1mTHxMieX9qI6s4/vl/D0fVlCaDiOlFhnKr
-         a5anYMIlM9lHYehClUpwoiGInKRvjUgI/wB/k/a8Xr9uSISYMzAS3/Uz6qYtm0CLpepF
-         Z8ER+nI3ARL4RvWJlhvaFWxwZBAq0JcxHjbjfFcMLNAjONO0A1A87wdsDoEoT+9rta09
-         NNfA==
-X-Gm-Message-State: AOAM530YQMjlnwT/K1r9hd7RxLkf5bnQjluSe0hLhS/fdd7W4AtQ1AfS
-        GP4Jzit1gh5v6BEQT95xdR708kdiAknrWTZsZ8VdTA==
-X-Google-Smtp-Source: ABdhPJwkSTN2k2+cCb/5j1O7GOWf5tHPZQTGClF4XMfIXkqfUU6u0cxa/9ce0K6W+0fRf4/ogm/E49p7+pcsIlV/t+U=
-X-Received: by 2002:ab0:23d5:: with SMTP id c21mr2809540uan.129.1606227975568;
- Tue, 24 Nov 2020 06:26:15 -0800 (PST)
+        bh=x6kP5uAmhVMOzDxA6JRa0F12t1u+ZcnAagQa2SKiwLA=;
+        b=soP1AFTil6I1VBTiaRX5ByYDi1RZqyIi9c/djamlbKAIpN4LKO/5WZ/CFQuF2rB/t9
+         NMA/vQX1LJQXJCzVkW+8Cx24eR/zuTAvzfZGnrqCImQAsBUR8jyK3zRGAwlf/p2FIjGn
+         qPlMeNWpzL/YwcMeoccFktf+k0a+4uPh5KLqHviLP5SbH+1S2wmJMgIP72mYCWMUj0A1
+         Tyh8OZN99MOUh1cqT4JrrlS6E0qZfyyTIPa+OmBLcA6I5+hp0iklbnN1OcFfPGREQ0Zf
+         JOmOjRFImHVeXKUq+RYzhIzHMzQXvkeI45xIq0gQ1OY3DrcNrozDWNN3RdE6ALJl7ZdH
+         QG8Q==
+X-Gm-Message-State: AOAM5335QX2U4vZRUjs2zPqimrbc+NITm9hCQJIryloogGjflRqvBat+
+        wz0RUWFPvKb0i3pwG3AtgfR8Eg/QW4JwaJmG4OliPONIQKo1rA==
+X-Google-Smtp-Source: ABdhPJyaXPzNR2z6DXfGmcxv9H7D3lmtRqJBFg9MIduENmWy7gIduw3rNtllzyQbi8ilAuKcw3s8UvlNRShdqKjfAgA=
+X-Received: by 2002:ab0:5859:: with SMTP id p25mr5654647uac.100.1606227980214;
+ Tue, 24 Nov 2020 06:26:20 -0800 (PST)
 MIME-Version: 1.0
-References: <20201123203004.18792-1-festevam@gmail.com>
-In-Reply-To: <20201123203004.18792-1-festevam@gmail.com>
+References: <20201123191956.10542-1-festevam@gmail.com>
+In-Reply-To: <20201123191956.10542-1-festevam@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 24 Nov 2020 15:25:38 +0100
-Message-ID: <CAPDyKFo71+Quyi108qAa4ZrMZK88CtykXSJDeEF=QLW9RqA7Sw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mxc: Convert the driver to DT-only
+Date:   Tue, 24 Nov 2020 15:25:42 +0100
+Message-ID: <CAPDyKFrBKJyWApnOHzeHnQ3RFuuYm-44iOR3MwY5Xe-j9tboSg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mxs: Remove the unused .id_table
 To:     Fabio Estevam <festevam@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc:     Sascha Hauer <kernel@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 23 Nov 2020 at 21:32, Fabio Estevam <festevam@gmail.com> wrote:
+On Mon, 23 Nov 2020 at 20:26, Fabio Estevam <festevam@gmail.com> wrote:
 >
-> Since 5.10-rc1 i.MX is a devicetree-only platform, so simplify the code
-> by removing the unused non-DT support.
+> The mxs-mmc driver is only used by DT platforms and the .id_table
+> is unused.
+>
+> Get rid of it to simplify the code.
+>
+> While at it, use of_device_get_match_data() to retrieve the driver
+> data.
 >
 > Signed-off-by: Fabio Estevam <festevam@gmail.com>
 
@@ -81,85 +87,59 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/mxcmmc.c | 33 ++++-----------------------------
->  1 file changed, 4 insertions(+), 29 deletions(-)
+>  drivers/mmc/host/mxs-mmc.c | 18 +-----------------
+>  1 file changed, 1 insertion(+), 17 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 12ee07285980..2fe6fcdbb1b3 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -157,32 +157,16 @@ struct mxcmci_host {
->         enum mxcmci_type        devtype;
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 75007f61df97..56bbc6cd9c84 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -545,19 +545,6 @@ static const struct mmc_host_ops mxs_mmc_ops = {
+>         .enable_sdio_irq = mxs_mmc_enable_sdio_irq,
 >  };
 >
-> -static const struct platform_device_id mxcmci_devtype[] = {
+> -static const struct platform_device_id mxs_ssp_ids[] = {
 > -       {
-> -               .name = "imx21-mmc",
-> -               .driver_data = IMX21_MMC,
+> -               .name = "imx23-mmc",
+> -               .driver_data = IMX23_SSP,
 > -       }, {
-> -               .name = "imx31-mmc",
-> -               .driver_data = IMX31_MMC,
-> -       }, {
-> -               .name = "mpc512x-sdhc",
-> -               .driver_data = MPC512X_MMC,
+> -               .name = "imx28-mmc",
+> -               .driver_data = IMX28_SSP,
 > -       }, {
 > -               /* sentinel */
 > -       }
 > -};
-> -MODULE_DEVICE_TABLE(platform, mxcmci_devtype);
+> -MODULE_DEVICE_TABLE(platform, mxs_ssp_ids);
 > -
->  static const struct of_device_id mxcmci_of_match[] = {
->         {
->                 .compatible = "fsl,imx21-mmc",
-> -               .data = &mxcmci_devtype[IMX21_MMC],
-> +               .data = (void *) IMX21_MMC,
->         }, {
->                 .compatible = "fsl,imx31-mmc",
-> -               .data = &mxcmci_devtype[IMX31_MMC],
-> +               .data = (void *) IMX31_MMC,
->         }, {
->                 .compatible = "fsl,mpc5121-sdhc",
-> -               .data = &mxcmci_devtype[MPC512X_MMC],
-> +               .data = (void *) MPC512X_MMC,
->         }, {
->                 /* sentinel */
+>  static const struct of_device_id mxs_mmc_dt_ids[] = {
+>         { .compatible = "fsl,imx23-mmc", .data = (void *) IMX23_SSP, },
+>         { .compatible = "fsl,imx28-mmc", .data = (void *) IMX28_SSP, },
+> @@ -567,8 +554,6 @@ MODULE_DEVICE_TABLE(of, mxs_mmc_dt_ids);
+>
+>  static int mxs_mmc_probe(struct platform_device *pdev)
+>  {
+> -       const struct of_device_id *of_id =
+> -                       of_match_device(mxs_mmc_dt_ids, &pdev->dev);
+>         struct device_node *np = pdev->dev.of_node;
+>         struct mxs_mmc_host *host;
+>         struct mmc_host *mmc;
+> @@ -593,7 +578,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>                 goto out_mmc_free;
 >         }
-> @@ -1001,13 +985,10 @@ static int mxcmci_probe(struct platform_device *pdev)
->         int ret = 0, irq;
->         bool dat3_card_detect = false;
->         dma_cap_mask_t mask;
-> -       const struct of_device_id *of_id;
->         struct imxmmc_platform_data *pdata = pdev->dev.platform_data;
 >
->         pr_info("i.MX/MPC512x SDHC driver\n");
+> -       ssp->devid = (enum mxs_ssp_id) of_id->data;
+> +       ssp->devid = (enum mxs_ssp_id)of_device_get_match_data(&pdev->dev);
 >
-> -       of_id = of_match_device(mxcmci_of_match, &pdev->dev);
-> -
->         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
->         irq = platform_get_irq(pdev, 0);
->         if (irq < 0)
-> @@ -1044,12 +1025,7 @@ static int mxcmci_probe(struct platform_device *pdev)
->         mmc->max_req_size = mmc->max_blk_size * mmc->max_blk_count;
->         mmc->max_seg_size = mmc->max_req_size;
->
-> -       if (of_id) {
-> -               const struct platform_device_id *id_entry = of_id->data;
-> -               host->devtype = id_entry->driver_data;
-> -       } else {
-> -               host->devtype = pdev->id_entry->driver_data;
-> -       }
-> +       host->devtype = (enum mxcmci_type)of_device_get_match_data(&pdev->dev);
->
->         /* adjust max_segs after devtype detection */
->         if (!is_mpc512x_mmc(host))
-> @@ -1241,7 +1217,6 @@ static SIMPLE_DEV_PM_OPS(mxcmci_pm_ops, mxcmci_suspend, mxcmci_resume);
->  static struct platform_driver mxcmci_driver = {
->         .probe          = mxcmci_probe,
->         .remove         = mxcmci_remove,
-> -       .id_table       = mxcmci_devtype,
+>         host->mmc = mmc;
+>         host->sdio_irq_en = 0;
+> @@ -723,7 +708,6 @@ static SIMPLE_DEV_PM_OPS(mxs_mmc_pm_ops, mxs_mmc_suspend, mxs_mmc_resume);
+>  static struct platform_driver mxs_mmc_driver = {
+>         .probe          = mxs_mmc_probe,
+>         .remove         = mxs_mmc_remove,
+> -       .id_table       = mxs_ssp_ids,
 >         .driver         = {
->                 .name           = DRIVER_NAME,
->                 .probe_type     = PROBE_PREFER_ASYNCHRONOUS,
+>                 .name   = DRIVER_NAME,
+>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
 > --
 > 2.17.1
 >
