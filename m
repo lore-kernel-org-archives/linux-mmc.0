@@ -2,175 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D86BC63798
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 17:04:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF5BEC56201
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 18:23:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BEDF0206D8
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 17:04:57 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="bn+pL/Hm"
+	by mail.kernel.org (Postfix) with ESMTP id 4C083206CA
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 18:23:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731336AbgKYREa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Nov 2020 12:04:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35880 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730445AbgKYRE1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 12:04:27 -0500
-Received: from mail-yb1-xb44.google.com (mail-yb1-xb44.google.com [IPv6:2607:f8b0:4864:20::b44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3713EC0613D4;
-        Wed, 25 Nov 2020 09:04:27 -0800 (PST)
-Received: by mail-yb1-xb44.google.com with SMTP id k65so372661ybk.5;
-        Wed, 25 Nov 2020 09:04:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=U7yONu+GErpj3wVA3mUEvd1gZrZu1iMtuB4J5cc4iYs=;
-        b=bn+pL/HmrYW2tlvsO08UsmlB+e0sDsIo/gBe6lZBPy5Ml0r7IepVRmwL3Z1msCDTmB
-         4Fj8yYJnSSwKpycrMD6jc9mJYcLEOxyjBt+mj/swgeJwfcTqBWFSYbINT99XJh8MBLLG
-         BhdJX4URpdAlU1PS41QCV8cX0uycEbKi5uankHMmLYXfRheyb1dBSnJ2lYbkM9jPzYRg
-         +YL1Fiv4xli6A/G5oR00+c/fqffNKJdLOgNLmafCTxGe8sUqpvTjraMjrzXLQkd2Vyg7
-         6NJIAQ3gm8Ro9XvzXTxxo6aHXEqSB5bdv5UB5bHkEX37ZUG4NR8CwSl4aaovOFcf7q/J
-         MTKg==
+        id S1730465AbgKYSXj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Nov 2020 13:23:39 -0500
+Received: from mail-lj1-f170.google.com ([209.85.208.170]:39522 "EHLO
+        mail-lj1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729153AbgKYSXj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 13:23:39 -0500
+Received: by mail-lj1-f170.google.com with SMTP id o24so3299097ljj.6;
+        Wed, 25 Nov 2020 10:23:37 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=U7yONu+GErpj3wVA3mUEvd1gZrZu1iMtuB4J5cc4iYs=;
-        b=ql30V3/AY7QbTMGqCub08su8oTMfUmvr1t/8CGEB/Lm0R2uEQRfW5f7BPJ6qJSyf9O
-         oKDvxOFt8OkoogAW/nlox1l/9SJ1QniYGNKbxfDUXpq1zOm3BaaH3b4VS31/LVWDMP5e
-         CrMPqXQNH3b04Efsg6bCOUG7G7sFsn4yoFrIMb+/j2JY2r1NWBWG0h4WXyB1umkxWOJN
-         fMLHNEFf0Gkx6XN/Im6mlOmyD2cEM8TwDxC59mjJlqYwDgkGUn2Piq6DQZzjxReoLpQl
-         dm5DrX9VI1QOJslbqDKuEmXE4XZAl1RzlPhaXjmWihBeaj1ERLip07fPe+/klbdcl/d+
-         uWDw==
-X-Gm-Message-State: AOAM530HmG34Xxl9oraCKyjbygTOo6DKP6lHLUss0CcIqkOH+yOkn21G
-        1oFu9S/7uVuDI3sLQvvyJ1JRtJr+jQGWeffKiZM=
-X-Google-Smtp-Source: ABdhPJwRDTWwRnnt/vVfXeVU3lUNCXdaAf9CCrzUJdkBRbFdtXrCpJBbeymEiGhAam+E5oqqQjDTbAdkVQMGwErIDPw=
-X-Received: by 2002:a25:aac5:: with SMTP id t63mr6307293ybi.22.1606323866493;
- Wed, 25 Nov 2020 09:04:26 -0800 (PST)
+        h=x-gm-message-state:to:cc:from:subject:message-id:date:user-agent
+         :mime-version:content-language:content-transfer-encoding;
+        bh=cPPQ179EgtW8kXz3cpwoQkCmMXkKDw1elffjhTNhfU4=;
+        b=g3YaGfQrmcI4EH/ByZCmC2c62jdj3ZCr3mEnqo1c7TDGKOBWxLJWk3H2ED4+TtCSWW
+         vE+7BTrzaz40/rQpCaSokWRcorcj9mditcjr86Z/n9Er0hZPHYPL80gYMGuK1V9ONE3O
+         Vei6Yb8Lidze4ioXtILAed0ssSkkSyagvbC/9HwV8crDqbYqLM5AubDl5t1CJ4XjIBTU
+         6/+YeB8I+J2++7n+qFOqxOFeMK+n0olZEC6HVHREZwFgZ1Xwi4cYMXcvthL2STSD66vB
+         2HxKcgA/6LhssthGih1CkX7U5X0gQ98IOkUlr7QgrYaPENysSTW2/RDoLwyYCgDBwS3P
+         vmXg==
+X-Gm-Message-State: AOAM532JBuMGitUBhjyYe2Fbz1pf+K7z5/GWZcIvul7h7dLJ8R+d4JB4
+        4Fjf/sI+LK7kr1s8LbuCRoE=
+X-Google-Smtp-Source: ABdhPJyKlM2u5yPWPouZUr4Cm7f8hO7xnjA92sVBkOEU3ScYpVOWFCvJouSekvXHGuIkYkorve2sng==
+X-Received: by 2002:a2e:2e10:: with SMTP id u16mr1917176lju.405.1606328616800;
+        Wed, 25 Nov 2020 10:23:36 -0800 (PST)
+Received: from [172.16.128.221] ([4.34.229.34])
+        by smtp.gmail.com with ESMTPSA id m202sm7189lfa.208.2020.11.25.10.23.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 25 Nov 2020 10:23:35 -0800 (PST)
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     linux-wireless@vger.kernel.org,
+        Arend Van Spriel <arend.vanspriel@broadcom.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Larry Finger <Larry.Finger@lwfinger.net>
+From:   Brian O'Keefe <bokeefe@alum.wpi.edu>
+Subject: [PATCH 1/2] mmc: sdio: Move SDIO IDs from rtl8723bs, driver to common
+ include file
+Message-ID: <16529bfd-0308-5da9-f7ce-4ffa9f77b4d0@alum.wpi.edu>
+Date:   Wed, 25 Nov 2020 13:23:31 -0500
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.4.1
 MIME-Version: 1.0
-References: <202011201129.B13FDB3C@keescook> <20201120115142.292999b2@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011220816.8B6591A@keescook> <9b57fd4914b46f38d54087d75e072d6e947cb56d.camel@HansenPartnership.com>
- <ca071decb87cc7e905411423c05a48f9fd2f58d7.camel@perches.com>
- <0147972a72bc13f3629de8a32dee6f1f308994b5.camel@HansenPartnership.com>
- <d8d1e9add08cdd4158405e77762d4946037208f8.camel@perches.com>
- <dbd2cb703ed9eefa7dde9281ea26ab0f7acc8afe.camel@HansenPartnership.com>
- <20201123130348.GA3119@embeddedor> <8f5611bb015e044fa1c0a48147293923c2d904e4.camel@HansenPartnership.com>
- <202011241327.BB28F12F6@keescook> <a841536fe65bb33f1c72ce2455a6eb47a0107565.camel@HansenPartnership.com>
- <CAKwvOdkGBn7nuWTAqrORMeN1G+w3YwBfCqqaRD2nwvoAXKi=Aw@mail.gmail.com> <20201125082405.1d8c23dc@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-In-Reply-To: <20201125082405.1d8c23dc@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
-From:   Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date:   Wed, 25 Nov 2020 18:04:15 +0100
-Message-ID: <CANiq72=RuekXf1O6Fxrz2Eend0GtS6=E72P4T2=48SDqVcTChA@mail.gmail.com>
-Subject: Re: [Intel-wired-lan] [PATCH 000/141] Fix fall-through warnings for Clang
-To:     Jakub Kicinski <kuba@kernel.org>
-Cc:     Nick Desaulniers <ndesaulniers@google.com>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        Kees Cook <keescook@chromium.org>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        Joe Perches <joe@perches.com>, alsa-devel@alsa-project.org,
-        linux-atm-general@lists.sourceforge.net,
-        reiserfs-devel@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        linux-fbdev@vger.kernel.org,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        linux-ide@vger.kernel.org, dm-devel@redhat.com,
-        keyrings@vger.kernel.org, linux-mtd@lists.infradead.org,
-        GR-everest-linux-l2@marvell.com, wcn36xx@lists.infradead.org,
-        samba-technical@lists.samba.org, linux-i3c@lists.infradead.org,
-        linux1394-devel@lists.sourceforge.net,
-        linux-afs@lists.infradead.org,
-        usb-storage@lists.one-eyed-alien.net, drbd-dev@lists.linbit.com,
-        devel@driverdev.osuosl.org, linux-cifs@vger.kernel.org,
-        rds-devel@oss.oracle.com, linux-scsi@vger.kernel.org,
-        linux-rdma@vger.kernel.org, oss-drivers@netronome.com,
-        bridge@lists.linux-foundation.org,
-        linux-security-module@vger.kernel.org,
-        amd-gfx list <amd-gfx@lists.freedesktop.org>,
-        linux-stm32@st-md-mailman.stormreply.com, cluster-devel@redhat.com,
-        linux-acpi@vger.kernel.org, coreteam@netfilter.org,
-        intel-wired-lan@lists.osuosl.org,
-        linux-input <linux-input@vger.kernel.org>,
-        Miguel Ojeda <ojeda@kernel.org>,
-        tipc-discussion@lists.sourceforge.net,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-watchdog@vger.kernel.org, selinux@vger.kernel.org,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        intel-gfx@lists.freedesktop.org, linux-geode@lists.infradead.org,
-        linux-can@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-gpio@vger.kernel.org, op-tee@lists.trustedfirmware.org,
-        linux-mediatek@lists.infradead.org, xen-devel@lists.xenproject.org,
-        nouveau@lists.freedesktop.org, linux-hams@vger.kernel.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-hwmon@vger.kernel.org,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        linux-nfs@vger.kernel.org, GR-Linux-NIC-Dev@marvell.com,
-        Linux Memory Management List <linux-mm@kvack.org>,
-        Network Development <netdev@vger.kernel.org>,
-        linux-decnet-user@lists.sourceforge.net, linux-mmc@vger.kernel.org,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        linux-sctp@vger.kernel.org, linux-usb@vger.kernel.org,
-        netfilter-devel@vger.kernel.org,
-        =?UTF-8?Q?open_list=3AHARDWARE_RANDOM_NUMBER_GENERATOR_CORE_=3Clinux=2Dcrypt?=
-         =?UTF-8?Q?o=40vger=2Ekernel=2Eorg=3E=2C_patches=40opensource=2Ecirrus=2Ecom=2C_linux=2Dint?=
-         =?UTF-8?Q?egrity=40vger=2Ekernel=2Eorg=2C_target=2Ddevel=40vger=2Ekernel=2Eorg=2C_linux=2D?=
-         =?UTF-8?Q?hardening=40vger=2Ekernel=2Eorg=2C_Jonathan_Cameron_=3CJonathan=2ECamero?=
-         =?UTF-8?Q?n=40huawei=2Ecom=3E=2C_Greg_KH?= 
-        <gregkh@linuxfoundation.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 25, 2020 at 5:24 PM Jakub Kicinski <kuba@kernel.org> wrote:
->
-> And just to spell it out,
->
-> case ENUM_VALUE1:
->         bla();
->         break;
-> case ENUM_VALUE2:
->         bla();
-> default:
->         break;
->
-> is a fairly idiomatic way of indicating that not all values of the enum
-> are expected to be handled by the switch statement.
+Macro names were derived from the Windows driver, as that was the best
+available source.
 
-It looks like a benign typo to me -- `ENUM_VALUE2` does not follow the
-same pattern like `ENUM_VALUE1`. To me, the presence of the `default`
-is what indicates (explicitly) that not everything is handled.
+Signed-off-by: Brian O'Keefe <bokeefe@alum.wpi.edu>
+---
+  include/linux/mmc/sdio_ids.h | 14 ++++++++++++++
+  1 file changed, 14 insertions(+)
 
-> Applying a real patch set and then getting a few follow ups the next day
-> for trivial coding things like fallthrough missing or static missing,
-> just because I didn't have the full range of compilers to check with
-> before applying makes me feel pretty shitty, like I'm not doing a good
-> job. YMMV.
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 12036619346c..97ccb0ac5e43 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -42,6 +42,20 @@
+  #define SDIO_VENDOR_ID_TI                      0x0097
+  #define SDIO_DEVICE_ID_TI_WL1271               0x4076
 
-The number of compilers, checkers, static analyzers, tests, etc. we
-use keeps going up. That, indeed, means maintainers will miss more
-things (unless maintainers do more work than before). But catching
-bugs before they happen is *not* a bad thing.
-
-Perhaps we could encourage more rebasing in -next (while still giving
-credit to bots and testers) to avoid having many fixing commits
-afterwards, but that is orthogonal.
-
-I really don't think we should encourage the feeling that a maintainer
-is doing a bad job if they don't catch everything on their reviews.
-Any review is worth it. Maintainers, in the end, are just the
-"guaranteed" reviewers that decide when the code looks reasonable
-enough. They should definitely not feel pressured to be perfect.
-
-Cheers,
-Miguel
++#define SDIO_VENDOR_ID_REALTEK                  0x024c
++#define SDIO_DEVICE_ID_REALTEK_BESTBUY_0        0x0240
++#define SDIO_DEVICE_ID_REALTEK_BESTBUY_1        0x0241
++#define SDIO_DEVICE_ID_REALTEK_HP               0x0523
++#define SDIO_DEVICE_ID_REALTEK_ECS              0x0524
++#define SDIO_DEVICE_ID_REALTEK_TCL              0x0525
++#define SDIO_DEVICE_ID_REALTEK_ACER             0x0623
++#define SDIO_DEVICE_ID_REALTEK_RSVD             0x0624
++#define SDIO_DEVICE_ID_REALTEK_ROCKCHIP         0x0625
++#define SDIO_DEVICE_ID_REALTEK_BRASWELL         0x0626
++#define SDIO_DEVICE_ID_REALTEK_ACER_PWR_LIMIT   0x0627
++#define SDIO_DEVICE_ID_REALTEK_COMMON_01        0x8753
++#define SDIO_DEVICE_ID_REALTEK_COMMON_02        0xb723
++
+  #define SDIO_VENDOR_ID_ATHEROS                 0x0271
+  #define SDIO_DEVICE_ID_ATHEROS_AR6003_00       0x0300
+  #define SDIO_DEVICE_ID_ATHEROS_AR6003_01       0x0301
+--
+2.25.1
