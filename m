@@ -5,41 +5,40 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48B39C64E7A
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6836AC64E7C
 	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 21:30:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E7F6B206E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 21:30:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2A43F2075A
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 21:30:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="oBJlt/8B"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="t35m+GO1"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732179AbgKYVaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1732189AbgKYVaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 25 Nov 2020 16:30:17 -0500
-Received: from www.zeus03.de ([194.117.254.33]:50292 "EHLO mail.zeus03.de"
+Received: from www.zeus03.de ([194.117.254.33]:50268 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732189AbgKYVaQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1732177AbgKYVaQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 25 Nov 2020 16:30:16 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=rdfbV7Lr2bOWPq
-        aYvs96W61a1TNaIaXNyfLaNfizkOk=; b=oBJlt/8B07U9npgKc9G4jW3l5PhSdd
-        V8M7h01hAyc0FAB+B7iex0rRufvir8wN9otycWXo9XBqxjq3I2mbEItqX5tKJuT5
-        cFhMzii8s2CkB+oPvCsoI4pttLv13C4+kx8xjgRAexJHMHy5zQWAzdagOxrVeQ3X
-        vUU/G5JuJ0duc=
-Received: (qmail 3441528 invoked from network); 25 Nov 2020 22:30:15 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Nov 2020 22:30:15 +0100
-X-UD-Smtp-Session: l3s3148p1@+TAQIvW0kr8gAwDPXwZjAA625bO7DiyS
+        :mime-version:content-transfer-encoding; s=k1; bh=HEdcyEHbRCd9oy
+        V9Y1QXtLJI+LDnrlr8diUfbG0+Sck=; b=t35m+GO1sBRms7K9wQmY/VU8mdf7SV
+        TgUAxu0vihdVylDgU/+3QtrvCOcUzkHQDW5EK4pQqKqETmCYoWoX2RaHVKWgpTjA
+        IoAaebtubNigxuXU2Lsprdaqx/XHowEO3uyVAlMx9Wfa9Vjr5T/Exgb0Bo88r09s
+        Wx/TuRstK06dA=
+Received: (qmail 3441469 invoked from network); 25 Nov 2020 22:30:14 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Nov 2020 22:30:14 +0100
+X-UD-Smtp-Session: l3s3148p1@b/kEIvW0jr8gAwDPXwZjAA625bO7DiyS
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa@kernel.org>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 3/3] mmc: renesas_sdhi: populate hook for longer busy_wait
-Date:   Wed, 25 Nov 2020 22:30:01 +0100
-Message-Id: <20201125213001.15003-4-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 1/3] mmc: tmio: set max_busy_timeout
+Date:   Wed, 25 Nov 2020 22:29:59 +0100
+Message-Id: <20201125213001.15003-2-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201125213001.15003-1-wsa+renesas@sang-engineering.com>
 References: <20201125213001.15003-1-wsa+renesas@sang-engineering.com>
@@ -49,76 +48,114 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa@kernel.org>
+Set max_busy_timeouts for variants known to support the TOPxx bits in
+the SD_OPTION register. The timeout mechanism was running in the
+background but not yet properly handled in the driver. So, let the MMC
+core know when to not use R1B to avoid unhandled timeouts.
 
-Make use of the EXTOP bit in R-Car Gen3 SoCs to have a twice as large
-busy wait duration.
+My datasheets for older variants (tmio_mmc.c) suggest that they support
+it, too. However, actual bit descriptions are lacking, so I chose an
+opt-in approach.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 20 ++++++++++++++++++++
+ drivers/mmc/host/renesas_sdhi_core.c |  3 +++
  drivers/mmc/host/tmio_mmc.h          |  2 ++
- 2 files changed, 22 insertions(+)
+ drivers/mmc/host/tmio_mmc_core.c     | 15 +++++++++++++++
+ drivers/mmc/host/uniphier-sd.c       |  1 +
+ include/linux/mfd/tmio.h             |  7 ++++++-
+ 5 files changed, 27 insertions(+), 1 deletion(-)
 
 diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 153767054c05..38f028e70633 100644
+index bb937411c2ec..153767054c05 100644
 --- a/drivers/mmc/host/renesas_sdhi_core.c
 +++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -561,6 +561,7 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
- static void renesas_sdhi_reset(struct tmio_mmc_host *host)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
-+	u16 val;
+@@ -1041,6 +1041,9 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 	/* All SDHI have SDIO status bits which must be 1 */
+ 	mmc_data->flags |= TMIO_MMC_SDIO_STATUS_SETBITS;
  
- 	if (priv->scc_ctl) {
- 		renesas_sdhi_disable_scc(host->mmc);
-@@ -573,6 +574,21 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
- 	}
++	/* All SDHI support HW busy detection */
++	mmc_data->flags |= TMIO_MMC_USE_BUSY_TIMEOUT;
++
+ 	dev_pm_domain_start(&pdev->dev);
  
- 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_INIT_RCAR2);
-+
-+	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
-+		val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
-+		val |= CARD_OPT_EXTOP;
-+		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, val);
-+	}
-+}
-+
-+static unsigned int renesas_sdhi_gen3_get_cycles(struct tmio_mmc_host *host)
-+{
-+	u16 num, val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
-+
-+	num = (val & CARD_OPT_TOP_MASK) >> CARD_OPT_TOP_SHIFT;
-+	return 1 << ((val & CARD_OPT_EXTOP ? 14 : 13) + num);
-+
- }
- 
- #define SH_MOBILE_SDHI_MIN_TAP_ROW 3
-@@ -1067,6 +1083,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 			quirks->hs400_calib_table + 1);
- 	}
- 
-+	/* these have an EXTOP bit */
-+	if (ver >= SDHI_VER_GEN3_SD)
-+		host->get_timeout_cycles = renesas_sdhi_gen3_get_cycles;
-+
- 	/* Enable tuning iff we have an SCC and a supported mode */
- 	if (of_data && of_data->scc_offset &&
- 	    (host->mmc->caps & MMC_CAP_UHS_SDR104 ||
+ 	ret = renesas_sdhi_clk_enable(host);
 diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index f60559bc413a..784fa6ed5843 100644
+index 7ff41185896a..819198af17f4 100644
 --- a/drivers/mmc/host/tmio_mmc.h
 +++ b/drivers/mmc/host/tmio_mmc.h
-@@ -82,7 +82,9 @@
+@@ -80,6 +80,8 @@
+ #define	CLK_CTL_SCLKEN		BIT(8)
+ 
  /* Definitions for values the CTL_SD_MEM_CARD_OPT register can take */
- #define CARD_OPT_TOP_MASK	0xf0
- #define CARD_OPT_TOP_SHIFT	4
-+#define CARD_OPT_EXTOP		BIT(9) /* first appeared on R-Car Gen3 SDHI */
++#define CARD_OPT_TOP_MASK	0xf0
++#define CARD_OPT_TOP_SHIFT	4
  #define CARD_OPT_WIDTH8		BIT(13)
-+#define CARD_OPT_ALWAYS1	BIT(14)
  #define CARD_OPT_WIDTH		BIT(15)
  
- /* Definitions for values the CTL_SDIO_STATUS register can take */
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 7f4a28125010..da9a6243f146 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -887,6 +887,18 @@ static void tmio_mmc_set_bus_width(struct tmio_mmc_host *host,
+ 	sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, reg);
+ }
+ 
++static void tmio_mmc_max_busy_timeout(struct tmio_mmc_host *host)
++{
++	u16 val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
++	unsigned int clk_rate = host->mmc->actual_clock ?: host->mmc->f_max;
++	unsigned int cycles;
++
++	val = (val & CARD_OPT_TOP_MASK) >> CARD_OPT_TOP_SHIFT;
++	cycles = 1 << (13 + val);
++
++	host->mmc->max_busy_timeout = cycles / (clk_rate / MSEC_PER_SEC);
++}
++
+ /* Set MMC clock / power.
+  * Note: This controller uses a simple divider scheme therefore it cannot
+  * run a MMC card at full speed (20MHz). The max clock is 24MHz on SD, but as
+@@ -945,6 +957,9 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
+ 	}
+ 
++	if (host->pdata->flags & TMIO_MMC_USE_BUSY_TIMEOUT)
++		tmio_mmc_max_busy_timeout(host);
++
+ 	/* Let things settle. delay taken from winCE driver */
+ 	usleep_range(140, 200);
+ 	if (PTR_ERR(host->mrq) == -EINTR)
+diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+index 3092466a99ab..a6cd16771d4e 100644
+--- a/drivers/mmc/host/uniphier-sd.c
++++ b/drivers/mmc/host/uniphier-sd.c
+@@ -586,6 +586,7 @@ static int uniphier_sd_probe(struct platform_device *pdev)
+ 
+ 	tmio_data = &priv->tmio_data;
+ 	tmio_data->flags |= TMIO_MMC_32BIT_DATA_PORT;
++	tmio_data->flags |= TMIO_MMC_USE_BUSY_TIMEOUT;
+ 
+ 	host = tmio_mmc_host_alloc(pdev, tmio_data);
+ 	if (IS_ERR(host))
+diff --git a/include/linux/mfd/tmio.h b/include/linux/mfd/tmio.h
+index 8ba042430d8e..27264fe4b3b9 100644
+--- a/include/linux/mfd/tmio.h
++++ b/include/linux/mfd/tmio.h
+@@ -55,7 +55,12 @@
+  */
+ #define TMIO_MMC_HAS_IDLE_WAIT		BIT(4)
+ 
+-/* BIT(5) is unused */
++/*
++ * Use the busy timeout feature. Probably all TMIO versions support it. Yet,
++ * we don't have documentation for old variants, so we enable only known good
++ * variants with this flag. Can be removed once all variants are known good.
++ */
++#define TMIO_MMC_USE_BUSY_TIMEOUT	BIT(5)
+ 
+ /*
+  * Some controllers have CMD12 automatically
 -- 
 2.28.0
 
