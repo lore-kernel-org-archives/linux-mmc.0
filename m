@@ -2,112 +2,168 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C6E9C5519F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 11:01:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C86E8C56202
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 11:05:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3320E20665
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 11:01:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E13220857
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 11:05:09 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AwFSXB8U"
+	dkim=pass (1024-bit key) header.d=renesasgroup.onmicrosoft.com header.i=@renesasgroup.onmicrosoft.com header.b="Iv253FMF"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728220AbgKYLBw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Nov 2020 06:01:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35780 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727338AbgKYLBw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 06:01:52 -0500
-Received: from mail-pf1-x441.google.com (mail-pf1-x441.google.com [IPv6:2607:f8b0:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3FC8C0613D4;
-        Wed, 25 Nov 2020 03:01:33 -0800 (PST)
-Received: by mail-pf1-x441.google.com with SMTP id y7so1943058pfq.11;
-        Wed, 25 Nov 2020 03:01:33 -0800 (PST)
+        id S1726103AbgKYLFI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Nov 2020 06:05:08 -0500
+Received: from mail-eopbgr1400130.outbound.protection.outlook.com ([40.107.140.130]:31200
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725792AbgKYLFI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 25 Nov 2020 06:05:08 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=RAlap7B2tgtrkCEFjI7sd8+LJkI3DNGQSFQSglHWRM+o4cLd3PIcVbvh8UVzIkQfNWVCcPgEEnMM8a/dPxi3GUHwwvse5cHDuUg9bc44ekepnxDdgKl7I3FQ3Spte84eFB4xqoa6wcDh4RhfYcaMm/GjwcYxkeg1Dl0K+BIqGXYJY42FYrVUR0Ee8AtBL4FVe9o3IV/0pqT6MZJGLpZd62AOdzEVhrvxStTmHClbEEdftcG/CWiqxpOAuTIJF4sqHvKayWixBu5R6N4MuklT07sw9OBSPOlsqWHmelvGrRLynRLKp1HIdfJxI9BqJBG4Sf3kV61dGN3AAck7t3CpEQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=R65Jt/vwV4qJJIn58EeFr1A09GeUsyXBj7UHq1NS9dw=;
+ b=MopVqer+mhPCJ9Qlo5FJSjoyjyYtu36FjoZq4d/cL6aWdwChl+81ZUZ2L8yI1pTO5KQF49M+ee8iEXUW3emUSF917HAdUO1sSRpEW05cUvUJurerxD2dLnL1imyULp/iSCAszIrt7sVsqCzk1q90hZYkhiH8NHHuPQ7Uk0/6qkzA5SJkztt/6yzlIfHWvjXt+q/c42jXAu0ScX6g8t8zCjcNtvyGO9kdU6q4aVo9YxmTmc2J/RwUBCzupIb/VR22llWSEWJB/5Q1vFaUoZBH9GbiFQim7TnmtBKsLIIYht7YBi2LsHAjDQDbeMhrCoPv0t2CGVV+3OnfTbgx232GWQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=yoVpAWHYjS1Wg3JLaDQSuDFhZa8zGnm8PN6jt6kl1oY=;
-        b=AwFSXB8UMOUzoQ89fUHMNhocwrNCH7yyrHVuEjkdDfcUSC6gVtmxxBYNeCpyV1iuP6
-         YjN9MuNwyVeT8FEuOJW1dhJUBp3q5+AMY18qev8VRc73IU2KJ0Ye/zDC+YBNdt6p2ynP
-         wY42CJ+HibFBpw4SFWcEdZZ7VjBBOXWO3kSpL/QeZvr2b9Ft4+7DsddHqK0Luzq+Pbms
-         SFBUMHhHJeDS9J95bKRhc8WE1beXYxkcvFeZXzyapxZHbWqoFKDnIOMN841ivfSncjac
-         u1yLcoclBn83f43/lYDri2cyvNAx7rRr3/Vld64U+UYKPglrd+Ruhv88S4eXJ3Piuou1
-         XYhQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=yoVpAWHYjS1Wg3JLaDQSuDFhZa8zGnm8PN6jt6kl1oY=;
-        b=ToCCo90XuF0SYTrJJHshdnjBS6LVcJiXJP7Wdn8gqnM3rfTk379RfxZQUopqR4FV3K
-         wEs5wpw2kfywedtRKnbApkD/TuxVXtlUkrLYhGkfkUMmCFrpoWELsqyW39XT6GnDsMme
-         Gf7O8zWT0Yd6zM+i9v97tuWX8Q+f/PkQdaP1pJfAA+D0Lfu2xQ/scsDoeM4uW+WKUuGk
-         WtvafCVwJkqR+4xnmrvRWWZeRJfPgpjdvlxOB1E5v3Ut+c/JxkA/ktvUY/ONkS3mJgEs
-         93ozik3qb8vB0EXzgOuQHTBVi6PtF+V9qmW0KZXafUQqbmmIEre0DXxfIprTGWejOeV3
-         Zhkg==
-X-Gm-Message-State: AOAM531REuNnI4qZEhsfkyB6E26FF2Pz09UdByl7lxm5z325lf+o+1om
-        jUkZN53NKyF5LcZIz6+C2Zc=
-X-Google-Smtp-Source: ABdhPJzutxYbnWLVx0LnkXjj3R3AWLqTJXbi/VdRS1SAsv04zmKDCjlHcueXEx2PBviecsjFM3F2HQ==
-X-Received: by 2002:a05:6a00:c8:b029:18b:b0e:e51 with SMTP id e8-20020a056a0000c8b029018b0b0e0e51mr2570993pfj.37.1606302093535;
-        Wed, 25 Nov 2020 03:01:33 -0800 (PST)
-Received: from gli-arch.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id g5sm2643381pju.9.2020.11.25.03.01.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Nov 2020 03:01:33 -0800 (PST)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
-        Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH,v2] mmc: sdhci-pci-gli: Disable slow mode in HS400 mode for GL9763E
-Date:   Wed, 25 Nov 2020 19:01:45 +0800
-Message-Id: <20201125110145.2824-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.29.2
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=R65Jt/vwV4qJJIn58EeFr1A09GeUsyXBj7UHq1NS9dw=;
+ b=Iv253FMFW4HjomULfVVRGy6oiIrMZ2GHs9UaRMYgpoHwDXK9I2GqDiphXV1dWVdQ/jLM9qI0tpnIyIVTiR3OPW1q9FpgneXogq8o4SdcfCmOdVxEAjEIOPa0dsmVeboQBKQ/lk+zYpl5CjNkHzk/wF1XEglIq3vzuRMpedOAhq0=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYAPR01MB4205.jpnprd01.prod.outlook.com (2603:1096:404:cb::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3589.22; Wed, 25 Nov
+ 2020 11:05:04 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::59ed:a6ce:d8dc:90dd]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::59ed:a6ce:d8dc:90dd%6]) with mapi id 15.20.3589.030; Wed, 25 Nov 2020
+ 11:05:04 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Masahiro Yamada <masahiroy@kernel.org>,
+        Masaharu Hayakawa <masaharu.hayakawa.ry@renesas.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>
+Subject: RE: [PATCH RFT v2 2/3] mmc: tmio: Add data timeout error detection
+Thread-Topic: [PATCH RFT v2 2/3] mmc: tmio: Add data timeout error detection
+Thread-Index: AQHWv07MDdJVcaSnFkOo6ZOWAaI4B6nWv+MggAHTL4CAABufIA==
+Date:   Wed, 25 Nov 2020 11:05:04 +0000
+Message-ID: <TY2PR01MB3692C0D399265BBB2641A1BBD8FA0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20201120150647.123237-1-wsa+renesas@sang-engineering.com>
+ <20201120150647.123237-3-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB3692D348DCAA67B40C589C50D8FB0@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <20201125085621.GD1577@kunai>
+In-Reply-To: <20201125085621.GD1577@kunai>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: b52b00e4-2b61-4634-36d1-08d89131f62f
+x-ms-traffictypediagnostic: TYAPR01MB4205:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <TYAPR01MB4205F4EDEB81698E19F5ACA2D8FA0@TYAPR01MB4205.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7691;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 12LrcHa5VDPrCUSJ43p9dkDze/VtN8vaYbhQUCujvPQpxJEtw2h2FsyMEr5B7voCqIYjCh8JuqRGPxPgi5BgEwDNr3N7xvdTEG0h/pnk+BigjhzrCpc30+/0G2iVNz46OrNu1SBMA8XC3K6kisuCbCKISIrzENrTipWXfpymq3tb3nWIWrea2v81jdGJXFHOEBs+vz09Mx3KCqMwZwUklcp6wHoK0KbfxsqASaEBkuMbH9WrhcV/O3wtr/2+ZOAt34IcxSwOSa7BIZoMLkMdhMGqCMdvFx10Jz2ohpNdUo4zcLBBq9LD4bs6LZ2BjofqMMisQAnw0bGVEerkaBlnpw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(376002)(366004)(396003)(346002)(39860400002)(8936002)(5660300002)(55016002)(71200400001)(86362001)(33656002)(52536014)(66446008)(64756008)(66476007)(66946007)(8676002)(4326008)(76116006)(107886003)(9686003)(54906003)(66556008)(7696005)(316002)(6506007)(26005)(478600001)(55236004)(2906002)(83380400001)(186003);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: o7CgO7ImWvhitZEMaxfH/P5rtVECnm+FUus72k6GKdjCnqj7bJ6NT9SWJizrAMZ7VzisME57GP+csnjXl9EbDUZwwsKYCh98csWFXnsQMeW7uqw7Qi/sDptZfeMBT/wol4zgpMlHxnTTPK9+LrHNVdEKJoEv9oT/UZOSeQBFDvGFDqxprUs956hCAiNHjFNDXTfe4wsM7A9H8sDT8nfljh8K8CUoURoUfrjQojynn5lw9ZhejRGUu7aQQF4nIhqL2AGNaMYDFaujmOMR64KxW9hWaWVBpvCPB1/A3Mq14RBztNOL/3eDb8ndqr4J7dCD5qFmU9QwNBlSBDggNPW3d9xQpRSFiRS6ZsZ2fpVvNx9issYBXDLMcojbkDgEfw8l7Jas5yXw3te3VsITvSGh+7mUdo/kUk2Nz7GVNxNbhBU2L6JlQflq9byN7McsV788I5SYWI1XR26PnZgn7NCUPR+qilQjxUjqQj0KpxJezEH5Oni2qnVP+xuJR3UVU5wRhhklXyjbF1Ebw3MXxM7cg/liGNYuF8kwA5Y8bjWVhJMZ6xRJsM0Qa4qVEqRjsgPC4f27r2aExSb3XWUq2Vm1gJ9+fUn1tejpoVdzfgT2F99J4aA8ODVYm9iMNS7tvQUmwVcKHz8pkGu5NtVZ3CNzc0FXLAN9HA2ZURbX1jyDQXq2DZ6mAh/3IdJQ+T4D8PUtWTG2yR4qcyU1TJplz5z/BvFEtjLXrS1+Rr/sIQserz1SX3+pyzsRhu3825OsSC1fP9RtWcZ4uWiK9RCVcCnzLp/QI99lppxiSxXyAwd+sX015TUFEzdbDAyfDnIsAzvTLfcQ5d72Ontag1XFYqBVJUEMRaA/+r+rD9ctK0sutrrOOSzXmhhvfhSBAgHSmj3lgRJih+IK4Vij0xIk24impw==
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b52b00e4-2b61-4634-36d1-08d89131f62f
+X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Nov 2020 11:05:04.1640
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: XXe+ONwc1C30FCM4l+Ukq9YMp1SKZhFq3Rt8pTMqKl10zQYf+Cmroj9xgAi7Lx4CicGWkVT2KodRwUAcBue5BVjRowEsvsfGxJM6rtW2boMBVctP03zY1jL2il/ou0L+
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4205
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Hi Wolfram-san,
 
-The GL9763E uses 150Mhz (slow mode) by default in HS400 mode. In order
-to make HS400 mode run at 200Mhz, the slow mode needs to be turned off.
+> From: Wolfram Sang, Sent: Wednesday, November 25, 2020 5:56 PM
+<snip>
+> > The following commit [1] is a BSP local patch though,
+> > we need to set -EILSEQ to retune a card for R-Car Gen3 [2]
+> > by MMC core driver [3].
+>=20
+> So, if there is a non-removable eMMC or a SD card inserted, then we need
+> to EILSEQ to enforce a retune. Otherwise it is a data timeout. Is my
+> understanding correct?
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Yes.
+
+> I wonder, though, if "Gen3" is a complete description? There are SDHI
+> instances on Gen2 which can also do SDR104. Won't they need the same
+> treatment? Then we could say that every SDHI which has an SCC will need
+> this treatment.
+
+Hmm, since Gen2 datasheet didn't update the flowchart so that I thought
+we need special handling for "Gen3". But, I'll ask hardware team whether
+my thought is correct or not.
+
+> >  - The patch also change the tmio_mmc_cmd_irq() when CMDTIMEOUT happens=
+ for R-Car Gen3.
+> >    But, for upstream, we should make a separated patch for it.
+>=20
+> I am sorry. I don't fully understand. Why does the change to
+> tmio_mmc_cmd_irq() need a seperate patch?
+
+The patch subject is "Add data timeout error detection".
+That's why I thought so.
+
+> >  - These "for R-Car Gen3" means I'm thinking we need additional conditi=
+on:
+> >     1) to set -EILSRQ or -ETIMEDOUT for R-Car Gen3
+> >     2) to set -ETIMEDOUT anyway for other SoCs.
+> >    # These are complex conditions a little though...
+>=20
+> Well, from what I understood this sounds not too hard. Let's hope I just
+> got it correctly :)
+
+I got it :)
+
+> However, there is something in this patch which makes mmc_test #15 work,
+> though. We still want this in this series, or do you think it is better
+> to move it to a seperate series?
+
+Thank you for the comments. I realized mmc_test #15 failed if tmio driver
+returned -EILSEQ when I applied the BSP patch as the following:
 ---
- drivers/mmc/host/sdhci-pci-gli.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+[  206.016193] mmc0: Starting tests of card mmc0:0001...
+[  206.022708] mmc0: Test case 15. Proper xfer_size at write (start failure=
+)...
+[  206.854082] mmc0: Result: ERROR (-84)
+[  206.858632] mmc0: Tests completed.
+---
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 9887485a4134..d45d7e529150 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -87,6 +87,9 @@
- #define PCIE_GLI_9763E_SCR	 0x8E0
- #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
- 
-+#define PCIE_GLI_9763E_MMC_CTRL  0x960
-+#define   GLI_9763E_HS400_SLOW     BIT(3)
-+
- #define SDHCI_GLI_9763E_CQE_BASE_ADDR	 0x200
- #define GLI_9763E_CQE_TRNS_MODE	   (SDHCI_TRNS_MULTI | \
- 				    SDHCI_TRNS_BLK_CNT_EN | \
-@@ -764,6 +767,10 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- 	value |= GLI_9763E_SCR_AXI_REQ;
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_SCR, value);
- 
-+	pci_read_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, &value);
-+	value &= ~GLI_9763E_HS400_SLOW;
-+	pci_write_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, value);
-+
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
- 	value &= ~GLI_9763E_VHS_REV;
- 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
--- 
-2.29.2
+So, I'm thinking retuning -EILSEQ in cmd/data timeout should be a separate =
+series now.
+# Perhaps we need other way to follow the retuning sequence for R-Car Gen3.=
+..
+
+Best regards,
+Yoshihiro Shimoda
 
