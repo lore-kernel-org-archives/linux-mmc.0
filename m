@@ -2,146 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7123C5519F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 09:57:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E8A7C5519F
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 10:00:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5834B206B7
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 09:57:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1244C206B7
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 10:00:19 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Y1MuhRmq"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Bp+wUJkO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727126AbgKYJ5g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Nov 2020 04:57:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53984 "EHLO
+        id S1726242AbgKYKAE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Nov 2020 05:00:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726250AbgKYJ5g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 04:57:36 -0500
-Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6370C0613D4
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2020 01:57:19 -0800 (PST)
-Received: by mail-vs1-xe41.google.com with SMTP id l22so898448vsa.4
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2020 01:57:19 -0800 (PST)
+        with ESMTP id S1725837AbgKYKAD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 05:00:03 -0500
+Received: from mail-pl1-x643.google.com (mail-pl1-x643.google.com [IPv6:2607:f8b0:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8A20C0613D4;
+        Wed, 25 Nov 2020 01:59:53 -0800 (PST)
+Received: by mail-pl1-x643.google.com with SMTP id l11so870229plt.1;
+        Wed, 25 Nov 2020 01:59:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=t0REdB3olCexNERcSHnzJwkFu42mj1xmlom0KLliQ/I=;
-        b=Y1MuhRmqz4Ac5OM43sgbecc7Bv0lPYZlg6hUu79nriANbuJ7cc3DV+kbp7m1OHR8rB
-         BN4fs6A3GfeN5ImPMKR0alrZMeCFRUrn7ErNv424xjNVe4MtBMQ4NXvleHyLoO3REg8r
-         QeP0Yg57+0ikm3CRLXyclKSiJe/0Lf1nuzOBmOE/1ozh85a6VxBmaxQO2BLqKw4pshe8
-         ew0/TQ9zLUeXlszjngC0w6Unskivab/rbt8kLsO9DPYTd4fgwFWEtTCzxw6PrldRrYtD
-         ypJBfBmWNKMfJo2FmB5PEso5RNtN+gZzIjVFDBzKa1p+EYysVkvHUFLfvG9SfA4Jdj+n
-         S4Eg==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=7IaqsdwaWWl1Yc0/ljKeIV10dw7aVi/wXUYW4bfFDoo=;
+        b=Bp+wUJkON9CbolW7/hHUHJbCphFSIov+mz2difSvA+snT+NR3PLQHSYEJBQLQwiVqW
+         gKrYkRjw3ggrN/O4r3J5uoHBXI4hzuvQ+4skbksy9SER2kG4xNEdg0OjtRlNo1n6q6JN
+         p+4cd+HhxlejhIYd+UP9XObnL97Q1/yXhOysaMMkO4Gi9kewiVyQiKe/qrRB9QVXAYIK
+         0S8UAUiTl+Yr4mZieJ4SasbWMS9dVKZqUxp+6V0ol8AzjPAuUVaZv+x4eEup/NBHi0yh
+         GtcnINVMNLJY6iCGjLCEDZ/sRO9m0R/M394Ze6naQomjbnRm9SkUTJvHtjknn9pF73xV
+         /2Dg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=t0REdB3olCexNERcSHnzJwkFu42mj1xmlom0KLliQ/I=;
-        b=ppE1po0xZObAvlNnL0cR9UUF83BOf3G2lxhZtX6MPkds0LQQNczWpZUXigm28djK+C
-         oijPQeg3N9n6vLl/QBjKJ78LF7SUWQcp5bYCZ/0smXnlJNhbA5krHXVW5yJLP54F+mS0
-         FWD5gxB+RsErvBqzbQ2IEEgqyf093taB+yl9Khofi8HYaM78WbUfmfiSwgUdQTGkwnut
-         Q/cyIRMYs5fNBYySeehoiaUnU2QLYrs1xfIzaUDohZRYilnPTvVbwQM0DvnwhnTVTV5W
-         ngfBoKhECuj/2JAvS5l19OTljILENG+qcX/O/bfHbPZRrlH3hHbfm0GbUoxKzJ6S2oRh
-         CxLA==
-X-Gm-Message-State: AOAM5301C5jt6P/crPz9QqTrH77XRbXLKYHtosO0hmr0KUPG70sYDiHP
-        ww4D5k5fJbaOFcQadpmoFhv1JP8APcP7Q9DM/uj4WQ==
-X-Google-Smtp-Source: ABdhPJzwbR3dPmM+DDvpmCIiGlOOwtZSknMvs/ZVop/d6QS3ZX9tdcZ8DRnaSlHSuFaOAu8Ffbe8WFpIzV7zBj+q5kU=
-X-Received: by 2002:a05:6102:322a:: with SMTP id x10mr473721vsf.19.1606298239005;
- Wed, 25 Nov 2020 01:57:19 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=7IaqsdwaWWl1Yc0/ljKeIV10dw7aVi/wXUYW4bfFDoo=;
+        b=cz5aCtkU+NeF3dSAnbjwl5WcGnWBGrfguSYQyDJGyeh9JSd2+uQW2rXBh2XKv/W9Kj
+         W9kHF+49xOyzvLY1ueVTcF+HDE60Yg3/21o7lzdisW1MkIid0HsQC78KLErK2wWlPKP9
+         T57i2TNcN17f/okkFxwj9R4nfmTZ5LOlURI7Z0xarqArRbLqEPP/V1E52UB872o0/zCI
+         LsekSyLCTrRInpLcDVhHPwCc0l6UnwOGjCNA6JOiAyLR3gpO521941pqhpP/RTkMnmTX
+         +rldV7FMTPmkWFs6LuBgyncWgSiRjkzkFwSbmcncM8+GrXi+J1FKwYTX5TVw092NLojp
+         Eqbg==
+X-Gm-Message-State: AOAM530h8pkeNCtVeSytQrznKsKGubi9pZAEympey7ZK2kBlJ/3G5sdT
+        qZgZMJaYsTj3sCNccAQyrZQw0yw8M5XNTA==
+X-Google-Smtp-Source: ABdhPJyTPHCnaIWIK2frUkUEDqTR301JWkLli+GF71A3C8SGYiGRJBMwtq7pc9os/9loP4V1KaYCUw==
+X-Received: by 2002:a17:902:c281:b029:d7:ce5d:6406 with SMTP id i1-20020a170902c281b02900d7ce5d6406mr2393406pld.35.1606298393569;
+        Wed, 25 Nov 2020 01:59:53 -0800 (PST)
+Received: from gli-arch.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id g4sm1837884pgu.81.2020.11.25.01.59.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Nov 2020 01:59:52 -0800 (PST)
+From:   Ben Chuang <benchuanggli@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, Ben Chuang <benchuanggli@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Disable slow mode in HS400 mode for GL9763E
+Date:   Wed, 25 Nov 2020 18:00:04 +0800
+Message-Id: <20201125100004.1288-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-References: <20201112194011.103774-1-ebiggers@kernel.org> <X7gQ9Y44iIgkiM64@sol.localdomain>
-In-Reply-To: <X7gQ9Y44iIgkiM64@sol.localdomain>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 25 Nov 2020 10:56:42 +0100
-Message-ID: <CAPDyKFrXtqqj3RXJ4m666e_danpp2neRD_M+FCaMWPC+Ow2jsA@mail.gmail.com>
-Subject: Re: [PATCH 0/8] eMMC inline encryption support
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
-        Satya Tangirala <satyat@google.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 20 Nov 2020 at 19:54, Eric Biggers <ebiggers@kernel.org> wrote:
->
-> On Thu, Nov 12, 2020 at 11:40:03AM -0800, Eric Biggers wrote:
-> > Hello,
-> >
-> > This patchset adds support for eMMC inline encryption, as specified by
-> > the upcoming version of the eMMC specification and as already
-> > implemented and used on many devices.  Building on that, it then adds
-> > Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
-> >
-> > Inline encryption hardware improves the performance of storage
-> > encryption and reduces power usage.  See
-> > Documentation/block/inline-encryption.rst for more information about
-> > inline encryption and the blk-crypto framework (upstreamed in v5.8)
-> > which supports it.  Most mobile devices already use UFS or eMMC inline
-> > encryption hardware; UFS support was already upstreamed in v5.9.
-> >
-> > Patches 1-3 add support for the standard eMMC inline encryption.
-> >
-> > However, as with UFS, host controller-specific patches are needed on top
-> > of the standard support.  Therefore, patches 4-8 add Qualcomm ICE
-> > (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
-> >
-> > To test this I took advantage of the recently upstreamed support for the
-> > Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
-> > project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
-> > particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
-> > a Debian chroot.  Among other things, these tests verified that the
-> > correct ciphertext is written to disk (the same as software encryption).
-> >
-> > It will also be possible to add support for Mediatek eMMC inline
-> > encryption hardware in mtk-sd, and it should be easier than the Qualcomm
-> > hardware since the Mediatek hardware follows the standard more closely.
-> > I.e., patches 1-3 should be almost enough for the Mediatek hardware.
-> > However, I don't have the hardware to do this yet.
-> >
-> > This patchset is based on v5.10-rc3, and it can also be retrieved from
-> > tag "mmc-crypto-v1" of
-> > https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
-> >
-> > Note: the fscrypt inline encryption support is partially broken in
-> > v5.10-rc3, so for testing a fscrypt fix needs to be applied too:
-> > https://lkml.kernel.org/r/20201111015224.303073-1-ebiggers@kernel.org
-> >
-> > Eric Biggers (8):
-> >   mmc: add basic support for inline encryption
-> >   mmc: cqhci: rename cqhci.c to cqhci-core.c
-> >   mmc: cqhci: add support for inline encryption
-> >   mmc: cqhci: add cqhci_host_ops::program_key
-> >   firmware: qcom_scm: update comment for ICE-related functions
-> >   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
-> >   arm64: dts: qcom: sdm630: add ICE registers and clocks
-> >   mmc: sdhci-msm: add Inline Crypto Engine support
->
-> Any comments on this patchset?
+From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 
-I have been busy, but just wanted to let you know that I am moving to
-start reviewing this series shortly.
+The GL9763E uses 150Mhz (slow mode) by default in HS400 mode. In order
+to make HS400 mode run at 200Mhz, the slow mode needs to be turned off.
 
-I also need to catch up on the eMMC spec a bit, before I can provide
-you with comments.
+Fixes: 1ae1d2d6e555 ("mmc: sdhci-pci-gli: Add Genesys Logic GL9763E support")
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index 9887485a4134..d45d7e529150 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -87,6 +87,9 @@
+ #define PCIE_GLI_9763E_SCR	 0x8E0
+ #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
+ 
++#define PCIE_GLI_9763E_MMC_CTRL  0x960
++#define   GLI_9763E_HS400_SLOW     BIT(3)
++
+ #define SDHCI_GLI_9763E_CQE_BASE_ADDR	 0x200
+ #define GLI_9763E_CQE_TRNS_MODE	   (SDHCI_TRNS_MULTI | \
+ 				    SDHCI_TRNS_BLK_CNT_EN | \
+@@ -764,6 +767,10 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+ 	value |= GLI_9763E_SCR_AXI_REQ;
+ 	pci_write_config_dword(pdev, PCIE_GLI_9763E_SCR, value);
+ 
++	pci_read_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, &value);
++	value &= ~GLI_9763E_HS400_SLOW;
++	pci_write_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, value);
++
+ 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+ 	value &= ~GLI_9763E_VHS_REV;
+ 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+-- 
+2.29.2
+
