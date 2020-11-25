@@ -2,198 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8213CC83011
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 22:45:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 521B6C56201
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 22:53:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 283B8206B5
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 22:45:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CFCFA20872
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 22:53:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mE3/9/w1"
+	dkim=pass (2048-bit key) header.d=aj.id.au header.i=@aj.id.au header.b="Cwi0ax+g";
+	dkim=temperror (0-bit key) header.d=messagingengine.com header.i=@messagingengine.com header.b="LH4ic9yC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727070AbgKYWoo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Nov 2020 17:44:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60936 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727365AbgKYWol (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 17:44:41 -0500
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CDD7C0617A7;
-        Wed, 25 Nov 2020 14:44:40 -0800 (PST)
-Received: by mail-wm1-x342.google.com with SMTP id h21so247913wmb.2;
-        Wed, 25 Nov 2020 14:44:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=mMrMdknFbsC77SFRvwwD3pm1cwl3V2MP65kzVJE6tY4=;
-        b=mE3/9/w1S1BsFafykdzrNl6nUKLQtv3irXzEz/AwtJdLppuZQnzVWeoYFC7Qb5OQef
-         2DAcZ7D6Froq/rlKPIBwqGtt0C/0XmhDJf/Ua0btTGl1wBl77rh04suLM7Drqc/fd1vb
-         erjCUGXrwTRfKAEK60/5plkWP59Lm5M7QZ9ENMraFyUEU5TYdKtuuKGBjQ65xtLyj0UE
-         nayIBzzwS8QdOAkDbWxTvDHZJGPoguOAiztDitejPSo1Rp931ceTN4KgHMls79AEVEp8
-         0UjkiGW0It0CwNfB/koaXcS1sEgjLFm2K1jcT9QDdZUmcgiCMPoll+6KvJ2hAfFlaA1V
-         8PSw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=mMrMdknFbsC77SFRvwwD3pm1cwl3V2MP65kzVJE6tY4=;
-        b=R38/AmTlsvIM12T7AyYl9h5ED9p/mJot6malZaFBOIhS1UbeLy13OmOyiz1xgjm04T
-         /HydEJD7nW6ZSDAP65iNZ4ZyQpQlKfNvvG8Zrwvv8uLZSOWvDS2YWdYP5VxYEjwyVAE8
-         YSM+eHBamHifsktd0Jjq0qynS/ayYPbhL9PwSiXdby3yGWsiEU1fpts0VkT3C/7OPWXj
-         ocRKFhPpzn6ePa6qPzRQhHBuDfNd4agXbMDyMhpJ4ap7fdFyO0BWuBv8VWH5RgyxCUwY
-         6Y0qWuDQb3TIvXwQT3pLdiSqYvZXlMRLdWDiZDbV/WByUr20I1nWQ2LPTZlO1wjSr71m
-         2AEQ==
-X-Gm-Message-State: AOAM532eKSvBjVG+OsfR5iiFXRN7Ljtttg7gTeLIoTGmff0y9VxAQec7
-        jDz3jNowF+BUGdrP0/LKn/s=
-X-Google-Smtp-Source: ABdhPJzVXPr1uOlB1vaw2cfl6zSoOiLq1F6oo5r6Yg/UanqxqpZONWe00UKvdrBaRFZ4o0pgYT/ByA==
-X-Received: by 2002:a7b:cf0a:: with SMTP id l10mr6364382wmg.103.1606344279394;
-        Wed, 25 Nov 2020 14:44:39 -0800 (PST)
-Received: from [192.168.1.122] (cpc92720-cmbg20-2-0-cust364.5-4.cable.virginm.net. [82.21.83.109])
-        by smtp.gmail.com with ESMTPSA id h15sm6411655wrw.15.2020.11.25.14.44.35
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 25 Nov 2020 14:44:38 -0800 (PST)
-Subject: Re: [PATCH 000/141] Fix fall-through warnings for Clang
-To:     Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>
-Cc:     Kees Cook <keescook@chromium.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        alsa-devel@alsa-project.org, amd-gfx@lists.freedesktop.org,
-        bridge@lists.linux-foundation.org, ceph-devel@vger.kernel.org,
-        cluster-devel@redhat.com, coreteam@netfilter.org,
-        devel@driverdev.osuosl.org, dm-devel@redhat.com,
-        drbd-dev@lists.linbit.com, dri-devel@lists.freedesktop.org,
-        GR-everest-linux-l2@marvell.com, GR-Linux-NIC-Dev@marvell.com,
-        intel-gfx@lists.freedesktop.org, intel-wired-lan@lists.osuosl.org,
-        keyrings@vger.kernel.org, linux1394-devel@lists.sourceforge.net,
-        linux-acpi@vger.kernel.org, linux-afs@lists.infradead.org,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-arm-msm@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net,
-        linux-block@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-cifs@vger.kernel.org,
-        Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
-        linux-decnet-user@lists.sourceforge.net,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>,
-        linux-fbdev@vger.kernel.org, linux-geode@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-hams@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
-        linux-ide@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input <linux-input@vger.kernel.org>,
-        linux-integrity@vger.kernel.org,
-        linux-mediatek@lists.infradead.org,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Linux-MM <linux-mm@kvack.org>,
-        linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org,
-        linux-rdma@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-sctp@vger.kernel.org,
-        linux-security-module@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        Network Development <netdev@vger.kernel.org>,
-        netfilter-devel@vger.kernel.org, nouveau@lists.freedesktop.org,
-        op-tee@lists.trustedfirmware.org, oss-drivers@netronome.com,
-        patches@opensource.cirrus.com, rds-devel@oss.oracle.com,
-        reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org,
-        selinux@vger.kernel.org, target-devel@vger.kernel.org,
-        tipc-discussion@lists.sourceforge.net,
-        usb-storage@lists.one-eyed-alien.net,
-        virtualization@lists.linux-foundation.org,
-        wcn36xx@lists.infradead.org,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        xen-devel@lists.xenproject.org, linux-hardening@vger.kernel.org,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        Miguel Ojeda <ojeda@kernel.org>, Joe Perches <joe@perches.com>
-References: <cover.1605896059.git.gustavoars@kernel.org>
- <20201120105344.4345c14e@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011201129.B13FDB3C@keescook>
- <20201120115142.292999b2@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011220816.8B6591A@keescook>
- <9b57fd4914b46f38d54087d75e072d6e947cb56d.camel@HansenPartnership.com>
- <CANiq72nZrHWTA4_Msg6MP9snTyenC6-eGfD27CyfNSu7QoVZbw@mail.gmail.com>
- <1c7d7fde126bc0acf825766de64bf2f9b888f216.camel@HansenPartnership.com>
- <CANiq72m22Jb5_+62NnwX8xds2iUdWDMAqD8PZw9cuxdHd95W0A@mail.gmail.com>
- <fc45750b6d0277c401015b7aa11e16cd15f32ab2.camel@HansenPartnership.com>
- <CANiq72k5tpDoDPmJ0ZWc1DGqm+81Gi-uEENAtvEs9v3SZcx6_Q@mail.gmail.com>
- <4993259d01a0064f8bb22770503490f9252f3659.camel@HansenPartnership.com>
- <CANiq72kqO=bYMJnFS2uYRpgWATJ=uXxZuNUsTXT+3aLtrpnzvQ@mail.gmail.com>
-From:   Edward Cree <ecree.xilinx@gmail.com>
-Message-ID: <44005bde-f6d4-5eaa-39b8-1a5efeedb2d3@gmail.com>
-Date:   Wed, 25 Nov 2020 22:44:35 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
- Thunderbird/60.7.2
-MIME-Version: 1.0
-In-Reply-To: <CANiq72kqO=bYMJnFS2uYRpgWATJ=uXxZuNUsTXT+3aLtrpnzvQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-Content-Transfer-Encoding: 8bit
+        id S1728868AbgKYWxW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Nov 2020 17:53:22 -0500
+Received: from out4-smtp.messagingengine.com ([66.111.4.28]:40109 "EHLO
+        out4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728862AbgKYWxV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 17:53:21 -0500
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id 6B88F5C00BD;
+        Wed, 25 Nov 2020 17:53:20 -0500 (EST)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Wed, 25 Nov 2020 17:53:20 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm1; bh=rDCqF/6BWwTlGiTI6jgr+wyA4epS+Rk
+        y7smBnS5oX7k=; b=Cwi0ax+gMfy1aXoVZafGL82507AbgSb3+cxI6jILb9FYs6d
+        0LnPlWpQnCbnGIHJUEeNtjipXrvLb4QSjHvTw7iWupsn+eNIO6f6TMdpLsxNi8NV
+        VPDo/ZLmkYIwcAEzuwWv4nmbGdG3adIv6McuBQVeCsCmUPB9WcqFwBCHfYvitbD1
+        Kjs+lWR+iViXoGvQjJt+oBoa17gllsnqZg4P1xnMIrDWwZqYRAqUgYUHAiOAkFsb
+        xBG1YDAvXnqhUNgKiGikHuZg+JJbkFFyOojvSnyu8kKirbZBqgOrSjzr/QKCcvHr
+        WpaAX+fLvw6iKGINZW9xU/hGJhAu2V94maTcmbQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=rDCqF/
+        6BWwTlGiTI6jgr+wyA4epS+Rky7smBnS5oX7k=; b=LH4ic9yCPOiT+CLtiR5FGG
+        oFBEI7YCcxcdzEZTuuc2g6S9AGv7tPO7ddhjHie7VJb3q+9yMvHJbBVHeeB4aK2g
+        MzctSTYlgsGpvvQJGYttfrnIEveZ5jQn/yHhG5OCMfJvuNTDhYj29q4Hy0yy0PEe
+        JM52ecBrbeYpYM2UTerf74SklKf6BNYqi97YbbQeBwgo4DKuGFlJJk5rzIKkvgB5
+        1CvTmNymmXxW6/n5hYyD8+99yUrHkGXHSIPe0dC/CqvBtVMSfKQeZZXqu0KcuBuf
+        SbLgqhl1h3GYmVl7XSYE5ihd0IU+yefVRuhF5w10NWeW+amMBG56R4m0Bqpngdrg
+        ==
+X-ME-Sender: <xms:X-C-X3dCYLAQkzRklE-5AtPYnWjzxqm8PIlQ34JK56W6scvpqYjfdw>
+    <xme:X-C-X9NSXVQ-3PnVzOHmX0dnHE4xcJwHUeRAnBAXevS39g8W0zkMSz2tI1BNj6XIn
+    _F6Gtb2RgJ4uaKM-g>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudehuddgtdegucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreertdenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhephefhfeekgfekudevheffheeihedujeefjeevjeefudfgfeeutdeuvdeh
+    hfevueffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:X-C-XwguChDjSAPpxwpyAO9qgzWWwlq44qX_tHv9QMiRkQISINzMKQ>
+    <xmx:X-C-X4819J0g8oIthXbDMuMponYkU9acyNIhbtBZD2uIWZCfHODAjw>
+    <xmx:X-C-XzsMMUeYU816bdmd6MjIfgUl39U9ZPKDY3ledBh2NXgLJxgmJQ>
+    <xmx:YOC-X883XcAHt3lJUpzFJwdMuNjbuTUoocr8GOl9dP2YQSK8vrgaPA>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 676D1E00B3; Wed, 25 Nov 2020 17:53:17 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.3.0-622-g4a97c0b-fm-20201115.001-g4a97c0b3
+Mime-Version: 1.0
+Message-Id: <e3c4f1a8-4fa0-4e2a-be7c-763f733f0cdb@www.fastmail.com>
+In-Reply-To: <CAPDyKFrC9vp5gtpFC5L1K17uN059GsJ2zF4f7-_=sFEQ5BBRpw@mail.gmail.com>
+References: <20201123063004.337345-1-andrew@aj.id.au>
+ <20201123063004.337345-2-andrew@aj.id.au>
+ <CAPDyKFrC9vp5gtpFC5L1K17uN059GsJ2zF4f7-_=sFEQ5BBRpw@mail.gmail.com>
+Date:   Thu, 26 Nov 2020 09:22:58 +1030
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Ulf Hansson" <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        DTML <devicetree@vger.kernel.org>,
+        "Linux ARM" <linux-arm-kernel@lists.infradead.org>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        "Ryan Chen" <ryan_chen@aspeedtech.com>
+Subject: Re: [PATCH v3 1/3] mmc: sdhci-of-aspeed: Expose phase delay tuning
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 25/11/2020 00:32, Miguel Ojeda wrote:
-> I have said *authoring* lines of *this* kind takes a minute per line.
-> Specifically: lines fixing the fallthrough warning mechanically and
-> repeatedly where the compiler tells you to, and doing so full-time for
-> a month.
-<snip>
-> It is useful since it makes intent clear.
-To make the intent clear, you have to first be certain that you
- understand the intent; otherwise by adding either a break or a
- fallthrough to suppress the warning you are just destroying the
- information that "the intent of this code is unknown".
-Figuring out the intent of a piece of unfamiliar code takes more
- than 1 minute; just because
-    case foo:
-        thing;
-    case bar:
-        break;
- produces identical code to
-    case foo:
-        thing;
-        break;
-    case bar:
-        break;
- doesn't mean that *either* is correct — maybe the author meant
- to write
-    case foo:
-        return thing;
-    case bar:
-        break;
- and by inserting that break you've destroyed the marker that
- would direct someone who knew what the code was about to look
- at that point in the code and spot the problem.
-Thus, you *always* have to look at more than just the immediate
- mechanical context of the code, to make a proper judgement that
- yes, this was the intent.  If you think that that sort of thing
- can be done in an *average* time of one minute, then I hope you
- stay away from code I'm responsible for!
-One minute would be an optimistic target for code that, as the
- maintainer, one is already somewhat familiar with.  For code
- that you're seeing for the first time, as is usually the case
- with the people doing these mechanical fix-a-warning patches,
- it's completely unrealistic.
 
-A warning is only useful because it makes you *think* about the
- code.  If you suppress the warning without doing that thinking,
- then you made the warning useless; and if the warning made you
- think about code that didn't *need* it, then the warning was
- useless from the start.
 
-So make your mind up: does Clang's stricter -Wimplicit-fallthrough
- flag up code that needs thought (in which case the fixes take
- effort both to author and to review) or does it flag up code
- that can be mindlessly "fixed" (in which case the warning is
- worthless)?  Proponents in this thread seem to be trying to
- have it both ways.
+On Wed, 25 Nov 2020, at 00:42, Ulf Hansson wrote:
+> On Mon, 23 Nov 2020 at 07:30, Andrew Jeffery <andrew@aj.id.au> wrote:
+> >
+> > The Aspeed SD/eMMC controllers feature up to two SDHCIs alongside a
+> > a set of "global" configuration registers. The global configuration
+> > registers house controller-specific settings that aren't exposed by the
+> > SDHCI, one example being a register for phase tuning.
+> >
+> > The phase tuning feature is new in the AST2600 design. It's exposed as a
+> > single register in the global register set and controls both the input
+> > and output phase adjustment for each slot. As the settings are
+> > slot-specific, the values to program are extracted from properties in
+> > the SDHCI devicetree nodes.
+> >
+> > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> 
+> [...]
+> 
+> >
+> > +static void
+> > +aspeed_sdhci_of_parse_phase(struct device_node *np, const char *prop,
+> > +                           struct aspeed_sdhci_phase_param *phase)
+> > +{
+> > +       int degrees[2] = {0};
+> > +       int rc;
+> > +
+> > +       rc = of_property_read_variable_u32_array(np, prop, degrees, 2, 0);
+> > +       phase->set = rc == 2;
+> > +       if (phase->set) {
+> > +               phase->in_deg = degrees[0];
+> > +               phase->out_deg = degrees[1];
+> > +       }
+> > +}
+> > +
+> > +static int aspeed_sdhci_of_parse(struct platform_device *pdev,
+> > +                                struct aspeed_sdhci *sdhci)
+> > +{
+> > +       struct device_node *np;
+> > +       struct device *dev;
+> > +
+> > +       if (!sdhci->phase_desc)
+> > +               return 0;
+> > +
+> > +       dev = &pdev->dev;
+> > +       np = dev->of_node;
+> > +
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-legacy",
+> > +                                   &sdhci->phase_param[MMC_TIMING_LEGACY]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-mmc-hs",
+> > +                                   &sdhci->phase_param[MMC_TIMING_MMC_HS]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-sd-hs",
+> > +                                   &sdhci->phase_param[MMC_TIMING_SD_HS]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-uhs-sdr12",
+> > +                                   &sdhci->phase_param[MMC_TIMING_UHS_SDR12]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-uhs-sdr25",
+> > +                                   &sdhci->phase_param[MMC_TIMING_UHS_SDR25]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-uhs-sdr50",
+> > +                                   &sdhci->phase_param[MMC_TIMING_UHS_SDR50]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-uhs-sdr104",
+> > +                                   &sdhci->phase_param[MMC_TIMING_UHS_SDR104]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-uhs-ddr50",
+> > +                                   &sdhci->phase_param[MMC_TIMING_UHS_DDR50]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-mmc-ddr52",
+> > +                                   &sdhci->phase_param[MMC_TIMING_MMC_DDR52]);
+> > +       aspeed_sdhci_of_parse_phase(np, "clk-phase-mmc-hs200",
+> > +                                   &sdhci->phase_param[MMC_TIMING_MMC_HS200]);
+> > +
+> > +       return 0;
+> > +}
+> 
+> If it's not too much to ask, would you mind adding a helper function
+> to the mmc core, as to let us avoid open coding? Then we should be
+> able to move the sdhci-of-arasan driver to use this as well.
 
--ed
+Yes, I can look at it and send a v4.
+
+> 
+> Perhaps the definition of the helper could look something like this:
+> int mmc_of_parse_clk_phase(struct mmc_host *host, struct mmc_clk_phase
+> *phases) (or something along those lines)
+> 
+> I think the struct mmc_clk_phase could be something that is stored in
+> the host specific struct, rather than in the common struct mmc_host
+> (to avoid sprinkle it with unnecessary data).
+> 
+> Moreover, we should probably use the device_property_* APIs instead of
+> the DT specific of_property_*.
+
+Yep, thanks for the pointers.
+
+Andrew
