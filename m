@@ -2,155 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E10C3C64E7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 09:10:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7123C5519F
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 09:57:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 80A58208C3
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 09:10:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5834B206B7
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 09:57:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=mess.org header.i=@mess.org header.b="SJYLrwiK"
+	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="Y1MuhRmq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726103AbgKYJJy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Nov 2020 04:09:54 -0500
-Received: from gofer.mess.org ([88.97.38.141]:33717 "EHLO gofer.mess.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726284AbgKYJJw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 25 Nov 2020 04:09:52 -0500
-X-Greylist: delayed 492 seconds by postgrey-1.27 at vger.kernel.org; Wed, 25 Nov 2020 04:09:46 EST
-Received: by gofer.mess.org (Postfix, from userid 1000)
-        id C2D44C63FB; Wed, 25 Nov 2020 09:01:14 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=mess.org; s=2020;
-        t=1606294874; bh=KH9dzgywMXfGPGDwmO8Qm6o//zr8KQDL4nO6EawRuDY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=SJYLrwiKZrmMRjkeBYo7cqsbs6xljPuQypU3vE6W0mhxhiBNmXN2bqL5RV07d2awA
-         Wb5Oa7L0TiIxfU/vxoLt2vFycI3gN8Kh1qdOF59uK2dEnqITAnDV+wsiQw/exDF78D
-         hoTz22IC76edW7bl4Xm8hYrqoRAlLOCNTSbizDTKI7x8BBnutJW03OyPsTxurVqfdC
-         T9t8y4uSMzXA9L5TYoAbkkzEdR07qHfBTYdhaiYGGYuE1E1bdzLhtRTU2iYu251NBa
-         zqIr2827TZMk9I1fNh/951tgkmCQWewUCt5nrmXnkgqHhLp9nxDE6gWAGCUXG6XCXv
-         3mw8Hv064saVQ==
-Date:   Wed, 25 Nov 2020 09:01:14 +0000
-From:   Sean Young <sean@mess.org>
-To:     James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc:     Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
-        Kees Cook <keescook@chromium.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        alsa-devel@alsa-project.org, amd-gfx@lists.freedesktop.org,
-        bridge@lists.linux-foundation.org, ceph-devel@vger.kernel.org,
-        cluster-devel@redhat.com, coreteam@netfilter.org,
-        devel@driverdev.osuosl.org, dm-devel@redhat.com,
-        drbd-dev@lists.linbit.com, dri-devel@lists.freedesktop.org,
-        GR-everest-linux-l2@marvell.com, GR-Linux-NIC-Dev@marvell.com,
-        intel-gfx@lists.freedesktop.org, intel-wired-lan@lists.osuosl.org,
-        keyrings@vger.kernel.org, linux1394-devel@lists.sourceforge.net,
-        linux-acpi@vger.kernel.org, linux-afs@lists.infradead.org,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-arm-msm@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net,
-        linux-block@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-cifs@vger.kernel.org,
-        Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
-        linux-decnet-user@lists.sourceforge.net,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>,
-        linux-fbdev@vger.kernel.org, linux-geode@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-hams@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i3c@lists.infradead.org,
-        linux-ide@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input <linux-input@vger.kernel.org>,
-        linux-integrity@vger.kernel.org,
-        linux-mediatek@lists.infradead.org,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Linux-MM <linux-mm@kvack.org>,
-        linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org,
-        linux-rdma@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-sctp@vger.kernel.org,
-        linux-security-module@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        Network Development <netdev@vger.kernel.org>,
-        netfilter-devel@vger.kernel.org, nouveau@lists.freedesktop.org,
-        op-tee@lists.trustedfirmware.org, oss-drivers@netronome.com,
-        patches@opensource.cirrus.com, rds-devel@oss.oracle.com,
-        reiserfs-devel@vger.kernel.org, samba-technical@lists.samba.org,
-        selinux@vger.kernel.org, target-devel@vger.kernel.org,
-        tipc-discussion@lists.sourceforge.net,
-        usb-storage@lists.one-eyed-alien.net,
-        virtualization@lists.linux-foundation.org,
-        wcn36xx@lists.infradead.org,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        xen-devel@lists.xenproject.org, linux-hardening@vger.kernel.org,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        Miguel Ojeda <ojeda@kernel.org>, Joe Perches <joe@perches.com>
-Subject: Re: [PATCH 000/141] Fix fall-through warnings for Clang
-Message-ID: <20201125090114.GA24274@gofer.mess.org>
-References: <cover.1605896059.git.gustavoars@kernel.org>
- <20201120105344.4345c14e@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011201129.B13FDB3C@keescook>
- <20201120115142.292999b2@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011220816.8B6591A@keescook>
- <9b57fd4914b46f38d54087d75e072d6e947cb56d.camel@HansenPartnership.com>
- <CANiq72nZrHWTA4_Msg6MP9snTyenC6-eGfD27CyfNSu7QoVZbw@mail.gmail.com>
- <1c7d7fde126bc0acf825766de64bf2f9b888f216.camel@HansenPartnership.com>
- <CANiq72m22Jb5_+62NnwX8xds2iUdWDMAqD8PZw9cuxdHd95W0A@mail.gmail.com>
- <fc45750b6d0277c401015b7aa11e16cd15f32ab2.camel@HansenPartnership.com>
+        id S1727126AbgKYJ5g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Nov 2020 04:57:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53984 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726250AbgKYJ5g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Nov 2020 04:57:36 -0500
+Received: from mail-vs1-xe41.google.com (mail-vs1-xe41.google.com [IPv6:2607:f8b0:4864:20::e41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6370C0613D4
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2020 01:57:19 -0800 (PST)
+Received: by mail-vs1-xe41.google.com with SMTP id l22so898448vsa.4
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Nov 2020 01:57:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=t0REdB3olCexNERcSHnzJwkFu42mj1xmlom0KLliQ/I=;
+        b=Y1MuhRmqz4Ac5OM43sgbecc7Bv0lPYZlg6hUu79nriANbuJ7cc3DV+kbp7m1OHR8rB
+         BN4fs6A3GfeN5ImPMKR0alrZMeCFRUrn7ErNv424xjNVe4MtBMQ4NXvleHyLoO3REg8r
+         QeP0Yg57+0ikm3CRLXyclKSiJe/0Lf1nuzOBmOE/1ozh85a6VxBmaxQO2BLqKw4pshe8
+         ew0/TQ9zLUeXlszjngC0w6Unskivab/rbt8kLsO9DPYTd4fgwFWEtTCzxw6PrldRrYtD
+         ypJBfBmWNKMfJo2FmB5PEso5RNtN+gZzIjVFDBzKa1p+EYysVkvHUFLfvG9SfA4Jdj+n
+         S4Eg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=t0REdB3olCexNERcSHnzJwkFu42mj1xmlom0KLliQ/I=;
+        b=ppE1po0xZObAvlNnL0cR9UUF83BOf3G2lxhZtX6MPkds0LQQNczWpZUXigm28djK+C
+         oijPQeg3N9n6vLl/QBjKJ78LF7SUWQcp5bYCZ/0smXnlJNhbA5krHXVW5yJLP54F+mS0
+         FWD5gxB+RsErvBqzbQ2IEEgqyf093taB+yl9Khofi8HYaM78WbUfmfiSwgUdQTGkwnut
+         Q/cyIRMYs5fNBYySeehoiaUnU2QLYrs1xfIzaUDohZRYilnPTvVbwQM0DvnwhnTVTV5W
+         ngfBoKhECuj/2JAvS5l19OTljILENG+qcX/O/bfHbPZRrlH3hHbfm0GbUoxKzJ6S2oRh
+         CxLA==
+X-Gm-Message-State: AOAM5301C5jt6P/crPz9QqTrH77XRbXLKYHtosO0hmr0KUPG70sYDiHP
+        ww4D5k5fJbaOFcQadpmoFhv1JP8APcP7Q9DM/uj4WQ==
+X-Google-Smtp-Source: ABdhPJzwbR3dPmM+DDvpmCIiGlOOwtZSknMvs/ZVop/d6QS3ZX9tdcZ8DRnaSlHSuFaOAu8Ffbe8WFpIzV7zBj+q5kU=
+X-Received: by 2002:a05:6102:322a:: with SMTP id x10mr473721vsf.19.1606298239005;
+ Wed, 25 Nov 2020 01:57:19 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <fc45750b6d0277c401015b7aa11e16cd15f32ab2.camel@HansenPartnership.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+References: <20201112194011.103774-1-ebiggers@kernel.org> <X7gQ9Y44iIgkiM64@sol.localdomain>
+In-Reply-To: <X7gQ9Y44iIgkiM64@sol.localdomain>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 25 Nov 2020 10:56:42 +0100
+Message-ID: <CAPDyKFrXtqqj3RXJ4m666e_danpp2neRD_M+FCaMWPC+Ow2jsA@mail.gmail.com>
+Subject: Re: [PATCH 0/8] eMMC inline encryption support
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Nov 23, 2020 at 07:58:06AM -0800, James Bottomley wrote:
-> On Mon, 2020-11-23 at 15:19 +0100, Miguel Ojeda wrote:
-> > On Sun, Nov 22, 2020 at 11:36 PM James Bottomley
-> > <James.Bottomley@hansenpartnership.com> wrote:
-> > > It's not about the risk of the changes it's about the cost of
-> > > implementing them.  Even if you discount the producer time (which
-> > > someone gets to pay for, and if I were the engineering manager, I'd
-> > > be unhappy about), the review/merge/rework time is pretty
-> > > significant in exchange for six minor bug fixes.  Fine, when a new
-> > > compiler warning comes along it's certainly reasonable to see if we
-> > > can benefit from it and the fact that the compiler people think
-> > > it's worthwhile is enough evidence to assume this initially.  But
-> > > at some point you have to ask whether that assumption is supported
-> > > by the evidence we've accumulated over the time we've been using
-> > > it.  And if the evidence doesn't support it perhaps it is time to
-> > > stop the experiment.
-> > 
-> > Maintainers routinely review 1-line trivial patches, not to mention
-> > internal API changes, etc.
-> 
-> We're also complaining about the inability to recruit maintainers:
-> 
-> https://www.theregister.com/2020/06/30/hard_to_find_linux_maintainers_says_torvalds/
-> 
-> And burn out:
-> 
-> http://antirez.com/news/129
-> 
-> The whole crux of your argument seems to be maintainers' time isn't
-> important so we should accept all trivial patches ... I'm pushing back
-> on that assumption in two places, firstly the valulessness of the time
-> and secondly that all trivial patches are valuable.
+On Fri, 20 Nov 2020 at 19:54, Eric Biggers <ebiggers@kernel.org> wrote:
+>
+> On Thu, Nov 12, 2020 at 11:40:03AM -0800, Eric Biggers wrote:
+> > Hello,
+> >
+> > This patchset adds support for eMMC inline encryption, as specified by
+> > the upcoming version of the eMMC specification and as already
+> > implemented and used on many devices.  Building on that, it then adds
+> > Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
+> >
+> > Inline encryption hardware improves the performance of storage
+> > encryption and reduces power usage.  See
+> > Documentation/block/inline-encryption.rst for more information about
+> > inline encryption and the blk-crypto framework (upstreamed in v5.8)
+> > which supports it.  Most mobile devices already use UFS or eMMC inline
+> > encryption hardware; UFS support was already upstreamed in v5.9.
+> >
+> > Patches 1-3 add support for the standard eMMC inline encryption.
+> >
+> > However, as with UFS, host controller-specific patches are needed on top
+> > of the standard support.  Therefore, patches 4-8 add Qualcomm ICE
+> > (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
+> >
+> > To test this I took advantage of the recently upstreamed support for the
+> > Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
+> > project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
+> > particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
+> > a Debian chroot.  Among other things, these tests verified that the
+> > correct ciphertext is written to disk (the same as software encryption).
+> >
+> > It will also be possible to add support for Mediatek eMMC inline
+> > encryption hardware in mtk-sd, and it should be easier than the Qualcomm
+> > hardware since the Mediatek hardware follows the standard more closely.
+> > I.e., patches 1-3 should be almost enough for the Mediatek hardware.
+> > However, I don't have the hardware to do this yet.
+> >
+> > This patchset is based on v5.10-rc3, and it can also be retrieved from
+> > tag "mmc-crypto-v1" of
+> > https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
+> >
+> > Note: the fscrypt inline encryption support is partially broken in
+> > v5.10-rc3, so for testing a fscrypt fix needs to be applied too:
+> > https://lkml.kernel.org/r/20201111015224.303073-1-ebiggers@kernel.org
+> >
+> > Eric Biggers (8):
+> >   mmc: add basic support for inline encryption
+> >   mmc: cqhci: rename cqhci.c to cqhci-core.c
+> >   mmc: cqhci: add support for inline encryption
+> >   mmc: cqhci: add cqhci_host_ops::program_key
+> >   firmware: qcom_scm: update comment for ICE-related functions
+> >   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+> >   arm64: dts: qcom: sdm630: add ICE registers and clocks
+> >   mmc: sdhci-msm: add Inline Crypto Engine support
+>
+> Any comments on this patchset?
 
-You're assuming burn out or recruitment problems is due to patch workload
-or too many "trivial" patches.
+I have been busy, but just wanted to let you know that I am moving to
+start reviewing this series shortly.
 
-In my experience, "other maintainers" is by far the biggest cause of
-burn out for my kernel maintenance work.
+I also need to catch up on the eMMC spec a bit, before I can provide
+you with comments.
 
-Certainly arguing with a maintainer about some obviously-correct patch
-series must be a good example of this.
-
-
-Sean
+Kind regards
+Uffe
