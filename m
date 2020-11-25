@@ -2,167 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FE36C64E7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 01:06:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39938C2D0E4
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 01:11:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 27B98216C4
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 01:06:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD34D20DD4
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 01:11:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PLHqMkuV"
+	dkim=pass (1024-bit key) header.d=mediatek.com header.i=@mediatek.com header.b="qIaUjWVq"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727872AbgKYBGC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Nov 2020 20:06:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57234 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726249AbgKYBGB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2020 20:06:01 -0500
-Received: from mail-qk1-x744.google.com (mail-qk1-x744.google.com [IPv6:2607:f8b0:4864:20::744])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AE61C0613D4;
-        Tue, 24 Nov 2020 17:06:01 -0800 (PST)
-Received: by mail-qk1-x744.google.com with SMTP id y18so1437133qki.11;
-        Tue, 24 Nov 2020 17:06:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=44pFzPZOXy9WMyxuVZ4PJwmHwfPvC91GWhNSdpkVBXk=;
-        b=PLHqMkuVQ6uE1aGa3jPkk7oL0rd2+0aQGjbXwXCM1BqpOEf5R6gUmrb1tTrj75nDjD
-         aG6VHTDP2JdODJ/e29C1vfEMjWhTPlycM3mNfL2JW5BhFtstP0di/Kwb3XYGnsRoKRp5
-         7FVJzAE2cPEDrpLIYX3jwoIfPno8H9ArdOwpkc9HelZA+M7Eq52S4RmPBHauFrK9tfW3
-         8wrBLWN/Mq7Fl9GTodmgwwudDuqrVUSiSILvkeQCl7qFs3/IjbI7/AG3m5iLRdEEw+2H
-         RzsA5+EdKfz0DIt5iJKomdRqiV67cH8ZcnWPF2PnARf/ANxCrT7QZJCkY0VU2DrQ9d/L
-         oW2A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=44pFzPZOXy9WMyxuVZ4PJwmHwfPvC91GWhNSdpkVBXk=;
-        b=eY+T6ISwV8PSYKgRZXhUfKPBBviK5+s8MUb2iDceYwNfPso3hpWeHStPTfy65/XnQT
-         6r2077Z7M4rT4rY5jaD6Ft33EPbvMufy4bhfEZZ6cYUFHqcRqZ9GtEfSnPdzgsU5NGGE
-         xHYjDbyUJC11idHY+9OQvsOEi4o0PuA1hOvRgyAlPWGK0umpxwJ60pbq8DDF1pZtKU6U
-         8DDpRqkWpSNYq1lVxBhh2NTQhubRC1ttrehXPJGZeCb2WVnXNvglLFhlaCGV30NVNjRg
-         44OZDZjoIED9OVwR+XQ5Cc1tINFl0Jm0hV4WOPPEV9V64LOwp6RWBxQsiod1+XvV8+2R
-         28Uw==
-X-Gm-Message-State: AOAM530NiI4NlCm+/kfBcVWN5zL/C4dtTZ2doHrcD5Qy1qedmf1KKHg3
-        I/epaiA1O+GyfzX7BOhrFi58YQH6HaGD5tdCYU8=
-X-Google-Smtp-Source: ABdhPJxG2tW9FM1fAqThCcvqKAPI/OeE1R4V2//A8ePZuSketjr0yKUxoxj6t2hcKlYt9sKRSewQcSyhG/w+5cGdzqU=
-X-Received: by 2002:a25:aac5:: with SMTP id t63mr1046305ybi.22.1606266360499;
- Tue, 24 Nov 2020 17:06:00 -0800 (PST)
-MIME-Version: 1.0
-References: <202011201129.B13FDB3C@keescook> <20201120115142.292999b2@kicinski-fedora-pc1c0hjn.dhcp.thefacebook.com>
- <202011220816.8B6591A@keescook> <9b57fd4914b46f38d54087d75e072d6e947cb56d.camel@HansenPartnership.com>
- <ca071decb87cc7e905411423c05a48f9fd2f58d7.camel@perches.com>
- <0147972a72bc13f3629de8a32dee6f1f308994b5.camel@HansenPartnership.com>
- <d8d1e9add08cdd4158405e77762d4946037208f8.camel@perches.com>
- <dbd2cb703ed9eefa7dde9281ea26ab0f7acc8afe.camel@HansenPartnership.com>
- <20201123130348.GA3119@embeddedor> <8f5611bb015e044fa1c0a48147293923c2d904e4.camel@HansenPartnership.com>
- <202011241327.BB28F12F6@keescook> <alpine.LNX.2.23.453.2011250859290.15@nippy.intranet>
- <CANiq72nUt57u5DG9rH=DB0DzQH7U6-QbG-2Ou+PyCY=p=_Ggag@mail.gmail.com> <alpine.LNX.2.23.453.2011251022550.14@nippy.intranet>
-In-Reply-To: <alpine.LNX.2.23.453.2011251022550.14@nippy.intranet>
-From:   Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date:   Wed, 25 Nov 2020 02:05:49 +0100
-Message-ID: <CANiq72m2kGxSy2E9jgYE4_xRV6h9rFqiJP25KXs_5ObYnH_nmA@mail.gmail.com>
-Subject: Re: [Intel-wired-lan] [PATCH 000/141] Fix fall-through warnings for Clang
-To:     Finn Thain <fthain@telegraphics.com.au>
-Cc:     Kees Cook <keescook@chromium.org>,
-        James Bottomley <James.Bottomley@hansenpartnership.com>,
-        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
-        Joe Perches <joe@perches.com>,
-        Jakub Kicinski <kuba@kernel.org>, alsa-devel@alsa-project.org,
-        linux-atm-general@lists.sourceforge.net,
-        reiserfs-devel@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        linux-ide@vger.kernel.org, dm-devel@redhat.com,
-        keyrings@vger.kernel.org, linux-mtd@lists.infradead.org,
-        GR-everest-linux-l2@marvell.com, wcn36xx@lists.infradead.org,
-        samba-technical@lists.samba.org, linux-i3c@lists.infradead.org,
-        linux1394-devel@lists.sourceforge.net,
-        linux-afs@lists.infradead.org,
-        usb-storage@lists.one-eyed-alien.net, drbd-dev@lists.linbit.com,
-        devel@driverdev.osuosl.org, linux-cifs@vger.kernel.org,
-        rds-devel@oss.oracle.com,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        linux-scsi@vger.kernel.org, linux-rdma@vger.kernel.org,
-        oss-drivers@netronome.com, bridge@lists.linux-foundation.org,
-        linux-security-module@vger.kernel.org,
-        amd-gfx@lists.freedesktop.org,
-        linux-stm32@st-md-mailman.stormreply.com, cluster-devel@redhat.com,
-        linux-acpi@vger.kernel.org, coreteam@netfilter.org,
-        intel-wired-lan@lists.osuosl.org,
-        linux-input <linux-input@vger.kernel.org>,
-        Miguel Ojeda <ojeda@kernel.org>,
-        tipc-discussion@lists.sourceforge.net,
-        Ext4 Developers List <linux-ext4@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-watchdog@vger.kernel.org, selinux@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, intel-gfx@lists.freedesktop.org,
-        linux-geode@lists.infradead.org, linux-can@vger.kernel.org,
-        linux-block@vger.kernel.org, linux-gpio@vger.kernel.org,
-        op-tee@lists.trustedfirmware.org,
-        linux-mediatek@lists.infradead.org, xen-devel@lists.xenproject.org,
-        nouveau@lists.freedesktop.org, linux-hams@vger.kernel.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
+        id S1727946AbgKYBLI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Nov 2020 20:11:08 -0500
+Received: from mailgw02.mediatek.com ([1.203.163.81]:4163 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727771AbgKYBLI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Nov 2020 20:11:08 -0500
+X-UUID: fc41a31c1a234de58e1ccec4b1de961b-20201125
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=zD9PnRSDQkta5y5sYo0Myaz8oC9QbODb/1/hmrtOsFo=;
+        b=qIaUjWVq4nUIkNiohHGbdTY+G8hI3xCXqGp46//yzaclqEWFABHi93KzjWnVIZr1WctGi6DxYtFCENOQjZ6pYO6zWvxC4YGp4NWrf6Gg7bIviCZcg03HW4l1ChPJW6lL4UBJSW5NapJk3KSqCqc9oUcoW2PlzGUJe+8n44tfwVY=;
+X-UUID: fc41a31c1a234de58e1ccec4b1de961b-20201125
+Received: from mtkcas34.mediatek.inc [(172.27.4.253)] by mailgw02.mediatek.com
+        (envelope-from <wenbin.mei@mediatek.com>)
+        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 2077199661; Wed, 25 Nov 2020 09:11:01 +0800
+Received: from MTKCAS36.mediatek.inc (172.27.4.186) by MTKMBS31DR.mediatek.inc
+ (172.27.6.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 25 Nov
+ 2020 09:10:57 +0800
+Received: from [10.17.3.153] (10.17.3.153) by MTKCAS36.mediatek.inc
+ (172.27.4.170) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Wed, 25 Nov 2020 09:10:55 +0800
+Message-ID: <1606266655.11864.7.camel@mhfsdcap03>
+Subject: Re: [PATCH] mmc: mediatek: Add system suspend/resume interface
+From:   Wenbin Mei <wenbin.mei@mediatek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-hwmon@vger.kernel.org,
-        "maintainer:X86 ARCHITECTURE (32-BIT AND 64-BIT)" <x86@kernel.org>,
-        linux-nfs@vger.kernel.org, GR-Linux-NIC-Dev@marvell.com,
-        Linux-MM <linux-mm@kvack.org>,
-        Network Development <netdev@vger.kernel.org>,
-        linux-decnet-user@lists.sourceforge.net, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org, linux-sctp@vger.kernel.org,
-        linux-usb@vger.kernel.org, netfilter-devel@vger.kernel.org,
-        Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
-        patches@opensource.cirrus.com, linux-integrity@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-hardening@vger.kernel.org,
-        Jonathan Cameron <Jonathan.Cameron@huawei.com>,
-        Greg KH <gregkh@linuxfoundation.org>
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        srv_heupstream <srv_heupstream@mediatek.com>
+Date:   Wed, 25 Nov 2020 09:10:55 +0800
+In-Reply-To: <CAPDyKFpHAWBtxLOOvvqmAYFAwCsV66s_LzzVJg-zfXH5QE++Ng@mail.gmail.com>
+References: <20201118063405.24906-1-wenbin.mei@mediatek.com>
+         <CAPDyKFpHAWBtxLOOvvqmAYFAwCsV66s_LzzVJg-zfXH5QE++Ng@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.10.4-0ubuntu2 
+MIME-Version: 1.0
+X-TM-SNTS-SMTP: E0BA17202977CDA0ADCBF4E0D56DAFAAA7974C1D3AD563521464216FB75063672000:8
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 25, 2020 at 12:53 AM Finn Thain <fthain@telegraphics.com.au> wrote:
->
-> I'm saying that supporting the official language spec makes more sense
-> than attempting to support a multitude of divergent interpretations of the
-> spec (i.e. gcc, clang, coverity etc.)
+T24gTW9uLCAyMDIwLTExLTIzIGF0IDE3OjA2ICswMTAwLCBVbGYgSGFuc3NvbiB3cm90ZToNCj4g
+T24gV2VkLCAxOCBOb3YgMjAyMCBhdCAwNzozNCwgV2VuYmluIE1laSA8d2VuYmluLm1laUBtZWRp
+YXRlay5jb20+IHdyb3RlOg0KPiA+DQo+ID4gQmVmb3JlIHdlIGdvdCB0aGVzZSBlcnJvcnMgb24g
+TVQ4MTkyIHBsYXRmb3JtOg0KPiA+IFsgICA1OS4xNTM4OTFdIFJlc3RhcnRpbmcgdGFza3MgLi4u
+DQo+ID4gWyAgIDU5LjE1NDU0MF0gZG9uZS4NCj4gPiBbICAgNTkuMTU5MTc1XSBQTTogc3VzcGVu
+ZCBleGl0DQo+ID4gWyAgIDU5LjIxODcyNF0gbXRrLW1zZGMgMTFmNjAwMDAubW1jOiBwaGFzZTog
+W21hcDpmZmZmZmZmZV0gW21heGxlbjozMV0NCj4gPiBbZmluYWw6MTZdDQo+ID4gWyAgMTE5Ljc3
+NjA4M10gbW1jMDogY3FoY2k6IHRpbWVvdXQgZm9yIHRhZyA5DQo+ID4gWyAgMTE5Ljc4MDE5Nl0g
+bW1jMDogY3FoY2k6ID09PT09PT09PT09PSBDUUhDSSBSRUdJU1RFUiBEVU1QID09PT09PT09PT09
+DQo+ID4gWyAgMTE5Ljc4NjcwOV0gbW1jMDogY3FoY2k6IENhcHM6ICAgICAgMHgxMDAwMjBiNiB8
+IFZlcnNpb246ICAweDAwMDAwNTEwDQo+ID4gWyAgMTE5Ljc5MzIyNV0gbW1jMDogY3FoY2k6IENv
+bmZpZzogICAgMHgwMDAwMDEwMSB8IENvbnRyb2w6ICAweDAwMDAwMDAwDQo+ID4gWyAgMTE5Ljc5
+OTcwNl0gbW1jMDogY3FoY2k6IEludCBzdGF0OiAgMHgwMDAwMDAwMCB8IEludCBlbmFiOiAweDAw
+MDAwMDAwDQo+ID4gWyAgMTE5LjgwNjE3N10gbW1jMDogY3FoY2k6IEludCBzaWc6ICAgMHgwMDAw
+MDAwMCB8IEludCBDb2FsOiAweDAwMDAwMDAwDQo+ID4gWyAgMTE5LjgxMjY3MF0gbW1jMDogY3Fo
+Y2k6IFRETCBiYXNlOiAgMHgwMDAwMDAwMCB8IFRETCB1cDMyOiAweDAwMDAwMDAwDQo+ID4gWyAg
+MTE5LjgxOTE0OV0gbW1jMDogY3FoY2k6IERvb3JiZWxsOiAgMHgwMDNmZmMwMCB8IFRDTjogICAg
+ICAweDAwMDAwMjAwDQo+ID4gWyAgMTE5LjgyNTY1Nl0gbW1jMDogY3FoY2k6IERldiBxdWV1ZTog
+MHgwMDAwMDAwMCB8IERldiBQZW5kOiAweDAwMDAwMDAwDQo+ID4gWyAgMTE5LjgzMjE1NV0gbW1j
+MDogY3FoY2k6IFRhc2sgY2xyOiAgMHgwMDAwMDAwMCB8IFNTQzE6ICAgICAweDAwMDAxMDAwDQo+
+ID4gWyAgMTE5LjgzODYyN10gbW1jMDogY3FoY2k6IFNTQzI6ICAgICAgMHgwMDAwMDAwMCB8IERD
+TUQgcnNwOiAweDAwMDAwMDAwDQo+ID4gWyAgMTE5Ljg0NTE3NF0gbW1jMDogY3FoY2k6IFJFRCBt
+YXNrOiAgMHhmZGY5YTA4MCB8IFRFUlJJOiAgICAweDAwMDA4OTFjDQo+ID4gWyAgMTE5Ljg1MTY1
+NF0gbW1jMDogY3FoY2k6IFJlc3AgaWR4OiAgMHgwMDAwMDAwMCB8IFJlc3AgYXJnOiAweDAwMDAw
+MDAwDQo+ID4gWyAgMTE5Ljg2NTc3M10gbW1jMDogY3FoY2k6IDogPT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PQ0KPiA+IFsgIDExOS44NzIzNThdIG1tYzA6IHJ1bm5p
+bmcgQ1FFIHJlY292ZXJ5DQo+ID4gRnJvbSB0aGVzZSBsb2dzLCB3ZSBmb3VuZCBUREwgYmFzZSB3
+YXMgYmFjayB0byB0aGUgZGVmYXVsdCB2YWx1ZS4NCj4gPg0KPiA+IEFmdGVyIHN1c3BlbmQsIHRo
+ZSBtbWMgaG9zdCBpcyBwb3dlcmVkIG9mZiBieSBIVywgYW5kIGJyaW5nIENRRSByZWdpc3Rlcg0K
+PiA+IHRvIHRoZSBkZWZhdWx0IHZhbHVlLCBzbyB3ZSBhZGQgc3lzdGVtIHN1c3BlbmQvcmVzdW1l
+IGludGVyZmFjZSwgdGhlbiBicmluZw0KPiA+IENRRSB0byBkZWFjdGl2YXRlZCBzdGF0ZSBiZWZv
+cmUgc3VzcGVuZCwgaXQgd2lsbCBiZSBlbmFibGVkIGJ5IENRRSBmaXJzdA0KPiA+IHJlcXVlc3Qg
+YWZ0ZXIgcmVzdW1lLg0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogV2VuYmluIE1laSA8d2VuYmlu
+Lm1laUBtZWRpYXRlay5jb20+DQo+IA0KPiBJIHRvb2sgdGhlIGxpYmVydHkgb2YgcmVuYW1pbmcg
+bXNkY19zeXNfc3VzcGVuZHxyZXN1bWUgdG8NCj4gbXNkY19zdXNwZW5kfHJlc3VtZSwgYXMgSSB0
+aGluayB0aGUgIl9zeXMiIGlzIGEgYml0IHN1cGVyZmx1b3VzLg0KPiANCj4gQWRkaXRpb25hbGx5
+LCBJIGFkZGVkIGEgZml4ZXMrc3RhYmxlIHRhZywgdGhlbiBJIGFwcGxpZWQgdGhpcyBmb3IgZml4
+ZXMsIHRoYW5rcyENCj4gDQo+IFBsZWFzZSB0ZWxsIG1lLCBpZiB0aGVyZSBpcyBhbnl0aGluZyB5
+b3Ugd291bGQgbGlrZSBtZSB0byBjaGFuZ2UuDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0K
+PiANCj4gSXQgaXMgT0sgZm9yIG1lLCB0aGFua3MgZm9yIHlvdXIgaGVscC4NCg0KPiA+IC0tLQ0K
+PiA+ICBkcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIHwgMjIgKysrKysrKysrKysrKysrKysrKyst
+LQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMjAgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkN
+Cj4gPg0KPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L210ay1zZC5jIGIvZHJpdmVy
+cy9tbWMvaG9zdC9tdGstc2QuYw0KPiA+IGluZGV4IGZjNWVlNWRmOTFhZC4uYzVmOWNkNmZjOTUx
+IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMNCj4gPiArKysgYi9k
+cml2ZXJzL21tYy9ob3N0L210ay1zZC5jDQo+ID4gQEAgLTI3NTgsMTEgKzI3NTgsMjkgQEAgc3Rh
+dGljIGludCBtc2RjX3J1bnRpbWVfcmVzdW1lKHN0cnVjdCBkZXZpY2UgKmRldikNCj4gPiAgICAg
+ICAgIG1zZGNfcmVzdG9yZV9yZWcoaG9zdCk7DQo+ID4gICAgICAgICByZXR1cm4gMDsNCj4gPiAg
+fQ0KPiA+ICsNCj4gPiArc3RhdGljIGludCBtc2RjX3N5c19zdXNwZW5kKHN0cnVjdCBkZXZpY2Ug
+KmRldikNCj4gPiArew0KPiA+ICsgICAgICAgc3RydWN0IG1tY19ob3N0ICptbWMgPSBkZXZfZ2V0
+X2RydmRhdGEoZGV2KTsNCj4gPiArICAgICAgIGludCByZXQ7DQo+ID4gKw0KPiA+ICsgICAgICAg
+aWYgKG1tYy0+Y2FwczIgJiBNTUNfQ0FQMl9DUUUpIHsNCj4gPiArICAgICAgICAgICAgICAgcmV0
+ID0gY3FoY2lfc3VzcGVuZChtbWMpOw0KPiA+ICsgICAgICAgICAgICAgICBpZiAocmV0KQ0KPiA+
+ICsgICAgICAgICAgICAgICAgICAgICAgIHJldHVybiByZXQ7DQo+ID4gKyAgICAgICB9DQo+ID4g
+Kw0KPiA+ICsgICAgICAgcmV0dXJuIHBtX3J1bnRpbWVfZm9yY2Vfc3VzcGVuZChkZXYpOw0KPiA+
+ICt9DQo+ID4gKw0KPiA+ICtzdGF0aWMgaW50IG1zZGNfc3lzX3Jlc3VtZShzdHJ1Y3QgZGV2aWNl
+ICpkZXYpDQo+ID4gK3sNCj4gPiArICAgICAgIHJldHVybiBwbV9ydW50aW1lX2ZvcmNlX3Jlc3Vt
+ZShkZXYpOw0KPiA+ICt9DQo+ID4gICNlbmRpZg0KPiA+DQo+ID4gIHN0YXRpYyBjb25zdCBzdHJ1
+Y3QgZGV2X3BtX29wcyBtc2RjX2Rldl9wbV9vcHMgPSB7DQo+ID4gLSAgICAgICBTRVRfU1lTVEVN
+X1NMRUVQX1BNX09QUyhwbV9ydW50aW1lX2ZvcmNlX3N1c3BlbmQsDQo+ID4gLSAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICBwbV9ydW50aW1lX2ZvcmNlX3Jlc3VtZSkNCj4gPiArICAgICAg
+IFNFVF9TWVNURU1fU0xFRVBfUE1fT1BTKG1zZGNfc3lzX3N1c3BlbmQsIG1zZGNfc3lzX3Jlc3Vt
+ZSkNCj4gPiAgICAgICAgIFNFVF9SVU5USU1FX1BNX09QUyhtc2RjX3J1bnRpbWVfc3VzcGVuZCwg
+bXNkY19ydW50aW1lX3Jlc3VtZSwgTlVMTCkNCj4gPiAgfTsNCj4gPg0KPiA+IC0tDQo+ID4gMi4x
+OC4wDQo+ID4NCg0K
 
-Making the kernel strictly conforming is a ship that sailed long ago,
-for several reasons. Anyway, supporting several compilers and other
-tools, regardless of extensions, is valuable.
-
-> I'm also saying that the reason why we use -std=gnu89 is that existing
-> code was written in that language, not in ad hoc languages comprised of
-> collections of extensions that change with every release.
-
-No, we aren't particularly tied to `gnu89` or anything like that. We
-could actually go for `gnu11` already, since the minimum GCC and Clang
-support it. Even if a bit of code needs fixing, that shouldn't be a
-problem if someone puts the work.
-
-In other words, the kernel code is not frozen, nor are the features it
-uses from compilers. They do, in fact, change from time to time.
-
-> Thank you for checking. I found a free version that's only 6 weeks old:
-
-You're welcome! There are quite a few new attributes coming, mostly
-following C++ ones.
-
-> It will be interesting to see whether 6.7.11.5 changes once the various
-> implementations reach agreement.
-
-Not sure what you mean. The standard does not evolve through
-implementations' agreement (although standardizing existing practice
-is one of the best arguments to back a change).
-
-Cheers,
-Miguel
