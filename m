@@ -3,86 +3,122 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EFA6C64E7B
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48B39C64E7A
 	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 21:30:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE72C2075A
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 21:30:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E7F6B206E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Nov 2020 21:30:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="SeKPG/OD"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=sang-engineering.com header.i=@sang-engineering.com header.b="oBJlt/8B"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732199AbgKYVaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1732179AbgKYVaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 25 Nov 2020 16:30:17 -0500
-Received: from www.zeus03.de ([194.117.254.33]:50258 "EHLO mail.zeus03.de"
+Received: from www.zeus03.de ([194.117.254.33]:50292 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732179AbgKYVaQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1732189AbgKYVaQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 25 Nov 2020 16:30:16 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=2VwnJyg0q5/oU+QkI2NPQZ3Nvs4
-        +Yi6IBsEPEV9djNw=; b=SeKPG/ODCO0HaGKwZWNHUyxf91azCxH6MAqtp22SH9P
-        9LoBzsjYzQSrSHvEQq0ydOgIHTTBEhDEAgUIYFB/a2+31UCjoczNGxVNK/Rv0kpg
-        MjC8qgtV+wp3l8yRwhnz6q1x7jj4wdNUIjckafszRs+0qa1Ni440jY/WuoUmvaD8
-        =
-Received: (qmail 3441441 invoked from network); 25 Nov 2020 22:30:14 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Nov 2020 22:30:14 +0100
-X-UD-Smtp-Session: l3s3148p1@I3ySIfW0jL8gAwDPXwZjAA625bO7DiyS
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=rdfbV7Lr2bOWPq
+        aYvs96W61a1TNaIaXNyfLaNfizkOk=; b=oBJlt/8B07U9npgKc9G4jW3l5PhSdd
+        V8M7h01hAyc0FAB+B7iex0rRufvir8wN9otycWXo9XBqxjq3I2mbEItqX5tKJuT5
+        cFhMzii8s2CkB+oPvCsoI4pttLv13C4+kx8xjgRAexJHMHy5zQWAzdagOxrVeQ3X
+        vUU/G5JuJ0duc=
+Received: (qmail 3441528 invoked from network); 25 Nov 2020 22:30:15 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Nov 2020 22:30:15 +0100
+X-UD-Smtp-Session: l3s3148p1@+TAQIvW0kr8gAwDPXwZjAA625bO7DiyS
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa@kernel.org>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/3] tmio: set max_busy_timeout
-Date:   Wed, 25 Nov 2020 22:29:58 +0100
-Message-Id: <20201125213001.15003-1-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 3/3] mmc: renesas_sdhi: populate hook for longer busy_wait
+Date:   Wed, 25 Nov 2020 22:30:01 +0100
+Message-Id: <20201125213001.15003-4-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201125213001.15003-1-wsa+renesas@sang-engineering.com>
+References: <20201125213001.15003-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This is a follow-up to the series "mmc: tmio: honor busy timeouts
-properly" which I sent out a few days ago. One of the patches there
-needs more discussion, so I regrouped the series with another one, and
-this is the first outcome. It is solely about max_busy_timeout:
+From: Wolfram Sang <wsa@kernel.org>
 
-Patch 1 is from the previous series (with the comment from Shimoda-san
-addressed) and sets max_busy_timeout with what TMIO always did. Patch 2
-introduces a hook and a default fallback for extended timeout ranges.
-Patch 3 uses the hook for the extended range of R-Car Gen3 SDHIs.
+Make use of the EXTOP bit in R-Car Gen3 SoCs to have a twice as large
+busy wait duration.
 
-It has been tested that the applied values make sense. I have not
-measured if the MMC core really sends R1 instead of R1B when the desired
-timeout value is exceeded. All on a Salvator-XS with R-Car M3N.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 20 ++++++++++++++++++++
+ drivers/mmc/host/tmio_mmc.h          |  2 ++
+ 2 files changed, 22 insertions(+)
 
-The patches are based on mmc/next as of today. The branch is here:
-
-git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/extop
-
-Looking forward to comments!
-
-Happy hacking,
-
-   Wolfram
-
-
-Wolfram Sang (3):
-  mmc: tmio: set max_busy_timeout
-  mmc: tmio: add hook for custom busy_wait calculation
-  mmc: renesas_sdhi: populate hook for longer busy_wait
-
- drivers/mmc/host/renesas_sdhi_core.c | 23 +++++++++++++++++++++++
- drivers/mmc/host/tmio_mmc.h          |  5 +++++
- drivers/mmc/host/tmio_mmc_core.c     | 22 ++++++++++++++++++++++
- drivers/mmc/host/uniphier-sd.c       |  1 +
- include/linux/mfd/tmio.h             |  7 ++++++-
- 5 files changed, 57 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 153767054c05..38f028e70633 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -561,6 +561,7 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
+ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ {
+ 	struct renesas_sdhi *priv = host_to_priv(host);
++	u16 val;
+ 
+ 	if (priv->scc_ctl) {
+ 		renesas_sdhi_disable_scc(host->mmc);
+@@ -573,6 +574,21 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ 	}
+ 
+ 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_INIT_RCAR2);
++
++	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
++		val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
++		val |= CARD_OPT_EXTOP;
++		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, val);
++	}
++}
++
++static unsigned int renesas_sdhi_gen3_get_cycles(struct tmio_mmc_host *host)
++{
++	u16 num, val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
++
++	num = (val & CARD_OPT_TOP_MASK) >> CARD_OPT_TOP_SHIFT;
++	return 1 << ((val & CARD_OPT_EXTOP ? 14 : 13) + num);
++
+ }
+ 
+ #define SH_MOBILE_SDHI_MIN_TAP_ROW 3
+@@ -1067,6 +1083,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 			quirks->hs400_calib_table + 1);
+ 	}
+ 
++	/* these have an EXTOP bit */
++	if (ver >= SDHI_VER_GEN3_SD)
++		host->get_timeout_cycles = renesas_sdhi_gen3_get_cycles;
++
+ 	/* Enable tuning iff we have an SCC and a supported mode */
+ 	if (of_data && of_data->scc_offset &&
+ 	    (host->mmc->caps & MMC_CAP_UHS_SDR104 ||
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index f60559bc413a..784fa6ed5843 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -82,7 +82,9 @@
+ /* Definitions for values the CTL_SD_MEM_CARD_OPT register can take */
+ #define CARD_OPT_TOP_MASK	0xf0
+ #define CARD_OPT_TOP_SHIFT	4
++#define CARD_OPT_EXTOP		BIT(9) /* first appeared on R-Car Gen3 SDHI */
+ #define CARD_OPT_WIDTH8		BIT(13)
++#define CARD_OPT_ALWAYS1	BIT(14)
+ #define CARD_OPT_WIDTH		BIT(15)
+ 
+ /* Definitions for values the CTL_SDIO_STATUS register can take */
 -- 
 2.28.0
 
