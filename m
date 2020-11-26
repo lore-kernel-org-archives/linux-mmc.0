@@ -2,103 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C5B3C56202
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 12:30:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E013C56202
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 14:19:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1B3CB20B80
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 12:30:31 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="fB/eWYAN"
+	by mail.kernel.org (Postfix) with ESMTP id 56CBC20B80
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 14:19:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728014AbgKZMaa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Nov 2020 07:30:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47404 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727633AbgKZMaa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2020 07:30:30 -0500
-Received: from mail-vk1-xa42.google.com (mail-vk1-xa42.google.com [IPv6:2607:f8b0:4864:20::a42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10524C0613D4
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2020 04:30:30 -0800 (PST)
-Received: by mail-vk1-xa42.google.com with SMTP id v185so422907vkf.8
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2020 04:30:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=dwfSmiW8wC4c8YEqJfMS6xstFSuOyZOshWT4MX1zhGw=;
-        b=fB/eWYANKJ4wxGSbCsSpJCytDe0rDDyixlvaOxzI8MmJqZeJjvt9TGekmN0QbgDcxQ
-         Bgw4wFZ7O3AEOE6/bEH8t2R31ONlQBS4SNeJQ7gUTloTh+A2TBl4SPMyulM/tWkI6BPq
-         B6ZhMrX8yAcV2mjMJqZo3zOFZSdzaS8pGqZ6bD1iWbrxYtVrGWKgc63eBkFPi6C3Bd8m
-         kS97lFU1a1nAU0aYS5qHWelQyXfxD+BXqEOYYORNZ26pyzfXoo1iZd/8I5DNMwI/yLnz
-         RDVW46vJVidOrW/eOewDhOVnh3M9MNWjfrwC4+xxh3fx2QbZYG76juc0Md7VpY7at93a
-         tENA==
+        id S2390875AbgKZOTm convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Nov 2020 09:19:42 -0500
+Received: from mail-ot1-f65.google.com ([209.85.210.65]:45131 "EHLO
+        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390022AbgKZOTm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2020 09:19:42 -0500
+Received: by mail-ot1-f65.google.com with SMTP id k3so1967449otp.12;
+        Thu, 26 Nov 2020 06:19:40 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=dwfSmiW8wC4c8YEqJfMS6xstFSuOyZOshWT4MX1zhGw=;
-        b=ly7aMu1F6HXOQEcsV/wdN8pmNcJHmIga5yucJSJR5mNWcJTZsXg1lRTCKZBMsKglv+
-         o+rm3BNSwdEPzboGwjLiiu1ZU8ecUhRxwHsdPIBYk3UeWFLcdL1SMrwHglbp8OaKD/k8
-         n9hqzppTdWi2jlCbndT8TlQzf8eqfSGiApUFh2vUXoqYs1KdKnYSGBWmjIOg/juVBnXp
-         UMYuJFK8U1HOr22MnaTNl8OteJUmww31BhAEgtRVq+CUWR2y4vHzZ0WJsp4CxpJ4irS6
-         wWvdaYADzapaUD9Tbd9d4RSDpdihwMYMcMJOoEQt1ybax9FvnAWbfNGyqeVL3ENVXZsN
-         reFA==
-X-Gm-Message-State: AOAM5320fTuHexfgGkojCKoZ+vcVjnOwmyDL++NvTnvIGeaCU+gkE14B
-        9tuMyCQTv4/9NiicERP8C6epyth5tuYWMzCd+7KfSQ==
-X-Google-Smtp-Source: ABdhPJwZN0eDGbKeVzoN1m8Rus6o4ajev7s0qab4LrVpDTTnfpneHD0T4F6OhdJc5Tzm3h4fXgnjgGfbZ45u9nfA3ZQ=
-X-Received: by 2002:a1f:5e0b:: with SMTP id s11mr1568478vkb.8.1606393829211;
- Thu, 26 Nov 2020 04:30:29 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=GwppLtz9RbhQVBUuzUzdKLtehGW1M1Jg+Up1fL9r49Q=;
+        b=JGjbv1SvOWoSeGXIbMYRwBmgytqlFk9VSQw0tlrdNVV0/M1DiRVU+RYKNPu6eGJu22
+         aZPdYohR/E//CoG4j9C+BGnbW3R9YUdm8AQ+P53CtpYcpJezCX/EaQsusYs3p3jF4i2B
+         U1GzOzCeMdcNJASv7VMAQSOunQ6902vpWPWf6bIyPn1iBTp+97EhaRJ9T0E5QooLG9nk
+         m5FZFBm3sOz7EPqeTSIPhrJNVGtliqVRx1eEll3hK1idPR/IbGBb8AqlGRNUzW7PchuY
+         AJoUg1puFL21OrIopVBriaIeySEzlzw3fyHWnVulTkJajP+dSJDg0j6MjFQ+hBq7aPo2
+         j55Q==
+X-Gm-Message-State: AOAM530F7+ADQFwtSacRhFDQwNd9ognybu21c2Jtm9VgHP4Q55i4F2MZ
+        DhQv8AoOR5FZlmF2dnqD0N36AY+rMTNmCse5qLw=
+X-Google-Smtp-Source: ABdhPJwLAfZXbySWLnLQSnt2tfdU5vqWZ9ViHjQ+x1Q62Sndi1ZEA9cNzW/jMhgVXe9oHodj5ptyp6Qe2dKWheYazSI=
+X-Received: by 2002:a05:6830:2385:: with SMTP id l5mr2425799ots.321.1606400379939;
+ Thu, 26 Nov 2020 06:19:39 -0800 (PST)
 MIME-Version: 1.0
-References: <16529bfd-0308-5da9-f7ce-4ffa9f77b4d0@alum.wpi.edu>
- <a646a587-25ae-2395-a169-3742ba7f9723@alum.wpi.edu> <X76svnTHv34FJaHI@kroah.com>
- <1760357a038.279b.9b12b7fc0a3841636cfb5e919b41b954@broadcom.com> <X79ZH+COJbxqd+eJ@kroah.com>
-In-Reply-To: <X79ZH+COJbxqd+eJ@kroah.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 26 Nov 2020 13:29:52 +0100
-Message-ID: <CAPDyKFpnp_JfpxtkM3MTjTi2S7jiDp0QXY_ists7cNAmfAAsUw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: sdio: Move SDIO IDs from rtl8723bs, driver to
- common include file
-To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc:     Arend Van Spriel <arend.vanspriel@broadcom.com>,
-        "Brian O'Keefe" <bokeefe@alum.wpi.edu>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Larry Finger <Larry.Finger@lwfinger.net>
+References: <20201124060202.776-1-ricky_wu@realtek.com> <20201124204915.GA585306@bjorn-Precision-5520>
+ <CAJZ5v0gt4aeC5S6RY2W98vmcMSs9gb_SBA8-eoq1NU3wPptL8g@mail.gmail.com> <6f721ea4d5a84f45b0249b932d742367@realtek.com>
+In-Reply-To: <6f721ea4d5a84f45b0249b932d742367@realtek.com>
+From:   "Rafael J. Wysocki" <rafael@kernel.org>
+Date:   Thu, 26 Nov 2020 15:19:26 +0100
+Message-ID: <CAJZ5v0ggtd3+YEo2nERhuTeurRx5OQrvLkAz3aEMPRmEfo_Rnw@mail.gmail.com>
+Subject: Re: [PATCH] misc: rtsx: rts5249 support runtime PM
+To:     =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+Cc:     "Rafael J. Wysocki" <rafael@kernel.org>,
+        Bjorn Helgaas <helgaas@kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        "vaibhavgupta40@gmail.com" <vaibhavgupta40@gmail.com>,
+        "kdlnx@doth.eu" <kdlnx@doth.eu>,
+        Doug Anderson <dianders@chromium.org>,
+        "rmfrfs@gmail.com" <rmfrfs@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Linux PM <linux-pm@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 26 Nov 2020 at 08:27, Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
+On Thu, Nov 26, 2020 at 4:07 AM 吳昊澄 Ricky <ricky_wu@realtek.com> wrote:
 >
-> On Thu, Nov 26, 2020 at 07:57:23AM +0100, Arend Van Spriel wrote:
-> > On November 25, 2020 8:13:07 PM Greg Kroah-Hartman
-> > <gregkh@linuxfoundation.org> wrote:
-> >
-> > > On Wed, Nov 25, 2020 at 01:33:00PM -0500, Brian O'Keefe wrote:
-> > > > Macro names were derived from the Windows driver, as that was the best
-> > > > available source.
+> > -----Original Message-----
+> > From: Rafael J. Wysocki [mailto:rafael@kernel.org]
+> > Sent: Wednesday, November 25, 2020 10:04 PM
+> > To: Bjorn Helgaas; 吳昊澄 Ricky
+
+[cut]
+
+> > > > +static void rtsx_pci_rtd3_work(struct work_struct *work)
+> > > > +{
+> > > > +     struct delayed_work *dwork = to_delayed_work(work);
+> > > > +     struct rtsx_pcr *pcr = container_of(dwork, struct rtsx_pcr,
+> > rtd3_work);
+> > > > +
+> > > > +     pcr_dbg(pcr, "--> %s\n", __func__);
+> > > > +
+> > > > +     while (pcr->pci->dev.power.usage_count.counter > 0) {
+> > > > +             if (pm_runtime_active(&(pcr->pci->dev)))
+> > > > +                     pm_runtime_put(&(pcr->pci->dev));
 > > >
-> > > Why move these?  What does this help with?
+> > > I'm not a runtime PM expert, but this looks fishy.  AFAICT this is the
+> > > only driver in the tree that uses usage_count.counter this way, which
+> > > is a pretty big hint that this needs a closer look.  Cc'd Rafael.
 > >
-> > Hi Greg,
+> > You are right, this is not correct from the PM-runtime POV.
 > >
-> > Most if not all SDIO-based (wifi) drivers in mainline have their venid and
-> > devid definitions in that header file. So seems like a good idea to me, but
-> > maybe not so for a staging driver?
+> > It looks like this attempts to force the PM-runtime usage counter down
+> > to 0 and it's kind of hard to say why this is done (and it shouldn't
+> > be done in the first place, because it destroys the usage counter
+> > balance).
+> >
+> > Ricky, is this an attempt to work around an issue of some sort?
+> >
 >
-> If the driver ever gets moved out, maybe do it then as part of that
-> effort.  I haven't seen that happening, so I would recommend just
-> leaving this alone for now.
+> Thanks Bjorn and Rafael
+> I found when we boot up, our dev pcr->pci->dev.power.usage_count.counter always is 2,
+> Don’t know how to make it to 0 because we need to support D3 and run runtime_suspended callback function
+> Is there something wrong with us to enable runtime PM?
 
-+1
+That is possible.
 
-Kind regards
-Uffe
+If you want it to be enabled by default, you need to call
+pm_runtime_allow() from the driver at probe time, in addition to
+pm_runtime_enable(), in the first place, but that only drops one
+reference, so question is where the other one comes from.
+
+Are the pm_runtime_get*() and pm_runtime_put*() calls balanced?
