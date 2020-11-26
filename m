@@ -8,53 +8,58 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4C2AC56202
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:17:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1AD8C56202
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:17:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 88CE8206B7
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:17:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 73F37206B7
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:17:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="UEUU2ICe"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="CPNUZWml"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388965AbgKZLRw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Nov 2020 06:17:52 -0500
+        id S2388975AbgKZLR4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Nov 2020 06:17:56 -0500
 Received: from mail-eopbgr40073.outbound.protection.outlook.com ([40.107.4.73]:56710
         "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1729001AbgKZLRw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Nov 2020 06:17:52 -0500
+        id S1729001AbgKZLRz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Nov 2020 06:17:55 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=CjbWBC1Uux/NiGRh5E+AQP1UOCgQhS2aDHQgieaFxYVfy+cLslxMIUCVAKg04hKjIrx+IIU2GoC4oB3vRMb7+4+6hHRwYARfLz2tX3h91G+enBPxiiXEObFFf9r0BWcyVt/6BmAGpmgKWuTgyVWrwVN1KMS1ovfqT8cAgTCL6ROGw24qQxlTaX0q2Ute14Pc81AT4ZLe7iKWn/+CyzXc8ft4VaIb1BJkUvnkwD/yku2gK3D4E6nM6Ti3whpma6PBsZoK6oFNuUFmGJb0IsVCn4VQEXuH9qApVA/lkJDLTHHHAElzW88D9LJ0nTJH0LVvlFg5k+ogam9Y28cCxuYCYA==
+ b=KsDFlF7HJEBAAM36L0ZxktYdZsIGmEMGG/Ee3cPq8wImiUqy8r/xqK1VC8oPtQW+i5sgMkPUlxz4rGKoUVoZspZfEUTwRutLYQC6HjoeC7CluGoQPuvpTAC9G56tt4iZjJ60xj9epIkUI2G/sUbVg7ZfDUB+eq7X6pe6qIL48VzCbR7YtX50BjVFzpBSrodcY1VjcxH/OEVfqXvYS1j1hRvWPE7t9X2sfIyzl3FMOkrrAl7bAFh0JAZIhNkjMPEhmp0ws/XAuxetBh7AJyLFaDaY7GJo1JcBdXSELJudepmyj4QeJOl4wfE7/SUPsD/VznAfV8LVzyBYRt2H6pXCUw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5PiHOu+fWXcwPAtOJGTb9PJHQKxbCJKLrzR5MHi05/k=;
- b=eoCFdSaluE1oJPkHnLeUXEQ2TE92ksnNcP/tbnD062z7vSU4N5uaMzZsQF+f5K0sGuqZpzrKHq8Ue+YicxqI1KoNNzy+v5xV9y/Enyj+6vk0bHRRV8daRaXxSXgY+QXw3A9y1laIparki9g2gbK+bOqJgXi4lovRCNn259aE6NSgrgBVvNdmcoLerGRVjeVrV+r25X+lr8y4VxvVnt4xW2M4b6WvjKMcQS7KMxn3al/xUSjBK+GDNFxzwuygBY4DDyPNAZbh/fwHLofcfOccYoQDAXHX0XdDJkr9t27rE1/fO53/drHj1jZ4LsNaXBBeHnj7NDtfAQKsEF+0E3Q+kg==
+ bh=w/QX7pvrDBPuunUeGRpZP4kA2yTN60H+ojHjit5PJ0I=;
+ b=Bcs2KVRbn38I8aBtWY7HaXAg/xkkrYKBOdyesRCt+xrlfBnUT/O/Rs4i5NdzlGzN1Tp2gdYazw/kQ0kPWBRJCXjsJwvtwhEcMvfyhuMeDSt0Xufd1XH3bNg3/FFrAHhWYcAr32hx7qykhZoEPVMu4kOcTOAiIgfNYBF9a/bHBxkWwy/PGHJG0SqO52xoUX7UamM46FZ7sZ/BGOdO//NWwJzryGZDyZ90vgtfelKN1xgO8XC4jdNieQfzL4jaEersqtRzFRON57kpSk2hNwWgLrOFj8Alts3YjahXFuMqjVCn8WvDmWi8aqo9nGBfxw/8AjZUGNV48LadFHr+RGNPLA==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=5PiHOu+fWXcwPAtOJGTb9PJHQKxbCJKLrzR5MHi05/k=;
- b=UEUU2ICeyJV1DT590BlVyhFZtLgfClvMu9C13r+gAk0NN9zfKnnsgO9t6wdC+4NyJKLEaWXCRokm5J7aSsdx4AlZFVqxbppnbmd4YVQ16UVFER6nD8VgfEfk+ZlcpX5G889vmfcKDB8AvoOaj2/TSLrA6eit71AQHmP/KgyWMSg=
+ bh=w/QX7pvrDBPuunUeGRpZP4kA2yTN60H+ojHjit5PJ0I=;
+ b=CPNUZWmlr0mNHWhX/daFZoi00wqlG6rsNsxCPbn4oH1exoLgG4ACHswnJzsocwjnqRwVdEBsfrIZ0Q0u9RshuszRQwMDDbzrgkY1gokp3lva78TDMQM47bbWWBglyxDxaZX5SwuyilIlQj9/eXVvnay1j09GKGDZCvdGvtbllo8=
 Authentication-Results: vger.kernel.org; dkim=none (message not signed)
  header.d=none;vger.kernel.org; dmarc=none action=none header.from=nxp.com;
 Received: from AM6PR04MB4966.eurprd04.prod.outlook.com (2603:10a6:20b:2::14)
  by AM6PR04MB5206.eurprd04.prod.outlook.com (2603:10a6:20b:12::28) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3611.22; Thu, 26 Nov
- 2020 11:16:49 +0000
+ 2020 11:17:03 +0000
 Received: from AM6PR04MB4966.eurprd04.prod.outlook.com
  ([fe80::3cfc:a92e:75ad:ce4a]) by AM6PR04MB4966.eurprd04.prod.outlook.com
  ([fe80::3cfc:a92e:75ad:ce4a%3]) with mapi id 15.20.3611.025; Thu, 26 Nov 2020
- 11:16:49 +0000
+ 11:17:03 +0000
 From:   Dong Aisheng <aisheng.dong@nxp.com>
 To:     devicetree@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
-        linux-mmc@vger.kernel.org, Dong Aisheng <aisheng.dong@nxp.com>
-Subject: [PATCH RESEND v4 11/18] arm64: dts: imx8: switch to new lpcg clock binding
-Date:   Thu, 26 Nov 2020 18:58:53 +0800
-Message-Id: <20201126105900.26658-12-aisheng.dong@nxp.com>
+        linux-mmc@vger.kernel.org, Dong Aisheng <aisheng.dong@nxp.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <fabio.estevam@nxp.com>
+Subject: [PATCH RESEND v4 15/18] arm64: dts: imx8qm: add dma ss support
+Date:   Thu, 26 Nov 2020 18:58:57 +0800
+Message-Id: <20201126105900.26658-16-aisheng.dong@nxp.com>
 X-Mailer: git-send-email 2.23.0
 In-Reply-To: <20201126105900.26658-1-aisheng.dong@nxp.com>
 References: <20201126105900.26658-1-aisheng.dong@nxp.com>
@@ -66,485 +71,118 @@ X-ClientProxiedBy: SG2PR03CA0160.apcprd03.prod.outlook.com
  (2603:10a6:20b:2::14)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from b29396-OptiPlex-7040.ap.freescale.net (119.31.174.66) by SG2PR03CA0160.apcprd03.prod.outlook.com (2603:1096:4:c9::15) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3632.7 via Frontend Transport; Thu, 26 Nov 2020 11:16:47 +0000
+Received: from b29396-OptiPlex-7040.ap.freescale.net (119.31.174.66) by SG2PR03CA0160.apcprd03.prod.outlook.com (2603:1096:4:c9::15) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3632.7 via Frontend Transport; Thu, 26 Nov 2020 11:17:00 +0000
 X-MS-PublicTrafficType: Email
 X-MS-Office365-Filtering-HT: Tenant
-X-MS-Office365-Filtering-Correlation-Id: 2b4e0ead-0d8b-47e4-b105-08d891fcc4f1
+X-MS-Office365-Filtering-Correlation-Id: 9694f9c4-60ab-4f6d-b8aa-08d891fcccee
 X-MS-TrafficTypeDiagnostic: AM6PR04MB5206:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <AM6PR04MB5206A3E206140A3455D2700E80F90@AM6PR04MB5206.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:69;
+X-Microsoft-Antispam-PRVS: <AM6PR04MB5206728676F83A991BAC3FC980F90@AM6PR04MB5206.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: gyrCWPBewncCv0NSzww+FlK9NjnDdIhwoQlSxkdGSMJtqZ7ZfOMkr5/3Rp5uBBK7p8PnVv3Gelu5cargCVTutGg/3gXK+783yf9KlY9xeg1eNCbp7oSm0CZ2k8QbxkSL0Sr1yVgjeW1my5ftDzQiDd7V2nsBBI+aT1rsyzxk1a1t0VhUCR5HS+aeE2Pa7dcInpVE1fUuDoYS4K3B+Aj5tEQyP2yolj4HjKtsbe/DddLouoCrQeBLpRpRYje0SQOZocjqpW5vx7EC2tvcxtlV41On3F+0FPWy8MS9Qp3C53BaVgvfxxXCIfAtQJy5pvxgnYNPriMGYk/Gk8zI8SnY+g==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM6PR04MB4966.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(366004)(396003)(39860400002)(346002)(376002)(6666004)(4326008)(8676002)(86362001)(6916009)(8936002)(1076003)(66476007)(2616005)(478600001)(956004)(2906002)(66556008)(6506007)(36756003)(5660300002)(316002)(30864003)(186003)(16526019)(66946007)(26005)(83380400001)(6486002)(52116002)(6512007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: T3jVtiJEIFjKFTP8YCmTKoPv7pXzuulndaCiMvj7M+BvXs9B8J5JW2NTQT0o33F221sgoAmGblrD8qyKzhFkxoWwbGkrSn09ee3KLfP6ZjZNPEWqXWl1vAn5mON8cg4fVvsWBo37DB3aiUYvw1yB++3RSPt7qBK4ntiAsmDaM9w6kiN3YJcizLuqQIbQTkbqePWczhcWkcsoFJPZnw0xBX+1Pbf+M0rRLRjfREEK0podov2b8li6o7rEvTO1KDMiZryZodyuRFmevi/3GfCY5csJkhjCnap3WA7NkUZc6RTYnJG9z7+PELkcxNojJPhpty6tG7hX3zcDOk+RoZonJcs9mwAMboxmBM1Wo95yHDM5h/oqcYkUeP/Jryhhbiet5Jqfb8hOI4BAAlydNm17a6EyeBd07bBzHwvLEdEX5Xgl0qn2wb73R2soC56rnPesz1RnRpowL8w+eV7JEHVRejXFqWzt5M72XRmjLwXUbGfcJg1M6n+fT/0pdpe4haBWLN9arTT+rxYmmib4kuQjVs48xfd52cvTg1pEsCG5ZYHl0J3aynDlcIthLZHTV2h50GvXwdPhY0LwMz+GFYVC0NeJvpTz3OIpqIMztz+jlOIemH0esS6SLgtIsGtPVWzx06CYwL7h6DyhB87kVTRcFkT13EMbBQ+aS2Gv4rECzkCDV25rWF+ABz8jNCPPCjIBsAu/LgJY2KJ85mI61RT/kllYzwyyT4TaNWbgXdOlhf9Ywhvu0DdsRxo+Ym1TxgR2cmsxaluTDm3Q8mGZNklroailLwPVEiwsCqR8BNU13ocDwYQvzg9hKHB/2DAczPnqsuZOoOqrYJUFyMC5WMXx9e/sfXg4O1zNF77dHCpafOclMpLt8tho8wfIAwilcl9trfORLYDxct+dUGwdC1pBvQ==
+X-Microsoft-Antispam-Message-Info: L86lgPQAtcks90m6emL5pfNinPQgNJUM/G67nsE0Uu2iXFkpyZeEMLdGCupxtOxD5A95oTSf3uE1UPMRuGh7jPXku7UExY2S87BL9UzAwEPVXkw3BikC5idMZ25nCdvCwCdjw7DuOXYjUyqkYJMNPbVpwht4GgCZ40G6EIElXVj6WjtKUPKb6GZoBkkyXfH0i2tFA1K98qLAQq41OC50Yt6KYFzf4DGf/SqW41wKWD/gP/Mh2lnBP/1NEVEfaH59ANSMhmP8yJ4y3hrZw5OgYD8FPJB+oVJTNxx9iVKKUqcpKJ9n6oo9wP5DcwhA+zzeCVxSMzcH1aj3MD6+xrzRpiX6nEcOyoAbp3eeV8k2vRwgO2QTOQ+gV9hTG8oTzWZC
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM6PR04MB4966.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(366004)(396003)(39860400002)(346002)(376002)(6666004)(4326008)(8676002)(86362001)(6916009)(8936002)(1076003)(66476007)(2616005)(478600001)(956004)(2906002)(66556008)(6506007)(36756003)(5660300002)(316002)(186003)(16526019)(66946007)(26005)(83380400001)(54906003)(6486002)(52116002)(6512007)(32563001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: VzqgNZYuctgctNzzMQOxFItGA0ylcrthGQtm+zFd7D1uYK+C6QFt6SYV31/i3yd8WNbF8893fnwbAcPGcedE06RDN2s3RcxRdYTbUVk20nlcWUF0cgAHK7B4XhFhzxzVPkvxxfFzqKn7g2bxtPMzJqJB5aKmMn+kXWoGyx+vmTWbevt7DzUMNvpHmZVqIiETiBzXvZEZvj+MWLrMYeB7fJSfU83p/T9D03PH0zq+VOYZnP+/B2UPf8x1/QXCul5e4g/nLOFmEMR6SrsosiXZWSXbchBAoPr3kXNB7rEv2yQcGMM+iQ4N0Qrr1aylwC94IyCH8BETwfnrAj5PYAjnnStfJ1CB+ig6w9+K6zk5bdAuv78VYJL6q9CXC2zNG4xm0ZQ1RtA1vZ2VkvKGf8IE8CYZJsxthHVe29HbFwlFxt+m+zGz8WnxI7GqqiroOu3Tt3uEI8EiMnOGKVC33gUj+rrCAPjzRN1DtYXBzDp/eMcQmN/apu25RLDc4D3Tz4U4XhRYGzakjTdyKLOhaQEzViodN9mXy4b6xHqtvex5p2kyivoCpNY0ITEtRa0YpTSJTu9XAlx89WEjQWnDI0pX1arY3jri9Rq8sN34OGWanw5anPPi1e/DDW6vqiEIii4knHQuQARI43h/7YIJj6/7hqlpA+JAJEErhsXd4QSQblu9pfZEribsQe5n0rrZQ1SD+3D9z1IVYk28s4Mdi/hRLOscAfLxjb0EHckD8Rjq7W7HOo16f2KXC4/hmqmk31HvuOia2Bo9TuEnVgGBI5OVspxIpoLwrI63Hf/KXM2Odi5GG3Bxo41+/PTmo3oMS5rmxVUUcd229VvETMpaSsw5Bb2OBpgO60YS1sK81i7MjWTsBbNtm8rWik48mKtamZ1g7mRTqQbakwrNELOFyqppHQ==
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2b4e0ead-0d8b-47e4-b105-08d891fcc4f1
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9694f9c4-60ab-4f6d-b8aa-08d891fcccee
 X-MS-Exchange-CrossTenant-AuthSource: AM6PR04MB4966.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Nov 2020 11:16:49.8323
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Nov 2020 11:17:03.1026
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: KQcpXHcAID2MAECyyOn19DzAkNtgX1tnBzZfVm+gwkdDRQY6M9J04UztT+lQ8rFe6dsAqMuzygRXg63ZPmTAGA==
+X-MS-Exchange-CrossTenant-UserPrincipalName: vZErEP5Knro2/wtRVZz2DOBGxP+2btNOmUgieuWUpt+RVG5uTOmB51/v3Zi05NiNkZTOXy2/FwszYCb6uq/RSA==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM6PR04MB5206
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-switch to new lpcg clock binding
+The DMA SS of MX8QM is mostly the same as the DMA part in MX8QXP ADMA SS
+while it has one more instance for each of LPUART, ADC and LPI2C. And unlike
+MX8QXP that flexcan clocks are shared between multiple CAN instances,
+MX8QM has separate flexcan clock slice.
 
+So we reuse the most part of common imx8-ss-dma.dtsi and add new things
+based on it.
+
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: devicetree@vger.kernel.org
+Cc: Shawn Guo <shawnguo@kernel.org>
+Cc: Sascha Hauer <kernel@pengutronix.de>
+Cc: Fabio Estevam <fabio.estevam@nxp.com>
 Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
 ---
 ChangeLog:
-v3->5:
- * no changes except rebase to latest kernel
 v2->v3:
  * use new clock-indices IDs
+ * update lpuart fallback compatible string to fsl,imx8qxp-lpuart
 v1->v2:
- * split scu clock changes
+ * change to the new two cell scu clk binding
 ---
- .../boot/dts/freescale/imx8-ss-adma.dtsi      | 46 ++++++++++---------
- .../boot/dts/freescale/imx8-ss-conn.dtsi      | 44 +++++++++---------
- .../boot/dts/freescale/imx8-ss-lsio.dtsi      | 13 ++++--
- .../boot/dts/freescale/imx8qxp-ss-adma.dtsi   |  4 --
- .../boot/dts/freescale/imx8qxp-ss-conn.dtsi   |  4 --
- .../boot/dts/freescale/imx8qxp-ss-lsio.dtsi   |  4 --
- arch/arm64/boot/dts/freescale/imx8qxp.dtsi    |  1 +
- 7 files changed, 56 insertions(+), 60 deletions(-)
+ .../boot/dts/freescale/imx8qm-ss-dma.dtsi     | 51 +++++++++++++++++++
+ 1 file changed, 51 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8qm-ss-dma.dtsi
 
-diff --git a/arch/arm64/boot/dts/freescale/imx8-ss-adma.dtsi b/arch/arm64/boot/dts/freescale/imx8-ss-adma.dtsi
-index 30f2089cfdc4..ff0696d80654 100644
---- a/arch/arm64/boot/dts/freescale/imx8-ss-adma.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8-ss-adma.dtsi
-@@ -20,13 +20,8 @@ adma_subsys: bus@59000000 {
- 		clock-output-names = "dma_ipg_clk";
- 	};
- 
--	/* LPCG clocks */
--	adma_lpcg: clock-controller@59000000 {
--		reg = <0x59000000 0x2000000>;
--		#clock-cells = <1>;
--	};
--
- 	dsp_lpcg: clock-controller@59580000 {
+diff --git a/arch/arm64/boot/dts/freescale/imx8qm-ss-dma.dtsi b/arch/arm64/boot/dts/freescale/imx8qm-ss-dma.dtsi
+new file mode 100644
+index 000000000000..bbe5f5ecfb92
+--- /dev/null
++++ b/arch/arm64/boot/dts/freescale/imx8qm-ss-dma.dtsi
+@@ -0,0 +1,51 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright 2018-2019 NXP
++ *	Dong Aisheng <aisheng.dong@nxp.com>
++ */
++
++&dma_subsys {
++	uart4_lpcg: clock-controller@5a4a0000 {
 +		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x59580000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&dma_ipg_clk>,
-@@ -41,6 +36,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	dsp_ram_lpcg: clock-controller@59590000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x59590000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&dma_ipg_clk>;
-@@ -52,9 +48,9 @@ adma_subsys: bus@59000000 {
- 	adma_dsp: dsp@596e8000 {
- 		compatible = "fsl,imx8qxp-dsp";
- 		reg = <0x596e8000 0x88000>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_DSP_IPG_CLK>,
--			<&adma_lpcg IMX_ADMA_LPCG_OCRAM_IPG_CLK>,
--			<&adma_lpcg IMX_ADMA_LPCG_DSP_CORE_CLK>;
-+		clocks = <&dsp_lpcg IMX_LPCG_CLK_5>,
-+			 <&dsp_ram_lpcg IMX_LPCG_CLK_4>,
-+			 <&dsp_lpcg IMX_LPCG_CLK_7>;
- 		clock-names = "ipg", "ocram", "core";
- 		power-domains = <&pd IMX_SC_R_MU_13A>,
- 			<&pd IMX_SC_R_MU_13B>,
-@@ -73,8 +69,8 @@ adma_subsys: bus@59000000 {
- 	adma_lpuart0: serial@5a060000 {
- 		reg = <0x5a060000 0x1000>;
- 		interrupts = <GIC_SPI 225 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_UART0_IPG_CLK>,
--			 <&adma_lpcg IMX_ADMA_LPCG_UART0_BAUD_CLK>;
-+		clocks = <&uart0_lpcg IMX_LPCG_CLK_4>,
-+			 <&uart0_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "ipg", "baud";
- 		power-domains = <&pd IMX_SC_R_UART_0>;
- 		status = "disabled";
-@@ -83,8 +79,8 @@ adma_subsys: bus@59000000 {
- 	adma_lpuart1: serial@5a070000 {
- 		reg = <0x5a070000 0x1000>;
- 		interrupts = <GIC_SPI 226 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_UART1_IPG_CLK>,
--			 <&adma_lpcg IMX_ADMA_LPCG_UART1_BAUD_CLK>;
-+		clocks = <&uart1_lpcg IMX_LPCG_CLK_4>,
-+			 <&uart1_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "ipg", "baud";
- 		power-domains = <&pd IMX_SC_R_UART_1>;
- 		status = "disabled";
-@@ -93,8 +89,8 @@ adma_subsys: bus@59000000 {
- 	adma_lpuart2: serial@5a080000 {
- 		reg = <0x5a080000 0x1000>;
- 		interrupts = <GIC_SPI 227 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_UART2_IPG_CLK>,
--			 <&adma_lpcg IMX_ADMA_LPCG_UART2_BAUD_CLK>;
-+		clocks = <&uart2_lpcg IMX_LPCG_CLK_4>,
-+			 <&uart2_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "ipg", "baud";
- 		power-domains = <&pd IMX_SC_R_UART_2>;
- 		status = "disabled";
-@@ -103,14 +99,15 @@ adma_subsys: bus@59000000 {
- 	adma_lpuart3: serial@5a090000 {
- 		reg = <0x5a090000 0x1000>;
- 		interrupts = <GIC_SPI 228 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_UART3_IPG_CLK>,
--			 <&adma_lpcg IMX_ADMA_LPCG_UART3_BAUD_CLK>;
-+		clocks = <&uart3_lpcg IMX_LPCG_CLK_4>,
-+			 <&uart3_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "ipg", "baud";
- 		power-domains = <&pd IMX_SC_R_UART_3>;
- 		status = "disabled";
- 	};
- 
- 	uart0_lpcg: clock-controller@5a460000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5a460000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_UART_0 IMX_SC_PM_CLK_PER>,
-@@ -122,6 +119,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	uart1_lpcg: clock-controller@5a470000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5a470000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_UART_1 IMX_SC_PM_CLK_PER>,
-@@ -133,6 +131,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	uart2_lpcg: clock-controller@5a480000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5a480000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_UART_2 IMX_SC_PM_CLK_PER>,
-@@ -144,6 +143,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	uart3_lpcg: clock-controller@5a490000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5a490000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_UART_3 IMX_SC_PM_CLK_PER>,
-@@ -157,7 +157,7 @@ adma_subsys: bus@59000000 {
- 	adma_i2c0: i2c@5a800000 {
- 		reg = <0x5a800000 0x4000>;
- 		interrupts = <GIC_SPI 220 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_I2C0_CLK>;
-+		clocks = <&i2c0_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "per";
- 		assigned-clocks = <&clk IMX_SC_R_I2C_0 IMX_SC_PM_CLK_PER>;
- 		assigned-clock-rates = <24000000>;
-@@ -168,7 +168,7 @@ adma_subsys: bus@59000000 {
- 	adma_i2c1: i2c@5a810000 {
- 		reg = <0x5a810000 0x4000>;
- 		interrupts = <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_I2C1_CLK>;
-+		clocks = <&i2c1_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "per";
- 		assigned-clocks = <&clk IMX_SC_R_I2C_1 IMX_SC_PM_CLK_PER>;
- 		assigned-clock-rates = <24000000>;
-@@ -179,7 +179,7 @@ adma_subsys: bus@59000000 {
- 	adma_i2c2: i2c@5a820000 {
- 		reg = <0x5a820000 0x4000>;
- 		interrupts = <GIC_SPI 222 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_I2C2_CLK>;
-+		clocks = <&i2c2_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "per";
- 		assigned-clocks = <&clk IMX_SC_R_I2C_2 IMX_SC_PM_CLK_PER>;
- 		assigned-clock-rates = <24000000>;
-@@ -190,7 +190,7 @@ adma_subsys: bus@59000000 {
- 	adma_i2c3: i2c@5a830000 {
- 		reg = <0x5a830000 0x4000>;
- 		interrupts = <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&adma_lpcg IMX_ADMA_LPCG_I2C3_CLK>;
-+		clocks = <&i2c3_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "per";
- 		assigned-clocks = <&clk IMX_SC_R_I2C_3 IMX_SC_PM_CLK_PER>;
- 		assigned-clock-rates = <24000000>;
-@@ -199,6 +199,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	i2c0_lpcg: clock-controller@5ac00000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5ac00000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_I2C_0 IMX_SC_PM_CLK_PER>,
-@@ -210,6 +211,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	i2c1_lpcg: clock-controller@5ac10000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5ac10000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_I2C_1 IMX_SC_PM_CLK_PER>,
-@@ -221,6 +223,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	i2c2_lpcg: clock-controller@5ac20000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5ac20000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_I2C_2 IMX_SC_PM_CLK_PER>,
-@@ -232,6 +235,7 @@ adma_subsys: bus@59000000 {
- 	};
- 
- 	i2c3_lpcg: clock-controller@5ac30000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5ac30000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_I2C_3 IMX_SC_PM_CLK_PER>,
-diff --git a/arch/arm64/boot/dts/freescale/imx8-ss-conn.dtsi b/arch/arm64/boot/dts/freescale/imx8-ss-conn.dtsi
-index 83945cc720e1..1ce40a1a092e 100644
---- a/arch/arm64/boot/dts/freescale/imx8-ss-conn.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8-ss-conn.dtsi
-@@ -37,9 +37,9 @@ conn_subsys: bus@5b000000 {
- 	usdhc1: mmc@5b010000 {
- 		interrupts = <GIC_SPI 232 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0x5b010000 0x10000>;
--		clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC0_IPG_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_SDHC0_PER_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_SDHC0_HCLK>;
-+		clocks = <&sdhc0_lpcg IMX_LPCG_CLK_4>,
-+			 <&sdhc0_lpcg IMX_LPCG_CLK_0>,
-+			 <&sdhc0_lpcg IMX_LPCG_CLK_5>;
- 		clock-names = "ipg", "per", "ahb";
- 		power-domains = <&pd IMX_SC_R_SDHC_0>;
- 		status = "disabled";
-@@ -48,9 +48,9 @@ conn_subsys: bus@5b000000 {
- 	usdhc2: mmc@5b020000 {
- 		interrupts = <GIC_SPI 233 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0x5b020000 0x10000>;
--		clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC1_IPG_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_SDHC1_PER_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_SDHC1_HCLK>;
-+		clocks = <&sdhc1_lpcg IMX_LPCG_CLK_4>,
-+			 <&sdhc1_lpcg IMX_LPCG_CLK_0>,
-+			 <&sdhc1_lpcg IMX_LPCG_CLK_5>;
- 		clock-names = "ipg", "per", "ahb";
- 		power-domains = <&pd IMX_SC_R_SDHC_1>;
- 		fsl,tuning-start-tap = <20>;
-@@ -61,9 +61,9 @@ conn_subsys: bus@5b000000 {
- 	usdhc3: mmc@5b030000 {
- 		interrupts = <GIC_SPI 234 IRQ_TYPE_LEVEL_HIGH>;
- 		reg = <0x5b030000 0x10000>;
--		clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC2_IPG_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_SDHC2_PER_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_SDHC2_HCLK>;
-+		clocks = <&sdhc2_lpcg IMX_LPCG_CLK_4>,
-+			 <&sdhc2_lpcg IMX_LPCG_CLK_0>,
-+			 <&sdhc2_lpcg IMX_LPCG_CLK_5>;
- 		clock-names = "ipg", "per", "ahb";
- 		power-domains = <&pd IMX_SC_R_SDHC_2>;
- 		status = "disabled";
-@@ -75,10 +75,10 @@ conn_subsys: bus@5b000000 {
- 			     <GIC_SPI 256 IRQ_TYPE_LEVEL_HIGH>,
- 			     <GIC_SPI 257 IRQ_TYPE_LEVEL_HIGH>,
- 			     <GIC_SPI 259 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&conn_lpcg IMX_CONN_LPCG_ENET0_IPG_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_ENET0_AHB_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_ENET0_TX_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_ENET0_ROOT_CLK>;
-+		clocks = <&enet0_lpcg IMX_LPCG_CLK_4>,
-+			 <&enet0_lpcg IMX_LPCG_CLK_2>,
-+			 <&enet0_lpcg IMX_LPCG_CLK_1>,
-+			 <&enet0_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "ipg", "ahb", "enet_clk_ref", "ptp";
- 		fsl,num-tx-queues=<3>;
- 		fsl,num-rx-queues=<3>;
-@@ -92,10 +92,10 @@ conn_subsys: bus@5b000000 {
- 				<GIC_SPI 260 IRQ_TYPE_LEVEL_HIGH>,
- 				<GIC_SPI 261 IRQ_TYPE_LEVEL_HIGH>,
- 				<GIC_SPI 263 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&conn_lpcg IMX_CONN_LPCG_ENET1_IPG_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_ENET1_AHB_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_ENET1_TX_CLK>,
--			 <&conn_lpcg IMX_CONN_LPCG_ENET1_ROOT_CLK>;
-+		clocks = <&enet1_lpcg IMX_LPCG_CLK_4>,
-+			 <&enet1_lpcg IMX_LPCG_CLK_2>,
-+			 <&enet1_lpcg IMX_LPCG_CLK_1>,
-+			 <&enet1_lpcg IMX_LPCG_CLK_0>;
- 		clock-names = "ipg", "ahb", "enet_clk_ref", "ptp";
- 		fsl,num-tx-queues=<3>;
- 		fsl,num-rx-queues=<3>;
-@@ -104,12 +104,8 @@ conn_subsys: bus@5b000000 {
- 	};
- 
- 	/* LPCG clocks */
--	conn_lpcg: clock-controller-legacy@5b200000 {
--		reg = <0x5b200000 0xb0000>;
--		#clock-cells = <1>;
--	};
--
- 	sdhc0_lpcg: clock-controller@5b200000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5b200000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_SDHC_0 IMX_SC_PM_CLK_PER>,
-@@ -123,6 +119,7 @@ conn_subsys: bus@5b000000 {
- 	};
- 
- 	sdhc1_lpcg: clock-controller@5b210000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5b210000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_SDHC_1 IMX_SC_PM_CLK_PER>,
-@@ -136,6 +133,7 @@ conn_subsys: bus@5b000000 {
- 	};
- 
- 	sdhc2_lpcg: clock-controller@5b220000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5b220000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_SDHC_2 IMX_SC_PM_CLK_PER>,
-@@ -149,6 +147,7 @@ conn_subsys: bus@5b000000 {
- 	};
- 
- 	enet0_lpcg: clock-controller@5b230000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5b230000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_ENET_0 IMX_SC_PM_CLK_PER>,
-@@ -166,6 +165,7 @@ conn_subsys: bus@5b000000 {
- 	};
- 
- 	enet1_lpcg: clock-controller@5b240000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5b240000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_ENET_1 IMX_SC_PM_CLK_PER>,
-diff --git a/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi b/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
-index 813dbac71d10..ee4e585a9c39 100644
---- a/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8-ss-lsio.dtsi
-@@ -149,12 +149,8 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	/* LPCG clocks */
--	lsio_lpcg: clock-controller-legacy@5d400000 {
--		reg = <0x5d400000 0x400000>;
--		#clock-cells = <1>;
--	};
--
- 	pwm0_lpcg: clock-controller@5d400000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d400000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_0 IMX_SC_PM_CLK_PER>,
-@@ -174,6 +170,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm1_lpcg: clock-controller@5d410000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d410000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_1 IMX_SC_PM_CLK_PER>,
-@@ -193,6 +190,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm2_lpcg: clock-controller@5d420000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d420000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_2 IMX_SC_PM_CLK_PER>,
-@@ -212,6 +210,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm3_lpcg: clock-controller@5d430000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d430000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_3 IMX_SC_PM_CLK_PER>,
-@@ -231,6 +230,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm4_lpcg: clock-controller@5d440000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d440000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_4 IMX_SC_PM_CLK_PER>,
-@@ -250,6 +250,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm5_lpcg: clock-controller@5d450000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d450000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_5 IMX_SC_PM_CLK_PER>,
-@@ -269,6 +270,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm6_lpcg: clock-controller@5d460000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d460000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_6 IMX_SC_PM_CLK_PER>,
-@@ -288,6 +290,7 @@ lsio_subsys: bus@5d000000 {
- 	};
- 
- 	pwm7_lpcg: clock-controller@5d470000 {
-+		compatible = "fsl,imx8qxp-lpcg";
- 		reg = <0x5d470000 0x10000>;
- 		#clock-cells = <1>;
- 		clocks = <&clk IMX_SC_R_PWM_7 IMX_SC_PM_CLK_PER>,
-diff --git a/arch/arm64/boot/dts/freescale/imx8qxp-ss-adma.dtsi b/arch/arm64/boot/dts/freescale/imx8qxp-ss-adma.dtsi
-index 64e51dda2dfd..3dc3238e7ca6 100644
---- a/arch/arm64/boot/dts/freescale/imx8qxp-ss-adma.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8qxp-ss-adma.dtsi
-@@ -4,10 +4,6 @@
-  *	Dong Aisheng <aisheng.dong@nxp.com>
-  */
- 
--&adma_lpcg {
--	compatible = "fsl,imx8qxp-lpcg-adma";
--};
--
- &adma_lpuart0 {
- 	compatible = "fsl,imx8qxp-lpuart", "fsl,imx7ulp-lpuart";
- };
-diff --git a/arch/arm64/boot/dts/freescale/imx8qxp-ss-conn.dtsi b/arch/arm64/boot/dts/freescale/imx8qxp-ss-conn.dtsi
-index bed3934ca029..f5f58959f65c 100644
---- a/arch/arm64/boot/dts/freescale/imx8qxp-ss-conn.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8qxp-ss-conn.dtsi
-@@ -4,10 +4,6 @@
-  *	Dong Aisheng <aisheng.dong@nxp.com>
-  */
- 
--&conn_lpcg {
--	compatible = "fsl,imx8qxp-lpcg-conn";
--};
--
- &usdhc1 {
- 	compatible = "fsl,imx8qxp-usdhc", "fsl,imx7d-usdhc";
- };
-diff --git a/arch/arm64/boot/dts/freescale/imx8qxp-ss-lsio.dtsi b/arch/arm64/boot/dts/freescale/imx8qxp-ss-lsio.dtsi
-index 82cebf04fca9..11395479ffc0 100644
---- a/arch/arm64/boot/dts/freescale/imx8qxp-ss-lsio.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8qxp-ss-lsio.dtsi
-@@ -59,7 +59,3 @@
- &lsio_mu13 {
- 	compatible = "fsl,imx8qxp-mu", "fsl,imx6sx-mu";
- };
--
--&lsio_lpcg {
--	compatible = "fsl,imx8qxp-lpcg-lsio";
--};
-diff --git a/arch/arm64/boot/dts/freescale/imx8qxp.dtsi b/arch/arm64/boot/dts/freescale/imx8qxp.dtsi
-index 095d3f69a9b7..9513bb7b5c89 100644
---- a/arch/arm64/boot/dts/freescale/imx8qxp.dtsi
-+++ b/arch/arm64/boot/dts/freescale/imx8qxp.dtsi
-@@ -6,6 +6,7 @@
-  */
- 
- #include <dt-bindings/clock/imx8-clock.h>
-+#include <dt-bindings/clock/imx8-lpcg.h>
- #include <dt-bindings/firmware/imx/rsrc.h>
- #include <dt-bindings/gpio/gpio.h>
- #include <dt-bindings/input/input.h>
++		reg = <0x5a4a0000 0x10000>;
++		#clock-cells = <1>;
++		clocks = <&clk IMX_SC_R_UART_4 IMX_SC_PM_CLK_PER>,
++			 <&dma_ipg_clk>;
++		clock-indices = <IMX_LPCG_CLK_0>, <IMX_LPCG_CLK_4>;
++		clock-output-names = "uart4_lpcg_baud_clk",
++				     "uart4_lpcg_ipg_clk";
++		power-domains = <&pd IMX_SC_R_UART_4>;
++	};
++};
++
++&lpuart0 {
++	compatible = "fsl,imx8qm-lpuart", "fsl,imx8qxp-lpuart";
++};
++
++&lpuart1 {
++	compatible = "fsl,imx8qm-lpuart", "fsl,imx8qxp-lpuart";
++};
++
++&lpuart2 {
++	compatible = "fsl,imx8qm-lpuart", "fsl,imx8qxp-lpuart";
++};
++
++&lpuart3 {
++	compatible = "fsl,imx8qm-lpuart", "fsl,imx8qxp-lpuart";
++};
++
++&i2c0 {
++	compatible = "fsl,imx8qm-lpi2c", "fsl,imx7ulp-lpi2c";
++};
++
++&i2c1 {
++	compatible = "fsl,imx8qm-lpi2c", "fsl,imx7ulp-lpi2c";
++};
++
++&i2c2 {
++	compatible = "fsl,imx8qm-lpi2c", "fsl,imx7ulp-lpi2c";
++};
++
++&i2c3 {
++	compatible = "fsl,imx8qm-lpi2c", "fsl,imx7ulp-lpi2c";
++};
 -- 
 2.23.0
 
