@@ -8,46 +8,46 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FA3BC63777
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:16:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24E4EC64E75
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:17:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7BC221D7E
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:16:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C024420DD4
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 11:17:00 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="n6kv38KN"
+	dkim=pass (1024-bit key) header.d=nxp.com header.i=@nxp.com header.b="SHo1wufc"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388881AbgKZLQ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Nov 2020 06:16:58 -0500
+        id S2388830AbgKZLRA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Nov 2020 06:17:00 -0500
 Received: from mail-vi1eur05on2058.outbound.protection.outlook.com ([40.107.21.58]:12768
         "EHLO EUR05-VI1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2388928AbgKZLQ5 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Nov 2020 06:16:57 -0500
+        id S2388936AbgKZLQ7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Nov 2020 06:16:59 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=MdLB65Oqk9pi46W1wO+MroV3/o7IlwKn7I0qs7U0zHj8JlgQpmZuCpLOl5g8upiPCQ46S2klNPJ9dV3HFXnIcXAX2LP6KyigwZacSC+Y9XGrYXhUZtUTCK8yUYC/yI0r7N+aONpdQkbhGZ8aqNZhjg92kHJaV1tuMqp6VC7T46OM7Zo1gjA7vrhrmRcTWXZPWHTHDn/B18iCuEHkSi2gIVtIT63pDPtlQcNpUVGtEMBWroqB6ggpKpZNreK1wQ4uTSqPk+xeBEjdOsM0hJ87CEQ3+AZ5yprKFUygIxM7J4A0/U/vDEX+ATz7Svt/T63y6fiORtTxJDWx8ukETDdtzg==
+ b=IafMVhInNoe2YRTulNdjQCY4hC89ti7R7Jsybq8lsbGYp4GmcIgru11EAkgk/5higYiSx/WcUR+hlTDBenQeOHS5C/vgeg+GHXYsIUP1qkhucem+VB8vPCpw+0X4AxIH+4yIHmofaZySWcqGX+B9V7qtcYqGnRiDZWcPi0By+QZLMxGygo0IW/Vr3CI1hbRBcgyMcO5yYFfmme47gG4MYCezj2MX5RzOAY9jbnqmztxXY2NFoYeq4Es0ae34JlF96a2a6Up4h7ElDyw+jfWqk2BxwLa/IgyGJ8GCTn/wreLO5sZTmWC60bdC5b8FjQI4KkoaUSM0U4iSWDXHfVfE7A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ONx5wn6x0u8tpu4gVV4d5pw+v84cjQwPsCFOz89Ozgw=;
- b=Bez5C9jgVFKIWDNoXyzoudIDlLbNqwSk5XdQDrVDMy5zECBsvmd0d4lcAlnHw98BPI/tH0NanajPqklOjJhPZaVgiCBASEosV7mI1yb5vZm4iYJYZKQ7txCd66BPTuD01NqmSqTM4l/csRrudI3/8zHBe8/98vGPfknSxJCYf02Bm/bNGUX814aw8E1cvgA/G22BqLol/XvtBiCKthdmJ7be/uxUquchUlYBYQiSLHQADWNybnBN+K1EpVhtB46Woj2XYr/66a51iAsLGIQiali+hm5gZgO35M56tEpxKFKfL9iJtjlrfrY5I5+QAZIZYzbQJ6q6A8Y+pbxpBXqQow==
+ bh=PxX8Qw9CbePVxHtgOH8i2GgkUkfBvrOcRM8gNDngs/Q=;
+ b=Vs/XBfOMhDkHUV3ztC+7drz8PvOxAp/RmRq3RaLXg5+GS8GCZ/LU8McYuQKHMSkn4XlWuZ6+6/ti2in/cEvC1N0d0wxV7zSfCIqTAqjMfA2gWZi2CE9SVmeggb9tx830IPSk1tpliNmx6JREBVRE829ERK6VKv4G22TXnYR/Z/+Dwy0bNgT1D3SAHXPnWAp/D2NgPEP8N6JA7m7K23Uf5ZkLBLRKxPMdhQRqYIMTj66LDKqrIGQFHqOxz/GAU7jYQPY/HJG+5/5xXrzheNNQAbmXuaYhVGAiBkouYdpq78K7YpgGtHQ+D6Zr/PUHE0IgFxq5wG18NdqEv7i/Q5i2+g==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ONx5wn6x0u8tpu4gVV4d5pw+v84cjQwPsCFOz89Ozgw=;
- b=n6kv38KNqylwLQ6D7GPTF+urCdot2aF70x4GPAbWx2EKrpCJgxfc/gGbAWbriAQ87P3HaC8G8r9jwxnuyGntcGQ6cDyK88AUGujmhTGIo7LVGvuAQtiCHEYnDxjPZyQkKjHKssA4K3kpInmVS1hrupm0vX33Xn6VWmIE3dyJuhI=
+ bh=PxX8Qw9CbePVxHtgOH8i2GgkUkfBvrOcRM8gNDngs/Q=;
+ b=SHo1wufcB7bSQ4y8K+FGqB3L8wb0Q56pfadCsRoq/DMLQr/4TYDrZag3M9zCXen3OhLriCnQFEIwJChgRc5XqWv/lfrIPUsJR4UxtWbo0PASMLUS0wyBotWrO5RNLFbtuv5+Jania4lvv8xHQiGHxF4t7855luRtS+g4EVBwJSw=
 Authentication-Results: vger.kernel.org; dkim=none (message not signed)
  header.d=none;vger.kernel.org; dmarc=none action=none header.from=nxp.com;
 Received: from AM6PR04MB4966.eurprd04.prod.outlook.com (2603:10a6:20b:2::14)
  by AM7PR04MB6869.eurprd04.prod.outlook.com (2603:10a6:20b:dc::11) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3611.20; Thu, 26 Nov
- 2020 11:16:53 +0000
+ 2020 11:16:56 +0000
 Received: from AM6PR04MB4966.eurprd04.prod.outlook.com
  ([fe80::3cfc:a92e:75ad:ce4a]) by AM6PR04MB4966.eurprd04.prod.outlook.com
  ([fe80::3cfc:a92e:75ad:ce4a%3]) with mapi id 15.20.3611.025; Thu, 26 Nov 2020
- 11:16:53 +0000
+ 11:16:56 +0000
 From:   Dong Aisheng <aisheng.dong@nxp.com>
 To:     devicetree@vger.kernel.org
 Cc:     linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
@@ -57,9 +57,9 @@ Cc:     linux-arm-kernel@lists.infradead.org, linux-imx@nxp.com,
         Shawn Guo <shawnguo@kernel.org>,
         Sascha Hauer <kernel@pengutronix.de>,
         Fabio Estevam <fabio.estevam@nxp.com>
-Subject: [PATCH RESEND v4 12/18] arm64: dts: imx8qm: add lsio ss support
-Date:   Thu, 26 Nov 2020 18:58:54 +0800
-Message-Id: <20201126105900.26658-13-aisheng.dong@nxp.com>
+Subject: [PATCH RESEND v4 13/18] arm64: dts: imx8qm: add conn ss support
+Date:   Thu, 26 Nov 2020 18:58:55 +0800
+Message-Id: <20201126105900.26658-14-aisheng.dong@nxp.com>
 X-Mailer: git-send-email 2.23.0
 In-Reply-To: <20201126105900.26658-1-aisheng.dong@nxp.com>
 References: <20201126105900.26658-1-aisheng.dong@nxp.com>
@@ -71,37 +71,38 @@ X-ClientProxiedBy: SG2PR03CA0160.apcprd03.prod.outlook.com
  (2603:10a6:20b:2::14)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from b29396-OptiPlex-7040.ap.freescale.net (119.31.174.66) by SG2PR03CA0160.apcprd03.prod.outlook.com (2603:1096:4:c9::15) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3632.7 via Frontend Transport; Thu, 26 Nov 2020 11:16:50 +0000
+Received: from b29396-OptiPlex-7040.ap.freescale.net (119.31.174.66) by SG2PR03CA0160.apcprd03.prod.outlook.com (2603:1096:4:c9::15) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3632.7 via Frontend Transport; Thu, 26 Nov 2020 11:16:53 +0000
 X-MS-PublicTrafficType: Email
 X-MS-Office365-Filtering-HT: Tenant
-X-MS-Office365-Filtering-Correlation-Id: 3239f9d6-c9db-43dc-bf73-08d891fcc707
+X-MS-Office365-Filtering-Correlation-Id: 2dc94ddd-59b5-4dfa-8300-08d891fcc92d
 X-MS-TrafficTypeDiagnostic: AM7PR04MB6869:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <AM7PR04MB68692B30B2E3D8FDA248042C80F90@AM7PR04MB6869.eurprd04.prod.outlook.com>
+X-Microsoft-Antispam-PRVS: <AM7PR04MB6869A7D008A18516FF9F487780F90@AM7PR04MB6869.eurprd04.prod.outlook.com>
 X-MS-Oob-TLC-OOBClassifiers: OLM:3513;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: mVns91qFKOjxBANegcbvF6M2N2LPlKXS4oqFHZaoFT+Akh6LZQuuAmkYMSlMFz6/ypzqOlENfyErBcUrpIK0yi3n+KDPnrQ6We6ga5tMAOoljkHGcoHxDoC6F4h502rrJ15r5ELmbu4+eFufXtHyXv8Tvgrj4TzcF9bj9vQX7JKCcIvijIznmTgC5r1ODOGbYxksrnGAFsXbEc5V+oQZC3VjArEynIYG1nRRK8IB6XXmeBcO5sb5dsW7SUygJdp0kHsiglzqRgGUOyOxkwauypuhs1fCuSl8LFrk06Egf9DTg9hdxwk/uY2TqoT/D/LdqhP7uBLSllJGmk09J6VNMEVA0ViadzfBtl2nZ57LBNU8oXft2RXI/if2Q+ln/Q+g
+X-Microsoft-Antispam-Message-Info: RTs9PyCXQyhObVousEQhC72fahkUCgIyPmVq/LR7+Wi1G+UrT3UI+r2JQA8n2VLfQ+BEYNiY2asyc1rxyP4rFSsfRYLsWGNNpN1TjqoM1XdHqWdkwc207ku5YLEST0MBx7K1OYVXo9xajclYoWHChP6wWVlyud/BOCbbjWLmYHQr0ZkHOIEsuRN+Z/WJewiAv6wbQqRh0q5z85BnK0u2zuN4mfIBDDdt5fH0Emw/7Vv/CT/dAMW009Tdvcoj9EAQJU5sPGTv+KbRcdBrom/fgG9vCthZPF7EO4b+rGsuAWayCBaiAWJBqaGXlHpJDoNp6hqyAx5bKTT/ANSCGbdW6ytJ2R2VP7vfXzBZWBdCpc1/uVqUCtHcoD0tYzrcnp1R
 X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM6PR04MB4966.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(366004)(346002)(376002)(136003)(39860400002)(6916009)(4326008)(478600001)(6506007)(316002)(956004)(8936002)(8676002)(6486002)(2616005)(6512007)(16526019)(83380400001)(186003)(86362001)(66946007)(36756003)(1076003)(66556008)(2906002)(54906003)(52116002)(5660300002)(26005)(66476007)(32563001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: hoLNleAeHBonQifEJ5jqRvXGiw4sAD7gFOXqlZDBj1408PejgJdeFfr0K1XiPgOLLIZHTLTzjPdJBiX4XfwnhgGpv6T7Esvjrh3zND+GAT9Ze1ZbioGaIWq8D0XaCJ2OMJW0Da4OeAehpGmibEK9gjMKEI8H7J93el7dF4u3ipWWV+lq8K1KhxFi+5vS1QdIlyQcj5inHfELePyoMpOMVz3c77s/oDjketLVNvrs5s6VgGSvfkzSzvFvjTGaS+mi8sPTbXqe0RAdrtg2dRNxIDCo9a8ChbGHpMpVh0wgwu6/8gfMMRZPXTPZk/KmCLbA+2PUs1FWHN3MNFseSWEUB6PMLKG9ELeZpNFKb2Q6bll9wnyP4iOPAuKVRc/VAAVw478exjHqWY1AoYl5qeAByqrpffYtVqGuc2XHxGmm2IM6c2Eyq1cqP+u7AFpgAU6SUmKVaqRapVlp1oDwVU64O3ycsle8Qot7c6QwYMAwiSIyiFHHEQlS/qbkFO1e8uo6IRNS/87rxpTEcJzil0HIxivLpjJTDHGNicUAMeQcc0YJh+XGbz/4IQv9UyNnOopc754s6DV4tySEg1C5QJoBJgRFEFvg9GbrwPkM2IAERRdj8mHD08MuywKOHYNXL2Il+DjbMN7x5iHVgOFL4LAkFLM1cBXzq4asL3t6KcVGhR4tnjanA91YiKKEG1ahzh5amMHhdjQqsgH37yFE9ohRgUKxTV1zEEVfQ3T79QpooDz0u7SCEN2TIRlou3MLDJHlJLrAysFS/qpo+IwJIMYV0bZO9U3SrYWmXPQYim8VA9eLtNrdul1x81ZvM+C4Zl01qeYfr8QdR2vfkMqBmeYWB154okkuWSrL1JAQnjj/ec4AcKaFTLAN9sCrwG24x/70qdyDCq4SxaBiZxzGwIQ0bA==
+X-MS-Exchange-AntiSpam-MessageData: HZ4wOlbumDBJOSW2w+w1FYaF26WBZJYNu3x2tx1DW4BXxJulMhmrkBY7A3DfzilR1HGazYVHaHpHDMM5us+KYn9RLgdDtWa57A360xy0+CV56hMx0SHVOLklinRG6M3vV0+WE+chZ/YVqP3Hr9FeFy7B9VU88V3qLgAyCj9xDTETsUy4tvMHoXteWhjg1lHkabYnvO1evundYiCOhZ9BNkhrcp8ySRMOCXzDQq17YMiEFrQhEQB9QoBQ1EjLpHzUb1Xv8O7n+JlcDYAv+++Go6dnkq9kVs1w3vx45Y0Z51JKuV7i37hY9RWTAhPJCwTagpl36vg6U4o98EDk40mpJOJsCTOBS4oYeRYVObWcIwIJ4ICJzzJ4r8MVWQ2s7mppqZF2rCVzhbVL0kANPC/rsSP16spuZulvHcc2WOBx5doHwwRpkC9Vv7cv0rXS04OsoQq+mJdc/s0H0N3449U+9iVLGpYORdiuZKja09bkaSSOynmR//JCX2YMebUS8YuEulDvGS3wIlnorK+2adQlr+kqtkFkS8xanBgjRvy5zG/RVptWQXUXlLDiKzI34ZkA88ufLwoCssUHe+8jSKgUgXNYMr/TqM4rOV1gV2AHDOZp9WiMj/opmNPkxYnfZobGmvwZ8bhnXAPteZXqNQYO0pmXcthDaV2p9id+hS7mCLf4MYdznrAvQOx9YjJhsfVQllwqseGdoy2NPtI8qDRKg36KGEYUa4a4iv3OtFG0X1D/5jRc2bI2ZbQ3ukN6rnUz1S3tYxK7aczkgPS20bohHCgJmr/OuP9+mKnTcby7iBLsy60GXnAaJhHTIm2aT+iA6aIt+WMda3oqu70KqhztJoS1OFMTdU0JVT5r+oaMbScgWtEIsA6YZ5Oi2mYuK16dTA5nWUuiTevB/2b/rhq+RQ==
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3239f9d6-c9db-43dc-bf73-08d891fcc707
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2dc94ddd-59b5-4dfa-8300-08d891fcc92d
 X-MS-Exchange-CrossTenant-AuthSource: AM6PR04MB4966.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Nov 2020 11:16:53.3722
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Nov 2020 11:16:56.7833
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Oz4T8kUXx3bpc8TEQYAjL11263+lSqoCD/4oHgbGF+H6iLKIblvNQDlYFFSXVncV5N4SjJlMNpy4nzBVNWJt6Q==
+X-MS-Exchange-CrossTenant-UserPrincipalName: mGa7IrR27vAUXweQTFuxP7Dps0NEt7DTsq2oG1ohwZj5Z40XaUaFWYgJFtVDzFpl6kyhuXxBhyd3HQ3320Dt/A==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM7PR04MB6869
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The LSIO SS of MX8QM is exactly the same as MX8QXP. So we can fully
-reuse the exist LSIO SS dtsi. Add <soc>-ss-lsio.dtsi with compatible
-string updated according to imx8-ss-lsio.dtsi.
+The CONN SS of MX8QM is mostly the same as MX8QXP except it has one more
+USB HSIC module support. So we can fully reuse the exist CONN SS dtsi.
+Add <soc>-ss-conn.dtsi with compatible string updated according to
+imx8-ss-conn.dtsi.
 
 Cc: Rob Herring <robh+dt@kernel.org>
 Cc: Mark Rutland <mark.rutland@arm.com>
@@ -117,76 +118,36 @@ v2->v3:
 v1->v2:
  * change to the new two cell scu clk binding
 ---
- .../boot/dts/freescale/imx8qm-ss-lsio.dtsi    | 61 +++++++++++++++++++
- 1 file changed, 61 insertions(+)
- create mode 100644 arch/arm64/boot/dts/freescale/imx8qm-ss-lsio.dtsi
+ .../boot/dts/freescale/imx8qm-ss-conn.dtsi    | 21 +++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/freescale/imx8qm-ss-conn.dtsi
 
-diff --git a/arch/arm64/boot/dts/freescale/imx8qm-ss-lsio.dtsi b/arch/arm64/boot/dts/freescale/imx8qm-ss-lsio.dtsi
+diff --git a/arch/arm64/boot/dts/freescale/imx8qm-ss-conn.dtsi b/arch/arm64/boot/dts/freescale/imx8qm-ss-conn.dtsi
 new file mode 100644
-index 000000000000..30896610c654
+index 000000000000..dc47c5c80eae
 --- /dev/null
-+++ b/arch/arm64/boot/dts/freescale/imx8qm-ss-lsio.dtsi
-@@ -0,0 +1,61 @@
++++ b/arch/arm64/boot/dts/freescale/imx8qm-ss-conn.dtsi
+@@ -0,0 +1,21 @@
 +// SPDX-License-Identifier: GPL-2.0+
 +/*
 + * Copyright 2019-2020 NXP
 + *	Dong Aisheng <aisheng.dong@nxp.com>
 + */
 +
-+&lsio_gpio0 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
++&fec1 {
++	compatible = "fsl,imx8qm-fec", "fsl,imx6sx-fec";
 +};
 +
-+&lsio_gpio1 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
++&fec2 {
++	compatible = "fsl,imx8qm-fec", "fsl,imx6sx-fec";
 +};
 +
-+&lsio_gpio2 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
++&usdhc1 {
++	compatible = "fsl,imx8qm-usdhc", "fsl,imx7d-usdhc";
 +};
 +
-+&lsio_gpio3 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
-+};
-+
-+&lsio_gpio4 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
-+};
-+
-+&lsio_gpio5 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
-+};
-+
-+&lsio_gpio6 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
-+};
-+
-+&lsio_gpio7 {
-+	compatible = "fsl,imx8qm-gpio", "fsl,imx35-gpio";
-+};
-+
-+&lsio_mu0 {
-+	compatible = "fsl,imx8-mu-scu", "fsl,imx8qm-mu", "fsl,imx6sx-mu";
-+};
-+
-+&lsio_mu1 {
-+	compatible = "fsl,imx8-mu-scu", "fsl,imx8qm-mu", "fsl,imx6sx-mu";
-+};
-+
-+&lsio_mu2 {
-+	compatible = "fsl,imx8-mu-scu", "fsl,imx8qm-mu", "fsl,imx6sx-mu";
-+};
-+
-+&lsio_mu3 {
-+	compatible = "fsl,imx8-mu-scu", "fsl,imx8qm-mu", "fsl,imx6sx-mu";
-+};
-+
-+&lsio_mu4 {
-+	compatible = "fsl,imx8-mu-scu", "fsl,imx8qm-mu", "fsl,imx6sx-mu";
-+};
-+
-+&lsio_mu13 {
-+	compatible = "fsl,imx8qm-mu", "fsl,imx6sx-mu";
++&usdhc2 {
++	compatible = "fsl,imx8qm-usdhc", "fsl,imx7d-usdhc";
 +};
 -- 
 2.23.0
