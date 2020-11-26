@@ -2,80 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76BF5C63798
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 07:27:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A9F3C56202
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 08:15:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1114A21D7F
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 07:27:28 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=linuxfoundation.org header.i=@linuxfoundation.org header.b="S79InGQM"
+	by mail.kernel.org (Postfix) with ESMTP id 2D63520857
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Nov 2020 08:15:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730004AbgKZH11 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Nov 2020 02:27:27 -0500
-Received: from mail.kernel.org ([198.145.29.99]:42662 "EHLO mail.kernel.org"
+        id S1729809AbgKZIPB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Nov 2020 03:15:01 -0500
+Received: from mga14.intel.com ([192.55.52.115]:54185 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727690AbgKZH11 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 26 Nov 2020 02:27:27 -0500
-Received: from localhost (83-86-74-64.cable.dynamic.v4.ziggo.nl [83.86.74.64])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 4C3A421D81;
-        Thu, 26 Nov 2020 07:27:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1606375646;
-        bh=Jhy6nXSwlJkOlHBD5C6ynntz3eKzwcrAp3/DgIorPoU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=S79InGQMVvFh4rAkwAFhZj7M3WPxwS7zPptn4W+G6tsAN5RBwIUWFuSUSBLt5lCCj
-         rOFlvP2p+A4ZzyPGfFt7uqwadTGggoR4AuCl41i3ols3iz9Dbzg1y1rvdNzynUQCCA
-         X8Fx72750pIXo9IB0pMKWzBe9jL9PDpiP0jaC7wo=
-Date:   Thu, 26 Nov 2020 08:28:31 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Arend Van Spriel <arend.vanspriel@broadcom.com>
-Cc:     Brian O'Keefe <bokeefe@alum.wpi.edu>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org,
-        Hans de Goede <hdegoede@redhat.com>,
-        Larry Finger <Larry.Finger@lwfinger.net>
-Subject: Re: [PATCH 1/2] mmc: sdio: Move SDIO IDs from rtl8723bs, driver to
- common include file
-Message-ID: <X79ZH+COJbxqd+eJ@kroah.com>
-References: <16529bfd-0308-5da9-f7ce-4ffa9f77b4d0@alum.wpi.edu>
- <a646a587-25ae-2395-a169-3742ba7f9723@alum.wpi.edu>
- <X76svnTHv34FJaHI@kroah.com>
- <1760357a038.279b.9b12b7fc0a3841636cfb5e919b41b954@broadcom.com>
+        id S1729107AbgKZIPB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Nov 2020 03:15:01 -0500
+IronPort-SDR: o73TE2EC9GsrGxmSwP43h4r04R/Aio1KUS6l1x7jURtl8CT7OoiEoOmTqhdi+BfIfozznZTMjo
+ Fz3rBlWa/hpA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9816"; a="171474067"
+X-IronPort-AV: E=Sophos;i="5.78,371,1599548400"; 
+   d="scan'208";a="171474067"
+X-Amp-Result: SKIPPED(no attachment in message)
+X-Amp-File-Uploaded: False
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Nov 2020 00:15:01 -0800
+IronPort-SDR: GT+jV+6JhxKeFSmlKrsBn6C4JcsItW6B4g5fgGn0cw9Gud+1a99YgD1DichrH3SosrivxQU61G
+ ggQYIjdtPqIw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.78,371,1599548400"; 
+   d="scan'208";a="362720839"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
+  by fmsmga004.fm.intel.com with ESMTP; 26 Nov 2020 00:14:59 -0800
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [RFC PATCH v3.1 08/27] mmc: sdhci: add a kernel configuration for
+ enabling UHS-II support
+To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw
+References: <20201106022726.19831-1-takahiro.akashi@linaro.org>
+ <20201106022726.19831-9-takahiro.akashi@linaro.org>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <98a9d355-80fe-ad48-e5c4-552e88e1c499@intel.com>
+Date:   Thu, 26 Nov 2020 10:14:36 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1760357a038.279b.9b12b7fc0a3841636cfb5e919b41b954@broadcom.com>
+In-Reply-To: <20201106022726.19831-9-takahiro.akashi@linaro.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 26, 2020 at 07:57:23AM +0100, Arend Van Spriel wrote:
-> On November 25, 2020 8:13:07 PM Greg Kroah-Hartman
-> <gregkh@linuxfoundation.org> wrote:
-> 
-> > On Wed, Nov 25, 2020 at 01:33:00PM -0500, Brian O'Keefe wrote:
-> > > Macro names were derived from the Windows driver, as that was the best
-> > > available source.
-> > 
-> > Why move these?  What does this help with?
-> 
-> Hi Greg,
-> 
-> Most if not all SDIO-based (wifi) drivers in mainline have their venid and
-> devid definitions in that header file. So seems like a good idea to me, but
-> maybe not so for a staging driver?
+On 6/11/20 4:27 am, AKASHI Takahiro wrote:
+> This kernel configuration, CONFIG_MMC_SDHCI_UHS2, will be used
+> in the following commits to indicate UHS-II specific code in sdhci
+> controllers.
 
-If the driver ever gets moved out, maybe do it then as part of that
-effort.  I haven't seen that happening, so I would recommend just
-leaving this alone for now.
+This patch needs to be combined with a patch that actually uses the config.
 
-thanks,
+> 
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> ---
+>  drivers/mmc/host/Kconfig | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index 31481c9fcc2e..5ca9ac03db40 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -89,6 +89,15 @@ config MMC_SDHCI_BIG_ENDIAN_32BIT_BYTE_SWAPPER
+>  
+>  	  This is the case for the Nintendo Wii SDHCI.
+>  
+> +config MMC_SDHCI_UHS2
+> +	tristate "UHS2 support on SDHCI controller"
+> +	depends on MMC_SDHCI
+> +	help
+> +	  This option is selected by SDHCI controller drivers that want to
+> +	  support UHS2-capable devices.
+> +
+> +	  If you have a controller with this feature, say Y or M here.
+> +
+>  config MMC_SDHCI_PCI
+>  	tristate "SDHCI support on PCI bus"
+>  	depends on MMC_SDHCI && PCI
+> 
 
-greg k-h
