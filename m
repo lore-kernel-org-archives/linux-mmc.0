@@ -2,80 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 106EAC2D0E4
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Nov 2020 03:50:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E914C2D0E4
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Nov 2020 04:40:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A3E57221FF
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Nov 2020 03:50:11 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mzUnt9I3"
+	by mail.kernel.org (Postfix) with ESMTP id 06CF52222C
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Nov 2020 04:40:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727953AbgK0DuL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Nov 2020 22:50:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47954 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726874AbgK0DuL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2020 22:50:11 -0500
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56A92C0613D1
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2020 19:50:09 -0800 (PST)
-Received: by mail-lj1-x231.google.com with SMTP id s9so4412473ljo.11
-        for <linux-mmc@vger.kernel.org>; Thu, 26 Nov 2020 19:50:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to;
-        bh=AagAkDLcDM4prsaMPWQhy/MLdX43TaW/lOI5pKjqlgY=;
-        b=mzUnt9I3Knk1DRL7qZMJFXcooiwgLEZoXy6LvobBfuVEuWxAJpn4c7sP0oyDlYrDVk
-         mrsuNrf9StBEFmm9TN2cs3RgQXR+FvOtU/cKyXEpSeQK2Y0MKfQC+RkDjGQ4NuUJyhS0
-         Xi1jCB+kUn/IfgSG2JtBwGPHrzB/boJBlEHzxVLritRYKVTKcAV1LZZY2MDi3MKJMbZs
-         z0CFbf3qHgrEg4+SlSWLzxwM/XSv0fyKewFePICYSw7qlLv2hOLSEGu3IaOi7wW7U3zz
-         5M7JFInr4QYHAiz3uBdOZwt04vkLDw7f2Qc7PPh93B0A6gpURWHqy3+Tis1PCCTYuHt3
-         mfCw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
-        bh=AagAkDLcDM4prsaMPWQhy/MLdX43TaW/lOI5pKjqlgY=;
-        b=Wlj0Q/A/nPOj9DqNnYCBvjfPSo4+oLd97bRJQlSI8Udn6pbAU3bJg6nUC6C5X5r0rP
-         I8BYyYhD8NaYWfgbgCoIxde3+vIbsZFsSkMmYBVTLh1zrjUwaD2iJgk7Tz+dLNQ5VYyx
-         MukfSZ5NO64RwCk8URaILqEkUzL2Pv5/kOIK66KkLtki5udQlEEFax4269P1XJK/FBGI
-         TrM+chcXDtqOqLzbdUS6djQiBzOXN++pcX6oOVsw+6+sE6UNJQcQ7YlpRqWZXUsNlQmq
-         igyquar8ekjfD1Z6JlgyYv3DQ6cVx7/czxuT9PECsRCKpHerTsZNDZ3BtAhiQlPvJ0G1
-         D7YQ==
-X-Gm-Message-State: AOAM532/DhfFINtf7A9oaQ6veYfUmeglbBlBgTDDPhGKMz0SFAc1Xfxt
-        neQ03EsKRy3B5Bb9utuFnP/v9Yg+zihZIJfM6l02eN3MZ30=
-X-Google-Smtp-Source: ABdhPJxjAiGqKqssGBSGjciVuslNVIorU+YzSmPrKCFh6phFNNP2gz5NRAGDmaEa7CMusKb48dEZgOfy25aN1E1JR4k=
-X-Received: by 2002:a2e:8e81:: with SMTP id z1mr2285688ljk.316.1606449007502;
- Thu, 26 Nov 2020 19:50:07 -0800 (PST)
+        id S2392458AbgK0Ekr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Nov 2020 23:40:47 -0500
+Received: from server-x.ipv4.hkg02.ds.network ([27.111.83.178]:51372 "EHLO
+        mail.gtsys.com.hk" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+        with ESMTP id S2392452AbgK0Ekr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Nov 2020 23:40:47 -0500
+Received: from localhost (localhost [127.0.0.1])
+        by mail.gtsys.com.hk (Postfix) with ESMTP id E8B0C200E247;
+        Fri, 27 Nov 2020 12:40:44 +0800 (HKT)
+X-Virus-Scanned: Debian amavisd-new at gtsys.com.hk
+Received: from mail.gtsys.com.hk ([127.0.0.1])
+        by localhost (mail.gtsys.com.hk [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id CcO9jNNoayne; Fri, 27 Nov 2020 12:40:44 +0800 (HKT)
+Received: from s01.gtsys.com.hk (unknown [10.128.4.2])
+        by mail.gtsys.com.hk (Postfix) with ESMTP id C8967200E245;
+        Fri, 27 Nov 2020 12:40:44 +0800 (HKT)
+Received: from armhf2.gtsys.com.hk (unknown [10.128.4.15])
+        by s01.gtsys.com.hk (Postfix) with ESMTP id B86B8C01F81;
+        Fri, 27 Nov 2020 12:40:44 +0800 (HKT)
+Received: by armhf2.gtsys.com.hk (Postfix, from userid 1000)
+        id 8F5BB200756; Fri, 27 Nov 2020 12:40:44 +0800 (HKT)
+From:   Chris Ruehl <chris.ruehl@gtsys.com.hk>
+Cc:     Chris Ruehl <chris.ruehl@gtsys.com.hk>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>,
+        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Chris Ball <chris@printf.net>,
+        Seungwon Jeon <tgih.jun@samsung.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: core: MMC_CAP2_HS200_1_8V_SDR with mmc-hs400-1_8v
+Date:   Fri, 27 Nov 2020 12:40:38 +0800
+Message-Id: <20201127044044.1127-1-chris.ruehl@gtsys.com.hk>
+X-Mailer: git-send-email 2.20.1
 MIME-Version: 1.0
-From:   Paul Thomas <pthomas8589@gmail.com>
-Date:   Thu, 26 Nov 2020 22:49:56 -0500
-Message-ID: <CAD56B7cpMcuu_+9bxQ0zCsr489J9Te268aOeQTC32rOeF1hG+A@mail.gmail.com>
-Subject: RE: mmc: sdhci-of-arasan: Issue DLL reset explicitly
-To:     linux-mmc@vger.kernel.org, Michal Simek <michal.simek@xilinx.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Everyone,
+This patch remove the MMC_CAP2_HS200_1_8V_SDR capacity from
+host->cap2 when the dt property mmc-hs400-1v8 set. It cause
+error and occasionally hang on boot and reboot.
+Board with this issue: rk3399 with SanDisk DG4008 eMMC.
 
-The recent commit d06d60d5 'mmc: sdhci-of-arasan: Issue DLL reset
-explicitly' seems to break the eMMC on our zynqmp boards, we get
-messages like this:
-mmc0: error -110 whilst initialising MMC card
-We're using the XCZU2EG-1SFVC784I parts [1]. I see that this is moving
-the DLL reset out of ATF. So part of the issue might be that we're
-using the 2019.1 ATF version.
+This patch did not change the mmc-hs400-1_2v host->cap2
+added the MMC_CAP2_HS200_1_2V_SDR.
 
-thanks,
-Paul
+Log shows a boot process with a HS400 5.1 capable SanDisk 8G
+with mmc-hs400-1_8v dt property and the MMC_CAP2_HS200_1_8V_SDR
+append to the host->cap2.
 
-[1] Enclustra modules:
-https://www.enclustra.com/en/products/system-on-chip-modules/mercury-xu5/
+[    1.775721] mmc1: CQHCI version 5.10
+[    1.802342] mmc1: SDHCI controller on fe330000.sdhci [fe330000.sdhci] using ADMA
+[    2.007581] mmc1: mmc_select_hs200 failed, error -110
+[    2.007589] mmc1: error -110 whilst initialising MMC card
+[    2.413559] mmc1: mmc_select_hs200 failed, error -110
+[    2.413562] mmc1: error -110 whilst initialising MMC card
+[    3.183343] mmc1: Command Queue Engine enabled
+[    3.183355] mmc1: new HS400 MMC card at address 0001
+[    3.197163] mmcblk1: mmc1:0001 DG4008 7.28 GiB
+[    3.197256] mmcblk1boot0: mmc1:0001 DG4008 partition 1 4.00 MiB
+[    3.197360] mmcblk1boot1: mmc1:0001 DG4008 partition 2 4.00 MiB
+[    3.197479] mmcblk1rpmb: mmc1:0001 DG4008 partition 3 4.00 MiB, chardev (242:0)
+
+after patch applied
+[    1.746691] mmc1: CQHCI version 5.10
+[    1.773316] mmc1: SDHCI controller on fe330000.sdhci [fe330000.sdhci] using ADMA
+[    1.858410] mmc1: Command Queue Engine enabled
+[    1.858418] mmc1: new HS400 MMC card at address 0001
+[    1.858897] mmcblk1: mmc1:0001 DG4008 7.28 GiB
+[    1.859002] mmcblk1boot0: mmc1:0001 DG4008 partition 1 4.00 MiB
+[    1.859097] mmcblk1boot1: mmc1:0001 DG4008 partition 2 4.00 MiB
+[    1.859182] mmcblk1rpmb: mmc1:0001 DG4008 partition 3 4.00 MiB, chardev (242:0)
+
+Fixes: c373eb489b27b mmc: core: add DT bindings for eMMC HS400 1.8/1.2V
+
+Signed-off-by: Chris Ruehl <chris.ruehl@gtsys.com.hk>
+---
+ drivers/mmc/core/host.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 96b2ca1f1b06..f55113e24c68 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -295,7 +295,7 @@ int mmc_of_parse(struct mmc_host *host)
+ 	if (device_property_read_bool(dev, "mmc-hs200-1_2v"))
+ 		host->caps2 |= MMC_CAP2_HS200_1_2V_SDR;
+ 	if (device_property_read_bool(dev, "mmc-hs400-1_8v"))
+-		host->caps2 |= MMC_CAP2_HS400_1_8V | MMC_CAP2_HS200_1_8V_SDR;
++		host->caps2 |= MMC_CAP2_HS400_1_8V;
+ 	if (device_property_read_bool(dev, "mmc-hs400-1_2v"))
+ 		host->caps2 |= MMC_CAP2_HS400_1_2V | MMC_CAP2_HS200_1_2V_SDR;
+ 	if (device_property_read_bool(dev, "mmc-hs400-enhanced-strobe"))
+--
+2.20.1
+
