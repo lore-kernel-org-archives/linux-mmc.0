@@ -8,66 +8,68 @@ X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D7E9C64E7C
-	for <linux-mmc@archiver.kernel.org>; Sun, 29 Nov 2020 20:32:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 858DCC64E7C
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Nov 2020 20:32:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 652C620757
-	for <linux-mmc@archiver.kernel.org>; Sun, 29 Nov 2020 20:32:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C46320757
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Nov 2020 20:32:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BbqU0XXJ"
+	dkim=fail reason="signature verification failed" (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Iq6NmnY2"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726344AbgK2UcN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 29 Nov 2020 15:32:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51582 "EHLO
+        id S1726440AbgK2UcU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 29 Nov 2020 15:32:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51588 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726293AbgK2UcN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2020 15:32:13 -0500
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A68CC0613CF;
+        with ESMTP id S1726293AbgK2UcU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Nov 2020 15:32:20 -0500
+Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F12ABC0613D2;
         Sun, 29 Nov 2020 12:31:33 -0800 (PST)
-Received: by mail-wr1-x444.google.com with SMTP id t4so12535563wrr.12;
+Received: by mail-wr1-x441.google.com with SMTP id l1so12562321wrb.9;
         Sun, 29 Nov 2020 12:31:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=RkHx25BRkh2eHsRS0pNBw3Iop5cZozEWk2vbjEjWymQ=;
-        b=BbqU0XXJNsMZFAN1ef4SZVZ+e+4ENsIh2R1PSjUC+N78D/EmGe4zYYNDY48LL/7lrs
-         y9rK5ZmQ3vn+6OfETraOV9zpLtsvs3/kF4UWaqAGVPyCvb0fawk81YMnfXjey7W2sf+W
-         ThWw3lZsD02VO6ajwobC/88QQGCDOcg21D+g4DuPfNfFyLI2+jhlZp46Q5fbT4GFUHR7
-         CBRZ1dlzJNowKGxdi7hM6aXiecn9TW84o8XpXfILg//vUIjuoXWBXjJX9eBBBG+V8/TU
-         RzxkwMI50HGvvVvmbYUXVCV6iY58XtapNXpqtpbHdvgpSPYpKbpNwIppURtAhyFv01KZ
-         4ZDA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=a+61rl8Elaa09l9GcyZ+z+uAZtLyVMaEf7GEyD6Ddls=;
+        b=Iq6NmnY2+bJcgQs4s22WQevUkqs94k6ha4EgdnN2wO7QUi+6ScpCTtlyRaPiRSicq3
+         peARZHQIulf7FXYahwM6YncDsk+K5cOxOyHcP1t1/K3gq0aU7qJ6LRyoFaboW+4+jZ7W
+         PMUveGqAbGgp6rdrmU/ycgCVr/m3YIso+nWWVkJkjjJPVINRi7oGMP/N2PYcBSSdAPMm
+         eJmFIKit8kfY2rU5TOfEdUSktnxwvLhRbqJxrgJXT1Z8yM4ZyBePOInAjX17olV8GShc
+         uk6l+7xffcRB4j1YuXKfHhsk5QpFClnMhxJWdpsZlFZg5jQSdTsl2UpK0bWRKvpGOK+2
+         h+rA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=RkHx25BRkh2eHsRS0pNBw3Iop5cZozEWk2vbjEjWymQ=;
-        b=kGlSAICBaazxfgsxYuWcdGCoKDmmKibB32dLMfP3TK79X5IGuvxF9WukgdvckvWu3l
-         C3+qQ89mHRD5UDFDOWKuIS8D23wqpFrBx3I6kzwIXJK4L6dxJCnRcF3QzsiCtxcY/3CH
-         BJJGRKGaNFKyr0OE9ZbzvidkCoMeF41UdwMOIqIECdjdVOkKlkaGnxsbClkfHqxVg9sr
-         cf1SWhSEXhckgR/XFkYw9ZaCfQd+WO5TgeWDxM5kbyCyDqiLTQDNfka41C4G0pJvyUpK
-         M2sRoBiBDdn7xw6y+qRpusGQQI2/eaxItr6iW1wKKxKtj1XomYyPmdSlj4P4diNxl8hi
-         D64g==
-X-Gm-Message-State: AOAM532H9+oXjgCuInt9/SQPGkk92Vovjp3ewLgVl7v1nTdCUuGovODm
-        WyhiAbZp0w2bnMveQMj3MV1ANBdKwuHIjg==
-X-Google-Smtp-Source: ABdhPJwn5HvBVBs+EIyxrcf3kYX/s3GC58gTrAEo6LxGP32NvDqno2Bc+AVFfvZwoCM9ucBa1geGhw==
-X-Received: by 2002:adf:f349:: with SMTP id e9mr24158997wrp.110.1606681891874;
-        Sun, 29 Nov 2020 12:31:31 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=a+61rl8Elaa09l9GcyZ+z+uAZtLyVMaEf7GEyD6Ddls=;
+        b=H5ooKlO5aoW6YThBte0J1XTw4uGgBe/qAP2R/4PNA/Jbz4T4RS/SDF5iR3bpJKncUr
+         PYAFFph5cnHCPpbq+QgV3YKOny1QYGm8cSRNhD4H2Nuxr1O0QBOtOH+VfAJfT34Njscw
+         MJEwQ3JpbQ5/5DHjZQqWu6UlyrosQkFwiw9dB9/gcNmuGrZR5xv20LbfPikW0Q0u3y4Q
+         Q4FMS18Mi373lnPRDo1rImuvjCWo9YOIcRBWq3EwW5g25Yy2KTm4CBD/Xm3VlrmCCTOE
+         y/Cmjzs5BcIoBZriooMh9uzrw1T1JB2KxKDLaJgDnhoFdC5WxifvhPtCb175gmgKqYf5
+         KoYQ==
+X-Gm-Message-State: AOAM531ZN6kdbpCrbZtrif0zPrKEGO5DdktxFhFAa2y11x96AWASDlWa
+        oL7o9En1f8cwmObtJaV45xY=
+X-Google-Smtp-Source: ABdhPJxTD0hHt5TLDJRkdINbsSpLmPvHo9EMfYVe2OzvP1ZTzI/eQqoDsS53zE2JU1MP8gnZ1qVzNQ==
+X-Received: by 2002:adf:e681:: with SMTP id r1mr25070757wrm.348.1606681892631;
+        Sun, 29 Nov 2020 12:31:32 -0800 (PST)
 Received: from adgra-XPS-15-9570.home (lfbn-idf1-1-1007-144.w86-238.abo.wanadoo.fr. [86.238.83.144])
         by smtp.gmail.com with ESMTPSA id a144sm22997876wmd.47.2020.11.29.12.31.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Nov 2020 12:31:31 -0800 (PST)
+        Sun, 29 Nov 2020 12:31:32 -0800 (PST)
 From:   Adrien Grassein <adrien.grassein@gmail.com>
 Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
         s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
         linux-imx@nxp.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org,
         Adrien Grassein <adrien.grassein@gmail.com>
-Subject: [PATCH 1/2] dt-bindings: mmc: add an option to disable HS400 for fsl
-Date:   Sun, 29 Nov 2020 21:31:15 +0100
-Message-Id: <20201129203116.11987-1-adrien.grassein@gmail.com>
+Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: allow to disable HS400 support
+Date:   Sun, 29 Nov 2020 21:31:16 +0100
+Message-Id: <20201129203116.11987-2-adrien.grassein@gmail.com>
 X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20201129203116.11987-1-adrien.grassein@gmail.com>
+References: <20201129203116.11987-1-adrien.grassein@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 To:     unlisted-recipients:; (no To-header on input)
@@ -75,29 +77,48 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add an option to disable the hs400 support in the fsl esdhc
-driver.
+This patch adds the posibility to remove the HS400
+support directly from the devicetree.
+
+This is useful for example for the sdcard slot of the
+Nitrogen8M mini that doesn't support the HS400 standard.
 
 Signed-off-by: Adrien Grassein <adrien.grassein@gmail.com>
 ---
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-index e71d13c2d109..070b40ae8c44 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -101,6 +101,10 @@ properties:
-       If not use this property, driver default set the delay target to value 7.
-       Only eMMC HS400 mode need to take care of this property.
-     default: 0
-+  fsl,no-mmc-hs400:
-+    description: |
-+      boolean, if present, indicate to disable mmc-hs400 support.
-+    type: boolean
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index fce8fa7e6b30..6fbd4bcca7a1 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -294,6 +294,7 @@ struct pltfm_imx_data {
+ 	} multiblock_status;
+ 	u32 is_ddr;
+ 	struct pm_qos_request pm_qos_req;
++	u32 disable_caps;
+ };
  
- required:
-   - compatible
+ static const struct platform_device_id imx_esdhc_devtype[] = {
+@@ -454,6 +455,8 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ 			    IS_ERR_OR_NULL(imx_data->pins_200mhz))
+ 				val &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50
+ 					 | SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_HS400);
++
++			val &= ~imx_data->disable_caps;
+ 		}
+ 	}
+ 
+@@ -1502,6 +1505,9 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+ 		boarddata->delay_line = 0;
+ 
++	if (of_find_property(np, "fsl,no-mmc-hs400", NULL))
++		imx_data->disable_caps |= SDHCI_SUPPORT_HS400;
++
+ 	mmc_of_parse_voltage(np, &host->ocr_mask);
+ 
+ 	if (esdhc_is_usdhc(imx_data)) {
 -- 
 2.20.1
 
