@@ -2,144 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A821C64E8A
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Nov 2020 15:09:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 950E2C71155
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Nov 2020 17:21:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 91B6520731
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Nov 2020 15:09:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 507612076E
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Nov 2020 17:21:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=linaro.org header.i=@linaro.org header.b="kgTvw0bD"
+	dkim=pass (1024-bit key) header.d=eaxlabs.cz header.i=@eaxlabs.cz header.b="Z07XJIeQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727375AbgK3PJV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Nov 2020 10:09:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53552 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725859AbgK3PJU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Nov 2020 10:09:20 -0500
-Received: from mail-ua1-x933.google.com (mail-ua1-x933.google.com [IPv6:2607:f8b0:4864:20::933])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95E7FC0613D2
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Nov 2020 07:08:40 -0800 (PST)
-Received: by mail-ua1-x933.google.com with SMTP id a10so3834905uan.12
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Nov 2020 07:08:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=oo/FBQBueWDd00EzjjP1iPUFL/XECO3UlBEDhq2h/3c=;
-        b=kgTvw0bDMX5tcHNMAbwnTcEPGamvZGqYkvCeVd8u60O2P4buPHWUZD4hjpCCpKCls7
-         00o8gJ5pKt3jEDcHfV9i0iRWRvzRBrjyZOn9oiZQOj5CMpOPZE61PK53fncZMRvCaPoX
-         ytuJ9picx0e/7B8oXjvQLuckNUcw8KQmNgmq/hqSuxKREnPCQQzgJtlkD9IuZpd0oRzh
-         vJF9AWahNpBcuQlabAiHJsLinPjtxgio3ZJfrTHINS32/uw5YVX32Ddsw83QF1tEUszD
-         QddNCSxSuTTL24p9OWPJFDOQunYV0KNp4r3H1mVIk6Bav4sGoBFaKoeeDL356pyRA19i
-         GaxA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=oo/FBQBueWDd00EzjjP1iPUFL/XECO3UlBEDhq2h/3c=;
-        b=uB3V9v1O4krmIOrjoy77RvfBXBnaW3VtBOyVSaliy/vIFRycdRyA4If0tMSuRd1RCd
-         1b3lBgyTFcDgQMsNcGlbWQKuJb7vywKiXO5NF78A9K0jXjTZcyaB3olDRtl83CjEswQq
-         9Tfu4YUKoykgUa03sKFVftYDPVp5CIdCyIlPmuAHRgJLxwShPoAeVfUm4JjCaP+NdxjB
-         Gv3NKToFcFMedHdycpARu5Qu9diM50SVdaLVEblbY0pSCEAC2t5NiKMgz5o9p4iQbPD5
-         e5v2VUyMDRP5e/5GOKNXhGBpV5OosD4NuSp//2sBndapaZLZQAYt4AMkhLrwQSkOTyJ4
-         4ikw==
-X-Gm-Message-State: AOAM531VvgVs+7ms+mSUHMDIaM3t7TJoA5ByrUvBeedpQ90rTeuPlmxT
-        GXDBBr+n+xNgUlGsKu1jQkupl0nJ1ACrzUTEnZg/vyWCoxW+9KoY
-X-Google-Smtp-Source: ABdhPJynFyHLFSQk/2ETJCHFnFPRt9+XPRb+zfMCwiW6pYdfHXa2NU3q1LYOLykRB9GSIcDA2uguoee+ryFCujWcdOY=
-X-Received: by 2002:ab0:60b1:: with SMTP id f17mr13575257uam.104.1606748919488;
- Mon, 30 Nov 2020 07:08:39 -0800 (PST)
-MIME-Version: 1.0
-References: <c5252887-e4f9-953d-88df-d8cc62ecd136@eaxlabs.cz>
-In-Reply-To: <c5252887-e4f9-953d-88df-d8cc62ecd136@eaxlabs.cz>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 30 Nov 2020 16:08:03 +0100
-Message-ID: <CAPDyKFr8t-u_4YkuCzQ3Xd3VgxkTq_Anu+NzBo4Pfj8SLBnsvg@mail.gmail.com>
+        id S1727309AbgK3RVL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Nov 2020 12:21:11 -0500
+Received: from ms9.eaxlabs.cz ([147.135.177.209]:35710 "EHLO ms9.eaxlabs.cz"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728178AbgK3RVL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 30 Nov 2020 12:21:11 -0500
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=eaxlabs.cz; s=mail;
+        h=Content-Transfer-Encoding:Content-Type:In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:Subject; bh=6FKTlB6TqmdpxuLkKOUo1N+s1AlhVtz2/lsEveWVg5Y=;
+        b=Z07XJIeQkODCNo2kBxdpJSP+hvfc7VgnY6CaE6pfCNKa6QhOQDcb9hOiPn3lWNsY0j0ZGLDhkwXGrNmEWht0EvB4zAkacggkLaWgTsR5zP6m0SfwUzvwPXzSt8HLq1nLtkzHdzZLZ/rrixitDZrFHxVbOZU/qHxMuv41eVovEmc=;
+Received: from [82.99.129.6] (helo=[10.76.6.116])
+        by ms9.eaxlabs.cz with esmtpsa (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        (Exim 4.84_2)
+        (envelope-from <devik@eaxlabs.cz>)
+        id 1kjmqh-00017I-Cc; Mon, 30 Nov 2020 18:20:29 +0100
 Subject: Re: armmmci rmmod causes hung tasks
-To:     Martin DEVERA <devik@eaxlabs.cz>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Linux ARM <linux-arm-kernel@lists.infradead.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+References: <c5252887-e4f9-953d-88df-d8cc62ecd136@eaxlabs.cz>
+ <CAPDyKFr8t-u_4YkuCzQ3Xd3VgxkTq_Anu+NzBo4Pfj8SLBnsvg@mail.gmail.com>
+From:   Martin DEVERA <devik@eaxlabs.cz>
+Message-ID: <3ce48390-a4fd-f833-1cb5-9f9e140065b8@eaxlabs.cz>
+Date:   Mon, 30 Nov 2020 18:20:26 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101
+ Thunderbird/60.8.0
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFr8t-u_4YkuCzQ3Xd3VgxkTq_Anu+NzBo4Pfj8SLBnsvg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 29 Nov 2020 at 19:20, Martin DEVERA <devik@eaxlabs.cz> wrote:
+On 11/30/20 4:08 PM, Ulf Hansson wrote:
+> On Sun, 29 Nov 2020 at 19:20, Martin DEVERA <devik@eaxlabs.cz> wrote:
+>> Hello,
+>>
+>> on STM32MP1 with almost vanilla 5.7.7 in single CPU mode. Pair of
+>> modprobe armmmci ; rmmod armmmci
+>>
+>> causes rmmod and kworker to hang. I should note that no MMC is detected
+>> on the board (SDIO device on MMC bus is not responding).
+>> On another board (where SDIO is responding) rmmod works.
+>>
+>> It seems as another manifestation of https://lkml.org/lkml/2019/8/27/945
+>>
+>> Thanks.
+>>
+>> INFO: task kworker/0:1:12 blocked for more than 368 seconds.
+>>         Not tainted 5.7.7kdb-00003-g10397828596c-dirty #224
+>> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+>> kworker/0:1     D    0    12      2 0x00000000
+>> Workqueue: events_freezable mmc_rescan
+>> (__schedule) from (schedule+0x5b/0x90)
+>> (schedule) from (schedule_timeout+0x1b/0xa0)
+>> (schedule_timeout) from (__wait_for_common+0x7d/0xdc)
+>> (__wait_for_common) from (mmc_wait_for_req_done+0x1b/0x8c)
+>> (mmc_wait_for_req_done) from (mmc_wait_for_cmd+0x4d/0x68)
+>> (mmc_wait_for_cmd) from (mmc_io_rw_direct_host+0x87/0xc8)
+>> (mmc_io_rw_direct_host) from (sdio_reset+0x3b/0x58)
+>> (sdio_reset) from (mmc_rescan+0x15d/0x1d4)
+>> (mmc_rescan) from (process_one_work+0xdd/0x168)
+>> (process_one_work) from (worker_thread+0x17d/0x1ec)
+>> (worker_thread) from (kthread+0x9b/0xa4)
+>> (kthread) from (ret_from_fork+0x11/0x28)
+> It looks like the worker thread, which runs mmc_rescan() to try to
+> detect the SDIO card is hanging. Exactly why, I don't know.
 >
-> Hello,
->
-> on STM32MP1 with almost vanilla 5.7.7 in single CPU mode. Pair of
-> modprobe armmmci ; rmmod armmmci
->
-> causes rmmod and kworker to hang. I should note that no MMC is detected
-> on the board (SDIO device on MMC bus is not responding).
-> On another board (where SDIO is responding) rmmod works.
->
-> It seems as another manifestation of https://lkml.org/lkml/2019/8/27/945
->
-> Thanks.
->
-> INFO: task kworker/0:1:12 blocked for more than 368 seconds.
->        Not tainted 5.7.7kdb-00003-g10397828596c-dirty #224
-> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> kworker/0:1     D    0    12      2 0x00000000
-> Workqueue: events_freezable mmc_rescan
-> (__schedule) from (schedule+0x5b/0x90)
-> (schedule) from (schedule_timeout+0x1b/0xa0)
-> (schedule_timeout) from (__wait_for_common+0x7d/0xdc)
-> (__wait_for_common) from (mmc_wait_for_req_done+0x1b/0x8c)
-> (mmc_wait_for_req_done) from (mmc_wait_for_cmd+0x4d/0x68)
-> (mmc_wait_for_cmd) from (mmc_io_rw_direct_host+0x87/0xc8)
-> (mmc_io_rw_direct_host) from (sdio_reset+0x3b/0x58)
-> (sdio_reset) from (mmc_rescan+0x15d/0x1d4)
-> (mmc_rescan) from (process_one_work+0xdd/0x168)
-> (process_one_work) from (worker_thread+0x17d/0x1ec)
-> (worker_thread) from (kthread+0x9b/0xa4)
-> (kthread) from (ret_from_fork+0x11/0x28)
+> Could be a misconfigured clock, pinctrl or a power domain being
+> suddenly gated...
 
-It looks like the worker thread, which runs mmc_rescan() to try to
-detect the SDIO card is hanging. Exactly why, I don't know.
+I turned some logging on (see below), IIUC pl18x is starting CMD52 with arg
+SDIO_CCCR_ABORT read and it got IRQ later along with response. Then sending
+again SDIO_CCCR_ABORT write but no IRQ comes back.
 
-Could be a misconfigured clock, pinctrl or a power domain being
-suddenly gated...
+[  135.810802] mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
+[  135.810832] mmc0: starting CMD52 arg 00000c00 flags 00000195
+[  135.810862] mmci-pl18x 48004000.sdmmc: op 34 arg 00000c00 flags 00000195
+[  135.811155] mmci-pl18x 48004000.sdmmc: irq0 (data+cmd) 00000040
+[  135.811178] mmc0: req done (CMD52): 0: 00000000 00000000 00000000 
+00000000
+[  135.811202] mmci-pl18x 48004000.sdmmc: irq0 (data+cmd) 00000000
+[  135.816487] mmc0: starting CMD52 arg 80000c08 flags 00000195
+[  135.816506] mmci-pl18x 48004000.sdmmc: op 34 arg 80000c08 flags 00000195
+[  172.150614] random: crng init done
+[  172.150642] random: 6 urandom warning(s) missed due to ratelimiting
+[  173.290565] INFO: task kworker/0:0:5 blocked for more than 20 seconds.
 
->
-> INFO: task rmmod:308 blocked for more than 368 seconds.
->        Not tainted 5.7.7kdb-00003-g10397828596c-dirty #224
-> "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> rmmod           D    0   308    222 0x00000000
-> (__schedule) from (schedule+0x5b/0x90)
-> (schedule) from (schedule_timeout+0x1b/0xa0)
-> (schedule_timeout) from (__wait_for_common+0x7d/0xdc)
-> (__wait_for_common) from (__flush_work+0xb3/0x110)
-> (__flush_work) from (__cancel_work_timer+0x97/0xf0)
-> (__cancel_work_timer) from (mmc_stop_host+0x29/0x88)
-> (mmc_stop_host) from (mmc_remove_host+0x9/0x22)
-> (mmc_remove_host) from (mmci_remove+0x19/0x92 [armmmci])
-> (mmci_remove [armmmci]) from (amba_remove+0x13/0x42)
-> (amba_remove) from (device_release_driver_internal+0x89/0xe4)
-> (device_release_driver_internal) from (driver_detach+0x57/0x60)
-> (driver_detach) from (bus_remove_driver+0x53/0x84)
-> (bus_remove_driver) from (mmci_driver_exit+0x9/0x11dc [armmmci])
-> (mmci_driver_exit [armmmci]) from (sys_delete_module+0x115/0x154)
-> (sys_delete_module) from (ret_fast_syscall+0x1/0x5a)
->
+Here is the same system, only with different (working) SDIO device on 
+the same bus:
 
-When unbinding the mmc host, mmc_stop_host() needs to make sure that
-mmc_rescan() becomes disabled. This is to prevent a card from being
-detected/removed at same time as when the host is being removed.
+[  495.654596] mmc0: mmc_rescan_try_freq: trying to init card at 400000 Hz
+[  495.654628] mmc0: starting CMD52 arg 00000c00 flags 00000195
+[  495.654658] mmci-pl18x 48004000.sdmmc: op 34 arg 00000c00 flags 00000195
+[  495.654996] mmci-pl18x 48004000.sdmmc: irq0 (data+cmd) 00000004
+[  495.655017] mmc0: req done (CMD52): -110: 00000000 00000000 00000000 
+00000000
+[  495.655042] mmci-pl18x 48004000.sdmmc: irq0 (data+cmd) 00000000
+[  495.660201] mmc0: starting CMD52 arg 80000c08 flags 00000195
+[  495.660222] mmci-pl18x 48004000.sdmmc: op 34 arg 80000c08 flags 00000195
+[  495.660549] mmci-pl18x 48004000.sdmmc: irq0 (data+cmd) 00000004
+[  495.660567] mmc0: req done (CMD52): -110: 00000000 00000000 00000000 
+00000000
+[  495.660591] mmci-pl18x 48004000.sdmmc: irq0 (data+cmd) 00000000
 
-In any case, when we call...
+Should it be expected, that invalid (probably non-responding) device on 
+the SDIO bus
+causes it to be locked up forever ?
+Or is it bug in pl18x driver not handling the error correctly ?
 
-cancel_delayed_work_sync(&host->detect);
+best regards,
+Martin
 
-...it seems like we end up waiting for the currently running
-mmc_rescan() work to be completed.
-
-Kind regards
-Uffe
