@@ -7,45 +7,45 @@ X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2E8AC64E7B
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 19:59:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F8B6C64E7B
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 20:01:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 44A5F2151B
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 19:59:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF93D20671
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 20:01:39 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=kemnade.info header.i=@kemnade.info header.b="C6bE3w/N"
+	dkim=fail reason="signature verification failed" (1024-bit key) header.d=kemnade.info header.i=@kemnade.info header.b="F6NwN8yJ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404401AbgLAT7y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Dec 2020 14:59:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40978 "EHLO
+        id S2404304AbgLAUBW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Dec 2020 15:01:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2404377AbgLAT73 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2020 14:59:29 -0500
+        with ESMTP id S1726148AbgLAUBV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2020 15:01:21 -0500
 Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10049C0613CF
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Dec 2020 11:58:49 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88D47C0613D4;
+        Tue,  1 Dec 2020 12:00:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=kemnade.info; s=20180802; h=Content-Transfer-Encoding:Content-Type:
         MIME-Version:Message-ID:Subject:To:From:Date:Sender:Reply-To:Cc:Content-ID:
         Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
         :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
         List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=7eMtjf+cySS70RWajkyKZtHfc94aexCgpD+8dlIX5iQ=; b=C6bE3w/NYN2JPyPYLx6ZGMsTYr
-        i+g1ELmtLFy9Wnu1s1s2NcpBI27AdP8XW6zSJdWVEQfSXTR0hfBQWGzFl+7IrBaIWSWUXwt2N9E6K
-        HRHpmpXd7+oYY7b98wM5rPjxmHaqIDv3eSmWmK3Cr4Q1gSt6ANx9/aPGwAXY76XEzh2w=;
+        bh=7eMtjf+cySS70RWajkyKZtHfc94aexCgpD+8dlIX5iQ=; b=F6NwN8yJIvpiRf0vkm92xj/dt2
+        HsR5LyvOnkrs0RtYjlji2eHYlgDH2F6mpZxROZgyqHoHr1ebAMlWyif3Q2FwWann5V42jphV80TC5
+        QtHgCoH2ZCaUOXciVEueJkp9onF93MK6d7kh47dRehWG+jkclCoDawIB39PAUtQI0t6g=;
 Received: from p200300ccff124e001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff12:4e00:1a3d:a2ff:febf:d33a] helo=aktux)
         by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
         (Exim 4.89)
         (envelope-from <andreas@kemnade.info>)
-        id 1kkBnS-0003aR-Vt; Tue, 01 Dec 2020 20:58:47 +0100
-Date:   Tue, 1 Dec 2020 20:58:45 +0100
+        id 1kkBpH-0003cH-T3; Tue, 01 Dec 2020 21:00:40 +0100
+Date:   Tue, 1 Dec 2020 21:00:39 +0100
 From:   Andreas Kemnade <andreas@kemnade.info>
-List-Id: <linux-omap.lore.kernel.org>
-To:     linux-omap@kernel.org, linux-mmc@vger.kernel.org,
+To:     linux-mmc@vger.kernel.org,
         Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>
+        <letux-kernel@openphoenux.org>,
+        Linux OMAP Mailing List <linux-omap@vger.kernel.org>
 Subject: Bug: Kernel oops during probing of mmc with WL1835 on GTA04A5
-Message-ID: <20201201205845.2f7bb73b@aktux>
+Message-ID: <20201201210039.258d3fed@aktux>
 X-Mailer: Claws Mail 3.17.3 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
