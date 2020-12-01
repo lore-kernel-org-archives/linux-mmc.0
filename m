@@ -2,472 +2,628 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F8B6C64E7B
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 20:01:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 38381C64E7A
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 20:27:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CF93D20671
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 20:01:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B1D952151B
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Dec 2020 20:27:22 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (1024-bit key) header.d=kemnade.info header.i=@kemnade.info header.b="F6NwN8yJ"
+	dkim=pass (1024-bit key) header.d=chromium.org header.i=@chromium.org header.b="klLeCrQ4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404304AbgLAUBW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Dec 2020 15:01:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41276 "EHLO
+        id S1730475AbgLAU1G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Dec 2020 15:27:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45240 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726148AbgLAUBV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2020 15:01:21 -0500
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88D47C0613D4;
-        Tue,  1 Dec 2020 12:00:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=kemnade.info; s=20180802; h=Content-Transfer-Encoding:Content-Type:
-        MIME-Version:Message-ID:Subject:To:From:Date:Sender:Reply-To:Cc:Content-ID:
-        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=7eMtjf+cySS70RWajkyKZtHfc94aexCgpD+8dlIX5iQ=; b=F6NwN8yJIvpiRf0vkm92xj/dt2
-        HsR5LyvOnkrs0RtYjlji2eHYlgDH2F6mpZxROZgyqHoHr1ebAMlWyif3Q2FwWann5V42jphV80TC5
-        QtHgCoH2ZCaUOXciVEueJkp9onF93MK6d7kh47dRehWG+jkclCoDawIB39PAUtQI0t6g=;
-Received: from p200300ccff124e001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff12:4e00:1a3d:a2ff:febf:d33a] helo=aktux)
-        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <andreas@kemnade.info>)
-        id 1kkBpH-0003cH-T3; Tue, 01 Dec 2020 21:00:40 +0100
-Date:   Tue, 1 Dec 2020 21:00:39 +0100
-From:   Andreas Kemnade <andreas@kemnade.info>
-To:     linux-mmc@vger.kernel.org,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>,
-        Linux OMAP Mailing List <linux-omap@vger.kernel.org>
-Subject: Bug: Kernel oops during probing of mmc with WL1835 on GTA04A5
-Message-ID: <20201201210039.258d3fed@aktux>
-X-Mailer: Claws Mail 3.17.3 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+        with ESMTP id S1728371AbgLAU1F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Dec 2020 15:27:05 -0500
+Received: from mail-pf1-x442.google.com (mail-pf1-x442.google.com [IPv6:2607:f8b0:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA993C0613D4
+        for <linux-mmc@vger.kernel.org>; Tue,  1 Dec 2020 12:26:25 -0800 (PST)
+Received: by mail-pf1-x442.google.com with SMTP id e13so1844843pfj.3
+        for <linux-mmc@vger.kernel.org>; Tue, 01 Dec 2020 12:26:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=g1iUCj5/POp53H9VLouCZz2dIMOju3IkpuJjJp0voSo=;
+        b=klLeCrQ4izlfxmUHuEGATCxDSBg1oHaZm+i4Rm0R5GWhcPL31z7CinobvbBDWG8aW7
+         GafvZZO+LSIsAbycnD3PzmpQOr6dEG+/xGJs0mGrmb1bq+KOhiNIzdS8ZBXOu7PkeBR7
+         XgeXStFXZjLkGOxk4PVZx0hdoKORMrwi6th6s=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=g1iUCj5/POp53H9VLouCZz2dIMOju3IkpuJjJp0voSo=;
+        b=H9yzEWXMvduv0RlBRo0Ykb/0CKQUEeLe28BHUOiGLATs6L8Nkusud6gaiN0eldwW2l
+         W5kzE3vtN2Gn6+r1vVqJUW5pr4uXhVGrh47mcOokpTLy1r0H1eLSn0KPXEYhUpO0vYwY
+         AdfKxcfz0GkZfiBjlN/zmHSORAgRp6gjfv2PnfW2LVlNRcbhBqua2FpBVcQCto71WinZ
+         dNBxiHbRbm7/4UDkg7yB0vqcvbdklGpDQzbFwC+vKgN3dNnCzb5wtSC77fMXkiUzcYx9
+         XB3LMqozLRwVxMNFOwO1nBQ91da+Q3iEYZIS9/MWrRCnLbKed+4FqScH+E6MXN/FrTen
+         fbIQ==
+X-Gm-Message-State: AOAM533JRb1t5yAhcv/rDk+sxp6UGqQJiG+W3rHIHWlsoxwscvlrTdTx
+        lOcx1p4FNk/07EpagBNFVUzIow==
+X-Google-Smtp-Source: ABdhPJzaNE1+eal1NLAbIS1oWF11dfCqdPbXTt5AkeT0bfEQwRimbESqA5ja0J4jPcc3ElrMPKDISg==
+X-Received: by 2002:aa7:980e:0:b029:197:d069:897 with SMTP id e14-20020aa7980e0000b0290197d0690897mr4128462pfl.46.1606854385056;
+        Tue, 01 Dec 2020 12:26:25 -0800 (PST)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id u7sm586309pfh.115.2020.12.01.12.26.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 01 Dec 2020 12:26:24 -0800 (PST)
+Date:   Tue, 1 Dec 2020 12:26:22 -0800
+From:   Kees Cook <keescook@chromium.org>
+To:     Bhaskara Budiredla <bbudiredla@marvell.com>
+Cc:     ulf.hansson@linaro.org, ccross@android.com, tony.luck@intel.com,
+        sgoutham@marvell.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        outgoing2/0000-cover-letter.patch@mx0b-0016f401.pphosted.com
+Subject: Re: [PATCH v2 1/2] mmc: Support kmsg dumper based on pstore/blk
+Message-ID: <202012011218.3B6566C5@keescook>
+References: <20201123111925.28999-1-bbudiredla@marvell.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201123111925.28999-1-bbudiredla@marvell.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Mon, Nov 23, 2020 at 04:49:24PM +0530, Bhaskara Budiredla wrote:
+> This patch introduces to mmcpstore. The functioning of mmcpstore
+> is similar to mtdpstore. mmcpstore works on FTL based flash devices
+> whereas mtdpstore works on raw flash devices. When the system crashes,
+> mmcpstore stores the kmsg panic and oops logs to a user specified
+> MMC device.
+> 
+> It collects the details about the host MMC device through pstore/blk
+> "blkdev" parameter. The user can specify the MMC device in many ways
+> by checking in Documentation/admin-guide/pstore-blk.rst.
+> 
+> The individual mmc host drivers have to define suitable polling
+> subroutines to write kmsg panic/oops logs through mmcpstore.
+> 
+> Signed-off-by: Bhaskara Budiredla <bbudiredla@marvell.com>
+> ---
+>  drivers/mmc/core/Kconfig     |  15 +-
+>  drivers/mmc/core/Makefile    |   1 +
+>  drivers/mmc/core/block.c     |  19 +++
+>  drivers/mmc/core/block.h     |   9 ++
+>  drivers/mmc/core/core.c      |  24 +++
+>  drivers/mmc/core/mmcpstore.c | 302 +++++++++++++++++++++++++++++++++++
+>  include/linux/mmc/core.h     |   4 +
+>  include/linux/mmc/host.h     |  12 ++
+>  8 files changed, 385 insertions(+), 1 deletion(-)
+>  create mode 100644 drivers/mmc/core/mmcpstore.c
+> 
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index c12fe13e4b14..505450a6ea2b 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -34,9 +34,23 @@ config PWRSEQ_SIMPLE
+>  	  This driver can also be built as a module. If so, the module
+>  	  will be called pwrseq_simple.
+>  
+> +config MMC_PSTORE_BACKEND
+> +	bool "Log panic/oops to a MMC buffer"
+> +	depends on MMC_BLOCK
+> +	default n
 
-during probing of second mmc host on the GTA04A5 which has a
-WL1835 wifi chip attached, I get the following oops. From a first glance
-this seems to be a timing sensitive. Maybe it rings some bells for someone.=
-..
-so I hesitate a bit to start the bisect job.
-Wild guessing: bus width is set while mmc module is not active, so registers
-are not accessible.
-Kernel configuration is omap2plus_defconfig
+"default n" is redundant and can be dropped.
 
-Regards,
-Andreas
+> +	help
+> +	  This option will let you create platform backend to store kmsg
+> +	  crash dumps to a user specified MMC device. This is primarily
+> +	  based on pstore/blk.
+> +
+> +config MMC_PSTORE
+> +	tristate
+> +	select PSTORE_BLK
+
+I don't understand why this is separate?
+
+> +
+>  config MMC_BLOCK
+>  	tristate "MMC block device driver"
+>  	depends on BLOCK
+> +	select MMC_PSTORE if MMC_PSTORE_BACKEND=y
+>  	default y
+>  	help
+>  	  Say Y here to enable the MMC block device driver support.
+> @@ -80,4 +94,3 @@ config MMC_TEST
+>  
+>  	  This driver is only of interest to those developing or
+>  	  testing a host driver. Most people should say N here.
+> -
+
+Why isn't this just written as:
+
+config MMC_PSTORE
+	bool "Log panic/oops to a MMC buffer"
+	depends on MMC_BLOCK
+	select PSTORE_BLK
+	help
+	  This option will let you create platform backend to store kmsg
+	  crash dumps to a user specified MMC device. This is primarily
+	  based on pstore/blk.
 
 
-[    0.000000] Booting Linux on physical CPU 0x0
-[    0.000000] Linux version 5.10.0-rc6 (andi@aktux) (arm-linux-gnueabihf-g=
-cc (Debian 8.3.0-2) 8.3.0, GNU0
-[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=3D10c=
-5387d
-[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instr=
-uction cache
-[    0.000000] OF: fdt: Machine model: Goldelico GTA04A5/Letux 2804
-[    0.000000] Memory policy: Data cache writeback
-[    0.000000] cma: Reserved 16 MiB at 0xbf000000
-[    0.000000] Zone ranges:
-[    0.000000]   Normal   [mem 0x0000000080000000-0x00000000afdfffff]
-[    0.000000]   HighMem  [mem 0x00000000afe00000-0x00000000bfffffff]
-[    0.000000] Movable zone start for each node
-[    0.000000] Early memory node ranges
-[    0.000000]   node   0: [mem 0x0000000080000000-0x00000000afdfffff]
-[    0.000000]   node   0: [mem 0x00000000b0000000-0x00000000bfffffff]
-[    0.000000] Initmem setup node 0 [mem 0x0000000080000000-0x00000000bffff=
-fff]
-[    0.000000] CPU: All CPU(s) started in SVC mode.
-[    0.000000] OMAP3630/DM3730 ES1.2 (l2cache iva sgx neon isp 192mhz_clk)
-[    0.000000] percpu: Embedded 20 pages/cpu s49228 r8192 d24500 u81920
-[    0.000000] Built 1 zonelists, mobility grouping on.  Total pages: 259908
-[    0.000000] Kernel command line: root=3D/dev/mmcblk0p6 rootfstype=3Dext4=
-,ext3,btrfs rootwait console=3DttyS20
-[    0.000000] Dentry cache hash table entries: 131072 (order: 7, 524288 by=
-tes, linear)
-[    0.000000] Inode-cache hash table entries: 65536 (order: 6, 262144 byte=
-s, linear)
-[    0.000000] mem auto-init: stack:off, heap alloc:off, heap free:off
-[    0.000000] Memory: 1005132K/1046528K available (9216K kernel code, 1028=
-K rwdata, 2176K rodata, 1024K )
-[    0.000000] rcu: Hierarchical RCU implementation.
-[    0.000000] rcu:     RCU event tracing is enabled.
-[    0.000000] rcu:     RCU restricting CPUs from NR_CPUS=3D2 to nr_cpu_ids=
-=3D1.
-[    0.000000] rcu: RCU calculated value of scheduler-enlistment delay is 1=
-0 jiffies.
-[    0.000000] rcu: Adjusting geometry for rcu_fanout_leaf=3D16, nr_cpu_ids=
-=3D1
-[    0.000000] NR_IRQS: 16, nr_irqs: 16, preallocated irqs: 16
-[    0.000000] IRQ: Found an INTC at 0x(ptrval) (revision 4.0) with 96 inte=
-rrupts
-[    0.000000] random: get_random_bytes called from start_kernel+0x30c/0x54=
-c with crng_init=3D0
-[    0.000000] Clocking rate (Crystal/Core/MPU): 26.0/400/600 MHz
-[    0.000000] OMAP clocksource: 32k_counter at 32768 Hz
-[    0.000000] clocksource: 32k_counter: mask: 0xffffffff max_cycles: 0xfff=
-fffff, max_idle_ns: 5832703998s
-[    0.000030] sched_clock: 32 bits at 32kHz, resolution 30517ns, wraps eve=
-ry 65535999984741ns
-[    0.003356] TI gptimer clockevent: always-on 32768 Hz at /ocp@68000000/t=
-arget-module@48318000
-[    0.005096] Console: colour dummy device 80x30
-[    0.005187] Calibrating delay loop... 600.47 BogoMIPS (lpj=3D3002368)
-[    0.053863] pid_max: default: 32768 minimum: 301
-[    0.054138] LSM: Security Framework initializing
-[    0.054260] Mount-cache hash table entries: 2048 (order: 1, 8192 bytes, =
-linear)
-[    0.054321] Mountpoint-cache hash table entries: 2048 (order: 1, 8192 by=
-tes, linear)
-[    0.055694] CPU: Testing write buffer coherency: ok
-[    0.055816] CPU0: Spectre v2: using BPIALL workaround
-[    0.056213] CPU0: thread -1, cpu 0, socket -1, mpidr 0
-[    0.057342] Setting up static identity map for 0x80100000 - 0x80100078
-[    0.057617] rcu: Hierarchical SRCU implementation.
-[    0.058349] smp: Bringing up secondary CPUs ...
-[    0.058380] smp: Brought up 1 node, 1 CPU
-[    0.058380] SMP: Total of 1 processors activated (600.47 BogoMIPS).
-[    0.058410] CPU: All CPU(s) started in SVC mode.
-[    0.059234] devtmpfs: initialized
-[    0.086822] VFP support v0.3: implementor 41 architecture 3 part 30 vari=
-ant c rev 3
-[    0.087280] clocksource: jiffies: mask: 0xffffffff max_cycles: 0xfffffff=
-f, max_idle_ns: 19112604462750s
-[    0.087310] futex hash table entries: 256 (order: 2, 16384 bytes, linear)
-[    0.088806] pinctrl core: initialized pinctrl subsystem
-[    0.090850] NET: Registered protocol family 16
-[    0.094573] DMA: preallocated 256 KiB pool for atomic coherent allocatio=
-ns
-[    0.121429] omap_hwmod: mcbsp2_sidetone using broken dt data from mcbsp
-[    0.122253] omap_hwmod: mcbsp3_sidetone using broken dt data from mcbsp
-[    0.206390] audit: initializing netlink subsys (disabled)
-[    0.207855] thermal_sys: Registered thermal governor 'fair_share'
-[    0.207855] thermal_sys: Registered thermal governor 'step_wise'
-[    0.207885] thermal_sys: Registered thermal governor 'user_space'
-[    0.208648] cpuidle: using governor menu
-[    0.209106] Reprogramming SDRC clock to 400000000 Hz
-[    0.252105] audit: type=3D2000 audit(0.200:1): state=3Dinitialized audit=
-_enabled=3D0 res=3D1
-[    0.252563] OMAP GPIO hardware version 2.5
-[    0.257019] gpio-111 (irda_en): hogged as output/high
-[    0.448425] No ATAGs?
-[    0.448455] hw-breakpoint: debug architecture 0x4 unsupported.
-[    0.478210] iommu: Default domain type: Translated=20
-[    0.480072] omap-iommu 480bd400.mmu: 480bd400.mmu registered
-[    0.480865] platform 480bc000.isp: Adding to iommu group 0
-[    0.483367] vgaarb: loaded
-[    0.484069] SCSI subsystem initialized
-[    0.490417] omap_i2c 48070000.i2c: bus 0 rev4.4 at 2600 kHz
-[    0.511016] omap_i2c 48072000.i2c: bus 1 rev4.4 at 400 kHz
-[    0.512695] omap_i2c 48060000.i2c: bus 2 rev4.4 at 100 kHz
-[    0.513214] pps_core: LinuxPPS API ver. 1 registered
-[    0.513244] pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo =
-Giometti <giometti@linux.it>
-[    0.513275] PTP clock support registered
-[    0.515014] clocksource: Switched to clocksource 32k_counter
-[    1.539031] VFS: Disk quotas dquot_6.6.0
-[    1.539184] VFS: Dquot-cache hash table entries: 1024 (order 0, 4096 byt=
-es)
-[    1.554412] NET: Registered protocol family 2
-[    1.555694] tcp_listen_portaddr_hash hash table entries: 512 (order: 0, =
-6144 bytes, linear)
-[    1.555755] TCP established hash table entries: 8192 (order: 3, 32768 by=
-tes, linear)
-[    1.555877] TCP bind hash table entries: 8192 (order: 4, 65536 bytes, li=
-near)
-[    1.556060] TCP: Hash tables configured (established 8192 bind 8192)
-[    1.556243] UDP hash table entries: 512 (order: 2, 16384 bytes, linear)
-[    1.556304] UDP-Lite hash table entries: 512 (order: 2, 16384 bytes, lin=
-ear)
-[    1.556579] NET: Registered protocol family 1
-[    1.557617] RPC: Registered named UNIX socket transport module.
-[    1.557647] RPC: Registered udp transport module.
-[    1.557678] RPC: Registered tcp transport module.
-[    1.557678] RPC: Registered tcp NFSv4.1 backchannel transport module.
-[    1.557708] PCI: CLS 0 bytes, default 64
-[    1.566101] hw perfevents: enabled with armv7_cortex_a8 PMU driver, 5 co=
-unters available
-[    1.568389] Initialise system trusted keyrings
-[    1.568878] workingset: timestamp_bits=3D14 max_order=3D18 bucket_order=
-=3D4
-[    1.570465] NFS: Registering the id_resolver key type
-[    1.570526] Key type id_resolver registered
-[    1.570556] Key type id_legacy registered
-[    1.570617] jffs2: version 2.2. (NAND) (SUMMARY)  =EF=BF=BD=C9=A9 2001-2=
-006 Red Hat, Inc.
-[    1.571105] Key type asymmetric registered
-[    1.571136] Asymmetric key parser 'x509' registered
-[    1.571228] bounce: pool size: 64 pages
-[    1.571258] io scheduler mq-deadline registered
-[    1.571289] io scheduler kyber registered
-[    1.597412] omap-dma-engine 48056000.dma-controller: OMAP DMA engine dri=
-ver (LinkedList1/2/3 supported)
-[    1.609954] pinctrl-single 48002030.pinmux: 284 pins, size 568
-[    1.610656] pinctrl-single 48002a00.pinmux: 46 pins, size 92
-[    1.611511] pinctrl-single 480025a0.pinmux: 46 pins, size 92
-[    1.612030] pinctrl-single 48002274.pinmux_mcbsp1: initialized with no i=
-nterrupts
-[    1.612060] pinctrl-single 48002274.pinmux_mcbsp1: 10 pins, size 4
-[    1.612396] pinctrl-single 480022d8.pinmux_tv_out: initialized with no i=
-nterrupts
-[    1.612426] pinctrl-single 480022d8.pinmux_tv_out: 4 pins, size 4
-[    1.619689] Serial: 8250/16550 driver, 6 ports, IRQ sharing enabled
-[    1.624481] 4806a000.serial: ttyS0 at MMIO 0x4806a000 (irq =3D 88, base_=
-baud =3D 3000000) is a 8250
-[    1.626922] 4806c000.serial: ttyS1 at MMIO 0x4806c000 (irq =3D 89, base_=
-baud =3D 3000000) is a 8250
-[    1.627258] serial serial0: tty port ttyS1 registered
-[    1.629028] 49020000.serial: ttyS2 at MMIO 0x49020000 (irq =3D 90, base_=
-baud =3D 3000000) is a 8250
-[    2.394439] printk: console [ttyS2] enabled
-[    2.401123] 49042000.serial: ttyS3 at MMIO 0x49042000 (irq =3D 96, base_=
-baud =3D 3000000) is a 8250
-[    2.428985] brd: module loaded
-[    2.444610] loop: module loaded
-[    2.477172] random: fast init done
-[    2.486877] twl 0-0048: PIH (irq 23) chaining IRQs 145..153
-[    2.492614] twl 0-0048: power (irq 150) chaining IRQs 153..160
-[    2.513305] VAUX3: Bringing 2800000uV into 2500000-2500000uV
-[    2.558990] twl4030_gpio twl4030-gpio: gpio (irq 145) chaining IRQs 161.=
-.178
-[    2.587097] mtdoops: mtd device (mtddev=3Dname/number) must be supplied
-[    2.601928] libphy: Fixed MDIO Bus: probed
-[    2.609924] i2c /dev entries driver
-[    2.619293] sdhci: Secure Digital Host Controller Interface driver
-[    2.625793] sdhci: Copyright(c) Pierre Ossman
-[    2.631317] sdhci-pltfm: SDHCI platform and OF driver helper
-[    2.643859] ledtrig-cpu: registered to indicate activity on CPUs
-[    2.654022] Initializing XFRM netlink socket
-[    2.658843] NET: Registered protocol family 10
-[    2.665496] Segment Routing with IPv6
-[    2.669311] sit: IPv6, IPv4 and MPLS over IPv4 tunneling driver
-[    2.676452] NET: Registered protocol family 17
-[    2.680969] NET: Registered protocol family 15
-[    2.685791] Key type dns_resolver registered
-[    2.690795] oprofile: using arm/armv7
-[    2.694641] ThumbEE CPU extension supported.
-[    2.699157] Registering SWP/SWPB emulation handler
-[    2.706512] SmartReflex Class3 initialized
-[    2.712371] Loading compiled-in X.509 certificates
-[    2.757385] smartreflex 480cb000.smartreflex: omap_sr_probe: SmartReflex=
- driver initialized
-[    2.766540] smartreflex 480c9000.smartreflex: omap_sr_probe: SmartReflex=
- driver initialized
-[    2.778320] omap-gpmc 6e000000.gpmc: GPMC revision 5.0
-[    2.783508] gpmc_mem_init: disabling cs 0 mapped at 0x0-0x1000000
-[    2.792236] omap2-onenand 4000000.onenand: initializing on CS0 (0x040000=
-00), va (ptrval), DMA mode
-[    2.801574] Muxed OneNAND 512MB 1.8V 16-bit (0x50)
-[    2.806579] OneNAND version =3D 0x0232
-[    2.811950] Scanning device for bad blocks
-[    2.872314] mmc0: host does not support reading read-only switch, assumi=
-ng write-enable
-[    2.895294] mmc0: new high speed SDXC card at address aaaa
-[    2.905822] mmcblk0: mmc0:aaaa SC64G 59.5 GiB=20
-[    3.098297] omap2-onenand 4000000.onenand: optimized timings for 83 MHz
-[    3.105010] 5 fixed-partitions partitions found on MTD device 4000000.on=
-enand
-[    3.112335] Creating 5 MTD partitions on "4000000.onenand":
-[    3.118133] 0x000000000000-0x000000080000 : "X-Loader"
-[    3.127716] 0x000000080000-0x000000240000 : "U-Boot"
-[    3.135925] 0x000000240000-0x000000280000 : "U-Boot Env"
-[    3.145904] 0x000000280000-0x000000880000 : "Kernel"
-[    3.152587]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 >
-[    3.159393] 0x000000880000-0x000020000000 : "File System"
-[    3.179534] omap_hsmmc 480b4000.mmc: omap_device_late_idle: enabled but =
-no driver.  Idling
-[    3.265594] 8<--- cut here ---
-[    3.268707] Unhandled fault: external abort on non-linefetch (0x1028) at=
- 0xfa0b402c
-[    3.276397] pgd =3D (ptrval)
-[    3.279144] [fa0b402c] *pgd=3D48011452(bad)
-[    3.283203] Internal error: : 1028 [#1] SMP ARM
-[    3.287750] Modules linked in:
-[    3.290832] CPU: 0 PID: 7 Comm: kworker/u2:0 Not tainted 5.10.0-rc6 #3
-[    3.297393] Hardware name: Generic OMAP36xx (Flattened Device Tree)
-[    3.303710] Workqueue: events_unbound async_run_entry_fn
-[    3.309082] PC is at omap_hsmmc_set_bus_width+0x8/0x78
-[    3.314239] LR is at omap_hsmmc_set_ios+0x11c/0x258
-[    3.319152] pc : [<c079787c>]    lr : [<c07996bc>]    psr: 20000013
-[    3.325469] sp : c10f9e00  ip : c175c800  fp : 00000066
-[    3.330718] r10: c175cb80  r9 : fa0b4000  r8 : 00000000
-[    3.335968] r7 : c123e010  r6 : c175ca58  r5 : c175cb80  r4 : c175c800
-[    3.342529] r3 : 00000001  r2 : 58ad940c  r1 : fa0b4000  r0 : c175cb80
-[    3.349090] Flags: nzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment=
- none
-[    3.356262] Control: 10c5387d  Table: 80004019  DAC: 00000051
-[    3.362030] Process kworker/u2:0 (pid: 7, stack limit =3D 0x(ptrval))
-[    3.368347] Stack: (0xc10f9e00 to 0xc10fa000)
-[    3.372741] 9e00: c175c800 00000007 c123e000 c123e010 00000000 c077b2b0 =
-c175c800 00000000
-[    3.380950] 9e20: c123e000 c077c14c c175c800 c077d284 c175c800 c175c800 =
-c123e000 c0799190
-[    3.389190] 9e40: 00000000 c1755040 c175cb80 00000000 c123fd68 58ad940c =
-00000001 c123e010
-[    3.397430] 9e60: 00000000 c0edaec8 00000000 00000000 c0edaec8 00000006 =
-ffffe000 c0666728
-[    3.405639] 9e80: c123e010 c0f38c28 c0f38c30 00000000 00000000 c066457c =
-c123e010 c0edaec8
-[    3.413879] 9ea0: c06649bc c0e051c8 00000000 00000000 c0efa4a0 c06648b8 =
-00000000 c10f9ef4
-[    3.422119] 9ec0: c06649bc c066298c 00000000 c1039e6c c1653738 58ad940c =
-c123e010 c123e010
-[    3.430328] 9ee0: c0e051c8 c123e054 c100f000 c0663e60 c0e03d00 c123e010 =
-00010101 58ad940c
-[    3.438568] 9f00: c12642d0 c0f02018 c12642c0 c015da48 c12642d0 c10bbf00 =
-c1009400 c100f000
-[    3.446807] 9f20: 00000000 c0153b74 c10bc800 c1009400 00000088 c10bbf00 =
-c10bbf14 c1009400
-[    3.455017] 9f40: 00000088 c1009418 c0e03d00 c1009400 ffffe000 c0153eec =
-ffffe000 00000000
-[    3.463256] 9f60: c10bbf00 00000000 c10b1ac0 c10b1c40 c10f8000 c0153ec0 =
-c10bbf00 c10ebe94
-[    3.471466] 9f80: c10b1ae4 c015a9ac 00000001 c10b1c40 c015a87c 00000000 =
-00000000 00000000
-[    3.479705] 9fa0: 00000000 00000000 00000000 c0100168 00000000 00000000 =
-00000000 00000000
-[    3.487945] 9fc0: 00000000 00000000 00000000 00000000 00000000 00000000 =
-00000000 00000000
-[    3.496154] 9fe0: 00000000 00000000 00000000 00000000 00000013 00000000 =
-00000000 00000000
-[    3.504394] [<c079787c>] (omap_hsmmc_set_bus_width) from [<c07996bc>] (o=
-map_hsmmc_set_ios+0x11c/0x258)
-[    3.513763] [<c07996bc>] (omap_hsmmc_set_ios) from [<c077b2b0>] (mmc_pow=
-er_up.part.8+0x3c/0xd0)
-[    3.522521] [<c077b2b0>] (mmc_power_up.part.8) from [<c077c14c>] (mmc_st=
-art_host+0x88/0x9c)
-[    3.530944] [<c077c14c>] (mmc_start_host) from [<c077d284>] (mmc_add_hos=
-t+0x58/0x84)
-[    3.538726] [<c077d284>] (mmc_add_host) from [<c0799190>] (omap_hsmmc_pr=
-obe+0x5fc/0x8c0)
-[    3.546874] [<c0799190>] (omap_hsmmc_probe) from [<c0666728>] (platform_=
-drv_probe+0x48/0x98)
-[    3.555358] [<c0666728>] (platform_drv_probe) from [<c066457c>] (really_=
-probe+0x1dc/0x3b4)
-[    3.563690] [<c066457c>] (really_probe) from [<c06648b8>] (driver_probe_=
-device+0x58/0xb4)
-[    3.571929] [<c06648b8>] (driver_probe_device) from [<c066298c>] (bus_fo=
-r_each_drv+0x7c/0xc4)
-[    3.580505] [<c066298c>] (bus_for_each_drv) from [<c0663e60>] (__device_=
-attach_async_helper+0xa4/0xd8)
-[    3.589874] [<c0663e60>] (__device_attach_async_helper) from [<c015da48>=
-] (async_run_entry_fn+0x3c/0x1)
-[    3.599487] [<c015da48>] (async_run_entry_fn) from [<c0153b74>] (process=
-_one_work+0x228/0x574)
-[    3.608154] [<c0153b74>] (process_one_work) from [<c0153eec>] (worker_th=
-read+0x2c/0x5d0)
-[    3.616302] [<c0153eec>] (worker_thread) from [<c015a9ac>] (kthread+0x13=
-0/0x144)
-[    3.623748] [<c015a9ac>] (kthread) from [<c0100168>] (ret_from_fork+0x14=
-/0x2c)
-[    3.631011] Exception stack(0xc10f9fb0 to 0xc10f9ff8)
-[    3.636108] 9fa0:                                     00000000 00000000 =
-00000000 00000000
-[    3.644317] 9fc0: 00000000 00000000 00000000 00000000 00000000 00000000 =
-00000000 00000000
-[    3.652557] 9fe0: 00000000 00000000 00000000 00000000 00000013 00000000
-[    3.659210] Code: e8bd4070 ea082166 e590c004 e5901024 (e591302c)=20
-[    3.665344] ---[ end trace 085f2ded837c839d ]---
-[    3.670013] In-band Error seen by MPU  at address 0
-[    3.674926] ------------[ cut here ]------------
-[    3.679565] WARNING: CPU: 0 PID: 7 at drivers/bus/omap_l3_smx.c:152 omap=
-3_l3_app_irq+0xb4/0x120
-[    3.688323] Modules linked in:
-[    3.691406] CPU: 0 PID: 7 Comm: kworker/u2:0 Tainted: G      D          =
- 5.10.0-rc6 #3
-[    3.699371] Hardware name: Generic OMAP36xx (Flattened Device Tree)
-[    3.705657] Workqueue: events_unbound async_run_entry_fn
-[    3.711029] [<c0110c34>] (unwind_backtrace) from [<c010b538>] (show_stac=
-k+0x10/0x14)
-[    3.718841] [<c010b538>] (show_stack) from [<c09924a8>] (dump_stack+0xc4=
-/0xe4)
-[    3.726104] [<c09924a8>] (dump_stack) from [<c0137968>] (__warn+0xd8/0x1=
-00)
-[    3.733123] [<c0137968>] (__warn) from [<c098e0f8>] (warn_slowpath_fmt+0=
-x58/0xb8)
-[    3.740661] [<c098e0f8>] (warn_slowpath_fmt) from [<c058d284>] (omap3_l3=
-_app_irq+0xb4/0x120)
-[    3.749145] [<c058d284>] (omap3_l3_app_irq) from [<c019b1c4>] (__handle_=
-irq_event_percpu+0x48/0x208)
-[    3.758331] [<c019b1c4>] (__handle_irq_event_percpu) from [<c019b3ac>] (=
-handle_irq_event_percpu+0x28/0)
-[    3.768035] [<c019b3ac>] (handle_irq_event_percpu) from [<c019b44c>] (ha=
-ndle_irq_event+0x48/0x6c)
-[    3.776977] [<c019b44c>] (handle_irq_event) from [<c019fa90>] (handle_le=
-vel_irq+0xc4/0x15c)
-[    3.785369] [<c019fa90>] (handle_level_irq) from [<c019a3e0>] (generic_h=
-andle_irq+0x30/0x44)
-[    3.793853] [<c019a3e0>] (generic_handle_irq) from [<c019a9f4>] (__handl=
-e_domain_irq+0x64/0xe0)
-[    3.802612] [<c019a9f4>] (__handle_domain_irq) from [<c0100b6c>] (__irq_=
-svc+0x6c/0x90)
-[    3.810577] Exception stack(0xc10f9cd0 to 0xc10f9d18)
-[    3.815673] 9cc0:                                     00000000 00000000 =
-c10bda80 00000002
-[    3.823883] 9ce0: 00000000 c10ecb40 00000000 00000000 c10f8000 00000000 =
-bf000000 ffffe000
-[    3.832122] 9d00: 00000000 c10f9d20 00000000 c01e0cd8 40000113 ffffffff
-[    3.838775] [<c0100b6c>] (__irq_svc) from [<c01e0cd8>] (acct_collect+0x1=
-b0/0x1cc)
-[    3.846313] [<c01e0cd8>] (acct_collect) from [<c013ca10>] (do_exit+0x1d0=
-/0xb44)
-[    3.853668] [<c013ca10>] (do_exit) from [<c010b860>] (die+0x324/0x364)
-[    3.860229] [<c010b860>] (die) from [<c01154e0>] (do_DataAbort+0x9c/0xb8)
-[    3.867065] [<c01154e0>] (do_DataAbort) from [<c0100ac0>] (__dabt_svc+0x=
-60/0xa0)
-[    3.874511] Exception stack(0xc10f9db0 to 0xc10f9df8)
-[    3.879608] 9da0:                                     c175cb80 fa0b4000 =
-58ad940c 00000001
-[    3.887817] 9dc0: c175c800 c175cb80 c175ca58 c123e010 00000000 fa0b4000 =
-c175cb80 00000066
-[    3.896057] 9de0: c175c800 c10f9e00 c07996bc c079787c 20000013 ffffffff
-[    3.902709] [<c0100ac0>] (__dabt_svc) from [<c079787c>] (omap_hsmmc_set_=
-bus_width+0x8/0x78)
-[    3.911102] [<c079787c>] (omap_hsmmc_set_bus_width) from [<c07996bc>] (o=
-map_hsmmc_set_ios+0x11c/0x258)
-[    3.920471] [<c07996bc>] (omap_hsmmc_set_ios) from [<c077b2b0>] (mmc_pow=
-er_up.part.8+0x3c/0xd0)
-[    3.929229] [<c077b2b0>] (mmc_power_up.part.8) from [<c077c14c>] (mmc_st=
-art_host+0x88/0x9c)
-[    3.937622] [<c077c14c>] (mmc_start_host) from [<c077d284>] (mmc_add_hos=
-t+0x58/0x84)
-[    3.945434] [<c077d284>] (mmc_add_host) from [<c0799190>] (omap_hsmmc_pr=
-obe+0x5fc/0x8c0)
-[    3.953552] [<c0799190>] (omap_hsmmc_probe) from [<c0666728>] (platform_=
-drv_probe+0x48/0x98)
-[    3.962066] [<c0666728>] (platform_drv_probe) from [<c066457c>] (really_=
-probe+0x1dc/0x3b4)
-[    3.970367] [<c066457c>] (really_probe) from [<c06648b8>] (driver_probe_=
-device+0x58/0xb4)
-[    3.978607] [<c06648b8>] (driver_probe_device) from [<c066298c>] (bus_fo=
-r_each_drv+0x7c/0xc4)
-[    3.987182] [<c066298c>] (bus_for_each_drv) from [<c0663e60>] (__device_=
-attach_async_helper+0xa4/0xd8)
-[    3.996551] [<c0663e60>] (__device_attach_async_helper) from [<c015da48>=
-] (async_run_entry_fn+0x3c/0x1)
-[    4.006164] [<c015da48>] (async_run_entry_fn) from [<c0153b74>] (process=
-_one_work+0x228/0x574)
-[    4.014831] [<c0153b74>] (process_one_work) from [<c0153eec>] (worker_th=
-read+0x2c/0x5d0)
-[    4.022979] [<c0153eec>] (worker_thread) from [<c015a9ac>] (kthread+0x13=
-0/0x144)
-[    4.030426] [<c015a9ac>] (kthread) from [<c0100168>] (ret_from_fork+0x14=
-/0x2c)
-[    4.037689] Exception stack(0xc10f9fb0 to 0xc10f9ff8)
-[    4.042755] 9fa0:                                     00000000 00000000 =
-00000000 00000000
-[    4.050994] 9fc0: 00000000 00000000 00000000 00000000 00000000 00000000 =
-00000000 00000000
-[    4.059204] 9fe0: 00000000 00000000 00000000 00000000 00000013 00000000
-[    4.065856] ---[ end trace 085f2ded837c839e ]---
+
+
+> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+> index 95ffe008ebdf..7cb9a3af4827 100644
+> --- a/drivers/mmc/core/Makefile
+> +++ b/drivers/mmc/core/Makefile
+> @@ -16,5 +16,6 @@ obj-$(CONFIG_PWRSEQ_EMMC)	+= pwrseq_emmc.o
+>  mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+>  obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
+>  mmc_block-objs			:= block.o queue.o
+> +mmc_block-$(CONFIG_MMC_PSTORE)	+= mmcpstore.o
+>  obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
+>  obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 8d3df0be0355..ed012a91e3a3 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2870,6 +2870,21 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
+>  
+>  #endif /* CONFIG_DEBUG_FS */
+>  
+> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
+> +sector_t mmc_blk_get_part(struct mmc_card *card, int part_num, sector_t *size)
+> +{
+> +	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
+> +	struct gendisk *disk = md->disk;
+> +	struct disk_part_tbl *part_tbl = disk->part_tbl;
+> +
+> +	if (part_num < 0 || part_num >= part_tbl->len)
+> +		return 0;
+> +
+> +	*size = part_tbl->part[part_num]->nr_sects << SECTOR_SHIFT;
+> +	return part_tbl->part[part_num]->start_sect;
+> +}
+> +#endif
+> +
+>  static int mmc_blk_probe(struct mmc_card *card)
+>  {
+>  	struct mmc_blk_data *md, *part_md;
+> @@ -2913,6 +2928,9 @@ static int mmc_blk_probe(struct mmc_card *card)
+>  			goto out;
+>  	}
+>  
+> +	if (mmc_card_mmc(card) || mmc_card_sd(card))
+> +		mmcpstore_card_set(card, md->disk->disk_name);
+> +
+>  	/* Add two debugfs entries */
+>  	mmc_blk_add_debugfs(card, md);
+>  
+> @@ -3060,6 +3078,7 @@ static void __exit mmc_blk_exit(void)
+>  	unregister_blkdev(MMC_BLOCK_MAJOR, "mmc");
+>  	unregister_chrdev_region(mmc_rpmb_devt, MAX_DEVICES);
+>  	bus_unregister(&mmc_rpmb_bus_type);
+> +	unregister_mmcpstore();
+>  }
+>  
+>  module_init(mmc_blk_init);
+> diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
+> index 31153f656f41..2a4ee5568194 100644
+> --- a/drivers/mmc/core/block.h
+> +++ b/drivers/mmc/core/block.h
+> @@ -16,5 +16,14 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq);
+>  struct work_struct;
+>  
+>  void mmc_blk_mq_complete_work(struct work_struct *work);
+> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
+> +sector_t mmc_blk_get_part(struct mmc_card *card, int part_num, sector_t *size);
+> +void mmcpstore_card_set(struct mmc_card *card, const char *disk_name);
+> +void unregister_mmcpstore(void);
+> +#else
+> +static inline void mmcpstore_card_set(struct mmc_card *card,
+> +					const char *disk_name) {}
+> +static inline void unregister_mmcpstore(void) {}
+> +#endif
+>  
+>  #endif
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index d42037f0f10d..7682b267f1d5 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -569,6 +569,30 @@ int mmc_cqe_recovery(struct mmc_host *host)
+>  }
+>  EXPORT_SYMBOL(mmc_cqe_recovery);
+>  
+> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
+> +/**
+> + *	mmc_wait_for_pstore_req - initiate a blocking mmc request
+> + *	@host: MMC host to start command
+> + *	@mrq: MMC request to start
+> + *
+> + *	Start a blocking MMC request for a host and wait for the request
+> + *	to complete that is based on polling and timeout.
+> + */
+> +void mmc_wait_for_pstore_req(struct mmc_host *host, struct mmc_request *mrq)
+> +{
+> +	unsigned int timeout;
+> +
+> +	host->ops->req_cleanup_pending(host);
+> +	mmc_start_request(host, mrq);
+> +
+> +	if (mrq->data) {
+> +		timeout = mrq->data->timeout_ns / NSEC_PER_MSEC;
+> +		host->ops->req_completion_poll(host, timeout);
+> +	}
+> +}
+> +EXPORT_SYMBOL(mmc_wait_for_pstore_req);
+> +#endif
+> +
+>  /**
+>   *	mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is done
+>   *	@host: MMC host
+> diff --git a/drivers/mmc/core/mmcpstore.c b/drivers/mmc/core/mmcpstore.c
+> new file mode 100644
+> index 000000000000..1113eae0756c
+> --- /dev/null
+> +++ b/drivers/mmc/core/mmcpstore.c
+> @@ -0,0 +1,302 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * MMC pstore support based on pstore/blk
+> + *
+> + * Copyright (c) 2020 Marvell.
+> + * Author: Bhaskara Budiredla <bbudiredla@marvell.com>
+> + */
+> +
+> +#define pr_fmt(fmt) "mmcpstore: " fmt
+> +
+> +#include <linux/kernel.h>
+> +#include <linux/module.h>
+> +#include <linux/pstore_blk.h>
+> +#include <linux/blkdev.h>
+> +#include <linux/mount.h>
+> +#include <linux/slab.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/card.h>
+> +#include <linux/scatterlist.h>
+> +#include "block.h"
+> +#include "card.h"
+> +#include "core.h"
+> +
+> +static struct mmcpstore_context {
+> +	char dev_name[BDEVNAME_SIZE];
+> +	int partno;
+> +	sector_t start_sect;
+> +	sector_t size;
+> +	struct pstore_device_info dev;
+> +	struct pstore_blk_config conf;
+> +	struct pstore_blk_info info;
+> +
+> +	char *sub;
+> +	struct mmc_card	*card;
+> +	struct mmc_request *mrq;
+> +} oops_cxt;
+> +
+> +static void mmc_prep_req(struct mmc_request *mrq,
+> +		unsigned int sect_offset, unsigned int nsects,
+> +		struct scatterlist *sg, u32 opcode, unsigned int flags)
+> +{
+> +	mrq->cmd->opcode = opcode;
+> +	mrq->cmd->arg = sect_offset;
+> +	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
+> +
+> +	if (nsects == 1) {
+> +		mrq->stop = NULL;
+> +	} else {
+> +		mrq->stop->opcode = MMC_STOP_TRANSMISSION;
+> +		mrq->stop->arg = 0;
+> +		mrq->stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
+> +	}
+> +
+> +	mrq->data->blksz = SECTOR_SIZE;
+> +	mrq->data->blocks = nsects;
+> +	mrq->data->flags = flags;
+> +	mrq->data->sg = sg;
+> +	mrq->data->sg_len = 1;
+> +}
+> +
+> +static int mmcpstore_rdwr_req(const char *buf, unsigned int nsects,
+> +			unsigned int sect_offset, unsigned int flags)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +	struct mmc_request *mrq = cxt->mrq;
+> +	struct mmc_card *card = cxt->card;
+> +	struct mmc_host *host = card->host;
+> +	struct scatterlist sg;
+> +	u32 opcode;
+> +
+> +	if (flags == MMC_DATA_READ)
+> +		opcode	= (nsects > 1) ?
+> +			MMC_READ_MULTIPLE_BLOCK : MMC_READ_SINGLE_BLOCK;
+> +	else
+> +		opcode = (nsects > 1) ?
+> +			MMC_WRITE_MULTIPLE_BLOCK : MMC_WRITE_BLOCK;
+> +
+> +	mmc_prep_req(mrq, sect_offset, nsects, &sg, opcode, flags);
+> +	sg_init_one(&sg, buf, (nsects << SECTOR_SHIFT));
+> +	mmc_set_data_timeout(mrq->data, cxt->card);
+> +
+> +	mmc_claim_host(host);
+> +	mmc_wait_for_req(host, mrq);
+> +	mdelay(mrq->data->timeout_ns / NSEC_PER_MSEC);
+> +	mmc_release_host(host);
+> +
+> +	if (mrq->cmd->error) {
+> +		pr_err("Cmd error: %d\n", mrq->cmd->error);
+> +		return mrq->cmd->error;
+> +	}
+> +	if (mrq->data->error) {
+> +		pr_err("Data error: %d\n", mrq->data->error);
+> +		return mrq->data->error;
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static ssize_t mmcpstore_write(const char *buf, size_t size, loff_t off)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +	int ret;
+> +
+> +	ret = mmcpstore_rdwr_req(buf, (size >> SECTOR_SHIFT),
+> +		cxt->start_sect + (off >> SECTOR_SHIFT), MMC_DATA_WRITE);
+> +	if (ret)
+> +		return ret;
+> +
+> +	return size;
+> +}
+> +
+> +static ssize_t mmcpstore_read(char *buf, size_t size, loff_t off)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +	unsigned int sect_off = cxt->start_sect  + (off >> SECTOR_SHIFT);
+> +	unsigned long sects = (cxt->conf.kmsg_size >> SECTOR_SHIFT);
+> +	int ret;
+> +
+> +	if (unlikely(!buf || !size))
+> +		return -EINVAL;
+> +
+> +	ret = mmcpstore_rdwr_req(cxt->sub, sects, sect_off, MMC_DATA_READ);
+> +	if (ret)
+> +		return ret;
+> +	memcpy(buf, cxt->sub, size);
+> +
+> +	return size;
+> +}
+> +
+> +static void mmcpstore_panic_write_req(const char *buf,
+> +		unsigned int nsects, unsigned int sect_offset)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +	struct mmc_request *mrq = cxt->mrq;
+> +	struct mmc_card *card = cxt->card;
+> +	struct mmc_host *host = card->host;
+> +	struct scatterlist sg;
+> +	u32 opcode;
+> +
+> +	opcode = (nsects > 1) ? MMC_WRITE_MULTIPLE_BLOCK : MMC_WRITE_BLOCK;
+> +	mmc_prep_req(mrq, sect_offset, nsects, &sg, opcode, MMC_DATA_WRITE);
+> +	sg_init_one(&sg, buf, (nsects << SECTOR_SHIFT));
+> +	mmc_set_data_timeout(mrq->data, cxt->card);
+> +
+> +	mmc_claim_host(host);
+> +	mmc_wait_for_pstore_req(host, mrq);
+> +	mmc_release_host(card->host);
+> +}
+> +
+> +static ssize_t mmcpstore_panic_write(const char *buf, size_t size, loff_t off)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +
+> +	mmcpstore_panic_write_req(buf, (size >> SECTOR_SHIFT),
+> +			cxt->start_sect + (off >> SECTOR_SHIFT));
+> +	return size;
+> +}
+> +
+> +static struct block_device *mmcpstore_open_backend(const char *device)
+> +{
+> +	struct block_device *bdev;
+> +	dev_t devt;
+> +
+> +	bdev = blkdev_get_by_path(device, FMODE_READ, NULL);
+> +	if (IS_ERR(bdev)) {
+> +		devt = name_to_dev_t(device);
+> +		if (devt == 0)
+> +			return ERR_PTR(-ENODEV);
+> +
+> +		bdev = blkdev_get_by_dev(devt, FMODE_READ, NULL);
+> +		if (IS_ERR(bdev))
+> +			return bdev;
+> +	}
+> +
+> +	return bdev;
+> +}
+> +
+> +static void mmcpstore_close_backend(struct block_device *bdev)
+> +{
+> +	if (!bdev)
+> +		return;
+> +	blkdev_put(bdev, FMODE_READ);
+> +}
+> +
+> +void mmcpstore_card_set(struct mmc_card *card, const char *disk_name)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +	struct pstore_blk_config *conf = &cxt->conf;
+> +	struct pstore_device_info *dev = &cxt->dev;
+> +	struct block_device *bdev;
+> +	struct mmc_command *stop;
+> +	struct mmc_command *cmd;
+> +	struct mmc_request *mrq;
+> +	struct mmc_data *data;
+> +	int ret;
+> +
+> +	ret = pstore_blk_get_config(conf);
+> +	if (!conf->device[0]) {
+> +		pr_debug("psblk backend is empty\n");
+> +		return;
+> +	}
+> +
+> +	/* Multiple backend devices not allowed */
+> +	if (cxt->dev_name[0])
+> +		return;
+> +
+> +	bdev =  mmcpstore_open_backend(conf->device);
+> +	if (IS_ERR(bdev)) {
+> +		pr_err("%s failed to open with %ld\n",
+> +				conf->device, PTR_ERR(bdev));
+> +		return;
+> +	}
+> +
+> +	bdevname(bdev, cxt->dev_name);
+> +	cxt->partno = bdev->bd_part->partno;
+> +	mmcpstore_close_backend(bdev);
+> +
+> +	if (strncmp(cxt->dev_name, disk_name, strlen(disk_name)))
+> +		return;
+
+Why isn't this just strcmp()?
+
+> +
+> +	cxt->start_sect = mmc_blk_get_part(card, cxt->partno, &cxt->size);
+> +	if (!cxt->start_sect) {
+> +		pr_err("Non-existent partition %d selected\n", cxt->partno);
+> +		return;
+> +	}
+> +
+> +	/* Check for host mmc panic write polling function definitions */
+> +	if (!card->host->ops->req_cleanup_pending ||
+> +			!card->host->ops->req_completion_poll)
+> +		return;
+> +
+> +	cxt->card = card;
+> +
+> +	cxt->sub = kmalloc(conf->kmsg_size, GFP_KERNEL);
+> +	if (!cxt->sub)
+> +		goto out;
+> +
+> +	mrq = kzalloc(sizeof(struct mmc_request), GFP_KERNEL);
+> +	if (!mrq)
+> +		goto free_sub;
+> +
+> +	cmd = kzalloc(sizeof(struct mmc_command), GFP_KERNEL);
+> +	if (!cmd)
+> +		goto free_mrq;
+> +
+> +	stop = kzalloc(sizeof(struct mmc_command), GFP_KERNEL);
+> +	if (!stop)
+> +		goto free_cmd;
+> +
+> +	data = kzalloc(sizeof(struct mmc_data), GFP_KERNEL);
+> +	if (!data)
+> +		goto free_stop;
+> +
+> +	mrq->cmd = cmd;
+> +	mrq->data = data;
+> +	mrq->stop = stop;
+> +	cxt->mrq = mrq;
+> +
+> +	dev->total_size = cxt->size;
+> +	dev->flags = PSTORE_FLAGS_DMESG;
+
+Can't this support more than just DMESG? I don't see anything specific
+to that. This is using pstore/zone ultimately, which can support
+whatever frontends it needs to.
+
+> +	dev->read = mmcpstore_read;
+> +	dev->write = mmcpstore_write;
+> +	dev->erase = NULL;
+
+No way to remove the records?
+
+> +	dev->panic_write = mmcpstore_panic_write;
+> +
+> +	ret = register_pstore_device(&cxt->dev);
+> +	if (ret) {
+> +		pr_err("%s registering with psblk failed (%d)\n",
+> +				cxt->dev_name, ret);
+> +		goto free_data;
+> +	}
+> +
+> +	pr_info("%s registered as psblk backend\n", cxt->dev_name);
+> +	return;
+> +
+> +free_data:
+> +	kfree(data);
+> +free_stop:
+> +	kfree(stop);
+> +free_cmd:
+> +	kfree(cmd);
+> +free_mrq:
+> +	kfree(mrq);
+> +free_sub:
+> +	kfree(cxt->sub);
+> +out:
+> +	return;
+> +}
+> +
+> +void unregister_mmcpstore(void)
+> +{
+> +	struct mmcpstore_context *cxt = &oops_cxt;
+> +
+> +	unregister_pstore_device(&cxt->dev);
+> +	kfree(cxt->mrq->data);
+> +	kfree(cxt->mrq->stop);
+> +	kfree(cxt->mrq->cmd);
+> +	kfree(cxt->mrq);
+> +	kfree(cxt->sub);
+> +	cxt->card = NULL;
+> +}
+> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+> index 29aa50711626..3889c2a90faa 100644
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -166,6 +166,10 @@ struct mmc_request {
+>  
+>  struct mmc_card;
+>  
+> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
+> +void mmc_wait_for_pstore_req(struct mmc_host *, struct mmc_request *);
+> +#endif
+> +
+>  void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
+>  int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
+>  		int retries);
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index c079b932330f..7d6751005ac6 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -173,6 +173,18 @@ struct mmc_host_ops {
+>  	 */
+>  	int	(*multi_io_quirk)(struct mmc_card *card,
+>  				  unsigned int direction, int blk_size);
+> +
+> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
+> +	/*
+> +	 * The following two APIs are introduced to support mmcpstore
+> +	 * functionality. Cleanup API to terminate the ongoing and
+> +	 * pending requests before a panic write post, and polling API
+> +	 * to ensure that write succeeds before the Kernel dies.
+> +	 */
+> +	void	(*req_cleanup_pending)(struct mmc_host *host);
+> +	int	(*req_completion_poll)(struct mmc_host *host,
+> +					unsigned long timeout);
+> +#endif
+>  };
+>  
+>  struct mmc_cqe_ops {
+> -- 
+> 2.17.1
+> 
+
+Otherwise, sure, this looks good to me as far as pstore is concerned.
+
+-- 
+Kees Cook
