@@ -2,386 +2,254 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,
-	DATE_IN_FUTURE_06_12,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 277F6C64E8A
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 07:04:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE3BCC83012
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 08:07:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB573221FB
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 07:04:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7AE3F20C56
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 08:07:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387622AbgLBHDi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Dec 2020 02:03:38 -0500
-Received: from mga11.intel.com ([192.55.52.93]:44051 "EHLO mga11.intel.com"
+        id S2387885AbgLBIGw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Dec 2020 03:06:52 -0500
+Received: from mga07.intel.com ([134.134.136.100]:27462 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387511AbgLBHDh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Dec 2020 02:03:37 -0500
-IronPort-SDR: X733h72U+IqZcPLoyaegdGqp70tA6uX0YZogNq8usbLMGbec6KTkCV4LV5EN1hFpNhoy3ccJs4
- QWP0m0owPdOQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9822"; a="169461826"
+        id S2387883AbgLBIGv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Dec 2020 03:06:51 -0500
+IronPort-SDR: JjT7EGNQlojeh0EzlZRkJLAa+nzkuZdE4lpB9hhSIOL1i/8ZImlsAwUHBA6XkYHxFjT1ip2b4G
+ dDgRT/hlq5oA==
+X-IronPort-AV: E=McAfee;i="6000,8403,9822"; a="237100286"
 X-IronPort-AV: E=Sophos;i="5.78,386,1599548400"; 
-   d="scan'208";a="169461826"
+   d="scan'208";a="237100286"
 X-Amp-Result: SKIPPED(no attachment in message)
 X-Amp-File-Uploaded: False
 Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Dec 2020 23:02:46 -0800
-IronPort-SDR: 4SC9ziNrhq4S2fUKDLefuSmXn4qw9CUKx/v09rUf5B2bGyYu9xh0sPPlAEei2evNax/8ugNX/h
- RzEgkmFjkERQ==
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Dec 2020 00:06:02 -0800
+IronPort-SDR: gQ6xsm5XZCF2JDWyLnFLAtP6zeOiawd6stkaMSlmZcSM75066Li3p0rU1MLLxICqZcZl2FSe2/
+ MjtmvW2byTfQ==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.78,386,1599548400"; 
-   d="scan'208";a="481430058"
-Received: from zulkifl3-ilbpg0.png.intel.com ([10.88.229.114])
-  by orsmga004.jf.intel.com with ESMTP; 01 Dec 2020 23:02:43 -0800
-From:   muhammad.husaini.zulkifli@intel.com
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
-        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Cc:     andriy.shevchenko@intel.com,
-        lakshmi.bai.raja.subramanian@intel.com,
-        wan.ahmad.zainie.wan.mohamad@intel.com,
-        muhammad.husaini.zulkifli@intel.com, mgross@linux.intel.com
-Subject: [PATCH v6 4/4] mmc: sdhci-of-arasan: Enable UHS-1 support for Keem Bay SOC
-Date:   Wed,  2 Dec 2020 23:02:04 +0800
-Message-Id: <20201202150205.20150-5-muhammad.husaini.zulkifli@intel.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20201202150205.20150-1-muhammad.husaini.zulkifli@intel.com>
-References: <20201202150205.20150-1-muhammad.husaini.zulkifli@intel.com>
+   d="scan'208";a="481449645"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
+  by orsmga004.jf.intel.com with ESMTP; 02 Dec 2020 00:05:57 -0800
+Subject: Re: [BUG] cqe unable to handle buggy cards
+To:     Peter Geis <pgwipeout@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        nuumiofi@gmail.com, Michal Simek <michal.simek@xilinx.com>,
+        Manish Narani <manish.narani@xilinx.com>
+References: <fa7f3fc5-c37a-ac49-e14a-45a1d2e0a942@gmail.com>
+ <CAPDyKFq9vKOODDQEEE2W+Gsx69_R3XV_Hb-owMU-=qAMbv39kg@mail.gmail.com>
+ <2ebdcb5c-1c52-08af-9233-16366c20820e@intel.com>
+ <CAMdYzYoFCfVkz7zwbfQ=ZoirNTymRrRyg8FCabVVEQSKRnoOEA@mail.gmail.com>
+ <CAMdYzYqEhgO6q3iXNzzuZ3snW_Y1bYP8BOBkNC5=fCPc310BUA@mail.gmail.com>
+ <80572b62-2601-ff53-05ef-4d231f7450fa@intel.com>
+ <CAMdYzYrMJBs3=cwK404jQauN1OhntsVq3Ppcu=9-TwW_dsmqmw@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <2fd27057-1991-fd04-2004-0981e5cef4ce@intel.com>
+Date:   Wed, 2 Dec 2020 10:05:32 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
+MIME-Version: 1.0
+In-Reply-To: <CAMdYzYrMJBs3=cwK404jQauN1OhntsVq3Ppcu=9-TwW_dsmqmw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+On 16/11/20 8:30 pm, Peter Geis wrote:
+> On Mon, Nov 16, 2020 at 3:22 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 6/11/20 10:54 pm, Peter Geis wrote:
+>>> On Wed, Nov 4, 2020 at 7:39 PM Peter Geis <pgwipeout@gmail.com> wrote:
+>>>>
+>>>> On Mon, Nov 2, 2020 at 11:32 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>>
+>>>>> On 2/11/20 4:54 pm, Ulf Hansson wrote:
+>>>>>> + cqhci maintainers
+>>>>>>
+>>>>>> On Sat, 31 Oct 2020 at 13:54, Peter Geis <pgwipeout@gmail.com> wrote:
+>>>>>>>
+>>>>>>> Good Morning,
+>>>>>>>
+>>>>>>> We are seeing an issue on the rk3399 with certain Foresee emmc modules
+>>>>>>> where the module reports it supports command queuing but fails in actual
+>>>>>>> implementation.
+>>>>>>>
+>>>>>>> Unfortunately there doesn't seem to be any method for the mmc core code
+>>>>>>> to detect this situation and disable command queue automatically.
+>>>>>>> There also appears to be no way to disable it at runtime.
+>>>>>
+>>>>> Since v5.5, if you know how to use SDHCI debug quirks there is
+>>>>> SDHCI_QUIRK_BROKEN_CQE
+>>>>> e.g. kernel command line option sdhci.debug_quirks=0x0x2020000
+>>>>
+>>>> Thank you, we will test this.
+>>>
+>>> This does resolve the issue of disabling cqe entirely for debugging, thanks!
+>>>
+>>>>
+>>>>>
+>>>>>>>
+>>>>>>> Certain modified kernels have added a patch to enable runtime disable of
+>>>>>>> command queue entirely, but this will affect mmc core as a whole and not
+>>>>>>> just the buggy card.
+>>>>>>>
+>>>>>>> Does anyone have any insight into this issue?
+>>>>>>> Thank you for your time.
+>>>>>>
+>>>>>> Unfortunate, not me personally. I assume the issue is either be card
+>>>>>> specific or host specific. Before looking at a disable option, we need
+>>>>>> to know more about what goes wrong, I think.
+>>>>>>
+>>>>>> Kind regards
+>>>>>> Uffe
+>>>>>>
+>>>>>>>
+>>>>>>> Very Respectfully,
+>>>>>>> Peter Geis
+>>>>>>>
+>>>>>>> [   64.472882] mmc2: cqhci: timeout for tag 2
+>>>>>>> [   64.473349] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+>>>>>>> [   64.474057] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+>>>>>>> [   64.474763] mmc2: cqhci: Config:    0x00000000 | Control:  0x00000000
+>>>>>>> [   64.475468] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000000
+>>>>>>> [   64.476172] mmc2: cqhci: Int sig:   0x00000000 | Int Coal: 0x00000000
+>>>>>>> [   64.476875] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+>>>>>
+>>>>> TDL base cannot be zero, so the register values have been lost.
+>>>>> Could be a reset issue like this one but for sdhci-of-arasan.c :
+>>>>>
+>>>>> https://lore.kernel.org/linux-mmc/20200819121848.16967-1-adrian.hunter@intel.com/
+>>>>
+>>>> Excellent, we will see if a similar implementation makes a difference
+>>>> here for us as well.
+>>>
+>>> I wrote a patch to implement this in the arasan driver.
+>>> https://paste.ee/p/cl5SX
+>>> Nuumiofi tested it with the buggy card.
+>>>
+>>> The good news, it solves the register clearing issue.
+>>> The bad news, the card still is broken, here is the kernel log:
+>>> https://paste.ubuntu.com/p/sF2yMwxpcV/
+>>
+>> You will need to enable dynamic debug to get more messages e.g.
+>>         kernel config: CONFIG_DYNAMIC_DEBUG=y
+>>         kernel command line:
+>> dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
+>>
+>> If it can't be made to work, you can set SDHCI_QUIRK_BROKEN_CQE in the
+>> driver as needed.
+> 
+> nuumiofi has collected logs with dynamic debug enabled.
+> He currently has four logs in a google drive folder:
+> cqe disabled
+> cqe enabled
+> cqe disabled with reset patch applied
+> cqe enabled with reset patch applied
+> 
+> https://drive.google.com/drive/folders/1m1DqzisxHH-6BiMkqR_ExLg9kgH1BDTy
 
-Keem Bay SOC can support dual voltage operations for GPIO SD Pins to
-either 1.8V or 3.3V for bus IO line power. In order to operate the GPIOs
-line for Clk,Cmd and Data on Keem Bay Hardware, it is important to
-configure the supplied voltage applied to their I/O Rail and the output
-of the i2c expander pin. Final Voltage applied on the GPIOs Line are
-dependent by both supplied voltage rail and expander pin output as it is
-been set after passing through the voltage sense resistor.
+Looks like some kind of issue with timeout settings:
 
-The Keem Bay HW is somewhat unique in the way of how IO bus line voltage
-are been controlled. Output of the Expander pins is been configured using
-regulator. Voltage rail output is being configured using
-keembay_io_rail_supplied_voltage() API in the sdhci driver directly.
-Pin control based implementation becomes problematic to control the
-voltage rail due to the base address of Always On Register is
-different from the base address of GPIO(Pinctrl). Thus, there is
-no way to control the I/O Rail using GPIO Pad configuration.
-On the other hand, using ARM SMC (Secure Monitor Call) directly from
-pin control driver for the sake of implement it as pin control model
-is not a good approach.
+[    1.728289] mmc2: sdhci: Too large timeout 0xf requested for CMD18!
+[    1.736197] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
+[    1.802390] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
+[    1.810496] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
+[    1.818562] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
+[    1.826652] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
+[    1.834470] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
+[    1.842256] mmc2: sdhci: Too large timeout 0xf requested for CMD25!
 
-This patch was tested with Keem Bay EVM.
+[    4.878368] mmc2: cqhci: error IRQ status: 0x00000000 cmd error -110 data error 0 TERRI: 0x0000822c
+[    4.880436] mmc2: failed to start CQE transfer for tag 3, error -16
+[    4.884075] mmc2: sdhci: Too large timeout 0xf requested for CMD12!
+[    4.886398] mmc2: sdhci: Too large timeout 0xf requested for CMD48!
+[    4.976803] mmc2: sdhci: Too large timeout 0xf requested for CMD8!
+[    5.032979] mmc2: cqhci: error IRQ status: 0x00000000 cmd error -110 data error 0 TERRI: 0x0000862c
+[    5.035910] mmc2: failed to start CQE transfer for tag 0, error -16
+[    5.039436] mmc2: sdhci: Too large timeout 0xf requested for CMD12!
+[    5.041640] mmc2: sdhci: Too large timeout 0xf requested for CMD48!
+[    5.048557] mmc2: cqhci: error IRQ status: 0x00000000 cmd error -110 data error 0 TERRI: 0x0000822c
+[    5.051405] mmc2: failed to start CQE transfer for tag 3, error -16
+[    5.054861] mmc2: sdhci: Too large timeout 0xf requested for CMD12!
+[    5.056984] mmc2: sdhci: Too large timeout 0xf requested for CMD48!
 
-Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-Reviewed-by: Andy Shevchenko <andriy.shevchenko@intel.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
-Acked-by: Michal Simek <michal.simek@xilinx.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 244 +++++++++++++++++++++++++++++
- 1 file changed, 244 insertions(+)
+Note error -110 is a timeout error
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 196e3d65277e..00ecdf54128c 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -23,6 +23,7 @@
- #include <linux/regmap.h>
- #include <linux/of.h>
- #include <linux/firmware/xlnx-zynqmp.h>
-+#include <linux/firmware/intel/keembay.h>
- 
- #include "cqhci.h"
- #include "sdhci-pltfm.h"
-@@ -79,6 +80,8 @@ struct sdhci_arasan_soc_ctl_field {
-  * @baseclkfreq:	Where to find corecfg_baseclkfreq
-  * @clockmultiplier:	Where to find corecfg_clockmultiplier
-  * @support64b:		Where to find SUPPORT64B bit
-+ * @otap_delay:		Where to find otap_delay
-+ * @sel_clk_buffer:	Where to find clock buffer delay
-  * @hiword_update:	If true, use HIWORD_UPDATE to access the syscon
-  *
-  * It's up to the licensee of the Arsan IP block to make these available
-@@ -89,6 +92,8 @@ struct sdhci_arasan_soc_ctl_map {
- 	struct sdhci_arasan_soc_ctl_field	baseclkfreq;
- 	struct sdhci_arasan_soc_ctl_field	clockmultiplier;
- 	struct sdhci_arasan_soc_ctl_field	support64b;
-+	struct sdhci_arasan_soc_ctl_field	otap_delay;
-+	struct sdhci_arasan_soc_ctl_field	sel_clk_buffer;
- 	bool					hiword_update;
- };
- 
-@@ -189,6 +194,8 @@ static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
- 	.baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
- 	.clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
- 	.support64b = { .reg = 0x4, .width = 1, .shift = 24 },
-+	.otap_delay = { .reg = 0x24, .width = 5, .shift = 23 },
-+	.sel_clk_buffer = { .reg = 0x2c, .width = 3, .shift = 25 },
- 	.hiword_update = false,
- };
- 
-@@ -364,6 +371,144 @@ static int sdhci_arasan_voltage_switch(struct mmc_host *mmc,
- 	return -EINVAL;
- }
- 
-+/**
-+ * sdhci_arasan_keembay_io_line_supply_operation - Supply for the bus IO line power
-+ *
-+ * @mmc:	Pointer to sdhci_host
-+ * @ios:	Pointer to IO bus setting
-+ *
-+ * For Keem Bay HW, in order to operate the GPIOs line for Clk,Cmd and Data,
-+ * it is important to configure the supplied voltage applied to their I/O Rail
-+ * and the output of the i2c expander Pin.
-+ *
-+ * Note that to configure the voltage rail setting, specific bits in AON_CFG
-+ * register must be set. While to configure the i2c expander pin output,
-+ * gpio regulator modelling is been used to control the pin state.
-+ *
-+ * Always on Domain register having different base address from GPIO base address
-+ * and it is a secure register. There is no way to control the I/O Voltage Rail
-+ * from the GPIO Pad. SMC CALL is been used to set the bits in AON_CFG1 register.
-+ *
-+ * Final Voltage applied on the GPIOs Line are dependent by both supplied voltage
-+ * I/O Rail and expander pin output as it is been set after passing through the
-+ * voltage sense resistor.
-+ *
-+ * Return: 0 on success and error value on error
-+ */
-+static int sdhci_arasan_keembay_io_line_supply_operation(struct mmc_host *mmc,
-+						  struct mmc_ios *ios)
-+{
-+	int ret, min_uV, max_uV, volt_rail;
-+
-+	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-+		min_uV = IOV_1V8;
-+		max_uV = IOV_1V8;
-+		volt_rail = KEEMBAY_SET_1V8_IO_RAIL;
-+	} else {
-+		min_uV = IOV_3V3;
-+		max_uV = IOV_3V3;
-+		volt_rail = KEEMBAY_SET_3V3_IO_RAIL;
-+	}
-+
-+	/* If no vqmmc supply then we can't change the voltage */
-+	if (IS_ERR(mmc->supply.vqmmc))
-+		return -EINVAL;
-+
-+	ret = regulator_set_voltage(mmc->supply.vqmmc, min_uV, max_uV);
-+	if (ret)
-+		return ret;
-+
-+	/*
-+	 * This is like a final gatekeeper. Need to ensure changed voltage
-+	 * is settled before and after turn on this bit.
-+	 */
-+	usleep_range(1000, 1100);
-+
-+	ret = keembay_io_rail_supplied_voltage(volt_rail);
-+	if (ret)
-+		return ret;
-+
-+	usleep_range(1000, 1100);
-+
-+	return 0;
-+}
-+
-+static int sdhci_arasan_keembay_voltage_switch(struct mmc_host *mmc,
-+				       struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	u16 ctrl_2, clk;
-+	int ret;
-+
-+	switch (ios->signal_voltage) {
-+	case MMC_SIGNAL_VOLTAGE_180:
-+		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		clk &= ~SDHCI_CLOCK_CARD_EN;
-+		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+
-+		clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		if (clk & SDHCI_CLOCK_CARD_EN)
-+			return -EAGAIN;
-+
-+		sdhci_writeb(host, SDHCI_POWER_ON | SDHCI_POWER_180,
-+				   SDHCI_POWER_CONTROL);
-+
-+		ret = sdhci_arasan_keembay_io_line_supply_operation(mmc, ios);
-+		if (ret)
-+			return ret;
-+
-+		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		ctrl_2 |= SDHCI_CTRL_VDD_180;
-+		sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+
-+		/* Sleep for 5ms to stabilize 1.8V regulator */
-+		usleep_range(5000, 5500);
-+
-+		/* 1.8V regulator output should be stable within 5 ms */
-+		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (!(ctrl_2 & SDHCI_CTRL_VDD_180))
-+			return -EAGAIN;
-+
-+		clk  = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		clk |= SDHCI_CLOCK_CARD_EN;
-+		sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-+		break;
-+	case MMC_SIGNAL_VOLTAGE_330:
-+		ret = sdhci_arasan_keembay_io_line_supply_operation(mmc, ios);
-+		if (ret)
-+			return ret;
-+
-+		/* Set 1.8V Signal Enable in the Host Control2 register to 0 */
-+		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		ctrl_2 &= ~SDHCI_CTRL_VDD_180;
-+		sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-+
-+		/* Sleep for 5ms to stabilize 3.3V regulator */
-+		usleep_range(5000, 5500);
-+
-+		/* 3.3V regulator output should be stable within 5 ms */
-+		ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-+		if (ctrl_2 & SDHCI_CTRL_VDD_180)
-+			return -EAGAIN;
-+
-+		break;
-+	default:
-+		return -EINVAL;
-+	}
-+
-+	return 0;
-+}
-+
-+static int sdhci_arasan_keembay_select_drive_strength(struct mmc_card *card,
-+					unsigned int max_dtr, int host_drv,
-+					int card_drv, int *drv_type)
-+{
-+	if (card->host->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_180)
-+		*drv_type = MMC_SET_DRIVER_TYPE_C;
-+
-+	return 0;
-+}
-+
- static const struct sdhci_ops sdhci_arasan_ops = {
- 	.set_clock = sdhci_arasan_set_clock,
- 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
-@@ -964,6 +1109,77 @@ static void sdhci_arasan_update_baseclkfreq(struct sdhci_host *host)
- 	sdhci_arasan_syscon_write(host, &soc_ctl_map->baseclkfreq, mhz);
- }
- 
-+/**
-+ * sdhci_arasan_update_otap_delay - Set otap delay
-+ *
-+ * This is used to manualy control the txclk Tap Delay,
-+ * for flopping the final stage flops.
-+ *
-+ * NOTES:
-+ * - Many existing devices don't seem to do this and work fine.  To keep
-+ *   compatibility for old hardware where the device tree doesn't provide a
-+ *   register map, this function is a noop if a soc_ctl_map hasn't been provided
-+ *   for this platform.
-+ *
-+ * @host:		The sdhci_host
-+ */
-+static void sdhci_arasan_update_otap_delay(struct sdhci_host *host,
-+						u32 value)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
-+		sdhci_arasan->soc_ctl_map;
-+
-+	/* Having a map is optional */
-+	if (!soc_ctl_map)
-+		return;
-+
-+	/* If we have a map, we expect to have a syscon */
-+	if (!sdhci_arasan->soc_ctl_base) {
-+		pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
-+			mmc_hostname(host->mmc));
-+		return;
-+	}
-+
-+	sdhci_arasan_syscon_write(host, &soc_ctl_map->otap_delay, value);
-+}
-+
-+/**
-+ * sdhci_arasan_update_clk_sel_buff - Clock buffer select
-+ *
-+ * This is used to delay the clock buffer
-+ *
-+ * NOTES:
-+ * - Many existing devices don't seem to do this and work fine.  To keep
-+ *   compatibility for old hardware where the device tree doesn't provide a
-+ *   register map, this function is a noop if a soc_ctl_map hasn't been provided
-+ *   for this platform.
-+ *
-+ * @host:		The sdhci_host
-+ */
-+static void sdhci_arasan_update_sel_clkbuf(struct sdhci_host *host,
-+						u32 value)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-+	const struct sdhci_arasan_soc_ctl_map *soc_ctl_map =
-+		sdhci_arasan->soc_ctl_map;
-+
-+	/* Having a map is optional */
-+	if (!soc_ctl_map)
-+		return;
-+
-+	/* If we have a map, we expect to have a syscon */
-+	if (!sdhci_arasan->soc_ctl_base) {
-+		pr_warn("%s: Have regmap, but no soc-ctl-syscon\n",
-+			mmc_hostname(host->mmc));
-+		return;
-+	}
-+
-+	sdhci_arasan_syscon_write(host, &soc_ctl_map->sel_clk_buffer, value);
-+}
-+
- static void sdhci_arasan_set_clk_delays(struct sdhci_host *host)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -1587,6 +1803,34 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
- 	}
- 
-+	if (of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sd")) {
-+		struct device_node *phys;
-+		u32 otap_delay, sel_clk_buffer;
-+
-+		phys = of_parse_phandle(dev->of_node, "phys", 0);
-+		if (!phys) {
-+			dev_err(dev, "Can't get phys for sd0\n");
-+			ret = -ENODEV;
-+			goto err_pltfm_free;
-+		}
-+
-+		of_property_read_u32(phys,
-+			"intel,keembay-emmc-phy-otap-dly", &otap_delay);
-+		of_property_read_u32(phys,
-+			"intel,keembay-emmc-phy-sel-clkbuf", &sel_clk_buffer);
-+
-+		of_node_put(phys);
-+
-+		sdhci_arasan_update_otap_delay(host, otap_delay);
-+		sdhci_arasan_update_sel_clkbuf(host, sel_clk_buffer);
-+
-+		host->mmc_host_ops.start_signal_voltage_switch =
-+			sdhci_arasan_keembay_voltage_switch;
-+
-+		host->mmc_host_ops.select_drive_strength =
-+			sdhci_arasan_keembay_select_drive_strength;
-+	}
-+
- 	sdhci_arasan_update_baseclkfreq(host);
- 
- 	ret = sdhci_arasan_register_sdclk(sdhci_arasan, clk_xin, dev);
--- 
-2.17.1
+> 
+>>
+>>>
+>>>>
+>>>>>
+>>>>>
+>>>>>>> [   64.477578] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+>>>>>>> [   64.478281] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+>>>>>>> [   64.478984] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+>>>>>>> [   64.479687] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+>>>>>>> [   64.489785] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+>>>>>>> [   64.499774] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+>>>>>>> [   64.509687] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+>>>>>>> [   64.519597] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+>>>>>>> [   64.529521] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+>>>>>>> [   64.539440] mmc2: sdhci: Argument:  0x00010000 | Trn mode: 0x00000010
+>>>>>>> [   64.549352] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+>>>>>>> [   64.559277] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+>>>>>>> [   64.569214] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+>>>>>>> [   64.579061] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+>>>>>>> [   64.588842] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+>>>>>>> [   64.598671] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>>>>>>> [   64.608446] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+>>>>>>> [   64.618161] mmc2: sdhci: Cmd:       0x00000d1a | Max curr: 0x00000000
+>>>>>>> [   64.627801] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x642017d7
+>>>>>>> [   64.637376] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+>>>>>>> [   64.646855] mmc2: sdhci: Host ctl2: 0x00000083
+>>>>>>> [   64.656080] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+>>>>>>> [   64.665445] mmc2: sdhci: ============================================
+>>>>>>> [   64.674998] mmc2: running CQE recovery
+>>>>>>>
+>>>>>>> [  125.912941] mmc2: cqhci: timeout for tag 3
+>>>>>>> [  125.921978] mmc2: cqhci: ============ CQHCI REGISTER DUMP ===========
+>>>>>>> [  125.931200] mmc2: cqhci: Caps:      0x00000000 | Version:  0x00000510
+>>>>>>> [  125.940389] mmc2: cqhci: Config:    0x00000001 | Control:  0x00000000
+>>>>>>> [  125.949499] mmc2: cqhci: Int stat:  0x00000000 | Int enab: 0x00000006
+>>>>>>> [  125.958527] mmc2: cqhci: Int sig:   0x00000006 | Int Coal: 0x00000000
+>>>>>>> [  125.967486] mmc2: cqhci: TDL base:  0x00000000 | TDL up32: 0x00000000
+>>>>>>> [  125.976260] mmc2: cqhci: Doorbell:  0x00000000 | TCN:      0x00000000
+>>>>>>> [  125.985065] mmc2: cqhci: Dev queue: 0x00000000 | Dev Pend: 0x00000000
+>>>>>>> [  125.993698] mmc2: cqhci: Task clr:  0x00000000 | SSC1:     0x00011000
+>>>>>>> [  126.002244] mmc2: cqhci: SSC2:      0x00000000 | DCMD rsp: 0x00000000
+>>>>>>> [  126.010716] mmc2: cqhci: RED mask:  0xfdf9a080 | TERRI:    0x00000000
+>>>>>>> [  126.019159] mmc2: cqhci: Resp idx:  0x00000000 | Resp arg: 0x00000000
+>>>>>>> [  126.027525] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+>>>>>>> [  126.035955] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00001002
+>>>>>>> [  126.044258] mmc2: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000000
+>>>>>>> [  126.052396] mmc2: sdhci: Argument:  0x00000001 | Trn mode: 0x00000010
+>>>>>>> [  126.060370] mmc2: sdhci: Present:   0x1fff0000 | Host ctl: 0x00000034
+>>>>>>> [  126.068241] mmc2: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+>>>>>>> [  126.075978] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+>>>>>>> [  126.083552] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+>>>>>>> [  126.090937] mmc2: sdhci: Int enab:  0x02ff4000 | Sig enab: 0x02ff4000
+>>>>>>> [  126.098219] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+>>>>>>> [  126.105403] mmc2: sdhci: Caps:      0x44edc880 | Caps_1:   0x800020f7
+>>>>>>> [  126.112649] mmc2: sdhci: Cmd:       0x00003013 | Max curr: 0x00000000
+>>>>>>> [  126.119700] mmc2: sdhci: Resp[0]:   0x00400800 | Resp[1]:  0x642017d7
+>>>>>>> [  126.126594] mmc2: sdhci: Resp[2]:   0x4e436172 | Resp[3]:  0x00880103
+>>>>>>> [  126.133334] mmc2: sdhci: Host ctl2: 0x00000083
+>>>>>>> [  126.139652] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xf0628208
+>>>>>>> [  126.146008] mmc2: sdhci: ============================================
+>>>>>>> [  126.152361] mmc2: running CQE recovery
+>>>>>>>
+>>>>>>>
+>>>>>
+>>
 
