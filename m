@@ -2,176 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2ED9DC71155
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 18:56:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF850C71155
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 19:33:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C406C2173E
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 18:56:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8BD5D22201
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 19:33:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387978AbgLBSzz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Dec 2020 13:55:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56038 "EHLO
+        id S1728969AbgLBTcz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Dec 2020 14:32:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729027AbgLBSzz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2020 13:55:55 -0500
-Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02A86C0613D6
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Dec 2020 10:55:09 -0800 (PST)
-Received: by mail-lf1-x142.google.com with SMTP id s27so6403244lfp.5
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Dec 2020 10:55:08 -0800 (PST)
+        with ESMTP id S1727925AbgLBTcy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2020 14:32:54 -0500
+Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE0A7C0617A6
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Dec 2020 11:32:14 -0800 (PST)
+Received: by mail-pl1-x644.google.com with SMTP id p6so1681170plr.7
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Dec 2020 11:32:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=vzG2Qs62vWfm1vJAAxBGqSFyWCTUKiSwUxDcB6FnM8Q=;
-        b=zyxERiUfIb4p2VyYj9+PBQ24/X1CYU5XhqCl3Yb7BeQHErnbyqYgsA7ja2izHzaQFA
-         V4M2QVxePKCQ2tCqUaqXwfHj+fWkTmsG72HTOfhQWf+dBv/4gMOgmUWTTY3LT18VqE8W
-         Pefih5oKkCIWolEzBehURzVRAkudQEmkX24ElodiJsjgVrePMWMmm/tHDcgMAUcg6ypH
-         UbUBgiV9SttwiOE1PhWGuz4D+MK2FZqTPufCfXl2qUFrwZrIqUcKQvCOZGoTHA+i3lKG
-         Okc0oo+Z+l32JIXrXxrB0VtFkIDQfhF8JZQiDRavyK7tm3a070z5ykVY/78cvIOYBSSe
-         P6Mw==
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=vbmUce51n0krhiz6IFENVF9pgBvxYw5qYTmdokIFBx0=;
+        b=OB8tdF7XPPRvLbxT/HXse2cshrzol0nnx/yT4ZkqLQVLlE+61uDznkIYtRwOdu+Amf
+         E8VOkgBUBS5QTKmNRPZdJs7ly7DcgNsV65BkQ3+puafMCrzr0EKTN4NbaqzIDBhxoIZI
+         rNwt6GigZQSOoupZa4d6lCm4hHPIV4BhMI8m0=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=vzG2Qs62vWfm1vJAAxBGqSFyWCTUKiSwUxDcB6FnM8Q=;
-        b=RJkNWAgwYF4nAxIAMGUB7lvjaroBtXIffPWb+wLvKBY1MXypnCZ7FkMF+jbYXUkInN
-         issiLG0OBwiyjonKsYnOhQj9SCikLlqOaG8YafLscVCkGEwV5MWI8rXpNtCEjFdMqJAN
-         qEUaKzc+EA8OeFoC6DeuQy+tb25WAgGJf6DwM3fFZ5BckSiMcRfLC69CW8zNOQ+Ur5Bq
-         i+6M5r6EpDM23OeTqvTJWLasmOnpCZqCYOe0eyutJ39RcqvmMkG4v+j7QxdvVVoqr5rD
-         J6TFxo35+lugojhe86crQEaU8yeUGitkWyo5Dy28fYSdzxtyJA7kxJus5Bd4zbHxxtke
-         ECgw==
-X-Gm-Message-State: AOAM530UmRUAhXb4NBe6YdEqxBiouuVbdtVq7nuwsgeFz7y6KZV5+II3
-        6H55sW/iF2l4sfJOFUtuk2tQjp+96coYn/gPwyTwrw==
-X-Google-Smtp-Source: ABdhPJzGSGthLJFer5bdjetaiDawgFGOHxrXLLqcN3AxjL2icZa4z97A1k8ysIutWyR7VqHwv/C4HUUiX/4nutNQ4J0=
-X-Received: by 2002:a19:ad41:: with SMTP id s1mr1495221lfd.571.1606935307302;
- Wed, 02 Dec 2020 10:55:07 -0800 (PST)
-MIME-Version: 1.0
-References: <20201202150205.20150-1-muhammad.husaini.zulkifli@intel.com> <20201202150205.20150-5-muhammad.husaini.zulkifli@intel.com>
-In-Reply-To: <20201202150205.20150-5-muhammad.husaini.zulkifli@intel.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 2 Dec 2020 19:54:55 +0100
-Message-ID: <CACRpkdZznKd4NYk8whBtq1sUAj9uhasn3+ykrh50A2XKokp=Aw@mail.gmail.com>
-Subject: Re: [PATCH v6 4/4] mmc: sdhci-of-arasan: Enable UHS-1 support for
- Keem Bay SOC
-To:     muhammad.husaini.zulkifli@intel.com
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=vbmUce51n0krhiz6IFENVF9pgBvxYw5qYTmdokIFBx0=;
+        b=XYHS33U6+nykvEupTAbZVac+LvXHP8k7sVaRkgHo+qC+2bVREwixcclLMwNZTu5EjO
+         98f8JH75bMDVHkc+R/y/TpVhZGsh6ZiNl36Wr1pZFy4rd/A+GyyX+ILkb+XX3JoOEKFv
+         5sHzNVZyNGDfakhxkO8CsThXz2nwz7V/iOdWvdXN3jY6hPtuHzSgxFAsdmtCfqSEtkkN
+         isWI0IY/oxBAcXvSFGVkHcNJHtXMkCp/IA3pTEqdDXQ3AToYSslllnumQn+2d62bKtgz
+         cbb2+ysRYpJqCqmmWmP8+4NYqsHFI41YdU4M5rzCM6NO4BkRVW6vUwlt2qwwb1F2Sftl
+         ZXhA==
+X-Gm-Message-State: AOAM5336jg+Dwk2l5kAk4p8rqL3RwYl6R2vMx2c08LHW7FK99RlMqTiO
+        pGpWuYzVpD6uhwJBUIiLXFwuGQ==
+X-Google-Smtp-Source: ABdhPJytpYwxiUYLTOB6lkAHyir5C1sXgAEZpkqx9VFbqEwkCcZ4Tf5Qqh08BnlIYViekoyeFZ64+g==
+X-Received: by 2002:a17:90a:4593:: with SMTP id v19mr1292857pjg.217.1606937534288;
+        Wed, 02 Dec 2020 11:32:14 -0800 (PST)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id x207sm573335pfc.171.2020.12.02.11.32.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 02 Dec 2020 11:32:13 -0800 (PST)
+Date:   Wed, 2 Dec 2020 11:32:12 -0800
+From:   Kees Cook <keescook@chromium.org>
+To:     Bhaskara Budiredla <bbudiredla@marvell.com>
+Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "ccross@android.com" <ccross@android.com>,
+        "tony.luck@intel.com" <tony.luck@intel.com>,
+        Sunil Kovvuri Goutham <sgoutham@marvell.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Andriy Shevchenko <andriy.shevchenko@intel.com>,
-        lakshmi.bai.raja.subramanian@intel.com,
-        wan.ahmad.zainie.wan.mohamad@intel.com,
-        Mark Gross <mgross@linux.intel.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        "outgoing2/0000-cover-letter.patch@mx0b-0016f401.pphosted.com" 
+        <outgoing2/0000-cover-letter.patch@mx0b-0016f401.pphosted.com>
+Subject: Re: [EXT] Re: [PATCH v2 1/2] mmc: Support kmsg dumper based on
+ pstore/blk
+Message-ID: <202012021126.20ACBBD@keescook>
+References: <20201123111925.28999-1-bbudiredla@marvell.com>
+ <202012011218.3B6566C5@keescook>
+ <CY4PR1801MB207097391BD8DE37A0F49102DEF30@CY4PR1801MB2070.namprd18.prod.outlook.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CY4PR1801MB207097391BD8DE37A0F49102DEF30@CY4PR1801MB2070.namprd18.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Muhammad,
+On Wed, Dec 02, 2020 at 06:36:21AM +0000, Bhaskara Budiredla wrote:
+> >From: Kees Cook <keescook@chromium.org>
+> >On Mon, Nov 23, 2020 at 04:49:24PM +0530, Bhaskara Budiredla wrote:
+> >Why isn't this just written as:
+> >
+> >config MMC_PSTORE
+> >	bool "Log panic/oops to a MMC buffer"
+> >	depends on MMC_BLOCK
+> >	select PSTORE_BLK
+> >	help
+> >	  This option will let you create platform backend to store kmsg
+> >	  crash dumps to a user specified MMC device. This is primarily
+> >	  based on pstore/blk.
+> >
+> 
+> The idea was to compile MMC_PSTORE as part of MMC_BLOCK driver,
+> provided it is optionally enabled.
+> The above arrangement compiles MMC_PSTORE 
+> as module: if (CONFIG_MMC_PSTORE_BACKEND == y && CONFIG_MMC_BLOCK == m)
+> as static:     if (CONFIG_MMC_PSTORE_BACKEND == y && CONFIG_MMC_BLOCK == y)
 
-thanks for your patch!
+Ah, okay. If it's a tri-state, wouldn't it track CONFIG_MMC_BLOCK's
+state? As in, does this work:
 
-On Wed, Dec 2, 2020 at 8:04 AM <muhammad.husaini.zulkifli@intel.com> wrote:
+config MMC_PSTORE
+	tristate "Log panic/oops to a MMC buffer"
+	depends on MMC_BLOCK
+	select PSTORE_BLK
+	help
+	  This option will let you create platform backend to store kmsg
+	  crash dumps to a user specified MMC device. This is primarily
+	  based on pstore/blk.
 
-> Keem Bay SOC can support dual voltage operations for GPIO SD Pins to
-> either 1.8V or 3.3V for bus IO line power. In order to operate the GPIOs
-> line for Clk,Cmd and Data on Keem Bay Hardware, it is important to
-> configure the supplied voltage applied to their I/O Rail and the output
-> of the i2c expander pin. Final Voltage applied on the GPIOs Line are
-> dependent by both supplied voltage rail and expander pin output as it is
-> been set after passing through the voltage sense resistor.
+> >> +	if (strncmp(cxt->dev_name, disk_name, strlen(disk_name)))
+> >> +		return;
+> >
+> >Why isn't this just strcmp()?
+> 
+> The mmc disk name (disk_name) doesn't include the partition number. 
+> strncmp is restricted to something like /dev/mmcblk0, it doesn't cover full /dev/mmcblk0pn.
+> The partition number check is carried out in the next statement.
 
-I think I understand this part.
+Okay, gotcha; thanks!
 
-> The Keem Bay HW is somewhat unique in the way of how IO bus line voltage
-> are been controlled. Output of the Expander pins is been configured using
-> regulator.
+> >> +	dev->flags = PSTORE_FLAGS_DMESG;
+> >
+> >Can't this support more than just DMESG? I don't see anything specific to that.
+> >This is using pstore/zone ultimately, which can support whatever frontends it
+> >needs to.
+> 
+> Yes, as of now the support is only for DMESG. We will extend this to other frontends
+> on need basis.
 
-That much is clear.
+Okay -- I assume this has mostly to do with not having erasure (below).
 
-> Voltage rail output is being configured using
-> keembay_io_rail_supplied_voltage() API in the sdhci driver directly.
+> >> +	dev->erase = NULL;
+> >
+> >No way to remove the records?
+> 
+> Yes, at this time, no removal of records.
 
-And that is an SMC call like that:
+Okay. (I think this might be worth mentioning in docs somewhere.)
 
-+static inline int keembay_io_rail_supplied_voltage(int volt)
-+{
-+       struct arm_smccc_res res;
-+
-+       arm_smccc_1_1_invoke(ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE, volt, &r=
-es);
-+       if ((int)res.a0 < 0)
-+               return -EINVAL;
-+
-+       return 0;
-
-That can set the voltage by calling into the Arm secure world I guess?
-
-> Pin control based implementation becomes problematic to control the
-> voltage rail due to the base address of Always On Register is
-> different fromThe driver does not have to be in the the base address of G=
-PIO(Pinctrl). Thus, there is
-> no way to control the I/O Rail using GPIO Pad configuration.
-
-I don't see why this would be pin control related, and that is as
-you point out leading to some confused discussions here.
-
-We do have something like this generic pin config:
-
- * @PIN_CONFIG_POWER_SOURCE: if the pin can select between different power
- *      supplies, the argument to this parameter (on a custom format) tells
- *      the driver which alternative power source to use.
-
-But it's ... yeah. It usually has a very specific purpose of selecting
-one of two available voltage rails inside the SoC. And it needs to
-apply to one pin or pin group. Also it kind of implies that those
-voltages are always on.
-
-As you say:
-
-> From the Databook itself with additional confirmation from
-> Keem Bay HW SOC Design Architect,
-> there is no direct control of these AON register bits from
-> GPIO pads.
-
-The keembay_io_rail_supplied_voltage() more resembles a
-selector (choose one on a menu) voltage regulator to me
-if anything.
-
-> On the other hand, using ARM SMC (Secure Monitor Call) directly from
-> pin control driver for the sake of implement it as pin control model
-> is not a good approach.
-
-Yeah it has to be called from somewhere, if you want an abstraction
-to make the driver neutral to any machine, then use a
-selector regulator. It can be placed
-anywhere in the kernel as long as you can reference it.
-
-The register is called (according to the code) AON_CGF1
-(really? not AON_CFG1?) and the "ON" part in "AON"  makes
-it sound like "analog ON" implying this is something that can be
-turned on/off and configured into two voltages and it has been
-wrapped in these custom SMCCs by a secure world developer
-(right?)
-
-If it should use any abstraction it should be a selector regulator
-IMO and while that may seem overengineered it adds something
-because regulators are used in  the MMC subsystem for vdd
-and vqmmc because we are handling the OCR mask with that
-and it can support any amount of present and future
-voltages for signal levels with that as well. Any future changes
-to how the different signal voltages are set or which voltages
-exist can then be done in that regulator driver.
-
-Just my =E2=82=AC0.01...
-
-Yours,
-Linus Walleij
+-- 
+Kees Cook
