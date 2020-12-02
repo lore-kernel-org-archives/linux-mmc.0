@@ -2,114 +2,190 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A1EEC64E7B
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 17:40:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54531C8300F
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 18:52:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 384F2208FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 17:40:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0002022240
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 18:52:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730837AbgLBRkH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Dec 2020 12:40:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44132 "EHLO
+        id S2389625AbgLBSwj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Dec 2020 13:52:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728558AbgLBRkH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2020 12:40:07 -0500
-Received: from mail-qk1-x743.google.com (mail-qk1-x743.google.com [IPv6:2607:f8b0:4864:20::743])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE6F1C0613D4
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Dec 2020 09:39:21 -0800 (PST)
-Received: by mail-qk1-x743.google.com with SMTP id i199so2012661qke.5
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Dec 2020 09:39:21 -0800 (PST)
+        with ESMTP id S2387805AbgLBSwj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2020 13:52:39 -0500
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 932A8C0617A7
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Dec 2020 10:51:58 -0800 (PST)
+Received: by mail-lj1-x244.google.com with SMTP id f24so4968716ljk.13
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Dec 2020 10:51:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=semihalf-com.20150623.gappssmtp.com; s=20150623;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=HGDDLpBXGNMg0LMolwGSeuNTRKQu3sxPBzrkwGCeCV8=;
-        b=CRYaomH7zz71puhu+kMqSSkTSmpZpb22SXX5agzTtcAHK1XuFkv+sNcPwRLDiwl2iM
-         DfK1bjPEBfr0ijAj6unk6UgTBqtmzcb03mc4FIaY+nY90iBKR9TvdydueKinRTsGXL9n
-         Utg8gB+vKZI0s4mrOkISQRbWqcwoXQl4QmShDUcMqFD9wl4B8rhSrpXkBHcOWBn9qHSJ
-         M4AO+sMAjut7KO1iiZfzbTCSArhL3+Z/Uuxx6SmE+LWoJiKlvgS0GoD6Yl0pQuCz9cKP
-         dx82Gho0fL5FYiIqfMSe1/yMkq4KIBIFSpdgfkdtJRKMalxCmsiyPimVr/wvIrtr/VPc
-         VPog==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=F3xpXE/TuWKwCPEX3+RhalyC0nSYPCE9cK2LWGjqF2g=;
+        b=cBV3lrSqHEhVTmOGmrlqL74YWk850oy735IjRpqT1NU37bWz/pJRqBmLbyj27tO9kd
+         1ICwPRyEijphFXkHOSeHrBCxa0J6S43XWDmn0aRvMfA73s0uR1cFyez+gnkpNFBqNk9S
+         PbtFBAW6k+5Iw8K/myRNMoJyHM7bEY4E5gMRcO9mniKJDfr3Kip7pB/r/mrBCKi7jsYu
+         +OoS2uYmvXxSg4+OuKAoQI+PIlTBo7o+4BUtPhFMiEOU4NwUxvBWLOiRYGO65XC69zDR
+         k+shQAiSrLZl4oEyN5XrBO5VIUtzPmQvnNR4H5wKDMoiCWSn2EzoFhvLjAvF5Rn9W8cB
+         PrQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=HGDDLpBXGNMg0LMolwGSeuNTRKQu3sxPBzrkwGCeCV8=;
-        b=P39IFX8GvHKLbI9zl8SiAaPU3zcyN865w1VGa+YwaqCCRmaxPTdLC1jGehM1Mz1Vk9
-         SCfih+qrNIipvbbwkoPn+vQoVLxFUUI8R8K0fV/mMhOEf3N6KPyXI6kj955EZKAFCFRI
-         ePoxdl/z0yXnV+OJlNRGx6Kg01Djf5zVdvcJu7t4hJaMsxQxtfoHt+vbQ66HdsLWXZrh
-         CVSeNwS7uEFZPS3ujJg8Ps0eLt8zA7mB8Qm94xd9Fmk5bPtDPOhHHDD9sIsn94y+ZbF9
-         DL80KtTj8BrhMbw++Km1rsQh7EXi0Q/139wJ0YNKZe2Kn0UFqt1F4aor1EdCTT3VAZCF
-         v8bQ==
-X-Gm-Message-State: AOAM531nnYrMaxVGnMR+8Vf4ns5LRTjtmIIrRPR5fpaTC6i0mb0rBtcF
-        YuTrCbeOFdJMJtWHhyFjvBxsbcGXqTwYLB7Sm/eSaw==
-X-Google-Smtp-Source: ABdhPJwJ5CP3xL/u9S7A6l5zYggC8BATzFrYqGlpBxtoUWCKus+HAwcGQ++rLe76lb1hP8z3tEnbzJDsjMi1CtyP/aE=
-X-Received: by 2002:a37:4acb:: with SMTP id x194mr3593249qka.295.1606930760481;
- Wed, 02 Dec 2020 09:39:20 -0800 (PST)
-MIME-Version: 1.0
-References: <20201120032639.24386-1-mw@semihalf.com> <5b5a1367-2632-2754-bc8b-7d57d0205232@intel.com>
-In-Reply-To: <5b5a1367-2632-2754-bc8b-7d57d0205232@intel.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=F3xpXE/TuWKwCPEX3+RhalyC0nSYPCE9cK2LWGjqF2g=;
+        b=RCzTLGSZzuLSpcTvGGJUC1+CESrJdJVkHyxe9E2DzSTXEa232nSCQEIIW65lU30v5t
+         eezaltBoAdDIi5jBU4VeuPAs7xPbsSS6OuphnPA/ZvjC/3ewiotjsTWX3j8H0x37Lpxg
+         ziO8Dh2/sDJGloLqqWxJe4Z8asgT6XqNrXjb1ccK22WBOfH9DreCuErqTf2FwXhQULXT
+         0T8ZPhOjBuFv3Vrm/j9oyiyl2EN/cq1yEJapxpTB9o6AZt0L8EBlep7KBZ6pZJUShlsw
+         vY6qb/1Maj1K9+MP953DUAzjovWIVgXrRTpz0KyCAUH3EDZOTVc2Gjg6ooKW04GH3Obg
+         Gk0g==
+X-Gm-Message-State: AOAM533zweVWGP0MdqQsQUNQnkd+rnzi14WTEMmavjJFw8sl/8ZAVvMq
+        6wMNlOcHeA3LWYaqbmwKfiL0MoUYAu/002mb
+X-Google-Smtp-Source: ABdhPJxXHJbBix9Ht7T9XduoA4gE/Nv2ipqExZmdTQD3nsNX98FAKtb1y61hePLw2yUephUORUn58g==
+X-Received: by 2002:a2e:9550:: with SMTP id t16mr1763793ljh.117.1606935117035;
+        Wed, 02 Dec 2020 10:51:57 -0800 (PST)
+Received: from gilgamesh.semihalf.com (193-106-246-138.noc.fibertech.net.pl. [193.106.246.138])
+        by smtp.gmail.com with ESMTPSA id y134sm666365lff.162.2020.12.02.10.51.55
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Wed, 02 Dec 2020 10:51:56 -0800 (PST)
 From:   Marcin Wojtas <mw@semihalf.com>
-Date:   Wed, 2 Dec 2020 18:39:09 +0100
-Message-ID: <CAPv3WKeQ27kUDE8Z4c7BWKBBX_CJRJe-t2TmHJ1ArTXX2V_PKA@mail.gmail.com>
-Subject: Re: [PATCH v2 0/4] sdhci-xenon ACPI support
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Ziji Hu <huziji@marvell.com>,
-        Grzegorz Jaszczyk <jaz@semihalf.com>,
-        Tomasz Nowicki <tn@semihalf.com>,
-        Ard Biesheuvel <ard.biesheuvel@arm.com>,
-        Kostya Porotchkin <kostap@marvell.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+To:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc:     ulf.hansson@linaro.org, huziji@marvell.com,
+        adrian.hunter@intel.com, jaz@semihalf.com, tn@semihalf.com,
+        ard.biesheuvel@arm.com, kostap@marvell.com,
+        Marcin Wojtas <mw@semihalf.com>
+Subject: [PATCH v3 3/4] mmc: sdhci-xenon: use clk only with DT
+Date:   Wed,  2 Dec 2020 19:51:17 +0100
+Message-Id: <20201202185118.29076-4-mw@semihalf.com>
+X-Mailer: git-send-email 2.29.0
+In-Reply-To: <20201202185118.29076-1-mw@semihalf.com>
+References: <20201202185118.29076-1-mw@semihalf.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-=C5=9Br., 2 gru 2020 o 09:30 Adrian Hunter <adrian.hunter@intel.com> napisa=
-=C5=82(a):
->
-> On 20/11/20 5:26 am, Marcin Wojtas wrote:
-> > Hi,
-> >
-> > The second version of the sdhci-xenon ACPI support
-> > is now split into 4 patches instead of a single one.
-> > There are minor functional differencse - match_data
-> > introduction and using dedicated ACPI ID per
-> > controller variant.
-> >
-> > The MacchiatoBin firmware for testing can be obtained from:
-> > https://drive.google.com/file/d/1Y8BhyaCrksQgT_GPfpqqiYHpQ41kP8Kp
-> >
-> > Changelog:
-> > v1->v2
-> >   * Split single commit to 4
-> >   * Use device_match_data and dedicated ACPI ID's per controller
-> >     variant
-> >
-> > Marcin Wojtas (4):
-> >   mmc: sdhci-xenon: use match data for controllers variants
-> >   mmc: sdhci-xenon: switch to device_* API
-> >   mmc: sdhci-xenon: use clk only with DT
-> >   mmc: sdhci-xenon: introduce ACPI support
-> >
-> >  drivers/mmc/host/sdhci-xenon.h     |  12 +-
-> >  drivers/mmc/host/sdhci-xenon-phy.c |  40 ++++---
-> >  drivers/mmc/host/sdhci-xenon.c     | 120 +++++++++++++-------
-> >  3 files changed, 110 insertions(+), 62 deletions(-)
-> >
->
-> Not withstanding Ulf's comments:
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+As a preparation for supporting ACPI, modify the driver
+to use the clk framework only when booting with DT -
+otherwise rely on the configuration done by firmware.
+For that purpose introduce also a custom SDHCI get_max_clock
+callback.
 
-Thank you, I will push v3 right away.
+Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-xenon.c | 61 ++++++++++++--------
+ 1 file changed, 38 insertions(+), 23 deletions(-)
 
-Best regards,
-Marcin
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index bfc76b0e3eaa..cc0fcc646b0e 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -247,6 +247,16 @@ static void xenon_voltage_switch(struct sdhci_host *host)
+ 	sdhci_readw(host, SDHCI_HOST_CONTROL2);
+ }
+ 
++static unsigned int xenon_get_max_clock(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++
++	if (pltfm_host->clk)
++		return sdhci_pltfm_clk_get_max_clock(host);
++	else
++		return pltfm_host->clock;
++}
++
+ static const struct sdhci_ops sdhci_xenon_ops = {
+ 	.voltage_switch		= xenon_voltage_switch,
+ 	.set_clock		= sdhci_set_clock,
+@@ -254,7 +264,7 @@ static const struct sdhci_ops sdhci_xenon_ops = {
+ 	.set_bus_width		= sdhci_set_bus_width,
+ 	.reset			= xenon_reset,
+ 	.set_uhs_signaling	= xenon_set_uhs_signaling,
+-	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
++	.get_max_clock		= xenon_get_max_clock,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
+@@ -483,6 +493,7 @@ static void xenon_sdhc_unprepare(struct sdhci_host *host)
+ static int xenon_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
++	struct device *dev = &pdev->dev;
+ 	struct sdhci_host *host;
+ 	struct xenon_priv *priv;
+ 	int err;
+@@ -503,25 +514,27 @@ static int xenon_probe(struct platform_device *pdev)
+ 	 */
+ 	xenon_replace_mmc_host_ops(host);
+ 
+-	pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
+-	if (IS_ERR(pltfm_host->clk)) {
+-		err = PTR_ERR(pltfm_host->clk);
+-		dev_err(&pdev->dev, "Failed to setup input clk: %d\n", err);
+-		goto free_pltfm;
+-	}
+-	err = clk_prepare_enable(pltfm_host->clk);
+-	if (err)
+-		goto free_pltfm;
+-
+-	priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
+-	if (IS_ERR(priv->axi_clk)) {
+-		err = PTR_ERR(priv->axi_clk);
+-		if (err == -EPROBE_DEFER)
+-			goto err_clk;
+-	} else {
+-		err = clk_prepare_enable(priv->axi_clk);
++	if (dev->of_node) {
++		pltfm_host->clk = devm_clk_get(&pdev->dev, "core");
++		if (IS_ERR(pltfm_host->clk)) {
++			err = PTR_ERR(pltfm_host->clk);
++			dev_err(&pdev->dev, "Failed to setup input clk: %d\n", err);
++			goto free_pltfm;
++		}
++		err = clk_prepare_enable(pltfm_host->clk);
+ 		if (err)
+-			goto err_clk;
++			goto free_pltfm;
++
++		priv->axi_clk = devm_clk_get(&pdev->dev, "axi");
++		if (IS_ERR(priv->axi_clk)) {
++			err = PTR_ERR(priv->axi_clk);
++			if (err == -EPROBE_DEFER)
++				goto err_clk;
++		} else {
++			err = clk_prepare_enable(priv->axi_clk);
++			if (err)
++				goto err_clk;
++		}
+ 	}
+ 
+ 	err = mmc_of_parse(host->mmc);
+@@ -637,10 +650,12 @@ static int xenon_runtime_resume(struct device *dev)
+ 	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
+ 
+-	ret = clk_prepare_enable(pltfm_host->clk);
+-	if (ret) {
+-		dev_err(dev, "can't enable mainck\n");
+-		return ret;
++	if (dev->of_node) {
++		ret = clk_prepare_enable(pltfm_host->clk);
++		if (ret) {
++			dev_err(dev, "can't enable mainck\n");
++			return ret;
++		}
+ 	}
+ 
+ 	if (priv->restore_needed) {
+-- 
+2.29.0
+
