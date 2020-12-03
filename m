@@ -2,107 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE2A5C71155
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 20:24:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8AAEC71155
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 01:18:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8383421527
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Dec 2020 20:24:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 59B3722206
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 01:18:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731094AbgLBUYP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Dec 2020 15:24:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41544 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729063AbgLBUYP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Dec 2020 15:24:15 -0500
-Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0164EC0613D6;
-        Wed,  2 Dec 2020 12:23:35 -0800 (PST)
-Received: by mail-ed1-x542.google.com with SMTP id b73so1739924edf.13;
-        Wed, 02 Dec 2020 12:23:34 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id;
-        bh=6Xn6cEGyktow5p3VgWzBUqWHQbYSFeH1C45TGfme5TQ=;
-        b=PVWClXnJuO31NKJGgDWsoVCmbhBw7LnNv1pGmPNaVU2dFDIYoQU4elvMm5hlARCYhv
-         19/lPlZV2T0kEOXh8AgdFxXayxAHCRGji1+9l0Q0AIz21Zw++I1FXVhff4eJu3jlKIRv
-         Ovx5xNopEvTIvpIR3SMicR8GAyLhbPjriXVn9To/lGhXD0dASnUiALrH4pd8Rv1hRZOU
-         S6GABk/01ulpgX/c+vopTNnlxyT9BK87J/70QTyk/B3O9tOoUpZpic0tGrooIR1dE4jt
-         +W20BdfVRR1iB0zzzEtlzY0DKT8lucxxUH+WPLzofkGBvjHqjTQ8xS7Gg2dqKe9rzG3G
-         W3Vg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=6Xn6cEGyktow5p3VgWzBUqWHQbYSFeH1C45TGfme5TQ=;
-        b=IncPv1E2KyR7DZHSW/uqtmYMmMUFOuiCORhfm4yw9IhQWDIo2ff0U+All5dCkzs7Xx
-         9RujDLAa3rdcoSl4dUlx9msUeaxKYnz3nk466JvDl190RBevSWuqQ6p6TbrVQ3GNCdtI
-         aijPCESu/sgwugJj9XNOLRpUXCh07B/2GynwpOHR/TJQJTLHafLdgAkmfIMp2X7ePDfd
-         BH7GYEOnc+KN4xsoflTUXnRPEasnr5LaP4nGjW4DVsXWWGX+Os9v/gRFA1Nk5e+7eH+1
-         qradV4b46SkN/h5g3lQPbJtbgfk7UQiCmHKqVphMGybfTDIN1Ksfo1ClAUGdBZZLtq7e
-         J8ww==
-X-Gm-Message-State: AOAM530SinsbaEsxsLFUI5izuheYH42SwLO54U8e2m35YJ8un4r0et0r
-        WnpxTJXIBkJXiaf/a+H40+E=
-X-Google-Smtp-Source: ABdhPJzkv2IFysSAiRWeMnEusdw/xqfmfC562SoKT5JOpvd6DMfm0ouM48i7yA1WEfWCfRFt7B+y1w==
-X-Received: by 2002:aa7:dbc3:: with SMTP id v3mr1737369edt.199.1606940613632;
-        Wed, 02 Dec 2020 12:23:33 -0800 (PST)
-Received: from localhost.localdomain (ip5f5bfce9.dynamic.kabel-deutschland.de. [95.91.252.233])
-        by smtp.gmail.com with ESMTPSA id y15sm666474eds.56.2020.12.02.12.23.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 02 Dec 2020 12:23:33 -0800 (PST)
-From:   Bean Huo <huobean@gmail.com>
-To:     ulf.hansson@linaro.org, axboe@kernel.dk, baolin.wang@linaro.org,
-        beanhuo@micron.com, arnd@arndb.de, vbadigan@codeaurora.org,
-        richard.peng@oppo.com, chaotian.jing@mediatek.com,
-        avri.altman@wdc.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, zliua@micron.com,
-        zszubbocsev@micron.com
-Cc:     stable@vger.kernel.org
-Subject: [PATCH] mmc: block: Let CMD13 polling only for MMC IOCTLS with the R1B response
-Date:   Wed,  2 Dec 2020 21:23:20 +0100
-Message-Id: <20201202202320.22165-1-huobean@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        id S1729315AbgLCBSL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Dec 2020 20:18:11 -0500
+Received: from mail.kernel.org ([198.145.29.99]:34706 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727351AbgLCBSL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Dec 2020 20:18:11 -0500
+Date:   Wed, 2 Dec 2020 17:17:27 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1606958250;
+        bh=T69XyqdOWUHSstTcJMG2jQvg/tn2n26dzZ7Wc4I/z8Y=;
+        h=From:To:Cc:Subject:References:In-Reply-To:From;
+        b=cW1PJtvz1PRASeEWhUc0wyW2t6eO5QSOMdjXvSHstUH907uCJ0SiV+jdDfxOgeNty
+         28b1QG6MKw8LG7VkwxXn7XA1NnZQMLXx1IgQuTb8MJzzt03cOdhAvF3RMeWjTLhjwz
+         p8jquBCqFjjjiPUkN8qOYmM8u7pRw2XhZ5VULfR3erFFb3Cz60LT9DoqvdZtfLEVA/
+         C4l2cE8KX1vJM/KRso+an9S+Ab/faaZyv59C6brYnLQofzhdt3Et8+39qzQca0JSDm
+         bQoOtVVrcMRBtjU+O6HvMrUpTZi4mnxXQyufzmEGIoR65HdUYmwxSq+k5Ok/G/w72r
+         T9yX3A/2b2cNg==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: Re: [PATCH 3/8] mmc: cqhci: add support for inline encryption
+Message-ID: <X8g8px5KaEyrbcmK@sol.localdomain>
+References: <20201112194011.103774-1-ebiggers@kernel.org>
+ <20201112194011.103774-4-ebiggers@kernel.org>
+ <48269904-d031-c2fd-59c5-78f7948b032a@intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <48269904-d031-c2fd-59c5-78f7948b032a@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Bean Huo <beanhuo@micron.com>
+On Wed, Dec 02, 2020 at 03:14:25PM +0200, Adrian Hunter wrote:
+> >  static void cqhci_prep_task_desc(struct mmc_request *mrq,
+> > -					u64 *data, bool intr)
+> > +				 struct cqhci_host *cq_host, int tag)
+> 
+> It would be neater if the changes to cqhci_prep_task_desc() parameters could
+> be a separate patch.
+> 
 
-The CMD13 polling is only needed for the command with R1B Resp. For the
-command with R1 Resp, such as open-ended multiple block read/write
-(CMD18/25) commands, the device will just wait for its next paired command.
-There is no need to poll device status through CMD13.
+I'll move it to a separate patch
+"mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors".
 
-Meanwhile, based on the original change commit (mmc: block: Add CMD13 polling
-for MMC IOCTLS with R1B response), and comment in __mmc_blk_ioctl_cmd(),
-current code is not in line with its original purpose. So fix it with this patch.
+> > @@ -709,6 +724,27 @@ static void cqhci_error_irq(struct mmc_host *mmc, u32 status, int cmd_error,
+> >  		}
+> >  	}
+> >  
+> > +	/*
+> > +	 * Handle "Invalid Crypto Configuration Error".  This should never
+> > +	 * happen, since the block layer ensures that all crypto-enabled I/O
+> > +	 * requests have a valid keyslot before they reach the driver.
+> > +	 */
+> > +	if (status & CQHCI_IS_ICCE) {
+> > +		tdpe = cqhci_readl(cq_host, CQHCI_TDPE);
+> > +		WARN_ONCE(1,
+> > +			  "%s: cqhci: invalid crypto configuration error. IRQ status: 0x%08x TDPE: 0x%08x\n",
+> > +			  mmc_hostname(mmc), status, tdpe);
+> > +		while (tdpe != 0) {
+> > +			tag = __ffs(tdpe);
+> > +			tdpe &= ~(1 << tag);
+> > +			slot = &cq_host->slot[tag];
+> > +			if (!slot->mrq)
+> > +				continue;
+> > +			slot->flags = cqhci_error_flags(data_error, cmd_error);
+> > +			cqhci_recovery_needed(mmc, slot->mrq, true);
+> > +		}
+> > +	}
+> > +
+> 
+> What about GCE?
 
-Fixes: a0d4c7eb71dd ("mmc: block: Add CMD13 polling for MMC IOCTLS with R1B response")
-Cc: stable@vger.kernel.org
-Reported-by: Zhan Liu <zliua@micron.com>
-Signed-off-by: Zhan Liu <zliua@micron.com>
-Signed-off-by: Bean Huo <beanhuo@micron.com>
----
- drivers/mmc/core/block.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I don't think anything more is needed for GCE (General Crypto Error).  As per
+the eMMC specification, GCE occurs during the execution of a task, and task
+error information is stored in the TERRI register -- just like some of the
+non-crypto related errors.  This patch already updates cqhci_irq() to call
+cqhci_error_irq() if the GCE bit is set, and cqhci_error_irq() already handles
+task errors by checking the TERRI register.  Also, cqhci_irq() already
+acknowledges all interrupts, including GCE.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 8d3df0be0355..42e27a298218 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -580,7 +580,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 
- 	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
- 
--	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B)) {
-+	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
- 		/*
- 		 * Ensure RPMB/R1B command has completed by polling CMD13
- 		 * "Send Status".
--- 
-2.17.1
+So I think GCE is handled correctly, though I don't currently have a way to
+actually test it.
 
+- Eric
