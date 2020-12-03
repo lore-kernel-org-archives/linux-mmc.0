@@ -7,46 +7,46 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32A56C63777
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86D5AC71156
 	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 09:35:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D5C3F22241
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 09:35:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3AB6D2222E
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 09:35:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730075AbgLCJfC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Dec 2020 04:35:02 -0500
-Received: from server-x.ipv4.hkg02.ds.network ([27.111.83.178]:37248 "EHLO
+        id S1730095AbgLCJfG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Dec 2020 04:35:06 -0500
+Received: from server-x.ipv4.hkg02.ds.network ([27.111.83.178]:37264 "EHLO
         mail.gtsys.com.hk" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-        with ESMTP id S1726070AbgLCJfC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Dec 2020 04:35:02 -0500
+        with ESMTP id S1726070AbgLCJfG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Dec 2020 04:35:06 -0500
 Received: from localhost (localhost [127.0.0.1])
-        by mail.gtsys.com.hk (Postfix) with ESMTP id 72BED20370C7;
-        Thu,  3 Dec 2020 17:34:14 +0800 (HKT)
+        by mail.gtsys.com.hk (Postfix) with ESMTP id 52A7722EB9E6;
+        Thu,  3 Dec 2020 17:34:19 +0800 (HKT)
 X-Virus-Scanned: Debian amavisd-new at gtsys.com.hk
 Received: from mail.gtsys.com.hk ([127.0.0.1])
         by localhost (mail.gtsys.com.hk [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id XaUp_DqSZvIZ; Thu,  3 Dec 2020 17:34:14 +0800 (HKT)
+        with ESMTP id louZf-KAolpD; Thu,  3 Dec 2020 17:34:19 +0800 (HKT)
 Received: from s01.gtsys.com.hk (unknown [10.128.4.2])
-        by mail.gtsys.com.hk (Postfix) with ESMTP id 58AE720001F5;
-        Thu,  3 Dec 2020 17:34:14 +0800 (HKT)
+        by mail.gtsys.com.hk (Postfix) with ESMTP id 3935C20001F5;
+        Thu,  3 Dec 2020 17:34:19 +0800 (HKT)
 Received: from armhf2.gtsys.com.hk (unknown [10.128.4.15])
-        by s01.gtsys.com.hk (Postfix) with ESMTP id 4FE1CC019FF;
-        Thu,  3 Dec 2020 17:34:14 +0800 (HKT)
+        by s01.gtsys.com.hk (Postfix) with ESMTP id 31263C019FF;
+        Thu,  3 Dec 2020 17:34:19 +0800 (HKT)
 Received: by armhf2.gtsys.com.hk (Postfix, from userid 1000)
-        id 5286F200756; Thu,  3 Dec 2020 17:34:14 +0800 (HKT)
+        id 3448A200756; Thu,  3 Dec 2020 17:34:19 +0800 (HKT)
 From:   Chris Ruehl <chris.ruehl@gtsys.com.hk>
 To:     Avri Altman <Avri.Altman@wdc.com>
 Cc:     Jack <jack.lo@gtsys.com.hk>,
         Chris Ruehl <chris.ruehl@gtsys.com.hk>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Baolin Wang <baolin.wang@linaro.org>,
         Krishna Konda <kkonda@codeaurora.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 1/3] mmc: core: prepare hs400 update, code order
-Date:   Thu,  3 Dec 2020 17:33:27 +0800
-Message-Id: <20201203093338.10480-2-chris.ruehl@gtsys.com.hk>
+Subject: [PATCH 2/3] mmc: core: make hs400 independent from hs200 init
+Date:   Thu,  3 Dec 2020 17:33:28 +0800
+Message-Id: <20201203093338.10480-3-chris.ruehl@gtsys.com.hk>
 X-Mailer: git-send-email 2.20.1
 In-Reply-To: <20201203093338.10480-1-chris.ruehl@gtsys.com.hk>
 References: <20201203093338.10480-1-chris.ruehl@gtsys.com.hk>
@@ -56,218 +56,168 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch didn't change functionality just move
-mmc_select_hs400() and mmc_hs200_to_hs400() between
-mmc_select_hs400es() and mmc_select_hs200 and
-fix checkpatch --script warings.
+Move mmc_select_hs400() out from hs200 init path and make hs400
+independent.
+
+The patch makes quite some changes and needs to be reviewed carefully.
+
+In function mmc_select_timing() call for mmc_select_hs400().
+HS400 requires a host bus with of 8bit, if not supported we
+return with -ENOTSUPP, there is no retry.
+If the host controller can't switch to 8bit (dts: bus-width = <4>)
+it can't recover on next power-up init failed.
+Have the controller set to HS mode, make the hs400 tuning prepare
+if any and run mmc tuning before switching to HS400.
+
+This patch resolve the problem if hs400-1_8v is set but extended
+strobe is not.
+
+&sdhci { // eMMC
+        bus-width = <8>;
+        mmc-hs400-1_8v;
+        // mmc-hs400-enhanced-strobe;
+        non-removable;
+        status = "okay";
+};
+
+[    1.775721] mmc1: CQHCI version 5.10
+[    1.802342] mmc1: SDHCI controller on fe330000.sdhci [fe330000.sdhci] using ADMA
+[    2.007581] mmc1: mmc_select_hs200 failed, error -110
+[    2.007589] mmc1: error -110 whilst initialising MMC card
+[    2.413559] mmc1: mmc_select_hs200 failed, error -110
+[    2.413562] mmc1: error -110 whilst initialising MMC card
+[    3.183343] mmc1: Command Queue Engine enabled
+[    3.183355] mmc1: new HS400 MMC card at address 0001
+[    3.197163] mmcblk1: mmc1:0001 DG4008 7.28 GiB
+[    3.197256] mmcblk1boot0: mmc1:0001 DG4008 partition 1 4.00 MiB
+[    3.197360] mmcblk1boot1: mmc1:0001 DG4008 partition 2 4.00 MiB
+[    3.197360] mmcblk1boot1: mmc1:0001 DG4008 partition 2 4.00 MiB
+[    3.197479] mmcblk1rpmb: mmc1:0001 DG4008 partition 3 4.00 MiB, chardev (242:0)
+
+[    1.743386] mmc1: CQHCI version 5.10
+[    1.769952] mmc1: SDHCI controller on fe330000.sdhci [fe330000.sdhci] using ADMA
+[    1.846223] mmc1: Command Queue Engine enabled
+[    1.846230] mmc1: new HS400 MMC card at address 0001
+[    1.846557] mmcblk1: mmc1:0001 DG4008 7.28 GiB
+[    1.846650] mmcblk1boot0: mmc1:0001 DG4008 partition 1 4.00 MiB
+[    1.846742] mmcblk1boot1: mmc1:0001 DG4008 partition 2 4.00 MiB
+[    1.846825] mmcblk1rpmb: mmc1:0001 DG4008 partition 3 4.00 MiB, chardev (242:0)
+
+Tested with rk3399 customized board.
+
+Note:
+We had 20% failure rate in the current production "not boot" or
+"reboot issues" this patch solved it. Some boards had been
+cooled down to -20C have boot failures, after apply the patch
+they pass the QC.
 
 Signed-off-by: Chris Ruehl <chris.ruehl@gtsys.com.hk>
 ---
- drivers/mmc/core/mmc.c | 184 ++++++++++++++++++++---------------------
- 1 file changed, 92 insertions(+), 92 deletions(-)
+ drivers/mmc/core/mmc.c | 59 ++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 51 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index ff3063ce2acd..5477786aded8 100644
+index 5477786aded8..45db890dee80 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -1142,98 +1142,6 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
- 	return err;
- }
- 
--static int mmc_select_hs400(struct mmc_card *card)
--{
--	struct mmc_host *host = card->host;
--	unsigned int max_dtr;
+@@ -1337,15 +1337,46 @@ static int mmc_select_hs400(struct mmc_card *card)
+ {
+ 	struct mmc_host *host = card->host;
+ 	unsigned int max_dtr;
 -	int err = 0;
--	u8 val;
--
--	/*
++	int err = -EINVAL;
+ 	u8 val;
+ 
+ 	/*
 -	 * HS400 mode requires 8-bit bus width
--	 */
++	 * HS400 mode requires host 8-bit bus width
+ 	 */
 -	if (!(card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
 -	      host->ios.bus_width == MMC_BUS_WIDTH_8))
 -		return 0;
--
--	/* Switch card to HS mode */
--	val = EXT_CSD_TIMING_HS;
--	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--			   EXT_CSD_HS_TIMING, val,
--			   card->ext_csd.generic_cmd6_time, 0,
--			   false, true);
--	if (err) {
--		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
--			mmc_hostname(host), err);
--		return err;
--	}
--
--	/* Prepare host to downgrade to HS timing */
--	if (host->ops->hs400_downgrade)
--		host->ops->hs400_downgrade(host);
--
--	/* Set host controller to HS timing */
--	mmc_set_timing(host, MMC_TIMING_MMC_HS);
--
--	/* Reduce frequency to HS frequency */
--	max_dtr = card->ext_csd.hs_max_dtr;
--	mmc_set_clock(host, max_dtr);
--
--	err = mmc_switch_status(card, true);
--	if (err)
--		goto out_err;
--
--	if (host->ops->hs400_prepare_ddr)
--		host->ops->hs400_prepare_ddr(host);
--
--	/* Switch card to DDR */
--	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--			 EXT_CSD_BUS_WIDTH,
--			 EXT_CSD_DDR_BUS_WIDTH_8,
--			 card->ext_csd.generic_cmd6_time);
--	if (err) {
--		pr_err("%s: switch to bus width for hs400 failed, err:%d\n",
--			mmc_hostname(host), err);
--		return err;
--	}
--
--	/* Switch card to HS400 */
--	val = EXT_CSD_TIMING_HS400 |
--	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
--	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
--			   EXT_CSD_HS_TIMING, val,
--			   card->ext_csd.generic_cmd6_time, 0,
--			   false, true);
--	if (err) {
--		pr_err("%s: switch to hs400 failed, err:%d\n",
--			 mmc_hostname(host), err);
--		return err;
--	}
--
--	/* Set host controller to HS400 timing and frequency */
--	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
--	mmc_set_bus_speed(card);
--
--	if (host->ops->hs400_complete)
--		host->ops->hs400_complete(host);
--
--	err = mmc_switch_status(card, true);
--	if (err)
--		goto out_err;
--
--	return 0;
--
--out_err:
--	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
--	       __func__, err);
--	return err;
--}
--
--int mmc_hs200_to_hs400(struct mmc_card *card)
--{
--	return mmc_select_hs400(card);
--}
--
- int mmc_hs400_to_hs200(struct mmc_card *card)
- {
- 	struct mmc_host *host = card->host;
-@@ -1425,6 +1333,98 @@ static int mmc_select_hs400es(struct mmc_card *card)
- 	return err;
- }
- 
-+static int mmc_select_hs400(struct mmc_card *card)
-+{
-+	struct mmc_host *host = card->host;
-+	unsigned int max_dtr;
-+	int err = 0;
-+	u8 val;
++	if (!(host->caps & MMC_CAP_8_BIT_DATA)) {
++		pr_err("%s: host not support hs400 8bit\n",
++		       mmc_hostname(host));
++		return -EOPNOTSUPP;
++	}
 +
 +	/*
-+	 * HS400 mode requires 8-bit bus width
++	 * Below is a change from previous logic.
++	 * mmc_avail_type vccq voltage set in dts, it can be 1_2v or 1_8v
++	 * but not both.
 +	 */
-+	if (!(card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400 &&
-+	      host->ios.bus_width == MMC_BUS_WIDTH_8))
-+		return 0;
-+
-+	/* Switch card to HS mode */
-+	val = EXT_CSD_TIMING_HS;
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			   EXT_CSD_HS_TIMING, val,
-+			   card->ext_csd.generic_cmd6_time, 0,
-+			   false, true);
-+	if (err) {
-+		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
-+		       mmc_hostname(host), err);
-+		return err;
++	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_2V) {
++		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_120);
++	} else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400_1_8V) {
++		err = mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180);
++	} else {
++		pr_err("%s: hs400 unsupported vccq voltage, err:%d\n",
++		       mmc_hostname(host), -EOPNOTSUPP);
++		return -EOPNOTSUPP;
 +	}
 +
-+	/* Prepare host to downgrade to HS timing */
-+	if (host->ops->hs400_downgrade)
-+		host->ops->hs400_downgrade(host);
-+
-+	/* Set host controller to HS timing */
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS);
-+
-+	/* Reduce frequency to HS frequency */
-+	max_dtr = card->ext_csd.hs_max_dtr;
-+	mmc_set_clock(host, max_dtr);
-+
-+	err = mmc_switch_status(card, true);
++	/* Failed set 1_2v or 1_8v try again during next card power cycle */
 +	if (err)
++		return err;
++
++	mmc_select_driver_type(card);
++
++	err = mmc_select_bus_width(card);
++	if (err != MMC_BUS_WIDTH_8) {
++		pr_err("%s: switch to 8bit bus width failed, err:%d\n",
++		       mmc_hostname(host), err);
++		err = err < 0 ? err : -EOPNOTSUPP;
 +		goto out_err;
-+
-+	if (host->ops->hs400_prepare_ddr)
-+		host->ops->hs400_prepare_ddr(host);
-+
-+	/* Switch card to DDR */
-+	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			 EXT_CSD_BUS_WIDTH,
-+			 EXT_CSD_DDR_BUS_WIDTH_8,
-+			 card->ext_csd.generic_cmd6_time);
++	}
+ 
+ 	/* Switch card to HS mode */
+ 	val = EXT_CSD_TIMING_HS;
+@@ -1388,6 +1419,18 @@ static int mmc_select_hs400(struct mmc_card *card)
+ 		return err;
+ 	}
+ 
++	/* HS400 prepare and execute tuning  */
++	host->doing_init_tune = 1;
++	if (host->ops->prepare_hs400_tuning)
++		host->ops->prepare_hs400_tuning(host, &host->ios);
++	err = mmc_execute_tuning(card);
++	host->doing_init_tune = 0;
 +	if (err) {
-+		pr_err("%s: switch to bus width for hs400 failed, err:%d\n",
++		pr_err("%s: hs400 tuning failed, err:%d\n",
 +		       mmc_hostname(host), err);
 +		return err;
 +	}
 +
-+	/* Switch card to HS400 */
-+	val = EXT_CSD_TIMING_HS400 |
-+	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
-+			   EXT_CSD_HS_TIMING, val,
-+			   card->ext_csd.generic_cmd6_time, 0,
-+			   false, true);
-+	if (err) {
-+		pr_err("%s: switch to hs400 failed, err:%d\n",
-+		       mmc_hostname(host), err);
-+		return err;
-+	}
-+
-+	/* Set host controller to HS400 timing and frequency */
-+	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
-+	mmc_set_bus_speed(card);
-+
-+	if (host->ops->hs400_complete)
-+		host->ops->hs400_complete(host);
-+
-+	err = mmc_switch_status(card, true);
-+	if (err)
-+		goto out_err;
-+
-+	return 0;
-+
-+out_err:
-+	pr_err("%s: %s failed, error %d\n", mmc_hostname(card->host),
-+	       __func__, err);
-+	return err;
-+}
-+
-+int mmc_hs200_to_hs400(struct mmc_card *card)
-+{
-+	return mmc_select_hs400(card);
-+}
-+
+ 	/* Switch card to HS400 */
+ 	val = EXT_CSD_TIMING_HS400 |
+ 	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
+@@ -1496,7 +1539,7 @@ static int mmc_select_hs200(struct mmc_card *card)
+ }
+ 
  /*
-  * For device supporting HS200 mode, the following sequence
-  * should be done before executing the tuning process.
+- * Activate High Speed, HS200 or HS400ES mode if supported.
++ * Activate High Speed, HS200 ,HS400 or HS400ES mode if supported.
+  */
+ static int mmc_select_timing(struct mmc_card *card)
+ {
+@@ -1507,6 +1550,8 @@ static int mmc_select_timing(struct mmc_card *card)
+ 
+ 	if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400ES)
+ 		err = mmc_select_hs400es(card);
++	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS400)
++		err = mmc_select_hs400(card);
+ 	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS200)
+ 		err = mmc_select_hs200(card);
+ 	else if (card->mmc_avail_type & EXT_CSD_CARD_TYPE_HS)
+@@ -1766,8 +1811,6 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 		host->doing_init_tune = 1;
+ 
+ 		err = mmc_hs200_tuning(card);
+-		if (!err)
+-			err = mmc_select_hs400(card);
+ 
+ 		host->doing_init_tune = 0;
+ 
 -- 
 2.20.1
 
