@@ -3,21 +3,21 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFCB6C71155
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 02:08:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D90DC8301F
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 02:09:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CC0221D91
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 02:08:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE84022203
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 02:09:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727803AbgLCCIr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Dec 2020 21:08:47 -0500
-Received: from mail.kernel.org ([198.145.29.99]:45518 "EHLO mail.kernel.org"
+        id S2387632AbgLCCJ0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Dec 2020 21:09:26 -0500
+Received: from mail.kernel.org ([198.145.29.99]:45644 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726535AbgLCCIq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Dec 2020 21:08:46 -0500
+        id S2387535AbgLCCJZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 2 Dec 2020 21:09:25 -0500
 From:   Eric Biggers <ebiggers@kernel.org>
 Authentication-Results: mail.kernel.org; dkim=permerror (bad message/signature format)
 To:     linux-mmc@vger.kernel.org
@@ -34,9 +34,9 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v2 3/9] mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
-Date:   Wed,  2 Dec 2020 18:05:10 -0800
-Message-Id: <20201203020516.225701-4-ebiggers@kernel.org>
+Subject: [PATCH v2 5/9] mmc: cqhci: add cqhci_host_ops::program_key
+Date:   Wed,  2 Dec 2020 18:05:12 -0800
+Message-Id: <20201203020516.225701-6-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201203020516.225701-1-ebiggers@kernel.org>
 References: <20201203020516.225701-1-ebiggers@kernel.org>
@@ -48,90 +48,116 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Move the task descriptor initialization into cqhci_prep_task_desc(), and
-make it initialize all 128 bits of the task descriptor if the host
-controller is using 128-bit task descriptors.
+On Snapdragon SoCs, the Linux kernel isn't permitted to directly access
+the standard CQHCI crypto configuration registers.  Instead, programming
+and evicting keys must be done through vendor-specific SMC calls.
 
-This is needed to prepare for CQHCI inline encryption support, which
-requires 128-bit task descriptors and uses the upper 64 bits.
+To support this hardware, add a ->program_key() method to
+'struct cqhci_host_ops'.  This allows overriding the standard CQHCI
+crypto key programming / eviction procedure.
 
-Note: since some host controllers already enable 128-bit task
-descriptors, it's unclear why the previous code worked when it wasn't
-initializing the upper 64 bits.  One possibility is that the bits are
-being ignored because the features that use them aren't enabled yet.
-In any case, setting them to 0 won't hurt.
+This is inspired by the corresponding UFS crypto support, which uses
+these same SMC calls.  See commit 1bc726e26ef3 ("scsi: ufs: Add
+program_key() variant op").
 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- drivers/mmc/host/cqhci-core.c | 30 ++++++++++++++++++++----------
- 1 file changed, 20 insertions(+), 10 deletions(-)
+ drivers/mmc/host/cqhci-crypto.c | 22 +++++++++++++---------
+ drivers/mmc/host/cqhci.h        |  4 ++++
+ 2 files changed, 17 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index 697fe40756bf2..ad7c9acff1728 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -408,13 +408,15 @@ static void cqhci_disable(struct mmc_host *mmc)
+diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
+index 98f141c8480ce..0aaa948d240b1 100644
+--- a/drivers/mmc/host/cqhci-crypto.c
++++ b/drivers/mmc/host/cqhci-crypto.c
+@@ -30,13 +30,16 @@ cqhci_host_from_ksm(struct blk_keyslot_manager *ksm)
+ 	return mmc->cqe_private;
  }
  
- static void cqhci_prep_task_desc(struct mmc_request *mrq,
--					u64 *data, bool intr)
-+				 struct cqhci_host *cq_host, int tag)
+-static void cqhci_crypto_program_key(struct cqhci_host *cq_host,
+-				     const union cqhci_crypto_cfg_entry *cfg,
+-				     int slot)
++static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
++				    const union cqhci_crypto_cfg_entry *cfg,
++				    int slot)
  {
-+	__le64 *task_desc = (__le64 __force *)get_desc(cq_host, tag);
- 	u32 req_flags = mrq->data->flags;
-+	u64 desc0;
+ 	u32 slot_offset = cq_host->crypto_cfg_register + slot * sizeof(*cfg);
+ 	int i;
  
--	*data = CQHCI_VALID(1) |
-+	desc0 = CQHCI_VALID(1) |
- 		CQHCI_END(1) |
--		CQHCI_INT(intr) |
-+		CQHCI_INT(1) |
- 		CQHCI_ACT(0x5) |
- 		CQHCI_FORCED_PROG(!!(req_flags & MMC_DATA_FORCED_PRG)) |
- 		CQHCI_DATA_TAG(!!(req_flags & MMC_DATA_DAT_TAG)) |
-@@ -425,8 +427,19 @@ static void cqhci_prep_task_desc(struct mmc_request *mrq,
- 		CQHCI_BLK_COUNT(mrq->data->blocks) |
- 		CQHCI_BLK_ADDR((u64)mrq->data->blk_addr);
++	if (cq_host->ops->program_key)
++		return cq_host->ops->program_key(cq_host, cfg, slot);
++
+ 	/* Clear CFGE */
+ 	cqhci_writel(cq_host, 0, slot_offset + 16 * sizeof(cfg->reg_val[0]));
  
--	pr_debug("%s: cqhci: tag %d task descriptor 0x%016llx\n",
--		 mmc_hostname(mrq->host), mrq->tag, (unsigned long long)*data);
-+	task_desc[0] = cpu_to_le64(desc0);
-+
-+	if (cq_host->caps & CQHCI_TASK_DESC_SZ_128) {
-+		u64 desc1 = 0;
-+
-+		task_desc[1] = cpu_to_le64(desc1);
-+
-+		pr_debug("%s: cqhci: tag %d task descriptor 0x%016llx%016llx\n",
-+			 mmc_hostname(mrq->host), mrq->tag, desc1, desc0);
-+	} else {
-+		pr_debug("%s: cqhci: tag %d task descriptor 0x%016llx\n",
-+			 mmc_hostname(mrq->host), mrq->tag, desc0);
-+	}
+@@ -51,6 +54,7 @@ static void cqhci_crypto_program_key(struct cqhci_host *cq_host,
+ 	/* Write dword 16, which includes the new value of CFGE */
+ 	cqhci_writel(cq_host, le32_to_cpu(cfg->reg_val[16]),
+ 		     slot_offset + 16 * sizeof(cfg->reg_val[0]));
++	return 0;
  }
  
- static int cqhci_dma_map(struct mmc_host *host, struct mmc_request *mrq)
-@@ -567,8 +580,6 @@ static inline int cqhci_tag(struct mmc_request *mrq)
- static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
- {
- 	int err = 0;
--	u64 data = 0;
--	u64 *task_desc = NULL;
- 	int tag = cqhci_tag(mrq);
- 	struct cqhci_host *cq_host = mmc->cqe_private;
- 	unsigned long flags;
-@@ -598,9 +609,8 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ static int cqhci_crypto_keyslot_program(struct blk_keyslot_manager *ksm,
+@@ -67,6 +71,7 @@ static int cqhci_crypto_keyslot_program(struct blk_keyslot_manager *ksm,
+ 	int i;
+ 	int cap_idx = -1;
+ 	union cqhci_crypto_cfg_entry cfg = {};
++	int err;
+ 
+ 	BUILD_BUG_ON(CQHCI_CRYPTO_KEY_SIZE_INVALID != 0);
+ 	for (i = 0; i < cq_host->crypto_capabilities.num_crypto_cap; i++) {
+@@ -93,13 +98,13 @@ static int cqhci_crypto_keyslot_program(struct blk_keyslot_manager *ksm,
+ 		memcpy(cfg.crypto_key, key->raw, key->size);
  	}
  
- 	if (mrq->data) {
--		task_desc = (__le64 __force *)get_desc(cq_host, tag);
--		cqhci_prep_task_desc(mrq, &data, 1);
--		*task_desc = cpu_to_le64(data);
-+		cqhci_prep_task_desc(mrq, cq_host, tag);
-+
- 		err = cqhci_prep_tran_desc(mrq, cq_host, tag);
- 		if (err) {
- 			pr_err("%s: cqhci: failed to setup tx desc: %d\n",
+-	cqhci_crypto_program_key(cq_host, &cfg, slot);
++	err = cqhci_crypto_program_key(cq_host, &cfg, slot);
+ 
+ 	memzero_explicit(&cfg, sizeof(cfg));
+-	return 0;
++	return err;
+ }
+ 
+-static void cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
++static int cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+ {
+ 	/*
+ 	 * Clear the crypto cfg on the device. Clearing CFGE
+@@ -107,7 +112,7 @@ static void cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+ 	 */
+ 	union cqhci_crypto_cfg_entry cfg = {};
+ 
+-	cqhci_crypto_program_key(cq_host, &cfg, slot);
++	return cqhci_crypto_program_key(cq_host, &cfg, slot);
+ }
+ 
+ static int cqhci_crypto_keyslot_evict(struct blk_keyslot_manager *ksm,
+@@ -116,8 +121,7 @@ static int cqhci_crypto_keyslot_evict(struct blk_keyslot_manager *ksm,
+ {
+ 	struct cqhci_host *cq_host = cqhci_host_from_ksm(ksm);
+ 
+-	cqhci_crypto_clear_keyslot(cq_host, slot);
+-	return 0;
++	return cqhci_crypto_clear_keyslot(cq_host, slot);
+ }
+ 
+ /*
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index 5c18734624fea..ece997dd8bcc7 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -287,6 +287,10 @@ struct cqhci_host_ops {
+ 				 u64 *data);
+ 	void (*pre_enable)(struct mmc_host *mmc);
+ 	void (*post_disable)(struct mmc_host *mmc);
++#ifdef CONFIG_MMC_CRYPTO
++	int (*program_key)(struct cqhci_host *cq_host,
++			   const union cqhci_crypto_cfg_entry *cfg, int slot);
++#endif
+ };
+ 
+ static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
 -- 
 2.29.2
 
