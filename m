@@ -2,102 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-9.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E524AC4361A
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 15:08:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1613BC4361A
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 15:55:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A9D0622B40
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 15:08:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D916822B30
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 15:55:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726908AbgLDPIm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Dec 2020 10:08:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43468 "EHLO
+        id S1730644AbgLDPyz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Dec 2020 10:54:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725923AbgLDPIl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 10:08:41 -0500
-Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E2F7C061A4F
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 07:08:01 -0800 (PST)
-Received: by mail-lj1-x241.google.com with SMTP id f24so6944630ljk.13
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 07:08:01 -0800 (PST)
+        with ESMTP id S1729461AbgLDPyy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 10:54:54 -0500
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE1EDC061A4F;
+        Fri,  4 Dec 2020 07:54:13 -0800 (PST)
+Received: by mail-ed1-x541.google.com with SMTP id cm17so6341213edb.4;
+        Fri, 04 Dec 2020 07:54:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ugm6nci6pFkFE2fZ87+ANMj4imEPU508tEZXdZdhnMQ=;
-        b=p10DaLJuegWL96xzPso5dt1qrw6xgzlmwOoM7oDf4usYdru+bxc+QbiI4MBs0YwHmi
-         6oYgnLKlWYw1ZnKUnLeB7VKUYbBS+z/zYK3cEE1d0bQdYbpNY3CJeydIU/+NIpsbQMW5
-         5iwMSzHgpA6DWxGvawABSI+IVSiyfjJI41HzjVKEB20clw9Zl5+2gkiTqPKtdHyuxDfl
-         FG3bz3narKSAlfO9TG9AlBHkq7IZCnJrkybg+hhCXgXgw2fjHYLEB+UyYdial0Fwh5hS
-         oYUAqoD6vY+TVj2LU5U7mJ7WDGKQhJXll4/P7SWUXLuCqwzgruZH0zLIrw+poQm498F3
-         /HIQ==
+        d=gmail.com; s=20161025;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=zO/lnZ8NaZABQdMJqO7ITwA6pWKefST87nWhdVmyakI=;
+        b=IxQD4YqX2O/E37H5J516Q0NE5nfMAFOISY4o5aasgRcfTvRiDXtMYzGR6qb1UzxKYp
+         7Y831iudbYXWZWJ+DVuaaki2gU4mS7fut1NFh83NIHvaN2Od+egrwNmYvstfkffYuIoZ
+         SDOisZDuQF0S+dfSPi/KztBznH+aZUEiSnmcpXbAU/yM9eWeL9auQRdK1BvW4gD+YRdg
+         oQoK4ta1zJR7oZJxsvlbLozNRF31eUTbkecHftm+u383brvcu+C4Kq7tenjJtrXVDOmV
+         pStedE6trccaxDDr6x6PexJWrObxXl4GuBhNZ7qQa3cy9MtNU+C3yqVYDgkD8mIrvPnC
+         H71w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ugm6nci6pFkFE2fZ87+ANMj4imEPU508tEZXdZdhnMQ=;
-        b=KdXIaND+n6I1DlhD9zx3NzA2jF+2wQW+uZFgZr3aZ1ZcmDkGLFc6nM5yuZkcCpmTGJ
-         AjI5qAzhZyTRP8s39QQtUGN4smjmyrDWtW7b/ugfrE/SLLoAYa+G+hRC1B2C/EtLoMzt
-         zh212n+1S1xnTMXdajmUZujXvqf7VkoURsmcGLDszGMyg5lINmw7UFbi0QFqB0yXhTta
-         71YYEtV9NOQV5pvmbeexMqnM5bjse3yS4raKJUuDhc1oLcmxfUbmJ22bj9SYj4Bh/wqT
-         /XN9fH5pWtkyvzSuZqqDbGIESPjLvO+aGZcTM3eglWFlvinaoa5Qe2JvQvlg3YWCLXWy
-         2QLA==
-X-Gm-Message-State: AOAM531d7n7N0efTtvBDJq0j2/HvksNJDJu2NmS1M8uLoxp22yWGY5+4
-        3KdsFXVu42dHfwE+jQ7hzc7/vK4+RqZfDBs+ds6+tA==
-X-Google-Smtp-Source: ABdhPJzHIwMUOmMN2sHISP7xlPGum+N6euE1+Z7nIc8dnisLvUyDzFd9N0UJu6A2WfrDU5SsPk6AJhpJ3zSMrsEzK6g=
-X-Received: by 2002:a2e:80c3:: with SMTP id r3mr3574649ljg.391.1607094479850;
- Fri, 04 Dec 2020 07:07:59 -0800 (PST)
-MIME-Version: 1.0
-References: <20201118063405.24906-1-wenbin.mei@mediatek.com>
- <CAPDyKFpHAWBtxLOOvvqmAYFAwCsV66s_LzzVJg-zfXH5QE++Ng@mail.gmail.com>
- <1606266655.11864.7.camel@mhfsdcap03> <CANMq1KBwtZNgkK5mEUdOk4sq05aXqQ59QsqYqapPqQr7DEWgMA@mail.gmail.com>
-In-Reply-To: <CANMq1KBwtZNgkK5mEUdOk4sq05aXqQ59QsqYqapPqQr7DEWgMA@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 4 Dec 2020 16:07:22 +0100
-Message-ID: <CAPDyKFruM-5MbsPGAt9zvZJFBdRiUuZcG3gphkBJV+y9-Z=VwQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mediatek: Add system suspend/resume interface
-To:     Nicolas Boichat <drinkcat@chromium.org>
-Cc:     Wenbin Mei <wenbin.mei@mediatek.com>,
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=zO/lnZ8NaZABQdMJqO7ITwA6pWKefST87nWhdVmyakI=;
+        b=JSsgQt5CgNUO0z7ogEX7g+FuOKJOcnySBmT9l9L0TNKtQJskQupYA3f6dIdA7w/L6p
+         DmUHthZI4UXjVn+kvhjbMBMFDy7wQ2pQhvJI4/tkWWmEJ4jr+yAVdION/tYwQlDFET0T
+         u2pYM/UKy+Of/fXN7op1dY+KedT3VkwvUDowZDjfjDLPpcntA6PSQNJCWnOAifCqxvBI
+         VC/BlZZ1S0oClkAMpONIWwCu8PMrxktXL+74+TzrKGkNOj7oVunkip4qj25F1/bauWVN
+         59cj448szKBdf+dvrCvAC0GL5529EacBZEwseicQMC6ysUgcwgfYD5M7aUxi8A5XSkAj
+         Q9Ww==
+X-Gm-Message-State: AOAM530M1maiN8AdmC4i0RnTdgSw8H10O7rWWxQAcmTxtxsjkDqzPxgc
+        c00GhRxPkvRL8STFnrKbUVQ=
+X-Google-Smtp-Source: ABdhPJyM+KQHySOyIZXJe/8GqKh7MhmWLNPzDyCGt734EGEbZ3fTdnQMGcEicy1GjbqoHoFlmFQs1Q==
+X-Received: by 2002:a05:6402:202e:: with SMTP id ay14mr8484994edb.102.1607097252620;
+        Fri, 04 Dec 2020 07:54:12 -0800 (PST)
+Received: from ubuntu-laptop (ip5f5bfce9.dynamic.kabel-deutschland.de. [95.91.252.233])
+        by smtp.googlemail.com with ESMTPSA id q23sm3545652edt.32.2020.12.04.07.54.10
+        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
+        Fri, 04 Dec 2020 07:54:12 -0800 (PST)
+Message-ID: <26b88b53116e1ec34384f49461e8e3bda36dec7f.camel@gmail.com>
+Subject: Re: [PATCH] mmc: block: Let CMD13 polling only for MMC IOCTLS with
+ the R1B response
+From:   Bean Huo <huobean@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        "(Exiting) Baolin Wang" <baolin.wang@linaro.org>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        =?UTF-8?Q?=E5=BD=AD=E6=B5=A9=28Richard=29?= <richard.peng@oppo.com>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
+        Avri Altman <avri.altman@wdc.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        srv_heupstream <srv_heupstream@mediatek.com>,
-        Guenter Roeck <groeck@chromium.org>
+        zliua@micron.com,
+        "Zoltan Szubbocsev (zszubbocsev)" <zszubbocsev@micron.com>,
+        "# 4.0+" <stable@vger.kernel.org>
+Date:   Fri, 04 Dec 2020 16:54:09 +0100
+In-Reply-To: <CAPDyKFpq-45z4MdMek0jGjR88QuG8PangcHRV+CJ4u57EcSqzg@mail.gmail.com>
+References: <20201202202320.22165-1-huobean@gmail.com>
+         <CAPDyKFpq-45z4MdMek0jGjR88QuG8PangcHRV+CJ4u57EcSqzg@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 3 Dec 2020 at 02:29, Nicolas Boichat <drinkcat@chromium.org> wrote:
->
-> This causes a 0-day warning (on our chromeos-5.4 backports but I don't
-> see why upstream would not be affected):
-> https://groups.google.com/g/cros-kernel-buildreports/c/MfS3SInT5jg/m/Hkzxh_U7AwAJ
->
-> Didn't look at the details of the config, but SET_SYSTEM_SLEEP_PM_OPS
-> is a noop if CONFIG_PM_SLEEP is not set (while SET_RUNTIME_PM_OPS is
-> noop-ed by CONFIG_PM).
->
-> So I guess msdc_suspend/msdc_resume should be guarded by
-> CONFIG_PM_SLEEP instead of CONFIG_PM.
+On Fri, 2020-12-04 at 15:38 +0100, Ulf Hansson wrote:
+> > There is no need to poll device status through CMD13.
+> > 
+> > Meanwhile, based on the original change commit (mmc: block: Add
+> > CMD13 polling
+> > for MMC IOCTLS with R1B response), and comment in
+> > __mmc_blk_ioctl_cmd(),
+> > current code is not in line with its original purpose. So fix it
+> > with this patch.
+> > 
+> > Fixes: a0d4c7eb71dd ("mmc: block: Add CMD13 polling for MMC IOCTLS
+> > with R1B response")
+> > Cc: stable@vger.kernel.org
+> > Reported-by: Zhan Liu <zliua@micron.com>
+> > Signed-off-by: Zhan Liu <zliua@micron.com>
+> > Signed-off-by: Bean Huo <beanhuo@micron.com>
+> 
+> Applied for fixes, thanks!
+> 
+> Note, I took the liberty to rephrase the commit message (and the
+> header) to clarify things a bit more.
+> 
 
-Yep.
+Uffe,
+Nice, thanks a lot.
 
-There is already a patch [1] in my queue for this. It uses the
-_maybe_unused approach (Arnd prefers that and I don't mind).
+Bean
 
-[...]
-
-Kind regards
-Uffe
-
-[1]
-https://patchwork.kernel.org/project/linux-mediatek/patch/20201203222922.1067522-1-arnd@kernel.org/
