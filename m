@@ -2,107 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE14CC4361B
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 17:42:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00D19C4361A
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 18:05:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C7C3022B40
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 17:42:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB59022AAF
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 18:05:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731378AbgLDRmT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Dec 2020 12:42:19 -0500
-Received: from mail.kernel.org ([198.145.29.99]:39994 "EHLO mail.kernel.org"
+        id S1729455AbgLDSFR convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Dec 2020 13:05:17 -0500
+Received: from aposti.net ([89.234.176.197]:52870 "EHLO aposti.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731103AbgLDRmT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 4 Dec 2020 12:42:19 -0500
-Date:   Fri, 4 Dec 2020 17:41:35 +0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1607103698;
-        bh=WGPvh/m1la/6pEZ0tQ/GOgG68+E+LycRUiq+bD3Iwkk=;
-        h=From:To:Cc:Subject:References:In-Reply-To:From;
-        b=g/TkCIMmBnQxPWxPF2qMZYVzCmn31CDUYt6k0CzRPEhcaQop/372ntwpVszp4hjIE
-         vIVuuPebp/OC1i7cGxGjhjvFCBH+ZOpJXrqSfBUsLkg92qAaqtHe1oRjW2/LiLKRoP
-         uV66KhSBbnh6OLWt+7k76XvCzSFsllU2Y5flxry9vND+O+lxolnf60O50XwwBPh+yq
-         SoPzZkAnY4VxswfQ2GzN2EHfELa7v8aeYr2tU6kH0grOPrleQ/frQmRoOuiQC9upQJ
-         YrsyZgnwacEkiNSykQCi1T9S/rE+RUrXs3/y3O5y2YsUSe/DVXEgxaJHuUZ1ya5ze9
-         iTXQfDZc1wffA==
-From:   Mark Brown <broonie@kernel.org>
-To:     Zhen Lei <thunder.leizhen@huawei.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Sumit Semwal <sumit.semwal@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Sam Ravnborg <sam@ravnborg.org>,
-        Hans Verkuil <hverkuil-cisco@xs4all.nl>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        Ricardo Ribalda <ribalda@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        id S1726851AbgLDSFR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 4 Dec 2020 13:05:17 -0500
+Date:   Fri, 04 Dec 2020 18:04:19 +0000
+From:   Paul Cercueil <paul@crapouillou.net>
+Subject: Re: [PATCH] mmc: mediatek: mark PM functions as __maybe_unused
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        linux-media <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mediatek <linux-mediatek@lists.infradead.org>,
-        alsa-devel <alsa-devel@alsa-project.org>
-Subject: Re: [PATCH 1/1] dt-bindings: eliminate yamllint warnings
-Message-ID: <20201204174135.GC4558@sirena.org.uk>
-References: <20201204024226.1222-1-thunder.leizhen@huawei.com>
- <20201204024226.1222-2-thunder.leizhen@huawei.com>
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
+        yong mao <yong.mao@mediatek.com>,
+        Amey Narkhede <ameynarkhede03@gmail.com>,
+        Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        ARM/Mediatek SoC support <linux-mediatek@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+Message-Id: <77UTKQ.VC4AUEXP1CN21@crapouillou.net>
+In-Reply-To: <CAK8P3a3srmTdY69j+g-wazMkrTL8_Grsw=vCMyizyA_7oOC4tg@mail.gmail.com>
+References: <20201203222922.1067522-1-arnd@kernel.org>
+        <CAPDyKFqtFYqc8i_fVzOUnuZGJjtwjVLqE-vebtOKuYJ-4PrDBg@mail.gmail.com>
+        <CAK8P3a3srmTdY69j+g-wazMkrTL8_Grsw=vCMyizyA_7oOC4tg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="NU0Ex4SbNnrxsi6C"
-Content-Disposition: inline
-In-Reply-To: <20201204024226.1222-2-thunder.leizhen@huawei.com>
-X-Cookie: Not a flying toy.
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset=iso-8859-1; format=flowed
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi,
 
---NU0Ex4SbNnrxsi6C
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Le ven. 4 déc. 2020 à 15:14, Arnd Bergmann <arnd@kernel.org> a écrit 
+:
+> On Fri, Dec 4, 2020 at 11:02 AM Ulf Hansson <ulf.hansson@linaro.org> 
+> wrote:
+>>  On Thu, 3 Dec 2020 at 23:29, Arnd Bergmann <arnd@kernel.org> wrote:
+> 
+>>  > -#ifdef CONFIG_PM
+>>  >  static void msdc_save_reg(struct msdc_host *host)
+>> 
+>>  Shouldn't msdc_save|restore_reg() be turned into "__maybe_unused" 
+>> as well?
+> 
+> There is no need since the compiler can figure that out already when 
+> there
+> is a reference to the function from dead code.
+> 
+>>  >
+>>  > -static int msdc_resume(struct device *dev)
+>>  > +static int __maybe_unused msdc_resume(struct device *dev)
+>>  >  {
+>>  >         return pm_runtime_force_resume(dev);
+>>  >  }
+>>  > -#endif
+>>  >
+>>  >  static const struct dev_pm_ops msdc_dev_pm_ops = {
+>> 
+>>  You may also change this to a __maybe_unused, as long as you also
+>>  assign the .pm pointer in the mt_msdc_driver with
+>>  pm_ptr(&msdc_dev_pm_ops).
+>> 
+>>  Ideally the compiler should drop these functions/datas entirely 
+>> then.
+> 
+> I don't see a lot of other instances of that yet, and it's fairly new.
+> Maybe we should fix it before it gets propagated further.
+> 
+> I would suggest we redefine pm_ptr like
+> 
+> #define pm_ptr(_ptr) (IS_ENABLED(CONFIG_PM) ? (_ptr) : NULL)
+> 
+> and remove the __maybe_unused annotations on those that we
+> already have. This also has the effect of dropping the unused
+> data from the object, but without having to an an #ifdef or
+> __maybe_unused.
+> 
+> Adding Paul and Rafael to Cc for clarification on this.
 
-On Fri, Dec 04, 2020 at 10:42:26AM +0800, Zhen Lei wrote:
-> All warnings are related only to "wrong indentation", except one:
-> Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:4:1: \
-> [error] missing document start "---" (document-start)
+I didn't think about that. That's smarter and much more elegant.
 
-It would make life easier (and be more normal practice) to split this up
-by driver/subsystem and send a bunch of separate patches to the relevant
-maintainers, this makes it much easier to review and handle things.
+Cheers,
+-Paul
 
---NU0Ex4SbNnrxsi6C
-Content-Type: application/pgp-signature; name="signature.asc"
 
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAl/KdM4ACgkQJNaLcl1U
-h9BGjQf/UZkJEtI4D/7Y6K4QlL3HTskWfvSDmZF26Ea+sD/TdJ91T1YJulT15TOK
-sKNLzMI5ERHHR+su1GGx0czMqpipoPYLvlULn6wLpL6fMbOx94cA+dc8Akr/JcjX
-EfMthdqAlA+5P1Lz5FivyeWRk/B2YgNQ4+Pa9bbLW4iZogcNL2jZmN55GvBHYlSa
-oyLVbN2YlJwy/t9b+c8mvlCGa5NyPDe5JmpplcFkCbn5DVZ9aFTHrGaQ0Ml1rv5W
-DyyLnw1kpVUck0Phs49+unaEOb88Mh7FY4Jtsqz6SuqZDkHYZuWCwod5VHJG7q53
-cpaFjB5+6e3/mAA/aRnxyzuOxLmoMA==
-=82J7
------END PGP SIGNATURE-----
-
---NU0Ex4SbNnrxsi6C--
