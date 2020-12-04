@@ -4,108 +4,116 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AB47C4361B
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10DFBC433FE
 	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 14:40:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8B4222B3B
+	by mail.kernel.org (Postfix) with ESMTP id D56F522B39
 	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 14:40:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726366AbgLDOj5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1726923AbgLDOj5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Fri, 4 Dec 2020 09:39:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38952 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730320AbgLDOj5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 09:39:57 -0500
-Received: from mail-vk1-xa44.google.com (mail-vk1-xa44.google.com [IPv6:2607:f8b0:4864:20::a44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFD2DC08C5F2
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 06:38:50 -0800 (PST)
-Received: by mail-vk1-xa44.google.com with SMTP id h133so299572vka.6
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 06:38:50 -0800 (PST)
+        with ESMTP id S1726366AbgLDOj4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 09:39:56 -0500
+Received: from mail-vs1-xe43.google.com (mail-vs1-xe43.google.com [IPv6:2607:f8b0:4864:20::e43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D79CEC061A55
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 06:38:46 -0800 (PST)
+Received: by mail-vs1-xe43.google.com with SMTP id 128so3330928vsw.10
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 06:38:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=n+PnrcoVAdtN8GPBxsVpfIuQzUembcvR9XiK1uQx4OM=;
-        b=cClF9W26HI1jeodnLahFAEF1AOV+L5iFQiL5QKpY/tZv0WYk7CZow4UPGxXcFknKPX
-         wJr3jS/KmrZ9Yel1YiQcJZJ7lxgTCb9Jv4th0tfQlG2tn2AaaOARvtEaYGAinM8kpW12
-         WB7Kr0wqHEuXSGo2qn8m/TeB8/+ck89rVsu6GXf3X2ZIyXoPG1gDA5z7p4zIyxzHVjvD
-         rGciDKMzC5GA05C169RWfnaL9TEDwTYXmOTgUV/udnEVtZ9cTHdyz3DkvYbB0I3NnYW/
-         4wAMVKfsWfguE828RODTsibaGsSZK/l9agfuyC855e6dWP/gTQz10aRDEzxiC+pSAuvj
-         Pnkg==
+        bh=ld4dnKet0Aan3wmVGmDEhQALDjT+lE0nQJqWzbzD/MU=;
+        b=WGi2/QVB6Oc9twB4+3YrCN1dvhzPGACKxJQDwiWbWnuxVZS/YBx0Xu9ZGpa1aROHis
+         ACv1JU6LKXb4c1ioBtMatYMuZVUAMqwGdq2kvLf2lQOtp15G0ofgcTLCMusmUFs38U5S
+         PO2yuL3Uk5rZjzjhi19dZfhV6CPA9Pgxy5RnvN80UUK5815AFbrEMRyAQAiU+AM8BWre
+         GHIyzIMZLbf7TwE+jU2MX5ZSIIz+NpCe5/HqUyWcIyV/pEMOoI5E66tR8QTC2ISnSSlz
+         fxsC54LSXJTOMli8IOh38i88xhyQ5vyBXDdcLhpji4OGJLHGt6cM7jgudLPftdlqY+8r
+         6UMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=n+PnrcoVAdtN8GPBxsVpfIuQzUembcvR9XiK1uQx4OM=;
-        b=RfGV6NHLoGLA8IOs5AQA0G21YhKYIU2mdOk/Qr9LwoFfZcm8hKhHYlqr3g/aU+T6uk
-         dWy71aSUi6X9TzhHcpSsWcR+LTnaA75pcRlcgpdeU5erSk/+JT38gZojka2OqJxNhToK
-         j8TcMUTQrMe7MwZ+LUtTTbSh+B2k4snK/3RgVyb7CiBWbemipxQIl0mTsQkk/+FuL61V
-         afoitwzhQv+zhOTCCQRO2R2JRFb8RTVAinxiuZ4cZNlPAQg6gGGiY2Y1FAAtqkSjSIS8
-         q5nFEMxiu5/1IxtpXOmWim+ldptRekVwoIuefT52xnoesemPLpRqjllLGvGv8wtnGbuH
-         xPlw==
-X-Gm-Message-State: AOAM5304JnAh39K01QdTql3vPf5lyjDVuVD6JcFZnSV8m+b/HvEPthe5
-        b3MliJ9CkZ0Vr8G3LWyDvMgchJcmEO344S8Q/Bu51A==
-X-Google-Smtp-Source: ABdhPJyikXHr7pn6pcbkVo8ISm8xKwkpzaeqRFQ5SQp7nae2EYK2Zb4KjBUBCUKi3Vp+0e1Z6ybSvyDvSywx7kp6V1o=
-X-Received: by 2002:a1f:1357:: with SMTP id 84mr3813030vkt.6.1607092730187;
- Fri, 04 Dec 2020 06:38:50 -0800 (PST)
+        bh=ld4dnKet0Aan3wmVGmDEhQALDjT+lE0nQJqWzbzD/MU=;
+        b=onPAeNiNv3Wvsbo+ysZMftoQtsk+L9kxvr4EjJZc0w1xC+GeukI6g7azHgE/HGJ86c
+         BIT70lfC5Q+sngpcZtMRzlimS93TvYsHPDj/54Zh93YMTxqmiiExQzTRnGaBzD6LCjyV
+         BH21V8cB2HcsVgKg2MInI03VJgh6XlzWC9LgqhCfs+7aim0Bb8+PSZl0iySozhCRS3sw
+         y84xwF3VXoLKCxSaQuZPzAHyTMArghBYnJckjNF6+IHzhN0XwH1mU79NLjEfIGt8/XYA
+         ckSLZu+TWFWSq3+hjnRdPFTUeQhxwcTN+uq/fUdkgJuEIB59qlEa6QwqJbdMSoy1A7Fm
+         GQ7Q==
+X-Gm-Message-State: AOAM5318+84jbMNoh288iwLzzHKuPTbkBZe0+F/S0YSKFo4ldBQ/mmCE
+        IIPLe4qpyJdvxvWI1RNU5NhjR9gh3HuV7bq7b+HDfA==
+X-Google-Smtp-Source: ABdhPJwnvZhvZ0ukN6hOxsx1tx/Kh8k9pUNeBGVL+JSvwrWUS+Wh6nHS35cqQnwEo0d/eQvVWwcIyBZNIcuskbt/+C8=
+X-Received: by 2002:a67:e286:: with SMTP id g6mr3935119vsf.42.1607092726109;
+ Fri, 04 Dec 2020 06:38:46 -0800 (PST)
 MIME-Version: 1.0
-References: <20201126105900.26658-1-aisheng.dong@nxp.com> <20201126105900.26658-2-aisheng.dong@nxp.com>
-In-Reply-To: <20201126105900.26658-2-aisheng.dong@nxp.com>
+References: <20201125204953.3344-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20201125204953.3344-1-wsa+renesas@sang-engineering.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 4 Dec 2020 15:38:11 +0100
-Message-ID: <CAPDyKFqJb4Pj6hwMM_qGQo_DnF2cE_C0u9yQYdMwV0scnsRPPw@mail.gmail.com>
-Subject: Re: [PATCH RESEND v4 01/18] dt-bindings: mmc: imx: fix the wrongly
- dropped imx8qm compatible string
-To:     Dong Aisheng <aisheng.dong@nxp.com>
-Cc:     DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>
+Date:   Fri, 4 Dec 2020 15:38:08 +0100
+Message-ID: <CAPDyKFrEAVNukL=EUN=QO3h-RC-wAY=b+vQooEqQ54EXhGwtjQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: tmio: improve bringing HW to a sane state with MMC_POWER_OFF
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 26 Nov 2020 at 12:16, Dong Aisheng <aisheng.dong@nxp.com> wrote:
+On Wed, 25 Nov 2020 at 21:51, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 >
-> The compatible string "fsl,imx8qm-usdhc" was wrongly dropped in patch:
-> commit 80fd350b9590 ("dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8 compatible matching")
-> Add it back.
+> Further testing of error cases revealed that downgrade is not enough, so
+> we need to reset the SCC which is done by calling the custom reset
+> function. This reset function can distinguish between the various SDHI
+> variants, so protecting the call with MIN_RCAR2 is enough here.
 >
-> Cc: Haibo Chen <haibo.chen@nxp.com>
-> Cc: Krzysztof Kozlowski <krzk@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Fixes: 80fd350b9590 ("dt-bindings: mmc: fsl-imx-esdhc: Fix i.MX 8 compatible matching")
-> Signed-off-by: Dong Aisheng <aisheng.dong@nxp.com>
+> Fixes: 24ce2d7b8bea ("mmc: tmio: bring tuning HW to a sane state with MMC_POWER_OFF")
+> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Applied for next and by amending the commit message according to
-Krzysztof's comment, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 1 +
->  1 file changed, 1 insertion(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index e71d13c2d109..802c9df23752 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -39,6 +39,7 @@ properties:
->                - fsl,imx8mn-usdhc
->                - fsl,imx8mp-usdhc
->                - fsl,imx8mq-usdhc
-> +              - fsl,imx8qm-usdhc
->                - fsl,imx8qxp-usdhc
->            - const: fsl,imx7d-usdhc
+> I was also evaluating if tmio_mmc_reset() would be better than
+> host->reset. I finally decided against it. This is the minimal change
+> that we need and which fixes an actual issue. I can't see why we would
+> want to terminate DMA because either everything went smooth and DMA
+> completed or the DMA error has already been handled. I think. Please
+> speak up if you disagree.
 >
+>  drivers/mmc/host/tmio_mmc_core.c | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 7f4a28125010..a89547f5d733 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -929,9 +929,9 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         switch (ios->power_mode) {
+>         case MMC_POWER_OFF:
+>                 tmio_mmc_power_off(host);
+> -               /* Downgrade ensures a sane state for tuning HW (e.g. SCC) */
+> -               if (host->mmc->ops->hs400_downgrade)
+> -                       host->mmc->ops->hs400_downgrade(host->mmc);
+> +               /* For R-Car Gen2+, we need to reset SDHI specific SCC */
+> +               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
+> +                       host->reset(host);
+>                 host->set_clock(host, 0);
+>                 break;
+>         case MMC_POWER_UP:
 > --
-> 2.23.0
+> 2.28.0
 >
