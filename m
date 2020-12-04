@@ -2,115 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61451C4361A
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 22:30:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14617C4361A
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 02:44:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0EAC5223DB
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Dec 2020 22:30:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B97DC2251E
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 02:44:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726405AbgLCWaJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Dec 2020 17:30:09 -0500
-Received: from mail.kernel.org ([198.145.29.99]:54520 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725885AbgLCWaJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 3 Dec 2020 17:30:09 -0500
-From:   Arnd Bergmann <arnd@kernel.org>
-Authentication-Results: mail.kernel.org; dkim=permerror (bad message/signature format)
-To:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        id S1727028AbgLDCo0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Dec 2020 21:44:26 -0500
+Received: from szxga04-in.huawei.com ([45.249.212.190]:8246 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726993AbgLDCoZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Dec 2020 21:44:25 -0500
+Received: from DGGEMS411-HUB.china.huawei.com (unknown [172.30.72.59])
+        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4CnH7b3FMKzkl4x;
+        Fri,  4 Dec 2020 10:43:07 +0800 (CST)
+Received: from thunder-town.china.huawei.com (10.174.177.9) by
+ DGGEMS411-HUB.china.huawei.com (10.3.19.211) with Microsoft SMTP Server id
+ 14.3.487.0; Fri, 4 Dec 2020 10:43:33 +0800
+From:   Zhen Lei <thunder.leizhen@huawei.com>
+To:     Rob Herring <robh+dt@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        "Pengutronix Kernel Team" <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        "NXP Linux Team" <linux-imx@nxp.com>,
+        David Airlie <airlied@linux.ie>,
+        "Daniel Vetter" <daniel@ffwll.ch>,
+        Sumit Semwal <sumit.semwal@linaro.org>,
+        "Thierry Reding" <thierry.reding@gmail.com>,
+        Sam Ravnborg <sam@ravnborg.org>,
+        "Hans Verkuil" <hverkuil-cisco@xs4all.nl>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Sakari Ailus <sakari.ailus@linux.intel.com>,
+        "Ricardo Ribalda" <ribalda@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>
-Cc:     Arnd Bergmann <arnd@arndb.de>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
-        yong mao <yong.mao@mediatek.com>,
-        Amey Narkhede <ameynarkhede03@gmail.com>,
-        Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: mediatek: mark PM functions as __maybe_unused
-Date:   Thu,  3 Dec 2020 23:29:16 +0100
-Message-Id: <20201203222922.1067522-1-arnd@kernel.org>
-X-Mailer: git-send-email 2.27.0
+        "Matthias Brugger" <matthias.bgg@gmail.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        "Mark Brown" <broonie@kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        linux-media <linux-media@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-mediatek <linux-mediatek@lists.infradead.org>,
+        alsa-devel <alsa-devel@alsa-project.org>
+CC:     Zhen Lei <thunder.leizhen@huawei.com>
+Subject: [PATCH 0/1] dt-bindings: eliminate yamllint warnings
+Date:   Fri, 4 Dec 2020 10:42:25 +0800
+Message-ID: <20201204024226.1222-1-thunder.leizhen@huawei.com>
+X-Mailer: git-send-email 2.26.0.windows.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.174.177.9]
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Arnd Bergmann <arnd@arndb.de>
+There're too many people, I just send to the maintainer, reviewer, supporter.
 
-The #ifdef check for the suspend/resume functions is wrong:
+Eliminate below warnings:
+./Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml:32:13: [warning] wrong indentation: expected 14 but found 12 (indentation)
+./Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml:35:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/display/intel,keembay-msscam.yaml:21:6: [warning] wrong indentation: expected 6 but found 5 (indentation)
+./Documentation/devicetree/bindings/display/bridge/analogix,anx7625.yaml:52:9: [warning] wrong indentation: expected 6 but found 8 (indentation)
+./Documentation/devicetree/bindings/display/bridge/intel,keembay-dsi.yaml:42:8: [warning] wrong indentation: expected 8 but found 7 (indentation)
+./Documentation/devicetree/bindings/display/bridge/intel,keembay-dsi.yaml:45:8: [warning] wrong indentation: expected 8 but found 7 (indentation)
+./Documentation/devicetree/bindings/display/panel/novatek,nt36672a.yaml:25:10: [warning] wrong indentation: expected 10 but found 9 (indentation)
+./Documentation/devicetree/bindings/media/i2c/adv7604.yaml:24:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:4:1: [error] missing document start "---" (document-start)
+./Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:29:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:32:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/media/i2c/ovti,ov772x.yaml:79:17: [warning] wrong indentation: expected 14 but found 16 (indentation)
+./Documentation/devicetree/bindings/media/i2c/ovti,ov772x.yaml:88:17: [warning] wrong indentation: expected 14 but found 16 (indentation)
+./Documentation/devicetree/bindings/media/i2c/sony,imx214.yaml:72:17: [warning] wrong indentation: expected 18 but found 16 (indentation)
+./Documentation/devicetree/bindings/media/i2c/sony,imx214.yaml:75:17: [warning] wrong indentation: expected 18 but found 16 (indentation)
+./Documentation/devicetree/bindings/mmc/mtk-sd.yaml:20:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/mmc/mtk-sd.yaml:30:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/mmc/mtk-sd.yaml:33:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+./Documentation/devicetree/bindings/sound/mt8192-mt6359-rt1015-rt5682.yaml:10:4: [warning] wrong indentation: expected 2 but found 3 (indentation)
 
-drivers/mmc/host/mtk-sd.c:2765:12: error: unused function 'msdc_suspend' [-Werror,-Wunused-function]
-static int msdc_suspend(struct device *dev)
-drivers/mmc/host/mtk-sd.c:2779:12: error: unused function 'msdc_resume' [-Werror,-Wunused-function]
-static int msdc_resume(struct device *dev)
 
-Remove the #ifdef and mark all four as __maybe_unused to aovid the
-problem.
+Zhen Lei (1):
+  dt-bindings: eliminate yamllint warnings
 
-Fixes: c0a2074ac575 ("mmc: mediatek: Fix system suspend/resume support for CQHCI")
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/mtk-sd.c | 10 ++++------
- 1 file changed, 4 insertions(+), 6 deletions(-)
+ .../devicetree/bindings/clock/imx8qxp-lpcg.yaml    | 20 ++++++++---------
+ .../bindings/display/bridge/analogix,anx7625.yaml  |  4 ++--
+ .../bindings/display/bridge/intel,keembay-dsi.yaml |  4 ++--
+ .../bindings/display/intel,keembay-msscam.yaml     |  4 ++--
+ .../bindings/display/panel/novatek,nt36672a.yaml   |  2 +-
+ .../devicetree/bindings/media/i2c/adv7604.yaml     |  4 ++--
+ .../devicetree/bindings/media/i2c/mipi-ccs.yaml    | 11 ++++-----
+ .../devicetree/bindings/media/i2c/ovti,ov772x.yaml | 12 +++++-----
+ .../devicetree/bindings/media/i2c/sony,imx214.yaml | 12 +++++-----
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  | 26 +++++++++++-----------
+ .../sound/mt8192-mt6359-rt1015-rt5682.yaml         |  4 ++--
+ 11 files changed, 52 insertions(+), 51 deletions(-)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index d057fb11112a..de09c6347524 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2683,7 +2683,6 @@ static int msdc_drv_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
--#ifdef CONFIG_PM
- static void msdc_save_reg(struct msdc_host *host)
- {
- 	u32 tune_reg = host->dev_comp->pad_tune_reg;
-@@ -2742,7 +2741,7 @@ static void msdc_restore_reg(struct msdc_host *host)
- 		__msdc_enable_sdio_irq(host, 1);
- }
- 
--static int msdc_runtime_suspend(struct device *dev)
-+static int __maybe_unused msdc_runtime_suspend(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -2752,7 +2751,7 @@ static int msdc_runtime_suspend(struct device *dev)
- 	return 0;
- }
- 
--static int msdc_runtime_resume(struct device *dev)
-+static int __maybe_unused msdc_runtime_resume(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -2762,7 +2761,7 @@ static int msdc_runtime_resume(struct device *dev)
- 	return 0;
- }
- 
--static int msdc_suspend(struct device *dev)
-+static int __maybe_unused msdc_suspend(struct device *dev)
- {
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	int ret;
-@@ -2776,11 +2775,10 @@ static int msdc_suspend(struct device *dev)
- 	return pm_runtime_force_suspend(dev);
- }
- 
--static int msdc_resume(struct device *dev)
-+static int __maybe_unused msdc_resume(struct device *dev)
- {
- 	return pm_runtime_force_resume(dev);
- }
--#endif
- 
- static const struct dev_pm_ops msdc_dev_pm_ops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
 -- 
-2.27.0
+1.8.3
+
 
