@@ -2,115 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1613BC4361A
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 15:55:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51016C4361A
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 17:18:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D916822B30
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 15:55:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0248B22B40
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 17:18:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730644AbgLDPyz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Dec 2020 10:54:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50654 "EHLO
+        id S1727513AbgLDRSp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Dec 2020 12:18:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729461AbgLDPyy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 10:54:54 -0500
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE1EDC061A4F;
-        Fri,  4 Dec 2020 07:54:13 -0800 (PST)
-Received: by mail-ed1-x541.google.com with SMTP id cm17so6341213edb.4;
-        Fri, 04 Dec 2020 07:54:13 -0800 (PST)
+        with ESMTP id S1726606AbgLDRSp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 12:18:45 -0500
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04667C0613D1
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 09:17:59 -0800 (PST)
+Received: by mail-lj1-x22c.google.com with SMTP id z1so7449689ljn.4
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 09:17:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=message-id:subject:from:to:cc:date:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=zO/lnZ8NaZABQdMJqO7ITwA6pWKefST87nWhdVmyakI=;
-        b=IxQD4YqX2O/E37H5J516Q0NE5nfMAFOISY4o5aasgRcfTvRiDXtMYzGR6qb1UzxKYp
-         7Y831iudbYXWZWJ+DVuaaki2gU4mS7fut1NFh83NIHvaN2Od+egrwNmYvstfkffYuIoZ
-         SDOisZDuQF0S+dfSPi/KztBznH+aZUEiSnmcpXbAU/yM9eWeL9auQRdK1BvW4gD+YRdg
-         oQoK4ta1zJR7oZJxsvlbLozNRF31eUTbkecHftm+u383brvcu+C4Kq7tenjJtrXVDOmV
-         pStedE6trccaxDDr6x6PexJWrObxXl4GuBhNZ7qQa3cy9MtNU+C3yqVYDgkD8mIrvPnC
-         H71w==
+        d=semihalf-com.20150623.gappssmtp.com; s=20150623;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Ll5ceqpDB5AdmiQFATtP2DWHGOxrfl42uXcXhf76pqk=;
+        b=xdGWAY0zvpDfyJTgs6/RnXCyaYqU4PutYcp33RY6VqcJwLk7gQMoH6e4uMop3GpyEZ
+         Ewv1KBXzGIPDRAQI/qli28e7GuVAuk5BrpLQX8c7lIB5sVuek5NOV6ripxJR1HNuGtcM
+         iC1ghHKxGJ0GUz1HaXnWUGAmDIxLwd4yWAMMaCWstChYe0LRHzANUjO3h+zARuYKY4jK
+         IEEPQOORJFuCRKzDFDI6eEL5GWkRW2UR47J/PsnZlMin6QAawFw6BgnnUiJPmkNsrX4w
+         92MkmIng19yUTsmMK57/Y+hWR1Mt+BxOFRDpLUyhxFAWQPZST7vjFqG0Fb6CSR8ajViJ
+         EfDw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=zO/lnZ8NaZABQdMJqO7ITwA6pWKefST87nWhdVmyakI=;
-        b=JSsgQt5CgNUO0z7ogEX7g+FuOKJOcnySBmT9l9L0TNKtQJskQupYA3f6dIdA7w/L6p
-         DmUHthZI4UXjVn+kvhjbMBMFDy7wQ2pQhvJI4/tkWWmEJ4jr+yAVdION/tYwQlDFET0T
-         u2pYM/UKy+Of/fXN7op1dY+KedT3VkwvUDowZDjfjDLPpcntA6PSQNJCWnOAifCqxvBI
-         VC/BlZZ1S0oClkAMpONIWwCu8PMrxktXL+74+TzrKGkNOj7oVunkip4qj25F1/bauWVN
-         59cj448szKBdf+dvrCvAC0GL5529EacBZEwseicQMC6ysUgcwgfYD5M7aUxi8A5XSkAj
-         Q9Ww==
-X-Gm-Message-State: AOAM530M1maiN8AdmC4i0RnTdgSw8H10O7rWWxQAcmTxtxsjkDqzPxgc
-        c00GhRxPkvRL8STFnrKbUVQ=
-X-Google-Smtp-Source: ABdhPJyM+KQHySOyIZXJe/8GqKh7MhmWLNPzDyCGt734EGEbZ3fTdnQMGcEicy1GjbqoHoFlmFQs1Q==
-X-Received: by 2002:a05:6402:202e:: with SMTP id ay14mr8484994edb.102.1607097252620;
-        Fri, 04 Dec 2020 07:54:12 -0800 (PST)
-Received: from ubuntu-laptop (ip5f5bfce9.dynamic.kabel-deutschland.de. [95.91.252.233])
-        by smtp.googlemail.com with ESMTPSA id q23sm3545652edt.32.2020.12.04.07.54.10
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Fri, 04 Dec 2020 07:54:12 -0800 (PST)
-Message-ID: <26b88b53116e1ec34384f49461e8e3bda36dec7f.camel@gmail.com>
-Subject: Re: [PATCH] mmc: block: Let CMD13 polling only for MMC IOCTLS with
- the R1B response
-From:   Bean Huo <huobean@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        "(Exiting) Baolin Wang" <baolin.wang@linaro.org>,
-        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        =?UTF-8?Q?=E5=BD=AD=E6=B5=A9=28Richard=29?= <richard.peng@oppo.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        zliua@micron.com,
-        "Zoltan Szubbocsev (zszubbocsev)" <zszubbocsev@micron.com>,
-        "# 4.0+" <stable@vger.kernel.org>
-Date:   Fri, 04 Dec 2020 16:54:09 +0100
-In-Reply-To: <CAPDyKFpq-45z4MdMek0jGjR88QuG8PangcHRV+CJ4u57EcSqzg@mail.gmail.com>
-References: <20201202202320.22165-1-huobean@gmail.com>
-         <CAPDyKFpq-45z4MdMek0jGjR88QuG8PangcHRV+CJ4u57EcSqzg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Ll5ceqpDB5AdmiQFATtP2DWHGOxrfl42uXcXhf76pqk=;
+        b=eMBHAE/PIH8pTNITb5hduQRs3+/LZCvau/s2rCkSPSbrloxdO+OE9epwi3gf5XEZR8
+         a4ZVJ2EenvfFWEKzHO9VWLhvOa5gmDPBQar+4vFunWylkuYq6v7GCnry0cA3XI/ICy+j
+         PxthMTPAQiNRpg+QAjdxavCfZcgLncdxRevqGCinuVXwLsmniYsG7ABALbvE1hSxLQHV
+         jaV9lIj6nrxSTUhBgKad0RwqKqOzhYuNXlJcq4jBaC+P+G/vAidyWuE5nOq/zR0Tw8r9
+         8D7mS+a3eFCzv9FK68iFhGT7udfHSIo8DoH+ceZLGV+cJ8+jI35whulYiK9pBTsE8t2r
+         rE/w==
+X-Gm-Message-State: AOAM532omssH39mH+GKE9xLd8qh2Z7RomqpLDhi4DENg0yvLlqHHXrHq
+        2UsHKiDmzsTk1jU0VPYXMZ9T5g==
+X-Google-Smtp-Source: ABdhPJzxsOJ3qEOb5WmcVd8vJ97fQ4sUK96p6qsU+5u1svoxfj3O0sS93J3LoY3K4K7mmmvrhbuYcQ==
+X-Received: by 2002:a2e:9c8d:: with SMTP id x13mr3825747lji.468.1607102277264;
+        Fri, 04 Dec 2020 09:17:57 -0800 (PST)
+Received: from gilgamesh.semihalf.com (193-106-246-138.noc.fibertech.net.pl. [193.106.246.138])
+        by smtp.gmail.com with ESMTPSA id w12sm1919802ljo.67.2020.12.04.09.17.55
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 04 Dec 2020 09:17:56 -0800 (PST)
+From:   Marcin Wojtas <mw@semihalf.com>
+To:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Cc:     ulf.hansson@linaro.org, huziji@marvell.com,
+        adrian.hunter@intel.com, jaz@semihalf.com, tn@semihalf.com,
+        ard.biesheuvel@arm.com, kostap@marvell.com,
+        Marcin Wojtas <mw@semihalf.com>
+Subject: [PATCH v4 0/4] sdhci-xenon ACPI support
+Date:   Fri,  4 Dec 2020 18:16:22 +0100
+Message-Id: <20201204171626.10935-1-mw@semihalf.com>
+X-Mailer: git-send-email 2.29.0
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2020-12-04 at 15:38 +0100, Ulf Hansson wrote:
-> > There is no need to poll device status through CMD13.
-> > 
-> > Meanwhile, based on the original change commit (mmc: block: Add
-> > CMD13 polling
-> > for MMC IOCTLS with R1B response), and comment in
-> > __mmc_blk_ioctl_cmd(),
-> > current code is not in line with its original purpose. So fix it
-> > with this patch.
-> > 
-> > Fixes: a0d4c7eb71dd ("mmc: block: Add CMD13 polling for MMC IOCTLS
-> > with R1B response")
-> > Cc: stable@vger.kernel.org
-> > Reported-by: Zhan Liu <zliua@micron.com>
-> > Signed-off-by: Zhan Liu <zliua@micron.com>
-> > Signed-off-by: Bean Huo <beanhuo@micron.com>
-> 
-> Applied for fixes, thanks!
-> 
-> Note, I took the liberty to rephrase the commit message (and the
-> header) to clarify things a bit more.
-> 
+Hi,
 
-Uffe,
-Nice, thanks a lot.
+The fourth version of the sdhci-xenon ACPI support
+addresses a comment regarding clk handling in xenon_runtime_resume.
 
-Bean
+The MacchiatoBin firmware for testing can be obtained from:
+https://drive.google.com/file/d/1Y8BhyaCrksQgT_GPfpqqiYHpQ41kP8Kp
+
+Changelog:
+v3->v4
+  * [3/4] Call clk_prepare_enable unconditionally in xenon_runtime_resume.
+  * Add Adrian's Acked-by to all patches.
+
+v2->v3
+  * [3/4] Call clk_disable_unprepare unconditionally.
+  * Add Adrian's Acked-by to all patches.
+
+v1->v2
+  * Split single commit to 4
+  * Use device_match_data and dedicated ACPI ID's per controller
+    variant
+
+Marcin Wojtas (4):
+  mmc: sdhci-xenon: use match data for controllers variants
+  mmc: sdhci-xenon: switch to device_* API
+  mmc: sdhci-xenon: use clk only with DT
+  mmc: sdhci-xenon: introduce ACPI support
+
+ drivers/mmc/host/sdhci-xenon.h     | 12 ++-
+ drivers/mmc/host/sdhci-xenon-phy.c | 40 +++++----
+ drivers/mmc/host/sdhci-xenon.c     | 91 +++++++++++++-------
+ 3 files changed, 91 insertions(+), 52 deletions(-)
+
+-- 
+2.29.0
 
