@@ -2,199 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE4C0C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 13:18:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1867CC4361B
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 13:19:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8BC662251F
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 13:18:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D597222AAC
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 13:19:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727967AbgLDNSK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Dec 2020 08:18:10 -0500
-Received: from relmlor2.renesas.com ([210.160.252.172]:13000 "EHLO
-        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726432AbgLDNSK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 08:18:10 -0500
-X-IronPort-AV: E=Sophos;i="5.78,392,1599490800"; 
-   d="scan'208";a="64663411"
-Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
-  by relmlie6.idc.renesas.com with ESMTP; 04 Dec 2020 22:17:38 +0900
-Received: from localhost.localdomain (unknown [10.166.252.89])
-        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 4BF2F433803C;
-        Fri,  4 Dec 2020 22:17:38 +0900 (JST)
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: [PATCH] mmc: host: renesas_internal_dmac: add pre_req and post_req support
-Date:   Fri,  4 Dec 2020 22:17:33 +0900
-Message-Id: <1607087853-6570-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
-X-Mailer: git-send-email 2.7.4
+        id S1729010AbgLDNTi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Dec 2020 08:19:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54708 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727383AbgLDNTh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 08:19:37 -0500
+Received: from mail-vs1-xe42.google.com (mail-vs1-xe42.google.com [IPv6:2607:f8b0:4864:20::e42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1C24C0613D1
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 05:18:57 -0800 (PST)
+Received: by mail-vs1-xe42.google.com with SMTP id p7so3201863vsf.8
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 05:18:57 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=jBNEUh/XtKi2eD8HVG/5DioPhKz6ioH7lNEIt4K6i5M=;
+        b=aKkZitLkekd1Pooc4uxJqdRoZrdBSSK03Ev4OkjKehsx5KXNePG+CHpBTUhyd+IYzc
+         DWtP/RMlpDFFlztdBtCHZ/70g+C2K3+CF4DyLh5rubI74X0jrlg1SDJkmNh19LbqDLHL
+         3wRYZgKsmMPjezrWjyMarchMH4EzGKO+2dYfBJpiGqWIsjOFh56F6VdFU5c2kN4uMvzd
+         xZqiPfvtqPL+hrhK2gzKHtJvrYsfGGpwcYeOyMKUnz8K3gF8PTL3AqYKwkBlsuVfdyva
+         kTZa/7w7yJIpQk5+M19rKJ0jsiwkMhqk+8XuLVx5rtPAfJE1H8LI7sndoB8jEZzwZolk
+         Omaw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jBNEUh/XtKi2eD8HVG/5DioPhKz6ioH7lNEIt4K6i5M=;
+        b=t6DltEI0dA5Vt9hmPTrzT3HwP1CsK84SitmDT+3WszVanszonwYiE1rSv+Cq5gGGxH
+         WKRjGtHidLIC8Af1L3f23A0kTDFw3w8dTud+kNT+rBcyCBnLT/fvLZAPFAkEOEde8zhc
+         BNOpf9O6buRQUbHAlPisNks7/END4ekFqA7NcXmIxjOa8GmPNcaFVA5DhiZG7JGtIVlW
+         UCbOGAjsZIcirk+A0/PyzINssP340yQEZFGSlD2tZjvlI73g5tSlvlDwji2y7bzIP2F/
+         NntJUhOs8TI8df/G0+t24a6wdk/3mG1LfbDJYkLG5oHmIRaVRlBXM61J4t9hO5MGPyI2
+         QTcg==
+X-Gm-Message-State: AOAM531Yb313jeqwUSskM5r0C1VfWNSTCJolUwmZiweJsp/AmIMqMb9t
+        X3puLyMuVQOZy5bl2y5eXKuzq6UzxV0r0Mp4Ohc30w==
+X-Google-Smtp-Source: ABdhPJwflJcYgzBlpRuR7y9qVoINWYG/pPFk/3b4tu5anT1AGwT4XzvkQsH3wpuoouw6UhvB+0k2/CNbdiy+8PMuEqE=
+X-Received: by 2002:a05:6102:2127:: with SMTP id f7mr3446383vsg.48.1607087936378;
+ Fri, 04 Dec 2020 05:18:56 -0800 (PST)
+MIME-Version: 1.0
+References: <20201129203116.11987-1-adrien.grassein@gmail.com>
+In-Reply-To: <20201129203116.11987-1-adrien.grassein@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 4 Dec 2020 14:18:18 +0100
+Message-ID: <CAPDyKFp0U5=s_AJh4-QAn=WCodkYUaFE9BuLjpJB80z23J7JkA@mail.gmail.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: add an option to disable HS400 for fsl
+To:     Adrien Grassein <adrien.grassein@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add pre_req and post_req support to improve performance.
+On Sun, 29 Nov 2020 at 21:31, Adrien Grassein <adrien.grassein@gmail.com> wrote:
+>
+> Add an option to disable the hs400 support in the fsl esdhc
+> driver.
+>
+> Signed-off-by: Adrien Grassein <adrien.grassein@gmail.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index e71d13c2d109..070b40ae8c44 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -101,6 +101,10 @@ properties:
+>        If not use this property, driver default set the delay target to value 7.
+>        Only eMMC HS400 mode need to take care of this property.
+>      default: 0
+> +  fsl,no-mmc-hs400:
+> +    description: |
+> +      boolean, if present, indicate to disable mmc-hs400 support.
+> +    type: boolean
 
-Inspired by a patch in the BSP by Masaharu Hayakawa.
+You need to disable hs400, because the sdhci capability register
+wrongly claims it to be supported, right?
 
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
----
- When I applied this patch, read performance on R-Car H3 with HS400 mode
- was greatly improved:
- - without the patch : about 200MB/sec
- - with the patch :    about 250MB/sec
+May I suggest using the DT property "sdhci-caps-mask" instead?
 
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 88 ++++++++++++++++++++++++---
- 1 file changed, 80 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index d8b811c..ce3c447 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -56,6 +56,12 @@
- #define INFO2_DTRANERR1		BIT(17)
- #define INFO2_DTRANERR0		BIT(16)
- 
-+enum renesas_sdhi_dma_cookie {
-+	COOKIE_UNMAPPED,
-+	COOKIE_PRE_MAPPED,
-+	COOKIE_MAPPED,
-+};
-+
- /*
-  * Specification of this driver:
-  * - host->chan_{rx,tx} will be used as a flag of enabling/disabling the dma
-@@ -172,6 +178,47 @@ renesas_sdhi_internal_dmac_dataend_dma(struct tmio_mmc_host *host) {
- 	tasklet_schedule(&priv->dma_priv.dma_complete);
- }
- 
-+/* Should not use host->sg_ptr/sg_len in the following function */
-+static void
-+renesas_sdhi_internal_dmac_unmap(struct tmio_mmc_host *host,
-+				 struct mmc_data *data,
-+				 enum renesas_sdhi_dma_cookie cookie,
-+				 bool expected_unmatch)
-+{
-+	bool unmap = expected_unmatch ? (data->host_cookie != cookie) :
-+					(data->host_cookie == cookie);
-+
-+	if (unmap) {
-+		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
-+			     mmc_get_dma_dir(data));
-+		data->host_cookie = COOKIE_UNMAPPED;
-+	}
-+}
-+
-+/* Should not use host->sg_ptr/sg_len in the following function */
-+static bool
-+renesas_sdhi_internal_dmac_map(struct tmio_mmc_host *host,
-+			       struct mmc_data *data,
-+			       enum renesas_sdhi_dma_cookie cookie)
-+{
-+	if (data->host_cookie == COOKIE_PRE_MAPPED)
-+		return true;
-+
-+	if (!dma_map_sg(&host->pdev->dev, data->sg, data->sg_len,
-+			    mmc_get_dma_dir(data)))
-+		return false;
-+
-+	data->host_cookie = cookie;
-+
-+	/* This DMAC cannot handle if buffer is not 8-bytes alignment */
-+	if (!IS_ALIGNED(sg_dma_address(data->sg), 8)) {
-+		renesas_sdhi_internal_dmac_unmap(host, data, cookie, false);
-+		return false;
-+	}
-+
-+	return true;
-+}
-+
- static void
- renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
- 				     struct mmc_data *data)
-@@ -182,14 +229,9 @@ renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
- 	if (!test_bit(SDHI_INTERNAL_DMAC_ADDR_MODE_FIXED_ONLY, &global_flags))
- 		dtran_mode |= DTRAN_MODE_ADDR_MODE;
- 
--	if (!dma_map_sg(&host->pdev->dev, sg, host->sg_len,
--			mmc_get_dma_dir(data)))
-+	if (!renesas_sdhi_internal_dmac_map(host, data, COOKIE_MAPPED))
- 		goto force_pio;
- 
--	/* This DMAC cannot handle if buffer is not 8-bytes alignment */
--	if (!IS_ALIGNED(sg_dma_address(sg), 8))
--		goto force_pio_with_unmap;
--
- 	if (data->flags & MMC_DATA_READ) {
- 		dtran_mode |= DTRAN_MODE_CH_NUM_CH1;
- 		if (test_bit(SDHI_INTERNAL_DMAC_ONE_RX_ONLY, &global_flags) &&
-@@ -212,7 +254,7 @@ renesas_sdhi_internal_dmac_start_dma(struct tmio_mmc_host *host,
- 	return;
- 
- force_pio_with_unmap:
--	dma_unmap_sg(&host->pdev->dev, sg, host->sg_len, mmc_get_dma_dir(data));
-+	renesas_sdhi_internal_dmac_unmap(host, data, COOKIE_UNMAPPED, true);
- 
- force_pio:
- 	renesas_sdhi_internal_dmac_enable_dma(host, false);
-@@ -245,7 +287,7 @@ static bool renesas_sdhi_internal_dmac_complete(struct tmio_mmc_host *host)
- 		dir = DMA_TO_DEVICE;
- 
- 	renesas_sdhi_internal_dmac_enable_dma(host, false);
--	dma_unmap_sg(&host->pdev->dev, host->sg_ptr, host->sg_len, dir);
-+	renesas_sdhi_internal_dmac_unmap(host, host->data, COOKIE_MAPPED, false);
- 
- 	if (dir == DMA_FROM_DEVICE)
- 		clear_bit(SDHI_INTERNAL_DMAC_RX_IN_USE, &global_flags);
-@@ -274,6 +316,32 @@ static void renesas_sdhi_internal_dmac_end_dma(struct tmio_mmc_host *host)
- 		renesas_sdhi_internal_dmac_complete(host);
- }
- 
-+static void renesas_sdhi_internal_dmac_post_req(struct mmc_host *mmc,
-+						struct mmc_request *req,
-+						int err)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = req->data;
-+
-+	if (!data)
-+		return;
-+
-+	renesas_sdhi_internal_dmac_unmap(host, data, COOKIE_UNMAPPED, true);
-+}
-+
-+static void renesas_sdhi_internal_dmac_pre_req(struct mmc_host *mmc,
-+					       struct mmc_request *req)
-+{
-+	struct tmio_mmc_host *host = mmc_priv(mmc);
-+	struct mmc_data *data = req->data;
-+
-+	if (!data)
-+		return;
-+
-+	data->host_cookie = COOKIE_UNMAPPED;
-+	renesas_sdhi_internal_dmac_map(host, data, COOKIE_PRE_MAPPED);
-+}
-+
- static void
- renesas_sdhi_internal_dmac_request_dma(struct tmio_mmc_host *host,
- 				       struct tmio_mmc_data *pdata)
-@@ -295,6 +363,10 @@ renesas_sdhi_internal_dmac_request_dma(struct tmio_mmc_host *host,
- 	tasklet_init(&host->dma_issue,
- 		     renesas_sdhi_internal_dmac_issue_tasklet_fn,
- 		     (unsigned long)host);
-+
-+	/* Add pre_req and post_req */
-+	host->ops.pre_req = renesas_sdhi_internal_dmac_pre_req;
-+	host->ops.post_req = renesas_sdhi_internal_dmac_post_req;
- }
- 
- static void
--- 
-2.7.4
-
+Kind regards
+Uffe
