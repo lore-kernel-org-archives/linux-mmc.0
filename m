@@ -2,119 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 074CCC4167B
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 03:21:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3EF7C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 08:22:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BEE0B22513
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 03:21:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 920A222573
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 08:22:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726583AbgLDDUp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Dec 2020 22:20:45 -0500
-Received: from szxga04-in.huawei.com ([45.249.212.190]:8642 "EHLO
-        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725847AbgLDDUo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Dec 2020 22:20:44 -0500
-Received: from DGGEMS404-HUB.china.huawei.com (unknown [172.30.72.60])
-        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4CnHxZ59R5z15XCk;
-        Fri,  4 Dec 2020 11:19:30 +0800 (CST)
-Received: from [127.0.0.1] (10.174.177.9) by DGGEMS404-HUB.china.huawei.com
- (10.3.19.204) with Microsoft SMTP Server id 14.3.487.0; Fri, 4 Dec 2020
- 11:19:54 +0800
-Subject: Re: [PATCH 0/1] dt-bindings: eliminate yamllint warnings
-To:     Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        "Pengutronix Kernel Team" <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        "NXP Linux Team" <linux-imx@nxp.com>,
-        David Airlie <airlied@linux.ie>,
-        "Daniel Vetter" <daniel@ffwll.ch>,
-        Sumit Semwal <sumit.semwal@linaro.org>,
-        "Thierry Reding" <thierry.reding@gmail.com>,
-        Sam Ravnborg <sam@ravnborg.org>,
-        "Hans Verkuil" <hverkuil-cisco@xs4all.nl>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        "Ricardo Ribalda" <ribalda@kernel.org>,
+        id S1726880AbgLDIWp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Dec 2020 03:22:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37172 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726395AbgLDIWo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 03:22:44 -0500
+Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 936C2C061A51;
+        Fri,  4 Dec 2020 00:22:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=kemnade.info; s=20180802; h=Content-Transfer-Encoding:Content-Type:
+        MIME-Version:References:In-Reply-To:Message-ID:Subject:Cc:To:From:Date:Sender
+        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
+        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
+        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+        bh=WbW+gn6S/fvAC4RBecIwLAv21lRtD0xCR13FIw/9+jg=; b=Fr3zOqv3Q/fWqOsqFpBJmkJ7A8
+        lXcLsoklT2cUl7fdYH7A99UDzo9mC7BAHRHHQ5Xx2dfLXW7rIJPDWGTg8AziltB5mCFvsxwgndZoR
+        T2drucFgUddgWlI3hTdN/NBB74obJPdQ1xGZhSAgUGHcltM4lgXT3ibb3oWAkbBT3W44=;
+Received: from p200300ccff0a0b001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff0a:b00:1a3d:a2ff:febf:d33a] helo=aktux)
+        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.89)
+        (envelope-from <andreas@kemnade.info>)
+        id 1kl6Lp-0002e2-C3; Fri, 04 Dec 2020 09:22:01 +0100
+Date:   Fri, 4 Dec 2020 09:22:00 +0100
+From:   Andreas Kemnade <andreas@kemnade.info>
+To:     Doug Anderson <dianders@chromium.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Discussions about the Letux Kernel 
+        <letux-kernel@openphoenux.org>,
+        Linux OMAP Mailing List <linux-omap@vger.kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Thierry Reding <treding@nvidia.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        "Matthias Brugger" <matthias.bgg@gmail.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        "Mark Brown" <broonie@kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        linux-media <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mediatek <linux-mediatek@lists.infradead.org>,
-        alsa-devel <alsa-devel@alsa-project.org>
-References: <20201204024226.1222-1-thunder.leizhen@huawei.com>
-From:   "Leizhen (ThunderTown)" <thunder.leizhen@huawei.com>
-Message-ID: <5dba4db6-dc66-44a8-ac4c-c5fe288c3430@huawei.com>
-Date:   Fri, 4 Dec 2020 11:19:52 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
- Thunderbird/60.7.0
+        Tony Lindgren <tony@atomide.com>
+Subject: Re: [REGRESSION] mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers
+ that existed in v4.4
+Message-ID: <20201204092200.0c7894ce@aktux>
+In-Reply-To: <CAD=FV=VucTxW3PxtrN-Dye4h0LravXd-wHLKU91TaKe0eQ4TyA@mail.gmail.com>
+References: <20201201210039.258d3fed@aktux>
+        <20201203224309.5b5e0b50@aktux>
+        <CAD=FV=VucTxW3PxtrN-Dye4h0LravXd-wHLKU91TaKe0eQ4TyA@mail.gmail.com>
+X-Mailer: Claws Mail 3.17.3 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-In-Reply-To: <20201204024226.1222-1-thunder.leizhen@huawei.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.174.177.9]
-X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Sorry, Forgot to say: This patch is based on the latest linux-next code.
+On Thu, 3 Dec 2020 14:03:46 -0800
+Doug Anderson <dianders@chromium.org> wrote:
 
+> Hi,
+> 
+> On Thu, Dec 3, 2020 at 1:43 PM Andreas Kemnade <andreas@kemnade.info> wrote:
+> >
+> > On Tue, 1 Dec 2020 21:00:39 +0100
+> > Andreas Kemnade <andreas@kemnade.info> wrote:
+> >  
+> > > Hi,
+> > >
+> > > during probing of second mmc host on the GTA04A5 which has a
+> > > WL1835 wifi chip attached, I get the following oops. From a first glance
+> > > this seems to be a timing sensitive. Maybe it rings some bells for someone...
+> > > so I hesitate a bit to start the bisect job.  
+> > Did the bisect job.
+> > 21b2cec61c04 (mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4)
+> >
+> > is the evil commit. Reverting it on top of v5.10-rc6 solves the problem.
+> >  
+> > > Wild guessing: bus width is set while mmc module is not active, so registers
+> > > are not accessible.
+> > > Kernel configuration is omap2plus_defconfig
+> > >
+> > > Regards,
+> > > Andreas
+> > >
+> > >  
+> 
+> ...snip...
+> 
+> > > [    3.152587]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 >
+> > > [    3.159393] 0x000000880000-0x000020000000 : "File System"
+> > > [    3.179534] omap_hsmmc 480b4000.mmc: omap_device_late_idle: enabled but no driver.  Idling  
+> 
+> I'm guessing that this is the key line.  It seems to come from
+> omap_device_late_idle().
+> 
+> I don't know tons about that function, but a quick guess is that it needs a:
+> 
+> wait_for_device_probe();
+> 
+> ...at the start of it.  It seems like it's trying to idle devices that
+> never got probed but not actually waiting for all devices to probe.
+> It's just assuming that everything is done by late_initcall_sync().
+> 
+hmm, not sure, we have:
+if (od->_driver_status != BUS_NOTIFY_BOUND_DRIVER &&
+            od->_driver_status != BUS_NOTIFY_BIND_DRIVER) {
+                if (od->_state == OMAP_DEVICE_STATE_ENABLED) {
+                        dev_warn(dev, "%s: enabled but no driver.  Idling\n",
+                                 __func__);
+                        omap_device_idle(pdev);
+                }
+        }
 
-On 2020/12/4 10:42, Zhen Lei wrote:
-> There're too many people, I just send to the maintainer, reviewer, supporter.
-> 
-> Eliminate below warnings:
-> ./Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml:32:13: [warning] wrong indentation: expected 14 but found 12 (indentation)
-> ./Documentation/devicetree/bindings/clock/imx8qxp-lpcg.yaml:35:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/display/intel,keembay-msscam.yaml:21:6: [warning] wrong indentation: expected 6 but found 5 (indentation)
-> ./Documentation/devicetree/bindings/display/bridge/analogix,anx7625.yaml:52:9: [warning] wrong indentation: expected 6 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/display/bridge/intel,keembay-dsi.yaml:42:8: [warning] wrong indentation: expected 8 but found 7 (indentation)
-> ./Documentation/devicetree/bindings/display/bridge/intel,keembay-dsi.yaml:45:8: [warning] wrong indentation: expected 8 but found 7 (indentation)
-> ./Documentation/devicetree/bindings/display/panel/novatek,nt36672a.yaml:25:10: [warning] wrong indentation: expected 10 but found 9 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/adv7604.yaml:24:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:4:1: [error] missing document start "---" (document-start)
-> ./Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:29:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:32:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/ovti,ov772x.yaml:79:17: [warning] wrong indentation: expected 14 but found 16 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/ovti,ov772x.yaml:88:17: [warning] wrong indentation: expected 14 but found 16 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/sony,imx214.yaml:72:17: [warning] wrong indentation: expected 18 but found 16 (indentation)
-> ./Documentation/devicetree/bindings/media/i2c/sony,imx214.yaml:75:17: [warning] wrong indentation: expected 18 but found 16 (indentation)
-> ./Documentation/devicetree/bindings/mmc/mtk-sd.yaml:20:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/mmc/mtk-sd.yaml:30:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/mmc/mtk-sd.yaml:33:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
-> ./Documentation/devicetree/bindings/sound/mt8192-mt6359-rt1015-rt5682.yaml:10:4: [warning] wrong indentation: expected 2 but found 3 (indentation)
-> 
-> 
-> Zhen Lei (1):
->   dt-bindings: eliminate yamllint warnings
-> 
->  .../devicetree/bindings/clock/imx8qxp-lpcg.yaml    | 20 ++++++++---------
->  .../bindings/display/bridge/analogix,anx7625.yaml  |  4 ++--
->  .../bindings/display/bridge/intel,keembay-dsi.yaml |  4 ++--
->  .../bindings/display/intel,keembay-msscam.yaml     |  4 ++--
->  .../bindings/display/panel/novatek,nt36672a.yaml   |  2 +-
->  .../devicetree/bindings/media/i2c/adv7604.yaml     |  4 ++--
->  .../devicetree/bindings/media/i2c/mipi-ccs.yaml    | 11 ++++-----
->  .../devicetree/bindings/media/i2c/ovti,ov772x.yaml | 12 +++++-----
->  .../devicetree/bindings/media/i2c/sony,imx214.yaml | 12 +++++-----
->  Documentation/devicetree/bindings/mmc/mtk-sd.yaml  | 26 +++++++++++-----------
->  .../sound/mt8192-mt6359-rt1015-rt5682.yaml         |  4 ++--
->  11 files changed, 52 insertions(+), 51 deletions(-)
-> 
+apparently there is no code to set _driver_status to
+BUS_NOTIFY_BOUND_DRIVER. I think that is the key problem. I will try to
+create a patch to fix that.
 
+Regards,
+Andreas
