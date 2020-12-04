@@ -2,126 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3EF7C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 08:22:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEAD8C2BB40
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 10:04:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 920A222573
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 08:22:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABEA922795
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 10:04:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726880AbgLDIWp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Dec 2020 03:22:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37172 "EHLO
+        id S1729512AbgLDKDp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Dec 2020 05:03:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52766 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726395AbgLDIWo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 03:22:44 -0500
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 936C2C061A51;
-        Fri,  4 Dec 2020 00:22:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=kemnade.info; s=20180802; h=Content-Transfer-Encoding:Content-Type:
-        MIME-Version:References:In-Reply-To:Message-ID:Subject:Cc:To:From:Date:Sender
-        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
-        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
-        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=WbW+gn6S/fvAC4RBecIwLAv21lRtD0xCR13FIw/9+jg=; b=Fr3zOqv3Q/fWqOsqFpBJmkJ7A8
-        lXcLsoklT2cUl7fdYH7A99UDzo9mC7BAHRHHQ5Xx2dfLXW7rIJPDWGTg8AziltB5mCFvsxwgndZoR
-        T2drucFgUddgWlI3hTdN/NBB74obJPdQ1xGZhSAgUGHcltM4lgXT3ibb3oWAkbBT3W44=;
-Received: from p200300ccff0a0b001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff0a:b00:1a3d:a2ff:febf:d33a] helo=aktux)
-        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <andreas@kemnade.info>)
-        id 1kl6Lp-0002e2-C3; Fri, 04 Dec 2020 09:22:01 +0100
-Date:   Fri, 4 Dec 2020 09:22:00 +0100
-From:   Andreas Kemnade <andreas@kemnade.info>
-To:     Doug Anderson <dianders@chromium.org>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>,
-        Linux OMAP Mailing List <linux-omap@vger.kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Tony Lindgren <tony@atomide.com>
-Subject: Re: [REGRESSION] mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers
- that existed in v4.4
-Message-ID: <20201204092200.0c7894ce@aktux>
-In-Reply-To: <CAD=FV=VucTxW3PxtrN-Dye4h0LravXd-wHLKU91TaKe0eQ4TyA@mail.gmail.com>
-References: <20201201210039.258d3fed@aktux>
-        <20201203224309.5b5e0b50@aktux>
-        <CAD=FV=VucTxW3PxtrN-Dye4h0LravXd-wHLKU91TaKe0eQ4TyA@mail.gmail.com>
-X-Mailer: Claws Mail 3.17.3 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
+        with ESMTP id S1726841AbgLDKDo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 05:03:44 -0500
+Received: from mail-vs1-xe44.google.com (mail-vs1-xe44.google.com [IPv6:2607:f8b0:4864:20::e44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C594EC0613D1
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 02:03:09 -0800 (PST)
+Received: by mail-vs1-xe44.google.com with SMTP id v8so2941546vso.2
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 02:03:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Rcku4lPAn/y4YhBZdjYlkKZQc+t40+z/luVVG1YdFJI=;
+        b=DHGwreClgzq5UgdvP5poTN7RLhMGva3+Muj5jp5VFGgimCmx9WYcK0eAsHiPKmOBvm
+         fNIxvrpnxT7enGivLKac/vig8mhqLw+2Cr5Ryv3fxuRyEA+glFI9u5W3FH+lcviTWeGe
+         gBc30+jMZuskqlYBYm3IDHW+cnGRkBk2GrNsHGWwfc0la+TFas3pa3GnvnDDDfrSJ5E/
+         lbhQqn6JI6qM9R1x/J78C+8KnVayuEfKRieda9i6E3ekSvyEAadWUtTwn7t5ZCmq1hzh
+         964NVr4rM402IWoljsqluvgZHAACwUvLsZ+XPrjLvLBmKS08Kc99fr5VRKqG48f1KGm8
+         G7Gg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Rcku4lPAn/y4YhBZdjYlkKZQc+t40+z/luVVG1YdFJI=;
+        b=evTkm5RwrgW+Gtx9lTJe/2C63l6LEC9rUNKf34d/KlMbEhtco+j2FP1nGuF4vpW67y
+         Jg+G/e7aEYAOiA7QNOceAgrJ1ra4rkU6Pn8PQ7Yhx3E6QCAIvvnfrRsmM1frOsy2RDiO
+         K5JZ1Pqt+tre2yrKcdGEFEWlObBmWvCbfWSH5vWvFe1nT2ZitYlvJtegD66Rm1yu9Qub
+         60ljAD6sUuXc/ymvV2nKPZWm30mUzDJ6a0V5iHtBWrCl2/hwU1WwkSqgNGgfv8k3mzlk
+         oO8RJ1tR9Otz+hKFXPTZS55WnYn10KTLwKrI2mBy0GQ8jaQIWX39+S7+M/8WXzVw7YU9
+         oKJQ==
+X-Gm-Message-State: AOAM530RT92PUGhi/CriQ6ykJJW+dWB16LiINflKjeHzRODaSiD8oNnq
+        0pBu/k89arphzh2sym7kr3ZNXbmJvXSs8U/L/hUMzQ==
+X-Google-Smtp-Source: ABdhPJzF251m6Qz8Y2YtlC0BVJfa4JQ2d5vZe0SrIQHOSN0qQQLEJYfanTHuPYzxI3so5RnK5TCTPRNHPYoR6mFf9U4=
+X-Received: by 2002:a67:fe85:: with SMTP id b5mr241341vsr.19.1607076189014;
+ Fri, 04 Dec 2020 02:03:09 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+References: <20201203222922.1067522-1-arnd@kernel.org>
+In-Reply-To: <20201203222922.1067522-1-arnd@kernel.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 4 Dec 2020 11:02:32 +0100
+Message-ID: <CAPDyKFqtFYqc8i_fVzOUnuZGJjtwjVLqE-vebtOKuYJ-4PrDBg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mediatek: mark PM functions as __maybe_unused
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
+        yong mao <yong.mao@mediatek.com>,
+        Amey Narkhede <ameynarkhede03@gmail.com>,
+        Marek Vasut <marex@denx.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/Mediatek SoC support" 
+        <linux-mediatek@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 3 Dec 2020 14:03:46 -0800
-Doug Anderson <dianders@chromium.org> wrote:
+On Thu, 3 Dec 2020 at 23:29, Arnd Bergmann <arnd@kernel.org> wrote:
+>
+> From: Arnd Bergmann <arnd@arndb.de>
+>
+> The #ifdef check for the suspend/resume functions is wrong:
+>
+> drivers/mmc/host/mtk-sd.c:2765:12: error: unused function 'msdc_suspend' [-Werror,-Wunused-function]
+> static int msdc_suspend(struct device *dev)
+> drivers/mmc/host/mtk-sd.c:2779:12: error: unused function 'msdc_resume' [-Werror,-Wunused-function]
+> static int msdc_resume(struct device *dev)
+>
+> Remove the #ifdef and mark all four as __maybe_unused to aovid the
+> problem.
+>
+> Fixes: c0a2074ac575 ("mmc: mediatek: Fix system suspend/resume support for CQHCI")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  drivers/mmc/host/mtk-sd.c | 10 ++++------
+>  1 file changed, 4 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index d057fb11112a..de09c6347524 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -2683,7 +2683,6 @@ static int msdc_drv_remove(struct platform_device *pdev)
+>         return 0;
+>  }
+>
+> -#ifdef CONFIG_PM
+>  static void msdc_save_reg(struct msdc_host *host)
 
-> Hi,
-> 
-> On Thu, Dec 3, 2020 at 1:43 PM Andreas Kemnade <andreas@kemnade.info> wrote:
-> >
-> > On Tue, 1 Dec 2020 21:00:39 +0100
-> > Andreas Kemnade <andreas@kemnade.info> wrote:
-> >  
-> > > Hi,
-> > >
-> > > during probing of second mmc host on the GTA04A5 which has a
-> > > WL1835 wifi chip attached, I get the following oops. From a first glance
-> > > this seems to be a timing sensitive. Maybe it rings some bells for someone...
-> > > so I hesitate a bit to start the bisect job.  
-> > Did the bisect job.
-> > 21b2cec61c04 (mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4)
-> >
-> > is the evil commit. Reverting it on top of v5.10-rc6 solves the problem.
-> >  
-> > > Wild guessing: bus width is set while mmc module is not active, so registers
-> > > are not accessible.
-> > > Kernel configuration is omap2plus_defconfig
-> > >
-> > > Regards,
-> > > Andreas
-> > >
-> > >  
-> 
-> ...snip...
-> 
-> > > [    3.152587]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 >
-> > > [    3.159393] 0x000000880000-0x000020000000 : "File System"
-> > > [    3.179534] omap_hsmmc 480b4000.mmc: omap_device_late_idle: enabled but no driver.  Idling  
-> 
-> I'm guessing that this is the key line.  It seems to come from
-> omap_device_late_idle().
-> 
-> I don't know tons about that function, but a quick guess is that it needs a:
-> 
-> wait_for_device_probe();
-> 
-> ...at the start of it.  It seems like it's trying to idle devices that
-> never got probed but not actually waiting for all devices to probe.
-> It's just assuming that everything is done by late_initcall_sync().
-> 
-hmm, not sure, we have:
-if (od->_driver_status != BUS_NOTIFY_BOUND_DRIVER &&
-            od->_driver_status != BUS_NOTIFY_BIND_DRIVER) {
-                if (od->_state == OMAP_DEVICE_STATE_ENABLED) {
-                        dev_warn(dev, "%s: enabled but no driver.  Idling\n",
-                                 __func__);
-                        omap_device_idle(pdev);
-                }
-        }
+Shouldn't msdc_save|restore_reg() be turned into "__maybe_unused" as well?
 
-apparently there is no code to set _driver_status to
-BUS_NOTIFY_BOUND_DRIVER. I think that is the key problem. I will try to
-create a patch to fix that.
+>  {
+>         u32 tune_reg = host->dev_comp->pad_tune_reg;
+> @@ -2742,7 +2741,7 @@ static void msdc_restore_reg(struct msdc_host *host)
+>                 __msdc_enable_sdio_irq(host, 1);
+>  }
+>
+> -static int msdc_runtime_suspend(struct device *dev)
+> +static int __maybe_unused msdc_runtime_suspend(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct msdc_host *host = mmc_priv(mmc);
+> @@ -2752,7 +2751,7 @@ static int msdc_runtime_suspend(struct device *dev)
+>         return 0;
+>  }
+>
+> -static int msdc_runtime_resume(struct device *dev)
+> +static int __maybe_unused msdc_runtime_resume(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         struct msdc_host *host = mmc_priv(mmc);
+> @@ -2762,7 +2761,7 @@ static int msdc_runtime_resume(struct device *dev)
+>         return 0;
+>  }
+>
+> -static int msdc_suspend(struct device *dev)
+> +static int __maybe_unused msdc_suspend(struct device *dev)
+>  {
+>         struct mmc_host *mmc = dev_get_drvdata(dev);
+>         int ret;
+> @@ -2776,11 +2775,10 @@ static int msdc_suspend(struct device *dev)
+>         return pm_runtime_force_suspend(dev);
+>  }
+>
+> -static int msdc_resume(struct device *dev)
+> +static int __maybe_unused msdc_resume(struct device *dev)
+>  {
+>         return pm_runtime_force_resume(dev);
+>  }
+> -#endif
+>
+>  static const struct dev_pm_ops msdc_dev_pm_ops = {
 
-Regards,
-Andreas
+You may also change this to a __maybe_unused, as long as you also
+assign the .pm pointer in the mt_msdc_driver with
+pm_ptr(&msdc_dev_pm_ops).
+
+Ideally the compiler should drop these functions/datas entirely then.
+
+>         SET_SYSTEM_SLEEP_PM_OPS(msdc_suspend, msdc_resume)
+> --
+> 2.27.0
+>
+
+Kind regards
+Uffe
