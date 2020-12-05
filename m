@@ -2,108 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+X-Spam-Status: No, score=-11.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 744B0C18E57
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 19:19:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EEB6C4167B
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 19:44:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 476D42311C
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 19:19:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0468C23123
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 19:44:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726874AbgLETTr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 5 Dec 2020 14:19:47 -0500
-Received: from asavdk4.altibox.net ([109.247.116.15]:53692 "EHLO
-        asavdk4.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726359AbgLETTa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Dec 2020 14:19:30 -0500
-Received: from ravnborg.org (unknown [188.228.123.71])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by asavdk4.altibox.net (Postfix) with ESMTPS id 694A6804C8;
-        Sat,  5 Dec 2020 20:18:37 +0100 (CET)
-Date:   Sat, 5 Dec 2020 20:18:35 +0100
-From:   Sam Ravnborg <sam@ravnborg.org>
-To:     Zhen Lei <thunder.leizhen@huawei.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Sumit Semwal <sumit.semwal@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Hans Verkuil <hverkuil-cisco@xs4all.nl>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        Ricardo Ribalda <ribalda@kernel.org>,
+        id S1726055AbgLEToF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 5 Dec 2020 14:44:05 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60496 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725902AbgLEToE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 5 Dec 2020 14:44:04 -0500
+Date:   Sat, 5 Dec 2020 11:43:21 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1607197404;
+        bh=mZONoqc0lPkPL1MqQfLfD5mq8tRoa7RCx26VR0bTPLM=;
+        h=From:To:Cc:Subject:References:In-Reply-To:From;
+        b=fQvGzIhTTUGbkL6jYDGNClM6hQ5l1BZUfKbZlzX7pFdus/V2YmkITn3CrN+D52RQZ
+         xYu4fqO7ISikguNZTYu2PKTqGI5/mTtkApg+nZ0ch8JWgaHiWZIQmAlrEAF4s57TZ9
+         bGJfy0zhllaA+0ARlSaEzCQJhi7Z12fPpYzpkSR/XpKV18W+vrb1HhM+jSx4wlJWWC
+         4JzFMgUjNmNo5381W3v1aukbHVB+j33lYvrybsmHQa6c08e0DWFSn2aOItSNeIxZ1j
+         wq8KvBXZ50EZWHoT5poGDcSwYIj07TbSVSEYvqHCUNj721xlGsuk7kTWSvdvmw7SId
+         YzPkW9W27nkOQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Satya Tangirala <satyat@google.com>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-fscrypt@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        linux-media <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mediatek <linux-mediatek@lists.infradead.org>,
-        alsa-devel <alsa-devel@alsa-project.org>
-Subject: Re: [PATCH 1/1] dt-bindings: eliminate yamllint warnings
-Message-ID: <20201205191835.GC332836@ravnborg.org>
-References: <20201204024226.1222-1-thunder.leizhen@huawei.com>
- <20201204024226.1222-2-thunder.leizhen@huawei.com>
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: Re: [PATCH v2 9/9] mmc: sdhci-msm: add Inline Crypto Engine support
+Message-ID: <X8vi2R0DYd74VCXr@sol.localdomain>
+References: <20201203020516.225701-1-ebiggers@kernel.org>
+ <20201203020516.225701-10-ebiggers@kernel.org>
+ <X8t4bLOc3vRbDSo5@google.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20201204024226.1222-2-thunder.leizhen@huawei.com>
-X-CMAE-Score: 0
-X-CMAE-Analysis: v=2.3 cv=Itgwjo3g c=1 sm=1 tr=0
-        a=S6zTFyMACwkrwXSdXUNehg==:117 a=S6zTFyMACwkrwXSdXUNehg==:17
-        a=kj9zAlcOel0A:10 a=i0EeH86SAAAA:8 a=VwQbUJbxAAAA:8 a=IpJZQVW2AAAA:8
-        a=pGLkceISAAAA:8 a=8AirrxEcAAAA:8 a=KKAkSRfTAAAA:8 a=7gkXJVJtAAAA:8
-        a=QyXUC8HyAAAA:8 a=ds-h48H8TGFLVGBnORYA:9 a=CjuIK1q_8ugA:10
-        a=AjGcO6oz07-iQ99wixmX:22 a=IawgGOuG5U0WyFbmm1f5:22
-        a=ST-jHhOKWsTCqRlWije3:22 a=cvBusfyB2V15izCimMoJ:22
-        a=E9Po1WZjFZOl8hwRPBS3:22
+In-Reply-To: <X8t4bLOc3vRbDSo5@google.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 04, 2020 at 10:42:26AM +0800, Zhen Lei wrote:
-> All warnings are related only to "wrong indentation", except one:
-> Documentation/devicetree/bindings/media/i2c/mipi-ccs.yaml:4:1: \
-> [error] missing document start "---" (document-start)
-> 
-> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Michael Turquette <mturquette@baylibre.com>
-> Cc: Stephen Boyd <sboyd@kernel.org>
-> Cc: Shawn Guo <shawnguo@kernel.org>
-> Cc: Sascha Hauer <s.hauer@pengutronix.de>
-> Cc: Pengutronix Kernel Team <kernel@pengutronix.de>
-> Cc: Fabio Estevam <festevam@gmail.com>
-> Cc: NXP Linux Team <linux-imx@nxp.com>
-> Cc: David Airlie <airlied@linux.ie>
-> Cc: Daniel Vetter <daniel@ffwll.ch>
-> Cc: Sumit Semwal <sumit.semwal@linaro.org>
-> Cc: Thierry Reding <thierry.reding@gmail.com>
-> Cc: Sam Ravnborg <sam@ravnborg.org>
-> Cc: Hans Verkuil <hverkuil-cisco@xs4all.nl>
-> Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
-> Cc: Sakari Ailus <sakari.ailus@linux.intel.com>
-> Cc: Ricardo Ribalda <ribalda@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Matthias Brugger <matthias.bgg@gmail.com>
-> Cc: Liam Girdwood <lgirdwood@gmail.com>
-> Cc: Mark Brown <broonie@kernel.org>
+On Sat, Dec 05, 2020 at 12:09:16PM +0000, Satya Tangirala wrote:
+> > +static void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
+> > +{
+> > +	if (!(msm_host->mmc->caps2 & MMC_CAP2_CRYPTO))
+> > +		return;
+> > +	sdhci_msm_ice_low_power_mode_enable(msm_host);
+> > +	sdhci_msm_ice_optimization_enable(msm_host);
+> > +	sdhci_msm_ice_wait_bist_status(msm_host);
+> If sdhci_msm_ice_wait_bist_status() fails, should we really ignore the
+> error and continue en/decrypting with ICE? I'm not sure what the BIST
+> failing might really mean, but if it means it's possible that the ICE
+> en/decrypts incorrectly it would be bad to continue to use it.....
 
-For the bindings/display/* parts:
-Acked-by: Sam Ravnborg <sam@ravnborg.org>
+The "built-in self-test" that the ICE hardware does seems to be a FIPS
+compliance thing which never actually fails in practice.
+
+If it does fail, then according to
+https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp2588.pdf
+(which is the closest thing I have to any documentation for ICE, other than the
+eMMC standard), then the hardware itself will reject any crypto requests.  So
+rejecting them in software too should be redundant.
+
+It's also worth noting that just because a hardware-level self-test passes
+doesn't mean that the actual end-to-end storage encryption is working correctly.
+To verify that you need to run something like Android's
+vts_kernel_encryption_test, or the ciphertext verification tests in xfstests.
+The hardware itself is really the wrong place to be testing the encryption.
+
+It would be possible to add some code that sets a flag in the cqhci_host if the
+ICE hardware test fails, and make cqhci_request() fail any crypto-enabled
+requests if that flag is set.  It just doesn't seem necessary, and I think we
+should error on the side of less complexity for now.
+
+What I was actually worried about is what happens if ICE needs to be used but
+its self-test is still running, so it doesn't want to accept requests yet.  I'm
+not sure that's really a thing or not (one might hope the MMC host doesn't say
+it's done resetting until the ICE tests are done), but that's why I left in the
+code that waits for the tests to complete, which the downstream driver had.
+
+Neeraj and Barani, if you have any additional insight or suggestions on this, or
+know of anything I may be overlooking, that would be greatly appreciated.
+
+Otherwise I just plan to add a comment that summarizes what I said above.
+
+> > @@ -2531,12 +2785,15 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
+> >  	 * Whenever core-clock is gated dynamically, it's needed to
+> >  	 * restore the SDR DLL settings when the clock is ungated.
+> >  	 */
+> > -	if (msm_host->restore_dll_config && msm_host->clk_rate)
+> > +	if (msm_host->restore_dll_config && msm_host->clk_rate) {
+> >  		ret = sdhci_msm_restore_sdr_dll_config(host);
+> > +		if (ret)
+> > +			return ret;
+> > +	}
+> >  
+> >  	dev_pm_opp_set_rate(dev, msm_host->clk_rate);
+> >  
+> > -	return ret;
+> > +	return sdhci_msm_ice_resume(msm_host);
+> >  }
+> Doesn't this modify existing behaviour if
+> sdhci_msm_restore_sdr_dll_config() returns a non-zero value? Previously,
+> dev_pm_opp_set_rate() would always be called regardless of ret, but now
+> it's not called on non-zero ret value.
+
+Yes but I don't think it matters.  IIUC, if a device's ->runtime_resume()
+callback fails, then Linux's runtime power management framework keeps the device
+in an error state and doesn't consider it to be resumed.
+
+So if resuming a device involves N different things, and one of them fails, I
+don't think we need to worry about trying to still do the other N-1 things; we
+can just return an error on the first failure.
+
+- Eric
