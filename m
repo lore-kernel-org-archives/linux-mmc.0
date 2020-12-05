@@ -5,58 +5,58 @@ X-Spam-Level:
 X-Spam-Status: No, score=-23.2 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,FSL_HELO_FAKE,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1ADD1C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 12:24:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8347C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 13:47:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CFB4823108
-	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 12:24:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E91D23107
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 13:47:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726415AbgLEMXI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 5 Dec 2020 07:23:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58298 "EHLO
+        id S1726791AbgLENBR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 5 Dec 2020 08:01:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47026 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729534AbgLELIY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Dec 2020 06:08:24 -0500
-Received: from mail-pl1-x643.google.com (mail-pl1-x643.google.com [IPv6:2607:f8b0:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B42A0C061A51
-        for <linux-mmc@vger.kernel.org>; Sat,  5 Dec 2020 02:59:32 -0800 (PST)
-Received: by mail-pl1-x643.google.com with SMTP id x15so4574246pll.2
-        for <linux-mmc@vger.kernel.org>; Sat, 05 Dec 2020 02:59:32 -0800 (PST)
+        with ESMTP id S1726609AbgLEM6x (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Dec 2020 07:58:53 -0500
+Received: from mail-pf1-x443.google.com (mail-pf1-x443.google.com [IPv6:2607:f8b0:4864:20::443])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3776C094240
+        for <linux-mmc@vger.kernel.org>; Sat,  5 Dec 2020 04:28:13 -0800 (PST)
+Received: by mail-pf1-x443.google.com with SMTP id w6so5721645pfu.1
+        for <linux-mmc@vger.kernel.org>; Sat, 05 Dec 2020 04:28:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=k8uhbhM0jPQEk1scdGF1vyJWWb58otXHWZWtrmeT+jo=;
-        b=JKafiUTPFdpuEpmQXPmeuSYhIK0zQQIXyJSI/laLGR37baVzq9pycJzmHEWr0fSx+C
-         4HirYgnlzDIV1/IKY01dMGjYdOPRY04ovKXeEqKFSzqp/AHmzXF0ulYlufZXtWg1Gtoz
-         wnwU7Rqf8ZahCLsvE8VBSpcTSVgWMNOpLDil37QdZHv2Xn1TthLiJkdOipdNWDEaAdyE
-         +Tvt4FgUEjbKgaWluWgFaKYWTpnzA64fFMvi+uIMFoeJl89Wom7ga+zKM+YAHZ+7caof
-         0NOYMTt4rN73ICCmFSOmXbODy4iSa0OlaF6R6rOt1g/gPe5rUbRYTa5qTPD3TbgHmeTG
-         XuoA==
+        bh=ZgBEHkpgl01HRtpZrFp742E+yaX6jesYRumgmxC5K3U=;
+        b=tueN1W2Khc/yZl/zS0KhG3Af8GRKjLzQj2y8tWsab7Gc1H2IDE6AOcnbWqIfq35Us1
+         yMw6A8Poz97pUBx13awVsFzI0ogfmDwFjeN9XE37LEcB3wBNHX51eV2RoKP1M0evJm2d
+         sKK4BYsIXvlNNT5mNHH24u9R8UVUb5yRPrZNZwZgDX3zE09sLp7TIWmjtV8A6CITKVel
+         QwJpX2rVO/2xA2KC7JD9ozaYEVewP0dDdVgPriW24mUoPqNSgHFNRPAzrYBDVZpOqGcw
+         T+elI5qtyi6IpYRhIXwiYPH8cAsxGtnaeJImWrRPLAA6m0qNNH83VkmlJngApLNJWYaD
+         Cjvg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=k8uhbhM0jPQEk1scdGF1vyJWWb58otXHWZWtrmeT+jo=;
-        b=riNpxu5tltsWnX4671WzLrHiNQRxfTpNnOeILm3lx9+e+U4pH4Ox6a/mEVFt4oLFBH
-         cnPPVS0Hja7e3c80NhY2Fce3r/R2RYCjDjIAvzmDIxszxbx7swMDOrXds4WqXcjzMLEE
-         LzxuOGEE3Z0Gkzt3h3telNi4SwpCokgMhWjMyprkcFUxyINMudu6mYtUVr5VqR8+pnYa
-         AlODjXeT7FsNeqXS0Yru3cx56xza1RepwczMr3vzA+EXR077ed/dH+9iQg/MBY8BMqNh
-         FdHJOoMZR2hp1g6D9ax3XC4wGaTvxdfk4o989CHDBhbH9qFiwpb5VZ0xwBVHrGDYWCxB
-         epwg==
-X-Gm-Message-State: AOAM532GFDgEToQ5cA95lEDFq4FVCqpyIjW7b50smITCrGZqXHWc/rwo
-        0rHTUcGxugZRjFMlvSg2G/BeCJcONQvEfCXS
-X-Google-Smtp-Source: ABdhPJy27uTroi4Wod0/cT5bsNNiPdIZUceJ2a8UKiFWFC7/7fN/lLDFNEMkqo3fw/la5XZwjckz9w==
-X-Received: by 2002:a17:90a:8c4:: with SMTP id 4mr8142199pjn.204.1607165971908;
-        Sat, 05 Dec 2020 02:59:31 -0800 (PST)
+        bh=ZgBEHkpgl01HRtpZrFp742E+yaX6jesYRumgmxC5K3U=;
+        b=VEYFkGNxipeYOfXITfA8woTXXhAFSg5DmJVlTfb1MfE4Zf8cDEEISV6Lu0s0+n0QPT
+         s9SswoRHP5Uw8X82GGYJ7ASCz5k8CCdt0k7KjFf+RpD2VbZSi8C4KQvNunBckxWMpqnJ
+         QSxSxxZY1LpCwPqT4Y+Rn8O1guewqu4pJtlCZZrRCZCAzwNQTO+MGZ6hZ66YR7KFbV6/
+         Ceh9bmkipFyn2UxGmd7oNY+2znh9b4t02LFHfvnlyfDh7VR7ia35eyx/yeQS/6zGugPK
+         OXhrWFjOdmpSFWNeQ4O4ZBRs777gpndngC829zXp6N/IPusqXmadaGGkZ1KxWgnBTQNl
+         yN1w==
+X-Gm-Message-State: AOAM533BWny9wRBLijSQ0Hb6w0hG/7746/kAihlnGCstlO8gjTr+bK6u
+        jZAFXGZE01p/v+SAjbThA6ns+w==
+X-Google-Smtp-Source: ABdhPJzFMSFHIXY1GVXd2hvdVsbwNME2YDcHh+tMsIEY0NPCZ7+iqZqiBOYh3BVViBZHE1Y0XfQ38w==
+X-Received: by 2002:a63:2d86:: with SMTP id t128mr11588610pgt.5.1607171292792;
+        Sat, 05 Dec 2020 04:28:12 -0800 (PST)
 Received: from google.com (154.137.233.35.bc.googleusercontent.com. [35.233.137.154])
-        by smtp.gmail.com with ESMTPSA id y188sm7947514pfy.98.2020.12.05.02.59.30
+        by smtp.gmail.com with ESMTPSA id a124sm8369633pfd.43.2020.12.05.04.28.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Dec 2020 02:59:31 -0800 (PST)
-Date:   Sat, 5 Dec 2020 10:59:27 +0000
+        Sat, 05 Dec 2020 04:28:12 -0800 (PST)
+Date:   Sat, 5 Dec 2020 12:28:08 +0000
 From:   Satya Tangirala <satyat@google.com>
 To:     Eric Biggers <ebiggers@kernel.org>
 Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
@@ -73,7 +73,7 @@ Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
 Subject: Re: [PATCH v2 4/9] mmc: cqhci: add support for inline encryption
-Message-ID: <X8toD7QtwCnzK5Ly@google.com>
+Message-ID: <X8t82HijJtbHVyLM@google.com>
 References: <20201203020516.225701-1-ebiggers@kernel.org>
  <20201203020516.225701-5-ebiggers@kernel.org>
 MIME-Version: 1.0
@@ -637,6 +637,9 @@ On Wed, Dec 02, 2020 at 06:05:11PM -0800, Eric Biggers wrote:
 > +	struct {
 > +		u8 crypto_key[CQHCI_CRYPTO_KEY_MAX_SIZE];
 > +		/* 4KB/512 = 8 */
+I'm not sure what this comment is for (admittedly, it seems I introduced
+this line into AOSP, and that seems to have made it here haha) - I think
+we should just remove it.
 > +		u8 data_unit_size;
 > +		u8 crypto_cap_idx;
 > +		u8 reserved_1;
@@ -667,6 +670,3 @@ On Wed, Dec 02, 2020 at 06:05:11PM -0800, Eric Biggers wrote:
 > -- 
 > 2.29.2
 > 
-The version of code from Qualcomm on AOSP reprogrammed all keyslots from
-cqhci_recovery_finish(). I notice that this patch drops that - I'm guessing
-that was intentional? Other than that, this patch looks good to me :).
