@@ -2,120 +2,149 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92A35C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 20:07:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FCC8C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 06:12:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 46FC422CAD
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Dec 2020 20:07:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 28FB922D72
+	for <linux-mmc@archiver.kernel.org>; Sat,  5 Dec 2020 06:12:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726063AbgLDUHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Dec 2020 15:07:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33406 "EHLO
+        id S1728362AbgLEGMH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 5 Dec 2020 01:12:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41328 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726021AbgLDUHC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Dec 2020 15:07:02 -0500
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16921C0613D1;
-        Fri,  4 Dec 2020 12:06:22 -0800 (PST)
-Received: by mail-ej1-x643.google.com with SMTP id x16so10429472ejj.7;
-        Fri, 04 Dec 2020 12:06:21 -0800 (PST)
+        with ESMTP id S1728080AbgLEGMH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 5 Dec 2020 01:12:07 -0500
+Received: from mail-pl1-x644.google.com (mail-pl1-x644.google.com [IPv6:2607:f8b0:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C21C9C061A4F
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Dec 2020 22:11:26 -0800 (PST)
+Received: by mail-pl1-x644.google.com with SMTP id r4so219000pls.11
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Dec 2020 22:11:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=Qs8bczzvvcOwQEvENjn4URGTN3wUu8Qwy1O5EPHsTig=;
-        b=ZW/eWHESkxaXaG9FG2ERuWlrJJ2EoQMuQe1ap/t4Zug2xHTKyUvLAe0LSma4Hr4D/2
-         sSMiCQ1AuK2IgAeuycOb5uINCa3XpZunE/MtvasipMDxT4x9h0dBXrW5ZSnsgrea6Quu
-         oE+TKrBVdYlJ60LcYxbjCzHutv1LLN1GYFlPb/guIJxnxiFNKmOEAIGVzc+3dINf0y2U
-         WMvf1vz+bq3a8zx96TxY3YgVrYLl7G3F6xV4fXFq5qaRSGXZ2escXPdnH/c9EEvY/7gt
-         +xxDEd7L/SCwFRzp1bqlM5Pq0vWXHeILgrYhM+zGSha4PEPdAoyyF/YOerl7Dy8QWhmz
-         QOaQ==
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=D7AczkzMwnCTqGNk/WinEN4GxDXh0TBrfFJyaIs9yxY=;
+        b=W6xJPGENxbezmkuhhtaWZSnVB8iblzBFz/ZlCgViToQq/1fJIkWo7hIZ6s89WkKvom
+         fKZ1/KGgHcS6ZuRfbmQebsZHKpdk2DSAJVlITgghsbHI0FWR7kMbuabZvjrU3pAT2Uql
+         k4hJtbP6tyfLVhUOe3VPtfnV1ln245JCCOPFNJRGPu3v6uzh2kuyBQeFvABGJfzt9NBw
+         9By5QUj73eF6+qeQLjlh+Nc8Ya+chlN4VLJXwdHM+vJqOJuZcpcHMiXUgyUQuk4w00b5
+         zTDoZia8oFImOhBVf3eAcExH7pekUIWZ/4NPjIKRyo5rF02BDVOFEBJYBXVIUshvK0j6
+         LzhQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=Qs8bczzvvcOwQEvENjn4URGTN3wUu8Qwy1O5EPHsTig=;
-        b=J6EaSr7WxdepE9I4get/d+QbhBrLf2MuLK82tB8c+jGVyI4gDxAgD0uaFltbXQzMaY
-         etDSSM9suNGvZ1MmBbsvfcLiz3gJdrYBIcJwnvoxUE7bUxtdCYLX+sOb2Je62iYdBtK2
-         Vx7wOJfPg44vliz1jkf7OUCEVEBxZ/OXqk844MV6dL/SE/GBuT0IPeQpfxnqntfzPeFi
-         35ozp1Cy9MwWI4GCGk9Q/o6v5ovS2fRhJUp0ymvucnlvR/7lY+ACeOSZDS55FDMFsGFw
-         2sb08d8nQ5qSTu9jHby1BKgsxEiM7eFj0LRxCwC60Gvpv+6Zpul1Nv4WqChVKDbHhvSx
-         3ZJQ==
-X-Gm-Message-State: AOAM532iGOxAX2mUI6An7OgQm2IP6PbUqQa0FjIy06FVFPf6zg8dyJgg
-        wqjn3QSOePLg9fMiI9GKhuHjxasT8TDsFTllGHo0gz/s
-X-Google-Smtp-Source: ABdhPJy8bqY9rTcK9UXixUcvuanWn9pcDguoM2gGjlVFhJsXrNeS0S/ACFdsGzvK97Sho3oM8Zmu3as25niNqcfU0q8=
-X-Received: by 2002:a17:906:2ec3:: with SMTP id s3mr8450543eji.133.1607112380662;
- Fri, 04 Dec 2020 12:06:20 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=D7AczkzMwnCTqGNk/WinEN4GxDXh0TBrfFJyaIs9yxY=;
+        b=mwZu4lgbrB94dMTnBPUbnowPQAk+ESmt3fUhLvVHbU1z6+3vjGRQyTsIhvQvQ5LKTU
+         M/kTYcTn+gtlnalxmIpOOMH8bP+yiow/LAPugBgK9Hx3anayt8Lb76ozvEjBlV6OHQyx
+         VwIogbuLX7PVflolVGLeGHb0vJSpRzdyV6RBdHLKai6WTwFvKj1JztFgrFk9Bfzc42Ju
+         UN7N4PnG7S0AJvWc/61CASZ1He4yZ44AAt/hME6sS2lMXJltSq0QZO+cAq901pJrd+fT
+         zARTYDhWr18qL5fTrvtau+izp+RL+s0YZiwvFzP6EMLpbhtQy7GC52jt8FeDp5AqYxTZ
+         2rLw==
+X-Gm-Message-State: AOAM5338xf0e89uyD3rxAaEyrGquu0qxB8bmghlzG/PXHi6KM8KcapMH
+        MebQiKBYohMbAe8AcmLyI6qR
+X-Google-Smtp-Source: ABdhPJzvEXQ4h/j2yTz8qIDNrIHGaz8TRTASTCZ9h+hLDXfffPdy21Bc34vKlGOcvRYRYnuIk6pB4w==
+X-Received: by 2002:a17:90a:7e95:: with SMTP id j21mr7373400pjl.217.1607148686216;
+        Fri, 04 Dec 2020 22:11:26 -0800 (PST)
+Received: from thinkpad ([2409:4072:648e:8bd1:74b2:a4d8:e3fe:225b])
+        by smtp.gmail.com with ESMTPSA id q23sm6915493pfg.18.2020.12.04.22.11.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 04 Dec 2020 22:11:25 -0800 (PST)
+Date:   Sat, 5 Dec 2020 11:41:15 +0530
+From:   Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+To:     Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
+        Vinod Koul <vkoul@kernel.org>, Wolfram Sang <wsa@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v2 00/18] Add CMU/RMU/DMA/MMC/I2C support for Actions
+ Semi S500 SoCs
+Message-ID: <20201205061115.GB4068@thinkpad>
+References: <cover.1605823502.git.cristian.ciocaltea@gmail.com>
 MIME-Version: 1.0
-References: <20201129203116.11987-1-adrien.grassein@gmail.com> <CAPDyKFp0U5=s_AJh4-QAn=WCodkYUaFE9BuLjpJB80z23J7JkA@mail.gmail.com>
-In-Reply-To: <CAPDyKFp0U5=s_AJh4-QAn=WCodkYUaFE9BuLjpJB80z23J7JkA@mail.gmail.com>
-From:   Adrien Grassein <adrien.grassein@gmail.com>
-Date:   Fri, 4 Dec 2020 21:06:09 +0100
-Message-ID: <CABkfQAEnVqOikmEBy2XhzSUM1zzvTSLJvMEP8M_k_EfpRuDw5w@mail.gmail.com>
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: add an option to disable HS400 for fsl
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cover.1605823502.git.cristian.ciocaltea@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+Hi Cristi,
 
-Thanks, it's working with your suggestion.
+On Fri, Nov 20, 2020 at 01:55:54AM +0200, Cristian Ciocaltea wrote:
+> Hi,
+> 
+> This patchset brings a series of improvements for the Actions Semi S500
+> SoCs family, by adding support for Clock & Reset Management Units, DMA,
+> MMC, I2C & SIRQ controllers.
+> 
+> Please note the patches consist mostly of DTS and bindings/compatibles
+> changes, since all the work they depend on has been already merged,
+> i.e. clock fixes/additions, pinctrl driver, sirq driver.
+> 
+> For the moment, I have only enabled the features I could test on
+> RoseapplePi SBC.
+> 
 
-You can delete/abandon these patches.
+I was hoping to apply this series for v5.11 but we ran out of time. So expect
+this series to be in v5.12.
 
-Thanks a lot,
-Regards,
-Adrien
+Thanks,
+Mani
 
-Le ven. 4 d=C3=A9c. 2020 =C3=A0 14:18, Ulf Hansson <ulf.hansson@linaro.org>=
- a =C3=A9crit :
->
-> On Sun, 29 Nov 2020 at 21:31, Adrien Grassein <adrien.grassein@gmail.com>=
- wrote:
-> >
-> > Add an option to disable the hs400 support in the fsl esdhc
-> > driver.
-> >
-> > Signed-off-by: Adrien Grassein <adrien.grassein@gmail.com>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++++
-> >  1 file changed, 4 insertions(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b=
-/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > index e71d13c2d109..070b40ae8c44 100644
-> > --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > @@ -101,6 +101,10 @@ properties:
-> >        If not use this property, driver default set the delay target to=
- value 7.
-> >        Only eMMC HS400 mode need to take care of this property.
-> >      default: 0
-> > +  fsl,no-mmc-hs400:
-> > +    description: |
-> > +      boolean, if present, indicate to disable mmc-hs400 support.
-> > +    type: boolean
->
-> You need to disable hs400, because the sdhci capability register
-> wrongly claims it to be supported, right?
->
-> May I suggest using the DT property "sdhci-caps-mask" instead?
->
-> Kind regards
-> Uffe
+> Thanks,
+> Cristi
+> 
+> Changes in v2:
+> - Added new bindings/compatibles for S500 DMA, MMC & I2C controllers
+> - Added support for the SIRQ controller
+> - Added new entries in MAINTAINERS
+> - Updated naming of some patches in v1
+> 
+> Cristian Ciocaltea (18):
+>   arm: dts: owl-s500: Add Clock Management Unit
+>   arm: dts: owl-s500: Set CMU clocks for UARTs
+>   arm: dts: owl-s500: Add Reset controller
+>   dt-bindings: dma: owl: Add compatible string for Actions Semi S500 SoC
+>   dmaengine: owl: Add compatible for the Actions Semi S500 DMA
+>     controller
+>   arm: dts: owl-s500: Add DMA controller
+>   arm: dts: owl-s500: Add pinctrl & GPIO support
+>   dt-bindings: mmc: owl: Add compatible string for Actions Semi S500 SoC
+>   arm: dts: owl-s500: Add MMC support
+>   dt-bindings: i2c: owl: Convert Actions Semi Owl binding to a schema
+>   MAINTAINERS: Update entry for Actions Semi Owl I2C binding
+>   i2c: owl: Add compatible for the Actions Semi S500 I2C controller
+>   arm: dts: owl-s500: Add I2C support
+>   arm: dts: owl-s500: Add SIRQ controller
+>   arm: dts: owl-s500-roseapplepi: Use UART clock from CMU
+>   arm: dts: owl-s500-roseapplepi: Add uSD support
+>   arm: dts: owl-s500-roseapplepi: Add I2C pinctrl configuration
+>   MAINTAINERS: Add linux-actions ML for Actions Semi Arch
+> 
+>  .../devicetree/bindings/dma/owl-dma.yaml      |   5 +-
+>  .../devicetree/bindings/i2c/i2c-owl.txt       |  29 ----
+>  .../devicetree/bindings/i2c/i2c-owl.yaml      |  62 ++++++++
+>  .../devicetree/bindings/mmc/owl-mmc.yaml      |   4 +-
+>  MAINTAINERS                                   |   3 +-
+>  arch/arm/boot/dts/owl-s500-roseapplepi.dts    |  97 +++++++++++-
+>  arch/arm/boot/dts/owl-s500.dtsi               | 140 ++++++++++++++++++
+>  drivers/dma/owl-dma.c                         |   1 +
+>  drivers/i2c/busses/i2c-owl.c                  |   1 +
+>  9 files changed, 304 insertions(+), 38 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/i2c/i2c-owl.txt
+>  create mode 100644 Documentation/devicetree/bindings/i2c/i2c-owl.yaml
+> 
+> -- 
+> 2.29.2
+> 
