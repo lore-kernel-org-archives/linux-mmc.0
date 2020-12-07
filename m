@@ -2,155 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C743C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Dec 2020 20:40:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14C7BC1B0E3
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Dec 2020 23:01:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D14042368A
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Dec 2020 20:40:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9C13239EE
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Dec 2020 23:01:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725933AbgLGUkQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Dec 2020 15:40:16 -0500
-Received: from ssl.serverraum.org ([176.9.125.105]:54701 "EHLO
-        ssl.serverraum.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725814AbgLGUkQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Dec 2020 15:40:16 -0500
-Received: from ssl.serverraum.org (web.serverraum.org [172.16.0.2])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ssl.serverraum.org (Postfix) with ESMTPSA id 0BFBF22E0A;
-        Mon,  7 Dec 2020 21:39:33 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=walle.cc; s=mail2016061301;
-        t=1607373573;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=99gx2cWANtw7xbgXmiVd706Ja27zb5HI7XI/tfZcAoQ=;
-        b=VjM5ehjWW56mCDj/RZGZ6fgh1Jr0pn/PbdVw4mFG46Ad1ezv8AjKzL8eBOwATYcCgTKbkv
-        6bOVcV/fNP5Y2MzvmhHsxmycff6Xg03odmS8uOzxt5k4keXLHZQI7utj9WR6YwqB8ceGGT
-        KjAaFOJ62GuTI1gOE1WdOOTuHcSAxxM=
+        id S1728017AbgLGXBo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Dec 2020 18:01:44 -0500
+Received: from mail-ot1-f65.google.com ([209.85.210.65]:44446 "EHLO
+        mail-ot1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727550AbgLGXBo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Dec 2020 18:01:44 -0500
+Received: by mail-ot1-f65.google.com with SMTP id f16so14149503otl.11;
+        Mon, 07 Dec 2020 15:01:29 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Yl8EdReeQNPvvWTCsgwnxMYnKdzktt93AM6rTiMbYOg=;
+        b=Ehq5UaAFy4kQXLv0OkwYpVUZF+H+2msmvSe15RaKBWXOUFeqcyaOc6A59+G9dq5MXP
+         Kn7aGWVrp/fBkuwZjPznGMbUjFLuG2Yt1KvBj+Mk7yZ/2rgF8pcPu8ynxAuyUbqOWl5o
+         zMbMTUSp5vWVqQI7HIBFSlxiYrdldbzYryZbqr826rxy5jOtlOoKtzC6KMMvIes0B4Bs
+         QdeV06jPzjl5QvzsWWYPeczMnxCGDinjDlJjT+J42gKKD+qlKLAfOZ2JXk64V3fD/RVi
+         5cQLtcq2SH1eTxp1T26JL2twL/AA8JLjXVMDLPt04Ox5ud4oaw4zQGLw/0x4UoPMGdRL
+         UINg==
+X-Gm-Message-State: AOAM531N2bALuq2akjc3PzZ8DiUv1Ar48TpnKoh/ZG9x8iRzNeO9ThFQ
+        ogzyoTnZw0xXDpIIJ4x8bA==
+X-Google-Smtp-Source: ABdhPJy4o+KKt2VsZ8/Ja1T2ELpm7ZEgXBUA9XH7X4kKGoAM+PzLDIBf1VLVvm2YaJvvjKBoOgHo3w==
+X-Received: by 2002:a9d:6c96:: with SMTP id c22mr12740600otr.196.1607382062820;
+        Mon, 07 Dec 2020 15:01:02 -0800 (PST)
+Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id v123sm3264882oie.20.2020.12.07.15.01.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 07 Dec 2020 15:01:02 -0800 (PST)
+Received: (nullmailer pid 1008235 invoked by uid 1000);
+        Mon, 07 Dec 2020 23:01:01 -0000
+Date:   Mon, 7 Dec 2020 17:01:01 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Zhen Lei <thunder.leizhen@huawei.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        linux-mediatek <linux-mediatek@lists.infradead.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>
+Subject: Re: [PATCH 1/1] dt-bindings: mmc: eliminate yamllint warnings
+Message-ID: <20201207230101.GA1008158@robh.at.kernel.org>
+References: <20201207032626.1445-1-thunder.leizhen@huawei.com>
+ <20201207032626.1445-2-thunder.leizhen@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Mon, 07 Dec 2020 21:39:32 +0100
-From:   Michael Walle <michael@walle.cc>
-To:     "Theodore Y. Ts'o" <tytso@mit.edu>
-Cc:     linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-block@vger.kernel.org
-Subject: Re: discard feature, mkfs.ext4 and mmc default fallback to normal
- erase op
-In-Reply-To: <20201207183534.GA52960@mit.edu>
-References: <97c4bb65c8a3e688b191d57e9f06aa5a@walle.cc>
- <20201207183534.GA52960@mit.edu>
-User-Agent: Roundcube Webmail/1.4.9
-Message-ID: <2edcf8e344937b3c5b92a0b87ebd13bd@walle.cc>
-X-Sender: michael@walle.cc
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20201207032626.1445-2-thunder.leizhen@huawei.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ted,
-
-Am 2020-12-07 19:35, schrieb Theodore Y. Ts'o:
-> On Mon, Dec 07, 2020 at 04:10:27PM +0100, Michael Walle wrote:
->> Hi,
->> 
->> The problem I'm having is that I'm trying to install debian on
->> an embedded system onto an sdcard. During installation it will
->> format the target filesystem, but the "mkfs.ext4 -F /dev/mmcblk0p2"
->> takes ages.
->> 
->> What I've found out so far:
->>  - mkfs.ext4 tries to discard all blocks on the target device
->>  - with my target device being an sdcard it seems to fallback
->>    to normal erase [1], with erase_arg being set to what the card
->>    is capable of [2]
->> 
->> Now I'm trying to figure out if this behavior is intended. I guess
->> one can reduce it to "blkdiscard /dev/mmcblk0p2". Should this
->> actually fall back to normal erasing or should it return -EOPNOTSUPP?
+On Mon, 07 Dec 2020 11:26:26 +0800, Zhen Lei wrote:
+> Eliminate the following yamllint warnings:
+> ./Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> :20:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+> :30:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
+> :33:9: [warning] wrong indentation: expected 10 but found 8 (indentation)
 > 
-> There are three different MMC commands which are defined:
+> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 26 +++++++++++------------
+>  1 file changed, 13 insertions(+), 13 deletions(-)
 > 
-> 1) DISCARD
-> 2) ERASE
-> 3) SECURE ERASE
-> 
-> The first two are expected to be fast, since it only involves clearing
-> some metadata fields in the Flash Translation Layer (FTL), so that the
-> LBA's in the specified range are no longer mapped to a flash page.
 
-Mh, where is it specified that the erase command is fast? According
-to the Physical Layer Simplified Specification Version 8.00:
-
-  The actual erase time may be quite long, and the host may issue CMD7
-  to deselect the card or perform card disconnection, as described in
-  the Block Write section, above.
-
-Honest question. Also reading "4.14 Erase Timeout Calculation" doesn't
-sound that it is fast.
-
-Also there is this comment:
-https://elixir.bootlin.com/linux/v5.9.12/source/drivers/mmc/core/core.c#L1495
-
-> The difference between "discard" and "erase" is that "discard" is a
-> hint, so the device is allowed to ignore it whenever it wants (in
-> practice, if it's busy doing a GC, or if it's busy writing back blocks
-> in its writeback cache).  "Erase" is guaranteed to work, in that after
-> an erase, a read from a specified sector MUST return all zeros, but
-> that can easily be done by redirecting a point in the FTL metadata.
-> 
-> "Secure Erase" is the one which can be slow, since it requires
-> physically zeroing all of the flash pages (although if the device is
-> self-encrypting, this in theory could also be fast if you're doing a
-> secure erase at the granularity of the device's encryption keys, so
-> all it needs to do is to regenerate the crypto key).
-> 
-> It sounds like your SD card is implementing the "erase" command in a
-> particularly non-optimal way.  If it's common, perhaps we need some
-> kind of blacklist for drivers with badly implemented erase commands.
-> As a workaround, you can run mke2fs with the command-line option "-E
-> discard=0".
-
-I've already tested that "mkfs.ext4 -E nodiscard" is fast (or works in
-the same way as before the pre-discard feature).
-
-But I wouldn't say it is a cheapo card (Toshiba Exceria). Although I
-cannot guarantee that it might be a china clone, but it looks authentic
-;)
-
-
-> P.S.  If your SD card got "erase" wrong, I'd be a little worried about
-> what else the FTL implementation may have screwed up.  So you want to
-> under simply getting a different SD card --- especially if this is
-> something that you plan to distribute as a product to downstream
-> customers.  In general, low-end flash needs to be very carefully
-> qualified to make sure they are competently implemented if you plan to
-> deploy in large quantities.  An example of what happen if this
-> qualification process is not done:
-> 
-> https://insideevs.com/news/376037/tesla-mcu-emmc-memory-issue/
-> 
-> Tesla is currently under investigation by the National Highway Traffic
-> Safety Administration due to cheaping out on their eMMC flash
-> (probably just a few pennies per unit).  Given that customers are
-> having to pay $1500 to replace their engine controller out of warranty
-> (and the NHTSA is considering whether or not to force Tesla to eat the
-> costs, as opposed to forcing their customers to pay $$$), that's an
-> example of false economy....
-
-Yeah I'm aware of the Tesla eMMC wear-out problem. But I've seen this
-esp. from a user point of view. Like take our product, where the user
-can freely choose its sdcard just to then notice that the installation
-of its distribution is painfully slow. So I'm interested in 
-understanding
-the implications. Like is it really the case that the erase command can
-be assumed fast.
-
--michael
+Reviewed-by: Rob Herring <robh@kernel.org>
