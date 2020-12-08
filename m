@@ -2,129 +2,192 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C5EEC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 08:49:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A9B3C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 09:51:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E75C023A7D
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 08:49:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3CF3923A82
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 09:51:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726228AbgLHIti (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Dec 2020 03:49:38 -0500
-Received: from mga09.intel.com ([134.134.136.24]:18181 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725927AbgLHIti (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Dec 2020 03:49:38 -0500
-IronPort-SDR: llUxlM0XzVXBBN1SffG6Z6aC+VRx4ZM3kYwRc8kUP1IZPxk8G+RZebdvTX+ZVd8DwkfFkOkiwt
- mereTPu+h73Q==
-X-IronPort-AV: E=McAfee;i="6000,8403,9828"; a="174002494"
-X-IronPort-AV: E=Sophos;i="5.78,402,1599548400"; 
-   d="scan'208";a="174002494"
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Dec 2020 00:48:51 -0800
-IronPort-SDR: pMczkkcSRYKv/O4u8W5KLpKfRiGFd5mjH1wslwYA8X5ddg7EHrvtiH8YMX2mtQ5UH5SdUgMe/r
- x4y2bWuiNdPA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,402,1599548400"; 
-   d="scan'208";a="347815745"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by orsmga002.jf.intel.com with ESMTP; 08 Dec 2020 00:48:49 -0800
-Subject: Re: [RFC PATCH v3.1 00/27] Add support UHS-II for GL9755
-To:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
-        greg.tu@genesyslogic.com.tw
-References: <20201106022726.19831-1-takahiro.akashi@linaro.org>
- <20201125074125.GC62993@laputa>
- <c8f7e9ad-3e8d-01cc-edeb-5be364bfcc36@intel.com>
- <20201201030937.GE43403@laputa>
- <523f9ed9-318e-7121-d58d-c3843d9b9b7c@intel.com>
- <20201208075815.GC31973@laputa>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <5eef5f29-624e-6413-dd9a-eacebf75fbc0@intel.com>
-Date:   Tue, 8 Dec 2020 10:48:45 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1728148AbgLHJuo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Dec 2020 04:50:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50814 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727273AbgLHJuo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2020 04:50:44 -0500
+Received: from mail-vk1-xa2c.google.com (mail-vk1-xa2c.google.com [IPv6:2607:f8b0:4864:20::a2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00432C061793
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Dec 2020 01:50:03 -0800 (PST)
+Received: by mail-vk1-xa2c.google.com with SMTP id j142so3796619vkj.9
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2020 01:50:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=I2kZdU6xAATA8afPjSbaUFvj53IL1FloZ2Fcg9Z0qb0=;
+        b=SbL5adQziQdh41QS9rIWevrpl3jNzf2hMWA39qV7Sr++gAmUeFcJzR4+3YHe+6yILx
+         YtOvysRrbLU1FP7a9pLUytPmGXtujjXe3bXyV7s0WdpDty84gRtTgZfyhQecMcrntVsF
+         Z4Lc2HHJOHgSZoic98FIlLGMDp6wqgM8GvwMp3G/vG1jpgzAnH/4Y3gHEb6ad+8Zym5J
+         Sy66uy7282XP8fWthAgR7ZVKE7ozfXfFH2+76CqlhX9ILWBSkBawPEXWXqHZ7FYMmRY2
+         BukxA4fnWQr5W5bO0p1KlB2dTxn8e4tBnUOk1gbxB05Vbhnx8bu2vh2i3eD1ZCZRvwaP
+         VNHA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=I2kZdU6xAATA8afPjSbaUFvj53IL1FloZ2Fcg9Z0qb0=;
+        b=nWuh3i2LSsAdtyVLDBF1+aty5fqMeMlH4rYkyP3VbCojtPhNU2av0AWnHMQ4jXQ/iw
+         EwJpmBZ8cLg9KrNz9blJc74FOUAwa1h7MKw2kulNyAKoRdMvYiayAp1Vfjgcwj+dagQV
+         /4h941HiFyE2/2A+98uRAAI3KXE+8cnkxfvTtUllaj4wOTBEcnH5GWWYY7ure4pE5KRd
+         9XcE3S0NshSCltLXWCobVs4Jk83dH/VovsNvpndk1FMPTHr6aURzmcbLxYqvLIKd0Vfk
+         OqtBKKPGj4F6EuVpDgdr6oi+EL2gR53gFlj1qtu8eppgHOsPydo968WfNgwAiNxIpcIL
+         m/pQ==
+X-Gm-Message-State: AOAM532/HWS15UzGzLoQjmzrYKbea1Rdt1nMUlytRElvrJVV/IR1/uE0
+        aENuzDKsK66Dk2U5b5SPbFr06zpK2nJF831AQXWpRA==
+X-Google-Smtp-Source: ABdhPJz9FLrnfEq+ttBq7kxXr5aUvSnFrr/unwT7mZDLOoTpuZGVnF+AL0GuhpkR0nPFa8fJgflwL9QbL2jgEflNe7I=
+X-Received: by 2002:a1f:8f48:: with SMTP id r69mr15757760vkd.6.1607421002919;
+ Tue, 08 Dec 2020 01:50:02 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20201208075815.GC31973@laputa>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <97c4bb65c8a3e688b191d57e9f06aa5a@walle.cc> <20201207183534.GA52960@mit.edu>
+ <2edcf8e344937b3c5b92a0b87ebd13bd@walle.cc> <20201208024057.GC52960@mit.edu>
+In-Reply-To: <20201208024057.GC52960@mit.edu>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 8 Dec 2020 10:49:26 +0100
+Message-ID: <CAPDyKFpY+M_FVXCyeg+97jAgDSqhGDTNoND8CQDMWH-e09KGKQ@mail.gmail.com>
+Subject: Re: discard feature, mkfs.ext4 and mmc default fallback to normal
+ erase op
+To:     "Theodore Y. Ts'o" <tytso@mit.edu>,
+        Michael Walle <michael@walle.cc>
+Cc:     linux-ext4@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/12/20 9:58 am, AKASHI Takahiro wrote:
-> Adrian,
-> 
-> On Thu, Dec 03, 2020 at 11:55:23AM +0200, Adrian Hunter wrote:
->> On 1/12/20 5:09 am, AKASHI Takahiro wrote:
->>> Adrian,
->>>
->>> Thank you for your review comments.
->>>
->>> On Thu, Nov 26, 2020 at 10:18:55AM +0200, Adrian Hunter wrote:
->>>> On 25/11/20 9:41 am, AKASHI Takahiro wrote:
->>>>> Gentle ping;
->>>>>
->>>>> On Fri, Nov 06, 2020 at 11:26:59AM +0900, AKASHI Takahiro wrote:
->>>>>> This is an interim snapshot of our next version, v4, for enabling
->>>>>> UHS-II on MMC/SD.
->>>>>>
->>>>>> It is focused on 'sdhci' side to address Adrian's comments regarding
->>>>>> "modularising" sdhci-uhs2.c.
->>>>>> The whole aim of this version is to get early feedback from Adrian (and
->>>>>> others) on this issue. Without any consensus about the code structure,
->>>>>
->>>>> Any comments so far?
->>>>>
->>>>
->>>> Overall, I like this approach of separating UHS2 from legacy sdhci as much
->>>> as possible.  The only major change, is to drop support for legacy quirks
->>>> and features that you do not need.  The reason for that, is that there may
->>>> be few drivers that end up with UHS-II support (opting instead for SD
->>>> Express), so there is no point going to a lot of trouble to support things
->>>> that never get used.
->>>>
->>>> From what I have seen that looks like it includes:
->>>> 	- any quirks
->>>
->>> GLI driver (gl9755) needs
->>>   * SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC
->>>   * SDHCI_QUIRK2_BROKEN_DDR50
->>> but they are managed in sdhci code.
->>>
->>>> 	- SDHCI LED support
->>>> 	- external DMA support
->>>
->>> Should we add 'depends on !SDHCI_UHS2' to MMC_SDHCI_EXTERNAL_DMA?
->>>
->>>> In this regard, the important thing is to have a comment somewhere that
->>>> lists what is not supported.
->>>>
->>>> I have only looked at SDHCI patches so far, and only up to about patch 20,
->>>> but maybe that gives you enough to go on for a while.
->>>
->>> Well, I have almost done.
->>> Can I expect your comments on the patches #21-#27 as well soon?
->>
->> I have made some more comments and that is all for now, except for anything
->> more you wish to discuss.
-> 
-> Thank you.
-> I assume that you don't have any objection against adding extra hooks
-> to sdhci_ops in patch#23 and #25, do you?
+Hi Ted, Michael,
 
-No objections at the moment.
+On Tue, 8 Dec 2020 at 03:41, Theodore Y. Ts'o <tytso@mit.edu> wrote:
+>
+> On Mon, Dec 07, 2020 at 09:39:32PM +0100, Michael Walle wrote:
+> > > There are three different MMC commands which are defined:
+> > >
+> > > 1) DISCARD
+> > > 2) ERASE
+> > > 3) SECURE ERASE
+> > >
+> > > The first two are expected to be fast, since it only involves clearing
+> > > some metadata fields in the Flash Translation Layer (FTL), so that the
+> > > LBA's in the specified range are no longer mapped to a flash page.
+> >
+> > Mh, where is it specified that the erase command is fast? According
+> > to the Physical Layer Simplified Specification Version 8.00:
+> >
+> >  The actual erase time may be quite long, and the host may issue CMD7
+> >  to deselect thhe card or perform card disconnection, as described in
+> >  the Block Write section, above.
 
-> 
-> If so, since we don't have any critical issues to discuss,
-> I hope that my changes will be contained in the new version
-> where a major rework will be done on the core side by Ben.
+Before I go into some more detail, of course I fully agree that
+dealing with erase/discard from the eMMC/SD specifications (and other
+types of devices) point of view isn't entirely easy. :-)
 
-Ok
+But I also think we can do better than currently, at least for eMMC/SD.
+
+>
+> I looked at the eMMC specification from JEDEC (JESD84-A44) and there,
+> both the "erase" and "trim" are specified that the work is to be
+> queued to be done at a time which is convenient to the controller
+> (read: FTL).  This is in contrast to the "secure erase" and "secure
+> trim" commands, where the erasing has to be done NOW NOW NOW for "high
+> security applications".
+>
+> The only difference between "erase" and "trim" seems to be that erahse
+> has to be done in units of the "erase groups" which is typically
+> larger than the "write pages" which is the granularity required by the
+> trim command.  There is also a comment that when you are erasing the
+> entire partition, "erase" is preferred over "trim".  (Presumably
+> because it is more convenient?  The spec is not clear.)
+>
+> Unfortunately, the SD Card spec and the eMMC spec both read like they
+> were written by a standards committee stacked by hardware engineers.
+> It doesn't look like they had file system engineers in the room,
+> because the distinctions between "erase" and "trim" are pretty silly,
+> and not well defined.  Aside from what I wrote, the spec is remarkably
+> silent about what the host OS can depend upon.
+
+Moreover, the specs have evolved over the years. Somehow, we need to
+map a REQ_OP_DISCARD and REQ_OP_SECURE_ERASE to the best matching
+operation that the currently inserted eMMC/SD card supports...
+
+Long time time ago, both the SD and eMMC spec introduced support for
+real discards commands, as being hints to the card without any
+guarantees of what will happen to the data from a logical or a
+physical point of view. If the card supports that, we should use it as
+the first option for REQ_OP_DISCARD. Although, what should we pick as
+the second best option, when the card doesn't support discard - that's
+when it becomes more tricky. And the similar applies for
+REQ_OP_SECURE_ERASE, or course.
+
+If you have any suggestions for how we can improve in the above
+decisions, feel free to suggest something.
+
+Another issue that most likely is causing poor performance for
+REQ_OP_DISCARD/REQ_OP_SECURE_ERASE for eMMC/SD, is that in
+mmc_queue_setup_discard() we set up the maximum discard sectors
+allowed per request and the discard granularity.
+
+To find performance bottlenecks, I would start looking at what actual
+eMMC/SD commands/args we end up mapping towards the
+REQ_OP_DISCARD/REQ_OP_SECURE_ERASE requests. Then definitely, I would
+also look at the values we end up picking as max discard sectors and
+the discard granularity.
+
+>
+> From the fs perspective, what we care about is whether or not the
+> command is a hint or a reliable way to zero a range of sectors.  A
+> command could be a hint if the device is allowed to ignore it, or if
+> the values of the sector are indeterminate, or if the sectors are
+> zero'ed or not could change after a power cycle.  (I've seen an
+> implementation where discard would result in the LBA's being read as
+> zero --- but after a power cycle, reading from the same LBA would
+> return the old data again.  This is standards complaint, but it's not
+> terribly useful.)
+
+:-)
+
+>
+> Assuming that the command is reliable, the next question is whether
+> the erase operation is logical or physical --- which is to say, if an
+> attacker has physical access to the die, with the ability to bypass
+> the FTL and directly read the flash cells, could the attack retrieve
+> the data, even if it required a distructive, physical attack on the
+> hardware?  A logical erase would not require that the data be erased
+> or otherwise made inaccessible against an attacker who bypasses the
+> FTL; a physical erase would provide security guarantees that even if
+> your phone has handed over to state-sponsored attacker, that nothing
+> could be extracted after a physical erase.
+>
+> So if I were king, those would be the three levels of discard: "hint",
+> "reliable logical", and "reliable physical", as those map to real use
+> cases that are of actual use to a Host.  The challenge is mapping what
+> we *actually* are given by different specs, which were written by
+> hardware engineers and make distinctions that are not well defined so
+> that multiple implementations can be "standard compliant", but have
+> completely different performance profiles, thus making life easy for
+> the marketing types, and hard for the file system engineers.  :-)
+
+I agree, these are the three levels that make sense to support.
+
+Honestly I haven't been paying enough attention to discussions for the
+generic block layer around discards. However, considering what you
+just stated above, we seem to be missing one request operation, don't
+we?
+
+[...]
+
+Kind regards
+Uffe
