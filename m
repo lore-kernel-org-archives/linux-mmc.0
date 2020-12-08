@@ -2,111 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29789C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 01:28:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86CB3C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 02:41:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F3E7C23A51
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 01:28:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 29905235F9
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 02:41:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727346AbgLHB23 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Dec 2020 20:28:29 -0500
-Received: from out3-smtp.messagingengine.com ([66.111.4.27]:37517 "EHLO
-        out3-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725972AbgLHB23 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Dec 2020 20:28:29 -0500
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.nyi.internal (Postfix) with ESMTP id 80C025C02DC;
-        Mon,  7 Dec 2020 20:26:47 -0500 (EST)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute3.internal (MEProxy); Mon, 07 Dec 2020 20:26:47 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=from
-        :to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=fm1; bh=3IBtn55EkJHpw
-        BMNVFMzrRkc/Dri1oJfvyFIx80EIec=; b=HOrKkGGU54aa/nR35X9Kj8yXMJCeY
-        IjXXO3jbZYGYbVCKSznAHCAWhyIqM8fMu+oKLIZAIvwo73DLj9csrjBYMkr8z/S3
-        eFH4D3YpFl2Ylksy0gj9hmGq777TUiODgEvW1nyf4ivDpcExAvI7rwIxVY2MHhxQ
-        N7QZ3nkyBuwANVO/mrvYoEHGiul7S0LU75PBPo/56ZjVUl1r+c9KvF5SpndhmQXO
-        FgofsZ9yEFWgOlmJR68Cxmhd9LkCrRijALCKHxV4cGO7obq51jwRzlx552hXvd+7
-        b6BrHHXpPhEDoJsNsT3LQOy7ddrQWj3ydp6MhDuoj3qyd3z5D1q+gbEUA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:date:from
-        :in-reply-to:message-id:mime-version:references:subject:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm1; bh=3IBtn55EkJHpwBMNVFMzrRkc/Dri1oJfvyFIx80EIec=; b=QMc5W5vY
-        r57m19gNrpmhHrPrUz5LGCyIjKgJdarW2fhKH4MuzhVdsJbR6ZpuP6DoBe6VWk0w
-        tHMgZ/fWibbAWhKbxFFOPIgLVvx3k/jEk0Z/bhd3E3xc07fbf3yLZR0k+iiL8Ghm
-        WJhlq+45iBV5xqQXIdKGeoiYtQAdIELkC+2Vsh9X8Q/L3lJBi0iOuaELvPDm/hGu
-        f1BWaaW0r45AgtlpaIHMYQCBHxmFn6wooZq42aE1e7fPnmMSU7CyVMY9BpCyDM+n
-        8L6uS7rkF5CMy5tnPi+i5H9hyg2gJEoMznN0lrtOix8vthaVOZLn3c7pAxgUD3zl
-        wobmF0LLqnCZnQ==
-X-ME-Sender: <xms:V9bOX5oQxsWQecY4LuvHV44cyL4I5f4tj6EUWn8KV5lwxB1ZP9WBUA>
-    <xme:V9bOX7qJLUroLK-lii7oqm0_wamsUWvH45vRDVvduSd8xUt63GNjemOxWPfdm-tig
-    qDz_FuBQrGhxGBZcA>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudejhedgfeehucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucenucfjughrpefhvffufffkofgjfhgggfestdekre
-    dtredttdenucfhrhhomheptehnughrvgifucflvghffhgvrhihuceorghnughrvgifsegr
-    jhdrihgurdgruheqnecuggftrfgrthhtvghrnhepjefgvdevheetkeevgeegleelgfelte
-    etjeffleffvdduudevieffgeetleevhfetnecukfhppedvtdefrdehjedrvddtkedrudeg
-    ieenucevlhhushhtvghrufhiiigvpeefnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrnh
-    gurhgvfiesrghjrdhiugdrrghu
-X-ME-Proxy: <xmx:V9bOX2MY-blarMJSvNaLBheeK6dbEkDENeAb6PTjpTtwONvTQYdN6A>
-    <xmx:V9bOX07AH5VqmKVK5NJT0lOqwMBDEhhppZ8jC85zODMYVb2Ok4rbxg>
-    <xmx:V9bOX465di3pGdsmwovGNyKD2VJzqz1zuSe6xrN9w5qO1JvgOV4wcw>
-    <xmx:V9bOX3b2VEsLnmkMkIkvraBBtKGBfUncR2a31ckdn4-Y9rmgZ6hBlg>
-Received: from localhost.localdomain (203-57-208-146.dyn.iinet.net.au [203.57.208.146])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 09B38108005B;
-        Mon,  7 Dec 2020 20:26:43 -0500 (EST)
-From:   Andrew Jeffery <andrew@aj.id.au>
-To:     linux-mmc@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org, joel@jms.id.au,
-        adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-aspeed@lists.ozlabs.org, ryan_chen@aspeedtech.com
-Subject: [PATCH v5 5/6] MAINTAINERS: Add entry for the ASPEED SD/MMC driver
-Date:   Tue,  8 Dec 2020 11:56:14 +1030
-Message-Id: <20201208012615.2717412-6-andrew@aj.id.au>
-X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20201208012615.2717412-1-andrew@aj.id.au>
-References: <20201208012615.2717412-1-andrew@aj.id.au>
+        id S1727623AbgLHClr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Dec 2020 21:41:47 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:41626 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726418AbgLHClr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Dec 2020 21:41:47 -0500
+Received: from callcc.thunk.org (pool-72-74-133-215.bstnma.fios.verizon.net [72.74.133.215])
+        (authenticated bits=0)
+        (User authenticated as tytso@ATHENA.MIT.EDU)
+        by outgoing.mit.edu (8.14.7/8.12.4) with ESMTP id 0B82evWA024426
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 7 Dec 2020 21:40:58 -0500
+Received: by callcc.thunk.org (Postfix, from userid 15806)
+        id AAC93420136; Mon,  7 Dec 2020 21:40:57 -0500 (EST)
+Date:   Mon, 7 Dec 2020 21:40:57 -0500
+From:   "Theodore Y. Ts'o" <tytso@mit.edu>
+To:     Michael Walle <michael@walle.cc>
+Cc:     linux-ext4@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-block@vger.kernel.org
+Subject: Re: discard feature, mkfs.ext4 and mmc default fallback to normal
+ erase op
+Message-ID: <20201208024057.GC52960@mit.edu>
+References: <97c4bb65c8a3e688b191d57e9f06aa5a@walle.cc>
+ <20201207183534.GA52960@mit.edu>
+ <2edcf8e344937b3c5b92a0b87ebd13bd@walle.cc>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2edcf8e344937b3c5b92a0b87ebd13bd@walle.cc>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add myself as the maintainer.
+On Mon, Dec 07, 2020 at 09:39:32PM +0100, Michael Walle wrote:
+> > There are three different MMC commands which are defined:
+> > 
+> > 1) DISCARD
+> > 2) ERASE
+> > 3) SECURE ERASE
+> > 
+> > The first two are expected to be fast, since it only involves clearing
+> > some metadata fields in the Flash Translation Layer (FTL), so that the
+> > LBA's in the specified range are no longer mapped to a flash page.
+> 
+> Mh, where is it specified that the erase command is fast? According
+> to the Physical Layer Simplified Specification Version 8.00:
+> 
+>  The actual erase time may be quite long, and the host may issue CMD7
+>  to deselect thhe card or perform card disconnection, as described in
+>  the Block Write section, above.
 
-Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
----
- MAINTAINERS | 9 +++++++++
- 1 file changed, 9 insertions(+)
+I looked at the eMMC specification from JEDEC (JESD84-A44) and there,
+both the "erase" and "trim" are specified that the work is to be
+queued to be done at a time which is convenient to the controller
+(read: FTL).  This is in contrast to the "secure erase" and "secure
+trim" commands, where the erasing has to be done NOW NOW NOW for "high
+security applications".
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index e451dcce054f..eae4322aae67 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -2826,6 +2826,15 @@ F:	Documentation/devicetree/bindings/interrupt-controller/aspeed,ast2xxx-scu-ic.
- F:	drivers/irqchip/irq-aspeed-scu-ic.c
- F:	include/dt-bindings/interrupt-controller/aspeed-scu-ic.h
- 
-+ASPEED SD/MMC DRIVER
-+M:	Andrew Jeffery <andrew@aj.id.au>
-+L:	linux-aspeed@lists.ozlabs.org (moderated for non-subscribers)
-+L:	openbmc@lists.ozlabs.org (moderated for non-subscribers)
-+L:	linux-mmc@vger.kernel.org
-+S:	Maintained
-+F:	Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-+F:	drivers/mmc/host/sdhci-of-aspeed*
-+
- ASPEED VIDEO ENGINE DRIVER
- M:	Eddie James <eajames@linux.ibm.com>
- L:	linux-media@vger.kernel.org
--- 
-2.27.0
+The only difference between "erase" and "trim" seems to be that erahse
+has to be done in units of the "erase groups" which is typically
+larger than the "write pages" which is the granularity required by the
+trim command.  There is also a comment that when you are erasing the
+entire partition, "erase" is preferred over "trim".  (Presumably
+because it is more convenient?  The spec is not clear.)
 
+Unfortunately, the SD Card spec and the eMMC spec both read like they
+were written by a standards committee stacked by hardware engineers.
+It doesn't look like they had file system engineers in the room,
+because the distinctions between "erase" and "trim" are pretty silly,
+and not well defined.  Aside from what I wrote, the spec is remarkably
+silent about what the host OS can depend upon.
+
+From the fs perspective, what we care about is whether or not the
+command is a hint or a reliable way to zero a range of sectors.  A
+command could be a hint if the device is allowed to ignore it, or if
+the values of the sector are indeterminate, or if the sectors are
+zero'ed or not could change after a power cycle.  (I've seen an
+implementation where discard would result in the LBA's being read as
+zero --- but after a power cycle, reading from the same LBA would
+return the old data again.  This is standards complaint, but it's not
+terribly useful.)
+
+Assuming that the command is reliable, the next question is whether
+the erase operation is logical or physical --- which is to say, if an
+attacker has physical access to the die, with the ability to bypass
+the FTL and directly read the flash cells, could the attack retrieve
+the data, even if it required a distructive, physical attack on the
+hardware?  A logical erase would not require that the data be erased
+or otherwise made inaccessible against an attacker who bypasses the
+FTL; a physical erase would provide security guarantees that even if
+your phone has handed over to state-sponsored attacker, that nothing
+could be extracted after a physical erase.
+
+So if I were king, those would be the three levels of discard: "hint",
+"reliable logical", and "reliable physical", as those map to real use
+cases that are of actual use to a Host.  The challenge is mapping what
+we *actually* are given by different specs, which were written by
+hardware engineers and make distinctions that are not well defined so
+that multiple implementations can be "standard compliant", but have
+completely different performance profiles, thus making life easy for
+the marketing types, and hard for the file system engineers.  :-)
+
+All I can tell you is that I know a bunch of Android system team
+members at $WORK, and the current assumptions seem to work just fine
+for the sorts of devices that are used on mobile handsets --- even
+really cheap ones that are sold in India.  At least, there are bunch
+of "cost optimized" (as well as high end) Android devices running
+ext4, and no one has complained to me about mke2fs taking a long time.
+
+I definitely agree with you that the SD Card spec seems to imply that
+other standards-compliant implementations could have the erase command
+taking minutes, and this seems to be allowable by the spec.  I would
+consider this to be a flaw in the spec, myself.  But I don't sit on
+the standards committess, and I don't write the specs.  I (and
+everyone else) just have to live with them.   Sigh....
+
+	       	    	    	      - Ted
