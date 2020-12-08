@@ -2,81 +2,206 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15A16C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 15:39:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2184FC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 16:18:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C572123A7B
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 15:39:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DDD7323A02
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Dec 2020 16:18:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729665AbgLHPjM convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Dec 2020 10:39:12 -0500
-Received: from aposti.net ([89.234.176.197]:45206 "EHLO aposti.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729572AbgLHPjM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Dec 2020 10:39:12 -0500
-Date:   Tue, 08 Dec 2020 15:38:14 +0000
-From:   Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH] mmc: mediatek: mark PM functions as __maybe_unused
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Chun-Hung Wu <chun-hung.wu@mediatek.com>,
-        yong mao <yong.mao@mediatek.com>,
-        Amey Narkhede <ameynarkhede03@gmail.com>,
-        Marek Vasut <marex@denx.de>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        ARM/Mediatek SoC support <linux-mediatek@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
-Message-Id: <Q321LQ.JCBWCTTZDHME3@crapouillou.net>
-In-Reply-To: <CAK8P3a21gkBsb3rcNvzH3XA_0GRRKPgnsrynTTO=EZVwy6DC+g@mail.gmail.com>
-References: <20201203222922.1067522-1-arnd@kernel.org>
-        <CAPDyKFqtFYqc8i_fVzOUnuZGJjtwjVLqE-vebtOKuYJ-4PrDBg@mail.gmail.com>
-        <CAK8P3a3srmTdY69j+g-wazMkrTL8_Grsw=vCMyizyA_7oOC4tg@mail.gmail.com>
-        <IVYYKQ.T5GFS8Z1QTP2@crapouillou.net>
-        <CAK8P3a21gkBsb3rcNvzH3XA_0GRRKPgnsrynTTO=EZVwy6DC+g@mail.gmail.com>
+        id S1728812AbgLHQSo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Dec 2020 11:18:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54446 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727113AbgLHQSo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Dec 2020 11:18:44 -0500
+Received: from mail-ua1-x92b.google.com (mail-ua1-x92b.google.com [IPv6:2607:f8b0:4864:20::92b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFABEC061793
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Dec 2020 08:18:03 -0800 (PST)
+Received: by mail-ua1-x92b.google.com with SMTP id x13so5777450uar.4
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Dec 2020 08:18:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=mbhQFLdCZ96w5QgWAp8Vujq+g3QNVh3Nk4mA27hHp4E=;
+        b=AgMVHkahg2pNl5nrPVCbBT6B42GivboG1Yz/6C5NBBO/M2kq7nj3AtQORQH/Tz3SDy
+         hqq7b0OosMo40YDshPaDilSCSjaj5ZYq5hI5tdW4Uig/9HxEIQVvlQGSok/vW2+tOtzK
+         JthEGykf4eNRVxdThvsfkJFLbHgoDpquHPVXZONp2qrH4Jrf2cV+UMDxtzW8884yaoAW
+         wyceVnJbTTdL1ZqHpGr1A3XNDe8NCxKMumXB5CSDv7Lvh/vs2lLQxrM98Uv6WRx4fhp2
+         18NOUlunN2xd7t1OR+IAh1nabV3jHV6G2cBmuZh9KXWEMUtKR7mys+Kil346lysIVuK7
+         coqQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=mbhQFLdCZ96w5QgWAp8Vujq+g3QNVh3Nk4mA27hHp4E=;
+        b=CSQJQXpBNbdCTfm1aDWxVbzNmRmvwgws9ap4wC+xdpgZTitN6EiYqVRdTVdgOZ806J
+         daT8V8ayWrt8uClAnL0Qz9F7QDVuAiAERknk3HPu0LaQqXl9/88A/NMUdjRuhB7z5zDw
+         811VIQtfWiuaN8upBrCm4bMORLsXO9M9GKW457q9tEeOzs9GFh1ngT/l1Q71tqkKZjws
+         hkptrFAKrme2N581Benq9m+Z2jD62k/AWdq0Dz4x9zUb/rd/mmJoU83rFxGfhrNK+7lU
+         N1W89C2vgtGM369QiCNdN5Z2cQxN9eERkbEyDlf4m5YPVdUaOYLLV0rZZAVL555kWCn0
+         WT6g==
+X-Gm-Message-State: AOAM531cpyAZbRHaLwuAm/nAgfPwbAvEqFuGLhiEllRKHm+yNg4ilIhJ
+        +kpRy5Sq9TVFVFO5xrwpomAKf2BYX1l1Af7GnGobADHtoEB7wJFp
+X-Google-Smtp-Source: ABdhPJzxv8o/M3YY8OFK/T3OqqY6UqmQZxHO883P7R6h8izIJvHIhNlJw8HwiAOuyi446Y2TIIwJJBYA0FYRT8aSAMM=
+X-Received: by 2002:a9f:3e4b:: with SMTP id c11mr15703128uaj.19.1607444282471;
+ Tue, 08 Dec 2020 08:18:02 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1; format=flowed
-Content-Transfer-Encoding: 8BIT
+References: <97c4bb65c8a3e688b191d57e9f06aa5a@walle.cc> <20201207183534.GA52960@mit.edu>
+ <2edcf8e344937b3c5b92a0b87ebd13bd@walle.cc> <20201208024057.GC52960@mit.edu>
+ <CAPDyKFpY+M_FVXCyeg+97jAgDSqhGDTNoND8CQDMWH-e09KGKQ@mail.gmail.com> <d7041bbb403698ac1097f7740f364467@walle.cc>
+In-Reply-To: <d7041bbb403698ac1097f7740f364467@walle.cc>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 8 Dec 2020 17:17:26 +0100
+Message-ID: <CAPDyKFqFT9g8OnyxEOEiATgmkgdCceu_G3drKqX3NawxSDV0kg@mail.gmail.com>
+Subject: Re: discard feature, mkfs.ext4 and mmc default fallback to normal
+ erase op
+To:     Michael Walle <michael@walle.cc>
+Cc:     "Theodore Y. Ts'o" <tytso@mit.edu>, linux-ext4@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 8 Dec 2020 at 12:26, Michael Walle <michael@walle.cc> wrote:
+>
+> Hi Ulf, Hi Ted,
+>
+> Am 2020-12-08 10:49, schrieb Ulf Hansson:
+> > On Tue, 8 Dec 2020 at 03:41, Theodore Y. Ts'o <tytso@mit.edu> wrote:
+> >> On Mon, Dec 07, 2020 at 09:39:32PM +0100, Michael Walle wrote:
+> >> > > There are three different MMC commands which are defined:
+> >> > >
+> >> > > 1) DISCARD
+> >> > > 2) ERASE
+> >> > > 3) SECURE ERASE
+> >> > >
+> >> > > The first two are expected to be fast, since it only involves clearing
+> >> > > some metadata fields in the Flash Translation Layer (FTL), so that the
+> >> > > LBA's in the specified range are no longer mapped to a flash page.
+> >> >
+> >> > Mh, where is it specified that the erase command is fast? According
+> >> > to the Physical Layer Simplified Specification Version 8.00:
+> >> >
+> >> >  The actual erase time may be quite long, and the host may issue CMD7
+> >> >  to deselect thhe card or perform card disconnection, as described in
+> >> >  the Block Write section, above.
+> >
+> > Before I go into some more detail, of course I fully agree that
+> > dealing with erase/discard from the eMMC/SD specifications (and other
+> > types of devices) point of view isn't entirely easy. :-)
+> >
+> > But I also think we can do better than currently, at least for eMMC/SD.
+> >
+> >>
+> >> I looked at the eMMC specification from JEDEC (JESD84-A44) and there,
+> >> both the "erase" and "trim" are specified that the work is to be
+> >> queued to be done at a time which is convenient to the controller
+> >> (read: FTL).  This is in contrast to the "secure erase" and "secure
+> >> trim" commands, where the erasing has to be done NOW NOW NOW for "high
+> >> security applications".
+>
+> Oh this might also be because I've cited from the wrong place, namely
+> the
+> mmc_init_card() function. But what I really meant was the sd card
+> equivalent
+> which should be mmc_read_ssr(). Sorry.
+>
+>         discard_support = UNSTUFF_BITS(resp, 313 - 288, 1);
+>         card->erase_arg = (card->scr.sda_specx && discard_support) ?
+>                             SD_DISCARD_ARG : SD_ERASE_ARG;
 
+I assumed you were referring to this, but good that you pointed this
+out, for clarity.
 
-Le mar. 8 déc. 2020 à 15:04, Arnd Bergmann <arnd@kernel.org> a écrit 
-:
-> On Mon, Dec 7, 2020 at 1:33 PM Paul Cercueil <paul@crapouillou.net> 
-> wrote:
->>  Le ven. 4 déc. 2020 à 15:14, Arnd Bergmann <arnd@kernel.org> a 
->> écrit
-> 
->>  By the way, as I'm ending up doing the same in a different context, 
->> I
->>  think it would be useful to have a IF_ENABLED() macro defined like 
->> this:
->> 
->>  #define IF_ENABLED(_cfg, _ptr) (IS_ENABLED(_cfg) ? (_ptr) : NULL)
->> 
->>  Then the pm_ptr(_ptr) macro could be defined like this:
->> 
->>  #define pm_ptr(_ptr) IF_ENABLED(CONFIG_PM, _ptr)
-> 
-> I like that. Do you just want to go ahead and start with adding
-> IF_ENABLED() to your own branch then?
+>
+> >> The only difference between "erase" and "trim" seems to be that erahse
+> >> has to be done in units of the "erase groups" which is typically
+> >> larger than the "write pages" which is the granularity required by the
+> >> trim command.  There is also a comment that when you are erasing the
+> >> entire partition, "erase" is preferred over "trim".  (Presumably
+> >> because it is more convenient?  The spec is not clear.)
+> >>
+> >> Unfortunately, the SD Card spec and the eMMC spec both read like they
+> >> were written by a standards committee stacked by hardware engineers.
+> >> It doesn't look like they had file system engineers in the room,
+> >> because the distinctions between "erase" and "trim" are pretty silly,
+> >> and not well defined.  Aside from what I wrote, the spec is remarkably
+> >> silent about what the host OS can depend upon.
+> >
+> > Moreover, the specs have evolved over the years. Somehow, we need to
+> > map a REQ_OP_DISCARD and   to the best matching
+> > operation that the currently inserted eMMC/SD card supports...
+>
+> Do we really need to map these functions? What if we don't have an
+> actual discard, but just a slow erase (I'm now assuming that erase
+> will likely be slow on sdcards)? Can't we just tell the user space
+> there is no discard? Like on a normal HDD?
 
-Sure. I'll send a patch later today and Cc you (and linux-arm?).
+I have considered that, but not sure what would be the best option.
 
-Cheers,
--Paul
+> I really don't know the
+> implications, seems like mmc_erase() is just there for the linux
+> discard feature.
 
+mmc_erase() is used for both REQ_OP_DISCARD and REQ_OP_SECURE_ERASE,
+but that's an implementation detail that we can change, of course.
 
+Honestly, the hole erase/discard support in the mmc core deserves a
+cleanup and I am looking at that (occasionally).
+
+>
+> Coming from the user space side. Does mkfs.ext4 assumes its pre-discard
+> is fast? I'd think so, right? I'd presume it was intented to tell the
+> FTL of the block device, "hey these blocks are unused, you can do some
+> wear leveling with them".
+
+I would assume that too.
+
+On the other hand, I guess there are situations when user space could
+live with slow formatting times. In particular if the goal is to let
+card clean up its internal garbage, as a way to improve "performance"
+for later I/O writes.
+
+>
+> > Long time time ago, both the SD and eMMC spec introduced support for
+> > real discards commands, as being hints to the card without any
+> > guarantees of what will happen to the data from a logical or a
+> > physical point of view. If the card supports that, we should use it as
+> > the first option for REQ_OP_DISCARD. Although, what should we pick as
+> > the second best option, when the card doesn't support discard - that's
+> > when it becomes more tricky. And the similar applies for
+> > REQ_OP_SECURE_ERASE, or course.
+> >
+> > If you have any suggestions for how we can improve in the above
+> > decisions, feel free to suggest something.
+> >
+> > Another issue that most likely is causing poor performance for
+> > REQ_OP_DISCARD/REQ_OP_SECURE_ERASE for eMMC/SD, is that in
+> > mmc_queue_setup_discard() we set up the maximum discard sectors
+> > allowed per request and the discard granularity.
+> >
+> > To find performance bottlenecks, I would start looking at what actual
+> > eMMC/SD commands/args we end up mapping towards the
+> > REQ_OP_DISCARD/REQ_OP_SECURE_ERASE requests. Then definitely, I would
+> > also look at the values we end up picking as max discard sectors and
+> > the discard granularity.
+>
+> I'm just about finding some SD cards and looking how they behave timing
+> wise and what they report they support (ie. erase or discard). Looks
+> like other cards are doing better. But I'd have to find out if they
+> support the discard (mine doesn't) and if they are slow too if I force
+> them to use the normal erase.
+
+Sounds great, looking forward to hear more about your findings.
+
+[...]
+
+Kind regards
+Uffe
