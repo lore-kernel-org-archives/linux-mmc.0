@@ -2,441 +2,198 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-22.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F804C35273
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 04:45:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EE5AC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 14:53:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 462C8205F4
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 04:45:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DF99523406
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 14:52:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727477AbgLIEpG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Dec 2020 23:45:06 -0500
-Received: from mail.kernel.org ([198.145.29.99]:45376 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727475AbgLIEpG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 8 Dec 2020 23:45:06 -0500
-From:   Eric Biggers <ebiggers@kernel.org>
-Authentication-Results: mail.kernel.org; dkim=permerror (bad message/signature format)
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v3 9/9] mmc: sdhci-msm: add Inline Crypto Engine support
-Date:   Tue,  8 Dec 2020 20:42:38 -0800
-Message-Id: <20201209044238.78659-10-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20201209044238.78659-1-ebiggers@kernel.org>
-References: <20201209044238.78659-1-ebiggers@kernel.org>
+        id S1733204AbgLIOwo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Dec 2020 09:52:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40000 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732315AbgLIOwm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Dec 2020 09:52:42 -0500
+Received: from mail-vk1-xa31.google.com (mail-vk1-xa31.google.com [IPv6:2607:f8b0:4864:20::a31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E66FAC0613D6
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Dec 2020 06:52:01 -0800 (PST)
+Received: by mail-vk1-xa31.google.com with SMTP id u67so395852vkb.5
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Dec 2020 06:52:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=LdMQ4ENUJAwDKpq6YGuzjxRRhbtj63eVZUaKhU3HWx4=;
+        b=WusDzr6lbmJcpg7SlW+CJ9WoxWVL0WYU3va7KO80XJ/idS8gQKVqlgSIfTd8/l4bJI
+         +fp842fy9wDLEkWjL5UU+EM7v/1raLon67cpxhDenquRw5C6yegTwQbcHyoc873GjtM6
+         XGqOghMwHoq2UfN/n+W9l8ZmLq7y7QW09aI/vMCNkfMGd4K+XamHOzBlkE99BfT/eYrj
+         6G60MHKLL0hvHXq3xXjVQfbp6oo6DZZj1T0CGMP/NEt54DyY3AxQ1olP0wkDzZgF3+Hu
+         nZi4D61NDIbc0hsQs516L8EdT/9Si6fZ6GKuDeNWT+AkE+3l7CdKPpWH6DZnuF6iQpNA
+         nBCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=LdMQ4ENUJAwDKpq6YGuzjxRRhbtj63eVZUaKhU3HWx4=;
+        b=coq4MV/OvQjGqC8DJcEF/57BJNg3y8UiUUBJOlbZ7zwBoU/cfon9wc7rXch1x4cL+y
+         9x0y6hsTFV87TZfhyR2w2mKKZ9W9VbRULNEUTnYt7Q9z6sy2sDuLXZ65nAEI5ZJNCL8e
+         arte3dCZW7TbYG+H1J6nHOL/GhEDH2PlX0e7Tdi0wXuCLoLPcE7G+PmlfM6wWKSZ/8Z7
+         HaNxe8tC99xLrMAkK/+M+oGVTn+kIMpNSydNphYZgARhOFlV9YsRQHEgC7L7r1tokZQp
+         jOmg7mOyV/G3EseiOxHepH8ned3d44RKzXJXMHIZ7oHBsoRq3gDKjQbs95ugSXc9In1f
+         xgkw==
+X-Gm-Message-State: AOAM530k/7w5UxwA36HJUam5xRDMP3ZzqVSl8XZanZykuGAAB0MaI+5I
+        S92W7LkXkcQjwIM1cbK+qGyMd5Bsc7NS1wnhXY/tTw==
+X-Google-Smtp-Source: ABdhPJxLMJiclWLbEVkhdiex2z02t+bsvo4kzUXNOWOXd3kibkzblj+Jly65Bgz0STAEqM9AUer3aG4gvYdnemVe9Kw=
+X-Received: by 2002:a1f:dec2:: with SMTP id v185mr2358196vkg.8.1607525520925;
+ Wed, 09 Dec 2020 06:52:00 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <97c4bb65c8a3e688b191d57e9f06aa5a@walle.cc> <20201207183534.GA52960@mit.edu>
+ <2edcf8e344937b3c5b92a0b87ebd13bd@walle.cc> <20201208024057.GC52960@mit.edu>
+ <CAPDyKFpY+M_FVXCyeg+97jAgDSqhGDTNoND8CQDMWH-e09KGKQ@mail.gmail.com>
+ <d7041bbb403698ac1097f7740f364467@walle.cc> <20201208165214.GD52960@mit.edu>
+In-Reply-To: <20201208165214.GD52960@mit.edu>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 9 Dec 2020 15:51:24 +0100
+Message-ID: <CAPDyKFrpccdMyqsxTi2dotbtr3_7hL0hUjWXc5Sx52kGnrDuLw@mail.gmail.com>
+Subject: Re: discard feature, mkfs.ext4 and mmc default fallback to normal
+ erase op
+To:     "Theodore Y. Ts'o" <tytso@mit.edu>
+Cc:     Michael Walle <michael@walle.cc>, linux-ext4@vger.kernel.org,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-block <linux-block@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On Tue, 8 Dec 2020 at 17:52, Theodore Y. Ts'o <tytso@mit.edu> wrote:
+>
+> On Tue, Dec 08, 2020 at 12:26:22PM +0100, Michael Walle wrote:
+> > Do we really need to map these functions? What if we don't have an
+> > actual discard, but just a slow erase (I'm now assuming that erase
+> > will likely be slow on sdcards)? Can't we just tell the user space
+> > there is no discard? Like on a normal HDD? I really don't know the
+> > implications, seems like mmc_erase() is just there for the linux
+> > discard feature.
+>
+> So the potential gotcha here is that "discard" is important for
+> reducing write amplification, and thus improving the lifespan of
+> devices.  (See my reference to the Tesla engine controller story
+> earlier.)  So if a device doesn't have "discard" but has "erase", and
+> "erase" is fast, then skipping the discard could end up significantly
+> reducing the lifespan of your product, and we're back to the NHTSA
+> investigating whether they should stick Tesla for the $1500 engine
+> controller replacement when cards die early.
 
-Add support for Qualcomm Inline Crypto Engine (ICE) to sdhci-msm.
+Yes, exactly. The point about wear leveling and the lifespan of the
+device are critical.
 
-The standard-compliant parts, such as querying the crypto capabilities
-and enabling crypto for individual MMC requests, are already handled by
-cqhci-crypto.c, which itself is wired into the blk-crypto framework.
-However, ICE requires vendor-specific init, enable, and resume logic,
-and it requires that keys be programmed and evicted by vendor-specific
-SMC calls.  Make the sdhci-msm driver handle these details.
+That said, we should continue to map discard requests to legacy erase
+commands for SD cards, unless the card supports the new discard, of
+course.
 
-This is heavily inspired by the similar changes made for UFS, since the
-UFS and eMMC ICE instances are very similar.  See commit df4ec2fa7a4d
-("scsi: ufs-qcom: Add Inline Crypto Engine support").
+One thing I realized though, is that we should probably announce and
+implement support for secure erase (QUEUE_FLAG_SECERASE) for SD cards,
+as that seems to map well towards with the erase command.
 
-I tested this on a Sony Xperia 10, which uses the Snapdragon 630 SoC,
-which has basic upstream support.  Mainly, I used android-xfstests
-(https://github.com/tytso/xfstests-bld/blob/master/Documentation/android-xfstests.md)
-to run the ext4 and f2fs encryption tests in a Debian chroot:
+An erase is specified in the SD spec as, after the erase the data is
+either "0" or "1", which I guess is what is expected from a
+REQ_OP_SECURE_ERASE operation?
 
-	android-xfstests -c ext4,f2fs -g encrypt -m inlinecrypt
+>
+> I guess the JEDEC spec does specify a way to query the card for how
+> long an erase takes, but I don't have the knowledge about how the
+> actual real-world implementations of these specs (and their many
+> variants over the years) actually behave.  Can the erase times that
+> they advertise actually be trusted to be accurate?  How many of them
+> actually supply erase times at all, no matter what the spec says?
 
-These tests included tests which verify that the on-disk ciphertext is
-identical to that produced by a software implementation.  I also
-verified that ICE was actually being used.
+For eMMC discard commands are fast, but probably also trim commands.
+For erase I don't know.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Satya Tangirala <satyat@google.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- drivers/mmc/host/Kconfig     |   1 +
- drivers/mmc/host/sdhci-msm.c | 276 ++++++++++++++++++++++++++++++++++-
- 2 files changed, 273 insertions(+), 4 deletions(-)
+Then, whether the corresponding "erase times" that are be specified in
+the eMMC registers, I guess those always refer to the worst case
+scenario. I don't know how useful they really are in the end.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 31481c9fcc2ec..4f8ff5a690fba 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -544,6 +544,7 @@ config MMC_SDHCI_MSM
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select MMC_CQHCI
-+	select QCOM_SCM if MMC_CRYPTO && ARCH_QCOM
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  support present in Qualcomm SOCs. The controller supports
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 3451eb3255135..485e1bcb13057 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -13,6 +13,7 @@
- #include <linux/pm_opp.h>
- #include <linux/slab.h>
- #include <linux/iopoll.h>
-+#include <linux/qcom_scm.h>
- #include <linux/regulator/consumer.h>
- #include <linux/interconnect.h>
- #include <linux/pinctrl/consumer.h>
-@@ -256,10 +257,12 @@ struct sdhci_msm_variant_info {
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-+	void __iomem *ice_mem;	/* MSM ICE mapped address (if available) */
- 	int pwr_irq;		/* power irq */
- 	struct clk *bus_clk;	/* SDHC bus voter clock */
- 	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
--	struct clk_bulk_data bulk_clks[4]; /* core, iface, cal, sleep clocks */
-+	/* core, iface, cal, sleep, and ice clocks */
-+	struct clk_bulk_data bulk_clks[5];
- 	unsigned long clk_rate;
- 	struct mmc_host *mmc;
- 	struct opp_table *opp_table;
-@@ -1785,6 +1788,246 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	__sdhci_msm_set_clock(host, clock);
- }
- 
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Inline Crypto Engine (ICE) support                                        *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+
-+#define AES_256_XTS_KEY_SIZE			64
-+
-+/* QCOM ICE registers */
-+
-+#define QCOM_ICE_REG_VERSION			0x0008
-+
-+#define QCOM_ICE_REG_FUSE_SETTING		0x0010
-+#define QCOM_ICE_FUSE_SETTING_MASK		0x1
-+#define QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK	0x2
-+#define QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK	0x4
-+
-+#define QCOM_ICE_REG_BIST_STATUS		0x0070
-+#define QCOM_ICE_BIST_STATUS_MASK		0xF0000000
-+
-+#define QCOM_ICE_REG_ADVANCED_CONTROL		0x1000
-+
-+#define sdhci_msm_ice_writel(host, val, reg)	\
-+	writel((val), (host)->ice_mem + (reg))
-+#define sdhci_msm_ice_readl(host, reg)	\
-+	readl((host)->ice_mem + (reg))
-+
-+static bool sdhci_msm_ice_supported(struct sdhci_msm_host *msm_host)
-+{
-+	struct device *dev = mmc_dev(msm_host->mmc);
-+	u32 regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_VERSION);
-+	int major = regval >> 24;
-+	int minor = (regval >> 16) & 0xFF;
-+	int step = regval & 0xFFFF;
-+
-+	/* For now this driver only supports ICE version 3. */
-+	if (major != 3) {
-+		dev_warn(dev, "Unsupported ICE version: v%d.%d.%d\n",
-+			 major, minor, step);
-+		return false;
-+	}
-+
-+	dev_info(dev, "Found QC Inline Crypto Engine (ICE) v%d.%d.%d\n",
-+		 major, minor, step);
-+
-+	/* If fuses are blown, ICE might not work in the standard way. */
-+	regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_FUSE_SETTING);
-+	if (regval & (QCOM_ICE_FUSE_SETTING_MASK |
-+		      QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK |
-+		      QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK)) {
-+		dev_warn(dev, "Fuses are blown; ICE is unusable!\n");
-+		return false;
-+	}
-+	return true;
-+}
-+
-+static inline struct clk *sdhci_msm_ice_get_clk(struct device *dev)
-+{
-+	return devm_clk_get(dev, "ice");
-+}
-+
-+static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
-+			      struct cqhci_host *cq_host)
-+{
-+	struct mmc_host *mmc = msm_host->mmc;
-+	struct device *dev = mmc_dev(mmc);
-+	struct resource *res;
-+	int err;
-+
-+	if (!(cqhci_readl(cq_host, CQHCI_CAP) & CQHCI_CAP_CS))
-+		return 0;
-+
-+	res = platform_get_resource_byname(msm_host->pdev, IORESOURCE_MEM,
-+					   "ice");
-+	if (!res) {
-+		dev_warn(dev, "ICE registers not found\n");
-+		goto disable;
-+	}
-+
-+	if (!qcom_scm_ice_available()) {
-+		dev_warn(dev, "ICE SCM interface not found\n");
-+		goto disable;
-+	}
-+
-+	msm_host->ice_mem = devm_ioremap_resource(dev, res);
-+	if (IS_ERR(msm_host->ice_mem)) {
-+		err = PTR_ERR(msm_host->ice_mem);
-+		dev_err(dev, "Failed to map ICE registers; err=%d\n", err);
-+		return err;
-+	}
-+
-+	if (!sdhci_msm_ice_supported(msm_host))
-+		goto disable;
-+
-+	mmc->caps2 |= MMC_CAP2_CRYPTO;
-+	return 0;
-+
-+disable:
-+	dev_warn(dev, "Disabling inline encryption support\n");
-+	return 0;
-+}
-+
-+static void sdhci_msm_ice_low_power_mode_enable(struct sdhci_msm_host *msm_host)
-+{
-+	u32 regval;
-+
-+	regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_ADVANCED_CONTROL);
-+	/*
-+	 * Enable low power mode sequence
-+	 * [0]-0, [1]-0, [2]-0, [3]-E, [4]-0, [5]-0, [6]-0, [7]-0
-+	 */
-+	regval |= 0x7000;
-+	sdhci_msm_ice_writel(msm_host, regval, QCOM_ICE_REG_ADVANCED_CONTROL);
-+}
-+
-+static void sdhci_msm_ice_optimization_enable(struct sdhci_msm_host *msm_host)
-+{
-+	u32 regval;
-+
-+	/* ICE Optimizations Enable Sequence */
-+	regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_ADVANCED_CONTROL);
-+	regval |= 0xD807100;
-+	/* ICE HPG requires delay before writing */
-+	udelay(5);
-+	sdhci_msm_ice_writel(msm_host, regval, QCOM_ICE_REG_ADVANCED_CONTROL);
-+	udelay(5);
-+}
-+
-+/*
-+ * Wait until the ICE BIST (built-in self-test) has completed.
-+ *
-+ * This may be necessary before ICE can be used.
-+ *
-+ * Note that we don't really care whether the BIST passed or failed; we really
-+ * just want to make sure that it isn't still running.  This is because (a) the
-+ * BIST is a FIPS compliance thing that never fails in practice, (b) ICE is
-+ * documented to reject crypto requests if the BIST fails, so we needn't do it
-+ * in software too, and (c) properly testing storage encryption requires testing
-+ * the full storage stack anyway, and not relying on hardware-level self-tests.
-+ */
-+static int sdhci_msm_ice_wait_bist_status(struct sdhci_msm_host *msm_host)
-+{
-+	u32 regval;
-+	int err;
-+
-+	err = readl_poll_timeout(msm_host->ice_mem + QCOM_ICE_REG_BIST_STATUS,
-+				 regval, !(regval & QCOM_ICE_BIST_STATUS_MASK),
-+				 50, 5000);
-+	if (err)
-+		dev_err(mmc_dev(msm_host->mmc),
-+			"Timed out waiting for ICE self-test to complete\n");
-+	return err;
-+}
-+
-+static void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
-+{
-+	if (!(msm_host->mmc->caps2 & MMC_CAP2_CRYPTO))
-+		return;
-+	sdhci_msm_ice_low_power_mode_enable(msm_host);
-+	sdhci_msm_ice_optimization_enable(msm_host);
-+	sdhci_msm_ice_wait_bist_status(msm_host);
-+}
-+
-+static int __maybe_unused sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
-+{
-+	if (!(msm_host->mmc->caps2 & MMC_CAP2_CRYPTO))
-+		return 0;
-+	return sdhci_msm_ice_wait_bist_status(msm_host);
-+}
-+
-+/*
-+ * Program a key into a QC ICE keyslot, or evict a keyslot.  QC ICE requires
-+ * vendor-specific SCM calls for this; it doesn't support the standard way.
-+ */
-+static int sdhci_msm_program_key(struct cqhci_host *cq_host,
-+				 const union cqhci_crypto_cfg_entry *cfg,
-+				 int slot)
-+{
-+	struct device *dev = mmc_dev(cq_host->mmc);
-+	union cqhci_crypto_cap_entry cap;
-+	union {
-+		u8 bytes[AES_256_XTS_KEY_SIZE];
-+		u32 words[AES_256_XTS_KEY_SIZE / sizeof(u32)];
-+	} key;
-+	int i;
-+	int err;
-+
-+	if (!(cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE))
-+		return qcom_scm_ice_invalidate_key(slot);
-+
-+	/* Only AES-256-XTS has been tested so far. */
-+	cap = cq_host->crypto_cap_array[cfg->crypto_cap_idx];
-+	if (cap.algorithm_id != CQHCI_CRYPTO_ALG_AES_XTS ||
-+	    cap.key_size != CQHCI_CRYPTO_KEY_SIZE_256) {
-+		dev_err_ratelimited(dev,
-+				    "Unhandled crypto capability; algorithm_id=%d, key_size=%d\n",
-+				    cap.algorithm_id, cap.key_size);
-+		return -EINVAL;
-+	}
-+
-+	memcpy(key.bytes, cfg->crypto_key, AES_256_XTS_KEY_SIZE);
-+
-+	/*
-+	 * The SCM call byte-swaps the 32-bit words of the key.  So we have to
-+	 * do the same, in order for the final key be correct.
-+	 */
-+	for (i = 0; i < ARRAY_SIZE(key.words); i++)
-+		__cpu_to_be32s(&key.words[i]);
-+
-+	err = qcom_scm_ice_set_key(slot, key.bytes, AES_256_XTS_KEY_SIZE,
-+				   QCOM_SCM_ICE_CIPHER_AES_256_XTS,
-+				   cfg->data_unit_size);
-+	memzero_explicit(&key, sizeof(key));
-+	return err;
-+}
-+#else /* CONFIG_MMC_CRYPTO */
-+static inline struct clk *sdhci_msm_ice_get_clk(struct device *dev)
-+{
-+	return NULL;
-+}
-+
-+static inline int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
-+				     struct cqhci_host *cq_host)
-+{
-+	return 0;
-+}
-+
-+static inline void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
-+{
-+}
-+
-+static inline int __maybe_unused
-+sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
-+{
-+	return 0;
-+}
-+#endif /* !CONFIG_MMC_CRYPTO */
-+
- /*****************************************************************************\
-  *                                                                           *
-  * MSM Command Queue Engine (CQE)                                            *
-@@ -1803,6 +2046,16 @@ static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
- 	return 0;
- }
- 
-+static void sdhci_msm_cqe_enable(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_cqe_enable(mmc);
-+	sdhci_msm_ice_enable(msm_host);
-+}
-+
- static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -1835,8 +2088,11 @@ static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
- }
- 
- static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
--	.enable		= sdhci_cqe_enable,
-+	.enable		= sdhci_msm_cqe_enable,
- 	.disable	= sdhci_msm_cqe_disable,
-+#ifdef CONFIG_MMC_CRYPTO
-+	.program_key	= sdhci_msm_program_key,
-+#endif
- };
- 
- static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
-@@ -1872,6 +2128,10 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
- 
- 	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
- 
-+	ret = sdhci_msm_ice_init(msm_host, cq_host);
-+	if (ret)
-+		goto cleanup;
-+
- 	ret = cqhci_init(cq_host, host->mmc, dma64);
- 	if (ret) {
- 		dev_err(&pdev->dev, "%s: CQE init: failed (%d)\n",
-@@ -2321,6 +2581,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		clk = NULL;
- 	msm_host->bulk_clks[3].clk = clk;
- 
-+	clk = sdhci_msm_ice_get_clk(&pdev->dev);
-+	if (IS_ERR(clk))
-+		clk = NULL;
-+	msm_host->bulk_clks[4].clk = clk;
-+
- 	ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
- 				      msm_host->bulk_clks);
- 	if (ret)
-@@ -2531,12 +2796,15 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
- 	 * Whenever core-clock is gated dynamically, it's needed to
- 	 * restore the SDR DLL settings when the clock is ungated.
- 	 */
--	if (msm_host->restore_dll_config && msm_host->clk_rate)
-+	if (msm_host->restore_dll_config && msm_host->clk_rate) {
- 		ret = sdhci_msm_restore_sdr_dll_config(host);
-+		if (ret)
-+			return ret;
-+	}
- 
- 	dev_pm_opp_set_rate(dev, msm_host->clk_rate);
- 
--	return ret;
-+	return sdhci_msm_ice_resume(msm_host);
- }
- 
- static const struct dev_pm_ops sdhci_msm_pm_ops = {
--- 
-2.29.2
+In any case, we may end up with poor erase/discard performance,
+because of internal FW implementations.
 
+Although, what I think we may be able to improve, both from eMMC and
+SD point of view, is to allow more blocks per discard/erase operation.
+But honestly, I don't know how big of a problem this is, even if just
+staring at the code, gives me some ideas.
+
+>
+> > Coming from the user space side. Does mkfs.ext4 assumes its pre-discard
+> > is fast? I'd think so, right? I'd presume it was intented to tell the
+> > FTL of the block device, "hey these blocks are unused, you can do some
+> > wear leveling with them".
+>
+> Yes, the assumption is that discard is fast.  Exactly how fast seems
+> to vary; this is one of the reasons why there are three different ways
+> to do discards on a file system after files are deleted.  One way is
+> to do them after the deleted definitely won't be unwound (i.e., after
+> the ext4 journal commit).  But on some devices, the discard command,
+> while fast, is slow enough that this will compete with the I/O
+> completion times of other read commands, thus degrading system
+> performance.  So you can also execute the trim commands out of cron,
+> using the fstrim command, which will run the discards in the
+> background, and the system administrator can adjust when fstrim is
+> executed during times wheno performance isn't critical.  (e.g., when
+> the phone is on a charger in the middle of the night, or at 4am local
+> time, etc.)  Finally, you can configure e2fsck to run the discards
+> after the file system consistency check is done.
+>
+> The reason why we have to leave this up to the system administrators
+> is that we have essentially no guidance from the device how slow the
+> discard command might be, how it intereferes with other device
+> operations, and whether the discard might be more likely ignored if
+> the device is busy.  So it might be that the discard will more likely
+> improve write endurance when it is done when the device is idle.  All
+> of the speccs (SCSI, SATA, UFS, eMMC, SD) are remarkable unhelpful
+> because performance considerations is generally consider "out of
+> scope" of standards committees.  They want to leave that up to market
+> forces; which is why big companies (at handset vendors, hyperscale
+> cloud providers, systems integrators, etc.) have to spend as much
+> money doing certification testing before deciding which products to
+> buy; think of it as a full-employment act for storage engineers.  :-)
+
+A few comments related to the above.
+
+Even if the discarded blocks are flushed at some wisely selected
+point, when the device is idle, that doesn't guarantee that the
+internal garbage collection runs inside the device. In the end that
+depends on the FW implementation of the card - and I assume it's
+likely triggered based on some internal idle time and the amount of
+"garbage" there is to deal with.
+
+For both eMMC and SD cards, the specs define commands for how to
+manually control the background operations inside the cards. In
+principle, this allows us to tell the card when it's a good time to
+run garbage collection (and when not to).
+
+Both for eMMC and SD, we are not using this, yet. However, I have been
+playing with a couple of different ideas to explore this:
+
+*) Use the runtime PM framework to detect an idle period and then
+trigger background operations. The problem is, that we don't really
+know how long we will be idle, meaning that we don't know if it's
+really a wise decision to trigger the background operations in the
+end.
+
+**) Invent a new type of generic block request, as to let userspace
+trigger this.
+
+Of course, another option is also to leave this as is, thus relying on
+the internal FW of the card to act the best it can.
+
+Do you have any thoughts around this?
+
+[...]
+
+Kind regards
+Uffe
