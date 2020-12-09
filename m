@@ -6,17 +6,17 @@ X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FE73C433FE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5275C2BBD4
 	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 04:45:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F316023B28
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 04:45:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4451238E9
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Dec 2020 04:45:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727416AbgLIEpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Dec 2020 23:45:04 -0500
-Received: from mail.kernel.org ([198.145.29.99]:45360 "EHLO mail.kernel.org"
+        id S1727495AbgLIEpF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Dec 2020 23:45:05 -0500
+Received: from mail.kernel.org ([198.145.29.99]:45372 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727459AbgLIEpE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1727473AbgLIEpE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Tue, 8 Dec 2020 23:45:04 -0500
 From:   Eric Biggers <ebiggers@kernel.org>
 Authentication-Results: mail.kernel.org; dkim=permerror (bad message/signature format)
@@ -34,9 +34,9 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v3 6/9] firmware: qcom_scm: update comment for ICE-related functions
-Date:   Tue,  8 Dec 2020 20:42:35 -0800
-Message-Id: <20201209044238.78659-7-ebiggers@kernel.org>
+Subject: [PATCH v3 8/9] arm64: dts: qcom: sdm630: add ICE registers and clocks
+Date:   Tue,  8 Dec 2020 20:42:37 -0800
+Message-Id: <20201209044238.78659-9-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201209044238.78659-1-ebiggers@kernel.org>
 References: <20201209044238.78659-1-ebiggers@kernel.org>
@@ -48,51 +48,43 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-The SCM calls QCOM_SCM_ES_INVALIDATE_ICE_KEY and
-QCOM_SCM_ES_CONFIG_SET_ICE_KEY are also needed for eMMC inline
-encryption support, not just for UFS.  Update the comments accordingly.
+Add the registers and clock for the Inline Crypto Engine (ICE) to the
+device tree node for the sdhci-msm host controller on sdm630.  This
+allows sdhci-msm to support inline encryption on sdm630.
 
-Reviewed-by: Satya Tangirala <satyat@google.com>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- drivers/firmware/qcom_scm.c | 16 +++++++++++-----
- 1 file changed, 11 insertions(+), 5 deletions(-)
+ arch/arm64/boot/dts/qcom/sdm630.dtsi | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/firmware/qcom_scm.c b/drivers/firmware/qcom_scm.c
-index 7be48c1bec96d..f57779fc7ee93 100644
---- a/drivers/firmware/qcom_scm.c
-+++ b/drivers/firmware/qcom_scm.c
-@@ -965,8 +965,11 @@ EXPORT_SYMBOL(qcom_scm_ice_available);
-  * qcom_scm_ice_invalidate_key() - Invalidate an inline encryption key
-  * @index: the keyslot to invalidate
-  *
-- * The UFSHCI standard defines a standard way to do this, but it doesn't work on
-- * these SoCs; only this SCM call does.
-+ * The UFSHCI and eMMC standards define a standard way to do this, but it
-+ * doesn't work on these SoCs; only this SCM call does.
-+ *
-+ * It is assumed that the SoC has only one ICE instance being used, as this SCM
-+ * call doesn't specify which ICE instance the keyslot belongs to.
-  *
-  * Return: 0 on success; -errno on failure.
-  */
-@@ -995,10 +998,13 @@ EXPORT_SYMBOL(qcom_scm_ice_invalidate_key);
-  *		    units, e.g. 1 = 512 bytes, 8 = 4096 bytes, etc.
-  *
-  * Program a key into a keyslot of Qualcomm ICE (Inline Crypto Engine), where it
-- * can then be used to encrypt/decrypt UFS I/O requests inline.
-+ * can then be used to encrypt/decrypt UFS or eMMC I/O requests inline.
-+ *
-+ * The UFSHCI and eMMC standards define a standard way to do this, but it
-+ * doesn't work on these SoCs; only this SCM call does.
-  *
-- * The UFSHCI standard defines a standard way to do this, but it doesn't work on
-- * these SoCs; only this SCM call does.
-+ * It is assumed that the SoC has only one ICE instance being used, as this SCM
-+ * call doesn't specify which ICE instance the keyslot belongs to.
-  *
-  * Return: 0 on success; -errno on failure.
-  */
+diff --git a/arch/arm64/boot/dts/qcom/sdm630.dtsi b/arch/arm64/boot/dts/qcom/sdm630.dtsi
+index deb928d303c22..21aee33518b54 100644
+--- a/arch/arm64/boot/dts/qcom/sdm630.dtsi
++++ b/arch/arm64/boot/dts/qcom/sdm630.dtsi
+@@ -808,8 +808,9 @@ spmi_bus: spmi@800f000 {
+ 		sdhc_1: sdhci@c0c4000 {
+ 			compatible = "qcom,sdm630-sdhci", "qcom,sdhci-msm-v5";
+ 			reg = <0x0c0c4000 0x1000>,
+-				<0x0c0c5000 0x1000>;
+-			reg-names = "hc", "cqhci";
++				<0x0c0c5000 0x1000>,
++				<0x0c0c8000 0x8000>;
++			reg-names = "hc", "cqhci", "ice";
+ 
+ 			interrupts = <GIC_SPI 110 IRQ_TYPE_LEVEL_HIGH>,
+ 					<GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
+@@ -817,8 +818,9 @@ sdhc_1: sdhci@c0c4000 {
+ 
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+ 					<&gcc GCC_SDCC1_AHB_CLK>,
+-					<&xo_board>;
+-			clock-names = "core", "iface", "xo";
++					<&xo_board>,
++					<&gcc GCC_SDCC1_ICE_CORE_CLK>;
++			clock-names = "core", "iface", "xo", "ice";
+ 
+ 			pinctrl-names = "default", "sleep";
+ 			pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on &sdc1_rclk_on>;
 -- 
 2.29.2
 
