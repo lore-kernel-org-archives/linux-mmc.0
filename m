@@ -2,90 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5982DC4361B
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Dec 2020 15:20:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47CA6C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Dec 2020 17:21:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 08D302310E
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Dec 2020 15:20:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 09B5D23DB3
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Dec 2020 17:21:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391093AbgLJPTy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Dec 2020 10:19:54 -0500
-Received: from mail-oi1-f196.google.com ([209.85.167.196]:45744 "EHLO
-        mail-oi1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389991AbgLJPTm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Dec 2020 10:19:42 -0500
-Received: by mail-oi1-f196.google.com with SMTP id f132so6054437oib.12;
-        Thu, 10 Dec 2020 07:19:26 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=isKnpZLWDmxxb3Yjeaxd76RZPLoaSrKYVnhT82zCGQk=;
-        b=D8dbadE7cID3JgFlb5YELFKUw0DYmFD2vGoHnrDYzje8p5y+NM56bvUjp1hP9QDBxY
-         zWor0ONLtl9U+ZmiNJRqziby0eOtofXPHSdqOJOYbj7FWnB2ICzHWWaIV16nhTDzHM1a
-         CrpKEbqvYdhOfG30vkWNiy7aYK6yabDT+Vv44s/HfwkCCc2eGyyJ8fi35Sgmp5HKOG7e
-         6XDYP2uDcyH8cjwz+cRlVOV4My3npeSfOffDP9bLHz+aM5/5IXDuN8TZVi/3RaZL90lS
-         bv7HiJ55mDZf86LoAzj2xDflB2ud1lt+H0dGZ8xSHhBeh9cTYSGqa5eXRuvu9BR5Ztb/
-         t1QQ==
-X-Gm-Message-State: AOAM531qOVU1Aa+3NiVI6nO9wP7uNjmh+6XLEZI/rvLtLxd1cmH/VV8i
-        rvctUcypd0jSGepVboHbSQ==
-X-Google-Smtp-Source: ABdhPJzA2iPp0rG4sGDDN0cx8K+xg1jPuuOC+wTD2Jx83mP/UbjeOKKl42g17sulPm6+QYKwvMVlew==
-X-Received: by 2002:aca:5204:: with SMTP id g4mr5750242oib.91.1607613541539;
-        Thu, 10 Dec 2020 07:19:01 -0800 (PST)
-Received: from xps15 (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id z10sm1065948oom.3.2020.12.10.07.18.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Dec 2020 07:19:00 -0800 (PST)
-Received: (nullmailer pid 2523995 invoked by uid 1000);
-        Thu, 10 Dec 2020 15:18:59 -0000
-Date:   Thu, 10 Dec 2020 09:18:59 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Neeraj Soni <neersoni@codeaurora.org>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        id S2390049AbgLJRVH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Dec 2020 12:21:07 -0500
+Received: from mslow2.mail.gandi.net ([217.70.178.242]:38566 "EHLO
+        mslow2.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2389954AbgLJRT3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Dec 2020 12:19:29 -0500
+Received: from relay9-d.mail.gandi.net (unknown [217.70.183.199])
+        by mslow2.mail.gandi.net (Postfix) with ESMTP id EBFED3A5AD5;
+        Thu, 10 Dec 2020 17:08:34 +0000 (UTC)
+X-Originating-IP: 86.194.74.19
+Received: from localhost (lfbn-lyo-1-997-19.w86-194.abo.wanadoo.fr [86.194.74.19])
+        (Authenticated sender: alexandre.belloni@bootlin.com)
+        by relay9-d.mail.gandi.net (Postfix) with ESMTPSA id 46927FF80D;
+        Thu, 10 Dec 2020 17:07:24 +0000 (UTC)
+Date:   Thu, 10 Dec 2020 18:07:23 +0100
+From:   Alexandre Belloni <alexandre.belloni@bootlin.com>
+To:     Markus Elfring <Markus.Elfring@web.de>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-fscrypt@vger.kernel.org,
-        Konrad Dybcio <konradybcio@gmail.com>,
-        Andy Gross <agross@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        linux-arm-msm@vger.kernel.org,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Satya Tangirala <satyat@google.com>,
-        devicetree@vger.kernel.org,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v3 7/9] dt-bindings: mmc: sdhci-msm: add ICE registers
- and clock
-Message-ID: <20201210151859.GA2523965@robh.at.kernel.org>
-References: <20201209044238.78659-1-ebiggers@kernel.org>
- <20201209044238.78659-8-ebiggers@kernel.org>
+        LKML <linux-kernel@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org
+Subject: Re: [PATCH] mmc: atmel-mci: =?utf-8?Q?Redu?=
+ =?utf-8?Q?ce_scope_for_the_variable_=E2=80=9Cslot?= =?utf-8?B?4oCd?= in
+ atmci_request_end()
+Message-ID: <20201210170723.GD1578121@piout.net>
+References: <466b4c6d-032f-fbcc-58ac-75f6f39d734f@web.de>
+ <20201210151035.GC1578121@piout.net>
+ <ec71d7b8-a36b-04f5-77a8-22874ac241e1@web.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20201209044238.78659-8-ebiggers@kernel.org>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <ec71d7b8-a36b-04f5-77a8-22874ac241e1@web.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 08 Dec 2020 20:42:36 -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+On 10/12/2020 17:35:31+0100, Markus Elfring wrote:
+> >> A local variable was used only within an if branch.
+> >> Thus move the definition for the variable “slot” into the corresponding
+> >> code block.
+> >>
+> >
+> > What is the improvement here?
 > 
-> Document the bindings for the registers and clock for the MMC instance
-> of the Inline Crypto Engine (ICE) on Snapdragon SoCs.  These bindings
-> are needed in order for sdhci-msm to support inline encryption.
-> 
-> Reviewed-by: Satya Tangirala <satyat@google.com>
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 3 +++
->  1 file changed, 3 insertions(+)
+> A possible refactoring.
+> https://refactoring.com/catalog/reduceScopeOfVariable.html
 > 
 
-Acked-by: Rob Herring <robh@kernel.org>
+I quote:
+"Since declarations of variables in many cases costs computational
+cycles, you may end up wasting time for nothing."
+
+This is false, it doesn't.
+
+I also quote:
+"When I'm writing new code I find I don't scope my temps any less than
+method scope. This is because I keep my methods short, so reducing scope
+any further doesn't add much value. The value of this refactoring is in
+breaking up a large method."
+
+Is that function large? It is not.
+
+
+> 
+> > This makes the code harder to read.
+> 
+> Can the extra null pointer initialisation trigger a source code analysis warning
+> like “Addresses-Coverity: ("Unused value")” for this function implementation?
+> 
+
+Did you check, does it? It doesn't.
+
+Are you wasting maintainer and reviewer's time? Yes you are.
+
+-- 
+Alexandre Belloni, Bootlin
+Embedded Linux and Kernel engineering
+https://bootlin.com
