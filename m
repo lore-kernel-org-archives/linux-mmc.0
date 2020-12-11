@@ -2,92 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62EF2C2BB48
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Dec 2020 08:40:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3A67C2BBCA
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Dec 2020 08:58:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 31A8023F33
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Dec 2020 08:40:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5EEE323F57
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Dec 2020 08:58:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2436907AbgLKIjZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Dec 2020 03:39:25 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:36474 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2392142AbgLKIis (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Dec 2020 03:38:48 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0BB8ZQuI131659;
-        Fri, 11 Dec 2020 08:37:49 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=IL/xX1pqQ+FwJTcRHs69J+NvLTwdwVVEJfd2g66opUA=;
- b=cWYi/zQOoX8hJ8NF5ANNdNO4n4NWz6h0q2WRNeyYzsdnfRIrTBOdZryatjmZAQiMSZ8a
- /+zALT5wCo4oucU4wYRmbNtjATArXvbYEQiGFDQp1EejblfUcBOTF6PqPrXjq6JWHige
- Fc95vrPNp5etIzrVC0Ip+a8vxfluaWWM4zAL9ACjlH18zhMvQOIZ0iOPaRXTXPkq17TW
- 9dD9tlCfPh2dRP7IenzC10kJZHxjhl/fY0L4L063k5MhgWx1o1WZ2VUuC7w97rLFf5Zo
- ZhP4V1mZ3CtY7WaCJXvOCUM5fNUjQaA1nwdZ7BAsdH2kCnJeMzfGCJm/4psZMF24WQ29 0Q== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by aserp2120.oracle.com with ESMTP id 35825mhc3k-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 11 Dec 2020 08:37:49 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0BB8UdRL180916;
-        Fri, 11 Dec 2020 08:37:48 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3020.oracle.com with ESMTP id 358m433uy5-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Fri, 11 Dec 2020 08:37:48 +0000
-Received: from abhmp0008.oracle.com (abhmp0008.oracle.com [141.146.116.14])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0BB8bdwV018287;
-        Fri, 11 Dec 2020 08:37:40 GMT
-Received: from kadam (/102.36.221.92)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Fri, 11 Dec 2020 00:37:39 -0800
-Date:   Fri, 11 Dec 2020 11:37:31 +0300
-From:   Dan Carpenter <dan.carpenter@oracle.com>
-To:     Alexandre Belloni <alexandre.belloni@bootlin.com>
-Cc:     Markus Elfring <Markus.Elfring@web.de>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org
-Subject: Re: [PATCH] mmc: atmel-mci: =?utf-8?Q?Redu?=
- =?utf-8?Q?ce_scope_for_the_variable_=E2=80=9Cslot?= =?utf-8?B?4oCd?= in
- atmci_request_end()
-Message-ID: <20201211083731.GP2789@kadam>
-References: <466b4c6d-032f-fbcc-58ac-75f6f39d734f@web.de>
- <20201210151035.GC1578121@piout.net>
+        id S2437227AbgLKI5d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Dec 2020 03:57:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49916 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2437223AbgLKI5a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Dec 2020 03:57:30 -0500
+Received: from mail-lf1-x141.google.com (mail-lf1-x141.google.com [IPv6:2a00:1450:4864:20::141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1C8FC0613CF
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Dec 2020 00:56:43 -0800 (PST)
+Received: by mail-lf1-x141.google.com with SMTP id m25so12277733lfc.11
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Dec 2020 00:56:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/gloM2T2ytwyUj9mw0BbcdmsyAq0N53F7iLnhz3YRDo=;
+        b=xi7RNWckbmr6CRXwoyierGqRYmJyCzHui6XnK1w2uv8z79VBmCeaGOVcfnUDrnBskf
+         zC8qwUx/abwLjFAJvi8XOjGWEcEeNCNNsIw9VkvJ60xtrx6T/tVcsseecm90B68hjnbJ
+         Un9Xg5cVRZ1l6nWLRDMm3+dP01kkcTbTlHO54yAjWGgzm4YePrdCkwKqbfswtXh4DbKs
+         jEgrhrc3jaDe2GIH54R6rnhp34h+okoYqZa9GOyAhJxvtZhitAWNVfNi6WSeiZYnw6og
+         WPiuWG+me+DpDEUf7VUNioWVU7ZLxVCwXXghcBmL2HNAEEdzH9Q93RFR0rkt24tmidL+
+         BmWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/gloM2T2ytwyUj9mw0BbcdmsyAq0N53F7iLnhz3YRDo=;
+        b=VxE+i6av20EkJI5kYyBtBAukEkUO05WCg/5E93uTXOanAKk3a4rEw9AQvC1+ZAONOW
+         9vwyJxnw8HNDY5uqjgcIXRdCw1MerHwH1O/Wqy/QUBzYeaCWQyMeWsM+9hNdokwwg7+N
+         4B3Y/H9sAF5+nkV07xx8Mn5PbOjru0vXGQhYK22nYRY2xMfpo9z8pDFe2b1E/UkwgRhX
+         pHj0j0FBUMcBhgLJrYqMyHKPi1RFqLVVY7qCJky/KeaGRe1Krrup/Hl9Diiji8u6dtNw
+         i1SX7HKPD0SHXuIWTvvblKTGEFsxi1l/C42f9YhGPAh+TWSObpSRYENd+1CO7X2rgbpW
+         w1WQ==
+X-Gm-Message-State: AOAM533u0MCpF6+fmIBQ2ko1ri/nwwpQtOllcuAP052YWd2POx/HFDcu
+        rOipJLRYsukzAqJl0ihWE1iw/Q==
+X-Google-Smtp-Source: ABdhPJxenfhBS5LaX+OydQLlgTw/3JR3lCKOpzxn08h4EeaJjncY+IRLxBvsjjBkyJkV76PQT4hfFg==
+X-Received: by 2002:a19:a06:: with SMTP id 6mr873535lfk.624.1607677002443;
+        Fri, 11 Dec 2020 00:56:42 -0800 (PST)
+Received: from localhost.localdomain (h-155-4-133-162.NA.cust.bahnhof.se. [155.4.133.162])
+        by smtp.gmail.com with ESMTPSA id 186sm809087lfb.176.2020.12.11.00.56.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 11 Dec 2020 00:56:41 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.10-rc8
+Date:   Fri, 11 Dec 2020 09:56:40 +0100
+Message-Id: <20201211085640.234657-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201210151035.GC1578121@piout.net>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9831 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 malwarescore=0 adultscore=0
- bulkscore=0 phishscore=0 suspectscore=0 mlxscore=0 mlxlogscore=893
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2012110054
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9831 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 suspectscore=0 adultscore=0 bulkscore=0
- phishscore=0 mlxlogscore=923 clxscore=1011 priorityscore=1501 mlxscore=0
- spamscore=0 lowpriorityscore=0 malwarescore=0 impostorscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2012110054
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Markus was banned from vger at the end of July after ignoring repeated
-warnings.  This makes it hard to review any patches or follow
-discussion...
+Hi Linus,
 
-regards,
-dan carpenter
+Here's a PR with a couple of MMC fixes intended for v5.10-rc8. Details about the
+highlights are as usual found in the signed tag.
 
+Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit d06d60d52ec0b0eef702dd3e7b4699f0b589ad0f:
+
+  mmc: sdhci-of-arasan: Issue DLL reset explicitly (2020-11-17 12:44:44 +0100)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.10-rc4-2
+
+for you to fetch changes up to c0d638a03bc5dfdb08fb95d0a79ecada25f40da8:
+
+  mmc: mediatek: mark PM functions as __maybe_unused (2020-12-04 15:35:54 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fixup condition for CMD13 polling for RPMB requests
+
+MMC host:
+ - mtk-sd: Fix system suspend/resume support for CQHCI
+ - mtd-sd: Extend SDIO IRQ fix to more variants
+ - sdhci-of-arasan: Fix clock registration error for Keem Bay SOC
+ - tmio: Bring HW to a sane state after a power off
+
+----------------------------------------------------------------
+Arnd Bergmann (1):
+      mmc: mediatek: mark PM functions as __maybe_unused
+
+Bean Huo (1):
+      mmc: block: Fixup condition for CMD13 polling for RPMB requests
+
+Muhammad Husaini Zulkifli (1):
+      mmc: sdhci-of-arasan: Fix clock registration error for Keem Bay SOC
+
+Wenbin Mei (1):
+      mmc: mediatek: Fix system suspend/resume support for CQHCI
+
+Wolfram Sang (1):
+      mmc: tmio: improve bringing HW to a sane state with MMC_POWER_OFF
+
+yong mao (1):
+      mmc: mediatek: Extend recheck_sdio_irq fix to more variants
+
+ drivers/mmc/core/block.c           |  2 +-
+ drivers/mmc/host/mtk-sd.c          | 39 +++++++++++++++++++++++++++-----------
+ drivers/mmc/host/sdhci-of-arasan.c |  3 +++
+ drivers/mmc/host/tmio_mmc_core.c   |  6 +++---
+ 4 files changed, 35 insertions(+), 15 deletions(-)
