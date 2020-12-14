@@ -2,198 +2,300 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8284FC1B0D8
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 12:45:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7942C4361B
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 13:30:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3626820663
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 12:45:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 624A922571
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 13:30:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2439299AbgLNMpB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Dec 2020 07:45:01 -0500
-Received: from m43-15.mailgun.net ([69.72.43.15]:33214 "EHLO
-        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2439122AbgLNMox (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 07:44:53 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1607949875; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=m7xKg4xAkB9ELFLlJVew8JC46YRWsfUOcTswVSYnR9E=; b=iSXfvwC8vOETVUEq/XkNlk3T2PxxOezkzdRyQPFxLWUWoAnCcKi75eN9A34ShsbsmgE+ZAoC
- UTW+MkVRF8x2Z1qGBHyr4lmpsCDM6GiIeSo9Q1Nk6HIlq/30usAt59Xn1tvdnBL1Smut3GDU
- 33RKR5Hb82ejsL1NB5pj3U+kjgE=
-X-Mailgun-Sending-Ip: 69.72.43.15
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n01.prod.us-west-2.postgun.com with SMTP id
- 5fd75e151f9c9f3c53f17ffb (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 14 Dec 2020 12:44:05
- GMT
-Sender: vbadigan=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id C87D3C433ED; Mon, 14 Dec 2020 12:44:05 +0000 (UTC)
-Received: from [192.168.0.105] (unknown [49.205.247.211])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id CB67CC433C6;
-        Mon, 14 Dec 2020 12:44:00 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org CB67CC433C6
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-msm: Actually set the actual clock
-To:     Douglas Anderson <dianders@chromium.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Stephen Boyd <swboyd@chromium.org>,
-        Taniya Das <tdas@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-References: <20201211091150.v4.1.Iec3430c7d3c2a29262695edef7b82a14aaa567e5@changeid>
- <20201211091150.v4.2.I7564620993acd4baa63fa0e3925ca879a86d3ee3@changeid>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <e817284c-1ae9-7d3f-5195-7313651ef9da@codeaurora.org>
-Date:   Mon, 14 Dec 2020 18:13:51 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.5.1
+        id S2439365AbgLNN3L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Dec 2020 08:29:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35686 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2439790AbgLNN3I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 08:29:08 -0500
+Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DEE6EC0613D3
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 05:28:26 -0800 (PST)
+Received: by mail-lf1-x12c.google.com with SMTP id y19so29955884lfa.13
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 05:28:26 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=l3NHQKjpN3iPPvef8aMgnFXeX1PMSrH+Mm3NM0UoQLA=;
+        b=m5U4ajEWvYYlIKsigL0IegzLhhWAKmGwzKXkxEJnz342PW6XguCfrD30mUpHCdf0vB
+         E/OaDtsrog/RHITuwK4E1ZawPyuxPFgXfDXY3eO6HFoS9AWMCOidD90ABkuDZEgYjwFC
+         /fKeqRQDWpAl0vp9Pp0+9CAIRzRSD1Lk21zbGUq5ev8AFoEj2otDwPIrnzR6V1bDetyR
+         16YS0AQzXjs+SXFqAXa+StpybikzcIvTds4aRySEvKOyfDTVXuieSFdGZYRauK25+UKo
+         n4R2GgHl9zty73jwhvN5mbBS8r2UkgJ+aZNgrzZU0e4LNHCAd3lL24x6+QyBEQ/2CuZR
+         KASA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=l3NHQKjpN3iPPvef8aMgnFXeX1PMSrH+Mm3NM0UoQLA=;
+        b=nxBsRbeEjR5wI4TFbUW/NejEDS/IPapgimQMSumO+OLSA854M5GPGSz7j2Bws0Qaak
+         k6USDlvcvGZ2tK2A0zN7LF7GxTg+9ogakNmrQSkjsoXtuD12i8rbRMiTBLTRxdoS2C7o
+         34woWCsFQ22IXgAZ5dVGJbgYtM9JonEcbI4lm+qsSyVYrkwdwmXy488L7lmwgoOb7+jq
+         e2YpdwPPMhKlRY2Mpvtfq1YQu/UB92y73fBHVGvYQJKVhRFzEgzvz9U0N4rZL3rBGwwF
+         6+iZnYM6FgJvY0zpN9jVvT9mbb3n/dOyxjuYtA0uF37LgDbQOA9tuEbW0/1U14/l7ipm
+         KrNQ==
+X-Gm-Message-State: AOAM531StjdQojxhJO8SG5p/uNE7tv9fD+jAlc+2sgE0IGOw0pkxyqQ1
+        mnnb5C20ArPCjUN2/9K0rxRc1akohvRoTT83
+X-Google-Smtp-Source: ABdhPJzM23LNPHMLz5JUxIP6nw87PDgiWIR88pmFGl4+Exs6PvaGdF7lERB46BoOodYZb2wl5JZNbg==
+X-Received: by 2002:a2e:9296:: with SMTP id d22mr1387927ljh.197.1607952505125;
+        Mon, 14 Dec 2020 05:28:25 -0800 (PST)
+Received: from localhost.localdomain (h-98-128-180-179.NA.cust.bahnhof.se. [98.128.180.179])
+        by smtp.gmail.com with ESMTPSA id x67sm2081685lff.82.2020.12.14.05.28.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Dec 2020 05:28:23 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK updates for v5.11
+Date:   Mon, 14 Dec 2020 14:28:22 +0100
+Message-Id: <20201214132822.248987-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20201211091150.v4.2.I7564620993acd4baa63fa0e3925ca879a86d3ee3@changeid>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Linus,
 
-On 12/11/2020 10:42 PM, Douglas Anderson wrote:
-> The MSM SDHCI driver always set the "actual_clock" field to 0.  It had
-> a comment about it not being needed because we weren't using the
-> standard SDHCI divider mechanism and we'd just fallback to
-> "host->clock".  However, it's still better to provide the actual
-> clock.  Why?
->
-> 1. It will make timeout calculations slightly better.  On one system I
->     have, the eMMC requets 200 MHz (for HS400-ES) but actually gets 192
->     MHz.  These are close, but why not get the more accurate one.
->
-> 2. If things are seriously off in the clock driver and it's missing
->     rates or picking the wrong rate (maybe it's rounding up instead of
->     down), this will make it much more obvious what's going on.
->
-> NOTE: we have to be a little careful here because the "actual_clock"
-> field shouldn't include the multiplier that sdhci-msm needs
-> internally.
->
-> Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> ---
->
-> Changes in v4:
-> - ("mmc: sdhci-msm: Actually set the actual clock") new for v4.
->
->   drivers/mmc/host/sdhci-msm.c | 32 ++++++++++++++------------------
->   1 file changed, 14 insertions(+), 18 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 50beb407dbe9..08a3960001ad 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -328,7 +328,7 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
->   	writel_relaxed(val, host->ioaddr + offset);
->   }
->   
-> -static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
-> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
->   						    unsigned int clock)
+Here's the PR with updates for MMC and MEMSTICK for v5.11. Details about the
+highlights are as usual found in the signed tag.
 
-nit: clock variable not being used anymore. We can drop it.
+Please pull this in!
 
->   {
->   	struct mmc_ios ios = host->mmc->ios;
-> @@ -342,8 +342,8 @@ static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
->   	    ios.timing == MMC_TIMING_MMC_DDR52 ||
->   	    ios.timing == MMC_TIMING_MMC_HS400 ||
->   	    host->flags & SDHCI_HS400_TUNING)
-> -		clock *= 2;
-> -	return clock;
-> +		return 2;
-> +	return 1;
->   }
->   
->   static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> @@ -354,14 +354,16 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->   	struct mmc_ios curr_ios = host->mmc->ios;
->   	struct clk *core_clk = msm_host->bulk_clks[0].clk;
->   	unsigned long achieved_rate;
-> +	unsigned int desired_rate;
-> +	unsigned int mult;
->   	int rc;
->   
-> -	clock = msm_get_clock_rate_for_bus_mode(host, clock);
-> -	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), clock);
-> +	mult = msm_get_clock_mult_for_bus_mode(host, clock);
-> +	desired_rate = clock * mult;
-> +	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
->   	if (rc) {
->   		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-> -		       mmc_hostname(host->mmc), clock,
-> -		       curr_ios.timing);
-> +		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
->   		return;
->   	}
->   
-> @@ -371,11 +373,12 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
->   	 * encounter it.
->   	 */
->   	achieved_rate = clk_get_rate(core_clk);
-> -	if (achieved_rate > clock)
-> +	if (achieved_rate > desired_rate)
->   		pr_warn("%s: Card appears overclocked; req %u Hz, actual %lu Hz\n",
-> -			mmc_hostname(host->mmc), clock, achieved_rate);
-> +			mmc_hostname(host->mmc), desired_rate, achieved_rate);
-> +	host->mmc->actual_clock = achieved_rate / mult;
->   
-> -	msm_host->clk_rate = clock;
-> +	msm_host->clk_rate = desired_rate;
+Kind regards
+Ulf Hansson
 
 
-Can you set msm_host->clk_rate also to achieved_rate?
+The following changes since commit c0d638a03bc5dfdb08fb95d0a79ecada25f40da8:
 
-At few places in this driver, host->clock is being used where 
-achieved_rate should be used ideally.
-I will replace those instances with 'msm_host->clk_rate' in a separate 
-patch once this change merged.
+  mmc: mediatek: mark PM functions as __maybe_unused (2020-12-04 15:35:54 +0100)
 
+are available in the Git repository at:
 
->   	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
->   		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
->   }
-> @@ -1756,13 +1759,6 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
->   static void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->   {
->   	u16 clk;
-> -	/*
-> -	 * Keep actual_clock as zero -
-> -	 * - since there is no divider used so no need of having actual_clock.
-> -	 * - MSM controller uses SDCLK for data timeout calculation. If
-> -	 *   actual_clock is zero, host->clock is taken for calculation.
-> -	 */
-> -	host->mmc->actual_clock = 0;
->   
->   	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
->   
-> @@ -1785,7 +1781,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
->   	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
->   
->   	if (!clock) {
-> -		msm_host->clk_rate = clock;
-> +		host->mmc->actual_clock = msm_host->clk_rate = 0;
->   		goto out;
->   	}
->   
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.11
+
+for you to fetch changes up to 72b248cfbf3fd308807afe7cc30d05fefeff7fb1:
+
+  dt-bindings: mmc: eliminate yamllint warnings (2020-12-11 10:08:58 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Initial support for SD express card/host
+
+MMC host:
+ - mxc: Convert the driver to DT-only
+ - mtk-sd: Add HS400 enhanced strobe support
+ - mtk-sd: Add support for the MT8192 SoC variant
+ - sdhci-acpi: Allow changing HS200/HS400 driver strength for AMDI0040
+ - sdhci-esdhc-imx: Convert the driver to DT-only
+ - sdhci-pci-gli: Improve performance for HS400 mode for GL9763E
+ - sdhci-pci-gli: Reduce power consumption for GL9755
+ - sdhci-xenon: Introduce ACPI support
+ - tmio: Fix command error processing
+ - tmio: Inform the core about the max_busy_timeout
+ - tmio/renesas_sdhi: Support custom calculation of busy-wait time
+ - renesas_sdhi: Reset SCC only when available
+ - rtsx_pci: Add SD Express mode support for RTS5261
+ - rtsx_pci: Various fixes and improvements for RTS5261
+
+MEMSTICK:
+ - Minor fixes/improvements.
+
+----------------------------------------------------------------
+Ben Chuang (2):
+      mmc: sdhci-pci-gli: Reduce power consumption for GL9755
+      mmc: sdhci-pci-gli: Disable slow mode in HS400 mode for GL9763E
+
+Colin Ian King (1):
+      mmc: host: Kconfig: fix spelling mistake "hardare" -> "hardware"
+
+Cristian Ciocaltea (1):
+      dt-bindings: mmc: owl: Add compatible string for Actions Semi S500 SoC
+
+Dmitry Baryshkov (1):
+      mmc: sdhci-msm: detect if tassadar_dll is used by using core version
+
+Dong Aisheng (1):
+      dt-bindings: mmc: imx: fix the wrongly dropped imx8qm compatible string
+
+Fabio Estevam (3):
+      mmc: sdhci-esdhc-imx: Convert the driver to DT-only
+      mmc: mxs: Remove the unused .id_table
+      mmc: mxc: Convert the driver to DT-only
+
+Gustavo A. R. Silva (1):
+      mmc: sdhci-of-arasan: Fix fall-through warnings for Clang
+
+Jeremy Linton (2):
+      mmc: sdhci: Update firmware interface API
+      mmc: sdhci: Use more concise device_property_read_u64
+
+Jing Xiangfeng (1):
+      memstick: r592: Fix error return in r592_probe()
+
+Kaixu Xia (1):
+      mmc: sdhci-pic32: Make pic32_sdhci_probe_platform() void
+
+Krzysztof Kozlowski (8):
+      mmc: s3cmci: include GPIO descriptor consumer header
+      mmc: s3cmci: enable compile testing
+      mmc: sunxi: drop of_match_ptr from of_device_id table
+      mmc: meson-gx: drop of_match_ptr from of_device_id table
+      mmc: tmio: do not print real IOMEM pointer
+      mmc: sdhci-sprd: drop of_match_ptr from of_device_id table
+      mmc: sdhci-st: drop of_match_ptr from of_device_id table
+      mmc: mediatek: depend on COMMON_CLK to fix compile tests
+
+Marcin Wojtas (4):
+      mmc: sdhci-xenon: use match data for controllers variants
+      mmc: sdhci-xenon: switch to device_* API
+      mmc: sdhci-xenon: use clk only with DT
+      mmc: sdhci-xenon: introduce ACPI support
+
+Masaharu Hayakawa (1):
+      mmc: tmio: Fix command error processing
+
+Michal Simek (1):
+      dt-bindings: mmc: Fix xlnx,mio-bank property values for arasan driver
+
+Qinglang Miao (1):
+      memstick: fix a double-free bug in memstick_check
+
+Raul E Rangel (1):
+      mmc: sdhci-acpi: AMDI0040: Allow changing HS200/HS400 driver strength
+
+Rui Feng (10):
+      misc: rtsx: Add SD Express mode support for RTS5261
+      mmc: rtsx_pci: Add SD Express mode support for RTS5261
+      mmc: rtsx: Add test mode for RTS5261
+      misc: rtsx: Fix OCP function for RTS5261
+      misc: rtsx: Fix aspm for RTS5261
+      misc: rtsx: Fix PAD driving for RTS5261
+      misc: rtsx: Check mmc support for RTS5261
+      misc: rtsx: Add CD & WP reverse support for RTS5261
+      misc: rtsx: Add hardware auto power off for RTS5261
+      misc: rtsx: Fix clock timing for RTS5261
+
+Tian Tao (5):
+      mmc: mediatek: Replace spin_lock_irqsave by spin_lock in hard IRQ
+      mmc: moxart: replace spin_lock_irqsave by spin_lock in hard IRQ
+      mmc: meson-mx-sdio: replace spin_lock_irqsave by spin_lock in hard IRQ
+      mmc: owl-mmc: replace spin_lock_irqsave by spin_lock in hard IRQ
+      mmc: dw_mmc: replace spin_lock_irqsave by spin_lock in hard IRQ
+
+Tom Rix (4):
+      memstick: jmb38x_ms: remove unneeded semicolon
+      memstick: mspro_block: remove unneeded semicolon
+      memstick: tifm: remove unneeded semicolon
+      mmc: davinci: remove unneeded semicolon
+
+Ulf Hansson (5):
+      mmc: core: Initial support for SD express card/host
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+      Merge branch 'fixes' into next
+
+Wenbin Mei (4):
+      dt-bindings: mmc: Convert mtk-sd to json-schema
+      dt-bindings: mmc: Add support for MT8192 SoC
+      mmc: mediatek: Add subsys clock control for MT8192 msdc
+      mmc: mediatek: add HS400 enhanced strobe support
+
+Wolfram Sang (14):
+      mmc: renesas_sdhi: only reset SCC when its pointer is populated
+      mmc: renesas_sdhi: probe into TMIO after SCC parameters have been setup
+      mmc: renesas_sdhi: populate SCC pointer at the proper place
+      mmc: renesas_sdhi: simplify reset routine a little
+      mmc: renesas_sdhi: clear TAPEN when resetting, too
+      mmc: renesas_sdhi: merge the SCC reset functions
+      mmc: renesas_sdhi: remove superfluous SCLKEN
+      mmc: renesas_sdhi: improve HOST_MODE usage
+      mmc: renesas_sdhi: don't hardcode SDIF values
+      mmc: renesas_sdhi: sort includes
+      mmc: sdhci: tegra: fix wrong unit with busy_timeout
+      mmc: tmio: set max_busy_timeout
+      mmc: tmio: add hook for custom busy_wait calculation
+      mmc: renesas_sdhi: populate hook for longer busy_wait
+
+Zhen Lei (1):
+      dt-bindings: mmc: eliminate yamllint warnings
+
+Zheng Liang (1):
+      mmc: mediatek: fix mem leak in msdc_drv_probe
+
+Zhihao Cheng (1):
+      mmc: pxamci: Fix error return code in pxamci_probe
+
+Zou Wei (1):
+      mmc: owl-mmc: use true and false for bool variables
+
+ .../devicetree/bindings/mmc/arasan,sdhci.yaml      |   2 +-
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |   1 +
+ Documentation/devicetree/bindings/mmc/mtk-sd.txt   |  75 ---------
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  | 176 +++++++++++++++++++++
+ Documentation/devicetree/bindings/mmc/owl-mmc.yaml |   4 +-
+ drivers/memstick/core/memstick.c                   |   1 -
+ drivers/memstick/core/mspro_block.c                |   2 +-
+ drivers/memstick/host/jmb38x_ms.c                  |   2 +-
+ drivers/memstick/host/r592.c                       |  12 +-
+ drivers/memstick/host/tifm_ms.c                    |   2 +-
+ drivers/misc/cardreader/rts5261.c                  |  61 +++++--
+ drivers/misc/cardreader/rts5261.h                  |  39 +----
+ drivers/misc/cardreader/rtsx_pcr.c                 |   5 +
+ drivers/mmc/core/core.c                            |  15 +-
+ drivers/mmc/core/host.h                            |   6 +
+ drivers/mmc/core/sd_ops.c                          |  49 +++++-
+ drivers/mmc/core/sd_ops.h                          |   1 +
+ drivers/mmc/host/Kconfig                           |   7 +-
+ drivers/mmc/host/davinci_mmc.c                     |   2 +-
+ drivers/mmc/host/dw_mmc.c                          |  17 +-
+ drivers/mmc/host/meson-gx-mmc.c                    |   2 +-
+ drivers/mmc/host/meson-mx-sdio.c                   |   5 +-
+ drivers/mmc/host/moxart-mmc.c                      |   5 +-
+ drivers/mmc/host/mtk-sd.c                          | 125 ++++++++++++---
+ drivers/mmc/host/mxcmmc.c                          |  33 +---
+ drivers/mmc/host/mxs-mmc.c                         |  18 +--
+ drivers/mmc/host/owl-mmc.c                         |   9 +-
+ drivers/mmc/host/pxamci.c                          |   1 +
+ drivers/mmc/host/renesas_sdhi_core.c               | 119 ++++++++------
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |  71 +++++++++
+ drivers/mmc/host/s3cmci.c                          |   2 +-
+ drivers/mmc/host/sdhci-acpi.c                      |  38 ++++-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |  91 +----------
+ drivers/mmc/host/sdhci-msm.c                       |  13 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |   4 +
+ drivers/mmc/host/sdhci-pci-gli.c                   |  27 ++++
+ drivers/mmc/host/sdhci-pic32.c                     |  11 +-
+ drivers/mmc/host/sdhci-sprd.c                      |   2 +-
+ drivers/mmc/host/sdhci-st.c                        |   2 +-
+ drivers/mmc/host/sdhci-tegra.c                     |   2 +-
+ drivers/mmc/host/sdhci-xenon-phy.c                 |  40 ++---
+ drivers/mmc/host/sdhci-xenon.c                     |  91 +++++++----
+ drivers/mmc/host/sdhci-xenon.h                     |  12 +-
+ drivers/mmc/host/sdhci.c                           |   8 +-
+ drivers/mmc/host/sunxi-mmc.c                       |   3 +-
+ drivers/mmc/host/tmio_mmc.c                        |   3 +-
+ drivers/mmc/host/tmio_mmc.h                        |   6 +-
+ drivers/mmc/host/tmio_mmc_core.c                   |  26 ++-
+ drivers/mmc/host/uniphier-sd.c                     |   1 +
+ include/linux/mfd/tmio.h                           |   7 +-
+ include/linux/mmc/host.h                           |   7 +
+ include/linux/rtsx_pci.h                           |  30 ++++
+ 52 files changed, 839 insertions(+), 454 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/mtk-sd.yaml
