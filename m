@@ -2,129 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AA5DC4361B
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 15:51:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B96B8C4361B
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 15:58:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E907522518
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 15:51:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 810B42253D
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 15:58:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2439307AbgLNPvI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Dec 2020 10:51:08 -0500
-Received: from www.zeus03.de ([194.117.254.33]:57828 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2439350AbgLNPu6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 14 Dec 2020 10:50:58 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=NyLHvPPkq2melxnmjnoWAzSgyk6o
-        Yx3/u9C2FjSi+9k=; b=Gesoolf7BAcynKOqyE7JFBJCFaOkpd7pqmT3iGw1tplt
-        ovYtcVLUpMvnyegoPF3Lh0uYC3Izkqnba8FL/sGm2evhDNnhStZso+pO9d+5j9r3
-        4yOqgNVnzX5f4HrlnZ2FqEf5PuSmscvjJZ/7Iwsm4hM34f4bUnQSqa9c1kP5hko=
-Received: (qmail 2467516 invoked from network); 14 Dec 2020 16:50:11 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 14 Dec 2020 16:50:11 +0100
-X-UD-Smtp-Session: l3s3148p1@oGJMmG620q1UhsJO
-Date:   Mon, 14 Dec 2020 16:50:01 +0100
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH] mmc: host: renesas_internal_dmac: add pre_req and
- post_req support
-Message-ID: <20201214155001.GA950@ninjato>
-References: <1607087853-6570-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+        id S1729496AbgLNP6Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Dec 2020 10:58:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58796 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727280AbgLNP6Q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 10:58:16 -0500
+Received: from mail-ua1-x943.google.com (mail-ua1-x943.google.com [IPv6:2607:f8b0:4864:20::943])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22C83C0613D3
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 07:57:36 -0800 (PST)
+Received: by mail-ua1-x943.google.com with SMTP id y26so5613933uan.5
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 07:57:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=dXj2L/gpA5Z+dEMYx7lFyvYb6eATLj9JT43cDhRuOs4=;
+        b=mItKLRyCuzJrSK8Od8x+kXuTZfDwYKDtxNWWYttW2xt9pJ340SAw3D74IPyF1TRQkj
+         bf6Zky0yKI6L5+LP6Z+6PDJ024szLWmlpSOptu0arTk+UGSLhPZE2fwXhrFv3RYdIacB
+         31JgIFaLxn4sEDuUi0vZDA2LtAACNqERBnyxoq/PT6wI7jXjxKi4StzKuXaFdFifd1Pi
+         Np5Drtzn1tBr0Ejw9giN/sHfJXz9aqR5upRR+I5gHTMPduzmzJZW8G9SwaWQtaD9ID/0
+         34rL6Z+EfpBjoej5wMc+RbiSM75QUYfZ1qUGbnMlw6nySB1TQ1XwoGsAd9RZg9dB7AMi
+         47XQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=dXj2L/gpA5Z+dEMYx7lFyvYb6eATLj9JT43cDhRuOs4=;
+        b=Qeevquqwxza78nS6kNSoaOksCoerfwxaZXXvV3eRTm2OjTxTLfc4o+q5hEXfLnd9A4
+         xHNzeTFcxYg/bzye3MT9l12MqJNg3fBj5JXvRmT9MhpkN7x8HEEmth+k37lku7oqi7OO
+         0Ib5f+5RHqR2/2osHscWlIHFwWKvtksaK7QVVJlLTpaQNkSRY8+Z0GNH6eMFswYaJ5Uu
+         9k4kqWWfoAhwUG38zZ2e+J7AvOXXjLurOhTNX0omUMUmmGHFi8tYvQ+xkVPpEBDLZW7N
+         LVz2aCs8OxH5P4aG7ym3beY7bjEjD/y3LY1OwY9jVnCiwE9aP32iGeALK76vDcS74BDx
+         Dt8g==
+X-Gm-Message-State: AOAM533kgCKX3cglrJNVz1sSChNiUyJozZx+aZrNe0QnNo439b7K9rTb
+        YhtaVS/kK4AGa1u+wKwc8BDK32iDT9XL/RJ3Iqkd+Q==
+X-Google-Smtp-Source: ABdhPJzdfWPRBW0/f0jpVNrHb1/fu5VTxg/DQ0L43Zjos4Zi2HwXvGdkwhaNygxEwdpDSjUu9VyxZY/jyLL25Bv2K38=
+X-Received: by 2002:a9f:2213:: with SMTP id 19mr23369715uad.15.1607961455333;
+ Mon, 14 Dec 2020 07:57:35 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="YiEDa0DAkWCtVeE4"
-Content-Disposition: inline
-In-Reply-To: <1607087853-6570-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+References: <20201208012615.2717412-1-andrew@aj.id.au>
+In-Reply-To: <20201208012615.2717412-1-andrew@aj.id.au>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 14 Dec 2020 16:56:59 +0100
+Message-ID: <CAPDyKFpCiA_fT0tQ58z_3mt183RJ30QZWE_qjbmXGO3imHqMzw@mail.gmail.com>
+Subject: Re: [PATCH v5 0/6] mmc: sdhci-of-aspeed: Expose phase delay tuning
+To:     Andrew Jeffery <andrew@aj.id.au>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        ryan_chen@aspeedtech.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, 8 Dec 2020 at 02:26, Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+> Hello,
+>
+> This series implements support for the MMC core clk-phase-* devicetree bindings
+> in the Aspeed SD/eMMC driver. The relevant register was exposed on the AST2600
+> and is present for both the SD/MMC controller and the dedicated eMMC
+> controller.
+>
+> v5 fixes some build issues identified by the kernel test robot.
+>
+> v4 can be found here:
+>
+> https://lore.kernel.org/linux-mmc/20201207142556.2045481-1-andrew@aj.id.au/
+>
+> The series has had light testing on an AST2600-based platform which requires
+> 180deg of input and output clock phase correction at HS200, as well as some
+> synthetic testing under qemu and KUnit.
+>
+> Please review!
 
---YiEDa0DAkWCtVeE4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+FYI, other than the comment I had on patch1, I think the series looks
+good to me.
 
-Hi Shimoda-san,
+[...]
 
-On Fri, Dec 04, 2020 at 10:17:33PM +0900, Yoshihiro Shimoda wrote:
-> Add pre_req and post_req support to improve performance.
->=20
-> Inspired by a patch in the BSP by Masaharu Hayakawa.
-
-Thank you for upporting this!
-
->  /*
->   * Specification of this driver:
->   * - host->chan_{rx,tx} will be used as a flag of enabling/disabling the=
- dma
-> @@ -172,6 +178,47 @@ renesas_sdhi_internal_dmac_dataend_dma(struct tmio_m=
-mc_host *host) {
->  	tasklet_schedule(&priv->dma_priv.dma_complete);
->  }
-> =20
-> +/* Should not use host->sg_ptr/sg_len in the following function */
-
-Maybe a short explanation why we shouldn't use the functions?
-
-> +static void
-> +renesas_sdhi_internal_dmac_unmap(struct tmio_mmc_host *host,
-> +				 struct mmc_data *data,
-> +				 enum renesas_sdhi_dma_cookie cookie,
-> +				 bool expected_unmatch)
-
-Can we maybe skip "expected_unmatch"? It is always true for
-COOKIE_UNMAPPED and always false for the COOKIE_*MAPPED values, or?
-
-> +{
-> +	bool unmap =3D expected_unmatch ? (data->host_cookie !=3D cookie) :
-> +					(data->host_cookie =3D=3D cookie);
-
-Then, we could do:
- +	bool unmap =3D cookie =3D=3D COOKIE_UNMAPPED ? (data->host_cookie !=3D c=
-ookie) :
- +					(data->host_cookie =3D=3D cookie);
-
-> +
-> +	if (unmap) {
-> +		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
-> +			     mmc_get_dma_dir(data));
-> +		data->host_cookie =3D COOKIE_UNMAPPED;
-> +	}
-
-Is it maybe worth a warning if the expected condition was not found?
-
-Rest looks good!
-
-All the best,
-
-   Wolfram
-
-
---YiEDa0DAkWCtVeE4
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAl/XiaUACgkQFA3kzBSg
-KbaySxAAgC+jxNcOwMQJrajJ46vkQDu1MV98i1rlmCppSlotui20wL0swP8GIpSy
-OwFawE2Byn/i56xqfVpKV+anus/G6b7bcFwrqwBRNUrnTbQ62itg+Rbwpt3P/Cj5
-InWSvcyGFCGO+wYOHykzMrIbQ/naE33lULmwQHOUxS0oZAFfnSYTmfZ+0l7m1xU+
-/IebS0DtjiRJesT7BDjiUrglzuCvcCQ+IJIRc6j6uZ/sNCoofXCEdoqd7tbeP6LI
-Cb5bCMwvfnluRM4AOa0MWX5VEuS8b4A+uS3MxmVolks5i5Y0QPxZXEp0hTkNmOzS
-Le5+cRVhuKX/0D6zbgemNQKRa3j9XBycIBt9NaGbJy2+mjrljdcurf9zbnUM1y/C
-6buRnxSHXh0XtKagEsp8YsZ+Cpwo6Dh/+4de7JHCCtNuyLvV33jIAQ9o6t4xA+w7
-eUpgVPPxd+LwZoIxy3xgOLH4UXl+Asa/1jw3k6VpvI1or7Lnhp4A5zQ86JYlxmAo
-6ZWxW2Tc6LrFIORr/iba4ohQzlvsdPSCD7bnnJ5qfdy2SgcZvOcjLRuSCslqOl10
-rI8OcenzWzGmRBcHIBbdEk65HednCDtcmVShlho0wzbTL994kQ8wDiNVaRd41Oj0
-EpRLmiZiVe6ZRyS0qlyjV4abOxfu+bwsGktTEUS3ZBcvVClJ5b8=
-=oPa6
------END PGP SIGNATURE-----
-
---YiEDa0DAkWCtVeE4--
+Kind regards
+Uffe
