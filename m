@@ -2,104 +2,198 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45D4FC4361B
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 07:09:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8284FC1B0D8
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 12:45:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 063B3225A9
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 07:09:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3626820663
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 12:45:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2392940AbgLNHJO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Dec 2020 02:09:14 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:42392 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2438873AbgLNHJC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 02:09:02 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0BE73rXZ144743;
-        Mon, 14 Dec 2020 07:08:04 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=corp-2020-01-29;
- bh=s7FDTZIBJKNR9KDMY14+lIuuYdlKTv9NS+Ix6giURYQ=;
- b=SderraMcfpBBIcxAUzDxRWv1UO4RERr989Qzya0I5vquPqCY9fO2FvaPbm7J6185El8J
- yMbTl5SNmKPLIomee1H0V6eMsg7fHOPVNIFz4J3vfyvA8fntIIDsgGSyhxzq/y48eUeJ
- Ko0uYi73QvLi/09rao+PAOE6pt16dIb+LZsQn1WjW4BNJjAbN8qjZ5u89lLkD0rLE97T
- WC8DBGJG1qSkr29qNk7JQJeDhPrxR5M/K2frSslz3lep8tmpGcvj1ZYcLRsYccSCKLQU
- Izp7kGwV3qnn8KEHKF74la2b677ZY9GBIfF+Px3X31hGn/iBR2exUuB6nQoe70szV8EI fQ== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by aserp2120.oracle.com with ESMTP id 35cntkuna2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Mon, 14 Dec 2020 07:08:04 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 0BE7628B185250;
-        Mon, 14 Dec 2020 07:06:04 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-        by userp3030.oracle.com with ESMTP id 35d7su3kyx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 14 Dec 2020 07:06:03 +0000
-Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
-        by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 0BE75lhQ014580;
-        Mon, 14 Dec 2020 07:05:47 GMT
-Received: from kadam (/102.36.221.92)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Sun, 13 Dec 2020 23:05:46 -0800
-Date:   Mon, 14 Dec 2020 10:05:36 +0300
-From:   Dan Carpenter <dan.carpenter@oracle.com>
-To:     Markus Elfring <Markus.Elfring@web.de>
-Cc:     kernel-janitors@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        id S2439299AbgLNMpB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Dec 2020 07:45:01 -0500
+Received: from m43-15.mailgun.net ([69.72.43.15]:33214 "EHLO
+        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2439122AbgLNMox (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 07:44:53 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1607949875; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=m7xKg4xAkB9ELFLlJVew8JC46YRWsfUOcTswVSYnR9E=; b=iSXfvwC8vOETVUEq/XkNlk3T2PxxOezkzdRyQPFxLWUWoAnCcKi75eN9A34ShsbsmgE+ZAoC
+ UTW+MkVRF8x2Z1qGBHyr4lmpsCDM6GiIeSo9Q1Nk6HIlq/30usAt59Xn1tvdnBL1Smut3GDU
+ 33RKR5Hb82ejsL1NB5pj3U+kjgE=
+X-Mailgun-Sending-Ip: 69.72.43.15
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n01.prod.us-west-2.postgun.com with SMTP id
+ 5fd75e151f9c9f3c53f17ffb (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 14 Dec 2020 12:44:05
+ GMT
+Sender: vbadigan=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id C87D3C433ED; Mon, 14 Dec 2020 12:44:05 +0000 (UTC)
+Received: from [192.168.0.105] (unknown [49.205.247.211])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id CB67CC433C6;
+        Mon, 14 Dec 2020 12:44:00 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org CB67CC433C6
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH v4 2/2] mmc: sdhci-msm: Actually set the actual clock
+To:     Douglas Anderson <dianders@chromium.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Colin Ian King <colin.king@canonical.com>
-Subject: Re: mmc: atmel-mci: Reduce =?utf-8?Q?scope?=
- =?utf-8?Q?_for_the_variable_=E2=80=9Cslot=E2=80=9D?= in atmci_request_end()
-Message-ID: <20201214070536.GB2809@kadam>
-References: <466b4c6d-032f-fbcc-58ac-75f6f39d734f@web.de>
- <20201210151035.GC1578121@piout.net>
- <20201211083731.GP2789@kadam>
- <e7910b04-4c4a-567b-d87d-d12352a48cfc@web.de>
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Stephen Boyd <swboyd@chromium.org>,
+        Taniya Das <tdas@codeaurora.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        linux-arm-msm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <20201211091150.v4.1.Iec3430c7d3c2a29262695edef7b82a14aaa567e5@changeid>
+ <20201211091150.v4.2.I7564620993acd4baa63fa0e3925ca879a86d3ee3@changeid>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <e817284c-1ae9-7d3f-5195-7313651ef9da@codeaurora.org>
+Date:   Mon, 14 Dec 2020 18:13:51 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.5.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e7910b04-4c4a-567b-d87d-d12352a48cfc@web.de>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9834 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 phishscore=0 bulkscore=0
- mlxlogscore=917 spamscore=0 mlxscore=0 suspectscore=0 malwarescore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2012140053
-X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9834 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 phishscore=0 mlxscore=0
- lowpriorityscore=0 spamscore=0 adultscore=0 malwarescore=0 suspectscore=0
- mlxlogscore=934 impostorscore=0 priorityscore=1501 clxscore=1015
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
- definitions=main-2012140053
+In-Reply-To: <20201211091150.v4.2.I7564620993acd4baa63fa0e3925ca879a86d3ee3@changeid>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 11, 2020 at 10:08:54AM +0100, Markus Elfring wrote:
-> > This makes it hard to review any patches or follow discussion...
-> 
-> You shared also special software development opinions about extra variable
-> initialisations occasionally, didn't you?
 
-I generally put everything at the top of the function...  I don't have
-a well developed philosophy for when variables should be declared with
-a smaller scope.
+On 12/11/2020 10:42 PM, Douglas Anderson wrote:
+> The MSM SDHCI driver always set the "actual_clock" field to 0.  It had
+> a comment about it not being needed because we weren't using the
+> standard SDHCI divider mechanism and we'd just fallback to
+> "host->clock".  However, it's still better to provide the actual
+> clock.  Why?
+>
+> 1. It will make timeout calculations slightly better.  On one system I
+>     have, the eMMC requets 200 MHz (for HS400-ES) but actually gets 192
+>     MHz.  These are close, but why not get the more accurate one.
+>
+> 2. If things are seriously off in the clock driver and it's missing
+>     rates or picking the wrong rate (maybe it's rounding up instead of
+>     down), this will make it much more obvious what's going on.
+>
+> NOTE: we have to be a little careful here because the "actual_clock"
+> field shouldn't include the multiplier that sdhci-msm needs
+> internally.
+>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+>
+> Changes in v4:
+> - ("mmc: sdhci-msm: Actually set the actual clock") new for v4.
+>
+>   drivers/mmc/host/sdhci-msm.c | 32 ++++++++++++++------------------
+>   1 file changed, 14 insertions(+), 18 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 50beb407dbe9..08a3960001ad 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -328,7 +328,7 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
+>   	writel_relaxed(val, host->ioaddr + offset);
+>   }
+>   
+> -static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
+> +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
+>   						    unsigned int clock)
 
-	int ret;  <-- this should always be function scope
+nit: clock variable not being used anymore. We can drop it.
 
-Probably the other people are right that making scopes shorter is more
-important when the function is very long.
+>   {
+>   	struct mmc_ios ios = host->mmc->ios;
+> @@ -342,8 +342,8 @@ static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
+>   	    ios.timing == MMC_TIMING_MMC_DDR52 ||
+>   	    ios.timing == MMC_TIMING_MMC_HS400 ||
+>   	    host->flags & SDHCI_HS400_TUNING)
+> -		clock *= 2;
+> -	return clock;
+> +		return 2;
+> +	return 1;
+>   }
+>   
+>   static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+> @@ -354,14 +354,16 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>   	struct mmc_ios curr_ios = host->mmc->ios;
+>   	struct clk *core_clk = msm_host->bulk_clks[0].clk;
+>   	unsigned long achieved_rate;
+> +	unsigned int desired_rate;
+> +	unsigned int mult;
+>   	int rc;
+>   
+> -	clock = msm_get_clock_rate_for_bus_mode(host, clock);
+> -	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), clock);
+> +	mult = msm_get_clock_mult_for_bus_mode(host, clock);
+> +	desired_rate = clock * mult;
+> +	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
+>   	if (rc) {
+>   		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
+> -		       mmc_hostname(host->mmc), clock,
+> -		       curr_ios.timing);
+> +		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
+>   		return;
+>   	}
+>   
+> @@ -371,11 +373,12 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+>   	 * encounter it.
+>   	 */
+>   	achieved_rate = clk_get_rate(core_clk);
+> -	if (achieved_rate > clock)
+> +	if (achieved_rate > desired_rate)
+>   		pr_warn("%s: Card appears overclocked; req %u Hz, actual %lu Hz\n",
+> -			mmc_hostname(host->mmc), clock, achieved_rate);
+> +			mmc_hostname(host->mmc), desired_rate, achieved_rate);
+> +	host->mmc->actual_clock = achieved_rate / mult;
+>   
+> -	msm_host->clk_rate = clock;
+> +	msm_host->clk_rate = desired_rate;
 
-regards,
-dan carpenter
+
+Can you set msm_host->clk_rate also to achieved_rate?
+
+At few places in this driver, host->clock is being used where 
+achieved_rate should be used ideally.
+I will replace those instances with 'msm_host->clk_rate' in a separate 
+patch once this change merged.
+
+
+>   	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
+>   		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
+>   }
+> @@ -1756,13 +1759,6 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
+>   static void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>   {
+>   	u16 clk;
+> -	/*
+> -	 * Keep actual_clock as zero -
+> -	 * - since there is no divider used so no need of having actual_clock.
+> -	 * - MSM controller uses SDCLK for data timeout calculation. If
+> -	 *   actual_clock is zero, host->clock is taken for calculation.
+> -	 */
+> -	host->mmc->actual_clock = 0;
+>   
+>   	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>   
+> @@ -1785,7 +1781,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
+>   	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+>   
+>   	if (!clock) {
+> -		msm_host->clk_rate = clock;
+> +		host->mmc->actual_clock = msm_host->clk_rate = 0;
+>   		goto out;
+>   	}
+>   
