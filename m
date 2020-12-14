@@ -2,198 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7876C3526A
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 17:33:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08589C4361B
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 23:33:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 777182251F
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 17:25:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB46622510
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 23:33:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2408520AbgLNRYl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Dec 2020 12:24:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43910 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2408522AbgLNRYh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 12:24:37 -0500
-Received: from mail-pj1-x1044.google.com (mail-pj1-x1044.google.com [IPv6:2607:f8b0:4864:20::1044])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60AACC0617A7
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:20 -0800 (PST)
-Received: by mail-pj1-x1044.google.com with SMTP id j13so6950530pjz.3
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Cg6Bq8u6T5dLgFu86otlHuVnE4BbKztYZ9gDn/MmCXc=;
-        b=M/f24FvBVPavu1tTNzezOto0bS8sgtxaEDsDYCm3yKXZOjBEHMug6ph2ZN2jp/rAcQ
-         0uAAjoQGoGvG7mlHkdqoJ20q2OX/rgkx+RcG5KYoh4rUtzgAksgNRx/HGWTLPeykoeUM
-         HNsvLfjZYGAaPTkJbX+yPO2qkw6UuG/pRLBPA=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Cg6Bq8u6T5dLgFu86otlHuVnE4BbKztYZ9gDn/MmCXc=;
-        b=IswIZNhEYKLC1rJaWewx3s3KWGSKGpizxea+m+BWndWK1Fvx7axtWDyPh+KsZr1KXJ
-         KO6arr4VfMBbx0Y+xMS7470+H6MvmJdSsQn7QBoo4ojbfIVtzLvD11mMFe+IAIxxi6RR
-         LJsI4h/moYKfItw+oJHGAHxEgO+oHDAapZT+l3XZ2FukzmS956uMTXi2V9yEut9VwY1F
-         trRpOB4hLez56w6D/kdlKduJ7RWk8gsm8cpcg12VYV8OIFD8hJLWwa8dmnNB0SQ7mvip
-         TY/o/jvLcTq8/fe8VQbIvskocPhhRdUzj0NG4a/bWyVuSAWaYXf2wDKUeEMcvFjmay6a
-         u7QQ==
-X-Gm-Message-State: AOAM532Go/SKK7z8PzvbBxTCA8elVKqYfDBaN3bLF6XH9wgezfljBXND
-        PGsuMjFOvQQuupm2vWnLBoZJeg==
-X-Google-Smtp-Source: ABdhPJzBFDAtXnY4SIfO2hMauHJDz6Ubh83KhYpJyoVJiaqsTbdWhwA9llolIS2fzSFnfZcuHDq/2A==
-X-Received: by 2002:a17:90b:50a:: with SMTP id r10mr26452721pjz.103.1607966599913;
-        Mon, 14 Dec 2020 09:23:19 -0800 (PST)
-Received: from tictac2.mtv.corp.google.com ([2620:15c:202:1:42b0:34ff:fe3d:58e6])
-        by smtp.gmail.com with ESMTPSA id 7sm16013498pfh.142.2020.12.14.09.23.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 14 Dec 2020 09:23:18 -0800 (PST)
-From:   Douglas Anderson <dianders@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Taniya Das <tdas@codeaurora.org>, vbadigan@codeaurora.org,
-        Stephen Boyd <swboyd@chromium.org>,
-        Douglas Anderson <dianders@chromium.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Andy Gross <agross@kernel.org>, linux-arm-msm@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v5 2/2] mmc: sdhci-msm: Actually set the actual clock
-Date:   Mon, 14 Dec 2020 09:21:15 -0800
-Message-Id: <20201214092048.v5.2.I7564620993acd4baa63fa0e3925ca879a86d3ee3@changeid>
-X-Mailer: git-send-email 2.29.2.576.ga3fc446d84-goog
-In-Reply-To: <20201214092048.v5.1.Iec3430c7d3c2a29262695edef7b82a14aaa567e5@changeid>
-References: <20201214092048.v5.1.Iec3430c7d3c2a29262695edef7b82a14aaa567e5@changeid>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        id S1725945AbgLNXdM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Dec 2020 18:33:12 -0500
+Received: from out3-smtp.messagingengine.com ([66.111.4.27]:51491 "EHLO
+        out3-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725789AbgLNXdB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 18:33:01 -0500
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id DF0815C0148;
+        Mon, 14 Dec 2020 18:31:53 -0500 (EST)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Mon, 14 Dec 2020 18:31:53 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm1; bh=LFF5/tO9nY1OZRQNLJeM62EI6jzrxQX
+        MkvpYLECbH9I=; b=P6AYp58NjCbaJzJB7EQ9YtLJ92XBQwmiwLDirRHAw4p1laV
+        ql7LGdi/IY8aIaL+6Aj53nj6UVA6rIK7dVDUnKtsaCSh940NnyAema4wMNX67IFb
+        9BxRzLARt5Jy1fEtcaII0WPmfWofSiwvoLU+jdaKqtVgIp9vo/udRhhgH6a/mTFG
+        SJTqJAykV11Pxp+Kc+EhqHHkBj0m6I+AP5pauQ1FDZhcHwcCvrjfiIylkWduFaT0
+        2FsEzwo5NvfUGhBWAaDaj4XFBUm/sBArucl2BpCv5DJt11eCIR6T426p1c7b7STY
+        ir5J1m12LwMt6FpxvdCsRiFuMLdNlXO+N7zZnfg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=LFF5/t
+        O9nY1OZRQNLJeM62EI6jzrxQXMkvpYLECbH9I=; b=R2FkRaT/Ga7w1WpVs8t5SQ
+        ir4SFkEy1jNs6LUChTaQzuQvfFWZu6cjf6elSXj6oS8vytP04U74H4O7tgpLriSM
+        Orn0UfhQc1kBWf+T7HT0sp859sxhQ/+9QXIaGRuZtHnIB/0zhJWsjmOaXSru/Tjk
+        ErbACiqu5OKD2Doc78BD8QLwX1eW58nv3QfJcGZ7x5jbjR5D/VHjJfDC3SCEIUfu
+        8kV2fyAjSD1CbJ/fI/gkTNCmLFyINdmjM96niDqzIuVEpkhh2ywDz0VCZProXNWd
+        XUTtJA779p49F218Hwad1m8IXiBGuncsPNwC1Vvm/2C4GsgaLR0zso+LbSlbJI+A
+        ==
+X-ME-Sender: <xms:6PXXX4jxW_gEbq9RtF6OTNO1Wh9nKZUXH8g1dmbMbJEQDsfMtaGkqQ>
+    <xme:6PXXXxAjfDvweqT3TMoi2snE1fYL3_jW3sr1ixRrdL-sTEe4e3jFffb91q8uIVBLT
+    PmsKlTpv6x3vBI8yQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudekledguddvucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
+    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:6PXXXwGmewVKVN_u7eGrtkLxmpbahAIRhl3_LCWLXSEahaNN_J7BSA>
+    <xmx:6PXXX5QAmpiaRkSD_chmsx0m3U5D_ksMIQDOthEqPQgaOcyl3VG8mg>
+    <xmx:6PXXX1z7ynJX5iT7XaSyvh-b8bczXebrLmq1TMLX6KGs64XznnPFMQ>
+    <xmx:6fXXX0yRdOggj1yG1JFdgzAlUTENLFI_HoFARIGIX67tjDU7cyvCqQ>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 8B284E00DD; Mon, 14 Dec 2020 18:31:50 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.3.1-61-gb52c239-fm-20201210.001-gb52c2396
+Mime-Version: 1.0
+Message-Id: <2ba456f0-d9ca-4ca6-9dd0-ae7b5f959333@www.fastmail.com>
+In-Reply-To: <CAPDyKFrceNPNz9+88p+mzbYEo-ZqWOwTBWaqycxPr3MQEFtbaA@mail.gmail.com>
+References: <20201208012615.2717412-1-andrew@aj.id.au>
+ <20201208012615.2717412-2-andrew@aj.id.au>
+ <CAPDyKFrceNPNz9+88p+mzbYEo-ZqWOwTBWaqycxPr3MQEFtbaA@mail.gmail.com>
+Date:   Tue, 15 Dec 2020 10:01:31 +1030
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Ulf Hansson" <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        "Linux ARM" <linux-arm-kernel@lists.infradead.org>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        "Ryan Chen" <ryan_chen@aspeedtech.com>
+Subject: =?UTF-8?Q?Re:_[PATCH_v5_1/6]_mmc:_core:_Add_helper_for_parsing_clock_pha?=
+ =?UTF-8?Q?se_properties?=
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The MSM SDHCI driver always set the "actual_clock" field to 0.  It had
-a comment about it not being needed because we weren't using the
-standard SDHCI divider mechanism and we'd just fallback to
-"host->clock".  However, it's still better to provide the actual
-clock.  Why?
 
-1. It will make timeout calculations slightly better.  On one system I
-   have, the eMMC requets 200 MHz (for HS400-ES) but actually gets 192
-   MHz.  These are close, but why not get the more accurate one.
 
-2. If things are seriously off in the clock driver and it's missing
-   rates or picking the wrong rate (maybe it's rounding up instead of
-   down), this will make it much more obvious what's going on.
+On Tue, 15 Dec 2020, at 02:18, Ulf Hansson wrote:
+> On Tue, 8 Dec 2020 at 02:26, Andrew Jeffery <andrew@aj.id.au> wrote:
+> >
+> > Drivers for MMC hosts that accept phase corrections can take advantage
+> > of the helper by embedding a mmc_clk_phase_map_t object in their
+> > private data and invoking mmc_of_parse_clk_phase() to extract phase
+> > parameters. It is the responsibility of the host driver to translate and
+> > apply the extracted values to hardware as required.
+> >
+> > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> > ---
+> >  drivers/mmc/core/host.c  | 44 ++++++++++++++++++++++++++++++++++++++++
+> >  include/linux/mmc/host.h | 17 ++++++++++++++++
+> >  2 files changed, 61 insertions(+)
+> >
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 96b2ca1f1b06..b1697f00c4b5 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -163,6 +163,50 @@ static void mmc_retune_timer(struct timer_list *t)
+> >         mmc_retune_needed(host);
+> >  }
+> >
+> > +static void mmc_of_parse_timing_phase(struct device *dev, const char *prop,
+> > +                                     struct mmc_clk_phase *phase)
+> > +{
+> > +       int degrees[2] = {0};
+> > +       int rc;
+> > +
+> > +       rc = device_property_read_u32_array(dev, prop, degrees, 2);
+> > +       phase->valid = !rc;
+> > +       if (phase->valid) {
+> > +               phase->in_deg = degrees[0];
+> > +               phase->out_deg = degrees[1];
+> > +       }
+> > +}
+> > +
+> > +void
+> > +mmc_of_parse_clk_phase(struct mmc_host *host, mmc_clk_phase_map_t map)
+> 
+> Would you mind to change to pass a "struct mmc_clk_phase_map *map" to this?
+> 
+> See more comments below.
+> 
+> > +{
+> > +       struct device *dev = host->parent;
+> > +
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-legacy",
+> > +                                 &map[MMC_TIMING_LEGACY]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs",
+> > +                                 &map[MMC_TIMING_MMC_HS]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-sd-hs",
+> > +                                 &map[MMC_TIMING_SD_HS]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr12",
+> > +                                 &map[MMC_TIMING_UHS_SDR12]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr25",
+> > +                                 &map[MMC_TIMING_UHS_SDR25]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr50",
+> > +                                 &map[MMC_TIMING_UHS_SDR50]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr104",
+> > +                                 &map[MMC_TIMING_UHS_SDR104]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-ddr50",
+> > +                                 &map[MMC_TIMING_UHS_DDR50]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-ddr52",
+> > +                                 &map[MMC_TIMING_MMC_DDR52]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs200",
+> > +                                 &map[MMC_TIMING_MMC_HS200]);
+> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs400",
+> > +                                 &map[MMC_TIMING_MMC_HS400]);
+> > +}
+> > +EXPORT_SYMBOL(mmc_of_parse_clk_phase);
+> > +
+> >  /**
+> >   *     mmc_of_parse() - parse host's device-tree node
+> >   *     @host: host whose node should be parsed.
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index 01bba36545c5..bc4731c9738f 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -79,6 +79,22 @@ struct mmc_ios {
+> >         bool enhanced_strobe;                   /* hs400es selection */
+> >  };
+> >
+> > +struct mmc_clk_phase {
+> > +       bool valid;
+> > +       u16 in_deg;
+> > +       u16 out_deg;
+> > +};
+> > +
+> > +/*
+> > + * Define a type to map between bus timings and phase correction values. To
+> > + * avoid bloat in struct mmc_host we leave it to the host driver to define the
+> > + * phase map object in its private data if it supports phase correction.
+> > + * However, mmc_of_parse_clk_phase() is provided by the mmc core and needs the
+> > + * provided array to be correctly sized, so typedef an appropriately sized
+> > + * array to minimise the chance that the wrong size object is passed.
+> > + */
+> > +typedef struct mmc_clk_phase mmc_clk_phase_map_t[MMC_TIMING_MMC_HS400 + 1];
+> > +
+> 
+> Nitpick: I would appreciate if we could avoid using "typedefs", as I
+> think they in many cases makes the code harder to read. How about
+> doing this instead?
+> 
+> #define MMC_NUM_CLK_PHASES (MMC_TIMING_MMC_HS400 + 1)
+> 
+> struct mmc_clk_phase_map {
+>         struct mmc_clk_phase phase[MMC_NUM_CLK_PHASES];
+> };
+> 
+> [...]
 
-NOTE: we have to be a little careful here because the "actual_clock"
-field shouldn't include the multiplier that sdhci-msm needs
-internally.
+Right; I experimented with that approach and felt it was kinda clunky (hence 
+the typedef), but I'll respin the series doing as such.
 
-Suggested-by: Adrian Hunter <adrian.hunter@intel.com>
-Signed-off-by: Douglas Anderson <dianders@chromium.org>
-Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
----
+Thanks,
 
-Changes in v5:
-- Remove unused clock parameter.
-- Add a comment that we're stashing the requested rate.
-
-Changes in v4:
-- ("mmc: sdhci-msm: Actually set the actual clock") new for v4.
-
- drivers/mmc/host/sdhci-msm.c | 35 ++++++++++++++++-------------------
- 1 file changed, 16 insertions(+), 19 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 50beb407dbe9..f5669dc858d0 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -328,8 +328,7 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
- 	writel_relaxed(val, host->ioaddr + offset);
- }
- 
--static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
--						    unsigned int clock)
-+static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host)
- {
- 	struct mmc_ios ios = host->mmc->ios;
- 	/*
-@@ -342,8 +341,8 @@ static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
- 	    ios.timing == MMC_TIMING_MMC_DDR52 ||
- 	    ios.timing == MMC_TIMING_MMC_HS400 ||
- 	    host->flags & SDHCI_HS400_TUNING)
--		clock *= 2;
--	return clock;
-+		return 2;
-+	return 1;
- }
- 
- static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-@@ -354,14 +353,16 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
- 	struct mmc_ios curr_ios = host->mmc->ios;
- 	struct clk *core_clk = msm_host->bulk_clks[0].clk;
- 	unsigned long achieved_rate;
-+	unsigned int desired_rate;
-+	unsigned int mult;
- 	int rc;
- 
--	clock = msm_get_clock_rate_for_bus_mode(host, clock);
--	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), clock);
-+	mult = msm_get_clock_mult_for_bus_mode(host);
-+	desired_rate = clock * mult;
-+	rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
- 	if (rc) {
- 		pr_err("%s: Failed to set clock at rate %u at timing %d\n",
--		       mmc_hostname(host->mmc), clock,
--		       curr_ios.timing);
-+		       mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
- 		return;
- 	}
- 
-@@ -371,11 +372,14 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
- 	 * encounter it.
- 	 */
- 	achieved_rate = clk_get_rate(core_clk);
--	if (achieved_rate > clock)
-+	if (achieved_rate > desired_rate)
- 		pr_warn("%s: Card appears overclocked; req %u Hz, actual %lu Hz\n",
--			mmc_hostname(host->mmc), clock, achieved_rate);
-+			mmc_hostname(host->mmc), desired_rate, achieved_rate);
-+	host->mmc->actual_clock = achieved_rate / mult;
-+
-+	/* Stash the rate we requested to use in sdhci_msm_runtime_resume() */
-+	msm_host->clk_rate = desired_rate;
- 
--	msm_host->clk_rate = clock;
- 	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
- 		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
- }
-@@ -1756,13 +1760,6 @@ static unsigned int sdhci_msm_get_min_clock(struct sdhci_host *host)
- static void __sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	u16 clk;
--	/*
--	 * Keep actual_clock as zero -
--	 * - since there is no divider used so no need of having actual_clock.
--	 * - MSM controller uses SDCLK for data timeout calculation. If
--	 *   actual_clock is zero, host->clock is taken for calculation.
--	 */
--	host->mmc->actual_clock = 0;
- 
- 	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
- 
-@@ -1785,7 +1782,7 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
- 
- 	if (!clock) {
--		msm_host->clk_rate = clock;
-+		host->mmc->actual_clock = msm_host->clk_rate = 0;
- 		goto out;
- 	}
- 
--- 
-2.29.2.576.ga3fc446d84-goog
-
+Andrew
