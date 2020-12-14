@@ -2,237 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56A3FC4361B
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 17:24:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2830C2D0E4
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 17:33:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15F6A2251F
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 17:24:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D352022AAE
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 17:25:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2408512AbgLNRYD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Dec 2020 12:24:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43792 "EHLO
+        id S2408527AbgLNRY6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Dec 2020 12:24:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2408506AbgLNRXy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 12:23:54 -0500
-Received: from mail-ua1-x942.google.com (mail-ua1-x942.google.com [IPv6:2607:f8b0:4864:20::942])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1625BC0613D3
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:14 -0800 (PST)
-Received: by mail-ua1-x942.google.com with SMTP id f29so5721278uab.0
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:14 -0800 (PST)
+        with ESMTP id S2408521AbgLNRYh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 12:24:37 -0500
+Received: from mail-pl1-x641.google.com (mail-pl1-x641.google.com [IPv6:2607:f8b0:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BD60C0617A6
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:18 -0800 (PST)
+Received: by mail-pl1-x641.google.com with SMTP id e2so1820861plt.12
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=B4/H5KkHplx6c8hRY9n/z1Ihm7wdVAC1WaMlKmQhNMg=;
-        b=heyEYswMrzq4NoyA2wH6PjiRH0I7R0Suukp6ZwO3UCTMXk9WkIHFqcti95Fo1+tPEx
-         nQZ7vvx3oFG6JMGgF3H3Lsm9Hi7reT7S0p0qkH2UnZYq9JwZL1BBlySy3Mcu5LTxkdA/
-         F59jc9Jhg9ADgh/gUlCuxhJ83aU8ov8PoI2T8=
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ixXiJOTpChsS+4hsOynBoznKWWFukOcSg8gnLionDSc=;
+        b=JR/A58L++gYOFPkthluSdjweS9CJRgdMUVOXmjprfA1QPNlbEHthNfByO0JoyKPdM/
+         clkf8QWTb84hc9tw2QCU5bNTf2w5sbO5wSvwK/jU1GwJ8CC2eZo0NvMv6lJXg5c4+nRm
+         vP6i3psTjbxQ2cZE2jn/VeQv44A8aaFeFxJRw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=B4/H5KkHplx6c8hRY9n/z1Ihm7wdVAC1WaMlKmQhNMg=;
-        b=KWZoF5VocJD5N10FXmaGDSOemPt54YfaWbIvaB3nxK33oEF5XAUc1jSuO61CD4Ybw2
-         ctQrcVOhIh5f/Py1o8y9jFoxiYPEfEmBC4Vl3NoJLF2ZlaOa4ZuAvaQxs/eeDeYdg4Uv
-         Wr0ffXDG1BajAnOmca5lW3fgk9gCKnc3yMd5DffqAdYlcYtS3piyjdPC7OzI7Paqciey
-         etrrT2vdGJrtmr/k2Nk4E81oSgznhv8jJZBhVCn5oWiWLrOQH4Re1sjgAjKxm7zLG+z/
-         h5xYlNj+MjX6MTz86FdR8hLryzSXSbLySDJHJREMTpG6/KNMjSNqjjiE3EklSiRhX1FQ
-         MZ3g==
-X-Gm-Message-State: AOAM530mF3wCIQfHZkfWtxfE0a5gPQirt6M5zGegH6tLr6Hvenbuo4d7
-        geCjjvpJGRZp4BDZRscxo18bRXhpySvpoA==
-X-Google-Smtp-Source: ABdhPJxAWqgbPo/2BzEk+DiVu+pNS8wdtAjfZonXnRsTnyuGTMGhTGgrzAa1mWrtf9bk4hD/xDYkIw==
-X-Received: by 2002:ab0:6aa:: with SMTP id g39mr24034006uag.71.1607966592885;
-        Mon, 14 Dec 2020 09:23:12 -0800 (PST)
-Received: from mail-ua1-f44.google.com (mail-ua1-f44.google.com. [209.85.222.44])
-        by smtp.gmail.com with ESMTPSA id f143sm2392899vka.26.2020.12.14.09.23.11
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 14 Dec 2020 09:23:12 -0800 (PST)
-Received: by mail-ua1-f44.google.com with SMTP id n18so5709392ual.9
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Dec 2020 09:23:11 -0800 (PST)
-X-Received: by 2002:ab0:6285:: with SMTP id z5mr24231786uao.0.1607966591317;
- Mon, 14 Dec 2020 09:23:11 -0800 (PST)
-MIME-Version: 1.0
-References: <20201211091150.v4.1.Iec3430c7d3c2a29262695edef7b82a14aaa567e5@changeid>
- <20201211091150.v4.2.I7564620993acd4baa63fa0e3925ca879a86d3ee3@changeid> <e817284c-1ae9-7d3f-5195-7313651ef9da@codeaurora.org>
-In-Reply-To: <e817284c-1ae9-7d3f-5195-7313651ef9da@codeaurora.org>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Mon, 14 Dec 2020 09:22:59 -0800
-X-Gmail-Original-Message-ID: <CAD=FV=WpZn8kx+X+EtmRnrtdS2B88x4M9fwuxbtt06BvL76jJQ@mail.gmail.com>
-Message-ID: <CAD=FV=WpZn8kx+X+EtmRnrtdS2B88x4M9fwuxbtt06BvL76jJQ@mail.gmail.com>
-Subject: Re: [PATCH v4 2/2] mmc: sdhci-msm: Actually set the actual clock
-To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ixXiJOTpChsS+4hsOynBoznKWWFukOcSg8gnLionDSc=;
+        b=qnzU/QbNHc6qQczQSh8UDr9Y3grZmVg/ZPmlav3381NcXBNH0lAt+GU9k01CZbYH+V
+         bJX2qpludR1q4c4i0Z/GWYCjlaS9zfOW39sKyDCeT4nY96PMX+hon5xoRrqeveTIqjUD
+         EdW/rUd4OZc6KW3JQKVROYaYbTF8r0beP2/0xI7Nyiy21NV5btLvls9BsjIfUrYIrUkG
+         Rbvo1V9lHb+vlzPMqdPSyFt955WO38MMsOgdI2UnOE4k+LnhUiLC9qmUQ8w79euDr2aO
+         N4UUcTPPIph/w2px+3qHO+aiaFBKBCdFoHVZiygLqMPh3Vt7FLloQwH1Y5cE7CBtv3iA
+         Gn4Q==
+X-Gm-Message-State: AOAM531d5yfHlfK0T8BXRYTeKB8mGPNYiiZMbbxvrkLFqfxKVl0xOu6t
+        2+4Je0GT386QTxvnyHzvTay5eg==
+X-Google-Smtp-Source: ABdhPJxnhLBxYwe6+7mjOz3eHTxWqA0+Qq10RmkZ3BR4aip0H78wl4m2aTZmzdXZNTGzKIjQ+UlDjQ==
+X-Received: by 2002:a17:90a:c910:: with SMTP id v16mr26359722pjt.198.1607966597919;
+        Mon, 14 Dec 2020 09:23:17 -0800 (PST)
+Received: from tictac2.mtv.corp.google.com ([2620:15c:202:1:42b0:34ff:fe3d:58e6])
+        by smtp.gmail.com with ESMTPSA id 7sm16013498pfh.142.2020.12.14.09.23.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Dec 2020 09:23:17 -0800 (PST)
+From:   Douglas Anderson <dianders@chromium.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Taniya Das <tdas@codeaurora.org>, vbadigan@codeaurora.org,
         Stephen Boyd <swboyd@chromium.org>,
-        Taniya Das <tdas@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
+        Douglas Anderson <dianders@chromium.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Andy Gross <agross@kernel.org>, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH v5 1/2] mmc: sdhci-msm: Warn about overclocking SD/MMC
+Date:   Mon, 14 Dec 2020 09:21:14 -0800
+Message-Id: <20201214092048.v5.1.Iec3430c7d3c2a29262695edef7b82a14aaa567e5@changeid>
+X-Mailer: git-send-email 2.29.2.576.ga3fc446d84-goog
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+As talked about in commit 5e4b7e82d497 ("clk: qcom: gcc-sdm845: Use
+floor ops for sdcc clks"), most clocks handled by the Qualcomm clock
+drivers are rounded _up_ by default instead of down.  We should make
+sure SD/MMC clocks are always rounded down in the clock drivers.
+Let's add a warning in the Qualcomm SDHCI driver to help catch the
+problem.
 
-On Mon, Dec 14, 2020 at 4:44 AM Veerabhadrarao Badiganti
-<vbadigan@codeaurora.org> wrote:
->
->
-> On 12/11/2020 10:42 PM, Douglas Anderson wrote:
-> > The MSM SDHCI driver always set the "actual_clock" field to 0.  It had
-> > a comment about it not being needed because we weren't using the
-> > standard SDHCI divider mechanism and we'd just fallback to
-> > "host->clock".  However, it's still better to provide the actual
-> > clock.  Why?
-> >
-> > 1. It will make timeout calculations slightly better.  On one system I
-> >     have, the eMMC requets 200 MHz (for HS400-ES) but actually gets 192
-> >     MHz.  These are close, but why not get the more accurate one.
-> >
-> > 2. If things are seriously off in the clock driver and it's missing
-> >     rates or picking the wrong rate (maybe it's rounding up instead of
-> >     down), this will make it much more obvious what's going on.
-> >
-> > NOTE: we have to be a little careful here because the "actual_clock"
-> > field shouldn't include the multiplier that sdhci-msm needs
-> > internally.
-> >
-> > Signed-off-by: Douglas Anderson <dianders@chromium.org>
-> > ---
-> >
-> > Changes in v4:
-> > - ("mmc: sdhci-msm: Actually set the actual clock") new for v4.
-> >
-> >   drivers/mmc/host/sdhci-msm.c | 32 ++++++++++++++------------------
-> >   1 file changed, 14 insertions(+), 18 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> > index 50beb407dbe9..08a3960001ad 100644
-> > --- a/drivers/mmc/host/sdhci-msm.c
-> > +++ b/drivers/mmc/host/sdhci-msm.c
-> > @@ -328,7 +328,7 @@ static void sdhci_msm_v5_variant_writel_relaxed(u32 val,
-> >       writel_relaxed(val, host->ioaddr + offset);
-> >   }
-> >
-> > -static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
-> > +static unsigned int msm_get_clock_mult_for_bus_mode(struct sdhci_host *host,
-> >                                                   unsigned int clock)
->
-> nit: clock variable not being used anymore. We can drop it.
+This would have saved a bunch of time [1].
 
-Good point.  Sending out a v5 with this.
+NOTE: this doesn't actually fix any problems, it just makes it obvious
+to devs that there is a problem and that should be an indication to
+fix the clock driver.
 
+[1] http://lore.kernel.org/r/20201210102234.1.I096779f219625148900fc984dd0084ed1ba87c7f@changeid
 
-> >   {
-> >       struct mmc_ios ios = host->mmc->ios;
-> > @@ -342,8 +342,8 @@ static unsigned int msm_get_clock_rate_for_bus_mode(struct sdhci_host *host,
-> >           ios.timing == MMC_TIMING_MMC_DDR52 ||
-> >           ios.timing == MMC_TIMING_MMC_HS400 ||
-> >           host->flags & SDHCI_HS400_TUNING)
-> > -             clock *= 2;
-> > -     return clock;
-> > +             return 2;
-> > +     return 1;
-> >   }
-> >
-> >   static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> > @@ -354,14 +354,16 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> >       struct mmc_ios curr_ios = host->mmc->ios;
-> >       struct clk *core_clk = msm_host->bulk_clks[0].clk;
-> >       unsigned long achieved_rate;
-> > +     unsigned int desired_rate;
-> > +     unsigned int mult;
-> >       int rc;
-> >
-> > -     clock = msm_get_clock_rate_for_bus_mode(host, clock);
-> > -     rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), clock);
-> > +     mult = msm_get_clock_mult_for_bus_mode(host, clock);
-> > +     desired_rate = clock * mult;
-> > +     rc = dev_pm_opp_set_rate(mmc_dev(host->mmc), desired_rate);
-> >       if (rc) {
-> >               pr_err("%s: Failed to set clock at rate %u at timing %d\n",
-> > -                    mmc_hostname(host->mmc), clock,
-> > -                    curr_ios.timing);
-> > +                    mmc_hostname(host->mmc), desired_rate, curr_ios.timing);
-> >               return;
-> >       }
-> >
-> > @@ -371,11 +373,12 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
-> >        * encounter it.
-> >        */
-> >       achieved_rate = clk_get_rate(core_clk);
-> > -     if (achieved_rate > clock)
-> > +     if (achieved_rate > desired_rate)
-> >               pr_warn("%s: Card appears overclocked; req %u Hz, actual %lu Hz\n",
-> > -                     mmc_hostname(host->mmc), clock, achieved_rate);
-> > +                     mmc_hostname(host->mmc), desired_rate, achieved_rate);
-> > +     host->mmc->actual_clock = achieved_rate / mult;
-> >
-> > -     msm_host->clk_rate = clock;
-> > +     msm_host->clk_rate = desired_rate;
->
->
-> Can you set msm_host->clk_rate also to achieved_rate?
+Suggested-by: Stephen Boyd <swboyd@chromium.org>
+Signed-off-by: Douglas Anderson <dianders@chromium.org>
+Reviewed-by: Stephen Boyd <swboyd@chromium.org>
+Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+---
 
-Personally I'd rather not, but if you are sure that's what you want I
-won't object to it too strongly.  Why do I feel this way?  The member
-"clk_rate" contains the value that we passed to dev_pm_opp_set_rate()
-the first time and I'd rather use that exact same value in
-sdhci_msm_runtime_resume().  Mostly I'm just being paranoid in case
-there is a bug and the operations aren't "stable".
+(no changes since v4)
 
-For instance, let's imagine a fictional case where somewhere in the
-clock framework there is a transition to kHz (something like this
-_actually_ happens in the DRM subsystem):
+Changes in v4:
+- Emphasize in the commit message that this itself doesn't fix anything.
 
-clk_set_rate(rate_hz):
-  rate_khz = rate_hz / 1000;
-  real_clk_set_rate(rate_khz);
+Changes in v3:
+- Proper printf format code.
 
-real_clk_set_rate(rate_khz)
-  rate_hz = rate_khz * 1000;
-  for each table_rate in table:
-    if table_rate <= rate_hz:
-      break;
-  set_hw_rate(table_rate);
+Changes in v2:
+- Store rate in unsigned long, not unsigned int.
+- Reuse the clk_get_rate() in the later print.
 
-real_clk_get_rate()
-  rate_hz = get_hw_rate();
-  return rate_hz / 1000;
+ drivers/mmc/host/sdhci-msm.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
 
-clk_get_rate()
-  rate_khz = real_clk_get_rate()
-  return rate_khz * 1000;
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index 3451eb325513..50beb407dbe9 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -353,6 +353,7 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+ 	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
+ 	struct mmc_ios curr_ios = host->mmc->ios;
+ 	struct clk *core_clk = msm_host->bulk_clks[0].clk;
++	unsigned long achieved_rate;
+ 	int rc;
+ 
+ 	clock = msm_get_clock_rate_for_bus_mode(host, clock);
+@@ -363,10 +364,20 @@ static void msm_set_clock_rate_for_bus_mode(struct sdhci_host *host,
+ 		       curr_ios.timing);
+ 		return;
+ 	}
++
++	/*
++	 * Qualcomm clock drivers by default round clock _up_ if they can't
++	 * make the requested rate.  This is not good for SD.  Yell if we
++	 * encounter it.
++	 */
++	achieved_rate = clk_get_rate(core_clk);
++	if (achieved_rate > clock)
++		pr_warn("%s: Card appears overclocked; req %u Hz, actual %lu Hz\n",
++			mmc_hostname(host->mmc), clock, achieved_rate);
++
+ 	msm_host->clk_rate = clock;
+ 	pr_debug("%s: Setting clock at rate %lu at timing %d\n",
+-		 mmc_hostname(host->mmc), clk_get_rate(core_clk),
+-		 curr_ios.timing);
++		 mmc_hostname(host->mmc), achieved_rate, curr_ios.timing);
+ }
+ 
+ /* Platform specific tuning */
+-- 
+2.29.2.576.ga3fc446d84-goog
 
-Now if your table has these rates:
-  { 111111111, 222222222, 333333333 }
-
-Calling clk_set_rate(400000000) will set your rate to 333333333 Hz.
-Now calling clk_get_rate() will return you 333333000.  Now calling
-clk_set_rate(333333000) will set your rate to 222222222 Hz!
-
-IMO the above would be a bug, but I have seen things like that happen.
-It's safer to stash the actual rate that we _requested_ and, if we
-need to request the rate again, we pass that same value.  That should
-always work.  I added a comment to at least make it look more explicit
-that we're stashing the requested value.
-
-
-> At few places in this driver, host->clock is being used where
-> achieved_rate should be used ideally.
-> I will replace those instances with 'msm_host->clk_rate' in a separate
-> patch once this change merged.
-
-Sounds good, thanks!
-
-
--Doug
