@@ -2,101 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30E69C4361B
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Dec 2020 17:17:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E3F4C2BB48
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Dec 2020 17:54:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D73FE227C3
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Dec 2020 17:17:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74CC722ADC
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Dec 2020 17:54:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727190AbgLORRB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Dec 2020 12:17:01 -0500
-Received: from mga01.intel.com ([192.55.52.88]:27334 "EHLO mga01.intel.com"
+        id S1730599AbgLORxh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Dec 2020 12:53:37 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37868 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729418AbgLORQy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 15 Dec 2020 12:16:54 -0500
-IronPort-SDR: 9JUSVY4GmF+LSCFAWuKWTIFfixqU4Sx7LoLtUD4GYwocGRpKeozRaQJOvQ3M8/M0VXXUP6uHf1
- UAa0A6GTaVfQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9836"; a="193292086"
-X-IronPort-AV: E=Sophos;i="5.78,422,1599548400"; 
-   d="scan'208";a="193292086"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Dec 2020 09:16:12 -0800
-IronPort-SDR: U9ByCr36JadSqj3Hs0PoJBV6xqwxW/vC6ty3U4gCyFx+WlQr08OuvincbcjJMpdsZvnah3UVn5
- h7K3+Qm+/r+A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,422,1599548400"; 
-   d="scan'208";a="559219738"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by fmsmga005.fm.intel.com with ESMTP; 15 Dec 2020 09:16:10 -0800
-Subject: Re: [PATCH 2/3] mmc: xenon: add AP807 compatible string
-To:     kostap@marvell.com, linux-mmc@vger.kernel.org
-Cc:     huziji@marvell.com, ulf.hansson@linaro.org, andrew@lunn.ch,
-        gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com,
-        mw@semihalf.com, jaz@semihalf.com
-References: <20201215155636.28474-1-kostap@marvell.com>
- <20201215155636.28474-3-kostap@marvell.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <30d17db8-5735-8e3c-b026-3a7f4794d1c7@intel.com>
-Date:   Tue, 15 Dec 2020 19:16:02 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1730154AbgLORxf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 15 Dec 2020 12:53:35 -0500
+Date:   Tue, 15 Dec 2020 09:52:51 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1608054774;
+        bh=hXPUuO6IQOjzr+sj64k3SZ3Y/yxjs2z8ZppnJqErAEY=;
+        h=From:To:Cc:Subject:References:In-Reply-To:From;
+        b=AiwUOOqvaALNAa9kg0a9Xkvn6d23jW8jD9fP+LVg2rXai4DOh4cO3mjtIZ0IOVVr7
+         6ov6RTxQKV5w3EfPaJ9jv3zxQuPWUFenCJimYmHh5q1+HsK6Rj9XLwfy6FUnv2KEi8
+         FliGXAEN5tD/Yf36A/5PRI2uevdO+kniLNZl//xdR2mXZGcZcOTnf/1iDSfCVAZwjU
+         kRE/jkZHyAnnZMlzK3Ax92N/rltQZ+VOcKAEfTjtONe5No0igt14hYQVpVYG1ox1/w
+         IE8+oTUiTcWFs+8VHBO62il6badS9NyKNETNe+d9L3bdyxDubAaqvQyA8qPTIyir4y
+         aQ7iAiSlzMTVA==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     "Peng.Zhou" <peng.zhou@mediatek.com>
+Cc:     linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: Re: [PATCH v3 0/9] eMMC inline encryption support
+Message-ID: <X9j38+54HGOEK7C/@sol.localdomain>
+References: <20201209044238.78659-1-ebiggers@kernel.org>
+ <1608019654.31445.8.camel@mbjsdccf07>
 MIME-Version: 1.0
-In-Reply-To: <20201215155636.28474-3-kostap@marvell.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1608019654.31445.8.camel@mbjsdccf07>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 15/12/20 5:56 pm, kostap@marvell.com wrote:
-> From: Marcin Wojtas <mw@semihalf.com>
-> 
-> This patch adds new compatible string to differentiate
-> between the controllers versions included in the AP807
-> north bridge. Thanks to this change, the SoCs which use
-> AP807 will not run unintentionally in the 'slow mode'
-> with disabled UHS modes.
-> 
-> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
-> ---
->  arch/arm64/boot/dts/marvell/armada-ap807.dtsi | 4 ++++
->  drivers/mmc/host/sdhci-xenon.c                | 1 +
->  2 files changed, 5 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/marvell/armada-ap807.dtsi b/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-> index 623010f3ca89..e9a740ec22cb 100644
-> --- a/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-> +++ b/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-> @@ -27,3 +27,7 @@
->  		#clock-cells = <1>;
->  	};
->  };
-> +
-> +&ap_sdhci0 {
-> +	compatible = "marvell,armada-ap807-sdhci";
-> +};
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index 24c978de2a3f..29f6bede9b96 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -668,6 +668,7 @@ static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
->  
->  static const struct of_device_id sdhci_xenon_dt_ids[] = {
->  	{ .compatible = "marvell,armada-ap806-sdhci",},
-> +	{ .compatible = "marvell,armada-ap807-sdhci",},
+On Tue, Dec 15, 2020 at 04:07:34PM +0800, Peng.Zhou wrote:
+> > 
+> I had verified this patchset in MT6853 (A 5G mobile smartphone platform
+> of Mediatek which meets eMMC v5.2 specification) and they work normally
+> in Android environment.
+> Reviewed and Tested by: Peng Zhou<peng.zhou@mediatek.com>
 
-Didn't you add match data here?  Then it needs a re-base on Ulf's 'next' branch.
+Thanks Peng.  Is your Reviewed-and-tested-by for the whole patchset, or just for
+patches 1-5?  Patches 6-9 only affect Qualcomm hardware.
 
->  	{ .compatible = "marvell,armada-cp110-sdhci",},
->  	{ .compatible = "marvell,armada-3700-sdhci",},
->  	{}
-> 
+Also, were many changes to mtk-sd.c required to get the crypto support working
+on your hardware, or was it just a matter of making a SMC call and setting the
+crypto capability flag, like it was for ufs-mediatek (commit 46426552e74f)?
+If you could send your patch for mtk-sd.c on top of this patchset, that would be
+helpful for people to see.
 
+- Eric
