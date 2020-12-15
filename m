@@ -2,209 +2,206 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08589C4361B
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 23:33:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A209C2BB48
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Dec 2020 01:33:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB46622510
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Dec 2020 23:33:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4454B221FD
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Dec 2020 01:33:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725945AbgLNXdM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Dec 2020 18:33:12 -0500
-Received: from out3-smtp.messagingengine.com ([66.111.4.27]:51491 "EHLO
-        out3-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725789AbgLNXdB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Dec 2020 18:33:01 -0500
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.nyi.internal (Postfix) with ESMTP id DF0815C0148;
-        Mon, 14 Dec 2020 18:31:53 -0500 (EST)
-Received: from imap2 ([10.202.2.52])
-  by compute3.internal (MEProxy); Mon, 14 Dec 2020 18:31:53 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
-        mime-version:message-id:in-reply-to:references:date:from:to:cc
-        :subject:content-type; s=fm1; bh=LFF5/tO9nY1OZRQNLJeM62EI6jzrxQX
-        MkvpYLECbH9I=; b=P6AYp58NjCbaJzJB7EQ9YtLJ92XBQwmiwLDirRHAw4p1laV
-        ql7LGdi/IY8aIaL+6Aj53nj6UVA6rIK7dVDUnKtsaCSh940NnyAema4wMNX67IFb
-        9BxRzLARt5Jy1fEtcaII0WPmfWofSiwvoLU+jdaKqtVgIp9vo/udRhhgH6a/mTFG
-        SJTqJAykV11Pxp+Kc+EhqHHkBj0m6I+AP5pauQ1FDZhcHwcCvrjfiIylkWduFaT0
-        2FsEzwo5NvfUGhBWAaDaj4XFBUm/sBArucl2BpCv5DJt11eCIR6T426p1c7b7STY
-        ir5J1m12LwMt6FpxvdCsRiFuMLdNlXO+N7zZnfg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=LFF5/t
-        O9nY1OZRQNLJeM62EI6jzrxQXMkvpYLECbH9I=; b=R2FkRaT/Ga7w1WpVs8t5SQ
-        ir4SFkEy1jNs6LUChTaQzuQvfFWZu6cjf6elSXj6oS8vytP04U74H4O7tgpLriSM
-        Orn0UfhQc1kBWf+T7HT0sp859sxhQ/+9QXIaGRuZtHnIB/0zhJWsjmOaXSru/Tjk
-        ErbACiqu5OKD2Doc78BD8QLwX1eW58nv3QfJcGZ7x5jbjR5D/VHjJfDC3SCEIUfu
-        8kV2fyAjSD1CbJ/fI/gkTNCmLFyINdmjM96niDqzIuVEpkhh2ywDz0VCZProXNWd
-        XUTtJA779p49F218Hwad1m8IXiBGuncsPNwC1Vvm/2C4GsgaLR0zso+LbSlbJI+A
-        ==
-X-ME-Sender: <xms:6PXXX4jxW_gEbq9RtF6OTNO1Wh9nKZUXH8g1dmbMbJEQDsfMtaGkqQ>
-    <xme:6PXXXxAjfDvweqT3TMoi2snE1fYL3_jW3sr1ixRrdL-sTEe4e3jFffb91q8uIVBLT
-    PmsKlTpv6x3vBI8yQ>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudekledguddvucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
-    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
-    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
-    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
-    eprghnughrvgifsegrjhdrihgurdgruh
-X-ME-Proxy: <xmx:6PXXXwGmewVKVN_u7eGrtkLxmpbahAIRhl3_LCWLXSEahaNN_J7BSA>
-    <xmx:6PXXX5QAmpiaRkSD_chmsx0m3U5D_ksMIQDOthEqPQgaOcyl3VG8mg>
-    <xmx:6PXXX1z7ynJX5iT7XaSyvh-b8bczXebrLmq1TMLX6KGs64XznnPFMQ>
-    <xmx:6fXXX0yRdOggj1yG1JFdgzAlUTENLFI_HoFARIGIX67tjDU7cyvCqQ>
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 8B284E00DD; Mon, 14 Dec 2020 18:31:50 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.3.1-61-gb52c239-fm-20201210.001-gb52c2396
-Mime-Version: 1.0
-Message-Id: <2ba456f0-d9ca-4ca6-9dd0-ae7b5f959333@www.fastmail.com>
-In-Reply-To: <CAPDyKFrceNPNz9+88p+mzbYEo-ZqWOwTBWaqycxPr3MQEFtbaA@mail.gmail.com>
-References: <20201208012615.2717412-1-andrew@aj.id.au>
- <20201208012615.2717412-2-andrew@aj.id.au>
- <CAPDyKFrceNPNz9+88p+mzbYEo-ZqWOwTBWaqycxPr3MQEFtbaA@mail.gmail.com>
-Date:   Tue, 15 Dec 2020 10:01:31 +1030
-From:   "Andrew Jeffery" <andrew@aj.id.au>
-To:     "Ulf Hansson" <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        "Rob Herring" <robh+dt@kernel.org>,
-        "Joel Stanley" <joel@jms.id.au>,
-        "Adrian Hunter" <adrian.hunter@intel.com>,
-        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        "Linux ARM" <linux-arm-kernel@lists.infradead.org>,
-        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
-        "Ryan Chen" <ryan_chen@aspeedtech.com>
-Subject: =?UTF-8?Q?Re:_[PATCH_v5_1/6]_mmc:_core:_Add_helper_for_parsing_clock_pha?=
- =?UTF-8?Q?se_properties?=
-Content-Type: text/plain
+        id S1729972AbgLOBdS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Dec 2020 20:33:18 -0500
+Received: from mail-eopbgr1410113.outbound.protection.outlook.com ([40.107.141.113]:32997
+        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1729980AbgLOBdS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 14 Dec 2020 20:33:18 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=DqJwmXjGNnuZ+/z9IeUElscw1Niwd95aCS8h6XTIXQnTnxE+xfaqhr+S+JiYmji+Frl1V6qF8xGh3kXNYLFP1VHfiqCd47kzrMAln6r1qX82vqh56VX1fNHeP93c12wg4rpV37LGTz/AJPt0Ie5KH4QZRvQOB4yoveYZp+5Wrqj8LPlw5+TBP6LQPptZbq4bJ4VZW1+N6jPp4xI4P/y4Ai7fLwxOUjkXeTRgNjqY7mJ3VVXwXW2FTfOaggQWw5+Op5kgVHqmtErVOM+Xn9M0lRCQFD2+bw+bWXdyJb/nxKWkjCFHOZyF0wW4bVdFcQO13kf67PzdwW+2G82t+h314w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=qcuwLeXzTwMh3k8XkVnmPxzScRueCwOCRqENIMY5k88=;
+ b=coc9QFiluSg2dk8nkN5YYZNCLfMNriqrLjqnMOgfDT3TRJbx4mPzqrb//GP38W0mOhqUHPLVIWUxpxYe1rDhoA7FqDRvm8W5LVKyCW2dBpW3DhCVJ19GhYZ4ZhDYssfmUAY7k1ZCzkWKpaPdxE9AWLRh0NlKs8gEc9aa+UTxz9+KkjLvzPao+1t37Mgj36BuhWYRSv8tXBS8sXTlK5LqNHbS1Kr/EbE5hyLzJ0DJMQlhZEMVotNMOAdXHOsr162EEwjXZ7MONklXRpKDRS5LsTqEEeexd2Emorr62v5v5AMDVegYkt/v6U4SOKD1k1vnfxuuQMxYmMi7I5t57arT5w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=qcuwLeXzTwMh3k8XkVnmPxzScRueCwOCRqENIMY5k88=;
+ b=gKss/t5D6wE8zaW1Cs3dNMpPfZdLSJKboCU0JBgnIZcgXn7/1JAWau5rZRd1dMcw0IiUVw4p/7n9JED33ZDy93nff3dP4m0VRe2JaU1C84cqP8JiW6usyNOuWmDcK5z7JrErDSSXKd/PQMBQ7ZEea9Wlu7t0o/tHpdaV1ljAyAg=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYAPR01MB2223.jpnprd01.prod.outlook.com (2603:1096:404:6::18) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3654.12; Tue, 15 Dec
+ 2020 01:32:29 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::2023:7ed1:37c3:8037]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::2023:7ed1:37c3:8037%5]) with mapi id 15.20.3654.025; Tue, 15 Dec 2020
+ 01:32:29 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH] mmc: host: renesas_internal_dmac: add pre_req and
+ post_req support
+Thread-Topic: [PATCH] mmc: host: renesas_internal_dmac: add pre_req and
+ post_req support
+Thread-Index: AQHWyj/XFRA8x/qYgketk3GLo6qcL6n2zRCAgACZ/JA=
+Date:   Tue, 15 Dec 2020 01:32:29 +0000
+Message-ID: <TY2PR01MB369299EDBA25C39E5B4FFBD4D8C60@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <1607087853-6570-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <20201214155001.GA950@ninjato>
+In-Reply-To: <20201214155001.GA950@ninjato>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [240f:60:5f3e:1:d95c:2734:f16c:3219]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: fc3c683c-a5b6-4236-6523-08d8a0994937
+x-ms-traffictypediagnostic: TYAPR01MB2223:
+x-microsoft-antispam-prvs: <TYAPR01MB222321FD2089DE64997D806FD8C60@TYAPR01MB2223.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8882;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: KoEOfgQ3uDQ+jJXwVzDA0VbMdWSoVao3rXdFIYZZtl1hkYWhSW0HiVH8PA3YEMe0fr+qZgKsHjmEzyc9zS6c0KXEYZyriYt0obMDQNpsr1KKpoyvnZsxTAaP9ZA9rX8JETfUpB6ciPO5Aq17n8GOYW9c1NV3S3SP5ZpuMIGkXxsBblFa8x4RuIpvgEch8M1kPl+p69JFXNBnzaBJktMgTMUHIfK9TJDx5ug+5+YXfI0H3gj6t+eP3rAgLEfDKQ5WGn/cvADCBoxCvXpyr1KI792v2mbgTKz9rHdAhQg7FYWEhJB0rqc+bRby6Lwu8x1niV6R33KRakc1W662Wj0Z1Q==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(376002)(136003)(39860400002)(346002)(396003)(186003)(4326008)(71200400001)(8676002)(5660300002)(33656002)(478600001)(52536014)(66476007)(7696005)(2906002)(64756008)(66556008)(9686003)(316002)(76116006)(55016002)(83380400001)(6506007)(54906003)(8936002)(86362001)(66946007)(66446008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: =?us-ascii?Q?Gaatl3vfusAmxxeTPVqPgz3D/FOQdAjewIrxO7Fnl0IS0OHaaZ7FxTr3c61R?=
+ =?us-ascii?Q?CGi97SnauYSfpDgR2UHCEjNl1mCOEL0m+dC4hFm/29bPafZWLSYqLAeQ5W4L?=
+ =?us-ascii?Q?eBPc1IT7tKF0Zw/sO5qhyiIoGH99D9JMsTQgtCjgjGV9xgSMUBLVdhWaYHcV?=
+ =?us-ascii?Q?YKXJOJCidwZ5A2W6+iZYfK41yqIvoHhIDMaBQ360R1FTrjXJvOVxbbLbFm5k?=
+ =?us-ascii?Q?rpyEuL1gDzCEwLoMIRXF8fyPyJfYtA0lWJVTuslfeghD57sWzP2BA0gAsH45?=
+ =?us-ascii?Q?72VgW70XNnN/2ymBCTCP9klGTMMCAbwRyfq+YNlMTHuoC8I+dHzKWnn9/oRc?=
+ =?us-ascii?Q?J4kfPnrrTg6gjSIQ0+Ol3QoKXqzOEtKGXlPIelkBlNjjVVPyt/L27tEyxHEj?=
+ =?us-ascii?Q?4ZfWBzuXaklMx+O1z7n4VVWPmHQ/LTQZuD4YLr7ld7Le3QoxaHcDbr1mUh3s?=
+ =?us-ascii?Q?MtV43CUouy7msELzJ+6l5ozbGHALOAyxPYrvm1iObAxv6PMAUCTqUck+2L9n?=
+ =?us-ascii?Q?4L2KT97RPb/C3xGM+5LoZkew/g4XuVWquUkpdMSQiAIIhvvgpLnIfbg0/1zL?=
+ =?us-ascii?Q?FVWVGf9Pef83oqvmzjKyguIVYnz8R3A41uOyVzwSXfeIwuifWf5mUWmeI7cc?=
+ =?us-ascii?Q?3FOA3yRM9Up5nAO/DHAbJ1skg9wWUBWA4TPQkHLB2nePbR2XEWjEHC682Wgp?=
+ =?us-ascii?Q?Qsj1ky3oyqh3VK407En+TAadKUnSDRr25YjNA1zJ2jRoqSRRyFUpoUQFO+c9?=
+ =?us-ascii?Q?uwmAqwbOFGwCq88E9ByMEmilKjRNglWZJ1ndyZJ+5bNo7tn+OXMNKvBC6lD/?=
+ =?us-ascii?Q?XKRbLXog2sJQvZ/i479Ftts1B5TVsnGnzINE4Mk+wU0z0q1Ep72IwbYqZZJu?=
+ =?us-ascii?Q?xHvMuIqppuTeaICnrcZGnSWPyVZsF9bE9PFZ6ICVqoW/Cl9i8JxtnxcKKEE0?=
+ =?us-ascii?Q?+Qu8fWb39LwFuU5dlv3Fpr0atVlIqF5yk1T3SgVPtXo/6PheIXSHKwTvyhxs?=
+ =?us-ascii?Q?CJqrOe68HYMPawGA/5H7MnPm062n7R9SAZnC+iToWTwOTHk=3D?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: fc3c683c-a5b6-4236-6523-08d8a0994937
+X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Dec 2020 01:32:29.1023
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: daR7JyjdTdy6IB7FDHJ1OEy05Y1Wvj1vZ2B/9afckhWNM3JLHB3PXKVzcRcYAQ4+1W/NwbS1ExCQMMRSSMyV7ExrZP3mank31GZGQS3DIRObh1/HLVPpKirUwVosMEti
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB2223
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Wolfram-san,
 
+Thank you for your review!
 
-On Tue, 15 Dec 2020, at 02:18, Ulf Hansson wrote:
-> On Tue, 8 Dec 2020 at 02:26, Andrew Jeffery <andrew@aj.id.au> wrote:
+> From: Wolfram Sang, Sent: Tuesday, December 15, 2020 12:50 AM
+>=20
+> Hi Shimoda-san,
+>=20
+> On Fri, Dec 04, 2020 at 10:17:33PM +0900, Yoshihiro Shimoda wrote:
+> > Add pre_req and post_req support to improve performance.
 > >
-> > Drivers for MMC hosts that accept phase corrections can take advantage
-> > of the helper by embedding a mmc_clk_phase_map_t object in their
-> > private data and invoking mmc_of_parse_clk_phase() to extract phase
-> > parameters. It is the responsibility of the host driver to translate and
-> > apply the extracted values to hardware as required.
-> >
-> > Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
-> > ---
-> >  drivers/mmc/core/host.c  | 44 ++++++++++++++++++++++++++++++++++++++++
-> >  include/linux/mmc/host.h | 17 ++++++++++++++++
-> >  2 files changed, 61 insertions(+)
-> >
-> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > index 96b2ca1f1b06..b1697f00c4b5 100644
-> > --- a/drivers/mmc/core/host.c
-> > +++ b/drivers/mmc/core/host.c
-> > @@ -163,6 +163,50 @@ static void mmc_retune_timer(struct timer_list *t)
-> >         mmc_retune_needed(host);
+> > Inspired by a patch in the BSP by Masaharu Hayakawa.
+>=20
+> Thank you for upporting this!
+>=20
+> >  /*
+> >   * Specification of this driver:
+> >   * - host->chan_{rx,tx} will be used as a flag of enabling/disabling t=
+he dma
+> > @@ -172,6 +178,47 @@ renesas_sdhi_internal_dmac_dataend_dma(struct tmio=
+_mmc_host *host) {
+> >  	tasklet_schedule(&priv->dma_priv.dma_complete);
 > >  }
 > >
-> > +static void mmc_of_parse_timing_phase(struct device *dev, const char *prop,
-> > +                                     struct mmc_clk_phase *phase)
+> > +/* Should not use host->sg_ptr/sg_len in the following function */
+>=20
+> Maybe a short explanation why we shouldn't use the functions?
+
+I tried to update the comment as below:
+/*
+ * tmio_mmc_request() only sets host->sg_{ptr,len} and
+ * renesas_sdhi_internal_dmac_pre_req() doesn't set host->sg_{ptr,len} so t=
+hat
+ * we should not use the values in the following function.
+ */
+
+Hmm... Perhaps, I should modify the code to use host->sg_{ptr,len}
+in both paths (.request() and .pre_req()) and remove this comments.
+So, I'll try to modify. I guess tmio_mmc_init_sg() is called in pre_req(),
+we can use host->sg_{ptr,len}.
+
+> > +static void
+> > +renesas_sdhi_internal_dmac_unmap(struct tmio_mmc_host *host,
+> > +				 struct mmc_data *data,
+> > +				 enum renesas_sdhi_dma_cookie cookie,
+> > +				 bool expected_unmatch)
+>=20
+> Can we maybe skip "expected_unmatch"? It is always true for
+> COOKIE_UNMAPPED and always false for the COOKIE_*MAPPED values, or?
+>=20
 > > +{
-> > +       int degrees[2] = {0};
-> > +       int rc;
-> > +
-> > +       rc = device_property_read_u32_array(dev, prop, degrees, 2);
-> > +       phase->valid = !rc;
-> > +       if (phase->valid) {
-> > +               phase->in_deg = degrees[0];
-> > +               phase->out_deg = degrees[1];
-> > +       }
-> > +}
-> > +
-> > +void
-> > +mmc_of_parse_clk_phase(struct mmc_host *host, mmc_clk_phase_map_t map)
-> 
-> Would you mind to change to pass a "struct mmc_clk_phase_map *map" to this?
-> 
-> See more comments below.
-> 
-> > +{
-> > +       struct device *dev = host->parent;
-> > +
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-legacy",
-> > +                                 &map[MMC_TIMING_LEGACY]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs",
-> > +                                 &map[MMC_TIMING_MMC_HS]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-sd-hs",
-> > +                                 &map[MMC_TIMING_SD_HS]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr12",
-> > +                                 &map[MMC_TIMING_UHS_SDR12]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr25",
-> > +                                 &map[MMC_TIMING_UHS_SDR25]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr50",
-> > +                                 &map[MMC_TIMING_UHS_SDR50]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-sdr104",
-> > +                                 &map[MMC_TIMING_UHS_SDR104]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-uhs-ddr50",
-> > +                                 &map[MMC_TIMING_UHS_DDR50]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-ddr52",
-> > +                                 &map[MMC_TIMING_MMC_DDR52]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs200",
-> > +                                 &map[MMC_TIMING_MMC_HS200]);
-> > +       mmc_of_parse_timing_phase(dev, "clk-phase-mmc-hs400",
-> > +                                 &map[MMC_TIMING_MMC_HS400]);
-> > +}
-> > +EXPORT_SYMBOL(mmc_of_parse_clk_phase);
-> > +
-> >  /**
-> >   *     mmc_of_parse() - parse host's device-tree node
-> >   *     @host: host whose node should be parsed.
-> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-> > index 01bba36545c5..bc4731c9738f 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -79,6 +79,22 @@ struct mmc_ios {
-> >         bool enhanced_strobe;                   /* hs400es selection */
-> >  };
-> >
-> > +struct mmc_clk_phase {
-> > +       bool valid;
-> > +       u16 in_deg;
-> > +       u16 out_deg;
-> > +};
-> > +
-> > +/*
-> > + * Define a type to map between bus timings and phase correction values. To
-> > + * avoid bloat in struct mmc_host we leave it to the host driver to define the
-> > + * phase map object in its private data if it supports phase correction.
-> > + * However, mmc_of_parse_clk_phase() is provided by the mmc core and needs the
-> > + * provided array to be correctly sized, so typedef an appropriately sized
-> > + * array to minimise the chance that the wrong size object is passed.
-> > + */
-> > +typedef struct mmc_clk_phase mmc_clk_phase_map_t[MMC_TIMING_MMC_HS400 + 1];
-> > +
-> 
-> Nitpick: I would appreciate if we could avoid using "typedefs", as I
-> think they in many cases makes the code harder to read. How about
-> doing this instead?
-> 
-> #define MMC_NUM_CLK_PHASES (MMC_TIMING_MMC_HS400 + 1)
-> 
-> struct mmc_clk_phase_map {
->         struct mmc_clk_phase phase[MMC_NUM_CLK_PHASES];
-> };
-> 
-> [...]
+> > +	bool unmap =3D expected_unmatch ? (data->host_cookie !=3D cookie) :
+> > +					(data->host_cookie =3D=3D cookie);
+>=20
+> Then, we could do:
+>  +	bool unmap =3D cookie =3D=3D COOKIE_UNMAPPED ? (data->host_cookie !=3D=
+ cookie) :
+>  +					(data->host_cookie =3D=3D cookie);
 
-Right; I experimented with that approach and felt it was kinda clunky (hence 
-the typedef), but I'll respin the series doing as such.
+Thank you for your suggestion! You're correct. I'll fix this.
 
-Thanks,
+> > +
+> > +	if (unmap) {
+> > +		dma_unmap_sg(&host->pdev->dev, data->sg, data->sg_len,
+> > +			     mmc_get_dma_dir(data));
+> > +		data->host_cookie =3D COOKIE_UNMAPPED;
+> > +	}
+>=20
+> Is it maybe worth a warning if the expected condition was not found?
 
-Andrew
+If we could add such a warning, it's helpful. However,
+I have no idea how to implement a condition for it because
+we cannot use "else" here. For example, when this driver mapped
+as PRE_MAPPED and then renesas_sdhi_internal_dmac_complete() is called,
+the "unmap" value of renesas_sdhi_internal_dmac_unmap()
+from renesas_sdhi_internal_dmac_complete() is false:
+
+	data->host_cookie =3D PRE_MAPPED,
+  and
+	cookie =3D MAPPED
+
+This is because this driver should unmap in .post_req() so that
+this is the expected condition in such a case. But, what do you think?
+
+> Rest looks good!
+
+Thanks!
+
+Best regards,
+Yoshihiro Shimoda
+
