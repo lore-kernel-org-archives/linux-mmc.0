@@ -2,107 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44EE4C0018C
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 07:47:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BF24C2BBCA
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 08:01:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B553A23357
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 07:47:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3265923357
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 08:01:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726357AbgLPHrS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Dec 2020 02:47:18 -0500
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:11418 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726355AbgLPHrS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Dec 2020 02:47:18 -0500
-Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
-        by mx0a-0016f401.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 0BG7dZpm030944;
-        Tue, 15 Dec 2020 23:46:30 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-type; s=pfpt0220; bh=Puao5oWLLJfN2JnWB5z4+yCqLqmX11iEa7/vH7+sU2k=;
- b=h8kgeo4wuhTfKpjbOOq+3ZDCm0Z36znNQ0ggIllUeqHAih9JfNqjY7sPvMxV8CTLW6ld
- s2vlJLp8FNE/FwNpJcZzdPQnUlYgqyjPZVNWXpcoTK0piOpp4Royekv4lm4gjYxxgA5Z
- fSb/3c2lRGnrSaod+0SHUp4plhhZr42FDtsaMnuZKemdt1TbUJqeSoUMXX9lu1Bg2qK7
- 9P7g8vKDVWXIHsyKuC7NYhe3l9ZFl2naqJGNzN/UKNA6dSBeZe7LMvU7JwTj8rUR3eIY
- ZnJU3HJpDLAOdANXsMQ75Y3ZkUq8ltTJ5iNDbZLKLK7HlTDEaj7i1aQsDhnOaqW9ab6M HA== 
-Received: from sc-exch01.marvell.com ([199.233.58.181])
-        by mx0a-0016f401.pphosted.com with ESMTP id 35cv3t34tw-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Tue, 15 Dec 2020 23:46:30 -0800
-Received: from DC5-EXCH02.marvell.com (10.69.176.39) by SC-EXCH01.marvell.com
- (10.93.176.81) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 15 Dec
- 2020 23:46:29 -0800
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 15 Dec
- 2020 23:46:29 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Tue, 15 Dec 2020 23:46:29 -0800
-Received: from vb-cavnet.porotchkin.lan (PT-LT0319.marvell.com [10.6.202.166])
-        by maili.marvell.com (Postfix) with ESMTP id CC46F3F703F;
-        Tue, 15 Dec 2020 23:46:26 -0800 (PST)
-From:   <kostap@marvell.com>
-To:     <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <andrew@lunn.ch>,
-        <gregory.clement@bootlin.com>, <sebastian.hesselbarth@gmail.com>,
-        <adrian.hunter@intel.com>, <mw@semihalf.com>, <jaz@semihalf.com>
-Subject: [PATCH v2 2/3] mmc: xenon: add AP807 compatible string
-Date:   Wed, 16 Dec 2020 09:45:39 +0200
-Message-ID: <20201216074540.30616-3-kostap@marvell.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20201216074540.30616-1-kostap@marvell.com>
-References: <20201216074540.30616-1-kostap@marvell.com>
+        id S1725769AbgLPIB1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Dec 2020 03:01:27 -0500
+Received: from mail-eopbgr1410120.outbound.protection.outlook.com ([40.107.141.120]:52192
+        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725766AbgLPIB1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 16 Dec 2020 03:01:27 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=UcDiKbwdoZ7/Lx596E21YPdu8pM5gou49Y8ZKdJdWv+5oMKa3i1xMfO69ct8+UfIrFF1cJzI4Qegg+Tz+XdLiEfPfXTfBdQ9jgaQsS/vihbYVZJD0E8ltOWjap3Gbgv+Rz/aROrWniseY4EpohLCGBGmloWYsCOCND7eeCRntiKlHPOeUPd0CTWQeVv8A4h29Hr1+nHwqofjxalgkbl/J/hzlnRiK7IId4lrEgwhIONOQpuuBeYylDaj0GgglcIBK4qKePRvZIMZBWA75vm0VhvR3sui1Fea3+40m5lx0o/mT60OLH8pAeOPX1WgLxcxayvW5T7VL0fIVMNLEOxvsw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=8jR2XgcD7DflSf1va5Q+zmfnoz4h8mmpAl8/2YAUqgs=;
+ b=DVnQiPERWHcLoI/r2KtjAVyKZ8mkxJ9D9ZeWKoUbaBaUUZM4ZBbMDZVIWeZGLsyhSZTrRKUbGqx10d/Mo+DMxtDdCYHpeHK2fjxHkpFYqhZD/frJ4dJFhDci46hS3bTbYo2lBRgl/BN3LULNNYEDDZLdkwoRsx64kWU5zssJ3GdsKcn52sVW9kEbTH4UNXiTiZ8M9cpZDOyfYTC0GB7z89Sk88OfN7Z2wx7vskuTuhsdYPfWNfXj+weUU2o4goO0QR6CVCS0G1eWsYaeaBOrx9Hq9Fo4gMtbXzj9lYAi6bmMtvywNCbcc4vX25z8YUxCBtjP4CRvGGavjEnnC34Baw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=8jR2XgcD7DflSf1va5Q+zmfnoz4h8mmpAl8/2YAUqgs=;
+ b=HvO8/oKsLaobtbIZ7cals+85iID7hR6BQv6Wgg3//ooYznMEBG02um/lrDb6rLJjLDdBT29ZziXvPuMWb31wG6UfQ7f335TZz5wSBaPxcPRbGNb3kW0jyxG+VsjdRwzlI4KTHxnd5n1q/JxTsV87qsC8wBWpAPYXYnjl0Xfav2o=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYAPR01MB5340.jpnprd01.prod.outlook.com (2603:1096:404:803b::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3654.12; Wed, 16 Dec
+ 2020 08:00:39 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::2023:7ed1:37c3:8037]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::2023:7ed1:37c3:8037%5]) with mapi id 15.20.3654.025; Wed, 16 Dec 2020
+ 08:00:39 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH] mmc: host: renesas_internal_dmac: add pre_req and
+ post_req support
+Thread-Topic: [PATCH] mmc: host: renesas_internal_dmac: add pre_req and
+ post_req support
+Thread-Index: AQHWyj/XFRA8x/qYgketk3GLo6qcL6n2zRCAgACZ/JCAAB6QIIAAJDvwgAHC8lA=
+Date:   Wed, 16 Dec 2020 08:00:39 +0000
+Message-ID: <TY2PR01MB3692DA2619361C6A23838259D8C50@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <1607087853-6570-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+ <20201214155001.GA950@ninjato>
+ <TY2PR01MB369299EDBA25C39E5B4FFBD4D8C60@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <TY2PR01MB3692AEAA842555886E0517B5D8C60@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <TY2PR01MB369240E88E0629EDC140D0A1D8C60@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+In-Reply-To: <TY2PR01MB369240E88E0629EDC140D0A1D8C60@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [240f:60:5f3e:1:68c8:85be:c13a:922b]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: af81a110-1c44-4311-2554-08d8a198ad97
+x-ms-traffictypediagnostic: TYAPR01MB5340:
+x-microsoft-antispam-prvs: <TYAPR01MB5340C67766FB0459E74AA15AD8C50@TYAPR01MB5340.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7219;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: OSagkkbxicCP36Df1eoNEwTUDDYY7SVHFC6Muaiy/Bzx4dzaextY4raTX3nFAHtBZFCwNrijL+HNVmm1MGmmrnajQHKntQQBz8x8tGaTui8GCBoI8i4Exbcw/NyYaHRmGC0Y/ss00lme+DwKUvbdd0YWyb9DUOGH19f3nj5Vj8FjqHiD58vY8qJ++qXJA4FJaOvaLEtLQzhm6pxgHn4J153K9eArWT9fcNUyrvswJs+t7uZmZ3bCgXkUf0M5Js82Ow+eE/U6pd43GbVSbplqm8NaVjs57098GMVSer9VAmRoafE4M47FN0ntMwTMNvoqAA6dBF2dUxT5TCtA27k5lw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(136003)(39860400002)(376002)(346002)(396003)(7696005)(9686003)(478600001)(8936002)(55016002)(8676002)(66446008)(316002)(4744005)(66476007)(4326008)(86362001)(6506007)(5660300002)(66946007)(2906002)(76116006)(54906003)(33656002)(52536014)(66556008)(83380400001)(71200400001)(186003)(64756008);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: =?us-ascii?Q?XTOUYD/DL+UzgTv3wJ8z2xgKS/doVXCfALRhBHPC+5j/jsyFRyDaC4jx+bNZ?=
+ =?us-ascii?Q?FvLbJsYpdhPQ+aYUzFq80XOSZPk98kB96y9AV8jtJ027ujZCEgzHvJW5Zvli?=
+ =?us-ascii?Q?w3ZOaQ0qYCRUiQsQBTXgcwqYXbTXWw1jUI8zgXvumu8hjHaoQ+brrv/nzti7?=
+ =?us-ascii?Q?AByaqZb0ZvSYFcSSbkFrIS2GmNy3xAnDr6ml9iIpBsgjvR7DT30gS1fBjctD?=
+ =?us-ascii?Q?AMIN/OJnkbvknKZjLkkMCfnt8L3wmfORyyAhnormpTVmlholjRN7PnLImEsw?=
+ =?us-ascii?Q?/E4QZAtGYh9F62OKMjU+D2hi6zbAVeqXNsX15zR8FxGjV9GvWq0taRa9IH8J?=
+ =?us-ascii?Q?adV1acFl2WNVluB3935BlHG1FRsiivEwfRckdDf7e5rQxVm89QHMcX4EJ18J?=
+ =?us-ascii?Q?ttuFUgcc6nWWI7ikRyG+8Ef7C/ThiMdxMKM0u6ZyGbOgwH2lo2iyTIirr4Z9?=
+ =?us-ascii?Q?+fFUaiffuBDEEcU55OYHFo0T59kqcFmuxXM9RW9H4VL34/5P1F8cQZyS6Cmb?=
+ =?us-ascii?Q?+9t+jWFDRlYvo1b3VlEeTQ2XrcsAbiV2K8LiomZeHG4YDEfSc/fp7yHYnuow?=
+ =?us-ascii?Q?Ly/p5q9HJdlz5oXBmMiJq4O0svWeCzkBptocMLFqkGk867xou2p7snZ5R96a?=
+ =?us-ascii?Q?5xE+vR6VwUO7WHxwMi/ZbxagCMkhDvx/jEx7crR9QaJv8Vl/O9JrnPXAfCR6?=
+ =?us-ascii?Q?6vLYC5c7We6s+2No5O/FUOB3+LK0LAEukqldcYe0woZ3tRQFFoKcK6I+9fG7?=
+ =?us-ascii?Q?Zgwi3+ZdBJ4xu5M4f99y8saLS0OW85sq7Uan3shvwtFU0QfgMih+jD+CUk6e?=
+ =?us-ascii?Q?EvfQXf3i79g3qgIzCCmZIJO6mwrlCGTbx42hKj3fkVPjVWJPqLJEHayoqVY5?=
+ =?us-ascii?Q?a+MEHbbo8keXLfRCLb4vGW9i5CsqElErYOy8gd9c/mtH77WlZ35wHlipqjR0?=
+ =?us-ascii?Q?Q2ZNdEulMmrXH59IPaVFJdDUsxzZ9nAcBORftqz1uxvo6jHBzqiSNd0OfSdr?=
+ =?us-ascii?Q?7G3JO/kuthcU0ofADQUKAgHzus/BVF3pyjkZjJIJWuj0KDM=3D?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
- definitions=2020-12-16_02:2020-12-15,2020-12-16 signatures=0
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: af81a110-1c44-4311-2554-08d8a198ad97
+X-MS-Exchange-CrossTenant-originalarrivaltime: 16 Dec 2020 08:00:39.1490
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: tJyP5cXzX/D/9IE/GYZ2JhRq5FONOY6YJuYMLAL+vf2NPdAVBhQ7zE2wwhO8LR3sur7fD9XtpjSElAytn8ZoPJax9r7PqRF7Ys9aQcLULE087dg8zJMyM9Rb8hVV5L4U
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB5340
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Marcin Wojtas <mw@semihalf.com>
+Hi Wolfram-san,
 
-This patch adds new compatible string to differentiate
-between the controllers versions included in the AP807
-north bridge. Thanks to this change, the SoCs which use
-AP807 will not run unintentionally in the 'slow mode'
-with disabled UHS modes.
+> From: Yoshihiro Shimoda, Sent: Tuesday, December 15, 2020 2:03 PM
+<snip>
+> I'm sorry again and again. But, I realized the current patch breaks
+> "force_pio" mode because tmio_mmc_pio_irq() doesn't take care of {pre,pos=
+t}_req.
+> So, I'll try to refactor tmio core to support {pre,post}_req().
 
-Signed-off-by: Marcin Wojtas <mw@semihalf.com>
----
- arch/arm64/boot/dts/marvell/armada-ap807.dtsi | 4 ++++
- drivers/mmc/host/sdhci-xenon.c                | 1 +
- 2 files changed, 5 insertions(+)
+I'm sorry. My fault injection code is bad. In other words, we don't need
+to refactor tmio core.
 
-diff --git a/arch/arm64/boot/dts/marvell/armada-ap807.dtsi b/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-index 623010f3ca89..e9a740ec22cb 100644
---- a/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-+++ b/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-@@ -27,3 +27,7 @@
- 		#clock-cells = <1>;
- 	};
- };
-+
-+&ap_sdhci0 {
-+	compatible = "marvell,armada-ap807-sdhci";
-+};
-diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-index c67611fdaa8a..add1b4dcd5e5 100644
---- a/drivers/mmc/host/sdhci-xenon.c
-+++ b/drivers/mmc/host/sdhci-xenon.c
-@@ -684,6 +684,7 @@ static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
- 
- static const struct of_device_id sdhci_xenon_dt_ids[] = {
- 	{ .compatible = "marvell,armada-ap806-sdhci", .data = (void *)XENON_AP806},
-+	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
- 	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
- 	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
- 	{}
--- 
-2.17.1
+I had added "goto force_pio;" in renesas_sdhi_internal_dmac_start_dma() yes=
+terday.
+However, I should have added "goto force_pio_with_unmap;" instead.
+Otherwise, the driver unmaps the buffer after pio finished so that reading =
+data
+by pio was invalidated by dma_unmap_sg().
+
+So, I'll submit v2 patch later.
+
+Best regards,
+Yoshihiro Shimoda
 
