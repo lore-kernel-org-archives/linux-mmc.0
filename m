@@ -2,101 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51EEBC4361B
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 08:11:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0390BC4361B
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 09:48:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F344023343
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 08:11:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A03222311B
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Dec 2020 09:48:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725287AbgLPILT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Dec 2020 03:11:19 -0500
-Received: from mga17.intel.com ([192.55.52.151]:24548 "EHLO mga17.intel.com"
+        id S1725890AbgLPJsS convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Dec 2020 04:48:18 -0500
+Received: from mail.actia.se ([195.67.112.82]:47806 "EHLO mail.actia.se"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725274AbgLPILT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 16 Dec 2020 03:11:19 -0500
-IronPort-SDR: PrV3jvXjWkQsqB91vM5doTNhgPHffUufaOp9qg5M71flZoxtuFBZB2int0I7u0Da9uO06cQYlB
- ScNAAcTLW6nQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9836"; a="154831232"
-X-IronPort-AV: E=Sophos;i="5.78,423,1599548400"; 
-   d="scan'208";a="154831232"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Dec 2020 00:10:38 -0800
-IronPort-SDR: N99cSldepDNkWOTMEKCXuWei04c8vZlcya9zI79ryZfoF+KmIBn2y3avHZf7jM8nSycZHQsmbz
- a8o65CK7De+A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,423,1599548400"; 
-   d="scan'208";a="559651320"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by fmsmga005.fm.intel.com with ESMTP; 16 Dec 2020 00:10:36 -0800
-Subject: Re: [PATCH v2 2/3] mmc: xenon: add AP807 compatible string
-To:     kostap@marvell.com, linux-mmc@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, andrew@lunn.ch,
-        gregory.clement@bootlin.com, sebastian.hesselbarth@gmail.com,
-        mw@semihalf.com, jaz@semihalf.com
-References: <20201216074540.30616-1-kostap@marvell.com>
- <20201216074540.30616-3-kostap@marvell.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <e5524e00-c3dc-8e7a-70ff-156edbc1f12a@intel.com>
-Date:   Wed, 16 Dec 2020 10:10:29 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
-MIME-Version: 1.0
-In-Reply-To: <20201216074540.30616-3-kostap@marvell.com>
-Content-Type: text/plain; charset=utf-8
+        id S1726235AbgLPJsR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 16 Dec 2020 04:48:17 -0500
+X-Greylist: delayed 942 seconds by postgrey-1.27 at vger.kernel.org; Wed, 16 Dec 2020 04:48:16 EST
+Received: from S036ANL.actianordic.se (192.168.16.117) by
+ S036ANL.actianordic.se (192.168.16.117) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2106.2; Wed, 16 Dec 2020 10:31:52 +0100
+Received: from S036ANL.actianordic.se ([fe80::e13e:1feb:4ea6:ec69]) by
+ S036ANL.actianordic.se ([fe80::e13e:1feb:4ea6:ec69%3]) with mapi id
+ 15.01.2106.004; Wed, 16 Dec 2020 10:31:52 +0100
+From:   John Ernberg <john.ernberg@actia.se>
+To:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "chris@printf.net" <chris@printf.net>,
+        John Ernberg <john.ernberg@actia.se>
+Subject: [PATCH][mmc-utils] rpmb: Zero-init MMC_IOC_MULTI_CMD structures
+Thread-Topic: [PATCH][mmc-utils] rpmb: Zero-init MMC_IOC_MULTI_CMD structures
+Thread-Index: AQHW045JWSYYsHHtu06c2XUZxYoGWQ==
+Date:   Wed, 16 Dec 2020 09:31:52 +0000
+Message-ID: <20201216093146.6218-1-john.ernberg@actia.se>
+Accept-Language: en-US, sv-SE
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-mailer: git-send-email 2.29.2
+x-originating-ip: [10.11.250.72]
+x-esetresult: clean, is OK
+x-esetid: 37303A29A33D5D686D7465
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/12/20 9:45 am, kostap@marvell.com wrote:
-> From: Marcin Wojtas <mw@semihalf.com>
-> 
-> This patch adds new compatible string to differentiate
-> between the controllers versions included in the AP807
-> north bridge. Thanks to this change, the SoCs which use
-> AP807 will not run unintentionally in the 'slow mode'
-> with disabled UHS modes.
-> 
-> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+On our board we would occationally see what looked like a
+kernel hang while doing RPMB operations, some additional
+printk debugging revealed that in the trouble case data
+such as this was being sent to the kernel:
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+    [  109.076981] idata[0]->ic->opcode = 0x19
+    [  109.077027] idata[0]->ic->arg = 0x0
+    [  109.080954] idata[0]->ic->write_flag = 0x1
+    [  109.084691] idata[0]->ic->is_acmd = 0x0
+    [  109.089007] idata[0]->ic->flags = 0xb5
+    [  109.092949] idata[0]->ic->blocks = 0x1
+    [  109.096865] idata[0]->ic->blksz = 0x200
+    [  109.100791] idata[0]->ic->postsleep_min_us = 0x7473696e
+    [  109.104745] idata[0]->ic->postsleep_max_us = 0x34383370
+    [  109.110167] idata[0]->ic->data_timeout_ns = 0x7265632d
+    [  109.115494] idata[0]->ic->data_ptr = 00000000e7ddd4cd
+    [  109.120832] idata[0]->rpmb = 00000000ffab5640
+    [  109.126077] idata[1]->ic->opcode = 0x12
+    [  109.130622] idata[1]->ic->arg = 0x0
+    [  109.135451] idata[1]->ic->write_flag = 0x0
+    [  109.139153] idata[1]->ic->is_acmd = 0x0
+    [  109.143437] idata[1]->ic->flags = 0xb5
+    [  109.147553] idata[1]->ic->blocks = 0x1
+    [  109.151420] idata[1]->ic->blksz = 0x200
+    [  109.155251] idata[1]->ic->postsleep_min_us = 0x652d6873
+    [  109.159166] idata[1]->ic->postsleep_max_us = 0x35353264
+    [  109.164561] idata[1]->ic->data_timeout_ns = 0x632d3931
+    [  109.169915] idata[1]->ic->data_ptr = 00000000bc641ed4
+    [  109.175152] idata[1]->rpmb = 00000000ffab5640
 
-> ---
->  arch/arm64/boot/dts/marvell/armada-ap807.dtsi | 4 ++++
->  drivers/mmc/host/sdhci-xenon.c                | 1 +
->  2 files changed, 5 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/marvell/armada-ap807.dtsi b/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-> index 623010f3ca89..e9a740ec22cb 100644
-> --- a/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-> +++ b/arch/arm64/boot/dts/marvell/armada-ap807.dtsi
-> @@ -27,3 +27,7 @@
->  		#clock-cells = <1>;
->  	};
->  };
-> +
-> +&ap_sdhci0 {
-> +	compatible = "marvell,armada-ap807-sdhci";
-> +};
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index c67611fdaa8a..add1b4dcd5e5 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -684,6 +684,7 @@ static const struct dev_pm_ops sdhci_xenon_dev_pm_ops = {
->  
->  static const struct of_device_id sdhci_xenon_dt_ids[] = {
->  	{ .compatible = "marvell,armada-ap806-sdhci", .data = (void *)XENON_AP806},
-> +	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
->  	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
->  	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
->  	{}
-> 
+Therefor, zero-init the MMC_IOC_MULTI_CMD structures to
+avoid the obscene sleep values.
 
+Signed-off-by: John Ernberg <john.ernberg@actia.se>
+---
+ mmc_cmds.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index fb37189..884cdf8 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -1922,7 +1922,7 @@ static int do_rpmb_op(int fd,
+ 
+ 	/* prepare arguments for MMC_IOC_MULTI_CMD ioctl */
+ 	mioc = (struct mmc_ioc_multi_cmd *)
+-		malloc(sizeof (struct mmc_ioc_multi_cmd) +
++		calloc(1, sizeof (struct mmc_ioc_multi_cmd) +
+ 		       RPMB_MULTI_CMD_MAX_CMDS * sizeof (struct mmc_ioc_cmd));
+ 	if (!mioc) {
+ 		return -ENOMEM;
+-- 
+2.29.2
