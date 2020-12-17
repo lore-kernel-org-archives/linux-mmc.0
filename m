@@ -7,34 +7,34 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90009C2BBCF
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Dec 2020 20:44:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09052C4361B
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Dec 2020 21:11:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 567F623A22
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Dec 2020 20:44:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B48C923A24
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Dec 2020 21:11:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729978AbgLQUoV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Dec 2020 15:44:21 -0500
-Received: from smtp09.smtpout.orange.fr ([80.12.242.131]:34422 "EHLO
+        id S1731740AbgLQVLF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Dec 2020 16:11:05 -0500
+Received: from smtp09.smtpout.orange.fr ([80.12.242.131]:50955 "EHLO
         smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725988AbgLQUoU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2020 15:44:20 -0500
+        with ESMTP id S1731677AbgLQVLF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2020 16:11:05 -0500
 Received: from localhost.localdomain ([93.22.133.164])
         by mwinf5d84 with ME
-        id 5Yia2400B3YyeAd03Yiaxi; Thu, 17 Dec 2020 21:42:36 +0100
+        id 5Z9K2400E3YyeAd03Z9Ln4; Thu, 17 Dec 2020 22:09:21 +0100
 X-ME-Helo: localhost.localdomain
 X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
-X-ME-Date: Thu, 17 Dec 2020 21:42:36 +0100
+X-ME-Date: Thu, 17 Dec 2020 22:09:21 +0100
 X-ME-IP: 93.22.133.164
 From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        orsonzhai@gmail.com, baolin.wang7@gmail.com, zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org,
+To:     jesper.nilsson@axis.com, lars.persson@axis.com,
+        ulf.hansson@linaro.org, g.liakhovetski@gmx.de, chris@printf.net
+Cc:     linux-arm-kernel@axis.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
         Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Subject: [PATCH] mmc: sdhci-sprd: Fix some resource leaks in the remove function
-Date:   Thu, 17 Dec 2020 21:42:36 +0100
-Message-Id: <20201217204236.163446-1-christophe.jaillet@wanadoo.fr>
+Subject: [PATCH] mmc: usdhi6rol0: Fix a resource leak in the error handling path of the probe
+Date:   Thu, 17 Dec 2020 22:09:22 +0100
+Message-Id: <20201217210922.165340-1-christophe.jaillet@wanadoo.fr>
 X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -42,44 +42,36 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-'sdhci_remove_host()' and 'sdhci_pltfm_free()' should be used in place of
-'mmc_remove_host()' and 'mmc_free_host()'.
+A call to 'ausdhi6_dma_release()' to undo a previous call to
+'usdhi6_dma_request()' is missing in the error handling path of the probe
+function.
 
-This avoids some resource leaks, is more in line with the error handling
-path of the probe function, and is more consistent with other drivers.
+It is already present in the remove function.
 
-Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+Fixes: 75fa9ea6e3c0 ("mmc: add a driver for the Renesas usdhi6rol0 SD/SDIO host controller")
 Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 ---
-Other adjustment may be needed.
-I'm not sure at all of the 0 passed to 'sdhci_remove_host()'. Some drivers
-pass 0, some have some more complicated computation.
----
- drivers/mmc/host/sdhci-sprd.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/usdhi6rol0.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index f85171edabeb..5dc36efff47f 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -708,14 +708,14 @@ static int sdhci_sprd_remove(struct platform_device *pdev)
- {
- 	struct sdhci_host *host = platform_get_drvdata(pdev);
- 	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
--	struct mmc_host *mmc = host->mmc;
+diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
+index e2d5112d809d..615f3d008af1 100644
+--- a/drivers/mmc/host/usdhi6rol0.c
++++ b/drivers/mmc/host/usdhi6rol0.c
+@@ -1858,10 +1858,12 @@ static int usdhi6_probe(struct platform_device *pdev)
  
--	mmc_remove_host(mmc);
-+	sdhci_remove_host(host, 0);
-+
- 	clk_disable_unprepare(sprd_host->clk_sdio);
- 	clk_disable_unprepare(sprd_host->clk_enable);
- 	clk_disable_unprepare(sprd_host->clk_2x_enable);
- 
--	mmc_free_host(mmc);
-+	sdhci_pltfm_free(pdev);
+ 	ret = mmc_add_host(mmc);
+ 	if (ret < 0)
+-		goto e_clk_off;
++		goto e_release_dma;
  
  	return 0;
- }
+ 
++e_release_dma:
++	usdhi6_dma_release(host);
+ e_clk_off:
+ 	clk_disable_unprepare(host->clk);
+ e_free_mmc:
 -- 
 2.27.0
 
