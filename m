@@ -7,47 +7,47 @@ X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AC99C2D0E4
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Dec 2020 03:54:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6CF1C4361B
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Dec 2020 03:55:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2BEE323A79
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Dec 2020 03:54:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9A95723A77
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Dec 2020 03:55:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732072AbgLRDyx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Dec 2020 22:54:53 -0500
-Received: from out2-smtp.messagingengine.com ([66.111.4.26]:50569 "EHLO
+        id S1732367AbgLRDzF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Dec 2020 22:55:05 -0500
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:43745 "EHLO
         out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726789AbgLRDyx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2020 22:54:53 -0500
+        by vger.kernel.org with ESMTP id S1726789AbgLRDzE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Dec 2020 22:55:04 -0500
 Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.nyi.internal (Postfix) with ESMTP id 6EC145C00F7;
-        Thu, 17 Dec 2020 22:54:06 -0500 (EST)
+        by mailout.nyi.internal (Postfix) with ESMTP id 31A925C00F4;
+        Thu, 17 Dec 2020 22:54:18 -0500 (EST)
 Received: from mailfrontend2 ([10.202.2.163])
-  by compute3.internal (MEProxy); Thu, 17 Dec 2020 22:54:06 -0500
+  by compute3.internal (MEProxy); Thu, 17 Dec 2020 22:54:18 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=from
         :to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=fm1; bh=724ecEhRDXWgZ
-        Zicro86oSLISUtE1mGbQqChDaE7fZo=; b=gT1zKlWZJ59VVo3ZH2+P+VaPrBxt7
-        6DpWjriPJInpk9n6lzLmZsH1vk2AcuR50Uu2kX36gshlakBnaggaU2sNyV/h/pCY
-        LO8f53BTMRTRopyjWqC6lqTS7pdPt6th4L7pdHWuARVxK+eFhmYD4PQ1zk6rdgWp
-        fvKOL0smPajBvHYQaJhDsElL6PgGSP4k6X8JeDvEj0C18Z3ch0R8YgT4DuqLr+Iz
-        x7zxciaFSC/IclRAtKLUtK+20zAREmvFonRhNgLmIiF6FWB+Dczf3HWwxq/wpOB8
-        mF2qLPiJRjyPAjm55fMQAbHx2PlqR0wDQARWpltYhFRpo4iNZ3d9YXCjQ==
+        :mime-version:content-transfer-encoding; s=fm1; bh=hVMm4VwyoVE0E
+        1Ux9HqgKQndPgPApnbPx+tXCVQwpSw=; b=gpfMTTE/U32PUFTes52Qgv/CR1mk1
+        NM/zsiRxFC67rlwIMMCd1Cp+DC2svIhE34KdjXUmIvKBVMvsRPK03xZNOkeANFn7
+        ix9Mrld8yp12wVz/xCvOpnSkDcDquynTISCHRqaeta/GkPCqgHV5NgqHGURsBWLt
+        ohkAuohjyHH4W9wd7JXutrpWGYqQwYGz6PLgAHJg8Vbx5TCY7SyDrxB+SCyoeTEl
+        rvxGgkR3ezjVvSVacDTP7XBBwS9hS7WtR5ygfVIVeapWlopaDsEVMop9waSwxytA
+        aBYzDGOgAcFCwo6tcTUzM5GSSTA4Z0w8asuAP1mPk01QTgDU3XYzadwNg==
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
         messagingengine.com; h=cc:content-transfer-encoding:date:from
         :in-reply-to:message-id:mime-version:references:subject:to
         :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm1; bh=724ecEhRDXWgZZicro86oSLISUtE1mGbQqChDaE7fZo=; b=az2WPMsu
-        EhEL+R+IjaasLlAdSFBtN1NDTzOo1fx2ihnbKQyv07jhfIXsutZLKNKfaFLS9mKw
-        +r/LQJWpKeL0RL7qODDFYRcWlSIerFvQ3bAWW/LIQ/KFTmeANVNHkai7cbMuZJgt
-        63R9ZT+wAYL8tzGmVDGRR4KFyKlV0/k8Ue4pc3iTpSiNn7nZHAI7Pai1Y7v7p+39
-        eoIhdyrD89BRIfdyTQQgOFY3INbSAru+HuTyFFlL/ZjsvqZDbJaqvfVfS24qRlO0
-        FuPCdwGd7Hiqd1pUQw5x15MGA/nlh0V/K4I5DiZK/VkmF41ST3agB965dBUrwApc
-        eOZrHXe1VNW2yg==
-X-ME-Sender: <xms:3ifcX4LNGWW-JKvy2wd0BHNTm1SBedP1-QHelcH3G3gtbZD2LML2dg>
-    <xme:3ifcX0AfXGHSWR3Fq6RCF0pjYGG8RaB_L8gZej_-KtkCOxtkBMwxz0PtICzcGVRsA
-    o5xkIcl2mn8ERlJug>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudelhedgieefucetufdoteggodetrfdotf
+        fm1; bh=hVMm4VwyoVE0E1Ux9HqgKQndPgPApnbPx+tXCVQwpSw=; b=F5F/Oran
+        E546fmjMkcj/dza/pZykL3+pY2l7lq+wwrCZhbGusjYqfBtbC65qNBu8rjxQizvQ
+        MDaFDv0QetwqiLRJ7kKjlyjYk+07+CJdC6dF7oOIufqjvSH/S2hNNtpbQ9YQPhLl
+        QW/XgXbHtuSrIEejyl7jNJWqPXQiKkxv1v+QE8hStrOS6UYujizTBeZRiZOFUozb
+        khNFg7G8ENcu+rxomGDNYXIKd4ccqdiFDCQQY7o2oAnls/uX8PxIPIJhSJgcTmqG
+        gyLP7vidFAViSrpntTR5dlKpoAbh8YrWcvbxDctjWaWlD9Jpidv5hk37bfPuM3PT
+        /to6a8vcDGroeA==
+X-ME-Sender: <xms:6ifcX--B6d9xJd9vTmCCCEFWW0Zx-9SoIQL6LOToeA13AsEA4PsboQ>
+    <xme:6ifcX8ganQTAucLpW2XtK737gCPu_SuaKC8E3MzVVsb4VHv58EkoboPzoukb0amA0
+    nOdhKl1zZyIW8Cxsw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudelhedgieegucetufdoteggodetrfdotf
     fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
     uceurghilhhouhhtmecufedttdenucenucfjughrpefhvffufffkofgjfhgggfestdekre
     dtredttdenucfhrhhomheptehnughrvgifucflvghffhgvrhihuceorghnughrvgifsegr
@@ -55,22 +55,22 @@ X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedujedrudelhedgieefucetufdoteggod
     etjeffleffvdduudevieffgeetleevhfetnecukfhppeduvddtrddvtddrjeejrddvuddu
     necuvehluhhsthgvrhfuihiivgepudenucfrrghrrghmpehmrghilhhfrhhomheprghnug
     hrvgifsegrjhdrihgurdgruh
-X-ME-Proxy: <xmx:3ifcX1vpF1fk4UlpkSJ4LCy4HFArNC9_qTJU2S9n-7u5MBwj66j-XQ>
-    <xmx:3ifcX6SI61c5N9HrWMBI3qJxiQULm5GikBtgD4jWyENyIorNImpImg>
-    <xmx:3ifcX0K_jQMVEdpzSp6rsu-tfWHsk3Ssn7aCJkrOHqqdGiaYunWzHQ>
-    <xmx:3ifcX_ONaaJ6fNoVJ2N-quFjvhIEd-qIIzi27Jdg4Vhq-mYKuAMJow>
+X-ME-Proxy: <xmx:6ifcX-dMleqTJCIJ3QjsoSVc7VKwBDCkBtE97QTy8SYFcW2jcw_Cdw>
+    <xmx:6ifcXzqWM4rwcCrRXGwNU-4iDYkBcK4UG6bD7M0yxA0W3jXrXtw5-g>
+    <xmx:6ifcXzAmUoKqaFepzBEC8gsfWyc7Jg_75tP_PYaIMaeaqEV-k4noLw>
+    <xmx:6ifcX0LWzBWjuq9yFknA6cIVrpD2SFrKtfNzi0pLHHl9RU6DBOk3kQ>
 Received: from localhost.localdomain (unknown [120.20.77.211])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 14E08108005F;
-        Thu, 17 Dec 2020 22:54:00 -0500 (EST)
+        by mail.messagingengine.com (Postfix) with ESMTPA id D1B951080057;
+        Thu, 17 Dec 2020 22:54:12 -0500 (EST)
 From:   Andrew Jeffery <andrew@aj.id.au>
 To:     linux-mmc@vger.kernel.org
 Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org, joel@jms.id.au,
         adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-aspeed@lists.ozlabs.org, ryan_chen@aspeedtech.com
-Subject: [PATCH v6 2/6] mmc: sdhci-of-aspeed: Expose clock phase controls
-Date:   Fri, 18 Dec 2020 14:23:34 +1030
-Message-Id: <20201218035338.1130849-3-andrew@aj.id.au>
+Subject: [PATCH v6 4/6] mmc: sdhci-of-aspeed: Add KUnit tests for phase calculations
+Date:   Fri, 18 Dec 2020 14:23:36 +1030
+Message-Id: <20201218035338.1130849-5-andrew@aj.id.au>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20201218035338.1130849-1-andrew@aj.id.au>
 References: <20201218035338.1130849-1-andrew@aj.id.au>
@@ -80,335 +80,160 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Aspeed SD/eMMC controllers expose configurable clock phase
-correction by inserting delays of up to 15 logic elements in length into
-the bus clock path. The hardware supports independent configuration for
-both bus directions on a per-slot basis.
-
-The timing delay per element encoded in the driver was experimentally
-determined by scope measurements.
-
-The phase controls for both slots are grouped together in a single
-register of the global register block of the SD/MMC controller(s), which
-drives the use of a locking scheme between the SDHCIs and the global
-register set.
+Converting degrees of phase to logic delays is irritating to test on
+hardware, so lets exercise the function using KUnit.
 
 Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
 ---
- drivers/mmc/host/sdhci-of-aspeed.c | 216 +++++++++++++++++++++++++++--
- 1 file changed, 208 insertions(+), 8 deletions(-)
+ drivers/mmc/host/Kconfig                |  14 ++++
+ drivers/mmc/host/Makefile               |   1 +
+ drivers/mmc/host/sdhci-of-aspeed-test.c | 100 ++++++++++++++++++++++++
+ 3 files changed, 115 insertions(+)
+ create mode 100644 drivers/mmc/host/sdhci-of-aspeed-test.c
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index 4f008ba3280e..b1a14e7dda82 100644
---- a/drivers/mmc/host/sdhci-of-aspeed.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -6,6 +6,7 @@
- #include <linux/delay.h>
- #include <linux/device.h>
- #include <linux/io.h>
-+#include <linux/math64.h>
- #include <linux/mmc/host.h>
- #include <linux/module.h>
- #include <linux/of_address.h>
-@@ -16,9 +17,19 @@
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index 596f32637315..d6f00d1d6251 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -168,6 +168,20 @@ config MMC_SDHCI_OF_ASPEED
  
- #include "sdhci-pltfm.h"
+ 	  If unsure, say N.
  
--#define ASPEED_SDC_INFO		0x00
--#define   ASPEED_SDC_S1MMC8	BIT(25)
--#define   ASPEED_SDC_S0MMC8	BIT(24)
-+#define ASPEED_SDC_INFO			0x00
-+#define   ASPEED_SDC_S1_MMC8		BIT(25)
-+#define   ASPEED_SDC_S0_MMC8		BIT(24)
-+#define ASPEED_SDC_PHASE		0xf4
-+#define   ASPEED_SDC_S1_PHASE_IN	GENMASK(25, 21)
-+#define   ASPEED_SDC_S0_PHASE_IN	GENMASK(20, 16)
-+#define   ASPEED_SDC_S1_PHASE_OUT	GENMASK(15, 11)
-+#define   ASPEED_SDC_S1_PHASE_IN_EN	BIT(10)
-+#define   ASPEED_SDC_S1_PHASE_OUT_EN	GENMASK(9, 8)
-+#define   ASPEED_SDC_S0_PHASE_OUT	GENMASK(7, 3)
-+#define   ASPEED_SDC_S0_PHASE_IN_EN	BIT(2)
-+#define   ASPEED_SDC_S0_PHASE_OUT_EN	GENMASK(1, 0)
-+#define   ASPEED_SDC_PHASE_MAX		31
- 
- struct aspeed_sdc {
- 	struct clk *clk;
-@@ -28,9 +39,36 @@ struct aspeed_sdc {
- 	void __iomem *regs;
- };
- 
-+struct aspeed_sdhci_tap_param {
-+	bool valid;
++config MMC_SDHCI_OF_ASPEED_TEST
++	bool "Tests for the ASPEED SDHCI driver"
++	depends on MMC_SDHCI_OF_ASPEED && KUNIT=y
++	help
++	  Enable KUnit tests for the ASPEED SDHCI driver. Select this
++	  option only if you will boot the kernel for the purpose of running
++	  unit tests (e.g. under UML or qemu).
 +
-+#define ASPEED_SDHCI_TAP_PARAM_INVERT_CLK	BIT(4)
-+	u8 in;
-+	u8 out;
-+};
++	  The KUnit tests generally exercise parts of the driver that do not
++	  directly touch the hardware, for example, the phase correction
++	  calculations.
 +
-+struct aspeed_sdhci_tap_desc {
-+	u32 tap_mask;
-+	u32 enable_mask;
-+	u8 enable_value;
-+};
++	  If unsure, say N.
 +
-+struct aspeed_sdhci_phase_desc {
-+	struct aspeed_sdhci_tap_desc in;
-+	struct aspeed_sdhci_tap_desc out;
-+};
+ config MMC_SDHCI_OF_AT91
+ 	tristate "SDHCI OF support for the Atmel SDMMC controller"
+ 	depends on MMC_SDHCI_PLTFM
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 451c25fc2c69..3ee59d5802cf 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -90,6 +90,7 @@ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+ obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)	+= sdhci-of-aspeed.o
++obj-$(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)	+= sdhci-of-aspeed-test.o
+ obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
+new file mode 100644
+index 000000000000..fb79b278fb81
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
+@@ -0,0 +1,100 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/* Copyright (C) 2020 IBM Corp. */
 +
-+struct aspeed_sdhci_pdata {
-+	const struct aspeed_sdhci_phase_desc *phase_desc;
-+	size_t nr_phase_descs;
-+};
++#include <kunit/test.h>
 +
- struct aspeed_sdhci {
-+	const struct aspeed_sdhci_pdata *pdata;
- 	struct aspeed_sdc *parent;
- 	u32 width_mask;
-+	struct mmc_clk_phase_map phase_map;
-+	const struct aspeed_sdhci_phase_desc *phase_desc;
- };
- 
- static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
-@@ -50,10 +88,118 @@ static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
- 	spin_unlock(&sdc->lock);
- }
- 
-+static u32
-+aspeed_sdc_set_phase_tap(const struct aspeed_sdhci_tap_desc *desc,
-+			 u8 tap, bool enable, u32 reg)
++#include "sdhci-of-aspeed.c"
++
++static void aspeed_sdhci_phase_ddr52(struct kunit *test)
 +{
-+	reg &= ~(desc->enable_mask | desc->tap_mask);
-+	if (enable) {
-+		reg |= tap << __ffs(desc->tap_mask);
-+		reg |= desc->enable_value << __ffs(desc->enable_mask);
-+	}
++	int rate = 52000000;
 +
-+	return reg;
++	KUNIT_EXPECT_EQ(test, 0,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 0));
++	KUNIT_EXPECT_EQ(test, 0,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 1));
++	KUNIT_EXPECT_EQ(test, 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 2));
++	KUNIT_EXPECT_EQ(test, 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 3));
++	KUNIT_EXPECT_EQ(test, 2,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 4));
++	KUNIT_EXPECT_EQ(test, 3,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 5));
++	KUNIT_EXPECT_EQ(test, 14,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 23));
++	KUNIT_EXPECT_EQ(test, 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 24));
++	KUNIT_EXPECT_EQ(test, 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 25));
++
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 180));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 181));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 182));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 183));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 2,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 184));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 3,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 185));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 203));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 204));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 205));
 +}
 +
-+static void
-+aspeed_sdc_set_phase_taps(struct aspeed_sdc *sdc,
-+			  const struct aspeed_sdhci_phase_desc *desc,
-+			  const struct aspeed_sdhci_tap_param *taps)
++static void aspeed_sdhci_phase_hs200(struct kunit *test)
 +{
-+	u32 reg;
++	int rate = 200000000;
 +
-+	spin_lock(&sdc->lock);
-+	reg = readl(sdc->regs + ASPEED_SDC_PHASE);
++	KUNIT_EXPECT_EQ(test, 0,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 0));
++	KUNIT_EXPECT_EQ(test, 0,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 5));
++	KUNIT_EXPECT_EQ(test, 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 6));
++	KUNIT_EXPECT_EQ(test, 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 7));
++	KUNIT_EXPECT_EQ(test, 14,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 89));
++	KUNIT_EXPECT_EQ(test, 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 90));
++	KUNIT_EXPECT_EQ(test, 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 91));
++	KUNIT_EXPECT_EQ(test, 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 96));
 +
-+	reg = aspeed_sdc_set_phase_tap(&desc->in, taps->in, taps->valid, reg);
-+	reg = aspeed_sdc_set_phase_tap(&desc->out, taps->out, taps->valid, reg);
-+
-+	writel(reg, sdc->regs + ASPEED_SDC_PHASE);
-+	spin_unlock(&sdc->lock);
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 180));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 185));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 186));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 187));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 269));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 270));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 271));
++	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
++			aspeed_sdhci_phase_to_tap(NULL, rate, 276));
 +}
 +
-+#define PICOSECONDS_PER_SECOND		1000000000000ULL
-+#define ASPEED_SDHCI_NR_TAPS		15
-+/* Measured value with *handwave* environmentals and static loading */
-+#define ASPEED_SDHCI_MAX_TAP_DELAY_PS	1253
-+static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
-+				     int phase_deg)
-+{
-+	u64 phase_period_ps;
-+	u64 prop_delay_ps;
-+	u64 clk_period_ps;
-+	unsigned int tap;
-+	u8 inverted;
-+
-+	phase_deg %= 360;
-+
-+	if (phase_deg >= 180) {
-+		inverted = ASPEED_SDHCI_TAP_PARAM_INVERT_CLK;
-+		phase_deg -= 180;
-+		dev_dbg(dev,
-+			"Inverting clock to reduce phase correction from %d to %d degrees\n",
-+			phase_deg + 180, phase_deg);
-+	} else {
-+		inverted = 0;
-+	}
-+
-+	prop_delay_ps = ASPEED_SDHCI_MAX_TAP_DELAY_PS / ASPEED_SDHCI_NR_TAPS;
-+	clk_period_ps = div_u64(PICOSECONDS_PER_SECOND, (u64)rate_hz);
-+	phase_period_ps = div_u64((u64)phase_deg * clk_period_ps, 360ULL);
-+
-+	tap = div_u64(phase_period_ps, prop_delay_ps);
-+	if (tap > ASPEED_SDHCI_NR_TAPS) {
-+		dev_warn(dev,
-+			 "Requested out of range phase tap %d for %d degrees of phase compensation at %luHz, clamping to tap %d\n",
-+			 tap, phase_deg, rate_hz, ASPEED_SDHCI_NR_TAPS);
-+		tap = ASPEED_SDHCI_NR_TAPS;
-+	}
-+
-+	return inverted | tap;
-+}
-+
-+static void
-+aspeed_sdhci_phases_to_taps(struct device *dev, unsigned long rate,
-+			    const struct mmc_clk_phase *phases,
-+			    struct aspeed_sdhci_tap_param *taps)
-+{
-+	taps->valid = phases->valid;
-+
-+	if (!phases->valid)
-+		return;
-+
-+	taps->in = aspeed_sdhci_phase_to_tap(dev, rate, phases->in_deg);
-+	taps->out = aspeed_sdhci_phase_to_tap(dev, rate, phases->out_deg);
-+}
-+
-+static void
-+aspeed_sdhci_configure_phase(struct sdhci_host *host, unsigned long rate)
-+{
-+	struct aspeed_sdhci_tap_param _taps = {0}, *taps = &_taps;
-+	struct mmc_clk_phase *params;
-+	struct aspeed_sdhci *sdhci;
-+	struct device *dev;
-+
-+	dev = host->mmc->parent;
-+	sdhci = sdhci_pltfm_priv(sdhci_priv(host));
-+
-+	if (!sdhci->phase_desc)
-+		return;
-+
-+	params = &sdhci->phase_map.phase[host->timing];
-+	aspeed_sdhci_phases_to_taps(dev, rate, params, taps);
-+	aspeed_sdc_set_phase_taps(sdhci->parent, sdhci->phase_desc, taps);
-+	dev_dbg(dev,
-+		"Using taps [%d, %d] for [%d, %d] degrees of phase correction at %luHz (%d)\n",
-+		taps->in & ASPEED_SDHCI_NR_TAPS,
-+		taps->out & ASPEED_SDHCI_NR_TAPS,
-+		params->in_deg, params->out_deg, rate, host->timing);
-+}
-+
- static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host;
--	unsigned long parent;
-+	unsigned long parent, bus;
- 	int div;
- 	u16 clk;
- 
-@@ -69,13 +215,17 @@ static void aspeed_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		clock = host->max_clk;
- 
- 	for (div = 2; div < 256; div *= 2) {
--		if ((parent / div) <= clock)
-+		bus = parent / div;
-+		if (bus <= clock)
- 			break;
- 	}
-+
- 	div >>= 1;
- 
- 	clk = div << SDHCI_DIVIDER_SHIFT;
- 
-+	aspeed_sdhci_configure_phase(host, bus);
-+
- 	sdhci_enable_clk(host, clk);
- }
- 
-@@ -157,6 +307,7 @@ static inline int aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
- 
- static int aspeed_sdhci_probe(struct platform_device *pdev)
- {
-+	const struct aspeed_sdhci_pdata *aspeed_pdata;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct aspeed_sdhci *dev;
- 	struct sdhci_host *host;
-@@ -164,12 +315,15 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
- 	int slot;
- 	int ret;
- 
-+	aspeed_pdata = of_device_get_match_data(&pdev->dev);
-+
- 	host = sdhci_pltfm_init(pdev, &aspeed_sdhci_pdata, sizeof(*dev));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
- 
- 	pltfm_host = sdhci_priv(host);
- 	dev = sdhci_pltfm_priv(pltfm_host);
-+	dev->pdata = aspeed_pdata;
- 	dev->parent = dev_get_drvdata(pdev->dev.parent);
- 
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-@@ -180,8 +334,17 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
- 	else if (slot >= 2)
- 		return -EINVAL;
- 
--	dev_info(&pdev->dev, "Configuring for slot %d\n", slot);
--	dev->width_mask = !slot ? ASPEED_SDC_S0MMC8 : ASPEED_SDC_S1MMC8;
-+	if (dev->pdata && slot < dev->pdata->nr_phase_descs) {
-+		dev->phase_desc = &dev->pdata->phase_desc[slot];
-+	} else {
-+		dev_info(&pdev->dev,
-+			 "Phase control not supported for slot %d\n", slot);
-+		dev->phase_desc = NULL;
-+	}
-+
-+	dev->width_mask = !slot ? ASPEED_SDC_S0_MMC8 : ASPEED_SDC_S1_MMC8;
-+
-+	dev_info(&pdev->dev, "Configured for slot %d\n", slot);
- 
- 	sdhci_get_of_property(pdev);
- 
-@@ -199,6 +362,9 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err_sdhci_add;
- 
-+	if (dev->phase_desc)
-+		mmc_of_parse_clk_phase(host->mmc, &dev->phase_map);
-+
- 	ret = sdhci_add_host(host);
- 	if (ret)
- 		goto err_sdhci_add;
-@@ -230,10 +396,44 @@ static int aspeed_sdhci_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
-+static const struct aspeed_sdhci_phase_desc ast2600_sdhci_phase[] = {
-+	/* SDHCI/Slot 0 */
-+	[0] = {
-+		.in = {
-+			.tap_mask = ASPEED_SDC_S0_PHASE_IN,
-+			.enable_mask = ASPEED_SDC_S0_PHASE_IN_EN,
-+			.enable_value = 1,
-+		},
-+		.out = {
-+			.tap_mask = ASPEED_SDC_S0_PHASE_OUT,
-+			.enable_mask = ASPEED_SDC_S0_PHASE_OUT_EN,
-+			.enable_value = 3,
-+		},
-+	},
-+	/* SDHCI/Slot 1 */
-+	[1] = {
-+		.in = {
-+			.tap_mask = ASPEED_SDC_S1_PHASE_IN,
-+			.enable_mask = ASPEED_SDC_S1_PHASE_IN_EN,
-+			.enable_value = 1,
-+		},
-+		.out = {
-+			.tap_mask = ASPEED_SDC_S1_PHASE_OUT,
-+			.enable_mask = ASPEED_SDC_S1_PHASE_OUT_EN,
-+			.enable_value = 3,
-+		},
-+	},
++static struct kunit_case aspeed_sdhci_test_cases[] = {
++	KUNIT_CASE(aspeed_sdhci_phase_ddr52),
++	KUNIT_CASE(aspeed_sdhci_phase_hs200),
++	{}
 +};
 +
-+static const struct aspeed_sdhci_pdata ast2600_sdhci_pdata = {
-+	.phase_desc = ast2600_sdhci_phase,
-+	.nr_phase_descs = ARRAY_SIZE(ast2600_sdhci_phase),
++static struct kunit_suite aspeed_sdhci_test_suite = {
++	.name = "sdhci-of-aspeed",
++	.test_cases = aspeed_sdhci_test_cases,
 +};
-+
- static const struct of_device_id aspeed_sdhci_of_match[] = {
- 	{ .compatible = "aspeed,ast2400-sdhci", },
- 	{ .compatible = "aspeed,ast2500-sdhci", },
--	{ .compatible = "aspeed,ast2600-sdhci", },
-+	{ .compatible = "aspeed,ast2600-sdhci", .data = &ast2600_sdhci_pdata, },
- 	{ }
- };
- 
++kunit_test_suite(aspeed_sdhci_test_suite);
 -- 
 2.27.0
 
