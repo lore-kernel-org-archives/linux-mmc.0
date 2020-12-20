@@ -2,140 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F61FC4361B
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Dec 2020 20:53:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BDDAEC0018C
+	for <linux-mmc@archiver.kernel.org>; Sun, 20 Dec 2020 02:06:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3A20D23B6C
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Dec 2020 20:53:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E96A22D6F
+	for <linux-mmc@archiver.kernel.org>; Sun, 20 Dec 2020 02:06:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725796AbgLRUw7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Dec 2020 15:52:59 -0500
-Received: from node.akkea.ca ([192.155.83.177]:60324 "EHLO node.akkea.ca"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725775AbgLRUw7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Dec 2020 15:52:59 -0500
-X-Greylist: delayed 409 seconds by postgrey-1.27 at vger.kernel.org; Fri, 18 Dec 2020 15:52:59 EST
-Received: from localhost (localhost [127.0.0.1])
-        by node.akkea.ca (Postfix) with ESMTP id F1E194E6562;
-        Fri, 18 Dec 2020 20:45:29 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akkea.ca; s=mail;
-        t=1608324330; bh=WejVtnCVkdeP6cDq74BjfNEvVaPnFPD/qvuyqoneZ7I=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References;
-        b=QyqfV//OV8teMzPd1evgPoAx+qln9nmPYh0YvmOFdcaBlyXg4DlHA/84J6sb280rA
-         hV0V29vb6nFu0/zknNaupQCV6BJcREzPFPmgMSMud2mDNedA3rnE/PqSssmz5ezGtC
-         HbJ5jKVUckwTTUAjoUOwh7eFZj/PlggBqwRzBXcg=
-X-Virus-Scanned: Debian amavisd-new at mail.akkea.ca
-Received: from node.akkea.ca ([127.0.0.1])
-        by localhost (mail.akkea.ca [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id c5lwaYtbGhqB; Fri, 18 Dec 2020 20:45:28 +0000 (UTC)
-Received: from www.akkea.ca (node.akkea.ca [192.155.83.177])
-        by node.akkea.ca (Postfix) with ESMTPSA id AFBD74E655D;
-        Fri, 18 Dec 2020 20:45:28 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akkea.ca; s=mail;
-        t=1608324328; bh=WejVtnCVkdeP6cDq74BjfNEvVaPnFPD/qvuyqoneZ7I=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References;
-        b=w4HhWqrYngUcJFcjAv35NdpV8AhlPoXaIpHKfKj6PG62zrAOF9VCoW1821O0sb6qB
-         KQ3QDQ8IaLmFRoPDHtk3nExoU6bGDHBiqsMW+Cs6+ESgZ7rBy2GzuPvuCPM0/+V2wc
-         ZTGkDhEXFgwy5fK/AHQjDQQ5PpcnQuVgqJtsmcec=
+        id S1726902AbgLTCGD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 19 Dec 2020 21:06:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47516 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726732AbgLTCGD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Dec 2020 21:06:03 -0500
+Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97CCEC0613CF;
+        Sat, 19 Dec 2020 18:05:21 -0800 (PST)
+Received: by mail-pj1-x1030.google.com with SMTP id j13so4079099pjz.3;
+        Sat, 19 Dec 2020 18:05:21 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=8vAJhtcnlmR0zuqlLalCyJpLf4qWM/qYJIE1uR2kv+o=;
+        b=lgJsdSHkqmPd+lGQpOuxo/BQACNoudnJUUT8uihKs5KlWVeAkWzu1SPoqXEdcOkRcp
+         M8/jeh7IPRNlFOz47a/5vyyTUSBKQuVv1BVkGX8OU+e0x4nS4RCkCFp356zXIbquOyJ1
+         kUG/FgxcvTm/rWzd5bohBc+dOP5JMqnj6Jziq3FWt95B3QJBR7n9QhTvQqrjSUiaRcyJ
+         UGmPmIxao0b7VAsXrxMwoi0B//tKCRENHto02WttC+HDcn4j8ZikECh0eU/Ies6VnWfG
+         fBcukb4h/tmnH7xVfTAXMb76pw7a1AH+rq914z5yGu7w8M1BtN5QBxsiSU5/LjPoOGhc
+         smpw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=8vAJhtcnlmR0zuqlLalCyJpLf4qWM/qYJIE1uR2kv+o=;
+        b=S3ZsPVM6V8B/8d4bs9J84XoUUI2F3J3Li5G5eHXqaSuos3vycgtSmDFVW5OmxxBLCo
+         337n0+zpMC67vn8pATlrGcsfDwCBCNl1JrugjBrWYxMxq5DOxqSbGIcXZp8gAABl2yQP
+         9FCdB8vF+4+pKipSEgVHQfWzFvRQVmEogPN3TwojqZnOCIkQMp9VnLWBLAT5ga+ri9oH
+         2Ig9cdGI4kEHLRLExHnoYUXdzOqb+mHeDcuIG6z1a76koyBZAnr1HcdlbnnC9EuCZ4oM
+         cuue3PP3YaVM/Yjh90PbVQcIWID3Hz+QvDGfqnR6yB0frz2tZrZn6b06m6xdE1ugKMdD
+         UwqA==
+X-Gm-Message-State: AOAM532C61A5nHd1p6QRSShzvMPPzx+aLt9faijPtCqxeYVrSyG6mLfW
+        XmKjYZ3de0xfsWc4RveU0PqBvnT08ymFUaCMSgs=
+X-Google-Smtp-Source: ABdhPJyF9aZl56KQrxBRg+MgfI6zjzpndBr8sunPbj3G0qErvkYhSIkwJ02z5edLdH1F4Oqy5VDfPrluGQmGrMXAy/I=
+X-Received: by 2002:a17:902:7d84:b029:db:feae:425e with SMTP id
+ a4-20020a1709027d84b02900dbfeae425emr10900360plm.43.1608429921087; Sat, 19
+ Dec 2020 18:05:21 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 8bit
-Date:   Fri, 18 Dec 2020 12:45:28 -0800
-From:   Angus Ainslie <angus@akkea.ca>
-To:     Lucas Stach <l.stach@pengutronix.de>
-Cc:     BOUGH CHEN <haibo.chen@nxp.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>
-Subject: Re: sdhci timeout on imx8mq
-In-Reply-To: <4a1fb9fa69d6fdb0ec2d7c390112d412d512ff13.camel@pengutronix.de>
-References: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
- <20200205092653.GB2737@bogon.m.sigxcpu.org>
- <CAOMZO5AAzK0QprHpKHaFOANjspJKd_4YaoMqAoGYG4KftcyiYw@mail.gmail.com>
- <VI1PR04MB5040A046E5D93265AE636B29901C0@VI1PR04MB5040.eurprd04.prod.outlook.com>
- <VI1PR04MB504091C7991353F6092A8D91901A0@VI1PR04MB5040.eurprd04.prod.outlook.com>
- <CAOMZO5CkSSidzLUSBUvJNAio3SnmU-fisTbDCiLN9v1EjS+HHQ@mail.gmail.com>
- <5ad361195f2e191484c8a231be0f5a07@akkea.ca>
- <CAOMZO5BarV1=6rx9L_hkJJLUQSicwPNUO4HFKWAXSQ6n0N+Kzg@mail.gmail.com>
- <VI1PR04MB52942233A0BA6BCB692F281E90670@VI1PR04MB5294.eurprd04.prod.outlook.com>
- <4a1fb9fa69d6fdb0ec2d7c390112d412d512ff13.camel@pengutronix.de>
-Message-ID: <f0255cf8701d823b862074a2e755cbe8@akkea.ca>
-X-Sender: angus@akkea.ca
-User-Agent: Roundcube Webmail/1.3.6
+References: <20201217204236.163446-1-christophe.jaillet@wanadoo.fr>
+ <CA+H2tpGkv0sPQ2e6OfUVuW2xFx-KSpZy_vYY3TG_9JBWvFZxAA@mail.gmail.com> <83712f89-deb7-b266-8e8a-99f0df4c6782@wanadoo.fr>
+In-Reply-To: <83712f89-deb7-b266-8e8a-99f0df4c6782@wanadoo.fr>
+From:   Orson Zhai <orsonzhai@gmail.com>
+Date:   Sun, 20 Dec 2020 10:05:09 +0800
+Message-ID: <CA+H2tpHQvnmv_rCby0CUP3nnFXFg75fVEVQYRHJTW9Ebpfc7Gg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-sprd: Fix some resource leaks in the remove function
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     adrian.hunter@intel.com, Ulf Hansson <ulf.hansson@linaro.org>,
+        Baolin Wang <baolin.wang7@gmail.com>,
+        Lyra Zhang <zhang.lyra@gmail.com>, linux-mmc@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org, billows.wu@unisoc.com,
+        Wu Hongtao <wuht06@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Lucas,
+On Fri, Dec 18, 2020 at 9:46 PM Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
+>
+> Le 17/12/2020 =C3=A0 23:55, Orson Zhai a =C3=A9crit :
+> > + cc: Billows
+> >
+> > Hi Christophe,
+> > On Fri, Dec 18, 2020 at 4:50 AM Christophe JAILLET
+> > <christophe.jaillet@wanadoo.fr> wrote:
+> >>
+> >> 'sdhci_remove_host()' and 'sdhci_pltfm_free()' should be used in place=
+ of
+> >> 'mmc_remove_host()' and 'mmc_free_host()'.
+> >>
+> >> This avoids some resource leaks, is more in line with the error handli=
+ng
+> >> path of the probe function, and is more consistent with other drivers.
+> >>
+> >> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host c=
+ontroller")
+> >> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+> >> ---
+> >> Other adjustment may be needed.
+> >> I'm not sure at all of the 0 passed to 'sdhci_remove_host()'. Some dri=
+vers
+> >> pass 0, some have some more complicated computation.
+> >> ---
+> >>   drivers/mmc/host/sdhci-sprd.c | 6 +++---
+> >>   1 file changed, 3 insertions(+), 3 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sp=
+rd.c
+> >> index f85171edabeb..5dc36efff47f 100644
+> >> --- a/drivers/mmc/host/sdhci-sprd.c
+> >> +++ b/drivers/mmc/host/sdhci-sprd.c
+> >> @@ -708,14 +708,14 @@ static int sdhci_sprd_remove(struct platform_dev=
+ice *pdev)
+> >>   {
+> >>          struct sdhci_host *host =3D platform_get_drvdata(pdev);
+> >>          struct sdhci_sprd_host *sprd_host =3D TO_SPRD_HOST(host);
+> >> -       struct mmc_host *mmc =3D host->mmc;
+> >>
+> >> -       mmc_remove_host(mmc);
+> >> +       sdhci_remove_host(host, 0);
+> >> +
+> >>          clk_disable_unprepare(sprd_host->clk_sdio);
+> >>          clk_disable_unprepare(sprd_host->clk_enable);
+> >>          clk_disable_unprepare(sprd_host->clk_2x_enable);
+> >>
+> >> -       mmc_free_host(mmc);
+> >> +       sdhci_pltfm_free(pdev);
+> >
+> > I saw a lot of drivers also use mmc_free_host().
+> > Do you have patches elsewhere to clean them?
+> >
+>
+> As far as I can see, all drivers that use 'mmc_free_host' also use
+> 'mmc_alloc_host'. (based on 5.10.1 and unless error)
+>
+> The only exception is 'sdhci-sprd.c'.
+>
+> So no, I don't plan any other clean-up.
+>
+>
+>
+> To spot it, I run one of my own cocci script which compare functions
+> called in the remove function and in the error handling path of the probe=
+.
+>
+> So I caught this one because 'mmc_free_host' is used in the porbe and
+> 'sdhci_pltfm_free' in the remove function.
 
-Thanks for the ping, I've been meaning to get back to this.
+Thanks for the clarification.
 
-On 2020-12-18 12:07, Lucas Stach wrote:
-> Hi all,
-> 
-> Am Mittwoch, dem 08.07.2020 um 01:32 +0000 schrieb BOUGH CHEN:
->> -----Original Message-----
->> From: Fabio Estevam [mailto:festevam@gmail.com]
->> Sent: 2020年7月7日 20:45
->> To: Angus Ainslie <angus@akkea.ca>
->> Cc: BOUGH CHEN <haibo.chen@nxp.com>; Ulf Hansson
->> <ulf.hansson@linaro.org>; Guido Günther <agx@sigxcpu.org>; linux-mmc
->> <linux-mmc@vger.kernel.org>; Adrian Hunter <adrian.hunter@intel.com>;
->> dl-linux-imx <linux-imx@nxp.com>; Sascha Hauer
->> <kernel@pengutronix.de>;
->> moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE
->> <linux-arm-kernel@lists.infradead.org>
->> Subject: Re: sdhci timeout on imx8mq
->> 
->> Hi Angus,
->> 
->> On Tue, Jun 30, 2020 at 4:39 PM Angus Ainslie <angus@akkea.ca> wrote:
->> 
->> > Has there been any progress with this. I'm getting this on about
->> > 50%
->> > of
->> 
->> Not from my side, sorry.
->> 
->> Bough,
->> 
->> Do you know why this problem affects the imx8mq-evk versions that are
->> populated with the Micron eMMC and not the ones with Sandisk eMMC?
-> 
-> Hi Angus,
-> 
-> Can you show me the full fail log? I do not meet this issue on my side,
-> besides, which kind of uboot do you use?
+Acked-by: Orson Zhai <orson.zhai@gmail.com>
 
-I have not seen this on any of my devices running 5.9.x but I think 
-there have been reports of this still failing so I'll try and find out 
-whether it's with the 5.9.x kernel or newer.
-
-We're using a modified imx u-boot
-
-https://source.puri.sm/Librem5/uboot-imx/
-
-> 
-> Has there been any progress on this issue? I'm now hitting this on a
-> system that just upgraded from 5.4 to 5.10. Has anyone tried bisecting
-> this issue, yet?
-
-We have other issues with 5.10 right now so it hasn't had much testing.
-
-Angus
-
-> 
-> Regards,
-> Lucas
+>
+>
+> CJ
+>
+> > Thanks,
+> > -Orson
+> >
+> >>
+> >>          return 0;
+> >>   }
+> >> --
+> >> 2.27.0
+> >>
+> >
+>
