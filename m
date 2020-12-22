@@ -2,46 +2,46 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E62EFC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:11:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB101C433E6
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:22:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B4C0D22583
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:11:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BD0F323355
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:22:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728039AbgLVPK5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Dec 2020 10:10:57 -0500
-Received: from m43-15.mailgun.net ([69.72.43.15]:14936 "EHLO
-        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727964AbgLVPK5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2020 10:10:57 -0500
+        id S1727970AbgLVPVn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Dec 2020 10:21:43 -0500
+Received: from so254-31.mailgun.net ([198.61.254.31]:58262 "EHLO
+        so254-31.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727301AbgLVPVn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2020 10:21:43 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1608649833; h=Content-Type: MIME-Version: Message-ID:
+ s=smtp; t=1608650482; h=Content-Type: MIME-Version: Message-ID:
  In-Reply-To: Date: References: Subject: Cc: To: From: Sender;
- bh=k4T60vC2s1dNLZaTWXiVi917FKafMfvtENzWjJYqIVo=; b=TetvwAE2lBqdxvmTEKJTMK3TDnc7ghh9GUVhlEiVjCmCodunr8JaGGTXyH3jkr7086YP9d65
- mM/7FuIc965FJklTDJHFO/+WX40YjIki25i6DzO8kQQhsVT61PAUH2Y0QvqAcNwkX+IETcn1
- SM7h3wrzysg6h3s4lIeOnIbMp9o=
-X-Mailgun-Sending-Ip: 69.72.43.15
+ bh=zdYObwsY2r8z2o2KPE7CUgSBuK7IkUOZ8qoqY6T5wcw=; b=ZZ8BExI29r3opPJA2t1qDKW37EXJDlGnVHLZdefuU0WoHF5bJYSa6BwbMi7BQyRtRYJeD5Kp
+ P6XnosFNfuuZJriBLJ9q7TnHPn4WSMBMxIpzxy2aXuAVrRq3TpV9Cpvpju1Ak9pRvc3bmoXF
+ 8B1gjl/jnmij5ea6gfcp04+mjnM=
+X-Mailgun-Sending-Ip: 198.61.254.31
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org
  (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n05.prod.us-west-2.postgun.com with SMTP id
- 5fe20c58da47198188df83a3 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 22 Dec 2020 15:10:16
+ smtp-out-n07.prod.us-west-2.postgun.com with SMTP id
+ 5fe20ed46d011aad6629c0ba (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 22 Dec 2020 15:20:52
  GMT
 Sender: kvalo=codeaurora.org@mg.codeaurora.org
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 89E4FC43462; Tue, 22 Dec 2020 15:10:16 +0000 (UTC)
+        id E9043C43463; Tue, 22 Dec 2020 15:20:51 +0000 (UTC)
 Received: from x230.qca.qualcomm.com (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 4A212C433C6;
-        Tue, 22 Dec 2020 15:10:13 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 4A212C433C6
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 4F788C433C6;
+        Tue, 22 Dec 2020 15:20:48 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 4F788C433C6
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=kvalo@codeaurora.org
 From:   Kalle Valo <kvalo@codeaurora.org>
@@ -54,13 +54,13 @@ Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
         linux-mmc@vger.kernel.org,
         Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 09/24] wfx: add hwio.c/hwio.h
+Subject: Re: [PATCH v3 12/24] wfx: add hif_api_*.h
 References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
-        <20201104155207.128076-10-Jerome.Pouiller@silabs.com>
-Date:   Tue, 22 Dec 2020 17:10:11 +0200
-In-Reply-To: <20201104155207.128076-10-Jerome.Pouiller@silabs.com> (Jerome
-        Pouiller's message of "Wed, 4 Nov 2020 16:51:52 +0100")
-Message-ID: <87lfdp98rw.fsf@codeaurora.org>
+        <20201104155207.128076-13-Jerome.Pouiller@silabs.com>
+Date:   Tue, 22 Dec 2020 17:20:46 +0200
+In-Reply-To: <20201104155207.128076-13-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Wed, 4 Nov 2020 16:51:55 +0100")
+Message-ID: <87h7od98a9.fsf@codeaurora.org>
 User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
 MIME-Version: 1.0
 Content-Type: text/plain
@@ -70,20 +70,30 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 
+> --- /dev/null
+> +++ b/drivers/net/wireless/silabs/wfx/hif_api_general.h
+> @@ -0,0 +1,267 @@
+> +/* SPDX-License-Identifier: Apache-2.0 */
 > +/*
-> + * Internal helpers.
+> + * WFx hardware interface definitions
 > + *
-> + * About CONFIG_VMAP_STACK:
-> + * When CONFIG_VMAP_STACK is enabled, it is not possible to run DMA on stack
-> + * allocated data. Functions below that work with registers (aka functions
-> + * ending with "32") automatically reallocate buffers with kmalloc. However,
-> + * functions that work with arbitrary length buffers let's caller to handle
-> + * memory location. In doubt, enable CONFIG_DEBUG_SG to detect badly located
-> + * buffer.
+> + * Copyright (c) 2018-2020, Silicon Laboratories Inc.
 > + */
+> +
+> +#ifndef WFX_HIF_API_GENERAL_H
+> +#define WFX_HIF_API_GENERAL_H
+> +
+> +#ifdef __KERNEL__
+> +#include <linux/types.h>
+> +#include <linux/if_ether.h>
+> +#else
+> +#include <net/ethernet.h>
+> +#include <stdint.h>
+> +#define __packed __attribute__((__packed__))
+> +#endif
 
-This sounds very hacky to me, I have understood that you should never
-use stack with DMA.
+Why check for __KERNEL__ and redefined __packed? These don't belong to a
+wireless driver.
 
 -- 
 https://patchwork.kernel.org/project/linux-wireless/list/
