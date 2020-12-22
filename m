@@ -2,47 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC003C433E9
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:06:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFDA5C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:09:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7F1E923103
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:06:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F0F32312E
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:09:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728019AbgLVPGO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Dec 2020 10:06:14 -0500
-Received: from so254-31.mailgun.net ([198.61.254.31]:44042 "EHLO
-        so254-31.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728013AbgLVPGO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2020 10:06:14 -0500
+        id S1727749AbgLVPI7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Dec 2020 10:08:59 -0500
+Received: from m43-15.mailgun.net ([69.72.43.15]:14936 "EHLO
+        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727715AbgLVPI7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2020 10:08:59 -0500
 DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1608649551; h=Content-Transfer-Encoding: Content-Type:
+ s=smtp; t=1608649718; h=Content-Transfer-Encoding: Content-Type:
  MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=nBdti4p145SybWnCMKjk232I8BcskhOJcfGH3EeiP68=; b=lEMk/hrmvaRDAQ8TU15Sm0luc5VsvuXbzCjwxOapP16GjBuEkGQjhLNh/QWJlxP+2sA9qZsl
- 6Jjq65kk6NZ4qRY/HnMUtqyn7q2hEuuc9HGgkEl2nB+WUoPSIes1dj6eNeAUVClcpFxGw4Lx
- 9ky762BSa3pGMcg1I+99Pn9yGlM=
-X-Mailgun-Sending-Ip: 198.61.254.31
+ To: From: Sender; bh=ZlCng/8clulWrjBwm8L11jZK1Evn1oWxnBMS0ZVA4DU=; b=VDJ5JvUp5+22d0xT8uS3vWwg44s3rNoclDdauiUHMdMEi3hF214c8Wn4cdQ9mMeY7/i3glmu
+ 02hrAA0Wa7gpZx+bvpH1gHtU9174eMJn8DNJKXIeRf3FhR0yahuH/lOcm13/jVev/naynGyx
+ x9a541PkAdDGhyHoUzYBcsuQWDQ=
+X-Mailgun-Sending-Ip: 69.72.43.15
 X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
 Received: from smtp.codeaurora.org
  (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n08.prod.us-east-1.postgun.com with SMTP id
- 5fe20b4b7bc801dc4f99888c (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 22 Dec 2020 15:05:47
+ smtp-out-n07.prod.us-east-1.postgun.com with SMTP id
+ 5fe20bd2b00c0d7ad40ad45c (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 22 Dec 2020 15:08:02
  GMT
 Sender: kvalo=codeaurora.org@mg.codeaurora.org
 Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 206A6C43461; Tue, 22 Dec 2020 15:05:47 +0000 (UTC)
+        id 05981C433ED; Tue, 22 Dec 2020 15:08:02 +0000 (UTC)
 Received: from x230.qca.qualcomm.com (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
         (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
         (No client certificate requested)
         (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 94631C433C6;
-        Tue, 22 Dec 2020 15:05:43 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 94631C433C6
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 587E1C433C6;
+        Tue, 22 Dec 2020 15:07:58 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 587E1C433C6
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
 Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=kvalo@codeaurora.org
 From:   Kalle Valo <kvalo@codeaurora.org>
@@ -55,13 +55,13 @@ Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
         linux-mmc@vger.kernel.org,
         Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH v3 03/24] wfx: add Makefile/Kconfig
+Subject: Re: [PATCH v3 05/24] wfx: add main.c/main.h
 References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
-        <20201104155207.128076-4-Jerome.Pouiller@silabs.com>
-Date:   Tue, 22 Dec 2020 17:05:41 +0200
-In-Reply-To: <20201104155207.128076-4-Jerome.Pouiller@silabs.com> (Jerome
-        Pouiller's message of "Wed, 4 Nov 2020 16:51:46 +0100")
-Message-ID: <87tusd98ze.fsf@codeaurora.org>
+        <20201104155207.128076-6-Jerome.Pouiller@silabs.com>
+Date:   Tue, 22 Dec 2020 17:07:56 +0200
+In-Reply-To: <20201104155207.128076-6-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Wed, 4 Nov 2020 16:51:48 +0100")
+Message-ID: <87pn3198vn.fsf@codeaurora.org>
 User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
@@ -75,31 +75,19 @@ Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
 >
 > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
-> ---
->  drivers/net/wireless/silabs/wfx/Kconfig  |  8 ++++++++
->  drivers/net/wireless/silabs/wfx/Makefile | 25 ++++++++++++++++++++++++
->  2 files changed, 33 insertions(+)
->  create mode 100644 drivers/net/wireless/silabs/wfx/Kconfig
->  create mode 100644 drivers/net/wireless/silabs/wfx/Makefile
->
-> diff --git a/drivers/net/wireless/silabs/wfx/Kconfig
-> b/drivers/net/wireless/silabs/wfx/Kconfig
-> new file mode 100644
-> index 000000000000..83ee4d0ca8c6
-> --- /dev/null
-> +++ b/drivers/net/wireless/silabs/wfx/Kconfig
-> @@ -0,0 +1,8 @@
-> +config WFX
-> +	tristate "Silicon Labs wireless chips WF200 and further"
-> +	depends on MAC80211
-> +	depends on MMC || !MMC # do not allow WFX=3Dy if MMC=3Dm
-> +	depends on (SPI || MMC)
-> +	help
-> +	  This is a driver for Silicons Labs WFxxx series (WF200 and further)
-> +	  chipsets. This chip can be found on SPI or SDIO buses.
 
-Kconfig should mention about the SDIO id snafu and that Device Tree is
-required.
+[...]
+
+> +static const struct ieee80211_supported_band wfx_band_2ghz =3D {
+> +	.channels =3D wfx_2ghz_chantable,
+> +	.n_channels =3D ARRAY_SIZE(wfx_2ghz_chantable),
+> +	.bitrates =3D wfx_rates,
+> +	.n_bitrates =3D ARRAY_SIZE(wfx_rates),
+> +	.ht_cap =3D {
+> +		// Receive caps
+
+This driver is full of C++ comments, please convert them to network
+style comments. More info in the coding style doc.
 
 --=20
 https://patchwork.kernel.org/project/linux-wireless/list/
