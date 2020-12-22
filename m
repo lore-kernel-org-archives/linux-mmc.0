@@ -2,67 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9302C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 13:34:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6D87C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:04:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C33D23103
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 13:34:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B10E2312E
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Dec 2020 15:04:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727240AbgLVNeM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Dec 2020 08:34:12 -0500
-Received: from szxga04-in.huawei.com ([45.249.212.190]:9636 "EHLO
-        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727095AbgLVNeM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2020 08:34:12 -0500
-Received: from DGGEMS407-HUB.china.huawei.com (unknown [172.30.72.58])
-        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4D0cht6bBsz15gcD;
-        Tue, 22 Dec 2020 21:32:46 +0800 (CST)
-Received: from ubuntu.network (10.175.138.68) by
- DGGEMS407-HUB.china.huawei.com (10.3.19.207) with Microsoft SMTP Server id
- 14.3.498.0; Tue, 22 Dec 2020 21:33:23 +0800
-From:   Zheng Yongjun <zhengyongjun3@huawei.com>
-To:     <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-CC:     Zheng Yongjun <zhengyongjun3@huawei.com>
-Subject: [PATCH -next] mmc: core: use roundup macro to to calculate blk_sz
-Date:   Tue, 22 Dec 2020 21:33:55 +0800
-Message-ID: <20201222133355.19807-1-zhengyongjun3@huawei.com>
-X-Mailer: git-send-email 2.22.0
+        id S1727605AbgLVPEd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Dec 2020 10:04:33 -0500
+Received: from m43-15.mailgun.net ([69.72.43.15]:25301 "EHLO
+        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726920AbgLVPEc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Dec 2020 10:04:32 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1608649449; h=Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
+ To: From: Sender; bh=Ko0cYP+ruBsHvHtPFfJioTlxlBelsXkFGfnxaOLV8Ic=; b=iMa9mYcUJ9ozsXbD8AfuRb4XOvjCY4acljbXTrsUdbbA7iYF7Ps3b/mRWqSViY45VvsRC6pK
+ Tq5kuQXg+psJ8x7cEgWKPSF6J7JwvfJZ7WjfrM+YeI10Q73ivmdcdnOjDIMpq6xMLq7lT9Wl
+ XAcAl4TXNQK4doIrQA2dFjE8KM4=
+X-Mailgun-Sending-Ip: 69.72.43.15
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n08.prod.us-west-2.postgun.com with SMTP id
+ 5fe20a95cfe5dd67db4ba023 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 22 Dec 2020 15:02:45
+ GMT
+Sender: kvalo=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 02922C43466; Tue, 22 Dec 2020 15:02:45 +0000 (UTC)
+Received: from x230.qca.qualcomm.com (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: kvalo)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id BF67AC433C6;
+        Tue, 22 Dec 2020 15:02:40 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org BF67AC433C6
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=kvalo@codeaurora.org
+From:   Kalle Valo <kvalo@codeaurora.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?utf-8?Q?Roh?= =?utf-8?Q?=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v3 03/24] wfx: add Makefile/Kconfig
+References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
+        <20201104155207.128076-4-Jerome.Pouiller@silabs.com>
+Date:   Tue, 22 Dec 2020 17:02:38 +0200
+In-Reply-To: <20201104155207.128076-4-Jerome.Pouiller@silabs.com> (Jerome
+        Pouiller's message of "Wed, 4 Nov 2020 16:51:46 +0100")
+Message-ID: <8735zxanox.fsf@codeaurora.org>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.138.68]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Don't open-code roundup() kernel macro.
+Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
 
-Signed-off-by: Zheng Yongjun <zhengyongjun3@huawei.com>
----
- drivers/mmc/core/sdio_io.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+> From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+>
+> Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
 
-diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-index 79dbf90216b5..35c69bdeb40e 100644
---- a/drivers/mmc/core/sdio_io.c
-+++ b/drivers/mmc/core/sdio_io.c
-@@ -263,8 +263,7 @@ unsigned int sdio_align_size(struct sdio_func *func, unsigned int sz)
- 		 * Realign it so that it can be done with one request,
- 		 * and recheck if the controller still likes it.
- 		 */
--		blk_sz = ((sz + func->cur_blksize - 1) /
--			func->cur_blksize) * func->cur_blksize;
-+		blk_sz = roundup(sz, func->cur_blksize);
- 		blk_sz = _sdio_align_size(blk_sz);
- 
- 		/*
--- 
-2.22.0
+[...]
 
+> +wfx-$(CONFIG_SPI) +=3D bus_spi.o
+> +wfx-$(subst m,y,$(CONFIG_MMC)) +=3D bus_sdio.o
+
+Why this subst? And why only for MMC?
+
+--=20
+https://patchwork.kernel.org/project/linux-wireless/list/
+
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
+hes
