@@ -7,30 +7,30 @@ X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6C1EC43333
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 02:40:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 543C6C4321A
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 02:46:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 80E8E2245C
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 02:40:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D49B225AA
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 02:46:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730679AbgLWCjo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Dec 2020 21:39:44 -0500
-Received: from mail.kernel.org ([198.145.29.99]:52102 "EHLO mail.kernel.org"
+        id S1728591AbgLWCqk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Dec 2020 21:46:40 -0500
+Received: from mail.kernel.org ([198.145.29.99]:51608 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730062AbgLWCXm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 22 Dec 2020 21:23:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 45263225AA;
-        Wed, 23 Dec 2020 02:23:26 +0000 (UTC)
+        id S1729588AbgLWCWX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 22 Dec 2020 21:22:23 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4D82F22D73;
+        Wed, 23 Dec 2020 02:21:42 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1608690207;
-        bh=K+bioDO4Ah8YGIttvteziuXMngBp1zEMtnN2NnFVgUU=;
+        s=k20201202; t=1608690103;
+        bh=XitNI+swoahknvrU7wIkuQWm/ZDSEfLzITifbQu7TJI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=iNlSmq4SOvFwvfGXd5ljoOKdmKCC+BD7bZ3h0nK/IA+KRBBjzXZyIoKfhlQxW+fE2
-         WKcTDbRd4xWBbTldiaDD+rtqWc0irahz2ndgaYOC9hli1obm7iy33aHIkntfCynbtQ
-         GVcRcgXXq7q9nKKxrpayOJKi0PxPf2FL6TA2I6SpRkG8a0FBvL5iFOEhNGUjDNEjsp
-         xjsTH1hTMJzkcQFxieKHN4DpUrukYI651LOwPhEiSYrbajGyFcbGkKBOSe66sFivbU
-         vN7kCG8JMXA6hOqQLrMGDrW5e/xHDdWZHJ3wQGFrOZUGl67ukXueKFFIWNkOoFIVXF
-         dsp6D6mv9pLqQ==
+        b=js5wlD4wxHTpiZFhD4qJsYquaDLNqZDK1JObJvDEKisbGpmjcFOTMlowsYVKOOXoj
+         H1wCuOAmr8IOfBBifpQILQYZaxqU5PtZ05/f9IhwbL/oKP3aArc4yrCU2l0OKVQLLf
+         MlR7WBN+A99wwjFyWII4jVZILs7Ywy+aKAgGvwGyAyj2HCQDzlbl8ZARI/er51RKx2
+         ii8T1/STzHBjYzNMdlRUkzrAV3/3uLbljoLSY1L6UvlzMFZn0eTIVHGt8WrGIy09fd
+         MSG/f/y+hVPQVLWe7MOK/OSfnqYQST9KoXT52fgMYaKhq+k2fbS/ZX4CrnRtrF1TUd
+         PQctjBP4av+xw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Krzysztof Kozlowski <krzk@kernel.org>,
@@ -38,12 +38,12 @@ Cc:     Krzysztof Kozlowski <krzk@kernel.org>,
         Dan Carpenter <dan.carpenter@oracle.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.14 27/66] mmc: tmio: do not print real IOMEM pointer
-Date:   Tue, 22 Dec 2020 21:22:13 -0500
-Message-Id: <20201223022253.2793452-27-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 32/87] mmc: tmio: do not print real IOMEM pointer
+Date:   Tue, 22 Dec 2020 21:20:08 -0500
+Message-Id: <20201223022103.2792705-32-sashal@kernel.org>
 X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20201223022253.2793452-1-sashal@kernel.org>
-References: <20201223022253.2793452-1-sashal@kernel.org>
+In-Reply-To: <20201223022103.2792705-1-sashal@kernel.org>
+References: <20201223022103.2792705-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -72,10 +72,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index 64b7e9f18361d..3b96c9cebbafa 100644
+index 43a2ea5cff24f..9564aaf71442b 100644
 --- a/drivers/mmc/host/tmio_mmc.c
 +++ b/drivers/mmc/host/tmio_mmc.c
-@@ -109,8 +109,7 @@ static int tmio_mmc_probe(struct platform_device *pdev)
+@@ -114,8 +114,7 @@ static int tmio_mmc_probe(struct platform_device *pdev)
  	if (ret)
  		goto host_remove;
  
