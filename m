@@ -2,119 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C867C43381
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 05:30:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C42BC433E6
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 07:31:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DDE58207A5
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 05:30:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1A19C222F9
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 07:31:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727160AbgLWF3v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Dec 2020 00:29:51 -0500
-Received: from m43-15.mailgun.net ([69.72.43.15]:21206 "EHLO
-        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727144AbgLWF3v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Dec 2020 00:29:51 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1608701365; h=Content-Transfer-Encoding: Content-Type:
- MIME-Version: Message-ID: In-Reply-To: Date: References: Subject: Cc:
- To: From: Sender; bh=+PgCftFCNKFXUIzjrZaJrrb1dDkJP0N7TDJaNh3c03M=; b=P8KGtr8Ih/acNhKj7ec2Y1pWv6wpuKN2gGELepv2/Rkq6HBI5L4rIsRoxsauN8DTcFUUdJ2n
- umyAHf7D6MgqXH0NUzyjkqpQMiPc8frZangTw+VvT99oSDk33e0x3iBNXumqu2Ih7CwTMH6Z
- ke+BfXB0Xvm9FFcbqGIzZTmPewE=
-X-Mailgun-Sending-Ip: 69.72.43.15
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n05.prod.us-west-2.postgun.com with SMTP id
- 5fe2d591da471981883969b7 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 23 Dec 2020 05:28:49
- GMT
-Sender: kvalo=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id DC5C9C43461; Wed, 23 Dec 2020 05:28:49 +0000 (UTC)
-Received: from x230.qca.qualcomm.com (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 460EBC433C6;
-        Wed, 23 Dec 2020 05:28:46 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 460EBC433C6
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=kvalo@codeaurora.org
-From:   Kalle Valo <kvalo@codeaurora.org>
-To:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        devel@driverdev.osuosl.org, devicetree@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>, netdev@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        Pali =?utf-8?Q?Roh=C3=A1r?= <pali@kernel.org>,
-        "David S . Miller" <davem@davemloft.net>
-Subject: Re: [PATCH v3 09/24] wfx: add hwio.c/hwio.h
-References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
-        <87lfdp98rw.fsf@codeaurora.org> <X+IQRct0Zsm87H4+@kroah.com>
-        <4279510.LvFx2qVVIh@pc-42>
-Date:   Wed, 23 Dec 2020 07:28:44 +0200
-In-Reply-To: <4279510.LvFx2qVVIh@pc-42> (=?utf-8?B?IkrDqXLDtG1l?=
- Pouiller"'s message of "Tue,
-        22 Dec 2020 22:02:09 +0100")
-Message-ID: <87im8t5bw3.fsf@codeaurora.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+        id S1727450AbgLWHbP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Dec 2020 02:31:15 -0500
+Received: from relmlor2.renesas.com ([210.160.252.172]:2516 "EHLO
+        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726463AbgLWHbP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Dec 2020 02:31:15 -0500
+X-IronPort-AV: E=Sophos;i="5.78,441,1599490800"; 
+   d="scan'208";a="66692938"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie6.idc.renesas.com with ESMTP; 23 Dec 2020 16:30:43 +0900
+Received: from localhost.localdomain (unknown [10.166.252.89])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id BE2B1400F2B5;
+        Wed, 23 Dec 2020 16:30:43 +0900 (JST)
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: [PATCH 0/2] mmc: host: tmio/renesas_sdhi: Add data timeout error detection
+Date:   Wed, 23 Dec 2020 16:30:20 +0900
+Message-Id: <1608708622-29668-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com> writes:
+This patch series is based on the mmc.git / next branch. The patch 1/2
+is a updated patch from Wolfram-san submitted [1]. And, I talked
+him locally, I can write this Reviewed-by and Tested-by instead of
+SoB. The patch 2/2 is a new patch for retuning a card when
+the host controller detects cmd/data timeout. And, I got Wolfram-san's
+Reviewed-by locally.
 
-> On Tuesday 22 December 2020 16:27:01 CET Greg Kroah-Hartman wrote:
->>=20
->> On Tue, Dec 22, 2020 at 05:10:11PM +0200, Kalle Valo wrote:
->> > Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
->> >
->> > > +/*
->> > > + * Internal helpers.
->> > > + *
->> > > + * About CONFIG_VMAP_STACK:
->> > > + * When CONFIG_VMAP_STACK is enabled, it is not possible to run DMA=
- on stack
->> > > + * allocated data. Functions below that work with registers (aka fu=
-nctions
->> > > + * ending with "32") automatically reallocate buffers with kmalloc.=
- However,
->> > > + * functions that work with arbitrary length buffers let's caller t=
-o handle
->> > > + * memory location. In doubt, enable CONFIG_DEBUG_SG to detect badl=
-y located
->> > > + * buffer.
->> > > + */
->> >
->> > This sounds very hacky to me, I have understood that you should never
->> > use stack with DMA.
->>=20
->> You should never do that because some platforms do not support it, so no
->> driver should ever try to do that as they do not know what platform they
->> are running on.
->
-> Yes, I have learned this rule the hard way.
->
-> There is no better way than a comment to warn the user that the argument
-> will be used with a DMA? A Sparse annotation, for example?
+Note that I don't include Hayakawa-san's email account which is
+the author of the patch 1/2 in To/CC because he left from Renesas
+now.
 
-I have not seen anything, but something like sparse annotation would be
-useful. Please let me know if you find anything like that.
+[1]
+https://lore.kernel.org/linux-mmc/20201120150647.123237-3-wsa+renesas@sang-engineering.com/
 
-But I think that CONFIG_VMAP_STACK is irrelevant and the comment should
-be clarified that using stack memory must NOT be used for DMA operations
-in any circumstances.
+Masaharu Hayakawa (1):
+  mmc: tmio: Add data timeout error detection
 
---=20
-https://patchwork.kernel.org/project/linux-wireless/list/
+Yoshihiro Shimoda (1):
+  mmc: host: renesas_sdhi: Add a condition of cmd/data timeout for
+    retune
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatc=
-hes
+ drivers/mmc/host/renesas_sdhi_core.c | 16 +++++++++++++---
+ drivers/mmc/host/tmio_mmc.h          |  2 +-
+ drivers/mmc/host/tmio_mmc_core.c     |  8 +++++---
+ 3 files changed, 19 insertions(+), 7 deletions(-)
+
+-- 
+2.7.4
+
