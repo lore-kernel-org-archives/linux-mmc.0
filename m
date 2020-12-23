@@ -2,43 +2,41 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33E31C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 09:10:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85CB7C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 09:13:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E0ED02247F
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 09:10:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 46449207CD
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 09:13:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728208AbgLWJK6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Dec 2020 04:10:58 -0500
-Received: from mo4-p01-ob.smtp.rzone.de ([85.215.255.52]:29233 "EHLO
-        mo4-p01-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727990AbgLWJK6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Dec 2020 04:10:58 -0500
-X-Greylist: delayed 368 seconds by postgrey-1.27 at vger.kernel.org; Wed, 23 Dec 2020 04:10:57 EST
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1608714486;
+        id S1728092AbgLWJNz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Dec 2020 04:13:55 -0500
+Received: from mo4-p00-ob.smtp.rzone.de ([85.215.255.25]:11778 "EHLO
+        mo4-p00-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728075AbgLWJNz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Dec 2020 04:13:55 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1608714603;
         s=strato-dkim-0002; d=goldelico.com;
-        h=References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:From:
-        Subject:Sender;
-        bh=bWfFA+3erMRdRT1G93Zujqalh9NeqGq0TkUqH4YyCfU=;
-        b=R3o7fvUF08xvnK93wDu+YG3wZAwF35bYOGZqqHqkuEIGfXBB5IGfRnDJQpj+UpBCQh
-        r77/SQ+Co5/5GW+B4RHAKe5qEqH/5Y4SC3bJAzf+NqNn0YKoKIfXNbSAz9aVCYoi4jWS
-        irT41h8AmWyUelwaw3MJ4b0ATjK40v3aPC4uDc/4nnNwspmROCobNC0p2yvM/+1ymRWw
-        2kAoTjvQjWM/ZCRrN6pg0XBfv1FnC9wldXySWx0Nb2dfvRWUDb7uSKVelTpTaxsN9aGC
-        SMBciDi5ITZiLKM4rRFtQNERWO/7WmPE9dn0pQLiigSfxlJYbOuwgd+ioWWok4S9pZmf
-        R2LA==
+        h=Message-Id:Date:Subject:Cc:To:From:From:Subject:Sender;
+        bh=/7waLQuVIPjLSu88Jl0tYw8XTevZYh4mXe3kIEp/qeY=;
+        b=HBc1lk5pp/Gj9qkGz74XkJZBSw08C+GHw1RsC8KBfsiaHgmRWC6rBiyjZ+pZPBq1vy
+        OcCiGWBDK0P3Y4ZDM3GnqJgKR5tMFlhJDPE4i2hI9iUY4erKp4TikO4dQdXWp/kQMPkm
+        kJygucm0CVOjgeauzffiHaVb2x7WlyouZXANeJEUoXPvSM5YNR9EvAW9ZKBmCSHuYxE6
+        tlVg++j0HXIHaHwS+IIR5Lrx1BUaGkQ+iijLBb5XO6tyFi1aws/ojnMLizitvnNi0Txs
+        c5Bl8wUovEE7y3+1xhAtSYlK5KyuOaABvVjrXe//HMRzHy0FLTHshoq8ZRjfpR3z8X2q
+        cjQw==
 X-RZG-AUTH: ":JGIXVUS7cutRB/49FwqZ7WcJeFKiMhflhwDubTJ9o1mfYzBGHXH7FjJ5/fxd"
 X-RZG-CLASS-ID: mo00
 Received: from iMac.fritz.box
         by smtp.strato.de (RZmta 47.10.6 DYNA|AUTH)
-        with ESMTPSA id U05a81wBN91q1Lv
+        with ESMTPSA id U05a81wBN91p1Lt
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
         (Client did not present a certificate);
-        Wed, 23 Dec 2020 10:01:52 +0100 (CET)
+        Wed, 23 Dec 2020 10:01:51 +0100 (CET)
 From:   "H. Nikolaus Schaller" <hns@goldelico.com>
 To:     Paul Cercueil <paul@crapouillou.net>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -47,39 +45,27 @@ To:     Paul Cercueil <paul@crapouillou.net>,
         "H. Nikolaus Schaller" <hns@goldelico.com>
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         letux-kernel@openphoenux.org
-Subject: [PATCH 2/2] mmc: omap: remove unused struct component card_detect_irq
-Date:   Wed, 23 Dec 2020 10:01:51 +0100
-Message-Id: <b6f2168b863e4273c6bca5a22fbd4a3a8ddf68d6.1608714110.git.hns@goldelico.com>
+Subject: [PATCH 0/2] mmc: remove unused struct component card_detect_irq
+Date:   Wed, 23 Dec 2020 10:01:49 +0100
+Message-Id: <cover.1608714110.git.hns@goldelico.com>
 X-Mailer: git-send-email 2.26.2
-In-Reply-To: <cover.1608714110.git.hns@goldelico.com>
-References: <cover.1608714110.git.hns@goldelico.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-I have not found any user for this struct component.
+card_detect_irq is not used anymore since v4.1.
+Remove it.
 
-Signed-off-by: H. Nikolaus Schaller <hns@goldelico.com>
----
+H. Nikolaus Schaller (2):
+  mmc: jz4740: remove unused struct component card_detect_irq
+  mmc: omap: remove unused struct component card_detect_irq
+
+ drivers/mmc/host/jz4740_mmc.c          | 1 -
  include/linux/platform_data/mmc-omap.h | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ 2 files changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/include/linux/platform_data/mmc-omap.h b/include/linux/platform_data/mmc-omap.h
-index f0b8947e6b07d8..91051e9907f34e 100644
---- a/include/linux/platform_data/mmc-omap.h
-+++ b/include/linux/platform_data/mmc-omap.h
-@@ -108,8 +108,7 @@ struct omap_mmc_platform_data {
- 		const char *name;
- 		u32 ocr_mask;
- 
--		/* Card detection IRQs */
--		int card_detect_irq;
-+		/* Card detection */
- 		int (*card_detect)(struct device *dev, int slot);
- 
- 		unsigned int ban_openended:1;
 -- 
 2.26.2
 
