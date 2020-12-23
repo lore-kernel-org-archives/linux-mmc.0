@@ -2,620 +2,307 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 995B4C433E9
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 14:41:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9146FC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 15:40:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7109C22482
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 14:41:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 616E9233FB
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 15:40:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726387AbgLWOlu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Dec 2020 09:41:50 -0500
-Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:40264 "EHLO
-        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727984AbgLWOlu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Dec 2020 09:41:50 -0500
-Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
-        by mx0b-0016f401.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 0BNEUwWv008545;
-        Wed, 23 Dec 2020 06:41:03 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-type; s=pfpt0220; bh=yrrzZ/fr68LyVO5tToxI92sitjN1KUUTQZh2j6drEYE=;
- b=c7449r8HVYM02j8A3+dvSGPh7OwEvGLl9Z6nAHOHvtceZvx9uVTKxoH8KmNzztsYTQK4
- ysFXQ3nlAYvQs2OF+ixakAjEAFZz9wFIFjrEcQGOr9BPCR30fFnCm/RH5vtv61Q3SnqA
- QvVlj6WpN8vno9voPQp0zGk3CsSXhHUyOrSqyp9G4HQu9uAHciClAcyYw+CFaNkoAf0h
- te3nj1klMtWzVcSG7vQc1fC7TiKfCzbsdF5yDbdRVCXQa6eyu1JB0XIW+mLix7BjhajH
- r+SWF2G1MhyW/pXUBsrAh3FR+ga/sRFbjBl8KttYA5F6DziUDGS+/JIcCypeVyio0XtL Vg== 
-Received: from sc-exch02.marvell.com ([199.233.58.182])
-        by mx0b-0016f401.pphosted.com with ESMTP id 35k0hx66nv-2
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Wed, 23 Dec 2020 06:41:03 -0800
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by SC-EXCH02.marvell.com
- (10.93.176.82) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 23 Dec
- 2020 06:40:48 -0800
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 23 Dec
- 2020 06:40:47 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 23 Dec 2020 06:40:47 -0800
-Received: from hyd1soter3.marvell.com (unknown [10.29.37.12])
-        by maili.marvell.com (Postfix) with ESMTP id 74DAB3F7041;
-        Wed, 23 Dec 2020 06:40:44 -0800 (PST)
-From:   Bhaskara Budiredla <bbudiredla@marvell.com>
-To:     <ulf.hansson@linaro.org>, <keescook@chromium.org>,
-        <ccross@android.com>, <tony.luck@intel.com>, <sgoutham@marvell.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        "Bhaskara Budiredla" <bbudiredla@marvell.com>
-Subject: [PATCH v4 1/2] mmc: Support kmsg dumper based on pstore/blk
-Date:   Wed, 23 Dec 2020 20:10:32 +0530
-Message-ID: <20201223144033.32571-2-bbudiredla@marvell.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20201223144033.32571-1-bbudiredla@marvell.com>
-References: <20201223144033.32571-1-bbudiredla@marvell.com>
+        id S1727351AbgLWPkd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Dec 2020 10:40:33 -0500
+Received: from mail-mw2nam12on2068.outbound.protection.outlook.com ([40.107.244.68]:31200
+        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727207AbgLWPkd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Dec 2020 10:40:33 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LEQ5+AwyU4EHTX3ASROSvZvdX6eVpnGJrEGpprEmvQdY+Eti9dF3HsdBQeCjHNV/9dBQkpETBjeG0gzKmA/l1taDU5DSsUb0QoNgIBvno296sM3+EmH4M7bkQrd6yGsx7v4lJQ1pFAKTCaiuu2VhclwIKB3Jy0AAYFzHNjdv/ITMuyDhuf4mVOXS0HbmAHG0yycdci2GirC6RKzkPy7Fj4ogWweXRErgFApIyLN2gtm5n6dgiN79/HHHerz3/V78C8fwBhfYPO79fJnwohMT5mxo+oZbUZR2DTiFZCLvhVrKTYHTV3RNZrYAxMNfeAB+wZlcrBfVF9PBExf8pC1Etw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=WD3dCTRfGtgEK3azB1MzZj5EjgMD/gjv3Xfh3qKE+6o=;
+ b=bkoWncz52CQblbnxxwr7ijOPynyWyZR+4echkVx1ay6OFO23rloPmG/4o3iU2h74vgfBs8sBk0EjAHWz5HFSvWzleobw9j2vXTzKeOErhWjC78p+oMgoG2xtgrn50GvFDbZTUzXrV+oR6bNLOiEZUD2Ee5cELH8H063vcAF6hnudyLg0nhfIOj4xytpGcS3U7OKBLT85IJU1oDZlchM9AYhmyjkhpJ1I753iHxcmbuIgZowOuMfKjibZhnzAmSWUtLW/9jVqFw7n0GEW/ojEOO1zcnxUyrZo2YK6v6TOFmCY4oIqqPjLNpOSnfcq1hG0FE17OJx8Ss1WkUSpQrjSIg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
+ dkim=pass header.d=silabs.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=WD3dCTRfGtgEK3azB1MzZj5EjgMD/gjv3Xfh3qKE+6o=;
+ b=RlMoyyJGIYue/WoxlUSKUQb2OPcorlnGGexsf5Poj2mlnZa6Z96hVtEa0cLtPqHhq6mRoUdtH2iaRiIvUVxzW8xveA0bkfAcgFyjdcebZ/Xh4m0Un29gM11y75Pkn/eOGaXnQIAqHnJSi+x6mL7q2KZvN/4QPvJC59wzqGJzABY=
+Authentication-Results: vger.kernel.org; dkim=none (message not signed)
+ header.d=none;vger.kernel.org; dmarc=none action=none header.from=silabs.com;
+Received: from SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18)
+ by SN6PR11MB2815.namprd11.prod.outlook.com (2603:10b6:805:62::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3676.25; Wed, 23 Dec
+ 2020 15:39:43 +0000
+Received: from SN6PR11MB2718.namprd11.prod.outlook.com
+ ([fe80::a989:f850:6736:97ca]) by SN6PR11MB2718.namprd11.prod.outlook.com
+ ([fe80::a989:f850:6736:97ca%5]) with mapi id 15.20.3700.026; Wed, 23 Dec 2020
+ 15:39:43 +0000
+From:   Jerome Pouiller <Jerome.Pouiller@silabs.com>
+To:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org
+Cc:     devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
+        <jerome.pouiller@silabs.com>
+Subject: [PATCH v4 00/24] wfx: get out from the staging area
+Date:   Wed, 23 Dec 2020 16:39:01 +0100
+Message-Id: <20201223153925.73742-1-Jerome.Pouiller@silabs.com>
+X-Mailer: git-send-email 2.29.2
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
+X-Originating-IP: [82.67.86.106]
+X-ClientProxiedBy: SA0PR12CA0024.namprd12.prod.outlook.com
+ (2603:10b6:806:6f::29) To SN6PR11MB2718.namprd11.prod.outlook.com
+ (2603:10b6:805:63::18)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
- definitions=2020-12-23_06:2020-12-23,2020-12-23 signatures=0
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from pc-42.silabs.com (82.67.86.106) by SA0PR12CA0024.namprd12.prod.outlook.com (2603:10b6:806:6f::29) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3700.27 via Frontend Transport; Wed, 23 Dec 2020 15:39:41 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 04d3e975-f58f-4926-c5a1-08d8a758f80e
+X-MS-TrafficTypeDiagnostic: SN6PR11MB2815:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <SN6PR11MB2815FF35550D4154A6D4210393DE0@SN6PR11MB2815.namprd11.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:3044;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: +gf3Xfhmz4LxG53/Zvzh1HFbVEkIY7GAag7XeXgCGqmXXwM3yNi1jHxEDDtgjDq8SqbE9+4uZ0EaOfme2rwTXmOUz/sNU59knTcsLXUaW6CA/pODK2FnsymhWd2MXDGcOFsKXzvCTCz0Rog6pNNYUEjHghmcaMIygfxYYB6e3OZA1W3NJ9VANuDv5xBoAud8O5KjeISaiS245MZ8+avpilFN5dSTelSBZiiZqx2pO1LFFMDo7mmM+MLpT3F452GfN/kS307BXJMW5sMQO6LHz9JDTuaMvtxRQZwMTllPdTpDU7wKdZLbevdZ0pZki6CfXV7oPjl9wY06exArfZKFUHcvrZzgtdDvLjSlIjZ1Vv7CTEq9gGVk7Rvy00akKWUg3U77YD1Ea6Tn5uhRLLZJJF4hvsvuHhA5KwtBvbVZpG/tlfMmFzFeJg/k6SS7SaeMvmGESyKReP4AO0wBYKno5Q==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR11MB2718.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(396003)(136003)(366004)(376002)(39850400004)(346002)(66574015)(478600001)(83380400001)(966005)(8676002)(186003)(2906002)(8936002)(26005)(52116002)(107886003)(16526019)(7696005)(66946007)(7416002)(6486002)(956004)(2616005)(54906003)(66476007)(316002)(4326008)(6666004)(36756003)(5660300002)(1076003)(86362001)(66556008);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?utf-8?B?Qk51elFTNUU1U1BKYjd2MmxLWVZJNTQ4UmtjM29mU2duQWdKUDVqNnlDUCs1?=
+ =?utf-8?B?cEthODB0Uk92SVhYRnlWNmFYejhneElNMzZpalFSaXhmS3E2cVRmb1gvdHRD?=
+ =?utf-8?B?Z3NUcVVud0NPbUE4ZDdCcUFHUmZOVjZTdXlPZUl3Vzl4WnJIOHlXNStEVU81?=
+ =?utf-8?B?ajY3T1BRc29UUnk3Rmxlc0dsdnc2N0oyZTRpT2RMVDlnWW5jNW1ocXV6OE0x?=
+ =?utf-8?B?NnM5dnhmOFZLWHRIU1dXSzZJYWNiaHRWK01IVmhwVjJJNm9TbSs0YytlTFNZ?=
+ =?utf-8?B?d1lwNjF4OFpINXRnaDRsa2lVTkdCZ0VPUTFtVlNEWWd5Z1B1MUw1V0pXOGpv?=
+ =?utf-8?B?N3RQejdMYVRVRm1Nd2IzL1JJV090eENyeHlFTmZaQkxzOHpEQ1RFdjZkM1Qz?=
+ =?utf-8?B?YnBmT3oxdWdpRHRqUFhjS0UzcjdsNFJ2TFNETFNBclA0dnROeWl0Wm9pZ3Er?=
+ =?utf-8?B?VkNxZjIrQ0N5OXRZWGViRHo3NmtPS0dHNjZuS2J2TTlaZEFuRVRzR2Z5ZTNI?=
+ =?utf-8?B?dHV4eGhEUVdxVjdTVFlucE9OZ2NRNmdtSnBCd2oxSnBtMjRJbTZwRFNtMFJS?=
+ =?utf-8?B?NHhvbFg1NXBVa1RndmFEanU0ejUwbi9mK3ZnWjV0SzFVK0kwNnhUTGdRVmVM?=
+ =?utf-8?B?NWcvM3hxTFdSNW0zZnZvMVpzdURWTU9oOG9IMWFxUGdqTlc3ckF0QzUrMmo5?=
+ =?utf-8?B?Z3M2TExFMDV6VjYzL0Y3M3ZwTm52V2ltcndTajFXVGsyVU1sQmNHTndXSTdS?=
+ =?utf-8?B?a1dhK1dtUUx5bUlNZ3ZRSEJjcDlKdjhCWjJYbW1Cb0owVkpZa2FQTjZreTBE?=
+ =?utf-8?B?ZHNsdnFxQ2VNckZLRWxsblRES0c2SUUyRUFKejd0Tm9KSWMvSzJHZ09MSG5D?=
+ =?utf-8?B?WEMrU2g5SVhTU2ttMHRQN3dpUE5ENG9XekR0SG5mK1JuOFF1Vm5XUHZNR3Fk?=
+ =?utf-8?B?S043Z0JjZTRyUUw0VGRSN01UUytJMmhrcmROWTNaMVFMdXRyRE5SMEhMd0cw?=
+ =?utf-8?B?N1JoWXJNNUhKWFo2RG5xbSsvRFNyYXZmQ29sQXEyTVdKNGJWRE43YlRxQnRo?=
+ =?utf-8?B?ejcwSlBnT0ZtbjNRMVc2WURkaHFXRVY2UVpsS2JRbDRMTnZJVUR1QmRyRUpN?=
+ =?utf-8?B?eDZ5UWhjdVR4em9aODlSTjc2YlJPb0twWWhrdmxBc0VNUE1icjBRUWRTY0pG?=
+ =?utf-8?B?aWZoREFjY0Z6aW8vWjBQdnM3UTVpWlAxTDJNbkxOTm1Rb1BQSnA0ck43UTVC?=
+ =?utf-8?B?UlE0bG1jVzRoa0psVWR0aDBTdUhnWElkaEI1VkM0ZjRXSWpmT3JPREVwT2pZ?=
+ =?utf-8?Q?uTHU8Jx5WKfwi4LBOKpDSD8SnjCbdEjylA?=
+X-OriginatorOrg: silabs.com
+X-MS-Exchange-CrossTenant-AuthSource: SN6PR11MB2718.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Dec 2020 15:39:43.2833
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
+X-MS-Exchange-CrossTenant-Network-Message-Id: 04d3e975-f58f-4926-c5a1-08d8a758f80e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 0HUN2OHE8iJWVm7bvQUaYo3uNJQ4TeNdYa8iR9ELs4aFUE9+BITpAOTDvuKqLROBXROYlI3wjGinGQJLQEMRkw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR11MB2815
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch introduces to mmcpstore. The functioning of mmcpstore
-is similar to mtdpstore. mmcpstore works on FTL based flash devices
-whereas mtdpstore works on raw flash devices. When the system crashes,
-mmcpstore stores the kmsg panic and oops logs to a user specified
-MMC device.
-
-It collects the details about the host MMC device through pstore/blk
-"blkdev" parameter. The user can specify the MMC device in many ways
-by checking in Documentation/admin-guide/pstore-blk.rst.
-
-The individual mmc host drivers have to define suitable polling and
-cleanup subroutines to write kmsg panic/oops logs through mmcpstore.
-These new host operations are needed as pstore panic write runs with
-interrupts disabled.
-
-Signed-off-by: Bhaskara Budiredla <bbudiredla@marvell.com>
----
- drivers/mmc/core/Kconfig     |  14 +-
- drivers/mmc/core/Makefile    |   1 +
- drivers/mmc/core/block.c     |  19 +++
- drivers/mmc/core/block.h     |   9 +
- drivers/mmc/core/core.c      |  44 +++++
- drivers/mmc/core/mmcpstore.c | 310 +++++++++++++++++++++++++++++++++++
- include/linux/mmc/core.h     |   5 +
- include/linux/mmc/host.h     |  12 ++
- 8 files changed, 413 insertions(+), 1 deletion(-)
- create mode 100644 drivers/mmc/core/mmcpstore.c
-
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index c12fe13e4b14..4c651da4f2d2 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -34,9 +34,22 @@ config PWRSEQ_SIMPLE
- 	  This driver can also be built as a module. If so, the module
- 	  will be called pwrseq_simple.
- 
-+config MMC_PSTORE_BACKEND
-+	bool "Log panic/oops to a MMC buffer"
-+	depends on MMC_BLOCK
-+	help
-+	  This option will let you create platform backend to store kmsg
-+	  crash dumps to a user specified MMC device. This is primarily
-+	  based on pstore/blk.
-+
-+config MMC_PSTORE
-+	tristate
-+	select PSTORE_BLK
-+
- config MMC_BLOCK
- 	tristate "MMC block device driver"
- 	depends on BLOCK
-+	select MMC_PSTORE if MMC_PSTORE_BACKEND=y
- 	default y
- 	help
- 	  Say Y here to enable the MMC block device driver support.
-@@ -80,4 +93,3 @@ config MMC_TEST
- 
- 	  This driver is only of interest to those developing or
- 	  testing a host driver. Most people should say N here.
--
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 95ffe008ebdf..7cb9a3af4827 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -16,5 +16,6 @@ obj-$(CONFIG_PWRSEQ_EMMC)	+= pwrseq_emmc.o
- mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
- obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
- mmc_block-objs			:= block.o queue.o
-+mmc_block-$(CONFIG_MMC_PSTORE)	+= mmcpstore.o
- obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
- obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 8d3df0be0355..ed012a91e3a3 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2870,6 +2870,21 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
- 
- #endif /* CONFIG_DEBUG_FS */
- 
-+#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+sector_t mmc_blk_get_part(struct mmc_card *card, int part_num, sector_t *size)
-+{
-+	struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
-+	struct gendisk *disk = md->disk;
-+	struct disk_part_tbl *part_tbl = disk->part_tbl;
-+
-+	if (part_num < 0 || part_num >= part_tbl->len)
-+		return 0;
-+
-+	*size = part_tbl->part[part_num]->nr_sects << SECTOR_SHIFT;
-+	return part_tbl->part[part_num]->start_sect;
-+}
-+#endif
-+
- static int mmc_blk_probe(struct mmc_card *card)
- {
- 	struct mmc_blk_data *md, *part_md;
-@@ -2913,6 +2928,9 @@ static int mmc_blk_probe(struct mmc_card *card)
- 			goto out;
- 	}
- 
-+	if (mmc_card_mmc(card) || mmc_card_sd(card))
-+		mmcpstore_card_set(card, md->disk->disk_name);
-+
- 	/* Add two debugfs entries */
- 	mmc_blk_add_debugfs(card, md);
- 
-@@ -3060,6 +3078,7 @@ static void __exit mmc_blk_exit(void)
- 	unregister_blkdev(MMC_BLOCK_MAJOR, "mmc");
- 	unregister_chrdev_region(mmc_rpmb_devt, MAX_DEVICES);
- 	bus_unregister(&mmc_rpmb_bus_type);
-+	unregister_mmcpstore();
- }
- 
- module_init(mmc_blk_init);
-diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
-index 31153f656f41..2a4ee5568194 100644
---- a/drivers/mmc/core/block.h
-+++ b/drivers/mmc/core/block.h
-@@ -16,5 +16,14 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq);
- struct work_struct;
- 
- void mmc_blk_mq_complete_work(struct work_struct *work);
-+#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+sector_t mmc_blk_get_part(struct mmc_card *card, int part_num, sector_t *size);
-+void mmcpstore_card_set(struct mmc_card *card, const char *disk_name);
-+void unregister_mmcpstore(void);
-+#else
-+static inline void mmcpstore_card_set(struct mmc_card *card,
-+					const char *disk_name) {}
-+static inline void unregister_mmcpstore(void) {}
-+#endif
- 
- #endif
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index d42037f0f10d..32df03f4c848 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -569,6 +569,30 @@ int mmc_cqe_recovery(struct mmc_host *host)
- }
- EXPORT_SYMBOL(mmc_cqe_recovery);
- 
-+#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+/**
-+ *	mmc_wait_for_pstore_req - initiate a blocking mmc request
-+ *	@host: MMC host to start command
-+ *	@mrq: MMC request to start
-+ *
-+ *	Start a blocking MMC request for a host and wait for the request
-+ *	to complete that is based on polling and timeout.
-+ */
-+void mmc_wait_for_pstore_req(struct mmc_host *host, struct mmc_request *mrq)
-+{
-+	unsigned int timeout;
-+
-+	host->ops->req_cleanup_pending(host);
-+	mmc_start_request(host, mrq);
-+
-+	if (mrq->data) {
-+		timeout = mrq->data->timeout_ns / NSEC_PER_MSEC;
-+		host->ops->req_completion_poll(host, timeout);
-+	}
-+}
-+EXPORT_SYMBOL(mmc_wait_for_pstore_req);
-+#endif
-+
- /**
-  *	mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is done
-  *	@host: MMC host
-@@ -817,6 +841,26 @@ int __mmc_claim_host(struct mmc_host *host, struct mmc_ctx *ctx,
- }
- EXPORT_SYMBOL(__mmc_claim_host);
- 
-+#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+/**
-+ *	mmc_claim_host_async - claim host in atomic context
-+ *	@host: mmc host to claim
-+ *
-+ *	This routine may be called in panic/oops scenarios.
-+ *	Return zero with host claim success, else busy status.
-+ */
-+int mmc_claim_host_async(struct mmc_host *host)
-+{
-+	if (!host->claimed && pm_runtime_active(mmc_dev(host))) {
-+		host->claimed = 1;
-+		return 0;
-+	}
-+
-+	return -EBUSY;
-+}
-+EXPORT_SYMBOL(mmc_claim_host_async);
-+#endif
-+
- /**
-  *	mmc_release_host - release a host
-  *	@host: mmc host to release
-diff --git a/drivers/mmc/core/mmcpstore.c b/drivers/mmc/core/mmcpstore.c
-new file mode 100644
-index 000000000000..d7abe82612cb
---- /dev/null
-+++ b/drivers/mmc/core/mmcpstore.c
-@@ -0,0 +1,310 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * MMC pstore support based on pstore/blk
-+ *
-+ * Copyright (c) 2020 Marvell.
-+ * Author: Bhaskara Budiredla <bbudiredla@marvell.com>
-+ */
-+
-+#define pr_fmt(fmt) "mmcpstore: " fmt
-+
-+#include <linux/kernel.h>
-+#include <linux/module.h>
-+#include <linux/pstore_blk.h>
-+#include <linux/blkdev.h>
-+#include <linux/mount.h>
-+#include <linux/slab.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
-+#include <linux/scatterlist.h>
-+#include "block.h"
-+#include "card.h"
-+#include "core.h"
-+
-+static struct mmcpstore_context {
-+	char dev_name[BDEVNAME_SIZE];
-+	int partno;
-+	sector_t start_sect;
-+	sector_t size;
-+	struct pstore_device_info dev;
-+	struct pstore_blk_config conf;
-+	struct pstore_blk_info info;
-+
-+	char *sub;
-+	struct mmc_card	*card;
-+	struct mmc_request *mrq;
-+} oops_cxt;
-+
-+static void mmc_prep_req(struct mmc_request *mrq,
-+		unsigned int sect_offset, unsigned int nsects,
-+		struct scatterlist *sg, u32 opcode, unsigned int flags)
-+{
-+	mrq->cmd->opcode = opcode;
-+	mrq->cmd->arg = sect_offset;
-+	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	if (nsects == 1) {
-+		mrq->stop = NULL;
-+	} else {
-+		mrq->stop->opcode = MMC_STOP_TRANSMISSION;
-+		mrq->stop->arg = 0;
-+		mrq->stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-+	}
-+
-+	mrq->data->blksz = SECTOR_SIZE;
-+	mrq->data->blocks = nsects;
-+	mrq->data->flags = flags;
-+	mrq->data->sg = sg;
-+	mrq->data->sg_len = 1;
-+}
-+
-+static int mmcpstore_rdwr_req(const char *buf, unsigned int nsects,
-+			unsigned int sect_offset, unsigned int flags)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+	struct mmc_request *mrq = cxt->mrq;
-+	struct mmc_card *card = cxt->card;
-+	struct mmc_host *host = card->host;
-+	struct scatterlist sg;
-+	u32 opcode;
-+
-+	if (flags == MMC_DATA_READ)
-+		opcode	= (nsects > 1) ?
-+			MMC_READ_MULTIPLE_BLOCK : MMC_READ_SINGLE_BLOCK;
-+	else
-+		opcode = (nsects > 1) ?
-+			MMC_WRITE_MULTIPLE_BLOCK : MMC_WRITE_BLOCK;
-+
-+	mmc_prep_req(mrq, sect_offset, nsects, &sg, opcode, flags);
-+	sg_init_one(&sg, buf, (nsects << SECTOR_SHIFT));
-+	mmc_set_data_timeout(mrq->data, cxt->card);
-+
-+	mmc_claim_host(host);
-+	mmc_wait_for_req(host, mrq);
-+	mdelay(mrq->data->timeout_ns / NSEC_PER_MSEC);
-+	mmc_release_host(host);
-+
-+	if (mrq->cmd->error) {
-+		pr_err("Cmd error: %d\n", mrq->cmd->error);
-+		return mrq->cmd->error;
-+	}
-+	if (mrq->data->error) {
-+		pr_err("Data error: %d\n", mrq->data->error);
-+		return mrq->data->error;
-+	}
-+
-+	return 0;
-+}
-+
-+static ssize_t mmcpstore_write(const char *buf, size_t size, loff_t off)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+	int ret;
-+
-+	ret = mmcpstore_rdwr_req(buf, (size >> SECTOR_SHIFT),
-+		cxt->start_sect + (off >> SECTOR_SHIFT), MMC_DATA_WRITE);
-+	if (ret)
-+		return ret;
-+
-+	return size;
-+}
-+
-+static ssize_t mmcpstore_read(char *buf, size_t size, loff_t off)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+	unsigned int sect_off = cxt->start_sect  + (off >> SECTOR_SHIFT);
-+	unsigned long sects = (cxt->conf.kmsg_size >> SECTOR_SHIFT);
-+	int ret;
-+
-+	if (unlikely(!buf || !size))
-+		return -EINVAL;
-+
-+	ret = mmcpstore_rdwr_req(cxt->sub, sects, sect_off, MMC_DATA_READ);
-+	if (ret)
-+		return ret;
-+	memcpy(buf, cxt->sub, size);
-+
-+	return size;
-+}
-+
-+static int mmcpstore_panic_write_req(const char *buf,
-+		unsigned int nsects, unsigned int sect_offset)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+	struct mmc_request *mrq = cxt->mrq;
-+	struct mmc_card *card = cxt->card;
-+	struct mmc_host *host = card->host;
-+	struct scatterlist sg;
-+	u32 opcode;
-+	int ret;
-+
-+	opcode = (nsects > 1) ? MMC_WRITE_MULTIPLE_BLOCK : MMC_WRITE_BLOCK;
-+	mmc_prep_req(mrq, sect_offset, nsects, &sg, opcode, MMC_DATA_WRITE);
-+	sg_init_one(&sg, buf, (nsects << SECTOR_SHIFT));
-+	mmc_set_data_timeout(mrq->data, cxt->card);
-+
-+	ret = mmc_claim_host_async(host);
-+	if (ret)
-+		return ret;
-+
-+	mmc_wait_for_pstore_req(host, mrq);
-+	return 0;
-+}
-+
-+static ssize_t mmcpstore_panic_write(const char *buf, size_t size, loff_t off)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+	int ret;
-+
-+	ret = mmcpstore_panic_write_req(buf, (size >> SECTOR_SHIFT),
-+			cxt->start_sect + (off >> SECTOR_SHIFT));
-+	if (ret)
-+		return ret;
-+
-+	return size;
-+}
-+
-+static struct block_device *mmcpstore_open_backend(const char *device)
-+{
-+	struct block_device *bdev;
-+	dev_t devt;
-+
-+	bdev = blkdev_get_by_path(device, FMODE_READ, NULL);
-+	if (IS_ERR(bdev)) {
-+		devt = name_to_dev_t(device);
-+		if (devt == 0)
-+			return ERR_PTR(-ENODEV);
-+
-+		bdev = blkdev_get_by_dev(devt, FMODE_READ, NULL);
-+		if (IS_ERR(bdev))
-+			return bdev;
-+	}
-+
-+	return bdev;
-+}
-+
-+static void mmcpstore_close_backend(struct block_device *bdev)
-+{
-+	if (!bdev)
-+		return;
-+	blkdev_put(bdev, FMODE_READ);
-+}
-+
-+void mmcpstore_card_set(struct mmc_card *card, const char *disk_name)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+	struct pstore_blk_config *conf = &cxt->conf;
-+	struct pstore_device_info *dev = &cxt->dev;
-+	struct block_device *bdev;
-+	struct mmc_command *stop;
-+	struct mmc_command *cmd;
-+	struct mmc_request *mrq;
-+	struct mmc_data *data;
-+	int ret;
-+
-+	ret = pstore_blk_get_config(conf);
-+	if (!conf->device[0]) {
-+		pr_debug("psblk backend is empty\n");
-+		return;
-+	}
-+
-+	/* Multiple backend devices not allowed */
-+	if (cxt->dev_name[0])
-+		return;
-+
-+	bdev =  mmcpstore_open_backend(conf->device);
-+	if (IS_ERR(bdev)) {
-+		pr_err("%s failed to open with %ld\n",
-+				conf->device, PTR_ERR(bdev));
-+		return;
-+	}
-+
-+	bdevname(bdev, cxt->dev_name);
-+	cxt->partno = bdev->bd_part->partno;
-+	mmcpstore_close_backend(bdev);
-+
-+	if (strncmp(cxt->dev_name, disk_name, strlen(disk_name)))
-+		return;
-+
-+	cxt->start_sect = mmc_blk_get_part(card, cxt->partno, &cxt->size);
-+	if (!cxt->start_sect) {
-+		pr_err("Non-existent partition %d selected\n", cxt->partno);
-+		return;
-+	}
-+
-+	/* Check for host mmc panic write polling function definitions */
-+	if (!card->host->ops->req_cleanup_pending ||
-+			!card->host->ops->req_completion_poll)
-+		return;
-+
-+	cxt->card = card;
-+
-+	cxt->sub = kmalloc(conf->kmsg_size, GFP_KERNEL);
-+	if (!cxt->sub)
-+		goto out;
-+
-+	mrq = kzalloc(sizeof(struct mmc_request), GFP_KERNEL);
-+	if (!mrq)
-+		goto free_sub;
-+
-+	cmd = kzalloc(sizeof(struct mmc_command), GFP_KERNEL);
-+	if (!cmd)
-+		goto free_mrq;
-+
-+	stop = kzalloc(sizeof(struct mmc_command), GFP_KERNEL);
-+	if (!stop)
-+		goto free_cmd;
-+
-+	data = kzalloc(sizeof(struct mmc_data), GFP_KERNEL);
-+	if (!data)
-+		goto free_stop;
-+
-+	mrq->cmd = cmd;
-+	mrq->data = data;
-+	mrq->stop = stop;
-+	cxt->mrq = mrq;
-+
-+	dev->total_size = cxt->size;
-+	dev->flags = PSTORE_FLAGS_DMESG;
-+	dev->read = mmcpstore_read;
-+	dev->write = mmcpstore_write;
-+	dev->erase = NULL;
-+	dev->panic_write = mmcpstore_panic_write;
-+
-+	ret = register_pstore_device(&cxt->dev);
-+	if (ret) {
-+		pr_err("%s registering with psblk failed (%d)\n",
-+				cxt->dev_name, ret);
-+		goto free_data;
-+	}
-+
-+	pr_info("%s registered as psblk backend\n", cxt->dev_name);
-+	return;
-+
-+free_data:
-+	kfree(data);
-+free_stop:
-+	kfree(stop);
-+free_cmd:
-+	kfree(cmd);
-+free_mrq:
-+	kfree(mrq);
-+free_sub:
-+	kfree(cxt->sub);
-+out:
-+	return;
-+}
-+
-+void unregister_mmcpstore(void)
-+{
-+	struct mmcpstore_context *cxt = &oops_cxt;
-+
-+	unregister_pstore_device(&cxt->dev);
-+	kfree(cxt->mrq->data);
-+	kfree(cxt->mrq->stop);
-+	kfree(cxt->mrq->cmd);
-+	kfree(cxt->mrq);
-+	kfree(cxt->sub);
-+	cxt->card = NULL;
-+}
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 29aa50711626..53840a361b5a 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -166,6 +166,11 @@ struct mmc_request {
- 
- struct mmc_card;
- 
-+#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+void mmc_wait_for_pstore_req(struct mmc_host *host, struct mmc_request *mrq);
-+int mmc_claim_host_async(struct mmc_host *host);
-+#endif
-+
- void mmc_wait_for_req(struct mmc_host *host, struct mmc_request *mrq);
- int mmc_wait_for_cmd(struct mmc_host *host, struct mmc_command *cmd,
- 		int retries);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index c079b932330f..7d6751005ac6 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -173,6 +173,18 @@ struct mmc_host_ops {
- 	 */
- 	int	(*multi_io_quirk)(struct mmc_card *card,
- 				  unsigned int direction, int blk_size);
-+
-+#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+	/*
-+	 * The following two APIs are introduced to support mmcpstore
-+	 * functionality. Cleanup API to terminate the ongoing and
-+	 * pending requests before a panic write post, and polling API
-+	 * to ensure that write succeeds before the Kernel dies.
-+	 */
-+	void	(*req_cleanup_pending)(struct mmc_host *host);
-+	int	(*req_completion_poll)(struct mmc_host *host,
-+					unsigned long timeout);
-+#endif
- };
- 
- struct mmc_cqe_ops {
--- 
-2.17.1
-
+RnJvbTogSsOpcsO0bWUgUG91aWxsZXIgPGplcm9tZS5wb3VpbGxlckBzaWxhYnMuY29tPgoKSSB0
+aGluayB0aGUgd2Z4IGRyaXZlciBpcyBub3cgbWF0dXJlIGVub3VnaCB0byBiZSBhY2NlcHRlZCBp
+biB0aGUKZHJpdmVycy9uZXQvd2lyZWxlc3MgZGlyZWN0b3J5LgoKVGhlIGZpcm13YXJlIGFzc29j
+aWF0ZWQgd2l0aCB0aGlzIGRyaXZlciBpcyBhdmFpbGFibGUgaGVyZVsxXS4gSXQgaXMgbm90IHll
+dAphdmFpbGFibGUgaW4gbGludXgtZmlybXdhcmUsIGJ1dCBJIGFtIHdvcmtpbmcgb24gdGhlIFBS
+LgoKWzFdOiBodHRwczovL2dpdGh1Yi5jb20vU2lsaWNvbkxhYnMvd2Z4LWZpcm13YXJlCgpBcyBy
+ZXF1ZXN0ZWQgYnkgS2FsbGVbMl0sIEkgc2VuZCBvbmUgZmlsZSBwZXIgcGF0Y2guIEF0IHRoZSBl
+bmQsIGFsbCB0aGUKcGF0Y2hlcyAob3IgYXQgbGVhc3QgdGhlIHBhdGNoZXMgMyB0byAyNCkgd2ls
+bCBiZSBzcXVhc2hlZCAodGhlcmVmb3JlLCBJCmRpZG4ndCBib3RoZXIgdG8gd3JpdGUgcmVhbCBj
+b21taXQgbWVzc2FnZXMpLgoKWzJdOiBodHRwczovL2xvcmUua2VybmVsLm9yZy9sa21sLzg3ZnQ2
+cDJuMGguZnNmQGNvZGVhdXJvcmEub3JnLwoKSGVyZSBpcyBhIGRpYWdyYW0gb2YgdGhlIGdsb2Jh
+bCBhcmNoaXRlY3R1cmUgdGhhdCBtYXkgaGVscCB0byB1bmRlcnN0YW5kCnRoZSBjb2RlOgoKICAg
+ICwtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0uCiAgICB8ICAgICAgICAgICAg
+ICAgIG1hYzgwMjExICAgICAgICAgICAgfAogICAgYC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLScKICAgICwtLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0rLS0tLS0tLS0tLS0uCiAg
+ICB8ICAgIHN0YSAgICAgfCAgICAgICAgICAgfCAgICAgICAgICAgfAogICAgfCAgICBzY2FuICAg
+IHwgICAgICAgICAgIHwgICAgICAgICAgIHwKICAgIHwgICAgbWFpbiAgICB8ICAgICAgICAgICB8
+ICAgICAgICAgICB8CiAgICArLS0tLS0tLS0tLS0tKyAgZGF0YV90eCAgfCAgICAgICAgICAgfAog
+ICAgfCAgICBrZXkgICAgIHwgICAgICAgICAgIHwgIGRhdGFfcnggIHwKICAgIHwgaGlmX3R4X21p
+YiB8ICAgcXVldWUgICB8ICAgICAgICAgICB8CiAgICB8ICAgaGlmX3R4ICAgfCAgICAgICAgICAg
+fCAgICAgICAgICAgfAogICAgfCAgIGhpZl9yeCAgIHwgICAgICAgICAgIHwgICAgICAgICAgIHwK
+ICAgIHwgIGhpZl9hcGlfKiB8ICAgICAgICAgICB8ICAgICAgICAgICB8CiAgICArLS0tLS0tLS0t
+LS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLS0tKy0tLS0tLS0tLgogICAgfCAgICAgICAgICAgICAg
+ICAgIGJoICAgICAgICAgICAgICAgIHwgIGZ3aW8gIHwKICAgICstLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0rLS0tLS0tLS0rCiAgICB8ICAgICAgICAgICAgICAgICAgICAgaHdp
+byAgICAgICAgICAgICAgICAgICAgfAogICAgKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLSsKICAgIHwgICAgICAgICAgICAgICAgICAgYnVzX3NkaW8gICAgICAg
+ICAgICAgICAgICB8CiAgICB8ICAgICAgICAgICAgICAgICAgIGJ1c19zcGkgICAgICAgICAgICAg
+ICAgICAgfAogICAgYC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LScKICAgICwtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0uCiAg
+ICB8ICAgICAgICAgICAgICAgICAgc3BpIC8gc2RpbyAgICAgICAgICAgICAgICAgfAogICAgYC0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLScKClJvdWdobHksIEkg
+aGF2ZSBzZW50IHRoZSBmaWxlcyBmcm9tIHRoZSBib3R0b20gdG8gdGhlIHRvcC4KCgpCZWxvdyB0
+aGUgZGlmZmVyZW5jZXMgd2l0aCB0aGUgZmlsZXMgZnJvbSBkcml2ZXJzL3N0YWdpbmcvd2Z4LzoK
+CnY0OgogIC0gUmViYXNlIG9uIGxhc3Qgc3RhZ2luZyB0cmVlCiAgLSBBZGQgJ2FkZGl0aW9uYWxQ
+cm9wZXJ0aWVzOiBmYWxzZScgdG8gdGhlIERUIHNwZWNpZmljYXRpb24gKEkgaGF2ZSBtYWRlCiAg
+ICB0aGF0IGNoYW5nZSBibGluZGx5IGJlY2F1c2UgSSBhbSBhYmxlIHRvIHJlcHJvZHVjZSB0aGUg
+Um9iJ3MgZXJyb3IpCiAgICAoUm9iKQogIC0gUmVwbGFjZSBDKysgY29tbWVudHMgd2l0aCBBbnNp
+IEMgY29tbWVudHMgKEthbGxlKQogIC0gQ2hlY2sgdGhhdCBleGlzdGluZyBBbnNpIEMgY29tbWVu
+dHMgY29tcGx5IHdpdGggbmV0LyAiY29tcGFjdCIgc3R5bGUKICAtIERyb3Agb25lIG9ic29sZXRl
+IGNvbW1lbnQKICAtIFJlbW92ZSBjb21tZW50cyBhZnRlciAnI2VuZGlmJyBpbiBoZWFkZXIgZmls
+ZXMKICAtIFJlbW92ZSBtYWNybyByZWRlZmluaXRpb25zIGluIGhpZl9hcGlfZ2VuZXJhbC5oIChL
+YWxsZSkKICAtIFJlcGxhY2UgY29tcGlsZXRpbWVfYXNzZXJ0KCkgd2l0aCBCVUlMRF9CVUdfT05f
+TVNHKCkgKEthbGxlKQogIC0gUmVuYW1lIGllZWU4MDIxMV9pc19hY3Rpb25fYmFjaygpIChLYWxs
+ZSkKICAtIEFkZCBhIGNvbW1lbnQgZXhwbGFpbmluZyBob3cgdGhlIFBEUyBpc2VudCB0byB0aGUg
+ZGV2aWNlIChLYWxsZSkKICAtIEFkZCBhIGNvbW1lbnQgYWJvdXQgY2FzZSB3aGVyZSBDT05GSUdf
+TU1DPT1tIGluIHRoZSBNYWtlZmlsZSAoS2FsbGUpCiAgLSBGaXggaXJyZWxldmFudCBjb21tZW50
+IGFib3V0IENPTkZJR19WTUFQX1NUQUNLIChLYWxsZSkKICAtIFRhbGsgYWJvdXQgdGhlIHVucmVs
+aWFibGUgU0RJTyBWZW5kb3IgSUQgaW4gdGhlIEtjb25maWcgaGVscCAoS2FsbGUpCiAgLSBNZW50
+aW9uIHRoZSBmaXJtd2FyZSBzdGF0dXMgaW4gdGhlIGNvdmVyIGxldHRlciAoS2FsbGUpCiAgLSBG
+aXggbWlzYWxpZ25lZCBmdW5jdGlvbiBhcmd1bWVudHMgaW4ga2V5LmMKCnYzOgogIC0gZHQtYmlu
+ZGluZ3M6IFJlbmFtZSBjb25maWctZmlsZSBwcm9wZXJ0eSAoUm9iKQogIC0gZHQtYmluZGluZ3M6
+IE5vIGFkZGl0aW9uYWwgcHJvcGVydGllcyBhcmUgYWxsb3dlZCAoc3BpLW1heC1mcmVxdWVuY3kg
+aXMKICAgIGFscmVhZHkgbGlzdGVkKSAoUm9iKQogIC0gZHQtYmluZGluZ3M6IFJlbW92ZSByZWZl
+cmVuY2VzIGZvciBtYWMtYWRkcmVzcyBwcm9wZXJ0aWVzIChSb2IpCiAgLSBSZWJhc2Ugb24gc3Rh
+Z2luZy9zdGFnaW5nLW5leHQKCnYyOgogIC0gZHQtYmluZGluZ3M6IEltcHJvdmUgZGV2aWNlIGRl
+c2NyaXB0aW9uIGFuZCBhZGQgbGluayB0byB0aGUgZGF0YXNoZWV0CiAgICAgIChSb2IpCiAgLSBk
+dC1iaW5kaW5nczogQWRkIGJsYW5rIGxpbmVzIGJldHdlZW4gZWFjaCBEVCBwcm9wZXJ0eSAoUm9i
+KQogIC0gZHQtYmluZGluZ3M6IEV4cGxpY2l0bHkgbWVudGlvbiBtYWMtYWRkcmVzcyBhbmQgbG9j
+YWwtbWFjLWFkZHJlc3MgYW5kCiAgICAgIGFkZCByZWZlcmVuY2VzIHRvIGV0aGVybmV0LWNvbnRy
+b2xsZXIueWFtbCAoUm9iKQogIC0gZHQtYmluZGluZ3M6ICJjb25maWctZmlsZSIgaXMgbm90IGZv
+ciBkZXZlbG9wbWVudC9kZWJ1ZyAoUm9iKQogIC0gZHQtYmluZGluZ3M6IFJlbW92ZSBkZXNjcmlw
+dGlvbiBvZiAic3BpLW1heC1mcmVxdWVuY3kiIChSb2IpCiAgLSBkdC1iaW5kaW5nczogVXNlICJm
+b2xkZWQgc2NhbGFyIiBzeW50YXggaW5zdGVhZCBvZiBlc2NhcGluZyB0aGUgY29sb25zCiAgLSBi
+dXNfc2Rpby5jOiBBIGNvbXBhdGlibGUgbm9kZSBpbiB0aGUgRFQgaXMgbm93IG1hbmRhdG9yeSB0
+byBwcm9iZSB0aGUKICAgICAgZGV2aWNlLiBBbHNvIGNoYW5nZSBkb2N1bWVudGF0aW9uIG9mIGR0
+LWJpbmRpbmdzIGFjY29yZGluZ2x5IChQYWxpLAogICAgICBVbGYpCiAgLSBidXNfc2Rpby5jOiBN
+b3ZlIFNESU8gSURzIHRvIHNkaW9faWRzLmggKFBhbGkpCiAgLSBiaC5jOiBJbXBvcnQgcGF0Y2gg
+InN0YWdpbmc6IHdmeDogZml4IHRlc3Qgb24gcmV0dXJuIHZhbHVlIG9mCiAgICAgIGdwaW9kX2dl
+dF92YWx1ZSgpIiAoTmF0aGFuKQogIC0gZGF0YV90eC5jOiBJbXBvcnQgcGF0Y2ggInN0YWdpbmc6
+IHdmeDogZml4IHVzZSBvZiB1bmluaXRpYWxpemVkCiAgICAgIHBvaW50ZXIiCiAgLSBzdGEuYzog
+SW1wb3J0IHBhdGNoICJzdGFnaW5nOiB3Zng6IG1ha2UgYSBjb25zdCBhcnJheSBzdGF0aWMsIG1h
+a2VzCiAgICAgIG9iamVjdCBzbWFsbGVyIiAoQ29saW4pCgp2MToKICAtIERyb3AgdGhlIGZ1bmN0
+aW9uIG5hbWUgaW4gdGhlIHdhcm5pbmcgbWVzc2FnZSAoS2FsbGUpCiAgLSBSZXBsYWNlIGdvdG8g
+YnkgcmV0dXJuIGluIHdmeF9zZW5kX3BkYXRhX3BkcygpIChLYWxsZSwgRGFuKQogIC0gSW1wcm92
+ZSBlcnJvciBsYWJlbCBpbiB3Znhfc2VuZF9wZGF0YV9wZHMoKSAoS2FsbGUpCgoKSsOpcsO0bWUg
+UG91aWxsZXIgKDI0KToKICBtbWM6IHNkaW86IGFkZCBTRElPIElEcyBmb3IgU2lsYWJzIFdGMjAw
+IGNoaXAKICBkdC1iaW5kaW5nczogaW50cm9kdWNlIHNpbGFicyx3ZngueWFtbAogIHdmeDogYWRk
+IE1ha2VmaWxlL0tjb25maWcKICB3Zng6IGFkZCB3ZnguaAogIHdmeDogYWRkIG1haW4uYy9tYWlu
+LmgKICB3Zng6IGFkZCBidXMuaAogIHdmeDogYWRkIGJ1c19zcGkuYwogIHdmeDogYWRkIGJ1c19z
+ZGlvLmMKICB3Zng6IGFkZCBod2lvLmMvaHdpby5oCiAgd2Z4OiBhZGQgZndpby5jL2Z3aW8uaAog
+IHdmeDogYWRkIGJoLmMvYmguaAogIHdmeDogYWRkIGhpZl9hcGlfKi5oCiAgd2Z4OiBhZGQgaGlm
+X3R4Ki5jL2hpZl90eCouaAogIHdmeDogYWRkIGtleS5jL2tleS5oCiAgd2Z4OiBhZGQgaGlmX3J4
+LmMvaGlmX3J4LmgKICB3Zng6IGFkZCBkYXRhX3J4LmMvZGF0YV9yeC5oCiAgd2Z4OiBhZGQgcXVl
+dWUuYy9xdWV1ZS5oCiAgd2Z4OiBhZGQgZGF0YV90eC5jL2RhdGFfdHguaAogIHdmeDogYWRkIHN0
+YS5jL3N0YS5oCiAgd2Z4OiBhZGQgc2Nhbi5jL3NjYW4uaAogIHdmeDogYWRkIGRlYnVnLmMvZGVi
+dWcuaAogIHdmeDogYWRkIHRyYWNlcy5oCiAgd2Z4OiByZW1vdmUgZnJvbSB0aGUgc3RhZ2luZyBh
+cmVhCiAgd2Z4OiBnZXQgb3V0IGZyb20gdGhlIHN0YWdpbmcgYXJlYQoKIC4uLi9iaW5kaW5ncy9u
+ZXQvd2lyZWxlc3Mvc2lsYWJzLHdmeC55YW1sICAgICB8IDY4ICsrKysrKysrKy0tLS0tLS0KIE1B
+SU5UQUlORVJTICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAzICstCiBkcml2
+ZXJzL25ldC93aXJlbGVzcy9LY29uZmlnICAgICAgICAgICAgICAgICAgfCAgMSArCiBkcml2ZXJz
+L25ldC93aXJlbGVzcy9NYWtlZmlsZSAgICAgICAgICAgICAgICAgfCAgMSArCiBkcml2ZXJzL25l
+dC93aXJlbGVzcy9zaWxhYnMvS2NvbmZpZyAgICAgICAgICAgfCAxOCArKysrKwogZHJpdmVycy9u
+ZXQvd2lyZWxlc3Mvc2lsYWJzL01ha2VmaWxlICAgICAgICAgIHwgIDMgKwogLi4uL3dpcmVsZXNz
+L3NpbGFic30vd2Z4L0tjb25maWcgICAgICAgICAgICAgIHwgIDQgKwogLi4uL3dpcmVsZXNzL3Np
+bGFic30vd2Z4L01ha2VmaWxlICAgICAgICAgICAgIHwgIDEgKwogLi4uL3tzdGFnaW5nID0+IG5l
+dC93aXJlbGVzcy9zaWxhYnN9L3dmeC9iaC5jIHwgMzEgKysrKy0tLS0KIC4uLi97c3RhZ2luZyA9
+PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvYmguaCB8ICAyICstCiAuLi4vd2lyZWxlc3Mvc2ls
+YWJzfS93ZngvYnVzLmggICAgICAgICAgICAgICAgfCAgMAogLi4uL3dpcmVsZXNzL3NpbGFic30v
+d2Z4L2J1c19zZGlvLmMgICAgICAgICAgIHwgMjMgKystLS0tCiAuLi4vd2lyZWxlc3Mvc2lsYWJz
+fS93ZngvYnVzX3NwaS5jICAgICAgICAgICAgfCAxOCArKy0tLQogLi4uL3dpcmVsZXNzL3NpbGFi
+c30vd2Z4L2RhdGFfcnguYyAgICAgICAgICAgIHwgIDUgKy0KIC4uLi93aXJlbGVzcy9zaWxhYnN9
+L3dmeC9kYXRhX3J4LmggICAgICAgICAgICB8ICAyICstCiAuLi4vd2lyZWxlc3Mvc2lsYWJzfS93
+ZngvZGF0YV90eC5jICAgICAgICAgICAgfCA2NSArKysrKysrKystLS0tLS0tCiAuLi4vd2lyZWxl
+c3Mvc2lsYWJzfS93ZngvZGF0YV90eC5oICAgICAgICAgICAgfCAgNCArLQogLi4uL3dpcmVsZXNz
+L3NpbGFic30vd2Z4L2RlYnVnLmMgICAgICAgICAgICAgIHwgMTIgKy0tCiAuLi4vd2lyZWxlc3Mv
+c2lsYWJzfS93ZngvZGVidWcuaCAgICAgICAgICAgICAgfCAgMiArLQogLi4uL3dpcmVsZXNzL3Np
+bGFic30vd2Z4L2Z3aW8uYyAgICAgICAgICAgICAgIHwgMjYgKysrLS0tLQogLi4uL3dpcmVsZXNz
+L3NpbGFic30vd2Z4L2Z3aW8uaCAgICAgICAgICAgICAgIHwgIDIgKy0KIC4uLi93aXJlbGVzcy9z
+aWxhYnN9L3dmeC9oaWZfYXBpX2NtZC5oICAgICAgICB8IDEyICstLQogLi4uL3dpcmVsZXNzL3Np
+bGFic30vd2Z4L2hpZl9hcGlfZ2VuZXJhbC5oICAgIHwgMjMgKysrLS0tCiAuLi4vd2lyZWxlc3Mv
+c2lsYWJzfS93ZngvaGlmX2FwaV9taWIuaCAgICAgICAgfCAgMiArLQogLi4uL3dpcmVsZXNzL3Np
+bGFic30vd2Z4L2hpZl9yeC5jICAgICAgICAgICAgIHwgMTcgKystLQogLi4uL3dpcmVsZXNzL3Np
+bGFic30vd2Z4L2hpZl9yeC5oICAgICAgICAgICAgIHwgIDAKIC4uLi93aXJlbGVzcy9zaWxhYnN9
+L3dmeC9oaWZfdHguYyAgICAgICAgICAgICB8IDMyICsrKystLS0tCiAuLi4vd2lyZWxlc3Mvc2ls
+YWJzfS93ZngvaGlmX3R4LmggICAgICAgICAgICAgfCAgMAogLi4uL3dpcmVsZXNzL3NpbGFic30v
+d2Z4L2hpZl90eF9taWIuYyAgICAgICAgIHwgIDQgKy0KIC4uLi93aXJlbGVzcy9zaWxhYnN9L3dm
+eC9oaWZfdHhfbWliLmggICAgICAgICB8ICAwCiAuLi4vd2lyZWxlc3Mvc2lsYWJzfS93ZngvaHdp
+by5jICAgICAgICAgICAgICAgfCAxOCArLS0tLQogLi4uL3dpcmVsZXNzL3NpbGFic30vd2Z4L2h3
+aW8uaCAgICAgICAgICAgICAgIHwgMjIgKysrLS0tCiAuLi4vd2lyZWxlc3Mvc2lsYWJzfS93Zngv
+a2V5LmMgICAgICAgICAgICAgICAgfCAzMCArKystLS0tCiAuLi4vd2lyZWxlc3Mvc2lsYWJzfS93
+Zngva2V5LmggICAgICAgICAgICAgICAgfCAgMiArLQogLi4uL3dpcmVsZXNzL3NpbGFic30vd2Z4
+L21haW4uYyAgICAgICAgICAgICAgIHwgMzcgKysrKysrLS0tCiAuLi4vd2lyZWxlc3Mvc2lsYWJz
+fS93ZngvbWFpbi5oICAgICAgICAgICAgICAgfCAgMyArLQogLi4uL3dpcmVsZXNzL3NpbGFic30v
+d2Z4L3F1ZXVlLmMgICAgICAgICAgICAgIHwgMjcgKysrKy0tLQogLi4uL3dpcmVsZXNzL3NpbGFi
+c30vd2Z4L3F1ZXVlLmggICAgICAgICAgICAgIHwgIDQgKy0KIC4uLi93aXJlbGVzcy9zaWxhYnN9
+L3dmeC9zY2FuLmMgICAgICAgICAgICAgICB8ICAzICstCiAuLi4vd2lyZWxlc3Mvc2lsYWJzfS93
+Zngvc2Nhbi5oICAgICAgICAgICAgICAgfCAgMiArLQogLi4uL3dpcmVsZXNzL3NpbGFic30vd2Z4
+L3N0YS5jICAgICAgICAgICAgICAgIHwgNzggKysrKysrKysrKy0tLS0tLS0tLQogLi4uL3dpcmVs
+ZXNzL3NpbGFic30vd2Z4L3N0YS5oICAgICAgICAgICAgICAgIHwgIDggKy0KIC4uLi93aXJlbGVz
+cy9zaWxhYnN9L3dmeC90cmFjZXMuaCAgICAgICAgICAgICB8ICAyICstCiAuLi4vd2lyZWxlc3Mv
+c2lsYWJzfS93Zngvd2Z4LmggICAgICAgICAgICAgICAgfCAgNCArLQogZHJpdmVycy9zdGFnaW5n
+L0tjb25maWcgICAgICAgICAgICAgICAgICAgICAgIHwgIDIgLQogZHJpdmVycy9zdGFnaW5nL01h
+a2VmaWxlICAgICAgICAgICAgICAgICAgICAgIHwgIDEgLQogZHJpdmVycy9zdGFnaW5nL3dmeC9U
+T0RPICAgICAgICAgICAgICAgICAgICAgIHwgIDYgLS0KIGluY2x1ZGUvbGludXgvbW1jL3NkaW9f
+aWRzLmggICAgICAgICAgICAgICAgICB8ICA3ICsrCiA0OCBmaWxlcyBjaGFuZ2VkLCAzMzkgaW5z
+ZXJ0aW9ucygrKSwgMjk4IGRlbGV0aW9ucygtKQogcmVuYW1lIHtkcml2ZXJzL3N0YWdpbmcvd2Z4
+L0RvY3VtZW50YXRpb24gPT4gRG9jdW1lbnRhdGlvbn0vZGV2aWNldHJlZS9iaW5kaW5ncy9uZXQv
+d2lyZWxlc3Mvc2lsYWJzLHdmeC55YW1sICg3MSUpCiBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVy
+cy9uZXQvd2lyZWxlc3Mvc2lsYWJzL0tjb25maWcKIGNyZWF0ZSBtb2RlIDEwMDY0NCBkcml2ZXJz
+L25ldC93aXJlbGVzcy9zaWxhYnMvTWFrZWZpbGUKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+
+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9LY29uZmlnICg2NSUpCiByZW5hbWUgZHJpdmVycy97
+c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvTWFrZWZpbGUgKDg1JSkKIHJlbmFt
+ZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9iaC5jICg5MyUp
+CiByZW5hbWUgZHJpdmVycy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvYmgu
+aCAoOTclKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30v
+d2Z4L2J1cy5oICgxMDAlKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNz
+L3NpbGFic30vd2Z4L2J1c19zZGlvLmMgKDg5JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+
+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9idXNfc3BpLmMgKDk0JSkKIHJlbmFtZSBkcml2ZXJz
+L3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9kYXRhX3J4LmMgKDk1JSkKIHJl
+bmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9kYXRhX3J4
+LmggKDkzJSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9
+L3dmeC9kYXRhX3R4LmMgKDkxJSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJl
+bGVzcy9zaWxhYnN9L3dmeC9kYXRhX3R4LmggKDk0JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5n
+ID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9kZWJ1Zy5jICg5NiUpCiByZW5hbWUgZHJpdmVy
+cy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvZGVidWcuaCAoOTQlKQogcmVu
+YW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L2Z3aW8uYyAo
+OTUlKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4
+L2Z3aW8uaCAoOTElKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3Np
+bGFic30vd2Z4L2hpZl9hcGlfY21kLmggKDk3JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+
+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dmeC9oaWZfYXBpX2dlbmVyYWwuaCAoOTMlKQogcmVuYW1l
+IGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L2hpZl9hcGlfbWli
+LmggKDk5JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9
+L3dmeC9oaWZfcnguYyAoOTYlKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVs
+ZXNzL3NpbGFic30vd2Z4L2hpZl9yeC5oICgxMDAlKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcg
+PT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L2hpZl90eC5jICg5NSUpCiByZW5hbWUgZHJpdmVy
+cy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvaGlmX3R4LmggKDEwMCUpCiBy
+ZW5hbWUgZHJpdmVycy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvaGlmX3R4
+X21pYi5jICg5OCUpCiByZW5hbWUgZHJpdmVycy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2ls
+YWJzfS93ZngvaGlmX3R4X21pYi5oICgxMDAlKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4g
+bmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L2h3aW8uYyAoOTMlKQogcmVuYW1lIGRyaXZlcnMve3N0
+YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L2h3aW8uaCAoNzclKQogcmVuYW1lIGRy
+aXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L2tleS5jICg5MSUpCiBy
+ZW5hbWUgZHJpdmVycy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93Zngva2V5Lmgg
+KDk0JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9zaWxhYnN9L3dm
+eC9tYWluLmMgKDkyJSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJlbGVzcy9z
+aWxhYnN9L3dmeC9tYWluLmggKDk0JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93
+aXJlbGVzcy9zaWxhYnN9L3dmeC9xdWV1ZS5jICg5MiUpCiByZW5hbWUgZHJpdmVycy97c3RhZ2lu
+ZyA9PiBuZXQvd2lyZWxlc3Mvc2lsYWJzfS93ZngvcXVldWUuaCAoOTQlKQogcmVuYW1lIGRyaXZl
+cnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L3NjYW4uYyAoOTglKQogcmVu
+YW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L3NjYW4uaCAo
+OTUlKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcgPT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4
+L3N0YS5jICg5MSUpCiByZW5hbWUgZHJpdmVycy97c3RhZ2luZyA9PiBuZXQvd2lyZWxlc3Mvc2ls
+YWJzfS93Zngvc3RhLmggKDk3JSkKIHJlbmFtZSBkcml2ZXJzL3tzdGFnaW5nID0+IG5ldC93aXJl
+bGVzcy9zaWxhYnN9L3dmeC90cmFjZXMuaCAoOTklKQogcmVuYW1lIGRyaXZlcnMve3N0YWdpbmcg
+PT4gbmV0L3dpcmVsZXNzL3NpbGFic30vd2Z4L3dmeC5oICg5NyUpCiBkZWxldGUgbW9kZSAxMDA2
+NDQgZHJpdmVycy9zdGFnaW5nL3dmeC9UT0RPCgotLSAKMi4yOS4yCgo=
