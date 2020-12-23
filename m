@@ -2,206 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13D19C43331
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 15:45:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 317FBC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 21:07:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB2772074A
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 15:45:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 06D8E2246B
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 21:07:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728099AbgLWPlK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Dec 2020 10:41:10 -0500
-Received: from mail-mw2nam12on2078.outbound.protection.outlook.com ([40.107.244.78]:27104
-        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728107AbgLWPlJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 23 Dec 2020 10:41:09 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=kuVvtTxv3LBSqha7Johdoqx2Hc9ITWSkfXx9aZ9Tuh6waG/e5KstUz1hBUwSrH+BLuRC/ssNqrT8p1lfoKtPo3QyJJGZHbkGUP4mRYZLKj8WQQ8iOnupJz6zrq9Boa9QINIhPPnUNgh1hCfeb59RLKTKbKYiUFV91tffR2YO78r9ED/RW0Jj7IvIwoTBbXpLFiAg4kz9yENp53jYrTp+HdfZINpFyUMXsrUMWhxNYzfoIkJmXAUSImuELiMMjMJlK82epce4/iNXrhjsGsJ3LdvNyqfTj/nNnR6VjCQgfoBgO8j6qVv4/nXH+uXoJQgZKjBut4xCG3jvjTArrvZQ8w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=QlzCuP+IndPbDwgzU+AEHLhgwFkWwgELq3L3PEPpkKw=;
- b=aGISTRa7DRv6Q+NEjsu6m7ulEK58+lfTgAbY8ZaaJVcPAHgafgnCur4uW6zInRFu98XkqKj278TWMY6R4e+jikeok5lTL86sQS3cSIgmJrg+7JjqUgb4zsWy9gwd0hchgdA4+P43PvUsph5BuTaA8FLVcmtQCLXNYRRQ7QvGs2+li9ZxKLMABZN4bNl2DfvIt34qJs2081GRwHXilOXEQ1kryQx8I1gHp3F6C2thEZY+Qe/vACbwX4iu8yD+cwR7UgbBkfwfi+d2H6n/eZq989Bv/PQhHBbDfHhIojZW/FslEP3DjT4/T5xATTT7h30QP0y1JhRD28CESzRL1uFWyg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=silabs.com; dmarc=pass action=none header.from=silabs.com;
- dkim=pass header.d=silabs.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=silabs.onmicrosoft.com; s=selector2-silabs-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=QlzCuP+IndPbDwgzU+AEHLhgwFkWwgELq3L3PEPpkKw=;
- b=MnIvGsY6/9LJt621TVJR19B7eNTeirkEutIWlIPNsM6QJxtWDnhzmO99XuTHPRp2jmqAKKdrMS7MQH9o2MIaYFh1uuC3I2KO+goCrjxWXLRqBXQoeWAlMLzUS5DtFpm+kjA+G/WRtkUCgZU8mzUw/KbHGWvWU+xl/Jq9X/wPpxU=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=silabs.com;
-Received: from SN6PR11MB2718.namprd11.prod.outlook.com (2603:10b6:805:63::18)
- by SN6PR11MB2815.namprd11.prod.outlook.com (2603:10b6:805:62::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3676.25; Wed, 23 Dec
- 2020 15:39:47 +0000
-Received: from SN6PR11MB2718.namprd11.prod.outlook.com
- ([fe80::a989:f850:6736:97ca]) by SN6PR11MB2718.namprd11.prod.outlook.com
- ([fe80::a989:f850:6736:97ca%5]) with mapi id 15.20.3700.026; Wed, 23 Dec 2020
- 15:39:47 +0000
-From:   Jerome Pouiller <Jerome.Pouiller@silabs.com>
-To:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org
-Cc:     devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-mmc@vger.kernel.org,
-        =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?q?J=C3=A9r=C3=B4me=20Pouiller?= 
-        <jerome.pouiller@silabs.com>
-Subject: [PATCH v4 02/24] dt-bindings: introduce silabs,wfx.yaml
-Date:   Wed, 23 Dec 2020 16:39:03 +0100
-Message-Id: <20201223153925.73742-3-Jerome.Pouiller@silabs.com>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20201223153925.73742-1-Jerome.Pouiller@silabs.com>
-References: <20201223153925.73742-1-Jerome.Pouiller@silabs.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
-X-Originating-IP: [82.67.86.106]
-X-ClientProxiedBy: SA0PR12CA0024.namprd12.prod.outlook.com
- (2603:10b6:806:6f::29) To SN6PR11MB2718.namprd11.prod.outlook.com
- (2603:10b6:805:63::18)
+        id S1729060AbgLWVGx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Dec 2020 16:06:53 -0500
+Received: from node.akkea.ca ([192.155.83.177]:46900 "EHLO node.akkea.ca"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726462AbgLWVGw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Dec 2020 16:06:52 -0500
+Received: from localhost (localhost [127.0.0.1])
+        by node.akkea.ca (Postfix) with ESMTP id 7F9934E7973;
+        Wed, 23 Dec 2020 21:06:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akkea.ca; s=mail;
+        t=1608757572; bh=F4kVbAC1fiNjqQCNQtH+R+Y+w2DekOd7qvPJuY26BbM=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References;
+        b=PH/Wt8IxKOgGYBNxxsV1hxXzvhN5sgkYCvWnwdvWYar12zcWHl16sHbISNSJ7dWZN
+         D7GaV9UCdIAhVdYOX/vup+5qMygbg9S2fGbiMFzkzsY5RNYexwGbREl0UzrS4XPXaD
+         Bbu5ac/ifqdQAjjGCK8fXd8dRPcfvuPuyGRztbpE=
+X-Virus-Scanned: Debian amavisd-new at mail.akkea.ca
+Received: from node.akkea.ca ([127.0.0.1])
+        by localhost (mail.akkea.ca [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id cZpFwZGwgZKM; Wed, 23 Dec 2020 21:06:09 +0000 (UTC)
+Received: from www.akkea.ca (node.akkea.ca [192.155.83.177])
+        by node.akkea.ca (Postfix) with ESMTPSA id D20FD4E796B;
+        Wed, 23 Dec 2020 21:06:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akkea.ca; s=mail;
+        t=1608757569; bh=F4kVbAC1fiNjqQCNQtH+R+Y+w2DekOd7qvPJuY26BbM=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References;
+        b=ACobnMibFxj7qdRyxg9k1J0d3KljzW37BDJ44PmkB/k93ibBm69WQrDeqN48+3UhS
+         rR9W6MYlbacJ39YIzV4BisO3TXIksBJZERqiIx/mcsHOHKNqEUOS6tJYGb5ePso3L/
+         fy7+sI2gyFl3kvKSTt07Ylnhv1YZ2X9AC+mZWmnE=
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from pc-42.silabs.com (82.67.86.106) by SA0PR12CA0024.namprd12.prod.outlook.com (2603:10b6:806:6f::29) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3700.27 via Frontend Transport; Wed, 23 Dec 2020 15:39:45 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 2301d090-828a-40d1-17d4-08d8a758faac
-X-MS-TrafficTypeDiagnostic: SN6PR11MB2815:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <SN6PR11MB28158B5F34D14B283D5499AC93DE0@SN6PR11MB2815.namprd11.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 5h/aKDfvgAnRLdv6vYh5IoDxc3IYv3bhhvUx7cLFOfsuLF/s2Ehjsh5f9Dxtw4tGpwWKLung8UTTdtyo8UGCvPwyMYBhZh5y2kwYzP6FfRxxlza7mu46gteeXlHonyk1AuHJ1dGdQj4ldxtomfbxLJVuyGY9fod9Cj4sirO2ycRy6CUKEV/JITGGYESCSxYxtKk2bM1ZQnMKV6kJXwindpWQn2eO6FxjpB/u5tio7CsPVEKqIXM2wtQK2op2HkIBXq15dHo+jLPB6fr6ILgAfKG39kjZnk+Q5kn6168soDP/3k2S7miZx9TSWaxtF4rLVe7sbdo9PQHMR2WGyvd+4kbsPqtEMW1DPMGqlWg1gfsjXPCmofkDoe1NPrSVTec3XtA/XCwVg8WBNsW9IJwYBf/P0Op/lX5lBwmUVQh25EdbANERt6S66izn900aYXDKWF/OZC9j/l7QQxBFIRJrZA==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SN6PR11MB2718.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(396003)(136003)(366004)(376002)(39850400004)(346002)(478600001)(966005)(8676002)(186003)(2906002)(8936002)(26005)(52116002)(107886003)(16526019)(7696005)(66946007)(7416002)(6486002)(956004)(2616005)(54906003)(66476007)(316002)(4326008)(6666004)(36756003)(5660300002)(1076003)(86362001)(66556008);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?utf-8?B?anA1dzFOekQ4Si9mWEx2TXVreStEWkVnamVNcGlLLzgxaGdPOTYrRzVKNjhV?=
- =?utf-8?B?MWt5VERZZXczWUFicE9rK0ZUWFplbjRIODFabEhNRExoUEJNQzU0R2h5WG9Q?=
- =?utf-8?B?UnRlYVVSWmI2WXZJdGV2enpJNVNBN0VNSlFUOXhmMXJWZEMvNllYQys1VmZY?=
- =?utf-8?B?ZDRIeGYxTmRwZUFOOG9PYy9EYzA0K3h3WGc3R0VJUzREMzcyR2x4emtzWDBN?=
- =?utf-8?B?WUdpSlMzVzBjalR2SVRSTFY3c3EzdWJrVzhmK0VQSzRPN3RJS0F1engwR3hl?=
- =?utf-8?B?dStKbzFBenJOdFFmUXp3NFhwQjJraGVJQ0NuMEdhenM2aHl1ZzMyeTd5RzJo?=
- =?utf-8?B?aFJ2bTJuOXZ3bUc3S1FVcHloMXorNkZZTFRnWEJWc2FjV3pxZVFWMCtqbTRO?=
- =?utf-8?B?YWgxSjArMFh3WlV4Um5UbGNtSmNVYTR5OFBKc05TMXVLSktLQXg2K3lKVTdW?=
- =?utf-8?B?ZFQ5K3d3b1R5eGxjOTN2eXlNMHdsVk5lK1hSZ29nUjNZeHZQZFhXYkpMY1U2?=
- =?utf-8?B?M1R4bndwZVZ1OFpIblNFU3loQW9WaW9vZ2htU1pSL0FHKzBEMGdFbURqQm1x?=
- =?utf-8?B?b3pwY2lXYnpLTzBhek03SVl2STZwQUF3VkFrUkhMRnk0cHpmNWFZTXNMZFhU?=
- =?utf-8?B?NTRqSkVnUjBuUGY1TnUvYUFIYVhYUVR6RTBqLzRIU2V4UmZPaEZMakVCYWxE?=
- =?utf-8?B?eU1xYTNwOXE3M3RzNzhldFNhT3BBQVB3SU85UmhUMGEwYjVSM0JlUFp5U0RN?=
- =?utf-8?B?RThsRkVxQVhtdUp0bmZSUldFTjl5cnVVOUxNbHNEYU10SEpFVzBWOWF2dHJE?=
- =?utf-8?B?MXg4U3VtaVBiWTVUZlVkclQxL0RzbzlZMWt4OXFRVExYb05OOVhOV3Zld3h2?=
- =?utf-8?B?YjZFd2JGT0t3M2x6ZDJmSVZVcFovWWtOMUdZNEhJSy9OTy9FZHg1cHR5WTlB?=
- =?utf-8?B?VkRiVmw5VWFlQjRYS3ZqQ01GRGpCeGpzcWc0UjZYTGZkaVB1VHkreTY2U3BZ?=
- =?utf-8?B?cVh2ODZ2K2hsejF0amVkdG9oSXJUU0lrdmc1UTdabDdlMll0TDVWcGJmY3dQ?=
- =?utf-8?B?eCtJM05YcW1zNGNTa2QzcE95c1lTbkM0NUU5T3JqS21IZkVZa1dPcGFmZVpE?=
- =?utf-8?B?Qzdia04xbzM4OGh5L0dDMGdlNzRqNFZNN0ZBSnJCNlhDRE5pUnVEdjJneG5L?=
- =?utf-8?B?K0d6clBIWXVzQW9zWkNWK2J0RHVTMFJxaGZCUXlScFpXTGVoQnFTOGNsZlNX?=
- =?utf-8?B?N29TYWM0K042eTRyWDZFbHo3K1l5QzZQTS9JcjQyYmRMUGNHMzBTU1VRMlA2?=
- =?utf-8?Q?BV7V5ksmIW6jY=3D?=
-X-OriginatorOrg: silabs.com
-X-MS-Exchange-CrossTenant-AuthSource: SN6PR11MB2718.namprd11.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Dec 2020 15:39:47.6808
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 54dbd822-5231-4b20-944d-6f4abcd541fb
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2301d090-828a-40d1-17d4-08d8a758faac
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: cJe4rTls5ADaJu0S/svRBQcfyn2bUMjrG3Fk+3+uv9oDvUZaWQpAS/quK5STcGIULSVSP4aFDVwDuUQFSgKWGA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN6PR11MB2815
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date:   Wed, 23 Dec 2020 13:06:08 -0800
+From:   Angus Ainslie <angus@akkea.ca>
+To:     Lucas Stach <l.stach@pengutronix.de>
+Cc:     BOUGH CHEN <haibo.chen@nxp.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>
+Subject: Re: sdhci timeout on imx8mq
+In-Reply-To: <4a1fb9fa69d6fdb0ec2d7c390112d412d512ff13.camel@pengutronix.de>
+References: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
+ <20200205092653.GB2737@bogon.m.sigxcpu.org>
+ <CAOMZO5AAzK0QprHpKHaFOANjspJKd_4YaoMqAoGYG4KftcyiYw@mail.gmail.com>
+ <VI1PR04MB5040A046E5D93265AE636B29901C0@VI1PR04MB5040.eurprd04.prod.outlook.com>
+ <VI1PR04MB504091C7991353F6092A8D91901A0@VI1PR04MB5040.eurprd04.prod.outlook.com>
+ <CAOMZO5CkSSidzLUSBUvJNAio3SnmU-fisTbDCiLN9v1EjS+HHQ@mail.gmail.com>
+ <5ad361195f2e191484c8a231be0f5a07@akkea.ca>
+ <CAOMZO5BarV1=6rx9L_hkJJLUQSicwPNUO4HFKWAXSQ6n0N+Kzg@mail.gmail.com>
+ <VI1PR04MB52942233A0BA6BCB692F281E90670@VI1PR04MB5294.eurprd04.prod.outlook.com>
+ <4a1fb9fa69d6fdb0ec2d7c390112d412d512ff13.camel@pengutronix.de>
+Message-ID: <0c2bdbe7b99f7edd6c39272d8307cd33@akkea.ca>
+X-Sender: angus@akkea.ca
+User-Agent: Roundcube Webmail/1.3.6
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-RnJvbTogSsOpcsO0bWUgUG91aWxsZXIgPGplcm9tZS5wb3VpbGxlckBzaWxhYnMuY29tPgoKU2ln
-bmVkLW9mZi1ieTogSsOpcsO0bWUgUG91aWxsZXIgPGplcm9tZS5wb3VpbGxlckBzaWxhYnMuY29t
-PgotLS0KIC4uLi9iaW5kaW5ncy9uZXQvd2lyZWxlc3Mvc2lsYWJzLHdmeC55YW1sICAgICB8IDEz
-MyArKysrKysrKysrKysrKysrKysKIDEgZmlsZSBjaGFuZ2VkLCAxMzMgaW5zZXJ0aW9ucygrKQog
-Y3JlYXRlIG1vZGUgMTAwNjQ0IERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9uZXQv
-d2lyZWxlc3Mvc2lsYWJzLHdmeC55YW1sCgpkaWZmIC0tZ2l0IGEvRG9jdW1lbnRhdGlvbi9kZXZp
-Y2V0cmVlL2JpbmRpbmdzL25ldC93aXJlbGVzcy9zaWxhYnMsd2Z4LnlhbWwgYi9Eb2N1bWVudGF0
-aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbmV0L3dpcmVsZXNzL3NpbGFicyx3ZngueWFtbApuZXcg
-ZmlsZSBtb2RlIDEwMDY0NAppbmRleCAwMDAwMDAwMDAwMDAuLjQ4N2Q0NmM1ZmRjMAotLS0gL2Rl
-di9udWxsCisrKyBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9uZXQvd2lyZWxl
-c3Mvc2lsYWJzLHdmeC55YW1sCkBAIC0wLDAgKzEsMTMzIEBACisjIFNQRFgtTGljZW5zZS1JZGVu
-dGlmaWVyOiAoR1BMLTIuMC1vbmx5IE9SIEJTRC0yLUNsYXVzZSkKKyMgQ29weXJpZ2h0IChjKSAy
-MDIwLCBTaWxpY29uIExhYm9yYXRvcmllcywgSW5jLgorJVlBTUwgMS4yCistLS0KKworJGlkOiBo
-dHRwOi8vZGV2aWNldHJlZS5vcmcvc2NoZW1hcy9uZXQvd2lyZWxlc3Mvc2lsYWJzLHdmeC55YW1s
-IworJHNjaGVtYTogaHR0cDovL2RldmljZXRyZWUub3JnL21ldGEtc2NoZW1hcy9jb3JlLnlhbWwj
-CisKK3RpdGxlOiBTaWxpY29uIExhYnMgV0Z4eHggZGV2aWNldHJlZSBiaW5kaW5ncworCittYWlu
-dGFpbmVyczoKKyAgLSBKw6lyw7RtZSBQb3VpbGxlciA8amVyb21lLnBvdWlsbGVyQHNpbGFicy5j
-b20+CisKK2Rlc2NyaXB0aW9uOiA+CisgIFN1cHBvcnQgZm9yIHRoZSBXaWZpIGNoaXAgV0Z4eHgg
-ZnJvbSBTaWxpY29uIExhYnMuIEN1cnJlbnRseSwgdGhlIG9ubHkgZGV2aWNlCisgIGZyb20gdGhl
-IFdGeHh4IHNlcmllcyBpcyB0aGUgV0YyMDAgZGVzY3JpYmVkIGhlcmU6CisgICAgIGh0dHBzOi8v
-d3d3LnNpbGFicy5jb20vZG9jdW1lbnRzL3B1YmxpYy9kYXRhLXNoZWV0cy93ZjIwMC1kYXRhc2hl
-ZXQucGRmCisgIAorICBUaGUgV0YyMDAgY2FuIGJlIGNvbm5lY3RlZCB2aWEgU1BJIG9yIHZpYSBT
-RElPLgorICAKKyAgRm9yIFNESU86CisgIAorICAgIERlY2xhcmluZyB0aGUgV0Z4eHggY2hpcCBp
-biBkZXZpY2UgdHJlZSBpcyBtYW5kYXRvcnkgKHVzdWFsbHksIHRoZSBWSUQvUElEIGlzCisgICAg
-c3VmZmljaWVudCBmb3IgdGhlIFNESU8gZGV2aWNlcykuCisgIAorICAgIEl0IGlzIHJlY29tbWVu
-ZGVkIHRvIGRlY2xhcmUgYSBtbWMtcHdyc2VxIG9uIFNESU8gaG9zdCBhYm92ZSBXRnguIFdpdGhv
-dXQKKyAgICBpdCwgeW91IG1heSBlbmNvdW50ZXIgaXNzdWVzIGR1cmluZyByZWJvb3QuIFRoZSBt
-bWMtcHdyc2VxIHNob3VsZCBiZQorICAgIGNvbXBhdGlibGUgd2l0aCBtbWMtcHdyc2VxLXNpbXBs
-ZS4gUGxlYXNlIGNvbnN1bHQKKyAgICBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3Mv
-bW1jL21tYy1wd3JzZXEtc2ltcGxlLnR4dCBmb3IgbW9yZQorICAgIGluZm9ybWF0aW9uLgorICAK
-KyAgRm9yIFNQSToKKyAgCisgICAgSW4gYWRkIG9mIHRoZSBwcm9wZXJ0aWVzIGJlbG93LCBwbGVh
-c2UgY29uc3VsdAorICAgIERvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9zcGkvc3Bp
-LWNvbnRyb2xsZXIueWFtbCBmb3Igb3B0aW9uYWwgU1BJCisgICAgcmVsYXRlZCBwcm9wZXJ0aWVz
-LgorCitwcm9wZXJ0aWVzOgorICBjb21wYXRpYmxlOgorICAgIGNvbnN0OiBzaWxhYnMsd2YyMDAK
-KworICByZWc6CisgICAgZGVzY3JpcHRpb246CisgICAgICBXaGVuIHVzZWQgb24gU0RJTyBidXMs
-IDxyZWc+IG11c3QgYmUgc2V0IHRvIDEuIFdoZW4gdXNlZCBvbiBTUEkgYnVzLCBpdCBpcworICAg
-ICAgdGhlIGNoaXAgc2VsZWN0IGFkZHJlc3Mgb2YgdGhlIGRldmljZSBhcyBkZWZpbmVkIGluIHRo
-ZSBTUEkgZGV2aWNlcworICAgICAgYmluZGluZ3MuCisgICAgbWF4SXRlbXM6IDEKKworICBzcGkt
-bWF4LWZyZXF1ZW5jeTogdHJ1ZQorCisgIGludGVycnVwdHM6CisgICAgZGVzY3JpcHRpb246IFRo
-ZSBpbnRlcnJ1cHQgbGluZS4gVHJpZ2dlcnMgSVJRX1RZUEVfTEVWRUxfSElHSCBhbmQKKyAgICAg
-IElSUV9UWVBFX0VER0VfUklTSU5HIGFyZSBib3RoIHN1cHBvcnRlZCBieSB0aGUgY2hpcCBhbmQg
-dGhlIGRyaXZlci4gV2hlbgorICAgICAgU1BJIGlzIHVzZWQsIHRoaXMgcHJvcGVydHkgaXMgcmVx
-dWlyZWQuIFdoZW4gU0RJTyBpcyB1c2VkLCB0aGUgImluLWJhbmQiCisgICAgICBpbnRlcnJ1cHQg
-cHJvdmlkZWQgYnkgdGhlIFNESU8gYnVzIGlzIHVzZWQgdW5sZXNzIGFuIGludGVycnVwdCBpcyBk
-ZWZpbmVkCisgICAgICBpbiB0aGUgRGV2aWNlIFRyZWUuCisgICAgbWF4SXRlbXM6IDEKKworICBy
-ZXNldC1ncGlvczoKKyAgICBkZXNjcmlwdGlvbjogKFNQSSBvbmx5KSBQaGFuZGxlIG9mIGdwaW8g
-dGhhdCB3aWxsIGJlIHVzZWQgdG8gcmVzZXQgY2hpcAorICAgICAgZHVyaW5nIHByb2JlLiBXaXRo
-b3V0IHRoaXMgcHJvcGVydHksIHlvdSBtYXkgZW5jb3VudGVyIGlzc3VlcyB3aXRoIHdhcm0KKyAg
-ICAgIGJvb3QuIChGb3IgbGVnYWN5IHB1cnBvc2UsIHRoZSBncGlvIGluIGludmVydGVkIHdoZW4g
-Y29tcGF0aWJsZSA9PQorICAgICAgInNpbGFicyx3Zngtc3BpIikKKworICAgICAgRm9yIFNESU8s
-IHRoZSByZXNldCBncGlvIHNob3VsZCBkZWNsYXJlZCB1c2luZyBhIG1tYy1wd3JzZXEuCisgICAg
-bWF4SXRlbXM6IDEKKworICB3YWtldXAtZ3Bpb3M6CisgICAgZGVzY3JpcHRpb246IFBoYW5kbGUg
-b2YgZ3BpbyB0aGF0IHdpbGwgYmUgdXNlZCB0byB3YWtlLXVwIGNoaXAuIFdpdGhvdXQgdGhpcwor
-ICAgICAgcHJvcGVydHksIGRyaXZlciB3aWxsIGRpc2FibGUgbW9zdCBvZiBwb3dlciBzYXZpbmcg
-ZmVhdHVyZXMuCisgICAgbWF4SXRlbXM6IDEKKworICBzaWxhYnMsYW50ZW5uYS1jb25maWctZmls
-ZToKKyAgICAkcmVmOiAvc2NoZW1hcy90eXBlcy55YW1sIy9kZWZpbml0aW9ucy9zdHJpbmcKKyAg
-ICBkZXNjcmlwdGlvbjogVXNlIGFuIGFsdGVybmF0aXZlIGZpbGUgZm9yIGFudGVubmEgY29uZmln
-dXJhdGlvbiAoYWthCisgICAgICAiUGxhdGZvcm0gRGF0YSBTZXQiIGluIFNpbGFicyBqYXJnb24p
-LiBEZWZhdWx0IGlzICd3ZjIwMC5wZHMnLgorCisgIGxvY2FsLW1hYy1hZGRyZXNzOiB0cnVlCisK
-KyAgbWFjLWFkZHJlc3M6IHRydWUKKworYWRkaXRpb25hbFByb3BlcnRpZXM6IGZhbHNlCisKK3Jl
-cXVpcmVkOgorICAtIGNvbXBhdGlibGUKKyAgLSByZWcKKworZXhhbXBsZXM6CisgIC0gfAorICAg
-ICNpbmNsdWRlIDxkdC1iaW5kaW5ncy9ncGlvL2dwaW8uaD4KKyAgICAjaW5jbHVkZSA8ZHQtYmlu
-ZGluZ3MvaW50ZXJydXB0LWNvbnRyb2xsZXIvaXJxLmg+CisKKyAgICBzcGkwIHsKKyAgICAgICAg
-I2FkZHJlc3MtY2VsbHMgPSA8MT47CisgICAgICAgICNzaXplLWNlbGxzID0gPDA+OworCisgICAg
-ICAgIHdpZmlAMCB7CisgICAgICAgICAgICBjb21wYXRpYmxlID0gInNpbGFicyx3ZjIwMCI7Cisg
-ICAgICAgICAgICBwaW5jdHJsLW5hbWVzID0gImRlZmF1bHQiOworICAgICAgICAgICAgcGluY3Ry
-bC0wID0gPCZ3ZnhfaXJxICZ3ZnhfZ3Bpb3M+OworICAgICAgICAgICAgcmVnID0gPDA+OworICAg
-ICAgICAgICAgaW50ZXJydXB0cy1leHRlbmRlZCA9IDwmZ3BpbyAxNiBJUlFfVFlQRV9FREdFX1JJ
-U0lORz47CisgICAgICAgICAgICB3YWtldXAtZ3Bpb3MgPSA8JmdwaW8gMTIgR1BJT19BQ1RJVkVf
-SElHSD47CisgICAgICAgICAgICByZXNldC1ncGlvcyA9IDwmZ3BpbyAxMyBHUElPX0FDVElWRV9M
-T1c+OworICAgICAgICAgICAgc3BpLW1heC1mcmVxdWVuY3kgPSA8NDIwMDAwMDA+OworICAgICAg
-ICB9OworICAgIH07CisKKyAgLSB8CisgICAgI2luY2x1ZGUgPGR0LWJpbmRpbmdzL2dwaW8vZ3Bp
-by5oPgorICAgICNpbmNsdWRlIDxkdC1iaW5kaW5ncy9pbnRlcnJ1cHQtY29udHJvbGxlci9pcnEu
-aD4KKworICAgIHdmeF9wd3JzZXE6IHdmeF9wd3JzZXEgeworICAgICAgICBjb21wYXRpYmxlID0g
-Im1tYy1wd3JzZXEtc2ltcGxlIjsKKyAgICAgICAgcGluY3RybC1uYW1lcyA9ICJkZWZhdWx0IjsK
-KyAgICAgICAgcGluY3RybC0wID0gPCZ3ZnhfcmVzZXQ+OworICAgICAgICByZXNldC1ncGlvcyA9
-IDwmZ3BpbyAxMyBHUElPX0FDVElWRV9MT1c+OworICAgIH07CisKKyAgICBtbWMwIHsKKyAgICAg
-ICAgbW1jLXB3cnNlcSA9IDwmd2Z4X3B3cnNlcT47CisgICAgICAgICNhZGRyZXNzLWNlbGxzID0g
-PDE+OworICAgICAgICAjc2l6ZS1jZWxscyA9IDwwPjsKKworICAgICAgICB3aWZpQDEgeworICAg
-ICAgICAgICAgY29tcGF0aWJsZSA9ICJzaWxhYnMsd2YyMDAiOworICAgICAgICAgICAgcGluY3Ry
-bC1uYW1lcyA9ICJkZWZhdWx0IjsKKyAgICAgICAgICAgIHBpbmN0cmwtMCA9IDwmd2Z4X3dha2V1
-cD47CisgICAgICAgICAgICByZWcgPSA8MT47CisgICAgICAgICAgICB3YWtldXAtZ3Bpb3MgPSA8
-JmdwaW8gMTIgR1BJT19BQ1RJVkVfSElHSD47CisgICAgICAgIH07CisgICAgfTsKKy4uLgotLSAK
-Mi4yOS4yCgo=
+Hi Lucas,
+
+On 2020-12-18 12:07, Lucas Stach wrote:
+> 
+> Can you show me the full fail log? I do not meet this issue on my side,
+> besides, which kind of uboot do you use?
+> 
+
+I've got the dmesg output and it's 33K. Should I send it to the list or 
+do you want to see it out of band ?
+
+The 2 relevant sections are
+
+[   13.281867] mmc0: Timeout waiting for hardware interrupt.
+[   13.287310] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[   13.293810] mmc0: sdhci: Sys addr:  0x00000800 | Version:  0x00000002
+[   13.300290] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+[   13.306774] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+[   13.313258] mmc0: sdhci: Present:   0x01f88a0a | Host ctl: 0x00000011
+[   13.319738] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
+[   13.326218] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x000020ff
+[   13.332699] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
+[   13.339178] mmc0: sdhci: Int enab:  0x107f100b | Sig enab: 0x107f100b
+[   13.345658] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00008402
+[   13.352141] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
+[   13.358622] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00ffffff
+[   13.365106] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
+[   13.371589] mmc0: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d02700
+[   13.378068] mmc0: sdhci: Host ctl2: 0x00000000
+[   13.382554] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xe5b90200
+[   13.389042] mmc0: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS 
+DUMP =========
+[   13.396661] mmc0: sdhci-esdhc-imx: cmd debug status:  0x2100
+[   13.402361] mmc0: sdhci-esdhc-imx: data debug status:  0x2200
+[   13.408119] mmc0: sdhci-esdhc-imx: trans debug status:  0x2300
+[   13.413991] mmc0: sdhci-esdhc-imx: dma debug status:  0x2402
+[   13.419718] mmc0: sdhci-esdhc-imx: adma debug status:  0x2501
+[   13.425478] mmc0: sdhci-esdhc-imx: fifo debug status:  0x2610
+[   13.431294] mmc0: sdhci-esdhc-imx: async fifo debug status:  0x2751
+[   13.437600] mmc0: sdhci: ============================================
+[   13.453076] mmc0: error -110 whilst initialising MMC card
+[   13.662288] mmc0: new HS400 MMC card at address 0001
+[   13.676191] mmcblk0: mmc0:0001 032G32 29.1 GiB
+[   13.684755] mmcblk0boot0: mmc0:0001 032G32 partition 1 4.00 MiB
+[   13.694405] mmcblk0boot1: mmc0:0001 032G32 partition 2 4.00 MiB
+[   13.702264] mmcblk0rpmb: mmc0:0001 032G32 partition 3 4.00 MiB, 
+chardev (245:0)
+[   13.715966]  mmcblk0: p1 p2
+
+[   29.665891] mmc1: Timeout waiting for hardware interrupt.
+[   29.671310] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+[   29.677758] mmc1: sdhci: Sys addr:  0x00000800 | Version:  0x00000002
+[   29.684201] mmc1: sdhci: Blk size:  0x00000004 | Blk cnt:  0x00000001
+[   29.690642] mmc1: sdhci: Argument:  0x12008004 | Trn mode: 0x00000013
+[   29.697086] mmc1: sdhci: Present:   0x01f88a0a | Host ctl: 0x00000013
+[   29.703529] mmc1: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
+[   29.709980] mmc1: sdhci: Wake-up:   0x00000008 | Clock:    0x0000003f
+[   29.716426] mmc1: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
+[   29.722868] mmc1: sdhci: Int enab:  0x107f110b | Sig enab: 0x107f110b
+[   29.729310] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00008402
+[   29.735754] mmc1: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
+[   29.742212] mmc1: sdhci: Cmd:       0x0000353a | Max curr: 0x00ffffff
+[   29.748658] mmc1: sdhci: Resp[0]:   0x00002000 | Resp[1]:  0x00000000
+[   29.755099] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[   29.761540] mmc1: sdhci: Host ctl2: 0x00000000
+[   29.765989] mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xe6605200
+[   29.772439] mmc1: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS 
+DUMP =========
+[   29.780026] mmc1: sdhci-esdhc-imx: cmd debug status:  0x2100
+[   29.785692] mmc1: sdhci-esdhc-imx: data debug status:  0x2200
+[   29.791448] mmc1: sdhci-esdhc-imx: trans debug status:  0x2300
+[   29.797284] mmc1: sdhci-esdhc-imx: dma debug status:  0x2402
+[   29.802943] mmc1: sdhci-esdhc-imx: adma debug status:  0x2501
+[   29.808690] mmc1: sdhci-esdhc-imx: fifo debug status:  0x2690
+[   29.814437] mmc1: sdhci-esdhc-imx: async fifo debug status:  0x2751
+[   29.820701] mmc1: sdhci: ============================================
+
+Thanks
+Angus
