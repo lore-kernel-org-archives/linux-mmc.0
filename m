@@ -2,156 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 317FBC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 21:07:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A8C0C433E0
+	for <linux-mmc@archiver.kernel.org>; Sun, 27 Dec 2020 17:43:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 06D8E2246B
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Dec 2020 21:07:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 205C322512
+	for <linux-mmc@archiver.kernel.org>; Sun, 27 Dec 2020 17:43:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729060AbgLWVGx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Dec 2020 16:06:53 -0500
-Received: from node.akkea.ca ([192.155.83.177]:46900 "EHLO node.akkea.ca"
+        id S1726247AbgL0Rmw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 27 Dec 2020 12:42:52 -0500
+Received: from www.zeus03.de ([194.117.254.33]:46718 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726462AbgLWVGw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 23 Dec 2020 16:06:52 -0500
-Received: from localhost (localhost [127.0.0.1])
-        by node.akkea.ca (Postfix) with ESMTP id 7F9934E7973;
-        Wed, 23 Dec 2020 21:06:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akkea.ca; s=mail;
-        t=1608757572; bh=F4kVbAC1fiNjqQCNQtH+R+Y+w2DekOd7qvPJuY26BbM=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References;
-        b=PH/Wt8IxKOgGYBNxxsV1hxXzvhN5sgkYCvWnwdvWYar12zcWHl16sHbISNSJ7dWZN
-         D7GaV9UCdIAhVdYOX/vup+5qMygbg9S2fGbiMFzkzsY5RNYexwGbREl0UzrS4XPXaD
-         Bbu5ac/ifqdQAjjGCK8fXd8dRPcfvuPuyGRztbpE=
-X-Virus-Scanned: Debian amavisd-new at mail.akkea.ca
-Received: from node.akkea.ca ([127.0.0.1])
-        by localhost (mail.akkea.ca [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id cZpFwZGwgZKM; Wed, 23 Dec 2020 21:06:09 +0000 (UTC)
-Received: from www.akkea.ca (node.akkea.ca [192.155.83.177])
-        by node.akkea.ca (Postfix) with ESMTPSA id D20FD4E796B;
-        Wed, 23 Dec 2020 21:06:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=akkea.ca; s=mail;
-        t=1608757569; bh=F4kVbAC1fiNjqQCNQtH+R+Y+w2DekOd7qvPJuY26BbM=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References;
-        b=ACobnMibFxj7qdRyxg9k1J0d3KljzW37BDJ44PmkB/k93ibBm69WQrDeqN48+3UhS
-         rR9W6MYlbacJ39YIzV4BisO3TXIksBJZERqiIx/mcsHOHKNqEUOS6tJYGb5ePso3L/
-         fy7+sI2gyFl3kvKSTt07Ylnhv1YZ2X9AC+mZWmnE=
+        id S1726189AbgL0Rmw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 27 Dec 2020 12:42:52 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=6nOEJgrHuMyJRiP7Y/GclKld1qO
+        GTPICoxsA54xoaw8=; b=UL6vbB0FBI08lotn/SH2oWNRTk2ySXkF4RIzDp2BlLE
+        I0Zw3zjRcZvB+5FZSm0bM/7TKC1e1xvyB+g8DKA4rp9xrEfpe4Kj++ruviHNrsFz
+        7mkFT0uHAr3ZJHAHPOcFPu4n3usVNzRqlHQn6JsFVC0qRxHAYxAD4xVjxQjWFC+8
+        =
+Received: (qmail 1556957 invoked from network); 27 Dec 2020 18:42:09 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 27 Dec 2020 18:42:09 +0100
+X-UD-Smtp-Session: l3s3148p1@7o74rHW3Tp5UhsuJ
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-renesas-soc@vger.kernel.org
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        devicetree@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH 0/6] v3u: add SDHI/MMC support
+Date:   Sun, 27 Dec 2020 18:41:54 +0100
+Message-Id: <20201227174202.40834-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Wed, 23 Dec 2020 13:06:08 -0800
-From:   Angus Ainslie <angus@akkea.ca>
-To:     Lucas Stach <l.stach@pengutronix.de>
-Cc:     BOUGH CHEN <haibo.chen@nxp.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>
-Subject: Re: sdhci timeout on imx8mq
-In-Reply-To: <4a1fb9fa69d6fdb0ec2d7c390112d412d512ff13.camel@pengutronix.de>
-References: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
- <20200205092653.GB2737@bogon.m.sigxcpu.org>
- <CAOMZO5AAzK0QprHpKHaFOANjspJKd_4YaoMqAoGYG4KftcyiYw@mail.gmail.com>
- <VI1PR04MB5040A046E5D93265AE636B29901C0@VI1PR04MB5040.eurprd04.prod.outlook.com>
- <VI1PR04MB504091C7991353F6092A8D91901A0@VI1PR04MB5040.eurprd04.prod.outlook.com>
- <CAOMZO5CkSSidzLUSBUvJNAio3SnmU-fisTbDCiLN9v1EjS+HHQ@mail.gmail.com>
- <5ad361195f2e191484c8a231be0f5a07@akkea.ca>
- <CAOMZO5BarV1=6rx9L_hkJJLUQSicwPNUO4HFKWAXSQ6n0N+Kzg@mail.gmail.com>
- <VI1PR04MB52942233A0BA6BCB692F281E90670@VI1PR04MB5294.eurprd04.prod.outlook.com>
- <4a1fb9fa69d6fdb0ec2d7c390112d412d512ff13.camel@pengutronix.de>
-Message-ID: <0c2bdbe7b99f7edd6c39272d8307cd33@akkea.ca>
-X-Sender: angus@akkea.ca
-User-Agent: Roundcube Webmail/1.3.6
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Lucas,
+So, this series adds SDHI/MMC support to the Renesas R-Car V3U SoC.
+While SDHI is usually complicated, adding basic support to V3U was
+refreshingly uncomplicated :) The crux was this time in the CPG driver.
+In order to avoid code duplication, a CPG library was introduced, so we
+can share the SD clock handling between generic Gen3, V3U, and hopefully
+Gen4 later. The library turned out to be a quite nice solution for SDHI.
+I am quite happy with it. I think we could have a similar benefit for
+RPC, but we still need to see if this is enabled on V3U after all.
 
-On 2020-12-18 12:07, Lucas Stach wrote:
-> 
-> Can you show me the full fail log? I do not meet this issue on my side,
-> besides, which kind of uboot do you use?
-> 
+So much for now, looking forward to comments. The branch is here:
 
-I've got the dmesg output and it's 33K. Should I send it to the list or 
-do you want to see it out of band ?
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/v3u/sdhi
 
-The 2 relevant sections are
+Happy hacking,
 
-[   13.281867] mmc0: Timeout waiting for hardware interrupt.
-[   13.287310] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[   13.293810] mmc0: sdhci: Sys addr:  0x00000800 | Version:  0x00000002
-[   13.300290] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
-[   13.306774] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
-[   13.313258] mmc0: sdhci: Present:   0x01f88a0a | Host ctl: 0x00000011
-[   13.319738] mmc0: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-[   13.326218] mmc0: sdhci: Wake-up:   0x00000008 | Clock:    0x000020ff
-[   13.332699] mmc0: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-[   13.339178] mmc0: sdhci: Int enab:  0x107f100b | Sig enab: 0x107f100b
-[   13.345658] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00008402
-[   13.352141] mmc0: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-[   13.358622] mmc0: sdhci: Cmd:       0x0000083a | Max curr: 0x00ffffff
-[   13.365106] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0xffffffff
-[   13.371589] mmc0: sdhci: Resp[2]:   0x328f5903 | Resp[3]:  0x00d02700
-[   13.378068] mmc0: sdhci: Host ctl2: 0x00000000
-[   13.382554] mmc0: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xe5b90200
-[   13.389042] mmc0: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS 
-DUMP =========
-[   13.396661] mmc0: sdhci-esdhc-imx: cmd debug status:  0x2100
-[   13.402361] mmc0: sdhci-esdhc-imx: data debug status:  0x2200
-[   13.408119] mmc0: sdhci-esdhc-imx: trans debug status:  0x2300
-[   13.413991] mmc0: sdhci-esdhc-imx: dma debug status:  0x2402
-[   13.419718] mmc0: sdhci-esdhc-imx: adma debug status:  0x2501
-[   13.425478] mmc0: sdhci-esdhc-imx: fifo debug status:  0x2610
-[   13.431294] mmc0: sdhci-esdhc-imx: async fifo debug status:  0x2751
-[   13.437600] mmc0: sdhci: ============================================
-[   13.453076] mmc0: error -110 whilst initialising MMC card
-[   13.662288] mmc0: new HS400 MMC card at address 0001
-[   13.676191] mmcblk0: mmc0:0001 032G32 29.1 GiB
-[   13.684755] mmcblk0boot0: mmc0:0001 032G32 partition 1 4.00 MiB
-[   13.694405] mmcblk0boot1: mmc0:0001 032G32 partition 2 4.00 MiB
-[   13.702264] mmcblk0rpmb: mmc0:0001 032G32 partition 3 4.00 MiB, 
-chardev (245:0)
-[   13.715966]  mmcblk0: p1 p2
+   Wolfram
 
-[   29.665891] mmc1: Timeout waiting for hardware interrupt.
-[   29.671310] mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
-[   29.677758] mmc1: sdhci: Sys addr:  0x00000800 | Version:  0x00000002
-[   29.684201] mmc1: sdhci: Blk size:  0x00000004 | Blk cnt:  0x00000001
-[   29.690642] mmc1: sdhci: Argument:  0x12008004 | Trn mode: 0x00000013
-[   29.697086] mmc1: sdhci: Present:   0x01f88a0a | Host ctl: 0x00000013
-[   29.703529] mmc1: sdhci: Power:     0x00000002 | Blk gap:  0x00000080
-[   29.709980] mmc1: sdhci: Wake-up:   0x00000008 | Clock:    0x0000003f
-[   29.716426] mmc1: sdhci: Timeout:   0x0000008f | Int stat: 0x00000000
-[   29.722868] mmc1: sdhci: Int enab:  0x107f110b | Sig enab: 0x107f110b
-[   29.729310] mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00008402
-[   29.735754] mmc1: sdhci: Caps:      0x07eb0000 | Caps_1:   0x8000b407
-[   29.742212] mmc1: sdhci: Cmd:       0x0000353a | Max curr: 0x00ffffff
-[   29.748658] mmc1: sdhci: Resp[0]:   0x00002000 | Resp[1]:  0x00000000
-[   29.755099] mmc1: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-[   29.761540] mmc1: sdhci: Host ctl2: 0x00000000
-[   29.765989] mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0xe6605200
-[   29.772439] mmc1: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS 
-DUMP =========
-[   29.780026] mmc1: sdhci-esdhc-imx: cmd debug status:  0x2100
-[   29.785692] mmc1: sdhci-esdhc-imx: data debug status:  0x2200
-[   29.791448] mmc1: sdhci-esdhc-imx: trans debug status:  0x2300
-[   29.797284] mmc1: sdhci-esdhc-imx: dma debug status:  0x2402
-[   29.802943] mmc1: sdhci-esdhc-imx: adma debug status:  0x2501
-[   29.808690] mmc1: sdhci-esdhc-imx: fifo debug status:  0x2690
-[   29.814437] mmc1: sdhci-esdhc-imx: async fifo debug status:  0x2751
-[   29.820701] mmc1: sdhci: ============================================
+Takeshi Saito (2):
+  arm64: dts: renesas: r8a779a0: Add MMC node
+  arm64: dts: renesas: falcon: Enable MMC
 
-Thanks
-Angus
+Wolfram Sang (4):
+  dt-bindings: mmc: renesas,sdhi: Add r8a779a0 support
+  clk: renesas: rcar-gen3: remove cpg_quirks access when registering SD
+    clock
+  clk: renesas: rcar-gen3: factor out CPG library
+  clk: renesas: r8a779a0: add SDHI support
+
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml |   1 +
+ .../boot/dts/renesas/r8a779a0-falcon.dts      |  41 +++
+ arch/arm64/boot/dts/renesas/r8a779a0.dtsi     |  12 +
+ drivers/clk/renesas/Kconfig                   |   5 +
+ drivers/clk/renesas/Makefile                  |   1 +
+ drivers/clk/renesas/r8a779a0-cpg-mssr.c       |  17 +-
+ drivers/clk/renesas/rcar-cpg-lib.c            | 270 ++++++++++++++++++
+ drivers/clk/renesas/rcar-cpg-lib.h            |  33 +++
+ drivers/clk/renesas/rcar-gen3-cpg.c           | 267 +----------------
+ 9 files changed, 387 insertions(+), 260 deletions(-)
+ create mode 100644 drivers/clk/renesas/rcar-cpg-lib.c
+ create mode 100644 drivers/clk/renesas/rcar-cpg-lib.h
+
+-- 
+2.28.0
+
