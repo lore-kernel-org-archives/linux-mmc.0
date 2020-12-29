@@ -2,183 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_2 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2353BC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Dec 2020 08:20:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17C66C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Dec 2020 08:47:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D07F920867
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Dec 2020 08:20:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D5FF2207B8
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Dec 2020 08:47:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726178AbgL2IUS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Dec 2020 03:20:18 -0500
-Received: from mail-bn8nam12on2068.outbound.protection.outlook.com ([40.107.237.68]:64800
+        id S1725866AbgL2IrC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Dec 2020 03:47:02 -0500
+Received: from mail-bn8nam12on2078.outbound.protection.outlook.com ([40.107.237.78]:12224
         "EHLO NAM12-BN8-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725979AbgL2IUR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 29 Dec 2020 03:20:17 -0500
+        id S1725964AbgL2IrB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 29 Dec 2020 03:47:01 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ePuGnbFnAankUnfhfBxE8mRIMONgkkDmEolRCZ5TJbqtHqZ6frLxMDWKQKRH1XHQb9adyhce7udi0s0gLKhPlhxrhyevARaHEubqsl5CUi/qzfvgHGMrsMYEBr6yE2W2QQhmqBTY0nyWVjeZ6mMH6SnT13YyLy0zitJ4rUeNPlnak+hHBsrHpy65yJ2LMYXaw6FMn3NAAYJKQCLOX680vXS6zz4OlBYqYpIIA0HXYtyBlJkd1PM3c1+lYPgHCLLcWyK2RURXot9dJ4kLCTSp/sRogMIbq2Yl7PQbc8j93bp6OC8SBTly517tEkdGK7wSyJxqFevGbZQtmR6Jd/SieQ==
+ b=LEXPPrcFXALFp474mLA5r0pjpPbIjQKfv6VAbuOzU6H9F4oU3SabUbuCDIHomraFIK0G/DWNTpLKymVqIlT5+wpA/nZh7fm+BpgSHNyCq/qa+RulYs4FFG/Z391tDwKbvRFqslu32+e0FaCgnLkkuAmuQiPOMMJ9nHTksWDgTQuNlfJDrrVtLtXKakx0eLPNPkskCbNLOqtPe32jAdkkWScC2IJGm+sFYJC2n+hpyBNYZY0/u8D51gdXe4nqibHyOCmKRifEF9WdUAlJJGc/rdwHfAxCcWMmemKz1ntWQnLnjcX+IbPPCBNzq6mvTTAvoAwCrpGSUUhnqvgV0Q/7PA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+X3u72+ZOHgAOinJvSGb/vEK4bwX1APmwWyY2TA7tYE=;
- b=dN5CTTj/0UMaUt1rL1nSvtOzvLrTqDMQ9BAQT8yeVsJzSvWAmOO6BrO894myyswHWewrlmUG2AHN/ncml9uxKXnZcpKARyQODnV8+DcoeDQ2iDWFqZoSv4QdlW1ijDrhQHwKryBsvnCJX79mh03cP0AIdza+kP1wC8WqHfjdzvwfXSNz07jrFGdCZCc0RY9yvyIrtl1GoIXlYVnb3VC71vsUcU/V0t0fv88kSeGf6IZV4a5qqIR2kMeLNSXpsyEbwN1TE01TKvClKhhXfMJDGCupCBR4Yr6cliIuh9WtXpzcmt0XBLgDdQyKmdLWSbnIa51RRku7fo/Oru6uQxbpFw==
+ bh=QscC6W/8f7utfoQwqB80oQshRO4b2hmqg8S7jDp+sOM=;
+ b=K4GBb4Is3/1zV1N6u9hbhu+2bBarM/ZdKTDqaEnMfN3f/gwV03tZPXp2PF5GhsLa5mCp4/SNn+vX7UW2Al5T3YPhF+lunWlXHPEdQJW137GslG6LQgJc9j6pS8d6q0IyewfPBy9GeQ4xO0JI+QB8XEqHd5QRdgTqLzgpRW0upOJ70oSLjyIBtrbcU1A8HpGkhFeLVZiAY013pe4jRWka49hceBzX9ValIEaRfwfsLLs27Cgfxq+G7HJ4x3Xfa3+5wO1a/FC/kl95YyrGfx637oHehFks4n4BCtDL7X74w9PDec6Bvu1bAw9T9dPdoGdGtHQzOECDtlf91wBGh8Keeg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=synaptics.com; dmarc=pass action=none
  header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=+X3u72+ZOHgAOinJvSGb/vEK4bwX1APmwWyY2TA7tYE=;
- b=o4HnawRPoLDWb1vQH3g/BdyQ4S2qI/WRWcG8x1Es+HNRXJ/moekGfew+GerKk2v0xTpUetdUIJnkx5wWnc2LuJzBIaFREd8WaLIqIWEBnrpmFgd0Nn+hqgKqfCdKoAjNzfylExIIfNMI+rwIvLDWVzSMC2U7vmnmnnpoYnbJw/c=
+ bh=QscC6W/8f7utfoQwqB80oQshRO4b2hmqg8S7jDp+sOM=;
+ b=DYGC0dNDuUHA4kmts+BzhTNSJKqqEcoUaD0WWl6TL9L5boSAzwcSdSclQ1ChWYcr2siRVvDJ6otQeQiUvPOJrv1tpk2jWyIwzGeTBCuvF5wdMjDdl1v63YYeF2Fp0Hzh20KjF4iEHh+nal5XHx67Wj33Jnc3sdrdujWRv+hjAS4=
 Authentication-Results: intel.com; dkim=none (message not signed)
  header.d=none;intel.com; dmarc=none action=none header.from=synaptics.com;
 Received: from BN8PR03MB4724.namprd03.prod.outlook.com (2603:10b6:408:96::21)
- by BN6PR03MB2851.namprd03.prod.outlook.com (2603:10b6:404:111::10) with
+ by BN8PR03MB4819.namprd03.prod.outlook.com (2603:10b6:408:97::29) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3700.28; Tue, 29 Dec
- 2020 08:19:28 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3700.27; Tue, 29 Dec
+ 2020 08:46:11 +0000
 Received: from BN8PR03MB4724.namprd03.prod.outlook.com
  ([fe80::e192:4c65:5936:1fb4]) by BN8PR03MB4724.namprd03.prod.outlook.com
  ([fe80::e192:4c65:5936:1fb4%5]) with mapi id 15.20.3700.031; Tue, 29 Dec 2020
- 08:19:28 +0000
-Date:   Tue, 29 Dec 2020 16:16:25 +0800
+ 08:46:10 +0000
+Date:   Tue, 29 Dec 2020 16:46:02 +0800
 From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
 To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: fix rpmb access
-Message-ID: <20201229161625.38255233@xhacker.debian>
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org,
+        Baolin Wang <baolin.wang@linux.alibaba.com>,
+        Eric Biggers <ebiggers@google.com>,
+        Satya Tangirala <satyat@google.com>
+Subject: [RFC] how to support ADMA3 and emmc CQ and inline encryption at the
+ same time
+Message-ID: <20201229164602.2dd49d28@xhacker.debian>
 X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
 X-Originating-IP: [192.147.44.204]
-X-ClientProxiedBy: BY5PR16CA0019.namprd16.prod.outlook.com
- (2603:10b6:a03:1a0::32) To BN8PR03MB4724.namprd03.prod.outlook.com
+X-ClientProxiedBy: SJ0PR13CA0235.namprd13.prod.outlook.com
+ (2603:10b6:a03:2c1::30) To BN8PR03MB4724.namprd03.prod.outlook.com
  (2603:10b6:408:96::21)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from xhacker.debian (192.147.44.204) by BY5PR16CA0019.namprd16.prod.outlook.com (2603:10b6:a03:1a0::32) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3700.27 via Frontend Transport; Tue, 29 Dec 2020 08:19:26 +0000
+Received: from xhacker.debian (192.147.44.204) by SJ0PR13CA0235.namprd13.prod.outlook.com (2603:10b6:a03:2c1::30) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3721.12 via Frontend Transport; Tue, 29 Dec 2020 08:46:08 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: e4a1349b-6c29-4f2b-7132-08d8abd275db
-X-MS-TrafficTypeDiagnostic: BN6PR03MB2851:
-X-Microsoft-Antispam-PRVS: <BN6PR03MB28516A19434525F0394821D0EDD80@BN6PR03MB2851.namprd03.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:8273;
+X-MS-Office365-Filtering-Correlation-Id: dd29683b-84ad-4970-e1a7-08d8abd63131
+X-MS-TrafficTypeDiagnostic: BN8PR03MB4819:
+X-Microsoft-Antispam-PRVS: <BN8PR03MB4819420ABF0D5DFCB65B95B6EDD80@BN8PR03MB4819.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: JzyrLuOkY9Mc4u2kK+Ab0zQ3NWevi5+GTURpNaOMMVPT599ZdTpGUFhUwNIJLckOPlB4Mzj+Dl5jkNkiamMRHyfaTxjOLm6xFj+5DIl6WyKErpf5O+BXwqOeeQZQfAhCD33D696oM3VdwhPViI3JkMzvY/beS7iSkgmiJOkIlm3iL46vi9oNe7nguBmyMd0wLGn08GvdXUQ5FTjiiMViY5ef22v7zS612b+B7X4PtoBf+kYToYhtvhObUa9lp8kIp7ptzR7N8zFtG279876stVA4hfov8kP1HIulIUuNdWnLqmilgp+bMhEKgFgiMpY6JKVTjOSje0qA8kOAC4xnZ9igTsnCDqGuJE2JDuNir9/PMD3+rxyX73vtzu+t3ZlB9PZhLYmqr1DWwbvcDnVxtEM1a7vR62/jhhHUWgreAGL9SdSaIJYKGQXGlbZ+Ofvp
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN8PR03MB4724.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(366004)(396003)(346002)(376002)(39860400002)(186003)(6506007)(316002)(55016002)(956004)(7696005)(66946007)(5660300002)(66556008)(66476007)(86362001)(1076003)(52116002)(83380400001)(2906002)(4326008)(478600001)(9686003)(26005)(8676002)(8936002)(110136005)(16526019)(133343001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?Y55kubgyPH9ExcITXIAdcsnCfk5l+xmMjSv1omYsDHi58MN/biKopRTcXdRA?=
- =?us-ascii?Q?VZom6OzpsB8vziQ8ud+H6qFegaQUjaHI4q6i8FA6FW/doUotPf9RpkMFWKVn?=
- =?us-ascii?Q?MsqiVB24FNq83KQ4D6SukCQALAestKJHKTwHY/gim9jfLvTMMBo4DMI/kXvL?=
- =?us-ascii?Q?kxDDp0GiN1/oGEVIPypQBNVnHC2pElbiC8Lgxyr4GKeBx11y5j746zOgwTTN?=
- =?us-ascii?Q?OLDDCJKTAaM0XuqDJJre59mJ7A5Wd69kanv6mFdZImJr/Rmu59B6pCqNYBve?=
- =?us-ascii?Q?xEd85T3qanhBQuSUpr1c7Pr8v1m4mHKoQTOlYK3XEBo23kfXWS9ytLjiwCm6?=
- =?us-ascii?Q?qHUxk1loN+MJVpcgTVR+L72P3R/Wf00vS19Y7X0cEO7GWZMN1c/4KHwDlcmX?=
- =?us-ascii?Q?77t+5L7bba66Dv/rTwghDQjV2sGJIdI2RI1U1ZtdIm3DSjHBQ3IdnAz8vMoN?=
- =?us-ascii?Q?q9ywvMFNpwWhtRi08L0S3fpFCntDWlC+gWV6/ZTkOiXXMyqRb9Jzch4WZrFJ?=
- =?us-ascii?Q?i5c+hh5qMQypyjylm4hnXHN8ZzRdzFdFFUZ3OOA4+98Xmu9EyLmuGy89iVdA?=
- =?us-ascii?Q?KrB687RNzDJ2xM52YlPtJ/v1faL2MsY+F2jq7HkCCYxkPLz/vQ24a6qpCiNh?=
- =?us-ascii?Q?4mdQ6ADt1VmyKYx27cN+tBnShFf8SZGtQ3s47HCWvaaIMeiXR5J5d2BgjjBU?=
- =?us-ascii?Q?t7Tu6Q4oGWMA2H4zh0eQGz4jQJGYTXOwq7iixrKxBr+hDyxPdpLAuWUgcGAw?=
- =?us-ascii?Q?5A8Tas7xk3bK5HzLF+ibDHKVyN2h1WF1AxDE+6Em3oxjnCDd/bDlPhLjJt7A?=
- =?us-ascii?Q?LvRDE0e1S+eVPO5fYVdfungk11QrJJofDge8RxMgl8IUqBj92NQ16YgxDhHR?=
- =?us-ascii?Q?MMKhUrIkMt2Ev2ZVhTRFhbgREs/vc/vy5Dcckgw2MLCS5zyb6oAbfyfikrmk?=
- =?us-ascii?Q?sA+zH3CRMNewDL5wd2jetaxWeIgNj8ns4DqPoEx2Ehr+3vsjqRM60KE4a39i?=
- =?us-ascii?Q?Eyyh?=
+X-Microsoft-Antispam-Message-Info: KvdgVc+K/rX8Tlf6IiZIolrKZIRw2A4L9MMqG/oGEwikWu8OtWwEkimAjMr3hbtMQiVWTGuk87Z8Clmh1wAtSwkKBTCy94iI9HwW3AYCHOJcI5EgBoEVkHf41XGegVwKuFzNyTzQycHiB9unqDqyKZevBTyB3RPG5Vt+y/d/uXvdD1/qgLH+luu50h2oOHM1m++s/5mc3Y+hgO7Ixv0p+6XVL9IhTbsXx1ttIebNHdqPo85WZKon+alm0T/4i/J7GABMWVtiV0T7Davf0KxTPjCIywmMHZSIr+o9rJylixCq1TZALfZEiP1fulKtvHfi2zAq6DnpUd+uI1h4oI2B9EGzDsZXB7CLwO73cHtNIf0I3Oirv9vLGjTfuPEz70uuRwgJU6D8JyeIHTQxKS+t029Evnpi1aZRRJoB3rY1SFiZY9PUt9Xw1hCrT9vdmALVOD3YsS+Y0Ib+jubrf1Xgwg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN8PR03MB4724.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(346002)(39860400002)(366004)(136003)(396003)(9686003)(66946007)(6666004)(7696005)(316002)(52116002)(1076003)(26005)(8936002)(8676002)(6506007)(110136005)(83380400001)(5660300002)(2906002)(16526019)(186003)(66476007)(966005)(66556008)(956004)(4744005)(478600001)(55016002)(86362001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?y5yaHgJgnu+GG5TQILc1aZWoaxh0rS3zH0TDVVr4zJCpSWUfR9L+oWzgS3vm?=
+ =?us-ascii?Q?GU9E1g8iepXeCXWHnIv2vOCF8NMR/0Ju4T+zySW0USG7SC2BMUf8a/cGoP8u?=
+ =?us-ascii?Q?NU4GX70vomTqlzjYBulxJs4rrsmUqXUux5VBzNhPep+F98ammwqM6CcgHBZy?=
+ =?us-ascii?Q?2rDPfsO2nLWkSwixlkaOFmNbfU/SzoNsuO+XBlyire9qQGHkSjRqJVNklNih?=
+ =?us-ascii?Q?/hz7iw8/npC6YwG4/49ktjJHVHFeRDrFgL+Olis26gN50sPAYlJn5g2gjEUo?=
+ =?us-ascii?Q?Gbh38aP+yCFanWSbDDJiUKdfh1A3veQFc5SVcbSFFhT/B3HYy0F6139vq0nh?=
+ =?us-ascii?Q?K7DS3KCg/9K/42vFjQa9H7Xz8NI/+160XVqWh3r0qo0wIRiVCkXHgQS81En+?=
+ =?us-ascii?Q?ea5ao0bzus/Oy8XsqEgtu9goNqXfTeqXklXTEPupAvxYwLIiiXITpqMl6aAr?=
+ =?us-ascii?Q?Or/S5PgNM6kJml1+hBX+jvB+JcUGofvMI37hOL/rnwh/l3ss3GLAHlIsyTdQ?=
+ =?us-ascii?Q?FaWOC2rEMgMOPr2DYMcI8PPYFlo6pBwUyMNRjw8DaDgxN6QJe390UxPVD16h?=
+ =?us-ascii?Q?EEgw4ZjyHh4RAQu+AfapAfSQ9EZoN7U/rXghtAP2+3MFCm/thHWWaycc+fOY?=
+ =?us-ascii?Q?3U9LfKrPHV9llGOGGrcfOqRhnEiEVXPjxQh3Z6zHzYxY0pyIPIXTQ0NzIXuT?=
+ =?us-ascii?Q?cfHB6CQ+evLHXXLsLWmJh+Ss6iFJeUMcaWMAAOLbbQCg7pvM03SSsmGsBut8?=
+ =?us-ascii?Q?oKiOy/BEqI0wqrV22EI4yDUAV6ggcpyFHofOTYt4h71GhzO2HMQvA9HfVmWn?=
+ =?us-ascii?Q?EGWLBhgMuYth5Gvva1QCK/HR45aqBsyuDRtGWBMeQI18uaswsBN2ab03vSvA?=
+ =?us-ascii?Q?cP5By67JarUctrVeGSeQfJCc1z9nI5RTq4oYjRabMl4QR3iz+YReWZIcT2Pn?=
+ =?us-ascii?Q?0CNw1ahYmzSJ/TmSC+L0uuBrB+/UJfICFWd22LCHiXQkaHkVtX4iqG3queLN?=
+ =?us-ascii?Q?QumV?=
 X-OriginatorOrg: synaptics.com
 X-MS-Exchange-CrossTenant-AuthSource: BN8PR03MB4724.namprd03.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Dec 2020 08:19:28.1013
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 29 Dec 2020 08:46:10.9109
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
-X-MS-Exchange-CrossTenant-Network-Message-Id: e4a1349b-6c29-4f2b-7132-08d8abd275db
+X-MS-Exchange-CrossTenant-Network-Message-Id: dd29683b-84ad-4970-e1a7-08d8abd63131
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: q6QuFUzHZChrwv/txSyRNv5qzbWv46aC7tyRCpeq/P06lX9cJIMb4YH0sxY9ZpNHzUjrl7XpD0DjUkXQpOy/Qg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN6PR03MB2851
+X-MS-Exchange-CrossTenant-UserPrincipalName: oKafEA6xRHCIy3MLPGZ6s4ii3Y7JGYNMIf6eVn9OYk/2HQGH4gOKhlvR8aq5CKMfud0sicQ/b84LvnCTnrWRyA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN8PR03MB4819
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Commit a44f7cb93732 ("mmc: core: use mrq->sbc when sending CMD23 for
-RPMB") began to use ACMD23 for RPMB if the host supports ACMD23. In
-RPMB ACM23 case, we need to set bit 31 to CMD23 argument, otherwise
-RPMB write operation will return general fail.
+Hi,
 
-However, no matter V4 is enabled or not, the dwcmshc's ARGUMENT2
-register is 32-bit block count register which doesn't support stuff
-bits of CMD23 argument. So let's handle this specific ACMD23 case.
+Two patch series:
 
-From another side, this patch also prepare for future v4 enabling
-for dwcmshc, because from the 4.10 spec, the ARGUMENT2 register is
-redefined as 32bit block count which doesn't support stuff bits of
-CMD23 argument.
+*emmc inline encryption
+Recently Eric sent out emmc inline encryption patches, per my understanding
+the emmc inline encryption based on CQ interface:cqhci.
 
-Fixes: a44f7cb93732 ("mmc: core: use mrq->sbc when sending CMD23 for RPMB")
-Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 27 +++++++++++++++++++++++++++
- 1 file changed, 27 insertions(+)
+*ADMA3 support
+Baolin send out ADMA3 support patches: https://lkml.org/lkml/2020/4/26/125
+which makes use of the ADMA3 transfer in mmc software queue.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-o=
-f-dwcmshc.c
-index 4b673792b5a4..d90020ed3622 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -16,6 +16,8 @@
-=20
- #include "sdhci-pltfm.h"
-=20
-+#define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
-+
- /* DWCMSHC specific Mode Select value */
- #define DWCMSHC_CTRL_HS400		0x7
-=20
-@@ -49,6 +51,29 @@ static void dwcmshc_adma_write_desc(struct sdhci_host *h=
-ost, void **desc,
- 	sdhci_adma_write_desc(host, desc, addr, len, cmd);
- }
-=20
-+static void dwcmshc_check_auto_cmd23(struct mmc_host *mmc,
-+				     struct mmc_request *mrq)
-+{
-+	struct sdhci_host *host =3D mmc_priv(mmc);
-+
-+	/*
-+	 * No matter V4 is enabled or not, ARGUMENT2 register is 32-bit
-+	 * block count register which doesn't support stuff bits of
-+	 * CMD23 argument on dwcmsch host controller.
-+	 */
-+	if (mrq->sbc && (mrq->sbc->arg & SDHCI_DWCMSHC_ARG2_STUFF))
-+		host->flags &=3D ~SDHCI_AUTO_CMD23;
-+	else
-+		host->flags |=3D SDHCI_AUTO_CMD23;
-+}
-+
-+static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-+{
-+	dwcmshc_check_auto_cmd23(mmc, mrq);
-+
-+	sdhci_request(mmc, mrq);
-+}
-+
- static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
- 				      unsigned int timing)
- {
-@@ -133,6 +158,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
-=20
- 	sdhci_get_of_property(pdev);
-=20
-+	host->mmc_host_ops.request =3D dwcmshc_request;
-+
- 	err =3D sdhci_add_host(host);
- 	if (err)
- 		goto err_clk;
---=20
-2.30.0.rc2
+Per my understanding, ADMA3 is focusing on the host side while the emmc CQ
+focuses on emmc card side, they don't conflict with each other. But current
+mmc_blk_cqe_issue_rw_rq() goes through either hsq or cqe code path but not both.
+
+So how can ADMA3 and CQE be used at the same time?
+
+Thanks in advance
 
