@@ -2,93 +2,150 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06C0FC433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 06:43:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14528C43381
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 07:55:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CB92D22288
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 06:43:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E1C8C2246B
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 07:55:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726218AbgLaGm5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Dec 2020 01:42:57 -0500
-Received: from m43-15.mailgun.net ([69.72.43.15]:48315 "EHLO
-        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726037AbgLaGm5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Dec 2020 01:42:57 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1609396953; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=OG7q1REiQSPkTlES34Ckv8c4QBwurXTi+jB+GQDEsKI=; b=xVYVDmL/Xm+peiHKhSpFPm6Hp0a3e1pBb36mUcZm4XBAtuF4fpzuqBN8B+WD6tM3yhutHS7F
- MgoNU2cj9Z1Vgi+qowkIVXBt/rkY2tr0lyeVYh0SzXJITLzfrLsh3TtAf6hyOeyjmSB6tfpm
- M3qwVphrXnakMZhA0jpNGYC3Yfw=
-X-Mailgun-Sending-Ip: 69.72.43.15
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n04.prod.us-east-1.postgun.com with SMTP id
- 5fed72bd584481b01bdb3189 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 31 Dec 2020 06:42:05
- GMT
-Sender: vbadigan=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id B26A7C43462; Thu, 31 Dec 2020 06:42:04 +0000 (UTC)
-Received: from [192.168.1.7] (unknown [117.198.144.215])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 84A56C433CA;
-        Thu, 31 Dec 2020 06:42:00 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 84A56C433CA
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH] mmc: sdhci-msm: Fix possible NULL pointer exception
-To:     Md Sadre Alam <mdalam@codeaurora.org>, bjorn.andersson@linaro.org,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     sricharan@codeaurora.org
-References: <1608626913-16675-1-git-send-email-mdalam@codeaurora.org>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <9687f027-7a5d-2959-82fe-96e68d59c1ab@codeaurora.org>
-Date:   Thu, 31 Dec 2020 12:11:52 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
+        id S1726354AbgLaHz0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Dec 2020 02:55:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44042 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726322AbgLaHz0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Dec 2020 02:55:26 -0500
+Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 445A9C06179C
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Dec 2020 23:54:46 -0800 (PST)
+Received: by mail-pl1-x632.google.com with SMTP id be12so9752165plb.4
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Dec 2020 23:54:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=LjRECRtXIzwtRi7U4uWbCOAACvteq5kQEsUibs961Aw=;
+        b=eRyeXnAgxzHv2sIST/aF1FE0S5bB0fG5s3OFAU9Mig/dUKdY5CLYRbIz7fOmO+Q4+d
+         o6eeuqqNT8nzu5n82t3N+VgJhnvemmvg2xzLahiXRVHWSB8im9hJw5x51ytnFpTzBxAc
+         PqgXoXWPGBSpxcM7OVvbkzxbQ+sGszr8pMr1ciwHU2WCDPSg6k4Nw4jqan4UjA0l6i2z
+         TwfOii3APxx1q2r7/pAUVdyyH5PmQkBFV0drfCZedZbmTKDrzOMWWU3t7ol0I+UZAldX
+         WJCpif5reqZ3/IpIqFraKYhl0F8sWyD7GukX1qS6Ba0nGbupRe4gUvHqRV5QLNvKGSnp
+         mx2A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=LjRECRtXIzwtRi7U4uWbCOAACvteq5kQEsUibs961Aw=;
+        b=q01CRB8zmmNZRzL/2SzgNz49NrWMbO5zgV6abojCZW2eNT0iAScPx0ChMqlFn+3V1J
+         hzBiX94WnSNWaEmgv82dqIPbdq1duSwkAHtbOMbDqTvIUyMvf/SPq15QYxnXqV1vEbz2
+         zoHJ3LM+O88pfo6oi+gdKH7znUa32RfaG9RXD3vlMc7gwHkiCaJDAHl8ewkhyWXu4qgU
+         3HF2J+VHRooJ1TIeAIZI6Eteh7cmEcc4n9VjPggVejWGOhvUWGzM5mAFUSff0qKj3YjW
+         z5ZgkM3hU2zWRYYudcSEhXMGHD3bdPXq1VNRaLvwDhHFxWMGcC2QFagybQJaadNRivaY
+         VvfQ==
+X-Gm-Message-State: AOAM533uAaLp+aApxVHRfnIo21PN2Y3JGUuonTAF2+bJ6H7DYyUScU9Y
+        43YltEjp0SNKSc4KJ4q9hNW9
+X-Google-Smtp-Source: ABdhPJy5P7AJ+WidqF/ZjXD1Won5mShdQwBoju/Dg6zwADGelOsHTdEdZSA8RHSVZHyR1QuZyCNbZg==
+X-Received: by 2002:a17:90a:348f:: with SMTP id p15mr12316040pjb.125.1609401284765;
+        Wed, 30 Dec 2020 23:54:44 -0800 (PST)
+Received: from thinkpad ([2409:4072:6d1f:be3b:71a9:d2bf:a32d:897d])
+        by smtp.gmail.com with ESMTPSA id z28sm46534047pfr.140.2020.12.30.23.54.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 30 Dec 2020 23:54:43 -0800 (PST)
+Date:   Thu, 31 Dec 2020 13:24:35 +0530
+From:   Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+To:     Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Wolfram Sang <wsa@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Peter Korsgaard <peter@korsgaard.com>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v3 00/13] Add CMU/RMU/DMA/MMC/I2C support for Actions Semi
+Message-ID: <20201231075435.GG7345@thinkpad>
+References: <cover.1609263738.git.cristian.ciocaltea@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1608626913-16675-1-git-send-email-mdalam@codeaurora.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <cover.1609263738.git.cristian.ciocaltea@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Dec 29, 2020 at 11:17:15PM +0200, Cristian Ciocaltea wrote:
+> Hi,
+> 
+> This patchset brings a series of improvements for the Actions Semi S500
+> SoCs family, by adding support for Clock & Reset Management Units, DMA,
+> MMC, I2C & SIRQ controllers.
+> 
+> Please note the patches consist mostly of DTS and bindings/compatibles
+> changes, since all the work they depend on has been already merged,
+> i.e. clock fixes/additions, pinctrl driver, sirq driver.
+> 
+> For the moment, I have only enabled the features I could test on
+> RoseapplePi SBC.
+> 
 
-On 12/22/2020 2:18 PM, Md Sadre Alam wrote:
-> of_device_get_match_data returns NULL when no match.
-> So add the NULL pointer check to avoid dereference.
->
-> Signed-off-by: Md Sadre Alam <mdalam@codeaurora.org>
-> ---
+Applied all patches except the 2 dmaengine patches for v5.12. Andreas, please
+let me know if you want to do the PR this time. Else I'll proceed.
 
-Reviewed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Thanks,
+Mani
 
->   drivers/mmc/host/sdhci-msm.c | 2 ++
->   1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 9c7927b..f20e424 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2235,6 +2235,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
->   	 * the data associated with the version info.
->   	 */
->   	var_info = of_device_get_match_data(&pdev->dev);
-> +	if (!var_info)
-> +		goto pltfm_free;
->   
->   	msm_host->mci_removed = var_info->mci_removed;
->   	msm_host->restore_dll_config = var_info->restore_dll_config;
+> Thanks,
+> Cristi
+> 
+> Changes in v3:
+> - Squashed 'arm: dts: owl-s500-roseapplepi: Use UART clock from CMU' with
+>   'arm: dts: owl-s500: Set CMU clocks for UARTs', according to Mani's review
+> - Rebased series on v5.11-rc1 and dropped the already merged patches:
+>  * dt-bindings: mmc: owl: Add compatible string for Actions Semi S500 SoC
+>  * dt-bindings: i2c: owl: Convert Actions Semi Owl binding to a schema
+>  * MAINTAINERS: Update entry for Actions Semi Owl I2C binding
+>  * i2c: owl: Add compatible for the Actions Semi S500 I2C controller
+> 
+> Changes in v2:
+> - Added new bindings/compatibles for S500 DMA, MMC & I2C controllers
+> - Added support for the SIRQ controller
+> - Added new entries in MAINTAINERS
+> - Updated naming of some patches in v1
+> 
+> Cristian Ciocaltea (13):
+>   arm: dts: owl-s500: Add Clock Management Unit
+>   arm: dts: owl-s500: Set CMU clocks for UARTs
+>   arm: dts: owl-s500: Add Reset controller
+>   dt-bindings: dma: owl: Add compatible string for Actions Semi S500 SoC
+>   dmaengine: owl: Add compatible for the Actions Semi S500 DMA
+>     controller
+>   arm: dts: owl-s500: Add DMA controller
+>   arm: dts: owl-s500: Add pinctrl & GPIO support
+>   arm: dts: owl-s500: Add MMC support
+>   arm: dts: owl-s500: Add I2C support
+>   arm: dts: owl-s500: Add SIRQ controller
+>   arm: dts: owl-s500-roseapplepi: Add uSD support
+>   arm: dts: owl-s500-roseapplepi: Add I2C pinctrl configuration
+>   MAINTAINERS: Add linux-actions ML for Actions Semi Arch
+> 
+>  .../devicetree/bindings/dma/owl-dma.yaml      |   7 +-
+>  MAINTAINERS                                   |   1 +
+>  arch/arm/boot/dts/owl-s500-cubieboard6.dts    |   7 -
+>  .../arm/boot/dts/owl-s500-guitar-bb-rev-b.dts |   7 -
+>  .../arm/boot/dts/owl-s500-labrador-base-m.dts |   7 -
+>  arch/arm/boot/dts/owl-s500-roseapplepi.dts    |  97 +++++++++++-
+>  arch/arm/boot/dts/owl-s500-sparky.dts         |   7 -
+>  arch/arm/boot/dts/owl-s500.dtsi               | 140 ++++++++++++++++++
+>  drivers/dma/owl-dma.c                         |   3 +-
+>  9 files changed, 239 insertions(+), 37 deletions(-)
+> 
+> -- 
+> 2.30.0
+> 
