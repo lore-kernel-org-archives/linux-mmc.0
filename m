@@ -2,94 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B496C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Dec 2020 12:27:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06C0FC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 06:43:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C62CD22209
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Dec 2020 12:27:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CB92D22288
+	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 06:43:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726604AbgL3M1V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Dec 2020 07:27:21 -0500
-Received: from mga02.intel.com ([134.134.136.20]:3083 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726533AbgL3M1U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Dec 2020 07:27:20 -0500
-IronPort-SDR: SsEsZPna0mmIbpasSThKR3t9AbILB9ygSkPnnd6qCE1a8Ge5fUNhnJNSiiYYCbFuPspeZP4Bnh
- VLjdcoFKnzGQ==
-X-IronPort-AV: E=McAfee;i="6000,8403,9849"; a="163661995"
-X-IronPort-AV: E=Sophos;i="5.78,461,1599548400"; 
-   d="scan'208";a="163661995"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Dec 2020 04:26:38 -0800
-IronPort-SDR: 9anj3X+IkFwsOrWCkuHZEh7C7RuGTgVCejDlBCyRSoQHwA9t1d/oBl6pSR1I7Ie7iS2l3SlAT7
- K0wEfpFgyI5A==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,461,1599548400"; 
-   d="scan'208";a="347824893"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by fmsmga008.fm.intel.com with ESMTP; 30 Dec 2020 04:26:36 -0800
-Subject: Re: [RFC] how to support ADMA3 and emmc CQ and inline encryption at
- the same time
-To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org,
-        Baolin Wang <baolin.wang@linux.alibaba.com>,
-        Eric Biggers <ebiggers@google.com>,
-        Satya Tangirala <satyat@google.com>
-References: <20201229164602.2dd49d28@xhacker.debian>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <6cd19111-e4cd-6550-d841-96692498a6b6@intel.com>
-Date:   Wed, 30 Dec 2020 14:26:24 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1726218AbgLaGm5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 31 Dec 2020 01:42:57 -0500
+Received: from m43-15.mailgun.net ([69.72.43.15]:48315 "EHLO
+        m43-15.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726037AbgLaGm5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Dec 2020 01:42:57 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1609396953; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=OG7q1REiQSPkTlES34Ckv8c4QBwurXTi+jB+GQDEsKI=; b=xVYVDmL/Xm+peiHKhSpFPm6Hp0a3e1pBb36mUcZm4XBAtuF4fpzuqBN8B+WD6tM3yhutHS7F
+ MgoNU2cj9Z1Vgi+qowkIVXBt/rkY2tr0lyeVYh0SzXJITLzfrLsh3TtAf6hyOeyjmSB6tfpm
+ M3qwVphrXnakMZhA0jpNGYC3Yfw=
+X-Mailgun-Sending-Ip: 69.72.43.15
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n04.prod.us-east-1.postgun.com with SMTP id
+ 5fed72bd584481b01bdb3189 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 31 Dec 2020 06:42:05
+ GMT
+Sender: vbadigan=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id B26A7C43462; Thu, 31 Dec 2020 06:42:04 +0000 (UTC)
+Received: from [192.168.1.7] (unknown [117.198.144.215])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 84A56C433CA;
+        Thu, 31 Dec 2020 06:42:00 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 84A56C433CA
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH] mmc: sdhci-msm: Fix possible NULL pointer exception
+To:     Md Sadre Alam <mdalam@codeaurora.org>, bjorn.andersson@linaro.org,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     sricharan@codeaurora.org
+References: <1608626913-16675-1-git-send-email-mdalam@codeaurora.org>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <9687f027-7a5d-2959-82fe-96e68d59c1ab@codeaurora.org>
+Date:   Thu, 31 Dec 2020 12:11:52 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.0
 MIME-Version: 1.0
-In-Reply-To: <20201229164602.2dd49d28@xhacker.debian>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <1608626913-16675-1-git-send-email-mdalam@codeaurora.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/12/20 10:46 am, Jisheng Zhang wrote:
-> Hi,
-> 
-> Two patch series:
-> 
-> *emmc inline encryption
-> Recently Eric sent out emmc inline encryption patches, per my understanding
-> the emmc inline encryption based on CQ interface:cqhci.
-> 
-> *ADMA3 support
-> Baolin send out ADMA3 support patches: https://lkml.org/lkml/2020/4/26/125
-> which makes use of the ADMA3 transfer in mmc software queue.
-> 
-> Per my understanding, ADMA3 is focusing on the host side while the emmc CQ
-> focuses on emmc card side, they don't conflict with each other. But current
-> mmc_blk_cqe_issue_rw_rq() goes through either hsq or cqe code path but not both.
-> 
-> So how can ADMA3 and CQE be used at the same time?
-> 
-> Thanks in advance
-> 
 
-The mmc block driver has a CQE *interface* based around struct mmc_cqe_ops,
-which was designed for JEDEC eMMC CQHCI.  CQHCI is a host side hardware
-command queue engine and it now supports hardware inline encryption.  CQHCI
-can only be used with eMMCs that support command queuing.
+On 12/22/2020 2:18 PM, Md Sadre Alam wrote:
+> of_device_get_match_data returns NULL when no match.
+> So add the NULL pointer check to avoid dereference.
+>
+> Signed-off-by: Md Sadre Alam <mdalam@codeaurora.org>
+> ---
 
-The mmc block driver CQE interface was later also adopted for a software
-based queue called hsq.  hsq does not support eMMC command queuing.
+Reviewed-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
 
-Command queuing is an eMMC card feature.  It does not require CQHCI although
-that is all we support at the moment.
-
-ADMA3 is a hardware host-side interface that conflicts with CQHCI.  ADMA3
-can be used with both SD cards and eMMC and does not require that a card
-supports command queuing.
+>   drivers/mmc/host/sdhci-msm.c | 2 ++
+>   1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 9c7927b..f20e424 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2235,6 +2235,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>   	 * the data associated with the version info.
+>   	 */
+>   	var_info = of_device_get_match_data(&pdev->dev);
+> +	if (!var_info)
+> +		goto pltfm_free;
+>   
+>   	msm_host->mci_removed = var_info->mci_removed;
+>   	msm_host->restore_dll_config = var_info->restore_dll_config;
