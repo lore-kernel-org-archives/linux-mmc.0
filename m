@@ -5,56 +5,56 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12B62C4332B
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 16:59:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8434C43142
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 16:59:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D3CB6224B2
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 16:59:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BFD2B22255
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 16:59:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727687AbhAAQ6i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Jan 2021 11:58:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36188 "EHLO
+        id S1727730AbhAAQ7C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Jan 2021 11:59:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36252 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727143AbhAAQ6g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jan 2021 11:58:36 -0500
-Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A690FC0613C1;
-        Fri,  1 Jan 2021 08:57:56 -0800 (PST)
-Received: by mail-pl1-x636.google.com with SMTP id e2so11239376plt.12;
-        Fri, 01 Jan 2021 08:57:56 -0800 (PST)
+        with ESMTP id S1727143AbhAAQ7B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jan 2021 11:59:01 -0500
+Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B663EC061575;
+        Fri,  1 Jan 2021 08:58:21 -0800 (PST)
+Received: by mail-pg1-x532.google.com with SMTP id p18so14716948pgm.11;
+        Fri, 01 Jan 2021 08:58:21 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=F/WPpPl1Y2V+ZuQ/3f5gGliaIHp/D14siqwLKMznygY=;
-        b=ENVma3D0wKYDd0nhKbTeMlxg5anuR2s5IWLvunZO/1fBJgKY5iNCetO+aqVXUivOnw
-         qlAaOGctYK5f8YLteGp1y+os+ACP4lTYrmUW+jVcnd198hEQSVBPTmylm6Nyl3mMd0X/
-         2cnxylfaWb0KdeQV/K4LTwp3elEVWu7njUlFVAf8sqsWY4wpx1tGe8ZkjY+1kK/V1lzd
-         lNebxa4G90GYtHFb2C/pZpw3aVjSiaZntZFUCk9Hqmu5wa9dNEBhE3BBHx9mRxGIeaRd
-         4/6gDJ3/n4IG82Jzcy5e8W66PUMONsn4PvUo1OMtymZP80gSW4ARkXZbSlLcXthfqm3o
-         PAYQ==
+        bh=EU47YshFMQ8A+mGEaPyqmbVPBnHFsI5ipdwKtLiSz4s=;
+        b=JufK/luBOCo/s5ncql0W3V2XyvhEB592ZNBUn2W/RkDG9Me7l06Y0x54pfiJYOiA9L
+         +1STzuc/0vuxMjdPmEg7VWuyXUQ/1Kbp92ii/iTyrEjTH0jFh/7/dSiC5a2VYP9163JY
+         u1j9ImuwwUpQiF/JuO8OJg75aMAWfphxIhNiyZuh5tkmOy3YG4GADymLHnzgbmN3oB5z
+         9pqGK5SaSEXtZx18hZaKT3W812sqmmAM4nuUwhekWoztYibraXxVbkPdE8TxvSIa/JBh
+         G92dtdDhZ++SjZQSX9dd1bwbRtIRvrFqO0e22jc4+L7xneOb0zYNnihbOmhnnw9lBReU
+         lGTw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=F/WPpPl1Y2V+ZuQ/3f5gGliaIHp/D14siqwLKMznygY=;
-        b=iYODG+ycFkVlbWILQC4epLVH1JkY/2QNY0kVR3V4NSO6Vs+QDW2VQVWilzvpTjU9rV
-         vtayT9LHZjzzeb2XwNFd/VT52jJ02mC/5SXiB/hAf1o0Ov0k1TW2CwcfJOM8Ks5n+Vos
-         94c/b1J98m3XmsxLcK2xSoakqg6bpWECz3/AEyjz0IslL0QQeP4jOFrR2K7kTi/lBGG9
-         C3V/Bj+OJllyRTkRNOYUfTpBwr6ZDaKRCWgY8kTV0AfcmP5pqCvhHEKqChwg149CNk+g
-         oX8U7Mt1uk3veVk2p4bxDzOf5/GXI06RC5qZ6mn+rkUTAqqwe0ZDA7e4w4EAfGc35POK
-         UVeA==
-X-Gm-Message-State: AOAM530YICrXKzs7k4cxluzYDh4fSDM7qNMat1Oc3vpGiN0a6muYZ5p8
-        DxVBkaLHuCOiJycKYYfqKWo=
-X-Google-Smtp-Source: ABdhPJwN3a+tylYYOkBWZhvnWgkugep3Fs+zAJ5RKRkuMyfw7Ml6JnvpNbMtmrf2eIesHL27ttl/Ug==
-X-Received: by 2002:a17:90b:224a:: with SMTP id hk10mr18256443pjb.81.1609520276252;
-        Fri, 01 Jan 2021 08:57:56 -0800 (PST)
+        bh=EU47YshFMQ8A+mGEaPyqmbVPBnHFsI5ipdwKtLiSz4s=;
+        b=b7fculnGKY6E3dUl+xFcPPr+9XuiWCoKEixVCaWMsikhF3MxMm3eIUhve/cO8PrMXf
+         OpMzEALdYxnF3QH/Hkq3h+WT5Q8weabsSnTR9vpOm/3eiEAZMbg3NtPgILKY9z5oyVuk
+         Et80s6qdmb5MDEuRaP/uCYJgxcZByMhsf2gogSJFE6pQrr0Vw8Cc6PiWB9DcqDtoLHYv
+         qntoev84839FtzAsn0eeVMhCT5T499Cf6QY026GNOAcvuZ544AVz3SdLX8w/J1NWD2k+
+         TeEC8WakbDlIWca9ryvMX+ldNwm4Ch84juTNftjevGvVzN4/4TnPOam1RmoVrJ9rrZo4
+         tI3A==
+X-Gm-Message-State: AOAM530urxNL/J92+mypWqjYSkXojqG6GCkAD7oYC3LVd1AQxPdUOtN2
+        UPPVTYHGW9jMQfSjpaaYNfA=
+X-Google-Smtp-Source: ABdhPJxkWvPaC3TTqrNU9bq91jdUwLxITK1x75Ku00AykTLvX4miBL1IQVS5J7ATWj9I5ZVs2YXyRg==
+X-Received: by 2002:a63:3d47:: with SMTP id k68mr59317193pga.218.1609520301362;
+        Fri, 01 Jan 2021 08:58:21 -0800 (PST)
 Received: from localhost.localdomain ([43.255.31.23])
-        by smtp.gmail.com with ESMTPSA id 84sm50002729pfy.9.2021.01.01.08.57.44
+        by smtp.gmail.com with ESMTPSA id 84sm50002729pfy.9.2021.01.01.08.58.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Jan 2021 08:57:55 -0800 (PST)
+        Fri, 01 Jan 2021 08:58:20 -0800 (PST)
 From:   Yangtao Li <tiny.windzz@gmail.com>
 To:     myungjoo.ham@samsung.com, kyungmin.park@samsung.com,
         cw00.choi@samsung.com, krzk@kernel.org, shawnguo@kernel.org,
@@ -91,9 +91,9 @@ Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
         linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
-Subject: [PATCH 11/31] mmc: sdhci-msm: fix potential mem leak in sdhci_msm_probe()
-Date:   Fri,  1 Jan 2021 16:54:47 +0000
-Message-Id: <20210101165507.19486-12-tiny.windzz@gmail.com>
+Subject: [PATCH 13/31] spi: spi-qcom-qspi: fix potential mem leak in qcom_qspi_probe()
+Date:   Fri,  1 Jan 2021 16:54:49 +0000
+Message-Id: <20210101165507.19486-14-tiny.windzz@gmail.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210101165507.19486-1-tiny.windzz@gmail.com>
 References: <20210101165507.19486-1-tiny.windzz@gmail.com>
@@ -106,37 +106,38 @@ dev_pm_opp_of_add_table() got error.
 
 Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 ---
- drivers/mmc/host/sdhci-msm.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ drivers/spi/spi-qcom-qspi.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 9c7927b03253..094ef95f5ecc 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2291,9 +2291,12 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 
+diff --git a/drivers/spi/spi-qcom-qspi.c b/drivers/spi/spi-qcom-qspi.c
+index 8863be370884..915ae115d8c1 100644
+--- a/drivers/spi/spi-qcom-qspi.c
++++ b/drivers/spi/spi-qcom-qspi.c
+@@ -536,9 +536,12 @@ static int qcom_qspi_probe(struct platform_device *pdev)
+ 		return PTR_ERR(ctrl->opp_table);
  	/* OPP table is optional */
  	ret = dev_pm_opp_of_add_table(&pdev->dev);
 -	if (ret && ret != -ENODEV) {
--		dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
--		goto opp_put_clkname;
+-		dev_err(&pdev->dev, "invalid OPP table in device tree\n");
+-		goto exit_probe_put_clkname;
 +	if (ret) {
-+		dev_pm_opp_put_clkname(msm_host->opp_table);
++		dev_pm_opp_put_clkname(ctrl->opp_table);
 +		if (ret != -ENODEV) {
-+			dev_err(&pdev->dev, "Invalid OPP table in Device tree\n");
-+			goto bus_clk_disable;
++			dev_err(&pdev->dev, "invalid OPP table in device tree\n");
++			return ret;
 +		}
  	}
  
- 	/* Vote for maximum clock rate for maximum performance */
-@@ -2461,7 +2464,6 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 				   msm_host->bulk_clks);
- opp_cleanup:
+ 	pm_runtime_use_autosuspend(dev);
+@@ -551,8 +554,6 @@ static int qcom_qspi_probe(struct platform_device *pdev)
+ 
+ 	pm_runtime_disable(dev);
  	dev_pm_opp_of_remove_table(&pdev->dev);
--opp_put_clkname:
- 	dev_pm_opp_put_clkname(msm_host->opp_table);
- bus_clk_disable:
- 	if (!IS_ERR(msm_host->bus_clk))
+-
+-exit_probe_put_clkname:
+ 	dev_pm_opp_put_clkname(ctrl->opp_table);
+ 
+ 	return ret;
 -- 
 2.25.1
 
