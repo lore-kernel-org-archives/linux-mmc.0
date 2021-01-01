@@ -2,182 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E1D9C433E6
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 17:13:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 850F0C4332E
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 16:56:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 15B75223E8
-	for <linux-mmc@archiver.kernel.org>; Thu, 31 Dec 2020 17:13:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5D5FC22228
+	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 16:56:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726314AbgLaRNf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 31 Dec 2020 12:13:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44690 "EHLO
+        id S1727211AbhAAQ4S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 1 Jan 2021 11:56:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726952AbgLaRNe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 31 Dec 2020 12:13:34 -0500
-Received: from mail-pf1-x42a.google.com (mail-pf1-x42a.google.com [IPv6:2607:f8b0:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 672D7C061575
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Dec 2020 09:12:54 -0800 (PST)
-Received: by mail-pf1-x42a.google.com with SMTP id t8so11495347pfg.8
-        for <linux-mmc@vger.kernel.org>; Thu, 31 Dec 2020 09:12:54 -0800 (PST)
+        with ESMTP id S1727115AbhAAQ4R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jan 2021 11:56:17 -0500
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BC9AC061573;
+        Fri,  1 Jan 2021 08:55:37 -0800 (PST)
+Received: by mail-pj1-x102e.google.com with SMTP id n3so3609507pjm.1;
+        Fri, 01 Jan 2021 08:55:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:user-agent:in-reply-to:references:mime-version
-         :content-transfer-encoding:subject:to:cc:from:message-id;
-        bh=7hwCMHPUw8k2tez5UN8MrGomr410FrSH66vnoa/gs8k=;
-        b=DzVZ6cS/WPYndni2FAhHfs6v8YyCxlPtCjiNHuBzc6ObXYrPpjy65EYNo7mQlXQ7S1
-         KL8jRcXg70EhlUzq8m7xewLdVcoQnFHohAunGv0vLTiWvucY3DMDRSxjFhERXZGg3h8/
-         qNEoDC2CJlIxRJttmjpRm9xBYYSO/7IaGnBcr+16zONVJagMnzK25TDF22diOe/T0AZH
-         oJPIfJKIpTnHG1l2cqEN6iip3kL5XPD45oca5a8jQc2Tj7dvCjbGtHPn+o2wmM3xvobV
-         4/4jWOMHvKXONDKO4A0BeFXMZLeuce6O840geX9mBrNlI2ehUaRfN0dNpeHpsmlb+ljp
-         R9zA==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=L/gCv/bt29Lids4NqNMCGnupZanWu1rzMA+oLszbsEM=;
+        b=fVzoGZOLGPB0P1BXu3jr26HnZLLXZ13i/G70DkLSPqNdxyinjBjU2Z8rq8j/or/Jtd
+         5Wz6/lOt1FPHGcNde6aIj752AwkaDDx3J2kknebedpgJ7gQ0V/NsaWEGSpQQOVNUXVih
+         wwYz3C6VExmF+lZLOK6aeAI12qICJZIhU8BuyY26XSkzoxpVMzofKBuzflyIx7zLelwa
+         NQvI/r5l33gJXaVEf7d4Q4CAFP19BcG8onF0cung1F4sC1rauOMV5Qx3MaIynva9rwF+
+         j04ivImQN7RBpI+8+1wBd6KJmOcVJzQwveKuzrrJfTHq8f5ZifRWTZ/qQKLqNpzkggRm
+         qT/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:user-agent:in-reply-to:references
-         :mime-version:content-transfer-encoding:subject:to:cc:from
-         :message-id;
-        bh=7hwCMHPUw8k2tez5UN8MrGomr410FrSH66vnoa/gs8k=;
-        b=iWPzqyMkSgi55+KM6A1PUAkUpR4v9Oji+CJ1gZkSWkp5PrkXeouI7vt3NHgtJ+YyFX
-         TcIlry1nRPnTld5bwZSmZNa2Nqz2wnKtf1FJch4VcA/jL/gtHSp9bsBES/5OinZ/HSa3
-         2NsRY1mB5Cu+BsLs02j8OHJCc4ICa9JlPL4t6EZU0lnr6YvT2AS+zBxw3MKbJKPDyiqQ
-         CyXM+fHqWfHSOpI85DShFvFO7q4cfy+1b8WUa0b1eAzWmpK9/2MwHHU7a6U7Ph6nxrUM
-         BwE/GGnL/yytT94OqBYuchpPm8s6BQSccJN4+DBbqEgEQqY/LponjccLjQAYlKduHdCX
-         BSlw==
-X-Gm-Message-State: AOAM5301B5FIgqIqhB/ZxXhUOkNNEArJ/y23MfbE6OY7tm5/Kev/x41E
-        JxRUR7ZYLoamHfDJkuUHQhbu
-X-Google-Smtp-Source: ABdhPJybDRQx7oYIX3ts8hYbGDZuPzkEURTCULUexr4yEQUuhgTkltP8lytioXqGHbsfT9rkE1854w==
-X-Received: by 2002:aa7:97b9:0:b029:1ae:2731:a769 with SMTP id d25-20020aa797b90000b02901ae2731a769mr2426901pfq.46.1609434773569;
-        Thu, 31 Dec 2020 09:12:53 -0800 (PST)
-Received: from ?IPv6:2409:4072:6c88:26c1:e5d9:a3a9:ff41:ef69? ([2409:4072:6c88:26c1:e5d9:a3a9:ff41:ef69])
-        by smtp.gmail.com with ESMTPSA id a1sm46382527pfo.56.2020.12.31.09.12.52
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 31 Dec 2020 09:12:52 -0800 (PST)
-Date:   Thu, 31 Dec 2020 22:42:47 +0530
-User-Agent: K-9 Mail for Android
-In-Reply-To: <20201231091202.GB916001@ubuntu2004>
-References: <cover.1609263738.git.cristian.ciocaltea@gmail.com> <20201231075435.GG7345@thinkpad> <20201231091202.GB916001@ubuntu2004>
-MIME-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Subject: Re: [PATCH v3 00/13] Add CMU/RMU/DMA/MMC/I2C support for Actions Semi
-To:     Cristian Ciocaltea <cristian.ciocaltea@gmail.com>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        =?ISO-8859-1?Q?Andreas_F=E4rber?= <afaerber@suse.de>,
-        Vinod Koul <vkoul@kernel.org>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Wolfram Sang <wsa@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Peter Korsgaard <peter@korsgaard.com>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org,
-        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-From:   Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Message-ID: <F54F3DEA-C1FD-444F-8C15-C8127D61D6EA@linaro.org>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=L/gCv/bt29Lids4NqNMCGnupZanWu1rzMA+oLszbsEM=;
+        b=Vjevyd/Z85zlTI6Dw1FRBwlz6/ozG3UwE5ErGOXbOwPD5r1G98S7/+8dupeuqB3OJd
+         0rc9vTdsVoyfeT2xo0R1emClT1pjjuMt7ENhl9gsnbUNBRLCG81dD0CNzSeey3thMVZp
+         /TsTSAPXHpldWNd0CpZt1OQyxLfTGmw7GO2exzfHMhzUeBT6tpXE25epKl+Lrbyybe15
+         2tdwIfuP3d+ZBLhgL8bG4Xe8TEQDQn8Ke7BpnRgUZ3P8Camw3kjaHZHC80qGtvrdsaAb
+         96IbLN/kEZbj37tAEyKBRt8OJuB4VMTbV2TmrbBO/jNVmmczVrrPZfB+0jMv5tOD5I5/
+         cudQ==
+X-Gm-Message-State: AOAM5320o8nrv9oApfPAm0bPJiS+C/DavB/KHNdIf6fFvEEwOd5x+pdn
+        hGlqzqcxEcXyzGDcva2FUaM=
+X-Google-Smtp-Source: ABdhPJxs/i/JADyQO9mxNRl6CW47gkY51PoANWqV9w//PRy+AIWEsNQMMeMTfC1dzEsLBpruFAB/bw==
+X-Received: by 2002:a17:90a:c396:: with SMTP id h22mr18709651pjt.84.1609520136798;
+        Fri, 01 Jan 2021 08:55:36 -0800 (PST)
+Received: from localhost.localdomain ([43.255.31.23])
+        by smtp.gmail.com with ESMTPSA id 84sm50002729pfy.9.2021.01.01.08.55.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 01 Jan 2021 08:55:35 -0800 (PST)
+From:   Yangtao Li <tiny.windzz@gmail.com>
+To:     myungjoo.ham@samsung.com, kyungmin.park@samsung.com,
+        cw00.choi@samsung.com, krzk@kernel.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        linux-imx@nxp.com, digetx@gmail.com, thierry.reding@gmail.com,
+        jonathanh@nvidia.com, yuq825@gmail.com, airlied@linux.ie,
+        daniel@ffwll.ch, robdclark@gmail.com, sean@poorly.run,
+        robh@kernel.org, tomeu.vizoso@collabora.com, steven.price@arm.com,
+        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
+        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
+        lukasz.luba@arm.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
+        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
+        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
+        marijn.suijten@somainline.org, gustavoars@kernel.org,
+        emil.velikov@collabora.com, jonathan@marek.ca,
+        akhilpo@codeaurora.org, smasetty@codeaurora.org,
+        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
+        tanmay@codeaurora.org, tiny.windzz@gmail.com,
+        ddavenport@chromium.org, jsanka@codeaurora.org,
+        rnayak@codeaurora.org, tongtiangen@huawei.com,
+        miaoqinglang@huawei.com, khsieh@codeaurora.org,
+        abhinavk@codeaurora.org, chandanu@codeaurora.org,
+        groeck@chromium.org, varar@codeaurora.org, mka@chromium.org,
+        harigovi@codeaurora.org, rikard.falkeborn@gmail.com,
+        natechancellor@gmail.com, georgi.djakov@linaro.org,
+        akashast@codeaurora.org, parashar@codeaurora.org,
+        dianders@chromium.org
+Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
+        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+Subject: [PATCH 00/31] Introduce devm_pm_opp_* API
+Date:   Fri,  1 Jan 2021 16:54:36 +0000
+Message-Id: <20210101165507.19486-1-tiny.windzz@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi,
 
+This patchset add devm_pm_opp_set_clkname, devm_pm_opp_put_clkname,
+devm_pm_opp_set_regulators, devm_pm_opp_put_regulators,
+devm_pm_opp_set_supported_hw, devm_pm_opp_of_add_table and
+devm_pm_opp_register_notifier.
 
-On 31 December 2020 2:42:02 PM IST, Cristian Ciocaltea <cristian=2Eciocalt=
-ea@gmail=2Ecom> wrote:
->On Thu, Dec 31, 2020 at 01:24:35PM +0530, Manivannan Sadhasivam wrote:
->> On Tue, Dec 29, 2020 at 11:17:15PM +0200, Cristian Ciocaltea wrote:
->> > Hi,
->> >=20
->> > This patchset brings a series of improvements for the Actions Semi
->S500
->> > SoCs family, by adding support for Clock & Reset Management Units,
->DMA,
->> > MMC, I2C & SIRQ controllers=2E
->> >=20
->> > Please note the patches consist mostly of DTS and
->bindings/compatibles
->> > changes, since all the work they depend on has been already merged,
->> > i=2Ee=2E clock fixes/additions, pinctrl driver, sirq driver=2E
->> >=20
->> > For the moment, I have only enabled the features I could test on
->> > RoseapplePi SBC=2E
->> >=20
->>=20
->> Applied all patches except the 2 dmaengine patches for v5=2E12=2E
->Andreas, please
->> let me know if you want to do the PR this time=2E Else I'll proceed=2E
->
->Thank you, Mani!
->The dmaengine patches should be picked up by Vinod, right?
->
+Yangtao Li (31):
+  opp: Add devres wrapper for dev_pm_opp_set_clkname and
+    dev_pm_opp_put_clkname
+  opp: Add devres wrapper for dev_pm_opp_set_regulators and
+    dev_pm_opp_put_regulators
+  opp: Add devres wrapper for dev_pm_opp_set_supported_hw
+  opp: Add devres wrapper for dev_pm_opp_of_add_table
+  opp: Add devres wrapper for dev_pm_opp_register_notifier
+  serial: qcom_geni_serial: fix potential mem leak in
+    qcom_geni_serial_probe()
+  serial: qcom_geni_serial: convert to use devm_pm_opp_* API
+  spi: spi-qcom-qspi: fix potential mem leak in spi_geni_probe()
+  spi: spi-qcom-qspi: fix potential mem leak in spi_geni_probe()
+  qcom-geni-se: remove opp_table
+  mmc: sdhci-msm: fix potential mem leak in sdhci_msm_probe()
+  mmc: sdhci-msm: convert to use devm_pm_opp_* API
+  spi: spi-qcom-qspi: fix potential mem leak in qcom_qspi_probe()
+  spi: spi-qcom-qspi: convert to use devm_pm_opp_* API
+  drm/msm: fix potential mem leak
+  drm/msm: convert to use devm_pm_opp_* API and remove dp_ctrl_put
+  drm/lima: convert to use devm_pm_opp_* API
+  drm/lima: remove unneeded devm_devfreq_remove_device()
+  drm/panfrost: convert to use devm_pm_opp_* API
+  media: venus: fix error check in core_get_v4()
+  media: venus: convert to use devm_pm_opp_* API
+  memory: samsung: exynos5422-dmc: fix return error in
+    exynos5_init_freq_table
+  memory: samsung: exynos5422-dmc: convert to use devm_pm_opp_* API
+  memory: tegra20: convert to use devm_pm_opp_* API
+  memory: tegra30: convert to use devm_pm_opp_* API
+  PM / devfreq: tegra30: convert to use devm_pm_opp_* API
+  PM / devfreq: rk3399_dmc: convert to use devm_pm_opp_* API
+  PM / devfreq: imx8m-ddrc: convert to use devm_pm_opp_* API
+  PM / devfreq: imx-bus: convert to use devm_pm_opp_* API
+  PM / devfreq: exynos: convert to use devm_pm_opp_* API
+  PM / devfreq: convert to devm_pm_opp_register_notifier and remove
+    unused API
 
-Yes! Vinod is just back from vacation, so he will :)=20
+ drivers/devfreq/devfreq.c                     |  66 +------
+ drivers/devfreq/exynos-bus.c                  |  42 +----
+ drivers/devfreq/imx-bus.c                     |  14 +-
+ drivers/devfreq/imx8m-ddrc.c                  |  15 +-
+ drivers/devfreq/rk3399_dmc.c                  |  22 +--
+ drivers/devfreq/tegra30-devfreq.c             |  21 +--
+ drivers/gpu/drm/lima/lima_devfreq.c           |  45 +----
+ drivers/gpu/drm/lima/lima_devfreq.h           |   2 -
+ drivers/gpu/drm/msm/adreno/a5xx_gpu.c         |   2 +-
+ drivers/gpu/drm/msm/adreno/a6xx_gmu.c         |   2 +-
+ drivers/gpu/drm/msm/adreno/adreno_gpu.c       |   2 +-
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.c       |  31 ++--
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.h       |   2 -
+ drivers/gpu/drm/msm/dp/dp_ctrl.c              |  29 +--
+ drivers/gpu/drm/msm/dp/dp_ctrl.h              |   1 -
+ drivers/gpu/drm/msm/dp/dp_display.c           |   5 +-
+ drivers/gpu/drm/msm/dsi/dsi_host.c            |  23 ++-
+ drivers/gpu/drm/panfrost/panfrost_devfreq.c   |  34 +---
+ drivers/gpu/drm/panfrost/panfrost_devfreq.h   |   1 -
+ .../media/platform/qcom/venus/pm_helpers.c    |  22 +--
+ drivers/memory/samsung/exynos5422-dmc.c       |  13 +-
+ drivers/memory/tegra/tegra20-emc.c            |  29 +--
+ drivers/memory/tegra/tegra30-emc.c            |  29 +--
+ drivers/mmc/host/sdhci-msm.c                  |  27 ++-
+ drivers/opp/core.c                            | 173 ++++++++++++++++++
+ drivers/opp/of.c                              |  36 ++++
+ drivers/spi/spi-geni-qcom.c                   |  23 ++-
+ drivers/spi/spi-qcom-qspi.c                   |  25 ++-
+ drivers/tty/serial/qcom_geni_serial.c         |  31 ++--
+ include/linux/devfreq.h                       |  23 ---
+ include/linux/pm_opp.h                        |  38 ++++
+ include/linux/qcom-geni-se.h                  |   2 -
+ 32 files changed, 402 insertions(+), 428 deletions(-)
 
-Thanks,=20
-Mani
+-- 
+2.25.1
 
->> Thanks,
->> Mani
->>=20
->> > Thanks,
->> > Cristi
->> >=20
->> > Changes in v3:
->> > - Squashed 'arm: dts: owl-s500-roseapplepi: Use UART clock from
->CMU' with
->> >   'arm: dts: owl-s500: Set CMU clocks for UARTs', according to
->Mani's review
->> > - Rebased series on v5=2E11-rc1 and dropped the already merged
->patches:
->> >  * dt-bindings: mmc: owl: Add compatible string for Actions Semi
->S500 SoC
->> >  * dt-bindings: i2c: owl: Convert Actions Semi Owl binding to a
->schema
->> >  * MAINTAINERS: Update entry for Actions Semi Owl I2C binding
->> >  * i2c: owl: Add compatible for the Actions Semi S500 I2C
->controller
->> >=20
->> > Changes in v2:
->> > - Added new bindings/compatibles for S500 DMA, MMC & I2C
->controllers
->> > - Added support for the SIRQ controller
->> > - Added new entries in MAINTAINERS
->> > - Updated naming of some patches in v1
->> >=20
->> > Cristian Ciocaltea (13):
->> >   arm: dts: owl-s500: Add Clock Management Unit
->> >   arm: dts: owl-s500: Set CMU clocks for UARTs
->> >   arm: dts: owl-s500: Add Reset controller
->> >   dt-bindings: dma: owl: Add compatible string for Actions Semi
->S500 SoC
->> >   dmaengine: owl: Add compatible for the Actions Semi S500 DMA
->> >     controller
->> >   arm: dts: owl-s500: Add DMA controller
->> >   arm: dts: owl-s500: Add pinctrl & GPIO support
->> >   arm: dts: owl-s500: Add MMC support
->> >   arm: dts: owl-s500: Add I2C support
->> >   arm: dts: owl-s500: Add SIRQ controller
->> >   arm: dts: owl-s500-roseapplepi: Add uSD support
->> >   arm: dts: owl-s500-roseapplepi: Add I2C pinctrl configuration
->> >   MAINTAINERS: Add linux-actions ML for Actions Semi Arch
->> >=20
->> >  =2E=2E=2E/devicetree/bindings/dma/owl-dma=2Eyaml      |   7 +-
->> >  MAINTAINERS                                   |   1 +
->> >  arch/arm/boot/dts/owl-s500-cubieboard6=2Edts    |   7 -
->> >  =2E=2E=2E/arm/boot/dts/owl-s500-guitar-bb-rev-b=2Edts |   7 -
->> >  =2E=2E=2E/arm/boot/dts/owl-s500-labrador-base-m=2Edts |   7 -
->> >  arch/arm/boot/dts/owl-s500-roseapplepi=2Edts    |  97 +++++++++++-
->> >  arch/arm/boot/dts/owl-s500-sparky=2Edts         |   7 -
->> >  arch/arm/boot/dts/owl-s500=2Edtsi               | 140
->++++++++++++++++++
->> >  drivers/dma/owl-dma=2Ec                         |   3 +-
->> >  9 files changed, 239 insertions(+), 37 deletions(-)
->> >=20
->> > --=20
->> > 2=2E30=2E0
->> >=20
-
---=20
-Sent from my Android device with K-9 Mail=2E Please excuse my brevity=2E
