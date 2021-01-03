@@ -5,56 +5,55 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FE95C43219
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 17:01:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1F81C433DB
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jan 2021 03:55:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36081221FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  1 Jan 2021 17:01:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 96A4620936
+	for <linux-mmc@archiver.kernel.org>; Sun,  3 Jan 2021 03:55:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727177AbhAARBU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 1 Jan 2021 12:01:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36628 "EHLO
+        id S1726253AbhACDzQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 2 Jan 2021 22:55:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727135AbhAARBT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 1 Jan 2021 12:01:19 -0500
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F7E8C061573;
-        Fri,  1 Jan 2021 09:00:39 -0800 (PST)
-Received: by mail-pj1-x1035.google.com with SMTP id v1so6300300pjr.2;
-        Fri, 01 Jan 2021 09:00:39 -0800 (PST)
+        with ESMTP id S1725827AbhACDzQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 2 Jan 2021 22:55:16 -0500
+Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C21E9C061573;
+        Sat,  2 Jan 2021 19:54:35 -0800 (PST)
+Received: by mail-pg1-x529.google.com with SMTP id p18so16569340pgm.11;
+        Sat, 02 Jan 2021 19:54:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=8tu+qmTBn19dJ5gPJsn24LjDSvHBfNF8Z6WeRyPnF0o=;
-        b=mtSShWOVItM7MqI3Ko7jFbYK4A8hl8pYqozq5KjocZVA23lW9QNonT8PJHA8dcPpTT
-         hLP9GVa6SmvfValVy1c405ZwzEV0OL2w8EJvYuIXLPZD3567ExhOEf1QTA05xlhKsnlM
-         CdAiTFViPyb7B88OR5kDre0PQPAl/MVnvcCHw2erWjrZtZCkqQKVwutd47duJlNxQSIX
-         uE9ZZYKMgni5Z5Oli1DM/qZA/Gbmg0iVW/cWOXgZWa4M4npQ6m2tKmWgL7TKn2N2Nsdv
-         uQY1BK6fWL6j/nVNJ+loYM+pc2TfwSMBKRZoWz+r9WXKAB71He02AHNrxbpUVW0AoF6S
-         4B5g==
+        h=from:to:cc:subject:date:message-id;
+        bh=upHhoKMhwNycSsUSkWTDTZGGHEnMJMcgkEoZXl3LtcE=;
+        b=A0sZKpRKEBmumkd+j40q8l8w0e6Orse8JgJFhy/apGOP6iLFx6yB45mUGQ3MmclC6c
+         aR+upeNFhOcGYl2SuGmLC68lbqb66N0Luch93M4VZnz8y5nA00724FAkKZ1GsUFgn0nE
+         NttE5XTiTT1LJDurD4XhqCx9pZKnjMKKbMWWWzDaztkfl9FH/OLZzkkJjrTjif7SmuJK
+         KzOZuPdeTHhfLh7oOVF89U3FWwLKk8mSCnt6MluhZWT6iu9SQ12bBD08gr36rkuw8W46
+         d1TIUxb/h0PXu/rb0qbgH/H7X84Yw1SMEI+bJzPaLWqdLFW97uTXRl+bkRgHCgr4s43Y
+         Mg0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=8tu+qmTBn19dJ5gPJsn24LjDSvHBfNF8Z6WeRyPnF0o=;
-        b=DVy5D/1FDfbWfqMXee4TjcnLts6uV8rwFOvxTMTmFhni7bU2z/pOAdyGjzXQa5XE7Q
-         5Tuj8mL8zWmyZF3d6B8RZOJIBc2nbFsm2+vps32ufUXCosy9HN9LRCgNXDfVzSSmQm0G
-         o+S5UiVoa/Hkp/9eOyDsLdwBX28pRX6qRxN2wQsm5vCP46T03Y0OCQ6PS5OYQ1fHaDjc
-         gZdfWelmhW5LUswTOK8/JIxzAPFq2Avrl2wFbtfJFIAIDH8vhkyLn6k6/Ij6y7yY875b
-         YPKjb3oihatGA0UPQXGRHsf79OIWN5oJDnCyoe6aAfFqNWbpA4hCzVtMafExNd3u6zj5
-         QOcQ==
-X-Gm-Message-State: AOAM531Ad2yEZTxTxDtEf4y3ZXxDucpau4mCTGCd4YPoy22yFFcTyS85
-        0OYdEOo/XY/qBirFHi/37Mc=
-X-Google-Smtp-Source: ABdhPJxdcJSkAjLz7kwVtZIMVT7S93VrpqFpUMA6/+FN8KvXEJO8cvrLmP3NDvFgN9RfnewK7jzAFg==
-X-Received: by 2002:a17:90b:46ca:: with SMTP id jx10mr18760999pjb.208.1609520438671;
-        Fri, 01 Jan 2021 09:00:38 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=upHhoKMhwNycSsUSkWTDTZGGHEnMJMcgkEoZXl3LtcE=;
+        b=lCfONExwz5ZRx9vWIjiR0CEDym+ESHPXT+evZyTlXfg31hFJZhLVF4NljcThy0I25C
+         A48JlCz2vtv5HfTeXo0CG8CDLAEoGUgGCFxGvkrgLTarAhevTWsl9NS0h+AbFYI6u5yX
+         1/0e1MU0Pogn31FucBX2CE+LybV89a7cx8sojTzZKRT+itzM6eMOZg7mAPaL5T0x6Vt4
+         EolqO8gQzq2kJHdtfHr2xDzikbfndl3uAYMhepcLgB/wwYPRiegZQPfmysugAf41E6cQ
+         s+X8zIhKxRFIFuELDZuGj0sM3X4TEUo7vWJEbGb1/YEiKjNaPExSKT9r3W1s8r2QVYna
+         FFzw==
+X-Gm-Message-State: AOAM533o6zj1c8az8GMplQMRTv1MwdDUXEFSk6uzGOMjtgEVSzU2WQO1
+        Uh0uyOt5mqMx+H3bgTg+fwU=
+X-Google-Smtp-Source: ABdhPJxv/KIPydC4rwftQy4xrCraXrrFy9P+M3m1ZoKozY9r6GNMFOiNFe7kIU7sHqxKl0WT+nK2fw==
+X-Received: by 2002:a65:6a09:: with SMTP id m9mr37744699pgu.51.1609646075302;
+        Sat, 02 Jan 2021 19:54:35 -0800 (PST)
 Received: from localhost.localdomain ([43.255.31.23])
-        by smtp.gmail.com with ESMTPSA id 84sm50002729pfy.9.2021.01.01.09.00.26
+        by smtp.gmail.com with ESMTPSA id s67sm14054605pgb.60.2021.01.02.19.54.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 01 Jan 2021 09:00:38 -0800 (PST)
+        Sat, 02 Jan 2021 19:54:34 -0800 (PST)
 From:   Yangtao Li <tiny.windzz@gmail.com>
 To:     myungjoo.ham@samsung.com, kyungmin.park@samsung.com,
         cw00.choi@samsung.com, krzk@kernel.org, shawnguo@kernel.org,
@@ -91,12 +90,10 @@ Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
         linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
-Subject: [PATCH 24/31] memory: tegra20: convert to use devm_pm_opp_* API
-Date:   Fri,  1 Jan 2021 16:55:00 +0000
-Message-Id: <20210101165507.19486-25-tiny.windzz@gmail.com>
+Subject: [PATCH 25/31] memory: tegra30: convert to use devm_pm_opp_* API
+Date:   Sun,  3 Jan 2021 03:54:15 +0000
+Message-Id: <20210103035415.23600-1-tiny.windzz@gmail.com>
 X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210101165507.19486-1-tiny.windzz@gmail.com>
-References: <20210101165507.19486-1-tiny.windzz@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -105,17 +102,17 @@ Use devm_pm_opp_* API to simplify code.
 
 Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 ---
- drivers/memory/tegra/tegra20-emc.c | 29 +++++++++--------------------
+ drivers/memory/tegra/tegra30-emc.c | 29 +++++++++--------------------
  1 file changed, 9 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/memory/tegra/tegra20-emc.c b/drivers/memory/tegra/tegra20-emc.c
-index 686aaf477d8a..223d9d97eb8f 100644
---- a/drivers/memory/tegra/tegra20-emc.c
-+++ b/drivers/memory/tegra/tegra20-emc.c
-@@ -911,31 +911,31 @@ static int tegra_emc_interconnect_init(struct tegra_emc *emc)
+diff --git a/drivers/memory/tegra/tegra30-emc.c b/drivers/memory/tegra/tegra30-emc.c
+index 44ac155936aa..a93d8c3629fe 100644
+--- a/drivers/memory/tegra/tegra30-emc.c
++++ b/drivers/memory/tegra/tegra30-emc.c
+@@ -1483,31 +1483,31 @@ static int tegra_emc_interconnect_init(struct tegra_emc *emc)
  static int tegra_emc_opp_table_init(struct tegra_emc *emc)
  {
- 	u32 hw_version = BIT(tegra_sku_info.soc_process_id);
+ 	u32 hw_version = BIT(tegra_sku_info.soc_speedo_id);
 -	struct opp_table *clk_opp_table, *hw_opp_table;
 +	struct opp_table *opp_table;
  	int err;
@@ -152,7 +149,7 @@ index 686aaf477d8a..223d9d97eb8f 100644
  	}
  
  	dev_info(emc->dev, "OPP HW ver. 0x%x, current clock rate %lu MHz\n",
-@@ -943,19 +943,8 @@ static int tegra_emc_opp_table_init(struct tegra_emc *emc)
+@@ -1515,19 +1515,8 @@ static int tegra_emc_opp_table_init(struct tegra_emc *emc)
  
  	/* first dummy rate-set initializes voltage state */
  	err = dev_pm_opp_set_rate(emc->dev, clk_get_rate(emc->clk));
