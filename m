@@ -2,43 +2,45 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CA81C43603
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB64EC433E6
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 20:47:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 53C9C22209
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 922DE216C4
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 20:47:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726300AbhADStt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Jan 2021 13:49:49 -0500
-Received: from mail.kernel.org ([198.145.29.99]:48270 "EHLO mail.kernel.org"
+        id S1726289AbhADUrJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Jan 2021 15:47:09 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36350 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726074AbhADSts (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 4 Jan 2021 13:49:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1D48F22225;
-        Mon,  4 Jan 2021 18:48:32 +0000 (UTC)
+        id S1726074AbhADUrJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 4 Jan 2021 15:47:09 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C4D02216C4;
+        Mon,  4 Jan 2021 20:46:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1609786112;
-        bh=G16sIENRX9EMyT17x8UvaimcQGeqHoMJpMYb9LmaK3k=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=nR7v/Ysi4UByPoRgGftY4dh5NEWtOVPS7/GJgr5f80rfojttkBR3OejCo4+ImVg95
-         JB2HXIW9mLYNWjV3mit0Kl1A75s8t8yzKC2dfIryC7q3l2rYqwzWhrDlmkI7FfKBjY
-         fDecqnTUlw4ByYOxvt+IKo1kyW3VMQH2CIl2aTZXJgJ4ztzHXzUmPAbxyg32kOvagT
-         jxcOtZ3bsWtdHb63lXVVqF3zNXkmvRgOJCCOArHFW5fZPg8rVl3T5eApFxEMgneFA5
-         U7rzs+Iz0AYNtI1kzaBh3Nn8+pJC0+4+ldpLMQLd4BB7ZrY8/4bUswIkywyfBmpurG
-         xhS9Oyt8aI6lw==
+        s=k20201202; t=1609793188;
+        bh=YqIdopmOGx1e+VJgMk2OWtmHGztHh2JIO7mbqBw+ZvA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ojDlygvzJm6AJYbApbRtXGu5fn8IHOoEsnavSY9e/5GqTUkwKASrHQkAOWGGsuHaL
+         zPgCMvdZ1mG3pkjWKWmrOOcA2HAwQSUkq5PhQULpdHrln3mUhFkSCJz5T58RlfH5Dl
+         L4Q+q3hmaW57vJiBmLD1Dza0h6gGx3lBp8r5OM2a3ojps/sWAjZRobLN9lKOLofN5G
+         +7Hq0Mz/qS5C9Ipd2xsUOIN0ibiZQ2tdvl7Jx9Pa00tWw4hMEJq4pgUwW3UG2sN+kU
+         ogb1tXgieCNFnX/hQ9+mQe5eNv3hiUe6+lOIPFf0BWAw+a91yMokFHel7RisgsH8ft
+         pH0Ia0dcFLlug==
+Date:   Mon, 4 Jan 2021 12:46:26 -0800
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
+        Ritesh Harjani <riteshh@codeaurora.org>,
         Asutosh Das <asutoshd@codeaurora.org>,
         Rob Herring <robh+dt@kernel.org>,
         Neeraj Soni <neersoni@codeaurora.org>,
@@ -46,57 +48,88 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v4 8/9] arm64: dts: qcom: sdm630: add ICE registers and clocks
-Date:   Mon,  4 Jan 2021 10:45:41 -0800
-Message-Id: <20210104184542.4616-9-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210104184542.4616-1-ebiggers@kernel.org>
-References: <20210104184542.4616-1-ebiggers@kernel.org>
+Subject: Re: [PATCH 0/8] eMMC inline encryption support
+Message-ID: <X/N+ouEtmMPYT0Qa@sol.localdomain>
+References: <20201112194011.103774-1-ebiggers@kernel.org>
+ <X7gQ9Y44iIgkiM64@sol.localdomain>
+ <CAPDyKFrXtqqj3RXJ4m666e_danpp2neRD_M+FCaMWPC+Ow2jsA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrXtqqj3RXJ4m666e_danpp2neRD_M+FCaMWPC+Ow2jsA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On Wed, Nov 25, 2020 at 10:56:42AM +0100, Ulf Hansson wrote:
+> On Fri, 20 Nov 2020 at 19:54, Eric Biggers <ebiggers@kernel.org> wrote:
+> >
+> > On Thu, Nov 12, 2020 at 11:40:03AM -0800, Eric Biggers wrote:
+> > > Hello,
+> > >
+> > > This patchset adds support for eMMC inline encryption, as specified by
+> > > the upcoming version of the eMMC specification and as already
+> > > implemented and used on many devices.  Building on that, it then adds
+> > > Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
+> > >
+> > > Inline encryption hardware improves the performance of storage
+> > > encryption and reduces power usage.  See
+> > > Documentation/block/inline-encryption.rst for more information about
+> > > inline encryption and the blk-crypto framework (upstreamed in v5.8)
+> > > which supports it.  Most mobile devices already use UFS or eMMC inline
+> > > encryption hardware; UFS support was already upstreamed in v5.9.
+> > >
+> > > Patches 1-3 add support for the standard eMMC inline encryption.
+> > >
+> > > However, as with UFS, host controller-specific patches are needed on top
+> > > of the standard support.  Therefore, patches 4-8 add Qualcomm ICE
+> > > (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
+> > >
+> > > To test this I took advantage of the recently upstreamed support for the
+> > > Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
+> > > project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
+> > > particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
+> > > a Debian chroot.  Among other things, these tests verified that the
+> > > correct ciphertext is written to disk (the same as software encryption).
+> > >
+> > > It will also be possible to add support for Mediatek eMMC inline
+> > > encryption hardware in mtk-sd, and it should be easier than the Qualcomm
+> > > hardware since the Mediatek hardware follows the standard more closely.
+> > > I.e., patches 1-3 should be almost enough for the Mediatek hardware.
+> > > However, I don't have the hardware to do this yet.
+> > >
+> > > This patchset is based on v5.10-rc3, and it can also be retrieved from
+> > > tag "mmc-crypto-v1" of
+> > > https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
+> > >
+> > > Note: the fscrypt inline encryption support is partially broken in
+> > > v5.10-rc3, so for testing a fscrypt fix needs to be applied too:
+> > > https://lkml.kernel.org/r/20201111015224.303073-1-ebiggers@kernel.org
+> > >
+> > > Eric Biggers (8):
+> > >   mmc: add basic support for inline encryption
+> > >   mmc: cqhci: rename cqhci.c to cqhci-core.c
+> > >   mmc: cqhci: add support for inline encryption
+> > >   mmc: cqhci: add cqhci_host_ops::program_key
+> > >   firmware: qcom_scm: update comment for ICE-related functions
+> > >   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+> > >   arm64: dts: qcom: sdm630: add ICE registers and clocks
+> > >   mmc: sdhci-msm: add Inline Crypto Engine support
+> >
+> > Any comments on this patchset?
+> 
+> I have been busy, but just wanted to let you know that I am moving to
+> start reviewing this series shortly.
+> 
+> I also need to catch up on the eMMC spec a bit, before I can provide
+> you with comments.
+> 
+> Kind regards
+> Uffe
 
-Add the registers and clock for the Inline Crypto Engine (ICE) to the
-device tree node for the sdhci-msm host controller on sdm630.  This
-allows sdhci-msm to support inline encryption on sdm630.
+Ulf, are you still planning to review this patchset?  I just sent out v4 of this
+patchset based on v5.11-rc2, but not a lot has changed from previous versions,
+since people have generally seemed happy with it.  Any chance that you will
+apply it for 5.12?  Thanks!
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- arch/arm64/boot/dts/qcom/sdm630.dtsi | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
-
-diff --git a/arch/arm64/boot/dts/qcom/sdm630.dtsi b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-index 37d5cc32f6b62..afb3d20c31fa0 100644
---- a/arch/arm64/boot/dts/qcom/sdm630.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-@@ -808,8 +808,9 @@ spmi_bus: spmi@800f000 {
- 		sdhc_1: sdhci@c0c4000 {
- 			compatible = "qcom,sdm630-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0x0c0c4000 0x1000>,
--				<0x0c0c5000 0x1000>;
--			reg-names = "hc", "cqhci";
-+				<0x0c0c5000 0x1000>,
-+				<0x0c0c8000 0x8000>;
-+			reg-names = "hc", "cqhci", "ice";
- 
- 			interrupts = <GIC_SPI 110 IRQ_TYPE_LEVEL_HIGH>,
- 					<GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
-@@ -817,8 +818,9 @@ sdhc_1: sdhci@c0c4000 {
- 
- 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
- 					<&gcc GCC_SDCC1_AHB_CLK>,
--					<&xo_board>;
--			clock-names = "core", "iface", "xo";
-+					<&xo_board>,
-+					<&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+			clock-names = "core", "iface", "xo", "ice";
- 
- 			pinctrl-names = "default", "sleep";
- 			pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on &sdc1_rclk_on>;
--- 
-2.30.0
-
+- Eric
