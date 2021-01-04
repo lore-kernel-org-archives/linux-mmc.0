@@ -4,33 +4,33 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A43C0C433E9
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F3A9C4332E
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7028122209
+	by mail.kernel.org (Postfix) with ESMTP id ED32421D93
 	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726148AbhADSts (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Jan 2021 13:49:48 -0500
-Received: from mail.kernel.org ([198.145.29.99]:48264 "EHLO mail.kernel.org"
+        id S1726074AbhADStt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Jan 2021 13:49:49 -0500
+Received: from mail.kernel.org ([198.145.29.99]:48266 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726019AbhADSts (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1725840AbhADSts (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Mon, 4 Jan 2021 13:49:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6EE202245C;
-        Mon,  4 Jan 2021 18:48:30 +0000 (UTC)
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9F1AA22286;
+        Mon,  4 Jan 2021 18:48:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1609786111;
-        bh=Hqn+3w4w448tHueQFmctpTuMmMzsGSSHLn+klAboTV8=;
+        s=k20201202; t=1609786110;
+        bh=BVDnmAoD0BpURKpu2oxVD5YUPrwAoEuC/MQmPFD53PE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=gGTrUKAyeJYFqAn5q/wBPGirJVPjXwkFsICzjK1BZ1HAILXC0Yf8iWa1xKIKqJXVA
-         +dHdBXIl8lq2BnK4hNldDIIbmTFXcXGoH7YSk1Gbe6K7uJQhLZcVWNrAqHSgS7Ju+Z
-         DDlb0n2dzd8AX6o6jDrf7U2ZfdDPB7ALzmXd3LM1P0A6AFwZ754J5Lbj87qPYvNnGD
-         C9PCjcaOyoU2ubwSR+J9uw+xboeYmvHL6h/ykDa7R9Hk8PDVhESyp/fe5WYn6kCewx
-         BglUWw43qoPDtqM9X9y9CE1UbU0N0s/jKR4mpj6Ykzf9W2hyL2S7PQBgLeBvGYF6uE
-         B3Nj3P+zuCPbA==
+        b=vR1grTM0RqXUmeROb/Pn7cKseJMzWPqQ1siv8NIswRl4yb/RSJ+Kt0lThLK2UlNtB
+         RUnyFoBsFSY7v1DZLkYh0M87sWu44Q60zkAC2KrJJvo5D6Ur2IPM1BhAsJGoez8W5C
+         VgfedLh8a7IpIFlb+1aosFgQ56T/e5kAuTpmLxQzUiX8mXDX8WBmpCl4bn1zWfHpWW
+         +APUBV8kfLvBsGCrFNY0iWx7CfRDosfy8HVva8mBmqGq+78AN3pieLLgMyWHUg+GNk
+         814SlG/v2aZavI0Wtz69vAnax8FgLoJhO5/+8XAAUpiGj8+esYNzLX3uGL+oOP/PED
+         9SmA6BnUp7gRw==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
@@ -46,9 +46,9 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v4 6/9] firmware: qcom_scm: update comment for ICE-related functions
-Date:   Mon,  4 Jan 2021 10:45:39 -0800
-Message-Id: <20210104184542.4616-7-ebiggers@kernel.org>
+Subject: [PATCH v4 5/9] mmc: cqhci: add cqhci_host_ops::program_key
+Date:   Mon,  4 Jan 2021 10:45:38 -0800
+Message-Id: <20210104184542.4616-6-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210104184542.4616-1-ebiggers@kernel.org>
 References: <20210104184542.4616-1-ebiggers@kernel.org>
@@ -60,51 +60,118 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-The SCM calls QCOM_SCM_ES_INVALIDATE_ICE_KEY and
-QCOM_SCM_ES_CONFIG_SET_ICE_KEY are also needed for eMMC inline
-encryption support, not just for UFS.  Update the comments accordingly.
+On Snapdragon SoCs, the Linux kernel isn't permitted to directly access
+the standard CQHCI crypto configuration registers.  Instead, programming
+and evicting keys must be done through vendor-specific SMC calls.
 
+To support this hardware, add a ->program_key() method to
+'struct cqhci_host_ops'.  This allows overriding the standard CQHCI
+crypto key programming / eviction procedure.
+
+This is inspired by the corresponding UFS crypto support, which uses
+these same SMC calls.  See commit 1bc726e26ef3 ("scsi: ufs: Add
+program_key() variant op").
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Reviewed-by: Satya Tangirala <satyat@google.com>
+Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- drivers/firmware/qcom_scm.c | 16 +++++++++++-----
- 1 file changed, 11 insertions(+), 5 deletions(-)
+ drivers/mmc/host/cqhci-crypto.c | 22 +++++++++++++---------
+ drivers/mmc/host/cqhci.h        |  4 ++++
+ 2 files changed, 17 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/firmware/qcom_scm.c b/drivers/firmware/qcom_scm.c
-index 7be48c1bec96d..f57779fc7ee93 100644
---- a/drivers/firmware/qcom_scm.c
-+++ b/drivers/firmware/qcom_scm.c
-@@ -965,8 +965,11 @@ EXPORT_SYMBOL(qcom_scm_ice_available);
-  * qcom_scm_ice_invalidate_key() - Invalidate an inline encryption key
-  * @index: the keyslot to invalidate
-  *
-- * The UFSHCI standard defines a standard way to do this, but it doesn't work on
-- * these SoCs; only this SCM call does.
-+ * The UFSHCI and eMMC standards define a standard way to do this, but it
-+ * doesn't work on these SoCs; only this SCM call does.
-+ *
-+ * It is assumed that the SoC has only one ICE instance being used, as this SCM
-+ * call doesn't specify which ICE instance the keyslot belongs to.
-  *
-  * Return: 0 on success; -errno on failure.
-  */
-@@ -995,10 +998,13 @@ EXPORT_SYMBOL(qcom_scm_ice_invalidate_key);
-  *		    units, e.g. 1 = 512 bytes, 8 = 4096 bytes, etc.
-  *
-  * Program a key into a keyslot of Qualcomm ICE (Inline Crypto Engine), where it
-- * can then be used to encrypt/decrypt UFS I/O requests inline.
-+ * can then be used to encrypt/decrypt UFS or eMMC I/O requests inline.
-+ *
-+ * The UFSHCI and eMMC standards define a standard way to do this, but it
-+ * doesn't work on these SoCs; only this SCM call does.
-  *
-- * The UFSHCI standard defines a standard way to do this, but it doesn't work on
-- * these SoCs; only this SCM call does.
-+ * It is assumed that the SoC has only one ICE instance being used, as this SCM
-+ * call doesn't specify which ICE instance the keyslot belongs to.
-  *
-  * Return: 0 on success; -errno on failure.
-  */
+diff --git a/drivers/mmc/host/cqhci-crypto.c b/drivers/mmc/host/cqhci-crypto.c
+index 98f141c8480ce..0aaa948d240b1 100644
+--- a/drivers/mmc/host/cqhci-crypto.c
++++ b/drivers/mmc/host/cqhci-crypto.c
+@@ -30,13 +30,16 @@ cqhci_host_from_ksm(struct blk_keyslot_manager *ksm)
+ 	return mmc->cqe_private;
+ }
+ 
+-static void cqhci_crypto_program_key(struct cqhci_host *cq_host,
+-				     const union cqhci_crypto_cfg_entry *cfg,
+-				     int slot)
++static int cqhci_crypto_program_key(struct cqhci_host *cq_host,
++				    const union cqhci_crypto_cfg_entry *cfg,
++				    int slot)
+ {
+ 	u32 slot_offset = cq_host->crypto_cfg_register + slot * sizeof(*cfg);
+ 	int i;
+ 
++	if (cq_host->ops->program_key)
++		return cq_host->ops->program_key(cq_host, cfg, slot);
++
+ 	/* Clear CFGE */
+ 	cqhci_writel(cq_host, 0, slot_offset + 16 * sizeof(cfg->reg_val[0]));
+ 
+@@ -51,6 +54,7 @@ static void cqhci_crypto_program_key(struct cqhci_host *cq_host,
+ 	/* Write dword 16, which includes the new value of CFGE */
+ 	cqhci_writel(cq_host, le32_to_cpu(cfg->reg_val[16]),
+ 		     slot_offset + 16 * sizeof(cfg->reg_val[0]));
++	return 0;
+ }
+ 
+ static int cqhci_crypto_keyslot_program(struct blk_keyslot_manager *ksm,
+@@ -67,6 +71,7 @@ static int cqhci_crypto_keyslot_program(struct blk_keyslot_manager *ksm,
+ 	int i;
+ 	int cap_idx = -1;
+ 	union cqhci_crypto_cfg_entry cfg = {};
++	int err;
+ 
+ 	BUILD_BUG_ON(CQHCI_CRYPTO_KEY_SIZE_INVALID != 0);
+ 	for (i = 0; i < cq_host->crypto_capabilities.num_crypto_cap; i++) {
+@@ -93,13 +98,13 @@ static int cqhci_crypto_keyslot_program(struct blk_keyslot_manager *ksm,
+ 		memcpy(cfg.crypto_key, key->raw, key->size);
+ 	}
+ 
+-	cqhci_crypto_program_key(cq_host, &cfg, slot);
++	err = cqhci_crypto_program_key(cq_host, &cfg, slot);
+ 
+ 	memzero_explicit(&cfg, sizeof(cfg));
+-	return 0;
++	return err;
+ }
+ 
+-static void cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
++static int cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+ {
+ 	/*
+ 	 * Clear the crypto cfg on the device. Clearing CFGE
+@@ -107,7 +112,7 @@ static void cqhci_crypto_clear_keyslot(struct cqhci_host *cq_host, int slot)
+ 	 */
+ 	union cqhci_crypto_cfg_entry cfg = {};
+ 
+-	cqhci_crypto_program_key(cq_host, &cfg, slot);
++	return cqhci_crypto_program_key(cq_host, &cfg, slot);
+ }
+ 
+ static int cqhci_crypto_keyslot_evict(struct blk_keyslot_manager *ksm,
+@@ -116,8 +121,7 @@ static int cqhci_crypto_keyslot_evict(struct blk_keyslot_manager *ksm,
+ {
+ 	struct cqhci_host *cq_host = cqhci_host_from_ksm(ksm);
+ 
+-	cqhci_crypto_clear_keyslot(cq_host, slot);
+-	return 0;
++	return cqhci_crypto_clear_keyslot(cq_host, slot);
+ }
+ 
+ /*
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index 8e9e8f5db5bcc..ba9387ed90eb6 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -286,6 +286,10 @@ struct cqhci_host_ops {
+ 				 u64 *data);
+ 	void (*pre_enable)(struct mmc_host *mmc);
+ 	void (*post_disable)(struct mmc_host *mmc);
++#ifdef CONFIG_MMC_CRYPTO
++	int (*program_key)(struct cqhci_host *cq_host,
++			   const union cqhci_crypto_cfg_entry *cfg, int slot);
++#endif
+ };
+ 
+ static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
 -- 
 2.30.0
 
