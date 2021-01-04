@@ -2,101 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 405D2C43331
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:07:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51C91C433E9
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 22EF3207BC
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:07:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0F7562225E
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:49:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727937AbhADSHO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Jan 2021 13:07:14 -0500
-Received: from mail-wr1-f44.google.com ([209.85.221.44]:41187 "EHLO
-        mail-wr1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727630AbhADSHO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jan 2021 13:07:14 -0500
-Received: by mail-wr1-f44.google.com with SMTP id a12so33074408wrv.8;
-        Mon, 04 Jan 2021 10:06:56 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Y4OzI0Gift9qAQwCOItPNRXBZiGMCN5H3dDmQ5W7k7k=;
-        b=CgzAg9+XozTRG4MiPHLtQzwqgZrL1SkCQU5SRe5E1IHQRraIV7bV3q16J08PL0cvW0
-         c4lML543wRu1MtxdFenwLAZKgT/gOiCTSOOoyr5KUmxb1vDRiS/uI8wfAALeCyOlRNCB
-         ZKtOiET2YK7EQQ4LDdQB92hEXuH5lzHWXD3LU3ltpjPqQ8lZDDdJAQbSzxQZd+YOePXk
-         uz/+LvKtQvx0GJoPE7Qx22UccXIu6tGW3ZE/jSr7hAIbRSCrSwI1Im3EEFu1kDiC5O+R
-         +c/G41qMAZ5+8UHHOtDBIQIw5m4LbJYe5tfBCMQyIYC4lMEC6KxIxaEStf7bgu8iueFP
-         kNdA==
-X-Gm-Message-State: AOAM531XWbht+J3JGjN1UMFXDvL1mZ3khq1wQ+H4MQjhxV2LFJHEMAAa
-        VRdpWfTCSaVth84p7xcWOgg=
-X-Google-Smtp-Source: ABdhPJwSJr+8sc9s0gJbtsMMAxXbPISgkriOlKIqFLVyMTanzET3gDdnClIP2ae3HciFRhbuw7YS/g==
-X-Received: by 2002:adf:9e47:: with SMTP id v7mr44312549wre.185.1609783591011;
-        Mon, 04 Jan 2021 10:06:31 -0800 (PST)
-Received: from kozik-lap (adsl-84-226-167-205.adslplus.ch. [84.226.167.205])
-        by smtp.googlemail.com with ESMTPSA id b7sm86189365wrv.47.2021.01.04.10.06.28
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 04 Jan 2021 10:06:29 -0800 (PST)
-Date:   Mon, 4 Jan 2021 19:06:27 +0100
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-To:     Yangtao Li <tiny.windzz@gmail.com>
-Cc:     myungjoo.ham@samsung.com, kyungmin.park@samsung.com,
-        cw00.choi@samsung.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
-        kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
-        digetx@gmail.com, thierry.reding@gmail.com, jonathanh@nvidia.com,
-        yuq825@gmail.com, airlied@linux.ie, daniel@ffwll.ch,
-        robdclark@gmail.com, sean@poorly.run, robh@kernel.org,
-        tomeu.vizoso@collabora.com, steven.price@arm.com,
-        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
-        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
-        lukasz.luba@arm.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
-        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
-        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
-        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
-        marijn.suijten@somainline.org, gustavoars@kernel.org,
-        emil.velikov@collabora.com, jonathan@marek.ca,
-        akhilpo@codeaurora.org, smasetty@codeaurora.org,
-        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
-        tanmay@codeaurora.org, ddavenport@chromium.org,
-        jsanka@codeaurora.org, rnayak@codeaurora.org,
-        tongtiangen@huawei.com, miaoqinglang@huawei.com,
-        khsieh@codeaurora.org, abhinavk@codeaurora.org,
-        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
-        mka@chromium.org, harigovi@codeaurora.org,
-        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
-        georgi.djakov@linaro.org, akashast@codeaurora.org,
-        parashar@codeaurora.org, dianders@chromium.org,
-        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-samsung-soc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
-        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
-Subject: Re: [PATCH 25/31] memory: tegra30: convert to use devm_pm_opp_* API
-Message-ID: <20210104180627.GA27043@kozik-lap>
-References: <20210103035415.23600-1-tiny.windzz@gmail.com>
+        id S1727434AbhADStH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Jan 2021 13:49:07 -0500
+Received: from mail.kernel.org ([198.145.29.99]:47974 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726176AbhADStH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 4 Jan 2021 13:49:07 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4C84021D93;
+        Mon,  4 Jan 2021 18:48:25 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1609786105;
+        bh=UeAEPSlmdNeY656v/iSeVlEWrO3oEH49AHa7ZG8PD0o=;
+        h=From:To:Cc:Subject:Date:From;
+        b=QMwkK6hpRCQWabRqaaoib8Zeg/WwoRSWGDvQTmX8Zf7xVA38AfQsynh/e9XiluJFj
+         U8moMkY3JBt3pE9m/HyqhHd1jKRzrA0rUpeS2fn9lRAhgldAVPm+9sh/HfJGbgguJN
+         GVVYgy7w9nF/DOLDF5qlB9xmfEGLMmBnNuI+q2XADMfTucLfYaqgC0lJUfsZVTasn/
+         x9HhqblKi7UF7XWiq6dUlZbus9i1OUxW8UEGC6tvOqqz0TM7B7kcGZIunhEzQUGui7
+         R0uWHeiCsoVEiHAMocwGYd2wT+iWqJ17RWi6r6A08vuXpCDIRlkbOPBdZYRd0CTDFn
+         +iTPPeO3EoQ7g==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: [PATCH v4 0/9] eMMC inline encryption support
+Date:   Mon,  4 Jan 2021 10:45:33 -0800
+Message-Id: <20210104184542.4616-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20210103035415.23600-1-tiny.windzz@gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Jan 03, 2021 at 03:54:15AM +0000, Yangtao Li wrote:
-> Use devm_pm_opp_* API to simplify code.
-> 
-> Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
-> ---
->  drivers/memory/tegra/tegra30-emc.c | 29 +++++++++--------------------
->  1 file changed, 9 insertions(+), 20 deletions(-)
+Hello,
 
-Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
+This patchset adds support for eMMC inline encryption, as specified by
+the upcoming version of the eMMC specification and as already
+implemented and used on many devices.  Building on that, it then adds
+Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
 
-Best regards,
-Krzysztof
+Inline encryption hardware improves the performance of storage
+encryption and reduces power usage.  See
+Documentation/block/inline-encryption.rst for more information about
+inline encryption and the blk-crypto framework (upstreamed in v5.8)
+which supports it.  Most mobile devices already use UFS or eMMC inline
+encryption hardware; UFS support was already upstreamed in v5.9.
+
+Patches 1-4 add support for the standard eMMC inline encryption.
+
+However, as with UFS, host controller-specific patches are needed on top
+of the standard support.  Therefore, patches 5-9 add Qualcomm ICE
+(Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
+
+To test this I took advantage of the recently upstreamed support for the
+Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
+project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
+particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
+a Debian chroot.  Among other things, these tests verified that the
+correct ciphertext is written to disk (the same as software encryption).
+
+It will also be possible to add support for Mediatek eMMC inline
+encryption hardware in mtk-sd, and it should be easier than the Qualcomm
+hardware since the Mediatek hardware follows the standard more closely.
+I.e., patches 1-4 should be almost enough for the Mediatek hardware.
+However, I don't have the hardware to do this yet.
+
+This patchset is based on v5.11-rc2, and it can also be retrieved from
+tag "mmc-crypto-v4" of
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
+
+Changed since v3:
+  - Added Acked-by and Reviewed-and-tested-by tags.
+  - Rebased onto v5.11-rc2.
+
+Changed since v2:
+  - Improved comment for sdhci_msm_ice_wait_bist_status()
+  - Removed an unhelpful comment in union cqhci_crypto_cfg_entry.
+  - Fixed the commit message of "mmc: cqhci: initialize upper 64 bits of
+    128-bit task descriptors".
+  - Added Reviewed-by's and Acked-by's.
+
+Changed since v1:
+  - Only select QCOM_SCM if ARCH_QCOM.  (Fixes a build break.)
+  - Split most of the cqhci_prep_task_desc() change into its own patch.
+  - Made sdhci_msm_ice_wait_bist_status() use readl_poll_timeout().
+  - Added a couple more comments.
+  - Added some Acked-by's.
+
+Eric Biggers (9):
+  mmc: add basic support for inline encryption
+  mmc: cqhci: rename cqhci.c to cqhci-core.c
+  mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
+  mmc: cqhci: add support for inline encryption
+  mmc: cqhci: add cqhci_host_ops::program_key
+  firmware: qcom_scm: update comment for ICE-related functions
+  dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+  arm64: dts: qcom: sdm630: add ICE registers and clocks
+  mmc: sdhci-msm: add Inline Crypto Engine support
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt     |   3 +
+ arch/arm64/boot/dts/qcom/sdm630.dtsi          |  10 +-
+ drivers/firmware/qcom_scm.c                   |  16 +-
+ drivers/mmc/core/Kconfig                      |   8 +
+ drivers/mmc/core/Makefile                     |   1 +
+ drivers/mmc/core/block.c                      |   3 +
+ drivers/mmc/core/core.c                       |   3 +
+ drivers/mmc/core/crypto.c                     |  54 ++++
+ drivers/mmc/core/crypto.h                     |  46 +++
+ drivers/mmc/core/host.c                       |   2 +
+ drivers/mmc/core/queue.c                      |   3 +
+ drivers/mmc/host/Kconfig                      |   1 +
+ drivers/mmc/host/Makefile                     |   2 +
+ drivers/mmc/host/{cqhci.c => cqhci-core.c}    |  69 ++++-
+ drivers/mmc/host/cqhci-crypto.c               | 245 ++++++++++++++++
+ drivers/mmc/host/cqhci-crypto.h               |  47 +++
+ drivers/mmc/host/cqhci.h                      |  84 +++++-
+ drivers/mmc/host/sdhci-msm.c                  | 276 +++++++++++++++++-
+ include/linux/mmc/core.h                      |   6 +
+ include/linux/mmc/host.h                      |   7 +
+ 20 files changed, 861 insertions(+), 25 deletions(-)
+ create mode 100644 drivers/mmc/core/crypto.c
+ create mode 100644 drivers/mmc/core/crypto.h
+ rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (94%)
+ create mode 100644 drivers/mmc/host/cqhci-crypto.c
+ create mode 100644 drivers/mmc/host/cqhci-crypto.h
+
+
+base-commit: e71ba9452f0b5b2e8dc8aa5445198cd9214a6a62
+-- 
+2.30.0
+
