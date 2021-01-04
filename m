@@ -2,178 +2,197 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1197C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 09:19:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0244CC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 12:35:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8526E21D7F
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 09:19:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BB4F3207B1
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 12:35:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726722AbhADJT5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Jan 2021 04:19:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39672 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726189AbhADJT4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jan 2021 04:19:56 -0500
-Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27C9AC061574
-        for <linux-mmc@vger.kernel.org>; Mon,  4 Jan 2021 01:19:16 -0800 (PST)
-Received: by mail-ej1-x630.google.com with SMTP id t16so6332329ejf.13
-        for <linux-mmc@vger.kernel.org>; Mon, 04 Jan 2021 01:19:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=references:user-agent:from:to:cc:subject:in-reply-to:message-id
-         :date:mime-version;
-        bh=DueC5htyr1VhszUpmTm/tUVLrShThCg3h0/N3NarSwU=;
-        b=A61zspJyVrET5bTumm0JSaxaUCSMDw0g8u6TZ1yADrWhPPWSaJ/nVlpBnHERM1nizQ
-         hOYhIy51OyR2Vj6Um/wAlqOHnt2n2/ET2pdwf/0ovKJ0OXz+BLsoDYZYoQqUHFJDbqWF
-         UmL+PUhQIT/qnQ7L2ye3fRa57+ajmccN3wqO+sXE71HGXN+nrpaYlEpazLl1svL4qSXd
-         wAhOL8V9HQA7piUP2IJLwG1yGrQsP7M+RjwQ3BOy2mg+Nxj575ms9e9kSBdL4lZx8J7w
-         FAfuFlVs+kQVe5VPkMaEyBa1APIvRpooat7UCOWO3juQsCRovne1wVwMsQqRBID4ss5z
-         qi0w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject
-         :in-reply-to:message-id:date:mime-version;
-        bh=DueC5htyr1VhszUpmTm/tUVLrShThCg3h0/N3NarSwU=;
-        b=YvZ191ZydNKsvi3BBgCm6d6+Q+cL1LvX3XwIJO5JgYsxJjbJCzVYDXLGPUncA/guyN
-         E6Qeg9RKd56asBEXBuYOYz6DOCJc9vH2LY4kSixSgeOJ7pqkQZ/8SdVwlCJC777EEsoS
-         M4zN4f7ZrXk7u0S04O/9QhJNI19ZykSzDm3bT5FMTLXHD0BDxJ9OwAKPMRbsXOUy2dzS
-         +yzdBz5H9J1eO7qYVKZaThjk/IM6H1jjoLSz6TNCuU1cR//nrfeiBZ1uzD5tMRp8YAhf
-         3o0lCqWM9o8IlXKrUuJfU3l5VPVvEzWrrsNKPg7Q6l8ZL98Mer8452rchRUY0n3VeC2H
-         dfQw==
-X-Gm-Message-State: AOAM531m1BJKaI4ZEeQMTEg6s3iANXt3aynLEgp0C2KP+p7ZwClTfG85
-        dBXs2A87Tp7cahMUswKUwiXk3Q==
-X-Google-Smtp-Source: ABdhPJxqFryCMELbN8WJJJjZ5a7Uk1KXymyUk57FkCsFhIM+ZX2JhMxlKrqs3m4qRgYb1qqMpb7ogA==
-X-Received: by 2002:a17:906:56ca:: with SMTP id an10mr66060606ejc.498.1609751954834;
-        Mon, 04 Jan 2021 01:19:14 -0800 (PST)
-Received: from localhost (82-65-169-74.subs.proxad.net. [82.65.169.74])
-        by smtp.gmail.com with ESMTPSA id e21sm43094575edv.96.2021.01.04.01.19.14
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 04 Jan 2021 01:19:14 -0800 (PST)
-References: <20201218075312.67338-1-lebed.dmitry@gmail.com>
- <b52f9e34-5170-59a0-fede-96cf2f999600@gmail.com>
-User-agent: mu4e 1.4.10; emacs 27.1
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     Heiner Kallweit <hkallweit1@gmail.com>,
-        Dmitry Lebed <lebed.dmitry@gmail.com>,
-        linux-amlogic@lists.infradead.org
-Cc:     martin.blumenstingl@googlemail.com, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmc: meson-gx: check for scatterlist size alignment in
- block mode
-In-reply-to: <b52f9e34-5170-59a0-fede-96cf2f999600@gmail.com>
-Message-ID: <1j8s99xdny.fsf@starbuckisacylon.baylibre.com>
-Date:   Mon, 04 Jan 2021 10:19:13 +0100
+        id S1726303AbhADMfj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Jan 2021 07:35:39 -0500
+Received: from userp2130.oracle.com ([156.151.31.86]:56634 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725889AbhADMfi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jan 2021 07:35:38 -0500
+Received: from pps.filterd (userp2130.oracle.com [127.0.0.1])
+        by userp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 104CTUfo191806;
+        Mon, 4 Jan 2021 12:34:45 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ content-transfer-encoding : in-reply-to; s=corp-2020-01-29;
+ bh=OZAIZZ+LOOMd8Q8EORWxprLVkOWQwkn33zW7h438YtU=;
+ b=pDh31UXUplxTwEIhg1ksfyfQ423ntLZFe/CeAQL2ERkCinvm6k2dUWamo0yYtTWvMqHg
+ W+69YGgsw1biRL8J0FdmxdjVclhE6/pTvr57yoE2anKvf+wwSQLZjSMhDSlFo41aN887
+ 4WkN98nB1sM1SlsxW0qgvU8xTDCDcTAVJzkxvI4r711ogB2IqIA9EWFyGXuMQnS/6V/N
+ a1lzIGHfCsx6DvvYqqPZizHGH4Iopqw1T6lBfLs3zBc4NFBSyS3vkPKkSMTWBq5gLJXt
+ urQ6Bdt0aViy+DPuj4ouCa5ZWkr/yAYuMS0HGl3K1G3KqBGfqYtrqDt7cXOvn6wnC841 ZA== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by userp2130.oracle.com with ESMTP id 35tg8qv28y-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 04 Jan 2021 12:34:45 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 104CULL0124671;
+        Mon, 4 Jan 2021 12:34:44 GMT
+Received: from userv0121.oracle.com (userv0121.oracle.com [156.151.31.72])
+        by aserp3030.oracle.com with ESMTP id 35v23x1y71-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Mon, 04 Jan 2021 12:34:44 +0000
+Received: from abhmp0010.oracle.com (abhmp0010.oracle.com [141.146.116.16])
+        by userv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 104CYgmp030126;
+        Mon, 4 Jan 2021 12:34:42 GMT
+Received: from kadam (/102.36.221.92)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Mon, 04 Jan 2021 04:34:40 -0800
+Date:   Mon, 4 Jan 2021 15:34:10 +0300
+From:   Dan Carpenter <dan.carpenter@oracle.com>
+To:     =?iso-8859-1?B?Suly9G1l?= Pouiller <jerome.pouiller@silabs.com>
+Cc:     Kalle Valo <kvalo@codeaurora.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        devel@driverdev.osuosl.org, devicetree@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>, netdev@vger.kernel.org,
+        linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        "David S . Miller" <davem@davemloft.net>
+Subject: Re: [PATCH v3 09/24] wfx: add hwio.c/hwio.h
+Message-ID: <20210104123410.GN2809@kadam>
+References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
+ <87lfdp98rw.fsf@codeaurora.org>
+ <X+IQRct0Zsm87H4+@kroah.com>
+ <4279510.LvFx2qVVIh@pc-42>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <4279510.LvFx2qVVIh@pc-42>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9853 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 bulkscore=0 spamscore=0
+ mlxlogscore=999 adultscore=0 suspectscore=0 mlxscore=0 phishscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2101040083
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9853 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1011 phishscore=0 bulkscore=0
+ spamscore=0 impostorscore=0 suspectscore=0 adultscore=0 mlxlogscore=999
+ mlxscore=0 malwarescore=0 lowpriorityscore=0 priorityscore=1501
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
+ definitions=main-2101040083
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Dec 22, 2020 at 10:02:09PM +0100, Jérôme Pouiller wrote:
+> On Tuesday 22 December 2020 16:27:01 CET Greg Kroah-Hartman wrote:
+> > 
+> > On Tue, Dec 22, 2020 at 05:10:11PM +0200, Kalle Valo wrote:
+> > > Jerome Pouiller <Jerome.Pouiller@silabs.com> writes:
+> > >
+> > > > +/*
+> > > > + * Internal helpers.
+> > > > + *
+> > > > + * About CONFIG_VMAP_STACK:
+> > > > + * When CONFIG_VMAP_STACK is enabled, it is not possible to run DMA on stack
+> > > > + * allocated data. Functions below that work with registers (aka functions
+> > > > + * ending with "32") automatically reallocate buffers with kmalloc. However,
+> > > > + * functions that work with arbitrary length buffers let's caller to handle
+> > > > + * memory location. In doubt, enable CONFIG_DEBUG_SG to detect badly located
+> > > > + * buffer.
+> > > > + */
+> > >
+> > > This sounds very hacky to me, I have understood that you should never
+> > > use stack with DMA.
+> > 
+> > You should never do that because some platforms do not support it, so no
+> > driver should ever try to do that as they do not know what platform they
+> > are running on.
+> 
+> Yes, I have learned this rule the hard way.
+> 
+> There is no better way than a comment to warn the user that the argument
+> will be used with a DMA? A Sparse annotation, for example?
+> 
 
-On Fri 18 Dec 2020 at 10:08, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+There is a Smatch warning for this, but I hadn't looked at the results
+in a while. :/  I'm not sure how many are valid.  Some kind of
+annotation would be nice.
 
-> Am 18.12.2020 um 08:53 schrieb Dmitry Lebed:
->> Enable SGDMA support for SD_IO_RW_EXTENDED and add proper check
->> for scatterlist size alignment in block mode.
->> 
->> According to documentation, in SDIO block mode meson-gx DMA could
->> only handle buffers with sizes that are multiples of SDIO block size.
->> 
->> Some SDIO drivers like brcmfmac use scatterlist API, but do not enforce
->> proper scatterlist buffer size alignemnt, this looks like a root cause
->> of non-working CMD53.
->> 
-> It's been too long ago that I worked on this to provide real feedback.
-> Just one comment: Your commit description sounds like there's a problem
-> in drivers like brcmfmac. Wouldn't it be better then to first fix these
-> drivers?
+regards,
+dan carpenter
 
-While this may be true, I think the proposed change is better than the
-device/command specific work around we had so far.
-
->
->> Some minor style fixes.
->> 
->> Signed-off-by: Dmitry Lebed <lebed.dmitry@gmail.com>
-
-Thx.
-
-Reviewed-by: Jerome Brunet <jbrunet@baylibre.com>
-
->> ---
->>  drivers/mmc/host/meson-gx-mmc.c | 37 ++++++++++++++++++++-------------
->>  1 file changed, 22 insertions(+), 15 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->> index 13f6a2c0ed04..eb6c02bc4a02 100644
->> --- a/drivers/mmc/host/meson-gx-mmc.c
->> +++ b/drivers/mmc/host/meson-gx-mmc.c
->> @@ -227,7 +227,6 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
->>  	struct mmc_data *data = mrq->data;
->>  	struct scatterlist *sg;
->>  	int i;
->> -	bool use_desc_chain_mode = true;
->>  
->>  	/*
->>  	 * When Controller DMA cannot directly access DDR memory, disable
->> @@ -237,25 +236,33 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
->>  	if (host->dram_access_quirk)
->>  		return;
->>  
->> -	/*
->> -	 * Broken SDIO with AP6255-based WiFi on Khadas VIM Pro has been
->> -	 * reported. For some strange reason this occurs in descriptor
->> -	 * chain mode only. So let's fall back to bounce buffer mode
->> -	 * for command SD_IO_RW_EXTENDED.
->> -	 */
->> -	if (mrq->cmd->opcode == SD_IO_RW_EXTENDED)
->> -		return;
->> +	if (data->blocks > 1) {
->> +		/*
->> +		 * In block mode DMA descriptor format, "length" field indicates
->> +		 * number of blocks and there is no way to pass DMA size that
->> +		 * is not multiple of SDIO block size, making it impossible to
->> +		 * tie more than one memory buffer with single SDIO block.
->> +		 * Block mode sg buffer size should be aligned with SDIO block
->> +		 * size, otherwise chain mode could not be used.
->> +		 */
->> +		for_each_sg(data->sg, sg, data->sg_len, i) {
->> +			if (sg->length % data->blksz) {
->> +				WARN_ONCE(1, "unaligned sg len %u blksize %u\n",
->> +					  sg->length, data->blksz);
->> +				return;
->> +			}
->> +		}
->> +	}
->>  
->> -	for_each_sg(data->sg, sg, data->sg_len, i)
->> +	for_each_sg(data->sg, sg, data->sg_len, i) {
->>  		/* check for 8 byte alignment */
->> -		if (sg->offset & 7) {
->> +		if (sg->offset % 8) {
->>  			WARN_ONCE(1, "unaligned scatterlist buffer\n");
->> -			use_desc_chain_mode = false;
->> -			break;
->> +			return;
->>  		}
->> +	}
->>  
->> -	if (use_desc_chain_mode)
->> -		data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
->> +	data->host_cookie |= SD_EMMC_DESC_CHAIN_MODE;
->>  }
->>  
->>  static inline bool meson_mmc_desc_chain_mode(const struct mmc_data *data)
->> 
->
->
-> _______________________________________________
-> linux-amlogic mailing list
-> linux-amlogic@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-amlogic
+drivers/staging/gdm724x/gdm_usb.c:69 request_mac_address() error: doing dma on the stack (buf)
+drivers/staging/rtl8192u/r8192U_core.c:1553 rtl8192_tx() error: doing dma on the stack (&zero)
+drivers/staging/comedi/drivers/dt9812.c:249 dt9812_read_info() error: doing dma on the stack (&cmd)
+drivers/staging/comedi/drivers/dt9812.c:273 dt9812_read_multiple_registers() error: doing dma on the stack (&cmd)
+drivers/staging/comedi/drivers/dt9812.c:299 dt9812_write_multiple_registers() error: doing dma on the stack (&cmd)
+drivers/staging/comedi/drivers/dt9812.c:318 dt9812_rmw_multiple_registers() error: doing dma on the stack (&cmd)
+drivers/staging/comedi/drivers/dt9812.c:330 dt9812_digital_in() error: doing dma on the stack (value)
+drivers/staging/comedi/drivers/dt9812.c:456 dt9812_analog_in() error: doing dma on the stack (val)
+drivers/staging/comedi/drivers/dt9812.c:692 dt9812_reset_device() error: doing dma on the stack (&tmp8)
+drivers/staging/comedi/drivers/dt9812.c:700 dt9812_reset_device() error: doing dma on the stack (&tmp8)
+drivers/staging/comedi/drivers/dt9812.c:711 dt9812_reset_device() error: doing dma on the stack (&tmp16)
+drivers/staging/comedi/drivers/dt9812.c:718 dt9812_reset_device() error: doing dma on the stack (&tmp16)
+drivers/staging/comedi/drivers/dt9812.c:725 dt9812_reset_device() error: doing dma on the stack (&tmp16)
+drivers/staging/comedi/drivers/dt9812.c:732 dt9812_reset_device() error: doing dma on the stack (&tmp32)
+drivers/usb/storage/alauda.c:498 alauda_check_status2() error: doing dma on the stack (command)
+drivers/usb/storage/alauda.c:503 alauda_check_status2() error: doing dma on the stack (data)
+drivers/usb/storage/alauda.c:527 alauda_get_redu_data() error: doing dma on the stack (command)
+drivers/usb/storage/alauda.c:702 alauda_erase_block() error: doing dma on the stack (command)
+drivers/usb/storage/alauda.c:707 alauda_erase_block() error: doing dma on the stack (buf)
+drivers/usb/storage/alauda.c:731 alauda_read_block_raw() error: doing dma on the stack (command)
+drivers/usb/storage/alauda.c:782 alauda_write_block() error: doing dma on the stack (command)
+drivers/usb/class/usblp.c:593 usblp_ioctl() error: doing dma on the stack (&newChannel)
+drivers/usb/serial/iuu_phoenix.c:542 iuu_uart_flush() error: doing dma on the stack (&rxcmd)
+drivers/firewire/core-device.c:565 read_config_rom() error: doing dma on the stack (&dummy)
+drivers/firewire/core-device.c:1111 reread_config_rom() error: doing dma on the stack (&q)
+drivers/media/usb/uvc/uvc_v4l2.c:910 uvc_ioctl_g_input() error: doing dma on the stack (&i)
+drivers/media/usb/uvc/uvc_v4l2.c:942 uvc_ioctl_s_input() error: doing dma on the stack (&i)
+drivers/media/usb/cx231xx/cx231xx-pcb-cfg.c:662 initialize_cx231xx() error: doing dma on the stack (data)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:90 uninitGPIO() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:1297 cx231xx_enable_i2c_port_3() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:1313 cx231xx_enable_i2c_port_3() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:1546 cx231xx_set_Colibri_For_LowIF() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2261 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2278 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2288 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2297 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2311 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2321 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2332 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2342 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2353 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2376 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2386 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2396 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2407 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2417 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2446 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2457 cx231xx_set_power_mode() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2469 cx231xx_power_suspend() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2481 cx231xx_power_suspend() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2497 cx231xx_start_stream() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2509 cx231xx_start_stream() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2523 cx231xx_stop_stream() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2534 cx231xx_stop_stream() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2591 cx231xx_initialize_stream_xfer() error: doing dma on the stack (val)
+drivers/media/usb/cx231xx/cx231xx-avcore.c:2599 cx231xx_initialize_stream_xfer() error: doing dma on the stack (val)
+drivers/media/usb/cx231xx/cx231xx-core.c:635 cx231xx_demod_reset() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-core.c:644 cx231xx_demod_reset() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-core.c:649 cx231xx_demod_reset() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-core.c:654 cx231xx_demod_reset() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-core.c:658 cx231xx_demod_reset() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-core.c:1253 cx231xx_stop_TS1() error: doing dma on the stack (val)
+drivers/media/usb/cx231xx/cx231xx-core.c:1260 cx231xx_stop_TS1() error: doing dma on the stack (val)
+drivers/media/usb/cx231xx/cx231xx-core.c:1272 cx231xx_start_TS1() error: doing dma on the stack (val)
+drivers/media/usb/cx231xx/cx231xx-core.c:1279 cx231xx_start_TS1() error: doing dma on the stack (val)
+drivers/media/usb/cx231xx/cx231xx-core.c:1533 cx231xx_mode_register() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-core.c:1546 cx231xx_mode_register() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-video.c:1236 cx231xx_g_register() error: doing dma on the stack (value)
+drivers/media/usb/cx231xx/cx231xx-video.c:1297 cx231xx_s_register() error: doing dma on the stack (data)
+drivers/media/usb/gspca/kinect.c:209 write_register() error: doing dma on the stack (reply)
+drivers/net/usb/rndis_host.c:129 rndis_command() error: doing dma on the stack (&notification)
 
