@@ -2,75 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CA85C433E9
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 14:49:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98A13C4332B
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:04:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 56F5522241
-	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 14:49:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 81FD621919
+	for <linux-mmc@archiver.kernel.org>; Mon,  4 Jan 2021 18:04:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727150AbhADOs7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 4 Jan 2021 09:48:59 -0500
-Received: from mail.kernel.org ([198.145.29.99]:49728 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726098AbhADOs7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 4 Jan 2021 09:48:59 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7071D207BC;
-        Mon,  4 Jan 2021 14:48:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1609771698;
-        bh=tMK9lgZTp2/PYxk2/HncYQK0TyrP7dM/vOybkysA4ls=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=O5IWFhMU5QgFCcWzhum7IkBzJ98LRTKf29hw+C7u2zDTWascteDhcVLFmEFB3Z1LV
-         CQALfQgyt2ileBW9dth1lC+I/miX0hslj580mwizB431pX91ml1MlTs+hFKXj18HpN
-         j557hRsNIxbrDZn6iZEqIRIxJEgv+yoP5yn1ZNUcbp6ZCaSCx0nfqJNBsg8TgiaCRv
-         3Z3kGZeXrefIV7tR99yYpV3Tb3FEDGqAUH8tbYT4o7E9zzZRl4bK4g7pGdjfpkd/YE
-         3cb/J1zKRoiSi/7YGdYJQaveVp7rLHH1UiySVbi7gSg0jOKUcJV20yoLNJB1A1yfW8
-         fgVTdq0eFNqog==
-Received: from johan by xi.lan with local (Exim 4.93.0.4)
-        (envelope-from <johan@kernel.org>)
-        id 1kwR9a-0007Hi-KG; Mon, 04 Jan 2021 15:48:15 +0100
-Date:   Mon, 4 Jan 2021 15:48:14 +0100
-From:   Johan Hovold <johan@kernel.org>
-To:     Dan Carpenter <dan.carpenter@oracle.com>
-Cc:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>,
-        devel@driverdev.osuosl.org, devicetree@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-wireless@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        Kalle Valo <kvalo@codeaurora.org>
-Subject: Re: [PATCH v3 09/24] wfx: add hwio.c/hwio.h
-Message-ID: <X/MqrvQSAPXkqFVF@hovoldconsulting.com>
-References: <20201104155207.128076-1-Jerome.Pouiller@silabs.com>
- <87lfdp98rw.fsf@codeaurora.org>
- <X+IQRct0Zsm87H4+@kroah.com>
- <4279510.LvFx2qVVIh@pc-42>
- <20210104123410.GN2809@kadam>
+        id S1727782AbhADSEb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 4 Jan 2021 13:04:31 -0500
+Received: from mail-wr1-f51.google.com ([209.85.221.51]:33517 "EHLO
+        mail-wr1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727749AbhADSEa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 4 Jan 2021 13:04:30 -0500
+Received: by mail-wr1-f51.google.com with SMTP id t30so33120348wrb.0;
+        Mon, 04 Jan 2021 10:04:13 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=h59iCiKuH4MXgrWgjRBSHuWSpOxsm5xD8Y4CubrF3xU=;
+        b=O9Z7vxMRaKMI5t4T35bv5YGBkatCDU5eq6r98qh3QvpeHWzlSAfvYP2gdGrDnTdeX+
+         9lFgK7c3VNoEmv3n0ooUqk/U/D//wbRrsJXgu/8hTYxbBT6jMKF2yD7oRNOYkIrred+Q
+         A36TcezbQKk4ldEN+dINQfU1JnD8ruELUrhvrFMbrHBc7derBdzkFgqYLmy3BtozESqV
+         FrYJR/DbD1nUP5Ci0TkvjufeoMcmg11E5E4KZqE8kJguHszQEotflCChxM97xswkECSV
+         E+gqqo2wMwSHM0FkvYPrWsR+Qc9N6IKAUY5odPzhSPLQuiFFn0ECjTZW7KfMPAGot3Jg
+         IJ6w==
+X-Gm-Message-State: AOAM530djHhjb46cspfzZL3CaJe+iYSF6jgIPNXImY1JNTtHRPCpTaS1
+        44cf+ZLNZ7z9omWXlgNTfzM=
+X-Google-Smtp-Source: ABdhPJxrRN4zoC9ySCl3+E0igqJkr5f1LUevrs1pugc92rcCWGC8YwtDgiDHvDzkbPEnhGyP6UumfQ==
+X-Received: by 2002:a5d:58fb:: with SMTP id f27mr71674294wrd.22.1609783427686;
+        Mon, 04 Jan 2021 10:03:47 -0800 (PST)
+Received: from kozik-lap (adsl-84-226-167-205.adslplus.ch. [84.226.167.205])
+        by smtp.googlemail.com with ESMTPSA id w8sm92329342wrl.91.2021.01.04.10.03.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 04 Jan 2021 10:03:46 -0800 (PST)
+Date:   Mon, 4 Jan 2021 19:03:43 +0100
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+To:     Yangtao Li <tiny.windzz@gmail.com>
+Cc:     myungjoo.ham@samsung.com, kyungmin.park@samsung.com,
+        cw00.choi@samsung.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
+        kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+        digetx@gmail.com, thierry.reding@gmail.com, jonathanh@nvidia.com,
+        yuq825@gmail.com, airlied@linux.ie, daniel@ffwll.ch,
+        robdclark@gmail.com, sean@poorly.run, robh@kernel.org,
+        tomeu.vizoso@collabora.com, steven.price@arm.com,
+        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
+        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
+        lukasz.luba@arm.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
+        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
+        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
+        marijn.suijten@somainline.org, gustavoars@kernel.org,
+        emil.velikov@collabora.com, jonathan@marek.ca,
+        akhilpo@codeaurora.org, smasetty@codeaurora.org,
+        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
+        tanmay@codeaurora.org, ddavenport@chromium.org,
+        jsanka@codeaurora.org, rnayak@codeaurora.org,
+        tongtiangen@huawei.com, miaoqinglang@huawei.com,
+        khsieh@codeaurora.org, abhinavk@codeaurora.org,
+        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
+        mka@chromium.org, harigovi@codeaurora.org,
+        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
+        georgi.djakov@linaro.org, akashast@codeaurora.org,
+        parashar@codeaurora.org, dianders@chromium.org,
+        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
+        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+Subject: Re: [PATCH 22/31] memory: samsung: exynos5422-dmc: fix return error
+ in exynos5_init_freq_table
+Message-ID: <20210104180343.GA26189@kozik-lap>
+References: <20210101165507.19486-1-tiny.windzz@gmail.com>
+ <20210101165507.19486-23-tiny.windzz@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20210104123410.GN2809@kadam>
+In-Reply-To: <20210101165507.19486-23-tiny.windzz@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jan 04, 2021 at 03:34:10PM +0300, Dan Carpenter wrote:
+On Fri, Jan 01, 2021 at 04:54:58PM +0000, Yangtao Li wrote:
+> We can't always return -EINVAL, let's fix it.
+> 
+> Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
+> ---
+>  drivers/memory/samsung/exynos5422-dmc.c | 10 +++++++---
+>  1 file changed, 7 insertions(+), 3 deletions(-)
 
-> There is a Smatch warning for this, but I hadn't looked at the results
-> in a while. :/  I'm not sure how many are valid.  Some kind of
-> annotation would be nice.
+Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
 
-> drivers/usb/class/usblp.c:593 usblp_ioctl() error: doing dma on the stack (&newChannel)
-> drivers/usb/serial/iuu_phoenix.c:542 iuu_uart_flush() error: doing dma on the stack (&rxcmd)
+I see that the next patch depends on it so feel free to take it via PM
+tree. Otherwise let me know.
 
-I only looked at these two but they are are indeed valid, and I've now
-fixed them up.
-
-Johan
+Best regards,
+Krzysztof
