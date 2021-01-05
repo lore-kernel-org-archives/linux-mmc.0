@@ -4,182 +4,117 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B96FC43331
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 18:13:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F583C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 19:21:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E6CE22D57
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 18:13:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 34B0322D5B
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 19:21:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726703AbhAESMn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Jan 2021 13:12:43 -0500
-Received: from mail.kernel.org ([198.145.29.99]:56244 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726132AbhAESMm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Jan 2021 13:12:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1791722D06;
-        Tue,  5 Jan 2021 18:12:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1609870321;
-        bh=/reYBV40Ygz4hCARqF75dpeeGG0UhQDuHeRU1Mh/CCA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Dz7ZYIQwZi2PGezSrfZYXMAyFlGgRS3XZShhWjyXT3ufXIdHDHMXjuLt80KX6GoPf
-         GG9vLFuw58bgfcX32hBzQHrbWIbM7IXR3efJsGv2iQnRdRw/2HGqFmSWyIJMZ/uav6
-         zW8xJU3VSIzNihZH289zC2LwLXOyr6xIMVOafDGE=
-Date:   Tue, 5 Jan 2021 19:13:25 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MyungJoo Ham <myungjoo.ham@samsung.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        linux-arm-kernel@lists.infradead.org, linux-ide@vger.kernel.org,
-        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-remoteproc@vger.kernel.org,
-        linux-riscv@lists.infradead.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
-        linux-usb@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: Add missing array size constraints
-Message-ID: <X/SsRVbYVXRX8Psq@kroah.com>
-References: <20210104230253.2805217-1-robh@kernel.org>
- <X/RjziK30y56uZUj@kroah.com>
- <20210105174008.GB1875909@robh.at.kernel.org>
+        id S1730338AbhAETUs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Jan 2021 14:20:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46254 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728560AbhAETUs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2021 14:20:48 -0500
+Received: from mail-oo1-xc30.google.com (mail-oo1-xc30.google.com [IPv6:2607:f8b0:4864:20::c30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51ACFC061796
+        for <linux-mmc@vger.kernel.org>; Tue,  5 Jan 2021 11:20:07 -0800 (PST)
+Received: by mail-oo1-xc30.google.com with SMTP id x23so212075oop.1
+        for <linux-mmc@vger.kernel.org>; Tue, 05 Jan 2021 11:20:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=pApZtT3kUoc3iG8fxyNumTsrhIoA70XGH4vOpczgKSg=;
+        b=GFG4+jX20prcNuncQrsCbCXaDE1/+gSTKbaKjfYpz+g0RCZIbl4pXANTxdKUdUTmHS
+         lYnsCEF966ZB+WYWeLXJI5CTuI4zriBu1UQ4Xc02Zuuo6RUFjeJzXQazknR4gKhGe+fC
+         3pPWITGRrA3Ktne+C44Q7JHlkdxng69Cw67wRXX3/ejaBneJgkyykaqaprrnUm7Tr54m
+         0X3tzTP4wrhtMOt1hZFzo7MKIenhTCcdq+DUtEoXASuzsXgY4zHSi92BJ8HQdUhhbhjg
+         chjSOgT7DKZBh+45Ve9DBTxsBmtYtM4IB7XZHzo3IM+dMAOuw43CyXk1+hD5ezrL2lpu
+         dZ4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=pApZtT3kUoc3iG8fxyNumTsrhIoA70XGH4vOpczgKSg=;
+        b=gpth2mpVeIqJySeOIYcZ+ZUdoPARxlTzxtq2xz+pWG6qqJGI00MIQ0to3Qf6K3Ehdi
+         KOqA2SeOW3EbJ6B64PTUjn8hrqOtog45O05S5LMqClmdD94kJJTPumUPz+P6aPVcXq9N
+         KIUqejHvZqzKgpFTquTfSikPZtMrMriACD/RSl82oecgRruEd1zwtx4uhSJrMWfqBIPT
+         T2gJ+vxwUWEbuJ0Y8nTCDCeL3rI9K39gxUzgViyiPGZPWPzRhFfqu/DoWr+Tw2J4NKfo
+         J0Q8NsHSfQKeU1N3cnZQQn3ippD0JOcOMiMT3eB0efmcEvg9JNzGQOswsHZtWwh0r64D
+         sRMw==
+X-Gm-Message-State: AOAM531Hf5T/801ULLvO0+x7pH8WyOL77ElDumPZ50t+8/mBV6d73+mj
+        ttqsKIjz73HJSywIA7o96h4P5w==
+X-Google-Smtp-Source: ABdhPJzXak7VMpj8lBTjdyUrKLPtv3rchrkXI4TeIrAZmIGtz8rHTtTrm8rWH9LxaRbq0cAhEmVtRA==
+X-Received: by 2002:a05:6820:441:: with SMTP id p1mr408451oou.21.1609874406662;
+        Tue, 05 Jan 2021 11:20:06 -0800 (PST)
+Received: from builder.lan (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
+        by smtp.gmail.com with ESMTPSA id g21sm23083otj.77.2021.01.05.11.20.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 Jan 2021 11:20:05 -0800 (PST)
+Date:   Tue, 5 Jan 2021 13:20:04 -0600
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Md Sadre Alam <mdalam@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, sricharan@codeaurora.org
+Subject: Re: [PATCH] mmc: sdhci-msm: Fix possible NULL pointer exception
+Message-ID: <X/S75LlfnMWw+seh@builder.lan>
+References: <1608626913-16675-1-git-send-email-mdalam@codeaurora.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210105174008.GB1875909@robh.at.kernel.org>
+In-Reply-To: <1608626913-16675-1-git-send-email-mdalam@codeaurora.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 05, 2021 at 10:40:08AM -0700, Rob Herring wrote:
-> On Tue, Jan 05, 2021 at 02:04:14PM +0100, Greg Kroah-Hartman wrote:
-> > On Mon, Jan 04, 2021 at 04:02:53PM -0700, Rob Herring wrote:
-> > > DT properties which can have multiple entries need to specify what the
-> > > entries are and define how many entries there can be. In the case of
-> > > only a single entry, just 'maxItems: 1' is sufficient.
-> > > 
-> > > Add the missing entry constraints. These were found with a modified
-> > > meta-schema. Unfortunately, there are a few cases where the size
-> > > constraints are not defined such as common bindings, so the meta-schema
-> > > can't be part of the normal checks.
-> > > 
-> > > Cc: Jens Axboe <axboe@kernel.dk>
-> > > Cc: Stephen Boyd <sboyd@kernel.org>
-> > > Cc: Thierry Reding <thierry.reding@gmail.com>
-> > > Cc: MyungJoo Ham <myungjoo.ham@samsung.com>
-> > > Cc: Chanwoo Choi <cw00.choi@samsung.com>
-> > > Cc: Linus Walleij <linus.walleij@linaro.org>
-> > > Cc: Bartosz Golaszewski <bgolaszewski@baylibre.com>
-> > > Cc: Jonathan Cameron <jic23@kernel.org>
-> > > Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
-> > > Cc: Thomas Gleixner <tglx@linutronix.de>
-> > > Cc: Marc Zyngier <maz@kernel.org>
-> > > Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
-> > > Cc: Chen-Yu Tsai <wens@csie.org>
-> > > Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> > > Cc: "David S. Miller" <davem@davemloft.net>
-> > > Cc: Jakub Kicinski <kuba@kernel.org>
-> > > Cc: Sebastian Reichel <sre@kernel.org>
-> > > Cc: Ohad Ben-Cohen <ohad@wizery.com>
-> > > Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-> > > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> > > Signed-off-by: Rob Herring <robh@kernel.org>
-> > 
-> > <snip>
-> > 
-> > > diff --git a/Documentation/devicetree/bindings/usb/generic-ehci.yaml b/Documentation/devicetree/bindings/usb/generic-ehci.yaml
-> > > index 247ef00381ea..f76b25f7fc7a 100644
-> > > --- a/Documentation/devicetree/bindings/usb/generic-ehci.yaml
-> > > +++ b/Documentation/devicetree/bindings/usb/generic-ehci.yaml
-> > > @@ -83,6 +83,7 @@ properties:
-> > >        Phandle of a companion.
-> > >  
-> > >    phys:
-> > > +    maxItems: 1
-> > >      description: PHY specifier for the USB PHY
-> > >  
-> > >    phy-names:
-> > > diff --git a/Documentation/devicetree/bindings/usb/generic-ohci.yaml b/Documentation/devicetree/bindings/usb/generic-ohci.yaml
-> > > index 2178bcc401bc..8e2bd61f2075 100644
-> > > --- a/Documentation/devicetree/bindings/usb/generic-ohci.yaml
-> > > +++ b/Documentation/devicetree/bindings/usb/generic-ohci.yaml
-> > > @@ -71,6 +71,7 @@ properties:
-> > >        Overrides the detected port count
-> > >  
-> > >    phys:
-> > > +    maxItems: 1
-> > >      description: PHY specifier for the USB PHY
-> > >  
-> > >    phy-names:
-> > > diff --git a/Documentation/devicetree/bindings/usb/ingenic,musb.yaml b/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
-> > > index 678396eeeb78..f506225a4d57 100644
-> > > --- a/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
-> > > +++ b/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
-> > > @@ -40,7 +40,7 @@ properties:
-> > >        - const: mc
-> > >  
-> > >    phys:
-> > > -    description: PHY specifier for the USB PHY
-> > > +    maxItems: 1
-> > >  
-> > >    usb-role-switch:
-> > >      type: boolean
-> > 
-> > Any reason you dropped the description for this entry, but not the other
-> > ones above?
-> 
-> No, I should have dropped those too. I dropped cases of genericish 
-> descriptions on common properties. There's nothing specific to this 
-> binding here really.
-> 
-> > 
-> > > diff --git a/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml b/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
-> > > index 388245b91a55..adce36e48bc9 100644
-> > > --- a/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
-> > > +++ b/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
-> > > @@ -15,13 +15,14 @@ properties:
-> > >        - const: ti,j721e-usb
-> > >  
-> > >    reg:
-> > > -    description: module registers
-> > > +    maxItems: 1
-> > >  
-> > >    power-domains:
-> > >      description:
-> > >        PM domain provider node and an args specifier containing
-> > >        the USB device id value. See,
-> > >        Documentation/devicetree/bindings/soc/ti/sci-pm-domain.txt
-> > > +    maxItems: 1
-> > >  
-> > >    clocks:
-> > >      description: Clock phandles to usb2_refclk and lpm_clk
-> > 
-> > Same here, why remove the description?
-> 
-> Really, the question is why keep 'description' on power-domains. Perhaps 
-> there's a little value in the reference to sci-pm-domain.txt, so I left 
-> it.
+On Tue 22 Dec 02:48 CST 2020, Md Sadre Alam wrote:
 
-Ok, if you are fine with this, that's ok with me, just didn't look very
-consistent :)
+> of_device_get_match_data returns NULL when no match.
+> So add the NULL pointer check to avoid dereference.
+> 
+> Signed-off-by: Md Sadre Alam <mdalam@codeaurora.org>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index 9c7927b..f20e424 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2235,6 +2235,8 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+>  	 * the data associated with the version info.
+>  	 */
+>  	var_info = of_device_get_match_data(&pdev->dev);
+> +	if (!var_info)
+
+To get this you (the SDHCI driver developer) needs to add an entry in
+sdhci_msm_dt_match[] without a .data specified.
+
+> +		goto pltfm_free;
+
+And this will cause sdhci_msm_probe() to return 0, giving no hint to
+said developer that they screwed up. Given that this can only be caused
+by a developer working on this driver you should provide feedback
+suitable for such developer, e.g. by:
+
+	if (WARN_ON(!var_info))
+		return -EINVAL;
+
+But given that this is only for the developer himself, I don't see that
+this adds any value over just reading the callstack you get from the
+panic when the next line dereferences var_info (NULL).
+
+Regards,
+Bjorn
+
+>  
+>  	msm_host->mci_removed = var_info->mci_removed;
+>  	msm_host->restore_dll_config = var_info->restore_dll_config;
+> -- 
+> 2.7.4
+> 
