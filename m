@@ -2,190 +2,195 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E11BAC433DB
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 16:34:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED748C43331
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 17:41:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B29FC22CB1
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 16:34:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B923D22D2B
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 17:41:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726655AbhAEQef (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Jan 2021 11:34:35 -0500
-Received: from foss.arm.com ([217.140.110.172]:57076 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726132AbhAEQee (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Jan 2021 11:34:34 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 83C64113E;
-        Tue,  5 Jan 2021 08:33:48 -0800 (PST)
-Received: from [192.168.1.179] (unknown [172.31.20.19])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 647673F70D;
-        Tue,  5 Jan 2021 08:33:37 -0800 (PST)
-Subject: Re: [PATCH 19/31] drm/panfrost: convert to use devm_pm_opp_* API
-To:     Yangtao Li <tiny.windzz@gmail.com>, myungjoo.ham@samsung.com,
-        kyungmin.park@samsung.com, cw00.choi@samsung.com, krzk@kernel.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, linux-imx@nxp.com, digetx@gmail.com,
-        thierry.reding@gmail.com, jonathanh@nvidia.com, yuq825@gmail.com,
-        airlied@linux.ie, daniel@ffwll.ch, robdclark@gmail.com,
-        sean@poorly.run, robh@kernel.org, tomeu.vizoso@collabora.com,
-        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
-        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
-        lukasz.luba@arm.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
-        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
-        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
-        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
-        marijn.suijten@somainline.org, gustavoars@kernel.org,
-        emil.velikov@collabora.com, jonathan@marek.ca,
-        akhilpo@codeaurora.org, smasetty@codeaurora.org,
-        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
-        tanmay@codeaurora.org, ddavenport@chromium.org,
-        jsanka@codeaurora.org, rnayak@codeaurora.org,
-        tongtiangen@huawei.com, miaoqinglang@huawei.com,
-        khsieh@codeaurora.org, abhinavk@codeaurora.org,
-        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
-        mka@chromium.org, harigovi@codeaurora.org,
-        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
-        georgi.djakov@linaro.org, akashast@codeaurora.org,
-        parashar@codeaurora.org, dianders@chromium.org
-Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-samsung-soc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
-        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
-References: <20210101165507.19486-1-tiny.windzz@gmail.com>
- <20210101165507.19486-20-tiny.windzz@gmail.com>
-From:   Steven Price <steven.price@arm.com>
-Message-ID: <63e5e2ae-0baf-cbd1-b2eb-43fac89acb7c@arm.com>
-Date:   Tue, 5 Jan 2021 16:33:32 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1730598AbhAERk5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Jan 2021 12:40:57 -0500
+Received: from mail-io1-f47.google.com ([209.85.166.47]:38559 "EHLO
+        mail-io1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729802AbhAERk4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 5 Jan 2021 12:40:56 -0500
+Received: by mail-io1-f47.google.com with SMTP id y5so121844iow.5;
+        Tue, 05 Jan 2021 09:40:39 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=8QCUqXr2bzGc5ddkxZAj8Vxc5oTvsGwo9juSuaK/DNc=;
+        b=dpiv0CpJakEgMYIkHp0lhaNf0d461HGJWH+aCceAtiK06rRDsTcTMmlKY49hvYeBLh
+         7Ty71HBKHYeiO7tR4vDt/nbyfS3So6W770LrQdh92+7tJttY7v6bNEPz9K6DyPt4FMLd
+         PIt1LLKtkEtRi0UIF/SrTqyc8+lLr/NyjHzBXZIkwKKYOWTnsle1FsD/3tdAJzYQHLJ8
+         5Wa4nrxHRmF4wbzaj7iiS8vhXcoFeE1qz694yyOGkLCUx5hT7HoR59vm5/MhqoPl6WyI
+         nwHivuhmthkX8gk5c3+LEXbUBtsKZCYBaNRO66SiQA1AkHaiy4ksJgdTlgLtAmm1z8Vq
+         VM5g==
+X-Gm-Message-State: AOAM5321qcVRq9N6s7VVvE3mTC6HsP7wLE0n3Y4SZ+nWozJ+Mbu4gJm/
+        A2rP/pRkkVNdQnfCttBO7A==
+X-Google-Smtp-Source: ABdhPJxCW42aLPbGC5oVtd7TRg3rkrFk+Qrm1SC6TjLARKSfiB9JNiyQ7YL2gLDjCHBjUScpozxZgA==
+X-Received: by 2002:a02:7692:: with SMTP id z140mr666018jab.21.1609868414264;
+        Tue, 05 Jan 2021 09:40:14 -0800 (PST)
+Received: from robh.at.kernel.org ([64.188.179.253])
+        by smtp.gmail.com with ESMTPSA id y15sm121208ili.65.2021.01.05.09.40.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 05 Jan 2021 09:40:13 -0800 (PST)
+Received: (nullmailer pid 426116 invoked by uid 1000);
+        Tue, 05 Jan 2021 17:40:08 -0000
+Date:   Tue, 5 Jan 2021 10:40:08 -0700
+From:   Rob Herring <robh@kernel.org>
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MyungJoo Ham <myungjoo.ham@samsung.com>,
+        Chanwoo Choi <cw00.choi@samsung.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Sebastian Reichel <sre@kernel.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, linux-ide@vger.kernel.org,
+        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-remoteproc@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Add missing array size constraints
+Message-ID: <20210105174008.GB1875909@robh.at.kernel.org>
+References: <20210104230253.2805217-1-robh@kernel.org>
+ <X/RjziK30y56uZUj@kroah.com>
 MIME-Version: 1.0
-In-Reply-To: <20210101165507.19486-20-tiny.windzz@gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <X/RjziK30y56uZUj@kroah.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 01/01/2021 16:54, Yangtao Li wrote:
-> Use devm_pm_opp_* API to simplify code, and remove opp_table
-> from panfrost_devfreq.
+On Tue, Jan 05, 2021 at 02:04:14PM +0100, Greg Kroah-Hartman wrote:
+> On Mon, Jan 04, 2021 at 04:02:53PM -0700, Rob Herring wrote:
+> > DT properties which can have multiple entries need to specify what the
+> > entries are and define how many entries there can be. In the case of
+> > only a single entry, just 'maxItems: 1' is sufficient.
+> > 
+> > Add the missing entry constraints. These were found with a modified
+> > meta-schema. Unfortunately, there are a few cases where the size
+> > constraints are not defined such as common bindings, so the meta-schema
+> > can't be part of the normal checks.
+> > 
+> > Cc: Jens Axboe <axboe@kernel.dk>
+> > Cc: Stephen Boyd <sboyd@kernel.org>
+> > Cc: Thierry Reding <thierry.reding@gmail.com>
+> > Cc: MyungJoo Ham <myungjoo.ham@samsung.com>
+> > Cc: Chanwoo Choi <cw00.choi@samsung.com>
+> > Cc: Linus Walleij <linus.walleij@linaro.org>
+> > Cc: Bartosz Golaszewski <bgolaszewski@baylibre.com>
+> > Cc: Jonathan Cameron <jic23@kernel.org>
+> > Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+> > Cc: Thomas Gleixner <tglx@linutronix.de>
+> > Cc: Marc Zyngier <maz@kernel.org>
+> > Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
+> > Cc: Chen-Yu Tsai <wens@csie.org>
+> > Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> > Cc: "David S. Miller" <davem@davemloft.net>
+> > Cc: Jakub Kicinski <kuba@kernel.org>
+> > Cc: Sebastian Reichel <sre@kernel.org>
+> > Cc: Ohad Ben-Cohen <ohad@wizery.com>
+> > Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+> > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> > Signed-off-by: Rob Herring <robh@kernel.org>
 > 
-> Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
-
-Reviewed-by: Steven Price <steven.price@arm.com>
-
-> ---
->   drivers/gpu/drm/panfrost/panfrost_devfreq.c | 34 ++++++---------------
->   drivers/gpu/drm/panfrost/panfrost_devfreq.h |  1 -
->   2 files changed, 10 insertions(+), 25 deletions(-)
+> <snip>
 > 
-> diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.c b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
-> index f44d28fad085..c42fa9eb43b1 100644
-> --- a/drivers/gpu/drm/panfrost/panfrost_devfreq.c
-> +++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
-> @@ -92,25 +92,26 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
->   	struct thermal_cooling_device *cooling;
->   	struct panfrost_devfreq *pfdevfreq = &pfdev->pfdevfreq;
->   
-> -	opp_table = dev_pm_opp_set_regulators(dev, pfdev->comp->supply_names,
-> +	opp_table = devm_pm_opp_set_regulators(dev, pfdev->comp->supply_names,
->   					      pfdev->comp->num_supplies);
->   	if (IS_ERR(opp_table)) {
->   		ret = PTR_ERR(opp_table);
->   		/* Continue if the optional regulator is missing */
->   		if (ret != -ENODEV) {
->   			DRM_DEV_ERROR(dev, "Couldn't set OPP regulators\n");
-> -			goto err_fini;
-> +			return ret;
->   		}
-> -	} else {
-> -		pfdevfreq->regulators_opp_table = opp_table;
->   	}
->   
-> -	ret = dev_pm_opp_of_add_table(dev);
-> +	ret = devm_pm_opp_of_add_table(dev);
->   	if (ret) {
-> +		if (!IS_ERR(opp_table))
-> +			devm_pm_opp_put_regulators(dev, opp_table);
-> +
->   		/* Optional, continue without devfreq */
->   		if (ret == -ENODEV)
->   			ret = 0;
-> -		goto err_fini;
-> +		return ret;
->   	}
->   	pfdevfreq->opp_of_table_added = true;
->   
-> @@ -121,10 +122,8 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
->   	cur_freq = clk_get_rate(pfdev->clock);
->   
->   	opp = devfreq_recommended_opp(dev, &cur_freq, 0);
-> -	if (IS_ERR(opp)) {
-> -		ret = PTR_ERR(opp);
-> -		goto err_fini;
-> -	}
-> +	if (IS_ERR(opp))
-> +		return PTR_ERR(opp);
->   
->   	panfrost_devfreq_profile.initial_freq = cur_freq;
->   	dev_pm_opp_put(opp);
-> @@ -133,8 +132,7 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
->   					  DEVFREQ_GOV_SIMPLE_ONDEMAND, NULL);
->   	if (IS_ERR(devfreq)) {
->   		DRM_DEV_ERROR(dev, "Couldn't initialize GPU devfreq\n");
-> -		ret = PTR_ERR(devfreq);
-> -		goto err_fini;
-> +		return PTR_ERR(devfreq);
->   	}
->   	pfdevfreq->devfreq = devfreq;
->   
-> @@ -145,10 +143,6 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
->   		pfdevfreq->cooling = cooling;
->   
->   	return 0;
-> -
-> -err_fini:
-> -	panfrost_devfreq_fini(pfdev);
-> -	return ret;
->   }
->   
->   void panfrost_devfreq_fini(struct panfrost_device *pfdev)
-> @@ -159,14 +153,6 @@ void panfrost_devfreq_fini(struct panfrost_device *pfdev)
->   		devfreq_cooling_unregister(pfdevfreq->cooling);
->   		pfdevfreq->cooling = NULL;
->   	}
-> -
-> -	if (pfdevfreq->opp_of_table_added) {
-> -		dev_pm_opp_of_remove_table(&pfdev->pdev->dev);
-> -		pfdevfreq->opp_of_table_added = false;
-> -	}
-> -
-> -	dev_pm_opp_put_regulators(pfdevfreq->regulators_opp_table);
-> -	pfdevfreq->regulators_opp_table = NULL;
->   }
->   
->   void panfrost_devfreq_resume(struct panfrost_device *pfdev)
-> diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.h b/drivers/gpu/drm/panfrost/panfrost_devfreq.h
-> index db6ea48e21f9..a51854cc8c06 100644
-> --- a/drivers/gpu/drm/panfrost/panfrost_devfreq.h
-> +++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.h
-> @@ -15,7 +15,6 @@ struct panfrost_device;
->   
->   struct panfrost_devfreq {
->   	struct devfreq *devfreq;
-> -	struct opp_table *regulators_opp_table;
->   	struct thermal_cooling_device *cooling;
->   	bool opp_of_table_added;
->   
+> > diff --git a/Documentation/devicetree/bindings/usb/generic-ehci.yaml b/Documentation/devicetree/bindings/usb/generic-ehci.yaml
+> > index 247ef00381ea..f76b25f7fc7a 100644
+> > --- a/Documentation/devicetree/bindings/usb/generic-ehci.yaml
+> > +++ b/Documentation/devicetree/bindings/usb/generic-ehci.yaml
+> > @@ -83,6 +83,7 @@ properties:
+> >        Phandle of a companion.
+> >  
+> >    phys:
+> > +    maxItems: 1
+> >      description: PHY specifier for the USB PHY
+> >  
+> >    phy-names:
+> > diff --git a/Documentation/devicetree/bindings/usb/generic-ohci.yaml b/Documentation/devicetree/bindings/usb/generic-ohci.yaml
+> > index 2178bcc401bc..8e2bd61f2075 100644
+> > --- a/Documentation/devicetree/bindings/usb/generic-ohci.yaml
+> > +++ b/Documentation/devicetree/bindings/usb/generic-ohci.yaml
+> > @@ -71,6 +71,7 @@ properties:
+> >        Overrides the detected port count
+> >  
+> >    phys:
+> > +    maxItems: 1
+> >      description: PHY specifier for the USB PHY
+> >  
+> >    phy-names:
+> > diff --git a/Documentation/devicetree/bindings/usb/ingenic,musb.yaml b/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
+> > index 678396eeeb78..f506225a4d57 100644
+> > --- a/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
+> > +++ b/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
+> > @@ -40,7 +40,7 @@ properties:
+> >        - const: mc
+> >  
+> >    phys:
+> > -    description: PHY specifier for the USB PHY
+> > +    maxItems: 1
+> >  
+> >    usb-role-switch:
+> >      type: boolean
 > 
+> Any reason you dropped the description for this entry, but not the other
+> ones above?
 
+No, I should have dropped those too. I dropped cases of genericish 
+descriptions on common properties. There's nothing specific to this 
+binding here really.
+
+> 
+> > diff --git a/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml b/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
+> > index 388245b91a55..adce36e48bc9 100644
+> > --- a/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
+> > +++ b/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
+> > @@ -15,13 +15,14 @@ properties:
+> >        - const: ti,j721e-usb
+> >  
+> >    reg:
+> > -    description: module registers
+> > +    maxItems: 1
+> >  
+> >    power-domains:
+> >      description:
+> >        PM domain provider node and an args specifier containing
+> >        the USB device id value. See,
+> >        Documentation/devicetree/bindings/soc/ti/sci-pm-domain.txt
+> > +    maxItems: 1
+> >  
+> >    clocks:
+> >      description: Clock phandles to usb2_refclk and lpm_clk
+> 
+> Same here, why remove the description?
+
+Really, the question is why keep 'description' on power-domains. Perhaps 
+there's a little value in the reference to sci-pm-domain.txt, so I left 
+it.
+
+Rob
