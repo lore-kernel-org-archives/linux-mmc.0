@@ -7,128 +7,185 @@ X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86319C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 16:01:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E11BAC433DB
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 16:34:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4C96B22C9D
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 16:01:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B29FC22CB1
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 16:34:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726957AbhAEQBA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Jan 2021 11:01:00 -0500
-Received: from mga14.intel.com ([192.55.52.115]:35258 "EHLO mga14.intel.com"
+        id S1726655AbhAEQef (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Jan 2021 11:34:35 -0500
+Received: from foss.arm.com ([217.140.110.172]:57076 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726711AbhAEQBA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Jan 2021 11:01:00 -0500
-IronPort-SDR: MxEUT6RReoE97PcVL9NtYozZRnpY3EkcrWt3f9kieVPLypCrJeknEyE+OWQsqOUgz0zdWDgdbM
- slTfMmDI42Lg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9855"; a="176345447"
-X-IronPort-AV: E=Sophos;i="5.78,477,1599548400"; 
-   d="scan'208";a="176345447"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2021 08:00:18 -0800
-IronPort-SDR: yWMIoScZAUAopoUwJJJgG3cKq68FO6y2rDLLIBjmk7KqrwMTpQVT8hKn2b51O6U/W5Zs6y/Sx0
- dufWnPbszwtA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,477,1599548400"; 
-   d="scan'208";a="421819081"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by orsmga001.jf.intel.com with ESMTP; 05 Jan 2021 08:00:16 -0800
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: fix rpmb access
-To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20201229161625.38255233@xhacker.debian>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <33a544d0-d911-17dd-6ea6-a847fce42b3c@intel.com>
-Date:   Tue, 5 Jan 2021 18:00:01 +0200
+        id S1726132AbhAEQee (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Jan 2021 11:34:34 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 83C64113E;
+        Tue,  5 Jan 2021 08:33:48 -0800 (PST)
+Received: from [192.168.1.179] (unknown [172.31.20.19])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 647673F70D;
+        Tue,  5 Jan 2021 08:33:37 -0800 (PST)
+Subject: Re: [PATCH 19/31] drm/panfrost: convert to use devm_pm_opp_* API
+To:     Yangtao Li <tiny.windzz@gmail.com>, myungjoo.ham@samsung.com,
+        kyungmin.park@samsung.com, cw00.choi@samsung.com, krzk@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com, digetx@gmail.com,
+        thierry.reding@gmail.com, jonathanh@nvidia.com, yuq825@gmail.com,
+        airlied@linux.ie, daniel@ffwll.ch, robdclark@gmail.com,
+        sean@poorly.run, robh@kernel.org, tomeu.vizoso@collabora.com,
+        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
+        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
+        lukasz.luba@arm.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
+        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
+        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
+        marijn.suijten@somainline.org, gustavoars@kernel.org,
+        emil.velikov@collabora.com, jonathan@marek.ca,
+        akhilpo@codeaurora.org, smasetty@codeaurora.org,
+        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
+        tanmay@codeaurora.org, ddavenport@chromium.org,
+        jsanka@codeaurora.org, rnayak@codeaurora.org,
+        tongtiangen@huawei.com, miaoqinglang@huawei.com,
+        khsieh@codeaurora.org, abhinavk@codeaurora.org,
+        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
+        mka@chromium.org, harigovi@codeaurora.org,
+        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
+        georgi.djakov@linaro.org, akashast@codeaurora.org,
+        parashar@codeaurora.org, dianders@chromium.org
+Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
+        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+References: <20210101165507.19486-1-tiny.windzz@gmail.com>
+ <20210101165507.19486-20-tiny.windzz@gmail.com>
+From:   Steven Price <steven.price@arm.com>
+Message-ID: <63e5e2ae-0baf-cbd1-b2eb-43fac89acb7c@arm.com>
+Date:   Tue, 5 Jan 2021 16:33:32 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20201229161625.38255233@xhacker.debian>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <20210101165507.19486-20-tiny.windzz@gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/12/20 10:16 am, Jisheng Zhang wrote:
-> Commit a44f7cb93732 ("mmc: core: use mrq->sbc when sending CMD23 for
-> RPMB") began to use ACMD23 for RPMB if the host supports ACMD23. In
-> RPMB ACM23 case, we need to set bit 31 to CMD23 argument, otherwise
-> RPMB write operation will return general fail.
+On 01/01/2021 16:54, Yangtao Li wrote:
+> Use devm_pm_opp_* API to simplify code, and remove opp_table
+> from panfrost_devfreq.
 > 
-> However, no matter V4 is enabled or not, the dwcmshc's ARGUMENT2
-> register is 32-bit block count register which doesn't support stuff
-> bits of CMD23 argument. So let's handle this specific ACMD23 case.
-> 
->>From another side, this patch also prepare for future v4 enabling
-> for dwcmshc, because from the 4.10 spec, the ARGUMENT2 register is
-> redefined as 32bit block count which doesn't support stuff bits of
-> CMD23 argument.
-> 
-> Fixes: a44f7cb93732 ("mmc: core: use mrq->sbc when sending CMD23 for RPMB")
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Reviewed-by: Steven Price <steven.price@arm.com>
 
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 27 +++++++++++++++++++++++++++
->  1 file changed, 27 insertions(+)
+>   drivers/gpu/drm/panfrost/panfrost_devfreq.c | 34 ++++++---------------
+>   drivers/gpu/drm/panfrost/panfrost_devfreq.h |  1 -
+>   2 files changed, 10 insertions(+), 25 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 4b673792b5a4..d90020ed3622 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -16,6 +16,8 @@
->  
->  #include "sdhci-pltfm.h"
->  
-> +#define SDHCI_DWCMSHC_ARG2_STUFF	GENMASK(31, 16)
+> diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.c b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
+> index f44d28fad085..c42fa9eb43b1 100644
+> --- a/drivers/gpu/drm/panfrost/panfrost_devfreq.c
+> +++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
+> @@ -92,25 +92,26 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
+>   	struct thermal_cooling_device *cooling;
+>   	struct panfrost_devfreq *pfdevfreq = &pfdev->pfdevfreq;
+>   
+> -	opp_table = dev_pm_opp_set_regulators(dev, pfdev->comp->supply_names,
+> +	opp_table = devm_pm_opp_set_regulators(dev, pfdev->comp->supply_names,
+>   					      pfdev->comp->num_supplies);
+>   	if (IS_ERR(opp_table)) {
+>   		ret = PTR_ERR(opp_table);
+>   		/* Continue if the optional regulator is missing */
+>   		if (ret != -ENODEV) {
+>   			DRM_DEV_ERROR(dev, "Couldn't set OPP regulators\n");
+> -			goto err_fini;
+> +			return ret;
+>   		}
+> -	} else {
+> -		pfdevfreq->regulators_opp_table = opp_table;
+>   	}
+>   
+> -	ret = dev_pm_opp_of_add_table(dev);
+> +	ret = devm_pm_opp_of_add_table(dev);
+>   	if (ret) {
+> +		if (!IS_ERR(opp_table))
+> +			devm_pm_opp_put_regulators(dev, opp_table);
 > +
->  /* DWCMSHC specific Mode Select value */
->  #define DWCMSHC_CTRL_HS400		0x7
->  
-> @@ -49,6 +51,29 @@ static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
->  	sdhci_adma_write_desc(host, desc, addr, len, cmd);
->  }
->  
-> +static void dwcmshc_check_auto_cmd23(struct mmc_host *mmc,
-> +				     struct mmc_request *mrq)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +
-> +	/*
-> +	 * No matter V4 is enabled or not, ARGUMENT2 register is 32-bit
-> +	 * block count register which doesn't support stuff bits of
-> +	 * CMD23 argument on dwcmsch host controller.
-> +	 */
-> +	if (mrq->sbc && (mrq->sbc->arg & SDHCI_DWCMSHC_ARG2_STUFF))
-> +		host->flags &= ~SDHCI_AUTO_CMD23;
-> +	else
-> +		host->flags |= SDHCI_AUTO_CMD23;
-> +}
-> +
-> +static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +	dwcmshc_check_auto_cmd23(mmc, mrq);
-> +
-> +	sdhci_request(mmc, mrq);
-> +}
-> +
->  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
->  				      unsigned int timing)
->  {
-> @@ -133,6 +158,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  
->  	sdhci_get_of_property(pdev);
->  
-> +	host->mmc_host_ops.request = dwcmshc_request;
-> +
->  	err = sdhci_add_host(host);
->  	if (err)
->  		goto err_clk;
+>   		/* Optional, continue without devfreq */
+>   		if (ret == -ENODEV)
+>   			ret = 0;
+> -		goto err_fini;
+> +		return ret;
+>   	}
+>   	pfdevfreq->opp_of_table_added = true;
+>   
+> @@ -121,10 +122,8 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
+>   	cur_freq = clk_get_rate(pfdev->clock);
+>   
+>   	opp = devfreq_recommended_opp(dev, &cur_freq, 0);
+> -	if (IS_ERR(opp)) {
+> -		ret = PTR_ERR(opp);
+> -		goto err_fini;
+> -	}
+> +	if (IS_ERR(opp))
+> +		return PTR_ERR(opp);
+>   
+>   	panfrost_devfreq_profile.initial_freq = cur_freq;
+>   	dev_pm_opp_put(opp);
+> @@ -133,8 +132,7 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
+>   					  DEVFREQ_GOV_SIMPLE_ONDEMAND, NULL);
+>   	if (IS_ERR(devfreq)) {
+>   		DRM_DEV_ERROR(dev, "Couldn't initialize GPU devfreq\n");
+> -		ret = PTR_ERR(devfreq);
+> -		goto err_fini;
+> +		return PTR_ERR(devfreq);
+>   	}
+>   	pfdevfreq->devfreq = devfreq;
+>   
+> @@ -145,10 +143,6 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
+>   		pfdevfreq->cooling = cooling;
+>   
+>   	return 0;
+> -
+> -err_fini:
+> -	panfrost_devfreq_fini(pfdev);
+> -	return ret;
+>   }
+>   
+>   void panfrost_devfreq_fini(struct panfrost_device *pfdev)
+> @@ -159,14 +153,6 @@ void panfrost_devfreq_fini(struct panfrost_device *pfdev)
+>   		devfreq_cooling_unregister(pfdevfreq->cooling);
+>   		pfdevfreq->cooling = NULL;
+>   	}
+> -
+> -	if (pfdevfreq->opp_of_table_added) {
+> -		dev_pm_opp_of_remove_table(&pfdev->pdev->dev);
+> -		pfdevfreq->opp_of_table_added = false;
+> -	}
+> -
+> -	dev_pm_opp_put_regulators(pfdevfreq->regulators_opp_table);
+> -	pfdevfreq->regulators_opp_table = NULL;
+>   }
+>   
+>   void panfrost_devfreq_resume(struct panfrost_device *pfdev)
+> diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.h b/drivers/gpu/drm/panfrost/panfrost_devfreq.h
+> index db6ea48e21f9..a51854cc8c06 100644
+> --- a/drivers/gpu/drm/panfrost/panfrost_devfreq.h
+> +++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.h
+> @@ -15,7 +15,6 @@ struct panfrost_device;
+>   
+>   struct panfrost_devfreq {
+>   	struct devfreq *devfreq;
+> -	struct opp_table *regulators_opp_table;
+>   	struct thermal_cooling_device *cooling;
+>   	bool opp_of_table_added;
+>   
 > 
 
