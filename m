@@ -2,109 +2,172 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E24F5C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 12:41:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51056C43219
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 13:03:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB50422AB9
-	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 12:41:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3B62D22240
+	for <linux-mmc@archiver.kernel.org>; Tue,  5 Jan 2021 13:03:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728778AbhAEMkv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 5 Jan 2021 07:40:51 -0500
-Received: from mga04.intel.com ([192.55.52.120]:62363 "EHLO mga04.intel.com"
+        id S1730462AbhAENDd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 5 Jan 2021 08:03:33 -0500
+Received: from mail.kernel.org ([198.145.29.99]:57172 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726189AbhAEMku (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 5 Jan 2021 07:40:50 -0500
-IronPort-SDR: tBEJiEVrWBLAWAxamEYe4L7ef4o0elxzm6H3DvSjQvmfOIjsHAVZyXShi+UeIojvuGYECuX+di
- wut3vzxX0vkg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9854"; a="174522447"
-X-IronPort-AV: E=Sophos;i="5.78,476,1599548400"; 
-   d="scan'208";a="174522447"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2021 04:40:09 -0800
-IronPort-SDR: 6IkOAP8MjGH/55q5jhZv/PwNqde/HhlTyXkBbEhuLnYqyG5Fv6u6PZ1FXQAKnJF+IXsFmgeDuX
- lxq3BIYT4zZg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.78,476,1599548400"; 
-   d="scan'208";a="421760825"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.94]) ([10.237.72.94])
-  by orsmga001.jf.intel.com with ESMTP; 05 Jan 2021 04:40:06 -0800
-Subject: Re: [PATCH] mmc: sdhci-sprd: Fix some resource leaks in the remove
- function
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        ulf.hansson@linaro.org, orsonzhai@gmail.com,
-        baolin.wang7@gmail.com, zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org
-References: <20201217204236.163446-1-christophe.jaillet@wanadoo.fr>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <1cfeeb62-8211-4a2a-0cf5-c3799d7ef42e@intel.com>
-Date:   Tue, 5 Jan 2021 14:39:52 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S1729685AbhAENDc (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 5 Jan 2021 08:03:32 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 2E2CA22AAC;
+        Tue,  5 Jan 2021 13:02:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1609851770;
+        bh=/Tnbq4FC5ordGqRMZzBmEF2707cpXLotVuL1pB4INEg=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=b7A+HlihRW0BWkxuWeObIBnymtaP0ufAI6iZqP+I33dmJaItT4s02eE21hd20fF/X
+         d/gLGOgVM5jXbgjwt3xldxp8Yx05uXAdpw5ayzs7kX/HEqtzXpXUB3oUcRe35cTc//
+         0LAxDBVV/TNR3PSOx4/g/7uEn2gJ4Mz3qDyRHQzw=
+Date:   Tue, 5 Jan 2021 14:04:14 +0100
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        MyungJoo Ham <myungjoo.ham@samsung.com>,
+        Chanwoo Choi <cw00.choi@samsung.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Sebastian Reichel <sre@kernel.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, linux-ide@vger.kernel.org,
+        linux-clk@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-remoteproc@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Add missing array size constraints
+Message-ID: <X/RjziK30y56uZUj@kroah.com>
+References: <20210104230253.2805217-1-robh@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20201217204236.163446-1-christophe.jaillet@wanadoo.fr>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210104230253.2805217-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/12/20 10:42 pm, Christophe JAILLET wrote:
-> 'sdhci_remove_host()' and 'sdhci_pltfm_free()' should be used in place of
-> 'mmc_remove_host()' and 'mmc_free_host()'.
+On Mon, Jan 04, 2021 at 04:02:53PM -0700, Rob Herring wrote:
+> DT properties which can have multiple entries need to specify what the
+> entries are and define how many entries there can be. In the case of
+> only a single entry, just 'maxItems: 1' is sufficient.
 > 
-> This avoids some resource leaks, is more in line with the error handling
-> path of the probe function, and is more consistent with other drivers.
+> Add the missing entry constraints. These were found with a modified
+> meta-schema. Unfortunately, there are a few cases where the size
+> constraints are not defined such as common bindings, so the meta-schema
+> can't be part of the normal checks.
 > 
-> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
-> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+> Cc: Jens Axboe <axboe@kernel.dk>
+> Cc: Stephen Boyd <sboyd@kernel.org>
+> Cc: Thierry Reding <thierry.reding@gmail.com>
+> Cc: MyungJoo Ham <myungjoo.ham@samsung.com>
+> Cc: Chanwoo Choi <cw00.choi@samsung.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Bartosz Golaszewski <bgolaszewski@baylibre.com>
+> Cc: Jonathan Cameron <jic23@kernel.org>
+> Cc: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Marc Zyngier <maz@kernel.org>
+> Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
+> Cc: Chen-Yu Tsai <wens@csie.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Jakub Kicinski <kuba@kernel.org>
+> Cc: Sebastian Reichel <sre@kernel.org>
+> Cc: Ohad Ben-Cohen <ohad@wizery.com>
+> Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Signed-off-by: Rob Herring <robh@kernel.org>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+<snip>
 
-> ---
-> Other adjustment may be needed.
-> I'm not sure at all of the 0 passed to 'sdhci_remove_host()'. Some drivers
-> pass 0, some have some more complicated computation.
-
-'0' means cleanup nicely. '1' (dead) means nothing works anymore, including
-interrupts, so give up on requests immediately.
-
-Either should work.  '0' is better unless your host controller really is
-dead, which is mostly not possible except for some legacy PCI devices.
-
-> ---
->  drivers/mmc/host/sdhci-sprd.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index f85171edabeb..5dc36efff47f 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -708,14 +708,14 @@ static int sdhci_sprd_remove(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host = platform_get_drvdata(pdev);
->  	struct sdhci_sprd_host *sprd_host = TO_SPRD_HOST(host);
-> -	struct mmc_host *mmc = host->mmc;
+> diff --git a/Documentation/devicetree/bindings/usb/generic-ehci.yaml b/Documentation/devicetree/bindings/usb/generic-ehci.yaml
+> index 247ef00381ea..f76b25f7fc7a 100644
+> --- a/Documentation/devicetree/bindings/usb/generic-ehci.yaml
+> +++ b/Documentation/devicetree/bindings/usb/generic-ehci.yaml
+> @@ -83,6 +83,7 @@ properties:
+>        Phandle of a companion.
 >  
-> -	mmc_remove_host(mmc);
-> +	sdhci_remove_host(host, 0);
-> +
->  	clk_disable_unprepare(sprd_host->clk_sdio);
->  	clk_disable_unprepare(sprd_host->clk_enable);
->  	clk_disable_unprepare(sprd_host->clk_2x_enable);
+>    phys:
+> +    maxItems: 1
+>      description: PHY specifier for the USB PHY
 >  
-> -	mmc_free_host(mmc);
-> +	sdhci_pltfm_free(pdev);
+>    phy-names:
+> diff --git a/Documentation/devicetree/bindings/usb/generic-ohci.yaml b/Documentation/devicetree/bindings/usb/generic-ohci.yaml
+> index 2178bcc401bc..8e2bd61f2075 100644
+> --- a/Documentation/devicetree/bindings/usb/generic-ohci.yaml
+> +++ b/Documentation/devicetree/bindings/usb/generic-ohci.yaml
+> @@ -71,6 +71,7 @@ properties:
+>        Overrides the detected port count
 >  
->  	return 0;
->  }
-> 
+>    phys:
+> +    maxItems: 1
+>      description: PHY specifier for the USB PHY
+>  
+>    phy-names:
+> diff --git a/Documentation/devicetree/bindings/usb/ingenic,musb.yaml b/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
+> index 678396eeeb78..f506225a4d57 100644
+> --- a/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
+> +++ b/Documentation/devicetree/bindings/usb/ingenic,musb.yaml
+> @@ -40,7 +40,7 @@ properties:
+>        - const: mc
+>  
+>    phys:
+> -    description: PHY specifier for the USB PHY
+> +    maxItems: 1
+>  
+>    usb-role-switch:
+>      type: boolean
 
+Any reason you dropped the description for this entry, but not the other
+ones above?
+
+> diff --git a/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml b/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
+> index 388245b91a55..adce36e48bc9 100644
+> --- a/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
+> +++ b/Documentation/devicetree/bindings/usb/ti,j721e-usb.yaml
+> @@ -15,13 +15,14 @@ properties:
+>        - const: ti,j721e-usb
+>  
+>    reg:
+> -    description: module registers
+> +    maxItems: 1
+>  
+>    power-domains:
+>      description:
+>        PM domain provider node and an args specifier containing
+>        the USB device id value. See,
+>        Documentation/devicetree/bindings/soc/ti/sci-pm-domain.txt
+> +    maxItems: 1
+>  
+>    clocks:
+>      description: Clock phandles to usb2_refclk and lpm_clk
+
+Same here, why remove the description?
+
+thanks,
+
+greg k-h
