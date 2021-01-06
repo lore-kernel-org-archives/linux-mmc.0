@@ -2,130 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2A4DC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 07:14:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D6D5C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 08:54:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77666230FB
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 07:14:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E24A72310A
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 08:54:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725906AbhAFHOU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Jan 2021 02:14:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45290 "EHLO
+        id S1726308AbhAFIyi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Jan 2021 03:54:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32980 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725800AbhAFHOU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2021 02:14:20 -0500
-Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98B4AC06134D
-        for <linux-mmc@vger.kernel.org>; Tue,  5 Jan 2021 23:13:39 -0800 (PST)
-Received: by mail-ej1-x62f.google.com with SMTP id ce23so3737381ejb.8
-        for <linux-mmc@vger.kernel.org>; Tue, 05 Jan 2021 23:13:39 -0800 (PST)
+        with ESMTP id S1726074AbhAFIyi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2021 03:54:38 -0500
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEB12C06134C;
+        Wed,  6 Jan 2021 00:53:57 -0800 (PST)
+Received: by mail-pg1-x52e.google.com with SMTP id i5so1810372pgo.1;
+        Wed, 06 Jan 2021 00:53:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=rT4Dc8swlK31/4OXAMfRD8Dy9QIvv8YpGOiKzBJjVS0=;
-        b=kW/FIQ9UMgiQ4U+TkdADVoEYk5gZPV3uhWmFEaBISm60k6X7HKncaLJMcm7Te12ixW
-         DmozTsbCxinSR4kw60jnPkTRpJcI2yoqWEX3PsYD1Gobe1MgtRCRsAYMvDuT6a2OmRZe
-         JA5aIaNzC2Qz1QI2pjKK7hj+qAEnukuAv07b9W7M8pBoGmUjZmXbHaL5522RR1fvjBcC
-         aUOByaCkN/CFtegf2L0lfAhcsuMiZ+e/Z0kGD0hJrq1CBcozlTfyZi2pX2qyg5tLtp5K
-         qfoj7U94CqKy1yfDXJToNFtVkn5zEBI7/9XBDJd/bwiyCn1gMrTQ4lsyGmJDatnR3P5D
-         m6RA==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=W8n/mDppQN/+rC6TXnhHYuqYVHdIMuqXKUEFt8ctLXQ=;
+        b=g+X3dHyr4s4V/Ptl8bLW7gd0BdYFoXyX6+5JMovjo74VQVyLpu4crFx5YC5IOzR1id
+         QpXu5mpN8g+4r/JwcOPQNj4BVTl7C2o45knNSCuMk5yFSlRifKrkck0rk8IkEjCn2ig/
+         pnOVTo+h/Ftt3zadMznUc8svUalT9V9lDEpBcDF++TrAgyLuvXgXExENr4p/9vEWreQ6
+         G2kgHnhj6CwIIoqLBPs41NPp/QLalyZQCy3wEyFRIgoAmFCliUclrbWVnoJbQhfqPYvX
+         M4af8vU6TdtYjoLAkYlHPdEpK8PgL5kW2MAK1rMlWDBYkrErwzzSbwXwFZGk1ZV3PeQB
+         FVkQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=rT4Dc8swlK31/4OXAMfRD8Dy9QIvv8YpGOiKzBJjVS0=;
-        b=r5/j5W7TzVWp4SI/czKOTK1NVUNIqpqb+zgIvEEeZkuyQLbgXQ1pqUFBhHIWXmCrmB
-         xyK3jFQipaoNSctAJiADo4CA5weXU6xD5tm2M/D0m3WSpcgY47DV512jQjw31UGl6Nez
-         tNbnYDYU4Agp+TCrO+LYHSIz9JsfPUNztaNrNDFotdFAh8ogQD8QnkxtVzhPtEbl8tiF
-         OYJ10m/7jR8Dj6Gte0IZoh/o5cCk9QXgl2BjVteebV4KtcyEWIOehzxitgbn1cEw23uj
-         q2zYQBmAi6CIGvw/adGUihCaR0Aoq4rRHYPJHQis2vGwZUFtSXJLLUryniX+N5fFY4HQ
-         VZPg==
-X-Gm-Message-State: AOAM5308BSqF9hF67LS0X9Cuan5GZ87NHgP26pdxp0efQVJge3Vo9puO
-        oKKfAmYdbW9O4W8lwoJO3E8w3LfzYBGIla4+hzb8gw==
-X-Google-Smtp-Source: ABdhPJz7NZsjb4UgOGiErAdqwk42sh/yXenAjVlhxnzAVaOFNfM5U6i5Q3E7GI/VvU/IA448wOjGCY/95IeDdC3rxz4=
-X-Received: by 2002:a17:906:8594:: with SMTP id v20mr1986708ejx.470.1609917218321;
- Tue, 05 Jan 2021 23:13:38 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=W8n/mDppQN/+rC6TXnhHYuqYVHdIMuqXKUEFt8ctLXQ=;
+        b=CFJeM7CivrBBZu4OZbqO1QNI52dxLH80OL9Pj96oGAcYe15blk/0OAMn/nGcr9jNLM
+         ZANeQRFhGWMr/rrnDtaMQEisP0Hyof+G91WPc4MyFv3uuZJ1e6siK7L18O5GHqu5PQO2
+         UILUFWWn7iG/D7q+aVO+O/Pim06mHxhwb2eSEz2mSFJzqdiuvW7tkLS73UX3wxwOvm2U
+         NK2ovQbb0vggkr77/MUQuCCoFkFkgmR5og6HXH/Dg7oIpSH9JhhA7l+YdpsYiLL0x/SJ
+         FpRWrpf8j1gj74lo//2vmHq2ugUrHgcHIfdj7dHBghr9A1xMYUsMWYEyflRyF2OEHwtB
+         4qCw==
+X-Gm-Message-State: AOAM530fesA7w0w51DZBh3h0EzVOJAuPEOZs3t3BNjSG33Y5koCCkGSU
+        CxBONfm6tdZWMjm1PaoF7nQ=
+X-Google-Smtp-Source: ABdhPJxRsGbPn7fB91Z8bm5aWqbISXgDXCNUFBC2SU9PpEFs102S0WPYceFOxBtb3hRogNEpjH94MQ==
+X-Received: by 2002:a63:5416:: with SMTP id i22mr3461995pgb.43.1609923237457;
+        Wed, 06 Jan 2021 00:53:57 -0800 (PST)
+Received: from gli-System-Product-Name.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id y189sm1739191pfb.155.2021.01.06.00.53.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 06 Jan 2021 00:53:56 -0800 (PST)
+From:   Renius Chen <reniuschengl@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        Renius Chen <reniuschengl@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Add a switch to enable/disable CQHCI support
+Date:   Wed,  6 Jan 2021 16:53:32 +0800
+Message-Id: <20210106085332.5494-1-reniuschengl@gmail.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-References: <20210104230253.2805217-1-robh@kernel.org>
-In-Reply-To: <20210104230253.2805217-1-robh@kernel.org>
-From:   Bartosz Golaszewski <bgolaszewski@baylibre.com>
-Date:   Wed, 6 Jan 2021 08:13:27 +0100
-Message-ID: <CAMpxmJVFFu6q53-O_iWCyhY3M3up2Hg1TMY_DpmOvED4eN8bJQ@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Add missing array size constraints
-To:     Rob Herring <robh@kernel.org>
-Cc:     linux-devicetree <devicetree@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        MyungJoo Ham <myungjoo.ham@samsung.com>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        arm-soc <linux-arm-kernel@lists.infradead.org>,
-        linux-ide@vger.kernel.org, linux-clk <linux-clk@vger.kernel.org>,
-        linux-drm <dri-devel@lists.freedesktop.org>,
-        linux-gpio <linux-gpio@vger.kernel.org>,
-        linux-iio <linux-iio@vger.kernel.org>,
-        Linux Input <linux-input@vger.kernel.org>,
-        linux-media <linux-media@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, netdev <netdev@vger.kernel.org>,
-        linux-pm <linux-pm@vger.kernel.org>,
-        linux-remoteproc@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-serial@vger.kernel.org,
-        Linux-ALSA <alsa-devel@alsa-project.org>,
-        linux-spi@vger.kernel.org, USB list <linux-usb@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 5, 2021 at 12:03 AM Rob Herring <robh@kernel.org> wrote:
->
-> DT properties which can have multiple entries need to specify what the
-> entries are and define how many entries there can be. In the case of
-> only a single entry, just 'maxItems: 1' is sufficient.
->
-> Add the missing entry constraints. These were found with a modified
-> meta-schema. Unfortunately, there are a few cases where the size
-> constraints are not defined such as common bindings, so the meta-schema
-> can't be part of the normal checks.
->
+Add a vendor-specific bit named GLI_9763E_MB_ERP_ON at the bit7 of
+register 888h to decide whether to enhance random R/W performance
+of GL9763E. CQHCI support will be enabled if and only if the bit is
+set and the GLI_9763E_MB_CMQ_OFF bit is not set.
 
-[snip!]
+Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
->  .../bindings/gpio/gpio-pca95xx.yaml           |  1 +
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index b85edd62e7f0..c6a107d7c742 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -84,6 +84,7 @@
+ #define   GLI_9763E_VHS_REV_W      0x2
+ #define PCIE_GLI_9763E_MB	 0x888
+ #define   GLI_9763E_MB_CMDQ_OFF	   BIT(19)
++#define   GLI_9763E_MB_ERP_ON      BIT(7)
+ #define PCIE_GLI_9763E_SCR	 0x8E0
+ #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
+ 
+@@ -814,7 +815,8 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
+ 
+ 	pci_read_config_dword(pdev, PCIE_GLI_9763E_MB, &value);
+ 	if (!(value & GLI_9763E_MB_CMDQ_OFF))
+-		host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
++		if (value & GLI_9763E_MB_ERP_ON)
++			host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+ 
+ 	gli_pcie_enable_msi(slot);
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+-- 
+2.27.0
 
-[snip!]
-
-> diff --git a/Documentation/devicetree/bindings/gpio/gpio-pca95xx.yaml b/Documentation/devicetree/bindings/gpio/gpio-pca95xx.yaml
-> index f5ee23c2df60..57cdcfd4ff3c 100644
-> --- a/Documentation/devicetree/bindings/gpio/gpio-pca95xx.yaml
-> +++ b/Documentation/devicetree/bindings/gpio/gpio-pca95xx.yaml
-> @@ -81,6 +81,7 @@ properties:
->      const: 2
->
->    reset-gpios:
-> +    maxItems: 1
->      description:
->        GPIO specification for the RESET input. This is an active low signal to
->        the PCA953x.  Not valid for Maxim MAX732x devices.
-
-Acked-by: Bartosz Golaszewski <bgolaszewski@baylibre.com>
