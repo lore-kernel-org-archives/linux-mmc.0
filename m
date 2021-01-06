@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D6D5C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 08:54:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FEB2C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 09:28:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E24A72310A
-	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 08:54:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B87C52310B
+	for <linux-mmc@archiver.kernel.org>; Wed,  6 Jan 2021 09:28:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726308AbhAFIyi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 6 Jan 2021 03:54:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32980 "EHLO
+        id S1726429AbhAFJ23 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 6 Jan 2021 04:28:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38218 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726074AbhAFIyi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2021 03:54:38 -0500
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEB12C06134C;
-        Wed,  6 Jan 2021 00:53:57 -0800 (PST)
-Received: by mail-pg1-x52e.google.com with SMTP id i5so1810372pgo.1;
-        Wed, 06 Jan 2021 00:53:57 -0800 (PST)
+        with ESMTP id S1726422AbhAFJ22 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 6 Jan 2021 04:28:28 -0500
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC4DBC06134D;
+        Wed,  6 Jan 2021 01:27:47 -0800 (PST)
+Received: by mail-pj1-x1031.google.com with SMTP id hk16so1287094pjb.4;
+        Wed, 06 Jan 2021 01:27:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=W8n/mDppQN/+rC6TXnhHYuqYVHdIMuqXKUEFt8ctLXQ=;
-        b=g+X3dHyr4s4V/Ptl8bLW7gd0BdYFoXyX6+5JMovjo74VQVyLpu4crFx5YC5IOzR1id
-         QpXu5mpN8g+4r/JwcOPQNj4BVTl7C2o45knNSCuMk5yFSlRifKrkck0rk8IkEjCn2ig/
-         pnOVTo+h/Ftt3zadMznUc8svUalT9V9lDEpBcDF++TrAgyLuvXgXExENr4p/9vEWreQ6
-         G2kgHnhj6CwIIoqLBPs41NPp/QLalyZQCy3wEyFRIgoAmFCliUclrbWVnoJbQhfqPYvX
-         M4af8vU6TdtYjoLAkYlHPdEpK8PgL5kW2MAK1rMlWDBYkrErwzzSbwXwFZGk1ZV3PeQB
-         FVkQ==
+        bh=30gO3S3DeQMcowqhl/FY8ymKxzURmO5FSvF9UTh/G6I=;
+        b=XAvivFEsmcwooJEGtCwulU6ckLwIJsgitf/Aim164ibCQT1dM6AE2vrit5OE2M4huq
+         TGJif+ABZAyXZRJ+kO0ktjJ0S93c0qojRzE0GV77VBZ9myv4YPvHRa8x9w/Fr2oHi4vl
+         bq2zVbzyVY0vKNkeFQjZVpgaDZZVU+/hFwKbD+nFOlniCVaNXjNJQ+g6uUrh2RYuo5D+
+         Rtw4mfWg8UcJlwuWYfRNti5QWQhUxnFv8n7+syNYyuuqd1C15U9ny7D5oEKWrNv/QLzO
+         9YFLJGmphB9LbUV5LFcekEol7DhumMYUgWn+AUrrlgkBNd+yO9KP23Qvyau/O8GGvNgf
+         cDBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=W8n/mDppQN/+rC6TXnhHYuqYVHdIMuqXKUEFt8ctLXQ=;
-        b=CFJeM7CivrBBZu4OZbqO1QNI52dxLH80OL9Pj96oGAcYe15blk/0OAMn/nGcr9jNLM
-         ZANeQRFhGWMr/rrnDtaMQEisP0Hyof+G91WPc4MyFv3uuZJ1e6siK7L18O5GHqu5PQO2
-         UILUFWWn7iG/D7q+aVO+O/Pim06mHxhwb2eSEz2mSFJzqdiuvW7tkLS73UX3wxwOvm2U
-         NK2ovQbb0vggkr77/MUQuCCoFkFkgmR5og6HXH/Dg7oIpSH9JhhA7l+YdpsYiLL0x/SJ
-         FpRWrpf8j1gj74lo//2vmHq2ugUrHgcHIfdj7dHBghr9A1xMYUsMWYEyflRyF2OEHwtB
-         4qCw==
-X-Gm-Message-State: AOAM530fesA7w0w51DZBh3h0EzVOJAuPEOZs3t3BNjSG33Y5koCCkGSU
-        CxBONfm6tdZWMjm1PaoF7nQ=
-X-Google-Smtp-Source: ABdhPJxRsGbPn7fB91Z8bm5aWqbISXgDXCNUFBC2SU9PpEFs102S0WPYceFOxBtb3hRogNEpjH94MQ==
-X-Received: by 2002:a63:5416:: with SMTP id i22mr3461995pgb.43.1609923237457;
-        Wed, 06 Jan 2021 00:53:57 -0800 (PST)
+        bh=30gO3S3DeQMcowqhl/FY8ymKxzURmO5FSvF9UTh/G6I=;
+        b=WStaDBRiGn58eG7nxKFk0aiCj+eAchgZjPAGfm7W7rU8vWC8mR27017TKDHNUzE30w
+         uzsJKT/TW3VVcI2pwq+rapIzw04AMGU4ZxbaJd8bGJobDH56H7Qz6gyZc8ZOFKpCMNYY
+         FaSKGKGpU9RHbdWX0s6FkU7aHWM3Y+u2bYwIujDsH9+5wSnRu4II8hlnlGXLcAbXnfh1
+         mTogmFYJI8oNKFp8CUz7GgkSb7GhEK88jPJ1cxfYetvHAsVDbc4DSoKkOR6l+prHCJo2
+         MH538a2NlULf28ABAaHFhTueefgsEewkFJZFhAwlk5YdiAFy7xtfrjLzZVJ38DFa5/KN
+         T7zA==
+X-Gm-Message-State: AOAM531AvaU7qHlSXtEKKvPqnp7DxWJKxpJb1ZJdfjMpvFTM7SnPjgFQ
+        YOfBCEKMA0IJvagKPfhvEyTCj4Ro3ngT6g==
+X-Google-Smtp-Source: ABdhPJwKH/EvrWP4Woi7DHxc+HRX512yiLzpLak7v+uHhk6xgrhack5WA51z5EVTZa7Ds/Fe+jARvg==
+X-Received: by 2002:a17:902:e9c5:b029:db:d1ae:46ba with SMTP id 5-20020a170902e9c5b02900dbd1ae46bamr3416884plk.38.1609925267338;
+        Wed, 06 Jan 2021 01:27:47 -0800 (PST)
 Received: from gli-System-Product-Name.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id y189sm1739191pfb.155.2021.01.06.00.53.55
+        by smtp.gmail.com with ESMTPSA id 129sm1856207pfw.86.2021.01.06.01.27.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 06 Jan 2021 00:53:56 -0800 (PST)
+        Wed, 06 Jan 2021 01:27:46 -0800 (PST)
 From:   Renius Chen <reniuschengl@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         Renius Chen <reniuschengl@gmail.com>
-Subject: [PATCH] mmc: sdhci-pci-gli: Add a switch to enable/disable CQHCI support
-Date:   Wed,  6 Jan 2021 16:53:32 +0800
-Message-Id: <20210106085332.5494-1-reniuschengl@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Enlarge ASPM L1 entry delay of GL9763E
+Date:   Wed,  6 Jan 2021 17:27:40 +0800
+Message-Id: <20210106092740.5808-1-reniuschengl@gmail.com>
 X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -71,38 +71,43 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a vendor-specific bit named GLI_9763E_MB_ERP_ON at the bit7 of
-register 888h to decide whether to enhance random R/W performance
-of GL9763E. CQHCI support will be enabled if and only if the bit is
-set and the GLI_9763E_MB_CMQ_OFF bit is not set.
+The R/W performance of GL9763E is low with some platforms, which
+support ASPM mechanism, due to entering L1 state very frequently
+in R/W process. Enlarge its ASPM L1 entry delay to improve the
+R/W performance of GL9763E.
 
 Signed-off-by: Renius Chen <reniuschengl@gmail.com>
 ---
- drivers/mmc/host/sdhci-pci-gli.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-pci-gli.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index b85edd62e7f0..c6a107d7c742 100644
+index c6a107d7c742..2d13bfcbcacf 100644
 --- a/drivers/mmc/host/sdhci-pci-gli.c
 +++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -84,6 +84,7 @@
- #define   GLI_9763E_VHS_REV_W      0x2
- #define PCIE_GLI_9763E_MB	 0x888
- #define   GLI_9763E_MB_CMDQ_OFF	   BIT(19)
-+#define   GLI_9763E_MB_ERP_ON      BIT(7)
+@@ -88,6 +88,10 @@
  #define PCIE_GLI_9763E_SCR	 0x8E0
  #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
  
-@@ -814,7 +815,8 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
++#define PCIE_GLI_9763E_CFG2      0x8A4
++#define   GLI_9763E_CFG2_L1DLY	   GENMASK(28, 19)
++#define   GLI_9763E_CFG2_L1DLY_MAX 0x3FF
++
+ #define PCIE_GLI_9763E_MMC_CTRL  0x960
+ #define   GLI_9763E_HS400_SLOW     BIT(3)
  
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_MB, &value);
- 	if (!(value & GLI_9763E_MB_CMDQ_OFF))
--		host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
-+		if (value & GLI_9763E_MB_ERP_ON)
-+			host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
+@@ -792,6 +796,11 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+ 	value &= ~GLI_9763E_HS400_SLOW;
+ 	pci_write_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, value);
  
- 	gli_pcie_enable_msi(slot);
- 	host->mmc_host_ops.hs400_enhanced_strobe =
++	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG2, &value);
++	value &= ~GLI_9763E_CFG2_L1DLY;
++	value |= FIELD_PREP(GLI_9763E_CFG2_L1DLY, GLI_9763E_CFG2_L1DLY_MAX);
++	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG2, value);
++
+ 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+ 	value &= ~GLI_9763E_VHS_REV;
+ 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
 -- 
 2.27.0
 
