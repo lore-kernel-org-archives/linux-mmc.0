@@ -2,106 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1174C4332B
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 14:37:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54ED4C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 22:16:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66F7D2311E
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 14:37:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1F871235FD
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 22:16:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729417AbhAGOgt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jan 2021 09:36:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56786 "EHLO
+        id S1726410AbhAGWQI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jan 2021 17:16:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729236AbhAGOcR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jan 2021 09:32:17 -0500
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF4BDC0612F6
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Jan 2021 06:31:36 -0800 (PST)
-Received: by mail-pj1-x1031.google.com with SMTP id j13so3900258pjz.3
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jan 2021 06:31:36 -0800 (PST)
+        with ESMTP id S1725944AbhAGWQI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jan 2021 17:16:08 -0500
+Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0085CC0612F5;
+        Thu,  7 Jan 2021 14:15:27 -0800 (PST)
+Received: by mail-pj1-x1030.google.com with SMTP id b5so4994375pjl.0;
+        Thu, 07 Jan 2021 14:15:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=sH2bFxCKx1Y8BaQTg3VTlV/2EBMMuPOF6dbVWV5OFqo=;
-        b=TwrjFtbYmKEKZ4701FStffI+UGbHHzVTwmX2K62eDF3mHt3kvetNBQRcpG7EMYgCyU
-         8wq2Xvy4jTINk9Sq8ctTDoaw+WDvRGp06dFkI2Jf9UtP2bovkwnCD7D5YFEh6u8jytoH
-         3QdzU9+2T5RZ0GOa1LkWmtaoXxeICzLVRHLuyQdMS0jjN5rBOhy94/njzFIFoTStuW+j
-         UhyIWDNG5UaGEjW4RZzdMwzNPnI65obm2LYtv+6VifeZGYljZhBeEzuCE8uwDz9Hi+d2
-         bG/mh8vPy49lxBFzo4bo4mnd2ZLYeogrdLzw6rddh1N9VDlQWxUOjgIrNc+9zVlL8VZx
-         jWUA==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=WZ0XBPw5rLkEDXHtBQzLvxXTmDU6S/SHITAFiBYK730=;
+        b=jIHeiI1kVrjG+DCsMVsO1xFF9i3dWyRGCrWqXgK8nOdaIlVJdMOhl0Ks9tOp6CS73N
+         zA07EaKb9XdM72SaymmJxFhJQzd/b0Lo3U5nO/RxjrJkELr4v7BX9LAQDjDb72EQuVOM
+         tKMynD66ISR97gNCU9fC1ibpizz50EsjKLhPZR0HTn6YPYpFbUgVKmEV1C8W7f5V2Y2u
+         8/NLW1CnG+MS8i9fZzzRyp8I2b7glhILN8de0jl9ORkErQfDAOhTzy0X4gZgyEkY+LX0
+         eMpvrIjt/DQuNytAsDiJpIRfa00yDZQCI9pa6ub+5LsyHDiiI+w1Fe5w+K0bBBWmoC/5
+         wQYA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=sH2bFxCKx1Y8BaQTg3VTlV/2EBMMuPOF6dbVWV5OFqo=;
-        b=MBRKlMt849dnpTHAqYyFCi8KysskQhMJYfLUad5ew2i/27GAaBBgA2Tpwlju5Fwdey
-         4IZv8y9rVLPo8AkeEIqQ3PDd8FQylwEqg/pX1U2qxuMcBtLkyNpP7XwQoRv6Hq2eOJyL
-         v8vFI/bMBhrmv9A1Ty9D841yWYHRl6exDsqMkcc7QTQadcf8DdSlUw85R/MsPf8pqL8e
-         rZVu8TE7Pzv6ctxJFPi8YohNKCn/9zHfhBRjJ74Iqa36HNLYdXkcVZyqYcmYeGfZIZCl
-         FfnUmA9en9TEvR7yBnjN7yP0sC0hd0FqHDFFWwaN/zAaxBzkxOzlQ++KspWDgCmgCwJj
-         RxYA==
-X-Gm-Message-State: AOAM531Sbh5eptBOvJ9wpJeiGAi1HXebwtq+vwIH+heY5/Q5jkYD8NlX
-        7PuYjIX3VxjFYxuTzLvaeLnf
-X-Google-Smtp-Source: ABdhPJzNk71bC17lPPMQlIwS45H2Kt1aqTQMKqplD0v8VlsGhks/Sakz2RN9lPCORLSLDErEG733AQ==
-X-Received: by 2002:a17:902:d385:b029:da:c6e4:5cab with SMTP id e5-20020a170902d385b02900dac6e45cabmr9118029pld.7.1610029896186;
-        Thu, 07 Jan 2021 06:31:36 -0800 (PST)
-Received: from localhost.localdomain ([103.77.37.128])
-        by smtp.gmail.com with ESMTPSA id 19sm6096465pfu.85.2021.01.07.06.31.31
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=WZ0XBPw5rLkEDXHtBQzLvxXTmDU6S/SHITAFiBYK730=;
+        b=GccVGb+zx4cfKOLBAwREzLTVVK+pIz67qoSi0qWT3g2s0rzjogfDXcDXTBmT14Fc+l
+         dek6jdvM2c1HMDJXMHSiXh0nBX5i0Wx+SMkPUJnJuo3/M5oaxp5knsqIS6STGtYnlfaS
+         Jg3H+CBHZYF2SoccwhgzjAVal7/L71FV3yk2B48XDuKENrCd8dqKxfu+afM2ctwap6kA
+         PeIHpc8D6kKtsE7d55voWwzeu6atGQgF0AQcOZBcNZSxQgi3whVx+9z7jwBiDCYxqjBZ
+         1vQGviQ9bqCYnO4clK8LQnJozAU6Whoe42f8OF/MXgSHUzpj38V7y7IpThiCjddEsq1a
+         S5ow==
+X-Gm-Message-State: AOAM5336V5T8zHUll7xKEuG6GAyBRL7b+6+rVpdL1taKo1KQvBUSRnch
+        uA7nDa7LgL9HlJ+FhtHjnYg1LQC/HYk=
+X-Google-Smtp-Source: ABdhPJw8j8kSHJ4xSxiB6bT1YL4sk7XN/GCNYzKFBjTUx2mSteKc+Y1JZb6r2nLm7KIFw3Bd8FoWyA==
+X-Received: by 2002:a17:90a:de03:: with SMTP id m3mr606664pjv.20.1610057727336;
+        Thu, 07 Jan 2021 14:15:27 -0800 (PST)
+Received: from stbsrv-and-01.and.broadcom.net ([192.19.231.250])
+        by smtp.gmail.com with ESMTPSA id nm6sm5958542pjb.25.2021.01.07.14.15.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Jan 2021 06:31:35 -0800 (PST)
-From:   Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-To:     robh+dt@kernel.org, devicetree@vger.kernel.org
-Cc:     bjorn.andersson@linaro.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
-        Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, Vinod Koul <vkoul@kernel.org>
-Subject: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Document the SDX55 compatible
-Date:   Thu,  7 Jan 2021 20:01:17 +0530
-Message-Id: <20210107143118.2386-1-manivannan.sadhasivam@linaro.org>
-X-Mailer: git-send-email 2.25.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        Thu, 07 Jan 2021 14:15:26 -0800 (PST)
+From:   Al Cooper <alcooperx@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     Al Cooper <alcooperx@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend
+Date:   Thu,  7 Jan 2021 17:15:09 -0500
+Message-Id: <20210107221509.6597-1-alcooperx@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The SDHCI controller on SDX55 is based on MSM SDHCI v5 IP. Hence,
-document the compatible with "qcom,sdhci-msm-v5" as the fallback.
-While at it, let's also sort the compatibles in ascending order.
+Commit e7b5d63a82fe ("mmc: sdhci-brcmstb: Add shutdown callback")
+that added a shutdown callback to the diver, is causing "mmc timeout"
+errors on S5 suspend. The problem was that the "remove" was queuing
+additional MMC commands after the "shutdown" and these caused
+timeouts as the MMC queues were cleaned up for "remove". The
+shutdown callback will be changed to calling sdhci-pltfm_suspend
+which should get better power savings because the clocks will be
+shutdown.
 
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mmc@vger.kernel.org
-Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Reviewed-by: Vinod Koul <vkoul@kernel.org>
+Fixes: e7b5d63a82fe ("mmc: sdhci-brcmstb: Add shutdown callback")
+Signed-off-by: Al Cooper <alcooperx@gmail.com>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-brcmstb.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 3b602fd6180b..9fa8a24fbc97 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -17,10 +17,11 @@ Required properties:
- 		"qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
- 		"qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
- 		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
--		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
--		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
- 		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
- 		"qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-+		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
-+		"qcom,sdx55-sdhci", "qcom,sdhci-msm-v5";
-+		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
- 	NOTE that some old device tree files may be floating around that only
- 	have the string "qcom,sdhci-msm-v4" without the SoC compatible string
- 	but doing that should be considered a deprecated practice.
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index bbf3496f4495..f9780c65ebe9 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -314,11 +314,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 
+ static void sdhci_brcmstb_shutdown(struct platform_device *pdev)
+ {
+-	int ret;
+-
+-	ret = sdhci_pltfm_unregister(pdev);
+-	if (ret)
+-		dev_err(&pdev->dev, "failed to shutdown\n");
++	sdhci_pltfm_suspend(&pdev->dev);
+ }
+ 
+ MODULE_DEVICE_TABLE(of, sdhci_brcm_of_match);
 -- 
-2.25.1
+2.17.1
 
