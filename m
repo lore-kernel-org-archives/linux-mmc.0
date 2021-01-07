@@ -2,163 +2,149 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AE2AC433DB
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 10:16:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EFF5BC433E6
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 11:27:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E124A23138
-	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 10:16:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A33D723138
+	for <linux-mmc@archiver.kernel.org>; Thu,  7 Jan 2021 11:27:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727364AbhAGKQp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jan 2021 05:16:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45132 "EHLO
+        id S1727811AbhAGL1l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 7 Jan 2021 06:27:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56252 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727333AbhAGKQp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jan 2021 05:16:45 -0500
-Received: from mail-ua1-x936.google.com (mail-ua1-x936.google.com [IPv6:2607:f8b0:4864:20::936])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDC89C0612F6
-        for <linux-mmc@vger.kernel.org>; Thu,  7 Jan 2021 02:16:04 -0800 (PST)
-Received: by mail-ua1-x936.google.com with SMTP id a31so2066598uae.11
-        for <linux-mmc@vger.kernel.org>; Thu, 07 Jan 2021 02:16:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=nN6dQuyXA1cgqaEtX0AA7VlQcXxY7DKXUbiyQ5ub41M=;
-        b=xxwLJ3IPnOXtSUDE2Gdlx0SJdkSqovTBp91M9E5FKZrmUHw7dCEQpFQ98RF8o+WrNH
-         knhaOrLGzOD18xACwcCw3gdpBpZPNfYkIONNySlqOmnSvz7fovgFMKGIPGEsQYFQnhaI
-         TtXkgMJCLQU51RNodvDwQij/Fvv2ynhYSkqKL1b6JTczfv1/EJfPH2MxEpD5u/JR4jyG
-         OxjGKGtcsRuVnyq5PIrLySxYaoOFSVYUd1PlUvQci7rFzjWQcubgc8kH6ei0IZ8h9AWj
-         DS5Dckqu4klEKtI1eU/AsegRJViuVjJfseycLxpMvEUTJZtpdUVWzWvRbV5EvtCEI03K
-         Yl+Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=nN6dQuyXA1cgqaEtX0AA7VlQcXxY7DKXUbiyQ5ub41M=;
-        b=SpHXH5q6+misj++V5Y/KLt5A9EcZNKreOI/m74VTvPfnveHS2JGSRhIEi/MeHBlj8f
-         W3AeA5UP4TV0XArSn7AP2gnmzgpBnj/9VsX7qft1fVKNzbwXsfpbr2B6oV1tyltaNCFN
-         AQQesDP/p7C689j1c8qX7i5eL8rEuAVy/PZoVgCVdEiQ5PECd43epefkRViOGgsmeLXA
-         qtaHA2q4rn7fSmhholEHssihJzvc4f0lBFCwm7/fBxHOuMfM6BMcgJVjCcI+M2EioQgn
-         dJoqABc+FaoBpOg0ol2K72zqJHBAbupsKbCzb92Lg8O/P3SDswW0jlQkSNo17juHST1d
-         MA8g==
-X-Gm-Message-State: AOAM533DyU5rkG49VCm0vAojfLYFZo40bfaL9/n51fP4TY37tTtXBziK
-        xNNQ7GfCg70oLndxisKZ8pN8iPua8J8w6HQPQtOW9g==
-X-Google-Smtp-Source: ABdhPJxu0lBxj9SXRgJDA/FBzEbFglx8xUdGm7WcmhHVlZDFqUon4K67vqgtMxOm7nKooSMq+yMOs6LAlI1VBW6Nbt8=
-X-Received: by 2002:ab0:78d:: with SMTP id c13mr6731978uaf.129.1610014563793;
- Thu, 07 Jan 2021 02:16:03 -0800 (PST)
-MIME-Version: 1.0
-References: <20201112194011.103774-1-ebiggers@kernel.org> <X7gQ9Y44iIgkiM64@sol.localdomain>
- <CAPDyKFrXtqqj3RXJ4m666e_danpp2neRD_M+FCaMWPC+Ow2jsA@mail.gmail.com> <X/N+ouEtmMPYT0Qa@sol.localdomain>
-In-Reply-To: <X/N+ouEtmMPYT0Qa@sol.localdomain>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 7 Jan 2021 11:15:26 +0100
-Message-ID: <CAPDyKFpjwen156VyR8HTLb579Npr=ocT8RGBcZb-i82bfi1gwQ@mail.gmail.com>
-Subject: Re: [PATCH 0/8] eMMC inline encryption support
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
-        Satya Tangirala <satyat@google.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        with ESMTP id S1727649AbhAGL1l (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jan 2021 06:27:41 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 599D6C0612F4
+        for <linux-mmc@vger.kernel.org>; Thu,  7 Jan 2021 03:27:01 -0800 (PST)
+Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[IPv6:::1])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <l.stach@pengutronix.de>)
+        id 1kxTRN-0007ZP-1h; Thu, 07 Jan 2021 12:26:53 +0100
+Message-ID: <f7e3cdd37d425d2df96112258dcaf0bc6565f3cf.camel@pengutronix.de>
+Subject: Re: sdhci timeout on imx8mq
+From:   Lucas Stach <l.stach@pengutronix.de>
+To:     Jacky Bai <ping.bai@nxp.com>, Fabio Estevam <festevam@gmail.com>
+Cc:     Bough Chen <haibo.chen@nxp.com>, Angus Ainslie <angus@akkea.ca>,
+        Leonard Crestez <leonard.crestez@nxp.com>,
+        Peng Fan <peng.fan@nxp.com>, Abel Vesa <abel.vesa@nxp.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Guido =?ISO-8859-1?Q?G=FCnther?= <agx@sigxcpu.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Ritesh Harjani <riteshh@codeaurora.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
+        dl-linux-imx <linux-imx@nxp.com>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        "moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>
+Date:   Thu, 07 Jan 2021 12:26:48 +0100
+In-Reply-To: <DBBPR04MB79308EBA24C4FD6B1053C57E87AF0@DBBPR04MB7930.eurprd04.prod.outlook.com>
+References: <CAOMZO5DMMCZPfwNbTaG8_iQhWg2K1XeO719nSA0Gsf2ywHy4jQ@mail.gmail.com>
+         <20200205092653.GB2737@bogon.m.sigxcpu.org>
+         <CAOMZO5AAzK0QprHpKHaFOANjspJKd_4YaoMqAoGYG4KftcyiYw@mail.gmail.com>
+         <VI1PR04MB5040A046E5D93265AE636B29901C0@VI1PR04MB5040.eurprd04.prod.outlook.com>
+         <VI1PR04MB504091C7991353F6092A8D91901A0@VI1PR04MB5040.eurprd04.prod.outlook.com>
+         <CAOMZO5CkSSidzLUSBUvJNAio3SnmU-fisTbDCiLN9v1EjS+HHQ@mail.gmail.com>
+         <5ad361195f2e191484c8a231be0f5a07@akkea.ca>
+         <CAOMZO5BarV1=6rx9L_hkJJLUQSicwPNUO4HFKWAXSQ6n0N+Kzg@mail.gmail.com>
+         <VI1PR04MB52942233A0BA6BCB692F281E90670@VI1PR04MB5294.eurprd04.prod.outlook.com>
+         <cd99776c0107833d69c9c7fc4c8d6ba1a41ea3d7.camel@pengutronix.de>
+         <CAOMZO5BzAw8CjvaOzH_Ynr2eapO1MViTOWN5yZ5i_BcAhv3tWA@mail.gmail.com>
+         <DBBPR04MB79308EBA24C4FD6B1053C57E87AF0@DBBPR04MB7930.eurprd04.prod.outlook.com>
 Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.38.2 (3.38.2-1.fc33) 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
+X-SA-Exim-Mail-From: l.stach@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 4 Jan 2021 at 21:46, Eric Biggers <ebiggers@kernel.org> wrote:
->
-> On Wed, Nov 25, 2020 at 10:56:42AM +0100, Ulf Hansson wrote:
-> > On Fri, 20 Nov 2020 at 19:54, Eric Biggers <ebiggers@kernel.org> wrote:
-> > >
-> > > On Thu, Nov 12, 2020 at 11:40:03AM -0800, Eric Biggers wrote:
-> > > > Hello,
-> > > >
-> > > > This patchset adds support for eMMC inline encryption, as specified by
-> > > > the upcoming version of the eMMC specification and as already
-> > > > implemented and used on many devices.  Building on that, it then adds
-> > > > Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
-> > > >
-> > > > Inline encryption hardware improves the performance of storage
-> > > > encryption and reduces power usage.  See
-> > > > Documentation/block/inline-encryption.rst for more information about
-> > > > inline encryption and the blk-crypto framework (upstreamed in v5.8)
-> > > > which supports it.  Most mobile devices already use UFS or eMMC inline
-> > > > encryption hardware; UFS support was already upstreamed in v5.9.
-> > > >
-> > > > Patches 1-3 add support for the standard eMMC inline encryption.
-> > > >
-> > > > However, as with UFS, host controller-specific patches are needed on top
-> > > > of the standard support.  Therefore, patches 4-8 add Qualcomm ICE
-> > > > (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
-> > > >
-> > > > To test this I took advantage of the recently upstreamed support for the
-> > > > Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
-> > > > project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
-> > > > particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
-> > > > a Debian chroot.  Among other things, these tests verified that the
-> > > > correct ciphertext is written to disk (the same as software encryption).
-> > > >
-> > > > It will also be possible to add support for Mediatek eMMC inline
-> > > > encryption hardware in mtk-sd, and it should be easier than the Qualcomm
-> > > > hardware since the Mediatek hardware follows the standard more closely.
-> > > > I.e., patches 1-3 should be almost enough for the Mediatek hardware.
-> > > > However, I don't have the hardware to do this yet.
-> > > >
-> > > > This patchset is based on v5.10-rc3, and it can also be retrieved from
-> > > > tag "mmc-crypto-v1" of
-> > > > https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
-> > > >
-> > > > Note: the fscrypt inline encryption support is partially broken in
-> > > > v5.10-rc3, so for testing a fscrypt fix needs to be applied too:
-> > > > https://lkml.kernel.org/r/20201111015224.303073-1-ebiggers@kernel.org
-> > > >
-> > > > Eric Biggers (8):
-> > > >   mmc: add basic support for inline encryption
-> > > >   mmc: cqhci: rename cqhci.c to cqhci-core.c
-> > > >   mmc: cqhci: add support for inline encryption
-> > > >   mmc: cqhci: add cqhci_host_ops::program_key
-> > > >   firmware: qcom_scm: update comment for ICE-related functions
-> > > >   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
-> > > >   arm64: dts: qcom: sdm630: add ICE registers and clocks
-> > > >   mmc: sdhci-msm: add Inline Crypto Engine support
-> > >
-> > > Any comments on this patchset?
-> >
-> > I have been busy, but just wanted to let you know that I am moving to
-> > start reviewing this series shortly.
-> >
-> > I also need to catch up on the eMMC spec a bit, before I can provide
-> > you with comments.
-> >
-> > Kind regards
-> > Uffe
->
-> Ulf, are you still planning to review this patchset?  I just sent out v4 of this
-> patchset based on v5.11-rc2, but not a lot has changed from previous versions,
-> since people have generally seemed happy with it.  Any chance that you will
-> apply it for 5.12?  Thanks!
+Hi Jacky,
 
-My apologies for the delay. I certainly appreciate the review that's
-been done by people and I intend to have a look myself within the
-coming week.
+Am Donnerstag, dem 07.01.2021 um 01:30 +0000 schrieb Jacky Bai:
+> > -----Original Message-----
+> > From: Fabio Estevam [mailto:festevam@gmail.com]
+> > Sent: Thursday, January 7, 2021 2:57 AM
+> > To: Lucas Stach <l.stach@pengutronix.de>
+> > Cc: Bough Chen <haibo.chen@nxp.com>; Angus Ainslie
+> > <angus@akkea.ca>;
+> > Leonard Crestez <leonard.crestez@nxp.com>; Peng Fan
+> > <peng.fan@nxp.com>; Abel Vesa <abel.vesa@nxp.com>; Stephen Boyd
+> > <sboyd@kernel.org>; Michael Turquette <mturquette@baylibre.com>;
+> > Ulf
+> > Hansson <ulf.hansson@linaro.org>; Guido Günther <agx@sigxcpu.org>;
+> > linux-mmc <linux-mmc@vger.kernel.org>; Adrian Hunter
+> > <adrian.hunter@intel.com>; dl-linux-imx <linux-imx@nxp.com>; Sascha
+> > Hauer <kernel@pengutronix.de>; moderated list:ARM/FREESCALE IMX /
+> > MXC
+> > ARM ARCHITECTURE <linux-arm-kernel@lists.infradead.org>
+> > Subject: Re: sdhci timeout on imx8mq
+> > 
+> > Hi Lucas,
+> > 
+> > On Tue, Jan 5, 2021 at 12:06 PM Lucas Stach
+> > <l.stach@pengutronix.de>
+> > wrote:
+> > 
+> > > The reference manual states about this situation: "For any clock,
+> > > its
+> > > source must be left on when it is kept on. Behavior is undefined
+> > > if
+> > > this rule is violated."
+> > > And it seems this is exactly what's happening here: some kind of
+> > > glitch is introduced in the nand_usdhc_bus clock, which prevents
+> > > the
+> > > SDHCI controller from working, even though the clock branch is
+> > > properly enabled later on. On my system the SDHCI timeout and
+> > > following runtime suspend/resume cycle on the nand_usdhc_bus
+> > > clock
+> > > seem to get it back into a working state.
+> > 
+> > I think your analysis is correct and I recall helping a customer
+> > with a similar
+> > issue:
+> > https://eur01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fcomm
+> > unity.nxp.com%2Ft5%2Fi-MX-Processors%2FExternal-clock-that-provide-
+> > root
+> > -clock-for-SAI3-and-SPDIF%2Fm-p%2F1019834&amp;data=04%7C01%7Cping
+> > .bai%40nxp.com%7C8d250a158cce469c378308d8b274d6d1%7C686ea1d3bc
+> > 2b4c6fa92cd99c5c301635%7C0%7C0%7C637455562183497049%7CUnknow
+> > n%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1ha
+> > WwiLCJXVCI6Mn0%3D%7C1000&amp;sdata=VkxuhmhDifzOxxfIgFz9PR5gKC1
+> > SyQhGeSHYysX1Co4%3D&amp;reserved=0
+> > 
+> 
+> For the customer case, it seem not the same issue. the customer issue
+> is caused by clock source change while parent has no clock output.
+> This is inherit limitation for the CCM clock slice when using the
+> smart interface to change the clock parent.
+> 
+> For current mmc timeout issue, I think we can have a try with
+> nand_usdhc_bus clock gated at the beginning of kernel boot, directly
+> modify the nand_usdhc_bus
+> Clock's HW register gate bit in clock-imx8mq.c.
 
-I definitely think it should be possible to get this queued for v5.12,
-unless I find some very weird things, which I doubt.
+While this might be an option to fix this specific issue, I would hope
+we can come up with something more generic, as the current clock
+framework behavior allows to violate the system specification
+constraint that parent clocks must not be disabled when any of the
+children are active. This seems like a fundamental issue and might hurt
+us also with other clocks than this specific nand_usdhc_bus clock.
 
-Kind regards
-Uffe
+Can you tell us if there were other issues found with the PLL1/2 gating
+patch? The fact that, according to Bough, it's reverted in your tree
+seems to suggest this.
+
+Regards,
+Lucas
+
