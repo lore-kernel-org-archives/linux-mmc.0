@@ -2,69 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84751C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 03:37:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27B94C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 12:24:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3FF53235DD
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 03:37:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ED0A3238E4
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 12:24:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727357AbhAHDhB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 7 Jan 2021 22:37:01 -0500
-Received: from mail-io1-f41.google.com ([209.85.166.41]:44583 "EHLO
-        mail-io1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726410AbhAHDhB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 7 Jan 2021 22:37:01 -0500
-Received: by mail-io1-f41.google.com with SMTP id z5so8421113iob.11;
-        Thu, 07 Jan 2021 19:36:46 -0800 (PST)
+        id S1726862AbhAHMX6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Jan 2021 07:23:58 -0500
+Received: from mail-oo1-f46.google.com ([209.85.161.46]:45197 "EHLO
+        mail-oo1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725965AbhAHMX6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2021 07:23:58 -0500
+Received: by mail-oo1-f46.google.com with SMTP id o5so2325390oop.12;
+        Fri, 08 Jan 2021 04:23:42 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=3VDZFiJx7Spodzkqss9mSg6HRwcEHXQuHkP19xzMH0I=;
-        b=oUQhidZi1EvohFRAa9dKVVBjY6/A5SiBJJQTZr0zAcIU6IhXYTmBvgnrjErwhZ/zl1
-         tbloGxfjs4GZV44g8P4PnPtZd0jjkrMIquu4FgcwihpMYuZOOCGVHReR5m9oxoU/nIn+
-         ml2JehFZTufS7Lbx2CZc+KKCPX1wZjMfPibVFT1RaQk3hFlvZohfHdzELmo2sjPhKGi+
-         q/dFTaW3DALsgd/pE2PYkf7gs9jpJVAxqycG5+bhmPkfVpIzIxkcBfYr7FjIGYkYloLD
-         e/XnvP/EFZkn0AYnJGyYZzKnFXW/ZXVuYDvBlg3qlbQBADIqXl95/FRWEKxtNpjXh/qH
-         en4Q==
-X-Gm-Message-State: AOAM533L+MTUh0jGASOiZOESbIfmp4o3CQVPvnhuUFwN4Eh9JAOr87fu
-        mD56wGF9qQJlbo48MLUjNQ==
-X-Google-Smtp-Source: ABdhPJyMZifp++9/Cg5R5t+3SbZt4WxN4m+BB9f2orCO4x+lxRP7aotyG+dM992Fj5Arxb/WWDPp+w==
-X-Received: by 2002:a5e:841a:: with SMTP id h26mr3818763ioj.54.1610076980597;
-        Thu, 07 Jan 2021 19:36:20 -0800 (PST)
-Received: from robh.at.kernel.org ([64.188.179.253])
-        by smtp.gmail.com with ESMTPSA id k4sm4805005ioh.45.2021.01.07.19.36.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 07 Jan 2021 19:36:19 -0800 (PST)
-Received: (nullmailer pid 1839226 invoked by uid 1000);
-        Fri, 08 Jan 2021 03:36:17 -0000
-Date:   Thu, 7 Jan 2021 20:36:17 -0700
-From:   Rob Herring <robh@kernel.org>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        devicetree@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Subject: Re: [PATCH 1/6] dt-bindings: mmc: renesas,sdhi: Add r8a779a0 support
-Message-ID: <20210108033617.GA1839197@robh.at.kernel.org>
-References: <20201227174202.40834-1-wsa+renesas@sang-engineering.com>
- <20201227174202.40834-2-wsa+renesas@sang-engineering.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=l7OdcqjyDor9BwazdtiKyf4HiIQOu+rqcNvqBVdFAhg=;
+        b=AFWeSk5Bu1L4osivPOServalr1NbtZsp4EH7nySm2+ykkBe24yy0jDCFxm+KN/Xnmt
+         MQ0bvCzSnyVwGPrMjfn039IJGFtt8LuYOF/25vKQ2PbRm1XuVAFwORjghe5zwbrYkpjh
+         AdsCFIewRH1YN7t1+zeglJfo/rqB9FP9Xc+UpeLTXxn6bfAbCJgVHUoY1ZYc6xDORRQo
+         D/KVhq9AQHseKw91Pf4DsUXTvlhjPUWF40o/yQJPCVEan5InMjJnBN+An6pZnCqwIPxF
+         HP1wNYbeKMob3cY9zJFPvO0fFgvPzmeRLGs8ODdLVg6TWDqGAREQ/thzD3tjIZW9iWP5
+         9FgA==
+X-Gm-Message-State: AOAM532gyOcKXFbY8GBCvzg5buvxPo9xCTPEPMGl8MgTmDhSUL/ktfid
+        PvKqEE+Yy5xsAN7T2ZOnQmsWBXrSPWhc6WasULQ=
+X-Google-Smtp-Source: ABdhPJxHVBS7wWZhg49UPwP89juTmOHL4Bq/N7J3LK6uD41jcKLaqFfegeyewa8/SMHqw85SE8v+Pq8GvdfRJJuCijs=
+X-Received: by 2002:a4a:ca14:: with SMTP id w20mr4137395ooq.11.1610108597447;
+ Fri, 08 Jan 2021 04:23:17 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20201227174202.40834-1-wsa+renesas@sang-engineering.com> <20201227174202.40834-2-wsa+renesas@sang-engineering.com>
 In-Reply-To: <20201227174202.40834-2-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 8 Jan 2021 13:23:06 +0100
+Message-ID: <CAMuHMdWkk+KusB-J0qp+mh34z+sNmKPtBBgwJ-APph5_jUtHhQ@mail.gmail.com>
+Subject: Re: [PATCH 1/6] dt-bindings: mmc: renesas,sdhi: Add r8a779a0 support
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 27 Dec 2020 18:41:55 +0100, Wolfram Sang wrote:
+On Sun, Dec 27, 2020 at 6:44 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
 > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
 
-Acked-by: Rob Herring <robh@kernel.org>
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
