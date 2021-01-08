@@ -2,144 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CCD20C433DB
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 19:08:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C98DC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 21:14:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9987F23A9D
-	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 19:08:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D7C5623A7F
+	for <linux-mmc@archiver.kernel.org>; Fri,  8 Jan 2021 21:14:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728695AbhAHTIc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Jan 2021 14:08:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41910 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728539AbhAHTIb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jan 2021 14:08:31 -0500
-Received: from mail-il1-x136.google.com (mail-il1-x136.google.com [IPv6:2607:f8b0:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66303C0612FE;
-        Fri,  8 Jan 2021 11:07:51 -0800 (PST)
-Received: by mail-il1-x136.google.com with SMTP id v3so11306310ilo.5;
-        Fri, 08 Jan 2021 11:07:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=NVZl857HB7wVKD8bItyLJ4Yj7dhRp8R9ZtfKjnyuqcs=;
-        b=O+ytVj7LbZoqFGa08BBVzJ/B0ii3s37zGw1KHKdx5KGPPcvByHwleJ17tAcepYm/mx
-         j1XLV3zSJXurQfDF+u4Lg3cpxmOLqOi1cqD7eZkUXvsDUUBvivwWmkEF6BQGyX9xD6VQ
-         J/1nsCTcaknwWb7YogRNWu2DIPLeq/xqtyRCwX9lxclY9SnB5atTutNRJk8I0uoDjVpN
-         yKl0Wwbw+0xJGeXWchMle0ydMyzzzR3AoezR56Ci06D9uklpHs1eB2Rnmn9OMA9ruXBT
-         5Dpl6P0FNXvK40VHsX6YdcBOccppkrFajBlV7OsUqcQLc2A/LeRsimQMEaZO8PcYFSlm
-         RGhA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=NVZl857HB7wVKD8bItyLJ4Yj7dhRp8R9ZtfKjnyuqcs=;
-        b=sWce5j1jhJiJNpoatx3sTRj92/UFXBt8Liu/8z+q49MQ9/+K87EoccKmNgIzz2OnWx
-         8F/2jo82mLRAheWdfXcuPjzqmgMmDc/fSYzJJ2CQJ+ytAHyqIycOImXZ0W+XzgVUphfp
-         0WT5/gXByxFC90I/5LgaiYC1+IZLFxjW9dOZ/fcBa/FAzy7MpRf0OQdVE8gpCScVUGaC
-         7BYwCLyVyCUVA7tjmVAC3zl7m4TEF4Ho/60qQXixWojz9abgJvdst2JcpihB+LO3TAPD
-         0C9/L0gUtocTparQWxXH/TKs7k9QcK5J6IkdW2hMm94lsDkvrKV8sccQnTfJ1rIAppgy
-         FtLA==
-X-Gm-Message-State: AOAM531OiDrkILQJg19nfn6MYrkH9kOQj5aUZZk4YAbnBNE5GBODNv6i
-        evMM9+DITLDofALySWDTH26Rn9LhH1WoVdQp05zT5hYt83RU7Q==
-X-Google-Smtp-Source: ABdhPJxvKP7bIhCeAO87oEwDpGRxgDp/1U9iSFcDXAZsig2Q2LymelwnjwA4As+/vysaIrieSq414L2+PPnTf8Gyhfo=
-X-Received: by 2002:a92:d2cf:: with SMTP id w15mr5289303ilg.214.1610132870609;
- Fri, 08 Jan 2021 11:07:50 -0800 (PST)
+        id S1728940AbhAHVOg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 8 Jan 2021 16:14:36 -0500
+Received: from foss.arm.com ([217.140.110.172]:57018 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728587AbhAHVOg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 8 Jan 2021 16:14:36 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 4E2A21063;
+        Fri,  8 Jan 2021 13:13:50 -0800 (PST)
+Received: from mammon-tx2.austin.arm.com (mammon-tx2.austin.arm.com [10.118.28.62])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPA id 459843F66E;
+        Fri,  8 Jan 2021 13:13:50 -0800 (PST)
+From:   Jeremy Linton <jeremy.linton@arm.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     bcm-kernel-feedback-list@broadcom.com, sbranden@broadcom.com,
+        rjui@broadcom.com, ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        f.fainelli@gmail.com, Jeremy Linton <jeremy.linton@arm.com>
+Subject: [PATCH] mmc: sdhci-iproc: Add ACPI bindings for the rpi4
+Date:   Fri,  8 Jan 2021 15:13:39 -0600
+Message-Id: <20210108211339.1724769-1-jeremy.linton@arm.com>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-References: <20201201210039.258d3fed@aktux> <20201203224309.5b5e0b50@aktux>
- <CAD=FV=VucTxW3PxtrN-Dye4h0LravXd-wHLKU91TaKe0eQ4TyA@mail.gmail.com> <20201204092200.0c7894ce@aktux>
-In-Reply-To: <20201204092200.0c7894ce@aktux>
-From:   Adam Ford <aford173@gmail.com>
-Date:   Fri, 8 Jan 2021 13:07:39 -0600
-Message-ID: <CAHCN7xKkh-=kjYWyop2f8Tic86NQtUgy0ihm1niVkvKSPeL6EQ@mail.gmail.com>
-Subject: Re: [REGRESSION] mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that
- existed in v4.4
-To:     Andreas Kemnade <andreas@kemnade.info>
-Cc:     Doug Anderson <dianders@chromium.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Discussions about the Letux Kernel 
-        <letux-kernel@openphoenux.org>,
-        Linux OMAP Mailing List <linux-omap@vger.kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Thierry Reding <treding@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Tony Lindgren <tony@atomide.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Dec 4, 2020 at 2:23 AM Andreas Kemnade <andreas@kemnade.info> wrote:
->
-> On Thu, 3 Dec 2020 14:03:46 -0800
-> Doug Anderson <dianders@chromium.org> wrote:
->
-> > Hi,
-> >
-> > On Thu, Dec 3, 2020 at 1:43 PM Andreas Kemnade <andreas@kemnade.info> wrote:
-> > >
-> > > On Tue, 1 Dec 2020 21:00:39 +0100
-> > > Andreas Kemnade <andreas@kemnade.info> wrote:
-> > >
-> > > > Hi,
-> > > >
-> > > > during probing of second mmc host on the GTA04A5 which has a
-> > > > WL1835 wifi chip attached, I get the following oops. From a first glance
-> > > > this seems to be a timing sensitive. Maybe it rings some bells for someone...
-> > > > so I hesitate a bit to start the bisect job.
-> > > Did the bisect job.
-> > > 21b2cec61c04 (mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v4.4)
-> > >
-> > > is the evil commit. Reverting it on top of v5.10-rc6 solves the problem.
-> > >
-> > > > Wild guessing: bus width is set while mmc module is not active, so registers
-> > > > are not accessible.
-> > > > Kernel configuration is omap2plus_defconfig
-> > > >
-> > > > Regards,
-> > > > Andreas
-> > > >
-> > > >
-> >
-> > ...snip...
-> >
-> > > > [    3.152587]  mmcblk0: p1 p2 p3 p4 < p5 p6 p7 p8 >
-> > > > [    3.159393] 0x000000880000-0x000020000000 : "File System"
-> > > > [    3.179534] omap_hsmmc 480b4000.mmc: omap_device_late_idle: enabled but no driver.  Idling
-> >
-> > I'm guessing that this is the key line.  It seems to come from
-> > omap_device_late_idle().
-> >
-> > I don't know tons about that function, but a quick guess is that it needs a:
-> >
-> > wait_for_device_probe();
-> >
-> > ...at the start of it.  It seems like it's trying to idle devices that
-> > never got probed but not actually waiting for all devices to probe.
-> > It's just assuming that everything is done by late_initcall_sync().
-> >
-> hmm, not sure, we have:
-> if (od->_driver_status != BUS_NOTIFY_BOUND_DRIVER &&
->             od->_driver_status != BUS_NOTIFY_BIND_DRIVER) {
->                 if (od->_state == OMAP_DEVICE_STATE_ENABLED) {
->                         dev_warn(dev, "%s: enabled but no driver.  Idling\n",
->                                  __func__);
->                         omap_device_idle(pdev);
->                 }
->         }
->
-> apparently there is no code to set _driver_status to
-> BUS_NOTIFY_BOUND_DRIVER. I think that is the key problem. I will try to
-> create a patch to fix that.
+The rpi4 has a Arasan controller it carries over
+from the rpi3, and a newer eMMC2 controller.
+Because of a couple "quirks" it seems wiser to bind
+these controllers to the same driver that DT is using
+on this platform rather than the generic sdhci_acpi
+driver with PNP0D40.
 
-I am seeing something similar on my DM3730
+So, we use BCM2847 for the older Arasan and BRCME88C
+for the newer eMMC2.
 
->
-> Regards,
-> Andreas
+With this change linux is capable of utilizing the
+SD card slot, and the wifi on this platform
+with linux.
+
+Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
+---
+ drivers/mmc/host/sdhci-iproc.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+index c9434b461aab..f79d97b41805 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -250,6 +250,14 @@ static const struct sdhci_pltfm_data sdhci_bcm2835_pltfm_data = {
+ 	.ops = &sdhci_iproc_32only_ops,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_bcm_arasan_data = {
++	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
++		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
++		  SDHCI_QUIRK_NO_HISPD_BIT,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++	.ops = &sdhci_iproc_32only_ops,
++};
++
+ static const struct sdhci_iproc_data bcm2835_data = {
+ 	.pdata = &sdhci_bcm2835_pltfm_data,
+ 	.caps = ((0x1 << SDHCI_MAX_BLOCK_SHIFT)
+@@ -261,6 +269,10 @@ static const struct sdhci_iproc_data bcm2835_data = {
+ 	.mmc_caps = 0x00000000,
+ };
+ 
++static const struct sdhci_iproc_data bcm_arasan_data = {
++	.pdata = &sdhci_bcm_arasan_data,
++};
++
+ static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
+ 	.read_l = sdhci_iproc_readl,
+ 	.read_w = sdhci_iproc_readw,
+@@ -299,6 +311,8 @@ MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+ static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
+ 	{ .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
+ 	{ .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
++	{ .id = "BCM2847",  .driver_data = (kernel_ulong_t)&bcm_arasan_data },
++	{ .id = "BRCME88C", .driver_data = (kernel_ulong_t)&bcm2711_data },
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
+-- 
+2.26.2
+
