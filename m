@@ -5,149 +5,118 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 693C6C43332
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jan 2021 18:07:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4A5FC43332
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jan 2021 18:08:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3E7C322CBE
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jan 2021 18:07:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 87BCA229CA
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jan 2021 18:08:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727030AbhAKSHo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jan 2021 13:07:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56344 "EHLO
+        id S2390205AbhAKSIK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jan 2021 13:08:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56512 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389299AbhAKSHo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jan 2021 13:07:44 -0500
-Received: from mail-ua1-x929.google.com (mail-ua1-x929.google.com [IPv6:2607:f8b0:4864:20::929])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DAF0C0617B1
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jan 2021 10:06:49 -0800 (PST)
-Received: by mail-ua1-x929.google.com with SMTP id a31so116894uae.11
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jan 2021 10:06:49 -0800 (PST)
+        with ESMTP id S2390221AbhAKSIJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jan 2021 13:08:09 -0500
+Received: from mail-ua1-x92d.google.com (mail-ua1-x92d.google.com [IPv6:2607:f8b0:4864:20::92d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9811FC0617BB
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jan 2021 10:07:01 -0800 (PST)
+Received: by mail-ua1-x92d.google.com with SMTP id f16so114707uav.12
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jan 2021 10:07:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=XWiH05HuaGWdRbA9U5L//orrI8G7vM7uoQMJxI3AypY=;
-        b=UYbp94mGeQYkBROkU3bvrAvpFFf4nVlbW5Vhlat17xqFjsNegXtz30bz3EI9akwZmg
-         qZs7MPAYdHs7UmBcBbJStXA9ahnnX88PLO62wS0rXjaWrbbtZUy8uht8h8Ukjq7SR80T
-         D5BCnKGKZ4Ewf/GlqkOpdlHEecDqwFG6MkKZfAnM+DZfgDe6b1B9bFwMEXYfFeZ4xPYw
-         4aaQ9hohj0w16piLZryWdDnnifPJ1uqeRDPWjdOES2tAFaGVZnSCTuMCPitzxu5LmHlU
-         Y1sP0qBdAwNWKaGm22sif3vwaHmpl61avubzrlqLaHRFW288o9RHh4Klag5TnR2rLTGK
-         8XCw==
+        bh=Kjroq5IVcsaocRlWVqumBmAjNs8Q1T2UaLZmChWgxjU=;
+        b=XEEsKYXMfqgNLBsBkUHKknxUjINn9OYd+Vbtf7fXC+xDMBW+NzkCwoOG5tYyW0TbLk
+         2MB6siADi+yjsiMKcNz1rRo55EPwSQolwPp1Zg2iZx1W/ZYi+gpj55YvUDAnFc5A8bC3
+         pWi3H4E5yjoCzI/7mp/+y2lZRdSfshXZuwuNipS6Jb25c/xXqJcplYXo/0lJFGy6YAsw
+         YOlxp5r6cDjojE1przzzBB6fxaNCL0/YIlTtwFGAT06GMgAJigNHbg8XcZhxLttHBgdR
+         ln16xnYPacs9YMm5DYAqeBqHXLywSLWQ6zzL8UUDYNLjK9Gmufqy4k0GwV9iHrhSP1m4
+         84xg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=XWiH05HuaGWdRbA9U5L//orrI8G7vM7uoQMJxI3AypY=;
-        b=kpsbPUcXfU5hpuEzzjQ2+q96p5WRlMf4B3c8R8xTcdpDl+0tIoWd0OJ5R1d8l0PM/a
-         WdrxGkYBxo5oq9avt5bORjw4elJSFxC3I8qay6mZ0m80oDRW37k8dZ41dUGpfO4nJ+zf
-         9V6B/yAwTppfva4HGo1FfkRzmoIBf6CwU2keYxvGKNwkTqUvJ8HZpw6FwoEQomDj29nQ
-         OJE1JPHQWotd3a/e+71rTYgOzgqPWFn84/O/jecP2EoMMAqc5sqO5rJbD499wyaoJHQ9
-         E8dopjxRn4oeSfI/AaJH6PAc8VQkLR5CI3evkd8G/xEUSiIFT5zSGadZfjESPSKNx1Mw
-         lkXg==
-X-Gm-Message-State: AOAM530JuVoqnG4RX3uZa619l2DgFdGzEWBB9xP+Q/0TG1oWESL2c6WO
-        WK1hPdf5FjlzfY1HFkqiuUcnH/uLGvVlk3Lknln2lQ==
-X-Google-Smtp-Source: ABdhPJy6k5BPXea4aijRSzb9FWxF8qw7DLALO/1gvHOZKC29+FYABLx5yMtCIB55CBVS1dmY1otNdJYl8fuFMcHN8wM=
-X-Received: by 2002:a9f:204e:: with SMTP id 72mr659337uam.19.1610388408471;
- Mon, 11 Jan 2021 10:06:48 -0800 (PST)
+        bh=Kjroq5IVcsaocRlWVqumBmAjNs8Q1T2UaLZmChWgxjU=;
+        b=hCZ1CAfTh6Z5idULGVNl+l0Ozfs1+7tGFtKTiAR/RQlu4E9LB+itBMIgiRdp2r/12K
+         55d9ff2CutsaiHgcNuxnq0JDacmkBxQwlY2xmZe8aT9J/Vxt1Vk8KGRyKbl+Dy6fr32q
+         DxlsMog4e/IPOL0DjEbQgSUbuhq/OoANcmSoTSeWLCR4XE3yhjGud1v3hIP/owGSwh9V
+         ApyO4+/pAUbyTPnbO0b+XWJmHjjGR6M/0u97kLHZrF5TTtulb4rR57QNLsM359lyvwnD
+         U6QrcFy5uWsnHUgp0nRf3ZLJHt8Sted0/1pN2JttrWzTgv4TUdj0IYYbOQ7BxKt0frlF
+         JXxA==
+X-Gm-Message-State: AOAM533KKEdegnW9OUgIe1UPnoOvEfUZV9p7lGO/6ymaz3h+Oes+vuRA
+        3Tql7Kesnwcg6esziRTYj8MyKp+Xh823okZQkKYi6Z56hK3Png==
+X-Google-Smtp-Source: ABdhPJxMPRMEkGTAbXkhnrrN+swnMYAQSC+WKmQmUp8nsi7df3jLRu3fgfIQ6FiYJhzQrb9jsDMgCm19+v6Gjlha7XU=
+X-Received: by 2002:ab0:78d:: with SMTP id c13mr653601uaf.129.1610388420862;
+ Mon, 11 Jan 2021 10:07:00 -0800 (PST)
 MIME-Version: 1.0
-References: <20201229161625.38255233@xhacker.debian>
-In-Reply-To: <20201229161625.38255233@xhacker.debian>
+References: <20201211141656.24915-1-mw@semihalf.com>
+In-Reply-To: <20201211141656.24915-1-mw@semihalf.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 11 Jan 2021 19:06:05 +0100
-Message-ID: <CAPDyKFqWMFpe=y5dO1pguTFnffDTp-b_9yF=+Ev5PhDbYSKUMA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: fix rpmb access
-To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+Date:   Mon, 11 Jan 2021 19:06:24 +0100
+Message-ID: <CAPDyKFqsSO+f9iG8vccwXZXDDNHgLEg7bfUe-KfHn2C-ZnOU4A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-xenon: fix 1.8v regulator stabilization
+To:     Marcin Wojtas <mw@semihalf.com>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Ziji Hu <huziji@marvell.com>,
+        Adrian Hunter <adrian.hunter@intel.com>, jaz@semihalf.com,
+        tn@semihalf.com, Kostya Porotchkin <kostap@marvell.com>,
+        Alex Leibovich <alexl@marvell.com>,
+        "# 4.0+" <stable@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 29 Dec 2020 at 09:19, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
+On Fri, 11 Dec 2020 at 15:17, Marcin Wojtas <mw@semihalf.com> wrote:
 >
-> Commit a44f7cb93732 ("mmc: core: use mrq->sbc when sending CMD23 for
-> RPMB") began to use ACMD23 for RPMB if the host supports ACMD23. In
-> RPMB ACM23 case, we need to set bit 31 to CMD23 argument, otherwise
-> RPMB write operation will return general fail.
+> From: Alex Leibovich <alexl@marvell.com>
 >
-> However, no matter V4 is enabled or not, the dwcmshc's ARGUMENT2
-> register is 32-bit block count register which doesn't support stuff
-> bits of CMD23 argument. So let's handle this specific ACMD23 case.
+> Automatic Clock Gating is a feature used for the power
+> consumption optimisation. It turned out that
+> during early init phase it may prevent the stable voltage
+> switch to 1.8V - due to that on some platfroms an endless
+> printout in dmesg can be observed:
+> "mmc1: 1.8V regulator output did not became stable"
+> Fix the problem by disabling the ACG at very beginning
+> of the sdhci_init and let that be enabled later.
 >
-> From another side, this patch also prepare for future v4 enabling
-> for dwcmshc, because from the 4.10 spec, the ARGUMENT2 register is
-> redefined as 32bit block count which doesn't support stuff bits of
-> CMD23 argument.
->
-> Fixes: a44f7cb93732 ("mmc: core: use mrq->sbc when sending CMD23 for RPMB")
-> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> Fixes: 3a3748dba881 ("mmc: sdhci-xenon: Add Marvell Xenon SDHC core functionality")
+> Signed-off-by: Alex Leibovich <alexl@marvell.com>
+> Signed-off-by: Marcin Wojtas <mw@semihalf.com>
+> Cc: stable@vger.kernel.org
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied for fixes (by fixing the typos), thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 27 +++++++++++++++++++++++++++
->  1 file changed, 27 insertions(+)
+>  drivers/mmc/host/sdhci-xenon.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index 4b673792b5a4..d90020ed3622 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -16,6 +16,8 @@
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index c67611fdaa8a..4b05f6fdefb4 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -168,7 +168,12 @@ static void xenon_reset_exit(struct sdhci_host *host,
+>         /* Disable tuning request and auto-retuning again */
+>         xenon_retune_setup(host);
 >
->  #include "sdhci-pltfm.h"
->
-> +#define SDHCI_DWCMSHC_ARG2_STUFF       GENMASK(31, 16)
-> +
->  /* DWCMSHC specific Mode Select value */
->  #define DWCMSHC_CTRL_HS400             0x7
->
-> @@ -49,6 +51,29 @@ static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
->         sdhci_adma_write_desc(host, desc, addr, len, cmd);
->  }
->
-> +static void dwcmshc_check_auto_cmd23(struct mmc_host *mmc,
-> +                                    struct mmc_request *mrq)
-> +{
-> +       struct sdhci_host *host = mmc_priv(mmc);
-> +
+> -       xenon_set_acg(host, true);
 > +       /*
-> +        * No matter V4 is enabled or not, ARGUMENT2 register is 32-bit
-> +        * block count register which doesn't support stuff bits of
-> +        * CMD23 argument on dwcmsch host controller.
+> +        * The ACG should be turned off at the early init time, in order
+> +        * to solve a possile issues with the 1.8V regulator stabilization.
+> +        * The feature is enabled in later stage.
 > +        */
-> +       if (mrq->sbc && (mrq->sbc->arg & SDHCI_DWCMSHC_ARG2_STUFF))
-> +               host->flags &= ~SDHCI_AUTO_CMD23;
-> +       else
-> +               host->flags |= SDHCI_AUTO_CMD23;
-> +}
-> +
-> +static void dwcmshc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +       dwcmshc_check_auto_cmd23(mmc, mrq);
-> +
-> +       sdhci_request(mmc, mrq);
-> +}
-> +
->  static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
->                                       unsigned int timing)
->  {
-> @@ -133,6 +158,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
+> +       xenon_set_acg(host, false);
 >
->         sdhci_get_of_property(pdev);
+>         xenon_set_sdclk_off_idle(host, sdhc_id, false);
 >
-> +       host->mmc_host_ops.request = dwcmshc_request;
-> +
->         err = sdhci_add_host(host);
->         if (err)
->                 goto err_clk;
 > --
-> 2.30.0.rc2
+> 2.29.0
 >
