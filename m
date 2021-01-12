@@ -2,153 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-21.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT,
+	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03B04C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jan 2021 21:44:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F00FC433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 04:03:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BC43722CAF
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jan 2021 21:44:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4ABE722A83
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 04:03:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730091AbhAKVom (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jan 2021 16:44:42 -0500
-Received: from foss.arm.com ([217.140.110.172]:36576 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729635AbhAKVol (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 11 Jan 2021 16:44:41 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id B6DEE101E;
-        Mon, 11 Jan 2021 13:43:55 -0800 (PST)
-Received: from [192.168.122.166] (unknown [172.31.20.19])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 451C53F66E;
-        Mon, 11 Jan 2021 13:43:55 -0800 (PST)
-Subject: Re: [PATCH] mmc: sdhci-iproc: Add ACPI bindings for the rpi4
-To:     Stefan Wahren <stefan.wahren@i2se.com>, linux-mmc@vger.kernel.org,
-        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-Cc:     ulf.hansson@linaro.org, f.fainelli@gmail.com,
-        sbranden@broadcom.com, rjui@broadcom.com, adrian.hunter@intel.com,
-        linux-kernel@vger.kernel.org,
-        bcm-kernel-feedback-list@broadcom.com,
-        linux-arm-kernel@lists.infradead.org
-References: <20210108211339.1724769-1-jeremy.linton@arm.com>
- <ab3b5788-1148-636a-751f-0a31c87dda33@i2se.com>
- <cd7c5d78-af92-84b9-8bbf-f480f63005e0@arm.com>
- <2d92e093-a6f2-ac2c-d7e3-2d0172e1047c@i2se.com>
-From:   Jeremy Linton <jeremy.linton@arm.com>
-Message-ID: <be996d25-7421-a5d3-0861-18b9e6502382@arm.com>
-Date:   Mon, 11 Jan 2021 15:43:54 -0600
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.3.1
-MIME-Version: 1.0
-In-Reply-To: <2d92e093-a6f2-ac2c-d7e3-2d0172e1047c@i2se.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+        id S1726602AbhALECw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jan 2021 23:02:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43306 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725885AbhALECw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jan 2021 23:02:52 -0500
+Received: from mail-qt1-x849.google.com (mail-qt1-x849.google.com [IPv6:2607:f8b0:4864:20::849])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C13BEC061575
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jan 2021 20:02:11 -0800 (PST)
+Received: by mail-qt1-x849.google.com with SMTP id b24so747851qtt.22
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jan 2021 20:02:11 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=sender:date:message-id:mime-version:subject:from:to:cc;
+        bh=srYruzwMD9dqHYu9mhQyqr32NqB25nzIPSQzatQ9efg=;
+        b=GlT7QDl0qRuEu0YpYsnP6Nit1RQ2PSu6oMQRj9edkRqFpIMNHxHS0D4KjkAwVNGt2a
+         wT4By/XUh61m9wv3WMvFTHjGmLhk9/iUTr8M9NjgPaiBGNjf6E64E3Tbjw9Uk2Umrtcy
+         OOkEXhcC3QXl27gCjn9gdmkYcK7eY0E4sXmn/ekW6A7N3h7ZzlAwYoGF8mxmy5EJaANt
+         K7ht9E0NdAON+/tZOeJuUMJUFDPakq0rlpKJJU3r1v65FBaUWODTG++dCUqjrvsRfYW6
+         IQlgtxKKk+3s9maM1s8dXFNyhQ9jviJ5meYp2OTwVb+xKXDO93FNCaxjGDzGeBmChp9g
+         W4IQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:date:message-id:mime-version:subject:from
+         :to:cc;
+        bh=srYruzwMD9dqHYu9mhQyqr32NqB25nzIPSQzatQ9efg=;
+        b=Y9L0uGqxIFikUY1e/c2MyTNYT1jt9Yst87g/4aWeJ6b/Am3jRmNEjJBlXNGCFCSiB6
+         K5PoYUmIh0t8VOxwtN7H56GegLoQP10RQosywrynaHCLIwlr4uUvdvVQtF/Kn2LaMnK0
+         FIyJVsw58afqEEXalRvLCgo9PI82HRhuY1Cu+7lbj3MeVW/a2jFKA2uzsT847WrK3p8w
+         lnZxlkVM+BqZbPX7xUFsF7RJiI1IvgdaJKy4M8l89HW4b63w/N5A5Fmn86wHNuzbp9G1
+         7T4Z9NCx1daik+Xx4HvWNq148IzmD2KvEQ3pCb/02MJntVtgHDOYhuTZl+ReA04Rf6cp
+         1gnA==
+X-Gm-Message-State: AOAM530Q7BUCA3tCVM6WosA6cWYei6DEFFyxR4EAdrsj0UyQE1h38PUq
+        JFGv5ywIRosIqJh0RosPhQnGnuPjzQF50hrp
+X-Google-Smtp-Source: ABdhPJzHaNQxh2u4Sn42cu3kPnjGaK0PQ9XvFceP0AiQPVTLUwD5y/p2yNAsPlnVhA/zG55IqN1PfQ4LrRNEPniv
+Sender: "victording via sendgmr" <victording@victording.c.googlers.com>
+X-Received: from victording.c.googlers.com ([fda3:e722:ac3:10:24:72f4:c0a8:65c7])
+ (user=victording job=sendgmr) by 2002:a05:6214:184a:: with SMTP id
+ d10mr2505402qvy.41.1610424130356; Mon, 11 Jan 2021 20:02:10 -0800 (PST)
+Date:   Tue, 12 Jan 2021 04:02:03 +0000
+Message-Id: <20210112040205.4117303-1-victording@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.30.0.284.gd98b1dd5eaa7-goog
+Subject: [PATCH 0/2] Disable ASPM on GL9750 during a suspension
+From:   Victor Ding <victording@google.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        Bjorn Helgaas <helgaas@kernel.org>,
+        linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Victor Ding <victording@google.com>,
+        Alex Levin <levinale@google.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        "Saheed O. Bolarinwa" <refactormyself@gmail.com>,
+        Sean Paul <seanpaul@chromium.org>,
+        Sukumar Ghorai <sukumar.ghorai@intel.com>,
+        Yicong Yang <yangyicong@hisilicon.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-On 1/11/21 6:23 AM, Stefan Wahren wrote:
-> Hi,
-> 
-> Am 11.01.21 um 04:39 schrieb Jeremy Linton:
->> Hi,
->>
->> On 1/9/21 5:07 AM, Stefan Wahren wrote:
->>> Hi Jeremy,
->>>
->>> +add Nicolas
->>>
->>> Am 08.01.21 um 22:13 schrieb Jeremy Linton:
->>>> The rpi4 has a Arasan controller it carries over
->>>> from the rpi3, and a newer eMMC2 controller.
->>>> Because of a couple "quirks" it seems wiser to bind
->>>> these controllers to the same driver that DT is using
->>>> on this platform rather than the generic sdhci_acpi
->>>> driver with PNP0D40.
->>>>
->>>> So, we use BCM2847 for the older Arasan and BRCME88C
->>>> for the newer eMMC2.
->>>>
->>>> With this change linux is capable of utilizing the
->>>> SD card slot, and the wifi on this platform
->>>> with linux.
->>>>
->>>> Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
->>>> ---
->>>>    drivers/mmc/host/sdhci-iproc.c | 14 ++++++++++++++
->>>>    1 file changed, 14 insertions(+)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-iproc.c
->>>> b/drivers/mmc/host/sdhci-iproc.c
->>>> index c9434b461aab..f79d97b41805 100644
->>>> --- a/drivers/mmc/host/sdhci-iproc.c
->>>> +++ b/drivers/mmc/host/sdhci-iproc.c
->>>> @@ -250,6 +250,14 @@ static const struct sdhci_pltfm_data
->>>> sdhci_bcm2835_pltfm_data = {
->>>>        .ops = &sdhci_iproc_32only_ops,
->>>>    };
->>>>    +static const struct sdhci_pltfm_data sdhci_bcm_arasan_data = {
->>>> +    .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
->>>> +          SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
->>>> +          SDHCI_QUIRK_NO_HISPD_BIT,
->>>> +    .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->>>> +    .ops = &sdhci_iproc_32only_ops,
->>>> +};
->>
->> First, thanks for taking a look at this!
->>
->>
->>> Why do we need an almost exact copy of bcm2835_data which works fine for
->>> all Raspberry Pi boards?
->>
->> The short answer to the remainder of this email is that i'm trying to
->> continue supporting existing OSs (windows) using the ACPI tables on
->> the rpi3/rpi4 while adding rpi4+Linux support.
->>
->> An even shorter answer is they don't work because ACPI doesn't provide
->> the same clock/attributes/etc controls that exist with DT.
->>
->> So, what happened here is that I got this controller "working" with
->> the generic PNP0D40 sdhci_acpi driver. I managed this only by
->> controlling the sdhci_caps/masks in the firmware. In theory this
->> minimizes the amount of work needed on the other OS which are booting
->> on the same ACPI tables (*bsds). They should only need to quirk the
->> bcm/arasan specific functionality, rather than some of the quirking
->> which change the caps behavior. But because we don't know which if any
->> of the older rpi/arasan quirks are still needed the safest solution is
->> to use the _iproc driver and just drop the quirk flags known to be
->> worked around by the firmware caps override.
-> 
-> okay, thanks for the explanation. I was also confused by bcm_arasan,
-> because there is already an Arasan specific sdhci driver. But now it's
-> clear to me.
-> 
-> Could you please add a short comment (above sdhci_bcm_arasan_data) why
-> we cannot use bcm2835_data?
+GL9750 SD Host Controller has a 3100us PortTPowerOnTime; however, it
+enters L1.2 after only ~4us inactivity per PCIe trace. During a
+suspend/resume process, PCI access operations are frequently longer than
+4us apart. Therefore, the device frequently enters and leaves L1.2 during
+this process, causing longer than desirable suspend/resume time. The total
+time cost due to this L1.2 exit latency could add up to ~200ms.
 
-Sure.
+Considering that PCI access operations are fairly close to each other
+(though sometimes > 4us), the actual time the device could stay in L1.2 is
+negligible. Therefore, the little power-saving benefit from ASPM during
+suspend/resume does not overweight the performance degradation caused by
+long L1.2 exit latency.
 
-> 
-> Btw the subject isn't complete. The patch is also related to the rpi3.
-
-Only via the historical ACPI tables. There isn't any attempt to get 
-ACPI+Linux working on the rpi3. Its to far away from BSA. For starters 
-it doesn't have a GIC. So while one could bind this driver on the rpi3, 
-that would require being able to boot Linux on the rpi3 in ACPI mode.
-
-Thanks again!
+Therefore, I am proposing to disable ASPM during a suspend/resume process.
 
 
+Victor Ding (2):
+  PCI/ASPM: Disable ASPM until its LTR and L1ss state is restored
+  mmc: sdhci-pci-gli: Disable ASPM during a suspension
 
-> 
-> Best regards
-> Stefan
-> 
-> 
+ drivers/mmc/host/sdhci-pci-core.c |  2 +-
+ drivers/mmc/host/sdhci-pci-gli.c  | 46 +++++++++++++++++++++++++++++--
+ drivers/mmc/host/sdhci-pci.h      |  1 +
+ drivers/pci/pci.c                 | 11 ++++++++
+ drivers/pci/pci.h                 |  2 ++
+ drivers/pci/pcie/aspm.c           |  2 +-
+ 6 files changed, 60 insertions(+), 4 deletions(-)
+
+-- 
+2.30.0.284.gd98b1dd5eaa7-goog
 
