@@ -7,45 +7,42 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE22AC4332D
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 09:48:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31F83C43333
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 09:48:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 94B2623103
+	by mail.kernel.org (Postfix) with ESMTP id EAC3B23100
 	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 09:48:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388644AbhALJsM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1732653AbhALJsM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Tue, 12 Jan 2021 04:48:12 -0500
-Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:13612 "EHLO
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:60622 "EHLO
         mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1732653AbhALJsK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2021 04:48:10 -0500
+        by vger.kernel.org with ESMTP id S2388625AbhALJsM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2021 04:48:12 -0500
 Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
-        by mx0a-0016f401.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 10C9VO9W001068;
-        Tue, 12 Jan 2021 01:47:12 -0800
+        by mx0a-0016f401.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 10C9VVcE001139;
+        Tue, 12 Jan 2021 01:47:23 -0800
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : mime-version :
- content-type; s=pfpt0220; bh=Nw8egbw32c0+yxawtWtnYEp32ktpZlw4wUCUC9usBUA=;
- b=IgERooYkMR9ZqeiiYsvjNWppUF4shcggU5l6BPDupqL32n7I55UKbXLAVDEOyPIJUtdW
- XYXKTIFmvWxKLCc/vKq5WggTH67IlGEgYvksgWn/TXT3D3mrEiIqReklSkcC0s/TSeny
- TgB9rpEwCovgUHpSiWybamEXDmO8M0WWdyq+tKDIlc3Dj4/X9hl2uexEtP+jT02kitgi
- yHAdBbsA1ios+fDNHY3xTN0ovsGntblVxs+cgMNdsGm9vwz06SOd2aHTX243/4rtBVSr
- HWgqFzYytYHh1UuntDC0EE3h7M88Do3rR3tfKxYdWR5EUYo4/riOrPI7IDLzb3dJXafz vg== 
-Received: from dc5-exch01.marvell.com ([199.233.59.181])
-        by mx0a-0016f401.pphosted.com with ESMTP id 35yaqsqmpa-1
+ content-type; s=pfpt0220; bh=dUeX9ZdPNHuFVeAWTAORQVIXK2VRGllOze1tz03uvY4=;
+ b=i/vyYv6ycGAt2vemgVMzOgglvicg2dYYzdG4PTwytK5fPeQYO5W3WTESSNusoRhljodT
+ pAefK3Fks3maEPBc9+IxALXAaxyA7QEeqkefmels4Rabsc48AEE1rLIY4msdqYqkhyAp
+ HTPLGqgleERQFVssSrUSk9vtcqEHqbwg3e4V13P+0fDWduWij+S+0Q/OmffTnqZNoHzK
+ AqhPis16bZaSlhK44rrFCIMgcIGhSVYvKAGel/P4dP+UeeT2LQ55nywGaqma73fFwdhh
+ 7qbHg6KLfj4JkgFkNQwYPp+0yQc0GlgW5uJ2oqBS8ASYNwvPoQpyVkr5+2Ql6Cn6ETHy WA== 
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+        by mx0a-0016f401.pphosted.com with ESMTP id 35yaqsqmq1-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Tue, 12 Jan 2021 01:47:12 -0800
-Received: from SC-EXCH01.marvell.com (10.93.176.81) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 12 Jan
- 2021 01:47:11 -0800
-Received: from DC5-EXCH01.marvell.com (10.69.176.38) by SC-EXCH01.marvell.com
- (10.93.176.81) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 12 Jan
- 2021 01:47:10 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
- (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Tue, 12 Jan 2021 01:47:10 -0800
+        Tue, 12 Jan 2021 01:47:23 -0800
+Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 12 Jan
+ 2021 01:47:22 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 12 Jan 2021 01:47:22 -0800
 Received: from octopus.marvell.com (octopus.marvell.com [10.5.24.3])
-        by maili.marvell.com (Postfix) with ESMTP id 3DB3D3F703F;
-        Tue, 12 Jan 2021 01:47:07 -0800 (PST)
+        by maili.marvell.com (Postfix) with ESMTP id 9A7A03F7043;
+        Tue, 12 Jan 2021 01:47:18 -0800 (PST)
 From:   <kostap@marvell.com>
 To:     <linux-mmc@vger.kernel.org>
 CC:     <ulf.hansson@linaro.org>, <robh+dt@kernel.org>, <andrew@lunn.ch>,
@@ -54,9 +51,9 @@ CC:     <ulf.hansson@linaro.org>, <robh+dt@kernel.org>, <andrew@lunn.ch>,
         <linux-arm-kernel@lists.infradead.org>, <mw@semihalf.com>,
         <jaz@semihalf.com>, <nadavh@marvell.com>, <bpeled@marvell.com>,
         <stefanc@marvell.com>, Konstantin Porotchkin <kostap@marvell.com>
-Subject: [PATCH v3 1/4] dt-bindings: mmc: xenon: add AP807 compatible string
-Date:   Tue, 12 Jan 2021 11:46:52 +0200
-Message-ID: <20210112094655.12274-2-kostap@marvell.com>
+Subject: [PATCH v3 4/4] arm64: dts: cn913x-db: enable MMC HS400
+Date:   Tue, 12 Jan 2021 11:46:55 +0200
+Message-ID: <20210112094655.12274-5-kostap@marvell.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210112094655.12274-1-kostap@marvell.com>
 References: <20210112094655.12274-1-kostap@marvell.com>
@@ -70,27 +67,29 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Marcin Wojtas <mw@semihalf.com>
 
-This patch adds DT binding description for the Xenon
-SD/MMC controller included in AP807 north bridge.
+This patch adds necessary flags in the device tree
+which enable HS400 mode on AP807 MMC controller
+on the CN913x-DB board.
 
 Signed-off-by: Marcin Wojtas <mw@semihalf.com>
 Signed-off-by: Konstantin Porotchkin <kostap@marvell.com>
 ---
- Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm64/boot/dts/marvell/cn9130-db.dts | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
-index ed1456f5c94d..c51a62d751dc 100644
---- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
-+++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.txt
-@@ -12,6 +12,7 @@ Required Properties:
-   - "marvell,armada-3700-sdhci": For controllers on Armada-3700 SoC.
-   Must provide a second register area and marvell,pad-type.
-   - "marvell,armada-ap806-sdhci": For controllers on Armada AP806.
-+  - "marvell,armada-ap807-sdhci": For controllers on Armada AP807.
-   - "marvell,armada-cp110-sdhci": For controllers on Armada CP110.
- 
- - clocks:
+diff --git a/arch/arm64/boot/dts/marvell/cn9130-db.dts b/arch/arm64/boot/dts/marvell/cn9130-db.dts
+index ce49a70d88a0..79020e6d2792 100644
+--- a/arch/arm64/boot/dts/marvell/cn9130-db.dts
++++ b/arch/arm64/boot/dts/marvell/cn9130-db.dts
+@@ -113,6 +113,8 @@
+ &ap_sdhci0 {
+ 	pinctrl-names = "default";
+ 	bus-width = <8>;
++	mmc-ddr-1_8v;
++	mmc-hs400-1_8v;
+ 	vqmmc-supply = <&ap0_reg_sd_vccq>;
+ 	status = "okay";
+ };
 -- 
 2.17.1
 
