@@ -2,103 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-26.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2ECEC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 14:19:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A685C43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 21:42:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 82DAA2311D
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 14:19:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F347F23121
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jan 2021 21:42:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725934AbhALOSu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Jan 2021 09:18:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34546 "EHLO
+        id S2437011AbhALVh1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Jan 2021 16:37:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725372AbhALOSu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2021 09:18:50 -0500
-Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 328D2C061575
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jan 2021 06:18:10 -0800 (PST)
-Received: by mail-pl1-x635.google.com with SMTP id j1so1475943pld.3
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jan 2021 06:18:10 -0800 (PST)
+        with ESMTP id S2437115AbhALVKe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2021 16:10:34 -0500
+Received: from mail-pf1-x449.google.com (mail-pf1-x449.google.com [IPv6:2607:f8b0:4864:20::449])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8B15C061575
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jan 2021 13:09:53 -0800 (PST)
+Received: by mail-pf1-x449.google.com with SMTP id e28so2058609pfl.19
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jan 2021 13:09:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=U/FOHxwIw3HVpW/GXNTzZPAMWanmn/ezG2bU3puOLvk=;
-        b=A7Rlzb3vHUU3yVjvXzyNBXFkscn1V0W5vuQR4T78oUcNAiw2rhx/4RFQHdSiCep7Ga
-         RGMxrwz7hrQ1EzXMDIeKhwlZBMOy2wMT8oCJqWIDURhqiQ/FuWJcFdqeV4bsSILU8ROL
-         wyZQHp6ci5afkThLjD7hpG5tIWBvOTud1E7zfdSkLN6Fg+eA2gTAwgyxmsaQW/dwIqBu
-         YrPT65gDKqTnAq8yawLdBQzLPsOKZrheu76ZqDJnw8ONh3HVtU5W673e1AhWsSDyZ/41
-         0mAThSevEkz5SWzf1ug14BUgvnJRQzs0mHzijIcufuSvltQNk3Aj9eYpgmDolVzl3VgW
-         K/Ww==
+        d=google.com; s=20161025;
+        h=sender:date:message-id:mime-version:subject:from:to:cc;
+        bh=DYH4KGGRLo58+wJXu6Zs0KHvvQ74z/iJErgpXt1oAZo=;
+        b=uReNw/Keo7pZ5ELnr3PhQx2Py5XGiTlaa7btJuPcg1ocsJIj6YKiY6DXqtFLhDKMIF
+         R1Dm2dABawlmIMOf/+fnyIAm63l1CDAnsysEQUNEB1M/r7eA/vZwnm3/SCMN5EiJo03j
+         zxp+2GQEFhgXwpW+F7vG+vUuUGd7inv7C+ErH6mMAVqJPA6Yvh8IfbxOhLkukQ88iANZ
+         KUmktcTIq9EifJIFAI8UF1x4cV/Qq9+Q/5qHjeEnKQlLweumHTOQeqigUHMdcyxPQ8o/
+         CAcmO4qCi2AKhtIgamPyel+y/SlUSk0i6LDtlNseBU4bv3nDgsgc1zo/JzRb7EswyePC
+         DjUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=U/FOHxwIw3HVpW/GXNTzZPAMWanmn/ezG2bU3puOLvk=;
-        b=VMbPQHhmLuC4JJtEraKFHJ+7W8hs22Wfw5kCjQJxdma3FwCHQ74P9fpzV+mpjkGyMb
-         8SYd/JfSO9K5qoE/MMvtPpSRrlLyxMBtsYUHRDQgtCV3VqPUuPsehJ+enIX6iusOn2ck
-         adnN4B+07mq4GWqKKEFqxZDTVPwWMwZ6JP76JBg1extsk/15dvU3KGEnZaCbOnGrwhM2
-         IGFDsbFRdn481NizLltfe1jglc14NMuUrwhYpa80b8NPBZQQ6dINK+am8AU9bvc0Yafu
-         TV4XnGGqsw1AK3oDU4PSXDGF00h+bnxjsQWuBr+tyQqWkfF7CiqW+tPaTKFsSAqt822R
-         WQrQ==
-X-Gm-Message-State: AOAM533xOCNjlW7Ynsdqo0tcIz0M94DO8vOBJDbqzcIWBKbt/FYvv/v1
-        3GPxGjtCTX5fI4bfK1JnHKb/PGmzuJhceA==
-X-Google-Smtp-Source: ABdhPJzunK96JyrQcuOmBw5BPNoXJJQxpTokxu2SuOEtd9gglfJQNfsWl4NgnBlZvawKBH7qiZTNPA==
-X-Received: by 2002:a17:902:ac93:b029:db:c725:e321 with SMTP id h19-20020a170902ac93b02900dbc725e321mr4951151plr.41.1610461089727;
-        Tue, 12 Jan 2021 06:18:09 -0800 (PST)
-Received: from localhost.localdomain ([210.0.158.164])
-        by smtp.googlemail.com with ESMTPSA id f7sm3555041pjs.25.2021.01.12.06.18.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Jan 2021 06:18:08 -0800 (PST)
-From:   Fengnan Chang <fengnanchang@gmail.com>
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, Fengnan Chang <fengnanchang@gmail.com>
-Subject: [PATCH] mmc: limit the number of retries when analyse tuples failed
-Date:   Tue, 12 Jan 2021 22:17:54 +0800
-Message-Id: <20210112141754.76539-1-fengnanchang@gmail.com>
-X-Mailer: git-send-email 2.25.1
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        h=x-gm-message-state:sender:date:message-id:mime-version:subject:from
+         :to:cc;
+        bh=DYH4KGGRLo58+wJXu6Zs0KHvvQ74z/iJErgpXt1oAZo=;
+        b=RwYrcs3yztXE9h9FBxyS46J2SHEhWGGGGlte4ZNa+92bGs9TngqCTz6RYVJkmr/Y0t
+         1naK4rJhh+m72FxRfnuvH9ORd05uS/fsx7yu5wWgYysqwbPDNBqYRB7fio5RFNv7ebDz
+         NN8g1oNrbXNi08x0XW5/tedKJsXoirkEqDcqTyuteOlKK94VRSi8ISRdXBfFMQPzJoaK
+         2U/NFHf4URNvH/n5Zc/ElYvyr2Y8d8+pDjvXbnlMnMoQavqV3SttrX8RIYZrS6bLqVSM
+         gUDbNa8eGSBY0aTmiVDFQW/sH+WivC9kn06m2HJkZXBNGMQRVP/G1Qq7FoXxVRuyCj1O
+         Rpcg==
+X-Gm-Message-State: AOAM533CMkJkwGQ/LYez3k2r4LQmyjIOUYIvgwTOoby3kN6qzxwovIg6
+        uWdUHIgYHGAeiEs6NZBd2NPT0Qk=
+X-Google-Smtp-Source: ABdhPJyUbIUFqJvnqbEtnF2GM+dp3za6uUWvNwxsyNUHMCzfHHHwXk0ZgnC607brm2xtZc07CdFzcPo=
+Sender: "pcc via sendgmr" <pcc@pcc-desktop.svl.corp.google.com>
+X-Received: from pcc-desktop.svl.corp.google.com ([2620:15c:2ce:0:7220:84ff:fe09:385a])
+ (user=pcc job=sendgmr) by 2002:a65:460d:: with SMTP id v13mr940156pgq.414.1610485793131;
+ Tue, 12 Jan 2021 13:09:53 -0800 (PST)
+Date:   Tue, 12 Jan 2021 13:09:44 -0800
+Message-Id: <20210112210944.605953-1-pcc@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.30.0.284.gd98b1dd5eaa7-goog
+Subject: [PATCH] mmc: core: don't initialize block size from ext_csd if not present
+From:   Peter Collingbourne <pcc@google.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Peter Collingbourne <pcc@google.com>, linux-mmc@vger.kernel.org,
+        Damien Le Moal <damien.lemoal@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-when analyse tuples failed, may enter an endless loop，so limit the number of retries.
+If extended CSD was not available, the eMMC driver would incorrectly
+set the block size to 0, as the data_sector_size field of ext_csd
+was never initialized. This issue was exposed by commit 817046ecddbc
+("block: Align max_hw_sectors to logical blocksize") which caused
+max_sectors and max_hw_sectors to be set to 0 after setting the block
+size to 0, resulting in a kernel panic in bio_split when attempting
+to read from the device. Fix it by only reading the block size from
+ext_csd if it is available.
 
-Signed-off-by: Fengnan Chang <fengnanchang@gmail.com>
+Fixes: 817046ecddbc ("block: Align max_hw_sectors to logical blocksize")
+Signed-off-by: Peter Collingbourne <pcc@google.com>
+Link: https://linux-review.googlesource.com/id/If244d178da4d86b52034459438fec295b02d6e60
 ---
- drivers/mmc/core/sdio_cis.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/mmc/core/queue.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-index dcb3dee59fa5..a3f0c3cc0c2c 100644
---- a/drivers/mmc/core/sdio_cis.c
-+++ b/drivers/mmc/core/sdio_cis.c
-@@ -266,6 +266,7 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index de7cb0369c30..735cdbf1145c 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -20,6 +20,7 @@
+ #include "core.h"
+ #include "card.h"
+ #include "host.h"
++#include "mmc_ops.h"
  
- 	do {
- 		unsigned char tpl_code, tpl_link;
-+		int  tries = 100;
+ #define MMC_DMA_MAP_MERGE_SEGMENTS	512
  
- 		ret = mmc_io_rw_direct(card, 0, 0, ptr++, 0, &tpl_code);
- 		if (ret)
-@@ -318,6 +319,9 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
- 			prev = &this->next;
+@@ -384,7 +385,7 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ 		     "merging was advertised but not possible");
+ 	blk_queue_max_segments(mq->queue, mmc_get_max_segments(host));
  
- 			if (ret == -ENOENT) {
-+				tries--;
-+				if (!tries)
-+					break;
- 				/* warn about unknown tuples */
- 				pr_warn_ratelimited("%s: queuing unknown"
- 				       " CIS tuple 0x%02x (%u bytes)\n",
+-	if (mmc_card_mmc(card))
++	if (mmc_card_mmc(card) && mmc_can_ext_csd(card))
+ 		block_size = card->ext_csd.data_sector_size;
+ 
+ 	blk_queue_logical_block_size(mq->queue, block_size);
 -- 
-2.25.1
+2.30.0.284.gd98b1dd5eaa7-goog
 
