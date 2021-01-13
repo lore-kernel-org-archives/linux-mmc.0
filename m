@@ -2,123 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-23.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77DB7C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 14:46:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64A5CC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 19:47:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2AE9E2313C
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 14:46:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 226A8206F1
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 19:47:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725858AbhAMOqC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 09:46:02 -0500
-Received: from mail-out.m-online.net ([212.18.0.9]:58090 "EHLO
-        mail-out.m-online.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725772AbhAMOqC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 09:46:02 -0500
-Received: from frontend01.mail.m-online.net (unknown [192.168.8.182])
-        by mail-out.m-online.net (Postfix) with ESMTP id 4DG9GF3d3mz1qw9v;
-        Wed, 13 Jan 2021 15:45:09 +0100 (CET)
-Received: from localhost (dynscan1.mnet-online.de [192.168.6.70])
-        by mail.m-online.net (Postfix) with ESMTP id 4DG9GF194Mz1tYWc;
-        Wed, 13 Jan 2021 15:45:09 +0100 (CET)
-X-Virus-Scanned: amavisd-new at mnet-online.de
-Received: from mail.mnet-online.de ([192.168.8.182])
-        by localhost (dynscan1.mail.m-online.net [192.168.6.70]) (amavisd-new, port 10024)
-        with ESMTP id Qs4kinPvzBp8; Wed, 13 Jan 2021 15:45:08 +0100 (CET)
-X-Auth-Info: e0i2lK6b5VfpekyATUmk8KQgP9D45XgI+JpoatpQhBE=
-Received: from [IPv6:::1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.mnet-online.de (Postfix) with ESMTPSA;
-        Wed, 13 Jan 2021 15:45:07 +0100 (CET)
-Subject: Re: [Linux-stm32] [PATCH] [RFC] mmc: mmci: Add support for probing
- bus voltage level translator
-To:     Yann GAUTIER <yann.gautier@foss.st.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com
-References: <20210105140718.122752-1-marex@denx.de>
- <CAPDyKFoQfm2ZtPdsZSZtOCDH-FJqNzihYqZny-vUdK4Q4tWTzQ@mail.gmail.com>
- <b83c1112-010b-a40f-319f-84c755424b0f@denx.de>
- <CAPDyKFo5Sqxj31owrnmz1sTZqgW_PtZM2H=pDPBz+9hc0W0hHA@mail.gmail.com>
- <77dd612b-23f0-1f77-797a-9cde512926e3@denx.de>
- <f91fbdfc-453d-78a6-970a-5d6eecd443b2@foss.st.com>
-From:   Marek Vasut <marex@denx.de>
-Message-ID: <ccef7ae4-8cd7-4434-9632-917a4fb92f53@denx.de>
-Date:   Wed, 13 Jan 2021 15:45:07 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
+        id S1728682AbhAMTrT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 14:47:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49542 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728555AbhAMTrT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 14:47:19 -0500
+Received: from mail-io1-xd32.google.com (mail-io1-xd32.google.com [IPv6:2607:f8b0:4864:20::d32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0805EC061575
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 11:46:39 -0800 (PST)
+Received: by mail-io1-xd32.google.com with SMTP id u26so6581181iof.3
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 11:46:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=R5S3fbVh75sTrcXZaOEMGuqYwwTThAkZV2dyVGj7pY0=;
+        b=b3Rcn4maSoEfnDlFNSf4teaXnDsu8Hk8pPpLRG65UOdodc7SMWyz5mkCmMUzKxH1Zp
+         EXqbNvWhwzqZX9mx/Fdy+D4kCKa1nzxhB8RZyR8l+fhkS2Qf9KCBsKpid2iYboE0Bu8A
+         d4zP57faMpOrcVULkpHV68983L3DgO4J7TzP40v5ZuJiZx41dK1qvUk0qsi0HcsJmQMu
+         S7a729CMo1r48YiTxaaZnm5rbO0MRYppU6kXNckZpFArajCsocQsE3g2FhnMv5fbd2+6
+         QvdvewLdkGF0Cm3uv4T4M3U1e0+RvuWryUjPfB6CwcQUQPaqnTJ8j98q2PsM0+D+RtpQ
+         ns7A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=R5S3fbVh75sTrcXZaOEMGuqYwwTThAkZV2dyVGj7pY0=;
+        b=XemZbYvHIPkdd9X5eaJkYfPjJr2ZHoypLpIXLHrfLhvKIzTPVq7JEcqicVGa0JZTF3
+         e568tJ2wP/Y7VuumCiXoRCCXTTv8GjF7KPVoE97BAe3qU+fT5ipr+utn2h5kGQWZQUrG
+         vFw7fxksN5hqHZz2b/s4faPTHedIu/8zB/auqOqywYPU+PvjKex6vOuF9ph9VBIpYsgp
+         13wsahiOBK80cA6KIFhKh0I3z7i03vKKV9UrShUp/aVLpofvI5grLZX76mbStz/cHGE1
+         uPJo6WhL3DGS3JRYejiO2vxu6zhicK07LLYgMmUdi1qvKIhUqmEAm1pktNtjQct486mV
+         Joig==
+X-Gm-Message-State: AOAM530DmekKwc/KbUuyMkCYKko7i2hAODOc6ML10+xteeVUBqgU9wtn
+        8kyujHwF4iYSVqpTpSYnvqwa7uupK66AKN1eyGXjfw==
+X-Google-Smtp-Source: ABdhPJy05DICZCPL1zdxNmpJef+jP3oPkoG5Kuk3c6L0Zs41kOpW4nxvaOEyGScDCxTufBM3+nG9pgMRyDCFIXm2jQA=
+X-Received: by 2002:a5e:dd0d:: with SMTP id t13mr2961246iop.132.1610567198273;
+ Wed, 13 Jan 2021 11:46:38 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <f91fbdfc-453d-78a6-970a-5d6eecd443b2@foss.st.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20210112210944.605953-1-pcc@google.com> <34278e68-d69f-0440-858e-b2079b8ac7bb@intel.com>
+In-Reply-To: <34278e68-d69f-0440-858e-b2079b8ac7bb@intel.com>
+From:   Peter Collingbourne <pcc@google.com>
+Date:   Wed, 13 Jan 2021 11:46:24 -0800
+Message-ID: <CAMn1gO5Yuy3c48Rscny6mnQAycZeUy-aCwex_r=h_XTMF6Lh-g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: don't initialize block size from ext_csd if
+ not present
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Christoph Hellwig <hch@lst.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, Damien Le Moal <damien.lemoal@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/13/21 3:21 PM, Yann GAUTIER wrote:
-> On 1/13/21 12:52 PM, Marek Vasut wrote:
->> On 1/13/21 12:38 PM, Ulf Hansson wrote:
->> [...]
->>>>>>    static int mmci_of_parse(struct device_node *np, struct 
->>>>>> mmc_host *mmc)
->>>>>>    {
->>>>>>           struct mmci_host *host = mmc_priv(mmc);
->>>>>> @@ -1913,7 +1973,7 @@ static int mmci_of_parse(struct device_node 
->>>>>> *np, struct mmc_host *mmc)
->>>>>>           if (of_get_property(np, "st,neg-edge", NULL))
->>>>>>                   host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
->>>>>>           if (of_get_property(np, "st,use-ckin", NULL))
->>>>>> -               host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
->>>>>> +               mmci_probe_level_translator(mmc);
->>>>>
->>>>> I think you can make this change bit less invasive. Rather than having
->>>>> to shuffle code around in ->probe(), I suggest you call
->>>>> mmci_probe_level_translator() outside and after mmci_of_parse() has
->>>>> been called.
->>>>>
->>>>> In this way, you can also provide mmci_probe_level_translator() with a
->>>>> struct mmci_host *, rather than having to pick it up from
->>>>> mmc_priv(mmc), if you see what I mean.
->>>>>
->>>>> Of course, this also means in mmci_probe_level_translator() you will
->>>>> have to check if MCI_STM32_CLK_SELCKIN has been set, and if not then
->>>>> do an early return.
->>>>
->>>> Testing the translator presence when checking whether its enabled in DT
->>>> seems like the right place, but that's really just an implementation 
->>>> detail.
->>>>
->>>> I am more interested in knowing whether adding
->>>> mmci_probe_level_translator() is even acceptable in the first place. 
->>>> Is it ?
->>>
->>> Honestly, I don't know.
->>>
->>> I think I need to defer that question to Linus Walleij. And of course,
->>> it would be nice to get the opinion from Ludovic as well.
->>
->> Good, that's what I was hoping for too.
-> 
-> Hi,
-> 
-> Ludovic is out of office this week.
-> 
-> The feature of detecting a level translator seems to be quite generic, 
-> and not dedicated to MMCI driver or the ST dedicated code, and with new 
-> st,* properties. It may be in generic mmc code. But I'll let Linus 
-> comment about that.
-> 
-> I also wonder if this HW detection should be done in kernel, or if it 
-> should be done in Bootloader. But it may be more complex, to add the 
-> st,use_ckin in kernel DT if bootloader detects this translator.
+On Wed, Jan 13, 2021 at 2:43 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 12/01/21 11:09 pm, Peter Collingbourne wrote:
+> > If extended CSD was not available, the eMMC driver would incorrectly
+> > set the block size to 0, as the data_sector_size field of ext_csd
+> > was never initialized. This issue was exposed by commit 817046ecddbc
+> > ("block: Align max_hw_sectors to logical blocksize") which caused
+> > max_sectors and max_hw_sectors to be set to 0 after setting the block
+> > size to 0, resulting in a kernel panic in bio_split when attempting
+> > to read from the device. Fix it by only reading the block size from
+> > ext_csd if it is available.
+> >
+> > Fixes: 817046ecddbc ("block: Align max_hw_sectors to logical blocksize")
+>
+> I would go with the original commit i.e.
+>
+> Fixes: a5075eb94837 ("mmc: block: Allow disabling 512B sector size emulation")
 
-Lets not attempt to hide inobvious functionality in bootloaders, the 
-kernel should be independent of bootloader where possible. And here it 
-is clearly and easily possible.
+Sure, makes sense.
+
+> > Signed-off-by: Peter Collingbourne <pcc@google.com>
+> > Link: https://linux-review.googlesource.com/id/If244d178da4d86b52034459438fec295b02d6e60
+> > ---
+> >  drivers/mmc/core/queue.c | 3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> > index de7cb0369c30..735cdbf1145c 100644
+> > --- a/drivers/mmc/core/queue.c
+> > +++ b/drivers/mmc/core/queue.c
+> > @@ -20,6 +20,7 @@
+> >  #include "core.h"
+> >  #include "card.h"
+> >  #include "host.h"
+> > +#include "mmc_ops.h"
+> >
+> >  #define MMC_DMA_MAP_MERGE_SEGMENTS   512
+> >
+> > @@ -384,7 +385,7 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+> >                    "merging was advertised but not possible");
+> >       blk_queue_max_segments(mq->queue, mmc_get_max_segments(host));
+> >
+> > -     if (mmc_card_mmc(card))
+> > +     if (mmc_card_mmc(card) && mmc_can_ext_csd(card))
+> >               block_size = card->ext_csd.data_sector_size;
+>
+> Might as well be:
+>
+>         if (mmc_card_mmc(card) && card->ext_csd.data_sector_size)
+>                 block_size = card->ext_csd.data_sector_size;
+
+Can we rely on this data structure to be zero initialized? I suppose
+so, provided that it was allocated with mmc_alloc_card which uses
+kzalloc. But it isn't entirely obvious and I figure it may be a little
+better to be explicit in our intent here. But either way works for me.
+
+Peter
