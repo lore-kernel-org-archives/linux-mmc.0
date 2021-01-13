@@ -2,117 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 67570C433E6
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:22:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 859AEC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:26:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F85523383
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:22:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 28644233A1
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:26:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726010AbhAMLWb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 06:22:31 -0500
-Received: from fllv0015.ext.ti.com ([198.47.19.141]:33762 "EHLO
-        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725747AbhAMLWa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:22:30 -0500
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10DBKrj0035137;
-        Wed, 13 Jan 2021 05:20:53 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1610536853;
-        bh=havUQaE9Q8MtbPDZbuGxqyTauNzAHO2v8GAg9BET1bM=;
-        h=Subject:To:CC:References:From:Date:In-Reply-To;
-        b=gpIS2oaQbOWVftAnTf4UfVP3sdN6OJYxqFDVOjQPdyAietiR3yuM2hQzNAp696JLC
-         3Yc/ASmekjD8nn+vJRIgOY4IVLrShSMjVhFkXX83SbxB6g4AQ5n/uuvAPyMuTi9C6C
-         2j9nprkduy/NNi5Icipn08SEJbPdXwY+1uCpVwRU=
-Received: from DFLE108.ent.ti.com (dfle108.ent.ti.com [10.64.6.29])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10DBKrSi095401
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 13 Jan 2021 05:20:53 -0600
-Received: from DFLE111.ent.ti.com (10.64.6.32) by DFLE108.ent.ti.com
- (10.64.6.29) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Wed, 13
- Jan 2021 05:20:53 -0600
-Received: from lelv0327.itg.ti.com (10.180.67.183) by DFLE111.ent.ti.com
- (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
- Frontend Transport; Wed, 13 Jan 2021 05:20:53 -0600
-Received: from [10.250.232.169] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10DBKnJo111139;
-        Wed, 13 Jan 2021 05:20:50 -0600
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-am654: Add compatible string for
- AM64 SoC
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Vignesh Raghavendra <vigneshr@ti.com>,
-        Sekhar Nori <nsekhar@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <20210107055457.14948-1-a-govindraju@ti.com>
- <CAPDyKFp89zPwr-SS9wgR6C5RM+KhSLWbkXivxAttRqTxtiVGDQ@mail.gmail.com>
-From:   Aswath Govindraju <a-govindraju@ti.com>
-Message-ID: <9ad5f3a3-2175-8f43-2481-7bef17828ce2@ti.com>
-Date:   Wed, 13 Jan 2021 16:50:48 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1727204AbhAML0M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 06:26:12 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53986 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726877AbhAML0M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:26:12 -0500
+Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B55CFC061786
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:25:31 -0800 (PST)
+Received: by mail-vs1-xe30.google.com with SMTP id z16so910959vsp.5
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:25:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=UTamP/ArLqqwGoTYLNMH/RB+OzgOFY7u6lXmJEovIaE=;
+        b=UgMjABl95Zcya/xwewD5TR75NWKt5G5GgXaDqG3SLnkwisVB45A4u+L3Ua4kqyacvy
+         Bn0yCJVY1CiYWxoqtkyrfRZxztRfJa2aCwS6COtCEMmtJq7FwDpBuEGa+JTivpDDaBJj
+         NRR3JPJeRibrwoQNcXKrErfCgTX2GaW0OugPvl4weCufgH2OdmH4BRCXdcY9LPOY1tqB
+         NfNmJP+hVexHo1qYOKc0Tef1W/RrKqs+oVGpctpXjtXjpYT/8g1/YwwXEEw5AQX4qC0n
+         u7ZR0YL9iEI6PS/a0ycfeo352VhDvgf5V8Nc3FgmEi/4OegCloz+pD5v1thJXv+oJnEv
+         HdXA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=UTamP/ArLqqwGoTYLNMH/RB+OzgOFY7u6lXmJEovIaE=;
+        b=D6hOZE//zVq7ZEvuJTbL7SYQ4NP1LDrUWVbjam1aax7WYwUU+PSiYvR8IVdlSjoNJc
+         pBwUIWEDJqyABI7ongco8HZVqM6FyRXry0w840Zcunp0RjbHHhAgLqySP5bpBAfnd8+v
+         J9CHjWDVu6slCTADX4mlnm3qom54fExdLFZMZMq1L4e/PmuMZ95R3umg+IS1w8GbYMCs
+         A9ZNcNvw+nbFIGwDWlRgFQyjE57O1BDQgx3ItB0tzgQecjqLVcpKleWAeDIh3K0BaVk7
+         7GvrgJQhePQJGpUAt9UEDVSYZKOc4kWYGNfm4joEtjOAEM9Wfe4fCFGHGmNtRoU3iNyx
+         tm/g==
+X-Gm-Message-State: AOAM531M0k3dFU0lpgB/qTrKUMWHZn7rAXXEoaTdN+KjVnvASNPR2MHH
+        0l9iuGnGQFu/bevNRRpHh8Kj7Cp2EGiZQnykt3Lnjk6r0DV4cA==
+X-Google-Smtp-Source: ABdhPJwBwHyie480O2xGlwJHrHs3ZflMifx52QfOELTUo6npGeUwrPtutxWDy4YxE8zNu13H6+PTxLqsROPnmyDevQY=
+X-Received: by 2002:a67:e286:: with SMTP id g6mr1628197vsf.42.1610537130904;
+ Wed, 13 Jan 2021 03:25:30 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFp89zPwr-SS9wgR6C5RM+KhSLWbkXivxAttRqTxtiVGDQ@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+References: <1608114572-1892-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <1608114572-1892-1-git-send-email-yoshihiro.shimoda.uh@renesas.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 13 Jan 2021 12:24:53 +0100
+Message-ID: <CAPDyKFrE0udk+GY2MnNB7h7GPrdrbLnCwT-U=KunwxUBbdM4qQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/2] mmc: renesas_internal_dmac: add pre_req and
+ post_req support
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Uffe,
+On Wed, 16 Dec 2020 at 11:29, Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
+>
+> To improve performance, add pre_req and post_req support into
+> renesas_internal_dmac. Note that the patch [1/2] is a bug fix patch.
+>
+> Changes from v1:
+>  - Add a bug fix patch for hardware limitation in patch 1.
+>  - Remove a redundant argument in the unmap function in patch 2.
+>  - Describe the reason why we should not use host->sg_ptr in patch 2.
+>  - Rename argument of struct mmc_request from req to mrq in patch 2.
+>
+> Takeshi Saito (1):
+>   mmc: renesas_sdhi_internal_dmac: Fix DMA buffer alignment from 8 to
+>     128-bytes
+>
+> Yoshihiro Shimoda (1):
+>   mmc: renesas_internal_dmac: add pre_req and post_req support
+>
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c | 91 ++++++++++++++++++++++++---
+>  1 file changed, 83 insertions(+), 8 deletions(-)
+>
 
-On 13/01/21 4:26 pm, Ulf Hansson wrote:
-> On Thu, 7 Jan 2021 at 06:55, Aswath Govindraju <a-govindraju@ti.com> wrote:
->>
->> Add compatible string for AM64 SoC in device tree binding of AM654 SDHCI
->> module as the same IP is used.
->>
->> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
-> 
-> Do you have a corresponding patch for the driver as well? I would like
-> to apply them together.
-> 
+Applied for next, thanks!
 
-Yes, I do. Here is the link to the patch,
-https://lore.kernel.org/patchwork/patch/1364589/
-
-Thanks,
-Aswath
-
-> Kind regards
-> Uffe
-> 
->> ---
->>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 2 ++
->>  1 file changed, 2 insertions(+)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
->> index 1ae945434c53..34e53db29428 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
->> @@ -21,6 +21,8 @@ properties:
->>        - ti,j721e-sdhci-4bit
->>        - ti,j7200-sdhci-8bit
->>        - ti,j721e-sdhci-4bit
->> +      - ti,am64-sdhci-8bit
->> +      - ti,am64-sdhci-4bit
->>
->>    reg:
->>      maxItems: 2
->> --
->> 2.17.1
->>
-
+Kind regards
+Uffe
