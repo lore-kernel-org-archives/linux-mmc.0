@@ -2,150 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FD03C433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:08:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 177FAC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 13:09:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 32FDD233FA
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:08:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A887223432
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 13:09:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726754AbhAMMIK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 07:08:10 -0500
-Received: from fllv0016.ext.ti.com ([198.47.19.142]:45794 "EHLO
-        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726692AbhAMMIK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 07:08:10 -0500
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10DC6V28110714;
-        Wed, 13 Jan 2021 06:06:31 -0600
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1610539591;
-        bh=bj1OIoKh7MPlLtR7S7imc28nG0Aa6DWPD3zetxMh0ds=;
-        h=Subject:CC:References:From:Date:In-Reply-To;
-        b=HnHcHYqSMFoLSi7sKS0j1SNbdWGt6tKxfo2AkwgAzKZWtANnGgxdk8mPNIsZawEaR
-         aF0w0WEmi0ZC1vEV+/Jj1rE49YX2UH3P5h0dGJ+EaD/JVaudUwTWhvROuKfkNZLwWm
-         CV0xTU08fO0fi7SPMYLVMVJY8kb7Q5jrWgPhrj94=
-Received: from DLEE112.ent.ti.com (dlee112.ent.ti.com [157.170.170.23])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10DC6VXh041122
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 13 Jan 2021 06:06:31 -0600
-Received: from DLEE106.ent.ti.com (157.170.170.36) by DLEE112.ent.ti.com
- (157.170.170.23) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Wed, 13
- Jan 2021 06:06:30 -0600
-Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE106.ent.ti.com
- (157.170.170.36) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
- Frontend Transport; Wed, 13 Jan 2021 06:06:30 -0600
-Received: from [10.250.232.169] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10DC6QGE055184;
-        Wed, 13 Jan 2021 06:06:27 -0600
-Subject: Re: [PATCH 2/2] mmc: sdhci_am654: Add Support for TI's AM64 SoC
-CC:     Sekhar Nori <nsekhar@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        Aswath Govindraju <a-govindraju@ti.com>
-References: <20210113115908.3882-1-a-govindraju@ti.com>
- <20210113115908.3882-3-a-govindraju@ti.com>
-From:   Aswath Govindraju <a-govindraju@ti.com>
-Message-ID: <a74e6fbf-5a46-e666-83ee-b0e967362630@ti.com>
-Date:   Wed, 13 Jan 2021 17:36:25 +0530
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1725910AbhAMNIs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 08:08:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47854 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725747AbhAMNIs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 08:08:48 -0500
+Received: from mail-vk1-xa30.google.com (mail-vk1-xa30.google.com [IPv6:2607:f8b0:4864:20::a30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30125C061786
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 05:08:08 -0800 (PST)
+Received: by mail-vk1-xa30.google.com with SMTP id d6so479770vkb.13
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 05:08:08 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=9oNPkEmUO8hkna64sWXChu9HZjo0m5iZB1erj41a8uI=;
+        b=qwHeMAfERZE2zl0I3lja3nX4Mwy/ITwsKJwRa1su1yK90uMfOzGztxj9fWZNqvNv8S
+         7/oc1PDmQUX3bnjseo4QLXR/7Gv2NRuBmyCjHAwDAW+5Jo6tMsxSe9OpV/tkq3GVl0Lf
+         OsSRcY4nHnN+1qNrbqZaD97FSchwHLK7q9ZPiUA6FWW7ajkKfAyCnxIAl6aT1+vXtt7h
+         0+vJa0/3j9DlBiL9TFXutAPHb5GN3JPMLYh1MWgr0RysQyW1as0DKK+ZXKBYZg0wqStO
+         4r4pmEeIpBFtiOe1XBwlY27+0zS52pNudiNejRz8H33dZIREBYFwpP40yKuUdH8rtBPa
+         tVlg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=9oNPkEmUO8hkna64sWXChu9HZjo0m5iZB1erj41a8uI=;
+        b=FTSQG4PASMbHsVBzz36+5zAkHquxLWHWREhbHEhPds1ik7d9iqcG3Kftbt56KrxP8D
+         8LTGBG7EwPoqRL+uJk/Ki1WbAxT6sAQJnwiIh1NPYuiFf754nEuZ5fNQBJdG+NBweOfX
+         21QY/Geho2b8dDwD+5zdmOHWOdPOocU8dQFvkta/OPA2qPIqsKv0m+qyns1XmEXNICiO
+         RHPk8G147CQ4yd8A9L+I9eXgSf443ZXGUtXlzkbZx2sowovjDDZV87wAxO7BPkUNElve
+         QmxQCO9XmBy1R5/xsMA3MbnV20z+1sv8SsimUhrh+5AAjH3tdbLM6o4a35AIHt3CgdYJ
+         /tUg==
+X-Gm-Message-State: AOAM531cmmAm3lkadJCLZOXuEbrK3y6VQLizixE98PR53j03YmyK26q2
+        JwZsBf23NGDnHvYWpMCv0ZxhUDSu8s0DuuR2lKxLrA==
+X-Google-Smtp-Source: ABdhPJwQAdLZCij898e92iUq41dX/oLOa7oxz5JbuvCcn/nO6ViS5Yj/u70grbsYjpCHZ4QTgqWEAq4wyvXXNKee4vo=
+X-Received: by 2002:a1f:dec2:: with SMTP id v185mr1702891vkg.8.1610543287405;
+ Wed, 13 Jan 2021 05:08:07 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20210113115908.3882-3-a-govindraju@ti.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
-To:     unlisted-recipients:; (no To-header on input)
+References: <20210113105723.7916-1-ricky_wu@realtek.com>
+In-Reply-To: <20210113105723.7916-1-ricky_wu@realtek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 13 Jan 2021 14:07:30 +0100
+Message-ID: <CAPDyKFrxpihy6wtRUPrAwRkWnwmRVxJcKMUesbjPKJURfrHJBQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: rtsx: add delay before power on
+To:     =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        feng@realsil.com.cn, Doug Anderson <dianders@chromium.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Wed, 13 Jan 2021 at 11:57, <ricky_wu@realtek.com> wrote:
+>
+> From: Ricky Wu <ricky_wu@realtek.com>
+>
+> Make sure voltage below 0.5V before power on
+> when do power cycle
+> At mmc-core recognition card phase will do
+> power cycle quickly so our device need at least 100ms
+> to make voltage down to below 0.5V
+>
+> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
 
-On 13/01/21 5:29 pm, Aswath Govindraju wrote:
-> From: Faiz Abbas <faiz_abbas@ti.com>
-> 
-> Add support for the controller present on the AM64x SoC.
-> 
-> There are instances:
-> sdhci0: 8bit bus width, max 400 MBps
-> sdhci1: 4bit bus width, max 100 MBps
-> 
-> Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
-> Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
-> Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
-> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+Applied for next, by amending the changelog a bit, thanks!
+
+Kind regards
+Uffe
+
+
 > ---
-
-Very sorry forgot to add RESEND tag in the subject. The link to the
-original patch,
-https://lore.kernel.org/patchwork/patch/1364589/
-
-Thanks,
-Aswath
-
->  drivers/mmc/host/sdhci_am654.c | 28 ++++++++++++++++++++++++++++
->  1 file changed, 28 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-> index a64ea143d185..7a34649b0754 100644
-> --- a/drivers/mmc/host/sdhci_am654.c
-> +++ b/drivers/mmc/host/sdhci_am654.c
-> @@ -514,6 +514,26 @@ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
->  	.flags = IOMUX_PRESENT,
->  };
->  
-> +static const struct sdhci_pltfm_data sdhci_am64_8bit_pdata = {
-> +	.ops = &sdhci_j721e_8bit_ops,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +};
+>  drivers/mmc/host/rtsx_pci_sdmmc.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> index e6f5bbce5685..0e5043a03965 100644
+> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
+> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+> @@ -906,6 +906,8 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
+>         if (host->power_state == SDMMC_POWER_ON)
+>                 return 0;
+>
+> +       msleep(100);
 > +
-> +static const struct sdhci_am654_driver_data sdhci_am64_8bit_drvdata = {
-> +	.pdata = &sdhci_am64_8bit_pdata,
-> +	.flags = DLL_PRESENT | DLL_CALIB,
-> +};
-> +
-> +static const struct sdhci_pltfm_data sdhci_am64_4bit_pdata = {
-> +	.ops = &sdhci_j721e_4bit_ops,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +};
-> +
-> +static const struct sdhci_am654_driver_data sdhci_am64_4bit_drvdata = {
-> +	.pdata = &sdhci_am64_4bit_pdata,
-> +	.flags = IOMUX_PRESENT,
-> +};
-> +
->  static const struct soc_device_attribute sdhci_am654_devices[] = {
->  	{ .family = "AM65X",
->  	  .revision = "SR1.0",
-> @@ -737,6 +757,14 @@ static const struct of_device_id sdhci_am654_of_match[] = {
->  		.compatible = "ti,j721e-sdhci-4bit",
->  		.data = &sdhci_j721e_4bit_drvdata,
->  	},
-> +	{
-> +		.compatible = "ti,am64-sdhci-8bit",
-> +		.data = &sdhci_am64_8bit_drvdata,
-> +	},
-> +	{
-> +		.compatible = "ti,am64-sdhci-4bit",
-> +		.data = &sdhci_am64_4bit_drvdata,
-> +	},
->  	{ /* sentinel */ }
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_am654_of_match);
-> 
-
+>         rtsx_pci_init_cmd(pcr);
+>         rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
+>         rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SHARE_MODE,
+> --
+> 2.17.1
+>
