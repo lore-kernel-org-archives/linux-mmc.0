@@ -2,102 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14E89C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:54:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F45AC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:00:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B1349233F8
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:54:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 23AA2233F9
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:00:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726754AbhAMLyU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 06:54:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60002 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726692AbhAMLyT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:54:19 -0500
-Received: from mail-out.m-online.net (mail-out.m-online.net [IPv6:2001:a60:0:28:0:1:25:1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40917C061575
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:53:24 -0800 (PST)
-Received: from frontend01.mail.m-online.net (unknown [192.168.8.182])
-        by mail-out.m-online.net (Postfix) with ESMTP id 4DG5R31QNXz1s8vN;
-        Wed, 13 Jan 2021 12:52:31 +0100 (CET)
-Received: from localhost (dynscan1.mnet-online.de [192.168.6.70])
-        by mail.m-online.net (Postfix) with ESMTP id 4DG5R30ctsz1tSQB;
-        Wed, 13 Jan 2021 12:52:31 +0100 (CET)
-X-Virus-Scanned: amavisd-new at mnet-online.de
-Received: from mail.mnet-online.de ([192.168.8.182])
-        by localhost (dynscan1.mail.m-online.net [192.168.6.70]) (amavisd-new, port 10024)
-        with ESMTP id WdqOKE_5sjir; Wed, 13 Jan 2021 12:52:29 +0100 (CET)
-X-Auth-Info: +dZY/g2E08KBBiW1kSe0TgijeYyITzju1CFoH6PC2Bc=
-Received: from [IPv6:::1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.mnet-online.de (Postfix) with ESMTPSA;
-        Wed, 13 Jan 2021 12:52:29 +0100 (CET)
-Subject: Re: [PATCH] [RFC] mmc: mmci: Add support for probing bus voltage
- level translator
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Linus Walleij <linus.walleij@linaro.org>
-References: <20210105140718.122752-1-marex@denx.de>
- <CAPDyKFoQfm2ZtPdsZSZtOCDH-FJqNzihYqZny-vUdK4Q4tWTzQ@mail.gmail.com>
- <b83c1112-010b-a40f-319f-84c755424b0f@denx.de>
- <CAPDyKFo5Sqxj31owrnmz1sTZqgW_PtZM2H=pDPBz+9hc0W0hHA@mail.gmail.com>
-From:   Marek Vasut <marex@denx.de>
-Message-ID: <77dd612b-23f0-1f77-797a-9cde512926e3@denx.de>
-Date:   Wed, 13 Jan 2021 12:52:29 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
+        id S1727108AbhAMMAO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 07:00:14 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:39740 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726923AbhAMMAO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 07:00:14 -0500
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10DBxU34045945;
+        Wed, 13 Jan 2021 05:59:30 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1610539170;
+        bh=GUonOkkIARDwv50MiC0wedALt3iHo3HDOz+ceuFKS6k=;
+        h=From:To:CC:Subject:Date:In-Reply-To:References;
+        b=Dfwmwo1tUF+rV59CjRE9NXeX0YriplT+NTt1wCnet0BpHyozkQ7XNbH0Rry9X1Tw1
+         6CFQ1hYaQYBg9jahsmDsiIS0ge7KveWxgn8Qq/N63+jpvL4HodQf9D7sbTK6wMYdq7
+         eT+Fn3hTSNtAUcscVC/Y+zn6O/6ieGkCtRfrbbg4=
+Received: from DLEE108.ent.ti.com (dlee108.ent.ti.com [157.170.170.38])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10DBxUHi030325
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 13 Jan 2021 05:59:30 -0600
+Received: from DLEE110.ent.ti.com (157.170.170.21) by DLEE108.ent.ti.com
+ (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Wed, 13
+ Jan 2021 05:59:30 -0600
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE110.ent.ti.com
+ (157.170.170.21) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
+ Frontend Transport; Wed, 13 Jan 2021 05:59:30 -0600
+Received: from gsaswath-HP-ProBook-640-G5.dal.design.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10DBxDdl041723;
+        Wed, 13 Jan 2021 05:59:26 -0600
+From:   Aswath Govindraju <a-govindraju@ti.com>
+CC:     Sekhar Nori <nsekhar@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Aswath Govindraju <a-govindraju@ti.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH 2/2] mmc: sdhci_am654: Add Support for TI's AM64 SoC
+Date:   Wed, 13 Jan 2021 17:29:08 +0530
+Message-ID: <20210113115908.3882-3-a-govindraju@ti.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210113115908.3882-1-a-govindraju@ti.com>
+References: <20210113115908.3882-1-a-govindraju@ti.com>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFo5Sqxj31owrnmz1sTZqgW_PtZM2H=pDPBz+9hc0W0hHA@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/13/21 12:38 PM, Ulf Hansson wrote:
-[...]
->>>>    static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
->>>>    {
->>>>           struct mmci_host *host = mmc_priv(mmc);
->>>> @@ -1913,7 +1973,7 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
->>>>           if (of_get_property(np, "st,neg-edge", NULL))
->>>>                   host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
->>>>           if (of_get_property(np, "st,use-ckin", NULL))
->>>> -               host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
->>>> +               mmci_probe_level_translator(mmc);
->>>
->>> I think you can make this change bit less invasive. Rather than having
->>> to shuffle code around in ->probe(), I suggest you call
->>> mmci_probe_level_translator() outside and after mmci_of_parse() has
->>> been called.
->>>
->>> In this way, you can also provide mmci_probe_level_translator() with a
->>> struct mmci_host *, rather than having to pick it up from
->>> mmc_priv(mmc), if you see what I mean.
->>>
->>> Of course, this also means in mmci_probe_level_translator() you will
->>> have to check if MCI_STM32_CLK_SELCKIN has been set, and if not then
->>> do an early return.
->>
->> Testing the translator presence when checking whether its enabled in DT
->> seems like the right place, but that's really just an implementation detail.
->>
->> I am more interested in knowing whether adding
->> mmci_probe_level_translator() is even acceptable in the first place. Is it ?
-> 
-> Honestly, I don't know.
-> 
-> I think I need to defer that question to Linus Walleij. And of course,
-> it would be nice to get the opinion from Ludovic as well.
+From: Faiz Abbas <faiz_abbas@ti.com>
 
-Good, that's what I was hoping for too.
+Add support for the controller present on the AM64x SoC.
+
+There are instances:
+sdhci0: 8bit bus width, max 400 MBps
+sdhci1: 4bit bus width, max 100 MBps
+
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+---
+ drivers/mmc/host/sdhci_am654.c | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index a64ea143d185..7a34649b0754 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -514,6 +514,26 @@ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
+ 	.flags = IOMUX_PRESENT,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_am64_8bit_pdata = {
++	.ops = &sdhci_j721e_8bit_ops,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
++static const struct sdhci_am654_driver_data sdhci_am64_8bit_drvdata = {
++	.pdata = &sdhci_am64_8bit_pdata,
++	.flags = DLL_PRESENT | DLL_CALIB,
++};
++
++static const struct sdhci_pltfm_data sdhci_am64_4bit_pdata = {
++	.ops = &sdhci_j721e_4bit_ops,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
++static const struct sdhci_am654_driver_data sdhci_am64_4bit_drvdata = {
++	.pdata = &sdhci_am64_4bit_pdata,
++	.flags = IOMUX_PRESENT,
++};
++
+ static const struct soc_device_attribute sdhci_am654_devices[] = {
+ 	{ .family = "AM65X",
+ 	  .revision = "SR1.0",
+@@ -737,6 +757,14 @@ static const struct of_device_id sdhci_am654_of_match[] = {
+ 		.compatible = "ti,j721e-sdhci-4bit",
+ 		.data = &sdhci_j721e_4bit_drvdata,
+ 	},
++	{
++		.compatible = "ti,am64-sdhci-8bit",
++		.data = &sdhci_am64_8bit_drvdata,
++	},
++	{
++		.compatible = "ti,am64-sdhci-4bit",
++		.data = &sdhci_am64_4bit_drvdata,
++	},
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_am654_of_match);
+-- 
+2.17.1
+
