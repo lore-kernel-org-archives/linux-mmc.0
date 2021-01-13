@@ -2,106 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43FD7C433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:16:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E06A2C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:19:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E764C2333F
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:16:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D41423359
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:19:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727913AbhAMLPu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 06:15:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51768 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727328AbhAMLPt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:15:49 -0500
-Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 470EFC061794
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:15:09 -0800 (PST)
-Received: by mail-vs1-xe34.google.com with SMTP id x26so906441vsq.1
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:15:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=5F3Y1+dvzqZPxeJEhWq1oJzPV10LGp3WuH2PQnvIrno=;
-        b=Bs01E+yS0to9O9W6rRtGlBZGNxNfce2hx/qfzQjInfwMBqnjKV7ikGKq2HirAXZm3o
-         kuorTChMOhCfYcF8vb/UhcdtDNbF8bx9FEutmtT8sdqjr97uwj7bJ8f7oKb8rNoFUhtC
-         A+nujCQ/rC7JenrVVGj6YTEpgADCf1ouOHlcbdOw729VwFEjNSja5b0wVCLb1zQQnIWH
-         +CpwzE7WRWgnKoLo2hBbQq94rxnrUkmpxj7G6aED/rxX55/aZ/9brjm0W2lMDuEXlOfV
-         q2g6o5lmjgcdImsSUx4FBC36NSvsBYAmygP54VAAarv4teMw+mOpyRVKvc/kwxpLFm6D
-         OQQQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=5F3Y1+dvzqZPxeJEhWq1oJzPV10LGp3WuH2PQnvIrno=;
-        b=kbLhR1H04eD6HiBQYthzTifzeK7OMco84TNdMwMfd1zT7AwUzGLSl8oG/a/JdIix8y
-         rJLrvr2HXZmF7PZpRcwr4efov7HQm+6rIurlZBrfXFJuxbKZQw5/yzwh9ByP8kxLwiwY
-         MhagD5iiBfNfjd3ttS5NQ5aI72g7nauPxc59hwfvgQAlGhMjDvk+KSZnqwhdfUTcnDmY
-         9KQ2e2herxxp7gzHKNmLmeBbz0zZlTtnN8C7SJm2PRecU2kd7E1PILGOl+imX7XZYRix
-         YltFG9j7rnEVPR7RRP63sM7Gdqx4MCzTRW12uMo/zAyJ/IGRf/azYqycevwXzw6MPW5u
-         Wn2Q==
-X-Gm-Message-State: AOAM531OLWpDa0heJ2xca1+E37msyuj6CUvsjAwIk8k056dIt9/484k/
-        FUl7+oeNyR1gyvsHzzUwuCLJlLgZLPCKPUz/4EfMPg==
-X-Google-Smtp-Source: ABdhPJymuNBcf7MceK1EWHcETSqNc+BDRBBcDPE8Si1HQfHJU2a2qnvqWQqXTbUq8gjU0N3YVjt0paoikQI9Ehnk13A=
-X-Received: by 2002:a67:fe85:: with SMTP id b5mr1167502vsr.19.1610536508532;
- Wed, 13 Jan 2021 03:15:08 -0800 (PST)
+        id S1727561AbhAMLTf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 06:19:35 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:33388 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727329AbhAMLTf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:19:35 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10DBHulC034417;
+        Wed, 13 Jan 2021 05:17:56 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1610536676;
+        bh=7QTv8FmNHOlwNjQhB0rw7xqLzcR5LnI5ud9jwmBnq3I=;
+        h=From:To:CC:Subject:Date;
+        b=PvnHFRqfqUsGm9exImCHMGs6B1x+UKQxA3aLhIjKfM7w5qdJj7NzuAlCOGQNvOyVo
+         b21Pfnq7O5g5+ow1JI7KjXd9abrbHwjptl2JSYbrL8MHL4r1SefVpoRM2/KAEczhLH
+         eaLnaMOhw+r5fekVR7upxP+Lu79J5x9t0hd1KJXE=
+Received: from DLEE115.ent.ti.com (dlee115.ent.ti.com [157.170.170.26])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10DBHuGH033246
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 13 Jan 2021 05:17:56 -0600
+Received: from DLEE101.ent.ti.com (157.170.170.31) by DLEE115.ent.ti.com
+ (157.170.170.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Wed, 13
+ Jan 2021 05:17:56 -0600
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DLEE101.ent.ti.com
+ (157.170.170.31) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
+ Frontend Transport; Wed, 13 Jan 2021 05:17:56 -0600
+Received: from gsaswath-HP-ProBook-640-G5.dal.design.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10DBHq7h047012;
+        Wed, 13 Jan 2021 05:17:53 -0600
+From:   Aswath Govindraju <a-govindraju@ti.com>
+CC:     Sekhar Nori <nsekhar@ti.com>, Faiz Abbas <faiz_abbas@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Aswath Govindraju <a-govindraju@ti.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: sdhci_am654: Add Support for TI's AM64 SoC
+Date:   Wed, 13 Jan 2021 16:47:42 +0530
+Message-ID: <20210113111742.29645-1-a-govindraju@ti.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-References: <1610358374-81002-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-In-Reply-To: <1610358374-81002-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 13 Jan 2021 12:14:32 +0100
-Message-ID: <CAPDyKFpV55EErFRXQO=W=yvu-W7R1Q3GAouCYZAr=-59kuouzg@mail.gmail.com>
-Subject: Re: [PATCH] host: omap_hsmmc: style: Simplify bool comparison
-To:     YANG LI <abaci-bugfix@linux.alibaba.com>
-Cc:     Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 11 Jan 2021 at 10:46, YANG LI <abaci-bugfix@linux.alibaba.com> wrote:
->
-> Fix the following coccicheck warning:
-> ./drivers/mmc/host/omap_hsmmc.c:297:6-25: WARNING: Comparison of 0/1 to
-> bool variable
+From: Faiz Abbas <faiz_abbas@ti.com>
 
-If you really want this change, I prefer if you can clean up all use
-of "pbias_enabled" - and at the same time, do the same clean up for
-"vqmmc_enabled".
+Add support for the controller present on the AM64x SoC.
 
-Kind regards
-Uffe
+There are two instances:
+sdhci0: 8bit bus width, max 400 MBps
+sdhci1: 4bit bus width, max 100 MBps
 
->
-> Signed-off-by: YANG LI <abaci-bugfix@linux.alibaba.com>
-> Reported-by: Abaci Robot<abaci@linux.alibaba.com>
-> ---
->  drivers/mmc/host/omap_hsmmc.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index aa9cc49..91a0760 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -294,7 +294,7 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on)
->                         host->pbias_enabled = 1;
->                 }
->         } else {
-> -               if (host->pbias_enabled == 1) {
-> +               if (host->pbias_enabled) {
->                         ret = regulator_disable(host->pbias);
->                         if (ret) {
->                                 dev_err(host->dev, "pbias reg disable fail\n");
-> --
-> 1.8.3.1
->
+Signed-off-by: Faiz Abbas <faiz_abbas@ti.com>
+Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+---
+
+This patch is dependent on,
+https://lore.kernel.org/patchwork/patch/1361560/
+
+ drivers/mmc/host/sdhci_am654.c | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index a64ea143d185..7a34649b0754 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -514,6 +514,26 @@ static const struct sdhci_am654_driver_data sdhci_j721e_4bit_drvdata = {
+ 	.flags = IOMUX_PRESENT,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_am64_8bit_pdata = {
++	.ops = &sdhci_j721e_8bit_ops,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
++static const struct sdhci_am654_driver_data sdhci_am64_8bit_drvdata = {
++	.pdata = &sdhci_am64_8bit_pdata,
++	.flags = DLL_PRESENT | DLL_CALIB,
++};
++
++static const struct sdhci_pltfm_data sdhci_am64_4bit_pdata = {
++	.ops = &sdhci_j721e_4bit_ops,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
++};
++
++static const struct sdhci_am654_driver_data sdhci_am64_4bit_drvdata = {
++	.pdata = &sdhci_am64_4bit_pdata,
++	.flags = IOMUX_PRESENT,
++};
++
+ static const struct soc_device_attribute sdhci_am654_devices[] = {
+ 	{ .family = "AM65X",
+ 	  .revision = "SR1.0",
+@@ -737,6 +757,14 @@ static const struct of_device_id sdhci_am654_of_match[] = {
+ 		.compatible = "ti,j721e-sdhci-4bit",
+ 		.data = &sdhci_j721e_4bit_drvdata,
+ 	},
++	{
++		.compatible = "ti,am64-sdhci-8bit",
++		.data = &sdhci_am64_8bit_drvdata,
++	},
++	{
++		.compatible = "ti,am64-sdhci-4bit",
++		.data = &sdhci_am64_4bit_drvdata,
++	},
+ 	{ /* sentinel */ }
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_am654_of_match);
+-- 
+2.17.1
+
