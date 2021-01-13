@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B18CC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:01:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 662BCC4332B
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:01:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 39C25233F9
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:01:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1AE91233F7
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 12:01:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727347AbhAMMA6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 07:00:58 -0500
-Received: from fllv0015.ext.ti.com ([198.47.19.141]:39694 "EHLO
+        id S1725910AbhAMMBF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 07:01:05 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:39704 "EHLO
         fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727255AbhAMMA5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 07:00:57 -0500
-Received: from fllv0034.itg.ti.com ([10.64.40.246])
-        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10DBxJhg045928;
-        Wed, 13 Jan 2021 05:59:19 -0600
+        with ESMTP id S1725857AbhAMMBE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 07:01:04 -0500
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10DBxPBw045936;
+        Wed, 13 Jan 2021 05:59:25 -0600
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1610539159;
-        bh=eUEK69G1k6sHVdIpkBoaIy/oX8qUmyR0wXBF3xfwgGU=;
-        h=From:To:CC:Subject:Date;
-        b=ah9LYVOIPVahH1kmbYZpSMqKO9pgBmwHK9lrxkb3If98jPdZ0xBSoBUg9qldDGQuq
-         Tx0lCakKs4/4d3AwRSTfqOvd9O5GTzI0UJ5b8X6oxeE5jBwmbmXm3N0xD73nytZIYi
-         40J0NXvI8X3Q5NS3SKvU86uSHzM976pjodf53FXs=
-Received: from DLEE111.ent.ti.com (dlee111.ent.ti.com [157.170.170.22])
-        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10DBxJMT030241
+        s=ti-com-17Q1; t=1610539165;
+        bh=XYYy/p5MNhVLJB6JUebFt3mqwa1/XMDguXfHo79l6IQ=;
+        h=From:To:CC:Subject:Date:In-Reply-To:References;
+        b=Dp+blHTRcVrcDyzrxpNezsZogKFgsbEDRZIP3ByEXEFQMGYw1ysmfiwwH7BZiC/c9
+         zdNstnp/s5uFO/WzCliTD69OCeQ5ThurSHDavittd0CSiuRenErxCloYBfFbtlh6i/
+         baRmQUFp3WsfyHDpA6FlIemOXeYFIM2WFPP1hNzA=
+Received: from DLEE103.ent.ti.com (dlee103.ent.ti.com [157.170.170.33])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10DBxPMM091427
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 13 Jan 2021 05:59:19 -0600
-Received: from DLEE105.ent.ti.com (157.170.170.35) by DLEE111.ent.ti.com
- (157.170.170.22) with Microsoft SMTP Server (version=TLS1_2,
+        Wed, 13 Jan 2021 05:59:25 -0600
+Received: from DLEE108.ent.ti.com (157.170.170.38) by DLEE103.ent.ti.com
+ (157.170.170.33) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Wed, 13
- Jan 2021 05:59:19 -0600
-Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE105.ent.ti.com
- (157.170.170.35) with Microsoft SMTP Server (version=TLS1_2,
+ Jan 2021 05:59:24 -0600
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE108.ent.ti.com
+ (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
- Frontend Transport; Wed, 13 Jan 2021 05:59:18 -0600
+ Frontend Transport; Wed, 13 Jan 2021 05:59:24 -0600
 Received: from gsaswath-HP-ProBook-640-G5.dal.design.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10DBxDdj041723;
-        Wed, 13 Jan 2021 05:59:14 -0600
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10DBxDdk041723;
+        Wed, 13 Jan 2021 05:59:20 -0600
 From:   Aswath Govindraju <a-govindraju@ti.com>
 CC:     Sekhar Nori <nsekhar@ti.com>,
         Vignesh Raghavendra <vigneshr@ti.com>,
@@ -55,10 +55,12 @@ CC:     Sekhar Nori <nsekhar@ti.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>
-Subject: [PATCH 0/2] mmc: AM64: Add new compatible string and driver support
-Date:   Wed, 13 Jan 2021 17:29:06 +0530
-Message-ID: <20210113115908.3882-1-a-govindraju@ti.com>
+Subject: [PATCH 1/2] dt-bindings: mmc: sdhci-am654: Add compatible string for AM64 SoC
+Date:   Wed, 13 Jan 2021 17:29:07 +0530
+Message-ID: <20210113115908.3882-2-a-govindraju@ti.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210113115908.3882-1-a-govindraju@ti.com>
+References: <20210113115908.3882-1-a-govindraju@ti.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
@@ -67,25 +69,28 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The following series of patches,
-- Adds new compatible string for AM64 SoC
-- Adds support for AM64 SoC in sdhci_am654 driver
+Add compatible string for AM64 SoC in device tree binding of AM654 SDHCI module
+as the same IP is used.
 
-This patch series is a combination of the patches [1] and [2].
+Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+Acked-by: Rob Herring <robh@kernel.org>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
 
-[1] - https://lore.kernel.org/patchwork/patch/1361560/
-[2] - https://lore.kernel.org/patchwork/patch/1364589/
-
-Aswath Govindraju (1):
-  dt-bindings: mmc: sdhci-am654: Add compatible string for AM64 SoC
-
-Faiz Abbas (1):
-  mmc: sdhci_am654: Add Support for TI's AM64 SoC
-
- .../devicetree/bindings/mmc/sdhci-am654.yaml  |  2 ++
- drivers/mmc/host/sdhci_am654.c                | 28 +++++++++++++++++++
- 2 files changed, 30 insertions(+)
-
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+index 1ae945434c53..34e53db29428 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+@@ -21,6 +21,8 @@ properties:
+       - ti,j721e-sdhci-4bit
+       - ti,j7200-sdhci-8bit
+       - ti,j721e-sdhci-4bit
++      - ti,am64-sdhci-8bit
++      - ti,am64-sdhci-4bit
+ 
+   reg:
+     maxItems: 2
 -- 
 2.17.1
 
