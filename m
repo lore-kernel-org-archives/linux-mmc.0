@@ -2,108 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA425C433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 09:59:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 03227C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 10:21:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 75A94233A2
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 09:59:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B07B822B4B
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 10:21:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726900AbhAMJ7u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 04:59:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35418 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726262AbhAMJ7u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 04:59:50 -0500
-Received: from mail-ua1-x931.google.com (mail-ua1-x931.google.com [IPv6:2607:f8b0:4864:20::931])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B135EC061575
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 01:59:09 -0800 (PST)
-Received: by mail-ua1-x931.google.com with SMTP id y21so508854uag.2
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 01:59:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=LGmIWyDuVO9oVyVosfnUvrEJ+6uYqwH01U/ypuWqHzA=;
-        b=rAVBu9fP9XMsjekcFFXd3MklM6sDjTnuBcnUT3SkjMDZACexowwQ8bokG0BDKTF+IC
-         pt7dEBYZyKlGi6rSPS6SRoZNbpWJ/juFWbPbDZ3cOWaEYlKBwkBYHaG/un97KO8s/yIO
-         njGDDLntKSuNuo2QBT6GB6dQ4hw3N1X/dEcOeV1vvjr7AkPOq48/EX5aL+/VBV08Voyk
-         PAWGdmVOdc33/Nfjz8yCcV+DUQJERa9vQyV4iUYjtMVGbmkQxl6l1LJ4vtBZ3tUa9yiC
-         Q7Qpe87FFbA9GmlLBII2C2/lys3mZbdbeh3NJPA5XkNf//1rPro1WkLeECKEq1a2q468
-         zc4w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=LGmIWyDuVO9oVyVosfnUvrEJ+6uYqwH01U/ypuWqHzA=;
-        b=WXu5QMFPEPhn/AWhDfdo1hokjTZRzeDAOaQjQ2ON/77zEVPK/snHo58g/kxDnDCKeD
-         Cs/vrKkAYTdRZeAFCsHE1YuDSfRMe6UGu0XRUFc9eKBxJ7muOFRORqUT+IlktBEx8aMS
-         RObIyanDuHmIxgVWIjXZatwkUUVCTAHVIXhb4zHJnRtvISon+qgXW7S9LAOVM3htEFhN
-         AdiCjW+/go8LPcOHh1IFi11ygpp9oLqm4MWMrmj5ugS7SOxrLVkFWU1Gbh9Q7TJt50nq
-         5Xlqe4MWTl1Ds3DEe5udwuDLhbl+dy84SO00aHJ+scjLLRbETuAaGQBJA2KZxasXqoqA
-         qrCg==
-X-Gm-Message-State: AOAM532bRmP9O+akCfbtWimSzO7utMalyMQO2KXFuNy5zpSReHnd3+me
-        ofbbwyqDiXtVqaH7wpo/MStYIJ+gyPHXjelXwX6Qfg==
-X-Google-Smtp-Source: ABdhPJyehSOINnOwLOeycoelO1Uthul2BxKY6eSZuKxRhJqBQQA9zzEyRMEUKrKeL9PokE/81DV7LBIuLaXTquH+Zik=
-X-Received: by 2002:a9f:2213:: with SMTP id 19mr1089390uad.15.1610531948901;
- Wed, 13 Jan 2021 01:59:08 -0800 (PST)
-MIME-Version: 1.0
-References: <20201230090401.12627-1-ricky_wu@realtek.com>
-In-Reply-To: <20201230090401.12627-1-ricky_wu@realtek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 13 Jan 2021 10:58:32 +0100
-Message-ID: <CAPDyKFro-dWCOVx=a1BhEJ=J=Hj_+nU+FmTUZjkeAkCqtML=kA@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: rtsx: add delay before power on
-To:     =?UTF-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        id S1725681AbhAMKVc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 05:21:32 -0500
+Received: from rtits2.realtek.com ([211.75.126.72]:52241 "EHLO
+        rtits2.realtek.com.tw" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725372AbhAMKVb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 05:21:31 -0500
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.73 with qID 10DAKhN72023201, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexmbs03.realtek.com.tw[172.21.6.96])
+        by rtits2.realtek.com.tw (8.15.2/2.70/5.88) with ESMTPS id 10DAKhN72023201
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
+        Wed, 13 Jan 2021 18:20:43 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXMBS03.realtek.com.tw (172.21.6.96) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2106.2; Wed, 13 Jan 2021 18:20:42 +0800
+Received: from RTEXMBS01.realtek.com.tw ([fe80::5d07:e256:a2a2:81ee]) by
+ RTEXMBS01.realtek.com.tw ([fe80::5d07:e256:a2a2:81ee%5]) with mapi id
+ 15.01.2106.006; Wed, 13 Jan 2021 18:20:42 +0800
+From:   =?utf-8?B?5ZCz5piK5r6EIFJpY2t5?= <ricky_wu@realtek.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Rui Feng <rui_feng@realsil.com.cn>,
         Rui Miguel Silva <rmfrfs@gmail.com>,
         Doug Anderson <dianders@chromium.org>,
         Lee Jones <lee.jones@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>
+Subject: RE: [PATCH 1/2] mmc: rtsx: add delay before power on
+Thread-Topic: [PATCH 1/2] mmc: rtsx: add delay before power on
+Thread-Index: AQHW3oq7dTZYnibKgUy6H8tXIkxRlaok4hsAgACICwA=
+Date:   Wed, 13 Jan 2021 10:20:42 +0000
+Message-ID: <d71300e7cf6d4ad8b1e8e3c7430d2c58@realtek.com>
+References: <20201230090401.12627-1-ricky_wu@realtek.com>
+ <CAPDyKFro-dWCOVx=a1BhEJ=J=Hj_+nU+FmTUZjkeAkCqtML=kA@mail.gmail.com>
+In-Reply-To: <CAPDyKFro-dWCOVx=a1BhEJ=J=Hj_+nU+FmTUZjkeAkCqtML=kA@mail.gmail.com>
+Accept-Language: zh-TW, en-US
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.22.88.99]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Dec 2020 at 10:04, <ricky_wu@realtek.com> wrote:
->
-> From: Ricky Wu <ricky_wu@realtek.com>
->
-> Make sure voltage below 0.5V before power on
-> when do power cycle
->
-> Signed-off-by: Ricky Wu <ricky_wu@realtek.com>
-> ---
->  drivers/mmc/host/rtsx_pci_sdmmc.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> index e6f5bbce5685..d21b99962b36 100644
-> --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-> +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-> @@ -906,6 +906,8 @@ static int sd_power_on(struct realtek_pci_sdmmc *host)
->         if (host->power_state == SDMMC_POWER_ON)
->                 return 0;
->
-> +       mdelay(100);
-> +
-
-Why exactly 100 ms? Can you at least add a comment about why in the code?
-
-Moreover, I think you should convert to use msleep() rather than mdelay.
-
->         rtsx_pci_init_cmd(pcr);
->         rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SELECT, 0x07, SD_MOD_SEL);
->         rtsx_pci_add_cmd(pcr, WRITE_REG_CMD, CARD_SHARE_MODE,
-> --
-> 2.17.1
->
-
-Kind regards
-Uffe
+PiBPbiBXZWQsIDMwIERlYyAyMDIwIGF0IDEwOjA0LCA8cmlja3lfd3VAcmVhbHRlay5jb20+IHdy
+b3RlOg0KPiA+DQo+ID4gRnJvbTogUmlja3kgV3UgPHJpY2t5X3d1QHJlYWx0ZWsuY29tPg0KPiA+
+DQo+ID4gTWFrZSBzdXJlIHZvbHRhZ2UgYmVsb3cgMC41ViBiZWZvcmUgcG93ZXIgb24gd2hlbiBk
+byBwb3dlciBjeWNsZQ0KPiA+DQo+ID4gU2lnbmVkLW9mZi1ieTogUmlja3kgV3UgPHJpY2t5X3d1
+QHJlYWx0ZWsuY29tPg0KPiA+IC0tLQ0KPiA+ICBkcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3Nk
+bW1jLmMgfCAyICsrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKykNCj4gPg0K
+PiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L3J0c3hfcGNpX3NkbW1jLmMNCj4gPiBi
+L2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0KPiA+IGluZGV4IGU2ZjViYmNlNTY4
+NS4uZDIxYjk5OTYyYjM2IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9w
+Y2lfc2RtbWMuYw0KPiA+ICsrKyBiL2RyaXZlcnMvbW1jL2hvc3QvcnRzeF9wY2lfc2RtbWMuYw0K
+PiA+IEBAIC05MDYsNiArOTA2LDggQEAgc3RhdGljIGludCBzZF9wb3dlcl9vbihzdHJ1Y3QgcmVh
+bHRla19wY2lfc2RtbWMNCj4gKmhvc3QpDQo+ID4gICAgICAgICBpZiAoaG9zdC0+cG93ZXJfc3Rh
+dGUgPT0gU0RNTUNfUE9XRVJfT04pDQo+ID4gICAgICAgICAgICAgICAgIHJldHVybiAwOw0KPiA+
+DQo+ID4gKyAgICAgICBtZGVsYXkoMTAwKTsNCj4gPiArDQo+IA0KPiBXaHkgZXhhY3RseSAxMDAg
+bXM/IENhbiB5b3UgYXQgbGVhc3QgYWRkIGEgY29tbWVudCBhYm91dCB3aHkgaW4gdGhlIGNvZGU/
+DQo+IA0KPiBNb3Jlb3ZlciwgSSB0aGluayB5b3Ugc2hvdWxkIGNvbnZlcnQgdG8gdXNlIG1zbGVl
+cCgpIHJhdGhlciB0aGFuIG1kZWxheS4NCj4gDQoNCkJlY2F1c2Ugd2UgbmVlZCB0byBtYWtlIHN1
+cmUgdm9sdGFnZSBiZWxvdyAwLjVWIGJlZm9yZSBwb3dlciBvbg0KbW1jLWNvcmUgd2lsbCBkbyBx
+dWlja2x5IHBvd2VyIGN5Y2xlIGF0IHJlY29nbml0aW9uIGNhcmQgcGhhc2UsIA0Kd2UgbmVlZCBh
+dCBsZWFzdCAxMDBtcyB0byBtYWtlIG91ciBkZXZpY2Ugdm9sdGFnZSBiZWxvdyAwLjVWIA0KDQpJ
+IHdpbGwgY2hhbmdlIG1kZWxheSgpIHRvIG1zbGVlcCgpDQoNCj4gPiAgICAgICAgIHJ0c3hfcGNp
+X2luaXRfY21kKHBjcik7DQo+ID4gICAgICAgICBydHN4X3BjaV9hZGRfY21kKHBjciwgV1JJVEVf
+UkVHX0NNRCwgQ0FSRF9TRUxFQ1QsIDB4MDcsDQo+IFNEX01PRF9TRUwpOw0KPiA+ICAgICAgICAg
+cnRzeF9wY2lfYWRkX2NtZChwY3IsIFdSSVRFX1JFR19DTUQsIENBUkRfU0hBUkVfTU9ERSwNCj4g
+PiAtLQ0KPiA+IDIuMTcuMQ0KPiA+DQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4g
+LS0tLS0tUGxlYXNlIGNvbnNpZGVyIHRoZSBlbnZpcm9ubWVudCBiZWZvcmUgcHJpbnRpbmcgdGhp
+cyBlLW1haWwuDQo=
