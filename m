@@ -2,78 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 447B1C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 03:22:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B68BC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 05:25:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F26B423131
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 03:22:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E034023120
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 05:25:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728976AbhAMDW4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Jan 2021 22:22:56 -0500
-Received: from mail-ot1-f47.google.com ([209.85.210.47]:39250 "EHLO
-        mail-ot1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727062AbhAMDWz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jan 2021 22:22:55 -0500
-Received: by mail-ot1-f47.google.com with SMTP id d8so626149otq.6;
-        Tue, 12 Jan 2021 19:22:40 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=uwsL9FTbsc+Aps2F7O2luTmoMA47O3xHRLZuIayA+lE=;
-        b=bM6P5yDQKu9jS12xZhoPivHsQxo4f5Lf86S26h6O+EtqfvolFemap0L6qSaQKbu+oS
-         SINKx8ye+TfwlRv5b+C4iwGUZhu1JcaeviuAIXA1Ac3xMVliOjp6pCOJy+fFMlITvsLf
-         5BGwmIXAdWJbh2iPK2c6dakPv2T2dBnc3yFK8FBmjfZdfFff6EYn1Nkb7EmgPAELcrw+
-         uoMpIY5qtQK7L6sSPjhstBmzhlCHXo2lxe2vcPDebNfSLmPWxnJPeioIWCDecEiBmrSo
-         8S6eBiFRuqT3lPYT9H6d8CjmO9iTrR/YGoCMI8L8JYtVHPYLfvY9IQyTv8XPsBbSqgdx
-         5DHA==
-X-Gm-Message-State: AOAM532kO8sgNaeJt2E5bZ6P3hhempqZRn/c3dVY6+1Isp7oogYP+O6S
-        1NuMtpr+5Hcry8EofJv0kQ==
-X-Google-Smtp-Source: ABdhPJyD6Bxo1ssdtzEhPiQb8BvrHMnTnthfAoe59bCXez8CHaIv/mz8h8nyWCO9TJ+rt8XKxasBow==
-X-Received: by 2002:a9d:4b19:: with SMTP id q25mr11270otf.124.1610508134929;
-        Tue, 12 Jan 2021 19:22:14 -0800 (PST)
-Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id e10sm162441otl.38.2021.01.12.19.22.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 12 Jan 2021 19:22:14 -0800 (PST)
-Received: (nullmailer pid 1467229 invoked by uid 1000);
-        Wed, 13 Jan 2021 03:22:13 -0000
-Date:   Tue, 12 Jan 2021 21:22:13 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-Cc:     bjorn.andersson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-arm-kernel@lists.infradead.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Document the SDX55
- compatible
-Message-ID: <20210113032213.GA1467169@robh.at.kernel.org>
-References: <20210107143118.2386-1-manivannan.sadhasivam@linaro.org>
+        id S1725883AbhAMFZa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 00:25:30 -0500
+Received: from wout2-smtp.messagingengine.com ([64.147.123.25]:56675 "EHLO
+        wout2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725831AbhAMFZa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 00:25:30 -0500
+Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
+        by mailout.west.internal (Postfix) with ESMTP id 00B3A1AF6;
+        Wed, 13 Jan 2021 00:24:23 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute5.internal (MEProxy); Wed, 13 Jan 2021 00:24:24 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sholland.org; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=fm1; bh=NYblmrex2MNrshV7uB3UmzbuWY
+        hNNNzfaDNwSbSid28=; b=IwmUZJXQej1jWnu/SuMs7ljUuuWqzbOveyhx0LLfy3
+        Zj0GP1lly61wtlAG9cV7LxCpbThpaJCYjhN2N85lz416NbdmBxvls11CcpYv8367
+        5ol6rykiC78hCNISxuXGlJn7flH9lxmtU9jxEsqBgBkmN3UejLWyNQxNXrctlA/c
+        kgcRkAnK+eDtHizfryWYvSarh+Vmm0a4w9gMBSLs4mHItz3V2yFnGvo9X9/Vo2D/
+        ottnsgDO7wDHKwRK4yNr0VhxgBT9S6wAvjym00ed581bOje97n50TKj61F1kBmIY
+        usyp1QsxYFjQfoGC+F6feHSLWP/1OusBiVCdmTI4RNwQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-transfer-encoding:date:from
+        :message-id:mime-version:subject:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=NYblmrex2MNrshV7u
+        B3UmzbuWYhNNNzfaDNwSbSid28=; b=fMDe20TiXcgXcnGK7MKK+q2mXXPXgJQ5T
+        kE1VAwSlaJSwefw2bnHVCt3uSRr7FyYD635NF4EW14lWOb2TFIkXwCbb1nZDW9PT
+        hQBOWiJRSGANqdLQxg+u7hx6jOzYit+eH0eZ+UbzfNyNotnwgyRa0gaCxdNmkN3f
+        CfXZzNsIC3T2jbHWOtFkUMIp07O713jkwjELqoqc8uJ3h1iyJqDuZ0xy4k2fRKCc
+        hT/CUSqFvP2qXuHDHaehzhdHNHKDG0eynIpWQ0Jfd7739b2X2q0Ne5Z2mvbscojB
+        QDOpwHxOjDMbaIxmfmVFDl56kPjTgZcSDcSCXIWcFa53tNiMQ/2dQ==
+X-ME-Sender: <xms:BoT-XzWfraRlxe-okimYn-RFu19Q_wPlnUhs8ElPGCp-Sm4lU3GnuQ>
+    <xme:BoT-X7mDyB1VcLClRDOeFwkOpK7YqXeJTa8Kb3v_qyZihsGMBvHuyvIg4vf0P2wem
+    P53oSguaSEwONoaAw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedukedrtddugdekgecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefhvffufffkofgggfestdekredtredttdenucfhrhhomhepufgrmhhuvghlucfj
+    ohhllhgrnhguuceoshgrmhhuvghlsehshhholhhlrghnugdrohhrgheqnecuggftrfgrth
+    htvghrnhepieetkefhheduudfgledtudefjeejfeegveehkeeufffhhfejkeehiefftdev
+    tdevnecukfhppeejtddrudefhedrudegkedrudehudenucevlhhushhtvghrufhiiigvpe
+    dtnecurfgrrhgrmhepmhgrihhlfhhrohhmpehsrghmuhgvlhesshhhohhllhgrnhgurdho
+    rhhg
+X-ME-Proxy: <xmx:BoT-X_ajpKiqzERbAj0rsWfyfuGkcLcZEqWDiJQ4PejCvu2VcuKDMw>
+    <xmx:BoT-X-U_FHnG6FgH5ksDKhmnXDolP2Y78sktfXRl3rU5o76ayc47SQ>
+    <xmx:BoT-X9m2Znh2g13nCLs9qnJ-tCeBvZKhq7KNrfzpCPOa4clsHuxUOw>
+    <xmx:B4T-Xwu8eaxisBgkItFgHkfxW69AS1kZDITm2jEqfdlE5lqV9li1dg>
+Received: from titanium.stl.sholland.net (70-135-148-151.lightspeed.stlsmo.sbcglobal.net [70.135.148.151])
+        by mail.messagingengine.com (Postfix) with ESMTPA id 640CD240057;
+        Wed, 13 Jan 2021 00:24:22 -0500 (EST)
+From:   Samuel Holland <samuel@sholland.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@siol.net>
+Cc:     linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Samuel Holland <samuel@sholland.org>
+Subject: [PATCH] mmc: sunxi-mmc: Ensure host is suspended during system sleep
+Date:   Tue, 12 Jan 2021 23:24:21 -0600
+Message-Id: <20210113052421.36553-1-samuel@sholland.org>
+X-Mailer: git-send-email 2.26.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210107143118.2386-1-manivannan.sadhasivam@linaro.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 07 Jan 2021 20:01:17 +0530, Manivannan Sadhasivam wrote:
-> The SDHCI controller on SDX55 is based on MSM SDHCI v5 IP. Hence,
-> document the compatible with "qcom,sdhci-msm-v5" as the fallback.
-> While at it, let's also sort the compatibles in ascending order.
-> 
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-mmc@vger.kernel.org
-> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
-> Reviewed-by: Vinod Koul <vkoul@kernel.org>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
-> 
+If the device suspend process begins before the mmc host's autosuspend
+timeout, the host will continue running during system sleep. Avoid
+this by forcing runtime suspend during a global suspend transition.
 
-Acked-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Samuel Holland <samuel@sholland.org>
+---
+ drivers/mmc/host/sunxi-mmc.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
+index 6310693f2ac0..cfee8db7b76d 100644
+--- a/drivers/mmc/host/sunxi-mmc.c
++++ b/drivers/mmc/host/sunxi-mmc.c
+@@ -1507,6 +1507,8 @@ static int sunxi_mmc_runtime_suspend(struct device *dev)
+ #endif
+ 
+ static const struct dev_pm_ops sunxi_mmc_pm_ops = {
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
+ 	SET_RUNTIME_PM_OPS(sunxi_mmc_runtime_suspend,
+ 			   sunxi_mmc_runtime_resume,
+ 			   NULL)
+-- 
+2.26.2
+
