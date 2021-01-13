@@ -3,98 +3,99 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA053C4332D
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:27:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC0E6C433E6
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:29:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0E31233A2
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:27:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A0F2E233EA
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:29:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727660AbhAML1o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 06:27:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54310 "EHLO
+        id S1728405AbhAML3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 06:29:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728406AbhAML1c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:27:32 -0500
-Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71D50C061383
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:26:07 -0800 (PST)
-Received: by mail-vs1-xe2b.google.com with SMTP id k30so909683vsp.6
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:26:07 -0800 (PST)
+        with ESMTP id S1728389AbhAML3D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:29:03 -0500
+Received: from mail-vk1-xa2f.google.com (mail-vk1-xa2f.google.com [IPv6:2607:f8b0:4864:20::a2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C754C061795
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:28:23 -0800 (PST)
+Received: by mail-vk1-xa2f.google.com with SMTP id q66so432608vke.0
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:28:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=J8jnevPejbGnXuRE1eNboLtO8z7zKZhz6Hgll9JoqIU=;
-        b=XWSAUiVl6lGR7286jXBaM0GJdDCLgq6VJ1wRJAskOKaSoppFAT7jpkgJLupWkCdKfZ
-         4OCU8lHhUHQruIBti0gbNY+NyUbKK52OIc6BPl+wqtmcux9JKT+cyJ37RX8tJlWl1EMs
-         uJlL7uBqswk8jQTTgVhoOCp5UAECFvUD7MsYlAU9aJ7IJFmdLMmHR0lQP0wW3NVb0BLH
-         Tjo9wSbdfAo80iCjE1QwZonmqTZPdyDR7aYhva8RHmMuKdj//riosEAqS7iOPUbLc7yb
-         kpSqD6DuE5HsWz9LJS/DUdtDEWQddLlUXgQXwMZ5foMdYz21D0QiKaNGp28PHvR+nRP6
-         HyWA==
+        bh=SBYo6W/p5JZvDAn/qFQUoh+980h8QORlUqiOC9iDQIw=;
+        b=F97GImsPv7LovRmqDSB0+LmGy8/qg5nuYKbrVVbTOmKjLBVlJGr3xHiQSy9dZwiiZx
+         8z1ClPYmkK1R4FwWocCAqAAhSENQi1nIc26a+wYqXyHEqpXaRCvCRO2RlW54PJD2oJS8
+         ECv1DAX9E+eseL8/HfGTI1fAksoGC6WF/8HmdefH3Ebkc/+GWiHmiPT8SRnUE82F8r5O
+         ybP9j1AzOPFVUxYeXcnhFlxOXe3hNtQMNKA00ljGsHKM+C7b5/l/6pGNcUxc9QdJgXlE
+         GBMsawzmK/eNTp9K0KNcvBZk9YC6kK3GKWPG+v/uhTjckwsLEdc/FudCd1V23omgWwQl
+         kXYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=J8jnevPejbGnXuRE1eNboLtO8z7zKZhz6Hgll9JoqIU=;
-        b=FA0r5PyDS89yQNWrYsyW/fxmFaiimOTefWVn4ANKykeq1PHHLFNQpH2hGIUXymVOHt
-         ipyrQYeFTOtHXXtEfqZR4n1nmTz4ck9wtSjeZbekyMikZSrH8ddUGnS5jJDxu2karbwo
-         pRXn4nC8ynqAZiIKNsHOXpw19fQgArwzkC4oHBQrJpaNYMVy/NLfF94xwIQzR9Wj8Nfi
-         2UL5DVWwgc5oYzyWWWVfZNgsVz31i2QNBfq/xMfTN7YrAAxw5214hg6WBh9COsZ8VF/3
-         VMUpcCv//Vib1tyvVJb3whxQQ7JHeC6NOoOr9oa1zZXCorDq7A0hOB2konaTpdm436/E
-         3wUg==
-X-Gm-Message-State: AOAM530bNpaoQ7osuqMddrGiOU8FyqFSObWppg4mysPuxgxNYw5RKTR8
-        lLHBeMP8iWCrSFb3y/dfppAVertXRyq8rymbrazR6w==
-X-Google-Smtp-Source: ABdhPJzfrPTWrOSLWP09mVB/1TJ84tDQudEsx/cZCljfINMeLiuZZP5UnGxMGp6TAmFAKwKOodVhuHFUYtxQyLmU+D8=
-X-Received: by 2002:a67:fe85:: with SMTP id b5mr1189707vsr.19.1610537166735;
- Wed, 13 Jan 2021 03:26:06 -0800 (PST)
+        bh=SBYo6W/p5JZvDAn/qFQUoh+980h8QORlUqiOC9iDQIw=;
+        b=b6sTLTD1lPlO2WckNl0e78QcrWl/XEVnP540khEgQhhJhv/7ELhvok/26VTQG/li5f
+         hthMTT03G07DSWELhxUREzAvXMblV4r43mw3j6XhePK/90HDi5t6KBae5TRxIxnY7MZD
+         wjUkZDvRzBtaW1c51RnSK2VHIbqIFBM3Fikm7chuykIvZs4WWNw4yb6a4T04saXkUVD4
+         5/iHVFVHdGes7ggOnggpRiPHwXerd+hcsjNa8uYcwU039f9T5gdbWD3eHuuv6ZFJWgdE
+         29g8HR8U0bz04eepxoxt09VcILb9AGBe7a5BEDq0secdK4cm4n5bPqNVHSuzpfXli7HY
+         ZGaw==
+X-Gm-Message-State: AOAM533ZZqyFN4J0+ef5XDPUinUnRU/uzkYWmQuLkePRtRBSn1YiCJmn
+        SKXI4RIZMXmgvRvzX22bvp3C7pU+NtK4KsnjDePV3XXdx/Nn5Q==
+X-Google-Smtp-Source: ABdhPJybCIKTJASUutX1qGCq7mRxFP1jaeKd4zmFJeMiCkz2FmVuxo081IaEVXn0JDNL1EvE8aRX8tzZuazzfVsTeZI=
+X-Received: by 2002:a1f:4582:: with SMTP id s124mr1483220vka.7.1610537302692;
+ Wed, 13 Jan 2021 03:28:22 -0800 (PST)
 MIME-Version: 1.0
-References: <20210111155001.12307-1-muhammad.husaini.zulkifli@intel.com>
-In-Reply-To: <20210111155001.12307-1-muhammad.husaini.zulkifli@intel.com>
+References: <20210107055457.14948-1-a-govindraju@ti.com> <CAPDyKFp89zPwr-SS9wgR6C5RM+KhSLWbkXivxAttRqTxtiVGDQ@mail.gmail.com>
+ <9ad5f3a3-2175-8f43-2481-7bef17828ce2@ti.com>
+In-Reply-To: <9ad5f3a3-2175-8f43-2481-7bef17828ce2@ti.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 13 Jan 2021 12:25:30 +0100
-Message-ID: <CAPDyKFrx3ZhHk_k7OOEUWVuW-+wwq-x47-ZCteEB1gDJEFDoWQ@mail.gmail.com>
-Subject: Re: [PATCH v1 0/2] mmc: sdhci-of-arasan: Fixed kernel-doc format warning
-To:     Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
+Date:   Wed, 13 Jan 2021 12:27:45 +0100
+Message-ID: <CAPDyKFpTSME=NTZdDUq3+tLpKNdzoBKFZ-B_WDyWzLqNOsx0EQ@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: sdhci-am654: Add compatible string for
+ AM64 SoC
+To:     Aswath Govindraju <a-govindraju@ti.com>
+Cc:     Vignesh Raghavendra <vigneshr@ti.com>,
+        Sekhar Nori <nsekhar@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Rob Herring <robh+dt@kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "Shevchenko, Andriy" <andriy.shevchenko@intel.com>
+        DTML <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 11 Jan 2021 at 16:51, Muhammad Husaini Zulkifli
-<muhammad.husaini.zulkifli@intel.com> wrote:
+On Wed, 13 Jan 2021 at 12:20, Aswath Govindraju <a-govindraju@ti.com> wrote:
 >
-> Hi,
+> Hi Uffe,
 >
-> This patch series are to fix the kernel-doc format warning when using kernel-doc
-> script tool and to change code style of mapping the syscon field for readability
-> and consistency.
+> On 13/01/21 4:26 pm, Ulf Hansson wrote:
+> > On Thu, 7 Jan 2021 at 06:55, Aswath Govindraju <a-govindraju@ti.com> wrote:
+> >>
+> >> Add compatible string for AM64 SoC in device tree binding of AM654 SDHCI
+> >> module as the same IP is used.
+> >>
+> >> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+> >
+> > Do you have a corresponding patch for the driver as well? I would like
+> > to apply them together.
+> >
 >
-> Kindly help to review this patch set.
->
-> Thanks.
->
-> Muhammad Husaini Zulkifli (2):
->   mmc: sdhci-of-arasan: Fixed kernel-doc format warning
->   mmc: sdhci-of-arasan: Change code style of mapping the syscon field
->
->  drivers/mmc/host/sdhci-of-arasan.c | 15 +++++++--------
->  1 file changed, 7 insertions(+), 8 deletions(-)
->
-> --
-> 2.17.1
->
+> Yes, I do. Here is the link to the patch,
+> https://lore.kernel.org/patchwork/patch/1364589/
 
-Applied for next, thanks!
+Great. Can you please re-submit them together to the linux-mmc list,
+then I can pick them up.
+
+[...]
 
 Kind regards
 Uffe
