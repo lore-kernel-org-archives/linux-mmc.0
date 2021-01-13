@@ -4,79 +4,84 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91AC5C433E6
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DA50C433E0
 	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:27:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 59D6A233E2
+	by mail.kernel.org (Postfix) with ESMTP id 3A0B6233A2
 	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 11:27:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726864AbhAML1I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S1726925AbhAML1I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 13 Jan 2021 06:27:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54082 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54080 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725910AbhAML1H (ORCPT
+        with ESMTP id S1726864AbhAML1H (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 06:27:07 -0500
-Received: from mail-ua1-x933.google.com (mail-ua1-x933.google.com [IPv6:2607:f8b0:4864:20::933])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13BF5C0617BB
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:25:57 -0800 (PST)
-Received: by mail-ua1-x933.google.com with SMTP id w7so559175uap.13
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:25:57 -0800 (PST)
+Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0CD7AC0617BD
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:26:01 -0800 (PST)
+Received: by mail-vs1-xe30.google.com with SMTP id j140so911971vsd.4
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 03:26:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=1P8nvNrhWNN3MmTi4o9dbNyhPJAsjJF2TM9bdEaNv/0=;
-        b=MxKhynVhLWCoqAXiucMLZT27vjzLyFvoWjJIN/SHUKtPkcZsukFdB+QWZiH+4/Fko1
-         9Ky5zgYKGdHg+qLWs1wqJpz3W1Wv42YtBA8uxrqyUUfDSYf3e87U3grWXW/4AHEG3pty
-         EEixzEu/7osioJarr67QvtrAGiFdpG3SM8NfK7E/R+RBqIcRiDo7NNAN2fp5kQJIX+LL
-         HOrA+7ydhQ9icxeF0KNGp+qGP6E69yMhnoNsDzzScGG6F/KQyN5y25jgBIO+JKYpZKc2
-         jTJ5SueGyd7xnL1xIurjmEqTIvchkjqFzFAsC+U3OBi7qcQcOm9JPqJjR/MvDT7d5UC0
-         XX6A==
+        bh=5+8zY4mAyzjmgjsrYvoqLVjDJOKDqaN1fkUOrBGLi4M=;
+        b=OiN+OkGx7489GZZh0hmDDLNJvwzokz7n7baE1dAg2JdPLXWQH+eyBoKVNNUmD/UHzl
+         LUtsej7UJpMuN3zRHOf/Pc6z0Dr/m/06kprtF/2UKtdvKV7hZS/NH57YOf7N89v5amU0
+         yEdmZGuuygp01KoL/S4EO0Z4+9wvZHUjv2LyUlNdXtPgGXw+mQMZYBWJu+YmKTzLfI24
+         +7esSdpJsGqkzAmrfqFg5NQyjUYW9q3jJ02mhTPW0dE6o9P9bJPzdSgqpzxS3IH/raUQ
+         H3dQ98j7/SmsuINw5DviiUGLSvG/MughwrzB49oNI/9i6zuxRJNplu3BbLtHwM2y+WgW
+         /DkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=1P8nvNrhWNN3MmTi4o9dbNyhPJAsjJF2TM9bdEaNv/0=;
-        b=ZltPPEBnTkhiYstHted1qXIPzSVdjXG1JujwMAzvRrTaFY+GLTTD+hmSgNFeFcNHA0
-         4RlG3DGfDdH8JPHEqXNn53qDXaQIS/k5D2EeEQYyCKBMmJXRcoB5ALxw5bfhv0cStTsA
-         +XOQoNN1nmPKJEjDAlztgN2SndmeasmOO0Ju/RFTU59C+YQXLYNIBHsnujSl+Z5gWONP
-         p/HpfjcmxTXrM7MROHNh6yhzGpVSLFxanzJJzzsFEWSCTCJCkSZtdHsYYefM7IMHideg
-         KXRtewfBgI3GdwBN98AyTqZnBwMBLcF1+EVeJ4gd1GcDmzSDMYB2/JKWGXgfLrpzwxZn
-         rdkw==
-X-Gm-Message-State: AOAM533yawtX29r5uC6IDApohYK2N+lfWIA7mIj9PChYMx/H4yb/gZS7
-        xYRLQefzxv6rUksf1bQk6blGfu3ziyHoJxzvPL2zpqNdt8/QDQ==
-X-Google-Smtp-Source: ABdhPJxdH05hXsZ/BTVxqZ2D50ftzxWMCHTCzPiYI8GfOnRnYju+WTFC9l7ag1OdLOqg8zBA4Qooo6XiVf4Q6T1c4fc=
-X-Received: by 2002:ab0:78d:: with SMTP id c13mr1289722uaf.129.1610537156300;
- Wed, 13 Jan 2021 03:25:56 -0800 (PST)
+        bh=5+8zY4mAyzjmgjsrYvoqLVjDJOKDqaN1fkUOrBGLi4M=;
+        b=aWzTHVtI9SUlLAkjrxd2Jx/yL3NlzpK0Frq0kgyZmKV46A89kEqDLCnj5RTq2R8X4r
+         Ccpps/H7SaJk4JKfdm3CDd3m70/eupZnO88NtPrsAm7Dy8VdXZ5Fiblw5khGPm9ovpOe
+         N2d0EEICOfwsNz35vSvWLtxSZUjYUN+sr9niHCtk+NtKXVcfZ4NOYZbqDQN7qaJnUwiH
+         19zEg+K//j4UcyEZpYXP8dw0robqRjQdK1u++F+pM2mGQXa3WZhMCRiVJ8g93TXTrWoJ
+         6Wes1LzAk6C3Ya81lxyWcuXNtjjNWDdRKjuwz2skenY1fE1MBL0up+zwFNWUIQ3CO0eo
+         tEfA==
+X-Gm-Message-State: AOAM532QidxO64yOXmZy2LbG8qhNHgiJw4bKg1x7/XXqOA9iPI88dL8O
+        U6ULvjclzlAlj5zjOG3L5sS/OJ5hmbFpCeDOHjHzow==
+X-Google-Smtp-Source: ABdhPJyEXS/qxGhlAHcgztCWad9kvXwLG1Ay9RD3A+8qxnVUMWamsOhdl/W7h+uvCfYzaoMIXQ1TJLpGt8dfvFUfVoE=
+X-Received: by 2002:a67:7f41:: with SMTP id a62mr1386085vsd.55.1610537160317;
+ Wed, 13 Jan 2021 03:26:00 -0800 (PST)
 MIME-Version: 1.0
-References: <20210106085332.5494-1-reniuschengl@gmail.com>
-In-Reply-To: <20210106085332.5494-1-reniuschengl@gmail.com>
+References: <20210107143118.2386-1-manivannan.sadhasivam@linaro.org>
+In-Reply-To: <20210107143118.2386-1-manivannan.sadhasivam@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 13 Jan 2021 12:25:20 +0100
-Message-ID: <CAPDyKFo=GE2GNuv0=SXfuSSgE-b0iBhXCxqvd=cgspqX6hph2w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Add a switch to enable/disable CQHCI support
-To:     Renius Chen <reniuschengl@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+Date:   Wed, 13 Jan 2021 12:25:23 +0100
+Message-ID: <CAPDyKFqFNq=GkcLS1dwx2rh5i2uMYP5Sum4Uu9udRkF8_-NbLg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: Document the SDX55 compatible
+To:     Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        greg.tu@genesyslogic.com.tw
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Vinod Koul <vkoul@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 6 Jan 2021 at 09:53, Renius Chen <reniuschengl@gmail.com> wrote:
+On Thu, 7 Jan 2021 at 15:31, Manivannan Sadhasivam
+<manivannan.sadhasivam@linaro.org> wrote:
 >
-> Add a vendor-specific bit named GLI_9763E_MB_ERP_ON at the bit7 of
-> register 888h to decide whether to enhance random R/W performance
-> of GL9763E. CQHCI support will be enabled if and only if the bit is
-> set and the GLI_9763E_MB_CMQ_OFF bit is not set.
+> The SDHCI controller on SDX55 is based on MSM SDHCI v5 IP. Hence,
+> document the compatible with "qcom,sdhci-msm-v5" as the fallback.
+> While at it, let's also sort the compatibles in ascending order.
 >
-> Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+> Reviewed-by: Vinod Koul <vkoul@kernel.org>
 
 Applied for next, thanks!
 
@@ -85,31 +90,27 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-pci-gli.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 5 +++--
+>  1 file changed, 3 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index b85edd62e7f0..c6a107d7c742 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -84,6 +84,7 @@
->  #define   GLI_9763E_VHS_REV_W      0x2
->  #define PCIE_GLI_9763E_MB       0x888
->  #define   GLI_9763E_MB_CMDQ_OFF           BIT(19)
-> +#define   GLI_9763E_MB_ERP_ON      BIT(7)
->  #define PCIE_GLI_9763E_SCR      0x8E0
->  #define   GLI_9763E_SCR_AXI_REQ           BIT(9)
->
-> @@ -814,7 +815,8 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
->
->         pci_read_config_dword(pdev, PCIE_GLI_9763E_MB, &value);
->         if (!(value & GLI_9763E_MB_CMDQ_OFF))
-> -               host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
-> +               if (value & GLI_9763E_MB_ERP_ON)
-> +                       host->mmc->caps2 |= MMC_CAP2_CQE | MMC_CAP2_CQE_DCMD;
->
->         gli_pcie_enable_msi(slot);
->         host->mmc_host_ops.hs400_enhanced_strobe =
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> index 3b602fd6180b..9fa8a24fbc97 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
+> @@ -17,10 +17,11 @@ Required properties:
+>                 "qcom,msm8916-sdhci", "qcom,sdhci-msm-v4"
+>                 "qcom,msm8992-sdhci", "qcom,sdhci-msm-v4"
+>                 "qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
+> -               "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
+> -               "qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
+>                 "qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
+>                 "qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
+> +               "qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
+> +               "qcom,sdx55-sdhci", "qcom,sdhci-msm-v5";
+> +               "qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
+>         NOTE that some old device tree files may be floating around that only
+>         have the string "qcom,sdhci-msm-v4" without the SoC compatible string
+>         but doing that should be considered a deprecated practice.
 > --
-> 2.27.0
+> 2.25.1
 >
