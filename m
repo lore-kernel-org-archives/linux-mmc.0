@@ -3,143 +3,103 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 787BFC433E9
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 17:16:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 022B2C433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 18:48:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4EE3F23B31
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 17:16:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B884C23B19
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 18:48:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728123AbhANRPt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Jan 2021 12:15:49 -0500
-Received: from mail.kernel.org ([198.145.29.99]:57460 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726172AbhANRPs (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 14 Jan 2021 12:15:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 52D6123A52;
-        Thu, 14 Jan 2021 17:15:07 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1610644507;
-        bh=z7hkXnrOP+wdoKAOpVuktCD+Lqo0Rxh/iodjSrIZzbA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=kZy7hLSB81pIj9mKxxRzhc+wwdn5BHyP2EYC9SdtRJZbj7oyA+GHXU8KwqAnq/00y
-         ciTa6Rauf8t+NIKkni1TErjQg941Me0sq9knDwjQaljVZtDsEcBI5QMeqnE+DTWFVt
-         uDWAC3CvldBTdTGUUMqDFvPBF63o0JuA5YH2Z6GLlBdq7f0y4ae3mSeYEfjz8Re9Tj
-         2khaMHBxVPNabodymYPD/lAXnFiX1aZ7IoZrgvVf29tBlkSMUn+FyvcEwjgfgqJhh8
-         4SBVSfd9lop8XgKnwMPEb+H3jWbdn2IjjCZI+giQ/UYoYUDBF7TyQDmpHY/b6rHPG/
-         uerbnsJu3b5GA==
-Date:   Thu, 14 Jan 2021 17:14:34 +0000
-From:   Mark Brown <broonie@kernel.org>
-To:     Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
-Cc:     ulf.hansson@linaro.org, lgirdwood@gmail.com, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, adrian.hunter@intel.com,
-        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, andriy.shevchenko@intel.com,
-        Rashmi.A@intel.com, mahesh.r.vaidya@intel.com,
-        Sudeep Holla <sudeep.holla@arm.com>
-Subject: Re: [PATCH v1 8/9] regulator: keembay: Add regulator for Keem Bay SoC
-Message-ID: <20210114171434.GI4854@sirena.org.uk>
-References: <20210114152700.21916-1-muhammad.husaini.zulkifli@intel.com>
- <20210114152700.21916-9-muhammad.husaini.zulkifli@intel.com>
+        id S1727875AbhANSsb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Jan 2021 13:48:31 -0500
+Received: from saphodev.broadcom.com ([192.19.232.172]:33960 "EHLO
+        relay.smtp-ext.broadcom.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726778AbhANSsa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 13:48:30 -0500
+X-Greylist: delayed 493 seconds by postgrey-1.27 at vger.kernel.org; Thu, 14 Jan 2021 13:48:30 EST
+Received: from [10.136.13.65] (lbrmn-lnxub113.ric.broadcom.net [10.136.13.65])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by relay.smtp-ext.broadcom.com (Postfix) with ESMTPS id C0AE5828A;
+        Thu, 14 Jan 2021 10:39:26 -0800 (PST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 relay.smtp-ext.broadcom.com C0AE5828A
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=broadcom.com;
+        s=dkimrelay; t=1610649567;
+        bh=vVw8/2auuSxRv9y4posLdV4M5sVNdtpuhclyC43Ddos=;
+        h=Subject:To:Cc:References:From:Date:In-Reply-To:From;
+        b=OEQhWHBgUgY3j03v0pLf0ZDGRYB3LffE6yhRid/QXJUZ1Cbxhgx1Xc5yGp+43zrx/
+         2r7KeYTQbkEdWRZ69ks/0yw0VkKLlUYJN+EmtrdQ3fm2jn6j1m1fPIDym/r/hoFOFw
+         OOnjI6TxQMwJ79aHGVDYqfeww4zP5vxCc8zUT9AY=
+Subject: Re: Bug Report Broadcom BCM57765/57785
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        =?UTF-8?B?TWFydMOtbiBYacO6aG5lbCBNb3JhIFJvbGTDoW4=?= 
+        <necrodos@gmail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+References: <CAG=_e5DcNhoVM3rbzsocpBKwuwt9C0x7-B-fLwrFwyN82zTvHQ@mail.gmail.com>
+ <CAPDyKFoycHLO_c3xfpoHLmLKzri6vQa1zvuFUjGiB803XxkGUQ@mail.gmail.com>
+From:   Scott Branden <scott.branden@broadcom.com>
+Message-ID: <f85c115f-5095-420a-e6b9-f971cefc8819@broadcom.com>
+Date:   Thu, 14 Jan 2021 10:39:25 -0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="1E1Oui4vdubnXi3o"
-Content-Disposition: inline
-In-Reply-To: <20210114152700.21916-9-muhammad.husaini.zulkifli@intel.com>
-X-Cookie: You have taken yourself too seriously.
-User-Agent: Mutt/1.10.1 (2018-07-13)
+In-Reply-To: <CAPDyKFoycHLO_c3xfpoHLmLKzri6vQa1zvuFUjGiB803XxkGUQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+Content-Language: en-CA
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Martin/Uffe
 
---1E1Oui4vdubnXi3o
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On 2021-01-14 3:55 a.m., Ulf Hansson wrote:
+> + Scott
+>
+> On Thu, 14 Jan 2021 at 02:50, Martín Xiúhnel Mora Roldán
+> <necrodos@gmail.com> wrote:
+>> Hi, I want to report a bug related to the drivers of the sd card
+>> reader Broadcom Broadcom Corporation BCM57765/57785 SDXC/MMC Card
+>> Reader. Basically It doesn't show the inserted cards, and even though
+>> it has a workaround that has worked flawless for mac users, many acer
+>> user seem to have problems like not being able to transfer large files
+>> (larger than a couple or not being able to format the card. I know
+>> this has been reported before but it keeps having problems. Thanks for
+>> your help, here are some links to previous reports of this bug and
+>> previous attempts to solve this issue. I experience this bug on a
+>> laptop acer v5-131 with said sd card reader running elementary 5.1.7
+>> Hera but I've encountered this same bug on all other ubuntu flavors on
+>> this same device. All using Kernel 5.4
+>>
+>> Please, if I'm doing something wrong by trying to report this bug,
+>> please let me know
+>>
+>> https://gist.github.com/samgooi4189/2e6e18fd1d562acaf39246e5e386d7cb
+>>
+>> https://askubuntu.com/questions/444484/broadcom-card-reader-bcm57765-bcm57785-doesnt-work-on-ubuntu-12-04-lts
+>>
+>> https://bugzilla.kernel.org/show_bug.cgi?id=206005
+>>
+>> Thanks you so much for your attention
+> Hi Martin,
+>
+> I am sorry, but this isn't really my cup of tea.
+>
+> It looks like the sd controller is based upon sdhci-pci. As far as I
+> know, I don't think there have been any Broadcom engineers working on
+> that driver ever, but I might not have the complete history.
+>
+> In any case, I have looped in Scott Branden from Broadcom, perhaps he
+> can help to move this forward in some way or the other.
+I'm sorry, but I don't know what a BCM57765/57785 even is but it is from some time in 2010 or earlier - nothing I have seen or worked on.
+I looked at our groups internal bug database and we have experienced issues with card detection or high speed usage on other products in the past.
+Some fixes needed have been resetting the SD card after the bootloader to get card into a known state, controlling gpios to set voltages for ultra high speed modes, DDR50 tuning, and what not.
 
-On Thu, Jan 14, 2021 at 11:26:59PM +0800, Muhammad Husaini Zulkifli wrote:
+I don't know what your specific issue for that card.
+>
+> Kind regards
+> Uffe
 
-> Keem Bay SD regulator driver module is added to encapsulate ARM
-> Secure Monitor Call Calling Convention (SMCCC) during set voltage
-> operations to control I/O Rail supplied voltage levels which communicate
-> with Trusted Firmware.
-
-Adding in Sudeep again for the SMCCC bits.  I just checked and am I
-right in thinking this might already be shipping in production?
-
-> @@ -0,0 +1,112 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Intel Keem Bay SD Regulator
-> + *
-> + * Copyright (C) 2020, Intel Corporation
-> + * Author: Muhammad Husaini Zulkifli <Muhammad.Husaini.Zulkifli@intel.com>
-> + */
-
-Please make the entire comment a C++ comment to improve legibility.
-
-> +static int keembay_regulator_set_voltage(struct regulator_dev *dev,
-> +					int min_uV, int max_uV,
-> +					unsigned *selector)
-> +{
-> +	int tmp_volt;
-> +
-> +	if (min_uV == KEEMBAY_IOV_1_8V_uV && max_uV == KEEMBAY_IOV_1_8V_uV)
-> +		tmp_volt = KEEMBAY_SET_1V8_IO_RAIL;
-> +	else
-> +		tmp_volt = KEEMBAY_SET_3V3_IO_RAIL;
-> +
-> +	return keembay_set_io_rail_supplied_voltage(tmp_volt);
-> +}
-
-This has serious problems with input validation and is broken for most
-valid input.  A set_voltage() function should set the voltage to the
-lowest valid voltage within the range specified in the arguments and
-return an error if it is not possible to set a voltage within the range
-specified by the arguments.  This function will set 3.3V for any input
-range other than exactly 1.8V so for example if the caller validly sets
-a range of 1.7V-1.9V then 3.3V will be selected instead of 1.8V, or if
-the user sets 1.0-1.1V then it will set 3.3V instead of returning an
-error.
-
-> +static int keembay_regulator_get_voltage(struct regulator_dev *dev)
-> +{
-> +	int ret;
-> +
-> +	ret = keembay_get_io_rail_supplied_voltage();
-> +
-> +	return ret ? KEEMBAY_IOV_1_8V_uV : KEEMBAY_IOV_3_3V_uV;
-> +}
-
-This ignores any errors or out of bounds values returned by the called
-function, and please write normal conditional statements rather than
-using the ternery operator to improve legibility.
-
-> +/*
-> + * Using subsys_initcall to ensure that Keem Bay regulator platform driver
-> + * is initialized before device driver try to utilize it.
-> + */
-> +subsys_initcall(keembay_regulator_init);
-
-There is no need to do this, probe deferral will ensure that
-dependencies will be resolved.
-
---1E1Oui4vdubnXi3o
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmAAe/kACgkQJNaLcl1U
-h9Do4Af/RWczu73+RbTFDo9aNENM8BeoKxbtXH9eMaV1Ld1loIafX0ASjSYsJzW8
-npIlmVMhfa0rdR3443Nd2AcCP8bu8y5QIkryte5XEac3nHy+BoLcxJLa8iUIdHqS
-9REvzq4D7mwHyXQtangWa9gKnkJKZitOrOOxddj31DTQe4P1BZrje4qXcgfxKTsS
-AB0EhRznmGJQxnssc+ANWs94IF7ixAKKPWBwhfrifKP4Z0GbMR5SjMbTGTEVsiMD
-35k0h/EcBhl8/9mnHgO3Z8h7VpQ8hf4yIAFJwZNjEv1z52flc+v2o6HABWMts4VT
-fNi1mU1wb/64EwoyDST2H6Ttk9cQQw==
-=9PuY
------END PGP SIGNATURE-----
-
---1E1Oui4vdubnXi3o--
