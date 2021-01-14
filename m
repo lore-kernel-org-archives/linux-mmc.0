@@ -2,104 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-26.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 022B2C433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 18:48:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D91BC433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 20:14:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B884C23B19
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 18:48:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C489F23976
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 20:14:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727875AbhANSsb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Jan 2021 13:48:31 -0500
-Received: from saphodev.broadcom.com ([192.19.232.172]:33960 "EHLO
-        relay.smtp-ext.broadcom.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726778AbhANSsa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 13:48:30 -0500
-X-Greylist: delayed 493 seconds by postgrey-1.27 at vger.kernel.org; Thu, 14 Jan 2021 13:48:30 EST
-Received: from [10.136.13.65] (lbrmn-lnxub113.ric.broadcom.net [10.136.13.65])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by relay.smtp-ext.broadcom.com (Postfix) with ESMTPS id C0AE5828A;
-        Thu, 14 Jan 2021 10:39:26 -0800 (PST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 relay.smtp-ext.broadcom.com C0AE5828A
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=broadcom.com;
-        s=dkimrelay; t=1610649567;
-        bh=vVw8/2auuSxRv9y4posLdV4M5sVNdtpuhclyC43Ddos=;
-        h=Subject:To:Cc:References:From:Date:In-Reply-To:From;
-        b=OEQhWHBgUgY3j03v0pLf0ZDGRYB3LffE6yhRid/QXJUZ1Cbxhgx1Xc5yGp+43zrx/
-         2r7KeYTQbkEdWRZ69ks/0yw0VkKLlUYJN+EmtrdQ3fm2jn6j1m1fPIDym/r/hoFOFw
-         OOnjI6TxQMwJ79aHGVDYqfeww4zP5vxCc8zUT9AY=
-Subject: Re: Bug Report Broadcom BCM57765/57785
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        =?UTF-8?B?TWFydMOtbiBYacO6aG5lbCBNb3JhIFJvbGTDoW4=?= 
-        <necrodos@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-References: <CAG=_e5DcNhoVM3rbzsocpBKwuwt9C0x7-B-fLwrFwyN82zTvHQ@mail.gmail.com>
- <CAPDyKFoycHLO_c3xfpoHLmLKzri6vQa1zvuFUjGiB803XxkGUQ@mail.gmail.com>
-From:   Scott Branden <scott.branden@broadcom.com>
-Message-ID: <f85c115f-5095-420a-e6b9-f971cefc8819@broadcom.com>
-Date:   Thu, 14 Jan 2021 10:39:25 -0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
-MIME-Version: 1.0
-In-Reply-To: <CAPDyKFoycHLO_c3xfpoHLmLKzri6vQa1zvuFUjGiB803XxkGUQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Content-Language: en-CA
+        id S1726855AbhANUO4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Jan 2021 15:14:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54928 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726518AbhANUO4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 15:14:56 -0500
+Received: from mail-qk1-x749.google.com (mail-qk1-x749.google.com [IPv6:2607:f8b0:4864:20::749])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B251DC061575
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 12:14:15 -0800 (PST)
+Received: by mail-qk1-x749.google.com with SMTP id n13so5737971qkn.2
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 12:14:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=sender:date:message-id:mime-version:subject:from:to:cc;
+        bh=e66+6f5Ooob60+bUgoVWv7yZUs3P9lZVZESwc0Aq0pY=;
+        b=sA8HzFA5tky1SaZLwHvJLO9v+S2LIh56boezG7Dzggcp+ji+LCgQ2yaRrTxH/sA2LY
+         4tl4kOIQjkGba6PVEm4OiQDxX65PqqClezRVX1AWwMeWTs36BYhAKodjgzPkez0qSoqE
+         +Voi3ybEJxC0N9y+Wt7mu2WNM6H825wae1dErzo9oSih182w0fmBMcgVqAZTMWOXlLH4
+         zKbSVBcjG7FzFtVu1ibre9fjqbikZ1r3nVZBCglXvklkhr6r5t+zQnqE3Opx+vACKwh3
+         OB3Pzo1W94z05GpokNccgnCMdnimri5FO1L6KO4q2FXitkh9vKeidoofyhEUTf490ZEp
+         ovFQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:date:message-id:mime-version:subject:from
+         :to:cc;
+        bh=e66+6f5Ooob60+bUgoVWv7yZUs3P9lZVZESwc0Aq0pY=;
+        b=GiuTKT9jB41oReJHlnvSS7Tb1kyeehaIW24uMm+G1D7YgQx1O3YUkMOwaup0PQSY8u
+         TFd20udBpbr67mVqFmbGLGnCpZInnEXd0PuS/eTu+SAkDWhb9JDuRsz3LsFF+kEz7S3A
+         2kK5+F9pSd74sTCEWsKI2ehCIZOyfqVPccxpSOuZW1eAFdsH5o9qe198SC2PoyZa4Yyp
+         z4EHGyaARNVdPz/PbNAeiZggs3OLWAEjJmzT7H8F2Hc5DlfHfhBdOgiQmtZ+oAdDwwCP
+         /NtGsRPjUDTCOwk/ARFZWFTSjjo1MbZfkMgy+RcNX8v52I9bvsrevmDYj7rcHL3xx9rw
+         i+Vw==
+X-Gm-Message-State: AOAM531nT2t3Q9ce9PZPd9pmsnFdk3TYzRs/zY6m+fil2dkaKShS0DFo
+        OE4RjNzuDbSnMNoKO6H/g/jGM9o=
+X-Google-Smtp-Source: ABdhPJzoSj6O9Gz5IJ+BRvlg0PsI0nUJD+KbXCrn50DVCKN7Z+eRP2spbOpPTopa8htfxJse/vcE8Cg=
+Sender: "pcc via sendgmr" <pcc@pcc-desktop.svl.corp.google.com>
+X-Received: from pcc-desktop.svl.corp.google.com ([2620:15c:2ce:0:7220:84ff:fe09:385a])
+ (user=pcc job=sendgmr) by 2002:a0c:8e85:: with SMTP id x5mr8933145qvb.11.1610655254834;
+ Thu, 14 Jan 2021 12:14:14 -0800 (PST)
+Date:   Thu, 14 Jan 2021 12:14:05 -0800
+Message-Id: <20210114201405.2934886-1-pcc@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.30.0.284.gd98b1dd5eaa7-goog
+Subject: [PATCH v2] mmc: core: don't initialize block size from ext_csd if not present
+From:   Peter Collingbourne <pcc@google.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Peter Collingbourne <pcc@google.com>, linux-mmc@vger.kernel.org,
+        Damien Le Moal <damien.lemoal@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Martin/Uffe
+If extended CSD was not available, the eMMC driver would incorrectly
+set the block size to 0, as the data_sector_size field of ext_csd
+was never initialized. This issue was exposed by commit 817046ecddbc
+("block: Align max_hw_sectors to logical blocksize") which caused
+max_sectors and max_hw_sectors to be set to 0 after setting the block
+size to 0, resulting in a kernel panic in bio_split when attempting
+to read from the device. Fix it by only reading the block size from
+ext_csd if it is available.
 
-On 2021-01-14 3:55 a.m., Ulf Hansson wrote:
-> + Scott
->
-> On Thu, 14 Jan 2021 at 02:50, Martín Xiúhnel Mora Roldán
-> <necrodos@gmail.com> wrote:
->> Hi, I want to report a bug related to the drivers of the sd card
->> reader Broadcom Broadcom Corporation BCM57765/57785 SDXC/MMC Card
->> Reader. Basically It doesn't show the inserted cards, and even though
->> it has a workaround that has worked flawless for mac users, many acer
->> user seem to have problems like not being able to transfer large files
->> (larger than a couple or not being able to format the card. I know
->> this has been reported before but it keeps having problems. Thanks for
->> your help, here are some links to previous reports of this bug and
->> previous attempts to solve this issue. I experience this bug on a
->> laptop acer v5-131 with said sd card reader running elementary 5.1.7
->> Hera but I've encountered this same bug on all other ubuntu flavors on
->> this same device. All using Kernel 5.4
->>
->> Please, if I'm doing something wrong by trying to report this bug,
->> please let me know
->>
->> https://gist.github.com/samgooi4189/2e6e18fd1d562acaf39246e5e386d7cb
->>
->> https://askubuntu.com/questions/444484/broadcom-card-reader-bcm57765-bcm57785-doesnt-work-on-ubuntu-12-04-lts
->>
->> https://bugzilla.kernel.org/show_bug.cgi?id=206005
->>
->> Thanks you so much for your attention
-> Hi Martin,
->
-> I am sorry, but this isn't really my cup of tea.
->
-> It looks like the sd controller is based upon sdhci-pci. As far as I
-> know, I don't think there have been any Broadcom engineers working on
-> that driver ever, but I might not have the complete history.
->
-> In any case, I have looped in Scott Branden from Broadcom, perhaps he
-> can help to move this forward in some way or the other.
-I'm sorry, but I don't know what a BCM57765/57785 even is but it is from some time in 2010 or earlier - nothing I have seen or worked on.
-I looked at our groups internal bug database and we have experienced issues with card detection or high speed usage on other products in the past.
-Some fixes needed have been resetting the SD card after the bootloader to get card into a known state, controlling gpios to set voltages for ultra high speed modes, DDR50 tuning, and what not.
+Fixes: a5075eb94837 ("mmc: block: Allow disabling 512B sector size emulation")
+Signed-off-by: Peter Collingbourne <pcc@google.com>
+Reviewed-by: Damien Le Moal <damien.lemoal@wdc.com>
+Link: https://linux-review.googlesource.com/id/If244d178da4d86b52034459438fec295b02d6e60
+---
+ drivers/mmc/core/queue.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-I don't know what your specific issue for that card.
->
-> Kind regards
-> Uffe
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index de7cb0369c30..002426e3cf76 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -384,8 +384,10 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+ 		     "merging was advertised but not possible");
+ 	blk_queue_max_segments(mq->queue, mmc_get_max_segments(host));
+ 
+-	if (mmc_card_mmc(card))
++	if (mmc_card_mmc(card) && card->ext_csd.data_sector_size) {
+ 		block_size = card->ext_csd.data_sector_size;
++		WARN_ON(block_size != 512 && block_size != 4096);
++	}
+ 
+ 	blk_queue_logical_block_size(mq->queue, block_size);
+ 	/*
+-- 
+2.30.0.284.gd98b1dd5eaa7-goog
 
