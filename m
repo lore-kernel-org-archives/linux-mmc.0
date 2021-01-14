@@ -2,267 +2,149 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-23.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EED4C433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 09:15:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF707C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 10:14:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1247623A05
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 09:15:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A201223A55
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 10:14:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727244AbhANJPR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Jan 2021 04:15:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53612 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727867AbhANJPG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 04:15:06 -0500
-Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF32EC0617A2
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 01:13:45 -0800 (PST)
-Received: by mail-lj1-x236.google.com with SMTP id b10so5619111ljp.6
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 01:13:45 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ObLDGp8DuMzPgMQv/qADlwdPf//cWJIYZWG0SUKU73w=;
-        b=h0xSUEhzob2HnVedUD2Pf29GGbGo+859Z+ax6VWigVg/CxGbhsvOTC3VGVZ6kMAeMU
-         55QySLwqdUsIwMrRQoJdPjL8iNXQIpFi/UwlbyRBMMR2eKOJsYvHPIVqtYKhD7SkKlU5
-         mUcQPLyDueAl9kmUCnGaVVX/zLBdQLftm8fDl/KCzB/ofYqTfIsHn+V1OXg+e3K293LB
-         e0AX27VB1pgJhpenSv+gg2/b5+ywAGtVl5NAcGXgAO3bLDjzpoZJ31DlzkeAv75J8muw
-         3iRdWkADPoS+Ez42vG/xgap5l4TfCsxCl5aqPYxP5e6Ief3Me545z4fbdllcFMHFAp0r
-         77hw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ObLDGp8DuMzPgMQv/qADlwdPf//cWJIYZWG0SUKU73w=;
-        b=cI+wl0Vld8/xOD8IureaOpglUJz9p7SwWJF7BLZEOUSKViKxhC0Gh34g+6+rGiYOmD
-         KqKN5bmEshbLhaOLwkwCHydprxUMO5qr3UT/a90/Pl7SAVCg3t8SnNL/MdPKgekh/GhO
-         bhW9g5Eg/6A7EGkouFzsoBEuFHw5MaPP1Io1HSCHP+Jndg41FEfICRe6tUlg+f/T7QfU
-         CQUu9CZB6AJeN9Jk8lA1/XXKDbj9079sSF97n57u4w6HfmbtuLpdbUUbD0aoK+MF7KVu
-         xxaJtOOuCfDH2x7NUTTCCVo99rzDG1F7+VfI3epbAbOjt5Y9UHUUp8eQ7LsSTZeAcNDm
-         yiOA==
-X-Gm-Message-State: AOAM532terkRcYBKkir9z/Soeq3dW9EFLRkxoJY2AkJBG4jCCvCIqIdr
-        2MZXCmQkSU9wPHwq65YcjuBd7qVc0FNEQj/Qg/TITw==
-X-Google-Smtp-Source: ABdhPJwR0tFjm9efXu0cD7T8HbZgWV+gZtMHsKLnBlvraKnS2E8/FIF9DB4zt34uoyasy9c5iLX5LUjTk0D7aAcTAHU=
-X-Received: by 2002:a2e:2a83:: with SMTP id q125mr2758210ljq.436.1610615624127;
- Thu, 14 Jan 2021 01:13:44 -0800 (PST)
+        id S1726055AbhANKNz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Jan 2021 05:13:55 -0500
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:22980 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726661AbhANKNy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 05:13:54 -0500
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 10EAD3r7016690;
+        Thu, 14 Jan 2021 11:13:08 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=sVesANlBEQEMySIkYMC5c1ewT46wm1qfoPp6x/8L7CY=;
+ b=f897wr/crCD6+1OR/xizgszd1H6fYzJZeXOb2w6A6NurinHySN00zVN2muwlxutNitoe
+ c3YQ4mfMgkpv4MjDTXQJdbUs57WtlNS1vYhWYtISM64kk5YPPKj7W7V8SOG/Uoo0Ntzp
+ 6ibP0JbEtRZi/X6wIK3zCvZOdgHWTPer0hl4YMNnr5MKXUtYR9CLglxa7vcEeAeOL0cz
+ A/oKVUf27eluND42Y4S0iCyKDUEWCYh25LPheNbQth4NZZEwbquB5Q08megoexAPCU61
+ 2FC/Lj5iDZd3TjAd7rZcG5tr35tRj5lFWBOrxfgH01e5eD53yyzIlk3niVzJ+byryph3 RQ== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 35yp3y1n00-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 14 Jan 2021 11:13:08 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 78FC910002A;
+        Thu, 14 Jan 2021 11:13:07 +0100 (CET)
+Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 5D81322D214;
+        Thu, 14 Jan 2021 11:13:07 +0100 (CET)
+Received: from lmecxl0504.lme.st.com (10.75.127.51) by SFHDAG2NODE3.st.com
+ (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 14 Jan
+ 2021 11:13:06 +0100
+Subject: Re: [Linux-stm32] [PATCH] [RFC] mmc: mmci: Add support for probing
+ bus voltage level translator
+To:     Marek Vasut <marex@denx.de>, Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Linus Walleij <linus.walleij@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20210105140718.122752-1-marex@denx.de>
+ <CAPDyKFoQfm2ZtPdsZSZtOCDH-FJqNzihYqZny-vUdK4Q4tWTzQ@mail.gmail.com>
+ <b83c1112-010b-a40f-319f-84c755424b0f@denx.de>
+ <CAPDyKFo5Sqxj31owrnmz1sTZqgW_PtZM2H=pDPBz+9hc0W0hHA@mail.gmail.com>
+ <77dd612b-23f0-1f77-797a-9cde512926e3@denx.de>
+ <f91fbdfc-453d-78a6-970a-5d6eecd443b2@foss.st.com>
+ <ccef7ae4-8cd7-4434-9632-917a4fb92f53@denx.de>
+From:   Yann GAUTIER <yann.gautier@foss.st.com>
+Message-ID: <ad4a108e-81f1-daf5-9921-9884ed06d237@foss.st.com>
+Date:   Thu, 14 Jan 2021 11:13:06 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <CANqTbdYYSAvpzN2oaPSb2PUCE=rssj19GueTZmkvmukQWj9vUw@mail.gmail.com>
- <20210113214822.GA1923207@bjorn-Precision-5520>
-In-Reply-To: <20210113214822.GA1923207@bjorn-Precision-5520>
-From:   Victor Ding <victording@google.com>
-Date:   Thu, 14 Jan 2021 20:13:08 +1100
-Message-ID: <CANqTbdY9PGMu7EzMcG0GG3SdoPDNhV0aUfOoRDKfGmo=BS+UPA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdhci-pci-gli: Disable ASPM during a suspension
-To:     Bjorn Helgaas <helgaas@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        LKML <linux-kernel@vger.kernel.org>, linux-pci@vger.kernel.org,
-        linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <ccef7ae4-8cd7-4434-9632-917a4fb92f53@denx.de>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.75.127.51]
+X-ClientProxiedBy: SFHDAG4NODE3.st.com (10.75.127.12) To SFHDAG2NODE3.st.com
+ (10.75.127.6)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
+ definitions=2021-01-14_03:2021-01-13,2021-01-14 signatures=0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 14, 2021 at 8:48 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
->
-> [+cc Rafael, suspend/resume expert]
->
-> On Wed, Jan 13, 2021 at 01:16:23PM +1100, Victor Ding wrote:
-> > On Wed, Jan 13, 2021 at 9:38 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > > On Tue, Jan 12, 2021 at 04:02:05AM +0000, Victor Ding wrote:
-> > > > GL9750 has a 3100us PortTPowerOnTime; however, it enters L1.2 after
-> > > > only ~4us inactivity per PCIe trace. During a suspend/resume process,
-> > > > PCI access operations are frequently longer than 4us apart.
-> > > > Therefore, the device frequently enters and leaves L1.2 during this
-> > > > process, causing longer than desirable suspend/resume time. The total
-> > > > time cost due to this L1.2 exit latency could add up to ~200ms.
-> > > >
-> > > > Considering that PCI access operations are fairly close to each other
-> > > > (though sometimes > 4us), the actual time the device could stay in
-> > > > L1.2 is negligible. Therefore, the little power-saving benefit from
-> > > > ASPM during suspend/resume does not overweight the performance
-> > > > degradation caused by long L1.2 exit latency.
-> > > >
-> > > > Therefore, this patch proposes to disable ASPM during a suspend/resume
-> > > > process.
-> > >
-> > > This sounds like an interesting idea, but it doesn't seem like
-> > > anything that's really device-dependent.  Drivers should not need to
-> > > be involved in PCI configuration at this level, and they shouldn't
-> > > read/write registers like PCI_EXP_LNKCTL directly.
-> > >
-> > > If we need to disable ASPM during suspend, I'd rather do it in the PCI
-> > > core so all devices can benefit and drivers don't need to worry about
-> > > it.
-> > >
-> > Good point. In theory all devices could encounter this issue, and it
-> > more-likely occurs on those with low entry timer but high exit latency.
-> > GL9750 is the only one I have access to that has such characteristics.
-> >
-> > I think we should have ASPM disabled during suspend, or at least part
-> > of the suspend process*, mainly for two reasons:
-> > 1. Power saving is expected to be little. During suspend/resume, we
-> >     frequently access PCI registers, making it unlikely to stay in low
-> >     power states;
-> > 2. It could cause performance degradation. Unfortunate timing could
-> >     put the device into low power states and wake it up very soon after;
-> >     resulting noticeable delays.
-> > * By "part if the suspend process", I refer [suspend/resume]_noirq, where
-> > there are frequent PCI register accesses and suffers most from this issue.
-> >
-> > Ideally, the entry time could be tune so that it is long enough that the
-> > device would not go into low power states during suspend; however, it
-> > may not be feasible mainly because:
-> > 1. Hardware limitations;
-> > 2. The best timing for suspend/resume may not be the best timing for other
-> >     tasks. Considering suspend/resume is a rare task, we probably do not
-> >     want to sacrifice other tasks;
-> > 3. If the goal is to avoid entering low power states during suspend, it might
-> >     be better just to disable it.
-> >
-> > What do you think?
->
-> I think we should look at disabling ASPM for all devices during
-> suspend.  I really don't want to put this kind of gunk in individual
-> drivers.  If we *have* to put something in drivers, it should be using
-> interfaces like pci_disable_link_state() instead of writing
-> PCI_EXP_LNKCTL directly.
->
-Agreed.
->
-> I *would* be interested in more details about this issue you're seeing
-> with GS9750, though.  It will help the case for a core change if we
-> can open a bugzilla.kernel.org issue with some of the details like the
-> L1 exit latency (from "lspci -vv") and details of the activities that
-> lead to these delays.  Typical L1 exit latencies are <100us, so to see
-> 200ms of delay would mean ~2000 L1.2 exits, which is higher than I
-> would expect.
->
-Sorry that I misread the PCIe specs and the trace results. It was
-PortTPowerOnTime (Port T_POWER_ON) which added up to ~200ms.
-GL9750's PortTPowerOnTime is 3100us or 3.1ms, and I saw up to 60
-occurrences during resume.
-I've created https://bugzilla.kernel.org/show_bug.cgi?id=211187
-We can continue the discussion there.
->
-> > > > Signed-off-by: Victor Ding <victording@google.com>
-> > > > ---
-> > > >
-> > > >  drivers/mmc/host/sdhci-pci-core.c |  2 +-
-> > > >  drivers/mmc/host/sdhci-pci-gli.c  | 46 +++++++++++++++++++++++++++++--
-> > > >  drivers/mmc/host/sdhci-pci.h      |  1 +
-> > > >  3 files changed, 46 insertions(+), 3 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> > > > index 9552708846ca..fd7544a498c0 100644
-> > > > --- a/drivers/mmc/host/sdhci-pci-core.c
-> > > > +++ b/drivers/mmc/host/sdhci-pci-core.c
-> > > > @@ -67,7 +67,7 @@ static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
-> > > >       return 0;
-> > > >  }
-> > > >
-> > > > -static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-> > > > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
-> > > >  {
-> > > >       int i, ret;
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> > > > index 9887485a4134..c7b788b0e22e 100644
-> > > > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > > > @@ -109,6 +109,12 @@
-> > > >
-> > > >  #define GLI_MAX_TUNING_LOOP 40
-> > > >
-> > > > +#ifdef CONFIG_PM_SLEEP
-> > > > +struct gli_host {
-> > > > +     u16 linkctl_saved;
-> > > > +};
-> > > > +#endif
-> > > > +
-> > > >  /* Genesys Logic chipset */
-> > > >  static inline void gl9750_wt_on(struct sdhci_host *host)
-> > > >  {
-> > > > @@ -577,14 +583,48 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
-> > > >  }
-> > > >
-> > > >  #ifdef CONFIG_PM_SLEEP
-> > > > +static int sdhci_pci_gli_suspend(struct sdhci_pci_chip *chip)
-> > > > +{
-> > > > +     int ret;
-> > > > +     struct sdhci_pci_slot *slot = chip->slots[0];
-> > > > +     struct pci_dev *pdev = slot->chip->pdev;
-> > > > +     struct gli_host *gli_host = sdhci_pci_priv(slot);
-> > > > +
-> > > > +     ret = pcie_capability_read_word(pdev, PCI_EXP_LNKCTL,
-> > > > +                     &gli_host->linkctl_saved);
-> > > > +     if (ret)
-> > > > +             goto exit;
-> > > > +
-> > > > +     ret = pcie_capability_write_word(pdev, PCI_EXP_LNKCTL,
-> > > > +                     gli_host->linkctl_saved & ~PCI_EXP_LNKCTL_ASPMC);
-> > > > +     if (ret)
-> > > > +             goto exit;
-> > > > +
-> > > > +     ret = sdhci_pci_suspend_host(chip);
-> > > > +
-> > > > +exit:
-> > > > +     return ret;
-> > > > +}
-> > > > +
-> > > >  static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
-> > > >  {
-> > > > +     int ret;
-> > > >       struct sdhci_pci_slot *slot = chip->slots[0];
-> > > > +     struct pci_dev *pdev = slot->chip->pdev;
-> > > > +     struct gli_host *gli_host = sdhci_pci_priv(slot);
-> > > >
-> > > > -     pci_free_irq_vectors(slot->chip->pdev);
-> > > > +     pci_free_irq_vectors(pdev);
-> > > >       gli_pcie_enable_msi(slot);
-> > > >
-> > > > -     return sdhci_pci_resume_host(chip);
-> > > > +     ret = sdhci_pci_resume_host(chip);
-> > > > +     if (ret)
-> > > > +             goto exit;
-> > > > +
-> > > > +     ret = pcie_capability_clear_and_set_word(pdev, PCI_EXP_LNKCTL,
-> > > > +                     PCI_EXP_LNKCTL_ASPMC, gli_host->linkctl_saved);
-> > > > +
-> > > > +exit:
-> > > > +     return ret;
-> > > >  }
-> > > >
-> > > >  static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
-> > > > @@ -834,7 +874,9 @@ const struct sdhci_pci_fixes sdhci_gl9750 = {
-> > > >       .probe_slot     = gli_probe_slot_gl9750,
-> > > >       .ops            = &sdhci_gl9750_ops,
-> > > >  #ifdef CONFIG_PM_SLEEP
-> > > > +     .suspend        = sdhci_pci_gli_suspend,
-> > > >       .resume         = sdhci_pci_gli_resume,
-> > > > +     .priv_size      = sizeof(struct gli_host),
-> > > >  #endif
-> > > >  };
-> > > >
-> > > > diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> > > > index d0ed232af0eb..16187a265e63 100644
-> > > > --- a/drivers/mmc/host/sdhci-pci.h
-> > > > +++ b/drivers/mmc/host/sdhci-pci.h
-> > > > @@ -187,6 +187,7 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
-> > > >  }
-> > > >
-> > > >  #ifdef CONFIG_PM_SLEEP
-> > > > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip);
-> > > >  int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
-> > > >  #endif
-> > > >  int sdhci_pci_enable_dma(struct sdhci_host *host);
-> > > > --
-> > > > 2.30.0.284.gd98b1dd5eaa7-goog
-> > > >
+On 1/13/21 3:45 PM, Marek Vasut wrote:
+> On 1/13/21 3:21 PM, Yann GAUTIER wrote:
+>> On 1/13/21 12:52 PM, Marek Vasut wrote:
+>>> On 1/13/21 12:38 PM, Ulf Hansson wrote:
+>>> [...]
+>>>>>>>    static int mmci_of_parse(struct device_node *np, struct 
+>>>>>>> mmc_host *mmc)
+>>>>>>>    {
+>>>>>>>           struct mmci_host *host = mmc_priv(mmc);
+>>>>>>> @@ -1913,7 +1973,7 @@ static int mmci_of_parse(struct device_node 
+>>>>>>> *np, struct mmc_host *mmc)
+>>>>>>>           if (of_get_property(np, "st,neg-edge", NULL))
+>>>>>>>                   host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
+>>>>>>>           if (of_get_property(np, "st,use-ckin", NULL))
+>>>>>>> -               host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
+>>>>>>> +               mmci_probe_level_translator(mmc);
+>>>>>>
+>>>>>> I think you can make this change bit less invasive. Rather than 
+>>>>>> having
+>>>>>> to shuffle code around in ->probe(), I suggest you call
+>>>>>> mmci_probe_level_translator() outside and after mmci_of_parse() has
+>>>>>> been called.
+>>>>>>
+>>>>>> In this way, you can also provide mmci_probe_level_translator() 
+>>>>>> with a
+>>>>>> struct mmci_host *, rather than having to pick it up from
+>>>>>> mmc_priv(mmc), if you see what I mean.
+>>>>>>
+>>>>>> Of course, this also means in mmci_probe_level_translator() you will
+>>>>>> have to check if MCI_STM32_CLK_SELCKIN has been set, and if not then
+>>>>>> do an early return.
+>>>>>
+>>>>> Testing the translator presence when checking whether its enabled 
+>>>>> in DT
+>>>>> seems like the right place, but that's really just an 
+>>>>> implementation detail.
+>>>>>
+>>>>> I am more interested in knowing whether adding
+>>>>> mmci_probe_level_translator() is even acceptable in the first 
+>>>>> place. Is it ?
+>>>>
+>>>> Honestly, I don't know.
+>>>>
+>>>> I think I need to defer that question to Linus Walleij. And of course,
+>>>> it would be nice to get the opinion from Ludovic as well.
+>>>
+>>> Good, that's what I was hoping for too.
+>>
+>> Hi,
+>>
+>> Ludovic is out of office this week.
+>>
+>> The feature of detecting a level translator seems to be quite generic, 
+>> and not dedicated to MMCI driver or the ST dedicated code, and with 
+>> new st,* properties. It may be in generic mmc code. But I'll let Linus 
+>> comment about that.
+>>
+>> I also wonder if this HW detection should be done in kernel, or if it 
+>> should be done in Bootloader. But it may be more complex, to add the 
+>> st,use_ckin in kernel DT if bootloader detects this translator.
+> 
+> Lets not attempt to hide inobvious functionality in bootloaders, the 
+> kernel should be independent of bootloader where possible. And here it 
+> is clearly and easily possible.
+
+OK for this part, I understand it will be better not to hide this in 
+bootloader.
+
+There is still the previous point for which Linus may help.
+
+Regards,
+Yann
