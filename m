@@ -2,144 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CA67C4332E
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 02:18:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E43D9C43381
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 03:16:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 79B6023343
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 02:18:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9C6CA236F9
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 03:16:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727222AbhANCSf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 21:18:35 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37764 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728763AbhAMVE0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 13 Jan 2021 16:04:26 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id D7D4521D95;
-        Wed, 13 Jan 2021 20:54:35 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1610571276;
-        bh=kJuETQaVMNcw8dbfJHqaFfpm2JkbaqeCXrQ+kZZ8lOc=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:From;
-        b=dkzE6zbnUkZwTPhDe65zzJcarln1ss0SZgbyCpBpSamUw56a/LPjGlvFlOXQL7MDl
-         YWgNWyN3gSuHa3WcCjVrd0fcNt1Z/c6q22wHPBv5j/Nwwh/WyWkOrmol60Ah1OgxLj
-         JjN8XBEGP9tQi09R4knorUPXRc4lIuQ1y+o9FPuIElVeXRMX86UvW+vu7rXbw3xktM
-         jlQHmrXNkCZwh52RIe9fRRLDLb2zWiKa4ubUVBjgPFAKnk89g7SNTDAxz2SUMD76tF
-         APU/F8L+LZarG6mWGFLDSPNaGBrvOz+JdZKjDUkcBvsza7ZIDsEqiiGSETcTvy8AQA
-         Kx7lZHDd9NJiA==
-Date:   Wed, 13 Jan 2021 14:54:34 -0600
-From:   Bjorn Helgaas <helgaas@kernel.org>
-To:     Victor Ding <victording@google.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        LKML <linux-kernel@vger.kernel.org>, linux-pci@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Alex Levin <levinale@google.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        "Saheed O. Bolarinwa" <refactormyself@gmail.com>,
-        Sean Paul <seanpaul@chromium.org>,
-        Sukumar Ghorai <sukumar.ghorai@intel.com>,
-        Yicong Yang <yangyicong@hisilicon.com>
-Subject: Re: [PATCH 1/2] PCI/ASPM: Disable ASPM until its LTR and L1ss state
- is restored
-Message-ID: <20210113205434.GA1926338@bjorn-Precision-5520>
+        id S1726113AbhANDPw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 22:15:52 -0500
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:34409 "EHLO
+        out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725871AbhANDPw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 22:15:52 -0500
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id A9F205C01EE;
+        Wed, 13 Jan 2021 22:14:45 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute3.internal (MEProxy); Wed, 13 Jan 2021 22:14:45 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=from
+        :to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=fm1; bh=XoOzQyq8r+J+/QRDndikLwkl6s
+        ZOoTHhqppNgPXoevU=; b=UBHJKtHUDXgkUai/PtA8gu7oTanN3OWM5YAC+RVCOr
+        7NFzNPTnp9LmG8oDdBD3mX32TRwHfMZ6I5XrPCJAa9/A/9CsNEh+5p0rJ8BcnGdn
+        LlRmpfCaUpkC7RMhFZPxsQHPsylcSPYnldxuxkSvrrRpOuO65icFsrXcVSYNY533
+        5AO/Ze6JF8XNFMHdBdsg47HUWelrePeurn31KrP7KEELcz7w7TsHCHm0W8GvZIYI
+        l0xO0pOSIPqbpvC6rVSKkjcmJR2B7AE5lLHZ8+i4mB8uZkW8DR/ei1P4qD0xLHNU
+        pvnMM/E/+4E3lptiRh0fHIZZf/fzYR2rZcZ+hzJRkFrw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-transfer-encoding:date:from
+        :message-id:mime-version:subject:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=XoOzQyq8r+J+/QRDn
+        dikLwkl6sZOoTHhqppNgPXoevU=; b=Ok63H03HL9rGeiuzlM2TsCaXexYGhoWOD
+        q+/3FWObErqnoE2msODrP+4gYr5EzTxZM+yViMGl4BBkac+3i+5/p9I3DW6REmVB
+        z3tAD+2HSObrtdj2YL/0r91EKSWUX28pr9x3f+Y2Yyxjk/4qwsAP6gN1gBPGY8EO
+        rfpSJfAguTLWgiGFKsHxsfqLGDoKZaWA7/vP61wZCaaQOjhnTv75utUn0Nv3a/DF
+        zsVhCKd4SyBsvvTcb6hibKG0R9at7auaUDj1j1RRoa58j28CgxIKOJaBzKFY+R26
+        Mw28NpnSOExM/jWFHzPJk0p0g/dF4YpYGN08yRC/hXvEbGjswtEVg==
+X-ME-Sender: <xms:JLf_X1pmuVXqfxZN_FYlJQ1Umr9ldt4U9ND4zSwsX7YelvKmWejIyg>
+    <xme:JLf_X3qM08AFZV2xT1x5_GCPRg4kdAvZZ3SS3fzs6yeoWKRwFFHPrbdaKuy9afH8D
+    _Nt4QsSHdiOSLJWsQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedukedrtdeggdehjecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecunecujfgurhephffvufffkffoggfgsedtkeertdertd
+    dtnecuhfhrohhmpeetnhgurhgvficulfgvfhhfvghrhicuoegrnhgurhgvfiesrghjrdhi
+    ugdrrghuqeenucggtffrrghtthgvrhhnpeeiteehudevlefhvddvjeeluefhleetveehff
+    fgiedtfeegkeejfeeivefgheehgfenucffohhmrghinhepkhgvrhhnvghlrdhorhhgnecu
+    kfhppeduudekrddvuddtrddujeefrdegkeenucevlhhushhtvghrufhiiigvpedtnecurf
+    grrhgrmhepmhgrihhlfhhrohhmpegrnhgurhgvfiesrghjrdhiugdrrghu
+X-ME-Proxy: <xmx:JLf_XyPEIG6VSysiwhelSYTu6ZUVY1WWPTs9HJnp9lHAUxYnrWPCVA>
+    <xmx:JLf_Xw5hUsMIISEPHoaE83mvOdMQZuHAYP3h9mj7RzLAZXceJsKNzQ>
+    <xmx:JLf_X06rcQateijtP5RaP5P2M5O8C8Iddu_4_dhULx8zNx7K5wE00w>
+    <xmx:Jbf_XzYpgfZVndtwnFaO0szdX7IVvJu1uRYAau8Vj1jGHKpdWzWVrA>
+Received: from localhost.localdomain (ppp118-210-173-48.adl-adc-lon-bras34.tpg.internode.on.net [118.210.173.48])
+        by mail.messagingengine.com (Postfix) with ESMTPA id B254124005C;
+        Wed, 13 Jan 2021 22:14:41 -0500 (EST)
+From:   Andrew Jeffery <andrew@aj.id.au>
+To:     linux-mmc@vger.kernel.org
+Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org, joel@jms.id.au,
+        adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-aspeed@lists.ozlabs.org, ryan_chen@aspeedtech.com
+Subject: [PATCH v7 0/6] mmc: sdhci-of-aspeed: Expose phase delay tuning
+Date:   Thu, 14 Jan 2021 13:44:27 +1030
+Message-Id: <20210114031433.2388532-1-andrew@aj.id.au>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CANqTbdb4gZYQUAZzatwymy-S9Ajb=PhfP53_D2TYLJp0zw4HxQ@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jan 13, 2021 at 01:16:05PM +1100, Victor Ding wrote:
-> On Wed, Jan 13, 2021 at 9:32 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > On Tue, Jan 12, 2021 at 04:02:04AM +0000, Victor Ding wrote:
-> > > Right after powering up, the device may have ASPM enabled; however,
-> > > its LTR and/or L1ss controls may not be in the desired states; hence,
-> > > the device may enter L1.2 undesirably and cause resume performance
-> > > penalty. This is especially problematic if ASPM related control
-> > > registers are modified before a suspension.
-> >
-> > s/L1ss/L1SS/ (several occurrences) to match existing usage.
-> >
-> I'll update it in the next version.
-> >
-> > > Therefore, ASPM should disabled until its LTR and L1ss states are
-> > > fully restored.
-> > >
-> > > Signed-off-by: Victor Ding <victording@google.com>
-> > > ---
-> > >
-> > >  drivers/pci/pci.c       | 11 +++++++++++
-> > >  drivers/pci/pci.h       |  2 ++
-> > >  drivers/pci/pcie/aspm.c |  2 +-
-> > >  3 files changed, 14 insertions(+), 1 deletion(-)
-> > >
-> > > diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
-> > > index eb323af34f1e..428de433f2e6 100644
-> > > --- a/drivers/pci/pci.c
-> > > +++ b/drivers/pci/pci.c
-> > > @@ -1660,6 +1660,17 @@ void pci_restore_state(struct pci_dev *dev)
-> > >       if (!dev->state_saved)
-> > >               return;
-> > >
-> > > +     /*
-> > > +      * Right after powering up, the device may have ASPM enabled;
-> >
-> > I think this could be stated more precisely.  "Right after powering
-> > up," ASPM should be *disabled* because ASPM Control in the Link
-> > Control register powers up as zero (disabled).
-> >
-> Good suggestion; I'll reword in the next version.
-> However, ASPM should be *disabled* for the opposite reason - ASPM Control
-> in the Link Control register *may* power as non-zero (enabled).
-> (More answered in the next section)
-> >
-> > > +      * however, its LTR and/or L1ss controls may not be in the desired
-> > > +      * states; as a result, the device may enter L1.2 undesirably and
-> > > +      * cause resume performance penalty.
-> > > +      * Therefore, ASPM is disabled until its LTR and L1ss states are
-> > > +      * fully restored.
-> > > +      * (enabling ASPM is part of pci_restore_pcie_state)
-> >
-> > If we're enabling L1.2 before LTR has been configured, that's
-> > definitely a bug.  But I don't see how that happens.  The current code
-> > looks like:
-> >
-> >   pci_restore_state
-> >     pci_restore_ltr_state
-> >       pci_write_config_word(dev, ltr + PCI_LTR_MAX_SNOOP_LAT, *cap++)
-> >       pci_write_config_word(dev, ltr + PCI_LTR_MAX_NOSNOOP_LAT, *cap++)
-> >     pci_restore_aspm_l1ss_state
-> >       pci_write_config_dword(dev, aspm_l1ss + PCI_L1SS_CTL1, *cap++)
-> >     pci_restore_pcie_state
-> >       pcie_capability_write_word(dev, PCI_EXP_LNKCTL, cap[i++])
-> >
-> > We *do* restore PCI_L1SS_CTL1, which contains "ASPM L1.2 Enable",
-> > before we restore PCI_EXP_LNKCTL, which contains "ASPM Control", but I
-> > don't think "ASPM L1.2 Enable" by itself should be enough to allow
-> > hardware to enter L1.2.
-> >
-> > Reading PCIe r5.0, sec 5.5.1, it seems like hardware should ignore the
-> > PCI_L1SS_CTL1 bits unless ASPM L1 entry is enabled in PCI_EXP_LNKCTL.
-> >
-> > What am I missing?
-> >
-> Correct; however, PCI_EXP_LNKCTL may power up as non-zero, i.e. has
-> ASPM Control enabled. BIOS may set PCI_EXP_LNKCTL (and
-> PCI_L1SS_CTL1) before Kernel takes control. When BIOS does so, there
-> is a brief period between powering up and Kernel restoring LTR state
-> that L1.2 is enabled but LTR isn't configured.
+Hello,
 
-IIUC you're saying that ASPM Control powers up as zero, but BIOS
-enables ASPM before transferring control to the OS.  That makes sense,
-but I wouldn't describe that as "the device powering up with ASPM
-enabled."
+This series implements support for the MMC core clk-phase-* devicetree bindings
+in the Aspeed SD/eMMC driver. The relevant register was exposed on the AST2600
+and is present for both the SD/MMC controller and the dedicated eMMC
+controller.
 
-If BIOS enables L1SS (specifically, if it enables L1.2) when LTR
-hasn't been configured, that sounds like a BIOS defect.
+v7 is just a small change to the the kunit testing in response to Adrian's
+feedback.
+
+I've just done a quick build test of v7 given the small change and more
+extensive testing done with v5. 
+
+v6 can be found here:
+
+https://lore.kernel.org/linux-mmc/20201218035338.1130849-1-andrew@aj.id.au/
+
+Please review!
+
+Cheers,
+
+Andrew
+
+Andrew Jeffery (6):
+  mmc: core: Add helper for parsing clock phase properties
+  mmc: sdhci-of-aspeed: Expose clock phase controls
+  mmc: sdhci-of-aspeed: Add AST2600 bus clock support
+  mmc: sdhci-of-aspeed: Add KUnit tests for phase calculations
+  MAINTAINERS: Add entry for the ASPEED SD/MMC driver
+  ARM: dts: rainier: Add eMMC clock phase compensation
+
+ MAINTAINERS                                  |   9 +
+ arch/arm/boot/dts/aspeed-bmc-ibm-rainier.dts |   1 +
+ drivers/mmc/core/host.c                      |  44 ++++
+ drivers/mmc/host/Kconfig                     |  14 +
+ drivers/mmc/host/sdhci-of-aspeed-test.c      |  98 +++++++
+ drivers/mmc/host/sdhci-of-aspeed.c           | 255 ++++++++++++++++++-
+ include/linux/mmc/host.h                     |  13 +
+ 7 files changed, 423 insertions(+), 11 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-of-aspeed-test.c
+
+-- 
+2.27.0
+
