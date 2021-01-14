@@ -7,166 +7,262 @@ X-Spam-Status: No, score=-23.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4252AC433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 09:14:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EED4C433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 09:15:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EC3AB221E2
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 09:14:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1247623A05
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 09:15:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727854AbhANJOh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Jan 2021 04:14:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53454 "EHLO
+        id S1727244AbhANJPR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Jan 2021 04:15:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53612 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727784AbhANJOW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 04:14:22 -0500
-Received: from mail-lj1-x235.google.com (mail-lj1-x235.google.com [IPv6:2a00:1450:4864:20::235])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D6D6C061795
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 01:13:41 -0800 (PST)
-Received: by mail-lj1-x235.google.com with SMTP id m13so5586854ljo.11
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 01:13:41 -0800 (PST)
+        with ESMTP id S1727867AbhANJPG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jan 2021 04:15:06 -0500
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF32EC0617A2
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 01:13:45 -0800 (PST)
+Received: by mail-lj1-x236.google.com with SMTP id b10so5619111ljp.6
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jan 2021 01:13:45 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=kdctETf80LWjU6yJ+2AwRyQgEwX7yPhocsVpx0q/Gaw=;
-        b=Welez8l5oKcIq/HqjL0V12xIb/B4MRaJynM2PZotiGt9Q6bUXGy/SJFygsI3NcrZ2v
-         y69l16E8WhxcA52pS0acwNrVMTvOIo0NweVT67sdvRgXlBGtPczOteef2YkGB7rM5cZq
-         fLA1nZcrOS9dmKzBkjrFJ+La1B41o+pIdv2YQnF9hiHT0cvS3CAoRY5JbQ6UkhRj1PMw
-         idmXN3f8cuG/tk9LveG/hOSQpiMylh5NyUMlW8r1qe+atx72OoM+oDcckW+V+YJAmAHf
-         7g7erDJzlbWA5Ypl/skub4LlQhogpoSEA3QC/ggU6F25x/lJsGWkKj6wBkQg/WR45MEW
-         usKg==
+        bh=ObLDGp8DuMzPgMQv/qADlwdPf//cWJIYZWG0SUKU73w=;
+        b=h0xSUEhzob2HnVedUD2Pf29GGbGo+859Z+ax6VWigVg/CxGbhsvOTC3VGVZ6kMAeMU
+         55QySLwqdUsIwMrRQoJdPjL8iNXQIpFi/UwlbyRBMMR2eKOJsYvHPIVqtYKhD7SkKlU5
+         mUcQPLyDueAl9kmUCnGaVVX/zLBdQLftm8fDl/KCzB/ofYqTfIsHn+V1OXg+e3K293LB
+         e0AX27VB1pgJhpenSv+gg2/b5+ywAGtVl5NAcGXgAO3bLDjzpoZJ31DlzkeAv75J8muw
+         3iRdWkADPoS+Ez42vG/xgap5l4TfCsxCl5aqPYxP5e6Ief3Me545z4fbdllcFMHFAp0r
+         77hw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=kdctETf80LWjU6yJ+2AwRyQgEwX7yPhocsVpx0q/Gaw=;
-        b=sZjt5j1LubKK4mYDVUm31hMYPmEhXcXxk1cH0ef07eRCmiVJ+SBiYhv5o8s6UwE0a8
-         g08bcAd6ovfqBttsLb5iwWVYv05q3ZgYLo501pEcswVlONJVRSKRgIb3WlLm6W/ytz/Z
-         ZaUFLdDtgn4xRukUdoAEXU2XS6WsKsJp5sLKiDuf8iHgOIAapKf0U0Cr+5vi1Lrdar0J
-         LBRkXGN+KDbmvvnTWSSg9VkfTXDXo2pMTS2HFmF6vKWYk83Em3CHw7FKuZLf6LrIjYou
-         rcZaJYiMJZVwWrg6F1wlFOnhM5JSwnUZhqeO3JQ3zIwCF2FDXB6EaQ7KVKZ2/1JVYe4v
-         6dNQ==
-X-Gm-Message-State: AOAM530qnXx2useVKR9sn90vcW8CQ8W7Vyu8s6ZoeWZWFZhFSsycVDEm
-        F9PHHN+7JJv3qyxqD0R1/F0Np5gtgBMYOn7hfYgArg==
-X-Google-Smtp-Source: ABdhPJzmBdNjASOcvMQWZppTC5PU5/rTE3C69C6JfPEwy8BDM3wXmu7aJ4VP3DCZGiJ/dYAc1w0uXNmd1qAtpSlllng=
-X-Received: by 2002:a2e:878a:: with SMTP id n10mr2726581lji.236.1610615619691;
- Thu, 14 Jan 2021 01:13:39 -0800 (PST)
+        bh=ObLDGp8DuMzPgMQv/qADlwdPf//cWJIYZWG0SUKU73w=;
+        b=cI+wl0Vld8/xOD8IureaOpglUJz9p7SwWJF7BLZEOUSKViKxhC0Gh34g+6+rGiYOmD
+         KqKN5bmEshbLhaOLwkwCHydprxUMO5qr3UT/a90/Pl7SAVCg3t8SnNL/MdPKgekh/GhO
+         bhW9g5Eg/6A7EGkouFzsoBEuFHw5MaPP1Io1HSCHP+Jndg41FEfICRe6tUlg+f/T7QfU
+         CQUu9CZB6AJeN9Jk8lA1/XXKDbj9079sSF97n57u4w6HfmbtuLpdbUUbD0aoK+MF7KVu
+         xxaJtOOuCfDH2x7NUTTCCVo99rzDG1F7+VfI3epbAbOjt5Y9UHUUp8eQ7LsSTZeAcNDm
+         yiOA==
+X-Gm-Message-State: AOAM532terkRcYBKkir9z/Soeq3dW9EFLRkxoJY2AkJBG4jCCvCIqIdr
+        2MZXCmQkSU9wPHwq65YcjuBd7qVc0FNEQj/Qg/TITw==
+X-Google-Smtp-Source: ABdhPJwR0tFjm9efXu0cD7T8HbZgWV+gZtMHsKLnBlvraKnS2E8/FIF9DB4zt34uoyasy9c5iLX5LUjTk0D7aAcTAHU=
+X-Received: by 2002:a2e:2a83:: with SMTP id q125mr2758210ljq.436.1610615624127;
+ Thu, 14 Jan 2021 01:13:44 -0800 (PST)
 MIME-Version: 1.0
-References: <CANqTbdb4gZYQUAZzatwymy-S9Ajb=PhfP53_D2TYLJp0zw4HxQ@mail.gmail.com>
- <20210113205434.GA1926338@bjorn-Precision-5520>
-In-Reply-To: <20210113205434.GA1926338@bjorn-Precision-5520>
+References: <CANqTbdYYSAvpzN2oaPSb2PUCE=rssj19GueTZmkvmukQWj9vUw@mail.gmail.com>
+ <20210113214822.GA1923207@bjorn-Precision-5520>
+In-Reply-To: <20210113214822.GA1923207@bjorn-Precision-5520>
 From:   Victor Ding <victording@google.com>
-Date:   Thu, 14 Jan 2021 20:13:03 +1100
-Message-ID: <CANqTbdb7iHdKtXv2H5Qrj+C52u1e1mL-QRE5x+vqYQ4NjmAf1Q@mail.gmail.com>
-Subject: Re: [PATCH 1/2] PCI/ASPM: Disable ASPM until its LTR and L1ss state
- is restored
+Date:   Thu, 14 Jan 2021 20:13:08 +1100
+Message-ID: <CANqTbdY9PGMu7EzMcG0GG3SdoPDNhV0aUfOoRDKfGmo=BS+UPA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-pci-gli: Disable ASPM during a suspension
 To:     Bjorn Helgaas <helgaas@kernel.org>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ben Chuang <ben.chuang@genesyslogic.com.tw>,
         LKML <linux-kernel@vger.kernel.org>, linux-pci@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Alex Levin <levinale@google.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        "Saheed O. Bolarinwa" <refactormyself@gmail.com>,
-        Sean Paul <seanpaul@chromium.org>,
-        Sukumar Ghorai <sukumar.ghorai@intel.com>,
-        Yicong Yang <yangyicong@hisilicon.com>
+        linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 14, 2021 at 7:54 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+On Thu, Jan 14, 2021 at 8:48 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
 >
-> On Wed, Jan 13, 2021 at 01:16:05PM +1100, Victor Ding wrote:
-> > On Wed, Jan 13, 2021 at 9:32 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
-> > > On Tue, Jan 12, 2021 at 04:02:04AM +0000, Victor Ding wrote:
-> > > > Right after powering up, the device may have ASPM enabled; however,
-> > > > its LTR and/or L1ss controls may not be in the desired states; hence,
-> > > > the device may enter L1.2 undesirably and cause resume performance
-> > > > penalty. This is especially problematic if ASPM related control
-> > > > registers are modified before a suspension.
-> > >
-> > > s/L1ss/L1SS/ (several occurrences) to match existing usage.
-> > >
-> > I'll update it in the next version.
-> > >
-> > > > Therefore, ASPM should disabled until its LTR and L1ss states are
-> > > > fully restored.
+> [+cc Rafael, suspend/resume expert]
+>
+> On Wed, Jan 13, 2021 at 01:16:23PM +1100, Victor Ding wrote:
+> > On Wed, Jan 13, 2021 at 9:38 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
+> > > On Tue, Jan 12, 2021 at 04:02:05AM +0000, Victor Ding wrote:
+> > > > GL9750 has a 3100us PortTPowerOnTime; however, it enters L1.2 after
+> > > > only ~4us inactivity per PCIe trace. During a suspend/resume process,
+> > > > PCI access operations are frequently longer than 4us apart.
+> > > > Therefore, the device frequently enters and leaves L1.2 during this
+> > > > process, causing longer than desirable suspend/resume time. The total
+> > > > time cost due to this L1.2 exit latency could add up to ~200ms.
 > > > >
+> > > > Considering that PCI access operations are fairly close to each other
+> > > > (though sometimes > 4us), the actual time the device could stay in
+> > > > L1.2 is negligible. Therefore, the little power-saving benefit from
+> > > > ASPM during suspend/resume does not overweight the performance
+> > > > degradation caused by long L1.2 exit latency.
+> > > >
+> > > > Therefore, this patch proposes to disable ASPM during a suspend/resume
+> > > > process.
+> > >
+> > > This sounds like an interesting idea, but it doesn't seem like
+> > > anything that's really device-dependent.  Drivers should not need to
+> > > be involved in PCI configuration at this level, and they shouldn't
+> > > read/write registers like PCI_EXP_LNKCTL directly.
+> > >
+> > > If we need to disable ASPM during suspend, I'd rather do it in the PCI
+> > > core so all devices can benefit and drivers don't need to worry about
+> > > it.
+> > >
+> > Good point. In theory all devices could encounter this issue, and it
+> > more-likely occurs on those with low entry timer but high exit latency.
+> > GL9750 is the only one I have access to that has such characteristics.
+> >
+> > I think we should have ASPM disabled during suspend, or at least part
+> > of the suspend process*, mainly for two reasons:
+> > 1. Power saving is expected to be little. During suspend/resume, we
+> >     frequently access PCI registers, making it unlikely to stay in low
+> >     power states;
+> > 2. It could cause performance degradation. Unfortunate timing could
+> >     put the device into low power states and wake it up very soon after;
+> >     resulting noticeable delays.
+> > * By "part if the suspend process", I refer [suspend/resume]_noirq, where
+> > there are frequent PCI register accesses and suffers most from this issue.
+> >
+> > Ideally, the entry time could be tune so that it is long enough that the
+> > device would not go into low power states during suspend; however, it
+> > may not be feasible mainly because:
+> > 1. Hardware limitations;
+> > 2. The best timing for suspend/resume may not be the best timing for other
+> >     tasks. Considering suspend/resume is a rare task, we probably do not
+> >     want to sacrifice other tasks;
+> > 3. If the goal is to avoid entering low power states during suspend, it might
+> >     be better just to disable it.
+> >
+> > What do you think?
+>
+> I think we should look at disabling ASPM for all devices during
+> suspend.  I really don't want to put this kind of gunk in individual
+> drivers.  If we *have* to put something in drivers, it should be using
+> interfaces like pci_disable_link_state() instead of writing
+> PCI_EXP_LNKCTL directly.
+>
+Agreed.
+>
+> I *would* be interested in more details about this issue you're seeing
+> with GS9750, though.  It will help the case for a core change if we
+> can open a bugzilla.kernel.org issue with some of the details like the
+> L1 exit latency (from "lspci -vv") and details of the activities that
+> lead to these delays.  Typical L1 exit latencies are <100us, so to see
+> 200ms of delay would mean ~2000 L1.2 exits, which is higher than I
+> would expect.
+>
+Sorry that I misread the PCIe specs and the trace results. It was
+PortTPowerOnTime (Port T_POWER_ON) which added up to ~200ms.
+GL9750's PortTPowerOnTime is 3100us or 3.1ms, and I saw up to 60
+occurrences during resume.
+I've created https://bugzilla.kernel.org/show_bug.cgi?id=211187
+We can continue the discussion there.
+>
 > > > > Signed-off-by: Victor Ding <victording@google.com>
 > > > > ---
 > > > >
-> > > >  drivers/pci/pci.c       | 11 +++++++++++
-> > > >  drivers/pci/pci.h       |  2 ++
-> > > >  drivers/pci/pcie/aspm.c |  2 +-
-> > > >  3 files changed, 14 insertions(+), 1 deletion(-)
+> > > >  drivers/mmc/host/sdhci-pci-core.c |  2 +-
+> > > >  drivers/mmc/host/sdhci-pci-gli.c  | 46 +++++++++++++++++++++++++++++--
+> > > >  drivers/mmc/host/sdhci-pci.h      |  1 +
+> > > >  3 files changed, 46 insertions(+), 3 deletions(-)
 > > > >
-> > > > diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
-> > > > index eb323af34f1e..428de433f2e6 100644
-> > > > --- a/drivers/pci/pci.c
-> > > > +++ b/drivers/pci/pci.c
-> > > > @@ -1660,6 +1660,17 @@ void pci_restore_state(struct pci_dev *dev)
-> > > >       if (!dev->state_saved)
-> > > >               return;
+> > > > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> > > > index 9552708846ca..fd7544a498c0 100644
+> > > > --- a/drivers/mmc/host/sdhci-pci-core.c
+> > > > +++ b/drivers/mmc/host/sdhci-pci-core.c
+> > > > @@ -67,7 +67,7 @@ static int sdhci_pci_init_wakeup(struct sdhci_pci_chip *chip)
+> > > >       return 0;
+> > > >  }
 > > > >
-> > > > +     /*
-> > > > +      * Right after powering up, the device may have ASPM enabled;
-> > >
-> > > I think this could be stated more precisely.  "Right after powering
-> > > up," ASPM should be *disabled* because ASPM Control in the Link
-> > > Control register powers up as zero (disabled).
-> > >
-> > Good suggestion; I'll reword in the next version.
-> > However, ASPM should be *disabled* for the opposite reason - ASPM Control
-> > in the Link Control register *may* power as non-zero (enabled).
-> > (More answered in the next section)
-> > >
-> > > > +      * however, its LTR and/or L1ss controls may not be in the desired
-> > > > +      * states; as a result, the device may enter L1.2 undesirably and
-> > > > +      * cause resume performance penalty.
-> > > > +      * Therefore, ASPM is disabled until its LTR and L1ss states are
-> > > > +      * fully restored.
-> > > > +      * (enabling ASPM is part of pci_restore_pcie_state)
-> > >
-> > > If we're enabling L1.2 before LTR has been configured, that's
-> > > definitely a bug.  But I don't see how that happens.  The current code
-> > > looks like:
-> > >
-> > >   pci_restore_state
-> > >     pci_restore_ltr_state
-> > >       pci_write_config_word(dev, ltr + PCI_LTR_MAX_SNOOP_LAT, *cap++)
-> > >       pci_write_config_word(dev, ltr + PCI_LTR_MAX_NOSNOOP_LAT, *cap++)
-> > >     pci_restore_aspm_l1ss_state
-> > >       pci_write_config_dword(dev, aspm_l1ss + PCI_L1SS_CTL1, *cap++)
-> > >     pci_restore_pcie_state
-> > >       pcie_capability_write_word(dev, PCI_EXP_LNKCTL, cap[i++])
-> > >
-> > > We *do* restore PCI_L1SS_CTL1, which contains "ASPM L1.2 Enable",
-> > > before we restore PCI_EXP_LNKCTL, which contains "ASPM Control", but I
-> > > don't think "ASPM L1.2 Enable" by itself should be enough to allow
-> > > hardware to enter L1.2.
-> > >
-> > > Reading PCIe r5.0, sec 5.5.1, it seems like hardware should ignore the
-> > > PCI_L1SS_CTL1 bits unless ASPM L1 entry is enabled in PCI_EXP_LNKCTL.
-> > >
-> > > What am I missing?
-> > >
-> > Correct; however, PCI_EXP_LNKCTL may power up as non-zero, i.e. has
-> > ASPM Control enabled. BIOS may set PCI_EXP_LNKCTL (and
-> > PCI_L1SS_CTL1) before Kernel takes control. When BIOS does so, there
-> > is a brief period between powering up and Kernel restoring LTR state
-> > that L1.2 is enabled but LTR isn't configured.
->
-> IIUC you're saying that ASPM Control powers up as zero, but BIOS
-> enables ASPM before transferring control to the OS.  That makes sense,
-> but I wouldn't describe that as "the device powering up with ASPM
-> enabled."
->
-Correct.
->
-> If BIOS enables L1SS (specifically, if it enables L1.2) when LTR
-> hasn't been configured, that sounds like a BIOS defect.
->
-Very good point. I'll withdraw this patch then.
+> > > > -static int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
+> > > > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip)
+> > > >  {
+> > > >       int i, ret;
+> > > >
+> > > > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > index 9887485a4134..c7b788b0e22e 100644
+> > > > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > > > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > > > @@ -109,6 +109,12 @@
+> > > >
+> > > >  #define GLI_MAX_TUNING_LOOP 40
+> > > >
+> > > > +#ifdef CONFIG_PM_SLEEP
+> > > > +struct gli_host {
+> > > > +     u16 linkctl_saved;
+> > > > +};
+> > > > +#endif
+> > > > +
+> > > >  /* Genesys Logic chipset */
+> > > >  static inline void gl9750_wt_on(struct sdhci_host *host)
+> > > >  {
+> > > > @@ -577,14 +583,48 @@ static u32 sdhci_gl9750_readl(struct sdhci_host *host, int reg)
+> > > >  }
+> > > >
+> > > >  #ifdef CONFIG_PM_SLEEP
+> > > > +static int sdhci_pci_gli_suspend(struct sdhci_pci_chip *chip)
+> > > > +{
+> > > > +     int ret;
+> > > > +     struct sdhci_pci_slot *slot = chip->slots[0];
+> > > > +     struct pci_dev *pdev = slot->chip->pdev;
+> > > > +     struct gli_host *gli_host = sdhci_pci_priv(slot);
+> > > > +
+> > > > +     ret = pcie_capability_read_word(pdev, PCI_EXP_LNKCTL,
+> > > > +                     &gli_host->linkctl_saved);
+> > > > +     if (ret)
+> > > > +             goto exit;
+> > > > +
+> > > > +     ret = pcie_capability_write_word(pdev, PCI_EXP_LNKCTL,
+> > > > +                     gli_host->linkctl_saved & ~PCI_EXP_LNKCTL_ASPMC);
+> > > > +     if (ret)
+> > > > +             goto exit;
+> > > > +
+> > > > +     ret = sdhci_pci_suspend_host(chip);
+> > > > +
+> > > > +exit:
+> > > > +     return ret;
+> > > > +}
+> > > > +
+> > > >  static int sdhci_pci_gli_resume(struct sdhci_pci_chip *chip)
+> > > >  {
+> > > > +     int ret;
+> > > >       struct sdhci_pci_slot *slot = chip->slots[0];
+> > > > +     struct pci_dev *pdev = slot->chip->pdev;
+> > > > +     struct gli_host *gli_host = sdhci_pci_priv(slot);
+> > > >
+> > > > -     pci_free_irq_vectors(slot->chip->pdev);
+> > > > +     pci_free_irq_vectors(pdev);
+> > > >       gli_pcie_enable_msi(slot);
+> > > >
+> > > > -     return sdhci_pci_resume_host(chip);
+> > > > +     ret = sdhci_pci_resume_host(chip);
+> > > > +     if (ret)
+> > > > +             goto exit;
+> > > > +
+> > > > +     ret = pcie_capability_clear_and_set_word(pdev, PCI_EXP_LNKCTL,
+> > > > +                     PCI_EXP_LNKCTL_ASPMC, gli_host->linkctl_saved);
+> > > > +
+> > > > +exit:
+> > > > +     return ret;
+> > > >  }
+> > > >
+> > > >  static int sdhci_cqhci_gli_resume(struct sdhci_pci_chip *chip)
+> > > > @@ -834,7 +874,9 @@ const struct sdhci_pci_fixes sdhci_gl9750 = {
+> > > >       .probe_slot     = gli_probe_slot_gl9750,
+> > > >       .ops            = &sdhci_gl9750_ops,
+> > > >  #ifdef CONFIG_PM_SLEEP
+> > > > +     .suspend        = sdhci_pci_gli_suspend,
+> > > >       .resume         = sdhci_pci_gli_resume,
+> > > > +     .priv_size      = sizeof(struct gli_host),
+> > > >  #endif
+> > > >  };
+> > > >
+> > > > diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> > > > index d0ed232af0eb..16187a265e63 100644
+> > > > --- a/drivers/mmc/host/sdhci-pci.h
+> > > > +++ b/drivers/mmc/host/sdhci-pci.h
+> > > > @@ -187,6 +187,7 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
+> > > >  }
+> > > >
+> > > >  #ifdef CONFIG_PM_SLEEP
+> > > > +int sdhci_pci_suspend_host(struct sdhci_pci_chip *chip);
+> > > >  int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
+> > > >  #endif
+> > > >  int sdhci_pci_enable_dma(struct sdhci_host *host);
+> > > > --
+> > > > 2.30.0.284.gd98b1dd5eaa7-goog
+> > > >
