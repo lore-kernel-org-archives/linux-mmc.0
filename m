@@ -2,128 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-23.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64A5CC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 19:47:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5F26C433E6
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 01:50:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 226A8206F1
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jan 2021 19:47:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6C6A72310A
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jan 2021 01:50:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728682AbhAMTrT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jan 2021 14:47:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49542 "EHLO
+        id S1727178AbhANBtc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jan 2021 20:49:32 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728555AbhAMTrT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 14:47:19 -0500
-Received: from mail-io1-xd32.google.com (mail-io1-xd32.google.com [IPv6:2607:f8b0:4864:20::d32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0805EC061575
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 11:46:39 -0800 (PST)
-Received: by mail-io1-xd32.google.com with SMTP id u26so6581181iof.3
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 11:46:38 -0800 (PST)
+        with ESMTP id S1729892AbhANAcY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jan 2021 19:32:24 -0500
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23D5BC061795
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 16:31:25 -0800 (PST)
+Received: by mail-lj1-x229.google.com with SMTP id n11so4629387lji.5
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jan 2021 16:31:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=R5S3fbVh75sTrcXZaOEMGuqYwwTThAkZV2dyVGj7pY0=;
-        b=b3Rcn4maSoEfnDlFNSf4teaXnDsu8Hk8pPpLRG65UOdodc7SMWyz5mkCmMUzKxH1Zp
-         EXqbNvWhwzqZX9mx/Fdy+D4kCKa1nzxhB8RZyR8l+fhkS2Qf9KCBsKpid2iYboE0Bu8A
-         d4zP57faMpOrcVULkpHV68983L3DgO4J7TzP40v5ZuJiZx41dK1qvUk0qsi0HcsJmQMu
-         S7a729CMo1r48YiTxaaZnm5rbO0MRYppU6kXNckZpFArajCsocQsE3g2FhnMv5fbd2+6
-         QvdvewLdkGF0Cm3uv4T4M3U1e0+RvuWryUjPfB6CwcQUQPaqnTJ8j98q2PsM0+D+RtpQ
-         ns7A==
+        d=gmail.com; s=20161025;
+        h=mime-version:from:date:message-id:subject:to
+         :content-transfer-encoding;
+        bh=Non6Z0wp0lj2wRTS63x4IYGpzg5HbiONDEmrRj3r+eQ=;
+        b=RtS8a+CKg1Ge7OK2L0vmJXjs6bkEbsxGqNI4lamJ2/+p6xoR2yY5g5xiukf/QZSSxp
+         UFJ0hZS3zVtQm+8PAoITpNcRkoovF5fmDuV0ZOXUHB7+zih+7FRX56AbYOEJDQdttQxO
+         3IdQ7HpwKspyIfQcfdLvC0mNyTkL7EVvemR2Zs2i6NRxt8e3JvGIaDWiwbBolHKRufmK
+         ZM8ohg+wQUITyhDtIoMXBYScpHs2XeTtmPDI7X+2iBCwEWj7KLqGE0T79hnf+OWKpIfn
+         vMgzGeCe5zuQTJ/yrbVv8fdNaTjopX2XoyydhJwV+UNDW/yDeiB+SwuzJ/G9YrfWvxMh
+         4xOw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=R5S3fbVh75sTrcXZaOEMGuqYwwTThAkZV2dyVGj7pY0=;
-        b=XemZbYvHIPkdd9X5eaJkYfPjJr2ZHoypLpIXLHrfLhvKIzTPVq7JEcqicVGa0JZTF3
-         e568tJ2wP/Y7VuumCiXoRCCXTTv8GjF7KPVoE97BAe3qU+fT5ipr+utn2h5kGQWZQUrG
-         vFw7fxksN5hqHZz2b/s4faPTHedIu/8zB/auqOqywYPU+PvjKex6vOuF9ph9VBIpYsgp
-         13wsahiOBK80cA6KIFhKh0I3z7i03vKKV9UrShUp/aVLpofvI5grLZX76mbStz/cHGE1
-         uPJo6WhL3DGS3JRYejiO2vxu6zhicK07LLYgMmUdi1qvKIhUqmEAm1pktNtjQct486mV
-         Joig==
-X-Gm-Message-State: AOAM530DmekKwc/KbUuyMkCYKko7i2hAODOc6ML10+xteeVUBqgU9wtn
-        8kyujHwF4iYSVqpTpSYnvqwa7uupK66AKN1eyGXjfw==
-X-Google-Smtp-Source: ABdhPJy05DICZCPL1zdxNmpJef+jP3oPkoG5Kuk3c6L0Zs41kOpW4nxvaOEyGScDCxTufBM3+nG9pgMRyDCFIXm2jQA=
-X-Received: by 2002:a5e:dd0d:: with SMTP id t13mr2961246iop.132.1610567198273;
- Wed, 13 Jan 2021 11:46:38 -0800 (PST)
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to
+         :content-transfer-encoding;
+        bh=Non6Z0wp0lj2wRTS63x4IYGpzg5HbiONDEmrRj3r+eQ=;
+        b=nWUBcLBWj9mgeaEl2p0cwb081mB2TQ0KCJVzqR2Qop2NQb6vj5RST+qCvPBeSoHTg4
+         y0zvFWWCcH5UrOrJ69PVn2XDfi2EETQT4nCNF+zBYCWFzDSLRRbbACZ0MMKu9xvygdtN
+         58Np6lt0uuMCY/wBWShjJx/Nx57UMwyikjS5tn85r/14pxQ74v1aW572Szq4QUUY7TR5
+         EtbdOQ9hFVL7eeH3kcaCnNP1qDlQMmgngQy38IVfsZCxHuaE+OIVgis/74GG7pX/cL16
+         Em1hBkFez8rYPsh3HLG1HLOoFccs7zYxMs4CqYpL1C9IWvb00xNOzgvpsgH5XDWSbL6p
+         8FvQ==
+X-Gm-Message-State: AOAM531R2JShq+sKM/F0IijyNBQCXupVPLU+pa221TnBK9mmSaMw5O3O
+        u0mi7lfGjvT99Bkr+IAipmOnJu4rPEj3XKXjPgqPnCNjl2A=
+X-Google-Smtp-Source: ABdhPJy4N+YaNRQZUP/aw+23as+Ai1hB/lElEo7IMcyO8ntiIfGG5Fifmm1E3o+uLK4Hfq7+2gqS4aPF2HSkJNs8VTU=
+X-Received: by 2002:a2e:8748:: with SMTP id q8mr2008985ljj.428.1610584283348;
+ Wed, 13 Jan 2021 16:31:23 -0800 (PST)
 MIME-Version: 1.0
-References: <20210112210944.605953-1-pcc@google.com> <34278e68-d69f-0440-858e-b2079b8ac7bb@intel.com>
-In-Reply-To: <34278e68-d69f-0440-858e-b2079b8ac7bb@intel.com>
-From:   Peter Collingbourne <pcc@google.com>
-Date:   Wed, 13 Jan 2021 11:46:24 -0800
-Message-ID: <CAMn1gO5Yuy3c48Rscny6mnQAycZeUy-aCwex_r=h_XTMF6Lh-g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: don't initialize block size from ext_csd if
- not present
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, Damien Le Moal <damien.lemoal@wdc.com>
+From:   =?UTF-8?B?TWFydMOtbiBYacO6aG5lbCBNb3JhIFJvbGTDoW4=?= 
+        <necrodos@gmail.com>
+Date:   Wed, 13 Jan 2021 18:31:11 -0600
+Message-ID: <CAG=_e5DcNhoVM3rbzsocpBKwuwt9C0x7-B-fLwrFwyN82zTvHQ@mail.gmail.com>
+Subject: Bug Report Broadcom BCM57765/57785
+To:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jan 13, 2021 at 2:43 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 12/01/21 11:09 pm, Peter Collingbourne wrote:
-> > If extended CSD was not available, the eMMC driver would incorrectly
-> > set the block size to 0, as the data_sector_size field of ext_csd
-> > was never initialized. This issue was exposed by commit 817046ecddbc
-> > ("block: Align max_hw_sectors to logical blocksize") which caused
-> > max_sectors and max_hw_sectors to be set to 0 after setting the block
-> > size to 0, resulting in a kernel panic in bio_split when attempting
-> > to read from the device. Fix it by only reading the block size from
-> > ext_csd if it is available.
-> >
-> > Fixes: 817046ecddbc ("block: Align max_hw_sectors to logical blocksize")
->
-> I would go with the original commit i.e.
->
-> Fixes: a5075eb94837 ("mmc: block: Allow disabling 512B sector size emulation")
+Hi, I want to report a bug related to the drivers of the sd card
+reader Broadcom Broadcom Corporation BCM57765/57785 SDXC/MMC Card
+Reader. Basically It doesn't show the inserted cards, and even though
+it has a workaround that has worked flawless for mac users, many acer
+user seem to have problems like not being able to transfer large files
+(larger than a couple or not being able to format the card. I know
+this has been reported before but it keeps having problems. Thanks for
+your help, here are some links to previous reports of this bug and
+previous attempts to solve this issue. I experience this bug on a
+laptop acer v5-131 with said sd card reader running elementary 5.1.7
+Hera but I've encountered this same bug on all other ubuntu flavors on
+this same device. All using Kernel 5.4
 
-Sure, makes sense.
+Please, if I'm doing something wrong by trying to report this bug,
+please let me know
 
-> > Signed-off-by: Peter Collingbourne <pcc@google.com>
-> > Link: https://linux-review.googlesource.com/id/If244d178da4d86b52034459438fec295b02d6e60
-> > ---
-> >  drivers/mmc/core/queue.c | 3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> > index de7cb0369c30..735cdbf1145c 100644
-> > --- a/drivers/mmc/core/queue.c
-> > +++ b/drivers/mmc/core/queue.c
-> > @@ -20,6 +20,7 @@
-> >  #include "core.h"
-> >  #include "card.h"
-> >  #include "host.h"
-> > +#include "mmc_ops.h"
-> >
-> >  #define MMC_DMA_MAP_MERGE_SEGMENTS   512
-> >
-> > @@ -384,7 +385,7 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
-> >                    "merging was advertised but not possible");
-> >       blk_queue_max_segments(mq->queue, mmc_get_max_segments(host));
-> >
-> > -     if (mmc_card_mmc(card))
-> > +     if (mmc_card_mmc(card) && mmc_can_ext_csd(card))
-> >               block_size = card->ext_csd.data_sector_size;
->
-> Might as well be:
->
->         if (mmc_card_mmc(card) && card->ext_csd.data_sector_size)
->                 block_size = card->ext_csd.data_sector_size;
+https://gist.github.com/samgooi4189/2e6e18fd1d562acaf39246e5e386d7cb
 
-Can we rely on this data structure to be zero initialized? I suppose
-so, provided that it was allocated with mmc_alloc_card which uses
-kzalloc. But it isn't entirely obvious and I figure it may be a little
-better to be explicit in our intent here. But either way works for me.
+https://askubuntu.com/questions/444484/broadcom-card-reader-bcm57765-bcm577=
+85-doesnt-work-on-ubuntu-12-04-lts
 
-Peter
+https://bugzilla.kernel.org/show_bug.cgi?id=3D206005
+
+Thanks you so much for your attention
+
+Mart=C3=ADn X.
