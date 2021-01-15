@@ -2,118 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA973C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 17:56:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF98DC43332
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 18:58:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A87722262
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 17:56:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8BDE123B86
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 18:58:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727902AbhAOR44 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jan 2021 12:56:56 -0500
-Received: from mail.kernel.org ([198.145.29.99]:35720 "EHLO mail.kernel.org"
+        id S2387861AbhAOS6x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jan 2021 13:58:53 -0500
+Received: from foss.arm.com ([217.140.110.172]:51642 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727443AbhAOR44 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 Jan 2021 12:56:56 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id EA79F22262;
-        Fri, 15 Jan 2021 17:56:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1610733375;
-        bh=vj26FR8f+iU2PtcYdkiiX4Rofrx/+1bCKnemSD3ZlAQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=JBsK2t1VzsBu7KmHfRB8fFQdKPeEXnjNV8szW2jRZ4QDkGhXgm0jdcVxgilxe9p4n
-         3rr27iUbtfupeVQ9dSztg52vZ+fqiF5Ttg75ixVu2Lvbu50jVCt8kYGzkOhia4psYj
-         uOvJvb3YOwdvG7agAGkKP6W2DfqhlHuM+a0NRLQFu+Y4mRQR2ck9zbXfOyG53Yu0TO
-         R8OBrPn6JClmTKnHxfX7MInKY5GFT6fNowCH7A5VjTF9kPc3k2FDlCzVg5UYjyx/Pk
-         tq0rw2Dzn10iP4FC6v4i6FDJ+0+5VgTyrUJz3OsrN8AIVDGK5sc9H+SYtmRF59xAD6
-         SUv6kieT6g8lw==
-Date:   Fri, 15 Jan 2021 09:56:13 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
-        Satya Tangirala <satyat@google.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Subject: Re: [PATCH v4 1/9] mmc: add basic support for inline encryption
-Message-ID: <YAHXPREJaKjK/z7+@sol.localdomain>
-References: <20210104184542.4616-1-ebiggers@kernel.org>
- <20210104184542.4616-2-ebiggers@kernel.org>
- <CAPDyKFq717teu2HPZLCn9QVxLOwZHdi_iS+Ji69S0kYX1o52PQ@mail.gmail.com>
+        id S1726347AbhAOS6x (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 15 Jan 2021 13:58:53 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id B4DE2ED1;
+        Fri, 15 Jan 2021 10:58:07 -0800 (PST)
+Received: from bogus (unknown [10.57.35.27])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 984513F719;
+        Fri, 15 Jan 2021 10:58:05 -0800 (PST)
+Date:   Fri, 15 Jan 2021 18:58:03 +0000
+From:   Sudeep Holla <sudeep.holla@arm.com>
+To:     Mark Brown <broonie@kernel.org>
+Cc:     Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>,
+        ulf.hansson@linaro.org, lgirdwood@gmail.com, robh+dt@kernel.org,
+        devicetree@vger.kernel.org, adrian.hunter@intel.com,
+        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, andriy.shevchenko@intel.com,
+        Rashmi.A@intel.com, mahesh.r.vaidya@intel.com,
+        Sudeep Holla <sudeep.holla@arm.com>
+Subject: Re: [PATCH v1 5/9] firmware: keembay: Add support for Trusted
+ Firmware Service call
+Message-ID: <20210115185803.infufa4thlffagxk@bogus>
+References: <20210114152700.21916-1-muhammad.husaini.zulkifli@intel.com>
+ <20210114152700.21916-6-muhammad.husaini.zulkifli@intel.com>
+ <20210114164811.GG4854@sirena.org.uk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAPDyKFq717teu2HPZLCn9QVxLOwZHdi_iS+Ji69S0kYX1o52PQ@mail.gmail.com>
+In-Reply-To: <20210114164811.GG4854@sirena.org.uk>
+User-Agent: NeoMutt/20171215
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 15, 2021 at 10:22:03AM +0100, Ulf Hansson wrote:
-> On Mon, 4 Jan 2021 at 19:48, Eric Biggers <ebiggers@kernel.org> wrote:
-> >
-> > From: Eric Biggers <ebiggers@google.com>
-> >
-> > In preparation for adding CQHCI crypto engine (inline encryption)
-> > support, add the code required to make mmc_core and mmc_block aware of
-> > inline encryption.  Specifically:
-> >
-> > - Add a capability flag MMC_CAP2_CRYPTO to struct mmc_host.  Drivers
-> >   will set this if the host and driver support inline encryption.
-> >
-> > - Embed a blk_keyslot_manager in struct mmc_host.  Drivers will
-> >   initialize this if the host and driver support inline encryption.
-> >   mmc_block registers this keyslot manager with the request_queue of any
-> >   MMC card attached to the host.  mmc_core destroys this keyslot manager
-> >   when freeing the mmc_host.
-> >
-> > - Make mmc_block copy the crypto keyslot and crypto data unit number
-> >   from struct request to struct mmc_request, so that drivers will have
-> >   access to them.
-> >
-> > - If the MMC host is reset, reprogram all the keyslots to ensure that
-> >   the software state stays in sync with the hardware state.
-> >
-> > Co-developed-by: Satya Tangirala <satyat@google.com>
-> > Signed-off-by: Satya Tangirala <satyat@google.com>
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> > Reviewed-by: Satya Tangirala <satyat@google.com>
-> > Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> 
-> Eric, again, my apologies for the delay. Overall, I think this looks good.
-> 
-> My only hesitation to merge this as is, is that I want to make sure
-> you have thought of the life cycle issues for the struct
-> blk_keyslot_manager ksm. It's being used both from the mmc core/block
-> device driver and the mmc host driver. I am looking at this right now
-> and will get back to you very soon, if I find some issues with it.
-> 
-> If you have some time, feel free to elaborate around how this is
-> intended to work.
-> 
-> Kind regards
-> Uffe
+On Thu, Jan 14, 2021 at 04:48:11PM +0000, Mark Brown wrote:
+> On Thu, Jan 14, 2021 at 11:26:56PM +0800, Muhammad Husaini Zulkifli wrote:
+> > Export inline function to encapsulate AON_CFG1 for controling the I/O Rail
+> > supplied voltage levels which communicate with Trusted Firmware.
+>
+> Adding Sudeep for the SMCCC bits, not deleting any context for his
+> benefit.
+>
 
-The blk_keyslot_manager is initialized early on when the other host structures
-(struct mmc_host, struct cqhci_host, struct sdhci_host, struct sdhci_msm_host)
-are initialized, prior to mmc_add_host().
+Thanks Mark for cc-ing me and joining the dots. I completely forgot about
+that fact that this platform was using SCMI using SMC as transport. Sorry
+for that and it is my fault. I did review the SCMI/SMC support for this
+platform sometime in June/July last year and forgot the fact it is same
+platform when voltage/regulator support patches for SD/MMC was posted
+sometime later last year. I concentrated on SMCCC conventions and other
+details.
 
-It is destroyed when the struct mmc_host is freed by mmc_free_host().
+[...]
 
-So it should just work; it's the same lifecycle as the existing host structures.
-Is there something you think I'm overlooking?
+> > +#define ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE		\
+> > +	ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL,		\
+> > +			   ARM_SMCCC_SMC_32,		\
+> > +			   ARM_SMCCC_OWNER_SIP,		\
+> > +			   KEEMBAY_SET_SD_VOLTAGE_ID)
+> > +
+> > +#define ARM_SMCCC_SIP_KEEMBAY_GET_SD_VOLTAGE		\
+> > +	ARM_SMCCC_CALL_VAL(ARM_SMCCC_FAST_CALL,		\
+> > +			   ARM_SMCCC_SMC_32,		\
+> > +			   ARM_SMCCC_OWNER_SIP,		\
+> > +			   KEEMBAY_GET_SD_VOLTAGE_ID)
+> > +
+> > +#define KEEMBAY_REG_NUM_CONSUMERS 2
+> > +
+> > +struct keembay_reg_supply {
+> > +	struct regulator *consumer;
+> > +};
+> > +
+> > +#if IS_ENABLED(CONFIG_HAVE_ARM_SMCCC_DISCOVERY)
+> > +/*
+> > + * Voltage applied on the IO Rail is controlled from the Always On Register using specific
+> > + * bits in AON_CGF1 register. This is a secure register. Keem Bay SOC cannot exposed this
+> > + * register address to the outside world.
+> > + */
+> > +static inline int keembay_set_io_rail_supplied_voltage(int volt)
+> > +{
+> > +	struct arm_smccc_res res;
+> > +
+> > +	arm_smccc_1_1_invoke(ARM_SMCCC_SIP_KEEMBAY_SET_SD_VOLTAGE, volt, &res);
+>
+> There is a SCMI voltage domain protocol intended for just this use case
+> of controlling regulators managed by the firmware, why are you not using
+> that for these systems?  See drivers/firmware/arm_scmi/voltage.c.
+>
 
-- Eric
+Indeed. Please switch to using the new voltage protocol added for this without
+any extra code. You just need to wire up DT for this.
+
+Just for curiosity, where is SCMI platform firmware implemented ? On Cortex-A,
+secure side or external processor. Does this platform run TF-A ?
+
+--
+Regards,
+Sudeep
