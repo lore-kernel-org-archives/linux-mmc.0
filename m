@@ -2,96 +2,395 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF9D4C433DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 22:50:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E3F9C433DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 22:54:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A17A423A6C
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 22:50:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D3E423A5E
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 22:54:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726172AbhAOWus (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jan 2021 17:50:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59632 "EHLO
+        id S1725863AbhAOWyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jan 2021 17:54:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725863AbhAOWur (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 17:50:47 -0500
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29048C0613D3
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2021 14:50:07 -0800 (PST)
-Received: by mail-lf1-x12c.google.com with SMTP id v67so15539265lfa.0
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2021 14:50:07 -0800 (PST)
+        with ESMTP id S1726789AbhAOWyA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 17:54:00 -0500
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05925C0613D3
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2021 14:53:20 -0800 (PST)
+Received: by mail-lj1-x22e.google.com with SMTP id p13so12124185ljg.2
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2021 14:53:19 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=K9KSr8/xWSCyHW7tN9xnYcCbpuAtDjpL1+6SsF6x/c8=;
-        b=m0G/IYzZj3G7d8stfAQn9ESWdEifj4TTtPEV1mAA6XZixfSweCE/9vFz9AI/zkVHOi
-         h2maiRt5yA8tL/AuQ8CzG0stziso5ZC1tKUpMTrqugyG1suaHt0t+YJtNsREYarAT2u0
-         ikMzgiAzmms1fYZ3wRF84D8dcE4V05U40k1I5g4Hk8AXcHtjZY+1f1pWKq7xMQ0YxmP9
-         jhF0W3YFwtW1XQ6dY28BnVo+jY1uc4hLT+Q1EJx43JXr1MxF6r/JDtjUMVqhk6elRmua
-         qgocTuvk3N0qAxet5KZsYLooYRD5wKCmfihh6zwIYjxgQ/b5jOQIo56LxceGu4BuNGoA
-         imhA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=fwkOKiWMywT1nhekMrwy4lfU/ngaQuFn0WH4H2XVxHo=;
+        b=Q03aROIejkz9Na92YUB+9Za8Mm0lQZb0mVg9pgOyrHWYHVFHcuBr7fASnBjYd3FoPd
+         Af3cdgXjaAK6j7Z+MGXEm8Zc4ycyJe25w4ka5bjTCXgZnXVlk4kc9txmC55dIUx3Lvgn
+         nR9o+eVIhQkKANWv/1RAktxSkE12stYCKKSHPHiNVuwhNNtX/PTbWapTpQVXxberHJPS
+         9kTLqvGd2L1Ajh7omPwm12qV/a+HLfjWJ72WudFX+koMEYkAmFHNCV7XKH+xx0Qxjpo4
+         B/MKI7dguNuA0LvDz3S+TGoAa0RduF/fyC2AxPqiLMYcdwlKkE79tn1KMRTvLZMU773T
+         te8A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=K9KSr8/xWSCyHW7tN9xnYcCbpuAtDjpL1+6SsF6x/c8=;
-        b=RWsQDvLeL8z7qVkkP2wTVr36lGjqac29BjxQdUDTa8Hhbahh08uNkVq27UsN93YVVI
-         LgiANHNEHUYpDJxuz1P/EjpcuPeOeQWNMcocOfYDspm7dqp/uK9EHDY0B7s3u/NvMOBn
-         KkjFaQL9TIY7YSleLzKZZFbAMsvSq6BMnIzlIBTICoOTAP6rkE0Uy6zDamZrYvExdiXh
-         /Z3L7sFotfSQ9UC/L36v2cmJvxR1cI7bS8F9t6iUIT/omJ9d0d9KJue3dhC+xljvLtWo
-         y/DTrBRGVvfdKenCPw6hQJdVan3/PeY3JzfF+75jUeCb93N5w/vkDjCUjNGxqilE3lzZ
-         F+WQ==
-X-Gm-Message-State: AOAM530VemWyYXavFv0xw/crAs/3H37UtUL+13MiyOcKDlEkbDLKkMYv
-        E645t/w4YcvXwPBqGvKUHTo+IEa38ACun7wD9+Q3TysBEy8=
-X-Google-Smtp-Source: ABdhPJwlRs6Es/A2YqSiBPXLgGTbo0FkuYbgKqGxUpEC1Rcbcg7AwYKokJ8VGaSpGDmS90BJvJCL9sTpvN3hSQwD5Rk=
-X-Received: by 2002:a19:6557:: with SMTP id c23mr6095888lfj.157.1610751005247;
- Fri, 15 Jan 2021 14:50:05 -0800 (PST)
-MIME-Version: 1.0
-References: <20210105140718.122752-1-marex@denx.de> <CAPDyKFoQfm2ZtPdsZSZtOCDH-FJqNzihYqZny-vUdK4Q4tWTzQ@mail.gmail.com>
- <b83c1112-010b-a40f-319f-84c755424b0f@denx.de> <CAPDyKFo5Sqxj31owrnmz1sTZqgW_PtZM2H=pDPBz+9hc0W0hHA@mail.gmail.com>
- <77dd612b-23f0-1f77-797a-9cde512926e3@denx.de> <f91fbdfc-453d-78a6-970a-5d6eecd443b2@foss.st.com>
- <ccef7ae4-8cd7-4434-9632-917a4fb92f53@denx.de> <ad4a108e-81f1-daf5-9921-9884ed06d237@foss.st.com>
-In-Reply-To: <ad4a108e-81f1-daf5-9921-9884ed06d237@foss.st.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=fwkOKiWMywT1nhekMrwy4lfU/ngaQuFn0WH4H2XVxHo=;
+        b=ADneN+k9WezY51uz9lJEbaaUh/jGUhTdg0BX7/1ke73VY79q5kf7atx0lK0jog2vNO
+         aAtlUqm16buP9/tbVmWkDZ5w61gEioDia7lYvIPIz3Kl4cBmx4Aa95SHuridkxOrOnfN
+         Oxb2/eMpHQBSceJl4wE4kYPHrWRpurB3Z1+4w4nH94G1XLMjf60OYwJlcKuwXCV6BDog
+         fDtcch1vvJ5bxViZ40b/hMoDdczbmNz5d+xLRrsoK0H4HAeGbI+z47ZOoN7i6qdou03t
+         jYdQyZwMK4m+/2vLnZ0o/AA/27UnCzOPSLIQ2YnZzqQcyTStDTZJpkVEXeuwbLfzrdt2
+         MHWA==
+X-Gm-Message-State: AOAM531O3i6kZDooVaRALFVKkV8N27f50e40ACEsGbBoO/lcAHfWZMrn
+        7jDQJAkI4/gRlhWNMpstSlVPLazbHOC5Dw==
+X-Google-Smtp-Source: ABdhPJxuLgXDkNwG+bMMOfy8r+hR7M+uPpyW1ixuykiq+qKQ1a5Gf9ttl5ozg6AcnVAQptBALP7eeg==
+X-Received: by 2002:a2e:b550:: with SMTP id a16mr6354870ljn.408.1610751198134;
+        Fri, 15 Jan 2021 14:53:18 -0800 (PST)
+Received: from localhost.localdomain (c-92d7225c.014-348-6c756e10.bbcust.telenor.se. [92.34.215.146])
+        by smtp.gmail.com with ESMTPSA id b29sm1054886lfc.12.2021.01.15.14.53.17
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 15 Jan 2021 14:53:17 -0800 (PST)
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 15 Jan 2021 23:49:54 +0100
-Message-ID: <CACRpkdY=n_-5giDVyqvSbCF7wy_-Xf7RfOrQbxrCQ+jC9b2rXw@mail.gmail.com>
-Subject: Re: [Linux-stm32] [PATCH] [RFC] mmc: mmci: Add support for probing
- bus voltage level translator
-To:     Yann GAUTIER <yann.gautier@foss.st.com>
-Cc:     Marek Vasut <marex@denx.de>, Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        devicetree@vger.kernel.org, Marek Vasut <marex@denx.de>
+Subject: [PATCH] RFC: mmc: mmci: Convert bindings to DT schema
+Date:   Fri, 15 Jan 2021 23:53:13 +0100
+Message-Id: <20210115225313.2616477-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.29.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 14, 2021 at 11:13 AM Yann GAUTIER <yann.gautier@foss.st.com> wrote:
-> On 1/13/21 3:45 PM, Marek Vasut wrote:
-> > On 1/13/21 3:21 PM, Yann GAUTIER wrote:
-> >> On 1/13/21 12:52 PM, Marek Vasut wrote:
+This converts the MMCI bindings from simple text to a proper
+schema.
 
-> >> I also wonder if this HW detection should be done in kernel, or if it
-> >> should be done in Bootloader. But it may be more complex, to add the
-> >> st,use_ckin in kernel DT if bootloader detects this translator.
-> >
-> > Lets not attempt to hide inobvious functionality in bootloaders, the
-> > kernel should be independent of bootloader where possible. And here it
-> > is clearly and easily possible.
->
-> OK for this part, I understand it will be better not to hide this in
-> bootloader.
+I can't get this to work when testing the schema and I don't
+know why, possibly my fault. That is why it is RFC.
 
-We all agree. I am against bootloaderism, the tendency to toss all
-complex hardware detection over the wall and call it
-a bootloader problem.
+/var/linus/linux-nomadik/build-ux500/Documentation/devicetree/bindings/mmc/arm,pl18x.example.dt.yaml: mmc@5000: 'clock-names', 'clocks' do not match any of the regexes: 'pinctrl-[0-9]+'
+	From schema: /var/linus/linux-nomadik/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+/var/linus/linux-nomadik/build-ux500/Documentation/devicetree/bindings/mmc/arm,pl18x.example.dt.yaml: mmc@80126000: 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'cd-gpios', 'clock-names', 'clocks', 'max-frequency', 'vmmc-supply', 'vqmmc-supply' do not match any of the regexes: 'pinctrl-[0-9]+'
 
-Let's proceed with Marek's solution.
+This appear on my machine despite:
 
-Yours,
-Linus Walleij
+allOf:
+  - $ref: /schemas/arm/primecell.yaml#
+  - $ref: /schemas/mmc/mmc-controller.yaml#
+
+No idea why these refs are not reffed. Help.
+
+Cc: devicetree@vger.kernel.org
+Cc: Marek Vasut <marex@denx.de>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ .../devicetree/bindings/mmc/arm,pl18x.yaml    | 208 ++++++++++++++++++
+ .../devicetree/bindings/mmc/mmci.txt          |  74 -------
+ 2 files changed, 208 insertions(+), 74 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/mmci.txt
+
+diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+new file mode 100644
+index 000000000000..2e1157560d7a
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+@@ -0,0 +1,208 @@
++# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/arm,pl18x.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: ARM PrimeCell MultiMedia Card Interface (MMCI) PL180 and PL181
++
++maintainers:
++  - Linus Walleij <linus.walleij@linaro.org>
++  - Ulf Hansson <ulf.hansson@linaro.org>
++
++description:
++  The ARM PrimeCells MMCI PL180 and PL181 provides an interface for
++  reading and writing to MultiMedia and SD cards alike. Over the years
++  vendors have use the VHDL code from ARM to create derivative MMC/SD/SDIO
++  host controllers with very similar characteristics.
++
++allOf:
++  - $ref: /schemas/arm/primecell.yaml#
++  - $ref: /schemas/mmc/mmc-controller.yaml#
++
++# We need a select here so we don't match all nodes with 'arm,primecell'
++select:
++  properties:
++    compatible:
++      contains:
++        enum:
++          - arm,pl180
++          - arm,pl181
++          - arm,pl18x
++  required:
++    - compatible
++
++properties:
++  compatible:
++    oneOf:
++      - description: The first version of the block, simply called
++          PL180 and found in the ARM Integrator IM/PD1 logic module.
++        items:
++          - const: arm,pl180
++          - const: arm,primecell
++      - description: The improved version of the block, found in the
++          ARM Versatile and later reference designs. Further revisions
++          exist but get detected at runtime by reading some magic numbers
++          in the PrimeCell ID registers.
++        items:
++          - const: arm,pl181
++          - const: arm,primecell
++      - description: Wildcard entry that will let the operating system
++          inspect the PrimeCell ID registers to determine which hardware
++          variant of PL180 or PL181 this is.
++        items:
++          - const: arm,pl18x
++          - const: arm,primecell
++
++  dmas:
++    description: Two or zero DMA channels for RX and TX DMA.
++    items:
++      - description: RX DMA channel
++      - description: TX DMA channel
++
++  dma-names:
++    description: One "tx" channel for transmit and one "rx" channel
++      for receive.
++    items:
++      - const: rx
++      - const: tx
++
++  power-domains: true
++
++  resets:
++    maxItems: 1
++
++  reg:
++    description: the MMIO memory window must be exactly 4KB (0x1000) and the
++      layout should provide the PrimeCell ID registers so that the device can
++      be discovered. On ST Micro variants, a second register window may be
++      defined if a delay block is present and used for tuning.
++
++  interrupts:
++    description: The first interrupt is the command interrupt and corresponds
++      to the event at the end of a command. The second interrupt is the
++      PIO (polled I/O) interrupt and occurs when the FIFO needs to be
++      emptied as part of a bulk read from the card. Some variants have these
++      two interrupts wired into the same line (logic OR) and in that case
++      only one interrupt may be provided.
++
++  st,sig-dir-dat0:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, bus signal direction pins used for
++      DAT[0].
++
++  st,sig-dir-dat2:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, bus signal direction pins used for
++      DAT[2].
++
++  st,sig-dir-dat31:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, bus signal direction pins used for
++      DAT[3] and DAT[1].
++
++  st,sig-dir-dat74:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, bus signal direction pins used for
++      DAT[7] and DAT[4].
++
++  st,sig-dir-cmd:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, CMD signal direction used for
++      pin CMD.
++
++  st,sig-pin-fbclk:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, feedback clock FBCLK signal pin
++      in use.
++
++  st,sig-dir:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, signal direction polarity used for
++      pins CMD, DAT[0], DAT[1], DAT[2] and DAT[3].
++
++  st,neg-edge:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, data and command phase relation,
++      generated on the sd clock falling edge.
++
++  st,use-ckin:
++    $ref: /schemas/types.yaml#/definitions/flag
++    description: ST Micro-specific property, use CKIN pin from an external
++      driver to sample the receive data (for example with a voltage switch
++      transceiver).
++
++additionalProperties: false
++
++required:
++  - compatible
++  - reg
++  - interrupts
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    #include <dt-bindings/gpio/gpio.h>
++
++    mmc@5000 {
++      compatible = "arm,pl180", "arm,primecell";
++      reg = <0x5000 0x1000>;
++      interrupts-extended = <&vic 22 &sic 1>;
++      clocks = <&xtal24mhz>, <&pclk>;
++      clock-names = "mclk", "apb_pclk";
++    };
++
++    mmc@80126000 {
++      compatible = "arm,pl18x", "arm,primecell";
++      reg = <0x80126000 0x1000>;
++      interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
++      dmas = <&dma 29 0 0x2>, <&dma 29 0 0x0>;
++      dma-names = "rx", "tx";
++      clocks = <&prcc_kclk 1 5>, <&prcc_pclk 1 5>;
++      clock-names = "sdi", "apb_pclk";
++      max-frequency = <100000000>;
++      bus-width = <4>;
++      cap-sd-highspeed;
++      cap-mmc-highspeed;
++      cd-gpios  = <&gpio2 31 0x4>;
++      st,sig-dir-dat0;
++      st,sig-dir-dat2;
++      st,sig-dir-cmd;
++      st,sig-pin-fbclk;
++      vmmc-supply = <&ab8500_ldo_aux3_reg>;
++      vqmmc-supply = <&vmmci>;
++    };
++
++    mmc@101f6000 {
++      compatible = "arm,pl18x", "arm,primecell";
++      reg = <0x101f6000 0x1000>;
++      clocks = <&sdiclk>, <&pclksdi>;
++      clock-names = "mclk", "apb_pclk";
++      interrupt-parent = <&vica>;
++      interrupts = <22>;
++      max-frequency = <400000>;
++      bus-width = <4>;
++      cap-mmc-highspeed;
++      cap-sd-highspeed;
++      full-pwr-cycle;
++      st,sig-dir-dat0;
++      st,sig-dir-dat2;
++      st,sig-dir-dat31;
++      st,sig-dir-cmd;
++      st,sig-pin-fbclk;
++      vmmc-supply = <&vmmc_regulator>;
++    };
++
++    mmc@52007000 {
++      compatible = "arm,pl18x", "arm,primecell";
++      arm,primecell-periphid = <0x10153180>;
++      reg = <0x52007000 0x1000>;
++      interrupts = <49>;
++      interrupt-names = "cmd_irq";
++      clocks = <&rcc 0>;
++      clock-names = "apb_pclk";
++      resets = <&rcc 1>;
++      cap-sd-highspeed;
++      cap-mmc-highspeed;
++      max-frequency = <120000000>;
++    };
+diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
+deleted file mode 100644
+index 4ec921e4bf34..000000000000
+--- a/Documentation/devicetree/bindings/mmc/mmci.txt
++++ /dev/null
+@@ -1,74 +0,0 @@
+-* ARM PrimeCell MultiMedia Card Interface (MMCI) PL180/1
+-
+-The ARM PrimeCell MMCI PL180 and PL181 provides an interface for
+-reading and writing to MultiMedia and SD cards alike.
+-
+-This file documents differences between the core properties described
+-by mmc.txt and the properties used by the mmci driver. Using "st" as
+-the prefix for a property, indicates support by the ST Micro variant.
+-
+-Required properties:
+-- compatible             : contains "arm,pl18x", "arm,primecell".
+-- vmmc-supply            : phandle to the regulator device tree node, mentioned
+-                           as the VCC/VDD supply in the eMMC/SD specs.
+-
+-Optional properties:
+-- arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
+-                           the ID provided by the HW
+-- resets                 : phandle to internal reset line.
+-			   Should be defined for sdmmc variant.
+-- vqmmc-supply           : phandle to the regulator device tree node, mentioned
+-                           as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+-specific for ux500 variant:
+-- st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
+-- st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
+-- st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
+-- st,sig-dir-dat74       : bus signal direction pin used for DAT[4] to DAT[7].
+-- st,sig-dir-cmd         : cmd signal direction pin used for CMD.
+-- st,sig-pin-fbclk       : feedback clock signal pin used.
+-
+-specific for sdmmc variant:
+-- reg			 : a second base register may be defined if a delay
+-                           block is present and used for tuning.
+-- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
+-- st,neg-edge            : data & command phase relation, generated on
+-                           sd clock falling edge.
+-- st,use-ckin            : use ckin pin from an external driver to sample
+-                           the receive data (example: with voltage
+-			   switch transceiver).
+-
+-Deprecated properties:
+-- mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
+-- mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
+-
+-Example:
+-
+-sdi0_per1@80126000 {
+-	compatible = "arm,pl18x", "arm,primecell";
+-	reg = <0x80126000 0x1000>;
+-	interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
+-
+-	dmas = <&dma 29 0 0x2>, /* Logical - DevToMem */
+-	       <&dma 29 0 0x0>; /* Logical - MemToDev */
+-	dma-names = "rx", "tx";
+-
+-	clocks = <&prcc_kclk 1 5>, <&prcc_pclk 1 5>;
+-	clock-names = "sdi", "apb_pclk";
+-
+-	max-frequency = <100000000>;
+-	bus-width = <4>;
+-	cap-sd-highspeed;
+-	cap-mmc-highspeed;
+-	cd-gpios  = <&gpio2 31 0x4>; // 95
+-	st,sig-dir-dat0;
+-	st,sig-dir-dat2;
+-	st,sig-dir-cmd;
+-	st,sig-pin-fbclk;
+-
+-	vmmc-supply = <&ab8500_ldo_aux3_reg>;
+-	vqmmc-supply = <&vmmci>;
+-
+-	pinctrl-names = "default", "sleep";
+-	pinctrl-0 = <&sdi0_default_mode>;
+-	pinctrl-1 = <&sdi0_sleep_mode>;
+-};
+-- 
+2.29.2
+
