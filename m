@@ -2,137 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEFD8C433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E24FAC433E0
 	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 05:48:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 96CC2239EF
+	by mail.kernel.org (Postfix) with ESMTP id AEDC7239FC
 	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 05:48:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727118AbhAOFsS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jan 2021 00:48:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36770 "EHLO
+        id S1730699AbhAOFsY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jan 2021 00:48:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729257AbhAOFsQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 00:48:16 -0500
-Received: from mail-qk1-x72c.google.com (mail-qk1-x72c.google.com [IPv6:2607:f8b0:4864:20::72c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E91FC061575;
-        Thu, 14 Jan 2021 21:47:36 -0800 (PST)
-Received: by mail-qk1-x72c.google.com with SMTP id b64so10712401qkc.12;
-        Thu, 14 Jan 2021 21:47:36 -0800 (PST)
+        with ESMTP id S1730562AbhAOFsV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 00:48:21 -0500
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81E72C061757;
+        Thu, 14 Jan 2021 21:47:41 -0800 (PST)
+Received: by mail-pg1-x533.google.com with SMTP id 30so5326389pgr.6;
+        Thu, 14 Jan 2021 21:47:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=ZuuCndbOtvm58/vkKrBedKYmsIRrJvREo1b8S1ptqFQ=;
-        b=et1CTe3omLNz4hbwGZr0zd/j9fOt9f4QTMhnEZJ8KBseCh7DgfR4LQN29AKoaSeJ0Y
-         TlvpcDN2DAVkQ5j+rW4WJZX2VtAiXr7sMsAnM9SQr7udUKDSbuEOIv72OORl4MGl8ODF
-         Ejjwus5n7N4523970dAvJuE5/Ga0sp1PGUS6EUUdlrUcF7jdOiL3ZfjbcIvGqHWthnro
-         DaK02h3iVYhzj7FwtV8n7ghXpwy8wuVaKR3G5Pn426YDFAZZGSkzFu6PKFCeDbQJEl6X
-         dcLucluwpfPtw6qreSANlBnmRXV0nvl6UskP6ACUeMbdWDQ1/FXOC4rKvSHOEPBJCTGN
-         HjuQ==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Y/rucpAwNr7H7Sq+3iwOrm/3FZrRl2K/TF/QHTKwAl4=;
+        b=prBSjERD/4xhSmfN/LZoOMqYKPZB+MJkLRhzWQs5F0STCTA0EGz8La3vovPqyW09U+
+         0V5UcopJa0JAQc4QlD/63Z7KyF+aIrZ1+ptx7Hyjs0AUioVAll703qW2I2WBkJjuDsIh
+         GO3DNPR5sSYqxyfOkCF9i5dppF+1F5LRRA5D43PLGzS/MhExhVtV28gISLA8451qlTVn
+         6g9+mmM3q/7Yp1XIw5ro+AphxFA6gWlUXCAka99WybAsj6MN3QUJWKrXK6aHu8noux/S
+         i0binNhfywyIlez1DuUwWXPRY/1UFS3//J+CD6luClp1O70SUG1/Zi09uRk6mM9GqTRo
+         7NDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=ZuuCndbOtvm58/vkKrBedKYmsIRrJvREo1b8S1ptqFQ=;
-        b=gqdaY+kyC/NI/LmLoV0jypFmAQThbA1ctwXRa8CJjVd/ZcZSV4o54MzTl/ztIM9FzH
-         1++6lCU0hcw736SAhB7Jb86g0myBg4CuO/0KGT1Nr5M2GyMIVGwReDoVj+75QEXCqH/C
-         mHad8LPkFANomv59ec9hiv7JOcQNvns4RLymtitn3Ca6zPb9RTMy+D/3EFX7vLssH+hc
-         xPAIaun+WbXYcOjx4Vna1DMfbR9HT/Vksy7sA8wyc7Cy6REJykKn+L6ujNuKIa50gg3l
-         1n49+ewBDm7eI81UNs+oe+brDKlkZ2lHCJ08zdAnrss/FWRVlLzb0lbC9Us6ePP5rQEl
-         pgmg==
-X-Gm-Message-State: AOAM531GDQX2lF7y0tfNoVRFJzDwNEX8stvB40rNRVyvcthc+4eyAZdK
-        lpkMxLHj3XDjmhF2N4bi2S6pg7FfVC1Kb49ori0=
-X-Google-Smtp-Source: ABdhPJwmHHW5taNBY8omsDPfDQakRE+VuaRoi+8DmQ0LHMYt39pdtsqNaGWk/EZZX2cBFFFV5vK4HFEdek7pAfTw8Ec=
-X-Received: by 2002:a37:a7d0:: with SMTP id q199mr10846239qke.217.1610689655854;
- Thu, 14 Jan 2021 21:47:35 -0800 (PST)
-MIME-Version: 1.0
-References: <20210106092740.5808-1-reniuschengl@gmail.com> <CAPDyKFq1EVVfU4HU_=-7TmSRinkTCA41pKWtrMD4C+yCUPYECg@mail.gmail.com>
- <CAJU4x8uKHQy_hbMhsErzWb2U5USjMRhAZv=+14a9zDn068vHmw@mail.gmail.com> <CAPDyKFrgHgkxFjG5X6v6jx6LYAwx4m5pGROrVY2a42wTPeTKiQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFrgHgkxFjG5X6v6jx6LYAwx4m5pGROrVY2a42wTPeTKiQ@mail.gmail.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Y/rucpAwNr7H7Sq+3iwOrm/3FZrRl2K/TF/QHTKwAl4=;
+        b=Ml2i03nsw7wIdlHEKykNyC8Yir5X8U62yEoNe/e8Ai/ldnF+z3/X/KDQjJYXumOq5c
+         TGLpY4mXaJpTxyyn0XtMkFvLfS+FEJXBBYfRVYIiwhfclCYzgdmOYyEiPiKGfX6msi+K
+         mZdAWbz0I47Wtjv4m/BBYCAeljp+ruLQXS1dOXLdC6WlkXTb/PSY8wFq4I97gNfxa5Az
+         daLudXzbILzek6DjMYwcYWm3WUKW8kbuigzOy5tl5J0f0rlzcAa7oonrXeuyva+ihO2R
+         +y87LrjIYsJLamB/HuTEohvqIM6ntF27tnIjtEDYca4OvM7qUiIh4/okq7IghZ1AnsEP
+         /pkQ==
+X-Gm-Message-State: AOAM531NBlZH9pHK9XvJOAF0B0FxXsUH630gfVPz5Hr/kVD6s5B2HNnp
+        A2T+ypSj64rggv/oi567nngc9S0LGf0Vow==
+X-Google-Smtp-Source: ABdhPJz3QaEPXYyvRtan7b9Ddu4rqqXDtp+0jZ0MB1Y1BA/TloVGN2WygeGPK0o7ogTp+Sp/OoHICg==
+X-Received: by 2002:a62:1d43:0:b029:1ab:7f7a:4ab8 with SMTP id d64-20020a621d430000b02901ab7f7a4ab8mr10960117pfd.43.1610689661151;
+        Thu, 14 Jan 2021 21:47:41 -0800 (PST)
+Received: from gli-System-Product-Name.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id t206sm6815854pgb.84.2021.01.14.21.47.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 Jan 2021 21:47:40 -0800 (PST)
 From:   Renius Chen <reniuschengl@gmail.com>
-Date:   Fri, 15 Jan 2021 13:47:24 +0800
-Message-ID: <CAJU4x8urzOdFSS=auDSGzxM2Dt1KfMviRiBvKZeeQyyRxRxweg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: Enlarge ASPM L1 entry delay of GL9763E
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        greg.tu@genesyslogic.com.tw
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        Renius Chen <reniuschengl@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Enlarge ASPM L1 entry delay of GL9763E (v2)
+Date:   Fri, 15 Jan 2021 13:47:36 +0800
+Message-Id: <20210115054736.27769-1-reniuschengl@gmail.com>
+X-Mailer: git-send-email 2.27.0
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> Ulf Hansson <ulf.hansson@linaro.org> =E6=96=BC 2021=E5=B9=B41=E6=9C=8814=
-=E6=97=A5 =E9=80=B1=E5=9B=9B =E4=B8=8B=E5=8D=888:04=E5=AF=AB=E9=81=93=EF=BC=
-=9A
->
-> On Thu, 14 Jan 2021 at 07:25, =E9=99=B3=E5=BB=BA=E5=AE=8F <reniuschengl@g=
-mail.com> wrote:
-> >
-> > > Ulf Hansson <ulf.hansson@linaro.org> =E6=96=BC 2021=E5=B9=B41=E6=9C=
-=8813=E6=97=A5 =E9=80=B1=E4=B8=89 =E4=B8=8B=E5=8D=886:53=E5=AF=AB=E9=81=93=
-=EF=BC=9A
-> > >
-> > > On Wed, 6 Jan 2021 at 10:27, Renius Chen <reniuschengl@gmail.com> wro=
-te:
-> > > >
-> > > > The R/W performance of GL9763E is low with some platforms, which
-> > > > support ASPM mechanism, due to entering L1 state very frequently
-> > > > in R/W process. Enlarge its ASPM L1 entry delay to improve the
-> > > > R/W performance of GL9763E.
-> > >
-> > > What do you mean by frequently? In between a burst of request or
-> > > during a burst of request?
-> >
-> > GL9763E enters ASPM L1 state after a very short idle in default, even
-> > during a burst of request.
->
-> Okay, then it certainly makes sense to extend the idle period.
->
-> Would you mind extending the commit message with some of this
-> information, as I think it's useful.
->
-> >
-> > > I am thinking that this could have an effect on energy instead, but I
-> > > guess it's not always straightforward to decide what's most important=
-.
-> > >
-> > > Anyway, what does it mean when you change to use 0x3FF? Are you
-> > > increasing the idle period? Then for how long?
-> >
-> > Yes, we considered that having high performance is more important than
-> > saving power during a burst of request.
-> > So we increased the idle period for 260us, by setting 0x3FF to the
-> > ASPM L1 entry delay bits of our vendor-specific register.
-> > Anyway, GL9763E can still enter ASPM L1 state by a longer idle.
->
-> Most mmc controllers that uses runtime PM autosuspend for the same
-> reasons, uses and idle period time of ~50us. 260us is in the same
-> ballpark, so I am fine with that, if that works for you.
->
-> However, can you please add a comment in the code (and preferably also
-> to the commit message) that 0x3FF means using a 260us idle period?
+GL9763E enters ASPM L1 state after a very short idle in default,
+even during a burst of request. So the R/W performance of GL9763E
+is low with some platforms, which support ASPM mechanism, due to
+entering ASPM L1 state very frequently in R/W process. Set the L1
+entry delay bits in vendor-specific register to 0x3FF to enlarge
+the idle period to 260us for improving the R/W performance
+of GL9763E.
 
-OK, I'll extend the commit message with some of these information and
-add a comment in the code to describe that the idle period is set to
-260us.
+Signed-off-by: Renius Chen <reniuschengl@gmail.com>
+---
+ drivers/mmc/host/sdhci-pci-gli.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-Then I'll submit a newer version: mmc: sdhci-pci-gli: Enlarge ASPM L1
-entry delay of GL9763E (v2).
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index c6a107d7c742..fb14f70cb9a0 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -88,6 +88,10 @@
+ #define PCIE_GLI_9763E_SCR	 0x8E0
+ #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
+ 
++#define PCIE_GLI_9763E_CFG2      0x8A4
++#define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
++#define   GLI_9763E_CFG2_L1DLY_MAX 0x3FF
++
+ #define PCIE_GLI_9763E_MMC_CTRL  0x960
+ #define   GLI_9763E_HS400_SLOW     BIT(3)
+ 
+@@ -792,6 +796,12 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
+ 	value &= ~GLI_9763E_HS400_SLOW;
+ 	pci_write_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, value);
+ 
++	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG2, &value);
++	value &= ~GLI_9763E_CFG2_L1DLY;
++	/* set ASPM L1 entry delay to 260us */
++	value |= FIELD_PREP(GLI_9763E_CFG2_L1DLY, GLI_9763E_CFG2_L1DLY_MAX);
++	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG2, value);
++
+ 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
+ 	value &= ~GLI_9763E_VHS_REV;
+ 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
+-- 
+2.27.0
 
-Thank you.
-
->
-> [...]
->
-> Kind regards
-> Uffe
