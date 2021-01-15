@@ -2,126 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC677C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 09:53:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABE10C433DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 12:23:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7155423877
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 09:53:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 86EB32256F
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 12:23:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728260AbhAOJxF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jan 2021 04:53:05 -0500
-Received: from out30-133.freemail.mail.aliyun.com ([115.124.30.133]:51679 "EHLO
-        out30-133.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726468AbhAOJxE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 04:53:04 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R881e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04394;MF=abaci-bugfix@linux.alibaba.com;NM=1;PH=DS;RN=7;SR=0;TI=SMTPD_---0ULo6iiE_1610704282;
-Received: from j63c13417.sqa.eu95.tbsite.net(mailfrom:abaci-bugfix@linux.alibaba.com fp:SMTPD_---0ULo6iiE_1610704282)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Fri, 15 Jan 2021 17:51:48 +0800
-From:   Yang Li <abaci-bugfix@linux.alibaba.com>
-To:     ulf.hansson@linaro.org
-Cc:     lgirdwood@gmail.com, broonie@kernel.org, linux-mmc@vger.kernel.org,
-        linux-omap@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Yang Li <abaci-bugfix@linux.alibaba.com>
-Subject: [PATCH v2] host: omap_hsmmc: style: Simplify bool comparison and conversion
-Date:   Fri, 15 Jan 2021 17:51:21 +0800
-Message-Id: <1610704281-11036-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-X-Mailer: git-send-email 1.8.3.1
+        id S1729191AbhAOMWr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jan 2021 07:22:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36648 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729146AbhAOMWr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 07:22:47 -0500
+Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24ADDC061757
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2021 04:22:07 -0800 (PST)
+Received: by mail-vs1-xe33.google.com with SMTP id o19so4901847vsn.3
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jan 2021 04:22:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=ijanfrn4HLw1PV8yIpNMyzh/KD5ZhkMn64d56nCsjBU=;
+        b=JgKxbMbDioWMyFHUcV68hsic40sJTbdKoY7BEmbhxBmQBHLBd7SzM5wsBHjg4NqsJ2
+         Mq8g6mfkt2x71G2p2Mly+o7iQ2b3gYRJQizYcprqsgBf1kRpMToSRHAoVm3f6LVSJTyc
+         FIJMnhKH/vLuzPxSdhDmXlWgAc0X82zIEjdwgkmUIlUxT+rhyfImd8fwPonVCS6bo7QV
+         buApqO2pP2LYgEBTvniGIKDe8qGcCCEApj+AH/wqoDvrm/CNMP2A3P1tQoUH0KnJLRF7
+         O2eANLo2GaVifyDffWHDnFnG2QU4qXiqrvt4ta/q7UqVHg8PNdmgk6euUycCNE7J7Umn
+         cJOg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=ijanfrn4HLw1PV8yIpNMyzh/KD5ZhkMn64d56nCsjBU=;
+        b=oXwgixpIh0CrSjvqH/L3SPDQb3H4Uodmt1dFcTbRdFJjq023M4SfKqSL3y9FR0Jtbd
+         DdyiFuo7+vP3knEl/g0Iajc4UIQGOyqhD7sjvdEMc322eA5lPjFexzOHKey/NHxxVoZu
+         EZxW/s48qpGimqv78Xey6gmHCLQ2Yab3huBLXMNZe1OtHegt36v4M9xsP7BCarvIoa7i
+         B/rWFg01rAYT5InM35b2mc84BJYBBsZFAnPWu5ss6d3uJEU2rf9IVyZMHMTuYYVCCS1g
+         SAC+TgDcCBF8GoBjD+qqtxSPBG07u1MhehlWrl1dZizInBfTst2agvTzWlkCVberhq0Z
+         03fQ==
+X-Gm-Message-State: AOAM531WQRzZlHvRpRQPbN57ZPdqr3jHMJQp55CX54fZUmJgqixLxWQa
+        8OOV+srX0tV5mfnYGBfoEOzfD0EY1K48ZTTrB+kgew==
+X-Google-Smtp-Source: ABdhPJxZee1q+Q7m5ohCnrJrjHnRacfhERV6puh7GFyYNM9ZYLU99195TutCaKwpIZcRuOUlWeH3RD8uHZgAwqF2lZo=
+X-Received: by 2002:a67:facb:: with SMTP id g11mr2932291vsq.19.1610713326101;
+ Fri, 15 Jan 2021 04:22:06 -0800 (PST)
+MIME-Version: 1.0
+References: <20210115034506.646-1-zbestahu@gmail.com>
+In-Reply-To: <20210115034506.646-1-zbestahu@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 15 Jan 2021 13:21:29 +0100
+Message-ID: <CAPDyKFpn9zCdiKzkEaO+uVeEmmc_G5o2O4Za+wLijLpdXueRDg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: remove redundant card null check to mmc_can_sleep()
+To:     Yue Hu <zbestahu@gmail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Yue Hu <huyue2@yulong.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fix the following coccicheck warning:
-./drivers/mmc/host/omap_hsmmc.c:297:6-25: WARNING: Comparison of 0/1 to
-bool variable
+On Fri, 15 Jan 2021 at 04:46, Yue Hu <zbestahu@gmail.com> wrote:
+>
+> From: Yue Hu <huyue2@yulong.com>
+>
+> Note that only _mmc_suspend() will call mmc_can_sleep(). And card is
+> checked before in mmc_can_poweroff_notify().
+>
+> Signed-off-by: Yue Hu <huyue2@yulong.com>
 
-According to the context, vqmmc_enabled is more suitable for bool
-type.
+Applied for next, thanks!
 
-Reported-by: Abaci Robot<abaci@linux.alibaba.com>
-Signed-off-by: Yang Li <abaci-bugfix@linux.alibaba.com>
----
-Changes in v2:
- -clean up all use of "pbias_enabled", and do the same clean up for
-"vqmmc_enabled".
+Kind regards
+Uffe
 
- drivers/mmc/host/omap_hsmmc.c | 18 +++++++++---------
- 1 file changed, 9 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index aa9cc49..2f8038d 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -177,7 +177,7 @@ struct omap_hsmmc_host {
- 	struct	regulator	*pbias;
- 	bool			pbias_enabled;
- 	void	__iomem		*base;
--	int			vqmmc_enabled;
-+	bool			vqmmc_enabled;
- 	resource_size_t		mapbase;
- 	spinlock_t		irq_lock; /* Prevent races with irq handler */
- 	unsigned int		dma_len;
-@@ -232,7 +232,7 @@ static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
- 			dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
- 			goto err_vqmmc;
- 		}
--		host->vqmmc_enabled = 1;
-+		host->vqmmc_enabled = true;
- 	}
- 
- 	return 0;
-@@ -256,7 +256,7 @@ static int omap_hsmmc_disable_supply(struct mmc_host *mmc)
- 			dev_err(mmc_dev(mmc), "vmmc_aux reg disable failed\n");
- 			return ret;
- 		}
--		host->vqmmc_enabled = 0;
-+		host->vqmmc_enabled = false;
- 	}
- 
- 	if (!IS_ERR(mmc->supply.vmmc)) {
-@@ -285,22 +285,22 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on)
- 		return 0;
- 
- 	if (power_on) {
--		if (host->pbias_enabled == 0) {
-+		if (!host->pbias_enabled) {
- 			ret = regulator_enable(host->pbias);
- 			if (ret) {
- 				dev_err(host->dev, "pbias reg enable fail\n");
- 				return ret;
- 			}
--			host->pbias_enabled = 1;
-+			host->pbias_enabled = true;
- 		}
- 	} else {
--		if (host->pbias_enabled == 1) {
-+		if (host->pbias_enabled) {
- 			ret = regulator_disable(host->pbias);
- 			if (ret) {
- 				dev_err(host->dev, "pbias reg disable fail\n");
- 				return ret;
- 			}
--			host->pbias_enabled = 0;
-+			host->pbias_enabled = false;
- 		}
- 	}
- 
-@@ -1861,8 +1861,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
- 	host->base	= base + pdata->reg_offset;
- 	host->power_mode = MMC_POWER_OFF;
- 	host->next_data.cookie = 1;
--	host->pbias_enabled = 0;
--	host->vqmmc_enabled = 0;
-+	host->pbias_enabled = false;
-+	host->vqmmc_enabled = false;
- 
- 	platform_set_drvdata(pdev, host);
- 
--- 
-1.8.3.1
-
+> ---
+>  drivers/mmc/core/mmc.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index ff3063c..49e5487 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1899,7 +1899,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>
+>  static int mmc_can_sleep(struct mmc_card *card)
+>  {
+> -       return (card && card->ext_csd.rev >= 3);
+> +       return card->ext_csd.rev >= 3;
+>  }
+>
+>  static int mmc_sleep(struct mmc_host *host)
+> --
+> 1.9.1
+>
