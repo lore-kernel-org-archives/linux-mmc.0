@@ -2,116 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E24FAC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 05:48:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABDEAC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 08:07:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AEDC7239FC
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 05:48:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 68120221FB
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 08:07:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730699AbhAOFsY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jan 2021 00:48:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36788 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730562AbhAOFsV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 00:48:21 -0500
-Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81E72C061757;
-        Thu, 14 Jan 2021 21:47:41 -0800 (PST)
-Received: by mail-pg1-x533.google.com with SMTP id 30so5326389pgr.6;
-        Thu, 14 Jan 2021 21:47:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Y/rucpAwNr7H7Sq+3iwOrm/3FZrRl2K/TF/QHTKwAl4=;
-        b=prBSjERD/4xhSmfN/LZoOMqYKPZB+MJkLRhzWQs5F0STCTA0EGz8La3vovPqyW09U+
-         0V5UcopJa0JAQc4QlD/63Z7KyF+aIrZ1+ptx7Hyjs0AUioVAll703qW2I2WBkJjuDsIh
-         GO3DNPR5sSYqxyfOkCF9i5dppF+1F5LRRA5D43PLGzS/MhExhVtV28gISLA8451qlTVn
-         6g9+mmM3q/7Yp1XIw5ro+AphxFA6gWlUXCAka99WybAsj6MN3QUJWKrXK6aHu8noux/S
-         i0binNhfywyIlez1DuUwWXPRY/1UFS3//J+CD6luClp1O70SUG1/Zi09uRk6mM9GqTRo
-         7NDQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Y/rucpAwNr7H7Sq+3iwOrm/3FZrRl2K/TF/QHTKwAl4=;
-        b=Ml2i03nsw7wIdlHEKykNyC8Yir5X8U62yEoNe/e8Ai/ldnF+z3/X/KDQjJYXumOq5c
-         TGLpY4mXaJpTxyyn0XtMkFvLfS+FEJXBBYfRVYIiwhfclCYzgdmOYyEiPiKGfX6msi+K
-         mZdAWbz0I47Wtjv4m/BBYCAeljp+ruLQXS1dOXLdC6WlkXTb/PSY8wFq4I97gNfxa5Az
-         daLudXzbILzek6DjMYwcYWm3WUKW8kbuigzOy5tl5J0f0rlzcAa7oonrXeuyva+ihO2R
-         +y87LrjIYsJLamB/HuTEohvqIM6ntF27tnIjtEDYca4OvM7qUiIh4/okq7IghZ1AnsEP
-         /pkQ==
-X-Gm-Message-State: AOAM531NBlZH9pHK9XvJOAF0B0FxXsUH630gfVPz5Hr/kVD6s5B2HNnp
-        A2T+ypSj64rggv/oi567nngc9S0LGf0Vow==
-X-Google-Smtp-Source: ABdhPJz3QaEPXYyvRtan7b9Ddu4rqqXDtp+0jZ0MB1Y1BA/TloVGN2WygeGPK0o7ogTp+Sp/OoHICg==
-X-Received: by 2002:a62:1d43:0:b029:1ab:7f7a:4ab8 with SMTP id d64-20020a621d430000b02901ab7f7a4ab8mr10960117pfd.43.1610689661151;
-        Thu, 14 Jan 2021 21:47:41 -0800 (PST)
-Received: from gli-System-Product-Name.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id t206sm6815854pgb.84.2021.01.14.21.47.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Jan 2021 21:47:40 -0800 (PST)
-From:   Renius Chen <reniuschengl@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
-        Renius Chen <reniuschengl@gmail.com>
-Subject: [PATCH] mmc: sdhci-pci-gli: Enlarge ASPM L1 entry delay of GL9763E (v2)
-Date:   Fri, 15 Jan 2021 13:47:36 +0800
-Message-Id: <20210115054736.27769-1-reniuschengl@gmail.com>
-X-Mailer: git-send-email 2.27.0
+        id S1725797AbhAOIH3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jan 2021 03:07:29 -0500
+Received: from mga04.intel.com ([192.55.52.120]:43728 "EHLO mga04.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1730254AbhAOIH1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 15 Jan 2021 03:07:27 -0500
+IronPort-SDR: Z1apPd78PJc3RUcA9DYpWO3+OVjBPKycIBkauVcnkWbz7QxhiTqCnFS3YOSdGlGAPX2agz13uw
+ Xx42zsId+FHQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9864"; a="175936617"
+X-IronPort-AV: E=Sophos;i="5.79,348,1602572400"; 
+   d="scan'208";a="175936617"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Jan 2021 00:06:45 -0800
+IronPort-SDR: aMX+UTSLzEFiYO9SVx/ZA27BVqmqZmSb0kLU9gxaabgyNInzx6okOmiZDf1F+xLYJd40ebfaOD
+ BbWlSGod90qw==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.79,348,1602572400"; 
+   d="scan'208";a="425231760"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.149]) ([10.237.72.149])
+  by orsmga001.jf.intel.com with ESMTP; 15 Jan 2021 00:06:43 -0800
+Subject: Re: [PATCH v2] mmc: core: don't initialize block size from ext_csd if
+ not present
+To:     Peter Collingbourne <pcc@google.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Damien Le Moal <damien.lemoal@wdc.com>
+References: <20210114201405.2934886-1-pcc@google.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <d8eebc23-0006-762f-237f-ed5ad19ac336@intel.com>
+Date:   Fri, 15 Jan 2021 10:06:41 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210114201405.2934886-1-pcc@google.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-GL9763E enters ASPM L1 state after a very short idle in default,
-even during a burst of request. So the R/W performance of GL9763E
-is low with some platforms, which support ASPM mechanism, due to
-entering ASPM L1 state very frequently in R/W process. Set the L1
-entry delay bits in vendor-specific register to 0x3FF to enlarge
-the idle period to 260us for improving the R/W performance
-of GL9763E.
+On 14/01/21 10:14 pm, Peter Collingbourne wrote:
+> If extended CSD was not available, the eMMC driver would incorrectly
+> set the block size to 0, as the data_sector_size field of ext_csd
+> was never initialized. This issue was exposed by commit 817046ecddbc
+> ("block: Align max_hw_sectors to logical blocksize") which caused
+> max_sectors and max_hw_sectors to be set to 0 after setting the block
+> size to 0, resulting in a kernel panic in bio_split when attempting
+> to read from the device. Fix it by only reading the block size from
+> ext_csd if it is available.
+> 
+> Fixes: a5075eb94837 ("mmc: block: Allow disabling 512B sector size emulation")
+> Signed-off-by: Peter Collingbourne <pcc@google.com>
+> Reviewed-by: Damien Le Moal <damien.lemoal@wdc.com>
+> Link: https://linux-review.googlesource.com/id/If244d178da4d86b52034459438fec295b02d6e60
 
-Signed-off-by: Renius Chen <reniuschengl@gmail.com>
----
- drivers/mmc/host/sdhci-pci-gli.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index c6a107d7c742..fb14f70cb9a0 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -88,6 +88,10 @@
- #define PCIE_GLI_9763E_SCR	 0x8E0
- #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
- 
-+#define PCIE_GLI_9763E_CFG2      0x8A4
-+#define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
-+#define   GLI_9763E_CFG2_L1DLY_MAX 0x3FF
-+
- #define PCIE_GLI_9763E_MMC_CTRL  0x960
- #define   GLI_9763E_HS400_SLOW     BIT(3)
- 
-@@ -792,6 +796,12 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- 	value &= ~GLI_9763E_HS400_SLOW;
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_MMC_CTRL, value);
- 
-+	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG2, &value);
-+	value &= ~GLI_9763E_CFG2_L1DLY;
-+	/* set ASPM L1 entry delay to 260us */
-+	value |= FIELD_PREP(GLI_9763E_CFG2_L1DLY, GLI_9763E_CFG2_L1DLY_MAX);
-+	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG2, value);
-+
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
- 	value &= ~GLI_9763E_VHS_REV;
- 	value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
--- 
-2.27.0
+> ---
+>  drivers/mmc/core/queue.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index de7cb0369c30..002426e3cf76 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -384,8 +384,10 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
+>  		     "merging was advertised but not possible");
+>  	blk_queue_max_segments(mq->queue, mmc_get_max_segments(host));
+>  
+> -	if (mmc_card_mmc(card))
+> +	if (mmc_card_mmc(card) && card->ext_csd.data_sector_size) {
+>  		block_size = card->ext_csd.data_sector_size;
+> +		WARN_ON(block_size != 512 && block_size != 4096);
+> +	}
+>  
+>  	blk_queue_logical_block_size(mq->queue, block_size);
+>  	/*
+> 
 
