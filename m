@@ -2,71 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 933EAC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 19:15:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB63EC433DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 19:33:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 64300235F8
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 19:15:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 90A1B23A9C
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jan 2021 19:33:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388359AbhAOTPR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jan 2021 14:15:17 -0500
-Received: from foss.arm.com ([217.140.110.172]:52484 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2388123AbhAOTPQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 15 Jan 2021 14:15:16 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id C28C7ED1;
-        Fri, 15 Jan 2021 11:14:30 -0800 (PST)
-Received: from bogus (unknown [10.57.35.27])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id BFF393F719;
-        Fri, 15 Jan 2021 11:14:28 -0800 (PST)
-Date:   Fri, 15 Jan 2021 19:14:26 +0000
-From:   Sudeep Holla <sudeep.holla@arm.com>
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>,
-        ulf.hansson@linaro.org, lgirdwood@gmail.com, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, adrian.hunter@intel.com,
-        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, andriy.shevchenko@intel.com,
-        Rashmi.A@intel.com, mahesh.r.vaidya@intel.com,
-        Sudeep Holla <sudeep.holla@arm.com>
-Subject: Re: [PATCH v1 8/9] regulator: keembay: Add regulator for Keem Bay SoC
-Message-ID: <20210115191426.xf23pde2drtlujkg@bogus>
-References: <20210114152700.21916-1-muhammad.husaini.zulkifli@intel.com>
- <20210114152700.21916-9-muhammad.husaini.zulkifli@intel.com>
- <20210114171434.GI4854@sirena.org.uk>
+        id S2387869AbhAOTdJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jan 2021 14:33:09 -0500
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:38234 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387641AbhAOTdI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jan 2021 14:33:08 -0500
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 10FJWQTt010421;
+        Fri, 15 Jan 2021 13:32:26 -0600
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1610739146;
+        bh=m0mz4dtHkMxa9GbD4ouVFHhkcK1uhi34MlSLQR7XL5E=;
+        h=From:To:CC:Subject:Date;
+        b=wZ02txGNoVnV0I3hk9k04diKdXqxuyo5vFJ4w/OpjLmzVftfAlV/RTKTs5CYdxzeC
+         r88REF3kTkj9DzLctLfWdvcXuVLkA8hXaw8s/KXIofd+53xDvjrjlVKNRAlfdiPEQb
+         jIUzt+w5DYnF+LS237uh68HiRNI5w2p+EP7lpugA=
+Received: from DFLE108.ent.ti.com (dfle108.ent.ti.com [10.64.6.29])
+        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 10FJWQK2031166
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 15 Jan 2021 13:32:26 -0600
+Received: from DFLE107.ent.ti.com (10.64.6.28) by DFLE108.ent.ti.com
+ (10.64.6.29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3; Fri, 15
+ Jan 2021 13:32:26 -0600
+Received: from lelv0327.itg.ti.com (10.180.67.183) by DFLE107.ent.ti.com
+ (10.64.6.28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.1979.3 via
+ Frontend Transport; Fri, 15 Jan 2021 13:32:26 -0600
+Received: from localhost (ileax41-snat.itg.ti.com [10.172.224.153])
+        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id 10FJWPHj064609;
+        Fri, 15 Jan 2021 13:32:25 -0600
+From:   Grygorii Strashko <grygorii.strashko@ti.com>
+To:     Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Nishanth Menon <nm@ti.com>, <linux-kernel@vger.kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        <linux-mmc@vger.kernel.org>,
+        Grygorii Strashko <grygorii.strashko@ti.com>
+Subject: [PATCH] dt-bindings: mmc: sdhci-am654: fix compatible for j7200
+Date:   Fri, 15 Jan 2021 21:32:18 +0200
+Message-ID: <20210115193218.5809-1-grygorii.strashko@ti.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210114171434.GI4854@sirena.org.uk>
-User-Agent: NeoMutt/20171215
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 14, 2021 at 05:14:34PM +0000, Mark Brown wrote:
-> On Thu, Jan 14, 2021 at 11:26:59PM +0800, Muhammad Husaini Zulkifli wrote:
->
-> > Keem Bay SD regulator driver module is added to encapsulate ARM
-> > Secure Monitor Call Calling Convention (SMCCC) during set voltage
-> > operations to control I/O Rail supplied voltage levels which communicate
-> > with Trusted Firmware.
->
-> Adding in Sudeep again for the SMCCC bits.  I just checked and am I
-> right in thinking this might already be shipping in production?
->
+On TI J7200 SoC the SDHCI controller compatible defined as
+ "ti,j7200-sdhci-8bit", "ti,j721e-sdhci-8bit"
+ or
+ "ti,j7200-sdhci-4bit", "ti,j721e-sdhci-4bit"
+which causes dtbs_check warnings:
+mmc@4f80000: compatible: ['ti,j7200-sdhci-8bit', 'ti,j721e-sdhci-8bit'] is too long
+mmc@4f80000: compatible: Additional items are not allowed ('ti,j721e-sdhci-8bit' was unexpected)
+mmc@4fb0000: compatible:0: 'ti,j7200-sdhci-4bit' is not one of ['ti,am654-sdhci-5.1', 'ti,j721e-sdhci-8bit',
+ 'ti,j721e-sdhci-4bit', 'ti,j7200-sdhci-8bit', 'ti,j721e-sdhci-4bit', 'ti,am64-sdhci-8bit', 'ti,am64-sdhci-4bit']
+mmc@4fb0000: compatible: ['ti,j7200-sdhci-4bit', 'ti,j721e-sdhci-4bit'] is too long
+mmc@4fb0000: compatible: Additional items are not allowed ('ti,j721e-sdhci-4bit' was unexpected)
 
-OK you seem to have asked the most important question here directly.
-I have asked for the details of platform firmware implementation in
-the other email basically for the same reason(to check how feasible is
-it to move to new SCMI voltage protocol). Some work in the firmware, but
-if the implement is on the A-profile itself in TF-A or any other equivalent,
-it should not be too difficult.
+Fix it by adding missing compatible strings and their combinations.
 
---
-Regards,
-Sudeep
+Fixes: 407d0c2cdd12 ("dt-bindings: mmc: sdhci-am654: Convert sdhci-am654 controller documentation to json schema")
+Signed-off-by: Grygorii Strashko <grygorii.strashko@ti.com>
+---
+ .../devicetree/bindings/mmc/sdhci-am654.yaml  | 21 ++++++++++++-------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+index 34e53db29428..3a79e39253d2 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+@@ -15,14 +15,19 @@ allOf:
+ 
+ properties:
+   compatible:
+-    enum:
+-      - ti,am654-sdhci-5.1
+-      - ti,j721e-sdhci-8bit
+-      - ti,j721e-sdhci-4bit
+-      - ti,j7200-sdhci-8bit
+-      - ti,j721e-sdhci-4bit
+-      - ti,am64-sdhci-8bit
+-      - ti,am64-sdhci-4bit
++    oneOf:
++      - const: ti,am654-sdhci-5.1
++      - const: ti,j721e-sdhci-8bit
++      - const: ti,j721e-sdhci-4bit
++      - const: ti,j721e-sdhci-4bit
++      - const: ti,am64-sdhci-8bit
++      - const: ti,am64-sdhci-4bit
++      - items:
++          - const: ti,j7200-sdhci-8bit
++          - const: ti,j721e-sdhci-8bit
++      - items:
++          - const: ti,j7200-sdhci-4bit
++          - const: ti,j721e-sdhci-4bit
+ 
+   reg:
+     maxItems: 2
+-- 
+2.17.1
+
