@@ -2,394 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 811C9C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 14:18:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF656C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 14:22:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4974122B4E
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 14:18:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8AC302231F
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 14:22:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2392846AbhAROS2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jan 2021 09:18:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51426 "EHLO
+        id S2392842AbhAROWd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jan 2021 09:22:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52272 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730245AbhAROSU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jan 2021 09:18:20 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD7F0C061575
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jan 2021 06:17:39 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id u25so24302863lfc.2
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jan 2021 06:17:39 -0800 (PST)
+        with ESMTP id S2392874AbhAROW1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jan 2021 09:22:27 -0500
+Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FF34C061573
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jan 2021 06:21:39 -0800 (PST)
+Received: by mail-vs1-xe2a.google.com with SMTP id o19so9268234vsn.3
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jan 2021 06:21:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=4cLRkD5fMwA8Gc20pqhJAXTwKJ6eAulUDWsudxs4dBs=;
-        b=eUGXgEqnkJ/7zQ8WZ3tYl6gC+d8tiyn4lC7t8LQyyIOFIqMWEIfuIRF5tuiqcHcLXf
-         ml7OgG6+Cd4wLWRY32OEHCodUSa6uZFm7XMDRy0D3h+n3+swtl8czdNJVjuSzHHZ5ZjM
-         nGAcoyNgrFVhODd1Q9a1LHlrxmiUwWBbkZd58M0gAuaopC+aWD8EMKFDdUhzZ3IQgXsI
-         ld74e+h5P8r30GscJ8JzIrynxz+esVOzMLulrnnqWt0jzRJhQjbXt3co3WeAdEs8VTba
-         1cFP39uqXsnMFlW/ZHPjV2bWoP2V6bSV6r96YfgpWCdoici2yPxnPjBXZIxowLip3Jjr
-         zC+Q==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=8Vm6t4j1UkDFvwn0ow87G236Agmhfjw2bgz8G0c2yDI=;
+        b=YXqE56R8iZgWt/xrgnWS0ADg7SYiBItKyNtuwN2h7t8q8wy0w5JqyNKlBWWFXshlUJ
+         CXagI21LIShLrGMg/Fe+mnuli1luaaTSzLB/NMpARZXTfROfsDQ/iYpdulrKRaH44omv
+         S3dWkuVPoYR3IwAGyg2u+a7pE2le0xJ5aSX6UQ02k2X7P8OC5oRR/2mBDYU/RO97xmR/
+         ue7BsAGWAwxc8eN2KmJVGqjUnBQuKE1bW5qwFvFfZ9cFLuc1KyfyJOPJVDZ+37g+WL2K
+         0rvDzQ7f2IYdc6wYIYYbseljKuikW3Le4bFcVJON3qyVmain2Bxgg3VOyYtwlTCcLffH
+         Uw4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=4cLRkD5fMwA8Gc20pqhJAXTwKJ6eAulUDWsudxs4dBs=;
-        b=XxcNOsfRTw1y9IjIixuC/5tjfDvJfEHL+0ffQd9pQqOENvZkzhejfCstiFrZW7sC5Y
-         GIiaKXTbxah+Wh7SX76VdVvkQTq8X2tTwiMDkr1ndVRHni9ylHBhfi8OzpESLO1Bf/ku
-         5ETSoEBGwxdMseRt2B9oBPfUIKl6t2aRmdOXYi0IrvTyZW1KVssH0OIJqZyyHTE2tpsK
-         icMhhkzvrHUdCr+1TOUL7zqdIFRADSBFLy/olZ+VyTMtBcoK4Smb3zhcPBU0kd0zftC5
-         xnYS1uRVBioQBJuDKrofZbxlko1+/xtHVNOk7jdUg5eexFiezzLwiMP2PZK4j/CJS0TX
-         Mv2g==
-X-Gm-Message-State: AOAM531j6SET2BrZxxPsEPW7IOQmGnl3+rWkScvmNzmXSjyg+ZgWcS+g
-        PoQsrfsZNe8QFmwilTDF5dvh9W4atj355A==
-X-Google-Smtp-Source: ABdhPJwVkGjH38o/DgaLFGP8QWPyUTY3reaUbkdfFfLsZbCVMY2rKjo0Bc+ArcAz9YYxiNbc61XYMg==
-X-Received: by 2002:a05:6512:491:: with SMTP id v17mr11504155lfq.148.1610979457888;
-        Mon, 18 Jan 2021 06:17:37 -0800 (PST)
-Received: from localhost.localdomain (c-92d7225c.014-348-6c756e10.bbcust.telenor.se. [92.34.215.146])
-        by smtp.gmail.com with ESMTPSA id a24sm1907358lfg.256.2021.01.18.06.17.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Jan 2021 06:17:36 -0800 (PST)
-From:   Linus Walleij <linus.walleij@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        devicetree@vger.kernel.org, Marek Vasut <marex@denx.de>
-Subject: [PATCH v2] mmc: mmci: Convert bindings to DT schema
-Date:   Mon, 18 Jan 2021 15:17:34 +0100
-Message-Id: <20210118141734.2722369-1-linus.walleij@linaro.org>
-X-Mailer: git-send-email 2.29.2
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=8Vm6t4j1UkDFvwn0ow87G236Agmhfjw2bgz8G0c2yDI=;
+        b=oDIbunLqWdmf5/PnTNbeY6yGlASjK2JWyg7CVjs2oP43S2ummOVHjZaScgm9aShA1V
+         33927DO5FQLdwnnkNoHOFceHu69D0pT0AJfltoUblnDq5v0QwHYoddFr1IfUrYZ1aJ4u
+         mjI3fIe7l/eGFhKzjIf54cPCY3KV0pYLSu79StdBXCOXSLuSNMISmglKldD3Qg46xtVb
+         x3YPqTroj1EPTUCTFlDNBjXTWB9HKGLifYa1eUZc6wtImTp672WyJXVTpA8dFGwRlman
+         kEDpkIRet6TIOt+3yN2Wl/46ffpsRhU45bBt2WNeImRdm5Q48vp2ZEf5YjeHxBH0Iid4
+         uXJg==
+X-Gm-Message-State: AOAM5329+kkQ6kgeMB79CgUqtpv6KhLG0/BxBxp02wvV97q0mv8bB+Gg
+        0gIw0F1kCCRhyQGnEJNvhVtRDvAvCjCnwIked8j2aA==
+X-Google-Smtp-Source: ABdhPJz90QZK3nqwzH2xdCIh6J4iWnuKhWdk04HEQs0XckljNnog8h9RjU13Vc2Neznz6h0kc0sFbd9aNjuBi9ia6Z0=
+X-Received: by 2002:a67:7f41:: with SMTP id a62mr17276352vsd.55.1610979698621;
+ Mon, 18 Jan 2021 06:21:38 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210104184542.4616-1-ebiggers@kernel.org> <20210104184542.4616-2-ebiggers@kernel.org>
+ <CAPDyKFq717teu2HPZLCn9QVxLOwZHdi_iS+Ji69S0kYX1o52PQ@mail.gmail.com> <YAHXPREJaKjK/z7+@sol.localdomain>
+In-Reply-To: <YAHXPREJaKjK/z7+@sol.localdomain>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 18 Jan 2021 15:21:01 +0100
+Message-ID: <CAPDyKFopKy6dwENJ6YQQ0KRPQdT25R_zmhrNH7jyu=+p6bKpNA@mail.gmail.com>
+Subject: Re: [PATCH v4 1/9] mmc: add basic support for inline encryption
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This converts the MMCI bindings from simple text to a proper
-schema.
+On Fri, 15 Jan 2021 at 18:56, Eric Biggers <ebiggers@kernel.org> wrote:
+>
+> On Fri, Jan 15, 2021 at 10:22:03AM +0100, Ulf Hansson wrote:
+> > On Mon, 4 Jan 2021 at 19:48, Eric Biggers <ebiggers@kernel.org> wrote:
+> > >
+> > > From: Eric Biggers <ebiggers@google.com>
+> > >
+> > > In preparation for adding CQHCI crypto engine (inline encryption)
+> > > support, add the code required to make mmc_core and mmc_block aware of
+> > > inline encryption.  Specifically:
+> > >
+> > > - Add a capability flag MMC_CAP2_CRYPTO to struct mmc_host.  Drivers
+> > >   will set this if the host and driver support inline encryption.
+> > >
+> > > - Embed a blk_keyslot_manager in struct mmc_host.  Drivers will
+> > >   initialize this if the host and driver support inline encryption.
+> > >   mmc_block registers this keyslot manager with the request_queue of any
+> > >   MMC card attached to the host.  mmc_core destroys this keyslot manager
+> > >   when freeing the mmc_host.
+> > >
+> > > - Make mmc_block copy the crypto keyslot and crypto data unit number
+> > >   from struct request to struct mmc_request, so that drivers will have
+> > >   access to them.
+> > >
+> > > - If the MMC host is reset, reprogram all the keyslots to ensure that
+> > >   the software state stays in sync with the hardware state.
+> > >
+> > > Co-developed-by: Satya Tangirala <satyat@google.com>
+> > > Signed-off-by: Satya Tangirala <satyat@google.com>
+> > > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> > > Reviewed-by: Satya Tangirala <satyat@google.com>
+> > > Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
+> > > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> >
+> > Eric, again, my apologies for the delay. Overall, I think this looks good.
+> >
+> > My only hesitation to merge this as is, is that I want to make sure
+> > you have thought of the life cycle issues for the struct
+> > blk_keyslot_manager ksm. It's being used both from the mmc core/block
+> > device driver and the mmc host driver. I am looking at this right now
+> > and will get back to you very soon, if I find some issues with it.
+> >
+> > If you have some time, feel free to elaborate around how this is
+> > intended to work.
+> >
+> > Kind regards
+> > Uffe
+>
+> The blk_keyslot_manager is initialized early on when the other host structures
+> (struct mmc_host, struct cqhci_host, struct sdhci_host, struct sdhci_msm_host)
+> are initialized, prior to mmc_add_host().
+>
+> It is destroyed when the struct mmc_host is freed by mmc_free_host().
+>
+> So it should just work; it's the same lifecycle as the existing host structures.
+> Is there something you think I'm overlooking?
 
-Cc: devicetree@vger.kernel.org
-Cc: Marek Vasut <marex@denx.de>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v1->v2:
-- Use unevaluatedProperties: false instead of
-  additionalProperties: false and refs start working.
-- Define clocks to 1 or 2 items.
-- Define interrupts to 1 or 2 items.
----
- .../devicetree/bindings/mmc/arm,pl18x.yaml    | 216 ++++++++++++++++++
- .../devicetree/bindings/mmc/mmci.txt          |  74 ------
- 2 files changed, 216 insertions(+), 74 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/mmci.txt
+I think so, but let me elaborate a bit.
 
-diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-new file mode 100644
-index 000000000000..7b8f189acc61
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-@@ -0,0 +1,216 @@
-+# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/arm,pl18x.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: ARM PrimeCell MultiMedia Card Interface (MMCI) PL180 and PL181
-+
-+maintainers:
-+  - Linus Walleij <linus.walleij@linaro.org>
-+  - Ulf Hansson <ulf.hansson@linaro.org>
-+
-+description:
-+  The ARM PrimeCells MMCI PL180 and PL181 provides an interface for
-+  reading and writing to MultiMedia and SD cards alike. Over the years
-+  vendors have use the VHDL code from ARM to create derivative MMC/SD/SDIO
-+  host controllers with very similar characteristics.
-+
-+allOf:
-+  - $ref: /schemas/arm/primecell.yaml#
-+  - $ref: mmc-controller.yaml#
-+
-+# We need a select here so we don't match all nodes with 'arm,primecell'
-+select:
-+  properties:
-+    compatible:
-+      contains:
-+        enum:
-+          - arm,pl180
-+          - arm,pl181
-+          - arm,pl18x
-+  required:
-+    - compatible
-+
-+properties:
-+  compatible:
-+    oneOf:
-+      - description: The first version of the block, simply called
-+          PL180 and found in the ARM Integrator IM/PD1 logic module.
-+        items:
-+          - const: arm,pl180
-+          - const: arm,primecell
-+      - description: The improved version of the block, found in the
-+          ARM Versatile and later reference designs. Further revisions
-+          exist but get detected at runtime by reading some magic numbers
-+          in the PrimeCell ID registers.
-+        items:
-+          - const: arm,pl181
-+          - const: arm,primecell
-+      - description: Wildcard entry that will let the operating system
-+          inspect the PrimeCell ID registers to determine which hardware
-+          variant of PL180 or PL181 this is.
-+        items:
-+          - const: arm,pl18x
-+          - const: arm,primecell
-+
-+  clocks:
-+    description: One or two clocks, the "apb_pclk" and the "MCLK"
-+      which is the core block clock. The names are not compulsory.
-+    minItems: 1
-+    maxItems: 2
-+
-+  dmas:
-+    description: Two or zero DMA channels for RX and TX DMA.
-+    items:
-+      - description: RX DMA channel
-+      - description: TX DMA channel
-+
-+  dma-names:
-+    description: One "tx" channel for transmit and one "rx" channel
-+      for receive.
-+    items:
-+      - const: rx
-+      - const: tx
-+
-+  power-domains: true
-+
-+  resets:
-+    maxItems: 1
-+
-+  reg:
-+    description: the MMIO memory window must be exactly 4KB (0x1000) and the
-+      layout should provide the PrimeCell ID registers so that the device can
-+      be discovered. On ST Micro variants, a second register window may be
-+      defined if a delay block is present and used for tuning.
-+
-+  interrupts:
-+    description: The first interrupt is the command interrupt and corresponds
-+      to the event at the end of a command. The second interrupt is the
-+      PIO (polled I/O) interrupt and occurs when the FIFO needs to be
-+      emptied as part of a bulk read from the card. Some variants have these
-+      two interrupts wired into the same line (logic OR) and in that case
-+      only one interrupt may be provided.
-+    minItems: 1
-+    maxItems: 2
-+
-+  st,sig-dir-dat0:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, bus signal direction pins used for
-+      DAT[0].
-+
-+  st,sig-dir-dat2:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, bus signal direction pins used for
-+      DAT[2].
-+
-+  st,sig-dir-dat31:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, bus signal direction pins used for
-+      DAT[3] and DAT[1].
-+
-+  st,sig-dir-dat74:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, bus signal direction pins used for
-+      DAT[7] and DAT[4].
-+
-+  st,sig-dir-cmd:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, CMD signal direction used for
-+      pin CMD.
-+
-+  st,sig-pin-fbclk:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, feedback clock FBCLK signal pin
-+      in use.
-+
-+  st,sig-dir:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, signal direction polarity used for
-+      pins CMD, DAT[0], DAT[1], DAT[2] and DAT[3].
-+
-+  st,neg-edge:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, data and command phase relation,
-+      generated on the sd clock falling edge.
-+
-+  st,use-ckin:
-+    $ref: /schemas/types.yaml#/definitions/flag
-+    description: ST Micro-specific property, use CKIN pin from an external
-+      driver to sample the receive data (for example with a voltage switch
-+      transceiver).
-+
-+unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include <dt-bindings/gpio/gpio.h>
-+
-+    mmc@5000 {
-+      compatible = "arm,pl180", "arm,primecell";
-+      reg = <0x5000 0x1000>;
-+      interrupts-extended = <&vic 22 &sic 1>;
-+      clocks = <&xtal24mhz>, <&pclk>;
-+      clock-names = "mclk", "apb_pclk";
-+    };
-+
-+    mmc@80126000 {
-+      compatible = "arm,pl18x", "arm,primecell";
-+      reg = <0x80126000 0x1000>;
-+      interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
-+      dmas = <&dma 29 0 0x2>, <&dma 29 0 0x0>;
-+      dma-names = "rx", "tx";
-+      clocks = <&prcc_kclk 1 5>, <&prcc_pclk 1 5>;
-+      clock-names = "sdi", "apb_pclk";
-+      max-frequency = <100000000>;
-+      bus-width = <4>;
-+      cap-sd-highspeed;
-+      cap-mmc-highspeed;
-+      cd-gpios  = <&gpio2 31 0x4>;
-+      st,sig-dir-dat0;
-+      st,sig-dir-dat2;
-+      st,sig-dir-cmd;
-+      st,sig-pin-fbclk;
-+      vmmc-supply = <&ab8500_ldo_aux3_reg>;
-+      vqmmc-supply = <&vmmci>;
-+    };
-+
-+    mmc@101f6000 {
-+      compatible = "arm,pl18x", "arm,primecell";
-+      reg = <0x101f6000 0x1000>;
-+      clocks = <&sdiclk>, <&pclksdi>;
-+      clock-names = "mclk", "apb_pclk";
-+      interrupt-parent = <&vica>;
-+      interrupts = <22>;
-+      max-frequency = <400000>;
-+      bus-width = <4>;
-+      cap-mmc-highspeed;
-+      cap-sd-highspeed;
-+      full-pwr-cycle;
-+      st,sig-dir-dat0;
-+      st,sig-dir-dat2;
-+      st,sig-dir-dat31;
-+      st,sig-dir-cmd;
-+      st,sig-pin-fbclk;
-+      vmmc-supply = <&vmmc_regulator>;
-+    };
-+
-+    mmc@52007000 {
-+      compatible = "arm,pl18x", "arm,primecell";
-+      arm,primecell-periphid = <0x10153180>;
-+      reg = <0x52007000 0x1000>;
-+      interrupts = <49>;
-+      interrupt-names = "cmd_irq";
-+      clocks = <&rcc 0>;
-+      clock-names = "apb_pclk";
-+      resets = <&rcc 1>;
-+      cap-sd-highspeed;
-+      cap-mmc-highspeed;
-+      max-frequency = <120000000>;
-+    };
-diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
-deleted file mode 100644
-index 4ec921e4bf34..000000000000
---- a/Documentation/devicetree/bindings/mmc/mmci.txt
-+++ /dev/null
-@@ -1,74 +0,0 @@
--* ARM PrimeCell MultiMedia Card Interface (MMCI) PL180/1
--
--The ARM PrimeCell MMCI PL180 and PL181 provides an interface for
--reading and writing to MultiMedia and SD cards alike.
--
--This file documents differences between the core properties described
--by mmc.txt and the properties used by the mmci driver. Using "st" as
--the prefix for a property, indicates support by the ST Micro variant.
--
--Required properties:
--- compatible             : contains "arm,pl18x", "arm,primecell".
--- vmmc-supply            : phandle to the regulator device tree node, mentioned
--                           as the VCC/VDD supply in the eMMC/SD specs.
--
--Optional properties:
--- arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
--                           the ID provided by the HW
--- resets                 : phandle to internal reset line.
--			   Should be defined for sdmmc variant.
--- vqmmc-supply           : phandle to the regulator device tree node, mentioned
--                           as the VCCQ/VDD_IO supply in the eMMC/SD specs.
--specific for ux500 variant:
--- st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
--- st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
--- st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
--- st,sig-dir-dat74       : bus signal direction pin used for DAT[4] to DAT[7].
--- st,sig-dir-cmd         : cmd signal direction pin used for CMD.
--- st,sig-pin-fbclk       : feedback clock signal pin used.
--
--specific for sdmmc variant:
--- reg			 : a second base register may be defined if a delay
--                           block is present and used for tuning.
--- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
--- st,neg-edge            : data & command phase relation, generated on
--                           sd clock falling edge.
--- st,use-ckin            : use ckin pin from an external driver to sample
--                           the receive data (example: with voltage
--			   switch transceiver).
--
--Deprecated properties:
--- mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
--- mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
--
--Example:
--
--sdi0_per1@80126000 {
--	compatible = "arm,pl18x", "arm,primecell";
--	reg = <0x80126000 0x1000>;
--	interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
--
--	dmas = <&dma 29 0 0x2>, /* Logical - DevToMem */
--	       <&dma 29 0 0x0>; /* Logical - MemToDev */
--	dma-names = "rx", "tx";
--
--	clocks = <&prcc_kclk 1 5>, <&prcc_pclk 1 5>;
--	clock-names = "sdi", "apb_pclk";
--
--	max-frequency = <100000000>;
--	bus-width = <4>;
--	cap-sd-highspeed;
--	cap-mmc-highspeed;
--	cd-gpios  = <&gpio2 31 0x4>; // 95
--	st,sig-dir-dat0;
--	st,sig-dir-dat2;
--	st,sig-dir-cmd;
--	st,sig-pin-fbclk;
--
--	vmmc-supply = <&ab8500_ldo_aux3_reg>;
--	vqmmc-supply = <&vmmci>;
--
--	pinctrl-names = "default", "sleep";
--	pinctrl-0 = <&sdi0_default_mode>;
--	pinctrl-1 = <&sdi0_sleep_mode>;
--};
--- 
-2.29.2
+As I understand it, to initialize the data structures, blk_ksm_init()
+is getting called and via cqhci_init().
 
+To hook up the block request queue, blk_ksm_register() is called via
+mmc_setup_queue(), which means this happens when the mmc block device
+driver is probed.
+
+To free up the data structures, blk_ksm_destroy() is called from
+mmc_free_host().
+
+To me, this can be made more consistent. For example, it looks like
+blk_ksm_destroy() could be called, even if blk_ksm_init() hasn't been
+called (depending on the probe error path of the mmc host).
+
+There are a couple of options to better deal with this.
+1) Extend the blk_ksm interface with a devm_blk_ksm_init() function
+(thus let it deal with lifecycle problems for us) and simply drop the
+call to blk_ksm_destroy().
+2) Extend the cqhci interface with a cleanup function (perhaps
+"cqhci_deinit") and let it call blk_ksm_destroy().
+3) Convert to let blk_ksm_init() to be called from mmc_add_host() and
+blk_ksm_destroy() from mmc_remove_host().
+
+Moreover, even if there seems to be no real need to call
+blk_ksm_unregister() for the mmc block device driver, perhaps we
+should still do it to be consistent with blk_ksm_register()?
+
+Then a final concern. It looks like the mmc core relies on checking
+"host->caps2 & MMC_CAP2_CRYPTO", when it calls blk_ksm_register() and
+blk_ksm_reprogram_all_keys(), for example. Normally, host->caps2 bits
+are considered as static configurations and set during the host driver
+probe path, which may not be a good match for this case. Instead, it
+seems like we should set a new separate flag, to indicate for the mmc
+core that blk_ksm_init has been enabled. Otherwise it looks like we
+could end up calling blk_ksm_reprogram_all_keys(), even if
+blk_ksm_init() hasn't been called.
+
+Kind regards
+Uffe
