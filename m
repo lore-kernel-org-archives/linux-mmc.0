@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD5FBC433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 08:37:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9315C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 08:46:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5FBE6229C6
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 08:37:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 729F8221FB
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 08:46:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387740AbhARIhE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jan 2021 03:37:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34622 "EHLO
+        id S2387771AbhARIqe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jan 2021 03:46:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387720AbhARIhC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jan 2021 03:37:02 -0500
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58779C061573;
-        Mon, 18 Jan 2021 00:36:22 -0800 (PST)
-Received: by mail-pl1-x634.google.com with SMTP id e9so4089518plh.3;
-        Mon, 18 Jan 2021 00:36:22 -0800 (PST)
+        with ESMTP id S2387625AbhARIq2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jan 2021 03:46:28 -0500
+Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E768C061575;
+        Mon, 18 Jan 2021 00:45:48 -0800 (PST)
+Received: by mail-pj1-x1030.google.com with SMTP id w1so8747053pjc.0;
+        Mon, 18 Jan 2021 00:45:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=QCCyHU2zDMLrImBBL+/S28Nlgaq/M9LMxN1voLK5Ag8=;
-        b=Ii48X1Br+3Xd3OjdEn1IO2Ko2V6sKOYzCTUMxqYjIb7CS0M5vfjx8rsGlA1PbnHOiB
-         I102wbgyMfVIub9wLwcn8L9sXhBwNIkn5daeDlRTr2IljmwNHv6UeB2mj0Km4wnoK3Ba
-         k205DXWeuNj5kNfwl5pi185Y+FxYjRXNCf59nmFgRSsLqVZiDgIzpEmlsPPKIWutX1e3
-         TDZKGMll11ZrqxjZWlh4ftn6coP3LlfxzJtD8NVFzoPPMdkdGWr48tUbCVOHDD0l9+8/
-         dPKiesz3wr6/wY9NLVgAfvbXm31xS6e8V9r8lGmwXHT6HyZhLzTFT7FuHdBePh+R7c6Z
-         rlMw==
+        bh=wL40GBtfiNYs/0GH+AFmz+V/sciBn4bLLFUI24iwtlQ=;
+        b=XgeTkabXbnIVyIx6vN41vaWFx1SH3fUFm2rfZZeLheVoDEJx3LaSzEceSDs+8ZukFQ
+         93Hntgx4LwS6hPmOMmVe+96LOAh1KMRJEndIzIO2fTNUFT7wARozY5kY3Wkw8e9ubO1l
+         MDWbbzXuUJpTV+BllQaPHBi/OhwZS8YbF6ipRMGZ068fuNwDtgoj2ojJgNKyzdTzlUyO
+         91tB0kvA3nD1llSv7U4TxMjrwcFW+uh6HAC7xm6cH5Oj2gJtK4EnomZWMG0c4bF3TD6N
+         /WxPyUWSJva1uN+ym8yxWF6ykqXCxHw50es+pDBFBm57xjYoj/9tjj/8+p0Ld77LDv1w
+         KeVw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=QCCyHU2zDMLrImBBL+/S28Nlgaq/M9LMxN1voLK5Ag8=;
-        b=drmOwCVY3Vh08ivb+Fg5xKFSUJJ/MJrAPJ9+mb3GtbqtRQjmAjxGtU4y7GzmowCLyw
-         ZWeoDzd7qaD1BRwyZGgpuHp0utNPlMf5RrxohEDi+3tZKbDkrdXRsOqj8mQFA6G1tqCo
-         ATbFi39CIzEGUG7FQmN1VECmHK1yIwsRJQNDBLRtVVvHifZbhLok0NTWjutRCsRMgCMb
-         E7jGSxOrV7OppRe8MPlRKMwBc67kRfr5QRqr76Q8bHaM8fLPsJScq2jbzn2kpe8sEhcd
-         JSt/vZFOo5qOc8pHq9de5b0gsypoMjVHemkoO9mp8zaGVMLke8DtO3ry9rtIIRnkBEK7
-         4I2A==
-X-Gm-Message-State: AOAM5302ikBccFs9GqatBwTmdfaRVViBknOgGFmNUNiQasmG9FxkXfGq
-        j8z48kaB8sf/kx/lIJjNlvs=
-X-Google-Smtp-Source: ABdhPJzhnyfKfDpYekqRJ/gBZVac6GjK0/7PaBkqfjwCQmdhSagVa6namIAasOUBHZ/l2YryzriWtg==
-X-Received: by 2002:a17:90a:2947:: with SMTP id x7mr543656pjf.157.1610958982037;
-        Mon, 18 Jan 2021 00:36:22 -0800 (PST)
+        bh=wL40GBtfiNYs/0GH+AFmz+V/sciBn4bLLFUI24iwtlQ=;
+        b=J1opBft0b9Idb2qeQR29PofOxRxBGL6zFSFQYsfNeCoJCwN+Cd2OJfkDsppHxtIGAo
+         XF6HSbrrF9O6Jrngk1z05SvlfnLKxWJP1Iis8wFFbVpzTCjuptT85/theCUV8vLpPGQg
+         dnBKNMpYwEAhUrHrM+g9wWprXfP2ImJ7TSNl80dwjBHnkVGjFiWznGGLRWbsbEzBoEBe
+         DleWKrK2vGfYhnP4iRUVTbkrgyBkdDtTqBYiR247E8v5Nwc/wHizZXvnhBGaP9QXb3Jf
+         C/ZD4KspHBVKYodNZmSe53m4WZeKBm3p2zooI35AYLobhLbWN9rem2kZDYEa82T41uCh
+         C/0A==
+X-Gm-Message-State: AOAM5301JXunnCqChg0kauwUDg1enpN5R7DUoKCxExmm0Mj8AStv09Ud
+        lEghDLzhmcKz/GvrbtUAkz8=
+X-Google-Smtp-Source: ABdhPJxfg6VQg31u41aN9H48Ck4d0nteRw7q7cscCJWbC2IyQzaytwWsb6pSs4lyPMpglSUKJFDAdQ==
+X-Received: by 2002:a17:902:d2cb:b029:de:757c:1f0c with SMTP id n11-20020a170902d2cbb02900de757c1f0cmr15050355plc.40.1610959547882;
+        Mon, 18 Jan 2021 00:45:47 -0800 (PST)
 Received: from tj.ccdomain.com ([103.220.76.197])
-        by smtp.gmail.com with ESMTPSA id e21sm15170528pgv.74.2021.01.18.00.36.19
+        by smtp.gmail.com with ESMTPSA id o7sm16587735pfp.144.2021.01.18.00.45.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 18 Jan 2021 00:36:21 -0800 (PST)
+        Mon, 18 Jan 2021 00:45:47 -0800 (PST)
 From:   Yue Hu <zbestahu@gmail.com>
 To:     ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         pali@kernel.org, huyue2@yulong.com, zhangwen@yulong.com,
         zbestahu@163.com
-Subject: [PATCH] mmc: core: remove unused host parameter of mmc_sd_get_csd()
-Date:   Mon, 18 Jan 2021 16:35:39 +0800
-Message-Id: <20210118083539.183-1-zbestahu@gmail.com>
+Subject: [PATCH v2] mmc: core: remove unused host parameter of mmc_sd_get_csd()
+Date:   Mon, 18 Jan 2021 16:45:20 +0800
+Message-Id: <20210118084520.241-1-zbestahu@gmail.com>
 X-Mailer: git-send-email 2.29.2.windows.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -73,11 +73,13 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yue Hu <huyue2@yulong.com>
 
-The host parameter host is not used in the body of mmc_sd_get_csd(),
-so let's remove it. Also update related code.
+The host parameter is not used in the body of mmc_sd_get_csd(),
+so let's remove it. Update related code at the same time.
 
 Signed-off-by: Yue Hu <huyue2@yulong.com>
 ---
+v2: fix minor commit message.
+
  drivers/mmc/core/sd.c   | 4 ++--
  drivers/mmc/core/sd.h   | 2 +-
  drivers/mmc/core/sdio.c | 2 +-
