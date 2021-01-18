@@ -6,28 +6,29 @@ X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
 	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 842A5C433E9
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 11:57:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D701C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 12:03:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 435D822472
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 11:57:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21DE1224B8
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jan 2021 12:03:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391099AbhARL41 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jan 2021 06:56:27 -0500
-Received: from foss.arm.com ([217.140.110.172]:34146 "EHLO foss.arm.com"
+        id S2403842AbhARMCi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jan 2021 07:02:38 -0500
+Received: from foss.arm.com ([217.140.110.172]:34258 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2390943AbhARL4X (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 18 Jan 2021 06:56:23 -0500
+        id S2403824AbhARMCe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 18 Jan 2021 07:02:34 -0500
 Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id ABEB331B;
-        Mon, 18 Jan 2021 03:55:35 -0800 (PST)
-Received: from bogus (unknown [10.57.35.27])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 948B53F719;
-        Mon, 18 Jan 2021 03:55:33 -0800 (PST)
-Date:   Mon, 18 Jan 2021 11:55:31 +0000
-From:   Sudeep Holla <sudeep.holla@arm.com>
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 5E77A31B;
+        Mon, 18 Jan 2021 04:01:37 -0800 (PST)
+Received: from e120937-lin (unknown [172.31.20.19])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 39A3F3F719;
+        Mon, 18 Jan 2021 04:01:35 -0800 (PST)
+Date:   Mon, 18 Jan 2021 12:01:32 +0000
+From:   Cristian Marussi <cristian.marussi@arm.com>
 To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-Cc:     Mark Brown <broonie@kernel.org>,
+Cc:     Sudeep Holla <sudeep.holla@arm.com>,
+        Mark Brown <broonie@kernel.org>,
         "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "lgirdwood@gmail.com" <lgirdwood@gmail.com>,
         "robh+dt@kernel.org" <robh+dt@kernel.org>,
@@ -37,12 +38,11 @@ Cc:     Mark Brown <broonie@kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "Shevchenko, Andriy" <andriy.shevchenko@intel.com>,
-        "i A, Rashmi" <rashmi.a@intel.com>,
-        Cristian Marussi <cristian.marussi@arm.com>,
+        "A, Rashmi" <rashmi.a@intel.com>,
         "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>
 Subject: Re: [PATCH v1 5/9] firmware: keembay: Add support for Trusted
  Firmware Service call
-Message-ID: <20210118115531.er5tih7k2faig5cr@bogus>
+Message-ID: <20210118120132.GC25035@e120937-lin>
 References: <20210114152700.21916-1-muhammad.husaini.zulkifli@intel.com>
  <20210114152700.21916-6-muhammad.husaini.zulkifli@intel.com>
  <20210114164811.GG4854@sirena.org.uk>
@@ -52,10 +52,14 @@ MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 In-Reply-To: <DM6PR11MB287679CF20BBC7C81B6E38F5B8A40@DM6PR11MB2876.namprd11.prod.outlook.com>
-User-Agent: NeoMutt/20171215
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
+
+Hi 
+
+sorry I'm a bit late on this.
 
 On Mon, Jan 18, 2021 at 10:28:33AM +0000, Zulkifli, Muhammad Husaini wrote:
 > Hi Sudeep and Mark,
@@ -139,15 +143,22 @@ On Mon, Jan 18, 2021 at 10:28:33AM +0000, Zulkifli, Muhammad Husaini wrote:
 > >> case of controlling regulators managed by the firmware, why are you
 > >> not using that for these systems?  See drivers/firmware/arm_scmi/voltage.c.
 > 
-> From mmc maintainer's perspective, I should use the common modelling either
-> using regulator framework or pinctrl to perform voltage operation. Not just
-> directly invoke  smccc call in the mmc driver. That is why I came up with
-> this regulator driver to perform voltage operation.
->
+> From mmc maintainer's perspective, I should use the common modelling either using 
+> regulator framework or pinctrl to perform voltage operation. Not just directly invoke 
+> smccc call in the mmc driver. That is why I came up with this regulator driver to perform 
+> voltage operation. 
+> 
 
-That's correct. Since the platform uses SCMI and SCMI spec[1] supports Voltage
-protocol and there is upstream driver[2] to support it, I see no point in
-duplicating the support with another custom/non-standard solution.
+There is an SCMI regulator driver built on top of SCMIv3.0 Voltage Domain
+Protocol, so as long as your SCMI platform firmware support the new VD
+protocol you should be able to wire up a generic SCMI regulator in the DT
+(as described in the arm,scmi.txt bindings) and then just use the usual
+regulator framework ops with such SCMI regulator without the need to add
+a custom regulator using custom SMCCC calls).
+
+Thanks
+
+Cristian
 
 > >>
 > >
@@ -156,29 +167,15 @@ duplicating the support with another custom/non-standard solution.
 > 
 > May I know even if I wire up the DT, how should I call this from the mmc driver
 > For set/get voltage operation? Any example?
->
-
-Mark has already pointed you to the binding document[3]
-
+> 
 > >
 > >Just for curiosity, where is SCMI platform firmware implemented ? On Cortex-
 > >A, secure side or external processor. Does this platform run TF-A ?
 > 
 > The KMB SCMI framework is implemented in secure runtime firmware (TF-A BL31). 
 > Hopefully I am answering your question.
->
-
-Yes, it should be easy to extend the implementation and add support for
-voltage protocol.
-
-If you still face any issues, please ask any queries on the list cc-ing
-me and Cristian Marussi(cc-ed)
-
---
-Regards,
-Sudeep
-
-[1] https://developer.arm.com/documentation/den0056/latest
-[2] drivers/firmware/arm_scmi/voltage.c + drivers/regulator/scmi-regulator.c
-[3] Documentation/devicetree/bindings/arm/arm,scmi.txt
-
+> 
+> >
+> >--
+> >Regards,
+> >Sudeep
