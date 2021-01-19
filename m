@@ -2,90 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71CCCC468C0
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:28:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB2CDC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 19:31:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 56BF920706
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:28:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7945F2310B
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 19:31:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389866AbhASRWk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Jan 2021 12:22:40 -0500
-Received: from foss.arm.com ([217.140.110.172]:41292 "EHLO foss.arm.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2390373AbhASRVb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 19 Jan 2021 12:21:31 -0500
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 4745111D4;
-        Tue, 19 Jan 2021 09:20:33 -0800 (PST)
-Received: from bogus (unknown [10.57.35.27])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 918BD3F66E;
-        Tue, 19 Jan 2021 09:20:30 -0800 (PST)
-Date:   Tue, 19 Jan 2021 17:20:28 +0000
-From:   Sudeep Holla <sudeep.holla@arm.com>
-To:     "Zulkifli, Muhammad Husaini" <muhammad.husaini.zulkifli@intel.com>
-Cc:     Cristian Marussi <cristian.marussi@arm.com>,
-        Mark Brown <broonie@kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "lgirdwood@gmail.com" <lgirdwood@gmail.com>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "michal.simek@xilinx.com" <michal.simek@xilinx.com>,
+        id S1728790AbhASTbv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Jan 2021 14:31:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33188 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2391782AbhASTbX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 14:31:23 -0500
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DD41C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 11:30:43 -0800 (PST)
+Received: by mail-pg1-x52e.google.com with SMTP id n7so13607587pgg.2
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 11:30:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=2a+AJpXRCTfZyczQuEB9u8BkJxf/cNBjjXi4k4TlSWw=;
+        b=e1M94iUqOKU+aAyCpeYRdv6GdAW8k4BKNsScVlx4Vdhw7LYfoIN7biO6tmrLfIIdvD
+         0EGUqvCdo36mugVbNLgC8uuoCkz9bugEBDAC05tTf8br6QRIEOG00zQI1LHzQClGOJNl
+         LBFd5gRfieCIjLr8Be6aMd6pRuGd8ont4Rhd4=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=2a+AJpXRCTfZyczQuEB9u8BkJxf/cNBjjXi4k4TlSWw=;
+        b=chLHzvhcK45BMunxQ4KLTnzE0qpVXwuBIWPfvGkYk08CNXRWocaIX0aatzjdnntFNg
+         SxUUrz5PCWEnb5BXvP11LJ7u8RO2vn9EfKO33oSheEnw7KfzRhXkFgwrr3EaBVH+r/DA
+         oHLTKth8XBSGbbjo2DuzngOwUjCH6ks+AjqQuSv1CbH1JXPyi6JjJckHUlSrWBQ2Lfjt
+         tv+stBGesw0TYZb4yWIZ9CDH5EuSTWloX7bQBcxnCWVvRlOR0HacHenszKCW1qzz2OB9
+         nRC4guQeyN8V/gt+ZXOZ9KyOuitWla8uClfSXUAdyQ6ohpG6YkLCd3qvpiAkgd4Gs5+t
+         pDTQ==
+X-Gm-Message-State: AOAM532Nmrmxc0SRucxtbOY+p44TNAOLDLflwNNu9mRKUBxv0F3FXFNH
+        1rnbTug59qczzZ7lB4+LL2V8MA==
+X-Google-Smtp-Source: ABdhPJyUvkfLSXjqHOEq8OgTC+xZiHsy62DRudN423jP+qTtj/pWPVamzTtU3XbQzUKSYlRFrfZXew==
+X-Received: by 2002:a62:65c7:0:b029:1b8:5c05:820b with SMTP id z190-20020a6265c70000b02901b85c05820bmr5673986pfb.48.1611084642828;
+        Tue, 19 Jan 2021 11:30:42 -0800 (PST)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id a18sm19634412pfg.107.2021.01.19.11.30.41
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 19 Jan 2021 11:30:42 -0800 (PST)
+Date:   Tue, 19 Jan 2021 11:30:41 -0800
+From:   Kees Cook <keescook@chromium.org>
+To:     Bhaskara Budiredla <bbudiredla@marvell.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Colin Cross <ccross@android.com>,
+        Tony Luck <tony.luck@intel.com>,
+        Sunil Kovvuri Goutham <sgoutham@marvell.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Shevchenko, Andriy" <andriy.shevchenko@intel.com>,
-        "A, Rashmi" <rashmi.a@intel.com>,
-        "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>
-Subject: Re: [PATCH v1 5/9] firmware: keembay: Add support for Trusted
- Firmware Service call
-Message-ID: <20210119172028.577x72bxv2khmg76@bogus>
-References: <20210118120132.GC25035@e120937-lin>
- <DM6PR11MB2876FCA96049D398A899A930B8A30@DM6PR11MB2876.namprd11.prod.outlook.com>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Subject: Re: [EXT] Re: [PATCH v4 1/2] mmc: Support kmsg dumper based on
+ pstore/blk
+Message-ID: <202101191130.4A8EC5F9@keescook>
+References: <20201223144033.32571-1-bbudiredla@marvell.com>
+ <20201223144033.32571-2-bbudiredla@marvell.com>
+ <CAPDyKFq41CQ8JbyAS0+k26=Cyf=KcOpdeD+VmY1AZxbh4D6f9w@mail.gmail.com>
+ <CY4PR1801MB207022E70C53D0DA87EB3F22DEA31@CY4PR1801MB2070.namprd18.prod.outlook.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <DM6PR11MB2876FCA96049D398A899A930B8A30@DM6PR11MB2876.namprd11.prod.outlook.com>
-User-Agent: NeoMutt/20171215
+In-Reply-To: <CY4PR1801MB207022E70C53D0DA87EB3F22DEA31@CY4PR1801MB2070.namprd18.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 19, 2021 at 02:38:32AM +0000, Zulkifli, Muhammad Husaini wrote:
+On Tue, Jan 19, 2021 at 04:11:31AM +0000, Bhaskara Budiredla wrote:
+> Do you see any issues to ACK this if the mmc pstore
+> registration is through register_pstore_blk()?
+> As Uffe said, eMMC would need to go through
+> psblk_generic_blk_read()/write() instead of
+> mmcpstore_read()/write().
 
-[...]
-
-> 
-> I try to hook up the DT last night. Seems like the SCMI Protocol 17 is not
-> implemented at ATF side.
-
-I had guessed that.
-
-> Double check with ATF Team, currently we don't have SCMI voltage domain
-> control in ARM Trusted Firmware yet as of now, that is why even if I map the
-> function to scmi, my call will be fail.
-
-Correct, but if you already have this custom SMCCC for voltage already
-implemented in TF-A, I don't see it is a big deal to support voltage
-protocol there.
-
-> 
-> [    2.648989] arm-scmi firmware:scmi: SCMI Notifications - Core Enabled.
-> [    2.656157] arm-scmi firmware:scmi: SCMI Protocol v1.0 'INTEL:KMB' Firmware version 0x1
-> [    2.664513] arm-scmi firmware:scmi: SCMI protocol 23 not implemented
-> [    2.675898] arm-scmi firmware:scmi: SCMI protocol 17 not implemented
-> 
-> Any possibilities that for UHS patch we go with my current regulator driver
-> implementation?
-
-Sorry absolutely no. If this platform was not using SCMI, I wouldn't have
-pushed back hard on this custom SMCCC. Please update TF-A to add this support.
-There is no point in having custom interface just for this when everything
-else is already using SCMI on this platform.
+I would be fine with that; yes.
 
 -- 
-Regards,
-Sudeep
+Kees Cook
