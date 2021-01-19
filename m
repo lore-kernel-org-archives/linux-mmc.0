@@ -4,117 +4,134 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63BF9C43333
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCF4EC4321A
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:27:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3EB3322E01
+	by mail.kernel.org (Postfix) with ESMTP id B685B22AAA
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:27:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387746AbhASOsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Jan 2021 09:48:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41730 "EHLO
+        id S2390933AbhASOtz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Jan 2021 09:49:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389648AbhASNjG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 08:39:06 -0500
-Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B47FEC061574
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:38:25 -0800 (PST)
-Received: by mail-ua1-x92f.google.com with SMTP id a16so347769uad.9
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:38:25 -0800 (PST)
+        with ESMTP id S2392680AbhASNqB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 08:46:01 -0500
+Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0FBAC061798
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:43:43 -0800 (PST)
+Received: by mail-vs1-xe33.google.com with SMTP id p20so3791245vsq.7
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:43:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=3X3PmZf5ZFX5QGwBhsXHXX/D7L5F3b1vb/uCDlLe9wI=;
-        b=jNWlkaIxY6NoZOqCqC5pGF+o4jvbMn/xb8jtfR0/d/FEbfV4idHAVkLtrjB52Lpwam
-         93L5kDYFuV+AVyiP7ti//mNLviydWK75z8+6hvuL/V/fixMPB/eDGEJ535CCzoEeU4Gx
-         q5Szg3zoK1wtu7FO/YDNqkh/a42G3vVViXgCXkOJI0Xl8DEbVWRQo9Aue2rwOm/3Sghq
-         W0jCEH3mmwUnRbkTqM1K87HAZobs6XlCaKJJ4BcpUnrW4PBBvGLIqi5OS2uVH3NoysF9
-         O/ZsUryG5wesVqgQAC7G5tIC4c9ntDxaVBaesjG/oltixMaZufVeyAqAXJCnalixm0G8
-         pjDg==
+        bh=ZwifCSX45KhsvY2iJTL0WhKEp/VAHjvt7PynTrJUsDk=;
+        b=gXiQ9xYsNg2rnEMj13umiSHP/tkUj27IExlmJW/qZx9JksExVXRsHUCGfoxnZWGyJJ
+         SKWAYjFK9DPjcoXXlgUEs9WTuRdGa/03tT/483PmfSPDxQJ6dbN225oN1DNdAsKB4uVH
+         /k4QpdhAfSSJQD8AYQSXb4pAQ5AY/AttZgTO5QjFveSHjxZ/B5NE8/kqGaMUNJuhjUso
+         UVVEF6SGqB27rWUHyjL+go4wPes6yO13Jlix6AX3TxAcQZ1ygsyq8wN3TPS6FHceaYle
+         pc4Kou13auHkqOan07St4EEvFaNXTJ0vIIPjfYz00ZFryUzmj1jtISPyqDlyxslZdlVU
+         SQSg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=3X3PmZf5ZFX5QGwBhsXHXX/D7L5F3b1vb/uCDlLe9wI=;
-        b=scKvwfl2CuzaO5zgStSJR0BFTKxbnw+WpdVWxOx2PMnPfTTITbNpjQHJ3nNaVgGgTD
-         LG54vnc42Wv+7Vp0DFkCP6/mst0kOLXY++WvMU9sWoKBG9Ekkh8ZA0BFjBrd4mhw2LQt
-         PgsLPcM7xlCI6BAbzo720DWFhb2neMa6Ahk0lc7p8i8P1dTN42kV/uHqvx1hmK1r7t92
-         E/MOcRc9d+CmyhHhbZld6pApKb+j/hRro9qxAqFKCE39MWSGjV+zfar5wsyHVVf2sjxt
-         xswhcmsl6KezVzC8Wz/4DsMo3AT/Yvk8p50pQzccztIdcb/1tefgNp0jt5bm1zgAwTqY
-         SXBA==
-X-Gm-Message-State: AOAM530zH4i9LovAvBlwF4MwYF/gUSNbAu0sHRGbw+Pnydq5Hz1GT67v
-        yHZyWGUp3rfTyXvJM3twGGWL8yl447kkO6br1x2s9g==
-X-Google-Smtp-Source: ABdhPJw5Geqvr9FjKwnfUyEHlqjInTcQwC1+sWVIZ1SYOgY3Qb8NqNpKBWOWTA3PrYyyeNrvlFstj6HKTroeAi4t7fM=
-X-Received: by 2002:ab0:768:: with SMTP id h95mr2255398uah.104.1611063504953;
- Tue, 19 Jan 2021 05:38:24 -0800 (PST)
+        bh=ZwifCSX45KhsvY2iJTL0WhKEp/VAHjvt7PynTrJUsDk=;
+        b=Z/8bN+lmBYRbZqNuwxz9C9Cx5l09J4r42gPgdWVMSYmIbyB05T2ppm1rz5RkxwAfyx
+         IG1R0EGbWxfRVLNsRbcX2xNnsaBb5L+Mud2jy1X202YMj/e4s7t+8KGaAwTWFxSZMQm1
+         bq5fgKsS6y3YKFVNbapnLBdy3EyAjrn51IKmjfg9GrrgLWkwde8QNB5yhAKqkoMMdm9C
+         S2ckfuHTfv27WWKAeg+qxX/oYXhiu78NQpZGyp3yZxylQ+zC6KZfeKWxGUwS/0Mtix0a
+         3SCQ19C1vg73rCuQhWcv/MX5jbTSmfSZqyFHrPZtk+zBkCznpCbYNOdTsUl4BNUusxCI
+         ReMw==
+X-Gm-Message-State: AOAM530cujlFyaIvjmMFnX0CXVtD0p23P9Cyt0HplKP55boo0AgoPaUX
+        NNVC1Rkzmm1AFHJiv0tcO6xAvaRxJmUdX3qkybV6+Q==
+X-Google-Smtp-Source: ABdhPJyNZwiCneblhx3D9rnVa5WXxr7vgezCM4SQABvJl8PA3qInPMT4IDEoPvGCeZB1In3tRQZbqkcIIA+453oN+aY=
+X-Received: by 2002:a67:f997:: with SMTP id b23mr2484759vsq.34.1611063823059;
+ Tue, 19 Jan 2021 05:43:43 -0800 (PST)
 MIME-Version: 1.0
-References: <20210115032423.15108-1-peng.fan@oss.nxp.com>
-In-Reply-To: <20210115032423.15108-1-peng.fan@oss.nxp.com>
+References: <20210115193218.5809-1-grygorii.strashko@ti.com>
+In-Reply-To: <20210115193218.5809-1-grygorii.strashko@ti.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Jan 2021 14:37:48 +0100
-Message-ID: <CAPDyKFr9Xan+FxgC4vz4KX2UfD15Eo7+TfCjD191YVC2Hv0wdw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: validate pinctrl before use it
-To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Tue, 19 Jan 2021 14:43:06 +0100
+Message-ID: <CAPDyKFp3K7G_36vB5BrMjhLgCD99xi4tL9sHGaunTGm+AqYeNw@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: sdhci-am654: fix compatible for j7200
+To:     Grygorii Strashko <grygorii.strashko@ti.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Faiz Abbas <faiz_abbas@ti.com>, Nishanth Menon <nm@ti.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Peng Fan <peng.fan@nxp.com>, Bough Chen <haobo.chen@nxp.com>,
-        Alice Guo <alice.guo@nxp.com>
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 15 Jan 2021 at 03:55, Peng Fan (OSS) <peng.fan@oss.nxp.com> wrote:
+On Fri, 15 Jan 2021 at 20:32, Grygorii Strashko
+<grygorii.strashko@ti.com> wrote:
 >
-> From: Peng Fan <peng.fan@nxp.com>
+> On TI J7200 SoC the SDHCI controller compatible defined as
+>  "ti,j7200-sdhci-8bit", "ti,j721e-sdhci-8bit"
+>  or
+>  "ti,j7200-sdhci-4bit", "ti,j721e-sdhci-4bit"
+> which causes dtbs_check warnings:
+> mmc@4f80000: compatible: ['ti,j7200-sdhci-8bit', 'ti,j721e-sdhci-8bit'] is too long
+> mmc@4f80000: compatible: Additional items are not allowed ('ti,j721e-sdhci-8bit' was unexpected)
+> mmc@4fb0000: compatible:0: 'ti,j7200-sdhci-4bit' is not one of ['ti,am654-sdhci-5.1', 'ti,j721e-sdhci-8bit',
+>  'ti,j721e-sdhci-4bit', 'ti,j7200-sdhci-8bit', 'ti,j721e-sdhci-4bit', 'ti,am64-sdhci-8bit', 'ti,am64-sdhci-4bit']
+> mmc@4fb0000: compatible: ['ti,j7200-sdhci-4bit', 'ti,j721e-sdhci-4bit'] is too long
+> mmc@4fb0000: compatible: Additional items are not allowed ('ti,j721e-sdhci-4bit' was unexpected)
 >
-> When imx_data->pinctrl is not a valid pointer, pinctrl_lookup_state
-> will trigger kernel panic.
+> Fix it by adding missing compatible strings and their combinations.
 >
-> When we boot Dual OS on Jailhouse hypervisor, we let the 1st Linux to
-> configure pinmux ready for the 2nd OS, so the 2nd OS not have pinctrl
-> settings.
->
-> Similar to this commit b62eee9f804e ("mmc: sdhci-esdhc-imx: no fail when no pinctrl available").
->
-> Reviewed-by: Bough Chen <haobo.chen@nxp.com>
-> Reviewed-by: Alice Guo <alice.guo@nxp.com>
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> Fixes: 407d0c2cdd12 ("dt-bindings: mmc: sdhci-am654: Convert sdhci-am654 controller documentation to json schema")
+> Signed-off-by: Grygorii Strashko <grygorii.strashko@ti.com>
 
-Looks like the documentation of DT bindings doesn't specify pinctrls
-at all. Please add it and explain when they should be used.
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  .../devicetree/bindings/mmc/sdhci-am654.yaml  | 21 ++++++++++++-------
+>  1 file changed, 13 insertions(+), 8 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 16ed19f47939..11d3a2244b36 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1488,7 +1488,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> index 34e53db29428..3a79e39253d2 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> @@ -15,14 +15,19 @@ allOf:
 >
->         mmc_of_parse_voltage(np, &host->ocr_mask);
+>  properties:
+>    compatible:
+> -    enum:
+> -      - ti,am654-sdhci-5.1
+> -      - ti,j721e-sdhci-8bit
+> -      - ti,j721e-sdhci-4bit
+> -      - ti,j7200-sdhci-8bit
+> -      - ti,j721e-sdhci-4bit
+> -      - ti,am64-sdhci-8bit
+> -      - ti,am64-sdhci-4bit
+> +    oneOf:
+> +      - const: ti,am654-sdhci-5.1
+> +      - const: ti,j721e-sdhci-8bit
+> +      - const: ti,j721e-sdhci-4bit
+> +      - const: ti,j721e-sdhci-4bit
+> +      - const: ti,am64-sdhci-8bit
+> +      - const: ti,am64-sdhci-4bit
+> +      - items:
+> +          - const: ti,j7200-sdhci-8bit
+> +          - const: ti,j721e-sdhci-8bit
+> +      - items:
+> +          - const: ti,j7200-sdhci-4bit
+> +          - const: ti,j721e-sdhci-4bit
 >
-> -       if (esdhc_is_usdhc(imx_data)) {
-> +       if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
->                 imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
->                                                 ESDHC_PINCTRL_STATE_100MHZ);
->                 imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+>    reg:
+>      maxItems: 2
 > --
-> 2.28.0
+> 2.17.1
 >
