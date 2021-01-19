@@ -7,163 +7,114 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0EA5C432C3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63BF9C43333
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:27:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7AE6F22DFB
+	by mail.kernel.org (Postfix) with ESMTP id 3EB3322E01
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:27:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387946AbhASOts (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Jan 2021 09:49:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43194 "EHLO
+        id S2387746AbhASOsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Jan 2021 09:48:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41730 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2392546AbhASNpz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 08:45:55 -0500
-Received: from mail-ua1-x932.google.com (mail-ua1-x932.google.com [IPv6:2607:f8b0:4864:20::932])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C006C061795
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:43:40 -0800 (PST)
-Received: by mail-ua1-x932.google.com with SMTP id v23so2388322uam.8
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:43:40 -0800 (PST)
+        with ESMTP id S2389648AbhASNjG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 08:39:06 -0500
+Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B47FEC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:38:25 -0800 (PST)
+Received: by mail-ua1-x92f.google.com with SMTP id a16so347769uad.9
+        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:38:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=tNvEq5am+ikTvDsBrW7I06pSqyQwukR3vU3Lj1BRMZY=;
-        b=SphubxSJTVl0TE0jAYvw8W8A2f9P9Mi5GZALEkVjbxipuCEaJJO53riF85DbU3rdL9
-         LpNZQrLAsNSuebeng43zG7UM1hic6+NQ9gU+MTOYYARS80T+KdOjdIFIBjE8VE0zCEua
-         bW2Pvf0Fa+Mo2mZMiMuHPCE6udwFMqiwjLf62PqwWVElt3ZNkYSND4twFP4dLdEUriAH
-         Z4rRhq67ev1ZkcXUNYVfems6a109dchqMDFU3eejhu5xqhDNLIcU2uNhtkTV5pFotmrf
-         aNQ7rhBiFMLAmc1cHEi+ITYc5WUw7A5fS7tmwdK1Dg7bLkvEkBtu6AKUzdlbt3yDtCnj
-         HEGQ==
+        bh=3X3PmZf5ZFX5QGwBhsXHXX/D7L5F3b1vb/uCDlLe9wI=;
+        b=jNWlkaIxY6NoZOqCqC5pGF+o4jvbMn/xb8jtfR0/d/FEbfV4idHAVkLtrjB52Lpwam
+         93L5kDYFuV+AVyiP7ti//mNLviydWK75z8+6hvuL/V/fixMPB/eDGEJ535CCzoEeU4Gx
+         q5Szg3zoK1wtu7FO/YDNqkh/a42G3vVViXgCXkOJI0Xl8DEbVWRQo9Aue2rwOm/3Sghq
+         W0jCEH3mmwUnRbkTqM1K87HAZobs6XlCaKJJ4BcpUnrW4PBBvGLIqi5OS2uVH3NoysF9
+         O/ZsUryG5wesVqgQAC7G5tIC4c9ntDxaVBaesjG/oltixMaZufVeyAqAXJCnalixm0G8
+         pjDg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=tNvEq5am+ikTvDsBrW7I06pSqyQwukR3vU3Lj1BRMZY=;
-        b=XIrwjwyu5jx7vvFEqRM6WG97903LoBifOHJ47RXUTLhyo4sGLOTWFhITprEIJOPg3n
-         8qsRr2v75+TD1oziNkERFmzs2Q14WvcfS5w8wPuXoXduu7AL2kLcq91+0O1nMp8liv1R
-         5Nzt23W2nlF95YQBaNFv3keXoFovI7Z3LU88sriQaEZjeG92hOtAvFhHUmE4Cqqx/s6Q
-         1nWVmF0CRGD0ugTLMjCcGoL+FKLJwCQoSwRm1DRDshdL/DkY+8mt7dq5RVH7zWS+bLrn
-         K2Gh1Pyb3eY3Ajl6a2rhfBqugzd7+3qhwVhEKPLiyLwtTuK0S2zBfQ9CFZOg8y5ZKzhk
-         9qIQ==
-X-Gm-Message-State: AOAM533bDYpiSQanQPs7miNw7SoVe/Jehsh0AZjy2/7cNNcym0EdYrsZ
-        ARP/4yMCxz2TL7xaECEgTW+INUm7Ht+cr2zXmDTu6w==
-X-Google-Smtp-Source: ABdhPJx1sJ4xEgc4HsCtvWM79eqIKYNMrMBIhqmEXfnsfu1Ih9nGPi9MRPZTKWZwDPPcFTUk4CrGjvf2AzBXz2uxEvU=
-X-Received: by 2002:ab0:768:: with SMTP id h95mr2267466uah.104.1611063819438;
- Tue, 19 Jan 2021 05:43:39 -0800 (PST)
+        bh=3X3PmZf5ZFX5QGwBhsXHXX/D7L5F3b1vb/uCDlLe9wI=;
+        b=scKvwfl2CuzaO5zgStSJR0BFTKxbnw+WpdVWxOx2PMnPfTTITbNpjQHJ3nNaVgGgTD
+         LG54vnc42Wv+7Vp0DFkCP6/mst0kOLXY++WvMU9sWoKBG9Ekkh8ZA0BFjBrd4mhw2LQt
+         PgsLPcM7xlCI6BAbzo720DWFhb2neMa6Ahk0lc7p8i8P1dTN42kV/uHqvx1hmK1r7t92
+         E/MOcRc9d+CmyhHhbZld6pApKb+j/hRro9qxAqFKCE39MWSGjV+zfar5wsyHVVf2sjxt
+         xswhcmsl6KezVzC8Wz/4DsMo3AT/Yvk8p50pQzccztIdcb/1tefgNp0jt5bm1zgAwTqY
+         SXBA==
+X-Gm-Message-State: AOAM530zH4i9LovAvBlwF4MwYF/gUSNbAu0sHRGbw+Pnydq5Hz1GT67v
+        yHZyWGUp3rfTyXvJM3twGGWL8yl447kkO6br1x2s9g==
+X-Google-Smtp-Source: ABdhPJw5Geqvr9FjKwnfUyEHlqjInTcQwC1+sWVIZ1SYOgY3Qb8NqNpKBWOWTA3PrYyyeNrvlFstj6HKTroeAi4t7fM=
+X-Received: by 2002:ab0:768:: with SMTP id h95mr2255398uah.104.1611063504953;
+ Tue, 19 Jan 2021 05:38:24 -0800 (PST)
 MIME-Version: 1.0
-References: <1610704281-11036-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-In-Reply-To: <1610704281-11036-1-git-send-email-abaci-bugfix@linux.alibaba.com>
+References: <20210115032423.15108-1-peng.fan@oss.nxp.com>
+In-Reply-To: <20210115032423.15108-1-peng.fan@oss.nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Jan 2021 14:43:03 +0100
-Message-ID: <CAPDyKFpwF6gX3YhKGMF=YUGP1UQD=JSuNgvSxuJHG+Ochzv5Bg@mail.gmail.com>
-Subject: Re: [PATCH v2] host: omap_hsmmc: style: Simplify bool comparison and conversion
-To:     Yang Li <abaci-bugfix@linux.alibaba.com>
-Cc:     Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
+Date:   Tue, 19 Jan 2021 14:37:48 +0100
+Message-ID: <CAPDyKFr9Xan+FxgC4vz4KX2UfD15Eo7+TfCjD191YVC2Hv0wdw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: validate pinctrl before use it
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Peng Fan <peng.fan@nxp.com>, Bough Chen <haobo.chen@nxp.com>,
+        Alice Guo <alice.guo@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 15 Jan 2021 at 10:51, Yang Li <abaci-bugfix@linux.alibaba.com> wrote:
+On Fri, 15 Jan 2021 at 03:55, Peng Fan (OSS) <peng.fan@oss.nxp.com> wrote:
 >
-> Fix the following coccicheck warning:
-> ./drivers/mmc/host/omap_hsmmc.c:297:6-25: WARNING: Comparison of 0/1 to
-> bool variable
+> From: Peng Fan <peng.fan@nxp.com>
 >
-> According to the context, vqmmc_enabled is more suitable for bool
-> type.
+> When imx_data->pinctrl is not a valid pointer, pinctrl_lookup_state
+> will trigger kernel panic.
 >
-> Reported-by: Abaci Robot<abaci@linux.alibaba.com>
-> Signed-off-by: Yang Li <abaci-bugfix@linux.alibaba.com>
+> When we boot Dual OS on Jailhouse hypervisor, we let the 1st Linux to
+> configure pinmux ready for the 2nd OS, so the 2nd OS not have pinctrl
+> settings.
+>
+> Similar to this commit b62eee9f804e ("mmc: sdhci-esdhc-imx: no fail when no pinctrl available").
+>
+> Reviewed-by: Bough Chen <haobo.chen@nxp.com>
+> Reviewed-by: Alice Guo <alice.guo@nxp.com>
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
 
-Applied for next, thanks!
+Looks like the documentation of DT bindings doesn't specify pinctrls
+at all. Please add it and explain when they should be used.
 
 Kind regards
 Uffe
 
-
 > ---
-> Changes in v2:
->  -clean up all use of "pbias_enabled", and do the same clean up for
-> "vqmmc_enabled".
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
->  drivers/mmc/host/omap_hsmmc.c | 18 +++++++++---------
->  1 file changed, 9 insertions(+), 9 deletions(-)
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 16ed19f47939..11d3a2244b36 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1488,7 +1488,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
 >
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index aa9cc49..2f8038d 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -177,7 +177,7 @@ struct omap_hsmmc_host {
->         struct  regulator       *pbias;
->         bool                    pbias_enabled;
->         void    __iomem         *base;
-> -       int                     vqmmc_enabled;
-> +       bool                    vqmmc_enabled;
->         resource_size_t         mapbase;
->         spinlock_t              irq_lock; /* Prevent races with irq handler */
->         unsigned int            dma_len;
-> @@ -232,7 +232,7 @@ static int omap_hsmmc_enable_supply(struct mmc_host *mmc)
->                         dev_err(mmc_dev(mmc), "vmmc_aux reg enable failed\n");
->                         goto err_vqmmc;
->                 }
-> -               host->vqmmc_enabled = 1;
-> +               host->vqmmc_enabled = true;
->         }
+>         mmc_of_parse_voltage(np, &host->ocr_mask);
 >
->         return 0;
-> @@ -256,7 +256,7 @@ static int omap_hsmmc_disable_supply(struct mmc_host *mmc)
->                         dev_err(mmc_dev(mmc), "vmmc_aux reg disable failed\n");
->                         return ret;
->                 }
-> -               host->vqmmc_enabled = 0;
-> +               host->vqmmc_enabled = false;
->         }
->
->         if (!IS_ERR(mmc->supply.vmmc)) {
-> @@ -285,22 +285,22 @@ static int omap_hsmmc_set_pbias(struct omap_hsmmc_host *host, bool power_on)
->                 return 0;
->
->         if (power_on) {
-> -               if (host->pbias_enabled == 0) {
-> +               if (!host->pbias_enabled) {
->                         ret = regulator_enable(host->pbias);
->                         if (ret) {
->                                 dev_err(host->dev, "pbias reg enable fail\n");
->                                 return ret;
->                         }
-> -                       host->pbias_enabled = 1;
-> +                       host->pbias_enabled = true;
->                 }
->         } else {
-> -               if (host->pbias_enabled == 1) {
-> +               if (host->pbias_enabled) {
->                         ret = regulator_disable(host->pbias);
->                         if (ret) {
->                                 dev_err(host->dev, "pbias reg disable fail\n");
->                                 return ret;
->                         }
-> -                       host->pbias_enabled = 0;
-> +                       host->pbias_enabled = false;
->                 }
->         }
->
-> @@ -1861,8 +1861,8 @@ static int omap_hsmmc_probe(struct platform_device *pdev)
->         host->base      = base + pdata->reg_offset;
->         host->power_mode = MMC_POWER_OFF;
->         host->next_data.cookie = 1;
-> -       host->pbias_enabled = 0;
-> -       host->vqmmc_enabled = 0;
-> +       host->pbias_enabled = false;
-> +       host->vqmmc_enabled = false;
->
->         platform_set_drvdata(pdev, host);
->
+> -       if (esdhc_is_usdhc(imx_data)) {
+> +       if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
+>                 imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
+>                                                 ESDHC_PINCTRL_STATE_100MHZ);
+>                 imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
 > --
-> 1.8.3.1
+> 2.28.0
 >
