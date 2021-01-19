@@ -2,101 +2,69 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5385FC43331
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DEA4C43332
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:27:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 27B8422CE3
+	by mail.kernel.org (Postfix) with ESMTP id 0EF272253A
 	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jan 2021 18:27:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389267AbhASOsU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 19 Jan 2021 09:48:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37496 "EHLO
+        id S1728865AbhASOsH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 19 Jan 2021 09:48:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54634 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2404027AbhASNUT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 08:20:19 -0500
-Received: from mail-ua1-x933.google.com (mail-ua1-x933.google.com [IPv6:2607:f8b0:4864:20::933])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0075AC0613C1
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:11:52 -0800 (PST)
-Received: by mail-ua1-x933.google.com with SMTP id y21so6639372uag.2
-        for <linux-mmc@vger.kernel.org>; Tue, 19 Jan 2021 05:11:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=FBCytU2tF2X6uPBN9VdsZsC0tQnDuvsMDL0KGzBzCMU=;
-        b=hxAZPtDJ6bUT3b2INOC7YVy3qWLFjcFkw7/nk0DMFpL33XpcKNr7Crukzxd2RiE5Kc
-         mkS+sRMYRcL/0Ubxx01jxTOxjZGUo4X7RHeXNZsbwzoKQmTWKBZLn2Z9Hj3X/OILYigf
-         e+mtA5pe8FexGOWspKNAssJ7RJ3LwYUFfWhHna44kRD6n6wLDsqt+509qc2pE0fCDzBE
-         hmja+6hXE5t+OocADu4rkTVznrmSTAPb7P53WivqmU7L3F+J9H9Shs5WjObhSxOLPJtl
-         R/ZdMZfNs8UKmRbqP69xySLBHq6edwjMF1/7/qcEHuxrWAOoi7AjW3/uW/CGR/zNIptS
-         b9ow==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=FBCytU2tF2X6uPBN9VdsZsC0tQnDuvsMDL0KGzBzCMU=;
-        b=lYeOn2hoteW0v/+IGJd4MmJTkApFsiswGc8O7ZXH/ymHP+Id2SRXSbVOuYAETEXFU4
-         ekQJXT6XW9G4iu7kSlGfjuoALzwVogJBhYkfJAIi/a4ZVSpZJLgSMmw5sC55AHvlAa13
-         Cz5+uJzFc9u6z2axHb2WhDiMPs2XmFSOKWnVRhUmuJaYy8V1PkifxEhbVOmH7QiKPRqe
-         Uc2F7gmeytIOWMBcdnGUQotsn6PpbUDhlCsmY2jkfKO8XU/XHBZD6oXi+FqldXP1FpVh
-         zUg0OmdO8+xil/gcGetwb8ainuVRC3WYcCWBU2O6VBwaMT2qu9GfSx7mq5OU+0mYhs/l
-         0Lzg==
-X-Gm-Message-State: AOAM532IFbkjapC4/yaRUn+D15zZGlBCVtfLJvBXlRbzyNH8NfN3cI9D
-        /vjBTL7ztn81ni8rbB8ksGclR3aYrbwpG2UFVGLdrnNJlHUo7w==
-X-Google-Smtp-Source: ABdhPJzbTV3Tj80gHuisSCGfdH5eJWfgr/hnn3526HhEGa4vMB/JFqMrctqxXAkTLOdWfhaWFVYby2dTs9FAW/S4z6M=
-X-Received: by 2002:a9f:204e:: with SMTP id 72mr2023850uam.19.1611061912130;
- Tue, 19 Jan 2021 05:11:52 -0800 (PST)
+        with ESMTP id S2389414AbhASM3E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 19 Jan 2021 07:29:04 -0500
+Received: from mail-out.m-online.net (mail-out.m-online.net [IPv6:2001:a60:0:28:0:1:25:1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B164C061573;
+        Tue, 19 Jan 2021 04:27:25 -0800 (PST)
+Received: from frontend01.mail.m-online.net (unknown [192.168.8.182])
+        by mail-out.m-online.net (Postfix) with ESMTP id 4DKnvV0tDBz1s8Mv;
+        Tue, 19 Jan 2021 13:26:30 +0100 (CET)
+Received: from localhost (dynscan1.mnet-online.de [192.168.6.70])
+        by mail.m-online.net (Postfix) with ESMTP id 4DKnvT6kxlz1qrPm;
+        Tue, 19 Jan 2021 13:26:29 +0100 (CET)
+X-Virus-Scanned: amavisd-new at mnet-online.de
+Received: from mail.mnet-online.de ([192.168.8.182])
+        by localhost (dynscan1.mail.m-online.net [192.168.6.70]) (amavisd-new, port 10024)
+        with ESMTP id TG6wQP6Q9FkO; Tue, 19 Jan 2021 13:26:28 +0100 (CET)
+X-Auth-Info: gfwXCj6ioGLcMlG5xwuDcWczg+YKs/KDYJt3xm6T8Gw=
+Received: from [IPv6:::1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.mnet-online.de (Postfix) with ESMTPSA;
+        Tue, 19 Jan 2021 13:26:28 +0100 (CET)
+Subject: Re: [PATCH v3] mmc: mmci: Convert bindings to DT schema
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     devicetree@vger.kernel.org
+References: <20210119100655.2755164-1-linus.walleij@linaro.org>
+From:   Marek Vasut <marex@denx.de>
+Message-ID: <5e2d5f9c-15f9-248a-9ef2-335ad0118e2b@denx.de>
+Date:   Tue, 19 Jan 2021 13:26:28 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.0
 MIME-Version: 1.0
-References: <20201222133355.19807-1-zhengyongjun3@huawei.com>
-In-Reply-To: <20201222133355.19807-1-zhengyongjun3@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 19 Jan 2021 14:11:16 +0100
-Message-ID: <CAPDyKFpGsAuBdmdcau8CwGUZYXaTF_RoQs=a-eoLOwZknZGBcw@mail.gmail.com>
-Subject: Re: [PATCH -next] mmc: core: use roundup macro to to calculate blk_sz
-To:     Zheng Yongjun <zhengyongjun3@huawei.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20210119100655.2755164-1-linus.walleij@linaro.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 22 Dec 2020 at 14:34, Zheng Yongjun <zhengyongjun3@huawei.com> wrote:
->
-> Don't open-code roundup() kernel macro.
->
-> Signed-off-by: Zheng Yongjun <zhengyongjun3@huawei.com>
-> ---
->  drivers/mmc/core/sdio_io.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_io.c b/drivers/mmc/core/sdio_io.c
-> index 79dbf90216b5..35c69bdeb40e 100644
-> --- a/drivers/mmc/core/sdio_io.c
-> +++ b/drivers/mmc/core/sdio_io.c
-> @@ -263,8 +263,7 @@ unsigned int sdio_align_size(struct sdio_func *func, unsigned int sz)
->                  * Realign it so that it can be done with one request,
->                  * and recheck if the controller still likes it.
->                  */
-> -               blk_sz = ((sz + func->cur_blksize - 1) /
-> -                       func->cur_blksize) * func->cur_blksize;
-> +               blk_sz = roundup(sz, func->cur_blksize);
+On 1/19/21 11:06 AM, Linus Walleij wrote:
+> This converts the MMCI bindings from simple text to a proper
+> schema.
+> 
+> Cc: devicetree@vger.kernel.org
+> Cc: Marek Vasut <marex@denx.de>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-If I understand correctly, roundup() assumes func->cur_blksize is a
-power of 2. The above doesn't, which means there is no open coding
-happening here.
+Tested-by: Marek Vasut <marex@denx.de>
 
->                 blk_sz = _sdio_align_size(blk_sz);
->
->                 /*
-> --
-> 2.22.0
->
-
-Kind regards
-Uffe
+Thanks
