@@ -2,418 +2,390 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2C44C433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 15:36:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EBF7C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 15:38:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 796D523381
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 15:36:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 586FF2339E
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 15:38:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727250AbhATOv6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Jan 2021 09:51:58 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40186 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389082AbhATO2s (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 20 Jan 2021 09:28:48 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5B41723381;
-        Wed, 20 Jan 2021 14:28:06 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611152887;
-        bh=Qd02fzmFArsS9FD/AjZSBTPR5EFMCK+sb1rmbEN7xi8=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=bh6Gg2SWXvTPikcNJDa2/23TDkJtf7meyQu0T8BecWLe6Knqj4djOGjUjlVtPOjhV
-         ubhsH003uJ9R14q2iP+EnfCeaXM7YXdZkg3ubOIed8a7pZIXscPVrZZxEAH2Ji+0f7
-         MsYKkUXR85wHpXmFH/DkgV3pz/Vmw+dFYInvmElriGvabT/BLFtlRQjxu1i4TBa2fk
-         Hwk1f+y5fA2GA0L9RVPzAG41/FwCMpRUNK9nwvwoOSHcmV/ynchKwrPNihSfhveTME
-         iF0KqCA4fYxQJIlHDdO/H4bkoPoB5ynN+drnK/stLUu0ltVXCwVRR/PWTqELRrKdRz
-         /wuiO+GztOUtw==
-From:   Arnd Bergmann <arnd@kernel.org>
-To:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Jun Nie <jun.nie@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>
-Subject: [PATCH 1/2] mmc: remove dw_mmc-zx driver
-Date:   Wed, 20 Jan 2021 15:28:00 +0100
-Message-Id: <20210120142801.334550-2-arnd@kernel.org>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20210120142801.334550-1-arnd@kernel.org>
-References: <20210120142801.334550-1-arnd@kernel.org>
+        id S2387573AbhATOvy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Jan 2021 09:51:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49138 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390187AbhATOLo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 09:11:44 -0500
+Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A36CEC061793
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:35 -0800 (PST)
+Received: by mail-ua1-x934.google.com with SMTP id a16so1581773uad.9
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=kzSnUO1IBl2rCi/hM/gu3eKVLQrhYdesLwIEYip4Q2I=;
+        b=DG13tf28yD94kYNz9VoREhx9rMSRnoe/xBmBI7gKMWmeZhRWUZqp7TBNxRUPEetUYt
+         y3RcRtDQB17rOL5DuTEfjFgiwblGTOJI8qbRWIE4G2aTbMGQH+MNtfKCSbS9k5Cqg8Ex
+         nNQVjjOfpO4H2siO3+7/+U+b26K0o3xbXeSr85r3Ay7LDY4P287G7MnkClC/Si5WSXzh
+         PG7/NOhvVPiJRyPCw3h3Qb5/7ngq4JcCqrFRpnCL8ZI0Su0ycBJpX87ZkRqirLFX1MZI
+         q0MAglAcNRFte4HmrTYQ2KcNll/oEyvgT7oc1n74URBk0YDhXuFsYZLrDGrHziT3FRLy
+         R86g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=kzSnUO1IBl2rCi/hM/gu3eKVLQrhYdesLwIEYip4Q2I=;
+        b=e5ckg8c0HdcdN91QYu1eAfK87pUVtozxwdQ4KQsH21maSbso5BquUdqm7Wcm+YNL9W
+         VsgkfWVjl14q4sELIHMBWl67hk0uLcH+964CpIcjyRi94bMU8C2v5nhGJWNOFi17IlkC
+         1+95Sh0gME3E9AtjjbrU1OlE9rYqdZPKULgI2rHEWyYJMDhQoXVeBQuAJUqrTBpN32xg
+         XJ/UNdzyUKnAQ/CiNWhpBiFySfDLIqi8O7GLKm/uMrjlvWGvPQtx88kq7JhMxOXEx+mz
+         5rX3wwWj1xxNRRs1s2HDc2ebIVVTriTgIwQakPJHGl43A+WSkRzS1gtxhAg8U8Y4NFu2
+         FBNg==
+X-Gm-Message-State: AOAM5300IAGFiwAxsfujyHMFlvwhFNfqWrOf8FuC3jAeEHEGKJU9dgSW
+        Z0GZMlvtXbxcywYR6zx9rK3KCupX/oBXCgLRpk+xig==
+X-Google-Smtp-Source: ABdhPJxNL2Cl3QqNd4tRQPOBhB2bUNVqth/eTCTLFskttjrvOfM+XiT1lIYJaN1GWqxrRSrpFqOC0Lbf09XVC8GKtSo=
+X-Received: by 2002:ab0:1c10:: with SMTP id a16mr6509705uaj.100.1611151714625;
+ Wed, 20 Jan 2021 06:08:34 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210119100655.2755164-1-linus.walleij@linaro.org>
+In-Reply-To: <20210119100655.2755164-1-linus.walleij@linaro.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 20 Jan 2021 15:07:56 +0100
+Message-ID: <CAPDyKFr-9B27bAdLH9hQnUxzc3XRPVZZ9ZAneC9qPKa8NhaH-Q@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: mmci: Convert bindings to DT schema
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, Marek Vasut <marex@denx.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Arnd Bergmann <arnd@arndb.de>
+On Tue, 19 Jan 2021 at 11:06, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> This converts the MMCI bindings from simple text to a proper
+> schema.
+>
+> Cc: devicetree@vger.kernel.org
+> Cc: Marek Vasut <marex@denx.de>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-The zte zx platform is getting removed, so this driver is no
-longer needed.
+Applied for next, thanks!
 
-Cc: Jun Nie <jun.nie@linaro.org>
-Cc: Shawn Guo <shawnguo@kernel.org>
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- .../devicetree/bindings/mmc/zx-dw-mshc.txt    |  31 ---
- drivers/mmc/host/Kconfig                      |   9 -
- drivers/mmc/host/Makefile                     |   1 -
- drivers/mmc/host/dw_mmc-zx.c                  | 234 ------------------
- drivers/mmc/host/dw_mmc-zx.h                  |  32 ---
- 5 files changed, 307 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
- delete mode 100644 drivers/mmc/host/dw_mmc-zx.c
- delete mode 100644 drivers/mmc/host/dw_mmc-zx.h
+Kind regards
+Uffe
 
-diff --git a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-deleted file mode 100644
-index 0f59bd5361f5..000000000000
---- a/Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
-+++ /dev/null
-@@ -1,31 +0,0 @@
--* ZTE specific extensions to the Synopsys Designware Mobile Storage
--  Host Controller
--
--The Synopsys designware mobile storage host controller is used to interface
--a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
--differences between the core Synopsys dw mshc controller properties described
--by synopsys-dw-mshc.txt and the properties used by the ZTE specific
--extensions to the Synopsys Designware Mobile Storage Host Controller.
--
--Required Properties:
--
--* compatible: should be
--	- "zte,zx296718-dw-mshc": for ZX SoCs
--
--Example:
--
--	mmc1: mmc@1110000 {
--		compatible = "zte,zx296718-dw-mshc";
--		reg = <0x01110000 0x1000>;
--		interrupts = <GIC_SPI 15 IRQ_TYPE_LEVEL_HIGH>;
--		fifo-depth = <32>;
--		data-addr = <0x200>;
--		fifo-watermark-aligned;
--		bus-width = <4>;
--		clock-frequency = <50000000>;
--		clocks = <&topcrm SD0_AHB>, <&topcrm SD0_WCLK>;
--		clock-names = "biu", "ciu";
--		max-frequency = <50000000>;
--		cap-sdio-irq;
--		cap-sd-highspeed;
--	};
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 596f32637315..255d37e8bd3a 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -868,15 +868,6 @@ config MMC_DW_ROCKCHIP
- 	  Synopsys DesignWare Memory Card Interface driver. Select this option
- 	  for platforms based on RK3066, RK3188 and RK3288 SoC's.
- 
--config MMC_DW_ZX
--	tristate "ZTE specific extensions for Synopsys DW Memory Card Interface"
--	depends on MMC_DW && ARCH_ZX
--	select MMC_DW_PLTFM
--	help
--	  This selects support for ZTE SoC specific extensions to the
--	  Synopsys DesignWare Memory Card Interface driver. Select this option
--	  for platforms based on ZX296718 SoC's.
--
- config MMC_SH_MMCIF
- 	tristate "SuperH Internal MMCIF support"
- 	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 451c25fc2c69..43136d382d5f 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -61,7 +61,6 @@ obj-$(CONFIG_MMC_DW_HI3798CV200) += dw_mmc-hi3798cv200.o
- obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
--obj-$(CONFIG_MMC_DW_ZX)		+= dw_mmc-zx.o
- obj-$(CONFIG_MMC_SH_MMCIF)	+= sh_mmcif.o
- obj-$(CONFIG_MMC_JZ4740)	+= jz4740_mmc.o
- obj-$(CONFIG_MMC_VUB300)	+= vub300.o
-diff --git a/drivers/mmc/host/dw_mmc-zx.c b/drivers/mmc/host/dw_mmc-zx.c
-deleted file mode 100644
-index 51bcc6332f3a..000000000000
---- a/drivers/mmc/host/dw_mmc-zx.c
-+++ /dev/null
-@@ -1,234 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0-or-later
--/*
-- * ZX Specific Extensions for Synopsys DW Multimedia Card Interface driver
-- *
-- * Copyright (C) 2016, Linaro Ltd.
-- * Copyright (C) 2016, ZTE Corp.
-- */
--
--#include <linux/clk.h>
--#include <linux/mfd/syscon.h>
--#include <linux/mmc/host.h>
--#include <linux/mmc/mmc.h>
--#include <linux/module.h>
--#include <linux/of.h>
--#include <linux/platform_device.h>
--#include <linux/pm_runtime.h>
--#include <linux/regmap.h>
--#include <linux/slab.h>
--
--#include "dw_mmc.h"
--#include "dw_mmc-pltfm.h"
--#include "dw_mmc-zx.h"
--
--struct dw_mci_zx_priv_data {
--	struct regmap	*sysc_base;
--};
--
--enum delay_type {
--	DELAY_TYPE_READ,	/* read dqs delay */
--	DELAY_TYPE_CLK,		/* clk sample delay */
--};
--
--static int dw_mci_zx_emmc_set_delay(struct dw_mci *host, unsigned int delay,
--				    enum delay_type dflag)
--{
--	struct dw_mci_zx_priv_data *priv = host->priv;
--	struct regmap *sysc_base = priv->sysc_base;
--	unsigned int clksel;
--	unsigned int loop = 1000;
--	int ret;
--
--	if (!sysc_base)
--		return -EINVAL;
--
--	ret = regmap_update_bits(sysc_base, LB_AON_EMMC_CFG_REG0,
--				 PARA_HALF_CLK_MODE | PARA_DLL_BYPASS_MODE |
--				 PARA_PHASE_DET_SEL_MASK |
--				 PARA_DLL_LOCK_NUM_MASK |
--				 DLL_REG_SET | PARA_DLL_START_MASK,
--				 PARA_DLL_START(4) | PARA_DLL_LOCK_NUM(4));
--	if (ret)
--		return ret;
--
--	ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG1, &clksel);
--	if (ret)
--		return ret;
--
--	if (dflag == DELAY_TYPE_CLK) {
--		clksel &= ~CLK_SAMP_DELAY_MASK;
--		clksel |= CLK_SAMP_DELAY(delay);
--	} else {
--		clksel &= ~READ_DQS_DELAY_MASK;
--		clksel |= READ_DQS_DELAY(delay);
--	}
--
--	regmap_write(sysc_base, LB_AON_EMMC_CFG_REG1, clksel);
--	regmap_update_bits(sysc_base, LB_AON_EMMC_CFG_REG0,
--			   PARA_DLL_START_MASK | PARA_DLL_LOCK_NUM_MASK |
--			   DLL_REG_SET,
--			   PARA_DLL_START(4) | PARA_DLL_LOCK_NUM(4) |
--			   DLL_REG_SET);
--
--	do {
--		ret = regmap_read(sysc_base, LB_AON_EMMC_CFG_REG2, &clksel);
--		if (ret)
--			return ret;
--
--	} while (--loop && !(clksel & ZX_DLL_LOCKED));
--
--	if (!loop) {
--		dev_err(host->dev, "Error: %s dll lock fail\n", __func__);
--		return -EIO;
--	}
--
--	return 0;
--}
--
--static int dw_mci_zx_emmc_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
--{
--	struct dw_mci *host = slot->host;
--	struct mmc_host *mmc = slot->mmc;
--	int ret, len = 0, start = 0, end = 0, delay, best = 0;
--
--	for (delay = 1; delay < 128; delay++) {
--		ret = dw_mci_zx_emmc_set_delay(host, delay, DELAY_TYPE_CLK);
--		if (!ret && mmc_send_tuning(mmc, opcode, NULL)) {
--			if (start >= 0) {
--				end = delay - 1;
--				/* check and update longest good range */
--				if ((end - start) > len) {
--					best = (start + end) >> 1;
--					len = end - start;
--				}
--			}
--			start = -1;
--			end = 0;
--			continue;
--		}
--		if (start < 0)
--			start = delay;
--	}
--
--	if (start >= 0) {
--		end = delay - 1;
--		if ((end - start) > len) {
--			best = (start + end) >> 1;
--			len = end - start;
--		}
--	}
--	if (best < 0)
--		return -EIO;
--
--	dev_info(host->dev, "%s best range: start %d end %d\n", __func__,
--		 start, end);
--	return dw_mci_zx_emmc_set_delay(host, best, DELAY_TYPE_CLK);
--}
--
--static int dw_mci_zx_prepare_hs400_tuning(struct dw_mci *host,
--					  struct mmc_ios *ios)
--{
--	int ret;
--
--	/* config phase shift as 90 degree */
--	ret = dw_mci_zx_emmc_set_delay(host, 32, DELAY_TYPE_READ);
--	if (ret < 0)
--		return -EIO;
--
--	return 0;
--}
--
--static int dw_mci_zx_execute_tuning(struct dw_mci_slot *slot, u32 opcode)
--{
--	struct dw_mci *host = slot->host;
--
--	if (host->verid == 0x290a) /* only for emmc */
--		return dw_mci_zx_emmc_execute_tuning(slot, opcode);
--	/* TODO: Add 0x210a dedicated tuning for sd/sdio */
--
--	return 0;
--}
--
--static int dw_mci_zx_parse_dt(struct dw_mci *host)
--{
--	struct device_node *np = host->dev->of_node;
--	struct device_node *node;
--	struct dw_mci_zx_priv_data *priv;
--	struct regmap *sysc_base;
--
--	/* syscon is needed only by emmc */
--	node = of_parse_phandle(np, "zte,aon-syscon", 0);
--	if (node) {
--		sysc_base = syscon_node_to_regmap(node);
--		of_node_put(node);
--
--		if (IS_ERR(sysc_base))
--			return dev_err_probe(host->dev, PTR_ERR(sysc_base),
--					     "Can't get syscon\n");
--	} else {
--		return 0;
--	}
--
--	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
--	if (!priv)
--		return -ENOMEM;
--	priv->sysc_base = sysc_base;
--	host->priv = priv;
--
--	return 0;
--}
--
--static unsigned long zx_dwmmc_caps[3] = {
--	MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
--	MMC_CAP_CMD23,
--};
--
--static const struct dw_mci_drv_data zx_drv_data = {
--	.caps			= zx_dwmmc_caps,
--	.num_caps		= ARRAY_SIZE(zx_dwmmc_caps),
--	.execute_tuning		= dw_mci_zx_execute_tuning,
--	.prepare_hs400_tuning	= dw_mci_zx_prepare_hs400_tuning,
--	.parse_dt               = dw_mci_zx_parse_dt,
--};
--
--static const struct of_device_id dw_mci_zx_match[] = {
--	{ .compatible = "zte,zx296718-dw-mshc", .data = &zx_drv_data},
--	{},
--};
--MODULE_DEVICE_TABLE(of, dw_mci_zx_match);
--
--static int dw_mci_zx_probe(struct platform_device *pdev)
--{
--	const struct dw_mci_drv_data *drv_data;
--	const struct of_device_id *match;
--
--	match = of_match_node(dw_mci_zx_match, pdev->dev.of_node);
--	drv_data = match->data;
--
--	return dw_mci_pltfm_register(pdev, drv_data);
--}
--
--static const struct dev_pm_ops dw_mci_zx_dev_pm_ops = {
--	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
--				pm_runtime_force_resume)
--	SET_RUNTIME_PM_OPS(dw_mci_runtime_suspend,
--			   dw_mci_runtime_resume,
--			   NULL)
--};
--
--static struct platform_driver dw_mci_zx_pltfm_driver = {
--	.probe		= dw_mci_zx_probe,
--	.remove		= dw_mci_pltfm_remove,
--	.driver		= {
--		.name		= "dwmmc_zx",
--		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
--		.of_match_table	= dw_mci_zx_match,
--		.pm		= &dw_mci_zx_dev_pm_ops,
--	},
--};
--
--module_platform_driver(dw_mci_zx_pltfm_driver);
--
--MODULE_DESCRIPTION("ZTE emmc/sd driver");
--MODULE_LICENSE("GPL v2");
-diff --git a/drivers/mmc/host/dw_mmc-zx.h b/drivers/mmc/host/dw_mmc-zx.h
-deleted file mode 100644
-index 09ac52766f14..000000000000
---- a/drivers/mmc/host/dw_mmc-zx.h
-+++ /dev/null
-@@ -1,32 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--#ifndef _DW_MMC_ZX_H_
--#define _DW_MMC_ZX_H_
--
--/* ZX296718 SoC specific DLL register offset. */
--#define LB_AON_EMMC_CFG_REG0  0x1B0
--#define LB_AON_EMMC_CFG_REG1  0x1B4
--#define LB_AON_EMMC_CFG_REG2  0x1B8
--
--/* LB_AON_EMMC_CFG_REG0 register defines */
--#define PARA_DLL_START(x)	((x) & 0xFF)
--#define PARA_DLL_START_MASK	0xFF
--#define DLL_REG_SET		BIT(8)
--#define PARA_DLL_LOCK_NUM(x)	(((x) & 7) << 16)
--#define PARA_DLL_LOCK_NUM_MASK  (7 << 16)
--#define PARA_PHASE_DET_SEL(x)	(((x) & 7) << 20)
--#define PARA_PHASE_DET_SEL_MASK	(7 << 20)
--#define PARA_DLL_BYPASS_MODE	BIT(23)
--#define PARA_HALF_CLK_MODE	BIT(24)
--
--/* LB_AON_EMMC_CFG_REG1 register defines */
--#define READ_DQS_DELAY(x)	((x) & 0x7F)
--#define READ_DQS_DELAY_MASK	(0x7F)
--#define READ_DQS_BYPASS_MODE	BIT(7)
--#define CLK_SAMP_DELAY(x)	(((x) & 0x7F) << 8)
--#define CLK_SAMP_DELAY_MASK	(0x7F << 8)
--#define CLK_SAMP_BYPASS_MODE	BIT(15)
--
--/* LB_AON_EMMC_CFG_REG2 register defines */
--#define ZX_DLL_LOCKED		BIT(2)
--
--#endif /* _DW_MMC_ZX_H_ */
--- 
-2.29.2
 
+> ---
+> ChangeLog v2->v3:
+> - Drop "dmas" and "dma-names" that are already part of the
+>   generic schema. Sorry for missing this in v2.
+> ChangeLog v1->v2:
+> - Use unevaluatedProperties: false instead of
+>   additionalProperties: false and refs start working.
+> - Define clocks to 1 or 2 items.
+> - Define interrupts to 1 or 2 items.
+> ---
+>  .../devicetree/bindings/mmc/arm,pl18x.yaml    | 203 ++++++++++++++++++
+>  .../devicetree/bindings/mmc/mmci.txt          |  74 -------
+>  2 files changed, 203 insertions(+), 74 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/mmci.txt
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> new file mode 100644
+> index 000000000000..eddc1f6bdbe5
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> @@ -0,0 +1,203 @@
+> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/arm,pl18x.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: ARM PrimeCell MultiMedia Card Interface (MMCI) PL180 and PL181
+> +
+> +maintainers:
+> +  - Linus Walleij <linus.walleij@linaro.org>
+> +  - Ulf Hansson <ulf.hansson@linaro.org>
+> +
+> +description:
+> +  The ARM PrimeCells MMCI PL180 and PL181 provides an interface for
+> +  reading and writing to MultiMedia and SD cards alike. Over the years
+> +  vendors have use the VHDL code from ARM to create derivative MMC/SD/SDIO
+> +  host controllers with very similar characteristics.
+> +
+> +allOf:
+> +  - $ref: /schemas/arm/primecell.yaml#
+> +  - $ref: mmc-controller.yaml#
+> +
+> +# We need a select here so we don't match all nodes with 'arm,primecell'
+> +select:
+> +  properties:
+> +    compatible:
+> +      contains:
+> +        enum:
+> +          - arm,pl180
+> +          - arm,pl181
+> +          - arm,pl18x
+> +  required:
+> +    - compatible
+> +
+> +properties:
+> +  compatible:
+> +    oneOf:
+> +      - description: The first version of the block, simply called
+> +          PL180 and found in the ARM Integrator IM/PD1 logic module.
+> +        items:
+> +          - const: arm,pl180
+> +          - const: arm,primecell
+> +      - description: The improved version of the block, found in the
+> +          ARM Versatile and later reference designs. Further revisions
+> +          exist but get detected at runtime by reading some magic numbers
+> +          in the PrimeCell ID registers.
+> +        items:
+> +          - const: arm,pl181
+> +          - const: arm,primecell
+> +      - description: Wildcard entry that will let the operating system
+> +          inspect the PrimeCell ID registers to determine which hardware
+> +          variant of PL180 or PL181 this is.
+> +        items:
+> +          - const: arm,pl18x
+> +          - const: arm,primecell
+> +
+> +  clocks:
+> +    description: One or two clocks, the "apb_pclk" and the "MCLK"
+> +      which is the core block clock. The names are not compulsory.
+> +    minItems: 1
+> +    maxItems: 2
+> +
+> +  power-domains: true
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  reg:
+> +    description: the MMIO memory window must be exactly 4KB (0x1000) and the
+> +      layout should provide the PrimeCell ID registers so that the device can
+> +      be discovered. On ST Micro variants, a second register window may be
+> +      defined if a delay block is present and used for tuning.
+> +
+> +  interrupts:
+> +    description: The first interrupt is the command interrupt and corresponds
+> +      to the event at the end of a command. The second interrupt is the
+> +      PIO (polled I/O) interrupt and occurs when the FIFO needs to be
+> +      emptied as part of a bulk read from the card. Some variants have these
+> +      two interrupts wired into the same line (logic OR) and in that case
+> +      only one interrupt may be provided.
+> +    minItems: 1
+> +    maxItems: 2
+> +
+> +  st,sig-dir-dat0:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, bus signal direction pins used for
+> +      DAT[0].
+> +
+> +  st,sig-dir-dat2:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, bus signal direction pins used for
+> +      DAT[2].
+> +
+> +  st,sig-dir-dat31:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, bus signal direction pins used for
+> +      DAT[3] and DAT[1].
+> +
+> +  st,sig-dir-dat74:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, bus signal direction pins used for
+> +      DAT[7] and DAT[4].
+> +
+> +  st,sig-dir-cmd:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, CMD signal direction used for
+> +      pin CMD.
+> +
+> +  st,sig-pin-fbclk:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, feedback clock FBCLK signal pin
+> +      in use.
+> +
+> +  st,sig-dir:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, signal direction polarity used for
+> +      pins CMD, DAT[0], DAT[1], DAT[2] and DAT[3].
+> +
+> +  st,neg-edge:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, data and command phase relation,
+> +      generated on the sd clock falling edge.
+> +
+> +  st,use-ckin:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description: ST Micro-specific property, use CKIN pin from an external
+> +      driver to sample the receive data (for example with a voltage switch
+> +      transceiver).
+> +
+> +unevaluatedProperties: false
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/gpio/gpio.h>
+> +
+> +    mmc@5000 {
+> +      compatible = "arm,pl180", "arm,primecell";
+> +      reg = <0x5000 0x1000>;
+> +      interrupts-extended = <&vic 22 &sic 1>;
+> +      clocks = <&xtal24mhz>, <&pclk>;
+> +      clock-names = "mclk", "apb_pclk";
+> +    };
+> +
+> +    mmc@80126000 {
+> +      compatible = "arm,pl18x", "arm,primecell";
+> +      reg = <0x80126000 0x1000>;
+> +      interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
+> +      dmas = <&dma 29 0 0x2>, <&dma 29 0 0x0>;
+> +      dma-names = "rx", "tx";
+> +      clocks = <&prcc_kclk 1 5>, <&prcc_pclk 1 5>;
+> +      clock-names = "sdi", "apb_pclk";
+> +      max-frequency = <100000000>;
+> +      bus-width = <4>;
+> +      cap-sd-highspeed;
+> +      cap-mmc-highspeed;
+> +      cd-gpios  = <&gpio2 31 0x4>;
+> +      st,sig-dir-dat0;
+> +      st,sig-dir-dat2;
+> +      st,sig-dir-cmd;
+> +      st,sig-pin-fbclk;
+> +      vmmc-supply = <&ab8500_ldo_aux3_reg>;
+> +      vqmmc-supply = <&vmmci>;
+> +    };
+> +
+> +    mmc@101f6000 {
+> +      compatible = "arm,pl18x", "arm,primecell";
+> +      reg = <0x101f6000 0x1000>;
+> +      clocks = <&sdiclk>, <&pclksdi>;
+> +      clock-names = "mclk", "apb_pclk";
+> +      interrupt-parent = <&vica>;
+> +      interrupts = <22>;
+> +      max-frequency = <400000>;
+> +      bus-width = <4>;
+> +      cap-mmc-highspeed;
+> +      cap-sd-highspeed;
+> +      full-pwr-cycle;
+> +      st,sig-dir-dat0;
+> +      st,sig-dir-dat2;
+> +      st,sig-dir-dat31;
+> +      st,sig-dir-cmd;
+> +      st,sig-pin-fbclk;
+> +      vmmc-supply = <&vmmc_regulator>;
+> +    };
+> +
+> +    mmc@52007000 {
+> +      compatible = "arm,pl18x", "arm,primecell";
+> +      arm,primecell-periphid = <0x10153180>;
+> +      reg = <0x52007000 0x1000>;
+> +      interrupts = <49>;
+> +      interrupt-names = "cmd_irq";
+> +      clocks = <&rcc 0>;
+> +      clock-names = "apb_pclk";
+> +      resets = <&rcc 1>;
+> +      cap-sd-highspeed;
+> +      cap-mmc-highspeed;
+> +      max-frequency = <120000000>;
+> +    };
+> diff --git a/Documentation/devicetree/bindings/mmc/mmci.txt b/Documentation/devicetree/bindings/mmc/mmci.txt
+> deleted file mode 100644
+> index 4ec921e4bf34..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/mmci.txt
+> +++ /dev/null
+> @@ -1,74 +0,0 @@
+> -* ARM PrimeCell MultiMedia Card Interface (MMCI) PL180/1
+> -
+> -The ARM PrimeCell MMCI PL180 and PL181 provides an interface for
+> -reading and writing to MultiMedia and SD cards alike.
+> -
+> -This file documents differences between the core properties described
+> -by mmc.txt and the properties used by the mmci driver. Using "st" as
+> -the prefix for a property, indicates support by the ST Micro variant.
+> -
+> -Required properties:
+> -- compatible             : contains "arm,pl18x", "arm,primecell".
+> -- vmmc-supply            : phandle to the regulator device tree node, mentioned
+> -                           as the VCC/VDD supply in the eMMC/SD specs.
+> -
+> -Optional properties:
+> -- arm,primecell-periphid : contains the PrimeCell Peripheral ID, it overrides
+> -                           the ID provided by the HW
+> -- resets                 : phandle to internal reset line.
+> -                          Should be defined for sdmmc variant.
+> -- vqmmc-supply           : phandle to the regulator device tree node, mentioned
+> -                           as the VCCQ/VDD_IO supply in the eMMC/SD specs.
+> -specific for ux500 variant:
+> -- st,sig-dir-dat0        : bus signal direction pin used for DAT[0].
+> -- st,sig-dir-dat2        : bus signal direction pin used for DAT[2].
+> -- st,sig-dir-dat31       : bus signal direction pin used for DAT[3] and DAT[1].
+> -- st,sig-dir-dat74       : bus signal direction pin used for DAT[4] to DAT[7].
+> -- st,sig-dir-cmd         : cmd signal direction pin used for CMD.
+> -- st,sig-pin-fbclk       : feedback clock signal pin used.
+> -
+> -specific for sdmmc variant:
+> -- reg                   : a second base register may be defined if a delay
+> -                           block is present and used for tuning.
+> -- st,sig-dir             : signal direction polarity used for cmd, dat0 dat123.
+> -- st,neg-edge            : data & command phase relation, generated on
+> -                           sd clock falling edge.
+> -- st,use-ckin            : use ckin pin from an external driver to sample
+> -                           the receive data (example: with voltage
+> -                          switch transceiver).
+> -
+> -Deprecated properties:
+> -- mmc-cap-mmc-highspeed  : indicates whether MMC is high speed capable.
+> -- mmc-cap-sd-highspeed   : indicates whether SD is high speed capable.
+> -
+> -Example:
+> -
+> -sdi0_per1@80126000 {
+> -       compatible = "arm,pl18x", "arm,primecell";
+> -       reg = <0x80126000 0x1000>;
+> -       interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
+> -
+> -       dmas = <&dma 29 0 0x2>, /* Logical - DevToMem */
+> -              <&dma 29 0 0x0>; /* Logical - MemToDev */
+> -       dma-names = "rx", "tx";
+> -
+> -       clocks = <&prcc_kclk 1 5>, <&prcc_pclk 1 5>;
+> -       clock-names = "sdi", "apb_pclk";
+> -
+> -       max-frequency = <100000000>;
+> -       bus-width = <4>;
+> -       cap-sd-highspeed;
+> -       cap-mmc-highspeed;
+> -       cd-gpios  = <&gpio2 31 0x4>; // 95
+> -       st,sig-dir-dat0;
+> -       st,sig-dir-dat2;
+> -       st,sig-dir-cmd;
+> -       st,sig-pin-fbclk;
+> -
+> -       vmmc-supply = <&ab8500_ldo_aux3_reg>;
+> -       vqmmc-supply = <&vmmci>;
+> -
+> -       pinctrl-names = "default", "sleep";
+> -       pinctrl-0 = <&sdi0_default_mode>;
+> -       pinctrl-1 = <&sdi0_sleep_mode>;
+> -};
+> --
+> 2.29.2
+>
