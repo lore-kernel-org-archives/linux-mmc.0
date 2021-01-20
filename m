@@ -2,147 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CACB8C43381
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 15:38:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCEE8C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 16:02:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B24802339E
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 15:38:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 78D952339E
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 16:02:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387528AbhATOvw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Jan 2021 09:51:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48940 "EHLO
+        id S1732023AbhATQCJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Jan 2021 11:02:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388965AbhATOLB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 09:11:01 -0500
-Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6FA8C0613ED
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:29 -0800 (PST)
-Received: by mail-vs1-xe32.google.com with SMTP id p20so5816225vsq.7
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:29 -0800 (PST)
+        with ESMTP id S2391211AbhATQBE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 11:01:04 -0500
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0C5FC061575;
+        Wed, 20 Jan 2021 08:00:23 -0800 (PST)
+Received: by mail-lf1-x12a.google.com with SMTP id q8so3172464lfm.10;
+        Wed, 20 Jan 2021 08:00:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=13b3vHVu39A33E0TnIXuY5Wj8JKntF5mua6ndCRhPkM=;
-        b=NK601z15ygFsvMzTe0v8tkPP1FHMOmkdAgM+Fd/TUnhA+4pnY8PyQYS+cjqtXGbi+F
-         d1OLdYfJZFXFmrBJKNaJtYWk3A8poM/AUyoIpe7inS+TWkojwbkVtOAG2jtR2LMWX/pt
-         Hx+BSzudXbHqUNEHHMn7SW1uh/g0968lniti3qBTtsU3gdDWTVUeDC+0YMhUC6M9jGLj
-         ItVKmLJZyadP9YsD4YVqpGCD3nzonxW44OawBufnUSBFxhuH4tgh6KFbITvAe9YcS9aa
-         N/BN+6h9e+VBiCyVnETSSuPHYmGKFgpe6S2uCLbk6W5iPgIg4XGoGjBchUOG/kJoxTEu
-         ATyQ==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=6pR6fg/vKnYn4hcu/THLeviR1hmHEHC9vnXYnmcjF/Q=;
+        b=abtLr1uy/58LoLQJLzYbf0L+o2zJbLuT/uYCyd48HpLF2JAhOx0hrfWwOfIcXeXTgE
+         9HOfUHGHmtSumGGVFBAuddWJ/pQvwtaaVjlR8LOgYJgvOr0axxti6ZdEumKE2Pdt5BDV
+         FdhlVFIlj6sF2mxWlGuxZfNjGlGpgOG+qnZ8Et4+3QqTh7tvZ5Ct1Xh1dbAdXTf2umqX
+         8x4F+Ku4eBtZ7uQ6IoiGOouZ5VCOxgk5/J7a8NInuLXOSX16zmC+Z7HYRrj5QDJifKoe
+         cNs1iMgtdoOFx+imchuo2kJ4HyYbPQwyxvWWVEV3zFd+tqiJgOtPAD/z2arSBt5IR3Cd
+         InCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=13b3vHVu39A33E0TnIXuY5Wj8JKntF5mua6ndCRhPkM=;
-        b=h/tVzk885zfNrfCuMi+aF5vn9IDPD5fcdwt2ci4HDNDjE7I+grqRLZiUESYWFRmaVk
-         g+H1nsb7NtdB7waTuPKlbNILVmaqwPbgOKdlvyF8odM4MiVAn1pdEbZlt0an1xejH35e
-         GdRgBG+ZJeelvFKxI3t9qo1sezNK8/JNxOxUFieU1w/Kva5oSfNWqG5mVXRwHVl4L0Ir
-         sKBcF06hQWC5G1h43+JROjasxOqDhXeUmyNT485TleAlWgNx0mISap9Ei7u2Pnh39g+6
-         e8bSnsF2TURJsyWBh1tFcL7IZUFOHW6jk7HuC1aQjCIWzw6lcmyrw2vv6oSReQPrauFB
-         Lf+Q==
-X-Gm-Message-State: AOAM533EBmkM4E0ljO4XM2Sr9WPF38mvDmtcHekP+PUw40IV0Ekrg2qd
-        3XuKS7XGVVmUAMLBj8/smPGM0a8gBIZb4BlqhL5YZQ==
-X-Google-Smtp-Source: ABdhPJy4LDyZYIAtppdXF0yWSCx3G22s//bf3YpgnSFitS4qEj2Wug0NMhlcWg/Hu8b5kx/LSb7fjKhy/XPer9WqcrA=
-X-Received: by 2002:a67:c787:: with SMTP id t7mr7074704vsk.48.1611151708746;
- Wed, 20 Jan 2021 06:08:28 -0800 (PST)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=6pR6fg/vKnYn4hcu/THLeviR1hmHEHC9vnXYnmcjF/Q=;
+        b=RjbihLs+ibnaGKRrtYsjPcyjTXNDV7TTEnrV4jv84GzBkhRCsf6C4+9ml9v9Ij1aiQ
+         cI+S5b/gQeCFcPYKEPyle9eSkE0VAcnHeGGChLKUt+QgIhfZ7MvGUFrB4p/L3/nenipY
+         WjQjso/bCG0pLaERjWTQoymZkrAwkW9MqeQhYfMg0ZAjQ9Soy+r34Gb+AnVTBYDxJjRs
+         M8V5I3+CdZudBI/QbdyJQ4vXynJC/jCmDOQSHy54jFcUm9VJAYbQTbkqn+YdcrMN2kNr
+         7utFUyomsaV2R11NuP+OLVmfxhZpCQqDJxTGo4F0d2Sd5HZMrctP0FYAMssiHnhLArbQ
+         JpXQ==
+X-Gm-Message-State: AOAM5328VRFpEImjdkhWz/tdhNBxlx2bY1/ImzfpKcMKILrUtjsm7HLB
+        sIFCN0EiJ3ybcJaz+VAdQTB6EjiP2aI=
+X-Google-Smtp-Source: ABdhPJx4ryhDhUccrXGgvid3ZVbrnrbevGoNExSyx1pGmnWuOH6PWddYTRxvkvma6v12P7EIGAI0ZA==
+X-Received: by 2002:ac2:58f2:: with SMTP id v18mr4396795lfo.623.1611158422110;
+        Wed, 20 Jan 2021 08:00:22 -0800 (PST)
+Received: from [192.168.2.145] (109-252-192-57.dynamic.spd-mgts.ru. [109.252.192.57])
+        by smtp.googlemail.com with ESMTPSA id 76sm233715lfh.163.2021.01.20.08.00.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 20 Jan 2021 08:00:21 -0800 (PST)
+Subject: Re: [PATCH 24/31] memory: tegra20: convert to use devm_pm_opp_* API
+To:     Yangtao Li <tiny.windzz@gmail.com>, myungjoo.ham@samsung.com,
+        kyungmin.park@samsung.com, cw00.choi@samsung.com, krzk@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com, thierry.reding@gmail.com,
+        jonathanh@nvidia.com, yuq825@gmail.com, airlied@linux.ie,
+        daniel@ffwll.ch, robdclark@gmail.com, sean@poorly.run,
+        robh@kernel.org, tomeu.vizoso@collabora.com, steven.price@arm.com,
+        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
+        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
+        lukasz.luba@arm.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
+        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
+        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
+        marijn.suijten@somainline.org, gustavoars@kernel.org,
+        emil.velikov@collabora.com, jonathan@marek.ca,
+        akhilpo@codeaurora.org, smasetty@codeaurora.org,
+        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
+        tanmay@codeaurora.org, ddavenport@chromium.org,
+        jsanka@codeaurora.org, rnayak@codeaurora.org,
+        tongtiangen@huawei.com, miaoqinglang@huawei.com,
+        khsieh@codeaurora.org, abhinavk@codeaurora.org,
+        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
+        mka@chromium.org, harigovi@codeaurora.org,
+        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
+        georgi.djakov@linaro.org, akashast@codeaurora.org,
+        parashar@codeaurora.org, dianders@chromium.org
+Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
+        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+References: <20210101165507.19486-1-tiny.windzz@gmail.com>
+ <20210101165507.19486-25-tiny.windzz@gmail.com>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <b9f19bb2-c225-b64d-a995-1f84926bd18b@gmail.com>
+Date:   Wed, 20 Jan 2021 19:00:19 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.4.2
 MIME-Version: 1.0
-References: <20210119073705.375-1-zbestahu@gmail.com>
-In-Reply-To: <20210119073705.375-1-zbestahu@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 20 Jan 2021 15:07:52 +0100
-Message-ID: <CAPDyKFpp2jeeqwzM9MPtQqB18txGbX=J5stym53gZ3Us_oNruw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: test: clean up mmc_test_cleanup()
-To:     Yue Hu <zbestahu@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Yue Hu <huyue2@yulong.com>, zbestahu@163.com
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20210101165507.19486-25-tiny.windzz@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 Jan 2021 at 08:37, Yue Hu <zbestahu@gmail.com> wrote:
->
-> From: Yue Hu <huyue2@yulong.com>
->
-> mmc_test_cleanup() has same body as __mmc_test_prepare() with write
-> except the character to memset().
->
-> Signed-off-by: Yue Hu <huyue2@yulong.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+01.01.2021 19:55, Yangtao Li пишет:
+> Use devm_pm_opp_* API to simplify code.
+> 
+> Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
 > ---
->  drivers/mmc/core/mmc_test.c | 24 +++++-------------------
->  1 file changed, 5 insertions(+), 19 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index f999b48..39a4788 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -624,7 +624,7 @@ static unsigned int mmc_test_capacity(struct mmc_card *card)
->   * Fill the first couple of sectors of the card with known data
->   * so that bad reads/writes can be detected
->   */
-> -static int __mmc_test_prepare(struct mmc_test_card *test, int write)
-> +static int __mmc_test_prepare(struct mmc_test_card *test, int write, int val)
->  {
->         int ret, i;
->
-> @@ -633,7 +633,7 @@ static int __mmc_test_prepare(struct mmc_test_card *test, int write)
->                 return ret;
->
->         if (write)
-> -               memset(test->buffer, 0xDF, 512);
-> +               memset(test->buffer, val, 512);
->         else {
->                 for (i = 0; i < 512; i++)
->                         test->buffer[i] = i;
-> @@ -650,31 +650,17 @@ static int __mmc_test_prepare(struct mmc_test_card *test, int write)
->
->  static int mmc_test_prepare_write(struct mmc_test_card *test)
->  {
-> -       return __mmc_test_prepare(test, 1);
-> +       return __mmc_test_prepare(test, 1, 0xDF);
->  }
->
->  static int mmc_test_prepare_read(struct mmc_test_card *test)
->  {
-> -       return __mmc_test_prepare(test, 0);
-> +       return __mmc_test_prepare(test, 0, 0);
->  }
->
->  static int mmc_test_cleanup(struct mmc_test_card *test)
->  {
-> -       int ret, i;
-> -
-> -       ret = mmc_test_set_blksize(test, 512);
-> -       if (ret)
-> -               return ret;
-> -
-> -       memset(test->buffer, 0, 512);
-> -
-> -       for (i = 0; i < BUFFER_SIZE / 512; i++) {
-> -               ret = mmc_test_buffer_transfer(test, test->buffer, i, 512, 1);
-> -               if (ret)
-> -                       return ret;
-> -       }
-> -
-> -       return 0;
-> +       return __mmc_test_prepare(test, 1, 0);
->  }
->
->  /*******************************************************************/
-> --
-> 1.9.1
->
+>  drivers/memory/tegra/tegra20-emc.c | 29 +++++++++--------------------
+>  1 file changed, 9 insertions(+), 20 deletions(-)
+
+There are also tegra30-emc.c and tegra124-emc.c with a similar OPP code.
+
+But could we please not touch these memory drivers? I already have a
+prepared patch which replaces all the tegra_emc_opp_table_init() with a
+single common helper that will use devm_opp_* helpers.
