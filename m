@@ -2,367 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6FD5C4321A
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 14:47:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A459C433E9
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 14:52:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A24C923383
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 14:47:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C04FF2245C
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 14:52:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389628AbhATOaS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Jan 2021 09:30:18 -0500
-Received: from mail.kernel.org ([198.145.29.99]:40270 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389112AbhATO3H (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 20 Jan 2021 09:29:07 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2ABBD23384;
-        Wed, 20 Jan 2021 14:28:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611152889;
-        bh=srvIxMd3/CJ+0aeMyWaVLG54T56qZNEfkg2XSq/7Md4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=o1RmJwHNuffsarP9vtdXBSI+h7VyvBQt5GI2K9ZiPZs3lqqqwcrc7fbEPO/eF5RB7
-         5c9D5AX+d0MS5gyJDAmJoaUCsRWjsCuKFM6Fpcb6wm/NMqn49QaUzoI0n8n57Kt4W3
-         0vythuSdruIMIbR68nhKzo+3dAKjOk/g5hJfPBswlCcHh8sG5rnq/5vsmRSb3g7WNe
-         mBf79EGB8r2nQqYYkmvLp9rQv5uQ16makPdeZ1kEcSGfIuqN9Hozd/O1cfdyeEvo0M
-         kba8dkFAWxU4qRb4COpE+MVZ9q4iXgRGnjm605YdEDHYG819pPjJtLeabPOE6Ntp3z
-         vJBp9tZJ13c+Q==
-From:   Arnd Bergmann <arnd@kernel.org>
-To:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Arnd Bergmann <arnd@arndb.de>, Barry Song <baohua@kernel.org>
-Subject: [PATCH 2/2] mmc: remove sirf prima/atlas driver
-Date:   Wed, 20 Jan 2021 15:28:01 +0100
-Message-Id: <20210120142801.334550-3-arnd@kernel.org>
-X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20210120142801.334550-1-arnd@kernel.org>
-References: <20210120142801.334550-1-arnd@kernel.org>
+        id S2387984AbhATOv4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Jan 2021 09:51:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49144 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2390190AbhATOLo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 09:11:44 -0500
+Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0098BC061795
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:38 -0800 (PST)
+Received: by mail-ua1-x92f.google.com with SMTP id a31so7892650uae.11
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=eQpo2/GqCSrtTmISxWObvMSxde4cEDeccm8J4/mCD54=;
+        b=lTIxJju2eS/rp0QjBo4fvpCZUn4yw9e3W7e0ZyLUR9HmfbqeoouDNTuc4S3WdM9dGk
+         y1epOqS0EEgxV+4dffWYitfyyo3DRt6F0LdBcOGXEAa6KPC3FU/VbXM7ME275IYEXGgp
+         XdTzWDnLZsx68Aqq+Sarh4vFxSrArQN0uH4vOkI9uyerMbKmsCQwGwPv6+2G4i8S8f16
+         LFg2dHEsu57WQIyD8lLsptAPB9K8nn/c16E0BHU0AH6uweA3IU2xJ1V0SjSQx0ey2NnB
+         gEExCq6JPX1VlHGX64YOtDk2esWYs3V5dtFirm3JdRq5xVdkffWCmMSTq5Awf78lkNLw
+         nYKg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=eQpo2/GqCSrtTmISxWObvMSxde4cEDeccm8J4/mCD54=;
+        b=AEl0NI0Otslm7DJynhyGbNh8o4R6WpAaVtUPYVlpDlg3/1dRnhD6Bt6lbUqDoG4dls
+         cg/qHdNep/XHxYexCdS1374ak5Pcs1i9rhVb0+2hhkuGZyXKGsvrAKhPURfaFPOKVFGd
+         IxWJo2OT2ECpwzpMOK3wHeJW9UcfSvfhV2635xvrMTrIF8Egx8zobqdDONNCNX4J/bIy
+         3VpY1o3P25+XJX5YzSFUfG6r8nA9j+XM2iIyvdriJ+QsZHaBtw1dThXXlH4syXhvkPNH
+         /NX4rmSXPLCMj5U5B2FDT8SpB3z+nUzODAdDEiaV6NvEmwB5shtgxigSoti5f3byUgR3
+         z21A==
+X-Gm-Message-State: AOAM533lCiWQpt7Zbat47A0LgTOvgscY1taE/vN0zIHdDLIq8XTpNWgT
+        6MsxXD4yMDpI/6OUebE98VeOXa/1qIRQPaUMtGrTJAEtcc6AiQ==
+X-Google-Smtp-Source: ABdhPJybCoOrEGS0XDMKG7uX6jLpbNIxEZ8jIL0POQxHlhWHccui2ZyndJkGmmB+OOhQGKOprR2gBnmX9oDRFoa4/bQ=
+X-Received: by 2002:a9f:2271:: with SMTP id 104mr6172058uad.15.1611151718095;
+ Wed, 20 Jan 2021 06:08:38 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210120000406.1843400-1-jeremy.linton@arm.com> <20210120000406.1843400-2-jeremy.linton@arm.com>
+In-Reply-To: <20210120000406.1843400-2-jeremy.linton@arm.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 20 Jan 2021 15:08:00 +0100
+Message-ID: <CAPDyKFpLpMU3ec7eV_q8w88oywazLrSo5wyVFZkVrzRqn3bhSQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci-iproc: Add ACPI bindings for the rpi
+To:     Jeremy Linton <jeremy.linton@arm.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        ardb@kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Arnd Bergmann <arnd@arndb.de>
+On Wed, 20 Jan 2021 at 01:04, Jeremy Linton <jeremy.linton@arm.com> wrote:
+>
+> The RPi4 has an Arasan controller it carries over
+> from the RPi3 and a newer eMMC2 controller.
+> Because of a couple of quirks, it seems wiser to bind
+> these controllers to the same driver that DT is using
+> on this platform rather than the generic sdhci_acpi
+> driver with PNP0D40.
+>
+> So, BCM2847 describes the older Arasan and
+> BRCME88C describes the newer eMMC2. The older
+> Arasan is reusing an existing ACPI _HID used
+> by other OSs booting these tables on the RPi.
+>
+> With this change, Linux is capable of utilizing the
+> SD card slot, and the wifi when booted with
+> UEFI+ACPI on the rpi4.
+>
+> Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
 
-The CSR SiRF prima2/atlas platforms are getting removed, so this driver
-is no longer needed.
+Applied for next (and by updating the commit message according to the
+nitpick comment from Florian), thanks!
 
-Cc: Barry Song <baohua@kernel.org>
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- .../devicetree/bindings/mmc/sdhci-sirf.txt    |  18 --
- drivers/mmc/host/Kconfig                      |  12 -
- drivers/mmc/host/Makefile                     |   1 -
- drivers/mmc/host/sdhci-sirf.c                 | 235 ------------------
- 4 files changed, 266 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sirf.txt
- delete mode 100644 drivers/mmc/host/sdhci-sirf.c
+Kind regards
+Uffe
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-sirf.txt b/Documentation/devicetree/bindings/mmc/sdhci-sirf.txt
-deleted file mode 100644
-index dd6ed464bcb8..000000000000
---- a/Documentation/devicetree/bindings/mmc/sdhci-sirf.txt
-+++ /dev/null
-@@ -1,18 +0,0 @@
--* SiRFprimII/marco/atlas6 SDHCI Controller
--
--This file documents differences between the core properties in mmc.txt
--and the properties used by the sdhci-sirf driver.
--
--Required properties:
--- compatible: sirf,prima2-sdhc
--
--Optional properties:
--- cd-gpios: card detect gpio, with zero flags.
--
--Example:
--
--	sd0: sdhci@56000000 {
--		compatible = "sirf,prima2-sdhc";
--		reg = <0xcd000000 0x100000>;
--		cd-gpios = <&gpio 6 0>;
--	};
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 255d37e8bd3a..b67f6028b6f3 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -312,18 +312,6 @@ config MMC_SDHCI_S3C
- 
- 	  If unsure, say N.
- 
--config MMC_SDHCI_SIRF
--	tristate "SDHCI support on CSR SiRFprimaII and SiRFmarco SoCs"
--	depends on ARCH_SIRF || COMPILE_TEST
--	depends on MMC_SDHCI_PLTFM
--	select MMC_SDHCI_IO_ACCESSORS
--	help
--	  This selects the SDHCI support for SiRF System-on-Chip devices.
--
--	  If you have a controller with this interface, say Y or M here.
--
--	  If unsure, say N.
--
- config MMC_SDHCI_PXAV3
- 	tristate "Marvell MMP2 SD Host Controller support (PXAV3)"
- 	depends on CLKDEV_LOOKUP
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 43136d382d5f..d2ec428cc808 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -19,7 +19,6 @@ obj-$(CONFIG_MMC_SDHCI_ACPI)	+= sdhci-acpi.o
- obj-$(CONFIG_MMC_SDHCI_PXAV3)	+= sdhci-pxav3.o
- obj-$(CONFIG_MMC_SDHCI_PXAV2)	+= sdhci-pxav2.o
- obj-$(CONFIG_MMC_SDHCI_S3C)	+= sdhci-s3c.o
--obj-$(CONFIG_MMC_SDHCI_SIRF)   	+= sdhci-sirf.o
- obj-$(CONFIG_MMC_SDHCI_F_SDH30)	+= sdhci_f_sdh30.o
- obj-$(CONFIG_MMC_SDHCI_MILBEAUT)	+= sdhci-milbeaut.o
- obj-$(CONFIG_MMC_SDHCI_SPEAR)	+= sdhci-spear.o
-diff --git a/drivers/mmc/host/sdhci-sirf.c b/drivers/mmc/host/sdhci-sirf.c
-deleted file mode 100644
-index e9b347b3af7e..000000000000
---- a/drivers/mmc/host/sdhci-sirf.c
-+++ /dev/null
-@@ -1,235 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0-or-later
--/*
-- * SDHCI support for SiRF primaII and marco SoCs
-- *
-- * Copyright (c) 2011 Cambridge Silicon Radio Limited, a CSR plc group company.
-- */
--
--#include <linux/delay.h>
--#include <linux/device.h>
--#include <linux/mmc/host.h>
--#include <linux/module.h>
--#include <linux/of.h>
--#include <linux/mmc/slot-gpio.h>
--#include "sdhci-pltfm.h"
--
--#define SDHCI_CLK_DELAY_SETTING 0x4C
--#define SDHCI_SIRF_8BITBUS BIT(3)
--#define SIRF_TUNING_COUNT 16384
--
--static void sdhci_sirf_set_bus_width(struct sdhci_host *host, int width)
--{
--	u8 ctrl;
--
--	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
--	ctrl &= ~(SDHCI_CTRL_4BITBUS | SDHCI_SIRF_8BITBUS);
--
--	/*
--	 * CSR atlas7 and prima2 SD host version is not 3.0
--	 * 8bit-width enable bit of CSR SD hosts is 3,
--	 * while stardard hosts use bit 5
--	 */
--	if (width == MMC_BUS_WIDTH_8)
--		ctrl |= SDHCI_SIRF_8BITBUS;
--	else if (width == MMC_BUS_WIDTH_4)
--		ctrl |= SDHCI_CTRL_4BITBUS;
--
--	sdhci_writeb(host, ctrl, SDHCI_HOST_CONTROL);
--}
--
--static u32 sdhci_sirf_readl_le(struct sdhci_host *host, int reg)
--{
--	u32 val = readl(host->ioaddr + reg);
--
--	if (unlikely((reg == SDHCI_CAPABILITIES_1) &&
--			(host->mmc->caps & MMC_CAP_UHS_SDR50))) {
--		/* fake CAP_1 register */
--		val = SDHCI_SUPPORT_DDR50 |
--			SDHCI_SUPPORT_SDR50 | SDHCI_USE_SDR50_TUNING;
--	}
--
--	if (unlikely(reg == SDHCI_SLOT_INT_STATUS)) {
--		u32 prss = val;
--		/* fake chips as V3.0 host conreoller */
--		prss &= ~(0xFF << 16);
--		val = prss | (SDHCI_SPEC_300 << 16);
--	}
--	return val;
--}
--
--static u16 sdhci_sirf_readw_le(struct sdhci_host *host, int reg)
--{
--	u16 ret = 0;
--
--	ret = readw(host->ioaddr + reg);
--
--	if (unlikely(reg == SDHCI_HOST_VERSION)) {
--		ret = readw(host->ioaddr + SDHCI_HOST_VERSION);
--		ret |= SDHCI_SPEC_300;
--	}
--
--	return ret;
--}
--
--static int sdhci_sirf_execute_tuning(struct sdhci_host *host, u32 opcode)
--{
--	int tuning_seq_cnt = 3;
--	int phase;
--	u8 tuned_phase_cnt = 0;
--	int rc = 0, longest_range = 0;
--	int start = -1, end = 0, tuning_value = -1, range = 0;
--	u16 clock_setting;
--	struct mmc_host *mmc = host->mmc;
--
--	clock_setting = sdhci_readw(host, SDHCI_CLK_DELAY_SETTING);
--	clock_setting &= ~0x3fff;
--
--retry:
--	phase = 0;
--	tuned_phase_cnt = 0;
--	do {
--		sdhci_writel(host,
--			clock_setting | phase,
--			SDHCI_CLK_DELAY_SETTING);
--
--		if (!mmc_send_tuning(mmc, opcode, NULL)) {
--			/* Tuning is successful at this tuning point */
--			tuned_phase_cnt++;
--			dev_dbg(mmc_dev(mmc), "%s: Found good phase = %d\n",
--				 mmc_hostname(mmc), phase);
--			if (start == -1)
--				start = phase;
--			end = phase;
--			range++;
--			if (phase == (SIRF_TUNING_COUNT - 1)
--				&& range > longest_range)
--				tuning_value = (start + end) / 2;
--		} else {
--			dev_dbg(mmc_dev(mmc), "%s: Found bad phase = %d\n",
--				 mmc_hostname(mmc), phase);
--			if (range > longest_range) {
--				tuning_value = (start + end) / 2;
--				longest_range = range;
--			}
--			start = -1;
--			end = range = 0;
--		}
--	} while (++phase < SIRF_TUNING_COUNT);
--
--	if (tuned_phase_cnt && tuning_value > 0) {
--		/*
--		 * Finally set the selected phase in delay
--		 * line hw block.
--		 */
--		phase = tuning_value;
--		sdhci_writel(host,
--			clock_setting | phase,
--			SDHCI_CLK_DELAY_SETTING);
--
--		dev_dbg(mmc_dev(mmc), "%s: Setting the tuning phase to %d\n",
--			 mmc_hostname(mmc), phase);
--	} else {
--		if (--tuning_seq_cnt)
--			goto retry;
--		/* Tuning failed */
--		dev_dbg(mmc_dev(mmc), "%s: No tuning point found\n",
--		       mmc_hostname(mmc));
--		rc = -EIO;
--	}
--
--	return rc;
--}
--
--static const struct sdhci_ops sdhci_sirf_ops = {
--	.read_l = sdhci_sirf_readl_le,
--	.read_w = sdhci_sirf_readw_le,
--	.platform_execute_tuning = sdhci_sirf_execute_tuning,
--	.set_clock = sdhci_set_clock,
--	.get_max_clock	= sdhci_pltfm_clk_get_max_clock,
--	.set_bus_width = sdhci_sirf_set_bus_width,
--	.reset = sdhci_reset,
--	.set_uhs_signaling = sdhci_set_uhs_signaling,
--};
--
--static const struct sdhci_pltfm_data sdhci_sirf_pdata = {
--	.ops = &sdhci_sirf_ops,
--	.quirks = SDHCI_QUIRK_BROKEN_TIMEOUT_VAL |
--		SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
--		SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
--		SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
--};
--
--static int sdhci_sirf_probe(struct platform_device *pdev)
--{
--	struct sdhci_host *host;
--	struct sdhci_pltfm_host *pltfm_host;
--	struct clk *clk;
--	int ret;
--
--	clk = devm_clk_get(&pdev->dev, NULL);
--	if (IS_ERR(clk)) {
--		dev_err(&pdev->dev, "unable to get clock");
--		return PTR_ERR(clk);
--	}
--
--	host = sdhci_pltfm_init(pdev, &sdhci_sirf_pdata, 0);
--	if (IS_ERR(host))
--		return PTR_ERR(host);
--
--	pltfm_host = sdhci_priv(host);
--	pltfm_host->clk = clk;
--
--	sdhci_get_of_property(pdev);
--
--	ret = clk_prepare_enable(pltfm_host->clk);
--	if (ret)
--		goto err_clk_prepare;
--
--	ret = sdhci_add_host(host);
--	if (ret)
--		goto err_sdhci_add;
--
--	/*
--	 * We must request the IRQ after sdhci_add_host(), as the tasklet only
--	 * gets setup in sdhci_add_host() and we oops.
--	 */
--	ret = mmc_gpiod_request_cd(host->mmc, "cd", 0, false, 0);
--	if (ret == -EPROBE_DEFER)
--		goto err_request_cd;
--	if (!ret)
--		mmc_gpiod_request_cd_irq(host->mmc);
--
--	return 0;
--
--err_request_cd:
--	sdhci_remove_host(host, 0);
--err_sdhci_add:
--	clk_disable_unprepare(pltfm_host->clk);
--err_clk_prepare:
--	sdhci_pltfm_free(pdev);
--	return ret;
--}
--
--static const struct of_device_id sdhci_sirf_of_match[] = {
--	{ .compatible = "sirf,prima2-sdhc" },
--	{ }
--};
--MODULE_DEVICE_TABLE(of, sdhci_sirf_of_match);
--
--static struct platform_driver sdhci_sirf_driver = {
--	.driver		= {
--		.name	= "sdhci-sirf",
--		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--		.of_match_table = sdhci_sirf_of_match,
--		.pm	= &sdhci_pltfm_pmops,
--	},
--	.probe		= sdhci_sirf_probe,
--	.remove		= sdhci_pltfm_unregister,
--};
--
--module_platform_driver(sdhci_sirf_driver);
--
--MODULE_DESCRIPTION("SDHCI driver for SiRFprimaII/SiRFmarco");
--MODULE_AUTHOR("Barry Song <21cnbao@gmail.com>");
--MODULE_LICENSE("GPL v2");
--- 
-2.29.2
 
+> ---
+>  drivers/mmc/host/sdhci-iproc.c | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index c9434b461aab..ddeaf8e1f72f 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -296,9 +296,27 @@ static const struct of_device_id sdhci_iproc_of_match[] = {
+>  MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+>
+>  #ifdef CONFIG_ACPI
+> +/*
+> + * This is a duplicate of bcm2835_(pltfrm_)data without caps quirks
+> + * which are provided by the ACPI table.
+> + */
+> +static const struct sdhci_pltfm_data sdhci_bcm_arasan_data = {
+> +       .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+> +                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> +                 SDHCI_QUIRK_NO_HISPD_BIT,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +       .ops = &sdhci_iproc_32only_ops,
+> +};
+> +
+> +static const struct sdhci_iproc_data bcm_arasan_data = {
+> +       .pdata = &sdhci_bcm_arasan_data,
+> +};
+> +
+>  static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
+>         { .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
+>         { .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
+> +       { .id = "BCM2847",  .driver_data = (kernel_ulong_t)&bcm_arasan_data },
+> +       { .id = "BRCME88C", .driver_data = (kernel_ulong_t)&bcm2711_data },
+>         { /* sentinel */ }
+>  };
+>  MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
+> --
+> 2.26.2
+>
