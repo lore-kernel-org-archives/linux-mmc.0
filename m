@@ -2,128 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3B5CC43381
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 07:41:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68EBFC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 12:59:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 65FE723339
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 07:41:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3944B2333C
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 12:59:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729590AbhATHkd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Jan 2021 02:40:33 -0500
-Received: from out30-54.freemail.mail.aliyun.com ([115.124.30.54]:59490 "EHLO
-        out30-54.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728982AbhATHk2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 02:40:28 -0500
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R101e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=e01e04400;MF=abaci-bugfix@linux.alibaba.com;NM=1;PH=DS;RN=8;SR=0;TI=SMTPD_---0UMJDD5N_1611128379;
-Received: from j63c13417.sqa.eu95.tbsite.net(mailfrom:abaci-bugfix@linux.alibaba.com fp:SMTPD_---0UMJDD5N_1611128379)
-          by smtp.aliyun-inc.com(127.0.0.1);
-          Wed, 20 Jan 2021 15:39:42 +0800
-From:   Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
-To:     ludovic.desroches@microchip.com
-Cc:     ulf.hansson@linaro.org, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
-Subject: [PATCH] mmc: Assign boolean values to a bool variable
-Date:   Wed, 20 Jan 2021 15:39:37 +0800
-Message-Id: <1611128377-66216-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-X-Mailer: git-send-email 1.8.3.1
+        id S1731788AbhATM6w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Jan 2021 07:58:52 -0500
+Received: from mx0a-0016f401.pphosted.com ([67.231.148.174]:36460 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S2389286AbhATMLq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 07:11:46 -0500
+Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
+        by mx0a-0016f401.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 10KCB3BB029315;
+        Wed, 20 Jan 2021 04:11:03 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-type; s=pfpt0220;
+ bh=uDCwteCVReYY7s4IxoAqqlecXUbtb1Gyu6EiEuDRKGE=;
+ b=kLfu5+8fdL7iajsBtDxPubuIM4mhvPw+ikFsA/JEK728L9GDyLg7N0xphgu2DE0CFucm
+ M6unzCxH5M5+9gVBb79BwsudXPTYogyyo4SNjUwrTFCP6tn5o4iUniTx98P6O84D6Qrf
+ 1LdzPvxxRKNapA6gxsf0k5e0A9ohGAPTHMM2LS/fB7N+DneHkqTS9/LKHPS7Erix1+kD
+ au5+3R6K1XCzRsClp7A3NlVJvRc2lTKJovpL6snzH/iMB/CnhdTN6rvEHn5QNXwwyZir
+ AafABzeBcAoDWEe4Rv0TjGLdvWGGMpXVnvVXQ3kgea9YmMMlk5WrCYTGb+HkXadVXzvq 8g== 
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+        by mx0a-0016f401.pphosted.com with ESMTP id 3668p2t35h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Wed, 20 Jan 2021 04:11:03 -0800
+Received: from SC-EXCH04.marvell.com (10.93.176.84) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 20 Jan
+ 2021 04:11:02 -0800
+Received: from DC5-EXCH01.marvell.com (10.69.176.38) by SC-EXCH04.marvell.com
+ (10.93.176.84) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 20 Jan
+ 2021 04:11:01 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Wed, 20 Jan 2021 04:11:01 -0800
+Received: from hyd1soter3.marvell.com (unknown [10.29.37.12])
+        by maili.marvell.com (Postfix) with ESMTP id 11B253F7041;
+        Wed, 20 Jan 2021 04:10:58 -0800 (PST)
+From:   Bhaskara Budiredla <bbudiredla@marvell.com>
+To:     <ulf.hansson@linaro.org>, <keescook@chromium.org>,
+        <ccross@android.com>, <tony.luck@intel.com>, <sgoutham@marvell.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        "Bhaskara Budiredla" <bbudiredla@marvell.com>
+Subject: [PATCH v5 0/2] mmc: support crash logging to MMC block devices
+Date:   Wed, 20 Jan 2021 17:40:45 +0530
+Message-ID: <20210120121047.2601-1-bbudiredla@marvell.com>
+X-Mailer: git-send-email 2.17.1
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
+ definitions=2021-01-20_05:2021-01-20,2021-01-20 signatures=0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fix the following coccicheck warnings:
+This patch introduces to mmcpstore.
 
-./drivers/mmc/host/atmel-mci.c:2436:2-34: WARNING: Assignment
-of 0/1 to bool variable.
+v5:
+ - Implement non-panic read/write support through pstore callbacks
 
-./drivers/mmc/host/atmel-mci.c:2425:2-20: WARNING: Assignment
-of 0/1 to bool variable.
+v4:
+ - Fix claiming host if host was already held or
+   if the device claiming host is not runtime active
 
-Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-Signed-off-by: Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
----
- drivers/mmc/host/atmel-mci.c | 46 ++++++++++++++++++++++----------------------
- 1 file changed, 23 insertions(+), 23 deletions(-)
+v3:
+ - Justify new host ops requirement through commit msg
+ - Remove 'default n' in Kconfig
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 444bd3a..6324120 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -2401,45 +2401,45 @@ static void atmci_get_cap(struct atmel_mci *host)
- 	dev_info(&host->pdev->dev,
- 			"version: 0x%x\n", version);
- 
--	host->caps.has_dma_conf_reg = 0;
--	host->caps.has_pdc = 1;
--	host->caps.has_cfg_reg = 0;
--	host->caps.has_cstor_reg = 0;
--	host->caps.has_highspeed = 0;
--	host->caps.has_rwproof = 0;
--	host->caps.has_odd_clk_div = 0;
--	host->caps.has_bad_data_ordering = 1;
--	host->caps.need_reset_after_xfer = 1;
--	host->caps.need_blksz_mul_4 = 1;
--	host->caps.need_notbusy_for_read_ops = 0;
-+	host->caps.has_dma_conf_reg = false;
-+	host->caps.has_pdc = true;
-+	host->caps.has_cfg_reg = false;
-+	host->caps.has_cstor_reg = false;
-+	host->caps.has_highspeed = false;
-+	host->caps.has_rwproof = false;
-+	host->caps.has_odd_clk_div = false;
-+	host->caps.has_bad_data_ordering = true;
-+	host->caps.need_reset_after_xfer = true;
-+	host->caps.need_blksz_mul_4 = true;
-+	host->caps.need_notbusy_for_read_ops = false;
- 
- 	/* keep only major version number */
- 	switch (version & 0xf00) {
- 	case 0x600:
- 	case 0x500:
--		host->caps.has_odd_clk_div = 1;
-+		host->caps.has_odd_clk_div = true;
- 		fallthrough;
- 	case 0x400:
- 	case 0x300:
--		host->caps.has_dma_conf_reg = 1;
--		host->caps.has_pdc = 0;
--		host->caps.has_cfg_reg = 1;
--		host->caps.has_cstor_reg = 1;
--		host->caps.has_highspeed = 1;
-+		host->caps.has_dma_conf_reg = true;
-+		host->caps.has_pdc = false;
-+		host->caps.has_cfg_reg = true;
-+		host->caps.has_cstor_reg = true;
-+		host->caps.has_highspeed = true;
- 		fallthrough;
- 	case 0x200:
--		host->caps.has_rwproof = 1;
--		host->caps.need_blksz_mul_4 = 0;
--		host->caps.need_notbusy_for_read_ops = 1;
-+		host->caps.has_rwproof = true;
-+		host->caps.need_blksz_mul_4 = false;
-+		host->caps.need_notbusy_for_read_ops = true;
- 		fallthrough;
- 	case 0x100:
--		host->caps.has_bad_data_ordering = 0;
--		host->caps.need_reset_after_xfer = 0;
-+		host->caps.has_bad_data_ordering = false;
-+		host->caps.need_reset_after_xfer = false;
- 		fallthrough;
- 	case 0x0:
- 		break;
- 	default:
--		host->caps.has_pdc = 0;
-+		host->caps.has_pdc = false;
- 		dev_warn(&host->pdev->dev,
- 				"Unmanaged mci version, set minimum capabilities\n");
- 		break;
+v2:
+ - Fix modpost issue with ARCH=sh
+ - Fix usage of ifdefs in common functions
+ - Add justification of new APIs to mmc_host_ops
+ - Compile mmcpstore as part of mmc blk
+
+v1: https://lore.kernel.org/linux-mmc/20201112062422.32212-1-bbudiredla@marvell.com/T/#t
+v2: https://lore.kernel.org/linux-mmc/6762a763-5284-04dc-e636-486c74dedd34@alum.wpi.edu/T/#u
+v3: https://lore.kernel.org/linux-mmc/20201207115753.21728-1-bbudiredla@marvell.com/T/#t
+v4: https://lore.kernel.org/linux-mmc/20201223144033.32571-1-bbudiredla@marvell.com/T/#md9fce2de5b6aaa66e8ff7cb04d138a548426a8e3
+
+Bhaskara Budiredla (2):
+  mmc: Support kmsg dumper based on pstore/blk
+  mmc: cavium: Add MMC polling method to support kmsg panic/oops write
+
+ drivers/mmc/core/Kconfig           |  14 +-
+ drivers/mmc/core/Makefile          |   1 +
+ drivers/mmc/core/block.c           |  19 +++
+ drivers/mmc/core/block.h           |   9 ++
+ drivers/mmc/core/core.c            |  44 ++++++
+ drivers/mmc/core/mmcpstore.c       | 227 +++++++++++++++++++++++++++++
+ drivers/mmc/host/cavium-thunderx.c |  10 ++
+ drivers/mmc/host/cavium.c          |  67 +++++++++
+ drivers/mmc/host/cavium.h          |   3 +
+ include/linux/mmc/core.h           |   5 +
+ include/linux/mmc/host.h           |  12 ++
+ 11 files changed, 410 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mmc/core/mmcpstore.c
+
 -- 
-1.8.3.1
+2.17.1
 
