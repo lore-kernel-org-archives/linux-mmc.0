@@ -3,111 +3,101 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 796E7C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 17:31:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 781D6C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 17:31:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2F3C720705
-	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 17:31:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3F5B120705
+	for <linux-mmc@archiver.kernel.org>; Wed, 20 Jan 2021 17:31:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727457AbhATRas (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Jan 2021 12:30:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48584 "EHLO
+        id S1732396AbhATRav (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Jan 2021 12:30:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56998 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390169AbhATOJG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 09:09:06 -0500
-Received: from mail-vs1-xe2c.google.com (mail-vs1-xe2c.google.com [IPv6:2607:f8b0:4864:20::e2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83D6EC0613D3
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:26 -0800 (PST)
-Received: by mail-vs1-xe2c.google.com with SMTP id n18so5619095vsa.12
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:08:26 -0800 (PST)
+        with ESMTP id S2387710AbhATOsK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 20 Jan 2021 09:48:10 -0500
+Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C6AFC061575
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:47:29 -0800 (PST)
+Received: by mail-pj1-x102d.google.com with SMTP id my11so3241531pjb.1
+        for <linux-mmc@vger.kernel.org>; Wed, 20 Jan 2021 06:47:29 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=TYF+Zz7wUDX6tFLm0vugTznzEeL36B9hGlq5J1Mejos=;
-        b=bB6s6Snu7BEd0g7q3kNiWIUMDzZs6R2ihemuVSpA9OHoV7py5zzTe4td1pxZvg3iQO
-         wAvWas1umsFvU4xr5zAGltp/VYDIu+HhKxXmeUPQgRAd9SQTXdcu/02hqNzN34jmFdi8
-         aJCNHGHND1ZhUOqZN/XZguJLR1Le7SQL47N84pRUJ+uUDhITBA30LKod3lyniRsc8ghi
-         y50gZvUmYm/LAgFgJzkaTx0UdX128J0STq8V7C5pIJgJuSmPyvbys9iDtc1Y7QkYSJZu
-         mkZwdTYxZoDWN8KFkTG2RhYmc9M77zCkPYKv+h3EQ4oxPbDffVATGuNF/HiSHxJVelQ6
-         W7AQ==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=jlkUCRECPn1JzcA3719LXaq3XQK9JuWCVgpVUPK45uE=;
+        b=vMEiJPVToombxMLqJX0wXG6rzvM+HHrDI5IcY+I2OXFnCvqT1ZIlT4Rlmm/ifJiV2b
+         NQdxl7xfJFN4EdaGIpnPnyk2pB4Eu6+b4008zBZC4xICgJToyWtNW89vevu12h0miYJb
+         /3RBt+uZz2ZO3+xPHdXyYjq5QXj2qa4w79niz5Mn4/B0+yDtdxT3Jp8gwJNdrUw3pytr
+         5HxyJC4was7lmKOB2cRO5i3aGajrciaBntkf+qwaWz7zjr9pKEdnbGrR7eQ+nfnR1dF7
+         wWA1oBIcdRXAgVYghEj45+RGMvJ9yuyb8M0+zesv1f2ENSjvE2ce6EO46O/Y+Z1vqkk1
+         tZ/w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=TYF+Zz7wUDX6tFLm0vugTznzEeL36B9hGlq5J1Mejos=;
-        b=rQ6TDvQ5HH48J7JVAv4o5BVfbzNlAgJXvz2RpIz56L/8fOD0LmNfe1ZLrhHABCVFmW
-         G6Ac1ImASYcV0Dq0a4j3hNZaknqSevPtcqORV43p+XjS4KzuFHoOyD0KLVQnKXzO8V2X
-         q3UqlilqVqqF862J6SdY7dMNDprQWUBJtKnmYW9E12hhbCVyf4+seNYpJQoewiqIDHe6
-         d8BHjh2M3BbvunB+zo5j5sc0WEPpRcP3MLZPBa+6jwi2kHXK+VGdSyAG7iOZlOzvoiUM
-         6ic3Eg4goG2nHorUnaeWJ5iwxcjD1LaVDH/yA6rOJeZbf6xpSBZvqVOFDsSoAxUdTkRg
-         h7iQ==
-X-Gm-Message-State: AOAM531YAhSusK2wNbrKyqs0Gcj6aZaYR4L2JBPJ9Qhj83zfHaT+xmXJ
-        X+WXb43ITYf81e9UxlTSQcJiHI0R8HbNr7/2WqLxtg==
-X-Google-Smtp-Source: ABdhPJzPT+5m2Uip2x9vfp7pBlxYZltKseMVwidfWwS9EYIZPJvzKkNBcaq7Pw/ew0QC+G0QrPPNK7NoCik1XvhD4+Y=
-X-Received: by 2002:a67:facb:: with SMTP id g11mr6768555vsq.19.1611151705806;
- Wed, 20 Jan 2021 06:08:25 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=jlkUCRECPn1JzcA3719LXaq3XQK9JuWCVgpVUPK45uE=;
+        b=YK49wBZD7xO+RamNt3OPZpQumT3vCNUTEUF/WODQSm94ajD6rXdrqrO7d/PSNtZb9F
+         W0b6cHKz0C+mADLVdtVA5gKwpbDlxrGjlpVzzF9M+kOTFMO93dB54/wOxQExQRpZuTgx
+         +IDY7NPSDRQd49PE2KdZ5LqI1sruohaaURHweCozwesAx7WSmjMHX3CslmsReCo7ZG4I
+         Bb8FYITOZLmRc/P2VKyWM8dhfhHpFT96ZydT9Kjku+vH4XdtQ/hbIGERr5WWdwy0GR25
+         j53RIqx8ZYXiAo158EsCL8/6CnihliyzrHuKqT+qAejDsiOyqNsd4T8l3cPgHEiTUgIy
+         Ak0A==
+X-Gm-Message-State: AOAM530pVrZDcj2af0J+i+20/EuTG5ooCg8GtMkOnrRDPhJSrB4bIC7Y
+        0Bj7dRDGcEH5bkXGHx9bi+I=
+X-Google-Smtp-Source: ABdhPJymFocj95/O/ZGeel2Dqc93gmgCR8eWwFfh6VTP4LpZmlohV8OQ9H59nQnsnQN8if2np/htJQ==
+X-Received: by 2002:a17:902:f54e:b029:de:19f9:c45f with SMTP id h14-20020a170902f54eb02900de19f9c45fmr10116312plf.48.1611154048867;
+        Wed, 20 Jan 2021 06:47:28 -0800 (PST)
+Received: from localhost.localdomain ([210.0.158.164])
+        by smtp.googlemail.com with ESMTPSA id u14sm2631369pgj.13.2021.01.20.06.47.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 20 Jan 2021 06:47:28 -0800 (PST)
+From:   Fengnan Chang <fengnanchang@gmail.com>
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, Fengnan Chang <fengnanchang@gmail.com>
+Subject: [PATCH v2] mmc: limit the time of retries when analyse tuples failed
+Date:   Wed, 20 Jan 2021 22:45:51 +0800
+Message-Id: <20210120144550.697303-1-fengnanchang@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20210119051425.305-1-zbestahu@gmail.com>
-In-Reply-To: <20210119051425.305-1-zbestahu@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 20 Jan 2021 15:07:48 +0100
-Message-ID: <CAPDyKFo1fc8xHN2PjrE1s4RGsTPzL6sq6e1+aCOZBJN-6iFD3A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: test: remove the shutdown function
-To:     Yue Hu <zbestahu@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Yue Hu <huyue2@yulong.com>, zbestahu@163.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 19 Jan 2021 at 06:14, Yue Hu <zbestahu@gmail.com> wrote:
->
-> From: Yue Hu <huyue2@yulong.com>
->
-> Since it's doing nothing for shutdown behavior. And the callback will
-> be checked firstly in mmc_bus_shutdown().
->
-> Signed-off-by: Yue Hu <huyue2@yulong.com>
+when analyse tuples failed, may enter an endless loop，so limit the time of retries.
 
-Applied for next, thanks!
+Signed-off-by: Fengnan Chang <fengnanchang@gmail.com>
+---
+ drivers/mmc/core/sdio_cis.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+index dcb3dee59fa5..47423a6d13fb 100644
+--- a/drivers/mmc/core/sdio_cis.c
++++ b/drivers/mmc/core/sdio_cis.c
+@@ -266,6 +266,7 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
 
+ 	do {
+ 		unsigned char tpl_code, tpl_link;
++		u64 timeout = get_jiffies_64() + 10 * HZ;
 
-> ---
->  drivers/mmc/core/mmc_test.c | 5 -----
->  1 file changed, 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 152e752..f999b48 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -3267,17 +3267,12 @@ static void mmc_test_remove(struct mmc_card *card)
->         mmc_test_free_dbgfs_file(card);
->  }
->
-> -static void mmc_test_shutdown(struct mmc_card *card)
-> -{
-> -}
-> -
->  static struct mmc_driver mmc_driver = {
->         .drv            = {
->                 .name   = "mmc_test",
->         },
->         .probe          = mmc_test_probe,
->         .remove         = mmc_test_remove,
-> -       .shutdown       = mmc_test_shutdown,
->  };
->
->  static int __init mmc_test_init(void)
-> --
-> 1.9.1
->
+ 		ret = mmc_io_rw_direct(card, 0, 0, ptr++, 0, &tpl_code);
+ 		if (ret)
+@@ -318,6 +319,8 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
+ 			prev = &this->next;
+
+ 			if (ret == -ENOENT) {
++				if (time_after64(get_jiffies_64(), timeout))
++					break;
+ 				/* warn about unknown tuples */
+ 				pr_warn_ratelimited("%s: queuing unknown"
+ 				       " CIS tuple 0x%02x (%u bytes)\n",
+--
+2.25.1
+
