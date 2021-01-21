@@ -2,90 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ED43C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 07:46:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F3F8C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 08:15:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 08CFC221F7
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 07:46:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2A1972396D
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 08:15:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727401AbhAUHqr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jan 2021 02:46:47 -0500
-Received: from mail.kernel.org ([198.145.29.99]:46378 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727718AbhAUHqe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 21 Jan 2021 02:46:34 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 367BC2396F;
-        Thu, 21 Jan 2021 07:45:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611215153;
-        bh=jaWMXBe7gnB8W5jif/JfABLr8mo1KpxJERzgLN9oXZo=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=OIDIMftRkRi5Tl0tyXx+ZfQIiktUN9xr0cGBGwWiV3B05YmzMI7mQh/rqhcdylAk2
-         1Sx9vkp4ogpH4hgwRwG/MRGCdmgSw42h+/aLshnTE+Pz3sYTsh6vjN9GOsY9jjkMvB
-         KsR5DjRqcQ8QKqwTJrk5D68VwH7eE6Hd2b0y5xTsi70MkOejjM3G4k3gMqgzXhT8ou
-         GawbG31BRe0AgsWemiWFo7HlHfgRyjIvQ/++wn5al8FF0ny9XFqKVwSYetumffqwK9
-         nHOkG54I3m7qaWH8hgmhvGlbNk25E9pHnCZT6EvEEWlkzVs+fNUJW1Ryx48ORKNJQo
-         Lk5ldJLBn0vsw==
-Date:   Wed, 20 Jan 2021 23:45:51 -0800
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
-        Satya Tangirala <satyat@google.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Subject: Re: [PATCH v4 1/9] mmc: add basic support for inline encryption
-Message-ID: <YAkxLx4JiAtSlx1E@sol.localdomain>
-References: <20210104184542.4616-1-ebiggers@kernel.org>
- <20210104184542.4616-2-ebiggers@kernel.org>
- <CAPDyKFq717teu2HPZLCn9QVxLOwZHdi_iS+Ji69S0kYX1o52PQ@mail.gmail.com>
- <YAHXPREJaKjK/z7+@sol.localdomain>
- <CAPDyKFopKy6dwENJ6YQQ0KRPQdT25R_zmhrNH7jyu=+p6bKpNA@mail.gmail.com>
- <YAdGbqU12cbJr78K@sol.localdomain>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YAdGbqU12cbJr78K@sol.localdomain>
+        id S1725933AbhAUIPZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Jan 2021 03:15:25 -0500
+Received: from out28-2.mail.aliyun.com ([115.124.28.2]:36758 "EHLO
+        out28-2.mail.aliyun.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726993AbhAUIOm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2021 03:14:42 -0500
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1421534|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_system_inform|0.00192036-0.000106734-0.997973;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047190;MF=liu.xiang@zlingsmart.com;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.JNl771T_1611216832;
+Received: from localhost(mailfrom:liu.xiang@zlingsmart.com fp:SMTPD_---.JNl771T_1611216832)
+          by smtp.aliyun-inc.com(10.194.97.171);
+          Thu, 21 Jan 2021 16:13:52 +0800
+From:   Liu Xiang <liu.xiang@zlingsmart.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     ulf.hansson@linaro.org, linux-kernel@vger.kernel.org,
+        liuxiang_1999@126.com, Liu Xiang <liu.xiang@zlingsmart.com>
+Subject: [PATCH] mmc: block: use REQ_HIPRI flag to complete request directly in own complete workqueue
+Date:   Thu, 21 Jan 2021 16:13:49 +0800
+Message-Id: <20210121081349.8266-1-liu.xiang@zlingsmart.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jan 19, 2021 at 12:52:00PM -0800, Eric Biggers wrote:
-> > To free up the data structures, blk_ksm_destroy() is called from
-> > mmc_free_host().
-> > 
-> > To me, this can be made more consistent. For example, it looks like
-> > blk_ksm_destroy() could be called, even if blk_ksm_init() hasn't been
-> > called (depending on the probe error path of the mmc host).
-> 
-> blk_ksm_destroy() is a no-op on an all-zeroed struct, so it's fine to call it
-> unnecessarily.  We could call it unconditionally, if that would be clearer.
-> 
-> > There are a couple of options to better deal with this.
-> > 1) Extend the blk_ksm interface with a devm_blk_ksm_init() function
-> > (thus let it deal with lifecycle problems for us) and simply drop the
-> > call to blk_ksm_destroy().
-> 
-> This would require adding APIs to devm to support zeroing buffers on free and to
-> use kvmalloc() instead of kmalloc().  It looks like these new APIs wouldn't be
-> useful for many drivers (since almost everyone else just wants regular kmalloc
-> with no special behavior on free), so they don't seem worth adding yet.
+After commit "40d09b53bfc557af7481b9d80f060a7ac9c7d314", request is
+completed in softirq. This may cause the system to suffer bad preemptoff
+time.
+The mmc driver has its own complete workqueue, but it can not work
+well now.
+The REQ_HIPRI flag can be used to complete request directly in its own
+complete workqueue and the preemptoff problem could be avoided.
 
-Actually devres is more flexible than I thought; it's possible to register
-custom actions to be executed.  I'll send out a patchset that adds
-devm_blk_ksm_init() and converts the UFS driver to use it.
+Signed-off-by: Liu Xiang <liu.xiang@zlingsmart.com>
+---
+ drivers/mmc/core/block.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-- Eric
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 42e27a298..c27239a89 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1985,8 +1985,10 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req)
+ 	 */
+ 	if (mq->in_recovery)
+ 		mmc_blk_mq_complete_rq(mq, req);
+-	else if (likely(!blk_should_fake_timeout(req->q)))
++	else if (likely(!blk_should_fake_timeout(req->q))) {
++		req->cmd_flags |= REQ_HIPRI;
+ 		blk_mq_complete_request(req);
++	}
+ 
+ 	mmc_blk_mq_dec_in_flight(mq, req);
+ }
+-- 
+2.17.1
+
