@@ -2,40 +2,41 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BE32C43333
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 09:09:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D41FEC433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 09:20:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 28B0723602
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 09:09:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A61E8238EC
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 09:20:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727155AbhAUJJV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jan 2021 04:09:21 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37836 "EHLO mail.kernel.org"
+        id S1728469AbhAUJTE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Jan 2021 04:19:04 -0500
+Received: from mail.kernel.org ([198.145.29.99]:41546 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728446AbhAUJEe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 21 Jan 2021 04:04:34 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0F41A23356;
-        Thu, 21 Jan 2021 09:03:53 +0000 (UTC)
+        id S1728428AbhAUJTC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 21 Jan 2021 04:19:02 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id DE675238E7;
+        Thu, 21 Jan 2021 09:18:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611219833;
-        bh=WWkiOlL5YRAT2gYztz4fBhB6bujfVFTQ5ffqrJmrp0g=;
-        h=From:To:Cc:Subject:Date:From;
-        b=THXg0WhRR+fO/xgH9NKM8+eAVMQeWOtqn1NB81oEl3LY7KefuK0BEqm8MajvimpFe
-         SDgAn3+xqqpneqWw/GFCfB3pYVotp5r1DqxukqAjzt88qz7+6sTCd0+4m58tLmfDvo
-         K6ZdOPjriH4yv5bZQcuc+JVW5MhdHAy6OmW2DeSNdZtCuElaFomO8XGLEdu1EiINHi
-         TVj2u3wVAOTyPA4Ycrvhycc9Xi8JkHSBmHYfpcFLRX1uEvB47Qu7sM5JfzlPqwzaF8
-         DdfGSdoWBAwqcuo+Y1AJ5ZkGsb4Yvk1LBG+2TmhDvwiLZ8VWhvaHwQCHFj1zWLfimn
-         EkzO/Wl7w6nOQ==
+        s=k20201202; t=1611220700;
+        bh=eFarvHVTjMQ9ZmzO4KuX5sosRLBK4K2eZziwDAumVjk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=ffxVy6jwS4dmZjLqB5b1xB+XqsYwBRZK0L9LTUBSxdYSOgEoDYkYIln++28Y8PKhI
+         n05z6RAeeb+ZphvMIyZ4xnpayAjnLXvFeR6eODq1AwYLIueezhDolvqA2utIqIekSu
+         o+PJV/zas1zDv4DhOJIMFK0vI+oeeqfAmCxL+LV+edosMFDupmTyEvgsJ+MfU59Czm
+         gsYd3MjRrSWUpBrZuyLuE3UnyQWmHjY15tZT2fZ7+97hpG0DjGIF6+G05/GFdBdCPo
+         UAct605DRv+opVDsqxZUydNPo/LxBBsevYF9APA2VW5VfErFiW6HE/zWvdtmO300fc
+         2cq/t44UPTNMg==
+Date:   Thu, 21 Jan 2021 01:18:18 -0800
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
@@ -46,114 +47,169 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v5 0/9] eMMC inline encryption support
-Date:   Thu, 21 Jan 2021 01:01:31 -0800
-Message-Id: <20210121090140.326380-1-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.30.0
+Subject: Re: [PATCH v4 1/9] mmc: add basic support for inline encryption
+Message-ID: <YAlG2j0RbKbcyzMD@sol.localdomain>
+References: <20210104184542.4616-1-ebiggers@kernel.org>
+ <20210104184542.4616-2-ebiggers@kernel.org>
+ <CAPDyKFq717teu2HPZLCn9QVxLOwZHdi_iS+Ji69S0kYX1o52PQ@mail.gmail.com>
+ <YAHXPREJaKjK/z7+@sol.localdomain>
+ <CAPDyKFopKy6dwENJ6YQQ0KRPQdT25R_zmhrNH7jyu=+p6bKpNA@mail.gmail.com>
+ <YAdGbqU12cbJr78K@sol.localdomain>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YAdGbqU12cbJr78K@sol.localdomain>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+On Tue, Jan 19, 2021 at 12:51:58PM -0800, Eric Biggers wrote:
+> On Mon, Jan 18, 2021 at 03:21:01PM +0100, Ulf Hansson wrote:
+> > > > Eric, again, my apologies for the delay. Overall, I think this looks good.
+> > > >
+> > > > My only hesitation to merge this as is, is that I want to make sure
+> > > > you have thought of the life cycle issues for the struct
+> > > > blk_keyslot_manager ksm. It's being used both from the mmc core/block
+> > > > device driver and the mmc host driver. I am looking at this right now
+> > > > and will get back to you very soon, if I find some issues with it.
+> > > >
+> > > > If you have some time, feel free to elaborate around how this is
+> > > > intended to work.
+> > > >
+> > > > Kind regards
+> > > > Uffe
+> > >
+> > > The blk_keyslot_manager is initialized early on when the other host structures
+> > > (struct mmc_host, struct cqhci_host, struct sdhci_host, struct sdhci_msm_host)
+> > > are initialized, prior to mmc_add_host().
+> > >
+> > > It is destroyed when the struct mmc_host is freed by mmc_free_host().
+> > >
+> > > So it should just work; it's the same lifecycle as the existing host structures.
+> > > Is there something you think I'm overlooking?
+> > 
+> > I think so, but let me elaborate a bit.
+> > 
+> > As I understand it, to initialize the data structures, blk_ksm_init()
+> > is getting called and via cqhci_init().
+> > 
+> > To hook up the block request queue, blk_ksm_register() is called via
+> > mmc_setup_queue(), which means this happens when the mmc block device
+> > driver is probed.
+> 
+> Well, the call to blk_ksm_register() happens in mmc_crypto_setup_queue(), when
+> allocating the request_queue for a particular mmc_card.  As far as I can tell,
+> the mmc_host has already been initialized and added then, so we don't have to
+> worry about cases where the mmc_host has only been partially initialized.
+> And in particular, MMC_CAP2_CRYPTO will have its final value.
+> 
+> > 
+> > To free up the data structures, blk_ksm_destroy() is called from
+> > mmc_free_host().
+> > 
+> > To me, this can be made more consistent. For example, it looks like
+> > blk_ksm_destroy() could be called, even if blk_ksm_init() hasn't been
+> > called (depending on the probe error path of the mmc host).
+> 
+> blk_ksm_destroy() is a no-op on an all-zeroed struct, so it's fine to call it
+> unnecessarily.  We could call it unconditionally, if that would be clearer.
+> 
+> > There are a couple of options to better deal with this.
+> > 1) Extend the blk_ksm interface with a devm_blk_ksm_init() function
+> > (thus let it deal with lifecycle problems for us) and simply drop the
+> > call to blk_ksm_destroy().
+> 
+> This would require adding APIs to devm to support zeroing buffers on free and to
+> use kvmalloc() instead of kmalloc().  It looks like these new APIs wouldn't be
+> useful for many drivers (since almost everyone else just wants regular kmalloc
+> with no special behavior on free), so they don't seem worth adding yet.
+> 
+> > 2) Extend the cqhci interface with a cleanup function (perhaps
+> > "cqhci_deinit") and let it call blk_ksm_destroy().
+> 
+> The blk_keyslot_manager is part of struct mmc_host, so it makes more sense for
+> mmc_core to be responsible for freeing it.
+> 
+> We could move it to cqhci_host, but that would require adding multiple new
+> function pointers to mmc_cqe_ops for use by mmc_crypto_set_initial_state(),
+> mmc_crypto_free_host(), and mmc_crypto_setup_queue(), as these all currently
+> need access to the blk_keyslot_manager.
+> 
+> I think that making mmc_core directly aware of the blk_keyslot_manager is the
+> right call, as it avoids excessive callbacks, and it avoids tying the inline
+> encryption support too closely to CQHCI.  (Keep in mind that in the future, MMC
+> hosts could support inline encryption using other interfaces besides CQHCI.)
+> 
+> > 3) Convert to let blk_ksm_init() to be called from mmc_add_host() and
+> > blk_ksm_destroy() from mmc_remove_host().
+> 
+> That won't work because the driver has to fill in the crypto capabilities in the
+> blk_keyslot_manager after calling blk_ksm_init().  mmc_add_host() is too late to
+> do that.  mmc_add_host() happens after the driver has already initialized the
+> host structures and is finally registering them with the driver model.
+> 
+> > 
+> > Moreover, even if there seems to be no real need to call
+> > blk_ksm_unregister() for the mmc block device driver, perhaps we
+> > should still do it to be consistent with blk_ksm_register()?
+> 
+> blk_ksm_unregister() isn't exported to modules.  Its only purpose is for the
+> block layer to disable inline encryption support on a disk if blk-integrity
+> support is registered on the same disk.  So it shouldn't (and can't) be called
+> by drivers.
+> 
+> We probably should just remove blk_ksm_unregister() and make
+> blk_integrity_register() set the ->ksm pointer to NULL directly.  Also maybe
+> blk_ksm_register() should be renamed to something like
+> "queue_set_keyslot_manager()" to avoid implying that "unregister" is needed.
+> 
+> However those would be block layer changes, not related to this patchset.
+> 
+> > 
+> > Then a final concern. It looks like the mmc core relies on checking
+> > "host->caps2 & MMC_CAP2_CRYPTO", when it calls blk_ksm_register() and
+> > blk_ksm_reprogram_all_keys(), for example. Normally, host->caps2 bits
+> > are considered as static configurations and set during the host driver
+> > probe path, which may not be a good match for this case. Instead, it
+> > seems like we should set a new separate flag, to indicate for the mmc
+> > core that blk_ksm_init has been enabled. Otherwise it looks like we
+> > could end up calling blk_ksm_reprogram_all_keys(), even if
+> > blk_ksm_init() hasn't been called.
+> 
+> MMC_CAP2_CRYPTO *is* a static configuration that is set during the host driver
+> probe path.  So I don't understand your concern here.
+> 
+> It's true that during the host driver probe path, MMC_CAP2_CRYPTO initially
+> means "the hardware might support crypto", and then cqhci_crypto_init() clears
+> it if it decides that the hardware doesn't support crypto after all, after which
+> the bit really does mean "the hardware supports crypto".
+> 
+> That seems fine because this all happens while the host structures are being
+> initialized, before they are registered with the driver model and MMC cards are
+> detected.  So AFAICS there can't be any concurrent calls to
+> mmc_crypto_set_initial_state() or mmc_crypto_setup_queue().  Do you think
+> otherwise?
 
-This patchset adds support for eMMC inline encryption, as specified by
-the upcoming version of the eMMC specification and as already
-implemented and used on many devices.  Building on that, it then adds
-Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
+I've sent out a new version of this patchset that uses the new function
+devm_blk_ksm_init() I've proposed, so that the blk_keyslot_manager no longer
+needs to be explicitly destroyed.
 
-Inline encryption hardware improves the performance of storage
-encryption and reduces power usage.  See
-Documentation/block/inline-encryption.rst for more information about
-inline encryption and the blk-crypto framework (upstreamed in v5.8)
-which supports it.  Most mobile devices already use UFS or eMMC inline
-encryption hardware; UFS support was already upstreamed in v5.9.
+Please let me know if you still have any other concerns.
 
-Patches 1-4 add support for the standard eMMC inline encryption.
+I think you may have been assuming that the blk_keyslot_manager doesn't get
+initialized until the CQE is enabled, and thus would have a separate lifetime
+from the other host structures?  That's not what happens; it just gets
+initialized on the driver probe path.  See e.g.:
 
-However, as with UFS, host controller-specific patches are needed on top
-of the standard support.  Therefore, patches 5-9 add Qualcomm ICE
-(Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
+	sdhci_msm_probe()
+	  => sdhci_msm_cqe_add_host()
+	     => cqhci_init()
+	        => cqhci_crypto_init()
+	           => devm_blk_ksm_init()
 
-To test this I took advantage of the recently upstreamed support for the
-Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
-project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
-particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
-a Debian chroot.  Among other things, these tests verified that the
-correct ciphertext is written to disk (the same as software encryption).
+And we don't leave MMC_CAP2_CRYPTO set but the blk_keyslot_manager
+uninitialized, as that combination doesn't make sense.
 
-It will also be possible to add support for Mediatek eMMC inline
-encryption hardware in mtk-sd, and it should be easier than the Qualcomm
-hardware since the Mediatek hardware follows the standard more closely.
-I.e., patches 1-4 should be almost enough for the Mediatek hardware.
+Thanks,
 
-This patchset is based on v5.11-rc2 plus the patch
-"block/keyslot-manager: introduce devm_blk_ksm_init()"
-(https://lkml.kernel.org/r/20210121082155.111333-2-ebiggers@kernel.org).
-It can also be retrieved from tag "mmc-crypto-v5" of
-https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
-
-Changed since v4:
-  - Use the proposed resource-managed variant of blk_ksm_init().
-  - Removed an unnecessary call to devm_kfree().
-
-Changed since v3:
-  - Added Acked-by and Reviewed-and-tested-by tags.
-  - Rebased onto v5.11-rc2.
-
-Changed since v2:
-  - Improved comment for sdhci_msm_ice_wait_bist_status()
-  - Removed an unhelpful comment in union cqhci_crypto_cfg_entry.
-  - Fixed the commit message of "mmc: cqhci: initialize upper 64 bits of
-    128-bit task descriptors".
-  - Added Reviewed-by's and Acked-by's.
-
-Changed since v1:
-  - Only select QCOM_SCM if ARCH_QCOM.  (Fixes a build break.)
-  - Split most of the cqhci_prep_task_desc() change into its own patch.
-  - Made sdhci_msm_ice_wait_bist_status() use readl_poll_timeout().
-  - Added a couple more comments.
-  - Added some Acked-by's.
-
-Eric Biggers (9):
-  mmc: add basic support for inline encryption
-  mmc: cqhci: rename cqhci.c to cqhci-core.c
-  mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
-  mmc: cqhci: add support for inline encryption
-  mmc: cqhci: add cqhci_host_ops::program_key
-  firmware: qcom_scm: update comment for ICE-related functions
-  dt-bindings: mmc: sdhci-msm: add ICE registers and clock
-  arm64: dts: qcom: sdm630: add ICE registers and clocks
-  mmc: sdhci-msm: add Inline Crypto Engine support
-
- .../devicetree/bindings/mmc/sdhci-msm.txt     |   3 +
- arch/arm64/boot/dts/qcom/sdm630.dtsi          |  10 +-
- drivers/firmware/qcom_scm.c                   |  16 +-
- drivers/mmc/core/Kconfig                      |   8 +
- drivers/mmc/core/Makefile                     |   1 +
- drivers/mmc/core/block.c                      |   3 +
- drivers/mmc/core/core.c                       |   3 +
- drivers/mmc/core/crypto.c                     |  48 +++
- drivers/mmc/core/crypto.h                     |  40 +++
- drivers/mmc/core/host.c                       |   1 +
- drivers/mmc/core/queue.c                      |   3 +
- drivers/mmc/host/Kconfig                      |   1 +
- drivers/mmc/host/Makefile                     |   2 +
- drivers/mmc/host/{cqhci.c => cqhci-core.c}    |  69 ++++-
- drivers/mmc/host/cqhci-crypto.c               | 242 +++++++++++++++
- drivers/mmc/host/cqhci-crypto.h               |  47 +++
- drivers/mmc/host/cqhci.h                      |  84 +++++-
- drivers/mmc/host/sdhci-msm.c                  | 276 +++++++++++++++++-
- include/linux/mmc/core.h                      |   6 +
- include/linux/mmc/host.h                      |   7 +
- 20 files changed, 845 insertions(+), 25 deletions(-)
- create mode 100644 drivers/mmc/core/crypto.c
- create mode 100644 drivers/mmc/core/crypto.h
- rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (94%)
- create mode 100644 drivers/mmc/host/cqhci-crypto.c
- create mode 100644 drivers/mmc/host/cqhci-crypto.h
-
--- 
-2.30.0
-
+- Eric
