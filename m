@@ -2,66 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B4EBC433E9
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 17:11:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0609BC433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 18:26:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66C4E23A54
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 17:11:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B096F23A57
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 18:26:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388289AbhAURL3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jan 2021 12:11:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57880 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388298AbhAURE5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2021 12:04:57 -0500
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EABDDC0613D6;
-        Thu, 21 Jan 2021 09:03:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=QzyNyEp1YsTE5vSV+3cDru2rTzeX2CsFjS3xBz6a990=; b=m/sCpkjOMCVgP4VoWYhFT+pNFA
-        XsN5cp/1QMUAEvRGYKVrcCWtT0K0Qc1rUYrY8tnWtvRBGAzYQF1aJcWF3PjXrGGN5DB6crvK52Uhq
-        VmNi8hTrqhlV+i2i9NAfj+R5YQr9uVin10+P+GGGvl4s+Wro8U/2/QQy8nAXo/5hPnH9AZL+NWlnM
-        toPoiBaqrmygPeFA0pi51swSnxTXmB2rXAaBa2z16O2JBwXvSZdc+MGy9skDIY3SNinDpyuqYtJ3N
-        cyelbC61FxOX5f44I6+AYEzvIq/k8mhEfUgaLp9Knoar2TChae7OQQlHwtAFdMat/0mm5SWvcQ2ZF
-        9pImn9Kw==;
-Received: from hch by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
-        id 1l2dMH-00HI8V-2u; Thu, 21 Jan 2021 17:03:07 +0000
-Date:   Thu, 21 Jan 2021 17:02:57 +0000
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
-Cc:     axboe@kernel.dk, linux-block@vger.kernel.org,
-        target-devel@vger.kernel.org, linux-scsi@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-nvme@lists.infradead.org, linux-nfs@vger.kernel.org
-Subject: Re: [PATCH 1/2] block: remove unnecessary argument from
- blk_execute_rq_nowait
-Message-ID: <20210121170257.GA4120717@infradead.org>
-References: <20210121142905.13089-1-guoqing.jiang@cloud.ionos.com>
- <20210121142905.13089-2-guoqing.jiang@cloud.ionos.com>
+        id S1726953AbhAUS0N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Jan 2021 13:26:13 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60030 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727457AbhAUSS2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 21 Jan 2021 13:18:28 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9A83423A3A;
+        Thu, 21 Jan 2021 18:17:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1611253054;
+        bh=K7MU5q7tdkr5vyIPyOgPh9VwES77OWz5XH2UBN04YNU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Gr1KnQqIE58OCbsdj+RYzLgiqTk2+MQv3Nt7Li3FKrHYGLN0p8GZieJHo68vXnuRf
+         Qycv1yW1F6e7dpkLF+MacJ4GqHUSFUE7aEDRkHhskBexkDX9Ix+Y+5+83iqGw7vlqj
+         grajGkIvNu4iPlxrqBR7NK/SjMbTKhAuMpymIjwXj39J9J8kKuL9/Tv90t7eC2PmkZ
+         grQFrwKosKzYFsf/G4fcbISkDSVUYprsXQlz+aDOm4EpfMcjcJElqYcgR1fzNjqhYw
+         ujNrVlQU6RRPlf9qNCGjCrCKx3flmJ31OplyBYCGUw+8RkQcirPFcV7Ad6UI+Vkcs0
+         OYQGmHGEO9MyQ==
+Date:   Thu, 21 Jan 2021 10:17:32 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: Re: [PATCH v5 4/9] mmc: cqhci: add support for inline encryption
+Message-ID: <YAnFPC0f4vJsKbuL@sol.localdomain>
+References: <20210121090140.326380-1-ebiggers@kernel.org>
+ <20210121090140.326380-5-ebiggers@kernel.org>
+ <CAPDyKFqCz=N9R6RpEoMO+zoKhJbds1rbvgzHJ2z+6k2U2Wq6Yg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210121142905.13089-2-guoqing.jiang@cloud.ionos.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <CAPDyKFqCz=N9R6RpEoMO+zoKhJbds1rbvgzHJ2z+6k2U2Wq6Yg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 21, 2021 at 03:29:04PM +0100, Guoqing Jiang wrote:
-> The 'q' is not used since commit a1ce35fa4985 ("block: remove dead
-> elevator code"), also update the comment of the function.
+On Thu, Jan 21, 2021 at 02:04:37PM +0100, Ulf Hansson wrote:
+> > +#else /* CONFIG_MMC_CRYPTO */
+> > +
+> > +static inline int cqhci_crypto_init(struct cqhci_host *host)
+> > +{
+> > +       return 0;
+> 
+> The host calling this function may have MMC_CAP2_CRYPTO set for it.
+> 
+> When CONFIG_MMC_CRYPTO is set, cqhci_crypto_init() may unset
+> MMC_CAP2_CRYPTO if initialization fails. It seems like we should unset
+> MMC_CAP2_CRYPTO in this stub function as well, right?
 
-And more importantly it never really was needed to start with given
-that we can triviall derive it from struct request.
+The code in sdhci-msm.c that sets MMC_CAP2_CRYPTO is conditional on
+CONFIG_MMC_CRYPTO.  So, MMC_CAP2_CRYPTO won't be set when !CONFIG_MMC_CRYPTO.
 
-> -extern void blk_execute_rq_nowait(struct request_queue *, struct gendisk *,
-> +extern void blk_execute_rq_nowait(struct gendisk *,
->  				  struct request *, int, rq_end_io_fn *);
+I suppose we might as well do something to stop other drivers from accidentally
+getting that wrong, though.
+
+How about just defining the flag to 0 when !CONFIG_MMC_CRYPTO:
+
+#ifdef CONFIG_MMC_CRYPTO
+#define MMC_CAP2_CRYPTO         (1 << 27)       /* Host supports inline encryption */
+#else
+#define MMC_CAP2_CRYPTO         0
+#endif
+
+That would be more reliable than relying on the flag getting cleared by
+something.
+
+- Eric
