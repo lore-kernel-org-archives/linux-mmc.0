@@ -8,44 +8,44 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B44E3C433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 03:54:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42951C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 04:44:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5FBFD238E5
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 03:54:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E83B8206FA
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 04:44:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731271AbhAUDyk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 20 Jan 2021 22:54:40 -0500
-Received: from mail-eopbgr70047.outbound.protection.outlook.com ([40.107.7.47]:28976
-        "EHLO EUR04-HE1-obe.outbound.protection.outlook.com"
+        id S1728304AbhAUDyJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 20 Jan 2021 22:54:09 -0500
+Received: from mail-eopbgr130058.outbound.protection.outlook.com ([40.107.13.58]:35302
+        "EHLO EUR01-HE1-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1732039AbhAUDWt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 20 Jan 2021 22:22:49 -0500
+        id S1731688AbhAUDWS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 20 Jan 2021 22:22:18 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Mx2xEf3YyznqDFLD5jX3A7XAPiyNRDXr8uDPNo09lJg48hOE/6Qz0K1vRccuHzLd0vKDXLhjPmysl1oh4Jluyt5s3O0TSs1AP486yqEbvbGkZg1oaeUvuBhixW04sASyPpnZyF9Dk3xY4CbvP07WhFMQX3M9JGHFEYXU3H8VEYFXChezkNOQ7oL0/O59mK0qnaV9Z4a1ocxM/GMTo5XK1iBsLb7AN7PXMlCeX4XQZua1Ty5IjCc4hyxRc5QX9N9L/98pZgNC4/1xSMQnCus2C5xsOFIox20Kl+BKoR9V+VHsNuvb8gggPMvMgySH3WGdEpoE8UevIAsAbEYVBCBKoA==
+ b=Fwx+MfrRiUU7mGhX3lB3CL1WgZ0TWVqwcS0RjAzMvTSQeFtVCmVPYtAz3k91mwnyoxjMaJWBf7N6pGknh7VV8NuwJEb5XvylX5gFyXKAbI+gJdKPBN8JOBExXVFbUfrrw12gi2ChxzAY4lMeIFhJNxgip0teMtPq/nsJZAPQRuRztyiRHfnxwMdgp/z0zonKbHMNgWxU2v6OhabUIPgybujadcleXp0/+M6WMom5HwobhIYZyDcWmAwpyuNf29MauVeM4QBpL3ZfO7j28Ab5M9fWCYgo4j21wabd7y6bp7hE2Pe5VcDZ6B0sQyjUBY8E5hTrzDLfpHi1m1jJZk6jeQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oDw0tsx8K+Btrx73PfUj0hSlKS3l8KQdV8eUXMyigKI=;
- b=W+fS8DdcQSCTo/5BmenYy0rQU5K97rs+ROtvRv98nYYygAhMYh0OY5CVuDANHDRHwAhst/CUBcR45+blr2gUzJ47z7Si3q8LCiV82b0OK2BaAaOdns5JgWlNvjvbOir68Ad+Yor1HO7ANQyz56NKhA5FMocbntUosNftJLvtyH6sbHmfxsBYyoUL7i6qh4ZfbHeOjvBUv+4K7Qv7zdU82qy4XfOiYndrNRsTupujV/Gf/oX1UmzvacoAR9td6taBNEfnyYUAN1GHHU6M1FikI5Am/nRZwcp6tTX/vc9EQnElKy5tESAjc22wJ1qD22ABYRF9O/73trxKe3J1d3RWtQ==
+ bh=eZVOUHJDqLF+mTpugRsqjottmEwzyYxavVvEC3suiFs=;
+ b=FhMmCXgUmnEitLKWiF3l0KIVE9JKyTQDBh0HypmMu7AsZTrdk1/Z8IocUI2SDXAw7tD1b++km5JGIUm4iSWmqkvv2hhlgXbkZfdfe11nR1mHxxGvuytbb3kakTPYKCWSUmR2AAi54i+bcpJ/SxmUhXk23AiGPBq7Max9qoj7WPyWCgZwxosc+J08MJxNXIbN+6dT7DMLxoL+J5r942kuxjm5LPx0IG2FM1fR4s4o6MMZO0LuMUnJbdtCNJ8eaqy2ln24bnqx1Y1KqBsjAJTqOHYXlPOn6QlCt/ez7spE7hp+tIrpZMJLXzZFf2tm87pK7zadlhYVa586mq/vC0PBsQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=oDw0tsx8K+Btrx73PfUj0hSlKS3l8KQdV8eUXMyigKI=;
- b=V8vkEPvz8GG74muNsRSiRWIPrER4wWy1A+eXFXKyiCImFTGxBllUK5o5OcFtnFCjpCiftrjpY6v9Q6nqbh0jcbFa6/KigeCuVq5nWPqdmc52QQ2+ifWme8bMTe3zfeZtZOIXq48Cd2eiCMV/9hdgIfMMnsNFcgdHeUun0svAopg=
+ bh=eZVOUHJDqLF+mTpugRsqjottmEwzyYxavVvEC3suiFs=;
+ b=PnLXnPI6S/VFg/92azyMcnszpwbqm7t7cFI89fgG9Jv6uuMCtNVoxSvo1vC7GUeTPS7GeiAa+9AsNRVoDm9O+PSUHYJpdfYZAoSn3ou5lZ/qHXhocUNKw+lE/Q3Y7CObun/82EMkzbcL4dVTVyRKdWxA9EtfDy5XOlFPPQAFx9A=
 Authentication-Results: linaro.org; dkim=none (message not signed)
  header.d=none;linaro.org; dmarc=none action=none header.from=nxp.com;
 Received: from DB6PR0402MB2760.eurprd04.prod.outlook.com (2603:10a6:4:a1::14)
  by DB8PR04MB6858.eurprd04.prod.outlook.com (2603:10a6:10:113::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3763.10; Thu, 21 Jan
- 2021 03:20:35 +0000
+ 2021 03:20:29 +0000
 Received: from DB6PR0402MB2760.eurprd04.prod.outlook.com
  ([fe80::c964:9:850a:fc5]) by DB6PR0402MB2760.eurprd04.prod.outlook.com
  ([fe80::c964:9:850a:fc5%10]) with mapi id 15.20.3763.016; Thu, 21 Jan 2021
- 03:20:35 +0000
+ 03:20:29 +0000
 From:   peng.fan@nxp.com
 To:     ulf.hansson@linaro.org, robh+dt@kernel.org, shawnguo@kernel.org,
         adrian.hunter@intel.com
@@ -53,9 +53,9 @@ Cc:     s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
         linux-imx@nxp.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org, Peng Fan <peng.fan@nxp.com>
-Subject: [PATCH V2 4/4] mmc: sdhci-esdhc-imx: validate pinctrl before use it
-Date:   Thu, 21 Jan 2021 11:09:53 +0800
-Message-Id: <1611198593-16287-5-git-send-email-peng.fan@nxp.com>
+Subject: [PATCH V2 3/4] arm64: dts: imx8qxp: correct usdhc clock-names sequence
+Date:   Thu, 21 Jan 2021 11:09:52 +0800
+Message-Id: <1611198593-16287-4-git-send-email-peng.fan@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1611198593-16287-1-git-send-email-peng.fan@nxp.com>
 References: <1611198593-16287-1-git-send-email-peng.fan@nxp.com>
@@ -65,46 +65,46 @@ X-ClientProxiedBy: SGXP274CA0005.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b8::17)
  To DB6PR0402MB2760.eurprd04.prod.outlook.com (2603:10a6:4:a1::14)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from localhost.localdomain (119.31.174.66) by SGXP274CA0005.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b8::17) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3784.12 via Frontend Transport; Thu, 21 Jan 2021 03:20:30 +0000
+Received: from localhost.localdomain (119.31.174.66) by SGXP274CA0005.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b8::17) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3784.12 via Frontend Transport; Thu, 21 Jan 2021 03:20:25 +0000
 X-MS-PublicTrafficType: Email
 X-MS-Office365-Filtering-HT: Tenant
-X-MS-Office365-Filtering-Correlation-Id: b4d6dddf-ff62-4493-c9df-08d8bdbb83cc
+X-MS-Office365-Filtering-Correlation-Id: 77201304-2969-400b-eceb-08d8bdbb80df
 X-MS-TrafficTypeDiagnostic: DB8PR04MB6858:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <DB8PR04MB68588501E070B82A0477D43088A10@DB8PR04MB6858.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:546;
+X-Microsoft-Antispam-PRVS: <DB8PR04MB6858C15D44641D8CFCEE5C3188A10@DB8PR04MB6858.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:1013;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: IcIo75BtfSJdJHl3ZbzNSWx9HD6q4+WYbaRq73LpfNFWiNgUvhyXDs+V92zUkPgECKgCdwmsbKFa7A6wpnk4QdfUpgFoNbp8fVwQfioDEfH4SHYECC+23q3o/F+xguxxonxrbLrzDQUZPnPF44oxcUKNGn1edqQNUDWnTmu3z1yn3r4qDsv3hql0PMdicWZberHKNTWWC6JtZPdig8xljPt7ZatGjWHIjmY2YehMn4PapBUZ5GVVAThHKbogeNDtBezXl3+cIXJHseqtd57TSY9blL5bGPb/vR2AuqY4BfKjFkNhScAmPvfP9KMOC1njl0dZwcorrYWZovGMdc8LtCode4efiqBdhBsHlHtO5G3S0JMWDFTHYCe7de3gdO3i+ODaqw2lhwLH27DFns4S8kgfZFbaMvdngKw5iEKplC+wP/RWqSPf/YXXmPr16KxZj6Q34fHY2xjgXOd6t2T1dg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0402MB2760.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(346002)(136003)(376002)(396003)(366004)(86362001)(36756003)(6486002)(8936002)(186003)(16526019)(6666004)(66476007)(7416002)(316002)(6512007)(8676002)(5660300002)(66556008)(52116002)(83380400001)(478600001)(66946007)(2906002)(4326008)(6506007)(26005)(956004)(9686003)(2616005)(69590400011);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?l4b3DZ41rF9ykMKyt/sTdY7i55gd9n8UjkEb/AMb8WSTz8jz0inV1c0kxNao?=
- =?us-ascii?Q?oioMFVfxjHiLdkDGzs6n+fwmSIv9wfjOKur7wmcla+asg4ypb+KdVj8GP7QW?=
- =?us-ascii?Q?vby9YNC9KC1Iw7jhNP9kGGzgks80GpNv1wHXmbS+9o53sGBuiERpokZmKieL?=
- =?us-ascii?Q?4wTquLtiFSRcgsi08u+ftv3tPfzsf60K8X1B0WReKOfiZ7+a25KYtU0fjfsR?=
- =?us-ascii?Q?otolv9Ee6tXDdPokbGEKBrumbax9awvWGhxIc4nS400iPC4y20Zmy4TlElnk?=
- =?us-ascii?Q?cdIYK8XQJ6SeUjkqMjc5sQ+zZNtgtegAhPze952BX9yotdI5e8R7rmHyRr9y?=
- =?us-ascii?Q?LL5ixDuYWddt76ORP/hszZKMkyoGz3WIAvZgl3tbF9YZMs4ZNekfrzN+QKSr?=
- =?us-ascii?Q?UKwzOzr0lnUCZSkGiKcVnmSKZ3Mf/Ti3fCP2Z7VFMKRv8+yD9altTi6f/qHB?=
- =?us-ascii?Q?+G1yuPGcXX+jU1cFcnwY1N+1Q8XJOzI4DU3nBorIBuAQEwwba4yYCzGxSq1a?=
- =?us-ascii?Q?ee4BJNx9xZOBAieaOAjUPFc7Ms9USabsUaICCaN9b2CrmRReGXdtiykJoaZW?=
- =?us-ascii?Q?7TNoTalZIbBmj6Y+QS36DWIrzsB47bOJ0pXdi5607r5koSaQvr5zzfWGfyUW?=
- =?us-ascii?Q?A08ioA7jntv8bLCQxEmk+Ut65SggAhr2M4XBN+Zfr4GkUm5b+SSmmaU+9xH2?=
- =?us-ascii?Q?pf3d2T9QJrRL84l4wOwa6Nd/cXUPK1F47a32WW2ghVcuaeDeKOYIx9V4odxJ?=
- =?us-ascii?Q?YKqP2XPWt9fVNqMw3NzkLnbymIRtLpnW88B+XpE3Rz+6UrF7YqFy8Y5hRFVf?=
- =?us-ascii?Q?Xdliv8LU1H0LhyeuZVyRTx40nl5Ef/9jibBd7VvtGcAsF6fmZWfFSuAuFax1?=
- =?us-ascii?Q?IRw6HQys6+5D6HTkjlQ51mSaC9KQGd4mTbNVPBRk3IYImfHAQpWNnynjxzkf?=
- =?us-ascii?Q?waQW28hhLQISkD+TqpcCDpl1clKZSwiPKdYOa2L072aP0ch5ewF7+pqilIS4?=
- =?us-ascii?Q?yF6k?=
+X-Microsoft-Antispam-Message-Info: J1fVEbKGoctQ7Ue5ZZokIRyJNjR5U4SEV9SJlkOJ1nyv/eM+DEZhknRFeHrR2XJnyUD4ydcd00a0dI7TVO8nksPLxhG17F9MZ0r0jYHGzEFKoIk8BUnbMc8cAcHtJR1jdLjbeCqQF+aVPkCyroVw9vPcXqv5KsNpiaDbRob+n8v7knIHSUoWoOhKJSCu1rxrj4/y6F76W4nf1oThypJzioMIHtapgzIBl8gA4WdC0ruk48aerXQrugi1/8EsF5Sbeu++Jv70BZ0Oeg3eNOHRs9mA1anGZXiQ9IQkkqAEqnE0fMFJbtzR01R/dNJGigzaZqStSG9LkkzCkDZ5yyPuYEo6fDK/VphVtLkvH7YVKM006UvBy2qsQ5iVUOwsWQl3k3r5TvL/nkv4kjPyBlEboFMl/5yJXC8BO3TOhPfSidX6VGrTVN9j+SpScSd/IK+kzSjmDR2zin7qXjCEkS3kG6TaTFuFLnTO5mcbmZx7HMg=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0402MB2760.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(346002)(136003)(376002)(396003)(366004)(86362001)(36756003)(6486002)(8936002)(186003)(16526019)(6666004)(66476007)(7416002)(316002)(6512007)(8676002)(5660300002)(66556008)(52116002)(83380400001)(478600001)(66946007)(2906002)(4326008)(6506007)(26005)(956004)(9686003)(2616005)(69590400011)(32563001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?rN8dcUIsvHoS2OteaLZRHskzAfJUttcqX8lT6hbyj5tJlIsKbfWQdoiMhViW?=
+ =?us-ascii?Q?DfP5VBO/rYvGq6h50y+J1eDgD13z3AY88cl8VdZpVLPOWvonWTIBJZdyP42q?=
+ =?us-ascii?Q?OLOqE7esx0J9LWzu56CP0Y+4BXwdDfDMy4UvhIxHzOz0vewfL/cjSV8cNqRZ?=
+ =?us-ascii?Q?8cSOcZ+ZCXikeG5JlaGujTsPixC0RgANLo3BaZufeXibHKHI22LG5gVfYA28?=
+ =?us-ascii?Q?FrOomd/0V7MTSa1Td+iOva6lXczwG6QtXw6wFlT9ppQEKHaVbCoK6ZJiHAop?=
+ =?us-ascii?Q?w2W6bdlUB7oyW3LsBs2Fr1wkmVQ8P3q9dLa0OsM+DrzgMUAnDSOv1Eup5tiJ?=
+ =?us-ascii?Q?0KB1m7uuYeg7ma/MMeMk7iDp2mYI4o1lqHByNBdFQ4LTn64RtSchYoIbxK8f?=
+ =?us-ascii?Q?yTSWuiWEIRCx9wh62jQGXuWJbtAyLXza6p5XSJsyW+Fohpz26SP1y6xu4R5m?=
+ =?us-ascii?Q?TxwX3bOq2g+NSueifyDrZQOkrvCDLn/A5t37g56PSId9rpx8snIvS7MwXVIm?=
+ =?us-ascii?Q?ZTW0k3APUnIvo8fpVWhgzHKlupG1wLvvjD/PR2bxVbKImChjkx2xhQHRsGc9?=
+ =?us-ascii?Q?83cwciZDW8GJXtElxMjEDRq3dmLLhBaKJ2npzLLMT1dkW94h96Q0Rdbmw5Uw?=
+ =?us-ascii?Q?3xXvU/BQvUHVgR0TxDiH4bRtBAmcPtpeIswU20Bhej12bZAnOy0GYx5qutw+?=
+ =?us-ascii?Q?0BY58G1ZwBIp6Kx4nvMmje/C4QqYl1XIADTkqX7ED2/mlj/6S+Cu2EsI6iYk?=
+ =?us-ascii?Q?Zcpwvx5fFwvKJKp7OawtDXaX/UmLsoeCVWsQ8JKY6cR4MdtQZJtJ/B/ms4zY?=
+ =?us-ascii?Q?wCzWuRd90C4pnesEksqkXqCwuVKN7JTtHDmdxPKqQqyaMKOhZHnd2aYOUlXJ?=
+ =?us-ascii?Q?sfCQA9X5/fG8RSBA6KCzRd5Jigt5vQhe+sMLoksI7HZYTZbURQikHQon3wvd?=
+ =?us-ascii?Q?SIQmwuzCWD8FKWcy0AIiXh18fC+6HJ3u/DvRDm2dJwRlwmp7vwh+9eNsrRGc?=
+ =?us-ascii?Q?OjY2?=
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b4d6dddf-ff62-4493-c9df-08d8bdbb83cc
+X-MS-Exchange-CrossTenant-Network-Message-Id: 77201304-2969-400b-eceb-08d8bdbb80df
 X-MS-Exchange-CrossTenant-AuthSource: DB6PR0402MB2760.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Jan 2021 03:20:35.1720
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Jan 2021 03:20:29.5566
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: MjmlC6LuNPOBhYB5quPsCAwX/LLJQ4yda4cL0rhRQQbBMrTAc0gdwRfZkiaZ8/UMv+AlW71C52XNPcwvyGzZ+A==
+X-MS-Exchange-CrossTenant-UserPrincipalName: r8p3+vpNPtYKdr7L9+eOdSLV9RNX//L2Me38C6V4JjOFUa6pt9c4RHr9qEyazc9FWZsE7SdTgZ5XLRvF+44AFA==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB8PR04MB6858
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -112,35 +112,57 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Peng Fan <peng.fan@nxp.com>
 
-When imx_data->pinctrl is not a valid pointer, pinctrl_lookup_state
-will trigger kernel panic.
+Per dt-bindings, the clock-names sequence should be ipg ahb per to pass
+dtbs_check.
 
-When we boot Dual OS on Jailhouse hypervisor, we let the 1st Linux to
-configure pinmux ready for the 2nd OS, so the 2nd OS not have pinctrl
-settings.
-
-Similar to this commit b62eee9f804e ("mmc: sdhci-esdhc-imx: no fail when no pinctrl available").
-
-Reviewed-by: Bough Chen <haobo.chen@nxp.com>
-Reviewed-by: Alice Guo <alice.guo@nxp.com>
 Signed-off-by: Peng Fan <peng.fan@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm64/boot/dts/freescale/imx8qxp.dtsi | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 16ed19f47939..11d3a2244b36 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1488,7 +1488,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 
- 	mmc_of_parse_voltage(np, &host->ocr_mask);
- 
--	if (esdhc_is_usdhc(imx_data)) {
-+	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
- 		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
- 						ESDHC_PINCTRL_STATE_100MHZ);
- 		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
+diff --git a/arch/arm64/boot/dts/freescale/imx8qxp.dtsi b/arch/arm64/boot/dts/freescale/imx8qxp.dtsi
+index e46faac1fe71..1d522de7b017 100644
+--- a/arch/arm64/boot/dts/freescale/imx8qxp.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8qxp.dtsi
+@@ -366,9 +366,9 @@ usdhc1: mmc@5b010000 {
+ 			interrupts = <GIC_SPI 232 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg = <0x5b010000 0x10000>;
+ 			clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC0_IPG_CLK>,
+-				 <&conn_lpcg IMX_CONN_LPCG_SDHC0_PER_CLK>,
+-				 <&conn_lpcg IMX_CONN_LPCG_SDHC0_HCLK>;
+-			clock-names = "ipg", "per", "ahb";
++				 <&conn_lpcg IMX_CONN_LPCG_SDHC0_HCLK>,
++				 <&conn_lpcg IMX_CONN_LPCG_SDHC0_PER_CLK>;
++			clock-names = "ipg", "ahb", "per";
+ 			power-domains = <&pd IMX_SC_R_SDHC_0>;
+ 			status = "disabled";
+ 		};
+@@ -378,9 +378,9 @@ usdhc2: mmc@5b020000 {
+ 			interrupts = <GIC_SPI 233 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg = <0x5b020000 0x10000>;
+ 			clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC1_IPG_CLK>,
+-				 <&conn_lpcg IMX_CONN_LPCG_SDHC1_PER_CLK>,
+-				 <&conn_lpcg IMX_CONN_LPCG_SDHC1_HCLK>;
+-			clock-names = "ipg", "per", "ahb";
++				 <&conn_lpcg IMX_CONN_LPCG_SDHC1_HCLK>,
++				 <&conn_lpcg IMX_CONN_LPCG_SDHC1_PER_CLK>;
++			clock-names = "ipg", "ahb", "per";
+ 			power-domains = <&pd IMX_SC_R_SDHC_1>;
+ 			fsl,tuning-start-tap = <20>;
+ 			fsl,tuning-step= <2>;
+@@ -392,9 +392,9 @@ usdhc3: mmc@5b030000 {
+ 			interrupts = <GIC_SPI 234 IRQ_TYPE_LEVEL_HIGH>;
+ 			reg = <0x5b030000 0x10000>;
+ 			clocks = <&conn_lpcg IMX_CONN_LPCG_SDHC2_IPG_CLK>,
+-				 <&conn_lpcg IMX_CONN_LPCG_SDHC2_PER_CLK>,
+-				 <&conn_lpcg IMX_CONN_LPCG_SDHC2_HCLK>;
+-			clock-names = "ipg", "per", "ahb";
++				 <&conn_lpcg IMX_CONN_LPCG_SDHC2_HCLK>,
++				 <&conn_lpcg IMX_CONN_LPCG_SDHC2_PER_CLK>;
++			clock-names = "ipg", "ahb", "per";
+ 			power-domains = <&pd IMX_SC_R_SDHC_2>;
+ 			status = "disabled";
+ 		};
 -- 
 2.28.0
 
