@@ -2,86 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3687BC433DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 03:37:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89C57C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 07:37:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E192A23888
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 03:37:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5386B230F9
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 07:37:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726199AbhAVDhT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jan 2021 22:37:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53026 "EHLO
+        id S1726810AbhAVHh4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jan 2021 02:37:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47918 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726160AbhAVDhR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2021 22:37:17 -0500
-Received: from merlin.infradead.org (merlin.infradead.org [IPv6:2001:8b0:10b:1231::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C8ABC06174A;
-        Thu, 21 Jan 2021 19:36:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=merlin.20170209; h=Content-Transfer-Encoding:Content-Type:
-        In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:Subject:Sender
-        :Reply-To:Content-ID:Content-Description;
-        bh=M3pOp5kptZ6YgzfG0S1o6cFzqzbA+kUwayqUm25hHcM=; b=LvfVrjVA/4jzbyfI6AIhmS7+di
-        aMB4ehdbvNADYyYINdG1nIbN8D8R5RIP2mIJhBgCEPa3B33AqGUIHDvX1WjwhprtQFKtdGZLmAhJp
-        JTGUsZCgdWt+MVJ3UhpUahOJrIxZXM3d190SGF5Q7ORdrpbXMKCmABvLa+YnsrYzm3oMD3ejpbJIP
-        12y83YrPLjX+YGZc0ZSXykJyHVD9pQLy0NMy8cOxosLO1D5MyCAjebN7Ma1EZjU86hu9+7XSFv06x
-        5CkPaS4Kxe+isBaELueIr8pvwvSPpMjx3hJarXCauM6wcT4ddhgBRnbZ+CK1oJ8sUtrfEID9CnjG9
-        9Ivb9mZg==;
-Received: from [2601:1c0:6280:3f0::9abc]
-        by merlin.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1l2nFQ-00041g-Rz; Fri, 22 Jan 2021 03:36:33 +0000
-Subject: Re: [PATCH] mmc: sdhci-of-aspeed: Fix kunit-related build error
-To:     Andrew Jeffery <andrew@aj.id.au>, linux-mmc@vger.kernel.org
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au,
-        linux-aspeed@lists.ozlabs.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        brendanhiggins@google.com
-References: <20210122032334.3663056-1-andrew@aj.id.au>
-From:   Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <fd80b74e-c6a0-9b84-1370-db0c0814dca6@infradead.org>
-Date:   Thu, 21 Jan 2021 19:36:25 -0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.4.0
+        with ESMTP id S1727031AbhAVHhx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 02:37:53 -0500
+Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16DFCC061788
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Jan 2021 23:37:12 -0800 (PST)
+Received: by mail-pf1-x42b.google.com with SMTP id w18so3164622pfu.9
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Jan 2021 23:37:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cloud.ionos.com; s=google;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=xnObBx7qCVcq4Xmng0HzOiOYW//hrsobDgYRbXW2qoA=;
+        b=dfhsrZgi1qJDI2m/ilO0UZ7ihv26w0btzlf1zmTicpi6ZJPqGMSAzlb7G4wGiF0FW3
+         Gijmj6YCtu3PwTEsxPDNKVLwzNJfoZ+kzsARJbaXfKhjIPk0hIdEI6k7+iABd3J0Ge6o
+         E21BaI1DVfxYzhQmtffSyiTWTX0ggTKcY1OLoksddvORRrvfQMQGbsphmp1xU/IKzC+G
+         sD/zie7QvCQK1vih68EwWOxT3P4AOnndd/VBNtbw7iZsbzo+OPZQFBdc76x6uF8HLA4t
+         egiWvXKCvt0EJ4zf4Nru3997s4IFCMrrcBcXNTQ8OpxxqBRXA3kIBOHmAEsIKhM9WxEA
+         fFbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=xnObBx7qCVcq4Xmng0HzOiOYW//hrsobDgYRbXW2qoA=;
+        b=dnvr99arQc/doouPXnzE6ALtQaA71hhKrdP2DEZDb9LQDtUPi4833Fw6D5IT/y8qK/
+         GwPstNw26XkjWRSgKxtZCrgXe7aUhuHoxOFOKa/HrBxjChkB9L2H06UCG+ZGJhLJsLwc
+         AK532rr1xaf4uZpTRsEiApwp2JeusPxZtX2jsXESMIF60+tu/sIahe4ZbWO0hTT9ImMU
+         9JpjIaZeIWKWjhr0zzYMzipwv7DMGV19BQ3/RVIBR6Yp3X0SNC2N80+Qblx4SF07ytuh
+         QDvVjMW6mjUZEC6MjzVD53N35mu2XLHBQAFw0zKX5k5qjVNrmnfUT4z2kZj5SR/1LAlE
+         sqNA==
+X-Gm-Message-State: AOAM530rqqtT/BclRcG8/l32zXMx/E5I5El/HEg/UQPnFk3rnBIVYlx6
+        NQfxKqb7+Qf/yTkRuR3eucf5DhiZXDWF3fRt
+X-Google-Smtp-Source: ABdhPJwPLaEjEPKwC34UrAC2gsulKg3s4j7+J97bZTNNIKaoZ/lJu48wNw2Iwm4BkDrJnbbca6y71A==
+X-Received: by 2002:a63:1f18:: with SMTP id f24mr3506723pgf.133.1611301030526;
+        Thu, 21 Jan 2021 23:37:10 -0800 (PST)
+Received: from [10.8.0.116] ([196.245.9.36])
+        by smtp.gmail.com with ESMTPSA id fh7sm7835085pjb.43.2021.01.21.23.37.01
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 21 Jan 2021 23:37:09 -0800 (PST)
+Subject: Re: [PATCH 1/2] block: remove unnecessary argument from
+ blk_execute_rq_nowait
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     axboe@kernel.dk, linux-block@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-scsi@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-nfs@vger.kernel.org
+References: <20210121142905.13089-1-guoqing.jiang@cloud.ionos.com>
+ <20210121142905.13089-2-guoqing.jiang@cloud.ionos.com>
+ <20210121170257.GA4120717@infradead.org>
+From:   Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+Message-ID: <b87591b9-e598-6436-d41f-80cc56640549@cloud.ionos.com>
+Date:   Fri, 22 Jan 2021 08:36:45 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20210122032334.3663056-1-andrew@aj.id.au>
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <20210121170257.GA4120717@infradead.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/21/21 7:23 PM, Andrew Jeffery wrote:
-> Randy found that with the following Kconfig settings we have duplicate
-> definitions (e.g. __inittest()) in sdhci-of-aspeed due to competing
-> module_init()/module_exit() calls from kunit and driver the itself.
+
+
+On 1/21/21 18:02, Christoph Hellwig wrote:
+> On Thu, Jan 21, 2021 at 03:29:04PM +0100, Guoqing Jiang wrote:
+>> The 'q' is not used since commit a1ce35fa4985 ("block: remove dead
+>> elevator code"), also update the comment of the function.
 > 
-> ```
-> CONFIG_MMC_SDHCI_OF_ASPEED=m
-> CONFIG_MMC_SDHCI_OF_ASPEED_TEST=y
-> ```
-> 
-> Conditionally open-code the kunit initialisation to avoid the error.
-> 
-> Fixes: 7efa02a981d6 ("mmc: sdhci-of-aspeed: Add KUnit tests for phase calculations")
-> Reported-by: Randy Dunlap <rdunlap@infradead.org>
-> Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+> And more importantly it never really was needed to start with given
+> that we can triviall derive it from struct request.
 
-Acked-by: Randy Dunlap <rdunlap@infradead.org> # build-tested
+Thanks Christoph, will add the above to header and send new version.
 
-Thanks.
-
-> ---
->  drivers/mmc/host/sdhci-of-aspeed-test.c |  9 ++++++++-
->  drivers/mmc/host/sdhci-of-aspeed.c      | 27 ++++++++++++++++++++-----
->  2 files changed, 30 insertions(+), 6 deletions(-)
-
-
--- 
-~Randy
-RFC: Features and documentation: http://lwn.net/Articles/260136/
+Guoqing
