@@ -2,105 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4AFAC433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:00:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02703C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:14:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 94BBE235E4
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:00:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B94EA238EE
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:14:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727244AbhAVKAk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Jan 2021 05:00:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50458 "EHLO
+        id S1726671AbhAVJte (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jan 2021 04:49:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47612 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727763AbhAVKAR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 05:00:17 -0500
-Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1953C061797
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:50:56 -0800 (PST)
-Received: by mail-vs1-xe2f.google.com with SMTP id 187so2687752vsg.4
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:50:56 -0800 (PST)
+        with ESMTP id S1727325AbhAVJqt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 04:46:49 -0500
+Received: from mail-vk1-xa33.google.com (mail-vk1-xa33.google.com [IPv6:2607:f8b0:4864:20::a33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F334C0617A7
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:45:40 -0800 (PST)
+Received: by mail-vk1-xa33.google.com with SMTP id k9so1206873vke.4
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:45:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=HqmXNnhOvww/se+uqGpbG2r6Wj6LjG3RtqIoCGkH17k=;
-        b=Bqt3b8b7kp2zQsjWv07hRffU5ZdsKDvLLb7CTBAQdsqsw2qRHDDv257TenVn8PQ0eh
-         7Faa1tfN668wJ7fnNrENLH7AoZ+Yz7eIgCNhVFIajtS786Ovqkv97Wr+V6k7E2k62MxY
-         +zFfZILJZPCMb2mgb5PIp7UG3mhyPOfuQoIscUoL7KcMmyArbnUdaC0O1T1v40yAIWCH
-         kb3Y/uHtCaFYyztgZ4c9IexZUktiJQ8TjmoyT1uO1aGHIVI3c5zzudaDyrdeK9RYpTX9
-         cIrmQQoHomR+23NhDIIBOqW/csi0rItWAjz9B7IdKkogQi35H0szd9iVKvGtnr3lgOid
-         vpug==
+        bh=wvHhaTPdznpDywUc/uYNd5dQxldk3088mJzvH+35Vbg=;
+        b=TDs126xEQJD1ti8VqWb0+VqNx/qwF6Y8zwl+j7PLiLc6mf7oovLlt1p8RFh+lAQbvy
+         ijAuFHwBj021707lZGfQ6vyJ2G5f6L6VpvUpZ0brnUhfYtnizZ2ao/ZRyqejzo9SOu4W
+         hxceFYmGWpMkkDq7fmarku07kdNN8JHa2JfRpWwC0tjx5QKYzFgaYm98UMnEvmxsDp1z
+         HTMspjQjREDEmSzsxMW5isx9W5DY1DZE3y6TKe1hmVo2webk4rw/9xeySiotGM2stjls
+         GKqlwSyov0o2EcYRwDNwxhClYqTRgvQDoiCx2gbnHzNTVrFxLHUE66gB6gBgEUV8IrB0
+         H4fw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=HqmXNnhOvww/se+uqGpbG2r6Wj6LjG3RtqIoCGkH17k=;
-        b=W0UmvCWbRRh4KfrpGc62R57keTSdCHqHHsHEfY0hPv/yQzQd+FmnKnRz63KnibSSsJ
-         k4VoSFGP/UKfGtpbU53L7gQS5pmkdizV3ejbEPqY4aPQWZUZVi2s7PRCmeEZTYTJNKOA
-         JsqUqH0TfrEPP8ZQiC89QJuqpA5KfE6Ua2dRszoWQChmMKy17WRui9DQEzKMXqNsW+8l
-         LQrT2U7n5TTx1OtS29fv+RRGelfJBScTCZ2FqTiDIh+QhV7rwyF7csfZsIEKp4BA/bFn
-         sN5Vap67Su7hIfRcofE5hFcreKBggHUAXLzP05ezsl93KOOZAK6mDi8IsZ0Mea2IXqq3
-         UwLA==
-X-Gm-Message-State: AOAM531ZOpSTDWp0ZxM0eVTELNrQtcYZqc9tBON+2CERKEM+g3BjP+nd
-        RZ/8u6MHLC9i0C70BaAn850+29WYKpBFKaPrR0ZCbQ==
-X-Google-Smtp-Source: ABdhPJzQkvbtXPAnaOXaJNiT2RO7BkT9eaJIQxnmfKyCTkaPtmRekmQxRuUvkDQuHQpmYuEkgvFe4kOJ3FrZfm16N6Y=
-X-Received: by 2002:a67:f997:: with SMTP id b23mr235525vsq.34.1611309056136;
- Fri, 22 Jan 2021 01:50:56 -0800 (PST)
+        bh=wvHhaTPdznpDywUc/uYNd5dQxldk3088mJzvH+35Vbg=;
+        b=kHdrwhl/ERDWdQ016nEhmk7MgOWzHZx68/cWz9jEf+QkFy0UakWq0L6VSo89CMrruN
+         MIrmHyyV9BhPFA57mnAP766imWuP1UD46LTmHNLB1HdOPB0eAcN5iweX8ZSz/YsfuGJH
+         wUqLK+M6wtL25X/rVuvU9CuZevR2sJb5PkoJzmNpVmU90Uj4epotNMel3exdo7nXWoI+
+         wSeNWWX2x6NHMl665xmCNZd9h/k8NAEPvQ6BK607JoEIiDI2Qos/k0J9IGGTak+SjDwJ
+         byRbKJB1tVIdnyL8lQ7A6HZDmI9IoO2uDnXrnrGS6JVCZ1p8q2wobLkKpPIiZ4pagw7/
+         mgvg==
+X-Gm-Message-State: AOAM533X0KKh+6XYMzORe3pxQ5vMDNNv22roQvZ09PK5zE4JGAn23QHn
+        kyqAzuAL10Hstf2t7pkuwRqmoC6atN9ya3s7e3I+eQ==
+X-Google-Smtp-Source: ABdhPJxFInzjt2t5iWXw+hGyhslaf/WF/hZSmKFuEeyY+Xur4Qh4zP1WtRcrELumIEDLg5G+gprwzRd6e+FBoI2Nutc=
+X-Received: by 2002:a1f:aecb:: with SMTP id x194mr2282842vke.6.1611308739834;
+ Fri, 22 Jan 2021 01:45:39 -0800 (PST)
 MIME-Version: 1.0
-References: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com> <20210122092824.20971-3-guoqing.jiang@cloud.ionos.com>
-In-Reply-To: <20210122092824.20971-3-guoqing.jiang@cloud.ionos.com>
+References: <20210120142801.334550-1-arnd@kernel.org>
+In-Reply-To: <20210120142801.334550-1-arnd@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 22 Jan 2021 10:50:20 +0100
-Message-ID: <CAPDyKFoPL4drfh3efKXyhXLp6Ce+j=oHwNd9VnVP4aaKQ0zmDQ@mail.gmail.com>
-Subject: Re: [PATCH V2 2/2] block: remove unnecessary argument from blk_execute_rq
-To:     Guoqing Jiang <guoqing.jiang@cloud.ionos.com>,
-        Jens Axboe <axboe@kernel.dk>
-Cc:     Christoph Hellwig <hch@infradead.org>, linux-nfs@vger.kernel.org,
-        linux-scsi <linux-scsi@vger.kernel.org>,
+Date:   Fri, 22 Jan 2021 10:45:03 +0100
+Message-ID: <CAPDyKFq+R44LCE0OshYL39aoPPcYv4-iXudKDGZ3Q=wwL+0u8A@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc: remove obsolete drivers
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-nvme@lists.infradead.org,
-        virtualization@lists.linux-foundation.org,
-        linux-block <linux-block@vger.kernel.org>,
-        linux-ide@vger.kernel.org, target-devel@vger.kernel.org
+        Arnd Bergmann <arnd@arndb.de>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 22 Jan 2021 at 10:28, Guoqing Jiang
-<guoqing.jiang@cloud.ionos.com> wrote:
+On Wed, 20 Jan 2021 at 15:28, Arnd Bergmann <arnd@kernel.org> wrote:
 >
-> We can remove 'q' from blk_execute_rq as well after the previous change
-> in blk_execute_rq_nowait.
+> From: Arnd Bergmann <arnd@arndb.de>
 >
-> And more importantly it never really was needed to start with given
-> that we can trivial derive it from struct request.
+> A few Arm platforms are getting removed in v5.12, this removes
+> the corresponding mmc drivers.
 >
-> Cc: linux-scsi@vger.kernel.org
-> Cc: virtualization@lists.linux-foundation.org
-> Cc: linux-ide@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-nvme@lists.infradead.org
-> Cc: linux-nfs@vger.kernel.org
-> Signed-off-by: Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+> Link: https://lore.kernel.org/linux-arm-kernel/20210120124812.2800027-1-arnd@kernel.org/T/
+>
+>
+> Arnd Bergmann (2):
+>   mmc: remove dw_mmc-zx driver
+>   mmc: remove sirf prima/atlas driver
+>
+>  .../devicetree/bindings/mmc/sdhci-sirf.txt    |  18 --
+>  .../devicetree/bindings/mmc/zx-dw-mshc.txt    |  31 ---
+>  drivers/mmc/host/Kconfig                      |  21 --
+>  drivers/mmc/host/Makefile                     |   2 -
+>  drivers/mmc/host/dw_mmc-zx.c                  | 234 -----------------
+>  drivers/mmc/host/dw_mmc-zx.h                  |  32 ---
+>  drivers/mmc/host/sdhci-sirf.c                 | 235 ------------------
+>  7 files changed, 573 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sirf.txt
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
+>  delete mode 100644 drivers/mmc/host/dw_mmc-zx.c
+>  delete mode 100644 drivers/mmc/host/dw_mmc-zx.h
+>  delete mode 100644 drivers/mmc/host/sdhci-sirf.c
 
-[...]
-
->  drivers/mmc/core/block.c          | 10 +++++-----
-
-[...]
-
-From mmc point of view, please add:
-
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-
-At the moment I don't think this will conflict with any changes to
-mmc, but if that happens let's sort it then...
+Applied for next, thanks!
 
 Kind regards
 Uffe
