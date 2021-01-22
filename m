@@ -2,193 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 019FAC433DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 11:50:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9B25C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 12:01:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B184D235F9
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 11:50:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F1A423A03
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 12:01:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726664AbhAVLuY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Jan 2021 06:50:24 -0500
-Received: from out2-smtp.messagingengine.com ([66.111.4.26]:59773 "EHLO
-        out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727744AbhAVLuQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 06:50:16 -0500
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.nyi.internal (Postfix) with ESMTP id CC1C55C0136;
-        Fri, 22 Jan 2021 06:49:05 -0500 (EST)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute4.internal (MEProxy); Fri, 22 Jan 2021 06:49:05 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=from
-        :to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=fm1; bh=Aur+84y6XjXo9NANGg4GxQPeSB
-        LTSsh+b06q0PumXRo=; b=B/ZwTxPhfBRlLmStrbjvZaaD7Mg6w4qzJ8bXbu65KU
-        3jMjIufM/Svx78Hrq3gvPtO3i1tTYYVrQiWcOiE3HYt4mknJbaTB1xrODEvGl8hm
-        2T/O0iFeuzI7MA8qNSUT6s6hZRlnKHwJUbC5nNWLlJD2zz8iTW+V9tbqxkYMS2WC
-        uJpVLCykxEbPaVo+0ia+S9vQzldlvC/LxKM6uMO/xntV9uPSnDv409y/LMBdixsy
-        G3jJkaqbPvUMI49gTUL8jikPH8+IGBlOHNgGbH72BJl18CiF7aDJPkhDuBVCxp38
-        KsI1iQkCUh3562uAHcxFVBV+/a7DKHNo9XVz95LCfETg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:date:from
-        :message-id:mime-version:subject:to:x-me-proxy:x-me-proxy
-        :x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=Aur+84y6XjXo9NANG
-        g4GxQPeSBLTSsh+b06q0PumXRo=; b=BTZwdDg5goBiKkL5JBhrbjTMzetVczF1G
-        TFmHprbqtWhp4v/Exo15rlz9xYnpAk7DpUk0yP2IuHqpdCziYtlFHsOjjjlWrZrD
-        7lOsJM/wzvoyoo2n1lBOD1nYzGeSrr1IvQu3XNq9bilYyrvBIVvyf/k2H/PnAYJ8
-        AlXV34P3q6/OjBEhnveifvq9TgZp8pTeRrV/Ty6N/AYp31PdGcLc1BWL28e6fxdX
-        ECQnDdNfm1bD6tlDPe7awZVSxr6GDh0ATR434iUkjyXD/2fvuqC7nWaUWqddFub+
-        B0AfmSSbXrGwEJVdt5AuITZumwc7EQwU2hUmrpqNLZCAqQyC6YNRg==
-X-ME-Sender: <xms:sLsKYFTsNfHLxZXowxy_4GKEGa9aUE2WehOfEdjs7mn5SKkcC96NJw>
-    <xme:sLsKYO6YSuYBcfBGfSarQgc34lQNvZs0UrR9fxILnGlKoKXYsE9X51RbE54wW7Apv
-    kTuqBjYKHcArSbrRg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrudeigdefjecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefhvffufffkofgggfestdekredtredttdenucfhrhhomheptehnughrvgifucfl
-    vghffhgvrhihuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrfgrthhtvghrnh
-    epkefhieffjeevfeevhedtieeihfefvdejledvvddthefftedujeethfeuueelfedtnecu
-    kfhppedvtdefrdehjedrvdduhedrvdefvdenucevlhhushhtvghrufhiiigvpedtnecurf
-    grrhgrmhepmhgrihhlfhhrohhmpegrnhgurhgvfiesrghjrdhiugdrrghu
-X-ME-Proxy: <xmx:sLsKYCz7Y-Cdu2hE8WcTCdq7xt_lCadrhHnN-HsDrfSyFKxQAIjJ1A>
-    <xmx:sLsKYFQ6-nXemAWFYWUKdKvQikIOTXTYoA-_u71_Xh7l5hWlMMkPwg>
-    <xmx:sLsKYJVbTBeCUNF5pb8XLNXYZaVxe_jGc8sgdhRkgRA5pZweczZROw>
-    <xmx:sbsKYLY2NGAXoGCXdsz3yIDGZCw3WO53noSAxjhKRuFMM7rq5J_vrA>
-Received: from localhost.localdomain (203-57-215-232.dyn.iinet.net.au [203.57.215.232])
-        by mail.messagingengine.com (Postfix) with ESMTPA id DEB9124005C;
-        Fri, 22 Jan 2021 06:49:00 -0500 (EST)
-From:   Andrew Jeffery <andrew@aj.id.au>
-To:     linux-mmc@vger.kernel.org
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au,
-        linux-aspeed@lists.ozlabs.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        brendanhiggins@google.com, Randy Dunlap <rdunlap@infradead.org>
-Subject: [PATCH v2] mmc: sdhci-of-aspeed: Fix kunit-related build error
-Date:   Fri, 22 Jan 2021 22:18:52 +1030
-Message-Id: <20210122114852.3790565-1-andrew@aj.id.au>
-X-Mailer: git-send-email 2.27.0
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        id S1726579AbhAVKzl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jan 2021 05:55:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43980 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727442AbhAVJaA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 04:30:00 -0500
+Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69309C061793
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:28:35 -0800 (PST)
+Received: by mail-ed1-x531.google.com with SMTP id c2so5500055edr.11
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:28:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=cloud.ionos.com; s=google;
+        h=from:to:cc:subject:date:message-id;
+        bh=e8zlznAImcFn6aUQKKQ/ezvduZl3NWTYoAtSuyukN7E=;
+        b=BRbFnfHDIs/smHNgoUrxYDsFF05nDbpo8aSX5PfzleHap763MuKQwDfK8u29Egxixj
+         LCg013vU1qCYwBh/SMZ8szaUPk+K5RJooP2EyszdG93GCzNP0+yTdjHxZgJ//gzygcOz
+         jArtPCqymk9K81zX3cm4IOjMeFbE06eym3lNUPhR4WZokG/h+vhIOlluYchjHAJe2/wv
+         ctoKg+wMd5of+A0178pvtkJUHW891tZo2G4b1lAcikc1QrB/V+fkdJXpi0rQp0EsOl4w
+         045fYov7QDjRjW6IQ2u5TVSfVF76TRDw+xRa7zVuj5ORUtWyC7ZzUfDYAr3l4ETfM5CW
+         A5pA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=e8zlznAImcFn6aUQKKQ/ezvduZl3NWTYoAtSuyukN7E=;
+        b=USZp4unMBPa2ZjNPCYzCp2V6JCwoOchVclIisustVRJn8uuVZx+rtHtvjCjZv9jSvf
+         1FLvNtXutE3q+iRBsZ2sGVTsfLFHlPcQ7IGdnj1y6pBThQhhtCS6VwLVDZPuxxCGU6RZ
+         Q/pSnV/4knf6E5fHkL5+K+3iHL8iwPJ7zTYKd6oAyaSCCLePVKTQa9EHKFsRYsdQatW8
+         rHequEfw4Hib5unCRczH8M5hMwyy/wMkwrH8lF2YN8AKyWY2WxnCkBBCVeSknuGvoUV7
+         7Ji2RTa91JECLBBj2geJ06UOp4CusazomO/SOXrD1TgzC1Cp888qFtGMyI2fERu19CPC
+         VWdg==
+X-Gm-Message-State: AOAM531DK7Eb0lpGfD+R0C/Y+X453IjteUSNBfXpD0cGUey//xbI/SVK
+        4GFHXATzGUqGwKSAINWTWPoMFA==
+X-Google-Smtp-Source: ABdhPJyMaoODmdy8RXoi2rfv+If9xXYUfirTcZFY48nRrUmzOPPhl1zUfZ7bEVx62nyqAu1KqG1gJA==
+X-Received: by 2002:a50:bacb:: with SMTP id x69mr2476714ede.39.1611307713947;
+        Fri, 22 Jan 2021 01:28:33 -0800 (PST)
+Received: from ls00508.pb.local ([2001:1438:4010:2540:481b:68e3:af3e:e933])
+        by smtp.gmail.com with ESMTPSA id g17sm4684508edb.39.2021.01.22.01.28.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 22 Jan 2021 01:28:33 -0800 (PST)
+From:   Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+To:     axboe@kernel.dk
+Cc:     linux-block@vger.kernel.org, target-devel@vger.kernel.org,
+        linux-scsi@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-nfs@vger.kernel.org,
+        hch@infradead.org, Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+Subject: [PATCH V2 0/2] remove unused argument from blk_execute_rq_nowait and blk_execute_rq
+Date:   Fri, 22 Jan 2021 10:28:22 +0100
+Message-Id: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Randy found that with the following Kconfig settings we have duplicate
-definitions (e.g. __inittest()) in sdhci-of-aspeed due to competing
-module_init()/module_exit() calls from kunit and driver the itself.
+V2 changes:
+1. update commit header per Christoph's comment.
 
-```
-CONFIG_MMC_SDHCI_OF_ASPEED=m
-CONFIG_MMC_SDHCI_OF_ASPEED_TEST=y
-```
+Hi Jens,
 
-Conditionally open-code the kunit initialisation to avoid the error.
+This series remove unused 'q' from blk_execute_rq_nowait and blk_execute_rq.
+Also update the comment for blk_execute_rq_nowait.
 
-Fixes: 7efa02a981d6 ("mmc: sdhci-of-aspeed: Add KUnit tests for phase calculations")
-Reported-by: Randy Dunlap <rdunlap@infradead.org>
-Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
----
+Thanks,
+Guoqing
 
-v2:
-* Collapse the #ifdef-ery
+Guoqing Jiang (2):
+  block: remove unnecessary argument from blk_execute_rq_nowait
+  block: remove unnecessary argument from blk_execute_rq
 
- drivers/mmc/host/sdhci-of-aspeed-test.c |  9 +++++-
- drivers/mmc/host/sdhci-of-aspeed.c      | 42 ++++++++++++++++++++++---
- 2 files changed, 45 insertions(+), 6 deletions(-)
+ block/blk-exec.c                   | 13 +++++--------
+ block/bsg.c                        |  2 +-
+ block/scsi_ioctl.c                 |  6 +++---
+ drivers/block/mtip32xx/mtip32xx.c  |  2 +-
+ drivers/block/paride/pd.c          |  2 +-
+ drivers/block/pktcdvd.c            |  2 +-
+ drivers/block/sx8.c                |  4 ++--
+ drivers/block/virtio_blk.c         |  2 +-
+ drivers/cdrom/cdrom.c              |  2 +-
+ drivers/ide/ide-atapi.c            |  2 +-
+ drivers/ide/ide-cd.c               |  2 +-
+ drivers/ide/ide-cd_ioctl.c         |  2 +-
+ drivers/ide/ide-devsets.c          |  2 +-
+ drivers/ide/ide-disk.c             |  2 +-
+ drivers/ide/ide-ioctls.c           |  4 ++--
+ drivers/ide/ide-park.c             |  2 +-
+ drivers/ide/ide-pm.c               |  4 ++--
+ drivers/ide/ide-tape.c             |  2 +-
+ drivers/ide/ide-taskfile.c         |  2 +-
+ drivers/mmc/core/block.c           | 10 +++++-----
+ drivers/nvme/host/core.c           |  8 ++++----
+ drivers/nvme/host/lightnvm.c       |  4 ++--
+ drivers/nvme/host/pci.c            |  4 ++--
+ drivers/nvme/target/passthru.c     |  2 +-
+ drivers/scsi/scsi_error.c          |  2 +-
+ drivers/scsi/scsi_lib.c            |  2 +-
+ drivers/scsi/sg.c                  |  3 +--
+ drivers/scsi/st.c                  |  2 +-
+ drivers/target/target_core_pscsi.c |  3 +--
+ fs/nfsd/blocklayout.c              |  2 +-
+ include/linux/blkdev.h             |  5 ++---
+ 31 files changed, 50 insertions(+), 56 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
-index 34070605b28b..bb67d159b7d8 100644
---- a/drivers/mmc/host/sdhci-of-aspeed-test.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
-@@ -95,4 +95,11 @@ static struct kunit_suite aspeed_sdhci_test_suite = {
- 	.name = "sdhci-of-aspeed",
- 	.test_cases = aspeed_sdhci_test_cases,
- };
--kunit_test_suite(aspeed_sdhci_test_suite);
-+
-+static struct kunit_suite *aspeed_sdc_test_suite_array[] = {
-+	&aspeed_sdhci_test_suite,
-+	NULL,
-+};
-+
-+static struct kunit_suite **aspeed_sdc_test_suites
-+	__used __section(".kunit_test_suites") = aspeed_sdc_test_suite_array;
-diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index 3b0d381e1215..7d8692e90996 100644
---- a/drivers/mmc/host/sdhci-of-aspeed.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -556,6 +556,29 @@ static struct platform_driver aspeed_sdc_driver = {
- 	.remove		= aspeed_sdc_remove,
- };
- 
-+#if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
-+#include "sdhci-of-aspeed-test.c"
-+
-+static inline int aspeed_sdc_tests_init(void)
-+{
-+	return __kunit_test_suites_init(aspeed_sdc_test_suites);
-+}
-+
-+static inline void aspeed_sdc_tests_exit(void)
-+{
-+	__kunit_test_suites_exit(aspeed_sdc_test_suites);
-+}
-+#else
-+static inline int aspeed_sdc_tests_init(void)
-+{
-+	return 0;
-+}
-+
-+static inline void aspeed_sdc_tests_exit(void)
-+{
-+}
-+#endif
-+
- static int __init aspeed_sdc_init(void)
- {
- 	int rc;
-@@ -566,7 +589,18 @@ static int __init aspeed_sdc_init(void)
- 
- 	rc = platform_driver_register(&aspeed_sdc_driver);
- 	if (rc < 0)
--		platform_driver_unregister(&aspeed_sdhci_driver);
-+		goto cleanup_sdhci;
-+
-+	rc = aspeed_sdc_tests_init();
-+	if (rc < 0) {
-+		platform_driver_unregister(&aspeed_sdc_driver);
-+		goto cleanup_sdhci;
-+	}
-+
-+	return 0;
-+
-+cleanup_sdhci:
-+	platform_driver_unregister(&aspeed_sdhci_driver);
- 
- 	return rc;
- }
-@@ -574,15 +608,13 @@ module_init(aspeed_sdc_init);
- 
- static void __exit aspeed_sdc_exit(void)
- {
-+	aspeed_sdc_tests_exit();
-+
- 	platform_driver_unregister(&aspeed_sdc_driver);
- 	platform_driver_unregister(&aspeed_sdhci_driver);
- }
- module_exit(aspeed_sdc_exit);
- 
--#if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
--#include "sdhci-of-aspeed-test.c"
--#endif
--
- MODULE_DESCRIPTION("Driver for the ASPEED SD/SDIO/SDHCI Controllers");
- MODULE_AUTHOR("Ryan Chen <ryan_chen@aspeedtech.com>");
- MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
 -- 
-2.27.0
+2.17.1
 
