@@ -2,162 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 113FAC433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 21:23:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E33C6C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 00:25:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B826B23381
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jan 2021 21:23:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB77D23A53
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 00:25:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725950AbhAUVW5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jan 2021 16:22:57 -0500
-Received: from esa.microchip.iphmx.com ([68.232.153.233]:3388 "EHLO
-        esa.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726127AbhAUVW1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2021 16:22:27 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1611264146; x=1642800146;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=IU7N6M9WqExUVmZAY20bnYzUlhHSkV8kquJkto9eAP0=;
-  b=GjPJPFatPWvDhqT9JS7d0Y5M1fnd/2A+uedw8MKfDc+QfwPG6spXrm6o
-   VsflD6RpXoQq09VDpwJSrXLkzJbpRKttYNwGDNoq+uTcpfW7r1QybCVCi
-   Vp0DZFwtZNWjXLl2GWuHIZqDcu3GhR6qf44ppeiUbqgc6EdF5rff8fmRu
-   j1DuAHl3MAB0VZr7fgdqjORkIlmxfcppZikho3mlAwKJ31hDj/u9IrI63
-   mSI2yuuonS9e/s0fWKsZrSlVgV2fkv4Tq/cRj81lIFtxHrAiod9t6HCdK
-   ljUQc5CIH5b1edDJfsyhZCT6Z8I2H53QTyGzczUyAObE3kzYiZvk+gJux
-   w==;
-IronPort-SDR: VQhmM0FZL1T92OJLLiODRsCJEF8Q7muLfGs3WBaMgk6PGjWKxSDTiLegwUXGkdj70Nj+mxwo3N
- cRRfiyOCdgVNPilk8wf5ewOCiHfzcJO1H96QacFP5joJWLPIHEVaO+POJDzYmHHjsWUx7Nw5Bs
- Y/zhslARHk2SeNxKI3Iqqce3ii8hMlFcLR3pNVfcOOeuRx8vSHk3L9OBlNUi0W/Q+/+YzCRy/M
- Gdi13yLSWvKfovqydu7jlaJkexHbFx8e6X4AmffpmlLazu/49rm8RrHrTT33OCo46qT2Jz38gM
- Kj4=
-X-IronPort-AV: E=Sophos;i="5.79,365,1602572400"; 
-   d="scan'208";a="111998573"
-Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 21 Jan 2021 14:20:58 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
- chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Thu, 21 Jan 2021 14:20:58 -0700
-Received: from localhost (10.10.115.15) by chn-vm-ex02.mchp-main.com
- (10.10.85.144) with Microsoft SMTP Server id 15.1.1979.3 via Frontend
- Transport; Thu, 21 Jan 2021 14:20:58 -0700
-Date:   Thu, 21 Jan 2021 22:20:57 +0100
-From:   Ludovic Desroches <ludovic.desroches@microchip.com>
-To:     Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
-CC:     <ulf.hansson@linaro.org>, <nicolas.ferre@microchip.com>,
-        <alexandre.belloni@bootlin.com>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH] mmc: Assign boolean values to a bool variable
-Message-ID: <20210121212057.kxoh7timeczhd4yh@sekiro>
-References: <1611128377-66216-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <1611128377-66216-1-git-send-email-abaci-bugfix@linux.alibaba.com>
+        id S1726335AbhAVAZk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Jan 2021 19:25:40 -0500
+Received: from out3-smtp.messagingengine.com ([66.111.4.27]:41085 "EHLO
+        out3-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726013AbhAVAZj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jan 2021 19:25:39 -0500
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id BD10D5C01B2;
+        Thu, 21 Jan 2021 19:24:32 -0500 (EST)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Thu, 21 Jan 2021 19:24:32 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm1; bh=pMu2u0JXdX26Iu25upndYWf4ySXL7H+
+        ACYBp69Hi7Zo=; b=EyMDx2S97U0BQXR+Dztp5VgNUYP422VTe7rIBJ9LkLu2SL8
+        qZpU4ToJ402C3xoN8KZaTku6Xdb2rTnCI1lhOfsAZjG+PZwzr3wRE5AjMqNMcW4n
+        +QBshECTJO2r2FBTVcmfQ2CmgnmGMHe6utBipXYqhWqK3bqmJuAPQzy0T605EGyn
+        InJjQTUJwzdPjCETKoQK9Q8uXWmbjmIo2Lb1QZ9wjxx5Sd1cuqKXdI6DlwDAZG4n
+        1bpWSm2J/5DftNY8UCPsk32KyeW1wv+kG6c3tA9JgoZQs5KPIrvsLyh3TbfsExuG
+        5Rw2wpDaGwubv5Ol5W0VWVQS9nExL+Ny1wIvE8A==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=pMu2u0
+        JXdX26Iu25upndYWf4ySXL7H+ACYBp69Hi7Zo=; b=SvvYkouHQFBgWDLhfrtded
+        x/R3bcJNYdZrPL8txOTgywumCX5rTIzSkQsRqc5YyIj2i+sVea6W442f7hix1vBu
+        KliO6GWE1l/ZPlZwhX7xmQtImstpbu9AKf9KfEiRVYlTU2in0WSxrc+T/aBp/NJD
+        NwT5iT0r1UcVZIR7JoXsAyZSRYEFGz5wJdHDUKgmQqPaHipg/tr9X9RUyfTe8qGQ
+        g4iAM+btdEJzDBp68vkUbemBWLVeF88LRYhsqATJjhfBaCCxW2ltVb2RrzJJOWsX
+        7CAye+FjNNjhenyfoaLlg9EmTEd9aPWMzyeqFrFTP5J/Ipo3Hj9ATxMCqolKeDzw
+        ==
+X-ME-Sender: <xms:PhsKYKt0ebLF8V10zhjIu_I1eApatb97z2jp1reEldQ7_OmxDgl5vQ>
+    <xme:PhsKYPdqIjy-SeIzfhA7d61cVw7Vfq8fL29i2eCFlUjFHNSBp52uwE_wsiXmK5niI
+    WedPouVnT2FUKxHwg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrudehgddvvdcutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefofgggkfgjfhffhffvufgtsehttdertderredtnecuhfhrohhmpedftehnughr
+    vgifucflvghffhgvrhihfdcuoegrnhgurhgvfiesrghjrdhiugdrrghuqeenucggtffrrg
+    htthgvrhhnpeehhfefkefgkeduveehffehieehudejfeejveejfedugfefuedtuedvhefh
+    veeuffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grnhgurhgvfiesrghjrdhiugdrrghu
+X-ME-Proxy: <xmx:PhsKYFzN1UuFnqmHh-vbgCYSwhtOI6FxVKKytTe5yIebqkhrOHRVFA>
+    <xmx:PhsKYFOEPL4NjB-XNT3aXw3WnZpl9Wm9VE-r8To6gn51N-at-Sj17A>
+    <xmx:PhsKYK-tbpGao10FTmtDsgla00bDxJUjDaGBDmwpOyCOGUEYGE1p4g>
+    <xmx:QBsKYBa1690_-cMuBU7hfbkiZRdP29IMjSR1d1dmAWWSHiKyKDXkvg>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id D8F9EA0005D; Thu, 21 Jan 2021 19:24:30 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-78-g36b56e88ef-fm-20210120.001-g36b56e88
+Mime-Version: 1.0
+Message-Id: <b1d4ca80-8dde-4c74-b71d-e73ede9dbf7d@www.fastmail.com>
+In-Reply-To: <b221bec1-0f04-c81c-a82b-a8cd06434708@infradead.org>
+References: <20210121182847.04ee4e32@canb.auug.org.au>
+ <b221bec1-0f04-c81c-a82b-a8cd06434708@infradead.org>
+Date:   Fri, 22 Jan 2021 10:54:10 +1030
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Randy Dunlap" <rdunlap@infradead.org>,
+        "Stephen Rothwell" <sfr@canb.auug.org.au>,
+        "Linux Next Mailing List" <linux-next@vger.kernel.org>
+Cc:     "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>
+Subject: Re: linux-next: Tree for Jan 21 (mmc/host/sdhci-of-aspeed-test.c)
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jan 20, 2021 at 03:39:37PM +0800, Jiapeng Zhong wrote:
-> Fix the following coccicheck warnings:
-> 
-> ./drivers/mmc/host/atmel-mci.c:2436:2-34: WARNING: Assignment
-> of 0/1 to bool variable.
-> 
-> ./drivers/mmc/host/atmel-mci.c:2425:2-20: WARNING: Assignment
-> of 0/1 to bool variable.
-> 
-> Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-> Signed-off-by: Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
-Acked-by: Ludovic Desroches <ludovic.desroches@microchip.com>
 
-Thanks
 
-> ---
->  drivers/mmc/host/atmel-mci.c | 46 ++++++++++++++++++++++----------------------
->  1 file changed, 23 insertions(+), 23 deletions(-)
+On Fri, 22 Jan 2021, at 06:37, Randy Dunlap wrote:
+> On 1/20/21 11:28 PM, Stephen Rothwell wrote:
+> > Hi all,
+> > 
+> > Changes since 20210120:
+> > 
 > 
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 444bd3a..6324120 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -2401,45 +2401,45 @@ static void atmci_get_cap(struct atmel_mci *host)
->         dev_info(&host->pdev->dev,
->                         "version: 0x%x\n", version);
 > 
-> -       host->caps.has_dma_conf_reg = 0;
-> -       host->caps.has_pdc = 1;
-> -       host->caps.has_cfg_reg = 0;
-> -       host->caps.has_cstor_reg = 0;
-> -       host->caps.has_highspeed = 0;
-> -       host->caps.has_rwproof = 0;
-> -       host->caps.has_odd_clk_div = 0;
-> -       host->caps.has_bad_data_ordering = 1;
-> -       host->caps.need_reset_after_xfer = 1;
-> -       host->caps.need_blksz_mul_4 = 1;
-> -       host->caps.need_notbusy_for_read_ops = 0;
-> +       host->caps.has_dma_conf_reg = false;
-> +       host->caps.has_pdc = true;
-> +       host->caps.has_cfg_reg = false;
-> +       host->caps.has_cstor_reg = false;
-> +       host->caps.has_highspeed = false;
-> +       host->caps.has_rwproof = false;
-> +       host->caps.has_odd_clk_div = false;
-> +       host->caps.has_bad_data_ordering = true;
-> +       host->caps.need_reset_after_xfer = true;
-> +       host->caps.need_blksz_mul_4 = true;
-> +       host->caps.need_notbusy_for_read_ops = false;
+> Hi,
+> I suppose that I have some config combo that has not been tested.
 > 
->         /* keep only major version number */
->         switch (version & 0xf00) {
->         case 0x600:
->         case 0x500:
-> -               host->caps.has_odd_clk_div = 1;
-> +               host->caps.has_odd_clk_div = true;
->                 fallthrough;
->         case 0x400:
->         case 0x300:
-> -               host->caps.has_dma_conf_reg = 1;
-> -               host->caps.has_pdc = 0;
-> -               host->caps.has_cfg_reg = 1;
-> -               host->caps.has_cstor_reg = 1;
-> -               host->caps.has_highspeed = 1;
-> +               host->caps.has_dma_conf_reg = true;
-> +               host->caps.has_pdc = false;
-> +               host->caps.has_cfg_reg = true;
-> +               host->caps.has_cstor_reg = true;
-> +               host->caps.has_highspeed = true;
->                 fallthrough;
->         case 0x200:
-> -               host->caps.has_rwproof = 1;
-> -               host->caps.need_blksz_mul_4 = 0;
-> -               host->caps.need_notbusy_for_read_ops = 1;
-> +               host->caps.has_rwproof = true;
-> +               host->caps.need_blksz_mul_4 = false;
-> +               host->caps.need_notbusy_for_read_ops = true;
->                 fallthrough;
->         case 0x100:
-> -               host->caps.has_bad_data_ordering = 0;
-> -               host->caps.need_reset_after_xfer = 0;
-> +               host->caps.has_bad_data_ordering = false;
-> +               host->caps.need_reset_after_xfer = false;
->                 fallthrough;
->         case 0x0:
->                 break;
->         default:
-> -               host->caps.has_pdc = 0;
-> +               host->caps.has_pdc = false;
->                 dev_warn(&host->pdev->dev,
->                                 "Unmanaged mci version, set minimum capabilities\n");
->                 break;
-> --
-> 1.8.3.1
 > 
+> on i386:
+> CONFIG_MMC_SDHCI_OF_ASPEED=m
+> CONFIG_MMC_SDHCI_OF_ASPEED_TEST=y
+
+I thought I'd tested that, but apparently not. Let me sort that out.
+
+> 
+> Full randconfig file is attached.
+> 
+
+Thanks.
+
+Andrew
