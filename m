@@ -7,293 +7,188 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46C78C433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:46:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 019FAC433DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 11:50:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ECBF7223C8
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:46:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B184D235F9
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 11:50:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727287AbhAVKps (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Jan 2021 05:45:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44006 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727461AbhAVJaU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 04:30:20 -0500
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51E22C0617AB
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:28:36 -0800 (PST)
-Received: by mail-ed1-x532.google.com with SMTP id c6so5797400ede.0
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:28:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=cloud.ionos.com; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=Gy+m5b/MpNl75+rvuADDvuvZdDur+rLnZjEt2V5VJu8=;
-        b=c96FNvIBo+d76PGg2h22AXLzbzNojslFyX2m+9F7mZEFba2aPyYIUDVE9vbpeNKgC3
-         pZo2hYyLfHf5icuu+iwQ+Mmx1AinyNSSPOabCUGI5+Igv72efZyeV5EDfYOHpvPEsyTf
-         9VykIeFFMSbdI8v9nU8m3aaoxGKJqGCDKTf6aGDV7Y5FB0SX+l2WcvQtOQIHHe/G7PjE
-         9APYTzjCin3UweKiEdYPT/GHXIcXKcvEp7Z2RcxC3wRFuU0kmxuZQ8HwLt89kIKhW2Ic
-         2tB3Su+d0EA2Dx4GGJ+Z4ANYyurMnRwTnLC+JzisnF53fssG8q1dFjN9gdpKetP+dyK2
-         Ptdw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references;
-        bh=Gy+m5b/MpNl75+rvuADDvuvZdDur+rLnZjEt2V5VJu8=;
-        b=fSajY7sblocuKidmz5HhO9Mqof+ECEPVxnaAxBe+8OTLWPD5Hi8NAQD+8p4Ts6juC1
-         Q4ceY7EebdvnhWuRxwyAwyI5yEwPLkwnqjb5x8U0NaMrJYSq76ezvdpls4l27sAl3dZ1
-         eDF1XsIMIu0Fh/FYym2S7zMVWdeW0G6s5gwPSJhxpkn4jpEJfwfxavz11O86I/FaSqAa
-         80v3ZiaW9Cm6cN283fTm4YW5w/IS/fuFVoXbW5aPGjFA9Xt1NwladisBbc0Cwhl28Ghu
-         AJML/75okzDSWr4LVEBYY9v7xjs01a6cZHQsVJ12uw1rWF2GuE0y5jEw3Mn4lLDDDxzP
-         IrPg==
-X-Gm-Message-State: AOAM530r8NRoCJA1/4BBxyZHZnWBxa4/f1LMgT3VXPiTblKYc1tqGTSB
-        3va9WtIw1qy/AV3OPjprKIP7zQ==
-X-Google-Smtp-Source: ABdhPJwBs+h2/oob0/YichSq036E8Te/eQQlFqwN1S+8lnnkni/ZFj+8n14tY2VDy71YxT0adcvlVQ==
-X-Received: by 2002:a05:6402:438d:: with SMTP id o13mr2442254edc.135.1611307714827;
-        Fri, 22 Jan 2021 01:28:34 -0800 (PST)
-Received: from ls00508.pb.local ([2001:1438:4010:2540:481b:68e3:af3e:e933])
-        by smtp.gmail.com with ESMTPSA id g17sm4684508edb.39.2021.01.22.01.28.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Jan 2021 01:28:34 -0800 (PST)
-From:   Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
-To:     axboe@kernel.dk
-Cc:     linux-block@vger.kernel.org, target-devel@vger.kernel.org,
-        linux-scsi@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-nvme@lists.infradead.org, linux-nfs@vger.kernel.org,
-        hch@infradead.org, Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
-Subject: [PATCH V2 1/2] block: remove unnecessary argument from blk_execute_rq_nowait
-Date:   Fri, 22 Jan 2021 10:28:23 +0100
-Message-Id: <20210122092824.20971-2-guoqing.jiang@cloud.ionos.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com>
-References: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com>
+        id S1726664AbhAVLuY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jan 2021 06:50:24 -0500
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:59773 "EHLO
+        out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727744AbhAVLuQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 06:50:16 -0500
+Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
+        by mailout.nyi.internal (Postfix) with ESMTP id CC1C55C0136;
+        Fri, 22 Jan 2021 06:49:05 -0500 (EST)
+Received: from mailfrontend1 ([10.202.2.162])
+  by compute4.internal (MEProxy); Fri, 22 Jan 2021 06:49:05 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=from
+        :to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=fm1; bh=Aur+84y6XjXo9NANGg4GxQPeSB
+        LTSsh+b06q0PumXRo=; b=B/ZwTxPhfBRlLmStrbjvZaaD7Mg6w4qzJ8bXbu65KU
+        3jMjIufM/Svx78Hrq3gvPtO3i1tTYYVrQiWcOiE3HYt4mknJbaTB1xrODEvGl8hm
+        2T/O0iFeuzI7MA8qNSUT6s6hZRlnKHwJUbC5nNWLlJD2zz8iTW+V9tbqxkYMS2WC
+        uJpVLCykxEbPaVo+0ia+S9vQzldlvC/LxKM6uMO/xntV9uPSnDv409y/LMBdixsy
+        G3jJkaqbPvUMI49gTUL8jikPH8+IGBlOHNgGbH72BJl18CiF7aDJPkhDuBVCxp38
+        KsI1iQkCUh3562uAHcxFVBV+/a7DKHNo9XVz95LCfETg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-transfer-encoding:date:from
+        :message-id:mime-version:subject:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=Aur+84y6XjXo9NANG
+        g4GxQPeSBLTSsh+b06q0PumXRo=; b=BTZwdDg5goBiKkL5JBhrbjTMzetVczF1G
+        TFmHprbqtWhp4v/Exo15rlz9xYnpAk7DpUk0yP2IuHqpdCziYtlFHsOjjjlWrZrD
+        7lOsJM/wzvoyoo2n1lBOD1nYzGeSrr1IvQu3XNq9bilYyrvBIVvyf/k2H/PnAYJ8
+        AlXV34P3q6/OjBEhnveifvq9TgZp8pTeRrV/Ty6N/AYp31PdGcLc1BWL28e6fxdX
+        ECQnDdNfm1bD6tlDPe7awZVSxr6GDh0ATR434iUkjyXD/2fvuqC7nWaUWqddFub+
+        B0AfmSSbXrGwEJVdt5AuITZumwc7EQwU2hUmrpqNLZCAqQyC6YNRg==
+X-ME-Sender: <xms:sLsKYFTsNfHLxZXowxy_4GKEGa9aUE2WehOfEdjs7mn5SKkcC96NJw>
+    <xme:sLsKYO6YSuYBcfBGfSarQgc34lQNvZs0UrR9fxILnGlKoKXYsE9X51RbE54wW7Apv
+    kTuqBjYKHcArSbrRg>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrudeigdefjecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefhvffufffkofgggfestdekredtredttdenucfhrhhomheptehnughrvgifucfl
+    vghffhgvrhihuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrfgrthhtvghrnh
+    epkefhieffjeevfeevhedtieeihfefvdejledvvddthefftedujeethfeuueelfedtnecu
+    kfhppedvtdefrdehjedrvdduhedrvdefvdenucevlhhushhtvghrufhiiigvpedtnecurf
+    grrhgrmhepmhgrihhlfhhrohhmpegrnhgurhgvfiesrghjrdhiugdrrghu
+X-ME-Proxy: <xmx:sLsKYCz7Y-Cdu2hE8WcTCdq7xt_lCadrhHnN-HsDrfSyFKxQAIjJ1A>
+    <xmx:sLsKYFQ6-nXemAWFYWUKdKvQikIOTXTYoA-_u71_Xh7l5hWlMMkPwg>
+    <xmx:sLsKYJVbTBeCUNF5pb8XLNXYZaVxe_jGc8sgdhRkgRA5pZweczZROw>
+    <xmx:sbsKYLY2NGAXoGCXdsz3yIDGZCw3WO53noSAxjhKRuFMM7rq5J_vrA>
+Received: from localhost.localdomain (203-57-215-232.dyn.iinet.net.au [203.57.215.232])
+        by mail.messagingengine.com (Postfix) with ESMTPA id DEB9124005C;
+        Fri, 22 Jan 2021 06:49:00 -0500 (EST)
+From:   Andrew Jeffery <andrew@aj.id.au>
+To:     linux-mmc@vger.kernel.org
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org, joel@jms.id.au,
+        linux-aspeed@lists.ozlabs.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        brendanhiggins@google.com, Randy Dunlap <rdunlap@infradead.org>
+Subject: [PATCH v2] mmc: sdhci-of-aspeed: Fix kunit-related build error
+Date:   Fri, 22 Jan 2021 22:18:52 +1030
+Message-Id: <20210122114852.3790565-1-andrew@aj.id.au>
+X-Mailer: git-send-email 2.27.0
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The 'q' is not used since commit a1ce35fa4985 ("block: remove dead
-elevator code"), also update the comment of the function.
+Randy found that with the following Kconfig settings we have duplicate
+definitions (e.g. __inittest()) in sdhci-of-aspeed due to competing
+module_init()/module_exit() calls from kunit and driver the itself.
 
-And more importantly it never really was needed to start with given
-that we can trivial derive it from struct request.
+```
+CONFIG_MMC_SDHCI_OF_ASPEED=m
+CONFIG_MMC_SDHCI_OF_ASPEED_TEST=y
+```
 
-Cc: target-devel@vger.kernel.org
-Cc: linux-scsi@vger.kernel.org
-Cc: virtualization@lists.linux-foundation.org
-Cc: linux-ide@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-nvme@lists.infradead.org
-Cc: linux-nfs@vger.kernel.org
-Signed-off-by: Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+Conditionally open-code the kunit initialisation to avoid the error.
+
+Fixes: 7efa02a981d6 ("mmc: sdhci-of-aspeed: Add KUnit tests for phase calculations")
+Reported-by: Randy Dunlap <rdunlap@infradead.org>
+Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
 ---
- block/blk-exec.c                   | 10 ++++------
- drivers/block/sx8.c                |  4 ++--
- drivers/nvme/host/core.c           |  4 ++--
- drivers/nvme/host/lightnvm.c       |  2 +-
- drivers/nvme/host/pci.c            |  4 ++--
- drivers/nvme/target/passthru.c     |  2 +-
- drivers/scsi/scsi_error.c          |  2 +-
- drivers/scsi/sg.c                  |  3 +--
- drivers/scsi/st.c                  |  2 +-
- drivers/target/target_core_pscsi.c |  3 +--
- include/linux/blkdev.h             |  2 +-
- 11 files changed, 17 insertions(+), 21 deletions(-)
 
-diff --git a/block/blk-exec.c b/block/blk-exec.c
-index 85324d53d072..2e37e85456fb 100644
---- a/block/blk-exec.c
-+++ b/block/blk-exec.c
-@@ -31,8 +31,7 @@ static void blk_end_sync_rq(struct request *rq, blk_status_t error)
- }
+v2:
+* Collapse the #ifdef-ery
+
+ drivers/mmc/host/sdhci-of-aspeed-test.c |  9 +++++-
+ drivers/mmc/host/sdhci-of-aspeed.c      | 42 ++++++++++++++++++++++---
+ 2 files changed, 45 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
+index 34070605b28b..bb67d159b7d8 100644
+--- a/drivers/mmc/host/sdhci-of-aspeed-test.c
++++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
+@@ -95,4 +95,11 @@ static struct kunit_suite aspeed_sdhci_test_suite = {
+ 	.name = "sdhci-of-aspeed",
+ 	.test_cases = aspeed_sdhci_test_cases,
+ };
+-kunit_test_suite(aspeed_sdhci_test_suite);
++
++static struct kunit_suite *aspeed_sdc_test_suite_array[] = {
++	&aspeed_sdhci_test_suite,
++	NULL,
++};
++
++static struct kunit_suite **aspeed_sdc_test_suites
++	__used __section(".kunit_test_suites") = aspeed_sdc_test_suite_array;
+diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+index 3b0d381e1215..7d8692e90996 100644
+--- a/drivers/mmc/host/sdhci-of-aspeed.c
++++ b/drivers/mmc/host/sdhci-of-aspeed.c
+@@ -556,6 +556,29 @@ static struct platform_driver aspeed_sdc_driver = {
+ 	.remove		= aspeed_sdc_remove,
+ };
  
- /**
-- * blk_execute_rq_nowait - insert a request into queue for execution
-- * @q:		queue to insert the request in
-+ * blk_execute_rq_nowait - insert a request to I/O scheduler for execution
-  * @bd_disk:	matching gendisk
-  * @rq:		request to insert
-  * @at_head:    insert request at head or tail of queue
-@@ -45,9 +44,8 @@ static void blk_end_sync_rq(struct request *rq, blk_status_t error)
-  * Note:
-  *    This function will invoke @done directly if the queue is dead.
-  */
--void blk_execute_rq_nowait(struct request_queue *q, struct gendisk *bd_disk,
--			   struct request *rq, int at_head,
--			   rq_end_io_fn *done)
-+void blk_execute_rq_nowait(struct gendisk *bd_disk, struct request *rq,
-+			   int at_head, rq_end_io_fn *done)
++#if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
++#include "sdhci-of-aspeed-test.c"
++
++static inline int aspeed_sdc_tests_init(void)
++{
++	return __kunit_test_suites_init(aspeed_sdc_test_suites);
++}
++
++static inline void aspeed_sdc_tests_exit(void)
++{
++	__kunit_test_suites_exit(aspeed_sdc_test_suites);
++}
++#else
++static inline int aspeed_sdc_tests_init(void)
++{
++	return 0;
++}
++
++static inline void aspeed_sdc_tests_exit(void)
++{
++}
++#endif
++
+ static int __init aspeed_sdc_init(void)
  {
- 	WARN_ON(irqs_disabled());
- 	WARN_ON(!blk_rq_is_passthrough(rq));
-@@ -83,7 +81,7 @@ void blk_execute_rq(struct request_queue *q, struct gendisk *bd_disk,
- 	unsigned long hang_check;
+ 	int rc;
+@@ -566,7 +589,18 @@ static int __init aspeed_sdc_init(void)
  
- 	rq->end_io_data = &wait;
--	blk_execute_rq_nowait(q, bd_disk, rq, at_head, blk_end_sync_rq);
-+	blk_execute_rq_nowait(bd_disk, rq, at_head, blk_end_sync_rq);
+ 	rc = platform_driver_register(&aspeed_sdc_driver);
+ 	if (rc < 0)
+-		platform_driver_unregister(&aspeed_sdhci_driver);
++		goto cleanup_sdhci;
++
++	rc = aspeed_sdc_tests_init();
++	if (rc < 0) {
++		platform_driver_unregister(&aspeed_sdc_driver);
++		goto cleanup_sdhci;
++	}
++
++	return 0;
++
++cleanup_sdhci:
++	platform_driver_unregister(&aspeed_sdhci_driver);
  
- 	/* Prevent hang_check timer from firing at us during very long I/O */
- 	hang_check = sysctl_hung_task_timeout_secs;
-diff --git a/drivers/block/sx8.c b/drivers/block/sx8.c
-index 4478eb7efee0..2cdf2771f8e8 100644
---- a/drivers/block/sx8.c
-+++ b/drivers/block/sx8.c
-@@ -539,7 +539,7 @@ static int carm_array_info (struct carm_host *host, unsigned int array_idx)
- 	spin_unlock_irq(&host->lock);
- 
- 	DPRINTK("blk_execute_rq_nowait, tag == %u\n", rq->tag);
--	blk_execute_rq_nowait(host->oob_q, NULL, rq, true, NULL);
-+	blk_execute_rq_nowait(NULL, rq, true, NULL);
- 
- 	return 0;
- 
-@@ -578,7 +578,7 @@ static int carm_send_special (struct carm_host *host, carm_sspc_t func)
- 	crq->msg_bucket = (u32) rc;
- 
- 	DPRINTK("blk_execute_rq_nowait, tag == %u\n", rq->tag);
--	blk_execute_rq_nowait(host->oob_q, NULL, rq, true, NULL);
-+	blk_execute_rq_nowait(NULL, rq, true, NULL);
- 
- 	return 0;
+ 	return rc;
  }
-diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
-index f320273fc672..63c469edb1bc 100644
---- a/drivers/nvme/host/core.c
-+++ b/drivers/nvme/host/core.c
-@@ -925,7 +925,7 @@ static void nvme_execute_rq_polled(struct request_queue *q,
+@@ -574,15 +608,13 @@ module_init(aspeed_sdc_init);
  
- 	rq->cmd_flags |= REQ_HIPRI;
- 	rq->end_io_data = &wait;
--	blk_execute_rq_nowait(q, bd_disk, rq, at_head, nvme_end_sync_rq);
-+	blk_execute_rq_nowait(bd_disk, rq, at_head, nvme_end_sync_rq);
- 
- 	while (!completion_done(&wait)) {
- 		blk_poll(q, request_to_qc_t(rq->mq_hctx, rq), true);
-@@ -1202,7 +1202,7 @@ static int nvme_keep_alive(struct nvme_ctrl *ctrl)
- 	rq->timeout = ctrl->kato * HZ;
- 	rq->end_io_data = ctrl;
- 
--	blk_execute_rq_nowait(rq->q, NULL, rq, 0, nvme_keep_alive_end_io);
-+	blk_execute_rq_nowait(NULL, rq, 0, nvme_keep_alive_end_io);
- 
- 	return 0;
+ static void __exit aspeed_sdc_exit(void)
+ {
++	aspeed_sdc_tests_exit();
++
+ 	platform_driver_unregister(&aspeed_sdc_driver);
+ 	platform_driver_unregister(&aspeed_sdhci_driver);
  }
-diff --git a/drivers/nvme/host/lightnvm.c b/drivers/nvme/host/lightnvm.c
-index 470cef3abec3..439f2b52e985 100644
---- a/drivers/nvme/host/lightnvm.c
-+++ b/drivers/nvme/host/lightnvm.c
-@@ -695,7 +695,7 @@ static int nvme_nvm_submit_io(struct nvm_dev *dev, struct nvm_rq *rqd,
+ module_exit(aspeed_sdc_exit);
  
- 	rq->end_io_data = rqd;
- 
--	blk_execute_rq_nowait(q, NULL, rq, 0, nvme_nvm_end_io);
-+	blk_execute_rq_nowait(NULL, rq, 0, nvme_nvm_end_io);
- 
- 	return 0;
- 
-diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
-index 50d9a20568a2..6aa11067c8d0 100644
---- a/drivers/nvme/host/pci.c
-+++ b/drivers/nvme/host/pci.c
-@@ -1327,7 +1327,7 @@ static enum blk_eh_timer_return nvme_timeout(struct request *req, bool reserved)
- 	}
- 
- 	abort_req->end_io_data = NULL;
--	blk_execute_rq_nowait(abort_req->q, NULL, abort_req, 0, abort_endio);
-+	blk_execute_rq_nowait(NULL, abort_req, 0, abort_endio);
- 
- 	/*
- 	 * The aborted req will be completed on receiving the abort req.
-@@ -2238,7 +2238,7 @@ static int nvme_delete_queue(struct nvme_queue *nvmeq, u8 opcode)
- 	req->end_io_data = nvmeq;
- 
- 	init_completion(&nvmeq->delete_done);
--	blk_execute_rq_nowait(q, NULL, req, false,
-+	blk_execute_rq_nowait(NULL, req, false,
- 			opcode == nvme_admin_delete_cq ?
- 				nvme_del_cq_end : nvme_del_queue_end);
- 	return 0;
-diff --git a/drivers/nvme/target/passthru.c b/drivers/nvme/target/passthru.c
-index b9776fc8f08f..cbc88acdd233 100644
---- a/drivers/nvme/target/passthru.c
-+++ b/drivers/nvme/target/passthru.c
-@@ -275,7 +275,7 @@ static void nvmet_passthru_execute_cmd(struct nvmet_req *req)
- 		schedule_work(&req->p.work);
- 	} else {
- 		rq->end_io_data = req;
--		blk_execute_rq_nowait(rq->q, ns ? ns->disk : NULL, rq, 0,
-+		blk_execute_rq_nowait(ns ? ns->disk : NULL, rq, 0,
- 				      nvmet_passthru_req_done);
- 	}
- 
-diff --git a/drivers/scsi/scsi_error.c b/drivers/scsi/scsi_error.c
-index f11f51e2465f..c00f06e9ecb0 100644
---- a/drivers/scsi/scsi_error.c
-+++ b/drivers/scsi/scsi_error.c
-@@ -2007,7 +2007,7 @@ static void scsi_eh_lock_door(struct scsi_device *sdev)
- 	req->timeout = 10 * HZ;
- 	rq->retries = 5;
- 
--	blk_execute_rq_nowait(req->q, NULL, req, 1, eh_lock_door_done);
-+	blk_execute_rq_nowait(NULL, req, 1, eh_lock_door_done);
- }
- 
- /**
-diff --git a/drivers/scsi/sg.c b/drivers/scsi/sg.c
-index bfa8d77322d7..4383d93110f8 100644
---- a/drivers/scsi/sg.c
-+++ b/drivers/scsi/sg.c
-@@ -829,8 +829,7 @@ sg_common_write(Sg_fd * sfp, Sg_request * srp,
- 
- 	srp->rq->timeout = timeout;
- 	kref_get(&sfp->f_ref); /* sg_rq_end_io() does kref_put(). */
--	blk_execute_rq_nowait(sdp->device->request_queue, sdp->disk,
--			      srp->rq, at_head, sg_rq_end_io);
-+	blk_execute_rq_nowait(sdp->disk, srp->rq, at_head, sg_rq_end_io);
- 	return 0;
- }
- 
-diff --git a/drivers/scsi/st.c b/drivers/scsi/st.c
-index 43f7624508a9..841ad2fc369a 100644
---- a/drivers/scsi/st.c
-+++ b/drivers/scsi/st.c
-@@ -585,7 +585,7 @@ static int st_scsi_execute(struct st_request *SRpnt, const unsigned char *cmd,
- 	rq->retries = retries;
- 	req->end_io_data = SRpnt;
- 
--	blk_execute_rq_nowait(req->q, NULL, req, 1, st_scsi_execute_end);
-+	blk_execute_rq_nowait(NULL, req, 1, st_scsi_execute_end);
- 	return 0;
- }
- 
-diff --git a/drivers/target/target_core_pscsi.c b/drivers/target/target_core_pscsi.c
-index 7994f27e4527..33770e5808ce 100644
---- a/drivers/target/target_core_pscsi.c
-+++ b/drivers/target/target_core_pscsi.c
-@@ -1000,8 +1000,7 @@ pscsi_execute_cmd(struct se_cmd *cmd)
- 		req->timeout = PS_TIMEOUT_OTHER;
- 	scsi_req(req)->retries = PS_RETRY;
- 
--	blk_execute_rq_nowait(pdv->pdv_sd->request_queue, NULL, req,
--			(cmd->sam_task_attr == TCM_HEAD_TAG),
-+	blk_execute_rq_nowait(NULL, req, (cmd->sam_task_attr == TCM_HEAD_TAG),
- 			pscsi_req_done);
- 
- 	return 0;
-diff --git a/include/linux/blkdev.h b/include/linux/blkdev.h
-index 070de09425ad..bf0ddef8aa10 100644
---- a/include/linux/blkdev.h
-+++ b/include/linux/blkdev.h
-@@ -942,7 +942,7 @@ extern int blk_rq_map_user_iov(struct request_queue *, struct request *,
- 			       gfp_t);
- extern void blk_execute_rq(struct request_queue *, struct gendisk *,
- 			  struct request *, int);
--extern void blk_execute_rq_nowait(struct request_queue *, struct gendisk *,
-+extern void blk_execute_rq_nowait(struct gendisk *,
- 				  struct request *, int, rq_end_io_fn *);
- 
- /* Helper to convert REQ_OP_XXX to its string format XXX */
+-#if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
+-#include "sdhci-of-aspeed-test.c"
+-#endif
+-
+ MODULE_DESCRIPTION("Driver for the ASPEED SD/SDIO/SDHCI Controllers");
+ MODULE_AUTHOR("Ryan Chen <ryan_chen@aspeedtech.com>");
+ MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
 -- 
-2.17.1
+2.27.0
 
