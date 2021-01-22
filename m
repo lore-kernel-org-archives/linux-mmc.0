@@ -4,169 +4,103 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D163FC433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 09:47:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4AFAC433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:00:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 90C7C235F7
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 09:47:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94BBE235E4
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:00:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727678AbhAVJrj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Jan 2021 04:47:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47610 "EHLO
+        id S1727244AbhAVKAk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jan 2021 05:00:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727336AbhAVJqt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 04:46:49 -0500
-Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72216C061794
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:45:28 -0800 (PST)
-Received: by mail-ua1-x92e.google.com with SMTP id a16so1629393uad.9
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:45:28 -0800 (PST)
+        with ESMTP id S1727763AbhAVKAR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 05:00:17 -0500
+Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1953C061797
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:50:56 -0800 (PST)
+Received: by mail-vs1-xe2f.google.com with SMTP id 187so2687752vsg.4
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:50:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=X8znVvt11Gf6tz3j7rgBydA6WYzetqabHTGjXGWf8sQ=;
-        b=fKAf9df3B+5Q3xvUV9EPDSzL5dugIci2p8+8LlVDaw3lkiPXV7VFmtQCAMWAuYyxBP
-         cpAIz4u0oafAzp6RAuSraf6NJRnWl9sD1szlojI4MXAzSHhLZlcZ5kVTRfhFUyrg9yGY
-         sx5TuiT9W/2S7qm98exNKvTdJRL9WFxZ0OGpjbzQnj2qMz4oaO4xmppDWpTeoaUNQZom
-         NqEqUneW8wKJCL+9UiGAShuZjn9eJCsi6mvfBf5jy0OqK7f9+nTOGs/gHmP+Y1K2q6ER
-         EPNsH8yOIe1I590YlqNSl2BcarrkG7pYYAChgJIRtD9nQvOS7wwwig+vJQFekotnXFxJ
-         WXmQ==
+        bh=HqmXNnhOvww/se+uqGpbG2r6Wj6LjG3RtqIoCGkH17k=;
+        b=Bqt3b8b7kp2zQsjWv07hRffU5ZdsKDvLLb7CTBAQdsqsw2qRHDDv257TenVn8PQ0eh
+         7Faa1tfN668wJ7fnNrENLH7AoZ+Yz7eIgCNhVFIajtS786Ovqkv97Wr+V6k7E2k62MxY
+         +zFfZILJZPCMb2mgb5PIp7UG3mhyPOfuQoIscUoL7KcMmyArbnUdaC0O1T1v40yAIWCH
+         kb3Y/uHtCaFYyztgZ4c9IexZUktiJQ8TjmoyT1uO1aGHIVI3c5zzudaDyrdeK9RYpTX9
+         cIrmQQoHomR+23NhDIIBOqW/csi0rItWAjz9B7IdKkogQi35H0szd9iVKvGtnr3lgOid
+         vpug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=X8znVvt11Gf6tz3j7rgBydA6WYzetqabHTGjXGWf8sQ=;
-        b=WE1It+miAMUDsoUTY5Cr71mInbnkei4Mr4n9ddpB6Up/zZWNfojf4W9GRvf8LlNYnQ
-         CjukUqVxjA6KKGC2VSwTw5tWAvy7JtSGwRx+402uvZE9mH/X9G0p/WwTMjOQgrsD3XA7
-         S8gakQHSjRWgXowBvpfz4gz92HA2tZwYU/3q90C24WuTPzh9sgUivRL0Nq9rHRfe7VMY
-         ZV09c1HHjyG50j45J+aKrHUI9vF+N5DQCYL/+xe67apAt7t4xdTUKcjt8c1jo1O8zveG
-         2RsbAqKYo7PVD89l7YvOpoz0YYL5ELv2tc2YW5t2ZXVEhaVVNXKIP+tSHNAnkFFbXX0A
-         Va1w==
-X-Gm-Message-State: AOAM531iFheTidarcTIgM4aUO8x1RHvMj3PqO03qRHPxsrKw1D+/W86A
-        bWAG5tylKXHMzhouenVpnCpqv4nOKnbH4DyknmXPcg==
-X-Google-Smtp-Source: ABdhPJxtzw1pzaWNMbHu+VHRXn6WXmioeGbrfQKrhYo5lZJ2VN+DOFrw1lf7f5j6UO/jggyepGcyVcZi+kSqr6Zw76U=
-X-Received: by 2002:ab0:768:: with SMTP id h95mr2569551uah.104.1611308727664;
- Fri, 22 Jan 2021 01:45:27 -0800 (PST)
+        bh=HqmXNnhOvww/se+uqGpbG2r6Wj6LjG3RtqIoCGkH17k=;
+        b=W0UmvCWbRRh4KfrpGc62R57keTSdCHqHHsHEfY0hPv/yQzQd+FmnKnRz63KnibSSsJ
+         k4VoSFGP/UKfGtpbU53L7gQS5pmkdizV3ejbEPqY4aPQWZUZVi2s7PRCmeEZTYTJNKOA
+         JsqUqH0TfrEPP8ZQiC89QJuqpA5KfE6Ua2dRszoWQChmMKy17WRui9DQEzKMXqNsW+8l
+         LQrT2U7n5TTx1OtS29fv+RRGelfJBScTCZ2FqTiDIh+QhV7rwyF7csfZsIEKp4BA/bFn
+         sN5Vap67Su7hIfRcofE5hFcreKBggHUAXLzP05ezsl93KOOZAK6mDi8IsZ0Mea2IXqq3
+         UwLA==
+X-Gm-Message-State: AOAM531ZOpSTDWp0ZxM0eVTELNrQtcYZqc9tBON+2CERKEM+g3BjP+nd
+        RZ/8u6MHLC9i0C70BaAn850+29WYKpBFKaPrR0ZCbQ==
+X-Google-Smtp-Source: ABdhPJzQkvbtXPAnaOXaJNiT2RO7BkT9eaJIQxnmfKyCTkaPtmRekmQxRuUvkDQuHQpmYuEkgvFe4kOJ3FrZfm16N6Y=
+X-Received: by 2002:a67:f997:: with SMTP id b23mr235525vsq.34.1611309056136;
+ Fri, 22 Jan 2021 01:50:56 -0800 (PST)
 MIME-Version: 1.0
-References: <1611128377-66216-1-git-send-email-abaci-bugfix@linux.alibaba.com>
-In-Reply-To: <1611128377-66216-1-git-send-email-abaci-bugfix@linux.alibaba.com>
+References: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com> <20210122092824.20971-3-guoqing.jiang@cloud.ionos.com>
+In-Reply-To: <20210122092824.20971-3-guoqing.jiang@cloud.ionos.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 22 Jan 2021 10:44:51 +0100
-Message-ID: <CAPDyKFq+byoyYW8GGnSx1GsbBx8Sci8Dqo2AAuapTyUmEHm_HQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Assign boolean values to a bool variable
-To:     Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
-Cc:     Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+Date:   Fri, 22 Jan 2021 10:50:20 +0100
+Message-ID: <CAPDyKFoPL4drfh3efKXyhXLp6Ce+j=oHwNd9VnVP4aaKQ0zmDQ@mail.gmail.com>
+Subject: Re: [PATCH V2 2/2] block: remove unnecessary argument from blk_execute_rq
+To:     Guoqing Jiang <guoqing.jiang@cloud.ionos.com>,
+        Jens Axboe <axboe@kernel.dk>
+Cc:     Christoph Hellwig <hch@infradead.org>, linux-nfs@vger.kernel.org,
+        linux-scsi <linux-scsi@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        linux-nvme@lists.infradead.org,
+        virtualization@lists.linux-foundation.org,
+        linux-block <linux-block@vger.kernel.org>,
+        linux-ide@vger.kernel.org, target-devel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 20 Jan 2021 at 08:39, Jiapeng Zhong
-<abaci-bugfix@linux.alibaba.com> wrote:
+On Fri, 22 Jan 2021 at 10:28, Guoqing Jiang
+<guoqing.jiang@cloud.ionos.com> wrote:
 >
-> Fix the following coccicheck warnings:
+> We can remove 'q' from blk_execute_rq as well after the previous change
+> in blk_execute_rq_nowait.
 >
-> ./drivers/mmc/host/atmel-mci.c:2436:2-34: WARNING: Assignment
-> of 0/1 to bool variable.
+> And more importantly it never really was needed to start with given
+> that we can trivial derive it from struct request.
 >
-> ./drivers/mmc/host/atmel-mci.c:2425:2-20: WARNING: Assignment
-> of 0/1 to bool variable.
->
-> Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-> Signed-off-by: Jiapeng Zhong <abaci-bugfix@linux.alibaba.com>
+> Cc: linux-scsi@vger.kernel.org
+> Cc: virtualization@lists.linux-foundation.org
+> Cc: linux-ide@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-nvme@lists.infradead.org
+> Cc: linux-nfs@vger.kernel.org
+> Signed-off-by: Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
 
-Applied for next, thanks!
+[...]
+
+>  drivers/mmc/core/block.c          | 10 +++++-----
+
+[...]
+
+From mmc point of view, please add:
+
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+At the moment I don't think this will conflict with any changes to
+mmc, but if that happens let's sort it then...
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/atmel-mci.c | 46 ++++++++++++++++++++++----------------------
->  1 file changed, 23 insertions(+), 23 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index 444bd3a..6324120 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -2401,45 +2401,45 @@ static void atmci_get_cap(struct atmel_mci *host)
->         dev_info(&host->pdev->dev,
->                         "version: 0x%x\n", version);
->
-> -       host->caps.has_dma_conf_reg = 0;
-> -       host->caps.has_pdc = 1;
-> -       host->caps.has_cfg_reg = 0;
-> -       host->caps.has_cstor_reg = 0;
-> -       host->caps.has_highspeed = 0;
-> -       host->caps.has_rwproof = 0;
-> -       host->caps.has_odd_clk_div = 0;
-> -       host->caps.has_bad_data_ordering = 1;
-> -       host->caps.need_reset_after_xfer = 1;
-> -       host->caps.need_blksz_mul_4 = 1;
-> -       host->caps.need_notbusy_for_read_ops = 0;
-> +       host->caps.has_dma_conf_reg = false;
-> +       host->caps.has_pdc = true;
-> +       host->caps.has_cfg_reg = false;
-> +       host->caps.has_cstor_reg = false;
-> +       host->caps.has_highspeed = false;
-> +       host->caps.has_rwproof = false;
-> +       host->caps.has_odd_clk_div = false;
-> +       host->caps.has_bad_data_ordering = true;
-> +       host->caps.need_reset_after_xfer = true;
-> +       host->caps.need_blksz_mul_4 = true;
-> +       host->caps.need_notbusy_for_read_ops = false;
->
->         /* keep only major version number */
->         switch (version & 0xf00) {
->         case 0x600:
->         case 0x500:
-> -               host->caps.has_odd_clk_div = 1;
-> +               host->caps.has_odd_clk_div = true;
->                 fallthrough;
->         case 0x400:
->         case 0x300:
-> -               host->caps.has_dma_conf_reg = 1;
-> -               host->caps.has_pdc = 0;
-> -               host->caps.has_cfg_reg = 1;
-> -               host->caps.has_cstor_reg = 1;
-> -               host->caps.has_highspeed = 1;
-> +               host->caps.has_dma_conf_reg = true;
-> +               host->caps.has_pdc = false;
-> +               host->caps.has_cfg_reg = true;
-> +               host->caps.has_cstor_reg = true;
-> +               host->caps.has_highspeed = true;
->                 fallthrough;
->         case 0x200:
-> -               host->caps.has_rwproof = 1;
-> -               host->caps.need_blksz_mul_4 = 0;
-> -               host->caps.need_notbusy_for_read_ops = 1;
-> +               host->caps.has_rwproof = true;
-> +               host->caps.need_blksz_mul_4 = false;
-> +               host->caps.need_notbusy_for_read_ops = true;
->                 fallthrough;
->         case 0x100:
-> -               host->caps.has_bad_data_ordering = 0;
-> -               host->caps.need_reset_after_xfer = 0;
-> +               host->caps.has_bad_data_ordering = false;
-> +               host->caps.need_reset_after_xfer = false;
->                 fallthrough;
->         case 0x0:
->                 break;
->         default:
-> -               host->caps.has_pdc = 0;
-> +               host->caps.has_pdc = false;
->                 dev_warn(&host->pdev->dev,
->                                 "Unmanaged mci version, set minimum capabilities\n");
->                 break;
-> --
-> 1.8.3.1
->
