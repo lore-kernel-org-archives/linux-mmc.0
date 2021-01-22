@@ -2,101 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02703C433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:14:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8C27C4361A
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:25:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B94EA238EE
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:14:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8B88023A82
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jan 2021 10:25:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726671AbhAVJte (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Jan 2021 04:49:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47612 "EHLO
+        id S1726654AbhAVJtd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jan 2021 04:49:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47226 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727325AbhAVJqt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 04:46:49 -0500
-Received: from mail-vk1-xa33.google.com (mail-vk1-xa33.google.com [IPv6:2607:f8b0:4864:20::a33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F334C0617A7
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:45:40 -0800 (PST)
-Received: by mail-vk1-xa33.google.com with SMTP id k9so1206873vke.4
-        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:45:40 -0800 (PST)
+        with ESMTP id S1726881AbhAVJpV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jan 2021 04:45:21 -0500
+Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2DFFC06174A
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:44:17 -0800 (PST)
+Received: by mail-lj1-x233.google.com with SMTP id u11so5732942ljo.13
+        for <linux-mmc@vger.kernel.org>; Fri, 22 Jan 2021 01:44:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=wvHhaTPdznpDywUc/uYNd5dQxldk3088mJzvH+35Vbg=;
-        b=TDs126xEQJD1ti8VqWb0+VqNx/qwF6Y8zwl+j7PLiLc6mf7oovLlt1p8RFh+lAQbvy
-         ijAuFHwBj021707lZGfQ6vyJ2G5f6L6VpvUpZ0brnUhfYtnizZ2ao/ZRyqejzo9SOu4W
-         hxceFYmGWpMkkDq7fmarku07kdNN8JHa2JfRpWwC0tjx5QKYzFgaYm98UMnEvmxsDp1z
-         HTMspjQjREDEmSzsxMW5isx9W5DY1DZE3y6TKe1hmVo2webk4rw/9xeySiotGM2stjls
-         GKqlwSyov0o2EcYRwDNwxhClYqTRgvQDoiCx2gbnHzNTVrFxLHUE66gB6gBgEUV8IrB0
-         H4fw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=cTGiS+heLDwMPrDkZxlriD+q4LmeVPglFgOPJ0siNp0=;
+        b=F256DV2QWsUrgpznESD2OlEkKF2ukvzZZQ4Aw7n2Favo/yBCwnRJAuhcbRhaKM5zdU
+         bxHC9I1Rz1ZQT3F5m0/QPSr+vUXIg4pRS2eVwESG8rUj1AOrgeUjkg3Y9MGGkuJBKbtr
+         OUcDgR/P9sQvA4ttAn0czDDG4KXivLXw3vIAHO2fhJpnBtRCOx1nsG4/WOPRopv03fp4
+         204Wc5EyzoVgB0qC1gRPYmjIHXdHivlXO5qsAIl5FcOEXuBepUd1OHrzVg3HgO/x9UIJ
+         ko3fCSZrNQoU1aj7Nm+w5YiXswlTi91ru8fi7fpV1RqUHRqtV7iIVUbgAbYav6z1TV37
+         78bA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=wvHhaTPdznpDywUc/uYNd5dQxldk3088mJzvH+35Vbg=;
-        b=kHdrwhl/ERDWdQ016nEhmk7MgOWzHZx68/cWz9jEf+QkFy0UakWq0L6VSo89CMrruN
-         MIrmHyyV9BhPFA57mnAP766imWuP1UD46LTmHNLB1HdOPB0eAcN5iweX8ZSz/YsfuGJH
-         wUqLK+M6wtL25X/rVuvU9CuZevR2sJb5PkoJzmNpVmU90Uj4epotNMel3exdo7nXWoI+
-         wSeNWWX2x6NHMl665xmCNZd9h/k8NAEPvQ6BK607JoEIiDI2Qos/k0J9IGGTak+SjDwJ
-         byRbKJB1tVIdnyL8lQ7A6HZDmI9IoO2uDnXrnrGS6JVCZ1p8q2wobLkKpPIiZ4pagw7/
-         mgvg==
-X-Gm-Message-State: AOAM533X0KKh+6XYMzORe3pxQ5vMDNNv22roQvZ09PK5zE4JGAn23QHn
-        kyqAzuAL10Hstf2t7pkuwRqmoC6atN9ya3s7e3I+eQ==
-X-Google-Smtp-Source: ABdhPJxFInzjt2t5iWXw+hGyhslaf/WF/hZSmKFuEeyY+Xur4Qh4zP1WtRcrELumIEDLg5G+gprwzRd6e+FBoI2Nutc=
-X-Received: by 2002:a1f:aecb:: with SMTP id x194mr2282842vke.6.1611308739834;
- Fri, 22 Jan 2021 01:45:39 -0800 (PST)
-MIME-Version: 1.0
-References: <20210120142801.334550-1-arnd@kernel.org>
-In-Reply-To: <20210120142801.334550-1-arnd@kernel.org>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=cTGiS+heLDwMPrDkZxlriD+q4LmeVPglFgOPJ0siNp0=;
+        b=XdCPAwJ/ABVGKuYVKfmVDlqiIWqjNfXKXuFSa/U7Z0Ke8FnmHBIK1vb/5npPvXqOPc
+         gFQY/t2WM4bPkb8cS2GMWYA1AAEBWGwqfU6zTBmXfvifwsfhgWjf6J9UU5ewKqSs45Mg
+         zuwxnjhU902haKVhWqjCWuThSR8ezNGmpZ72852FqDZQgI4LyiPYcRbPEuFWycc3vrag
+         HK8019F6yfbzyq5ahpbSgqF11q3jrri1a4OHh0PQmUVcfcNj9bDFvAK4YjsTW+05rfgP
+         vK6UmQhJNIVkxlQTG2r+ImV1bv7Y6oI9IX5SPNF99XfmwJ5bpGQbEN5uy5mbzZXJ/HWY
+         EZfw==
+X-Gm-Message-State: AOAM531EYrVsnIhYxplQZ4akvWVIr++KO/2XImJs0qEI4TNXhHx3KUSt
+        WBXUlP0moDGgsApZR6SgbClYSQ==
+X-Google-Smtp-Source: ABdhPJzqTqNqnW5z3kQ4JW34MX/y9yYZzWPkUDhZm5ktkPZgZQPJR/4+KJ/J1Q92gtO/sOA65aljdw==
+X-Received: by 2002:a2e:90d3:: with SMTP id o19mr1444028ljg.382.1611308655122;
+        Fri, 22 Jan 2021 01:44:15 -0800 (PST)
+Received: from localhost.localdomain (h-98-128-180-179.NA.cust.bahnhof.se. [98.128.180.179])
+        by smtp.gmail.com with ESMTPSA id n18sm820161lfh.37.2021.01.22.01.44.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 22 Jan 2021 01:44:14 -0800 (PST)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 22 Jan 2021 10:45:03 +0100
-Message-ID: <CAPDyKFq+R44LCE0OshYL39aoPPcYv4-iXudKDGZ3Q=wwL+0u8A@mail.gmail.com>
-Subject: Re: [PATCH 0/2] mmc: remove obsolete drivers
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>
-Content-Type: text/plain; charset="UTF-8"
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.11-rc5
+Date:   Fri, 22 Jan 2021 10:44:13 +0100
+Message-Id: <20210122094413.69488-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 20 Jan 2021 at 15:28, Arnd Bergmann <arnd@kernel.org> wrote:
->
-> From: Arnd Bergmann <arnd@arndb.de>
->
-> A few Arm platforms are getting removed in v5.12, this removes
-> the corresponding mmc drivers.
->
-> Link: https://lore.kernel.org/linux-arm-kernel/20210120124812.2800027-1-arnd@kernel.org/T/
->
->
-> Arnd Bergmann (2):
->   mmc: remove dw_mmc-zx driver
->   mmc: remove sirf prima/atlas driver
->
->  .../devicetree/bindings/mmc/sdhci-sirf.txt    |  18 --
->  .../devicetree/bindings/mmc/zx-dw-mshc.txt    |  31 ---
->  drivers/mmc/host/Kconfig                      |  21 --
->  drivers/mmc/host/Makefile                     |   2 -
->  drivers/mmc/host/dw_mmc-zx.c                  | 234 -----------------
->  drivers/mmc/host/dw_mmc-zx.h                  |  32 ---
->  drivers/mmc/host/sdhci-sirf.c                 | 235 ------------------
->  7 files changed, 573 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-sirf.txt
->  delete mode 100644 Documentation/devicetree/bindings/mmc/zx-dw-mshc.txt
->  delete mode 100644 drivers/mmc/host/dw_mmc-zx.c
->  delete mode 100644 drivers/mmc/host/dw_mmc-zx.h
->  delete mode 100644 drivers/mmc/host/sdhci-sirf.c
+Hi Linus,
 
-Applied for next, thanks!
+Here's a PR with a couple of MMC fixes intended for v5.11-rc5. Details about the
+highlights are as usual found in the signed tag.
+
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
+
+
+The following changes since commit 7c53f6b671f4aba70ff15e1b05148b10d58c2837:
+
+  Linux 5.11-rc3 (2021-01-10 14:34:50 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.11-rc3
+
+for you to fetch changes up to b503087445ce7e45fabdee87ca9e460d5b5b5168:
+
+  mmc: core: don't initialize block size from ext_csd if not present (2021-01-15 12:09:15 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix initialization of block size when ext_csd isn't present
+
+MMC host:
+ - sdhci-brcmstb: Fix mmc timeout errors on S5 suspend
+ - sdhci-of-dwcmshc: Fix request accessing RPMB
+ - sdhci-xenon: Fix 1.8v regulator stabilization
+
+----------------------------------------------------------------
+Al Cooper (1):
+      mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend
+
+Alex Leibovich (1):
+      mmc: sdhci-xenon: fix 1.8v regulator stabilization
+
+Jisheng Zhang (1):
+      mmc: sdhci-of-dwcmshc: fix rpmb access
+
+Peter Collingbourne (1):
+      mmc: core: don't initialize block size from ext_csd if not present
+
+ drivers/mmc/core/queue.c            |  4 +++-
+ drivers/mmc/host/sdhci-brcmstb.c    |  6 +-----
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 27 +++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-xenon.c      |  7 ++++++-
+ 4 files changed, 37 insertions(+), 7 deletions(-)
