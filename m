@@ -2,96 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5020C433DB
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Jan 2021 22:52:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44DA3C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 01:25:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A113B22581
-	for <linux-mmc@archiver.kernel.org>; Sun, 24 Jan 2021 22:52:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D0CB22C9F
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 01:25:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726398AbhAXWwj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Jan 2021 17:52:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41850 "EHLO
+        id S1726678AbhAYBZN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Jan 2021 20:25:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726007AbhAXWwi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Jan 2021 17:52:38 -0500
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBD53C061573
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 14:51:57 -0800 (PST)
-Received: by mail-lj1-x22e.google.com with SMTP id a25so11954927ljn.0
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 14:51:57 -0800 (PST)
+        with ESMTP id S1726694AbhAYBYu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Jan 2021 20:24:50 -0500
+Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 466F8C06174A
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 17:24:10 -0800 (PST)
+Received: by mail-pg1-x532.google.com with SMTP id n7so7855576pgg.2
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 17:24:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4HuGZS3FXmpI/CZ9WRJi1GTxY4eR6JlbnQlmIWJDvhs=;
-        b=NUPplP+vwWcGNZku67kF6v0Zc3+oX52TgC4UVnC9NbzphbJ7yOo3lZgx0NHXvAzi4/
-         xnRCAIHE0ruAJ8HvkZDbaiyl/5VEQFlcXHUyUOg5W0tXmw8xRR/9ZGxYRibTCKQd2Em3
-         JGzKjFrj8IqxAGlyzt9x8qfsWUU1NwCPVqpRz2nhXoRxd+1G7sHECm9fdWqcPoKOiUDE
-         xoPn9xr3ZkalTIBSogHq2aR3gkTcYeyYoFzZivXKeIY/XR4ENYkwdlJ7WamTamtbwtXi
-         hTYSsVxmsDFQD9NO4GyfrEW+6KtsLs3TFca+J5YdXQ+PCtX8ME9+98DFYwf/wy+DY0Rd
-         Gc0g==
+        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=MSpVHwkCX6jn2zmjsM3ERb1RCWT/CaWYVTGYkGxLPMQ=;
+        b=cANH8e1JsQWWCA6K7c2yEeTbdiEO1GVf52BOvOvHMuuzuOwLMbDpTIG8lwpolK0icK
+         0L3S/ocwk1bn0K4m4mezLZfUoMQFkPMVdzF0swABRaRDvhjPdS//d4rYF/hhSVlIj0e5
+         GCTjUL4+USqxWngHHgmkMMISuZnFlCQ/DjAcXqZTPP+gCqtwV9N6H5Us2R2RTf4/Wm3l
+         v9dC6xJ3eOcxO2kdzsIP9/VK8pDSh3vIrWiQigEURvRp6ZKeNDds2ga8oMas6khTZbUU
+         bAXCXf9s6wkbPhLdiUZZx1F3c1+XzZivD4vAPVU1i93DCZ5GpPiHbaFqNE9Ar2HplqEB
+         J7+g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4HuGZS3FXmpI/CZ9WRJi1GTxY4eR6JlbnQlmIWJDvhs=;
-        b=R37BBGAzrei2wrGj+AI/5ts1DtbrbGXOATnjtPOa/933RqIEAK7MPWTpBD/RsPdFWI
-         0Anatw84xFK7p+x+GBXKF5YYI1IdM3KXjfwSxDRsp/hAdWkwJQ1XjPF5sISI/zx1OqQJ
-         FdmGF44lGyiq277c7eyW/HfnpIWaE/9zqHVjjK7d5uoVFtxunuLmOhprzvPmj7TaKrsx
-         NZRYalGipFfs1yDfonkwiDFritEaOehWepPzJX9UjvQtv9cemWxdwFd13ZrgevULbMur
-         jNyfAbZfnaZkxAQO7hfB5Khd36JkqxC0RK+WVYSZWfDjDh2Z6zO16ZGqOVObR/jpHMxx
-         4W8w==
-X-Gm-Message-State: AOAM5323WARdrgSZu7N/VIKliP7xXd3wfNNqU0s5lK2YN3wPIw3DUpZy
-        89qNuAtCC84HEkTGlodOasz0ZwSkHJNlB4vCNLCSdw==
-X-Google-Smtp-Source: ABdhPJxQyfKzJabalN+bedwoS7NGWpYLLpd54boyq2sKBZ7lVn6U5490067UEc04d3r+vv3OMoYA394NyqYfuciT6KQ=
-X-Received: by 2002:a2e:9ec3:: with SMTP id h3mr120887ljk.200.1611528716487;
- Sun, 24 Jan 2021 14:51:56 -0800 (PST)
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=MSpVHwkCX6jn2zmjsM3ERb1RCWT/CaWYVTGYkGxLPMQ=;
+        b=CMAcIYbHR4iOOHTTQ1VJTpxjrBxBUHcDQhMPmZNrUe5YgOKC2dU9frkpzfr4LlGCbO
+         jC1QyZzW15FJc3u2NoF5Qi7nHIcOyfTIpPrPe+NODueQe8ZV+9P2w5UQYI6ZiYfQAtFb
+         MxaR1IvPFhn8FSNXN12rRMEipFo/m2EmCSZotI+zyMsOZJAvwD8qMRITYwXRhhgYsZbC
+         DlA9cGW68EAPyKS3uBO5JEOZaX69OCLARyLiPvFPQlsG9sJWzIbkUUrk6svGCYLBUOAu
+         zkxjmmvfKYFJt9/L621TzQtqTPbMI8llezvpOysWG3U34f3w0EQwCpFBhFDmPzokfJiq
+         BS/g==
+X-Gm-Message-State: AOAM531s8JMwgtQ5sLcn9TDPPYrVE40KETqFxgrWqZINkY0WjelEs15l
+        gAnrHlJkHCxwSkbIeDBkcnL3I8cYpoT9qQ==
+X-Google-Smtp-Source: ABdhPJwGmmoJHjWbM4oOrfmGt+RyPavosTLmBxchZDys8SFvm/6ZSwmX7zSbzb/FwCp9pNaqXVDW9g==
+X-Received: by 2002:a63:e30d:: with SMTP id f13mr8331115pgh.39.1611537849731;
+        Sun, 24 Jan 2021 17:24:09 -0800 (PST)
+Received: from [192.168.4.41] (cpe-72-132-29-68.dc.res.rr.com. [72.132.29.68])
+        by smtp.gmail.com with ESMTPSA id b18sm15216556pfi.173.2021.01.24.17.24.07
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 24 Jan 2021 17:24:08 -0800 (PST)
+Subject: Re: [PATCH V2 0/2] remove unused argument from blk_execute_rq_nowait
+ and blk_execute_rq
+To:     Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+Cc:     linux-block@vger.kernel.org, target-devel@vger.kernel.org,
+        linux-scsi@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-nfs@vger.kernel.org,
+        hch@infradead.org
+References: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com>
+From:   Jens Axboe <axboe@kernel.dk>
+Message-ID: <683e16be-1146-e60c-cfea-e4606844f080@kernel.dk>
+Date:   Sun, 24 Jan 2021 18:24:07 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-References: <20210124170258.32862-1-marex@denx.de>
-In-Reply-To: <20210124170258.32862-1-marex@denx.de>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sun, 24 Jan 2021 23:51:45 +0100
-Message-ID: <CACRpkdaLN_Q9rmMnuVhB8wuZJzMMzqdc+O54WOKfc4a2bgnUwQ@mail.gmail.com>
-Subject: Re: [PATCH V2 1/4] mmc: mmci: Add bindings to operate CMD, CK, CKIN
- pins as GPIO
-To:     Marek Vasut <marex@denx.de>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Jan 24, 2021 at 6:03 PM Marek Vasut <marex@denx.de> wrote:
+On 1/22/21 2:28 AM, Guoqing Jiang wrote:
+> V2 changes:
+> 1. update commit header per Christoph's comment.
+> 
+> Hi Jens,
+> 
+> This series remove unused 'q' from blk_execute_rq_nowait and blk_execute_rq.
+> Also update the comment for blk_execute_rq_nowait.
 
-> Add DT bindings to describe GPIO line associated with CMD, CK, CKIN pins.
->
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> Cc: Alexandre Torgue <alexandre.torgue@st.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> Cc: devicetree@vger.kernel.org
-> ---
-> V2: Rebase on next-20210122
+What's this against? The lightnvm patch doesn't apply.
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+-- 
+Jens Axboe
 
-I would probably add an example as well, but that can be
-done separately and isn't super-important.
-
-Yours,
-Linus Walleij
