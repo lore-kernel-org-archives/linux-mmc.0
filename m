@@ -2,125 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 069F5C43381
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:19:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEC68C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:24:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D4BE0207B6
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:19:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 96BDA2074B
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:24:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731305AbhAYVRr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Jan 2021 16:17:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48978 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732560AbhAYVRj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2021 16:17:39 -0500
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 19170C061756
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2021 13:16:32 -0800 (PST)
-Received: by mail-pf1-x42d.google.com with SMTP id o20so9164066pfu.0
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2021 13:16:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=+xXlGKTVDgIyvWhOoljB9Gs9FebPS3Flyvxw1e08Ee4=;
-        b=NdK/uI7VhBO9KWdGbLnVxZKhox4QUgowO1vpru6G1PeartHOjKFh8WvQlF0fhdPl5q
-         mIKgSpdJ+WvOOnLJcgqMvgONzmyPe9PDyw/yFcX33n45HgJJgmlsXSx1kuaMomVt/N5W
-         osFpkbr1DVcEkYoEXaU4vIk52KZkVSFgS8YkpLIzU64oGgcI44BzqlTlKjLIJL0DTace
-         ENKiFrM+ATIX/9iI2oSLmKgx6mpwqfBObVg+NvFCBLfMfULuFtG+WiOFZ/7vf7IAAu12
-         3ArfEIKUs/wSdNPilvkqKr33g5B8lK38kWT9GMJff3a7tx0lRCfU+eHbtkOMLLbtL01t
-         Ymeg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=+xXlGKTVDgIyvWhOoljB9Gs9FebPS3Flyvxw1e08Ee4=;
-        b=F68Rt3KHLZK7XsSuo4/V/LmegZLvlxtA6NepUe7glESY+50dCfnODSEyFvQFDi++Np
-         qMtiQGDg13R8+xgQ4xsgmdXqp7FU0gCLnaCaMj9ZAy78z6dQ/77VJnTP0WdhQET4b6Rv
-         QAHFBSE8mLybCreNrA+U591kmA1sDYVtpsTkD4dyAjVWtPrCJn+miS4fRBkQaOQyII7A
-         VW6cDBsej5cXHtXvQl7h3X6qKAGqTI8/2kDSOFYWExMQnyvq1DkqGDBg1NXXUZnnmXSd
-         b08/axRiadTDNpbOwxD9PlgVEYP+YExRJFJfkSBBuTwCt2ghaFxD/gAdmHTjUE+wVHZk
-         Vpdw==
-X-Gm-Message-State: AOAM533R7rWpIfufYQpUzUIZGdb3wR+o4Ww/H6UZGGoWm8FS+r/Kanoi
-        hyZfJuRtz8OB4Z7D/yRNyZhLbQ==
-X-Google-Smtp-Source: ABdhPJwzuZn6IAHaUTKcz4pq9UDRKZp32og5hS04jcTF9nG6ejx0eeknVKsRuMOrUgoTmKNsC5GZKA==
-X-Received: by 2002:a65:6290:: with SMTP id f16mr2400670pgv.69.1611609391559;
-        Mon, 25 Jan 2021 13:16:31 -0800 (PST)
-Received: from [192.168.4.41] (cpe-72-132-29-68.dc.res.rr.com. [72.132.29.68])
-        by smtp.gmail.com with ESMTPSA id 6sm17653269pfz.34.2021.01.25.13.16.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 25 Jan 2021 13:16:30 -0800 (PST)
-Subject: Re: [PATCH 1/2] block/keyslot-manager: introduce devm_blk_ksm_init()
-To:     Eric Biggers <ebiggers@kernel.org>,
+        id S1732651AbhAYVXj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Jan 2021 16:23:39 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33624 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1732605AbhAYVW0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Jan 2021 16:22:26 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8991720719;
+        Mon, 25 Jan 2021 21:21:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1611609700;
+        bh=z87QTkRSd+XZgm1xX6rbNmFYErK8Hx+A8b/nVcwjafQ=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=eRMk6NoCYdyxGwPnOq88HKPT4ngh3uMdH95F+meH3edFPsjPpliSeg8dVUP7nhlK0
+         bPTa/ct7ZgTdRXi/Bwbkj7oDNr7zyV1ExZuVu3hR7ULee3r2/t/6s942YfUHnqp9M9
+         ZinRsW8WseK9qU9FyJnrWwP8cj/b4Amt67UwxeR62vfkS6rUzpnRSwDcZb0NY8Uu6o
+         qI+a2t8bytpKpA/yLulc5PKWjNUye3F7YPqm46Va4vQrtrGPjLQuS0LX1ZjX7I7si4
+         Tp+GFttjkl9nf0Owbun9f1gVgDY2bbc/rQF9KCJSHPd7nKX5bVdDIk1mr790YTcEx4
+         VsbfMktcZGA8A==
+Date:   Mon, 25 Jan 2021 13:21:39 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "James E.J. Bottomley" <jejb@linux.ibm.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        linux-block <linux-block@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
         Satya Tangirala <satyat@google.com>
-Cc:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 0/2] Resource-managed blk_ksm_init()
+Message-ID: <YA82Y43vGr30v7Ml@gmail.com>
 References: <20210121082155.111333-1-ebiggers@kernel.org>
- <20210121082155.111333-2-ebiggers@kernel.org>
- <CAA+FYZerh02JXSKghCKuG29ATdYU_=2O93moGnLgD6Jv2v2auQ@mail.gmail.com>
- <YA8pMDqHsKZA0zfR@sol.localdomain>
-From:   Jens Axboe <axboe@kernel.dk>
-Message-ID: <3b1b6a94-f283-e8a3-8638-6475d0323c30@kernel.dk>
-Date:   Mon, 25 Jan 2021 14:16:29 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ <CAPDyKFrLn_4Csxc6BeRR0-zY+_RQuNqNSF9SmKk3Bx2WFJJ_Ag@mail.gmail.com>
+ <2d03dda2-adaf-a44a-922d-f3770e3da8f4@kernel.dk>
 MIME-Version: 1.0
-In-Reply-To: <YA8pMDqHsKZA0zfR@sol.localdomain>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2d03dda2-adaf-a44a-922d-f3770e3da8f4@kernel.dk>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/25/21 1:25 PM, Eric Biggers wrote:
-> On Mon, Jan 25, 2021 at 12:14:00PM -0800, Satya Tangirala wrote:
->> On Thu, Jan 21, 2021 at 12:23 AM Eric Biggers <ebiggers@kernel.org> wrote:
->>>
->>> From: Eric Biggers <ebiggers@google.com>
->>>
->>> Add a resource-managed variant of blk_ksm_init() so that drivers don't
->>> have to worry about calling blk_ksm_destroy().
->>>
->>> Note that the implementation uses a custom devres action to call
->>> blk_ksm_destroy() rather than switching the two allocations to be
->>> directly devres-managed, e.g. with devm_kmalloc().  This is because we
->>> need to keep zeroing the memory containing the keyslots when it is
->>> freed, and also because we want to continue using kvmalloc() (and there
->>> is no devm_kvmalloc()).
->>>
->>> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> [..]
->>> diff --git a/include/linux/keyslot-manager.h b/include/linux/keyslot-manager.h
->>> index 18f3f5346843f..443ad817c6c57 100644
->>> --- a/include/linux/keyslot-manager.h
->>> +++ b/include/linux/keyslot-manager.h
->>> @@ -85,6 +85,9 @@ struct blk_keyslot_manager {
->>>
->>>  int blk_ksm_init(struct blk_keyslot_manager *ksm, unsigned int num_slots);
->>>
->>> +int devm_blk_ksm_init(struct device *dev, struct blk_keyslot_manager *ksm,
->>> +                     unsigned int num_slots);
->>> +
->>>  blk_status_t blk_ksm_get_slot_for_key(struct blk_keyslot_manager *ksm,
->>>                                       const struct blk_crypto_key *key,
->>>                                       struct blk_ksm_keyslot **slot_ptr);
->>> --
->>
->> Looks good to me. Please feel free to add
->> Reviewed-by: Satya Tangirala <satyat@google.com>
+On Mon, Jan 25, 2021 at 02:14:32PM -0700, Jens Axboe wrote:
+> On 1/21/21 5:50 AM, Ulf Hansson wrote:
+> > + Jens, Martin, James
+> > 
+> > 
+> > On Thu, 21 Jan 2021 at 09:23, Eric Biggers <ebiggers@kernel.org> wrote:
+> >>
+> >> This patchset adds a resource-managed variant of blk_ksm_init() so that
+> >> drivers don't have to worry about calling blk_ksm_destroy().
+> >>
+> >> This was suggested during review of my patchset which adds eMMC inline
+> >> encryption support
+> >> (https://lkml.kernel.org/linux-mmc/20210104184542.4616-1-ebiggers@kernel.org/T/#u).
+> >> That patchset proposes a second caller of blk_ksm_init().  But it can
+> >> instead use the resource-managed variant, as can the UFS driver.
+> >>
+> >> My preference is that patch #1 be taken through the MMC tree together
+> >> with my MMC patchset, so that we don't have to wait an extra cycle for
+> >> the MMC changes.  Patch #2 can then go in later.
+> > 
+> > Sure, I can pick patch #1 through my mmc tree, but need an ack from
+> > Jens to do it. Or whatever he prefers.
 > 
-> Thanks Satya.  Jens, any objection to this patch going in through the MMC tree?
+> Or we can take it through the block tree, usually the easiest as
+> it's the most likely source of potential conflicts. And that's true
+> for both of them, as long as the SCSI side signs off on patch 2/2.
+> 
 
-No objections from me, doesn't look like we have any real worries of
-conflicts.
+As I mentioned, the issue is that my patchset to add eMMC inline encryption
+support (https://lkml.kernel.org/r/20210121090140.326380-1-ebiggers@kernel.org)
+depends on devm_blk_ksm_init(), as it was requested during review.
 
--- 
-Jens Axboe
+So if devm_blk_ksm_init() goes in through the block tree, Ulf won't be able to
+take the eMMC patchset for 5.12.
 
+- Eric
