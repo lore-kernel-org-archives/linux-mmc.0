@@ -2,124 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FC56C433DB
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 19:13:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E415C433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 19:13:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1B1BB22A84
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 19:13:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 66A6322A84
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 19:13:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388988AbhAZFz4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 00:55:56 -0500
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:2666 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729382AbhAYOUt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2021 09:20:49 -0500
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 10PEGlfg032259;
-        Mon, 25 Jan 2021 15:19:54 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=oMdkZm40ACOSf8auj1kXawbXsXZ+gWEYe1elBBMLiag=;
- b=j8cgtIVdYfjqPMV3wigODycdPHCm2aHPbf/+HQ4Uyt0mz+CEozez1LIPnx/D9++Hhmbh
- nr8UZ1mfDwqsorBbgn2y+mHZSky6TzAbyrQLzLCUvyuQ0BYxHAbE6NvQMoqR5tt5b+kW
- 5Tr8jP/GJWpc5KmglXnXgD9V1QavGJoNB4oHsaAIkxMPJp2BORCddxvaUV4X9bV3/QfM
- to4MtZZd5JvKyyPGDN3QnStlIL5didXmPUnPf7Be0+CEM2ILe2ZZDGrfbP8ZddAXQ7DT
- ehjVEK/eiyUhVZ0oxgAe8x9i0lkJHBSezFsJwWhLD2L+GfyxSXfPjCS10jXFcHhWzL0f PA== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 3689tdkmvc-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 25 Jan 2021 15:19:54 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 9D07110002A;
-        Mon, 25 Jan 2021 15:19:52 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 8974B2AD9F7;
-        Mon, 25 Jan 2021 15:19:52 +0100 (CET)
-Received: from lmecxl0912.lme.st.com (10.75.127.49) by SFHDAG2NODE3.st.com
- (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Mon, 25 Jan
- 2021 15:19:52 +0100
-Subject: Re: [PATCH V2 4/4] ARM: dts: stm32: Enable voltage translator
- auto-detection on DHCOM
-To:     Marek Vasut <marex@denx.de>, <linux-mmc@vger.kernel.org>
-CC:     Alexandre Torgue <alexandre.torgue@st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>
-References: <20210124170258.32862-1-marex@denx.de>
- <20210124170258.32862-4-marex@denx.de>
-From:   Alexandre TORGUE <alexandre.torgue@foss.st.com>
-Message-ID: <6d8a1479-e9e7-27ad-6d41-d6d0e586c543@foss.st.com>
-Date:   Mon, 25 Jan 2021 15:19:51 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S1732328AbhAZFzx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 00:55:53 -0500
+Received: from mail.kernel.org ([198.145.29.99]:38422 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728178AbhAYMki (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Jan 2021 07:40:38 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B967F2310C;
+        Mon, 25 Jan 2021 12:28:05 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1611577688;
+        bh=zrGnvmXulEw+Ps4sGkdPh+BXUTzR8G54IaR9EQXhkXs=;
+        h=From:To:Cc:Subject:Date:From;
+        b=gXf/rN+F7ALFrI+/fFCV+sAuUgXj/71PUoThimfacmVwKjxGvT2oHlYXX6/EIZmw6
+         REPaggAnMj1+7Taq0ZdiktFiBmP0GEstg0K9ItrSb3Z4xe5BAq7JDl1RAr0JLa+LUO
+         zdIVcEdNZrEz1LDBc0Ta1DfbkYkii2R/4Vh3Nll2a49dzVDHdGPZWHk4P31Fwy0drj
+         SMg9yUwrxSj9MlzQL9/3+QgleFcf2Nxidi0LdUlkfSPERngc6ZJEg7muSLA+BEB90R
+         qMj0Wiq369B/gHNtYTwbsll5jH5DQqGugxuv7de6Akl5MED45Li4AY86SuH+Fues8r
+         FGIad8esWIPRQ==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andrew Jeffery <andrew@aj.id.au>, Joel Stanley <joel@jms.id.au>
+Cc:     Arnd Bergmann <arnd@arndb.de>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: [PATCH] mmc: aspeed: move kunit test into separate module
+Date:   Mon, 25 Jan 2021 13:27:27 +0100
+Message-Id: <20210125122802.982-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-In-Reply-To: <20210124170258.32862-4-marex@denx.de>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.49]
-X-ClientProxiedBy: SFHDAG3NODE2.st.com (10.75.127.8) To SFHDAG2NODE3.st.com
- (10.75.127.6)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
- definitions=2021-01-25_04:2021-01-25,2021-01-25 signatures=0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Marek
+From: Arnd Bergmann <arnd@arndb.de>
 
-On 1/24/21 6:02 PM, Marek Vasut wrote:
-> The DHCOM SoM uSD slot has an optional voltage level translator, add
-> DT bindings which permit the MMCI driver to detect the translator
-> automatically.
-> 
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> Cc: Alexandre Torgue <alexandre.torgue@st.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> ---
-> V2: Rebase on next-20210122
-> ---
->   arch/arm/boot/dts/stm32mp15xx-dhcom-som.dtsi | 7 ++++++-
->   1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/arch/arm/boot/dts/stm32mp15xx-dhcom-som.dtsi b/arch/arm/boot/dts/stm32mp15xx-dhcom-som.dtsi
-> index ff70bd03a017..661d8d071296 100644
-> --- a/arch/arm/boot/dts/stm32mp15xx-dhcom-som.dtsi
-> +++ b/arch/arm/boot/dts/stm32mp15xx-dhcom-som.dtsi
-> @@ -408,14 +408,19 @@ &rtc {
->   };
->   
->   &sdmmc1 {
-> -	pinctrl-names = "default", "opendrain", "sleep";
-> +	pinctrl-names = "default", "opendrain", "sleep", "init";
->   	pinctrl-0 = <&sdmmc1_b4_pins_a &sdmmc1_dir_pins_a>;
->   	pinctrl-1 = <&sdmmc1_b4_od_pins_a &sdmmc1_dir_pins_a>;
->   	pinctrl-2 = <&sdmmc1_b4_sleep_pins_a &sdmmc1_dir_sleep_pins_a>;
-> +	pinctrl-3 = <&sdmmc1_b4_init_pins_a &sdmmc1_dir_init_pins_a>;
->   	cd-gpios = <&gpiog 1 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
->   	disable-wp;
->   	st,sig-dir;
->   	st,neg-edge;
-> +	st,use-ckin;
-> +	st,cmd-gpios = <&gpiod 2 0>;
-> +	st,ck-gpios = <&gpioc 12 0>;
-> +	st,ckin-gpios = <&gpioe 4 0>;
->   	bus-width = <4>;
->   	vmmc-supply = <&vdd_sd>;
->   	status = "okay";
-> 
+Having both the driver and the unit test in the same module
+leads to a link failure because of the extra init/exit functions:
 
-DT patches applied on stm32-next.
+drivers/mmc/host/sdhci-of-aspeed-test.c:98:1: error: redefinition of '__inittest'
+kunit_test_suite(aspeed_sdhci_test_suite);
 
-Thanks
-Alex
+Make it a separate module instead.
+
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/Kconfig                |  2 +-
+ drivers/mmc/host/Makefile               |  1 +
+ drivers/mmc/host/sdhci-of-aspeed-test.c |  5 +++++
+ drivers/mmc/host/sdhci-of-aspeed.c      | 11 ++++-------
+ drivers/mmc/host/sdhci-of-aspeed.h      | 10 ++++++++++
+ 5 files changed, 21 insertions(+), 8 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-of-aspeed.h
+
+diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+index d6f00d1d6251..a248f9f6be91 100644
+--- a/drivers/mmc/host/Kconfig
++++ b/drivers/mmc/host/Kconfig
+@@ -169,7 +169,7 @@ config MMC_SDHCI_OF_ASPEED
+ 	  If unsure, say N.
+ 
+ config MMC_SDHCI_OF_ASPEED_TEST
+-	bool "Tests for the ASPEED SDHCI driver"
++	tristate "Tests for the ASPEED SDHCI driver"
+ 	depends on MMC_SDHCI_OF_ASPEED && KUNIT=y
+ 	help
+ 	  Enable KUnit tests for the ASPEED SDHCI driver. Select this
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 451c25fc2c69..5cc7e5f13587 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -90,6 +90,7 @@ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+ obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)	+= sdhci-of-aspeed.o
++obj-$(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)  += sdhci-of-aspeed-test.o
+ obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
+diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
+index 34070605b28b..e7e42991534a 100644
+--- a/drivers/mmc/host/sdhci-of-aspeed-test.c
++++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
+@@ -2,6 +2,7 @@
+ /* Copyright (C) 2020 IBM Corp. */
+ 
+ #include <kunit/test.h>
++#include "sdhci-of-aspeed.h"
+ 
+ static void aspeed_sdhci_phase_ddr52(struct kunit *test)
+ {
+@@ -96,3 +97,7 @@ static struct kunit_suite aspeed_sdhci_test_suite = {
+ 	.test_cases = aspeed_sdhci_test_cases,
+ };
+ kunit_test_suite(aspeed_sdhci_test_suite);
++
++MODULE_DESCRIPTION("Unit test for the ASPEED SD/SDIO/SDHCI Controllers");
++MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
++MODULE_LICENSE("GPL");
+diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+index 3b0d381e1215..dcc80099f528 100644
+--- a/drivers/mmc/host/sdhci-of-aspeed.c
++++ b/drivers/mmc/host/sdhci-of-aspeed.c
+@@ -15,6 +15,7 @@
+ #include <linux/platform_device.h>
+ #include <linux/spinlock.h>
+ 
++#include "sdhci-of-aspeed.h"
+ #include "sdhci-pltfm.h"
+ 
+ #define ASPEED_SDC_INFO			0x00
+@@ -42,7 +43,6 @@ struct aspeed_sdc {
+ struct aspeed_sdhci_tap_param {
+ 	bool valid;
+ 
+-#define ASPEED_SDHCI_TAP_PARAM_INVERT_CLK	BIT(4)
+ 	u8 in;
+ 	u8 out;
+ };
+@@ -123,8 +123,8 @@ aspeed_sdc_set_phase_taps(struct aspeed_sdc *sdc,
+ #define ASPEED_SDHCI_NR_TAPS		15
+ /* Measured value with *handwave* environmentals and static loading */
+ #define ASPEED_SDHCI_MAX_TAP_DELAY_PS	1253
+-static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+-				     int phase_deg)
++int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
++			      int phase_deg)
+ {
+ 	u64 phase_period_ps;
+ 	u64 prop_delay_ps;
+@@ -158,6 +158,7 @@ static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+ 
+ 	return inverted | tap;
+ }
++EXPORT_SYMBOL_GPL(aspeed_sdhci_phase_to_tap);
+ 
+ static void
+ aspeed_sdhci_phases_to_taps(struct device *dev, unsigned long rate,
+@@ -579,10 +580,6 @@ static void __exit aspeed_sdc_exit(void)
+ }
+ module_exit(aspeed_sdc_exit);
+ 
+-#if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
+-#include "sdhci-of-aspeed-test.c"
+-#endif
+-
+ MODULE_DESCRIPTION("Driver for the ASPEED SD/SDIO/SDHCI Controllers");
+ MODULE_AUTHOR("Ryan Chen <ryan_chen@aspeedtech.com>");
+ MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
+diff --git a/drivers/mmc/host/sdhci-of-aspeed.h b/drivers/mmc/host/sdhci-of-aspeed.h
+new file mode 100644
+index 000000000000..931e70781d08
+--- /dev/null
++++ b/drivers/mmc/host/sdhci-of-aspeed.h
+@@ -0,0 +1,10 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++#ifndef _SDHCI_OF_ASPEED_H
++#define _SDHCI_OF_ASPEED_H
++
++struct device;
++int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
++			      int phase_deg);
++#define ASPEED_SDHCI_TAP_PARAM_INVERT_CLK	BIT(4)
++
++#endif /* _SDHCI_OF_ASPEED_H */
+-- 
+2.29.2
+
