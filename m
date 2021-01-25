@@ -7,30 +7,30 @@ X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B609C433DB
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:56:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7A2AC43381
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:56:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 19DA9221EA
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:56:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA32B207B1
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:56:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2388999AbhAZF4C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 00:56:02 -0500
-Received: from mail.kernel.org ([198.145.29.99]:57724 "EHLO mail.kernel.org"
+        id S1728538AbhAZF4e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 00:56:34 -0500
+Received: from mail.kernel.org ([198.145.29.99]:58164 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727146AbhAYSlL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 Jan 2021 13:41:11 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C87BE2067B;
-        Mon, 25 Jan 2021 18:40:29 +0000 (UTC)
+        id S1726616AbhAYSlx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Jan 2021 13:41:53 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E42F02074B;
+        Mon, 25 Jan 2021 18:40:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611600030;
-        bh=R8sFfCHubgkOU0cGm4n8neybL2+MAy4yCvazMFWKA44=;
+        s=k20201202; t=1611600033;
+        bh=yKVzEkVKDl7uInjhgl+8i9Z04rJES7ElWiONfmMl4Mo=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=cROb1MxAnT7aYWfElG3bDQ0x7OYvctkn1KCepPCBge2qxsxW73g1aikMjNTYze4UY
-         jQ6xABO7ZyDLBIEWp0SHdPASaSw+Ioncv5b/is/WD/zcgBFCV6IbFTWSyGZwVfhFs3
-         f8iDtqYJ/z+cKQnCJfFh46x8h29lsXfUk8BxqPGtl2Tl2Y/KErVj90aNsdEqYw/4i9
-         LA9oAW+czD/T/b50VzXs1fZJ2RlRdp1FloKOPVoyFwqsqim4VbcBzff2oYrVsc+VU6
-         p4o8+3WGAdN9kSjqE7AyaoaZhie/mSJbEZ85mb1Xvo1ubmzqU/juRcgX577Tz6jwG6
-         UotaeY1TfxM1Q==
+        b=Xez6CDhgp9rvpqTaTz3BUlc/FARK/r64iwY7iI6IEqyWlMMwNaTtjh9YcKA4aOTsM
+         FOs7PIzPK+xhaqcPa0Zgc/ovm3gyeZAP0j4xzDAUAxoxVo4wTnLFhuhf7W8Ok+UAvS
+         kQFCj0m+UrXBsw676VAv0VFZpJf67eJe6Jqc/OaKEvsxfWYDHz+JfhB0M0Fx9m1HvC
+         ogLvg+tjYwIIkMiJRK0Go1bwC56Qk6PirUe/9ZG5WdC+cyGjJ3/SH7GdoI0bX+b02V
+         uEDhIOy3E8vCUDBPqn+mIy+Q1Dl6A3vgpbUKHWW/q+ig3mnsK8IVMCzhf+5Yw5faQ4
+         44OihUmMiMv5A==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
@@ -46,9 +46,9 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v6 1/9] mmc: add basic support for inline encryption
-Date:   Mon, 25 Jan 2021 10:38:02 -0800
-Message-Id: <20210125183810.198008-2-ebiggers@kernel.org>
+Subject: [PATCH v6 6/9] firmware: qcom_scm: update comment for ICE-related functions
+Date:   Mon, 25 Jan 2021 10:38:07 -0800
+Message-Id: <20210125183810.198008-7-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210125183810.198008-1-ebiggers@kernel.org>
 References: <20210125183810.198008-1-ebiggers@kernel.org>
@@ -60,299 +60,52 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-In preparation for adding CQHCI crypto engine (inline encryption)
-support, add the code required to make mmc_core and mmc_block aware of
-inline encryption.  Specifically:
+The SCM calls QCOM_SCM_ES_INVALIDATE_ICE_KEY and
+QCOM_SCM_ES_CONFIG_SET_ICE_KEY are also needed for eMMC inline
+encryption support, not just for UFS.  Update the comments accordingly.
 
-- Add a capability flag MMC_CAP2_CRYPTO to struct mmc_host.  Drivers
-  will set this if the host and driver support inline encryption.
-
-- Embed a blk_keyslot_manager in struct mmc_host.  Drivers will
-  initialize this (as a device-managed resource) if the host and driver
-  support inline encryption.  mmc_block registers this keyslot manager
-  with the request_queue of any MMC card attached to the host.
-
-- Make mmc_block copy the crypto keyslot and crypto data unit number
-  from struct request to struct mmc_request, so that drivers will have
-  access to them.
-
-- If the MMC host is reset, reprogram all the keyslots to ensure that
-  the software state stays in sync with the hardware state.
-
-Co-developed-by: Satya Tangirala <satyat@google.com>
-Signed-off-by: Satya Tangirala <satyat@google.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 Reviewed-by: Satya Tangirala <satyat@google.com>
-Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
+Acked-by: Bjorn Andersson <bjorn.andersson@linaro.org>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- drivers/mmc/core/Kconfig  |  8 +++++++
- drivers/mmc/core/Makefile |  1 +
- drivers/mmc/core/block.c  |  3 +++
- drivers/mmc/core/core.c   |  3 +++
- drivers/mmc/core/crypto.c | 48 +++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/crypto.h | 40 ++++++++++++++++++++++++++++++++
- drivers/mmc/core/host.c   |  1 +
- drivers/mmc/core/queue.c  |  3 +++
- include/linux/mmc/core.h  |  6 +++++
- include/linux/mmc/host.h  | 11 +++++++++
- 10 files changed, 124 insertions(+)
- create mode 100644 drivers/mmc/core/crypto.c
- create mode 100644 drivers/mmc/core/crypto.h
+ drivers/firmware/qcom_scm.c | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index c12fe13e4b147..ae8b69aee6190 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -81,3 +81,11 @@ config MMC_TEST
- 	  This driver is only of interest to those developing or
- 	  testing a host driver. Most people should say N here.
- 
-+config MMC_CRYPTO
-+	bool "MMC Crypto Engine Support"
-+	depends on BLK_INLINE_ENCRYPTION
-+	help
-+	  Enable Crypto Engine Support in MMC.
-+	  Enabling this makes it possible for the kernel to use the crypto
-+	  capabilities of the MMC device (if present) to perform crypto
-+	  operations on data being transferred to/from the device.
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 95ffe008ebdf8..6a907736cd7a5 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -18,3 +18,4 @@ obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
- mmc_block-objs			:= block.o queue.o
- obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
- obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
-+mmc_core-$(CONFIG_MMC_CRYPTO)	+= crypto.o
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 42e27a2982180..b877f62df3660 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -51,6 +51,7 @@
- #include "block.h"
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "host.h"
- #include "bus.h"
- #include "mmc_ops.h"
-@@ -1247,6 +1248,8 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 
- 	memset(brq, 0, sizeof(struct mmc_blk_request));
- 
-+	mmc_crypto_prepare_req(mqrq);
-+
- 	brq->mrq.data = &brq->data;
- 	brq->mrq.tag = req->tag;
- 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 49d9117550afe..1136b859ddd86 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -37,6 +37,7 @@
- 
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "bus.h"
- #include "host.h"
- #include "sdio_bus.h"
-@@ -992,6 +993,8 @@ void mmc_set_initial_state(struct mmc_host *host)
- 		host->ops->hs400_enhanced_strobe(host, &host->ios);
- 
- 	mmc_set_ios(host);
-+
-+	mmc_crypto_set_initial_state(host);
- }
- 
- /**
-diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
-new file mode 100644
-index 0000000000000..419a368f84029
---- /dev/null
-+++ b/drivers/mmc/core/crypto.c
-@@ -0,0 +1,48 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * MMC crypto engine (inline encryption) support
+diff --git a/drivers/firmware/qcom_scm.c b/drivers/firmware/qcom_scm.c
+index 7be48c1bec96d..f57779fc7ee93 100644
+--- a/drivers/firmware/qcom_scm.c
++++ b/drivers/firmware/qcom_scm.c
+@@ -965,8 +965,11 @@ EXPORT_SYMBOL(qcom_scm_ice_available);
+  * qcom_scm_ice_invalidate_key() - Invalidate an inline encryption key
+  * @index: the keyslot to invalidate
+  *
+- * The UFSHCI standard defines a standard way to do this, but it doesn't work on
+- * these SoCs; only this SCM call does.
++ * The UFSHCI and eMMC standards define a standard way to do this, but it
++ * doesn't work on these SoCs; only this SCM call does.
 + *
-+ * Copyright 2020 Google LLC
-+ */
-+
-+#include <linux/blk-crypto.h>
-+#include <linux/mmc/host.h>
-+
-+#include "core.h"
-+#include "crypto.h"
-+#include "queue.h"
-+
-+void mmc_crypto_set_initial_state(struct mmc_host *host)
-+{
-+	/* Reset might clear all keys, so reprogram all the keys. */
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_reprogram_all_keys(&host->ksm);
-+}
-+
-+void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host)
-+{
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_register(&host->ksm, q);
-+}
-+EXPORT_SYMBOL_GPL(mmc_crypto_setup_queue);
-+
-+void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
-+{
-+	struct request *req = mmc_queue_req_to_req(mqrq);
-+	struct mmc_request *mrq = &mqrq->brq.mrq;
-+
-+	if (!req->crypt_keyslot)
-+		return;
-+
-+	mrq->crypto_enabled = true;
-+	mrq->crypto_key_slot = blk_ksm_get_slot_idx(req->crypt_keyslot);
-+
-+	/*
-+	 * For now we assume that all MMC drivers set max_dun_bytes_supported=4,
-+	 * which is the limit for CQHCI crypto.  So all DUNs should be 32-bit.
-+	 */
-+	WARN_ON_ONCE(req->crypt_ctx->bc_dun[0] > U32_MAX);
-+
-+	mrq->data_unit_num = req->crypt_ctx->bc_dun[0];
-+}
-+EXPORT_SYMBOL_GPL(mmc_crypto_prepare_req);
-diff --git a/drivers/mmc/core/crypto.h b/drivers/mmc/core/crypto.h
-new file mode 100644
-index 0000000000000..fbe9a520bf90d
---- /dev/null
-+++ b/drivers/mmc/core/crypto.h
-@@ -0,0 +1,40 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * MMC crypto engine (inline encryption) support
++ * It is assumed that the SoC has only one ICE instance being used, as this SCM
++ * call doesn't specify which ICE instance the keyslot belongs to.
+  *
+  * Return: 0 on success; -errno on failure.
+  */
+@@ -995,10 +998,13 @@ EXPORT_SYMBOL(qcom_scm_ice_invalidate_key);
+  *		    units, e.g. 1 = 512 bytes, 8 = 4096 bytes, etc.
+  *
+  * Program a key into a keyslot of Qualcomm ICE (Inline Crypto Engine), where it
+- * can then be used to encrypt/decrypt UFS I/O requests inline.
++ * can then be used to encrypt/decrypt UFS or eMMC I/O requests inline.
 + *
-+ * Copyright 2020 Google LLC
-+ */
-+
-+#ifndef _MMC_CORE_CRYPTO_H
-+#define _MMC_CORE_CRYPTO_H
-+
-+struct mmc_host;
-+struct mmc_queue_req;
-+struct request_queue;
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+
-+void mmc_crypto_set_initial_state(struct mmc_host *host);
-+
-+void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host);
-+
-+void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq);
-+
-+#else /* CONFIG_MMC_CRYPTO */
-+
-+static inline void mmc_crypto_set_initial_state(struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_setup_queue(struct request_queue *q,
-+					  struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
-+{
-+}
-+
-+#endif /* !CONFIG_MMC_CRYPTO */
-+
-+#endif /* _MMC_CORE_CRYPTO_H */
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 74e853bb69482..9b89a91b6b476 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -25,6 +25,7 @@
- #include <linux/mmc/slot-gpio.h>
- 
- #include "core.h"
-+#include "crypto.h"
- #include "host.h"
- #include "slot-gpio.h"
- #include "pwrseq.h"
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 002426e3cf76c..33e7e65b6ddea 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -19,6 +19,7 @@
- #include "block.h"
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "host.h"
- 
- #define MMC_DMA_MAP_MERGE_SEGMENTS	512
-@@ -407,6 +408,8 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
- 	mutex_init(&mq->complete_lock);
- 
- 	init_waitqueue_head(&mq->wait);
-+
-+	mmc_crypto_setup_queue(mq->queue, host);
- }
- 
- static inline bool mmc_merge_capable(struct mmc_host *host)
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 29aa507116261..ab19245e99451 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -162,6 +162,12 @@ struct mmc_request {
- 	bool			cap_cmd_during_tfr;
- 
- 	int			tag;
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+	bool			crypto_enabled;
-+	int			crypto_key_slot;
-+	u32			data_unit_num;
-+#endif
- };
- 
- struct mmc_card;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8cf686d98a68f..927ba75666176 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -15,6 +15,7 @@
- #include <linux/mmc/card.h>
- #include <linux/mmc/pm.h>
- #include <linux/dma-direction.h>
-+#include <linux/keyslot-manager.h>
- 
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
-@@ -395,6 +396,11 @@ struct mmc_host {
- #define MMC_CAP2_CQE_DCMD	(1 << 24)	/* CQE can issue a direct command */
- #define MMC_CAP2_AVOID_3_3V	(1 << 25)	/* Host must negotiate down from 3.3V */
- #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
-+#ifdef CONFIG_MMC_CRYPTO
-+#define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
-+#else
-+#define MMC_CAP2_CRYPTO		0
-+#endif
- 
- 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
- 
-@@ -489,6 +495,11 @@ struct mmc_host {
- 	bool			cqe_enabled;
- 	bool			cqe_on;
- 
-+	/* Inline encryption support */
-+#ifdef CONFIG_MMC_CRYPTO
-+	struct blk_keyslot_manager ksm;
-+#endif
-+
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
- 
++ * The UFSHCI and eMMC standards define a standard way to do this, but it
++ * doesn't work on these SoCs; only this SCM call does.
+  *
+- * The UFSHCI standard defines a standard way to do this, but it doesn't work on
+- * these SoCs; only this SCM call does.
++ * It is assumed that the SoC has only one ICE instance being used, as this SCM
++ * call doesn't specify which ICE instance the keyslot belongs to.
+  *
+  * Return: 0 on success; -errno on failure.
+  */
 -- 
 2.30.0
 
