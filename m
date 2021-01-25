@@ -2,452 +2,183 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-24.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E51F3C433E9
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 18:42:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1B67C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 20:15:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B4140207B3
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 18:42:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A7CF022583
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 20:15:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726698AbhAYSmU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Jan 2021 13:42:20 -0500
-Received: from mail.kernel.org ([198.145.29.99]:58344 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726725AbhAYSmG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 Jan 2021 13:42:06 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 1B5FD221E7;
-        Mon, 25 Jan 2021 18:40:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611600034;
-        bh=IL3fKoYywx8E3sEg7Ojvw5iaWwEK8cFMa0PYN3PSCdQ=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=uBngGyjERhk8wT16r4R3c20Rc/glumV4htW9AdAdxdZOh1uCsvjGn9VoKR+vMguIW
-         Cez3YdC8sBhjCzIr2PrdujKrTRJZPxBoJlEBErKwa7gUCvMO5R1vmGN/P3rBL4ypYP
-         EBtx6+r6r9Wbg45JIpz91IQrA7xSxCriWRrxEE/C2YZkowMvQJsLI5b+3hVDM8AJnm
-         kdWlxquMGpeKcKPKGDaf6hsR9g0gZLHtri9MhcZWJMGDQlCTxRoDfLqHiKwdQcfPJa
-         TKUmsKFHhQAbOmtQiwIUwIL/2YEPcc8uIBBvPZSxHU0gUNgRH/C7QnsrLB53Tpf77k
-         pCX839G7l2aew==
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH v6 8/9] mmc: sdhci-msm: add Inline Crypto Engine support
-Date:   Mon, 25 Jan 2021 10:38:09 -0800
-Message-Id: <20210125183810.198008-9-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210125183810.198008-1-ebiggers@kernel.org>
-References: <20210125183810.198008-1-ebiggers@kernel.org>
+        id S1732025AbhAYUPI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Jan 2021 15:15:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35482 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731984AbhAYUOw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2021 15:14:52 -0500
+Received: from mail-io1-xd34.google.com (mail-io1-xd34.google.com [IPv6:2607:f8b0:4864:20::d34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 11263C0613D6
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2021 12:14:12 -0800 (PST)
+Received: by mail-io1-xd34.google.com with SMTP id d81so29183517iof.3
+        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2021 12:14:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=5oPVxsDUHFnjzZ37jztimVx7kT5rl5MLP23lod84D8k=;
+        b=O7ObVy/vbDbvYgKIJLJJe1Y9IKfOCCLlQ6AzYhjLSNlxQ1feUkOZBwlBjw+UCjoO68
+         SoONYMJJPORKbbwddqa0AP8EdbK0fP3GezYgLp2C7FF3PJT9bdhP+7EtHDzxCH3z1Hgr
+         ZaDtA2Pb5lNw5h7P7YQp2ybuW1FNCqIq3AjX5MFuiFDJfI5sJ+tgm+v+KDfaSNsbZA3D
+         t6QCSDvG9sY9qA0cmzpFWbArfD3avEasYZvSHAsSXvxqmTUst4QOhxubnaG2MPygpyIm
+         r2s7yZdAYKTJFhAfIJwa2MgmhNICTcpq16Bcb8DmgRQdQ4y61MZsVNfs0dXPo5QNUSZd
+         sFUg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=5oPVxsDUHFnjzZ37jztimVx7kT5rl5MLP23lod84D8k=;
+        b=QazC+wsLW+3ommBySWyXjUSPRIlcqOa27UaMh2Czzr0LrqKX60DANxx49ID2l9rJJn
+         J/QNpqhK+qVodaO/vXOiMRACnHRd0SE/h9ZsUFMYtxW5jjz5qbQztAPaAyuQLyctiFCT
+         Cj7zMCNdEKoKh0IITpfYB3yPXZ9LWvljtQttH9IUNpk4ruhqPVJ/VRBgW+tJJ2UljDpA
+         XDmewOGFIMbfEu/zouBZA8lPSLlv+rGx6DFcpK7qycsmZvvGRSsTPNE8zdkd/VbZjfCB
+         N/noX9ES1WBy0UdpSpnIwe8Sg0xCUhK6/h3RBSexiJq4C4sx16mZYYmA9Vqh9rp9gLY3
+         PMRA==
+X-Gm-Message-State: AOAM533WL8j6iVX1WUhcyTxbVaJr6DPlTTkdkszRgQHM36+aT8pNY0Wg
+        o33NVTfriT+dGOQibYhvhj/VzWi+eQe3D4+hVKW2uQ==
+X-Google-Smtp-Source: ABdhPJzMjR4NyG/6n7ZBSL9gkgUVYaYxJ5W7f+6z3TKM10CBC8DzB/dFVXPVii8iOsQguaod82m7mEWmkYOU3l7Har4=
+X-Received: by 2002:a5e:8905:: with SMTP id k5mr1836963ioj.140.1611605651165;
+ Mon, 25 Jan 2021 12:14:11 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210121082155.111333-1-ebiggers@kernel.org> <20210121082155.111333-2-ebiggers@kernel.org>
+In-Reply-To: <20210121082155.111333-2-ebiggers@kernel.org>
+From:   Satya Tangirala <satyat@google.com>
+Date:   Mon, 25 Jan 2021 12:14:00 -0800
+Message-ID: <CAA+FYZerh02JXSKghCKuG29ATdYU_=2O93moGnLgD6Jv2v2auQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] block/keyslot-manager: introduce devm_blk_ksm_init()
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-scsi@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
-
-Add support for Qualcomm Inline Crypto Engine (ICE) to sdhci-msm.
-
-The standard-compliant parts, such as querying the crypto capabilities
-and enabling crypto for individual MMC requests, are already handled by
-cqhci-crypto.c, which itself is wired into the blk-crypto framework.
-However, ICE requires vendor-specific init, enable, and resume logic,
-and it requires that keys be programmed and evicted by vendor-specific
-SMC calls.  Make the sdhci-msm driver handle these details.
-
-This is heavily inspired by the similar changes made for UFS, since the
-UFS and eMMC ICE instances are very similar.  See commit df4ec2fa7a4d
-("scsi: ufs-qcom: Add Inline Crypto Engine support").
-
-I tested this on a Sony Xperia 10, which uses the Snapdragon 630 SoC,
-which has basic upstream support.  Mainly, I used android-xfstests
-(https://github.com/tytso/xfstests-bld/blob/master/Documentation/android-xfstests.md)
-to run the ext4 and f2fs encryption tests in a Debian chroot:
-
-	android-xfstests -c ext4,f2fs -g encrypt -m inlinecrypt
-
-These tests included tests which verify that the on-disk ciphertext is
-identical to that produced by a software implementation.  I also
-verified that ICE was actually being used.
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On Thu, Jan 21, 2021 at 12:23 AM Eric Biggers <ebiggers@kernel.org> wrote:
+>
+> From: Eric Biggers <ebiggers@google.com>
+>
+> Add a resource-managed variant of blk_ksm_init() so that drivers don't
+> have to worry about calling blk_ksm_destroy().
+>
+> Note that the implementation uses a custom devres action to call
+> blk_ksm_destroy() rather than switching the two allocations to be
+> directly devres-managed, e.g. with devm_kmalloc().  This is because we
+> need to keep zeroing the memory containing the keyslots when it is
+> freed, and also because we want to continue using kvmalloc() (and there
+> is no devm_kvmalloc()).
+>
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  Documentation/block/inline-encryption.rst | 12 +++++-----
+>  block/keyslot-manager.c                   | 29 +++++++++++++++++++++++
+>  include/linux/keyslot-manager.h           |  3 +++
+>  3 files changed, 38 insertions(+), 6 deletions(-)
+>
+> diff --git a/Documentation/block/inline-encryption.rst b/Documentation/block/inline-encryption.rst
+> index e75151e467d39..7f9b40d6b416b 100644
+> --- a/Documentation/block/inline-encryption.rst
+> +++ b/Documentation/block/inline-encryption.rst
+> @@ -182,8 +182,9 @@ API presented to device drivers
+>
+>  A :c:type:``struct blk_keyslot_manager`` should be set up by device drivers in
+>  the ``request_queue`` of the device. The device driver needs to call
+> -``blk_ksm_init`` on the ``blk_keyslot_manager``, which specifying the number of
+> -keyslots supported by the hardware.
+> +``blk_ksm_init`` (or its resource-managed variant ``devm_blk_ksm_init``) on the
+> +``blk_keyslot_manager``, while specifying the number of keyslots supported by
+> +the hardware.
+>
+>  The device driver also needs to tell the KSM how to actually manipulate the
+>  IE hardware in the device to do things like programming the crypto key into
+> @@ -202,10 +203,9 @@ needs each and every of its keyslots to be reprogrammed with the key it
+>  "should have" at the point in time when the function is called. This is useful
+>  e.g. if a device loses all its keys on runtime power down/up.
+>
+> -``blk_ksm_destroy`` should be called to free up all resources used by a keyslot
+> -manager upon ``blk_ksm_init``, once the ``blk_keyslot_manager`` is no longer
+> -needed.
+> -
+> +If the driver used ``blk_ksm_init`` instead of ``devm_blk_ksm_init``, then
+> +``blk_ksm_destroy`` should be called to free up all resources used by a
+> +``blk_keyslot_manager`` once it is no longer needed.
+>
+>  Layered Devices
+>  ===============
+> diff --git a/block/keyslot-manager.c b/block/keyslot-manager.c
+> index 86f8195d8039e..324bf4244f5fb 100644
+> --- a/block/keyslot-manager.c
+> +++ b/block/keyslot-manager.c
+> @@ -29,6 +29,7 @@
+>  #define pr_fmt(fmt) "blk-crypto: " fmt
+>
+>  #include <linux/keyslot-manager.h>
+> +#include <linux/device.h>
+>  #include <linux/atomic.h>
+>  #include <linux/mutex.h>
+>  #include <linux/pm_runtime.h>
+> @@ -127,6 +128,34 @@ int blk_ksm_init(struct blk_keyslot_manager *ksm, unsigned int num_slots)
+>  }
+>  EXPORT_SYMBOL_GPL(blk_ksm_init);
+>
+> +static void blk_ksm_destroy_callback(void *ksm)
+> +{
+> +       blk_ksm_destroy(ksm);
+> +}
+> +
+> +/**
+> + * devm_blk_ksm_init() - Resource-managed blk_ksm_init()
+> + * @dev: The device which owns the blk_keyslot_manager.
+> + * @ksm: The blk_keyslot_manager to initialize.
+> + * @num_slots: The number of key slots to manage.
+> + *
+> + * Like blk_ksm_init(), but causes blk_ksm_destroy() to be called automatically
+> + * on driver detach.
+> + *
+> + * Return: 0 on success, or else a negative error code.
+> + */
+> +int devm_blk_ksm_init(struct device *dev, struct blk_keyslot_manager *ksm,
+> +                     unsigned int num_slots)
+> +{
+> +       int err = blk_ksm_init(ksm, num_slots);
+> +
+> +       if (err)
+> +               return err;
+> +
+> +       return devm_add_action_or_reset(dev, blk_ksm_destroy_callback, ksm);
+> +}
+> +EXPORT_SYMBOL_GPL(devm_blk_ksm_init);
+> +
+>  static inline struct hlist_head *
+>  blk_ksm_hash_bucket_for_key(struct blk_keyslot_manager *ksm,
+>                             const struct blk_crypto_key *key)
+> diff --git a/include/linux/keyslot-manager.h b/include/linux/keyslot-manager.h
+> index 18f3f5346843f..443ad817c6c57 100644
+> --- a/include/linux/keyslot-manager.h
+> +++ b/include/linux/keyslot-manager.h
+> @@ -85,6 +85,9 @@ struct blk_keyslot_manager {
+>
+>  int blk_ksm_init(struct blk_keyslot_manager *ksm, unsigned int num_slots);
+>
+> +int devm_blk_ksm_init(struct device *dev, struct blk_keyslot_manager *ksm,
+> +                     unsigned int num_slots);
+> +
+>  blk_status_t blk_ksm_get_slot_for_key(struct blk_keyslot_manager *ksm,
+>                                       const struct blk_crypto_key *key,
+>                                       struct blk_ksm_keyslot **slot_ptr);
+> --
+> 2.30.0
+Looks good to me. Please feel free to add
 Reviewed-by: Satya Tangirala <satyat@google.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- drivers/mmc/host/Kconfig     |   1 +
- drivers/mmc/host/sdhci-msm.c | 276 ++++++++++++++++++++++++++++++++++-
- 2 files changed, 273 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index bbf6989e36386..a29411ca626f5 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -546,6 +546,7 @@ config MMC_SDHCI_MSM
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select MMC_CQHCI
-+	select QCOM_SCM if MMC_CRYPTO && ARCH_QCOM
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  support present in Qualcomm SOCs. The controller supports
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 97902616a695e..5e1da4df096f6 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -13,6 +13,7 @@
- #include <linux/pm_opp.h>
- #include <linux/slab.h>
- #include <linux/iopoll.h>
-+#include <linux/qcom_scm.h>
- #include <linux/regulator/consumer.h>
- #include <linux/interconnect.h>
- #include <linux/pinctrl/consumer.h>
-@@ -255,10 +256,12 @@ struct sdhci_msm_variant_info {
- struct sdhci_msm_host {
- 	struct platform_device *pdev;
- 	void __iomem *core_mem;	/* MSM SDCC mapped address */
-+	void __iomem *ice_mem;	/* MSM ICE mapped address (if available) */
- 	int pwr_irq;		/* power irq */
- 	struct clk *bus_clk;	/* SDHC bus voter clock */
- 	struct clk *xo_clk;	/* TCXO clk needed for FLL feature of cm_dll*/
--	struct clk_bulk_data bulk_clks[4]; /* core, iface, cal, sleep clocks */
-+	/* core, iface, cal, sleep, and ice clocks */
-+	struct clk_bulk_data bulk_clks[5];
- 	unsigned long clk_rate;
- 	struct mmc_host *mmc;
- 	struct opp_table *opp_table;
-@@ -1792,6 +1795,246 @@ static void sdhci_msm_set_clock(struct sdhci_host *host, unsigned int clock)
- 	__sdhci_msm_set_clock(host, clock);
- }
- 
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Inline Crypto Engine (ICE) support                                        *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+
-+#define AES_256_XTS_KEY_SIZE			64
-+
-+/* QCOM ICE registers */
-+
-+#define QCOM_ICE_REG_VERSION			0x0008
-+
-+#define QCOM_ICE_REG_FUSE_SETTING		0x0010
-+#define QCOM_ICE_FUSE_SETTING_MASK		0x1
-+#define QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK	0x2
-+#define QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK	0x4
-+
-+#define QCOM_ICE_REG_BIST_STATUS		0x0070
-+#define QCOM_ICE_BIST_STATUS_MASK		0xF0000000
-+
-+#define QCOM_ICE_REG_ADVANCED_CONTROL		0x1000
-+
-+#define sdhci_msm_ice_writel(host, val, reg)	\
-+	writel((val), (host)->ice_mem + (reg))
-+#define sdhci_msm_ice_readl(host, reg)	\
-+	readl((host)->ice_mem + (reg))
-+
-+static bool sdhci_msm_ice_supported(struct sdhci_msm_host *msm_host)
-+{
-+	struct device *dev = mmc_dev(msm_host->mmc);
-+	u32 regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_VERSION);
-+	int major = regval >> 24;
-+	int minor = (regval >> 16) & 0xFF;
-+	int step = regval & 0xFFFF;
-+
-+	/* For now this driver only supports ICE version 3. */
-+	if (major != 3) {
-+		dev_warn(dev, "Unsupported ICE version: v%d.%d.%d\n",
-+			 major, minor, step);
-+		return false;
-+	}
-+
-+	dev_info(dev, "Found QC Inline Crypto Engine (ICE) v%d.%d.%d\n",
-+		 major, minor, step);
-+
-+	/* If fuses are blown, ICE might not work in the standard way. */
-+	regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_FUSE_SETTING);
-+	if (regval & (QCOM_ICE_FUSE_SETTING_MASK |
-+		      QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK |
-+		      QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK)) {
-+		dev_warn(dev, "Fuses are blown; ICE is unusable!\n");
-+		return false;
-+	}
-+	return true;
-+}
-+
-+static inline struct clk *sdhci_msm_ice_get_clk(struct device *dev)
-+{
-+	return devm_clk_get(dev, "ice");
-+}
-+
-+static int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
-+			      struct cqhci_host *cq_host)
-+{
-+	struct mmc_host *mmc = msm_host->mmc;
-+	struct device *dev = mmc_dev(mmc);
-+	struct resource *res;
-+	int err;
-+
-+	if (!(cqhci_readl(cq_host, CQHCI_CAP) & CQHCI_CAP_CS))
-+		return 0;
-+
-+	res = platform_get_resource_byname(msm_host->pdev, IORESOURCE_MEM,
-+					   "ice");
-+	if (!res) {
-+		dev_warn(dev, "ICE registers not found\n");
-+		goto disable;
-+	}
-+
-+	if (!qcom_scm_ice_available()) {
-+		dev_warn(dev, "ICE SCM interface not found\n");
-+		goto disable;
-+	}
-+
-+	msm_host->ice_mem = devm_ioremap_resource(dev, res);
-+	if (IS_ERR(msm_host->ice_mem)) {
-+		err = PTR_ERR(msm_host->ice_mem);
-+		dev_err(dev, "Failed to map ICE registers; err=%d\n", err);
-+		return err;
-+	}
-+
-+	if (!sdhci_msm_ice_supported(msm_host))
-+		goto disable;
-+
-+	mmc->caps2 |= MMC_CAP2_CRYPTO;
-+	return 0;
-+
-+disable:
-+	dev_warn(dev, "Disabling inline encryption support\n");
-+	return 0;
-+}
-+
-+static void sdhci_msm_ice_low_power_mode_enable(struct sdhci_msm_host *msm_host)
-+{
-+	u32 regval;
-+
-+	regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_ADVANCED_CONTROL);
-+	/*
-+	 * Enable low power mode sequence
-+	 * [0]-0, [1]-0, [2]-0, [3]-E, [4]-0, [5]-0, [6]-0, [7]-0
-+	 */
-+	regval |= 0x7000;
-+	sdhci_msm_ice_writel(msm_host, regval, QCOM_ICE_REG_ADVANCED_CONTROL);
-+}
-+
-+static void sdhci_msm_ice_optimization_enable(struct sdhci_msm_host *msm_host)
-+{
-+	u32 regval;
-+
-+	/* ICE Optimizations Enable Sequence */
-+	regval = sdhci_msm_ice_readl(msm_host, QCOM_ICE_REG_ADVANCED_CONTROL);
-+	regval |= 0xD807100;
-+	/* ICE HPG requires delay before writing */
-+	udelay(5);
-+	sdhci_msm_ice_writel(msm_host, regval, QCOM_ICE_REG_ADVANCED_CONTROL);
-+	udelay(5);
-+}
-+
-+/*
-+ * Wait until the ICE BIST (built-in self-test) has completed.
-+ *
-+ * This may be necessary before ICE can be used.
-+ *
-+ * Note that we don't really care whether the BIST passed or failed; we really
-+ * just want to make sure that it isn't still running.  This is because (a) the
-+ * BIST is a FIPS compliance thing that never fails in practice, (b) ICE is
-+ * documented to reject crypto requests if the BIST fails, so we needn't do it
-+ * in software too, and (c) properly testing storage encryption requires testing
-+ * the full storage stack anyway, and not relying on hardware-level self-tests.
-+ */
-+static int sdhci_msm_ice_wait_bist_status(struct sdhci_msm_host *msm_host)
-+{
-+	u32 regval;
-+	int err;
-+
-+	err = readl_poll_timeout(msm_host->ice_mem + QCOM_ICE_REG_BIST_STATUS,
-+				 regval, !(regval & QCOM_ICE_BIST_STATUS_MASK),
-+				 50, 5000);
-+	if (err)
-+		dev_err(mmc_dev(msm_host->mmc),
-+			"Timed out waiting for ICE self-test to complete\n");
-+	return err;
-+}
-+
-+static void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
-+{
-+	if (!(msm_host->mmc->caps2 & MMC_CAP2_CRYPTO))
-+		return;
-+	sdhci_msm_ice_low_power_mode_enable(msm_host);
-+	sdhci_msm_ice_optimization_enable(msm_host);
-+	sdhci_msm_ice_wait_bist_status(msm_host);
-+}
-+
-+static int __maybe_unused sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
-+{
-+	if (!(msm_host->mmc->caps2 & MMC_CAP2_CRYPTO))
-+		return 0;
-+	return sdhci_msm_ice_wait_bist_status(msm_host);
-+}
-+
-+/*
-+ * Program a key into a QC ICE keyslot, or evict a keyslot.  QC ICE requires
-+ * vendor-specific SCM calls for this; it doesn't support the standard way.
-+ */
-+static int sdhci_msm_program_key(struct cqhci_host *cq_host,
-+				 const union cqhci_crypto_cfg_entry *cfg,
-+				 int slot)
-+{
-+	struct device *dev = mmc_dev(cq_host->mmc);
-+	union cqhci_crypto_cap_entry cap;
-+	union {
-+		u8 bytes[AES_256_XTS_KEY_SIZE];
-+		u32 words[AES_256_XTS_KEY_SIZE / sizeof(u32)];
-+	} key;
-+	int i;
-+	int err;
-+
-+	if (!(cfg->config_enable & CQHCI_CRYPTO_CONFIGURATION_ENABLE))
-+		return qcom_scm_ice_invalidate_key(slot);
-+
-+	/* Only AES-256-XTS has been tested so far. */
-+	cap = cq_host->crypto_cap_array[cfg->crypto_cap_idx];
-+	if (cap.algorithm_id != CQHCI_CRYPTO_ALG_AES_XTS ||
-+	    cap.key_size != CQHCI_CRYPTO_KEY_SIZE_256) {
-+		dev_err_ratelimited(dev,
-+				    "Unhandled crypto capability; algorithm_id=%d, key_size=%d\n",
-+				    cap.algorithm_id, cap.key_size);
-+		return -EINVAL;
-+	}
-+
-+	memcpy(key.bytes, cfg->crypto_key, AES_256_XTS_KEY_SIZE);
-+
-+	/*
-+	 * The SCM call byte-swaps the 32-bit words of the key.  So we have to
-+	 * do the same, in order for the final key be correct.
-+	 */
-+	for (i = 0; i < ARRAY_SIZE(key.words); i++)
-+		__cpu_to_be32s(&key.words[i]);
-+
-+	err = qcom_scm_ice_set_key(slot, key.bytes, AES_256_XTS_KEY_SIZE,
-+				   QCOM_SCM_ICE_CIPHER_AES_256_XTS,
-+				   cfg->data_unit_size);
-+	memzero_explicit(&key, sizeof(key));
-+	return err;
-+}
-+#else /* CONFIG_MMC_CRYPTO */
-+static inline struct clk *sdhci_msm_ice_get_clk(struct device *dev)
-+{
-+	return NULL;
-+}
-+
-+static inline int sdhci_msm_ice_init(struct sdhci_msm_host *msm_host,
-+				     struct cqhci_host *cq_host)
-+{
-+	return 0;
-+}
-+
-+static inline void sdhci_msm_ice_enable(struct sdhci_msm_host *msm_host)
-+{
-+}
-+
-+static inline int __maybe_unused
-+sdhci_msm_ice_resume(struct sdhci_msm_host *msm_host)
-+{
-+	return 0;
-+}
-+#endif /* !CONFIG_MMC_CRYPTO */
-+
- /*****************************************************************************\
-  *                                                                           *
-  * MSM Command Queue Engine (CQE)                                            *
-@@ -1810,6 +2053,16 @@ static u32 sdhci_msm_cqe_irq(struct sdhci_host *host, u32 intmask)
- 	return 0;
- }
- 
-+static void sdhci_msm_cqe_enable(struct mmc_host *mmc)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct sdhci_msm_host *msm_host = sdhci_pltfm_priv(pltfm_host);
-+
-+	sdhci_cqe_enable(mmc);
-+	sdhci_msm_ice_enable(msm_host);
-+}
-+
- static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -1842,8 +2095,11 @@ static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
- }
- 
- static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
--	.enable		= sdhci_cqe_enable,
-+	.enable		= sdhci_msm_cqe_enable,
- 	.disable	= sdhci_msm_cqe_disable,
-+#ifdef CONFIG_MMC_CRYPTO
-+	.program_key	= sdhci_msm_program_key,
-+#endif
- };
- 
- static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
-@@ -1879,6 +2135,10 @@ static int sdhci_msm_cqe_add_host(struct sdhci_host *host,
- 
- 	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
- 
-+	ret = sdhci_msm_ice_init(msm_host, cq_host);
-+	if (ret)
-+		goto cleanup;
-+
- 	ret = cqhci_init(cq_host, host->mmc, dma64);
- 	if (ret) {
- 		dev_err(&pdev->dev, "%s: CQE init: failed (%d)\n",
-@@ -2319,6 +2579,11 @@ static int sdhci_msm_probe(struct platform_device *pdev)
- 		clk = NULL;
- 	msm_host->bulk_clks[3].clk = clk;
- 
-+	clk = sdhci_msm_ice_get_clk(&pdev->dev);
-+	if (IS_ERR(clk))
-+		clk = NULL;
-+	msm_host->bulk_clks[4].clk = clk;
-+
- 	ret = clk_bulk_prepare_enable(ARRAY_SIZE(msm_host->bulk_clks),
- 				      msm_host->bulk_clks);
- 	if (ret)
-@@ -2532,12 +2797,15 @@ static __maybe_unused int sdhci_msm_runtime_resume(struct device *dev)
- 	 * Whenever core-clock is gated dynamically, it's needed to
- 	 * restore the SDR DLL settings when the clock is ungated.
- 	 */
--	if (msm_host->restore_dll_config && msm_host->clk_rate)
-+	if (msm_host->restore_dll_config && msm_host->clk_rate) {
- 		ret = sdhci_msm_restore_sdr_dll_config(host);
-+		if (ret)
-+			return ret;
-+	}
- 
- 	dev_pm_opp_set_rate(dev, msm_host->clk_rate);
- 
--	return ret;
-+	return sdhci_msm_ice_resume(msm_host);
- }
- 
- static const struct dev_pm_ops sdhci_msm_pm_ops = {
--- 
-2.30.0
-
