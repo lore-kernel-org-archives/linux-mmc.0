@@ -2,126 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF085C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:26:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E08FC43381
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:55:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 91408208C7
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:26:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 09951216FD
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 21:55:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732534AbhAYV0L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Jan 2021 16:26:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50556 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732702AbhAYVYX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2021 16:24:23 -0500
-Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F0B5C061574
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2021 13:23:42 -0800 (PST)
-Received: by mail-pg1-x532.google.com with SMTP id o16so194130pgg.5
-        for <linux-mmc@vger.kernel.org>; Mon, 25 Jan 2021 13:23:42 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=rUEo2ymm1PXl62fUfLLLw3fQUnSwO6veMAzxwu2oAuk=;
-        b=fnHI91VluGYQQfqIZc6EFptoip89t8cA7LEDV/ZS2zTM+Rs4azNhieCHsesKM5map/
-         wsuC7NOWZNJOLMJd1+/K6SIJJMhcj8YZ8cqjAARlemFWs3926QjQYgG3oi3ManwLzaWG
-         1PR9WmiPsQW4BR2LjXWegdbwFjDT3SAFcZZ+NJQe7nnxe8+Ft8g8ukjkBxqygOEWWuz4
-         x1q/uQVP2Yr9hMQeSW5++vrkDDAfMWP4b4n2hWYtYdHRdUe9gKcxY+C3AfqmJe1DuEeZ
-         e2PKDXCUeT27jwKxDGzRShw6MZmihOf+QQ9q1toA+TBl+TX+kKwi+zziTJHLzC/Z2yMU
-         uCkA==
+        id S1732516AbhAYVsr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Jan 2021 16:48:47 -0500
+Received: from mail-ot1-f51.google.com ([209.85.210.51]:35571 "EHLO
+        mail-ot1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1733005AbhAYVim (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2021 16:38:42 -0500
+Received: by mail-ot1-f51.google.com with SMTP id 36so14275651otp.2;
+        Mon, 25 Jan 2021 13:38:25 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=rUEo2ymm1PXl62fUfLLLw3fQUnSwO6veMAzxwu2oAuk=;
-        b=o+j1l6w7wH7NFfvWilcgkEFMRpa86wcjfGKOE2EOERMf9ZZ1krcH9LBOuVoB+g3dOX
-         iVL+WNpNLhh0I80T8y/qeQTF35UkegDqmLVqSR1pxDnXgcYUe7teyaO7uAjFQTVn9b1Z
-         tc8jPZLSvh0kH87Pgs8jv0ygGG+tmhYmcaGG6FuSLsGMTniltdPPzFIo78Um64E1Nrhe
-         mt3w/bqBhxk1HKGtvigdIu/iMeCs5Dn57+DKywlkhJNANq08LyacW1+QGWWbSFOkp2uH
-         oMM+7K9jxmi7SEF4qWH8I23NYnUwa5pXAxaywtVBz1tPWO3s2ZjdyOlx5hVUfeLpubLT
-         TFzw==
-X-Gm-Message-State: AOAM5316t5J9cmJbVjQQdx50HhkE2BDkWDazkw86FueQTIvZC97woeUj
-        OkYiR51vOZAR4AEb9jjiONEgHT+nM0OiAA==
-X-Google-Smtp-Source: ABdhPJwGzdAL2/wRuNfjey+PXVF5Uw4uvnuSrQM9YGJky2hnvbhS8e3E5wir6j0I6fd8eUkqD+KBpw==
-X-Received: by 2002:a05:6a00:8d0:b029:1b6:3581:4f41 with SMTP id s16-20020a056a0008d0b02901b635814f41mr2108903pfu.56.1611609821727;
-        Mon, 25 Jan 2021 13:23:41 -0800 (PST)
-Received: from [192.168.4.41] (cpe-72-132-29-68.dc.res.rr.com. [72.132.29.68])
-        by smtp.gmail.com with ESMTPSA id s73sm17997839pgc.46.2021.01.25.13.23.40
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 25 Jan 2021 13:23:41 -0800 (PST)
-Subject: Re: [PATCH 0/2] Resource-managed blk_ksm_init()
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "James E.J. Bottomley" <jejb@linux.ibm.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        linux-block <linux-block@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        Satya Tangirala <satyat@google.com>
-References: <20210121082155.111333-1-ebiggers@kernel.org>
- <CAPDyKFrLn_4Csxc6BeRR0-zY+_RQuNqNSF9SmKk3Bx2WFJJ_Ag@mail.gmail.com>
- <2d03dda2-adaf-a44a-922d-f3770e3da8f4@kernel.dk> <YA82Y43vGr30v7Ml@gmail.com>
-From:   Jens Axboe <axboe@kernel.dk>
-Message-ID: <848e8646-b179-6f83-1c26-97c984a2c85f@kernel.dk>
-Date:   Mon, 25 Jan 2021 14:23:39 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=XQtlQwc0CWDU+/5MkfFrUYSWDoYjbHyLw6ppWMy86ZE=;
+        b=n3IIAdfby7QYFxcsuDV2PCENDn+zLd96GQmpxPF4LxKHe8FFVZ8o94DxxD9Izg5cnC
+         H2hzBvxp5+lAphb98JPrR6Dx3W2LHKLtm9N3/pYRGDQkfK95CXYRryAyWwBYSNDpQ+hS
+         PI96r1syfwavVF9Gn4n6nspXwRqQYA7LSJzzT8hP+hYoP4RTXPcR2fRpMBHmRMpuwJhZ
+         MsJ9yqFAINihvthKwZxVf3kJNdev1bkFYcdBID9mCPCWx6Lu+mmAAbj1+52cUmMHmaBM
+         OVl1WmLSk3zFPzAJo4Nxe+yihK5f+BE4EJjzB4bvhXzwSIjQNuX8l/flXYWN7Vd4N8R/
+         dcQA==
+X-Gm-Message-State: AOAM530C1s7R8vhDI2RZ2IH8PO6AKNjh++gp5ARmy0MDMzns1vIBFW1c
+        4VR+vs8ZQpC0D7QAV78Uew==
+X-Google-Smtp-Source: ABdhPJyjZXPw+jRnyybOSzoUCwDlCfYOukQtsSAE9rpKrpjbp9vPdfxePbD7VOY7Bkz61SeMMWPyaQ==
+X-Received: by 2002:a9d:5e0f:: with SMTP id d15mr1805348oti.308.1611610680316;
+        Mon, 25 Jan 2021 13:38:00 -0800 (PST)
+Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id p4sm3799500oib.24.2021.01.25.13.37.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 25 Jan 2021 13:37:59 -0800 (PST)
+Received: (nullmailer pid 1048034 invoked by uid 1000);
+        Mon, 25 Jan 2021 21:37:58 -0000
+Date:   Mon, 25 Jan 2021 15:37:58 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+Cc:     ulf.hansson@linaro.org, broonie@kernel.org, lgirdwood@gmail.com,
+        devicetree@vger.kernel.org, adrian.hunter@intel.com,
+        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, andriy.shevchenko@intel.com,
+        Rashmi.A@intel.com, mahesh.r.vaidya@intel.com
+Subject: Re: [PATCH v1 9/9] mmc: sdhci-of-arasan: Add UHS-1 support for Keem
+ Bay SOC
+Message-ID: <20210125213758.GA1026926@robh.at.kernel.org>
+References: <20210114152700.21916-1-muhammad.husaini.zulkifli@intel.com>
+ <20210114152700.21916-10-muhammad.husaini.zulkifli@intel.com>
 MIME-Version: 1.0
-In-Reply-To: <YA82Y43vGr30v7Ml@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210114152700.21916-10-muhammad.husaini.zulkifli@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/25/21 2:21 PM, Eric Biggers wrote:
-> On Mon, Jan 25, 2021 at 02:14:32PM -0700, Jens Axboe wrote:
->> On 1/21/21 5:50 AM, Ulf Hansson wrote:
->>> + Jens, Martin, James
->>>
->>>
->>> On Thu, 21 Jan 2021 at 09:23, Eric Biggers <ebiggers@kernel.org> wrote:
->>>>
->>>> This patchset adds a resource-managed variant of blk_ksm_init() so that
->>>> drivers don't have to worry about calling blk_ksm_destroy().
->>>>
->>>> This was suggested during review of my patchset which adds eMMC inline
->>>> encryption support
->>>> (https://lkml.kernel.org/linux-mmc/20210104184542.4616-1-ebiggers@kernel.org/T/#u).
->>>> That patchset proposes a second caller of blk_ksm_init().  But it can
->>>> instead use the resource-managed variant, as can the UFS driver.
->>>>
->>>> My preference is that patch #1 be taken through the MMC tree together
->>>> with my MMC patchset, so that we don't have to wait an extra cycle for
->>>> the MMC changes.  Patch #2 can then go in later.
->>>
->>> Sure, I can pick patch #1 through my mmc tree, but need an ack from
->>> Jens to do it. Or whatever he prefers.
->>
->> Or we can take it through the block tree, usually the easiest as
->> it's the most likely source of potential conflicts. And that's true
->> for both of them, as long as the SCSI side signs off on patch 2/2.
->>
+On Thu, Jan 14, 2021 at 11:27:00PM +0800, Muhammad Husaini Zulkifli wrote:
+> Keem Bay SOC can support dual voltage operations for GPIO SD pins to
+> either 1.8V or 3.3V for bus IO line power. In order to operate the GPIOs
+> line for Clk, Cmd and Data on Keem Bay hardware, it is important to
+> configure the supplied voltage applied to their I/O Rail and the output
+> of the I²C expander pin. Final Voltage applied on the GPIOs line are
+> dependent by both supplied voltage rail and expander pin output as it is
+> been set after passing through the voltage sense resistor.
 > 
-> As I mentioned, the issue is that my patchset to add eMMC inline encryption
-> support (https://lkml.kernel.org/r/20210121090140.326380-1-ebiggers@kernel.org)
-> depends on devm_blk_ksm_init(), as it was requested during review.
+> Keem Bay hardware is somewhat unique in the way of how IO bus line
+> voltage are been controlled.
 > 
-> So if devm_blk_ksm_init() goes in through the block tree, Ulf won't be able to
-> take the eMMC patchset for 5.12.
+> Expander pin output is controlled by gpio-regulator. Voltage rail output
+> is controlled by Keem Bay SD regulator. Keem Bay SD regulator encapsulated
+> the Secure Monitor Calling Convention (SMCCC) to communicate with Trusted
+> Firmware during set voltage operation.
+> 
+> Signed-off-by: Muhammad Husaini Zulkifli <muhammad.husaini.zulkifli@intel.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Acked-by: Andy Shevchenko <andriy.shevchenko@intel.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 263 +++++++++++++++++++++++++++++
+>  1 file changed, 263 insertions(+)
 
-Well he could, such cross tree dependencies are not hard to solve. But
-as mentioned in the other email, for this one, just queued it up
-yourself. You can add my acked-by to it.
+> +	u32 otap_delay, sel_clk_buffer;
+> +
+> +	phys = of_parse_phandle(dev->of_node, "phys", 0);
 
--- 
-Jens Axboe
+Normally, you'd use the phy API here. Though not required from a DT 
+perspective.
 
+> +	if (!phys) {
+> +		dev_err(dev, "Can't get phys for sd0\n");
+> +		return -ENODEV;
+> +	}
+> +
+> +	of_property_read_u32(phys, "intel,keembay-emmc-phy-otap-dly", &otap_delay);
+> +	of_property_read_u32(phys, "intel,keembay-emmc-phy-sel-clkbuf", &sel_clk_buffer);
+
+Not doucmented?
+
+For property names, I'd leave out the SoC name. Might want to use it in 
+the next chip.
+
+Rob
