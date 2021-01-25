@@ -2,122 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84EFBC433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 04:37:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DFB4EC433E9
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 04:51:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 58FF622E03
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 04:37:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CB0E22CAD
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 04:51:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727032AbhAYEhC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 24 Jan 2021 23:37:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58596 "EHLO
+        id S1726736AbhAYEvQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Jan 2021 23:51:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33444 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727024AbhAYEhA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Jan 2021 23:37:00 -0500
-Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77E6AC06174A
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 20:36:20 -0800 (PST)
-Received: by mail-pg1-x52f.google.com with SMTP id t25so151058pga.2
-        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 20:36:20 -0800 (PST)
+        with ESMTP id S1726801AbhAYEvP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Jan 2021 23:51:15 -0500
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7F99CC0613D6
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 20:50:34 -0800 (PST)
+Received: by mail-pl1-x62c.google.com with SMTP id e9so6859268plh.3
+        for <linux-mmc@vger.kernel.org>; Sun, 24 Jan 2021 20:50:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=cloud.ionos.com; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=FijkUVA4wtqEzKdrwPNqr5BszwjDE0ObYH72kW/p/Qc=;
-        b=ba/PQSHzp1XMXEYfaF8IHUMMLul1kjomGVtf+iR7PS5f0N91qzg13X0RZJ97PPA0Vh
-         2RdglhLdiBxokgZLrklGFKw5elkOv9IMkxXL0wir8HcRac0waGN3dSgDWP5u3/F7/Cgi
-         zYenYmfFAphreQtQ6crnNkJJn2bJDNx+iWqrZ9M/3gKEPnNx6sQ/UjR6GyJB8zRxqnDY
-         8AoCDP3zaCxdj45M0aZ0vmEL3zsal3fLpbCh9fg8FUjTPIm99GyHz5AH1S6u4wgID8kS
-         qSTr2uI9gX38rFZ2+qHIncgSSpsuO7n+wVQHBnvHeHyyCbF6tB6X6fJpGBFJ/5ws39Hs
-         f7Sw==
+        h=from:to:cc:subject:date:message-id;
+        bh=1QOy2CBTli39v+zKLvkwbYlNYYcskK1HWR3qTfGjr/s=;
+        b=G5WxyZUyXn2TcQ2TUWNRcJXDXSWCQkRfwFMjOzhWd2VG0x8Al9J87MMoGSZg8Zo5Kw
+         JHttGPILbg1UDvjztvtFKR9QxHcJKRQ+GdPrGD+3B0IIrgffQ6Wl7S68CdBozUyvVCNW
+         KASF7GF/jowIwiKDzLDjVFpb0mH17+yia19Xi+ej48Gp5tfoyeDg7rssffnwxCHGX9h0
+         mPNJsUljmKd9FlunBUeh57kJjwtktU2E8+k3+QKXMom4TZRlabJNskiG/59h0WBWK/on
+         hh5rtkOZq0DoJnY//4krP33/IiGcygcB/3YT7yWIbl9Kf/sEJZaDdovEwDFLrIJxk4m4
+         7Y+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=FijkUVA4wtqEzKdrwPNqr5BszwjDE0ObYH72kW/p/Qc=;
-        b=Uv1FogNUsk1ipCCOQiUqsl9Li7rMlzGjEiovjkv9bSA1ng3VtuO1IzsLlqaNoGLMko
-         n4jhNNhJ5jHnW0eW2h+ICDRPct/8Kxf/KyIZePsjPH25MLzLnJ6m/fd9Pq4+7W+GZHiM
-         00yu/Ju+m2LHl3Z4JXyWIhDTmPorihUpmqs68cMTH+Dhm9vVUVVo0jzThEQBDBS8FVLg
-         X7CPQQ7EEV0aiOIDpIYlhaNTJiaZj+LxSb4sq40mj/V7yzrrxm37F7Ed3B+repVFDWfK
-         eCeUL6TrVTRC7fAYU5XaXcCSJoUFH8vjt5FlAAsqMvl1swnx3ZsixrfnRMU6CIHeNukN
-         iX2A==
-X-Gm-Message-State: AOAM531IXBQPL+voVqug4L1yxQ/dF/BSu1DMaaCsadd3A1DH+oI51kCt
-        4+hPyxXwUyUg5qBL3cnwbJxRUg==
-X-Google-Smtp-Source: ABdhPJwqMLqKBZAD9FxC+3lNxtWNGWUkaLysCeumNlPXimZYcundbTEt00KrsFB9Hb+bWilXVtUrpA==
-X-Received: by 2002:a63:d917:: with SMTP id r23mr1043183pgg.126.1611549378270;
-        Sun, 24 Jan 2021 20:36:18 -0800 (PST)
-Received: from [10.8.2.15] ([185.125.207.232])
-        by smtp.gmail.com with ESMTPSA id k64sm14947157pfd.75.2021.01.24.20.36.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 24 Jan 2021 20:36:17 -0800 (PST)
-Subject: Re: [PATCH V2 2/2] block: remove unnecessary argument from
- blk_execute_rq
-To:     Ulf Hansson <ulf.hansson@linaro.org>, Jens Axboe <axboe@kernel.dk>
-Cc:     Christoph Hellwig <hch@infradead.org>, linux-nfs@vger.kernel.org,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-nvme@lists.infradead.org,
-        virtualization@lists.linux-foundation.org,
-        linux-block <linux-block@vger.kernel.org>,
-        linux-ide@vger.kernel.org, target-devel@vger.kernel.org
-References: <20210122092824.20971-1-guoqing.jiang@cloud.ionos.com>
- <20210122092824.20971-3-guoqing.jiang@cloud.ionos.com>
- <CAPDyKFoPL4drfh3efKXyhXLp6Ce+j=oHwNd9VnVP4aaKQ0zmDQ@mail.gmail.com>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=1QOy2CBTli39v+zKLvkwbYlNYYcskK1HWR3qTfGjr/s=;
+        b=GdJmKr34V1o+yk9alMoqOXVSfkoks9r9wkA7b32UWI1jcPwdk2Fqxw2i+Dl4qJ7vh0
+         hrHSbB5rpHXg43qiDqoWCMbDsEYO1zSBNPwePpnbCFxA+EzexaI3AKkBIgXDEoJyo4Ip
+         yz6Qy0ukxkThWaMr5z2DRb6/upm5eCUl6b7vJLd/tCEGGUTP3muQYhaLiFmMxz6tsRTh
+         xoFraicPiQlrME8idDx3dWSBGtAs8SCrjA5OoMlxthTF4RNIiJU3Zo2FQJZJtCnsFQRA
+         i6QNDdc6Pcy8fbwryr0K0r67VDPe74rCr2gSfmFuiXeAlyxUlI5Zp9Nk+86+PoDiMFR4
+         vnyA==
+X-Gm-Message-State: AOAM533Ix3K7sJsyxEFLVEVGu+k5caKN7S6bzkqPE1/P35Fg+SCv0eS4
+        hElZ4uID2Q9vnGu52SjO2edGf/RRUR+PjA==
+X-Google-Smtp-Source: ABdhPJy9JWWDNN0mRi0G9IluzOoJiSMRJOLAXNAMVlwM18EUSiXPydwWoMS8dIEKe5strOocpzPtPg==
+X-Received: by 2002:a17:90a:aa8a:: with SMTP id l10mr894891pjq.86.1611550233842;
+        Sun, 24 Jan 2021 20:50:33 -0800 (PST)
+Received: from gqjiang-home.profitbricks.net ([185.125.207.232])
+        by smtp.gmail.com with ESMTPSA id l14sm16459423pjy.15.2021.01.24.20.50.22
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sun, 24 Jan 2021 20:50:32 -0800 (PST)
 From:   Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
-Message-ID: <439d415f-6aed-7092-a593-0d2d490652d2@cloud.ionos.com>
-Date:   Mon, 25 Jan 2021 05:35:54 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
-MIME-Version: 1.0
-In-Reply-To: <CAPDyKFoPL4drfh3efKXyhXLp6Ce+j=oHwNd9VnVP4aaKQ0zmDQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+To:     axboe@kernel.dk
+Cc:     linux-block@vger.kernel.org, linux-scsi@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-nfs@vger.kernel.org,
+        hch@infradead.org, Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
+Subject: [PATCH V3 0/2] remove unused argument from blk_execute_rq_nowait and blk_execute_rq
+Date:   Mon, 25 Jan 2021 05:49:56 +0100
+Message-Id: <1611550198-17142-1-git-send-email-guoqing.jiang@cloud.ionos.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+V3 changes:
+1. rebase with for-5.12/block branch.
+2. add Ulf's Acked-by.
 
+V2 changes:
+1. update commit header per Christoph's comment.
 
-On 1/22/21 10:50, Ulf Hansson wrote:
-> On Fri, 22 Jan 2021 at 10:28, Guoqing Jiang
-> <guoqing.jiang@cloud.ionos.com> wrote:
->>
->> We can remove 'q' from blk_execute_rq as well after the previous change
->> in blk_execute_rq_nowait.
->>
->> And more importantly it never really was needed to start with given
->> that we can trivial derive it from struct request.
->>
->> Cc: linux-scsi@vger.kernel.org
->> Cc: virtualization@lists.linux-foundation.org
->> Cc: linux-ide@vger.kernel.org
->> Cc: linux-mmc@vger.kernel.org
->> Cc: linux-nvme@lists.infradead.org
->> Cc: linux-nfs@vger.kernel.org
->> Signed-off-by: Guoqing Jiang <guoqing.jiang@cloud.ionos.com>
-> 
-> [...]
-> 
->>   drivers/mmc/core/block.c          | 10 +++++-----
-> 
-> [...]
-> 
->  From mmc point of view, please add:
-> 
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> 
-> At the moment I don't think this will conflict with any changes to
-> mmc, but if that happens let's sort it then...
-> 
+Hi Jens,
 
-Thank you! Will resend and add your acked-by.
+This series remove unused 'q' from blk_execute_rq_nowait and blk_execute_rq.
+Also update the comment for blk_execute_rq_nowait.
 
+Thanks,
 Guoqing
+
+Guoqing Jiang (2):
+  block: remove unnecessary argument from blk_execute_rq_nowait
+  block: remove unnecessary argument from blk_execute_rq
+
+ block/blk-exec.c                   | 13 +++++--------
+ block/bsg.c                        |  2 +-
+ block/scsi_ioctl.c                 |  6 +++---
+ drivers/block/mtip32xx/mtip32xx.c  |  2 +-
+ drivers/block/paride/pd.c          |  2 +-
+ drivers/block/pktcdvd.c            |  2 +-
+ drivers/block/sx8.c                |  4 ++--
+ drivers/block/virtio_blk.c         |  2 +-
+ drivers/cdrom/cdrom.c              |  2 +-
+ drivers/ide/ide-atapi.c            |  2 +-
+ drivers/ide/ide-cd.c               |  2 +-
+ drivers/ide/ide-cd_ioctl.c         |  2 +-
+ drivers/ide/ide-devsets.c          |  2 +-
+ drivers/ide/ide-disk.c             |  2 +-
+ drivers/ide/ide-ioctls.c           |  4 ++--
+ drivers/ide/ide-park.c             |  2 +-
+ drivers/ide/ide-pm.c               |  4 ++--
+ drivers/ide/ide-tape.c             |  2 +-
+ drivers/ide/ide-taskfile.c         |  2 +-
+ drivers/mmc/core/block.c           | 10 +++++-----
+ drivers/nvme/host/core.c           |  8 ++++----
+ drivers/nvme/host/lightnvm.c       |  4 ++--
+ drivers/nvme/host/pci.c            |  4 ++--
+ drivers/nvme/target/passthru.c     |  2 +-
+ drivers/scsi/scsi_error.c          |  2 +-
+ drivers/scsi/scsi_lib.c            |  2 +-
+ drivers/scsi/sg.c                  |  3 +--
+ drivers/scsi/st.c                  |  2 +-
+ drivers/target/target_core_pscsi.c |  3 +--
+ fs/nfsd/blocklayout.c              |  2 +-
+ include/linux/blkdev.h             |  5 ++---
+ 31 files changed, 50 insertions(+), 56 deletions(-)
+
+-- 
+2.7.4
+
