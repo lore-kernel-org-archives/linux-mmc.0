@@ -2,114 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAB1DC433E6
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 17:43:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0465EC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 18:41:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A499222B3B
-	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 17:43:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC7F4230FA
+	for <linux-mmc@archiver.kernel.org>; Mon, 25 Jan 2021 18:41:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731142AbhAYRm4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 25 Jan 2021 12:42:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58138 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731004AbhAYRlF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 25 Jan 2021 12:41:05 -0500
-Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1E1F9C06174A;
-        Mon, 25 Jan 2021 09:40:21 -0800 (PST)
-Received: by mail-pf1-x429.google.com with SMTP id w14so8811508pfi.2;
-        Mon, 25 Jan 2021 09:40:21 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=Ll5CPSA8oXAVF+ATpu54RVy1Dmm80vxtyP/rheTo5bY=;
-        b=TrPHo+IIlhYXEIUGZnvVvy0gZqdTpRW2zdvLckAXnziMr3wC+urBR+OmQS8W73nnb0
-         N0vxhZJ8/8h99P+aZTdkqPzGQoVGVnDTGGoAs2tnSGyPtQOQ6naUqLpCyfOQLDQ3U7/S
-         Afcy9kRlkwOaVGteCaBQ7XKmTp5sTPwkXkzaFu62CivM4nKEJN0l6aBwf+zzA3ZNkUxX
-         Wj6Gpi0KSHnPDgqDGdITrbPhONGqTLpaZO8ilrZnPxTaabHzp8ivl6w9laSqsNPyOLPz
-         1I5D0O+xlBEOlorR1+7UfVaAxC6ZZcvj2q+KhRGt5e1gU1O3zpdmsCceM7ob5Rn7rEub
-         0Zlw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=Ll5CPSA8oXAVF+ATpu54RVy1Dmm80vxtyP/rheTo5bY=;
-        b=lbw1AaCaB/A9IYv0HjLbXlDhBq4fcuOSqpUQbxNxTfa31RvZs5GtrpDraKMbvLCVIk
-         8BfVh6CgmvyIct0YTlV4/DfzEN5E3/NR+U8vugICNyQzk6HzI4e2myS+/bdr1xDvdv1n
-         ns5ybhchvwM0Kty0YNLKbChtf6AnbNHovUK12G7rZ8UNByY1EN9Rx3Nno6gGv1reig8f
-         kK9bU2hs+CNG+iT2GTZH49/U2DMPX0pevNvIQhRr5wknxt/lo0Y62C5qqk4TUsvDJgWI
-         ywbw8ECHrTiRoLfaonCQ80DQpGe26oCNIrSZZ4gaf/yRdxs35KMBfrCyHAAnJI++4HYt
-         hORg==
-X-Gm-Message-State: AOAM533HAEtlTU4YCRponjugJqfNSxsoB1g0ymvIx0dmMBGPaEkWkDwy
-        RXr1YBU/9lMmuKxwnRw3jWz9woEPJ60=
-X-Google-Smtp-Source: ABdhPJx/x1gICR2eqXW4n+pOoamjEIIYYGojiydYeWPyZhXE0r9WcMnr2TwUrRP7Nat2R+vlDUpYzg==
-X-Received: by 2002:a63:6d2:: with SMTP id 201mr1614834pgg.270.1611596420007;
-        Mon, 25 Jan 2021 09:40:20 -0800 (PST)
-Received: from [10.230.29.30] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id c5sm17764227pgt.73.2021.01.25.09.40.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 25 Jan 2021 09:40:19 -0800 (PST)
-Subject: Re: [PATCH] mmc: brcmstb: Fix sdhci_pltfm_suspend link error
-To:     Arnd Bergmann <arnd@kernel.org>, Al Cooper <alcooperx@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        id S1726627AbhAYSl0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 25 Jan 2021 13:41:26 -0500
+Received: from mail.kernel.org ([198.145.29.99]:57702 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727050AbhAYSlK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 25 Jan 2021 13:41:10 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 3A1982063A;
+        Mon, 25 Jan 2021 18:40:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1611600029;
+        bh=hh8b0e0c4loqqFoN+PWjxQCkQrYyCAkBlcpa1rAA1QY=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Ub0exa77R2jvKdBW5JYmLGIwsruOb6XnIBAGZI3kLwdsJDHdapC0WwaKzxa4VLrFi
+         VODw8ehplEKjqNmtk2QX5JWk7w1of6OK3NwNZMiq3XvVx+LoSoOp8/vMnxrryNLQQE
+         CAT5OjuoY+GM+w0drYE58ffed0soxL+PJwroi5T0vtnruugKY+zpLeII/ZcZ2oDs63
+         N0l6JWjbtYVXA2Tat+LE4Mcf3lUPSJN7hu1jODKxsM6rcH/DRTGBdA5o004xfn0pzA
+         a6P/nxQQ4Xs0NYtnO4UxspybKIeKlwrZoeROp1WrGfqu3ymIrD62sIbbbDz/G6HZW/
+         BKoB2TAixQcsQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        bcm-kernel-feedback-list@broadcom.com,
-        Nicolas Schichan <nschichan@freebox.fr>
-Cc:     Arnd Bergmann <arnd@arndb.de>, stable@vger.kernel.org,
-        Douglas Anderson <dianders@chromium.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-References: <20210125125050.102605-1-arnd@kernel.org>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-Message-ID: <f671f5d2-36c4-ded5-c4b9-93c5c57cc9f2@gmail.com>
-Date:   Mon, 25 Jan 2021 09:40:16 -0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.6.1
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: [PATCH v6 0/9] eMMC inline encryption support
+Date:   Mon, 25 Jan 2021 10:38:01 -0800
+Message-Id: <20210125183810.198008-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-In-Reply-To: <20210125125050.102605-1-arnd@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+Nicolas,
+Hello,
 
-On 1/25/2021 4:50 AM, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> sdhci_pltfm_suspend() is only available when CONFIG_PM_SLEEP
-> support is built into the kernel, which caused a regression
-> in a recent bugfix:
-> 
-> ld.lld: error: undefined symbol: sdhci_pltfm_suspend
->>>> referenced by sdhci-brcmstb.c
->>>>               mmc/host/sdhci-brcmstb.o:(sdhci_brcmstb_shutdown) in archive drivers/built-in.a
-> 
-> Making the call conditional on the symbol fixes the link
-> error.
-> 
-> Fixes: 5b191dcba719 ("mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend")
-> Fixes: e7b5d63a82fe ("mmc: sdhci-brcmstb: Add shutdown callback")
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> ---
-> It would be helpful if someone could test this to ensure that the
-> driver works correctly even when CONFIG_PM_SLEEP is disabled
+This patchset adds support for eMMC inline encryption, as specified by
+the upcoming version of the eMMC specification and as already
+implemented and used on many devices.  Building on that, it then adds
+Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
 
-Why not create stubs for sdhci_pltfm_suspend() when CONFIG_PM_SLEEP=n? I
-don't think this is going to be a functional issue given that the
-purpose of having the .shutdown() function is to save power if we cannot
-that is fine, too.
+Inline encryption hardware improves the performance of storage
+encryption and reduces power usage.  See
+Documentation/block/inline-encryption.rst for more information about
+inline encryption and the blk-crypto framework (upstreamed in v5.8)
+which supports it.  Most mobile devices already use UFS or eMMC inline
+encryption hardware; UFS support was already upstreamed in v5.9.
+
+Patches 1-4 add support for the standard eMMC inline encryption.
+
+However, as with UFS, host controller-specific patches are needed on top
+of the standard support.  Therefore, patches 5-9 add Qualcomm ICE
+(Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
+
+To test this I took advantage of the recently upstreamed support for the
+Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
+project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
+particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
+a Debian chroot.  Among other things, these tests verified that the
+correct ciphertext is written to disk (the same as software encryption).
+
+It will also be possible to add support for Mediatek eMMC inline
+encryption hardware in mtk-sd, and it should be easier than the Qualcomm
+hardware since the Mediatek hardware follows the standard more closely.
+I.e., patches 1-4 should be almost enough for the Mediatek hardware.
+
+This patchset is based on the "next" branch of
+https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git,
+plus the patch "block/keyslot-manager: introduce devm_blk_ksm_init()"
+(https://lkml.kernel.org/r/20210121082155.111333-2-ebiggers@kernel.org).
+It can also be retrieved from tag "mmc-crypto-v6" of
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
+
+Changed in v6:
+  - Define MMC_CAP2_CRYPTO to 0 when !CONFIG_MMC_CRYPTO.
+  - Moved the sdm630 device tree update to the end of the series,
+    since it will go in through a different tree.
+  - Added an Acked-by.
+
+Changed in v5:
+  - Use the proposed resource-managed variant of blk_ksm_init().
+  - Removed an unnecessary call to devm_kfree().
+
+Changed in v4:
+  - Added Acked-by and Reviewed-and-tested-by tags.
+  - Rebased onto v5.11-rc2.
+
+Changed in v3:
+  - Improved comment for sdhci_msm_ice_wait_bist_status()
+  - Removed an unhelpful comment in union cqhci_crypto_cfg_entry.
+  - Fixed the commit message of "mmc: cqhci: initialize upper 64 bits of
+    128-bit task descriptors".
+  - Added Reviewed-by's and Acked-by's.
+
+Changed in v2:
+  - Only select QCOM_SCM if ARCH_QCOM.  (Fixes a build break.)
+  - Split most of the cqhci_prep_task_desc() change into its own patch.
+  - Made sdhci_msm_ice_wait_bist_status() use readl_poll_timeout().
+  - Added a couple more comments.
+  - Added some Acked-by's.
+
+Eric Biggers (9):
+  mmc: add basic support for inline encryption
+  mmc: cqhci: rename cqhci.c to cqhci-core.c
+  mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
+  mmc: cqhci: add support for inline encryption
+  mmc: cqhci: add cqhci_host_ops::program_key
+  firmware: qcom_scm: update comment for ICE-related functions
+  dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+  mmc: sdhci-msm: add Inline Crypto Engine support
+  arm64: dts: qcom: sdm630: add ICE registers and clocks
+
+ .../devicetree/bindings/mmc/sdhci-msm.txt     |   3 +
+ arch/arm64/boot/dts/qcom/sdm630.dtsi          |  10 +-
+ drivers/firmware/qcom_scm.c                   |  16 +-
+ drivers/mmc/core/Kconfig                      |   8 +
+ drivers/mmc/core/Makefile                     |   1 +
+ drivers/mmc/core/block.c                      |   3 +
+ drivers/mmc/core/core.c                       |   3 +
+ drivers/mmc/core/crypto.c                     |  48 +++
+ drivers/mmc/core/crypto.h                     |  40 +++
+ drivers/mmc/core/host.c                       |   1 +
+ drivers/mmc/core/queue.c                      |   3 +
+ drivers/mmc/host/Kconfig                      |   1 +
+ drivers/mmc/host/Makefile                     |   2 +
+ drivers/mmc/host/{cqhci.c => cqhci-core.c}    |  69 ++++-
+ drivers/mmc/host/cqhci-crypto.c               | 242 +++++++++++++++
+ drivers/mmc/host/cqhci-crypto.h               |  47 +++
+ drivers/mmc/host/cqhci.h                      |  84 +++++-
+ drivers/mmc/host/sdhci-msm.c                  | 276 +++++++++++++++++-
+ include/linux/mmc/core.h                      |   6 +
+ include/linux/mmc/host.h                      |  11 +
+ 20 files changed, 849 insertions(+), 25 deletions(-)
+ create mode 100644 drivers/mmc/core/crypto.c
+ create mode 100644 drivers/mmc/core/crypto.h
+ rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (94%)
+ create mode 100644 drivers/mmc/host/cqhci-crypto.c
+ create mode 100644 drivers/mmc/host/cqhci-crypto.h
+
 -- 
-Florian
+2.30.0
+
