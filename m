@@ -2,64 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92CC4C433E6
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 13:41:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAC29C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 14:11:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 658E622DFB
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 13:41:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A2F7822D04
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 14:11:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2392684AbhAZNle (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 08:41:34 -0500
-Received: from pop32.abv.bg ([194.153.145.222]:34416 "EHLO pop32.abv.bg"
+        id S2392711AbhAZOLZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 09:11:25 -0500
+Received: from mail.kernel.org ([198.145.29.99]:52092 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2403906AbhAZNkp (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 26 Jan 2021 08:40:45 -0500
-X-Greylist: delayed 576 seconds by postgrey-1.27 at vger.kernel.org; Tue, 26 Jan 2021 08:40:44 EST
-Received: from smtp.abv.bg (localhost [127.0.0.1])
-        by pop32.abv.bg (Postfix) with ESMTP id 6D17D200F7
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 15:29:04 +0200 (EET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=abv.bg; s=smtp-out;
-        t=1611667744; bh=eoOyn5w5MbvNhHnzb+uFMtogZEah9Q42+famfziX028=;
-        h=To:From:Subject:Date:From;
-        b=wnlH4uUnYxYcIIS1O6LA00vgcL2OemXkJTM7roj+bRtmttHTAHqJ+jAHmzxeK9nGc
-         nB60EYTxU42914m5l3ixF+Zvwg55b04+D4nWnkT0Rnl4a+56sMFRVy6A4botGzY68E
-         vuVa4wbL6W0JfZJbJbi8LxFvfhC61i/BvA51NSw8=
-X-HELO: [192.168.1.115]
-Authentication-Results: smtp.abv.bg; auth=pass (plain) smtp.auth=buboleck@abv.bg
-Received: from 46-249-79-198.net1.bg (HELO [192.168.1.115]) (46.249.79.198)
- by smtp.abv.bg (qpsmtpd/0.96) with ESMTPSA (ECDHE-RSA-AES128-GCM-SHA256 encrypted); Tue, 26 Jan 2021 15:29:04 +0200
-To:     linux-mmc@vger.kernel.org
-From:   Dimitar Kosev <buboleck@abv.bg>
-Subject: Realtek USB Card Reader Driver issues
-Message-ID: <1c123f6f-705b-8e47-1a01-dc6a61e6d416@abv.bg>
-Date:   Tue, 26 Jan 2021 15:28:43 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.1
+        id S2391192AbhAZOLM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 26 Jan 2021 09:11:12 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5C36022DFB;
+        Tue, 26 Jan 2021 14:10:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1611670212;
+        bh=GB4LM+e+KeQGmPPaLGcE23K9W8YeHZUp43KVm86dkoA=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=i7uSImQguDH5lJDoFDoN2maBLvW1GpbbrufKZVE4cQBo8cXKNsyvoYJETsxfFNny0
+         X922heTn/Md9zsoDABajJXyvr3oYttOinUXgvYni4sKnWa49/3TrpWWS0dJ4a98h3x
+         6SqIA/VrVDzTsWeYU7cQb6e7Joe9fG07rKh+ablVnJmvMNBpNfpVkBL43mvugJU4G+
+         qtUewldsJ7XMQw350kaNvoJORSFL7VGwAFz7f9vxw8usB/bq/aJBqL4lgzdqu9XdQ4
+         U/MOJYK59W9rpH0qWAFLvW/xbpwe64lrKb1H3CFKRUlj+6Wsu2f4cmZzIUS9lv8GS9
+         votvddrUrAYhw==
+Received: by mail-ot1-f54.google.com with SMTP id s2so14075395otp.5;
+        Tue, 26 Jan 2021 06:10:12 -0800 (PST)
+X-Gm-Message-State: AOAM5337LYhsSfgI07pSjUk4sxKhsXs9MeFTi/naMUCfjMphlg7MgDgD
+        TN83QwCsUzGA1/Z3SlrCGxv+NO0XwgI6pFmulGo=
+X-Google-Smtp-Source: ABdhPJw7ommRj9+grbObZCNjDx1zbb9kddzZfzWL972a7v/ySOvAuA/pnVFKhfW2s+774OmbYvq4E5qfNtKYQWjbJ2g=
+X-Received: by 2002:a05:6830:139a:: with SMTP id d26mr4103374otq.305.1611670211771;
+ Tue, 26 Jan 2021 06:10:11 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+References: <20210126095230.26580-1-ulf.hansson@linaro.org>
+In-Reply-To: <20210126095230.26580-1-ulf.hansson@linaro.org>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Tue, 26 Jan 2021 15:09:55 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a2MyPc81OdOsOryVgGqomum-UL=5vEDGjtdwNPUJKFFjw@mail.gmail.com>
+Message-ID: <CAK8P3a2MyPc81OdOsOryVgGqomum-UL=5vEDGjtdwNPUJKFFjw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pltfm: Fix linking err for sdhci-brcmstb
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Nicolas Schichan <nschichan@freebox.fr>,
+        "# 3.4.x" <stable@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+On Tue, Jan 26, 2021 at 10:52 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> The implementation of sdhci_pltfm_suspend() is only available when
+> CONFIG_PM_SLEEP is set, which triggers a linking error:
+>
+> "undefined symbol: sdhci_pltfm_suspend" when building sdhci-brcmstb.c.
+>
+> Fix this by implementing the missing stubs when CONFIG_PM_SLEEP is unset.
+>
+> Reported-by: Arnd Bergmann <arnd@arndb.de>
+> Suggested-by: Florian Fainelli <f.fainelli@gmail.com>
+> Cc: Nicolas Schichan <nschichan@freebox.fr>
+> Fixes: 5b191dcba719 ("mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
 
-It seems there is some issue with the rtsx_usb module. I'm using Gentoo 
-with kernel 5.7.9 at the moment as the card reader driver does not work 
-with 5.9 and 5.10 kernels, I don't know if the issue is there with 5.8 
-kernels as it was causing issues with my vga, my card reader info below:
-
-Bus 002 Device 002: ID 0bda:0129 Realtek Semiconductor Corp. RTS5129 
-Card Reader Controller
-
-The module detect the reader but does not detect the sd cards inserted, 
-the same cards work with 5.7 so I assume something was broken i the driver.
-
-Kind regards,
-
+Acked-by: Arnd Bergmann <arnd@arndb.de>
