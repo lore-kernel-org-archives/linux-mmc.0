@@ -3,196 +3,131 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EBBEC433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35C8DC433E0
 	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9A3F2311D
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0DFCD2311F
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391773AbhAZMqD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 07:46:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42948 "EHLO
+        id S2391647AbhAZMqF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 07:46:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42510 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391783AbhAZJ7W (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:22 -0500
-Received: from mail-ua1-x935.google.com (mail-ua1-x935.google.com [IPv6:2607:f8b0:4864:20::935])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7896C06178B
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:40 -0800 (PST)
-Received: by mail-ua1-x935.google.com with SMTP id d3so5417539uap.4
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:40 -0800 (PST)
+        with ESMTP id S2391805AbhAZJ7j (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:39 -0500
+Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D9A8C061351
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:48 -0800 (PST)
+Received: by mail-vs1-xe2f.google.com with SMTP id w187so8710648vsw.5
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:48 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=2s091ZCbXkY5kPsLe1N1zqI9t9bafuafJrjbGry9Cmw=;
-        b=me7uH48huC1WigZiogNpzBPm61ucNewUzZWg0f4fVWUAqnmeg73oSGMw4cvVl2YpMt
-         m72B812Vm8Ep+efiP0kM/1TqNPHPscNieVwDInZRX0ifjLlx7FYHf0cjb/OWBrgf+ds3
-         7Cm4pWLLKay1jkb2Am2XSCfPDKoCsGwe5kZUCEOC7qxwgW3sIxWZc7vU+iaeWgbxrVDa
-         Xq70GMRtoA/80D1FIAh2KEknoBJOHZrlCLUt4lij3HI0+7RRLYvLyiQPJLbr2jX9NL2E
-         BWfnkt8ZX7GJ10s1XK+eQD4cJd9K9b1tVPCy+zQbvLokDBSOJt2nc+bg6qNEbkTLVDx4
-         9Qrg==
+        bh=l2QpuY8rM4toyVpou9vFx2TY09PAPQwcRntc7oTA0is=;
+        b=REheRH86QOMZ/fp5spJI+HYISUR+or1vKvxmyLai8utojsCRMMqRZNCOUCtr9iDzzT
+         XKCjgZykN3eQ+Yd4tWF8Nx84mDqCcPaAX51DnmV1EQb0s+BU7FQ4/dGwbq8Hjyx4lb8X
+         1bz23M3gWrmtbp0qNqGFhbDKnqcf/r4Nv8yHm996ztOvPdgDCz+F3cpsXgpcSvwX9/BB
+         5M1Ld2sSZPlcwZEZgnauow/fO1i+zZ2dRrWkLhVtJm6FyvYm7Mzu7FdKu0qA41KQHY+c
+         5mtgGQP6aqes5Uoo/O6YvxTu2aLRM9Al9fxuL8529+GWQY26Y2Za0GGLeltGrnjt6kff
+         l6Kg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=2s091ZCbXkY5kPsLe1N1zqI9t9bafuafJrjbGry9Cmw=;
-        b=idB/6haVsSkQRddJ8TeIZVXk/1stARZ5VoAV7bJzdeJ0xXWrtmVMg/WoSu5PiTmWUm
-         p+jvLS4QIb70fN0ZJ6q830jQ7WcCP9wsZUVj75bAy8EfNGg1WA1uccMZ2D0SlILXk4of
-         jxyzp0wAW891qJxBclVyNkhO8CdtUU4rCbktiqrvE9XbPvsmD7dEQJ9mlSaPYGtICwvw
-         aYmWwk0MnNEiqTJJRW3EBUMHBe49BZ7rg0FvEZB5lxPvWK/HEG7PYeX6dtgJuGs6GEn7
-         zbOSdDqlW4i2+W3Ivia+653d7MwJIUAMsfhzTGC6HtuoU79RXjuDOnAtOb77UdyB3mNV
-         jQkg==
-X-Gm-Message-State: AOAM533Cmyd2Xb5Otz5vJWVIENI6no6LAo52EPX9j8HWPzqlkWZp4qgl
-        ++phPRTHNpfCioz3AofmA6fMiehFb1o5VJE9it/ZlA==
-X-Google-Smtp-Source: ABdhPJzoOxmNVPAsa+mo+p6s77bXk9Znkd/2lfcQFCTupY7epko0u8YpeILwE6V0/D1n9mDNs1+v+nrLYpCm/DmzQUA=
-X-Received: by 2002:ab0:338c:: with SMTP id y12mr3373917uap.19.1611655120019;
- Tue, 26 Jan 2021 01:58:40 -0800 (PST)
+        bh=l2QpuY8rM4toyVpou9vFx2TY09PAPQwcRntc7oTA0is=;
+        b=CwPuuvcPwg37aONrb6OWCxbJ6MsTyhaGYGyGRnBEfVU3ZSVTogtG9U2ZmtR/zxxfG1
+         2oSefLg62cyWVS4Hjsrb72oiP9adIExqnPIYrn9UCZifCDfSaDeIRZLRv5deg2Dj4rgJ
+         ZSPTJ8ftRyBcXyOzfcVcHWx0lGRsybH4QvyrWKlOTDfMUi3lBMQeB9tdXG3KkNikenWT
+         9SvhNeiRxzXOupgcCHv9xSh17gJBuRci0JKaB3/rlv8lSccEpaIrWBMvUl4oFJm6tzcq
+         aeupUuNcLdwDhB6ay8fRGYBFrgDhHB1YRpV+UXEdjbU9RIUfFRtWZsSZ1EzdFSgaqP15
+         erkQ==
+X-Gm-Message-State: AOAM530ofprgOldUvM8hymsqOXU4UvBk03m65QYLDK2pzTTovnMmkp/L
+        r0/bUON7APx9Wyaz00h458NoTZcx5OKWgyINHOvPmyU0aHcFVg==
+X-Google-Smtp-Source: ABdhPJyTySMXS2eZMh5eS03L32cNf15ToE5AvKZz7eICs1uJdhhGYno+oad4aRW7fF20tSBBSv54Xp63sFrSLCAF2oM=
+X-Received: by 2002:a67:f997:: with SMTP id b23mr3471696vsq.34.1611655127850;
+ Tue, 26 Jan 2021 01:58:47 -0800 (PST)
 MIME-Version: 1.0
-References: <20210126001456.382989-1-ebiggers@kernel.org>
-In-Reply-To: <20210126001456.382989-1-ebiggers@kernel.org>
+References: <20210124170258.32862-1-marex@denx.de>
+In-Reply-To: <20210124170258.32862-1-marex@denx.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Jan 2021 10:58:03 +0100
-Message-ID: <CAPDyKFqLVtiYkjeQmuYOf8K8k=oQSZ18928PPHvJDiUtTw2F-g@mail.gmail.com>
-Subject: Re: [PATCH RESEND v6 0/9] eMMC inline encryption support
-To:     Eric Biggers <ebiggers@kernel.org>
+Date:   Tue, 26 Jan 2021 10:58:11 +0100
+Message-ID: <CAPDyKFrUnx4XSyxx=H8reDV=_vRORe7fE=6HQivC9T7OkHfyRg@mail.gmail.com>
+Subject: Re: [PATCH V2 1/4] mmc: mmci: Add bindings to operate CMD, CK, CKIN
+ pins as GPIO
+To:     =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
-        Satya Tangirala <satyat@google.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Ludovic Barre <ludovic.barre@st.com>,
         Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
+        linux-stm32@st-md-mailman.stormreply.com,
+        DTML <devicetree@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 26 Jan 2021 at 01:15, Eric Biggers <ebiggers@kernel.org> wrote:
+On Sun, 24 Jan 2021 at 18:03, Marek Vasut <marex@denx.de> wrote:
 >
-> [Resending because most of the patches didn't make it to the lists for
-> some reason...]
+> Add DT bindings to describe GPIO line associated with CMD, CK, CKIN pins.
 >
-> Hello,
->
-> This patchset adds support for eMMC inline encryption, as specified by
-> the upcoming version of the eMMC specification and as already
-> implemented and used on many devices.  Building on that, it then adds
-> Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
->
-> Inline encryption hardware improves the performance of storage
-> encryption and reduces power usage.  See
-> Documentation/block/inline-encryption.rst for more information about
-> inline encryption and the blk-crypto framework (upstreamed in v5.8)
-> which supports it.  Most mobile devices already use UFS or eMMC inline
-> encryption hardware; UFS support was already upstreamed in v5.9.
->
-> Patches 1-4 add support for the standard eMMC inline encryption.
->
-> However, as with UFS, host controller-specific patches are needed on top
-> of the standard support.  Therefore, patches 5-9 add Qualcomm ICE
-> (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
->
-> To test this I took advantage of the recently upstreamed support for the
-> Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
-> project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
-> particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
-> a Debian chroot.  Among other things, these tests verified that the
-> correct ciphertext is written to disk (the same as software encryption).
->
-> It will also be possible to add support for Mediatek eMMC inline
-> encryption hardware in mtk-sd, and it should be easier than the Qualcomm
-> hardware since the Mediatek hardware follows the standard more closely.
-> I.e., patches 1-4 should be almost enough for the Mediatek hardware.
->
-> This patchset is based on the "next" branch (commit 42af8761bc84) of
-> https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git,
-> plus the patch "block/keyslot-manager: introduce devm_blk_ksm_init()"
-> (https://lkml.kernel.org/r/20210121082155.111333-2-ebiggers@kernel.org).
-> It can also be retrieved from tag "mmc-crypto-v6" of
-> https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
->
-> Changed in v6:
->   - Define MMC_CAP2_CRYPTO to 0 when !CONFIG_MMC_CRYPTO.
->   - Moved the sdm630 device tree update to the end of the series,
->     since it will go in through a different tree.
->   - Added an Acked-by.
->
-> Changed in v5:
->   - Use the proposed resource-managed variant of blk_ksm_init().
->   - Removed an unnecessary call to devm_kfree().
->
-> Changed in v4:
->   - Added Acked-by and Reviewed-and-tested-by tags.
->   - Rebased onto v5.11-rc2.
->
-> Changed in v3:
->   - Improved comment for sdhci_msm_ice_wait_bist_status()
->   - Removed an unhelpful comment in union cqhci_crypto_cfg_entry.
->   - Fixed the commit message of "mmc: cqhci: initialize upper 64 bits of
->     128-bit task descriptors".
->   - Added Reviewed-by's and Acked-by's.
->
-> Changed in v2:
->   - Only select QCOM_SCM if ARCH_QCOM.  (Fixes a build break.)
->   - Split most of the cqhci_prep_task_desc() change into its own patch.
->   - Made sdhci_msm_ice_wait_bist_status() use readl_poll_timeout().
->   - Added a couple more comments.
->   - Added some Acked-by's.
->
-> Eric Biggers (9):
->   mmc: add basic support for inline encryption
->   mmc: cqhci: rename cqhci.c to cqhci-core.c
->   mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
->   mmc: cqhci: add support for inline encryption
->   mmc: cqhci: add cqhci_host_ops::program_key
->   firmware: qcom_scm: update comment for ICE-related functions
->   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
->   mmc: sdhci-msm: add Inline Crypto Engine support
->   arm64: dts: qcom: sdm630: add ICE registers and clocks
->
->  .../devicetree/bindings/mmc/sdhci-msm.txt     |   3 +
->  arch/arm64/boot/dts/qcom/sdm630.dtsi          |  10 +-
->  drivers/firmware/qcom_scm.c                   |  16 +-
->  drivers/mmc/core/Kconfig                      |   8 +
->  drivers/mmc/core/Makefile                     |   1 +
->  drivers/mmc/core/block.c                      |   3 +
->  drivers/mmc/core/core.c                       |   3 +
->  drivers/mmc/core/crypto.c                     |  48 +++
->  drivers/mmc/core/crypto.h                     |  40 +++
->  drivers/mmc/core/host.c                       |   1 +
->  drivers/mmc/core/queue.c                      |   3 +
->  drivers/mmc/host/Kconfig                      |   1 +
->  drivers/mmc/host/Makefile                     |   2 +
->  drivers/mmc/host/{cqhci.c => cqhci-core.c}    |  69 ++++-
->  drivers/mmc/host/cqhci-crypto.c               | 242 +++++++++++++++
->  drivers/mmc/host/cqhci-crypto.h               |  47 +++
->  drivers/mmc/host/cqhci.h                      |  84 +++++-
->  drivers/mmc/host/sdhci-msm.c                  | 276 +++++++++++++++++-
->  include/linux/mmc/core.h                      |   6 +
->  include/linux/mmc/host.h                      |  11 +
->  20 files changed, 849 insertions(+), 25 deletions(-)
->  create mode 100644 drivers/mmc/core/crypto.c
->  create mode 100644 drivers/mmc/core/crypto.h
->  rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (94%)
->  create mode 100644 drivers/mmc/host/cqhci-crypto.c
->  create mode 100644 drivers/mmc/host/cqhci-crypto.h
->
-> --
-> 2.30.0
->
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> Cc: Alexandre Torgue <alexandre.torgue@st.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Ludovic Barre <ludovic.barre@st.com>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-stm32@st-md-mailman.stormreply.com
+> Cc: devicetree@vger.kernel.org
 
-Applied for next (leaving patch9 for arm soc), thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> V2: Rebase on next-20210122
+> ---
+>  .../devicetree/bindings/mmc/arm,pl18x.yaml    | 20 +++++++++++++++++++
+>  1 file changed, 20 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> index eddc1f6bdbe5..47595cb483be 100644
+> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> @@ -127,6 +127,26 @@ properties:
+>        driver to sample the receive data (for example with a voltage switch
+>        transceiver).
+>
+> +  st,cmd-gpios:
+> +    maxItems: 1
+> +    description:
+> +      The GPIO matching the CMD pin.
+> +
+> +  st,ck-gpios:
+> +    maxItems: 1
+> +    description:
+> +      The GPIO matching the CK pin.
+> +
+> +  st,ckin-gpios:
+> +    maxItems: 1
+> +    description:
+> +      The GPIO matching the CKIN pin.
+> +
+> +dependencies:
+> +  st,cmd-gpios: [ "st,use-ckin" ]
+> +  st,ck-gpios: [ "st,use-ckin" ]
+> +  st,ckin-gpios: [ "st,use-ckin" ]
+> +
+>  unevaluatedProperties: false
+>
+>  required:
+> --
+> 2.29.2
+>
