@@ -4,160 +4,221 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5F8BC4332B
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 13:25:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62E05C4332E
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 13:25:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F9A6206F9
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 13:25:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2F00F206F9
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 13:25:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726957AbhAZNZb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 08:25:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42506 "EHLO
+        id S1731532AbhAZNZh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 08:25:37 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391709AbhAZJ6v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:58:51 -0500
-Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2753C061788
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:36 -0800 (PST)
-Received: by mail-vs1-xe2a.google.com with SMTP id b5so4126269vsh.3
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:36 -0800 (PST)
+        with ESMTP id S2391743AbhAZJ7C (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:02 -0500
+Received: from mail-vs1-xe2c.google.com (mail-vs1-xe2c.google.com [IPv6:2607:f8b0:4864:20::e2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0BE0C06174A
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:20 -0800 (PST)
+Received: by mail-vs1-xe2c.google.com with SMTP id m13so3576844vsr.2
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=xAUX4GprPzfJpnKS+Lo2k56itTCgxOq8hTIK9hhikBo=;
-        b=yMLqhusdi2aisI8n3EYsY4b7uX64DLjmgiN7ntAidBYbDsED5leOQCmJSlsCarF/T+
-         Ed34AakMn7atFG1tHuru1bxCZfLwNf3/9RWXCZqJfzrhoYcYJvYvZe3JAWsNcN3mx029
-         XvbZasWKe7z20SCTOhJwM5B5hOteG5k+4UWVWSTm7bDy4+lrjVJDZhlEPzteoaS36tCi
-         OMPlQCWh5EfwHMGAT0qeom5wyPo9iJfFcvgT/t7wjQ5SWXN46cvFMbJ5nXx1Mbgx6RBk
-         AKawWmFxBazSWcZt940JkHuyie/rMXEQA0YAypuSICTCX1A68NMG9s+JBxZurKZbKqMZ
-         X7xA==
+        bh=mLEfURoFvMMPicE7Sci98/F9GqRXhnpDvzTDrgr8tH4=;
+        b=JSZizunWnHFUkmtUHyAHOYnJD7wXa9KEiZveWMNJbTnIsq8DBDHrjQKEOAVIUnS48Z
+         B89LBx4/bpXA2X9q/59Ie5CSj3LKHJW8WBFd/ZiMU0nbvpV36l+1/kjI3XNyFgX2CJvQ
+         hMq5myY+0eEMn1T6cvm/zpTpATSRcY2hMgLA0YZ4BfwlqjcoTEu6WjHjqxpncT8ra3UL
+         R/Q89uXzi+GFTylz+4amrwKIDE71qCVeU/Ml8E0so8uucmBgKVDaIF6mW6GLmW/Vohrn
+         azwJ4PE5eJbhKEXypO4atxOccHGtZjJsh/Idz05fkAehRjL6+wzTRuW9nfGQGouv+fi/
+         8r0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=xAUX4GprPzfJpnKS+Lo2k56itTCgxOq8hTIK9hhikBo=;
-        b=MC47L9YHAOjbnfwV++4lmsfIIZm8vAgJZN8VIrVGCDvNGRJ8bEbOYmD+neZ9Jh8YxZ
-         0sJOHQIpVBPqLZH+JVEoLR+OR/8u7qCYsN7zkcvRFiD8HcYAKIigbJ202nrr5eYNJBq8
-         F7p4Cuq3pZE9L9XpeBDeeznogjs2CSO8ZZiJAZaZ7WbH615y7SDZFGK94qW3qKQwBsu5
-         Mtt3zP1tS4dfDIcjFfP/LiKXOwJXHJk3R1APBAL3Jp7vljO3Z6YTlc+FVrZAPeR6gJEM
-         MMSldWGkq+oosHKlf1T8kZ1HgWrhnQsvmOFbBpgRnq+pTsL6AkUXJkWJNX2bMn3KcDaM
-         ldQw==
-X-Gm-Message-State: AOAM533bT9bzx6p1Uo30O97VCOkSD4xbnIIT/M+/MN4dVNt0KtnJkDEw
-        ciTqlzBbtqV/fKueyGAGgDX5pTTdvAINidJT0ADp3d6WiWv3yg==
-X-Google-Smtp-Source: ABdhPJz/rKFclHqeegtULkB5WJdYhx0oUc8lnkCsoUksDa5rkBDuriXnXzAWxmfhrKfLGYMbfLPN+b1awwoLDJ9pLa8=
-X-Received: by 2002:a05:6102:67b:: with SMTP id z27mr2247015vsf.19.1611655115911;
- Tue, 26 Jan 2021 01:58:35 -0800 (PST)
+        bh=mLEfURoFvMMPicE7Sci98/F9GqRXhnpDvzTDrgr8tH4=;
+        b=OaGEPe2MWqLMI5gMVlaWZ5q3lBuJtkd1XbQPI45XVropZ37YM5ftLNS2GG6hZIHpwe
+         qeNJVamtR/N4P64qHJWXqKNF6PSwufXi4nNFq8jgv0r6ruhbjIj6ijgwloWQdh/VYVTz
+         rx/syhYee7AhUICZgmXMoLoxeAgs3XDVU96dKQOUIy5x3wVrmUt+ipNzvTTf2fBz3EAv
+         +HGKzGOCuzt03KdFrVmd8sNlFQRFuY77C69FpksMpRDjW0UVXvgRGpNWBXxDtP6t52pv
+         J0KDyb3VnD6aMN6CvtIIb2TiFkW0f3+pX1VOCbVWjpADPgoqg+fHuYRfEfltLnAGCNBH
+         8WTg==
+X-Gm-Message-State: AOAM533XE8+K2dOQVLxzsEyyYqTJtPu81inouKMicikLLNEk4qqWQgh5
+        mcMjyqMLjTMs+MnkdT5j8mfPIhgwM9O1k/wG2dnjpA==
+X-Google-Smtp-Source: ABdhPJyxGvvKaiWsvdAfgnpUMrYd5zV8ocbx1A6czDj8b/zotF18PP3KFNdesTQFGkoR6pzaz7PSef5aB7V6Asl73Ks=
+X-Received: by 2002:a67:f997:: with SMTP id b23mr3471044vsq.34.1611655100162;
+ Tue, 26 Jan 2021 01:58:20 -0800 (PST)
 MIME-Version: 1.0
-References: <20210121082155.111333-1-ebiggers@kernel.org> <20210121082155.111333-3-ebiggers@kernel.org>
-In-Reply-To: <20210121082155.111333-3-ebiggers@kernel.org>
+References: <20210125122802.982-1-arnd@kernel.org>
+In-Reply-To: <20210125122802.982-1-arnd@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Jan 2021 10:57:59 +0100
-Message-ID: <CAPDyKFo_nsZuCX+nVBDTJ5QxZ18mQMx=MssJZtWTfJfFC=u+xw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] scsi: ufs: use devm_blk_ksm_init()
-To:     Eric Biggers <ebiggers@kernel.org>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        "James E.J. Bottomley" <jejb@linux.ibm.com>
-Cc:     linux-block <linux-block@vger.kernel.org>,
+Date:   Tue, 26 Jan 2021 10:57:42 +0100
+Message-ID: <CAPDyKFqhHw6N=j5xLuDJEiOn+D98xzR=hUYmxY81_7cq3aitdQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: aspeed: move kunit test into separate module
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Joel Stanley <joel@jms.id.au>, Arnd Bergmann <arnd@arndb.de>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Baolin Wang <baolin.wang@linaro.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        Satya Tangirala <satyat@google.com>
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        OpenBMC Maillist <openbmc@lists.ozlabs.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Martin, James
-
-On Thu, 21 Jan 2021 at 09:23, Eric Biggers <ebiggers@kernel.org> wrote:
+On Mon, 25 Jan 2021 at 13:28, Arnd Bergmann <arnd@kernel.org> wrote:
 >
-> From: Eric Biggers <ebiggers@google.com>
+> From: Arnd Bergmann <arnd@arndb.de>
 >
-> Use the new resource-managed variant of blk_ksm_init() so that the UFS
-> driver doesn't have to manually call blk_ksm_destroy().
+> Having both the driver and the unit test in the same module
+> leads to a link failure because of the extra init/exit functions:
 >
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> drivers/mmc/host/sdhci-of-aspeed-test.c:98:1: error: redefinition of '__inittest'
+> kunit_test_suite(aspeed_sdhci_test_suite);
+>
+> Make it a separate module instead.
+>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-I took the liberty of applying this one to my mmc tree along with
-patch1, as it looks trivial to me.
+Arnd, thanks for the patch and for your help! However, this time
+Andrew already posted a similar patch [1] to fix the problem, which I
+have just applied.
 
-Martin/James - if you have objections or want to ack it, please tell me.
+[1]
+https://patchwork.kernel.org/project/linux-mmc/patch/20210122114852.3790565-1-andrew@aj.id.au/
 
-Thanks and kind regards
+Kind regards
 Uffe
 
 
-
-
-
 > ---
->  drivers/scsi/ufs/ufshcd-crypto.c | 9 ++-------
->  drivers/scsi/ufs/ufshcd-crypto.h | 5 -----
->  drivers/scsi/ufs/ufshcd.c        | 1 -
->  3 files changed, 2 insertions(+), 13 deletions(-)
+>  drivers/mmc/host/Kconfig                |  2 +-
+>  drivers/mmc/host/Makefile               |  1 +
+>  drivers/mmc/host/sdhci-of-aspeed-test.c |  5 +++++
+>  drivers/mmc/host/sdhci-of-aspeed.c      | 11 ++++-------
+>  drivers/mmc/host/sdhci-of-aspeed.h      | 10 ++++++++++
+>  5 files changed, 21 insertions(+), 8 deletions(-)
+>  create mode 100644 drivers/mmc/host/sdhci-of-aspeed.h
 >
-> diff --git a/drivers/scsi/ufs/ufshcd-crypto.c b/drivers/scsi/ufs/ufshcd-crypto.c
-> index 07310b12a5dc8..153dd5765d9ca 100644
-> --- a/drivers/scsi/ufs/ufshcd-crypto.c
-> +++ b/drivers/scsi/ufs/ufshcd-crypto.c
-> @@ -179,8 +179,8 @@ int ufshcd_hba_init_crypto_capabilities(struct ufs_hba *hba)
->         }
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index d6f00d1d6251..a248f9f6be91 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -169,7 +169,7 @@ config MMC_SDHCI_OF_ASPEED
+>           If unsure, say N.
 >
->         /* The actual number of configurations supported is (CFGC+1) */
-> -       err = blk_ksm_init(&hba->ksm,
-> -                          hba->crypto_capabilities.config_count + 1);
-> +       err = devm_blk_ksm_init(hba->dev, &hba->ksm,
-> +                               hba->crypto_capabilities.config_count + 1);
->         if (err)
->                 goto out_free_caps;
+>  config MMC_SDHCI_OF_ASPEED_TEST
+> -       bool "Tests for the ASPEED SDHCI driver"
+> +       tristate "Tests for the ASPEED SDHCI driver"
+>         depends on MMC_SDHCI_OF_ASPEED && KUNIT=y
+>         help
+>           Enable KUnit tests for the ASPEED SDHCI driver. Select this
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 451c25fc2c69..5cc7e5f13587 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -90,6 +90,7 @@ obj-$(CONFIG_MMC_SDHCI_DOVE)          += sdhci-dove.o
+>  obj-$(CONFIG_MMC_SDHCI_TEGRA)          += sdhci-tegra.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)      += sdhci-of-arasan.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)      += sdhci-of-aspeed.o
+> +obj-$(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)  += sdhci-of-aspeed-test.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_AT91)                += sdhci-of-at91.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)       += sdhci-of-esdhc.o
+>  obj-$(CONFIG_MMC_SDHCI_OF_HLWD)                += sdhci-of-hlwd.o
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
+> index 34070605b28b..e7e42991534a 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed-test.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
+> @@ -2,6 +2,7 @@
+>  /* Copyright (C) 2020 IBM Corp. */
 >
-> @@ -238,8 +238,3 @@ void ufshcd_crypto_setup_rq_keyslot_manager(struct ufs_hba *hba,
->         if (hba->caps & UFSHCD_CAP_CRYPTO)
->                 blk_ksm_register(&hba->ksm, q);
->  }
-> -
-> -void ufshcd_crypto_destroy_keyslot_manager(struct ufs_hba *hba)
-> -{
-> -       blk_ksm_destroy(&hba->ksm);
-> -}
-> diff --git a/drivers/scsi/ufs/ufshcd-crypto.h b/drivers/scsi/ufs/ufshcd-crypto.h
-> index d53851be55416..78a58e788dff9 100644
-> --- a/drivers/scsi/ufs/ufshcd-crypto.h
-> +++ b/drivers/scsi/ufs/ufshcd-crypto.h
-> @@ -43,8 +43,6 @@ void ufshcd_init_crypto(struct ufs_hba *hba);
->  void ufshcd_crypto_setup_rq_keyslot_manager(struct ufs_hba *hba,
->                                             struct request_queue *q);
+>  #include <kunit/test.h>
+> +#include "sdhci-of-aspeed.h"
 >
-> -void ufshcd_crypto_destroy_keyslot_manager(struct ufs_hba *hba);
-> -
->  #else /* CONFIG_SCSI_UFS_CRYPTO */
->
->  static inline void ufshcd_prepare_lrbp_crypto(struct request *rq,
-> @@ -69,9 +67,6 @@ static inline void ufshcd_init_crypto(struct ufs_hba *hba) { }
->  static inline void ufshcd_crypto_setup_rq_keyslot_manager(struct ufs_hba *hba,
->                                                 struct request_queue *q) { }
->
-> -static inline void ufshcd_crypto_destroy_keyslot_manager(struct ufs_hba *hba)
-> -{ }
-> -
->  #endif /* CONFIG_SCSI_UFS_CRYPTO */
->
->  #endif /* _UFSHCD_CRYPTO_H */
-> diff --git a/drivers/scsi/ufs/ufshcd.c b/drivers/scsi/ufs/ufshcd.c
-> index e31d2c5c7b23b..d905c84474c2c 100644
-> --- a/drivers/scsi/ufs/ufshcd.c
-> +++ b/drivers/scsi/ufs/ufshcd.c
-> @@ -9139,7 +9139,6 @@ EXPORT_SYMBOL_GPL(ufshcd_remove);
->   */
->  void ufshcd_dealloc_host(struct ufs_hba *hba)
+>  static void aspeed_sdhci_phase_ddr52(struct kunit *test)
 >  {
-> -       ufshcd_crypto_destroy_keyslot_manager(hba);
->         scsi_host_put(hba->host);
+> @@ -96,3 +97,7 @@ static struct kunit_suite aspeed_sdhci_test_suite = {
+>         .test_cases = aspeed_sdhci_test_cases,
+>  };
+>  kunit_test_suite(aspeed_sdhci_test_suite);
+> +
+> +MODULE_DESCRIPTION("Unit test for the ASPEED SD/SDIO/SDHCI Controllers");
+> +MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
+> +MODULE_LICENSE("GPL");
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index 3b0d381e1215..dcc80099f528 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/platform_device.h>
+>  #include <linux/spinlock.h>
+>
+> +#include "sdhci-of-aspeed.h"
+>  #include "sdhci-pltfm.h"
+>
+>  #define ASPEED_SDC_INFO                        0x00
+> @@ -42,7 +43,6 @@ struct aspeed_sdc {
+>  struct aspeed_sdhci_tap_param {
+>         bool valid;
+>
+> -#define ASPEED_SDHCI_TAP_PARAM_INVERT_CLK      BIT(4)
+>         u8 in;
+>         u8 out;
+>  };
+> @@ -123,8 +123,8 @@ aspeed_sdc_set_phase_taps(struct aspeed_sdc *sdc,
+>  #define ASPEED_SDHCI_NR_TAPS           15
+>  /* Measured value with *handwave* environmentals and static loading */
+>  #define ASPEED_SDHCI_MAX_TAP_DELAY_PS  1253
+> -static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+> -                                    int phase_deg)
+> +int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+> +                             int phase_deg)
+>  {
+>         u64 phase_period_ps;
+>         u64 prop_delay_ps;
+> @@ -158,6 +158,7 @@ static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+>
+>         return inverted | tap;
 >  }
->  EXPORT_SYMBOL_GPL(ufshcd_dealloc_host);
+> +EXPORT_SYMBOL_GPL(aspeed_sdhci_phase_to_tap);
+>
+>  static void
+>  aspeed_sdhci_phases_to_taps(struct device *dev, unsigned long rate,
+> @@ -579,10 +580,6 @@ static void __exit aspeed_sdc_exit(void)
+>  }
+>  module_exit(aspeed_sdc_exit);
+>
+> -#if defined(CONFIG_MMC_SDHCI_OF_ASPEED_TEST)
+> -#include "sdhci-of-aspeed-test.c"
+> -#endif
+> -
+>  MODULE_DESCRIPTION("Driver for the ASPEED SD/SDIO/SDHCI Controllers");
+>  MODULE_AUTHOR("Ryan Chen <ryan_chen@aspeedtech.com>");
+>  MODULE_AUTHOR("Andrew Jeffery <andrew@aj.id.au>");
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.h b/drivers/mmc/host/sdhci-of-aspeed.h
+> new file mode 100644
+> index 000000000000..931e70781d08
+> --- /dev/null
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.h
+> @@ -0,0 +1,10 @@
+> +// SPDX-License-Identifier: GPL-2.0-or-later
+> +#ifndef _SDHCI_OF_ASPEED_H
+> +#define _SDHCI_OF_ASPEED_H
+> +
+> +struct device;
+> +int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+> +                             int phase_deg);
+> +#define ASPEED_SDHCI_TAP_PARAM_INVERT_CLK      BIT(4)
+> +
+> +#endif /* _SDHCI_OF_ASPEED_H */
 > --
-> 2.30.0
+> 2.29.2
 >
