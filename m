@@ -2,35 +2,36 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 522B5C433E9
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB0F9C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0F40B221EA
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A998F221EA
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389023AbhAZF5D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 00:57:03 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36130 "EHLO mail.kernel.org"
+        id S1728186AbhAZF5I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 00:57:08 -0500
+Received: from mail.kernel.org ([198.145.29.99]:36126 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1731959AbhAZCDd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1731946AbhAZCDd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Mon, 25 Jan 2021 21:03:33 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 121BD22B3F;
-        Tue, 26 Jan 2021 00:15:16 +0000 (UTC)
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 116DF22AAC;
+        Tue, 26 Jan 2021 00:15:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611620116;
-        bh=cX3hhlW1d9/YsB6hj6Qe4lavdDpm38z9XYx4ck60cDE=;
+        s=k20201202; t=1611620113;
+        bh=ameHPCB/oz4/BeevZFfLSTXuBt6P8JY+tdmpWZqMTOI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=TOhwCDaBYtIiDMkwl5c8+FMG7ZL+sc6YXZYcQK1oZKLaDHGEFAk7V6Jx13+UdN3HW
-         dgliD1jTkIonfLbPwgTZPL0+TIlfcVrPF7DuMBys2SPvgzXQUG+pU8PBKa2FLZNB96
-         E7sOpZuOscjJWLWLirk9PoTDdLi9Py9NHy+Jk3iFMEkbZgdtoPiO2illCCvKXC5bbK
-         I9MI490tcr0SnzSVoT8Mxl7+3Pv3J9KKdl+LB2OD6EAXor75C/e4XGF2uO/F+VHLdG
-         qQJl2T0mZfRzkXJMbOZ/oeZbd6R4KXHJEqB5IMCqoTjH0PoOSiqOWSCnnS5dTI4m6v
-         isCHYmoGuRRgA==
+        b=Wf11EHrrCmVm35joh6g3yG//NltKnKnMLqdau3Tic7vMBtrOeHy5sqNRdxsYW1ajv
+         OYNTYb9OGSm4Tzv3TKVM81kAhMebqLTLMnYDtqfQLNiH2CrkxPuGn/TZCHdKm1ubST
+         +lp8z6o1hkoBtVGY4MT6x2S76ioNu6rSMz9kPo8D4/DcQqM8kFuXvvZKSNLFuzDSK+
+         8T+ovQiVScQxxWPtRU6CWbpEocdNtviyfpemGwACQWv7X5dVkhwqiw7ffpwjnNOZqE
+         Y2VZgfp8tWvoSZS5XSmpsM6R/O3rv2z/R2zc+qrxRr7DA2o1iw/SouqcQ680/JAtGl
+         CwPw5tWnpvAkw==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
@@ -45,11 +46,10 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Barani Muthukumaran <bmuthuku@codeaurora.org>,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>,
-        Rob Herring <robh@kernel.org>
-Subject: [PATCH RESEND v6 7/9] dt-bindings: mmc: sdhci-msm: add ICE registers and clock
-Date:   Mon, 25 Jan 2021 16:14:54 -0800
-Message-Id: <20210126001456.382989-8-ebiggers@kernel.org>
+        Konrad Dybcio <konradybcio@gmail.com>
+Subject: [PATCH RESEND v6 2/9] mmc: cqhci: rename cqhci.c to cqhci-core.c
+Date:   Mon, 25 Jan 2021 16:14:49 -0800
+Message-Id: <20210126001456.382989-3-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210126001456.382989-1-ebiggers@kernel.org>
 References: <20210126001456.382989-1-ebiggers@kernel.org>
@@ -61,42 +61,34 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Document the bindings for the registers and clock for the MMC instance
-of the Inline Crypto Engine (ICE) on Snapdragon SoCs.  These bindings
-are needed in order for sdhci-msm to support inline encryption.
+Rename cqhci.c to cqhci-core.c so that another source file can be added
+to the cqhci module without having to rename the module.
 
-Reviewed-by: Satya Tangirala <satyat@google.com>
-Acked-by: Rob Herring <robh@kernel.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/Makefile                  | 1 +
+ drivers/mmc/host/{cqhci.c => cqhci-core.c} | 0
+ 2 files changed, 1 insertion(+)
+ rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (100%)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 9fa8a24fbc97d..4c7fa6a4ed15c 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -31,10 +31,12 @@ Required properties:
- 	- SD Core register map (required for controllers earlier than msm-v5)
- 	- CQE register map (Optional, CQE support is present on SDHC instance meant
- 	                    for eMMC and version v4.2 and above)
-+	- Inline Crypto Engine register map (optional)
- - reg-names: When CQE register map is supplied, below reg-names are required
- 	- "hc" for Host controller register map
- 	- "core" for SD core register map
- 	- "cqhci" for CQE register map
-+	- "ice" for Inline Crypto Engine register map (optional)
- - interrupts: Should contain an interrupt-specifiers for the interrupts:
- 	- Host controller interrupt (required)
- - pinctrl-names: Should contain only one value - "default".
-@@ -47,6 +49,7 @@ Required properties:
- 	"xo"	- TCXO clock (optional)
- 	"cal"	- reference clock for RCLK delay calibration (optional)
- 	"sleep"	- sleep clock for RCLK delay calibration (optional)
-+	"ice" - clock for Inline Crypto Engine (optional)
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index d2ec428cc8086..19687ad42c6b4 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -102,6 +102,7 @@ obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
+ obj-$(CONFIG_MMC_SDHCI_OMAP)		+= sdhci-omap.o
+ obj-$(CONFIG_MMC_SDHCI_SPRD)		+= sdhci-sprd.o
+ obj-$(CONFIG_MMC_CQHCI)			+= cqhci.o
++cqhci-y					+= cqhci-core.o
+ obj-$(CONFIG_MMC_HSQ)			+= mmc_hsq.o
  
- - qcom,ddr-config: Certain chipsets and platforms require particular settings
- 	for the DDR_CONFIG register. Use this field to specify the register
+ ifeq ($(CONFIG_CB710_DEBUG),y)
+diff --git a/drivers/mmc/host/cqhci.c b/drivers/mmc/host/cqhci-core.c
+similarity index 100%
+rename from drivers/mmc/host/cqhci.c
+rename to drivers/mmc/host/cqhci-core.c
 -- 
 2.30.0
 
