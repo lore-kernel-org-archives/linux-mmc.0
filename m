@@ -2,134 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3EBBC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 21:53:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D40AC433E6
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 21:53:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B413E2064C
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 21:53:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3ED7C20657
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 21:53:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726954AbhAZVwi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 16:52:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50252 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729030AbhAZRCV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 12:02:21 -0500
-Received: from mail-io1-xd2e.google.com (mail-io1-xd2e.google.com [IPv6:2607:f8b0:4864:20::d2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2447EC061797;
-        Tue, 26 Jan 2021 08:41:33 -0800 (PST)
-Received: by mail-io1-xd2e.google.com with SMTP id u8so21718920ior.13;
-        Tue, 26 Jan 2021 08:41:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=noF668HAsWh6B0PaJj016gYYJwQjDmvicFCMUsI1bRs=;
-        b=WMl7Lx+tGgX1ACuDlJqnbk7pSgwknR5vVIotif8GTeGjyVlBzSBugNcr64RgctAwr9
-         v1AabNcsA/9o/vsGpjPwAmOcIlACM7EOJ7fDxtdoWgJRsQB2xuzxMfOi6EUZcA/kBGJJ
-         nEME2Am+VidBBh7RZ1QTb/gA9O0utEm+S5atCwIePPNt/Xw+PPub3TRx68OJKYQ1VctT
-         BbclNtWv125e4ZjjWkTCyfGIKkINBr9FKGRs9Z+0oNHOBBiZUcUcwNppljJkdSuW4sRx
-         ZRmzo6PSit7Uki39Og4DHZVnPx6FJNIUDG1t7rabkFX+8exi6sDOQcyFv4fYQa9aoeUf
-         Hyig==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=noF668HAsWh6B0PaJj016gYYJwQjDmvicFCMUsI1bRs=;
-        b=WxG/0aM32L890XnmLhP/nTbyahdqfJBtBdZygLUl0oCR6Z92IfmlxcXfNlgziP7irS
-         lR0kel6JjiyYGLy365FI67rsBd6NnOIBVFc63l3pAdHQCNh3OuRo74NPC0oqlYUhSKIc
-         4OGcwZ+iCPE6eug6jcFL8wA9+O2DE+t22w19rxtID85+scGLhyVS6rpblSP7072BnXrL
-         KIjyVeG94OHNvp2t4ecRnrAwS/l/QqqiVn3HRdJrjisBJaee4+r0xuMbJo2uZoR9K8E3
-         Q6F8enGUQkMAILvbgYxJvyRkgQbVVJOH7FC7QoZHSrTy+GBNGiye1xvHPULG2JBnxTVU
-         YTVg==
-X-Gm-Message-State: AOAM530Q1CHtGG7SvNMfjgdzCKnGm6NGRXISLyeJ865dY/JxRZ1ne7ni
-        16V+ducQ/tfBoYviBCqb1dKhULPjHp6DA2+eigw=
-X-Google-Smtp-Source: ABdhPJysUCly5W+Y+gBjDlv6OwEO5GXaEtF85Qq/vidnGYZoXHstctLsPBe7Is/3Gj3yjni5WWc6wHddZFYmCapRgsk=
-X-Received: by 2002:a92:bd06:: with SMTP id c6mr5474781ile.158.1611679291832;
- Tue, 26 Jan 2021 08:41:31 -0800 (PST)
-MIME-Version: 1.0
-References: <20210125125050.102605-1-arnd@kernel.org> <f671f5d2-36c4-ded5-c4b9-93c5c57cc9f2@gmail.com>
- <CAPDyKFoGDHtE8JgLurwuN-W6CmmyBB3GP+7Z-bWqJiWw+TJEaQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFoGDHtE8JgLurwuN-W6CmmyBB3GP+7Z-bWqJiWw+TJEaQ@mail.gmail.com>
-From:   Alan Cooper <alcooperx@gmail.com>
-Date:   Tue, 26 Jan 2021 11:41:20 -0500
-Message-ID: <CAOGqxeVmvW-sXs9SBu7MbiNjthDmKH0uK1gvHNNBie8miGRsCQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: brcmstb: Fix sdhci_pltfm_suspend link error
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Florian Fainelli <f.fainelli@gmail.com>,
-        Arnd Bergmann <arnd@kernel.org>,
-        Nicolas Schichan <nschichan@freebox.fr>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        "# 4.0+" <stable@vger.kernel.org>,
-        Douglas Anderson <dianders@chromium.org>,
+        id S1727018AbhAZVwz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 16:52:55 -0500
+Received: from foss.arm.com ([217.140.110.172]:48778 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729902AbhAZRL2 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 26 Jan 2021 12:11:28 -0500
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 843DFD6E;
+        Tue, 26 Jan 2021 09:08:55 -0800 (PST)
+Received: from [10.57.40.145] (unknown [10.57.40.145])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 099A63F66E;
+        Tue, 26 Jan 2021 09:08:45 -0800 (PST)
+Subject: Re: [PATCH v3 4/5] amba: Make the remove callback return void
+To:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Russell King <linux@armlinux.org.uk>,
+        Matt Mackall <mpm@selenic.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Eric Anholt <eric@anholt.net>, David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Vladimir Zapolskiy <vz@mleia.com>,
         Krzysztof Kozlowski <krzk@kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Mark Brown <broonie@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Eric Auger <eric.auger@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.com>
+Cc:     linux-kernel@vger.kernel.org, kernel@pengutronix.de,
+        Mike Leach <mike.leach@linaro.org>,
+        Leo Yan <leo.yan@linaro.org>, Arnd Bergmann <arnd@arndb.de>,
+        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, coresight@lists.linaro.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-i2c@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-rtc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org,
+        kvm@vger.kernel.org, linux-fbdev@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, alsa-devel@alsa-project.org
+References: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
+ <20210126165835.687514-5-u.kleine-koenig@pengutronix.de>
+From:   Suzuki K Poulose <suzuki.poulose@arm.com>
+Message-ID: <3e42b2ea-c713-31b2-9c86-c49a70d8e1f4@arm.com>
+Date:   Tue, 26 Jan 2021 17:08:40 +0000
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.6.1
+MIME-Version: 1.0
+In-Reply-To: <20210126165835.687514-5-u.kleine-koenig@pengutronix.de>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> I just posted a new patch for this, please have a look and test it.
->
-> Kind regards
-> Uffe
+Hi
 
-I tested your new patch and it works.
-Reviewed-and-tested-by: Al Cooper <alcooperx@gmail.com>
+On 1/26/21 4:58 PM, Uwe Kleine-König wrote:
+> All amba drivers return 0 in their remove callback. Together with the
+> driver core ignoring the return value anyhow, it doesn't make sense to
+> return a value here.
+> 
+> Change the remove prototype to return void, which makes it explicit that
+> returning an error value doesn't work as expected. This simplifies changing
+> the core remove callback to return void, too.
+> 
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Reviewed-by: Arnd Bergmann <arnd@arndb.de>
+> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
+> Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+> Acked-by: Krzysztof Kozlowski <krzk@kernel.org> # for drivers/memory
+> Acked-by: Mark Brown <broonie@kernel.org>
+  > Acked-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+> Acked-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
 
-Thanks
-Al
 
+>   drivers/hwtracing/coresight/coresight-etm4x-core.c | 4 +---
 
+You are most likely to have a conflict for the above file, with what is
+in coresight/next. It should be easy to resolve.
 
-On Tue, Jan 26, 2021 at 4:55 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Mon, 25 Jan 2021 at 18:40, Florian Fainelli <f.fainelli@gmail.com> wrote:
-> >
-> > +Nicolas,
-> >
-> > On 1/25/2021 4:50 AM, Arnd Bergmann wrote:
-> > > From: Arnd Bergmann <arnd@arndb.de>
-> > >
-> > > sdhci_pltfm_suspend() is only available when CONFIG_PM_SLEEP
-> > > support is built into the kernel, which caused a regression
-> > > in a recent bugfix:
-> > >
-> > > ld.lld: error: undefined symbol: sdhci_pltfm_suspend
-> > >>>> referenced by sdhci-brcmstb.c
-> > >>>>               mmc/host/sdhci-brcmstb.o:(sdhci_brcmstb_shutdown) in archive drivers/built-in.a
-> > >
-> > > Making the call conditional on the symbol fixes the link
-> > > error.
-> > >
-> > > Fixes: 5b191dcba719 ("mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend")
-> > > Fixes: e7b5d63a82fe ("mmc: sdhci-brcmstb: Add shutdown callback")
-> > > Cc: stable@vger.kernel.org
-> > > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> > > ---
-> > > It would be helpful if someone could test this to ensure that the
-> > > driver works correctly even when CONFIG_PM_SLEEP is disabled
-> >
-> > Why not create stubs for sdhci_pltfm_suspend() when CONFIG_PM_SLEEP=n? I
-> > don't think this is going to be a functional issue given that the
-> > purpose of having the .shutdown() function is to save power if we cannot
-> > that is fine, too.
-> > --
-> > Florian
->
-> I would prefer this approach - we shouldn't leave stub functions
-> unimplemented, which is what looks to me.
->
-> I just posted a new patch for this, please have a look and test it.
->
-> Kind regards
-> Uffe
+Otherwise, the changes look good for the drivers/hwtracing/coresight/*
+
+Acked-by: Suzuki K Poulose <suzuki.poulose@arm.com>
