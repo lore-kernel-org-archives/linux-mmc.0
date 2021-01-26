@@ -3,118 +3,196 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14C17C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EBBEC433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E64282311F
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9A3F2311D
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2403783AbhAZMp7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 07:45:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42912 "EHLO
+        id S2391773AbhAZMqD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 07:46:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391773AbhAZJ7N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:13 -0500
-Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 112A1C061797
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:33 -0800 (PST)
-Received: by mail-vs1-xe33.google.com with SMTP id b5so4126204vsh.3
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:33 -0800 (PST)
+        with ESMTP id S2391783AbhAZJ7W (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:22 -0500
+Received: from mail-ua1-x935.google.com (mail-ua1-x935.google.com [IPv6:2607:f8b0:4864:20::935])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7896C06178B
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:40 -0800 (PST)
+Received: by mail-ua1-x935.google.com with SMTP id d3so5417539uap.4
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=V09Ue7aLBQ6MasDKq8tKkbzc8OyCG8WfSUIi+pxHZ0A=;
-        b=CHlVroXsOgdhhTPTerkwYExyowok7JnOu1dgx3Qe5C+WdAY9SuwbHHYtgflWAiyHXA
-         6nk/cPRyb5qitgEgrQ12v8btdOrwCH8AVbfR2laYZKDz9gIq8s04GFaa8x7ElPb8GbKT
-         oOqLh6fukCxIin4MRGYp8DW83XwqXltmRrbonhhJnmIVBkrjVn8FwpIfUufmCoRazpIz
-         82fdB/S7WvPikAR9P3PR8RboYxAWzp+XCg7dvH9rw7hJ2wqNHi2YgpHDfMqYnhe3ZBpS
-         9SK3HgV7HU9TxNcbi+YXXZ0B88xcLL3pB3p45beQAXEZ5qXZJKE0nrXFxMFEcaokAX0k
-         XoSA==
+        bh=2s091ZCbXkY5kPsLe1N1zqI9t9bafuafJrjbGry9Cmw=;
+        b=me7uH48huC1WigZiogNpzBPm61ucNewUzZWg0f4fVWUAqnmeg73oSGMw4cvVl2YpMt
+         m72B812Vm8Ep+efiP0kM/1TqNPHPscNieVwDInZRX0ifjLlx7FYHf0cjb/OWBrgf+ds3
+         7Cm4pWLLKay1jkb2Am2XSCfPDKoCsGwe5kZUCEOC7qxwgW3sIxWZc7vU+iaeWgbxrVDa
+         Xq70GMRtoA/80D1FIAh2KEknoBJOHZrlCLUt4lij3HI0+7RRLYvLyiQPJLbr2jX9NL2E
+         BWfnkt8ZX7GJ10s1XK+eQD4cJd9K9b1tVPCy+zQbvLokDBSOJt2nc+bg6qNEbkTLVDx4
+         9Qrg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=V09Ue7aLBQ6MasDKq8tKkbzc8OyCG8WfSUIi+pxHZ0A=;
-        b=qsMIMb3haAknLAaRK+kDO5gg/dokX3mbEzcAuacVouqP8IO8yluGE+x1uO6j/Ds5by
-         bZT4eNfO7XyWE+bjsDIg0lOiXRPxmxyGlRHuUnbzSUTxNup0IRcI30Qarn6fVaSc2GWf
-         mPJx/Wf8HeoQLSp8YsoSF3T83Bv88GZwFqz6jO3k0Q0NjomQz9NhaMvceH2mB4RhYi/n
-         CoLtXArFA8Nxfbe58BPQTtPon1t7BQe7rCgcHdZaksrTgYMBUJoNNNl3gkI1vAXyYK4V
-         h8C+0DQd3PsFFoZf/ipI62hJYoaDQKmH/kWibxj9H59xBV+M4kandViQnksvzpMsBEy1
-         ffCA==
-X-Gm-Message-State: AOAM5317FTq2yfgQUETS31Z7texfeUt99mebEryGioJPwYbGyi6qT4g+
-        M9+o+GSkHXZIItH/WfNSShyymeA4WW56Ei7Nm5CTZw==
-X-Google-Smtp-Source: ABdhPJyxfS6eXOv4r25zRNMylO+JLPVa+hbsuQ550KJ78Oyz1/Jpr4fsWYgKLy/30YnR5meyw9A4c2VWMyETl9lCtpM=
-X-Received: by 2002:a67:7f41:: with SMTP id a62mr3552156vsd.55.1611655112263;
- Tue, 26 Jan 2021 01:58:32 -0800 (PST)
+        bh=2s091ZCbXkY5kPsLe1N1zqI9t9bafuafJrjbGry9Cmw=;
+        b=idB/6haVsSkQRddJ8TeIZVXk/1stARZ5VoAV7bJzdeJ0xXWrtmVMg/WoSu5PiTmWUm
+         p+jvLS4QIb70fN0ZJ6q830jQ7WcCP9wsZUVj75bAy8EfNGg1WA1uccMZ2D0SlILXk4of
+         jxyzp0wAW891qJxBclVyNkhO8CdtUU4rCbktiqrvE9XbPvsmD7dEQJ9mlSaPYGtICwvw
+         aYmWwk0MnNEiqTJJRW3EBUMHBe49BZ7rg0FvEZB5lxPvWK/HEG7PYeX6dtgJuGs6GEn7
+         zbOSdDqlW4i2+W3Ivia+653d7MwJIUAMsfhzTGC6HtuoU79RXjuDOnAtOb77UdyB3mNV
+         jQkg==
+X-Gm-Message-State: AOAM533Cmyd2Xb5Otz5vJWVIENI6no6LAo52EPX9j8HWPzqlkWZp4qgl
+        ++phPRTHNpfCioz3AofmA6fMiehFb1o5VJE9it/ZlA==
+X-Google-Smtp-Source: ABdhPJzoOxmNVPAsa+mo+p6s77bXk9Znkd/2lfcQFCTupY7epko0u8YpeILwE6V0/D1n9mDNs1+v+nrLYpCm/DmzQUA=
+X-Received: by 2002:ab0:338c:: with SMTP id y12mr3373917uap.19.1611655120019;
+ Tue, 26 Jan 2021 01:58:40 -0800 (PST)
 MIME-Version: 1.0
-References: <20210121082155.111333-1-ebiggers@kernel.org> <20210121082155.111333-2-ebiggers@kernel.org>
- <CAA+FYZerh02JXSKghCKuG29ATdYU_=2O93moGnLgD6Jv2v2auQ@mail.gmail.com>
- <YA8pMDqHsKZA0zfR@sol.localdomain> <3b1b6a94-f283-e8a3-8638-6475d0323c30@kernel.dk>
-In-Reply-To: <3b1b6a94-f283-e8a3-8638-6475d0323c30@kernel.dk>
+References: <20210126001456.382989-1-ebiggers@kernel.org>
+In-Reply-To: <20210126001456.382989-1-ebiggers@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Jan 2021 10:57:55 +0100
-Message-ID: <CAPDyKFoU1ciLfDig5XkULK-CBkCsmsbAgpyo51O8LEsTr3Q+Sg@mail.gmail.com>
-Subject: Re: [PATCH 1/2] block/keyslot-manager: introduce devm_blk_ksm_init()
-To:     Jens Axboe <axboe@kernel.dk>, Eric Biggers <ebiggers@kernel.org>
-Cc:     Satya Tangirala <satyat@google.com>,
-        linux-block <linux-block@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>
+Date:   Tue, 26 Jan 2021 10:58:03 +0100
+Message-ID: <CAPDyKFqLVtiYkjeQmuYOf8K8k=oQSZ18928PPHvJDiUtTw2F-g@mail.gmail.com>
+Subject: Re: [PATCH RESEND v6 0/9] eMMC inline encryption support
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, linux-fscrypt@vger.kernel.org,
+        Satya Tangirala <satyat@google.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Neeraj Soni <neersoni@codeaurora.org>,
+        Barani Muthukumaran <bmuthuku@codeaurora.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        Konrad Dybcio <konradybcio@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 25 Jan 2021 at 22:16, Jens Axboe <axboe@kernel.dk> wrote:
+On Tue, 26 Jan 2021 at 01:15, Eric Biggers <ebiggers@kernel.org> wrote:
 >
-> On 1/25/21 1:25 PM, Eric Biggers wrote:
-> > On Mon, Jan 25, 2021 at 12:14:00PM -0800, Satya Tangirala wrote:
-> >> On Thu, Jan 21, 2021 at 12:23 AM Eric Biggers <ebiggers@kernel.org> wrote:
-> >>>
-> >>> From: Eric Biggers <ebiggers@google.com>
-> >>>
-> >>> Add a resource-managed variant of blk_ksm_init() so that drivers don't
-> >>> have to worry about calling blk_ksm_destroy().
-> >>>
-> >>> Note that the implementation uses a custom devres action to call
-> >>> blk_ksm_destroy() rather than switching the two allocations to be
-> >>> directly devres-managed, e.g. with devm_kmalloc().  This is because we
-> >>> need to keep zeroing the memory containing the keyslots when it is
-> >>> freed, and also because we want to continue using kvmalloc() (and there
-> >>> is no devm_kvmalloc()).
-> >>>
-> >>> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > [..]
-> >>> diff --git a/include/linux/keyslot-manager.h b/include/linux/keyslot-manager.h
-> >>> index 18f3f5346843f..443ad817c6c57 100644
-> >>> --- a/include/linux/keyslot-manager.h
-> >>> +++ b/include/linux/keyslot-manager.h
-> >>> @@ -85,6 +85,9 @@ struct blk_keyslot_manager {
-> >>>
-> >>>  int blk_ksm_init(struct blk_keyslot_manager *ksm, unsigned int num_slots);
-> >>>
-> >>> +int devm_blk_ksm_init(struct device *dev, struct blk_keyslot_manager *ksm,
-> >>> +                     unsigned int num_slots);
-> >>> +
-> >>>  blk_status_t blk_ksm_get_slot_for_key(struct blk_keyslot_manager *ksm,
-> >>>                                       const struct blk_crypto_key *key,
-> >>>                                       struct blk_ksm_keyslot **slot_ptr);
-> >>> --
-> >>
-> >> Looks good to me. Please feel free to add
-> >> Reviewed-by: Satya Tangirala <satyat@google.com>
-> >
-> > Thanks Satya.  Jens, any objection to this patch going in through the MMC tree?
+> [Resending because most of the patches didn't make it to the lists for
+> some reason...]
 >
-> No objections from me, doesn't look like we have any real worries of
-> conflicts.
+> Hello,
+>
+> This patchset adds support for eMMC inline encryption, as specified by
+> the upcoming version of the eMMC specification and as already
+> implemented and used on many devices.  Building on that, it then adds
+> Qualcomm ICE support and wires it up for the Snapdragon 630 SoC.
+>
+> Inline encryption hardware improves the performance of storage
+> encryption and reduces power usage.  See
+> Documentation/block/inline-encryption.rst for more information about
+> inline encryption and the blk-crypto framework (upstreamed in v5.8)
+> which supports it.  Most mobile devices already use UFS or eMMC inline
+> encryption hardware; UFS support was already upstreamed in v5.9.
+>
+> Patches 1-4 add support for the standard eMMC inline encryption.
+>
+> However, as with UFS, host controller-specific patches are needed on top
+> of the standard support.  Therefore, patches 5-9 add Qualcomm ICE
+> (Inline Crypto Engine) support and wire it up on the Snapdragon 630 SoC.
+>
+> To test this I took advantage of the recently upstreamed support for the
+> Snapdragon 630 SoC, plus work-in-progress patches from the SoMainline
+> project (https://github.com/SoMainline/linux/tree/konrad/v5.10-rc3).  In
+> particular, I was able to run the fscrypt xfstests for ext4 and f2fs in
+> a Debian chroot.  Among other things, these tests verified that the
+> correct ciphertext is written to disk (the same as software encryption).
+>
+> It will also be possible to add support for Mediatek eMMC inline
+> encryption hardware in mtk-sd, and it should be easier than the Qualcomm
+> hardware since the Mediatek hardware follows the standard more closely.
+> I.e., patches 1-4 should be almost enough for the Mediatek hardware.
+>
+> This patchset is based on the "next" branch (commit 42af8761bc84) of
+> https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git,
+> plus the patch "block/keyslot-manager: introduce devm_blk_ksm_init()"
+> (https://lkml.kernel.org/r/20210121082155.111333-2-ebiggers@kernel.org).
+> It can also be retrieved from tag "mmc-crypto-v6" of
+> https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
+>
+> Changed in v6:
+>   - Define MMC_CAP2_CRYPTO to 0 when !CONFIG_MMC_CRYPTO.
+>   - Moved the sdm630 device tree update to the end of the series,
+>     since it will go in through a different tree.
+>   - Added an Acked-by.
+>
+> Changed in v5:
+>   - Use the proposed resource-managed variant of blk_ksm_init().
+>   - Removed an unnecessary call to devm_kfree().
+>
+> Changed in v4:
+>   - Added Acked-by and Reviewed-and-tested-by tags.
+>   - Rebased onto v5.11-rc2.
+>
+> Changed in v3:
+>   - Improved comment for sdhci_msm_ice_wait_bist_status()
+>   - Removed an unhelpful comment in union cqhci_crypto_cfg_entry.
+>   - Fixed the commit message of "mmc: cqhci: initialize upper 64 bits of
+>     128-bit task descriptors".
+>   - Added Reviewed-by's and Acked-by's.
+>
+> Changed in v2:
+>   - Only select QCOM_SCM if ARCH_QCOM.  (Fixes a build break.)
+>   - Split most of the cqhci_prep_task_desc() change into its own patch.
+>   - Made sdhci_msm_ice_wait_bist_status() use readl_poll_timeout().
+>   - Added a couple more comments.
+>   - Added some Acked-by's.
+>
+> Eric Biggers (9):
+>   mmc: add basic support for inline encryption
+>   mmc: cqhci: rename cqhci.c to cqhci-core.c
+>   mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
+>   mmc: cqhci: add support for inline encryption
+>   mmc: cqhci: add cqhci_host_ops::program_key
+>   firmware: qcom_scm: update comment for ICE-related functions
+>   dt-bindings: mmc: sdhci-msm: add ICE registers and clock
+>   mmc: sdhci-msm: add Inline Crypto Engine support
+>   arm64: dts: qcom: sdm630: add ICE registers and clocks
+>
+>  .../devicetree/bindings/mmc/sdhci-msm.txt     |   3 +
+>  arch/arm64/boot/dts/qcom/sdm630.dtsi          |  10 +-
+>  drivers/firmware/qcom_scm.c                   |  16 +-
+>  drivers/mmc/core/Kconfig                      |   8 +
+>  drivers/mmc/core/Makefile                     |   1 +
+>  drivers/mmc/core/block.c                      |   3 +
+>  drivers/mmc/core/core.c                       |   3 +
+>  drivers/mmc/core/crypto.c                     |  48 +++
+>  drivers/mmc/core/crypto.h                     |  40 +++
+>  drivers/mmc/core/host.c                       |   1 +
+>  drivers/mmc/core/queue.c                      |   3 +
+>  drivers/mmc/host/Kconfig                      |   1 +
+>  drivers/mmc/host/Makefile                     |   2 +
+>  drivers/mmc/host/{cqhci.c => cqhci-core.c}    |  69 ++++-
+>  drivers/mmc/host/cqhci-crypto.c               | 242 +++++++++++++++
+>  drivers/mmc/host/cqhci-crypto.h               |  47 +++
+>  drivers/mmc/host/cqhci.h                      |  84 +++++-
+>  drivers/mmc/host/sdhci-msm.c                  | 276 +++++++++++++++++-
+>  include/linux/mmc/core.h                      |   6 +
+>  include/linux/mmc/host.h                      |  11 +
+>  20 files changed, 849 insertions(+), 25 deletions(-)
+>  create mode 100644 drivers/mmc/core/crypto.c
+>  create mode 100644 drivers/mmc/core/crypto.h
+>  rename drivers/mmc/host/{cqhci.c => cqhci-core.c} (94%)
+>  create mode 100644 drivers/mmc/host/cqhci-crypto.c
+>  create mode 100644 drivers/mmc/host/cqhci-crypto.h
+>
+> --
+> 2.30.0
+>
 
-Applied to my mmc for the next branch, by adding Jens' ack. Thanks everybody!
+Applied for next (leaving patch9 for arm soc), thanks!
 
 Kind regards
 Uffe
