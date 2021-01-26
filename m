@@ -2,357 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D612C433DB
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5204DC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:28:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 23B10207B1
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2217D23109
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:28:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1732178AbhAZF5S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 00:57:18 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37334 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1732169AbhAZCGR (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 25 Jan 2021 21:06:17 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 7326022AAA;
-        Tue, 26 Jan 2021 00:15:12 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611620112;
-        bh=R8sFfCHubgkOU0cGm4n8neybL2+MAy4yCvazMFWKA44=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=R20i+Ru87U4OBpNu7yIG2s8yKqd9X++mhBDy6OkNHv3qEKe/UmaZ+e2j29B+xfkhs
-         8LKx5+c/IIbu/uElLWTHX6pgw+OSLcPTD5CFqTgP+3l3SEZga1KqIRWYsnRw1WZzQX
-         31104r/Z5WU9HEX4TINfhEiJv+I7ShAJUbAZ0BQdr8i/haYlMv1wuohWJgPJjndyjh
-         xyp3EK+f6tDiysX4e9iPeojLZGai+z5IeFjZCQan4jGF+aRa+wNHf8zns2Zu8TuYyM
-         B2TN48eb8hxvYwmb1Rhx+f1GQ5mKx6OJK874UT2v1HCKFNZx0ozd23kRqMkf1n4pqt
-         R5Y3Tgp6hXm0w==
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-fscrypt@vger.kernel.org, Satya Tangirala <satyat@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Neeraj Soni <neersoni@codeaurora.org>,
-        Barani Muthukumaran <bmuthuku@codeaurora.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH RESEND v6 1/9] mmc: add basic support for inline encryption
-Date:   Mon, 25 Jan 2021 16:14:48 -0800
-Message-Id: <20210126001456.382989-2-ebiggers@kernel.org>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210126001456.382989-1-ebiggers@kernel.org>
-References: <20210126001456.382989-1-ebiggers@kernel.org>
+        id S2404288AbhAZM2K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 07:28:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46906 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2404446AbhAZM2B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 07:28:01 -0500
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E3F1C0611BD
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 04:27:20 -0800 (PST)
+Received: by mail-lj1-x22a.google.com with SMTP id a25so18175480ljn.0
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 04:27:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=freebox-fr.20150623.gappssmtp.com; s=20150623;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=9v3KzGuGqK5MBcKhrYjClIynInTPzsS/HTqIFvp1/IQ=;
+        b=AhNeC2fz88Ilx7fr9U//EqOYLJZuP4afzoY1D9Y/bD2x0QTfkyd4mKOivKJxKrQ0Yf
+         6AvZnGWJ+8LIf9dqoKuCS6bVudx19xZbFELWI43p6MaiD6HlMHGZn9DB+SNCIrXee6Ab
+         eqMtMi4JDWBe5lQUk4xFFtxSmYZP0Ucw+Ov1Fp43HytHn3j1Ibi/PCf4/YuHN3aGeLvK
+         GUIFIvLGogG+pAvZxYHFZq704nBoKjv6IL+3GJnyh9QRAMF39P9lFY1Z9Cq9IZ6tDM+7
+         pK9wJQJCbRKYmOj3QsDHtWvQsugGdzgQ0HViEv2CgJEv2tfA7uECayDfXOPMkVaLxfHo
+         VpPQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=9v3KzGuGqK5MBcKhrYjClIynInTPzsS/HTqIFvp1/IQ=;
+        b=UQLtqFlenDvM54vPFInlIKV9OE1wbf2bBbw35h0L6QojZ4rrg/kBpig5B9A1/xV0bg
+         koqBMNIvKDcPu8EBuckGw0s9znGuEvUriqfhFHqbnc3+myOrrTJI4kgCMXT+0UKXBdBx
+         xYu17id6rXGy03bMYnzyy04+YWKN0EXUq8ngtMU89booueb8EbYrsEkT0dzCoSaYkSbx
+         JATTFscSqywA2JVejKBzGkAH0j18XM6RWALlTXEIMu6+gvU1OyBZsXifTK27J3Ikls0m
+         D5KRKbJauOHU+zWlQxLL+ZAbALqznmBeXaLSf0kIQK0482A+Tdpv8oLlosrz9glF8+UJ
+         ofSg==
+X-Gm-Message-State: AOAM531w8ZsKuOjjqVCYOy9voawAI8BE2eC2wDm7Dc8cJzLf9/Fopm9H
+        spuU9LyMfRXjNHDYHyzXEOU88tgQpxAChSRLN3dLDQ==
+X-Google-Smtp-Source: ABdhPJwQDPzt2pQJdG1h2shmSbkHRYF079XcqA/pvY3/oPEW206//2F908lHU7Mei6Id7APUc3gEXfQ+JgG0zDmUVa8=
+X-Received: by 2002:a2e:854d:: with SMTP id u13mr2614130ljj.439.1611664038883;
+ Tue, 26 Jan 2021 04:27:18 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210126095230.26580-1-ulf.hansson@linaro.org>
+In-Reply-To: <20210126095230.26580-1-ulf.hansson@linaro.org>
+From:   Nicolas Schichan <nschichan@freebox.fr>
+Date:   Tue, 26 Jan 2021 13:27:08 +0100
+Message-ID: <CAHNNwZCFrZvmiVD7A3Ys9rpxfb0AytJx1CFQDYkMWUkYTDuCsw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pltfm: Fix linking err for sdhci-brcmstb
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Florian Fainelli <f.fainelli@gmail.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eric Biggers <ebiggers@google.com>
+On Tue, Jan 26, 2021 at 10:52 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> The implementation of sdhci_pltfm_suspend() is only available when
+> CONFIG_PM_SLEEP is set, which triggers a linking error:
+>
+> "undefined symbol: sdhci_pltfm_suspend" when building sdhci-brcmstb.c.
+>
+> Fix this by implementing the missing stubs when CONFIG_PM_SLEEP is unset.
+>
+> Reported-by: Arnd Bergmann <arnd@arndb.de>
+> Suggested-by: Florian Fainelli <f.fainelli@gmail.com>
+> Cc: Nicolas Schichan <nschichan@freebox.fr>
+> Fixes: 5b191dcba719 ("mmc: sdhci-brcmstb: Fix mmc timeout errors on S5 suspend")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-pltfm.h | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pltfm.h b/drivers/mmc/host/sdhci-pltfm.h
+> index 6301b81cf573..9bd717ff784b 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.h
+> +++ b/drivers/mmc/host/sdhci-pltfm.h
+> @@ -111,8 +111,13 @@ static inline void *sdhci_pltfm_priv(struct sdhci_pltfm_host *host)
+>         return host->private;
+>  }
+>
+> +extern const struct dev_pm_ops sdhci_pltfm_pmops;
+> +#ifdef CONFIG_PM_SLEEP
+>  int sdhci_pltfm_suspend(struct device *dev);
+>  int sdhci_pltfm_resume(struct device *dev);
+> -extern const struct dev_pm_ops sdhci_pltfm_pmops;
+> +#else
+> +static inline int sdhci_pltfm_suspend(struct device *dev) { return 0; }
+> +static inline int sdhci_pltfm_resume(struct device *dev) { return 0; }
+> +#endif
+>
+>  #endif /* _DRIVERS_MMC_SDHCI_PLTFM_H */
+> --
+> 2.25.1
+>
 
-In preparation for adding CQHCI crypto engine (inline encryption)
-support, add the code required to make mmc_core and mmc_block aware of
-inline encryption.  Specifically:
+Hello,
 
-- Add a capability flag MMC_CAP2_CRYPTO to struct mmc_host.  Drivers
-  will set this if the host and driver support inline encryption.
+I have just given this patch a test and no issues here, so:
 
-- Embed a blk_keyslot_manager in struct mmc_host.  Drivers will
-  initialize this (as a device-managed resource) if the host and driver
-  support inline encryption.  mmc_block registers this keyslot manager
-  with the request_queue of any MMC card attached to the host.
+Tested-By: Nicolas Schichan <nschichan@freeebox.fr>
 
-- Make mmc_block copy the crypto keyslot and crypto data unit number
-  from struct request to struct mmc_request, so that drivers will have
-  access to them.
+Regards,
 
-- If the MMC host is reset, reprogram all the keyslots to ensure that
-  the software state stays in sync with the hardware state.
-
-Co-developed-by: Satya Tangirala <satyat@google.com>
-Signed-off-by: Satya Tangirala <satyat@google.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Reviewed-by: Satya Tangirala <satyat@google.com>
-Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- drivers/mmc/core/Kconfig  |  8 +++++++
- drivers/mmc/core/Makefile |  1 +
- drivers/mmc/core/block.c  |  3 +++
- drivers/mmc/core/core.c   |  3 +++
- drivers/mmc/core/crypto.c | 48 +++++++++++++++++++++++++++++++++++++++
- drivers/mmc/core/crypto.h | 40 ++++++++++++++++++++++++++++++++
- drivers/mmc/core/host.c   |  1 +
- drivers/mmc/core/queue.c  |  3 +++
- include/linux/mmc/core.h  |  6 +++++
- include/linux/mmc/host.h  | 11 +++++++++
- 10 files changed, 124 insertions(+)
- create mode 100644 drivers/mmc/core/crypto.c
- create mode 100644 drivers/mmc/core/crypto.h
-
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index c12fe13e4b147..ae8b69aee6190 100644
---- a/drivers/mmc/core/Kconfig
-+++ b/drivers/mmc/core/Kconfig
-@@ -81,3 +81,11 @@ config MMC_TEST
- 	  This driver is only of interest to those developing or
- 	  testing a host driver. Most people should say N here.
- 
-+config MMC_CRYPTO
-+	bool "MMC Crypto Engine Support"
-+	depends on BLK_INLINE_ENCRYPTION
-+	help
-+	  Enable Crypto Engine Support in MMC.
-+	  Enabling this makes it possible for the kernel to use the crypto
-+	  capabilities of the MMC device (if present) to perform crypto
-+	  operations on data being transferred to/from the device.
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 95ffe008ebdf8..6a907736cd7a5 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -18,3 +18,4 @@ obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
- mmc_block-objs			:= block.o queue.o
- obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
- obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
-+mmc_core-$(CONFIG_MMC_CRYPTO)	+= crypto.o
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 42e27a2982180..b877f62df3660 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -51,6 +51,7 @@
- #include "block.h"
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "host.h"
- #include "bus.h"
- #include "mmc_ops.h"
-@@ -1247,6 +1248,8 @@ static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
- 
- 	memset(brq, 0, sizeof(struct mmc_blk_request));
- 
-+	mmc_crypto_prepare_req(mqrq);
-+
- 	brq->mrq.data = &brq->data;
- 	brq->mrq.tag = req->tag;
- 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 49d9117550afe..1136b859ddd86 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -37,6 +37,7 @@
- 
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "bus.h"
- #include "host.h"
- #include "sdio_bus.h"
-@@ -992,6 +993,8 @@ void mmc_set_initial_state(struct mmc_host *host)
- 		host->ops->hs400_enhanced_strobe(host, &host->ios);
- 
- 	mmc_set_ios(host);
-+
-+	mmc_crypto_set_initial_state(host);
- }
- 
- /**
-diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
-new file mode 100644
-index 0000000000000..419a368f84029
---- /dev/null
-+++ b/drivers/mmc/core/crypto.c
-@@ -0,0 +1,48 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * MMC crypto engine (inline encryption) support
-+ *
-+ * Copyright 2020 Google LLC
-+ */
-+
-+#include <linux/blk-crypto.h>
-+#include <linux/mmc/host.h>
-+
-+#include "core.h"
-+#include "crypto.h"
-+#include "queue.h"
-+
-+void mmc_crypto_set_initial_state(struct mmc_host *host)
-+{
-+	/* Reset might clear all keys, so reprogram all the keys. */
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_reprogram_all_keys(&host->ksm);
-+}
-+
-+void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host)
-+{
-+	if (host->caps2 & MMC_CAP2_CRYPTO)
-+		blk_ksm_register(&host->ksm, q);
-+}
-+EXPORT_SYMBOL_GPL(mmc_crypto_setup_queue);
-+
-+void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
-+{
-+	struct request *req = mmc_queue_req_to_req(mqrq);
-+	struct mmc_request *mrq = &mqrq->brq.mrq;
-+
-+	if (!req->crypt_keyslot)
-+		return;
-+
-+	mrq->crypto_enabled = true;
-+	mrq->crypto_key_slot = blk_ksm_get_slot_idx(req->crypt_keyslot);
-+
-+	/*
-+	 * For now we assume that all MMC drivers set max_dun_bytes_supported=4,
-+	 * which is the limit for CQHCI crypto.  So all DUNs should be 32-bit.
-+	 */
-+	WARN_ON_ONCE(req->crypt_ctx->bc_dun[0] > U32_MAX);
-+
-+	mrq->data_unit_num = req->crypt_ctx->bc_dun[0];
-+}
-+EXPORT_SYMBOL_GPL(mmc_crypto_prepare_req);
-diff --git a/drivers/mmc/core/crypto.h b/drivers/mmc/core/crypto.h
-new file mode 100644
-index 0000000000000..fbe9a520bf90d
---- /dev/null
-+++ b/drivers/mmc/core/crypto.h
-@@ -0,0 +1,40 @@
-+/* SPDX-License-Identifier: GPL-2.0-only */
-+/*
-+ * MMC crypto engine (inline encryption) support
-+ *
-+ * Copyright 2020 Google LLC
-+ */
-+
-+#ifndef _MMC_CORE_CRYPTO_H
-+#define _MMC_CORE_CRYPTO_H
-+
-+struct mmc_host;
-+struct mmc_queue_req;
-+struct request_queue;
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+
-+void mmc_crypto_set_initial_state(struct mmc_host *host);
-+
-+void mmc_crypto_setup_queue(struct request_queue *q, struct mmc_host *host);
-+
-+void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq);
-+
-+#else /* CONFIG_MMC_CRYPTO */
-+
-+static inline void mmc_crypto_set_initial_state(struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_setup_queue(struct request_queue *q,
-+					  struct mmc_host *host)
-+{
-+}
-+
-+static inline void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
-+{
-+}
-+
-+#endif /* !CONFIG_MMC_CRYPTO */
-+
-+#endif /* _MMC_CORE_CRYPTO_H */
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 74e853bb69482..9b89a91b6b476 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -25,6 +25,7 @@
- #include <linux/mmc/slot-gpio.h>
- 
- #include "core.h"
-+#include "crypto.h"
- #include "host.h"
- #include "slot-gpio.h"
- #include "pwrseq.h"
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index 002426e3cf76c..33e7e65b6ddea 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -19,6 +19,7 @@
- #include "block.h"
- #include "core.h"
- #include "card.h"
-+#include "crypto.h"
- #include "host.h"
- 
- #define MMC_DMA_MAP_MERGE_SEGMENTS	512
-@@ -407,6 +408,8 @@ static void mmc_setup_queue(struct mmc_queue *mq, struct mmc_card *card)
- 	mutex_init(&mq->complete_lock);
- 
- 	init_waitqueue_head(&mq->wait);
-+
-+	mmc_crypto_setup_queue(mq->queue, host);
- }
- 
- static inline bool mmc_merge_capable(struct mmc_host *host)
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 29aa507116261..ab19245e99451 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -162,6 +162,12 @@ struct mmc_request {
- 	bool			cap_cmd_during_tfr;
- 
- 	int			tag;
-+
-+#ifdef CONFIG_MMC_CRYPTO
-+	bool			crypto_enabled;
-+	int			crypto_key_slot;
-+	u32			data_unit_num;
-+#endif
- };
- 
- struct mmc_card;
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8cf686d98a68f..927ba75666176 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -15,6 +15,7 @@
- #include <linux/mmc/card.h>
- #include <linux/mmc/pm.h>
- #include <linux/dma-direction.h>
-+#include <linux/keyslot-manager.h>
- 
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
-@@ -395,6 +396,11 @@ struct mmc_host {
- #define MMC_CAP2_CQE_DCMD	(1 << 24)	/* CQE can issue a direct command */
- #define MMC_CAP2_AVOID_3_3V	(1 << 25)	/* Host must negotiate down from 3.3V */
- #define MMC_CAP2_MERGE_CAPABLE	(1 << 26)	/* Host can merge a segment over the segment size */
-+#ifdef CONFIG_MMC_CRYPTO
-+#define MMC_CAP2_CRYPTO		(1 << 27)	/* Host supports inline encryption */
-+#else
-+#define MMC_CAP2_CRYPTO		0
-+#endif
- 
- 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
- 
-@@ -489,6 +495,11 @@ struct mmc_host {
- 	bool			cqe_enabled;
- 	bool			cqe_on;
- 
-+	/* Inline encryption support */
-+#ifdef CONFIG_MMC_CRYPTO
-+	struct blk_keyslot_manager ksm;
-+#endif
-+
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
- 
--- 
-2.30.0
-
+--
+Nicolas Schichan
