@@ -7,81 +7,93 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54DF8C433E9
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E93E0C433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 276512311D
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C04F823127
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2404006AbhAZMqI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 07:46:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42506 "EHLO
+        id S2404137AbhAZMqJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 07:46:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391808AbhAZJ7n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:43 -0500
-Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87159C061353
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:55 -0800 (PST)
-Received: by mail-vs1-xe32.google.com with SMTP id o186so8722313vso.1
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:55 -0800 (PST)
+        with ESMTP id S2391822AbhAZKAE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 05:00:04 -0500
+Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10946C061352
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:52 -0800 (PST)
+Received: by mail-vk1-xa29.google.com with SMTP id y8so1771106vky.4
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=pJCLQRxrq3qEZskHQDdRGHVs/g7GsIs44v+7gnvo2ls=;
-        b=FOFq8Rt4wj3ueoHnR83ehUcVd2jOut0bL1z0vDVXeQV2Rs3Vl4jGN3McmmUsSjU/ja
-         wamaDid3KnCaWtLk5G90d0nwdcQUc4BlfZr9SJFqdejzfVHGeCBc/cR5KQhUvKARusF1
-         ZPFskfWFCLWcp1uPPkQVOevDa63ZTw9U9oRCS0NZf9dZ/8bQWWmQCormdTj2fHKJz0Kt
-         uSapIEtaovuHMj5EW1FIropN2ShVEdx071K943vd2znRgeRaB3lkm34Z1pQ2LW+YbB6m
-         srbCbhRaXHf6YbJS0g8jFa2Adp3Yhfyn4zEZkLSssA2BzPFLsdpyfve88lfS+PLhUrxK
-         6mZQ==
+        bh=OJ9v9Eswuw8AGGiIrKPTyPin8ZlyKUfcCAR1/7Zh/xM=;
+        b=cyDIRjpO4ZFnV9DET3FtMjX1D/Hxer5/id5g72v3adkfwmLW9gVcnnTXjc5RCcMLH7
+         doX76Bobh/BCQcD6YSmWuKwQJcEKNLMhjhdumwRK7lhyz25Oo9CtfOs6oM1orZ9Q713x
+         1hPeiBG1hTkxvTC+PrPd0ULC9K/wPIGUl/RbJmyvPy7/8K3xL2rDF4MthNFxMM9hVOOX
+         xYYrnAZJvBul/Cu/0OEyWtOHNEW1vC6MKQ9/Tc6TFpOr/py0SYAZP1IC4EcJfJgthd/K
+         wx9RPXFarfoUIEHSn0WnmHP0EYv0JDfXHesZMTyRN/DBa/058FPVpc4zfUTNwJoZSbd0
+         Copw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=pJCLQRxrq3qEZskHQDdRGHVs/g7GsIs44v+7gnvo2ls=;
-        b=qyWv3rJ62VkNzWYD3wiDFcTfx32EYopP6f7wSIgZ0ZAjJoOsMq2UdYteMO9WukU1pb
-         1v+Mr4DYtHns1b9m9SaIzDhhLp+0elFKUJqoN9ICFNY2UkIptR940nONvT8shD8wP0pT
-         tnAkvT6rbh3QdNCeSlNh1uCw08ZTSpyaR6cytIbYry6r4Y/hnq5JOtN4A1ehM9yyMjfU
-         7nFqDM6g6Z0pNzGJiUbx3FfsaoHLF03A5qxFL/5RiccHI61Yc7VrtNeO6A/F9ZO18w6Q
-         aY8Av8cvfv4oSqdoEfY+9HIEekYnLj9Izv821pqPO9QIBu34bdGlI3RCnJYRKG2hRXZt
-         pg9A==
-X-Gm-Message-State: AOAM533Ne5+SuTpb97OFpJQizZhTFaoqzxiBY6w2tBx1k1aGOvpXN2Gc
-        pqyU8PjzNWQucAiOJbDCmyZk8sXk5aN/qtoUpNolFcVeaMelkQ==
-X-Google-Smtp-Source: ABdhPJxABc5UXW4in2s8UJsSPUcaq4oOAuUUuvd5smFLRDOyRYY5OppaOYrWw/Wc0F4v8snNQaOM8Rlku8cV1xHbXQ4=
-X-Received: by 2002:a67:c787:: with SMTP id t7mr3895407vsk.48.1611655134813;
- Tue, 26 Jan 2021 01:58:54 -0800 (PST)
+        bh=OJ9v9Eswuw8AGGiIrKPTyPin8ZlyKUfcCAR1/7Zh/xM=;
+        b=riec6a63kzajDosJ43O1K/b4SWGcaASR/cSHLhRZZgbNAmZRApvmvDmk/8+EfQ/BQq
+         d/EZF65IjUE29CcAVOUwBVb0Yvi/mez9nNNzUoDx72I6YDRfACqpVYA7t9uXP1fe/A4M
+         KOFayrhf2gLFmU541qZwfxlfnLxTDrm3Yo+N5hF9jhxWcxgWFYuWw5mGCMfit6psQcC+
+         kYEGg5YQZ5SQGmZaQhMQn1J1oNQEDwwuawe/c1iSZsWqAMi0alwq86u9r+vQCRAZ3Pqu
+         s02Z7Rwv5cHQLTe0/lsYZbkHVjamJnKqdF441B7uHW9x84KrUuYh/vYWfHMsqw5yePdv
+         VGMQ==
+X-Gm-Message-State: AOAM531pVwQwdl/AeyQ6Zgl2T/NkT8L+GqypILmtIKaoJKfSyh32hqga
+        PPYIn+RI+60+RhFQ5dx5NCdKqanwMPyb2bvWcbZFzA==
+X-Google-Smtp-Source: ABdhPJzC9akXFrbRt4Jm1DTTTS+O1MYoHbnyPrNkFvF2mxlHPqUwHojEqZvYDAxg5Ar2kbdE6A5vZRDISwvvG+EKCIM=
+X-Received: by 2002:a1f:2b58:: with SMTP id r85mr3612849vkr.6.1611655131305;
+ Tue, 26 Jan 2021 01:58:51 -0800 (PST)
 MIME-Version: 1.0
-References: <CGME20210125064728epcas1p3c44396f8f733463d5e0add003cc2b7eb@epcas1p3.samsung.com>
- <20210125064355.28545-1-cw9316.lee@samsung.com>
-In-Reply-To: <20210125064355.28545-1-cw9316.lee@samsung.com>
+References: <20210124170258.32862-1-marex@denx.de> <20210124170258.32862-2-marex@denx.de>
+In-Reply-To: <20210124170258.32862-2-marex@denx.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Jan 2021 10:58:17 +0100
-Message-ID: <CAPDyKFqM+PfzoP8aznomAncAVaFqUXN8SzCVf5rauqes+jGmPQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: queue: Exclude unnecessary header file
-To:     Chanwoo Lee <cw9316.lee@samsung.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        "(Exiting) Baolin Wang" <baolin.wang@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>, Coly Li <colyli@suse.de>,
-        Lee Jones <lee.jones@linaro.org>,
-        Sarthak Garg <sartgarg@codeaurora.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        grant.jung@samsung.com, jt77.jang@samsung.com,
-        dh0421.hwang@samsung.com, sh043.lee@samsung.com
+Date:   Tue, 26 Jan 2021 10:58:14 +0100
+Message-ID: <CAPDyKFpn1PZWPnGTP-NdizVjwRgtdfPpw=Wf1g++Cf0y4dYxgA@mail.gmail.com>
+Subject: Re: [PATCH V2 2/4] mmc: mmci: Add support for probing bus voltage
+ level translator
+To:     =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Ludovic Barre <ludovic.barre@st.com>,
+        linux-stm32@st-md-mailman.stormreply.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 25 Jan 2021 at 07:47, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
+On Sun, 24 Jan 2021 at 18:03, Marek Vasut <marex@denx.de> wrote:
 >
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
+> Add support for testing whether bus voltage level translator is present
+> and operational. This is useful on systems where the bus voltage level
+> translator is optional, as the translator can be auto-detected by the
+> driver and the feedback clock functionality can be disabled if it is
+> not present.
 >
-> From the 4.19 kernel, thread related code has been removed in queue.c.
-> So we can exclude unnecessary header file.
+> This requires additional pinmux state, "init", where the CMD, CK, CKIN
+> lines are not configured, so they can be claimed as GPIOs early on in
+> probe(). The translator test sets CMD high to avoid interfering with a
+> card, and then verifies whether signal set on CK is detected on CKIN.
+> If the signal is detected, translator is present, otherwise the CKIN
+> feedback clock are disabled.
 >
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+> Tested-by: Yann Gautier <yann.gautier@foss.st.com>
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> Cc: Alexandre Torgue <alexandre.torgue@st.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Ludovic Barre <ludovic.barre@st.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-stm32@st-md-mailman.stormreply.com
 
 Applied for next, thanks!
 
@@ -90,21 +102,118 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/queue.c | 1 -
->  1 file changed, 1 deletion(-)
+> V2: Rebase on next-20210122, add TB and RB
+> ---
+>  drivers/mmc/host/mmci.c | 70 ++++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 65 insertions(+), 5 deletions(-)
 >
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index de7cb0369c30..c7218da6f17c 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -7,7 +7,6 @@
->  #include <linux/module.h>
->  #include <linux/blkdev.h>
->  #include <linux/freezer.h>
-> -#include <linux/kthread.h>
->  #include <linux/scatterlist.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/backing-dev.h>
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index b5a41a7ce165..1bc674577ff9 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -36,6 +36,7 @@
+>  #include <linux/types.h>
+>  #include <linux/pinctrl/consumer.h>
+>  #include <linux/reset.h>
+> +#include <linux/gpio/consumer.h>
+>
+>  #include <asm/div64.h>
+>  #include <asm/io.h>
+> @@ -1888,6 +1889,65 @@ static struct mmc_host_ops mmci_ops = {
+>         .start_signal_voltage_switch = mmci_sig_volt_switch,
+>  };
+>
+> +static void mmci_probe_level_translator(struct mmc_host *mmc)
+> +{
+> +       struct device *dev = mmc_dev(mmc);
+> +       struct mmci_host *host = mmc_priv(mmc);
+> +       struct gpio_desc *cmd_gpio;
+> +       struct gpio_desc *ck_gpio;
+> +       struct gpio_desc *ckin_gpio;
+> +       int clk_hi, clk_lo;
+> +
+> +       /*
+> +        * Assume the level translator is present if st,use-ckin is set.
+> +        * This is to cater for DTs which do not implement this test.
+> +        */
+> +       host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
+> +
+> +       cmd_gpio = gpiod_get(dev, "st,cmd", GPIOD_OUT_HIGH);
+> +       if (IS_ERR(cmd_gpio))
+> +               goto exit_cmd;
+> +
+> +       ck_gpio = gpiod_get(dev, "st,ck", GPIOD_OUT_HIGH);
+> +       if (IS_ERR(ck_gpio))
+> +               goto exit_ck;
+> +
+> +       ckin_gpio = gpiod_get(dev, "st,ckin", GPIOD_IN);
+> +       if (IS_ERR(ckin_gpio))
+> +               goto exit_ckin;
+> +
+> +       /* All GPIOs are valid, test whether level translator works */
+> +
+> +       /* Sample CKIN */
+> +       clk_hi = !!gpiod_get_value(ckin_gpio);
+> +
+> +       /* Set CK low */
+> +       gpiod_set_value(ck_gpio, 0);
+> +
+> +       /* Sample CKIN */
+> +       clk_lo = !!gpiod_get_value(ckin_gpio);
+> +
+> +       /* Tristate all */
+> +       gpiod_direction_input(cmd_gpio);
+> +       gpiod_direction_input(ck_gpio);
+> +
+> +       /* Level translator is present if CK signal is propagated to CKIN */
+> +       if (!clk_hi || clk_lo) {
+> +               host->clk_reg_add &= ~MCI_STM32_CLK_SELCKIN;
+> +               dev_warn(dev,
+> +                        "Level translator inoperable, CK signal not detected on CKIN, disabling.\n");
+> +       }
+> +
+> +       gpiod_put(ckin_gpio);
+> +
+> +exit_ckin:
+> +       gpiod_put(ck_gpio);
+> +exit_ck:
+> +       gpiod_put(cmd_gpio);
+> +exit_cmd:
+> +       pinctrl_select_default_state(dev);
+> +}
+> +
+>  static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
+>  {
+>         struct mmci_host *host = mmc_priv(mmc);
+> @@ -1913,7 +1973,7 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
+>         if (of_get_property(np, "st,neg-edge", NULL))
+>                 host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
+>         if (of_get_property(np, "st,use-ckin", NULL))
+> -               host->clk_reg_add |= MCI_STM32_CLK_SELCKIN;
+> +               mmci_probe_level_translator(mmc);
+>
+>         if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
+>                 mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+> @@ -1949,15 +2009,15 @@ static int mmci_probe(struct amba_device *dev,
+>         if (!mmc)
+>                 return -ENOMEM;
+>
+> -       ret = mmci_of_parse(np, mmc);
+> -       if (ret)
+> -               goto host_free;
+> -
+>         host = mmc_priv(mmc);
+>         host->mmc = mmc;
+>         host->mmc_ops = &mmci_ops;
+>         mmc->ops = &mmci_ops;
+>
+> +       ret = mmci_of_parse(np, mmc);
+> +       if (ret)
+> +               goto host_free;
+> +
+>         /*
+>          * Some variant (STM32) doesn't have opendrain bit, nevertheless
+>          * pins can be set accordingly using pinctrl
 > --
-> 2.29.0
+> 2.29.2
 >
