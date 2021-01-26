@@ -4,119 +4,117 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06DA8C433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14C17C433E0
 	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D1B9F2311D
+	by mail.kernel.org (Postfix) with ESMTP id E64282311F
 	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2403768AbhAZMp5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 07:45:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42896 "EHLO
+        id S2403783AbhAZMp7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 07:45:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391769AbhAZJ7L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:11 -0500
-Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72809C061793
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:28 -0800 (PST)
-Received: by mail-vs1-xe34.google.com with SMTP id m13so3576989vsr.2
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:28 -0800 (PST)
+        with ESMTP id S2391773AbhAZJ7N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:13 -0500
+Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 112A1C061797
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:33 -0800 (PST)
+Received: by mail-vs1-xe33.google.com with SMTP id b5so4126204vsh.3
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=cMqmP92ckJOWxLFOub/+kXkPVPFprM8AhWxx6VtR/qI=;
-        b=SDN9LSS4iSoL4PcI8w/6y9Vexfzx5c8cqZ18zzCYRrsk2rznZrPPtIzEGxIvY/1+CZ
-         s9tQPtdSmVsVsGaBNLcdSI26raqrQLsY8Dg39gtKd6e/voK4/lyMgqR553LqdTdeL4Rm
-         U1kkzfcBT0OwpVmHG4eDd/InWTU+jncR9ousiqhcNRiPgAPAOksMr+T8FyQ4lWRKjfT+
-         0ncXeu7AJTQvYi8+faDFrw9MBJCjxBVIl33NXfgzdjYVTsmAJGTAp4r4kUU2V9rSNxMs
-         8uYQguQ17/3rb7A7DiWO+j2XeNzIMTmQnbMLT6XCPl/zI6gLyQSV6EthY8oEbnWMADfF
-         11uQ==
+         :cc;
+        bh=V09Ue7aLBQ6MasDKq8tKkbzc8OyCG8WfSUIi+pxHZ0A=;
+        b=CHlVroXsOgdhhTPTerkwYExyowok7JnOu1dgx3Qe5C+WdAY9SuwbHHYtgflWAiyHXA
+         6nk/cPRyb5qitgEgrQ12v8btdOrwCH8AVbfR2laYZKDz9gIq8s04GFaa8x7ElPb8GbKT
+         oOqLh6fukCxIin4MRGYp8DW83XwqXltmRrbonhhJnmIVBkrjVn8FwpIfUufmCoRazpIz
+         82fdB/S7WvPikAR9P3PR8RboYxAWzp+XCg7dvH9rw7hJ2wqNHi2YgpHDfMqYnhe3ZBpS
+         9SK3HgV7HU9TxNcbi+YXXZ0B88xcLL3pB3p45beQAXEZ5qXZJKE0nrXFxMFEcaokAX0k
+         XoSA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=cMqmP92ckJOWxLFOub/+kXkPVPFprM8AhWxx6VtR/qI=;
-        b=ODeo35tmRNM/WeD12s2NRG3RZ4mlNblcQcFfkN/VnZMFeP6tfXdOlezwHVlavk8yju
-         2lg4Yx9WamX29zuAZpivxXztde9oRx/cdMsvYDHiql1GZdsmXJD1U/CnMiZcXWDlV+vd
-         gjjODvuMKaom+elbPC0KecSDJ7fHt8aXQELoSjINSoKek951RUyV9yZ1o/FfHZTTKkW0
-         1QAm7hNyLTpen4yjFR3NNnWjHkhvk9qNRPhsbKDIEXoiBI1QDNzRUUX7EACzIMpNHRtl
-         b57+0Agd/xz4bQUpF25b15z2opCnyC0R4GmZCpFZpNP+CzBDP3q+8sOUkOZdBrvOofJS
-         //bg==
-X-Gm-Message-State: AOAM531jp+IZxvd/AzpcpdC6FogoWrbvFAtLAGC4cfbvwXhdp9bPoxSx
-        6qTpIhHwkQ5vywl3wVUGOWD+0b2nx6LeeAmLYmXV2z+3p+bX4A==
-X-Google-Smtp-Source: ABdhPJy5nF+IJ+Cb5EK/VNlwIRItJcbtubjXDncYomMeI1pg1LOsvK6RTLry9ROPhlpAS3hijJ889BcE2aNH6stJuJ4=
-X-Received: by 2002:a05:6102:48a:: with SMTP id n10mr3763060vsa.42.1611655107693;
- Tue, 26 Jan 2021 01:58:27 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=V09Ue7aLBQ6MasDKq8tKkbzc8OyCG8WfSUIi+pxHZ0A=;
+        b=qsMIMb3haAknLAaRK+kDO5gg/dokX3mbEzcAuacVouqP8IO8yluGE+x1uO6j/Ds5by
+         bZT4eNfO7XyWE+bjsDIg0lOiXRPxmxyGlRHuUnbzSUTxNup0IRcI30Qarn6fVaSc2GWf
+         mPJx/Wf8HeoQLSp8YsoSF3T83Bv88GZwFqz6jO3k0Q0NjomQz9NhaMvceH2mB4RhYi/n
+         CoLtXArFA8Nxfbe58BPQTtPon1t7BQe7rCgcHdZaksrTgYMBUJoNNNl3gkI1vAXyYK4V
+         h8C+0DQd3PsFFoZf/ipI62hJYoaDQKmH/kWibxj9H59xBV+M4kandViQnksvzpMsBEy1
+         ffCA==
+X-Gm-Message-State: AOAM5317FTq2yfgQUETS31Z7texfeUt99mebEryGioJPwYbGyi6qT4g+
+        M9+o+GSkHXZIItH/WfNSShyymeA4WW56Ei7Nm5CTZw==
+X-Google-Smtp-Source: ABdhPJyxfS6eXOv4r25zRNMylO+JLPVa+hbsuQ550KJ78Oyz1/Jpr4fsWYgKLy/30YnR5meyw9A4c2VWMyETl9lCtpM=
+X-Received: by 2002:a67:7f41:: with SMTP id a62mr3552156vsd.55.1611655112263;
+ Tue, 26 Jan 2021 01:58:32 -0800 (PST)
 MIME-Version: 1.0
-References: <20210123033230.36442-1-fengnanchang@gmail.com>
-In-Reply-To: <20210123033230.36442-1-fengnanchang@gmail.com>
+References: <20210121082155.111333-1-ebiggers@kernel.org> <20210121082155.111333-2-ebiggers@kernel.org>
+ <CAA+FYZerh02JXSKghCKuG29ATdYU_=2O93moGnLgD6Jv2v2auQ@mail.gmail.com>
+ <YA8pMDqHsKZA0zfR@sol.localdomain> <3b1b6a94-f283-e8a3-8638-6475d0323c30@kernel.dk>
+In-Reply-To: <3b1b6a94-f283-e8a3-8638-6475d0323c30@kernel.dk>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Jan 2021 10:57:51 +0100
-Message-ID: <CAPDyKFrAVP4jstB79wJhO5LCGn1EFQKtPRkck8+QYoA8eQV9CQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: limit the number of retries when analyse tuples failed
-To:     Fengnan Chang <fengnanchang@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date:   Tue, 26 Jan 2021 10:57:55 +0100
+Message-ID: <CAPDyKFoU1ciLfDig5XkULK-CBkCsmsbAgpyo51O8LEsTr3Q+Sg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] block/keyslot-manager: introduce devm_blk_ksm_init()
+To:     Jens Axboe <axboe@kernel.dk>, Eric Biggers <ebiggers@kernel.org>
+Cc:     Satya Tangirala <satyat@google.com>,
+        linux-block <linux-block@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 23 Jan 2021 at 04:32, Fengnan Chang <fengnanchang@gmail.com> wrote:
+On Mon, 25 Jan 2021 at 22:16, Jens Axboe <axboe@kernel.dk> wrote:
 >
-> when analyse tuples failed, may enter an endless loop=EF=BC=8Cso limit th=
-e time of retries.
+> On 1/25/21 1:25 PM, Eric Biggers wrote:
+> > On Mon, Jan 25, 2021 at 12:14:00PM -0800, Satya Tangirala wrote:
+> >> On Thu, Jan 21, 2021 at 12:23 AM Eric Biggers <ebiggers@kernel.org> wrote:
+> >>>
+> >>> From: Eric Biggers <ebiggers@google.com>
+> >>>
+> >>> Add a resource-managed variant of blk_ksm_init() so that drivers don't
+> >>> have to worry about calling blk_ksm_destroy().
+> >>>
+> >>> Note that the implementation uses a custom devres action to call
+> >>> blk_ksm_destroy() rather than switching the two allocations to be
+> >>> directly devres-managed, e.g. with devm_kmalloc().  This is because we
+> >>> need to keep zeroing the memory containing the keyslots when it is
+> >>> freed, and also because we want to continue using kvmalloc() (and there
+> >>> is no devm_kvmalloc()).
+> >>>
+> >>> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > [..]
+> >>> diff --git a/include/linux/keyslot-manager.h b/include/linux/keyslot-manager.h
+> >>> index 18f3f5346843f..443ad817c6c57 100644
+> >>> --- a/include/linux/keyslot-manager.h
+> >>> +++ b/include/linux/keyslot-manager.h
+> >>> @@ -85,6 +85,9 @@ struct blk_keyslot_manager {
+> >>>
+> >>>  int blk_ksm_init(struct blk_keyslot_manager *ksm, unsigned int num_slots);
+> >>>
+> >>> +int devm_blk_ksm_init(struct device *dev, struct blk_keyslot_manager *ksm,
+> >>> +                     unsigned int num_slots);
+> >>> +
+> >>>  blk_status_t blk_ksm_get_slot_for_key(struct blk_keyslot_manager *ksm,
+> >>>                                       const struct blk_crypto_key *key,
+> >>>                                       struct blk_ksm_keyslot **slot_ptr);
+> >>> --
+> >>
+> >> Looks good to me. Please feel free to add
+> >> Reviewed-by: Satya Tangirala <satyat@google.com>
+> >
+> > Thanks Satya.  Jens, any objection to this patch going in through the MMC tree?
 >
-> Signed-off-by: Fengnan Chang <fengnanchang@gmail.com>
+> No objections from me, doesn't look like we have any real worries of
+> conflicts.
 
-Applied for fixes and by adding a stable tag, thanks!
+Applied to my mmc for the next branch, by adding Jens' ack. Thanks everybody!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/core/sdio_cis.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-> index dcb3dee59fa5..b8d8b6df9961 100644
-> --- a/drivers/mmc/core/sdio_cis.c
-> +++ b/drivers/mmc/core/sdio_cis.c
-> @@ -24,6 +24,8 @@
->  #include "sdio_cis.h"
->  #include "sdio_ops.h"
->
-> +#define SDIO_READ_CIS_TIMEOUT_MS  (10 * 1000) /* 10s */
-> +
->  static int cistpl_vers_1(struct mmc_card *card, struct sdio_func *func,
->                          const unsigned char *buf, unsigned size)
->  {
-> @@ -266,6 +268,8 @@ static int sdio_read_cis(struct mmc_card *card, struc=
-t sdio_func *func)
->
->         do {
->                 unsigned char tpl_code, tpl_link;
-> +               unsigned long timeout =3D jiffies +
-> +                       msecs_to_jiffies(SDIO_READ_CIS_TIMEOUT_MS);
->
->                 ret =3D mmc_io_rw_direct(card, 0, 0, ptr++, 0, &tpl_code)=
-;
->                 if (ret)
-> @@ -318,6 +322,8 @@ static int sdio_read_cis(struct mmc_card *card, struc=
-t sdio_func *func)
->                         prev =3D &this->next;
->
->                         if (ret =3D=3D -ENOENT) {
-> +                               if (time_after(jiffies, timeout))
-> +                                       break;
->                                 /* warn about unknown tuples */
->                                 pr_warn_ratelimited("%s: queuing unknown"
->                                        " CIS tuple 0x%02x (%u bytes)\n",
-> --
-> 2.25.1
->
