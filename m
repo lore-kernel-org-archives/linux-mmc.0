@@ -4,33 +4,33 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2955C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F3C5C433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 70CFD221EA
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EC44B207B1
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 05:57:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731921AbhAZF5M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 00:57:12 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37336 "EHLO mail.kernel.org"
+        id S1729983AbhAZF5N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 00:57:13 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37338 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729983AbhAZCGQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S1732171AbhAZCGQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Mon, 25 Jan 2021 21:06:16 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 51EB222D50;
-        Tue, 26 Jan 2021 00:15:17 +0000 (UTC)
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A308022ADF;
+        Tue, 26 Jan 2021 00:15:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1611620117;
-        bh=G16sIENRX9EMyT17x8UvaimcQGeqHoMJpMYb9LmaK3k=;
+        s=k20201202; t=1611620114;
+        bh=4SCmQuraOYmu7VQ5L24jw7LalSZJa0vOhswtHkrL8l8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=iEufz0HdZJC1U8LIy/seQ34aF3gVSFXWEmeHUby/eUKsm5lI4Ci13ZXStoKWIUWik
-         poGDxnRQkvDK8XZK7nJCc7cSTyFwRAZkCEnId29adMDNCfd8RRfXcXuYj7aKAdWClK
-         FhOXpue4UMeZo4yaHpDc9XvNmcd3sUD4J7Sjy6fUxLVu3I8fZPTOVCuPV27CzzyC7m
-         iN8LJOnKZ5NYpwtnJqUD6H4YXmLToAQIJkwW9jaKZ0Qq6eQ3bBSOScbHUky4vBf+b4
-         SQiAPwaXbiGrBDLDfJVsmDVLyMeY5CqbmCchFRU752siOfKe9go46VcxbfouG5rr4b
-         J/KyEepdMXghg==
+        b=m7edEaCpEew0vDhx/9upmmNP4JqKWsq+kP2QJAQGT47X3dNZNlPae8Ea14yqvIJX0
+         wTSBhHWsDfoHqSDCyKyx8CVXwSoTFBKEy5eFZWSRBnrlp2g4xTjrRgo0cXxqhiZ7JH
+         CN3g6Ia2zarWHnrtMremsfqU4zFiEmAdMr456ZvwA+dSbxzONls3+Ddda1gJCS5rOo
+         Hmy+HmhUcLAFu10qCvGoCgprbGwY3NcJMCu7C9mzqn4bhLNhhO1T4C7absvwrqyqwR
+         MTQt2kjx49VsfOn8yAArEJYV1RKlRW/aLPbExeY/zq+WFRlHUvW5f+JcdpsglUM+O7
+         Snysm3MH5+4AQ==
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
@@ -46,9 +46,9 @@ Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Peng Zhou <peng.zhou@mediatek.com>,
         Stanley Chu <stanley.chu@mediatek.com>,
         Konrad Dybcio <konradybcio@gmail.com>
-Subject: [PATCH RESEND v6 9/9] arm64: dts: qcom: sdm630: add ICE registers and clocks
-Date:   Mon, 25 Jan 2021 16:14:56 -0800
-Message-Id: <20210126001456.382989-10-ebiggers@kernel.org>
+Subject: [PATCH RESEND v6 3/9] mmc: cqhci: initialize upper 64 bits of 128-bit task descriptors
+Date:   Mon, 25 Jan 2021 16:14:50 -0800
+Message-Id: <20210126001456.382989-4-ebiggers@kernel.org>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210126001456.382989-1-ebiggers@kernel.org>
 References: <20210126001456.382989-1-ebiggers@kernel.org>
@@ -60,43 +60,88 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Eric Biggers <ebiggers@google.com>
 
-Add the registers and clock for the Inline Crypto Engine (ICE) to the
-device tree node for the sdhci-msm host controller on sdm630.  This
-allows sdhci-msm to support inline encryption on sdm630.
+Move the task descriptor initialization into cqhci_prep_task_desc().
+In addition, make it explicitly initialize all 128 bits of the task
+descriptor if the host controller is using 128-bit task descriptors,
+rather than relying on the implicit zeroing from dmam_alloc_coherent().
 
+This is needed to prepare for CQHCI inline encryption support, which
+requires 128-bit task descriptors and uses the upper 64 bits.
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Reviewed-by: Satya Tangirala <satyat@google.com>
+Reviewed-and-tested-by: Peng Zhou <peng.zhou@mediatek.com>
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- arch/arm64/boot/dts/qcom/sdm630.dtsi | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ drivers/mmc/host/cqhci-core.c | 30 ++++++++++++++++++++----------
+ 1 file changed, 20 insertions(+), 10 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/qcom/sdm630.dtsi b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-index 37d5cc32f6b62..afb3d20c31fa0 100644
---- a/arch/arm64/boot/dts/qcom/sdm630.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-@@ -808,8 +808,9 @@ spmi_bus: spmi@800f000 {
- 		sdhc_1: sdhci@c0c4000 {
- 			compatible = "qcom,sdm630-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0x0c0c4000 0x1000>,
--				<0x0c0c5000 0x1000>;
--			reg-names = "hc", "cqhci";
-+				<0x0c0c5000 0x1000>,
-+				<0x0c0c8000 0x8000>;
-+			reg-names = "hc", "cqhci", "ice";
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index 697fe40756bf2..ad7c9acff1728 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -408,13 +408,15 @@ static void cqhci_disable(struct mmc_host *mmc)
+ }
  
- 			interrupts = <GIC_SPI 110 IRQ_TYPE_LEVEL_HIGH>,
- 					<GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
-@@ -817,8 +818,9 @@ sdhc_1: sdhci@c0c4000 {
+ static void cqhci_prep_task_desc(struct mmc_request *mrq,
+-					u64 *data, bool intr)
++				 struct cqhci_host *cq_host, int tag)
+ {
++	__le64 *task_desc = (__le64 __force *)get_desc(cq_host, tag);
+ 	u32 req_flags = mrq->data->flags;
++	u64 desc0;
  
- 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
- 					<&gcc GCC_SDCC1_AHB_CLK>,
--					<&xo_board>;
--			clock-names = "core", "iface", "xo";
-+					<&xo_board>,
-+					<&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+			clock-names = "core", "iface", "xo", "ice";
+-	*data = CQHCI_VALID(1) |
++	desc0 = CQHCI_VALID(1) |
+ 		CQHCI_END(1) |
+-		CQHCI_INT(intr) |
++		CQHCI_INT(1) |
+ 		CQHCI_ACT(0x5) |
+ 		CQHCI_FORCED_PROG(!!(req_flags & MMC_DATA_FORCED_PRG)) |
+ 		CQHCI_DATA_TAG(!!(req_flags & MMC_DATA_DAT_TAG)) |
+@@ -425,8 +427,19 @@ static void cqhci_prep_task_desc(struct mmc_request *mrq,
+ 		CQHCI_BLK_COUNT(mrq->data->blocks) |
+ 		CQHCI_BLK_ADDR((u64)mrq->data->blk_addr);
  
- 			pinctrl-names = "default", "sleep";
- 			pinctrl-0 = <&sdc1_clk_on &sdc1_cmd_on &sdc1_data_on &sdc1_rclk_on>;
+-	pr_debug("%s: cqhci: tag %d task descriptor 0x%016llx\n",
+-		 mmc_hostname(mrq->host), mrq->tag, (unsigned long long)*data);
++	task_desc[0] = cpu_to_le64(desc0);
++
++	if (cq_host->caps & CQHCI_TASK_DESC_SZ_128) {
++		u64 desc1 = 0;
++
++		task_desc[1] = cpu_to_le64(desc1);
++
++		pr_debug("%s: cqhci: tag %d task descriptor 0x%016llx%016llx\n",
++			 mmc_hostname(mrq->host), mrq->tag, desc1, desc0);
++	} else {
++		pr_debug("%s: cqhci: tag %d task descriptor 0x%016llx\n",
++			 mmc_hostname(mrq->host), mrq->tag, desc0);
++	}
+ }
+ 
+ static int cqhci_dma_map(struct mmc_host *host, struct mmc_request *mrq)
+@@ -567,8 +580,6 @@ static inline int cqhci_tag(struct mmc_request *mrq)
+ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	int err = 0;
+-	u64 data = 0;
+-	u64 *task_desc = NULL;
+ 	int tag = cqhci_tag(mrq);
+ 	struct cqhci_host *cq_host = mmc->cqe_private;
+ 	unsigned long flags;
+@@ -598,9 +609,8 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	}
+ 
+ 	if (mrq->data) {
+-		task_desc = (__le64 __force *)get_desc(cq_host, tag);
+-		cqhci_prep_task_desc(mrq, &data, 1);
+-		*task_desc = cpu_to_le64(data);
++		cqhci_prep_task_desc(mrq, cq_host, tag);
++
+ 		err = cqhci_prep_tran_desc(mrq, cq_host, tag);
+ 		if (err) {
+ 			pr_err("%s: cqhci: failed to setup tx desc: %d\n",
 -- 
 2.30.0
 
