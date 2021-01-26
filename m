@@ -5,85 +5,83 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35C8DC433E0
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54DF8C433E9
 	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DFCD2311F
+	by mail.kernel.org (Postfix) with ESMTP id 276512311D
 	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jan 2021 12:46:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2391647AbhAZMqF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jan 2021 07:46:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42510 "EHLO
+        id S2404006AbhAZMqI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jan 2021 07:46:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42506 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391805AbhAZJ7j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:39 -0500
-Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D9A8C061351
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:48 -0800 (PST)
-Received: by mail-vs1-xe2f.google.com with SMTP id w187so8710648vsw.5
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:48 -0800 (PST)
+        with ESMTP id S2391808AbhAZJ7n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jan 2021 04:59:43 -0500
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87159C061353
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:55 -0800 (PST)
+Received: by mail-vs1-xe32.google.com with SMTP id o186so8722313vso.1
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jan 2021 01:58:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=l2QpuY8rM4toyVpou9vFx2TY09PAPQwcRntc7oTA0is=;
-        b=REheRH86QOMZ/fp5spJI+HYISUR+or1vKvxmyLai8utojsCRMMqRZNCOUCtr9iDzzT
-         XKCjgZykN3eQ+Yd4tWF8Nx84mDqCcPaAX51DnmV1EQb0s+BU7FQ4/dGwbq8Hjyx4lb8X
-         1bz23M3gWrmtbp0qNqGFhbDKnqcf/r4Nv8yHm996ztOvPdgDCz+F3cpsXgpcSvwX9/BB
-         5M1Ld2sSZPlcwZEZgnauow/fO1i+zZ2dRrWkLhVtJm6FyvYm7Mzu7FdKu0qA41KQHY+c
-         5mtgGQP6aqes5Uoo/O6YvxTu2aLRM9Al9fxuL8529+GWQY26Y2Za0GGLeltGrnjt6kff
-         l6Kg==
+        bh=pJCLQRxrq3qEZskHQDdRGHVs/g7GsIs44v+7gnvo2ls=;
+        b=FOFq8Rt4wj3ueoHnR83ehUcVd2jOut0bL1z0vDVXeQV2Rs3Vl4jGN3McmmUsSjU/ja
+         wamaDid3KnCaWtLk5G90d0nwdcQUc4BlfZr9SJFqdejzfVHGeCBc/cR5KQhUvKARusF1
+         ZPFskfWFCLWcp1uPPkQVOevDa63ZTw9U9oRCS0NZf9dZ/8bQWWmQCormdTj2fHKJz0Kt
+         uSapIEtaovuHMj5EW1FIropN2ShVEdx071K943vd2znRgeRaB3lkm34Z1pQ2LW+YbB6m
+         srbCbhRaXHf6YbJS0g8jFa2Adp3Yhfyn4zEZkLSssA2BzPFLsdpyfve88lfS+PLhUrxK
+         6mZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=l2QpuY8rM4toyVpou9vFx2TY09PAPQwcRntc7oTA0is=;
-        b=CwPuuvcPwg37aONrb6OWCxbJ6MsTyhaGYGyGRnBEfVU3ZSVTogtG9U2ZmtR/zxxfG1
-         2oSefLg62cyWVS4Hjsrb72oiP9adIExqnPIYrn9UCZifCDfSaDeIRZLRv5deg2Dj4rgJ
-         ZSPTJ8ftRyBcXyOzfcVcHWx0lGRsybH4QvyrWKlOTDfMUi3lBMQeB9tdXG3KkNikenWT
-         9SvhNeiRxzXOupgcCHv9xSh17gJBuRci0JKaB3/rlv8lSccEpaIrWBMvUl4oFJm6tzcq
-         aeupUuNcLdwDhB6ay8fRGYBFrgDhHB1YRpV+UXEdjbU9RIUfFRtWZsSZ1EzdFSgaqP15
-         erkQ==
-X-Gm-Message-State: AOAM530ofprgOldUvM8hymsqOXU4UvBk03m65QYLDK2pzTTovnMmkp/L
-        r0/bUON7APx9Wyaz00h458NoTZcx5OKWgyINHOvPmyU0aHcFVg==
-X-Google-Smtp-Source: ABdhPJyTySMXS2eZMh5eS03L32cNf15ToE5AvKZz7eICs1uJdhhGYno+oad4aRW7fF20tSBBSv54Xp63sFrSLCAF2oM=
-X-Received: by 2002:a67:f997:: with SMTP id b23mr3471696vsq.34.1611655127850;
- Tue, 26 Jan 2021 01:58:47 -0800 (PST)
+        bh=pJCLQRxrq3qEZskHQDdRGHVs/g7GsIs44v+7gnvo2ls=;
+        b=qyWv3rJ62VkNzWYD3wiDFcTfx32EYopP6f7wSIgZ0ZAjJoOsMq2UdYteMO9WukU1pb
+         1v+Mr4DYtHns1b9m9SaIzDhhLp+0elFKUJqoN9ICFNY2UkIptR940nONvT8shD8wP0pT
+         tnAkvT6rbh3QdNCeSlNh1uCw08ZTSpyaR6cytIbYry6r4Y/hnq5JOtN4A1ehM9yyMjfU
+         7nFqDM6g6Z0pNzGJiUbx3FfsaoHLF03A5qxFL/5RiccHI61Yc7VrtNeO6A/F9ZO18w6Q
+         aY8Av8cvfv4oSqdoEfY+9HIEekYnLj9Izv821pqPO9QIBu34bdGlI3RCnJYRKG2hRXZt
+         pg9A==
+X-Gm-Message-State: AOAM533Ne5+SuTpb97OFpJQizZhTFaoqzxiBY6w2tBx1k1aGOvpXN2Gc
+        pqyU8PjzNWQucAiOJbDCmyZk8sXk5aN/qtoUpNolFcVeaMelkQ==
+X-Google-Smtp-Source: ABdhPJxABc5UXW4in2s8UJsSPUcaq4oOAuUUuvd5smFLRDOyRYY5OppaOYrWw/Wc0F4v8snNQaOM8Rlku8cV1xHbXQ4=
+X-Received: by 2002:a67:c787:: with SMTP id t7mr3895407vsk.48.1611655134813;
+ Tue, 26 Jan 2021 01:58:54 -0800 (PST)
 MIME-Version: 1.0
-References: <20210124170258.32862-1-marex@denx.de>
-In-Reply-To: <20210124170258.32862-1-marex@denx.de>
+References: <CGME20210125064728epcas1p3c44396f8f733463d5e0add003cc2b7eb@epcas1p3.samsung.com>
+ <20210125064355.28545-1-cw9316.lee@samsung.com>
+In-Reply-To: <20210125064355.28545-1-cw9316.lee@samsung.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 26 Jan 2021 10:58:11 +0100
-Message-ID: <CAPDyKFrUnx4XSyxx=H8reDV=_vRORe7fE=6HQivC9T7OkHfyRg@mail.gmail.com>
-Subject: Re: [PATCH V2 1/4] mmc: mmci: Add bindings to operate CMD, CK, CKIN
- pins as GPIO
-To:     =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        DTML <devicetree@vger.kernel.org>
+Date:   Tue, 26 Jan 2021 10:58:17 +0100
+Message-ID: <CAPDyKFqM+PfzoP8aznomAncAVaFqUXN8SzCVf5rauqes+jGmPQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: queue: Exclude unnecessary header file
+To:     Chanwoo Lee <cw9316.lee@samsung.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "(Exiting) Baolin Wang" <baolin.wang@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, Coly Li <colyli@suse.de>,
+        Lee Jones <lee.jones@linaro.org>,
+        Sarthak Garg <sartgarg@codeaurora.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        grant.jung@samsung.com, jt77.jang@samsung.com,
+        dh0421.hwang@samsung.com, sh043.lee@samsung.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 24 Jan 2021 at 18:03, Marek Vasut <marex@denx.de> wrote:
+On Mon, 25 Jan 2021 at 07:47, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
 >
-> Add DT bindings to describe GPIO line associated with CMD, CK, CKIN pins.
+> From: ChanWoo Lee <cw9316.lee@samsung.com>
 >
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> Cc: Alexandre Torgue <alexandre.torgue@st.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> Cc: devicetree@vger.kernel.org
+> From the 4.19 kernel, thread related code has been removed in queue.c.
+> So we can exclude unnecessary header file.
+>
+> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
 
 Applied for next, thanks!
 
@@ -92,42 +90,21 @@ Uffe
 
 
 > ---
-> V2: Rebase on next-20210122
-> ---
->  .../devicetree/bindings/mmc/arm,pl18x.yaml    | 20 +++++++++++++++++++
->  1 file changed, 20 insertions(+)
+>  drivers/mmc/core/queue.c | 1 -
+>  1 file changed, 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> index eddc1f6bdbe5..47595cb483be 100644
-> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> @@ -127,6 +127,26 @@ properties:
->        driver to sample the receive data (for example with a voltage switch
->        transceiver).
->
-> +  st,cmd-gpios:
-> +    maxItems: 1
-> +    description:
-> +      The GPIO matching the CMD pin.
-> +
-> +  st,ck-gpios:
-> +    maxItems: 1
-> +    description:
-> +      The GPIO matching the CK pin.
-> +
-> +  st,ckin-gpios:
-> +    maxItems: 1
-> +    description:
-> +      The GPIO matching the CKIN pin.
-> +
-> +dependencies:
-> +  st,cmd-gpios: [ "st,use-ckin" ]
-> +  st,ck-gpios: [ "st,use-ckin" ]
-> +  st,ckin-gpios: [ "st,use-ckin" ]
-> +
->  unevaluatedProperties: false
->
->  required:
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index de7cb0369c30..c7218da6f17c 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -7,7 +7,6 @@
+>  #include <linux/module.h>
+>  #include <linux/blkdev.h>
+>  #include <linux/freezer.h>
+> -#include <linux/kthread.h>
+>  #include <linux/scatterlist.h>
+>  #include <linux/dma-mapping.h>
+>  #include <linux/backing-dev.h>
 > --
-> 2.29.2
+> 2.29.0
 >
