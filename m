@@ -2,98 +2,139 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+X-Spam-Status: No, score=-5.0 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D3367C433DB
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 10:32:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58C32C433E9
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 10:51:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9123364E2C
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 10:32:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0C8B564EE2
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 10:51:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229614AbhBBKcH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Feb 2021 05:32:07 -0500
-Received: from pop31.abv.bg ([194.153.145.221]:45998 "EHLO pop31.abv.bg"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229870AbhBBKcG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 Feb 2021 05:32:06 -0500
-Received: from smtp.abv.bg (localhost [127.0.0.1])
-        by pop31.abv.bg (Postfix) with ESMTP id F215218053FF;
-        Tue,  2 Feb 2021 12:29:59 +0200 (EET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=abv.bg; s=smtp-out;
-        t=1612261800; bh=gA7vMMdOydq2agNzCYgSJg/VodZ1lLjOsSe3IufOKyk=;
-        h=Subject:To:Cc:References:From:Date:In-Reply-To:From;
-        b=kFqVpt/uku8aFZnXF7nntlnsl+v3GBK+HlPRekMXrFSiaiO/sKRvcE0jtxgtuSrvW
-         SfIbLvgFjbNlSj8CelNoNBMfPc+sq+HeGKo6U/TKMTxuOnCsURY0TRMIdhhUlD6yi1
-         KwNBhp9uZoEDbBmQEnCgwWz1CPOTaKi6kH26lpf8=
-X-HELO: [192.168.1.115]
-Authentication-Results: smtp.abv.bg; auth=pass (plain) smtp.auth=buboleck@abv.bg
-Received: from 46-249-79-198.net1.bg (HELO [192.168.1.115]) (46.249.79.198)
- by smtp.abv.bg (qpsmtpd/0.96) with ESMTPSA (ECDHE-RSA-AES256-GCM-SHA384 encrypted); Tue, 02 Feb 2021 12:29:59 +0200
-Subject: Re: Realtek USB Card Reader Driver issues
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Rui Feng <rui_feng@realsil.com.cn>,
-        Ricky Wu <ricky_wu@realtek.com>
-References: <1c123f6f-705b-8e47-1a01-dc6a61e6d416@abv.bg>
- <CAPDyKFpFCTcuW1=NrojEos=3+0DzEaXq-TqvBE5iyLOabNRQrQ@mail.gmail.com>
-From:   Dimitar Kosev <buboleck@abv.bg>
-Message-ID: <3fcae81a-e754-2e0f-e01f-f8c4a113d542@abv.bg>
-Date:   Tue, 2 Feb 2021 12:29:30 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.7.0
+        id S229787AbhBBKvl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Feb 2021 05:51:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37114 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229537AbhBBKvj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2021 05:51:39 -0500
+Received: from pandora.armlinux.org.uk (pandora.armlinux.org.uk [IPv6:2001:4d48:ad52:32c8:5054:ff:fe00:142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51DB0C061573;
+        Tue,  2 Feb 2021 02:50:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=armlinux.org.uk; s=pandora-2019; h=Sender:In-Reply-To:
+        Content-Transfer-Encoding:Content-Type:MIME-Version:References:Message-ID:
+        Subject:Cc:To:From:Date:Reply-To:Content-ID:Content-Description:Resent-Date:
+        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
+        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+         bh=QUFoL1M4pevTeMyLwnDogHEMlQrHMZssskb6wG1LFcA=; b=wg2o6QP/gHbhqBuIhn1RZoUGj
+        2iHotGU7ufXkLAWPw4UwYFPNHzUu8ddsLF6ZH7DAZK9ibPxZPao37pY3QUiSj2kNvPg18QoU3RIbp
+        SB9YdTsgzRp09KPTWE899TVtBN6b7+9uCVpM084z3RB+393ttTKlzy9IbXmuACxRaE7AQP1axErmx
+        9bdLyqL5Tzp+2AR1s8H8Ra8HKPn+VaEgvK7MKLCh/WvBYIcLxWRrMqhYn6+wAR7lOhqYiExSBYnla
+        2ZSGKUuSlOCD0mvUg9A5mz9A1bzzWPt0jeQ/XhpyrV3IGp6JHZ9fsbmIMsvJ8Mev9a6w8QLTZD9/a
+        CRpSMItzA==;
+Received: from shell.armlinux.org.uk ([fd8f:7570:feb6:1:5054:ff:fe00:4ec]:38176)
+        by pandora.armlinux.org.uk with esmtpsa (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <linux@armlinux.org.uk>)
+        id 1l6tFN-0004FH-LS; Tue, 02 Feb 2021 10:49:25 +0000
+Received: from linux by shell.armlinux.org.uk with local (Exim 4.92)
+        (envelope-from <linux@shell.armlinux.org.uk>)
+        id 1l6tFE-0002yZ-0J; Tue, 02 Feb 2021 10:49:16 +0000
+Date:   Tue, 2 Feb 2021 10:49:15 +0000
+From:   Russell King - ARM Linux admin <linux@armlinux.org.uk>
+To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>
+Cc:     Matt Mackall <mpm@selenic.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Vinod Koul <vkoul@kernel.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Eric Anholt <eric@anholt.net>, David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Suzuki K Poulose <suzuki.poulose@arm.com>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Vladimir Zapolskiy <vz@mleia.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Mark Brown <broonie@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Eric Auger <eric.auger@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Takashi Iwai <tiwai@suse.com>, linux-kernel@vger.kernel.org,
+        kernel@pengutronix.de,
+        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig.org@pengutronix.de>,
+        Mike Leach <mike.leach@linaro.org>,
+        Leo Yan <leo.yan@linaro.org>, Arnd Bergmann <arnd@arndb.de>,
+        linux-crypto@vger.kernel.org, dmaengine@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, coresight@lists.linaro.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-i2c@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-rtc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org,
+        kvm@vger.kernel.org, linux-fbdev@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: Re: [PATCH v3 0/5] amba: minor fix and various cleanups
+Message-ID: <20210202104915.GK1463@shell.armlinux.org.uk>
+References: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFpFCTcuW1=NrojEos=3+0DzEaXq-TqvBE5iyLOabNRQrQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
+User-Agent: Mutt/1.10.1 (2018-07-13)
+Sender: Russell King - ARM Linux admin <linux@armlinux.org.uk>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Ulf,
+On Tue, Jan 26, 2021 at 05:58:30PM +0100, Uwe Kleine-König wrote:
+> From: Uwe Kleine-König <u.kleine-koenig.org@pengutronix.de
+> 
+> Hello,
+> 
+> Changes since v2 sent with Message-Id:
+> 20201124133139.3072124-1-uwe@kleine-koenig.org:
+> 
+>  - Rebase to v5.11-rc1 (which resulted in a few conflicts in
+>    drivers/hwtracing).
+>  - Add various Acks.
+>  - Send to more maintainers directly (which I think is one of the
+>    reasons why there are so few Acks).
+> 
+> For my taste patch 4 needs some more acks (drivers/char/hw_random,
+> drivers/dma, drivers/gpu/drm/pl111, drivers/i2c, drivers/mmc,
+> drivers/vfio, drivers/watchdog and sound/arm have no maintainer feedback
+> yet).
+> 
+> My suggestion is to let this series go in via Russell King (who cares
+> for amba). Once enough Acks are there I can also provide a tag for
+> merging into different trees. Just tell me if you prefer this solution.
+> 
+> Would be great if this could make it for v5.12, but I'm aware it's
+> already late in the v5.11 cycle so it might have to wait for v5.13.
 
-Red herring. Apparently the issue is not in the card reader driver but 
-in some other new kernel option. If I build the new (5.10.10) kernel 
-using the 5.7 config and make oldconfig giving no to all new things then 
-the cards are not detected. If I copy the 5.7 config and use make 
-xconfig and just save it then it works. I just wonder what this option 
-might be and why it is not selected automatically if it is required.
+I think you need to have a 6th patch which moves the
+probe/remove/shutdown methods into the bus_type - if you're setting
+them for every struct device_driver, then there's no point doing that
+and they may as well be in the bus_type.
 
-Kind regards.
+Apart from that, it looks good.
 
-On 2/1/21 1:20 PM, Ulf Hansson wrote:
-> + Rui, Ricky
->
-> On Tue, 26 Jan 2021 at 14:42, Dimitar Kosev <buboleck@abv.bg> wrote:
->> Hello,
->>
->> It seems there is some issue with the rtsx_usb module. I'm using Gentoo
->> with kernel 5.7.9 at the moment as the card reader driver does not work
->> with 5.9 and 5.10 kernels, I don't know if the issue is there with 5.8
->> kernels as it was causing issues with my vga, my card reader info below:
->>
->> Bus 002 Device 002: ID 0bda:0129 Realtek Semiconductor Corp. RTS5129
->> Card Reader Controller
->>
->> The module detect the reader but does not detect the sd cards inserted,
->> the same cards work with 5.7 so I assume something was broken i the driver.
->>
-> >From the drivers/mmc/host/rtsx_usb_sdmmc.c perspective, nothing has
-> changed for quite a while and likewise for
-> drivers/misc/cardreader/rtsx_usb.c.
->
-> However, I think you probably need to run a "git bisect" to point out
-> the offending commit. And it looks like you already have some good
-> starting point to use for the git bisect.
->
-> I have also looped in some of the developers from Realtek/Realsil,
-> please keep them in the loop, as they know this HW and driver.
->
-> Kind regards
-> Uffe
->
-
+-- 
+RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
+FTTP is here! 40Mbps down 10Mbps up. Decent connectivity at last!
