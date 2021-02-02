@@ -2,248 +2,199 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PULL_REQUEST,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A75E7C4332B
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 20:57:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18717C4332B
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 21:39:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 755A364F3F
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 20:57:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAF4564E4A
+	for <linux-mmc@archiver.kernel.org>; Tue,  2 Feb 2021 21:39:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234084AbhBBU4p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Feb 2021 15:56:45 -0500
-Received: from mail-oi1-f174.google.com ([209.85.167.174]:43504 "EHLO
-        mail-oi1-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233892AbhBBU4f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2021 15:56:35 -0500
-Received: by mail-oi1-f174.google.com with SMTP id d20so8522257oiw.10;
-        Tue, 02 Feb 2021 12:56:18 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=6WKE/3EQ/xJ6AJH5xmJE9YBaYDJN1xjVTBGt+kvQ65Y=;
-        b=TirDo8SCmisn1W/UErBbzPEcNL9EIsBI0Hpki5C3reAXYhoSyMvLH9cxTottf6sVxK
-         xf/Jtyc9BJmX5T656HZ6pbppu0F7+Cl682xD1LEhWhOyi9yZ0DUoRwJ96KHcw8CCG2tC
-         z2IoZZZvvU8DC/4XUKBbC5SA/yxyTbLTpApTQE2AlkFPI4DM6b+dEkZBT+RTzYZRsPCR
-         UZk4i5iInD9oE06ZG8JyG8t++oZ/fr4ar46h3ZtGsortA3UNrRcdaL8unGU2FDBqKEG/
-         gn95tEvaLm8gG8JiayyY5UYcHIqWZM/VwtPZVOdSpSxVXxXuCuRkoK0pPPsmO+78Mb0N
-         /vGg==
-X-Gm-Message-State: AOAM531v5X1td8BoFObr3WdUUyVxfBZJ8i14wlmi8ivhfbfEVjD8sS2l
-        DD/Nk7DiI16rGCbsdeeq8vxsvi6uBg==
-X-Google-Smtp-Source: ABdhPJypjDN+Ts39JWA5K5FwFDZxnlgjEBltLJwzpuZeV8Gkh6PNkOJl8PkeKNKnT1CjwRFOWOyTZg==
-X-Received: by 2002:aca:dc07:: with SMTP id t7mr4037098oig.15.1612299353146;
-        Tue, 02 Feb 2021 12:55:53 -0800 (PST)
-Received: from xps15.herring.priv (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.googlemail.com with ESMTPSA id k15sm4206otp.10.2021.02.02.12.55.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 02 Feb 2021 12:55:52 -0800 (PST)
-From:   Rob Herring <robh@kernel.org>
-To:     devicetree@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, Stephen Boyd <sboyd@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
+        id S232062AbhBBVjp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Feb 2021 16:39:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35590 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230168AbhBBVji (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Feb 2021 16:39:38 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84C4DC061794
+        for <linux-mmc@vger.kernel.org>; Tue,  2 Feb 2021 13:38:29 -0800 (PST)
+Received: from ptx.hi.pengutronix.de ([2001:67c:670:100:1d::c0])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1l73KK-0005G0-0Y; Tue, 02 Feb 2021 22:35:12 +0100
+Received: from ukl by ptx.hi.pengutronix.de with local (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1l73KD-000359-6W; Tue, 02 Feb 2021 22:35:05 +0100
+Date:   Tue, 2 Feb 2021 22:35:02 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Russell King <linux+pull@armlinux.org.uk>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Suzuki K Poulose <suzuki.poulose@arm.com>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     linux-fbdev@vger.kernel.org, Cornelia Huck <cohuck@redhat.com>,
+        kvm@vger.kernel.org, David Airlie <airlied@linux.ie>,
         Linus Walleij <linus.walleij@linaro.org>,
+        alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org,
+        Jaroslav Kysela <perex@perex.cz>,
+        Eric Anholt <eric@anholt.net>, linux-i2c@vger.kernel.org,
+        Jiri Slaby <jirislaby@kernel.org>,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        linux-rtc@vger.kernel.org,
         Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        Daniel Palmer <daniel@thingy.jp>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Avi Fishman <avifishman70@gmail.com>,
-        Tomer Maimon <tmaimon77@gmail.com>,
-        Tali Perry <tali.perry1@gmail.com>,
-        Joerg Roedel <joro@8bytes.org>, Will Deacon <will@kernel.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Joel Stanley <joel@jms.id.au>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Vincent Cheng <vincent.cheng.xh@renesas.com>,
-        linux-clk@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org,
-        iommu@lists.linux-foundation.org, linux-watchdog@vger.kernel.org,
-        Eric Anholt <eric@anholt.net>,
-        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Pavel Machek <pavel@ucw.cz>,
+        Takashi Iwai <tiwai@suse.com>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        linux-serial@vger.kernel.org, linux-input@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        dri-devel@lists.freedesktop.org, linux-leds@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH 3/3] dt-bindings: Fix errors in 'if' schemas
-Date:   Tue,  2 Feb 2021 14:55:44 -0600
-Message-Id: <20210202205544.24812-3-robh@kernel.org>
-X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20210202205544.24812-1-robh@kernel.org>
-References: <20210202205544.24812-1-robh@kernel.org>
+        Guenter Roeck <linux@roeck-us.net>,
+        Mike Leach <mike.leach@linaro.org>,
+        linux-watchdog@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        coresight@lists.linaro.org, Vladimir Zapolskiy <vz@mleia.com>,
+        Eric Auger <eric.auger@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>,
+        Matt Mackall <mpm@selenic.com>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-spi@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
+        linux-crypto@vger.kernel.org, kernel@pengutronix.de,
+        Leo Yan <leo.yan@linaro.org>, dmaengine@vger.kernel.org
+Subject: Re: [GIT PULL] immutable branch for amba changes targeting v5.12-rc1
+Message-ID: <20210202213502.ya4luwvklbte72sz@pengutronix.de>
+References: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
+ <20210202135350.36nj3dmcoq3t7gcf@pengutronix.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="iy6nspqtdtxt6xyd"
+Content-Disposition: inline
+In-Reply-To: <20210202135350.36nj3dmcoq3t7gcf@pengutronix.de>
+X-SA-Exim-Connect-IP: 2001:67c:670:100:1d::c0
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Properties in if/then schemas weren't getting checked by the meta-schemas.
-Enabling meta-schema checks finds several errors.
 
-The use of an 'items' schema (as opposed to the list form) is wrong in
-some cases as it applies to all entries. 'contains' is the correct schema
-to use in the case of multiple entries.
+--iy6nspqtdtxt6xyd
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Cc: Herbert Xu <herbert@gondor.apana.org.au>
-Cc: "David S. Miller" <davem@davemloft.net>
-Cc: Maxime Ripard <mripard@kernel.org>
-Cc: Chen-Yu Tsai <wens@csie.org>
-Cc: Eric Anholt <eric@anholt.net>
-Cc: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-Cc: Florian Fainelli <f.fainelli@gmail.com>
-Cc: Ray Jui <rjui@broadcom.com>
-Cc: Scott Branden <sbranden@broadcom.com>
-Cc: Pavel Machek <pavel@ucw.cz>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Kishon Vijay Abraham I <kishon@ti.com>
-Cc: Vinod Koul <vkoul@kernel.org>
-Cc: Geert Uytterhoeven <geert+renesas@glider.be>
-Cc: Linus Walleij <linus.walleij@linaro.org>
-Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
-Cc: linux-crypto@vger.kernel.org
-Cc: dri-devel@lists.freedesktop.org
-Cc: linux-leds@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-gpio@vger.kernel.org
-Signed-off-by: Rob Herring <robh@kernel.org>
----
- .../devicetree/bindings/crypto/allwinner,sun8i-ce.yaml   | 3 +--
- .../devicetree/bindings/display/brcm,bcm2835-hvs.yaml    | 2 +-
- Documentation/devicetree/bindings/leds/ti,tca6507.yaml   | 1 +
- Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml  | 2 +-
- Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml | 3 +--
- .../devicetree/bindings/phy/renesas,usb2-phy.yaml        | 5 ++---
- .../devicetree/bindings/pinctrl/renesas,pfc.yaml         | 9 ++++-----
- .../bindings/timer/allwinner,sun5i-a13-hstimer.yaml      | 3 +--
- 8 files changed, 12 insertions(+), 16 deletions(-)
+Hello,
 
-diff --git a/Documentation/devicetree/bindings/crypto/allwinner,sun8i-ce.yaml b/Documentation/devicetree/bindings/crypto/allwinner,sun8i-ce.yaml
-index 7a60d84289cc..6ab07eba7778 100644
---- a/Documentation/devicetree/bindings/crypto/allwinner,sun8i-ce.yaml
-+++ b/Documentation/devicetree/bindings/crypto/allwinner,sun8i-ce.yaml
-@@ -46,8 +46,7 @@ properties:
- if:
-   properties:
-     compatible:
--      items:
--        const: allwinner,sun50i-h6-crypto
-+      const: allwinner,sun50i-h6-crypto
- then:
-   properties:
-     clocks:
-diff --git a/Documentation/devicetree/bindings/display/brcm,bcm2835-hvs.yaml b/Documentation/devicetree/bindings/display/brcm,bcm2835-hvs.yaml
-index e826ab0adb75..2e8566f47e63 100644
---- a/Documentation/devicetree/bindings/display/brcm,bcm2835-hvs.yaml
-+++ b/Documentation/devicetree/bindings/display/brcm,bcm2835-hvs.yaml
-@@ -36,7 +36,7 @@ if:
-   properties:
-     compatible:
-       contains:
--        const: brcm,bcm2711-hvs"
-+        const: brcm,bcm2711-hvs
- 
- then:
-   required:
-diff --git a/Documentation/devicetree/bindings/leds/ti,tca6507.yaml b/Documentation/devicetree/bindings/leds/ti,tca6507.yaml
-index 94c307c98762..32c600387895 100644
---- a/Documentation/devicetree/bindings/leds/ti,tca6507.yaml
-+++ b/Documentation/devicetree/bindings/leds/ti,tca6507.yaml
-@@ -69,6 +69,7 @@ patternProperties:
- if:
-   patternProperties:
-     "^gpio@[0-6]$":
-+      type: object
-       properties:
-         compatible:
-           contains:
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 6bbf29b5c239..6c13703b31db 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -123,7 +123,7 @@ required:
- if:
-   properties:
-     compatible:
--      items:
-+      contains:
-         enum:
-           - renesas,sdhi-r7s72100
-           - renesas,sdhi-r7s9210
-diff --git a/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml b/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml
-index 58c3ef8004ad..04edda504ab6 100644
---- a/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml
-+++ b/Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml
-@@ -99,8 +99,7 @@ patternProperties:
- if:
-   properties:
-     compatible:
--      items:
--        const: brcm,iproc-ns2-sata-phy
-+      const: brcm,iproc-ns2-sata-phy
- then:
-   properties:
-     reg:
-diff --git a/Documentation/devicetree/bindings/phy/renesas,usb2-phy.yaml b/Documentation/devicetree/bindings/phy/renesas,usb2-phy.yaml
-index 829e8c7e467a..0f358d5b84ef 100644
---- a/Documentation/devicetree/bindings/phy/renesas,usb2-phy.yaml
-+++ b/Documentation/devicetree/bindings/phy/renesas,usb2-phy.yaml
-@@ -81,9 +81,8 @@ properties:
- if:
-   properties:
-     compatible:
--      items:
--        enum:
--          - renesas,usb2-phy-r7s9210
-+      contains:
-+        const: renesas,usb2-phy-r7s9210
- then:
-   required:
-     - clock-names
-diff --git a/Documentation/devicetree/bindings/pinctrl/renesas,pfc.yaml b/Documentation/devicetree/bindings/pinctrl/renesas,pfc.yaml
-index 5b5b1b9d2ec7..5d3947902f2d 100644
---- a/Documentation/devicetree/bindings/pinctrl/renesas,pfc.yaml
-+++ b/Documentation/devicetree/bindings/pinctrl/renesas,pfc.yaml
-@@ -76,11 +76,10 @@ required:
- if:
-   properties:
-     compatible:
--      items:
--        enum:
--          - renesas,pfc-r8a73a4
--          - renesas,pfc-r8a7740
--          - renesas,pfc-sh73a0
-+      enum:
-+        - renesas,pfc-r8a73a4
-+        - renesas,pfc-r8a7740
-+        - renesas,pfc-sh73a0
- then:
-   required:
-     - interrupts-extended
-diff --git a/Documentation/devicetree/bindings/timer/allwinner,sun5i-a13-hstimer.yaml b/Documentation/devicetree/bindings/timer/allwinner,sun5i-a13-hstimer.yaml
-index 40fc4bcb3145..b6a6d03a08b2 100644
---- a/Documentation/devicetree/bindings/timer/allwinner,sun5i-a13-hstimer.yaml
-+++ b/Documentation/devicetree/bindings/timer/allwinner,sun5i-a13-hstimer.yaml
-@@ -46,8 +46,7 @@ required:
- if:
-   properties:
-     compatible:
--      items:
--        const: allwinner,sun5i-a13-hstimer
-+      const: allwinner,sun5i-a13-hstimer
- 
- then:
-   properties:
--- 
-2.27.0
+On Tue, Feb 02, 2021 at 02:53:50PM +0100, Uwe Kleine-K=F6nig wrote:
+> the following changes since commit 5c8fe583cce542aa0b84adc939ce85293de36e=
+5e:
+>=20
+>   Linux 5.11-rc1 (2020-12-27 15:30:22 -0800)
+>=20
+> are available in the Git repository at:
+>=20
+>   https://git.pengutronix.de/git/ukl/linux tags/amba-make-remove-return-v=
+oid
+>=20
+> for you to fetch changes up to f170b59fedd733b92f58c4d7c8357fbf7601d623:
+>=20
+>   amba: Make use of bus_type functions (2021-02-02 14:26:02 +0100)
+>=20
+> I expect this tag to be merged by Russell King as amba maintainer and by
+> Mathieu Poirier (or Greg Kroah-Hartman?) for coresight as there are some
+> pending conflicting changes. These are not hard to resolve but also
+> non-trivial. Tell me if you need assistance for resolving, also if it's o=
+nly a
+> second pair of eyes to judge your resolution.
 
+Alternatively to my additional patch sent earlier today I prepared a v2
+tag at
+
+  https://git.pengutronix.de/git/ukl/linux tags/amba-make-remove-return-voi=
+d-v2
+
+with the build fix squashed in. Iff you prefer and both Russell and Greg
+agree to pull this one instead of the (implicit) v1 we can maybe prevent
+introducing this build regression in mainline. Please coordinate among
+you two. And sorry again for breaking the build.
+
+Best regards
+Uwe
+
+PS: The range-diff between the original
+tags/amba-make-remove-return-void and
+tags/amba-make-remove-return-void-v2 is:
+
+1:  3fd269e74f2f ! 1:  481963c91284 amba: Make the remove callback return v=
+oid
+    @@ Commit message
+         Acked-by: Vladimir Zapolskiy <vz@mleia.com> # for memory/pl172
+         Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+         Link: https://lore.kernel.org/r/20210126165835.687514-5-u.kleine-k=
+oenig@pengutronix.de
+    +    [ukleinek: squashed in a build fix for drivers/mailbox/arm_mhuv2.c]
+         Signed-off-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
+    =20
+      ## drivers/amba/bus.c ##
+    @@ drivers/input/serio/ambakmi.c: static int amba_kmi_remove(struct amb=
+a_device *de
+     =20
+      static int __maybe_unused amba_kmi_resume(struct device *dev)
+    =20
+    + ## drivers/mailbox/arm_mhuv2.c ##
+    +@@ drivers/mailbox/arm_mhuv2.c: static int mhuv2_probe(struct amba_dev=
+ice *adev, const struct amba_id *id)
+    +   return ret;
+    + }
+    +=20
+    +-static int mhuv2_remove(struct amba_device *adev)
+    ++static void mhuv2_remove(struct amba_device *adev)
+    + {
+    +   struct mhuv2 *mhu =3D amba_get_drvdata(adev);
+    +=20
+    +   if (mhu->frame =3D=3D SENDER_FRAME)
+    +           writel_relaxed(0x0, &mhu->send->access_request);
+    +-
+    +-  return 0;
+    + }
+    +=20
+    + static struct amba_id mhuv2_ids[] =3D {
+    +
+      ## drivers/memory/pl172.c ##
+     @@ drivers/memory/pl172.c: static int pl172_probe(struct amba_device *=
+adev, const struct amba_id *id)
+        return ret;
+2:  f170b59fedd7 =3D 2:  f30d22a7bfab amba: Make use of bus_type functions
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--iy6nspqtdtxt6xyd
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmAZxYMACgkQwfwUeK3K
+7AnuCggAjiQbE+eiwx7Lq2dUAxw0U6bgjFY/EXIcLCMbTPjdEffSVExAzMT3cTCy
+zISJDI3QF315/RleMFcnEXrXJl7Ft8SkoEvZfheNfz5JmPu8jPIEUp5giooDmpBi
+TV/LqBdE+wmy+J7byBdoH8Chvg9RR52u6aJFyj8nzwAoqj/+YiSYcB2nsMtr962B
+GLNq7i0h7Lj0cZxGVTsh75QuVSyK7yedx7gS4F5wUURJpSa5LzeeWAboWgARpg+M
+/BIWHX1CAs2JGZQqzJF2hffd/HZhQCWJlgTa1x92sg2Ic62K+ufwdsHlo87Wuo42
+N6jvYIoY/t/LHHL+3zxpfxM1yFao+A==
+=lf3x
+-----END PGP SIGNATURE-----
+
+--iy6nspqtdtxt6xyd--
