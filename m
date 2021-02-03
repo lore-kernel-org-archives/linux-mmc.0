@@ -2,103 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.4 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98730C433DB
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 07:37:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C324FC433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 07:55:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4B24C64F5C
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 07:37:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 84EE064F8D
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 07:55:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231826AbhBCHhY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Feb 2021 02:37:24 -0500
-Received: from mga17.intel.com ([192.55.52.151]:51600 "EHLO mga17.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231834AbhBCHhW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 3 Feb 2021 02:37:22 -0500
-IronPort-SDR: kDUqwn7elpv/X0bw4HIH+mskKF/d7c4jxWViRD8fThOpJSaS+rg6VVJkNYnl2BTtnjHmjcEIhV
- XWnBiCqrXPkw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9883"; a="160760880"
-X-IronPort-AV: E=Sophos;i="5.79,397,1602572400"; 
-   d="scan'208";a="160760880"
-Received: from orsmga002.jf.intel.com ([10.7.209.21])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2021 23:36:37 -0800
-IronPort-SDR: peD/CeSohs1xq+wtPJu0LOIU0QocDFx1r3nTgnm4Rhg86dkhLSi9EbjKWQyTaW5Kjw87BP5BJr
- FVgvYz64HJKQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.79,397,1602572400"; 
-   d="scan'208";a="372282320"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.149]) ([10.237.72.149])
-  by orsmga002.jf.intel.com with ESMTP; 02 Feb 2021 23:36:31 -0800
-Subject: Re: [PATCH] mmc: queue: Remove unused define
-To:     Chanwoo Lee <cw9316.lee@samsung.com>, ulf.hansson@linaro.org,
-        baolin.wang@linaro.org, arnd@arndb.de, colyli@suse.de,
-        lee.jones@linaro.org, sartgarg@codeaurora.org, pcc@google.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     grant.jung@samsung.com, jt77.jang@samsung.com,
-        dh0421.hwang@samsung.com, sh043.lee@samsung.com
-References: <CGME20210203072341epcas1p186cca2cf8177a31d04f1ede4bb5f1ec7@epcas1p1.samsung.com>
- <20210203072014.30272-1-cw9316.lee@samsung.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <f7984520-8239-24ae-0142-811f4c6d9d9f@intel.com>
-Date:   Wed, 3 Feb 2021 09:36:34 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        id S232148AbhBCHyw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Feb 2021 02:54:52 -0500
+Received: from metis.ext.pengutronix.de ([85.220.165.71]:44195 "EHLO
+        metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231983AbhBCHyw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Feb 2021 02:54:52 -0500
+Received: from ptx.hi.pengutronix.de ([2001:67c:670:100:1d::c0])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1l7CrV-0000mf-2a; Wed, 03 Feb 2021 08:46:05 +0100
+Received: from ukl by ptx.hi.pengutronix.de with local (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1l7CrM-0005LW-0J; Wed, 03 Feb 2021 08:45:56 +0100
+Date:   Wed, 3 Feb 2021 08:45:55 +0100
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Russell King - ARM Linux admin <linux@armlinux.org.uk>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Cornelia Huck <cohuck@redhat.com>, kvm@vger.kernel.org,
+        David Airlie <airlied@linux.ie>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        dri-devel@lists.freedesktop.org, Jaroslav Kysela <perex@perex.cz>,
+        Eric Anholt <eric@anholt.net>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig.org@pengutronix.de>, linux-i2c@vger.kernel.org,
+        linux-spi@vger.kernel.org, Jiri Slaby <jirislaby@kernel.org>,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Alexandre Torgue <alexandre.torgue@st.com>,
+        linux-rtc@vger.kernel.org,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        linux-serial@vger.kernel.org, linux-input@vger.kernel.org,
+        Guenter Roeck <linux@roeck-us.net>,
+        Mike Leach <mike.leach@linaro.org>,
+        Daniel Vetter <daniel@ffwll.ch>, Arnd Bergmann <arnd@arndb.de>,
+        Suzuki K Poulose <suzuki.poulose@arm.com>,
+        coresight@lists.linaro.org, Vladimir Zapolskiy <vz@mleia.com>,
+        Eric Auger <eric.auger@redhat.com>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Mark Brown <broonie@kernel.org>, linux-fbdev@vger.kernel.org,
+        Matt Mackall <mpm@selenic.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        linux-watchdog@vger.kernel.org,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        linux-mmc@vger.kernel.org, Takashi Iwai <tiwai@suse.com>,
+        linux-kernel@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
+        linux-crypto@vger.kernel.org,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Leo Yan <leo.yan@linaro.org>, dmaengine@vger.kernel.org,
+        alsa-devel@alsa-project.org
+Subject: Re: [PATCH v3 0/5] amba: minor fix and various cleanups
+Message-ID: <20210203074555.tusulu3iqg5wgxeb@pengutronix.de>
+References: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
+ <20210202104915.GK1463@shell.armlinux.org.uk>
 MIME-Version: 1.0
-In-Reply-To: <20210203072014.30272-1-cw9316.lee@samsung.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="nnu6wqtgppbbywlf"
+Content-Disposition: inline
+In-Reply-To: <20210202104915.GK1463@shell.armlinux.org.uk>
+X-SA-Exim-Connect-IP: 2001:67c:670:100:1d::c0
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/02/21 9:20 am, Chanwoo Lee wrote:
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
-> 
-> MMC_CQE_QUEUE_FULL is not set and is only cleared.
-> Therefore, define is unnecessary.
-> 
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
 
-Looks like a pre blk-mq remanent.
+--nnu6wqtgppbbywlf
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Hello,
 
-> ---
->  drivers/mmc/core/queue.c | 2 --
->  drivers/mmc/core/queue.h | 1 -
->  2 files changed, 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index 002426e3cf76..9f37a8b909e8 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -33,8 +33,6 @@ void mmc_cqe_check_busy(struct mmc_queue *mq)
->  {
->  	if ((mq->cqe_busy & MMC_CQE_DCMD_BUSY) && !mmc_cqe_dcmd_busy(mq))
->  		mq->cqe_busy &= ~MMC_CQE_DCMD_BUSY;
-> -
-> -	mq->cqe_busy &= ~MMC_CQE_QUEUE_FULL;
->  }
->  
->  static inline bool mmc_cqe_can_dcmd(struct mmc_host *host)
-> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-> index fd11491ced9f..57c59b6cb1b9 100644
-> --- a/drivers/mmc/core/queue.h
-> +++ b/drivers/mmc/core/queue.h
-> @@ -81,7 +81,6 @@ struct mmc_queue {
->  	int			in_flight[MMC_ISSUE_MAX];
->  	unsigned int		cqe_busy;
->  #define MMC_CQE_DCMD_BUSY	BIT(0)
-> -#define MMC_CQE_QUEUE_FULL	BIT(1)
->  	bool			busy;
->  	bool			use_cqe;
->  	bool			recovery_needed;
-> 
+we already talked about this via irc, but for the record and the benefit
+of others:
 
+On Tue, Feb 02, 2021 at 10:49:15AM +0000, Russell King - ARM Linux admin wr=
+ote:
+> I think you need to have a 6th patch which moves the
+> probe/remove/shutdown methods into the bus_type - if you're setting
+> them for every struct device_driver, then there's no point doing that
+> and they may as well be in the bus_type.
+
+This is implemented in patch 5 already.
+
+Best regards
+Uwe
+
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--nnu6wqtgppbbywlf
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmAaVLAACgkQwfwUeK3K
+7AlQLgf+P1DKYj6OELp8rvge2qlgjLziflPm/vmYKoER7GP62xMAt1jHBWvMgDLx
+SQfCWfc7aNauEmrPFy3TDOyu3SrNFjDVRf3DfOGZ+VpYmmtyUJihjezhbbhpysK5
+Pchia3IjZ0wVWPBC0mb8a1o5w1GQ7l49/QaVZ6buVR+RoNYiKGFdiKcEc8JB+c19
+s2ksv2HXH9eB66fQ+yNQY7W2lNiK98iTc0txk+lhP2wRnFXHPMgqQhFb3j2wt7Or
+ix27mqEX40GyAOv+Xmam2NtjLRM5WD4zflnasEKvxQoa0Qe0mpR6aSKIotUmM4yi
+oNcARpnSdJUwDrfHL0GDd9ksOomPMA==
+=r9/H
+-----END PGP SIGNATURE-----
+
+--nnu6wqtgppbbywlf--
