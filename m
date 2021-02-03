@@ -7,56 +7,56 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,
 	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 791A7C433E9
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 23:40:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AA0DC4332D
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 23:41:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 495D964F68
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 23:40:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 07E4764F59
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Feb 2021 23:41:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233234AbhBCXkC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Feb 2021 18:40:02 -0500
-Received: from aserp2120.oracle.com ([141.146.126.78]:36956 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233019AbhBCXkB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Feb 2021 18:40:01 -0500
-Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
-        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 113N8wg9103664;
-        Wed, 3 Feb 2021 23:37:46 GMT
+        id S233830AbhBCXle (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Feb 2021 18:41:34 -0500
+Received: from aserp2130.oracle.com ([141.146.126.79]:34146 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233868AbhBCXkt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Feb 2021 18:40:49 -0500
+Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
+        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 113N9lJ4053674;
+        Wed, 3 Feb 2021 23:38:09 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=from : to : cc :
  subject : date : message-id : in-reply-to : references : content-type :
  mime-version; s=corp-2020-01-29;
- bh=cOkwV9kqyN08qwK1NmwlE/kmA1LrE5vAxbf45V3rJbU=;
- b=NQGceTWcGnFSzxuNLWlAT7ftp0+qtrFa+QqxyH4luxuOx/4CbpdhaoE1Woq2H+KFeerO
- qHYOHjtQMoRtQcteMlRdRh0gRMZKRjAll6TtCIhagOKGAtHQK+a4RnXZyZtxYS+eWhO7
- Q9zk3YuYVHCYkJer6I5mEs0RWCDyNsLtfty3ihQJahSEH+AOAXeery6C8G+lw+Wve6VO
- RrakFbj29sTk1eqKCA6k7frw/kNvX2KNbYKUY73dlVBQUUazqqcpjvB7x1UWhf7Oxjls
- +JVF9g5XDO8m4yApyiGveb+BwV1HXWmNq5cuIY7dNvj4EEXadoMkUTRMO+SamF8ipE9/ zQ== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by aserp2120.oracle.com with ESMTP id 36cydm2q16-1
+ bh=ufcarBGag7Sjp5Mq5hX2uNHVicBXg/LdEy+UArhzb+Q=;
+ b=pnoIjQjRAimCOZGBFABR649EZDLrKxG6Rg+Koe7dVE64t/PjnvnPZt/5g7CWcLP5cu52
+ P6eBa7EAlCqK/BoeTW6vxGAfUKSPLS3hYYUXkTTMlMMLrZJQygd0WggDf/bNlyJP8Ach
+ upL7IU+DgF9INdgJ9Jy5KwJ94emFs97z0p49t0KEbZLYH0NU/Sb0NQHW/ppSJ3yG26o3
+ UeDWaKBcm9re+ww+zpHOsdb45vWIIZeVvU1aF7NtPhh3qxt8DftSnQAzVNbztT7vRnVD
+ YMckMHkzfZaqs8LhaE/YbExCu0PPhS2LoJDTbRxu8k6i93v+Qr81JeiCNCaVBw2IXiJY gw== 
+Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
+        by aserp2130.oracle.com with ESMTP id 36cvyb2weg-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 03 Feb 2021 23:37:46 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 113NAbHS112134;
-        Wed, 3 Feb 2021 23:37:45 GMT
-Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2171.outbound.protection.outlook.com [104.47.56.171])
-        by userp3030.oracle.com with ESMTP id 36dhd0h98t-1
+        Wed, 03 Feb 2021 23:38:08 +0000
+Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
+        by aserp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 113NBZjm083373;
+        Wed, 3 Feb 2021 23:38:08 GMT
+Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2174.outbound.protection.outlook.com [104.47.56.174])
+        by aserp3030.oracle.com with ESMTP id 36dh1rp0ay-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 03 Feb 2021 23:37:45 +0000
+        Wed, 03 Feb 2021 23:38:08 +0000
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=dzeUWNcU9Mj4e0TYMjDEEa04Puyz6RPQSjKZYKBWfmB0YwXGpAgYd9oM8VKYP8KXENITMV8yDMjP8CYacJPwv8DWmD4pSTiPOoRhlSV0oSyx0fWkiuokgpZ+MNc10AjBFlPN3fS6+wmdDwxaSMmr3AWXeIHjleiC2b90oOD5l7lecsd4TJ9inlejRmA0LhPrJE+i4qIR9reLEtuATKI0CpBOk/U9dhS+oomHA0MkWrlzRvDNVn3m/crta3/rFfJdhqMD/lwZ4mioO+D+XS7pQ9BYpw2e4rYERQEKbrZv9QIBXA98liYSs+uPxvIe4cpX6aBF1q3jWKa57MKtPPxTeQ==
+ b=JmNqAIq6lFOC9ainynSrQWiPZxnortBSHQvRtJoXz7LQpCjd3M+ye/KymfgLmc4EJeh2XCmLTv7sCAmczKH9xO6EESx5QQPcX+Pi7PAwsZHkIVs9jytyNBNZzT7htfvXU2mXGVhPDPF8lK3ulnVkvhUwo1A5ir4EXEtkyels3vUl6KvXxEcvwIm2MDJFYwcUTqh/UucspnoQEOV8WVWhuFYFSq2XCUiFEB4+Ab3cFD3LxCQ4ykD/RpE+H12AZCxjEr7u/lzXFuPUI8Zv0e3N5tAI592Tt8HieDU7Kvn4pctbe3RetR/iBRoUwm+WRjHjjpFa08O/i2TIZv7u00nzoQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cOkwV9kqyN08qwK1NmwlE/kmA1LrE5vAxbf45V3rJbU=;
- b=oRgVV+HDbkWsmdM/NCIX14g0sj7/IHgOUpcV3ziyxhzl7Gd9U6OrO+hsNKg1+9hy5LFfkCdBPZ67Gvymn2hvh0EzIWmwXrCGTGCBKlXzcua2sNyEM6w6d04IriWe5nKG8hbefsrZXYHtfl+nck4edJFi/egB74dCn39TyjYaAlQT5uc3NlHVNJY8OU7o92ZDnbztY0QqnurGr2ImA4x5GETYQOsOk+i8iBEMYO2ycotIs7s6a2T4+epsSq3dofegTAZpSmjSlWo9yQ7cTq2AF75IrKWjRMvAxpe2iczboLVN5wyQgvGjq2ox9eG5EPbYxxMX81tkmyq68p0VkxAEGg==
+ bh=ufcarBGag7Sjp5Mq5hX2uNHVicBXg/LdEy+UArhzb+Q=;
+ b=A0ZPOADVVWV+Uj0/W8XGR394r9l5spc0nvzBnJvU0/rTEDb6RY8kZCTqRuBygUm03fprvI9YUgzPZSqNagCDc+RUmdqhN5fGnTrQjiBIWvB/iSZEi9cZNa0Wo+8mJ0cCs/gG2FQ7dICg5b0HcPS/TXK+Oul2GPKEgXO+M9AgitIDNtj+krmSsZ/d16skFak7nXurOhCJV2OykyOc5O43pjwcbIGL0mGuIPyxH7Fh3saJ2ELcsTlsC9i+mJQF5CBt5B9t9dRRTbxRDywZI2QkUHhz2fNRvEnMnX7d3RBnwoXQjwgTdZ4+zhrHBk6KPPfcFnXVslNmWK5xJfg/uCzk/w==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
  dkim=pass header.d=oracle.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
  d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cOkwV9kqyN08qwK1NmwlE/kmA1LrE5vAxbf45V3rJbU=;
- b=tjvCr9fEZnS/1sygRCnSm5Q2dXA7fAn8eTEtv5NpIiQ6sP2WsjoRLTtl1Z8622ok/gg2EPDiZ56/V2lbBNjHiKgjEsauVAX7RlT/FjXK+64C4N6hsxUAM+k9NP1EKmHYkVkYTH8WDGFNWmhbaiWPaHdLUdqB+5PpwCiQeDtoIs0=
+ bh=ufcarBGag7Sjp5Mq5hX2uNHVicBXg/LdEy+UArhzb+Q=;
+ b=SuQhKsBZuPC3v2+9NTZ3wq0i3I8MSiWjwvz1ZyiiwHaXki6ngpjRZXZixVoFMMxGo7dPX/PYBT1Mt+IFEMuaxqcskcFwb4xhYy3KAWa+xsYaoLVcsDiiDtHDgTrC9Xu95xQBHdW8C8/ibsPNos9Abpi3nPaCoF7GwaiyZTzlIDU=
 Authentication-Results: lists.freedesktop.org; dkim=none (message not signed)
  header.d=none;lists.freedesktop.org; dmarc=none action=none
  header.from=oracle.com;
@@ -64,11 +64,11 @@ Received: from BYAPR10MB2663.namprd10.prod.outlook.com (2603:10b6:a02:a9::20)
  by SJ0PR10MB4784.namprd10.prod.outlook.com (2603:10b6:a03:2d4::22) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3805.19; Wed, 3 Feb
- 2021 23:37:42 +0000
+ 2021 23:38:05 +0000
 Received: from BYAPR10MB2663.namprd10.prod.outlook.com
  ([fe80::b52e:bdd3:d193:4d14]) by BYAPR10MB2663.namprd10.prod.outlook.com
  ([fe80::b52e:bdd3:d193:4d14%7]) with mapi id 15.20.3805.026; Wed, 3 Feb 2021
- 23:37:42 +0000
+ 23:38:05 +0000
 From:   Dongli Zhang <dongli.zhang@oracle.com>
 To:     dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
         iommu@lists.linux-foundation.org, linux-mips@vger.kernel.org,
@@ -89,9 +89,9 @@ Cc:     linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
         bauerman@linux.ibm.com, tsbogend@alpha.franken.de,
         tglx@linutronix.de, ulf.hansson@linaro.org, joe.jin@oracle.com,
         thomas.lendacky@amd.com
-Subject: [PATCH RFC v1 1/6] swiotlb: define new enumerated type
-Date:   Wed,  3 Feb 2021 15:37:04 -0800
-Message-Id: <20210203233709.19819-2-dongli.zhang@oracle.com>
+Subject: [PATCH RFC v1 5/6] xen-swiotlb: convert variables to arrays
+Date:   Wed,  3 Feb 2021 15:37:08 -0800
+Message-Id: <20210203233709.19819-6-dongli.zhang@oracle.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210203233709.19819-1-dongli.zhang@oracle.com>
 References: <20210203233709.19819-1-dongli.zhang@oracle.com>
@@ -102,92 +102,271 @@ X-ClientProxiedBy: CH0PR03CA0008.namprd03.prod.outlook.com
  (2603:10b6:a02:a9::20)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from localhost.localdomain (138.3.200.16) by CH0PR03CA0008.namprd03.prod.outlook.com (2603:10b6:610:b0::13) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3825.17 via Frontend Transport; Wed, 3 Feb 2021 23:37:36 +0000
+Received: from localhost.localdomain (138.3.200.16) by CH0PR03CA0008.namprd03.prod.outlook.com (2603:10b6:610:b0::13) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3825.17 via Frontend Transport; Wed, 3 Feb 2021 23:37:59 +0000
 X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 95a27da3-82a5-4fa4-cf2a-08d8c89cb345
+X-MS-Office365-Filtering-Correlation-Id: 55a79f1c-f122-4636-8dd4-08d8c89cc12c
 X-MS-TrafficTypeDiagnostic: SJ0PR10MB4784:
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <SJ0PR10MB47847DD3B5C66C7017909B5FF0B49@SJ0PR10MB4784.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:2657;
+X-Microsoft-Antispam-PRVS: <SJ0PR10MB47849DB7651ADA2BD0D3E36EF0B49@SJ0PR10MB4784.namprd10.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:173;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: kyMvFO94V89ozWj18bC0Vn9q8FAfrj1y9eDdojT3KXhZ3Kb6y0lMwkIUajPU89ixDjx/OGTr/llm3guooQuOtVd+PpQ9YQUQhSfr0VFSEaouKp9j6rQxBc2TDkU3n5TWws0P+gsQ9ClTDsY9obcuVuIpjWx8canMnExyJCp5opcTw4kGqQW+2+W11CZ3GfQA/4/tYYsbBhNweERyMTssLgeMrtTCtHAaB7mU9lopLRJxj2jUoeCAvT2jIcoEdnUPcQsrrvYmOO0jFqky9d3sZhy1e0161Va50YgEy72BmrZriZB7Fl1RBIJTb13rVgOZCbpYnWmPSfKYKtobkI66O/AUHyUDOyZMTNQBR2Mv1wasGM4dt/FVklQoggzHlBFeKpjEo6m1rahep0DWs5s3iFzqE5GbyMkd7KlvzTs1OY1vFoh+bHjv8LoQzMG7W+6nLoal5vB2LR6vIuK2+agcXr4rLiYxXl+a+AkvVQmNmsI6626FXj3SqSvLeM8oEJiQZCJ4U1Q6g3nnWr4d83pSjBwkmZVCAyR8hTQR7DHXcHQnZGjwHSyBmM0W44hGWgRhS7GVj+ds0MKOwrTfTcagGfrroQKUBZjTQBUCad4qCbc=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR10MB2663.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(136003)(366004)(39860400002)(396003)(376002)(346002)(83380400001)(6666004)(316002)(5660300002)(956004)(66946007)(6506007)(86362001)(7406005)(4744005)(1076003)(66476007)(8676002)(186003)(26005)(36756003)(7416002)(478600001)(2906002)(66556008)(8936002)(6486002)(16526019)(69590400011)(4326008)(6512007)(44832011)(921005)(2616005)(52116002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?qeAfDC+0fc/jTywdxpwqkCaMRYdTCNWdYfhK/QFffR8uC9UvZ9YkUddjJqj8?=
- =?us-ascii?Q?LMepJPhT0a36sLGoYCc8pE42XpdTs25YEvJgJbE+r15lAPOhZ2uG8YaqDpie?=
- =?us-ascii?Q?YBy4aMhXnck5XH46LZbJJ5Bc6YzUGPA/RpT5PCmWbcQzB8peKv+pFSlMP+73?=
- =?us-ascii?Q?gIpYKWEVF/EtR6TOku8PeSlGV2dRHpAnvJ67O+hahgMBD7bgCaFV694aTg4w?=
- =?us-ascii?Q?KSujev4hlObPNbItkXf5I4GifCbVNuALJHlzJ8DOx3jIyR3vPyw0wng4LXc+?=
- =?us-ascii?Q?+9ix1gN2MitGR30SK1CJCpvNbznMmFVfpzPTnriq0kYWtNemlOD6oInjEJhz?=
- =?us-ascii?Q?lX/MAKiyokUXQ0qit/KLj+zLzuAH3F6pVaMRrXRn4VjzBw0wtn318NY07ege?=
- =?us-ascii?Q?hHXyWnZhyM9l0kHMf/ze9KlQNE6Sdg2p3vYo/Hq92jn1rRbO59GTtLfvxPn5?=
- =?us-ascii?Q?QxqO6FkLHZ/88+48rGj194umjw35pFBKx4rrKzuzS4pWSvhkdzyrhRnTCVdM?=
- =?us-ascii?Q?I7qC6QKCOzWDkQEVzuMBoOZzNkUwie7LrRumo3wMlr/8czcevewuo2IXNIzg?=
- =?us-ascii?Q?D7TJxw98KoyA2iOs/gldXx3CPC4SiFaEvp6dq7I4fh8GdU0qF1MVOiPdvsoT?=
- =?us-ascii?Q?rQQ5UWwcFD6h++pJRtaYAs0C+nUc9goj4CFBgjdYM+L4Dlgz5tEzQlMNUsnq?=
- =?us-ascii?Q?XSXVhlVhkhC9yEZcOc5IrfZuT2dzHSy7+Qbe5nInBellfHBl+CWcEpWn/jjl?=
- =?us-ascii?Q?wX9HL0m1ighHydAXVY+AV2URNDoOpHzWjwqPs8PpDN+JOoS9P98XRkJjFge+?=
- =?us-ascii?Q?4Yje34H5B0XWticmtwtHcMefFIsWWY2QXorWYako3rd0RzGNYZyuYX2uCp8i?=
- =?us-ascii?Q?sVTcOvSqj/a8gFakwJ+4nV154Vi4eug2Wo+C5oGTWB4Hswx1HebZVaMqKvKR?=
- =?us-ascii?Q?GbCdRkVX22oK6iyaAiiYpf5nB1Ep2AUAYg+Qx7ut96diFZLdXYFfNfoFZwVG?=
- =?us-ascii?Q?ussF8YCLj236NHMPrisyvb5av6Siy21oV3RqJshiJW95ZfJqpRrmbUTOdTCn?=
- =?us-ascii?Q?J9a7MZ47?=
+X-Microsoft-Antispam-Message-Info: w77riGtFxYZxbwSzlnLDDwaRSpIhQOZiCo7C6NAvJRIvk6fyvrnj5N07AptsCQM8Ls9ytt1iCLVQDJZYrEFBvlTjOhbcE9YJtxeD1SD4ad6x9UmE3mT0P2uDXh8kPTr3JlWDod/q2PNM7LqKgCTowQDE8jXR2bOUVt4ix3LvHciJZ4Xcq7H2GXDhKzdwXTKGu5Mgc/3Qev9FMhOZQ9g17mKuf9xfaYHfo6Dx/rzxrLP/DVQdxytqGBIVhk2jo8iq4rZtbHv6iYSfNqY00vHZ5r8pP9r/N/sEP6WDw/6JBKAm61IGhvf3fQ4beQAIaqw1aErcezXYVibpPmEofuXM6cDBnRgIULXs8zoronpTqW1+mLoTnkuCPvTmeSFbnUNJrCY5zMjfLQ0N8HxWz9APVN7Nik94Ev2ddkvwXkbddkqR7lfedjlniJnS/LArFITW5iqTd/xi5Rd/D2U5fDK3tMSSEh3gesvmGePlvsfgi7IXv3dlgzrdtausINCULlW0JpnJJvTOLkHQAU9XC0cmLmrBmfA2STeUzp5HCTZj+w5DWGhq4YRjzIAX8fbqqj3pDjD9QI5Ij9O9xtbwOV6yI4oi1pFIVamN9ei02syvNXM=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR10MB2663.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(136003)(366004)(39860400002)(396003)(376002)(346002)(83380400001)(6666004)(316002)(5660300002)(956004)(66946007)(6506007)(86362001)(7406005)(1076003)(66476007)(8676002)(186003)(26005)(36756003)(7416002)(478600001)(2906002)(66556008)(8936002)(6486002)(16526019)(69590400011)(4326008)(6512007)(44832011)(921005)(2616005)(52116002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?JOaqLB/L6hqA4VUE0kNmiLvAjzCeznvsu3Cr6DfHJWdEzSttbELTyL58Z9LL?=
+ =?us-ascii?Q?ahqD02oPjGOF/MLn+QNete/4x2BQJuL4BmpjZaT5x3TRnVBy3Wlh9xgE8fsV?=
+ =?us-ascii?Q?VVNkDHHxkITVzis4PdWG8B7PXb6R3xPxM0QnENF0AWmWS0HLV//9XazhbpcK?=
+ =?us-ascii?Q?XmpD7trzVCKsUv/WpjcjAGMVXKneA5Yx9kIDfqSh2UhvuP/rH/n+QP8S4tap?=
+ =?us-ascii?Q?ug1ebPrVG9itaWj+Eo7WgCgjWKxoSAvVt+KOeHIWfRLUqo/YZv/PNnGFKZ+y?=
+ =?us-ascii?Q?NRYwucUzawHwv9EQHRyZFuai97VEQVwIwWJ2DLh++ktFL0aowH4Gvmdd8Z90?=
+ =?us-ascii?Q?ZfR5Q7VdIg8DkVImvEfkossqIUJsaLEFQDuZd8Nz+NKlaD0i9iv7xZ94+Hj9?=
+ =?us-ascii?Q?Ief7D+OF+3JggwgSKfljSwLBJL/KWwEDLU2o0d4d7quP9dsYji4Rn3zSQXCX?=
+ =?us-ascii?Q?YHnRjGhSYQlYYS/8C26DWtMF625wdFu5CBgdLqNzwb+3zPvxYRevw5JfCUgW?=
+ =?us-ascii?Q?WFrWq3wn6Q7MAEKly0t06OpKuQ0D+oCxW4p+ne5TOvvdBZtPbsP4j2KQc6L4?=
+ =?us-ascii?Q?pTDqTV9cebXeNKgw6DSqPvEugv2EDgIyLGfD9/zqWV/bhTwdKCyRNx9bhc2E?=
+ =?us-ascii?Q?1OTjvA+ijbnKDcbZyG8qz24UhYVmZ3I9zq5gwD9KSfRvOIYTra0O5OBpz0j4?=
+ =?us-ascii?Q?UQmsYodAQ6aGaxH1t8bAK5xJpBz5YosKCtXuFLJ3woygzLUCpZP18fLGTX0k?=
+ =?us-ascii?Q?Z5i4YGVXoEOHmO6CegU0vYFLYpo8Q7bhGQZZkC/3xIO/eJ3swYnN35uaLnrh?=
+ =?us-ascii?Q?LkALh+TdMNC8nTUvCIKwfWipsx0goweO3wb6MA7OD16mRv9YAvLKVcGdEWhn?=
+ =?us-ascii?Q?29dEIbdkSRoPkfangpUGDOiCXyr1ikK8v7DWDY+Fqy6sP0ws4RBvDBzPZAdK?=
+ =?us-ascii?Q?5pnYA67j39+xPNsLLKTIWA534gYGFUyyumFunSj+nTgjPmhYRHfKLKuwGfQW?=
+ =?us-ascii?Q?CFj1qI/H08Qh4n7CyGJB+7XEsrHq52oARzMGKYALm/GGwT1TOFAH/QKk8Ixg?=
+ =?us-ascii?Q?czp2pmvr?=
 X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 95a27da3-82a5-4fa4-cf2a-08d8c89cb345
+X-MS-Exchange-CrossTenant-Network-Message-Id: 55a79f1c-f122-4636-8dd4-08d8c89cc12c
 X-MS-Exchange-CrossTenant-AuthSource: BYAPR10MB2663.namprd10.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Feb 2021 23:37:42.3473
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Feb 2021 23:38:05.6010
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: Zk+fQUFRjPWPo8X09lgguRz1ZQvV/Q3+611J76qZ14X/Exg/9tU5P18MdXg55YsgQonrvMBApO+7wQjpLqZc+A==
+X-MS-Exchange-CrossTenant-UserPrincipalName: jUSQZrsRsfIIenrB0i+mXbNWLbyi4KAfiByVhFlKYSye86P0YY8sKEgjzQs4qhhWqfZ1mhwlltkYXlrN55IWjg==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR10MB4784
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9884 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 mlxlogscore=999 phishscore=0
- spamscore=0 suspectscore=0 malwarescore=0 adultscore=0 bulkscore=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 spamscore=0 phishscore=0
+ suspectscore=0 mlxlogscore=999 bulkscore=0 mlxscore=0 malwarescore=0
  classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2009150000
  definitions=main-2102030143
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9884 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 bulkscore=0 adultscore=0
- priorityscore=1501 impostorscore=0 malwarescore=0 clxscore=1015
- spamscore=0 lowpriorityscore=0 phishscore=0 mlxlogscore=999 mlxscore=0
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1015 impostorscore=0
+ mlxscore=0 spamscore=0 bulkscore=0 priorityscore=1501 adultscore=0
+ lowpriorityscore=0 malwarescore=0 phishscore=0 mlxlogscore=999
  suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2009150000 definitions=main-2102030143
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This is just to define new enumerated type without functional change.
+This patch converts several xen-swiotlb related variables to arrays, in
+order to maintain stat/status for different swiotlb buffers. Here are
+variables involved:
 
-The 'SWIOTLB_LO' is to index legacy 32-bit swiotlb buffer, while the
-'SWIOTLB_HI' is to index the 64-bit buffer.
+- xen_io_tlb_start and xen_io_tlb_end
+- xen_io_tlb_nslabs
+- MAX_DMA_BITS
 
-This is to prepare to enable 64-bit swiotlb.
+There is no functional change and this is to prepare to enable 64-bit
+xen-swiotlb.
 
 Cc: Joe Jin <joe.jin@oracle.com>
 Signed-off-by: Dongli Zhang <dongli.zhang@oracle.com>
 ---
- include/linux/swiotlb.h | 6 ++++++
- 1 file changed, 6 insertions(+)
+ drivers/xen/swiotlb-xen.c | 75 +++++++++++++++++++++------------------
+ 1 file changed, 40 insertions(+), 35 deletions(-)
 
-diff --git a/include/linux/swiotlb.h b/include/linux/swiotlb.h
-index d9c9fc9ca5d2..ca125c1b1281 100644
---- a/include/linux/swiotlb.h
-+++ b/include/linux/swiotlb.h
-@@ -17,6 +17,12 @@ enum swiotlb_force {
- 	SWIOTLB_NO_FORCE,	/* swiotlb=noforce */
- };
+diff --git a/drivers/xen/swiotlb-xen.c b/drivers/xen/swiotlb-xen.c
+index 662638093542..e18cae693cdc 100644
+--- a/drivers/xen/swiotlb-xen.c
++++ b/drivers/xen/swiotlb-xen.c
+@@ -39,15 +39,17 @@
+ #include <asm/xen/page-coherent.h>
  
-+enum swiotlb_t {
-+	SWIOTLB_LO,
-+	SWIOTLB_HI,
-+	SWIOTLB_MAX,
-+};
+ #include <trace/events/swiotlb.h>
+-#define MAX_DMA_BITS 32
+ /*
+  * Used to do a quick range check in swiotlb_tbl_unmap_single and
+  * swiotlb_tbl_sync_single_*, to see if the memory was in fact allocated by this
+  * API.
+  */
+ 
+-static char *xen_io_tlb_start, *xen_io_tlb_end;
+-static unsigned long xen_io_tlb_nslabs;
++static char *xen_io_tlb_start[SWIOTLB_MAX], *xen_io_tlb_end[SWIOTLB_MAX];
++static unsigned long xen_io_tlb_nslabs[SWIOTLB_MAX];
++
++static int max_dma_bits[] = {32, 64};
 +
  /*
-  * Maximum allowable number of contiguous slabs to map,
-  * must be a power of 2.  What is the appropriate value ?
+  * Quick lookup value of the bus address of the IOTLB.
+  */
+@@ -112,8 +114,8 @@ static int is_xen_swiotlb_buffer(struct device *dev, dma_addr_t dma_addr)
+ 	 * in our domain. Therefore _only_ check address within our domain.
+ 	 */
+ 	if (pfn_valid(PFN_DOWN(paddr))) {
+-		return paddr >= virt_to_phys(xen_io_tlb_start) &&
+-		       paddr < virt_to_phys(xen_io_tlb_end);
++		return paddr >= virt_to_phys(xen_io_tlb_start[SWIOTLB_LO]) &&
++		       paddr < virt_to_phys(xen_io_tlb_end[SWIOTLB_LO]);
+ 	}
+ 	return 0;
+ }
+@@ -137,7 +139,7 @@ xen_swiotlb_fixup(void *buf, size_t size, unsigned long nslabs)
+ 				p + (i << IO_TLB_SHIFT),
+ 				get_order(slabs << IO_TLB_SHIFT),
+ 				dma_bits, &dma_handle);
+-		} while (rc && dma_bits++ < MAX_DMA_BITS);
++		} while (rc && dma_bits++ < max_dma_bits[SWIOTLB_LO]);
+ 		if (rc)
+ 			return rc;
+ 
+@@ -148,12 +150,13 @@ xen_swiotlb_fixup(void *buf, size_t size, unsigned long nslabs)
+ static unsigned long xen_set_nslabs(unsigned long nr_tbl)
+ {
+ 	if (!nr_tbl) {
+-		xen_io_tlb_nslabs = (64 * 1024 * 1024 >> IO_TLB_SHIFT);
+-		xen_io_tlb_nslabs = ALIGN(xen_io_tlb_nslabs, IO_TLB_SEGSIZE);
++		xen_io_tlb_nslabs[SWIOTLB_LO] = (64 * 1024 * 1024 >> IO_TLB_SHIFT);
++		xen_io_tlb_nslabs[SWIOTLB_LO] = ALIGN(xen_io_tlb_nslabs[SWIOTLB_LO],
++						      IO_TLB_SEGSIZE);
+ 	} else
+-		xen_io_tlb_nslabs = nr_tbl;
++		xen_io_tlb_nslabs[SWIOTLB_LO] = nr_tbl;
+ 
+-	return xen_io_tlb_nslabs << IO_TLB_SHIFT;
++	return xen_io_tlb_nslabs[SWIOTLB_LO] << IO_TLB_SHIFT;
+ }
+ 
+ enum xen_swiotlb_err {
+@@ -184,16 +187,16 @@ int __ref xen_swiotlb_init(int verbose, bool early)
+ 	enum xen_swiotlb_err m_ret = XEN_SWIOTLB_UNKNOWN;
+ 	unsigned int repeat = 3;
+ 
+-	xen_io_tlb_nslabs = swiotlb_nr_tbl(SWIOTLB_LO);
++	xen_io_tlb_nslabs[SWIOTLB_LO] = swiotlb_nr_tbl(SWIOTLB_LO);
+ retry:
+-	bytes = xen_set_nslabs(xen_io_tlb_nslabs);
+-	order = get_order(xen_io_tlb_nslabs << IO_TLB_SHIFT);
++	bytes = xen_set_nslabs(xen_io_tlb_nslabs[SWIOTLB_LO]);
++	order = get_order(xen_io_tlb_nslabs[SWIOTLB_LO] << IO_TLB_SHIFT);
+ 
+ 	/*
+ 	 * IO TLB memory already allocated. Just use it.
+ 	 */
+ 	if (io_tlb_start[SWIOTLB_LO] != 0) {
+-		xen_io_tlb_start = phys_to_virt(io_tlb_start[SWIOTLB_LO]);
++		xen_io_tlb_start[SWIOTLB_LO] = phys_to_virt(io_tlb_start[SWIOTLB_LO]);
+ 		goto end;
+ 	}
+ 
+@@ -201,76 +204,78 @@ int __ref xen_swiotlb_init(int verbose, bool early)
+ 	 * Get IO TLB memory from any location.
+ 	 */
+ 	if (early) {
+-		xen_io_tlb_start = memblock_alloc(PAGE_ALIGN(bytes),
++		xen_io_tlb_start[SWIOTLB_LO] = memblock_alloc(PAGE_ALIGN(bytes),
+ 						  PAGE_SIZE);
+-		if (!xen_io_tlb_start)
++		if (!xen_io_tlb_start[SWIOTLB_LO])
+ 			panic("%s: Failed to allocate %lu bytes align=0x%lx\n",
+ 			      __func__, PAGE_ALIGN(bytes), PAGE_SIZE);
+ 	} else {
+ #define SLABS_PER_PAGE (1 << (PAGE_SHIFT - IO_TLB_SHIFT))
+ #define IO_TLB_MIN_SLABS ((1<<20) >> IO_TLB_SHIFT)
+ 		while ((SLABS_PER_PAGE << order) > IO_TLB_MIN_SLABS) {
+-			xen_io_tlb_start = (void *)xen_get_swiotlb_free_pages(order);
+-			if (xen_io_tlb_start)
++			xen_io_tlb_start[SWIOTLB_LO] = (void *)xen_get_swiotlb_free_pages(order);
++			if (xen_io_tlb_start[SWIOTLB_LO])
+ 				break;
+ 			order--;
+ 		}
+ 		if (order != get_order(bytes)) {
+ 			pr_warn("Warning: only able to allocate %ld MB for software IO TLB\n",
+ 				(PAGE_SIZE << order) >> 20);
+-			xen_io_tlb_nslabs = SLABS_PER_PAGE << order;
+-			bytes = xen_io_tlb_nslabs << IO_TLB_SHIFT;
++			xen_io_tlb_nslabs[SWIOTLB_LO] = SLABS_PER_PAGE << order;
++			bytes = xen_io_tlb_nslabs[SWIOTLB_LO] << IO_TLB_SHIFT;
+ 		}
+ 	}
+-	if (!xen_io_tlb_start) {
++	if (!xen_io_tlb_start[SWIOTLB_LO]) {
+ 		m_ret = XEN_SWIOTLB_ENOMEM;
+ 		goto error;
+ 	}
+ 	/*
+ 	 * And replace that memory with pages under 4GB.
+ 	 */
+-	rc = xen_swiotlb_fixup(xen_io_tlb_start,
++	rc = xen_swiotlb_fixup(xen_io_tlb_start[SWIOTLB_LO],
+ 			       bytes,
+-			       xen_io_tlb_nslabs);
++			       xen_io_tlb_nslabs[SWIOTLB_LO]);
+ 	if (rc) {
+ 		if (early)
+-			memblock_free(__pa(xen_io_tlb_start),
++			memblock_free(__pa(xen_io_tlb_start[SWIOTLB_LO]),
+ 				      PAGE_ALIGN(bytes));
+ 		else {
+-			free_pages((unsigned long)xen_io_tlb_start, order);
+-			xen_io_tlb_start = NULL;
++			free_pages((unsigned long)xen_io_tlb_start[SWIOTLB_LO], order);
++			xen_io_tlb_start[SWIOTLB_LO] = NULL;
+ 		}
+ 		m_ret = XEN_SWIOTLB_EFIXUP;
+ 		goto error;
+ 	}
+ 	if (early) {
+-		if (swiotlb_init_with_tbl(xen_io_tlb_start, xen_io_tlb_nslabs,
++		if (swiotlb_init_with_tbl(xen_io_tlb_start[SWIOTLB_LO],
++					  xen_io_tlb_nslabs[SWIOTLB_LO],
+ 					  SWIOTLB_LO, verbose))
+ 			panic("Cannot allocate SWIOTLB buffer");
+ 		rc = 0;
+ 	} else
+-		rc = swiotlb_late_init_with_tbl(xen_io_tlb_start,
+-						xen_io_tlb_nslabs, SWIOTLB_LO);
++		rc = swiotlb_late_init_with_tbl(xen_io_tlb_start[SWIOTLB_LO],
++						xen_io_tlb_nslabs[SWIOTLB_LO],
++						SWIOTLB_LO);
+ 
+ end:
+-	xen_io_tlb_end = xen_io_tlb_start + bytes;
++	xen_io_tlb_end[SWIOTLB_LO] = xen_io_tlb_start[SWIOTLB_LO] + bytes;
+ 	if (!rc)
+ 		swiotlb_set_max_segment(PAGE_SIZE, SWIOTLB_LO);
+ 
+ 	return rc;
+ error:
+ 	if (repeat--) {
+-		xen_io_tlb_nslabs = max(1024UL, /* Min is 2MB */
+-					(xen_io_tlb_nslabs >> 1));
++		xen_io_tlb_nslabs[SWIOTLB_LO] = max(1024UL, /* Min is 2MB */
++					(xen_io_tlb_nslabs[SWIOTLB_LO] >> 1));
+ 		pr_info("Lowering to %luMB\n",
+-			(xen_io_tlb_nslabs << IO_TLB_SHIFT) >> 20);
++			(xen_io_tlb_nslabs[SWIOTLB_LO] << IO_TLB_SHIFT) >> 20);
+ 		goto retry;
+ 	}
+ 	pr_err("%s (rc:%d)\n", xen_swiotlb_error(m_ret), rc);
+ 	if (early)
+ 		panic("%s (rc:%d)", xen_swiotlb_error(m_ret), rc);
+ 	else
+-		free_pages((unsigned long)xen_io_tlb_start, order);
++		free_pages((unsigned long)xen_io_tlb_start[SWIOTLB_LO], order);
+ 	return rc;
+ }
+ 
+@@ -561,7 +566,7 @@ xen_swiotlb_sync_sg_for_device(struct device *dev, struct scatterlist *sgl,
+ static int
+ xen_swiotlb_dma_supported(struct device *hwdev, u64 mask)
+ {
+-	return xen_virt_to_bus(hwdev, xen_io_tlb_end - 1) <= mask;
++	return xen_virt_to_bus(hwdev, xen_io_tlb_end[SWIOTLB_LO] - 1) <= mask;
+ }
+ 
+ const struct dma_map_ops xen_swiotlb_dma_ops = {
 -- 
 2.17.1
 
