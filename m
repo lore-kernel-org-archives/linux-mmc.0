@@ -7,54 +7,54 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6753BC433DB
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:21:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 817D1C43381
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:22:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3784B64E31
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:21:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5B3A264DDA
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:22:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237246AbhBDPVZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Feb 2021 10:21:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36924 "EHLO
+        id S237277AbhBDPWX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Feb 2021 10:22:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36938 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237196AbhBDPVA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:21:00 -0500
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5393C06178C;
-        Thu,  4 Feb 2021 07:19:15 -0800 (PST)
-Received: by mail-ed1-x530.google.com with SMTP id c6so4637393ede.0;
-        Thu, 04 Feb 2021 07:19:15 -0800 (PST)
+        with ESMTP id S237232AbhBDPVD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:21:03 -0500
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20960C061797;
+        Thu,  4 Feb 2021 07:19:20 -0800 (PST)
+Received: by mail-ej1-x62e.google.com with SMTP id w2so5853182ejk.13;
+        Thu, 04 Feb 2021 07:19:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=sender:from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=LhxDawnboy/GOphLJPpwmu1nF8PhAWga8yWTDRyj8XA=;
-        b=HHM0tu+en/eiYDTTVtlaIPgY73OWrtR8jXN3A7v8VdCMFu1WCO03MK1uu37ltdUyrA
-         baMzWM5FUOYzCHmVv1foThsw0iwyok9Di2vg8TVPZCSoYgIZ/OOfY4v/goTOE4Uwyowt
-         1/H6erNXJWEtOO51eDB/c5tk8X71qffK22OUmXK6QpB06rQZaRPWikOqL7+GfFrb2kTw
-         0DJAtUb2WywdQwU6wsik3h4AGOQsCgMXUGK0a/W9woFfU3o81A7ZA6pFdC0B4vo6yRnR
-         rSd5+O35CW3dhOpbtztWWKHdc7kPaqFC1MgvlOrF6Yut0roaByCX79cLY6SPZ/Z63tsr
-         26mQ==
+        bh=N2WmQEa3BjX3ncRzYIQrV88zAWNTStgvbrnt2gC25ds=;
+        b=pLrqpZXobX/BN7V31Gin+rlULIYKilZRzPSg2xhaB7QQRja338SqRQYtB6sGduQR6t
+         SpkFueZqQlQUV7s0D3t+VDoe2OSx3ZQ0jF8NNjnVGSKhdjjt3tv39fLJ6FokgRPf6MDH
+         HIYJ4A1t11mjke3xCrDwNitdGe8s5t7C0rF+tmMcLoAFmsI0NHv3u1paYz6DizW7Dcee
+         qJoPTnP501IOro5fX5d8YLp6cRf4/vCXxKn13ukVgCE97I6qboXn70vSgi53QRPGiG2P
+         N3+dVCm3EcSc/1p1hABKXa0ZdSbboQHX9IAigI+SaCiwDVU4Pn7GcYbT3dGKlebfQsU7
+         Jk3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:from:to:cc:subject:date:message-id
          :in-reply-to:references:mime-version:content-transfer-encoding;
-        bh=LhxDawnboy/GOphLJPpwmu1nF8PhAWga8yWTDRyj8XA=;
-        b=V5Cpn8w4a2yL+WYvsqhwQ4GQe+uQk5ovqTr7qpB9I8rKEcL6l3y8wjUYDlfyg+6rjz
-         46t0ZmZEwmurc1OFohLmXZWW+dEYdm2ax3rC8HSLzEnsSlupBalkij09ZF15Nd7pxhq+
-         LLsmu9O0eUA++kxpDGS4j/1I0j3ZmUyKS30VXYZL+EKwPhSweuB01CpCCWz8YoXSMmWA
-         hcKbwu/i6KUSDBvJ05IhxvWJDzeJ8dyIXAWNOamvZ9ZLH1CR22zvFypd8IaQsXBarCHW
-         cqxygr/06OTObHkmICDSVY6xN/bh1bZRY1LbcmdXG8aA+GnD+w1HMG7Mva3Qe1yDldhY
-         F3+w==
-X-Gm-Message-State: AOAM533aVo3ivKn/cP+izMUthOoQM7zpKskwTuL0ZNydudhYRQzQBL/L
-        1xnaKDhi0haa6qCyCRfCBSUjCjwZc74J81BJ
-X-Google-Smtp-Source: ABdhPJwKity2jdws4yrIx+7J7mgQzjqxjDjle4kCJ+oulDjfv3k5nDcDMydPchdLcweT589z7HQq1Q==
-X-Received: by 2002:a05:6402:1484:: with SMTP id e4mr1079509edv.104.1612451954704;
-        Thu, 04 Feb 2021 07:19:14 -0800 (PST)
+        bh=N2WmQEa3BjX3ncRzYIQrV88zAWNTStgvbrnt2gC25ds=;
+        b=GT6wxKKAUTT7B1HpFmRqa4qQkaNY/aatj0nixyL/E9yeUIGaZ8iYCy2lrta7lM97aK
+         8cN8cqDf9rBx4FsMX8sxXZAZ6usnLCtU9SktG0AnqDj42+0E3ETTASbQ55ab6NXCliKP
+         nkfjrPxnDO3S+o4gyBDxWm8H8BsTY2Mmq80viwfEEuMeJ+9NI7fwInnjwSAKY0dUpLHj
+         vR6thRO+jqjIYg6zwwhs1ElWsge2F6nWrPg3H4AYC9l4DzNdfCJukiQ5KWjvQUY6yez4
+         N1pAeFmTyShJsaujGKKeb1r25wjQjFqvz+G5HeNuluXqVfCV38Iv1SpwAVAGBFUmw+Jq
+         s87g==
+X-Gm-Message-State: AOAM531MCXLY4vnGMgnHjt1wL/QHcVWaqG42rVc1Xuiw0jUOSdVCFskO
+        QAVHuVi57YKeXAFik1j4J6IPid5lqC+GjyCE
+X-Google-Smtp-Source: ABdhPJwiILFpv5ahW61oLwlmasbtA/F6ia/OU2V3dbtBa3foPSZ6iMEwvO2Wb0/LY/T3k2+HMO4nDw==
+X-Received: by 2002:a17:906:43d7:: with SMTP id j23mr4464993ejn.519.1612451958882;
+        Thu, 04 Feb 2021 07:19:18 -0800 (PST)
 Received: from stitch.. ([80.71.140.73])
-        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.13
+        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Feb 2021 07:19:14 -0800 (PST)
+        Thu, 04 Feb 2021 07:19:18 -0800 (PST)
 Sender: Emil Renner Berthing <emil.renner.berthing@gmail.com>
 From:   Emil Renner Berthing <kernel@esmil.dk>
 To:     linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
@@ -71,9 +71,9 @@ Cc:     Emil Renner Berthing <kernel@esmil.dk>,
         Harald Welte <HaraldWelte@viatech.com>,
         Pierre Ossman <pierre@ossman.eu>,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 5/9] mmc: s3cmci: Use new tasklet API
-Date:   Thu,  4 Feb 2021 16:18:43 +0100
-Message-Id: <20210204151847.91353-6-kernel@esmil.dk>
+Subject: [PATCH 8/9] mmc: via-sdmmc: Use new tasklet API
+Date:   Thu,  4 Feb 2021 16:18:46 +0100
+Message-Id: <20210204151847.91353-9-kernel@esmil.dk>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210204151847.91353-1-kernel@esmil.dk>
 References: <20210204151847.91353-1-kernel@esmil.dk>
@@ -88,34 +88,40 @@ commit 12cc923f1ccc ("tasklet: Introduce new initialization API")
 
 Signed-off-by: Emil Renner Berthing <kernel@esmil.dk>
 ---
- drivers/mmc/host/s3cmci.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/mmc/host/via-sdmmc.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mmc/host/s3cmci.c b/drivers/mmc/host/s3cmci.c
-index a33a7823c265..0ca6f6d30b75 100644
---- a/drivers/mmc/host/s3cmci.c
-+++ b/drivers/mmc/host/s3cmci.c
-@@ -540,9 +540,9 @@ static void do_pio_write(struct s3cmci_host *host)
- 	enable_imask(host, S3C2410_SDIIMSK_TXFIFOHALF);
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index 9b755ea0fa03..4f4c0813f9fd 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -959,14 +959,12 @@ static void via_sdc_timeout(struct timer_list *t)
+ 	spin_unlock_irqrestore(&sdhost->lock, flags);
  }
  
--static void pio_tasklet(unsigned long data)
-+static void pio_tasklet(struct tasklet_struct *t)
+-static void via_sdc_tasklet_finish(unsigned long param)
++static void via_sdc_tasklet_finish(struct tasklet_struct *t)
  {
--	struct s3cmci_host *host = (struct s3cmci_host *) data;
-+	struct s3cmci_host *host = from_tasklet(host, t, pio_tasklet);
+-	struct via_crdr_mmc_host *host;
++	struct via_crdr_mmc_host *host = from_tasklet(host, t, finish_tasklet);
+ 	unsigned long flags;
+ 	struct mmc_request *mrq;
  
- 	s3cmci_disable_irq(host, true);
+-	host = (struct via_crdr_mmc_host *)param;
+-
+ 	spin_lock_irqsave(&host->lock, flags);
  
-@@ -1532,7 +1532,7 @@ static int s3cmci_probe(struct platform_device *pdev)
- 	host->pdata = pdev->dev.platform_data;
+ 	del_timer(&host->timer);
+@@ -1050,8 +1048,7 @@ static void via_init_mmc_host(struct via_crdr_mmc_host *host)
  
- 	spin_lock_init(&host->complete_lock);
--	tasklet_init(&host->pio_tasklet, pio_tasklet, (unsigned long) host);
-+	tasklet_setup(&host->pio_tasklet, pio_tasklet);
+ 	INIT_WORK(&host->carddet_work, via_sdc_card_detect);
  
- 	if (host->is2440) {
- 		host->sdiimsk	= S3C2440_SDIIMSK;
+-	tasklet_init(&host->finish_tasklet, via_sdc_tasklet_finish,
+-		     (unsigned long)host);
++	tasklet_setup(&host->finish_tasklet, via_sdc_tasklet_finish);
+ 
+ 	addrbase = host->sdhc_mmiobase;
+ 	writel(0x0, addrbase + VIA_CRDR_SDINTMASK);
 -- 
 2.30.0
 
