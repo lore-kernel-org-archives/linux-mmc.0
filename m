@@ -2,59 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25CF7C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:21:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC659C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:21:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8D2264DDA
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:21:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BA58364E08
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:21:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237165AbhBDPUd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Feb 2021 10:20:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36656 "EHLO
+        id S237243AbhBDPVS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Feb 2021 10:21:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36926 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237018AbhBDPTr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:19:47 -0500
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77A64C0613D6;
-        Thu,  4 Feb 2021 07:19:07 -0800 (PST)
-Received: by mail-ej1-x632.google.com with SMTP id sa23so6008346ejb.0;
-        Thu, 04 Feb 2021 07:19:07 -0800 (PST)
+        with ESMTP id S237111AbhBDPVA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:21:00 -0500
+Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A974C061793;
+        Thu,  4 Feb 2021 07:19:17 -0800 (PST)
+Received: by mail-ed1-x531.google.com with SMTP id l12so4617357edt.3;
+        Thu, 04 Feb 2021 07:19:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=sender:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=f6iWFEAYRCiS0CjNBB4+1Bs58fQyu4Ujqibyp6Xzunk=;
-        b=g8JjPr8Og6MOjlid6yiCVvuvoywGwnt6hVt9ISTETXyI+cqnUNkwfKCWwunTCT9Iy+
-         k5U13HLU7smUIPdEYk6N2bBfLH4CgiHTN+jFupnKsldM+I5QaYaEVHwJjuCzJ/Uap6PI
-         AUp4wtfFJZCndMJC1DOrzn7NElv4g77c0ZuLLyAH8tvNfw184ZUl0ybtfylYbSyVMWBy
-         zb1BSAvAEB6xuRKDftnfiOF4LJ6z03NR7i+vu8dsx+zzHNxv4rHKBhtjn4mHrJa6qRc5
-         7TVvd3w0+q1zLYwPqui0FLPUCy3zjimIjBjI1pZPsuN78Mofy8kytbZ5Y2QuRexk0KIC
-         WoqA==
+        h=sender:from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=4t6PsBrxLZ5UTEGPBoOEAai2ONn3/gIQgFeqq55RME0=;
+        b=dl7XayJ5ZZtlj2NxoVsVvbvmImyaVKnGXuxpCPR+o9CYjyWD/tFlLmIIf3GkKH6iNf
+         nuRX7RpF+nb9qOBAJova7MSSQ2cadUwIhSKNBxhXu4Xyewmn5KXnx/WfSbwyo3hSB4sw
+         ufSFB2d0KutTspXPxf7PukV/mRlpu5bBa64UkJHC2rv0sBsPPJfvKKUIIRGvRoucwoWm
+         4kGU/8xWYMXMupMpO9I8MeseYxgIkMKHrOu6VX9IylQV0RSbLpHSzuiV/jGQn2fcQS/7
+         sfMucw4Z+YxC0G+Iil/LqohjxbaLkO/miES8JKc4SoeFgVIJ0C2CbBe9YrfkYbPtzB6d
+         kqqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:from:to:cc:subject:date:message-id
-         :mime-version:content-transfer-encoding;
-        bh=f6iWFEAYRCiS0CjNBB4+1Bs58fQyu4Ujqibyp6Xzunk=;
-        b=oCgv3SFvwBujrcYL/9fdeuaYiJJ7Cgn40QSYTbcaJDOBh5fysYv8eS1fJJgvJmX8a7
-         t/qrUcp8BYZv7ix1kFirJXm46UHeebAqOcVU0XNQrIE8FypvPNcJ+HkTH5emJwiZOVOf
-         Yu59HW4cHw8ZtqOFeFoJeNRc04MFuSqOB93uB6cSTfWU0RkFucnJZIFmm9GCKsgiBT1U
-         bCIBPTcCZSoaMxbFmkjEUAHRjfEzS3MebHiSmQNZGi3L63bDZmMR+d2q6Sf7ydoLYfPU
-         CMzE5WetupUBm8fITKAtP3/wScnkA45WGBc5AHICWHqeNnOWvmqhBhmsAQwHd726/PsG
-         CWlQ==
-X-Gm-Message-State: AOAM531HO6ldk9+CxQhS/eR8BjGjDWby3wy0bJYuDpE17PbT8dFeLmNi
-        MFZ/a1hERh0hxk6fg4y5kB1OFKJp1sH+1VYE
-X-Google-Smtp-Source: ABdhPJz3Q4QIVCuc3EgJ+sTEXLy5VS0DEZI5CscTUcmPq9rkUY+3j7YXO3u+jmN1MedN4mHikAL2uw==
-X-Received: by 2002:a17:907:35ca:: with SMTP id ap10mr8479505ejc.451.1612451946279;
-        Thu, 04 Feb 2021 07:19:06 -0800 (PST)
+         :in-reply-to:references:mime-version:content-transfer-encoding;
+        bh=4t6PsBrxLZ5UTEGPBoOEAai2ONn3/gIQgFeqq55RME0=;
+        b=qsAxvGzj+jcpebynKR9oGUQF/fFFceJyqXxw7XDGu4+HkNSXMP44EElaiaUBYcREje
+         tuXIfkHeV/K1SDNHthmmT4/RMMEtykfxhN1uSp/Es2H5KdhY346hLqCsmh7rudYcC3Xo
+         c1lw3QjQgRv2ZjOwiALJMnXmmhPW+h49qBOTFI3axYHdkuFeGm1LVC9CjzIZuOmMVwAV
+         52a8cX/7bFq5/2lao+WC847OHshJjQGDjYEDgPPhxKqy2rR6JB/ciNXcE3+EFW58r9Mo
+         mkoTXkA4cKcF1YDeer98LSdDFaelxm32RsNI65x7rNhNN59lcs1n/WdWWLBNoNpaiNTy
+         qeIA==
+X-Gm-Message-State: AOAM5306UXhDi/5lcRY0RfAtTxzG9p2FlXkRa+eVWjSxuCdurIJdzg1B
+        QW0YLyMxss0cX7f8pVP266+DXAYXZm3/AZlR
+X-Google-Smtp-Source: ABdhPJzjyf4iJXj0C/1GfT9PvnICS23k9kQYo+BRNVNiF2+Upy/bNN6K1UgKwUZ3NJV9xENOVOzYQQ==
+X-Received: by 2002:a05:6402:208:: with SMTP id t8mr8345346edv.189.1612451956240;
+        Thu, 04 Feb 2021 07:19:16 -0800 (PST)
 Received: from stitch.. ([80.71.140.73])
-        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.04
+        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Feb 2021 07:19:05 -0800 (PST)
+        Thu, 04 Feb 2021 07:19:15 -0800 (PST)
 Sender: Emil Renner Berthing <emil.renner.berthing@gmail.com>
 From:   Emil Renner Berthing <kernel@esmil.dk>
 To:     linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
@@ -71,94 +71,52 @@ Cc:     Emil Renner Berthing <kernel@esmil.dk>,
         Harald Welte <HaraldWelte@viatech.com>,
         Pierre Ossman <pierre@ossman.eu>,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 0/9] drivers: mmc: Update trivial tasklet_init() callers
-Date:   Thu,  4 Feb 2021 16:18:38 +0100
-Message-Id: <20210204151847.91353-1-kernel@esmil.dk>
+Subject: [PATCH 6/9] mmc: tifm_sd: Use new tasklet API
+Date:   Thu,  4 Feb 2021 16:18:44 +0100
+Message-Id: <20210204151847.91353-7-kernel@esmil.dk>
 X-Mailer: git-send-email 2.30.0
+In-Reply-To: <20210204151847.91353-1-kernel@esmil.dk>
+References: <20210204151847.91353-1-kernel@esmil.dk>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This updates callers of tasklet_init() in drivers/mmc to the new API
-in commit 12cc923f1ccc ("tasklet: Introduce new initialization API")
+This converts the driver to use the new tasklet API introduced in
+commit 12cc923f1ccc ("tasklet: Introduce new initialization API")
 
-All changes are made by coccinelle using the following semantic patch:
+Signed-off-by: Emil Renner Berthing <kernel@esmil.dk>
+---
+ drivers/mmc/host/tifm_sd.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
 
-@ match @
-type T;
-T *container;
-identifier tasklet;
-identifier callback;
-@@
-	tasklet_init(&container->tasklet, callback, (unsigned long)container);
-
-@ patch1 depends on match @
-type match.T;
-identifier match.tasklet;
-identifier match.callback;
-identifier data;
-identifier container;
-@@
--void callback(unsigned long data)
-+void callback(struct tasklet_struct *t)
-{
-	...
--	T *container = \( (T *)data \| (void *)data \);
-+	T *container = from_tasklet(container, t, tasklet);
-	...
-}
-
-@ patch2 depends on match @
-type match.T;
-identifier match.tasklet;
-identifier match.callback;
-identifier data;
-identifier container;
-@@
--void callback(unsigned long data)
-+void callback(struct tasklet_struct *t)
-{
-	...
--	T *container;
-+	T *container = from_tasklet(container, t, tasklet);
-	...
--	container = \( (T *)data \| (void *)data \);
-	...
-}
-
-@ depends on (patch1 || patch2) @
-match.T *container;
-identifier match.tasklet;
-identifier match.callback;
-@@
--	tasklet_init(&container->tasklet, callback, (unsigned long)container);
-+	tasklet_setup(&container->tasklet, callback);
-
-
-Emil Renner Berthing (9):
-  mmc: atmel-mci: Use new tasklet API
-  mmc: au1xmmc: Use new tasklet API
-  mmc: dw_mmc: Use new tasklet API
-  mmc: omap: Use new tasklet API
-  mmc: s3cmci: Use new tasklet API
-  mmc: tifm_sd: Use new tasklet API
-  mmc: uniphier-sd: Use new tasklet API
-  mmc: via-sdmmc: Use new tasklet API
-  mmc: wbsd: Use new tasklet API
-
- drivers/mmc/host/atmel-mci.c   |  6 +++---
- drivers/mmc/host/au1xmmc.c     | 14 ++++++--------
- drivers/mmc/host/dw_mmc.c      |  6 +++---
- drivers/mmc/host/omap.c        |  7 +++----
- drivers/mmc/host/s3cmci.c      |  6 +++---
- drivers/mmc/host/tifm_sd.c     |  7 +++----
- drivers/mmc/host/uniphier-sd.c | 14 ++++++--------
- drivers/mmc/host/via-sdmmc.c   |  9 +++------
- drivers/mmc/host/wbsd.c        | 35 +++++++++++++++-------------------
- 9 files changed, 45 insertions(+), 59 deletions(-)
-
+diff --git a/drivers/mmc/host/tifm_sd.c b/drivers/mmc/host/tifm_sd.c
+index fd8b72d3e02c..9fdf7ea06e3f 100644
+--- a/drivers/mmc/host/tifm_sd.c
++++ b/drivers/mmc/host/tifm_sd.c
+@@ -731,9 +731,9 @@ static void tifm_sd_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	mmc_request_done(mmc, mrq);
+ }
+ 
+-static void tifm_sd_end_cmd(unsigned long data)
++static void tifm_sd_end_cmd(struct tasklet_struct *t)
+ {
+-	struct tifm_sd *host = (struct tifm_sd*)data;
++	struct tifm_sd *host = from_tasklet(host, t, finish_tasklet);
+ 	struct tifm_dev *sock = host->dev;
+ 	struct mmc_host *mmc = tifm_get_drvdata(sock);
+ 	struct mmc_request *mrq;
+@@ -968,8 +968,7 @@ static int tifm_sd_probe(struct tifm_dev *sock)
+ 	 */
+ 	mmc->max_busy_timeout = TIFM_MMCSD_REQ_TIMEOUT_MS;
+ 
+-	tasklet_init(&host->finish_tasklet, tifm_sd_end_cmd,
+-		     (unsigned long)host);
++	tasklet_setup(&host->finish_tasklet, tifm_sd_end_cmd);
+ 	timer_setup(&host->timer, tifm_sd_abort, 0);
+ 
+ 	mmc->ops = &tifm_sd_ops;
 -- 
 2.30.0
 
