@@ -2,165 +2,291 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E7D5C433E6
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 18:26:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F25CC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 19:38:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0686164E22
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 18:26:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4870F64E07
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 19:38:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239088AbhBDSZy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Feb 2021 13:25:54 -0500
-Received: from metis.ext.pengutronix.de ([85.220.165.71]:50941 "EHLO
-        metis.ext.pengutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239073AbhBDSZl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 13:25:41 -0500
-Received: from ptx.hi.pengutronix.de ([2001:67c:670:100:1d::c0])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1l7jAm-0002WQ-TD; Thu, 04 Feb 2021 19:16:08 +0100
-Received: from ukl by ptx.hi.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1l7jAV-0005Pi-Pr; Thu, 04 Feb 2021 19:15:51 +0100
-Date:   Thu, 4 Feb 2021 19:15:51 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Russell King - ARM Linux admin <linux@armlinux.org.uk>
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-fbdev@vger.kernel.org,
-        Alessandro Zummo <a.zummo@towertech.it>, kvm@vger.kernel.org,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        alsa-devel@alsa-project.org, dri-devel@lists.freedesktop.org,
-        Jaroslav Kysela <perex@perex.cz>,
-        Eric Anholt <eric@anholt.net>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig.org@pengutronix.de>, linux-i2c@vger.kernel.org,
-        Jiri Slaby <jirislaby@kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        linux-rtc@vger.kernel.org, Cornelia Huck <cohuck@redhat.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Takashi Iwai <tiwai@suse.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        David Airlie <airlied@linux.ie>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        linux-serial@vger.kernel.org, linux-input@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Mike Leach <mike.leach@linaro.org>,
-        linux-watchdog@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        Suzuki K Poulose <suzuki.poulose@arm.com>,
-        coresight@lists.linaro.org, Vladimir Zapolskiy <vz@mleia.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Matt Mackall <mpm@selenic.com>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-spi@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-        linux-crypto@vger.kernel.org, kernel@pengutronix.de,
-        Leo Yan <leo.yan@linaro.org>, dmaengine@vger.kernel.org
-Subject: Re: [GIT PULL] immutable branch for amba changes targeting v5.12-rc1
-Message-ID: <20210204181551.ethtuzm65flujmwe@pengutronix.de>
-References: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
- <20210202135350.36nj3dmcoq3t7gcf@pengutronix.de>
- <YBlcTXlxemmC2lgr@kroah.com>
- <20210204165224.GA1463@shell.armlinux.org.uk>
- <YBwnUrQqlAz2LDPI@kroah.com>
- <20210204165951.GB1463@shell.armlinux.org.uk>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="mw66hszyvu2hxhxe"
+        id S238272AbhBDTiV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Feb 2021 14:38:21 -0500
+Received: from aserp2130.oracle.com ([141.146.126.79]:57480 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S238242AbhBDTiT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 14:38:19 -0500
+Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
+        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 114JTdwm044841;
+        Thu, 4 Feb 2021 19:33:50 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : content-type : in-reply-to :
+ mime-version; s=corp-2020-01-29;
+ bh=1mSbR7UYytrVmb9m+OjsfJQ+ECzLuT5FK3uth4D/hSw=;
+ b=uoPRZ4vz6mb4z1gMXMHFvxwBkbXKBRmCy2XhjVbaPw0jNoHu0QaiZnf3j5/B7emztro5
+ 0iztbYhLd3vDgay72tQ6v0ij5PSveEkRKdrr3wcjAKxozyU0JID7seBQmz211BJWL3/n
+ 21EHOXgDC0bsG30hLvCbhqscoLzqfAVDMG+yD0DGaFTgq86fgtsLcFNTfURcxZlBx5/k
+ FJjWBPesneE3gBMvwHtZumwjne8eT2iYPAdxJ5t4GcypklTFE0C6r4ZHlw4l5CMRCBMQ
+ jrOMtCxfZphJ9eSlzXIBH5oTU4e6e81X+VeOeNvIRXTOuKTE+Drv6PXP6ARwvuQ25MEv IA== 
+Received: from userp3020.oracle.com (userp3020.oracle.com [156.151.31.79])
+        by aserp2130.oracle.com with ESMTP id 36cvyb71sb-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 04 Feb 2021 19:33:50 +0000
+Received: from pps.filterd (userp3020.oracle.com [127.0.0.1])
+        by userp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 114JUXk4106088;
+        Thu, 4 Feb 2021 19:31:49 GMT
+Received: from nam10-dm6-obe.outbound.protection.outlook.com (mail-dm6nam10lp2103.outbound.protection.outlook.com [104.47.58.103])
+        by userp3020.oracle.com with ESMTP id 36dh7vm7bb-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Thu, 04 Feb 2021 19:31:49 +0000
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=JJRX8n8XulXtIXRsy8uGNsuDKgHehZ06tN4hkr9Y6Hpqe8VBz7mF4vuALeeF3RsXj6VV6Ioe+1HMiye4RgatyupMXkb9gZzMwGsHKUkZ8JQ7k3wMjdACflMNZ0QgpRNAf7eE5sQApZzzUksWAz+xfp7Bw9x54qX0YDJgpXdCRCUSpv46iRKsibQnlxkQtfzDayvDW7nfFsCpPC6IEIvHgpYeLLTIrwSqeQ7tfW6aQxULPXNk2ZL1TjCzgXRx3EDggfdVbglGophPcLovgGOrZZtxZdDQgKr83njV6y8JagEv8AMZdCRBsfuoZCLtmu4uh4DFTpLJSEvfJAk/oa+qOw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=1mSbR7UYytrVmb9m+OjsfJQ+ECzLuT5FK3uth4D/hSw=;
+ b=d3fos0Kh39uzd19oyhdNiV5RCgUmtGZXuOsU4vT+3gPP4jy8C91KNWGYCoHRzariSN2dsL+Vn8OvhwROsmBtGp0ZL4SEidWTl1hz1XMIEPA03QlTOSj9ekIKjKXFi2vnzEsT8Lyt3nMrJw/6XTFbduPupuhZxeJp5PR1mQmvxeUfJOLVF4lFBhkNxj0wi5k94K/FuwlN1j0QXl78BmDaALE+Q7Um8K6TtofF9+Fb9lEzBx+/lkqjN8bphoMh15JK+b3890ccbfi++FdQ9kODvO5TaCsKE1YGXcnprZxnuUMGlIshUNfXBBEwrOYXlCN3Lu/cYbqtsQokn+fPuiuB2Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
+ dkim=pass header.d=oracle.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=1mSbR7UYytrVmb9m+OjsfJQ+ECzLuT5FK3uth4D/hSw=;
+ b=nN9hWOh2tdMNz04L6MgzOKjjxEgtPjBcD0ZS7FMUKMpvtLgryAf3qEzi5GMWMiaUjUXtVqLYOx5IDYPB47nY/ZU+80CJmagSSM2aTRJEDxAIf99xx/fjlshMQjyV1BIE5WGD8JbhrwHYs/f2ROVtiJzYXdD8C5Cu0LO/4Sf27Lc=
+Authentication-Results: arm.com; dkim=none (message not signed)
+ header.d=none;arm.com; dmarc=none action=none header.from=oracle.com;
+Received: from BYAPR10MB2999.namprd10.prod.outlook.com (2603:10b6:a03:85::27)
+ by BYAPR10MB3207.namprd10.prod.outlook.com (2603:10b6:a03:152::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3805.19; Thu, 4 Feb
+ 2021 19:31:44 +0000
+Received: from BYAPR10MB2999.namprd10.prod.outlook.com
+ ([fe80::e180:1ba2:d87:456]) by BYAPR10MB2999.namprd10.prod.outlook.com
+ ([fe80::e180:1ba2:d87:456%4]) with mapi id 15.20.3825.024; Thu, 4 Feb 2021
+ 19:31:44 +0000
+Date:   Thu, 4 Feb 2021 14:31:36 -0500
+From:   Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+To:     Robin Murphy <robin.murphy@arm.com>
+Cc:     Christoph Hellwig <hch@lst.de>,
+        Dongli Zhang <dongli.zhang@oracle.com>,
+        dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+        iommu@lists.linux-foundation.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
+        linuxppc-dev@lists.ozlabs.org, nouveau@lists.freedesktop.org,
+        x86@kernel.org, xen-devel@lists.xenproject.org,
+        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
+        akpm@linux-foundation.org, benh@kernel.crashing.org,
+        bskeggs@redhat.com, bhelgaas@google.com, bp@alien8.de,
+        boris.ostrovsky@oracle.com, chris@chris-wilson.co.uk,
+        daniel@ffwll.ch, airlied@linux.ie, hpa@zytor.com, mingo@kernel.org,
+        mingo@redhat.com, jani.nikula@linux.intel.com,
+        joonas.lahtinen@linux.intel.com, jgross@suse.com,
+        m.szyprowski@samsung.com, matthew.auld@intel.com,
+        mpe@ellerman.id.au, rppt@kernel.org, paulus@samba.org,
+        peterz@infradead.org, rodrigo.vivi@intel.com,
+        sstabellini@kernel.org, bauerman@linux.ibm.com,
+        tsbogend@alpha.franken.de, tglx@linutronix.de,
+        ulf.hansson@linaro.org, joe.jin@oracle.com,
+        thomas.lendacky@amd.com, Claire Chang <tientzu@chromium.org>
+Subject: Re: [PATCH RFC v1 2/6] swiotlb: convert variables to arrays
+Message-ID: <20210204193136.GA333094@fedora>
+References: <20210203233709.19819-1-dongli.zhang@oracle.com>
+ <20210203233709.19819-3-dongli.zhang@oracle.com>
+ <20210204072947.GA29812@lst.de>
+ <b46ddefe-d91a-fa6a-0e0d-cf1edc343c2e@arm.com>
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210204165951.GB1463@shell.armlinux.org.uk>
-X-SA-Exim-Connect-IP: 2001:67c:670:100:1d::c0
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+In-Reply-To: <b46ddefe-d91a-fa6a-0e0d-cf1edc343c2e@arm.com>
+X-Originating-IP: [209.6.208.110]
+X-ClientProxiedBy: BL0PR02CA0129.namprd02.prod.outlook.com
+ (2603:10b6:208:35::34) To BYAPR10MB2999.namprd10.prod.outlook.com
+ (2603:10b6:a03:85::27)
+MIME-Version: 1.0
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from fedora (209.6.208.110) by BL0PR02CA0129.namprd02.prod.outlook.com (2603:10b6:208:35::34) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3825.20 via Frontend Transport; Thu, 4 Feb 2021 19:31:38 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: ef55351e-693f-4d96-4932-08d8c943812e
+X-MS-TrafficTypeDiagnostic: BYAPR10MB3207:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <BYAPR10MB3207426DBD5DE06078DD9EE689B39@BYAPR10MB3207.namprd10.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: uAgalEdYjwOjJHCH2G7vN5tWQtCMtbX0n85NOzjg397fr4HPpL38hU+5XzzeT49OmKLLJVsnwxIpo+to5zKKQGIsK846HRhFER2KPTbPklCujGd8DTLblcPCup5OKFImj7oo9vISCGsDUiJZkiV/3ToqgvCCnZ6B7MuTJOyFbK32wJugnDz83jEY9ajCSyngUqObEoMU3edySoele8YHKMKQs6lZYD+ISVSsalYC0OzhTRXQE4+4oUMREmANuddjCtRwMZYVha7Km7A6VrPYzrIZUTCE+qTKTB/5qMehAd+orN5NztZ/wh0QB0yaOmm5HKNNBXGarBx77cjIGbdqh02HNg3UnBXLSrO3Vlw0yTXHrDNDI2IfSSAHFKYY8deJXB9W2dzWfmTSvLvpo+OPXRc2RGZ951S6BJ1FROzMHQhCJzBIgXYmDz/ZaD2ufs3XKyOOO17e5wOUQtMfLmh7W/1FrwiplQ115y6pFi47ExlWLvcLqtuN7NfidZI4Czy4IotM2VARalMW8UzXklor4Gvk0Bu87CDO0GQd7Z6htWQc5dBRVrO9l/fxVoYdjmAg
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR10MB2999.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(39860400002)(346002)(396003)(376002)(136003)(8936002)(26005)(4326008)(9576002)(8676002)(33656002)(86362001)(16526019)(5660300002)(53546011)(186003)(83380400001)(956004)(66556008)(52116002)(66946007)(55016002)(478600001)(7416002)(6496006)(2906002)(6916009)(66476007)(316002)(54906003)(7406005)(33716001)(9686003)(1076003)(21314003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?wawCRNyZ8ljyEuFsDq2wYljIRGRa+x/+LWf2aOYw3EPj/ts+T86ZgSpVrNI1?=
+ =?us-ascii?Q?E+hi9N0U+VHnKEi643sfk/lKPgdNcyg1X5dIqfKRQ4obHAugfVLS3yvF9uHA?=
+ =?us-ascii?Q?Et/CzMB5IJrQmQCH1De9LLITIdU4HxYUHXWeiyTewys9ZPW92hzJbHRHipFS?=
+ =?us-ascii?Q?ZjKreRgS4eenVHSWbXtGKX1RdGwsvFmGUtZmt6RPIQnBG2nQbh6uY1x8XDm+?=
+ =?us-ascii?Q?HNlo4+zCXXBRmqVsO/7K9N6zTYffAibVUCmdssjl652dJxDd3pjO60aeIy0D?=
+ =?us-ascii?Q?8V+eyWUUKndo85mK1a37h25dT8XAJwF9Su3wjpK6ufcFPfV0VuubOJHsl211?=
+ =?us-ascii?Q?eA7BLwTGejgutN/nAwdMSAZkzE2FrKGJS10H0MSnyrk04g7iNLjEZgUdKSG3?=
+ =?us-ascii?Q?dbKSyYBKbpp42miUwg9hkS08itIpYL2S9a9RkXNAde3GAtY8hBCh3qcgSHdi?=
+ =?us-ascii?Q?6Bwioin/m6tIHwT2fqnyX9f92pWdI4xt6zbdalUgmS0Nn/nWd6UBBXTVIwp3?=
+ =?us-ascii?Q?dIIm4w1C7EEb9JRK6Ur4QTI7vS8dkeShTS7EEI0vs2iqliz4Ng9rEm1Ef1AH?=
+ =?us-ascii?Q?7oWFim24xrTDWQ5X5aZEq27Kuqu+tHvo+AT6VOmALtiohgErAKdEVxNQZh0x?=
+ =?us-ascii?Q?Vml36FCg9b/IZbsngoX9D721PfCaqnU+oC4nPWWIgX0I74A33IcyRGjtiXTn?=
+ =?us-ascii?Q?Ia0ZN5cwmDDIGVeJGyG3iNUfqiIqi0y7Zeqhe9JI1OfjSliJO8W+KRBewRsa?=
+ =?us-ascii?Q?TWvEmmm8e9DHFLSpnnuNii/MUeYnKoFTiIFdCEn+7nHBcowyz281im4/anKz?=
+ =?us-ascii?Q?mlQI4Wr14VzMSyrfRi+QjA7lU5xNQGDgk4P6StAGD+ydA0roF+OAcMIs+Y0B?=
+ =?us-ascii?Q?oLhz70asx7ROi582lpwamEJbklY3Udnoslrv910cdfzXvIG+i5kqodTaRA2n?=
+ =?us-ascii?Q?H/vSpzVb3icXkkiJQGuwVwDxwg2+AvhseyrxM1QG/HMlrIT4zuO3DAM8Q+Xc?=
+ =?us-ascii?Q?WhNd8k33wXZ5x9HqOyUVfSGBgprXrx/AWC7J2VboMq8mp1zfTY0uZ5flkTcc?=
+ =?us-ascii?Q?KPICc97M?=
+X-OriginatorOrg: oracle.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: ef55351e-693f-4d96-4932-08d8c943812e
+X-MS-Exchange-CrossTenant-AuthSource: BYAPR10MB2999.namprd10.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Feb 2021 19:31:44.2409
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: ezbeptdNGkgwxrYaRP+vWUR9oW8gyl3BZp7dR4e7wHu1eriSLHANm2B5ihfHQRmNh+F5kZ7Hnkdiiin0cMy+PQ==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR10MB3207
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9885 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 mlxscore=0
+ suspectscore=0 spamscore=0 mlxlogscore=999 phishscore=0 adultscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2102040118
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9885 signatures=668683
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 clxscore=1011 impostorscore=0
+ mlxscore=0 spamscore=0 bulkscore=0 priorityscore=1501 adultscore=0
+ lowpriorityscore=0 malwarescore=0 phishscore=0 mlxlogscore=999
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2009150000 definitions=main-2102040118
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Thu, Feb 04, 2021 at 11:49:23AM +0000, Robin Murphy wrote:
+> On 2021-02-04 07:29, Christoph Hellwig wrote:
+> > On Wed, Feb 03, 2021 at 03:37:05PM -0800, Dongli Zhang wrote:
+> > > This patch converts several swiotlb related variables to arrays, in
+> > > order to maintain stat/status for different swiotlb buffers. Here are
+> > > variables involved:
+> > > 
+> > > - io_tlb_start and io_tlb_end
+> > > - io_tlb_nslabs and io_tlb_used
+> > > - io_tlb_list
+> > > - io_tlb_index
+> > > - max_segment
+> > > - io_tlb_orig_addr
+> > > - no_iotlb_memory
+> > > 
+> > > There is no functional change and this is to prepare to enable 64-bit
+> > > swiotlb.
+> > 
+> > Claire Chang (on Cc) already posted a patch like this a month ago,
+> > which looks much better because it actually uses a struct instead
+> > of all the random variables.
+> 
+> Indeed, I skimmed the cover letter and immediately thought that this whole
+> thing is just the restricted DMA pool concept[1] again, only from a slightly
+> different angle.
 
---mw66hszyvu2hxhxe
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, Feb 04, 2021 at 04:59:51PM +0000, Russell King - ARM Linux admin wr=
-ote:
-> On Thu, Feb 04, 2021 at 05:56:50PM +0100, Greg Kroah-Hartman wrote:
-> > On Thu, Feb 04, 2021 at 04:52:24PM +0000, Russell King - ARM Linux admi=
-n wrote:
-> > > On Tue, Feb 02, 2021 at 03:06:05PM +0100, Greg Kroah-Hartman wrote:
-> > > > I'm glad to take this through my char/misc tree, as that's where the
-> > > > other coresight changes flow through.  So if no one else objects, I=
- will
-> > > > do so...
-> > >=20
-> > > Greg, did you end up pulling this after all? If not, Uwe produced a v=
-2.
-> > > I haven't merged v2 yet as I don't know what you've done.
-> >=20
-> > I thought you merged this?
->=20
-> I took v1, and put it in a branch I've promised in the past not to
-> rebase/rewind. Uwe is now asking for me to take a v2 or apply a patch
-> on top.
->=20
-> The only reason to produce an "immutable" branch is if it's the basis
-> for some dependent work and you need that branch merged into other
-> people's trees... so the whole "lets produce a v2" is really odd
-> workflow... I'm confused about what I should do, and who has to be
-> informed which option I take.
->=20
-> I'm rather lost here too.
+Kind of. Let me lay out how some of these pieces are right now:
 
-Sorry to have cause this confusion. After I saw that my initial tag
-missed to adapt a driver I wanted to make it easy for you to fix the
-situation.
-So I created a patch to fix it and created a second tag with the patch
-squashed in. Obviously only one of them have to be picked and I hoped
-you (=3D Russell + Greg) would agree which option to pick.
++-----------------------+      +----------------------+
+|                       |      |                      |
+|                       |      |                      |
+|   a)Xen-SWIOTLB       |      | b)SWIOTLB (for !Xen) |
+|                       |      |                      |
++-----------XX----------+      +-------X--------------+
+              XXXX             XXXXXXXXX
+                 XXXX     XX XXX
+                    X   XX
+                    XXXX
+         +----------XX-----------+
+         |                       |
+         |                       |
+         |   c) SWIOTLB generic  |
+         |                       |
+         +-----------------------+
 
-My preference would be if you both pick up v2 of the tag to yield a
-history that is bisectable without build problems, but if Russell (who
-already picked up the broken tag) considers his tree immutable and so
-isn't willing to rebase, then picking up the patch is the way to go.
+Dongli's patches modify the SWIOTLB generic c), and Xen-SWIOTLB a)
+parts.
 
-I suggest that Russell descides which option he wants to pick and tells
-Greg to do the same!?
+Also see the IOMMU_INIT logic which lays this a bit more deepth
+(for example how to enable SWIOTLB on AMD boxes, or IBM with Calgary
+IOMMU, etc - see iommu_table.h).
 
-Best regards
-Uwe
+Furtheremore it lays the groundwork to allocate AMD SEV SWIOTLB buffers
+later after boot (so that you can stich different pools together).
+All the bits are kind of inside of the SWIOTLB code. And also it changes
+the Xen-SWIOTLB to do something similar.
 
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+The mempool did it similarly by taking the internal parts (aka the
+various io_tlb) of SWIOTLB and exposing them out and having
+other code:
 
---mw66hszyvu2hxhxe
-Content-Type: application/pgp-signature; name="signature.asc"
++-----------------------+      +----------------------+
+|                       |      |                      |
+|                       |      |                      |
+| a)Xen-SWIOTLB         |      | b)SWIOTLB (for !Xen) |
+|                       |      |                      |
++-----------XX----------+      +-------X--------------+
+              XXXX             XXXXXXXXX
+                 XXXX     XX XXX
+                    X   XX
+                    XXXX
+         +----------XX-----------+         +------------------+
+         |                       |         | Device tree      |
+         |                       +<--------+ enabling SWIOTLB |
+         |c) SWIOTLB generic     |         |                  |
+         |                       |         | mempool          |
+         +-----------------------+         +------------------+
 
------BEGIN PGP SIGNATURE-----
+What I was suggesting to Clarie to follow Xen model, that is
+do something like this:
 
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmAcOdQACgkQwfwUeK3K
-7AlatwgAoTySm2q5g+gxl/CCA9C6tYko2Pu8wLkL3YfNBIgf05iOJ9G8Miwhd95G
-eDv5Ue6LEvHVOMZHbbZMliKzacCtSGzzhTpNpIcL7SZH/Vu0nyB8qGbN+PAm+rsX
-K54DEaOvyPIcDUkuXgUGC2e0nXjg7499oDQs/rajEADbs8ECpDvKCTRYczmQ6E8v
-VS9a/GOt/WDa0dqOdAt6OfxirahLKjPQC1/FS1kcREk1QBYbH6TqM/t8b4t0ED9p
-A5RYkSHAXArD/ifkinbRDUIhLY7XzhBYGEiiNgwCCtsbHE06GP/BNPlXMj6+fLAY
-g/wGBoyP1j9OrCrpGDnsy/oyv64XRg==
-=Rv8c
------END PGP SIGNATURE-----
++-----------------------+      +----------------------+   +--------------------+
+|                       |      |                      |   |                    |
+|                       |      |                      |   |                    |
+| a)Xen-SWIOTLB         |      | b)SWIOTLB (for !Xen) |   | e) DT-SWIOTLB      |
+|                       |      |                      |   |                    |
++-----------XX----------+      +-------X--------------+   +----XX-X------------+
+              XXXX             XXXXXXXXX        XXX X X XX X XX
+                 XXXX     XX XXX        XXXXXXXX
+                    X   XX XXXXXXXXXXXXX
+                    XXXXXXXX
+         +----------XXX----------+
+         |                       |
+         |                       |
+         |c) SWIOTLB generic     |
+         |                       |
+         +-----------------------+
 
---mw66hszyvu2hxhxe--
+
+so using the SWIOTLB generic parts, and then bolt on top
+of the device-tree logic, along with the mempool logic.
+
+
+
+But Christopher has an interesting suggestion which is
+to squash the all the existing code (a, b, c) all together
+and pepper it with various jump-tables.
+
+
+So:
+
+
+-----------------------------+
+| SWIOTLB:                   |
+|                            |
+|  a) SWIOTLB (for non-Xen)  |
+|  b) Xen-SWIOTLB            |
+|  c) DT-SWIOTLB             |
+|                            |
+|                            |
+-----------------------------+
+
+
+with all the various bits (M2P/P2M for Xen, mempool for ARM,
+and normal allocation for BM) in one big file.
+
