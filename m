@@ -2,81 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BA021C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 07:10:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBC49C433E9
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 07:30:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85C1264F4E
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 07:10:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B742E64F44
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 07:30:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232128AbhBDHKo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Feb 2021 02:10:44 -0500
-Received: from szxga04-in.huawei.com ([45.249.212.190]:12124 "EHLO
-        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234206AbhBDHKZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 02:10:25 -0500
-Received: from DGGEMS413-HUB.china.huawei.com (unknown [172.30.72.59])
-        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4DWV536Q3Bz162SJ;
-        Thu,  4 Feb 2021 15:08:23 +0800 (CST)
-Received: from localhost.localdomain (10.67.165.24) by
- DGGEMS413-HUB.china.huawei.com (10.3.19.213) with Microsoft SMTP Server id
- 14.3.498.0; Thu, 4 Feb 2021 15:09:33 +0800
-From:   Xiaofei Tan <tanxiaofei@huawei.com>
-To:     <rric@kernel.org>, <ulf.hansson@linaro.org>, <rmfrfs@gmail.com>,
-        <linus.walleij@linaro.org>
-CC:     Xiaofei Tan <tanxiaofei@huawei.com>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linuxarm@openeuler.org>
-Subject: [PATCH] mmc: cavium: Replace spin_lock_irqsave with spin_lock in hard IRQ
-Date:   Thu, 4 Feb 2021 15:07:18 +0800
-Message-ID: <1612422438-32525-1-git-send-email-tanxiaofei@huawei.com>
-X-Mailer: git-send-email 2.8.1
+        id S234132AbhBDHag (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Feb 2021 02:30:36 -0500
+Received: from verein.lst.de ([213.95.11.211]:54722 "EHLO verein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232977AbhBDHaf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 4 Feb 2021 02:30:35 -0500
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id DD16068AFE; Thu,  4 Feb 2021 08:29:47 +0100 (CET)
+Date:   Thu, 4 Feb 2021 08:29:47 +0100
+From:   Christoph Hellwig <hch@lst.de>
+To:     Dongli Zhang <dongli.zhang@oracle.com>
+Cc:     dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
+        iommu@lists.linux-foundation.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
+        linuxppc-dev@lists.ozlabs.org, nouveau@lists.freedesktop.org,
+        x86@kernel.org, xen-devel@lists.xenproject.org,
+        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
+        akpm@linux-foundation.org, benh@kernel.crashing.org,
+        bskeggs@redhat.com, bhelgaas@google.com, bp@alien8.de,
+        boris.ostrovsky@oracle.com, hch@lst.de, chris@chris-wilson.co.uk,
+        daniel@ffwll.ch, airlied@linux.ie, hpa@zytor.com, mingo@kernel.org,
+        mingo@redhat.com, jani.nikula@linux.intel.com,
+        joonas.lahtinen@linux.intel.com, jgross@suse.com,
+        konrad.wilk@oracle.com, m.szyprowski@samsung.com,
+        matthew.auld@intel.com, mpe@ellerman.id.au, rppt@kernel.org,
+        paulus@samba.org, peterz@infradead.org, robin.murphy@arm.com,
+        rodrigo.vivi@intel.com, sstabellini@kernel.org,
+        bauerman@linux.ibm.com, tsbogend@alpha.franken.de,
+        tglx@linutronix.de, ulf.hansson@linaro.org, joe.jin@oracle.com,
+        thomas.lendacky@amd.com, Claire Chang <tientzu@chromium.org>
+Subject: Re: [PATCH RFC v1 2/6] swiotlb: convert variables to arrays
+Message-ID: <20210204072947.GA29812@lst.de>
+References: <20210203233709.19819-1-dongli.zhang@oracle.com> <20210203233709.19819-3-dongli.zhang@oracle.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.67.165.24]
-X-CFilter-Loop: Reflected
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210203233709.19819-3-dongli.zhang@oracle.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It is redundant to do irqsave and irqrestore in hardIRQ context, where
-it has been in a irq-disabled context.
+On Wed, Feb 03, 2021 at 03:37:05PM -0800, Dongli Zhang wrote:
+> This patch converts several swiotlb related variables to arrays, in
+> order to maintain stat/status for different swiotlb buffers. Here are
+> variables involved:
+> 
+> - io_tlb_start and io_tlb_end
+> - io_tlb_nslabs and io_tlb_used
+> - io_tlb_list
+> - io_tlb_index
+> - max_segment
+> - io_tlb_orig_addr
+> - no_iotlb_memory
+> 
+> There is no functional change and this is to prepare to enable 64-bit
+> swiotlb.
 
-Signed-off-by: Xiaofei Tan <tanxiaofei@huawei.com>
----
- drivers/mmc/host/cavium.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
-index c5da3aa..4bb8f28 100644
---- a/drivers/mmc/host/cavium.c
-+++ b/drivers/mmc/host/cavium.c
-@@ -436,12 +436,11 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
- {
- 	struct cvm_mmc_host *host = dev_id;
- 	struct mmc_request *req;
--	unsigned long flags = 0;
- 	u64 emm_int, rsp_sts;
- 	bool host_done;
- 
- 	if (host->need_irq_handler_lock)
--		spin_lock_irqsave(&host->irq_handler_lock, flags);
-+		spin_lock(&host->irq_handler_lock);
- 	else
- 		__acquire(&host->irq_handler_lock);
- 
-@@ -504,7 +503,7 @@ irqreturn_t cvm_mmc_interrupt(int irq, void *dev_id)
- 		host->release_bus(host);
- out:
- 	if (host->need_irq_handler_lock)
--		spin_unlock_irqrestore(&host->irq_handler_lock, flags);
-+		spin_unlock(&host->irq_handler_lock);
- 	else
- 		__release(&host->irq_handler_lock);
- 	return IRQ_RETVAL(emm_int != 0);
--- 
-2.8.1
-
+Claire Chang (on Cc) already posted a patch like this a month ago,
+which looks much better because it actually uses a struct instead
+of all the random variables. 
