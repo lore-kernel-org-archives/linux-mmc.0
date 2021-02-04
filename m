@@ -7,54 +7,54 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 168A8C4332D
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:22:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F61FC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 16:02:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D808D64E08
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:22:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1552B64F4D
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 16:02:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237279AbhBDPW1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Feb 2021 10:22:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36936 "EHLO
+        id S237163AbhBDPU3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Feb 2021 10:20:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237230AbhBDPVD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:21:03 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 039C1C061794;
-        Thu,  4 Feb 2021 07:19:19 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id c6so4637593ede.0;
-        Thu, 04 Feb 2021 07:19:18 -0800 (PST)
+        with ESMTP id S237047AbhBDPTs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:19:48 -0500
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5FE9C061786;
+        Thu,  4 Feb 2021 07:19:08 -0800 (PST)
+Received: by mail-ej1-x630.google.com with SMTP id bl23so5939410ejb.5;
+        Thu, 04 Feb 2021 07:19:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=sender:from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=oEFEAmIXC+si+Rsqnq5kk8ZiqPQSzbKTorEVbnyUtrQ=;
-        b=Hfqb1+4R1GUz/Fq49+JCqN+pc8rKpE2gGtfvjDDmxll15xVwGMrHW+vIvMUrM/X/ZV
-         AXGGEWknQyVw6tbyUbuUiekt+svajALlZW/cFplCV9Q9gPEp2myYaVaHYcnMsoUNAbMg
-         LMLH+hB3PsItBvcL3c8lar4QvYq+1hyuGBhyGCg1oPOZHP+3t3qT6+aaPA1++GN/1ucO
-         QEsCbOAmgNwpxkvLV/w6ZP7VxH5jvEe9T20N2tIu/0QzCyuI042GlnNBpBxz8AolrID/
-         t7rdr8OXwjjWmQJyzK9ciOrFMpECdBAkZRPAS+iY+Ui/+Wu15KuaeHiZVjSGp8ytLoEO
-         NoqA==
+        bh=M0B41tZ9BhfpLW130tpoMukMFanCubX5mUQuKs1xFi0=;
+        b=iYWnQw3hSsJEBErHWKDUIRMWHyND3VAfFPvB7gVkyB8D18b3eaWSt3iNjvjvrbHWQM
+         75Vdxp1oU1adk5KW22osTw+ituLWAmeQZ2m08qmG77wDsF0+nVY+IUxgrk9JjbLp6EM/
+         /Kf+nWKF1Bvd3a/oDHc2dxC+025HVLbw979OaCKqQpQUDOcbohLmO/PA/YqbcL8Jd33S
+         ubUuQ95FsYX8UhwW7TJSqjN4SbxPeKoDFJXIFxi6zEbW1jS+Em2KWNOCjy6whR7BhlEq
+         /QDuWCX6ldtTobr44tD7LVzn0l9ECAftuz5mpgLeUQkUUMFPrf9nPHpHp2toJ9qhwaVM
+         YNtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:sender:from:to:cc:subject:date:message-id
          :in-reply-to:references:mime-version:content-transfer-encoding;
-        bh=oEFEAmIXC+si+Rsqnq5kk8ZiqPQSzbKTorEVbnyUtrQ=;
-        b=iVjFtsSY7JqVapFIZG82qM7OVFcxpUJh/A6dnkYao0fFRldQSnenS73o5suG8ZprLp
-         A52mksG5QtjEOCZcjVM8AnEd91mulRRsRparaxOFs//uLOhj58tK9Eglxl6EkO4zkSMB
-         rEnAzVhJnNhktnx6t31lu9gsh/kE2qEvfp5wTf7vluxu0wCkdrDCWwv/tq8BBK7So+mn
-         WuqJaLQXCZhwC76M3E9MK79jGpqf6DaL9WCRoYtXDx8x6nJdVIv1UqJzyFBjR4cQeVsy
-         AdN/eJUVaHTlOMHeKfxgSVBQX8slkQOFVeIdpBLFiXL5M5829TliifL5VgmdAPZsmFu1
-         qjAQ==
-X-Gm-Message-State: AOAM530RP4zhBqfIUWzSv8SG73U2HkmFQjbEy6jkjiI0QibfCI91UMqb
-        M7ny9D5EKww63Ai0kM6YI14sm6OIWST7/Wbo
-X-Google-Smtp-Source: ABdhPJx/K6k06YoQR/hwfftcPlygX5tTSIxSg+9Is6MP8I2y+HmHxOno8nh+obmf63KnWwXXtRF/9A==
-X-Received: by 2002:aa7:de10:: with SMTP id h16mr8440874edv.385.1612451957817;
-        Thu, 04 Feb 2021 07:19:17 -0800 (PST)
+        bh=M0B41tZ9BhfpLW130tpoMukMFanCubX5mUQuKs1xFi0=;
+        b=AvyRVf7/FwzhIq0jP6OOI3FH6xhxCEXclnCftNIpDg0E/liZ249MSPx1Srai8R4tKO
+         fAM+plP1fLvO7bp7i9ltP0aolzCLPghIkEXEwXQmvGdRgonguIt0V54LryFQsA/n7HN5
+         sQgoLr+T6kUPwA0P89KvZqhbmUlzAskqSZeAwUJLoglmLV/ESF5ZRxGHGLhoRE1CcrlU
+         98jJQfM4AWH1er1hE9vzmqedzksLRIj5rNbSgHDLF/70SQWT46Ej/29eCJTU6sD75aLB
+         u3DaYWOB1ASt9icWOrDkSOhFKDz4SHhRX/tAsHQlzHEiSKkYo7WtZdT8tBfQQbw/dXtL
+         WbBg==
+X-Gm-Message-State: AOAM5316jOaJbJViX0VkxFHON9pFVG+QuObfPO7YIXnmaIO2n0G9dsDs
+        0EkGfTkfFaKqOp6OM3XmrZdmJA83EVqObt43
+X-Google-Smtp-Source: ABdhPJyM0C+Whgrs7E27chcilpw2rTGgXyVbl/SoxO+o6Bj9uU3gr7yZUEbUSLYC1hmFrOCVw36NEg==
+X-Received: by 2002:a17:907:7289:: with SMTP id dt9mr8477022ejc.446.1612451947555;
+        Thu, 04 Feb 2021 07:19:07 -0800 (PST)
 Received: from stitch.. ([80.71.140.73])
-        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.16
+        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Feb 2021 07:19:17 -0800 (PST)
+        Thu, 04 Feb 2021 07:19:07 -0800 (PST)
 Sender: Emil Renner Berthing <emil.renner.berthing@gmail.com>
 From:   Emil Renner Berthing <kernel@esmil.dk>
 To:     linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
@@ -71,9 +71,9 @@ Cc:     Emil Renner Berthing <kernel@esmil.dk>,
         Harald Welte <HaraldWelte@viatech.com>,
         Pierre Ossman <pierre@ossman.eu>,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 7/9] mmc: uniphier-sd: Use new tasklet API
-Date:   Thu,  4 Feb 2021 16:18:45 +0100
-Message-Id: <20210204151847.91353-8-kernel@esmil.dk>
+Subject: [PATCH 1/9] mmc: atmel-mci: Use new tasklet API
+Date:   Thu,  4 Feb 2021 16:18:39 +0100
+Message-Id: <20210204151847.91353-2-kernel@esmil.dk>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210204151847.91353-1-kernel@esmil.dk>
 References: <20210204151847.91353-1-kernel@esmil.dk>
@@ -88,57 +88,34 @@ commit 12cc923f1ccc ("tasklet: Introduce new initialization API")
 
 Signed-off-by: Emil Renner Berthing <kernel@esmil.dk>
 ---
- drivers/mmc/host/uniphier-sd.c | 14 ++++++--------
- 1 file changed, 6 insertions(+), 8 deletions(-)
+ drivers/mmc/host/atmel-mci.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
-index a6cd16771d4e..2413b6750cec 100644
---- a/drivers/mmc/host/uniphier-sd.c
-+++ b/drivers/mmc/host/uniphier-sd.c
-@@ -81,9 +81,9 @@ static void uniphier_sd_dma_endisable(struct tmio_mmc_host *host, int enable)
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index 632412066eda..807177c953f3 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -1719,9 +1719,9 @@ static void atmci_detect_change(struct timer_list *t)
+ 	}
  }
  
- /* external DMA engine */
--static void uniphier_sd_external_dma_issue(unsigned long arg)
-+static void uniphier_sd_external_dma_issue(struct tasklet_struct *t)
+-static void atmci_tasklet_func(unsigned long priv)
++static void atmci_tasklet_func(struct tasklet_struct *t)
  {
--	struct tmio_mmc_host *host = (void *)arg;
-+	struct tmio_mmc_host *host = from_tasklet(host, t, dma_issue);
- 	struct uniphier_sd_priv *priv = uniphier_sd_priv(host);
+-	struct atmel_mci	*host = (struct atmel_mci *)priv;
++	struct atmel_mci        *host = from_tasklet(host, t, tasklet);
+ 	struct mmc_request	*mrq = host->mrq;
+ 	struct mmc_data		*data = host->data;
+ 	enum atmel_mci_state	state = host->state;
+@@ -2496,7 +2496,7 @@ static int atmci_probe(struct platform_device *pdev)
  
- 	uniphier_sd_dma_endisable(host, 1);
-@@ -190,8 +190,7 @@ static void uniphier_sd_external_dma_request(struct tmio_mmc_host *host,
- 	host->chan_rx = chan;
- 	host->chan_tx = chan;
+ 	host->mapbase = regs->start;
  
--	tasklet_init(&host->dma_issue, uniphier_sd_external_dma_issue,
--		     (unsigned long)host);
-+	tasklet_setup(&host->dma_issue, uniphier_sd_external_dma_issue);
- }
+-	tasklet_init(&host->tasklet, atmci_tasklet_func, (unsigned long)host);
++	tasklet_setup(&host->tasklet, atmci_tasklet_func);
  
- static void uniphier_sd_external_dma_release(struct tmio_mmc_host *host)
-@@ -228,9 +227,9 @@ static const struct tmio_mmc_dma_ops uniphier_sd_external_dma_ops = {
- 	.dataend = uniphier_sd_external_dma_dataend,
- };
- 
--static void uniphier_sd_internal_dma_issue(unsigned long arg)
-+static void uniphier_sd_internal_dma_issue(struct tasklet_struct *t)
- {
--	struct tmio_mmc_host *host = (void *)arg;
-+	struct tmio_mmc_host *host = from_tasklet(host, t, dma_issue);
- 	unsigned long flags;
- 
- 	spin_lock_irqsave(&host->lock, flags);
-@@ -309,8 +308,7 @@ static void uniphier_sd_internal_dma_request(struct tmio_mmc_host *host,
- 
- 	host->chan_tx = (void *)0xdeadbeaf;
- 
--	tasklet_init(&host->dma_issue, uniphier_sd_internal_dma_issue,
--		     (unsigned long)host);
-+	tasklet_setup(&host->dma_issue, uniphier_sd_internal_dma_issue);
- }
- 
- static void uniphier_sd_internal_dma_release(struct tmio_mmc_host *host)
+ 	ret = request_irq(irq, atmci_interrupt, 0, dev_name(&pdev->dev), host);
+ 	if (ret) {
 -- 
 2.30.0
 
