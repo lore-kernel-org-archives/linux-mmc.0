@@ -2,91 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ADA8C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 13:08:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BF2CC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:20:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21AB664E34
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 13:08:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5ADE664E41
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Feb 2021 15:20:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236254AbhBDNIN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Feb 2021 08:08:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36620 "EHLO
+        id S237179AbhBDPUg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Feb 2021 10:20:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236258AbhBDNII (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 08:08:08 -0500
-Received: from mail-out.m-online.net (mail-out.m-online.net [IPv6:2001:a60:0:28:0:1:25:1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E215C0613D6;
-        Thu,  4 Feb 2021 05:07:28 -0800 (PST)
-Received: from frontend01.mail.m-online.net (unknown [192.168.8.182])
-        by mail-out.m-online.net (Postfix) with ESMTP id 4DWf3J5MzLz1s46W;
-        Thu,  4 Feb 2021 14:07:22 +0100 (CET)
-Received: from localhost (dynscan1.mnet-online.de [192.168.6.70])
-        by mail.m-online.net (Postfix) with ESMTP id 4DWf3G5DpDz1t6pd;
-        Thu,  4 Feb 2021 14:07:22 +0100 (CET)
-X-Virus-Scanned: amavisd-new at mnet-online.de
-Received: from mail.mnet-online.de ([192.168.8.182])
-        by localhost (dynscan1.mail.m-online.net [192.168.6.70]) (amavisd-new, port 10024)
-        with ESMTP id rMuKl75E9QlS; Thu,  4 Feb 2021 14:07:20 +0100 (CET)
-X-Auth-Info: D0bG0TMQNvtHsjyTpMg0Mv2GMX5Ec5sREluid0wh+VU=
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.mnet-online.de (Postfix) with ESMTPSA;
-        Thu,  4 Feb 2021 14:07:20 +0100 (CET)
-Subject: Re: [PATCH 1/2] mmc: mmci: enable MMC_CAP_NEED_RSP_BUSY
-To:     Yann GAUTIER <yann.gautier@foss.st.com>, ulf.hansson@linaro.org
-Cc:     linux@armlinux.org.uk, linus.walleij@linaro.org,
-        ludovic.barre@foss.st.com, per.forlin@linaro.org,
-        huyue2@yulong.com, wsa+renesas@sang-engineering.com,
-        vbadigan@codeaurora.org, adrian.hunter@intel.com,
-        p.zabel@pengutronix.de, swboyd@chromium.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20210204120547.15381-1-yann.gautier@foss.st.com>
- <20210204120547.15381-2-yann.gautier@foss.st.com>
- <0ac77e8d-9400-abc8-f963-943e9cba94db@denx.de>
- <9fbd2fca-e4f5-d28f-74de-d9906cc232bf@foss.st.com>
-From:   Marek Vasut <marex@denx.de>
-Message-ID: <50d92d9a-b42e-b313-a0c7-ff0848a3c673@denx.de>
-Date:   Thu, 4 Feb 2021 14:07:20 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.7.0
+        with ESMTP id S237223AbhBDPTt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Feb 2021 10:19:49 -0500
+Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CAD41C061788;
+        Thu,  4 Feb 2021 07:19:09 -0800 (PST)
+Received: by mail-ed1-x52a.google.com with SMTP id y18so4522479edw.13;
+        Thu, 04 Feb 2021 07:19:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=sender:from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=kA7iM6G+tHsHX5qw3wt51wVo7E+zCJZCLkoKnrDKq4Y=;
+        b=W4cfV5/0dL0av9SOsoeYkRGZsmBPL2hqK42EOZerpGQsi95XPA4dnspkZkdpAAMxSV
+         pkb1zX3XZmCCxKcJYAZ2QT8iUpEbAXozdkFoXAcgvC9vCHP4mWtSdBjYteMEQnpxQ+M9
+         4ZT7Rg5fFI+ziKmlcRx3AE9wuiTaZhQWlslkBkfz1JdfvwAbG7AQI2EHg/hs1LRkYx2u
+         9QZF+bsyZ8HOUIeZ/32EINf43pmwMmIJgv6ilOFsU4JRaLTuQn2Dt2b5AgSzB9U0aKUy
+         +lMc95NaqxZwzHg/4lAZl7JAeQQeoXe7gxLfXRs2NfoDKGIMeqn5fXKbcBHPfZRRvmQ5
+         jTAA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:sender:from:to:cc:subject:date:message-id
+         :in-reply-to:references:mime-version:content-transfer-encoding;
+        bh=kA7iM6G+tHsHX5qw3wt51wVo7E+zCJZCLkoKnrDKq4Y=;
+        b=cwLATTB/HNGus3jX8HnhtK7QSpeTlVw2TrfjC5SiLcOeFUKfaliKb6RuMUWuvl50Nk
+         nHGPrp4e1i5SbF97osWvrprGL1Fc/FITTyvjlGO4EuA5qG7HR0PKnZActLC5SfMLRZsn
+         BwJY69lAKrpqD8HD6OKBFhSU84PMucmRHU65d0BuA5LeIMU2oVuKaa1q22Ww9T+egh9y
+         fQ+AHRwtT3+TJBjAejI8pAtm0nLuLH1VjCOFujoT4IT7IBZVL1DhVZWAopOj3CGptbWG
+         mdIzKYEIUDTXvAJlfuuz1dtT3QhLU7hpkLWDDx4Fxn7zxa7+bLxn2rDD2PvtUea72q2y
+         fn6Q==
+X-Gm-Message-State: AOAM530nt6kpuXA3+oUw6D5JOiEWn+OI5RS7DINnRWA9pIZulbVPhXrc
+        Fp63U0SCwL9R/iH0yhTLrrMsKiRhYAhPu+Kn
+X-Google-Smtp-Source: ABdhPJwfG3Ce99XsaCXs91f6lfYXHfdV7XQFeKGSYxh2mMSowdr1KYmIsT98CTsuVcyOQJJGG9coHQ==
+X-Received: by 2002:a05:6402:3487:: with SMTP id v7mr8562518edc.68.1612451948549;
+        Thu, 04 Feb 2021 07:19:08 -0800 (PST)
+Received: from stitch.. ([80.71.140.73])
+        by smtp.gmail.com with ESMTPSA id a6sm2600001ejs.79.2021.02.04.07.19.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 04 Feb 2021 07:19:08 -0800 (PST)
+Sender: Emil Renner Berthing <emil.renner.berthing@gmail.com>
+From:   Emil Renner Berthing <kernel@esmil.dk>
+To:     linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org
+Cc:     Emil Renner Berthing <kernel@esmil.dk>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Manuel Lauss <manuel.lauss@gmail.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Ben Dooks <ben-linux@fluff.org>, Alex Dubov <oakad@yahoo.com>,
+        Bruce Chang <brucechang@via.com.tw>,
+        Harald Welte <HaraldWelte@viatech.com>,
+        Pierre Ossman <pierre@ossman.eu>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 2/9] mmc: au1xmmc: Use new tasklet API
+Date:   Thu,  4 Feb 2021 16:18:40 +0100
+Message-Id: <20210204151847.91353-3-kernel@esmil.dk>
+X-Mailer: git-send-email 2.30.0
+In-Reply-To: <20210204151847.91353-1-kernel@esmil.dk>
+References: <20210204151847.91353-1-kernel@esmil.dk>
 MIME-Version: 1.0
-In-Reply-To: <9fbd2fca-e4f5-d28f-74de-d9906cc232bf@foss.st.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/4/21 1:54 PM, Yann GAUTIER wrote:
-> On 2/4/21 1:26 PM, Marek Vasut wrote:
->> On 2/4/21 1:05 PM, yann.gautier@foss.st.com wrote:
->>> From: Yann Gautier <yann.gautier@foss.st.com>
->>>
->>> To properly manage commands awaiting R1B responses, the capability
->>> MMC_CAP_NEED_RSP_BUSY is enabled in mmci driver, for variants that
->>> manage busy detection.
->>> This R1B management needs both the flags MMC_CAP_NEED_RSP_BUSY and
->>> MMC_CAP_WAIT_WHILE_BUSY to be enabled together.
->>>
->> Shouldn't this have Fixes: tag ?
-> 
-> Hi Marek,
-> 
-> There is no unique patch that brought the issue, but a combination of 
-> several things:
-> - The series that brought the MMC_CAP_NEED_RSP_BUSY flag [1]
-> - The series that enabled MMC_ERASE for all hosts [2] (removal of 
-> MMC_CAP_ERASE)
-> 
-> But you're right, this patch may go on v5.8.x kernel and newer versions.
+This converts the driver to use the new tasklet API introduced in
+commit 12cc923f1ccc ("tasklet: Introduce new initialization API")
 
-I think there will be quite some interest in 5.10.y LTS on the MP1 from 
-the various industrial/embedded users, so it would be nice to have that 
-5.10.y well maintained with necessary backports / fixes :)
+Signed-off-by: Emil Renner Berthing <kernel@esmil.dk>
+---
+ drivers/mmc/host/au1xmmc.c | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
+index bd00515fbaba..0acc237843f7 100644
+--- a/drivers/mmc/host/au1xmmc.c
++++ b/drivers/mmc/host/au1xmmc.c
+@@ -253,9 +253,9 @@ static void au1xmmc_finish_request(struct au1xmmc_host *host)
+ 	mmc_request_done(host->mmc, mrq);
+ }
+ 
+-static void au1xmmc_tasklet_finish(unsigned long param)
++static void au1xmmc_tasklet_finish(struct tasklet_struct *t)
+ {
+-	struct au1xmmc_host *host = (struct au1xmmc_host *) param;
++	struct au1xmmc_host *host = from_tasklet(host, t, finish_task);
+ 	au1xmmc_finish_request(host);
+ }
+ 
+@@ -363,9 +363,9 @@ static void au1xmmc_data_complete(struct au1xmmc_host *host, u32 status)
+ 	au1xmmc_finish_request(host);
+ }
+ 
+-static void au1xmmc_tasklet_data(unsigned long param)
++static void au1xmmc_tasklet_data(struct tasklet_struct *t)
+ {
+-	struct au1xmmc_host *host = (struct au1xmmc_host *)param;
++	struct au1xmmc_host *host = from_tasklet(host, t, data_task);
+ 
+ 	u32 status = __raw_readl(HOST_STATUS(host));
+ 	au1xmmc_data_complete(host, status);
+@@ -1037,11 +1037,9 @@ static int au1xmmc_probe(struct platform_device *pdev)
+ 	if (host->platdata)
+ 		mmc->caps &= ~(host->platdata->mask_host_caps);
+ 
+-	tasklet_init(&host->data_task, au1xmmc_tasklet_data,
+-			(unsigned long)host);
++	tasklet_setup(&host->data_task, au1xmmc_tasklet_data);
+ 
+-	tasklet_init(&host->finish_task, au1xmmc_tasklet_finish,
+-			(unsigned long)host);
++	tasklet_setup(&host->finish_task, au1xmmc_tasklet_finish);
+ 
+ 	if (has_dbdma()) {
+ 		ret = au1xmmc_dbdma_init(host);
+-- 
+2.30.0
+
