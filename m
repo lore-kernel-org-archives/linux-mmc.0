@@ -2,131 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-21.7 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-15.6 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84EB2C433DB
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Feb 2021 13:14:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 758F2C433DB
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Feb 2021 18:47:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 41D0364FBC
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Feb 2021 13:14:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 405BA64F19
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Feb 2021 18:47:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231274AbhBENMd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Feb 2021 08:12:33 -0500
-Received: from antares.kleine-koenig.org ([94.130.110.236]:34562 "EHLO
-        antares.kleine-koenig.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231284AbhBENJ7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Feb 2021 08:09:59 -0500
-Received: by antares.kleine-koenig.org (Postfix, from userid 1000)
-        id D67A7AED6A1; Fri,  5 Feb 2021 14:08:50 +0100 (CET)
-From:   =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
-To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc:     Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        kvm@vger.kernel.org, David Airlie <airlied@linux.ie>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        Jaroslav Kysela <perex@perex.cz>,
-        Eric Anholt <eric@anholt.net>,
-        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig.org@pengutronix.de>, linux-i2c@vger.kernel.org,
-        Jiri Slaby <jirislaby@kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-watchdog@vger.kernel.org, linux-rtc@vger.kernel.org,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Takashi Iwai <tiwai@suse.com>,
-        Russell King - ARM Linux admin <linux@armlinux.org.uk>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        linux-serial@vger.kernel.org, linux-input@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Mike Leach <mike.leach@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        alsa-devel@alsa-project.org,
-        Suzuki K Poulose <suzuki.poulose@arm.com>,
-        coresight@lists.linaro.org, Vladimir Zapolskiy <vz@mleia.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Matt Mackall <mpm@selenic.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Cornelia Huck <cohuck@redhat.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-spi@vger.kernel.org,
-        Vinod Koul <vkoul@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-        linux-crypto@vger.kernel.org, Daniel Vetter <daniel@ffwll.ch>,
-        Leo Yan <leo.yan@linaro.org>, dmaengine@vger.kernel.org
-Subject: [PATCH] coresight: etm4x: Fix merge resolution for amba rework
-Date:   Fri,  5 Feb 2021 14:08:47 +0100
-Message-Id: <20210205130848.20009-1-uwe@kleine-koenig.org>
-X-Mailer: git-send-email 2.29.2
+        id S233521AbhBEREb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 Feb 2021 12:04:31 -0500
+Received: from mga03.intel.com ([134.134.136.65]:27726 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233719AbhBERB1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 5 Feb 2021 12:01:27 -0500
+IronPort-SDR: w8Z0cBMJJDsKPS4DDWlRTXx9HTkKARRfghNcWDe2sMzeK8XXTvn/YB3U4TFfPLIVv+JjbDiqFf
+ 6yGMmXiSBLlQ==
+X-IronPort-AV: E=McAfee;i="6000,8403,9886"; a="181537266"
+X-IronPort-AV: E=Sophos;i="5.81,155,1610438400"; 
+   d="scan'208";a="181537266"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Feb 2021 10:43:10 -0800
+IronPort-SDR: Q2LLkeL2CXHCPzqY8eW2S/QyhOm5+7Xw5DMsNzxHWO3d09gzEz58S0hIrUd+tF+OO3fRP/qX+A
+ kFzp0btcoZDQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.81,155,1610438400"; 
+   d="scan'208";a="583877176"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.149]) ([10.237.72.149])
+  by fmsmga005.fm.intel.com with ESMTP; 05 Feb 2021 10:43:08 -0800
+Subject: Re: [PATCH] sdhci: stop poking into swiotlb internals
+To:     Christoph Hellwig <hch@lst.de>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, Jiri Slaby <jslaby@suse.cz>
+References: <20210205162346.2847165-1-hch@lst.de>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <195d7168-3be0-91ea-1c5b-e850d5c12582@intel.com>
+Date:   Fri, 5 Feb 2021 20:43:10 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210205162346.2847165-1-hch@lst.de>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This was non-trivial to get right because commits
-c23bc382ef0e ("coresight: etm4x: Refactor probing routine") and
-5214b563588e ("coresight: etm4x: Add support for sysreg only devices")
-changed the code flow considerably. With this change the driver can be
-built again.
++ Jiri Slaby <jslaby@suse.cz>
 
-Fixes: 0573d3fa4864 ("Merge branch 'devel-stable' of git://git.armlinux.org.uk/~rmk/linux-arm into char-misc-next")
-Signed-off-by: Uwe Kleine-König <uwe@kleine-koenig.org>
----
-On Fri, Feb 05, 2021 at 12:07:09PM +0100, Greg Kroah-Hartman wrote:
-> On Fri, Feb 05, 2021 at 11:56:15AM +0100, Uwe Kleine-König wrote:
-> > I didn't compile test, but I'm willing to bet your resolution is wrong.
-> > You have no return statement in etm4_remove_dev() but its return type is
-> > int and etm4_remove_amba() still returns int but should return void.
+On 5/02/21 6:23 pm, Christoph Hellwig wrote:
+> Use the proper API to query the max mapping size instead of guessing
+> it based on swiotlb internals.
 > 
-> Can you send a patch to fix this up?
-
-Sure, here it comes. As I'm unsure if you want to squash it into the
-merge or want to keep it separate I crafted a commit message. If you
-prefer squashing feel free to do so.
-
-This change corresponds to the merge resolution I suggested before.
-
-Best regards
-Uwe
-
- drivers/hwtracing/coresight/coresight-etm4x-core.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/hwtracing/coresight/coresight-etm4x-core.c b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-index bc55b261af23..c8ecd91e289e 100644
---- a/drivers/hwtracing/coresight/coresight-etm4x-core.c
-+++ b/drivers/hwtracing/coresight/coresight-etm4x-core.c
-@@ -1906,15 +1906,16 @@ static int __exit etm4_remove_dev(struct etmv4_drvdata *drvdata)
- 	cpus_read_unlock();
- 
- 	coresight_unregister(drvdata->csdev);
-+
-+	return 0;
- }
- 
--static int __exit etm4_remove_amba(struct amba_device *adev)
-+static void __exit etm4_remove_amba(struct amba_device *adev)
- {
- 	struct etmv4_drvdata *drvdata = dev_get_drvdata(&adev->dev);
- 
- 	if (drvdata)
--		return etm4_remove_dev(drvdata);
--	return 0;
-+		etm4_remove_dev(drvdata);
- }
- 
- static int __exit etm4_remove_platform_dev(struct platform_device *pdev)
--- 
-2.29.2
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  drivers/mmc/host/sdhci.c | 9 ++-------
+>  1 file changed, 2 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 646823ddd31715..2d73407ee52ec7 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -20,7 +20,6 @@
+>  #include <linux/slab.h>
+>  #include <linux/scatterlist.h>
+>  #include <linux/sizes.h>
+> -#include <linux/swiotlb.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/pm_runtime.h>
+>  #include <linux/of.h>
+> @@ -4582,12 +4581,8 @@ int sdhci_setup_host(struct sdhci_host *host)
+>  		mmc->max_segs = SDHCI_MAX_SEGS;
+>  	} else if (host->flags & SDHCI_USE_SDMA) {
+>  		mmc->max_segs = 1;
+> -		if (swiotlb_max_segment()) {
+> -			unsigned int max_req_size = (1 << IO_TLB_SHIFT) *
+> -						IO_TLB_SEGSIZE;
+> -			mmc->max_req_size = min(mmc->max_req_size,
+> -						max_req_size);
+> -		}
+> +		mmc->max_req_size = min_t(size_t, mmc->max_req_size,
+> +					  dma_max_mapping_size(mmc_dev(mmc)));
+>  	} else { /* PIO */
+>  		mmc->max_segs = SDHCI_MAX_SEGS;
+>  	}
+> 
 
