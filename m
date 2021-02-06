@@ -2,225 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C555C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Feb 2021 23:16:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2ADD0C433E0
+	for <linux-mmc@archiver.kernel.org>; Sat,  6 Feb 2021 03:28:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 494B364F97
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Feb 2021 23:16:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D1E4764F9C
+	for <linux-mmc@archiver.kernel.org>; Sat,  6 Feb 2021 03:28:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230178AbhBEXOw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 Feb 2021 18:14:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36204 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231860AbhBEK67 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 Feb 2021 05:58:59 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91A4FC06121E
-        for <linux-mmc@vger.kernel.org>; Fri,  5 Feb 2021 02:58:18 -0800 (PST)
-Received: from ptx.hi.pengutronix.de ([2001:67c:670:100:1d::c0])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1l7ymj-00035C-2Q; Fri, 05 Feb 2021 11:56:21 +0100
-Received: from ukl by ptx.hi.pengutronix.de with local (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1l7ymd-0004Fb-NN; Fri, 05 Feb 2021 11:56:15 +0100
-Date:   Fri, 5 Feb 2021 11:56:15 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc:     linux-fbdev@vger.kernel.org, Cornelia Huck <cohuck@redhat.com>,
-        kvm@vger.kernel.org, David Airlie <airlied@linux.ie>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        dri-devel@lists.freedesktop.org, Jaroslav Kysela <perex@perex.cz>,
-        Eric Anholt <eric@anholt.net>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig.org@pengutronix.de>, linux-i2c@vger.kernel.org,
-        Jiri Slaby <jirislaby@kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        linux-rtc@vger.kernel.org,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Russell King - ARM Linux admin <linux@armlinux.org.uk>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        linux-serial@vger.kernel.org, linux-input@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Mike Leach <mike.leach@linaro.org>,
-        linux-watchdog@vger.kernel.org, alsa-devel@alsa-project.org,
-        Suzuki K Poulose <suzuki.poulose@arm.com>,
-        linux-kernel@vger.kernel.org, coresight@lists.linaro.org,
-        Vladimir Zapolskiy <vz@mleia.com>,
-        Eric Auger <eric.auger@redhat.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Mark Brown <broonie@kernel.org>,
-        Matt Mackall <mpm@selenic.com>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        kernel@pengutronix.de, linux-arm-kernel@lists.infradead.org,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        linux-mmc@vger.kernel.org, Takashi Iwai <tiwai@suse.com>,
-        linux-spi@vger.kernel.org, Vinod Koul <vkoul@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>, linux-crypto@vger.kernel.org,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Leo Yan <leo.yan@linaro.org>, dmaengine@vger.kernel.org
-Subject: Re: [GIT PULL] immutable branch for amba changes targeting v5.12-rc1
-Message-ID: <20210205105615.qumu45huvntf2v4j@pengutronix.de>
-References: <20210126165835.687514-1-u.kleine-koenig@pengutronix.de>
- <20210202135350.36nj3dmcoq3t7gcf@pengutronix.de>
- <YBlcTXlxemmC2lgr@kroah.com>
- <20210204165224.GA1463@shell.armlinux.org.uk>
- <YBwnUrQqlAz2LDPI@kroah.com>
- <20210204165951.GB1463@shell.armlinux.org.uk>
- <20210204181551.ethtuzm65flujmwe@pengutronix.de>
- <20210205093744.kr4rc7yvfiq6wimq@pengutronix.de>
- <YB0baUzgvpd+EoO6@kroah.com>
+        id S230313AbhBFD20 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 Feb 2021 22:28:26 -0500
+Received: from mail-dm6nam08on2130.outbound.protection.outlook.com ([40.107.102.130]:59361
+        "EHLO NAM04-DM6-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S231872AbhBFDPn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 5 Feb 2021 22:15:43 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=EWJmBwXRe2pEa/Z6LDhMqSxZwYwNnrFQzqrmtViAJEH5iVeMLuQr6wvUud1zpGdXZwp8ORWR8D5EKVtPWtazdPLOgy/T9FgzJ9Q4vDCGV1pww+9vLpIpwVYeADGn14NhVrF8PdJdvzCWtWfTnfOecYWNLIMdNIN0tBtaAZ280rRcl4dJ1rWg0DOe5MDW6MeoX/4kd5765vjn4VsKCWXmK4WrMbqq0AsmTnWBBm45dk0iPrJ87c3TgeT/J5rcJVAkQtW+CaUnXA4jGVWWwuaauAi4teqdsygS/uwwy9pi7Jz/np+h4duYqkvGnhkwUEkvxEMJj5C+Jibv6XjT74Exew==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=U3vOdL3NFBmvWoeSFuaYqS+F7qA47NxsQG+biV4KObM=;
+ b=ZmeaxvBqVoYA0DPAu+4kJtWYWfbDA7pqsbpXNKU4q3qtaN4+otrduXLPuzGH2s1LnjP55rpoJpKIhOnuySrYhjqpFtPWYP4WyD51FXak6rl1gvumLNs2D8rczugoVtM2LMxMbJ8dpo+tlJLM0LoxlNaUjJvFi5ahZ5cW79598XCWmikumHe4x8Qg2oxm2jkKY98dbhlKHS7NM6AP968i3lQWOzFu0wMieVDnSbJ3PhiRqmNuI7xFec/qd/uZQeGNQmD7MGfbZpyje+g2y3OfCXS1CFftZDdgN7UgswESPznNcqk3wWRR/iJNzyyM+S6FsGT3k6meCBvSJqxWAXO+zg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=bayhubtech.com; dmarc=pass action=none
+ header.from=bayhubtech.com; dkim=pass header.d=bayhubtech.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=towerbridgetechnology.onmicrosoft.com;
+ s=selector2-towerbridgetechnology-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=U3vOdL3NFBmvWoeSFuaYqS+F7qA47NxsQG+biV4KObM=;
+ b=Zhm8mvLCZUQylvZFZw6dhZupshvsWhfB+t5uAEXTl/OUdLSUF7qAwjP58q4Ed5s9GmcV1sYcu9DyGdao8n1vAjVaX1xtbuMweS+H8QJY4I64xoFj8j70FZcZKYbOrsqAuLVC/yDAqMy2qXGQQHuCuFZY2gF7m2FcRoJtZQcT7eg=
+Authentication-Results: intel.com; dkim=none (message not signed)
+ header.d=none;intel.com; dmarc=none action=none header.from=bayhubtech.com;
+Received: from SJ0PR16MB4175.namprd16.prod.outlook.com (2603:10b6:a03:324::13)
+ by BYAPR16MB2918.namprd16.prod.outlook.com (2603:10b6:a03:e3::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3805.19; Sat, 6 Feb
+ 2021 01:37:08 +0000
+Received: from SJ0PR16MB4175.namprd16.prod.outlook.com
+ ([fe80::ad55:4b6a:db35:1195]) by SJ0PR16MB4175.namprd16.prod.outlook.com
+ ([fe80::ad55:4b6a:db35:1195%6]) with mapi id 15.20.3825.023; Sat, 6 Feb 2021
+ 01:37:08 +0000
+From:   Shirley Her <shirley.her@bayhubtech.com>
+To:     adrian_hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     chevron.li@bayhubtech.com, shaper.liu@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com
+Subject: [PATCH V1 1/1] mmc:sdhci-pci-o2micro: Bug fix for SDR104 HW tuning failure
+Date:   Fri,  5 Feb 2021 17:37:02 -0800
+Message-Id: <20210206013702.3362-1-shirley.her@bayhubtech.com>
+X-Mailer: git-send-email 2.17.1
+Content-Type: text/plain
+X-Originating-IP: [209.36.105.184]
+X-ClientProxiedBy: SJ0PR05CA0032.namprd05.prod.outlook.com
+ (2603:10b6:a03:33f::7) To SJ0PR16MB4175.namprd16.prod.outlook.com
+ (2603:10b6:a03:324::13)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="vslstwmibba5nymi"
-Content-Disposition: inline
-In-Reply-To: <YB0baUzgvpd+EoO6@kroah.com>
-X-SA-Exim-Connect-IP: 2001:67c:670:100:1d::c0
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from localhost.localdomain (209.36.105.184) by SJ0PR05CA0032.namprd05.prod.outlook.com (2603:10b6:a03:33f::7) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3846.11 via Frontend Transport; Sat, 6 Feb 2021 01:37:08 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 078feb3f-8816-4409-acaa-08d8ca3fb79c
+X-MS-TrafficTypeDiagnostic: BYAPR16MB2918:
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <BYAPR16MB29185CECA4661E6299A0667A8BB19@BYAPR16MB2918.namprd16.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:5797;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: MIDR1v4hRrP19qFGEtsEwvYgxYteEmRLjw4xyAQSb/lyrqgEJeP/rpW/hty5CBhJ6rm2Fz5cz2ACQQBZAs13FIYRzssfhSDc6uejcEk2GUM3i48DPY+k7cej4zD5YlVHGQeCrpkIG9wHa9gbsTSM77+HYqo2XZUfvxmAexdPxPzbZcBDdU1IfDYrUcjRZZiF+FBaAjNk8E7hoBWX/Ze1nJNPg/85fZVdA6ASh3vme+3LqsgXtWDC0Mcp2V+9+QWNb9L4mwQkx/FzOJeR3TQ9zgI4T/PgF3NihU3dShXSrcPVwQwiVjF0xGXqfgJzsvOoKBNyKsIEbMuLUp9utHdsl23gdsGqvdDhsZxyJlRpTv+SJZbYR92VwqhkaXn9dowQRkUIbBjDgqUww/khplGB6DCoPmlmsp8YBPdgAD1ucdnLbh/3wa72GP5pI+gyEiEjw2p6/a4MJYQuzsdshqq2o0aPUd46zFHttvtX1x6z/ZAxgVihrqbP/b56wJqhIdWUi2yazEPDAMZKUzt0QCw6pId+8L4JZruTDjQxig/V58OCmNjcb3mOJX9D+m6fw2VbxipiDjPG1EhNPfhUvJ0y3g==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SJ0PR16MB4175.namprd16.prod.outlook.com;PTR:;CAT:NONE;SFS:(39830400003)(366004)(396003)(376002)(346002)(136003)(478600001)(6506007)(107886003)(66946007)(6666004)(5660300002)(66476007)(2906002)(52116002)(86362001)(44832011)(186003)(4326008)(1076003)(8936002)(8676002)(26005)(36756003)(16526019)(69590400011)(6512007)(2616005)(6486002)(83380400001)(316002)(956004)(66556008);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?rFSy1lHNIWW5mo5w1UWE7XF3K54y+lRJFwBU+MIVjbS8zUY7CCuAhNuUieA6?=
+ =?us-ascii?Q?BTUxfDrjlVjvSeKAe2HmolEL/jTdLWh060HuAn6w8OX0BKip7cIWzx0JM/7T?=
+ =?us-ascii?Q?AG6PcbbGsO6qPX6+uLUR0V4aZDELuZ8A3LiKd8UnUUiB7P03zEw1CVyG0oq2?=
+ =?us-ascii?Q?Aqb1q1AnYmNDrQxeofWQgv8njI6wyDY6iev4R//Kwl+VJzxXQ5QFud5wsMeH?=
+ =?us-ascii?Q?h2mbEzk4zB01zrf4Xb+z5f+EwyQTXH6qpWwTxE+XKaLK2tpHDTRsdNpqu1Rt?=
+ =?us-ascii?Q?NLz5IJnJ3dNnMDzYdlCWZpN+wpqCuR3vpzh8rucaSSKd9QtbPQQCPjD/SrBc?=
+ =?us-ascii?Q?rPMrJEP1LFl49/DNX+JT1kBDcAUG16NVJf2jJRu3g6zk5MCGGiKFiGrQE4zO?=
+ =?us-ascii?Q?/AzqvCgROdfDEwE6XVDNTNUNEDqTclhX4Nr7QFSz7nS/PS0VPfYNKm6L4JAo?=
+ =?us-ascii?Q?SZq6iT66F+fbBcw9uSGcPfTB/KL3mVqlF0f2rcApXE/Z6HY0CaGFHYJDeZpQ?=
+ =?us-ascii?Q?j+0XruHOGnBulEMLS4FYFvBZJihLjSLprzwulwFTaErUxiW17fY3NoeZJ7tu?=
+ =?us-ascii?Q?U5CIdj55RLXaC5lid9giLDYtrv94uOikcIWqap9UdwhxQG02IaRoa4Clk6Vp?=
+ =?us-ascii?Q?BlAdMLTiEgEdVIWVdZ4wx+6jld7eWzhEtL/xeFBmUHSDcYAd11CuzVUGstNv?=
+ =?us-ascii?Q?I6FWHcv2VcvguzjgbJJj0n4hyBZ5eT0dGUHz96Ln9AQb20cFYjHZRe3GMw4Q?=
+ =?us-ascii?Q?pff6Nfywil1SQeIzvM7eilEte5Sx1aoepjamlURDQgZoZWBGuLm6eGUrWW2e?=
+ =?us-ascii?Q?kvtJglAUgs3QLhW3G9tbRs4NKjgY63QPuii7nf9/zIWHH5FbpcV2mQbQ0h7W?=
+ =?us-ascii?Q?6Mc4rqHB77cp39lg74SwStNmBH1C00QTeR1CuJ86AvCuhm/cEEs1FbHAeGwN?=
+ =?us-ascii?Q?Iw5udBRDR+ZYv09SLBntYUslnQ+EBKtqu9SRxfCSrscfhxaZYoPQ0IwIYAJS?=
+ =?us-ascii?Q?qZhFhhDW47F3RtZAU2Jf+ZEbVybJzKZ7lYBNHI8GaTPbPOHKiVoakGFY8upX?=
+ =?us-ascii?Q?T0ML5pXwstTz9l0qUXjjNj+RaS/qmeUv20J18osoc0Q6Z2CzGihtp5vlW6Am?=
+ =?us-ascii?Q?ki1EsX13sYwVD5Jlc48os4mh3ei9mo/ivgPiwdf7KtcXgFb8/gnjDLCg8OpM?=
+ =?us-ascii?Q?P1TIjfWyk3TEv7uTVtOEX3ZbWXpXpP5Na81kvhLX0AITGuSFRY4Twj3RudES?=
+ =?us-ascii?Q?hJzsY35rOAKadLV9q8aGRoQAsJ9QoIr2AEavNuX5ET8tkPeTBhxAlyh0+Okl?=
+ =?us-ascii?Q?CWFEQ1ysGtzumlQK4R0t7+up?=
+X-OriginatorOrg: bayhubtech.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 078feb3f-8816-4409-acaa-08d8ca3fb79c
+X-MS-Exchange-CrossTenant-AuthSource: SJ0PR16MB4175.namprd16.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Feb 2021 01:37:08.6826
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 0a7aae2b-8f2e-44df-ba2f-42de7f93c642
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: wBjiuYvgo73ij97oqLWqgBwsUKdYEyTkjJ8RVxsuJlN4dAu+Cbza4dBmeGXC1TfrAQwS+HoapQ2BmQES36qzmNreNze9cGgSgLiyRjDdvdc=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR16MB2918
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Force chip enter L0 power state during SDR104 HW tuning to avoid tuning failure
 
---vslstwmibba5nymi
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
+---
+change in V1:
+1. Force chip enter L0 power mode before HW tuning
+2. Cancel force chip enter L0 power mode after HW tuning
+---
+---
+ drivers/mmc/host/sdhci-pci-o2micro.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
-On Fri, Feb 05, 2021 at 11:18:17AM +0100, Greg Kroah-Hartman wrote:
-> On Fri, Feb 05, 2021 at 10:37:44AM +0100, Uwe Kleine-K=F6nig wrote:
-> > Hello Russell, hello Greg,
-> >=20
-> > On Thu, Feb 04, 2021 at 07:15:51PM +0100, Uwe Kleine-K=F6nig wrote:
-> > > On Thu, Feb 04, 2021 at 04:59:51PM +0000, Russell King - ARM Linux ad=
-min wrote:
-> > > > On Thu, Feb 04, 2021 at 05:56:50PM +0100, Greg Kroah-Hartman wrote:
-> > > > > On Thu, Feb 04, 2021 at 04:52:24PM +0000, Russell King - ARM Linu=
-x admin wrote:
-> > > > > > On Tue, Feb 02, 2021 at 03:06:05PM +0100, Greg Kroah-Hartman wr=
-ote:
-> > > > > > > I'm glad to take this through my char/misc tree, as that's wh=
-ere the
-> > > > > > > other coresight changes flow through.  So if no one else obje=
-cts, I will
-> > > > > > > do so...
-> > > > > >=20
-> > > > > > Greg, did you end up pulling this after all? If not, Uwe produc=
-ed a v2.
-> > > > > > I haven't merged v2 yet as I don't know what you've done.
-> > > > >=20
-> > > > > I thought you merged this?
-> > > >=20
-> > > > I took v1, and put it in a branch I've promised in the past not to
-> > > > rebase/rewind. Uwe is now asking for me to take a v2 or apply a pat=
-ch
-> > > > on top.
-> > > >=20
-> > > > The only reason to produce an "immutable" branch is if it's the bas=
-is
-> > > > for some dependent work and you need that branch merged into other
-> > > > people's trees... so the whole "lets produce a v2" is really odd
-> > > > workflow... I'm confused about what I should do, and who has to be
-> > > > informed which option I take.
-> > > >=20
-> > > > I'm rather lost here too.
-> > >=20
-> > > Sorry to have cause this confusion. After I saw that my initial tag
-> > > missed to adapt a driver I wanted to make it easy for you to fix the
-> > > situation.
-> > > So I created a patch to fix it and created a second tag with the patch
-> > > squashed in. Obviously only one of them have to be picked and I hoped
-> > > you (=3D Russell + Greg) would agree which option to pick.
-> > >=20
-> > > My preference would be if you both pick up v2 of the tag to yield a
-> > > history that is bisectable without build problems, but if Russell (who
-> > > already picked up the broken tag) considers his tree immutable and so
-> > > isn't willing to rebase, then picking up the patch is the way to go.
-> >=20
-> > OK, the current state is that Russell applied the patch fixing
-> > drivers/mailbox/arm_mhuv2.c on top of merging my first tag.
-> >=20
-> > So the way forward now is that Greg pulls
-> >=20
-> > 	git://git.armlinux.org.uk/~rmk/linux-arm.git devel-stable
-> >=20
-> > which currently points to=20
-> >=20
-> > 	860660fd829e ("ARM: 9055/1: mailbox: arm_mhuv2: make remove callback r=
-eturn void")
-> >=20
-> > , into his tree that contains the hwtracing changes that conflict with =
-my
-> > changes. @Greg: Is this good enough, or do you require a dedicated tag
-> > to pull that?
-> >=20
-> > I think these conflicting hwtracing changes are not yet in any of Greg's
-> > trees (at least they are not in next).
-> >=20
-> > When I pull
-> >=20
-> > 	https://git.kernel.org/pub/scm/linux/kernel/git/coresight/linux.git ne=
-xt
-> >=20
-> > (currently pointing to 4e73ff249184 ("coresight: etm4x: Handle accesses
-> > to TRCSTALLCTLR")) into 860660fd829e, I get a conflict in
-> > drivers/hwtracing/coresight/coresight-etm4x-core.c as expected. My
-> > resolution looks as follows:
->=20
-> Ok, my resolution looked a bit different.
->=20
-> Can you pull my char-misc-testing branch and verify I got this all
-> pulled in correctly?
+diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+index fa76748d8929..94e3f72f6405 100644
+--- a/drivers/mmc/host/sdhci-pci-o2micro.c
++++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+@@ -33,6 +33,8 @@
+ #define O2_SD_ADMA2		0xE7
+ #define O2_SD_INF_MOD		0xF1
+ #define O2_SD_MISC_CTRL4	0xFC
++#define O2_SD_MISC_CTRL		0x1C0
++#define O2_SD_PWR_FORCE_L0	0x0002
+ #define O2_SD_TUNING_CTRL	0x300
+ #define O2_SD_PLL_SETTING	0x304
+ #define O2_SD_MISC_SETTING	0x308
+@@ -300,6 +302,8 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+ 	int current_bus_width = 0;
++	u32 scratch32 = 0;
++	u16 scratch = 0;
+ 
+ 	/*
+ 	 * This handler only implements the eMMC tuning that is specific to
+@@ -312,6 +316,17 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 	if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
+ 			(opcode != MMC_SEND_TUNING_BLOCK)))
+ 		return -EINVAL;
++
++	/* Force power mode enter L0 */
++	scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
++	scratch |= O2_SD_PWR_FORCE_L0;
++	sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
++
++	/* wait DLL lock, timeout value 5ms */
++	if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
++		scratch32, (scratch32 & O2_DLL_LOCK_STATUS), 1, 5000))
++		pr_warn("%s: DLL can't lock in 5ms after force L0 during tuning.\n",
++				mmc_hostname(host->mmc));
+ 	/*
+ 	 * Judge the tuning reason, whether caused by dll shift
+ 	 * If cause by dll shift, should call sdhci_o2_dll_recovery
+@@ -344,6 +359,11 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+ 		sdhci_set_bus_width(host, current_bus_width);
+ 	}
+ 
++	/* Cancel force power mode enter L0 */
++	scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
++	scratch &= ~(O2_SD_PWR_FORCE_L0);
++	sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
++
+ 	sdhci_reset(host, SDHCI_RESET_CMD);
+ 	sdhci_reset(host, SDHCI_RESET_DATA);
+ 
+-- 
+2.17.1
 
-minor side-note: mentioning the repo url would have simplified that test.
-
-I looked at
-
-	https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/char-misc.git char-=
-misc-testing
-
-commit 0573d3fa48640f0fa6b105ff92dcb02b94d6c1ab now.
-
-I didn't compile test, but I'm willing to bet your resolution is wrong.
-You have no return statement in etm4_remove_dev() but its return type is
-int and etm4_remove_amba() still returns int but should return void.
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---vslstwmibba5nymi
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmAdJEwACgkQwfwUeK3K
-7AkhPggAk0ucNSGkkTWYbQF9BBYOZDKVlqvPHzvkMilvBGuAa1EXhuHHKu3esHxh
-NZf5xH5Lh7cnNyXodWF4Mp20NZfV0VFjzhbfNFexDfO2QfKJhJbATh9YiJ5onzsT
-cbMDvw+fQNUmooGN1gOW4OCiRvEPcYf8Z/TdrAkBXuRDaCYLiqJBPX1PCFTumEr3
-8Lxp3+k4zN9Wpkt17sqmgJxalvUHqNFOuL+1II2APrzMSZHB6T5fNtxEzMXUGXHx
-LzNGWjnnUKovRddHUyjFZu+rr6B/MUELKSYf9WH7lPI6osLnyjQf6vtczDdyZmlP
-PmCOMN9d1QJAKEMe6RJZvyfO22d11w==
-=kmsA
------END PGP SIGNATURE-----
-
---vslstwmibba5nymi--
