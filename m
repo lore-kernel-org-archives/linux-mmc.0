@@ -2,121 +2,164 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2B9FC433E0
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Feb 2021 12:11:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 203DBC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Feb 2021 12:12:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9885E64E85
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Feb 2021 12:11:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C133064DCC
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Feb 2021 12:12:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229581AbhBHMKk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Feb 2021 07:10:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40664 "EHLO
+        id S229878AbhBHMLi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Feb 2021 07:11:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40966 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231699AbhBHMIj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Feb 2021 07:08:39 -0500
-Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53385C06178B
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Feb 2021 04:07:26 -0800 (PST)
-Received: by mail-vs1-xe34.google.com with SMTP id l192so7376235vsd.5
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Feb 2021 04:07:26 -0800 (PST)
+        with ESMTP id S229631AbhBHMJ5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Feb 2021 07:09:57 -0500
+Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36ED7C0617AB
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Feb 2021 04:07:38 -0800 (PST)
+Received: by mail-vs1-xe2b.google.com with SMTP id x201so7402290vsc.0
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Feb 2021 04:07:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=ImspA1BSqvczZ+MWUWIRyfcIF1TY4t53ZG9PfWvHtxQ=;
-        b=AV4fYeCBmYOLfiveuetMK91m+CKQCbIxlcsrEIPQCA/hUQqSTxDqGXDoCivvhmyGRK
-         2rnBAi8pTtT3PmrhPm2jPFeTDjvMztmOBLwjNWKa2/prHJvTNuarzTrO4SRrDNGFODvp
-         F1RmtTiaqyIRXXAUJwGfHz6a3shk6EucHp98b84kHpi7mYaIs6O465KaUYg/7oE54dFD
-         7d0ioAKO0OJjOzcXb0m+kCzhxhgWB0HOP6xeoSvcXARVfzsw8g0Mk2QOZxjzQs4jVBpF
-         By3BMLPSRdeIFtH3LZJ/QpkxVUsUFIaKu2FH7it7M3H/+V76no3eKPTvQlybwOEwqeME
-         o0AQ==
+        bh=Q+j5o1c0su2L6YdF71vWuSQLkAAyzmVika0Z7We4Rac=;
+        b=fGVWBffzUrOIaO3OE9oqhO2bDHkyUt6xA45dv+PjB3q6C2+dLEpXekxAyisHfGOK+K
+         ykgs+JcdTimpWykmP6LCmsZIUB8GrEmDWzU/hg7gooX8xJWFXUZMNORu/vPtadQUMdR4
+         1Om4gc4kgRhtpIllX9VLrQxhtdQKBd9LSk92ZhbA8B22mG00N9T+VjOIAKztk0/F57k1
+         ESTec0UJjqRtFNbSEWwqm6dJFxzWDjgrBfnRX9IS8A1tAtfWhjWG5Ocz9ProgoozNGHR
+         RN2ww2Ey2y0zLA7/edPES5Jf0PRSTh0lN0adOf5qc5lMY8M3+CFTgUVzIED9TKqP7TpX
+         +qUg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=ImspA1BSqvczZ+MWUWIRyfcIF1TY4t53ZG9PfWvHtxQ=;
-        b=XDUw9mq1k/erPkRgjNHMQ36hLK6zUHiA+06irQJeXs7DKlRei2hMP4B72oGPUhhg++
-         Ox3b/FZKg83VST7x/4bvShBpFpCpYbvNaDDBEDHIQBAU8VLoY296UBrSEFrH83/0ZMfu
-         pjiJtTFikDqLzmDi2dylUmjIhSedoCDdDb48PpyESjiCn3FJjjPsvFlo9tvzep3WUmrV
-         vxNY6MsyBZo7qQYfjjFEzr/ZjE1Ci2sOnmk+qoL8nnlVZ6xj/cdsfftod9tIviUBBIup
-         Oyo7MLOdF7H6rPC1WV+BZ/2i+azKSJLH/APP6DVbmDdWha79D+iZSx5tpMXCVuiS8A7z
-         fFug==
-X-Gm-Message-State: AOAM531FCpxYCIeVCZyIWfayAjzqK0PqWoC7JhEYTMVdU7y1BXiNdsLQ
-        mKiYJcs7IL3RmiI/K0n+1b/jxtENHoejjE5XnIswFg==
-X-Google-Smtp-Source: ABdhPJy0o73WHE0A3cv9ExV8w5v32lkjGY7HEi9/2UOqKDYqJj6nA6Rkora+iRan9kSlqrYhNslmxOIgTSZMmVFi/CA=
-X-Received: by 2002:a67:2c82:: with SMTP id s124mr9892311vss.34.1612786045588;
- Mon, 08 Feb 2021 04:07:25 -0800 (PST)
+        bh=Q+j5o1c0su2L6YdF71vWuSQLkAAyzmVika0Z7We4Rac=;
+        b=ilaSuwsSCNCUNonIqFooN8DQ6iMYYlom1P5D5sV0l51L2zaFNCk473j3+xqMH64Oe4
+         D77iwcClNIQei1sQmbtoHW0VYHwLuMWfEK1ME/BTPDapvvaRUp1PAGrfW1F63YWBRVwy
+         4DStDgE2BYgyLgv6l1+DIqaGbCLYAFdauxZnBXJxibfmwqX68I28PqnQCYSPLUImarVX
+         Z3Cbe01T03JdvAGXc8e9v3E4/4HUIgzaMOAmDN6z83GQlbCubqgq78g+hBQzsKBe5Bc6
+         I86vfCwoMadB3DpK69K0NxDkjj8BAPzDT06wtMS2KKSavkofmEQMeXuLndl7Fs++jH0N
+         9FWQ==
+X-Gm-Message-State: AOAM530vjV6mFYnGd4dZI/vO6B0PRuk6HKNaQrvnNdO/7H99axkswla4
+        OEZQj+AQQPDoIfCsjog4TCyR0W0Abtcwp0R1XOiwcc2B4TGfVw==
+X-Google-Smtp-Source: ABdhPJzdeJt7cR2Lci0/u43eiwTMDXryQjeAQX7GjhkgnwIUBZrkUU985x0DMiJvS4aJ2y06E5DIneLyvogQpFyKpI4=
+X-Received: by 2002:a67:c787:: with SMTP id t7mr10392016vsk.48.1612786057397;
+ Mon, 08 Feb 2021 04:07:37 -0800 (PST)
 MIME-Version: 1.0
-References: <20210201055507.542-1-zbestahu@gmail.com>
-In-Reply-To: <20210201055507.542-1-zbestahu@gmail.com>
+References: <20210204151847.91353-1-kernel@esmil.dk>
+In-Reply-To: <20210204151847.91353-1-kernel@esmil.dk>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 8 Feb 2021 13:06:49 +0100
-Message-ID: <CAPDyKFooNGx7JRdiBv4gkMnKr-Q8u_RrAMOXQxE7tZ6C_DxDRw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Use host instead of card argument to mmc_spi_send_csd()
-To:     Yue Hu <zbestahu@gmail.com>
+Date:   Mon, 8 Feb 2021 13:07:00 +0100
+Message-ID: <CAPDyKFrFPWu-mb+krWBYAC=DPpWDqYDseACRRFHyscKbG7yHaA@mail.gmail.com>
+Subject: Re: [PATCH 0/9] drivers: mmc: Update trivial tasklet_init() callers
+To:     Emil Renner Berthing <kernel@esmil.dk>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Yue Hu <huyue2@yulong.com>, zhangwen@yulong.com,
-        zbestahu@163.com
+        linux-omap <linux-omap@vger.kernel.org>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Manuel Lauss <manuel.lauss@gmail.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Ben Dooks <ben-linux@fluff.org>, Alex Dubov <oakad@yahoo.com>,
+        Bruce Chang <brucechang@via.com.tw>,
+        Harald Welte <HaraldWelte@viatech.com>,
+        Pierre Ossman <pierre@ossman.eu>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 1 Feb 2021 at 06:57, Yue Hu <zbestahu@gmail.com> wrote:
+On Thu, 4 Feb 2021 at 16:19, Emil Renner Berthing <kernel@esmil.dk> wrote:
 >
-> From: Yue Hu <huyue2@yulong.com>
+> This updates callers of tasklet_init() in drivers/mmc to the new API
+> in commit 12cc923f1ccc ("tasklet: Introduce new initialization API")
 >
-> Since mmc_send_cxd_data() does not care card if opcode is MMC_SEND_CSD.
+> All changes are made by coccinelle using the following semantic patch:
 >
-> Signed-off-by: Yue Hu <huyue2@yulong.com>
+> @ match @
+> type T;
+> T *container;
+> identifier tasklet;
+> identifier callback;
+> @@
+>         tasklet_init(&container->tasklet, callback, (unsigned long)container);
+>
+> @ patch1 depends on match @
+> type match.T;
+> identifier match.tasklet;
+> identifier match.callback;
+> identifier data;
+> identifier container;
+> @@
+> -void callback(unsigned long data)
+> +void callback(struct tasklet_struct *t)
+> {
+>         ...
+> -       T *container = \( (T *)data \| (void *)data \);
+> +       T *container = from_tasklet(container, t, tasklet);
+>         ...
+> }
+>
+> @ patch2 depends on match @
+> type match.T;
+> identifier match.tasklet;
+> identifier match.callback;
+> identifier data;
+> identifier container;
+> @@
+> -void callback(unsigned long data)
+> +void callback(struct tasklet_struct *t)
+> {
+>         ...
+> -       T *container;
+> +       T *container = from_tasklet(container, t, tasklet);
+>         ...
+> -       container = \( (T *)data \| (void *)data \);
+>         ...
+> }
+>
+> @ depends on (patch1 || patch2) @
+> match.T *container;
+> identifier match.tasklet;
+> identifier match.callback;
+> @@
+> -       tasklet_init(&container->tasklet, callback, (unsigned long)container);
+> +       tasklet_setup(&container->tasklet, callback);
+>
+>
+> Emil Renner Berthing (9):
+>   mmc: atmel-mci: Use new tasklet API
+>   mmc: au1xmmc: Use new tasklet API
+>   mmc: dw_mmc: Use new tasklet API
+>   mmc: omap: Use new tasklet API
+>   mmc: s3cmci: Use new tasklet API
+>   mmc: tifm_sd: Use new tasklet API
+>   mmc: uniphier-sd: Use new tasklet API
+>   mmc: via-sdmmc: Use new tasklet API
+>   mmc: wbsd: Use new tasklet API
+>
+>  drivers/mmc/host/atmel-mci.c   |  6 +++---
+>  drivers/mmc/host/au1xmmc.c     | 14 ++++++--------
+>  drivers/mmc/host/dw_mmc.c      |  6 +++---
+>  drivers/mmc/host/omap.c        |  7 +++----
+>  drivers/mmc/host/s3cmci.c      |  6 +++---
+>  drivers/mmc/host/tifm_sd.c     |  7 +++----
+>  drivers/mmc/host/uniphier-sd.c | 14 ++++++--------
+>  drivers/mmc/host/via-sdmmc.c   |  9 +++------
+>  drivers/mmc/host/wbsd.c        | 35 +++++++++++++++-------------------
+>  9 files changed, 45 insertions(+), 59 deletions(-)
+>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/core/mmc_ops.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index baa6314..265d95e 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -296,7 +296,7 @@ int mmc_set_relative_addr(struct mmc_card *card)
->         return 0;
->  }
->
-> -static int mmc_spi_send_csd(struct mmc_card *card, u32 *csd)
-> +static int mmc_spi_send_csd(struct mmc_host *host, u32 *csd)
->  {
->         int ret, i;
->         __be32 *csd_tmp;
-> @@ -305,7 +305,7 @@ static int mmc_spi_send_csd(struct mmc_card *card, u32 *csd)
->         if (!csd_tmp)
->                 return -ENOMEM;
->
-> -       ret = mmc_send_cxd_data(card, card->host, MMC_SEND_CSD, csd_tmp, 16);
-> +       ret = mmc_send_cxd_data(NULL, host, MMC_SEND_CSD, csd_tmp, 16);
->         if (ret)
->                 goto err;
->
-> @@ -320,7 +320,7 @@ static int mmc_spi_send_csd(struct mmc_card *card, u32 *csd)
->  int mmc_send_csd(struct mmc_card *card, u32 *csd)
->  {
->         if (mmc_host_is_spi(card->host))
-> -               return mmc_spi_send_csd(card, csd);
-> +               return mmc_spi_send_csd(card->host, csd);
->
->         return mmc_send_cxd_native(card->host, card->rca << 16, csd,
->                                 MMC_SEND_CSD);
-> --
-> 1.9.1
->
