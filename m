@@ -2,95 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DEAR_SOMETHING,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B90F3C433E6
-	for <linux-mmc@archiver.kernel.org>; Sun,  7 Feb 2021 15:57:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3CD8C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Feb 2021 02:29:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7884F64E3E
-	for <linux-mmc@archiver.kernel.org>; Sun,  7 Feb 2021 15:57:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 88CBC64E37
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Feb 2021 02:29:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229565AbhBGP4v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 7 Feb 2021 10:56:51 -0500
-Received: from verein.lst.de ([213.95.11.211]:38553 "EHLO verein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229491AbhBGP4u (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 7 Feb 2021 10:56:50 -0500
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 3732F68B02; Sun,  7 Feb 2021 16:56:02 +0100 (CET)
-Date:   Sun, 7 Feb 2021 16:56:01 +0100
-From:   Christoph Hellwig <hch@lst.de>
-To:     Dongli Zhang <dongli.zhang@oracle.com>
-Cc:     dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
-        iommu@lists.linux-foundation.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
-        linuxppc-dev@lists.ozlabs.org, nouveau@lists.freedesktop.org,
-        x86@kernel.org, xen-devel@lists.xenproject.org,
-        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
-        akpm@linux-foundation.org, benh@kernel.crashing.org,
-        bskeggs@redhat.com, bhelgaas@google.com, bp@alien8.de,
-        boris.ostrovsky@oracle.com, hch@lst.de, chris@chris-wilson.co.uk,
-        daniel@ffwll.ch, airlied@linux.ie, hpa@zytor.com, mingo@kernel.org,
-        mingo@redhat.com, jani.nikula@linux.intel.com,
-        joonas.lahtinen@linux.intel.com, jgross@suse.com,
-        konrad.wilk@oracle.com, m.szyprowski@samsung.com,
-        matthew.auld@intel.com, mpe@ellerman.id.au, rppt@kernel.org,
-        paulus@samba.org, peterz@infradead.org, robin.murphy@arm.com,
-        rodrigo.vivi@intel.com, sstabellini@kernel.org,
-        bauerman@linux.ibm.com, tsbogend@alpha.franken.de,
-        tglx@linutronix.de, ulf.hansson@linaro.org, joe.jin@oracle.com,
-        thomas.lendacky@amd.com
-Subject: Re: [PATCH RFC v1 5/6] xen-swiotlb: convert variables to arrays
-Message-ID: <20210207155601.GA25111@lst.de>
-References: <20210203233709.19819-1-dongli.zhang@oracle.com> <20210203233709.19819-6-dongli.zhang@oracle.com> <20210204084023.GA32328@lst.de>
+        id S229681AbhBHC24 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 7 Feb 2021 21:28:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57600 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229690AbhBHC2z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Feb 2021 21:28:55 -0500
+Received: from mail-pl1-x62d.google.com (mail-pl1-x62d.google.com [IPv6:2607:f8b0:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27F07C06174A
+        for <linux-mmc@vger.kernel.org>; Sun,  7 Feb 2021 18:28:15 -0800 (PST)
+Received: by mail-pl1-x62d.google.com with SMTP id s15so7000429plr.9
+        for <linux-mmc@vger.kernel.org>; Sun, 07 Feb 2021 18:28:15 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=oMP/G93TfBHyEy6dswHxFnCQUDA5nFWzSh+xr7IDeDM=;
+        b=hrF9XFc/A8scbs/IbL5fftP83OMHXVZGCGLVmskzgJayIrOJrVoaMLXPj05aBXaO9V
+         pCvUuTGPSDNK+vF2yFlgYsEiBfvJGPUgDZ0J9egI0eNsb2GkdedGuPC92eFf9Ogn4uaX
+         ffp5ZkYtYc8fYUpJC2NmjwkKprHSCxmQeFPUvveX4bhEt4wU5cGlOROwiwtA/zIOYdgv
+         5YOvyfotOSkg4oX4OlkkBH1ck8lV9PGkkRPpVv1QUQFiGy43PiXniM6J83j1qZiYgsY7
+         IcIkgRgf0686XnW0yf6yspTWfDSgupE0DhpAA5tv4mnJh6md16tD091Qwrs2s0tfW4kK
+         XKUg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=oMP/G93TfBHyEy6dswHxFnCQUDA5nFWzSh+xr7IDeDM=;
+        b=NfoKsu3T5iFgP/25r3bzB2VsONoO3TmHhkCT2ntLwoporx+LIYVXs/i4HDPHA8dr4V
+         va7CiIFBP51vzc+cGoQ/aOFHrZMGZmse7n9E9NZBq1xmnJjBf9i8X4Vd1lgTuU+HE89N
+         n3/1g9hKwRT2s4oDuww0nzQ+agtEm1IGt0XlSewRNewzlCtMSVVwCjh+DNcN6D60Fo5V
+         FFdDJJ4XEC9RwMEWRngtfvFy1eUbZnwdof/1ORs7ZWypQS4z+KWLOP9kwxvInMF0tPr9
+         zn0rwpecEXchxB0ngFHE0Mrxb6puWRrjLYQq8yOUXQHcEf03U0fATk7sfwy8s67C6GHL
+         bNlQ==
+X-Gm-Message-State: AOAM531/PgcZm1GtFBA59nI0PgEcXw4FYJyXJUtkuYUd67+XywH5sTTO
+        /8bwojnciBr6gN7AZRL77Z6AqzqqmaL9G0BW
+X-Google-Smtp-Source: ABdhPJyMRT5IOqH15aeC24Odtjy7W/xbvajcyQmHYKa9/6E4LsI6cKB5+KzL+cfXomNIY79JZJxr4g==
+X-Received: by 2002:a17:90a:8b82:: with SMTP id z2mr14454918pjn.25.1612751294713;
+        Sun, 07 Feb 2021 18:28:14 -0800 (PST)
+Received: from wuxy20.example.com (v-162-248-93-139.unman-vds.inap-la.nfoservers.com. [162.248.93.139])
+        by smtp.gmail.com with ESMTPSA id hi15sm14356130pjb.19.2021.02.07.18.28.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 07 Feb 2021 18:28:14 -0800 (PST)
+From:   Xingyu Wu <wuxy20@gmail.com>
+To:     chris@printf.net, jwerner@chromium.org, gwendal@chromium.org,
+        linux-mmc@vger.kernel.org
+Cc:     wuxy20@lenovo.com, Xingyu Wu <wuxy20@gmail.com>
+Subject: [PATCH V2 0/1] fix messy code to be printed
+Date:   Mon,  8 Feb 2021 10:26:41 +0800
+Message-Id: <20210208022642.7823-1-wuxy20@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210204084023.GA32328@lst.de>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Feb 04, 2021 at 09:40:23AM +0100, Christoph Hellwig wrote:
-> So one thing that has been on my mind for a while:  I'd really like
-> to kill the separate dma ops in Xen swiotlb.  If we compare xen-swiotlb
-> to swiotlb the main difference seems to be:
-> 
->  - additional reasons to bounce I/O vs the plain DMA capable
->  - the possibility to do a hypercall on arm/arm64
->  - an extra translation layer before doing the phys_to_dma and vice
->    versa
->  - an special memory allocator
-> 
-> I wonder if inbetween a few jump labels or other no overhead enablement
-> options and possibly better use of the dma_range_map we could kill
-> off most of swiotlb-xen instead of maintaining all this code duplication?
+Dear Sirs:
+This patch fixes messy printing of firmware name, please help to review,
+thank you very much.
 
-So I looked at this a bit more.
+Version V2 change:
+Add the recipient: linux-mmc@vger.kernel.org 
 
-For x86 with XENFEAT_auto_translated_physmap (how common is that?)
-pfn_to_gfn is a nop, so plain phys_to_dma/dma_to_phys do work as-is.
+Xingyu Wu (1):
+  mmc-utils: fix messy code printed
 
-xen_arch_need_swiotlb always returns true for x86, and
-range_straddles_page_boundary should never be true for the
-XENFEAT_auto_translated_physmap case.
+ mmc_cmds.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
 
-So as far as I can tell the mapping fast path for the
-XENFEAT_auto_translated_physmap can be trivially reused from swiotlb.
-
-That leaves us with the next more complicated case, x86 or fully cache
-coherent arm{,64} without XENFEAT_auto_translated_physmap.  In that case
-we need to patch in a phys_to_dma/dma_to_phys that performs the MFN
-lookup, which could be done using alternatives or jump labels.
-I think if that is done right we should also be able to let that cover
-the foreign pages in is_xen_swiotlb_buffer/is_swiotlb_buffer, but
-in that worst case that would need another alternative / jump label.
-
-For non-coherent arm{,64} we'd also need to use alternatives or jump
-labels to for the cache maintainance ops, but that isn't a hard problem
-either.
-
+-- 
+2.25.1
 
