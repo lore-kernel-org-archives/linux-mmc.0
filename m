@@ -2,223 +2,263 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEC4BC433DB
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Feb 2021 12:50:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E51B3C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Feb 2021 14:02:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AAB8964E74
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Feb 2021 12:50:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8837664D99
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Feb 2021 14:02:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230173AbhBIMu2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Feb 2021 07:50:28 -0500
-Received: from mailout2.w1.samsung.com ([210.118.77.12]:58890 "EHLO
-        mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230077AbhBIMtE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Feb 2021 07:49:04 -0500
-Received: from eucas1p1.samsung.com (unknown [182.198.249.206])
-        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20210209124819euoutp0229436664966ecad91fdbc893500f0489~iFS0ZY8Ge0858808588euoutp02p
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Feb 2021 12:48:19 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20210209124819euoutp0229436664966ecad91fdbc893500f0489~iFS0ZY8Ge0858808588euoutp02p
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1612874900;
-        bh=WADn8AnZ90v/RRrY6lvRpiPwVJJcfXSCBiVTe+a3jl4=;
-        h=From:Subject:To:Cc:Date:References:From;
-        b=HcWkEGkuz3iHEAlZcpRqSlZ746wl6Y1FbUoByZYh13ljoxymEKqf5Nf+ZnqU8w88/
-         /hyojEdBjJl7pqHpyJOguStQRUyWA1qguhhPkp0W1tdjU7qFUpVjOq/M54BbMthZXp
-         h3PAWF+mfH4lHm8nJSigfdGDPzsXFQtDLNfNpAGU=
-Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
-        eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-        20210209124819eucas1p17a56eafa0daf9af55aed9de54c4aa6fb~iFS0D_3Gl0112001120eucas1p1t;
-        Tue,  9 Feb 2021 12:48:19 +0000 (GMT)
-Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
-        eusmges2new.samsung.com (EUCPMTA) with SMTP id 68.33.44805.39482206; Tue,  9
-        Feb 2021 12:48:19 +0000 (GMT)
-Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
-        eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
-        20210209124819eucas1p29c9b481ef524a753ce79aa6ab580d0a7~iFSzo4_cX2601126011eucas1p2d;
-        Tue,  9 Feb 2021 12:48:19 +0000 (GMT)
-Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
-        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20210209124819eusmtrp15c9b332e4200ed090cb8169abc1a2609~iFSzoKbB-1894918949eusmtrp1W;
-        Tue,  9 Feb 2021 12:48:19 +0000 (GMT)
-X-AuditID: cbfec7f4-b37ff7000000af05-22-6022849303ce
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-        eusmgms1.samsung.com (EUCPMTA) with SMTP id 54.99.21957.29482206; Tue,  9
-        Feb 2021 12:48:19 +0000 (GMT)
-Received: from [106.210.134.192] (unknown [106.210.134.192]) by
-        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-        20210209124818eusmtip2d19833cb01bf712c2a449b17afd7356d~iFSy3CZwt0114701147eusmtip2c;
-        Tue,  9 Feb 2021 12:48:18 +0000 (GMT)
-From:   Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: brcmfmac and unaligned sdio access on Khadas VIM3L
-To:     linux-wireless@vger.kernel.org,
-        brcm80211-dev-list.pdl@broadcom.com,
-        linux-amlogic@lists.infradead.org,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc:     Dmitry Lebed <lebed.dmitry@gmail.com>,
-        martin.blumenstingl@googlemail.com,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
-        Wright Feng <wright.feng@infineon.com>,
-        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>,
-        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
-Message-ID: <967b6bfe-a612-707f-583e-c45d61acffe0@samsung.com>
-Date:   Tue, 9 Feb 2021 13:48:17 +0100
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0)
-        Gecko/20100101 Thunderbird/78.7.0
+        id S230000AbhBIOCQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Feb 2021 09:02:16 -0500
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:21350 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S231971AbhBIOCI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Feb 2021 09:02:08 -0500
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 119DvDfb018685;
+        Tue, 9 Feb 2021 15:01:18 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=9AVHdvUAIwUcnAMHaIh6YvIvWqn1oa337b0BjM9c3I4=;
+ b=yf+GtKlpXz8+u9mRHOcSrR3DNUq65y3loOM8lVFg537GjfH5GOaqL+xYEJ7Q3r2KduPU
+ rrqTtQotw5v2ILRv7H/l3Yq41f/G4H5l2NjTmZ0UgCsZA/1ffmEzeRjmz5Bhqu51cLYt
+ ifvIZ3uzE9zOlCJSgzGJmrdEvJlyaMBflT7lTcYoS18rDFMiqaK0UEjKqQllW3xOds+W
+ 6XK1aLz2MWNyJ39DQiKUw0bqias1G2S4rK7wKsvte8guuqLVCQLy7KL5A5kYb5zdN4GF
+ F/XMMGPgpNPnCT7/o5l+GMbau9Uukb87tHRFQNaiemZtBnEdyOq/UlyhhnpGYytSNWaS Gg== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 36hrf7918v-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 09 Feb 2021 15:01:18 +0100
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id E2AC110002A;
+        Tue,  9 Feb 2021 15:01:16 +0100 (CET)
+Received: from Webmail-eu.st.com (gpxdag2node6.st.com [10.75.127.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id B991E23BD43;
+        Tue,  9 Feb 2021 15:01:16 +0100 (CET)
+Received: from lmecxl0504.lme.st.com (10.75.127.121) by GPXDAG2NODE6.st.com
+ (10.75.127.70) with Microsoft SMTP Server (TLS) id 15.0.1473.3; Tue, 9 Feb
+ 2021 15:01:15 +0100
+Subject: Re: [PATCH 1/2] mmc: mmci: enable MMC_CAP_NEED_RSP_BUSY
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Russell King <linux@armlinux.org.uk>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        <ludovic.barre@foss.st.com>,
+        =?UTF-8?Q?Marek_Va=c5=a1ut?= <marex@denx.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20210204120547.15381-1-yann.gautier@foss.st.com>
+ <20210204120547.15381-2-yann.gautier@foss.st.com>
+ <CAPDyKFqdtK33HSW_AM0s9172V=cBM6wnKuHubXSOGCVqJ8nzFg@mail.gmail.com>
+ <e31df871-ae1a-7c80-d741-0813f90532c7@foss.st.com>
+ <1c1814dc-f87b-ef5c-24b4-b9a6ec570dbc@foss.st.com>
+ <CAPDyKFq26Q3jwwJ71vp6s-+ux3jUnL6+m2FEzfi_gh5z8meqrw@mail.gmail.com>
+From:   Yann Gautier <yann.gautier@foss.st.com>
+Message-ID: <cc8a480c-77dc-f44b-ae98-309ab59c4e13@foss.st.com>
+Date:   Tue, 9 Feb 2021 15:01:15 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPDyKFq26Q3jwwJ71vp6s-+ux3jUnL6+m2FEzfi_gh5z8meqrw@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Language: en-US
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrJKsWRmVeSWpSXmKPExsWy7djP87qTW5QSDObfVbD4v/YWi8XGGetZ
-        LT63tDFZLFn3gtniza/1jBY/Fr1gs/jx6AaLxaL3M1gtes71MFssmM1tceR/P6PFmxV32C2O
-        LTrJYnFh3z02Bz6PWffPsnnsnHWX3ePphMnsHrN3TWLx2Lyk3qNvyypGj8+b5ALYo7hsUlJz
-        MstSi/TtErgyVq+6zlowQb1ix6H4BsYOpS5GTg4JAROJg/9fMXYxcnEICaxglPj/bQM7hPOF
-        UeLAzxtsEM5nRomeVaeZYVoWndsN1bKcUeL3rk1QVR8ZJRY8X8ECUsUmYCjR9baLDcQWFrCW
-        mP31HFi3CEjH+znpIA3MAluZJZZff88EkuAVsJP4/HseI4jNIqAi0fBpJ5gtKpAksfzmH6ga
-        QYmTM5+ALWAWkJdo3jqbGcIWl7j1ZD4TyFAJgWZOiQkvTwAlOIAcF4mJHVIQZwtLvDq+hR3C
-        lpE4PbmHBaqeUeLhubXsEE4Po8TlphmMEFXWEnfO/WIDGcQsoCmxfpc+RNhRYsfLrUwQ8/kk
-        brwVhLiBT2LStulQa3klOtqEIKrVJGYdXwe39uCFS9BQ9JCY9OII4wRGxVlIPpuF5LNZSD6b
-        hXDDAkaWVYziqaXFuempxUZ5qeV6xYm5xaV56XrJ+bmbGIGp7fS/4192MC5/9VHvECMTB+Mh
-        RgkOZiUR3vA6pQQh3pTEyqrUovz4otKc1OJDjNIcLErivElb1sQLCaQnlqRmp6YWpBbBZJk4
-        OKUamIROTmWsPZ5WMl9xnrGA1onI8+aT57HHcq1eZRuqeOzR3adRTAwX/P4dWaR0o8n68cpT
-        G4RiV3ee4NuQ1rds3n+mdWnHtm9Pu8Ih5PjOesmvH9P3cfAZLNqrn2S6WtmjPuBY1B3G31uq
-        bhxqqd497dXJjI8nb3SL3tWdsGCn/ftbCxiKt383+OA+MbbS9P4xNd68g9OiFWKPFOumPa/e
-        mak47aPe0QV/mpdGZ/+q8/CbdmWPwZXCR9s9//83CLMzVfO5ti3O4s3dJXrLjIRnGbfvvXKn
-        cPpH7QkhBlYRqxbd6w8+ahilpLZWQ8zQ6b50jHKI+nSLMvbXp3/M37Lt9c503Y/neXKdQ71O
-        lfN1PdulxFKckWioxVxUnAgAE+XKuNwDAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrCIsWRmVeSWpSXmKPExsVy+t/xe7qTW5QSDDZOZrL4v/YWi8XGGetZ
-        LT63tDFZLFn3gtniza/1jBY/Fr1gs/jx6AaLxaL3M1gtes71MFssmM1tceR/P6PFmxV32C2O
-        LTrJYnFh3z02Bz6PWffPsnnsnHWX3ePphMnsHrN3TWLx2Lyk3qNvyypGj8+b5ALYo/RsivJL
-        S1IVMvKLS2yVog0tjPQMLS30jEws9QyNzWOtjEyV9O1sUlJzMstSi/TtEvQyVq+6zlowQb1i
-        x6H4BsYOpS5GTg4JAROJRed2M3YxcnEICSxllFi6o4MZIiEjcXJaAyuELSzx51oXG0TRe0aJ
-        7TcngiXYBAwlut6CJDg5hAWsJWZ/PccMUiQisJxR4tLvdewgDrPAdmaJs41nwDp4BewkPv+e
-        xwhiswioSDR82glmiwokSTy+dZ8JokZQ4uTMJywgNrOAmcS8zQ+ZIWx5ieats6FscYlbT+Yz
-        TWAUmIWkZRaSlllIWmYhaVnAyLKKUSS1tDg3PbfYUK84Mbe4NC9dLzk/dxMjMDq3Hfu5eQfj
-        vFcf9Q4xMnEwHmKU4GBWEuENr1NKEOJNSaysSi3Kjy8qzUktPsRoCvTDRGYp0eR8YHrIK4k3
-        NDMwNTQxszQwtTQzVhLn3Tp3TbyQQHpiSWp2ampBahFMHxMHp1QDU6TO3uVzP3nrOkcd93i8
-        UGUy70T2RZG2b6b17mBddOJmpjb/G9Zjr7/7ai9rf/9PJy9vzsn6LL6oWV/1FLvF4hXyJ4ur
-        36r9nydr6P7R4Who5+lH8yzEcv5qC9/Tb/pSMGvmN2nh9vBZn21ePW5ybV/ZsI/H9sGa/FcG
-        vpXfby9XOvKsvrR9k8lJowIhkbKg5b1Gd585vWDlF+WtKwlk/fLxWP6yPImTvzdp/pb78uLt
-        u4QITgWumLqVMfJFi3g1Te08s5sedNmumnbyUXlRa/0Rrpq64CMnNLdVcN9Y2x92b+Nip3Ir
-        77y246fm+L8vYhBdM/mxhEvn6gt1lftnNPm8DFxxpcayusQ58MJHJZbijERDLeai4kQAC1dK
-        HlcDAAA=
-X-CMS-MailID: 20210209124819eucas1p29c9b481ef524a753ce79aa6ab580d0a7
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20210209124819eucas1p29c9b481ef524a753ce79aa6ab580d0a7
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20210209124819eucas1p29c9b481ef524a753ce79aa6ab580d0a7
-References: <CGME20210209124819eucas1p29c9b481ef524a753ce79aa6ab580d0a7@eucas1p2.samsung.com>
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.121]
+X-ClientProxiedBy: GPXDAG2NODE4.st.com (10.75.127.68) To GPXDAG2NODE6.st.com
+ (10.75.127.70)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.369,18.0.737
+ definitions=2021-02-09_03:2021-02-09,2021-02-09 signatures=0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi
+On 2/8/21 4:03 PM, Ulf Hansson wrote:
+> On Mon, 8 Feb 2021 at 13:16, Yann GAUTIER <yann.gautier@foss.st.com> wrote:
+>>
+>> On 2/5/21 1:19 PM, Yann GAUTIER wrote:
+>>> On 2/5/21 10:53 AM, Ulf Hansson wrote:
+>>>> - trimmed cc-list
+>>>>
+>>>> On Thu, 4 Feb 2021 at 13:08, <yann.gautier@foss.st.com> wrote:
+>>>>>
+>>>>> From: Yann Gautier <yann.gautier@foss.st.com>
+>>>>>
+>>>>> To properly manage commands awaiting R1B responses, the capability
+>>>>> MMC_CAP_NEED_RSP_BUSY is enabled in mmci driver, for variants that
+>>>>> manage busy detection.
+>>>>> This R1B management needs both the flags MMC_CAP_NEED_RSP_BUSY and
+>>>>> MMC_CAP_WAIT_WHILE_BUSY to be enabled together.
+>>>>
+>>>> Would it be possible for you to share a little bit more about the
+>>>> problem? Like under what circumstances does things screw up?
+>>>>
+>>>> Is the issue only occurring when the cmd->busy_timeout becomes larger
+>>>> than host->max_busy_timeout. Or even in other cases?
+>>>>
+>>>>>
+>>>>> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+>>>>> ---
+>>>>>    drivers/mmc/host/mmci.c | 2 +-
+>>>>>    1 file changed, 1 insertion(+), 1 deletion(-)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+>>>>> index 1bc674577ff9..bf6971fdd1a6 100644
+>>>>> --- a/drivers/mmc/host/mmci.c
+>>>>> +++ b/drivers/mmc/host/mmci.c
+>>>>> @@ -2148,7 +2148,7 @@ static int mmci_probe(struct amba_device *dev,
+>>>>>                   if (variant->busy_dpsm_flag)
+>>>>>                           mmci_write_datactrlreg(host,
+>>>>>
+>>>>> host->variant->busy_dpsm_flag);
+>>>>> -               mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>>>>> +               mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY |
+>>>>> MMC_CAP_NEED_RSP_BUSY;
+>>>>
+>>>> This isn't correct as the ux500 (and likely also other legacy
+>>>> variants) don't need this. I have tried it in the past and it works
+>>>> fine for ux500 without MMC_CAP_NEED_RSP_BUSY.
+>>>>
+>>>> The difference is rather that the busy detection for stm32 variants
+>>>> needs a corresponding HW busy timeout to be set (its
+>>>> variant->busy_timeout flag is set). Perhaps we can use that
+>>>> information instead?
+>>>>
+>>>> Note that, MMC_CAP_NEED_RSP_BUSY, means that cmd->busy_timeout will
+>>>> not be set by the core for erase commands, CMD5 and CMD6.
+>>>>
+>>>> By looking at the code in mmci_start_command(), it looks like we will
+>>>> default to a timeout of 10s, when cmd->busy_timeout isn't set. At
+>>>> least for some erase requests, that won't be sufficient. Would it be
+>>>> possible to disable the HW busy timeout in some way - and maybe use a
+>>>> software timeout instead? Maybe I already asked Ludovic about this?
+>>>> :-)
+>>>>
+>>>> BTW, did you check that the MMCIDATATIMER does get the correct value
+>>>> set for the timer in mmci_start_command() and if
+>>>> host->max_busy_timeout gets correctly set in
+>>>> mmci_set_max_busy_timeout()?
+>>>>
+>>>> [...]
+>>>>
+>>>> Kind regards
+>>>> Uffe
+>>>>
+>>>
+>>> Hi Ulf,
+>>>
+>>> Thanks for the hints.
+>>> I'll check all of that and get back with updated patches.
+>>>
+>>> As I tried to explain in the cover letter and in reply to Adrian, I saw
+>>> a freeze (BUSYD0) in test 37 during MMC_ERASE command  with
+>>> SECURE_ERASE_ARG, when running this test just after test 36 (or any
+>>> other write test). But maybe, as you said that's mostly a incorrect
+>>> timeout issue.
+>>>
+>>> Regards,
+>>> Yann
+>>
+>> Hi,
+>>
+>> I made some extra tests, and the timeout value set in MMCIDATATIMER
+>> correspond to the one computed:
+>> card->ext_csd.erase_group_def is set to 1 in mmc_init_card()
+>> In mmc_mmc_erase_timeout(), we have:
+>> erase_timeout = card->ext_csd.hc_erase_timeout; // 300ms * 0x07 (for the
+>> eMMC card I have: THGBMDG5D1LBAIL
+>> erase_timeout *= card->ext_csd.sec_erase_mult; // 0xDC
+>> erase_timeout *= qty; // 32 (from = 0x1d0000, to = 0x20ffff)
+>>
+>> This leads to a timeout of 14784000ms (~4 hours).
+>> The max_busy_timeout is 86767ms.
+>>
+>> After those 4 hours, I get this message:
+>> mmc1: Card stuck being busy! __mmc_poll_for_busy
+> 
+> Okay, I see.
+> 
+> This means that we end up polling for busy in __mmc_poll_for_busy().
+> However, not by using CMD13 but rather with the ->card_busy() ops (as
+> mmci has this callback set).
+> 
+> Could it be that the ->card_busy() callback isn't working correctly
+> for the stm32 variant?
+> 
+> What happens if you temporarily drop the assignment of the
+> ->card_busy() callback, thus force the mmc core to poll with CMD13
+> instead? Would this work?
+> 
 
-I've noticed that the Broadcom Wifi chip performs unaligned SDIO access 
-during the station scan on Khadas VIM3l board. This issue went unnoticed 
-so far, because there was a workaround in the meson MMC driver, which 
-has been recently disabled by commit e085b51c74cc ("mmc: meson-gx: check 
-for scatterlist size alignment in block mode") from current linux-next.
+Hi Ulf,
 
-I can easily reproduce this issue with the following commands:
+When ->card_busy() is stubbed for MMC_ERASE command, CMD13 is running in 
+loop, for ~66 seconds.
+The card status is just 0xe00 here, no errors, just prog state, as 
+awaited for CMD38, and READY_FOR_DATA bit not set.
+And after those 66 seconds, the status changes to 0x900.
+But busyd0 is still set to 1, during the CMD13 and after.
+The test continues, with a CMD25, still with busyd0 and DPSM so the IP 
+is stuck, and the STOP command is sent (mrq->stop in mmc_mrq_pr_debug).
+And here nothing more happens, wait_for_completion() from 
+mmc_wait_for_req_done().
 
-# dmesg | grep brcm
-[   11.659351] Bluetooth: hci0: BCM4359C0 'brcm/BCM4359C0.hcd' Patch
-[   13.079767] brcmfmac: brcmf_fw_alloc_request: using 
-brcm/brcmfmac4359-sdio for chip BCM4359/9
-[   13.527363] brcmfmac: brcmf_fw_alloc_request: using 
-brcm/brcmfmac4359-sdio for chip BCM4359/9
-[   13.601269] brcmfmac: brcmf_c_process_clm_blob: no clm_blob available 
-(err=-11), device may have limited channels available
-[   13.619414] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4359/9 wl0: 
-Mar  6 2017 10:16:06 version 9.87.51.7 (r686312) FWID 01-4dcc75d9
-# ifconfig wlan0 up
-[  208.052058] ieee80211 phy0: brcmf_dongle_roam: WLC_SET_ROAM_TRIGGER 
-error (-52)
-# iw wlan0 scan >/dev/null
-[  218.148345] ------------[ cut here ]------------
-[  218.148501] unaligned sg len 504 blksize 256
-[  218.153712] WARNING: CPU: 1 PID: 75 at 
-drivers/mmc/host/meson-gx-mmc.c:251 
-meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
-[  218.162616] Modules linked in: ipv6 brcmfmac brcmutil cfg80211 
-dw_hdmi_cec dw_hdmi_i2s_audio hci_uart btqca btbcm bluetooth 
-ecdh_generic ecc crct10dif_ce rfkill panfrost 
-snd_soc_meson_axg_sound_card snd_soc_meson_card_utils gpu_sched 
-meson_gxbb_wdt rtc_hym8563 pwm_meson meson_gxl rtc_meson_vrtc rc_khadas 
-meson_ir reset_meson_audio_arb realtek snd_soc_meson_g12a_tohdmitx 
-snd_soc_meson_codec_glue snd_soc_meson_axg_tdmout 
-snd_soc_meson_axg_frddr snd_soc_meson_axg_fifo axg_audio sclk_div 
-clk_phase mdio_mux_meson_g12a meson_dw_hdmi meson_drm meson_rng 
-dwmac_generic snd_soc_meson_axg_tdm_interface meson_canvas rng_core 
-dw_hdmi snd_soc_meson_axg_tdm_formatter dwmac_meson8b stmmac_platform 
-stmmac display_connector adc_keys pcs_xpcs nvmem_meson_efuse
-[  218.228329] CPU: 1 PID: 75 Comm: kworker/u8:2 Not tainted 
-5.11.0-rc6-next-20210208 #2492
-[  218.236343] Hardware name: Khadas VIM3L (DT)
-[  218.240579] Workqueue: brcmf_wq/mmc2:0001:1 brcmf_sdio_dataworker 
-[brcmfmac]
-[  218.247559] pstate: 60400009 (nZCv daif +PAN -UAO -TCO BTYPE=--)
-[  218.253506] pc : meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
-[  218.259372] lr : meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
-[  218.265237] sp : ffff80001327b870
-[  218.268514] x29: ffff80001327b870 x28: 0000000000000003
-[  218.273776] x27: 0000000000000218 x26: 0000000000000600
-[  218.279036] x25: ffff000003a17678 x24: 0000000000000000
-[  218.284296] x23: ffff8000121cfae8 x22: ffff800011b54000
-[  218.289559] x21: ffff80001327bb18 x20: ffff00000277d000
-[  218.294819] x19: ffff80001327ba40 x18: 00000002faf07f80
-[  218.300081] x17: 0000000000004000 x16: 0000000000000000
-[  218.305341] x15: 0000000000000380 x14: 0000000000000000
-[  218.310603] x13: 0000000000000080 x12: 0000000000000000
-[  218.315865] x11: 0000000000000000 x10: 0000000000001370
-[  218.321125] x9 : ffff00006f995258 x8 : 000000009e0e7ca7
-[  218.326387] x7 : ffff80001327b4a0 x6 : 0000000000000001
-[  218.331648] x5 : 0000000000000001 x4 : 0000000000000000
-[  218.336912] x3 : 0000000000000002 x2 : ffff8000121f4768
-[  218.342171] x1 : 42fe1bd05e5eaa00 x0 : 0000000000000000
-[  218.347435] Call trace:
-[  218.349854]  meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
-[  218.355368]  meson_mmc_request+0x74/0xb0
-[  218.359250]  __mmc_start_request+0xa4/0x2b0
-[  218.363390]  mmc_start_request+0x80/0xa8
-[  218.367272]  mmc_wait_for_req+0x68/0xd8
-[  218.371066]  mmc_submit_one.isra.17+0x78/0x148 [brcmfmac]
-[  218.376416]  brcmf_sdiod_sglist_rw+0x324/0x4a8 [brcmfmac]
-[  218.381762]  brcmf_sdiod_recv_chain+0x70/0x140 [brcmfmac]
-[  218.387110]  brcmf_sdio_dataworker+0x614/0x17d0 [brcmfmac]
-[  218.392545]  process_one_work+0x2a8/0x728
-[  218.396510]  worker_thread+0x48/0x460
-[  218.400132]  kthread+0x134/0x160
-[  218.403323]  ret_from_fork+0x10/0x18
-[  218.406862] irq event stamp: 15834
-[  218.410222] hardirqs last  enabled at (15833): [<ffff800010f95804>] 
-_raw_spin_unlock_irq+0x3c/0x80
-[  218.419107] hardirqs last disabled at (15834): [<ffff800010f895ac>] 
-el1_dbg+0x24/0x50
-[  218.426869] softirqs last  enabled at (15828): [<ffff800010010508>] 
-_stext+0x508/0x638
-[  218.434717] softirqs last disabled at (15823): [<ffff8000100952ec>] 
-irq_exit+0x19c/0x1a8
-[  218.442739] ---[ end trace dfc38bb4458b4c37 ]---
-#
+>>
+>> The second erase with MMC_ERASE_ARG finds an erase timeout of 67200ms,
+>> and uses R1B command.
+>> But as the first erase failed, the DPSMACT is still enabled, the busy
+>> timeout doesn't seem to happen. Something may be missing in the error path.
+> 
+> Assuming the eMMC card completed the first erase operation
+> successfully, then yes, the second erase should work.
+> 
+> However, what if the eMMC actually failed with the first erase? How can we know?
 
-Surprisingly the same commands executed on the Khadas VIM3 board with 
-the same kernel don't trigger the warning.
+In the case where ->card_busy() is used:
+As busyd0 is still 1 in the STATUS register, we cannot know if the 
+command really finished. And as the DPSM is stuck, we cannot send other 
+read command to check what is on the card.
 
-Let me know if I can help debugging this issue.
+As I said in another thread:
+"I've discussed with Ludovic, and it is somewhat related to this patch set:
+https://patchwork.kernel.org/project/linux-mmc/list/?series=186219&state=%2A&archive=both
 
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
+The STM32 SDMMC IP needs a specific reset procedure when a data timeout 
+occurs. If it is hardware, this is managed with the threaded IRQ. But if 
+it is a SW polling (if R1B is replaced with R1), there is nothing in 
+frameworks that could call this "unstuck" procedure for STM32 variant.
+I don't know how this should be handled."
+
+Are there other things I should check?
+
+The main issue here is that we cannot use R1B if timeout > 
+mmc->max_busy_timeout, and SW polling won't be able to call our reset 
+procedure in case of trouble.
+
+The second patch in the series, changing the MMC_ERASE argument from 
+MMC_SECURE_ERASE_ARG to the argument chosen in the framework will then 
+compute a timeout lower than mmc->max_busy_timeout, and the test will pass.
+But this does not explain why STM32 SDMMC IP doesn't react well to this 
+secure argument after it has executed a write test.
+
+
+Thanks,
+Yann
+
+> 
+>>
+>> Anyway, I'll push an update of the second patch of the series, and just
+>> drop this first one.
+>>
+>>
+>> Regards,
+>> Yann
+> 
+> Kind regards
+> Uffe
+> 
 
