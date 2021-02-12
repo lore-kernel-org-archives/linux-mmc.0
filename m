@@ -7,144 +7,121 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44F4FC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Feb 2021 12:23:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87E41C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Feb 2021 12:23:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 17C5864E2D
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Feb 2021 12:23:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5929764E23
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Feb 2021 12:23:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231320AbhBLMXB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Feb 2021 07:23:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38240 "EHLO
+        id S231352AbhBLMXY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Feb 2021 07:23:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38698 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231474AbhBLMVC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Feb 2021 07:21:02 -0500
-Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7404DC06178B
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Feb 2021 04:20:46 -0800 (PST)
-Received: by mail-vs1-xe30.google.com with SMTP id q23so4692310vsg.4
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Feb 2021 04:20:46 -0800 (PST)
+        with ESMTP id S231345AbhBLMVU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Feb 2021 07:21:20 -0500
+Received: from mail-vk1-xa33.google.com (mail-vk1-xa33.google.com [IPv6:2607:f8b0:4864:20::a33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A59FC06178A
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Feb 2021 04:20:40 -0800 (PST)
+Received: by mail-vk1-xa33.google.com with SMTP id y8so2021058vky.4
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Feb 2021 04:20:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=qIB+VGSdD9YcsSCVUYBjeDlexutXyfRr+CUFNS7fmCM=;
-        b=k+sBVjGyEc+DW0L+e1JJS+4pKlo2Sx5pn0dQ+r5aXueSE4tkEJDt1VSpjyCPXoi1Os
-         CUsfQb6uUac3bxNQQki+hZAk+SQNR9QWjzl/e4mDW/d8LWd4tuyOLtSX2YhSXR6dcKhr
-         mCeVBAhdsbklDH8bWYIgKtHQDEFsbsIK6QrcDPyBXmRPNRFQ4WSHkxEa46Cr64GybEmK
-         84hAzfGvv/XZim7KCOPCY6aeujRj/bycx04qxrtCPitEHp/I6bHTOVaQrjNmjbpeKFaU
-         ax9+CC0fYFkIGsaQ4HFHuRQnWLyZbR5PiOwMiSEAc9OS372CXzFnyen9P1LzV+l/IqwX
-         LHGw==
+        bh=K7cVpiyFvKnbzOkHpmdbCjD/gvDLBbbhp96xZdfeqF4=;
+        b=vJxssJowYGLiIGwwoDnJH93+1/Ibpn6Kudfu0/PHyC/CuW2+GG/XPq4WhcMgj8d8Zi
+         3XB4K0TxEF/0PxLEgZlvmy32jk2qL8zJXutEChCgExNIhcx2/wywziqBH4I/apfBc30f
+         hZNP5NkeMTC0tWBBX+eg55yq6b9VkjA0v3o2O9JnaMtPD0PODgY2eJiSyHTnAD2rxqJm
+         iZ5fEhpYvSQ68zLgZBNOo0Pm62ZhOEeklozxvfWXodz7ynJRcw+v7T8pQZRNZeYuP9y6
+         xW8NTqCd9eIxa6KWBUnaV/0a0PtAlhPvgJmVcf0zpZa55A11jhyh1rkirfCn+0fUXRfG
+         7Cdw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=qIB+VGSdD9YcsSCVUYBjeDlexutXyfRr+CUFNS7fmCM=;
-        b=JvoawIE7JAK75S0Sv4pR703rcAqEVZyAUcIc+sv37FOy8P2FVJalx92JrzTutEOP4O
-         ChKnRQb7C22Hx4md41ViOt1A/3vYqZbIWdKRN8AWwOu5Tjbi87Gvw2g3cKf3hhwbolN0
-         knLMA00262JcyJ9aCh9iUWAP+Y050QaWG6M1PNYg/Lhr7Fi9Y/LvinSiQAS7mQ48j4Yg
-         URrzU7H7XnM57iddvYuO0S9wA44WcUhHO4LUAS3tHS9TNoJ5rWIfd3f8wLNvbmhWcNtd
-         FfLEOmp4nh69vqWVSGtW012PjXvUw0t4I919sZFHDMoLMeXE6vFTwDmBqkOjs3gPZvH3
-         ezcQ==
-X-Gm-Message-State: AOAM533wceOlq5yckx89g7U4lSC00hemys/EgMlojIEmAkVaRPJS4bqg
-        kIyUHuyuvl6cCoJExURiXIPGSvT+NKc9sHV+UUWc2Q==
-X-Google-Smtp-Source: ABdhPJwugF9nB4p2Ckla1hXyjm4O8jjX65retjJkhBc7IDqL2uvTxwtjriqS5gcdsynu44/YknLnMG8VBBUf1Q118EM=
-X-Received: by 2002:a67:7d54:: with SMTP id y81mr1141836vsc.42.1613132445607;
- Fri, 12 Feb 2021 04:20:45 -0800 (PST)
+        bh=K7cVpiyFvKnbzOkHpmdbCjD/gvDLBbbhp96xZdfeqF4=;
+        b=jLqGf+XBi9w/Zv7Zhba8Ntkdjmx2QZP0abWIadgeWeDFHbfdk5kE3fiYgOqamzA54l
+         eaIHSFjurnq3L0jw0U7+rBuQskywZwgBGzvbx0CJfRS07rqNGDjb5GtxMr9wqpdLWCqB
+         fzBImo/GcfRo9Cp5zHMsX+JkQv5Dkghg5czlgegzgPRFB4ONd4JLI5t3Rtfi/fRobSJu
+         kV6BQw9jdW7kzdktIfZbBhIIoFvPTT5XcMp2t8gsnrCJf7MT5paxErgWldGJYYBq3biO
+         XlIvxC8SA/JiDfbK8S3hnivAWSYwc2X1u6HLrrdqCt25CsfNKnsuFG0ZguzYK2XaGxvz
+         b80A==
+X-Gm-Message-State: AOAM532/3mq+dYKWJnyuWVAmNo9YuvnsDaPjTpXEjWq5qjEXBJfSqZ9A
+        KIQDG/LoHX/4D4fsntmOi+LnIWSqjE+7Ppo+ZcGnxw==
+X-Google-Smtp-Source: ABdhPJwQ1nSjux4OA93qdZZpDmtAPc2tQg5ZNbInA+vx/OIZYknuqD5ptknS6RW8OMMayzqjHyxN+/W+PYunEdkNWck=
+X-Received: by 2002:a1f:5606:: with SMTP id k6mr1088106vkb.6.1613132439488;
+ Fri, 12 Feb 2021 04:20:39 -0800 (PST)
 MIME-Version: 1.0
-References: <20210206014051.3418-1-shirley.her@bayhubtech.com>
-In-Reply-To: <20210206014051.3418-1-shirley.her@bayhubtech.com>
+References: <20210209145214.10518-1-yann.gautier@foss.st.com>
+In-Reply-To: <20210209145214.10518-1-yann.gautier@foss.st.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 12 Feb 2021 13:20:09 +0100
-Message-ID: <CAPDyKFrMqkebCdH8ucOZOaMH0UPRxedkHr_Q6L=rqkFckGpZSQ@mail.gmail.com>
-Subject: Re: [PATCH V1 1/1] mmc:sdhci-pci-o2micro: Bug fix for SDR104 HW
- tuning failure
-To:     Shirley Her <shirley.her@bayhubtech.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+Date:   Fri, 12 Feb 2021 13:20:03 +0100
+Message-ID: <CAPDyKFrdoCWy5+xnFbMesBwACyK4zbPSHEUPA4YMAmO1ys3Sxg@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: mmc_test: use erase_arg for mmc_erase command
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Russell King <linux@armlinux.org.uk>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        ludovic.barre@foss.st.com, Adrian Hunter <adrian.hunter@intel.com>,
+        =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "Chevron Li (WH)" <chevron.li@bayhubtech.com>,
-        "Shaper Liu (WH)" <shaper.liu@bayhubtech.com>,
-        "Xiaoguang Yu (WH)" <xiaoguang.yu@bayhubtech.com>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 6 Feb 2021 at 02:40, Shirley Her <shirley.her@bayhubtech.com> wrote:
+On Tue, 9 Feb 2021 at 15:52, <yann.gautier@foss.st.com> wrote:
 >
-> Force chip enter L0 power state during SDR104 HW tuning to avoid tuning failure
+> From: Yann Gautier <yann.gautier@foss.st.com>
 >
-> Signed-off-by: Shirley Her <shirley.her@bayhubtech.com>
+> Since [1], the erase argument for mmc_erase() function is saved in
+> erase_arg field of card structure. It is preferable to use it instead of
+> hard-coded MMC_SECURE_ERASE_ARG, which from eMMC 4.51 spec is not
+> recommended:
+> "6.6.16 Secure Erase
+> NOTE Secure Erase is included for backwards compatibility. New system
+> level implementations (based on v4.51 devices and beyond) should use
+> Erase combined with Sanitize instead of secure erase."
+>
+> On STM32MP157C-EV1 board, embedding a THGBMDG5D1LBAIL eMMC, using
+> MMC_ERASE command with MMC_SECURE_ERASE_ARG may stuck the STM32 SDMMC IP,
+> if test 37 or test 38 are launched just after a write test, e.g. test 36.
+> Using the default MMC_ERASE argument from framework with erase_arg,
+> which default in our case to MMC_DISCARD_ARG does no more trig the
+> issue.
+>
+>  [1] commit 01904ff77676 ("mmc: core: Calculate the discard arg only once")
+>
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 
-Applied for next, thanks!
-
-Please tell, if you'd like me to tag this for stable?
+Applied for next, and by adding Adrian's ack from the previous version, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> change in V1:
-> 1. Force chip enter L0 power mode before HW tuning
-> 2. Cancel force chip enter L0 power mode after HW tuning
-> ---
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index fa76748d8929..94e3f72f6405 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -33,6 +33,8 @@
->  #define O2_SD_ADMA2            0xE7
->  #define O2_SD_INF_MOD          0xF1
->  #define O2_SD_MISC_CTRL4       0xFC
-> +#define O2_SD_MISC_CTRL                0x1C0
-> +#define O2_SD_PWR_FORCE_L0     0x0002
->  #define O2_SD_TUNING_CTRL      0x300
->  #define O2_SD_PLL_SETTING      0x304
->  #define O2_SD_MISC_SETTING     0x308
-> @@ -300,6 +302,8 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  {
->         struct sdhci_host *host = mmc_priv(mmc);
->         int current_bus_width = 0;
-> +       u32 scratch32 = 0;
-> +       u16 scratch = 0;
+> Changes in v2:
+> - Drop patch 1 from the previous series
+> - Update comment
 >
->         /*
->          * This handler only implements the eMMC tuning that is specific to
-> @@ -312,6 +316,17 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
->         if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
->                         (opcode != MMC_SEND_TUNING_BLOCK)))
->                 return -EINVAL;
-> +
-> +       /* Force power mode enter L0 */
-> +       scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
-> +       scratch |= O2_SD_PWR_FORCE_L0;
-> +       sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
-> +
-> +       /* wait DLL lock, timeout value 5ms */
-> +       if (readx_poll_timeout(sdhci_o2_pll_dll_wdt_control, host,
-> +               scratch32, (scratch32 & O2_DLL_LOCK_STATUS), 1, 5000))
-> +               pr_warn("%s: DLL can't lock in 5ms after force L0 during tuning.\n",
-> +                               mmc_hostname(host->mmc));
->         /*
->          * Judge the tuning reason, whether caused by dll shift
->          * If cause by dll shift, should call sdhci_o2_dll_recovery
-> @@ -344,6 +359,11 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 sdhci_set_bus_width(host, current_bus_width);
->         }
+>  drivers/mmc/core/mmc_test.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> +       /* Cancel force power mode enter L0 */
-> +       scratch = sdhci_readw(host, O2_SD_MISC_CTRL);
-> +       scratch &= ~(O2_SD_PWR_FORCE_L0);
-> +       sdhci_writew(host, scratch, O2_SD_MISC_CTRL);
-> +
->         sdhci_reset(host, SDHCI_RESET_CMD);
->         sdhci_reset(host, SDHCI_RESET_DATA);
->
+> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+> index 39a478874ca3..63524551a13a 100644
+> --- a/drivers/mmc/core/mmc_test.c
+> +++ b/drivers/mmc/core/mmc_test.c
+> @@ -2110,7 +2110,7 @@ static int mmc_test_rw_multiple(struct mmc_test_card *test,
+>         if (mmc_can_erase(test->card) &&
+>             tdata->prepare & MMC_TEST_PREP_ERASE) {
+>                 ret = mmc_erase(test->card, dev_addr,
+> -                               size / 512, MMC_SECURE_ERASE_ARG);
+> +                               size / 512, test->card->erase_arg);
+>                 if (ret)
+>                         ret = mmc_erase(test->card, dev_addr,
+>                                         size / 512, MMC_ERASE_ARG);
 > --
 > 2.17.1
 >
