@@ -2,120 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4D19C4332B
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Feb 2021 11:41:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06B87C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Feb 2021 11:56:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7BF864ED6
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Feb 2021 11:41:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AD18864E15
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Feb 2021 11:56:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230083AbhBVLkr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Feb 2021 06:40:47 -0500
-Received: from www.zeus03.de ([194.117.254.33]:48288 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230189AbhBVLkq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 22 Feb 2021 06:40:46 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=hKOcOukzq0DpKJ
-        sSUNKkVBEiC3JIGvliRlA+tppvrsU=; b=jZ7hiKxtrQh9hj4dv0l78+2dVo2Tp0
-        XtGOYhUiqDhUW6hP9bUlKUT8X5+SufjdVhPuPy4uBkcZvnz0z8rmKZ3kvkRA9UYP
-        uO+zufNnNBcVGfa0S2EIcl3bM6LXrAye7DjGnPbYYO3o6D7J15RjvZFSjS77nLvl
-        4zvAT8Zv6Nb58=
-Received: (qmail 2216209 invoked from network); 22 Feb 2021 12:40:04 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Feb 2021 12:40:04 +0100
-X-UD-Smtp-Session: l3s3148p1@g69RQ+u7RsAgARa4RXmUARZp+YIgYjUK
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH v2 2/2] mmc: renesas_sdhi: do hard reset if possible
-Date:   Mon, 22 Feb 2021 12:39:55 +0100
-Message-Id: <20210222113955.7779-3-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210222113955.7779-1-wsa+renesas@sang-engineering.com>
-References: <20210222113955.7779-1-wsa+renesas@sang-engineering.com>
+        id S230071AbhBVL4c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Feb 2021 06:56:32 -0500
+Received: from condef-06.nifty.com ([202.248.20.71]:25669 "EHLO
+        condef-06.nifty.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229968AbhBVL4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Feb 2021 06:56:31 -0500
+X-Greylist: delayed 339 seconds by postgrey-1.27 at vger.kernel.org; Mon, 22 Feb 2021 06:56:29 EST
+Received: from conssluserg-02.nifty.com ([10.126.8.81])by condef-06.nifty.com with ESMTP id 11MBljUD028238;
+        Mon, 22 Feb 2021 20:47:45 +0900
+Received: from mail-pj1-f45.google.com (mail-pj1-f45.google.com [209.85.216.45]) (authenticated)
+        by conssluserg-02.nifty.com with ESMTP id 11MBkeTB016598;
+        Mon, 22 Feb 2021 20:46:40 +0900
+DKIM-Filter: OpenDKIM Filter v2.10.3 conssluserg-02.nifty.com 11MBkeTB016598
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nifty.com;
+        s=dec2015msa; t=1613994400;
+        bh=OtISAtkJ9mbtgcPz90LjKAYDel3mXKzEg/nMsg1GTeQ=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=aND6dYBQYOzz87Qyydccf51cdx9Gqc9gViHf4kv4Uqw97Pd7c3OVecOpjmYg79dfW
+         pd/mg2DL2yje/d2//LnKkIUpxgV9CKGeRAmPQM7R2WSCANhj4cyab0GxdmbvKtojc0
+         soDN1JVE6zmeg6JDLWnDR3HvpFGoSOo2ortyvjFbBZmeOkM4Ak0t7VfBeVvDRQV940
+         eG2P3h7RK/daru2JQm+wXar5afxqVqIQ8YRg21hSDH0UJvACHhxiMYwnUAdFItpLom
+         c+0xdhD0bzhqW7AWyq3EhYKH2Bx0sWmWgTpZYSpzIsuviEzNQliXmrFHs5UDVkRLv4
+         0Y9410srdEJ3w==
+X-Nifty-SrcIP: [209.85.216.45]
+Received: by mail-pj1-f45.google.com with SMTP id e9so8872254pjj.0;
+        Mon, 22 Feb 2021 03:46:40 -0800 (PST)
+X-Gm-Message-State: AOAM530mPM0C83T7bLiALjvBH68BGrcyZ9oPWdHQQC+l9oyWupLVeUOl
+        03j8kUTMOOZkmLzGSqUniLV3J02ZDfhoQwHQ8+8=
+X-Google-Smtp-Source: ABdhPJxXjM3iaClmcPKGi6JvZex/D/Qp7gqlV13AP90Lg9gGgDLgn86FciVS5BjPsX6nAjS0+pf0VRninMdzmX8XNZQ=
+X-Received: by 2002:a17:90a:609:: with SMTP id j9mr23494118pjj.198.1613994399749;
+ Mon, 22 Feb 2021 03:46:39 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210220142953.918608-1-christophe.jaillet@wanadoo.fr>
+In-Reply-To: <20210220142953.918608-1-christophe.jaillet@wanadoo.fr>
+From:   Masahiro Yamada <masahiroy@kernel.org>
+Date:   Mon, 22 Feb 2021 20:46:02 +0900
+X-Gmail-Original-Message-ID: <CAK7LNAQuuaZxKqcS5t7jW_P8jwFJ83jKEMcyQ0h9hw54gAfxDQ@mail.gmail.com>
+Message-ID: <CAK7LNAQuuaZxKqcS5t7jW_P8jwFJ83jKEMcyQ0h9hw54gAfxDQ@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: uniphier-sd: Fix a resource leak in the remove function
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        kernel@esmil.dk, Douglas Anderson <dianders@chromium.org>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some SDHI instances can be reset via the reset controller. If one is
-found, use it instead of the custom reset.
+On Sat, Feb 20, 2021 at 11:31 PM Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
+>
+> A 'tmio_mmc_host_free()' call is missing in the remove function, in order
+> to balance a 'tmio_mmc_host_alloc()' call in the probe.
+> This is done in the error handling path of the probe, but not in the remove
+> function.
+>
+> Add the missing call.
+>
+> Fixes: 3fd784f745dd ("mmc: uniphier-sd: add UniPhier SD/eMMC controller driver")
+> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/renesas_sdhi.h      |  2 ++
- drivers/mmc/host/renesas_sdhi_core.c | 13 ++++++++++++-
- 2 files changed, 14 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index cb962c7883dc..53eded81a53e 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -70,6 +70,8 @@ struct renesas_sdhi {
- 	DECLARE_BITMAP(smpcmp, BITS_PER_LONG);
- 	unsigned int tap_num;
- 	unsigned int tap_set;
-+
-+	struct reset_control *rstc;
- };
- 
- #define host_to_priv(host) \
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 158c21e5a942..a1de5c431f07 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -20,6 +20,7 @@
- 
- #include <linux/clk.h>
- #include <linux/delay.h>
-+#include <linux/iopoll.h>
- #include <linux/kernel.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
-@@ -32,6 +33,7 @@
- #include <linux/platform_device.h>
- #include <linux/pm_domain.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/reset.h>
- #include <linux/sh_dma.h>
- #include <linux/slab.h>
- #include <linux/sys_soc.h>
-@@ -561,9 +563,16 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
- static void renesas_sdhi_reset(struct tmio_mmc_host *host)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
-+	int ret;
- 	u16 val;
- 
--	if (priv->scc_ctl) {
-+	if (!IS_ERR(priv->rstc)) {
-+		reset_control_reset(priv->rstc);
-+		/* Unknown why but without polling reset status, it will hang */
-+		read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
-+				  false, priv->rstc);
-+		priv->needs_adjust_hs400 = false;
-+	} else if (priv->scc_ctl) {
- 		renesas_sdhi_disable_scc(host->mmc);
- 		renesas_sdhi_reset_hs400_mode(host, priv);
- 		priv->needs_adjust_hs400 = false;
-@@ -1076,6 +1085,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 	if (ret)
- 		goto efree;
- 
-+	priv->rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
-+
- 	ver = sd_ctrl_read16(host, CTL_VERSION);
- 	/* GEN2_SDR104 is first known SDHI to use 32bit block count */
- 	if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
+Reviewed-by: Masahiro Yamada <masahiroy@kernel.org>
+
+
+> ---
+>  drivers/mmc/host/uniphier-sd.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/host/uniphier-sd.c b/drivers/mmc/host/uniphier-sd.c
+> index 6f0f05466917..ccbf9885a52b 100644
+> --- a/drivers/mmc/host/uniphier-sd.c
+> +++ b/drivers/mmc/host/uniphier-sd.c
+> @@ -660,6 +660,7 @@ static int uniphier_sd_remove(struct platform_device *pdev)
+>
+>         tmio_mmc_host_remove(host);
+>         uniphier_sd_clk_disable(host);
+> +       tmio_mmc_host_free(host);
+>
+>         return 0;
+>  }
+> --
+> 2.27.0
+>
+
+
 -- 
-2.30.0
-
+Best Regards
+Masahiro Yamada
