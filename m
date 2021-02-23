@@ -2,162 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2AC1C433DB
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 01:24:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE8D2C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 09:25:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9BAF664E61
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 01:24:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 834CC64E21
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 09:25:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230511AbhBWBXw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Feb 2021 20:23:52 -0500
-Received: from mail.kernel.org ([198.145.29.99]:37912 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230380AbhBWBXI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 22 Feb 2021 20:23:08 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A8BC86023B;
-        Tue, 23 Feb 2021 01:22:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614043347;
-        bh=QyNsljerVpDiDO+K9/ltiFTkhVqcxc/0Ay2CXZ1z8vI=;
-        h=Date:From:To:cc:Subject:In-Reply-To:References:From;
-        b=qT9uEWGJgqYzpURFhCR6u+Wbw6bbsJzfvEpXt+qOvRpZBeHHsRUnipN3HQHDDB3E3
-         gCjXrJz0oOmy8eLfkAtbzisTgVdrdP8aPT65rPgULTDiPO+qGgU3kXayVSCi7szBX/
-         MfxWKKRGZmJ1Y0ya3KFks5fDwYLPA+LP36j6egOWcx+zZZlUCQVI7We8WcL7pgLfTc
-         aFyNR7YKXv/dZO9DLIrqsrZIWF99Xag6MDO0N1HuYflfFdk0rqJHeOrj3VhyML8MHz
-         tVChYYBBryvSqBDuB2Mo5J/NvyYzT12d/wTuwUUZX0GTHVvNU/omP5eYzJ827lYJXw
-         ABjqJ4JGM8RZA==
-Date:   Mon, 22 Feb 2021 17:22:24 -0800 (PST)
-From:   Stefano Stabellini <sstabellini@kernel.org>
-X-X-Sender: sstabellini@sstabellini-ThinkPad-T480s
-To:     Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
-cc:     Christoph Hellwig <hch@lst.de>,
-        Boris Ostrovsky <boris.ostrovsky@oracle.com>, jgross@suse.com,
-        Dongli Zhang <dongli.zhang@oracle.com>,
-        dri-devel@lists.freedesktop.org, intel-gfx@lists.freedesktop.org,
-        iommu@lists.linux-foundation.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
-        linuxppc-dev@lists.ozlabs.org, nouveau@lists.freedesktop.org,
-        x86@kernel.org, xen-devel@lists.xenproject.org,
-        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
-        akpm@linux-foundation.org, benh@kernel.crashing.org,
-        bskeggs@redhat.com, bhelgaas@google.com, bp@alien8.de,
-        chris@chris-wilson.co.uk, daniel@ffwll.ch, airlied@linux.ie,
-        hpa@zytor.com, mingo@kernel.org, mingo@redhat.com,
-        jani.nikula@linux.intel.com, joonas.lahtinen@linux.intel.com,
-        m.szyprowski@samsung.com, matthew.auld@intel.com,
-        mpe@ellerman.id.au, rppt@kernel.org, paulus@samba.org,
-        peterz@infradead.org, robin.murphy@arm.com, rodrigo.vivi@intel.com,
-        sstabellini@kernel.org, bauerman@linux.ibm.com,
-        tsbogend@alpha.franken.de, tglx@linutronix.de,
-        ulf.hansson@linaro.org, joe.jin@oracle.com, thomas.lendacky@amd.com
-Subject: Re: [PATCH RFC v1 5/6] xen-swiotlb: convert variables to arrays
-In-Reply-To: <YDAgT2ZIdncNwNlf@Konrads-MacBook-Pro.local>
-Message-ID: <alpine.DEB.2.21.2102221511360.3234@sstabellini-ThinkPad-T480s>
-References: <20210203233709.19819-1-dongli.zhang@oracle.com> <20210203233709.19819-6-dongli.zhang@oracle.com> <20210204084023.GA32328@lst.de> <20210207155601.GA25111@lst.de> <YDAgT2ZIdncNwNlf@Konrads-MacBook-Pro.local>
-User-Agent: Alpine 2.21 (DEB 202 2017-01-01)
+        id S231675AbhBWJYs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Feb 2021 04:24:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48438 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229961AbhBWJYr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Feb 2021 04:24:47 -0500
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0281C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Feb 2021 01:24:06 -0800 (PST)
+Received: by mail-vs1-xe32.google.com with SMTP id a62so8025633vsa.10
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Feb 2021 01:24:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=6nC3/SZXY0BFKnlWPr9cqk3PFaHR1HZv7S1zADN2Xf8=;
+        b=WmmJXMbM0cORGdhpgj2FrFNvd6PCM42hEzI4FTaINaZWbg8Nh47xEbSTEOT3ga2lln
+         VnXY5hfPYw2rCglQxiiUV9eNNuY0SYtEg1OaFYwaoAqKnuH1mZIKi/PkLQiqpuUbJWdd
+         tc/5MsHaZ2GlcBr8oSrvoqrSw7G5EhBRMfRLcI6Tf0w84Bn3QeW4zfPixJfpbWu/ZAZr
+         UKTUHVsUIVd1NEGdUW6SKTau+rTojulSMV0rrRTegmuI/B+DI+QdCqHDlr/IldiylIR9
+         urf+VkBzbvQEgpKG1zbPo2sq7O2PwdrvF+a2jN8z4Nd7q42NEbIiWQsGLO3TwfMIcv4i
+         btyQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=6nC3/SZXY0BFKnlWPr9cqk3PFaHR1HZv7S1zADN2Xf8=;
+        b=ZAiAg8q/XTThqwCwXRO66PvNBIML3ED4JjO5XKWViIr+/I8lt/PoNFrH6sfdjYK6kT
+         2vaAJIx3j47xSA+MvXrkwYhV/fq/Rf9mWJJt8WhyC3PU6XSIHyAOgrEDhjIOnQ9lmyFo
+         VqFjW9XX9PQhNYAlosdmPvvQksaQ4LAxtA7WAWalJODYm8FTM6xRM8MeNHs/Gwu6AQul
+         kjKU1nF13azfNPZUC51FPnEac902AkJMoK2v/7lXqUCaJp1OYn8MdfXyxzJuTwyy37xW
+         00UZo4KlHR7fuoMpurmEBeofJJVK7dyznw+QCYBfWRVhMKNEOvEReJztkfyuPPy9Muqn
+         qrpQ==
+X-Gm-Message-State: AOAM5319JK438+QexVkG1IgB6ITq/ozb4AFODyTmwjA9hKmUDGgO4NbT
+        PH7z8kQr2I+CGmUPzrwvR0jMSQOlwbyI7znAwDPjTNENY89FpdbF
+X-Google-Smtp-Source: ABdhPJxipOo6t16uzNiI5OJ+1fjUrjneldDcdjRdPXKOhIDpAXGeD4yuHJuvBBtb+1vh8eGCPdnpJi9p0gGeaO6bDcE=
+X-Received: by 2002:a67:f290:: with SMTP id m16mr13081907vsk.34.1614072245731;
+ Tue, 23 Feb 2021 01:24:05 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+References: <20200122142747.5690-1-ulf.hansson@linaro.org> <20200122142747.5690-4-ulf.hansson@linaro.org>
+ <20210222162406.GA17142@home.paul.comp> <20210222201245.GW2059@home.paul.comp>
+In-Reply-To: <20210222201245.GW2059@home.paul.comp>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 23 Feb 2021 10:23:28 +0100
+Message-ID: <CAPDyKFpXceh0qWZMxnOnLmrnwyt==qWWaxHCYzb6UxGRcvgksA@mail.gmail.com>
+Subject: Re: [PATCH 3/3] mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
+To:     Paul Fertser <fercerpav@gmail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 19 Feb 2021, Konrad Rzeszutek Wilk wrote:
-> On Sun, Feb 07, 2021 at 04:56:01PM +0100, Christoph Hellwig wrote:
-> > On Thu, Feb 04, 2021 at 09:40:23AM +0100, Christoph Hellwig wrote:
-> > > So one thing that has been on my mind for a while:  I'd really like
-> > > to kill the separate dma ops in Xen swiotlb.  If we compare xen-swiotlb
-> > > to swiotlb the main difference seems to be:
-> > > 
-> > >  - additional reasons to bounce I/O vs the plain DMA capable
-> > >  - the possibility to do a hypercall on arm/arm64
-> > >  - an extra translation layer before doing the phys_to_dma and vice
-> > >    versa
-> > >  - an special memory allocator
-> > > 
-> > > I wonder if inbetween a few jump labels or other no overhead enablement
-> > > options and possibly better use of the dma_range_map we could kill
-> > > off most of swiotlb-xen instead of maintaining all this code duplication?
-> > 
-> > So I looked at this a bit more.
-> > 
-> > For x86 with XENFEAT_auto_translated_physmap (how common is that?)
-> 
-> Juergen, Boris please correct me if I am wrong, but that XENFEAT_auto_translated_physmap
-> only works for PVH guests?
+On Mon, 22 Feb 2021 at 21:12, Paul Fertser <fercerpav@gmail.com> wrote:
+>
+> On Mon, Feb 22, 2021 at 07:24:06PM +0300, Paul Fertser wrote:
+> > On Wed, Jan 22, 2020 at 03:27:47PM +0100, Ulf Hansson wrote:
+> > > All callers of __mmc_switch() should now be specifying a valid timeout for
+> > > the CMD6 command.
+> >
+> > I'm running a kernel based on linux-next on a Tegra2 system (Toshiba
+> > ac100 aka paz00, on-board eMMC) and seeing plenty of these warnings on
+> > boot. I added WARN_ON_ONCE to see the backtrace and here's what I get:
+> ...
+> > [    3.338454] [<c063d8a4>] (mmc_switch) from [<c0648f48>] (mmc_blk_mq_issue_rq+0x22c/0x900)
+> > [    3.396728] [<c0648f48>] (mmc_blk_mq_issue_rq) from [<c064998c>] (mmc_mq_queue_rq+0x124/0x258)
+> > [    3.409215] [<c064998c>] (mmc_mq_queue_rq) from [<c039a9e8>] (__blk_mq_try_issue_directly+0x140/0x1cc)
+>
+> FWIW, with
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index f5dedb7f9b27..9adf735391fa 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -426,8 +426,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
+>                 /* EXT_CSD value is in units of 10ms, but we store in ms */
+>                 card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
+>                 /* Some eMMC set the value too low so set a minimum */
+> -               if (card->ext_csd.part_time &&
+> -                   card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
+> +               if (card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
+>                         card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
+>
+>                 /* Sleep / awake timeout in 100ns units */
+>
+> I do not see any more warnings on my system.
 
-ARM is always XENFEAT_auto_translated_physmap
+That looks like the correct fix to the problem. Do you want to send a
+proper patch that I can pick up or do you prefer if help to do it?
 
+Seems like we should add the following fixes tag as well.
+Fixes: 1c447116d017 ("mmc: mmc: Fix partition switch timeout for some eMMCs")
 
-> > pfn_to_gfn is a nop, so plain phys_to_dma/dma_to_phys do work as-is.
-> > 
-> > xen_arch_need_swiotlb always returns true for x86, and
-> > range_straddles_page_boundary should never be true for the
-> > XENFEAT_auto_translated_physmap case.
-> 
-> Correct. The kernel should have no clue of what the real MFNs are
-> for PFNs.
-
-On ARM, Linux knows the MFNs because for local pages MFN == PFN and for
-foreign pages it keeps track in arch/arm/xen/p2m.c. More on this below.
-
-xen_arch_need_swiotlb only returns true on ARM in rare situations where
-bouncing on swiotlb buffers is required. Today it only happens on old
-versions of Xen that don't support the cache flushing hypercall but
-there could be more cases in the future.
-
-
-> > 
-> > So as far as I can tell the mapping fast path for the
-> > XENFEAT_auto_translated_physmap can be trivially reused from swiotlb.
-> > 
-> > That leaves us with the next more complicated case, x86 or fully cache
-> > coherent arm{,64} without XENFEAT_auto_translated_physmap.  In that case
-> > we need to patch in a phys_to_dma/dma_to_phys that performs the MFN
-> > lookup, which could be done using alternatives or jump labels.
-> > I think if that is done right we should also be able to let that cover
-> > the foreign pages in is_xen_swiotlb_buffer/is_swiotlb_buffer, but
-> > in that worst case that would need another alternative / jump label.
-> > 
-> > For non-coherent arm{,64} we'd also need to use alternatives or jump
-> > labels to for the cache maintainance ops, but that isn't a hard problem
-> > either.
-
-With the caveat that ARM is always XENFEAT_auto_translated_physmap, what
-you wrote looks correct. I am writing down a brief explanation on how
-swiotlb-xen is used on ARM.
-
-
-pfn: address as seen by the guest, pseudo-physical address in ARM terminology
-mfn (or bfn): real address, physical address in ARM terminology
-
-
-On ARM dom0 is auto_translated (so Xen sets up the stage2 translation
-in the MMU) and the translation is 1:1. So pfn == mfn for Dom0.
-
-However, when another domain shares a page with Dom0, that page is not
-1:1. Swiotlb-xen is used to retrieve the mfn for the foreign page at
-xen_swiotlb_map_page. It does that with xen_phys_to_bus -> pfn_to_bfn.
-It is implemented with a rbtree in arch/arm/xen/p2m.c.
-
-In addition, swiotlb-xen is also used to cache-flush the page via
-hypercall at xen_swiotlb_unmap_page. That is done because dev_addr is
-really the mfn at unmap_page and we don't know the pfn for it. We can do
-pfn-to-mfn but we cannot do mfn-to-pfn (there are good reasons for it
-unfortunately). The only way to cache-flush by mfn is by issuing a
-hypercall. The hypercall is implemented in arch/arm/xen/mm.c.
-
-The pfn != bfn and pfn_valid() checks are used to detect if the page is
-local (of dom0) or foreign; they work thanks to the fact that Dom0 is
-1:1 mapped.
-
-
-Getting back to what you wrote, yes if we had a way to do MFN lookups in
-phys_to_dma, and a way to call the hypercall at unmap_page if the page
-is foreign (e.g. if it fails a pfn_valid check) then I think we would be
-good from an ARM perspective. The only exception is when
-xen_arch_need_swiotlb returns true, in which case we need to actually
-bounce on swiotlb buffers.
+Kind regards
+Uffe
