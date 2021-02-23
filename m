@@ -2,116 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73E7AC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:08:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17029C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:10:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 32B3F64E4B
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:08:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD2E764DBD
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:10:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232164AbhBWKHh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Feb 2021 05:07:37 -0500
-Received: from mail-ot1-f47.google.com ([209.85.210.47]:38818 "EHLO
-        mail-ot1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231653AbhBWKHb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Feb 2021 05:07:31 -0500
-Received: by mail-ot1-f47.google.com with SMTP id s3so11806975otg.5;
-        Tue, 23 Feb 2021 02:07:15 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=qS91opuzKuj6UsKq1hsmw5SOC2S+9ux49qSaIDpiTMI=;
-        b=Gd7TRRQtQoJ2XzxnIVsXEB/N+kJqwCjxUJgXrE5/BPpoz0633ys4U+ol1EnL6p/Jrn
-         uFD2yCh529Zi5Yjmd82XxQsa7m/rn0Ceta81jcs30QzqhJ5xDY5Xa6cG6Xsw7u25Ih+H
-         zkiQRdPt6akQux9qedkuJBAFTycDJfecJXaD1JG3LRZ55s3nuWf/JZm51psFizGlExRe
-         eAaZyRIS6G7HepPvIxHioLPgArDcBzFC8FYz+ECEoGB/o1q04X/KD8zITJZWDNFNsETP
-         zKGTllydbaQvB65ZZNiNb+livfWUlOhPd/eRzo8+7b2tmE/c99xFKUf8m6Bytbbqh/7C
-         cVLg==
-X-Gm-Message-State: AOAM530NorxbYPEYvwsixbqiGcY98HK0KHGT7MMnVq7qQbxeYMKys4fH
-        3am/v++2kHCBjGg1Ukk61EF4wQTAUX+uC05DQR7DoT/0Y+I=
-X-Google-Smtp-Source: ABdhPJxl4hts8ZrGqFxgamuICFlj+A5QLe6yTwfz6wTl6XQ6+d3Un6bm7LFOHopxClf+6O5h4f8rDnG6eA3qElDO6/g=
-X-Received: by 2002:a9d:77d6:: with SMTP id w22mr20204993otl.145.1614074810420;
- Tue, 23 Feb 2021 02:06:50 -0800 (PST)
+        id S232448AbhBWKKr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Feb 2021 05:10:47 -0500
+Received: from www.zeus03.de ([194.117.254.33]:49256 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232447AbhBWKJ3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 23 Feb 2021 05:09:29 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=swQwgygcCcX+xI
+        WGjfHEC15s4QQy690Il85VbgodZNM=; b=PS4tSo+bVmdI/wsIpnlKSqt31HmSMq
+        ulzAcKJpmfvhGBTJTAzYp+GeB5J6QbCK4iuoQQQQDXg7ydL3OuLax4CBesLg43bb
+        EGqP83Kyyux7cpsDIrhEDcZFKOkgUYiSiDf5595whcNDn0g4SZdBxWTiYx9xhM8o
+        fdcVT74o4PDmk=
+Received: (qmail 2594375 invoked from network); 23 Feb 2021 11:08:39 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Feb 2021 11:08:39 +0100
+X-UD-Smtp-Session: l3s3148p1@gtA3Gv67JoMgARa4RdeBASWYxunz7zkl
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH 2/2] mmc: renesas_sdhi: use custom mask for TMIO_MASK_ALL
+Date:   Tue, 23 Feb 2021 11:08:30 +0100
+Message-Id: <20210223100830.25125-3-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.0
+In-Reply-To: <20210223100830.25125-1-wsa+renesas@sang-engineering.com>
+References: <20210223100830.25125-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-References: <20210222113955.7779-1-wsa+renesas@sang-engineering.com> <20210222113955.7779-3-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210222113955.7779-3-wsa+renesas@sang-engineering.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 23 Feb 2021 11:06:39 +0100
-Message-ID: <CAMuHMdVFuof3C7JPw9BLUM0vBaiD+ZpUX2nSf8hiAZ4qw9doSQ@mail.gmail.com>
-Subject: Re: [RFC PATCH v2 2/2] mmc: renesas_sdhi: do hard reset if possible
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Populate the new member for custom mask values to make sure this value
+is applied whenever needed. Also, rename the define holding the value
+because this is not only about initialization anymore.
 
-On Mon, Feb 22, 2021 at 12:41 PM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> Some SDHI instances can be reset via the reset controller. If one is
-> found, use it instead of the custom reset.
->
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 3 ++-
+ drivers/mmc/host/tmio_mmc.h          | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
 
-Thanks for your patch!
-
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-
-> @@ -561,9 +563,16 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
->  static void renesas_sdhi_reset(struct tmio_mmc_host *host)
->  {
->         struct renesas_sdhi *priv = host_to_priv(host);
-> +       int ret;
->         u16 val;
->
-> -       if (priv->scc_ctl) {
-> +       if (!IS_ERR(priv->rstc)) {
-
-"if (priv->rstc)" if the reset is made optional.
-
-> +               reset_control_reset(priv->rstc);
-> +               /* Unknown why but without polling reset status, it will hang */
-> +               read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
-> +                                 false, priv->rstc);
-> +               priv->needs_adjust_hs400 = false;
-> +       } else if (priv->scc_ctl) {
->                 renesas_sdhi_disable_scc(host->mmc);
->                 renesas_sdhi_reset_hs400_mode(host, priv);
->                 priv->needs_adjust_hs400 = false;
-> @@ -1076,6 +1085,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
->         if (ret)
->                 goto efree;
->
-> +       priv->rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
-
-devm_reset_control_get_optional_exclusive()?
-+ missing error handling (real errors and -EPROBE_DEFER).
-
-Perhaps you want to add a "select RESET_CONTROLLER" to "config
-MMC_SDHI"?
-
-> +
->         ver = sd_ctrl_read16(host, CTL_VERSION);
->         /* GEN2_SDR104 is first known SDHI to use 32bit block count */
->         if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index a1de5c431f07..734442dacdfa 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -582,7 +582,7 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ 			       sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_RVSCNTL));
+ 	}
+ 
+-	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_INIT_RCAR2);
++	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_ALL_RCAR2);
+ 
+ 	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
+ 		val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
+@@ -1043,6 +1043,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+ 		host->ops.start_signal_voltage_switch =
+ 			renesas_sdhi_start_signal_voltage_switch;
+ 		host->sdcard_irq_setbit_mask = TMIO_STAT_ALWAYS_SET_27;
++		host->sdcard_irq_mask_all = TMIO_MASK_ALL_RCAR2;
+ 		host->reset = renesas_sdhi_reset;
+ 	}
+ 
+diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
+index 7d5201d6a006..3b242f2e2c98 100644
+--- a/drivers/mmc/host/tmio_mmc.h
++++ b/drivers/mmc/host/tmio_mmc.h
+@@ -100,7 +100,7 @@
+ 
+ /* Define some IRQ masks */
+ /* This is the mask used at reset by the chip */
+-#define TMIO_MASK_INIT_RCAR2	0x8b7f031d /* Initial value for R-Car Gen2+ */
++#define TMIO_MASK_ALL_RCAR2	0x8b7f031d /* Initial value for R-Car Gen2+ */
+ #define TMIO_MASK_ALL           0x837f031d
+ #define TMIO_MASK_READOP  (TMIO_STAT_RXRDY | TMIO_STAT_DATAEND)
+ #define TMIO_MASK_WRITEOP (TMIO_STAT_TXRQ | TMIO_STAT_DATAEND)
 -- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+2.30.0
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
