@@ -2,119 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B05BC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 09:35:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73E7AC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:08:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CEE876023C
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 09:35:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 32B3F64E4B
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:08:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230142AbhBWJe4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Feb 2021 04:34:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50316 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230466AbhBWJdh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Feb 2021 04:33:37 -0500
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6596C06178A
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Feb 2021 01:32:56 -0800 (PST)
-Received: by mail-lj1-x231.google.com with SMTP id q14so62261117ljp.4
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Feb 2021 01:32:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=0lDejisqH6bDNxUrmvdHi9RzSa2AbCpbgwdzBzgYc20=;
-        b=IijTlhJOHG0LCb+oN6ToVlMQD0Z5bgmZKQqPqfKmKXknGIc1CgKPVRVsrVyB681+VP
-         5IVImZ88u/9HXpCMlywH21Q0rJ5MmCPpFWNTYJ3FkVhK0aU3RNFB0kc/rYVSY4HJBCom
-         /1JuU1DT8oOTlKgt7JtsoSvGm3z8lQiJbdr3tRtbNANG7ISf/KBidEsrbqrv0y7hROEi
-         8neIROOavQfPe3Ecelh81tNFdarGOaUKSMXwWTiWiLQKYodgJVxIjRAvDFVFdeUy1LR2
-         kHnIi8bfqQsvYvXjM8q0hpfrAqMbNnjkhVjZK8POr6s95i+yoGAqsjxJIX5rK8SwTcHE
-         hdfQ==
+        id S232164AbhBWKHh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Feb 2021 05:07:37 -0500
+Received: from mail-ot1-f47.google.com ([209.85.210.47]:38818 "EHLO
+        mail-ot1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231653AbhBWKHb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Feb 2021 05:07:31 -0500
+Received: by mail-ot1-f47.google.com with SMTP id s3so11806975otg.5;
+        Tue, 23 Feb 2021 02:07:15 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=0lDejisqH6bDNxUrmvdHi9RzSa2AbCpbgwdzBzgYc20=;
-        b=rr7MH7XpplzhqsgJ6B9jcNZD2iVOJQg40ne0GegCX+DAVSzcIjLPBIcEEO0aBspjX5
-         G5c9/N945VjqcHwRakYoItD5gzuIcQvrc1Ft1EC1ofLiGZvs53ivsx/eNvUYEU5/fy/N
-         hRjQFGgBsyDbwbgDi1ByHFoCwEuNApKFA7LITh8WqsyitYWevrlnQYAIR+6SB9PfBlJC
-         Cbv53yi8hCdmJcEOwyBNQ4SPKanadJQ4vY74K3Ggk6m6QR+mEChAKIqfhnW5lwwPE+D6
-         oE1zvL5xjqZATx9JMTrWwdexC2hM5CvOZgCsr9nYv6WAcQCDHwMQIpamjFeZ9rigcFel
-         W6NA==
-X-Gm-Message-State: AOAM531YTe1nhTZmRgUPA4zk+B3KpyRZZvK2kqTNWjPEBaGQ+ABArS2I
-        QoOfdqPUvcWvgxssO6Y4Ans=
-X-Google-Smtp-Source: ABdhPJwb3hWtZzMT4BgXVWPhyvqdnAA2Ee6xs+9F4ilamJJV80nYyy01slEUt3qLSkSuu0xan0qELw==
-X-Received: by 2002:a2e:b051:: with SMTP id d17mr160213ljl.255.1614072772754;
-        Tue, 23 Feb 2021 01:32:52 -0800 (PST)
-Received: from home.paul.comp (paulfertser.info. [2001:470:26:54b:226:9eff:fe70:80c2])
-        by smtp.gmail.com with ESMTPSA id h11sm1883537lfc.298.2021.02.23.01.32.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 23 Feb 2021 01:32:52 -0800 (PST)
-Received: from home.paul.comp (home.paul.comp [IPv6:0:0:0:0:0:0:0:1])
-        by home.paul.comp (8.15.2/8.15.2/Debian-14~deb10u1) with ESMTP id 11N9Wn8m010817;
-        Tue, 23 Feb 2021 12:32:50 +0300
-Received: (from paul@localhost)
-        by home.paul.comp (8.15.2/8.15.2/Submit) id 11N9Wlrk010816;
-        Tue, 23 Feb 2021 12:32:47 +0300
-Date:   Tue, 23 Feb 2021 12:32:47 +0300
-From:   Paul Fertser <fercerpav@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        =?utf-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-Subject: Re: [PATCH 3/3] mmc: core: Default to generic_cmd6_time as timeout
- in __mmc_switch()
-Message-ID: <20210223093247.GA2059@home.paul.comp>
-References: <20200122142747.5690-1-ulf.hansson@linaro.org>
- <20200122142747.5690-4-ulf.hansson@linaro.org>
- <20210222162406.GA17142@home.paul.comp>
- <20210222201245.GW2059@home.paul.comp>
- <CAPDyKFpXceh0qWZMxnOnLmrnwyt==qWWaxHCYzb6UxGRcvgksA@mail.gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=qS91opuzKuj6UsKq1hsmw5SOC2S+9ux49qSaIDpiTMI=;
+        b=Gd7TRRQtQoJ2XzxnIVsXEB/N+kJqwCjxUJgXrE5/BPpoz0633ys4U+ol1EnL6p/Jrn
+         uFD2yCh529Zi5Yjmd82XxQsa7m/rn0Ceta81jcs30QzqhJ5xDY5Xa6cG6Xsw7u25Ih+H
+         zkiQRdPt6akQux9qedkuJBAFTycDJfecJXaD1JG3LRZ55s3nuWf/JZm51psFizGlExRe
+         eAaZyRIS6G7HepPvIxHioLPgArDcBzFC8FYz+ECEoGB/o1q04X/KD8zITJZWDNFNsETP
+         zKGTllydbaQvB65ZZNiNb+livfWUlOhPd/eRzo8+7b2tmE/c99xFKUf8m6Bytbbqh/7C
+         cVLg==
+X-Gm-Message-State: AOAM530NorxbYPEYvwsixbqiGcY98HK0KHGT7MMnVq7qQbxeYMKys4fH
+        3am/v++2kHCBjGg1Ukk61EF4wQTAUX+uC05DQR7DoT/0Y+I=
+X-Google-Smtp-Source: ABdhPJxl4hts8ZrGqFxgamuICFlj+A5QLe6yTwfz6wTl6XQ6+d3Un6bm7LFOHopxClf+6O5h4f8rDnG6eA3qElDO6/g=
+X-Received: by 2002:a9d:77d6:: with SMTP id w22mr20204993otl.145.1614074810420;
+ Tue, 23 Feb 2021 02:06:50 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpXceh0qWZMxnOnLmrnwyt==qWWaxHCYzb6UxGRcvgksA@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+References: <20210222113955.7779-1-wsa+renesas@sang-engineering.com> <20210222113955.7779-3-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210222113955.7779-3-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 23 Feb 2021 11:06:39 +0100
+Message-ID: <CAMuHMdVFuof3C7JPw9BLUM0vBaiD+ZpUX2nSf8hiAZ4qw9doSQ@mail.gmail.com>
+Subject: Re: [RFC PATCH v2 2/2] mmc: renesas_sdhi: do hard reset if possible
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Ulf,
+Hi Wolfram,
 
-On Tue, Feb 23, 2021 at 10:23:28AM +0100, Ulf Hansson wrote:
-> > diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> > index f5dedb7f9b27..9adf735391fa 100644
-> > --- a/drivers/mmc/core/mmc.c
-> > +++ b/drivers/mmc/core/mmc.c
-> > @@ -426,8 +426,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
-> >                 /* EXT_CSD value is in units of 10ms, but we store in ms */
-> >                 card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
-> >                 /* Some eMMC set the value too low so set a minimum */
-> > -               if (card->ext_csd.part_time &&
-> > -                   card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-> > +               if (card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-> >                         card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
-> >
-> >                 /* Sleep / awake timeout in 100ns units */
-> >
-> > I do not see any more warnings on my system.
-> 
-> That looks like the correct fix to the problem. Do you want to send a
-> proper patch that I can pick up or do you prefer if help to do it?
+On Mon, Feb 22, 2021 at 12:41 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Some SDHI instances can be reset via the reset controller. If one is
+> found, use it instead of the custom reset.
+>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-I've sent this as a diff precisely because 1c447116d017 was so
-explicit about special-casing zero ext_csd timeout value, so I thought
-probably Adrian can provide the rationale for that. I'd prefer to wait
-for his feedback before sending a formal patch. Does this make sense?
+Thanks for your patch!
+
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+
+> @@ -561,9 +563,16 @@ static int renesas_sdhi_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_io
+>  static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+>  {
+>         struct renesas_sdhi *priv = host_to_priv(host);
+> +       int ret;
+>         u16 val;
+>
+> -       if (priv->scc_ctl) {
+> +       if (!IS_ERR(priv->rstc)) {
+
+"if (priv->rstc)" if the reset is made optional.
+
+> +               reset_control_reset(priv->rstc);
+> +               /* Unknown why but without polling reset status, it will hang */
+> +               read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
+> +                                 false, priv->rstc);
+> +               priv->needs_adjust_hs400 = false;
+> +       } else if (priv->scc_ctl) {
+>                 renesas_sdhi_disable_scc(host->mmc);
+>                 renesas_sdhi_reset_hs400_mode(host, priv);
+>                 priv->needs_adjust_hs400 = false;
+> @@ -1076,6 +1085,8 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>         if (ret)
+>                 goto efree;
+>
+> +       priv->rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
+
+devm_reset_control_get_optional_exclusive()?
++ missing error handling (real errors and -EPROBE_DEFER).
+
+Perhaps you want to add a "select RESET_CONTROLLER" to "config
+MMC_SDHI"?
+
+> +
+>         ver = sd_ctrl_read16(host, CTL_VERSION);
+>         /* GEN2_SDR104 is first known SDHI to use 32bit block count */
+>         if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
+
+Gr{oetje,eeting}s,
+
+                        Geert
 
 -- 
-Be free, use free (http://www.gnu.org/philosophy/free-sw.html) software!
-mailto:fercerpav@gmail.com
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
