@@ -2,105 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CE2FC433E6
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:10:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9AC4C433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:17:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F260564E57
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:10:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6BCDE64E31
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Feb 2021 10:17:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232447AbhBWKKs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Feb 2021 05:10:48 -0500
-Received: from www.zeus03.de ([194.117.254.33]:49244 "EHLO mail.zeus03.de"
+        id S231812AbhBWKRx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Feb 2021 05:17:53 -0500
+Received: from www.zeus03.de ([194.117.254.33]:51586 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232441AbhBWKJ3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 23 Feb 2021 05:09:29 -0500
+        id S231793AbhBWKRw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 23 Feb 2021 05:17:52 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=+YfE37GZhgVRlk
-        p1VH1/Ni/UnOLq9XL6A5x6aE1z0/0=; b=JLfYx79FOKPZ9nMot3GiOcSqhjL0td
-        QFHtlAXk/+vpWT8mLBvyPoSw4K1ZA3Llu8/xEaud3KqaD3Lmptcqv9pdF7xrLpwU
-        4RFgjhwucN0jNzlvGERrK7Ou0IPU+yUMwCTvlmSn9UA39eWgMgpT5cE0YcEP5MGs
-        JL4/txiHVQ7no=
-Received: (qmail 2594344 invoked from network); 23 Feb 2021 11:08:39 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Feb 2021 11:08:39 +0100
-X-UD-Smtp-Session: l3s3148p1@x3YxGv67JIMgARa4RdeBASWYxunz7zkl
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=iClqYnFJ5jndIZkRL8nZCTTZiauO
+        AmKqtLat/qOoGxU=; b=PIVGDXxXWkutzjWcOp1fWieq4OwVT8tX5+rX3aJGjAum
+        La60oVAEZU4YZVU7euUGtX+pkdSSem+UUiXdaaEvu5VCeywNHEoB2H2nZwqBko9/
+        KKFr+1yn+2YvCrF7bd7XuGV7gcTzwA03jk0+SF/uv9PDK6lth9v7C3BWhdwwYcA=
+Received: (qmail 2597289 invoked from network); 23 Feb 2021 11:17:11 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Feb 2021 11:17:11 +0100
+X-UD-Smtp-Session: l3s3148p1@KjmyOP67NIMgARa4RdeBASWYxunz7zkl
+Date:   Tue, 23 Feb 2021 11:17:09 +0100
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 1/2] mmc: tmio: support custom irq masks
-Date:   Tue, 23 Feb 2021 11:08:29 +0100
-Message-Id: <20210223100830.25125-2-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210223100830.25125-1-wsa+renesas@sang-engineering.com>
-References: <20210223100830.25125-1-wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [RFC PATCH v2 2/2] mmc: renesas_sdhi: do hard reset if possible
+Message-ID: <20210223101709.GA2486@ninjato>
+References: <20210222113955.7779-1-wsa+renesas@sang-engineering.com>
+ <20210222113955.7779-3-wsa+renesas@sang-engineering.com>
+ <CAMuHMdVFuof3C7JPw9BLUM0vBaiD+ZpUX2nSf8hiAZ4qw9doSQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="ZPt4rx8FFjLCG7dd"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdVFuof3C7JPw9BLUM0vBaiD+ZpUX2nSf8hiAZ4qw9doSQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SDHI Gen2+ has a different value for TMIO_MASK_ALL, so add a member to
-support that. If the member is not used, the previous default value is
-applied.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/tmio_mmc.h      | 1 +
- drivers/mmc/host/tmio_mmc_core.c | 8 +++++---
- 2 files changed, 6 insertions(+), 3 deletions(-)
+--ZPt4rx8FFjLCG7dd
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index 2d1db9396d4a..7d5201d6a006 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -164,6 +164,7 @@ struct tmio_mmc_host {
- 	u32			sdio_irq_mask;
- 	unsigned int		clk_cache;
- 	u32			sdcard_irq_setbit_mask;
-+	u32			sdcard_irq_mask_all;
- 
- 	spinlock_t		lock;		/* protect host private data */
- 	unsigned long		last_req_ts;
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 0e7a2faa5238..eca767dcabba 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1175,7 +1175,9 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
- 	tmio_mmc_reset(_host);
- 
- 	_host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(_host, CTL_IRQ_MASK);
--	tmio_mmc_disable_mmc_irqs(_host, TMIO_MASK_ALL);
-+	if (!_host->sdcard_irq_mask_all)
-+		_host->sdcard_irq_mask_all = TMIO_MASK_ALL;
-+	tmio_mmc_disable_mmc_irqs(_host, _host->sdcard_irq_mask_all);
- 
- 	if (_host->native_hotplug)
- 		tmio_mmc_enable_mmc_irqs(_host,
-@@ -1229,7 +1231,7 @@ void tmio_mmc_host_remove(struct tmio_mmc_host *host)
- 	cancel_work_sync(&host->done);
- 	cancel_delayed_work_sync(&host->delayed_reset_work);
- 	tmio_mmc_release_dma(host);
--	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
-+	tmio_mmc_disable_mmc_irqs(host, host->sdcard_irq_mask_all);
- 
- 	if (host->native_hotplug)
- 		pm_runtime_put_noidle(&pdev->dev);
-@@ -1259,7 +1261,7 @@ int tmio_mmc_host_runtime_suspend(struct device *dev)
- {
- 	struct tmio_mmc_host *host = dev_get_drvdata(dev);
- 
--	tmio_mmc_disable_mmc_irqs(host, TMIO_MASK_ALL);
-+	tmio_mmc_disable_mmc_irqs(host, host->sdcard_irq_mask_all);
- 
- 	if (host->clk_cache)
- 		host->set_clock(host, 0);
--- 
-2.30.0
+Hi Geert,
 
+> "if (priv->rstc)" if the reset is made optional.
+
+Yes, that would be better.
+
+> > +       priv->rstc =3D devm_reset_control_get_exclusive(&pdev->dev, NUL=
+L);
+>=20
+> devm_reset_control_get_optional_exclusive()?
+> + missing error handling (real errors and -EPROBE_DEFER).
+
+OK.
+
+> Perhaps you want to add a "select RESET_CONTROLLER" to "config
+> MMC_SDHI"?
+
+Isn't "select" too strong for an optional feature? I'd think so.
+
+Thanks,
+
+   Wolfram
+
+--ZPt4rx8FFjLCG7dd
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmA01iIACgkQFA3kzBSg
+KbYawBAAm5dMf2/ksXxYKM5CO/CXTDlPzDaHro7jPEYwb8gA/s8sIwNlJxN27q/F
+lHMT+5hd1OEIN8V/HhRAXgzdT9RP3M0B94Il95C+B9KQo0iHSv1b3BaaFPTpl+oU
+jAutaEbaI1bgEjODENy4dPKHkwDG7jwVEnNLjGSjpx23IEyPyppiAn3irh3/0K5m
+IZLq1zEFQ5jK42bUVDqETh3eg8eKyc5Q+FveQmtXxSiG0a51lPoWUZyq99+MJ47/
+/XUPEuutKliJzHfXOO3ULiQ0RDczhfeNMtkJ2Bw6mundOfi7CGXWs9LEfG9cAfVZ
+k/CmG4tYJ6NJE/G9AcV9QRq8f3lWOo8d+5MxLaD94siO7D8Z/CE/LbftFWbETObu
+DHAs1y1F+sg7ae3BVZew1JgL9oYqvMso6ogR1S4AeVtwqOKO/ybS8yxk67aNetz+
+WoLkoRmppNkQpwC0ytCjIXSxvjuKTTY30fdQhS+BdNfrsk/sV32fFjCeStFmGcJ9
+WTrPpVPmUCmIpmq5EPJub1D38urDraUYdJZ1pJaPPV4N5yJyON9yZVR0vsdO27s5
+vCj2/DinqPnZHj7PYgH/vhcCwp819/E99BFej1j2uZBWH3amuymORJwAbwoFwtpQ
+SOoPE3DRNlmzldxHOCUlc9dzOqky8yCMjA9cyL3puXNMsIXh7U4=
+=d+SM
+-----END PGP SIGNATURE-----
+
+--ZPt4rx8FFjLCG7dd--
