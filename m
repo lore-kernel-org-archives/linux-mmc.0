@@ -2,148 +2,159 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED60EC433E9
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Feb 2021 11:13:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94700C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Feb 2021 11:56:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A6BA164E83
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Feb 2021 11:13:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 47F2D601FA
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Feb 2021 11:56:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234964AbhBXLNH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Feb 2021 06:13:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41022 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235076AbhBXLLC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Feb 2021 06:11:02 -0500
-Received: from mail-vk1-xa35.google.com (mail-vk1-xa35.google.com [IPv6:2607:f8b0:4864:20::a35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E148FC06174A
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Feb 2021 03:10:21 -0800 (PST)
-Received: by mail-vk1-xa35.google.com with SMTP id f145so300945vka.8
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Feb 2021 03:10:21 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=txkNSeLKdJc4A/HFV0EIcYQzv1SDtoALla8sa3Zs300=;
-        b=hmAYQEeBuHTWj+pSNmxGALWZhzOB3HZupxTcOQpX4Th09YPh+Igvh9xuDY26+PfsqC
-         zoQ2VGQ6ZDYOEdxwj+DqDv9NXwbq5zUHZf0Dm7SvqEF9jbUAutihmgnjexF/8tSZldIq
-         4dXyUD3X3gj3i/Y5pcIl6G3bCClzlVPDBX2oibkqvconVlhMeJkS0zR4abCSl8YvvSaR
-         lYFnCL8TwUjFdtI0/XFdFakg6Op3n6e8p8fp9Zd9ZBeq2GjWKQ71iIxwpMbQNhnVPHWa
-         L8i2hqiznEx6uoiSoNKcYcw1pQ4EmjU5Bz7gh/HeEdvZtw0x96SWIQ4fhNscIFqur8im
-         XKmA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=txkNSeLKdJc4A/HFV0EIcYQzv1SDtoALla8sa3Zs300=;
-        b=K1QFLzxU/VMOqosl0dgmUoUgM+tvZwORNBxSvEdw46AFvvSvh/a15LReblSmjuP7Ew
-         OZ/1/SYvv77plHsO7TjfFlDytGZHjjWTeTaaTNyLxJeBNtSi5psMALh/Mo3TJC8s5Hpu
-         a+BQCoKB+lm/b3H7PjtY3b7FZ3p5qIXRbQTRSBTN1/NUIvRYnWwd561g7cUF8oQBZiTJ
-         IRT5ngfWNKAGTpAmqt7soDAsQJTjYYpQbb0tHkQAbzFbsi3/YfnQQwy0GJFn1fUBZK51
-         00xADopwX/3IqJGd/3HVhu6IImQg6kaELQvesJkfIUsw/T9ZJ0peHPkL4FOjxE6C4fk4
-         5M6Q==
-X-Gm-Message-State: AOAM530wNm1CBkZ1u7j/7KtYsvSpNLClJtMhuPIMrk4XAdkXrivltGVk
-        2j+9htGUoWAutCjInSCAdJNxyp6wwgXeSrvz/FvNBQ==
-X-Google-Smtp-Source: ABdhPJwy+O1BLefPHmQluv603pH+Dce8Q+ALO/XD+B02smBHOMb582R82R+DjMLXBixxdDAnwR82pRvUXTmo+K08QxA=
-X-Received: by 2002:a1f:b408:: with SMTP id d8mr3930360vkf.8.1614165021057;
- Wed, 24 Feb 2021 03:10:21 -0800 (PST)
+        id S235212AbhBXL4D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Feb 2021 06:56:03 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:23909 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S235217AbhBXLzS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Feb 2021 06:55:18 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1614167631;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=rL0rqJykzi+068H31HVXzImuu55OZFksWorJVNSie2w=;
+        b=AVFfWoIB1B0wob/EqO4FUTrrCsPT9d5RuCqmIva9C54I23kINCZpVWlAQo/vqklVHP3MnQ
+        BnAZ3eK4hNpoz62TNme8iLb0kUe4m7y/ZM1/dInBsB3yT2OGSjOrZIZ8cOFn69bF3ZVMCh
+        q8u9ypQQFIr++Ozu2DBDNH6Hx0u0Vmg=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-525-f_kFJMjjM8aoNLA5ErJwfQ-1; Wed, 24 Feb 2021 06:53:48 -0500
+X-MC-Unique: f_kFJMjjM8aoNLA5ErJwfQ-1
+Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 9EB0A18B6142;
+        Wed, 24 Feb 2021 11:53:42 +0000 (UTC)
+Received: from localhost (ovpn-115-137.ams2.redhat.com [10.36.115.137])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id A20EE10016F0;
+        Wed, 24 Feb 2021 11:53:30 +0000 (UTC)
+Date:   Wed, 24 Feb 2021 11:53:29 +0000
+From:   Stefan Hajnoczi <stefanha@redhat.com>
+To:     Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
+Cc:     linux-kernel@vger.kernel.org, linux-scsi@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-ide@vger.kernel.org, linux-mmc@vger.kernel.org,
+        target-devel@vger.kernel.org, linux-nfs@vger.kernel.org,
+        linux-block@vger.kernel.org, dm-devel@redhat.com, axboe@kernel.dk,
+        fujita.tomonori@lab.ntt.co.jp, tim@cyberelk.net, mst@redhat.com,
+        jasowang@redhat.com, pbonzini@redhat.com, davem@davemloft.net,
+        bp@alien8.de, agk@redhat.com, snitzer@redhat.com,
+        ulf.hansson@linaro.org, jejb@linux.ibm.com,
+        martin.petersen@oracle.com, dgilbert@interlog.com,
+        Kai.Makisara@kolumbus.fi, alim.akhtar@samsung.com,
+        avri.altman@wdc.com, bfields@fieldses.org, chuck.lever@oracle.com,
+        baolin.wang@linaro.org, vbadigan@codeaurora.org, zliua@micron.com,
+        richard.peng@oppo.com, guoqing.jiang@cloud.ionos.com,
+        stanley.chu@mediatek.com, cang@codeaurora.org,
+        asutoshd@codeaurora.org, beanhuo@micron.com, jaegeuk@kernel.org
+Subject: Re: [RFC PATCH] blk-core: remove blk_put_request()
+Message-ID: <YDY+ObNNiBMMuSEt@stefanha-x1.localdomain>
+References: <20210222211115.30416-1-chaitanya.kulkarni@wdc.com>
 MIME-Version: 1.0
-References: <20200122142747.5690-1-ulf.hansson@linaro.org> <20200122142747.5690-4-ulf.hansson@linaro.org>
- <20210222162406.GA17142@home.paul.comp> <20210222201245.GW2059@home.paul.comp>
- <CAPDyKFpXceh0qWZMxnOnLmrnwyt==qWWaxHCYzb6UxGRcvgksA@mail.gmail.com>
- <20210223093247.GA2059@home.paul.comp> <3c8007d5-4040-2a43-59a5-08579824ddff@intel.com>
- <20210223111926.GC2059@home.paul.comp> <CAPDyKFp=XhnoD0re3kwM-yt4URK4vc7UnJE_+oKnqierMuKJ5g@mail.gmail.com>
- <c9adeaa3-8833-fe2b-cea8-50b645db0a9d@intel.com>
-In-Reply-To: <c9adeaa3-8833-fe2b-cea8-50b645db0a9d@intel.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 24 Feb 2021 12:09:44 +0100
-Message-ID: <CAPDyKFrWOs7xO1f+miz4cQznHcYQL+sunpzOW3Jg6P0rFOSS1g@mail.gmail.com>
-Subject: Re: [PATCH 3/3] mmc: core: Default to generic_cmd6_time as timeout in __mmc_switch()
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Paul Fertser <fercerpav@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="nED3gpEEOc5iD8Dg"
+Content-Disposition: inline
+In-Reply-To: <20210222211115.30416-1-chaitanya.kulkarni@wdc.com>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 23 Feb 2021 at 14:42, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 23/02/21 1:54 pm, Ulf Hansson wrote:
-> > On Tue, 23 Feb 2021 at 12:19, Paul Fertser <fercerpav@gmail.com> wrote:
-> >>
-> >> Hello Adrian,
-> >>
-> >> On Tue, Feb 23, 2021 at 01:01:09PM +0200, Adrian Hunter wrote:
-> >>> On 23/02/21 11:32 am, Paul Fertser wrote:
-> >>>> Hello Ulf,
-> >>>>
-> >>>> On Tue, Feb 23, 2021 at 10:23:28AM +0100, Ulf Hansson wrote:
-> >>>>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-> >>>>>> index f5dedb7f9b27..9adf735391fa 100644
-> >>>>>> --- a/drivers/mmc/core/mmc.c
-> >>>>>> +++ b/drivers/mmc/core/mmc.c
-> >>>>>> @@ -426,8 +426,7 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
-> >>>>>>                 /* EXT_CSD value is in units of 10ms, but we store in ms */
-> >>>>>>                 card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
-> >>>>>>                 /* Some eMMC set the value too low so set a minimum */
-> >>>>>> -               if (card->ext_csd.part_time &&
-> >>>>>> -                   card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-> >>>>>> +               if (card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-> >>>>>>                         card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
-> >>>>>>
-> >>>>>>                 /* Sleep / awake timeout in 100ns units */
-> >>>>>>
-> >>>>>> I do not see any more warnings on my system.
-> >>>>>
-> >>>>> That looks like the correct fix to the problem. Do you want to send a
-> >>>>> proper patch that I can pick up or do you prefer if help to do it?
-> >>>>
-> >>>> I've sent this as a diff precisely because 1c447116d017 was so
-> >>>> explicit about special-casing zero ext_csd timeout value, so I thought
-> >>>> probably Adrian can provide the rationale for that. I'd prefer to wait
-> >>>> for his feedback before sending a formal patch. Does this make sense?
-> >>>
-> >>> Zero means indefinite.  Might be safer to use a higher value than
-> >>> MMC_MIN_PART_SWITCH_TIME for that case.  The maximum GENERIC_CMD6_TIME is
-> >>> 2550 ms.
-> >>
-> >> Thanks for the clarification! I would guess that most likely than not
-> >> when whoever defines that value to be zero it means "I do not
-> >> care/know" rather than "the timeout must be set to more than 2550 ms,
-> >> too bad 8 bits are not enough to represent that". I'd say setting it
-> >> to DEFAULT_CMD6_TIMEOUT_MS should be safe enough since it worked
-> >> before.
-> >
-> > Hmm.
-> >
-> > The DEFAULT_CMD6_TIMEOUT_MS is intended to override the
-> > ext_csd->generic_cmd6_time, in case it's not defined in the register.
-> >
-> > Perhaps it's reasonable to think that eMMC vendors specify the
-> > GENERIC_CMD6_TIME, but may skip to specify other timeouts, like the
-> > PARTITION_SWITCH_TIME. In that case, should we use the specified
-> > GENERIC_CMD6_TIME, rather than always default to
-> > DEFAULT_CMD6_TIMEOUT_MS?
->
-> Sounds reasonable, but perhaps still enforce a minimum, for some of the same
-> reasons as commit 1c447116d017 ?
-> e.g.
->
->         if (!card->ext_csd.part_time)
->                 card->ext_csd.part_time = card->ext_csd.generic_cmd6_time;
->         if (card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
->                 card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
->
 
-Makes perfect sense to me!
+--nED3gpEEOc5iD8Dg
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Kind regards
-Uffe
+On Mon, Feb 22, 2021 at 01:11:15PM -0800, Chaitanya Kulkarni wrote:
+> The function blk_put_request() is just a wrapper to
+> blk_mq_free_request(), remove the unnecessary wrapper.
+>=20
+> Any feedback is welcome on this RFC.
+>=20
+> Signed-off-by: Chaitanya Kulkarni <chaitanya.kulkarni@wdc.com>
+> ---
+>  block/blk-core.c                   |  6 ------
+>  block/blk-merge.c                  |  2 +-
+>  block/bsg-lib.c                    |  4 ++--
+>  block/bsg.c                        |  4 ++--
+>  block/scsi_ioctl.c                 |  6 +++---
+>  drivers/block/paride/pd.c          |  2 +-
+>  drivers/block/pktcdvd.c            |  2 +-
+>  drivers/block/virtio_blk.c         |  2 +-
+>  drivers/cdrom/cdrom.c              |  4 ++--
+>  drivers/ide/ide-atapi.c            |  2 +-
+>  drivers/ide/ide-cd.c               |  4 ++--
+>  drivers/ide/ide-cd_ioctl.c         |  2 +-
+>  drivers/ide/ide-devsets.c          |  2 +-
+>  drivers/ide/ide-disk.c             |  2 +-
+>  drivers/ide/ide-ioctls.c           |  4 ++--
+>  drivers/ide/ide-park.c             |  2 +-
+>  drivers/ide/ide-pm.c               |  4 ++--
+>  drivers/ide/ide-tape.c             |  2 +-
+>  drivers/ide/ide-taskfile.c         |  2 +-
+>  drivers/md/dm-mpath.c              |  2 +-
+>  drivers/mmc/core/block.c           | 10 +++++-----
+>  drivers/scsi/scsi_error.c          |  2 +-
+>  drivers/scsi/scsi_lib.c            |  2 +-
+>  drivers/scsi/sg.c                  |  6 +++---
+>  drivers/scsi/st.c                  |  4 ++--
+>  drivers/scsi/ufs/ufshcd.c          |  6 +++---
+>  drivers/target/target_core_pscsi.c |  4 ++--
+>  fs/nfsd/blocklayout.c              |  4 ++--
+>  include/linux/blkdev.h             |  1 -
+>  29 files changed, 46 insertions(+), 53 deletions(-)
+>=20
+> diff --git a/block/blk-core.c b/block/blk-core.c
+> index fc60ff208497..1754f5e7cc80 100644
+> --- a/block/blk-core.c
+> +++ b/block/blk-core.c
+> @@ -642,12 +642,6 @@ struct request *blk_get_request(struct request_queue=
+ *q, unsigned int op,
+>  }
+>  EXPORT_SYMBOL(blk_get_request);
+> =20
+> -void blk_put_request(struct request *req)
+> -{
+> -	blk_mq_free_request(req);
+> -}
+> -EXPORT_SYMBOL(blk_put_request);
+
+blk_get_request() still exists after this patch. A "get" API usually has
+a corresponding "put" API. I'm not sure this patch helps the consistency
+and clarity of the code.
+
+If you do go ahead, please update the blk_get_request() doc comment
+explicitly mentioning that blk_mq_free_request() needs to be called.
+
+Stefan
+
+--nED3gpEEOc5iD8Dg
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEEhpWov9P5fNqsNXdanKSrs4Grc8gFAmA2PjkACgkQnKSrs4Gr
+c8hCowf/apCHcJenx6DM1jzpYo1NNnpfJb2nifukyVLP2UVasntjvQM1WD7v1t84
+WZMQu4BXSLlqhke4oxGQpx0/dNYaC3vi0/XB4yedtojqiAeLYqUgZf17ZDRybfvo
+o0JmcTVjGtEm48hmt4kulUe9VTeIBaMh8c+IkEjxAEjFN45LgERG9YKRDdTVDCIg
+ozqQR2DJJDN7ND80Mu397WnT32WJAJnpU5fLYIKrp8Y3ZINRly5h9F6rn87RmbHq
+KdfZiGjiKMHIOnF1hP1oXi+a9xckj9US9MbvSBiMovQhs5zxuI0hBnpmsO1J6Pnl
+6OYJzeRg/xtmqSUt8yY53YS9Hur9zg==
+=4OR2
+-----END PGP SIGNATURE-----
+
+--nED3gpEEOc5iD8Dg--
+
