@@ -2,125 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5056C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 14:56:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B66CFC433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 17:06:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 46E5964ECE
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 14:56:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5AF0864F19
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 17:06:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229561AbhBYO4g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Feb 2021 09:56:36 -0500
-Received: from mx07-00178001.pphosted.com ([185.132.182.106]:46633 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229498AbhBYO4f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Feb 2021 09:56:35 -0500
-Received: from pps.filterd (m0046668.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 11PEr8uX015318;
-        Thu, 25 Feb 2021 15:55:35 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : to : cc :
- subject : date : message-id : mime-version : content-type; s=selector1;
- bh=qCrvlMRtCkTQFfJ0RxV1KE9Dy1D6noU5d5mt7t050ao=;
- b=5HJnUrTYv0tTf8bCqKENBWH3CnTWsFuCgp+wStuf4hd4fVGMXm95EpbzxL8tSTVtBitW
- Duf5ZO/jBMIyV9Mctefm51Pvl3h/AqyO/P+zA+JKuHVXeXeLPBlMiCCQpSxfNvq1YcaH
- 7P8YyhCbqqttvdWHNvrdjwfsxw9H3/QyDeYNLGnhHqg5zFqxNfJVDfSJA8rYVDAYcdgc
- CbWv9PaoPP6w3hexZ+WWXkGrO8q4T+O1Q58XrHLEjVKRIH5DC0Y2HCd37WbmI4E1ltvi
- prmVz28kdBTRm1Plpf+4rLMVELhiL5hXnqwEchn2d2Tbe9yp+5JX7AvDCGj0r/zmxtOg Rg== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 36w66u6jjr-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 25 Feb 2021 15:55:35 +0100
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 03DD9100034;
-        Thu, 25 Feb 2021 15:55:33 +0100 (CET)
-Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id BD585236FDD;
-        Thu, 25 Feb 2021 15:55:33 +0100 (CET)
-Received: from localhost (10.75.127.46) by SFHDAG2NODE3.st.com (10.75.127.6)
- with Microsoft SMTP Server (TLS) id 15.0.1473.3; Thu, 25 Feb 2021 15:55:33
- +0100
-From:   Yann Gautier <yann.gautier@foss.st.com>
-To:     <ulf.hansson@linaro.org>, <linux@armlinux.org.uk>
-CC:     <mcoquelin.stm32@gmail.com>, <alexandre.torgue@st.com>,
-        <ludovic.barre@st.com>, <marex@denx.de>,
-        <linus.walleij@linaro.org>, <gregkh@linuxfoundation.org>,
-        <yann.gautier@foss.st.com>, <u.kleine-koenig@pengutronix.de>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        <linux-arm-kernel@lists.infradead.org>
-Subject: [PATCH v2] mmc: mmci: manage MMC_CAP_NEED_RSP_BUSY for stm32 variant
-Date:   Thu, 25 Feb 2021 15:54:54 +0100
-Message-ID: <20210225145454.12780-1-yann.gautier@foss.st.com>
-X-Mailer: git-send-email 2.17.1
+        id S233732AbhBYRFw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Feb 2021 12:05:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58654 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231771AbhBYREs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Feb 2021 12:04:48 -0500
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4ABCC06174A
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Feb 2021 09:04:06 -0800 (PST)
+Received: by mail-lf1-x134.google.com with SMTP id z11so9581066lfb.9
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Feb 2021 09:04:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=DOap4yHkmq8CavcY7I4GN8w1SlMHMd4tkxnPryvWXe8=;
+        b=hgNtW1+GWpoz6K7hbtSnL7IQqJuU4A23n/pa13h69n5TBX7AIzjMqNemROx2zXyrkM
+         CUqAKHgFSDQcY1UT8XsEcbgsysRJJDmLpnsgCouPMFFX8sdMO5x+U5YAqRCRONEpjkCu
+         KSE+ALwaFtuaYwI/8SZc+gRWrC7MEhWEqWTB4qV10LyplFUWui7gT8eaarIjBnYpg5ot
+         DBNbc2X7/Zu0GHKlxyEG0Qphudd/fJ+2A6d9TZQTa90YxiDxbW9/8bNV/p6wJqFZNxrK
+         kh2DGGeXpmvGqkwM9Cqz18/WaCjwsMVHZ9TpwjxD8GtM5tYNFi0tRDS9PQP7AJUIGkfH
+         964g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=DOap4yHkmq8CavcY7I4GN8w1SlMHMd4tkxnPryvWXe8=;
+        b=Y30EwonrkCKpR4s1qTzBTy+255dZdl0ooPjdO5MfHJyH5REjRKZMwdborD7sqKZT67
+         6AONL47RxhmVbroRMnckly8Jl+O4KUY61tK03VX4VlE4Gm05z4JSkWU28reaZ3Qcbgfl
+         qPzawZzRAgJMeOj4ERUz9S4qZ92AhfQqMl4nvrVLPPaAK2LR/mQu+p3q3RkTUzamps/m
+         ATQh5r0YZzFO+xZN2sPUZp+kNWMzEDQQLyFm4G4sxpwlA2UbRIBCaMig8i/WuxHlHGkM
+         c6z/9RxgBf7ilt7zhDauOR6FFmFmieFJnxkXkfM5aDSJfvLhuDfdc2yMlCqKiR4ASrps
+         OqSw==
+X-Gm-Message-State: AOAM531X//uA7oBduclkMIs+Ku4U+e50liFgqTb2UKdR4NXkedq2oI12
+        0R1aSYvR7AqkcW5w1k6emlf4vwcOktUhug==
+X-Google-Smtp-Source: ABdhPJxvTvVREmUjSS6lpbqvTkeJX4iCimDk0nZyHdbyH/BFA8at+6wvgxayb4JO+PIlU9lZLFijjw==
+X-Received: by 2002:a19:7114:: with SMTP id m20mr2297506lfc.570.1614272644253;
+        Thu, 25 Feb 2021 09:04:04 -0800 (PST)
+Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
+        by smtp.gmail.com with ESMTPSA id b39sm1103749ljf.68.2021.02.25.09.04.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 25 Feb 2021 09:04:03 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        greg.tu@genesyslogic.com.tw, Renius Chen <reniuschengl@gmail.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        Takao Orito <orito.takao@socionext.com>,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH 0/4] mmc: core: Preparations to support SD UHS-II cards
+Date:   Thu, 25 Feb 2021 18:03:48 +0100
+Message-Id: <20210225170352.76872-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG3NODE1.st.com (10.75.127.7) To SFHDAG2NODE3.st.com
- (10.75.127.6)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.369,18.0.761
- definitions=2021-02-25_09:2021-02-24,2021-02-25 signatures=0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To properly manage commands awaiting R1B responses, the capability
-MMC_CAP_NEED_RSP_BUSY is enabled in mmci driver, for stm32 variant.
-The issue was seen on STM32MP157C-EV1 board, with an erase command,
-with secure erase argument, letting the card stuck, possibly waiting
-for 4 hours before timeout.
+A series [1] that has been collaborative worked upon by Takahiro Akashi
+(Linaro) and Ben Chuang (Genesys Logic) is targeting to add SD UHS-II support
+to the mmc subsystem.
 
-Fixes: 94fe2580a2f3 ("mmc: core: Enable erase/discard/trim support for all mmc hosts")
+Throughout the reviews, we realized that the changes affecting the mmc core to
+support the UHS-II interface/protocol might not be entirely straightforward to
+implement. Especially, I expressed some concerns about the code that manages
+power on/off, initialization and power management of a SD UHS-II card.
 
-Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
----
-This is somehow a v2 for patch [1].
-Changes:
-- Only apply MMC_CAP_NEED_RSP_BUSY to stm32 variant
-- Cap the used timeout written to MMCIDATATIMER (when using
-MMC_CAP_NEED_RSP_BUSY, cmd->busy_timeout may be greater than
-host->max_busy_timeout)
+Therefore, I have posted this small series to try to help to put some of the
+foundation in the mmc core in place. Hopefully this can provide some guidance
+and an overall structure, of how I think the code could evolve.
 
- [1] https://patchwork.kernel.org/project/linux-mmc/patch/20210204120547.15381-2-yann.gautier@foss.st.com/
+More details are available in the commit messages and through comments in the
+code, for each path.
 
- drivers/mmc/host/mmci.c             | 8 +++++++-
- drivers/mmc/host/mmci_stm32_sdmmc.c | 1 +
- 2 files changed, 8 insertions(+), 1 deletion(-)
+Kind regards
+Uffe
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 17dbc81c221e..89e0e9ccfb71 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1242,7 +1242,13 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
- 		if (!cmd->busy_timeout)
- 			cmd->busy_timeout = 10 * MSEC_PER_SEC;
- 
--		clks = (unsigned long long)cmd->busy_timeout * host->cclk;
-+		if (host->mmc->caps & MMC_CAP_NEED_RSP_BUSY &&
-+		    host->mmc->max_busy_timeout &&
-+		    cmd->busy_timeout > host->mmc->max_busy_timeout)
-+			clks = (unsigned long long)host->mmc->max_busy_timeout * host->cclk;
-+		else
-+			clks = (unsigned long long)cmd->busy_timeout * host->cclk;
-+
- 		do_div(clks, MSEC_PER_SEC);
- 		writel_relaxed(clks, host->base + MMCIDATATIMER);
- 	}
-diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-index 51db30acf4dc..2ad577618324 100644
---- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-+++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-@@ -522,6 +522,7 @@ void sdmmc_variant_init(struct mmci_host *host)
- 
- 	host->ops = &sdmmc_variant_ops;
- 	host->pwr_reg = readl_relaxed(host->base + MMCIPOWER);
-+	host->mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
- 
- 	base_dlyb = devm_of_iomap(mmc_dev(host->mmc), np, 1, NULL);
- 	if (IS_ERR(base_dlyb))
+[1]
+https://lkml.org/lkml/2020/11/5/1472
+
+
+Ulf Hansson (4):
+  mmc: core: Cleanup printing of speed mode at card insertion
+  mmc: core: Prepare to support SD UHS-II cards
+  mmc: core: Announce successful insertion of an SD UHS-II card
+  mmc: core: Extend support for mmc regulators with a vqmmc2
+
+ drivers/mmc/core/Makefile    |   2 +-
+ drivers/mmc/core/bus.c       |  38 +++--
+ drivers/mmc/core/core.c      |  17 ++-
+ drivers/mmc/core/core.h      |   1 +
+ drivers/mmc/core/host.h      |   5 +
+ drivers/mmc/core/regulator.c |  34 +++++
+ drivers/mmc/core/sd_uhs2.c   | 289 +++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h     |   6 +
+ include/linux/mmc/host.h     |  30 ++++
+ 9 files changed, 404 insertions(+), 18 deletions(-)
+ create mode 100644 drivers/mmc/core/sd_uhs2.c
+
 -- 
-2.17.1
+2.25.1
 
