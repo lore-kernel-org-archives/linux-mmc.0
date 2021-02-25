@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45900C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 03:23:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AB13C433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 03:24:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 016DD64EC4
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 03:23:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16CEB64EC4
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 03:24:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234935AbhBYDXm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Feb 2021 22:23:42 -0500
-Received: from mail-eopbgr70048.outbound.protection.outlook.com ([40.107.7.48]:43061
-        "EHLO EUR04-HE1-obe.outbound.protection.outlook.com"
+        id S235918AbhBYDXu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Feb 2021 22:23:50 -0500
+Received: from mail-eopbgr40063.outbound.protection.outlook.com ([40.107.4.63]:28622
+        "EHLO EUR03-DB5-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232723AbhBYDXl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 24 Feb 2021 22:23:41 -0500
+        id S232723AbhBYDXu (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 Feb 2021 22:23:50 -0500
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=LH04lAxva28sDiO51dZCNoJKNtq2FgDi71AZE9M1+qlO8CsAWWbBZowmsnADpRNX7Fp9WEs1LrARugqCivRZLBBydxktF/QumdiC0g7NOZPWLxpswG0A5kHwK/gf6Het5nmejqqRuE9Yw6XrH0AThcE6LsRKHE+LZBMKmvC5ktMTcPCcZxe81mzZTLlkoBJjHMfZK+EV7Yj5jTr/ARJjGzHoGcmlbHj4oDuy2ZBReOrdrxQVNDCAvxt/lm6VtjMDGQIiIDc+Rd5apfZ3yEBZUzf0Gv0mpGqdBs3KE2cSg83uWjIqhUYq+in3eLAqxCMHLWRXD8jVkewhlaW6ADUnOQ==
+ b=FWu0i/zb40KEGYua7u6obAeZSTiBv8+YQmdILuZQQwGkao9aY2rDl9/UupRN3f5MZP3Uo8ihqGKBjp/leUV4KhkNft+0EsU/Vqpj/NRJ470+z5f/mRWGVZ1ej4EjxCYB/+7IkAIDlYQBfI/rE6XyhgkgcS0oIUHe/bhchXN13zfMi09xgbssMeu+AgSK8Cpvn1Ng5YTdomoogYLetDslFwcF4tisTF7oS2jpjbWmYLrJl8XI/wgC7vBHieOFYpzOngsDflLlBOzq37csinQ4OUe0nXH34Ik5A6Px9WWsg8b+3zzKeKtKYOLuqKbL+9BQuhEVXhfsYo0T1frjtDzVXQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DI5e+rFJBLpAzVtuBVlng/SwYRFZMCR58hfFtaTRJTs=;
- b=h4S8rwz381oLP2djzU02w5mPcI/nl0P1WDxRS2Lew0sUOmaprFylukdkrNUO3vGFrc67+EYO+C7QJkFlPEnG1VqfrrohPzb9mrSnN+cpSO5rfn6L1q5vgUDITyKd0uGY1uasnPEwJ3A0k20ISY6FC5svstIl0k/dBu0WrS+eJZznf0vuj8iX62SrYpNlmJC+Y1n58wOQXFO+Lf7egEh4KVaWiMrCY/3ct1uhi+Sab3V1VOAJgGj1u2/uNoH12aFOqWAFv44NUIleIvfVYsOLwBZ7KACeitSbburT4Iu9F3RUVog08Lk4VgeMaFzP9dGKt1A/yok+JrUvpzE1YUdV+w==
+ bh=Lck6ZS8A2U9T+PdekfnW8U8SUFXIjFDjy5TRKWl5XXM=;
+ b=Nzx3oAP37m5yDM9ysjXNKZhHtCxA3ZZSex+xI0lFrwrO5D/rlCvtYh2a5LpgVc26ju5f2nM8agH/4iedG0LKIt5lPSZvdKSKCD6N59XEy6xOB/FwvMkCzNXWBLKASsXnSY9x5fcfHVgpiRNjr643jFe2Pan1Pe9juNX3JcHk6sD7MpoaPChZUQHouThM6Qa42Kr0zubh9bi3aioIiyr09EhhU3q7fpdpLsdvrf57WAwvCrb0V6c9Y6BIp0Fe85JYIDNq03jIZtLe30ou9OTjnqptp0qTsgX0tNtogCSscrm2LIfXMC1iYCI+95Yu8jf4/HQ1UA4FZQAwUNBGStAWDw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
  dkim=pass header.d=oss.nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
  s=selector2-NXP1-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DI5e+rFJBLpAzVtuBVlng/SwYRFZMCR58hfFtaTRJTs=;
- b=L+jvEBXW7WMYJ19Jkb+thj24fbvzZWqVZRoXovR+y7ZhXLCCCrZm23ltq9by+1fBSvVY84D03z+MKNAE819vKvRzkNsmR5zaljhxnZUEyBmoncq6K84Hpw3/ph2yQTTimj1hzyb1tiMs27y1s+XG2oGZqSLzave7tOfZnDno7dI=
+ bh=Lck6ZS8A2U9T+PdekfnW8U8SUFXIjFDjy5TRKWl5XXM=;
+ b=Qi1BDqQY1ZozV6lnsm0giqNX6Map9psX3K/S2ZqwFTWZWYVgM7YzaVpHpgNmSiASoYVrSxWho34v9QOd6PlAUk7kKq13TPQ01QiGLvW1KRN5XtztaEJG+qRATVEErlupGAgsaZ762r1e/SIVwCp4pNDFcYENjffg03p3CE17NC0=
 Authentication-Results: kernel.org; dkim=none (message not signed)
  header.d=none;kernel.org; dmarc=none action=none header.from=oss.nxp.com;
 Received: from DB6PR0402MB2760.eurprd04.prod.outlook.com (2603:10a6:4:a1::14)
- by DB7PR04MB4089.eurprd04.prod.outlook.com (2603:10a6:5:1b::29) with
+ by DBAPR04MB7222.eurprd04.prod.outlook.com (2603:10a6:10:1af::18) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3868.31; Thu, 25 Feb
- 2021 03:22:29 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3890.20; Thu, 25 Feb
+ 2021 03:22:59 +0000
 Received: from DB6PR0402MB2760.eurprd04.prod.outlook.com
  ([fe80::d58c:d479:d094:43d0]) by DB6PR0402MB2760.eurprd04.prod.outlook.com
  ([fe80::d58c:d479:d094:43d0%9]) with mapi id 15.20.3846.043; Thu, 25 Feb 2021
- 03:22:29 +0000
+ 03:22:59 +0000
 From:   peng.fan@oss.nxp.com
 To:     sboyd@kernel.org, robh+dt@kernel.org, shawnguo@kernel.org,
         s.hauer@pengutronix.de
@@ -54,90 +54,100 @@ Cc:     kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
         linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, Peng Fan <peng.fan@nxp.com>
-Subject: [PATCH V3 0/5] imx esdhc dt/driver update 
-Date:   Thu, 25 Feb 2021 11:09:59 +0800
-Message-Id: <1614222604-27066-1-git-send-email-peng.fan@oss.nxp.com>
+Subject: [PATCH V3 5/5] mmc: sdhci-esdhc-imx: validate pinctrl before use it
+Date:   Thu, 25 Feb 2021 11:10:04 +0800
+Message-Id: <1614222604-27066-6-git-send-email-peng.fan@oss.nxp.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1614222604-27066-1-git-send-email-peng.fan@oss.nxp.com>
+References: <1614222604-27066-1-git-send-email-peng.fan@oss.nxp.com>
 Content-Type: text/plain
 X-Originating-IP: [119.31.174.66]
 X-ClientProxiedBy: SGAP274CA0007.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b6::19)
  To DB6PR0402MB2760.eurprd04.prod.outlook.com (2603:10a6:4:a1::14)
 MIME-Version: 1.0
 X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from localhost.localdomain (119.31.174.66) by SGAP274CA0007.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b6::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3890.19 via Frontend Transport; Thu, 25 Feb 2021 03:22:24 +0000
+Received: from localhost.localdomain (119.31.174.66) by SGAP274CA0007.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b6::19) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.20.3890.19 via Frontend Transport; Thu, 25 Feb 2021 03:22:55 +0000
 X-MS-PublicTrafficType: Email
 X-MS-Office365-Filtering-HT: Tenant
-X-MS-Office365-Filtering-Correlation-Id: 8f40012a-08ef-4d8c-efb6-08d8d93c946b
-X-MS-TrafficTypeDiagnostic: DB7PR04MB4089:
+X-MS-Office365-Filtering-Correlation-Id: f408410d-0c89-4925-92b8-08d8d93ca6cf
+X-MS-TrafficTypeDiagnostic: DBAPR04MB7222:
 X-MS-Exchange-SharedMailbox-RoutingAgent-Processed: True
 X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <DB7PR04MB40891F4A780132D0BD63CCEBC99E9@DB7PR04MB4089.eurprd04.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:4303;
+X-Microsoft-Antispam-PRVS: <DBAPR04MB7222285E2EE003B18C9AB8A9C99E9@DBAPR04MB7222.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:546;
 X-MS-Exchange-SenderADCheck: 1
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: jd8KqBDGKiMmqEBrZ+7tQDiAXUkGWYvVYnVsAmfifnN2oRN96lOM4W5QJDXllsLrBCzYJbEp16vExecl2+vP+nNknBbjnFi6yXdh6Fk7skvgWfwW84am8y7HAa8jKwdo97yDe5yUTtiliwt6cK+setzE93Q4dLDW8ONBQohovnyZMr+V4m9T4TvyjmJHDSNImHu2bN6o4VHyFLRwx/feT2lHFD7T3Y5zsP70SaMw9s9k72Idor1GB+mZUgNJ87GZEAqVx7V3kifBPN7o6CJSwuta5QtbQ0J+Vc2NfTA+k4k8wluet7kiHMI70QefhkGBnkUV73BzZVIJUel6o73xqhRrQLP7C3hQp1AGvkGPLlKb3ZTfGnsz8c5IcEWys06s97j5C+yURIJSFRCuPx2ZloREmd+6x7wGhyExLm9wrByqShyMBpxhRotVW6/uLxL94/eDccyypJ9T4ysuq1t5WkrfzvrvEtXU0vzNb/C81Hl4+AxpXN3zB8TAmPFYrie8x4W/0u0ry1pyF3X0cAHXkRhaIAsYaPUlgtuq9uQOzTClnWR1irk9sy7y7s4sWbcVmftTz8lsW6W+9ghoDSxxK8u5c5KlW3rRptuGbs43vr59zq6Oz8DbeaC7EWYsWS/8ibWz1uVkCyaAqPzKhUlVtSFaoS8/KxDg5FFqwDvzKps=
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0402MB2760.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(366004)(136003)(376002)(39860400002)(346002)(15650500001)(6666004)(66946007)(316002)(8936002)(8676002)(66476007)(66556008)(966005)(2616005)(478600001)(52116002)(4743002)(186003)(4326008)(86362001)(69590400012)(956004)(83380400001)(26005)(6506007)(6486002)(2906002)(7416002)(4744005)(16526019)(9686003)(5660300002)(6512007);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?WQZg6i75fwTZasupGOIe84/8DBVq179AaV0LJr5gWp5Iif2w1Aw7IUaScxUX?=
- =?us-ascii?Q?JgEcR4RH+jkL+WSHL4luWegHFWv+F8lXDA/gmYQLYw2PgUL3f89nbjXbwrzs?=
- =?us-ascii?Q?lXsHc0nTJOWH2Aw1GkaiDwFxcqAsuqsz6Dp9LpTSZFmo7Tj0JLa2os62BYjk?=
- =?us-ascii?Q?5e4EqQzmqRJzdAoP/vVy596kAyblW0rZfQy7ShQFwK8Pwn9FuY2M8rLUNZQ6?=
- =?us-ascii?Q?ynGGBWHQ4T2dgMBL7Z10mdmuA00dGVykwaaDWYMyjpK2OXKXMxygt4Fj2gsV?=
- =?us-ascii?Q?w54EAgC51fMm/eB6Mf2FyrxxUiUJ6UvrBdal+HPpOcprv+sCNiiSx4SlqbaX?=
- =?us-ascii?Q?ryRWeYbJQcjZ7UUfZh0ec4bbMFCfD7TrzODCTf3H3vDlz1ZAy09I2EFAjeSi?=
- =?us-ascii?Q?JItqKRckCTyW3LZClc3FV9ZxaC3gtkqVNhydv62iTj70lI/EspNdairLzf4U?=
- =?us-ascii?Q?4vZpFBM+m+I6HGFPn0CAxJulHGiCKiHcYBE/y6neF3Xw5jFQC5D04NT6SHBy?=
- =?us-ascii?Q?QL+WvzTENeeMRLaXk76QUh2PK99WLIMrps1Or2jS06gpdAPDstqrGri21hPz?=
- =?us-ascii?Q?CiUoR0d5UBWXVA4xx1YkJZ+biP9SxTuC3H+JIaJ7gjAErFvvS1B4Q2sWtsWi?=
- =?us-ascii?Q?7vCoJ8kYbAzsreMgwPnrfxpNTl0d2ymQoQkGbVGD8s61eX+VDKUZPxzQwFE1?=
- =?us-ascii?Q?SNKIxz0ijiKiUPbAh/GD7FnmGGfyDlSuzMAHY323rDfeNMNZARymgGVuW0yp?=
- =?us-ascii?Q?W7IR2+IKTlSqma4ArEwD3F5qxm7TDDcShen/Ew2KNzglbuerKH9Mm7oFQqgy?=
- =?us-ascii?Q?Os8eyKrlPTzzgI2kgGSW6qo3ghR1g2JLy+CXi+IUZFvSwrClfYYUj0z6bdGk?=
- =?us-ascii?Q?P+xWE5IDWWzBeA3jWGgsfXvlFy9zY4A5SiYU1DWiMnkTWiBlPaA9BLlAj9j2?=
- =?us-ascii?Q?jfqQV2Jaf6IFrqCPPzWPObaCJnvCmRq9t1A5Zi3CYhJjEC0RFL2Oj8/p4dD3?=
- =?us-ascii?Q?owR59khqID3b2uDmfm1OOe0f6pjU7CGcI9V/noBla7EiHioJd2/TWdakG4bN?=
- =?us-ascii?Q?613f60ccNbnyJsXPAF7VA6wjj94uXvPZc2YLqlmKfz34o3lJ4eEkMgJ+8Ic3?=
- =?us-ascii?Q?kd8kc53glg97070SQGEs1lD1oZSE5704QWGo+Y0gPqDm6JwElbPItPk39zKH?=
- =?us-ascii?Q?efVUEfTSbiWBAdRotJSvu9U7wYXA0wS/XYZ7ifo2w4T92DF090NR61Wj3rYK?=
- =?us-ascii?Q?6dPITM33voDzww/dMhJ+OgTFF5skc7BCcYH/7cbzsoEG2xZkmEQeuR+Ah6+C?=
- =?us-ascii?Q?EVtJvLCBErWVaPW6QQJ4LB7p?=
+X-Microsoft-Antispam-Message-Info: WNvVANhwfWvA3vTXVH/e9+IIOctca6BZ9rNhErMK1S8tq+XrweGG9Dc9nCqlJb73iNXHHK6fB0/jvjYtFmrmzlWa9Pwm/Bz3KUbcdOyNsrGjarDY8lB3vWWj/6gwxiXblmafGPaTWaJzw7cYgzR2UDksEtdTa0ux+NirVxq2t0DudXv0TVA8Mr1zOgg5sq0MD5zqVKu8e6t/bx0S0ZjUdbhYkT2CJhtG4NUDUaKokW7ljAy7uw9d+k5oZsqDdHmTCDO0DaYhNKVjh5uZmBwqMZXpd8z5gYTY4p/I2CMomPgy8SEAQGXXnn0DqRytceVMwYN2vjlGze2ZjC4mq7whkWqtmXsnH1tg3RRvT/dEGEnI10aOKgzA6Nkes4WfD7njm0USP3NcpkTgrtDBhN7R/kp/CGHezsYzPDIEHhW95K/vTaDfoF4OIhswIvbBPecIJ0+TqzmLLoDK59nYQA85UNMPC5WZEFjSaKW93lcTnFHATE6wmOnn9sSPvCpFD6CtnsINydHgDPPcprXTSbXuSCql7SY4fTdBkKExehuR4n7C75ubF9tseIj8WqB6serpbNRCQzde/76yyjRSOYWvhg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0402MB2760.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(136003)(376002)(39860400002)(366004)(396003)(26005)(6486002)(5660300002)(66556008)(66946007)(66476007)(478600001)(86362001)(7416002)(956004)(6506007)(2906002)(6512007)(2616005)(6666004)(9686003)(83380400001)(16526019)(8676002)(69590400012)(4326008)(316002)(186003)(52116002)(8936002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?SPGrzSHYtxpOYXFVSfTyy66FHRj2o6w1AckK8GddO5z9yrG6rmlPqGcUBLVL?=
+ =?us-ascii?Q?ezlwdu4QQiKNGP897BsVZqH/Ed3+JLk+7HLRZYYEypP6kxcgxv7xSZRCF5FR?=
+ =?us-ascii?Q?wrOY5knBcOKPlGbH2m55+jn2zhzC+9p6zSHv73JA622NGxM5EWr6dt/ibMVV?=
+ =?us-ascii?Q?vRcIxHvulPu3Y6oww+LxwJ8TLA+1ygeEfey5Usdh1CMGrh/lDA3/THaDUblC?=
+ =?us-ascii?Q?3iXJxpXM6n03p/C3Gn2Y+/moVvmbQ4YNWFU9XXOctaNb5sBhjnUFzUSn8/9o?=
+ =?us-ascii?Q?mWZuB72YPzByQAk6krZnRkorrpng8zTOmKJUqFFagoma08PZCi+BiAXfIFiC?=
+ =?us-ascii?Q?B4mqzzCr3lCBnXevDYVBaC+O/DxbRbqAWvSC14yMUcL2kcPapddeXoM/dC4M?=
+ =?us-ascii?Q?Bl0oOgvZEoF/QiGR5MxBXq/CUWnJL6miCcdDYqtbLQxLWJ2PXlg96DigA1y3?=
+ =?us-ascii?Q?WF90A8ooC5SzCiJ0gENyRNPUZxN7G+5VFXjsBFYxyedg9O4HyVEfHOapk8w1?=
+ =?us-ascii?Q?TPnWS3Pa+yHP3RaqAkcI8mEGoVqYJoH7TegP3laaeVem3OBeMDZwDNDyb/Os?=
+ =?us-ascii?Q?M+Ht7iDh2q5zgtikyZogYigLoCFy4p6zbSSbCmimRXFe7nn3YtgUQi5QqHE7?=
+ =?us-ascii?Q?B5ugDOxhM3PZRDFHh2o5G78lSWCZMvkU8DI5Cpm2ELajC02NvjgkHv8Nvxk+?=
+ =?us-ascii?Q?JSh/4gYmJhRXbfryOMf+pNn6Clpv5g5sqJ5K0E69k8mdlonaBtnchQq36dfM?=
+ =?us-ascii?Q?Jbj6xUxwKjk4eded56FOTsaSL/l3uipU/xAB9b+TIPfydXxtHGyo8IaBh0p4?=
+ =?us-ascii?Q?OEivjRbxIG+cRXuvK1Is6EXTFuLPrO/ifUc96/QIVpIn5ZqgfjsZ+neYDHw+?=
+ =?us-ascii?Q?cDljirM0nOS5sbddehYrnFQaBrhx7triJiEJPTk1NqHVnU9iFeRnkPO/tCrh?=
+ =?us-ascii?Q?HL25nrHjlvW1swCzxxsarpmrGnSqV2URJ87yPuZDxDmVLCkbUvDTlnrIeXgZ?=
+ =?us-ascii?Q?RoKkX3WxdhClWJDYcVtaEistmvSQYUKDBlsFp2C53Qlv+p7F5uf5bXavtHeM?=
+ =?us-ascii?Q?bkA5YfF3tPVzQ74s1aRsadHtVdlBGFZd69I5ID2hCF2OJxWxtbHRg+HTpwjN?=
+ =?us-ascii?Q?CSdKAB1PJb5UU315qZR8KMqGLLfwSwvUF+0vfPwhB0OUFGDI5lDVOqVl8McO?=
+ =?us-ascii?Q?YwMQyRs0XGM+JUY1KMSCA6MLf+nWH/YsaFfuj14Rm8DlpIoZDKxlJm0LHRCI?=
+ =?us-ascii?Q?02zZoUvksZTHzf31zlbOJe7IHN+5AJNaW3WImdCCkIFuk4Ij8cbKDjOQtpmC?=
+ =?us-ascii?Q?VZxRwQ+qNqfcWfDZcElAu7l4?=
 X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8f40012a-08ef-4d8c-efb6-08d8d93c946b
+X-MS-Exchange-CrossTenant-Network-Message-Id: f408410d-0c89-4925-92b8-08d8d93ca6cf
 X-MS-Exchange-CrossTenant-AuthSource: DB6PR0402MB2760.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Feb 2021 03:22:29.0869
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Feb 2021 03:22:59.6659
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: lmebUqAKHalFHiRZKPtCkj77zkVtFhEnyQoRJGUFAyatZmU7FmX01CqlgRgOG4RN3vzfnINl+AgRVBm0y/+N5A==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB7PR04MB4089
+X-MS-Exchange-CrossTenant-UserPrincipalName: srLEI1leelfHm0DpJBd0oAWo12FUorhLW++ZzNpobwY4S6b4EYeM8YH/eozEZAQqMIQykXSVJXvq4HCkJdSptA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DBAPR04MB7222
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Peng Fan <peng.fan@nxp.com>
 
-V3:
- Patch 1, drop unneeded pinctrl-0/1/2
- Patch 2 is new to avoid break dt bindings check
-V2:
- patch 1, 2, 3 is new
- patch 4 is not changed
- https://patchwork.kernel.org/project/linux-arm-kernel/cover/1611198593-16287-1-git-send-email-peng.fan@nxp.com/
+When imx_data->pinctrl is not a valid pointer, pinctrl_lookup_state
+will trigger kernel panic.
 
-Peng Fan (5):
-  dt-bindings: mmc: fsl-imx-esdhc: add pinctrl bindings
-  dt-bindings: clock: imx8qxp-lpcg: correct the example clock-names
-  arm64: dts: imx8qxp: correct usdhc clock-names sequence
-  dt-bindings: mmc: fsl-imx-esdhc: add clock bindings
-  mmc: sdhci-esdhc-imx: validate pinctrl before use it
+When we boot Dual OS on Jailhouse hypervisor, we let the 1st Linux to
+configure pinmux ready for the 2nd OS, so the 2nd OS not have pinctrl
+settings.
 
- .../bindings/clock/imx8qxp-lpcg.yaml          |  6 +++---
- .../bindings/mmc/fsl-imx-esdhc.yaml           | 20 +++++++++++++++++++
- arch/arm64/boot/dts/freescale/imx8qxp.dtsi    | 18 ++++++++---------
- drivers/mmc/host/sdhci-esdhc-imx.c            |  2 +-
- 4 files changed, 33 insertions(+), 13 deletions(-)
+Similar to this commit b62eee9f804e ("mmc: sdhci-esdhc-imx: no fail when no pinctrl available").
 
+Reviewed-by: Bough Chen <haobo.chen@nxp.com>
+Reviewed-by: Alice Guo <alice.guo@nxp.com>
+Signed-off-by: Peng Fan <peng.fan@nxp.com>
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index a20459744d21..94327988da91 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1488,7 +1488,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 
+ 	mmc_of_parse_voltage(np, &host->ocr_mask);
+ 
+-	if (esdhc_is_usdhc(imx_data)) {
++	if (esdhc_is_usdhc(imx_data) && !IS_ERR(imx_data->pinctrl)) {
+ 		imx_data->pins_100mhz = pinctrl_lookup_state(imx_data->pinctrl,
+ 						ESDHC_PINCTRL_STATE_100MHZ);
+ 		imx_data->pins_200mhz = pinctrl_lookup_state(imx_data->pinctrl,
 -- 
 2.30.0
 
