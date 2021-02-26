@@ -2,200 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEFE1C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 17:07:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A456C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 08:15:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6624864F19
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Feb 2021 17:07:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CD72D64EE3
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 08:15:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234143AbhBYRHa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Feb 2021 12:07:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59028 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234070AbhBYRG2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Feb 2021 12:06:28 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE1FEC061797
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Feb 2021 09:04:14 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id e7so9651779lft.2
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Feb 2021 09:04:14 -0800 (PST)
+        id S230001AbhBZIPk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Feb 2021 03:15:40 -0500
+Received: from mail-eopbgr1400137.outbound.protection.outlook.com ([40.107.140.137]:49073
+        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S229482AbhBZIPh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 26 Feb 2021 03:15:37 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=CG+/ZA5tXPqekzxHbU8cPF2p8rOEtw7Gg5/INKqDpLtRj3opy3p2L2cytVezDwx+aPTpzg6lsC8iEJyCUL5A2SUfvX3XyLMqUnEY+wKsIro10W/hT76qz28mI0s1wPsoHFPqPOPmnJJrJ+DgVtkVYOudSawy5gH2llxaHXYST9rQ79jO4dbNwkV7SfvcFMG6mIHOhfT6I3MpVFt75E0hX9z/V1yZ+RYLd+nx2t3oqkxTw5rdiN6J+GuTrKyAGDcL6HUIl7w7wPlGK3R5daNyQA+g+PUIUGu8SHvRzmYNN8CQ8CmH1EIhicK6tiUHqi7vbFa2tObHRA5FbvzAFG5Oyw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=FIS0w8tgouK1wwu4Hh9una79vseadx1Ix6bu8WydBYg=;
+ b=mVwz3c4zSkxhB/+FTucUwt0jQbNNp+Are01ktK8EjkET5JlMCzQXalQIUE3XS3/lq4bnUwgSXnvQZtNHCbZw4+4AGDf+cPiNBDfcUa3VwCuM8Ff0lCDOijQLTnswF/4PQVx+PDEYKqLBRVRdNQqotnR50FzDl8MEjHfUHmFOkawIjyjKr3hbuf7clzZNyFYzHzSBuCrbhWiK4Lsfk+MMMa3KL2kA+rVNlR8R4mOz1atGYO871QZyrf0c/RaYeSbLxI+XMd2enCucFxvVtiF0LFTMwkRdhrG6XAafALtDo74kHJdUxbUXLpaWfN2yJAzdTmNVDBq0BOoSBS7ZRJZW5Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=e/iSON5QK+omS1XoqwWY7ETX5FXArOjI6pz19z6lB0I=;
-        b=j6bY4H6kfrR0AN3pMN9cqLQivgCqUaS8EYdXbNzkj3DhKOys3gqvJdKERyEF7zKDvv
-         BbFY5S8YB8Mfm18GmLWR7a+hGktWJflNKitgAKptY176lqfBwXP4Ej61uNqGS6p2HM34
-         GJqj7nc0IVINWxhrpON80l4Tl9IUj6YFL0xDRwhgfNiX28fm63EIuU2il+33zEJ2eSpe
-         nKtOwu8KHwN6CHOp3Z/wc6sXdMMOShJYoL0R2kw3W7yS59Bze2AIWt0KSWixL8LDz31p
-         h5asIv/FzpV+kqHv+3z+O432JbxBqIo8dj6M/jQWOgB6O1D/4ZmY+v8WCuxaVSvDlVW3
-         5YVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=e/iSON5QK+omS1XoqwWY7ETX5FXArOjI6pz19z6lB0I=;
-        b=RBKjj8sGxbYBqN8JXbxg8YuiebN/12wHA7Xbq/1IN4G6CmCLITuuJd2YanJmKcpmWJ
-         wkHWi2BBewO34aXBLwuyIf9K5WRqda3bK8iJsEMgD9Du2mCFCduinA6MSxnopX4HzxD8
-         THrg8t5Q+iiQuUTVfehr3bTAhCI35XCOzPPHeyz0XkZnpvZIn0a4AjhfhTzxMXxgMnER
-         ggNBvREjYtF4PKfJziWiPlfEjflVz/aOiFSNsHDdUHKgZUZ/WXP3poJk0m/Pza5mX7OD
-         AzqAs6KsxkLVsD8ujLTI+f2+Eg4ebwEhvRI4LdyTd5p/U1cld4xQvFFZOjYiewyp5gnq
-         aRxQ==
-X-Gm-Message-State: AOAM530U1w/qhnNLpdfgRZGJj8RDODLvAHeiHHLmIlpvs+b0STVOwdhe
-        iSJbcStaxl2R51DF0Lnl4xKTPhPys9sgoQ==
-X-Google-Smtp-Source: ABdhPJx+R9ayXorBaTSiwQJpj6otLXaJvnFpp+m0n+rGegnSlXrw1gvtGaes4gOSb//SiZkmcutOTw==
-X-Received: by 2002:a05:6512:398d:: with SMTP id j13mr2290695lfu.41.1614272652167;
-        Thu, 25 Feb 2021 09:04:12 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
-        by smtp.gmail.com with ESMTPSA id b39sm1103749ljf.68.2021.02.25.09.04.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 25 Feb 2021 09:04:11 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        greg.tu@genesyslogic.com.tw, Renius Chen <reniuschengl@gmail.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        Takao Orito <orito.takao@socionext.com>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH 4/4] mmc: core: Extend support for mmc regulators with a vqmmc2
-Date:   Thu, 25 Feb 2021 18:03:52 +0100
-Message-Id: <20210225170352.76872-5-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210225170352.76872-1-ulf.hansson@linaro.org>
-References: <20210225170352.76872-1-ulf.hansson@linaro.org>
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=FIS0w8tgouK1wwu4Hh9una79vseadx1Ix6bu8WydBYg=;
+ b=EXOOXngE56L3rpx3R+lqQI6McAkMSHUXmR5SIrQTeeu+zvhoPmNgzl7Gf+s2TMdGlvICbUA4b2NQTOnIYN1zJObhZu8lEi6Nlchga9oUt+i4fF3z15TkYHSpCQZWJhu4W/nJmbc96bHm+lWxwHPvRanmlQaCOAb/WBT9hfgCXgQ=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYAPR01MB6363.jpnprd01.prod.outlook.com (2603:1096:400:a2::13) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3890.19; Fri, 26 Feb
+ 2021 08:14:47 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::cb4:9680:bb26:8f3f]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::cb4:9680:bb26:8f3f%4]) with mapi id 15.20.3890.019; Fri, 26 Feb 2021
+ 08:14:47 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: RE: [PATCH 1/2] mmc: tmio: support custom irq masks
+Thread-Topic: [PATCH 1/2] mmc: tmio: support custom irq masks
+Thread-Index: AQHXCcvfz+AR7jGLlU+ZuaMIgxk2eKpqGQ3w
+Date:   Fri, 26 Feb 2021 08:14:47 +0000
+Message-ID: <TY2PR01MB36920AF027AA8B5F25F0333DD89D9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20210223100830.25125-1-wsa+renesas@sang-engineering.com>
+ <20210223100830.25125-2-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210223100830.25125-2-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [240f:60:5f3e:1:e5f7:ee15:e4ae:ce73]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: d6c2b801-0e93-47f5-f1b5-08d8da2e94e5
+x-ms-traffictypediagnostic: TYAPR01MB6363:
+x-microsoft-antispam-prvs: <TYAPR01MB6363D46442B558115E02A27DD89D9@TYAPR01MB6363.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:7691;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: ZJHA2j6tSmFgTQGjStd/rfskIafoe/UIz9/fDpSD/7AfAkj6MDO++qwmNBhsdXUlYPr3V53w5vdiEsN8EnLOU/qEMb3uNgbiBPwKwngRAvadTlXD3Q1pvBAjAQxMPN+O6Uz0aeLt3qBW5fBtCDik9lOY9xBaK/5MyzRJid6AsvN6UpejdA/mK+k6tfHxYwQKUIgEMqbbw1CciRLlrgwNUEOG3hjF9+E6kT4IGsjlNEmphDDr/opSZGWoMK7TLSF/SzDpzKZwKdIhekhHvvk6ib/rZL2TBn8IU5Ngpd7ElF8NT5tDJujJrQ/C1pwK0CXi5p6QOv5GIdbYyTCTQ3MdmSACB1nSMt9jeOq3d2Ps/RLTOgO1ewloS+G+fGwZ2/z0CVeQqhao/stQU30m4v44pa6mPBpYXJkNNO/WesdHDcsYfHkqzhGVTrOAVdc55FuMr9R7k2D+BJxu008qBkJpXZHTCDLtHIxUOTk3H9dNyFCZCOb2rnVa2/KyJd1ZdcYIiDvNlSpSB+Xo9htSE91sEQ==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(136003)(39860400002)(366004)(396003)(346002)(4326008)(8936002)(2906002)(8676002)(316002)(7696005)(86362001)(55016002)(33656002)(110136005)(9686003)(66946007)(66476007)(4744005)(66556008)(5660300002)(52536014)(66446008)(478600001)(71200400001)(76116006)(64756008)(6506007)(186003);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: =?us-ascii?Q?dLJDDpCiKyKsMCafdXuDFgGVokmqHwLHzRTKKoCln5FB9h3RvOjGWjMJAl9/?=
+ =?us-ascii?Q?UThdHy4H93+POo6OIv5MGpeZJ4TmzAkP2MoFr2WA/R/wfK6runlzHsVS0Dw8?=
+ =?us-ascii?Q?y/E8bQNKIj899V/gpBAAZGRFRXilhKg7HaO3LQXBzL0cLOezXHZ57gwY/B9F?=
+ =?us-ascii?Q?kSKrY7IKDwbl2QZZWIg9fMZwPcVG0SzPvHq7W1C7Cnx6bq8E643X6hBHma4w?=
+ =?us-ascii?Q?TZ3XTrAqlD2vF3Z+SE+mWGIwRr5m5PR4C+zlDcsN3JCuYyctySoifqfuhiu3?=
+ =?us-ascii?Q?7Nvq1bMQI2aBkjFhWA1rnrTCYKmUBneLERQfZjB/L/vAE/XZGXYljjGLzgDe?=
+ =?us-ascii?Q?+pt0zYIMOrPi2W+taeN9qKmf85KsiEEjXF2jBMY2AuhxOB786jxgaoG3e0FU?=
+ =?us-ascii?Q?eiW53omhTYFb/hAFrxgeB6gIBziygZ2d6cFfQnZekrD5xbe0w82mrSL0DYSN?=
+ =?us-ascii?Q?OOaNJhSSYShaAePWzUarbkt6i7Ex5GvP5jH8R8jyqnQuGeUNqJg2e7p6lgqr?=
+ =?us-ascii?Q?3Zz1lZZOkfJOfQCeNNqUYx1DwUAGpTGb9/FdwDHmH4nBfyfCh20zS4q+y33c?=
+ =?us-ascii?Q?ZLYO7t/Ovp6WbOdhXkrGGDH7j08ntRvzLhtliK7/R8YxaUprVItm9Fls7wQD?=
+ =?us-ascii?Q?mjWMVzK16HRyKRhUDtIwne61jRGwkbApVZuPVOApTLMZ5u7GTjMjyvU68EO+?=
+ =?us-ascii?Q?gEz153NAm5K0u9yPGgqH+OtgA4PrQlDrTqxf8Y3jZSKNaI899pSujAiBCMtm?=
+ =?us-ascii?Q?cubt9WlMaojSIm2kuOBh5vUnhzwPa8KvgjOS9rxBTNB8myRyfKuahfXdNzwz?=
+ =?us-ascii?Q?fkhneVbdNH91FUISMAj5aI+dMLFunS1K0cxr4u/hrFQf6Y3KGEybKrSeEiaA?=
+ =?us-ascii?Q?akX9V/pOm2r827/WQTb6xGhYzQ8b6o9MHDQvDEIgArTDW5pSddU89w1KBYoG?=
+ =?us-ascii?Q?9gW0gJzgWDPdYK2zB3ztnhVpHalwgmwwXE2KXiBwmvm/HDP1Lvzs8iorHVzU?=
+ =?us-ascii?Q?Kk9f2NDTM+QJ1CSWlTUbPCG2NjR0Bdpn9z+1ZF8LPWHonN/nMWmNYLtSfa3T?=
+ =?us-ascii?Q?lE7b3g382qPS3TdXjOnh3vdV3Wa/zwWMiJeg6mxhAttap5sosgezvQyWNofc?=
+ =?us-ascii?Q?InBMud198A3HuzVyu68ULYK5pDuiFIiaOWDl73qniPZjumE4NgXU6aUjuaJ0?=
+ =?us-ascii?Q?r1aBt0iCYc7m4g0pv4K2A7POZxY6inp7d9JpjZvJgf8xDIx7JnJLIBxanHf/?=
+ =?us-ascii?Q?prKYEWQr4/bJyzlP0kzGi9exkerXgL6Qa9vueYTxwCvfQ5QR9hdWsK/hcMfT?=
+ =?us-ascii?Q?1/GUwvnrDFVd6WxeYi0oC7hDYVjK9XyEr+evUZptPpjPGemQJoEN7VRVdxhj?=
+ =?us-ascii?Q?59UXGi8=3D?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d6c2b801-0e93-47f5-f1b5-08d8da2e94e5
+X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Feb 2021 08:14:47.3394
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: Tan4PKea2JN60NZ3m0N5ZyCiDdbi+ZTqm1aFjT6sWe59szEyPupAB71HKzMHqI5qldPWase8ysw9XJ0cTARJYvdjZr6e7B9U3wtjumN6oMHVrlOpXnBJ0LhDTvjTQ3Vp
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB6363
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To allow an additional external regulator to be controlled by an mmc host
-driver, let's add support for a vqmmc2 regulator to the mmc core.
+Hi Wolfram-san,
 
-For an SD UHS-II interface the vqmmc2 regulator may correspond to the so
-called vdd2 supply, as described by the SD spec. Initially, only 1.8V is
-needed, hence limit the new helper function, mmc_regulator_set_vqmmc2() to
-this too.
+> From: Wolfram Sang, Sent: Tuesday, February 23, 2021 7:08 PM
+>=20
+> SDHI Gen2+ has a different value for TMIO_MASK_ALL, so add a member to
+> support that. If the member is not used, the previous default value is
+> applied.
+>=20
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Note that, to allow for flexibility mmc host drivers need to manage the
-enable/disable of the vqmmc2 regulator themselves, while the regulator is
-looked up through the common mmc_regulator_get_supply().
+Thank you for the patch!
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/regulator.c | 34 ++++++++++++++++++++++++++++++++++
- include/linux/mmc/host.h     | 11 +++++++++++
- 2 files changed, 45 insertions(+)
+Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
-index 609201a467ef..3c189682797c 100644
---- a/drivers/mmc/core/regulator.c
-+++ b/drivers/mmc/core/regulator.c
-@@ -223,6 +223,33 @@ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
- }
- EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
- 
-+/**
-+ * mmc_regulator_set_vqmmc2 - Set vqmmc2 as per the ios->vqmmc2_voltage
-+ * @mmc: The mmc host to regulate
-+ * @ios: The io bus settings
-+ *
-+ * Sets a new voltage level for the vqmmc2 regulator, which may correspond to
-+ * the vdd2 regulator for an SD UHS-II interface. This function is expected to
-+ * be called by mmc host drivers.
-+ *
-+ * Returns a negative error code on failure, zero if the voltage level was
-+ * changed successfully or a positive value if the level didn't need to change.
-+ */
-+int mmc_regulator_set_vqmmc2(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	if (IS_ERR(mmc->supply.vqmmc2))
-+		return -EINVAL;
-+
-+	switch (ios->vqmmc2_voltage) {
-+	case MMC_VQMMC2_VOLTAGE_180:
-+		return mmc_regulator_set_voltage_if_supported(
-+			mmc->supply.vqmmc2, 1700000, 1800000, 1950000);
-+	default:
-+		return -EINVAL;
-+	}
-+}
-+EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc2);
-+
- #else
- 
- static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
-@@ -249,6 +276,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 
- 	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
- 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
-+	mmc->supply.vqmmc2 = devm_regulator_get_optional(dev, "vqmmc2");
- 
- 	if (IS_ERR(mmc->supply.vmmc)) {
- 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
-@@ -268,6 +296,12 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 		dev_dbg(dev, "No vqmmc regulator found\n");
- 	}
- 
-+	if (IS_ERR(mmc->supply.vqmmc2)) {
-+		if (PTR_ERR(mmc->supply.vqmmc2) == -EPROBE_DEFER)
-+			return -EPROBE_DEFER;
-+		dev_dbg(dev, "No vqmmc2 regulator found\n");
-+	}
-+
- 	return 0;
- }
- EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 0a777caaf7f3..ac9f45e3e203 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -65,6 +65,9 @@ struct mmc_ios {
- #define MMC_TIMING_SD_EXP_1_2V	12
- #define MMC_TIMING_SD_UHS2	13
- 
-+	unsigned char	vqmmc2_voltage;
-+#define MMC_VQMMC2_VOLTAGE_180	0
-+
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
- 
- #define MMC_SIGNAL_VOLTAGE_330	0
-@@ -299,6 +302,7 @@ struct mmc_pwrseq;
- struct mmc_supply {
- 	struct regulator *vmmc;		/* Card power supply */
- 	struct regulator *vqmmc;	/* Optional Vccq supply */
-+	struct regulator *vqmmc2;	/* Optional supply for phy */
- };
- 
- struct mmc_ctx {
-@@ -579,6 +583,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 			struct regulator *supply,
- 			unsigned short vdd_bit);
- int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios);
-+int mmc_regulator_set_vqmmc2(struct mmc_host *mmc, struct mmc_ios *ios);
- #else
- static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 				 struct regulator *supply,
-@@ -592,6 +597,12 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
- {
- 	return -EINVAL;
- }
-+
-+static inline int mmc_regulator_set_vqmmc2(struct mmc_host *mmc,
-+					   struct mmc_ios *ios)
-+{
-+	return -EINVAL;
-+}
- #endif
- 
- int mmc_regulator_get_supply(struct mmc_host *mmc);
--- 
-2.25.1
+And, I tested on my environment (r8a77951-salvator-xs.dts) and
+I didn't observe any regression, so,
+
+Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+
+Best regards,
+Yoshihiro Shimoda
 
