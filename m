@@ -2,106 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 278FFC433DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 08:43:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14463C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 08:52:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D5F2C64EE7
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 08:42:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BBCB064EC3
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 08:52:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230292AbhBZIm4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Feb 2021 03:42:56 -0500
-Received: from mail.zju.edu.cn ([61.164.42.155]:20054 "EHLO zju.edu.cn"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229449AbhBZImv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 26 Feb 2021 03:42:51 -0500
-Received: from localhost.localdomain (unknown [10.192.85.18])
-        by mail-app3 (Coremail) with SMTP id cC_KCgBnvthKtDhg5Z7LAQ--.49145S4;
-        Fri, 26 Feb 2021 16:41:50 +0800 (CST)
-From:   Dinghao Liu <dinghao.liu@zju.edu.cn>
-To:     dinghao.liu@zju.edu.cn, kjlu@umn.edu
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-pci-o2micro: Add missing checks in sdhci_pci_o2_probe
-Date:   Fri, 26 Feb 2021 16:41:46 +0800
-Message-Id: <20210226084146.29095-1-dinghao.liu@zju.edu.cn>
-X-Mailer: git-send-email 2.17.1
-X-CM-TRANSID: cC_KCgBnvthKtDhg5Z7LAQ--.49145S4
-X-Coremail-Antispam: 1UD129KBjvJXoW7ur18XFyfJr4kZw45JFWUArb_yoW8Ar4DpF
-        s5ZrW5Cr4kJFyYkF9rAwn5Xr1YyrZFyrWUGryfG34xZFWUAFZ0yrZ3GFW5tr1DWrWkKa1f
-        ZFsYqryDCFWUJaUanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDU0xBIdaVrnRJUUUkq1xkIjI8I6I8E6xAIw20EY4v20xvaj40_Wr0E3s1l1IIY67AE
-        w4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwVA0rcxSw2x7M28EF7xvwVC0I7IYx2
-        IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8IcVCY1x0267AKxVWxJr0_GcWl84ACjcxK6I8E
-        87Iv67AKxVW0oVCq3wA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_GcCE3s1le2I262IYc4CY6c
-        8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E2Ix0cI8IcVAFwI0_Jr0_
-        Jr4lYx0Ex4A2jsIE14v26r1j6r4UMcvjeVCFs4IE7xkEbVWUJVW8JwACjcxG0xvY0x0EwI
-        xGrwACjI8F5VA0II8E6IAqYI8I648v4I1l42xK82IYc2Ij64vIr41l42xK82IY6x8ErcxF
-        aVAv8VW8uw4UJr1UMxC20s026xCaFVCjc4AY6r1j6r4UMI8I3I0E5I8CrVAFwI0_Jr0_Jr
-        4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67AKxVWUAVWUtwCIc40Y0x0EwIxG
-        rwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0cI8IcVCY1x0267AKxVWUJVW8Jw
-        CI42IY6xAIw20EY4v20xvaj40_Wr1j6rW3Jr1lIxAIcVC2z280aVAFwI0_Jr0_Gr1lIxAI
-        cVC2z280aVCY1x0267AKxVW8JVW8JrUvcSsGvfC2KfnxnUUI43ZEXa7VUbXdbUUUUUU==
-X-CM-SenderInfo: qrrzjiaqtzq6lmxovvfxof0/1tbiAgQGBlZdtSfEeAAMsv
+        id S229526AbhBZIwX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Feb 2021 03:52:23 -0500
+Received: from www.zeus03.de ([194.117.254.33]:36994 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229482AbhBZIwX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 26 Feb 2021 03:52:23 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=9+cm6ZeElC8MQVLgjwbYMABdcI9W
+        9UU7naI/i4nlMjw=; b=f2T2M48C38tdHHfSfjcHR6K7E0wBPcR58Sc/phRIAiHt
+        RHoM1+ma+A7bw1133oXUUMDhyWCpn46Gorky9KttEDwf4tCc0ipE1QrYHUySYV3k
+        r1bfUONA8UjjdX4cagmo5b9TSscFGRp3aDPUcUZbhAvVv/shvOfWNhDF7fW4vOo=
+Received: (qmail 3727257 invoked from network); 26 Feb 2021 09:51:40 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 26 Feb 2021 09:51:40 +0100
+X-UD-Smtp-Session: l3s3148p1@KwgzYDm83qggAwDPXwklALhYvQZ7ym2x
+Date:   Fri, 26 Feb 2021 09:51:35 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>
+Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: use custom mask for TMIO_MASK_ALL
+Message-ID: <20210226085135.GA1014@ninjato>
+References: <20210223100830.25125-1-wsa+renesas@sang-engineering.com>
+ <20210223100830.25125-3-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB36926EB1E0E6C0BE6978E725D89D9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="GvXjxJ+pjyke8COw"
+Content-Disposition: inline
+In-Reply-To: <TY2PR01MB36926EB1E0E6C0BE6978E725D89D9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It's odd to adopt different error handling on failure of
-pci_read_config_dword(). Check the return value and terminate
-execution flow on failure of all pci_read_config_dword() calls
-in this function.
 
-Signed-off-by: Dinghao Liu <dinghao.liu@zju.edu.cn>
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+--GvXjxJ+pjyke8COw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 94e3f72f6405..51d55a87aebe 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -706,6 +706,8 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 			ret = pci_read_config_dword(chip->pdev,
- 						    O2_SD_FUNC_REG0,
- 						    &scratch_32);
-+			if (ret)
-+				return ret;
- 			scratch_32 = ((scratch_32 & 0xFF000000) >> 24);
- 
- 			/* Check Whether subId is 0x11 or 0x12 */
-@@ -716,6 +718,8 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 				ret = pci_read_config_dword(chip->pdev,
- 							    O2_SD_FUNC_REG4,
- 							    &scratch_32);
-+				if (ret)
-+					return ret;
- 
- 				/* Enable Base Clk setting change */
- 				scratch_32 |= O2_SD_FREG4_ENABLE_CLK_SET;
-@@ -795,6 +799,8 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 
- 		ret = pci_read_config_dword(chip->pdev,
- 					    O2_SD_PLL_SETTING, &scratch_32);
-+		if (ret)
-+			return ret;
- 
- 		if ((scratch_32 & 0xff000000) == 0x01000000) {
- 			scratch_32 &= 0x0000FFFF;
-@@ -812,6 +818,8 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
- 			ret = pci_read_config_dword(chip->pdev,
- 						    O2_SD_FUNC_REG4,
- 						    &scratch_32);
-+			if (ret)
-+				return ret;
- 			scratch_32 |= (1 << 22);
- 			pci_write_config_dword(chip->pdev,
- 					       O2_SD_FUNC_REG4, scratch_32);
--- 
-2.17.1
 
+> > -#define TMIO_MASK_INIT_RCAR2	0x8b7f031d /* Initial value for R-Car Gen=
+2+ */
+> > +#define TMIO_MASK_ALL_RCAR2	0x8b7f031d /* Initial value for R-Car Gen2=
++ */
+>=20
+> nit: Perhaps, we also have to change the comment "Initial value"?
+
+Good point, I will fix it. Thank you!
+
+
+--GvXjxJ+pjyke8COw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmA4tpMACgkQFA3kzBSg
+KbbJFQ/+KN/bfwmfWmYmaMN5aPrbsrkT7VlzrXPDYkyNe8mm2iahBqInWsKmp1zT
+prFWcqAqAVut7kpghK7Ek1/RUiv6R7YXx9yYPTsdWnlbwZifiMzI7Km02n0pdF8l
+iYySkU0phKBe7IphAPvy9JhrJwLcxxpMZx/SE3R/4hlheiiLk9+3aBmhsxbqryuZ
+jOoigXDtJZcP61My4JksdLERUYveRnSCbKvDhcF+U7MlChcvSNQvwnSLTWndhJ77
+teyRxcNknjLUZxT5jEfotlfHOBC7z1U49TcnZowiIpWXdApjNtyLIq2+4/439b/f
+w4sUKKzBKjwOlRN2Qhyux0BAF0umfYyyQ22VQAjuVwotTEMbo2tW7Pgja1Fd4D26
+dN02eft5w/y1QucOZpb4KF+6oAaX7gRTkbsjVCvtNt/tjIurOTavoLU1KYXJSkH7
+FP63seRj+cgR8Itf79WCx32jR1PnnaN3jUr1gvJjLb2g9kfn5hjmlkqLC1xBq635
+5MNK0FUkCCxO50kkNi71wqcODz+eoTiVgdFaeMGd6hnlcR8JszhdKhtLwcR2tV2h
+mxsLNRIhLxLWZTqSZehNqzmpvABbjUUn5ffT5ipP07CeXwMX/5C/aXzecJuRsN3F
+KHmMmo6+VkDaD+1cwE3QR0yDsxSrYvLoRFb4pvDuLDgznszEoQ4=
+=pFh9
+-----END PGP SIGNATURE-----
+
+--GvXjxJ+pjyke8COw--
