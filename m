@@ -2,301 +2,237 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F379C433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 14:16:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BD89C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 Mar 2021 08:25:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 368B864EE1
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Feb 2021 14:16:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 67A4964E45
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 Mar 2021 08:25:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230083AbhBZOP6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Feb 2021 09:15:58 -0500
-Received: from mail-mw2nam12on2075.outbound.protection.outlook.com ([40.107.244.75]:63521
-        "EHLO NAM12-MW2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229996AbhBZOPl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 26 Feb 2021 09:15:41 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=GNPLPMZVwJ+kGBOqq+Mvwl0sObgKzkqsAG0Kizp7d5dWWitDUK7Fyr8Hlv+l53ygxtX2bxB4d/u4TlmLza8VaD2YixB6hGAihJJ+MLAFbcGNjbG7pg9RrrqmCFHLWTI6F88oHFHo0mgsMtBxcftGE6DF4riuJokIHCp0+AoKQiFXTLLEmYEpjbmhtr0mX17qFLuHX22WA1D/Bgg31eflL+sUXoOxz7B6i/BPC+E5VGuIfoSOBgkAQ9tc615QAkcBoEDn8sbZqI/C3C9rarL+OtoGxbxe8god8oC+PShXV3GJl2g6gted0JRI2Lq/+4RIVyzbtK5aREcQreJrIXwi4g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=v1TcuNL4CSkNtTnZL1DO8TI6zy+sf838t2sXnA6/JH0=;
- b=C5XTTMdf1MbzODS4fe/JC3VPzK3It8Se40pduv28OP2/HyGwDcIF0WCHdeBe2gw6pX04NmCxhYUpKFEVWTrlcm6n1fO6toK+MJOXKdKr0sJOdBcN/7OIcxmnHt3zv6qVBkLqkY2r/IAryFUNwSXcpUkm1pmYsHnItTZPS936yJ+tApso63pVGmHRnZI2saHkHSu876TpVLxUAoZf7zyIOfjmZoBK1YZzWudeI2sxh/jIABFQnIti1rdyv7J9c8wNulGyrhNsk+o9kLJ+cDBRH4e1X6sEkxlvCh32GQeJkvKwE8sn/OnDkph3UUuayuAnluiblnvc+C7LCgkIQE8WrA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=micron.com; dmarc=pass action=none header.from=micron.com;
- dkim=pass header.d=micron.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=micron.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=v1TcuNL4CSkNtTnZL1DO8TI6zy+sf838t2sXnA6/JH0=;
- b=Oyn73HFH0I5I1uM5KMtZGJph3NAAN+npvPER5yO6K9LbFaBW3FRJclNBw6TtPE207NOR31tiHp/utliyTFOjKEXF9gCYHBSXttl55L0qiix3fJjq9aNjeU8KBiJ0qprGAqw3G6hPwWpx6npl9rVLwhzwwWxZYjxXdPS7OLjj5cY=
-Received: from MN2PR08MB6397.namprd08.prod.outlook.com (2603:10b6:208:1aa::10)
- by MN2PR08MB6414.namprd08.prod.outlook.com (2603:10b6:208:1aa::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3890.20; Fri, 26 Feb
- 2021 14:14:44 +0000
-Received: from MN2PR08MB6397.namprd08.prod.outlook.com
- ([fe80::18c0:fc4a:5ba4:406e]) by MN2PR08MB6397.namprd08.prod.outlook.com
- ([fe80::18c0:fc4a:5ba4:406e%5]) with mapi id 15.20.3890.023; Fri, 26 Feb 2021
- 14:14:44 +0000
-From:   "Shivamurthy Shastri (sshivamurthy)" <sshivamurthy@micron.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Chris Ball <chris@printf.net>, Avri Altman <Avri.Altman@wdc.com>,
-        Avi Shchislowski <Avi.Shchislowski@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Yaniv Agman <yaniv.agman@sandisk.com>,
-        Avi Shchislowski <avi.shchislowski@sandisk.com>
-Subject: RE: [EXT] Re: [PATCH V3] mmc-utils: let FFU mode use CMD23 and CMD25
-Thread-Topic: [EXT] Re: [PATCH V3] mmc-utils: let FFU mode use CMD23 and CMD25
-Thread-Index: AdTvoXWOn75nh0U7Ta2A6hwTLWaWDoQ4/WyQAAl5woAAAL+DEA==
-Date:   Fri, 26 Feb 2021 14:14:44 +0000
-Message-ID: <MN2PR08MB639793A76353E6EE5CFC7F90B89D9@MN2PR08MB6397.namprd08.prod.outlook.com>
-References: <MN2PR08MB5951783BA8508D7C50907044B82E0@MN2PR08MB5951.namprd08.prod.outlook.com>
- <MN2PR08MB6397DB58E881F03AE2AEEA82B89D9@MN2PR08MB6397.namprd08.prod.outlook.com>
- <CAPDyKFrPCPX42rWvSt7QGh6OrG+qoO2=xSXyt-2OSH3mppq4TQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFrPCPX42rWvSt7QGh6OrG+qoO2=xSXyt-2OSH3mppq4TQ@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-msip_labels: MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_Enabled=true;
- MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_SetDate=2021-02-26T14:14:42Z;
- MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_Method=Standard;
- MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_Name=Confidential;
- MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_SiteId=f38a5ecd-2813-4862-b11b-ac1d563c806f;
- MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_ActionId=d830590d-0d07-4a25-b4f9-40921539d8b2;
- MSIP_Label_37874100-6000-43b6-a204-2d77792600b9_ContentBits=3
-authentication-results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=micron.com;
-x-originating-ip: [147.161.165.80]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: b92ec75e-efae-429f-62ea-08d8da60ddad
-x-ms-traffictypediagnostic: MN2PR08MB6414:
-x-microsoft-antispam-prvs: <MN2PR08MB6414E221CCFF10915A69E920B89D9@MN2PR08MB6414.namprd08.prod.outlook.com>
-x-ms-exchange-transport-forked: True
-x-ms-oob-tlc-oobclassifiers: OLM:10000;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: ZubfgrJnsltf3Ed2yIiVyE8Gt6ip2aJmrT5x1Kz/lrBzm5IrqXMTdqX1diRffTkwl7C0Wz9Itk11+8Z3G9tGfI6lMl4TisbU+SqqKI14emUrueDu7OV110NXHuKT3Jy9kd/qoaQwZSCG00aWw3EqlgVn8L0b2svbsrz9ehf2+tbU1KGQX18UscCVDrbpuidnt31UJP/FoKStPWHkPqI37DBZobiG+lLti6uBFn3qIgBalTgRzZb374ZExZtT3/e7828I+695okRqgzr/j1B+p2hfwaxU1GlBh+d8W4rWBDBHpWdDTFx2H1VMzNjMhaS+6bH7vHFFm2psZUWhwsK9eUy/81fePMOArisRICc8OkP/Dx8C0aCAlf2Yd3qV0ZsI5+bCCB2/j6DOKiD8eiV0gapikOT5j24W/D8vUoZx3e6e7x+ViIf9bylYjNeCpVIn1ABIZt6u0W5Yrg/V+EZj8DBDRMj3FaJmzoPUKLNInJ+fJGshRH4J55udbXnV9u/ygfmBKYhOLQeW2twaO4wgpQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MN2PR08MB6397.namprd08.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(136003)(39860400002)(376002)(346002)(366004)(8676002)(71200400001)(26005)(8936002)(2906002)(186003)(83380400001)(7696005)(33656002)(316002)(55016002)(86362001)(52536014)(9686003)(6916009)(5660300002)(478600001)(6506007)(64756008)(66556008)(76116006)(66476007)(66446008)(66946007)(4326008)(54906003);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata: =?utf-8?B?eE9ZMG04Yk5sZ09sSTJCbjFaUFloeFh4azI3NXNQNTBIUUtoYUlHdi93OUlP?=
- =?utf-8?B?VWVCNHlGNGtRMW5xZ25za1B5VWNuK3RmRndTV05TWlE4NmV6WXFyaFM3b2o2?=
- =?utf-8?B?bTJJcDhqUWhmTGgyNVBaOHM1RVlsK3FDMUhQOUFkRkpTVHU2cG5xcUZaZVZv?=
- =?utf-8?B?aXpUdTB2MVN1b2c1UWFGeWszcS9zcGxXQ0hrNzVETVlKdVhUOFJPT3V3V2dF?=
- =?utf-8?B?QzVlc1lzM1ZoYUtmNUhoNENOSUZJWDJ1Q1ZPbml6T3Q5SStYbnVGNGpIZXdk?=
- =?utf-8?B?YnpPS0sxL0lvMkFPbkNmN3NjR2NGaVljMWhiY3BxUG5UNHdlVFp2RUtTaHR3?=
- =?utf-8?B?TXBTL0RhSVFXMVVSNFFmeHNMRTRHTGhxUXdBdGpYZ0syVFlhR29UcW9jYU83?=
- =?utf-8?B?TGtzN0k4MHh5TkdkLy9LT3NnMnJHOWEyREwreDFIbStoV0hBaWVxYW4vYlFh?=
- =?utf-8?B?K0MxK3NqbWlNbFZidWtNRExiRnRJMmQzYWZDU2dmQ0JCdGMvVmozaEcwaXNN?=
- =?utf-8?B?ZG1xdi90dnZIZjhMd3lpSzBnM052UlBBRkthMytwc0V1R2VpSHBQVzNreDJV?=
- =?utf-8?B?cDN4SFFOd3ppZ2xZb2hhb1hDclkxRU9lUVF6RzJNV2Q5ek9EbUVtN1hYNUEv?=
- =?utf-8?B?ME9GTENrMU0zVnZjV3dQV25ScTIrYS9SZm11WkYrT3o2YzF5K3M4U01vdkUz?=
- =?utf-8?B?dW9GSWtYNzBIWmZ3Tkg1d015RkFMUjIvby9lTHdVaUhrZXA3WTBQZkFvbmZo?=
- =?utf-8?B?VDVZOGVld21MRFU5WHRsQzFBSjBrdlRMU2lxd2YyZVVKdTJJb1JySWVFa2hB?=
- =?utf-8?B?cHRTUi81QW01ZmYyUFFrZzNRV2hDNzNOYmR0azc0MWU2TzVuTkxLb0I3SlRL?=
- =?utf-8?B?aWowcDZvSTdTcDQwNExLS05MZzZiVU5VZHZuaWUrdWs0YTBrTHp6UVZBb2Vk?=
- =?utf-8?B?TUthOGNFVW5DNVY2bXlaSFhod2E3aUZEY0s5MVhJbEx6YlZwQVphYVZOMHZG?=
- =?utf-8?B?T25oZFp4VzNWRFZLMWp6WkMzVStvTWxPaG1iTEJEQitCWURnVU9oMU5aVGZM?=
- =?utf-8?B?Z1RJT00vc3JjQmlBdDdnTHYyRjNvS0I4RkFXOTFnY2ZkZ2xVek1oNXFOT3p6?=
- =?utf-8?B?SXhzSUtweWNiUmpJb0wzRW5Dc1lEUE56L2ZzTDZBa2lxZmJRMzJNZWcvSGZY?=
- =?utf-8?B?bXZtN1ZqY0JCaTFzdEYwS0hxTGtBNy9kb253cm9SS0s4MkdIc1NRWi9sUXIy?=
- =?utf-8?B?NjhjZ0hqeEdIVnh5Ymt1cTk5d0hSVzd4SFlSN0oyU3ozakRZTEsySHpEbWpj?=
- =?utf-8?B?eU91V2R4MHNsVjVka1BFdXhTOC83aXc3bmc2S29rU3ZiWXJZZWM4bUd0RTZV?=
- =?utf-8?B?WU1CUnBrMEpJQTIwNU8rQVZDTks3UUhzZEFEcWwxNEtFUDBqZHBGTS96TDJZ?=
- =?utf-8?B?dUpXSndtQUxPYlpIZUdNcFQvY0hvdXBTRmQyV2ZMZDZaampKbWFaQU1tSmVJ?=
- =?utf-8?B?TUkvVEJKYURHVUl0Y1dRNzA4T090RTQxVmFTRkdRZ3FvOFVDcFhpbFN5UmtJ?=
- =?utf-8?B?NG5WRW5JS09BMmJ0TlBSbk5nUExrSGJneVlHTCtPQnZmUFpCSXNFc0pSa0tO?=
- =?utf-8?B?R3pQdUh1ZEQ5S3FKeld0czNpa01sL1RHSVZVeWcxeWhla3FmNk13bG44NzFm?=
- =?utf-8?B?ZDcxWHJXN3FSTW1nU0srdDlJZTcwM0FKbE9RSDhBR21wc0kxMCs2b0wyaC9N?=
- =?utf-8?Q?fCdG4E22AtNBnhk4zlZvsmPhxaHeGJTM38cCsH3?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S232902AbhCAIZG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 1 Mar 2021 03:25:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45474 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232890AbhCAIZC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Mar 2021 03:25:02 -0500
+Received: from mail-vk1-xa30.google.com (mail-vk1-xa30.google.com [IPv6:2607:f8b0:4864:20::a30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CB82C061788
+        for <linux-mmc@vger.kernel.org>; Mon,  1 Mar 2021 00:24:22 -0800 (PST)
+Received: by mail-vk1-xa30.google.com with SMTP id i4so2530183vkc.12
+        for <linux-mmc@vger.kernel.org>; Mon, 01 Mar 2021 00:24:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=UHCZlU+c9CUTU/gpQiF5hFVniv5vmhFaRF7G3ycFPv0=;
+        b=CnbCOR7VKbhXI0bk25JR9P+t9AMdFZgv5kR4d/sgiZ2aNaTvn1yx2XRktQCLSI/yRN
+         yjUIXW+HQYNDqhUGJnqbU4SFT2YjnqYkZb217Q1EUYQsxu0/fUifhQhjkdYYL+BLlVik
+         BeiCyw7t8Oeo4IBHpmza8ZR9jR9L5AleyPSiWMdYvV6OjCrWVulqpIDFkoH/su5i8OAz
+         NWP/AYWxTVOGUNS2bxgkBCEvnJ5tDL/cRt8zT/XFuOMKRdM4ZAUXtWDlta1hYsDbN8uS
+         VknrxoVykR0+3NImhaRpBG81OzfYZr9CafNb+fwWcYgmlPKHqa0l/B65Xc7gwmOQphhF
+         Ua4w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=UHCZlU+c9CUTU/gpQiF5hFVniv5vmhFaRF7G3ycFPv0=;
+        b=RmJKUtEp8DP6KdAbf9fHKf43japBnqJcaxiPP0XxucKZxu40WL2KU2X2BIVzJYTdbQ
+         KMF/W6lyEXPuPoZmsuQ4ZSEtcV0247LYFaPfk1yRkRT7cvPzey1p5HUKzq1gMG70rsoS
+         tbSQYCswiNKzhNr/VZooplTHPCSSylSCzTv0pvjLTS0Sf6kJzE3KQFVL87VOlBZyjqB0
+         ZH8RE5oMXt2W+bO+Iz03g58wDT1uIRUo7p6OBLgB+4Dqr3CuYfZ0TvjX2MtqxjDYnP3e
+         cLfPOow+f6DeVlYhyWe3K7xfLH50CE+X4zxQxRFbORP7eMQsao7xbcExfyZKc2gvjKev
+         SDoA==
+X-Gm-Message-State: AOAM533JGvjF2rrAdqJ0HfEL7cMfyQVkEqbvzMUJcC39abNl/l4PE39P
+        ZqkbTMdYT6SCqU3DP2anaLs1trRJM/ue6mVeSnipMA==
+X-Google-Smtp-Source: ABdhPJzvoEAOhO13PrlIDICiW+zZStCDpACerIy2ridZD7d00uMib+hyu24W5F9akMcfLFPYmiz9D15G43dtz9jNKIQ=
+X-Received: by 2002:a1f:a68d:: with SMTP id p135mr7504410vke.6.1614587061060;
+ Mon, 01 Mar 2021 00:24:21 -0800 (PST)
 MIME-Version: 1.0
-X-OriginatorOrg: micron.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: MN2PR08MB6397.namprd08.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b92ec75e-efae-429f-62ea-08d8da60ddad
-X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Feb 2021 14:14:44.2474
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: f38a5ecd-2813-4862-b11b-ac1d563c806f
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: jAWloImvG2ABCNByovfsj2avTLxEQ0P9Tnzo77sabgGr9nuDNJfRz/OJrh7Yoqgg/cv4pFeOuKKShxHvSnMxKQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR08MB6414
+References: <20210217052239.13780-1-dh0421.hwang@samsung.com>
+ <CGME20210217053521epcas1p2aa80cae5d52f30c8c8882f44abe8045c@epcas1p2.samsung.com>
+ <20210217052239.13780-3-dh0421.hwang@samsung.com> <4035139d-7850-8460-f069-06fc61d13039@intel.com>
+ <3e6525b5-9cd7-e632-800a-1066c5fa3581@intel.com> <000001d70509$54bf59b0$fe3e0d10$@samsung.com>
+In-Reply-To: <000001d70509$54bf59b0$fe3e0d10$@samsung.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 1 Mar 2021 09:23:44 +0100
+Message-ID: <CAPDyKFrgAanRYCe1QckWK8vxwV=rXV3KzTRynY_mkNaRkSrj+g@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: core: Add no single read retries
+To:     DooHyun Hwang <dh0421.hwang@samsung.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>, Jens Axboe <axboe@kernel.dk>,
+        Satya Tangirala <satyat@google.com>, ebiggers@google.com,
+        "Gustavo A. R. Silva" <gustavoars@kernel.org>,
+        grant.jung@samsung.com, jt77.jang@samsung.com,
+        junwoo80.lee@samsung.com, jangsub.yi@samsung.com,
+        sh043.lee@samsung.com, Chanwoo Lee <cw9316.lee@samsung.com>,
+        sh8267.baek@samsung.com, wkon.kim@samsung.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-TWljcm9uIENvbmZpZGVudGlhbA0KDQpIaSBVZmZlLA0KIA0KPiANCj4gT24gRnJpLCAyNiBGZWIg
-MjAyMSBhdCAxMDoyNSwgU2hpdmFtdXJ0aHkgU2hhc3RyaSAoc3NoaXZhbXVydGh5KQ0KPiA8c3No
-aXZhbXVydGh5QG1pY3Jvbi5jb20+IHdyb3RlOg0KPiA+DQo+ID4gSGVsbG8gQ2hyaXMsDQo+ID4N
-Cj4gPiBJIGhhdmUgc2VudCB0aGlzIHBhdGNoIGFsbW9zdCB0d28geWVhcnMgYWdvIGFuZCByZXZp
-ZXdlZCBieSBBdnJpLg0KPiA+IEkgYW0gbm90IHN1cmUgd2h5IHRoaXMgcGF0Y2ggbm90IHlldCBt
-YWlubGluZWQuDQo+ID4NCj4gPiBUaGlzIGlzIGdlbnRsZSByZW1pbmRlci4NCj4gPiBEbyBJIG5l
-ZWQgdG8gcmVzZW5kIHRoZSBwYXRjaD8NCj4gDQo+IEkgYW0gd29ya2luZyBvbiBnZXR0aW5nIHBl
-cm1pc3Npb25zIHRvIGhlbHAgd2l0aCBtYWludGVuYW5jZSBvZiB0aGUNCj4gZ2l0IHRyZWUuIEl0
-IHNlZW1zIGxpa2UgQ2hyaXMgaXMgYnVzeSBhbmQgaGFzbid0IGJlZW4gbWFpbnRhaW5pbmcgdGhl
-DQo+IHRyZWUgZm9yIHRoZSBsYXN0IGNvdXBsZSBvZiB5ZWFycy4NCj4gDQo+IFRoYXQgc2FpZCwg
-cGxlYXNlIHJlcG9zdCB0aGUgcGF0Y2ggYW5kIEkgd2lsbCBoYXZlIGEgbG9vaywgYXMgc29vbiBh
-cw0KPiBJIGdldCB0aGUgbmVlZGVkIHBlcm1pc3Npb25zIGluIHBsYWNlLg0KDQpUaGFuayB5b3Ug
-Zm9yIHJldmVydGluZyBiYWNrLg0KSSByZXNlbmQgdGhlIHBhdGNoIGFzIFY0IHdpdGggb25lIHRy
-aXZpYWwgY2hhbmdlIGFuZCByZXZpZXdlZC1ieSwgdGVzdGVkLWJ5Lg0KDQpUaGFua3MsDQpTaGl2
-YQ0KDQo+IA0KPiBLaW5kIHJlZ2FyZHMNCj4gVWZmZQ0KPiANCj4gPg0KPiA+IFRoYW5rcywNCj4g
-PiBTaGl2YQ0KPiA+DQo+ID4gPiBTdWJqZWN0OiBbUEFUQ0ggVjNdIG1tYy11dGlsczogbGV0IEZG
-VSBtb2RlIHVzZSBDTUQyMyBhbmQgQ01EMjUNCj4gPiA+DQo+ID4gPiBBcyBwZXIgc3BlY2lmaWNh
-dGlvbiwgdGhlIGhvc3QgY2FuIHVzZSBlaXRoZXIgQ01EMjQgb3IgQ01EMjUgaW4NCj4gPiA+IGNs
-b3NlZC1lbmRlZCBvciBvcGVuLWVuZGVkIHdheS4NCj4gPiA+IENNRDI1IGlzIGJldHRlciBvcHRp
-b24gYXMgaXQgY2FuIGZsYXNoIHRoZSBmaXJtd2FyZSBpbWFnZSBpbiBvbmUgZ28uDQo+ID4gPg0K
-PiA+ID4gU2lnbmVkLW9mZi1ieTogU2hpdmFtdXJ0aHkgU2hhc3RyaSA8c3NoaXZhbXVydGh5QG1p
-Y3Jvbi5jb20+DQo+ID4gPiBSZXZpZXdlZC1ieTogQXZyaSBBbHRtYW4gPGF2cmkuYWx0bWFuQHdk
-Yy5jb20+DQo+ID4gPg0KPiA+ID4gLS0tDQo+ID4gPg0KPiA+ID4gVjM6DQo+ID4gPiAgICAtIENo
-ZWNraW5nIHRoZSBmaXJtd2FyZSBzaXplIHdpdGggTU1DX0lPQ19NQVhfQllURVMNCj4gPiA+DQo+
-ID4gPiAtLS0NCj4gPiA+DQo+ID4gPiBWMjoNCj4gPiA+ICAgIC0gUmVtb3ZlZCBvcHRpb25hbCBw
-YXJhbWV0ZXIgJy1jJw0KPiA+ID4gICAgLSBGRlUgbW9kZSB1c2UgQ01EMjUgaW5zdGVhZCBvZiBD
-TUQyNA0KPiA+ID4gICAgLSBDTUQyNSB1c2VkIGFzIGNsb3NlZC1lbmRlZA0KPiA+ID4gLS0tDQo+
-ID4gPiAgbW1jLmggICAgICB8ICAyICsrDQo+ID4gPiAgbW1jX2NtZHMuYyB8IDcwICsrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQ0KPiA+ID4gIDIg
-ZmlsZXMgY2hhbmdlZCwgNDEgaW5zZXJ0aW9ucygrKSwgMzEgZGVsZXRpb25zKC0pDQo+ID4gPg0K
-PiA+ID4gZGlmZiAtLWdpdCBhL21tYy5oIGIvbW1jLmgNCj4gPiA+IGluZGV4IDI4NWMxZjEuLmE0
-Y2JiYTQgMTAwNjQ0DQo+ID4gPiAtLS0gYS9tbWMuaA0KPiA+ID4gKysrIGIvbW1jLmgNCj4gPiA+
-IEBAIC0yNSwxMCArMjUsMTIgQEANCj4gPiA+ICAvKiBGcm9tIGtlcm5lbCBsaW51eC9tbWMvbW1j
-LmggKi8NCj4gPiA+ICAjZGVmaW5lIE1NQ19TV0lUQ0ggICAgICAgICAgIDYgICAgICAgLyogYWMg
-ICBbMzE6MF0gU2VlIGJlbG93ICAgICAgICBSMWIgKi8NCj4gPiA+ICAjZGVmaW5lIE1NQ19TRU5E
-X0VYVF9DU0QgICAgIDggICAgICAgLyogYWR0YyAgICAgICAgICAgICAgICAgICAgICAgICBSMSAg
-Ki8NCj4gPiA+ICsjZGVmaW5lIE1NQ19TVE9QX1RSQU5TTUlTU0lPTiAgICAxMiAgIC8qIGFjICAg
-ICAgICAgICAgICAgICAgICAgIFIxYiAqLw0KPiA+ID4gICNkZWZpbmUgTU1DX1NFTkRfU1RBVFVT
-ICAgICAgICAgICAgICAxMyAgICAgIC8qIGFjICAgWzMxOjE2XSBSQ0EgICAgICAgIFIxICAqLw0K
-PiA+ID4gICNkZWZpbmUgUjFfU1dJVENIX0VSUk9SICAgKDEgPDwgNykgIC8qIHN4LCBjICovDQo+
-ID4gPiAgI2RlZmluZSBNTUNfU1dJVENIX01PREVfV1JJVEVfQllURSAgIDB4MDMgICAgLyogU2V0
-IHRhcmdldCB0byB2YWx1ZQ0KPiA+ID4gKi8NCj4gPiA+ICAjZGVmaW5lIE1NQ19SRUFEX01VTFRJ
-UExFX0JMT0NLICAxOCAgIC8qIGFkdGMgWzMxOjBdIGRhdGEgYWRkciAgIFIxICAqLw0KPiA+ID4g
-KyNkZWZpbmUgTU1DX1NFVF9CTE9DS19DT1VOVCAgICAgIDIzICAgLyogYWR0YyBbMzE6MF0gZGF0
-YSBhZGRyICAgUjEgICovDQo+ID4gPiAgI2RlZmluZSBNTUNfV1JJVEVfQkxPQ0sgICAgICAgICAg
-ICAgIDI0ICAgICAgLyogYWR0YyBbMzE6MF0gZGF0YSBhZGRyICAgICAgICBSMSAgKi8NCj4gPiA+
-ICAjZGVmaW5lIE1NQ19XUklURV9NVUxUSVBMRV9CTE9DSyAyNSAgIC8qIGFkdGMgICAgICAgICAg
-ICAgICAgICAgIFIxICAqLw0KPiA+ID4gICNkZWZpbmUgTU1DX1NFVF9XUklURV9QUk9UICAgMjgg
-ICAgLyogYWMgICBbMzE6MF0gZGF0YSBhZGRyICAgUjFiICovDQo+ID4gPiBkaWZmIC0tZ2l0IGEv
-bW1jX2NtZHMuYyBiL21tY19jbWRzLmMNCj4gPiA+IGluZGV4IDE5YTlkYTEuLjQzZTFmOGIgMTAw
-NjQ0DQo+ID4gPiAtLS0gYS9tbWNfY21kcy5jDQo+ID4gPiArKysgYi9tbWNfY21kcy5jDQo+ID4g
-PiBAQCAtMjQxNCwxMiArMjQxNCwxMyBAQCBpbnQgZG9fZmZ1KGludCBuYXJncywgY2hhciAqKmFy
-Z3YpDQo+ID4gPiAgICAgICBpbnQgc2VjdF9kb25lID0gMCwgcmV0cnkgPSAzLCByZXQgPSAtRUlO
-VkFMOw0KPiA+ID4gICAgICAgdW5zaWduZWQgaW50IHNlY3Rfc2l6ZTsNCj4gPiA+ICAgICAgIF9f
-dTggZXh0X2NzZFs1MTJdOw0KPiA+ID4gLSAgICAgX191OCAqYnVmOw0KPiA+ID4gKyAgICAgX191
-OCAqYnVmID0gTlVMTDsNCj4gPiA+ICAgICAgIF9fdTMyIGFyZzsNCj4gPiA+ICAgICAgIG9mZl90
-IGZ3X3NpemU7DQo+ID4gPiAgICAgICBzc2l6ZV90IGNodW5rX3NpemU7DQo+ID4gPiAgICAgICBj
-aGFyICpkZXZpY2U7DQo+ID4gPiAtICAgICBzdHJ1Y3QgbW1jX2lvY19tdWx0aV9jbWQgKm11bHRp
-X2NtZDsNCj4gPiA+ICsgICAgIHN0cnVjdCBtbWNfaW9jX211bHRpX2NtZCAqbXVsdGlfY21kID0g
-TlVMTDsNCj4gPiA+ICsgICAgIF9fdTMyIGJsb2NrcyA9IDE7DQo+ID4gPg0KPiA+ID4gICAgICAg
-aWYgKG5hcmdzICE9IDMpIHsNCj4gPiA+ICAgICAgICAgICAgICAgZnByaW50ZihzdGRlcnIsICJV
-c2FnZTogZmZ1IDxpbWFnZSBuYW1lPiA8L3BhdGgvdG8vbW1jYmxrWD4NCj4gPiA+IFxuIik7DQo+
-ID4gPiBAQCAtMjQzOSwxNCArMjQ0MCw2IEBAIGludCBkb19mZnUoaW50IG5hcmdzLCBjaGFyICoq
-YXJndikNCj4gPiA+ICAgICAgICAgICAgICAgZXhpdCgxKTsNCj4gPiA+ICAgICAgIH0NCj4gPiA+
-DQo+ID4gPiAtICAgICBidWYgPSBtYWxsb2MoNTEyKTsNCj4gPiA+IC0gICAgIG11bHRpX2NtZCA9
-IGNhbGxvYygxLCBzaXplb2Yoc3RydWN0IG1tY19pb2NfbXVsdGlfY21kKSArDQo+ID4gPiAtICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAzICogc2l6ZW9mKHN0cnVjdCBtbWNfaW9jX2NtZCkp
-Ow0KPiA+ID4gLSAgICAgaWYgKCFidWYgfHwgIW11bHRpX2NtZCkgew0KPiA+ID4gLSAgICAgICAg
-ICAgICBwZXJyb3IoImZhaWxlZCB0byBhbGxvY2F0ZSBtZW1vcnkiKTsNCj4gPiA+IC0gICAgICAg
-ICAgICAgZ290byBvdXQ7DQo+ID4gPiAtICAgICB9DQo+ID4gPiAtDQo+ID4gPiAgICAgICByZXQg
-PSByZWFkX2V4dGNzZChkZXZfZmQsIGV4dF9jc2QpOw0KPiA+ID4gICAgICAgaWYgKHJldCkgew0K
-PiA+ID4gICAgICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIkNvdWxkIG5vdCByZWFkIEVYVF9D
-U0QgZnJvbSAlc1xuIiwgZGV2aWNlKTsNCj4gPiA+IEBAIC0yNDcxLDkgKzI0NjQsMTcgQEAgaW50
-IGRvX2ZmdShpbnQgbmFyZ3MsIGNoYXIgKiphcmd2KQ0KPiA+ID4gICAgICAgfQ0KPiA+ID4NCj4g
-PiA+ICAgICAgIGZ3X3NpemUgPSBsc2VlayhpbWdfZmQsIDAsIFNFRUtfRU5EKTsNCj4gPiA+ICsg
-ICAgIGlmIChmd19zaXplID4gTU1DX0lPQ19NQVhfQllURVMgfHwgZndfc2l6ZSA9PSAwKSB7DQo+
-ID4gPiArICAgICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiV3JvbmcgZmlybXdhcmUgc2l6ZSIp
-Ow0KPiA+ID4gKyAgICAgICAgICAgICBnb3RvIG91dDsNCj4gPiA+ICsgICAgIH0NCj4gPiA+DQo+
-ID4gPiAtICAgICBpZiAoZndfc2l6ZSA9PSAwKSB7DQo+ID4gPiAtICAgICAgICAgICAgIGZwcmlu
-dGYoc3RkZXJyLCAiRmlybXdhcmUgaW1hZ2UgaXMgZW1wdHkiKTsNCj4gPiA+ICsgICAgIC8qIGFs
-bG9jYXRlIG1heGltdW0gcmVxdWlyZWQgKi8NCj4gPiA+ICsgICAgIGJ1ZiA9IG1hbGxvYyhmd19z
-aXplKTsNCj4gPiA+ICsgICAgIG11bHRpX2NtZCA9IGNhbGxvYygxLCBzaXplb2Yoc3RydWN0IG1t
-Y19pb2NfbXVsdGlfY21kKSArDQo+ID4gPiArICAgICAgICAgICAgICAgICAgICAgICAgICAgICA0
-ICogc2l6ZW9mKHN0cnVjdCBtbWNfaW9jX2NtZCkpOw0KPiA+ID4gKyAgICAgaWYgKCFidWYgfHwg
-IW11bHRpX2NtZCkgew0KPiA+ID4gKyAgICAgICAgICAgICBwZXJyb3IoImZhaWxlZCB0byBhbGxv
-Y2F0ZSBtZW1vcnkiKTsNCj4gPiA+ICAgICAgICAgICAgICAgZ290byBvdXQ7DQo+ID4gPiAgICAg
-ICB9DQo+ID4gPg0KPiA+ID4gQEAgLTI0ODMsMTQgKzI0ODQsMTkgQEAgaW50IGRvX2ZmdShpbnQg
-bmFyZ3MsIGNoYXIgKiphcmd2KQ0KPiA+ID4gICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gPiA+
-ICAgICAgIH0NCj4gPiA+DQo+ID4gPiArICAgICAvKiBjYWxjdWxhdGUgcmVxdWlyZWQgZncgYmxv
-Y2tzIGZvciBDTUQyNSAqLw0KPiA+ID4gKyAgICAgYmxvY2tzID0gZndfc2l6ZSAvIHNlY3Rfc2l6
-ZTsNCj4gPiA+ICsNCj4gPiA+ICAgICAgIC8qIHNldCBDTUQgQVJHICovDQo+ID4gPiAgICAgICBh
-cmcgPSBleHRfY3NkW0VYVF9DU0RfRkZVX0FSR18wXSB8DQo+ID4gPiAgICAgICAgICAgICAgIGV4
-dF9jc2RbRVhUX0NTRF9GRlVfQVJHXzFdIDw8IDggfA0KPiA+ID4gICAgICAgICAgICAgICBleHRf
-Y3NkW0VYVF9DU0RfRkZVX0FSR18yXSA8PCAxNiB8DQo+ID4gPiAgICAgICAgICAgICAgIGV4dF9j
-c2RbRVhUX0NTRF9GRlVfQVJHXzNdIDw8IDI0Ow0KPiA+ID4NCj4gPiA+ICsgICAgIC8qIHByZXBh
-cmUgbXVsdGlfY21kIGZvciBGRlUgYmFzZWQgb24gY21kIHRvIGJlIHVzZWQgKi8NCj4gPiA+ICsN
-Cj4gPiA+ICAgICAgIC8qIHByZXBhcmUgbXVsdGlfY21kIHRvIGJlIHNlbnQgKi8NCj4gPiA+IC0g
-ICAgIG11bHRpX2NtZC0+bnVtX29mX2NtZHMgPSAzOw0KPiA+ID4gKyAgICAgbXVsdGlfY21kLT5u
-dW1fb2ZfY21kcyA9IDQ7DQo+ID4gPg0KPiA+ID4gICAgICAgLyogcHV0IGRldmljZSBpbnRvIGZm
-dSBtb2RlICovDQo+ID4gPiAgICAgICBtdWx0aV9jbWQtPmNtZHNbMF0ub3Bjb2RlID0gTU1DX1NX
-SVRDSDsNCj4gPiA+IEBAIC0yNTAxLDM3ICsyNTA3LDQyIEBAIGludCBkb19mZnUoaW50IG5hcmdz
-LCBjaGFyICoqYXJndikNCj4gPiA+ICAgICAgIG11bHRpX2NtZC0+Y21kc1swXS5mbGFncyA9IE1N
-Q19SU1BfU1BJX1IxQiB8IE1NQ19SU1BfUjFCIHwNCj4gPiA+IE1NQ19DTURfQUM7DQo+ID4gPiAg
-ICAgICBtdWx0aV9jbWQtPmNtZHNbMF0ud3JpdGVfZmxhZyA9IDE7DQo+ID4gPg0KPiA+ID4gKyAg
-ICAgLyogc2VuZCBibG9jayBjb3VudCAqLw0KPiA+ID4gKyAgICAgbXVsdGlfY21kLT5jbWRzWzFd
-Lm9wY29kZSA9IE1NQ19TRVRfQkxPQ0tfQ09VTlQ7DQo+ID4gPiArICAgICBtdWx0aV9jbWQtPmNt
-ZHNbMV0uYXJnID0gYmxvY2tzOw0KPiA+ID4gKyAgICAgbXVsdGlfY21kLT5jbWRzWzFdLmZsYWdz
-ID0gTU1DX1JTUF9TUElfUjEgfCBNTUNfUlNQX1IxIHwNCj4gPiA+IE1NQ19DTURfQUM7DQo+ID4g
-PiArDQo+ID4gPiAgICAgICAvKiBzZW5kIGltYWdlIGNodW5rICovDQo+ID4gPiAtICAgICBtdWx0
-aV9jbWQtPmNtZHNbMV0ub3Bjb2RlID0gTU1DX1dSSVRFX0JMT0NLOw0KPiA+ID4gLSAgICAgbXVs
-dGlfY21kLT5jbWRzWzFdLmJsa3N6ID0gc2VjdF9zaXplOw0KPiA+ID4gLSAgICAgbXVsdGlfY21k
-LT5jbWRzWzFdLmJsb2NrcyA9IDE7DQo+ID4gPiAtICAgICBtdWx0aV9jbWQtPmNtZHNbMV0uYXJn
-ID0gYXJnOw0KPiA+ID4gLSAgICAgbXVsdGlfY21kLT5jbWRzWzFdLmZsYWdzID0gTU1DX1JTUF9T
-UElfUjEgfCBNTUNfUlNQX1IxIHwNCj4gPiA+IE1NQ19DTURfQURUQzsNCj4gPiA+IC0gICAgIG11
-bHRpX2NtZC0+Y21kc1sxXS53cml0ZV9mbGFnID0gMTsNCj4gPiA+IC0gICAgIG1tY19pb2NfY21k
-X3NldF9kYXRhKG11bHRpX2NtZC0+Y21kc1sxXSwgYnVmKTsNCj4gPiA+ICsgICAgIG11bHRpX2Nt
-ZC0+Y21kc1syXS5vcGNvZGUgPSBNTUNfV1JJVEVfTVVMVElQTEVfQkxPQ0s7DQo+ID4gPiArICAg
-ICBtdWx0aV9jbWQtPmNtZHNbMl0uYmxrc3ogPSBzZWN0X3NpemU7DQo+ID4gPiArICAgICBtdWx0
-aV9jbWQtPmNtZHNbMl0uYmxvY2tzID0gYmxvY2tzOw0KPiA+ID4gKyAgICAgbXVsdGlfY21kLT5j
-bWRzWzJdLmFyZyA9IGFyZzsNCj4gPiA+ICsgICAgIG11bHRpX2NtZC0+Y21kc1syXS5mbGFncyA9
-IE1NQ19SU1BfU1BJX1IxIHwgTU1DX1JTUF9SMSB8DQo+ID4gPiBNTUNfQ01EX0FEVEM7DQo+ID4g
-PiArICAgICBtdWx0aV9jbWQtPmNtZHNbMl0ud3JpdGVfZmxhZyA9IDE7DQo+ID4gPiArICAgICBt
-bWNfaW9jX2NtZF9zZXRfZGF0YShtdWx0aV9jbWQtPmNtZHNbMl0sIGJ1Zik7DQo+ID4gPg0KPiA+
-ID4gICAgICAgLyogcmV0dXJuIGRldmljZSBpbnRvIG5vcm1hbCBtb2RlICovDQo+ID4gPiAtICAg
-ICBtdWx0aV9jbWQtPmNtZHNbMl0ub3Bjb2RlID0gTU1DX1NXSVRDSDsNCj4gPiA+IC0gICAgIG11
-bHRpX2NtZC0+Y21kc1syXS5hcmcgPSAoTU1DX1NXSVRDSF9NT0RFX1dSSVRFX0JZVEUgPDwgMjQp
-IHwNCj4gPiA+ICsgICAgIG11bHRpX2NtZC0+Y21kc1szXS5vcGNvZGUgPSBNTUNfU1dJVENIOw0K
-PiA+ID4gKyAgICAgbXVsdGlfY21kLT5jbWRzWzNdLmFyZyA9IChNTUNfU1dJVENIX01PREVfV1JJ
-VEVfQllURSA8PCAyNCkgfA0KPiA+ID4gICAgICAgICAgICAgICAgICAgICAgIChFWFRfQ1NEX01P
-REVfQ09ORklHIDw8IDE2KSB8DQo+ID4gPiAgICAgICAgICAgICAgICAgICAgICAgKEVYVF9DU0Rf
-Tk9STUFMX01PREUgPDwgOCkgfA0KPiA+ID4gICAgICAgICAgICAgICAgICAgICAgIEVYVF9DU0Rf
-Q01EX1NFVF9OT1JNQUw7DQo+ID4gPiAtICAgICBtdWx0aV9jbWQtPmNtZHNbMl0uZmxhZ3MgPSBN
-TUNfUlNQX1NQSV9SMUIgfCBNTUNfUlNQX1IxQiB8DQo+ID4gPiBNTUNfQ01EX0FDOw0KPiA+ID4g
-LSAgICAgbXVsdGlfY21kLT5jbWRzWzJdLndyaXRlX2ZsYWcgPSAxOw0KPiA+ID4gKyAgICAgbXVs
-dGlfY21kLT5jbWRzWzNdLmZsYWdzID0gTU1DX1JTUF9TUElfUjFCIHwgTU1DX1JTUF9SMUIgfA0K
-PiA+ID4gTU1DX0NNRF9BQzsNCj4gPiA+ICsgICAgIG11bHRpX2NtZC0+Y21kc1szXS53cml0ZV9m
-bGFnID0gMTsNCj4gPiA+DQo+ID4gPiAgZG9fcmV0cnk6DQo+ID4gPiAgICAgICAvKiByZWFkIGZp
-cm13YXJlIGNodW5rICovDQo+ID4gPiAgICAgICBsc2VlayhpbWdfZmQsIDAsIFNFRUtfU0VUKTsN
-Cj4gPiA+IC0gICAgIGNodW5rX3NpemUgPSByZWFkKGltZ19mZCwgYnVmLCA1MTIpOw0KPiA+ID4g
-KyAgICAgY2h1bmtfc2l6ZSA9IHJlYWQoaW1nX2ZkLCBidWYsIGZ3X3NpemUpOw0KPiA+ID4NCj4g
-PiA+IC0gICAgIHdoaWxlIChjaHVua19zaXplID4gMCkgew0KPiA+ID4gKyAgICAgaWYgKGNodW5r
-X3NpemUgPiAwKSB7DQo+ID4gPiAgICAgICAgICAgICAgIC8qIHNlbmQgaW9jdGwgd2l0aCBtdWx0
-aS1jbWQgKi8NCj4gPiA+ICAgICAgICAgICAgICAgcmV0ID0gaW9jdGwoZGV2X2ZkLCBNTUNfSU9D
-X01VTFRJX0NNRCwgbXVsdGlfY21kKTsNCj4gPiA+DQo+ID4gPiAgICAgICAgICAgICAgIGlmIChy
-ZXQpIHsNCj4gPiA+ICAgICAgICAgICAgICAgICAgICAgICBwZXJyb3IoIk11bHRpLWNtZCBpb2N0
-bCIpOw0KPiA+ID4gICAgICAgICAgICAgICAgICAgICAgIC8qIEluIGNhc2UgbXVsdGktY21kIGlv
-Y3RsIGZhaWxlZCBiZWZvcmUgZXhpdGluZyBmcm9tIGZmdQ0KPiA+ID4gbW9kZSAqLw0KPiA+ID4g
-LSAgICAgICAgICAgICAgICAgICAgIGlvY3RsKGRldl9mZCwgTU1DX0lPQ19DTUQsICZtdWx0aV9j
-bWQtPmNtZHNbMl0pOw0KPiA+ID4gKyAgICAgICAgICAgICAgICAgICAgIGlvY3RsKGRldl9mZCwg
-TU1DX0lPQ19DTUQsICZtdWx0aV9jbWQtPmNtZHNbM10pOw0KPiA+ID4gICAgICAgICAgICAgICAg
-ICAgICAgIGdvdG8gb3V0Ow0KPiA+ID4gICAgICAgICAgICAgICB9DQo+ID4gPg0KPiA+ID4gQEAg
-LTI1NTgsOSArMjU2OSw2IEBAIGRvX3JldHJ5Og0KPiA+ID4gICAgICAgICAgICAgICB9IGVsc2Ug
-ew0KPiA+ID4gICAgICAgICAgICAgICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiUHJvZ3JhbW1l
-ZCAlZC8lamQgYnl0ZXNcciIsDQo+ID4gPiBzZWN0X2RvbmUgKiBzZWN0X3NpemUsIChpbnRtYXhf
-dClmd19zaXplKTsNCj4gPiA+ICAgICAgICAgICAgICAgfQ0KPiA+ID4gLQ0KPiA+ID4gLSAgICAg
-ICAgICAgICAvKiByZWFkIHRoZSBuZXh0IGZpcm13YXJlIGNodW5rIChpZiBhbnkpICovDQo+ID4g
-PiAtICAgICAgICAgICAgIGNodW5rX3NpemUgPSByZWFkKGltZ19mZCwgYnVmLCA1MTIpOw0KPiA+
-ID4gICAgICAgfQ0KPiA+ID4NCj4gPiA+ICAgICAgIGlmICgoc2VjdF9kb25lICogc2VjdF9zaXpl
-KSA9PSBmd19zaXplKSB7DQo+ID4gPiBAQCAtMjU5Nyw3ICsyNjA1LDcgQEAgZG9fcmV0cnk6DQo+
-ID4gPiAgICAgICAgICAgICAgIGlmIChyZXQpIHsNCj4gPiA+ICAgICAgICAgICAgICAgICAgICAg
-ICBwZXJyb3IoIk11bHRpLWNtZCBpb2N0bCBmYWlsZWQgc2V0dGluZyBpbnN0YWxsIG1vZGUiKTsN
-Cj4gPiA+ICAgICAgICAgICAgICAgICAgICAgICAvKiBJbiBjYXNlIG11bHRpLWNtZCBpb2N0bCBm
-YWlsZWQgYmVmb3JlIGV4aXRpbmcgZnJvbSBmZnUNCj4gPiA+IG1vZGUgKi8NCj4gPiA+IC0gICAg
-ICAgICAgICAgICAgICAgICBpb2N0bChkZXZfZmQsIE1NQ19JT0NfQ01ELCAmbXVsdGlfY21kLT5j
-bWRzWzJdKTsNCj4gPiA+ICsgICAgICAgICAgICAgICAgICAgICBpb2N0bChkZXZfZmQsIE1NQ19J
-T0NfQ01ELCAmbXVsdGlfY21kLT5jbWRzWzNdKTsNCj4gPiA+ICAgICAgICAgICAgICAgICAgICAg
-ICBnb3RvIG91dDsNCj4gPiA+ICAgICAgICAgICAgICAgfQ0KPiA+ID4NCj4gPiA+IC0tDQo+ID4g
-PiAyLjE3LjENCj4gPg0KDQpNaWNyb24gQ29uZmlkZW50aWFsDQo=
+On Wed, 17 Feb 2021 at 09:46, DooHyun Hwang <dh0421.hwang@samsung.com> wrote:
+>
+>
+> On 17/02/21 8:00 am, Adrian Hunter wrote:
+> >On 17/02/21 7:46 am, Adrian Hunter wrote:
+> >> On 17/02/21 7:22 am, DooHyun Hwang wrote:
+> >>> This makes to handle read errors faster by not retrying multiple
+> >>> block read(CMD18) errors with single block reads(CMD17).
+> >>>
+> >>> On some bad SD Cards that have problem with read operations, it is
+> >>> not helpful to retry multiple block read errors with several single
+> >>> block reads, and it is delayed to treat read operations as I/O error
+> >>> as much as retrying single block reads.
+> >>
+> >> If the issue is that it takes too long, then maybe it would be better
+> >> to get
+> >> mmc_blk_read_single() to give up after a certain amount of time.
+> >>
+> >
+> >So that a device property would not be needed I mean.  Then everyone would
+> >benefit.
+
+Just wanted to confirm with Adrian's points, that we don't want a
+device property for this.
+
+In fact, the DT maintainers would reject it because it would be
+considered as a software configuration, which doesn't belong in DT.
+
+>
+> Thank you for reviewing this.
+>
+> mmc_blk_read_single() takes a different time depending on the number of
+> sectors to read and the timeout value for each CMD.
+>
+> I think it's difficult to set the criteria for "a certain amount of time"
+> you talked about.
+> And it's harder to proceed with any errors caused by giving up in
+> mmc_blk_read_single() than no retrying.
+>
+> So, I would like to add a configurable property to skip the single block
+> read retrying because if multiple block read error occurs, single block
+> read retrying doesn't help for some bad SD cards.
+
+I certainly agree that falling back to single block reads is
+questionable, at least for some cases. Moreover, I am pretty sure it's
+not always the SD card that should be blamed, but a broken mmc host
+driver or broken HW/controller.
+
+That said, I assume that the main reason why we fall back to retry
+with single block reads, is to try to recover as much data as possible
+from a broken SD card. The intent is good, but to recover data from a
+broken card, we should also consider to move to a lower/legacy speed
+mode and to decrease the clock rate of the interface.
+
+For the clock rate, we already have a debugfs node, allowing us to
+change the rate per mmc host. I suggest we add a few more debugfs
+nodes, allowing us to restrict the speed mode and to enable/disable
+single/multi block read.
+
+If we can get these things in place to help with recovery, I wouldn't
+mind us changing the default behaviour to skip the single block read
+in the recovery path.
+
+>
+> This is the log to check for this patch.
+> #0. time difference is about 2.37s for 8 sectors between with(#1) and without(#2)
+>      single block read retrying
+>      This is a test for just one CMD18.
+>      When there are many I/O requests, it takes too long to handle the errors.
+>
+> #1. retry multiple block read (8 sectors) error with single block reads
+> // It takes about 3.585671s for the I/O error.
+> // issue CMD23 (+ arg 0x8)
+> // issue CMD18 (+ arg 0x000320e0) and error occurs
+> <7>[  316.657115]  [5:   kworker/5:1H:  324] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  316.657124]  [5:   kworker/5:1H:  324] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> <7>[  316.826302] I[0:      swapper/0:    0] mmc0: req done <CMD23>: 0: 00000000 00000000 00000000 00000000
+> <7>[  316.826327] I[0:      swapper/0:    0] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+> <7>[  316.826362] I[0:      swapper/0:    0] mmc0:     0 bytes transferred: -110
+> <7>[  316.826389] I[0:      swapper/0:    0] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+> <7>[  316.826516]  [0:   kworker/0:1H:  338] mmc0: starting CMD13 arg 00010000 flags 00000195
+> <7>[  316.826621] I[0:   kworker/0:1H:  338] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+> // retry CMD18 (+ arg 0x000320e0) and error occurs again. Same as above.
+> <7>[  316.829224]  [5:   kworker/5:1H:  324] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  316.829237]  [5:   kworker/5:1H:  324] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> <7>[  316.999588] I[0:      swapper/0:    0] mmc0: req done <CMD23>: 0: 00000000 00000000 00000000 00000000
+> <7>[  316.999653] I[0:      swapper/0:    0] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+> <7>[  316.999725] I[0:      swapper/0:    0] mmc0:     0 bytes transferred: -110
+> <7>[  316.999789] I[0:      swapper/0:    0] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+> <7>[  317.000034]  [0:   kworker/0:1H:  338] mmc0: starting CMD13 arg 00010000 flags 00000195
+> <7>[  317.000370] I[0:   kworker/0:1H:  338] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+> // mmc_blk_reset() and it's completed
+> <7>[  317.000523]  [0:   kworker/0:1H:  338] mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
+> ...
+> // mmc_blk_read_single() : CMD17, CMD13 and CMD12 repeats 8 times (for retrying multiple block read with 8 sectors)
+> // CMD17 (+ arg 0x000320e0 ~ 0x000320e7) and timeout errors occur
+> // It takes about 1.351s
+> <7>[  317.200351]  [0:   kworker/0:1H:  338] mmc0: starting CMD17 arg 000320e0 flags 000000b5
+> <7>[  317.368748] I[0:      swapper/0:    0] mmc0: req done (CMD17): 0: 00000900 00000000 00000000 00000000
+> <7>[  317.368776] I[0:      swapper/0:    0] mmc0:     0 bytes transferred: -110
+> <7>[  317.368871]  [0:   kworker/0:1H:  338] mmc0: starting CMD13 arg 00010000 flags 00000195
+> <7>[  317.368932] I[0:   kworker/0:1H:  338] mmc0: sdhci: IRQ status 0x00000001
+> <7>[  317.368970] I[0:   kworker/0:1H:  338] mmc0: req done (CMD13): 0: 00000b00 00000000 00000000 00000000
+> <7>[  317.369020]  [0:   kworker/0:1H:  338] mmc0: starting CMD12 arg 00000000 flags 00000095
+> <7>[  317.369070] I[0:   kworker/0:1H:  338] mmc0: sdhci: IRQ status 0x00000001
+> <7>[  317.369108] I[0:   kworker/0:1H:  338] mmc0: req done (CMD12): 0: 00000b00 00000000 00000000 00000000
+> <7>[  317.369155]  [0:   kworker/0:1H:  338] mmc0: starting CMD13 arg 00010000 flags 00000195
+> <7>[  317.369204] I[0:   kworker/0:1H:  338] mmc0: sdhci: IRQ status 0x00000001
+> <7>[  317.369245] I[0:   kworker/0:1H:  338] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+> <3>[  317.369298]  [0:   kworker/0:1H:  338] print_req_error: I/O error, dev mmcblk0, sector 205024
+> <7>[  317.369342]  [0:   kworker/0:1H:  338] mmc0: starting CMD17 arg 000320e1 flags 000000b5
+> ...
+> <7>[  318.382668]  [0:   kworker/0:1H:  338] mmc0: starting CMD17 arg 000320e7 flags 000000b5
+> <3>[  318.551568]  [0:   kworker/0:1H:  338] print_req_error: I/O error, dev mmcblk0, sector 205031
+> // retry CMD18 (+ arg 0x000320e0) and error occurs again.
+> <7>[  318.551850]  [5:   kworker/5:1H:  324] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  318.551867]  [5:   kworker/5:1H:  324] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> ...
+> // retry CMD18 (+ arg 0x000320e0) and error occurs again.
+> <7>[  318.721767]  [5:   kworker/5:1H:  324] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> // CMD17 (+ arg 0x000320e0 ~ 0x000320e7)
+> <7>[  318.891054]  [0:   kworker/0:1H:  338] mmc0: starting CMD17 arg 000320e0 flags 000000b5
+> ...
+> <7>[  320.073861]  [0:   kworker/0:1H:  338] mmc0: starting CMD17 arg 000320e7 flags 000000b5
+> // Return I/O error for read operation finally
+> <3>[  320.242786]  [0:   kworker/0:1H:  338] Buffer I/O error on dev mmcblk0, logical block 25628, async page read
+>
+> #2. retry multiple block read (8 sectors) error without single block reads
+> // It takes about 1.205941s for the I/O error.
+> // issue CMD23 (+ arg 0x8)
+> // issue CMD18 (+ arg 0x000320e0) and error occurs
+> <7>[  126.467114]  [7:   kworker/7:2H: 8887] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  126.467125]  [7:   kworker/7:2H: 8887] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> <7>[  126.636188] I[0:Measurement Wor: 9074] mmc0: req done <CMD23>: 0: 00000000 00000000 00000000 00000000
+> <7>[  126.636213] I[0:Measurement Wor: 9074] mmc0: req done (CMD18): 0: 00000900 00000000 00000000 00000000
+> <7>[  126.636241] I[0:Measurement Wor: 9074] mmc0:     0 bytes transferred: -110
+> <7>[  126.636265] I[0:Measurement Wor: 9074] mmc0:     (CMD12): 0: 00000b00 00000000 00000000 00000000
+> <7>[  126.636379]  [0:   kworker/0:1H:  336] mmc0: starting CMD13 arg 00010000 flags 00000195
+> <7>[  126.636495] I[0:   kworker/0:1H:  336] mmc0: req done (CMD13): 0: 00000900 00000000 00000000 00000000
+> // retry CMD18 (+ arg 0x000320e0) and error occurs again. Same as above.
+> <7>[  126.638284]  [7:   kworker/7:2H: 8887] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  126.638298]  [7:   kworker/7:2H: 8887] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> // mmc_blk_reset() and it's completed
+> <7>[  126.807645]  [0:   kworker/0:1H:  336] mmc0: clock 0Hz busmode 2 powermode 0 cs 0 Vdd 0 width 1 timing 0
+> ...
+> // no mmc_blk_read_single() calling
+> // retry CMD18 (+ arg 0x000320e0) and error occurs again.
+> <7>[  126.993628]  [7:   kworker/7:2H: 8887] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  126.993643]  [7:   kworker/7:2H: 8887] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> // retry CMD18 (+ arg 0x000320e0) and error occurs again.
+> <7>[  127.164836]  [7:   kworker/7:2H: 8887] <mmc0: starting CMD23 arg 00000008 flags 00000015>
+> <7>[  127.164848]  [7:   kworker/7:2H: 8887] mmc0: starting CMD18 arg 000320e0 flags 000000b5
+> ...
+> // Return I/O error for read operation finally
+> <3>[  127.673055] I[7:      swapper/7:    0] Buffer I/O error on dev mmcblk0, logical block 25628, async page read
+>
+
+Kind regards
+Uffe
