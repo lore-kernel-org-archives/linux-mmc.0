@@ -2,217 +2,169 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3A5AC433E6
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47F8BC43381
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C60DF64E60
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2049164E62
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234771AbhCCBkw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:40:52 -0500
-Received: from mga03.intel.com ([134.134.136.65]:10203 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1836603AbhCBHEg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 Mar 2021 02:04:36 -0500
-IronPort-SDR: yxhffZ72o/qL89tMRcB/+xSNbosCw9OUwYSKiudYAlai9W4kYsjQrTm8zIJL6O3Gtz2ycv6JhU
- bJhncZ1Pk5Qw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9910"; a="186771396"
-X-IronPort-AV: E=Sophos;i="5.81,216,1610438400"; 
-   d="scan'208";a="186771396"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Mar 2021 23:03:54 -0800
-IronPort-SDR: 7IzRiX8E44ofpMaGwotx0lKalu9xYiLpFVU1Q1E1mAI+eQeYkweZVB3EWtP5QkMe3OSeVHKg0j
- pKddNgteuoow==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.81,216,1610438400"; 
-   d="scan'208";a="585794184"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga005.jf.intel.com with ESMTP; 01 Mar 2021 23:03:52 -0800
-Subject: Re: [PATCH 1/1] mmc: cqhci: fix random crash when remove mmc module
-To:     Frank Li <lznuaa@gmail.com>, riteshh@codeaurora.org,
-        asutoshd@codeaurora.org, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        haibo.chen@nxp.com
-References: <20210301172151.281814-1-Frank.Li@nxp.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <0d135a2b-02d0-f05b-918b-c4253d67caf9@intel.com>
-Date:   Tue, 2 Mar 2021 09:04:03 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.0
+        id S229957AbhCCBlv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:41:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48616 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1377993AbhCBIqU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 03:46:20 -0500
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC369C061356
+        for <linux-mmc@vger.kernel.org>; Tue,  2 Mar 2021 00:45:39 -0800 (PST)
+Received: by mail-vs1-xe32.google.com with SMTP id o186so10225326vso.1
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Mar 2021 00:45:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=BDwFPh89sek8c4gYigyPtmobsd1aoVN5drZwpxRsgFE=;
+        b=KVzLefRbNuNm+PTem7wZkaTTCSR5XP88Ln/heJszN9Rsu2bb9ItIHI46eCuvV7BuUy
+         26WBpoFMhOzub+R/Gi+FcLChTwb0gCRqYUz4LyJ3IAhWg8uhIOszb5t9lJKA1DWx8PpI
+         hLUVBQiz7rBxi2aMAB9T1It2WOsD51RK8OCgu0r10sa81BLCn1IYxHSK1B3/GVX21t4Q
+         NzbpbACfpC8yOUXaa0UmH3xJ92YAkDErCPBMzINM2C8sY/6H2ZZr/9UH5VgfPwQ2bb9G
+         +Pj6dnOrghAGpk4oTNAlVQ+jQIKK/c1gHLGBPYQFpsVnJn6/WdzLltWs35DWtBoGZtew
+         XE+w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=BDwFPh89sek8c4gYigyPtmobsd1aoVN5drZwpxRsgFE=;
+        b=YWN2VleiCKYNG4oATros0v0mSLX6cyumkGR0lss40GKoHshGYGtCyUtkDEHrjl2Swk
+         +YCf1sAPA6dQR423qTNQuvKD4hIgkP7H3uEpmLkvCPwrbVD6vJrIDOLP0OgKK5U20WlK
+         lqMa8SVOLLPqscNCJuQvRksR3UAFTduwQnW+zozLNfzZS9RF9sEe2NEYPWAY5FbVCX9u
+         j3Nu3bkDV4sNGW62MGvSON2a/80gfdA4PNBYHXaQ9YOykouzQaM+h9pL4RFw8L4I+ecr
+         HgLiGOXXcZXKO1bWVqeieVJXKiIEqVZpR1AuH8Y0BURfLXKsFrFlCsFHtc12BQE07u1s
+         3gvA==
+X-Gm-Message-State: AOAM533JHY6zbQigMBhxJrlT9nouqLsA01x2nEOHMX8c5ajntz2o9per
+        zAcKXC63RTbDcbRvVrPKtP5B+CD+3Vgu0lkzQHo24w==
+X-Google-Smtp-Source: ABdhPJwltS124Jky7ewef1zQsANHCdXtXFdUUmqwI7r+Tsdk17xjqOLrIAcxy2V84YK0YyM4pBoYJdfxFDB5SkNHQFs=
+X-Received: by 2002:a67:8c6:: with SMTP id 189mr1388424vsi.55.1614674738964;
+ Tue, 02 Mar 2021 00:45:38 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20210301172151.281814-1-Frank.Li@nxp.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20210216224252.22187-1-marten.lindahl@axis.com>
+ <CAPDyKFoASx=U8b1Oqtuo6ikiM=gXfL2x1Gsz=rfAn9zxP0y_iA@mail.gmail.com> <20210301215923.6jfg6mg5ntorttan@axis.com>
+In-Reply-To: <20210301215923.6jfg6mg5ntorttan@axis.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 2 Mar 2021 09:45:02 +0100
+Message-ID: <CAPDyKFoaKfuwweaEMf1Pz+ECAPU3P9-gmCJcpq+MADH5gH1c=Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Try power cycling card if command request times out
+To:     Marten Lindahl <martenli@axis.com>
+Cc:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <Marten.Lindahl@axis.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        kernel <kernel@axis.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/03/21 7:21 pm, Frank Li wrote:
-> [ 6684.493350] Unable to handle kernel paging request at virtual address ffff800011c5b0f0
-> [ 6684.498531] mmc0: card 0001 removed
-> [ 6684.501556] Mem abort info:
-> [ 6684.509681]   ESR = 0x96000047
-> [ 6684.512786]   EC = 0x25: DABT (current EL), IL = 32 bits
-> [ 6684.518394]   SET = 0, FnV = 0
-> [ 6684.521707]   EA = 0, S1PTW = 0
-> [ 6684.524998] Data abort info:
-> [ 6684.528236]   ISV = 0, ISS = 0x00000047
-> [ 6684.532986]   CM = 0, WnR = 1
-> [ 6684.536129] swapper pgtable: 4k pages, 48-bit VAs, pgdp=0000000081b22000
-> [ 6684.543923] [ffff800011c5b0f0] pgd=00000000bffff003, p4d=00000000bffff003, pud=00000000bfffe003, pmd=00000000900e1003, pte=0000000000000000
-> [ 6684.557915] Internal error: Oops: 96000047 [#1] PREEMPT SMP
-> [ 6684.564240] Modules linked in: sdhci_esdhc_imx(-) sdhci_pltfm sdhci cqhci mmc_block mmc_core fsl_jr_uio caam_jr caamkeyblob_desc caamhash_desc caamalg_desc crypto_engine rng_core authenc libdes crct10dif_ce flexcan can_dev caam error [last unloaded: mmc_core]
-> [ 6684.587281] CPU: 0 PID: 79138 Comm: kworker/0:3H Not tainted 5.10.9-01410-g3ba33182767b-dirty #10
-> [ 6684.596160] Hardware name: Freescale i.MX8DXL EVK (DT)
-> [ 6684.601320] Workqueue: kblockd blk_mq_run_work_fn
-> 
-> [ 6684.606094] pstate: 40000005 (nZcv daif -PAN -UAO -TCO BTYPE=--)
-> [ 6684.612286] pc : cqhci_request+0x148/0x4e8 [cqhci]
-> ^GMessage from syslogd@  at Thu Jan  1 01:51:24 1970 ...[ 6684.617085] lr : cqhci_request+0x314/0x4e8 [cqhci]
-> [ 6684.626734] sp : ffff80001243b9f0
-> [ 6684.630049] x29: ffff80001243b9f0 x28: ffff00002c3dd000
-> [ 6684.635367] x27: 0000000000000001 x26: 0000000000000001
-> [ 6684.640690] x25: ffff00002c451000 x24: 000000000000000f
-> [ 6684.646007] x23: ffff000017e71c80 x22: ffff00002c451000
-> [ 6684.651326] x21: ffff00002c0f3550 x20: ffff00002c0f3550
-> [ 6684.656651] x19: ffff000017d46880 x18: ffff00002cea1500
-> [ 6684.661977] x17: 0000000000000000 x16: 0000000000000000
-> [ 6684.667294] x15: 000001ee628e3ed1 x14: 0000000000000278
-> [ 6684.672610] x13: 0000000000000001 x12: 0000000000000001
-> [ 6684.677927] x11: 0000000000000000 x10: 0000000000000000
-> [ 6684.683243] x9 : 000000000000002b x8 : 0000000000001000
-> [ 6684.688560] x7 : 0000000000000010 x6 : ffff00002c0f3678
-> [ 6684.693886] x5 : 000000000000000f x4 : ffff800011c5b000
-> [ 6684.699211] x3 : 000000000002d988 x2 : 0000000000000008
-> [ 6684.704537] x1 : 00000000000000f0 x0 : 0002d9880008102f
-> [ 6684.709854] Call trace:
-> [ 6684.712313]  cqhci_request+0x148/0x4e8 [cqhci]
-> [ 6684.716803]  mmc_cqe_start_req+0x58/0x68 [mmc_core]
-> [ 6684.721698]  mmc_blk_mq_issue_rq+0x460/0x810 [mmc_block]
-> [ 6684.727018]  mmc_mq_queue_rq+0x118/0x2b0 [mmc_block]
-> 
-> cqhci_request was called after cqhci_disable.
-> 
-> cqhci_disable                                 cqhci_request
-> {                                             {
-> 	dmam_free_coherent();  (1) free
->                                                   if(!cq_host->enable)
->                                                        return
-> 				         (2) pass check here
-> 	cq_host->enable = false;
-> 
->                                                   task_desc= get_desc(cq_host,tag);
->                                                              ^^^^ crash here
->                                          (3) access memory which is already free
-> 
-> }                                             }
-> 
-> Signed-off-by: Frank Li <Frank.Li@nxp.com>
-> ---
->  drivers/mmc/host/cqhci-core.c | 18 ++++++++++++++----
->  1 file changed, 14 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index 93b0432bb601..36d292261e50 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -389,6 +389,7 @@ static void cqhci_off(struct mmc_host *mmc)
->  static void cqhci_disable(struct mmc_host *mmc)
->  {
->  	struct cqhci_host *cq_host = mmc->cqe_private;
-> +	unsigned long flags;
->  
->  	if (!cq_host->enabled)
->  		return;
-> @@ -397,6 +398,11 @@ static void cqhci_disable(struct mmc_host *mmc)
->  
->  	__cqhci_disable(cq_host);
->  
-> +	/* need wait for cqhci_request finish before free memory */
-> +	spin_lock_irqsave(&cq_host->lock, flags);
-> +	cq_host->enabled = false;
-> +	spin_unlock_irqrestore(&cq_host->lock, flags);
-> +
->  	dmam_free_coherent(mmc_dev(mmc), cq_host->data_size,
->  			   cq_host->trans_desc_base,
->  			   cq_host->trans_desc_dma_base);
-> @@ -408,7 +414,6 @@ static void cqhci_disable(struct mmc_host *mmc)
->  	cq_host->trans_desc_base = NULL;
->  	cq_host->desc_base = NULL;
->  
-> -	cq_host->enabled = false;
->  }
->  
->  static void cqhci_prep_task_desc(struct mmc_request *mrq,
-> @@ -612,6 +617,13 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  			cq_host->ops->enable(mmc);
->  	}
->  
-> +	spin_lock_irqsave(&cq_host->lock, flags);
-> +	if (!cq_host->enabled) {
-> +		pr_err("%s: cqhci: not enabled\n", mmc_hostname(mmc));
-> +		err = -EINVAL;
-> +		goto out_unlock;
-> +	}
-> +
->  	if (mrq->data) {
->  		cqhci_prep_task_desc(mrq, cq_host, tag);
->  
-> @@ -619,14 +631,12 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
->  		if (err) {
->  			pr_err("%s: cqhci: failed to setup tx desc: %d\n",
->  			       mmc_hostname(mmc), err);
-> -			return err;
-> +			goto out_unlock;
->  		}
->  	} else {
->  		cqhci_prep_dcmd_desc(mmc, mrq);
->  	}
->  
-> -	spin_lock_irqsave(&cq_host->lock, flags);
-> -
->  	if (cq_host->recovery_halt) {
->  		err = -EBUSY;
->  		goto out_unlock;
-> 
+On Mon, 1 Mar 2021 at 22:59, Marten Lindahl <martenli@axis.com> wrote:
+>
+> Hi Ulf!
+>
+> Thank you for your comments!
+>
+> On Mon, Mar 01, 2021 at 09:50:56AM +0100, Ulf Hansson wrote:
+> > + Adrian
+> >
+> > On Tue, 16 Feb 2021 at 23:43, M=C3=A5rten Lindahl <marten.lindahl@axis.=
+com> wrote:
+> > >
+> > > Sometimes SD cards that has been run for a long time enters a state
+> > > where it cannot by itself be recovered, but needs a power cycle to be
+> > > operational again. Card status analysis has indicated that the card c=
+an
+> > > end up in a state where all external commands are ignored by the card
+> > > since it is halted by data timeouts.
+> > >
+> > > If the card has been heavily used for a long time it can be weared ou=
+t,
+> > > and should typically be replaced. But on some tests, it shows that th=
+e
+> > > card can still be functional after a power cycle, but as it requires =
+an
+> > > operator to do it, the card can remain in a non-operational state for=
+ a
+> > > long time until the problem has been observed by the operator.
+> > >
+> > > This patch adds function to power cycle the card in case it does not
+> > > respond to a command, and then resend the command if the power cycle
+> > > was successful. This procedure will be tested 1 time before giving up=
+,
+> > > and resuming host operation as normal.
+> >
+> > I assume the context above is all about the ioctl interface?
+> >
+>
+> Yes, that's correct. The problem we have seen is triggered by ioctls.
+>
+> > So, when the card enters this non functional state, have you tried
+> > just reading a block through the regular I/O interface. Does it
+> > trigger a power cycle of the card - and then makes it functional
+> > again?
+> >
+>
+> Yes, we have tried that, and it does trigger a power cycle, making the ca=
+rd
+> operational again. But as it requires an operator to trigger it, I though=
+t
+> it might be something that could be automated here. At least once.
 
-Please try the following instead:
+Not sure what you mean by operator here? In the end it's a userspace
+program running and I assume it can deal with error paths. :-)
 
+In any case, I understand your point.
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index c2e70b757dd1..dfc8d2877115 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -399,11 +399,6 @@ void mmc_remove_card(struct mmc_card *card)
- 	mmc_remove_card_debugfs(card);
- #endif
- 
--	if (host->cqe_enabled) {
--		host->cqe_ops->cqe_disable(host);
--		host->cqe_enabled = false;
--	}
--
- 	if (mmc_card_present(card)) {
- 		if (mmc_host_is_spi(card->host)) {
- 			pr_info("%s: SPI card removed\n",
-@@ -416,6 +411,11 @@ void mmc_remove_card(struct mmc_card *card)
- 		of_node_put(card->dev.of_node);
- 	}
- 
-+	if (host->cqe_enabled) {
-+		host->cqe_ops->cqe_disable(host);
-+		host->cqe_enabled = false;
-+	}
-+
- 	put_device(&card->dev);
- }
- 
+>
+> > >
+> > > Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
+> > > ---
+> > > Please note: This might not be the way we want to handle these cases,
+> > > but at least it lets us start the discussion. In which cases should t=
+he
+> > > mmc framework deal with error messages like ETIMEDOUT, and in which
+> > > cases should it be handled by userspace?
+> > > The mmc framework tries to recover a failed block request
+> > > (mmc_blk_mq_rw_recovery) which may end up in a HW reset of the card.
+> > > Would it be an idea to act in a similar way when an ioctl times out?
+> >
+> > Maybe, it's a good idea to allow the similar reset for ioctls as we do
+> > for regular I/O requests. My concern with this though, is that we
+> > might allow user space to trigger a HW resets a bit too easily - and
+> > that could damage the card.
+> >
+> > Did you consider this?
+> >
+>
+> Yes, that is a valid point, and that is why the power cycle is only tried
+> once. But the conditon for this reset is a -ETIMEDOUT, and this is the pa=
+rt of
+> this patch where I am myself not sure of if it is enough to check for. Wo=
+uld
+> this be an error that you could expect to happen with ioctl requests in o=
+ther
+> situations also, but not necessarily cause by a stalled card?
 
+Exactly.
+
+Many different commands can get pushed down to the card through the
+mmc ioctl interface. It's difficult to know what error path we should
+pick, other than reporting and propagating the error codes.
+
+[...]
+
+Kind regards
+Uffe
