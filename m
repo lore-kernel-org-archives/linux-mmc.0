@@ -2,169 +2,382 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.9 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47F8BC43381
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E19FC433E9
 	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2049164E62
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD22E61606
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229957AbhCCBlv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:41:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48616 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377993AbhCBIqU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 03:46:20 -0500
-Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC369C061356
-        for <linux-mmc@vger.kernel.org>; Tue,  2 Mar 2021 00:45:39 -0800 (PST)
-Received: by mail-vs1-xe32.google.com with SMTP id o186so10225326vso.1
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Mar 2021 00:45:39 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=BDwFPh89sek8c4gYigyPtmobsd1aoVN5drZwpxRsgFE=;
-        b=KVzLefRbNuNm+PTem7wZkaTTCSR5XP88Ln/heJszN9Rsu2bb9ItIHI46eCuvV7BuUy
-         26WBpoFMhOzub+R/Gi+FcLChTwb0gCRqYUz4LyJ3IAhWg8uhIOszb5t9lJKA1DWx8PpI
-         hLUVBQiz7rBxi2aMAB9T1It2WOsD51RK8OCgu0r10sa81BLCn1IYxHSK1B3/GVX21t4Q
-         NzbpbACfpC8yOUXaa0UmH3xJ92YAkDErCPBMzINM2C8sY/6H2ZZr/9UH5VgfPwQ2bb9G
-         +Pj6dnOrghAGpk4oTNAlVQ+jQIKK/c1gHLGBPYQFpsVnJn6/WdzLltWs35DWtBoGZtew
-         XE+w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=BDwFPh89sek8c4gYigyPtmobsd1aoVN5drZwpxRsgFE=;
-        b=YWN2VleiCKYNG4oATros0v0mSLX6cyumkGR0lss40GKoHshGYGtCyUtkDEHrjl2Swk
-         +YCf1sAPA6dQR423qTNQuvKD4hIgkP7H3uEpmLkvCPwrbVD6vJrIDOLP0OgKK5U20WlK
-         lqMa8SVOLLPqscNCJuQvRksR3UAFTduwQnW+zozLNfzZS9RF9sEe2NEYPWAY5FbVCX9u
-         j3Nu3bkDV4sNGW62MGvSON2a/80gfdA4PNBYHXaQ9YOykouzQaM+h9pL4RFw8L4I+ecr
-         HgLiGOXXcZXKO1bWVqeieVJXKiIEqVZpR1AuH8Y0BURfLXKsFrFlCsFHtc12BQE07u1s
-         3gvA==
-X-Gm-Message-State: AOAM533JHY6zbQigMBhxJrlT9nouqLsA01x2nEOHMX8c5ajntz2o9per
-        zAcKXC63RTbDcbRvVrPKtP5B+CD+3Vgu0lkzQHo24w==
-X-Google-Smtp-Source: ABdhPJwltS124Jky7ewef1zQsANHCdXtXFdUUmqwI7r+Tsdk17xjqOLrIAcxy2V84YK0YyM4pBoYJdfxFDB5SkNHQFs=
-X-Received: by 2002:a67:8c6:: with SMTP id 189mr1388424vsi.55.1614674738964;
- Tue, 02 Mar 2021 00:45:38 -0800 (PST)
-MIME-Version: 1.0
-References: <20210216224252.22187-1-marten.lindahl@axis.com>
- <CAPDyKFoASx=U8b1Oqtuo6ikiM=gXfL2x1Gsz=rfAn9zxP0y_iA@mail.gmail.com> <20210301215923.6jfg6mg5ntorttan@axis.com>
-In-Reply-To: <20210301215923.6jfg6mg5ntorttan@axis.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 2 Mar 2021 09:45:02 +0100
-Message-ID: <CAPDyKFoaKfuwweaEMf1Pz+ECAPU3P9-gmCJcpq+MADH5gH1c=Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Try power cycling card if command request times out
-To:     Marten Lindahl <martenli@axis.com>
-Cc:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <Marten.Lindahl@axis.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        kernel <kernel@axis.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        id S235181AbhCCBlS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:41:18 -0500
+Received: from lucky1.263xmail.com ([211.157.147.131]:55236 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1376704AbhCBHuO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 02:50:14 -0500
+Received: from localhost (unknown [192.168.167.70])
+        by lucky1.263xmail.com (Postfix) with ESMTP id 1E1C1B936D;
+        Tue,  2 Mar 2021 15:47:09 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-ABS-CHECKED: 0
+Received: from localhost.localdomain (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P31655T140708522473216S1614671227405312_;
+        Tue, 02 Mar 2021 15:47:08 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <23915da47d9d43c6971bb409d1616a33>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: ulf.hansson@linaro.org
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        linux-rockchip@lists.infradead.org,
+        Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH] mmc: sdhci-of-dwcmshc: add rockchip platform support
+Date:   Tue,  2 Mar 2021 15:46:57 +0800
+Message-Id: <1614671217-133008-1-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 1 Mar 2021 at 22:59, Marten Lindahl <martenli@axis.com> wrote:
->
-> Hi Ulf!
->
-> Thank you for your comments!
->
-> On Mon, Mar 01, 2021 at 09:50:56AM +0100, Ulf Hansson wrote:
-> > + Adrian
-> >
-> > On Tue, 16 Feb 2021 at 23:43, M=C3=A5rten Lindahl <marten.lindahl@axis.=
-com> wrote:
-> > >
-> > > Sometimes SD cards that has been run for a long time enters a state
-> > > where it cannot by itself be recovered, but needs a power cycle to be
-> > > operational again. Card status analysis has indicated that the card c=
-an
-> > > end up in a state where all external commands are ignored by the card
-> > > since it is halted by data timeouts.
-> > >
-> > > If the card has been heavily used for a long time it can be weared ou=
-t,
-> > > and should typically be replaced. But on some tests, it shows that th=
-e
-> > > card can still be functional after a power cycle, but as it requires =
-an
-> > > operator to do it, the card can remain in a non-operational state for=
- a
-> > > long time until the problem has been observed by the operator.
-> > >
-> > > This patch adds function to power cycle the card in case it does not
-> > > respond to a command, and then resend the command if the power cycle
-> > > was successful. This procedure will be tested 1 time before giving up=
-,
-> > > and resuming host operation as normal.
-> >
-> > I assume the context above is all about the ioctl interface?
-> >
->
-> Yes, that's correct. The problem we have seen is triggered by ioctls.
->
-> > So, when the card enters this non functional state, have you tried
-> > just reading a block through the regular I/O interface. Does it
-> > trigger a power cycle of the card - and then makes it functional
-> > again?
-> >
->
-> Yes, we have tried that, and it does trigger a power cycle, making the ca=
-rd
-> operational again. But as it requires an operator to trigger it, I though=
-t
-> it might be something that could be automated here. At least once.
+sdhci based synopsys MMC IP is also used on some rockchip platforms,
+so add a basic support here.
 
-Not sure what you mean by operator here? In the end it's a userspace
-program running and I assume it can deal with error paths. :-)
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
 
-In any case, I understand your point.
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 220 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 213 insertions(+), 7 deletions(-)
 
->
-> > >
-> > > Signed-off-by: M=C3=A5rten Lindahl <marten.lindahl@axis.com>
-> > > ---
-> > > Please note: This might not be the way we want to handle these cases,
-> > > but at least it lets us start the discussion. In which cases should t=
-he
-> > > mmc framework deal with error messages like ETIMEDOUT, and in which
-> > > cases should it be handled by userspace?
-> > > The mmc framework tries to recover a failed block request
-> > > (mmc_blk_mq_rw_recovery) which may end up in a HW reset of the card.
-> > > Would it be an idea to act in a similar way when an ioctl times out?
-> >
-> > Maybe, it's a good idea to allow the similar reset for ioctls as we do
-> > for regular I/O requests. My concern with this though, is that we
-> > might allow user space to trigger a HW resets a bit too easily - and
-> > that could damage the card.
-> >
-> > Did you consider this?
-> >
->
-> Yes, that is a valid point, and that is why the power cycle is only tried
-> once. But the conditon for this reset is a -ETIMEDOUT, and this is the pa=
-rt of
-> this patch where I am myself not sure of if it is enough to check for. Wo=
-uld
-> this be an error that you could expect to happen with ioctl requests in o=
-ther
-> situations also, but not necessarily cause by a stalled card?
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 59d8d96..959084c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -9,9 +9,11 @@
+ 
+ #include <linux/clk.h>
+ #include <linux/dma-mapping.h>
++#include <linux/iopoll.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
++#include <linux/of_device.h>
+ #include <linux/sizes.h>
+ 
+ #include "sdhci-pltfm.h"
+@@ -21,11 +23,43 @@
+ /* DWCMSHC specific Mode Select value */
+ #define DWCMSHC_CTRL_HS400		0x7
+ 
++/* Rockchip specific Registers */
++#define DWCMSHC_HOST_CTRL3		0x508
++#define DWCMSHC_EMMC_CONTROL		0x52c
++#define DWCMSHC_EMMC_ATCTRL		0x540
++#define DWCMSHC_EMMC_DLL_CTRL		0x800
++#define DWCMSHC_EMMC_DLL_RXCLK		0x804
++#define DWCMSHC_EMMC_DLL_TXCLK		0x808
++#define DWCMSHC_EMMC_DLL_STRBIN		0x80c
++#define DWCMSHC_EMMC_DLL_STATUS0	0x840
++#define DWCMSHC_EMMC_DLL_START		BIT(0)
++#define DWCMSHC_EMMC_DLL_RXCLK_SRCSEL	29
++#define DWCMSHC_EMMC_DLL_START_POINT	16
++#define DWCMSHC_EMMC_DLL_INC		8
++#define DWCMSHC_EMMC_DLL_DLYENA		BIT(27)
++#define DLL_TXCLK_TAPNUM_DEFAULT	0x8
++#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
++#define DLL_TXCLK_TAPNUM_FROM_SW	BIT(24)
++#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
++#define DWCMSHC_EMMC_DLL_LOCKED		BIT(8)
++#define DWCMSHC_EMMC_DLL_TIMEOUT	BIT(9)
++#define DLL_RXCLK_NO_INVERTER		1
++#define DLL_RXCLK_INVERTER		0
++#define DWCMSHC_ENHANCED_STROBE		BIT(8)
++#define DLL_LOCK_WO_TMOUT(x) \
++	((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
++	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
++#define ROCKCHIP_MAX_CLKS		3
++
+ #define BOUNDARY_OK(addr, len) \
+ 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+ 
+ struct dwcmshc_priv {
+ 	struct clk	*bus_clk;
++
++	/* Rockchip specified optional clocks */
++	struct clk_bulk_data rockchip_clks[ROCKCHIP_MAX_CLKS];
++	int txclk_tapnum;
+ };
+ 
+ /*
+@@ -100,6 +134,97 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
+ 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+ }
+ 
++static void dwcmshc_rk_hs400_enhanced_strobe(struct mmc_host *mmc,
++					     struct mmc_ios *ios)
++{
++	u32 vendor;
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	vendor = sdhci_readl(host, DWCMSHC_EMMC_CONTROL);
++	if (ios->enhanced_strobe)
++		vendor |= DWCMSHC_ENHANCED_STROBE;
++	else
++		vendor &= ~DWCMSHC_ENHANCED_STROBE;
++
++	sdhci_writel(host, vendor, DWCMSHC_EMMC_CONTROL);
++}
++
++static void dwcmshc_rk_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	u32 txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT, extra;
++	int err;
++
++	host->mmc->actual_clock = 0;
++
++	/* DO NOT TOUCH THIS SETTING */
++	extra = DWCMSHC_EMMC_DLL_DLYENA |
++		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
++
++	if (clock == 0)
++		return;
++
++	/* Rockchip platform only support 375KHz for identify mode */
++	if (clock <= 400000)
++		clock = 375000;
++
++	err = clk_set_rate(pltfm_host->clk, clock);
++	if (err)
++		dev_err(mmc_dev(host->mmc), "fail to set clock %d", clock);
++
++	sdhci_set_clock(host, clock);
++
++	/* Disable cmd conflict check */
++	extra = sdhci_readl(host, DWCMSHC_HOST_CTRL3);
++	extra &= ~BIT(0);
++	sdhci_writel(host, extra, DWCMSHC_HOST_CTRL3);
++
++	if (clock <= 400000) {
++		/* Disable DLL to reset sample clock */
++		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_CTRL);
++		return;
++	}
++
++	/* Reset DLL */
++	sdhci_writel(host, BIT(1), DWCMSHC_EMMC_DLL_CTRL);
++	udelay(1);
++	sdhci_writel(host, 0x0, DWCMSHC_EMMC_DLL_CTRL);
++
++	/* Init DLL settings */
++	extra = 0x5 << DWCMSHC_EMMC_DLL_START_POINT |
++		0x2 << DWCMSHC_EMMC_DLL_INC |
++		DWCMSHC_EMMC_DLL_START;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_CTRL);
++	err = readl_poll_timeout(host->ioaddr + DWCMSHC_EMMC_DLL_STATUS0,
++				 extra, DLL_LOCK_WO_TMOUT(extra), 1,
++				 500 * USEC_PER_MSEC);
++	if (err) {
++		dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
++		return;
++	}
++
++	extra = 0x1 << 16 | /* tune clock stop en */
++		0x2 << 17 | /* pre-change delay */
++		0x3 << 19;  /* post-change delay */
++	sdhci_writel(host, extra, DWCMSHC_EMMC_ATCTRL);
++
++	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
++	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
++		txclk_tapnum = priv->txclk_tapnum;
++
++	extra = DWCMSHC_EMMC_DLL_DLYENA |
++		DLL_TXCLK_TAPNUM_FROM_SW |
++		txclk_tapnum;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_TXCLK);
++
++	extra = DWCMSHC_EMMC_DLL_DLYENA |
++		DLL_STRBIN_TAPNUM_DEFAULT |
++		DLL_STRBIN_TAPNUM_FROM_SW;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
++}
++
+ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+ 	.set_clock		= sdhci_set_clock,
+ 	.set_bus_width		= sdhci_set_bus_width,
+@@ -109,21 +234,91 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+ 	.adma_write_desc	= dwcmshc_adma_write_desc,
+ };
+ 
++static const struct sdhci_ops sdhci_dwcmshc_rk_ops = {
++	.set_clock		= dwcmshc_rk_set_clock,
++	.set_bus_width		= sdhci_set_bus_width,
++	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
++	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
++	.reset			= sdhci_reset,
++	.adma_write_desc	= dwcmshc_adma_write_desc,
++};
++
+ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+ 	.ops = &sdhci_dwcmshc_ops,
+ 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_dwcmshc_rk_pdata = {
++	.ops = &sdhci_dwcmshc_rk_ops,
++	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
++};
++
++static int rockchip_pltf_init(struct sdhci_host *host, struct dwcmshc_priv *priv)
++{
++	int err;
++
++	priv->rockchip_clks[0].id = "axi";
++	priv->rockchip_clks[1].id = "block";
++	priv->rockchip_clks[2].id = "timer";
++	err = devm_clk_bulk_get_optional(mmc_dev(host->mmc), ROCKCHIP_MAX_CLKS,
++					 priv->rockchip_clks);
++	if (err) {
++		dev_err(mmc_dev(host->mmc), "failed to get clocks %d\n", err);
++		return err;
++	}
++
++	err = clk_bulk_prepare_enable(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
++	if (err) {
++		dev_err(mmc_dev(host->mmc), "failed to enable clocks %d\n", err);
++		return err;
++	}
++
++	if (of_property_read_u32(mmc_dev(host->mmc)->of_node, "rockchip,txclk-tapnum",
++				 &priv->txclk_tapnum))
++		priv->txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT;
++
++	/* Disable cmd conflict check */
++	sdhci_writel(host, 0x0, DWCMSHC_HOST_CTRL3);
++	/* Reset previous settings */
++	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
++	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
++
++	return 0;
++}
++
++static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
++	{
++		.compatible = "snps,dwcmshc-sdhci",
++		.data = &sdhci_dwcmshc_pdata,
++	},
++	{
++		.compatible = "rockchip,dwcmshc-sdhci",
++		.data = &sdhci_dwcmshc_rk_pdata,
++	},
++	{},
++};
++MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
++
+ static int dwcmshc_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_host *host;
+ 	struct dwcmshc_priv *priv;
++	const struct sdhci_pltfm_data *pltfm_data;
+ 	int err;
+ 	u32 extra;
+ 
+-	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
++	pltfm_data = of_device_get_match_data(&pdev->dev);
++	if (!pltfm_data) {
++		dev_err(&pdev->dev, "Error: No device match data found\n");
++		return -ENODEV;
++	}
++
++	host = sdhci_pltfm_init(pdev, pltfm_data,
+ 				sizeof(struct dwcmshc_priv));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+@@ -161,6 +356,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 
+ 	host->mmc_host_ops.request = dwcmshc_request;
+ 
++	if (pltfm_data == &sdhci_dwcmshc_rk_pdata) {
++		host->mmc_host_ops.hs400_enhanced_strobe =
++			dwcmshc_rk_hs400_enhanced_strobe;
++
++		err = rockchip_pltf_init(host, priv);
++		if (err)
++			goto err_clk;
++	}
++
+ 	err = sdhci_add_host(host);
+ 	if (err)
+ 		goto err_clk;
+@@ -170,6 +374,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ err_clk:
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_disable_unprepare(priv->bus_clk);
++	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
+ free_pltfm:
+ 	sdhci_pltfm_free(pdev);
+ 	return err;
+@@ -185,6 +390,7 @@ static int dwcmshc_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_disable_unprepare(priv->bus_clk);
++	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
+ 
+ 	sdhci_pltfm_free(pdev);
+ 
+@@ -207,6 +413,8 @@ static int dwcmshc_suspend(struct device *dev)
+ 	if (!IS_ERR(priv->bus_clk))
+ 		clk_disable_unprepare(priv->bus_clk);
+ 
++	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
++
+ 	return ret;
+ }
+ 
+@@ -227,18 +435,16 @@ static int dwcmshc_resume(struct device *dev)
+ 			return ret;
+ 	}
+ 
++	ret = clk_bulk_prepare_enable(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
++	if (ret)
++		return ret;
++
+ 	return sdhci_resume_host(host);
+ }
+ #endif
+ 
+ static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
+ 
+-static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+-	{ .compatible = "snps,dwcmshc-sdhci" },
+-	{}
+-};
+-MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
+-
+ static struct platform_driver sdhci_dwcmshc_driver = {
+ 	.driver	= {
+ 		.name	= "sdhci-dwcmshc",
+-- 
+2.7.4
 
-Exactly.
 
-Many different commands can get pushed down to the card through the
-mmc ioctl interface. It's difficult to know what error path we should
-pick, other than reporting and propagating the error codes.
 
-[...]
-
-Kind regards
-Uffe
