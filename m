@@ -4,33 +4,33 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7809C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EF39C28CC4
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A0DD764E60
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3F97C64E62
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242412AbhCCBry (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:47:54 -0500
-Received: from mail.kernel.org ([198.145.29.99]:35616 "EHLO mail.kernel.org"
+        id S242845AbhCCBr6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:47:58 -0500
+Received: from mail.kernel.org ([198.145.29.99]:38996 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1446135AbhCBN2y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 Mar 2021 08:28:54 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id F370564F4D;
-        Tue,  2 Mar 2021 11:56:58 +0000 (UTC)
+        id S1384036AbhCBNwh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 Mar 2021 08:52:37 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B8CF964F84;
+        Tue,  2 Mar 2021 11:57:57 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614686219;
-        bh=cIkRF14zPcPSqpWRrh6YRDsCHvdb0fJJdHqgkrmKZvU=;
+        s=k20201202; t=1614686278;
+        bh=JNK95SdVhIVLOXU8nEZ/8IUZMewWsAmR59ci6jG+V2c=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=vF50CTG2UNOTiCEfRH96BRKfLw+6V5biCJ3LjLGW4YpB535K70+LeYEE8vm3WfJ/f
-         0orodGpno6ZeTxeaIjj8AyIedO9PCDidZ/zFwOUp+/0CY75QVRKUEI6EVkmUZB1VW3
-         AvdoX6ZvymKj8YOJg2xwUuDtccYfAcgWAhK8rPIb3TlEsFtOwni+ez1LnCYdkql05T
-         Lb/Gp/hM1lJ792iyVCZIl/20IAPm2LFpzpe8prg9RZm5dqgmFRmz1uBcuSVoLtyTAm
-         HD96ToggmOUYaQOp0lZbzyTkx3LigIhyxhMahp0RjRqqeinZcUSZaTlKFdeTSpf54n
-         0SVy1TPZeB3Uw==
+        b=IBpGvjhS/oWpV02faACmZPKn61sLqLi1Hh7GRiAaXZZCQMYJPWZArxRFAxx1JwYBz
+         mEzux85JXoC+Jt14M0OngS9+WsBAkPDgd7kft2UpzW6Wrj1PQUWkiIDzDsElIxUZ/N
+         MSr+EGikOfZjNWzb5BERACLpCrD682X+URIrwLaxdkwTwRAkVg+T2gz+lz5qFUpiZ/
+         Tl3LHW4PZJvx0uIks2m/qx8/nL7erXvOw4xa2pHNPis9JLbDj4as9RR31a/d1gYqt1
+         xDlbZkaMdVX3T/dqWyLn0WZNyKJPziOI5hPK4D2YRQ5oQkQOvThw0g3eIk/mGE3yae
+         s/qfFiNXV8oAg==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
@@ -38,12 +38,12 @@ Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org
-Subject: [PATCH AUTOSEL 5.10 10/47] mmc: mediatek: fix race condition between msdc_request_timeout and irq
-Date:   Tue,  2 Mar 2021 06:56:09 -0500
-Message-Id: <20210302115646.62291-10-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.4 06/33] mmc: mediatek: fix race condition between msdc_request_timeout and irq
+Date:   Tue,  2 Mar 2021 06:57:22 -0500
+Message-Id: <20210302115749.62653-6-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.1
-In-Reply-To: <20210302115646.62291-1-sashal@kernel.org>
-References: <20210302115646.62291-1-sashal@kernel.org>
+In-Reply-To: <20210302115749.62653-1-sashal@kernel.org>
+References: <20210302115749.62653-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -71,10 +71,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 10 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 004fbfc23672..dc84e2dff408 100644
+index 9d47a2bd2546..1254a5650cff 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -1101,13 +1101,13 @@ static void msdc_track_cmd_data(struct msdc_host *host,
+@@ -1020,13 +1020,13 @@ static void msdc_track_cmd_data(struct msdc_host *host,
  static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
  {
  	unsigned long flags;
@@ -94,7 +94,7 @@ index 004fbfc23672..dc84e2dff408 100644
  	spin_lock_irqsave(&host->lock, flags);
  	host->mrq = NULL;
  	spin_unlock_irqrestore(&host->lock, flags);
-@@ -1129,7 +1129,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+@@ -1046,7 +1046,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
  	bool done = false;
  	bool sbc_error;
  	unsigned long flags;
@@ -103,7 +103,7 @@ index 004fbfc23672..dc84e2dff408 100644
  
  	if (mrq->sbc && cmd == mrq->cmd &&
  	    (events & (MSDC_INT_ACMDRDY | MSDC_INT_ACMDCRCERR
-@@ -1150,6 +1150,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+@@ -1067,6 +1067,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
  
  	if (done)
  		return true;
@@ -111,7 +111,7 @@ index 004fbfc23672..dc84e2dff408 100644
  
  	sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
  
-@@ -1337,7 +1338,7 @@ static void msdc_data_xfer_next(struct msdc_host *host,
+@@ -1254,7 +1255,7 @@ static void msdc_data_xfer_next(struct msdc_host *host,
  static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
  				struct mmc_request *mrq, struct mmc_data *data)
  {
@@ -120,7 +120,7 @@ index 004fbfc23672..dc84e2dff408 100644
  	unsigned long flags;
  	bool done;
  	unsigned int check_data = events &
-@@ -1353,6 +1354,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+@@ -1270,6 +1271,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
  
  	if (done)
  		return true;
