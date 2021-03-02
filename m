@@ -2,132 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8DB1C43142
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9174FC4361B
 	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 737E161606
+	by mail.kernel.org (Postfix) with ESMTP id 4898564E66
 	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242355AbhCCBrx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:47:53 -0500
-Received: from mail.kernel.org ([198.145.29.99]:33728 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1446110AbhCBNNm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 Mar 2021 08:13:42 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 937C564FD2;
-        Tue,  2 Mar 2021 11:59:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614686379;
-        bh=Z5V6QxlYbSnVGsT/Zskji+exXNBQu9FvWIp6KdSxNg4=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=WN+TQSR8iCEBG9jWle9TwfWfHnKAk3Rcvyttxyez9JSD/msMSmyw++k+Pd0DGnA7I
-         w61hK4pvGc2HAR5oE3K55s+w+J/2uJKfb9aAx/+7/aT9e99xRjFWVI43+zz9z8EDhW
-         iMY0uodzNcCwJD4OL+i/rb33AmiehAL42H+28gsMDb2z/fxlizkQLcAFalayYE/Tui
-         Cftnet43GPQZrVV7i7ZHvsshDOM+vgRgcBQPnpQdfLuOT4jVWgnVc8aIoSmbCr+8mg
-         khA3htVcmxmKkkCOSVrMW+tRms22zPL4nAy8bnBZ0akHlnnwEhf2w08aAT9sde+ro9
-         gyvqdXuPDb0LA==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org
-Subject: [PATCH AUTOSEL 4.4 2/8] mmc: mediatek: fix race condition between msdc_request_timeout and irq
-Date:   Tue,  2 Mar 2021 06:59:29 -0500
-Message-Id: <20210302115935.63777-2-sashal@kernel.org>
-X-Mailer: git-send-email 2.30.1
-In-Reply-To: <20210302115935.63777-1-sashal@kernel.org>
-References: <20210302115935.63777-1-sashal@kernel.org>
+        id S241279AbhCCBrw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:47:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42836 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1447014AbhCBMly (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 07:41:54 -0500
+Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12ECAC0611C1
+        for <linux-mmc@vger.kernel.org>; Tue,  2 Mar 2021 04:41:08 -0800 (PST)
+Received: by mail-vs1-xe33.google.com with SMTP id b6so10498051vsf.8
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Mar 2021 04:41:08 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=8FA0+xDkpxWpMTD6/VNtezp6e2q2PIvD54UVdpD6N/k=;
+        b=eAYWvB2fbTL7xQgjImFyAVq47B8XROotdRd9UQW/zhAg5SPZocGLjbpJP71Y1jWqZn
+         clCZOrJtqn+o9fSfk+OGPZ2c55ErdCH6OsG49QlOSvdQzFS0bAeTTM70+pVmbIwcP2Yq
+         ik9FfyKHRVqP5PTqTS+K2dLz9Lm28b8j8n8ItsyFRnZWRN4t5vdc79mHWdKQ4byBm70u
+         milP4MsNXTXFqZZntJ4oxrXOXO050MqcvVSaiXOef2DXZ5OGdktPRUxpdVuDjDeU04V0
+         uk5fp4/SLWvuNd1uc5yOIgO1oC0BEs136JdJb9gaxcEjtLRlc49lbo8ysqCa0CXswyM9
+         jEnQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=8FA0+xDkpxWpMTD6/VNtezp6e2q2PIvD54UVdpD6N/k=;
+        b=mv2H51kgchH4gipM2BV2GQxfGmW0zVqgL6H5XH9SaGPWX0R0j2+dAEWjQVQ7vQuE2N
+         oe/GGAcloo9q75Z3AwXHNljWGuISWbLs29Gvlc3zVBamg/1oEVoUwhRCZYNsuoZAQH+/
+         CJCZO63l0vvLER7tosGtGNd0rkbzT7sJ5QALPELn9aU7X17erYw0Do6Dcc0MfLGjStxa
+         HdQ+eoWAaagbAVLY5HAZFliXSGXTl19bwiwff9i8HRBmm/RvP12qfnaSQVMNKFmVrJJG
+         qaEk6Qb/FN6wh+18BGeVpw43WgmrjD7YKWnnV65aM6f0t3IGaCL3KyqOBDkSmPSc4tNL
+         kO6w==
+X-Gm-Message-State: AOAM533JOhH14YwiJXubAJO9oWCnClh6GKjtWi79BCQqw+JfUwaTybYP
+        W99gnLy7bmRqBRbpIam9pG+VAJWEUMqjWjXpvpn63Q==
+X-Google-Smtp-Source: ABdhPJy36yv7rZG1Hq9VCXSpJ+QrpfcEaWmsdvckuxrX6gCuYFzdjWMXC2BLkUw9NQWF10uqG3A49GSCNOS2Gfx+kFo=
+X-Received: by 2002:a67:8c6:: with SMTP id 189mr1797005vsi.55.1614688867294;
+ Tue, 02 Mar 2021 04:41:07 -0800 (PST)
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+References: <20210302024557.4868-1-peng.zhou@mediatek.com> <YD3OFkjS8a6EUOHM@google.com>
+In-Reply-To: <YD3OFkjS8a6EUOHM@google.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 2 Mar 2021 13:40:31 +0100
+Message-ID: <CAPDyKFp9Uu69i7_0rDm2=c26GCagkjyuzp=avdVd2RcpoC2ZYA@mail.gmail.com>
+Subject: Re: [PATCH 1/4] mmc: mediatek: add Inline Crypto Engine support
+To:     Satya Tangirala <satyat@google.com>,
+        Peng Zhou <peng.zhou@mediatek.com>
+Cc:     Eric Biggers <ebiggers@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Wulin Li <wulin.li@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Chaotian Jing <chaotian.jing@mediatek.com>
+On Tue, 2 Mar 2021 at 06:33, Satya Tangirala <satyat@google.com> wrote:
+>
+> On Tue, Mar 02, 2021 at 10:45:57AM +0800, Peng Zhou wrote:
+> > - add crypto clock control and ungate it before CQHCI init
+> > - set MMC_CAP2_CRYPTO property of eMMC
+> >
+> > Signed-off-by: Peng Zhou <peng.zhou@mediatek.com>
+> > ---
+> >  drivers/mmc/host/mtk-sd.c | 17 +++++++++++++++--
+> >  1 file changed, 15 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > index de09c6347524..1a5894ec551f 100644
+> > --- a/drivers/mmc/host/mtk-sd.c
+> > +++ b/drivers/mmc/host/mtk-sd.c
+> > @@ -442,6 +442,7 @@ struct msdc_host {
+> >       struct clk *src_clk_cg; /* msdc source clock control gate */
+> >       struct clk *sys_clk_cg; /* msdc subsys clock control gate */
+> >       struct clk_bulk_data bulk_clks[MSDC_NR_CLOCKS];
+> > +     struct clk *crypto_clk; /* msdc crypto clock */
+> >       u32 mclk;               /* mmc subsystem clock frequency */
+> >       u32 src_clk_freq;       /* source clock frequency */
+> >       unsigned char timing;
+> > @@ -802,6 +803,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
+> >
+> >  static void msdc_gate_clock(struct msdc_host *host)
+> >  {
+> > +     clk_disable_unprepare(host->crypto_clk);
+> >       clk_bulk_disable_unprepare(MSDC_NR_CLOCKS, host->bulk_clks);
+> >       clk_disable_unprepare(host->src_clk_cg);
+> >       clk_disable_unprepare(host->src_clk);
+> > @@ -822,7 +824,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
+> >               dev_err(host->dev, "Cannot enable pclk/axi/ahb clock gates\n");
+> >               return;
+> >       }
+> > -
+> > +     clk_prepare_enable(host->crypto_clk);
+> >       while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+> >               cpu_relax();
+> >  }
+> > @@ -2510,6 +2512,16 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> >               goto host_free;
+> >       }
+> >
+> > +     /* only eMMC has crypto property */
+> > +     if ((mmc->caps2 & MMC_CAP2_NO_SD) &&
+> > +         (mmc->caps2 & MMC_CAP2_NO_SDIO)) {
+> > +             host->crypto_clk = devm_clk_get(&pdev->dev, "crypto");
+> > +             if (IS_ERR(host->crypto_clk))
+> > +                     host->crypto_clk = NULL;
+> > +             else
+> > +                     mmc->caps2 |= MMC_CAP2_CRYPTO;
+> > +     }
+> > +
+> >       host->irq = platform_get_irq(pdev, 0);
+> >       if (host->irq < 0) {
+> >               ret = -EINVAL;
+> > @@ -2580,6 +2592,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> >               host->dma_mask = DMA_BIT_MASK(32);
+> >       mmc_dev(mmc)->dma_mask = &host->dma_mask;
+> >
+> > +     /* here ungate due to cqhci init will access registers */
+> > +     msdc_ungate_clock(host);
+> >       if (mmc->caps2 & MMC_CAP2_CQE) {
+> >               host->cq_host = devm_kzalloc(mmc->parent,
+> >                                            sizeof(*host->cq_host),
+> > @@ -2616,7 +2630,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> >       spin_lock_init(&host->lock);
+> >
+> >       platform_set_drvdata(pdev, mmc);
+> > -     msdc_ungate_clock(host);
+> >       msdc_init_hw(host);
+> >
+> >       ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> > --
+> > 2.18.0
+> Somehow I can't apply this patch using git am. It looks like the mail
+> isn't completely plain text (there's some html it seems), which may be
+> why git am is complaining.
 
-[ Upstream commit 0354ca6edd464a2cf332f390581977b8699ed081 ]
+I assume this is why patchwork didn't accept them. Please re-post in
+plain/text and use "git send-email".
 
-when get request SW timeout, if CMD/DAT xfer done irq coming right now,
-then there is race between the msdc_request_timeout work and irq handler,
-and the host->cmd and host->data may set to NULL in irq handler. also,
-current flow ensure that only one path can go to msdc_request_done(), so
-no need check the return value of cancel_delayed_work().
-
-Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
-Link: https://lore.kernel.org/r/20201218071611.12276-1-chaotian.jing@mediatek.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/mtk-sd.c | 18 ++++++++++--------
- 1 file changed, 10 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 5ef25463494f..1770c8df9d1b 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -720,13 +720,13 @@ static void msdc_track_cmd_data(struct msdc_host *host,
- static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
- {
- 	unsigned long flags;
--	bool ret;
- 
--	ret = cancel_delayed_work(&host->req_timeout);
--	if (!ret) {
--		/* delay work already running */
--		return;
--	}
-+	/*
-+	 * No need check the return value of cancel_delayed_work, as only ONE
-+	 * path will go here!
-+	 */
-+	cancel_delayed_work(&host->req_timeout);
-+
- 	spin_lock_irqsave(&host->lock, flags);
- 	host->mrq = NULL;
- 	spin_unlock_irqrestore(&host->lock, flags);
-@@ -747,7 +747,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 	bool done = false;
- 	bool sbc_error;
- 	unsigned long flags;
--	u32 *rsp = cmd->resp;
-+	u32 *rsp;
- 
- 	if (mrq->sbc && cmd == mrq->cmd &&
- 	    (events & (MSDC_INT_ACMDRDY | MSDC_INT_ACMDCRCERR
-@@ -768,6 +768,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 
- 	if (done)
- 		return true;
-+	rsp = cmd->resp;
- 
- 	sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
- 
-@@ -942,7 +943,7 @@ static void msdc_data_xfer_next(struct msdc_host *host,
- static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 				struct mmc_request *mrq, struct mmc_data *data)
- {
--	struct mmc_command *stop = data->stop;
-+	struct mmc_command *stop;
- 	unsigned long flags;
- 	bool done;
- 	unsigned int check_data = events &
-@@ -958,6 +959,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
- 
- 	if (done)
- 		return true;
-+	stop = data->stop;
- 
- 	if (check_data || (stop && stop->error)) {
- 		dev_dbg(host->dev, "DMA status: 0x%8X\n",
--- 
-2.30.1
-
+Kind regards
+Uffe
