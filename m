@@ -7,44 +7,41 @@ X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D240AC4332B
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A675BC4321A
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C7A364E60
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7AC5F64E66
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239781AbhCCBrU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:47:20 -0500
-Received: from mail.kernel.org ([198.145.29.99]:44118 "EHLO mail.kernel.org"
+        id S241358AbhCCBri (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:47:38 -0500
+Received: from mail.kernel.org ([198.145.29.99]:49000 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1383818AbhCBMLd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 2 Mar 2021 07:11:33 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 4904F64F56;
-        Tue,  2 Mar 2021 11:57:00 +0000 (UTC)
+        id S1349127AbhCBM3J (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 Mar 2021 07:29:09 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 9895864FC5;
+        Tue,  2 Mar 2021 11:59:24 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1614686221;
-        bh=ErfQwjmd8r4+acZhXc+ggYrttmA12hddJQe7yT8J+dY=;
+        s=k20201202; t=1614686365;
+        bh=XQ2zSEW/W21CTzIhc5QdKoiwCXhCc8zccWUX161ff7M=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=bp03qdLa0EpKBNodBNH341Dc0btecAQEzuoC2s8mxnkrIy060Y16HfGdaftls+X2D
-         VPmjcmGcjzg0XBN2X/vORk7HiEh3kFU4LxRRhbfJIJjdm1oeDfhuNAZLOjEqGgs4zF
-         BgxNSm29M9mHjjckFwYgKVMeqprtfB6S76DYHVxUFU8TQyfNGXe8UpR8smykMgEzTx
-         PLOnaonNoGeeGDU0u6n061dA6EzkJSed44zdvS8xYzEleTgsvxF6f3AnyVqucAqIhO
-         sF8RtMBgfR4Ak2NraDM5eXWsVR1WOd9agcVxyktRvQ7eAhnW26WkV0q7zjDRgMTMLn
-         SA2V+ANViCO1w==
+        b=jEuPY4//gDCoR/92+fpkQmYSrDO2VOvPULLx/BFhG+cnFYK1yAAB7/nF88b6t0Jb2
+         GSzXb2IwyVjF5/fbKbYElcst1C7wMKCqGDWFAui7sLKrpte7bFLq+tXaKzSTH7R6cN
+         G/mkqj9UW5vflYF0SCJw37EXN0j152uebOm/j1QWGDbEgPQemOTVePmLCrpDoqcDSd
+         5OQp/cEZMcf3f9DZ20MCO2QwpX2M/QmwQcH+BYyVjReqgthqEvRehkeIRotGhpVSUz
+         /IKyEVAQM5B1K+yIHpLlRErDw4u6eZxH5Rj9/zy9o2uQK02wZFxWlO5AEg1hShMr6D
+         sWn/3gVm/0V7Q==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Jeremy Linton <jeremy.linton@arm.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
+Cc:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        bcm-kernel-feedback-list@broadcom.com
-Subject: [PATCH AUTOSEL 5.10 11/47] mmc: sdhci-iproc: Add ACPI bindings for the RPi
-Date:   Tue,  2 Mar 2021 06:56:10 -0500
-Message-Id: <20210302115646.62291-11-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 4.9 02/10] mmc: mxs-mmc: Fix a resource leak in an error handling path in 'mxs_mmc_probe()'
+Date:   Tue,  2 Mar 2021 06:59:13 -0500
+Message-Id: <20210302115921.63636-2-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.1
-In-Reply-To: <20210302115646.62291-1-sashal@kernel.org>
-References: <20210302115646.62291-1-sashal@kernel.org>
+In-Reply-To: <20210302115921.63636-1-sashal@kernel.org>
+References: <20210302115921.63636-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -53,63 +50,34 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Jeremy Linton <jeremy.linton@arm.com>
+From: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 
-[ Upstream commit 4f9833d3ec8da34861cd0680b00c73e653877eb9 ]
+[ Upstream commit 0bb7e560f821c7770973a94e346654c4bdccd42c ]
 
-The RPi4 has an Arasan controller it carries over from the RPi3 and a newer
-eMMC2 controller.  Because of a couple of quirks, it seems wiser to bind
-these controllers to the same driver that DT is using on this platform
-rather than the generic sdhci_acpi driver with PNP0D40.
+If 'mmc_of_parse()' fails, we must undo the previous 'dma_request_chan()'
+call.
 
-So, BCM2847 describes the older Arasan and BRCME88C describes the newer
-eMMC2. The older Arasan is reusing an existing ACPI _HID used by other OSes
-booting these tables on the RPi.
-
-With this change, Linux is capable of utilizing the SD card slot, and the
-Wi-Fi when booted with UEFI+ACPI on the RPi4.
-
-Signed-off-by: Jeremy Linton <jeremy.linton@arm.com>
-Acked-by: Florian Fainelli <f.fainelli@gmail.com>
-Link: https://lore.kernel.org/r/20210120000406.1843400-2-jeremy.linton@arm.com
+Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Link: https://lore.kernel.org/r/20201208203527.49262-1-christophe.jaillet@wanadoo.fr
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-iproc.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ drivers/mmc/host/mxs-mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index c9434b461aab..ddeaf8e1f72f 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -296,9 +296,27 @@ static const struct of_device_id sdhci_iproc_of_match[] = {
- MODULE_DEVICE_TABLE(of, sdhci_iproc_of_match);
+diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+index c8b8ac66ff7e..687fd68fbbcd 100644
+--- a/drivers/mmc/host/mxs-mmc.c
++++ b/drivers/mmc/host/mxs-mmc.c
+@@ -651,7 +651,7 @@ static int mxs_mmc_probe(struct platform_device *pdev)
  
- #ifdef CONFIG_ACPI
-+/*
-+ * This is a duplicate of bcm2835_(pltfrm_)data without caps quirks
-+ * which are provided by the ACPI table.
-+ */
-+static const struct sdhci_pltfm_data sdhci_bcm_arasan_data = {
-+	.quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
-+		  SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-+		  SDHCI_QUIRK_NO_HISPD_BIT,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.ops = &sdhci_iproc_32only_ops,
-+};
-+
-+static const struct sdhci_iproc_data bcm_arasan_data = {
-+	.pdata = &sdhci_bcm_arasan_data,
-+};
-+
- static const struct acpi_device_id sdhci_iproc_acpi_ids[] = {
- 	{ .id = "BRCM5871", .driver_data = (kernel_ulong_t)&iproc_cygnus_data },
- 	{ .id = "BRCM5872", .driver_data = (kernel_ulong_t)&iproc_data },
-+	{ .id = "BCM2847",  .driver_data = (kernel_ulong_t)&bcm_arasan_data },
-+	{ .id = "BRCME88C", .driver_data = (kernel_ulong_t)&bcm2711_data },
- 	{ /* sentinel */ }
- };
- MODULE_DEVICE_TABLE(acpi, sdhci_iproc_acpi_ids);
+ 	ret = mmc_of_parse(mmc);
+ 	if (ret)
+-		goto out_clk_disable;
++		goto out_free_dma;
+ 
+ 	mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
+ 
 -- 
 2.30.1
 
