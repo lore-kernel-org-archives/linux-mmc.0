@@ -4,155 +4,278 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9201EC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44F14C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 425C464E62
+	by mail.kernel.org (Postfix) with ESMTP id F299364E60
 	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238625AbhCCBqi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:46:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44952 "EHLO
+        id S238814AbhCCBqt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:46:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349604AbhCBKml (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 05:42:41 -0500
-Received: from mail-vk1-xa32.google.com (mail-vk1-xa32.google.com [IPv6:2607:f8b0:4864:20::a32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A204C061A29
-        for <linux-mmc@vger.kernel.org>; Tue,  2 Mar 2021 02:40:39 -0800 (PST)
-Received: by mail-vk1-xa32.google.com with SMTP id j188so4291677vke.13
-        for <linux-mmc@vger.kernel.org>; Tue, 02 Mar 2021 02:40:39 -0800 (PST)
+        with ESMTP id S1383168AbhCBKrU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 05:47:20 -0500
+Received: from mail-vk1-xa36.google.com (mail-vk1-xa36.google.com [IPv6:2607:f8b0:4864:20::a36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2AD59C061756
+        for <linux-mmc@vger.kernel.org>; Tue,  2 Mar 2021 02:46:39 -0800 (PST)
+Received: by mail-vk1-xa36.google.com with SMTP id j188so4294826vke.13
+        for <linux-mmc@vger.kernel.org>; Tue, 02 Mar 2021 02:46:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=bs3aFYj5lDwWpMkhgX+vmRNoLw6eyqE+e72Cvwu8vBk=;
-        b=ToEs2IVLIl0MtkeQXFndYK8lCO+lXPNZFM3errsVl5pQqRpY7LrHelfh1FFvgGvYBp
-         0gqhijGNEGXqGl1T0K3/N53d2mVVhXeaWYSsgjhT0ZJzpG+gmbmT0JurcWaSyaLzZOpi
-         8LtvYAq81Q0DpIEah8otXb8gryswM8KFpelDADsolgqYkV+SShg5kbE4U3XUY0EApSrQ
-         3ACWW+2qOPu7/FPnQEYQSD5qTWBDNJK3NXXin6TA3Jnlob3mJwpewe7AdubCXb17Sv/R
-         jXQ9Kyl7aRiV1woyMDdsjBe5eH1Ek7fdZm2YUp9wVd9kpx2c/LRFDYHT+WRT2gyT/F4E
-         FF7w==
+        bh=ef2O5NL0Jf/SRcnD4ZQcM2BLQkBkWgDo+EABNwcEgQQ=;
+        b=famOJKdlx+UgKQfiiMCahDIqboeS5/AwttgLlvF4FmUgRqusCcztXGTTaeBWPNwAeZ
+         ERRMW6QNNYL+VV+aKS9Yw2dWodpkMZ9jGpCXkOK1NuvC5mP2ReEzuR/GLV4OA76DIvSh
+         +DwttiBCZRziMKWu0SzS6rcpwpKSMlott2irTrJSOPpholxqAXDbXHwJGHjr96XpfUE/
+         iJHdW+hqU5DltrC7QCTirLL6LiBDv3ZLRX86d0Tdi25k0dZWSf1IwSqUJEZs+56cR+Bp
+         EA5ktx+ZgegT1XPw7yEFwLjxbtX5Cw+PlDRAygQqCb3bOl9eQ9r+mfznvkkH0Di+5Lwo
+         eOnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=bs3aFYj5lDwWpMkhgX+vmRNoLw6eyqE+e72Cvwu8vBk=;
-        b=bYTz+67pW+L+2vvQ5ZLayYwpkkR0cpLSuX9dMPTaKW1VgsFC+xPEmufHXM9eyreq+F
-         FD+GEPquWd0LoWqT3aVRXV/TETtiZeHVHF7IzL84u5CaztnFRlQFTERR2npr2suNQ+hG
-         drVJwThk2FsTLyfvht97ywKitzDEk00ZBOig/saJotByPEcngGoJhfzCqpQXfL5Uk0Nb
-         lB/bbX+bHjcZ89iHurUwh1GIPCRBylzC9+fPEJd9Tb9ArI+257mlWzsNIeBBuRl+b+nJ
-         wXOj35LWDVqjIUZtLgWwuC93KksYm9gmmM0ezzpx2bO1urRXKR7SlIkc4uc4E2B/pRN4
-         A1rg==
-X-Gm-Message-State: AOAM530UR3HSrWBsOGwXYM81Cl6d7r2n65T4a4sIMxC6tNrD6pVAFat7
-        meLE4p60z3W4zjmH/2buPgAWX2l11+v/9xv8BpXFzw==
-X-Google-Smtp-Source: ABdhPJxYFL17WoK6xDGbyRm9sJUh1M3Fmjg8cvD8NbL+WhqWEHetCeB7mvwoOHS5jK5CbyPdRi8GrPSEvMZdOOHYOu0=
-X-Received: by 2002:a1f:a68d:: with SMTP id p135mr1850179vke.6.1614681638153;
- Tue, 02 Mar 2021 02:40:38 -0800 (PST)
+        bh=ef2O5NL0Jf/SRcnD4ZQcM2BLQkBkWgDo+EABNwcEgQQ=;
+        b=S8Gr/xVrvalX7VqqsRr1IFV78NUrf/IHDjEBdyv9cLA2HMko9OuSF0UaLE3yIAZnjV
+         XisD1o/kmZdxSy694a+BqK5Ykz8aZBRK6pgeaX6nsBJfQmHanI2Jj0dAFKOrtFDGXdyw
+         pjW1B8kqWag1oWexoQzm48+hbdAUBAkk8+Wz0D9HpQpqpPr3ClDXlWAe1AtKHWF569Tj
+         bulhfLQxmlO6BywC4fLAXI+rub7PzERZMIJvSyDsFUKNagZ4ACJ7dyjInv+Hp81vPqma
+         i5MGeb8gRHaL3Wgo9U57oB7FIi+TI1VpFNFfUzN7wNQFoEkBoKL0rHA+1DLqIoLGRpXc
+         g+xQ==
+X-Gm-Message-State: AOAM5322nBPfCVEf9UqNKWDf0WuJ7lAZ9qOWmCztxcQOs38tepZkhbVi
+        +uLIuJXwEs6zzU/rvdCmce9hfItUSrQX2KrYHGAL2Q==
+X-Google-Smtp-Source: ABdhPJy1RoI+P6DlS4SxWqy8KSOQ/Tn5qyIUdL/+aV/m6/WFfzv0Bc/lRV5U8HFtTb0pi5UBEspCt9doY3PZkLWQFmg=
+X-Received: by 2002:a05:6122:7c7:: with SMTP id l7mr1417814vkr.6.1614681998332;
+ Tue, 02 Mar 2021 02:46:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20210225145454.12780-1-yann.gautier@foss.st.com>
-In-Reply-To: <20210225145454.12780-1-yann.gautier@foss.st.com>
+References: <20210215003249.GA12303@lupo-laptop>
+In-Reply-To: <20210215003249.GA12303@lupo-laptop>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 2 Mar 2021 11:40:02 +0100
-Message-ID: <CAPDyKFo-98OWNg4QJ1cgY2QwYFB9d-6tVrMs0RYt6-=cU3-73w@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmci: manage MMC_CAP_NEED_RSP_BUSY for stm32 variant
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Russell King <linux@armlinux.org.uk>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@st.com>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        =?UTF-8?B?TWFyZWsgVmHFoXV0?= <marex@denx.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
+Date:   Tue, 2 Mar 2021 11:46:02 +0100
+Message-ID: <CAPDyKFou4VdtUV66-c8y_tV9g9oaUCa8nphsLW6gH0_bi7y_dA@mail.gmail.com>
+Subject: Re: [RFC PATCH 2/2] Make cmdq_en attribute writeable
+To:     Luca Porzio <porzio@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Zhan Liu <zliua@micron.com>, Luca Porzio <lporzio@micron.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 25 Feb 2021 at 15:55, Yann Gautier <yann.gautier@foss.st.com> wrote:
++ Adrian
+
+On Mon, 15 Feb 2021 at 01:33, Luca Porzio <porzio@gmail.com> wrote:
 >
-> To properly manage commands awaiting R1B responses, the capability
-> MMC_CAP_NEED_RSP_BUSY is enabled in mmci driver, for stm32 variant.
-> The issue was seen on STM32MP157C-EV1 board, with an erase command,
-> with secure erase argument, letting the card stuck, possibly waiting
-> for 4 hours before timeout.
+> cmdq_en attribute in sysfs now can now be written.
+> When 0 is written:
+>   CMDQ is disabled and kept disabled across device reboots.
+> When 1 is written:
+>   CMDQ mode is instantly reneabled (if supported).
 >
-> Fixes: 94fe2580a2f3 ("mmc: core: Enable erase/discard/trim support for all mmc hosts")
->
-> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> Signed-off-by: Luca Porzio <lporzio@micron.com>
+> Signed-off-by: Zhan Liu <zliua@micron.com>
+
+Luca, thanks for your patch! I am about to start to review this.
+
+I have also looped in Adrian to get his opinions.
+
+Get back to you soon!
+
+Kind regards
+Uffe
+
 > ---
-> This is somehow a v2 for patch [1].
-> Changes:
-> - Only apply MMC_CAP_NEED_RSP_BUSY to stm32 variant
-> - Cap the used timeout written to MMCIDATATIMER (when using
-> MMC_CAP_NEED_RSP_BUSY, cmd->busy_timeout may be greater than
-> host->max_busy_timeout)
+>  drivers/mmc/core/mmc.c   | 152 ++++++++++++++++++++++++++++++---------
+>  include/linux/mmc/card.h |   1 +
+>  2 files changed, 118 insertions(+), 35 deletions(-)
 >
->  [1] https://patchwork.kernel.org/project/linux-mmc/patch/20210204120547.15381-2-yann.gautier@foss.st.com/
->
->  drivers/mmc/host/mmci.c             | 8 +++++++-
->  drivers/mmc/host/mmci_stm32_sdmmc.c | 1 +
->  2 files changed, 8 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 17dbc81c221e..89e0e9ccfb71 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1242,7 +1242,13 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
->                 if (!cmd->busy_timeout)
->                         cmd->busy_timeout = 10 * MSEC_PER_SEC;
->
-> -               clks = (unsigned long long)cmd->busy_timeout * host->cclk;
-> +               if (host->mmc->caps & MMC_CAP_NEED_RSP_BUSY &&
-> +                   host->mmc->max_busy_timeout &&
-> +                   cmd->busy_timeout > host->mmc->max_busy_timeout)
-
-We are already within "if (host->variant->busy_timeout ....", a few
-lines above, which means this can be simplified into:
-
-if (cmd->busy_timeout > host->mmc->max_busy_timeout)
-
-> +                       clks = (unsigned long long)host->mmc->max_busy_timeout * host->cclk;
-> +               else
-> +                       clks = (unsigned long long)cmd->busy_timeout * host->cclk;
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 0d80b72ddde8..5c7d5bac5c00 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -794,7 +794,120 @@ MMC_DEV_ATTR(enhanced_rpmb_supported, "%#x\n",
+>  MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
+>  MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr);
+>  MMC_DEV_ATTR(rca, "0x%04x\n", card->rca);
+> -MMC_DEV_ATTR(cmdq_en, "%d\n", card->ext_csd.cmdq_en);
 > +
->                 do_div(clks, MSEC_PER_SEC);
->                 writel_relaxed(clks, host->base + MMCIDATATIMER);
->         }
-> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> index 51db30acf4dc..2ad577618324 100644
-> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> @@ -522,6 +522,7 @@ void sdmmc_variant_init(struct mmci_host *host)
+> +
+> +/* Setup command queue mode and CQE if underling hw supports it
+> + * and assuming force_disable_cmdq has not been set.
+> + */
+> +static int mmc_cmdq_setup(struct mmc_host *host, struct mmc_card *card)
+> +{
+> +       int err;
+> +
+> +       /* Check HW support */
+> +       if (!card->ext_csd.cmdq_support || !(host->caps2 & MMC_CAP2_CQE))
+> +               card->force_disable_cmdq = true;
+> +
+> +       /* Enable/Disable  CMDQ mode */
+> +       if (!card->ext_csd.cmdq_en && !card->force_disable_cmdq) {
+> +               err = mmc_cmdq_enable(card);
+> +               if (err && err != -EBADMSG)
+> +                       return err;
+> +               if (err) {
+> +                       pr_warn("%s: Enabling CMDQ failed\n",
+> +                           mmc_hostname(card->host));
+> +                       card->ext_csd.cmdq_support = false;
+> +                       card->ext_csd.cmdq_depth = 0;
+> +               }
+> +
+> +       } else if (card->ext_csd.cmdq_en && card->force_disable_cmdq) {
+> +               err = mmc_cmdq_disable(card);
+> +               if (err) {
+> +                       pr_warn("%s: Disabling CMDQ failed, error %d\n",
+> +                           mmc_hostname(card->host), err);
+> +                       err = 0;
+> +               }
+> +       }
+> +
+> +       /*
+> +        * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
+> +        * disabled for a time, so a flag is needed to indicate to re-enable the
+> +        * Command Queue.
+> +        */
+> +       card->reenable_cmdq = card->ext_csd.cmdq_en;
+> +
+> +       /* Enable/Disable Host CQE */
+> +       if (!card->force_disable_cmdq) {
+> +
+> +               if (host->cqe_ops && !host->cqe_enabled) {
+> +                       err = host->cqe_ops->cqe_enable(host, card);
+> +                       if (!err) {
+> +                               host->cqe_enabled = true;
+> +
+> +                               if (card->ext_csd.cmdq_en) {
+> +                                       pr_info("%s: Command Queue Engine enabled\n",
+> +                                           mmc_hostname(host));
+> +                               } else {
+> +                                       host->hsq_enabled = true;
+> +                                       pr_info("%s: Host Software Queue enabled\n",
+> +                                           mmc_hostname(host));
+> +                               }
+> +                       }
+> +               }
+> +
+> +       } else {
+> +
+> +               if (host->cqe_enabled) {
+> +                       host->cqe_ops->cqe_disable(host);
+> +                       host->cqe_enabled = false;
+> +                       pr_info("%s: Command Queue Engine disabled\n",
+> +                           mmc_hostname(host));
+> +               }
+> +
+> +               host->hsq_enabled = false;
+> +               err = 0;
+> +       }
+> +
+> +       return err;
+> +}
+> +
+> +
+> +static ssize_t cmdq_en_show(struct device *dev, struct device_attribute *attr, char *buf)
+> +{
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +
+> +       return sprintf(buf, "%d\n", card->ext_csd.cmdq_en);
+> +}
+> +
+> +static ssize_t cmdq_en_store(struct device *dev, struct device_attribute *attr,
+> +                                const char *buf, size_t count)
+> +{
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +       struct mmc_host *host = card->host;
+> +       unsigned long enable;
+> +       int err;
+> +
+> +       if (!card || kstrtoul(buf, 0, &enable))
+> +               return -EINVAL;
+> +       if (!card->ext_csd.cmdq_support)
+> +               return -EOPNOTSUPP;
+> +
+> +       enable = !!enable;
+> +       if (enable == card->ext_csd.cmdq_en)
+> +               return count;
+> +
+> +       mmc_get_card(card, NULL);
+> +       card->force_disable_cmdq = !enable;
+> +       err = mmc_cmdq_setup(host, card);
+> +       mmc_put_card(card, NULL);
+> +
+> +       if (err)
+> +               return err;
+> +       else
+> +               return count;
+> +}
+> +
+> +static DEVICE_ATTR_RW(cmdq_en);
+> +
 >
->         host->ops = &sdmmc_variant_ops;
->         host->pwr_reg = readl_relaxed(host->base + MMCIPOWER);
-> +       host->mmc->caps |= MMC_CAP_NEED_RSP_BUSY;
-
-To make it more clear that this is for variants having the
-->busy_timeout flag set, I suggest to move this into mmci_probe().
-
+>  static ssize_t mmc_fwrev_show(struct device *dev,
+>                               struct device_attribute *attr,
+> @@ -1838,40 +1951,9 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>          * Enable Command Queue if supported. Note that Packed Commands cannot
+>          * be used with Command Queue.
+>          */
+> -       card->ext_csd.cmdq_en = false;
+> -       if (card->ext_csd.cmdq_support && host->caps2 & MMC_CAP2_CQE) {
+> -               err = mmc_cmdq_enable(card);
+> -               if (err && err != -EBADMSG)
+> -                       goto free_card;
+> -               if (err) {
+> -                       pr_warn("%s: Enabling CMDQ failed\n",
+> -                               mmc_hostname(card->host));
+> -                       card->ext_csd.cmdq_support = false;
+> -                       card->ext_csd.cmdq_depth = 0;
+> -               }
+> -       }
+> -       /*
+> -        * In some cases (e.g. RPMB or mmc_test), the Command Queue must be
+> -        * disabled for a time, so a flag is needed to indicate to re-enable the
+> -        * Command Queue.
+> -        */
+> -       card->reenable_cmdq = card->ext_csd.cmdq_en;
+> -
+> -       if (host->cqe_ops && !host->cqe_enabled) {
+> -               err = host->cqe_ops->cqe_enable(host, card);
+> -               if (!err) {
+> -                       host->cqe_enabled = true;
+> -
+> -                       if (card->ext_csd.cmdq_en) {
+> -                               pr_info("%s: Command Queue Engine enabled\n",
+> -                                       mmc_hostname(host));
+> -                       } else {
+> -                               host->hsq_enabled = true;
+> -                               pr_info("%s: Host Software Queue enabled\n",
+> -                                       mmc_hostname(host));
+> -                       }
+> -               }
+> -       }
+> +       err = mmc_cmdq_setup(host, card);
+> +       if (err)
+> +               goto free_card;
 >
->         base_dlyb = devm_of_iomap(mmc_dev(host->mmc), np, 1, NULL);
->         if (IS_ERR(base_dlyb))
+>         if (host->caps2 & MMC_CAP2_AVOID_3_3V &&
+>             host->ios.signal_voltage == MMC_SIGNAL_VOLTAGE_330) {
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index f9ad35dd6012..e554bb0cf722 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -272,6 +272,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
+>
+>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+> +       bool                    force_disable_cmdq; /* Keep Command Queue disabled */
+>
+>         unsigned int            erase_size;     /* erase size in sectors */
+>         unsigned int            erase_shift;    /* if erase unit is power 2 */
 > --
 > 2.17.1
 >
-
-Well, I decided to help out a bit. I have amend the patch according to
-the above and extended the commit message with some valuable
-information, based upon our earlier discussions.
-
-Patch is applied at my fixes branch with a stable tag, please have a
-look, test and shout at me if there is something that looks wrong!
-
-Thanks and kind regards
-Uffe
