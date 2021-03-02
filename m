@@ -2,123 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 041C3C28CBC
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7809C433E0
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CD1BE61606
+	by mail.kernel.org (Postfix) with ESMTP id A0DD764E60
 	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:52:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242644AbhCCBr5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:47:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55672 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1447518AbhCBNl1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 08:41:27 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85C0CC061756;
-        Tue,  2 Mar 2021 05:40:38 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id q25so11076955lfc.8;
-        Tue, 02 Mar 2021 05:40:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:from:to:cc:references:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=sy2937whkD36NnxmnEnOHu/2WmMpJHhESVIp923Q2ms=;
-        b=WR417b2TXL4XluWU3Q62QUJQT2KHPwbcPUhvSl9ZQVrVxjti1bnY0rVY28lskvQOQ9
-         Wd4ONpWLQsrq2U9ZfDpZJ9FfQ0enFUDeq957Rh8PhHNklfHjRCfh4w3CGHcGpKedn3JL
-         JU325/yJb/LyWrSRbGakExDJSSgUVg+qczoU+PFZZ2dZHklZkgt4nYBqwUHa/sX6A7Vq
-         KcMVXJKg88SR6oBSveZT8yEuJBNqlxOaa9sbDxhpRkGsJXaBT3wgy8o8QOEuUJEnZHii
-         cNSLUqZnaK/Zmp1Gtp5hNnFenxB8+j+e6Auapc+QBS0WcKBPGyzm5C2dO3+rub2odxvy
-         Guzw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=sy2937whkD36NnxmnEnOHu/2WmMpJHhESVIp923Q2ms=;
-        b=EhoMuAQ7DKnyEuzgvbgptxDcLLMmpunXnYHxlPxyQYlBX0OjfsollGtZPKjopFc4Lg
-         40uNKjaP3JVWNk8+DhBnFwh+LBgGeIjsGt1KOGWWPQ6QdlGquhp9IGcyncV8+zJ9+2f5
-         G8iTj7VRvZcK7Q2lH57ZD6t4xt7SuCdvGwj+LwntDW857ylrcIbL/0VPpgQHQjkEYJta
-         5Lo7y4tW9K19X3AOCHs7IMsOarZG9apGXTnCmJi+bn106t5rMpMZinFyvug+/mNeArqF
-         njguiz5NpnMpZqLrAVnYeMA/vQhlwJ7Ba2xQkbipd1eT1OAM52UoQc7J32a3skK9648c
-         92eQ==
-X-Gm-Message-State: AOAM531ECC0QCVft70Sjj/KRUzLAwuj20RwAe+0fj/VW89xsh5eOzvau
-        65n4IeFIMCeoXganNFUiRbwUBmbuuUo=
-X-Google-Smtp-Source: ABdhPJxRPWPVr1JuoC8bNRBtDqyUDprT1LYGiwQlldtoe/FBCoxaKt0EfpMAr+/aLHyNPv+Ih4vpaQ==
-X-Received: by 2002:ac2:4ecd:: with SMTP id p13mr5165188lfr.421.1614692436754;
-        Tue, 02 Mar 2021 05:40:36 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-52.dynamic.spd-mgts.ru. [109.252.193.52])
-        by smtp.googlemail.com with ESMTPSA id 192sm2462749ljj.95.2021.03.02.05.40.34
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 02 Mar 2021 05:40:36 -0800 (PST)
-Subject: Re: [PATCH 00/31] Introduce devm_pm_opp_* API
-From:   Dmitry Osipenko <digetx@gmail.com>
-To:     Yangtao Li <tiny.windzz@gmail.com>, myungjoo.ham@samsung.com,
-        kyungmin.park@samsung.com, cw00.choi@samsung.com, krzk@kernel.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, linux-imx@nxp.com, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, yuq825@gmail.com, airlied@linux.ie,
-        daniel@ffwll.ch, robdclark@gmail.com, sean@poorly.run,
-        robh@kernel.org, tomeu.vizoso@collabora.com, steven.price@arm.com,
-        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
-        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
-        lukasz.luba@arm.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
-        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
-        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
-        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
-        marijn.suijten@somainline.org, gustavoars@kernel.org,
-        emil.velikov@collabora.com, jonathan@marek.ca,
-        akhilpo@codeaurora.org, smasetty@codeaurora.org,
-        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
-        tanmay@codeaurora.org, ddavenport@chromium.org,
-        jsanka@codeaurora.org, rnayak@codeaurora.org,
-        tongtiangen@huawei.com, miaoqinglang@huawei.com,
-        khsieh@codeaurora.org, abhinavk@codeaurora.org,
-        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
-        mka@chromium.org, harigovi@codeaurora.org,
-        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
-        georgi.djakov@linaro.org, akashast@codeaurora.org,
-        parashar@codeaurora.org, dianders@chromium.org
-Cc:     linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-samsung-soc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
-        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
-References: <20210101165507.19486-1-tiny.windzz@gmail.com>
- <6bd6730c-6f4e-df93-65cd-93fa4785a8d8@gmail.com>
-Message-ID: <c7a246a4-ab25-a193-f74a-98351780135e@gmail.com>
-Date:   Tue, 2 Mar 2021 16:40:34 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.4.2
+        id S242412AbhCCBry (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:47:54 -0500
+Received: from mail.kernel.org ([198.145.29.99]:35616 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1446135AbhCBN2y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 Mar 2021 08:28:54 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id F370564F4D;
+        Tue,  2 Mar 2021 11:56:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1614686219;
+        bh=cIkRF14zPcPSqpWRrh6YRDsCHvdb0fJJdHqgkrmKZvU=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=vF50CTG2UNOTiCEfRH96BRKfLw+6V5biCJ3LjLGW4YpB535K70+LeYEE8vm3WfJ/f
+         0orodGpno6ZeTxeaIjj8AyIedO9PCDidZ/zFwOUp+/0CY75QVRKUEI6EVkmUZB1VW3
+         AvdoX6ZvymKj8YOJg2xwUuDtccYfAcgWAhK8rPIb3TlEsFtOwni+ez1LnCYdkql05T
+         Lb/Gp/hM1lJ792iyVCZIl/20IAPm2LFpzpe8prg9RZm5dqgmFRmz1uBcuSVoLtyTAm
+         HD96ToggmOUYaQOp0lZbzyTkx3LigIhyxhMahp0RjRqqeinZcUSZaTlKFdeTSpf54n
+         0SVy1TPZeB3Uw==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
+Subject: [PATCH AUTOSEL 5.10 10/47] mmc: mediatek: fix race condition between msdc_request_timeout and irq
+Date:   Tue,  2 Mar 2021 06:56:09 -0500
+Message-Id: <20210302115646.62291-10-sashal@kernel.org>
+X-Mailer: git-send-email 2.30.1
+In-Reply-To: <20210302115646.62291-1-sashal@kernel.org>
+References: <20210302115646.62291-1-sashal@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <6bd6730c-6f4e-df93-65cd-93fa4785a8d8@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+X-stable: review
+X-Patchwork-Hint: Ignore
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-20.01.2021 19:01, Dmitry Osipenko пишет:
-> 01.01.2021 19:54, Yangtao Li пишет:
->> Hi,
->>
->> This patchset add devm_pm_opp_set_clkname, devm_pm_opp_put_clkname,
->> devm_pm_opp_set_regulators, devm_pm_opp_put_regulators,
->> devm_pm_opp_set_supported_hw, devm_pm_opp_of_add_table and
->> devm_pm_opp_register_notifier.
-> 
-> Hello Yangtao,
-> 
-> Thank you for your effort, looking forward to v2!
+From: Chaotian Jing <chaotian.jing@mediatek.com>
 
-Yangtao, could you please let me know what is the status of this series?
-Will you be able to make a v2 anytime soon?
+[ Upstream commit 0354ca6edd464a2cf332f390581977b8699ed081 ]
+
+when get request SW timeout, if CMD/DAT xfer done irq coming right now,
+then there is race between the msdc_request_timeout work and irq handler,
+and the host->cmd and host->data may set to NULL in irq handler. also,
+current flow ensure that only one path can go to msdc_request_done(), so
+no need check the return value of cancel_delayed_work().
+
+Signed-off-by: Chaotian Jing <chaotian.jing@mediatek.com>
+Link: https://lore.kernel.org/r/20201218071611.12276-1-chaotian.jing@mediatek.com
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ drivers/mmc/host/mtk-sd.c | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 004fbfc23672..dc84e2dff408 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -1101,13 +1101,13 @@ static void msdc_track_cmd_data(struct msdc_host *host,
+ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
+ {
+ 	unsigned long flags;
+-	bool ret;
+ 
+-	ret = cancel_delayed_work(&host->req_timeout);
+-	if (!ret) {
+-		/* delay work already running */
+-		return;
+-	}
++	/*
++	 * No need check the return value of cancel_delayed_work, as only ONE
++	 * path will go here!
++	 */
++	cancel_delayed_work(&host->req_timeout);
++
+ 	spin_lock_irqsave(&host->lock, flags);
+ 	host->mrq = NULL;
+ 	spin_unlock_irqrestore(&host->lock, flags);
+@@ -1129,7 +1129,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+ 	bool done = false;
+ 	bool sbc_error;
+ 	unsigned long flags;
+-	u32 *rsp = cmd->resp;
++	u32 *rsp;
+ 
+ 	if (mrq->sbc && cmd == mrq->cmd &&
+ 	    (events & (MSDC_INT_ACMDRDY | MSDC_INT_ACMDCRCERR
+@@ -1150,6 +1150,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+ 
+ 	if (done)
+ 		return true;
++	rsp = cmd->resp;
+ 
+ 	sdr_clr_bits(host->base + MSDC_INTEN, cmd_ints_mask);
+ 
+@@ -1337,7 +1338,7 @@ static void msdc_data_xfer_next(struct msdc_host *host,
+ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+ 				struct mmc_request *mrq, struct mmc_data *data)
+ {
+-	struct mmc_command *stop = data->stop;
++	struct mmc_command *stop;
+ 	unsigned long flags;
+ 	bool done;
+ 	unsigned int check_data = events &
+@@ -1353,6 +1354,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+ 
+ 	if (done)
+ 		return true;
++	stop = data->stop;
+ 
+ 	if (check_data || (stop && stop->error)) {
+ 		dev_dbg(host->dev, "DMA status: 0x%8X\n",
+-- 
+2.30.1
+
