@@ -2,152 +2,217 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-23.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FABAC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:42:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3A5AC433E6
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D7B6B64E60
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:42:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C60DF64E60
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Mar 2021 01:51:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233888AbhCCB3o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 Mar 2021 20:29:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35896 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1577010AbhCBFfh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 Mar 2021 00:35:37 -0500
-Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED647C061221
-        for <linux-mmc@vger.kernel.org>; Mon,  1 Mar 2021 21:33:14 -0800 (PST)
-Received: by mail-pl1-x635.google.com with SMTP id p5so11366661plo.4
-        for <linux-mmc@vger.kernel.org>; Mon, 01 Mar 2021 21:33:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=QlVGLrkHIuUSrMOT86XjP1lDUQ4YVXSQssLeyeB3P2w=;
-        b=s3u3zOqN+5mSihsKV0/UUHtIUFDp0I1NrNhtMYDJddNEcFe/vZpWFUiQzXcWKIjUzL
-         DA3MdrxTgGITpruaO2y8qFb+j7KBolTK3NwIlo5NaNCwN7qtirNMf3KwqBir441YhdUQ
-         SXxCZatVIFXMvzp6CW2mQeeD8lH0qPkF5PY/cl3uzcggLd/MA1c7ZNNiqQPxFA0CH2Bl
-         SCwm+TtTSOGx2wLS0avUXgsRJEBVfLHkQLOSeTymJj9SN2lRQRQ59ysVS54q7Wxtvu1/
-         c0k2JpYSPaWp7dLB9uhGmGWoDO9J2Tl1/rn59+c+4gExzIAiua9oDJ1wDbIwz/1NLAEl
-         jpiw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=QlVGLrkHIuUSrMOT86XjP1lDUQ4YVXSQssLeyeB3P2w=;
-        b=QcL1NGLLCRv/PmvB607xfdeDa2IFsxSVhJXYVClXU80BpAo7kJoH1tbU9abysxgG8O
-         EHovbpFGBhkmbW1v3qjmq3IuOFhl66XjZJKS8QCjthbpEn8nnOlB/GxmenZ7XBNMeNua
-         6bgG16rKkuwvu/GfAXls5NmsKVmeO/3wPr+Ol+ykvYsUwFFSTREn/+Shu5nHWU2E1y9Q
-         Q43zvqP/nTAoaWuiJi3YdwSjhqG8qSkgJFUpBIuAnHhzqxW44xyi0760X3O6SXeB7T3r
-         o3xCmPpg2AL41d3P2Ns0LpQQxcIRrj4NOoPQAKBksXd+oQfVt41gcwiYP8H6R/JWEt5k
-         It2Q==
-X-Gm-Message-State: AOAM531C36s82zeRqFJ9GFz8HFP113abN2yK63082phAkwOnDjakQKz+
-        MXzmd1D10krcrwcja9XPo2Zg+Q==
-X-Google-Smtp-Source: ABdhPJymEZ3Tl3oz31AARFwRD5fs9K1aC/aaVoA8JvRVQ1xUXd54+SmhpfZlqk5+sTkGNH4d+F/3DA==
-X-Received: by 2002:a17:90a:d14c:: with SMTP id t12mr2417845pjw.5.1614663194409;
-        Mon, 01 Mar 2021 21:33:14 -0800 (PST)
-Received: from google.com (139.60.82.34.bc.googleusercontent.com. [34.82.60.139])
-        by smtp.gmail.com with ESMTPSA id i7sm1381624pjs.1.2021.03.01.21.33.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 01 Mar 2021 21:33:14 -0800 (PST)
-Date:   Tue, 2 Mar 2021 05:33:10 +0000
-From:   Satya Tangirala <satyat@google.com>
-To:     Peng Zhou <peng.zhou@mediatek.com>
-Cc:     Eric Biggers <ebiggers@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
-        Wulin Li <wulin.li@mediatek.com>
-Subject: Re: [PATCH 1/4] mmc: mediatek: add Inline Crypto Engine support
-Message-ID: <YD3OFkjS8a6EUOHM@google.com>
-References: <20210302024557.4868-1-peng.zhou@mediatek.com>
+        id S234771AbhCCBkw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 2 Mar 2021 20:40:52 -0500
+Received: from mga03.intel.com ([134.134.136.65]:10203 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1836603AbhCBHEg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 2 Mar 2021 02:04:36 -0500
+IronPort-SDR: yxhffZ72o/qL89tMRcB/+xSNbosCw9OUwYSKiudYAlai9W4kYsjQrTm8zIJL6O3Gtz2ycv6JhU
+ bJhncZ1Pk5Qw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9910"; a="186771396"
+X-IronPort-AV: E=Sophos;i="5.81,216,1610438400"; 
+   d="scan'208";a="186771396"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 01 Mar 2021 23:03:54 -0800
+IronPort-SDR: 7IzRiX8E44ofpMaGwotx0lKalu9xYiLpFVU1Q1E1mAI+eQeYkweZVB3EWtP5QkMe3OSeVHKg0j
+ pKddNgteuoow==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.81,216,1610438400"; 
+   d="scan'208";a="585794184"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
+  by orsmga005.jf.intel.com with ESMTP; 01 Mar 2021 23:03:52 -0800
+Subject: Re: [PATCH 1/1] mmc: cqhci: fix random crash when remove mmc module
+To:     Frank Li <lznuaa@gmail.com>, riteshh@codeaurora.org,
+        asutoshd@codeaurora.org, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        haibo.chen@nxp.com
+References: <20210301172151.281814-1-Frank.Li@nxp.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <0d135a2b-02d0-f05b-918b-c4253d67caf9@intel.com>
+Date:   Tue, 2 Mar 2021 09:04:03 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210302024557.4868-1-peng.zhou@mediatek.com>
+In-Reply-To: <20210301172151.281814-1-Frank.Li@nxp.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 02, 2021 at 10:45:57AM +0800, Peng Zhou wrote:
-> - add crypto clock control and ungate it before CQHCI init
-> - set MMC_CAP2_CRYPTO property of eMMC
+On 1/03/21 7:21 pm, Frank Li wrote:
+> [ 6684.493350] Unable to handle kernel paging request at virtual address ffff800011c5b0f0
+> [ 6684.498531] mmc0: card 0001 removed
+> [ 6684.501556] Mem abort info:
+> [ 6684.509681]   ESR = 0x96000047
+> [ 6684.512786]   EC = 0x25: DABT (current EL), IL = 32 bits
+> [ 6684.518394]   SET = 0, FnV = 0
+> [ 6684.521707]   EA = 0, S1PTW = 0
+> [ 6684.524998] Data abort info:
+> [ 6684.528236]   ISV = 0, ISS = 0x00000047
+> [ 6684.532986]   CM = 0, WnR = 1
+> [ 6684.536129] swapper pgtable: 4k pages, 48-bit VAs, pgdp=0000000081b22000
+> [ 6684.543923] [ffff800011c5b0f0] pgd=00000000bffff003, p4d=00000000bffff003, pud=00000000bfffe003, pmd=00000000900e1003, pte=0000000000000000
+> [ 6684.557915] Internal error: Oops: 96000047 [#1] PREEMPT SMP
+> [ 6684.564240] Modules linked in: sdhci_esdhc_imx(-) sdhci_pltfm sdhci cqhci mmc_block mmc_core fsl_jr_uio caam_jr caamkeyblob_desc caamhash_desc caamalg_desc crypto_engine rng_core authenc libdes crct10dif_ce flexcan can_dev caam error [last unloaded: mmc_core]
+> [ 6684.587281] CPU: 0 PID: 79138 Comm: kworker/0:3H Not tainted 5.10.9-01410-g3ba33182767b-dirty #10
+> [ 6684.596160] Hardware name: Freescale i.MX8DXL EVK (DT)
+> [ 6684.601320] Workqueue: kblockd blk_mq_run_work_fn
 > 
-> Signed-off-by: Peng Zhou <peng.zhou@mediatek.com>
+> [ 6684.606094] pstate: 40000005 (nZcv daif -PAN -UAO -TCO BTYPE=--)
+> [ 6684.612286] pc : cqhci_request+0x148/0x4e8 [cqhci]
+> ^GMessage from syslogd@  at Thu Jan  1 01:51:24 1970 ...[ 6684.617085] lr : cqhci_request+0x314/0x4e8 [cqhci]
+> [ 6684.626734] sp : ffff80001243b9f0
+> [ 6684.630049] x29: ffff80001243b9f0 x28: ffff00002c3dd000
+> [ 6684.635367] x27: 0000000000000001 x26: 0000000000000001
+> [ 6684.640690] x25: ffff00002c451000 x24: 000000000000000f
+> [ 6684.646007] x23: ffff000017e71c80 x22: ffff00002c451000
+> [ 6684.651326] x21: ffff00002c0f3550 x20: ffff00002c0f3550
+> [ 6684.656651] x19: ffff000017d46880 x18: ffff00002cea1500
+> [ 6684.661977] x17: 0000000000000000 x16: 0000000000000000
+> [ 6684.667294] x15: 000001ee628e3ed1 x14: 0000000000000278
+> [ 6684.672610] x13: 0000000000000001 x12: 0000000000000001
+> [ 6684.677927] x11: 0000000000000000 x10: 0000000000000000
+> [ 6684.683243] x9 : 000000000000002b x8 : 0000000000001000
+> [ 6684.688560] x7 : 0000000000000010 x6 : ffff00002c0f3678
+> [ 6684.693886] x5 : 000000000000000f x4 : ffff800011c5b000
+> [ 6684.699211] x3 : 000000000002d988 x2 : 0000000000000008
+> [ 6684.704537] x1 : 00000000000000f0 x0 : 0002d9880008102f
+> [ 6684.709854] Call trace:
+> [ 6684.712313]  cqhci_request+0x148/0x4e8 [cqhci]
+> [ 6684.716803]  mmc_cqe_start_req+0x58/0x68 [mmc_core]
+> [ 6684.721698]  mmc_blk_mq_issue_rq+0x460/0x810 [mmc_block]
+> [ 6684.727018]  mmc_mq_queue_rq+0x118/0x2b0 [mmc_block]
+> 
+> cqhci_request was called after cqhci_disable.
+> 
+> cqhci_disable                                 cqhci_request
+> {                                             {
+> 	dmam_free_coherent();  (1) free
+>                                                   if(!cq_host->enable)
+>                                                        return
+> 				         (2) pass check here
+> 	cq_host->enable = false;
+> 
+>                                                   task_desc= get_desc(cq_host,tag);
+>                                                              ^^^^ crash here
+>                                          (3) access memory which is already free
+> 
+> }                                             }
+> 
+> Signed-off-by: Frank Li <Frank.Li@nxp.com>
 > ---
->  drivers/mmc/host/mtk-sd.c | 17 +++++++++++++++--
->  1 file changed, 15 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/cqhci-core.c | 18 ++++++++++++++----
+>  1 file changed, 14 insertions(+), 4 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index de09c6347524..1a5894ec551f 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -442,6 +442,7 @@ struct msdc_host {
->  	struct clk *src_clk_cg; /* msdc source clock control gate */
->  	struct clk *sys_clk_cg;	/* msdc subsys clock control gate */
->  	struct clk_bulk_data bulk_clks[MSDC_NR_CLOCKS];
-> +	struct clk *crypto_clk; /* msdc crypto clock */
->  	u32 mclk;		/* mmc subsystem clock frequency */
->  	u32 src_clk_freq;	/* source clock frequency */
->  	unsigned char timing;
-> @@ -802,6 +803,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
->  
->  static void msdc_gate_clock(struct msdc_host *host)
+> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+> index 93b0432bb601..36d292261e50 100644
+> --- a/drivers/mmc/host/cqhci-core.c
+> +++ b/drivers/mmc/host/cqhci-core.c
+> @@ -389,6 +389,7 @@ static void cqhci_off(struct mmc_host *mmc)
+>  static void cqhci_disable(struct mmc_host *mmc)
 >  {
-> +	clk_disable_unprepare(host->crypto_clk);
->  	clk_bulk_disable_unprepare(MSDC_NR_CLOCKS, host->bulk_clks);
->  	clk_disable_unprepare(host->src_clk_cg);
->  	clk_disable_unprepare(host->src_clk);
-> @@ -822,7 +824,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
->  		dev_err(host->dev, "Cannot enable pclk/axi/ahb clock gates\n");
+>  	struct cqhci_host *cq_host = mmc->cqe_private;
+> +	unsigned long flags;
+>  
+>  	if (!cq_host->enabled)
 >  		return;
->  	}
-> -
-> +	clk_prepare_enable(host->crypto_clk);
->  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
->  		cpu_relax();
+> @@ -397,6 +398,11 @@ static void cqhci_disable(struct mmc_host *mmc)
+>  
+>  	__cqhci_disable(cq_host);
+>  
+> +	/* need wait for cqhci_request finish before free memory */
+> +	spin_lock_irqsave(&cq_host->lock, flags);
+> +	cq_host->enabled = false;
+> +	spin_unlock_irqrestore(&cq_host->lock, flags);
+> +
+>  	dmam_free_coherent(mmc_dev(mmc), cq_host->data_size,
+>  			   cq_host->trans_desc_base,
+>  			   cq_host->trans_desc_dma_base);
+> @@ -408,7 +414,6 @@ static void cqhci_disable(struct mmc_host *mmc)
+>  	cq_host->trans_desc_base = NULL;
+>  	cq_host->desc_base = NULL;
+>  
+> -	cq_host->enabled = false;
 >  }
-> @@ -2510,6 +2512,16 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		goto host_free;
+>  
+>  static void cqhci_prep_task_desc(struct mmc_request *mrq,
+> @@ -612,6 +617,13 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  			cq_host->ops->enable(mmc);
 >  	}
 >  
-> +	/* only eMMC has crypto property */
-> +	if ((mmc->caps2 & MMC_CAP2_NO_SD) &&
-> +	    (mmc->caps2 & MMC_CAP2_NO_SDIO)) {
-> +		host->crypto_clk = devm_clk_get(&pdev->dev, "crypto");
-> +		if (IS_ERR(host->crypto_clk))
-> +			host->crypto_clk = NULL;
-> +		else
-> +			mmc->caps2 |= MMC_CAP2_CRYPTO;
+> +	spin_lock_irqsave(&cq_host->lock, flags);
+> +	if (!cq_host->enabled) {
+> +		pr_err("%s: cqhci: not enabled\n", mmc_hostname(mmc));
+> +		err = -EINVAL;
+> +		goto out_unlock;
 > +	}
 > +
->  	host->irq = platform_get_irq(pdev, 0);
->  	if (host->irq < 0) {
->  		ret = -EINVAL;
-> @@ -2580,6 +2592,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		host->dma_mask = DMA_BIT_MASK(32);
->  	mmc_dev(mmc)->dma_mask = &host->dma_mask;
+>  	if (mrq->data) {
+>  		cqhci_prep_task_desc(mrq, cq_host, tag);
 >  
-> +	/* here ungate due to cqhci init will access registers */
-> +	msdc_ungate_clock(host);
->  	if (mmc->caps2 & MMC_CAP2_CQE) {
->  		host->cq_host = devm_kzalloc(mmc->parent,
->  					     sizeof(*host->cq_host),
-> @@ -2616,7 +2630,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	spin_lock_init(&host->lock);
+> @@ -619,14 +631,12 @@ static int cqhci_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>  		if (err) {
+>  			pr_err("%s: cqhci: failed to setup tx desc: %d\n",
+>  			       mmc_hostname(mmc), err);
+> -			return err;
+> +			goto out_unlock;
+>  		}
+>  	} else {
+>  		cqhci_prep_dcmd_desc(mmc, mrq);
+>  	}
 >  
->  	platform_set_drvdata(pdev, mmc);
-> -	msdc_ungate_clock(host);
->  	msdc_init_hw(host);
->  
->  	ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
-> -- 
-> 2.18.0
-Somehow I can't apply this patch using git am. It looks like the mail
-isn't completely plain text (there's some html it seems), which may be
-why git am is complaining.
+> -	spin_lock_irqsave(&cq_host->lock, flags);
+> -
+>  	if (cq_host->recovery_halt) {
+>  		err = -EBUSY;
+>  		goto out_unlock;
+> 
+
+Please try the following instead:
+
+
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index c2e70b757dd1..dfc8d2877115 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -399,11 +399,6 @@ void mmc_remove_card(struct mmc_card *card)
+ 	mmc_remove_card_debugfs(card);
+ #endif
+ 
+-	if (host->cqe_enabled) {
+-		host->cqe_ops->cqe_disable(host);
+-		host->cqe_enabled = false;
+-	}
+-
+ 	if (mmc_card_present(card)) {
+ 		if (mmc_host_is_spi(card->host)) {
+ 			pr_info("%s: SPI card removed\n",
+@@ -416,6 +411,11 @@ void mmc_remove_card(struct mmc_card *card)
+ 		of_node_put(card->dev.of_node);
+ 	}
+ 
++	if (host->cqe_enabled) {
++		host->cqe_ops->cqe_disable(host);
++		host->cqe_enabled = false;
++	}
++
+ 	put_device(&card->dev);
+ }
+ 
+
