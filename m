@@ -8,55 +8,55 @@ X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB9A9C43381
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:03:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39075C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:03:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8219164FC2
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:03:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 078DD64F37
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:03:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238904AbhCDAAJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Mar 2021 19:00:09 -0500
-Received: from mailout3.samsung.com ([203.254.224.33]:27790 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1347057AbhCCGkm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 01:40:42 -0500
+        id S1350298AbhCDAAI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Mar 2021 19:00:08 -0500
+Received: from mailout2.samsung.com ([203.254.224.25]:14994 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1345130AbhCCGbe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 01:31:34 -0500
 Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
-        by mailout3.samsung.com (KnoxPortal) with ESMTP id 20210303063956epoutp0324328c1a65433259b32a3a0437a2365c~owdcgLM6K2699726997epoutp03S
-        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 06:39:56 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20210303063956epoutp0324328c1a65433259b32a3a0437a2365c~owdcgLM6K2699726997epoutp03S
+        by mailout2.samsung.com (KnoxPortal) with ESMTP id 20210303063047epoutp0245d401aa164295cfc1928e376d9136e7~owVdn9gJC0566005660epoutp02O
+        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 06:30:47 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20210303063047epoutp0245d401aa164295cfc1928e376d9136e7~owVdn9gJC0566005660epoutp02O
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1614753596;
-        bh=57jiLkfedtl+CGz1CoJrxuyPN0UuFnJN95hA3tTJLwg=;
+        s=mail20170921; t=1614753047;
+        bh=py6OZSm/Pq78AmVUxnSD2SACJrpI1MvkqnthLtcfGHM=;
         h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
-        b=Ks2gxdEc72EaFxdHbA6E+wLETBU6fqbpA/qcl8hvUgbacb4r56bES/xb3Z4UdEC9u
-         k0/HW9eli6NWL8pqKAEWqrf1e1/4mUuUiEo+q52jXxxK4e/wCiOl7qpe9EWVuiaYK4
-         nYs6Y0TvGvzYSTwXLEzdoa8S+BC8GAAVZELHC+uk=
-Received: from epsnrtp4.localdomain (unknown [182.195.42.165]) by
-        epcas1p4.samsung.com (KnoxPortal) with ESMTP id
-        20210303063954epcas1p48b590cc24c0eb4e5a362a3397bc7b685~owdbV6HQ12656326563epcas1p4b;
-        Wed,  3 Mar 2021 06:39:54 +0000 (GMT)
-Received: from epsmges1p5.samsung.com (unknown [182.195.40.160]) by
-        epsnrtp4.localdomain (Postfix) with ESMTP id 4Dr49j6Yk6z4x9Q6; Wed,  3 Mar
-        2021 06:39:53 +0000 (GMT)
+        b=nMXVLEJv0RbdOsLV6ByklrjzNnlTWcjmzOJxELPAapjzVr8fXuvpQ6Z+4waBSdwqF
+         /2ZTufDAKhHu3cGYQQ4LM2u0qFtXUw0Lq4XshKm0388usvLrHb2yH/EydY4yXltKf0
+         Y4XHcGuQybmI712gSyPbKoqPj7IOVGeU83GdNNYs=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+        epcas1p2.samsung.com (KnoxPortal) with ESMTP id
+        20210303063046epcas1p25c2a50a587efdeb400ddad45d713e7ce~owVcf618i1703717037epcas1p2e;
+        Wed,  3 Mar 2021 06:30:46 +0000 (GMT)
+Received: from epsmges1p4.samsung.com (unknown [182.195.40.163]) by
+        epsnrtp2.localdomain (Postfix) with ESMTP id 4Dr3z81Mbtz4x9Q4; Wed,  3 Mar
+        2021 06:30:44 +0000 (GMT)
 Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
-        epsmges1p5.samsung.com (Symantec Messaging Gateway) with SMTP id
-        E1.4F.09577.93F2F306; Wed,  3 Mar 2021 15:39:53 +0900 (KST)
+        epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
+        EA.C0.10463.31D2F306; Wed,  3 Mar 2021 15:30:44 +0900 (KST)
 Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
         epcas1p1.samsung.com (KnoxPortal) with ESMTPA id
-        20210303063948epcas1p1a0c125f1a4a566b89db149f99035f510~owdVuTYE31790117901epcas1p1X;
-        Wed,  3 Mar 2021 06:39:48 +0000 (GMT)
+        20210303063043epcas1p121cff24fd85543708c95cf6f27bae651~owVZquNDI1371513715epcas1p1d;
+        Wed,  3 Mar 2021 06:30:43 +0000 (GMT)
 Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
         epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20210303063948epsmtrp1baae28799858de9824d1688f9ddabfe2~owdVtC-ho0860808608epsmtrp1v;
-        Wed,  3 Mar 2021 06:39:48 +0000 (GMT)
-X-AuditID: b6c32a39-c13ff70000002569-d0-603f2f39af47
-Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
+        20210303063043epsmtrp1ef95fffe399bacb40f0cecea1fd4b0f7~owVZprELi0466404664epsmtrp1O;
+        Wed,  3 Mar 2021 06:30:43 +0000 (GMT)
+X-AuditID: b6c32a38-f11ff700000028df-ef-603f2d13395d
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
         epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
-        51.18.08745.43F2F306; Wed,  3 Mar 2021 15:39:48 +0900 (KST)
+        D9.E6.08745.31D2F306; Wed,  3 Mar 2021 15:30:43 +0900 (KST)
 Received: from dh0421hwang01 (unknown [10.253.101.58]) by
-        epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-        20210303063948epsmtip12e7eaf917729413715f6dc8f89820d34~owdVbuV6U0921109211epsmtip1D;
-        Wed,  3 Mar 2021 06:39:48 +0000 (GMT)
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20210303063043epsmtip2805a70e9bf599cc81afe6fac4d1bcfe0~owVZdReiQ0758707587epsmtip2i;
+        Wed,  3 Mar 2021 06:30:43 +0000 (GMT)
 From:   "DooHyun Hwang" <dh0421.hwang@samsung.com>
 To:     "'Ulf Hansson'" <ulf.hansson@linaro.org>
 Cc:     <linux-mmc@vger.kernel.org>,
@@ -72,48 +72,48 @@ Cc:     <linux-mmc@vger.kernel.org>,
         <sh8267.baek@samsung.com>, <wkon.kim@samsung.com>
 In-Reply-To: <CAPDyKFpQyoNELdh3FrFF++HXKjH_Tn9oaY=PzUXHcE8o=KK-hg@mail.gmail.com>
 Subject: RE: [PATCH] mmc: core: add a power cycle when CMD11 fails
-Date:   Wed, 3 Mar 2021 15:39:48 +0900
-Message-ID: <021a01d70ff8$01ba94b0$052fbe10$@samsung.com>
+Date:   Wed, 3 Mar 2021 15:30:43 +0900
+Message-ID: <01df01d70ff6$bc9dd230$35d97690$@samsung.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
 X-Mailer: Microsoft Outlook 16.0
-Thread-Index: AQGOblsIe7vdZk8c0sfi2jsUpFOvKwL6qeaxAl7SNUWq2EbE4A==
+Thread-Index: AQGOblsIe7vdZk8c0sfi2jsUpFOvKwL6qeaxAl7SNUWq2BSgYA==
 Content-Language: ko
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrOJsWRmVeSWpSXmKPExsWy7bCmvq6lvn2CwZc7hhYzTrWxWlxc3cJq
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrCJsWRmVeSWpSXmKPExsWy7bCmvq6Irn2CwfobzBYzTrWxWlxc3cJq
         8evvenaLjq2TmSx2PD/DbrHrbzOTxZQ/y5ksLu+aw2Zx5H8/o8WRA44W/avvslk0/dnHYnHt
         zAlWi+Nrwy02X/rGYtF3zt1BwGPBplKPO9f2sHn0bVnF6PFs4XoWj6c/9jJ7fN4kF8AWlWOT
         kZqYklqkkJqXnJ+SmZduq+QdHO8cb2pmYKhraGlhrqSQl5ibaqvk4hOg65aZA3S0kkJZYk4p
-        UCggsbhYSd/Opii/tCRVISO/uMRWKbUgJafA0KBArzgxt7g0L10vOT/XytDAwMgUqDIhJ2PW
-        /6VMBd9jK34f3szUwDjZu4uRk0NCwESi+1AvexcjF4eQwA5GicaFX1ggnE+MEjMPToLKfGaU
-        OHn+IxNMy9nre1ghErsYJaZcPQxV9ZpRYuGkfmaQKjYBA4nJx96wgdgiAjoSM940g3UwC6xg
-        kbh48CErSIJTIFDi+MsfYA3CAk4S1z/3gMVZBFQkdj0/CbaOV8BSYumcjWwQtqDEyZlPWEBs
-        ZgFtiWULXzNDnKQg8fPpMlaIZU4SXc/vMULUiEjM7mxjBlksIXCHQ+JQ/2KoBheJ5/f2sUPY
-        whKvjm+BsqUkXva3QdndjBL9h+wgmicwSlw+3sMGkTCW+PT5M9AGDqANmhLrd+lDhBUldv6e
-        C7WYT+LdV5BnOIDivBIdbUIQJWoSi/99ByphB7JlJBq5JzAqzULy2Cwkj81C8sAshFULGFlW
-        MYqlFhTnpqcWGxaYIsf2JkZwitay3ME4/e0HvUOMTByMhxglOJiVRHjFX9omCPGmJFZWpRbl
-        xxeV5qQWH2I0BQb1RGYp0eR8YJbIK4k3NDUyNja2MDEzNzM1VhLnTTJ4EC8kkJ5YkpqdmlqQ
-        WgTTx8TBKdXAFFGgvkoy6+yEr0FC9WFuqZ3Cb9N+m4fOvsZhrfOePdR+28msa9dXFBbFv4r/
-        pPv1RwRrAl/8wqutj8r/HFt/ZA9jQfk8B1GBfyp/vjFceCgoZF+nyaoY8+LoxvBvu2dt3H9R
-        Q8Fj92Zur9y2jMRdk3f84/di3D+53LSm7HKs39fwtflbOTyW9OqaxyzKPORdKrdic9ib/M9u
-        uh9fX5i5ZmvhTR2VgPdFBtr5JxTlbCZ0VnpmnDcxt9peU+kTm1dW3fzldZPT/e2G0vtPXPrC
-        0x5wZ1L5lvXO3Re3dt1Kcbsem3tcydFUkOeMjuDd+vQ7mWI3svU8PlRsjVvxZU/08byECTcm
-        iN8Q1txrmJ6kxFKckWioxVxUnAgAj+2OpFoEAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrIIsWRmVeSWpSXmKPExsWy7bCSnK6Jvn2CwcU/mhYzTrWxWlxc3cJq
+        UCggsbhYSd/Opii/tCRVISO/uMRWKbUgJafA0KBArzgxt7g0L10vOT/XytDAwMgUqDIhJ+P7
+        ki7mgp+xFRt3PGdtYJzs3cXIySEhYCKx4dc/1i5GLg4hgR2MErs+vmKDcD4xSkyYsIkNpEpI
+        4DOjxJZ56TAdrZ82s0DEdzFKPG1wgGh4zSixZs1VsAY2AQOJycfegNkiAjoSM940g61gFljB
+        InHx4ENWkASnQKDE8Zc/mEFsYQEnieufe8DiLAIqEt83rmEEsXkFLCW2rtnICmELSpyc+QRs
+        M7OAtsSyha+ZIS5SkPj5dBkrxDIniUNX2hkhakQkZne2QdXc4JB4dpoDwnaR6Py8BCouLPHq
+        +BZ2CFtK4mV/G5TdzSjRf8gO5GgJgQmMEpeP97BBJIwlPn3+DLSAA2iBpsT6XfoQYUWJnb/n
+        Qu3lk3j3FeQXDqA4r0RHmxBEiZrE4n/fgUrYgWwZiUbuCYxKs5D8NQvJX7OQ3D8LYdUCRpZV
+        jGKpBcW56anFhgUmyFG9iRGcnLUsdjDOfftB7xAjEwfjIUYJDmYlEV7xl7YJQrwpiZVVqUX5
+        8UWlOanFhxhNgSE9kVlKNDkfmB/ySuINTY2MjY0tTMzMzUyNlcR5kwwexAsJpCeWpGanphak
+        FsH0MXFwSjUw8Z3dbJg6R/D7/Iy8uEp93d3Pvhu5eWxuXi+5+Jb8q1CtF3u04qoTTQ98tl6w
+        Ss3NUck+ULVvgua1qzNzBDIWr7ySNEHnL8fl19352swqhj5Oj53FVznvNPokzDSxM/69wfIu
+        ngB7rTUm4StWTRB6w/Dm+uvXH2KDckNnfvm3rZ8/Zit3Uj2DQ3bSlL36f/NCZGbtkplZt97T
+        K+Wj+JZ2rbrfvKENfPdWp4bqXH+8jPfdBe83f0qy2k+cSuN9uORq/sIYyfWlLqf49lexfS1w
+        LWGaEehiq+htseK20X2ZTawprxx3q5vO+xS3TnZa1czpEwISs+YnWbjr7Dil//ZICvumT3Li
+        bnJ3PgbO/memxFKckWioxVxUnAgACncRFlcEAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrEIsWRmVeSWpSXmKPExsWy7bCSvK6wrn2CwZaVfBYzTrWxWlxc3cJq
         8evvenaLjq2TmSx2PD/DbrHrbzOTxZQ/y5ksLu+aw2Zx5H8/o8WRA44W/avvslk0/dnHYnHt
         zAlWi+Nrwy02X/rGYtF3zt1BwGPBplKPO9f2sHn0bVnF6PFs4XoWj6c/9jJ7fN4kF8AWxWWT
-        kpqTWZZapG+XwJWxrekXY8GliIqjXy6yNTC+ce1i5OSQEDCROHt9D2sXIxeHkMAORokZp1Yz
-        QSRkJLrv72XvYuQAsoUlDh8uBgkLCbxklNjVqQ5iswkYSEw+9oYNxBYR0JGY8aYZbA6zwDYW
-        iTfnm6CGXmaUOLftCyNIFadAoMTxlz+YQWxhASeJ6597WEFsFgEViV3PT4It5hWwlFg6ZyMb
-        hC0ocXLmExYQm1lAW+Lpzadw9rKFr5khDlWQ+Pl0GSvEFU4SXc/vMULUiEjM7mxjnsAoPAvJ
-        qFlIRs1CMmoWkpYFjCyrGCVTC4pz03OLDQuM8lLL9YoTc4tL89L1kvNzNzGCY1VLawfjnlUf
-        9A4xMnEwHmKU4GBWEuEVf2mbIMSbklhZlVqUH19UmpNafIhRmoNFSZz3QtfJeCGB9MSS1OzU
-        1ILUIpgsEwenVAMTj3R+/KlVIRe+Bt2aV/z38KopizqfrNtx0kj+6vS9X3IjnmX3r9nSpr3q
-        hsiKmTUX3uw3cTL+2rNRrsqxZd1kD5OZmupzwgRzJDL11Y28Jx+wS7F0eypizBas9Pmsm/gC
-        IYOjsflt53sSSovbnkwSEnW16Ihd4b33PZ+N+5y21U8vmBdv0fotuFOI+U+TIvejk3z6d569
-        8l9aIXq+9dDX84f23TNvsSy/caP+3fVsY2kpQ1OJXD3Lyy0e4WU92WH+pdYabLpPFshz3ns+
-        h2PPeisj64pW6Ux+6/LcZe86l9oobajfsaNvUWfDR9+yr1kvOWVrzCU+rTieseSXttx3HSUN
-        xtNPO65Nk9iXKajEUpyRaKjFXFScCAAvJB2ERAMAAA==
-X-CMS-MailID: 20210303063948epcas1p1a0c125f1a4a566b89db149f99035f510
+        kpqTWZZapG+XwJWx7mkfU8GViIrzzQ9YGxjfuHYxcnJICJhItH7azNLFyMUhJLCDUeJQywFG
+        iISMRPf9vexdjBxAtrDE4cPFEDUvGSVmTHzNAlLDJmAgMfnYGzYQW0RAR2LGm2ZWkCJmgW0s
+        Em/ON7FCdFxmlDi37QvYVE6BQInjL38wg9jCAk4S1z/3sILYLAIqEt83rgGr4RWwlNi6ZiMr
+        hC0ocXLmE7BtzALaEk9vPoWzly18zQxxqYLEz6fLWCGucJI4dKWdEaJGRGJ2ZxvzBEbhWUhG
+        zUIyahaSUbOQtCxgZFnFKJlaUJybnltsWGCUl1quV5yYW1yal66XnJ+7iREcrVpaOxj3rPqg
+        d4iRiYPxEKMEB7OSCK/4S9sEId6UxMqq1KL8+KLSnNTiQ4zSHCxK4rwXuk7GCwmkJ5akZqem
+        FqQWwWSZODilGpjU94i3MF3YGFm5x89lzwVdplfVktEn/iX92dzazCc8n+Gjtcj1GHvhuDdf
+        Xvxi5r75ceKvKNvKb83vl8VOyGiMYDNYt/vsGcHesLB3Si8iGi+HPuP02v8vnKX49tZfU+Ne
+        Hjd17Q4N63nQ935ti/B9D+7He/26r6t7qraFrpNeclF0m5ZSBsu5rTUn1Ho3PftpXmVt/oah
+        T2yHlH61uF3K+j3Vv7y0v9SHxaXZv70s0fR6vsQ+V/5tX961vORjWTOpckbo9eCP8bKRF279
+        1W+cdbDHgk2IOTuvQqQ34qn+nsNbbVxKZXqusmmF3E51fLPI14pR5ck9RtVgqabw2ibbA27L
+        qh713Xp3dvFGIyWW4oxEQy3mouJEAAQS1PxFAwAA
+X-CMS-MailID: 20210303063043epcas1p121cff24fd85543708c95cf6f27bae651
 X-Msg-Generator: CA
 Content-Type: text/plain; charset="utf-8"
 X-Sendblock-Type: SVC_REQ_APPROVE
@@ -127,7 +127,6 @@ References: <CGME20210210051209epcas1p3e55c0cbab7313731bc6e425da6189bb4@epcas1p3
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
-
 
 On Tue, 2 Mar 2021 at 10:38, Ulf Hansson <ulf.hansson=40linaro.org> wrote:
 >On Wed, 10 Feb 2021 at 06:12, DooHyun Hwang <dh0421.hwang=40samsung.com>
@@ -154,13 +153,13 @@ On Tue, 2 Mar 2021 at 10:38, Ulf Hansson <ulf.hansson=40linaro.org> wrote:
 >
 >BTW, did you try to force the error to -EAGAIN, to keep retrying for a
 >couple of times? If so, did it end up with the same kind of errors?
->
 
 Thank you for reviewing this.
 
 Yes. I tested with 2 SD cards.
-I think the power cycle is needed before retrying because SD card doesn't r=
-espond SD_ROCR_S18A when retrying without power cycle.
+I think the power cycle is needed before retrying
+because SD card doesn't respond SD_ROCR_S18A when retrying without power cy=
+cle.
 
 
 =231. No change
@@ -193,7 +192,8 @@ g 000001aa flags 000002f5
 <7>=5B  100.859607=5D  =5B0:    kworker/0:0:    5=5D mmc0: starting CMD55 a=
 rg 00000000 flags 000000f5
 <7>=5B  100.860098=5D I=5B0:  Binder:4670_3: 4705=5D mmc0: req done (CMD55)=
-: -84: 00000000 00000000 00000000 00000000 ...
+: -84: 00000000 00000000 00000000 00000000
+...
 <3>=5B  100.861846=5D  =5B0:    kworker/0:0:    5=5D mmc0: error -84 whilst=
  initialising SD card
 
@@ -354,6 +354,7 @@ rg 00000000 flags 00000015
 : 0: 00000320 00000000 00000000 00000000
 
 
+>
 >> ---
 >>  drivers/mmc/core/core.c =7C 2 +-
 >>  1 file changed, 1 insertion(+), 1 deletion(-)
