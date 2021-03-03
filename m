@@ -2,118 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FBA4C4332E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEE20C432C3
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:03:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5063964FC7
+	by mail.kernel.org (Postfix) with ESMTP id B6CF864F9B
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:03:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235414AbhCDAAO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Mar 2021 19:00:14 -0500
-Received: from mga09.intel.com ([134.134.136.24]:19204 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S240998AbhCCKcL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 3 Mar 2021 05:32:11 -0500
-IronPort-SDR: Izo0VTZKsLwt5whglQsRsRGn9Qi70p9fs/ZChP0fGe4WRGHS0btmmAS7Dz5FV7mbq8g5o0BUh7
- NAxoKnQb7/ew==
-X-IronPort-AV: E=McAfee;i="6000,8403,9911"; a="187267614"
-X-IronPort-AV: E=Sophos;i="5.81,219,1610438400"; 
-   d="scan'208";a="187267614"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2021 01:26:04 -0800
-IronPort-SDR: qNbxjsDkiRVoqar4NBzDqkpqO1Kn7BSrNbmjqI94a0PD3dc4jVzQ2Vf7fhesD6Px5nqfh2+mB1
- GYWk6brSUYqg==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.81,219,1610438400"; 
-   d="scan'208";a="406385750"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga007.jf.intel.com with ESMTP; 03 Mar 2021 01:26:02 -0800
-Subject: [PATCH] mmc: mmc: Fix partition switch time
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Paul Fertser <fercerpav@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
-References: <20200122142747.5690-1-ulf.hansson@linaro.org>
- <20200122142747.5690-4-ulf.hansson@linaro.org>
- <20210222162406.GA17142@home.paul.comp>
- <20210222201245.GW2059@home.paul.comp>
- <CAPDyKFpXceh0qWZMxnOnLmrnwyt==qWWaxHCYzb6UxGRcvgksA@mail.gmail.com>
- <20210223093247.GA2059@home.paul.comp>
- <3c8007d5-4040-2a43-59a5-08579824ddff@intel.com>
- <20210223111926.GC2059@home.paul.comp>
- <CAPDyKFp=XhnoD0re3kwM-yt4URK4vc7UnJE_+oKnqierMuKJ5g@mail.gmail.com>
- <c9adeaa3-8833-fe2b-cea8-50b645db0a9d@intel.com>
- <CAPDyKFrWOs7xO1f+miz4cQznHcYQL+sunpzOW3Jg6P0rFOSS1g@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <168bbfd6-0c5b-5ace-ab41-402e7937c46e@intel.com>
-Date:   Wed, 3 Mar 2021 11:26:14 +0200
+        id S233355AbhCDAAN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Mar 2021 19:00:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37992 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1843004AbhCCKXq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 05:23:46 -0500
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69C8DC06121E;
+        Wed,  3 Mar 2021 00:31:43 -0800 (PST)
+Received: by mail-lf1-x12a.google.com with SMTP id v9so17989081lfa.1;
+        Wed, 03 Mar 2021 00:31:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=dA8KKHZiMQ0M1dMyQ+8WM+bKH9WXXF3VYD9qxoBSYVM=;
+        b=Q2BL7+lc+ylMlu+ydH2KPz1PqTODp5OqgVZiHR9jqO4OZm50aqIxSjjmz78JiiooFH
+         i7YC35lXSOUX9yg/ckanbCMcDnIlEnFIWaLOgdtj+UDXrH5hO9M8tW0d4lY0F73Zgtv0
+         EP4JLr8ALm6ZBEyiThejlCrrfIVjY9pIOHj19FhIOTMenDf39h9gGiIWXvyNDLGkM5mo
+         m/2nGyP009dWktprR8h6cgF5Vdo4NdkfBfb3BDPwDqJkwoi523txy9Y1R+1aHRYDxFMU
+         pbUa9veKiX8fC3Qy7J68bxgQZFZPn42rhUh6PUmrP6NqhAMjEwXXM5pQ+2lI5jRGc3fG
+         Miaw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=dA8KKHZiMQ0M1dMyQ+8WM+bKH9WXXF3VYD9qxoBSYVM=;
+        b=f6ZSIMX8nAv5AFjL21Ejo5Bv3NJ3Rp8ijmSTbsKlQYt6Ekl94iKE9TQIHIFyeDf+eT
+         4U32HV13v5mTABQ3WNlZOivEzWGS1py9zHDoZZ6zFdY3g3+sfbqcspgY/f8SK3sTER5N
+         09uXG0t5uD2JUyWzIs0kA838rkFolPnrW+qjLsRR4EdvOGDZQ5dt0oiXEWGDRqNCc1vf
+         6YIgnCjMyKJCssoimM7iGriqww+KbKAaP3idu40E9el3QnDkQ7mdUdKnvVq+pDFA2i35
+         6uVUiZofGRHsrGdBUzcyXf31pXUoMJCHfRBq9hRRhjNCuNChYx9NHWqj2Ba6DxCP+7Ix
+         0Bww==
+X-Gm-Message-State: AOAM530n4Tohk0m88Dm8GcAfvRhgv+oALZsuZxkYrxBffq71r+aHyhk5
+        D6rUONzoAxuMVY/19AH/6iXMbEuXb0s=
+X-Google-Smtp-Source: ABdhPJyVYXtuCpQJixD14PrCS9E2RYkwzmpI6ancOTzzhejj1erUKOBHDXNJht8WUd/TI7wGU6pDCw==
+X-Received: by 2002:a05:6512:110b:: with SMTP id l11mr15110220lfg.468.1614760301712;
+        Wed, 03 Mar 2021 00:31:41 -0800 (PST)
+Received: from [192.168.2.145] (109-252-193-52.dynamic.spd-mgts.ru. [109.252.193.52])
+        by smtp.googlemail.com with ESMTPSA id 192sm2767251ljj.95.2021.03.03.00.31.38
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 03 Mar 2021 00:31:41 -0800 (PST)
+Subject: Re: [PATCH 00/31] Introduce devm_pm_opp_* API
+To:     Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Yangtao Li <tiny.windzz@gmail.com>, myungjoo.ham@samsung.com,
+        kyungmin.park@samsung.com, cw00.choi@samsung.com, krzk@kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com, thierry.reding@gmail.com,
+        jonathanh@nvidia.com, yuq825@gmail.com, airlied@linux.ie,
+        daniel@ffwll.ch, robdclark@gmail.com, sean@poorly.run,
+        robh@kernel.org, tomeu.vizoso@collabora.com, steven.price@arm.com,
+        alyssa.rosenzweig@collabora.com, stanimir.varbanov@linaro.org,
+        agross@kernel.org, bjorn.andersson@linaro.org, mchehab@kernel.org,
+        lukasz.luba@arm.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, vireshk@kernel.org, nm@ti.com,
+        sboyd@kernel.org, broonie@kernel.org, gregkh@linuxfoundation.org,
+        jirislaby@kernel.org, rjw@rjwysocki.net, jcrouse@codeaurora.org,
+        hoegsberg@google.com, eric@anholt.net, tzimmermann@suse.de,
+        marijn.suijten@somainline.org, gustavoars@kernel.org,
+        emil.velikov@collabora.com, jonathan@marek.ca,
+        akhilpo@codeaurora.org, smasetty@codeaurora.org,
+        airlied@redhat.com, masneyb@onstation.org, kalyan_t@codeaurora.org,
+        tanmay@codeaurora.org, ddavenport@chromium.org,
+        jsanka@codeaurora.org, rnayak@codeaurora.org,
+        tongtiangen@huawei.com, miaoqinglang@huawei.com,
+        khsieh@codeaurora.org, abhinavk@codeaurora.org,
+        chandanu@codeaurora.org, groeck@chromium.org, varar@codeaurora.org,
+        mka@chromium.org, harigovi@codeaurora.org,
+        rikard.falkeborn@gmail.com, natechancellor@gmail.com,
+        georgi.djakov@linaro.org, akashast@codeaurora.org,
+        parashar@codeaurora.org, dianders@chromium.org,
+        linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-tegra@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
+        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org
+References: <20210101165507.19486-1-tiny.windzz@gmail.com>
+ <6bd6730c-6f4e-df93-65cd-93fa4785a8d8@gmail.com>
+ <c7a246a4-ab25-a193-f74a-98351780135e@gmail.com>
+ <20210303040119.hpeybankxph4fyuj@vireshk-i7>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <9e5edc16-abfa-632b-97e9-1367c24ef8bc@gmail.com>
+Date:   Wed, 3 Mar 2021 11:31:37 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.0
+ Thunderbird/78.4.2
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFrWOs7xO1f+miz4cQznHcYQL+sunpzOW3Jg6P0rFOSS1g@mail.gmail.com>
+In-Reply-To: <20210303040119.hpeybankxph4fyuj@vireshk-i7>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Avoid the following warning by always defining partition switch time:
+03.03.2021 07:01, Viresh Kumar пишет:
+> On 02-03-21, 16:40, Dmitry Osipenko wrote:
+>> 20.01.2021 19:01, Dmitry Osipenko пишет:
+>>> 01.01.2021 19:54, Yangtao Li пишет:
+>>>> Hi,
+>>>>
+>>>> This patchset add devm_pm_opp_set_clkname, devm_pm_opp_put_clkname,
+>>>> devm_pm_opp_set_regulators, devm_pm_opp_put_regulators,
+>>>> devm_pm_opp_set_supported_hw, devm_pm_opp_of_add_table and
+>>>> devm_pm_opp_register_notifier.
+>>>
+>>> Hello Yangtao,
+>>>
+>>> Thank you for your effort, looking forward to v2!
+>>
+>> Yangtao, could you please let me know what is the status of this series?
+>> Will you be able to make a v2 anytime soon?
+> 
+> Dmitry, if Yangtao doesn't reply back this week with a proposal, please go ahead
+> and respin the patches yourself. Thanks.
+> 
 
- [    3.209874] mmc1: unspecified timeout for CMD6 - use generic
- [    3.222780] ------------[ cut here ]------------
- [    3.233363] WARNING: CPU: 1 PID: 111 at drivers/mmc/core/mmc_ops.c:575 __mmc_switch+0x200/0x204
-
-Reported-by: Paul Fertser <fercerpav@gmail.com>
-Fixes: 1c447116d017 ("mmc: mmc: Fix partition switch timeout for some eMMCs")
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/core/mmc.c | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 0d80b72ddde8..8741271d3971 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -423,10 +423,6 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 
- 		/* EXT_CSD value is in units of 10ms, but we store in ms */
- 		card->ext_csd.part_time = 10 * ext_csd[EXT_CSD_PART_SWITCH_TIME];
--		/* Some eMMC set the value too low so set a minimum */
--		if (card->ext_csd.part_time &&
--		    card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
--			card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
- 
- 		/* Sleep / awake timeout in 100ns units */
- 		if (sa_shift > 0 && sa_shift <= 0x17)
-@@ -616,6 +612,17 @@ static int mmc_decode_ext_csd(struct mmc_card *card, u8 *ext_csd)
- 		card->ext_csd.data_sector_size = 512;
- 	}
- 
-+	/*
-+	 * GENERIC_CMD6_TIME is to be used "unless a specific timeout is defined
-+	 * when accessing a specific field", so use it here if there is no
-+	 * PARTITION_SWITCH_TIME.
-+	 */
-+	if (!card->ext_csd.part_time)
-+		card->ext_csd.part_time = card->ext_csd.generic_cmd6_time;
-+	/* Some eMMC set the value too low so set a minimum */
-+	if (card->ext_csd.part_time < MMC_MIN_PART_SWITCH_TIME)
-+		card->ext_csd.part_time = MMC_MIN_PART_SWITCH_TIME;
-+
- 	/* eMMC v5 or later */
- 	if (card->ext_csd.rev >= 7) {
- 		memcpy(card->ext_csd.fwrev, &ext_csd[EXT_CSD_FIRMWARE_VERSION],
--- 
-2.17.1
-
-
+Alright!
