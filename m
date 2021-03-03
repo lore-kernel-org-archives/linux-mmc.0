@@ -2,583 +2,337 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 215E9C432C3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07D18C43381
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:02:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E83E664FCF
+	by mail.kernel.org (Postfix) with ESMTP id D141464FBA
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:02:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344691AbhCDAAa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Mar 2021 19:00:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55080 "EHLO
+        id S233478AbhCDAAi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Mar 2021 19:00:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1348941AbhCCN4R (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 08:56:17 -0500
-Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D63C6C0611C0
-        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 05:55:07 -0800 (PST)
-Received: by mail-wr1-x436.google.com with SMTP id u14so23789283wri.3
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Mar 2021 05:55:07 -0800 (PST)
+        with ESMTP id S1574608AbhCCRd4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 12:33:56 -0500
+Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD2CCC061756;
+        Wed,  3 Mar 2021 09:33:13 -0800 (PST)
+Received: by mail-ej1-x631.google.com with SMTP id jt13so43854948ejb.0;
+        Wed, 03 Mar 2021 09:33:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=HCnjHWCo/Q+bojTy7byBJ3tyq3PAWYgoo0RiPlZgCx8=;
-        b=eM6j6sHD8iQR88/l5k52Vjbo6tLW/vfWt4PrURyyXxxIMpNZFM6pTi3/0eWgzDctxk
-         x2YL5bv03zGQelKM5mRJvn/U5TWhT4YJSWOHh5Jg3gLhmB5eF18YaQAFbodRKw9S8W7e
-         /3KuHpHx0xnb7mVRw4K29Za0CmfY7KY/BNzdJ8pI1cwajO4m6k6JKm+x8gj8g8MOHmpw
-         OGfFrzvX3D90S7iBwaR1cXoZwhxJddXZGXKoQU/Eb9POoAU1sXL2cW7F0fgh0kQtmSHs
-         C6clHKEF82LkPySj+3ekBr/u014f6wnIcRR81DLCt3ryvIOFFl8sHDQNBrxZvu8rLxdR
-         S92A==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=itha46lG6GJpAnlsT3tziViWP7zEFEbO5gF2/DFo1UI=;
+        b=hU7pH4YH+1N9FY8LzC2VxMSBe4F2n59apWv0Im/UBz37wrlJcwGqy2OCtm/PwZHCAr
+         mkEoxkMeafFlLXvMi/8gN+1SXo676wbuw7USIIIqo6sU77+Mdxu2cJG+uDBpZWHyPq0X
+         moGhswUPG7iN/3tGQ8HtSh/njrHbFkQ7lcLcGC7h7aTaj4vpOk3bGsyD1/J3Nf+/v5fs
+         P6DIF2fJ+IZcm6nrhAttlV48d9X1hUsaqgf8CUJaLKtBH4eKqGSU6PdLiSlxhIPyN7RX
+         bx1wMEz0d4QLTiJ3egWGYwxrmN9iU4Dj091EfcAcU8LTOZSQbt7vA+47I28LpehdbXhO
+         A71Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=HCnjHWCo/Q+bojTy7byBJ3tyq3PAWYgoo0RiPlZgCx8=;
-        b=ubui6ZFbi1LucnVPc9k2Vuw+xAnS4cBzw2sdPYdYcwDoTGEOq4TwTAz+nNmno5SAb3
-         cOwLwwbefNN7uJ/CM+b78gNbMgyOReafNQWtaM62xEhj/xRb9MYjtYKKuMP4s2irjAgx
-         Tdu5q7i5mPKbQpvYFlcfL76kBEycDqyAzww/UgK04w+7tV5AmA/GRD/5n2Aa3FsXOApo
-         JuVmpGQ/gHK1AE47KXaMRzNTkIfz4NPhXS3gX2uzVeqZ6eSZsMygXQxKNCoNDu4JTO3V
-         rb4mHH+FV/pKWagLRszFQ0UYBrINlTeYak4cr5BJoMv+TalUJsZp4a78lhlXT6zXarc0
-         M/IQ==
-X-Gm-Message-State: AOAM532tOYBRpPhEFP9RgGiOKhemiwaXJGHvi+l3NXN8mW8nRX6qOzKP
-        lwhBCwZDZ9a7DcFCjRJP4iEZOA==
-X-Google-Smtp-Source: ABdhPJwlAh9tNhxULFZF16PZlGBU2V90owZCRl8FCwlJucyHY5D9KQP00fmYRJZAkLW3VyZkOYFlUQ==
-X-Received: by 2002:adf:f587:: with SMTP id f7mr16082253wro.147.1614779706553;
-        Wed, 03 Mar 2021 05:55:06 -0800 (PST)
-Received: from zen.linaroharston ([51.148.130.216])
-        by smtp.gmail.com with ESMTPSA id a21sm7759875wmb.5.2021.03.03.05.55.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Mar 2021 05:55:01 -0800 (PST)
-Received: from zen.lan (localhost [127.0.0.1])
-        by zen.linaroharston (Postfix) with ESMTP id C5CAC1FF90;
-        Wed,  3 Mar 2021 13:55:00 +0000 (GMT)
-From:   =?UTF-8?q?Alex=20Benn=C3=A9e?= <alex.bennee@linaro.org>
-To:     linux-kernel@vger.kernel.org
-Cc:     maxim.uvarov@linaro.org, joakim.bech@linaro.org,
-        ilias.apalodimas@linaro.org, arnd@linaro.org,
-        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
-        yang.huang@intel.com, bing.zhu@intel.com,
-        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
-        linux-nvme@vger.kernel.org,
-        =?UTF-8?q?Alex=20Benn=C3=A9e?= <alex.bennee@linaro.org>
-Subject: [RFC PATCH  4/5] rpmb: create virtio rpmb frontend driver [WIP]
-Date:   Wed,  3 Mar 2021 13:54:59 +0000
-Message-Id: <20210303135500.24673-5-alex.bennee@linaro.org>
-X-Mailer: git-send-email 2.20.1
-In-Reply-To: <20210303135500.24673-1-alex.bennee@linaro.org>
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=itha46lG6GJpAnlsT3tziViWP7zEFEbO5gF2/DFo1UI=;
+        b=DIL14h4dGr4Ym5r0GmHdHlX0HYqDRIqtOKZQbACVXG99TZafPa7hDeNAHRNrgpNzEd
+         M/VETps21uTqRWkOftyQEHj9rj3Ty1MMeg0B+U3oxfoyBLb8wP4Y6gkg98WccxNasCXe
+         lld94TjAiYIjMYBa6ktUIIQ6Lz7AWvHTAxOhmsC7NBM3KiXZldhwlXCr32DzJ6ls6w3M
+         hLsiyNaT0ZdASlOm3K2CcDdi3f1X+u6G/xuyMF2fcbNW9LpJ9M+Ct9dmzegalDuYslrH
+         edeNnhcEqetJ7N0LeyY6nCMfmSlB6Ub8nwCJOheppATOrhQFG/9fkNcddms5r236wn+W
+         MyMg==
+X-Gm-Message-State: AOAM531BjKspXwXWqIo4x0678Z7XcrBbl7EGDko9YB64V8VDFf/1JTuM
+        yQpmeGkKwn94lHuiv3m/ttinTM7B/LH5Ecal5w7U7hYou7E=
+X-Google-Smtp-Source: ABdhPJx9Jz9tmKhg6xqr8R9ZtNirp6o+sVugD8rEFMffxUwOb/dTtvjD7mBKJge+1D7ucz9Aa83KfbxZEGK+Hk5Q09E=
+X-Received: by 2002:a17:906:38da:: with SMTP id r26mr16567083ejd.251.1614792792231;
+ Wed, 03 Mar 2021 09:33:12 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20210301172151.281814-1-Frank.Li@nxp.com> <0d135a2b-02d0-f05b-918b-c4253d67caf9@intel.com>
+ <CAHrpEqQrB5rb-cbV19LQ-EDeCjSw+6O7D3wbsRYWWcDwTYBU=Q@mail.gmail.com>
+ <42a468dd-24e0-355e-c3b9-a12ddee8dd3a@intel.com> <CAHrpEqQNvAxUhsU89P2ArAZiNxLMqTkf5ez+8RZPqkfSx9FRiA@mail.gmail.com>
+In-Reply-To: <CAHrpEqQNvAxUhsU89P2ArAZiNxLMqTkf5ez+8RZPqkfSx9FRiA@mail.gmail.com>
+From:   Zhi Li <lznuaa@gmail.com>
+Date:   Wed, 3 Mar 2021 11:33:01 -0600
+Message-ID: <CAHrpEqS835dq75qKBpcwz9NY0dJufPwbKs9T=rMrchOvnF306A@mail.gmail.com>
+Subject: Re: [PATCH 1/1] mmc: cqhci: fix random crash when remove mmc module
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     riteshh@codeaurora.org, asutoshd@codeaurora.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org,
+        kernel list <linux-kernel@vger.kernel.org>, haibo.chen@nxp.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This implements a virtio rpmb frontend driver for the RPMB subsystem.
+On Tue, Mar 2, 2021 at 12:39 PM Zhi Li <lznuaa@gmail.com> wrote:
+>
+> On Tue, Mar 2, 2021 at 10:25 AM Adrian Hunter <adrian.hunter@intel.com> w=
+rote:
+> >
+> > On 2/03/21 5:12 pm, Zhi Li wrote:
+> > >
+> > >
+> > > On Tue, Mar 2, 2021 at 1:03 AM Adrian Hunter <adrian.hunter@intel.com=
+ <mailto:adrian.hunter@intel.com>> wrote:
+> > >
+> > >     On 1/03/21 7:21 pm, Frank Li wrote:
+> > >     > [ 6684.493350] Unable to handle kernel paging request at virtua=
+l address ffff800011c5b0f0
+> > >     > [ 6684.498531] mmc0: card 0001 removed
+> > >     > [ 6684.501556] Mem abort info:
+> > >     > [ 6684.509681]   ESR =3D 0x96000047
+> > >     > [ 6684.512786]   EC =3D 0x25: DABT (current EL), IL =3D 32 bits
+> > >     > [ 6684.518394]   SET =3D 0, FnV =3D 0
+> > >     > [ 6684.521707]   EA =3D 0, S1PTW =3D 0
+> > >     > [ 6684.524998] Data abort info:
+> > >     > [ 6684.528236]   ISV =3D 0, ISS =3D 0x00000047
+> > >     > [ 6684.532986]   CM =3D 0, WnR =3D 1
+> > >     > [ 6684.536129] swapper pgtable: 4k pages, 48-bit VAs, pgdp=3D00=
+00000081b22000
+> > >     > [ 6684.543923] [ffff800011c5b0f0] pgd=3D00000000bffff003, p4d=
+=3D00000000bffff003, pud=3D00000000bfffe003, pmd=3D00000000900e1003, pte=3D=
+0000000000000000
+> > >     > [ 6684.557915] Internal error: Oops: 96000047 [#1] PREEMPT SMP
+> > >     > [ 6684.564240] Modules linked in: sdhci_esdhc_imx(-) sdhci_pltf=
+m sdhci cqhci mmc_block mmc_core fsl_jr_uio caam_jr caamkeyblob_desc caamha=
+sh_desc caamalg_desc crypto_engine rng_core authenc libdes crct10dif_ce fle=
+xcan can_dev caam error [last unloaded: mmc_core]
+> > >     > [ 6684.587281] CPU: 0 PID: 79138 Comm: kworker/0:3H Not tainted=
+ 5.10.9-01410-g3ba33182767b-dirty #10
+> > >     > [ 6684.596160] Hardware name: Freescale i.MX8DXL EVK (DT)
+> > >     > [ 6684.601320] Workqueue: kblockd blk_mq_run_work_fn
+> > >     >
+> > >     > [ 6684.606094] pstate: 40000005 (nZcv daif -PAN -UAO -TCO BTYPE=
+=3D--)
+> > >     > [ 6684.612286] pc : cqhci_request+0x148/0x4e8 [cqhci]
+> > >     > ^GMessage from syslogd@  at Thu Jan  1 01:51:24 1970 ...[ 6684.=
+617085] lr : cqhci_request+0x314/0x4e8 [cqhci]
+> > >     > [ 6684.626734] sp : ffff80001243b9f0
+> > >     > [ 6684.630049] x29: ffff80001243b9f0 x28: ffff00002c3dd000
+> > >     > [ 6684.635367] x27: 0000000000000001 x26: 0000000000000001
+> > >     > [ 6684.640690] x25: ffff00002c451000 x24: 000000000000000f
+> > >     > [ 6684.646007] x23: ffff000017e71c80 x22: ffff00002c451000
+> > >     > [ 6684.651326] x21: ffff00002c0f3550 x20: ffff00002c0f3550
+> > >     > [ 6684.656651] x19: ffff000017d46880 x18: ffff00002cea1500
+> > >     > [ 6684.661977] x17: 0000000000000000 x16: 0000000000000000
+> > >     > [ 6684.667294] x15: 000001ee628e3ed1 x14: 0000000000000278
+> > >     > [ 6684.672610] x13: 0000000000000001 x12: 0000000000000001
+> > >     > [ 6684.677927] x11: 0000000000000000 x10: 0000000000000000
+> > >     > [ 6684.683243] x9 : 000000000000002b x8 : 0000000000001000
+> > >     > [ 6684.688560] x7 : 0000000000000010 x6 : ffff00002c0f3678
+> > >     > [ 6684.693886] x5 : 000000000000000f x4 : ffff800011c5b000
+> > >     > [ 6684.699211] x3 : 000000000002d988 x2 : 0000000000000008
+> > >     > [ 6684.704537] x1 : 00000000000000f0 x0 : 0002d9880008102f
+> > >     > [ 6684.709854] Call trace:
+> > >     > [ 6684.712313]  cqhci_request+0x148/0x4e8 [cqhci]
+> > >     > [ 6684.716803]  mmc_cqe_start_req+0x58/0x68 [mmc_core]
+> > >     > [ 6684.721698]  mmc_blk_mq_issue_rq+0x460/0x810 [mmc_block]
+> > >     > [ 6684.727018]  mmc_mq_queue_rq+0x118/0x2b0 [mmc_block]
+> > >     >
+> > >     > cqhci_request was called after cqhci_disable.
+> > >     >
+> > >     > cqhci_disable                                 cqhci_request
+> > >     > {                                             {
+> > >     >       dmam_free_coherent();  (1) free
+> > >     >                                                   if(!cq_host->=
+enable)
+> > >     >                                                        return
+> > >     >                                        (2) pass check here
+> > >     >       cq_host->enable =3D false;
+> > >     >
+> > >     >                                                   task_desc=3D =
+get_desc(cq_host,tag);
+> > >     >                                                              ^^=
+^^ crash here
+> > >     >                                          (3) access memory whic=
+h is already free
+> > >     >
+> > >     > }                                             }
+> > >     >
+> > >     > Signed-off-by: Frank Li <Frank.Li@nxp.com <mailto:Frank.Li@nxp.=
+com>>
+> > >     > ---
+> > >     >  drivers/mmc/host/cqhci-core.c | 18 ++++++++++++++----
+> > >     >  1 file changed, 14 insertions(+), 4 deletions(-)
+> > >     >
+> > >     > diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/c=
+qhci-core.c
+> > >     > index 93b0432bb601..36d292261e50 100644
+> > >     > --- a/drivers/mmc/host/cqhci-core.c
+> > >     > +++ b/drivers/mmc/host/cqhci-core.c
+> > >     > @@ -389,6 +389,7 @@ static void cqhci_off(struct mmc_host *mmc)
+> > >     >  static void cqhci_disable(struct mmc_host *mmc)
+> > >     >  {
+> > >     >       struct cqhci_host *cq_host =3D mmc->cqe_private;
+> > >     > +     unsigned long flags;
+> > >     >
+> > >     >       if (!cq_host->enabled)
+> > >     >               return;
+> > >     > @@ -397,6 +398,11 @@ static void cqhci_disable(struct mmc_host =
+*mmc)
+> > >     >
+> > >     >       __cqhci_disable(cq_host);
+> > >     >
+> > >     > +     /* need wait for cqhci_request finish before free memory =
+*/
+> > >     > +     spin_lock_irqsave(&cq_host->lock, flags);
+> > >     > +     cq_host->enabled =3D false;
+> > >     > +     spin_unlock_irqrestore(&cq_host->lock, flags);
+> > >     > +
+> > >     >       dmam_free_coherent(mmc_dev(mmc), cq_host->data_size,
+> > >     >                          cq_host->trans_desc_base,
+> > >     >                          cq_host->trans_desc_dma_base);
+> > >     > @@ -408,7 +414,6 @@ static void cqhci_disable(struct mmc_host *=
+mmc)
+> > >     >       cq_host->trans_desc_base =3D NULL;
+> > >     >       cq_host->desc_base =3D NULL;
+> > >     >
+> > >     > -     cq_host->enabled =3D false;
+> > >     >  }
+> > >     >
+> > >     >  static void cqhci_prep_task_desc(struct mmc_request *mrq,
+> > >     > @@ -612,6 +617,13 @@ static int cqhci_request(struct mmc_host *=
+mmc, struct mmc_request *mrq)
+> > >     >                       cq_host->ops->enable(mmc);
+> > >     >       }
+> > >     >
+> > >     > +     spin_lock_irqsave(&cq_host->lock, flags);
+> > >     > +     if (!cq_host->enabled) {
+> > >     > +             pr_err("%s: cqhci: not enabled\n", mmc_hostname(m=
+mc));
+> > >     > +             err =3D -EINVAL;
+> > >     > +             goto out_unlock;
+> > >     > +     }
+> > >     > +
+> > >     >       if (mrq->data) {
+> > >     >               cqhci_prep_task_desc(mrq, cq_host, tag);
+> > >     >
+> > >     > @@ -619,14 +631,12 @@ static int cqhci_request(struct mmc_host =
+*mmc, struct mmc_request *mrq)
+> > >     >               if (err) {
+> > >     >                       pr_err("%s: cqhci: failed to setup tx des=
+c: %d\n",
+> > >     >                              mmc_hostname(mmc), err);
+> > >     > -                     return err;
+> > >     > +                     goto out_unlock;
+> > >     >               }
+> > >     >       } else {
+> > >     >               cqhci_prep_dcmd_desc(mmc, mrq);
+> > >     >       }
+> > >     >
+> > >     > -     spin_lock_irqsave(&cq_host->lock, flags);
+> > >     > -
+> > >     >       if (cq_host->recovery_halt) {
+> > >     >               err =3D -EBUSY;
+> > >     >               goto out_unlock;
+> > >     >
+> > >
+> > >     Please try the following instead:
+> > >
+> > >
+> > >     diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> > >     index c2e70b757dd1..dfc8d2877115 100644
+> > >     --- a/drivers/mmc/core/bus.c
+> > >     +++ b/drivers/mmc/core/bus.c
+> > >     @@ -399,11 +399,6 @@ void mmc_remove_card(struct mmc_card *card)
+> > >             mmc_remove_card_debugfs(card);
+> > >      #endif
+> > >
+> > >     -       if (host->cqe_enabled) {
+> > >     -               host->cqe_ops->cqe_disable(host);
+> > >     -               host->cqe_enabled =3D false;
+> > >     -       }
+> > >     -
+> > >             if (mmc_card_present(card)) {
+> > >                     if (mmc_host_is_spi(card->host)) {
+> > >                             pr_info("%s: SPI card removed\n",
+> > >     @@ -416,6 +411,11 @@ void mmc_remove_card(struct mmc_card *card)
+> > >                     of_node_put(card->dev.of_node);
+> > >             }
+> > >
+> > >     +       if (host->cqe_enabled) {
+> > >     +               host->cqe_ops->cqe_disable(host);
+> > >     +               host->cqe_enabled =3D false;
+> > >     +       }
+> > >     +
+> > >             put_device(&card->dev);
+> > >      }
+> > >
+> > >
+> > > Actually this is my first solution,  it can't resolve issues 100% and=
+ just reduce possibility.
+> > >
+> > > One core run                                                         =
+                 The another core run
+> > > mmc_remove_card                                                      =
+          mmc_mq_queue_rq
+> > > {                                                                    =
+                          {
+> > >
+> > >                                                                      =
+                                        if (mmc_card_removed(mq->card)) {
+> > >                                                                      =
+                                                         req->rq_flags |=3D=
+ RQF_QUIET;
+> > >                                                                      =
+                                                          return BLK_STS_IO=
+ERR;
+> > >                                                                      =
+                                         }
+> > >                                                                      =
+                                         //pass check here
+> > >         device_del(&card->dev);
+> >
+> > Deleting the card device removes it from the block driver
+> > (i.e. mmc_blk_remove()), which cleans up the request queues,
+> > so the scenario you describe here should never happen.
+> >
+> > Can you determine if mmc_blk_remove() is called and whether
+> > it cleans up blk queues?
+> >
+>
+> yes, mmc_blk_remove is called.
+> Let me run my test case. It takes at least 24 hours.
 
-[AJB: the principle difference is all the MAC calculation and
-validation is now done in the driver]
+No crash found, this method can fix this problem.
+Let me send out a new patch.
 
-Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
-Cc: Tomas Winkler <tomas.winkler@intel.com>
-
----
-ajb:
-  - add include linux/slab.h for kzalloc
-  - include standardised VIRTIO_ID_RPMB
-  - remove extra frames when sending commands down virtqueue
-  - clean up out/in sgs - hopefully more conforming
-  - remove cmd_cap code
----
- drivers/char/rpmb/Kconfig        |  10 +
- drivers/char/rpmb/Makefile       |   1 +
- drivers/char/rpmb/virtio_rpmb.c  | 366 +++++++++++++++++++++++++++++++
- include/uapi/linux/virtio_ids.h  |   1 +
- include/uapi/linux/virtio_rpmb.h |  54 +++++
- 5 files changed, 432 insertions(+)
- create mode 100644 drivers/char/rpmb/virtio_rpmb.c
- create mode 100644 include/uapi/linux/virtio_rpmb.h
-
-diff --git a/drivers/char/rpmb/Kconfig b/drivers/char/rpmb/Kconfig
-index 9068664a399a..845f458452a5 100644
---- a/drivers/char/rpmb/Kconfig
-+++ b/drivers/char/rpmb/Kconfig
-@@ -16,3 +16,13 @@ config RPMB_INTF_DEV
- 	help
- 	  Say yes here if you want to access RPMB from user space
- 	  via character device interface /dev/rpmb%d
-+
-+config VIRTIO_RPMB
-+	tristate "Virtio RPMB character device interface /dev/vrpmb"
-+	default n
-+	depends on VIRTIO && KEYS
-+	select RPMB
-+	help
-+	  Say yes here if you want to access virtio RPMB from user space
-+	  via character device interface /dev/vrpmb.
-+	  This device interface is only for guest/frontend virtio driver.
-diff --git a/drivers/char/rpmb/Makefile b/drivers/char/rpmb/Makefile
-index f54b3f30514b..4b397b50a42c 100644
---- a/drivers/char/rpmb/Makefile
-+++ b/drivers/char/rpmb/Makefile
-@@ -4,5 +4,6 @@
- obj-$(CONFIG_RPMB) += rpmb.o
- rpmb-objs += core.o
- rpmb-$(CONFIG_RPMB_INTF_DEV) += cdev.o
-+obj-$(CONFIG_VIRTIO_RPMB) += virtio_rpmb.o
- 
- ccflags-y += -D__CHECK_ENDIAN__
-diff --git a/drivers/char/rpmb/virtio_rpmb.c b/drivers/char/rpmb/virtio_rpmb.c
-new file mode 100644
-index 000000000000..6ade26874a4e
---- /dev/null
-+++ b/drivers/char/rpmb/virtio_rpmb.c
-@@ -0,0 +1,366 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Virtio RPMB Front End Driver
-+ *
-+ * Copyright (c) 2018-2019 Intel Corporation.
-+ * Copyright (c) 2021 Linaro Ltd.
-+ */
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+#include <linux/err.h>
-+#include <linux/scatterlist.h>
-+#include <linux/spinlock.h>
-+#include <linux/slab.h>
-+#include <linux/virtio.h>
-+#include <linux/module.h>
-+#include <linux/virtio_ids.h>
-+#include <linux/fs.h>
-+#include <linux/virtio_config.h>
-+#include <linux/virtio_rpmb.h>
-+#include <linux/uaccess.h>
-+#include <linux/key.h>
-+#include <linux/rpmb.h>
-+
-+#define RPMB_MAC_SIZE 32
-+
-+static const char id[] = "RPMB:VIRTIO";
-+
-+struct virtio_rpmb_info {
-+	struct virtqueue *vq;
-+	struct mutex lock; /* info lock */
-+	wait_queue_head_t have_data;
-+	struct rpmb_dev *rdev;
-+};
-+
-+static void virtio_rpmb_recv_done(struct virtqueue *vq)
-+{
-+	struct virtio_rpmb_info *vi;
-+	struct virtio_device *vdev = vq->vdev;
-+
-+	vi = vq->vdev->priv;
-+	if (!vi) {
-+		dev_err(&vdev->dev, "Error: no found vi data.\n");
-+		return;
-+	}
-+
-+	wake_up(&vi->have_data);
-+}
-+
-+/* static int rpmb_virtio_cmd_seq(struct device *dev, u8 target, */
-+/* 			       struct rpmb_cmd *cmds, u32 ncmds) */
-+/* { */
-+/* 	struct virtio_device *vdev = dev_to_virtio(dev); */
-+/* 	struct virtio_rpmb_info *vi = vdev->priv; */
-+/* 	unsigned int i; */
-+/* 	struct scatterlist out_frames[3]; */
-+/* 	struct scatterlist in_frames[3]; */
-+/* 	struct scatterlist *sgs[3]; */
-+/* 	unsigned int num_out = 0, num_in = 0; */
-+/* 	size_t sz; */
-+/* 	int ret; */
-+/* 	unsigned int len; */
-+
-+/* 	if (ncmds > RPMB_SEQ_CMD_MAX) */
-+/* 		return -EINVAL; */
-+
-+/* 	mutex_lock(&vi->lock); */
-+
-+/* 	/\* */
-+/* 	 * Process the frames - putting in the appropriate out_frames */
-+/* 	 * and in_frames before we build our final ordered sgs[] out */
-+/* 	 * array. */
-+/* 	 *\/ */
-+/* 	for (i = 0; i < ncmds; i++) { */
-+/* 		struct rpmb_cmd *cmd = &cmds[i]; */
-+/* 		sz = sizeof(struct rpmb_frame_jdec) * (cmd->nframes ?: 1); */
-+/* 		if (cmd->flags) { */
-+/* 			sg_init_one(&out_frames[num_out++], cmd->frames, sz); */
-+/* 		} else { */
-+/* 			sg_init_one(&in_frames[num_in++], cmd->frames, sz); */
-+/* 		} */
-+/* 	} */
-+
-+/* 	for (i = 0; i < num_out; i++) { */
-+/* 		sgs[i] = &out_frames[i]; */
-+/* 	} */
-+/* 	for (i = 0; i < num_in; i++) { */
-+/* 		sgs[num_out + i] = &in_frames[i]; */
-+/* 	} */
-+
-+/* 	dev_warn(dev, "out = %d, in = %d\n", num_out, num_in); */
-+
-+/* 	virtqueue_add_sgs(vi->vq, sgs, num_out, num_in, vi, GFP_KERNEL); */
-+/* 	virtqueue_kick(vi->vq); */
-+
-+/* 	wait_event(vi->have_data, virtqueue_get_buf(vi->vq, &len)); */
-+
-+/* 	ret = 0; */
-+
-+/* 	/\* */
-+/* 	 * We can't fail at this point, we assume we got a response */
-+/* 	 * buffer back. */
-+/* 	 *\/ */
-+
-+/* 	mutex_unlock(&vi->lock); */
-+/* 	return ret; */
-+/* } */
-+
-+static void * rpmb_virtio_get_key(struct device *dev, key_serial_t keyid)
-+{
-+	key_ref_t keyref;
-+	struct key *key;
-+	void *ptr = NULL;
-+
-+	keyref = lookup_user_key(keyid, 0, KEY_NEED_SEARCH);
-+	if (IS_ERR(keyref))
-+		return NULL;
-+
-+	key = key_ref_to_ptr(keyref);
-+
-+	if (key->datalen != RPMB_MAC_SIZE)
-+		dev_err(dev, "Invalid key size (%d)", key->datalen);
-+	else
-+		ptr = key->payload.data[0];
-+
-+	key_put(key);
-+	return ptr;
-+}
-+
-+static int rpmb_virtio_program_key(struct device *dev, u8 target, key_serial_t keyid)
-+{
-+	struct virtio_device *vdev = dev_to_virtio(dev);
-+	struct virtio_rpmb_info *vi = vdev->priv;
-+	const void *key = rpmb_virtio_get_key(dev, keyid);
-+
-+	if (key) {
-+		struct scatterlist out_frame;
-+		struct scatterlist in_frame;
-+		struct scatterlist *sgs[2];
-+		unsigned int len;
-+		struct virtio_rpmb_frame resp;
-+		struct virtio_rpmb_frame cmd = {
-+			.req_resp = cpu_to_le16(VIRTIO_RPMB_REQ_PROGRAM_KEY)
-+		};
-+
-+		/* Prepare the command frame & response */
-+		memcpy(&cmd.key_mac, key, sizeof(cmd.key_mac));
-+
-+		mutex_lock(&vi->lock);
-+
-+		/* Wrap into SG array */
-+		sg_init_one(&out_frame, &cmd, sizeof(cmd));
-+		sg_init_one(&in_frame, &resp, sizeof(resp));
-+		sgs[0] = &out_frame;
-+		sgs[1] = &in_frame;
-+
-+		/* Send it */
-+		virtqueue_add_sgs(vi->vq, sgs, 1, 1, vi, GFP_KERNEL);
-+		virtqueue_kick(vi->vq);
-+		wait_event(vi->have_data, virtqueue_get_buf(vi->vq, &len));
-+
-+		mutex_unlock(&vi->lock);
-+
-+		if (le16_to_cpu(resp.req_resp) != VIRTIO_RPMB_RESP_PROGRAM_KEY) {
-+			dev_err(dev, "Bad response from device (%x/%x)",
-+				le16_to_cpu(resp.req_resp), le16_to_cpu(resp.result));
-+			return -EPROTO;
-+		}
-+
-+		/* check the MAC? */
-+
-+		/* map responses to better errors? */
-+		return le16_to_cpu(resp.result) == VIRTIO_RPMB_RES_OK ? 0 : -EIO;
-+	} else {
-+		return -EINVAL;
-+	}
-+}
-+
-+static int rpmb_virtio_get_capacity(struct device *dev, u8 target)
-+{
-+	struct virtio_device *vdev = dev_to_virtio(dev);
-+	u8 capacity;
-+
-+	virtio_cread(vdev, struct virtio_rpmb_config, capacity, &capacity);
-+
-+	if (capacity > 0x80) {
-+		dev_err(&vdev->dev, "Error: invalid capacity reported.\n");
-+		capacity = 0x80;
-+	}
-+
-+	return capacity;
-+}
-+
-+static int rpmb_virtio_get_write_count(struct device *dev, u8 target)
-+{
-+	struct virtio_device *vdev = dev_to_virtio(dev);
-+	struct virtio_rpmb_info *vi = vdev->priv;
-+	struct scatterlist out_frame;
-+	struct scatterlist in_frame;
-+	struct scatterlist *sgs[2];
-+	unsigned int len;
-+	struct virtio_rpmb_frame resp;
-+	struct virtio_rpmb_frame cmd = {
-+		.req_resp = cpu_to_le16(VIRTIO_RPMB_REQ_GET_WRITE_COUNTER)
-+	};
-+
-+	mutex_lock(&vi->lock);
-+
-+	/* Wrap into SG array */
-+	sg_init_one(&out_frame, &cmd, sizeof(cmd));
-+	sg_init_one(&in_frame, &resp, sizeof(resp));
-+	sgs[0] = &out_frame;
-+	sgs[1] = &in_frame;
-+
-+	/* Send it */
-+	virtqueue_add_sgs(vi->vq, sgs, 1, 1, vi, GFP_KERNEL);
-+	virtqueue_kick(vi->vq);
-+	wait_event(vi->have_data, virtqueue_get_buf(vi->vq, &len));
-+
-+	mutex_unlock(&vi->lock);
-+
-+	if (le16_to_cpu(resp.req_resp) != VIRTIO_RPMB_RESP_GET_COUNTER) {
-+		dev_err(dev, "failed to program key (%x/%x)",
-+			le16_to_cpu(resp.req_resp), le16_to_cpu(resp.result));
-+		return -EPROTO;
-+	}
-+
-+	return le16_to_cpu(resp.result) == VIRTIO_RPMB_RES_OK ? be32_to_cpu(resp.write_counter) : -EIO;
-+}
-+
-+static struct rpmb_ops rpmb_virtio_ops = {
-+	.program_key = rpmb_virtio_program_key,
-+	.get_capacity = rpmb_virtio_get_capacity,
-+	.get_write_count = rpmb_virtio_get_write_count,
-+	/* .write_blocks = rpmb_virtio_write_blocks, */
-+	/* .read_blocks = rpmb_virtio_read_blocks, */
-+	.auth_method = RPMB_HMAC_ALGO_SHA_256,
-+};
-+
-+static int rpmb_virtio_dev_init(struct virtio_rpmb_info *vi)
-+{
-+	int ret = 0;
-+	struct device *dev = &vi->vq->vdev->dev;
-+	struct virtio_device *vdev = dev_to_virtio(dev);
-+	u8 max_wr, max_rd;
-+
-+	virtio_cread(vdev, struct virtio_rpmb_config,
-+		     max_wr_cnt, &max_wr);
-+	virtio_cread(vdev, struct virtio_rpmb_config,
-+		     max_rd_cnt, &max_rd);
-+
-+	rpmb_virtio_ops.dev_id_len = strlen(id);
-+	rpmb_virtio_ops.dev_id = id;
-+	rpmb_virtio_ops.wr_cnt_max = max_wr;
-+	rpmb_virtio_ops.rd_cnt_max = max_rd;
-+	rpmb_virtio_ops.block_size = 1;
-+
-+	vi->rdev = rpmb_dev_register(dev, 0, &rpmb_virtio_ops);
-+	if (IS_ERR(vi->rdev)) {
-+		ret = PTR_ERR(vi->rdev);
-+		goto err;
-+	}
-+
-+	dev_set_drvdata(dev, vi);
-+err:
-+	return ret;
-+}
-+
-+static int virtio_rpmb_init(struct virtio_device *vdev)
-+{
-+	int ret;
-+	struct virtio_rpmb_info *vi;
-+
-+	vi = kzalloc(sizeof(*vi), GFP_KERNEL);
-+	if (!vi)
-+		return -ENOMEM;
-+
-+	init_waitqueue_head(&vi->have_data);
-+	mutex_init(&vi->lock);
-+	vdev->priv = vi;
-+
-+	/* We expect a single virtqueue. */
-+	vi->vq = virtio_find_single_vq(vdev, virtio_rpmb_recv_done, "request");
-+	if (IS_ERR(vi->vq)) {
-+		dev_err(&vdev->dev, "get single vq failed!\n");
-+		ret = PTR_ERR(vi->vq);
-+		goto err;
-+	}
-+
-+	/* create vrpmb device. */
-+	ret = rpmb_virtio_dev_init(vi);
-+	if (ret) {
-+		dev_err(&vdev->dev, "create vrpmb device failed.\n");
-+		goto err;
-+	}
-+
-+	dev_info(&vdev->dev, "init done!\n");
-+
-+	return 0;
-+
-+err:
-+	kfree(vi);
-+	return ret;
-+}
-+
-+static void virtio_rpmb_remove(struct virtio_device *vdev)
-+{
-+	struct virtio_rpmb_info *vi;
-+
-+	vi = vdev->priv;
-+	if (!vi)
-+		return;
-+
-+	if (wq_has_sleeper(&vi->have_data))
-+		wake_up(&vi->have_data);
-+
-+	rpmb_dev_unregister(vi->rdev);
-+
-+	if (vdev->config->reset)
-+		vdev->config->reset(vdev);
-+
-+	if (vdev->config->del_vqs)
-+		vdev->config->del_vqs(vdev);
-+
-+	kfree(vi);
-+}
-+
-+static int virtio_rpmb_probe(struct virtio_device *vdev)
-+{
-+	return virtio_rpmb_init(vdev);
-+}
-+
-+#ifdef CONFIG_PM_SLEEP
-+static int virtio_rpmb_freeze(struct virtio_device *vdev)
-+{
-+	virtio_rpmb_remove(vdev);
-+	return 0;
-+}
-+
-+static int virtio_rpmb_restore(struct virtio_device *vdev)
-+{
-+	return virtio_rpmb_init(vdev);
-+}
-+#endif
-+
-+static struct virtio_device_id id_table[] = {
-+	{ VIRTIO_ID_RPMB, VIRTIO_DEV_ANY_ID },
-+	{ 0 },
-+};
-+
-+static struct virtio_driver virtio_rpmb_driver = {
-+	.driver.name =	KBUILD_MODNAME,
-+	.driver.owner =	THIS_MODULE,
-+	.id_table =	id_table,
-+	.probe =	virtio_rpmb_probe,
-+	.remove =	virtio_rpmb_remove,
-+#ifdef CONFIG_PM_SLEEP
-+	.freeze =	virtio_rpmb_freeze,
-+	.restore =	virtio_rpmb_restore,
-+#endif
-+};
-+
-+module_virtio_driver(virtio_rpmb_driver);
-+MODULE_DEVICE_TABLE(virtio, id_table);
-+
-+MODULE_DESCRIPTION("Virtio rpmb frontend driver");
-+MODULE_AUTHOR("Intel Corporation");
-+MODULE_LICENSE("Dual BSD/GPL");
-diff --git a/include/uapi/linux/virtio_ids.h b/include/uapi/linux/virtio_ids.h
-index bc1c0621f5ed..934df72714e2 100644
---- a/include/uapi/linux/virtio_ids.h
-+++ b/include/uapi/linux/virtio_ids.h
-@@ -53,6 +53,7 @@
- #define VIRTIO_ID_MEM			24 /* virtio mem */
- #define VIRTIO_ID_FS			26 /* virtio filesystem */
- #define VIRTIO_ID_PMEM			27 /* virtio pmem */
-+#define VIRTIO_ID_RPMB			28 /* virtio RPMB */
- #define VIRTIO_ID_MAC80211_HWSIM	29 /* virtio mac80211-hwsim */
- 
- #endif /* _LINUX_VIRTIO_IDS_H */
-diff --git a/include/uapi/linux/virtio_rpmb.h b/include/uapi/linux/virtio_rpmb.h
-new file mode 100644
-index 000000000000..f048cd968210
---- /dev/null
-+++ b/include/uapi/linux/virtio_rpmb.h
-@@ -0,0 +1,54 @@
-+/* SPDX-License-Identifier: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause) */
-+
-+#ifndef _UAPI_LINUX_VIRTIO_RPMB_H
-+#define _UAPI_LINUX_VIRTIO_RPMB_H
-+
-+#include <linux/types.h>
-+#include <linux/virtio_ids.h>
-+#include <linux/virtio_config.h>
-+#include <linux/virtio_types.h>
-+
-+struct virtio_rpmb_config {
-+	__u8 capacity;
-+	__u8 max_wr_cnt;
-+	__u8 max_rd_cnt;
-+} __attribute__((packed));
-+
-+/* RPMB Request Types (in .req_resp) */
-+#define VIRTIO_RPMB_REQ_PROGRAM_KEY        0x0001
-+#define VIRTIO_RPMB_REQ_GET_WRITE_COUNTER  0x0002
-+#define VIRTIO_RPMB_REQ_DATA_WRITE         0x0003
-+#define VIRTIO_RPMB_REQ_DATA_READ          0x0004
-+#define VIRTIO_RPMB_REQ_RESULT_READ        0x0005
-+
-+/* RPMB Response Types (in .req_resp) */
-+#define VIRTIO_RPMB_RESP_PROGRAM_KEY       0x0100
-+#define VIRTIO_RPMB_RESP_GET_COUNTER       0x0200
-+#define VIRTIO_RPMB_RESP_DATA_WRITE        0x0300
-+#define VIRTIO_RPMB_RESP_DATA_READ         0x0400
-+
-+struct virtio_rpmb_frame {
-+	__u8 stuff[196];
-+	__u8 key_mac[32];
-+	__u8 data[256];
-+	__u8 nonce[16];
-+	__be32 write_counter;
-+	__be16 address;
-+	__be16 block_count;
-+	__be16 result;
-+	__be16 req_resp;
-+} __attribute__((packed));
-+
-+/* RPMB Operation Results (in .result) */
-+#define VIRTIO_RPMB_RES_OK                     0x0000
-+#define VIRTIO_RPMB_RES_GENERAL_FAILURE        0x0001
-+#define VIRTIO_RPMB_RES_AUTH_FAILURE           0x0002
-+#define VIRTIO_RPMB_RES_COUNT_FAILURE          0x0003
-+#define VIRTIO_RPMB_RES_ADDR_FAILURE           0x0004
-+#define VIRTIO_RPMB_RES_WRITE_FAILURE          0x0005
-+#define VIRTIO_RPMB_RES_READ_FAILURE           0x0006
-+#define VIRTIO_RPMB_RES_NO_AUTH_KEY            0x0007
-+#define VIRTIO_RPMB_RES_WRITE_COUNTER_EXPIRED  0x0080
-+
-+
-+#endif /* _UAPI_LINUX_VIRTIO_RPMB_H */
--- 
-2.20.1
-
+>
+> >
+> >
+> > >         //free resource here
+> > >         host->cqe_ops->cqe_disable(host);
+> > >
+> > >                                                                      =
+                                         call  cqhci_request
+> > >                                                                      =
+                                           //kernel dump here to access mem=
+ory that is already free.
+> > >
+> > > }                                                                    =
+                           }
+> > >
+> > > There is one fundamental problem that there is NOT read lock when che=
+cking mmc_card_removed, and write lock for updating md->card.
+> > > The risk conditions always exist between queue request and card remov=
+e.
+> > >
+> > > There are no issues for non-command queue host controllers, it just c=
+auses a redundant cmd sent by host,  cmd will be timeout.  Just an expected=
+ IO error
+> > > happened. Maybe just errors code is different.
+> > >
+> > > But Cmd queue is different,  cmd queue disabled  function free memory=
+ resources. if risk conditions happen, there are kernel dump.
+> > >
+> > >
+> > >
+> >
