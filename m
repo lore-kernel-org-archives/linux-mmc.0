@@ -4,159 +4,618 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 673D5C433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 934C9C433E0
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:00:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2352664F5A
+	by mail.kernel.org (Postfix) with ESMTP id 553C964F94
 	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 00:00:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237644AbhCDAAW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Mar 2021 19:00:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35478 "EHLO
+        id S244750AbhCDAAa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Mar 2021 19:00:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1377226AbhCCMWg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 07:22:36 -0500
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1EE5C0617A9
-        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 04:20:58 -0800 (PST)
-Received: by mail-lf1-x131.google.com with SMTP id k9so16848039lfo.12
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Mar 2021 04:20:58 -0800 (PST)
+        with ESMTP id S1348847AbhCCN4R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 08:56:17 -0500
+Received: from mail-wm1-x331.google.com (mail-wm1-x331.google.com [IPv6:2a00:1450:4864:20::331])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E96E3C061225
+        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 05:55:06 -0800 (PST)
+Received: by mail-wm1-x331.google.com with SMTP id o16so6438339wmh.0
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Mar 2021 05:55:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Vf8w2DOx9jzNzEvSal2fcDgyCGSYzKizUYKhFMSZIWY=;
-        b=b+YOBur+UNT3fr1MydkfahrEEu0JFWr+GUvB+DTkjYwK3771dYvme0s6U/30Qq2qVU
-         aGyBROFh+WGe8PSdgsVYxWFKg/xBEe13a2dYCdKNBCdPhAKCNjgUNl97HkNkwNZluNMB
-         9jXhYjoCW8IRDeNORW4rAqeKcEnNtUGSVw2Rer0Utm4lRD/wkuX/Jwiji31TkuBx7xm1
-         b9N+DmuUo0YQWje6iiV0e9loryhhKnXDI0Fcgy9csg4UgsaeIPANALzEQi5g7SPKzkuC
-         Uqi6y1VTOsGtTrdsxUqLWAKM0zy+v/tx1OCd3GG5hoE2kux5vbGhKOqUC/xB/r5JQS8T
-         dw2g==
+        bh=WJUtAp3RgTuh77Yze697rFi7ZjYyj9YiGnAS+QwJ7C0=;
+        b=YL9ezgrsIYF/mhf7EYRWSR1lQZXrDPM/NOFRk+RGiRvHGHVOtx/Y3isZqopKl4RG6z
+         ix32xeM0AR16nmSlcBFhUbyu/6WdESyu+0x3bkTWPfhCrigYGd0dhAn5uII4A4ombPrL
+         bnggwd5WcH4P9RhdrafjN379iDJlE8OrjDeGZBiFjMWE3pyOzJZVYP7C81Ab7/GaNy7D
+         xRMsOkrzbyq7dxDRHQh3MlVKKVlci7syCEhd6qLTuV1LlYRbIxHPgUDGb4MzWGigkLaH
+         zr2T8xG+2g4lZ0dZcs4XDO2ef4cFMViexc6uT+xAJPYtJ+3TJLxCj86QlOTE40QR6pZ0
+         GGFQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Vf8w2DOx9jzNzEvSal2fcDgyCGSYzKizUYKhFMSZIWY=;
-        b=rCKOCHo8N1hShGWzA2+LVsP/SbH9O4gn5Bcyb7rd4/TppmF21rUissjA8DaFSxs38+
-         pdE8WLfj4U73MjZR3PShpa8/X7buQANprOBF3cf1/hJEZHLwUD+ZW+3HyK3sJChI7EJu
-         u9A+KrqFhx4T0bN+cIsfBqfdmrI+5x6+EuXZ2VZ30w92jLsyBTTrSojLuXN1IajVKFkk
-         OhKW0UjocpDcJS/RBLEy+QXysdofCiubhmN41rcSc8GjRjj26yoK+gOXB2ZCQjD0D2Uk
-         nA/VMM2NSQqJFMW5Y6dZ9Y9dz/nw9Pomvx2fvGbN0UVCBfjNV820ax7SWYIKmbujhD4f
-         BEuQ==
-X-Gm-Message-State: AOAM532War5Jw2zcqm2KmB/rdIaDqLyFs8spzv0UY9fomLo7H7Q/B7UT
-        dy52J2YLtwN2T1yfquUhL406ejSdcy6/Ag==
-X-Google-Smtp-Source: ABdhPJyejyZYo5gNNlhWEICEam/nrx5cNRlHDqbjVPosD7259wOXYQnbJgEu1XQs1VsA48M6VuUiPg==
-X-Received: by 2002:a19:4101:: with SMTP id o1mr14056347lfa.16.1614774056786;
-        Wed, 03 Mar 2021 04:20:56 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
-        by smtp.gmail.com with ESMTPSA id d3sm811519lfq.249.2021.03.03.04.20.55
+        bh=WJUtAp3RgTuh77Yze697rFi7ZjYyj9YiGnAS+QwJ7C0=;
+        b=e34C06gch7map4cVSjSShs8rHCNtHD3DKWX7avlyfdaKg2B6ZIAOQBmu4QPNwtFq5L
+         bDwMaTToSvLW7joFPV8eKw3TXUqL3uhuemxgfEPZDmcjbsJyhBzif5tPGJlAQ9McvmCo
+         iICDqucUAjFn+tqm76bK9ZZr401CeMdnVZzQzbcO4Dl4TVT+QYnPFrcYTcinhd/W7fF7
+         9tU/lVHNcYX0FB3iVv/C7TVwjMs8YBtcy7Hl48c/r5AQP1aq7NscZSCog+h8o36rVbWO
+         OpE5GNowIlwS6yNOP8asMaUtbEzGieJGbBhW0ryJwXFDnuauZDUCLrkKUBCMsCDhoO6q
+         ZQ4w==
+X-Gm-Message-State: AOAM5305qAJhZ44YdLu4GHV/nyRcknio+zx/IZzuYP7Xxjtli/Vs8JKd
+        O7IUrEQ3UGsxY91vJG9eVj23ug==
+X-Google-Smtp-Source: ABdhPJxIJTZNj1xIlqq51htSj3XbOWuBJixpryvB02USBa1G2kBlj1jXo8vwVEEiGDDHKtsMgTtvqg==
+X-Received: by 2002:a1c:2ed4:: with SMTP id u203mr9479000wmu.45.1614779705554;
+        Wed, 03 Mar 2021 05:55:05 -0800 (PST)
+Received: from zen.linaroharston ([51.148.130.216])
+        by smtp.gmail.com with ESMTPSA id l15sm5963387wme.43.2021.03.03.05.55.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Mar 2021 04:20:55 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH 2/3] mmc: block: Simplify logging during probe about added partitions
-Date:   Wed,  3 Mar 2021 13:20:48 +0100
-Message-Id: <20210303122049.151986-3-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210303122049.151986-1-ulf.hansson@linaro.org>
-References: <20210303122049.151986-1-ulf.hansson@linaro.org>
+        Wed, 03 Mar 2021 05:55:01 -0800 (PST)
+Received: from zen.lan (localhost [127.0.0.1])
+        by zen.linaroharston (Postfix) with ESMTP id A9ED71FF8C;
+        Wed,  3 Mar 2021 13:55:00 +0000 (GMT)
+From:   =?UTF-8?q?Alex=20Benn=C3=A9e?= <alex.bennee@linaro.org>
+To:     linux-kernel@vger.kernel.org
+Cc:     maxim.uvarov@linaro.org, joakim.bech@linaro.org,
+        ilias.apalodimas@linaro.org, arnd@linaro.org,
+        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
+        yang.huang@intel.com, bing.zhu@intel.com,
+        Matti.Moell@opensynergy.com, hmo@opensynergy.com,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-nvme@vger.kernel.org,
+        =?UTF-8?q?Alex=20Benn=C3=A9e?= <alex.bennee@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        Alexander Usyskin <alexander.usyskin@intel.com>,
+        Avri Altman <avri.altman@sandisk.com>
+Subject: [RFC PATCH  2/5] char: rpmb: provide a user space interface
+Date:   Wed,  3 Mar 2021 13:54:57 +0000
+Message-Id: <20210303135500.24673-3-alex.bennee@linaro.org>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20210303135500.24673-1-alex.bennee@linaro.org>
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To simplify the code, move the logging into the common mmc_blk_alloc_req()
-and drop the rather useless information about the partition type/id.
+The user space API is achieved via a number of synchronous IOCTLs.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+  * RPMB_IOC_VER_CMD - simple versioning API
+  * RPMB_IOC_CAP_CMD - query of underlying capabilities
+  * RPMB_IOC_PKEY_CMD - one time programming of access key
+  * RPMB_IOC_COUNTER_CMD - query the write counter
+  * RPMB_IOC_WBLOCKS_CMD - write blocks to device
+  * RPMB_IOC_RBLOCKS_CMD - read blocks from device
+
+The keys used for programming and writing blocks to the device are
+key_serial_t handles as provided by the keyctl() interface.
+
+[AJB: here there are two key differences between this and the original
+proposal. The first is the dropping of the sequence of preformated
+frames in favour of explicit actions. The second is the introduction
+of key_serial_t and the keyring API for referencing the key to use]
+
+Signed-off-by: Alex Bennée <alex.bennee@linaro.org>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Linus  Walleij <linus.walleij@linaro.org>
+Cc: Arnd Bergmann <arnd.bergmann@linaro.org>
+Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Cc: Tomas Winkler <tomas.winkler@intel.com>
+Cc: Alexander Usyskin <alexander.usyskin@intel.com>
+Cc: Avri Altman <avri.altman@sandisk.com>
 ---
- drivers/mmc/core/block.c | 25 +++++++++----------------
- 1 file changed, 9 insertions(+), 16 deletions(-)
+ .../userspace-api/ioctl/ioctl-number.rst      |   1 +
+ MAINTAINERS                                   |   1 +
+ drivers/char/rpmb/Kconfig                     |   7 +
+ drivers/char/rpmb/Makefile                    |   1 +
+ drivers/char/rpmb/cdev.c                      | 246 ++++++++++++++++++
+ drivers/char/rpmb/core.c                      |  10 +-
+ drivers/char/rpmb/rpmb-cdev.h                 |  17 ++
+ include/linux/rpmb.h                          |  10 +
+ include/uapi/linux/rpmb.h                     |  68 +++++
+ 9 files changed, 357 insertions(+), 4 deletions(-)
+ create mode 100644 drivers/char/rpmb/cdev.c
+ create mode 100644 drivers/char/rpmb/rpmb-cdev.h
+ create mode 100644 include/uapi/linux/rpmb.h
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index dc6b2e8f4f95..39308b35a1fb 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2261,6 +2261,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- {
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
-+	char cap_str[10];
+diff --git a/Documentation/userspace-api/ioctl/ioctl-number.rst b/Documentation/userspace-api/ioctl/ioctl-number.rst
+index a4c75a28c839..0ff2d4d81bb0 100644
+--- a/Documentation/userspace-api/ioctl/ioctl-number.rst
++++ b/Documentation/userspace-api/ioctl/ioctl-number.rst
+@@ -344,6 +344,7 @@ Code  Seq#    Include File                                           Comments
+ 0xB5  00-0F  uapi/linux/rpmsg.h                                      <mailto:linux-remoteproc@vger.kernel.org>
+ 0xB6  all    linux/fpga-dfl.h
+ 0xB7  all    uapi/linux/remoteproc_cdev.h                            <mailto:linux-remoteproc@vger.kernel.org>
++0xB8  80-8F  uapi/linux/rpmb.h                                       <mailto:linux-mmc@vger.kernel.org>
+ 0xC0  00-0F  linux/usb/iowarrior.h
+ 0xCA  00-0F  uapi/misc/cxl.h
+ 0xCA  10-2F  uapi/misc/ocxl.h
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 076f3983526c..c60b41b6e6bd 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -15374,6 +15374,7 @@ M:	?
+ L:	linux-kernel@vger.kernel.org
+ S:	Supported
+ F:	drivers/char/rpmb/*
++F:	include/uapi/linux/rpmb.h
+ F:	include/linux/rpmb.h
  
- 	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
- 	if (devidx < 0) {
-@@ -2365,6 +2366,12 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 		blk_queue_write_cache(md->queue.queue, true, true);
- 	}
+ RTL2830 MEDIA DRIVER
+diff --git a/drivers/char/rpmb/Kconfig b/drivers/char/rpmb/Kconfig
+index 431c2823cf70..9068664a399a 100644
+--- a/drivers/char/rpmb/Kconfig
++++ b/drivers/char/rpmb/Kconfig
+@@ -9,3 +9,10 @@ config RPMB
+ 	  access RPMB partition.
  
-+	string_get_size((u64)size, 512, STRING_UNITS_2,
-+			cap_str, sizeof(cap_str));
-+	pr_info("%s: %s %s %s %s\n",
-+		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
-+		cap_str, md->read_only ? "(ro)" : "");
+ 	  If unsure, select N.
 +
- 	return md;
++config RPMB_INTF_DEV
++	bool "RPMB character device interface /dev/rpmbN"
++	depends on RPMB && KEYS
++	help
++	  Say yes here if you want to access RPMB from user space
++	  via character device interface /dev/rpmb%d
+diff --git a/drivers/char/rpmb/Makefile b/drivers/char/rpmb/Makefile
+index 24d4752a9a53..f54b3f30514b 100644
+--- a/drivers/char/rpmb/Makefile
++++ b/drivers/char/rpmb/Makefile
+@@ -3,5 +3,6 @@
  
-  err_putdisk:
-@@ -2407,7 +2414,6 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
- 			      const char *subname,
- 			      int area_type)
+ obj-$(CONFIG_RPMB) += rpmb.o
+ rpmb-objs += core.o
++rpmb-$(CONFIG_RPMB_INTF_DEV) += cdev.o
+ 
+ ccflags-y += -D__CHECK_ENDIAN__
+diff --git a/drivers/char/rpmb/cdev.c b/drivers/char/rpmb/cdev.c
+new file mode 100644
+index 000000000000..55f66720fd03
+--- /dev/null
++++ b/drivers/char/rpmb/cdev.c
+@@ -0,0 +1,246 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright(c) 2015 - 2019 Intel Corporation.
++ */
++#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++
++#include <linux/fs.h>
++#include <linux/uaccess.h>
++#include <linux/compat.h>
++#include <linux/slab.h>
++#include <linux/capability.h>
++
++#include <linux/rpmb.h>
++
++#include "rpmb-cdev.h"
++
++static dev_t rpmb_devt;
++#define RPMB_MAX_DEVS  MINORMASK
++
++#define RPMB_DEV_OPEN    0  /** single open bit (position) */
++
++/**
++ * rpmb_open - the open function
++ *
++ * @inode: pointer to inode structure
++ * @fp: pointer to file structure
++ *
++ * Return: 0 on success, <0 on error
++ */
++static int rpmb_open(struct inode *inode, struct file *fp)
++{
++	struct rpmb_dev *rdev;
++
++	rdev = container_of(inode->i_cdev, struct rpmb_dev, cdev);
++	if (!rdev)
++		return -ENODEV;
++
++	/* the rpmb is single open! */
++	if (test_and_set_bit(RPMB_DEV_OPEN, &rdev->status))
++		return -EBUSY;
++
++	mutex_lock(&rdev->lock);
++
++	fp->private_data = rdev;
++
++	mutex_unlock(&rdev->lock);
++
++	return nonseekable_open(inode, fp);
++}
++
++/**
++ * rpmb_release - the cdev release function
++ *
++ * @inode: pointer to inode structure
++ * @fp: pointer to file structure
++ *
++ * Return: 0 always.
++ */
++static int rpmb_release(struct inode *inode, struct file *fp)
++{
++	struct rpmb_dev *rdev = fp->private_data;
++
++	clear_bit(RPMB_DEV_OPEN, &rdev->status);
++
++	return 0;
++}
++
++static long rpmb_ioctl_ver_cmd(struct rpmb_dev *rdev,
++			       struct rpmb_ioc_ver_cmd __user *ptr)
++{
++	struct rpmb_ioc_ver_cmd ver = {
++		.api_version = RPMB_API_VERSION,
++	};
++
++	return copy_to_user(ptr, &ver, sizeof(ver)) ? -EFAULT : 0;
++}
++
++static long rpmb_ioctl_cap_cmd(struct rpmb_dev *rdev,
++			       struct rpmb_ioc_cap_cmd __user *ptr)
++{
++	struct rpmb_ioc_cap_cmd cap;
++
++	cap.target      = rdev->target;
++	cap.block_size  = rdev->ops->block_size;
++	cap.wr_cnt_max  = rdev->ops->wr_cnt_max;
++	cap.rd_cnt_max  = rdev->ops->rd_cnt_max;
++	cap.auth_method = rdev->ops->auth_method;
++	cap.capacity    = rpmb_get_capacity(rdev);
++	cap.reserved    = 0;
++
++	return copy_to_user(ptr, &cap, sizeof(cap)) ? -EFAULT : 0;
++}
++
++static long rpmb_ioctl_pkey_cmd(struct rpmb_dev *rdev, key_serial_t __user *k)
++{
++	key_serial_t keyid;
++
++	if (get_user(keyid, k))
++		return -EFAULT;
++	else
++		return rpmb_program_key(rdev, keyid);
++}
++
++static long rpmb_ioctl_counter_cmd(struct rpmb_dev *rdev, int __user *ptr)
++{
++	int count = rpmb_get_write_count(rdev);
++
++	if (count > 0)
++		return put_user(count, ptr);
++	else
++		return count;
++}
++
++static long rpmb_ioctl_wblocks_cmd(struct rpmb_dev *rdev,
++				   struct rpmb_ioc_blocks_cmd __user *ptr)
++{
++	struct rpmb_ioc_blocks_cmd wblocks;
++	int sz;
++	long ret;
++	u8 *data;
++
++	if (copy_from_user(&wblocks, ptr, sizeof(struct rpmb_ioc_blocks_cmd)))
++		return -EFAULT;
++
++	/* Don't write more blocks device supports */
++	if (wblocks.count > rdev->ops->wr_cnt_max)
++		return -EINVAL;
++
++	sz = wblocks.count * 256;
++	data = kmalloc(sz, GFP_KERNEL);
++
++	if (!data)
++		return -ENOMEM;
++
++	if (copy_from_user(data, wblocks.data, sz))
++		ret = -EFAULT;
++	else
++		ret = rpmb_write_blocks(rdev, wblocks.key, wblocks.addr, wblocks.count, data);
++
++	kfree(data);
++	return ret;
++}
++
++static long rpmb_ioctl_rblocks_cmd(struct rpmb_dev *rdev,
++				   struct rpmb_ioc_blocks_cmd __user *ptr)
++{
++	struct rpmb_ioc_blocks_cmd rblocks;
++	int sz;
++	long ret;
++	u8 *data;
++
++	if (copy_from_user(&rblocks, ptr, sizeof(struct rpmb_ioc_blocks_cmd)))
++		return -EFAULT;
++
++	if (rblocks.count > rdev->ops->rd_cnt_max)
++		return -EINVAL;
++
++	sz = rblocks.count * 256;
++	data = kmalloc(sz, GFP_KERNEL);
++
++	if (!data)
++		return -ENOMEM;
++
++	ret = rpmb_read_blocks(rdev, rblocks.addr, rblocks.count, data);
++
++	if (ret == 0)
++		ret = copy_to_user(rblocks.data, data, sz);
++
++	kfree(data);
++	return ret;
++}
++
++/**
++ * rpmb_ioctl - rpmb ioctl dispatcher
++ *
++ * @fp: a file pointer
++ * @cmd: ioctl command RPMB_IOC_SEQ_CMD RPMB_IOC_VER_CMD RPMB_IOC_CAP_CMD
++ * @arg: ioctl data: rpmb_ioc_ver_cmd rpmb_ioc_cap_cmd pmb_ioc_seq_cmd
++ *
++ * Return: 0 on success; < 0 on error
++ */
++static long rpmb_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
++{
++	struct rpmb_dev *rdev = fp->private_data;
++	void __user *ptr = (void __user *)arg;
++
++	switch (cmd) {
++	case RPMB_IOC_VER_CMD:
++		return rpmb_ioctl_ver_cmd(rdev, ptr);
++	case RPMB_IOC_CAP_CMD:
++		return rpmb_ioctl_cap_cmd(rdev, ptr);
++	case RPMB_IOC_PKEY_CMD:
++		return rpmb_ioctl_pkey_cmd(rdev, ptr);
++	case RPMB_IOC_COUNTER_CMD:
++		return rpmb_ioctl_counter_cmd(rdev, ptr);
++	case RPMB_IOC_WBLOCKS_CMD:
++		return rpmb_ioctl_wblocks_cmd(rdev, ptr);
++	case RPMB_IOC_RBLOCKS_CMD:
++		return rpmb_ioctl_rblocks_cmd(rdev, ptr);
++	default:
++		dev_err(&rdev->dev, "unsupported ioctl 0x%x.\n", cmd);
++		return -ENOIOCTLCMD;
++	}
++}
++
++static const struct file_operations rpmb_fops = {
++	.open           = rpmb_open,
++	.release        = rpmb_release,
++	.unlocked_ioctl = rpmb_ioctl,
++	.owner          = THIS_MODULE,
++	.llseek         = noop_llseek,
++};
++
++void rpmb_cdev_prepare(struct rpmb_dev *rdev)
++{
++	rdev->dev.devt = MKDEV(MAJOR(rpmb_devt), rdev->id);
++	rdev->cdev.owner = THIS_MODULE;
++	cdev_init(&rdev->cdev, &rpmb_fops);
++}
++
++void rpmb_cdev_add(struct rpmb_dev *rdev)
++{
++	cdev_add(&rdev->cdev, rdev->dev.devt, 1);
++}
++
++void rpmb_cdev_del(struct rpmb_dev *rdev)
++{
++	if (rdev->dev.devt)
++		cdev_del(&rdev->cdev);
++}
++
++int __init rpmb_cdev_init(void)
++{
++	int ret;
++
++	ret = alloc_chrdev_region(&rpmb_devt, 0, RPMB_MAX_DEVS, "rpmb");
++	if (ret < 0)
++		pr_err("unable to allocate char dev region\n");
++
++	return ret;
++}
++
++void __exit rpmb_cdev_exit(void)
++{
++	unregister_chrdev_region(rpmb_devt, RPMB_MAX_DEVS);
++}
+diff --git a/drivers/char/rpmb/core.c b/drivers/char/rpmb/core.c
+index a2e21c14986a..e26d605e48e1 100644
+--- a/drivers/char/rpmb/core.c
++++ b/drivers/char/rpmb/core.c
+@@ -12,6 +12,7 @@
+ #include <linux/slab.h>
+ 
+ #include <linux/rpmb.h>
++#include "rpmb-cdev.h"
+ 
+ static DEFINE_IDA(rpmb_ida);
+ 
+@@ -277,6 +278,7 @@ int rpmb_dev_unregister(struct rpmb_dev *rdev)
+ 		return -EINVAL;
+ 
+ 	mutex_lock(&rdev->lock);
++	rpmb_cdev_del(rdev);
+ 	device_del(&rdev->dev);
+ 	mutex_unlock(&rdev->lock);
+ 
+@@ -371,9 +373,6 @@ struct rpmb_dev *rpmb_dev_register(struct device *dev, u8 target,
+ 	if (!ops->read_blocks)
+ 		return ERR_PTR(-EINVAL);
+ 
+-	if (ops->type == RPMB_TYPE_ANY || ops->type > RPMB_TYPE_MAX)
+-		return ERR_PTR(-EINVAL);
+-
+ 	rdev = kzalloc(sizeof(*rdev), GFP_KERNEL);
+ 	if (!rdev)
+ 		return ERR_PTR(-ENOMEM);
+@@ -396,6 +395,8 @@ struct rpmb_dev *rpmb_dev_register(struct device *dev, u8 target,
+ 	if (ret)
+ 		goto exit;
+ 
++	rpmb_cdev_add(rdev);
++
+ 	dev_dbg(&rdev->dev, "registered device\n");
+ 
+ 	return rdev;
+@@ -412,11 +413,12 @@ static int __init rpmb_init(void)
  {
--	char cap_str[10];
- 	struct mmc_blk_data *part_md;
- 
- 	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size, default_ro,
-@@ -2417,11 +2423,6 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
- 	part_md->part_type = part_type;
- 	list_add(&part_md->part, &md->part);
- 
--	string_get_size((u64)get_capacity(part_md->disk), 512, STRING_UNITS_2,
--			cap_str, sizeof(cap_str));
--	pr_info("%s: %s %s partition %u %s\n",
--	       part_md->disk->disk_name, mmc_card_id(card),
--	       mmc_card_name(card), part_md->part_type, cap_str);
- 	return 0;
+ 	ida_init(&rpmb_ida);
+ 	class_register(&rpmb_class);
+-	return 0;
++	return rpmb_cdev_init();
  }
  
-@@ -2558,9 +2559,8 @@ static int mmc_blk_alloc_rpmb_part(struct mmc_card *card,
- 	string_get_size((u64)size, 512, STRING_UNITS_2,
- 			cap_str, sizeof(cap_str));
- 
--	pr_info("%s: %s %s partition %u %s, chardev (%d:%d)\n",
--		rpmb_name, mmc_card_id(card),
--		mmc_card_name(card), EXT_CSD_PART_CONFIG_ACC_RPMB, cap_str,
-+	pr_info("%s: %s %s %s, chardev (%d:%d)\n",
-+		rpmb_name, mmc_card_id(card), mmc_card_name(card), cap_str,
- 		MAJOR(mmc_rpmb_devt), rpmb->id);
- 
- 	return 0;
-@@ -2876,7 +2876,6 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
- static int mmc_blk_probe(struct mmc_card *card)
+ static void __exit rpmb_exit(void)
  {
- 	struct mmc_blk_data *md, *part_md;
--	char cap_str[10];
++	rpmb_cdev_exit();
+ 	class_unregister(&rpmb_class);
+ 	ida_destroy(&rpmb_ida);
+ }
+diff --git a/drivers/char/rpmb/rpmb-cdev.h b/drivers/char/rpmb/rpmb-cdev.h
+new file mode 100644
+index 000000000000..e59ff0c05e9d
+--- /dev/null
++++ b/drivers/char/rpmb/rpmb-cdev.h
+@@ -0,0 +1,17 @@
++/* SPDX-License-Identifier: BSD-3-Clause OR GPL-2.0 */
++/*
++ * Copyright (C) 2015-2018 Intel Corp. All rights reserved
++ */
++#ifdef CONFIG_RPMB_INTF_DEV
++int __init rpmb_cdev_init(void);
++void __exit rpmb_cdev_exit(void);
++void rpmb_cdev_prepare(struct rpmb_dev *rdev);
++void rpmb_cdev_add(struct rpmb_dev *rdev);
++void rpmb_cdev_del(struct rpmb_dev *rdev);
++#else
++static inline int __init rpmb_cdev_init(void) { return 0; }
++static inline void __exit rpmb_cdev_exit(void) {}
++static inline void rpmb_cdev_prepare(struct rpmb_dev *rdev) {}
++static inline void rpmb_cdev_add(struct rpmb_dev *rdev) {}
++static inline void rpmb_cdev_del(struct rpmb_dev *rdev) {}
++#endif /* CONFIG_RPMB_INTF_DEV */
+diff --git a/include/linux/rpmb.h b/include/linux/rpmb.h
+index 718ba7c91ecd..fe44f60efe31 100644
+--- a/include/linux/rpmb.h
++++ b/include/linux/rpmb.h
+@@ -8,9 +8,13 @@
  
- 	/*
- 	 * Check that the card supports the command class(es) we need.
-@@ -2897,12 +2896,6 @@ static int mmc_blk_probe(struct mmc_card *card)
- 	if (IS_ERR(md))
- 		return PTR_ERR(md);
+ #include <linux/types.h>
+ #include <linux/device.h>
++#include <linux/cdev.h>
++#include <uapi/linux/rpmb.h>
+ #include <linux/kref.h>
+ #include <linux/key.h>
  
--	string_get_size((u64)get_capacity(md->disk), 512, STRING_UNITS_2,
--			cap_str, sizeof(cap_str));
--	pr_info("%s: %s %s %s %s\n",
--		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
--		cap_str, md->read_only ? "(ro)" : "");
--
- 	if (mmc_blk_alloc_parts(card, md))
- 		goto out;
++#define RPMB_API_VERSION 0x80000001
++
+ /**
+  * struct rpmb_ops - RPMB ops to be implemented by underlying block device
+  *
+@@ -51,6 +55,8 @@ struct rpmb_ops {
+  * @dev        : device
+  * @id         : device id
+  * @target     : RPMB target/region within the physical device
++ * @cdev       : character dev
++ * @status     : device status
+  * @ops        : operation exported by block layer
+  */
+ struct rpmb_dev {
+@@ -58,6 +64,10 @@ struct rpmb_dev {
+ 	struct device dev;
+ 	int id;
+ 	u8 target;
++#ifdef CONFIG_RPMB_INTF_DEV
++	struct cdev cdev;
++	unsigned long status;
++#endif /* CONFIG_RPMB_INTF_DEV */
+ 	const struct rpmb_ops *ops;
+ };
  
+diff --git a/include/uapi/linux/rpmb.h b/include/uapi/linux/rpmb.h
+new file mode 100644
+index 000000000000..3957b785cdd5
+--- /dev/null
++++ b/include/uapi/linux/rpmb.h
+@@ -0,0 +1,68 @@
++/* SPDX-License-Identifier: ((GPL-2.0 WITH Linux-syscall-note) OR BSD-3-Clause) */
++/*
++ * Copyright (C) 2015-2018 Intel Corp. All rights reserved
++ * Copyright (C) 2021 Linaro Ltd
++ */
++#ifndef _UAPI_LINUX_RPMB_H_
++#define _UAPI_LINUX_RPMB_H_
++
++#include <linux/types.h>
++
++/**
++ * struct rpmb_ioc_ver_cmd - rpmb api version
++ *
++ * @api_version: rpmb API version.
++ */
++struct rpmb_ioc_ver_cmd {
++	__u32 api_version;
++} __packed;
++
++enum rpmb_auth_method {
++	RPMB_HMAC_ALGO_SHA_256 = 0,
++};
++
++/**
++ * struct rpmb_ioc_cap_cmd - rpmb capabilities
++ *
++ * @target: rpmb target/region within RPMB partition.
++ * @capacity: storage capacity (in units of 128K)
++ * @block_size: storage data block size (in units of 256B)
++ * @wr_cnt_max: maximal number of block that can be written in a single request.
++ * @rd_cnt_max: maximal number of block that can be read in a single request.
++ * @auth_method: authentication method: currently always HMAC_SHA_256
++ * @reserved: reserved to align to 4 bytes.
++ */
++struct rpmb_ioc_cap_cmd {
++	__u16 target;
++	__u16 capacity;
++	__u16 block_size;
++	__u16 wr_cnt_max;
++	__u16 rd_cnt_max;
++	__u16 auth_method;
++	__u16 reserved;
++} __attribute__((packed));
++
++/**
++ * struct rpmb_ioc_blocks_cmd - read/write blocks to/from RPMB
++ *
++ * @keyid: key_serial_t of key to use
++ * @addr: index into device (units of 256B blocks)
++ * @count: number of 256B blocks
++ * @data: pointer to data to write/read
++ */
++struct rpmb_ioc_blocks_cmd {
++	__s32 key; /* key_serial_t */
++	__u32 addr;
++	__u32 count;
++	__u8 __user *data;
++} __attribute__((packed));
++
++
++#define RPMB_IOC_VER_CMD     _IOR(0xB8, 80, struct rpmb_ioc_ver_cmd)
++#define RPMB_IOC_CAP_CMD     _IOR(0xB8, 81, struct rpmb_ioc_cap_cmd)
++#define RPMB_IOC_PKEY_CMD    _IOW(0xB8, 82, key_serial_t)
++#define RPMB_IOC_COUNTER_CMD _IOR(0xB8, 84, int)
++#define RPMB_IOC_WBLOCKS_CMD _IOW(0xB8, 85, struct rpmb_ioc_blocks_cmd)
++#define RPMB_IOC_RBLOCKS_CMD _IOR(0xB8, 86, struct rpmb_ioc_blocks_cmd)
++
++#endif /* _UAPI_LINUX_RPMB_H_ */
 -- 
-2.25.1
+2.20.1
 
