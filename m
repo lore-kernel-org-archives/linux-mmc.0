@@ -2,253 +2,960 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS autolearn=no
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93A32C433E9
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 07:45:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27F8DC433E9
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 08:05:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7260264F0A
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 07:45:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD5B464F0B
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 08:05:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233782AbhCDHo3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 02:44:29 -0500
-Received: from mailout1.samsung.com ([203.254.224.24]:12547 "EHLO
-        mailout1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234393AbhCDHoP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 02:44:15 -0500
-Received: from epcas2p2.samsung.com (unknown [182.195.41.54])
-        by mailout1.samsung.com (KnoxPortal) with ESMTP id 20210304074334epoutp01db0c434d48f957af1fdb1f1f36575872~pE_ShjhyI0463304633epoutp010
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 07:43:34 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20210304074334epoutp01db0c434d48f957af1fdb1f1f36575872~pE_ShjhyI0463304633epoutp010
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1614843814;
-        bh=f6z1KjukkPmDFowDYbXQ5aH8USh6cvoy28n+DQI3I7c=;
-        h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
-        b=Z+JJoX8WUvyMjCBWS1KGNBmCBopgmLTGQvFw22hIoLC5gvRlliGNNZfKZ1sleAT7I
-         SrrjpGLb94Mvc6floK8adyuSGCeGCkeTO1eGZJBM+vqSCPJhnS5IAebxdBbbNdh4Vz
-         CCgKtNimgyNBHMLrOAwncbgPXQKE/61hgr3AF5sQ=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-        epcas2p2.samsung.com (KnoxPortal) with ESMTP id
-        20210304074333epcas2p2391be15ee5835cebddcae0d2c1de8815~pE_SB0oT91628716287epcas2p2p;
-        Thu,  4 Mar 2021 07:43:33 +0000 (GMT)
-Received: from epsmges2p2.samsung.com (unknown [182.195.40.183]) by
-        epsnrtp3.localdomain (Postfix) with ESMTP id 4DrjXg1NpCz4x9Q2; Thu,  4 Mar
-        2021 07:43:31 +0000 (GMT)
-Received: from epcas2p2.samsung.com ( [182.195.41.54]) by
-        epsmges2p2.samsung.com (Symantec Messaging Gateway) with SMTP id
-        C4.DB.56312.2AF80406; Thu,  4 Mar 2021 16:43:30 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-        epcas2p1.samsung.com (KnoxPortal) with ESMTPA id
-        20210304074330epcas2p1d44724ca5e6c2892873e20e001178a33~pE_PFAlRX0613606136epcas2p1t;
-        Thu,  4 Mar 2021 07:43:30 +0000 (GMT)
-Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
-        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20210304074330epsmtrp1d5388e8d17f99b6ae38ab81073b48c4d~pE_PEa4W30394603946epsmtrp1b;
-        Thu,  4 Mar 2021 07:43:30 +0000 (GMT)
-X-AuditID: b6c32a46-1d9ff7000000dbf8-3e-60408fa25c1e
-Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
-        BC.1D.08745.2AF80406; Thu,  4 Mar 2021 16:43:30 +0900 (KST)
-Received: from KORCO011456 (unknown [12.36.185.54]) by epsmtip2.samsung.com
-        (KnoxPortal) with ESMTPA id
-        20210304074330epsmtip280c49674777bdd016329b3a6f8b8c1fc~pE_O8oy6H1971519715epsmtip2f;
-        Thu,  4 Mar 2021 07:43:30 +0000 (GMT)
-From:   "Kiwoong Kim" <kwmad.kim@samsung.com>
-To:     "'Ulf Hansson'" <ulf.hansson@linaro.org>
-Cc:     <linux-mmc@vger.kernel.org>
-In-Reply-To: <CAPDyKFr0x7vinYpy=AHcYfqxO-Q_S+SuU_SUb+kRTxRkNm4G6A@mail.gmail.com>
-Subject: RE: About SD initialization at resume time
-Date:   Thu, 4 Mar 2021 16:43:29 +0900
-Message-ID: <008b01d710ca$1207fab0$3617f010$@samsung.com>
+        id S235369AbhCDIEp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 03:04:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36222 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235396AbhCDIEk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 03:04:40 -0500
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 653DCC061574;
+        Thu,  4 Mar 2021 00:03:59 -0800 (PST)
+Received: by mail-lf1-x12d.google.com with SMTP id m22so41687926lfg.5;
+        Thu, 04 Mar 2021 00:03:59 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=p9grc8fXU1jc972mzIK4SeNb75F6Vg/ZLoSUEVpUnSg=;
+        b=t0W7bkwNI8XuCO10QIqKab7Pa5ZOZb54Q2x0gWKgSDD4iPA4iS64vMSSu/A7QadIs2
+         EJttgT+pDfCTGEsxcjXoPNJhO+4hjO6+AlerjPiH60dvtHl4EQ0fy+h/+V31v99Yyww6
+         qWy9TEgD2xvKi3CTumQYQ4XCYZB/jx+wQW/DjJcGgLz5xp3+3N9aQukaHODEcN9P7TYZ
+         IuDflPWqiiRKklchL8mn4+q6/3X32bNVfeb+NbyKa8G2QIahkg9ByHo/XljkDehMdaTf
+         F7LPdbhVw8VEALrV1s5NlyFKOSt7UIew5tbVASDCu/JmhyL97NKWzKtZA2zL5AO4Z6sq
+         bpQA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=p9grc8fXU1jc972mzIK4SeNb75F6Vg/ZLoSUEVpUnSg=;
+        b=SgkAQH/zob3mSpDIEBXxQsk9X2uCGJy2/xRlFHO8GcW9F3Jfr3/15h9bwDTj3cCePq
+         ykud7gILMWwMvG8ZSGrMT0RmN0LS97tUtbG1ErcQJ69H6tNcpSZhXC6zlpVhO9B6t6IT
+         LaCXTmrLISzsCkjdoIcjKiz/ReZQX0Xk8hY1xkRtoqyzIHixDP5oup6m5X0/Ybx+sCEZ
+         U2uokm0fR0He2gIkaFlskmOLqjcHUPC9F341Xojz0JgdJAtpWrFj8FRyBH+UNIx9jXyf
+         UNPTy2qh2Nk4kDBcUB3orawhODCA+kOAu8C4GudQSQtJc2EgNRGQc0u/VFzm+tsp9j5s
+         etLQ==
+X-Gm-Message-State: AOAM533Q57ci1gl/A9rUVDfF1xgLlVLLp7G0VAd5p89AcbGOlFGuy/g8
+        NC3JnPp3ESrKeCOzIcmLHW/NgdMMjFAoL/cd
+X-Google-Smtp-Source: ABdhPJyF/yBS615fXPgFTkr4fJaSiYODJzBXDvNOjOVkYWdosoZv+avGnZKjbIv5RJaEbekGXU1eDg==
+X-Received: by 2002:a05:6512:20c6:: with SMTP id u6mr1566691lfr.493.1614845037861;
+        Thu, 04 Mar 2021 00:03:57 -0800 (PST)
+Received: from mobilestation ([95.79.88.254])
+        by smtp.gmail.com with ESMTPSA id n7sm3183986lfu.123.2021.03.04.00.03.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 04 Mar 2021 00:03:57 -0800 (PST)
+Date:   Thu, 4 Mar 2021 11:03:55 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, olof@lixom.net, linux-gpio@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 7/8] arm64: dts: Add Pensando Elba SoC support
+Message-ID: <20210304080355.cc37g7jagswro3dg@mobilestation>
+References: <20210304034141.7062-1-brad@pensando.io>
+ <20210304034141.7062-8-brad@pensando.io>
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-X-Mailer: Microsoft Outlook 16.0
-Thread-Index: AQKRzA59woR7UZh8YcjBzEvw7y0zfQFaIJ2IAjxzo+So4UG5QA==
-Content-Language: ko
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrHKsWRmVeSWpSXmKPExsWy7bCmme7ifocEg182Fkf+9zNaHF8b7sDk
-        cefaHjaPz5vkApiicmwyUhNTUosUUvOS81My89JtlbyD453jTc0MDHUNLS3MlRTyEnNTbZVc
-        fAJ03TJzgIYrKZQl5pQChQISi4uV9O1sivJLS1IVMvKLS2yVUgtScgoMDQv0ihNzi0vz0vWS
-        83OtDA0MjEyBKhNyMmZ+m89c8NS44vH1acwNjFO0uhg5OSQETCRubz7C3MXIxSEksINR4tyW
-        TVDOJ0aJa0cPsUA4nxklbn9bzdrFyAHW8vWcHER8F6PEqw1/oTpeMErMXnebBWQum4C2xLSH
-        u1lBbBEBHYkZb5rBbGYBeYm3V1aA2ZwCgRJz22cwgtjCAsYSP9cvZwOxWQRUJCZ93gRm8wpY
-        SjzseM8KYQtKnJz5hAVijrbEsoWvmSF+UJD4+XQZ1C4nidf/PjBB1IhIzO5sAztOQuASu8Si
-        zsdMEA0uEpP/32aFsIUlXh3fwg5hS0m87G+Dsusl9k1tYIVo7mGUeLrvHyNEwlhi1rN2RlBQ
-        MAtoSqzfpQ8JFWWJI7egbuOT6Dj8lx0izCvR0SYE0ags8WvSZKghkhIzb95hn8CoNAvJZ7OQ
-        fDYLyQezEHYtYGRZxSiWWlCcm55abFRghBzZmxjBCU/LbQfjlLcf9A4xMnEwHmKU4GBWEuEV
-        f2mbIMSbklhZlVqUH19UmpNafIjRFBjWE5mlRJPzgSk3ryTe0NTIzMzA0tTC1MzIQkmct9jg
-        QbyQQHpiSWp2ampBahFMHxMHp1QDE796Wc+q4CcNkifcvOMsDofvE7/WqdRjqKDZ+jSbaW/b
-        qsPca86bTVG+eGXG1m0LnSbffLWYS3ByLEekwcyLT0MmJu2Y6BspuqIhKPDVUZF8ow7F8M+7
-        eTQUbzxaGejGGZf695ugw5UqoVlzDii9XjYj0//NPM1TX7fPuCdtZj1h4tkSryl/b8j9XvVo
-        3e3dk38a2ut9DToWkXz4lVrOdJ6uPs1fAus9WBO35N5bdmPD6kJrvwb+ruebKyriO81byvjO
-        Gv0zC1SqiJHdEBiRk5a6Kzf+8KMpTzKFLn04cCrqUZPzjWgdiV1fFc+qNuQU7dcRfX9yj5fR
-        TqNnC2aGcK82a5/xzWZBZLJgRshSfyWW4oxEQy3mouJEAHd7qJMBBAAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrFLMWRmVeSWpSXmKPExsWy7bCSvO6ifocEg1lbhS2O/O9ntDi+NtyB
-        yePOtT1sHp83yQUwRXHZpKTmZJalFunbJXBl9DU8ZCs4oV/xedcM9gbGn6pdjBwcEgImEl/P
-        yXUxcnEICexglHhyYwl7FyMnUFxS4sTO54wQtrDE/ZYjrBBFzxglmifeYAJJsAloS0x7uJsV
-        xBYR0JGY8aYZzGYWkJd4e2UFVMMFRonDK1+AJTgFAiXmts8AmyosYCzxc/1yNhCbRUBFYtLn
-        TWA2r4ClxMOO96wQtqDEyZlPWCCGaks8vfkUzl628DUzxHUKEj+fLoM6wkni9b8PTBA1IhKz
-        O9uYJzAKz0IyahaSUbOQjJqFpGUBI8sqRsnUguLc9NxiwwKjvNRyveLE3OLSvHS95PzcTYzg
-        4NfS2sG4Z9UHvUOMTByMhxglOJiVRHjFX9omCPGmJFZWpRblxxeV5qQWH2KU5mBREue90HUy
-        XkggPbEkNTs1tSC1CCbLxMEp1cDU6KSrtDsz//KtBZZPZrwTKOgJtnU7k1L+uuskd97y/zMO
-        rUnQrTZetGyX0BkLUdnjbm8VrkZnqf6+U5elFOV2e0/4Ucv4nTPW3PmuO/tOu4/EHKu97mtZ
-        FDjn3nl8LL/n7b5FjmKhuxkUzdcG/FtQrjIl7JZ+9Me0KYa7lmzYyLXj3sPrub9/SzJYzLFe
-        Xicg/iLgEmdLevntHu1a3+oppqd7DwVO8Wj9X5/PaGKQGrM1ernF3hMqF7Njp//w8r/CwPKb
-        ++Aru/A/FpkvolljX598nhM8bW7+RpFZGz7KdlR8ZnVttdry7s703WxnA0OOXXjHoqhRNN3F
-        5+3ug/NO+XTeLZT4sNVNqrdCPO6JEktxRqKhFnNRcSIA/ZcN9+0CAAA=
-X-CMS-MailID: 20210304074330epcas2p1d44724ca5e6c2892873e20e001178a33
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: AUTO_CONFIDENTIAL
-CMS-TYPE: 102P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20210303092222epcas2p11fbb2697a53b54dbc138d741893c9f07
-References: <CGME20210303092222epcas2p11fbb2697a53b54dbc138d741893c9f07@epcas2p1.samsung.com>
-        <000001d7100e$b7380f50$25a82df0$@samsung.com>
-        <CAPDyKFr0x7vinYpy=AHcYfqxO-Q_S+SuU_SUb+kRTxRkNm4G6A@mail.gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210304034141.7062-8-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> > This is what had actually happened and was fixed with some code in
-> commercial products.
->=20
-> The above code in the mmc core was introduced around kernel v3.11, even i=
-f
-> it has been fine tuned since then.
->=20
-> Maybe you have been using even older kernels?
->=20
-Dear Uffe
+On Wed, Mar 03, 2021 at 07:41:40PM -0800, Brad Larson wrote:
+> Add Pensando common and Elba SoC specific device nodes
+> and corresponding binding documentation.
 
-First, you give me what I want.
-We've used higher versions than 3.11 but applied our own changes for some r=
-easons.
-Anyway, thanks =21
+This also needs to be split up into sub-patches seeing these are
+unrelated changes like device bindings update, new platform DT file.
 
-That is the first problem for me on SD.
-The 2nd thing is very long latency issue for a race between an IO thread an=
-d a kworker to run mmc_rescan.
+Note text-based bindings are deprecated in favor of the DT schemas.
+Also note dts needs to pass dtbs_check validation. So all new HW/DT
+nodes need to be reflected in the DT-schemas. See [1] for details.
 
-There is an application to put many IO requests to a SD card right after co=
-mpletion of system resume.
-Current MMC stack invokes mmc_rescan is invoked asynchronously for PM_POST_=
-SUSPEND.
-As reported to me, however, there could be a race between an IO thread and =
-the kworker for mmc_rescan
-especially the function of mmc_rescan is run later than expected and the ap=
-plication mentioned before is installed.
+[1] Documentation/devicetree/writing-schema.rst
 
-For a series of IO requests, mmc_rescan, particularily at __mmc_claim_host =
-called in mmc_sd_detect,
-doesn't acquire a host for longer than expected.
-Below is the call stacks shown after the symptom happened and the system tr=
-ied to enter into suspend again.
-In this case, mmc pm notifier is called with PM_SUSPEND_PREPARE, so it wait=
-s for completion or cancelling the work for mmc_rescan.
-For the latency, users can see black screen for a long time sometimes.
+> 
+> Signed-off-by: Brad Larson <brad@pensando.io>
+> ---
+>  .../bindings/gpio/pensando,elba-spics.txt     |  24 ++
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   |   2 +-
+>  .../bindings/spi/cadence-quadspi.txt          |   1 +
+>  .../devicetree/bindings/vendor-prefixes.yaml  |   2 +
+>  arch/arm64/boot/dts/Makefile                  |   1 +
+>  arch/arm64/boot/dts/pensando/Makefile         |   6 +
+>  arch/arm64/boot/dts/pensando/elba-16core.dtsi | 171 ++++++++++
+>  .../boot/dts/pensando/elba-asic-common.dtsi   | 113 +++++++
+>  arch/arm64/boot/dts/pensando/elba-asic.dts    |   8 +
+>  .../boot/dts/pensando/elba-flash-parts.dtsi   |  80 +++++
+>  arch/arm64/boot/dts/pensando/elba.dtsi        | 310 ++++++++++++++++++
+>  11 files changed, 717 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/devicetree/bindings/gpio/pensando,elba-spics.txt
+>  create mode 100644 arch/arm64/boot/dts/pensando/Makefile
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-16core.dtsi
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-asic.dts
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba.dtsi
+> 
+> diff --git a/Documentation/devicetree/bindings/gpio/pensando,elba-spics.txt b/Documentation/devicetree/bindings/gpio/pensando,elba-spics.txt
+> new file mode 100644
+> index 000000000000..30f5f3275238
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/gpio/pensando,elba-spics.txt
+> @@ -0,0 +1,24 @@
+> +Pensando Elba SPI Chip Select Driver
+> +
+> +The Pensando Elba ASIC provides four SPI bus chip selects
+> +
+> +Required properties:
+> +- compatible: Should be "pensando,elba-spics"
+> +- reg: Address range of spics controller
+> +- gpio-controller: Marks the device node as gpio controller
+> +- #gpio-cells: Must be 2
+> +
+> +Example:
+> +-------
+> +spics: spics@307c2468 {
+> +        compatible = "pensando,elba-spics";
+> +        reg = <0x0 0x307c2468 0x0 0x4>;
+> +        gpio-controller;
+> +        #gpio-cells = <2>;
+> +};
+> +
+> +&spi0 {
+> +        num-cs = <4>;
+> +        cs-gpios = <&spics 0 0>, <&spics 1 0>, <&porta 1 0>, <&porta 7 0>;
+> +	...
+> +}
+> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> index af7442f73881..645ae696ba24 100644
+> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> @@ -122,7 +122,7 @@ unevaluatedProperties: false
+>  examples:
+>    - |
+>      emmc: mmc@5a000000 {
 
-So I want to post a patch not to do _mmc_detect_change conditionally
-because it helps remove the race and the case assumes SD card initializatio=
-n is already done.
-If you have your different views, please let me know.
+> -        compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+> +        compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc", "pensando,elba-emmc";
 
-Thanks.
+Alas it's not enough. New HW compatible strings shall be defined in the
+binding schema.
 
---
-<6>=5B 3965.259816=5D I=5B0:      swapper/0:    0=5D    22631        0     =
- 227    3902403994884 D(2)   3  ffffffc0007ee338                0  ffffffc8=
-5678e000 *    kworker/u16:4 =5B__mmc_claim_host=5D
-<6>=5B 3965.259839=5D I=5B0:      swapper/0:    0=5D Workqueue: kmmcd mmc_r=
-escan
-<0>=5B 3965.259854=5D I=5B0:      swapper/0:    0=5D Call trace:
-<4>=5B 3965.259870=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00013e674>=
-=5D __switch_to+0x80/0x90
-<4>=5B 3965.259886=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b137f4>=
-=5D __schedule+0x530/0x76c
-<4>=5B 3965.259902=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b13a9c>=
-=5D schedule+0x6c/0x7c
-<4>=5B 3965.259919=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007ee338>=
-=5D __mmc_claim_host+0xb8/0x188
-<4>=5B 3965.259937=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007eebfc>=
-=5D mmc_get_card+0x24/0x38
-<4>=5B 3965.259956=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007f5c44>=
-=5D mmc_sd_detect+0x90/0xe8
-<4>=5B 3965.259973=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007f08d8>=
-=5D mmc_rescan+0xa0/0x2ec
-<4>=5B 3965.259991=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0001688e0>=
-=5D process_one_work+0x26c/0x434
-<4>=5B 3965.260008=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000168dc8>=
-=5D worker_thread+0x320/0x444
-<4>=5B 3965.260026=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00016dac0>=
-=5D kthread+0xdc/0xec
-..
-<0>=5B 3965.259854=5D I=5B0:      swapper/0:    0=5D Call trace:
-<4>=5B 3965.259870=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00013e674>=
-=5D __switch_to+0x80/0x90
-<4>=5B 3965.259886=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b137f4>=
-=5D __schedule+0x530/0x76c
-<4>=5B 3965.259902=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b13a9c>=
-=5D schedule+0x6c/0x7c
-<4>=5B 3965.259919=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007ee338>=
-=5D __mmc_claim_host+0xb8/0x188
-<4>=5B 3965.259937=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007eebfc>=
-=5D mmc_get_card+0x24/0x38
-<4>=5B 3965.259956=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007f5c44>=
-=5D mmc_sd_detect+0x90/0xe8
-<4>=5B 3965.259973=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007f08d8>=
-=5D mmc_rescan+0xa0/0x2ec
-<4>=5B 3965.259991=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0001688e0>=
-=5D process_one_work+0x26c/0x434
-<4>=5B 3965.260008=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000168dc8>=
-=5D worker_thread+0x320/0x444
-<4>=5B 3965.260026=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00016dac0>=
-=5D kthread+0xdc/0xec
-..
-<0>=5B 3965.203379=5D I=5B0:      swapper/0:    0=5D Call trace:
-<4>=5B 3965.203397=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00013e674>=
-=5D __switch_to+0x80/0x90
-<4>=5B 3965.203414=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b137f4>=
-=5D __schedule+0x530/0x76c
-<4>=5B 3965.203430=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b13a9c>=
-=5D schedule+0x6c/0x7c
-<4>=5B 3965.203448=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b160e8>=
-=5D schedule_timeout+0x28/0x214
-<4>=5B 3965.203464=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b145a0>=
-=5D wait_for_common+0x114/0x15c
-<4>=5B 3965.203482=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000b14710>=
-=5D wait_for_completion+0x10/0x20
-<4>=5B 3965.203498=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000169990>=
-=5D flush_work+0xf0/0x11c
-<4>=5B 3965.203516=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000169ad0>=
-=5D __cancel_work_timer+0x114/0x1a0
-<4>=5B 3965.203533=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000169c44>=
-=5D cancel_delayed_work_sync+0xc/0x1c
-<4>=5B 3965.203554=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0007f1000>=
-=5D mmc_pm_notify+0x78/0x12c
-<4>=5B 3965.203573=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00016ebf4>=
-=5D notifier_call_chain+0x7c/0xec
-<4>=5B 3965.203590=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00016ef08>=
-=5D __blocking_notifier_call_chain+0x44/0x68
-<4>=5B 3965.203608=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc00016ef3c>=
-=5D blocking_notifier_call_chain+0x10/0x20
-<4>=5B 3965.203628=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0001964ec>=
-=5D pm_notifier_call_chain+0x1c/0x44
-<4>=5B 3965.203644=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000197ad0>=
-=5D pm_suspend+0x2e0/0x5fc
-<4>=5B 3965.203662=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0001961cc>=
-=5D state_store+0x4c/0x8c
-<4>=5B 3965.203683=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0003f35ec>=
-=5D kobj_attr_store+0x14/0x2c
-<4>=5B 3965.203703=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0002aac2c>=
-=5D sysfs_kf_write+0x40/0x50
-<4>=5B 3965.203721=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc0002aa000>=
-=5D kernfs_fop_write+0xfc/0x148
-<4>=5B 3965.203739=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000249b4c>=
-=5D vfs_write+0xb8/0x190
-<4>=5B 3965.203755=5D I=5B0:      swapper/0:    0=5D =5B<ffffffc000249cf0>=
-=5D SyS_write+0x44/0x88
+>          reg = <0x5a000000 0x400>;
+>          interrupts = <0 78 4>;
+>          clocks = <&clk 4>;
+> diff --git a/Documentation/devicetree/bindings/spi/cadence-quadspi.txt b/Documentation/devicetree/bindings/spi/cadence-quadspi.txt
+> index 8ace832a2d80..dbb346b2b1d7 100644
+> --- a/Documentation/devicetree/bindings/spi/cadence-quadspi.txt
+> +++ b/Documentation/devicetree/bindings/spi/cadence-quadspi.txt
+> @@ -6,6 +6,7 @@ Required properties:
+>  	For TI 66AK2G SoC - "ti,k2g-qspi", "cdns,qspi-nor".
+>  	For TI AM654 SoC  - "ti,am654-ospi", "cdns,qspi-nor".
+>  	For Intel LGM SoC - "intel,lgm-qspi", "cdns,qspi-nor".
 
+> +	For Pensando SoC - "pensando,cdns-qspi".
+
+What about converting this file to DT-schema and adding new HW
+bindings in there?
+
+>  - reg : Contains two entries, each of which is a tuple consisting of a
+>  	physical address and length. The first entry is the address and
+>  	length of the controller register set. The second entry is the
+> diff --git a/Documentation/devicetree/bindings/vendor-prefixes.yaml b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+> index f6064d84a424..9a21d780c5e1 100644
+> --- a/Documentation/devicetree/bindings/vendor-prefixes.yaml
+> +++ b/Documentation/devicetree/bindings/vendor-prefixes.yaml
+> @@ -850,6 +850,8 @@ patternProperties:
+>      description: Parallax Inc.
+>    "^pda,.*":
+>      description: Precision Design Associates, Inc.
+> +  "^pensando,.*":
+> +    description: Pensando Systems Inc.
+>    "^pericom,.*":
+>      description: Pericom Technology Inc.
+>    "^pervasive,.*":
+> diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
+> index f1173cd93594..c85db0a097fe 100644
+> --- a/arch/arm64/boot/dts/Makefile
+> +++ b/arch/arm64/boot/dts/Makefile
+> @@ -19,6 +19,7 @@ subdir-y += marvell
+>  subdir-y += mediatek
+>  subdir-y += microchip
+>  subdir-y += nvidia
+> +subdir-y += pensando
+>  subdir-y += qcom
+>  subdir-y += realtek
+>  subdir-y += renesas
+> diff --git a/arch/arm64/boot/dts/pensando/Makefile b/arch/arm64/boot/dts/pensando/Makefile
+> new file mode 100644
+> index 000000000000..0c2c0961e64a
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/Makefile
+> @@ -0,0 +1,6 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +dtb-$(CONFIG_ARCH_PENSANDO_ELBA_SOC) += elba-asic.dtb
+> +
+> +always-y	:= $(dtb-y)
+> +subdir-y	:= $(dts-dirs)
+> +clean-files	:= *.dtb
+> diff --git a/arch/arm64/boot/dts/pensando/elba-16core.dtsi b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
+> new file mode 100644
+> index 000000000000..b0386864cfec
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
+> @@ -0,0 +1,171 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +/ {
+> +	cpus {
+> +		#address-cells = <2>;
+> +		#size-cells = <0>;
+> +
+> +		cpu-map {
+> +			cluster0 {
+> +				core0 { cpu = <&cpu0>; };
+> +				core1 { cpu = <&cpu1>; };
+> +				core2 { cpu = <&cpu2>; };
+> +				core3 { cpu = <&cpu3>; };
+> +			};
+> +			cluster1 {
+> +				core0 { cpu = <&cpu4>; };
+> +				core1 { cpu = <&cpu5>; };
+> +				core2 { cpu = <&cpu6>; };
+> +				core3 { cpu = <&cpu7>; };
+> +			};
+> +			cluster2 {
+> +				core0 { cpu = <&cpu8>; };
+> +				core1 { cpu = <&cpu9>; };
+> +				core2 { cpu = <&cpu10>; };
+> +				core3 { cpu = <&cpu11>; };
+> +			};
+> +			cluster3 {
+> +				core0 { cpu = <&cpu12>; };
+> +				core1 { cpu = <&cpu13>; };
+> +				core2 { cpu = <&cpu14>; };
+> +				core3 { cpu = <&cpu15>; };
+> +			};
+> +		};
+> +
+> +		// CLUSTER 0
+> +		cpu0: cpu@0 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x0>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +		cpu1: cpu@1 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x1>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +		cpu2: cpu@2 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x2>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +		cpu3: cpu@3 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x3>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +
+> +		l2_0: l2-cache0 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		// CLUSTER 1
+> +		cpu4: cpu@100 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x100>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +		cpu5: cpu@101 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x101>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +		cpu6: cpu@102 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x102>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +		cpu7: cpu@103 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x103>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +
+> +		l2_1: l2-cache1 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		// CLUSTER 2
+> +		cpu8: cpu@200 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x200>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +		cpu9: cpu@201 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x201>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +		cpu10: cpu@202 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x202>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +		cpu11: cpu@203 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x203>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +
+> +		l2_2: l2-cache2 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		// CLUSTER 3
+> +		cpu12: cpu@300 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x300>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +		cpu13: cpu@301 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x301>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +		cpu14: cpu@302 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x302>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +		cpu15: cpu@303 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x303>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +
+> +		l2_3: l2-cache3 {
+> +			compatible = "cache";
+> +		};
+> +	};
+> +};
+> diff --git a/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+> new file mode 100644
+> index 000000000000..9623df208131
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+> @@ -0,0 +1,113 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +/ {
+> +	model = "Elba ASIC Board";
+> +
+> +	aliases {
+> +		serial0 = &uart0;
+> +                spi0 = &spi0;
+> +                spi1 = &qspi;
+> +	};
+> +
+> +	chosen {
+
+> +		stdout-path = "serial0:19200n8";
+
+Baudrate of 19200? So sad.(
+
+> +	};
+> +};
+> +
+> +&ahb_clk {
+> +	clock-frequency = <400000000>;
+> +};
+> +
+> +&emmc_clk {
+> +	clock-frequency = <200000000>;
+> +};
+> +
+> +&flash_clk {
+> +	clock-frequency = <400000000>;
+> +};
+> +
+> +&ref_clk {
+> +	clock-frequency = <156250000>;
+> +};
+> +
+> +&qspi {
+> +	status = "okay";
+> +	flash0: mt25q@0 {
+> +		compatible = "jdec,spi-nor";
+> +		reg = <0>;
+> +		spi-max-frequency = <40000000>;
+> +		spi-rx-bus-width = <2>;
+> +		m25p,fast-read;
+> +		cdns,read-delay = <0>;
+> +		cdns,tshsl-ns = <0>;
+> +		cdns,tsd2d-ns = <0>;
+> +		cdns,tchsh-ns = <0>;
+> +		cdns,tslch-ns = <0>;
+> +	};
+> +};
+> +
+> +&gpio0 {
+> +	status = "ok";
+> +};
+> +
+> +&emmc {
+> +	bus-width = <8>;
+> +	status = "ok";
+> +};
+> +
+> +&wdt0 {
+> +	status = "okay";
+> +};
+> +
+> +&i2c0 {
+> +	clock-frequency = <100000>;
+> +	status = "okay";
+> +	tmp451@4c {
+> +		compatible = "ti,tmp451";
+> +		reg = <0x4c>;
+> +	};
+> +	tps53659@62 {
+> +		compatible = "ti,tps53659";
+> +		reg = <0x62>;
+> +	};
+> +	pcf85263@51 {
+> +		compatible = "nxp,pcf85263";
+> +		reg = <0x51>;
+> +	};
+> +};
+> +
+> +&spi0 {
+> +	num-cs = <4>;
+
+> +	cs-gpios = <&spics 0 0>, <&spics 1 0>, <&porta 1 0>, <&porta 7 0>;
+
+Oh, you've got four peripheral SPI devices connected with only two native CS
+available. Hmm, then I don't really know a better way, but just to forget about
+the native DW APB CS functionality and activate the direct driving of
+all the CS-pins at the moment of the DW APB SPI controller probe
+procedure. Then indeed you'll need a custom CS function defined in the DW APB
+SPI driver to handle that.
+
+> +	status = "okay";
+> +	spi@0 {
+> +		compatible = "pensando,cpld";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <0>;
+> +	};
+> +	spi@1 {
+> +		compatible = "pensando,cpld";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <1>;
+> +	};
+> +	spi@2 {
+> +		compatible = "pensando,cpld-rd1173";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <2>;
+> +		interrupt-parent = <&porta>;
+> +		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+> +	};
+> +	spi@3 {
+> +		compatible = "pensando,cpld";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <3>;
+> +	};
+> +};
+> diff --git a/arch/arm64/boot/dts/pensando/elba-asic.dts b/arch/arm64/boot/dts/pensando/elba-asic.dts
+> new file mode 100644
+> index 000000000000..411c48457006
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-asic.dts
+> @@ -0,0 +1,8 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +/dts-v1/;
+> +
+> +#include "elba.dtsi"
+> +#include "elba-16core.dtsi"
+> +#include "elba-asic-common.dtsi"
+> +#include "elba-flash-parts.dtsi"
+> diff --git a/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi b/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
+> new file mode 100644
+> index 000000000000..1983de1a8403
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
+> @@ -0,0 +1,80 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +
+> +&flash0 {
+> +	partitions {
+> +		compatible = "fixed-partitions";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		partition@0 {
+> +			label = "flash";
+> +			reg = <0x00010000 0x0fff0000>;
+> +		};
+> +		partition@f0000 {
+> +			label = "golduenv";
+> +			reg = <0x000f0000 0x00010000>;
+> +		};
+> +		partition@100000 {
+> +			label = "boot0";
+> +			reg = <0x00100000 0x00080000>;
+> +		};
+> +		partition@180000 {
+> +			label = "golduboot";
+> +			reg = <0x00180000 0x00200000>;
+> +		};
+> +		partition@400000 {
+> +			label = "goldfw";
+> +			reg = <0x00400000 0x03c00000>;
+> +		};
+> +		partition@4010000 {
+> +			label = "fwmap";
+> +			reg = <0x04010000 0x00020000>;
+> +		};
+> +		partition@4030000 {
+> +			label = "fwsel";
+> +			reg = <0x04030000 0x00020000>;
+> +		};
+> +		partition@4090000 {
+> +			label = "bootlog";
+> +			reg = <0x04090000 0x00020000>;
+> +		};
+> +		partition@40b0000 {
+> +			label = "panicbuf";
+> +			reg = <0x040b0000 0x00020000>;
+> +		};
+> +		partition@40d0000 {
+> +			label = "uservars";
+> +			reg = <0x040d0000 0x00020000>;
+> +		};
+> +		partition@4200000 {
+> +			label = "uboota";
+> +			reg = <0x04200000 0x00400000>;
+> +		};
+> +		partition@4600000 {
+> +			label = "ubootb";
+> +			reg = <0x04600000 0x00400000>;
+> +		};
+> +		partition@4a00000 {
+> +			label = "mainfwa";
+> +			reg = <0x04a00000 0x01000000>;
+> +		};
+> +		partition@5a00000 {
+> +			label = "mainfwb";
+> +			reg = <0x05a00000 0x01000000>;
+> +		};
+> +		partition@8000000 {
+> +			label = "diagfw";
+> +			reg = <0x08000000 0x07fe0000>;
+> +		};
+> +		partition@ffe0000 {
+> +			label = "ubootenv";
+> +			reg = <0x0ffe0000 0x00010000>;
+> +		};
+> +	};
+> +};
+> +
+> +&soc {
+> +	panicdump@740b0000 {
+> +		compatible = "pensando,capri-crash";
+> +		reg = <0x0 0x740b0000 0x0 0x00020000>;
+> +	};
+> +};
+> diff --git a/arch/arm64/boot/dts/pensando/elba.dtsi b/arch/arm64/boot/dts/pensando/elba.dtsi
+> new file mode 100644
+> index 000000000000..72245e279483
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba.dtsi
+> @@ -0,0 +1,310 @@
+> +// SPDX-License-Identifier: GPL-2.0
+> +/*
+> + * Copyright (c) 2019-2021, Pensando Systems Inc.
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
+> +
+> +#include "dt-bindings/interrupt-controller/arm-gic.h"
+> +
+> +/ {
+> +	compatible = "pensando,elba";
+> +
+> +	interrupt-parent = <&gic>;
+> +	#address-cells = <2>;
+> +	#size-cells = <2>;
+> +
+> +	clocks {
+> +		ahb_clk: oscillator0 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +		emmc_clk: oscillator2 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +		flash_clk: oscillator3 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +		ref_clk: oscillator4 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +	};
+> +
+> +	timer {
+> +		compatible = "arm,armv8-timer";
+> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>,
+> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>,
+> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>,
+> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>;
+> +	};
+> +
+> +	pmu {
+> +		compatible = "arm,cortex-a72-pmu";
+> +		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(1) |
+> +				IRQ_TYPE_LEVEL_LOW)>;
+> +	};
+> +
+> +	/* Common UIO device for MSI drivers */
+> +	uio_penmsi {
+> +		compatible = "pensando,uio_penmsi";
+> +		name = "uio_penmsi";
+> +	};
+> +
+> +
+> +	soc: soc {
+> +		compatible = "simple-bus";
+> +		#address-cells = <2>;
+> +		#size-cells = <2>;
+> +		ranges;
+> +
+> +		gic: interrupt-controller@800000 {
+> +			compatible = "arm,gic-v3";
+> +			#interrupt-cells = <3>;
+> +			#address-cells = <2>;
+> +			#size-cells = <2>;
+> +			ranges;
+> +			interrupt-controller;
+> +			reg = <0x0 0x800000 0x0 0x200000>,	// GICD
+> +			      <0x0 0xa00000 0x0 0x200000>;	// GICR
+> +			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
+> +
+> +			its: interrupt-controller@820000 {
+> +				compatible = "arm,gic-v3-its";
+> +				msi-controller;
+> +				#msi-cells = <1>;
+> +				reg = <0x0 0x820000 0x0 0x10000>;
+> +				socionext,synquacer-pre-its =
+> +							<0xc00000 0x1000000>;
+> +			};
+> +		};
+> +
+> +		/*
+> +		 * Until we  know the interrupt domain following this, we
+> +		 * are forced to use this is the place where interrupts from
+> +		 * PCI converge. In the ideal case, we use one domain higher,
+> +		 * where the PCI-ness has been shed.
+> +		 */
+> +		pxc0_intr: intc@20102200 {
+> +			compatible = "pensando,soc-ictlr-csrintr";
+> +			interrupt-controller;
+> +			reg = <0x0 0x20102200 0x0 0x4>;
+> +			#interrupt-cells = <3>;
+> +			interrupt-parent = <&gic>;
+> +			interrupts = <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "pxc0_intr";
+> +		};
+> +
+> +		uart0: serial@4800 {
+> +			device_type = "serial";
+> +			compatible = "ns16550a";
+> +			reg = <0x0 0x4800 0x0 0x100>;
+> +			clocks = <&ref_clk>;
+> +			interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
+> +			reg-shift = <2>;
+> +			reg-io-width = <4>;
+> +		};
+> +
+> +		qspi: spi@2400 {
+> +			compatible = "pensando,cdns-qspi";
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			reg = <0x0 0x2400 0x0 0x400>,
+> +			      <0x0 0x7fff0000 0x0 0x1000>;
+> +			interrupts = <GIC_SPI 0 IRQ_TYPE_LEVEL_HIGH>;
+> +			clocks = <&flash_clk>;
+> +			cdns,fifo-depth = <1024>;
+> +			cdns,fifo-width = <4>;
+> +			cdns,trigger-address = <0x7fff0000>;
+> +			status = "disabled";
+> +		};
+> +
+> +		gpio0: gpio@4000 {
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			compatible = "snps,dw-apb-gpio";
+> +			reg = <0x0 0x4000 0x0 0x78>;
+> +			status = "disabled";
+> +
+> +			porta: gpio-controller@0 {
+> +				compatible = "snps,dw-apb-gpio-port";
+> +				reg = <0>;
+> +				gpio-controller;
+> +				#gpio-cells = <2>;
+> +				ngpios = <8>;
+> +				interrupts = <GIC_SPI 1 IRQ_TYPE_LEVEL_HIGH>;
+> +				interrupt-controller;
+> +				interrupt-parent = <&gic>;
+> +				#interrupt-cells = <2>;
+> +			};
+> +			portb: gpio-controller@1 {
+> +				compatible = "snps,dw-apb-gpio-port";
+> +				reg = <1>;
+> +				gpio-controller;
+> +				#gpio-cells = <2>;
+> +				ngpios = <8>;
+> +			};
+> +		};
+> +
+> +		i2c0: i2c@400 {
+> +			compatible = "snps,designware-i2c";
+> +			reg = <0x0 0x400 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			i2c-sda-hold-time-ns = <480>;
+> +			snps,sda-timeout-ms = <750>;
+> +			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +
+> +		/* UIO device using interrupt line PCIEMAC */
+> +		pciemac@20102200 {
+> +			#address-cells = <2>;
+> +			#size-cells = <2>;
+> +			#interrupt-cells = <3>;
+> +
+> +			compatible = "pensando,uio_pciemac";
+> +			register-type = "csr-interrupt";
+> +			interrupt-parent = <&pxc0_intr>;
+> +			interrupts = <GIC_SPI 0 IRQ_TYPE_LEVEL_HIGH>;
+> +			reg = <0x0 0x20102200 0x0 0x10>; /* pxc0_intr */
+> +
+> +			enable_csr_paddr = <0x0 0x20102200 0x0 0x10>;
+> +			enable_mask = <(1 << 0)>;
+> +		};
+> +
+> +		/* MSI UIO device 1 */
+> +		uio_penmsi1@520000 {
+> +			compatible = "pensando,uio_penmsi1";
+> +			reg = <0x0 0x520000 0x0 0x10000>;
+> +			msi-parent = <&its 0xa>;
+> +			num-interrupts = <16>;  /* # MSI interrupts to get */
+> +		};
+> +
+
+> +		spics: spics@307c2468 {
+> +			compatible = "pensando,elba-spics";
+> +			reg = <0x0 0x307c2468 0x0 0x4>;
+> +			gpio-controller;
+> +			#gpio-cells = <2>;
+> +		};
+
+So that GPIO-controller is just a single register which provides a way
+to toggle the DW APB SPI CS-mode together with their output value.
+If so and seeing there are a few more tiny spaces of config
+registers added to eMMC, PCI, etc DT node, I suppose all of them
+belong to some bigger config space of the SoC. Thus I'd suggest to at
+least implement them as part of a System Controller DT node. Then use
+that device service to switch on/off corresponding functionality.
+See [2] and the rest of added to the kernel DTS files with
+syscon-nodes for example.
+
+[2] Documentation/devicetree/bindings/mfd/syscon.yaml
+
+-Sergey
+
+> +
+> +		spi0: spi@2800 {
+> +			compatible = "pensando,elba-spi";
+> +			reg = <0x0 0x2800 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			num-cs = <2>;
+> +			status = "disabled";
+> +		};
+> +
+> +		wdt0: watchdog@1400 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x1400 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +		wdt1: watchdog@1800 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x1800 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +		wdt2: watchdog@1c00 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x1c00 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +		wdt3: watchdog@2000 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x2000 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +
+> +		emmc: sdio-host-chip@30440000 {
+> +			compatible = "pensando,elba-emmc";
+> +			clocks = <&emmc_clk>;
+> +			interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
+> +			reg = <0x0 0x30440000 0x0 0x10000
+> +			       0x0 0x30480044 0x0 0x4>;
+> +			cdns,phy-input-delay-sd-highspeed = <0x4>;
+> +			cdns,phy-input-delay-legacy = <0x4>;
+> +			cdns,phy-input-delay-sd-uhs-sdr50 = <0x6>;
+> +			cdns,phy-input-delay-sd-uhs-ddr50 = <0x16>;
+> +			cdns,mmc-ddr-1_8v;
+> +			status = "disabled";
+> +		} ;
+> +
+> +		pcie@307c2480 {
+> +			compatible = "pensando,pcie";
+> +			reg = <0x0 0x307c2480 0x0 0x4   /* MS CFG_WDT */
+> +			       0x0 0x00001400 0x0 0x10  /* WDT0 */
+> +			       0x0 0x20000000 0x0 0x00380000>; /* PXB Base */
+> +		};
+> +
+> +		panic: panicdump@0 {
+> +			compatible = "pensando,pen-crash";
+> +			status = "disabled";
+> +		};
+> +
+> +		bsm@307c2080 {
+> +			compatible = "pensando,bsm";
+> +			reg = <0x0 0x307c2080 0x0 0x4>;
+> +		};
+> +	};
+> +	mnet0: mnet0 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x0>;
+> +	};
+> +	mnet1: mnet1 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x1>;
+> +	};
+> +	mnet2: mnet2 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x2>;
+> +	};
+> +	mnet3: mnet3 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x3>;
+> +	};
+> +	mnet4: mnet4 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x4>;
+> +	};
+> +	mnet5: mnet5 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x5>;
+> +	};
+> +	mnet6: mnet6 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x6>;
+> +	};
+> +	mnet7: mnet7 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x7>;
+> +	};
+> +	mnet8: mnet8 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x8>;
+> +	};
+> +	mnet9: mnet9 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x9>;
+> +	};
+> +};
+> -- 
+> 2.17.1
+> 
