@@ -2,57 +2,58 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED774C433E6
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 03:44:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE47DC4332B
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 03:44:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B089964EE3
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 03:44:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 95FB364EEF
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 03:44:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232807AbhCDDne (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Mar 2021 22:43:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36186 "EHLO
+        id S232858AbhCDDoI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Mar 2021 22:44:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232710AbhCDDnD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 22:43:03 -0500
-Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A22CCC061761
-        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 19:42:23 -0800 (PST)
-Received: by mail-pg1-x52c.google.com with SMTP id o38so17975307pgm.9
-        for <linux-mmc@vger.kernel.org>; Wed, 03 Mar 2021 19:42:23 -0800 (PST)
+        with ESMTP id S232881AbhCDDno (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Mar 2021 22:43:44 -0500
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B690C0613DB
+        for <linux-mmc@vger.kernel.org>; Wed,  3 Mar 2021 19:42:26 -0800 (PST)
+Received: by mail-pl1-x631.google.com with SMTP id d11so15344871plo.8
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Mar 2021 19:42:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
-        h=from:to:cc:subject:date:message-id;
-        bh=tffW+x0Z9bWuAJnHiB6v6+v5SpYm7jDmBmoT2CaZJw8=;
-        b=qDtH6oDuTzlpqxjbf8twdPlTY00ztG6wCgoGm0W6AAv2U45owzkShTCQd9BoPnW+fH
-         GbpWmVHLCuWHyEVRhCMM68qAqannSmnJJm4US789d5g70iG17K/9N97zKdPp7lDCP1bM
-         olfXkdeZL/1CzCaFkG1Rweyi/jiXqRwl1ucz7/48ovi69WNck9U+DJbU8RMOhljnty9V
-         iGVyIXggwuX1T5QqYcFiPsLmzGKK9n4SrVj3ey7L4tKzdAuLIaASTPADaKEsJeAH+Fe0
-         Zx/9u0CtwlL+kHHG/FiPYv+1tCrkardPK8A5fhtVMl5jXztMYN3lly/EtNQZfl+yHGm8
-         UnZA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references;
+        bh=pEDn5zvdGAqn29kJmMDpnpbScHXapYdOv8Q9mn7KjzI=;
+        b=dyQ6mxeda93Ed1Ys7wxwT79+2r8nJaEpnMREGZsW250EbE7qM9c6J9b4zVtzRWhVwc
+         8wRCFySB0rRbna24MTqikfa5Jbf5T67hOZlAQw8qrNH4/1JrBBymRZdyD5gZvo4thKw3
+         uPcuryUoMDCsW/g+88IWioCkLxarMIOuosRWUuyEPcgtnfNz9LUup9BcXlOK0t7RmzvQ
+         G2+NF4Fu68lGlBGMpk33MXkuHaeuIJQjbObKz15VsEh+sJAJErqq0Z9JPR+Fo6uKc6Gb
+         9s7AsqWHtdmtJ9sb/w+i9BpjbwUQg0haBUa/9bS+8LTlAHk4lg5CMQLUq63AY8j34xuv
+         Tk+A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=tffW+x0Z9bWuAJnHiB6v6+v5SpYm7jDmBmoT2CaZJw8=;
-        b=uTaAwFCCBTVXI3BEekSYu7HurAl/3kHZxzF1mKeIzZqeitSkUhdWNI3YQQY9XIEt6V
-         idl+UODq7x/LxOEEvxV155bX7Pb4MsWJBtiY9Irjmhc2VdR1LRgVANpCUU+jPO8W+Vvf
-         mLYBMa3QCVS2MWaFbFqxD5zgzf5o0QZR+2koB/Wajn/VXUXPzE/xrDFugNIS3r+aIljZ
-         mlzapfw/8GVAKFvY8SizTQgaLBZvqduO/piMNonMWGIbDjBFAqT8ZoV++mUJ4BKlGEmB
-         aORiLyPkowHIQUX/J2Guimx4lKnAsgWt+DX3U9CLd7tMX5HZBrVHwiTa5AeUPloHnIPg
-         y/1w==
-X-Gm-Message-State: AOAM531NL8TDGSrp60cpU2hjDg8S1RTMXoTg/0ANgEM/kO0jBKYS3JxS
-        tKvjHY4d76An6PmtYX35MfksqWtGWFdvWtjD
-X-Google-Smtp-Source: ABdhPJwabYrzrkPq11VEa1zJd9zZb5yOqiXy+o2pXK7oTU9bAkSOGXpV+0Zt1s0aOxLeYaagJZCB1g==
-X-Received: by 2002:a62:7c95:0:b029:1ed:ae61:5379 with SMTP id x143-20020a627c950000b02901edae615379mr2003953pfc.63.1614829343029;
-        Wed, 03 Mar 2021 19:42:23 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references;
+        bh=pEDn5zvdGAqn29kJmMDpnpbScHXapYdOv8Q9mn7KjzI=;
+        b=Q81Cq0gjffX8edISTRAHSLGt6O91iBHiWb+9nzdj7D5wA8MJxPnFa3hPj9Zn9SqwR7
+         qfiGyFfEisFowgPeZoksUD35k39XiOaBTzMhPYsO8q+FxzayVuThokgPWi2Njmko2IxB
+         1vgiKu9XdXSN8U/NSW5NPxMF8I+8YxrFlVLvCmKTwmZIDLIUq+YsquWib85iMTlkN25J
+         mx7Mk9L2IyLDqgeWRaMV0FVKLc6g4d5Pb11Ai9MBPlF7IW5T74mllHgj5k8PiNlUOgBq
+         FStjzgLuPdJEqUqwi6sXIhHQCunhTmtXS6MFE7IkNB4bnP/YTg8gvEX/HbH7f+cTJJjz
+         ZIbw==
+X-Gm-Message-State: AOAM531bgdYbCW3sW6c36gwM6i6HMfQARJMv7r2eCSRD5tcJ7m+QglKD
+        N1br/Q8ik9ZRfMHjOHJ/iRhfgw==
+X-Google-Smtp-Source: ABdhPJwYrpHQt7QzewDSFjUimFQsjcQaardRWxa9Dovbew7izqL2bGvYzhlZbHVt9HmcILArx/1A5g==
+X-Received: by 2002:a17:90a:8b82:: with SMTP id z2mr2278618pjn.25.1614829346114;
+        Wed, 03 Mar 2021 19:42:26 -0800 (PST)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id h17sm2403989pfc.211.2021.03.03.19.42.21
+        by smtp.gmail.com with ESMTPSA id h17sm2403989pfc.211.2021.03.03.19.42.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 Mar 2021 19:42:22 -0800 (PST)
+        Wed, 03 Mar 2021 19:42:25 -0800 (PST)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com,
@@ -61,73 +62,57 @@ Cc:     arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com,
         brad@pensando.io, linux-gpio@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 0/8] Support Pensando Elba SoC
-Date:   Wed,  3 Mar 2021 19:41:33 -0800
-Message-Id: <20210304034141.7062-1-brad@pensando.io>
+Subject: [PATCH 2/8] spi: cadence-quadspi: Add QSPI support for Pensando Elba SoC
+Date:   Wed,  3 Mar 2021 19:41:35 -0800
+Message-Id: <20210304034141.7062-3-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210304034141.7062-1-brad@pensando.io>
+References: <20210304034141.7062-1-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This series enables support for Pensando Elba SoC based platforms.
-The Elba SoC has the following features:
+Add QSPI controller support fo Pensando Elba SoC.
 
-- Sixteen ARM64 A72 cores
-- Dual DDR 4/5 memory controllers
-- 32 lanes of PCIe Gen3/4 to the Host
-- Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
-  also a single 1GE management port.
-- Storage/crypto offloads and 144 programmable P4 cores.
-- QSPI and EMMC for SoC storage
-- Two SPI interfaces for peripheral management
-- I2C bus for platform management
+Signed-off-by: Brad Larson <brad@pensando.io>
+---
+ drivers/spi/spi-cadence-quadspi.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-Brad Larson (8):
-  gpio: Add Elba SoC gpio driver for spi cs control
-  spi: cadence-quadspi: Add QSPI support for Pensando Elba SoC
-  spi: dw: Add support for Pensando Elba SoC SPI
-  spidev: Add Pensando CPLD compatible
-  mmc: sdhci-cadence: Add Pensando Elba SoC support
-  arm64: Add config for Pensando SoC platforms
-  arm64: dts: Add Pensando Elba SoC support
-  MAINTAINERS: Add entry for PENSANDO
-
- .../bindings/gpio/pensando,elba-spics.txt     |  24 ++
- .../devicetree/bindings/mmc/cdns,sdhci.yaml   |   2 +-
- .../bindings/spi/cadence-quadspi.txt          |   1 +
- .../devicetree/bindings/vendor-prefixes.yaml  |   2 +
- MAINTAINERS                                   |   9 +
- arch/arm64/Kconfig.platforms                  |   5 +
- arch/arm64/boot/dts/Makefile                  |   1 +
- arch/arm64/boot/dts/pensando/Makefile         |   6 +
- arch/arm64/boot/dts/pensando/elba-16core.dtsi | 171 ++++++++++
- .../boot/dts/pensando/elba-asic-common.dtsi   | 113 +++++++
- arch/arm64/boot/dts/pensando/elba-asic.dts    |   8 +
- .../boot/dts/pensando/elba-flash-parts.dtsi   |  80 +++++
- arch/arm64/boot/dts/pensando/elba.dtsi        | 310 ++++++++++++++++++
- drivers/gpio/Kconfig                          |   6 +
- drivers/gpio/Makefile                         |   1 +
- drivers/gpio/gpio-elba-spics.c                | 120 +++++++
- drivers/mmc/host/Kconfig                      |  15 +
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/sdhci-cadence-elba.c         | 137 ++++++++
- drivers/mmc/host/sdhci-cadence.c              |  78 ++---
- drivers/mmc/host/sdhci-cadence.h              |  68 ++++
- drivers/spi/spi-cadence-quadspi.c             |   9 +
- drivers/spi/spi-dw-mmio.c                     |  35 +-
- drivers/spi/spidev.c                          |   1 +
- 24 files changed, 1159 insertions(+), 44 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/gpio/pensando,elba-spics.txt
- create mode 100644 arch/arm64/boot/dts/pensando/Makefile
- create mode 100644 arch/arm64/boot/dts/pensando/elba-16core.dtsi
- create mode 100644 arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
- create mode 100644 arch/arm64/boot/dts/pensando/elba-asic.dts
- create mode 100644 arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
- create mode 100644 arch/arm64/boot/dts/pensando/elba.dtsi
- create mode 100644 drivers/gpio/gpio-elba-spics.c
- create mode 100644 drivers/mmc/host/sdhci-cadence-elba.c
- create mode 100644 drivers/mmc/host/sdhci-cadence.h
-
+diff --git a/drivers/spi/spi-cadence-quadspi.c b/drivers/spi/spi-cadence-quadspi.c
+index 442cc7c53a47..fb0d9b0bd596 100644
+--- a/drivers/spi/spi-cadence-quadspi.c
++++ b/drivers/spi/spi-cadence-quadspi.c
+@@ -1353,6 +1353,7 @@ static int cqspi_request_mmap_dma(struct cqspi_st *cqspi)
+ 	cqspi->rx_chan = dma_request_chan_by_mask(&mask);
+ 	if (IS_ERR(cqspi->rx_chan)) {
+ 		int ret = PTR_ERR(cqspi->rx_chan);
++
+ 		cqspi->rx_chan = NULL;
+ 		return dev_err_probe(&cqspi->pdev->dev, ret, "No Rx DMA available\n");
+ 	}
+@@ -1632,6 +1633,10 @@ static const struct cqspi_driver_platdata intel_lgm_qspi = {
+ 	.quirks = CQSPI_DISABLE_DAC_MODE,
+ };
+ 
++static const struct cqspi_driver_platdata pen_cdns_qspi = {
++	.quirks = CQSPI_NEEDS_WR_DELAY | CQSPI_DISABLE_DAC_MODE,
++};
++
+ static const struct of_device_id cqspi_dt_ids[] = {
+ 	{
+ 		.compatible = "cdns,qspi-nor",
+@@ -1649,6 +1654,10 @@ static const struct of_device_id cqspi_dt_ids[] = {
+ 		.compatible = "intel,lgm-qspi",
+ 		.data = &intel_lgm_qspi,
+ 	},
++	{
++		.compatible = "pensando,cdns-qspi",
++		.data = &pen_cdns_qspi,
++	},
+ 	{ /* end of table */ }
+ };
+ 
 -- 
 2.17.1
 
