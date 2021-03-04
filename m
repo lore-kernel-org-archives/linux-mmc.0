@@ -2,215 +2,183 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DFE4C4332B
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 15:18:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4122BC433E6
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:02:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8F7464FD6
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 15:18:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1BBA864F53
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:02:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234095AbhCDPRk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 10:17:40 -0500
-Received: from z11.mailgun.us ([104.130.96.11]:25462 "EHLO z11.mailgun.us"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232334AbhCDPRb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 4 Mar 2021 10:17:31 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1614871032; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=dyltIQ8oRrwKvMEyJ11sgR7hrRe+moPL6rUKrk/x2wk=;
- b=sQXYWaxXNp+Qf1Iz/L7Z98exnrA2ikVhT/9hAr/498bCX38nG6xNOftlHEhizSoIGtRA4xrr
- SCma+m+j4hk8/nYyrvXAI3m/B/gorgkzmu2PgpyijUe1SaRQQhNEXcyOsT5cdB4cH1Gnoovi
- hUs5njDOODQpBau+aZIz/G/Ejvk=
-X-Mailgun-Sending-Ip: 104.130.96.11
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n01.prod.us-west-2.postgun.com with SMTP id
- 6040f9d4c862e1b9fd27f3f6 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 04 Mar 2021 15:16:36
- GMT
-Sender: pragalla=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 9B837C43461; Thu,  4 Mar 2021 15:16:36 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: pragalla)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 9EED9C433CA;
-        Thu,  4 Mar 2021 15:16:35 +0000 (UTC)
+        id S232455AbhCDSBs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 13:01:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51864 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231878AbhCDSBR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 13:01:17 -0500
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBD0AC06175F
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 10:00:36 -0800 (PST)
+Received: by mail-wr1-x42b.google.com with SMTP id l12so28657680wry.2
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 10:00:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=references:user-agent:from:to:cc:subject:date:in-reply-to
+         :message-id:mime-version:content-transfer-encoding;
+        bh=8R7Ifb0lG6B9vvUmi1oPee7NhyKlrhTZle2Mf9WBYdQ=;
+        b=xsl1yZ6gGZXAoEu02jhqZeM0rHDiFWFH/3g3Kq+bb5AL3RAImOHMR2VPDce9buhUs5
+         wgXVWxcIDm9seZmzGULizGtbzfErxlddmAsquXMb40FHvDKf8fo6y7v+HGes/L8Iu2mq
+         9k5QhKMJfYOo5VqfsPP//nDxQiT68+5sO9lG6aYhXIvdl3m4dihgCZOElKMozwREOaGD
+         I85a/Sgq+RxIR2SAVRmMwpKXeghOUj/PyjpayUbjN4I6l47bJReBrH4pYk6cq3qygw1g
+         QuqdlirqO7QM7NxQg4BEOH0ozHE5EMpcX+HEBKztSiZHe48YNFB1km4pJKkNcVApJwk1
+         P8ww==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:references:user-agent:from:to:cc:subject:date
+         :in-reply-to:message-id:mime-version:content-transfer-encoding;
+        bh=8R7Ifb0lG6B9vvUmi1oPee7NhyKlrhTZle2Mf9WBYdQ=;
+        b=bpMjvwAxpZ04KnODKg2NyPTLarvzoXPO2eYzwUbwJ/aTo2kRAfaJWpEwW5h1p1Vc57
+         oKnh6bc1Ueu4JUbjwj8RtOXlPzK8iveozmBKosB38LMwbFJFytCxhOOWOfDOvnaYSdZL
+         Jbyx6a6MtcLqF2o5XKWHP6I3ZEhQ1zIiybPj1FtGh+5Bz+q1nKtETRMTfx1w1TyVVCiD
+         S/NMJ9X1LeGUWPxVTdoe6yoPfjwY709SHcnkaEJHO5m6LTXuEGpTrfExDNzD9aTt5jl9
+         wm+lXOErbCPL9dTjUfBaLzrqz+NbITqpZazK2haoNDrGATpP7nhKo9M9VomdZJAn+SF/
+         8+9g==
+X-Gm-Message-State: AOAM530wfh/PQ77ly/ccmFNwPtccc6p5HcsstMAJwTJDdmMZIFy86UZ4
+        dWgYTM5FsP0bKipqYcmFRXAzcQ==
+X-Google-Smtp-Source: ABdhPJzhkm+tkyOCMF8OnkU0x7xGFO/OwotnOJ7F3gwaZPtm3sEslFvYxW4NxGROAFsxgOn4fhDKgA==
+X-Received: by 2002:adf:dd4f:: with SMTP id u15mr5426860wrm.260.1614880835435;
+        Thu, 04 Mar 2021 10:00:35 -0800 (PST)
+Received: from zen.linaroharston ([51.148.130.216])
+        by smtp.gmail.com with ESMTPSA id o20sm322634wmq.5.2021.03.04.10.00.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 04 Mar 2021 10:00:34 -0800 (PST)
+Received: from zen (localhost [127.0.0.1])
+        by zen.linaroharston (Postfix) with ESMTP id 9CC271FF7E;
+        Thu,  4 Mar 2021 18:00:33 +0000 (GMT)
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-3-alex.bennee@linaro.org>
+ <ff78164cc13b4855911116c2d48929a2@intel.com> <87eegvgr0w.fsf@linaro.org>
+ <590e0157d6c44d55aa166ccad6355db5@intel.com>
+User-agent: mu4e 1.5.8; emacs 28.0.50
+From:   Alex =?utf-8?Q?Benn=C3=A9e?= <alex.bennee@linaro.org>
+To:     "Winkler, Tomas" <tomas.winkler@intel.com>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
+        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
+        "ilias.apalodimas@linaro.org" <ilias.apalodimas@linaro.org>,
+        "arnd@linaro.org" <arnd@linaro.org>,
+        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
+        "Huang, Yang" <yang.huang@intel.com>,
+        "Zhu, Bing" <bing.zhu@intel.com>,
+        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
+        "hmo@opensynergy.com" <hmo@opensynergy.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+        linux-nvme@lists.infradead.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "Linus Walleij" <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        "Usyskin, Alexander" <alexander.usyskin@intel.com>,
+        Avri Altman <avri.altman@sandisk.com>
+Subject: Re: [RFC PATCH  2/5] char: rpmb: provide a user space interface
+Date:   Thu, 04 Mar 2021 17:52:01 +0000
+In-reply-to: <590e0157d6c44d55aa166ccad6355db5@intel.com>
+Message-ID: <87wnumg5oe.fsf@linaro.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Thu, 04 Mar 2021 20:46:35 +0530
-From:   pragalla@codeaurora.org
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Pradeep P V K <pragalla@qti.qualcomm.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        linux-mmc@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH V2] mmc: sdhci: Check for reset prior to DMA address unmap
-In-Reply-To: <CAPDyKFqFNr7AiOdVP07XS=CKpMbDKC7n0gMPu0516fgH3=S18Q@mail.gmail.com>
-References: <1614760331-43499-1-git-send-email-pragalla@qti.qualcomm.com>
- <CAPDyKFqFNr7AiOdVP07XS=CKpMbDKC7n0gMPu0516fgH3=S18Q@mail.gmail.com>
-Message-ID: <3962320b58beaa4626ed69b3120d4246@codeaurora.org>
-X-Sender: pragalla@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-03-04 19:19, Ulf Hansson wrote:
-> On Wed, 3 Mar 2021 at 09:32, Pradeep P V K <pragalla@qti.qualcomm.com> 
-> wrote:
->> 
->> From: Pradeep P V K <pragalla@codeaurora.org>
->> 
->> For data read commands, SDHC may initiate data transfers even before 
->> it
->> completely process the command response. In case command itself fails,
->> driver un-maps the memory associated with data transfer but this 
->> memory
->> can still be accessed by SDHC for the already initiated data transfer.
->> This scenario can lead to un-mapped memory access error.
->> 
->> To avoid this scenario, reset SDHC (when command fails) prior to
->> un-mapping memory. Resetting SDHC ensures that all in-flight data
->> transfers are either aborted or completed. So we don't run into this
->> scenario.
->> 
->> Swap the reset, un-map steps sequence in sdhci_request_done().
->> 
->> Changes since V1:
->> - Added an empty line and fixed the comment style.
->> - Retained the Acked-by signoff.
->> 
->> Suggested-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
->> Signed-off-by: Pradeep P V K <pragalla@codeaurora.org>
->> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Hi Uffe,
-> 
-> Seems like it might be a good idea to tag this for stable? I did that,
-> but awaiting for your confirmation.
-> 
-Yes, this fix is applicable for all stable starting from 4.9 (n/a for 
-4.4).
-Kindly go ahead.
+Winkler, Tomas <tomas.winkler@intel.com> writes:
 
-> So, applied for next, thanks!
-> 
-> Kind regards
-> Uffe
-> 
-Thanks and Regards,
-Pradeep
+>> "Winkler, Tomas" <tomas.winkler@intel.com> writes:
+>>=20
+>> >> The user space API is achieved via a number of synchronous IOCTLs.
+>> >>
+>> >>   * RPMB_IOC_VER_CMD - simple versioning API
+>> >>   * RPMB_IOC_CAP_CMD - query of underlying capabilities
+>> >>   * RPMB_IOC_PKEY_CMD - one time programming of access key
+>> >>   * RPMB_IOC_COUNTER_CMD - query the write counter
+>> >>   * RPMB_IOC_WBLOCKS_CMD - write blocks to device
+>> >>   * RPMB_IOC_RBLOCKS_CMD - read blocks from device
+>> >>
+>> >> The keys used for programming and writing blocks to the device are
+>> >> key_serial_t handles as provided by the keyctl() interface.
+>> >>
+>> >> [AJB: here there are two key differences between this and the
+>> >> original proposal. The first is the dropping of the sequence of
+>> >> preformated frames in favour of explicit actions. The second is the
+>> >> introduction of key_serial_t and the keyring API for referencing the
+>> >> key to use]
+>> >
+>> > Putting it gently I'm not sure this is good idea, from the security po=
+int of
+>> view.
+>> > The key has to be possession of the one that signs the frames as they =
+are,
+>> it doesn't mean it is linux kernel keyring, it can be other party on dif=
+ferent
+>> system.
+>> > With this approach you will make the other usecases not applicable. It
+>> > is less then trivial to move key securely from one system to another.
+>>=20
+>> OK I can understand the desire for such a use-case but it does constrain=
+ the
+>> interface on the kernel with access to the hardware to purely providing a
+>> pipe to the raw hardware while also having to expose the details of the =
+HW
+>> to userspace.=20
+> This is the use case in Android. The key is in the "trusty" which
+> different os running in a virtual environment. The file storage
+> abstraction is implemented there. I'm not sure the point of
+> constraining the kernel, can you please elaborate on that.
 
-> 
->> ---
->>  drivers/mmc/host/sdhci.c | 60 
->> +++++++++++++++++++++++++-----------------------
->>  1 file changed, 31 insertions(+), 29 deletions(-)
->> 
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index 646823d..130fd2d 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -2998,6 +2998,37 @@ static bool sdhci_request_done(struct 
->> sdhci_host *host)
->>         }
->> 
->>         /*
->> +        * The controller needs a reset of internal state machines
->> +        * upon error conditions.
->> +        */
->> +       if (sdhci_needs_reset(host, mrq)) {
->> +               /*
->> +                * Do not finish until command and data lines are 
->> available for
->> +                * reset. Note there can only be one other mrq, so it 
->> cannot
->> +                * also be in mrqs_done, otherwise host->cmd and 
->> host->data_cmd
->> +                * would both be null.
->> +                */
->> +               if (host->cmd || host->data_cmd) {
->> +                       spin_unlock_irqrestore(&host->lock, flags);
->> +                       return true;
->> +               }
->> +
->> +               /* Some controllers need this kick or reset won't work 
->> here */
->> +               if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
->> +                       /* This is to force an update */
->> +                       host->ops->set_clock(host, host->clock);
->> +
->> +               /*
->> +                * Spec says we should do both at the same time, but 
->> Ricoh
->> +                * controllers do not like that.
->> +                */
->> +               sdhci_do_reset(host, SDHCI_RESET_CMD);
->> +               sdhci_do_reset(host, SDHCI_RESET_DATA);
->> +
->> +               host->pending_reset = false;
->> +       }
->> +
->> +       /*
->>          * Always unmap the data buffers if they were mapped by
->>          * sdhci_prepare_data() whenever we finish with a request.
->>          * This avoids leaking DMA mappings on error.
->> @@ -3060,35 +3091,6 @@ static bool sdhci_request_done(struct 
->> sdhci_host *host)
->>                 }
->>         }
->> 
->> -       /*
->> -        * The controller needs a reset of internal state machines
->> -        * upon error conditions.
->> -        */
->> -       if (sdhci_needs_reset(host, mrq)) {
->> -               /*
->> -                * Do not finish until command and data lines are 
->> available for
->> -                * reset. Note there can only be one other mrq, so it 
->> cannot
->> -                * also be in mrqs_done, otherwise host->cmd and 
->> host->data_cmd
->> -                * would both be null.
->> -                */
->> -               if (host->cmd || host->data_cmd) {
->> -                       spin_unlock_irqrestore(&host->lock, flags);
->> -                       return true;
->> -               }
->> -
->> -               /* Some controllers need this kick or reset won't work 
->> here */
->> -               if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
->> -                       /* This is to force an update */
->> -                       host->ops->set_clock(host, host->clock);
->> -
->> -               /* Spec says we should do both at the same time, but 
->> Ricoh
->> -                  controllers do not like that. */
->> -               sdhci_do_reset(host, SDHCI_RESET_CMD);
->> -               sdhci_do_reset(host, SDHCI_RESET_DATA);
->> -
->> -               host->pending_reset = false;
->> -       }
->> -
->>         host->mrqs_done[i] = NULL;
->> 
->>         spin_unlock_irqrestore(&host->lock, flags);
->> --
->> 2.7.4
->> 
+Well the kernel is all about abstracting differences not baking in
+assumptions. However can I ask a bit more about this security model?
+
+Is the secure enclave just a separate userspace process or is it in a
+separate virtual machine? Is it accessible at all by the kernel running
+the driver?
+
+The fact that key id is passed down into the kernel doesn't have to
+imply the kernel does the final cryptographic operation. In the ARM
+world you could make a call to the secure world to do the operation for
+you. I note the keyctl() interface already has support for going to
+userspace to make queries of the keyring. Maybe what is really needed is
+an abstraction for the kernel to delegate the MAC calculation to some other
+trusted process that also understands the keyid.
+
+>
+> Also doesn't this break down after a PROGRAM_KEY event as
+>> the key will have had to traverse into the "untrusted" kernel?
+>
+> This is one in a life event of the card happening on the manufacturing
+> floor, maybe even not performed on Linux.
+
+In an off list conversation it was suggested that maybe the PROGRAM_KEY
+ioctl should be disabled for locked down kernels to dissuade production
+use of the facility (it is handy for testing though!).
+
+>> I wonder if virtio-rpmb may be of help here? You could wrap up up the fr=
+ont-
+>> end in the security domain that has the keys although I don't know how e=
+asy
+>> it would be for a backend to work with real hardware?
+>
+> I'm open to see any proposal, not sure I can wrap may head about it right=
+ now.=20
+>
+> Anyway I was about to send the new round of my code,  but let's come to c=
+ommon ground first.=20
+>
+
+OK - I'll see what the others say.
+
+--=20
+Alex Benn=C3=A9e
