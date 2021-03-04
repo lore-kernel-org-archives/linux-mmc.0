@@ -2,165 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0616CC433DB
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 22:12:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27A72C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 22:48:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0C6B64FF4
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 22:12:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D709465018
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 22:48:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229516AbhCDWMG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 17:12:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44292 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241196AbhCDVo2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 16:44:28 -0500
-Received: from mail-ot1-x332.google.com (mail-ot1-x332.google.com [IPv6:2607:f8b0:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0ABEC061574
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 13:43:48 -0800 (PST)
-Received: by mail-ot1-x332.google.com with SMTP id 97so1891216otf.13
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 13:43:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Q7tBXV4lZRcDzR1WeLqLPxHv84GSFkk+SyKZ277C1YA=;
-        b=BBwDnQyKyqeYcC+rrb3errHEavPdPrQzuH20BcbkwwSkN4sOmjPaHs3qZkHfw3LPxf
-         AXPK4CFmZ17nm3gnZoT2Brknojh08y/pQegZL+u4+6Cmz3jRrAkZQwCEfq/THW2YxdtB
-         D1JWY8tKCCWgDZsRdnWTJmWGyMCdbLNa6XsceoabVl1IrwZku+HFIV8lnJ9b2gtExOat
-         2wQweKIDkUDK7iiTX02F1M8X/ggX0ur2426JxvUK82PsmLZRENvpvb35XC5p9FV5cPhU
-         85ROecKQqDuatcFd0RbMUbPspXl0d1zSKXOId8XTESy039ZfA32fP5fbWSzXPc60ry1k
-         g8ZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Q7tBXV4lZRcDzR1WeLqLPxHv84GSFkk+SyKZ277C1YA=;
-        b=fZ8z+mEC1JuaEe78C0jV1C61Y6+iwHcbt3ljfLMKK+ZPdhNv87iIGO9a2Kd776OZ7R
-         JsXaXpPtPax47s7g1W7N1bGqW6L7+Z4j7JTKiZSqyngp5ERqXUl2xH3YyslmSD6pJxXU
-         4djNpnZ17cddsTMXoyO3PRwgoTQGrZeOC2X1R4RGO95HAItOOFVU390tsOrujiZR3esx
-         KpAt6yDe4TrswD2Jay/6PoeVdeWZyOhFdLeSYPhtlLpr0vFWuaIJcRf+Vi9UQGjKwLc+
-         FwpMmtR1V4omTU4pejFQJXn2tEFoPcrNeE1HxPS1te2FuCZ8hzHeneRr8dQ9mlc7Kkjd
-         Ax5Q==
-X-Gm-Message-State: AOAM530r3A2rqDb9/xEhPl1vx0QfWH8LfUhkd2scHjGuTJgHAJY9jbC8
-        rygc1XILAWrDp8rn3MRGJq+YTg==
-X-Google-Smtp-Source: ABdhPJy4VH9hTVyRKwcTVnfoTCpeZU1NhCuy3a0Xs9hBMHD5RUVuGcDc9VrE5aEbF00ZzxYZhVADVg==
-X-Received: by 2002:a9d:7481:: with SMTP id t1mr5180625otk.208.1614894228086;
-        Thu, 04 Mar 2021 13:43:48 -0800 (PST)
-Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com. [209.85.167.169])
-        by smtp.gmail.com with ESMTPSA id b21sm119052oot.34.2021.03.04.13.43.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 04 Mar 2021 13:43:47 -0800 (PST)
-Received: by mail-oi1-f169.google.com with SMTP id w65so86996oie.7;
-        Thu, 04 Mar 2021 13:43:47 -0800 (PST)
-X-Received: by 2002:aca:5e85:: with SMTP id s127mr4293199oib.67.1614894226912;
- Thu, 04 Mar 2021 13:43:46 -0800 (PST)
+        id S231843AbhCDWsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 17:48:55 -0500
+Received: from mail.kernel.org ([198.145.29.99]:37466 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231736AbhCDWsy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 4 Mar 2021 17:48:54 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0D15E6501C;
+        Thu,  4 Mar 2021 22:48:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1614898134;
+        bh=GrerDAoTAovyyWNYvvC+zs2BPxmDLs2XKLKb4mqZLDY=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=fl2hoAYr4FyvTGzDjQer3murYeBpxPsKxixW9QAs3SiMjkbVs1F6FyKCasSDdBKDp
+         zms401sqEExyK82KF2BP0C5B1QnWwF8GmIE9Rht6pQkWowXTn1Xp/S3LL6Oba5r0nQ
+         fULHUIHs0N1ZDiSWS/9Zyac6uOLCmzYZvxglLV5bpA286cjBBokgvz4c8AJFxjB8+8
+         ORBXxQ3v1FqOKOS7oGjPWBs5NziUFCirD/ZmwTFS5WzWJCCMITmC37DONZR5KN48R3
+         e6ZhYA4UocjazvhXkVhggBXfwbffEMI3He5G+faTJl3AjHo03NKinnRCBxeqmKF4nP
+         Hg7CymCsevq4g==
+Received: by mail-ej1-f46.google.com with SMTP id w1so52703037ejf.11;
+        Thu, 04 Mar 2021 14:48:53 -0800 (PST)
+X-Gm-Message-State: AOAM532shjaGSfTJW3GVXYwzHU4fQjeVzgcy307Wk6xGu3GgzPg52dMO
+        B/S9rGWEGcN73G4U1+Tcoq7lauTljwHNT175ng==
+X-Google-Smtp-Source: ABdhPJwsSfTpWjPL+cZrEMvosQ1IPs0l8gQZ/vIA9NHMjVhs68GFDG/L9SRf5PtvlaFJJ8yVPqheQ48Al0kdk2WAF/c=
+X-Received: by 2002:a17:906:380b:: with SMTP id v11mr6717737ejc.183.1614898132557;
+ Thu, 04 Mar 2021 14:48:52 -0800 (PST)
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-3-alex.bennee@linaro.org> <ff78164cc13b4855911116c2d48929a2@intel.com>
- <87eegvgr0w.fsf@linaro.org> <590e0157d6c44d55aa166ccad6355db5@intel.com>
- <87wnumg5oe.fsf@linaro.org> <baa46857daba4bb685491ea9323fe45f@intel.com>
-In-Reply-To: <baa46857daba4bb685491ea9323fe45f@intel.com>
-From:   Arnd Bergmann <arnd@linaro.org>
-Date:   Thu, 4 Mar 2021 22:43:30 +0100
-X-Gmail-Original-Message-ID: <CAK8P3a0ATHxzS02_5kypbGwHYLaWZmEPG8xtZchWuuM-93o8CA@mail.gmail.com>
-Message-ID: <CAK8P3a0ATHxzS02_5kypbGwHYLaWZmEPG8xtZchWuuM-93o8CA@mail.gmail.com>
-Subject: Re: [RFC PATCH 2/5] char: rpmb: provide a user space interface
-To:     "Winkler, Tomas" <tomas.winkler@intel.com>
-Cc:     =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
-        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
-        "ilias.apalodimas@linaro.org" <ilias.apalodimas@linaro.org>,
-        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
-        "Huang, Yang" <yang.huang@intel.com>,
-        "Zhu, Bing" <bing.zhu@intel.com>,
-        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
-        "hmo@opensynergy.com" <hmo@opensynergy.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
-        "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>,
+References: <1614222604-27066-1-git-send-email-peng.fan@oss.nxp.com> <1614222604-27066-5-git-send-email-peng.fan@oss.nxp.com>
+In-Reply-To: <1614222604-27066-5-git-send-email-peng.fan@oss.nxp.com>
+From:   Rob Herring <robh+dt@kernel.org>
+Date:   Thu, 4 Mar 2021 16:48:40 -0600
+X-Gmail-Original-Message-ID: <CAL_JsqKAOUKnVLvu-VNeDVg0ShXPy56wxhCQv38+rO2k961v+g@mail.gmail.com>
+Message-ID: <CAL_JsqKAOUKnVLvu-VNeDVg0ShXPy56wxhCQv38+rO2k961v+g@mail.gmail.com>
+Subject: Re: [PATCH V3 4/5] dt-bindings: mmc: fsl-imx-esdhc: add clock bindings
+To:     peng.fan@oss.nxp.com
+Cc:     Stephen Boyd <sboyd@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        "Usyskin, Alexander" <alexander.usyskin@intel.com>,
-        Avri Altman <avri.altman@sandisk.com>
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-clk <linux-clk@vger.kernel.org>,
+        devicetree@vger.kernel.org,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Peng Fan <peng.fan@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 4, 2021 at 8:54 PM Winkler, Tomas <tomas.winkler@intel.com> wrote:
-> > Winkler, Tomas <tomas.winkler@intel.com> writes:
-> > >> "Winkler, Tomas" <tomas.winkler@intel.com> writes:
-> > >>
-> > >> >> The user space API is achieved via a number of synchronous IOCTLs.
-> > >> >>
-> > >> >>   * RPMB_IOC_VER_CMD - simple versioning API
-> > >> >>   * RPMB_IOC_CAP_CMD - query of underlying capabilities
-> > >> >>   * RPMB_IOC_PKEY_CMD - one time programming of access key
-> > >> >>   * RPMB_IOC_COUNTER_CMD - query the write counter
-> > >> >>   * RPMB_IOC_WBLOCKS_CMD - write blocks to device
-> > >> >>   * RPMB_IOC_RBLOCKS_CMD - read blocks from device
-> > >> >>
-> > >> >> The keys used for programming and writing blocks to the device are
-> > >> >> key_serial_t handles as provided by the keyctl() interface.
-> > >> >>
-> > >> >> [AJB: here there are two key differences between this and the
-> > >> >> original proposal. The first is the dropping of the sequence of
-> > >> >> preformated frames in favour of explicit actions. The second is
-> > >> >> the introduction of key_serial_t and the keyring API for
-> > >> >> referencing the key to use]
-> > >> >
-> > >> > Putting it gently I'm not sure this is good idea, from the security
-> > >> > point of
-> > >> view.
-> > >> > The key has to be possession of the one that signs the frames as
-> > >> > they are,
-> > >> it doesn't mean it is linux kernel keyring, it can be other party on
-> > >> different system.
-> > >> > With this approach you will make the other usecases not applicable.
-> > >> > It is less then trivial to move key securely from one system to another.
-> > >>
-> > >> OK I can understand the desire for such a use-case but it does
-> > >> constrain the interface on the kernel with access to the hardware to
-> > >> purely providing a pipe to the raw hardware while also having to
-> > >> expose the details of the HW to userspace.
-> > > This is the use case in Android. The key is in the "trusty" which
-> > > different os running in a virtual environment. The file storage
-> > > abstraction is implemented there. I'm not sure the point of
-> > > constraining the kernel, can you please elaborate on that.
-> >
-> > Well the kernel is all about abstracting differences not baking in assumptions.
-> > However can I ask a bit more about this security model?
-> > Is the secure enclave just a separate userspace process or is it in a separate
-> > virtual machine? Is it accessible at all by the kernel running the driver?
+On Wed, Feb 24, 2021 at 9:23 PM <peng.fan@oss.nxp.com> wrote:
 >
-> It's not an assumption this is working for few years already (https://source.android.com/security/trusty#application_services)
-> The model is that you have a trusted environment (TEE)  in which can be in any of the form you described above.
-> And there is established agreement via the RPMB key that TEE is only entity that can produce content to be stored on RPBM,
-> The RPMB hardware also ensure that nobody can catch it in the middle and replay that storage event.
+> From: Peng Fan <peng.fan@nxp.com>
 >
-> My point is that interface you are suggesting is not covering all possible usages of RPMB, actually usages that are already in place.
+> Add clock bindings for fsl-imx-esdhc yaml
+>
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> ---
+>  .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml        | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
 
-It turned out that the application that we (Linaro) need does have the
-same requirements and needs to store the key in a TEE, transferring
-the message with the MAC into the kernel, rather than keeping the
-key stored in user space or kernel.
+Looks like this landed in linux-next and introduces warnings:
 
-However, after I had a look at the nvme-rpmb user space implementation,
-I found that this is different, and always expects the key to be stored
-in a local file:
-https://github.com/linux-nvme/nvme-cli/blob/master/nvme-rpmb.c#L878
-
-This both works with the same kernel interface though, as the kernel
-would still get the data along with the HMAC, rather than having the key
-stored in the kernel, but it does mean that the frame gets passed to
-the kernel in a device specific layout, with at least nvme using an incompatible
-layout from everything else.
-
-        Arnd
+/builds/robherring/linux-dt-bindings/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml:
+mmc@5b010000: clock-names:1: 'ahb' was expected
+ From schema: /builds/robherring/linux-dt-bindings/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+/builds/robherring/linux-dt-bindings/Documentation/devicetree/bindings/clock/imx8qxp-lpcg.example.dt.yaml:
+mmc@5b010000: clock-names:2: 'per' was expected
+ From schema: /builds/robherring/linux-dt-bindings/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
