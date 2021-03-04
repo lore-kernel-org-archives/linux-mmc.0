@@ -2,111 +2,167 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4274FC4332D
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 20:49:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FE3CC433E6
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 20:58:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1901E64F70
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 20:49:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE8F264F72
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 20:57:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235650AbhCDUs5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 15:48:57 -0500
-Received: from mail-ot1-f46.google.com ([209.85.210.46]:43146 "EHLO
-        mail-ot1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235648AbhCDUsc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 15:48:32 -0500
-Received: by mail-ot1-f46.google.com with SMTP id v12so27544423ott.10;
-        Thu, 04 Mar 2021 12:48:16 -0800 (PST)
+        id S233180AbhCDU51 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 15:57:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34100 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232766AbhCDU5W (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 15:57:22 -0500
+Received: from mail-oi1-x22f.google.com (mail-oi1-x22f.google.com [IPv6:2607:f8b0:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F3B6C06175F
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 12:56:42 -0800 (PST)
+Received: by mail-oi1-x22f.google.com with SMTP id f3so31625138oiw.13
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 12:56:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=lBfTd3oDp2KFnFnmSKQxa1nC+FsiGtIxnlk+/Kblz0k=;
+        b=Zu1gFLVGQxh8fZR3srbK2UHHspUpnBkj9DkPdzrVHRSDrMG+OnqxjB1qxqA9u3LYDv
+         1g1xcntTCYr1DMx+ym/8enYaviBH6YDPfgqPB5aCd5U4m8X1ZIfeeD4L1xm+K0HHX2lA
+         EYj9CJXioEGlVxjjh4NaJjR8UT1zHeKadqsj23LtdWzdEfevIt5n03xjn67Qaa19Y9s7
+         wCKEPApxuavczhGwe/VYa7zQkIl//+0tYUEt3pTGd151AY/FLTRUpBCdKtG0LiykW0Ov
+         C3MuQisaxZ0Xw1dNcy+tqgvfjR0a9WgkAO910K+DctQlsz8g1XRtGoJUjCY+1HAZFDvq
+         uILg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
-         :message-id;
-        bh=2OoGTJOyct6c2S8dv3hmx3zLqIL0twuJ2fEgd59m/TU=;
-        b=VZwxrZ5bA/QdC0MS7WdX3QbMN4hfMXIkI1TDesxNvVMN9KMYmCs9WJ5ncBEJLb1ftw
-         DzinOM30H/PZDFCU0sT/rnikrq1FimmdCG2kYyCVe1L34kg0TKlkKgo6d01bPu37R199
-         VMfZ8Uy7Kjozo/YAhG276N7VE9L8D79n73nZpZYBd9GF3lXeDN+Bi/MtpOMXz2zIBnMn
-         fDS3fJfOtlVorTkoX80VqrZqSYTy8Sk8395FIYmlJAaNU6aL8MsEl3Eeg79HIIgjfTHW
-         9rpSjC10ZMBhQxWZQzCydSZYm9+LQy+GpTLvNETUN5JctwnGehOR7msuvRu1ypPTi3zO
-         tokA==
-X-Gm-Message-State: AOAM533Oc+d6wXDAKp/4x/uIDHq7TYldc31r18I1GJiUOJ6qNcbQenFB
-        1c246niHGvmEYpJLQz4alg==
-X-Google-Smtp-Source: ABdhPJzd3nJvYXZhRJFS+SMlJsLzkWd0UMzd0TMfhc3TUuc6jKDJCflKn9KZ8VetSGIqdeybqOJ9ew==
-X-Received: by 2002:a9d:3422:: with SMTP id v31mr653634otb.260.1614890871544;
-        Thu, 04 Mar 2021 12:47:51 -0800 (PST)
-Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id t4sm98452ooh.4.2021.03.04.12.47.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Mar 2021 12:47:50 -0800 (PST)
-Received: (nullmailer pid 2778955 invoked by uid 1000);
-        Thu, 04 Mar 2021 20:47:29 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     arnd@arndb.de, linux-spi@vger.kernel.org,
-        bgolaszewski@baylibre.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        broonie@kernel.org, olof@lixom.net, devicetree@vger.kernel.org,
-        fancer.lancer@gmail.com, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org
-In-Reply-To: <20210304034141.7062-8-brad@pensando.io>
-References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-8-brad@pensando.io>
-Subject: Re: [PATCH 7/8] arm64: dts: Add Pensando Elba SoC support
-Date:   Thu, 04 Mar 2021 14:47:29 -0600
-Message-Id: <1614890849.092166.2778954.nullmailer@robh.at.kernel.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=lBfTd3oDp2KFnFnmSKQxa1nC+FsiGtIxnlk+/Kblz0k=;
+        b=PfybIun/aJowYM70m6b3aQxq3g1C18/jbo498AfINYwPQ0iCjR3ZbcpGdMMO5UMHcp
+         iYM2v+K4Rsnp7vx7LMk4MrsT+PpLJ9tO/qisrKF+AJ968L2M52UELgUcttiRHIykm44F
+         dtgx/T054Ncqcim5iMkCgIRRi5A58z7nYhS/79Djz0rgHXhudmpm79/xTqGn4uwkWONR
+         KfXOwkPGXqGisuBdfHnTp4n6AAU5nmeWWfcksmkWdDVm3azMxTu8Hqk2hEnIUUycrBbF
+         Y3emVRGuneap9DpNEfEd/YZODVq/5Lgm2RI8xS+YbvIvx/h3wmkjEtxd04ZZv9w6fAHc
+         G/4A==
+X-Gm-Message-State: AOAM530h4z8wMJAhofG00MdGE6HdBBHGnXB40D9sWqAi3FiIytDNaB9m
+        Q9LfWxuXmBPbn50tutJ/uBy91A==
+X-Google-Smtp-Source: ABdhPJzOBvaVFSRgVt+//TfqyyS1JKpi+aQ6WdfahlQHMA5Vr9VSpFQYTuQ8h84jmUBwahv6OCCr8Q==
+X-Received: by 2002:a05:6808:a8d:: with SMTP id q13mr4341622oij.29.1614891401568;
+        Thu, 04 Mar 2021 12:56:41 -0800 (PST)
+Received: from mail-ot1-f41.google.com (mail-ot1-f41.google.com. [209.85.210.41])
+        by smtp.gmail.com with ESMTPSA id w9sm66357oia.46.2021.03.04.12.56.40
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 04 Mar 2021 12:56:40 -0800 (PST)
+Received: by mail-ot1-f41.google.com with SMTP id 97so1753436otf.13;
+        Thu, 04 Mar 2021 12:56:40 -0800 (PST)
+X-Received: by 2002:a9d:12e1:: with SMTP id g88mr1612888otg.305.1614891400360;
+ Thu, 04 Mar 2021 12:56:40 -0800 (PST)
+MIME-Version: 1.0
+References: <20210303135500.24673-1-alex.bennee@linaro.org> <20210303135500.24673-2-alex.bennee@linaro.org>
+In-Reply-To: <20210303135500.24673-2-alex.bennee@linaro.org>
+From:   Arnd Bergmann <arnd@linaro.org>
+Date:   Thu, 4 Mar 2021 21:56:24 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+Message-ID: <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To:     =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        ruchika.gupta@linaro.org,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 03 Mar 2021 19:41:40 -0800, Brad Larson wrote:
-> Add Pensando common and Elba SoC specific device nodes
-> and corresponding binding documentation.
-> 
-> Signed-off-by: Brad Larson <brad@pensando.io>
+On Wed, Mar 3, 2021 at 2:54 PM Alex Benn=C3=A9e <alex.bennee@linaro.org> wr=
+ote:
+>
+> A number of storage technologies support a specialised hardware
+> partition designed to be resistant to replay attacks. The underlying
+> HW protocols differ but the operations are common. The RPMB partition
+> cannot be accessed via standard block layer, but by a set of specific
+> commands: WRITE, READ, GET_WRITE_COUNTER, and PROGRAM_KEY. Such a
+> partition provides authenticated and replay protected access, hence
+> suitable as a secure storage.
+>
+> The RPMB layer aims to provide in-kernel API for Trusted Execution
+> Environment (TEE) devices that are capable to securely compute block
+> frame signature. In case a TEE device wishes to store a replay
+> protected data, requests the storage device via RPMB layer to store
+> the data.
+>
+> A TEE device driver can claim the RPMB interface, for example, via
+> class_interface_register(). The RPMB layer provides a series of
+> operations for interacting with the device.
+>
+>   * program_key - a one time operation for setting up a new device
+>   * get_capacity - introspect the device capacity
+>   * get_write_count - check the write counter
+>   * write_blocks - write a series of blocks to the RPMB device
+>   * read_blocks - read a series of blocks from the RPMB device
+
+Based on the discussion we had today in a meeting, it seems the
+main change that is needed is to get back to the original model
+of passing the encrypted data to the kernel instead of cleartext
+data, as the main use case we know of is to have the key inside of
+the TEE device and not available to the kernel or user space.
+
+This is also required to be able to forward the encrypted data
+through the same interface on a KVM host, when the guest
+uses virtio-rpmb, and the host forwards the data into an mmc or
+ufs device.
+
+That said, I can also imagine use cases where we do want to
+store the key in the kernel's keyring, so maybe we end up needing
+both.
+
+> The detailed operation of implementing the access is left to the TEE
+> device driver itself.
+>
+> [This is based-on Thomas Winkler's proposed API from:
+>
+>   https://lore.kernel.org/linux-mmc/1478548394-8184-2-git-send-email-toma=
+s.winkler@intel.com/
+>
+> The principle difference is the framing details and HW specific
+> bits (JDEC vs NVME frames) are left to the lower level TEE driver to
+> worry about. The eventual userspace ioctl interface will aim to be
+> similarly generic. This is an RFC to follow up on:
+>
+>   Subject: RPMB user space ABI
+>   Date: Thu, 11 Feb 2021 14:07:00 +0000
+>   Message-ID: <87mtwashi4.fsf@linaro.org>]
+>
+> Signed-off-by: Alex Benn=C3=A9e <alex.bennee@linaro.org>
+> Cc: Tomas Winkler <tomas.winkler@intel.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Linus  Walleij <linus.walleij@linaro.org>
+> Cc: Arnd Bergmann <arnd.bergmann@linaro.org>
+> Cc: Ilias Apalodimas <ilias.apalodimas@linaro.org>
 > ---
->  .../bindings/gpio/pensando,elba-spics.txt     |  24 ++
->  .../devicetree/bindings/mmc/cdns,sdhci.yaml   |   2 +-
->  .../bindings/spi/cadence-quadspi.txt          |   1 +
->  .../devicetree/bindings/vendor-prefixes.yaml  |   2 +
->  arch/arm64/boot/dts/Makefile                  |   1 +
->  arch/arm64/boot/dts/pensando/Makefile         |   6 +
->  arch/arm64/boot/dts/pensando/elba-16core.dtsi | 171 ++++++++++
->  .../boot/dts/pensando/elba-asic-common.dtsi   | 113 +++++++
->  arch/arm64/boot/dts/pensando/elba-asic.dts    |   8 +
->  .../boot/dts/pensando/elba-flash-parts.dtsi   |  80 +++++
->  arch/arm64/boot/dts/pensando/elba.dtsi        | 310 ++++++++++++++++++
->  11 files changed, 717 insertions(+), 1 deletion(-)
->  create mode 100644 Documentation/devicetree/bindings/gpio/pensando,elba-spics.txt
->  create mode 100644 arch/arm64/boot/dts/pensando/Makefile
->  create mode 100644 arch/arm64/boot/dts/pensando/elba-16core.dtsi
->  create mode 100644 arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
->  create mode 100644 arch/arm64/boot/dts/pensando/elba-asic.dts
->  create mode 100644 arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
->  create mode 100644 arch/arm64/boot/dts/pensando/elba.dtsi
-> 
+>  MAINTAINERS                |   7 +
+>  drivers/char/Kconfig       |   2 +
+>  drivers/char/Makefile      |   1 +
+>  drivers/char/rpmb/Kconfig  |  11 +
+>  drivers/char/rpmb/Makefile |   7 +
+>  drivers/char/rpmb/core.c   | 429 +++++++++++++++++++++++++++++++++++++
+>  include/linux/rpmb.h       | 163 ++++++++++++++
 
-My bot found errors running 'make dt_binding_check' on your patch:
 
-yamllint warnings/errors:
+My feeling is that it should be a top-level subsystem, in drivers/rpmb
+rather than drivers/char/rpmb, as you implement an abstraction layer
+that other drivers can plug into, rather than a simple driver.
 
-dtschema/dtc warnings/errors:
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/cdns,sdhci.example.dt.yaml: mmc@5a000000: compatible: ['socionext,uniphier-sd4hc', 'cdns,sd4hc', 'pensando,elba-emmc'] is too long
-	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-/builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/cdns,sdhci.example.dt.yaml: mmc@5a000000: compatible: Additional items are not allowed ('pensando,elba-emmc' was unexpected)
-	From schema: /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-
-See https://patchwork.ozlabs.org/patch/1447072
-
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit.
-
+       Arnd
