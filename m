@@ -5,189 +5,189 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 065A7C433E0
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 13:51:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9421C433E6
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 13:52:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE80E64F4A
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 13:51:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A5A3B64F44
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 13:52:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241491AbhCDNvP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 08:51:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54398 "EHLO
+        id S241507AbhCDNvs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 08:51:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54482 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241600AbhCDNvN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 08:51:13 -0500
-Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49498C061574
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 05:50:33 -0800 (PST)
-Received: by mail-vs1-xe32.google.com with SMTP id b189so8653620vsd.0
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 05:50:33 -0800 (PST)
+        with ESMTP id S241607AbhCDNvf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 08:51:35 -0500
+Received: from mail-vk1-xa2e.google.com (mail-vk1-xa2e.google.com [IPv6:2607:f8b0:4864:20::a2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DAE5C061760
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 05:50:55 -0800 (PST)
+Received: by mail-vk1-xa2e.google.com with SMTP id i27so3799763vkp.9
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 05:50:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=cuj7PrrpTUGz6W6b+3LSWHrJMrhRSHgCKv4axOnp68A=;
-        b=zkoV0/hJBCXr3hS9sIJVhnnxQzzfcseN453Du+BSX3NKMq/sEQUel/sgBOZUAnXoIL
-         gJiyeeziPYCIxJQlyWGlgycgsb6PxUZpWYwvxGFCioOfZgYbnqzbgUyboNPWBSssbbWw
-         ny33lLNgZO+oRrt9h1ss29rjEVoo0A2/u6UtF9KGFp73rdEGWnZugdgT+s2ckLlqBa2P
-         8YHzjD16VDVcTl58m1+GyAM4YUSPXR8c02dVIrEw/7ZAbdYB6TBWyrEbVIU95UJvxf3t
-         I+7wEflKW+olGkIyBnENPAVqQERQATH95QvIMh8QdNkAtqMWLejv/8EOlqw1sL5rw+Lx
-         3ydQ==
+         :cc:content-transfer-encoding;
+        bh=WfBNuUrd/opuKzkgtwMeHEBHTqndp4QteWKqmlqjrkk=;
+        b=EV27IFZ+KtpLSZGMRFgQ2JSb1S+71I7aezbRUK4i7JX7v1rbFFIQgMMOECEg7IfmR0
+         tYC91rQ8L8/j0Yi6kQnpdJPFcEPrgrxMX4oUpgxzqPbbDskKkGVfAWiaN37YULwZZeoP
+         wGQD5UlgQ9UVfP3EwqZmkxddmqr4bh4/67/pGcb54zeJgmMFDoAjkxYsAf2hWlCvFB9H
+         em07LWlHSICrZLayhSEhVU9+BhBujQavIswpkSB4DHMY0aVg3121uTr4z1cNIYe0gIQD
+         TugaTLqaw2uog3ICI37ePDFDGGIufKtYzKdPYIJEnqUy+GKyE9S2TZ6Wj/PTq4RbbveV
+         lCcw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=cuj7PrrpTUGz6W6b+3LSWHrJMrhRSHgCKv4axOnp68A=;
-        b=LaqXo8a8ZgcV9l9L6yXaJThU+iEKGwr5f7kIt0Mg1H/i0qw1bZqPLHAxT2Jnfaw2BE
-         Vkl91shcUmtTCw2Iv1UPghbKNQ4xmDUc7qQ+9xGYrKhMkf3S7XmJz7YfVxrEy6KjQ/GN
-         /VySqE88zK68KdlIK4w5sr+3fgXnmhshzuNBSKd7vyRHLi4pJWz9a8TDb+YUUfbnzenb
-         nZmWsH3CqCeG+OiaBBym7JS8ARsqqWldqfPVQxYJ2/eSKcE07Kuv4TQdx+0tTYced00b
-         JRva8pGC8dq+dxBdz50bS4GAJI2xHjqsLzYuKdJ+irTYf7pQR/XngAsze9FDDl32FSv/
-         HjdQ==
-X-Gm-Message-State: AOAM5319nnfqKO7/f3icwu2wtf/mu3lew4I4y19V6y2hyfLnBQZAhxkq
-        VgVeuMTYRKgAPBfykNg6YH94RndMqnO0u4RGt8dx4WDM1QdzCQ==
-X-Google-Smtp-Source: ABdhPJwAc1wO/KSW/CPaJgowVTMaXIAiHRBU7RsSYpC0VdVPy1G60E9AZZMaeX+wsYX2NmTRbAq8x9H/MV6CDweQt3k=
-X-Received: by 2002:a67:c787:: with SMTP id t7mr2666358vsk.48.1614865832499;
- Thu, 04 Mar 2021 05:50:32 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=WfBNuUrd/opuKzkgtwMeHEBHTqndp4QteWKqmlqjrkk=;
+        b=Q8MpobcnwvpjH/g9/QRf25ItsKvUZVUBDndEu43NZWdVCZySjy+zh/LLFKO3ek5O9n
+         t1S9IIF1i+jwvyVWyEXQnGTFd5n1vosrEXbFpx2vN5lLqhyWYhQF3B1jAYmt28zsfJVC
+         W5hNXeTO0ZBC8iHub2Q5Z7G42KwUMWhddFGbuTZgkt+xnDYyrJCYzKDcMZs2kQWeKgHS
+         KFDmOI0VeSWyfaeGczoKrYAXwJ/S1PPfEvEhUt9VfVwPiQbXIIVW3pmUUAs64bThyro2
+         /J+F3SQFS6e6gZs7RdmG28cDpJHTAi71IelwX9hVP2fQaaL6EHsMz6Gk75HTcwLfi3ew
+         4Taw==
+X-Gm-Message-State: AOAM530oy6bAHNcu0NAkYl3KhK+tUkKCQNZ9a8ChgfXDU16IWFC0uAjx
+        FTwXvWXwIR45duxjJanPP3NgSI+Ljj7GeNbE1FK5+A==
+X-Google-Smtp-Source: ABdhPJyOw8Ivbs5I2MbmiW7PCGlUo1so5zhUDrOfGB44xQi6GqIBDItt+f25Di8kQdBmoZJFN0vhArCpH9GkQGXWNz4=
+X-Received: by 2002:a1f:a68d:: with SMTP id p135mr2712297vke.6.1614865854678;
+ Thu, 04 Mar 2021 05:50:54 -0800 (PST)
 MIME-Version: 1.0
-References: <1614760331-43499-1-git-send-email-pragalla@qti.qualcomm.com>
-In-Reply-To: <1614760331-43499-1-git-send-email-pragalla@qti.qualcomm.com>
+References: <20210303174248.542175-1-Frank.Li@nxp.com>
+In-Reply-To: <20210303174248.542175-1-Frank.Li@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 4 Mar 2021 14:49:55 +0100
-Message-ID: <CAPDyKFqFNr7AiOdVP07XS=CKpMbDKC7n0gMPu0516fgH3=S18Q@mail.gmail.com>
-Subject: Re: [PATCH V2] mmc: sdhci: Check for reset prior to DMA address unmap
-To:     Pradeep P V K <pragalla@qti.qualcomm.com>
+Date:   Thu, 4 Mar 2021 14:50:18 +0100
+Message-ID: <CAPDyKFoHRfvKHS6NWrkkLD4Ek6DyXPyPd2ey5zhsWMCY=cCOZw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/1] mmc: cqhci: fix random crash when remove mmc module
+To:     Frank Li <lznuaa@gmail.com>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Harjani Ritesh <riteshh@codeaurora.org>,
         Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Pradeep P V K <pragalla@codeaurora.org>
+        Haibo Chen <haibo.chen@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 3 Mar 2021 at 09:32, Pradeep P V K <pragalla@qti.qualcomm.com> wrote:
+On Wed, 3 Mar 2021 at 18:42, Frank Li <lznuaa@gmail.com> wrote:
 >
-> From: Pradeep P V K <pragalla@codeaurora.org>
+> [ 6684.493350] Unable to handle kernel paging request at virtual address =
+ffff800011c5b0f0
+> [ 6684.498531] mmc0: card 0001 removed
+> [ 6684.501556] Mem abort info:
+> [ 6684.509681]   ESR =3D 0x96000047
+> [ 6684.512786]   EC =3D 0x25: DABT (current EL), IL =3D 32 bits
+> [ 6684.518394]   SET =3D 0, FnV =3D 0
+> [ 6684.521707]   EA =3D 0, S1PTW =3D 0
+> [ 6684.524998] Data abort info:
+> [ 6684.528236]   ISV =3D 0, ISS =3D 0x00000047
+> [ 6684.532986]   CM =3D 0, WnR =3D 1
+> [ 6684.536129] swapper pgtable: 4k pages, 48-bit VAs, pgdp=3D0000000081b2=
+2000
+> [ 6684.543923] [ffff800011c5b0f0] pgd=3D00000000bffff003, p4d=3D00000000b=
+ffff003, pud=3D00000000bfffe003, pmd=3D00000000900e1003, pte=3D000000000000=
+0000
+> [ 6684.557915] Internal error: Oops: 96000047 [#1] PREEMPT SMP
+> [ 6684.564240] Modules linked in: sdhci_esdhc_imx(-) sdhci_pltfm sdhci cq=
+hci mmc_block mmc_core fsl_jr_uio caam_jr caamkeyblob_desc caamhash_desc ca=
+amalg_desc crypto_engine rng_core authenc libdes crct10dif_ce flexcan can_d=
+ev caam error [last unloaded: mmc_core]
+> [ 6684.587281] CPU: 0 PID: 79138 Comm: kworker/0:3H Not tainted 5.10.9-01=
+410-g3ba33182767b-dirty #10
+> [ 6684.596160] Hardware name: Freescale i.MX8DXL EVK (DT)
+> [ 6684.601320] Workqueue: kblockd blk_mq_run_work_fn
 >
-> For data read commands, SDHC may initiate data transfers even before it
-> completely process the command response. In case command itself fails,
-> driver un-maps the memory associated with data transfer but this memory
-> can still be accessed by SDHC for the already initiated data transfer.
-> This scenario can lead to un-mapped memory access error.
+> [ 6684.606094] pstate: 40000005 (nZcv daif -PAN -UAO -TCO BTYPE=3D--)
+> [ 6684.612286] pc : cqhci_request+0x148/0x4e8 [cqhci]
+> ^GMessage from syslogd@  at Thu Jan  1 01:51:24 1970 ...[ 6684.617085] lr=
+ : cqhci_request+0x314/0x4e8 [cqhci]
+> [ 6684.626734] sp : ffff80001243b9f0
+> [ 6684.630049] x29: ffff80001243b9f0 x28: ffff00002c3dd000
+> [ 6684.635367] x27: 0000000000000001 x26: 0000000000000001
+> [ 6684.640690] x25: ffff00002c451000 x24: 000000000000000f
+> [ 6684.646007] x23: ffff000017e71c80 x22: ffff00002c451000
+> [ 6684.651326] x21: ffff00002c0f3550 x20: ffff00002c0f3550
+> [ 6684.656651] x19: ffff000017d46880 x18: ffff00002cea1500
+> [ 6684.661977] x17: 0000000000000000 x16: 0000000000000000
+> [ 6684.667294] x15: 000001ee628e3ed1 x14: 0000000000000278
+> [ 6684.672610] x13: 0000000000000001 x12: 0000000000000001
+> [ 6684.677927] x11: 0000000000000000 x10: 0000000000000000
+> [ 6684.683243] x9 : 000000000000002b x8 : 0000000000001000
+> [ 6684.688560] x7 : 0000000000000010 x6 : ffff00002c0f3678
+> [ 6684.693886] x5 : 000000000000000f x4 : ffff800011c5b000
+> [ 6684.699211] x3 : 000000000002d988 x2 : 0000000000000008
+> [ 6684.704537] x1 : 00000000000000f0 x0 : 0002d9880008102f
+> [ 6684.709854] Call trace:
+> [ 6684.712313]  cqhci_request+0x148/0x4e8 [cqhci]
+> [ 6684.716803]  mmc_cqe_start_req+0x58/0x68 [mmc_core]
+> [ 6684.721698]  mmc_blk_mq_issue_rq+0x460/0x810 [mmc_block]
+> [ 6684.727018]  mmc_mq_queue_rq+0x118/0x2b0 [mmc_block]
 >
-> To avoid this scenario, reset SDHC (when command fails) prior to
-> un-mapping memory. Resetting SDHC ensures that all in-flight data
-> transfers are either aborted or completed. So we don't run into this
-> scenario.
+> cqhci_request was called after cqhci_disable.
 >
-> Swap the reset, un-map steps sequence in sdhci_request_done().
+> cqhci_disable                                 cqhci_request
+> {                                             {
+>         dmam_free_coherent();  (1) free
+>                                                   if(!cq_host->enable)
+>                                                        return
+>                                          (2) pass check here
+>         cq_host->enable =3D false;
 >
-> Changes since V1:
-> - Added an empty line and fixed the comment style.
-> - Retained the Acked-by signoff.
+>                                                   task_desc=3D get_desc(c=
+q_host,tag);
+>                                                              ^^^^ crash h=
+ere
+>                                          (3) access memory which is alrea=
+dy free
 >
-> Suggested-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-> Signed-off-by: Pradeep P V K <pragalla@codeaurora.org>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> }                                             }
+>
+> Signed-off-by: Frank Li <Frank.Li@nxp.com>
 
-Seems like it might be a good idea to tag this for stable? I did that,
-but awaiting for your confirmation.
-
-So, applied for next, thanks!
+Applied for fixes, thanks! I added a fixes tag and a stable tag.
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci.c | 60 +++++++++++++++++++++++++-----------------------
->  1 file changed, 31 insertions(+), 29 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 646823d..130fd2d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -2998,6 +2998,37 @@ static bool sdhci_request_done(struct sdhci_host *host)
->         }
+> Change from v1 to v2
+>  - use Adrian Hunter suggested method to fix this problem
 >
->         /*
-> +        * The controller needs a reset of internal state machines
-> +        * upon error conditions.
-> +        */
-> +       if (sdhci_needs_reset(host, mrq)) {
-> +               /*
-> +                * Do not finish until command and data lines are available for
-> +                * reset. Note there can only be one other mrq, so it cannot
-> +                * also be in mrqs_done, otherwise host->cmd and host->data_cmd
-> +                * would both be null.
-> +                */
-> +               if (host->cmd || host->data_cmd) {
-> +                       spin_unlock_irqrestore(&host->lock, flags);
-> +                       return true;
-> +               }
-> +
-> +               /* Some controllers need this kick or reset won't work here */
-> +               if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
-> +                       /* This is to force an update */
-> +                       host->ops->set_clock(host, host->clock);
-> +
-> +               /*
-> +                * Spec says we should do both at the same time, but Ricoh
-> +                * controllers do not like that.
-> +                */
-> +               sdhci_do_reset(host, SDHCI_RESET_CMD);
-> +               sdhci_do_reset(host, SDHCI_RESET_DATA);
-> +
-> +               host->pending_reset = false;
-> +       }
-> +
-> +       /*
->          * Always unmap the data buffers if they were mapped by
->          * sdhci_prepare_data() whenever we finish with a request.
->          * This avoids leaking DMA mappings on error.
-> @@ -3060,35 +3091,6 @@ static bool sdhci_request_done(struct sdhci_host *host)
->                 }
->         }
+>  drivers/mmc/core/bus.c | 11 +++++------
+>  1 file changed, 5 insertions(+), 6 deletions(-)
 >
-> -       /*
-> -        * The controller needs a reset of internal state machines
-> -        * upon error conditions.
-> -        */
-> -       if (sdhci_needs_reset(host, mrq)) {
-> -               /*
-> -                * Do not finish until command and data lines are available for
-> -                * reset. Note there can only be one other mrq, so it cannot
-> -                * also be in mrqs_done, otherwise host->cmd and host->data_cmd
-> -                * would both be null.
-> -                */
-> -               if (host->cmd || host->data_cmd) {
-> -                       spin_unlock_irqrestore(&host->lock, flags);
-> -                       return true;
-> -               }
-> -
-> -               /* Some controllers need this kick or reset won't work here */
-> -               if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
-> -                       /* This is to force an update */
-> -                       host->ops->set_clock(host, host->clock);
-> -
-> -               /* Spec says we should do both at the same time, but Ricoh
-> -                  controllers do not like that. */
-> -               sdhci_do_reset(host, SDHCI_RESET_CMD);
-> -               sdhci_do_reset(host, SDHCI_RESET_DATA);
-> -
-> -               host->pending_reset = false;
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index c2e70b757dd1..4383c262b3f5 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -399,11 +399,6 @@ void mmc_remove_card(struct mmc_card *card)
+>         mmc_remove_card_debugfs(card);
+>  #endif
+>
+> -       if (host->cqe_enabled) {
+> -               host->cqe_ops->cqe_disable(host);
+> -               host->cqe_enabled =3D false;
 > -       }
 > -
->         host->mrqs_done[i] = NULL;
+>         if (mmc_card_present(card)) {
+>                 if (mmc_host_is_spi(card->host)) {
+>                         pr_info("%s: SPI card removed\n",
+> @@ -416,6 +411,10 @@ void mmc_remove_card(struct mmc_card *card)
+>                 of_node_put(card->dev.of_node);
+>         }
 >
->         spin_unlock_irqrestore(&host->lock, flags);
+> +       if (host->cqe_enabled) {
+> +               host->cqe_ops->cqe_disable(host);
+> +               host->cqe_enabled =3D false;
+> +       }
+> +
+>         put_device(&card->dev);
+>  }
+> -
 > --
-> 2.7.4
+> 2.25.1
 >
