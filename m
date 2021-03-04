@@ -2,192 +2,227 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F09BC433E9
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:05:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D85CC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:11:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77C1664F5C
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:05:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 01EC464F64
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:11:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232520AbhCDSE2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 13:04:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52446 "EHLO
+        id S230395AbhCDSKU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 13:10:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232450AbhCDSD4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 13:03:56 -0500
-Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BC9AC061761
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 10:03:16 -0800 (PST)
-Received: by mail-ua1-x934.google.com with SMTP id y35so9567317uad.5
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 10:03:16 -0800 (PST)
+        with ESMTP id S231248AbhCDSJ5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 13:09:57 -0500
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01C2FC061756
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 10:09:17 -0800 (PST)
+Received: by mail-vs1-xe32.google.com with SMTP id l27so7573246vsj.4
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 10:09:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=ot0pBmNC9C2X+nBkx9lvZxGNQE3VnPlcBNxjMI2kl+A=;
-        b=fG6Yc8BxmivwsyBhxPN1l4Usla51wPxUb9C+NJKw79QMnmmdMxSKukhr9vHrPDsG9S
-         0g23BMN5bI2LBgTYDB4apV4a5icGjwB5ZqPDM+aHN3H5bE+G1mzAxLxqK8pItyJ3Tngy
-         gTOWsJJVQlOhdqP328V3kJdm+R0lSBOBvQ5cIwXhEttI1D/l/hkg3O0tFsIvvp+hsKwu
-         Bh2izbfPWkw7g5fVQ2ITw2dpwZSZXzwZ0SK2z4xftMe9Drhiyg4unRjrbfqT4SLTrsx1
-         X1U7O0O/7sUUuBqLaNWWFMmi/Fwsk8FvjcZ1G10xwccF/Um6gWFn4+Bpy+oWk6n/o0oX
-         jKYg==
+         :cc;
+        bh=+wm+y856/FEFQ1e35KnxFw2YAIiTFgOMKJrDML+IDxE=;
+        b=Di0tAVlQ3YEt8EKPx7Hgz0fG1B3NVCfjPp4ZvTH2wlFQC2s8ry+u2bOdn5Vdm3Apov
+         kEAjpYqM5S8agUmR1KrTEauU+sLsPgTN3dgp84qz8xHeKH8aJAyT0LEaUe2Ig3VwBB/A
+         tfWeEPsGf5B2lFmnrZzhcInieZszJweqAZCt8jHSYl01dFbF0v1uBeY2UIcvhUgDoAcA
+         UgJF94/hzwVHSDeT8lw5iU4DGPCgQ/ydJpdADjG+lHCmBRIoNV8YpLjdz/5+W+IpPkqR
+         xyAVmihHVikQr27YiCEXryuM9mbG9Ei4iaMD6yK3FvIBmwbc4wGYQl8YCaEyMKgnSnpu
+         b4Ig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=ot0pBmNC9C2X+nBkx9lvZxGNQE3VnPlcBNxjMI2kl+A=;
-        b=Rg/Z7hJWIw33ZjnhasHqYQ++T7HTaJn4zXeZ8d2X9cpc4QVQHEzPL3Mi6li8KbtOMs
-         iKsUcn97JKPfxin81KpReOVwzisePr2nXNLdJeC5B0KS0eKjf3IAMQTkGJpficvpkUFr
-         TrJrv2j+nqHzEXba3U0DcEGPPWG65wrdyGEm6Ed7R6TBXh+2VruFElkBOV9IsocxNOis
-         tC5dWBJGKoNqKXxlFxpdqbwfRYdyuu/05NqKGlwCmwyxIzqdYeUnJsCKMYtIF9voiSDp
-         QlvOcCvAiOeWDa5I0oHscNPofxt8uwuBVfQ3CgZ5n2bBpfFMq3yQJr6AUFSPKK/3+hA9
-         5PVw==
-X-Gm-Message-State: AOAM532bIoQvG3/gnewwRd/Tc0a7aL91dM9dqjNl6wGC2b1MBCSqjiD2
-        Qdsvbl+STfwNjQlUoo+AoIOIau2D/efLugxo/dMQQA==
-X-Google-Smtp-Source: ABdhPJzytwgL73ZPP1K08fGAHeN5ehDIPgAIh1Ry5wIZKXT9Gb2rtJUPv8Stfn3sJQFKv9Ay2SrZvQYLvDwrweiH8mY=
-X-Received: by 2002:ab0:6045:: with SMTP id o5mr3525813ual.100.1614880995595;
- Thu, 04 Mar 2021 10:03:15 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=+wm+y856/FEFQ1e35KnxFw2YAIiTFgOMKJrDML+IDxE=;
+        b=OtqRJ0QyfZMm9UP7fpLfIsk3P0XBjyX45qHykW69cdLfEycJ1FkXJHRoQMtC2ThYkt
+         9c7b3YQUZcSxmXsonp6ShOdPWRjfrtuadlrEYxTQzk9WilK0ImELKA5+ytwx/MPRGsfZ
+         hSh3TBNH7k1Aj++nRNM4Ioexip2CeGHlfDFPb/8GUzs9De1HYfWpbCUN1cCBVLiGecXQ
+         Y/K+f2WfqwMJfHLBoKtlMRaFMeSlP9+Sn+AwPBy1lCwh5OvhdL0nQpwkqL9lUnRK4xZk
+         h7XfDD0c6vSeyXq2Jh94cEMuxTlnRAWxhesXjh5By9C3j9DrNgqbeo1NsO6BRZ4RE0he
+         1/Bg==
+X-Gm-Message-State: AOAM533LxFOlldb1Oc+MbWh0M50oWos4ANO8JEK3rwuM+9fN0aLeRpku
+        vCyTzDNlRZVU7lzCxALkMk7dTuZBTxmKVRE3NAabGw==
+X-Google-Smtp-Source: ABdhPJyWGWmkBQ2Jx35VWGQm63T9M353cU7X+gHZzwBZ1z3mxrW+bkrVPrdQM4lbq0CH29K67mcKZZsSRElyafGrRxk=
+X-Received: by 2002:a67:c787:: with SMTP id t7mr3952276vsk.48.1614881356015;
+ Thu, 04 Mar 2021 10:09:16 -0800 (PST)
 MIME-Version: 1.0
-References: <20210216224252.22187-1-marten.lindahl@axis.com>
- <CAPDyKFoASx=U8b1Oqtuo6ikiM=gXfL2x1Gsz=rfAn9zxP0y_iA@mail.gmail.com>
- <20210301215923.6jfg6mg5ntorttan@axis.com> <CAPDyKFoaKfuwweaEMf1Pz+ECAPU3P9-gmCJcpq+MADH5gH1c=Q@mail.gmail.com>
- <20210304134836.xlw7wbbvkc5bqzmm@axis.com> <CAPDyKFous2oDwcUgPkZV8bZzpd+yA8m9LwC3+yk0uxqWcrJx1w@mail.gmail.com>
- <20210304145946.tnbbd4qq6nvc2mcb@axis.com>
-In-Reply-To: <20210304145946.tnbbd4qq6nvc2mcb@axis.com>
+References: <1614760331-43499-1-git-send-email-pragalla@qti.qualcomm.com>
+ <CAPDyKFqFNr7AiOdVP07XS=CKpMbDKC7n0gMPu0516fgH3=S18Q@mail.gmail.com> <3962320b58beaa4626ed69b3120d4246@codeaurora.org>
+In-Reply-To: <3962320b58beaa4626ed69b3120d4246@codeaurora.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 4 Mar 2021 19:02:38 +0100
-Message-ID: <CAPDyKFqF3MSfatooLQyXsz3Yu_zNSpzKaGWUP0nJsQjJZ+0FGQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Try power cycling card if command request times out
-To:     Marten Lindahl <martenli@axis.com>
-Cc:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <Marten.Lindahl@axis.com>,
+Date:   Thu, 4 Mar 2021 19:08:39 +0100
+Message-ID: <CAPDyKFrTHiZyVAsP5TR5evOdbSi4dS_c+k5u6rdA4UwhAc6YuA@mail.gmail.com>
+Subject: Re: [PATCH V2] mmc: sdhci: Check for reset prior to DMA address unmap
+To:     Pradeep P V K <pragalla@codeaurora.org>
+Cc:     Pradeep P V K <pragalla@qti.qualcomm.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        kernel <kernel@axis.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 4 Mar 2021 at 15:59, Marten Lindahl <martenli@axis.com> wrote:
+On Thu, 4 Mar 2021 at 16:16, <pragalla@codeaurora.org> wrote:
 >
-> On Thu, Mar 04, 2021 at 03:06:54PM +0100, Ulf Hansson wrote:
-> > On Thu, 4 Mar 2021 at 14:48, Marten Lindahl <martenli@axis.com> wrote:
-> > >
-> > > Hi Ulf! My apologies for the delay.
-> > >
-> > > On Tue, Mar 02, 2021 at 09:45:02AM +0100, Ulf Hansson wrote:
-> > > > On Mon, 1 Mar 2021 at 22:59, Marten Lindahl <martenli@axis.com> wro=
-te:
-> > > > >
-> > > > > Hi Ulf!
-> > > > >
-> > > > > Thank you for your comments!
-> > > > >
-> > > > > On Mon, Mar 01, 2021 at 09:50:56AM +0100, Ulf Hansson wrote:
-> > > > > > + Adrian
-> > > > > >
-> > > > > > On Tue, 16 Feb 2021 at 23:43, M=C3=A5rten Lindahl <marten.linda=
-hl@axis.com> wrote:
-> > > > > > >
-> > > > > > > Sometimes SD cards that has been run for a long time enters a=
- state
-> > > > > > > where it cannot by itself be recovered, but needs a power cyc=
-le to be
-> > > > > > > operational again. Card status analysis has indicated that th=
-e card can
-> > > > > > > end up in a state where all external commands are ignored by =
-the card
-> > > > > > > since it is halted by data timeouts.
-> > > > > > >
-> > > > > > > If the card has been heavily used for a long time it can be w=
-eared out,
-> > > > > > > and should typically be replaced. But on some tests, it shows=
- that the
-> > > > > > > card can still be functional after a power cycle, but as it r=
-equires an
-> > > > > > > operator to do it, the card can remain in a non-operational s=
-tate for a
-> > > > > > > long time until the problem has been observed by the operator=
-.
-> > > > > > >
-> > > > > > > This patch adds function to power cycle the card in case it d=
-oes not
-> > > > > > > respond to a command, and then resend the command if the powe=
-r cycle
-> > > > > > > was successful. This procedure will be tested 1 time before g=
-iving up,
-> > > > > > > and resuming host operation as normal.
-> > > > > >
-> > > > > > I assume the context above is all about the ioctl interface?
-> > > > > >
-> > > > >
-> > > > > Yes, that's correct. The problem we have seen is triggered by ioc=
-tls.
-> > > > >
-> > > > > > So, when the card enters this non functional state, have you tr=
-ied
-> > > > > > just reading a block through the regular I/O interface. Does it
-> > > > > > trigger a power cycle of the card - and then makes it functiona=
-l
-> > > > > > again?
-> > > > > >
-> > > > >
-> > > > > Yes, we have tried that, and it does trigger a power cycle, makin=
-g the card
-> > > > > operational again. But as it requires an operator to trigger it, =
-I thought
-> > > > > it might be something that could be automated here. At least once=
-.
-> > > >
-> > > > Not sure what you mean by operator here? In the end it's a userspac=
-e
-> > > > program running and I assume it can deal with error paths. :-)
-> > > >
-> > > > In any case, I understand your point.
-> > > >
-> > >
-> > > Yes, we have a userspace program. So if the userspace program will tr=
-y to
-> > > restore the card in a situation such as the one we are trying to solv=
-e
-> > > here, how shall it perform it? Is it expected that a ioctl CMD0 reque=
-st
-> > > should be enough, or is there any other support for a userspace progr=
-am to
-> > > reset the card?
-> >
-> > Correct, there is no way for userspace to reset cards through an ioctl.
-> >
-> > >
-> > > If it falls on a ioctl command to reset the card, how do we handle th=
-e case
-> > > where the ioctl times out anyway? Or is the only way for a userspace =
-program
-> > > to restore the card, to make a block transfer that fails?
-> >
-> > Yes, that is what I was thinking. According to the use case you have
-> > described, this should be possible for you to implement as a part of
-> > your userspace program, no?
+> On 2021-03-04 19:19, Ulf Hansson wrote:
+> > On Wed, 3 Mar 2021 at 09:32, Pradeep P V K <pragalla@qti.qualcomm.com>
+> > wrote:
+> >>
+> >> From: Pradeep P V K <pragalla@codeaurora.org>
+> >>
+> >> For data read commands, SDHC may initiate data transfers even before
+> >> it
+> >> completely process the command response. In case command itself fails,
+> >> driver un-maps the memory associated with data transfer but this
+> >> memory
+> >> can still be accessed by SDHC for the already initiated data transfer.
+> >> This scenario can lead to un-mapped memory access error.
+> >>
+> >> To avoid this scenario, reset SDHC (when command fails) prior to
+> >> un-mapping memory. Resetting SDHC ensures that all in-flight data
+> >> transfers are either aborted or completed. So we don't run into this
+> >> scenario.
+> >>
+> >> Swap the reset, un-map steps sequence in sdhci_request_done().
+> >>
+> >> Changes since V1:
+> >> - Added an empty line and fixed the comment style.
+> >> - Retained the Acked-by signoff.
+> >>
+> >> Suggested-by: Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+> >> Signed-off-by: Pradeep P V K <pragalla@codeaurora.org>
+> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >
-> Ok, I will discuss that with the people maintaining the userspace program=
- :)
+> Hi Uffe,
+> >
+> > Seems like it might be a good idea to tag this for stable? I did that,
+> > but awaiting for your confirmation.
+> >
+> Yes, this fix is applicable for all stable starting from 4.9 (n/a for
+> 4.4).
+> Kindly go ahead.
 >
-> But would it be of interest to review a patch introducing a more clean ca=
-rd
-> reset request, without block transfers?
+> > So, applied for next, thanks!
+> >
+> > Kind regards
+> > Uffe
+> >
+> Thanks and Regards,
+> Pradeep
 
-Well, if you can solve it with block transfers that's the preferred
-option, in my opinion.
-
-As I stated earlier, my main issue with the HW reset through the ioctl
-interface, is that we don't know what combination of
-request/command/response we should be doing a reset for.
+Thanks for confirming, I have updated the stable tag.
 
 Kind regards
 Uffe
+
+>
+> >
+> >> ---
+> >>  drivers/mmc/host/sdhci.c | 60
+> >> +++++++++++++++++++++++++-----------------------
+> >>  1 file changed, 31 insertions(+), 29 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> >> index 646823d..130fd2d 100644
+> >> --- a/drivers/mmc/host/sdhci.c
+> >> +++ b/drivers/mmc/host/sdhci.c
+> >> @@ -2998,6 +2998,37 @@ static bool sdhci_request_done(struct
+> >> sdhci_host *host)
+> >>         }
+> >>
+> >>         /*
+> >> +        * The controller needs a reset of internal state machines
+> >> +        * upon error conditions.
+> >> +        */
+> >> +       if (sdhci_needs_reset(host, mrq)) {
+> >> +               /*
+> >> +                * Do not finish until command and data lines are
+> >> available for
+> >> +                * reset. Note there can only be one other mrq, so it
+> >> cannot
+> >> +                * also be in mrqs_done, otherwise host->cmd and
+> >> host->data_cmd
+> >> +                * would both be null.
+> >> +                */
+> >> +               if (host->cmd || host->data_cmd) {
+> >> +                       spin_unlock_irqrestore(&host->lock, flags);
+> >> +                       return true;
+> >> +               }
+> >> +
+> >> +               /* Some controllers need this kick or reset won't work
+> >> here */
+> >> +               if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
+> >> +                       /* This is to force an update */
+> >> +                       host->ops->set_clock(host, host->clock);
+> >> +
+> >> +               /*
+> >> +                * Spec says we should do both at the same time, but
+> >> Ricoh
+> >> +                * controllers do not like that.
+> >> +                */
+> >> +               sdhci_do_reset(host, SDHCI_RESET_CMD);
+> >> +               sdhci_do_reset(host, SDHCI_RESET_DATA);
+> >> +
+> >> +               host->pending_reset = false;
+> >> +       }
+> >> +
+> >> +       /*
+> >>          * Always unmap the data buffers if they were mapped by
+> >>          * sdhci_prepare_data() whenever we finish with a request.
+> >>          * This avoids leaking DMA mappings on error.
+> >> @@ -3060,35 +3091,6 @@ static bool sdhci_request_done(struct
+> >> sdhci_host *host)
+> >>                 }
+> >>         }
+> >>
+> >> -       /*
+> >> -        * The controller needs a reset of internal state machines
+> >> -        * upon error conditions.
+> >> -        */
+> >> -       if (sdhci_needs_reset(host, mrq)) {
+> >> -               /*
+> >> -                * Do not finish until command and data lines are
+> >> available for
+> >> -                * reset. Note there can only be one other mrq, so it
+> >> cannot
+> >> -                * also be in mrqs_done, otherwise host->cmd and
+> >> host->data_cmd
+> >> -                * would both be null.
+> >> -                */
+> >> -               if (host->cmd || host->data_cmd) {
+> >> -                       spin_unlock_irqrestore(&host->lock, flags);
+> >> -                       return true;
+> >> -               }
+> >> -
+> >> -               /* Some controllers need this kick or reset won't work
+> >> here */
+> >> -               if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
+> >> -                       /* This is to force an update */
+> >> -                       host->ops->set_clock(host, host->clock);
+> >> -
+> >> -               /* Spec says we should do both at the same time, but
+> >> Ricoh
+> >> -                  controllers do not like that. */
+> >> -               sdhci_do_reset(host, SDHCI_RESET_CMD);
+> >> -               sdhci_do_reset(host, SDHCI_RESET_DATA);
+> >> -
+> >> -               host->pending_reset = false;
+> >> -       }
+> >> -
+> >>         host->mrqs_done[i] = NULL;
+> >>
+> >>         spin_unlock_irqrestore(&host->lock, flags);
+> >> --
+> >> 2.7.4
+> >>
