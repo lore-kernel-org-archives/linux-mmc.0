@@ -7,178 +7,187 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4122BC433E6
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:02:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F09BC433E9
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:05:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1BBA864F53
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:02:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 77C1664F5C
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Mar 2021 18:05:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232455AbhCDSBs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 13:01:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51864 "EHLO
+        id S232520AbhCDSE2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 13:04:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52446 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231878AbhCDSBR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 13:01:17 -0500
-Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBD0AC06175F
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 10:00:36 -0800 (PST)
-Received: by mail-wr1-x42b.google.com with SMTP id l12so28657680wry.2
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 10:00:36 -0800 (PST)
+        with ESMTP id S232450AbhCDSD4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 13:03:56 -0500
+Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BC9AC061761
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Mar 2021 10:03:16 -0800 (PST)
+Received: by mail-ua1-x934.google.com with SMTP id y35so9567317uad.5
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Mar 2021 10:03:16 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=references:user-agent:from:to:cc:subject:date:in-reply-to
-         :message-id:mime-version:content-transfer-encoding;
-        bh=8R7Ifb0lG6B9vvUmi1oPee7NhyKlrhTZle2Mf9WBYdQ=;
-        b=xsl1yZ6gGZXAoEu02jhqZeM0rHDiFWFH/3g3Kq+bb5AL3RAImOHMR2VPDce9buhUs5
-         wgXVWxcIDm9seZmzGULizGtbzfErxlddmAsquXMb40FHvDKf8fo6y7v+HGes/L8Iu2mq
-         9k5QhKMJfYOo5VqfsPP//nDxQiT68+5sO9lG6aYhXIvdl3m4dihgCZOElKMozwREOaGD
-         I85a/Sgq+RxIR2SAVRmMwpKXeghOUj/PyjpayUbjN4I6l47bJReBrH4pYk6cq3qygw1g
-         QuqdlirqO7QM7NxQg4BEOH0ozHE5EMpcX+HEBKztSiZHe48YNFB1km4pJKkNcVApJwk1
-         P8ww==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=ot0pBmNC9C2X+nBkx9lvZxGNQE3VnPlcBNxjMI2kl+A=;
+        b=fG6Yc8BxmivwsyBhxPN1l4Usla51wPxUb9C+NJKw79QMnmmdMxSKukhr9vHrPDsG9S
+         0g23BMN5bI2LBgTYDB4apV4a5icGjwB5ZqPDM+aHN3H5bE+G1mzAxLxqK8pItyJ3Tngy
+         gTOWsJJVQlOhdqP328V3kJdm+R0lSBOBvQ5cIwXhEttI1D/l/hkg3O0tFsIvvp+hsKwu
+         Bh2izbfPWkw7g5fVQ2ITw2dpwZSZXzwZ0SK2z4xftMe9Drhiyg4unRjrbfqT4SLTrsx1
+         X1U7O0O/7sUUuBqLaNWWFMmi/Fwsk8FvjcZ1G10xwccF/Um6gWFn4+Bpy+oWk6n/o0oX
+         jKYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:references:user-agent:from:to:cc:subject:date
-         :in-reply-to:message-id:mime-version:content-transfer-encoding;
-        bh=8R7Ifb0lG6B9vvUmi1oPee7NhyKlrhTZle2Mf9WBYdQ=;
-        b=bpMjvwAxpZ04KnODKg2NyPTLarvzoXPO2eYzwUbwJ/aTo2kRAfaJWpEwW5h1p1Vc57
-         oKnh6bc1Ueu4JUbjwj8RtOXlPzK8iveozmBKosB38LMwbFJFytCxhOOWOfDOvnaYSdZL
-         Jbyx6a6MtcLqF2o5XKWHP6I3ZEhQ1zIiybPj1FtGh+5Bz+q1nKtETRMTfx1w1TyVVCiD
-         S/NMJ9X1LeGUWPxVTdoe6yoPfjwY709SHcnkaEJHO5m6LTXuEGpTrfExDNzD9aTt5jl9
-         wm+lXOErbCPL9dTjUfBaLzrqz+NbITqpZazK2haoNDrGATpP7nhKo9M9VomdZJAn+SF/
-         8+9g==
-X-Gm-Message-State: AOAM530wfh/PQ77ly/ccmFNwPtccc6p5HcsstMAJwTJDdmMZIFy86UZ4
-        dWgYTM5FsP0bKipqYcmFRXAzcQ==
-X-Google-Smtp-Source: ABdhPJzhkm+tkyOCMF8OnkU0x7xGFO/OwotnOJ7F3gwaZPtm3sEslFvYxW4NxGROAFsxgOn4fhDKgA==
-X-Received: by 2002:adf:dd4f:: with SMTP id u15mr5426860wrm.260.1614880835435;
-        Thu, 04 Mar 2021 10:00:35 -0800 (PST)
-Received: from zen.linaroharston ([51.148.130.216])
-        by smtp.gmail.com with ESMTPSA id o20sm322634wmq.5.2021.03.04.10.00.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 04 Mar 2021 10:00:34 -0800 (PST)
-Received: from zen (localhost [127.0.0.1])
-        by zen.linaroharston (Postfix) with ESMTP id 9CC271FF7E;
-        Thu,  4 Mar 2021 18:00:33 +0000 (GMT)
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-3-alex.bennee@linaro.org>
- <ff78164cc13b4855911116c2d48929a2@intel.com> <87eegvgr0w.fsf@linaro.org>
- <590e0157d6c44d55aa166ccad6355db5@intel.com>
-User-agent: mu4e 1.5.8; emacs 28.0.50
-From:   Alex =?utf-8?Q?Benn=C3=A9e?= <alex.bennee@linaro.org>
-To:     "Winkler, Tomas" <tomas.winkler@intel.com>
-Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
-        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
-        "ilias.apalodimas@linaro.org" <ilias.apalodimas@linaro.org>,
-        "arnd@linaro.org" <arnd@linaro.org>,
-        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
-        "Huang, Yang" <yang.huang@intel.com>,
-        "Zhu, Bing" <bing.zhu@intel.com>,
-        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
-        "hmo@opensynergy.com" <hmo@opensynergy.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
-        linux-nvme@lists.infradead.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "Linus Walleij" <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        "Usyskin, Alexander" <alexander.usyskin@intel.com>,
-        Avri Altman <avri.altman@sandisk.com>
-Subject: Re: [RFC PATCH  2/5] char: rpmb: provide a user space interface
-Date:   Thu, 04 Mar 2021 17:52:01 +0000
-In-reply-to: <590e0157d6c44d55aa166ccad6355db5@intel.com>
-Message-ID: <87wnumg5oe.fsf@linaro.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=ot0pBmNC9C2X+nBkx9lvZxGNQE3VnPlcBNxjMI2kl+A=;
+        b=Rg/Z7hJWIw33ZjnhasHqYQ++T7HTaJn4zXeZ8d2X9cpc4QVQHEzPL3Mi6li8KbtOMs
+         iKsUcn97JKPfxin81KpReOVwzisePr2nXNLdJeC5B0KS0eKjf3IAMQTkGJpficvpkUFr
+         TrJrv2j+nqHzEXba3U0DcEGPPWG65wrdyGEm6Ed7R6TBXh+2VruFElkBOV9IsocxNOis
+         tC5dWBJGKoNqKXxlFxpdqbwfRYdyuu/05NqKGlwCmwyxIzqdYeUnJsCKMYtIF9voiSDp
+         QlvOcCvAiOeWDa5I0oHscNPofxt8uwuBVfQ3CgZ5n2bBpfFMq3yQJr6AUFSPKK/3+hA9
+         5PVw==
+X-Gm-Message-State: AOAM532bIoQvG3/gnewwRd/Tc0a7aL91dM9dqjNl6wGC2b1MBCSqjiD2
+        Qdsvbl+STfwNjQlUoo+AoIOIau2D/efLugxo/dMQQA==
+X-Google-Smtp-Source: ABdhPJzytwgL73ZPP1K08fGAHeN5ehDIPgAIh1Ry5wIZKXT9Gb2rtJUPv8Stfn3sJQFKv9Ay2SrZvQYLvDwrweiH8mY=
+X-Received: by 2002:ab0:6045:: with SMTP id o5mr3525813ual.100.1614880995595;
+ Thu, 04 Mar 2021 10:03:15 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+References: <20210216224252.22187-1-marten.lindahl@axis.com>
+ <CAPDyKFoASx=U8b1Oqtuo6ikiM=gXfL2x1Gsz=rfAn9zxP0y_iA@mail.gmail.com>
+ <20210301215923.6jfg6mg5ntorttan@axis.com> <CAPDyKFoaKfuwweaEMf1Pz+ECAPU3P9-gmCJcpq+MADH5gH1c=Q@mail.gmail.com>
+ <20210304134836.xlw7wbbvkc5bqzmm@axis.com> <CAPDyKFous2oDwcUgPkZV8bZzpd+yA8m9LwC3+yk0uxqWcrJx1w@mail.gmail.com>
+ <20210304145946.tnbbd4qq6nvc2mcb@axis.com>
+In-Reply-To: <20210304145946.tnbbd4qq6nvc2mcb@axis.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 4 Mar 2021 19:02:38 +0100
+Message-ID: <CAPDyKFqF3MSfatooLQyXsz3Yu_zNSpzKaGWUP0nJsQjJZ+0FGQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Try power cycling card if command request times out
+To:     Marten Lindahl <martenli@axis.com>
+Cc:     =?UTF-8?Q?M=C3=A5rten_Lindahl?= <Marten.Lindahl@axis.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        kernel <kernel@axis.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-Winkler, Tomas <tomas.winkler@intel.com> writes:
-
->> "Winkler, Tomas" <tomas.winkler@intel.com> writes:
->>=20
->> >> The user space API is achieved via a number of synchronous IOCTLs.
->> >>
->> >>   * RPMB_IOC_VER_CMD - simple versioning API
->> >>   * RPMB_IOC_CAP_CMD - query of underlying capabilities
->> >>   * RPMB_IOC_PKEY_CMD - one time programming of access key
->> >>   * RPMB_IOC_COUNTER_CMD - query the write counter
->> >>   * RPMB_IOC_WBLOCKS_CMD - write blocks to device
->> >>   * RPMB_IOC_RBLOCKS_CMD - read blocks from device
->> >>
->> >> The keys used for programming and writing blocks to the device are
->> >> key_serial_t handles as provided by the keyctl() interface.
->> >>
->> >> [AJB: here there are two key differences between this and the
->> >> original proposal. The first is the dropping of the sequence of
->> >> preformated frames in favour of explicit actions. The second is the
->> >> introduction of key_serial_t and the keyring API for referencing the
->> >> key to use]
->> >
->> > Putting it gently I'm not sure this is good idea, from the security po=
-int of
->> view.
->> > The key has to be possession of the one that signs the frames as they =
-are,
->> it doesn't mean it is linux kernel keyring, it can be other party on dif=
-ferent
->> system.
->> > With this approach you will make the other usecases not applicable. It
->> > is less then trivial to move key securely from one system to another.
->>=20
->> OK I can understand the desire for such a use-case but it does constrain=
- the
->> interface on the kernel with access to the hardware to purely providing a
->> pipe to the raw hardware while also having to expose the details of the =
-HW
->> to userspace.=20
-> This is the use case in Android. The key is in the "trusty" which
-> different os running in a virtual environment. The file storage
-> abstraction is implemented there. I'm not sure the point of
-> constraining the kernel, can you please elaborate on that.
-
-Well the kernel is all about abstracting differences not baking in
-assumptions. However can I ask a bit more about this security model?
-
-Is the secure enclave just a separate userspace process or is it in a
-separate virtual machine? Is it accessible at all by the kernel running
-the driver?
-
-The fact that key id is passed down into the kernel doesn't have to
-imply the kernel does the final cryptographic operation. In the ARM
-world you could make a call to the secure world to do the operation for
-you. I note the keyctl() interface already has support for going to
-userspace to make queries of the keyring. Maybe what is really needed is
-an abstraction for the kernel to delegate the MAC calculation to some other
-trusted process that also understands the keyid.
-
+On Thu, 4 Mar 2021 at 15:59, Marten Lindahl <martenli@axis.com> wrote:
 >
-> Also doesn't this break down after a PROGRAM_KEY event as
->> the key will have had to traverse into the "untrusted" kernel?
+> On Thu, Mar 04, 2021 at 03:06:54PM +0100, Ulf Hansson wrote:
+> > On Thu, 4 Mar 2021 at 14:48, Marten Lindahl <martenli@axis.com> wrote:
+> > >
+> > > Hi Ulf! My apologies for the delay.
+> > >
+> > > On Tue, Mar 02, 2021 at 09:45:02AM +0100, Ulf Hansson wrote:
+> > > > On Mon, 1 Mar 2021 at 22:59, Marten Lindahl <martenli@axis.com> wro=
+te:
+> > > > >
+> > > > > Hi Ulf!
+> > > > >
+> > > > > Thank you for your comments!
+> > > > >
+> > > > > On Mon, Mar 01, 2021 at 09:50:56AM +0100, Ulf Hansson wrote:
+> > > > > > + Adrian
+> > > > > >
+> > > > > > On Tue, 16 Feb 2021 at 23:43, M=C3=A5rten Lindahl <marten.linda=
+hl@axis.com> wrote:
+> > > > > > >
+> > > > > > > Sometimes SD cards that has been run for a long time enters a=
+ state
+> > > > > > > where it cannot by itself be recovered, but needs a power cyc=
+le to be
+> > > > > > > operational again. Card status analysis has indicated that th=
+e card can
+> > > > > > > end up in a state where all external commands are ignored by =
+the card
+> > > > > > > since it is halted by data timeouts.
+> > > > > > >
+> > > > > > > If the card has been heavily used for a long time it can be w=
+eared out,
+> > > > > > > and should typically be replaced. But on some tests, it shows=
+ that the
+> > > > > > > card can still be functional after a power cycle, but as it r=
+equires an
+> > > > > > > operator to do it, the card can remain in a non-operational s=
+tate for a
+> > > > > > > long time until the problem has been observed by the operator=
+.
+> > > > > > >
+> > > > > > > This patch adds function to power cycle the card in case it d=
+oes not
+> > > > > > > respond to a command, and then resend the command if the powe=
+r cycle
+> > > > > > > was successful. This procedure will be tested 1 time before g=
+iving up,
+> > > > > > > and resuming host operation as normal.
+> > > > > >
+> > > > > > I assume the context above is all about the ioctl interface?
+> > > > > >
+> > > > >
+> > > > > Yes, that's correct. The problem we have seen is triggered by ioc=
+tls.
+> > > > >
+> > > > > > So, when the card enters this non functional state, have you tr=
+ied
+> > > > > > just reading a block through the regular I/O interface. Does it
+> > > > > > trigger a power cycle of the card - and then makes it functiona=
+l
+> > > > > > again?
+> > > > > >
+> > > > >
+> > > > > Yes, we have tried that, and it does trigger a power cycle, makin=
+g the card
+> > > > > operational again. But as it requires an operator to trigger it, =
+I thought
+> > > > > it might be something that could be automated here. At least once=
+.
+> > > >
+> > > > Not sure what you mean by operator here? In the end it's a userspac=
+e
+> > > > program running and I assume it can deal with error paths. :-)
+> > > >
+> > > > In any case, I understand your point.
+> > > >
+> > >
+> > > Yes, we have a userspace program. So if the userspace program will tr=
+y to
+> > > restore the card in a situation such as the one we are trying to solv=
+e
+> > > here, how shall it perform it? Is it expected that a ioctl CMD0 reque=
+st
+> > > should be enough, or is there any other support for a userspace progr=
+am to
+> > > reset the card?
+> >
+> > Correct, there is no way for userspace to reset cards through an ioctl.
+> >
+> > >
+> > > If it falls on a ioctl command to reset the card, how do we handle th=
+e case
+> > > where the ioctl times out anyway? Or is the only way for a userspace =
+program
+> > > to restore the card, to make a block transfer that fails?
+> >
+> > Yes, that is what I was thinking. According to the use case you have
+> > described, this should be possible for you to implement as a part of
+> > your userspace program, no?
 >
-> This is one in a life event of the card happening on the manufacturing
-> floor, maybe even not performed on Linux.
-
-In an off list conversation it was suggested that maybe the PROGRAM_KEY
-ioctl should be disabled for locked down kernels to dissuade production
-use of the facility (it is handy for testing though!).
-
->> I wonder if virtio-rpmb may be of help here? You could wrap up up the fr=
-ont-
->> end in the security domain that has the keys although I don't know how e=
-asy
->> it would be for a backend to work with real hardware?
+> Ok, I will discuss that with the people maintaining the userspace program=
+ :)
 >
-> I'm open to see any proposal, not sure I can wrap may head about it right=
- now.=20
->
-> Anyway I was about to send the new round of my code,  but let's come to c=
-ommon ground first.=20
->
+> But would it be of interest to review a patch introducing a more clean ca=
+rd
+> reset request, without block transfers?
 
-OK - I'll see what the others say.
+Well, if you can solve it with block transfers that's the preferred
+option, in my opinion.
 
---=20
-Alex Benn=C3=A9e
+As I stated earlier, my main issue with the HW reset through the ioctl
+interface, is that we don't know what combination of
+request/command/response we should be doing a reset for.
+
+Kind regards
+Uffe
