@@ -2,157 +2,385 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.9 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61DA5C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Mar 2021 00:38:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6E86C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Mar 2021 01:54:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 33CF86500A
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 Mar 2021 00:38:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C9BD65005
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 Mar 2021 01:54:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231357AbhCEAi0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Mar 2021 19:38:26 -0500
-Received: from mail-db8eur05on2044.outbound.protection.outlook.com ([40.107.20.44]:55782
-        "EHLO EUR05-DB8-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229465AbhCEAiZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 4 Mar 2021 19:38:25 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=QDFT2KIIBicX6wbOZ/DmTx/C+dBl8XqaLbr5kTEUkzVMjF/mWWcV27NDns9I3Tdt0WkReT2dCv1bQ62eb4gROwdCe8/j1hYPUDo95+5IyfaHvyKoRKAhGrT/cfstyiDkGrzNjC+3opwAtmhXlnazc5lvOnSUE0uVzRq+s0J66AaiQHXw4Q3DjOBluZgy7FPntk4SWLc4RIy384skccnm3lHb+LTcrY7fuhabCzi44BrP4qdlJa5tq23vtV68BZd955iCp1xZJGtcCbBTx5+yoO9gc2s12wWE+fAP5ppVnGBvqSHIfjFrC69BLxADvdavlNglCIhRx71acEusXv864A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=sjko22WxTYdpl0dj2jlAfbiHkL9/jc9/UQXpSUcIenw=;
- b=YwkDMnMTsdnGhobcVjZ+KWnCuvjrQr/PYu76vL/8vEnwqyIQijkwsNMfrPC8CQpVW4lB+HYoCF2r/653xGIaAQV7Xy/FYnN2hhtCQUs0iBSiVLHZfQCJ5youU2uBsCcH4QC3tXrgFX4pMhUplFKi5jRULXGw/sVS0jt25YF0XvgP46adFsweWOBtc/5tjZ7LII3x1zKTjvaI9L43jYtb+jBC+V4b0/zEkcNonYwkyLugXugMR0HZSc5hteHtvzCll9BJ+CF9BoLoFLLY8Y2UNczcDg80/EpcggSDcI47YkpHs+P6+KgwLWd7FTKN1C4EPnrYhYF/Gx9P4oFqDEJu4Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=sjko22WxTYdpl0dj2jlAfbiHkL9/jc9/UQXpSUcIenw=;
- b=N93cWXrdhcsFaJvzWtzxsm6vyA8bnn2+UftNgaA+ox3pskIwk/2NBvLzAdaz2VDU1r0DETtgQfNNoD3fE8v2ARDnqVkfyuhQh14VIcs36CNpdrK4yleHqX0xIdMCcsEILCiMWDjjjR2UEW0Cl+ywlWkPS6kKR52mREkRrE4iZKg=
-Received: from DB6PR0402MB2760.eurprd04.prod.outlook.com (2603:10a6:4:a1::14)
- by DB7PR04MB5243.eurprd04.prod.outlook.com (2603:10a6:10:17::31) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3868.31; Fri, 5 Mar
- 2021 00:38:22 +0000
-Received: from DB6PR0402MB2760.eurprd04.prod.outlook.com
- ([fe80::d58c:d479:d094:43d0]) by DB6PR0402MB2760.eurprd04.prod.outlook.com
- ([fe80::d58c:d479:d094:43d0%9]) with mapi id 15.20.3846.049; Fri, 5 Mar 2021
- 00:38:21 +0000
-From:   Peng Fan <peng.fan@nxp.com>
+        id S229478AbhCEByy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Mar 2021 20:54:54 -0500
+Received: from lucky1.263xmail.com ([211.157.147.133]:37786 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229653AbhCEByx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Mar 2021 20:54:53 -0500
+Received: from localhost (unknown [192.168.167.235])
+        by lucky1.263xmail.com (Postfix) with ESMTP id 5FD42CC3BB;
+        Fri,  5 Mar 2021 09:54:43 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-ABS-CHECKED: 0
+Received: from localhost.localdomain (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P19729T140184970585856S1614909278778031_;
+        Fri, 05 Mar 2021 09:54:43 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <ca34ae4571550c92610b027f84132320>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: robh+dt@kernel.org
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+From:   Shawn Lin <shawn.lin@rock-chips.com>
 To:     Rob Herring <robh+dt@kernel.org>,
-        "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
-CC:     Stephen Boyd <sboyd@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-clk <linux-clk@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH V3 4/5] dt-bindings: mmc: fsl-imx-esdhc: add clock
- bindings
-Thread-Topic: [PATCH V3 4/5] dt-bindings: mmc: fsl-imx-esdhc: add clock
- bindings
-Thread-Index: AQHXCyWBw7rdwKHv8EyTisodgYlu9qp0er8AgAAeXgA=
-Date:   Fri, 5 Mar 2021 00:38:21 +0000
-Message-ID: <DB6PR0402MB2760DE61170314280DE56F6388969@DB6PR0402MB2760.eurprd04.prod.outlook.com>
-References: <1614222604-27066-1-git-send-email-peng.fan@oss.nxp.com>
- <1614222604-27066-5-git-send-email-peng.fan@oss.nxp.com>
- <CAL_JsqKAOUKnVLvu-VNeDVg0ShXPy56wxhCQv38+rO2k961v+g@mail.gmail.com>
-In-Reply-To: <CAL_JsqKAOUKnVLvu-VNeDVg0ShXPy56wxhCQv38+rO2k961v+g@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=nxp.com;
-x-originating-ip: [58.208.155.62]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 6e6e8f75-48a6-4c4a-4fae-08d8df6efaca
-x-ms-traffictypediagnostic: DB7PR04MB5243:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <DB7PR04MB52434ED51428F82EF85C879988969@DB7PR04MB5243.eurprd04.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: rWhWaBooUhvr7xSRRXJ8PVdnX60x/rcKNVEUE2IG3r/Gk8ednWXHfLM4KoQkm41fFLWpv8mSW+5L+G5uFFhAGuA8yytDxuZoKib400W9GOgRbNgj3G7f6U/UgTt9R+lEf8aSr9Kql/CyvWWoFMXSXj3G4Rpej4zYqwZTGKXN69zVfj3beHSWpIMWCWOYNeFYcSJSVsBgT/Mo+MQ9fXlcmwTgiODPxZpHfuJOz36h3NRAy0HIHgwfoDVwYPDraR8cwwxx9osQMkAIFUBgnXb9Rgk7O1nN5C/QhLtj8hxQD48Ldo5442klDeqi+urYSpQU6XljWpr7esUVXh+zDRpsEkolRlKNhcgt47lN5A2aPWFjyBABOJvhc0ujwE59LPEO0QEGq0zPkGUmbqAU6+ChQLgh1Os2ICBYk+PgXCiANPC3PsT2FCMImkKO1AkxalSgRIAQMLzJ/WjASjPnR8/CfvAOrBT5pVYN06EjpGuwupxlhJmiVLRQHFEZXdv0Fx0fGt0kTj5wBZ8CCcF5oGEQ5g==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0402MB2760.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(39860400002)(136003)(376002)(366004)(346002)(396003)(55016002)(7696005)(186003)(9686003)(4326008)(26005)(8676002)(66476007)(76116006)(52536014)(71200400001)(7416002)(2906002)(33656002)(66556008)(64756008)(6506007)(53546011)(110136005)(478600001)(66446008)(66946007)(54906003)(44832011)(5660300002)(86362001)(83380400001)(8936002)(316002);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata: =?utf-8?B?WklkdjBUdkE1ZWNBV0pNWGFVUWJhWXUrNEx5Umx3dW5Jd083M0tGL2tKeE5q?=
- =?utf-8?B?OGlldjNjeVVVTmYvWDRSNFljc1FOSjA3eUVOSDRtVk1tUkNTajZGNGhNMjNL?=
- =?utf-8?B?ZFFXbEd0a0VVSUljUHFENU8wRFE3c0VXV2JRVnpRMmo4VWtZQmRXbHVlTkd0?=
- =?utf-8?B?UEJEQ0VzSE1DdEFCajgzMUFSdE85dkxTbEtVZndoMzBnRGRmRkhOZ3YwYTJQ?=
- =?utf-8?B?cm13YVF6T1BNWE1kSUQzRGVRcVg2eGY2Q2xzMWVid1JGVlZZbmtxUldzSHpF?=
- =?utf-8?B?Mk04RC8vUzJMYXViZkxjQjZzWk5XclRUMzZLc0JNMlhWUHNBelVkRTYzUGU2?=
- =?utf-8?B?b2ZxcnNGMUVQTzlYNm9UWHJsUDNOZXJQNHdHelBITkV2K3V1VE4wOFcwMU12?=
- =?utf-8?B?U1F5Z3oyUXpab21GRDhuRk5reDZoSUpCZHdPbHBLRzNta1pFYjhSRjBtQ1pF?=
- =?utf-8?B?cnRZalZVOUg5U1hJSTNTcjBYMnZZRmdKWk44bDZTTzRGREhWdHBkYkYwZW9T?=
- =?utf-8?B?SWxYck9Pay9ieUxJaTZNRXNCdmNlWjA2SUF1a2VWUUpETEZELytqVDlUdzlK?=
- =?utf-8?B?RzR3WmRQSFUzU081QnVXSk9GYmpaU2IzeklRZzhaTWFVV29NMlIyQmQrNkx6?=
- =?utf-8?B?anRwb2tOdDc3SWN1V1dmN1V2dEg3eERWeFRoMlhlYTREaHZCMGdJRjR2Y2VP?=
- =?utf-8?B?dTlsMkVuS1AzN2tGeVpDbFpja0ROUXlQdlVScUdNcUkzUWlka2JxUFBDTldp?=
- =?utf-8?B?YVpvaVkyQlNKUWlZdXhFV2todWJZYkNMR2UyL2lBZ2FHMmtBMWhvVjExekYz?=
- =?utf-8?B?dkI5ZkJrYVBmV0FzaXpzTHlBWWY0NjBhNFp1SENERTJVaVN6K0Q2eGpHckgw?=
- =?utf-8?B?SHZvVDhCWS9TQk1seG5ZSW9aM2dRZHgrTUNveXpxZ3BjZHVRUGtyTlU4SGc1?=
- =?utf-8?B?ZHg1b2VUZExJbnhZTzlETUxpK29sbDhpSFFpbDYzT1MxUjY4QkIxSENyWW5t?=
- =?utf-8?B?eVR4VlVXaktaTVZHVld2dVZWa2U4bEtKdU1NRlRWUU50UDZoR250U0ZjQ3dk?=
- =?utf-8?B?SzJJRWtmcE00YTNCT3VuL1hqZG9vM2RhNG9ZeTZjcnVUS21zU25nVHYzS0R2?=
- =?utf-8?B?djhEN1pKOW82dTZBa2NweStXUlJGcjNneFAzZkdQd1pZUVhCWWRXelcrdXV0?=
- =?utf-8?B?OVc4OUxNTXV4bDNPY2RFTmJtZyt4ZVNMZHhkalU3U3ZxaGJQYTZLVUZDYld0?=
- =?utf-8?B?bkZ3b3NIaCtCY1IrK3l5a3h1RnF4VXAvY3o3eFo1Z3djVXVrT1pVSnVYYjlV?=
- =?utf-8?B?RHJ4eDB1OWF0bHJsbkwxaE92c0ZJdWQvc3A5Wnc2bGFHL0dtNFJpKzRxS2NN?=
- =?utf-8?B?WFM3VTFJZUJYYXR0eEJtM0w5dEpJUVRFK1lOUjRHWHB6R1NRUWdPVmowTGdS?=
- =?utf-8?B?RjNpZThvdHhiWEpWQVB2WkR0S242a0lrOTF5Q2JaZnZhWENWODBQOGMwMzRu?=
- =?utf-8?B?ZGxQT2Zpbytxb215WmdFTnlaZmdmZER4VWpoL2Q1OUJQYmRNRDFMZWx6QWJy?=
- =?utf-8?B?QjVnSzdpcXFKOUdreCtGeTRNWHpER3dWbG1oNUhQZ1lIaEVSOFc4aVFhK2Zo?=
- =?utf-8?B?bnZQWm9XYTdZZGlGM3ZmY2dibE9lUlVFS1RNcnRKUmxCaGpweDJxaE9VcEVj?=
- =?utf-8?B?ekRYSGtId29aQjY3Qk1GeVBpTERlSjNlRlVoWFMvbk14T2FSMGt6YVYrYWxy?=
- =?utf-8?Q?3f1THkbLKYSfU6v/Y8=3D?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DB6PR0402MB2760.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 6e6e8f75-48a6-4c4a-4fae-08d8df6efaca
-X-MS-Exchange-CrossTenant-originalarrivaltime: 05 Mar 2021 00:38:21.8974
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: mkOMlldYBBHr7Djree05V2kvmpiNBYQejojOmVT5La92XmuOHjrg86sSpHBHNTGluXmi8fdnUDtc3rUkBCGzzA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB7PR04MB5243
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org,
+        Shawn Lin <shawn.lin@rock-chips.com>
+Subject: [PATCH v2 3/3] mmc: sdhci-of-dwcmshc: add rockchip platform support
+Date:   Fri,  5 Mar 2021 09:54:22 +0800
+Message-Id: <1614909262-205658-3-git-send-email-shawn.lin@rock-chips.com>
+X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1614909262-205658-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1614909262-205658-1-git-send-email-shawn.lin@rock-chips.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgUm9iLA0KDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0ggVjMgNC81XSBkdC1iaW5kaW5nczogbW1j
-OiBmc2wtaW14LWVzZGhjOiBhZGQgY2xvY2sNCj4gYmluZGluZ3MNCj4gDQo+IE9uIFdlZCwgRmVi
-IDI0LCAyMDIxIGF0IDk6MjMgUE0gPHBlbmcuZmFuQG9zcy5ueHAuY29tPiB3cm90ZToNCj4gPg0K
-PiA+IEZyb206IFBlbmcgRmFuIDxwZW5nLmZhbkBueHAuY29tPg0KPiA+DQo+ID4gQWRkIGNsb2Nr
-IGJpbmRpbmdzIGZvciBmc2wtaW14LWVzZGhjIHlhbWwNCj4gPg0KPiA+IFNpZ25lZC1vZmYtYnk6
-IFBlbmcgRmFuIDxwZW5nLmZhbkBueHAuY29tPg0KPiA+IC0tLQ0KPiA+ICAuLi4vZGV2aWNldHJl
-ZS9iaW5kaW5ncy9tbWMvZnNsLWlteC1lc2RoYy55YW1sICAgICAgICB8IDExDQo+ICsrKysrKysr
-KysrDQo+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxMSBpbnNlcnRpb25zKCspDQo+IA0KPiBMb29rcyBs
-aWtlIHRoaXMgbGFuZGVkIGluIGxpbnV4LW5leHQgYW5kIGludHJvZHVjZXMgd2FybmluZ3M6DQoN
-ClBhdGNoIDIsMyBoYXMgbm90IGJlZW4gcGlja2VkIGJ5IFNoYXduLiBBZnRlciBwYXRjaCAyLCAz
-IHBpY2tlZCB1cCwNCnRoZXJlIHdpbGwgYmUgbm8gd2FybmluZ3MuDQoNClRoYW5rcywNClBlbmcu
-DQoNCj4gDQo+IC9idWlsZHMvcm9iaGVycmluZy9saW51eC1kdC1iaW5kaW5ncy9Eb2N1bWVudGF0
-aW9uL2RldmljZXRyZWUvYmluZGluZ3MvY2xvDQo+IGNrL2lteDhxeHAtbHBjZy5leGFtcGxlLmR0
-LnlhbWw6DQo+IG1tY0A1YjAxMDAwMDogY2xvY2stbmFtZXM6MTogJ2FoYicgd2FzIGV4cGVjdGVk
-ICBGcm9tIHNjaGVtYToNCj4gL2J1aWxkcy9yb2JoZXJyaW5nL2xpbnV4LWR0LWJpbmRpbmdzL0Rv
-Y3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5ncy9tDQo+IG1jL2ZzbC1pbXgtZXNkaGMueWFt
-bA0KPiAvYnVpbGRzL3JvYmhlcnJpbmcvbGludXgtZHQtYmluZGluZ3MvRG9jdW1lbnRhdGlvbi9k
-ZXZpY2V0cmVlL2JpbmRpbmdzL2Nsbw0KPiBjay9pbXg4cXhwLWxwY2cuZXhhbXBsZS5kdC55YW1s
-Og0KPiBtbWNANWIwMTAwMDA6IGNsb2NrLW5hbWVzOjI6ICdwZXInIHdhcyBleHBlY3RlZCAgRnJv
-bSBzY2hlbWE6DQo+IC9idWlsZHMvcm9iaGVycmluZy9saW51eC1kdC1iaW5kaW5ncy9Eb2N1bWVu
-dGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvbQ0KPiBtYy9mc2wtaW14LWVzZGhjLnlhbWwNCg==
+sdhci based synopsys MMC IP is also used on some rockchip platforms,
+so add a basic support here.
+
+Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+---
+
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 220 ++++++++++++++++++++++++++++++++++--
+ 1 file changed, 213 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 59d8d96..959084c 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -9,9 +9,11 @@
+ 
+ #include <linux/clk.h>
+ #include <linux/dma-mapping.h>
++#include <linux/iopoll.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
++#include <linux/of_device.h>
+ #include <linux/sizes.h>
+ 
+ #include "sdhci-pltfm.h"
+@@ -21,11 +23,43 @@
+ /* DWCMSHC specific Mode Select value */
+ #define DWCMSHC_CTRL_HS400		0x7
+ 
++/* Rockchip specific Registers */
++#define DWCMSHC_HOST_CTRL3		0x508
++#define DWCMSHC_EMMC_CONTROL		0x52c
++#define DWCMSHC_EMMC_ATCTRL		0x540
++#define DWCMSHC_EMMC_DLL_CTRL		0x800
++#define DWCMSHC_EMMC_DLL_RXCLK		0x804
++#define DWCMSHC_EMMC_DLL_TXCLK		0x808
++#define DWCMSHC_EMMC_DLL_STRBIN		0x80c
++#define DWCMSHC_EMMC_DLL_STATUS0	0x840
++#define DWCMSHC_EMMC_DLL_START		BIT(0)
++#define DWCMSHC_EMMC_DLL_RXCLK_SRCSEL	29
++#define DWCMSHC_EMMC_DLL_START_POINT	16
++#define DWCMSHC_EMMC_DLL_INC		8
++#define DWCMSHC_EMMC_DLL_DLYENA		BIT(27)
++#define DLL_TXCLK_TAPNUM_DEFAULT	0x8
++#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
++#define DLL_TXCLK_TAPNUM_FROM_SW	BIT(24)
++#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
++#define DWCMSHC_EMMC_DLL_LOCKED		BIT(8)
++#define DWCMSHC_EMMC_DLL_TIMEOUT	BIT(9)
++#define DLL_RXCLK_NO_INVERTER		1
++#define DLL_RXCLK_INVERTER		0
++#define DWCMSHC_ENHANCED_STROBE		BIT(8)
++#define DLL_LOCK_WO_TMOUT(x) \
++	((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
++	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
++#define ROCKCHIP_MAX_CLKS		3
++
+ #define BOUNDARY_OK(addr, len) \
+ 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
+ 
+ struct dwcmshc_priv {
+ 	struct clk	*bus_clk;
++
++	/* Rockchip specified optional clocks */
++	struct clk_bulk_data rockchip_clks[ROCKCHIP_MAX_CLKS];
++	int txclk_tapnum;
+ };
+ 
+ /*
+@@ -100,6 +134,97 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
+ 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+ }
+ 
++static void dwcmshc_rk_hs400_enhanced_strobe(struct mmc_host *mmc,
++					     struct mmc_ios *ios)
++{
++	u32 vendor;
++	struct sdhci_host *host = mmc_priv(mmc);
++
++	vendor = sdhci_readl(host, DWCMSHC_EMMC_CONTROL);
++	if (ios->enhanced_strobe)
++		vendor |= DWCMSHC_ENHANCED_STROBE;
++	else
++		vendor &= ~DWCMSHC_ENHANCED_STROBE;
++
++	sdhci_writel(host, vendor, DWCMSHC_EMMC_CONTROL);
++}
++
++static void dwcmshc_rk_set_clock(struct sdhci_host *host, unsigned int clock)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	u32 txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT, extra;
++	int err;
++
++	host->mmc->actual_clock = 0;
++
++	/* DO NOT TOUCH THIS SETTING */
++	extra = DWCMSHC_EMMC_DLL_DLYENA |
++		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
++
++	if (clock == 0)
++		return;
++
++	/* Rockchip platform only support 375KHz for identify mode */
++	if (clock <= 400000)
++		clock = 375000;
++
++	err = clk_set_rate(pltfm_host->clk, clock);
++	if (err)
++		dev_err(mmc_dev(host->mmc), "fail to set clock %d", clock);
++
++	sdhci_set_clock(host, clock);
++
++	/* Disable cmd conflict check */
++	extra = sdhci_readl(host, DWCMSHC_HOST_CTRL3);
++	extra &= ~BIT(0);
++	sdhci_writel(host, extra, DWCMSHC_HOST_CTRL3);
++
++	if (clock <= 400000) {
++		/* Disable DLL to reset sample clock */
++		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_CTRL);
++		return;
++	}
++
++	/* Reset DLL */
++	sdhci_writel(host, BIT(1), DWCMSHC_EMMC_DLL_CTRL);
++	udelay(1);
++	sdhci_writel(host, 0x0, DWCMSHC_EMMC_DLL_CTRL);
++
++	/* Init DLL settings */
++	extra = 0x5 << DWCMSHC_EMMC_DLL_START_POINT |
++		0x2 << DWCMSHC_EMMC_DLL_INC |
++		DWCMSHC_EMMC_DLL_START;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_CTRL);
++	err = readl_poll_timeout(host->ioaddr + DWCMSHC_EMMC_DLL_STATUS0,
++				 extra, DLL_LOCK_WO_TMOUT(extra), 1,
++				 500 * USEC_PER_MSEC);
++	if (err) {
++		dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
++		return;
++	}
++
++	extra = 0x1 << 16 | /* tune clock stop en */
++		0x2 << 17 | /* pre-change delay */
++		0x3 << 19;  /* post-change delay */
++	sdhci_writel(host, extra, DWCMSHC_EMMC_ATCTRL);
++
++	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
++	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
++		txclk_tapnum = priv->txclk_tapnum;
++
++	extra = DWCMSHC_EMMC_DLL_DLYENA |
++		DLL_TXCLK_TAPNUM_FROM_SW |
++		txclk_tapnum;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_TXCLK);
++
++	extra = DWCMSHC_EMMC_DLL_DLYENA |
++		DLL_STRBIN_TAPNUM_DEFAULT |
++		DLL_STRBIN_TAPNUM_FROM_SW;
++	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
++}
++
+ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+ 	.set_clock		= sdhci_set_clock,
+ 	.set_bus_width		= sdhci_set_bus_width,
+@@ -109,21 +234,91 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
+ 	.adma_write_desc	= dwcmshc_adma_write_desc,
+ };
+ 
++static const struct sdhci_ops sdhci_dwcmshc_rk_ops = {
++	.set_clock		= dwcmshc_rk_set_clock,
++	.set_bus_width		= sdhci_set_bus_width,
++	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
++	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
++	.reset			= sdhci_reset,
++	.adma_write_desc	= dwcmshc_adma_write_desc,
++};
++
+ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+ 	.ops = &sdhci_dwcmshc_ops,
+ 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ };
+ 
++static const struct sdhci_pltfm_data sdhci_dwcmshc_rk_pdata = {
++	.ops = &sdhci_dwcmshc_rk_ops,
++	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
++		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
++};
++
++static int rockchip_pltf_init(struct sdhci_host *host, struct dwcmshc_priv *priv)
++{
++	int err;
++
++	priv->rockchip_clks[0].id = "axi";
++	priv->rockchip_clks[1].id = "block";
++	priv->rockchip_clks[2].id = "timer";
++	err = devm_clk_bulk_get_optional(mmc_dev(host->mmc), ROCKCHIP_MAX_CLKS,
++					 priv->rockchip_clks);
++	if (err) {
++		dev_err(mmc_dev(host->mmc), "failed to get clocks %d\n", err);
++		return err;
++	}
++
++	err = clk_bulk_prepare_enable(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
++	if (err) {
++		dev_err(mmc_dev(host->mmc), "failed to enable clocks %d\n", err);
++		return err;
++	}
++
++	if (of_property_read_u32(mmc_dev(host->mmc)->of_node, "rockchip,txclk-tapnum",
++				 &priv->txclk_tapnum))
++		priv->txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT;
++
++	/* Disable cmd conflict check */
++	sdhci_writel(host, 0x0, DWCMSHC_HOST_CTRL3);
++	/* Reset previous settings */
++	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
++	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
++
++	return 0;
++}
++
++static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
++	{
++		.compatible = "snps,dwcmshc-sdhci",
++		.data = &sdhci_dwcmshc_pdata,
++	},
++	{
++		.compatible = "rockchip,dwcmshc-sdhci",
++		.data = &sdhci_dwcmshc_rk_pdata,
++	},
++	{},
++};
++MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
++
+ static int dwcmshc_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_host *host;
+ 	struct dwcmshc_priv *priv;
++	const struct sdhci_pltfm_data *pltfm_data;
+ 	int err;
+ 	u32 extra;
+ 
+-	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
++	pltfm_data = of_device_get_match_data(&pdev->dev);
++	if (!pltfm_data) {
++		dev_err(&pdev->dev, "Error: No device match data found\n");
++		return -ENODEV;
++	}
++
++	host = sdhci_pltfm_init(pdev, pltfm_data,
+ 				sizeof(struct dwcmshc_priv));
+ 	if (IS_ERR(host))
+ 		return PTR_ERR(host);
+@@ -161,6 +356,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 
+ 	host->mmc_host_ops.request = dwcmshc_request;
+ 
++	if (pltfm_data == &sdhci_dwcmshc_rk_pdata) {
++		host->mmc_host_ops.hs400_enhanced_strobe =
++			dwcmshc_rk_hs400_enhanced_strobe;
++
++		err = rockchip_pltf_init(host, priv);
++		if (err)
++			goto err_clk;
++	}
++
+ 	err = sdhci_add_host(host);
+ 	if (err)
+ 		goto err_clk;
+@@ -170,6 +374,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ err_clk:
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_disable_unprepare(priv->bus_clk);
++	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
+ free_pltfm:
+ 	sdhci_pltfm_free(pdev);
+ 	return err;
+@@ -185,6 +390,7 @@ static int dwcmshc_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(pltfm_host->clk);
+ 	clk_disable_unprepare(priv->bus_clk);
++	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
+ 
+ 	sdhci_pltfm_free(pdev);
+ 
+@@ -207,6 +413,8 @@ static int dwcmshc_suspend(struct device *dev)
+ 	if (!IS_ERR(priv->bus_clk))
+ 		clk_disable_unprepare(priv->bus_clk);
+ 
++	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
++
+ 	return ret;
+ }
+ 
+@@ -227,18 +435,16 @@ static int dwcmshc_resume(struct device *dev)
+ 			return ret;
+ 	}
+ 
++	ret = clk_bulk_prepare_enable(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
++	if (ret)
++		return ret;
++
+ 	return sdhci_resume_host(host);
+ }
+ #endif
+ 
+ static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
+ 
+-static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
+-	{ .compatible = "snps,dwcmshc-sdhci" },
+-	{}
+-};
+-MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
+-
+ static struct platform_driver sdhci_dwcmshc_driver = {
+ 	.driver	= {
+ 		.name	= "sdhci-dwcmshc",
+-- 
+2.7.4
+
+
+
