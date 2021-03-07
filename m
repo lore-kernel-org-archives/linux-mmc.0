@@ -2,189 +2,189 @@ Return-Path: <SRS0=UqoE=IF=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91866C4332D
-	for <linux-mmc@archiver.kernel.org>; Sun,  7 Mar 2021 17:08:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB7EEC433DB
+	for <linux-mmc@archiver.kernel.org>; Sun,  7 Mar 2021 19:22:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 72CB96503E
-	for <linux-mmc@archiver.kernel.org>; Sun,  7 Mar 2021 17:08:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94A596516B
+	for <linux-mmc@archiver.kernel.org>; Sun,  7 Mar 2021 19:22:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232565AbhCGRIW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 7 Mar 2021 12:08:22 -0500
-Received: from aposti.net ([89.234.176.197]:40154 "EHLO aposti.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232564AbhCGRIJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 7 Mar 2021 12:08:09 -0500
-From:   Paul Cercueil <paul@crapouillou.net>
-To:     Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King <linux@armlinux.org.uk>
-Cc:     od@zcrc.me, linux-clk@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH 2/2] mmc: jz4740: Add support for monitoring PLL clock rate changes
-Date:   Sun,  7 Mar 2021 17:07:42 +0000
-Message-Id: <20210307170742.70949-3-paul@crapouillou.net>
-In-Reply-To: <20210307170742.70949-1-paul@crapouillou.net>
-References: <20210307170742.70949-1-paul@crapouillou.net>
+        id S232299AbhCGTVa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 7 Mar 2021 14:21:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36826 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232699AbhCGTV2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Mar 2021 14:21:28 -0500
+Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01B75C06174A;
+        Sun,  7 Mar 2021 11:21:28 -0800 (PST)
+Received: by mail-pj1-x1029.google.com with SMTP id kk2-20020a17090b4a02b02900c777aa746fso1873517pjb.3;
+        Sun, 07 Mar 2021 11:21:27 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=UkeqWC55kJTV4Yb9Tbs1HqONBSiHbCRhWpmLfHihoSk=;
+        b=EeIzKRdRUihhcdRzRr+axK8QStgSjGHyFURcDfeFYRBhRlBGg9kgYkVk+ZoHJZ9bn2
+         sesPp1vse80DR6bfp4h3fw/SIwk6NuJ8SlnqTmRkxzv1FVfhB/p8UhaJlG0qk/hRrCcN
+         GXlvv5UwEy38zscq8MnY2ej8fDIYzxVc2C90czxmDcvlANe7Y4rE4gfcpdkSNxCiO63n
+         fne0bEFNsUHsiIC4PR5q6fZn0WGqG+JOBnfyUjr9tqqPMcr/q52vnoPXz9ThpG5J5+j8
+         /FoRnsDHYZb3K7PDWQauAipHQ4UZO2Wem0ea8pdOp3k5ObU/qcBJXLo/582Cs83QP5CO
+         rxQw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=UkeqWC55kJTV4Yb9Tbs1HqONBSiHbCRhWpmLfHihoSk=;
+        b=Dm4JpJrt99sNgUn6H5clqStVaqIzOk7SW/1rgMiLwchROONKRklALpM15pk/94RIdo
+         d9c9QtaTzSmPwhiXWBtUgkvMOsxfBTXurrAbFGEZLWtExIEOGIO+k8Xz3lKHg2Moc7qO
+         S0kNH9BIRAJRCeR+W2ZSZkuCydealZYRB0l83zyM/qxLXo476tKREO5jIW1vKlS37/aN
+         OI8/de3iLqH3KY+YmSq/FwVjNthrU3KLuG1lPrAYwetR+OZiLZLobHU54k8/vfXSImlp
+         lNQoMnYgt0BjipntUDtzcQIgQlbA91QhSAAN1X5alAqeiepC/OKm8Wbh0VfmmtYXEBmc
+         3J6g==
+X-Gm-Message-State: AOAM532fTOGCodgn8pHnvYCV2XsHpVC0l2vzpWg4czSuZbmEQg10bGcg
+        bV5I2En0U0qEMSnAShdrpTgMo23E9aW1U8ly81M=
+X-Google-Smtp-Source: ABdhPJzatndY+CjO/QtMpVyVcD6ehTMkJVOZqLV3GXbFqCesKeMlUivTQ42umZ2KmyyjRuFLXdTptqERX51VRJhCJaw=
+X-Received: by 2002:a17:90a:c84:: with SMTP id v4mr21390102pja.228.1615144887522;
+ Sun, 07 Mar 2021 11:21:27 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
+In-Reply-To: <20210304034141.7062-2-brad@pensando.io>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Sun, 7 Mar 2021 21:21:11 +0200
+Message-ID: <CAHp75VcG9KajNpDbewDq7QzotB6t7MfwiGk15FaobX+cmMVSzg@mail.gmail.com>
+Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The main PLL can have its rate changed at any moment. To keep the MMC
-clock running at a rate that fits the specifications, we need to
-recompute the MMC clock rate every time the PLL rate changes.
+On Thu, Mar 4, 2021 at 4:40 PM Brad Larson <brad@pensando.io> wrote:
+>
+> This GPIO driver is for the Pensando Elba SoC which
+> provides control of four chip selects on two SPI busses.
 
-Use a mutex to ensure that the MMC is idle before performing the PLL and
-MMC rate changes.
+I will try to avoid repeating otheris in their reviews, but my comments below.
 
-Signed-off-by: Paul Cercueil <paul@crapouillou.net>
----
- drivers/mmc/host/jz4740_mmc.c | 70 ++++++++++++++++++++++++++++++++++-
- 1 file changed, 69 insertions(+), 1 deletion(-)
+...
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index b3c636edbb46..1197b8c6b6ed 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -18,6 +18,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/slot-gpio.h>
- #include <linux/module.h>
-+#include <linux/mutex.h>
- #include <linux/of_device.h>
- #include <linux/pinctrl/consumer.h>
- #include <linux/platform_device.h>
-@@ -149,6 +150,10 @@ struct jz4740_mmc_host {
- 	struct platform_device *pdev;
- 	struct clk *clk;
- 
-+	atomic_t clk_mutex_count;
-+	struct mutex clk_mutex;
-+	struct notifier_block clock_nb;
-+
- 	enum jz4740_mmc_version version;
- 
- 	int irq;
-@@ -338,6 +343,9 @@ static void jz4740_mmc_pre_request(struct mmc_host *mmc,
- 	struct jz4740_mmc_host *host = mmc_priv(mmc);
- 	struct mmc_data *data = mrq->data;
- 
-+	if (atomic_inc_and_test(&host->clk_mutex_count))
-+		mutex_lock(&host->clk_mutex);
-+
- 	if (!host->use_dma)
- 		return;
- 
-@@ -353,6 +361,9 @@ static void jz4740_mmc_post_request(struct mmc_host *mmc,
- 	struct jz4740_mmc_host *host = mmc_priv(mmc);
- 	struct mmc_data *data = mrq->data;
- 
-+	if (atomic_dec_return(&host->clk_mutex_count) == -1)
-+		mutex_unlock(&host->clk_mutex);
-+
- 	if (data && data->host_cookie != COOKIE_UNMAPPED)
- 		jz4740_mmc_dma_unmap(host, data);
- 
-@@ -955,6 +966,48 @@ static const struct mmc_host_ops jz4740_mmc_ops = {
- 	.enable_sdio_irq = jz4740_mmc_enable_sdio_irq,
- };
- 
-+static inline struct jz4740_mmc_host *
-+jz4740_mmc_nb_get_priv(struct notifier_block *nb)
-+{
-+	return container_of(nb, struct jz4740_mmc_host, clock_nb);
-+}
-+
-+static struct clk *jz4740_mmc_get_parent_clk(struct clk *clk)
-+{
-+	/*
-+	 * Return the first clock above the one that will effectively modify
-+	 * its rate when clk_set_rate(clk) is called.
-+	 */
-+	clk = clk_get_first_to_set_rate(clk);
-+
-+	return clk_get_parent(clk);
-+}
-+
-+static int jz4740_mmc_update_clk(struct notifier_block *nb,
-+				 unsigned long action,
-+				 void *data)
-+{
-+	struct jz4740_mmc_host *host = jz4740_mmc_nb_get_priv(nb);
-+
-+	/*
-+	 * PLL may have changed its frequency; our clock may be running above
-+	 * spec. Wait until MMC is idle (using host->clk_mutex) before changing
-+	 * the PLL clock, and after it's done, reset our clock rate.
-+	 */
-+
-+	switch (action) {
-+	case PRE_RATE_CHANGE:
-+		mutex_lock(&host->clk_mutex);
-+		break;
-+	default:
-+		clk_set_rate(host->clk, host->mmc->f_max);
-+		mutex_unlock(&host->clk_mutex);
-+		break;
-+	}
-+
-+	return NOTIFY_OK;
-+}
-+
- static const struct of_device_id jz4740_mmc_of_match[] = {
- 	{ .compatible = "ingenic,jz4740-mmc", .data = (void *) JZ_MMC_JZ4740 },
- 	{ .compatible = "ingenic,jz4725b-mmc", .data = (void *)JZ_MMC_JZ4725B },
-@@ -971,6 +1024,7 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	struct mmc_host *mmc;
- 	struct jz4740_mmc_host *host;
- 	const struct of_device_id *match;
-+	struct clk *parent_clk;
- 
- 	mmc = mmc_alloc_host(sizeof(struct jz4740_mmc_host), &pdev->dev);
- 	if (!mmc) {
-@@ -1058,12 +1112,24 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 		goto err_free_irq;
- 	host->use_dma = !ret;
- 
-+	atomic_set(&host->clk_mutex_count, -1);
-+	mutex_init(&host->clk_mutex);
-+	host->clock_nb.notifier_call = jz4740_mmc_update_clk;
-+
-+	parent_clk = jz4740_mmc_get_parent_clk(host->clk);
-+
-+	ret = clk_notifier_register(parent_clk, &host->clock_nb);
-+	if (ret) {
-+		dev_err(&pdev->dev, "Unable to register clock notifier\n");
-+		goto err_release_dma;
-+	}
-+
- 	platform_set_drvdata(pdev, host);
- 	ret = mmc_add_host(mmc);
- 
- 	if (ret) {
- 		dev_err(&pdev->dev, "Failed to add mmc host: %d\n", ret);
--		goto err_release_dma;
-+		goto err_unregister_clk_notifier;
- 	}
- 	dev_info(&pdev->dev, "Ingenic SD/MMC card driver registered\n");
- 
-@@ -1074,6 +1140,8 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 
- 	return 0;
- 
-+err_unregister_clk_notifier:
-+	clk_notifier_unregister(parent_clk, &host->clock_nb);
- err_release_dma:
- 	if (host->use_dma)
- 		jz4740_mmc_release_dma_channels(host);
+> +config GPIO_ELBA_SPICS
+> +       bool "Pensando Elba SPI chip-select"
+
+Can't it be a module? Why?
+
+> +       depends on ARCH_PENSANDO_ELBA_SOC
+> +       help
+> +         Say yes here to support the Pensndo Elba SoC SPI chip-select driver
+
+Please give more explanation what it is and why users might need it,
+and also tell users how the module will be named (if there is no
+strong argument why it can't be a  module).
+
+...
+
+> +#include <linux/of.h>
+
+It's not used here, but you missed mod_devicetable.h.
+
+...
+
+> +/*
+> + * pin:             3            2        |       1            0
+> + * bit:         7------6------5------4----|---3------2------1------0
+> + *     cs1  cs1_ovr  cs0  cs0_ovr |  cs1  cs1_ovr  cs0  cs0_ovr
+> + *                ssi1            |             ssi0
+> + */
+> +#define SPICS_PIN_SHIFT(pin)   (2 * (pin))
+> +#define SPICS_MASK(pin)                (0x3 << SPICS_PIN_SHIFT(pin))
+
+> +#define SPICS_SET(pin, val)    ((((val) << 1) | 0x1) << SPICS_PIN_SHIFT(pin))
+
+Isn't it easier to define as ((value) << (2 * (pin) + 1) | BIT(2 * (pin)))
+
+...
+
+> +struct elba_spics_priv {
+> +       void __iomem *base;
+> +       spinlock_t lock;
+
+> +       struct gpio_chip chip;
+
+If you put it as a first member a container_of() becomes a no-op. OTOH
+dunno if there is any such container_of() use in the code.
+
+> +};
+
+...
+
+> +static int elba_spics_get_value(struct gpio_chip *chip, unsigned int pin)
+> +{
+> +       return -ENXIO;
+
+Hmm... Is it really acceptable error code here?
+
+> +}
+...
+
+> +static int elba_spics_direction_input(struct gpio_chip *chip, unsigned int pin)
+> +{
+> +       return -ENXIO;
+
+Ditto.
+
+> +}
+
+...
+
+> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> +       p->base = devm_ioremap_resource(&pdev->dev, res);
+
+p->base = devm_platform_ioremap_resource(pdev, 0);
+
+> +       if (IS_ERR(p->base)) {
+
+> +               dev_err(&pdev->dev, "failed to remap I/O memory\n");
+
+Duplicate noisy message.
+
+> +               return PTR_ERR(p->base);
+> +       }
+
+> +       ret = devm_gpiochip_add_data(&pdev->dev, &p->chip, p);
+> +       if (ret) {
+> +               dev_err(&pdev->dev, "unable to add gpio chip\n");
+
+> +               return ret;
+> +       }
+> +
+> +       dev_info(&pdev->dev, "elba spics registered\n");
+> +       return 0;
+
+if (ret)
+  dev_err(...);
+return ret;
+
+> +}
+
 -- 
-2.30.1
-
+With Best Regards,
+Andy Shevchenko
