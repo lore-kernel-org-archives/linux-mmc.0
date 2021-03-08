@@ -2,188 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D134C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 21:43:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBB44C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 23:03:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D15EC65257
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 21:43:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A27D86529C
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 23:03:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229528AbhCHVnV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Mar 2021 16:43:21 -0500
-Received: from mail-io1-f42.google.com ([209.85.166.42]:41043 "EHLO
-        mail-io1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229471AbhCHVmt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 16:42:49 -0500
-Received: by mail-io1-f42.google.com with SMTP id z13so11636773iox.8;
-        Mon, 08 Mar 2021 13:42:48 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=wHaDCIFSJ/WaA+1UndQODdn6YA7l7EOGWs12tpJYWwc=;
-        b=aKTR1SwFX/R1dpQ/Og56vAJKlXsFp8j/j9HwMNgmZ8DdfqrA0eB9MRWMQ+7ktDJ+lQ
-         uAqSwiVWYR11zXyPuOxIvmcvPptygAcfRYxcOjWQ04GyUOtALYQdgg34+nItKdZgCt3C
-         BY5LZf99I8qzGLR6lTjCrKqjZzKVE9ryQh5j3BGVGHAxYFx4jBXyuzMfPyWV1gBBia66
-         Xn1KrDfF2m3AquIsQI2VuaZTllZRY9frCErmzcLIoW2eM5P/IQTkcrj1kuDsA/g/H8tu
-         tZ5GY7NI+1mtjaR+egnSbmtnsuEZUMdMINc0GR359GVRHM2mvlG00uKT01RudjX0hIMQ
-         Q4Yg==
-X-Gm-Message-State: AOAM5310uV+FG9P/dydTOWHqbTupD13HvVTQV8+rYxg7ZCrhcdu4B5VK
-        urXaTFoUOxlGII+mFD0zSPN3IOxUBA==
-X-Google-Smtp-Source: ABdhPJxM035frlT4oHWfpTCS3AKMyqbXOwdLygiLPvLj+LFEYJyvL6l/HOkEc2Ks/pXPGvbugX4PBQ==
-X-Received: by 2002:a5d:81c8:: with SMTP id t8mr20788383iol.38.1615239768523;
-        Mon, 08 Mar 2021 13:42:48 -0800 (PST)
-Received: from robh.at.kernel.org ([64.188.179.253])
-        by smtp.gmail.com with ESMTPSA id u14sm6528028ilv.0.2021.03.08.13.42.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 Mar 2021 13:42:47 -0800 (PST)
-Received: (nullmailer pid 3004894 invoked by uid 1000);
-        Mon, 08 Mar 2021 21:42:45 -0000
-Date:   Mon, 8 Mar 2021 14:42:45 -0700
-From:   Rob Herring <robh@kernel.org>
-To:     Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        id S229528AbhCHXCm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Mar 2021 18:02:42 -0500
+Received: from mail.kernel.org ([198.145.29.99]:33818 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231408AbhCHXCV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 8 Mar 2021 18:02:21 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0CF5E6529E;
+        Mon,  8 Mar 2021 23:02:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1615244541;
+        bh=baOfkGpu04qh/09ctPJ2h4EovLtbYGc6HVKRrEA1EC8=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=IsjfBJEeCqmzkLIIjbMDZ6tar87u3mo3hAujfL4D6TBwUl4LpoMf+eKOdTqk8yVP5
+         h1dlnSx4opy/Bt5ebV5y14X2gG9nGZ5dbGA6Ceyc6od5tACUzvYmz8iKMVWEu5CpWr
+         mUeoaJRki8SKo7Rp14vp+9vhTS7GJJmZdQ5bds7sfZaVgquv3/qvaj+JUFJmo/Rvk6
+         rmYEIKs5xflov9S7o05TA5mJtZJbCyEuE8dtd95O9boclphVtjMdXBJLOkk3qJ96dU
+         rumSibJ+l6kxlQ6aELYmkvUfgGqjEp6/tJWJyQdXTpR7rsPz/ZdOXwIbKPno5+yLjX
+         o8NyOLq4D6W5A==
+Date:   Mon, 8 Mar 2021 15:02:19 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Peng Zhou <peng.zhou@mediatek.com>
+Cc:     linux-mmc@vger.kernel.org,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Satya Tangirala <satyat@google.com>,
+        devicetree@vger.kernel.org,
         Adrian Hunter <adrian.hunter@intel.com>,
-        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Convert to
- yaml file
-Message-ID: <20210308214245.GA2999684@robh.at.kernel.org>
-References: <1614909262-205658-1-git-send-email-shawn.lin@rock-chips.com>
+        Wulin Li <wulin.li@mediatek.com>,
+        Mason Zhang <mason.zhang@mediatek.com>
+Subject: Re: [PATCH v2 0/4] MediaTek eMMC inline encryption support
+Message-ID: <YEas+9mY5zdJh6mX@gmail.com>
+References: <20210308080855.30459-1-peng.zhou@mediatek.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1614909262-205658-1-git-send-email-shawn.lin@rock-chips.com>
+In-Reply-To: <20210308080855.30459-1-peng.zhou@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 05, 2021 at 09:54:20AM +0800, Shawn Lin wrote:
-> This patch converts sdhci-of-dwcmshc.txt to sdhci-of-dwcmshc.yaml
+On Mon, Mar 08, 2021 at 04:08:56PM +0800, Peng Zhou wrote:
+> Hello,
 > 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
+> Mediatek eMMC hardware IP has Inline Crypto Engine (ICE),
+> we support inline encryption now.
 > 
->  .../devicetree/bindings/mmc/sdhci-of-dwcmshc.txt   | 20 -------
->  .../devicetree/bindings/mmc/sdhci-of-dwcmshc.yaml  | 63 ++++++++++++++++++++++
-
-Use the compatible string for filename.
-
->  2 files changed, 63 insertions(+), 20 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
->  create mode 100755 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.yaml
+> For Inline Crypto Engine (ICE), see:
+> - https://lore.kernel.org/linux-arm-msm/20210126001456.382989-2-ebiggers@kernel.org/T/
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
-> deleted file mode 100644
-> index ee4253b..0000000
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
-> +++ /dev/null
-> @@ -1,20 +0,0 @@
-> -* Synopsys DesignWare Cores Mobile Storage Host Controller
-> -
-> -Required properties:
-> -- compatible: should be one of the following:
-> -    "snps,dwcmshc-sdhci"
-> -- reg: offset and length of the register set for the device.
-> -- interrupts: a single interrupt specifier.
-> -- clocks: Array of clocks required for SDHCI; requires at least one for
-> -    core clock.
-> -- clock-names: Array of names corresponding to clocks property; shall be
-> -    "core" for core clock and "bus" for optional bus clock.
-> -
-> -Example:
-> -	sdhci2: sdhci@aa0000 {
-> -		compatible = "snps,dwcmshc-sdhci";
-> -		reg = <0xaa0000 0x1000>;
-> -		interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
-> -		clocks = <&emmcclk>;
-> -		bus-width = <8>;
-> -	}
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.yaml b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.yaml
-> new file mode 100755
-> index 0000000..9d717a8
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.yaml
-> @@ -0,0 +1,63 @@
-> +# SPDX-License-Identifier: GPL-2.0-only
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/sdhci-of-dwcmshc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Synopsys Designware Mobile Storage Host Controller Binding
-> +
-> +maintainers:
-> +  - Ulf Hansson <ulf.hansson@linaro.org>
-> +  - Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - snps,dwcmshc-sdhci
-> +
-> +  reg:
-> +    minItems: 1
-> +    maxItems: 3
-
-You need to define what each entry is.
-
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    minItems: 1
-> +    maxItems: 2
-> +    description:
-> +      Handle to "core" for core clock and "bus" for optional bus clock.
-
-minItems: 1
-items:
-  - description: core clock
-  - description: bus clock
-
-> +
-> +  clock-names:
-> +    minItems: 1
-> +    maxItems: 2
-
-Don't need maxItems here (implied by 'items' length).
-
-> +    items:
-> +      - const: core
-> +      - const: bus
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +  - clock-names
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    mmc@aa0000 {
-> +      compatible = "snps,dwcmshc-sdhci";
-> +      reg = <0xaa000 0x1000>;
-> +      interrupts = <0 25 0x4>;
-> +      clocks = <&cru 17>, <&cru 18>;
-> +      clock-names = "core", "bus";
-> +      bus-width = <8>;
-> +      #address-cells = <1>;
-> +      #size-cells = <0>;
-> +    };
-> +
-> +...
-> -- 
-> 2.7.4
+> Changed in v2:
+> - fix email format
+> - change some description
 > 
+> Peng Zhou (4):
+>   mmc: Mediatek: add Inline Crypto Engine support
+>   mmc: Mediatek: enable crypto hardware engine
+>   arm64: dts: Mediatek: MT6779: add mmc node with ICE setting
+>   dt-bingdings: mmc: Mediatek: add ICE clock
 > 
-> 
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       |  6 ++-
+>  arch/arm64/boot/dts/mediatek/mt6779.dtsi      | 14 +++++++
+>  drivers/mmc/host/mtk-sd.c                     | 42 ++++++++++++++++++-
+>  3 files changed, 59 insertions(+), 3 deletions(-)
+
+Now I received this cover letter 5 more times, but none of the other patches.
+How are you sending this out?
+
+- Eric
