@@ -1,190 +1,104 @@
-Return-Path: <SRS0=UqoE=IF=vger.kernel.org=linux-mmc-owner@kernel.org>
+Return-Path: <SRS0=Ubev=IG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB7EEC433DB
-	for <linux-mmc@archiver.kernel.org>; Sun,  7 Mar 2021 19:22:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF1D3C433E9
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 00:53:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 94A596516B
-	for <linux-mmc@archiver.kernel.org>; Sun,  7 Mar 2021 19:22:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 75E6C650F8
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 00:53:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232299AbhCGTVa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 7 Mar 2021 14:21:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36826 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232699AbhCGTV2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 7 Mar 2021 14:21:28 -0500
-Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01B75C06174A;
-        Sun,  7 Mar 2021 11:21:28 -0800 (PST)
-Received: by mail-pj1-x1029.google.com with SMTP id kk2-20020a17090b4a02b02900c777aa746fso1873517pjb.3;
-        Sun, 07 Mar 2021 11:21:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=UkeqWC55kJTV4Yb9Tbs1HqONBSiHbCRhWpmLfHihoSk=;
-        b=EeIzKRdRUihhcdRzRr+axK8QStgSjGHyFURcDfeFYRBhRlBGg9kgYkVk+ZoHJZ9bn2
-         sesPp1vse80DR6bfp4h3fw/SIwk6NuJ8SlnqTmRkxzv1FVfhB/p8UhaJlG0qk/hRrCcN
-         GXlvv5UwEy38zscq8MnY2ej8fDIYzxVc2C90czxmDcvlANe7Y4rE4gfcpdkSNxCiO63n
-         fne0bEFNsUHsiIC4PR5q6fZn0WGqG+JOBnfyUjr9tqqPMcr/q52vnoPXz9ThpG5J5+j8
-         /FoRnsDHYZb3K7PDWQauAipHQ4UZO2Wem0ea8pdOp3k5ObU/qcBJXLo/582Cs83QP5CO
-         rxQw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=UkeqWC55kJTV4Yb9Tbs1HqONBSiHbCRhWpmLfHihoSk=;
-        b=Dm4JpJrt99sNgUn6H5clqStVaqIzOk7SW/1rgMiLwchROONKRklALpM15pk/94RIdo
-         d9c9QtaTzSmPwhiXWBtUgkvMOsxfBTXurrAbFGEZLWtExIEOGIO+k8Xz3lKHg2Moc7qO
-         S0kNH9BIRAJRCeR+W2ZSZkuCydealZYRB0l83zyM/qxLXo476tKREO5jIW1vKlS37/aN
-         OI8/de3iLqH3KY+YmSq/FwVjNthrU3KLuG1lPrAYwetR+OZiLZLobHU54k8/vfXSImlp
-         lNQoMnYgt0BjipntUDtzcQIgQlbA91QhSAAN1X5alAqeiepC/OKm8Wbh0VfmmtYXEBmc
-         3J6g==
-X-Gm-Message-State: AOAM532fTOGCodgn8pHnvYCV2XsHpVC0l2vzpWg4czSuZbmEQg10bGcg
-        bV5I2En0U0qEMSnAShdrpTgMo23E9aW1U8ly81M=
-X-Google-Smtp-Source: ABdhPJzatndY+CjO/QtMpVyVcD6ehTMkJVOZqLV3GXbFqCesKeMlUivTQ42umZ2KmyyjRuFLXdTptqERX51VRJhCJaw=
-X-Received: by 2002:a17:90a:c84:: with SMTP id v4mr21390102pja.228.1615144887522;
- Sun, 07 Mar 2021 11:21:27 -0800 (PST)
-MIME-Version: 1.0
-References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
-In-Reply-To: <20210304034141.7062-2-brad@pensando.io>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Sun, 7 Mar 2021 21:21:11 +0200
-Message-ID: <CAHp75VcG9KajNpDbewDq7QzotB6t7MfwiGk15FaobX+cmMVSzg@mail.gmail.com>
-Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
+        id S233418AbhCHAwW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 7 Mar 2021 19:52:22 -0500
+Received: from mail.kernel.org ([198.145.29.99]:60132 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229662AbhCHAvw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 7 Mar 2021 19:51:52 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 38A56650F8;
+        Mon,  8 Mar 2021 00:51:49 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1615164711;
+        bh=1MGnQmu1b3U04ICK52m8O/d4JLHCpkWgIMSFMA+gp6k=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=RE4rU4Ulk7Onj7JnwEzY4Yxz2+Aifjg4+5cyJntibiuIjrap7xt7HmWtHtxai9wOz
+         Px41agLmJ68aiC5abovOPbYF7AMv6dD6qMudNjTaoH0J0Fif5fqi7PBv0CvlkfWjvw
+         30OHAzD2iepyVO51hM2McAjmRkoigKZ4w8TdLpQfvR30wKGtAqyaBosYV4Fc0MofW1
+         8pdsY3i+gMTwAquYanKv0KzYZaLOTIDHF395rkY1yqrmjGIzX3Udb1msds9jyuYgwP
+         yoXfIWmlti1jQSKEilu1xFCZe5N1P1FF2dNGlQhfd+teldtA4LO/rd/tHj77VJEyW/
+         i7XzgiWgZy0uQ==
+Date:   Mon, 8 Mar 2021 08:51:45 +0800
+From:   Shawn Guo <shawnguo@kernel.org>
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        linux-clk <linux-clk@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH V3 0/5] imx esdhc dt/driver update
+Message-ID: <20210308005144.GN543@dragon>
+References: <1614222604-27066-1-git-send-email-peng.fan@oss.nxp.com>
+ <CAPDyKFq3J=Shzgxp8XsdZqdZcOZ-n5WJ+mWejXM1-Qp8PgjBNA@mail.gmail.com>
+ <DB6PR0402MB276016438D7D39579A05D08A88989@DB6PR0402MB2760.eurprd04.prod.outlook.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <DB6PR0402MB276016438D7D39579A05D08A88989@DB6PR0402MB2760.eurprd04.prod.outlook.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 4, 2021 at 4:40 PM Brad Larson <brad@pensando.io> wrote:
->
-> This GPIO driver is for the Pensando Elba SoC which
-> provides control of four chip selects on two SPI busses.
+On Wed, Mar 03, 2021 at 03:00:57AM +0000, Peng Fan (OSS) wrote:
+> Hi Shawn,
+> 
+> > Subject: Re: [PATCH V3 0/5] imx esdhc dt/driver update
+> > 
+> > On Thu, 25 Feb 2021 at 04:22, <peng.fan@oss.nxp.com> wrote:
+> > >
+> > > From: Peng Fan <peng.fan@nxp.com>
+> > >
+> > > V3:
+> > >  Patch 1, drop unneeded pinctrl-0/1/2
+> > >  Patch 2 is new to avoid break dt bindings check
+> > > V2:
+> > >  patch 1, 2, 3 is new
+> > >  patch 4 is not changed
+> > >
+> > >
+> > > Peng Fan (5):
+> > >   dt-bindings: mmc: fsl-imx-esdhc: add pinctrl bindings
+> > >   dt-bindings: clock: imx8qxp-lpcg: correct the example clock-names
+> > >   arm64: dts: imx8qxp: correct usdhc clock-names sequence
+> > >   dt-bindings: mmc: fsl-imx-esdhc: add clock bindings
+> > >   mmc: sdhci-esdhc-imx: validate pinctrl before use it
+> > >
+> > >  .../bindings/clock/imx8qxp-lpcg.yaml          |  6 +++---
+> > >  .../bindings/mmc/fsl-imx-esdhc.yaml           | 20
+> > +++++++++++++++++++
+> > >  arch/arm64/boot/dts/freescale/imx8qxp.dtsi    | 18 ++++++++---------
+> > >  drivers/mmc/host/sdhci-esdhc-imx.c            |  2 +-
+> > >  4 files changed, 33 insertions(+), 13 deletions(-)
+> > >
+> > > --
+> > > 2.30.0
+> > >
+> > 
+> > Applied patch 1, 4 and 5, thanks!
+> 
+> 
+> Would you pick patch 2,3?
 
-I will try to avoid repeating otheris in their reviews, but my comments below.
-
-...
-
-> +config GPIO_ELBA_SPICS
-> +       bool "Pensando Elba SPI chip-select"
-
-Can't it be a module? Why?
-
-> +       depends on ARCH_PENSANDO_ELBA_SOC
-> +       help
-> +         Say yes here to support the Pensndo Elba SoC SPI chip-select driver
-
-Please give more explanation what it is and why users might need it,
-and also tell users how the module will be named (if there is no
-strong argument why it can't be a  module).
-
-...
-
-> +#include <linux/of.h>
-
-It's not used here, but you missed mod_devicetable.h.
-
-...
-
-> +/*
-> + * pin:             3            2        |       1            0
-> + * bit:         7------6------5------4----|---3------2------1------0
-> + *     cs1  cs1_ovr  cs0  cs0_ovr |  cs1  cs1_ovr  cs0  cs0_ovr
-> + *                ssi1            |             ssi0
-> + */
-> +#define SPICS_PIN_SHIFT(pin)   (2 * (pin))
-> +#define SPICS_MASK(pin)                (0x3 << SPICS_PIN_SHIFT(pin))
-
-> +#define SPICS_SET(pin, val)    ((((val) << 1) | 0x1) << SPICS_PIN_SHIFT(pin))
-
-Isn't it easier to define as ((value) << (2 * (pin) + 1) | BIT(2 * (pin)))
-
-...
-
-> +struct elba_spics_priv {
-> +       void __iomem *base;
-> +       spinlock_t lock;
-
-> +       struct gpio_chip chip;
-
-If you put it as a first member a container_of() becomes a no-op. OTOH
-dunno if there is any such container_of() use in the code.
-
-> +};
-
-...
-
-> +static int elba_spics_get_value(struct gpio_chip *chip, unsigned int pin)
-> +{
-> +       return -ENXIO;
-
-Hmm... Is it really acceptable error code here?
-
-> +}
-...
-
-> +static int elba_spics_direction_input(struct gpio_chip *chip, unsigned int pin)
-> +{
-> +       return -ENXIO;
-
-Ditto.
-
-> +}
-
-...
-
-> +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> +       p->base = devm_ioremap_resource(&pdev->dev, res);
-
-p->base = devm_platform_ioremap_resource(pdev, 0);
-
-> +       if (IS_ERR(p->base)) {
-
-> +               dev_err(&pdev->dev, "failed to remap I/O memory\n");
-
-Duplicate noisy message.
-
-> +               return PTR_ERR(p->base);
-> +       }
-
-> +       ret = devm_gpiochip_add_data(&pdev->dev, &p->chip, p);
-> +       if (ret) {
-> +               dev_err(&pdev->dev, "unable to add gpio chip\n");
-
-> +               return ret;
-> +       }
-> +
-> +       dev_info(&pdev->dev, "elba spics registered\n");
-> +       return 0;
-
-if (ret)
-  dev_err(...);
-return ret;
-
-> +}
-
--- 
-With Best Regards,
-Andy Shevchenko
+Done.
