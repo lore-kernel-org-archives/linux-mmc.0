@@ -2,136 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2000AC433DB
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 16:20:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF044C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 17:07:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D3FA765226
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 16:20:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 849FB65230
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 17:07:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229737AbhCHQUX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Mar 2021 11:20:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52854 "EHLO
+        id S229813AbhCHRGo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Mar 2021 12:06:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229904AbhCHQUV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 11:20:21 -0500
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AD75C061762
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Mar 2021 08:20:21 -0800 (PST)
-Received: by mail-lf1-x132.google.com with SMTP id f1so21904044lfu.3
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Mar 2021 08:20:21 -0800 (PST)
+        with ESMTP id S229469AbhCHRGc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 12:06:32 -0500
+Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2272BC06174A
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Mar 2021 09:06:32 -0800 (PST)
+Received: by mail-ua1-x934.google.com with SMTP id 101so3570204uag.1
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Mar 2021 09:06:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=mq5t5EXYTkjP+ybGzyx3+G3Vm4kxVCqgAzqjpUIRzNM=;
-        b=b+h+112y3ebiz95oGha/nSHDUyV4qWqLbh7s6HWXqpchc/KQ6l9+lY9uMVVoe2jacZ
-         +6AGyh3Tyx9X9sN/HgSye3HXdYOxEbRa6fBqDY5mD6QEGq0gwpEhSMUW8wsgzIJiboO2
-         Nfc5c+q6gYUTSNdqZGlFablRt4ma1wiCHwiruWqcpj1Ie9eKyrwiRa6TE4GSQlUYOSC4
-         BFZ8auSPNqAHtgknYX4ZaZHhpWe0Vk/tv5G6uWoEBGqb5UF8aQ2svCv7zlrXkNowHpKV
-         rirSDxOMW8QXt1hefFpX98AxtMOTDHy9WDfbNiCkBUpZ/GCke2KlcoBO8Bice77rNA+j
-         z5DQ==
+        bh=jDoWGmrOVl7rZdkrxzmJVcDoBJy5ua5BZTw4puY4Qyg=;
+        b=I7Jme62a0xK9QZW4vukdWqx4TkwVilI3Wsj9LDBwHJsWLZl4qkrlMdzsGlaJBIjjnf
+         8lHS9qE8m/OAHPyq0z9tC4j7Q/oqXm9YvK2qy5IwAb95PxqJdm7xwHJXbK2A3jfzCt0q
+         5drmEStirEJiibwu6kAv1dV3OpUBw0Eaw7zsIMue+dlGjmyMweieXY6YLyuP4qoWO6jG
+         6hfkcAYSPJBEg05p/m97uTafFHnY9JXeKzits65ytWherOTZPGEvh9FOTQl6WRtbyfNN
+         Fvrh6qKsGK//Mza4VQHdlvzP5fG/l7tGKvg2+fQbxf6gLGKZAKhGihFYtrLVSCbJtkp6
+         5dRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=mq5t5EXYTkjP+ybGzyx3+G3Vm4kxVCqgAzqjpUIRzNM=;
-        b=jOs9GqW4npb7r/MqMHSLWGJLBbcT2WuvJwvmamj07253kLUL2IhG2lg6wFPIAWnuZh
-         t09/lp+/xNj+h0ZtKMpP5wHZWCYQ0Y6853Zzpj2EZR7DgHvZg2oaS4I48pKsFAxOINzK
-         7ApJFHsBCgXPXEjQsIvJ0gz0sphAvHpYuHwO2SfOmvmMTgxsAG2x1oQE3yb4W+YxL+eP
-         D9iuWpkhj0X/JUAfsjLb0v7WsJHuowdhtWQEaOShRj1FwgVNz00UPipPkALbqqr6ucnw
-         PsWKf5XSqgesqdYR289N6ZuOeGSQ4Wokm/xVlENVv4tvka6h7ut3/TmpOoaiNCugQ5gk
-         LOOA==
-X-Gm-Message-State: AOAM530ZhErR4Qj3cmzi22aBX1dR0qQYdIdrnX20F4S+LFQcLZZ7lAsm
-        2xedkL4DuecqgWtQmwWb5N9oN4f8TCQ8PHopV2aRpg==
-X-Google-Smtp-Source: ABdhPJxefbXkGdCY3QxQH6a1mIYMLsvpRgHrK9W4yH+Qa5hC2ifqLSzeiXPxO7L3VQVm2HDLKnQkMK0MqMetWU92tJk=
-X-Received: by 2002:a05:6512:10d1:: with SMTP id k17mr14325798lfg.649.1615220419656;
- Mon, 08 Mar 2021 08:20:19 -0800 (PST)
+        bh=jDoWGmrOVl7rZdkrxzmJVcDoBJy5ua5BZTw4puY4Qyg=;
+        b=WmJ3SKMRNeLkG1ClMj3Ubue0h4VOL777hvOpoHPfePlZZMyl3BIypUgYSFMXniIZ6E
+         V6Ho6naLdD7kNGanyJtpPAjBcpj1/lROArgJ+KiD8mk26Ih+HoHuZPQcpv2r5lVmzr8K
+         0h4VcefnNf8mfYzddyKixZjIGpwP6LfCph3B1y6PvSPb4icfgFMItfhjlhuk+qZEnWKv
+         BAH+U/MIVkJ6s5WPLz+/5l7WHM7cCuO3t1nzOPtdp2e5yYGlzNj1F0WDzTxzEwwOx+Ft
+         a0dO6FtVh6gbKYmXWXG1aMnpf9imMoA/dKK9S5ZdMdkECxJG+AKiChbYcEujrNCRQAcD
+         dYOQ==
+X-Gm-Message-State: AOAM530ria2exyIkBacTjKkTHcH3TW/oR0Y+ClKckDDzkLISOoGVS9To
+        plw6if4K+xo3vOhHUFdyXY6A8sVADI3FWGQ0/Bs9hw==
+X-Google-Smtp-Source: ABdhPJzK17GUzESGEXSQjhpoFBU4DHSGlHEfTnjfLiT+vZ/vt+UXKhfSK/1wa2pKucQngc0w/nxL+dsMKigC2hTuly0=
+X-Received: by 2002:a9f:3546:: with SMTP id o64mr14117245uao.129.1615223190563;
+ Mon, 08 Mar 2021 09:06:30 -0800 (PST)
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
-In-Reply-To: <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 8 Mar 2021 17:20:08 +0100
-Message-ID: <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     Arnd Bergmann <arnd@linaro.org>, keyrings@vger.kernel.org,
-        David Howells <dhowells@redhat.com>,
-        Jarkko Sakkinen <jarkko@kernel.org>
-Cc:     Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        ruchika.gupta@linaro.org,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Hector Martin <marcan@marcan.st>
+References: <20210215003249.GA12303@lupo-laptop>
+In-Reply-To: <20210215003249.GA12303@lupo-laptop>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 8 Mar 2021 18:05:53 +0100
+Message-ID: <CAPDyKFqy5z3a5sCXM8BCrhWQgNCUuOGc4VoOBqVwXnHZSdQaxQ@mail.gmail.com>
+Subject: Re: [RFC PATCH 2/2] Make cmdq_en attribute writeable
+To:     Luca Porzio <porzio@gmail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Zhan Liu <zliua@micron.com>, Luca Porzio <lporzio@micron.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 5, 2021 at 9:44 AM Arnd Bergmann <arnd@linaro.org> wrote:
+On Mon, 15 Feb 2021 at 01:33, Luca Porzio <porzio@gmail.com> wrote:
+>
+> cmdq_en attribute in sysfs now can now be written.
+> When 0 is written:
+>   CMDQ is disabled and kept disabled across device reboots.
+> When 1 is written:
+>   CMDQ mode is instantly reneabled (if supported).
+>
+> Signed-off-by: Luca Porzio <lporzio@micron.com>
+> Signed-off-by: Zhan Liu <zliua@micron.com>
+> ---
+>  drivers/mmc/core/mmc.c   | 152 ++++++++++++++++++++++++++++++---------
+>  include/linux/mmc/card.h |   1 +
+>  2 files changed, 118 insertions(+), 35 deletions(-)
+>
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
 
-> I think the scenario for the 'nvme-rpmb' tool that does the signing in user
-> space does not involve any TEE at the moment, because PCs usually
-> don't have one.
+[...]
 
-Isn't that because (Windows-)PC:s prefer to use TPMs which
-include their own key storage?
+> +static ssize_t cmdq_en_store(struct device *dev, struct device_attribute *attr,
+> +                                const char *buf, size_t count)
+> +{
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +       struct mmc_host *host = card->host;
+> +       unsigned long enable;
+> +       int err;
+> +
+> +       if (!card || kstrtoul(buf, 0, &enable))
+> +               return -EINVAL;
+> +       if (!card->ext_csd.cmdq_support)
+> +               return -EOPNOTSUPP;
+> +
+> +       enable = !!enable;
+> +       if (enable == card->ext_csd.cmdq_en)
+> +               return count;
+> +
+> +       mmc_get_card(card, NULL);
 
-Apple has their "secure enclave" (separate security chip) and as illustrated
-by Marcan it did not make use of RPMB as of 2016:
-https://marcan.st/2016/03/untangling-ios-pin-code-security/
-Maybe they have since started to use it? (They should.)
+This means adding a new path for when the host needs to get locked
+(claimed), which is the opposite direction of what we have been
+working on for SD/eMMC during the last couple of years.
 
-AFAICT the use case for RPMB is:
-1. Used by Android with some TEE, and if you're not running
-    Android and some TEE then
-2. Use it for whatever you like
+Please have a look at mmc_blk_issue_drv_op(), where you can find how
+these kinds of requests are being funneled through the mmc block
+device layer instead. This is the preferred option.
 
-As it seems neither Microsoft nor Apple is paying it much attention
-(+/- new facts) it will be up to the community to define use cases
-for RPMB. I don't know what would make most sense, but the
-kernel keyring seems to make a bit of sense as it is a well maintained
-keyring project.
+That said, I am actually wondering if we perhaps could manage the
+enable/disable of CQE "automagically" for FFU, along the lines of what
+we do for RPMB already. In fact, maybe the best/easiest approach is to
+*always* disable CQE when there is a request being received through
+the mmc ioctl interface. Of course, then if we disabled CQE we should
+also re-enable it when the ioctl request has been completed.
 
-So the proposal is to (as some goal) bridge the keyring subsystem
-to the proposed RPMB subsystem with an kernel-internal API.
+What do you think?
 
-What do the keyring people think of this? Added David & Jarkko to the
-thread to get some input.
+> +       card->force_disable_cmdq = !enable;
+> +       err = mmc_cmdq_setup(host, card);
+> +       mmc_put_card(card, NULL);
+> +
+> +       if (err)
+> +               return err;
+> +       else
+> +               return count;
+> +}
+> +
+> +static DEVICE_ATTR_RW(cmdq_en);
+> +
+>
 
-I suppose it would be a bit brutal if the kernel would just go in and
-appropriate any empty RPMB it finds, but I suspect it is the right way
-to make use of this facility given that so many of them are just sitting
-there unused. Noone will run $CUSTOM_UTILITY any more than they
-run the current RPMB tools in mmc-tools.
+[...]
 
-Agreeing with OP-TEE on the format and management of
-any one RPMB partition seems like a good idea, if for nothing else
-then for sharing documentation.
-
-> I agree that sharing the RPMB is not a great idea, so if you have a TEE
-> in the system that requires an RPMB for storage, it won't be usable by
-> anything else. However, you can have multiple RPMB partitions with separate
-> keys on an NVMe drive, and you can easily have multiple emulated
-> virtio-rpmb devices  in a guest and use them for purposes other than the
-> TEE.
-
-The eMMC RPMB code even handles multiple RPMB partitions on an
-eMMC. But I don't think I have ever seen a device with more than
-one RPMB.
-
-Yours,
-Linus Walleij
+Kind regards
+Uffe
