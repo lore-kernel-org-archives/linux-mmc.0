@@ -2,163 +2,225 @@ Return-Path: <SRS0=Ubev=IG=vger.kernel.org=linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1F23C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 11:33:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E06E8C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 12:02:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 52C5C651D3
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 11:33:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9035364D92
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Mar 2021 12:02:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229757AbhCHLdG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Mar 2021 06:33:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46472 "EHLO
+        id S231995AbhCHMBv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Mar 2021 07:01:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231159AbhCHLct (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 06:32:49 -0500
-Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 094F4C06174A
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Mar 2021 03:32:49 -0800 (PST)
-Received: by mail-vs1-xe2e.google.com with SMTP id b189so4652926vsd.0
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Mar 2021 03:32:48 -0800 (PST)
+        with ESMTP id S232128AbhCHMBt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 07:01:49 -0500
+Received: from mail-io1-xd2d.google.com (mail-io1-xd2d.google.com [IPv6:2607:f8b0:4864:20::d2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7302FC06174A
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Mar 2021 04:01:49 -0800 (PST)
+Received: by mail-io1-xd2d.google.com with SMTP id o11so9622877iob.1
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Mar 2021 04:01:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=7j5Ym8di/S9MMBAyH8gxfLYD6RZeMR3DvmAm26nMwd8=;
-        b=tV4kL+rFMzgtqv+9mPMtlY8E8ogmIC18X83EcBWAIHRTU9dA04Rq/9y2lnJGMQ/nV0
-         cV3c0FwkeNfbndU/WxEjtyo9a5A6LE7t1c6RCdHJQDX3GoYtqRgLM026/pqTalGrQ6EE
-         LChfS9Ep3H/v/hpnJHcu0wA5oIP/cgXjI9XOTNLUFAAun7hCLgk39EAv9y2z94LqRLzY
-         rEI5Xakay17uQGZAV3CPX0DhgBflZ+W4AcrbbgDnXoCTZIK6LpQ3HrUe79q8wUV4PxF5
-         b3TkErrwoaim4XVsPC4SQQYfXwJ88EvTXi/M0PPYDB2p6cgMpadM3uXT05oV8nQtEGda
-         Myyw==
+        d=gmail.com; s=20161025;
+        h=to:from:subject:message-id:date:user-agent:mime-version
+         :content-transfer-encoding:content-language;
+        bh=5LHVcOGdhAoJthrWSfup2O7q0CV7Yhvcd8FBK4vAcKs=;
+        b=FJfzwNdLDfGyrDW35w0murMqESEHJ5paU/ZdJqrgMc1bBwZSySKloqfO9eFvJ23jOZ
+         6Nngbw6J21a4OPUAKr4OSv3uAzAAKZjS+wt6f7ouGV4Z6DMf4NY+6Z30fpq0BfNtzdBS
+         Ps/+2HHkzW0j/rMEVxUFP1de3SYGCpYes9aRjmorMM8bMzM0E27upsDFQx0g2cJ4D6vT
+         r9137lbZkcFGxTSOcmSWG5fpC1lPwiRHZo78MFiBIvRE3u8rG75emghV3ivN55BlleVt
+         7Eyc99tFBBaDnt5WmMUKHMxARDwvFNKGCPU7qgAab2eaCvWnTYtI+ADfph4+GDcg5eZP
+         1S2Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=7j5Ym8di/S9MMBAyH8gxfLYD6RZeMR3DvmAm26nMwd8=;
-        b=K+IvY1qIflo2ItZrm9ppxk234MVPGKxJMLlfQK4KZCCxwHzFv7Wuu3rqX23s+25jA9
-         Tg+78eNLCFBY79X8iTiSq9yVyuahf7KGZuOsiEM8hl42cOIiDZUfELC+8fi/QugMlGgy
-         D3l6EaWLzqNx4Q9IhXPoQOrqtgTYcpZkHgsNeNoH6TCY87TUaZnFnpodOC8rnfCy0T/0
-         zafYOCwJ/+K6t/D+YrifGFfqYRb4qMCYfpVc0tT3sX83PTvI+/+vkkQXixkrURhrag61
-         cMCsChCcbhbAyNSBb6ELR96UCQrPvUvk9JDneu64jVQ4JM9xLD1/Q9z0Kih9w/+PjB77
-         xdpQ==
-X-Gm-Message-State: AOAM530e0lh5HWUUCnLuHU2E1nWk9t5tjp9CYHxliuqYD4BObMuci0nT
-        oWoZYS5PFSnZEuQYyUW5o6BVkre8xkYxDtRODpCmQA==
-X-Google-Smtp-Source: ABdhPJyqwO2kUWusG8tUPLQQI6MMaSMCDzhHKDIkdGvq50Wj71ZBiKuNIVHZb8P0idzmfOkk0fvCi7ObWdOvQce0838=
-X-Received: by 2002:a05:6102:7b0:: with SMTP id x16mr10558498vsg.34.1615203168156;
- Mon, 08 Mar 2021 03:32:48 -0800 (PST)
+        h=x-gm-message-state:to:from:subject:message-id:date:user-agent
+         :mime-version:content-transfer-encoding:content-language;
+        bh=5LHVcOGdhAoJthrWSfup2O7q0CV7Yhvcd8FBK4vAcKs=;
+        b=LTNKEdCrpuHKkMIhZR4qkjWt4yyLl2fHyK1hOobd0hLa/DYWBNJXhynAspalDwrxEj
+         7xnntGs3bWJW2VlFyq9yH+QIPgK2NLS9Xn8MoTlDeRJhyCOwW+AfRwyc8RZ4ZfRZdPSH
+         Ju6bvupuu5gghIR7akkjQiNNylMISG+roUTjZQombTThL2/lLWvE1TtqLQzkwbf0jqB6
+         sNWtVnGpUGx+ikmdReRNqqRC31AN/wCHB8xbspaEns9ODRomc27/zIHhUkcy3TRjseUD
+         yGgbAM1J0rKeDiahlClLLYrSxPWQE796KBh8jiX8rAt7V7T4jrE1EmWzBtYB/aRYttf5
+         LNDQ==
+X-Gm-Message-State: AOAM532X4fxmvZTrKOO07dhtRvVHSgELaeLMK2xa0WbrxnskPkAYmtt3
+        QgthHNncaX4bbA7CebKrT1End+uEWnM=
+X-Google-Smtp-Source: ABdhPJxm9Fx9CBvHtzjViqFeDrz9nE/+X9z6ffTT3Vh5cVxx43zWU8OZdfoYVvJst2P0dyhZgnYe9w==
+X-Received: by 2002:a6b:7c4a:: with SMTP id b10mr15882020ioq.170.1615204908983;
+        Mon, 08 Mar 2021 04:01:48 -0800 (PST)
+Received: from [0.0.0.0] ([144.168.164.26])
+        by smtp.gmail.com with ESMTPSA id s18sm6197977ilt.9.2021.03.08.04.01.47
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 08 Mar 2021 04:01:48 -0800 (PST)
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        "Shirley,Her" <shirley.her@bayhubtech.com>
+From:   Andy Lavr <andy.lavr@gmail.com>
+Subject: [BUG] mmc0: Internal clock never stabilised.
+Message-ID: <4109a876-4521-8268-9bec-ba0c768d93ee@gmail.com>
+Date:   Mon, 8 Mar 2021 12:01:45 +0000
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101 Firefox/78.0
 MIME-Version: 1.0
-References: <CGME20210303092222epcas2p11fbb2697a53b54dbc138d741893c9f07@epcas2p1.samsung.com>
- <000001d7100e$b7380f50$25a82df0$@samsung.com> <CAPDyKFr0x7vinYpy=AHcYfqxO-Q_S+SuU_SUb+kRTxRkNm4G6A@mail.gmail.com>
- <008b01d710ca$1207fab0$3617f010$@samsung.com>
-In-Reply-To: <008b01d710ca$1207fab0$3617f010$@samsung.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 8 Mar 2021 12:32:11 +0100
-Message-ID: <CAPDyKFprcns85m2aVocrK-M7Cmwi3_Vjc5FRgv+-Z+p5TdW3JA@mail.gmail.com>
-Subject: Re: About SD initialization at resume time
-To:     Kiwoong Kim <kwmad.kim@samsung.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: ru
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 4 Mar 2021 at 08:43, Kiwoong Kim <kwmad.kim@samsung.com> wrote:
->
-> > > This is what had actually happened and was fixed with some code in
-> > commercial products.
-> >
-> > The above code in the mmc core was introduced around kernel v3.11, even if
-> > it has been fine tuned since then.
-> >
-> > Maybe you have been using even older kernels?
-> >
-> Dear Uffe
->
-> First, you give me what I want.
-> We've used higher versions than 3.11 but applied our own changes for some reasons.
-> Anyway, thanks !
->
-> That is the first problem for me on SD.
-> The 2nd thing is very long latency issue for a race between an IO thread and a kworker to run mmc_rescan.
->
-> There is an application to put many IO requests to a SD card right after completion of system resume.
-> Current MMC stack invokes mmc_rescan is invoked asynchronously for PM_POST_SUSPEND.
-> As reported to me, however, there could be a race between an IO thread and the kworker for mmc_rescan
-> especially the function of mmc_rescan is run later than expected and the application mentioned before is installed.
->
-> For a series of IO requests, mmc_rescan, particularily at __mmc_claim_host called in mmc_sd_detect,
-> doesn't acquire a host for longer than expected.
-> Below is the call stacks shown after the symptom happened and the system tried to enter into suspend again.
-> In this case, mmc pm notifier is called with PM_SUSPEND_PREPARE, so it waits for completion or cancelling the work for mmc_rescan.
-> For the latency, users can see black screen for a long time sometimes.
->
-> So I want to post a patch not to do _mmc_detect_change conditionally
-> because it helps remove the race and the case assumes SD card initialization is already done.
-> If you have your different views, please let me know.
+Hey,
 
-This is getting hard to discuss, as you are bringing up several
-different things in the same email thread.
 
-Please repost this as a separate bug-report to continue the discussion there.
+*Kernel linux-next 20210305
+*
 
-Kind regards
-Uffe
 
->
-> Thanks.
->
-> --
-> <6>[ 3965.259816] I[0:      swapper/0:    0]    22631        0      227    3902403994884 D(2)   3  ffffffc0007ee338                0  ffffffc85678e000 *    kworker/u16:4 [__mmc_claim_host]
-> <6>[ 3965.259839] I[0:      swapper/0:    0] Workqueue: kmmcd mmc_rescan
-> <0>[ 3965.259854] I[0:      swapper/0:    0] Call trace:
-> <4>[ 3965.259870] I[0:      swapper/0:    0] [<ffffffc00013e674>] __switch_to+0x80/0x90
-> <4>[ 3965.259886] I[0:      swapper/0:    0] [<ffffffc000b137f4>] __schedule+0x530/0x76c
-> <4>[ 3965.259902] I[0:      swapper/0:    0] [<ffffffc000b13a9c>] schedule+0x6c/0x7c
-> <4>[ 3965.259919] I[0:      swapper/0:    0] [<ffffffc0007ee338>] __mmc_claim_host+0xb8/0x188
-> <4>[ 3965.259937] I[0:      swapper/0:    0] [<ffffffc0007eebfc>] mmc_get_card+0x24/0x38
-> <4>[ 3965.259956] I[0:      swapper/0:    0] [<ffffffc0007f5c44>] mmc_sd_detect+0x90/0xe8
-> <4>[ 3965.259973] I[0:      swapper/0:    0] [<ffffffc0007f08d8>] mmc_rescan+0xa0/0x2ec
-> <4>[ 3965.259991] I[0:      swapper/0:    0] [<ffffffc0001688e0>] process_one_work+0x26c/0x434
-> <4>[ 3965.260008] I[0:      swapper/0:    0] [<ffffffc000168dc8>] worker_thread+0x320/0x444
-> <4>[ 3965.260026] I[0:      swapper/0:    0] [<ffffffc00016dac0>] kthread+0xdc/0xec
-> ..
-> <0>[ 3965.259854] I[0:      swapper/0:    0] Call trace:
-> <4>[ 3965.259870] I[0:      swapper/0:    0] [<ffffffc00013e674>] __switch_to+0x80/0x90
-> <4>[ 3965.259886] I[0:      swapper/0:    0] [<ffffffc000b137f4>] __schedule+0x530/0x76c
-> <4>[ 3965.259902] I[0:      swapper/0:    0] [<ffffffc000b13a9c>] schedule+0x6c/0x7c
-> <4>[ 3965.259919] I[0:      swapper/0:    0] [<ffffffc0007ee338>] __mmc_claim_host+0xb8/0x188
-> <4>[ 3965.259937] I[0:      swapper/0:    0] [<ffffffc0007eebfc>] mmc_get_card+0x24/0x38
-> <4>[ 3965.259956] I[0:      swapper/0:    0] [<ffffffc0007f5c44>] mmc_sd_detect+0x90/0xe8
-> <4>[ 3965.259973] I[0:      swapper/0:    0] [<ffffffc0007f08d8>] mmc_rescan+0xa0/0x2ec
-> <4>[ 3965.259991] I[0:      swapper/0:    0] [<ffffffc0001688e0>] process_one_work+0x26c/0x434
-> <4>[ 3965.260008] I[0:      swapper/0:    0] [<ffffffc000168dc8>] worker_thread+0x320/0x444
-> <4>[ 3965.260026] I[0:      swapper/0:    0] [<ffffffc00016dac0>] kthread+0xdc/0xec
-> ..
-> <0>[ 3965.203379] I[0:      swapper/0:    0] Call trace:
-> <4>[ 3965.203397] I[0:      swapper/0:    0] [<ffffffc00013e674>] __switch_to+0x80/0x90
-> <4>[ 3965.203414] I[0:      swapper/0:    0] [<ffffffc000b137f4>] __schedule+0x530/0x76c
-> <4>[ 3965.203430] I[0:      swapper/0:    0] [<ffffffc000b13a9c>] schedule+0x6c/0x7c
-> <4>[ 3965.203448] I[0:      swapper/0:    0] [<ffffffc000b160e8>] schedule_timeout+0x28/0x214
-> <4>[ 3965.203464] I[0:      swapper/0:    0] [<ffffffc000b145a0>] wait_for_common+0x114/0x15c
-> <4>[ 3965.203482] I[0:      swapper/0:    0] [<ffffffc000b14710>] wait_for_completion+0x10/0x20
-> <4>[ 3965.203498] I[0:      swapper/0:    0] [<ffffffc000169990>] flush_work+0xf0/0x11c
-> <4>[ 3965.203516] I[0:      swapper/0:    0] [<ffffffc000169ad0>] __cancel_work_timer+0x114/0x1a0
-> <4>[ 3965.203533] I[0:      swapper/0:    0] [<ffffffc000169c44>] cancel_delayed_work_sync+0xc/0x1c
-> <4>[ 3965.203554] I[0:      swapper/0:    0] [<ffffffc0007f1000>] mmc_pm_notify+0x78/0x12c
-> <4>[ 3965.203573] I[0:      swapper/0:    0] [<ffffffc00016ebf4>] notifier_call_chain+0x7c/0xec
-> <4>[ 3965.203590] I[0:      swapper/0:    0] [<ffffffc00016ef08>] __blocking_notifier_call_chain+0x44/0x68
-> <4>[ 3965.203608] I[0:      swapper/0:    0] [<ffffffc00016ef3c>] blocking_notifier_call_chain+0x10/0x20
-> <4>[ 3965.203628] I[0:      swapper/0:    0] [<ffffffc0001964ec>] pm_notifier_call_chain+0x1c/0x44
-> <4>[ 3965.203644] I[0:      swapper/0:    0] [<ffffffc000197ad0>] pm_suspend+0x2e0/0x5fc
-> <4>[ 3965.203662] I[0:      swapper/0:    0] [<ffffffc0001961cc>] state_store+0x4c/0x8c
-> <4>[ 3965.203683] I[0:      swapper/0:    0] [<ffffffc0003f35ec>] kobj_attr_store+0x14/0x2c
-> <4>[ 3965.203703] I[0:      swapper/0:    0] [<ffffffc0002aac2c>] sysfs_kf_write+0x40/0x50
-> <4>[ 3965.203721] I[0:      swapper/0:    0] [<ffffffc0002aa000>] kernfs_fop_write+0xfc/0x148
-> <4>[ 3965.203739] I[0:      swapper/0:    0] [<ffffffc000249b4c>] vfs_write+0xb8/0x190
-> <4>[ 3965.203755] I[0:      swapper/0:    0] [<ffffffc000249cf0>] SyS_write+0x44/0x88
->
+I haven't used mmc for a very long time and I can't say when the 
+regression appeared.
+
+
+
+The problem is with this function (drivers/mmc/host/sdhci-pci-o2micro.c):
+
+
+static void sdhci_o2_enable_internal_clock(struct sdhci_host *host)
+{
+         ktime_t timeout;
+         u16 scratch;
+         u32 scratch32;
+
+         /* PLL software reset */
+         scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+         scratch32 |= O2_PLL_SOFT_RESET;
+         sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+         udelay(1);
+         scratch32 &= ~(O2_PLL_SOFT_RESET);
+         sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+
+         /* PLL force active */
+         scratch32 |= O2_PLL_FORCE_ACTIVE;
+         sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+
+         /* Wait max 20 ms */
+         timeout = ktime_add_ms(ktime_get(), 20);
+         while (1) {
+                 bool timedout = ktime_after(ktime_get(), timeout);
+
+                 scratch = sdhci_readw(host, O2_PLL_DLL_WDT_CONTROL1);
+                 if (scratch & O2_PLL_LOCK_STATUS)
+                         break;
+                 if (timedout) {
+                         pr_err("%s: Internal clock never stabilised.\n",
+                                mmc_hostname(host->mmc));
+                         sdhci_dumpregs(host);
+                         goto out;
+                 }
+                 udelay(10);
+         }
+
+         /* Wait for card detect finish */
+         udelay(1);
+         sdhci_o2_wait_card_detect_stable(host);
+
+out:
+         /* Cancel PLL force active */
+         scratch32 = sdhci_readl(host, O2_PLL_DLL_WDT_CONTROL1);
+         scratch32 &= ~O2_PLL_FORCE_ACTIVE;
+         sdhci_writel(host, scratch32, O2_PLL_DLL_WDT_CONTROL1);
+}
+
+
+[  +2,416948] mmc0: Internal clock never stabilised.
+[  +0,000006] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  +0,000008] mmc0: sdhci: Sys addr:  0x00000000 | Version: 0x0000c001
+[  +0,000007] mmc0: sdhci: Blk size:  0x00000000 | Blk cnt: 0x00000000
+[  +0,000007] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+[  +0,000007] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000000
+[  +0,000007] mmc0: sdhci: Power:     0x0000000f | Blk gap: 0x00000000
+[  +0,000007] mmc0: sdhci: Wake-up:   0x00000000 | Clock: 0x00001003
+[  +0,000007] mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+[  +0,000007] mmc0: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
+[  +0,000007] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[  +0,000006] mmc0: sdhci: Caps:      0x21e608b2 | Caps_1: 0x00002077
+[  +0,000007] mmc0: sdhci: Cmd:       0x00000000 | Max curr: 0x00000064
+[  +0,000007] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]: 0x00000000
+[  +0,000007] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]: 0x00000000
+[  +0,000005] mmc0: sdhci: Host ctl2: 0x00000000
+[  +0,000001] mmc0: sdhci: ============================================
+[  +0,020025] mmc0: Internal clock never stabilised.
+[  +0,000008] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  +0,000019] mmc0: sdhci: Sys addr:  0x00000000 | Version: 0x0000c001
+[  +0,000010] mmc0: sdhci: Blk size:  0x00000000 | Blk cnt: 0x00000000
+[  +0,000007] mmc0: sdhci: Argument:  0x00000000 | Trn mode: 0x00000000
+[  +0,000007] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000000
+[  +0,000007] mmc0: sdhci: Power:     0x0000000f | Blk gap: 0x00000000
+[  +0,000008] mmc0: sdhci: Wake-up:   0x00000000 | Clock: 0x00001003
+[  +0,000009] mmc0: sdhci: Timeout:   0x00000000 | Int stat: 0x00000000
+[  +0,000009] mmc0: sdhci: Int enab:  0x00ff0083 | Sig enab: 0x00ff0083
+[  +0,000010] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[  +0,000007] mmc0: sdhci: Caps:      0x21e608b2 | Caps_1: 0x00002077
+[  +0,000007] mmc0: sdhci: Cmd:       0x00000000 | Max curr: 0x00000064
+[  +0,000007] mmc0: sdhci: Resp[0]:   0x00000000 | Resp[1]: 0x00000000
+[  +0,000007] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]: 0x00000000
+[  +0,000004] mmc0: sdhci: Host ctl2: 0x00000000
+[  +0,000002] mmc0: sdhci: ============================================
+[  +0,144927] mmc0: Internal clock never stabilised.
+[  +0,000006] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  +0,000008] mmc0: sdhci: Sys addr:  0xfffe0058 | Version: 0x0000c001
+[  +0,000007] mmc0: sdhci: Blk size:  0x00007040 | Blk cnt: 0x00000001
+[  +0,000007] mmc0: sdhci: Argument:  0x80fffff1 | Trn mode: 0x00000013
+[  +0,000008] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000004
+[  +0,000008] mmc0: sdhci: Power:     0x0000000f | Blk gap: 0x00000000
+[  +0,000008] mmc0: sdhci: Wake-up:   0x00000000 | Clock: 0x00000003
+[  +0,000007] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+[  +0,000006] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
+[  +0,000007] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[  +0,000007] mmc0: sdhci: Caps:      0x21e608b2 | Caps_1: 0x00002077
+[  +0,000007] mmc0: sdhci: Cmd:       0x0000063a | Max curr: 0x00000064
+[  +0,000018] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]: 0x001d6f7f
+[  +0,000009] mmc0: sdhci: Resp[2]:   0x325b5900 | Resp[3]: 0x00400e00
+[  +0,000004] mmc0: sdhci: Host ctl2: 0x00000000
+[  +0,000002] mmc0: sdhci: ============================================
+[  +0,020026] mmc0: Internal clock never stabilised.
+[  +0,000005] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  +0,000008] mmc0: sdhci: Sys addr:  0xfffe0058 | Version: 0x0000c001
+[  +0,000007] mmc0: sdhci: Blk size:  0x00007040 | Blk cnt: 0x00000001
+[  +0,000007] mmc0: sdhci: Argument:  0x80fffff1 | Trn mode: 0x00000013
+[  +0,000007] mmc0: sdhci: Present:   0x01ff0000 | Host ctl: 0x00000004
+[  +0,000008] mmc0: sdhci: Power:     0x0000000f | Blk gap: 0x00000000
+[  +0,000006] mmc0: sdhci: Wake-up:   0x00000000 | Clock: 0x00000003
+[  +0,000008] mmc0: sdhci: Timeout:   0x0000000a | Int stat: 0x00000000
+[  +0,000008] mmc0: sdhci: Int enab:  0x02ff008b | Sig enab: 0x02ff008b
+[  +0,000007] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[  +0,000008] mmc0: sdhci: Caps:      0x21e608b2 | Caps_1: 0x00002077
+[  +0,000047] mmc0: sdhci: Cmd:       0x0000063a | Max curr: 0x00000064
+[  +0,000011] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]: 0x001d6f7f
+[  +0,000012] mmc0: sdhci: Resp[2]:   0x325b5900 | Resp[3]: 0x00400e00
+[  +0,000009] mmc0: sdhci: Host ctl2: 0x00000000
+[  +0,000001] mmc0: sdhci: ============================================
+[  +0,000136] mmc0: new high speed SDHC card at address 1234
+
+[  +0,000252] mmcblk0: mmc0:1234 SA04G 3.68 GiB
+
+[  +0,015905]  mmcblk0: p1
+
+
+
+-- 
+Best regards, Andy Lavr.
+
+  CONFIDENTIAL NOTE
+
+  This email (including any attachments) is intended only for the person or entity to which it is addressed
+  and may contain confidential and/or privileged material.  Any review, retransmission, dissemination or other
+  use of, or taking of any action in reliance upon, this information by persons or entities other than the
+  intended recipient is prohibited. If you received this in error, please notify the sender immediately and
+  delete the material completely from your system. E-mail communication cannot be guaranteed to be reliable,
+  secure, error-free or virus-free. Accordingly, we cannot accept liability for any damage sustained as a
+  result of any virus, error or incompleteness of this e-mail or any failure to deliver promptly or at all
+  information exchanged between you and us by this means. If you suspect that this e-mail may have been
+  intercepted or amended, please contact the sender. Any views or opinions expressed in this email are solely
+  those of the author and do not necessarily represent those of our entity or related/associated entities.
+
