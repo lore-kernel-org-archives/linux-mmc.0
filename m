@@ -7,60 +7,60 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2F01C433E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B86CC4332D
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9CF3E64E75
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 22B7864F89
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229854AbhCIJDA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 04:03:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44112 "EHLO
+        id S229726AbhCIJDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 04:03:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44158 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229837AbhCIJC2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 04:02:28 -0500
-Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED6DDC06175F
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 01:02:27 -0800 (PST)
-Received: by mail-ua1-x92e.google.com with SMTP id s7so4281966uag.7
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 01:02:27 -0800 (PST)
+        with ESMTP id S229767AbhCIJCi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 04:02:38 -0500
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4998C06174A
+        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 01:02:37 -0800 (PST)
+Received: by mail-vs1-xe29.google.com with SMTP id l27so6413850vsj.4
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 01:02:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=sssySl0JVi+jBXZFxuWDq2kypNNSm148y4r47Euw4YM=;
-        b=AsGzH1MMqc8CDZt9a0Do3IMClW3xqLU2GevRxpPuYfzRD8JJr+9FaKOBoKrcsXZBSU
-         RKIC7PzMiuHKzEKhCt/9WRlgLEtkYs/34OxLOBHj8+n19oJfZX8Nnn2gvSdW7s6SlkAK
-         XMwV1lGClGFC80zICWXoblreQ1aYelNiih6Gx/0FlJuhplVsbBP2Po9Uhu0mJelH3NjA
-         EHgdq9SRJuCcY3nyPYtt5FODNxiYPa19tR9l1QeuCSesjAOkcydr05vQl3aAl7fEZIbM
-         iLyLrbQ0DMtDmcByRBlEtxlEt+1yEF2lDxDm0AgakOIENPpE+IjovZnqBkYxXgayZ4Wo
-         O7JA==
+        bh=/mOjqeg59DhCO1NJGI6CFwmiKdDTe7R83FJmZUTJAeo=;
+        b=w5apAR8EPMmNag6YyvemjSWjfJ/hnuEzTl5B8SExhz9x6nxXaAWGmiD64JgsQWoumy
+         7JG3vyMhDaVAkSG4PBYKCkG6cO7GC9bc+BF6DHF6IFMom7Gkfaho+c5V6sOrSxw9nMTQ
+         n63L0ZeZvPLCW66Ey23loYenxIA9d36dFgeJ1IGVMUgzPbCIpk7DsjVJG+4RCtx/aLOj
+         YmYfjCIEm5SsqTClmZ2ScoSC1xXv3zpf+yfUHtelpqyQquK0cvB+gmpjfGxqi1YlwoPs
+         eSlypjinXfyskMIRp19oz+CDBPJLFhUgvt25l1cqNHHYEchSk3bWrCKOu17iljE4Kmkm
+         TO2w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=sssySl0JVi+jBXZFxuWDq2kypNNSm148y4r47Euw4YM=;
-        b=BvMF/krRofsDq5ugtTO5Z9cJlcNtRSqC5u8mLYKWJ5hXi0DDFf+nGrwE0H3BtAvGkR
-         m3nNkikOMG5BcdVz8V1CUTi8HGQfhVTyMksDEwXVc0fcKUtZTZZPI+1CSiTMUK5F/GDt
-         zWYKdy79K1hRbT7ClFnBCn43zuImQMGiF9ZHsyFIQHEQrfz6nW2GxyUqzGocEFcf3LmR
-         Uj2EhavObvzsv7SQhilqAptUgIP4Qgc0LnzHlfnYR42Sh4na+deX0xJYl5UhBdjrhlFY
-         ftuGZkTu2QaR3nEk6mIOhe5xWwuN7N5dYnCjvby22D/V9vsrXFhAueUoW/WfUJK1giGl
-         l/Mg==
-X-Gm-Message-State: AOAM531nc862IaN9taA/QKhwOqJ4f1K+OLEK3sGYtCmYa7hVGeRZKNbJ
-        hdgw2jijnpTSezRSH2oiIyiAWNh5rxvIqbx50Ynrtg==
-X-Google-Smtp-Source: ABdhPJwKHqIif2rFtWqqp7PjT4VBd442T+0y6eF98qpBCyS8psQLLgDYTXZcYTAAXYKCfsUcSd2rEGYzGxTczr/wDVI=
-X-Received: by 2002:ab0:7a68:: with SMTP id c8mr4714930uat.104.1615280546955;
- Tue, 09 Mar 2021 01:02:26 -0800 (PST)
+        bh=/mOjqeg59DhCO1NJGI6CFwmiKdDTe7R83FJmZUTJAeo=;
+        b=Zx4p02UxqGazErNvBdYI+bl3IePSY72DFNOeriyaGbDV9IRKKUvTPPQ8KXDnWMRaLD
+         lKQXL4oNrlBwDYIzFwTBVs5OiWVmUy+AiSppD4cSD8L2ndE4m0W17VoPq6pSmUAwFvxM
+         5/fjV/JH/guEA/35weevUiJuTJ6WT5YfRHRNdSiYIQDtf8m4WqUmDz+uaRT58dGRwhSZ
+         svVJr28ZSRDVadNp/qgGXK+oJDz96WbXQGUyX29T9Fgs5hUjZ+WwCzmcrcQbsHV2MNur
+         AaaV/0h4YyVjhPyfI8ILDJurS6oyrU0mpGaZbkxcoLpFJoKJuhZOHjXs5ImHYCxRbjlT
+         qJ+A==
+X-Gm-Message-State: AOAM531vuCWMISlZ97kO7VZH+YBIuZtyq5gAMCbVP4/OKGbtPkcmmwto
+        wc4UsGukZe/OeltU1hynWIMV5lpKrBj385bUoi1gfsN7jsRHsQ==
+X-Google-Smtp-Source: ABdhPJxGQF7CijfR+scQTuoiyx2kIjHkpuuT+rY7LqsLLG1Lih/s8D2YCemUQD/gJValy8R3oo67L2NoZH3QLfIAV3g=
+X-Received: by 2002:a67:6942:: with SMTP id e63mr3815959vsc.48.1615280557135;
+ Tue, 09 Mar 2021 01:02:37 -0800 (PST)
 MIME-Version: 1.0
-References: <20210305021445.3435-1-baijiaju1990@gmail.com>
-In-Reply-To: <20210305021445.3435-1-baijiaju1990@gmail.com>
+References: <1615272478-52458-1-git-send-email-yang.lee@linux.alibaba.com>
+In-Reply-To: <1615272478-52458-1-git-send-email-yang.lee@linux.alibaba.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 9 Mar 2021 10:01:50 +0100
-Message-ID: <CAPDyKFpqrjfinrM3a=-p+OxzCzKsWNDS4GpaF7E0Pbb5uiTL=w@mail.gmail.com>
-Subject: Re: [PATCH] memstick: core: fix error return code of mspro_block_resume()
-To:     Jia-Ju Bai <baijiaju1990@gmail.com>
-Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, trix@redhat.com,
+Date:   Tue, 9 Mar 2021 10:02:00 +0100
+Message-ID: <CAPDyKFp67w=vT2VHmtsjc1++HtEfZNyKSo-N1gmdJtB-d62m6w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: via-sdmmc: remove unneeded variable 'ret'
+To:     Yang Li <yang.lee@linux.alibaba.com>
+Cc:     Bruce Chang <brucechang@via.com.tw>,
+        Harald Welte <HaraldWelte@viatech.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
@@ -68,15 +68,14 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 5 Mar 2021 at 03:14, Jia-Ju Bai <baijiaju1990@gmail.com> wrote:
+On Tue, 9 Mar 2021 at 07:48, Yang Li <yang.lee@linux.alibaba.com> wrote:
 >
-> When mspro_block_init_card() fails, no error return code of
-> mspro_block_resume() is assigned.
-> To fix this bug, rc is assigned with the return value of
-> mspro_block_init_card(), and then rc is checked.
+> Fix the following coccicheck warning:
+> ./drivers/mmc/host/via-sdmmc.c:1274:5-8: Unneeded variable: "ret".
+> Return "0" on line 1295
 >
-> Reported-by: TOTE Robot <oslab@tsinghua.edu.cn>
-> Signed-off-by: Jia-Ju Bai <baijiaju1990@gmail.com>
+> Reported-by: Abaci Robot <abaci@linux.alibaba.com>
+> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
 
 Applied for next, thanks!
 
@@ -85,23 +84,30 @@ Uffe
 
 
 > ---
->  drivers/memstick/core/mspro_block.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/via-sdmmc.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/drivers/memstick/core/mspro_block.c b/drivers/memstick/core/mspro_block.c
-> index afb892e7ffc6..cf7fe0d58ee7 100644
-> --- a/drivers/memstick/core/mspro_block.c
-> +++ b/drivers/memstick/core/mspro_block.c
-> @@ -1382,7 +1382,8 @@ static int mspro_block_resume(struct memstick_dev *card)
+> diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+> index 4f4c081..a1d0985 100644
+> --- a/drivers/mmc/host/via-sdmmc.c
+> +++ b/drivers/mmc/host/via-sdmmc.c
+> @@ -1271,7 +1271,6 @@ static int __maybe_unused via_sd_suspend(struct device *dev)
+>  static int __maybe_unused via_sd_resume(struct device *dev)
+>  {
+>         struct via_crdr_mmc_host *sdhost;
+> -       int ret = 0;
+>         u8 gatt;
 >
->         new_msb->card = card;
->         memstick_set_drvdata(card, new_msb);
-> -       if (mspro_block_init_card(card))
-> +       rc = mspro_block_init_card(card);
-> +       if (rc)
->                 goto out_free;
+>         sdhost = dev_get_drvdata(dev);
+> @@ -1292,7 +1291,7 @@ static int __maybe_unused via_sd_resume(struct device *dev)
+>         via_restore_pcictrlreg(sdhost);
+>         via_init_sdc_pm(sdhost);
 >
->         for (cnt = 0; new_msb->attr_group.attrs[cnt]
+> -       return ret;
+> +       return 0;
+>  }
+>
+>  static SIMPLE_DEV_PM_OPS(via_sd_pm_ops, via_sd_suspend, via_sd_resume);
 > --
-> 2.17.1
+> 1.8.3.1
 >
