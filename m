@@ -2,387 +2,75 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MIME_BASE64_TEXT,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FE08C4332E
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 01:58:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20ACCC433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 02:00:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6DFD765279
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 01:58:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CEBC965279
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 02:00:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229611AbhCIB5V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Mar 2021 20:57:21 -0500
-Received: from lucky1.263xmail.com ([211.157.147.131]:47104 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229772AbhCIB4x (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 20:56:53 -0500
-Received: from localhost (unknown [192.168.167.223])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 95FC9B94DA;
-        Tue,  9 Mar 2021 09:56:41 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-ABS-CHECKED: 0
-Received: from localhost.localdomain (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P23505T140626794366720S1615254997318814_;
-        Tue, 09 Mar 2021 09:56:41 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <a09f1e6671dee1dbf1ca1fcac0a15b7c>
-X-RL-SENDER: shawn.lin@rock-chips.com
-X-SENDER: lintao@rock-chips.com
-X-LOGIN-NAME: shawn.lin@rock-chips.com
-X-FST-TO: robh+dt@kernel.org
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-To:     Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
-        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org,
-        Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v3 3/3] mmc: sdhci-of-dwcmshc: add rockchip platform support
-Date:   Tue,  9 Mar 2021 09:56:30 +0800
-Message-Id: <1615254990-192784-3-git-send-email-shawn.lin@rock-chips.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
-References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
+        id S230214AbhCICAR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Mar 2021 21:00:17 -0500
+Received: from Mailgw01.mediatek.com ([1.203.163.78]:20675 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S230127AbhCIB7t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 20:59:49 -0500
+X-UUID: 98a9888fc1eb44a68a4d1795eebdce54-20210309
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=voKB3JTtp23roJcLmppifE/2eVEe8ZJYpXa+eKJCcHU=;
+        b=VG/wgq5rGW9ON/VQkr5ELeGw7quJEyKXAkFTGOMZdE4Zpkjftk0qIZTgdUEs3mzk8MzYxvFRPckrGsaxGfXX4Sb2ZCQvXTBWZls9NGOiYVBHXKmkR2FBeHnO1fetu9z3F1tIJI9UvXU9do6KcVZQmHurdoHEZwm7SV6w5jKrDTE=;
+X-UUID: 98a9888fc1eb44a68a4d1795eebdce54-20210309
+Received: from mtkcas36.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
+        (envelope-from <peng.zhou@mediatek.com>)
+        (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 1874155827; Tue, 09 Mar 2021 09:59:44 +0800
+Received: from MTKCAS06.mediatek.inc (172.21.101.30) by
+ MTKMBS31N2.mediatek.inc (172.27.4.87) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Tue, 9 Mar 2021 09:59:39 +0800
+Received: from localhost.localdomain (10.15.20.246) by MTKCAS06.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Tue, 9 Mar 2021 09:59:39 +0800
+From:   Peng Zhou <peng.zhou@mediatek.com>
+To:     Eric Biggers <ebiggers@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        <linux-mmc@vger.kernel.org>
+CC:     <devicetree@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Satya Tangirala <satyat@google.com>,
+        Wulin Li <wulin.li@mediatek.com>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Peng Zhou <Peng.Zhou@mediatek.com>
+Subject: [PATCH v2 0/4] MediaTek eMMC inline encryption support 
+Date:   Tue, 9 Mar 2021 09:53:32 +0800
+Message-ID: <20210309015331.10457-1-peng.zhou@mediatek.com>
+X-Mailer: git-send-email 2.18.0
+MIME-Version: 1.0
+Content-Type: text/plain
+X-TM-SNTS-SMTP: D2C565463BD08AAB9A21D43E5F22A286DBA322E6FB1527A90110E54108D30B7E2000:8
+X-MTK:  N
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-sdhci based synopsys MMC IP is also used on some rockchip platforms,
-so add a basic support here.
-
-Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
----
-
-Changes in v3: None
-
- drivers/mmc/host/sdhci-of-dwcmshc.c | 220 ++++++++++++++++++++++++++++++++++--
- 1 file changed, 213 insertions(+), 7 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index 59d8d96..959084c 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -9,9 +9,11 @@
- 
- #include <linux/clk.h>
- #include <linux/dma-mapping.h>
-+#include <linux/iopoll.h>
- #include <linux/kernel.h>
- #include <linux/module.h>
- #include <linux/of.h>
-+#include <linux/of_device.h>
- #include <linux/sizes.h>
- 
- #include "sdhci-pltfm.h"
-@@ -21,11 +23,43 @@
- /* DWCMSHC specific Mode Select value */
- #define DWCMSHC_CTRL_HS400		0x7
- 
-+/* Rockchip specific Registers */
-+#define DWCMSHC_HOST_CTRL3		0x508
-+#define DWCMSHC_EMMC_CONTROL		0x52c
-+#define DWCMSHC_EMMC_ATCTRL		0x540
-+#define DWCMSHC_EMMC_DLL_CTRL		0x800
-+#define DWCMSHC_EMMC_DLL_RXCLK		0x804
-+#define DWCMSHC_EMMC_DLL_TXCLK		0x808
-+#define DWCMSHC_EMMC_DLL_STRBIN		0x80c
-+#define DWCMSHC_EMMC_DLL_STATUS0	0x840
-+#define DWCMSHC_EMMC_DLL_START		BIT(0)
-+#define DWCMSHC_EMMC_DLL_RXCLK_SRCSEL	29
-+#define DWCMSHC_EMMC_DLL_START_POINT	16
-+#define DWCMSHC_EMMC_DLL_INC		8
-+#define DWCMSHC_EMMC_DLL_DLYENA		BIT(27)
-+#define DLL_TXCLK_TAPNUM_DEFAULT	0x8
-+#define DLL_STRBIN_TAPNUM_DEFAULT	0x8
-+#define DLL_TXCLK_TAPNUM_FROM_SW	BIT(24)
-+#define DLL_STRBIN_TAPNUM_FROM_SW	BIT(24)
-+#define DWCMSHC_EMMC_DLL_LOCKED		BIT(8)
-+#define DWCMSHC_EMMC_DLL_TIMEOUT	BIT(9)
-+#define DLL_RXCLK_NO_INVERTER		1
-+#define DLL_RXCLK_INVERTER		0
-+#define DWCMSHC_ENHANCED_STROBE		BIT(8)
-+#define DLL_LOCK_WO_TMOUT(x) \
-+	((((x) & DWCMSHC_EMMC_DLL_LOCKED) == DWCMSHC_EMMC_DLL_LOCKED) && \
-+	(((x) & DWCMSHC_EMMC_DLL_TIMEOUT) == 0))
-+#define ROCKCHIP_MAX_CLKS		3
-+
- #define BOUNDARY_OK(addr, len) \
- 	((addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1)))
- 
- struct dwcmshc_priv {
- 	struct clk	*bus_clk;
-+
-+	/* Rockchip specified optional clocks */
-+	struct clk_bulk_data rockchip_clks[ROCKCHIP_MAX_CLKS];
-+	int txclk_tapnum;
- };
- 
- /*
-@@ -100,6 +134,97 @@ static void dwcmshc_set_uhs_signaling(struct sdhci_host *host,
- 	sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
- }
- 
-+static void dwcmshc_rk_hs400_enhanced_strobe(struct mmc_host *mmc,
-+					     struct mmc_ios *ios)
-+{
-+	u32 vendor;
-+	struct sdhci_host *host = mmc_priv(mmc);
-+
-+	vendor = sdhci_readl(host, DWCMSHC_EMMC_CONTROL);
-+	if (ios->enhanced_strobe)
-+		vendor |= DWCMSHC_ENHANCED_STROBE;
-+	else
-+		vendor &= ~DWCMSHC_ENHANCED_STROBE;
-+
-+	sdhci_writel(host, vendor, DWCMSHC_EMMC_CONTROL);
-+}
-+
-+static void dwcmshc_rk_set_clock(struct sdhci_host *host, unsigned int clock)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct dwcmshc_priv *priv = sdhci_pltfm_priv(pltfm_host);
-+	u32 txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT, extra;
-+	int err;
-+
-+	host->mmc->actual_clock = 0;
-+
-+	/* DO NOT TOUCH THIS SETTING */
-+	extra = DWCMSHC_EMMC_DLL_DLYENA |
-+		DLL_RXCLK_NO_INVERTER << DWCMSHC_EMMC_DLL_RXCLK_SRCSEL;
-+	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_RXCLK);
-+
-+	if (clock == 0)
-+		return;
-+
-+	/* Rockchip platform only support 375KHz for identify mode */
-+	if (clock <= 400000)
-+		clock = 375000;
-+
-+	err = clk_set_rate(pltfm_host->clk, clock);
-+	if (err)
-+		dev_err(mmc_dev(host->mmc), "fail to set clock %d", clock);
-+
-+	sdhci_set_clock(host, clock);
-+
-+	/* Disable cmd conflict check */
-+	extra = sdhci_readl(host, DWCMSHC_HOST_CTRL3);
-+	extra &= ~BIT(0);
-+	sdhci_writel(host, extra, DWCMSHC_HOST_CTRL3);
-+
-+	if (clock <= 400000) {
-+		/* Disable DLL to reset sample clock */
-+		sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_CTRL);
-+		return;
-+	}
-+
-+	/* Reset DLL */
-+	sdhci_writel(host, BIT(1), DWCMSHC_EMMC_DLL_CTRL);
-+	udelay(1);
-+	sdhci_writel(host, 0x0, DWCMSHC_EMMC_DLL_CTRL);
-+
-+	/* Init DLL settings */
-+	extra = 0x5 << DWCMSHC_EMMC_DLL_START_POINT |
-+		0x2 << DWCMSHC_EMMC_DLL_INC |
-+		DWCMSHC_EMMC_DLL_START;
-+	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_CTRL);
-+	err = readl_poll_timeout(host->ioaddr + DWCMSHC_EMMC_DLL_STATUS0,
-+				 extra, DLL_LOCK_WO_TMOUT(extra), 1,
-+				 500 * USEC_PER_MSEC);
-+	if (err) {
-+		dev_err(mmc_dev(host->mmc), "DLL lock timeout!\n");
-+		return;
-+	}
-+
-+	extra = 0x1 << 16 | /* tune clock stop en */
-+		0x2 << 17 | /* pre-change delay */
-+		0x3 << 19;  /* post-change delay */
-+	sdhci_writel(host, extra, DWCMSHC_EMMC_ATCTRL);
-+
-+	if (host->mmc->ios.timing == MMC_TIMING_MMC_HS200 ||
-+	    host->mmc->ios.timing == MMC_TIMING_MMC_HS400)
-+		txclk_tapnum = priv->txclk_tapnum;
-+
-+	extra = DWCMSHC_EMMC_DLL_DLYENA |
-+		DLL_TXCLK_TAPNUM_FROM_SW |
-+		txclk_tapnum;
-+	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_TXCLK);
-+
-+	extra = DWCMSHC_EMMC_DLL_DLYENA |
-+		DLL_STRBIN_TAPNUM_DEFAULT |
-+		DLL_STRBIN_TAPNUM_FROM_SW;
-+	sdhci_writel(host, extra, DWCMSHC_EMMC_DLL_STRBIN);
-+}
-+
- static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.set_clock		= sdhci_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
-@@ -109,21 +234,91 @@ static const struct sdhci_ops sdhci_dwcmshc_ops = {
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
- };
- 
-+static const struct sdhci_ops sdhci_dwcmshc_rk_ops = {
-+	.set_clock		= dwcmshc_rk_set_clock,
-+	.set_bus_width		= sdhci_set_bus_width,
-+	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
-+	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-+	.reset			= sdhci_reset,
-+	.adma_write_desc	= dwcmshc_adma_write_desc,
-+};
-+
- static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
- 	.ops = &sdhci_dwcmshc_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
- 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
- };
- 
-+static const struct sdhci_pltfm_data sdhci_dwcmshc_rk_pdata = {
-+	.ops = &sdhci_dwcmshc_rk_ops,
-+	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-+		  SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
-+};
-+
-+static int rockchip_pltf_init(struct sdhci_host *host, struct dwcmshc_priv *priv)
-+{
-+	int err;
-+
-+	priv->rockchip_clks[0].id = "axi";
-+	priv->rockchip_clks[1].id = "block";
-+	priv->rockchip_clks[2].id = "timer";
-+	err = devm_clk_bulk_get_optional(mmc_dev(host->mmc), ROCKCHIP_MAX_CLKS,
-+					 priv->rockchip_clks);
-+	if (err) {
-+		dev_err(mmc_dev(host->mmc), "failed to get clocks %d\n", err);
-+		return err;
-+	}
-+
-+	err = clk_bulk_prepare_enable(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
-+	if (err) {
-+		dev_err(mmc_dev(host->mmc), "failed to enable clocks %d\n", err);
-+		return err;
-+	}
-+
-+	if (of_property_read_u32(mmc_dev(host->mmc)->of_node, "rockchip,txclk-tapnum",
-+				 &priv->txclk_tapnum))
-+		priv->txclk_tapnum = DLL_TXCLK_TAPNUM_DEFAULT;
-+
-+	/* Disable cmd conflict check */
-+	sdhci_writel(host, 0x0, DWCMSHC_HOST_CTRL3);
-+	/* Reset previous settings */
-+	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_TXCLK);
-+	sdhci_writel(host, 0, DWCMSHC_EMMC_DLL_STRBIN);
-+
-+	return 0;
-+}
-+
-+static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
-+	{
-+		.compatible = "snps,dwcmshc-sdhci",
-+		.data = &sdhci_dwcmshc_pdata,
-+	},
-+	{
-+		.compatible = "rockchip,dwcmshc-sdhci",
-+		.data = &sdhci_dwcmshc_rk_pdata,
-+	},
-+	{},
-+};
-+MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
-+
- static int dwcmshc_probe(struct platform_device *pdev)
- {
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct sdhci_host *host;
- 	struct dwcmshc_priv *priv;
-+	const struct sdhci_pltfm_data *pltfm_data;
- 	int err;
- 	u32 extra;
- 
--	host = sdhci_pltfm_init(pdev, &sdhci_dwcmshc_pdata,
-+	pltfm_data = of_device_get_match_data(&pdev->dev);
-+	if (!pltfm_data) {
-+		dev_err(&pdev->dev, "Error: No device match data found\n");
-+		return -ENODEV;
-+	}
-+
-+	host = sdhci_pltfm_init(pdev, pltfm_data,
- 				sizeof(struct dwcmshc_priv));
- 	if (IS_ERR(host))
- 		return PTR_ERR(host);
-@@ -161,6 +356,15 @@ static int dwcmshc_probe(struct platform_device *pdev)
- 
- 	host->mmc_host_ops.request = dwcmshc_request;
- 
-+	if (pltfm_data == &sdhci_dwcmshc_rk_pdata) {
-+		host->mmc_host_ops.hs400_enhanced_strobe =
-+			dwcmshc_rk_hs400_enhanced_strobe;
-+
-+		err = rockchip_pltf_init(host, priv);
-+		if (err)
-+			goto err_clk;
-+	}
-+
- 	err = sdhci_add_host(host);
- 	if (err)
- 		goto err_clk;
-@@ -170,6 +374,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
- err_clk:
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_disable_unprepare(priv->bus_clk);
-+	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
- free_pltfm:
- 	sdhci_pltfm_free(pdev);
- 	return err;
-@@ -185,6 +390,7 @@ static int dwcmshc_remove(struct platform_device *pdev)
- 
- 	clk_disable_unprepare(pltfm_host->clk);
- 	clk_disable_unprepare(priv->bus_clk);
-+	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
- 
- 	sdhci_pltfm_free(pdev);
- 
-@@ -207,6 +413,8 @@ static int dwcmshc_suspend(struct device *dev)
- 	if (!IS_ERR(priv->bus_clk))
- 		clk_disable_unprepare(priv->bus_clk);
- 
-+	clk_bulk_disable_unprepare(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
-+
- 	return ret;
- }
- 
-@@ -227,18 +435,16 @@ static int dwcmshc_resume(struct device *dev)
- 			return ret;
- 	}
- 
-+	ret = clk_bulk_prepare_enable(ROCKCHIP_MAX_CLKS, priv->rockchip_clks);
-+	if (ret)
-+		return ret;
-+
- 	return sdhci_resume_host(host);
- }
- #endif
- 
- static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
- 
--static const struct of_device_id sdhci_dwcmshc_dt_ids[] = {
--	{ .compatible = "snps,dwcmshc-sdhci" },
--	{}
--};
--MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
--
- static struct platform_driver sdhci_dwcmshc_driver = {
- 	.driver	= {
- 		.name	= "sdhci-dwcmshc",
--- 
-2.7.4
-
-
+RnJvbTogUGVuZyBaaG91IDxQZW5nLlpob3VAbWVkaWF0ZWsuY29tPg0KDQpIZWxsbywNCg0KTWVk
+aWF0ZWsgZU1NQyBoYXJkd2FyZSBJUCBoYXMgSW5saW5lIENyeXB0byBFbmdpbmUgKElDRSksDQp3
+ZSBzdXBwb3J0IGlubGluZSBlbmNyeXB0aW9uIG5vdy4NCg0KRm9yIElubGluZSBDcnlwdG8gRW5n
+aW5lIChJQ0UpLCBzZWU6DQotIGh0dHBzOi8vbG9yZS5rZXJuZWwub3JnL2xpbnV4LWFybS1tc20v
+MjAyMTAxMjYwMDE0NTYuMzgyOTg5LTItZWJpZ2dlcnNAa2VybmVsLm9yZy9ULw0KDQpDaGFuZ2Vk
+IGluIHYyOg0KLSBmaXggZW1haWwgZm9ybWF0DQotIGNoYW5nZSBzb21lIGRlc2NyaXB0aW9uDQoN
+ClBlbmcgWmhvdSAoNCk6DQogIG1tYzogTWVkaWF0ZWs6IGFkZCBJbmxpbmUgQ3J5cHRvIEVuZ2lu
+ZSBzdXBwb3J0DQogIG1tYzogTWVkaWF0ZWs6IGVuYWJsZSBjcnlwdG8gaGFyZHdhcmUgZW5naW5l
+DQogIGFybTY0OiBkdHM6IE1lZGlhdGVrOiBNVDY3Nzk6IGFkZCBtbWMgbm9kZSB3aXRoIElDRSBz
+ZXR0aW5nDQogIGR0LWJpbmdkaW5nczogbW1jOiBNZWRpYXRlazogYWRkIElDRSBjbG9jaw0KDQog
+Li4uL2RldmljZXRyZWUvYmluZGluZ3MvbW1jL210ay1zZC55YW1sICAgICAgIHwgIDYgKystDQog
+YXJjaC9hcm02NC9ib290L2R0cy9tZWRpYXRlay9tdDY3NzkuZHRzaSAgICAgIHwgMTQgKysrKysr
+Kw0KIGRyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMgICAgICAgICAgICAgICAgICAgICB8IDQyICsr
+KysrKysrKysrKysrKysrKy0NCiAzIGZpbGVzIGNoYW5nZWQsIDU5IGluc2VydGlvbnMoKyksIDMg
+ZGVsZXRpb25zKC0pDQoNCi0tIA0KMi4xOC4wDQo=
 
