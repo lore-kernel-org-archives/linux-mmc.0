@@ -2,75 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E668AC433E9
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:24:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BEB4DC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:29:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B101D65220
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:24:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 82A0665147
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:29:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229900AbhCIJYU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 04:24:20 -0500
-Received: from www.zeus03.de ([194.117.254.33]:40624 "EHLO mail.zeus03.de"
+        id S229840AbhCIJ2m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 04:28:42 -0500
+Received: from www.zeus03.de ([194.117.254.33]:42800 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229881AbhCIJYG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 9 Mar 2021 04:24:06 -0500
+        id S229714AbhCIJ20 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 9 Mar 2021 04:28:26 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=4hWmqDORYnmyweeEodNvD8l/IEx
-        2Ud4wi8k1ewHaD60=; b=DeX9B/7zbi2FcwjOMBbLqVDos6YmfEBpnXFZfq9yHWF
-        emRTjm4Z1/ljnS50K4T+hnzRGn/TMnc8xzojD7mZELLqpkDcA8/GY9Ij8YnyYD8G
-        dOB/rtoG2bIsvFuPJmEiCBAKkqdX3ahmLEHqbafScelwgs3iIlUg+rN8/SoRZUF4
-        =
-Received: (qmail 3419210 invoked from network); 9 Mar 2021 10:23:40 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Mar 2021 10:23:40 +0100
-X-UD-Smtp-Session: l3s3148p1@ACbyGhe9noogAwDPXw8WAIb6kxwVO+fo
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=4vtblMC+QH9ScS5QM7dKY1E7qN67
+        lcadFcQbhhEQgiM=; b=JdrNBH6PH9zc3j4vFBpYaasbtDXp4BVmXDs9sOxfqiJ4
+        aoF47+OY7gOcDbtbC/gHRFFqoVPDlBUwbE1fHbjBjYA2ihgSzYY6wv5RG+3O1beg
+        HuVSOBIDJc3eyqIiiWCpDKhZSusEXqSBmODf66CIyCyM/R+opPBnLPqBTZeDsWI=
+Received: (qmail 3420989 invoked from network); 9 Mar 2021 10:28:24 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Mar 2021 10:28:24 +0100
+X-UD-Smtp-Session: l3s3148p1@szYQLBe92IogAwDPXw8WAIb6kxwVO+fo
+Date:   Tue, 9 Mar 2021 10:28:24 +0100
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/2] mmc: renesas_sdhi: reset via reset controller
-Date:   Tue,  9 Mar 2021 10:23:30 +0100
-Message-Id: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.0
+        Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 0/2] mmc: renesas_sdhi: reset via reset controller
+Message-ID: <20210309092824.GA2538@ninjato>
+References: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="FCuugMFkClbJLl1L"
+Content-Disposition: inline
+In-Reply-To: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This series enables SDHI to be reset via a reset controller.
 
-Please let me know about your (and BSP team's) thoughts.
+--FCuugMFkClbJLl1L
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Changes since RFC v2 (thanks Geert for the review!):
+On Tue, Mar 09, 2021 at 10:23:30AM +0100, Wolfram Sang wrote:
+> This series enables SDHI to be reset via a reset controller.
+>=20
+> Please let me know about your (and BSP team's) thoughts.
+>=20
+> Changes since RFC v2 (thanks Geert for the review!):
+>=20
+> * use devm_reset_control_get_optional_exclusive()
+> * select RESET_CONTROLLER
+> * given reason in commit message of patch 2
+>=20
+> Tested on a Salvator-XS with a Renesas R-Car M3-N.
 
-* use devm_reset_control_get_optional_exclusive()
-* select RESET_CONTROLLER
-* given reason in commit message of patch 2
-
-Tested on a Salvator-XS with a Renesas R-Car M3-N.
-
-Shimoda-san: I think we need to get this series upstream first. On top
-of this, I will work on the better irq_mask handling.
+Patches are on top of mmc/next.
 
 
-Wolfram Sang (2):
-  mmc: tmio: abort DMA before reset
-  mmc: renesas_sdhi: do hard reset if possible
+--FCuugMFkClbJLl1L
+Content-Type: application/pgp-signature; name="signature.asc"
 
- drivers/mmc/host/Kconfig             |  1 +
- drivers/mmc/host/renesas_sdhi.h      |  2 ++
- drivers/mmc/host/renesas_sdhi_core.c | 15 ++++++++++++++-
- drivers/mmc/host/tmio_mmc_core.c     |  4 ++--
- 4 files changed, 19 insertions(+), 3 deletions(-)
+-----BEGIN PGP SIGNATURE-----
 
--- 
-2.30.0
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmBHP7QACgkQFA3kzBSg
+KbZ9Ww/+J3SGInGxihu1/a94aK9k3NkPcbHQAY6dz5aG0IAh6EE9Lu6Tbd6mT4TJ
+5hNFWvbYyUrCbb49pG6pUSrkri0+oILrfc7JxuFrTcIp6rkGWk8Q7rATM8gAeo3u
+xayc+t18qMqtJxPBxUzYTSWxDwlBPBkt0zzm1oEeOvZYiKPtIJelf15Ez3qyy7QL
+vpIQftrbuTyBOIQtaHl6aGA9VJEab+D62gikO0xOxHS9bG8hbGEQnFcpB2wuA+Yp
+jOCMrdJnyhvO5ip0+EDIulUL8l9dRNuf706FJTEsz72YqVUdZa1U28qpV2ZlanlQ
++ZLZKdG7plJN7FWm95kN4ZHxSbhVJd3f3/L3wSqKf3SoEarvq0VJCqpkqELariPy
+7KN1OzE4+tDuSyIuRuoHUNsbNXVMD/a3XD2POnRZ2Hu3m3lPXrLuSQHvpRYMwew+
+Qg5AWFeIWcrJEVtaPVs6evJB9VGUe3p473CYk+8L7XqIFfgJKuaNLcINprsEYplx
+7AbMl8joFj9RLBZtG+YhzgzROM8vfkIZMhQyb12Aggh6uQ3WE1xZc5FchJIGzRfo
+a1lS0O7Y6UF/CV77y7JWRrGK0uI19PUJ95aGJ5KPxOzxVBWrPzvf7Nx5+6bzVSPO
+jzbXBlJpaSh4hvxQJ4jlIcnLu+nBToqME1VdnChcOjfPruUfOSY=
+=vYSN
+-----END PGP SIGNATURE-----
 
+--FCuugMFkClbJLl1L--
