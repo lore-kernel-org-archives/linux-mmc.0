@@ -7,66 +7,66 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B383C43381
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36AE6C433DB
 	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 08EF66525B
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DB34C64F73
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 09:03:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229929AbhCIJDC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 04:03:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44142 "EHLO
+        id S229924AbhCIJDB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 04:03:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44130 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229726AbhCIJCf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 04:02:35 -0500
-Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13BDEC06175F
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 01:02:35 -0800 (PST)
-Received: by mail-ua1-x92c.google.com with SMTP id a31so4270290uae.11
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 01:02:35 -0800 (PST)
+        with ESMTP id S229520AbhCIJCd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 04:02:33 -0500
+Received: from mail-ua1-x932.google.com (mail-ua1-x932.google.com [IPv6:2607:f8b0:4864:20::932])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28E67C06174A
+        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 01:02:32 -0800 (PST)
+Received: by mail-ua1-x932.google.com with SMTP id 101so4303565uag.1
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 01:02:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=YTS4jcamZbNk8wX2IQOPXMrKr/myqA0Gbr1rtO1bGCw=;
-        b=v0jdExRcv1ZK6Js28rL+CxBuo42P4nU38B9hxVxMw7XdXOw3cGNjORJQk5X9/tO01M
-         /Pvwn/dkDn3GH+DPLAWH0MR6pdLfGaIppwoyDMbc3et5oamhZIOhBRHY89Toh/xE9JtO
-         epvfEx065vhO5KwhYh7mjkB1beNS6XOKrgfHg9grblOVeRMccDZQdseYmHzqo9QNu9Rx
-         E1ZS7jox0Z2a6rDADMyvI0V4NjbF7zrNBzI/2Anhe7pmyfGtPe7HO1ljGGYCMd+TNglG
-         QlmxYo/MlxkPGTirClDDCsJWBvp6+xQMswBToVFqs5+th3/bazHqQhlSwoxUv0Kt/D4C
-         5hxA==
+        bh=r0xnm0+GPRG6xm7UmnAIp8FML6si7jNaq0GBV1Vgnz4=;
+        b=KfhH7Ad/IWsNt5oMg8fzCkmW8ltKpC/YCMD9deToYJRMrwTuKt/rCOauW6AVHdJcxH
+         ZmVmq0D6Yzbvg9iegOaRf1iwW+a2Vz8A1666noloVpp1CE6aq1eR7ugOtZwPTl8R3AEj
+         YjTg/wmeM9g/MMUSfVHEuE2Wr/0Ak44JPxUGDwMNQ+MzfQamqeDYtizrvLfIv/jADnIi
+         UaJrl3asxSpy1bewCxtrcdv9Z5ZBd/waT9Ug3mjptBjZ90Xo8W0/mZV8/Mj/zxaDHEqG
+         /Wt9+xLTzkDVu5ikt04peK8DLZfVlJce7ctRaW5I5IkkD7BnZw+eKiydPK2tOV20Tasd
+         v+6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=YTS4jcamZbNk8wX2IQOPXMrKr/myqA0Gbr1rtO1bGCw=;
-        b=ndHor0EHTBgrV9QYHEylNp0G1On3gLYcJkrt23OiARkTq9mLEZ95E69G655QntR84J
-         j5nm9bindGhHGg+G3Mi7kx3jGJ4qbXMzbJbow7OacRon08AEwaJg1Voj6plB+ZnR+fGI
-         d85NEj5YSSpmWIK+NAiSZUMgCbib0W5Y+mkfNBnD+3Cq4HVar1UySO46wbWk7Cx5Xg/x
-         DoZznC5X8V4Qc/sKWaqVND2yzfk6F+y8s3bTeSJGldfNTIFt0YS2PDDEpNTeA/87xBvo
-         VEw/hSDAzYiFYhe+JMsV1bZwzTYDj2OYGvFo8ZOdxW3gM3kI8Nde7bu7WYVXj90EFOtB
-         Er5g==
-X-Gm-Message-State: AOAM530d3yG6awuEG39DTIf3l3Qm8JWYtFG/73Re/pwC+Es9TWVyzrhZ
-        0DwK+1pOlqMKtL2xsayTgXc2/zjG6d/IaxAErO1t2nhJaf4oJA==
-X-Google-Smtp-Source: ABdhPJyU9pLHDctMoyDBwL0mk0d2cmk888NY/n8Ux/igMFANmuCDrhZwjctbhB75uGHw+rUcLoOuPvAaNiQgQrEGa40=
-X-Received: by 2002:ab0:6045:: with SMTP id o5mr15745542ual.100.1615280554230;
- Tue, 09 Mar 2021 01:02:34 -0800 (PST)
+        bh=r0xnm0+GPRG6xm7UmnAIp8FML6si7jNaq0GBV1Vgnz4=;
+        b=ZO1GMvTKmN1gBh5xzJKcPGZpU/82Ru4ZlQE8gqXdJe+MxsbMZC4hzt2ylrIY5QLDOe
+         68InZeNnEEcKFVWx7kc5taYwgZpS9vQSGGLo+3ssu43wY/mNei5XIv+uAU2VgRw5F2fR
+         mIQipMWA4Dd5QcSEIFHLiGfs4ywZJrHt/2pVPP1qh+6EWWged+ltTzXCGI3UmzuqRdHi
+         T7e24JXaFaeQfui36S95BaJ6OcpQNLM25/4RDfH426C7on/7h/GIv2OapJn1SBEivT3s
+         wWY0F5SzG60/oLrDoRoq/V27ORxDLltPMbg6JLuw7/y2ouLzMIU4w6KMLx6ZNBPXxofA
+         oqzg==
+X-Gm-Message-State: AOAM532OiN4HdKbuHdUJE/vvO3KPxBbIuSNXMPp7HqT6+/QVAkHpS/y0
+        R/pyPXjxCTkUhUNuOJ5/swKSYVaM36X3GCJoXupaRQ==
+X-Google-Smtp-Source: ABdhPJz46+awTIhV0y9pKZODPaQva2bWW6X1xuqUKvN1EGJ2TgDxjB7ETkLR97+NB+2nY3ccumucJR7PAxORHXNjOx8=
+X-Received: by 2002:a9f:3546:: with SMTP id o64mr16115394uao.129.1615280551400;
+ Tue, 09 Mar 2021 01:02:31 -0800 (PST)
 MIME-Version: 1.0
-References: <20210305090724.18832-1-p.zabel@pengutronix.de>
-In-Reply-To: <20210305090724.18832-1-p.zabel@pengutronix.de>
+References: <20210305090827.19124-1-p.zabel@pengutronix.de>
+In-Reply-To: <20210305090827.19124-1-p.zabel@pengutronix.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 9 Mar 2021 10:01:57 +0100
-Message-ID: <CAPDyKFrfeigvZBVvJUTXWgZCNpPORyHdfuXCbKKjZ-1xpoD-RQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: simplify optional reset handling
+Date:   Tue, 9 Mar 2021 10:01:54 +0100
+Message-ID: <CAPDyKFp7d5cfgMdyVXZt2HkZkttBpB89b9cZqU=hcwakjPhCKA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-st: simplify optional reset handling
 To:     Philipp Zabel <p.zabel@pengutronix.de>
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>
+        Patrice Chotard <patrice.chotard@st.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 5 Mar 2021 at 10:07, Philipp Zabel <p.zabel@pengutronix.de> wrote:
+On Fri, 5 Mar 2021 at 10:08, Philipp Zabel <p.zabel@pengutronix.de> wrote:
 >
 > As of commit bb475230b8e5 ("reset: make optional functions really
 > optional"), the reset framework API calls use NULL pointers to describe
@@ -84,55 +84,68 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/dw_mmc.c | 14 +++++---------
->  1 file changed, 5 insertions(+), 9 deletions(-)
+>  drivers/mmc/host/sdhci-st.c | 19 +++++++------------
+>  1 file changed, 7 insertions(+), 12 deletions(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 2f4de30f650b..807f77fefc20 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -3095,10 +3095,8 @@ static struct dw_mci_board *dw_mci_parse_dt(struct dw_mci *host)
+> diff --git a/drivers/mmc/host/sdhci-st.c b/drivers/mmc/host/sdhci-st.c
+> index 962872aec164..78941ac3a1d6 100644
+> --- a/drivers/mmc/host/sdhci-st.c
+> +++ b/drivers/mmc/host/sdhci-st.c
+> @@ -362,11 +362,10 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>         if (IS_ERR(icnclk))
+>                 icnclk = NULL;
 >
->         /* find reset controller when exist */
->         pdata->rstc = devm_reset_control_get_optional_exclusive(dev, "reset");
-> -       if (IS_ERR(pdata->rstc)) {
-> -               if (PTR_ERR(pdata->rstc) == -EPROBE_DEFER)
-> -                       return ERR_PTR(-EPROBE_DEFER);
-> -       }
-> +       if (IS_ERR(pdata->rstc))
-> +               return ERR_CAST(pdata->rstc);
+> -       rstc = devm_reset_control_get_exclusive(&pdev->dev, NULL);
+> +       rstc = devm_reset_control_get_optional_exclusive(&pdev->dev, NULL);
+>         if (IS_ERR(rstc))
+> -               rstc = NULL;
+> -       else
+> -               reset_control_deassert(rstc);
+> +               return PTR_ERR(rstc);
+> +       reset_control_deassert(rstc);
 >
->         if (device_property_read_u32(dev, "fifo-depth", &pdata->fifo_depth))
->                 dev_info(dev,
-> @@ -3204,7 +3202,7 @@ int dw_mci_probe(struct dw_mci *host)
->                 goto err_clk_ciu;
+>         host = sdhci_pltfm_init(pdev, &sdhci_st_pdata, sizeof(*pdata));
+>         if (IS_ERR(host)) {
+> @@ -432,8 +431,7 @@ static int sdhci_st_probe(struct platform_device *pdev)
+>  err_of:
+>         sdhci_pltfm_free(pdev);
+>  err_pltfm_init:
+> -       if (rstc)
+> -               reset_control_assert(rstc);
+> +       reset_control_assert(rstc);
+>
+>         return ret;
+>  }
+> @@ -450,8 +448,7 @@ static int sdhci_st_remove(struct platform_device *pdev)
+>
+>         clk_disable_unprepare(pdata->icnclk);
+>
+> -       if (rstc)
+> -               reset_control_assert(rstc);
+> +       reset_control_assert(rstc);
+>
+>         return ret;
+>  }
+> @@ -471,8 +468,7 @@ static int sdhci_st_suspend(struct device *dev)
+>         if (ret)
+>                 goto out;
+>
+> -       if (pdata->rstc)
+> -               reset_control_assert(pdata->rstc);
+> +       reset_control_assert(pdata->rstc);
+>
+>         clk_disable_unprepare(pdata->icnclk);
+>         clk_disable_unprepare(pltfm_host->clk);
+> @@ -498,8 +494,7 @@ static int sdhci_st_resume(struct device *dev)
+>                 return ret;
 >         }
 >
-> -       if (!IS_ERR(host->pdata->rstc)) {
-> +       if (host->pdata->rstc) {
->                 reset_control_assert(host->pdata->rstc);
->                 usleep_range(10, 50);
->                 reset_control_deassert(host->pdata->rstc);
-> @@ -3344,8 +3342,7 @@ int dw_mci_probe(struct dw_mci *host)
->         if (host->use_dma && host->dma_ops->exit)
->                 host->dma_ops->exit(host);
+> -       if (pdata->rstc)
+> -               reset_control_deassert(pdata->rstc);
+> +       reset_control_deassert(pdata->rstc);
 >
-> -       if (!IS_ERR(host->pdata->rstc))
-> -               reset_control_assert(host->pdata->rstc);
-> +       reset_control_assert(host->pdata->rstc);
+>         st_mmcss_cconfig(np, host);
 >
->  err_clk_ciu:
->         clk_disable_unprepare(host->ciu_clk);
-> @@ -3373,8 +3370,7 @@ void dw_mci_remove(struct dw_mci *host)
->         if (host->use_dma && host->dma_ops->exit)
->                 host->dma_ops->exit(host);
->
-> -       if (!IS_ERR(host->pdata->rstc))
-> -               reset_control_assert(host->pdata->rstc);
-> +       reset_control_assert(host->pdata->rstc);
->
->         clk_disable_unprepare(host->ciu_clk);
->         clk_disable_unprepare(host->biu_clk);
 > --
 > 2.29.2
 >
