@@ -2,92 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E01ABC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 13:28:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0161DC433DB
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 13:40:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8EB9D650E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 13:28:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B49DA65101
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 13:40:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231197AbhCIN1v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 08:27:51 -0500
-Received: from esa3.hgst.iphmx.com ([216.71.153.141]:40103 "EHLO
-        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230462AbhCIN1a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 08:27:30 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1615296450; x=1646832450;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=o801WpJ7u1Na+IXF41rulbrs+RI+ZynTaPoiXJhQhac=;
-  b=I/KZiv7MWtnzEUqe222Er+LOM1JyUNTs3xsJnf6hxsD2qVmHxJLidRJ0
-   cbz5xB4WWexZtpLEA7JvFfYxwuZtu96o8TPI7Vw4A9eAnybaIdZz7QEgn
-   FeHxZku78upomqASjcDAEDPUHjPRH5PSJCeimHHMeLRROtAkJt3gZDlwV
-   Botz8AQ6ueWqTsG6X3bc+hYmoODJjzMEyN/0YYZ7rMpRxG8krwe31dMPw
-   ksI0n7WIwST4YhAJfirf+Jymq4E4KcpCxawuy4oE3NuYDOsKlqXlMFFft
-   dnFUMf3j1X4/jTVwNNBuCwKpmKJc2m7slbqJoT8EkH6Vsbm7ihRZyqswd
-   Q==;
-IronPort-SDR: bb5Qj5aFlibhloSNhnNWgOxiB8Knn7JLEZ0JI1kK0d27u5JQIK2bSq5fMDTdPM2N1Aj1G/qiVc
- NZLcb7ji/1W7pk+/chsQJevrPsJ3pZQlqg1UPclYsfsNBNWjOocUNEB/sD/3c5fkpTZgA+4TI7
- tPL1JezL4OMMD5+X+iTTpbzlRN/pPvtqDgC9rNJ2kWRq5ryHiuTqH8L+0gB6UVL6PAZ2t5AvS6
- mz1dIQooB2Y0YsJjLdpq9na969dxn/E6ajF5ictoFHx+JuQLE51rKHdQgpaOt5EY6REKnVAgne
- 33c=
-X-IronPort-AV: E=Sophos;i="5.81,234,1610380800"; 
-   d="scan'208";a="166215158"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 09 Mar 2021 21:27:29 +0800
-IronPort-SDR: uDJkKXOJG/HW+wiBSdkuUZ225av7y+g333NjvAXkiYsfXh33hhGMmIc/I6/Y+LLL2Vkjwm33pa
- 0AMZnF2laaRQ9Y2mf/t7V23DnOPWwUdUTCbNy6hHYEFC8o9a0lyG5ZqsB8BKpMXAANpLyzMnsK
- Py10AjYOOCF2rW6+fz3ZviXmuktMPJVMyOb87HFEN8LNWD2F/8DvjwQ3X2Jo4LarBovxHWFg3L
- 4I7wa7Tz62AFYrG6um1IwUPzq56Qo7geA3zOLe1bW2sS0iggzkmK6Uni+quujp7Ij1vcHmUJoc
- XlzgoCvk74O3Vq8/disvl84e
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Mar 2021 05:08:27 -0800
-IronPort-SDR: V1pvUC/GOU87ho1DuYSPyyj3+CKrO7ouUqgyOB9kBlbD2VRqRpELWgFP/7i2D2w4Vkiyy3qZo1
- yOwqrrSxmuRb208CcUoXLIQG56i3npT2y1SHck9c/hbHotzhdnXRJAcSkE8TWFQ/qR/hX47uIt
- GlPJrbe6GP/jvv5E0tFHaInLn9dAAMC1ediwC2zHG17fhPb6/fapIicqKMpYxHSITsCM2ofO75
- EeyiCRYHKtG5IKTzVwtIqB7m6WLp9saXK/wzhA7ytJIzb2VJ+jArmAw6bNolwM20fvfa3njg3G
- 0oo=
-WDCIronportException: Internal
-Received: from bxygm33.sdcorp.global.sandisk.com ([10.0.231.247])
-  by uls-op-cesaip02.wdc.com with ESMTP; 09 Mar 2021 05:27:26 -0800
-From:   Avri Altman <avri.altman@wdc.com>
-To:     alex.bennee@linaro.org
-Cc:     Matti.Moell@opensynergy.com, arnd@linaro.org, bing.zhu@intel.com,
-        hmo@opensynergy.com, ilias.apalodimas@linaro.org,
-        joakim.bech@linaro.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-nvme@vger.kernel.org,
-        linux-scsi@vger.kernel.org, maxim.uvarov@linaro.org,
-        ruchika.gupta@linaro.org, tomas.winkler@intel.com,
-        yang.huang@intel.com
-Subject: [RFC PATCH  0/5] RPMB internal and user-space API + WIP virtio-rpmb frontend
-Date:   Tue,  9 Mar 2021 15:27:25 +0200
-Message-Id: <20210309132725.638205-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210303135500.24673-1-alex.bennee@linaro.org>
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
+        id S230046AbhCINkP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 08:40:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47756 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231299AbhCINkG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 08:40:06 -0500
+Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D705C06174A;
+        Tue,  9 Mar 2021 05:40:06 -0800 (PST)
+Received: by mail-pj1-x102b.google.com with SMTP id i14so907287pjz.4;
+        Tue, 09 Mar 2021 05:40:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-transfer-encoding:content-language;
+        bh=EfRNWzuGNBnhyAcRR8YiG4gPJSCXyRxbY59iKyGieEM=;
+        b=bSFj4cVXRH4Uyt5PbRaBkRomb40p5oImg8LwuuirDjxXJmQHkTAyE+D4Zv+smEGHdz
+         PssQ7BOd9f4hUiIcznzaMuwGkSWzFSx3KD4Yk2G33yYpEzm3G9G+5sXWzRV+oO4HwrZW
+         NsPWKnV7RCXSNwc2xXO4DSSzOg8EfFlYtpIUi13ZgvSGPB4eqtSap6bLju3Y0luYCUUZ
+         Ia0EnfFir8/NdfyPsqjB8IOwMTZ/edObR5YpDrH21myII8nF6uUKmIPbp9R708wUTXsO
+         2iWoWBdE2jhbSPTK/wi6pR2TiT5EYNoNzel9zAnruWghJTRIjKG3xdy46dQqCmrSAsW6
+         bVrw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-transfer-encoding
+         :content-language;
+        bh=EfRNWzuGNBnhyAcRR8YiG4gPJSCXyRxbY59iKyGieEM=;
+        b=FiAt3thewtbav/bGA5QLdUhF8HtMREy2hEWBDP9BZll6FSqlmXEGp9e0JmpBE/8sLM
+         Dz0w79AIibXlZ3CpDLd9ihqKztjXFtuERYJCMgtfvGoqH7O0wGeZuBV3w/v5nq3z76dN
+         UWx26pR7Lf9IIu6m96YE4VtcjqscUyQvNxrm2utUg+Z8T8TTc+mOHL8opIGrEYExxr8X
+         yqpibrIlwJ4jue3sg2hF/RKshCWmOcuysq4PkfJcLgH9fm14K+o/D0UaxX4Q+Xc7f/NE
+         TW2ILVsBqD4VR0CVZ9NSVgefqJNWfjBhUa7Q9ulLdx58uYEot1fuA97Md1wLulser8/w
+         geFw==
+X-Gm-Message-State: AOAM530SLRc4bHIGruZAV2cTh9VUK/b2LILiEKpoaAjbt1F8ti7LhBsZ
+        AU+MTSsiKxzTC+YWRonceKAq70CAcdD6CYo9
+X-Google-Smtp-Source: ABdhPJzF2Ju5j0GoVlbGzuoBxEXHnAx21+9hbPmDpXfy80CvN8i+0OlsDH7E74ICSInCNjA80Wte6g==
+X-Received: by 2002:a17:902:b70d:b029:e3:6c97:d180 with SMTP id d13-20020a170902b70db02900e36c97d180mr25954776pls.40.1615297205578;
+        Tue, 09 Mar 2021 05:40:05 -0800 (PST)
+Received: from [10.160.0.34] ([45.135.186.124])
+        by smtp.gmail.com with ESMTPSA id y1sm2567169pjr.3.2021.03.09.05.40.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 09 Mar 2021 05:40:05 -0800 (PST)
+Subject: Re: [BUG] memstick: core: missing error return code in msb_resume()
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, trix@redhat.com,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <473ecf21-f0d3-9024-161e-72093004971f@gmail.com>
+ <CAPDyKFp61gV_irmqCuTuERDgA8KqogS_nhtvoOQJpFB0XEmvrQ@mail.gmail.com>
+From:   Jia-Ju Bai <baijiaju1990@gmail.com>
+Message-ID: <7c55dc0f-b6a5-d35e-79de-6f3b5d8d66c2@gmail.com>
+Date:   Tue, 9 Mar 2021 21:40:02 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.4.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPDyKFp61gV_irmqCuTuERDgA8KqogS_nhtvoOQJpFB0XEmvrQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The mmc driver has some hooks to support rpmb access, but access is
-mainly facilitated from user space, e.g. mmc-utils.
 
-The ufs driver has no concept of rpmb access - it is facilitated via
-user space, e.g. ufs-utils and similar.
 
-Both for ufs and mmc, rpmb access is defined in their applicable jedec
-specs. This is the case for few years now - AFAIK No new rpmb-related
-stuff is expected to be introduced in the near future.
+On 2021/3/9 16:44, Ulf Hansson wrote:
+> On Fri, 5 Mar 2021 at 03:45, Jia-Ju Bai <baijiaju1990@gmail.com> wrote:
+>> My static analysis tool reports that no error return code is assigned in
+>> error handling code of msb_resume().
+>> However, many other drivers assign error return code in xxx_resume(),
+>> such as sky2_resume() and e1000_resume().
+>> I wonder whether this is intentional?
+> It's for sure intentional, but it really doesn't matter that much as
+> we are probably in rather dodgy state anyways.
+>
+> Of course, propagating error codes upwards in the stack is always good
+> practise, so feel free to add it.
+>
 
-What problems, as far as mmc and ufs, are you trying to solve by this new subsystem?
+Thanks for the reply!
+I will find time to add error return code in this function :)
 
-Thanks,
-Avri
 
+Best wishes,
+Jia-Ju Bai
