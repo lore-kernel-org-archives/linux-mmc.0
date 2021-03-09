@@ -7,21 +7,21 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F40CEC433DB
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 01:58:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B407C4332B
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 01:58:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C2A5565255
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 01:58:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3645D6527E
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 01:58:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229688AbhCIB5V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S229520AbhCIB5V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 8 Mar 2021 20:57:21 -0500
-Received: from lucky1.263xmail.com ([211.157.147.132]:35586 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.135]:50528 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229611AbhCIB4x (ORCPT
+        with ESMTP id S229764AbhCIB4x (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Mar 2021 20:56:53 -0500
 Received: from localhost (unknown [192.168.167.223])
-        by lucky1.263xmail.com (Postfix) with ESMTP id B297FF2DFF;
-        Tue,  9 Mar 2021 09:56:38 +0800 (CST)
+        by lucky1.263xmail.com (Postfix) with ESMTP id 6062AA7F49;
+        Tue,  9 Mar 2021 09:56:39 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
 X-ADDR-CHECKED4: 1
@@ -29,9 +29,9 @@ X-ANTISPAM-LEVEL: 2
 X-ABS-CHECKED: 0
 Received: from localhost.localdomain (unknown [58.22.7.114])
         by smtp.263.net (postfix) whith ESMTP id P23505T140626794366720S1615254997318814_;
-        Tue, 09 Mar 2021 09:56:38 +0800 (CST)
+        Tue, 09 Mar 2021 09:56:39 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <99b35143d881a883b8cbf2167576181f>
+X-UNIQUE-TAG: <b60339c4527dbc220ff3d2d4e33573ac>
 X-RL-SENDER: shawn.lin@rock-chips.com
 X-SENDER: lintao@rock-chips.com
 X-LOGIN-NAME: shawn.lin@rock-chips.com
@@ -45,124 +45,81 @@ To:     Rob Herring <robh+dt@kernel.org>,
 Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
         devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org,
         Shawn Lin <shawn.lin@rock-chips.com>
-Subject: [PATCH v3 1/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Convert to yaml file
-Date:   Tue,  9 Mar 2021 09:56:28 +0800
-Message-Id: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
+Subject: [PATCH v3 2/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add rockchip support
+Date:   Tue,  9 Mar 2021 09:56:29 +0800
+Message-Id: <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
+References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch converts sdhci-of-dwcmshc.txt to sdhci-of-dwcmshc.yaml
+This patch adds rockchip support in sdhci-of-dwcmhsc.yaml
 
 Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-
 ---
 
-Changes in v3:
-- fix filename and other improvments suggested by Rob
+Changes in v3: None
 
- .../devicetree/bindings/mmc/sdhci-of-dwcmshc.txt   | 20 -------
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml           | 63 ++++++++++++++++++++++
- 2 files changed, 63 insertions(+), 20 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml           | 24 ++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt b/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
-deleted file mode 100644
-index ee4253b..0000000
---- a/Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
-+++ /dev/null
-@@ -1,20 +0,0 @@
--* Synopsys DesignWare Cores Mobile Storage Host Controller
--
--Required properties:
--- compatible: should be one of the following:
--    "snps,dwcmshc-sdhci"
--- reg: offset and length of the register set for the device.
--- interrupts: a single interrupt specifier.
--- clocks: Array of clocks required for SDHCI; requires at least one for
--    core clock.
--- clock-names: Array of names corresponding to clocks property; shall be
--    "core" for core clock and "bus" for optional bus clock.
--
--Example:
--	sdhci2: sdhci@aa0000 {
--		compatible = "snps,dwcmshc-sdhci";
--		reg = <0xaa0000 0x1000>;
--		interrupts = <GIC_SPI 21 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&emmcclk>;
--		bus-width = <8>;
--	}
 diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-new file mode 100644
-index 0000000..f99fb9f
---- /dev/null
+index f99fb9f..43989f2 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
 +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-@@ -0,0 +1,63 @@
-+# SPDX-License-Identifier: GPL-2.0-only
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/snps,dwcmshc-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+@@ -16,6 +16,7 @@ allOf:
+ properties:
+   compatible:
+     enum:
++      - rockchip,dwcmshc-sdhci
+       - snps,dwcmshc-sdhci
+ 
+   reg:
+@@ -31,12 +32,24 @@ properties:
+     items:
+       - description: core clock
+       - description: bus clock for optional
++      - description: axi clock for rockchip specified
++      - description: block clock for rockchip specified
++      - description: timer clock for rockchip specified
 +
-+title: Synopsys Designware Mobile Storage Host Controller Binding
+ 
+   clock-names:
+     minItems: 1
+     items:
+       - const: core
+       - const: bus
++      - const: axi
++      - const: block
++      - const: timer
 +
-+maintainers:
-+  - Ulf Hansson <ulf.hansson@linaro.org>
-+  - Jisheng Zhang <Jisheng.Zhang@synaptics.com>
++  rockchip,txclk-tapnum:
++    description: Specify the number of delay for tx sampling.
++    $ref: /schemas/types.yaml#/definitions/uint32
 +
-+allOf:
-+  - $ref: mmc-controller.yaml#
-+
-+properties:
-+  compatible:
-+    enum:
-+      - snps,dwcmshc-sdhci
-+
-+  reg:
-+    minItems: 1
-+    items:
-+      - description: Offset and length of the register set for the device
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    minItems: 1
-+    items:
-+      - description: core clock
-+      - description: bus clock for optional
-+
-+  clock-names:
-+    minItems: 1
-+    items:
-+      - const: core
-+      - const: bus
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    mmc@aa0000 {
-+      compatible = "snps,dwcmshc-sdhci";
-+      reg = <0xaa000 0x1000>;
+ 
+ required:
+   - compatible
+@@ -49,6 +62,17 @@ unevaluatedProperties: false
+ 
+ examples:
+   - |
++    mmc@fe310000 {
++      compatible = "rockchip,dwcmshc-sdhci";
++      reg = <0xfe310000 0x10000>;
 +      interrupts = <0 25 0x4>;
-+      clocks = <&cru 17>, <&cru 18>;
-+      clock-names = "core", "bus";
++      clocks = <&cru 17>, <&cru 18>, <&cru 19>, <&cru 20>, <&cru 21>;
++      clock-names = "core", "bus", "axi", "block", "timer";
 +      bus-width = <8>;
 +      #address-cells = <1>;
 +      #size-cells = <0>;
 +    };
-+
-+...
++  - |
+     mmc@aa0000 {
+       compatible = "snps,dwcmshc-sdhci";
+       reg = <0xaa000 0x1000>;
 -- 
 2.7.4
 
