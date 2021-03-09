@@ -2,123 +2,303 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9310C433E6
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 17:23:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 381F4C433E6
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 19:19:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8E4D565235
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 17:23:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 134B065239
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Mar 2021 19:19:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230489AbhCIRWl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 12:22:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39928 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229688AbhCIRWP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 12:22:15 -0500
-Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4AA7C06174A
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 09:22:15 -0800 (PST)
-Received: by mail-vs1-xe32.google.com with SMTP id z65so7177096vsz.12
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 09:22:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=icH34N0BzxWptc4AsCi8eFQPKCsD1ffvQta96njCeko=;
-        b=UBK8W01OY9HLcrmjdo6e0EnHeBBn6a3F3srBAC4doo8KW+L4eAnDhY/YDntxKqThJb
-         YkAMA33qZJ/+fnPKgXTatjx5szbLeMDvd07jP5ZnUf7kls7/PU54/XKaEHuwx4fk3fN/
-         MnY8eaLFIZAKLyIypdWi2zGXCnFFqoRV3H18zHce7zkRcQdrPQGET56+GCkjFx2vusau
-         6ZlDFMrqxP2zvera8MTGe9rx++RnkEm/UoyZlV0SPWeefCSKZ7ZWf7/BjZgPAUtck71H
-         VoWLmUEbIriIbyAT9z7JuJ4GmFC4UWMH3Tg21I1uC1jkO9/9zs8hf09XcNVn17CHRui/
-         1eVA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=icH34N0BzxWptc4AsCi8eFQPKCsD1ffvQta96njCeko=;
-        b=hIbnNDXLSuaYMVbUZ7UIJw4J1Mkf5LOpBCLqn2FB0u4LfCyKpHlHF3pWEZ2FYDb6Ee
-         1NcREKGTwsqSyz62dQzaKEaHOQDzRbXYrgfXSOV+P9vRRstw6P1Z9szIQ4QcOxrFblWs
-         /APouGvym4XO1fEUeMVDHw1FeNtQv8F37tgWK8GY5lyoKfhVcDtYnb0x0xvPrSOa6MqB
-         VFTA13xp5DRDIM2WUgB6Adv1VCuVmYTuX08BTqkUd5HYFuQTJsdiCztq485VHp/XSfCC
-         WrlDI977/UnRLxlSmrdy5Kddba+9O5Ng8Auc6YEZwLxvTAKRxQOXpw0akVKMny/2Iz+g
-         Roww==
-X-Gm-Message-State: AOAM533B9E8PpZLhpjqleyL5XMQXcIHR53V7qE/1L5DtYzYcddp9h3dW
-        pGQur3lduD0V1vEOeQrE1GGqHtCLYenCHddQ/O4bsgCndabv2w==
-X-Google-Smtp-Source: ABdhPJwD5PFvImpnAFp8yCzDarn54M24T8+O5uhL/zwYZ+UgFzbpJoy6Copf2kbjJv9dPDXjs8mqhtzuS4H0gdnvx8A=
-X-Received: by 2002:a05:6102:7b0:: with SMTP id x16mr15479343vsg.34.1615310534496;
- Tue, 09 Mar 2021 09:22:14 -0800 (PST)
-MIME-Version: 1.0
-References: <CGME20210309041059epcas2p49567b092c8d82bb80aa76ad26f8d212b@epcas2p4.samsung.com>
- <02da01d7149a$35dec530$a19c4f90$@samsung.com> <CAPDyKFpeCWp6JUS4w9h1K7ZLjvE0JuREuWgrsuQSzD7dOJBHGw@mail.gmail.com>
-In-Reply-To: <CAPDyKFpeCWp6JUS4w9h1K7ZLjvE0JuREuWgrsuQSzD7dOJBHGw@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 9 Mar 2021 18:21:37 +0100
-Message-ID: <CAPDyKFoEGp1CHo1OuTTeGqKkPG1Nke0k_rLBLSwmLH_BCcDDtA@mail.gmail.com>
-Subject: Re: About a possibility of long latency to claim host
-To:     Kiwoong Kim <kwmad.kim@samsung.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        id S231367AbhCITTR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 14:19:17 -0500
+Received: from alexa-out.qualcomm.com ([129.46.98.28]:17772 "EHLO
+        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231357AbhCITS7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 14:18:59 -0500
+Received: from ironmsg07-lv.qualcomm.com (HELO ironmsg07-lv.qulacomm.com) ([10.47.202.151])
+  by alexa-out.qualcomm.com with ESMTP; 09 Mar 2021 11:18:59 -0800
+X-QCInternal: smtphost
+Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
+  by ironmsg07-lv.qulacomm.com with ESMTP/TLS/AES256-SHA; 09 Mar 2021 11:18:56 -0800
+X-QCInternal: smtphost
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg01-blr.qualcomm.com with ESMTP; 10 Mar 2021 00:48:03 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id 6F78446DF; Wed, 10 Mar 2021 00:48:03 +0530 (IST)
+From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, sartgarg@codeaurora.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, rnayak@codeaurora.org,
+        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
+        cang@codeaurora.org, pragalla@codeaurora.org,
+        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Subject: [PATCH V1] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
+Date:   Wed, 10 Mar 2021 00:48:03 +0530
+Message-Id: <1615317483-23780-1-git-send-email-sbhanu@codeaurora.org>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 9 Mar 2021 at 14:07, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Tue, 9 Mar 2021 at 05:11, Kiwoong Kim <kwmad.kim@samsung.com> wrote:
-> >
-> > Dear All
-> >
-> > I want to discuss about this topic with you guys.
-> >
-> > There is an application to put many IO requests to a SD card right after completion of system resume.
-> > Current MMC stack invokes mmc_rescan asynchronously for PM_POST_SUSPEND.
-> > As reported to me, there could be a race between an IO thread and the kworker for mmc_rescan,
-> > especially when the application mentioned before is installed and the function of mmc_rescan is run later than expected
-> > For a series of IO requests, mmc_rescan, particularily at __mmc_claim_host called in mmc_sd_detect, didn't acquire a host for longer than expected.
->
-> That's not a problem, in general.
->
-> As long as the card is inserted and functional, the I/O operations
-> should be completed successfully. It doesn't matter if mmc_rescan() is
-> waiting to claim the host, as it's not important that it gets to run
-> as long as the card remains inserted/functional.
->
-> >
-> > Below is the call stacks shown after the symptom happened and the system tried to enter into suspend again.
-> > In this case, mmc pm notifier is called with PM_SUSPEND_PREPARE, so it waits for completion or cancelling the work for mmc_rescan.
-> > For the latency, mobile users can see black screen for a long time sometimes, even with pushing a power button to wake up the system.
->
-> I think I understand what you are saying, but please correct me if I am wrong.
->
-> The I/O requests keep flowing into the blk queue even after
-> PM_SUSPEND_PREPARE has been fired, thus preventing the earlier
-> scheduled mmc_rescan() from claiming the host?
->
-> This sounds quite reasonable that it could happen, at least
-> theoretically. Although, I am a bit surprised that nobody has reported
-> about this problem, until now. The design in the mmc core, has
-> remained unchanged in regards to this behaviour, for a very very long
-> time.
->
-> Let me try to reproduce the problem, I will get back to you soon. In
-> the meantime, I would also appreciate it if you could share, more
-> exactly, how to trigger this problem at your side.
+Add nodes for eMMC and SD card on sc7280.
 
-I have managed to reproduce the problem!  Wow, I wonder how this could
-have slipped through without anybody reporting about this, until now.
-So, thanks for bringing this to my attention!
+Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
 
-My rough guess is that SD cards, used in these kinds of configurations
-(Android), are actually set to non removable. This would prevent
-mmc_rescan() from claiming the host.
+---
+This change is depends on the below patch series:
+https://lore.kernel.org/lkml/1613114930-1661-1-git-send-email-rnayak@codeaurora.org/
+https://lore.kernel.org/patchwork/project/lkml/list/?series=&submitter=28035&state=&q=&archive=&delegate=
+---
+ arch/arm64/boot/dts/qcom/sc7280-idp.dts |  26 +++++
+ arch/arm64/boot/dts/qcom/sc7280.dtsi    | 170 ++++++++++++++++++++++++++++++++
+ 2 files changed, 196 insertions(+)
 
-In any case, this needs to be fixed properly. I will continue to work
-on a solution and get back to you with a patch.
+diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+index ac79420..6abb2aa 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
++++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+@@ -8,6 +8,7 @@
+ /dts-v1/;
+ 
+ #include "sc7280.dtsi"
++#include <dt-bindings/gpio/gpio.h>
+ 
+ / {
+ 	model = "Qualcomm Technologies, Inc. SC7280 IDP platform";
+@@ -256,3 +257,28 @@
+ 		bias-pull-up;
+ 	};
+ };
++
++&sdhc_1 {
++	status = "okay";
++
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&sdc1_on>;
++	pinctrl-1 = <&sdc1_off>;
++
++	vmmc-supply = <&vreg_l7b_2p9>;
++	vqmmc-supply = <&vreg_l19b_1p8>;
++
++};
++
++&sdhc_2 {
++	status = "okay";
++
++	pinctrl-names = "default","sleep";
++	pinctrl-0 = <&sdc2_on>;
++	pinctrl-1 = <&sdc2_off>;
++
++	vmmc-supply = <&vreg_l9c_2p9>;
++	vqmmc-supply = <&vreg_l6c_2p9>;
++
++	cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
++};
+diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+index 3b86052..91fb18a 100644
+--- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+@@ -18,6 +18,11 @@
+ 
+ 	chosen { };
+ 
++	aliases {
++		mmc1 = &sdhc_1;
++		mmc2 = &sdhc_2;
++	};
++
+ 	clocks {
+ 		xo_board: xo-board {
+ 			compatible = "fixed-clock";
+@@ -315,6 +320,69 @@
+ 			#power-domain-cells = <1>;
+ 		};
+ 
++		sdhc_1: sdhci@7c4000 {
++			compatible = "qcom,sdhci-msm-v5";
++			reg = <0 0x7c4000 0 0x1000>,
++					<0 0x7c5000 0 0x1000>;
++			reg-names = "hc", "cqhci";
++
++			iommus = <&apps_smmu 0xC0 0x0>;
++			interrupts = <GIC_SPI 652 IRQ_TYPE_LEVEL_HIGH>,
++					<GIC_SPI 656 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "hc_irq", "pwr_irq";
++
++			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
++					<&gcc GCC_SDCC1_AHB_CLK>,
++					<&rpmhcc RPMH_CXO_CLK>;
++			clock-names = "core", "iface", "xo";
++
++			bus-width = <8>;
++			non-removable;
++			supports-cqe;
++			no-sd;
++			no-sdio;
++
++			max-frequency = <192000000>;
++
++			qcom,dll-config = <0x0007642c>;
++			qcom,ddr-config = <0x80040868>;
++
++			mmc-ddr-1_8v;
++			mmc-hs200-1_8v;
++			mmc-hs400-1_8v;
++			mmc-hs400-enhanced-strobe;
++
++			status = "disabled";
++
++		};
++
++		sdhc_2: sdhci@8804000 {
++			compatible = "qcom,sdhci-msm-v5";
++			reg = <0 0x08804000 0 0x1000>;
++
++			iommus = <&apps_smmu 0x100 0x0>;
++			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
++					<GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "hc_irq", "pwr_irq";
++
++			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
++					<&gcc GCC_SDCC2_AHB_CLK>,
++					<&rpmhcc RPMH_CXO_CLK>;
++			clock-names = "core", "iface", "xo";
++
++			bus-width = <4>;
++
++			no-mmc;
++			no-sdio;
++
++			max-frequency = <202000000>;
++
++			qcom,dll-config = <0x0007642c>;
++
++			status = "disabled";
++
++		};
++
+ 		qupv3_id_0: geniqup@9c0000 {
+ 			compatible = "qcom,geni-se-qup";
+ 			reg = <0 0x009c0000 0 0x2000>;
+@@ -385,6 +453,108 @@
+ 				pins = "gpio46", "gpio47";
+ 				function = "qup13";
+ 			};
++
++			sdc1_on: sdc1-on {
++				pinconf-clk {
++					pins = "sdc1_clk";
++					bias-disable;
++					drive-strength = <16>;
++				};
++
++				pinconf-cmd {
++					pins = "sdc1_cmd";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				pinconf-data {
++					pins = "sdc1_data";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				pinconf-rclk {
++					pins = "sdc1_rclk";
++					bias-pull-down;
++				};
++			};
++
++			sdc1_off: sdc1-off {
++				pinconf-clk {
++					pins = "sdc1_clk";
++					bias-disable;
++					drive-strength = <2>;
++				};
++
++				pinconf-cmd {
++					pins = "sdc1_cmd";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				pinconf-data {
++					pins = "sdc1_data";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				pinconf-rclk {
++					pins = "sdc1_rclk";
++					bias-pull-down;
++				};
++			};
++
++			sdc2_on: sdc2-on {
++				pinconf-clk {
++					pins = "sdc2_clk";
++					bias-disable;
++					drive-strength = <16>;
++				};
++
++				pinconf-cmd {
++					pins = "sdc2_cmd";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				pinconf-data {
++					pins = "sdc2_data";
++					bias-pull-up;
++					drive-strength = <10>;
++				};
++
++				pinconf-sd-cd {
++					pins = "gpio91";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++			};
++
++			sdc2_off: sdc2-off {
++				pinconf-clk {
++					pins = "sdc2_clk";
++					bias-disable;
++					drive-strength = <2>;
++				};
++
++				pinconf-cmd {
++					pins = "sdc2_cmd";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				pinconf-data {
++					pins = "sdc2_data";
++					bias-pull-up;
++					drive-strength = <2>;
++				};
++
++				pinconf-sd-cd {
++					pins = "gpio91";
++					bias-disable;
++					drive-strength = <2>;
++				};
++			};
+ 		};
+ 
+ 		apps_smmu: iommu@15000000 {
+-- 
+2.7.4
 
-[...]
-
-Kind regards
-Uffe
