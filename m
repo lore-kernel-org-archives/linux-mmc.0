@@ -2,123 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2440BC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 10:35:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E126EC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 12:46:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE18364F76
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 10:35:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A428B64FF2
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 12:46:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229948AbhCJKep (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 05:34:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37018 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229660AbhCJKeo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 05:34:44 -0500
-Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC3C3C06174A
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 02:34:43 -0800 (PST)
-Received: by mail-lj1-x236.google.com with SMTP id m11so24873267lji.10
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 02:34:43 -0800 (PST)
+        id S232584AbhCJMqO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 07:46:14 -0500
+Received: from mail-eopbgr1410122.outbound.protection.outlook.com ([40.107.141.122]:23451
+        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S231880AbhCJMpm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 10 Mar 2021 07:45:42 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=JyswzTebY5T/j7p4dBLvnPNL8H+fgbR/zGcDNg0YvkRN0DsuyK6/W62BzWOgdoKHnjBnVslOEUsGKcpaI73Dpoo/5/OuVjR3qf08y/gh6rf/y/3t//otu4ofomuNutcqS08Eg7rw89ui85uB7qSy3VNCuDvVQLPVViH7ZZ/KYEoUgPjNqwdLhoRwFJsBXc4kXEz34wo87soxYWcNQqJYRSQ40PavgQSvCcAKLEHUpvIvpWI+CA+jIjYnOYb1n1tFdxbi470+U6XEbJA+Mxg8d2F9Rij321vyfh7ats43JCoW0CkXKSOfKD2TOnSPmW3a/dXBMyVNPX6qgl5+VnFD/w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=XzNBmCeNyCdku0yLtjvKxLULvIDXEucC1Vnb538lwQk=;
+ b=CZBTEMPfvKYNErhRrN7ZSzgo8Wd1ZJ1eoPHe7UFd+RmE7zZuQofH1LQE0vQEG7WCy4fz/V8ub8ep9k3tJbCnsvt2mBhNhfv1fFQmhvexYxId2Iug8qqhk6LierBaV50FY7Vac68+8ek01cQ15v2kNxTOmOs36kSX/TvP/ALCBx+YZH94gtTRRcKzwN0GMOxmPmJE/btEfRa2Ot754YSS6T9a3+kiJLAaZ2aB2GdRk/3R2EqsZfyuXh/Z9EzkBT81iO/AkQc6ADyI+C++Ah56qznJOZZYhQX15pm7nV3zUZh9sVqrW8WUutyAtezHb+WNQYi6dcOsFv3OG9yMWm20FA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=PWsBNa17zFFbX5pQPj28HEPvIzD8iLvjdf7cvgUKZAc=;
-        b=h/rjgSKjtOPaokmW/Wxd2af4y6iFXdiil64wC1WgmbB1PU4Bc/7Z82IwFiEqZfNrsQ
-         2CF0eSmm8dDM1yJSa+hYetsHsgrZfMHMKyfilslKJ70E7xXRi+A4zl0TfyLjO669vfTU
-         dNHYl16Tog1VIHPsQpgRyPI6rRupLW3G2IlV4yyhXt+r+sKgkAAyQJIeANNaCCQn9DA+
-         RNDzmfmb1WsS2Yd1ss2UaAIHkeU/kW7P6w0Yqbg10azDDVKE4bTaUd6EFJe0+f/+yk1T
-         jO5uB7TF+4Y9bthum58ev6/k2yefCR0jmEWjjj6ofvNZt6+Bp39KY7ShS7SEUNoLR25y
-         ij1g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=PWsBNa17zFFbX5pQPj28HEPvIzD8iLvjdf7cvgUKZAc=;
-        b=q3ShRHLkhYaqcTfP7aP0cdr6i64/ZjS/JKe3CmKvMTEtym3bNf1N2VBPlX8NsvSIvn
-         a6J8v97ng+D367fB364FI/AVBTXRMK2zHhaq6bx0DvKcl3g9rHqdr7u7StPPZ09EJkuq
-         OqOV02K24pM7Z9eKJW/q+l+yrCsL31kOzBbWFw1QFDRxANmrK4W3OR0IRTxGF2UkT5YK
-         KHIf4Hy+s/mRsa8CwPBYqyVTL23DLf6GrbULMgrdIy35oWwhENixpoiWjlScXjOEqvjP
-         aho1h1XX6/IHLyKnIrcfsfooNN/K/qDsAAjnhR+BjWOXNWrzQuMehEp8YDdWcUiv0iKr
-         XDLA==
-X-Gm-Message-State: AOAM5312bxYTQPvHLYMQzzFo9PIS+3t+CUn+RMk2gLyNKArZm8OAWE7h
-        at0yd5nG+ddIrAwWTp5M2TTl9ovD9OFutg==
-X-Google-Smtp-Source: ABdhPJzlp9pTxknKie81xrXQaug5Sm6YfQEMdTMTxaQ7YZTK5knNmAwXlwsLiDw5BnzEc7Lwcp/rYQ==
-X-Received: by 2002:a2e:900b:: with SMTP id h11mr1438577ljg.258.1615372482168;
-        Wed, 10 Mar 2021 02:34:42 -0800 (PST)
-Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
-        by smtp.gmail.com with ESMTPSA id h26sm3035757ljc.17.2021.03.10.02.34.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 10 Mar 2021 02:34:39 -0800 (PST)
-Date:   Wed, 10 Mar 2021 11:34:38 +0100
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=XzNBmCeNyCdku0yLtjvKxLULvIDXEucC1Vnb538lwQk=;
+ b=XHIpE05jZFpkeEnIneALRJW0LwJwHXTtq9C2eoERTx0tiBBlN5JdAeiJb/Q8BKxEQi2vwiwG4xxiXubrhNjpbt5h625XscLIbrnfJX6LicOEk1/eu1jycLE8U+RWPmsRWoJ3vApYrGtQ3AE8DI9k9zNfcEdphfAV453coGDAnN8=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYCPR01MB6431.jpnprd01.prod.outlook.com (2603:1096:400:9a::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3912.2; Wed, 10 Mar
+ 2021 12:45:41 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::cb4:9680:bb26:8f3f]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::cb4:9680:bb26:8f3f%4]) with mapi id 15.20.3912.027; Wed, 10 Mar 2021
+ 12:45:40 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 1/2] mmc: tmio: abort DMA before reset
-Message-ID: <YEigvgfGVUmeG/vP@oden.dyn.berto.se>
+CC:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
+Thread-Topic: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
+Thread-Index: AQHXFMXo4wNgQS9GTkW0a+Aab4SqFqp9FyLQ
+Date:   Wed, 10 Mar 2021 12:45:40 +0000
+Message-ID: <TY2PR01MB3692A6D95BD60A17AE698DF3D8919@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 References: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
- <20210309092332.30705-2-wsa+renesas@sang-engineering.com>
+ <20210309092332.30705-3-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210309092332.30705-3-wsa+renesas@sang-engineering.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: sang-engineering.com; dkim=none (message not signed)
+ header.d=none;sang-engineering.com; dmarc=none action=none
+ header.from=renesas.com;
+x-originating-ip: [124.210.22.195]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-ht: Tenant
+x-ms-office365-filtering-correlation-id: b3b049f8-7b54-421b-fb55-08d8e3c269a4
+x-ms-traffictypediagnostic: TYCPR01MB6431:
+x-microsoft-antispam-prvs: <TYCPR01MB643190D743315A91EACE34BAD8919@TYCPR01MB6431.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:9508;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: GVpgoGNvsuu6IjXKJLlzedk4vYl85uQsplKwEiDKm5jdBa03XdFbn1oC9vIUO6u/FTpJUoJChh5b6XIhX27/r71kSO9Tm1jm2QsCFeH6WNrKsbgad+limthqEghza+Fk77HXyadBALtOpCJXS+jvd6qikRMiFlS9/39/0DQzY33R2KV8z/Q2xzQ7xjTzgyhODktjbOiIB6e3J9nbUedgEJoeYoEyakBvvQVxcKQqfhQXBBOB6lOf4s/fzl8vmrZrnp5+itTmrEjmur13Jpz0Ok8zTgCdFK5yV7LAp1qXZWvTcgSnYib2W0N1OFvX63RSQOGBEiXFsTbYAmKD9eU2k6sstFvq/bwUl8LBoJZ5h3fPahuoN407VDb/NqpXWMoL7S7ZolHM+z1KzbcbHfhhjkWxEggWXRK6XdnPUAX2SM6kOznSVDPTHt0Uqjm11xKCsrJhCZyM8FHfeaqo7hYq/Ja1u6QjVEQFZMOwqZE8Dr91q818F9OZQdsrIMQ2j2WW/6WXSU5qN8JEFJSIza2J6g==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(39860400002)(366004)(346002)(376002)(136003)(76116006)(5660300002)(478600001)(8936002)(4326008)(66946007)(66446008)(66476007)(66556008)(86362001)(64756008)(54906003)(316002)(26005)(55016002)(7696005)(52536014)(83380400001)(9686003)(6506007)(33656002)(8676002)(55236004)(186003)(2906002)(71200400001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata: =?us-ascii?Q?HHTJALKi1pdLpyQsVLdxQf/jUn8/VXQmSMFmBRIu7Saq2zx5+AJpie1EsGx5?=
+ =?us-ascii?Q?t/oF/YyfeiBdUDbsFgJNPRuQvcNXQLyAcv3/vEXQIYhRDdaTaKJJWFzM7YhV?=
+ =?us-ascii?Q?178nd8XzJNh5ZVNfhR7Hd7jpXjU1AI2goulVGN1dRW1Sb9npQsVdLtB1A0tx?=
+ =?us-ascii?Q?/2XN3tHTQVuaLXk3pfypUbvetHhAR4cXTF/ox8kW+42IbQCKVWABMcaxhQ8w?=
+ =?us-ascii?Q?Ed+pKDA3Zpy8QE5G5ac4ESjPQvlFds20/LKak86Yb8aY/RoS3vUPp4bJsLyF?=
+ =?us-ascii?Q?rcjnYJ92aNZtsMn2VMA1T4+fMzgTk5SGyZna+KXC3ULxDTMh5JZPmGzO9QYu?=
+ =?us-ascii?Q?azNYHUY4W5t2XuLGIfni+304kgTyuIBRQHCES2OSouHV7DAbRE/iKw3kLfwq?=
+ =?us-ascii?Q?CXZqNcJDqKmzY848jZ9+YpKsuoSdcsTiZQkfnxbdP5gY/mLKiu161AOjgb5K?=
+ =?us-ascii?Q?JNV4DDDJpH+9POWSch2tOBlZgG0cEaOIieQZuZXs8Ivofld7liEPfpCn4QUd?=
+ =?us-ascii?Q?LLDT0zfqnSJ3Hg+l1rDGp7yuEJsCgXTUmowPE90udt3WYmH0ngHFPf4FiXCM?=
+ =?us-ascii?Q?Pb4efub0Yf4UBOIpilg2R1xb5cW9xIsw13r9uXGgUT32N3aNPK/2/At8vgOh?=
+ =?us-ascii?Q?BlcibjUvXefvWghrGbmw7U+AJUwgTu0gjf9npj2yqWfWycvH6ioZD9jgHnyw?=
+ =?us-ascii?Q?01CMz9P4kd1Nh+9LKg+PzLU1tu8nS2gVY/2RZXvpt5pJUHXn9eHY0KCBQVsS?=
+ =?us-ascii?Q?DfuPVSVBsmGkHzDBAOTUIuICIzlVcYNSrUpMJXRRDfbFaCtyHNzpsdZPtwRV?=
+ =?us-ascii?Q?7rYzNT5jIZK6apfAD3VFpSk3T24NnF7IlluR7lqWNkdIva/oIOj+Dnbf4io7?=
+ =?us-ascii?Q?+2EQBWhVUiv0NAMrL1UnJR1/9iztbXMR65s3fFtG6OCevjgak2zW1lompZzP?=
+ =?us-ascii?Q?ksP8RdLN+7Wz9oUbDuXcAhuzXWW84FCVUpXyjVEp5IJn9/7EX4xBSKjMrydw?=
+ =?us-ascii?Q?xBNwIp+xdyfLTEMd0SKLYDCnhPunwYjeOcl3Icf9u0LVS2t8T8X5/zxXf6Bv?=
+ =?us-ascii?Q?qqeV5ai85cShXcvUB120PAMbGb5NTdSyTa77+lbGAgde3E8cuaUbYVTdiG3m?=
+ =?us-ascii?Q?tHWIaS1uQa8fCj0I8W4i+PebAc337sOenK+TX4iUqBfr6hFVSlA2VbcLMhjm?=
+ =?us-ascii?Q?TjL25fj6nbCJqU8LulOZwzm6gyhPzHXMjehPyhoS7K7QpdxIuoEbQJmkXn6b?=
+ =?us-ascii?Q?VQxY/uPeYgcwRjGDyVzMedVwJrxYFgXmRLEPkgMsko2LSC9huEpyLDLiU2sv?=
+ =?us-ascii?Q?NgV5vcBeFTgIGYSf7lHcInXp?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210309092332.30705-2-wsa+renesas@sang-engineering.com>
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: b3b049f8-7b54-421b-fb55-08d8e3c269a4
+X-MS-Exchange-CrossTenant-originalarrivaltime: 10 Mar 2021 12:45:40.7216
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: +keVWDWg9Bky1eHncuE2MaFrxOOW29RNSUq/vx8TOlNubhsd/Fd1F08QPyXn4zYaYk94Dxn18aGm7zNp4W7cXgmTis3gWL8iFer31GDJ0yhZ/DLaMNGR2bnXUYHiXz+L
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYCPR01MB6431
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Hi Wolfram-san,
 
-Thanks for your patch.
+Thank you for the patch!
 
-On 2021-03-09 10:23:31 +0100, Wolfram Sang wrote:
-> We will soon allow resetting the whole IP core via a reset controller.
-> For this case, DMA must be terminated before the actual reset. For the
-> other cases, it is probably better, too.
-
-I agree I think it makes more sens to abort dma before reseting the 
-device.
-
-> 
+> From: Wolfram Sang, Sent: Tuesday, March 9, 2021 6:24 PM
+>=20
+> All recent SDHI instances can be reset via the reset controller. If one
+> is found, use it instead of the open coded reset. This is to get a
+> future-proof sane reset state.
+>=20
 > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
-
 > ---
->  drivers/mmc/host/tmio_mmc_core.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 5aa57640d0e6..eca767dcabba 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -172,11 +172,11 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
->  	sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
->  	usleep_range(10000, 11000);
->  
-> +	tmio_mmc_abort_dma(host);
-> +
->  	if (host->reset)
->  		host->reset(host);
->  
-> -	tmio_mmc_abort_dma(host);
-> -
->  	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
->  		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
->  		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
-> -- 
-> 2.30.0
-> 
+<snip>
+> @@ -561,9 +563,16 @@ static int renesas_sdhi_prepare_hs400_tuning(struct =
+mmc_host *mmc, struct mmc_io
+>  static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+>  {
+>  	struct renesas_sdhi *priv =3D host_to_priv(host);
+> +	int ret;
+>  	u16 val;
+>=20
+> -	if (priv->scc_ctl) {
+> +	if (priv->rstc) {
+> +		reset_control_reset(priv->rstc);
+> +		/* Unknown why but without polling reset status, it will hang */
+> +		read_poll_timeout(reset_control_status, ret, ret =3D=3D 0, 1, 100,
+> +				  false, priv->rstc);
+> +		priv->needs_adjust_hs400 =3D false;
 
--- 
-Regards,
-Niklas Söderlund
+After we did hard reset here, sometimes tmio_mmc_reset_work() cannot recove=
+r
+again with "mmcblk0: recovery failed!" message... So, I investigated this
+issue and I found a reason.
+
+> +	} else if (priv->scc_ctl) {
+>  		renesas_sdhi_disable_scc(host->mmc);
+
+I realized this renesas_sdhi_disable_scc() will set CLK_CTL_SCLKEN.
+So, the previous code can issue CMD13 after tmio_mmc_reset_work() was calle=
+d.
+But, after we applied this patch, the CMD13 failed because the clock was di=
+sabled.
+# In other words, if a controller doesn't have scc, the previous code canno=
+t issue
+# CMD13 in such a case, I guess.
+
+So, before we apply this patch, we have to add ->set_clock() calling in
+tmio_mmc_reset_work() like below:
+---
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_c=
+ore.c
+index eca767dcabba..a05ccfc7aa0d 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -222,6 +222,7 @@ static void tmio_mmc_reset_work(struct work_struct *wor=
+k)
+ 	spin_unlock_irqrestore(&host->lock, flags);
+=20
+ 	tmio_mmc_reset(host);
++	host->set_clock(host, host->clk_cache);
+=20
+ 	/* Ready for new calls */
+ 	host->mrq =3D NULL;
+---
+
+Best regards,
+Yoshihiro Shimoda
