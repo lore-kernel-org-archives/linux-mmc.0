@@ -2,153 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE559C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 10:30:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2440BC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 10:35:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8DA9D64F72
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 10:30:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CE18364F76
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 10:35:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232502AbhCJK34 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 05:29:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35932 "EHLO
+        id S229948AbhCJKep (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 05:34:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232484AbhCJK3j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 05:29:39 -0500
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFDFFC061762
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 02:29:38 -0800 (PST)
-Received: by mail-lf1-x12a.google.com with SMTP id 18so32547376lff.6
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 02:29:38 -0800 (PST)
+        with ESMTP id S229660AbhCJKeo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 05:34:44 -0500
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC3C3C06174A
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 02:34:43 -0800 (PST)
+Received: by mail-lj1-x236.google.com with SMTP id m11so24873267lji.10
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 02:34:43 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=hZu8kYWcUsjJZQZLgu1XKiWKVJDy+c+Bw7NCUyMv0Bc=;
-        b=RJH9YJ4ctf1i7yh5gwJmVZ6iIZEtaOi4hcZsPJS+3fHl6JJRW9vQcHUJuIbxI7ELPW
-         4WWZ7RYqXaZCBUAmpCBQibq4rGpusj9qpj7lq4rIsorl11VcXQWfGJ/1U8KC/nXVH0lC
-         X5enEIdvBbbV7lC+KCEhzTEZxen86rsiL5tYoCOGGj56VETxgkV3iU/jxhh+EA3a9RPu
-         3rzJnssS2eVBVNTlQRd/h34engsUMq7A63Zn5Va3+VeF/B5tGfVPWLfn5WR4G2Mtxn0I
-         9Ry+cNgqM6c5mrkJFQS4CxtCLc91eV+wfOLKMTeAdLbtGmTT4WDXeKYQ2R9eZ1bsyD1g
-         Y35A==
+        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=PWsBNa17zFFbX5pQPj28HEPvIzD8iLvjdf7cvgUKZAc=;
+        b=h/rjgSKjtOPaokmW/Wxd2af4y6iFXdiil64wC1WgmbB1PU4Bc/7Z82IwFiEqZfNrsQ
+         2CF0eSmm8dDM1yJSa+hYetsHsgrZfMHMKyfilslKJ70E7xXRi+A4zl0TfyLjO669vfTU
+         dNHYl16Tog1VIHPsQpgRyPI6rRupLW3G2IlV4yyhXt+r+sKgkAAyQJIeANNaCCQn9DA+
+         RNDzmfmb1WsS2Yd1ss2UaAIHkeU/kW7P6w0Yqbg10azDDVKE4bTaUd6EFJe0+f/+yk1T
+         jO5uB7TF+4Y9bthum58ev6/k2yefCR0jmEWjjj6ofvNZt6+Bp39KY7ShS7SEUNoLR25y
+         ij1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=hZu8kYWcUsjJZQZLgu1XKiWKVJDy+c+Bw7NCUyMv0Bc=;
-        b=bwJLrsb6R9i8JhvUk72v81ya1hKKjQ72SO0IFvcdlHFzXfjbDztVkUfeo+tZ2lsppD
-         VouU60e2VLos84tBdMxJMwMA98DNpVWgYJ04/TmwqyhfslTN/KYPXtfim1C5K7mCznH9
-         czp5nccoNdWGc+wHcfbrDZOlYKhkefCctibyOx1r6VLpjafAMEU4NfdNi8ve2Fnh+Vlj
-         zdzf5/cY+ahfP0/SYtm9hIcfY9B6jYXyNl0zYEStT06RIfkvBGQBrTBwf5cxUbjGhhhq
-         9JijV0tVuxdZlo1oLmZCtmvOAPRFzhxaCnKo6iUugP+QNL0gQaJ9TamOISp8mUU1292y
-         /FDw==
-X-Gm-Message-State: AOAM5326ZJKqMd+VhOf/rMKJID9nrGKxLC/nsXSuau93ywcSwoHqq15N
-        UC+LFkFsRNCiGC4Na8uBzQDNV1ObR9dbzMQNWYt69Q==
-X-Google-Smtp-Source: ABdhPJzV5rCJIjqxQ3LiucCut2xv+IIf2U8hV+WxjX4O6mNhhvyogQZlfhPtOtXXp1t/ll9omuk+MAkZGnu5Q6bJfH0=
-X-Received: by 2002:ac2:46db:: with SMTP id p27mr1639785lfo.396.1615372177245;
- Wed, 10 Mar 2021 02:29:37 -0800 (PST)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=PWsBNa17zFFbX5pQPj28HEPvIzD8iLvjdf7cvgUKZAc=;
+        b=q3ShRHLkhYaqcTfP7aP0cdr6i64/ZjS/JKe3CmKvMTEtym3bNf1N2VBPlX8NsvSIvn
+         a6J8v97ng+D367fB364FI/AVBTXRMK2zHhaq6bx0DvKcl3g9rHqdr7u7StPPZ09EJkuq
+         OqOV02K24pM7Z9eKJW/q+l+yrCsL31kOzBbWFw1QFDRxANmrK4W3OR0IRTxGF2UkT5YK
+         KHIf4Hy+s/mRsa8CwPBYqyVTL23DLf6GrbULMgrdIy35oWwhENixpoiWjlScXjOEqvjP
+         aho1h1XX6/IHLyKnIrcfsfooNN/K/qDsAAjnhR+BjWOXNWrzQuMehEp8YDdWcUiv0iKr
+         XDLA==
+X-Gm-Message-State: AOAM5312bxYTQPvHLYMQzzFo9PIS+3t+CUn+RMk2gLyNKArZm8OAWE7h
+        at0yd5nG+ddIrAwWTp5M2TTl9ovD9OFutg==
+X-Google-Smtp-Source: ABdhPJzlp9pTxknKie81xrXQaug5Sm6YfQEMdTMTxaQ7YZTK5knNmAwXlwsLiDw5BnzEc7Lwcp/rYQ==
+X-Received: by 2002:a2e:900b:: with SMTP id h11mr1438577ljg.258.1615372482168;
+        Wed, 10 Mar 2021 02:34:42 -0800 (PST)
+Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
+        by smtp.gmail.com with ESMTPSA id h26sm3035757ljc.17.2021.03.10.02.34.39
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 10 Mar 2021 02:34:39 -0800 (PST)
+Date:   Wed, 10 Mar 2021 11:34:38 +0100
+From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 1/2] mmc: tmio: abort DMA before reset
+Message-ID: <YEigvgfGVUmeG/vP@oden.dyn.berto.se>
+References: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
+ <20210309092332.30705-2-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
- <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
- <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
- <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
-In-Reply-To: <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
-From:   Sumit Garg <sumit.garg@linaro.org>
-Date:   Wed, 10 Mar 2021 15:59:25 +0530
-Message-ID: <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     Hector Martin <marcan@marcan.st>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Arnd Bergmann <arnd@linaro.org>,
-        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
-        David Howells <dhowells@redhat.com>,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Ruchika Gupta <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210309092332.30705-2-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 10 Mar 2021 at 14:17, Hector Martin <marcan@marcan.st> wrote:
->
-> On 10/03/2021 14.14, Sumit Garg wrote:
-> > On Wed, 10 Mar 2021 at 02:47, Hector Martin <marcan@marcan.st> wrote:
-> >>
-> >> On 09/03/2021 01.20, Linus Walleij wrote:
-> >>> I suppose it would be a bit brutal if the kernel would just go in and
-> >>> appropriate any empty RPMB it finds, but I suspect it is the right way
-> >>> to make use of this facility given that so many of them are just sitting
-> >>> there unused. Noone will run $CUSTOM_UTILITY any more than they
-> >>> run the current RPMB tools in mmc-tools.
-> >>
-> >> AIUI the entire thing relies on a shared key that is programmed once
-> >> into the RPMB device, which is a permanent operation. This key has to be
-> >> secure, usually stored on CPU fuses or derived based on such a root of
-> >> trust. To me it would seem ill-advised to attempt to automate this
-> >> process and have the kernel do a permanent take-over of any RPMBs it
-> >> finds (with what key, for one?) :)
-> >>
-> >
-> > Wouldn't it be a good idea to use DT here to represent whether a
-> > particular RPMB is used as a TEE backup or is available for normal
-> > kernel usage?
-> >
-> > In case of normal kernel usage, I think the RPMB key can come from
-> > trusted and encrypted keys subsystem.
->
-> Remember that if the key is ever lost, the RPMB is now completely
-> useless forever.
->
-> This is why, as far as I know, most sane platforms will use hard fused
-> values to derive this kind of thing, not any kind of key stored in
-> erasable storage.
+Hi Wolfram,
 
-AFAIK, trusted and encrypted keys are generally loaded from initramfs
-(as an encrypted blob) which happens during boot and if an attacker is
-able to erase initramfs then it's already able to make the device
-non-bootable (DoS attack which is hard to prevent against).
+Thanks for your patch.
 
-Although, I agree with you that fuses are the preferred way to store
-RPMB key but not every platform may possess it and vendors may decide
-to re-flash a bricked device via recovery image.
+On 2021-03-09 10:23:31 +0100, Wolfram Sang wrote:
+> We will soon allow resetting the whole IP core via a reset controller.
+> For this case, DMA must be terminated before the actual reset. For the
+> other cases, it is probably better, too.
 
->
-> Also, newly provisioned keys are sent in plain text, which means that
-> any kind of "if the RPMB is blank, take it over" automation equates to
-> handing over your key who an attacker who removes the RPMB and replaces
-> it with a blank one, and then they can go access anything they want on
-> the old RPMB device (assuming the key hasn't changed; and if it has
-> changed that's conversely a recipe for data loss if something goes wrong).
->
-> I really think trying to automate any kind of "default" usage of an RPMB
-> is a terrible idea. It needs to be a conscious decision on a
-> per-platform basis.
->
+I agree I think it makes more sens to abort dma before reseting the 
+device.
 
-Agree and via DT method I only meant to assign already provisioned
-RPMB device/s either to TEE or Linux kernel. And RPMB key provisioning
-being a one time process should be carried out carefully during device
-manufacturing only.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
--Sumit
+Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
 
-> --
-> Hector Martin (marcan@marcan.st)
-> Public Key: https://mrcn.st/pub
+> ---
+>  drivers/mmc/host/tmio_mmc_core.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 5aa57640d0e6..eca767dcabba 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -172,11 +172,11 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+>  	sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
+>  	usleep_range(10000, 11000);
+>  
+> +	tmio_mmc_abort_dma(host);
+> +
+>  	if (host->reset)
+>  		host->reset(host);
+>  
+> -	tmio_mmc_abort_dma(host);
+> -
+>  	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
+>  		sd_ctrl_write16(host, CTL_SDIO_IRQ_MASK, host->sdio_irq_mask);
+>  		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
+> -- 
+> 2.30.0
+> 
+
+-- 
+Regards,
+Niklas Söderlund
