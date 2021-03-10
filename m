@@ -2,333 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DA0BCC43381
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 04:49:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C36F4C433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 04:55:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B391E64FF4
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 04:49:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F18664FF4
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 04:55:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232353AbhCJEsr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 23:48:47 -0500
-Received: from z11.mailgun.us ([104.130.96.11]:26900 "EHLO z11.mailgun.us"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232361AbhCJEsd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 9 Mar 2021 23:48:33 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1615351713; h=Content-Transfer-Encoding: Content-Type:
- In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
- Subject: Sender; bh=3QJl+xQdpkUYQGTAXkdYwW5Vo4YmIjcRh7Npt+NHeiA=; b=LN/vlN0D47WreXZ62/3jzjz0Y7gZxwevM91IHxsT8AaCRV8QBKgv11ecfxmVjDfE2aUw34uX
- kn7FOKolo4kGCTXIT86iZVqA0JH/k8tf7pXBHc3TP1XO16Vjzxuftbseo7/VhfuJBYegAxCa
- 4pqehfeD8ePBajvc5zjOHGe2/20=
-X-Mailgun-Sending-Ip: 104.130.96.11
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n06.prod.us-east-1.postgun.com with SMTP id
- 60484f99a6850484a6e27bad (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 10 Mar 2021 04:48:25
- GMT
-Sender: vbadigan=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id E5EE5C433C6; Wed, 10 Mar 2021 04:48:24 +0000 (UTC)
-Received: from [192.168.0.101] (unknown [49.205.242.72])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: vbadigan)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 37DCCC433C6;
-        Wed, 10 Mar 2021 04:48:15 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 37DCCC433C6
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
-Subject: Re: [PATCH V1] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
- card
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, sartgarg@codeaurora.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        rampraka@codeaurora.org, sayalil@codeaurora.org,
-        rnayak@codeaurora.org, saiprakash.ranjan@codeaurora.org,
-        sibis@codeaurora.org, cang@codeaurora.org, pragalla@codeaurora.org,
-        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org
-References: <1615317483-23780-1-git-send-email-sbhanu@codeaurora.org>
-From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
-Message-ID: <885574fe-3afe-8850-4acb-c330e1755a96@codeaurora.org>
-Date:   Wed, 10 Mar 2021 10:18:12 +0530
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.1
+        id S232380AbhCJEzE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 23:55:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48046 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230346AbhCJEyq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 23:54:46 -0500
+Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14A28C06174A
+        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 20:54:46 -0800 (PST)
+Received: by mail-lf1-x12c.google.com with SMTP id k9so31215016lfo.12
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 20:54:45 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=9nJduy9vJ/gQ9Q5XK6k0XKFhpSnNly3WrZaYD2M0E4M=;
+        b=Qu+1v9uZK4/SCesRdfvdaIGpwyqIYD3wcfpeNPzOcsro1n4BnHpcpIshrnhMWrC297
+         bJ1vLzD8JDObKwC5i3DXxeM1b6ttsMToxGQiVstvyI4EzvPyPEmcgDwImrG7jz35W76R
+         5WBVSyEOuu0OOPuNDEgZJyyPu3wrxis8s+iJK6IxnMnPMM5fQXVmjj6V/BgYVnzhtRt8
+         Q/g3YQRgbR8t6eYYRUcO7tTT4k79FpDfKDxiCqmg614HPZB3FPgXAABs2eXgqEyoOU86
+         3XGRbsqTonKUCL3dh5eUUlW3+4Jvd/Wys5N/s+z3AXteE5qQ0zl+736eu+txVvl14A5E
+         bsGQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=9nJduy9vJ/gQ9Q5XK6k0XKFhpSnNly3WrZaYD2M0E4M=;
+        b=pWikCowWIa5ZFjyHEMyB+IMu3R/aYEZa5+Aiq9mc+EVVnzuNdpIUbO4C5JRxsbYGcx
+         a9roq1gInW9DXgQHWNqx+87yO+2/d4tXNYQPOKkGlAjyuNMJn7IS+mKINlhL+xvnbM+N
+         Q82ikcDvDLHcWXfZq7X9I//mJ08Ag8qm/kul/a32BmWhZoGrGGb+jzPmx6SbDvUV52Kg
+         SpK8lbNwKqszQcNHM7VxMDwnjHz+YB4VxU+NnuzHhYYlMUGpny8pyBm43/N1R5khkkW0
+         qw0mtVh4VtuXNaPCOXqSpqFcleFSoZuELKLeAioTDNL07L4qlPN6a4UfdGnrYE/U4dAL
+         Rp1w==
+X-Gm-Message-State: AOAM533lTtMJAeKrzWKCLKwkLJnaj26TlCm3/sJ/krBD/qeE2F6JHuSg
+        LJwGcH6B0RifBFNRtD+OoYDSs8hfWAcsiSZ6NTJOLA==
+X-Google-Smtp-Source: ABdhPJyA+Fk223H+bm0hGNLZN8BH2HdjMZLq6AkSXE9jXyn96FwjiEAycghxLxVYi1VmZdSiSE4xc4Vgs9mOjBPtTQw=
+X-Received: by 2002:ac2:5970:: with SMTP id h16mr901084lfp.108.1615352084389;
+ Tue, 09 Mar 2021 20:54:44 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1615317483-23780-1-git-send-email-sbhanu@codeaurora.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+ <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+ <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com> <178479.1615309961@warthog.procyon.org.uk>
+In-Reply-To: <178479.1615309961@warthog.procyon.org.uk>
+From:   Sumit Garg <sumit.garg@linaro.org>
+Date:   Wed, 10 Mar 2021 10:24:33 +0530
+Message-ID: <CAFA6WYOvszeEBUL6_mhX90zZMFAtGN6f=tBAC7L43ik00Js7=w@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To:     David Howells <dhowells@redhat.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>,
+        Hector Martin <marcan@marcan.st>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi David,
 
-On 3/10/2021 12:48 AM, Shaik Sajida Bhanu wrote:
-> Add nodes for eMMC and SD card on sc7280.
+On Tue, 9 Mar 2021 at 22:43, David Howells <dhowells@redhat.com> wrote:
 >
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> ---
-> This change is depends on the below patch series:
-> https://lore.kernel.org/lkml/1613114930-1661-1-git-send-email-rnayak@codeaurora.org/
-> https://lore.kernel.org/patchwork/project/lkml/list/?series=&submitter=28035&state=&q=&archive=&delegate=
-> ---
->   arch/arm64/boot/dts/qcom/sc7280-idp.dts |  26 +++++
->   arch/arm64/boot/dts/qcom/sc7280.dtsi    | 170 ++++++++++++++++++++++++++++++++
->   2 files changed, 196 insertions(+)
+> > As it seems neither Microsoft nor Apple is paying it much attention
+> > (+/- new facts) it will be up to the community to define use cases
+> > for RPMB. I don't know what would make most sense, but the
+> > kernel keyring seems to make a bit of sense as it is a well maintained
+> > keyring project.
 >
-> diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
-> index ac79420..6abb2aa 100644
-> --- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
-> +++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
-> @@ -8,6 +8,7 @@
->   /dts-v1/;
->   
->   #include "sc7280.dtsi"
-> +#include <dt-bindings/gpio/gpio.h>
->   
->   / {
->   	model = "Qualcomm Technologies, Inc. SC7280 IDP platform";
-> @@ -256,3 +257,28 @@
->   		bias-pull-up;
->   	};
->   };
-> +
-> +&sdhc_1 {
-> +	status = "okay";
-> +
-> +	pinctrl-names = "default", "sleep";
-> +	pinctrl-0 = <&sdc1_on>;
-> +	pinctrl-1 = <&sdc1_off>;
-> +
-> +	vmmc-supply = <&vreg_l7b_2p9>;
-> +	vqmmc-supply = <&vreg_l19b_1p8>;
-> +
-> +};
-> +
-> +&sdhc_2 {
-> +	status = "okay";
-> +
-> +	pinctrl-names = "default","sleep";
-> +	pinctrl-0 = <&sdc2_on>;
-> +	pinctrl-1 = <&sdc2_off>;
-> +
-> +	vmmc-supply = <&vreg_l9c_2p9>;
-> +	vqmmc-supply = <&vreg_l6c_2p9>;
-> +
-> +	cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
-> +};
-> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi b/arch/arm64/boot/dts/qcom/sc7280.dtsi
-> index 3b86052..91fb18a 100644
-> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
-> @@ -18,6 +18,11 @@
->   
->   	chosen { };
->   
-> +	aliases {
-> +		mmc1 = &sdhc_1;
-> +		mmc2 = &sdhc_2;
-> +	};
-> +
->   	clocks {
->   		xo_board: xo-board {
->   			compatible = "fixed-clock";
-> @@ -315,6 +320,69 @@
->   			#power-domain-cells = <1>;
->   		};
->   
-> +		sdhc_1: sdhci@7c4000 {
-> +			compatible = "qcom,sdhci-msm-v5";
-> +			reg = <0 0x7c4000 0 0x1000>,
-> +					<0 0x7c5000 0 0x1000>;
-> +			reg-names = "hc", "cqhci";
-> +
-> +			iommus = <&apps_smmu 0xC0 0x0>;
-> +			interrupts = <GIC_SPI 652 IRQ_TYPE_LEVEL_HIGH>,
-> +					<GIC_SPI 656 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> +					<&gcc GCC_SDCC1_AHB_CLK>,
-> +					<&rpmhcc RPMH_CXO_CLK>;
-> +			clock-names = "core", "iface", "xo";
-> +
-> +			bus-width = <8>;
-> +			non-removable;
-> +			supports-cqe;
-> +			no-sd;
-> +			no-sdio;
-> +
-> +			max-frequency = <192000000>;
-> +
-> +			qcom,dll-config = <0x0007642c>;
-> +			qcom,ddr-config = <0x80040868>;
-> +
-> +			mmc-ddr-1_8v;
-> +			mmc-hs200-1_8v;
-> +			mmc-hs400-1_8v;
-> +			mmc-hs400-enhanced-strobe;
-> +
-> +			status = "disabled";
-> +
-> +		};
-> +
-> +		sdhc_2: sdhci@8804000 {
-> +			compatible = "qcom,sdhci-msm-v5";
-> +			reg = <0 0x08804000 0 0x1000>;
-> +
-> +			iommus = <&apps_smmu 0x100 0x0>;
-> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-> +					<GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-> +					<&gcc GCC_SDCC2_AHB_CLK>,
-> +					<&rpmhcc RPMH_CXO_CLK>;
-> +			clock-names = "core", "iface", "xo";
-> +
-> +			bus-width = <4>;
-> +
-> +			no-mmc;
-> +			no-sdio;
-> +
-> +			max-frequency = <202000000>;
-> +
-> +			qcom,dll-config = <0x0007642c>;
-> +
-> +			status = "disabled";
-> +
-> +		};
-> +
->   		qupv3_id_0: geniqup@9c0000 {
->   			compatible = "qcom,geni-se-qup";
->   			reg = <0 0x009c0000 0 0x2000>;
-> @@ -385,6 +453,108 @@
->   				pins = "gpio46", "gpio47";
->   				function = "qup13";
->   			};
-> +
-> +			sdc1_on: sdc1-on {
-> +				pinconf-clk {
-> +					pins = "sdc1_clk";
-> +					bias-disable;
-> +					drive-strength = <16>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc1_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc1_data";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-rclk {
-> +					pins = "sdc1_rclk";
-> +					bias-pull-down;
-> +				};
-> +			};
-> +
-> +			sdc1_off: sdc1-off {
-> +				pinconf-clk {
-> +					pins = "sdc1_clk";
-> +					bias-disable;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc1_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc1_data";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-rclk {
-> +					pins = "sdc1_rclk";
-> +					bias-pull-down;
-> +				};
-> +			};
-> +
-> +			sdc2_on: sdc2-on {
-> +				pinconf-clk {
-> +					pins = "sdc2_clk";
-> +					bias-disable;
-> +					drive-strength = <16>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc2_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc2_data";
-> +					bias-pull-up;
-> +					drive-strength = <10>;
-> +				};
-> +
-> +				pinconf-sd-cd {
-> +					pins = "gpio91";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +			};
-> +
-> +			sdc2_off: sdc2-off {
-> +				pinconf-clk {
-> +					pins = "sdc2_clk";
-> +					bias-disable;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-cmd {
-> +					pins = "sdc2_cmd";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-data {
-> +					pins = "sdc2_data";
-> +					bias-pull-up;
-> +					drive-strength = <2>;
-> +				};
-> +
-> +				pinconf-sd-cd {
-> +					pins = "gpio91";
-> +					bias-disable;
-On few sc7180 based boards where external pull up is missing on cd-gpio,
-we had seen issues like un-intended interrupt on cd-gpio pin (since its
-getting toggled) during runtime PM cycle and resulting in unnecessary
-scheduling of SDcard scan (mmc_rescan). This issue is seen only when SDcard
-is not present.
-By enabling internal pull all the time (bais-pull-up), we can avoid such 
-issue.
+> I'm afraid I don't know a whole lot about the RPMB.  I've just been and read
+> https://lwn.net/Articles/682276/ about it.
+>
+> What is it you envision the keyring API doing with regard to this?  Being used
+> to represent the key needed to access the RPMB or being used to represent an
+> RPMB entry (does it have entries?)?
+>
 
-> +					drive-strength = <2>;
-> +				};
-> +			};
->   		};
->   
->   		apps_smmu: iommu@15000000 {
+I think it's the former one to represent the RPMB key and it looks
+like the trusted and encrypted keys subsystem should be useful here to
+prevent any user-space exposures of the RPMB key.
+
+-Sumit
+
+> David
+>
