@@ -2,210 +2,171 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83EB7C433E9
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:34:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C396C433E6
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:39:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3CAAD64FFF
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:34:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F172164FFA
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:39:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232433AbhCJJdz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 04:33:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51922 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232154AbhCJJdt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 04:33:49 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A76E8C06174A
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 01:33:48 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id e7so32389707lft.2
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 01:33:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=dDRhDJmwcUrEs6ffAtS8tb/gtAhqWCALd3fRPCTAJ70=;
-        b=bEUB6pz/vURQUdnkngDfbZbhni4rEB0aSPdUbUHgY9kTycoRiNRdZd8NKsojY2Qf6V
-         sWGYFVgJXD7iz++3qlg7CPyNnJhDrhLfTNx8abBb+PuEapPT8bna2NGgl5Yd/t0JIJg+
-         j19O4RtXQx59KLmeEyhcWN0i0q5/G1oq7yueI6eG4GtlA3ZZhQ8/YSD/RbI7P9h1yffw
-         NOgrjH9rO6UWfkaurrhy6r4UrCm+gIyzA5kA2gaTK8PuObuQsUFug5gIff4Z3an9Yn0m
-         5pSav63YOGmRbU63n5I6U7/LKhbQ01Ps3yQyOy/YDWhrZI81Oms1sjf2WIpdSchApRWT
-         Km0A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=dDRhDJmwcUrEs6ffAtS8tb/gtAhqWCALd3fRPCTAJ70=;
-        b=cNoz7pVaLeiux3AtJMJb+DvSsJpBcSF+OiQtLYufXBAHB7/lT9R0HOC/0PfwPU+QnV
-         JqhQ6Aax1F5ylNECjraOInl0+Rne095OFsjibbpayS6Qi0Dj8oQzaiqZwOyARKgpjkLj
-         ek26xmUoH+yWYdckRucBRGJjSpnghMvFCBZzBbhsJbl2PUow93bjUdVF2lcmhQgBOc2S
-         iDRPeUjadB3MTSZ4F7H4Lt7OmlNMeNiG3gDeMpJUHaAxXjXH7IWLC5qsbgRgeR9CU13G
-         7eZIOEFRDbdzO8g0L0erISN4G2T34AO9z0D1fakgUMeFVHE3PWi6V9Kke3p6xM8T2z+F
-         s2pw==
-X-Gm-Message-State: AOAM532htWWTsGCbTFZ6kIhqXjbtN75wkd+R/DX8CQTuTOaNIQ4RjV1V
-        Or4FjJCZb+xl1CoforafWxzvfzfJ9m0KauFGlHKuTw==
-X-Google-Smtp-Source: ABdhPJxKM2BZRaNYPJ+fEjUPaeQksl/pR4sY3mSXpwekxQcskbbSM2E3UzpJMwFDvfLbDXlYPy+XJcSeA8y8GteS4wM=
-X-Received: by 2002:a19:4c08:: with SMTP id z8mr1459058lfa.157.1615368827066;
- Wed, 10 Mar 2021 01:33:47 -0800 (PST)
+        id S231681AbhCJJin (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 04:38:43 -0500
+Received: from regular1.263xmail.com ([211.150.70.200]:44760 "EHLO
+        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231492AbhCJJiQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 04:38:16 -0500
+Received: from localhost (unknown [192.168.167.235])
+        by regular1.263xmail.com (Postfix) with ESMTP id 34BED1C5D;
+        Wed, 10 Mar 2021 17:37:34 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-SKE-CHECKED: 1
+X-ABS-CHECKED: 1
+Received: from [172.16.12.64] (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P24304T139685251299072S1615369053264450_;
+        Wed, 10 Mar 2021 17:37:34 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <6df6f007d349241a15ee878e4b443baf>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: heiko@sntech.de
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+Message-ID: <7573e8c1-3f55-9925-bc14-534455f1ffa3@rock-chips.com>
+Date:   Wed, 10 Mar 2021 17:37:33 +0800
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
- <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com> <178479.1615309961@warthog.procyon.org.uk>
-In-Reply-To: <178479.1615309961@warthog.procyon.org.uk>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 10 Mar 2021 10:33:35 +0100
-Message-ID: <CACRpkdaDtG4Xf0nYnT66C5d8GOwOoqd3=bZ1E3_=osveWo_C5A@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     David Howells <dhowells@redhat.com>
-Cc:     Arnd Bergmann <arnd@linaro.org>, keyrings@vger.kernel.org,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Ruchika Gupta <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>,
-        Hector Martin <marcan@marcan.st>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101
+ Thunderbird/86.0
+Cc:     shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org,
+        Heiko Stuebner <heiko@sntech.de>
+Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add rockchip
+ support
+To:     Johan Jonker <jbx6244@gmail.com>, Rob Herring <robh@kernel.org>
+References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
+ <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
+ <20210310030122.GA1664258@robh.at.kernel.org>
+ <9f8b3be6-d87e-d944-d5db-67f3bcf0fad0@gmail.com>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <9f8b3be6-d87e-d944-d5db-67f3bcf0fad0@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 9, 2021 at 6:12 PM David Howells <dhowells@redhat.com> wrote:
-> Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> > As it seems neither Microsoft nor Apple is paying it much attention
-> > (+/- new facts) it will be up to the community to define use cases
-> > for RPMB. I don't know what would make most sense, but the
-> > kernel keyring seems to make a bit of sense as it is a well maintained
-> > keyring project.
->
-> I'm afraid I don't know a whole lot about the RPMB.  I've just been and read
-> https://lwn.net/Articles/682276/ about it.
 
-Sorry, here is a primer on RPMB.
+On 2021/3/10 15:00, Johan Jonker wrote:
+> On 3/10/21 4:01 AM, Rob Herring wrote:
+>> On Tue, Mar 09, 2021 at 09:56:29AM +0800, Shawn Lin wrote:
+>>> This patch adds rockchip support in sdhci-of-dwcmhsc.yaml
+>>>
+>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>> ---
+>>>
+>>> Changes in v3: None
+>>>
+>>>   .../bindings/mmc/snps,dwcmshc-sdhci.yaml           | 24 ++++++++++++++++++++++
+>>>   1 file changed, 24 insertions(+)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+>>> index f99fb9f..43989f2 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+>>> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+>>> @@ -16,6 +16,7 @@ allOf:
+>>>   properties:
+>>>     compatible:
+>>>       enum:
+> 
+>>> +      - rockchip,dwcmshc-sdhci
+> 
+> Compatible strings are supposed to be SoC orientated.
+> What SoC was this change for? rk3568 ?
+> Could Shawn confirm that?
 
-The proper source is the eMMC specification from JEDEC
-which has semi-open access:
-https://www.jedec.org/standards-documents/technology-focus-areas/flash-memory-ssds-ufs-emmc/e-mmc
+Yes. We are inclined to use this controller from now on for a
+long time for up-coming SoCs. Should we tag compatible for rk3568
+specified? One of the negative things I could come up with is that we
+do this for dwmmc-rockchip, but we end up doing nothing else,
+except for adding new compatible string again and again in Document.
 
-The spec is not super helpful because it does not describe what the
-intention or use case for RPMB is, just what commands it can be
-given.
+> 
+>           - rockchip,rk3568-dwcmshc-sdhci ??
+> 
+> Could Rob advise here?
+> 
+>>>         - snps,dwcmshc-sdhci
+>>>   
+>>>     reg:
+>>> @@ -31,12 +32,24 @@ properties:
+>>>       items:
+>>>         - description: core clock
+>>>         - description: bus clock for optional
+>>> +      - description: axi clock for rockchip specified
+>>> +      - description: block clock for rockchip specified
+>>> +      - description: timer clock for rockchip specified
+>>> +
+>>>   
+>>>     clock-names:
+>>>       minItems: 1
+>>>       items:
+>>>         - const: core
+>>>         - const: bus
+>>> +      - const: axi
+>>> +      - const: block
+>>> +      - const: timer
+>>> +
+>>> +  rockchip,txclk-tapnum:
+>>> +    description: Specify the number of delay for tx sampling.
+>>> +    $ref: /schemas/types.yaml#/definitions/uint32
+>>
+>> Constraints for this? 0 - 2^32 is okay?
+>>
+>>> +
+>>>   
+>>>   required:
+>>>     - compatible
+>>> @@ -49,6 +62,17 @@ unevaluatedProperties: false
+>>>   
+>>>   examples:
+>>>     - |
+>>> +    mmc@fe310000 {
+> 
+>>> +      compatible = "rockchip,dwcmshc-sdhci";
+> 
+>        compatible = "rockchip,rk3568-dwcmshc-sdhci"; ??
+> 
+>>> +      reg = <0xfe310000 0x10000>;
+>>> +      interrupts = <0 25 0x4>;
+>>> +      clocks = <&cru 17>, <&cru 18>, <&cru 19>, <&cru 20>, <&cru 21>;
+>>> +      clock-names = "core", "bus", "axi", "block", "timer";
+>>> +      bus-width = <8>;
+>>> +      #address-cells = <1>;
+>>> +      #size-cells = <0>;
+>>> +    };
+>>> +  - |
+>>>       mmc@aa0000 {
+>>>         compatible = "snps,dwcmshc-sdhci";
+>>>         reg = <0xaa000 0x1000>;
+>>> -- 
+>>> 2.7.4
+>>>
+>>>
+>>>
+>>
+> 
+> 
+> 
+> 
+> 
 
-Western Digital describes the use cases in this whitepaper page 5 ff:
-https://documents.westerndigital.com/content/dam/doc-library/en_us/assets/public/western-digital/collateral/white-paper/white-paper-emmc-security.pdf
 
-Quote:
-"Some well-known use cases include software version
-authentication, fingerprint verification, secure key storage,
-network vendor information, digital rights management (DRM)
-and secure payments."
-
-The replay protected memory block comes from mobile phone
-vendors, and it is described as designed for a usecase known
-as "anti-rollback": make it impossible to flash an older firmware.
-This is achieved by monotonic counters: a hardware counter
-that always increases so that if we have software version 13
-flashed we can flash version 14 or 15 but not version 10 or 12.
-Attackers of mobile phones used the possibility to revert to
-old firmware with vulnerabilities as an attack vector.
-
-Messages to the RPMB are protected by a symmetric key
-which is 32 bytes long. The hash used in messaging is
-HMAC SHA-256.
-
-The symmetric key is written once to initialize the RPMB.
-With the current mmc-utils "mmc" command it looks like this:
-
-echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb write-key /dev/mmcblk0rpmb -
-
-The entity writing stuff to RPMB needs to keep track of this
-secret. This is why a secure world such as TEE is often using
-RPMB, as these usually have access to a protected secret
-key, but any trusted environment can use the mechanism.
-Compared to TPM, we are on the inside of the chip here,
-so the agent dealing with this secret key will be vulnerable.
-
-After this secret has been initialized, protected data blocks of 256
-bytes can be written to RPMB while providing the key likt this:
-
-(awk 'BEGIN {while (c++<256) printf "a"}' | echo -n
-AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH) | mmc rpmb write-block
-/dev/mmcblk0rpmb 0x02 - -
-
-0x02 is the *counter*, so if you after this try to send the message
-with 0x01 it will fail, whereas 0x03 will work. That is how the
-monotonic counter is specified in the write interactions.
-
-This can be imagined as writing keys 1, 2, 3 ... while you cannot
-overwrite an older key you can write the next one in sequence.
-Typically this would be the version number of a firmware.
-The 256 bytes of data sent along with the key number is
-typically the hash of a firmware. But it can be any 256 bytes
-of data, RPMB leaves this up to whoever implements it.
-
-You can also read chunks of 256 bytes from the device:
-echo -n AAAABBBBCCCCDDDDEEEEFFFFGGGGHHHH | mmc rpmb read-block
-/dev/mmcblk0rpmb 0x02 1 /tmp/block -
-
-(0x02 again is the key index, 1 is the number of blocks/keys
-we want to read)
-
-This protocol is challenge-response so a random session key
-will be used along with the MAC for authentication.
-
-It is possible to read a key without authentication. I don't know
-what the use case of this would be:
-
-mmc rpmb read-block /dev/mmcblk0rpmb 0x02 1 /tmp/block
-
-RPMB is a multiple of 128KB of key storage. Most typically
-it is that size, so 128KB/256 = 512 unique keys can be
-written in most standard parts.
-
-> What is it you envision the keyring API doing with regard to this?
-> Being used to represent the key needed to access the RPMB or
-> being used to represent an RPMB entry (does it have entries?)?
-
-The idea is to have an API toward RPMB that keyring can
-use to store replay protection or other monotonic sequence
-information. Only one party can hold the authentication key
-so I guess both.
-
-The most intuitive use case is protecting against exhaustive
-password/pin/fingerprint/other authentication token search.
-
-On mobile phones it is used to establish that 3 attempts is really
-3 attempts, then your device is locked, for example. Doesn't
-have to be 3. Can be 500. But to put a cap on it.
-
-Also a time stamp from a monotonic clock can be stored in
-RPMB so that the increasing time between unlock attempts
-is enforced and cannot be manipulated. This requires
-secure, monotonic time (which can be achieved in various
-ways).
-
-Is this something keyring does today, or would be doing
-in the future? (Sorry for my ignorance...)
-
-The original use case of being unable to install older
-software can also be done, but since Linux distributions
-generally support installing older packages I don't think
-this is going to be requested much, maybe Chromebooks
-and Androids would appreciate to do that through this
-mechanism though?
-
-Yours,
-Linus Walleij
