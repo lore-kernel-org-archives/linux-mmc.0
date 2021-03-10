@@ -2,171 +2,154 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C396C433E6
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:39:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B8A5C433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:50:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F172164FFA
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:39:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37E7B64FC9
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 09:50:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231681AbhCJJin (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 04:38:43 -0500
-Received: from regular1.263xmail.com ([211.150.70.200]:44760 "EHLO
-        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231492AbhCJJiQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 04:38:16 -0500
-Received: from localhost (unknown [192.168.167.235])
-        by regular1.263xmail.com (Postfix) with ESMTP id 34BED1C5D;
-        Wed, 10 Mar 2021 17:37:34 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-SKE-CHECKED: 1
-X-ABS-CHECKED: 1
-Received: from [172.16.12.64] (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P24304T139685251299072S1615369053264450_;
-        Wed, 10 Mar 2021 17:37:34 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <6df6f007d349241a15ee878e4b443baf>
-X-RL-SENDER: shawn.lin@rock-chips.com
-X-SENDER: lintao@rock-chips.com
-X-LOGIN-NAME: shawn.lin@rock-chips.com
-X-FST-TO: heiko@sntech.de
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-Message-ID: <7573e8c1-3f55-9925-bc14-534455f1ffa3@rock-chips.com>
-Date:   Wed, 10 Mar 2021 17:37:33 +0800
+        id S231822AbhCJJtj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 04:49:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55264 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231828AbhCJJtH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 04:49:07 -0500
+Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2EBA2C061762
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 01:48:50 -0800 (PST)
+Received: by mail-lj1-x234.google.com with SMTP id i26so13125288ljn.1
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 01:48:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=XtHA2WDlEgIkr4gPC6h7Fo/UqIYBpPKwlhK+eaqepyw=;
+        b=tY/zIW4Jt+MrodIYY2WZdIiCNb/lU3TrDkCWVH1GC0ZPyU8Fx0CiEb9Y0y6cWNwv7U
+         3+UQ4tj0HCbX1WI9IIyo1VQinhXuWm4yZ4/FrglyModxavmcD8ic3hi8VDuL0mu7sjvO
+         r5E3kNoy61v/83xcWywtQVUii/xoonAa4J0vcuc4IIrtgr+1XAGhb6OW3Mi4t5bvbWxc
+         GIgozN4dt2GxWFomJxp6BI7YoAy/xPboNJQTdjjKnrHxVFj4+9L5cBB9ed/Szln9egGk
+         D9vT9z4k3NfBlpCqmdhXbTHzIRr2dVJNtXzUNIocr7litDYcpUQG9qfLgvf2bTY4K7bC
+         /Isw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=XtHA2WDlEgIkr4gPC6h7Fo/UqIYBpPKwlhK+eaqepyw=;
+        b=LFyXyzrEOd1U8Z/HYIcbDAbiuqmYJvNmzcdFd4MdzK/SSIggUJ1gt5RXyYadSwqkuz
+         jPZQXJGxoeg5ZWWF7oMIbDwSbT4Iz/y4n3tQh01WkigVaiRmNEclKEqzySib/66E4sqD
+         UH3dc3sV9rhsDX8JaVzljfjtnZg5iatwSe87EDo6c2aZbyRoTLXhRZJbqFdyKOPvjHGB
+         3ZmRYK5kmP1lTkKcjGwiZvSfWQt/LXki8XmPmXjwKPHQbAolQo9Fn+zPgTk7o53QsTT/
+         aPRV75XcDfYrZi52z5Ch9LL28q1IbFMsQimQQPVrWKLtZF9MjTjlR8DLkd692HwDyqEX
+         FCfA==
+X-Gm-Message-State: AOAM533OEhtJFfJtExUYnZRGCjwuwGCEUW3NB59f15KsCUSMB9QQJFMB
+        7MkivSPP3lDUO2schx/jDuURoDrPRLahjJ4inrcV5g==
+X-Google-Smtp-Source: ABdhPJy+6iVKLlhEs9ytjE2yJ6jzfWyAjkcYGwRmlv2dADiCXewf+sSTgUSixyA6cjqoVwsnHGvaAVVLYVVNGU7AOWM=
+X-Received: by 2002:a2e:864a:: with SMTP id i10mr1268524ljj.467.1615369729068;
+ Wed, 10 Mar 2021 01:48:49 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101
- Thunderbird/86.0
-Cc:     shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
-        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org,
-        Heiko Stuebner <heiko@sntech.de>
-Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add rockchip
- support
-To:     Johan Jonker <jbx6244@gmail.com>, Rob Herring <robh@kernel.org>
-References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
- <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
- <20210310030122.GA1664258@robh.at.kernel.org>
- <9f8b3be6-d87e-d944-d5db-67f3bcf0fad0@gmail.com>
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <9f8b3be6-d87e-d944-d5db-67f3bcf0fad0@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+ <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+ <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+ <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+ <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
+In-Reply-To: <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 10 Mar 2021 10:48:38 +0100
+Message-ID: <CACRpkdbQks5pRFNHkNLVvLHCBhh0XCv7pHYq25EVAbU60PcwsA@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To:     Hector Martin <marcan@marcan.st>,
+        David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org,
+        Jarkko Sakkinen <jarkko@kernel.org>
+Cc:     Sumit Garg <sumit.garg@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed, Mar 10, 2021 at 9:47 AM Hector Martin <marcan@marcan.st> wrote:
 
-On 2021/3/10 15:00, Johan Jonker wrote:
-> On 3/10/21 4:01 AM, Rob Herring wrote:
->> On Tue, Mar 09, 2021 at 09:56:29AM +0800, Shawn Lin wrote:
->>> This patch adds rockchip support in sdhci-of-dwcmhsc.yaml
->>>
->>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>> ---
->>>
->>> Changes in v3: None
->>>
->>>   .../bindings/mmc/snps,dwcmshc-sdhci.yaml           | 24 ++++++++++++++++++++++
->>>   1 file changed, 24 insertions(+)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
->>> index f99fb9f..43989f2 100644
->>> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
->>> @@ -16,6 +16,7 @@ allOf:
->>>   properties:
->>>     compatible:
->>>       enum:
-> 
->>> +      - rockchip,dwcmshc-sdhci
-> 
-> Compatible strings are supposed to be SoC orientated.
-> What SoC was this change for? rk3568 ?
-> Could Shawn confirm that?
+> Remember that if the key is ever lost, the RPMB is now completely
+> useless forever.
+>
+> This is why, as far as I know, most sane platforms will use hard fused
+> values to derive this kind of thing, not any kind of key stored in
+> erasable storage.
 
-Yes. We are inclined to use this controller from now on for a
-long time for up-coming SoCs. Should we tag compatible for rk3568
-specified? One of the negative things I could come up with is that we
-do this for dwmmc-rockchip, but we end up doing nothing else,
-except for adding new compatible string again and again in Document.
+You're right. In the mobile phone world this is a given fact.
 
-> 
->           - rockchip,rk3568-dwcmshc-sdhci ??
-> 
-> Could Rob advise here?
-> 
->>>         - snps,dwcmshc-sdhci
->>>   
->>>     reg:
->>> @@ -31,12 +32,24 @@ properties:
->>>       items:
->>>         - description: core clock
->>>         - description: bus clock for optional
->>> +      - description: axi clock for rockchip specified
->>> +      - description: block clock for rockchip specified
->>> +      - description: timer clock for rockchip specified
->>> +
->>>   
->>>     clock-names:
->>>       minItems: 1
->>>       items:
->>>         - const: core
->>>         - const: bus
->>> +      - const: axi
->>> +      - const: block
->>> +      - const: timer
->>> +
->>> +  rockchip,txclk-tapnum:
->>> +    description: Specify the number of delay for tx sampling.
->>> +    $ref: /schemas/types.yaml#/definitions/uint32
->>
->> Constraints for this? 0 - 2^32 is okay?
->>
->>> +
->>>   
->>>   required:
->>>     - compatible
->>> @@ -49,6 +62,17 @@ unevaluatedProperties: false
->>>   
->>>   examples:
->>>     - |
->>> +    mmc@fe310000 {
-> 
->>> +      compatible = "rockchip,dwcmshc-sdhci";
-> 
->        compatible = "rockchip,rk3568-dwcmshc-sdhci"; ??
-> 
->>> +      reg = <0xfe310000 0x10000>;
->>> +      interrupts = <0 25 0x4>;
->>> +      clocks = <&cru 17>, <&cru 18>, <&cru 19>, <&cru 20>, <&cru 21>;
->>> +      clock-names = "core", "bus", "axi", "block", "timer";
->>> +      bus-width = <8>;
->>> +      #address-cells = <1>;
->>> +      #size-cells = <0>;
->>> +    };
->>> +  - |
->>>       mmc@aa0000 {
->>>         compatible = "snps,dwcmshc-sdhci";
->>>         reg = <0xaa000 0x1000>;
->>> -- 
->>> 2.7.4
->>>
->>>
->>>
->>
-> 
-> 
-> 
-> 
-> 
+If we are thinking devices are to be repurposed or reinstalled
+from scratch for example, like ordinary desktops or servers,
+RPMB does not make generic sense: it is not for
+"generic computing" but rather for protecting devices that you
+carry around and can be lost: mobile phones, chromebooks,
+maybe laptops.
 
+If and only if the user so desires, I would say, but sometimes
+the vendors decide policy...
 
+(+/- the fact that some recent supply chain attacks for server
+software may actually make cloud people start thinking like this
+about their servers integrity, what do I know.)
+
+> Also, newly provisioned keys are sent in plain text, which means that
+> any kind of "if the RPMB is blank, take it over" automation equates to
+> handing over your key who an attacker who removes the RPMB and replaces
+> it with a blank one, and then they can go access anything they want on
+> the old RPMB device (assuming the key hasn't changed; and if it has
+> changed that's conversely a recipe for data loss if something goes wrong).
+>
+> I really think trying to automate any kind of "default" usage of an RPMB
+> is a terrible idea. It needs to be a conscious decision on a
+> per-platform basis.
+
+OK sorry for my bad ideas, what was I thinking :D
+
+For a laptop or so, I would say, a user who is paranoid that their
+device gets stolen and used by someone else, should be able to
+set their device up, with some tool, such that a secret key from
+somewhere and RPMB is used to lock down the machine so that
+attackers cannot get into it and get the data out.
+
+Disk is encrypted, and RPMB is there to block any exhaustive
+password or other authentication token search.
+
+Ideally: the only way to make use of the hardware again would
+be to solder off the eMMC, if eMMC is used for RPMB.
+If we have RPMB on an NVME or UFS drive, the idea is
+to lock that thing such that it becomes useless and need to
+be replaced with a new part in this scenario.
+
+In practice: make it hard, because we know no such jail is
+perfect. Make it not worth the effort, make it cheaper for thieves
+to just buy a new harddrive to use a stolen laptop, locking
+the data that was in it away forever by making the drive
+useless for any practical attacks.
+
+Maybe it will be possible to blank the drive and use without
+RPMB since that is now locked with a key they can no longer
+acces: the end result is the same: RPMB protected the data
+of the original user. So a one-time user protection such
+as a seal, once broken this seal cannot be reused to seal
+anything again and that is OK.
+
+Yours,
+Linus Walleij
