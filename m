@@ -2,136 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB769C433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 03:02:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49E9DC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 03:54:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 899FC64FE8
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 03:02:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 113C364FEF
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 03:54:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232170AbhCJDBt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Mar 2021 22:01:49 -0500
-Received: from mail-io1-f49.google.com ([209.85.166.49]:46645 "EHLO
-        mail-io1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232013AbhCJDBZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 22:01:25 -0500
-Received: by mail-io1-f49.google.com with SMTP id u8so16288385ior.13;
-        Tue, 09 Mar 2021 19:01:25 -0800 (PST)
+        id S232055AbhCJDx2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Mar 2021 22:53:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34856 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231335AbhCJDxH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Mar 2021 22:53:07 -0500
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3B2EC06174A
+        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 19:53:06 -0800 (PST)
+Received: by mail-ed1-x52f.google.com with SMTP id bd6so25287325edb.10
+        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 19:53:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pensando.io; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=V85TNfWqFZ1YWa4+0GmlbK4ntqljyBS3Rdg24ykQOq8=;
+        b=T8WNl3ye+lgMOr3Hf7sVPy7jQOGqPpwD9/Jt8gsoFhzRrcvWM62VXcGTl47x2GnQkF
+         CFwacwingV3+q1IbKsKuyuNfcEGRf0Ty3T14iZATP6JfeNfPlVlYa7CuuimjxHHfsSIi
+         opLIGbAKyuXFTAmfxA41bk3cXk/xy1w2rk4+3SqRFMx/Ngj003h4ewfssX3ZHmw9lnde
+         Znk/TrU4AuthDorMF34LO58IV18yCB+OuLOEd+WQgbnmZrUZp6MiyLTf8dL1D67Vl69g
+         eW24XhNgo9w39ZjUqGYpyVmfu3C1r7XCYS213qniCd7nzkoGWu9CUs1l77guT1o83qOA
+         z1NQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=344tVBROrcGfG7Le5DlzQjIDt0SKG8pa76TGE6syYKo=;
-        b=HkqC+Nx31C7nObd87mBzZUzC8qkMhMf5ZSErcb8rGcUnx7s44/i9T8B5nLSH9agftY
-         3kQqcZghGdBu4XriphcBKH6NAcRh9VJzbzumSW+7crMtHGFqXw1LQlvviqzmw4w7RDE4
-         ocOLmYtDgijQhQjYgBjrHo0JCd1aWRwXwIJwiXOT/5o08DEmA18jM6XbRC3JS7UK5k/k
-         0e1LCmfM0iN/l6IobaFYtYzW14OV1YczTlx4/OdnnWM2tfjoejldtk7Hx845l65oWJ8j
-         hdKNZkVHLRpVX6B89fMXn4cgIMBv8/x6JUFUAGK6Hn5IpxaWaH2aL683vp0Jt+6JK+iT
-         sNeQ==
-X-Gm-Message-State: AOAM5337hy2Sh3XNnpE36Bg5Omt6ZtWR5uIl71B+Cso3vvM1+2zLB4bN
-        xUwY5TR4VENQU4IeLLitwk0J34d4fA==
-X-Google-Smtp-Source: ABdhPJylE3SN4ifqoY3q9XY3cnPA0IAuGy62a5W/RzBRG2WNspkLT5vtScelB/9Khap1fxrZ0GXl9w==
-X-Received: by 2002:a5e:a508:: with SMTP id 8mr993226iog.135.1615345284888;
-        Tue, 09 Mar 2021 19:01:24 -0800 (PST)
-Received: from robh.at.kernel.org ([64.188.179.253])
-        by smtp.gmail.com with ESMTPSA id o7sm8628180ilj.67.2021.03.09.19.01.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 Mar 2021 19:01:24 -0800 (PST)
-Received: (nullmailer pid 1665491 invoked by uid 1000);
-        Wed, 10 Mar 2021 03:01:22 -0000
-Date:   Tue, 9 Mar 2021 20:01:22 -0700
-From:   Rob Herring <robh@kernel.org>
-To:     Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org
-Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add rockchip
- support
-Message-ID: <20210310030122.GA1664258@robh.at.kernel.org>
-References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
- <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=V85TNfWqFZ1YWa4+0GmlbK4ntqljyBS3Rdg24ykQOq8=;
+        b=uoTEVKlzCkBu/EjJL1G9VquA/Izw7OIiY29wSoPq1uBEPppzbH73Tmn4jqq7ODoA9/
+         d0zSmWkEKgxxH7uVk8bbArlDePFk+xGMNCp5T1ZNNJ+5dyEQ4ccHzJZVFJTcltmmHigD
+         A8CNWCGffVeAUpBFNjA36GlOwNOKqKG+epVOOU7gm1pOCUihWpwaxGX2w/wQs/J6s/MD
+         1oiH46ySZqVdxoEvk4UVJ+V3+icjE+Kk524Q8nidvFWCi1Q+iwT9Me5Srk9dm1jD10KW
+         IN3lDT2/26QwqoOUFK5Y7XN20SVzQu2VYW9c6Tpur6E7EzBt0ff189Hy8S32Ws4jd9T1
+         s4CA==
+X-Gm-Message-State: AOAM533yLJ3wrnSH8LrQhoXSrWorhrQ5PT++0qR8QUk3hndJxX6z61If
+        AkYNSQdJvMvDuqCkCbyZGQPPaKpMGvLsYFC5dGmnWQ==
+X-Google-Smtp-Source: ABdhPJzB8cRnMmkiPZTcmJvX4c2OtzugP+mbvj2rl8DsysINHwrol+RNZBcMO6TXO06YDz3jiaOXzCAzsTSfru8WhXM=
+X-Received: by 2002:aa7:c496:: with SMTP id m22mr935303edq.292.1615348385484;
+ Tue, 09 Mar 2021 19:53:05 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
+References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-4-brad@pensando.io>
+ <CACRpkdbqkmUXTPyX8OFxBRJahEL-vdxR0wP=rMAWud34bq7tcQ@mail.gmail.com>
+In-Reply-To: <CACRpkdbqkmUXTPyX8OFxBRJahEL-vdxR0wP=rMAWud34bq7tcQ@mail.gmail.com>
+From:   Brad Larson <brad@pensando.io>
+Date:   Tue, 9 Mar 2021 19:52:54 -0800
+Message-ID: <CAK9rFnyqkPSvSAJP12ORkSC4J0OGuYeQPNFSgbokor9HpbUh+A@mail.gmail.com>
+Subject: Re: [PATCH 3/8] spi: dw: Add support for Pensando Elba SoC SPI
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 09, 2021 at 09:56:29AM +0800, Shawn Lin wrote:
-> This patch adds rockchip support in sdhci-of-dwcmhsc.yaml
-> 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> ---
-> 
-> Changes in v3: None
-> 
->  .../bindings/mmc/snps,dwcmshc-sdhci.yaml           | 24 ++++++++++++++++++++++
->  1 file changed, 24 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index f99fb9f..43989f2 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -16,6 +16,7 @@ allOf:
->  properties:
->    compatible:
->      enum:
-> +      - rockchip,dwcmshc-sdhci
->        - snps,dwcmshc-sdhci
->  
->    reg:
-> @@ -31,12 +32,24 @@ properties:
->      items:
->        - description: core clock
->        - description: bus clock for optional
-> +      - description: axi clock for rockchip specified
-> +      - description: block clock for rockchip specified
-> +      - description: timer clock for rockchip specified
-> +
->  
->    clock-names:
->      minItems: 1
->      items:
->        - const: core
->        - const: bus
-> +      - const: axi
-> +      - const: block
-> +      - const: timer
-> +
-> +  rockchip,txclk-tapnum:
-> +    description: Specify the number of delay for tx sampling.
-> +    $ref: /schemas/types.yaml#/definitions/uint32
+On Thu, Mar 4, 2021 at 12:48 AM Linus Walleij <linus.walleij@linaro.org> wrote:
 
-Constraints for this? 0 - 2^32 is okay?
+> On Thu, Mar 4, 2021 at 4:42 AM Brad Larson <brad@pensando.io> wrote:
+>
+> > The Pensando Elba SoC uses a GPIO based chip select
+> > for two DW SPI busses with each bus having two
+> > chip selects.
+> >
+> > Signed-off-by: Brad Larson <brad@pensando.io>
+>
+> I agree with Serge's comments here: the existing cs callback should
+> work for your SoC, you should only need the new compatible string.
+>
+> I see why you need the special GPIO driver for this now, as that
+> is obviously driven by totally different hardware.
+>
+> Yours,
+> Linus Walleij
 
-> +
->  
->  required:
->    - compatible
-> @@ -49,6 +62,17 @@ unevaluatedProperties: false
->  
->  examples:
->    - |
-> +    mmc@fe310000 {
-> +      compatible = "rockchip,dwcmshc-sdhci";
-> +      reg = <0xfe310000 0x10000>;
-> +      interrupts = <0 25 0x4>;
-> +      clocks = <&cru 17>, <&cru 18>, <&cru 19>, <&cru 20>, <&cru 21>;
-> +      clock-names = "core", "bus", "axi", "block", "timer";
-> +      bus-width = <8>;
-> +      #address-cells = <1>;
-> +      #size-cells = <0>;
-> +    };
-> +  - |
->      mmc@aa0000 {
->        compatible = "snps,dwcmshc-sdhci";
->        reg = <0xaa000 0x1000>;
-> -- 
-> 2.7.4
-> 
-> 
-> 
+Thanks Serge and Linus for the review.
+
+In the SPI driver, the reason we need our own set_cs function is that
+our DW SPI controller only supports intrinsic 2 chip-select pins.
+
+This is the standard DW set_cs function:
+
+void dw_spi_set_cs(struct spi_device *spi, bool enable)
+{
+        struct dw_spi *dws = spi_controller_get_devdata(spi->controller);
+        bool cs_high = !!(spi->mode & SPI_CS_HIGH);
+
+        /*
+         * DW SPI controller demands any native CS being set in order to
+         * proceed with data transfer. So in order to activate the SPI
+         * communications we must set a corresponding bit in the Slave
+         * Enable register no matter whether the SPI core is configured to
+         * support active-high or active-low CS level.
+         */
+        if (cs_high == enable)
+                dw_writel(dws, DW_SPI_SER, BIT(spi->chip_select));
+        else
+                dw_writel(dws, DW_SPI_SER, 0);
+}
+
+The dw_writel function argument DW_SPI_SER, BIT(spi->chip_select)
+works for chip-select 0 & 1, but not for 2 & 3, as the IP only
+implements bits [1:0] in the DW_SPI_SER register.  In the Elba SoC we
+require GPIO-style chip-selects, our own set_cs function, and we
+always use bit 0 of DW_SPI_SER to start the serial machine, not as a
+chip-select control.  In the dw_spi_set_cs() function the below else
+clause is never taken and leads to confusion.
+
+             } else {
+                        /*
+                         * Using the intrinsic DW chip-select; set the
+                         * appropriate CS.
+                         */
+                        dw_writel(dws, DW_SPI_SER, BIT(spi->chip_select));
+                }
+
+This else clause will be removed in patch set V2.  I tried the generic
+dw_spi_set_cs() thinking it would just start the serial machine while
+the Elba spics drives the gpio chip select, that didn't work.  I will
+take another look at it as I work on V2 of the patchset to see exactly
+what breaks during spi init.
+
+Best,
+Brad
