@@ -2,128 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F00EC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 05:16:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEBCFC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 06:55:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0BCBB64FF4
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 05:16:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AA9E064F79
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 06:55:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229725AbhCJFPb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 00:15:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52408 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229544AbhCJFPK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 00:15:10 -0500
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 911C5C061760
-        for <linux-mmc@vger.kernel.org>; Tue,  9 Mar 2021 21:15:09 -0800 (PST)
-Received: by mail-lf1-x136.google.com with SMTP id d3so31254589lfg.10
-        for <linux-mmc@vger.kernel.org>; Tue, 09 Mar 2021 21:15:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=UiJsJNOiBm83fFLXpqk2WZEpnaCEog3O/QAN1Beolgw=;
-        b=mMxAC7+XqZJtvqPlzrX8H8HsuDT3PIQhBPZgHEZY7uSUXMOt8eK64tK1BN2d2NJ87O
-         dy5qm0kARf89bitpEgGirnDhLNypQzkyVSp6Uc7SMLqE9ZpoA3ImyIcZzrQhGZkCzC23
-         YLZ64Umyue7CnQPoip9grEaYaDmGmCEXDkKXEQeSj1qNAwm2Gd0ZhIX2aXrPsNqsED4T
-         /Jr8ZYX7newASgm08bVGZv7gokq5WIWnEXSZfju3yfxW8bb9GjsMLud/iAdJpiEH7Rom
-         wCvq80nt9aOaBrdykb4ISM4GI8Bd5xQd45Vi8qlpDxnk3IlXKf1I8kGhLlZNBsgTNuXx
-         BELA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=UiJsJNOiBm83fFLXpqk2WZEpnaCEog3O/QAN1Beolgw=;
-        b=RxyCAi9e6EBekq7wpdIfkNAT+voaWHWeFt08K4iSAEOtMXcCV1SyQ9U9hBkRUtRfI+
-         BQ97gdDlgSrFPhLS/fXnpAP6r9f47ivhga39Gb4KomlqyW98T0Tuvc4tevxpSQZCAF2w
-         qK/QP9wqsitWpfOzBNUr0xuJADzuzT0jebhBC4G6pR75jWfKgQfuTOSIfqYwdr4muYAY
-         OXUPGFOzLvPaPnaz87gYqD/QQd9jeFLg+M21hBZxEMNOyitAzQmoJiyIhP952rBHhrMS
-         YQpUR7qZpfD7DdKvB+2/7pfZPA0a2dWjBY2J1P+9qvuIpa8E7dygls94qZ0O314s1q4q
-         QtRQ==
-X-Gm-Message-State: AOAM530K9SKOB7K0BimU82PdBB4ufyLdMD/kjItFJj7LWJP4YtA1BbzK
-        ajA7ODHhNMsqkHrGNM2GGPhNfXw9jYMrAfX7xEUV+w==
-X-Google-Smtp-Source: ABdhPJwFtZgar+wUjdSWUlZLQ5UKaYKz078M+ePh7BM1x6vt3vlU5X9TaM5D3xzXGLb+CzhnfsoM3ZqRIk4bKeD0wMA=
-X-Received: by 2002:ac2:46db:: with SMTP id p27mr972790lfo.396.1615353307886;
- Tue, 09 Mar 2021 21:15:07 -0800 (PST)
+        id S229804AbhCJGyf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 01:54:35 -0500
+Received: from regular1.263xmail.com ([211.150.70.206]:50360 "EHLO
+        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229920AbhCJGyD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 01:54:03 -0500
+X-Greylist: delayed 532 seconds by postgrey-1.27 at vger.kernel.org; Wed, 10 Mar 2021 01:54:02 EST
+Received: from localhost (unknown [192.168.167.13])
+        by regular1.263xmail.com (Postfix) with ESMTP id AE8001B0A;
+        Wed, 10 Mar 2021 14:44:27 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-SKE-CHECKED: 1
+X-ABS-CHECKED: 1
+Received: from [172.16.12.64] (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P13096T140547786254080S1615358667251887_;
+        Wed, 10 Mar 2021 14:44:27 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <922dcb4a27086f313d7c2f0d168d7104>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: linux-rockchip@lists.infradead.org
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+Message-ID: <fab85a6a-5db3-a5c1-f6e1-16f55641ecb5@rock-chips.com>
+Date:   Wed, 10 Mar 2021 14:44:26 +0800
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
- <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com> <6c542548-cc16-af68-c755-df52bd13b209@marcan.st>
-In-Reply-To: <6c542548-cc16-af68-c755-df52bd13b209@marcan.st>
-From:   Sumit Garg <sumit.garg@linaro.org>
-Date:   Wed, 10 Mar 2021 10:44:56 +0530
-Message-ID: <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     Hector Martin <marcan@marcan.st>,
-        Linus Walleij <linus.walleij@linaro.org>
-Cc:     Arnd Bergmann <arnd@linaro.org>,
-        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
-        David Howells <dhowells@redhat.com>,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Ruchika Gupta <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:86.0) Gecko/20100101
+ Thunderbird/86.0
+Cc:     shawn.lin@rock-chips.com, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org
+Subject: =?UTF-8?Q?Re=3a_=5bPATCH_v3_2/3=5d_dt-bindings=3a_mmc=3a_sdhci-of-d?=
+ =?UTF-8?B?d2NtaHNjOiBBZGQgcm9ja2NoaXAgc3VwcG9ydOOAkOivt+azqOaEj++8jOmCrg==?=
+ =?UTF-8?B?5Lu255Sxcm9iaGVycmluZzJAZ21haWwuY29t5Luj5Y+R44CR?=
+To:     Rob Herring <robh@kernel.org>
+References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
+ <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
+ <20210310030122.GA1664258@robh.at.kernel.org>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20210310030122.GA1664258@robh.at.kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 10 Mar 2021 at 02:47, Hector Martin <marcan@marcan.st> wrote:
->
-> On 09/03/2021 01.20, Linus Walleij wrote:
-> > I suppose it would be a bit brutal if the kernel would just go in and
-> > appropriate any empty RPMB it finds, but I suspect it is the right way
-> > to make use of this facility given that so many of them are just sitting
-> > there unused. Noone will run $CUSTOM_UTILITY any more than they
-> > run the current RPMB tools in mmc-tools.
->
-> AIUI the entire thing relies on a shared key that is programmed once
-> into the RPMB device, which is a permanent operation. This key has to be
-> secure, usually stored on CPU fuses or derived based on such a root of
-> trust. To me it would seem ill-advised to attempt to automate this
-> process and have the kernel do a permanent take-over of any RPMBs it
-> finds (with what key, for one?) :)
->
+Hi Rob
 
-Wouldn't it be a good idea to use DT here to represent whether a
-particular RPMB is used as a TEE backup or is available for normal
-kernel usage?
+On 2021/3/10 11:01, Rob Herring wrote:
+> On Tue, Mar 09, 2021 at 09:56:29AM +0800, Shawn Lin wrote:
+>> This patch adds rockchip support in sdhci-of-dwcmhsc.yaml
+>>
+>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
 
-In case of normal kernel usage, I think the RPMB key can come from
-trusted and encrypted keys subsystem.
+.....
 
--Sumit
+>> +
+>> +  rockchip,txclk-tapnum:
+>> +    description: Specify the number of delay for tx sampling.
+>> +    $ref: /schemas/types.yaml#/definitions/uint32
+> 
+> Constraints for this? 0 - 2^32 is okay?
 
-> For what it's worth, these days I think Apple uses a separate, dedicated
-> secure element for replay protected storage, not RPMB. That seems like a
-> sane approach, given that obviously Flash storage vendors cannot be
-> trusted to write security-critical firmware. But if all you have is
-> RPMB, using it is better than nothing.
->
-> The main purpose of the RPMB is, as the name implies, replay protection.
-> You can do secure storage on any random flash with encryption, and even
-> do full authentication with hash trees, but the problem is no matter how
-> fancy your scheme is, attackers can always dump all memory and roll your
-> device back to the past. This defeats stuff like PIN code attempt
-> limits. So it isn't so much for storing crypto keys or such, but rather
-> a way to prevent these attacks.
->
-> --
-> Hector Martin (marcan@marcan.st)
-> Public Key: https://mrcn.st/pub
+Oh, actually this is a 4-bit value, and the reg map looks like:
+
+7:5 RO reserved
+--------------------
+4:0 RW tapnum
+
+So I think it should constraints for u8?
+
+
+> 
+>> +
+>>   
+>>   required:
+>>     - compatible
+>> @@ -49,6 +62,17 @@ unevaluatedProperties: false
+>>   
+>>   examples:
+>>     - |
+>> +    mmc@fe310000 {
+>> +      compatible = "rockchip,dwcmshc-sdhci";
+>> +      reg = <0xfe310000 0x10000>;
+>> +      interrupts = <0 25 0x4>;
+>> +      clocks = <&cru 17>, <&cru 18>, <&cru 19>, <&cru 20>, <&cru 21>;
+>> +      clock-names = "core", "bus", "axi", "block", "timer";
+>> +      bus-width = <8>;
+>> +      #address-cells = <1>;
+>> +      #size-cells = <0>;
+>> +    };
+>> +  - |
+>>       mmc@aa0000 {
+>>         compatible = "snps,dwcmshc-sdhci";
+>>         reg = <0xaa000 0x1000>;
+>> -- 
+>> 2.7.4
+>>
+>>
+>>
+> 
+> 
+> 
+
+
