@@ -2,186 +2,332 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E126EC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 12:46:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0D40C433E6
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 13:16:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A428B64FF2
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 12:46:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94D2464FE8
+	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 13:16:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232584AbhCJMqO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 07:46:14 -0500
-Received: from mail-eopbgr1410122.outbound.protection.outlook.com ([40.107.141.122]:23451
-        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231880AbhCJMpm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 10 Mar 2021 07:45:42 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=JyswzTebY5T/j7p4dBLvnPNL8H+fgbR/zGcDNg0YvkRN0DsuyK6/W62BzWOgdoKHnjBnVslOEUsGKcpaI73Dpoo/5/OuVjR3qf08y/gh6rf/y/3t//otu4ofomuNutcqS08Eg7rw89ui85uB7qSy3VNCuDvVQLPVViH7ZZ/KYEoUgPjNqwdLhoRwFJsBXc4kXEz34wo87soxYWcNQqJYRSQ40PavgQSvCcAKLEHUpvIvpWI+CA+jIjYnOYb1n1tFdxbi470+U6XEbJA+Mxg8d2F9Rij321vyfh7ats43JCoW0CkXKSOfKD2TOnSPmW3a/dXBMyVNPX6qgl5+VnFD/w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=XzNBmCeNyCdku0yLtjvKxLULvIDXEucC1Vnb538lwQk=;
- b=CZBTEMPfvKYNErhRrN7ZSzgo8Wd1ZJ1eoPHe7UFd+RmE7zZuQofH1LQE0vQEG7WCy4fz/V8ub8ep9k3tJbCnsvt2mBhNhfv1fFQmhvexYxId2Iug8qqhk6LierBaV50FY7Vac68+8ek01cQ15v2kNxTOmOs36kSX/TvP/ALCBx+YZH94gtTRRcKzwN0GMOxmPmJE/btEfRa2Ot754YSS6T9a3+kiJLAaZ2aB2GdRk/3R2EqsZfyuXh/Z9EzkBT81iO/AkQc6ADyI+C++Ah56qznJOZZYhQX15pm7nV3zUZh9sVqrW8WUutyAtezHb+WNQYi6dcOsFv3OG9yMWm20FA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=XzNBmCeNyCdku0yLtjvKxLULvIDXEucC1Vnb538lwQk=;
- b=XHIpE05jZFpkeEnIneALRJW0LwJwHXTtq9C2eoERTx0tiBBlN5JdAeiJb/Q8BKxEQi2vwiwG4xxiXubrhNjpbt5h625XscLIbrnfJX6LicOEk1/eu1jycLE8U+RWPmsRWoJ3vApYrGtQ3AE8DI9k9zNfcEdphfAV453coGDAnN8=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYCPR01MB6431.jpnprd01.prod.outlook.com (2603:1096:400:9a::9) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3912.2; Wed, 10 Mar
- 2021 12:45:41 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::cb4:9680:bb26:8f3f]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::cb4:9680:bb26:8f3f%4]) with mapi id 15.20.3912.027; Wed, 10 Mar 2021
- 12:45:40 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
-Thread-Topic: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
-Thread-Index: AQHXFMXo4wNgQS9GTkW0a+Aab4SqFqp9FyLQ
-Date:   Wed, 10 Mar 2021 12:45:40 +0000
-Message-ID: <TY2PR01MB3692A6D95BD60A17AE698DF3D8919@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
- <20210309092332.30705-3-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210309092332.30705-3-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: b3b049f8-7b54-421b-fb55-08d8e3c269a4
-x-ms-traffictypediagnostic: TYCPR01MB6431:
-x-microsoft-antispam-prvs: <TYCPR01MB643190D743315A91EACE34BAD8919@TYCPR01MB6431.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: GVpgoGNvsuu6IjXKJLlzedk4vYl85uQsplKwEiDKm5jdBa03XdFbn1oC9vIUO6u/FTpJUoJChh5b6XIhX27/r71kSO9Tm1jm2QsCFeH6WNrKsbgad+limthqEghza+Fk77HXyadBALtOpCJXS+jvd6qikRMiFlS9/39/0DQzY33R2KV8z/Q2xzQ7xjTzgyhODktjbOiIB6e3J9nbUedgEJoeYoEyakBvvQVxcKQqfhQXBBOB6lOf4s/fzl8vmrZrnp5+itTmrEjmur13Jpz0Ok8zTgCdFK5yV7LAp1qXZWvTcgSnYib2W0N1OFvX63RSQOGBEiXFsTbYAmKD9eU2k6sstFvq/bwUl8LBoJZ5h3fPahuoN407VDb/NqpXWMoL7S7ZolHM+z1KzbcbHfhhjkWxEggWXRK6XdnPUAX2SM6kOznSVDPTHt0Uqjm11xKCsrJhCZyM8FHfeaqo7hYq/Ja1u6QjVEQFZMOwqZE8Dr91q818F9OZQdsrIMQ2j2WW/6WXSU5qN8JEFJSIza2J6g==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(39860400002)(366004)(346002)(376002)(136003)(76116006)(5660300002)(478600001)(8936002)(4326008)(66946007)(66446008)(66476007)(66556008)(86362001)(64756008)(54906003)(316002)(26005)(55016002)(7696005)(52536014)(83380400001)(9686003)(6506007)(33656002)(8676002)(55236004)(186003)(2906002)(71200400001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?HHTJALKi1pdLpyQsVLdxQf/jUn8/VXQmSMFmBRIu7Saq2zx5+AJpie1EsGx5?=
- =?us-ascii?Q?t/oF/YyfeiBdUDbsFgJNPRuQvcNXQLyAcv3/vEXQIYhRDdaTaKJJWFzM7YhV?=
- =?us-ascii?Q?178nd8XzJNh5ZVNfhR7Hd7jpXjU1AI2goulVGN1dRW1Sb9npQsVdLtB1A0tx?=
- =?us-ascii?Q?/2XN3tHTQVuaLXk3pfypUbvetHhAR4cXTF/ox8kW+42IbQCKVWABMcaxhQ8w?=
- =?us-ascii?Q?Ed+pKDA3Zpy8QE5G5ac4ESjPQvlFds20/LKak86Yb8aY/RoS3vUPp4bJsLyF?=
- =?us-ascii?Q?rcjnYJ92aNZtsMn2VMA1T4+fMzgTk5SGyZna+KXC3ULxDTMh5JZPmGzO9QYu?=
- =?us-ascii?Q?azNYHUY4W5t2XuLGIfni+304kgTyuIBRQHCES2OSouHV7DAbRE/iKw3kLfwq?=
- =?us-ascii?Q?CXZqNcJDqKmzY848jZ9+YpKsuoSdcsTiZQkfnxbdP5gY/mLKiu161AOjgb5K?=
- =?us-ascii?Q?JNV4DDDJpH+9POWSch2tOBlZgG0cEaOIieQZuZXs8Ivofld7liEPfpCn4QUd?=
- =?us-ascii?Q?LLDT0zfqnSJ3Hg+l1rDGp7yuEJsCgXTUmowPE90udt3WYmH0ngHFPf4FiXCM?=
- =?us-ascii?Q?Pb4efub0Yf4UBOIpilg2R1xb5cW9xIsw13r9uXGgUT32N3aNPK/2/At8vgOh?=
- =?us-ascii?Q?BlcibjUvXefvWghrGbmw7U+AJUwgTu0gjf9npj2yqWfWycvH6ioZD9jgHnyw?=
- =?us-ascii?Q?01CMz9P4kd1Nh+9LKg+PzLU1tu8nS2gVY/2RZXvpt5pJUHXn9eHY0KCBQVsS?=
- =?us-ascii?Q?DfuPVSVBsmGkHzDBAOTUIuICIzlVcYNSrUpMJXRRDfbFaCtyHNzpsdZPtwRV?=
- =?us-ascii?Q?7rYzNT5jIZK6apfAD3VFpSk3T24NnF7IlluR7lqWNkdIva/oIOj+Dnbf4io7?=
- =?us-ascii?Q?+2EQBWhVUiv0NAMrL1UnJR1/9iztbXMR65s3fFtG6OCevjgak2zW1lompZzP?=
- =?us-ascii?Q?ksP8RdLN+7Wz9oUbDuXcAhuzXWW84FCVUpXyjVEp5IJn9/7EX4xBSKjMrydw?=
- =?us-ascii?Q?xBNwIp+xdyfLTEMd0SKLYDCnhPunwYjeOcl3Icf9u0LVS2t8T8X5/zxXf6Bv?=
- =?us-ascii?Q?qqeV5ai85cShXcvUB120PAMbGb5NTdSyTa77+lbGAgde3E8cuaUbYVTdiG3m?=
- =?us-ascii?Q?tHWIaS1uQa8fCj0I8W4i+PebAc337sOenK+TX4iUqBfr6hFVSlA2VbcLMhjm?=
- =?us-ascii?Q?TjL25fj6nbCJqU8LulOZwzm6gyhPzHXMjehPyhoS7K7QpdxIuoEbQJmkXn6b?=
- =?us-ascii?Q?VQxY/uPeYgcwRjGDyVzMedVwJrxYFgXmRLEPkgMsko2LSC9huEpyLDLiU2sv?=
- =?us-ascii?Q?NgV5vcBeFTgIGYSf7lHcInXp?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        id S232627AbhCJNPa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 08:15:30 -0500
+Received: from m42-2.mailgun.net ([69.72.42.2]:15062 "EHLO m42-2.mailgun.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232333AbhCJNPL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 10 Mar 2021 08:15:11 -0500
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1615382110; h=Message-ID: References: In-Reply-To: Subject:
+ Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Sender; bh=m0kvh85QidKUdcjDxW4gWa2rnH/W1str02pa5bkyzV0=;
+ b=fTpKkJrsWwD6jjUybjJxP2XUFjvBZeT2IZEQ3NkRAQ/uQPi52vV3jChaL8I/fr+W7yFyUwOE
+ BEws4UdKw6EmnIABjgufJiBEhXHMW4yTgGQg5VHNQI2joZK6h9HcBNUQqwD81wXTmPPRCMLv
+ PaoDETvtqEGw4dN09YQu5LCtQF0=
+X-Mailgun-Sending-Ip: 69.72.42.2
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n06.prod.us-west-2.postgun.com with SMTP id
+ 6048c651bb6300df7547158b (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 10 Mar 2021 13:14:57
+ GMT
+Sender: sbhanu=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id E4BC7C43463; Wed, 10 Mar 2021 13:14:56 +0000 (UTC)
+Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
+        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: sbhanu)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id BDCCBC433CA;
+        Wed, 10 Mar 2021 13:14:55 +0000 (UTC)
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b3b049f8-7b54-421b-fb55-08d8e3c269a4
-X-MS-Exchange-CrossTenant-originalarrivaltime: 10 Mar 2021 12:45:40.7216
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: +keVWDWg9Bky1eHncuE2MaFrxOOW29RNSUq/vx8TOlNubhsd/Fd1F08QPyXn4zYaYk94Dxn18aGm7zNp4W7cXgmTis3gWL8iFer31GDJ0yhZ/DLaMNGR2bnXUYHiXz+L
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYCPR01MB6431
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date:   Wed, 10 Mar 2021 18:44:55 +0530
+From:   sbhanu@codeaurora.org
+To:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, sartgarg@codeaurora.org,
+        asutoshd@codeaurora.org, stummala@codeaurora.org,
+        rampraka@codeaurora.org, sayalil@codeaurora.org,
+        rnayak@codeaurora.org, saiprakash.ranjan@codeaurora.org,
+        sibis@codeaurora.org, cang@codeaurora.org, pragalla@codeaurora.org,
+        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org, vbadigan=codeaurora.org@codeaurora.org
+Subject: Re: [PATCH V1] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
+ card
+In-Reply-To: <885574fe-3afe-8850-4acb-c330e1755a96@codeaurora.org>
+References: <1615317483-23780-1-git-send-email-sbhanu@codeaurora.org>
+ <885574fe-3afe-8850-4acb-c330e1755a96@codeaurora.org>
+Message-ID: <95a36b4285575222efad9291bb4ab7a3@codeaurora.org>
+X-Sender: sbhanu@codeaurora.org
+User-Agent: Roundcube Webmail/1.3.9
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
-
-Thank you for the patch!
-
-> From: Wolfram Sang, Sent: Tuesday, March 9, 2021 6:24 PM
->=20
-> All recent SDHI instances can be reset via the reset controller. If one
-> is found, use it instead of the open coded reset. This is to get a
-> future-proof sane reset state.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
-<snip>
-> @@ -561,9 +563,16 @@ static int renesas_sdhi_prepare_hs400_tuning(struct =
-mmc_host *mmc, struct mmc_io
->  static void renesas_sdhi_reset(struct tmio_mmc_host *host)
->  {
->  	struct renesas_sdhi *priv =3D host_to_priv(host);
-> +	int ret;
->  	u16 val;
->=20
-> -	if (priv->scc_ctl) {
-> +	if (priv->rstc) {
-> +		reset_control_reset(priv->rstc);
-> +		/* Unknown why but without polling reset status, it will hang */
-> +		read_poll_timeout(reset_control_status, ret, ret =3D=3D 0, 1, 100,
-> +				  false, priv->rstc);
-> +		priv->needs_adjust_hs400 =3D false;
-
-After we did hard reset here, sometimes tmio_mmc_reset_work() cannot recove=
-r
-again with "mmcblk0: recovery failed!" message... So, I investigated this
-issue and I found a reason.
-
-> +	} else if (priv->scc_ctl) {
->  		renesas_sdhi_disable_scc(host->mmc);
-
-I realized this renesas_sdhi_disable_scc() will set CLK_CTL_SCLKEN.
-So, the previous code can issue CMD13 after tmio_mmc_reset_work() was calle=
-d.
-But, after we applied this patch, the CMD13 failed because the clock was di=
-sabled.
-# In other words, if a controller doesn't have scc, the previous code canno=
-t issue
-# CMD13 in such a case, I guess.
-
-So, before we apply this patch, we have to add ->set_clock() calling in
-tmio_mmc_reset_work() like below:
----
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_c=
-ore.c
-index eca767dcabba..a05ccfc7aa0d 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -222,6 +222,7 @@ static void tmio_mmc_reset_work(struct work_struct *wor=
-k)
- 	spin_unlock_irqrestore(&host->lock, flags);
-=20
- 	tmio_mmc_reset(host);
-+	host->set_clock(host, host->clk_cache);
-=20
- 	/* Ready for new calls */
- 	host->mrq =3D NULL;
----
-
-Best regards,
-Yoshihiro Shimoda
+On 2021-03-10 10:18, Veerabhadrarao Badiganti wrote:
+> On 3/10/2021 12:48 AM, Shaik Sajida Bhanu wrote:
+>> Add nodes for eMMC and SD card on sc7280.
+>> 
+>> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+>> 
+>> ---
+>> This change is depends on the below patch series:
+>> https://lore.kernel.org/lkml/1613114930-1661-1-git-send-email-rnayak@codeaurora.org/
+>> https://lore.kernel.org/patchwork/project/lkml/list/?series=&submitter=28035&state=&q=&archive=&delegate=
+>> ---
+>>   arch/arm64/boot/dts/qcom/sc7280-idp.dts |  26 +++++
+>>   arch/arm64/boot/dts/qcom/sc7280.dtsi    | 170 
+>> ++++++++++++++++++++++++++++++++
+>>   2 files changed, 196 insertions(+)
+>> 
+>> diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts 
+>> b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+>> index ac79420..6abb2aa 100644
+>> --- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+>> +++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+>> @@ -8,6 +8,7 @@
+>>   /dts-v1/;
+>>     #include "sc7280.dtsi"
+>> +#include <dt-bindings/gpio/gpio.h>
+>>     / {
+>>   	model = "Qualcomm Technologies, Inc. SC7280 IDP platform";
+>> @@ -256,3 +257,28 @@
+>>   		bias-pull-up;
+>>   	};
+>>   };
+>> +
+>> +&sdhc_1 {
+>> +	status = "okay";
+>> +
+>> +	pinctrl-names = "default", "sleep";
+>> +	pinctrl-0 = <&sdc1_on>;
+>> +	pinctrl-1 = <&sdc1_off>;
+>> +
+>> +	vmmc-supply = <&vreg_l7b_2p9>;
+>> +	vqmmc-supply = <&vreg_l19b_1p8>;
+>> +
+>> +};
+>> +
+>> +&sdhc_2 {
+>> +	status = "okay";
+>> +
+>> +	pinctrl-names = "default","sleep";
+>> +	pinctrl-0 = <&sdc2_on>;
+>> +	pinctrl-1 = <&sdc2_off>;
+>> +
+>> +	vmmc-supply = <&vreg_l9c_2p9>;
+>> +	vqmmc-supply = <&vreg_l6c_2p9>;
+>> +
+>> +	cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
+>> +};
+>> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi 
+>> b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+>> index 3b86052..91fb18a 100644
+>> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
+>> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+>> @@ -18,6 +18,11 @@
+>>     	chosen { };
+>>   +	aliases {
+>> +		mmc1 = &sdhc_1;
+>> +		mmc2 = &sdhc_2;
+>> +	};
+>> +
+>>   	clocks {
+>>   		xo_board: xo-board {
+>>   			compatible = "fixed-clock";
+>> @@ -315,6 +320,69 @@
+>>   			#power-domain-cells = <1>;
+>>   		};
+>>   +		sdhc_1: sdhci@7c4000 {
+>> +			compatible = "qcom,sdhci-msm-v5";
+>> +			reg = <0 0x7c4000 0 0x1000>,
+>> +					<0 0x7c5000 0 0x1000>;
+>> +			reg-names = "hc", "cqhci";
+>> +
+>> +			iommus = <&apps_smmu 0xC0 0x0>;
+>> +			interrupts = <GIC_SPI 652 IRQ_TYPE_LEVEL_HIGH>,
+>> +					<GIC_SPI 656 IRQ_TYPE_LEVEL_HIGH>;
+>> +			interrupt-names = "hc_irq", "pwr_irq";
+>> +
+>> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+>> +					<&gcc GCC_SDCC1_AHB_CLK>,
+>> +					<&rpmhcc RPMH_CXO_CLK>;
+>> +			clock-names = "core", "iface", "xo";
+>> +
+>> +			bus-width = <8>;
+>> +			non-removable;
+>> +			supports-cqe;
+>> +			no-sd;
+>> +			no-sdio;
+>> +
+>> +			max-frequency = <192000000>;
+>> +
+>> +			qcom,dll-config = <0x0007642c>;
+>> +			qcom,ddr-config = <0x80040868>;
+>> +
+>> +			mmc-ddr-1_8v;
+>> +			mmc-hs200-1_8v;
+>> +			mmc-hs400-1_8v;
+>> +			mmc-hs400-enhanced-strobe;
+>> +
+>> +			status = "disabled";
+>> +
+>> +		};
+>> +
+>> +		sdhc_2: sdhci@8804000 {
+>> +			compatible = "qcom,sdhci-msm-v5";
+>> +			reg = <0 0x08804000 0 0x1000>;
+>> +
+>> +			iommus = <&apps_smmu 0x100 0x0>;
+>> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+>> +					<GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+>> +			interrupt-names = "hc_irq", "pwr_irq";
+>> +
+>> +			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+>> +					<&gcc GCC_SDCC2_AHB_CLK>,
+>> +					<&rpmhcc RPMH_CXO_CLK>;
+>> +			clock-names = "core", "iface", "xo";
+>> +
+>> +			bus-width = <4>;
+>> +
+>> +			no-mmc;
+>> +			no-sdio;
+>> +
+>> +			max-frequency = <202000000>;
+>> +
+>> +			qcom,dll-config = <0x0007642c>;
+>> +
+>> +			status = "disabled";
+>> +
+>> +		};
+>> +
+>>   		qupv3_id_0: geniqup@9c0000 {
+>>   			compatible = "qcom,geni-se-qup";
+>>   			reg = <0 0x009c0000 0 0x2000>;
+>> @@ -385,6 +453,108 @@
+>>   				pins = "gpio46", "gpio47";
+>>   				function = "qup13";
+>>   			};
+>> +
+>> +			sdc1_on: sdc1-on {
+>> +				pinconf-clk {
+>> +					pins = "sdc1_clk";
+>> +					bias-disable;
+>> +					drive-strength = <16>;
+>> +				};
+>> +
+>> +				pinconf-cmd {
+>> +					pins = "sdc1_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				pinconf-data {
+>> +					pins = "sdc1_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				pinconf-rclk {
+>> +					pins = "sdc1_rclk";
+>> +					bias-pull-down;
+>> +				};
+>> +			};
+>> +
+>> +			sdc1_off: sdc1-off {
+>> +				pinconf-clk {
+>> +					pins = "sdc1_clk";
+>> +					bias-disable;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				pinconf-cmd {
+>> +					pins = "sdc1_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				pinconf-data {
+>> +					pins = "sdc1_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				pinconf-rclk {
+>> +					pins = "sdc1_rclk";
+>> +					bias-pull-down;
+>> +				};
+>> +			};
+>> +
+>> +			sdc2_on: sdc2-on {
+>> +				pinconf-clk {
+>> +					pins = "sdc2_clk";
+>> +					bias-disable;
+>> +					drive-strength = <16>;
+>> +				};
+>> +
+>> +				pinconf-cmd {
+>> +					pins = "sdc2_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				pinconf-data {
+>> +					pins = "sdc2_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <10>;
+>> +				};
+>> +
+>> +				pinconf-sd-cd {
+>> +					pins = "gpio91";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +			};
+>> +
+>> +			sdc2_off: sdc2-off {
+>> +				pinconf-clk {
+>> +					pins = "sdc2_clk";
+>> +					bias-disable;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				pinconf-cmd {
+>> +					pins = "sdc2_cmd";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				pinconf-data {
+>> +					pins = "sdc2_data";
+>> +					bias-pull-up;
+>> +					drive-strength = <2>;
+>> +				};
+>> +
+>> +				pinconf-sd-cd {
+>> +					pins = "gpio91";
+>> +					bias-disable;
+> On few sc7180 based boards where external pull up is missing on 
+> cd-gpio,
+> we had seen issues like un-intended interrupt on cd-gpio pin (since its
+> getting toggled) during runtime PM cycle and resulting in unnecessary
+> scheduling of SDcard scan (mmc_rescan). This issue is seen only when 
+> SDcard
+> is not present.
+> By enabling internal pull all the time (bais-pull-up), we can avoid 
+> such issue.
+> 
+sure
+>> +					drive-strength = <2>;
+>> +				};
+>> +			};
+>>   		};
+>>     		apps_smmu: iommu@15000000 {
