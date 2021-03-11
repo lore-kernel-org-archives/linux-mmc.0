@@ -2,141 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5D6BC433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 09:46:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16974C433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 10:15:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A57C564FC0
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 09:46:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B751164F9D
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 10:15:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232138AbhCKJp7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Mar 2021 04:45:59 -0500
-Received: from [212.63.208.185] ([212.63.208.185]:49688 "EHLO
-        mail.marcansoft.com" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232152AbhCKJpp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Mar 2021 04:45:45 -0500
-X-Greylist: delayed 71604 seconds by postgrey-1.27 at vger.kernel.org; Thu, 11 Mar 2021 04:45:44 EST
-Received: from [127.0.0.1] (localhost [127.0.0.1])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: marcan@marcan.st)
-        by mail.marcansoft.com (Postfix) with ESMTPSA id D365C4246F;
-        Thu, 11 Mar 2021 09:45:32 +0000 (UTC)
-To:     Linus Walleij <linus.walleij@linaro.org>,
-        Sumit Garg <sumit.garg@linaro.org>
-Cc:     Arnd Bergmann <arnd@linaro.org>,
-        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
-        David Howells <dhowells@redhat.com>,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?Q?Alex_Benn=c3=a9e?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Ruchika Gupta <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org>
- <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby>
- <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
- <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
- <6c542548-cc16-af68-c755-df52bd13b209@marcan.st>
- <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
- <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
- <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
- <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
-From:   Hector Martin <marcan@marcan.st>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB)
- subsystem
-Message-ID: <e5d3f4b5-748e-0700-b897-393187b2bb1a@marcan.st>
-Date:   Thu, 11 Mar 2021 18:45:30 +0900
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
+        id S232068AbhCKKOv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Mar 2021 05:14:51 -0500
+Received: from mail-eopbgr700080.outbound.protection.outlook.com ([40.107.70.80]:56928
+        "EHLO NAM04-SN1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S232021AbhCKKOm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 11 Mar 2021 05:14:42 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=bucbsVAIJzMxRcv4P9sr1knYZe03FybI+RIVm8GYAfCio6uQUko7b5SuIA5Ax7vfpzfBfqt27bhcu11IwzobFR79eusM1tE3J0H8bMhOpFwcZPSRYu6b8tMnJZBkirjFF3xWq5wrMZfgWkBfjpZW7rIofj42VX8gwqvY8uGPHnChwhPloH1lbldjaMwViOFAz7vKE9GL00C3NZTW6383ACW6A73THFlNVCnDnU8vftxC/SfY/3OU/NrPiy0uzK0X74Y5hjY/yNrEBpBa7rsYOCMBH3niVjycaPbeQVcTC9hySxXKHe9/MrEs5dQdB6szqKo0JzQ7dJ56w3qsQjjrvg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=HfF7zCmOsPpWaBHtlKFZD48WtbHOLpKB7V/vMhbSgmg=;
+ b=PRFtBQ192Ighic+lY/ucD9DglTEiympjTXyBZyldpED209ZoUhBS/uJZCgpJvePEQlTcsKTD4kCBXqj2BclKffpgcGgM5MftNm+UeweuWrJKcp4R5e+82wozig8cNzWZHCVWiORr9x7XgizprgJv6Zg/y0LLm6W4ebT1y0z56ACClk19nUfxEzzFS1kwK1svoKELapgYpxUzNq4BrT1+1EABxaYT0UDybR80FT64RqiO8d+0K0wpj/4yKAvt5zN6GZSuM9lTt1WPH6ZQxlCPHtYGbjca33gU2J6OFUrS6Y5uRwBeb2jJ6NY8aiZpq+fXigXqzMz5S94Qhz65kRgoIA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=synaptics.com; dmarc=pass action=none
+ header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=HfF7zCmOsPpWaBHtlKFZD48WtbHOLpKB7V/vMhbSgmg=;
+ b=hT+ozIU0puR/CShCWz71YqeF5CnS8d1eAq8J2oASSkINW78PC+E6vVEiJia0Fklj7RQRDM6WOcH9uBepJIMuR1Fil/PX5i92VrrDEv4IsWTCP6MA8OlrTCvzRoHxf9t2jiePivqwf75606CLQgpDZlty2J7pM2xYEZDgvBbflTQ=
+Authentication-Results: intel.com; dkim=none (message not signed)
+ header.d=none;intel.com; dmarc=none action=none header.from=synaptics.com;
+Received: from BN3PR03MB2307.namprd03.prod.outlook.com
+ (2a01:111:e400:7bb1::16) by BN7PR03MB3603.namprd03.prod.outlook.com
+ (2603:10b6:406:c4::28) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3912.28; Thu, 11 Mar
+ 2021 10:14:40 +0000
+Received: from BN3PR03MB2307.namprd03.prod.outlook.com
+ ([fe80::246d:2f3d:93bf:ee56]) by BN3PR03MB2307.namprd03.prod.outlook.com
+ ([fe80::246d:2f3d:93bf:ee56%4]) with mapi id 15.20.3912.030; Thu, 11 Mar 2021
+ 10:14:40 +0000
+Date:   Thu, 11 Mar 2021 18:14:32 +0800
+From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-pci: Avoid comma separated statements
+Message-ID: <20210311181432.6385cd2b@xhacker.debian>
+X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [192.147.44.204]
+X-ClientProxiedBy: BY3PR05CA0047.namprd05.prod.outlook.com
+ (2603:10b6:a03:39b::22) To BN3PR03MB2307.namprd03.prod.outlook.com
+ (2a01:111:e400:7bb1::16)
 MIME-Version: 1.0
-In-Reply-To: <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: es-ES
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from xhacker.debian (192.147.44.204) by BY3PR05CA0047.namprd05.prod.outlook.com (2603:10b6:a03:39b::22) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3955.11 via Frontend Transport; Thu, 11 Mar 2021 10:14:38 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 9eadd2c8-b0ab-46fd-e6be-08d8e4767b74
+X-MS-TrafficTypeDiagnostic: BN7PR03MB3603:
+X-Microsoft-Antispam-PRVS: <BN7PR03MB3603D15AE604B202576123FEED909@BN7PR03MB3603.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:346;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: FgV2Hp4ialVnfQ/2r20xqhmCvCX8FDvJNZHJxBztjcC/NgKg/SepTAI8D6Nyj6Lpx+6P/sibbf8U64oJMFfKzXFeEXgY3Ai+AtH2neGljxInEe8iZOa4Aza5mhbcIBZplr/i+8bMbHl0tyLuZaVu6SONvBYXg537XC0sU2QCgeRGXmJ0QKAThV4dhimjqJshyWX/JC2yrS5iUolu6MFfFMCSbC8q6nVXbP8/n0q9d9GjDSmS8qE5Rb/YiAmrOCqFZZutE5h7a7e4596hcUZd7LJefSBgL22P5aDNa4ZMWBL/X0Hw8DCMYr/f8T5o56gQovN7OJu4nJGjPw4ZT9CrwG74iV2oB/YRFR6659yai7dj5uqRNccEVGQaKr9OmRxq/lMLwoJHgU+fYcerNxCAxrE827BwfP4uQlR1goSggqOIrrb6sa5xevx5V+W7/VEkFN04YboqIXhAoNQJUsBeDabk76dfvljEBJnrANtM734ktWQirUxmMs/AuJ2fQQTqju+Adk0Y41q+nF6SxfaYpQ==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN3PR03MB2307.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(136003)(39850400004)(396003)(366004)(376002)(346002)(1076003)(66946007)(66556008)(8676002)(7696005)(110136005)(316002)(4326008)(6666004)(52116002)(8936002)(66476007)(5660300002)(478600001)(4744005)(956004)(26005)(2906002)(9686003)(55016002)(6506007)(83380400001)(16526019)(86362001)(186003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?aqdZgatbvKaER5R0wbVMBXNEGQBNpVBWHhXzpubnMi9woeB0tqx6TBxrQMbw?=
+ =?us-ascii?Q?swY1eyrk1IuTrBxrvu/tln5721cPnQSTQ2uG8B4AdtGX97qsnOUHFdbDL9dU?=
+ =?us-ascii?Q?UEKApwb5ei0gZrek9jeCHKLBEo/XxAibrAg9j75d7bXLuoWVB9Pgz7ZodS0F?=
+ =?us-ascii?Q?SFGZ1Ju4/q88OgKZWBvTW9Ek5QIWXkd5RVtjae1Ls6/zCWKS7hrWG4yFeHIV?=
+ =?us-ascii?Q?3xR/YkwBFsta5lzUU/Ulbme3DnLCPLCcNvA3O+sMqCHQ7g2znye2FFGqUwSv?=
+ =?us-ascii?Q?L/KVuNAMFo7QQljKA7XxNLO85waxSAtgrMUWuNH8BVW3RsNXGsntDe2ax/vy?=
+ =?us-ascii?Q?rVwFftD8YbtnmTVqbfzVdr5txtWufMPp+7v2W6gKU9CmFusFxZ7dNosGdPI/?=
+ =?us-ascii?Q?swfrtlizWxQ5cXBg1BPRHk82algori+hTzs5gfktqnIk/W1xfV7z5mUEwpAp?=
+ =?us-ascii?Q?3bhiSFAoE3cGBrxDmicSJo/Acx0Cq3ffE3NOTHvK/qoBSdtn2/XUNZ770S2x?=
+ =?us-ascii?Q?sFkvGru/gQawhOn09hPIqPKgAs7NUUXKtYrEuxjjMuyApmr/nqZ3NZZhGr+t?=
+ =?us-ascii?Q?1h0T63T8XQq8mtvEHwzLVaDhmhgXjN3cbEwkwYvyNy1qKER8K0v82yIrN5gq?=
+ =?us-ascii?Q?c6CL+ITxmjNYKQuqx6UCKHsD+GGKEGHr0QrklHLHpQukfpF4cYQ01fMyEhK2?=
+ =?us-ascii?Q?ROliKN31YGsnUZ4D8/a2R0qTLHHk+cVJSzDx60sng/nvpL98Wg8qxi54pfRx?=
+ =?us-ascii?Q?8Gmn9UCg/MXT51bSKDqAbSbbLd8DSgm5uMtXO0D7y9H6Ghhkp/5bnEpV7kAn?=
+ =?us-ascii?Q?vSJMQPZr4RWZJ/deMmeNvBC+hCbvsBpvmXER2hNUSWLjs1yRm4wXvQW2Mj/F?=
+ =?us-ascii?Q?yMxQ70Nq2TwfamPltfiruRVaz32/TYYIooP0nYiZw190syRcldwY8xCokdim?=
+ =?us-ascii?Q?P3qo0GPNg3r5sqmzpT58qocG1lxJa45cNV0w+pNMCzFTSDSE6B6mv4CJ5c7a?=
+ =?us-ascii?Q?fQEHvxVdAWzzS/1U0wjQl+fr4BvK0lfa6rIMvYgVLXC4VpZf1s0ZyXA70TE7?=
+ =?us-ascii?Q?caeFxAiP4VOOkP6PPriYtpKWYPTzbQHLhHl69Wqe3sTP+vRsQxcH3VxVPRn5?=
+ =?us-ascii?Q?+bQ6p8PKTeljHtM6MFXySoyzOeDEhFHR3THYRKjrjsDm4I/oRvXhHGjibNbU?=
+ =?us-ascii?Q?xbXdSUo+TR2HVQ3TNGIDwsAW/LraYTiodrhHiQ0JMFbrM1T5CpV7mieIoSGW?=
+ =?us-ascii?Q?txzy89xjlEGXuwiP6rWplvYSNVC7cDQF8JYrrMJGVPuWHBcvZehD8CbGXG7i?=
+ =?us-ascii?Q?kVHOQBlVCwblAstl5UeeR6pO?=
+X-OriginatorOrg: synaptics.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9eadd2c8-b0ab-46fd-e6be-08d8e4767b74
+X-MS-Exchange-CrossTenant-AuthSource: BN3PR03MB2307.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Mar 2021 10:14:40.3147
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: cdEKbsK+daKXXBiorcaGb5hCr984zBeVOl4WdA688ZlBArS3IIQGt7qQhBjk151DUQ0S6G6nExVCx21et8mY6g==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN7PR03MB3603
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/03/2021 09.49, Linus Walleij wrote:
-> The use case for TPM on laptops is similar: it can be used by a
-> provider to lock down a machine, but it can also be used by the
-> random user to store keys. Very few users beside James
-> Bottomley are capable of doing that (I am not) but they exist.
-> https://blog.hansenpartnership.com/using-your-tpm-as-a-secure-key-store/
+Use semicolons.
 
-I've used a TPM as an SSH key keystore in the past (these days I use 
-YubiKeys, but same idea). TPMs are useful because they *do* implement 
-policy and cryptographic operations. So you can, in fact, get security 
-guarantees out of a TPM without secureboot.
+Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+---
+ drivers/mmc/host/sdhci-pci-core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-For example, assuming the TPM is secure, it is impossible to clone an 
-SSH key private key managed by a TPM. This means that any usage has to 
-be on-device, which provides inherent rate-limiting. Then, the TPM can 
-gate access to the key based on a passphrase, which again provides 
-inherent rate-limits on cracking attempts. TPM 2.0 devices also provide 
-explicit count limits and time-based throttling for unlocking attempts.
-
-We have much the same story with the Secure Enclave Processor on Apple 
-Silicon machines (which I'm working on porting Linux to) - it provides 
-policy, and can even authenticate with fingerprints (there is a hardware 
-secure channel between the reader and the SEP) as well as passphrases. 
-For all intents and purposes it is an Apple-managed TPM (with its own 
-secureboot). So it is similarly useful for us to support the SEP for key 
-storage, and perhaps even integrate it with kernel subsystems at some 
-point. It's useful for our regular users, even though they are unlikely 
-to be running with full secureboot on the main CPU (though Apple's 
-implementation does allow for a user-controlled secureboot subset, and 
-it should be possible to provide hard guarantees there as well, but I 
-digress).
-
-All of these things make putting keys into TPMs, YubiKeys, the SEP, etc 
-a useful thing for anyone, regardless of whether their machine is locked 
-down or not.
-
-This is not the case for RPMB. RPMB *relies* on the software running on 
-the other side being trusted. RPMB, alone, provides zero new security 
-guarantees, without trusted software communicating with it.
-
-The key initialization story is also a lot thornier in RPMB. TPMs, the 
-SEP, and YubiKeys are all designed so that they can be factory-reset 
-(losing all key material in the process) by a user with physical access, 
-which means that provisioning operations and experiments are risk-free, 
-and the only danger is data loss, not making the hardware less useful. 
-With the MAC key provisioning for RPMB being a one-time process, it is 
-inherently a very risky operation that a user must commit to with great 
-care, as they only get one chance, ever. Better have that key backed up 
-somewhere (but not somewhere an attacker can get to... see the 
-problem?). This is like fusing secureboot keys on SoCs (I remember being 
-*very* nervous about hitting <enter> on the command to fuse a Tegra X1 
-board with a secureboot key for some experiments... these kinds of 
-irreversible things are no joke).
-
-Basically, TPMs, SEP, YubiKeys, etc were designed to be generally useful 
-and flexible devices for various crypto and authentication use cases. 
-RPMB was designed for the sole purpose of plugging the secure storage 
-replay exploit for Android phones running TrustZone secure monitors. It 
-doesn't really do anything else; it's just a single low-level primitive 
-and you need to already have an equivalent design that is only missing 
-that piece to get anything from it. And its provisioning model assumes a 
-typical OEM device production pipeline and integration with CPU fusing; 
-it isn't friendly to Linux hackers messing around with securing LUKS 
-unlock attempt counters.
-
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 9552708846ca..62799c1d9c0c 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -958,7 +958,7 @@ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 		slot->host->mmc->caps2 |= MMC_CAP2_CQE;
+ 
+ 	if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
+-		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES,
++		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+ 		slot->host->mmc_host_ops.hs400_enhanced_strobe =
+ 						intel_hs400_enhanced_strobe;
+ 		slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
 -- 
-Hector Martin (marcan@marcan.st)
-Public Key: https://mrcn.st/pub
+2.30.2
+
