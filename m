@@ -2,111 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EFE4C433E6
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 20:59:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75EFFC433E6
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 00:37:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3D3D364FC8
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 Mar 2021 20:59:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 439C664FC0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 00:37:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229574AbhCJU6f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 15:58:35 -0500
-Received: from mail.kernel.org ([198.145.29.99]:60530 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231293AbhCJU6U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 10 Mar 2021 15:58:20 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id ED4D664EE8;
-        Wed, 10 Mar 2021 20:58:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615409900;
-        bh=pRdp6Or+xWH9uQm/XD+ddLGeOs+oJVy1HPUmgvyVhfI=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=qnrnn+ZvxH0YHuXXsI/nLVbDxnrjE+Gd1pmUDVRXEvwgTHJ3jIUdNaUuKbC0djob7
-         2ZAMcvq+dzH14VfYeQ7QMIQQ/iE4u+E02BhRY9Fj+3BWAVEl9sH6S913pa5tuFQ8AK
-         kFmQSJaHycvKKwhtnxMN5efcyzK9GLSUjNcvwukMMe7V6TJFWlOM8QgBClHGUTdAO8
-         tj7g2amwdfwoaj0bkSUq4F8IjyVeJcsm50Dzoecdk1G6g50C8ihD/HYmair0eTvOHj
-         Ml+D+Aq5hOJYmQQcZ/nb1tM2lBbt25lUem1PnIr7Gy/1SCFGTVrVlIdYyT2az9JScA
-         Ixh2FLDot/W3A==
-Received: by mail-ej1-f54.google.com with SMTP id jt13so41608340ejb.0;
-        Wed, 10 Mar 2021 12:58:19 -0800 (PST)
-X-Gm-Message-State: AOAM530gqu2Oo53fnbXCuWZ+l+wwxxr5VN3qlRvl4w+M5MmWH7o8m5J0
-        K7Cjl7Ep33/nhKvceaCFfCibHnNiUGIS4liv1Q==
-X-Google-Smtp-Source: ABdhPJw0cfBK+wxXYoeL+KV83s9r5gdTg3TpXOSPGEAiK5qMN3apGPP2k4JS/2HWZwYXB2MoQtWXYO1Wozz1AHBqMzY=
-X-Received: by 2002:a17:906:7d48:: with SMTP id l8mr333166ejp.108.1615409898298;
- Wed, 10 Mar 2021 12:58:18 -0800 (PST)
+        id S229893AbhCKAhQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 19:37:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50150 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230527AbhCKAgx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 19:36:53 -0500
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF8F5C061574
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 16:36:52 -0800 (PST)
+Received: by mail-lf1-x129.google.com with SMTP id f1so36795988lfu.3
+        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 16:36:52 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=EEzbsSCDR9QboIA8OrN63K5HZEwShS0wIkxT1lrzd0Y=;
+        b=riZjyH1NfHDCunME5Ebgwcbph2FiEIMHDSKKFitpNg0U8iOTWuJwtB6GzHL3vNfxn3
+         bKC6k1jMXjsf5GoCwsYzyYIe9V8eRGIjZxbtrzAHA4cWo/kfcaVq0a2yxRHziD/UHYtL
+         KrJVPIzP09ibIN4SoXEEPVGDtIxaHre5IZ2sYsYyR9ToplAng35DTKF6bOubx+i39R1f
+         Dyh6YNTaIYGkqNxapf4Gtw75AiC382TPw8+LxMz+fxeVGy15sf7k73kyLEtXBsVNkWpt
+         etsNBpGlXtrr7f+X+XS+9XGQN3Nqb1sTEg7ly23GPExeT193DJfFsQE4BqchIm93na3Z
+         gRrw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=EEzbsSCDR9QboIA8OrN63K5HZEwShS0wIkxT1lrzd0Y=;
+        b=JL4fkDkrn+FY+CSrzh/iSPPfApTome2FzOfA+ddW999XS0MRuUNffrHpKYT/eIs6Ut
+         56QACa9HbIvUw18VkRXZ+TFLeK0A9m2AWzQrgm4dbmoeMC7CMZTx3iwz24hZAQv5KuFu
+         4OqOM+7oGVD1excA1Y6zWUx7hlfBU7WvpdFlLi0MPdVYDbYDU/11mAQOr6GNre6OZcAp
+         0nFqhbNEyqQ/P4iRT+YGpInAF3g39cQDPuN+eoXjC9Pt/xAw/fsNL3fzyXnYUzrGf4uD
+         iDbBjNr40tSXChdg5V3mpwj1nucYCfIRKQlUY6kIB81JpkHiTIqt/Z1UUTNUn9Xgp2c3
+         Vt3w==
+X-Gm-Message-State: AOAM530HQ+NM2mJhKaOzuRVSLQMXqBe1HwtMD8X+PmgmJnXOSjdxh2AV
+        Lfld4pblhRvnwRwjGhc0ORvVq+a+MvAXjYv8giZjTg==
+X-Google-Smtp-Source: ABdhPJxPA73QJEO2P06IeIm6xha2IwSe1nk/jxmy8+2H6YjUfx61sOITuBIwpepPUOCRRsAhsWRrIoW1PKscdwIJ+Vc=
+X-Received: by 2002:a19:4c08:: with SMTP id z8mr638983lfa.157.1615423011194;
+ Wed, 10 Mar 2021 16:36:51 -0800 (PST)
 MIME-Version: 1.0
-References: <1615254990-192784-1-git-send-email-shawn.lin@rock-chips.com>
- <1615254990-192784-2-git-send-email-shawn.lin@rock-chips.com>
- <20210310030122.GA1664258@robh.at.kernel.org> <9f8b3be6-d87e-d944-d5db-67f3bcf0fad0@gmail.com>
- <7573e8c1-3f55-9925-bc14-534455f1ffa3@rock-chips.com>
-In-Reply-To: <7573e8c1-3f55-9925-bc14-534455f1ffa3@rock-chips.com>
-From:   Rob Herring <robh@kernel.org>
-Date:   Wed, 10 Mar 2021 13:58:06 -0700
-X-Gmail-Original-Message-ID: <CAL_JsqKTvzmskPL5eNVCzMmS7YO4oiyGdrf1+73ET1_DfgjPyQ@mail.gmail.com>
-Message-ID: <CAL_JsqKTvzmskPL5eNVCzMmS7YO4oiyGdrf1+73ET1_DfgjPyQ@mail.gmail.com>
-Subject: Re: [PATCH v3 2/3] dt-bindings: mmc: sdhci-of-dwcmhsc: Add rockchip support
-To:     Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     Johan Jonker <jbx6244@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        devicetree@vger.kernel.org,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Heiko Stuebner <heiko@sntech.de>
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+ <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+ <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+ <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+ <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st> <CACRpkdbQks5pRFNHkNLVvLHCBhh0XCv7pHYq25EVAbU60PcwsA@mail.gmail.com>
+ <0a26713a-8988-1713-4358-bc62364b9e25@marcan.st>
+In-Reply-To: <0a26713a-8988-1713-4358-bc62364b9e25@marcan.st>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 11 Mar 2021 01:36:39 +0100
+Message-ID: <CACRpkda9f-BNmu-CaNsghnDoOcSXvvvji=tag2Xos+tg_nNZ0w@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To:     Hector Martin <marcan@marcan.st>
+Cc:     David Howells <dhowells@redhat.com>, keyrings@vger.kernel.org,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Sumit Garg <sumit.garg@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 10, 2021 at 2:37 AM Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On Wed, Mar 10, 2021 at 2:52 PM Hector Martin <marcan@marcan.st> wrote:
+
+> This relies on having a secure boot chain to start with (otherwise you
+> can just bypass policy that way; the RPMB is merely storage to give you
+> anti-rollback properties, it can't enforce anything itself). So you
+> would have to have a laptop with a fully locked down secure boot, which
+> can only boot some version of Linux signed by you until, say, LUKS
+> decryption. And then the tooling around that needs to be integrated with
+> RPMB, to use it as an attempt counter.
+
+Yes and no. For secure boot yes. For other use cases it can
+still be useful.
+
+The way I understand it, there are people (not me) with secure boot
+ambitions but I wouldn't say that is the only use case, see below.
+
+> But now this ends up having to involve userspace anyway; the kernel key
+> stuff doesn't support policy like this, does it? So having the kernel
+> automagically use RPMB wouldn't get us there.
+
+Yes, you are right, I had the wrong idea. It needs to be something
+the user (or the users agent such as an organization) decides to
+make use of, and it is policy so it should be in userspace. We
+may standardize the key format on the device though.
+
+> I may be wrong on the details here, but as far as I know RPMB is
+> strictly equivalent to a simple secure increment-only counter in what it
+> buys you. The stuff about writing data to it securely is all a red
+> herring - you can implement secure storage elsewhere, and with secure
+> storage + a single secure counter, you can implement anti-rollback.
 >
->
-> On 2021/3/10 15:00, Johan Jonker wrote:
-> > On 3/10/21 4:01 AM, Rob Herring wrote:
-> >> On Tue, Mar 09, 2021 at 09:56:29AM +0800, Shawn Lin wrote:
-> >>> This patch adds rockchip support in sdhci-of-dwcmhsc.yaml
-> >>>
-> >>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
-> >>> ---
-> >>>
-> >>> Changes in v3: None
-> >>>
-> >>>   .../bindings/mmc/snps,dwcmshc-sdhci.yaml           | 24 ++++++++++++++++++++++
-> >>>   1 file changed, 24 insertions(+)
-> >>>
-> >>> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> >>> index f99fb9f..43989f2 100644
-> >>> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> >>> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> >>> @@ -16,6 +16,7 @@ allOf:
-> >>>   properties:
-> >>>     compatible:
-> >>>       enum:
-> >
-> >>> +      - rockchip,dwcmshc-sdhci
-> >
-> > Compatible strings are supposed to be SoC orientated.
-> > What SoC was this change for? rk3568 ?
-> > Could Shawn confirm that?
->
-> Yes. We are inclined to use this controller from now on for a
-> long time for up-coming SoCs. Should we tag compatible for rk3568
-> specified? One of the negative things I could come up with is that we
-> do this for dwmmc-rockchip, but we end up doing nothing else,
-> except for adding new compatible string again and again in Document.
+> It is not intended to store keys in a way that is somehow safer than
+> other mechanisms. After all, you need to securely store the RPMB key to
+> begin with; you might as well use that to encrypt a keystore on any
+> random block device.
 
-Yes, you should make this SoC specific.
+The typical use-case mentioned in one reference is to restrict
+the number of password/pin attempts and  combine that with
+secure time to make sure that longer and longer intervals are
+required between password attempts.
 
-It's one line patches if nothing else changed.
+This seems pretty neat to me.
 
-> >
-> >           - rockchip,rk3568-dwcmshc-sdhci ??
+> But RPMB does not enforce any of this policy for you. RPMB only gives
+> you a primitive: the ability to have storage that cannot be externally
+> rolled back. So none of this works unless the entire system is set up to
+> securely boot all the way until the drive unlock happens, and there are
+> no other blatant code execution avenues.
 
-I'd shorten it to 'rockchip,rk3568-dwcmshc'.
+This is true for firmware anti-rollback or say secure boot.
 
-> >
-> > Could Rob advise here?
+But RPMB can also be used for example for restricting the
+number of PIN attempts.
+
+A typical attack vector on phones (I think candybar phones
+even) was a robot that was punching PIN codes to unlock
+the phone, combined with an electronic probe that would
+cut the WE (write enable) signal to the flash right after
+punching a code. The counter was stored in the flash.
+
+(A bit silly example as this can be countered by reading back
+the counter from flash and checking etc, but you get the idea,
+various versions of this attack is possible,)
+
+With RPMB this can be properly protected against because
+the next attempt can not be made until after the RPMB
+monotonic counter has been increased.
+
+Of course the system can be compromised in other ways,
+(like, maybe it doesn't even have secure boot or even
+no encrypted drive) but this is one of the protection
+mechanisms that can plug one hole.
+
+It is thus a countermeasure to keyboard emulators and other
+evil hardware trying to brute force their way past screen
+locks and passwords. Such devices exist, sadly.
+
+> There isn't even any encryption involved in the protocol, so all the
+> data stored in the RPMB is public and available to any attacker.
+
+You need to pass the symmetric key to increase a counter
+and store a new "key" (data chunk, 256 bytes). But as you say
+one can read it without the symmetric key.
+
+AFAICT that is not a problem for any use case for RPMB.
+
+> So unless the kernel grows a subsystem/feature to enforce complex key
+> policies (with things like use counts, retry times, etc), I don't think
+> there's a place to integrate RPMB kernel-side. You still need a trusted
+> userspace tool to glue it all together.
+
+Yes, I understand such ambitions may exist and pretty much why
+I CC the keyring people. So the question is whether they think
+that is something they would go and use for e.g. passphrase
+retries.
+
+Yours,
+Linus Walleij
