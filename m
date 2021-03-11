@@ -2,134 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_2 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16974C433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 10:15:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC1FEC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 10:58:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B751164F9D
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 10:15:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8A71B64E67
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 10:58:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232068AbhCKKOv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Mar 2021 05:14:51 -0500
-Received: from mail-eopbgr700080.outbound.protection.outlook.com ([40.107.70.80]:56928
-        "EHLO NAM04-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232021AbhCKKOm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 11 Mar 2021 05:14:42 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bucbsVAIJzMxRcv4P9sr1knYZe03FybI+RIVm8GYAfCio6uQUko7b5SuIA5Ax7vfpzfBfqt27bhcu11IwzobFR79eusM1tE3J0H8bMhOpFwcZPSRYu6b8tMnJZBkirjFF3xWq5wrMZfgWkBfjpZW7rIofj42VX8gwqvY8uGPHnChwhPloH1lbldjaMwViOFAz7vKE9GL00C3NZTW6383ACW6A73THFlNVCnDnU8vftxC/SfY/3OU/NrPiy0uzK0X74Y5hjY/yNrEBpBa7rsYOCMBH3niVjycaPbeQVcTC9hySxXKHe9/MrEs5dQdB6szqKo0JzQ7dJ56w3qsQjjrvg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=HfF7zCmOsPpWaBHtlKFZD48WtbHOLpKB7V/vMhbSgmg=;
- b=PRFtBQ192Ighic+lY/ucD9DglTEiympjTXyBZyldpED209ZoUhBS/uJZCgpJvePEQlTcsKTD4kCBXqj2BclKffpgcGgM5MftNm+UeweuWrJKcp4R5e+82wozig8cNzWZHCVWiORr9x7XgizprgJv6Zg/y0LLm6W4ebT1y0z56ACClk19nUfxEzzFS1kwK1svoKELapgYpxUzNq4BrT1+1EABxaYT0UDybR80FT64RqiO8d+0K0wpj/4yKAvt5zN6GZSuM9lTt1WPH6ZQxlCPHtYGbjca33gU2J6OFUrS6Y5uRwBeb2jJ6NY8aiZpq+fXigXqzMz5S94Qhz65kRgoIA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=synaptics.com; dmarc=pass action=none
- header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
+        id S232540AbhCKK6J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Mar 2021 05:58:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42014 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232544AbhCKK5k (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Mar 2021 05:57:40 -0500
+Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3214C061574
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Mar 2021 02:57:39 -0800 (PST)
+Received: by mail-ua1-x92c.google.com with SMTP id g7so462892uab.12
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Mar 2021 02:57:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=HfF7zCmOsPpWaBHtlKFZD48WtbHOLpKB7V/vMhbSgmg=;
- b=hT+ozIU0puR/CShCWz71YqeF5CnS8d1eAq8J2oASSkINW78PC+E6vVEiJia0Fklj7RQRDM6WOcH9uBepJIMuR1Fil/PX5i92VrrDEv4IsWTCP6MA8OlrTCvzRoHxf9t2jiePivqwf75606CLQgpDZlty2J7pM2xYEZDgvBbflTQ=
-Authentication-Results: intel.com; dkim=none (message not signed)
- header.d=none;intel.com; dmarc=none action=none header.from=synaptics.com;
-Received: from BN3PR03MB2307.namprd03.prod.outlook.com
- (2a01:111:e400:7bb1::16) by BN7PR03MB3603.namprd03.prod.outlook.com
- (2603:10b6:406:c4::28) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3912.28; Thu, 11 Mar
- 2021 10:14:40 +0000
-Received: from BN3PR03MB2307.namprd03.prod.outlook.com
- ([fe80::246d:2f3d:93bf:ee56]) by BN3PR03MB2307.namprd03.prod.outlook.com
- ([fe80::246d:2f3d:93bf:ee56%4]) with mapi id 15.20.3912.030; Thu, 11 Mar 2021
- 10:14:40 +0000
-Date:   Thu, 11 Mar 2021 18:14:32 +0800
-From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-pci: Avoid comma separated statements
-Message-ID: <20210311181432.6385cd2b@xhacker.debian>
-X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [192.147.44.204]
-X-ClientProxiedBy: BY3PR05CA0047.namprd05.prod.outlook.com
- (2603:10b6:a03:39b::22) To BN3PR03MB2307.namprd03.prod.outlook.com
- (2a01:111:e400:7bb1::16)
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=VhCbRq6AtdBjwnonZsJCwx9bYEGLYFxfv2gxi80ch5g=;
+        b=A2FKRP/DcTnXGGgsgddrySXuzsbPZRlNQhQF3iwzKnBnE8ZwwbZxalj5RUy8f6s3Gf
+         FL2z8W7tqUSj9r7w4514AUhGbgmXHASELTA21v72joswHcSvFbmagXJqL+IAAeCj9rh0
+         fqCd6GB9IGngabrbDCNNJr4N/HAFTPqHIPRUqZrmZ8LZ0ZY16S+qLmltKC2CxbG43ad2
+         0mPrPMDt9Z8XU+wpWaJmmRN+FBCBLpiN9JMHWOuOyJBykDgn1MeKgeavq6xm+185izn6
+         sPI5FZB8voNHacbM9a67BsE6kE/HtnzOGzdhXiVA8CNHtbUKlDlXJJ+qY7s+AyIs2+j1
+         1xMw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=VhCbRq6AtdBjwnonZsJCwx9bYEGLYFxfv2gxi80ch5g=;
+        b=DrSNmoXudCVAm6dEZxIJHUeC+PveIwAX94DIeIKhxOiaouWxLsPjOFiAOPE7LF2cxm
+         ot7dH58cX16HgVPgt7kSSPH9WMmf+fjuLtJjFzWwqErgKAcAI9PS0c7KVUDNKhOZG8Dl
+         lH/uwmhETpt97lP2oXaJwah331QYCqBwG7qt/3NittHsFSaBbgVMicyjgf2H033D6oPt
+         1vFSZNpWOyGNRreCw2rXi9wr5aGuHkWjYe1uESAQmPBpkEH1/jHOXAJgMy3V8Z2Tcw5W
+         YmnA4Evw63nvHeLBy4dh+oPYESzun9hW/2Q9L3qJ3YezgupJx6qxUnxma1GMrxEYQ3Nh
+         TnWg==
+X-Gm-Message-State: AOAM533w49YkJpE9SSxE26w2ZkqGb4bKquHs3CHmfz4JIm3PDsBYZCLe
+        qxB7TiGdXbwOEXOkS0qGyjwT1FsNU7S1tdeiZhcZnA==
+X-Google-Smtp-Source: ABdhPJxl0wiLbT5XKYx2OeE/0A/5dFP0opQRgr3W0U++as0oWRsXChTpziQMmVfwKcM2e7/2scZBIf40nDgtrdIfhxw=
+X-Received: by 2002:a9f:3546:: with SMTP id o64mr4683366uao.129.1615460259190;
+ Thu, 11 Mar 2021 02:57:39 -0800 (PST)
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from xhacker.debian (192.147.44.204) by BY3PR05CA0047.namprd05.prod.outlook.com (2603:10b6:a03:39b::22) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3955.11 via Frontend Transport; Thu, 11 Mar 2021 10:14:38 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 9eadd2c8-b0ab-46fd-e6be-08d8e4767b74
-X-MS-TrafficTypeDiagnostic: BN7PR03MB3603:
-X-Microsoft-Antispam-PRVS: <BN7PR03MB3603D15AE604B202576123FEED909@BN7PR03MB3603.namprd03.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:346;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: FgV2Hp4ialVnfQ/2r20xqhmCvCX8FDvJNZHJxBztjcC/NgKg/SepTAI8D6Nyj6Lpx+6P/sibbf8U64oJMFfKzXFeEXgY3Ai+AtH2neGljxInEe8iZOa4Aza5mhbcIBZplr/i+8bMbHl0tyLuZaVu6SONvBYXg537XC0sU2QCgeRGXmJ0QKAThV4dhimjqJshyWX/JC2yrS5iUolu6MFfFMCSbC8q6nVXbP8/n0q9d9GjDSmS8qE5Rb/YiAmrOCqFZZutE5h7a7e4596hcUZd7LJefSBgL22P5aDNa4ZMWBL/X0Hw8DCMYr/f8T5o56gQovN7OJu4nJGjPw4ZT9CrwG74iV2oB/YRFR6659yai7dj5uqRNccEVGQaKr9OmRxq/lMLwoJHgU+fYcerNxCAxrE827BwfP4uQlR1goSggqOIrrb6sa5xevx5V+W7/VEkFN04YboqIXhAoNQJUsBeDabk76dfvljEBJnrANtM734ktWQirUxmMs/AuJ2fQQTqju+Adk0Y41q+nF6SxfaYpQ==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN3PR03MB2307.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(136003)(39850400004)(396003)(366004)(376002)(346002)(1076003)(66946007)(66556008)(8676002)(7696005)(110136005)(316002)(4326008)(6666004)(52116002)(8936002)(66476007)(5660300002)(478600001)(4744005)(956004)(26005)(2906002)(9686003)(55016002)(6506007)(83380400001)(16526019)(86362001)(186003);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?aqdZgatbvKaER5R0wbVMBXNEGQBNpVBWHhXzpubnMi9woeB0tqx6TBxrQMbw?=
- =?us-ascii?Q?swY1eyrk1IuTrBxrvu/tln5721cPnQSTQ2uG8B4AdtGX97qsnOUHFdbDL9dU?=
- =?us-ascii?Q?UEKApwb5ei0gZrek9jeCHKLBEo/XxAibrAg9j75d7bXLuoWVB9Pgz7ZodS0F?=
- =?us-ascii?Q?SFGZ1Ju4/q88OgKZWBvTW9Ek5QIWXkd5RVtjae1Ls6/zCWKS7hrWG4yFeHIV?=
- =?us-ascii?Q?3xR/YkwBFsta5lzUU/Ulbme3DnLCPLCcNvA3O+sMqCHQ7g2znye2FFGqUwSv?=
- =?us-ascii?Q?L/KVuNAMFo7QQljKA7XxNLO85waxSAtgrMUWuNH8BVW3RsNXGsntDe2ax/vy?=
- =?us-ascii?Q?rVwFftD8YbtnmTVqbfzVdr5txtWufMPp+7v2W6gKU9CmFusFxZ7dNosGdPI/?=
- =?us-ascii?Q?swfrtlizWxQ5cXBg1BPRHk82algori+hTzs5gfktqnIk/W1xfV7z5mUEwpAp?=
- =?us-ascii?Q?3bhiSFAoE3cGBrxDmicSJo/Acx0Cq3ffE3NOTHvK/qoBSdtn2/XUNZ770S2x?=
- =?us-ascii?Q?sFkvGru/gQawhOn09hPIqPKgAs7NUUXKtYrEuxjjMuyApmr/nqZ3NZZhGr+t?=
- =?us-ascii?Q?1h0T63T8XQq8mtvEHwzLVaDhmhgXjN3cbEwkwYvyNy1qKER8K0v82yIrN5gq?=
- =?us-ascii?Q?c6CL+ITxmjNYKQuqx6UCKHsD+GGKEGHr0QrklHLHpQukfpF4cYQ01fMyEhK2?=
- =?us-ascii?Q?ROliKN31YGsnUZ4D8/a2R0qTLHHk+cVJSzDx60sng/nvpL98Wg8qxi54pfRx?=
- =?us-ascii?Q?8Gmn9UCg/MXT51bSKDqAbSbbLd8DSgm5uMtXO0D7y9H6Ghhkp/5bnEpV7kAn?=
- =?us-ascii?Q?vSJMQPZr4RWZJ/deMmeNvBC+hCbvsBpvmXER2hNUSWLjs1yRm4wXvQW2Mj/F?=
- =?us-ascii?Q?yMxQ70Nq2TwfamPltfiruRVaz32/TYYIooP0nYiZw190syRcldwY8xCokdim?=
- =?us-ascii?Q?P3qo0GPNg3r5sqmzpT58qocG1lxJa45cNV0w+pNMCzFTSDSE6B6mv4CJ5c7a?=
- =?us-ascii?Q?fQEHvxVdAWzzS/1U0wjQl+fr4BvK0lfa6rIMvYgVLXC4VpZf1s0ZyXA70TE7?=
- =?us-ascii?Q?caeFxAiP4VOOkP6PPriYtpKWYPTzbQHLhHl69Wqe3sTP+vRsQxcH3VxVPRn5?=
- =?us-ascii?Q?+bQ6p8PKTeljHtM6MFXySoyzOeDEhFHR3THYRKjrjsDm4I/oRvXhHGjibNbU?=
- =?us-ascii?Q?xbXdSUo+TR2HVQ3TNGIDwsAW/LraYTiodrhHiQ0JMFbrM1T5CpV7mieIoSGW?=
- =?us-ascii?Q?txzy89xjlEGXuwiP6rWplvYSNVC7cDQF8JYrrMJGVPuWHBcvZehD8CbGXG7i?=
- =?us-ascii?Q?kVHOQBlVCwblAstl5UeeR6pO?=
-X-OriginatorOrg: synaptics.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9eadd2c8-b0ab-46fd-e6be-08d8e4767b74
-X-MS-Exchange-CrossTenant-AuthSource: BN3PR03MB2307.namprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 Mar 2021 10:14:40.3147
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: cdEKbsK+daKXXBiorcaGb5hCr984zBeVOl4WdA688ZlBArS3IIQGt7qQhBjk151DUQ0S6G6nExVCx21et8mY6g==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN7PR03MB3603
+References: <20210311174046.597d1951@xhacker.debian>
+In-Reply-To: <20210311174046.597d1951@xhacker.debian>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 11 Mar 2021 11:57:03 +0100
+Message-ID: <CAPDyKFpUM+Xpui3e8Ft2C1KpWEmR33QT-wERo33vmEJp0Grrbw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Use "mmc" directly rather than "host->mmc"
+To:     Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use semicolons.
+On Thu, 11 Mar 2021 at 10:40, Jisheng Zhang <Jisheng.Zhang@synaptics.com> wrote:
+>
+> Clean up the code to use the "mmc" directly instead of "host->mmc".
+> If the code sits in hot code path, this clean up also brings trvial
+> performance improvement. Take the sdhci_post_req() for example:
+>
+> before the patch:
+>      ...
+>      8d0:       a9be7bfd        stp     x29, x30, [sp, #-32]!
+>      8d4:       910003fd        mov     x29, sp
+>      8d8:       f9000bf3        str     x19, [sp, #16]
+>      8dc:       f9400833        ldr     x19, [x1, #16]
+>      8e0:       b9404261        ldr     w1, [x19, #64]
+>      8e4:       34000161        cbz     w1, 910 <sdhci_post_req+0x50>
+>      8e8:       f9424400        ldr     x0, [x0, #1160]
+>      8ec:       d2800004        mov     x4, #0x0                        // #0
+>      8f0:       b9401a61        ldr     w1, [x19, #24]
+>      8f4:       b9403262        ldr     w2, [x19, #48]
+>      8f8:       f9400000        ldr     x0, [x0]
+>      8fc:       f278003f        tst     x1, #0x100
+>      900:       f9401e61        ldr     x1, [x19, #56]
+>      904:       1a9f17e3        cset    w3, eq  // eq = none
+>      908:       11000463        add     w3, w3, #0x1
+>      90c:       94000000        bl      0 <dma_unmap_sg_attrs>
+>      ...
+>
+> After the patch:
+>      ...
+>      8d0:       a9be7bfd        stp     x29, x30, [sp, #-32]!
+>      8d4:       910003fd        mov     x29, sp
+>      8d8:       f9000bf3        str     x19, [sp, #16]
+>      8dc:       f9400833        ldr     x19, [x1, #16]
+>      8e0:       b9404261        ldr     w1, [x19, #64]
+>      8e4:       34000141        cbz     w1, 90c <sdhci_post_req+0x4c>
+>      8e8:       b9401a61        ldr     w1, [x19, #24]
+>      8ec:       d2800004        mov     x4, #0x0                        // #0
+>      8f0:       b9403262        ldr     w2, [x19, #48]
+>      8f4:       f9400000        ldr     x0, [x0]
+>      8f8:       f278003f        tst     x1, #0x100
+>      8fc:       f9401e61        ldr     x1, [x19, #56]
+>      900:       1a9f17e3        cset    w3, eq  // eq = none
+>      904:       11000463        add     w3, w3, #0x1
+>      908:       94000000        bl      0 <dma_unmap_sg_attrs>
+>      ...
+>
+> We saved one ldr instruction: "ldr     x0, [x0, #1160]"
 
-Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
----
- drivers/mmc/host/sdhci-pci-core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Nice!
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 9552708846ca..62799c1d9c0c 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -958,7 +958,7 @@ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
- 		slot->host->mmc->caps2 |= MMC_CAP2_CQE;
- 
- 	if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
--		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES,
-+		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES;
- 		slot->host->mmc_host_ops.hs400_enhanced_strobe =
- 						intel_hs400_enhanced_strobe;
- 		slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
--- 
-2.30.2
+Even if I think the cleanup of code makes sense alone.
 
+>
+> Signed-off-by: Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+> ---
+>  drivers/mmc/host/sdhci.c | 33 ++++++++++++++++-----------------
+>  1 file changed, 16 insertions(+), 17 deletions(-)
+>
+
+[...]
+
+> @@ -2489,14 +2489,14 @@ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable)
+>         unsigned long flags;
+>
+>         if (enable)
+> -               pm_runtime_get_noresume(host->mmc->parent);
+> +               pm_runtime_get_noresume(mmc->parent);
+
+Maybe use mmc_dev(mmc) instead? At least I think I would appreciate
+consistency in the entire c-file, today it seems like both
+"mmc->parent" and mmc_dev(mmc) are being used.
+
+[...]
+
+Kind regards
+Uffe
