@@ -3,120 +3,118 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9F5CC433E0
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 01:03:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93289C433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 01:08:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85EDF64FDD
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 01:03:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 514D164FC0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 01:08:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229469AbhCKBCi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 Mar 2021 20:02:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55594 "EHLO
+        id S229512AbhCKBII (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 10 Mar 2021 20:08:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56764 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229538AbhCKBCK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 20:02:10 -0500
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FCF9C061760
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 17:02:10 -0800 (PST)
-Received: by mail-lj1-x231.google.com with SMTP id p15so160532ljc.13
-        for <linux-mmc@vger.kernel.org>; Wed, 10 Mar 2021 17:02:10 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=c8MWUEPcWRqlNN6HV0ALExHUT0G/wuf/0Gpk6qlo1WE=;
-        b=UhMP6tzOupn8Kgm9qYDbMvA5SCQImG9o3THb5a8Ek4/IxA6Ws6YGQoiQaHOUEBSRcc
-         /ZpjF/pAJubmqTu9r/jwd7HBBwpIAp/E+cSIIircb7aU6kwwbRJuxr7BN5dvmMGw01io
-         5pVLAWKHtIxUn/RKgjkjffI+X8LpF5V88y1/uaJ9Ku/hMV1zyg+KDMDkBrczbFUCzhGs
-         S4hOB6Km+eAAvrBcseYvd3NlDzvkQTg6zzCq3AqRuJ06/FT5I8IqtJbek2KTykNN+zRz
-         s3z1LKVDczv1nd/6qnTe63ho1j/gNgmQLCSc3V4M1KuFMY7f99od7XGzD+aT+hY2pOVY
-         96xA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=c8MWUEPcWRqlNN6HV0ALExHUT0G/wuf/0Gpk6qlo1WE=;
-        b=Lja86ckN/BVkqkSQdjS8qzpgwfc0MsFkn/iRCj8QTdUmvy9TU1JCwNSsSSp9LB2Vlo
-         HJdZAOB4KGaWaHV/SePfUzIJ8lt40JgNiUzvs/8RbEJxEYhUaffqqWnejBJ1iO9VVN0h
-         dbXdNRhT7thsPXJ2qxqGTiqL0d2H3Fyzd11ZXLmBuCANUU/OZJCGO+y0eu/6KG0kh6zg
-         UOKJ2V0r+a8KHsLXd0spWCDP/+9sJbYFT/ZX3VqoCF1feffgWOjXD5UV17czkD5S764d
-         Q9dcgGBYEHCju0tMGs7GCuBJaRx4cR6HDAJIjoZnUB0P5/kdMILcUjU8Gd/8zx2fCtPE
-         TkMA==
-X-Gm-Message-State: AOAM532XQEyGBNI40t9zxqn+DZuwtUrdDWzVHmer/2jMBOqXBMCK8Yy/
-        j4yDajprITvTQlKFmjpXcutA41dOyK+cW16BB9mLTw==
-X-Google-Smtp-Source: ABdhPJzkcZbjChLiKr2QTj6cupQ7Gt4EKlXJ9kqPzoWN9882YNqqEJKPD3YGlEuuS/DQkce8boJ9ojboDa+oHD5ilFI=
-X-Received: by 2002:a2e:1649:: with SMTP id 9mr3492915ljw.74.1615424528892;
- Wed, 10 Mar 2021 17:02:08 -0800 (PST)
-MIME-Version: 1.0
-References: <20210310152900.149380-1-ulf.hansson@linaro.org>
-In-Reply-To: <20210310152900.149380-1-ulf.hansson@linaro.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 11 Mar 2021 02:01:57 +0100
-Message-ID: <CACRpkdayGkuJE9z+QT41ZVoJJN4sBx4e28c5OLzC9obvE94gBw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Fix hanging on I/O during system suspend for
- removable cards
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        "Rafael J . Wysocki" <rjw@rjwysocki.net>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        with ESMTP id S229520AbhCKBHj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 Mar 2021 20:07:39 -0500
+Received: from bedivere.hansenpartnership.com (bedivere.hansenpartnership.com [IPv6:2607:fcd0:100:8a00::2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D29DDC061574;
+        Wed, 10 Mar 2021 17:07:38 -0800 (PST)
+Received: from localhost (localhost [127.0.0.1])
+        by bedivere.hansenpartnership.com (Postfix) with ESMTP id D65C61280622;
+        Wed, 10 Mar 2021 17:07:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+        d=hansenpartnership.com; s=20151216; t=1615424856;
+        bh=rPT+VYV1+Cvgf3klr7B1cClAbrNcSs/uscoE5EBQ0nc=;
+        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
+        b=p12GzutZqy8xcUa2GnBy4AOa+gxAVmux6akGb/gVO8WcPowOFQyN5jmyE52Lyz7/r
+         BnDxvXjx8FggJ+nr1mNWUTNHncvcWJIEcSSWGK5if6n5S5UvFcoGs9xCV/aH6Zx5oI
+         cLwFa94vi+9FtHBA27LQV/mVFHIhmeEXGaeMba6U=
+Received: from bedivere.hansenpartnership.com ([127.0.0.1])
+        by localhost (bedivere.hansenpartnership.com [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id gW20K4LJnFMI; Wed, 10 Mar 2021 17:07:36 -0800 (PST)
+Received: from jarvis.int.hansenpartnership.com (unknown [IPv6:2601:600:8280:66d1::527])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by bedivere.hansenpartnership.com (Postfix) with ESMTPSA id AA7E31280610;
+        Wed, 10 Mar 2021 17:07:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+        d=hansenpartnership.com; s=20151216; t=1615424856;
+        bh=rPT+VYV1+Cvgf3klr7B1cClAbrNcSs/uscoE5EBQ0nc=;
+        h=Message-ID:Subject:From:To:Date:In-Reply-To:References:From;
+        b=p12GzutZqy8xcUa2GnBy4AOa+gxAVmux6akGb/gVO8WcPowOFQyN5jmyE52Lyz7/r
+         BnDxvXjx8FggJ+nr1mNWUTNHncvcWJIEcSSWGK5if6n5S5UvFcoGs9xCV/aH6Zx5oI
+         cLwFa94vi+9FtHBA27LQV/mVFHIhmeEXGaeMba6U=
+Message-ID: <d93321502a3df2f7afa42da417137d79f6e49961.camel@HansenPartnership.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB)
+ subsystem
+From:   James Bottomley <James.Bottomley@HansenPartnership.com>
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        Sumit Garg <sumit.garg@linaro.org>
+Cc:     Hector Martin <marcan@marcan.st>, Arnd Bergmann <arnd@linaro.org>,
+        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        Alex =?ISO-8859-1?Q?Benn=E9e?= <alex.bennee@linaro.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        Android Kernel Team <kernel-team@android.com>,
-        stable <stable@vger.kernel.org>
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
+Date:   Wed, 10 Mar 2021 17:07:34 -0800
+In-Reply-To: <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+         <20210303135500.24673-2-alex.bennee@linaro.org>
+         <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+         <20210305075131.GA15940@goby>
+         <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+         <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+         <6c542548-cc16-af68-c755-df52bd13b209@marcan.st>
+         <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+         <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
+         <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
+         <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.34.4 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 10, 2021 at 4:29 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+On Thu, 2021-03-11 at 01:49 +0100, Linus Walleij wrote:
+> The use case for TPM on laptops is similar: it can be used by a
+> provider to lock down a machine, but it can also be used by the
+> random user to store keys. Very few users beside James
+> Bottomley are capable of doing that (I am not)
 
-> The mmc core uses a PM notifier to temporarily during system suspend, turn
-> off the card detection mechanism for removal/insertion of (e)MMC/SD/SDIO
-> cards. Additionally, the notifier may be used to remove an SDIO card
-> entirely, if a corresponding SDIO functional driver don't have the system
-> suspend/resume callbacks assigned. This behaviour has been around for a
-> very long time.
->
-> However, a recent bug report tells us there are problems with this
-> approach. More precisely, when receiving the PM_SUSPEND_PREPARE
-> notification, we may end up hanging on I/O to be completed, thus also
-> preventing the system from getting suspended.
->
-> In the end what happens, is that the cancel_delayed_work_sync() in
-> mmc_pm_notify() ends up waiting for mmc_rescan() to complete - and since
-> mmc_rescan() wants to claim the host, it needs to wait for the I/O to be
-> completed first.
->
-> Typically, this problem is triggered in Android, if there is ongoing I/O
-> while the user decides to suspend, resume and then suspend the system
-> again. This due to that after the resume, an mmc_rescan() work gets punted
-> to the workqueue, which job is to verify that the card remains inserted
-> after the system has resumed.
->
-> To fix this problem, userspace needs to become frozen to suspend the I/O,
-> prior to turning off the card detection mechanism. Therefore, let's drop
-> the PM notifiers for mmc subsystem altogether and rely on the card
-> detection to be turned off/on as a part of the system_freezable_wq, that we
-> are already using.
->
-> Moreover, to allow and SDIO card to be removed during system suspend, let's
-> manage this from a ->prepare() callback, assigned at the mmc_host_class
-> level. In this way, we can use the parent device (the mmc_host_class
-> device), to remove the card device that is the child, in the
-> device_prepare() phase.
->
-> Reported-by: Kiwoong Kim <kwmad.kim@samsung.com>
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Yes, that's the problem with the TPM: pretty much no-one other than
+someone prepared to become an expert in the subject can use it.  This
+means that enabling RPMB is unlikely to be useful ... you have to
+develop easy use cases for it as well.
 
-This makes sense to me.
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+>  but they exist.
+> https://blog.hansenpartnership.com/using-your-tpm-as-a-secure-key-store/
 
-Yours,
-Linus Walleij
+It's the difficulty of actually *using* the thing as a keystore which
+causes the problem.   The trick to expanding use it to make it simple.
+Not to derail the thread, but this should hopefully become a whole lot
+easier soon.  Gnupg-2.3 will release with easy to use TPM support for
+all your gpg keys:
+
+https://git.gnupg.org/cgi-bin/gitweb.cgi?p=gnupg.git;a=log;h=6720f1343aef9342127380b155c19e12c92d65ac
+
+It's not the end of the road by any means, but hopefully it will become
+a beach head of sorts for more uses.
+
+James
+
+
