@@ -2,115 +2,219 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91A28C433DB
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 19:53:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F15ACC433E0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 20:03:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5021D64FA6
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 19:53:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ACAEE64F81
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 20:03:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229555AbhCKTw5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Mar 2021 14:52:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44728 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229607AbhCKTwe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Mar 2021 14:52:34 -0500
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A27CC061574;
-        Thu, 11 Mar 2021 11:52:33 -0800 (PST)
-Received: by mail-lj1-x22b.google.com with SMTP id 9so3731859ljd.7;
-        Thu, 11 Mar 2021 11:52:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=NzktC61WLHyGiWXBjMZlD5s3DKyEhRdHqxU4GfY6M6c=;
-        b=aAhQavJLtQkk/nECiXIlx+O/QFcYOij/vUvk4Wb3id8VTVQ0DyGKOupLcfPcnhws9M
-         iTylNQCipW5MSqd0wNcpVw4dB3diCb3QY/PKAwT+/BxAHD4yYg+lSPtwGG/DTHT3NehP
-         CaoEl5t7uGJD3ud2WDG316ejAt9g9t9FDMn5fpvYV9Ui71GaGzvyAItDW9kJ2gOneKSC
-         asVAk7ZuMTAk2n+46AdJFDyaKPMsG4xv/4UfEf6ULxafrkhpkpzYK2+5iVazZOxsor5w
-         uTljITefaZioOQJAu4nlANrdsnfQbXc2UvMRBg4l1oavRU/lcVlrzwLCJQ86EbOo4P7r
-         Jzvg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=NzktC61WLHyGiWXBjMZlD5s3DKyEhRdHqxU4GfY6M6c=;
-        b=BaGPppYF6xa0YcL/sZY7Ar6+pmg+KaMaCVBr2SG6QNwUxvcxjNvEbu8OfDDRGXFRvl
-         EdL5peQ2xA0AW3XVFpNvoQVr4e/ypgj7xZVQrpunrU78ZHwMAOxby4N4BVL8HM7u8+GN
-         1mAoKCPjbryUD9D3aeSnnJYVL7a88O8F8OEV8QYshO3YnyKUciBKzSWdziLGULtWg+eZ
-         wAPA+qHH/kzPmrmJwnHIVpZ/yEsf7o8+g25rb4pOKfsWhgAW6LytWCq9SYY3Jd321YPX
-         xK50aAsb8i3pbkiHzHjqq37DkDathrnNJPif2PQoQIS6y3cLTtb9Bq6fWiUHoqDkBg76
-         95eQ==
-X-Gm-Message-State: AOAM532Vqs93wweySnn/BOuuhOh00+Jk9b2G24m9egrACVp/g8DElKQu
-        3vMFwlQ1887T/D7psBtTrj8U13XWePg=
-X-Google-Smtp-Source: ABdhPJy1BIvKdq3/KI+BkHi/0PnhadIhGpaaLM0alJjY9nXsG8WO7V4czzQ/EgXdXTqTkrhNdbzLPg==
-X-Received: by 2002:a05:651c:303:: with SMTP id a3mr285703ljp.290.1615492351563;
-        Thu, 11 Mar 2021 11:52:31 -0800 (PST)
-Received: from [192.168.2.145] (109-252-193-52.dynamic.spd-mgts.ru. [109.252.193.52])
-        by smtp.googlemail.com with ESMTPSA id d14sm1075232lfg.128.2021.03.11.11.52.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 11 Mar 2021 11:52:31 -0800 (PST)
-Subject: Re: [PATCH v2 07/14] spi: spi-geni-qcom: Convert to use
- resource-managed OPP API
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Qiang Yu <yuq825@gmail.com>, Rob Clark <robdclark@gmail.com>,
-        Sean Paul <sean@poorly.run>, Rob Herring <robh@kernel.org>,
-        Tomeu Vizoso <tomeu.vizoso@collabora.com>,
-        Steven Price <steven.price@arm.com>,
-        Alyssa Rosenzweig <alyssa.rosenzweig@collabora.com>,
-        Stanimir Varbanov <stanimir.varbanov@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Lukasz Luba <lukasz.luba@arm.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>, Nishanth Menon <nm@ti.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Yangtao Li <tiny.windzz@gmail.com>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        dri-devel@lists.freedesktop.org, lima@lists.freedesktop.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        freedreno@lists.freedesktop.org, linux-media@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-samsung-soc@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-tegra@vger.kernel.org
-References: <20210311192105.14998-1-digetx@gmail.com>
- <20210311192105.14998-8-digetx@gmail.com>
- <20210311194428.GK4962@sirena.org.uk>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <552bb8fe-cd46-a420-8646-3fbe8975f01d@gmail.com>
-Date:   Thu, 11 Mar 2021 22:52:29 +0300
+        id S229900AbhCKUCp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Mar 2021 15:02:45 -0500
+Received: from [212.63.208.185] ([212.63.208.185]:43780 "EHLO
+        mail.marcansoft.com" rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S229796AbhCKUCh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Mar 2021 15:02:37 -0500
+Received: from [127.0.0.1] (localhost [127.0.0.1])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: marcan@marcan.st)
+        by mail.marcansoft.com (Postfix) with ESMTPSA id 7A616424D9;
+        Thu, 11 Mar 2021 20:02:24 +0000 (UTC)
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     David Howells <dhowells@redhat.com>,
+        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Sumit Garg <sumit.garg@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        =?UTF-8?Q?Alex_Benn=c3=a9e?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-2-alex.bennee@linaro.org>
+ <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+ <20210305075131.GA15940@goby>
+ <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+ <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+ <6c542548-cc16-af68-c755-df52bd13b209@marcan.st>
+ <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+ <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
+ <CACRpkdbQks5pRFNHkNLVvLHCBhh0XCv7pHYq25EVAbU60PcwsA@mail.gmail.com>
+ <0a26713a-8988-1713-4358-bc62364b9e25@marcan.st>
+ <CACRpkda9f-BNmu-CaNsghnDoOcSXvvvji=tag2Xos+tg_nNZ0w@mail.gmail.com>
+ <32bdceb1-e70d-7481-96e3-a064a7108eb9@marcan.st>
+ <CACRpkdZ_-rqGBUOxUcBPeqVkLzX=Q9pjO9M+zY20-S9tNXAE0Q@mail.gmail.com>
+From:   Hector Martin <marcan@marcan.st>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB)
+ subsystem
+Message-ID: <d7f8a732-7a44-f609-52dc-3ba824a3d192@marcan.st>
+Date:   Fri, 12 Mar 2021 05:02:22 +0900
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.4.2
+ Thunderbird/78.6.0
 MIME-Version: 1.0
-In-Reply-To: <20210311194428.GK4962@sirena.org.uk>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+In-Reply-To: <CACRpkdZ_-rqGBUOxUcBPeqVkLzX=Q9pjO9M+zY20-S9tNXAE0Q@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: es-ES
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-11.03.2021 22:44, Mark Brown пишет:
-> On Thu, Mar 11, 2021 at 10:20:58PM +0300, Dmitry Osipenko wrote:
+On 11/03/2021 23.06, Linus Walleij wrote:
+> Yes. And this is what mobile phone vendors typically did.
 > 
->> Acked-by: Mark brown <broonie@kernel.org>
-> 
-> Typo there.
-> 
+> But the nature of different electrical attacks made them worried
+> about different schemes involving cutting power and disturbing
+> signals with different probes, so they wanted this counter
+> implemented in hardware and that is why RPMB exists at all
+> (IIUC).
 
-Good catch! Although, that should be a patchwork fault since it
-auto-added acks when I downloaded v1 patches and I haven't changed them.
-I'll fix it in v3 or, if there won't be anything else to improve, then
-maybe Viresh could fix it up while applying patches.
+No, prior to RPMB there was no such secure counter at all. The problem 
+is that non-volatile erasable storage (i.e. EEPROM/Flash) is 
+incompatible with modern SoC manufacturing processes, so there is no way 
+to embed a secure counter into the main SoC. And once your counter needs 
+to be external, there needs to be a secure communications protocol to 
+access it. This is what RPMB implements.
+
+For preventing software downgrades, especially of bootloader code, this 
+can be implemented with one-time fuses embedded in the SoC, but there is 
+a limited supply of those. So this doesn't work for things like PIN 
+attempt counters. For that you need a secure external counter.
+
+> It is fine to be of the opinion that this entire piece of hardware
+> is pointless because the same can be achieved using
+> well written software.
+
+You've misunderstood me. RPMB isn't pointless; what I am saying is that 
+if you strip away everything but the counter functionality, you can 
+still build equivalent security guarantees. You still need the counter. 
+There is no way to get that counter without RPMB or something like it 
+(another option is e.g. to use a smartcard IC as a secure element; AIUI 
+modern Apple devices do this). Software alone doesn't work. This is why 
+I wrote that article about how the FBI cracks iPhones; that works 
+because they weren't using a secure rollback-protected storage/counter 
+chip of any kind.
+
+> The position that the kernel community shall just ignore this
+> hardware is a possible outcome of this discussion, but we need
+> to have the discussion anyway, because now a RPMB framework
+> is being promoted. The people who want it will need to sell it to
+> us.
+
+Again, you're kind of misunderstanding me here. I'm not saying the 
+feature is useless. What I'm saying is that, to understand *how* it is 
+useful, it helps if you forget about the read/write commands and treat 
+it as a simple counter.
+
+Once you do that, you'll realize that e.g. putting keys in RPMB doesn't 
+really make sense as a kernel primitive. The usefulness of RPMB is 
+purely in the integration of that counter (which is equivalent to 
+rollback-protected storage) with a policy system. Everything else is 
+icing on the cake; it doesn't create new use cases.
+
+Consider this:
+
+* You have RPMB, but you will use it as a counter only.
+* To use RPMB, you need to have a secure shared key.
+* You use the RPMB key (or a hash, or whatever) to encrypt a GPG key in 
+your filesystem
+* You have a Git repo. This is your secure rollback-protected storage.
+* We assume the filesystem can be potentially read, written, and 
+intercepted.
+
+To read from your rollback-protected storage, you:
+
+* Read the RPMB counter securely
+* Fetch the Git tag named "v%d" with the counter value
+* Ensure the Git tag is correctly signed with your secure GPG key
+* Ensure the commit description of the signed commit is also "v%d"
+
+To write to your rollback protected storage, you:
+
+* Commit your changes to the repository (as a child of the current known 
+good commit, which you know is secure via the prevous read process) with 
+the commit message "v%d" with the counter value + 1
+* Tag it "v%d" with the current counter value + 1, signing the tag with 
+your GPG private key
+* Ensure all changes are flushed to disk
+* Perform an increment operation on the RPMB counter
+
+You have now built a secure, rollback-protected Git repository, with 
+similar security properties to RPMB storage, without using RPMB storage; 
+just a counter.
+
+Just like RPMB storage, the repo is readable without a key.
+Just like RPMB storage, you need to have a secured master key stored 
+somewhere; if the attacker gets your key it is game over.
+Just like RPMB storage, the repo can only be updated (in a way that 
+would be accepted) with the key available
+Just like RPMB storage, the repo cannot be rolled back to a prior 
+version (because it would not match the counter value)
+
+Thus, we can conclude that the storage features of RPMB do not provide 
+additional security properties that cannot be derived from a simple counter.
+
+* Disclaimer: please don't actually deploy this; I'm trying to make a 
+point here, it's 5AM and I'm not claiming this is a perfectly secure 
+design and I haven't missed anything. Please don't design 
+rollback-protected Git repositories without expert review. I am assuming 
+filesystem mutations only happen between operations and handwaving away 
+active attacks, which I doubt Git is designed to be robust against. A 
+scheme like this can be implemented securely with care, but not naively.
+
+>>> With RPMB this can be properly protected against because
+>>> the next attempt can not be made until after the RPMB
+>>> monotonic counter has been increased.
+>>
+>> But this is only enforced by software. If you do not have secure boot,
+>> you can just patch software to allow infinite tries without touching the
+>> RPMB. The RPMB doesn't check PINs for you, it doesn't even gate read
+>> access to data in any way. All it does is promise you cannot make the
+>> counter count down, or make the data stored within go back in time.
+> 
+> This is true, I guess the argument is something along the
+> line that if one link in the chain is weaker, why harden
+> any other link, the chain will break anyway?
+
+This is how security works, yes :-)
+
+I'm not saying hardening a link in the chain is pointless in every case, 
+but in this case it's like heat treating one link in the chain, then 
+joining it to the next one with a ziptie. Only once you at least have 
+the entire chain of steel does it make sense to start thinking about 
+heat treatment.
+
+> I am more of the position let's harden this link if we can
+> and then deal with the others when they come up, i.e.
+> my concern is this piece of the puzzle, even if it is not
+> the centerpiece (maybe the centerpiece is secure boot
+> what do I know).
+
+Well, that's what I'm saying, you do need secureboot for this to make 
+sense :-)
+
+RPMB isn't useless and some systems should implement it; but there's no 
+real way for the kernel to transparently use it to improve security in 
+general (for anyone) without the user being aware. Since any security 
+benefit from RPMB must come from integration with user policy, it 
+doesn't make sense to "well, just do something else with RPMB because 
+it's better than nothing"; just doing "something" doesn't make systems 
+more secure. There needs to be a specific, practical use case that we'd 
+be trying to solve with RPMB here.
+
+-- 
+Hector Martin (marcan@marcan.st)
+Public Key: https://mrcn.st/pub
