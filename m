@@ -2,138 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 23584C433E6
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 18:45:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94E18C43381
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 19:09:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C26BB64FDD
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 18:44:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 50DBC64EE8
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Mar 2021 19:09:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229675AbhCKSoZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Mar 2021 13:44:25 -0500
-Received: from mail.kernel.org ([198.145.29.99]:36348 "EHLO mail.kernel.org"
+        id S229938AbhCKTIc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Mar 2021 14:08:32 -0500
+Received: from mail.kernel.org ([198.145.29.99]:39536 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229562AbhCKSoS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 11 Mar 2021 13:44:18 -0500
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B1DC764F8E;
-        Thu, 11 Mar 2021 18:44:17 +0000 (UTC)
+        id S229721AbhCKTIE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 11 Mar 2021 14:08:04 -0500
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 77EF664FE0;
+        Thu, 11 Mar 2021 19:08:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615488258;
-        bh=DYeHy66eRup4CHRWH3huzJ01TuQ0LiVd36jb05cmqtA=;
+        s=k20201202; t=1615489682;
+        bh=+MqxPqLxS0fmcZSkxqaGS/7xnCYlQhr8+DK+/ePJsDE=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lqDIySRP0vQlPsZPkbyRFvxvrTmFX/4zLvht6cRb/e3TaGR3QUqqhOujaLXm+ttrF
-         IMGVB0/i2UInSWaAf0crs3X9SiWhXQ6UdSQucSvIwS3njLuuaMvGGTOClRfySpY43O
-         nVn3666rASt+UfvVQTxeDd9oKNIGO2z9vTYVCU4wQOBtoyQYKmCfkOJCV9gXmsyZnn
-         MqMQ5D87ZnvZYNMECrC8RIfCGQk9PZ6ycDs+hGc9pTWS5aPLmXEupVgGI+nVRVh9iE
-         W/s+cUViySMLb92twqaZhTR9QZ8nSK+DFjqsvauF5XuM3XF9WyhA8ZeZMIdbh0akZy
-         vZuDreChI0o7g==
-Date:   Thu, 11 Mar 2021 10:44:15 -0800
+        b=V5MNT4BHOqod0O8XEiHiDDZBzJM7BDrJFZjL0FvTnGjdV85TOijRaR9AQvrOnhQVV
+         ulfWeO2Q785ENXGd2iGmhcoNfHLkxx2Bqc08uWVvOnOubM6nPIb0RQsSvdDDieSMQp
+         KppyVCtJpMEDvovtpatEtA4lyZkdu3Xj28dkoQmEbWotinPIbdSq69fhHZqd+5XoOc
+         dWbaROFQm2qh/8YRFEwDfHNd49yvkAMK2B3kTwPRFD1mfJ93HRE0Noih6TRvCZ90hV
+         AF+nW/B5JSeAfFgAf+u0Rld8GnK/9c9HWhHUrV1gMUzjZCMNEk+hNUpJ30iF/+g1CN
+         3Fv1Efm/4Cegg==
+Date:   Thu, 11 Mar 2021 11:08:00 -0800
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     Peng Zhou <peng.zhou@mediatek.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Peng Zhou <peng.zhou@mediatek.com>,
+        linux-block <linux-block@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Satya Tangirala <satyat@google.com>,
         Wulin Li <wulin.li@mediatek.com>
-Subject: Re: [PATCH v2 1/4] mmc: Mediatek: add Inline Crypto Engine support
-Message-ID: <YEpk//tPRS47tLij@gmail.com>
-References: <20210309015630.19545-1-peng.zhou@mediatek.com>
+Subject: Re: [PATCH v2 2/4] mmc: Mediatek: enable crypto hardware engine
+Message-ID: <YEpqkAq6wOZ+TpR9@gmail.com>
+References: <20210309015750.6283-1-peng.zhou@mediatek.com>
+ <CACRpkdYTkW7b9SFEY6Ubq4NicgR_5ewQMjE2zHvGbgxYadhHQQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210309015630.19545-1-peng.zhou@mediatek.com>
+In-Reply-To: <CACRpkdYTkW7b9SFEY6Ubq4NicgR_5ewQMjE2zHvGbgxYadhHQQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 09, 2021 at 09:56:31AM +0800, Peng Zhou wrote:
-> 1. add crypto clock control and ungate it before CQHCI init
+On Thu, Mar 11, 2021 at 02:48:23PM +0100, Linus Walleij wrote:
+> Hi Peng,
 > 
-> 2. set MMC_CAP2_CRYPTO property of eMMC
+> thanks for your patch!
 > 
-> Signed-off-by: Peng Zhou <peng.zhou@mediatek.com>
-> ---
->  drivers/mmc/host/mtk-sd.c | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
+> On Tue, Mar 9, 2021 at 3:06 AM Peng Zhou <peng.zhou@mediatek.com> wrote:
 > 
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 898ed1b023df..1c90360d6cf2 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -442,6 +442,7 @@ struct msdc_host {
->  	struct clk *src_clk_cg; /* msdc source clock control gate */
->  	struct clk *sys_clk_cg;	/* msdc subsys clock control gate */
->  	struct clk_bulk_data bulk_clks[MSDC_NR_CLOCKS];
-> +	struct clk *crypto_clk; /* msdc crypto clock */
->  	u32 mclk;		/* mmc subsystem clock frequency */
->  	u32 src_clk_freq;	/* source clock frequency */
->  	unsigned char timing;
-> @@ -802,6 +803,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
->  
->  static void msdc_gate_clock(struct msdc_host *host)
->  {
-> +	clk_disable_unprepare(host->crypto_clk);
->  	clk_bulk_disable_unprepare(MSDC_NR_CLOCKS, host->bulk_clks);
->  	clk_disable_unprepare(host->src_clk_cg);
->  	clk_disable_unprepare(host->src_clk);
-> @@ -822,6 +824,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
->  		dev_err(host->dev, "Cannot enable pclk/axi/ahb clock gates\n");
->  		return;
->  	}
-> +	clk_prepare_enable(host->crypto_clk);
->  
->  	while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
->  		cpu_relax();
-> @@ -2512,6 +2515,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		goto host_free;
->  	}
->  
-> +	/* only eMMC has crypto property */
-> +	if ((mmc->caps2 & MMC_CAP2_NO_SD) && (mmc->caps2 & MMC_CAP2_NO_SDIO)) {
-> +		host->crypto_clk = devm_clk_get(&pdev->dev, "crypto");
-> +		if (IS_ERR(host->crypto_clk))
-> +			host->crypto_clk = NULL;
-> +		else
-> +			mmc->caps2 |= MMC_CAP2_CRYPTO;
-> +	}
-> +
->  	host->irq = platform_get_irq(pdev, 0);
->  	if (host->irq < 0) {
->  		ret = -EINVAL;
-> @@ -2582,6 +2594,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  		host->dma_mask = DMA_BIT_MASK(32);
->  	mmc_dev(mmc)->dma_mask = &host->dma_mask;
->  
-> +	/* here ungate due to cqhci init will access registers */
-> +	msdc_ungate_clock(host);
->  	if (mmc->caps2 & MMC_CAP2_CQE) {
->  		host->cq_host = devm_kzalloc(mmc->parent,
->  					     sizeof(*host->cq_host),
-> @@ -2618,7 +2632,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
->  	spin_lock_init(&host->lock);
->  
->  	platform_set_drvdata(pdev, mmc);
-> -	msdc_ungate_clock(host);
->  	msdc_init_hw(host);
+> > Use SMC call enable hardware crypto engine
+> > due to it only be changed in ATF(EL3).
+> >
+> > Signed-off-by: Peng Zhou <peng.zhou@mediatek.com>
+> 
+> Unfortunately this commit message is way to short to
+> understand what is going on, and has a lot of assumed
+> previous knowledge.
+> 
+> Can you expand the commit message so that anyone
+> who just know MMC and some SoC basics can understand
+> what an SMC call and and what ATF(EL3) means?
+> 
+> I assume this some kind of inline encryption?
+> 
+> I think maybe linux-block mailing list need to be involved
+> because there is certain a Linux standard way of setting
+> up inline encryption for the block layer.
+> 
+> For example: how is the key to be used derived?
+> How is the device unlocked in the first place?
+> 
+> If I insert a LUKS encrypted harddrive in a Linux machine
+> the whole system is pretty much aware of how this should
+> be handled and everything "just works", I enter a pass
+> phrase and off it goes. I can use symmetric keys as well.
+> How is this stuff done for this hardware?
+> 
+> > +       /*
+> > +        * 1: MSDC_AES_CTL_INIT
+> > +        * 4: cap_id, no-meaning now
+> > +        * 1: cfg_id, we choose the second cfg group
+> > +        */
+> > +       if (mmc->caps2 & MMC_CAP2_CRYPTO)
+> > +               arm_smccc_smc(MTK_SIP_MMC_CONTROL,
+> > +                             1, 4, 1, 0, 0, 0, 0, &smccc_res);
+> 
+> The same as above: these comments assume that everyone
+> already knows what is going on.
+> 
+> AES encryption requires a key and I don't see the driver
+> setting up any key. How is the code in this file:
+> drivers/mmc/core/crypto.c
+> interacting with your driver?
+> drivers/mmc/host/cqhci-crypto.c
+> is used by SDHCI and is quite readable and I see what is going on.
+> For example it contains functions like:
+> cqhci_crypto_program_key()
+> cqhci_crypto_keyslot_program()
+> cqhci_crypto_clear_keyslot()
+> cqhci_crypto_keyslot_evict()
+> cqhci_find_blk_crypto_mode()
+> 
+> MMC_CAP2_CRYPTO is used as a sign that the driver
+> can do inline encryption, then devm_blk_ksm_init() is called
+> to initialize a block encryption abstraction with the block layer.
+> Ops are registered using
+> struct blk_ksm_ll_ops cqhci_ksm_ops.
+> 
+> This is very straight forward.
+> 
+> But where does all the above happen for this driver?
+> 
 
-I'm still not able to apply this patch.  You can see yourself if you check out
-v5.12-rc2 (or mmc/next), download this email from lkml.kernel.org
-(https://lkml.kernel.org/linux-mmc/20210309015630.19545-1-peng.zhou@mediatek.com/raw),
-and use 'git am'.  It's probably related to the email being base64-encoded,
-which it shouldn't be.
+It happens in the same place, cqhci-crypto.c.  Mediatek's eMMC inline encryption
+hardware follows the eMMC standard fairly closely, so Peng's patch series just
+sets MMC_CAP2_CRYPTO to make it use the standard cqhci crypto code, and does a
+couple extra things to actually enable the hardware's crypto support on Mediatek
+platforms since it isn't enabled by default.  (*Why* it requires an SMC call to
+enable instead of just working as expected, I don't know though.)
 
-Also, this patch series isn't in a thread, so it's hard to follow.
+The way all this gets used is via the blk-crypto framework
+(Documentation/block/inline-encryption.rst), which is used by fscrypt
+(ext4 and f2fs encryption).
 
-Please make sure you use 'git format-patch --cover-letter v5.12-rc2..@' or
-similar, and then 'git send-email', passing it all the patches (including the
-cover letter) at once.  And please make sure that your company's mail server is
-set up to properly handle plaintext email.
-
-Thanks,
+Peng, if you could explain all this properly in the cover letter, commit
+messages, and code comments (where it makes sense), that would be really helpful
+for people.  Also please make sure your patch series is in a thread so that
+people see it together.
 
 - Eric
