@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47863C433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:48:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CBE8C433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:01:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1F5EC64FDC
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:48:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EBC6464FDC
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:01:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232822AbhCLJr4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 04:47:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54368 "EHLO
+        id S232985AbhCLKA4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 05:00:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57304 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232867AbhCLJrq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 04:47:46 -0500
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0154C061762
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:47:34 -0800 (PST)
-Received: by mail-lf1-x132.google.com with SMTP id e7so44787273lft.2
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:47:34 -0800 (PST)
+        with ESMTP id S232975AbhCLKAi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 05:00:38 -0500
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 212D2C061574
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:00:38 -0800 (PST)
+Received: by mail-lf1-x12d.google.com with SMTP id k9so44771870lfo.12
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:00:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=VMk9ZOPG5drs53p+SuNaGTRJ/y2LmEHScXuPR6AdCe8=;
-        b=w/JETIl+jQpqvLCzn65MfrNC+8dTeF7KPKuQmMEOIbfX+jVeeA7NaQgQWGUwT2Rxsg
-         pTAP60qjPN4LU5FcusSQZTv1JZfc9SlNHr7cl8Q5SbAcp3Mnaprsyck5NHPd85i8uj4I
-         aSPTwaD6/RWpoysa3nFv9ZL/ZGFUv4kJkMrIy7xKD2fqtJu5vWfsJeCo1WyoOpH+iy8w
-         T520hqje2419f+Hn33AHVMTRrN8mdybSM4zmVUrpRpSUHm0wrq4HJeLNUksNJZ1gd4TJ
-         AwyOn+1R/+Uf20b6CwA4QCQqdwpn/uWjRs970tvXuNyO3BQygdJsKzyaj73sTpgV+en3
-         O9rQ==
+         :cc:content-transfer-encoding;
+        bh=x7b0YhLiDRYT0yOrjk/x/Y6N+KIRlemcKfsY/iEVybQ=;
+        b=F52JBUW2RVO02xz7XfNFfnrhSZLb7p6RwfOQXW0+QwKiTpTiaiE/kwYwO+y5kvwTTb
+         xZxDlKTU0zC8iGi9s3eB3O1qh9vAuqnCzdm0FQbgsL4bLr3Ruqn3fhleGWalnmxC38rB
+         FgK2CVQxAaWOiBRWXiXhaAdbIjpvXMgUpIWczpQhvC4dfF3O6uaqfZeXxiEEoU7pYdoh
+         v0OxguUFdiCEoCC7zzxnbDnPPd+iR1h3DsnWmx5o1uALjWmEGFn0rxgH7VcoOP1somqS
+         7HT5R8y07TA7h0PvmtdQ9IxgC4c4DqqDp/Sprqpgk7IqJYUO5UnI+msLE1D5pICduzc5
+         BEYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=VMk9ZOPG5drs53p+SuNaGTRJ/y2LmEHScXuPR6AdCe8=;
-        b=K2MHDazSmnI9iCEpE3YY/AfGRYA/6jMzruHuYeTRLOwAEH4AXnQTT94aJGp076Wfid
-         Yp/bj7c1oUL4ij0OFhAudUEIf45FI9c/EIwI5fcWIefYtRjcXhIPKGR+5PDfFYlmwCwh
-         xQZJ98Ze91aM8x4wcMgFBdPlXOfyltj/WzcLtBnsRpWo2QLA0DHqI11cTg787YmlsT0b
-         PFdZcR4hk+NPIYYwlzSXVNj2Mqku09A8eWrUaA+PFcoHkZRfSgGfNLxmNT10YvRnFWkw
-         fCqS8Ro05WTiq6PMXbIpRNsudXFNEG//4ilYRaRQdqtbzk5ya8WhcP8Apb9PZaLvMhcq
-         z8RA==
-X-Gm-Message-State: AOAM531QQn23nBZ1H+TmSZpn068HmwlOpTD+rEFNQQkui23uTXnx6Rkb
-        temmAndcVZSnmJIn32bTrWun3nG1/yfAP8r3POn/Sw==
-X-Google-Smtp-Source: ABdhPJz3WLLA+H74P//j1Ln11RFxEyFm1vpbROXtZ66D7ytPG5df2SySNnXZoEquL+Ke2jaSnccKJ8/ughXkxGzr2Yw=
-X-Received: by 2002:a19:6b13:: with SMTP id d19mr4768518lfa.291.1615542453087;
- Fri, 12 Mar 2021 01:47:33 -0800 (PST)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=x7b0YhLiDRYT0yOrjk/x/Y6N+KIRlemcKfsY/iEVybQ=;
+        b=Uci3LklaYGTco1DwN6AV7P900IFprkzbYNTfWA9WwA4BIyj2UKo9PySZUasSaagpVi
+         7xiNu8tcRNHPKNQ34KX8fKJXwT2shhVQ4gVgx04MKXjxevbfeTKv/lzNoyk/EvW1ty2u
+         e4WG7w1r749nQCtlHAgz0BU4OW9skwf03ej7AvndHJqwzFSbBBVjRYMnsdXWf3tULgnp
+         awBAujZonF9Y52X/OWNUMY9cMthybOKzd5EQYO4V9kMBjolXfIL1AxD1IHrc8xnNSO/s
+         +tBq2D3hCfYu9pm9bwfT1SEUIcBMMj4sYpan9k3Mqu8E/PNTBDMEa9MDVwxtS004EYxe
+         bTWw==
+X-Gm-Message-State: AOAM5322xSyKeyMpPoNM0vXAqJANr2gvO/t7DIESmNwRigERda8wr4eE
+        DGlQm895ZdzhSZUmsR1Ok69eR5lqeNenrZt6PDkUag==
+X-Google-Smtp-Source: ABdhPJzDpESWQoECqt1prXQcSIVot287iP/QjDAbfHp3ibm4TSWaAfKPuHPAW9M9l7h49Y9aMEgq9QJPlARRE4cVnxQ=
+X-Received: by 2002:ac2:4d95:: with SMTP id g21mr5165763lfe.29.1615543236661;
+ Fri, 12 Mar 2021 02:00:36 -0800 (PST)
 MIME-Version: 1.0
 References: <20210303135500.24673-1-alex.bennee@linaro.org>
  <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
@@ -60,20 +60,20 @@ References: <20210303135500.24673-1-alex.bennee@linaro.org>
  <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st> <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
  <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
  <e5d3f4b5-748e-0700-b897-393187b2bb1a@marcan.st> <CACRpkdYxMGN3N-jFt1Uw4AkBR-x=dRj6HEvDp6g+2ku7+qCLwg@mail.gmail.com>
- <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st>
-In-Reply-To: <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st>
+ <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st> <87k0qd7615.fsf@linaro.org>
+In-Reply-To: <87k0qd7615.fsf@linaro.org>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 12 Mar 2021 10:47:21 +0100
-Message-ID: <CACRpkdZS4qoDOsm+GTpYV1bGB8ewjd0g3xA397XDoNQk4Nk82w@mail.gmail.com>
+Date:   Fri, 12 Mar 2021 11:00:24 +0100
+Message-ID: <CACRpkdYNdoK9T503en6dPfz5sSc0eDGLzhnUBqRUbZR3j43byA@mail.gmail.com>
 Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     Hector Martin <marcan@marcan.st>
-Cc:     Sumit Garg <sumit.garg@linaro.org>,
+To:     =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
+Cc:     Hector Martin <marcan@marcan.st>,
+        Sumit Garg <sumit.garg@linaro.org>,
         Arnd Bergmann <arnd@linaro.org>,
         "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
         David Howells <dhowells@redhat.com>,
         Jarkko Sakkinen <jarkko@kernel.org>,
         Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         Maxim Uvarov <maxim.uvarov@linaro.org>,
         Ilias Apalodimas <ilias.apalodimas@linaro.org>,
@@ -82,81 +82,52 @@ Cc:     Sumit Garg <sumit.garg@linaro.org>,
         bing.zhu@intel.com, Matti.Moell@opensynergy.com,
         hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
         linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Arnd Bergmann <arnd.bergmann@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Hector,
+On Thu, Mar 11, 2021 at 10:08 PM Alex Benn=C3=A9e <alex.bennee@linaro.org> =
+wrote:
 
-I see a misunderstanding here :) explaining below.
+> I guess what we are saying is that real secure monitors should come up
+> with their own common API for interfacing with RPMB devices without
+> looking to the Linux kernel for inspiration?
 
-On Thu, Mar 11, 2021 at 9:29 PM Hector Martin <marcan@marcan.st> wrote:
+The problem is that eMMC at least (I don't know about NVME etc)
+has serialized commands, meaning you execute one command at
+a time (some augmentation exist nowadays to speed up things).
 
-> And so we're back to embedded platforms like Android phones and other
-> SoC stuff... user-controlled secureboot is already somewhat rare here,
-> and even rarer are the cases where the user controls the whole chain
-> including the TEE if any (otherwise it'll be using RPMB already); this
-> pretty much excludes all production Android phones except for a few
-> designed as completely open systems; we're left with those and a subset
-> of dev boards (e.g. the Jetson TX1 I did fuse experiments on). In the
-> end, those systems will probably end up with fairly bespoke set-ups for
-> any given device or SoC family, for using RPMB.
+When it comes to RPMB, the eMMC device must stop all other
+activity (such as reading/writing any blocks to the eMMC) send a
+special command to switch to the RPMB  partition, then execute
+the RPMB command(s) then send a special command to switch
+back to ordinary storage.
 
-Hehe. I think we have different ideas of "user-controlled" here,
-our "users" include OP-TEE, which develop and deploy a TEE
-which is open source.
-https://www.op-tee.org/
-Joakim who works on this project is on CC he's just not saying
-anything (yet).
+Someone has to be in control of the eMMC arbitration. Right now
+Linux MMC/SD storage stack does this.
 
-This project is forked and deployed by different Android and
-other Arm SoC-using vendors.
+If the secure world want to use RPMB independently of the Linux
+kernel there are two solutions:
 
-Some vendors have written their own TEE from scratch.
+- Mount a second eMMC just for the secure world - looks expensive
+  so some other secure counter storage would likely be cheaper
+  and it inevitably increases the BOM which is sensitive to
+  manufacturers (this option is unrealistic)
 
-So our users include these guys. :) As in: they take an active
-interest in what we are designing here. They have access to
-devices where they can replace the whole secure world for
-development. They work actively with the kernel and created
-the drivers/tee subsystem which is the pipe where the kernel
-and the TEE communicate.
+- Let the secure world arbitrate all access to the eMMC - looks
+  inefficient and also dangerous since the secure world now has to
+  implement everything in drivers/mmc/core which is a few 100
+  KB of really complex code that need to be maintained perpetually.
+  (IMO this option is also unrealistic for performance and
+  maintenance reasons, but who knows what secure world
+  imperialists are out there).
 
-> But then again, if you have a full secureboot system where you control
-> the TEE level, wouldn't you want to put the RPMB shenanigans there and
-> get some semblance of secure TPM/keystore/attempt throttling
-> functionality that is robust against Linux exploits and has a smaller
-> attack surface? Systems without EL3 are rare (Apple M1 :-)) so it makes
-> more sense to do this on those that do have it. If you're paranoid
-> enough to be getting into building your own secure system with
-> anti-rollback for retry counters, you should be heading in that directly
-> anyway.
->
-> And now Linux's RPMB code is useless because you're running the stack in
-> the secure monitor instead :-)
-
-The way OP-TEE makes use of RPMB is to call out to a userspace
-daemon called tee-supplicant, which issues ioctl()s down to the
-eMMC device to read/write counters. AFAIK other TEE implementations
-use a similar scheme. (Judging from feedback I got when rewriting
-the RPMB code in the MMC subsystem, it mattered to them.)
-Their source code is here:
-https://github.com/OP-TEE/optee_client/blob/master/tee-supplicant/src/rpmb.c
-
-So Linux' eMMC RPMB code is already in wide use for this, it is
-what I think all Android phones are actually using to read/write RPMB
-counters. It's not like they're accessing RPMB "on the side" or
-so. (I might be wrong!)
-
-Since reading/writing RPMB on eMMC needs to be serialized
-alongside Linux' read/write commands it is absolutely necessary
-that the secure world and the Linux storage drivers cooperate
-so the solution is to let Linux handle this arbitration.
-
-Now the question for this patch set is: is TEE software the only
-user we need to care about?
+This leaves Linux in control of the eMMC RPMB under all
+circumstances as far as I can see.
 
 Yours,
 Linus Walleij
