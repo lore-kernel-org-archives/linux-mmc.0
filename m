@@ -2,115 +2,182 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39F3BC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 11:03:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 162FEC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 12:00:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 151DB64FE0
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 11:03:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4B7464FF5
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 12:00:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233679AbhCLLCy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 06:02:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42510 "EHLO
+        id S230383AbhCLL7i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 06:59:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54904 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233314AbhCLLCl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 06:02:41 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 453F3C061574
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 03:02:41 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id v9so45092632lfa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 03:02:41 -0800 (PST)
+        with ESMTP id S230175AbhCLL7e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 06:59:34 -0500
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B563C061574
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 03:59:34 -0800 (PST)
+Received: by mail-lj1-x22c.google.com with SMTP id u4so6410653ljo.6
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 03:59:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=lUkWWP7QtoyKW+p9PVjEC7J9wcMKoCcktZeNogcq/VI=;
-        b=W2jGvcdU20upo5UDCNpO+C2xU5sJJgj/WjGt/U/+tBGOkMgJsUWGnMq4q53K11RwC+
-         CND6msi+RrkBF3A7rM4EqHb4660MCEd9LIBtRpkykSkJetAEb8Yasl1xelzIiiznekMJ
-         MvHQWCzwMX1OhnZzLQxMzPAPrFDNp1gsOo9AS7c9eaDKaFQBy5epYU/qIPoV4BMEeH59
-         3QYBQGsGht7h6gV+J5Na81fARuw/fiHFRzZVia/xNcWcXLLiRoRu2C0zRZEI7w4/rQhA
-         bZxqceuAPF9cZPd3aQb26bHTglVpixSRV0WobQYEgjueV6eRctvEfk48b38b/KbaMpIx
-         I8aQ==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=bpfFLNlEFTtLYALUbQ+wZtMSFLoEa38YGl9oGhtt8UU=;
+        b=OJ8hOSmZeHOaMypXlHqIgOHHwqUyA+0g8YG/4U7b/fYQ6g4HCAlV6X9TPzumop9vA8
+         tkoN5lRrgX8emUbeDsV/4j46mRDMg0ufRupWxDxCo9QSAX5H9bpF1UQ4rigGhUw4T0Dd
+         eZZzQ1x3g4sQCQJ3aa/h5qP/MQ6LGzMLkPyc5ywa4TX0D98YEKXuBYt40Vu2eSjc7ToW
+         BxTDuwTn0DnAk6dGmloeRM9x0nOe/ygTpeKvWOEDjth6rqt7y14En7Co6lAX3RMGh3gi
+         AjrVOE2kpaeBH7gfC2159MMgA1SUp3/irNNIJc6sH8fLV+eHgY2GESnaY4Fh7B0xl4Ad
+         LNdA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=lUkWWP7QtoyKW+p9PVjEC7J9wcMKoCcktZeNogcq/VI=;
-        b=qEOzipfzhXLMfiI0bR0eu0lmEswPzKtqTYNcnnmQCS4xBDF/rOpth9a2BbOUcbS+LA
-         KsMKDd5LfnNeLieGXVRgDFGkaJ3MKLLLoy4OJqJcFE3Uj4rExKrD1xgQStslCfDwBQnX
-         Ti1WNpjTMGvDVc5hFXtRhJ2/muN/ZvgO/Jrf1xbn+QLa5FEWMy2SGUazt10TROqSsTs9
-         MId4cDUWZmyXANZl51V6sA9BRh/2yWJlmERU+2aLflB6lhpVRGCreq/weq4vyfk2TWFo
-         gUl9V4kge5n9k9NReibC1R5HTchqxWpzG3KdejwHlTB8WKkMnjQ6+L7nSmb65YbWG3wK
-         hwNg==
-X-Gm-Message-State: AOAM531ZG9YUBQwbQAxCmBPNjtZ7ajAHIKJWic4VIuB/Zyz9uvrCW/hU
-        qVPFscgLM0ZzCb0fVUCryy9KuQ==
-X-Google-Smtp-Source: ABdhPJzOz/wOTBs9Q4k/78L4//AFn4BXGSrmYePYXZnvasIVMMl3mFJmCIu8CQfTYK32QMl3fzCamg==
-X-Received: by 2002:a05:6512:acb:: with SMTP id n11mr5013428lfu.288.1615546959825;
-        Fri, 12 Mar 2021 03:02:39 -0800 (PST)
-Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
-        by smtp.gmail.com with ESMTPSA id p13sm1933647ljg.116.2021.03.12.03.02.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 12 Mar 2021 03:02:38 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v5.12-rc3
-Date:   Fri, 12 Mar 2021 12:02:37 +0100
-Message-Id: <20210312110237.174917-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=bpfFLNlEFTtLYALUbQ+wZtMSFLoEa38YGl9oGhtt8UU=;
+        b=ebgiinHG3hA+IEdwYHfcud+QC4EP2e3ZBfEYDKrmDl1oAJhF8EwZQYvo+nSdczIctQ
+         5I5cEiIerWpBR2aNT2P/b96c8hW1yQWsV6yUkk7M5xDiZnEni9H5ayVsFFtGIcDwgPWX
+         LK7ktEWOY7tAv6Nuh14tGCm4xH2oMcjctZQKtgOqaAXLetatdq9idX6NxKpm51mLg3d6
+         VqvJIqTz1JMo93VLdY6lRuH+hoQJRL43DfVzEw3TDezPwj2Ed707cV9onrVhy19/tabE
+         rrFy6iD3CMU7hn7im8A9hgtatPDuBfcyxwNkDnQ+1XRvhR5TdfgxQTvgFykgsjErTmpA
+         SZdg==
+X-Gm-Message-State: AOAM532n2P/3ygtdW+rRSDjUtqjAK0Rkzok1MPHH1zSEYLCeFqGXzU3q
+        BXBhgr3VM4r+HlLVNwDBvLTjL41hDCW6hkJWHT4yjA==
+X-Google-Smtp-Source: ABdhPJxBpkMW0oIMw6HcC9zHDH/L+Q4z9D32/WawBaLNPoKN8etVYWlF9S7muspZtb9FeRIPoarJptbwT8HAOnqGR3s=
+X-Received: by 2002:a2e:557:: with SMTP id 84mr2219735ljf.480.1615550372646;
+ Fri, 12 Mar 2021 03:59:32 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+ <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+ <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+ <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+ <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st> <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
+ <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
+ <e5d3f4b5-748e-0700-b897-393187b2bb1a@marcan.st> <CACRpkdYxMGN3N-jFt1Uw4AkBR-x=dRj6HEvDp6g+2ku7+qCLwg@mail.gmail.com>
+ <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st>
+In-Reply-To: <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st>
+From:   Sumit Garg <sumit.garg@linaro.org>
+Date:   Fri, 12 Mar 2021 17:29:20 +0530
+Message-ID: <CAFA6WYNzEofaQpEQFRG+XaWQqkEWugOW-1qEf=9J2-tje59QsA@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To:     Hector Martin <marcan@marcan.st>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Fri, 12 Mar 2021 at 01:59, Hector Martin <marcan@marcan.st> wrote:
+>
+> On 11/03/2021 23.31, Linus Walleij wrote:
+> > I understand your argument, is your position such that the nature
+> > of the hardware is such that community should leave this hardware
+> > alone and not try to make use of RPMB  for say ordinary (self-installed)
+> > Linux distributions?
+>
+> It's not really that the community should leave this hardware alone, so
+> much that I think there is a very small subset of users who will be able
+> to benefit from it, and that subset will be happy with a usable
+> kernel/userspace interface and some userspace tooling for this purpose,
+> including provisioning and such.
+>
+> Consider the prerequisites for using RPMB usefully here:
+>
+> * You need (user-controlled) secureboot
 
-Here's a PR with a couple of MMC fixes intended for v5.12-rc3. Details about the
-highlights are as usual found in the signed tag.
+Agree with this prerequisite since secure boot is essential to build
+initial trust in any system whether that system employs TEE, TPM,
+secure elements etc.
 
-Please pull this in!
+> * You need secret key storage - so either some kind of CPU-fused key, or
+> one protected by a TPM paired with the secureboot (key sealed to PCR
+> values and such)
+> * But if you have a TPM, that can handle secure counters for you already
+> AIUI, so you don't need RPMB
 
-Kind regards
-Ulf Hansson
+Does TPM provide replay protected memory to store information such as:
+- PIN retry timestamps?
+- Hash of encrypted nvme? IMO, having replay protection for user data
+on encrypted nvme is a valid use-case.
 
+> * So this means you must be running a non-TPM secureboot system
+>
 
-The following changes since commit a38fd8748464831584a19438cbb3082b5a2dab15:
+AFAIK, there exist such systems which provide you with a hardware
+crypto accelerator (like CAAM on i.Mx SoCs) that can protect your keys
+(in this case RPMB key) and hence can leverage RPMB for replay
+protection.
 
-  Linux 5.12-rc2 (2021-03-05 17:33:41 -0800)
+> And so we're back to embedded platforms like Android phones and other
+> SoC stuff... user-controlled secureboot is already somewhat rare here,
+> and even rarer are the cases where the user controls the whole chain
+> including the TEE if any (otherwise it'll be using RPMB already); this
+> pretty much excludes all production Android phones except for a few
+> designed as completely open systems; we're left with those and a subset
+> of dev boards (e.g. the Jetson TX1 I did fuse experiments on). In the
+> end, those systems will probably end up with fairly bespoke set-ups for
+> any given device or SoC family, for using RPMB.
+>
+> But then again, if you have a full secureboot system where you control
+> the TEE level, wouldn't you want to put the RPMB shenanigans there and
+> get some semblance of secure TPM/keystore/attempt throttling
+> functionality that is robust against Linux exploits and has a smaller
+> attack surface? Systems without EL3 are rare (Apple M1 :-)) so it makes
+> more sense to do this on those that do have it. If you're paranoid
+> enough to be getting into building your own secure system with
+> anti-rollback for retry counters, you should be heading in that directly
+> anyway.
+>
+> And now Linux's RPMB code is useless because you're running the stack in
+> the secure monitor instead :-)
+>
 
-are available in the Git repository at:
+As Linus mentioned in other reply, there are limitations in order to
+put eMMC/RPMB drivers in TEE / secure monitor such as:
+- One of the design principle for a TEE is to keep its footprint as
+minimal as possible like in OP-TEE we generally try to rely on Linux
+for filesystem services, RPMB access etc. And currently we rely on a
+user-space daemon (tee-supplicant) for RPMB access which IMO isn't as
+secure as compared to direct RPMB access via kernel.
+- Most embedded systems possess a single storage device (like eMMC)
+for which the kernel needs to play an arbiter role.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.12-rc2
+It looks like other TEE implementations such as Trusty on Android [1]
+and QSEE [2] have a similar interface for RPMB access.
 
-for you to fetch changes up to f06391c45e83f9a731045deb23df7cc3814fd795:
+So it's definitely useful for various TEE implementations to have
+direct RPMB access via kernel. And while we are at it, I think it
+should be useful (given replay protection benefits) to provide an
+additional kernel interface to RPMB leveraging Trusted and Encrypted
+Keys subsystem.
 
-  mmc: cqhci: Fix random crash when remove mmc module/card (2021-03-09 10:00:52 +0100)
+[1] https://android.googlesource.com/trusty/app/storage/
+[2] https://www.qualcomm.com/media/documents/files/guard-your-data-with-the-qualcomm-snapdragon-mobile-platform.pdf
 
-----------------------------------------------------------------
-MMC core:
- - Fix partition switch time for eMMC
+-Sumit
 
-MMC host:
- - mmci: Enforce R1B response to fix busy detection for the stm32 variants
- - cqhci: Fix crash when removing mmc module/card
-
-----------------------------------------------------------------
-Adrian Hunter (1):
-      mmc: core: Fix partition switch time for eMMC
-
-Frank Li (1):
-      mmc: cqhci: Fix random crash when remove mmc module/card
-
-Yann Gautier (1):
-      mmc: mmci: Add MMC_CAP_NEED_RSP_BUSY for the stm32 variants
-
- drivers/mmc/core/bus.c  | 11 +++++------
- drivers/mmc/core/mmc.c  | 15 +++++++++++----
- drivers/mmc/host/mmci.c | 10 +++++++++-
- 3 files changed, 25 insertions(+), 11 deletions(-)
+> --
+> Hector Martin (marcan@marcan.st)
+> Public Key: https://mrcn.st/pub
