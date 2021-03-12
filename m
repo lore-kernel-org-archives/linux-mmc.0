@@ -2,222 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_2 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E728C433DB
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:23:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DCACC43381
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:23:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 76F2A64FF3
+	by mail.kernel.org (Postfix) with ESMTP id D1A1F65005
 	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:23:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232778AbhCLJW7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 04:22:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49016 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232827AbhCLJWh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 04:22:37 -0500
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70AE8C061762
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:22:37 -0800 (PST)
-Received: by mail-lf1-x12a.google.com with SMTP id v9so44654839lfa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:22:37 -0800 (PST)
+        id S232840AbhCLJXA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 04:23:00 -0500
+Received: from mail-co1nam11on2089.outbound.protection.outlook.com ([40.107.220.89]:12640
+        "EHLO NAM11-CO1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S232833AbhCLJWn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 12 Mar 2021 04:22:43 -0500
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=mlDmGREfFU6g5cb2l5r/1RiRti583peZnUKbASBO0A+3hPs9C47UWQEzmw7tFj2XZz0+6wJh7fazvuqiP/8IIciDWOWSXiXu3etKeoPbjjHXHwoXbjGQtBAPBETuRUfG7oEzGxmdoDZPhLsZ6LHmitk9lXjY5NHd6hDxW2d4rFsHNJ5niVX6YEIp0bBIjCg1VxJ5ErVoe05ou7yHZcRydtvYr4EaAhCSiZbAqtSYV1Xn+5xza9wQKddZxDD9jnsFLsFdorgZ7Bo8C73Blj8uZhhTdXVm+jEukFq6JD3h3yGzBXAfaXzHWpUX/Q2CW/572DNfRPHAvsXHKBHACoSiFA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=WOwpCyxP9SZOWLK0dwZTL1FpqWTNVuqC98KQMnt21/g=;
+ b=le30Sk1DEB2Pgu34q7/am0gjm+iScksOYEg35lB5GfzQNW4w0inzzMAYAKMku9oPxqWipIztzS2pOsjkJkleAx2+tjzt9WVCkBEW6oQMRsisswBAUqAO2Eca4uA49gX5J5wumAZ53F5LH/3DW6pYJ+ySi5J/LLdld3UtZ0h8IY/4HEgZmygZxjFioRKsBAKohhoiOzqlABHPUMjjH5+fct5FI4oBxHLKab/sbfm0hNFhUebYGedXFUOockNeSjm9wsRWlTUmp9R5skl4ED2eMPfQr+ZTEqHOOkqFnXp6Z/Fz//d/OOhYdCm3taL9rTXgbaDG5K/cuvrnEh+Wb88+aA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=synaptics.com; dmarc=pass action=none
+ header.from=synaptics.com; dkim=pass header.d=synaptics.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=oc5bTi7/1MBiAyWrb/BCqxKaS2n3HhEl1VJrsEcMc6k=;
-        b=KDFdseRP1eAOQEMh2Ks3MiJXJtEoNybe7gdJzx1f/I/PLG7U3A/Moiz1/CxbjuJp72
-         fpQqvBBkdC/hcLc3wA5TCEOTBLQ2aFBVwqDB97xSBmttxHg/ydqlbdZzR84D1tQsdnS/
-         76mH37N6q/1iS6dVN96PQqaGQEN2ckQV9xhaYowqgSr3ZxIvxDJz8j8WiV8HgEyWOqUH
-         RVq1S9eXjzn4oixocusNCm6/y08R7v8wf3TE8TRbjFbF6Ph0n578RuEXpmi1m1rvxszD
-         4WYDpUzpSr4gMYS0qyXesNgBNsnLP3EK6sYBecZmnUrFJwYRLvnAdQKzJfJDs2R7APZw
-         aFdQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=oc5bTi7/1MBiAyWrb/BCqxKaS2n3HhEl1VJrsEcMc6k=;
-        b=UcyfTrAOkOuO/EdzZypGvwu/iDQO4uEV3DUAfOE11V4oPGBp9ixy/IJstuDVUoSBrV
-         CJ7MCXbHv+C3NlXlG6zZe3J7t2LfFZuThLq58J3h7cNpAnjLsDooyqTEfhOo/AhO8y07
-         /MF55KNiOr0kdg7V+Ds+EsAr87WDZAcm/CpbF8GpS4kMAGkfXCj4WoFJCIhC5cikgijW
-         BGvCh0SO4PNU+2VgUiQTgXz/sPXvrjwsJhW+7LUTjfyW2BwINTMgTGFgPIf+1FcsTfjJ
-         DaGBIhkbhXJVOWtsQ9px6xbRKGh//o8pCFKV9KHODgFooqqcAXFsG6OKkX0Wlzm/Fb15
-         MCHw==
-X-Gm-Message-State: AOAM530o1i2WkfzCiKZ+7FOKQV/DApy6vS5pwoNgpLUQDQxFLMu+aI2Y
-        vwCl7w0UnnZ5CONOa01PZ7VBFr2hxfBE4S/wl+wIQQ==
-X-Google-Smtp-Source: ABdhPJwi966hWS07LJwz9bEWS3611t5gBvrGW9dceY/bml/CRf47iE8bUw+ljH42WS1Quj2YyGgFvZuR2EaxJaPOnZE=
-X-Received: by 2002:a05:6512:243:: with SMTP id b3mr4968951lfo.529.1615540955761;
- Fri, 12 Mar 2021 01:22:35 -0800 (PST)
+ d=Synaptics.onmicrosoft.com; s=selector2-Synaptics-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=WOwpCyxP9SZOWLK0dwZTL1FpqWTNVuqC98KQMnt21/g=;
+ b=QQSF5uU+Q5EWZrGRFbwSO93qLNYRSU0PGPufQVx1JqVg7Ix5JxoSlZUvANLjWQJ/EHRPoHIZTpW5E+YWxlcqYLOc2qoOE4q/CVvd5QI9jly0QgsERL3fm0dJWNk5qAhps8HVre9UIcCIn4a8bI+HVZf305Wc6LlbIRsSQvzoZDw=
+Authentication-Results: rock-chips.com; dkim=none (message not signed)
+ header.d=none;rock-chips.com; dmarc=none action=none
+ header.from=synaptics.com;
+Received: from BN3PR03MB2307.namprd03.prod.outlook.com
+ (2a01:111:e400:7bb1::16) by BN6PR03MB2900.namprd03.prod.outlook.com
+ (2603:10b6:404:10e::15) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3912.17; Fri, 12 Mar
+ 2021 09:22:36 +0000
+Received: from BN3PR03MB2307.namprd03.prod.outlook.com
+ ([fe80::246d:2f3d:93bf:ee56]) by BN3PR03MB2307.namprd03.prod.outlook.com
+ ([fe80::246d:2f3d:93bf:ee56%4]) with mapi id 15.20.3912.031; Fri, 12 Mar 2021
+ 09:22:36 +0000
+Date:   Fri, 12 Mar 2021 17:22:23 +0800
+From:   Jisheng Zhang <Jisheng.Zhang@synaptics.com>
+To:     Shawn Lin <shawn.lin@rock-chips.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
+        devicetree@vger.kernel.org, linux-rockchip@lists.infradead.org
+Subject: Re: [PATCH v4 3/3] mmc: sdhci-of-dwcmshc: add rockchip platform
+ support
+Message-ID: <20210312172223.05c537d8@xhacker.debian>
+In-Reply-To: <9b7106e4-8817-6b49-e400-daa7b33a96ca@rock-chips.com>
+References: <1615443684-198078-1-git-send-email-shawn.lin@rock-chips.com>
+        <1615443684-198078-3-git-send-email-shawn.lin@rock-chips.com>
+        <20210311145924.498c690a@xhacker.debian>
+        <9b7106e4-8817-6b49-e400-daa7b33a96ca@rock-chips.com>
+X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [192.147.44.204]
+X-ClientProxiedBy: BYAPR21CA0008.namprd21.prod.outlook.com
+ (2603:10b6:a03:114::18) To BN3PR03MB2307.namprd03.prod.outlook.com
+ (2a01:111:e400:7bb1::16)
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
- <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
- <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
- <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st> <CACRpkdbQks5pRFNHkNLVvLHCBhh0XCv7pHYq25EVAbU60PcwsA@mail.gmail.com>
- <0a26713a-8988-1713-4358-bc62364b9e25@marcan.st> <CACRpkda9f-BNmu-CaNsghnDoOcSXvvvji=tag2Xos+tg_nNZ0w@mail.gmail.com>
- <32bdceb1-e70d-7481-96e3-a064a7108eb9@marcan.st> <CACRpkdZ_-rqGBUOxUcBPeqVkLzX=Q9pjO9M+zY20-S9tNXAE0Q@mail.gmail.com>
- <d7f8a732-7a44-f609-52dc-3ba824a3d192@marcan.st>
-In-Reply-To: <d7f8a732-7a44-f609-52dc-3ba824a3d192@marcan.st>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 12 Mar 2021 10:22:24 +0100
-Message-ID: <CACRpkdZmXMgAWkPDoi=_tDHuC4W2_PMa892XLLHJz27ChDLD2Q@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     Hector Martin <marcan@marcan.st>
-Cc:     David Howells <dhowells@redhat.com>,
-        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        Arnd Bergmann <arnd@linaro.org>,
-        Joakim Bech <joakim.bech@linaro.org>,
-        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Ruchika Gupta <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from xhacker.debian (192.147.44.204) by BYAPR21CA0008.namprd21.prod.outlook.com (2603:10b6:a03:114::18) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3955.3 via Frontend Transport; Fri, 12 Mar 2021 09:22:33 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 4b7b70e0-714a-45d4-b7ca-08d8e5385fb4
+X-MS-TrafficTypeDiagnostic: BN6PR03MB2900:
+X-Microsoft-Antispam-PRVS: <BN6PR03MB2900108206E83E974F3461D8ED6F9@BN6PR03MB2900.namprd03.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:9508;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: D0Mjrch3+FueE++xYqkRC3XX9o0ksHIfLxtvCZVoH7g2D1QwUSGVTXjydlOH16yHIUR1LhI1KAc/0zTwken6TJ7UYlaUOVzoZm/i/jxIVFzRLQQ5BMBAjyPYTx2RdgEn+eXdPh1X8e8FMtVaEV1lh3kJ94WJzkeIwU/+jeWJH6Xm5o5jK9P8mx+2Uvf3d017hEVupNW24Ji6ySSLCH0QSxguxs7P4INlh0Yy8UQdtbKWZqlQtdBDu0WtNiaRyYPhBjwwkXx0pRfnvYXlGwgk2/sPVj8iZlFfJ4iodgW4UBE3VWt4nF/T6Rc2wKDQHuuGbErjXSVSbleGP00fNYO7ttDGebK5dSj9UO++fOg7esQjYdaVqp4ciY5JMB6vXx8L/D55XKdEP3hRjCsrVtqYXhygQSHJF2tJ8GtgXk3BIsbJurLXNouh6+gXCZu1m5n0owqoH1DHpSXaYOtnY6zm42k6sJwCnDJWG1YxbVZaUAV7MwVO4912Lfj6puhusbFEpiRcI9kkn9u+hKZONYkotp1/p2WDIFJLVNWRq2+NwFyrOfgO2BwO/uGlRD5IyCpK2QJysF5+/fo60DlPmzxjQWccSbbok9aH4zcCwplE2D8=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BN3PR03MB2307.namprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(396003)(39850400004)(366004)(346002)(376002)(136003)(83380400001)(186003)(53546011)(6506007)(16526019)(956004)(6666004)(55016002)(26005)(9686003)(316002)(5660300002)(66556008)(54906003)(66946007)(2906002)(66476007)(8676002)(1076003)(478600001)(8936002)(7696005)(86362001)(52116002)(4326008)(6916009)(133343001)(473944003);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?us-ascii?Q?MpYSan+zmpiw5vxzQl0KjEXHoOJ5jTKqN2vkxeQYpSqt6DlAnUXOE3Kahg5k?=
+ =?us-ascii?Q?m9/yNgaDUJfRCY4pWhVZRVwmKb2xhMJE1q5bTmKPUPuNfbhfKijYnckyJO8z?=
+ =?us-ascii?Q?UrxG2VL3V/kFGCjhmP24+NMpVX8lbezLrSjofMUlUOcfm/Y87YRQMUY3N5Nv?=
+ =?us-ascii?Q?1takc3GJXpC9B3eG7jlD7aYp6/YwHwrLRRCU1SG7kank3jjqOBg7ovdW2sun?=
+ =?us-ascii?Q?qx1+xZwQjQibe+ncCfmYmQX1xlxyttRdR89AlkPiXVjflPH5gUq1TixFJs5n?=
+ =?us-ascii?Q?ILMdSlYOapOQAJ6D0JUslMWRULNpFCiyYDvknpgFA2cWJgd/nBCBnAIbd7SM?=
+ =?us-ascii?Q?MJ4mBf8wZywA9RwmdFwnkpPoRMy3PU8AwN1U+4vibnk6Nuk8hEBFzbtpuYlZ?=
+ =?us-ascii?Q?pimoV9wu4TheVLP0l58E/cOZzC6AqRv+5r6OLaDaBvSsC177i3lR7U5cG6O4?=
+ =?us-ascii?Q?f1fzRSODPX1+EPkB+/9vuZbWrbazDp6aXR7WWP1EEDa/PHgbIEVxRv9B+D3y?=
+ =?us-ascii?Q?/Td9Bu7YFAe4DkgNnWSerKNSRTgcp3mecw8+md6nEJqVSPUg3C/qoPECN0QJ?=
+ =?us-ascii?Q?tiqlp/l3E41sOflHYYi3bTfqSUZ1JM2lX3UdW158VkmBtZwr55f1c03ekKVu?=
+ =?us-ascii?Q?mrP3GSznij6RraSuZVlURn43j74EiAxrtyL3G2CkEc/hPaKG9Q2yWdig8+wV?=
+ =?us-ascii?Q?BAgAUwHfjOhqQIK47ABsYGmBOw55cArIaNxbCeLI+cFF9KEBSaGMeOg4GrLk?=
+ =?us-ascii?Q?LmaEjDZ8VaqCiXGrhF6ibwEaBcTvDjHzv5g2ODkbZJPy+dQOgLSTXLIukK/q?=
+ =?us-ascii?Q?Ol4ExfEzymCPZ2i8qQ9/lbsAnkiRds3S6wcPku+TCZocQiVlfzFmatLKKiOA?=
+ =?us-ascii?Q?dYF+F3kd6C2RvYBWDG5sJMFgHU26Z8QZgcUE0oXAl24vQn0YM9fn5tnOuJ+l?=
+ =?us-ascii?Q?seydSL/Kmw5KShF7i1KLB+WNrziOiCmXuQOIVgcupyA/emf/GNK29pofhrmM?=
+ =?us-ascii?Q?CHQV9lIQPWC6S9eiSuEHkFi8EMuk2EUfiPKlnIE3IYK3FKCsqjuwx9rOeV1Q?=
+ =?us-ascii?Q?eToMX3GWFpLr4FTYdkkGrj2alzJB3vKkp+mp9ctNWTu0B89Wlac4CVrfortu?=
+ =?us-ascii?Q?bi7sQqB67z1Yw8/OH1WGbSJ/7oe1FfWWYG9AdkNvgIkXPuEsw9ShWk2SjPPT?=
+ =?us-ascii?Q?6OpIk1p6QSV66tJMeHOw4Wxo6kn15fL1+261s4OCtjM3laUVQ6YoRXn2omfG?=
+ =?us-ascii?Q?x5K5yX8V0HxBy/AXUtD3ioAB4ustUOau9UtDpTJ3FjbJKvn2YuNWkxOb9fdI?=
+ =?us-ascii?Q?LcZUJGbEDgloY/O7vQC6kKhp?=
+X-OriginatorOrg: synaptics.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4b7b70e0-714a-45d4-b7ca-08d8e5385fb4
+X-MS-Exchange-CrossTenant-AuthSource: BN3PR03MB2307.namprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Mar 2021 09:22:36.1692
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 335d1fbc-2124-4173-9863-17e7051a2a0e
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: WHyC0bJnIt/ewrgZV8LAnH5qFeQ6WszA+PxeUS3MI2oaTh0rB+wt+PtPjMqe44RsdBWheV6smNpFWCpyRnvd2w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN6PR03MB2900
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Hector,
+Hi
 
-thanks for the long and detailed answer! I learn new things
-all the time. (Maybe one day I add something too, who knows.)
+On Thu, 11 Mar 2021 15:08:03 +0800
+Shawn Lin <shawn.lin@rock-chips.com> wrote:
 
-I hope I'm not taking too much of your time, we're having fun :)
 
-On Thu, Mar 11, 2021 at 9:02 PM Hector Martin <marcan@marcan.st> wrote:
-> On 11/03/2021 23.06, Linus Walleij wrote:
-> > Yes. And this is what mobile phone vendors typically did.
+> 
+> Hi Jisheng
+> 
+> On 2021/3/11 14:59, Jisheng Zhang wrote:
+> > Hi Shawn,
 > >
-> > But the nature of different electrical attacks made them worried
-> > about different schemes involving cutting power and disturbing
-> > signals with different probes, so they wanted this counter
-> > implemented in hardware and that is why RPMB exists at all
-> > (IIUC).
->
-> No, prior to RPMB there was no such secure counter at all. The problem
-> is that non-volatile erasable storage (i.e. EEPROM/Flash) is
-> incompatible with modern SoC manufacturing processes, so there is no way
-> to embed a secure counter into the main SoC. And once your counter needs
-> to be external, there needs to be a secure communications protocol to
-> access it. This is what RPMB implements.
->
-> For preventing software downgrades, especially of bootloader code, this
-> can be implemented with one-time fuses embedded in the SoC, but there is
-> a limited supply of those. So this doesn't work for things like PIN
-> attempt counters. For that you need a secure external counter.
+> > On Thu, 11 Mar 2021 14:21:24 +0800 Shawn Lin <shawn.lin@rock-chips.com> wrote:
+> >  
+> >>
+> >> sdhci based synopsys MMC IP is also used on some rockchip platforms,
+> >> so add a basic support here.
+> >>
+> >> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+> >> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> >> ---
+> >>
+> >> Changes in v4:
+> >> - add comments for disabling rx invert
+> >> - add tag from Adrian
+> >>
+> >>   drivers/mmc/host/sdhci-of-dwcmshc.c | 225 ++++++++++++++++++++++++++++++++++--
+> >>   1 file changed, 218 insertions(+), 7 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >> index 59d8d96..dabc1ec 100644
+> >> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> >> @@ -9,9 +9,11 @@
+> >>
+> >>   #include <linux/clk.h>
+> >>   #include <linux/dma-mapping.h>
+> >> +#include <linux/iopoll.h>
+> >>   #include <linux/kernel.h>
+> >>   #include <linux/module.h>
+> >>   #include <linux/of.h>
+> >> +#include <linux/of_device.h>
+> >>   #include <linux/sizes.h>
+> >>
+> >>   #include "sdhci-pltfm.h"
+> >> @@ -21,11 +23,43 @@
+> >>   /* DWCMSHC specific Mode Select value */
+> >>   #define DWCMSHC_CTRL_HS400             0x7
+> >>
+> >> +/* Rockchip specific Registers */
+> >> +#define DWCMSHC_HOST_CTRL3             0x508  
+> >
+> > Maybe 0x500 can be read from VENDOR_PTR_R while 0x8 is the offset?  
+> 
+> It should be but we didn't add this info for this IP so we have
+> to hardcode the register offset.
 
-Actually what we did (I was there, kind of) was to go to the flash vendors
-(IIRC first Intel) and require what is today called "fuses" in the flash
-memory.
+Per my understanding, this register always exists, so mind to double check
+whether you can access the register and read out 0x500. If the vendor offset
+can't be read out on your side, mind to add var such as vendor_ptr etc. then
+configure it as 0x500 for RK? I believe HS400 ES support code is common
+to this IP, the only difference maybe the vendor offset can be dynamically
+read out while RK may need to hardcode the offset as you said.
 
-Originally this was for things like unique serial numbers set in
-production. But they could easily add some more of it for other
-use cases.
+Thanks
 
-This became what is known as OTP (one time programmable flash).
-The OTP was all set to 1:s when the flash was new, then what we
-did for anti-rollback was to designate some bits for software versions.
-
-To make sure the OTP readout wasn't tampered with, some additional
-hashes of the OTP was stored in the flash and MAC signed. This was
-recalculated when we changed a bit from 1->0 in the OTP to indicate
-a new firmware version.
-
-Clever, isn't it? :)
-
-I think the scheme in RPMB was based in part on the needs
-solved by that crude mechanism.
-
-(Linux MTD did actually even gain some support for OTP recently,
-it is used only from userspace AFIAK.)
-
-> RPMB isn't pointless; what I am saying is that
-> if you strip away everything but the counter functionality, you can
-> still build equivalent security guarantees. You still need the counter.
-> There is no way to get that counter without RPMB or something like it
-> (another option is e.g. to use a smartcard IC as a secure element; AIUI
-> modern Apple devices do this). Software alone doesn't work. This is why
-> I wrote that article about how the FBI cracks iPhones; that works
-> because they weren't using a secure rollback-protected storage/counter
-> chip of any kind.
-
-Yeah. Hm, actually if they had flash memory they should have
-used the OTP... But I suppose they were all on eMMC.
-
-> it helps if you forget about the read/write commands and treat
-> it as a simple counter.
-
-Yep you're right.
-
-> Once you do that, you'll realize that e.g. putting keys in RPMB doesn't
-> really make sense as a kernel primitive. The usefulness of RPMB is
-> purely in the integration of that counter (which is equivalent to
-> rollback-protected storage) with a policy system. Everything else is
-> icing on the cake; it doesn't create new use cases.
-
-OK I understand. So what you're saying is we can't develop
-anything without also developing a full policy system.
-
-> Consider this:
-(...)
-> You have now built a secure, rollback-protected Git repository, with
-> similar security properties to RPMB storage, without using RPMB storage;
-> just a counter.
-
-This example of using the RPMB to protect rollback of a git
-was really nice! I think I understood as much before but
-maybe I don't explain that well enough :/
-
-> Thus, we can conclude that the storage features of RPMB do not provide
-> additional security properties that cannot be derived from a simple counter.
-
-I agree.
-
-> * Disclaimer: please don't actually deploy this; I'm trying to make a
-> point here, it's 5AM and I'm not claiming this is a perfectly secure
-> design and I haven't missed anything. Please don't design
-> rollback-protected Git repositories without expert review. I am assuming
-> filesystem mutations only happen between operations and handwaving away
-> active attacks, which I doubt Git is designed to be robust against. A
-> scheme like this can be implemented securely with care, but not naively.
-
-It's an example all kernel developers can relate to, so the
-educational value is high!
-
-> Well, that's what I'm saying, you do need secureboot for this to make
-> sense :-)
->
-> RPMB isn't useless and some systems should implement it; but there's no
-> real way for the kernel to transparently use it to improve security in
-> general (for anyone) without the user being aware. Since any security
-> benefit from RPMB must come from integration with user policy, it
-> doesn't make sense to "well, just do something else with RPMB because
-> it's better than nothing"; just doing "something" doesn't make systems
-> more secure. There needs to be a specific, practical use case that we'd
-> be trying to solve with RPMB here.
-
-As of now there are no other real world examples than TEE
-for this user policy. TPM and secure enclave exist, but they both
-have their own counters and does not need this.
-
-Can one realistically imagine another secure environment
-needing a RPMB counter? If not, then TEE (tee-supplicant is
-the name of the software daemon in userspace for OP-TEE,
-then some vendors have their own version of TEE)
-will ever be the only user, and then we only need to design
-for that.
-
-Yours,
-Linus Walleij
