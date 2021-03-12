@@ -2,130 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78DADC43332
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:37:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7507C433E9
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:48:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4737665045
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:37:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C65D665036
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:48:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231752AbhCLKh1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 05:37:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36926 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233462AbhCLKhZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 05:37:25 -0500
-Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDC4BC061574
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:37:24 -0800 (PST)
-Received: by mail-vs1-xe34.google.com with SMTP id s8so12249068vsc.8
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:37:24 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=K3/Vc1Ah6eKHyLWI1pgidt8/nWh+3HJqZHQUqW0QsJY=;
-        b=e/OV4wNhRA/Hs5pdnjxqlm48AcxIBgreDOOJNjy58xe/C+lYYaCP1LvYHtxw5nNMDd
-         ALc5X7QtHJfqYjQJtkk29KbBS+sCEO+r861cukBYcKfIkwG7Ou4nlCW1n/UmnxXDl8UZ
-         Z/fv7WEl9eLwGeyto13VUunS/sfPRI2c3QsnbpFtyEdc7Gfom8B6Uyb0CQaIhkyCgJpI
-         Vsh00DPD7rj87XdaxRSYPfBsBAN7FvwewFG9kAbAybHO8w6BrDs7Q/oHkpYaTspxVr8g
-         hG55hBJ9e6DnKN6cjQsuVlY7/n4MxMQTtSF3SukeI2+Zdfpe9OF7WCVtCu8zUxSY8ajX
-         hHEQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=K3/Vc1Ah6eKHyLWI1pgidt8/nWh+3HJqZHQUqW0QsJY=;
-        b=rH18U8b4N07TL6AlMENSvgkcURkJjPl9rXIAgNlY6mGZY8jHf/v17+Rl7wRG7g59KC
-         cVBfAa1U/M3QXKojV8e+QPxjFewoLyEC5xvK7BIcUtujtXfHmXj0m2HMiDzENJY7Gxxt
-         hVDB3JLbh4RGxk8hLPDkalbGr1Zp0C+qssgsxxwBugTfwrsc4pA5Rl6PlrY/zmm1vugx
-         0H1mwkhjUZq03KPlUPar/HgGaeq8GYcnrHRYcWlg8L+T3kOt4qV++R+lEk0gEAc0FjFB
-         Mwdn7/CZr6bP6QixvYr/YeRw/m/5v4I3neXAQ9BRKAL0KUrLklxGfPjJkg0XPu4gEcEh
-         zH4w==
-X-Gm-Message-State: AOAM532jaRAl7EOSGEzXi54F4jMA/bsv+MDnv7mXg508yGZZIPqXRUD4
-        J3UVHOWa15b1wznHxjK/QczaYPtCpil55zBe2SyIog==
-X-Google-Smtp-Source: ABdhPJyLTgXQd1zTmLlKpEGuucdoDu6MxM1Ifem4y53cs/Xb9ONexPA+wPxOnpJgqOBWr4/fpZSZO+YOQXGKhLX6tmk=
-X-Received: by 2002:a67:6942:: with SMTP id e63mr8188302vsc.48.1615545442849;
- Fri, 12 Mar 2021 02:37:22 -0800 (PST)
+        id S233600AbhCLKrs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 05:47:48 -0500
+Received: from mout.kundenserver.de ([212.227.126.131]:49781 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233555AbhCLKrY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 05:47:24 -0500
+Received: from mail-ot1-f52.google.com ([209.85.210.52]) by
+ mrelayeu.kundenserver.de (mreue011 [213.165.67.97]) with ESMTPSA (Nemesis) id
+ 1MKbTo-1l1u1G0aui-00KwvW; Fri, 12 Mar 2021 11:47:22 +0100
+Received: by mail-ot1-f52.google.com with SMTP id o19-20020a9d22130000b02901bfa5b79e18so1159376ota.0;
+        Fri, 12 Mar 2021 02:47:21 -0800 (PST)
+X-Gm-Message-State: AOAM531kDOMqe2OxjYvkLN2T/PHI8L6zZaBQuqHLTcnpXj8Wdb1q3N5c
+        kua2Dl1LVrEei7N451a4eYnJtTky3K6NsYCDgZo=
+X-Google-Smtp-Source: ABdhPJz7zdlDpmXmM7BtqEG5Qr+1v5ljUta4AloLV5NxxcVPVwQnNpopJT0aoWIPmmaxOc8wySYDowkTwwg0qlmDJT8=
+X-Received: by 2002:a05:6830:148c:: with SMTP id s12mr2953752otq.251.1615546040667;
+ Fri, 12 Mar 2021 02:47:20 -0800 (PST)
 MIME-Version: 1.0
-References: <20210311192105.14998-1-digetx@gmail.com> <20210311192105.14998-2-digetx@gmail.com>
- <20210312053312.zgke2mzjkqmwn67i@vireshk-i7>
-In-Reply-To: <20210312053312.zgke2mzjkqmwn67i@vireshk-i7>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 12 Mar 2021 11:36:46 +0100
-Message-ID: <CAPDyKFqrUCjTfrNqZ4gFfQS6LpoQCevGc-tv4WVOwuGhx5iiBg@mail.gmail.com>
-Subject: Re: [PATCH v2 01/14] opp: Add devres wrapper for dev_pm_opp_set_clkname
-To:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Osipenko <digetx@gmail.com>
-Cc:     Qiang Yu <yuq825@gmail.com>, Rob Clark <robdclark@gmail.com>,
-        Sean Paul <sean@poorly.run>, Rob Herring <robh@kernel.org>,
-        Tomeu Vizoso <tomeu.vizoso@collabora.com>,
-        Steven Price <steven.price@arm.com>,
-        Alyssa Rosenzweig <alyssa.rosenzweig@collabora.com>,
-        Stanimir Varbanov <stanimir.varbanov@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Lukasz Luba <lukasz.luba@arm.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+References: <20210309015750.6283-1-peng.zhou@mediatek.com> <CACRpkdYTkW7b9SFEY6Ubq4NicgR_5ewQMjE2zHvGbgxYadhHQQ@mail.gmail.com>
+ <YEpqkAq6wOZ+TpR9@gmail.com> <CAPDyKFoWg7HYHAbxYJRbOad5kqm+rzVLVQ0O3g76ROO5Z+MF3Q@mail.gmail.com>
+In-Reply-To: <CAPDyKFoWg7HYHAbxYJRbOad5kqm+rzVLVQ0O3g76ROO5Z+MF3Q@mail.gmail.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Fri, 12 Mar 2021 11:47:04 +0100
+X-Gmail-Original-Message-ID: <CAK8P3a0qEGS0AxyyDkzv2BD=vC=4GBSt5qXbM9t=jkWi4LXmBw@mail.gmail.com>
+Message-ID: <CAK8P3a0qEGS0AxyyDkzv2BD=vC=4GBSt5qXbM9t=jkWi4LXmBw@mail.gmail.com>
+Subject: Re: [PATCH v2 2/4] mmc: Mediatek: enable crypto hardware engine
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Eric Biggers <ebiggers@kernel.org>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Viresh Kumar <vireshk@kernel.org>, Nishanth Menon <nm@ti.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Yangtao Li <tiny.windzz@gmail.com>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        lima@lists.freedesktop.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        freedreno <freedreno@lists.freedesktop.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org,
-        linux-tegra <linux-tegra@vger.kernel.org>
+        Satya Tangirala <satyat@google.com>,
+        Wulin Li <wulin.li@mediatek.com>,
+        Sudeep Holla <sudeep.holla@arm.com>
 Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:oYK1jENEdu4qKWbDYYZKq+7LCHSfxKlnsb37fZHFvF71/mUIs7o
+ F7O8Wmc8nS02vPJOHcEfKloMirN4p5GB0yLAyTmjPCaWsdDAg1yEzQwHjymyjT+b8fkQ2I5
+ Jg1g4pQE3L9mSwrJZJUmZwf+Xp/RiA09vTaq4cGQgBklB3fKb5n6j+3Ls8+zWM0C5N/P7P6
+ 9T2TsQMCJSUQEnj7fUXKw==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:PDalZpyHKKA=:QeYizN1udW2n8cyQEMpMTq
+ Sp8oEA3kOze6SK6aoRtB43Y8+pJrl++qD2JuF/Slz4qfnr5MMG0MH48Xbpjg2mCWesfBIaH++
+ tfF0TWs7kJnetGdxq9q7LjF6eYvYw3uFj9mHy8TIzZWIphbVhLHCIWKo40yfQkbu7LOnW/6tD
+ 3f3TSGDdrptoL66HQ0Xqa8iCwmCTB8hv5ef0vd1XUvLtOEtSAcG79nV5mlivsp55ZyBQcsAfM
+ fJuyDmWCyxcba4PXYdurbKjoaaTggye0GsrIGF2CGsgf81es/Zzwye1ZF7+8vVNp1ZhTMWitd
+ CzPlsdq3+5TI6RyhrFEY9e/Tz+BKXZh3zN7aNQmrH3c5iCnRdvvJppfx8SLQDthHiHEG8WY+z
+ CTD4gR5NGI1A8L8NHIUxM7okUGg4RexRsd+LpGv4swEvV78I49vmHfFdeXP9KxxjACh7uDJRz
+ YMPzB+MKgnPywrPjAHeH1k1nFdReVIYsnJ2RkZyt3rHPwIoxnTnIEt/IGNKStjXkv5Ir47zBx
+ QPBK+I1hxANePobajn02RTy0K4r+opoxqvICcVMC4Kdys0e6PGvkVQJ4rf26Mi6Qg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 12 Mar 2021 at 06:33, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+On Fri, Mar 12, 2021 at 10:05 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On Thu, 11 Mar 2021 at 20:08, Eric Biggers <ebiggers@kernel.org> wrote:
+> > On Thu, Mar 11, 2021 at 02:48:23PM +0100, Linus Walleij wrote:
+> >
+> > It happens in the same place, cqhci-crypto.c.  Mediatek's eMMC inline encryption
+> > hardware follows the eMMC standard fairly closely, so Peng's patch series just
+> > sets MMC_CAP2_CRYPTO to make it use the standard cqhci crypto code, and does a
+> > couple extra things to actually enable the hardware's crypto support on Mediatek
+> > platforms since it isn't enabled by default.  (*Why* it requires an SMC call to
+> > enable instead of just working as expected, I don't know though.)
 >
-> On 11-03-21, 22:20, Dmitry Osipenko wrote:
-> > +struct opp_table *devm_pm_opp_set_clkname(struct device *dev, const char *name)
-> > +{
-> > +     struct opp_table *opp_table;
-> > +     int err;
-> > +
-> > +     opp_table = dev_pm_opp_set_clkname(dev, name);
-> > +     if (IS_ERR(opp_table))
-> > +             return opp_table;
-> > +
-> > +     err = devm_add_action_or_reset(dev, devm_pm_opp_clkname_release, opp_table);
-> > +     if (err)
-> > +             opp_table = ERR_PTR(err);
-> > +
-> > +     return opp_table;
-> > +}
+> As I have probably indicated earlier, I am starting to become more and
+> more annoyed with these arm_smccc_smc() calls in generic drivers.
 >
-> I wonder if we still need to return opp_table from here, or a simple
-> integer is fine.. The callers shouldn't be required to use the OPP
-> table directly anymore I believe and so better simplify the return
-> part of this and all other routines you are adding here..
+> As a matter of fact, I think the situation is about to explode. Just
+> do a "git grep arm_smccc_smc" and you will find that it's not only SoC
+> specific drivers that call them. In general we want to keep drivers
+> portable and this is clearly moving in the wrong direction. Or maybe
+> it's just me being grumpy and having a bad day. :-)
 
-Yes, please. I was thinking along the same lines, when I reviewed the
-mmc patch (patch9).
+I agree, this really does feel underspecified, as there is no way to
+actually know which smc interfaces are available, or which ones belong
+to a particular driver. Simply calling them is not that different from
+using an ioremap() on a hardwired physical address just because you
+know where a device is on a given SoC. Or another way of looking at
+it is that these are function calls that are arbitrarily moved out from
+the kernel into a piece of (usually) closed source software running on
+the same chip.
 
->
-> If there is a user which needs the opp_table, let it use the regular
-> non-devm variant.
+A first step toward managing this better might be to enforce namespaces
+of the smc calls, if we can find a way to limit arm_smccc_smc() calls
+those that have the first argument defined in a central header file.
 
-Kind regards
-Uffe
+        Arnd
