@@ -7,127 +7,125 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CBE8C433E6
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:01:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78DADC43332
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:37:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EBC6464FDC
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:01:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4737665045
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:37:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232985AbhCLKA4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 05:00:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57304 "EHLO
+        id S231752AbhCLKh1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 05:37:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36926 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232975AbhCLKAi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 05:00:38 -0500
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 212D2C061574
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:00:38 -0800 (PST)
-Received: by mail-lf1-x12d.google.com with SMTP id k9so44771870lfo.12
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:00:38 -0800 (PST)
+        with ESMTP id S233462AbhCLKhZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 05:37:25 -0500
+Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BDC4BC061574
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:37:24 -0800 (PST)
+Received: by mail-vs1-xe34.google.com with SMTP id s8so12249068vsc.8
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 02:37:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=x7b0YhLiDRYT0yOrjk/x/Y6N+KIRlemcKfsY/iEVybQ=;
-        b=F52JBUW2RVO02xz7XfNFfnrhSZLb7p6RwfOQXW0+QwKiTpTiaiE/kwYwO+y5kvwTTb
-         xZxDlKTU0zC8iGi9s3eB3O1qh9vAuqnCzdm0FQbgsL4bLr3Ruqn3fhleGWalnmxC38rB
-         FgK2CVQxAaWOiBRWXiXhaAdbIjpvXMgUpIWczpQhvC4dfF3O6uaqfZeXxiEEoU7pYdoh
-         v0OxguUFdiCEoCC7zzxnbDnPPd+iR1h3DsnWmx5o1uALjWmEGFn0rxgH7VcoOP1somqS
-         7HT5R8y07TA7h0PvmtdQ9IxgC4c4DqqDp/Sprqpgk7IqJYUO5UnI+msLE1D5pICduzc5
-         BEYw==
+         :cc;
+        bh=K3/Vc1Ah6eKHyLWI1pgidt8/nWh+3HJqZHQUqW0QsJY=;
+        b=e/OV4wNhRA/Hs5pdnjxqlm48AcxIBgreDOOJNjy58xe/C+lYYaCP1LvYHtxw5nNMDd
+         ALc5X7QtHJfqYjQJtkk29KbBS+sCEO+r861cukBYcKfIkwG7Ou4nlCW1n/UmnxXDl8UZ
+         Z/fv7WEl9eLwGeyto13VUunS/sfPRI2c3QsnbpFtyEdc7Gfom8B6Uyb0CQaIhkyCgJpI
+         Vsh00DPD7rj87XdaxRSYPfBsBAN7FvwewFG9kAbAybHO8w6BrDs7Q/oHkpYaTspxVr8g
+         hG55hBJ9e6DnKN6cjQsuVlY7/n4MxMQTtSF3SukeI2+Zdfpe9OF7WCVtCu8zUxSY8ajX
+         hHEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=x7b0YhLiDRYT0yOrjk/x/Y6N+KIRlemcKfsY/iEVybQ=;
-        b=Uci3LklaYGTco1DwN6AV7P900IFprkzbYNTfWA9WwA4BIyj2UKo9PySZUasSaagpVi
-         7xiNu8tcRNHPKNQ34KX8fKJXwT2shhVQ4gVgx04MKXjxevbfeTKv/lzNoyk/EvW1ty2u
-         e4WG7w1r749nQCtlHAgz0BU4OW9skwf03ej7AvndHJqwzFSbBBVjRYMnsdXWf3tULgnp
-         awBAujZonF9Y52X/OWNUMY9cMthybOKzd5EQYO4V9kMBjolXfIL1AxD1IHrc8xnNSO/s
-         +tBq2D3hCfYu9pm9bwfT1SEUIcBMMj4sYpan9k3Mqu8E/PNTBDMEa9MDVwxtS004EYxe
-         bTWw==
-X-Gm-Message-State: AOAM5322xSyKeyMpPoNM0vXAqJANr2gvO/t7DIESmNwRigERda8wr4eE
-        DGlQm895ZdzhSZUmsR1Ok69eR5lqeNenrZt6PDkUag==
-X-Google-Smtp-Source: ABdhPJzDpESWQoECqt1prXQcSIVot287iP/QjDAbfHp3ibm4TSWaAfKPuHPAW9M9l7h49Y9aMEgq9QJPlARRE4cVnxQ=
-X-Received: by 2002:ac2:4d95:: with SMTP id g21mr5165763lfe.29.1615543236661;
- Fri, 12 Mar 2021 02:00:36 -0800 (PST)
+         :message-id:subject:to:cc;
+        bh=K3/Vc1Ah6eKHyLWI1pgidt8/nWh+3HJqZHQUqW0QsJY=;
+        b=rH18U8b4N07TL6AlMENSvgkcURkJjPl9rXIAgNlY6mGZY8jHf/v17+Rl7wRG7g59KC
+         cVBfAa1U/M3QXKojV8e+QPxjFewoLyEC5xvK7BIcUtujtXfHmXj0m2HMiDzENJY7Gxxt
+         hVDB3JLbh4RGxk8hLPDkalbGr1Zp0C+qssgsxxwBugTfwrsc4pA5Rl6PlrY/zmm1vugx
+         0H1mwkhjUZq03KPlUPar/HgGaeq8GYcnrHRYcWlg8L+T3kOt4qV++R+lEk0gEAc0FjFB
+         Mwdn7/CZr6bP6QixvYr/YeRw/m/5v4I3neXAQ9BRKAL0KUrLklxGfPjJkg0XPu4gEcEh
+         zH4w==
+X-Gm-Message-State: AOAM532jaRAl7EOSGEzXi54F4jMA/bsv+MDnv7mXg508yGZZIPqXRUD4
+        J3UVHOWa15b1wznHxjK/QczaYPtCpil55zBe2SyIog==
+X-Google-Smtp-Source: ABdhPJyLTgXQd1zTmLlKpEGuucdoDu6MxM1Ifem4y53cs/Xb9ONexPA+wPxOnpJgqOBWr4/fpZSZO+YOQXGKhLX6tmk=
+X-Received: by 2002:a67:6942:: with SMTP id e63mr8188302vsc.48.1615545442849;
+ Fri, 12 Mar 2021 02:37:22 -0800 (PST)
 MIME-Version: 1.0
-References: <20210303135500.24673-1-alex.bennee@linaro.org>
- <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
- <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
- <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
- <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
- <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st> <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
- <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
- <e5d3f4b5-748e-0700-b897-393187b2bb1a@marcan.st> <CACRpkdYxMGN3N-jFt1Uw4AkBR-x=dRj6HEvDp6g+2ku7+qCLwg@mail.gmail.com>
- <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st> <87k0qd7615.fsf@linaro.org>
-In-Reply-To: <87k0qd7615.fsf@linaro.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Fri, 12 Mar 2021 11:00:24 +0100
-Message-ID: <CACRpkdYNdoK9T503en6dPfz5sSc0eDGLzhnUBqRUbZR3j43byA@mail.gmail.com>
-Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
-To:     =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>
-Cc:     Hector Martin <marcan@marcan.st>,
-        Sumit Garg <sumit.garg@linaro.org>,
-        Arnd Bergmann <arnd@linaro.org>,
-        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
-        David Howells <dhowells@redhat.com>,
-        Jarkko Sakkinen <jarkko@kernel.org>,
-        Joakim Bech <joakim.bech@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Maxim Uvarov <maxim.uvarov@linaro.org>,
-        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
-        Ruchika Gupta <ruchika.gupta@linaro.org>,
-        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
-        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
-        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd.bergmann@linaro.org>
+References: <20210311192105.14998-1-digetx@gmail.com> <20210311192105.14998-2-digetx@gmail.com>
+ <20210312053312.zgke2mzjkqmwn67i@vireshk-i7>
+In-Reply-To: <20210312053312.zgke2mzjkqmwn67i@vireshk-i7>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 12 Mar 2021 11:36:46 +0100
+Message-ID: <CAPDyKFqrUCjTfrNqZ4gFfQS6LpoQCevGc-tv4WVOwuGhx5iiBg@mail.gmail.com>
+Subject: Re: [PATCH v2 01/14] opp: Add devres wrapper for dev_pm_opp_set_clkname
+To:     Viresh Kumar <viresh.kumar@linaro.org>,
+        Dmitry Osipenko <digetx@gmail.com>
+Cc:     Qiang Yu <yuq825@gmail.com>, Rob Clark <robdclark@gmail.com>,
+        Sean Paul <sean@poorly.run>, Rob Herring <robh@kernel.org>,
+        Tomeu Vizoso <tomeu.vizoso@collabora.com>,
+        Steven Price <steven.price@arm.com>,
+        Alyssa Rosenzweig <alyssa.rosenzweig@collabora.com>,
+        Stanimir Varbanov <stanimir.varbanov@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Lukasz Luba <lukasz.luba@arm.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Viresh Kumar <vireshk@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Yangtao Li <tiny.windzz@gmail.com>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        lima@lists.freedesktop.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        freedreno <freedreno@lists.freedesktop.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        linux-samsung-soc <linux-samsung-soc@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org,
+        linux-tegra <linux-tegra@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 11, 2021 at 10:08 PM Alex Benn=C3=A9e <alex.bennee@linaro.org> =
-wrote:
+On Fri, 12 Mar 2021 at 06:33, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+>
+> On 11-03-21, 22:20, Dmitry Osipenko wrote:
+> > +struct opp_table *devm_pm_opp_set_clkname(struct device *dev, const char *name)
+> > +{
+> > +     struct opp_table *opp_table;
+> > +     int err;
+> > +
+> > +     opp_table = dev_pm_opp_set_clkname(dev, name);
+> > +     if (IS_ERR(opp_table))
+> > +             return opp_table;
+> > +
+> > +     err = devm_add_action_or_reset(dev, devm_pm_opp_clkname_release, opp_table);
+> > +     if (err)
+> > +             opp_table = ERR_PTR(err);
+> > +
+> > +     return opp_table;
+> > +}
+>
+> I wonder if we still need to return opp_table from here, or a simple
+> integer is fine.. The callers shouldn't be required to use the OPP
+> table directly anymore I believe and so better simplify the return
+> part of this and all other routines you are adding here..
 
-> I guess what we are saying is that real secure monitors should come up
-> with their own common API for interfacing with RPMB devices without
-> looking to the Linux kernel for inspiration?
+Yes, please. I was thinking along the same lines, when I reviewed the
+mmc patch (patch9).
 
-The problem is that eMMC at least (I don't know about NVME etc)
-has serialized commands, meaning you execute one command at
-a time (some augmentation exist nowadays to speed up things).
+>
+> If there is a user which needs the opp_table, let it use the regular
+> non-devm variant.
 
-When it comes to RPMB, the eMMC device must stop all other
-activity (such as reading/writing any blocks to the eMMC) send a
-special command to switch to the RPMB  partition, then execute
-the RPMB command(s) then send a special command to switch
-back to ordinary storage.
-
-Someone has to be in control of the eMMC arbitration. Right now
-Linux MMC/SD storage stack does this.
-
-If the secure world want to use RPMB independently of the Linux
-kernel there are two solutions:
-
-- Mount a second eMMC just for the secure world - looks expensive
-  so some other secure counter storage would likely be cheaper
-  and it inevitably increases the BOM which is sensitive to
-  manufacturers (this option is unrealistic)
-
-- Let the secure world arbitrate all access to the eMMC - looks
-  inefficient and also dangerous since the secure world now has to
-  implement everything in drivers/mmc/core which is a few 100
-  KB of really complex code that need to be maintained perpetually.
-  (IMO this option is also unrealistic for performance and
-  maintenance reasons, but who knows what secure world
-  imperialists are out there).
-
-This leaves Linux in control of the eMMC RPMB under all
-circumstances as far as I can see.
-
-Yours,
-Linus Walleij
+Kind regards
+Uffe
