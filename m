@@ -2,103 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7507C433E9
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:48:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39F3BC433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 11:03:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C65D665036
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 10:48:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 151DB64FE0
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 11:03:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233600AbhCLKrs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 05:47:48 -0500
-Received: from mout.kundenserver.de ([212.227.126.131]:49781 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233555AbhCLKrY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 05:47:24 -0500
-Received: from mail-ot1-f52.google.com ([209.85.210.52]) by
- mrelayeu.kundenserver.de (mreue011 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1MKbTo-1l1u1G0aui-00KwvW; Fri, 12 Mar 2021 11:47:22 +0100
-Received: by mail-ot1-f52.google.com with SMTP id o19-20020a9d22130000b02901bfa5b79e18so1159376ota.0;
-        Fri, 12 Mar 2021 02:47:21 -0800 (PST)
-X-Gm-Message-State: AOAM531kDOMqe2OxjYvkLN2T/PHI8L6zZaBQuqHLTcnpXj8Wdb1q3N5c
-        kua2Dl1LVrEei7N451a4eYnJtTky3K6NsYCDgZo=
-X-Google-Smtp-Source: ABdhPJz7zdlDpmXmM7BtqEG5Qr+1v5ljUta4AloLV5NxxcVPVwQnNpopJT0aoWIPmmaxOc8wySYDowkTwwg0qlmDJT8=
-X-Received: by 2002:a05:6830:148c:: with SMTP id s12mr2953752otq.251.1615546040667;
- Fri, 12 Mar 2021 02:47:20 -0800 (PST)
+        id S233679AbhCLLCy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 06:02:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42510 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233314AbhCLLCl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 06:02:41 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 453F3C061574
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 03:02:41 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id v9so45092632lfa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 03:02:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=lUkWWP7QtoyKW+p9PVjEC7J9wcMKoCcktZeNogcq/VI=;
+        b=W2jGvcdU20upo5UDCNpO+C2xU5sJJgj/WjGt/U/+tBGOkMgJsUWGnMq4q53K11RwC+
+         CND6msi+RrkBF3A7rM4EqHb4660MCEd9LIBtRpkykSkJetAEb8Yasl1xelzIiiznekMJ
+         MvHQWCzwMX1OhnZzLQxMzPAPrFDNp1gsOo9AS7c9eaDKaFQBy5epYU/qIPoV4BMEeH59
+         3QYBQGsGht7h6gV+J5Na81fARuw/fiHFRzZVia/xNcWcXLLiRoRu2C0zRZEI7w4/rQhA
+         bZxqceuAPF9cZPd3aQb26bHTglVpixSRV0WobQYEgjueV6eRctvEfk48b38b/KbaMpIx
+         I8aQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=lUkWWP7QtoyKW+p9PVjEC7J9wcMKoCcktZeNogcq/VI=;
+        b=qEOzipfzhXLMfiI0bR0eu0lmEswPzKtqTYNcnnmQCS4xBDF/rOpth9a2BbOUcbS+LA
+         KsMKDd5LfnNeLieGXVRgDFGkaJ3MKLLLoy4OJqJcFE3Uj4rExKrD1xgQStslCfDwBQnX
+         Ti1WNpjTMGvDVc5hFXtRhJ2/muN/ZvgO/Jrf1xbn+QLa5FEWMy2SGUazt10TROqSsTs9
+         MId4cDUWZmyXANZl51V6sA9BRh/2yWJlmERU+2aLflB6lhpVRGCreq/weq4vyfk2TWFo
+         gUl9V4kge5n9k9NReibC1R5HTchqxWpzG3KdejwHlTB8WKkMnjQ6+L7nSmb65YbWG3wK
+         hwNg==
+X-Gm-Message-State: AOAM531ZG9YUBQwbQAxCmBPNjtZ7ajAHIKJWic4VIuB/Zyz9uvrCW/hU
+        qVPFscgLM0ZzCb0fVUCryy9KuQ==
+X-Google-Smtp-Source: ABdhPJzOz/wOTBs9Q4k/78L4//AFn4BXGSrmYePYXZnvasIVMMl3mFJmCIu8CQfTYK32QMl3fzCamg==
+X-Received: by 2002:a05:6512:acb:: with SMTP id n11mr5013428lfu.288.1615546959825;
+        Fri, 12 Mar 2021 03:02:39 -0800 (PST)
+Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
+        by smtp.gmail.com with ESMTPSA id p13sm1933647ljg.116.2021.03.12.03.02.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Mar 2021 03:02:38 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.12-rc3
+Date:   Fri, 12 Mar 2021 12:02:37 +0100
+Message-Id: <20210312110237.174917-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20210309015750.6283-1-peng.zhou@mediatek.com> <CACRpkdYTkW7b9SFEY6Ubq4NicgR_5ewQMjE2zHvGbgxYadhHQQ@mail.gmail.com>
- <YEpqkAq6wOZ+TpR9@gmail.com> <CAPDyKFoWg7HYHAbxYJRbOad5kqm+rzVLVQ0O3g76ROO5Z+MF3Q@mail.gmail.com>
-In-Reply-To: <CAPDyKFoWg7HYHAbxYJRbOad5kqm+rzVLVQ0O3g76ROO5Z+MF3Q@mail.gmail.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Fri, 12 Mar 2021 11:47:04 +0100
-X-Gmail-Original-Message-ID: <CAK8P3a0qEGS0AxyyDkzv2BD=vC=4GBSt5qXbM9t=jkWi4LXmBw@mail.gmail.com>
-Message-ID: <CAK8P3a0qEGS0AxyyDkzv2BD=vC=4GBSt5qXbM9t=jkWi4LXmBw@mail.gmail.com>
-Subject: Re: [PATCH v2 2/4] mmc: Mediatek: enable crypto hardware engine
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Eric Biggers <ebiggers@kernel.org>,
-        Peng Zhou <peng.zhou@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Satya Tangirala <satyat@google.com>,
-        Wulin Li <wulin.li@mediatek.com>,
-        Sudeep Holla <sudeep.holla@arm.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:oYK1jENEdu4qKWbDYYZKq+7LCHSfxKlnsb37fZHFvF71/mUIs7o
- F7O8Wmc8nS02vPJOHcEfKloMirN4p5GB0yLAyTmjPCaWsdDAg1yEzQwHjymyjT+b8fkQ2I5
- Jg1g4pQE3L9mSwrJZJUmZwf+Xp/RiA09vTaq4cGQgBklB3fKb5n6j+3Ls8+zWM0C5N/P7P6
- 9T2TsQMCJSUQEnj7fUXKw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:PDalZpyHKKA=:QeYizN1udW2n8cyQEMpMTq
- Sp8oEA3kOze6SK6aoRtB43Y8+pJrl++qD2JuF/Slz4qfnr5MMG0MH48Xbpjg2mCWesfBIaH++
- tfF0TWs7kJnetGdxq9q7LjF6eYvYw3uFj9mHy8TIzZWIphbVhLHCIWKo40yfQkbu7LOnW/6tD
- 3f3TSGDdrptoL66HQ0Xqa8iCwmCTB8hv5ef0vd1XUvLtOEtSAcG79nV5mlivsp55ZyBQcsAfM
- fJuyDmWCyxcba4PXYdurbKjoaaTggye0GsrIGF2CGsgf81es/Zzwye1ZF7+8vVNp1ZhTMWitd
- CzPlsdq3+5TI6RyhrFEY9e/Tz+BKXZh3zN7aNQmrH3c5iCnRdvvJppfx8SLQDthHiHEG8WY+z
- CTD4gR5NGI1A8L8NHIUxM7okUGg4RexRsd+LpGv4swEvV78I49vmHfFdeXP9KxxjACh7uDJRz
- YMPzB+MKgnPywrPjAHeH1k1nFdReVIYsnJ2RkZyt3rHPwIoxnTnIEt/IGNKStjXkv5Ir47zBx
- QPBK+I1hxANePobajn02RTy0K4r+opoxqvICcVMC4Kdys0e6PGvkVQJ4rf26Mi6Qg==
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 12, 2021 at 10:05 AM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On Thu, 11 Mar 2021 at 20:08, Eric Biggers <ebiggers@kernel.org> wrote:
-> > On Thu, Mar 11, 2021 at 02:48:23PM +0100, Linus Walleij wrote:
-> >
-> > It happens in the same place, cqhci-crypto.c.  Mediatek's eMMC inline encryption
-> > hardware follows the eMMC standard fairly closely, so Peng's patch series just
-> > sets MMC_CAP2_CRYPTO to make it use the standard cqhci crypto code, and does a
-> > couple extra things to actually enable the hardware's crypto support on Mediatek
-> > platforms since it isn't enabled by default.  (*Why* it requires an SMC call to
-> > enable instead of just working as expected, I don't know though.)
->
-> As I have probably indicated earlier, I am starting to become more and
-> more annoyed with these arm_smccc_smc() calls in generic drivers.
->
-> As a matter of fact, I think the situation is about to explode. Just
-> do a "git grep arm_smccc_smc" and you will find that it's not only SoC
-> specific drivers that call them. In general we want to keep drivers
-> portable and this is clearly moving in the wrong direction. Or maybe
-> it's just me being grumpy and having a bad day. :-)
+Hi Linus,
 
-I agree, this really does feel underspecified, as there is no way to
-actually know which smc interfaces are available, or which ones belong
-to a particular driver. Simply calling them is not that different from
-using an ioremap() on a hardwired physical address just because you
-know where a device is on a given SoC. Or another way of looking at
-it is that these are function calls that are arbitrarily moved out from
-the kernel into a piece of (usually) closed source software running on
-the same chip.
+Here's a PR with a couple of MMC fixes intended for v5.12-rc3. Details about the
+highlights are as usual found in the signed tag.
 
-A first step toward managing this better might be to enforce namespaces
-of the smc calls, if we can find a way to limit arm_smccc_smc() calls
-those that have the first argument defined in a central header file.
+Please pull this in!
 
-        Arnd
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit a38fd8748464831584a19438cbb3082b5a2dab15:
+
+  Linux 5.12-rc2 (2021-03-05 17:33:41 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.12-rc2
+
+for you to fetch changes up to f06391c45e83f9a731045deb23df7cc3814fd795:
+
+  mmc: cqhci: Fix random crash when remove mmc module/card (2021-03-09 10:00:52 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix partition switch time for eMMC
+
+MMC host:
+ - mmci: Enforce R1B response to fix busy detection for the stm32 variants
+ - cqhci: Fix crash when removing mmc module/card
+
+----------------------------------------------------------------
+Adrian Hunter (1):
+      mmc: core: Fix partition switch time for eMMC
+
+Frank Li (1):
+      mmc: cqhci: Fix random crash when remove mmc module/card
+
+Yann Gautier (1):
+      mmc: mmci: Add MMC_CAP_NEED_RSP_BUSY for the stm32 variants
+
+ drivers/mmc/core/bus.c  | 11 +++++------
+ drivers/mmc/core/mmc.c  | 15 +++++++++++----
+ drivers/mmc/host/mmci.c | 10 +++++++++-
+ 3 files changed, 25 insertions(+), 11 deletions(-)
