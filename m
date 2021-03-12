@@ -2,168 +2,205 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D815EC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 12:06:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3560FC433E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 12:08:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A46FA64FE2
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 12:06:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0E4A464FDC
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 12:08:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229799AbhCLMFf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 07:05:35 -0500
-Received: from mail-eopbgr1320098.outbound.protection.outlook.com ([40.107.132.98]:8760
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229728AbhCLMFJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 12 Mar 2021 07:05:09 -0500
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=JgTcpfuFXqIkw17IlGUEYrq1qIxvMmg7t5LT4Ulpw/TFGTCcwOMSEvccTFMTDNj7lN+uzc0mPORm9Ut2puF/x7oTTpgYwmZXdgM3cKqzrEOQxQqN9ZxktJWA3/Zg6xJ3wWiuBuWAlN1BSn5QTxZDvd9mqqcOV2yGEK8QUHrkCK5pnvML/uWJWuq1ht5hzYhHMQ/1xAsfHavNp3fWmdQKKMaLuUf5SioVZTUZPTXYlVEtHAymyH2TlhpWO/oWDKxGGJoFxHrKQ3iduxSxVx8rFnbd6e+pL84Dp4PhCfyou37562VUKCp8+VA1BHgtva6u18eJ/pMl2CBqSuQl3r9mDg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=NYl7n/BeqtJIwBuZLI7t7HPW88fRLf0GpxXz9aXLKNs=;
- b=bSscStX47p8hwMYgHY/WlTQBjDV+bXpLULBAQN1qu6Xs2jjgBiAo88hfiprkmhadVwrl8kJc9atqhPsR21SiXZQ2hH52+tBLe0K93fXCSmQXeE/EF5ixWt3cd1KCnj97iL7/+DQSfrShdPNf0KTfW+viKhMZPSMHsmK5Lq1zOArqgS+Jjqx6sAWrVV/0BzBBJoMeYz7ex5WbOKmau2LWOp686Qsv81TBpKdtcufmq6mnG92fZuqhgStSDKHz1C+V8eB9WR9+6QpS1I8hDEtPeHbfDW7DZZ1iC7cvHsKYeYKSch1VwsCyHRFbxike7VTMa3lytblnoxxzsFCv5bElRw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S229902AbhCLMIT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 07:08:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56798 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229549AbhCLMIG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 07:08:06 -0500
+Received: from mail-wr1-x434.google.com (mail-wr1-x434.google.com [IPv6:2a00:1450:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 456BDC061763
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 04:08:06 -0800 (PST)
+Received: by mail-wr1-x434.google.com with SMTP id v15so4677247wrx.4
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 04:08:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=NYl7n/BeqtJIwBuZLI7t7HPW88fRLf0GpxXz9aXLKNs=;
- b=EY26jtkk1kBv2fNgCRSjkg7t9rMgMn3KkRwWpaNhY23BPa/UDXf7sWppg8+CN8bxY1MopoS8MrQY2K6h7xPcKi9T2WK+edb+lHSZeANd7SAORnHYGXRbV0AllaLgEcRPkkyywGcdCchqwZFA8Kfq/XzhtL9DdQywEgqby8jX0rc=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TY2PR01MB4297.jpnprd01.prod.outlook.com (2603:1096:404:111::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3912.30; Fri, 12 Mar
- 2021 12:05:01 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::cb4:9680:bb26:8f3f]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::cb4:9680:bb26:8f3f%4]) with mapi id 15.20.3933.031; Fri, 12 Mar 2021
- 12:05:01 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
-Thread-Topic: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
-Thread-Index: AQHXFMXo4wNgQS9GTkW0a+Aab4SqFqp9FyLQgAGxLgCAAXt5wA==
-Date:   Fri, 12 Mar 2021 12:05:01 +0000
-Message-ID: <TY2PR01MB3692BAF4BB03CDFE3D904B98D86F9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
- <20210309092332.30705-3-wsa+renesas@sang-engineering.com>
- <TY2PR01MB3692A6D95BD60A17AE698DF3D8919@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <20210311131748.GG3566@ninjato>
-In-Reply-To: <20210311131748.GG3566@ninjato>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: c6d936cb-c36b-4765-8849-08d8e54f10a8
-x-ms-traffictypediagnostic: TY2PR01MB4297:
-x-microsoft-antispam-prvs: <TY2PR01MB429709413FFC956ED83999FDD86F9@TY2PR01MB4297.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:2512;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: d56IT8WVEYhhzQxse/zCgkGH0VUQog5ggcNKaGyClSeJTHGo8cM7Qq0er/TOAYR6VE8ZO8qfmKz5GLqn97KUGppmi34sQNY+uEtHUv/dkg8W3NXmBB1GZmLVavKHNLSsdGpAZr4rYJLiBnoQO3MqSq9xOepY2+/v8WZr8h7cQtpNgRLe5L7WhzCrB3neNKwFqMhcgFwIzk8o7RUeV5m6fij0MO8/COtp3f/CK0KFovou0NuXHZX8J/rSrsKWLZ351bFJO1RVXEfEfEZqUI5kAA3OZTlrIYkX8WRrJXwFeRPM5iYNh9fNkMJCw8yD8g0wd6qX2BsWaz6YItDy4G2WCpsCSIlsZtufQHU2BlMMwFWLisrqzRzifF1gl519WMb/zxWK5Imd+06QU8RPlRJ7il9N4e75U+VgE52+ihJSKMv5sZuiMfk0rPh4NPuAj6MOyPKPbUVmEKJ/pk7/eGoLEv6nmjqdMEUa5whq85SjoWqwwRgmuL/QAVAzOp6o6NyBE4yszsWezNhJQuHKCyS+kQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(376002)(39860400002)(396003)(136003)(346002)(2906002)(71200400001)(86362001)(5660300002)(4326008)(54906003)(6506007)(66476007)(55236004)(66446008)(66556008)(76116006)(8936002)(478600001)(64756008)(66946007)(316002)(8676002)(7696005)(83380400001)(186003)(55016002)(9686003)(52536014)(33656002)(26005);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?wCgPvLVv3J4XK6ceOhFRDKRE8cDutRLR81iMAUaj9Q3vw6ja/smdxiP8bZwN?=
- =?us-ascii?Q?933J/XUt7WU4NMpF6fceDBdvdndAGcyH9uB19ii4ajDO5O8yxxqonRrTfnme?=
- =?us-ascii?Q?OXnG4kXGEMjUqQn2hIi2/+NaJ/BmdNRvjrA5idwuyPK9U5bHVtJOmCp8AiBD?=
- =?us-ascii?Q?OUF9YeXPr5C9O7bGNGx+uKD6OcXtemNxoFMKT/JLgN4jREZ0AC1v/xsnUo2F?=
- =?us-ascii?Q?Di1ZptebW3gfSRMmq475imUJA6+IaL47zSsqSR/J1QngZOhc3BmMpoYg/FSQ?=
- =?us-ascii?Q?XCNsCjxKslqNOVpMOO9cUMfrR5vDUgtjCeHizDHCEIk0lEfliZz8U05hZMD3?=
- =?us-ascii?Q?AeGa6LeVDFtnOQj+R9R6CVE5Qp0DXk0QfA3WIguc1IaHwrvvWPqWqWxP8dvr?=
- =?us-ascii?Q?q0nToH+CZbIv5mb1a5ssk+ZbdL4Ez0O8hYOLhPds3cetbWkBQgTLIYYVDMRj?=
- =?us-ascii?Q?1U8VdaL3MooH+D5ReC8ox82/p7mscI9fglPoQ51pbwqOzLa66ElDWWTM4XGo?=
- =?us-ascii?Q?58o3U5AoyAHm0IzA+UTblBjYP0DcQ7JT34FDF7BKMmFAxgwT3PQcq4Wg2ctf?=
- =?us-ascii?Q?IQRvbOY1HYPqpex8T6YI5Fb6t87PXB/jTRd315SmxvV/hpZHkhiucz3IbMsw?=
- =?us-ascii?Q?cneDvVpihP2Mvk4e7rZ3QNae0xf+zCr0bIJD4rbESHc8ABfHoNMRsaTGwHHf?=
- =?us-ascii?Q?MEour7TFhFLn6jkx7bGFjPEh6SWTMm5UOBbtIwnO8zwOJgTSpdjAYMwBYLGL?=
- =?us-ascii?Q?4KKt3u1lgA5XBukrGRAzTj5zknyWNVQUFCxDC+CxpevFCh45K90BcWs5p70t?=
- =?us-ascii?Q?E0lHh4t4O9BQSjrc4o9yk+ofZdTPcydhP2xm+baLjX2SYyjfG5EAVWax9ISg?=
- =?us-ascii?Q?I4VxRuago+k1pkLWuuQOsNC4p/Pad1peCQ/IU+1ZWrN2O0RL572yvIku6eNH?=
- =?us-ascii?Q?jwY08Mwp/vy+mskdMNdwdG0UdoUVqQf1z4BaEZF0h6QJ5O3ICqrzkBd3XT4y?=
- =?us-ascii?Q?BmHv6QYMz87IPZrYHiAdhAqxSiCZYp8YtC4ggW2fTs2BOZ8QhF0HX3URonHi?=
- =?us-ascii?Q?9qnVtFoiEW0r36HFWvs0tItW7lnIEQ0msG69ARWLrxsgmQhqxs60HChbUTVZ?=
- =?us-ascii?Q?UfjW0r6udlM3TcHvmKWkHoZY69B4ciB6B0bWlVuHDlJJg6Vrw2VQuIXIpL+E?=
- =?us-ascii?Q?65ATnjyCc1clIQvC/QGOMYJqYxCXpNyNBp6E3d2krhgesVZEcjR+Pcn2fNws?=
- =?us-ascii?Q?tjI/J2YvYVQUHRw2Sgx93OOY6GctJJYIrEgP7f0D3Pihfs0QCk1FARnziMMQ?=
- =?us-ascii?Q?kYrE815ndqFoAoJ4HIGO6ccK?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=bYlq3QuwCXBZy32rCYPOxMij/FKdzPl+ga1AXT6AMUw=;
+        b=BCLpHAq5ldRKBvqrEtoKcuGqLL2GKiwjrR1A+mvEO/ekxNx/FUaU8ijHmzdhmUaUMc
+         U6hIJc3dYCzUaB7CqpdXES3WakTBHjPlFyCsZC/Jv/mwT3Hxq9TtHqeAyUzrI4QSFbQU
+         HjbLN8JsTbtdtzJeVi5Bz/rz3rJOnxf5kpYUY6ZeMym6WqGpCNByUim+7tnccsRbQy6h
+         vnHRT7VSnQ6gBIycjjt60ZGmIhx0GOZH66e4mOIhXgLmcVeLbo+t48mH0NrxnpjWmSst
+         RlIVmFO1W5t0vHV6wIXXyogQkwEIeTM0BKMWgOlSOKLOQOk1XIXppgSOdqqqcufq5vpb
+         Iqsg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=bYlq3QuwCXBZy32rCYPOxMij/FKdzPl+ga1AXT6AMUw=;
+        b=r5J5kmiYnc9uoSE02kjpBhAp3gmt5XjakK627RaVxOmkkhMk1RCudbWv17iVNbhB/E
+         Q6IhEK1wKsO0dS4/3KJXPBHISWbEl+aY5oYdjtfnueb18u6U+XJrghrAt67rwYV+vKld
+         Lclmp2goQvQbViQEYSb5OojdUBVvuaXGMAIgyp8t97ahS7/esZWfE73Iv95Lcx1+DgeR
+         GEv04hfnPBz3RT6T5uLY4yVyEPKL29aa8pE/qiVkm1AvX/8f/BRrSZ7Pxt/oTPWTHKmV
+         TDas9vYPgJTwCCqJcdAW3pPCr7fI6BHO9mcDnPNXdtNjpy3gdcWvui6RQ9PPy1E7kMRO
+         vgkQ==
+X-Gm-Message-State: AOAM531z/DMwdtTrCSYdNxqbiBWzt8jLVNW2yQM8PsBdPN/PFUQJGSdQ
+        pIkTkhWsiVkpA1Yie7g0sVHI3w==
+X-Google-Smtp-Source: ABdhPJy9bWztyuiT+IyYCfmcTc6apygViQxe58Ssuj9DGSSxkLBEXiYFUHnmL6jsm9M/TOMs5ZHdww==
+X-Received: by 2002:adf:f60b:: with SMTP id t11mr8471788wrp.269.1615550884731;
+        Fri, 12 Mar 2021 04:08:04 -0800 (PST)
+Received: from apalos.home (ppp-94-64-113-158.home.otenet.gr. [94.64.113.158])
+        by smtp.gmail.com with ESMTPSA id g5sm7501708wrq.30.2021.03.12.04.08.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 Mar 2021 04:08:04 -0800 (PST)
+Date:   Fri, 12 Mar 2021 14:08:00 +0200
+From:   Ilias Apalodimas <ilias.apalodimas@linaro.org>
+To:     Sumit Garg <sumit.garg@linaro.org>
+Cc:     Hector Martin <marcan@marcan.st>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
+        David Howells <dhowells@redhat.com>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        Alex =?iso-8859-1?Q?Benn=E9e?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB)
+ subsystem
+Message-ID: <YEtZoAJATXZoK3a+@apalos.home>
+References: <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+ <6c542548-cc16-af68-c755-df52bd13b209@marcan.st>
+ <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+ <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st>
+ <CAFA6WYMSJxK2CjmoLJ6mdNNEfOQOMVXZPbbFRfah7KLeZNfguw@mail.gmail.com>
+ <CACRpkdZb5UMyq5qSJE==3ZnH-7fh92q_t4AnE8mPm0oFEJxqpQ@mail.gmail.com>
+ <e5d3f4b5-748e-0700-b897-393187b2bb1a@marcan.st>
+ <CACRpkdYxMGN3N-jFt1Uw4AkBR-x=dRj6HEvDp6g+2ku7+qCLwg@mail.gmail.com>
+ <02d035ca-697d-1634-a434-a43b9c01f4a9@marcan.st>
+ <CAFA6WYNzEofaQpEQFRG+XaWQqkEWugOW-1qEf=9J2-tje59QsA@mail.gmail.com>
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: c6d936cb-c36b-4765-8849-08d8e54f10a8
-X-MS-Exchange-CrossTenant-originalarrivaltime: 12 Mar 2021 12:05:01.6503
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Si79H2hzhnxL/7ZGsdB/QeI/xG9NRZxDeaFUQoDX1VNWPbLCsRLeKgtElLJovJmUKsLBK1zh7+10SvwIxM/nlvcZ8t3hQj3hpUZT6e6rMEtMmtC5OJLln4V1DtHWqurF
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB4297
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAFA6WYNzEofaQpEQFRG+XaWQqkEWugOW-1qEf=9J2-tje59QsA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+On Fri, Mar 12, 2021 at 05:29:20PM +0530, Sumit Garg wrote:
+> On Fri, 12 Mar 2021 at 01:59, Hector Martin <marcan@marcan.st> wrote:
+> >
+> > On 11/03/2021 23.31, Linus Walleij wrote:
+> > > I understand your argument, is your position such that the nature
+> > > of the hardware is such that community should leave this hardware
+> > > alone and not try to make use of RPMB  for say ordinary (self-installed)
+> > > Linux distributions?
+> >
+> > It's not really that the community should leave this hardware alone, so
+> > much that I think there is a very small subset of users who will be able
+> > to benefit from it, and that subset will be happy with a usable
+> > kernel/userspace interface and some userspace tooling for this purpose,
+> > including provisioning and such.
+> >
+> > Consider the prerequisites for using RPMB usefully here:
+> >
+> > * You need (user-controlled) secureboot
+> 
+> Agree with this prerequisite since secure boot is essential to build
+> initial trust in any system whether that system employs TEE, TPM,
+> secure elements etc.
+> 
+> > * You need secret key storage - so either some kind of CPU-fused key, or
+> > one protected by a TPM paired with the secureboot (key sealed to PCR
+> > values and such)
+> > * But if you have a TPM, that can handle secure counters for you already
+> > AIUI, so you don't need RPMB
+> 
+> Does TPM provide replay protected memory to store information such as:
+> - PIN retry timestamps?
+> - Hash of encrypted nvme? IMO, having replay protection for user data
+> on encrypted nvme is a valid use-case.
+> 
+> > * So this means you must be running a non-TPM secureboot system
+> >
+> 
+> AFAIK, there exist such systems which provide you with a hardware
+> crypto accelerator (like CAAM on i.Mx SoCs) that can protect your keys
+> (in this case RPMB key) and hence can leverage RPMB for replay
+> protection.
+> 
+> > And so we're back to embedded platforms like Android phones and other
+> > SoC stuff... user-controlled secureboot is already somewhat rare here,
+> > and even rarer are the cases where the user controls the whole chain
+> > including the TEE if any (otherwise it'll be using RPMB already); this
+> > pretty much excludes all production Android phones except for a few
+> > designed as completely open systems; we're left with those and a subset
+> > of dev boards (e.g. the Jetson TX1 I did fuse experiments on). In the
+> > end, those systems will probably end up with fairly bespoke set-ups for
+> > any given device or SoC family, for using RPMB.
+> >
+> > But then again, if you have a full secureboot system where you control
+> > the TEE level, wouldn't you want to put the RPMB shenanigans there and
+> > get some semblance of secure TPM/keystore/attempt throttling
+> > functionality that is robust against Linux exploits and has a smaller
+> > attack surface? Systems without EL3 are rare (Apple M1 :-)) so it makes
+> > more sense to do this on those that do have it. If you're paranoid
+> > enough to be getting into building your own secure system with
+> > anti-rollback for retry counters, you should be heading in that directly
+> > anyway.
+> >
+> > And now Linux's RPMB code is useless because you're running the stack in
+> > the secure monitor instead :-)
+> >
+> 
+> As Linus mentioned in other reply, there are limitations in order to
+> put eMMC/RPMB drivers in TEE / secure monitor such as:
+> - One of the design principle for a TEE is to keep its footprint as
+> minimal as possible like in OP-TEE we generally try to rely on Linux
+> for filesystem services, RPMB access etc. And currently we rely on a
+> user-space daemon (tee-supplicant) for RPMB access which IMO isn't as
+> secure as compared to direct RPMB access via kernel.
+> - Most embedded systems possess a single storage device (like eMMC)
+> for which the kernel needs to play an arbiter role.
 
-> From: Wolfram Sang, Sent: Thursday, March 11, 2021 10:18 PM
-> >  	tmio_mmc_reset(host);
-> > +	host->set_clock(host, host->clk_cache);
->=20
-> What about putting it into the reset function itself, so it will be
-> always enabled (like for the scc_ctl case)?
->=20
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
-sas_sdhi_core.c
-> index 473f155f6d3d..672953e3362d 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -572,6 +572,7 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *=
-host)
->  		read_poll_timeout(reset_control_status, ret, ret =3D=3D 0, 1, 100,
->  				  false, priv->rstc);
->  		priv->needs_adjust_hs400 =3D false;
-> +		renesas_sdhi_set_clock(host, host->clk_cache);
->  	} else if (priv->scc_ctl) {
->  		renesas_sdhi_disable_scc(host->mmc);
->  		renesas_sdhi_reset_hs400_mode(host, priv);
->=20
-> If you agree, I will fold this into v2 of this series.
+Yep exactly. This is a no-go for small embedded platforms with a single eMMC.
+The device *must* be in the non-secure world, so the bootloader can load the
+kernel/rootfs from the eMMC.  If you restrain that in secure world access
+only, that complicates things a lot ...
 
-Adding the function itself seems OK. However, I checked the code, and then
-adding hard reset into renesas_sdhi_reset() seems to break the following:
------
-commit 5b0739d76227fd5a3f02f014385bfa9c86e0404b
-Author: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Date:   Thu Aug 20 15:25:37 2020 +0200
+> 
+> It looks like other TEE implementations such as Trusty on Android [1]
+> and QSEE [2] have a similar interface for RPMB access.
+> 
+> So it's definitely useful for various TEE implementations to have
+> direct RPMB access via kernel. And while we are at it, I think it
+> should be useful (given replay protection benefits) to provide an
+> additional kernel interface to RPMB leveraging Trusted and Encrypted
+> Keys subsystem.
 
-    mmc: tmio: don't reset whole IP core when tuning fails
+As for the EFI that was mentioned earlier, newer Arm devices and the
+standardization behind those, is actually trying to use UEFI on most
+of the platforms.  FWIW we already have code that manages the EFI variables in
+the RPMB (which is kind of irrelevant to the current discussion, just giving
+people a heads up).
 
-    SDHI needs to reset the SCC only, not the whole IP core. So, if tuning
-    fails, don't handle specifics in the generic TMIO core, but in the
-    specific drivers. For SDHI, we need to move around the reset routine a
-    bit. It is not modified.
-------
-
-So, perhaps, we have to fix renesas_sdhi_execute_tuning() somehow before
-adding hard reset. But, what do you think?
-
-Best regards,
-Yoshihiro Shimoda
-
+Regards
+/Ilias
+> 
+> [1] https://android.googlesource.com/trusty/app/storage/
+> [2] https://www.qualcomm.com/media/documents/files/guard-your-data-with-the-qualcomm-snapdragon-mobile-platform.pdf
+> 
+> -Sumit
+> 
+> > --
+> > Hector Martin (marcan@marcan.st)
+> > Public Key: https://mrcn.st/pub
