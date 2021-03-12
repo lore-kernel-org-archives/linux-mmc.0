@@ -2,193 +2,222 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADA34C433E9
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:07:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E728C433DB
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:23:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8444A64FD5
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:07:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 76F2A64FF3
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Mar 2021 09:23:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232499AbhCLJGh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 Mar 2021 04:06:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45526 "EHLO
+        id S232778AbhCLJW7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Mar 2021 04:22:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232444AbhCLJG3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 04:06:29 -0500
-Received: from mail-vs1-xe36.google.com (mail-vs1-xe36.google.com [IPv6:2607:f8b0:4864:20::e36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C04FC061761
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:06:29 -0800 (PST)
-Received: by mail-vs1-xe36.google.com with SMTP id j12so9886402vsm.2
-        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:06:28 -0800 (PST)
+        with ESMTP id S232827AbhCLJWh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Mar 2021 04:22:37 -0500
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70AE8C061762
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:22:37 -0800 (PST)
+Received: by mail-lf1-x12a.google.com with SMTP id v9so44654839lfa.1
+        for <linux-mmc@vger.kernel.org>; Fri, 12 Mar 2021 01:22:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=oKUgWAnyYxdaXxA4WcJUs92ZAvj1xyLLHDtMDJLSkd0=;
-        b=dSIdoTd+DHa3b3s48bp7fWShXcqwUQyj8Si1t00CGfGaSzaSMROEDdIubHnYI158gD
-         i2BxrzOy8RBKKsC5aBuoA9cXJJV6ZJEOUEaDq+s5uMd/eXgp3A8TYfiw+Gm7sXUx+loY
-         mk327FO4u+eTnbNJTCvbnmJRWl+KiepfjPmv3fgh+ghY93pJUzEwBoemHPkEFxhpBj6s
-         ksk4NMJ0pCF7Fs7tsm8IcUVWoyI+EamxsmT5Yd1HFCqk7qvfsFg2135ZU+h1Lv6AHb2q
-         KH8RZp6E8wEmSBAMR3XTZtRD9L6qgxNaXng1t40dsPYMr4Unp+d4l2WWlT82O62ovF5t
-         WJdw==
+        bh=oc5bTi7/1MBiAyWrb/BCqxKaS2n3HhEl1VJrsEcMc6k=;
+        b=KDFdseRP1eAOQEMh2Ks3MiJXJtEoNybe7gdJzx1f/I/PLG7U3A/Moiz1/CxbjuJp72
+         fpQqvBBkdC/hcLc3wA5TCEOTBLQ2aFBVwqDB97xSBmttxHg/ydqlbdZzR84D1tQsdnS/
+         76mH37N6q/1iS6dVN96PQqaGQEN2ckQV9xhaYowqgSr3ZxIvxDJz8j8WiV8HgEyWOqUH
+         RVq1S9eXjzn4oixocusNCm6/y08R7v8wf3TE8TRbjFbF6Ph0n578RuEXpmi1m1rvxszD
+         4WYDpUzpSr4gMYS0qyXesNgBNsnLP3EK6sYBecZmnUrFJwYRLvnAdQKzJfJDs2R7APZw
+         aFdQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=oKUgWAnyYxdaXxA4WcJUs92ZAvj1xyLLHDtMDJLSkd0=;
-        b=uTF7tGYO4kykqshjoeoCk6thfp+l03yFBdIdEXJwVyetf1FM0oL9YHRAOkd8+KQ6RZ
-         07kRk3a0CWApJs64Zlnd8i2H6n/2eFPWBkeXr4JeabETYwJwS6MTM3015Cbp28SKR5+d
-         yJRtlmqyLrrqaGbG/A0J0wlpOgS8wqnEUKdzKuHbw4Q2axyh9dPQjv+s8uMO5TRFk5mv
-         +usgHsPI4URKJu5HCH1XZpBT7UMRqOodQWDdp38/0+HICbiDAZPVujF4yd6sytLjlE5e
-         HggdnFLWkfpeG2fHzbCDlKp5/u003fmiVq4aU1q4GruERQwXtW1cIf+9dv39sWaS8EGr
-         cSqg==
-X-Gm-Message-State: AOAM5328AoGdAxT7mBGYLDPUIZF6aY8jAZZYesHkQshxeXdiXvS0moKp
-        l/TcpaOo/I+Vot5sNmKr2xp0x08bhZcSI0Zb7SWcDQ==
-X-Google-Smtp-Source: ABdhPJywyg+TZqWkv+eOIIeDvlTZhsk1W2Rf0tP+aSqF6848Pp5TOH0dcsimKnhzzavXvrnzQsoNF1mgevMYfZ9lPxA=
-X-Received: by 2002:a67:6942:: with SMTP id e63mr8074907vsc.48.1615539988056;
- Fri, 12 Mar 2021 01:06:28 -0800 (PST)
+        bh=oc5bTi7/1MBiAyWrb/BCqxKaS2n3HhEl1VJrsEcMc6k=;
+        b=UcyfTrAOkOuO/EdzZypGvwu/iDQO4uEV3DUAfOE11V4oPGBp9ixy/IJstuDVUoSBrV
+         CJ7MCXbHv+C3NlXlG6zZe3J7t2LfFZuThLq58J3h7cNpAnjLsDooyqTEfhOo/AhO8y07
+         /MF55KNiOr0kdg7V+Ds+EsAr87WDZAcm/CpbF8GpS4kMAGkfXCj4WoFJCIhC5cikgijW
+         BGvCh0SO4PNU+2VgUiQTgXz/sPXvrjwsJhW+7LUTjfyW2BwINTMgTGFgPIf+1FcsTfjJ
+         DaGBIhkbhXJVOWtsQ9px6xbRKGh//o8pCFKV9KHODgFooqqcAXFsG6OKkX0Wlzm/Fb15
+         MCHw==
+X-Gm-Message-State: AOAM530o1i2WkfzCiKZ+7FOKQV/DApy6vS5pwoNgpLUQDQxFLMu+aI2Y
+        vwCl7w0UnnZ5CONOa01PZ7VBFr2hxfBE4S/wl+wIQQ==
+X-Google-Smtp-Source: ABdhPJwi966hWS07LJwz9bEWS3611t5gBvrGW9dceY/bml/CRf47iE8bUw+ljH42WS1Quj2YyGgFvZuR2EaxJaPOnZE=
+X-Received: by 2002:a05:6512:243:: with SMTP id b3mr4968951lfo.529.1615540955761;
+ Fri, 12 Mar 2021 01:22:35 -0800 (PST)
 MIME-Version: 1.0
-References: <20210309015750.6283-1-peng.zhou@mediatek.com> <CACRpkdYTkW7b9SFEY6Ubq4NicgR_5ewQMjE2zHvGbgxYadhHQQ@mail.gmail.com>
- <YEpqkAq6wOZ+TpR9@gmail.com>
-In-Reply-To: <YEpqkAq6wOZ+TpR9@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 12 Mar 2021 10:05:51 +0100
-Message-ID: <CAPDyKFoWg7HYHAbxYJRbOad5kqm+rzVLVQ0O3g76ROO5Z+MF3Q@mail.gmail.com>
-Subject: Re: [PATCH v2 2/4] mmc: Mediatek: enable crypto hardware engine
-To:     Eric Biggers <ebiggers@kernel.org>,
-        Peng Zhou <peng.zhou@mediatek.com>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Satya Tangirala <satyat@google.com>,
-        Wulin Li <wulin.li@mediatek.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Sudeep Holla <sudeep.holla@arm.com>
+References: <20210303135500.24673-1-alex.bennee@linaro.org>
+ <20210303135500.24673-2-alex.bennee@linaro.org> <CAK8P3a0W5X8Mvq0tDrz7d67SfQA=PqthpnGDhn8w1Xhwa030-A@mail.gmail.com>
+ <20210305075131.GA15940@goby> <CAK8P3a0qtByN4Fnutr1yetdVZkPJn87yK+w+_DAUXOMif-13aA@mail.gmail.com>
+ <CACRpkdb4RkQvDBgTMW_+7yYBsHNRyJZiT5bn04uQJgk7tKGDOA@mail.gmail.com>
+ <6c542548-cc16-af68-c755-df52bd13b209@marcan.st> <CAFA6WYOYmTgguVDwpyjnt3gLssqW48qzAkRD_nyPYg0nNhxT2A@mail.gmail.com>
+ <beca6bc8-8970-bd01-8de0-6ded1fb69be2@marcan.st> <CACRpkdbQks5pRFNHkNLVvLHCBhh0XCv7pHYq25EVAbU60PcwsA@mail.gmail.com>
+ <0a26713a-8988-1713-4358-bc62364b9e25@marcan.st> <CACRpkda9f-BNmu-CaNsghnDoOcSXvvvji=tag2Xos+tg_nNZ0w@mail.gmail.com>
+ <32bdceb1-e70d-7481-96e3-a064a7108eb9@marcan.st> <CACRpkdZ_-rqGBUOxUcBPeqVkLzX=Q9pjO9M+zY20-S9tNXAE0Q@mail.gmail.com>
+ <d7f8a732-7a44-f609-52dc-3ba824a3d192@marcan.st>
+In-Reply-To: <d7f8a732-7a44-f609-52dc-3ba824a3d192@marcan.st>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Fri, 12 Mar 2021 10:22:24 +0100
+Message-ID: <CACRpkdZmXMgAWkPDoi=_tDHuC4W2_PMa892XLLHJz27ChDLD2Q@mail.gmail.com>
+Subject: Re: [RFC PATCH 1/5] rpmb: add Replay Protected Memory Block (RPMB) subsystem
+To:     Hector Martin <marcan@marcan.st>
+Cc:     David Howells <dhowells@redhat.com>,
+        "open list:ASYMMETRIC KEYS" <keyrings@vger.kernel.org>,
+        Jarkko Sakkinen <jarkko@kernel.org>,
+        Sumit Garg <sumit.garg@linaro.org>,
+        Arnd Bergmann <arnd@linaro.org>,
+        Joakim Bech <joakim.bech@linaro.org>,
+        =?UTF-8?B?QWxleCBCZW5uw6ll?= <alex.bennee@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Maxim Uvarov <maxim.uvarov@linaro.org>,
+        Ilias Apalodimas <ilias.apalodimas@linaro.org>,
+        Ruchika Gupta <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>, yang.huang@intel.com,
+        bing.zhu@intel.com, Matti.Moell@opensynergy.com,
+        hmo@opensynergy.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd.bergmann@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Arnd, Sudeep
+Hi Hector,
 
-On Thu, 11 Mar 2021 at 20:08, Eric Biggers <ebiggers@kernel.org> wrote:
+thanks for the long and detailed answer! I learn new things
+all the time. (Maybe one day I add something too, who knows.)
+
+I hope I'm not taking too much of your time, we're having fun :)
+
+On Thu, Mar 11, 2021 at 9:02 PM Hector Martin <marcan@marcan.st> wrote:
+> On 11/03/2021 23.06, Linus Walleij wrote:
+> > Yes. And this is what mobile phone vendors typically did.
+> >
+> > But the nature of different electrical attacks made them worried
+> > about different schemes involving cutting power and disturbing
+> > signals with different probes, so they wanted this counter
+> > implemented in hardware and that is why RPMB exists at all
+> > (IIUC).
 >
-> On Thu, Mar 11, 2021 at 02:48:23PM +0100, Linus Walleij wrote:
-> > Hi Peng,
-> >
-> > thanks for your patch!
-> >
-> > On Tue, Mar 9, 2021 at 3:06 AM Peng Zhou <peng.zhou@mediatek.com> wrote:
-> >
-> > > Use SMC call enable hardware crypto engine
-> > > due to it only be changed in ATF(EL3).
-> > >
-> > > Signed-off-by: Peng Zhou <peng.zhou@mediatek.com>
-> >
-> > Unfortunately this commit message is way to short to
-> > understand what is going on, and has a lot of assumed
-> > previous knowledge.
-> >
-> > Can you expand the commit message so that anyone
-> > who just know MMC and some SoC basics can understand
-> > what an SMC call and and what ATF(EL3) means?
-> >
-> > I assume this some kind of inline encryption?
-> >
-> > I think maybe linux-block mailing list need to be involved
-> > because there is certain a Linux standard way of setting
-> > up inline encryption for the block layer.
-> >
-> > For example: how is the key to be used derived?
-> > How is the device unlocked in the first place?
-> >
-> > If I insert a LUKS encrypted harddrive in a Linux machine
-> > the whole system is pretty much aware of how this should
-> > be handled and everything "just works", I enter a pass
-> > phrase and off it goes. I can use symmetric keys as well.
-> > How is this stuff done for this hardware?
-> >
-> > > +       /*
-> > > +        * 1: MSDC_AES_CTL_INIT
-> > > +        * 4: cap_id, no-meaning now
-> > > +        * 1: cfg_id, we choose the second cfg group
-> > > +        */
-> > > +       if (mmc->caps2 & MMC_CAP2_CRYPTO)
-> > > +               arm_smccc_smc(MTK_SIP_MMC_CONTROL,
-> > > +                             1, 4, 1, 0, 0, 0, 0, &smccc_res);
-> >
-> > The same as above: these comments assume that everyone
-> > already knows what is going on.
-> >
-> > AES encryption requires a key and I don't see the driver
-> > setting up any key. How is the code in this file:
-> > drivers/mmc/core/crypto.c
-> > interacting with your driver?
-> > drivers/mmc/host/cqhci-crypto.c
-> > is used by SDHCI and is quite readable and I see what is going on.
-> > For example it contains functions like:
-> > cqhci_crypto_program_key()
-> > cqhci_crypto_keyslot_program()
-> > cqhci_crypto_clear_keyslot()
-> > cqhci_crypto_keyslot_evict()
-> > cqhci_find_blk_crypto_mode()
-> >
-> > MMC_CAP2_CRYPTO is used as a sign that the driver
-> > can do inline encryption, then devm_blk_ksm_init() is called
-> > to initialize a block encryption abstraction with the block layer.
-> > Ops are registered using
-> > struct blk_ksm_ll_ops cqhci_ksm_ops.
-> >
-> > This is very straight forward.
-> >
-> > But where does all the above happen for this driver?
-> >
+> No, prior to RPMB there was no such secure counter at all. The problem
+> is that non-volatile erasable storage (i.e. EEPROM/Flash) is
+> incompatible with modern SoC manufacturing processes, so there is no way
+> to embed a secure counter into the main SoC. And once your counter needs
+> to be external, there needs to be a secure communications protocol to
+> access it. This is what RPMB implements.
 >
-> It happens in the same place, cqhci-crypto.c.  Mediatek's eMMC inline encryption
-> hardware follows the eMMC standard fairly closely, so Peng's patch series just
-> sets MMC_CAP2_CRYPTO to make it use the standard cqhci crypto code, and does a
-> couple extra things to actually enable the hardware's crypto support on Mediatek
-> platforms since it isn't enabled by default.  (*Why* it requires an SMC call to
-> enable instead of just working as expected, I don't know though.)
+> For preventing software downgrades, especially of bootloader code, this
+> can be implemented with one-time fuses embedded in the SoC, but there is
+> a limited supply of those. So this doesn't work for things like PIN
+> attempt counters. For that you need a secure external counter.
 
-As I have probably indicated earlier, I am starting to become more and
-more annoyed with these arm_smccc_smc() calls in generic drivers.
+Actually what we did (I was there, kind of) was to go to the flash vendors
+(IIRC first Intel) and require what is today called "fuses" in the flash
+memory.
 
-As a matter of fact, I think the situation is about to explode. Just
-do a "git grep arm_smccc_smc" and you will find that it's not only SoC
-specific drivers that call them. In general we want to keep drivers
-portable and this is clearly moving in the wrong direction. Or maybe
-it's just me being grumpy and having a bad day. :-)
+Originally this was for things like unique serial numbers set in
+production. But they could easily add some more of it for other
+use cases.
 
-In the Qcom mmc case (drivers/mmc/host/sdhci-msm.c) for eMMC inline
-encryption, the arm_smccc_smc() call is slightly better handled as
-it's abstracted behind a Qcom specific firmware API. So, sdhci-msm.c
-calls qcom_scm_ice_set_key() (implemented in
-drivers/firmware/qcom_scm.c) to program a key. I guess we don't have
-an abstraction layer that would fit for this case, right?
+This became what is known as OTP (one time programmable flash).
+The OTP was all set to 1:s when the flash was new, then what we
+did for anti-rollback was to designate some bits for software versions.
 
-My point is, when there is no proper abstraction layer to use for the
-relevant arm_smccc_smc() call, the Qcom way is fine to me.
+To make sure the OTP readout wasn't tampered with, some additional
+hashes of the OTP was stored in the flash and MAC signed. This was
+recalculated when we changed a bit from 1->0 in the OTP to indicate
+a new firmware version.
 
-In this Mediatek case, it looks slightly different. To me it looks
-more like a resource that needs to be turned on/off to enable/disable
-the "inline encryption engine". Could it be modeled as phy,
-power-rail, clock, pinctrl or perhaps behind a PM domain (where SoC
-specific calls makes perfect sense).
+Clever, isn't it? :)
 
-Peng can you please elaborate on what goes on behind the
-arm_smccc_smc() call, as that would help us to understand what
-abstraction layer to pick?
+I think the scheme in RPMB was based in part on the needs
+solved by that crude mechanism.
 
-[...]
+(Linux MTD did actually even gain some support for OTP recently,
+it is used only from userspace AFIAK.)
 
-Kind regards
-Uffe
+> RPMB isn't pointless; what I am saying is that
+> if you strip away everything but the counter functionality, you can
+> still build equivalent security guarantees. You still need the counter.
+> There is no way to get that counter without RPMB or something like it
+> (another option is e.g. to use a smartcard IC as a secure element; AIUI
+> modern Apple devices do this). Software alone doesn't work. This is why
+> I wrote that article about how the FBI cracks iPhones; that works
+> because they weren't using a secure rollback-protected storage/counter
+> chip of any kind.
+
+Yeah. Hm, actually if they had flash memory they should have
+used the OTP... But I suppose they were all on eMMC.
+
+> it helps if you forget about the read/write commands and treat
+> it as a simple counter.
+
+Yep you're right.
+
+> Once you do that, you'll realize that e.g. putting keys in RPMB doesn't
+> really make sense as a kernel primitive. The usefulness of RPMB is
+> purely in the integration of that counter (which is equivalent to
+> rollback-protected storage) with a policy system. Everything else is
+> icing on the cake; it doesn't create new use cases.
+
+OK I understand. So what you're saying is we can't develop
+anything without also developing a full policy system.
+
+> Consider this:
+(...)
+> You have now built a secure, rollback-protected Git repository, with
+> similar security properties to RPMB storage, without using RPMB storage;
+> just a counter.
+
+This example of using the RPMB to protect rollback of a git
+was really nice! I think I understood as much before but
+maybe I don't explain that well enough :/
+
+> Thus, we can conclude that the storage features of RPMB do not provide
+> additional security properties that cannot be derived from a simple counter.
+
+I agree.
+
+> * Disclaimer: please don't actually deploy this; I'm trying to make a
+> point here, it's 5AM and I'm not claiming this is a perfectly secure
+> design and I haven't missed anything. Please don't design
+> rollback-protected Git repositories without expert review. I am assuming
+> filesystem mutations only happen between operations and handwaving away
+> active attacks, which I doubt Git is designed to be robust against. A
+> scheme like this can be implemented securely with care, but not naively.
+
+It's an example all kernel developers can relate to, so the
+educational value is high!
+
+> Well, that's what I'm saying, you do need secureboot for this to make
+> sense :-)
+>
+> RPMB isn't useless and some systems should implement it; but there's no
+> real way for the kernel to transparently use it to improve security in
+> general (for anyone) without the user being aware. Since any security
+> benefit from RPMB must come from integration with user policy, it
+> doesn't make sense to "well, just do something else with RPMB because
+> it's better than nothing"; just doing "something" doesn't make systems
+> more secure. There needs to be a specific, practical use case that we'd
+> be trying to solve with RPMB here.
+
+As of now there are no other real world examples than TEE
+for this user policy. TPM and secure enclave exist, but they both
+have their own counters and does not need this.
+
+Can one realistically imagine another secure environment
+needing a RPMB counter? If not, then TEE (tee-supplicant is
+the name of the software daemon in userspace for OP-TEE,
+then some vendors have their own version of TEE)
+will ever be the only user, and then we only need to design
+for that.
+
+Yours,
+Linus Walleij
