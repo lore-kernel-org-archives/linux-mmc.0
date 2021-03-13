@@ -2,352 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6739C433E6
-	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 08:18:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0ABBC433DB
+	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 17:38:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 81BBE64F2A
-	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 08:18:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ADB1164ED9
+	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 17:38:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232179AbhCMIR6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 13 Mar 2021 03:17:58 -0500
-Received: from m42-2.mailgun.net ([69.72.42.2]:59696 "EHLO m42-2.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231938AbhCMIRw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 13 Mar 2021 03:17:52 -0500
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1615623472; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=R8SK1AL94Yflrs9yNuF+m1NKXGnH4Oer/GeADnYHyao=;
- b=DO7KJda5OcLaylhpay6kMHhOxqilT5Vl5JBnmNroX1RwTsOP1w7SajW7hzLr7x+RJ+nRyAyu
- C1khyY1COfI/1mZDYw39WtkNTo5EJS5/r8F5ni4iBBhmEiMCu9N1wi4towqL98krcFYd5ZPu
- XbLzVxMk+JGED//IrRb0LhZAVac=
-X-Mailgun-Sending-Ip: 69.72.42.2
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n02.prod.us-west-2.postgun.com with SMTP id
- 604c752e21031618f6837523 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Sat, 13 Mar 2021 08:17:50
- GMT
-Sender: sbhanu=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 8D01AC433ED; Sat, 13 Mar 2021 08:17:50 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 6051CC433CA;
-        Sat, 13 Mar 2021 08:17:49 +0000 (UTC)
+        id S233951AbhCMRh6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 13 Mar 2021 12:37:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41310 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234010AbhCMRhm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Mar 2021 12:37:42 -0500
+Received: from mail-qt1-x832.google.com (mail-qt1-x832.google.com [IPv6:2607:f8b0:4864:20::832])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD7B1C061574
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Mar 2021 09:37:41 -0800 (PST)
+Received: by mail-qt1-x832.google.com with SMTP id 6so6340359qty.3
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Mar 2021 09:37:41 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
+        bh=99UXm2bK0b+j4PKx8DY4eP69XsoTe2LlKSBzFsKKLDc=;
+        b=XxZWbVtpK8/1ifkXWGCxoD1Tc+xpeoo43tnmiCD9I/ciVIrvDXqfn/YlOy8OX9Ygcw
+         q8dUhvIpb1/D/j3iCHhbt+bwU3wGc0SNSjmLZ19mGGsvpNvBaBn08JvqD868EfQ43U+q
+         8QNpZU4C62DYkJM6hXhpKMLfiqtPoSuAjpdeEpOm1fZE13qq7i0MMRoHyONAdDg3spFC
+         dsx1CYfUUIPHa1ZIo+cb99HQkX4VbhV1F90Vejmy8dNulmwUg2su81hv70IXyNM3M1b+
+         1nXes0fJ279vkv38My0/mXrKreQ1U90xgRlegE/4NXJJUK1zUpqYjhHys4XPSxANUHe5
+         2kXg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
+         :content-disposition;
+        bh=99UXm2bK0b+j4PKx8DY4eP69XsoTe2LlKSBzFsKKLDc=;
+        b=CVG2NfQtbOr9rptrcGc+cHtLCXVejgu5YxRteQTNtnlS5zHhipATVh9S2WsSEjOVaL
+         waio8q5iiAY3rOnw6zhldQSjNgdyjx4vN8orLNRhGTyivO4T3vtbfJ80mUl/LP0U01O2
+         lRBVnlyTMb4E/8pgZdLqDaNoDUEhd6RQp+rq3QpAvtsFHbBVfACePZp86gW7O88vs309
+         1OUNFMPXUmsk9R9xvm8oS2bbxlOGNgaMuh+5fo6O1hHSnmC4MucYglq4PasFhISJbFUM
+         zWC6y2SXXjBheW27XJEDpZBAsedE1ClPnX9HqLozs5yHep1w+He87h1SNTyHvk3Cbx/h
+         RyZA==
+X-Gm-Message-State: AOAM5302rprhEuJo9iYtZkIMXdS/y1hfmAtR416xhcLd4DVPprP9Glsw
+        WwoNafzp0zX2+3QD3zM1wA8AHN08uco=
+X-Google-Smtp-Source: ABdhPJwGtvzvBn4VadI24AiRq1/DWtdYTmJoanJygW6tiP4XUcRb4a5fbEb3dfklWwdld68Q84NRdQ==
+X-Received: by 2002:ac8:148e:: with SMTP id l14mr16596786qtj.164.1615657061001;
+        Sat, 13 Mar 2021 09:37:41 -0800 (PST)
+Received: from joeylaptop ([2601:5cc:0:a480:77c5:f4b4:99be:b2ea])
+        by smtp.gmail.com with ESMTPSA id o7sm6886307qki.63.2021.03.13.09.37.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 13 Mar 2021 09:37:40 -0800 (PST)
+Date:   Sat, 13 Mar 2021 12:37:40 -0500
+From:   Joey Pabalan <jpabalanb@gmail.com>
+To:     Maxim Levitsky <maximlevitsky@gmail.com>
+Cc:     linux-mmc@vger.kernel.org
+Subject: [PATCH] memstick: Remove useless else branch
+Message-ID: <20210313173740.GA580681@joeylaptop>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Sat, 13 Mar 2021 13:47:49 +0530
-From:   sbhanu@codeaurora.org
-To:     Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, sartgarg@codeaurora.org,
-        asutoshd@codeaurora.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, rampraka@codeaurora.org,
-        sayalil@codeaurora.org, rnayak@codeaurora.org,
-        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
-        cang@codeaurora.org, pragalla@codeaurora.org,
-        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org
-Subject: Re: [PATCH V1] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
- card
-In-Reply-To: <b25a0793df3bc6ae841502aca1f9fc3e@codeaurora.org>
-References: <1615317483-23780-1-git-send-email-sbhanu@codeaurora.org>
- <YEfUOljmaxpkxqZq@builder.lan>
- <b25a0793df3bc6ae841502aca1f9fc3e@codeaurora.org>
-Message-ID: <bfd67fa65b0c012e06dc5691c85c1c63@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-03-10 19:17, sbhanu@codeaurora.org wrote:
-> On 2021-03-10 01:32, Bjorn Andersson wrote:
->> On Tue 09 Mar 13:18 CST 2021, Shaik Sajida Bhanu wrote:
->> 
->>> Add nodes for eMMC and SD card on sc7280.
->>> 
->>> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
->>> 
->>> ---
->>> This change is depends on the below patch series:
->>> https://lore.kernel.org/lkml/1613114930-1661-1-git-send-email-rnayak@codeaurora.org/
->>> https://lore.kernel.org/patchwork/project/lkml/list/?series=&submitter=28035&state=&q=&archive=&delegate=
->>> ---
->>>  arch/arm64/boot/dts/qcom/sc7280-idp.dts |  26 +++++
->>>  arch/arm64/boot/dts/qcom/sc7280.dtsi    | 170 
->>> ++++++++++++++++++++++++++++++++
->>>  2 files changed, 196 insertions(+)
->>> 
->>> diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts 
->>> b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->>> index ac79420..6abb2aa 100644
->>> --- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->>> +++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->>> @@ -8,6 +8,7 @@
->>>  /dts-v1/;
->>> 
->>>  #include "sc7280.dtsi"
->>> +#include <dt-bindings/gpio/gpio.h>
->>> 
->>>  / {
->>>  	model = "Qualcomm Technologies, Inc. SC7280 IDP platform";
->>> @@ -256,3 +257,28 @@
->>>  		bias-pull-up;
->>>  	};
->>>  };
->>> +
->>> +&sdhc_1 {
->>> +	status = "okay";
->>> +
->>> +	pinctrl-names = "default", "sleep";
->>> +	pinctrl-0 = <&sdc1_on>;
->>> +	pinctrl-1 = <&sdc1_off>;
->>> +
->>> +	vmmc-supply = <&vreg_l7b_2p9>;
->>> +	vqmmc-supply = <&vreg_l19b_1p8>;
->>> +
->>> +};
->>> +
->>> +&sdhc_2 {
->>> +	status = "okay";
->>> +
->>> +	pinctrl-names = "default","sleep";
->>> +	pinctrl-0 = <&sdc2_on>;
->>> +	pinctrl-1 = <&sdc2_off>;
->>> +
->>> +	vmmc-supply = <&vreg_l9c_2p9>;
->>> +	vqmmc-supply = <&vreg_l6c_2p9>;
->>> +
->>> +	cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
->> 
->> Please add these nodes above the comment that says "PINCTRL -
->> additions..." and please include the pinctrl state for gpio 91.
->> 
-> sure
-Hi
+Remove else branch on line 334 of memstick.c, after the return of the
+previous branch. Found by checkpatch.
 
->> "and please include the pinctrl state for gpio 91"
-sorry didn't get this
+Signed-off-by: Joey Pabalan <jpabalanb@gmail.com>
+---
+ drivers/memstick/core/memstick.c | 21 ++++++++++-----------
+ 1 file changed, 10 insertions(+), 11 deletions(-)
 
->>> +};
->>> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi 
->>> b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->>> index 3b86052..91fb18a 100644
->>> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
->>> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->>> @@ -18,6 +18,11 @@
->>> 
->>>  	chosen { };
->>> 
->>> +	aliases {
->>> +		mmc1 = &sdhc_1;
->>> +		mmc2 = &sdhc_2;
->>> +	};
->>> +
->>>  	clocks {
->>>  		xo_board: xo-board {
->>>  			compatible = "fixed-clock";
->>> @@ -315,6 +320,69 @@
->>>  			#power-domain-cells = <1>;
->>>  		};
->>> 
->>> +		sdhc_1: sdhci@7c4000 {
->>> +			compatible = "qcom,sdhci-msm-v5";
->>> +			reg = <0 0x7c4000 0 0x1000>,
->>> +					<0 0x7c5000 0 0x1000>;
->>> +			reg-names = "hc", "cqhci";
->>> +
->>> +			iommus = <&apps_smmu 0xC0 0x0>;
->>> +			interrupts = <GIC_SPI 652 IRQ_TYPE_LEVEL_HIGH>,
->>> +					<GIC_SPI 656 IRQ_TYPE_LEVEL_HIGH>;
->>> +			interrupt-names = "hc_irq", "pwr_irq";
->>> +
->>> +			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
->>> +					<&gcc GCC_SDCC1_AHB_CLK>,
->>> +					<&rpmhcc RPMH_CXO_CLK>;
->>> +			clock-names = "core", "iface", "xo";
->>> +
->>> +			bus-width = <8>;
->>> +			non-removable;
->>> +			supports-cqe;
->>> +			no-sd;
->>> +			no-sdio;
->>> +
->>> +			max-frequency = <192000000>;
->>> +
->>> +			qcom,dll-config = <0x0007642c>;
->>> +			qcom,ddr-config = <0x80040868>;
->>> +
->>> +			mmc-ddr-1_8v;
->>> +			mmc-hs200-1_8v;
->>> +			mmc-hs400-1_8v;
->>> +			mmc-hs400-enhanced-strobe;
->>> +
->>> +			status = "disabled";
->>> +
->>> +		};
->>> +
->>> +		sdhc_2: sdhci@8804000 {
->>> +			compatible = "qcom,sdhci-msm-v5";
->>> +			reg = <0 0x08804000 0 0x1000>;
->>> +
->>> +			iommus = <&apps_smmu 0x100 0x0>;
->>> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
->>> +					<GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
->>> +			interrupt-names = "hc_irq", "pwr_irq";
->>> +
->>> +			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
->>> +					<&gcc GCC_SDCC2_AHB_CLK>,
->>> +					<&rpmhcc RPMH_CXO_CLK>;
->>> +			clock-names = "core", "iface", "xo";
->>> +
->>> +			bus-width = <4>;
->>> +
->>> +			no-mmc;
->>> +			no-sdio;
->>> +
->>> +			max-frequency = <202000000>;
->>> +
->>> +			qcom,dll-config = <0x0007642c>;
->>> +
->>> +			status = "disabled";
->>> +
->>> +		};
->>> +
->>>  		qupv3_id_0: geniqup@9c0000 {
->>>  			compatible = "qcom,geni-se-qup";
->>>  			reg = <0 0x009c0000 0 0x2000>;
->>> @@ -385,6 +453,108 @@
->>>  				pins = "gpio46", "gpio47";
->>>  				function = "qup13";
->>>  			};
->>> +
->>> +			sdc1_on: sdc1-on {
->>> +				pinconf-clk {
->> 
->> The "pinconf-" prefix does not provide any value here. Can you please
->> drop it?
->> 
->> Regards,
->> Bjorn
-> 
-> sure will drop
->> 
->>> +					pins = "sdc1_clk";
->>> +					bias-disable;
->>> +					drive-strength = <16>;
->>> +				};
->>> +
->>> +				pinconf-cmd {
->>> +					pins = "sdc1_cmd";
->>> +					bias-pull-up;
->>> +					drive-strength = <10>;
->>> +				};
->>> +
->>> +				pinconf-data {
->>> +					pins = "sdc1_data";
->>> +					bias-pull-up;
->>> +					drive-strength = <10>;
->>> +				};
->>> +
->>> +				pinconf-rclk {
->>> +					pins = "sdc1_rclk";
->>> +					bias-pull-down;
->>> +				};
->>> +			};
->>> +
->>> +			sdc1_off: sdc1-off {
->>> +				pinconf-clk {
->>> +					pins = "sdc1_clk";
->>> +					bias-disable;
->>> +					drive-strength = <2>;
->>> +				};
->>> +
->>> +				pinconf-cmd {
->>> +					pins = "sdc1_cmd";
->>> +					bias-pull-up;
->>> +					drive-strength = <2>;
->>> +				};
->>> +
->>> +				pinconf-data {
->>> +					pins = "sdc1_data";
->>> +					bias-pull-up;
->>> +					drive-strength = <2>;
->>> +				};
->>> +
->>> +				pinconf-rclk {
->>> +					pins = "sdc1_rclk";
->>> +					bias-pull-down;
->>> +				};
->>> +			};
->>> +
->>> +			sdc2_on: sdc2-on {
->>> +				pinconf-clk {
->>> +					pins = "sdc2_clk";
->>> +					bias-disable;
->>> +					drive-strength = <16>;
->>> +				};
->>> +
->>> +				pinconf-cmd {
->>> +					pins = "sdc2_cmd";
->>> +					bias-pull-up;
->>> +					drive-strength = <10>;
->>> +				};
->>> +
->>> +				pinconf-data {
->>> +					pins = "sdc2_data";
->>> +					bias-pull-up;
->>> +					drive-strength = <10>;
->>> +				};
->>> +
->>> +				pinconf-sd-cd {
->>> +					pins = "gpio91";
->>> +					bias-pull-up;
->>> +					drive-strength = <2>;
->>> +				};
->>> +			};
->>> +
->>> +			sdc2_off: sdc2-off {
->>> +				pinconf-clk {
->>> +					pins = "sdc2_clk";
->>> +					bias-disable;
->>> +					drive-strength = <2>;
->>> +				};
->>> +
->>> +				pinconf-cmd {
->>> +					pins = "sdc2_cmd";
->>> +					bias-pull-up;
->>> +					drive-strength = <2>;
->>> +				};
->>> +
->>> +				pinconf-data {
->>> +					pins = "sdc2_data";
->>> +					bias-pull-up;
->>> +					drive-strength = <2>;
->>> +				};
->>> +
->>> +				pinconf-sd-cd {
->>> +					pins = "gpio91";
->>> +					bias-disable;
->>> +					drive-strength = <2>;
->>> +				};
->>> +			};
->>>  		};
->>> 
->>>  		apps_smmu: iommu@15000000 {
->>> --
->>> 2.7.4
->>> 
+diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+index 12bc3f5a6cbb..bb1065990aeb 100644
+--- a/drivers/memstick/core/memstick.c
++++ b/drivers/memstick/core/memstick.c
+@@ -331,18 +331,17 @@ static int h_memstick_read_dev_id(struct memstick_dev *card,
+ 				  sizeof(struct ms_id_register));
+ 		*mrq = &card->current_mrq;
+ 		return 0;
+-	} else {
+-		if (!(*mrq)->error) {
+-			memcpy(&id_reg, (*mrq)->data, sizeof(id_reg));
+-			card->id.match_flags = MEMSTICK_MATCH_ALL;
+-			card->id.type = id_reg.type;
+-			card->id.category = id_reg.category;
+-			card->id.class = id_reg.class;
+-			dev_dbg(&card->dev, "if_mode = %02x\n", id_reg.if_mode);
+-		}
+-		complete(&card->mrq_complete);
+-		return -EAGAIN;
+ 	}
++	if (!(*mrq)->error) {
++		memcpy(&id_reg, (*mrq)->data, sizeof(id_reg));
++		card->id.match_flags = MEMSTICK_MATCH_ALL;
++		card->id.type = id_reg.type;
++		card->id.category = id_reg.category;
++		card->id.class = id_reg.class;
++		dev_dbg(&card->dev, "if_mode = %02x\n", id_reg.if_mode);
++	}
++	complete(&card->mrq_complete);
++	return -EAGAIN;
+ }
+ 
+ static int h_memstick_set_rw_addr(struct memstick_dev *card,
+-- 
+2.27.0
+
