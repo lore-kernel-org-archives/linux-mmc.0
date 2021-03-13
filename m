@@ -2,113 +2,261 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0ABBC433DB
-	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 17:38:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EFA4C433E6
+	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 21:53:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ADB1164ED9
-	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 17:38:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05EBA64ECD
+	for <linux-mmc@archiver.kernel.org>; Sat, 13 Mar 2021 21:53:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233951AbhCMRh6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 13 Mar 2021 12:37:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41310 "EHLO
+        id S234409AbhCMVxR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 13 Mar 2021 16:53:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234010AbhCMRhm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Mar 2021 12:37:42 -0500
-Received: from mail-qt1-x832.google.com (mail-qt1-x832.google.com [IPv6:2607:f8b0:4864:20::832])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD7B1C061574
-        for <linux-mmc@vger.kernel.org>; Sat, 13 Mar 2021 09:37:41 -0800 (PST)
-Received: by mail-qt1-x832.google.com with SMTP id 6so6340359qty.3
-        for <linux-mmc@vger.kernel.org>; Sat, 13 Mar 2021 09:37:41 -0800 (PST)
+        with ESMTP id S234182AbhCMVxG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Mar 2021 16:53:06 -0500
+Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EFDD5C061574
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Mar 2021 13:53:05 -0800 (PST)
+Received: by mail-lj1-x22b.google.com with SMTP id u20so11757188lja.13
+        for <linux-mmc@vger.kernel.org>; Sat, 13 Mar 2021 13:53:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
-        bh=99UXm2bK0b+j4PKx8DY4eP69XsoTe2LlKSBzFsKKLDc=;
-        b=XxZWbVtpK8/1ifkXWGCxoD1Tc+xpeoo43tnmiCD9I/ciVIrvDXqfn/YlOy8OX9Ygcw
-         q8dUhvIpb1/D/j3iCHhbt+bwU3wGc0SNSjmLZ19mGGsvpNvBaBn08JvqD868EfQ43U+q
-         8QNpZU4C62DYkJM6hXhpKMLfiqtPoSuAjpdeEpOm1fZE13qq7i0MMRoHyONAdDg3spFC
-         dsx1CYfUUIPHa1ZIo+cb99HQkX4VbhV1F90Vejmy8dNulmwUg2su81hv70IXyNM3M1b+
-         1nXes0fJ279vkv38My0/mXrKreQ1U90xgRlegE/4NXJJUK1zUpqYjhHys4XPSxANUHe5
-         2kXg==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=zeMrkglujiTzPE4Zy3XbR9wMePA6IveVBZZS1HWZ7Jk=;
+        b=I8llNvx42f7D2yt7Dl54YSWj/dQWZilBkqyva9Notkh8QB01o6HRAt07UWSuiKyD/i
+         Q4u2A3RlAw+A7VYEjGI3ErFaD+MtlfjuEwQM3CQSqpj+TvGGWlIwVg3JhSAJVcLmy/OI
+         KRRZig5UrSkH+ixqzUUOulo0ZHbouhn1ENMQb9rBTEWU29TdM3P2EbKMvt5w6Nkf78FN
+         4vQR1F1dtaI1QG3dfperyVDRfF4VpmYm/OXQFHlJC9e0ogxEVrhmZQsMwSJhrbROuooE
+         FirTqymUCp7KkhE4HjYmIsgAN/BEOq531mh95NltzCKob+K9cUlohEVA4dfBbo4loviX
+         Y8aw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
-         :content-disposition;
-        bh=99UXm2bK0b+j4PKx8DY4eP69XsoTe2LlKSBzFsKKLDc=;
-        b=CVG2NfQtbOr9rptrcGc+cHtLCXVejgu5YxRteQTNtnlS5zHhipATVh9S2WsSEjOVaL
-         waio8q5iiAY3rOnw6zhldQSjNgdyjx4vN8orLNRhGTyivO4T3vtbfJ80mUl/LP0U01O2
-         lRBVnlyTMb4E/8pgZdLqDaNoDUEhd6RQp+rq3QpAvtsFHbBVfACePZp86gW7O88vs309
-         1OUNFMPXUmsk9R9xvm8oS2bbxlOGNgaMuh+5fo6O1hHSnmC4MucYglq4PasFhISJbFUM
-         zWC6y2SXXjBheW27XJEDpZBAsedE1ClPnX9HqLozs5yHep1w+He87h1SNTyHvk3Cbx/h
-         RyZA==
-X-Gm-Message-State: AOAM5302rprhEuJo9iYtZkIMXdS/y1hfmAtR416xhcLd4DVPprP9Glsw
-        WwoNafzp0zX2+3QD3zM1wA8AHN08uco=
-X-Google-Smtp-Source: ABdhPJwGtvzvBn4VadI24AiRq1/DWtdYTmJoanJygW6tiP4XUcRb4a5fbEb3dfklWwdld68Q84NRdQ==
-X-Received: by 2002:ac8:148e:: with SMTP id l14mr16596786qtj.164.1615657061001;
-        Sat, 13 Mar 2021 09:37:41 -0800 (PST)
-Received: from joeylaptop ([2601:5cc:0:a480:77c5:f4b4:99be:b2ea])
-        by smtp.gmail.com with ESMTPSA id o7sm6886307qki.63.2021.03.13.09.37.40
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=zeMrkglujiTzPE4Zy3XbR9wMePA6IveVBZZS1HWZ7Jk=;
+        b=SCJiHy9AVtZ+2f6FSSPuZjWXrYKh71XmDmoKXhlgnNHrhCCI3Cal1T2K78SQBmguYe
+         DosLIU4muR+m1lKZ9eV/Lr+2qjiwdakws1JDClFqA9awM8tq6Ysa78SXL5QahOm+ioji
+         F7Hl9Hz0UVbCUnXXax9wLTC64bK1Vqeuzwk00tiseI3gKAjsjgqdgq4abtTmyFP64+yB
+         Fz4UbKIQk+dZWbsWsJBkDoqCESG49U1zDXU0X2xEls2anOBShocXbQ9b3NwYebzk2mYI
+         lBxrODfyRXwDbAAzaSI+mRBQYEyf0TMiZKmVPgStHS9i3U+OPYZBhJOGLg/EzT2yXeWC
+         aOYQ==
+X-Gm-Message-State: AOAM532UCMLKlnrUxSv/SskqKPvUJ/K4chRnQjFtPK4XTyBx0QIGqDV9
+        qGXq887i3Oy7t04gO0CGfNgEHgWmfZsuDVmckRI=
+X-Google-Smtp-Source: ABdhPJxxAn9QqdL1PA5RzazC1c1Qu/+dpClT2F8xC3pnTxnwkql2R6lP2I4ncLOcVLp+LyrQW9DKlA==
+X-Received: by 2002:a2e:a58d:: with SMTP id m13mr6241354ljp.347.1615672384296;
+        Sat, 13 Mar 2021 13:53:04 -0800 (PST)
+Received: from localhost.localdomain (c-d7cb225c.014-348-6c756e10.bbcust.telenor.se. [92.34.203.215])
+        by smtp.gmail.com with ESMTPSA id l7sm2442214lje.30.2021.03.13.13.53.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 13 Mar 2021 09:37:40 -0800 (PST)
-Date:   Sat, 13 Mar 2021 12:37:40 -0500
-From:   Joey Pabalan <jpabalanb@gmail.com>
-To:     Maxim Levitsky <maximlevitsky@gmail.com>
-Cc:     linux-mmc@vger.kernel.org
-Subject: [PATCH] memstick: Remove useless else branch
-Message-ID: <20210313173740.GA580681@joeylaptop>
+        Sat, 13 Mar 2021 13:53:03 -0800 (PST)
+From:   Linus Walleij <linus.walleij@linaro.org>
+To:     Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
+        Wright Feng <wright.feng@infineon.com>,
+        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>
+Cc:     linux-wireless@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        brcm80211-dev-list.pdl@broadcom.com,
+        SHA-cyfmac-dev-list@infineon.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+Subject: [PATCH] dt-bindings: Convert the BCM4329 bindings to YAML and extend
+Date:   Sat, 13 Mar 2021 22:53:02 +0100
+Message-Id: <20210313215302.4076765-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Remove else branch on line 334 of memstick.c, after the return of the
-previous branch. Found by checkpatch.
+This converts the BCM4329 family bindings to YAML schema, and
+extends and fixes the bindings like this:
 
-Signed-off-by: Joey Pabalan <jpabalanb@gmail.com>
+- Name the bindings after the first chip (BCM4329) since
+  wildcards like 43xx are nowadays frowned upon by the DT
+  binding reviewers. We call this the "BCM4329 family"
+- Add compatible strings for all the variants that seem to
+  exist in the wild. (Derived from firmware listings.)
+- Add required reg property (SDIO function number)
+- Add reset-gpios property (some systems wire this to a GPIO
+  line).
+- I have only listed Arend as maintainer for now, volunteers
+  can be added.
+
+Cc: Arend van Spriel <aspriel@gmail.com>
+Cc: Franky Lin <franky.lin@broadcom.com>
+Cc: Hante Meuleman <hante.meuleman@broadcom.com>
+Cc: Chi-hsien Lin <chi-hsien.lin@infineon.com>
+Cc: Wright Feng <wright.feng@infineon.com>
+Cc: Chung-hsien Hsu <chung-hsien.hsu@infineon.com>
+Cc: brcm80211-dev-list.pdl@broadcom.com
+Cc: SHA-cyfmac-dev-list@infineon.com
+Cc: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 ---
- drivers/memstick/core/memstick.c | 21 ++++++++++-----------
- 1 file changed, 10 insertions(+), 11 deletions(-)
+ .../net/wireless/brcm,bcm4329-fmac.yaml       | 98 +++++++++++++++++++
+ .../net/wireless/brcm,bcm43xx-fmac.txt        | 38 -------
+ 2 files changed, 98 insertions(+), 38 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
+ delete mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
 
-diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-index 12bc3f5a6cbb..bb1065990aeb 100644
---- a/drivers/memstick/core/memstick.c
-+++ b/drivers/memstick/core/memstick.c
-@@ -331,18 +331,17 @@ static int h_memstick_read_dev_id(struct memstick_dev *card,
- 				  sizeof(struct ms_id_register));
- 		*mrq = &card->current_mrq;
- 		return 0;
--	} else {
--		if (!(*mrq)->error) {
--			memcpy(&id_reg, (*mrq)->data, sizeof(id_reg));
--			card->id.match_flags = MEMSTICK_MATCH_ALL;
--			card->id.type = id_reg.type;
--			card->id.category = id_reg.category;
--			card->id.class = id_reg.class;
--			dev_dbg(&card->dev, "if_mode = %02x\n", id_reg.if_mode);
--		}
--		complete(&card->mrq_complete);
--		return -EAGAIN;
- 	}
-+	if (!(*mrq)->error) {
-+		memcpy(&id_reg, (*mrq)->data, sizeof(id_reg));
-+		card->id.match_flags = MEMSTICK_MATCH_ALL;
-+		card->id.type = id_reg.type;
-+		card->id.category = id_reg.category;
-+		card->id.class = id_reg.class;
-+		dev_dbg(&card->dev, "if_mode = %02x\n", id_reg.if_mode);
-+	}
-+	complete(&card->mrq_complete);
-+	return -EAGAIN;
- }
- 
- static int h_memstick_set_rw_addr(struct memstick_dev *card,
+diff --git a/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml b/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
+new file mode 100644
+index 000000000000..d172ee486cf6
+--- /dev/null
++++ b/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
+@@ -0,0 +1,98 @@
++# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/net/wireless/brcm,bcm4329-fmac.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Broadcom BCM4329 family fullmac wireless SDIO devices
++
++maintainers:
++  - Arend van Spriel <arend@broadcom.com>
++
++description:
++  The Broadcom Single chip MAC part for the BCM4329 family and
++  later Cypress chips in the same family named CYW4373 and similar.
++  These chips also have a Bluetooth portion described in a separate
++  binding.
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - brcm,bcm43143-fmac
++          - brcm,bcm4341b0-fmac
++          - brcm,bcm4341b4-fmac
++          - brcm,bcm4341b5-fmac
++          - brcm,bcm4329-fmac
++          - brcm,bcm4330-fmac
++          - brcm,bcm4334-fmac
++          - brcm,bcm43340-fmac
++          - brcm,bcm4335-fmac
++          - brcm,bcm43362-fmac
++          - brcm,bcm4339-fmac
++          - brcm,bcm43430a0-fmac
++          - brcm,bcm43430a1-fmac
++          - brcm,bcm43455-fmac
++          - brcm,bcm43456-fmac
++          - brcm,bcm4354-fmac
++          - brcm,bcm4356-fmac
++          - brcm,bcm4359-fmac
++          - cypress,cyw4373-fmac
++          - cypress,cyw43012-fmac
++
++  reg:
++    description: SDIO function number for the device, for most cases
++      this will be 1.
++
++  interrupts:
++    maxItems: 1
++    description: Out-of-band (OOB) IRQ line for waking up the host
++      in response to WLAN activity. This corresponds to the HOST_WAKE
++      line into the chip.
++
++  interrupt-names:
++    description: Name for the OOB IRQ, this must be set to "host-wake".
++    const: host-wake
++
++  brcm,drive-strength:
++    $ref: /schemas/types.yaml#/definitions/uint32
++    description: Drive strength used for the SDIO pins on the device in mA.
++    minimum: 0
++    maximum: 32
++
++  reset-gpios:
++    maxItems: 1
++    description: A GPIO line connected to the WL_RST line, if present
++      this shall be flagged as active low.
++
++required:
++  - compatible
++  - reg
++
++additionalProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/irq.h>
++    #include <dt-bindings/gpio/gpio.h>
++    mmc@80118000 {
++      compatible = "arm,pl18x", "arm,primecell";
++      reg = <0x80118000 0x1000>;
++      clocks = <&clk 0>, <&clk 1>;
++      clock-names = "mclk", "apb_pclk";
++      interrupts = <0 60 IRQ_TYPE_LEVEL_HIGH>;
++      bus-width = <4>;
++      non-removable;
++      vmmc-supply = <&wl_bt_reg>;
++      #address-cells = <1>;
++      #size-cells = <0>;
++
++      wifi@1 {
++        compatible = "brcm,bcm4329-fmac";
++        reg = <1>;
++        interrupt-parent = <&gpio>;
++        interrupts = <24 IRQ_TYPE_EDGE_FALLING>;
++        interrupt-names = "host-wake";
++        reset-gpios = <&gpio 23 GPIO_ACTIVE_LOW>;
++      };
++    };
+diff --git a/Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt b/Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
+deleted file mode 100644
+index cffb2d6876e3..000000000000
+--- a/Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
++++ /dev/null
+@@ -1,38 +0,0 @@
+-Broadcom BCM43xx Fullmac wireless SDIO devices
+-
+-This node provides properties for controlling the Broadcom wireless device. The
+-node is expected to be specified as a child node to the SDIO controller that
+-connects the device to the system.
+-
+-Required properties:
+-
+- - compatible : Should be "brcm,bcm4329-fmac".
+-
+-Optional properties:
+- - brcm,drive-strength : drive strength used for SDIO pins on device in mA
+-	(default = 6).
+- - interrupts : specifies attributes for the out-of-band interrupt (host-wake).
+-	When not specified the device will use in-band SDIO interrupts.
+- - interrupt-names : name of the out-of-band interrupt, which must be set
+-	to "host-wake".
+-
+-Example:
+-
+-mmc3: mmc@1c12000 {
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-
+-	pinctrl-names = "default";
+-	pinctrl-0 = <&mmc3_pins_a>;
+-	vmmc-supply = <&reg_vmmc3>;
+-	bus-width = <4>;
+-	non-removable;
+-
+-	brcmf: wifi@1 {
+-		reg = <1>;
+-		compatible = "brcm,bcm4329-fmac";
+-		interrupt-parent = <&pio>;
+-		interrupts = <10 8>; /* PH10 / EINT10 */
+-		interrupt-names = "host-wake";
+-	};
+-};
 -- 
-2.27.0
+2.29.2
 
