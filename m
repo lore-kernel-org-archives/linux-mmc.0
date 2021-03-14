@@ -2,170 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF817C433DB
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 00:06:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CEE6C433E0
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 16:35:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 96DF964D9E
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 00:06:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 15F8664EC6
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 16:35:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234869AbhCNAFr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 13 Mar 2021 19:05:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39222 "EHLO
+        id S234074AbhCNQev (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 Mar 2021 12:34:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51902 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233634AbhCNAFd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 13 Mar 2021 19:05:33 -0500
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA4A1C061574;
-        Sat, 13 Mar 2021 16:05:31 -0800 (PST)
-Received: by mail-ed1-x52c.google.com with SMTP id z1so13115230edb.8;
-        Sat, 13 Mar 2021 16:05:31 -0800 (PST)
+        with ESMTP id S233530AbhCNQeb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Mar 2021 12:34:31 -0400
+Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FB59C061574;
+        Sun, 14 Mar 2021 09:34:30 -0700 (PDT)
+Received: by mail-wr1-x42d.google.com with SMTP id v15so7488859wrx.4;
+        Sun, 14 Mar 2021 09:34:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SMX4PGAdnxUDz2rgcUrWaWmNPXTCnjfQBU+O2I1RQIU=;
-        b=aLNiuIPtXynQ0D7jmFlbZ6tKjJAoE/30t8wTpWRdDuzn3aE6NrywEvZ+fGWewoCPlh
-         Ok6il+rCWYs7LREk3Lxf2KJIqPodlwHh5qszl8vLgJtdmg05BxpxBtizy8i9nf38qJIa
-         o/VF+xOrX0SdY7x9dMt0S3E2mOOClYxDEWU7Wifh5GZMOnthl1y3oZwsvKccbhecQF+H
-         vvYCY/HdZcjDOtKl2cLZl3d7S5EBcSkZzjKVCdk5XXLF6K3wp8C0+G7JJzdloaT+ONTq
-         ZCnV6eXAwaBQA9Fc5ORTqC7G6XfJaiaBP/zzM8rGPkauWdABz6YtOEhBaB5JkqOn92ab
-         1lhg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Dk+u80d7+DPr6f37qq0svEt55gFJ9tkcYaJUZ9gMJ0E=;
+        b=odz2KMFjnuhb+rsTA1UTIbkBLsTNRvMBNSMRiw8zxC4bWm7uwaiwsCXODkOpuWYygp
+         uPU8oyV7+fL4tqvAu2Qi/KxLJ0NMIZ38VJHySHemlGhL1DlopQm3WtA9Sht2KNeAoAP+
+         ZHlURy+2dKRSfqikCGrEaHH90tT+BwxckcE/dd9hWjs9MXYbwQY3As0wpUGcq06VDFmW
+         BZuQqJhYdotA3HLtV8KYQagN4hc9Y43XegpW96y5oVt/UTHFtXlOzYG8FybF7viwVXnW
+         Qb2ZZrGcp4g4aVCQ/jLBHK8TF8yiL1ImgA0Ni1kpRvRZgV5I0fPJPAEYubbKyERAh0xs
+         1gPA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SMX4PGAdnxUDz2rgcUrWaWmNPXTCnjfQBU+O2I1RQIU=;
-        b=rxmwFPkE5WYwzAWCPsp6rbWzBHkGJgRKdqTAEg1283zmPjjO5yYA6KKDpR9kSNrgsO
-         /YgEZjWXjAq8KFXsRPgdLgbDTVrrCDV4CwW649zHySMYi61VGOQoRDKf5nv/ofIJVcoB
-         yzLowqQz816vcESPFUtvdYwV6WIEBBVlz83ys03P5LM9F/+P1e1YtM2kbHWT73IvDCWc
-         0q1ksZ98PLlv3BWBm/DNDe+eQanuIE0XSEfzZ8F76fz6sFjnI0aYJDNcoDebbi55fIQe
-         tr9FnlIIwLhF7bzhxH1U38oKxH9ppyqmehFrP4HwJtN9SraJO6iGgWgjyX1BtWti2CYG
-         9UcA==
-X-Gm-Message-State: AOAM530XfURIMAgsoghJfrr8BbfAA28gGJ2hJ3wRSitCcL3UhhKbMpqs
-        Uzya7io4QMiz43r4MbIfkcuv4La8nbwrMkPBAHA=
-X-Google-Smtp-Source: ABdhPJzWWail3s8JDkQtTD/knWUAbZVCF3iT+21h9hf5MS4ptYmJQ4e1E6dsBvUpW4Jxk97wbCBNthg71GKjXSvYFPs=
-X-Received: by 2002:a05:6402:30a2:: with SMTP id df2mr22139260edb.29.1615680330069;
- Sat, 13 Mar 2021 16:05:30 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Dk+u80d7+DPr6f37qq0svEt55gFJ9tkcYaJUZ9gMJ0E=;
+        b=sa9sIniQZDM0K1yHEQNiU560A5SPjTPXadJ0Ex/Rsgi9/WAyLIcHqEZzvBN4jRgpAD
+         IAMO65VvPfPsZQJKxdRxf2W2gRmqLH50bw6unkOVSSe8My9VV0tEuXs2N3B7sYq2hkld
+         t5B0SE1qZ+o5rQ4TUDnYWXXh8eg1Nt3L/GhJ0ksKyVosXiMyfCTN8JTA5htFHlsYZW+G
+         dXE8cLZCLD9Zl79rAbxHaGdDCO7NfFCyaZR8+gPC7uiwG5lbpKmI6mVWm1RSXeANk6qM
+         UcO6A5XH9nY254P9rogpUj2RJmTk0rh/6HpUzaVgJH/PG9+8/XOv62/RnHvmy/k3PMEG
+         bLVA==
+X-Gm-Message-State: AOAM533lWCsAygB6uwFH7NPu38ABjLQgiY9JNrJ4O1dLIPvYtkQWjmE8
+        yjUTwfZwMmGwCxQklTlktpM=
+X-Google-Smtp-Source: ABdhPJyleajyRpBrrXUjD8GqJPpb/1++iWRzfLdTQ72N8RYDVENKPnSXNItvO94J7ZdMRAdWS/ix6g==
+X-Received: by 2002:a5d:6412:: with SMTP id z18mr23774132wru.214.1615739669218;
+        Sun, 14 Mar 2021 09:34:29 -0700 (PDT)
+Received: from localhost.localdomain (109-252-193-52.dynamic.spd-mgts.ru. [109.252.193.52])
+        by smtp.gmail.com with ESMTPSA id o7sm15723239wrs.16.2021.03.14.09.34.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 14 Mar 2021 09:34:28 -0700 (PDT)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Qiang Yu <yuq825@gmail.com>, Rob Clark <robdclark@gmail.com>,
+        Sean Paul <sean@poorly.run>, Rob Herring <robh@kernel.org>,
+        Tomeu Vizoso <tomeu.vizoso@collabora.com>,
+        Steven Price <steven.price@arm.com>,
+        Alyssa Rosenzweig <alyssa.rosenzweig@collabora.com>,
+        Stanimir Varbanov <stanimir.varbanov@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Lukasz Luba <lukasz.luba@arm.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>, Nishanth Menon <nm@ti.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Yangtao Li <tiny.windzz@gmail.com>
+Cc:     Daniel Vetter <daniel@ffwll.ch>, dri-devel@lists.freedesktop.org,
+        lima@lists.freedesktop.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, freedreno@lists.freedesktop.org,
+        linux-media@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-tegra@vger.kernel.org
+Subject: [PATCH v3 00/15] Introduce devm_pm_opp_* API
+Date:   Sun, 14 Mar 2021 19:33:53 +0300
+Message-Id: <20210314163408.22292-1-digetx@gmail.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-References: <20210313215302.4076765-1-linus.walleij@linaro.org>
-In-Reply-To: <20210313215302.4076765-1-linus.walleij@linaro.org>
-From:   Julian Calaby <julian.calaby@gmail.com>
-Date:   Sun, 14 Mar 2021 11:05:17 +1100
-Message-ID: <CAGRGNgU_C6keHC_Ty3iruJc5cwsBGJRRBm8DWH91fHjygPv0fg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Convert the BCM4329 bindings to YAML and extend
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
-        Wright Feng <wright.feng@infineon.com>,
-        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>,
-        linux-wireless@vger.kernel.org,
-        brcm80211-dev-list.pdl@broadcom.com,
-        SHA-cyfmac-dev-list@infineon.com, linux-mmc@vger.kernel.org,
-        devicetree <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+This series adds resource-managed OPP API helpers and makes drivers
+to use them.
 
-On Sun, Mar 14, 2021 at 9:00 AM Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> This converts the BCM4329 family bindings to YAML schema, and
-> extends and fixes the bindings like this:
->
-> - Name the bindings after the first chip (BCM4329) since
->   wildcards like 43xx are nowadays frowned upon by the DT
->   binding reviewers. We call this the "BCM4329 family"
-> - Add compatible strings for all the variants that seem to
->   exist in the wild. (Derived from firmware listings.)
-> - Add required reg property (SDIO function number)
-> - Add reset-gpios property (some systems wire this to a GPIO
->   line).
-> - I have only listed Arend as maintainer for now, volunteers
->   can be added.
->
-> Cc: Arend van Spriel <aspriel@gmail.com>
-> Cc: Franky Lin <franky.lin@broadcom.com>
-> Cc: Hante Meuleman <hante.meuleman@broadcom.com>
-> Cc: Chi-hsien Lin <chi-hsien.lin@infineon.com>
-> Cc: Wright Feng <wright.feng@infineon.com>
-> Cc: Chung-hsien Hsu <chung-hsien.hsu@infineon.com>
-> Cc: brcm80211-dev-list.pdl@broadcom.com
-> Cc: SHA-cyfmac-dev-list@infineon.com
-> Cc: linux-mmc@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  .../net/wireless/brcm,bcm4329-fmac.yaml       | 98 +++++++++++++++++++
->  .../net/wireless/brcm,bcm43xx-fmac.txt        | 38 -------
->  2 files changed, 98 insertions(+), 38 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
->  delete mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
->
-> diff --git a/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml b/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
-> new file mode 100644
-> index 000000000000..d172ee486cf6
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
-> @@ -0,0 +1,98 @@
-> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/net/wireless/brcm,bcm4329-fmac.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Broadcom BCM4329 family fullmac wireless SDIO devices
-> +
-> +maintainers:
-> +  - Arend van Spriel <arend@broadcom.com>
-> +
-> +description:
-> +  The Broadcom Single chip MAC part for the BCM4329 family and
-> +  later Cypress chips in the same family named CYW4373 and similar.
-> +  These chips also have a Bluetooth portion described in a separate
-> +  binding.
-> +
-> +properties:
-> +  compatible:
-> +    items:
-> +      - enum:
-> +          - brcm,bcm43143-fmac
-> +          - brcm,bcm4341b0-fmac
-> +          - brcm,bcm4341b4-fmac
-> +          - brcm,bcm4341b5-fmac
-> +          - brcm,bcm4329-fmac
-> +          - brcm,bcm4330-fmac
-> +          - brcm,bcm4334-fmac
-> +          - brcm,bcm43340-fmac
-> +          - brcm,bcm4335-fmac
-> +          - brcm,bcm43362-fmac
-> +          - brcm,bcm4339-fmac
-> +          - brcm,bcm43430a0-fmac
-> +          - brcm,bcm43430a1-fmac
-> +          - brcm,bcm43455-fmac
-> +          - brcm,bcm43456-fmac
-> +          - brcm,bcm4354-fmac
-> +          - brcm,bcm4356-fmac
-> +          - brcm,bcm4359-fmac
-> +          - cypress,cyw4373-fmac
-> +          - cypress,cyw43012-fmac
+Changelog:
 
-I don't know if this is necessary for SDIO, but should the non-4329
-compatibles have the 4329 compatible as an alternative?
+v3: - Dropped dev_pm_opp_register_notifier().
 
-Thanks,
+    - Changed return type of the devm helpers from opp_table pointer
+      to errno.
+
+    - Corrected drm/msm patch which missed to remove opp_put_supported_hw()
+      from a6xx_gpu. Note that the a5xx_gpu driver was missing the
+      opp_put_supported_hw() at all.
+
+    - Corrected spelling of the ack from Mark Brown.
+
+v2: - This is a continuation of the work that was started by Yangtao Li.
+      Apparently Yangtao doesn't have time to finish it, so I
+      (Dmitry Osipenko) picked up the effort since these patches are
+      wanted by the NVIDIA Tegra voltage-scaling series that I'm
+      working on.
+
+    - Fixed the double put of OPP resources.
+
+    - Dropped all patches that are unrelated to OPP API. I also dropped
+      the Tegra memory patch since it doesn't apply now and because I plan
+      to switch all Tegra drivers soon to a common tegra-specific OPP helper
+      that will use the resource-managed OPP API anyways.
+
+    - Squashed couple patches into a single ones since there was no
+      good reason to separate them.
+
+    - Added acks that were given to a couple of v1 patches.
+
+Dmitry Osipenko (2):
+  opp: Change return type of devm_pm_opp_register_set_opp_helper()
+  opp: Change return type of devm_pm_opp_attach_genpd()
+
+Yangtao Li (13):
+  opp: Add devres wrapper for dev_pm_opp_set_clkname
+  opp: Add devres wrapper for dev_pm_opp_set_regulators
+  opp: Add devres wrapper for dev_pm_opp_set_supported_hw
+  opp: Add devres wrapper for dev_pm_opp_of_add_table
+  serial: qcom_geni_serial: Convert to use resource-managed OPP API
+  spi: spi-geni-qcom: Convert to use resource-managed OPP API
+  spi: spi-qcom-qspi: Convert to use resource-managed OPP API
+  mmc: sdhci-msm: Convert to use resource-managed OPP API
+  drm/msm: Convert to use resource-managed OPP API
+  drm/lima: Convert to use resource-managed OPP API
+  drm/panfrost: Convert to use resource-managed OPP API
+  media: venus: Convert to use resource-managed OPP API
+  memory: samsung: exynos5422-dmc: Convert to use resource-managed OPP
+    API
+
+ drivers/gpu/drm/lima/lima_devfreq.c           |  47 ++-----
+ drivers/gpu/drm/lima/lima_devfreq.h           |   3 -
+ drivers/gpu/drm/msm/adreno/a5xx_gpu.c         |   2 +-
+ drivers/gpu/drm/msm/adreno/a6xx_gmu.c         |   2 +-
+ drivers/gpu/drm/msm/adreno/a6xx_gpu.c         |  11 +-
+ drivers/gpu/drm/msm/adreno/a6xx_gpu.h         |   2 -
+ drivers/gpu/drm/msm/adreno/adreno_gpu.c       |   2 +-
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.c       |  23 ++--
+ drivers/gpu/drm/msm/disp/dpu1/dpu_kms.h       |   2 -
+ drivers/gpu/drm/msm/dp/dp_ctrl.c              |  30 +----
+ drivers/gpu/drm/msm/dp/dp_ctrl.h              |   1 -
+ drivers/gpu/drm/msm/dp/dp_display.c           |   5 +-
+ drivers/gpu/drm/msm/dsi/dsi_host.c            |  13 +-
+ drivers/gpu/drm/panfrost/panfrost_devfreq.c   |  37 ++----
+ drivers/gpu/drm/panfrost/panfrost_devfreq.h   |   2 -
+ drivers/media/platform/qcom/venus/core.h      |   1 -
+ .../media/platform/qcom/venus/pm_helpers.c    |  35 ++---
+ drivers/memory/samsung/exynos5422-dmc.c       |  13 +-
+ drivers/mmc/host/sdhci-msm.c                  |  19 +--
+ drivers/opp/core.c                            | 122 ++++++++++++++----
+ drivers/opp/of.c                              |  36 ++++++
+ drivers/spi/spi-geni-qcom.c                   |  16 +--
+ drivers/spi/spi-qcom-qspi.c                   |  18 +--
+ drivers/tty/serial/qcom_geni_serial.c         |  23 ++--
+ include/linux/pm_opp.h                        |  43 +++++-
+ include/linux/qcom-geni-se.h                  |   2 -
+ 26 files changed, 250 insertions(+), 260 deletions(-)
 
 -- 
-Julian Calaby
+2.30.2
 
-Email: julian.calaby@gmail.com
-Profile: http://www.google.com/profiles/julian.calaby/
