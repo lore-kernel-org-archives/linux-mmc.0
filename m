@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9ADB7C4151A
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 16:35:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19B59C2BB84
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 16:35:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 827AB64F02
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 16:35:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 03E1564EC3
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Mar 2021 16:35:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234714AbhCNQfr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 14 Mar 2021 12:35:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52036 "EHLO
+        id S234732AbhCNQft (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 Mar 2021 12:35:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52052 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234168AbhCNQe7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Mar 2021 12:34:59 -0400
-Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67E4FC061574;
-        Sun, 14 Mar 2021 09:34:58 -0700 (PDT)
-Received: by mail-wr1-x42b.google.com with SMTP id w11so7451409wrr.10;
-        Sun, 14 Mar 2021 09:34:58 -0700 (PDT)
+        with ESMTP id S234256AbhCNQfE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Mar 2021 12:35:04 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4E9EC061574;
+        Sun, 14 Mar 2021 09:35:02 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id j7so4487624wrd.1;
+        Sun, 14 Mar 2021 09:35:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=yf+iKFcas/0uJoCP5/vtaWj8GnADCEOBO/yEczpj9kI=;
-        b=ppsS1pK7H2N/OHPVt818su8ZmgPauDF+VE0HF6n30iy9PosMmhRbW+xFPtmKOHdsEf
-         aXtWn7eRzpckEKaGNbtTvXoErtPQ9/zRLQ3HYUCbTQFSs1BEiYUkxAmkCwlb7mYcLSbR
-         rTeCySKnUjuDcS0wtPKCqixjQfN8pwzCyoSxsU5iZRHWS2dfWWbfHw2MOoEw/W6tGK6s
-         GrWUeJu9IsMAyYSnUhkBjLoF4T8IQb5XREczYr3d28EzqAKc/mOe0a5GFmDG0jTHUwEG
-         Wni8zBOfBtfyTEsQTou3erE1gmwHrzwKzMvk7GGAAeXb/vB9hYcXICRMNhv/Gljz1VCK
-         ffQg==
+        bh=wztVjPrbaWUiGypvft6cn5K7xFwngQ+a+vmAeJ+d5sc=;
+        b=gZ63/BBVKEvbFwRt6vnGpOTOZzf+jEJGMgOWLucPD2hCX1Gq7BbSzsBXORqyxGjnz3
+         9+6jfdEpD16ubrdhyv/41cqJIBZIQXyj0undmJjqqr/op2c7I0KZBGpo8tgnVQYAmMpg
+         2lC4Xdse0JHm8+nmIOaNT9ainSSu0CktacH1pEoj259ys4OypRaYkVLzZpWLvrmIaCM+
+         2Gi8bAlMndI3q9qCr74w2A3rTaJkTyb7I2/iLC7HChnGoBz4yoAC1mnYnqD7ceNaACYe
+         EEtviL2vSzgji6mY8X+PXXV9b8xe27kOY2A4qjctp/IRBYSBxcKUfd7nYCywa9A6y0mU
+         +opA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=yf+iKFcas/0uJoCP5/vtaWj8GnADCEOBO/yEczpj9kI=;
-        b=s7lSLZvVi8bf6EFeBSQaw+u54cl4mRvNOGVplJ515jFXTxg2bWMkxWda+5f4SVNuO5
-         Mmk8GfHk7a+6x38Jq0x3Nv/Ra4mDZlvoyxNhqd8r9hfQokpqw0tEYxchyTXSBfqBDjIh
-         6JixBlD5Y1R3x/R9ELFK+OoT9j1E/XO2JD4HE8ZMGCN7JXJ1mMbtp7ppy3znqcQ1Ctb8
-         cEcYcWLghElhz6nulQw1XavKX994chwyo0Qxgj2GEudfEORzYswReg/5RrrxR6jd7Vcn
-         J81m4nVZJiOXUJvNK6O9lvfU4obQY1p7iP+EdN3OZXcLtI2Qa+zov8VfbubO8sAcHzrC
-         EU1w==
-X-Gm-Message-State: AOAM533kQ+aq7dxTlCk+hBD3SFJ1hEqAXpbDqGcvN3+Zc3jVkdI25Pcn
-        COg8LTv32/duVxxYMDDS2AY=
-X-Google-Smtp-Source: ABdhPJyBQvV7xZv9vCfna5TuO6tJlXlewHlW50bnTQPbzuJunn1EI5WEi80mIYlzX20zsmb/XNcBXA==
-X-Received: by 2002:a05:6000:10c5:: with SMTP id b5mr23293529wrx.347.1615739697207;
-        Sun, 14 Mar 2021 09:34:57 -0700 (PDT)
+        bh=wztVjPrbaWUiGypvft6cn5K7xFwngQ+a+vmAeJ+d5sc=;
+        b=eigBD5vMcvkx40r4Y2tjhhhU1Sbrk4p0wAAmIy8fD87z1SD1te3U1h0ZySgPvyC7i+
+         z/fZWMiqnHmpv3Tc6xJP/PPiFXbh3IRxrjpjtFgfE8JRPgQZaTUDhE0uNoXUewwB0OJ7
+         NKoaC4z5VoI2uZdqlh1d4K8RA2ZFsP4GBHxOtA8n2FxYYqX6AdQSNa8DwTxRb/jQAPvM
+         Zgnm/uxBzuzRzE+MNrzLl0UtuVYl4LtTYaVdM1A+fzopiq138bFxhmkWolNLi/igbJuJ
+         GAgxEk4pVIbpaOEQaMtL5IR5znX0QCJFe4dmJkgibJMxK+o45H+NafLjSC6ZqHF0qZfD
+         kPhA==
+X-Gm-Message-State: AOAM530p64RuSzxNi0clhDlhjWYQGp4hhxgHq2fHjixe/iow1DtxKdQl
+        vEGr2nxtX63ZRthcBP5Ur9Y=
+X-Google-Smtp-Source: ABdhPJzvr9Lkkt1hNoHreSALn01qCW8D0EVwWu49kIaEFRwZgYUEUti/e7ibV8Z4E4X6E3VPTTQfCw==
+X-Received: by 2002:adf:f743:: with SMTP id z3mr23604775wrp.304.1615739701459;
+        Sun, 14 Mar 2021 09:35:01 -0700 (PDT)
 Received: from localhost.localdomain (109-252-193-52.dynamic.spd-mgts.ru. [109.252.193.52])
-        by smtp.gmail.com with ESMTPSA id o7sm15723239wrs.16.2021.03.14.09.34.55
+        by smtp.gmail.com with ESMTPSA id o7sm15723239wrs.16.2021.03.14.09.34.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 14 Mar 2021 09:34:57 -0700 (PDT)
+        Sun, 14 Mar 2021 09:35:01 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Qiang Yu <yuq825@gmail.com>, Rob Clark <robdclark@gmail.com>,
         Sean Paul <sean@poorly.run>, Rob Herring <robh@kernel.org>,
@@ -83,9 +83,9 @@ Cc:     Daniel Vetter <daniel@ffwll.ch>, dri-devel@lists.freedesktop.org,
         linux-samsung-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-tegra@vger.kernel.org
-Subject: [PATCH v3 13/15] drm/panfrost: Convert to use resource-managed OPP API
-Date:   Sun, 14 Mar 2021 19:34:06 +0300
-Message-Id: <20210314163408.22292-14-digetx@gmail.com>
+Subject: [PATCH v3 15/15] memory: samsung: exynos5422-dmc: Convert to use resource-managed OPP API
+Date:   Sun, 14 Mar 2021 19:34:08 +0300
+Message-Id: <20210314163408.22292-16-digetx@gmail.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210314163408.22292-1-digetx@gmail.com>
 References: <20210314163408.22292-1-digetx@gmail.com>
@@ -100,120 +100,63 @@ From: Yangtao Li <tiny.windzz@gmail.com>
 Use resource-managed OPP API to simplify code.
 
 Signed-off-by: Yangtao Li <tiny.windzz@gmail.com>
-Reviewed-by: Steven Price <steven.price@arm.com>
+Reviewed-by: Krzysztof Kozlowski <krzk@kernel.org>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/gpu/drm/panfrost/panfrost_devfreq.c | 37 +++++----------------
- drivers/gpu/drm/panfrost/panfrost_devfreq.h |  2 --
- 2 files changed, 9 insertions(+), 30 deletions(-)
+ drivers/memory/samsung/exynos5422-dmc.c | 13 +++----------
+ 1 file changed, 3 insertions(+), 10 deletions(-)
 
-diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.c b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
-index 56b3f5935703..c878391f3e8c 100644
---- a/drivers/gpu/drm/panfrost/panfrost_devfreq.c
-+++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.c
-@@ -89,29 +89,25 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
- 	unsigned long cur_freq;
- 	struct device *dev = &pfdev->pdev->dev;
- 	struct devfreq *devfreq;
--	struct opp_table *opp_table;
- 	struct thermal_cooling_device *cooling;
- 	struct panfrost_devfreq *pfdevfreq = &pfdev->pfdevfreq;
+diff --git a/drivers/memory/samsung/exynos5422-dmc.c b/drivers/memory/samsung/exynos5422-dmc.c
+index 1dabb509dec3..56f6e65d40cd 100644
+--- a/drivers/memory/samsung/exynos5422-dmc.c
++++ b/drivers/memory/samsung/exynos5422-dmc.c
+@@ -343,7 +343,7 @@ static int exynos5_init_freq_table(struct exynos5_dmc *dmc,
+ 	int idx;
+ 	unsigned long freq;
  
--	opp_table = dev_pm_opp_set_regulators(dev, pfdev->comp->supply_names,
--					      pfdev->comp->num_supplies);
--	if (IS_ERR(opp_table)) {
--		ret = PTR_ERR(opp_table);
-+	ret = devm_pm_opp_set_regulators(dev, pfdev->comp->supply_names,
-+					 pfdev->comp->num_supplies);
-+	if (ret) {
- 		/* Continue if the optional regulator is missing */
- 		if (ret != -ENODEV) {
- 			DRM_DEV_ERROR(dev, "Couldn't set OPP regulators\n");
--			goto err_fini;
-+			return ret;
- 		}
--	} else {
--		pfdevfreq->regulators_opp_table = opp_table;
+-	ret = dev_pm_opp_of_add_table(dmc->dev);
++	ret = devm_pm_opp_of_add_table(dmc->dev);
+ 	if (ret < 0) {
+ 		dev_err(dmc->dev, "Failed to get OPP table\n");
+ 		return ret;
+@@ -354,7 +354,7 @@ static int exynos5_init_freq_table(struct exynos5_dmc *dmc,
+ 	dmc->opp = devm_kmalloc_array(dmc->dev, dmc->opp_count,
+ 				      sizeof(struct dmc_opp_table), GFP_KERNEL);
+ 	if (!dmc->opp)
+-		goto err_opp;
++		return -ENOMEM;
+ 
+ 	idx = dmc->opp_count - 1;
+ 	for (i = 0, freq = ULONG_MAX; i < dmc->opp_count; i++, freq--) {
+@@ -362,7 +362,7 @@ static int exynos5_init_freq_table(struct exynos5_dmc *dmc,
+ 
+ 		opp = dev_pm_opp_find_freq_floor(dmc->dev, &freq);
+ 		if (IS_ERR(opp))
+-			goto err_opp;
++			return PTR_ERR(opp);
+ 
+ 		dmc->opp[idx - i].freq_hz = freq;
+ 		dmc->opp[idx - i].volt_uv = dev_pm_opp_get_voltage(opp);
+@@ -371,11 +371,6 @@ static int exynos5_init_freq_table(struct exynos5_dmc *dmc,
  	}
- 
--	ret = dev_pm_opp_of_add_table(dev);
-+	ret = devm_pm_opp_of_add_table(dev);
- 	if (ret) {
- 		/* Optional, continue without devfreq */
- 		if (ret == -ENODEV)
- 			ret = 0;
--		goto err_fini;
-+		return ret;
- 	}
- 	pfdevfreq->opp_of_table_added = true;
- 
-@@ -122,10 +118,8 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
- 	cur_freq = clk_get_rate(pfdev->clock);
- 
- 	opp = devfreq_recommended_opp(dev, &cur_freq, 0);
--	if (IS_ERR(opp)) {
--		ret = PTR_ERR(opp);
--		goto err_fini;
--	}
-+	if (IS_ERR(opp))
-+		return PTR_ERR(opp);
- 
- 	panfrost_devfreq_profile.initial_freq = cur_freq;
- 	dev_pm_opp_put(opp);
-@@ -134,8 +128,7 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
- 					  DEVFREQ_GOV_SIMPLE_ONDEMAND, NULL);
- 	if (IS_ERR(devfreq)) {
- 		DRM_DEV_ERROR(dev, "Couldn't initialize GPU devfreq\n");
--		ret = PTR_ERR(devfreq);
--		goto err_fini;
-+		return PTR_ERR(devfreq);
- 	}
- 	pfdevfreq->devfreq = devfreq;
- 
-@@ -146,10 +139,6 @@ int panfrost_devfreq_init(struct panfrost_device *pfdev)
- 		pfdevfreq->cooling = cooling;
  
  	return 0;
 -
--err_fini:
--	panfrost_devfreq_fini(pfdev);
--	return ret;
+-err_opp:
+-	dev_pm_opp_of_remove_table(dmc->dev);
+-
+-	return -EINVAL;
  }
  
- void panfrost_devfreq_fini(struct panfrost_device *pfdev)
-@@ -160,14 +149,6 @@ void panfrost_devfreq_fini(struct panfrost_device *pfdev)
- 		devfreq_cooling_unregister(pfdevfreq->cooling);
- 		pfdevfreq->cooling = NULL;
- 	}
+ /**
+@@ -1567,8 +1562,6 @@ static int exynos5_dmc_remove(struct platform_device *pdev)
+ 	clk_disable_unprepare(dmc->mout_bpll);
+ 	clk_disable_unprepare(dmc->fout_bpll);
+ 
+-	dev_pm_opp_remove_table(dmc->dev);
 -
--	if (pfdevfreq->opp_of_table_added) {
--		dev_pm_opp_of_remove_table(&pfdev->pdev->dev);
--		pfdevfreq->opp_of_table_added = false;
--	}
--
--	dev_pm_opp_put_regulators(pfdevfreq->regulators_opp_table);
--	pfdevfreq->regulators_opp_table = NULL;
+ 	return 0;
  }
- 
- void panfrost_devfreq_resume(struct panfrost_device *pfdev)
-diff --git a/drivers/gpu/drm/panfrost/panfrost_devfreq.h b/drivers/gpu/drm/panfrost/panfrost_devfreq.h
-index db6ea48e21f9..210269944687 100644
---- a/drivers/gpu/drm/panfrost/panfrost_devfreq.h
-+++ b/drivers/gpu/drm/panfrost/panfrost_devfreq.h
-@@ -8,14 +8,12 @@
- #include <linux/ktime.h>
- 
- struct devfreq;
--struct opp_table;
- struct thermal_cooling_device;
- 
- struct panfrost_device;
- 
- struct panfrost_devfreq {
- 	struct devfreq *devfreq;
--	struct opp_table *regulators_opp_table;
- 	struct thermal_cooling_device *cooling;
- 	bool opp_of_table_added;
  
 -- 
 2.30.2
