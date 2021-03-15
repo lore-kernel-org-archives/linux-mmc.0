@@ -2,163 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E596C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 08:34:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35A69C433E9
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 09:59:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 34EA064E90
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 08:34:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1269D64EDD
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 09:59:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229445AbhCOIdc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Mar 2021 04:33:32 -0400
-Received: from mga14.intel.com ([192.55.52.115]:51623 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229523AbhCOId0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 15 Mar 2021 04:33:26 -0400
-IronPort-SDR: p90FytXK6lNyVfyiuc0C9EA2y3rdVKEM3gbP/D+5JJwlGk9UXTxxzHCUATqgflJFPVMjncyu5/
- NUkYcVLM0MCw==
-X-IronPort-AV: E=McAfee;i="6000,8403,9923"; a="188414655"
-X-IronPort-AV: E=Sophos;i="5.81,249,1610438400"; 
-   d="scan'208";a="188414655"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2021 01:33:24 -0700
-IronPort-SDR: ZgEVDje230GewEXPvE8PeHo8e/TZ8o7bNkwgoEYdgu0xed67WxuNlJpx2QA93FLv/F/CEFOqKF
- PkwmsR4ykJsA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.81,249,1610438400"; 
-   d="scan'208";a="590253278"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga005.jf.intel.com with ESMTP; 15 Mar 2021 01:33:22 -0700
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-acpi: Add support for NVIDIA
- BlueField-3 SoC
-To:     Liming Sun <limings@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Khalil Blaiech <kblaiech@nvidia.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <b62a68d1f8488e7f95befc6723ba5c20d6781628.1615487235.git.limings@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <8236f89c-720e-f8bd-86d0-9654175de659@intel.com>
-Date:   Mon, 15 Mar 2021 10:33:30 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.0
+        id S229767AbhCOJ7F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Mar 2021 05:59:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49132 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229460AbhCOJ6u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2021 05:58:50 -0400
+Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A916C061574
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Mar 2021 02:58:49 -0700 (PDT)
+Received: by mail-vs1-xe2a.google.com with SMTP id a12so16002569vsd.3
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Mar 2021 02:58:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=jxbWASu5oWJzNTcEYWC8hv+A2NytfrTKC8d5cxLm8m4=;
+        b=QO+Dsj7DNztito3plfPpudEkW6UzYy/kwjSy/EX1bSXEeAdO/n8ENbftctcLSbZ9AN
+         1kgJGGRmS34bwBJ1KwCrYGXiVAi2B3cycK89PyEdtXIKd3iRFlUnYVigr2Q9GJTsHbPs
+         Kco6SQp3afkjqy7/cvcQC1U1Uhu4Dh0v7iy41Oy7rxVoRhOSfgniazjeFbofQg/YMlpJ
+         VB7p6Qj3gklfF2sf8e5MpP9WYwoPWoqf5UfZu158hQziwRs9JsyAecaZRQTtZZSvlguI
+         P/Qra+J54RbhumZHnnfeT1W1Dhw04mEnJghbr6VI7Y9OIeKLziBK2q5HaUYbc226vCFq
+         cS6g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jxbWASu5oWJzNTcEYWC8hv+A2NytfrTKC8d5cxLm8m4=;
+        b=Qkn2Mn8BVthN+ZeQwB1UpoR4xT39lGEekcOHm/S/sPZib89UUIGtjXtSfH999FPHt2
+         DOPJBJdvibZYJ7TgLGMkYZFqrdcB/bRlyD9cAhilT5Z1jSmmrfkSaA3BXZFtC2roNvRh
+         DIIs+sQLrws6/SEt2G9CpFCM8FhvcoAn+8nsNDJpT9nLuCj+5A/4ksDokTjPXX4Rdnrs
+         eknDi15fAZXcNCHtGBj642jTmACa+Ie7Ze31Fi5fNsbFPYWmlt6yvKrrZYqYIyN7yfBX
+         4+mhZPlVetenW1fKXrpGgK1PkTj7ANB9RojFkw/ykS03hyLr001RYZ5JfFIFbetxOZx4
+         P22A==
+X-Gm-Message-State: AOAM532u3x6qm+EhKe1DdM8emyUjweN6QPOXRsdRW0KhsfHvvQDkEYI4
+        H1awAHiLH6i/oLRD1UGbi3p+Imn8VnFQoWwdDAkBlh5NN3pgQ/Fc
+X-Google-Smtp-Source: ABdhPJwtB/z3n3jeh8srMpGid+o1Na0JidEiSqnpdf8GFP15mWlT0Y1Aw9O1VY+dSpPMcVJqbQp5nBt84u676RgcYPs=
+X-Received: by 2002:a67:8c89:: with SMTP id o131mr1866968vsd.42.1615802328387;
+ Mon, 15 Mar 2021 02:58:48 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <b62a68d1f8488e7f95befc6723ba5c20d6781628.1615487235.git.limings@nvidia.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <CGME20210310152931epcas2p1be7719eeaca8d14bf7a8244ff389bd39@epcas2p1.samsung.com>
+ <20210310152900.149380-1-ulf.hansson@linaro.org> <000001d7195e$8122ca00$83685e00$@samsung.com>
+In-Reply-To: <000001d7195e$8122ca00$83685e00$@samsung.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 15 Mar 2021 10:58:11 +0100
+Message-ID: <CAPDyKFqAXejhr4yytY7KwLycSTnyC0Y4AD3DErxbYMuXUJhVbg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Fix hanging on I/O during system suspend for
+ removable cards
+To:     Kiwoong Kim <kwmad.kim@samsung.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/03/21 3:48 pm, Liming Sun wrote:
-> This commit adds ACPI support for the BlueField-3 SoC which uses
-> the DWC_mshc eMMC controller. The boundary check logic in static
-> function dwcmshc_adma_write_desc() comes from sdhci-of-dwcmshc.c.
+On Mon, 15 Mar 2021 at 06:46, Kiwoong Kim <kwmad.kim@samsung.com> wrote:
+>
+> > The mmc core uses a PM notifier to temporarily during system suspend, turn
+> > off the card detection mechanism for removal/insertion of (e)MMC/SD/SDIO
+> > cards. Additionally, the notifier may be used to remove an SDIO card
+> > entirely, if a corresponding SDIO functional driver don't have the system
+> > suspend/resume callbacks assigned. This behaviour has been around for a
+> > very long time.
+> >
+> > However, a recent bug report tells us there are problems with this
+> > approach. More precisely, when receiving the PM_SUSPEND_PREPARE
+> > notification, we may end up hanging on I/O to be completed, thus also
+> > preventing the system from getting suspended.
+> >
+> > In the end what happens, is that the cancel_delayed_work_sync() in
+> > mmc_pm_notify() ends up waiting for mmc_rescan() to complete - and since
+> > mmc_rescan() wants to claim the host, it needs to wait for the I/O to be
+> > completed first.
+> >
+> > Typically, this problem is triggered in Android, if there is ongoing I/O
+> > while the user decides to suspend, resume and then suspend the system
+> > again. This due to that after the resume, an mmc_rescan() work gets punted
+> > to the workqueue, which job is to verify that the card remains inserted
+> > after the system has resumed.
+> >
+> > To fix this problem, userspace needs to become frozen to suspend the I/O,
+> > prior to turning off the card detection mechanism. Therefore, let's drop
+> > the PM notifiers for mmc subsystem altogether and rely on the card
+> > detection to be turned off/on as a part of the system_freezable_wq, that
+> > we are already using.
+> >
+> Dear Ulf
+>
+> Do you think there is no possibility that claiming a host by mmc_rescan is
+> postponed by early IO requests?
+> E.g. the case where the work is executed later unexpectedly for something.
 
-Did you consider adding ACPI support to sdhci-of-dwcmshc.c ?
-Other drivers have taken that approach, see sdhci-xenon.c or sdhci-iproc.c
+That shouldn't matter.
 
-> 
-> Signed-off-by: Liming Sun <limings@nvidia.com>
-> Reviewed-by: Khalil Blaiech <kblaiech@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-acpi.c | 64 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 64 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index 54205e3..6448e94e 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -716,6 +716,68 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
->  	.priv_size	= sizeof(struct amd_sdhci_host),
->  };
->  
-> +/* Check DMA address/length boundary. */
-> +static inline bool dwcmshc_adma_boundary_ok(dma_addr_t addr, int len)
-> +{
-> +	return (addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1));
-> +}
-> +
-> +/*
-> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
-> + * so that each DMA transfer doesn't exceed the boundary.
-> + */
-> +static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
-> +				    dma_addr_t addr, int len, unsigned int cmd)
-> +{
-> +	int tmplen, offset;
-> +
-> +	if (likely(!len || dwcmshc_adma_boundary_ok(addr, len))) {
-> +		sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +		return;
-> +	}
-> +
-> +	offset = addr & (SZ_128M - 1);
-> +	tmplen = SZ_128M - offset;
-> +	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
-> +
-> +	addr += tmplen;
-> +	len -= tmplen;
-> +	sdhci_adma_write_desc(host, desc, addr, len, cmd);
-> +}
-> +
-> +static int sdhci_acpi_emmc_nvda_bf_probe_slot(struct platform_device *pdev,
-> +					      struct acpi_device *adev)
-> +{
-> +	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
-> +	struct sdhci_host *host = c->host;
-> +	u32 extra;
-> +
-> +	/* Extra adma table cnt for cross 128M boundary handling. */
-> +	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
-> +	extra = min(extra, (u32)SDHCI_MAX_SEGS);
-> +	host->adma_table_cnt += extra;
-> +
-> +	return 0;
-> +}
-> +
-> +static const struct sdhci_ops sdhci_acpi_ops_nvda_bf = {
-> +	.set_clock		= sdhci_set_clock,
-> +	.set_bus_width		= sdhci_set_bus_width,
-> +	.set_uhs_signaling	= sdhci_set_uhs_signaling,
-> +	.reset			= sdhci_reset,
-> +	.adma_write_desc	= dwcmshc_adma_write_desc,
-> +};
-> +
-> +static const struct sdhci_acpi_chip sdhci_acpi_chip_nvda_bf = {
-> +	.ops = &sdhci_acpi_ops_nvda_bf,
-> +};
-> +
-> +static const struct sdhci_acpi_slot sdhci_acpi_slot_nvda_bf_emmc = {
-> +	.chip		= &sdhci_acpi_chip_nvda_bf,
-> +	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
-> +	.probe_slot	= sdhci_acpi_emmc_nvda_bf_probe_slot,
-> +};
-> +
->  struct sdhci_acpi_uid_slot {
->  	const char *hid;
->  	const char *uid;
-> @@ -740,6 +802,7 @@ struct sdhci_acpi_uid_slot {
->  	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
->  	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
->  	{ "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc },
-> +	{ "MLNXBF30", NULL, &sdhci_acpi_slot_nvda_bf_emmc },
->  	{ },
->  };
->  
-> @@ -757,6 +820,7 @@ struct sdhci_acpi_uid_slot {
->  	{ "QCOM8051" },
->  	{ "QCOM8052" },
->  	{ "AMDI0040" },
-> +	{ "MLNXBF30" },
->  	{ },
->  };
->  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
-> 
+The important part is that I/O from userspace gets suspended before
+the system_freezable_wq gets frozen, which is what mmc_rescan() runs
+from.
 
+>
+> And it seems that cancelling the work before system suspend is removed in
+> the patch.
+> That means you might think there is no case with the pended the work, I
+> think.
+> Am I right?
+
+When system_freezable_wq is frozen, running works will be synced for
+completion. Scheduled works don't get to run until the
+system_freezable_wq is unfrozen.
+
+In other words, the behaviour remains the same, except that we are
+suspending card detection in mmc_rescan() to a slightly later state.
+
+>
+> If I mis-understand something, please let me know.
+>
+> Thanks.
+> Kiwoong Kim
+>
+
+Did you try out the patch at your side, to see if it resolves your problems?
+
+Kind regards
+Uffe
