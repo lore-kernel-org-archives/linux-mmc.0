@@ -7,51 +7,48 @@ X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF90EC433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 07:12:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E596C433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 08:34:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8DA3164E49
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 07:12:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 34EA064E90
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 08:34:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229828AbhCOHLo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Mar 2021 03:11:44 -0400
-Received: from mga05.intel.com ([192.55.52.43]:64137 "EHLO mga05.intel.com"
+        id S229445AbhCOIdc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Mar 2021 04:33:32 -0400
+Received: from mga14.intel.com ([192.55.52.115]:51623 "EHLO mga14.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230053AbhCOHLV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 15 Mar 2021 03:11:21 -0400
-IronPort-SDR: 0miSnHwvMNzICocwgMlzjpOX07QWpCV8X2t7lTamOduTv8h7IMbHsD7z+wMEZlOt5AZgA6IM58
- RYJiHdujekow==
-X-IronPort-AV: E=McAfee;i="6000,8403,9923"; a="274088569"
+        id S229523AbhCOId0 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 15 Mar 2021 04:33:26 -0400
+IronPort-SDR: p90FytXK6lNyVfyiuc0C9EA2y3rdVKEM3gbP/D+5JJwlGk9UXTxxzHCUATqgflJFPVMjncyu5/
+ NUkYcVLM0MCw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9923"; a="188414655"
 X-IronPort-AV: E=Sophos;i="5.81,249,1610438400"; 
-   d="scan'208";a="274088569"
+   d="scan'208";a="188414655"
 Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2021 00:11:16 -0700
-IronPort-SDR: hk6d821A7mYPCVvHFIN+xmMlUAkXp1U61h+sUoll09wKa650Hrrz7P35rnDfgM2fXxgUS/AsOR
- S95dCw95a+dg==
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2021 01:33:24 -0700
+IronPort-SDR: ZgEVDje230GewEXPvE8PeHo8e/TZ8o7bNkwgoEYdgu0xed67WxuNlJpx2QA93FLv/F/CEFOqKF
+ PkwmsR4ykJsA==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.81,249,1610438400"; 
-   d="scan'208";a="590234443"
+   d="scan'208";a="590253278"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.76]) ([10.237.72.76])
-  by orsmga005.jf.intel.com with ESMTP; 15 Mar 2021 00:11:14 -0700
-Subject: Re: [EXT] Re: [RFC PATCH 2/2] Make cmdq_en attribute writeable
-To:     "Luca Porzio (lporzio)" <lporzio@micron.com>,
+  by orsmga005.jf.intel.com with ESMTP; 15 Mar 2021 01:33:22 -0700
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-acpi: Add support for NVIDIA
+ BlueField-3 SoC
+To:     Liming Sun <limings@nvidia.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Luca Porzio <porzio@gmail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "Zhan Liu (zliua)" <zliua@micron.com>
-References: <20210215003249.GA12303@lupo-laptop>
- <CAPDyKFou4VdtUV66-c8y_tV9g9oaUCa8nphsLW6gH0_bi7y_dA@mail.gmail.com>
- <d9d7a7c7-dd26-8e07-e510-7e2493bff882@intel.com>
- <BN7PR08MB4753E077C122538BE9C116FCDC6D9@BN7PR08MB4753.namprd08.prod.outlook.com>
+        Khalil Blaiech <kblaiech@nvidia.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <b62a68d1f8488e7f95befc6723ba5c20d6781628.1615487235.git.limings@nvidia.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <0b4aea34-4759-14cf-cba3-3d85dbb3270e@intel.com>
-Date:   Mon, 15 Mar 2021 09:11:22 +0200
+Message-ID: <8236f89c-720e-f8bd-86d0-9654175de659@intel.com>
+Date:   Mon, 15 Mar 2021 10:33:30 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.8.0
 MIME-Version: 1.0
-In-Reply-To: <BN7PR08MB4753E077C122538BE9C116FCDC6D9@BN7PR08MB4753.namprd08.prod.outlook.com>
+In-Reply-To: <b62a68d1f8488e7f95befc6723ba5c20d6781628.1615487235.git.limings@nvidia.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -59,168 +56,109 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 15/03/21 12:33 am, Luca Porzio (lporzio) wrote:
-> Micron Confidential
-> 
-> 
-> 
->> -----Original Message-----
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Sent: Wednesday, March 10, 2021 9:54 AM
->> To: Ulf Hansson <ulf.hansson@linaro.org>; Luca Porzio <porzio@gmail.com>
->> Cc: linux-mmc@vger.kernel.org; Zhan Liu (zliua) <zliua@micron.com>; Luca
->> Porzio (lporzio) <lporzio@micron.com>
->> Subject: [EXT] Re: [RFC PATCH 2/2] Make cmdq_en attribute writeable
->>
->> CAUTION: EXTERNAL EMAIL. Do not click links or open attachments unless
->> you recognize the sender and were expecting this message.
->>
->>
->> On 2/03/21 12:46 pm, Ulf Hansson wrote:
->>> + Adrian
->>>
->>> On Mon, 15 Feb 2021 at 01:33, Luca Porzio <porzio@gmail.com> wrote:
->>>>
->>>> cmdq_en attribute in sysfs now can now be written.
->>>> When 0 is written:
->>>>   CMDQ is disabled and kept disabled across device reboots.
->>>> When 1 is written:
->>>>   CMDQ mode is instantly reneabled (if supported).
->>>>
->>>> Signed-off-by: Luca Porzio <lporzio@micron.com>
->>>> Signed-off-by: Zhan Liu <zliua@micron.com>
->>>
->>> Luca, thanks for your patch! I am about to start to review this.
->>>
->>> I have also looped in Adrian to get his opinions.
->>>
->>> Get back to you soon!
->>>
->>> Kind regards
->>> Uffe
->>>
->>>> ---
->>>>  drivers/mmc/core/mmc.c   | 152 ++++++++++++++++++++++++++++++-
->> --------
->>>>  include/linux/mmc/card.h |   1 +
->>>>  2 files changed, 118 insertions(+), 35 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c index
->>>> 0d80b72ddde8..5c7d5bac5c00 100644
->>>> --- a/drivers/mmc/core/mmc.c
->>>> +++ b/drivers/mmc/core/mmc.c
->>>> @@ -794,7 +794,120 @@ MMC_DEV_ATTR(enhanced_rpmb_supported,
->> "%#x\n",
->>>> MMC_DEV_ATTR(rel_sectors, "%#x\n", card->ext_csd.rel_sectors);
->>>> MMC_DEV_ATTR(ocr, "0x%08x\n", card->ocr);  MMC_DEV_ATTR(rca,
->>>> "0x%04x\n", card->rca); -MMC_DEV_ATTR(cmdq_en, "%d\n",
->>>> card->ext_csd.cmdq_en);
->>>> +
->>>> +
->>>> +/* Setup command queue mode and CQE if underling hw supports it
->>>> + * and assuming force_disable_cmdq has not been set.
->>>> + */
->>>> +static int mmc_cmdq_setup(struct mmc_host *host, struct mmc_card
->>>> +*card) {
->>>> +       int err;
->>>> +
->>>> +       /* Check HW support */
->>>> +       if (!card->ext_csd.cmdq_support || !(host->caps2 &
->> MMC_CAP2_CQE))
->>>> +               card->force_disable_cmdq = true;
->>>> +
->>>> +       /* Enable/Disable  CMDQ mode */
->>>> +       if (!card->ext_csd.cmdq_en && !card->force_disable_cmdq) {
->>>> +               err = mmc_cmdq_enable(card);
->>>> +               if (err && err != -EBADMSG)
->>>> +                       return err;
->>>> +               if (err) {
->>>> +                       pr_warn("%s: Enabling CMDQ failed\n",
->>>> +                           mmc_hostname(card->host));
->>>> +                       card->ext_csd.cmdq_support = false;
->>>> +                       card->ext_csd.cmdq_depth = 0;
->>>> +               }
->>>> +
->>>> +       } else if (card->ext_csd.cmdq_en && card->force_disable_cmdq) {
->>>> +               err = mmc_cmdq_disable(card);
->>>> +               if (err) {
->>>> +                       pr_warn("%s: Disabling CMDQ failed, error %d\n",
->>>> +                           mmc_hostname(card->host), err);
->>>> +                       err = 0;
->>>> +               }
->>>> +       }
->>>> +
->>>> +       /*
->>>> +        * In some cases (e.g. RPMB or mmc_test), the Command Queue
->> must be
->>>> +        * disabled for a time, so a flag is needed to indicate to re-enable the
->>>> +        * Command Queue.
->>>> +        */
->>>> +       card->reenable_cmdq = card->ext_csd.cmdq_en;
->>>> +
->>>> +       /* Enable/Disable Host CQE */
->>>> +       if (!card->force_disable_cmdq) {
->>>> +
->>>> +               if (host->cqe_ops && !host->cqe_enabled) {
->>>> +                       err = host->cqe_ops->cqe_enable(host, card);
->>>> +                       if (!err) {
->>>> +                               host->cqe_enabled = true;
->>
->> Re-initializing the card is also a recovery path for the block driver.
->> Changing host->cqe_enabled during a recovery reset, creates an unexpected
->> dependency for the block driver.  That should not be necessary, and given
->> that cqhci does memory allocation as part of enabling, it is better not to
->> disable / re-enable if it can be helped.
->>
-> 
-> Adrian,
-> 
-> This patch does nothing if the CMDQ maintains the same status (even 
-> across reboots). It only take decision if CMDQ state is to be changed, thus
-> the occurrence you mention should not happen.
+On 12/03/21 3:48 pm, Liming Sun wrote:
+> This commit adds ACPI support for the BlueField-3 SoC which uses
+> the DWC_mshc eMMC controller. The boundary check logic in static
+> function dwcmshc_adma_write_desc() comes from sdhci-of-dwcmshc.c.
 
-It does if there are errors.
+Did you consider adding ACPI support to sdhci-of-dwcmshc.c ?
+Other drivers have taken that approach, see sdhci-xenon.c or sdhci-iproc.c
 
+> 
+> Signed-off-by: Liming Sun <limings@nvidia.com>
+> Reviewed-by: Khalil Blaiech <kblaiech@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-acpi.c | 64 +++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 64 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index 54205e3..6448e94e 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -716,6 +716,68 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+>  	.priv_size	= sizeof(struct amd_sdhci_host),
+>  };
 >  
->> From a design point of view, it is really the block driver that should control
->> the use of command queuing rather than expecting it to cope with changes
->> from a lower level.
->>
+> +/* Check DMA address/length boundary. */
+> +static inline bool dwcmshc_adma_boundary_ok(dma_addr_t addr, int len)
+> +{
+> +	return (addr | (SZ_128M - 1)) == ((addr + len - 1) | (SZ_128M - 1));
+> +}
+> +
+> +/*
+> + * If DMA addr spans 128MB boundary, we split the DMA transfer into two
+> + * so that each DMA transfer doesn't exceed the boundary.
+> + */
+> +static void dwcmshc_adma_write_desc(struct sdhci_host *host, void **desc,
+> +				    dma_addr_t addr, int len, unsigned int cmd)
+> +{
+> +	int tmplen, offset;
+> +
+> +	if (likely(!len || dwcmshc_adma_boundary_ok(addr, len))) {
+> +		sdhci_adma_write_desc(host, desc, addr, len, cmd);
+> +		return;
+> +	}
+> +
+> +	offset = addr & (SZ_128M - 1);
+> +	tmplen = SZ_128M - offset;
+> +	sdhci_adma_write_desc(host, desc, addr, tmplen, cmd);
+> +
+> +	addr += tmplen;
+> +	len -= tmplen;
+> +	sdhci_adma_write_desc(host, desc, addr, len, cmd);
+> +}
+> +
+> +static int sdhci_acpi_emmc_nvda_bf_probe_slot(struct platform_device *pdev,
+> +					      struct acpi_device *adev)
+> +{
+> +	struct sdhci_acpi_host *c = platform_get_drvdata(pdev);
+> +	struct sdhci_host *host = c->host;
+> +	u32 extra;
+> +
+> +	/* Extra adma table cnt for cross 128M boundary handling. */
+> +	extra = DIV_ROUND_UP_ULL(dma_get_required_mask(&pdev->dev), SZ_128M);
+> +	extra = min(extra, (u32)SDHCI_MAX_SEGS);
+> +	host->adma_table_cnt += extra;
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct sdhci_ops sdhci_acpi_ops_nvda_bf = {
+> +	.set_clock		= sdhci_set_clock,
+> +	.set_bus_width		= sdhci_set_bus_width,
+> +	.set_uhs_signaling	= sdhci_set_uhs_signaling,
+> +	.reset			= sdhci_reset,
+> +	.adma_write_desc	= dwcmshc_adma_write_desc,
+> +};
+> +
+> +static const struct sdhci_acpi_chip sdhci_acpi_chip_nvda_bf = {
+> +	.ops = &sdhci_acpi_ops_nvda_bf,
+> +};
+> +
+> +static const struct sdhci_acpi_slot sdhci_acpi_slot_nvda_bf_emmc = {
+> +	.chip		= &sdhci_acpi_chip_nvda_bf,
+> +	.caps		= MMC_CAP_8_BIT_DATA | MMC_CAP_NONREMOVABLE,
+> +	.probe_slot	= sdhci_acpi_emmc_nvda_bf_probe_slot,
+> +};
+> +
+>  struct sdhci_acpi_uid_slot {
+>  	const char *hid;
+>  	const char *uid;
+> @@ -740,6 +802,7 @@ struct sdhci_acpi_uid_slot {
+>  	{ "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
+>  	{ "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
+>  	{ "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc },
+> +	{ "MLNXBF30", NULL, &sdhci_acpi_slot_nvda_bf_emmc },
+>  	{ },
+>  };
+>  
+> @@ -757,6 +820,7 @@ struct sdhci_acpi_uid_slot {
+>  	{ "QCOM8051" },
+>  	{ "QCOM8052" },
+>  	{ "AMDI0040" },
+> +	{ "MLNXBF30" },
+>  	{ },
+>  };
+>  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
 > 
-> I see this is also related with comment from Ulf. I will propose a new patch 
-> which addresses this one. Thanks for your comment here.
-> 
->>>> +
->>>> +                               if (card->ext_csd.cmdq_en) {
->>>> +                                       pr_info("%s: Command Queue Engine enabled\n",
->>>> +                                           mmc_hostname(host));
->>>> +                               } else {
->>>> +                                       host->hsq_enabled = true;
->>>> +                                       pr_info("%s: Host Software Queue enabled\n",
->>>> +                                           mmc_hostname(host));
->>>> +                               }
->>>> +                       }
->>>> +               }
->>>> +
->>>> +       } else {
->>>> +
->>>> +               if (host->cqe_enabled) {
->>>> +                       host->cqe_ops->cqe_disable(host);
->>>> +                       host->cqe_enabled = false;
->>>> +                       pr_info("%s: Command Queue Engine disabled\n",
->>>> +                           mmc_hostname(host));
->>>> +               }
->>>> +
->>>> +               host->hsq_enabled = false;
->>
->> This looks quite wrong for hsq which is currently not used with cmdq.
->>
-> 
-> HSQ is really trying to speed up command adoption but in my use case
-> (ie. multi cmd list with as low as possible interference from other sources)
-> HSQ could mix commands and make problems, so I decided to stay safe 
-> and prefer stability against speed of execution.
-> 
-> Do you agree? Any suggestion?
 
-I just meant, do not break HSQ.
