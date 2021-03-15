@@ -2,138 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_NONE,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A4D1C43333
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 15:00:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B7D0C433E6
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 15:12:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D4BE64D5D
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 15:00:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E882E64E10
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 15:12:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233179AbhCOPAD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Mar 2021 11:00:03 -0400
-Received: from www.zeus03.de ([194.117.254.33]:47520 "EHLO mail.zeus03.de"
+        id S232763AbhCOPMT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Mar 2021 11:12:19 -0400
+Received: from mail.kernel.org ([198.145.29.99]:52042 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233176AbhCOO7n (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 15 Mar 2021 10:59:43 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=t8iUTSfb7kOqAF
-        0vK4VOLAEP+Ojkq/VM7IgeG1+ToqU=; b=hSeJhEsPcUl2P7P6z1XavQKAGAmcv0
-        pL+ceJ9MYAqs4tT1N91AYZBdjNjrOROwF9b3t3hXQ+61U4PoQmfY10BtGetvB2Qi
-        Oqp3M5u83h3kFe1qh/Y5KDw6U2m57RhjSezWcLVBHPeqD/A83/8nfqto9tfaEfEy
-        IsaCUt7L+jxRo=
-Received: (qmail 1439293 invoked from network); 15 Mar 2021 15:59:41 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 15 Mar 2021 15:59:41 +0100
-X-UD-Smtp-Session: l3s3148p1@uZ/Uf5S9EIsgARa4RYTzARykWRFxRPkz
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH v2 3/3] mmc: renesas_sdhi: do hard reset if possible
-Date:   Mon, 15 Mar 2021 15:59:38 +0100
-Message-Id: <20210315145938.58565-4-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210315145938.58565-1-wsa+renesas@sang-engineering.com>
-References: <20210315145938.58565-1-wsa+renesas@sang-engineering.com>
+        id S232168AbhCOPL4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 15 Mar 2021 11:11:56 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id AD03B64DF0;
+        Mon, 15 Mar 2021 15:11:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1615821116;
+        bh=L7mnfgF+lb3L7iB9rSiuo2URmRNaFyzItGPOorf386w=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=QVtsZts/cibSxdjb/Jr3vi8PXgNlYqDm55wHi7LqMy+T8agsvjuRMA+tQDeN+jlyq
+         O6r7vWYrtQ/zQRIH2ECqR7bKeAmZD7zO+ftKuY9dEoNpOVX9t1ECuUc+uNzibBSQ6q
+         NwD45oywH1vZddYlES25P956rTE6lENmxejcS1csz0UuW1iMg3XLGQb2CGCexAk0HA
+         tvdzBh/9KlhbnGlIFm2pm8aSL5BO9/GVWw8VBlrGKWRUsGnfhOJOcAWOke17+PKwRk
+         /2YwNxDmaJdhIo0qwkIwI9aygAK/B9byS2SneQHGeV1yVTyuFSK58tARWt0esHEiE/
+         eOT1ucJaKb9NQ==
+Date:   Mon, 15 Mar 2021 17:11:52 +0200
+From:   Leon Romanovsky <leon@kernel.org>
+To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
+Cc:     linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-mmc@vger.kernel.org,
+        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH v5 03/24] wfx: add Makefile/Kconfig
+Message-ID: <YE95OCx5hWRedi+W@unreal>
+References: <20210315132501.441681-1-Jerome.Pouiller@silabs.com>
+ <20210315132501.441681-4-Jerome.Pouiller@silabs.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210315132501.441681-4-Jerome.Pouiller@silabs.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-All recent SDHI instances can be reset via the reset controller. If one
-is found, use it instead of the open coded reset. This is to get a
-future-proof sane reset state.
+On Mon, Mar 15, 2021 at 02:24:40PM +0100, Jerome Pouiller wrote:
+> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
+>
+> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> ---
+>  drivers/net/wireless/silabs/wfx/Kconfig  | 12 +++++++++++
+>  drivers/net/wireless/silabs/wfx/Makefile | 26 ++++++++++++++++++++++++
+>  2 files changed, 38 insertions(+)
+>  create mode 100644 drivers/net/wireless/silabs/wfx/Kconfig
+>  create mode 100644 drivers/net/wireless/silabs/wfx/Makefile
+>
+> diff --git a/drivers/net/wireless/silabs/wfx/Kconfig b/drivers/net/wireless/silabs/wfx/Kconfig
+> new file mode 100644
+> index 000000000000..3be4b1e735e1
+> --- /dev/null
+> +++ b/drivers/net/wireless/silabs/wfx/Kconfig
+> @@ -0,0 +1,12 @@
+> +config WFX
+> +	tristate "Silicon Labs wireless chips WF200 and further"
+> +	depends on MAC80211
+> +	depends on MMC || !MMC # do not allow WFX=y if MMC=m
+> +	depends on (SPI || MMC)
+> +	help
+> +	  This is a driver for Silicons Labs WFxxx series (WF200 and further)
+> +	  chipsets. This chip can be found on SPI or SDIO buses.
+> +
+> +	  Silabs does not use a reliable SDIO vendor ID. So, to avoid conflicts,
+> +	  the driver won't probe the device if it is not also declared in the
+> +	  Device Tree.
+> diff --git a/drivers/net/wireless/silabs/wfx/Makefile b/drivers/net/wireless/silabs/wfx/Makefile
+> new file mode 100644
+> index 000000000000..f399962c8619
+> --- /dev/null
+> +++ b/drivers/net/wireless/silabs/wfx/Makefile
+> @@ -0,0 +1,26 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +
+> +# Necessary for CREATE_TRACE_POINTS
+> +CFLAGS_debug.o = -I$(src)
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/Kconfig             |  1 +
- drivers/mmc/host/renesas_sdhi.h      |  2 ++
- drivers/mmc/host/renesas_sdhi_core.c | 17 ++++++++++++++++-
- 3 files changed, 19 insertions(+), 1 deletion(-)
+I wonder if it is still relevant outside of the staging tree.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index b236dfe2e879..1f1b691f10ce 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -707,6 +707,7 @@ config MMC_SDHI
- 	tristate "Renesas SDHI SD/SDIO controller support"
- 	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
- 	select MMC_TMIO_CORE
-+	select RESET_CONTROLLER
- 	help
- 	  This provides support for the SDHI SD/SDIO controller found in
- 	  Renesas SuperH, ARM and ARM64 based SoCs
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index cb962c7883dc..53eded81a53e 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -70,6 +70,8 @@ struct renesas_sdhi {
- 	DECLARE_BITMAP(smpcmp, BITS_PER_LONG);
- 	unsigned int tap_num;
- 	unsigned int tap_set;
-+
-+	struct reset_control *rstc;
- };
- 
- #define host_to_priv(host) \
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index db753829eaf6..d36181b6f687 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -20,6 +20,7 @@
- 
- #include <linux/clk.h>
- #include <linux/delay.h>
-+#include <linux/iopoll.h>
- #include <linux/kernel.h>
- #include <linux/mfd/tmio.h>
- #include <linux/mmc/host.h>
-@@ -32,6 +33,7 @@
- #include <linux/platform_device.h>
- #include <linux/pm_domain.h>
- #include <linux/regulator/consumer.h>
-+#include <linux/reset.h>
- #include <linux/sh_dma.h>
- #include <linux/slab.h>
- #include <linux/sys_soc.h>
-@@ -572,10 +574,19 @@ static void renesas_sdhi_scc_reset(struct tmio_mmc_host *host, struct renesas_sd
- static void renesas_sdhi_reset(struct tmio_mmc_host *host)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
-+	int ret;
- 	u16 val;
- 
--	if (priv->scc_ctl)
-+	if (priv->rstc) {
-+		reset_control_reset(priv->rstc);
-+		/* Unknown why but without polling reset status, it will hang */
-+		read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
-+				  false, priv->rstc);
-+		priv->needs_adjust_hs400 = false;
-+		renesas_sdhi_set_clock(host, host->clk_cache);
-+	} else if (priv->scc_ctl) {
- 		renesas_sdhi_scc_reset(host, priv);
-+	}
- 
- 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_ALL_RCAR2);
- 
-@@ -1081,6 +1092,10 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 	if (ret)
- 		goto efree;
- 
-+	priv->rstc = devm_reset_control_get_optional_exclusive(&pdev->dev, NULL);
-+	if (IS_ERR(priv->rstc))
-+		return PTR_ERR(priv->rstc);
-+
- 	ver = sd_ctrl_read16(host, CTL_VERSION);
- 	/* GEN2_SDR104 is first known SDHI to use 32bit block count */
- 	if (ver < SDHI_VER_GEN2_SDR104 && mmc_data->max_blk_count > U16_MAX)
--- 
-2.30.0
-
+Thanks
