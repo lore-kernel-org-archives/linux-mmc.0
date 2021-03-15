@@ -2,109 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A25ACC433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 11:05:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46042C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 12:32:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7025A64EC4
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 11:05:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 13EA264E10
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 12:32:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229532AbhCOLFZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Mar 2021 07:05:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35166 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229579AbhCOLFK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2021 07:05:10 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16FC7C06175F
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Mar 2021 04:05:10 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id n16so56172057lfb.4
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Mar 2021 04:05:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Sgvr9igcXWBKUfY1IE4B67mheq905Em2jQKjOx4y1YE=;
-        b=HKhfeeknB7kfXg9qqI7wWyr88d6N6N0MnUy9HDIvwsgFr28rpFNDBeukf2x56mBXZj
-         7IlMrOSTUnj7+Vk9EhivUeiQ8sDpaVhccDqZR1tjkHXa2xLNGgg7ZCAwvsXHb3xGij6l
-         0gfIx7huASrtnFKcJxIdY/WZww0WvTf8WgknDunIM7IcpqEnJ+aROCHqsrcfZDvir0t9
-         hOgKn+wphPfw7jMHzivOFyB9L6174KZg3aYkaifYnqYxRyrGteoLhms1ppDCgZx+gK0p
-         RVfXT2Shj+bfkssrku57lF2Gk7O+Mq2REwSnmJFEShEDAG5PMQl/DF/iexdibaQhMMCz
-         NmoQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Sgvr9igcXWBKUfY1IE4B67mheq905Em2jQKjOx4y1YE=;
-        b=FEKTBhCuHqpjfk1WXp32T/JzBNiRzrpL7QDf9ui6RJXEZwBy9P2lfGBl/qbMhThCpS
-         rVqy+D+jzbYiToa/Kda8pKTZM73teq+E3w+S5PlfvAVTsKBmG2EpDUO8b7VPlCwrpRB5
-         pNzXJMWLzRBP3LCIe0MzMGNdcHxApJnX2NUi9qci5RvWI/1MtdSaYjRuMBLKp2ti8B1b
-         40QzC5SFrCbY31x+lrQwJa+b1sjAl6dWCOpFhA+pIenOQy/13PY466Se4FibV9s9aHL+
-         9B2/cJt6R3iyM58zJ1bjm9yyf2wL/255KCDtUEMbvN760qzWONpdas6bQv/A5ymm7I1r
-         o8iQ==
-X-Gm-Message-State: AOAM533y0EYZI4ywfvYhLRWt7MAa7AhSBwnVM/nL3zh/6XkQiKRfLHu1
-        JZ/d4ES1qMf5Sfp1UbTAQvBIJRXP1VIC4JOWY3EYpw==
-X-Google-Smtp-Source: ABdhPJxgA++CWYgtrmM/Gv6XPeHInoxEYMwul217KfTlYslgm0DxKCREAH3B2IZa7VtwpBjIvONTWthCpwTuZd52zt8=
-X-Received: by 2002:a05:6512:243:: with SMTP id b3mr7794596lfo.529.1615806308540;
- Mon, 15 Mar 2021 04:05:08 -0700 (PDT)
+        id S229526AbhCOMbp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Mar 2021 08:31:45 -0400
+Received: from www.zeus03.de ([194.117.254.33]:60802 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229774AbhCOMbV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 15 Mar 2021 08:31:21 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=hyr2anXZBr9wlz34u3sUYM9zb0qk
+        Ivb8CxWQ0lYmBnc=; b=KVEhicLcnM6fLrHpxFTA0PYOHU0qjf1rbm17CZ1fTAZP
+        TCYYiPlvet35vD6LypeB94fQ3qEAcC6EqZrWfHnscN8kg6+ePkiihJ7GiIXWX/Ty
+        g2ba1lXAB017V6NI3NDmd3WvgZ+OxbQQzb09QsgDVn+96u+J6J9LXdk2ax1xIWk=
+Received: (qmail 1390144 invoked from network); 15 Mar 2021 13:31:19 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 15 Mar 2021 13:31:19 +0100
+X-UD-Smtp-Session: l3s3148p1@C2w+bZK9noggARa4RYTzARykWRFxRPkz
+Date:   Mon, 15 Mar 2021 13:31:17 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH 2/2] mmc: renesas_sdhi: do hard reset if possible
+Message-ID: <20210315123117.GC1182@ninjato>
+References: <20210309092332.30705-1-wsa+renesas@sang-engineering.com>
+ <20210309092332.30705-3-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB3692A6D95BD60A17AE698DF3D8919@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <20210311131748.GG3566@ninjato>
+ <TY2PR01MB3692BAF4BB03CDFE3D904B98D86F9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
-References: <20210313215302.4076765-1-linus.walleij@linaro.org>
-In-Reply-To: <20210313215302.4076765-1-linus.walleij@linaro.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 15 Mar 2021 12:04:57 +0100
-Message-ID: <CACRpkdZCoeb-uFgOrj5QETdiUPim9O=kXTXwqaFCZ-o76qzpuQ@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: Convert the BCM4329 bindings to YAML and extend
-To:     Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
-        Wright Feng <wright.feng@infineon.com>,
-        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>
-Cc:     linux-wireless <linux-wireless@vger.kernel.org>,
-        brcm80211-dev-list.pdl@broadcom.com,
-        SHA-cyfmac-dev-list@infineon.com,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="qjNfmADvan18RZcF"
+Content-Disposition: inline
+In-Reply-To: <TY2PR01MB3692BAF4BB03CDFE3D904B98D86F9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-By the way, here is a question to the broadcom folks:
 
-On Sat, Mar 13, 2021 at 10:53 PM Linus Walleij <linus.walleij@linaro.org> wrote:
+--qjNfmADvan18RZcF
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> +          - brcm,bcm43143-fmac
-> +          - brcm,bcm4341b0-fmac
-> +          - brcm,bcm4341b4-fmac
-> +          - brcm,bcm4341b5-fmac
-> +          - brcm,bcm4329-fmac
-> +          - brcm,bcm4330-fmac
-> +          - brcm,bcm4334-fmac
-> +          - brcm,bcm43340-fmac
-> +          - brcm,bcm4335-fmac
-> +          - brcm,bcm43362-fmac
-> +          - brcm,bcm4339-fmac
-> +          - brcm,bcm43430a0-fmac
-> +          - brcm,bcm43430a1-fmac
-> +          - brcm,bcm43455-fmac
-> +          - brcm,bcm43456-fmac
-> +          - brcm,bcm4354-fmac
-> +          - brcm,bcm4356-fmac
-> +          - brcm,bcm4359-fmac
-> +          - cypress,cyw4373-fmac
-> +          - cypress,cyw43012-fmac
 
-Here the "-fmac" suffix is added to distinguish the function from
-other functions
-in a combochip, usually WLAN + Bluetooth.
+> Adding the function itself seems OK. However, I checked the code, and then
+> adding hard reset into renesas_sdhi_reset() seems to break the following:
+> -----
+> commit 5b0739d76227fd5a3f02f014385bfa9c86e0404b
+> Author: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Date:   Thu Aug 20 15:25:37 2020 +0200
+>=20
+>     mmc: tmio: don't reset whole IP core when tuning fails
+>=20
+>     SDHI needs to reset the SCC only, not the whole IP core. So, if tuning
+>     fails, don't handle specifics in the generic TMIO core, but in the
+>     specific drivers. For SDHI, we need to move around the reset routine a
+>     bit. It is not modified.
+> ------
+>=20
+> So, perhaps, we have to fix renesas_sdhi_execute_tuning() somehow before
+> adding hard reset. But, what do you think?
 
-Are there some of these that are just WLAN and not combochips? In that case they
-shall not have the "-fmac" suffix.
+Thanks for the pointer, Shimoda-san! It seems it gets messy again, so
+time for getting clearer, I think. I will introduce a reset_scc funtion
+again which is seperate from reset_sdhi, so we have a clear distinction.
+Then, I will call reset_scc from renesas_sdhi_execute_tuning() and the
+rest stays with reset_sdhi. I have a prototype patch which I will test
+some more and  hopefully send out later.
 
-Yours,
-Linus Walleij
+
+--qjNfmADvan18RZcF
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmBPU5EACgkQFA3kzBSg
+KbbIIQ/9GZvkfcgYsJBpmXrnB0Mz3rVRJHujZSAscz0d+p2pFqiw1OI7Z9kvkmgC
+HfxPeacaSnIxxUmAfLvtb9vVQ8NxZvlWJYcNXYNHI9yz9+ZQ3R4CnTGpOec5nW4I
+L0IZzhtfmJh7n+brRrmAeOMz0wCYn8KG25nFBXLzfnyVUVB/C8Pobd3Je3uDxJX1
+evwRJ1GXPXQvUFgKyP5wAi/5/0OmO6S5A3j+K3gjKUYAs7Qcnh86NRox6rpLCjxh
+xOrmc3/QsOyFXgUxJ2zTcXr6bTcGmYgAkM0/mo6zMjrJcGfr7VlnMidokG3Eky62
+eLfOhLP8S85tqdtJ72b8+vcAUfkGYgEfdsmMySH2/Ry/7wGBxvLBCZ2MCZFPXsMP
+zy5uVdxlB0jmoQ1avFQ/wfu2zyLHzaPB5v4LLa2bfEm+LQB+utAsNjnIVhbAu+K2
+FbXXFQhU8PSRHZ89Mmoc86hpboQvz9+ILlNVZwpPJPdil5Nmz8UkYll8/kikO1dd
+54g4DdvNmM2l3HPSMGuzWJsoa/hdZE77sXXBhIR1aG/fYJ8a9AtvZtmnIeanO2uq
+xHmEGwsbSbtY+lnhGlSe5L3u3O69/wZ3CRKsRBmmjm0yIvU2ifr+68M573+l/KIQ
+T/8mhZqesNNDJW4gE1rGviA0sUP2dcA7Vr+nCfZeKKTd7vDbMIQ=
+=fE9+
+-----END PGP SIGNATURE-----
+
+--qjNfmADvan18RZcF--
