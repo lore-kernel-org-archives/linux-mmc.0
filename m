@@ -2,135 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35A69C433E9
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 09:59:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF69FC433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 10:41:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1269D64EDD
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 09:59:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A5AE664E89
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Mar 2021 10:41:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229767AbhCOJ7F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Mar 2021 05:59:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49132 "EHLO
+        id S229601AbhCOKkf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Mar 2021 06:40:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229460AbhCOJ6u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2021 05:58:50 -0400
-Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A916C061574
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Mar 2021 02:58:49 -0700 (PDT)
-Received: by mail-vs1-xe2a.google.com with SMTP id a12so16002569vsd.3
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Mar 2021 02:58:49 -0700 (PDT)
+        with ESMTP id S229673AbhCOKkN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Mar 2021 06:40:13 -0400
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DE701C061574;
+        Mon, 15 Mar 2021 03:40:12 -0700 (PDT)
+Received: by mail-ej1-x630.google.com with SMTP id lr13so65338292ejb.8;
+        Mon, 15 Mar 2021 03:40:12 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=jxbWASu5oWJzNTcEYWC8hv+A2NytfrTKC8d5cxLm8m4=;
-        b=QO+Dsj7DNztito3plfPpudEkW6UzYy/kwjSy/EX1bSXEeAdO/n8ENbftctcLSbZ9AN
-         1kgJGGRmS34bwBJ1KwCrYGXiVAi2B3cycK89PyEdtXIKd3iRFlUnYVigr2Q9GJTsHbPs
-         Kco6SQp3afkjqy7/cvcQC1U1Uhu4Dh0v7iy41Oy7rxVoRhOSfgniazjeFbofQg/YMlpJ
-         VB7p6Qj3gklfF2sf8e5MpP9WYwoPWoqf5UfZu158hQziwRs9JsyAecaZRQTtZZSvlguI
-         P/Qra+J54RbhumZHnnfeT1W1Dhw04mEnJghbr6VI7Y9OIeKLziBK2q5HaUYbc226vCFq
-         cS6g==
+        bh=DqzTiNwq7F43KRl7MeDTQAW5DfLX3HRrkcyj01ylqdg=;
+        b=OAHm4NsI295ATwtqDJ6uWfMyjCp1UrvV1Os5KFJTwp8mV0pF0TJxhe+NYcMIYNKKHX
+         xAxkXLUnteNgUGFYKjLHX7Owotbf98s3hFsrRFjlO4iK1exkBb7UL3QIsrDXWjTbIZi9
+         Sm2IflJgyHcnkuo9+cEtWy9YadMu7e840pufNuXSEym5LHB/unl/DnJU7SvW/9JpSYYK
+         S2p5mO9jR9BlJMcBRPgZuskkVEnGE0I3h582BELwrOemv1x/hW6hchxEG7nm1UBwDeES
+         c0oE+dj/5zgFkOtef9Hq9/Db1JvYQVWDrE1gU/N94ULNqTIUYRRx/KeVmwInA+sEax1b
+         Oldg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=jxbWASu5oWJzNTcEYWC8hv+A2NytfrTKC8d5cxLm8m4=;
-        b=Qkn2Mn8BVthN+ZeQwB1UpoR4xT39lGEekcOHm/S/sPZib89UUIGtjXtSfH999FPHt2
-         DOPJBJdvibZYJ7TgLGMkYZFqrdcB/bRlyD9cAhilT5Z1jSmmrfkSaA3BXZFtC2roNvRh
-         DIIs+sQLrws6/SEt2G9CpFCM8FhvcoAn+8nsNDJpT9nLuCj+5A/4ksDokTjPXX4Rdnrs
-         eknDi15fAZXcNCHtGBj642jTmACa+Ie7Ze31Fi5fNsbFPYWmlt6yvKrrZYqYIyN7yfBX
-         4+mhZPlVetenW1fKXrpGgK1PkTj7ANB9RojFkw/ykS03hyLr001RYZ5JfFIFbetxOZx4
-         P22A==
-X-Gm-Message-State: AOAM532u3x6qm+EhKe1DdM8emyUjweN6QPOXRsdRW0KhsfHvvQDkEYI4
-        H1awAHiLH6i/oLRD1UGbi3p+Imn8VnFQoWwdDAkBlh5NN3pgQ/Fc
-X-Google-Smtp-Source: ABdhPJwtB/z3n3jeh8srMpGid+o1Na0JidEiSqnpdf8GFP15mWlT0Y1Aw9O1VY+dSpPMcVJqbQp5nBt84u676RgcYPs=
-X-Received: by 2002:a67:8c89:: with SMTP id o131mr1866968vsd.42.1615802328387;
- Mon, 15 Mar 2021 02:58:48 -0700 (PDT)
+        bh=DqzTiNwq7F43KRl7MeDTQAW5DfLX3HRrkcyj01ylqdg=;
+        b=fBof9wcxbb8ReKcW4RRC9I9HlG+yJMab+UxHwovWW8gf6Iz0sFDihgKa5zWI6RGRAi
+         OanFz+2YyU6T2O6C0hkst1c0Q0rzCTuuNm0FEcHlqLULmFcxgK4PZyhyWeXjsTaHCSi8
+         XrYD4FTN0IOrxCZGfm5IFMt1IzCbBz8BuIAsfdSw1mMBTSbyZXURSPbA2Jc5SIS0nrTl
+         DFyrH+ZojIMu41fuQCOZRHL4vwM3uqoWlPLlzmMF3l8Zm++aVKKmuxN1CYAHdPS5oxmU
+         EQSz76pTOQMnj6MgwPUafzPa1bkk5LuB9ofd3qBxVvpyZXxPXn/5XsTrLbRG1bRXPXx9
+         mCyA==
+X-Gm-Message-State: AOAM532oLVS76YWtR2LvgWu7/52SeLpMOkjzbxNE8z23YVeckX26As8x
+        VRDSGWu4mVUNP9oaLL0Pi40AavZckVu384pCeA8=
+X-Google-Smtp-Source: ABdhPJyMTPKqLAPCgX5HECYtPHc584QK7Bo03u0+OSFE3M17en7cxnIzQqX+5hZ0KYbIC+jQn+YkMke4VpejGjHc66Y=
+X-Received: by 2002:a17:906:3849:: with SMTP id w9mr23036529ejc.7.1615804811719;
+ Mon, 15 Mar 2021 03:40:11 -0700 (PDT)
 MIME-Version: 1.0
-References: <CGME20210310152931epcas2p1be7719eeaca8d14bf7a8244ff389bd39@epcas2p1.samsung.com>
- <20210310152900.149380-1-ulf.hansson@linaro.org> <000001d7195e$8122ca00$83685e00$@samsung.com>
-In-Reply-To: <000001d7195e$8122ca00$83685e00$@samsung.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 15 Mar 2021 10:58:11 +0100
-Message-ID: <CAPDyKFqAXejhr4yytY7KwLycSTnyC0Y4AD3DErxbYMuXUJhVbg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Fix hanging on I/O during system suspend for
- removable cards
-To:     Kiwoong Kim <kwmad.kim@samsung.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+References: <20210313215302.4076765-1-linus.walleij@linaro.org>
+ <CAGRGNgU_C6keHC_Ty3iruJc5cwsBGJRRBm8DWH91fHjygPv0fg@mail.gmail.com> <CACRpkdbHfH=+m3EJ9CBGkQ3rh6MGtKy4ixk3fgu15rxEzMg5dw@mail.gmail.com>
+In-Reply-To: <CACRpkdbHfH=+m3EJ9CBGkQ3rh6MGtKy4ixk3fgu15rxEzMg5dw@mail.gmail.com>
+From:   Julian Calaby <julian.calaby@gmail.com>
+Date:   Mon, 15 Mar 2021 21:40:00 +1100
+Message-ID: <CAGRGNgUNzzHTre1oOjvV7-c-4mvjDuOAAmYRc4Nd_D6m+tLdPg@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: Convert the BCM4329 bindings to YAML and extend
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
+        Wright Feng <wright.feng@infineon.com>,
+        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        brcm80211-dev-list.pdl@broadcom.com,
+        SHA-cyfmac-dev-list@infineon.com,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 15 Mar 2021 at 06:46, Kiwoong Kim <kwmad.kim@samsung.com> wrote:
+Hi Linus,
+
+On Mon, Mar 15, 2021 at 10:43 AM Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> > The mmc core uses a PM notifier to temporarily during system suspend, turn
-> > off the card detection mechanism for removal/insertion of (e)MMC/SD/SDIO
-> > cards. Additionally, the notifier may be used to remove an SDIO card
-> > entirely, if a corresponding SDIO functional driver don't have the system
-> > suspend/resume callbacks assigned. This behaviour has been around for a
-> > very long time.
-> >
-> > However, a recent bug report tells us there are problems with this
-> > approach. More precisely, when receiving the PM_SUSPEND_PREPARE
-> > notification, we may end up hanging on I/O to be completed, thus also
-> > preventing the system from getting suspended.
-> >
-> > In the end what happens, is that the cancel_delayed_work_sync() in
-> > mmc_pm_notify() ends up waiting for mmc_rescan() to complete - and since
-> > mmc_rescan() wants to claim the host, it needs to wait for the I/O to be
-> > completed first.
-> >
-> > Typically, this problem is triggered in Android, if there is ongoing I/O
-> > while the user decides to suspend, resume and then suspend the system
-> > again. This due to that after the resume, an mmc_rescan() work gets punted
-> > to the workqueue, which job is to verify that the card remains inserted
-> > after the system has resumed.
-> >
-> > To fix this problem, userspace needs to become frozen to suspend the I/O,
-> > prior to turning off the card detection mechanism. Therefore, let's drop
-> > the PM notifiers for mmc subsystem altogether and rely on the card
-> > detection to be turned off/on as a part of the system_freezable_wq, that
-> > we are already using.
-> >
-> Dear Ulf
+> On Sun, Mar 14, 2021 at 1:05 AM Julian Calaby <julian.calaby@gmail.com> wrote:
 >
-> Do you think there is no possibility that claiming a host by mmc_rescan is
-> postponed by early IO requests?
-> E.g. the case where the work is executed later unexpectedly for something.
-
-That shouldn't matter.
-
-The important part is that I/O from userspace gets suspended before
-the system_freezable_wq gets frozen, which is what mmc_rescan() runs
-from.
-
+> > I don't know if this is necessary for SDIO, but should the non-4329
+> > compatibles have the 4329 compatible as an alternative?
 >
-> And it seems that cancelling the work before system suspend is removed in
-> the patch.
-> That means you might think there is no case with the pended the work, I
-> think.
-> Am I right?
-
-When system_freezable_wq is frozen, running works will be synced for
-completion. Scheduled works don't get to run until the
-system_freezable_wq is unfrozen.
-
-In other words, the behaviour remains the same, except that we are
-suspending card detection in mmc_rescan() to a slightly later state.
-
+> I can, and I guess I should add it, as I grep:ed and saw this:
 >
-> If I mis-understand something, please let me know.
+> arch/arm/boot/dts/qcom-msm8974-lge-nexus5-hammerhead.dts
+> compatible = "brcm,bcm4339-fmac", "brcm,bcm4329-fmac";
 >
-> Thanks.
-> Kiwoong Kim
+> So from more to less specific.
 >
+> Yours,
+> Linus Walleij
 
-Did you try out the patch at your side, to see if it resolves your problems?
+If it helps, the pattern I've seen before for this is:
 
-Kind regards
-Uffe
+oneOf:
+  - const: vendor,specific-device-1234
+  - items:
+    - enum:
+      - vendor,compatible-device-2345
+      - vendor,compatible-device-3456
+    - const: vendor,specific-device-1234
+
+See https://elixir.bootlin.com/linux/v5.12-rc3/source/Documentation/devicetree/bindings/spi/allwinner,sun6i-a31-spi.yaml
+for an example.
+
+Thanks,
+
+-- 
+Julian Calaby
+
+Email: julian.calaby@gmail.com
+Profile: http://www.google.com/profiles/julian.calaby/
