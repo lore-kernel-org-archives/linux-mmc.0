@@ -2,133 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 573E5C4332E
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 21:16:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EF55C433E6
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 22:08:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3D1EB64F97
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 21:16:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D897964F96
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 22:08:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232841AbhCPVQS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 Mar 2021 17:16:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55484 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232793AbhCPVPr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Mar 2021 17:15:47 -0400
-Received: from mail-ot1-x32a.google.com (mail-ot1-x32a.google.com [IPv6:2607:f8b0:4864:20::32a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58CBCC06174A;
-        Tue, 16 Mar 2021 14:15:46 -0700 (PDT)
-Received: by mail-ot1-x32a.google.com with SMTP id p24so9284248ota.11;
-        Tue, 16 Mar 2021 14:15:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=yor1EiHWBTylh9kpWP/wCw+xZkPtpXh/+Ths3TbYe0w=;
-        b=FHM728QhNdZyvNZnbLRwhMr7POs7HeQb93i3aK0NTjbEX0TCRXWXK+IqWNF5miwyj1
-         bcjH00mGyQ+dmGW7HrZOByZv0XDKLsK9gF2fV+6Ds2ef1uQ015/RVugX8UyqARMpNkuT
-         481x4m8K8+wGUjDl/aZcOU67x2qh3biB4O3MwxvxySiQrTYE0Cjvnb9arnosXi1rWfvl
-         HJZritG/sbhEsBCdbFb2lSWOljRPCkLq1tXYwzfgRO3rPglkBjwfSMDmLAtXxIXrrOuD
-         HZ8kBN2rJr/i2EMRZ5WU/TSik1ttHnZF4Cvzl6qLtq1pqY2GHNLGiZHtt9IrL8U9s6Cy
-         hXzg==
+        id S230438AbhCPWHc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 Mar 2021 18:07:32 -0400
+Received: from mail-il1-f178.google.com ([209.85.166.178]:39041 "EHLO
+        mail-il1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230286AbhCPWHK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 Mar 2021 18:07:10 -0400
+Received: by mail-il1-f178.google.com with SMTP id d5so14196877iln.6;
+        Tue, 16 Mar 2021 15:06:59 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to:user-agent;
-        bh=yor1EiHWBTylh9kpWP/wCw+xZkPtpXh/+Ths3TbYe0w=;
-        b=n03d5JERUBS/EreMYoDb8OdjvIGsnFMgA6VbemTyFHWfgQt8AQhcTt9WsOyS6jVDn8
-         pp0tlPg5bf45UKDGUzxgcXvLp/3ykQ1+/rOuDwTTZXV+LhnqyWvI4gCvRrjTrY2fGy8j
-         jF/ecDCY9V0SkTgZdHPA9Q0CMxiMdpuxNYc0BZ08ATvffX6TyGM/eerNeO+uw4R0BpSQ
-         fJQDb20QTLUFdQ8FHW+4nB4G1YOJlfrDxTdgK/h0ASkno/0VYdCedbBxJ/zbPxCVifpl
-         YM40sqiZxnMg0GG3+k370G9Hk0tYHBmgztKptheEoCG+MtgqsoBlP5vd5y58LPCSB2m7
-         zU7Q==
-X-Gm-Message-State: AOAM530pjYy+fk3M3KIpWFEaoGrSslF7090vTrX7pq3O1xkbdjKvaw7k
-        iFpvtVd82RRIapBh2gOu9jc=
-X-Google-Smtp-Source: ABdhPJz+tI/5qUoyqoIXj+lrmspTrR6p+9F7dSCgDDDieF1KKvij53ZFQt/vbOIgPzPDzCZKyrjFFg==
-X-Received: by 2002:a9d:7545:: with SMTP id b5mr579421otl.223.1615929345829;
-        Tue, 16 Mar 2021 14:15:45 -0700 (PDT)
-Received: from localhost ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id o197sm8075424ooo.44.2021.03.16.14.15.45
-        (version=TLS1_2 cipher=ECDHE-ECDSA-CHACHA20-POLY1305 bits=256/256);
-        Tue, 16 Mar 2021 14:15:45 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date:   Tue, 16 Mar 2021 14:15:44 -0700
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     Seiya Wang <seiya.wang@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Peter Meerwald-Stadler <pmeerw@pmeerw.net>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=c7PiDBTH7M3rD94WrweiGEydSkQAgo6g3DUgMc8MiXo=;
+        b=AwU7+IaXhr0n6koUMzajuE2yQPpWWXOnnSI9ZJkXl5yRjV+BuQeqml2hXiDBsc6puD
+         UDWKxBhkwuARTdFFkAXKIklqiEQUDc9n4b57IITqtmZsYJCmM25S1iShbl6KWksm/Q85
+         RDm8LA3foZ0KKFot+eDMCKNhSwVlvNSwOTkO/VmGF2m7bx7AUgL6xK3KoJCluJyXfTXs
+         Y2ZE4E0m1MSnYViF9gCSl9+NDXp+4ZB3lk9b7O44ymLTRfAwEaMDtqk/vkXqFx2Q1dFN
+         MB+E8GsAP235jO+YC5h8gP2FQFtosuxU2+IS6dZ6LfnM+PZsp1fCtBGzkQkbtikOB/Ey
+         P14w==
+X-Gm-Message-State: AOAM531gIMUN+4jp76P6krCPXDyziL7yhOGq0lJhW6FtuVXCL/M4s7vh
+        zOuynX8Fu7RB635fhO8+fw==
+X-Google-Smtp-Source: ABdhPJzRxK/0AogAZXl7YXNMtbCnlmB6+Cie+xr/Yd5aXirMYSX+ma7l1UMS9sm3iwMWVypDrn70oQ==
+X-Received: by 2002:a05:6e02:ca1:: with SMTP id 1mr5192128ilg.242.1615932418900;
+        Tue, 16 Mar 2021 15:06:58 -0700 (PDT)
+Received: from robh.at.kernel.org ([64.188.179.253])
+        by smtp.gmail.com with ESMTPSA id v7sm4526639ilu.72.2021.03.16.15.06.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 16 Mar 2021 15:06:58 -0700 (PDT)
+Received: (nullmailer pid 3764195 invoked by uid 1000);
+        Tue, 16 Mar 2021 22:06:56 -0000
+Date:   Tue, 16 Mar 2021 16:06:56 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Peng Zhou <peng.zhou@mediatek.com>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Chunfeng Yun <chunfeng.yun@mediatek.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
-        Hsin-Yi Wang <hsinyi@chromium.org>,
-        Fabien Parent <fparent@baylibre.com>,
-        Sean Wang <sean.wang@mediatek.com>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Bayi Cheng <bayi.cheng@mediatek.com>,
-        Chuanhong Guo <gch981213@gmail.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        srv_heupstream@mediatek.com
-Subject: Re: [PATCH 03/10] dt-bindings: watchdog: Add compatible for Mediatek
- MT8195
-Message-ID: <20210316211544.GE60156@roeck-us.net>
-References: <20210316111443.3332-1-seiya.wang@mediatek.com>
- <20210316111443.3332-4-seiya.wang@mediatek.com>
+        linux-mmc@vger.kernel.org, Satya Tangirala <satyat@google.com>,
+        devicetree@vger.kernel.org, Eric Biggers <ebiggers@kernel.org>,
+        Wulin Li <wulin.li@mediatek.com>
+Subject: Re: [PATCH v2 4/4] dt-bingdings: mmc: Mediatek: add ICE clock
+Message-ID: <20210316220656.GA3764131@robh.at.kernel.org>
+References: <20210309020649.582-1-peng.zhou@mediatek.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210316111443.3332-4-seiya.wang@mediatek.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
+In-Reply-To: <20210309020649.582-1-peng.zhou@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 16, 2021 at 07:14:36PM +0800, Seiya Wang wrote:
-> This commit adds dt-binding documentation of watchdog for Mediatek MT8195 SoC
-> Platform.
+On Tue, 09 Mar 2021 10:06:50 +0800, Peng Zhou wrote:
+> Document the binding for crypto clock of the Inline Crypto Engine (ICE)
+> on Mediatek SoCs.
 > 
-> Signed-off-by: Seiya Wang <seiya.wang@mediatek.com>
-
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
-
-Guenter
-
+> Signed-off-by: Peng Zhou <peng.zhou@mediatek.com>
 > ---
->  Documentation/devicetree/bindings/watchdog/mtk-wdt.txt | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/watchdog/mtk-wdt.txt b/Documentation/devicetree/bindings/watchdog/mtk-wdt.txt
-> index e36ba60de829..a658a0b92b9a 100644
-> --- a/Documentation/devicetree/bindings/watchdog/mtk-wdt.txt
-> +++ b/Documentation/devicetree/bindings/watchdog/mtk-wdt.txt
-> @@ -13,6 +13,7 @@ Required properties:
->  	"mediatek,mt8183-wdt": for MT8183
->  	"mediatek,mt8516-wdt", "mediatek,mt6589-wdt": for MT8516
->  	"mediatek,mt8192-wdt": for MT8192
-> +	"mediatek,mt8195-wdt", "mediatek,mt6589-wdt": for MT8195
->  
->  - reg : Specifies base physical address and size of the registers.
->  
-> -- 
-> 2.14.1
-> 
+
+Reviewed-by: Rob Herring <robh@kernel.org>
