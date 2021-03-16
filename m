@@ -2,139 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7A29C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 08:03:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B6A1C433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 08:58:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A2A3264FD1
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 08:03:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B84FB65001
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 Mar 2021 08:58:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229894AbhCPIDV convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 Mar 2021 04:03:21 -0400
-Received: from mga09.intel.com ([134.134.136.24]:40127 "EHLO mga09.intel.com"
+        id S235889AbhCPI5y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 Mar 2021 04:57:54 -0400
+Received: from www.zeus03.de ([194.117.254.33]:33810 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232577AbhCPIDF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 16 Mar 2021 04:03:05 -0400
-IronPort-SDR: baPMBGcSlhUp+sNUWayTAZs6xnV2B4bTwrIepqye1q4pnbEPn2bYJz4Fc22REYeB2FWHRomBHb
- 5mgeJXvSv8Ew==
-X-IronPort-AV: E=McAfee;i="6000,8403,9924"; a="189310814"
-X-IronPort-AV: E=Sophos;i="5.81,251,1610438400"; 
-   d="scan'208";a="189310814"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2021 01:03:04 -0700
-IronPort-SDR: 4Mlf+xJkj70RZ08Adl2iC52T/Xk6/ENFhy59/2Pj5tyn0kcKwhlsNQJ8+GIkjBJu+nLCvAGJVR
- VpXWdqS3Y8HQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.81,251,1610438400"; 
-   d="scan'208";a="590576542"
-Received: from fmsmsx606.amr.corp.intel.com ([10.18.126.86])
-  by orsmga005.jf.intel.com with ESMTP; 16 Mar 2021 01:03:04 -0700
-Received: from shsmsx603.ccr.corp.intel.com (10.109.6.143) by
- fmsmsx606.amr.corp.intel.com (10.18.126.86) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2106.2; Tue, 16 Mar 2021 01:03:03 -0700
-Received: from shsmsx601.ccr.corp.intel.com (10.109.6.141) by
- SHSMSX603.ccr.corp.intel.com (10.109.6.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2106.2; Tue, 16 Mar 2021 16:03:01 +0800
-Received: from shsmsx601.ccr.corp.intel.com ([10.109.6.141]) by
- SHSMSX601.ccr.corp.intel.com ([10.109.6.141]) with mapi id 15.01.2106.013;
- Tue, 16 Mar 2021 16:03:01 +0800
-From:   "Li, Philip" <philip.li@intel.com>
-To:     =?iso-8859-1?Q?J=E9r=F4me_Pouiller?= <jerome.pouiller@silabs.com>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        lkp <lkp@intel.com>
-CC:     "kbuild-all@lists.01.org" <kbuild-all@lists.01.org>,
-        "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [kbuild-all] Re: [PATCH] wfx: fix irqf_oneshot.cocci warnings
-Thread-Topic: [kbuild-all] Re: [PATCH] wfx: fix irqf_oneshot.cocci warnings
-Thread-Index: AQHXGjluGKy1l/wG8EupGMY1Pavj+qqGQOCw
-Date:   Tue, 16 Mar 2021 08:03:00 +0000
-Message-ID: <a8dba72b92a7407c9f2d531527137643@intel.com>
-References: <20210315132501.441681-25-Jerome.Pouiller@silabs.com>
- <20210315210920.GA43634@d108da9836c5> <3096745.nmkoU2l6Xm@pc-42>
-In-Reply-To: <3096745.nmkoU2l6Xm@pc-42>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-dlp-product: dlpe-windows
-dlp-reaction: no-action
-dlp-version: 11.5.1.3
-x-originating-ip: [10.239.127.36]
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        id S232841AbhCPI5X (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 16 Mar 2021 04:57:23 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=0eWuABZzt2y3YmESLoPkr/Wo+VE
+        351mAIuEA+1OQEIg=; b=Wp/8xvngCUi3q8DiblvMpdJ4Vql99swIqNYkoGKnYlv
+        MIGXjyv+cL6ggrix3iAU9Yu+PoWuOMawtxJkjEb+p8iCbnXmyooTD3lv/Gct+XgV
+        W4OMFOs4mKLQnwaJRix9swptKWdgUR1D1E8kkl05eJLkkJ+qMpUm1IMdppz2/B3o
+        =
+Received: (qmail 1697707 invoked from network); 16 Mar 2021 09:57:21 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 16 Mar 2021 09:57:21 +0100
+X-UD-Smtp-Session: l3s3148p1@zIfbjaO9cpwgARa4ReUdAWIPBxWmfbkD
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH RFT 0/2] mmc: tmio: make resets more robust
+Date:   Tue, 16 Mar 2021 09:57:15 +0100
+Message-Id: <20210316085717.7276-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> Subject: [kbuild-all] Re: [PATCH] wfx: fix irqf_oneshot.cocci warnings
-> 
-> Hello,
-> 
-> On Monday 15 March 2021 22:09:20 CET kernel test robot wrote:
-> >
-> > From: kernel test robot <lkp@intel.com>
-> >
-> > drivers/net/wireless/silabs/wfx/bus_sdio.c:134:8-33: ERROR: Threaded IRQ with no primary handler requested without
-> IRQF_ONESHOT
-> >
-> >  Since commit 1c6c69525b40 ("genirq: Reject bogus threaded irq requests")
-> >  threaded IRQs without a primary handler need to be requested with
-> >  IRQF_ONESHOT, otherwise the request will fail.
-> >
-> >  So pass the IRQF_ONESHOT flag in this case.
-> >
-> > Generated by: scripts/coccinelle/misc/irqf_oneshot.cocci
-> >
-> > CC: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> > Reported-by: kernel test robot <lkp@intel.com>
-> > Signed-off-by: kernel test robot <lkp@intel.com>
-> > ---
-> >
-> > url:    https://github.com/0day-ci/linux/commits/Jerome-Pouiller/wfx-get-out-from-the-staging-area/20210315-212855
-> > base:   https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/staging.git b828324bba8f575fde487a91fec07303789dda8a
-> >
-> >  bus_sdio.c |    3 ++-
-> >  1 file changed, 2 insertions(+), 1 deletion(-)
-> >
-> > --- a/drivers/net/wireless/silabs/wfx/bus_sdio.c
-> > +++ b/drivers/net/wireless/silabs/wfx/bus_sdio.c
-> > @@ -132,7 +132,8 @@ static int wfx_sdio_irq_subscribe(void *
-> >                 flags = IRQF_TRIGGER_HIGH;
-> >         flags |= IRQF_ONESHOT;
-> >         return devm_request_threaded_irq(&bus->func->dev, bus->of_irq, NULL,
-> > -                                        wfx_sdio_irq_handler_ext, flags,
-> > +                                        wfx_sdio_irq_handler_ext,
-> > +                                        flags | IRQF_ONESHOT,
-> >                                          "wfx", bus);
-> >  }
-> >
-> >
-> 
-> Obviously, "flags" always contains IRQF_ONESHOT. So, it is a false positive.
-Thanks for the feedback. Sorry about this false positive, this had been disabled
-for auto report now.
+Here are two more patches improving the robustness of resetting the IP
+core. Patches are on top of mmc/next and this series "[PATCH v2 0/3]
+mmc: renesas_sdhi: reset via reset controller", especially "[PATCH v2
+1/3] mmc: tmio: abort DMA before reset".
 
-> 
-> 
-> --
-> Jérôme Pouiller
-> 
-> _______________________________________________
-> kbuild-all mailing list -- kbuild-all@lists.01.org
-> To unsubscribe send an email to kbuild-all-leave@lists.01.org
+Tested on Salvator-XS with H3 ES2.0 and M3-N. A branch for testing can
+be found here:
+
+git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/for-5.13
+
+Some additional testing by Shimoda-san or the BSP team would be much
+appreciated!
+
+   Wolfram
+
+
+Takeshi Saito (1):
+  mmc: tmio: restore bus width when resetting
+
+Wolfram Sang (1):
+  mmc: tmio: always flag retune when resetting and a card is present
+
+ drivers/mmc/host/tmio_mmc_core.c | 37 +++++++++++++++++---------------
+ 1 file changed, 20 insertions(+), 17 deletions(-)
+
+-- 
+2.30.0
+
