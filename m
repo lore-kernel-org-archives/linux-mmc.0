@@ -2,85 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AAA2CC4332D
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Mar 2021 06:41:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9175FC43381
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Mar 2021 09:17:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7EDB364FAB
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 Mar 2021 06:41:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 48E1964F6E
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 Mar 2021 09:17:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230519AbhCQGkj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 Mar 2021 02:40:39 -0400
-Received: from mail.kernel.org ([198.145.29.99]:52632 "EHLO mail.kernel.org"
+        id S229791AbhCQJQl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 Mar 2021 05:16:41 -0400
+Received: from www.zeus03.de ([194.117.254.33]:58776 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229904AbhCQGkG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 17 Mar 2021 02:40:06 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0CCF364F4F;
-        Wed, 17 Mar 2021 06:40:05 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1615963205;
-        bh=DKkSbpTtYNi1ZVDKfEu/pISf3KKivN5OtDm3wdZBSMk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=MCL6GBsTblKeyK6Xlm4N9pcyXR/52vV0wfElZZo6h3qXk0qFwaGDjTmju2Jxvm23r
-         1fJF/nJ6AAjg7wFRajkNsIY/gqyYiesHF0A5O3zZk/en5bTBYKqWjfFTmUrQN69Kye
-         TfSf8TAA9Ea3XUCs1b1OAgM5lURWcIZn7l/ojFJP5UnHvqylKxpc8wluDnINwemtpW
-         HbOqMfg6TzzgWwRTmnsR3oEXTZyKdaiWeAWJOjXO6gSzcl/PoYy/Vd6nY5bqPf0GYn
-         1VVM4ZROPY/vjpG4O6xzvHtpe3auTvH31ZnAuin/NBKrAqjLPzPdg+G5NSk3kG2mXQ
-         qEcKepk6ROisQ==
-Date:   Wed, 17 Mar 2021 12:10:02 +0530
-From:   Vinod Koul <vkoul@kernel.org>
-To:     Seiya Wang <seiya.wang@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Peter Meerwald-Stadler <pmeerw@pmeerw.net>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Chunfeng Yun <chunfeng.yun@mediatek.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
-        Hsin-Yi Wang <hsinyi@chromium.org>,
-        Fabien Parent <fparent@baylibre.com>,
-        Sean Wang <sean.wang@mediatek.com>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        Bayi Cheng <bayi.cheng@mediatek.com>,
-        Chuanhong Guo <gch981213@gmail.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        srv_heupstream@mediatek.com
-Subject: Re: [PATCH 08/10] dt-bindings: phy: Add compatible for Mediatek
- MT8195
-Message-ID: <YFGkQq1J0g4AKTNZ@vkoul-mobl.Dlink>
-References: <20210316111443.3332-1-seiya.wang@mediatek.com>
- <20210316111443.3332-9-seiya.wang@mediatek.com>
+        id S229751AbhCQJQ1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 17 Mar 2021 05:16:27 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version:content-type
+        :content-transfer-encoding; s=k1; bh=LKuEV/Ax3lbS6y5RDllq/dTqKBA
+        ydTmnURThRcugPig=; b=Hjo91Qy944BZ4B3VrF6tTolMmu5RKfxFTscGqbbeHiZ
+        Ivggpus7pTEqIH7wTCsGXcv9N6xVG0ZfYaEXV+KLI3Z7teW0z8iOeZfBzRYKvCAg
+        f9OYZDJE+YvuD6qvTDjZpWwLc1Aj84nNyX/WWAZnYd7LvWhHgCOTL/GxqLMcNpUA
+        =
+Received: (qmail 2082568 invoked from network); 17 Mar 2021 10:16:25 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 17 Mar 2021 10:16:25 +0100
+X-UD-Smtp-Session: l3s3148p1@5YXo77e90JEgARa4RUHsAfjwOo+4/zku
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH v3 0/3] mmc: renesas_sdhi: reset via reset controller
+Date:   Wed, 17 Mar 2021 10:16:19 +0100
+Message-Id: <20210317091622.31890-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210316111443.3332-9-seiya.wang@mediatek.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16-03-21, 19:14, Seiya Wang wrote:
-> This commit adds dt-binding documentation of UFS M-Phy for Mediatek MT8195 SoC
-> Platform.
+This series enables SDHI to be reset via a reset controller. The series
+is based on mmc/next and tested on Salvator-XS with R-Car H3 ES2.0 with
+what I think I can do locally here. Shimoda-san, tested, too (thanks!)
 
-Applied, thanks
+Changes since v2:
+* 'select' statement in Kconfig only for ARCH_RENESAS
+* Shimoda-san's tags added
+
+Wolfram Sang (3):
+  mmc: tmio: abort DMA before reset
+  mmc: renesas_sdhi: break SCC reset into own function
+  mmc: renesas_sdhi: do hard reset if possible
+
+ drivers/mmc/host/Kconfig             |  1 +
+ drivers/mmc/host/renesas_sdhi.h      |  2 ++
+ drivers/mmc/host/renesas_sdhi_core.c | 35 +++++++++++++++++++++-------
+ drivers/mmc/host/tmio_mmc_core.c     |  4 ++--
+ 4 files changed, 32 insertions(+), 10 deletions(-)
 
 -- 
-~Vinod
+2.30.0
+
