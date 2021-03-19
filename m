@@ -2,110 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73714C4360C
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 14:14:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B91B0C433C1
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 15:43:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3A7E464F45
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 14:14:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8B16461950
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 15:43:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230115AbhCSONc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Mar 2021 10:13:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51706 "EHLO
+        id S229875AbhCSPnP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Mar 2021 11:43:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229937AbhCSONR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2021 10:13:17 -0400
-Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 910C4C06174A
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Mar 2021 07:13:17 -0700 (PDT)
-Received: by mail-vs1-xe31.google.com with SMTP id h25so3546458vso.2
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Mar 2021 07:13:17 -0700 (PDT)
+        with ESMTP id S229914AbhCSPmq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2021 11:42:46 -0400
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95107C06174A;
+        Fri, 19 Mar 2021 08:42:45 -0700 (PDT)
+Received: by mail-ej1-x62e.google.com with SMTP id b9so10456097ejc.11;
+        Fri, 19 Mar 2021 08:42:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=uafdnfiJzIvKurj0qcQE3+fQ0RdZsmqs2/6mKqo2E10=;
-        b=al22ctb4JVkjksBULRPtWtQB/RI8XSnov+BpRGt1XvvVhFdqbpULM591LL6u9ZRpeF
-         rUNEr+0L3lgpi5JoNtZkM7MJakqKutVYdLsFwMcvid8sVDblknXc8EXTE9KKxevzAxuV
-         yWVQXHb3iiVNsygAqpmidHDLgbal0UQgfoSopzxKpRT7DHd2nrcYIF7WvDmsLr/wlmRt
-         wKUDM6jDuCNVzu7uC7xrEcAxHfiMslMJ1N0330pBEJHELDc9uxdqQEH1iAJ+dxJNWiPR
-         66Ro8AGPCkk037ACUY/e0jQzkKdpRu4J+qkOy2slKTdWS5ArHZBtWMEyhPmslnG10nGQ
-         AIYQ==
+        d=gmail.com; s=20161025;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=AosAsdPYu9Ufpf4Wk/dfAmNbL8dSXdLyf4cxfVtJsJs=;
+        b=lyiABF6FyD5T6JqaesOU6h9kIR+cKrn1Sh7bTfLrms514h0BC0oBI8qKQ5kFm8M212
+         UH2rhod/YmnMU1/eLyFO1c2a+E+vdnNN1kPXazbx1W+g0MpCjxaFCzmHJlXQmAIrwaPU
+         U2ReVax7N3j2SopCQcveKL9Yi83d2Xyn888ybrDJdvbFcCVPGLa8edUQ5RVIyzAsvL1a
+         mfR4ba5Hss1Ze48Z/zR1LQ2HUTG5JqoZ9IDxfjoCTY7fQo7/UglYIhJUv5mnDkpGRO44
+         zPrxTmF8BixYWaA/YUdRu80+XpSHYlvrzqAhSPI399dUn5hUksURO5SnvohjEALl0ZBf
+         iosg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=uafdnfiJzIvKurj0qcQE3+fQ0RdZsmqs2/6mKqo2E10=;
-        b=KAWGsGEoKCcMRMZRkX25RCE4xgzUw1GGqOpuH1fHM8a8K+x875NF1S6IwjBkyuTy2J
-         ItZ8Z2JZ4D58Cu0rxSd+bqHrGST2yVGglWTa+K1FQGR1+E3CPAM4n1unuriAGCCxvdH5
-         /S0W9QMha1GRcZPpmDtQhN/pTcc7FPLWNTL2x5nYXsDL4NApN7tLlMyig97d5ggFIe+O
-         GoDl1o4Ph10NUxNMJBq1h7wMTuVfMYLYqGn+DoLo89xMKsHP5ey/03NQeUi1i0Q9nYFp
-         Cl0Vi6zipWdvX5Fl6UuEGVgja7ur1ZsE+N0LBZh1h/M09BaN6q/+zns2gYWNiNtRPzHy
-         YD6g==
-X-Gm-Message-State: AOAM531AuQPsDhGEigvQo0sz8llvZbNxVCpfUq7yrnlltqzMfD50TesN
-        itM2PmkDG4kNK8KPN3juy9hd+Wfbu9McQ/1qsyS1L9eJMfRYtw==
-X-Google-Smtp-Source: ABdhPJwfsLNAHuqowqPMNFrPCjZtrqcKdtoUhzKvIy7PthSVSu8qU0872j6D9OWsCCC/CIBF1PuM00+mC3t0GO6YM9Q=
-X-Received: by 2002:a67:6942:: with SMTP id e63mr2910540vsc.48.1616163196799;
- Fri, 19 Mar 2021 07:13:16 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210318124025.3002861-1-james@pocketfluff.org>
-In-Reply-To: <20210318124025.3002861-1-james@pocketfluff.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 19 Mar 2021 15:12:39 +0100
-Message-ID: <CAPDyKFo69ap+XxTRx8sry=j4va=27zP1qxsDnLziUyFX3+=MAQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-acpi: Add device ID for the AMDI0041 variant
- of the AMD eMMC controller.
-To:     James Young <james@pocketfluff.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=AosAsdPYu9Ufpf4Wk/dfAmNbL8dSXdLyf4cxfVtJsJs=;
+        b=EAGmXnK8SMk2wIYa80RVs1pu0iQpTn7wiNbhx8KcqF9JggHBYP60FsJZPqdyinQLte
+         HNSGezeiw610qZRanP+AnURa81BkmmCuPENNPufYV0kqKxAfGDxHaUkd4/MtQvrRhcTf
+         up2AJg4IlEja4lF5f5uNVHsSRK92P/K/h8K4RcRgCoqD85dH6bg8z122MmOGaMbh8Cb1
+         ao4jxZPDkjGBvH5EP5u9upG666zjNeKKStV1BvXWYPOkeISXnuenKipD8cDUdJg0bjFn
+         qBixz2dLG/xMzGfVbMLaka7zfHKXcc1HKENz7xRD8AS918JS0oa2gezd8oyzkN2mWHLZ
+         ZrAw==
+X-Gm-Message-State: AOAM533WMiKY3e1B2uYIQ7YtXZG3O2Ai0llmlE1fZsFWsCoWuBZYWbHP
+        /vVO37lp8Iax1xE+0jr08Rs=
+X-Google-Smtp-Source: ABdhPJzXUYXeQXqLVlM1MCjV0Leex/cYqKuZRVk8YjMdykP6fA1NLo4fwo9IQpog+vz9sgkmkV03cQ==
+X-Received: by 2002:a17:907:2d24:: with SMTP id gs36mr5152295ejc.344.1616168558515;
+        Fri, 19 Mar 2021 08:42:38 -0700 (PDT)
+Received: from ubuntu-laptop (ip5f5bec5d.dynamic.kabel-deutschland.de. [95.91.236.93])
+        by smtp.googlemail.com with ESMTPSA id r17sm4203287edt.70.2021.03.19.08.42.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 19 Mar 2021 08:42:38 -0700 (PDT)
+Message-ID: <79ec60974875d4ac17589ea4575e36ec1204f881.camel@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: cavium: Remove redundant if-statement
+ checkup
+From:   Bean Huo <huobean@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     rric@kernel.org, Linus Walleij <linus.walleij@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
+        "# 4.0+" <stable@vger.kernel.org>
+Date:   Fri, 19 Mar 2021 16:42:37 +0100
+In-Reply-To: <CAPDyKFrU591aeH5GyuuQW8tPeNc9wav=t8wqF1EdTBbCc9xheg@mail.gmail.com>
+References: <20210319121357.255176-1-huobean@gmail.com>
+         <20210319121357.255176-3-huobean@gmail.com>
+         <CAPDyKFrU591aeH5GyuuQW8tPeNc9wav=t8wqF1EdTBbCc9xheg@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.4-0ubuntu1 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 18 Mar 2021 at 13:42, James Young <james@pocketfluff.org> wrote:
->
-> This variant is present on a Lenovo IdeaPad Slim 1, which uses an AMD Dali/Athlon Silver 3050e.
-> The Windows AMD SD Host Controller driver also lists this as a valid device ID.
->
-> Adding this device ID makes the internal eMMC storage on the Lenovo accessible.
-> Consequently this makes Linux installable and usable on it as well.
->
-> Signed-off-by: James Young <james@pocketfluff.org>
+On Fri, 2021-03-19 at 15:09 +0100, Ulf Hansson wrote:
+> On Fri, 19 Mar 2021 at 13:14, Bean Huo <huobean@gmail.com> wrote:
+> 
+> > From: Bean Huo <beanhuo@micron.com>
+> > Currently, we have two ways to issue multiple-block read/write the
+> > command to the eMMC. One is by normal IO request path fs->block-
+> > >mmc.
+> > Another one is that we can issue multiple-block read/write through
+> > MMC ioctl interface. For the first path, mrq->stop, and mrq->stop-
+> > >opcode
+> > will be initialized in mmc_blk_data_prep(). However, for the second
+> > IO
+> > path, mrq->stop is not initialized since it is a pre-defined
+> > multiple
+> > blocks read/write.
+> 
+> 
+> As a matter of fact this way is also supported for the regular block
+> 
+> I/O path. To make the mmc block driver to use it, mmc host drivers
+> 
+> need to announce that it's supported by setting MMC_CAP_CMD23.
+> 
+> 
+> 
+> It looks like that is what your patch should be targeted towards, can
+> 
+> you have a look at this instead?
+> 
+> 
 
-Applied for next, thanks!
+Hi Ulf,
+Thanks for your comments. I will look at that as your suggestion.
+The patch [1/2] is accepted, so I will just update this patch to
+the next version.
 
-Kind regards
-Uffe
+Kind regards,
+Bean
 
+> 
+> Kind regards
+> 
+> Uffe
 
-> ---
->  drivers/mmc/host/sdhci-acpi.c | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index b6574e7fd26b..c3fbf8c825c4 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -772,6 +772,7 @@ static const struct sdhci_acpi_uid_slot sdhci_acpi_uids[] = {
->         { "QCOM8051", NULL, &sdhci_acpi_slot_qcom_sd_3v },
->         { "QCOM8052", NULL, &sdhci_acpi_slot_qcom_sd },
->         { "AMDI0040", NULL, &sdhci_acpi_slot_amd_emmc },
-> +       { "AMDI0041", NULL, &sdhci_acpi_slot_amd_emmc },
->         { },
->  };
->
-> @@ -789,6 +790,7 @@ static const struct acpi_device_id sdhci_acpi_ids[] = {
->         { "QCOM8051" },
->         { "QCOM8052" },
->         { "AMDI0040" },
-> +       { "AMDI0041" },
->         { },
->  };
->  MODULE_DEVICE_TABLE(acpi, sdhci_acpi_ids);
-> --
-> 2.25.1
->
