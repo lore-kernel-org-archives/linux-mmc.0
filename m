@@ -2,95 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9E6DC43332
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 14:14:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D61FC4321A
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 14:14:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A388C64F6A
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 14:14:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 26E6C64F59
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Mar 2021 14:14:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230154AbhCSONb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Mar 2021 10:13:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51662 "EHLO
+        id S230160AbhCSONd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Mar 2021 10:13:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230105AbhCSONK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2021 10:13:10 -0400
-Received: from mail-vs1-xe2c.google.com (mail-vs1-xe2c.google.com [IPv6:2607:f8b0:4864:20::e2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE1A4C06174A
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Mar 2021 07:13:09 -0700 (PDT)
-Received: by mail-vs1-xe2c.google.com with SMTP id s25so3553875vsa.1
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Mar 2021 07:13:09 -0700 (PDT)
+        with ESMTP id S230009AbhCSONU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Mar 2021 10:13:20 -0400
+Received: from mail-vk1-xa2f.google.com (mail-vk1-xa2f.google.com [IPv6:2607:f8b0:4864:20::a2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6B9FC06174A
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Mar 2021 07:13:20 -0700 (PDT)
+Received: by mail-vk1-xa2f.google.com with SMTP id o85so2130118vko.8
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Mar 2021 07:13:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=lK7Wu5em661YsAR1P2potPtShBWXtZV+d3VXeg7OZ/4=;
-        b=PuwPqedHM4wwnj/REp27vI/oK8PfMnDRpyeL08ngxS9vZmjitbH5wKYhe9Cc1b6aEB
-         WYY7u2oTBpF5/WjawVEDOQlpKUnM5JNc4GpG6EMXHxRQaMPuQZY+rkuoyFBRRTQOqEIg
-         QJyQp164IRzxayvhaKjA6k8UYyvrd/OWufy7gH045vrqO/mWWV/SXYO33xH1b+18bkoS
-         cYZipf1giPZKmDeuf+idECeI+r8Lep6S+/VKrwpTR+uzs9OVLcIvTX/YUtjJjJkli+2B
-         LfvIUCn//nOyTb4G2R1ciTaPFI9m+ymdnWjsziPlMoMyDRm9zghYE3t2QwqlHKdJm1cR
-         FM/g==
+        bh=jxm+/pPcm1XVG4+mY+cSz5OGxQEii57vbnoHpCbdW98=;
+        b=oJ3/MhJce5u9An6ttjIoHlmAsPixMOYiHetFbmJFYfotGoZdr9fskv4V4RimusY92P
+         4V1keHZZwZ2TGJ1xHxYKlHLCZqNcVw5dXVfyGKVdGy3EvaIj9RV5yuDURurnCKpki4Xg
+         TcpON6cB+yzQnTUN89jR+g5p+9P9tvABzK58Lcnc8BQFxhXwiJp+WPzDlxnvvKbebVvu
+         lbk06ohMWGQfZZxyjuqjUowAArE+iFx7r1AsZJWuoto6k/RxK/e0eY1nh+ykuD5GiVne
+         X6zlnINyPqpUxzO2H5DTIWXUM6l0BeXRk3HuDaIe+HrjceZg6TlYWxaOlwtxua8TZeTR
+         5s0g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=lK7Wu5em661YsAR1P2potPtShBWXtZV+d3VXeg7OZ/4=;
-        b=RKd/QN/sRO+hHGIdyRhX/uZCILb1JdV+1hauobc0gnAYwnzT+RDJlWiZqNF2knBWyQ
-         QmF7vu5o71USLJJTdSVg2I7OGxtJnnmBBMFcMlDCiPYSmBgk2rXuHiV+3ichhZ4HY5qa
-         DXBrxzJwdP74krRDxubIpwybM39TRqWXlAGSo0aFSDxYcHY/axI6Bx2TCrc9qA5V3u+Z
-         OkSysSqY97hY6tGznMAvooOffegsi2pUUM98VUM3lRjv3LosJOAvK1peb8XmCPGyU5Ia
-         CvbFhm5UfA7VOpqImZgkwzDFfO8mwO9WjPEHxJ7bOtH57Ot9f5/FAeyQMbW+Lwmg0QgF
-         obTg==
-X-Gm-Message-State: AOAM530XfVUmYS4NGtpKGvsjpg7nVMGDOy6PqqmoZeZzN6zld7GBr+F/
-        immzOPf4rWTnYUc81SJ36Rg4PYdkGnGyFFLBYzM5pw==
-X-Google-Smtp-Source: ABdhPJyNpWg4z4tcFrSKHiEmVMgwRWPb64lSh15KFv9VTHU/nCdYRX3yO8gVoBDCVbF/xqquafwLoV54HttmqWVawTQ=
-X-Received: by 2002:a05:6102:7b0:: with SMTP id x16mr2733377vsg.34.1616163189000;
- Fri, 19 Mar 2021 07:13:09 -0700 (PDT)
+        bh=jxm+/pPcm1XVG4+mY+cSz5OGxQEii57vbnoHpCbdW98=;
+        b=alnpHP7DoPsiJajKwya49CAXQvelhcJ6QqdyXogGhcMrc0IL+LydAs+BEKILlojc/K
+         LsXUyJRTojQlYxrenwJwgvOSbDoZGYYzoMmS3i4hrB+Q8XvLlSQuwicONqZGWtyk5oUk
+         ZxTLP8oEBcG2obEU186PMa7K9WLdkY8EbBZQreRW7/htJKThxqZCiNb8q7z67SJ+/tJg
+         5dNTYjnGqGxQF8Js8RhvTPR3kaOwgy8uFYAS3jTIhqPnB3viMmeXRz26gIXYF66aE5f7
+         IKPCVwUt5SGKg+Yr1vXYNLvTIPjMSrvNT7N8TGeAmWQNJAsXtzLR6gJW/g389qZAsRLO
+         zlUg==
+X-Gm-Message-State: AOAM532sfxXuOr8esqCRI/7thy6qMy1eCuqF3JN4jjO12u0TJgrdHQeu
+        UAsRv3lZ7cp5vyu9YfoQmRZ5fb52aqmIMLUFTYCkdA==
+X-Google-Smtp-Source: ABdhPJx2+SzVQl8imKo0EQ3B+5dXnijhV7xS6mcteSNG7VLsSVEp39ebWCZcfEIb2iQ9RP8ErpC2Xasvz+xL8WNGjiY=
+X-Received: by 2002:a1f:5504:: with SMTP id j4mr2765495vkb.7.1616163199593;
+ Fri, 19 Mar 2021 07:13:19 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210317091622.31890-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210317091622.31890-1-wsa+renesas@sang-engineering.com>
+References: <20210319121357.255176-1-huobean@gmail.com> <20210319121357.255176-2-huobean@gmail.com>
+In-Reply-To: <20210319121357.255176-2-huobean@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 19 Mar 2021 15:12:32 +0100
-Message-ID: <CAPDyKFr2HCu+DLc5RhdNZhzyiuEggZhr_BMG39S7Gmnt2An0Aw@mail.gmail.com>
-Subject: Re: [PATCH v3 0/3] mmc: renesas_sdhi: reset via reset controller
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Date:   Fri, 19 Mar 2021 15:12:42 +0100
+Message-ID: <CAPDyKFp4Y-MS_tsNpCS9M8pqm2RoTmMG7=4MYyxZ7ZsnVKKeQw@mail.gmail.com>
+Subject: Re: [PATCH v1 1/2] mmc: cavium: Use '"%s...", __func__' to print
+ function name
+To:     Bean Huo <huobean@gmail.com>
+Cc:     rric@kernel.org, Linus Walleij <linus.walleij@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 17 Mar 2021 at 10:17, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Fri, 19 Mar 2021 at 13:14, Bean Huo <huobean@gmail.com> wrote:
 >
-> This series enables SDHI to be reset via a reset controller. The series
-> is based on mmc/next and tested on Salvator-XS with R-Car H3 ES2.0 with
-> what I think I can do locally here. Shimoda-san, tested, too (thanks!)
+> From: Bean Huo <beanhuo@micron.com>
 >
-> Changes since v2:
-> * 'select' statement in Kconfig only for ARCH_RENESAS
-> * Shimoda-san's tags added
+> Use preferred way '"%s...", __func__' to print function name.
 >
-> Wolfram Sang (3):
->   mmc: tmio: abort DMA before reset
->   mmc: renesas_sdhi: break SCC reset into own function
->   mmc: renesas_sdhi: do hard reset if possible
->
->  drivers/mmc/host/Kconfig             |  1 +
->  drivers/mmc/host/renesas_sdhi.h      |  2 ++
->  drivers/mmc/host/renesas_sdhi_core.c | 35 +++++++++++++++++++++-------
->  drivers/mmc/host/tmio_mmc_core.c     |  4 ++--
->  4 files changed, 32 insertions(+), 10 deletions(-)
->
+> Signed-off-by: Bean Huo <beanhuo@micron.com>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/cavium.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/cavium.c b/drivers/mmc/host/cavium.c
+> index 4bb8f2800a2b..95a41983c6c0 100644
+> --- a/drivers/mmc/host/cavium.c
+> +++ b/drivers/mmc/host/cavium.c
+> @@ -656,8 +656,7 @@ static void cvm_mmc_dma_request(struct mmc_host *mmc,
+>
+>         if (!mrq->data || !mrq->data->sg || !mrq->data->sg_len ||
+>             !mrq->stop || mrq->stop->opcode != MMC_STOP_TRANSMISSION) {
+> -               dev_err(&mmc->card->dev,
+> -                       "Error: cmv_mmc_dma_request no data\n");
+> +               dev_err(&mmc->card->dev, "Error: %s no data\n", __func__);
+>                 goto error;
+>         }
+>
+> --
+> 2.25.1
+>
