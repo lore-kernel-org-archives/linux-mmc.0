@@ -5,65 +5,64 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8497FC433C1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3000C433E0
 	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 13:38:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 521D66192A
+	by mail.kernel.org (Postfix) with ESMTP id 795E961930
 	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 13:38:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230332AbhCVNiF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Mar 2021 09:38:05 -0400
-Received: from esa4.hgst.iphmx.com ([216.71.154.42]:49481 "EHLO
-        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229866AbhCVNhj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2021 09:37:39 -0400
+        id S230336AbhCVNiH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Mar 2021 09:38:07 -0400
+Received: from esa3.hgst.iphmx.com ([216.71.153.141]:57176 "EHLO
+        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229995AbhCVNhy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2021 09:37:54 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1616420259; x=1647956259;
+  t=1616420274; x=1647956274;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=wGMs1i8GIsX+8EmvtvhoYSNrVnYNajIZfQ9Kyx3KzkE=;
-  b=GO66Cdc7Bh2WZ9MWcJp9byIKeVSCU+m3phlUUgFE/DoBPaVWx64vxv3P
-   l6Vd0LkVMy5s7qmV6WsB5BFtq4UsJuTr7PQ2dy+Y1l3TDnDbkUAN7N5b+
-   OadGId3tJdpZFhm8hzzJ3iILKBCqZAQyeV8Eyw1jyFHzX7kWkAisssMdu
-   QAA537xYNZdBFfLnzRUMIYQzYaqtfjSwvYmj0lf1PUBDzoxvEDfUT7KeB
-   oqlANgwAXS3rxGz8h8qumLt/3UHlJPAmsfkmxkhGVbT6NX2HBaJOIlpnI
-   ELerAnqRutJ7tup0GBUuI2uXB9liAlSNGuC6Cw2k+qrk22CHv+ItMJEsG
-   w==;
-IronPort-SDR: ypwj/r+fw7AMTorQERVsJqub6BSnHXxi9AcXIB/7caUesE/sm7KekTT1/y0Qmt5aAHY35WH0zr
- EhvkdCiGVYu22Ba1tO0UMh+lk4N/n+Jxco0bUKKaOBZXFjbSBXytKiI06D72Z9zyeVwJXfUJqE
- Q60r/5lW9yOwrB0BkkYsBFeoj4VPml1IYaSNY9n7hbZD/vxrC4n44/FpgLGfX6Fuq7kXUaE0cX
- bd3fk7A/qjMQF+3lo3r5SuN+eQzxtQdLtX/XIPER+6gbWtGZ8EQY0DNU4ZY/Hd+7KStlJUUL9K
- EPE=
+  bh=t/DXKWpQXaxw6CxRe4hbgo5MFUB8rwUKH45I5giLmoQ=;
+  b=KnLTrQZt46owMQLbBPqV/FalL+GOznAA0n9HA0k0pZ/6CxjfPhO9DEJr
+   8xwFy8MDZ57uOq3p0pbjKgoA4O3rlofyg7ZXGlNGC5AWO3P/USsnbsB7/
+   osdoi8/uWLEzfBcafhiacC3CWStZMBpMASm3aNo60RchtV9wH5Bu/3mUi
+   TwjaFBxvuzL87IijJ8nnY0v8OXs2AfWqfWDMHpV5q76W/ReOx0ztinKix
+   U8ZOD3VaJcCOXGl2grXdw1uMk3vdf+EPn0y12MPLQwEfu8qzZlmljPs6U
+   ukUrTzPEHKxB/d18q34aBvN6blUKPE2NtFjTgUSDZw9xCYf3R/9wTUUI0
+   A==;
+IronPort-SDR: 1SJ3r80m6Q6joNykuzlhGds8qEASG5MJX+SbNebsrv/CxSd5IFetg/NBdp9N02bsNd1jm1qkvt
+ b2FNFBCkXM7PQYyZuZxuVjiXmgg7TpE7xzZy6o7SNXN11QG2TBRNXEZL3HF47lH/gr00LDlEa5
+ ESwngzcANQq/cOA6GcgsaycCIAfm02QJnV7i7y7E8sKRyxEhlMsgrYu92VCx3q7h6JYLBXbSpy
+ oNGSB4ppDyHAmwgs01rvLibAH9mECZHG+LVMywoAu0Vt/prfgPwsG0oC7toNBJua8w4TlbqW+4
+ RuE=
 X-IronPort-AV: E=Sophos;i="5.81,269,1610380800"; 
-   d="scan'208";a="162662254"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 22 Mar 2021 21:37:38 +0800
-IronPort-SDR: EKPy2R58q53Zyyv06juLFHVHcn6c7NHkEA4i0Maezs5liJhS/a4E5clLHlvaVeSZQD/++XpTFw
- bVi39YuZxHaetgq76EoE2DGksWuc6jfvx6EE6UnyiZGvGKqZzeunPqBC6cxmbFLPMe1rmjqAIv
- v9MXpJRhljx14lospbFGj64HazZFasBGbaTG64dMx6O7AUFgFprDwbNRqf7X3d97mHosEWZJDq
- WyQ/TrspTPShS81LD4D2wWrc76y0qhVkQROPSlnBi5e+Q8HQLf0lc3XbBqq4kKdIqJrsHb3xQu
- cQBqOkvfPhMJ5lnf9mjbGGdb
+   d="scan'208";a="167184356"
+Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 22 Mar 2021 21:37:52 +0800
+IronPort-SDR: rs9E5qquxFNu3a0Go1bQrYDBAi9NuZ+Gjmi/mXdoC86CG1AMrq0Zb0/QKX5f5fILdRiSYdeu/q
+ g9IgoYjsy5QoFMv+X0ZSIZmUXsNAWrq3O9hN9o6tvIcqArQhnJyQsRPfIE1SAuMtvXs5rE/0ao
+ VIuWpKEBM1p8EacimgQ3ZRIUrjsKlXQGrOXoSBN9g+uJ2aspipd9lrGMJCw6GiH2vFt+sdFKw3
+ XfGLf7TZbg3h/ClZbFvtMsHeMOZzjW+fQJ5ySNkhhhs84ITZfVb5rRj7d2yD8B6zNbFNkN20XA
+ +cjGDiFyR/qf/WTQsyRPX8aM
 Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Mar 2021 06:19:46 -0700
-IronPort-SDR: KnPH3ktiq33w5JmrhXn2KpQbgFZRyaNdd91I2gCPct12qTcVssVzjWADRT7OuD0xk051X7Rctv
- jT3PohrIMcoTBbslNCE0IGlmL4LjFKyPsnUxAmZ5dH1qwwta41aks91tCi8RLib4fFHUXCfRpM
- GFDHUDqVxEsmA8VKvQaWTkW5nE0fqHTnG1XQC4IyY6U+76n/cecqUgzbD5p7OP85FN7j1oaUVa
- IZzP+FyIwWt0IKqI1Od7AXoR+rpJhtuVLW/QRSNxSKPPUxxhIay56JtxgeRoVMLD907Bf4KT+b
- Xyw=
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Mar 2021 06:18:21 -0700
+IronPort-SDR: PxW9nuiZ7KDBZF2jVI2d0GeIeoWRVIkygl9u/a2SiEFR5zLIQdbeOV6vN3eHVZgCjRs6KTczOJ
+ 1/wSisd9udjYsjBnfgYRoXbUmB4LQAQKJ9E/po0yzDamEJV68viXxNciFUZsH5f1p4EQjl2Ym0
+ p4wDQDmA3huDnLebGOeBvKd5Cny7qtLloxRN5jtQcy5RDIvnxRelqyGW2Qa7YeP4iuUJyxlphm
+ VcndSU3MD/iAl9HAQJYgrZ7fq17jV8DTzh6+s3w0yHvIjzrhvPJckkXNuUYCgkpgcuGgZ+xqgt
+ P1U=
 WDCIronportException: Internal
 Received: from bxygm33.sdcorp.global.sandisk.com ([10.0.231.247])
-  by uls-op-cesaip02.wdc.com with ESMTP; 22 Mar 2021 06:37:36 -0700
+  by uls-op-cesaip02.wdc.com with ESMTP; 22 Mar 2021 06:37:47 -0700
 From:   Avri Altman <avri.altman@wdc.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>,
-        Brendan Peter <bpeter@lytx.com>
-Subject: [PATCH 1/2] mmc: block: Issue flush only if allowed
-Date:   Mon, 22 Mar 2021 15:36:44 +0200
-Message-Id: <20210322133645.4901-2-avri.altman@wdc.com>
+        linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH 2/2] mmc: block: Update ext_csd.cache_ctrl if it was written
+Date:   Mon, 22 Mar 2021 15:36:45 +0200
+Message-Id: <20210322133645.4901-3-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20210322133645.4901-1-avri.altman@wdc.com>
 References: <20210322133645.4901-1-avri.altman@wdc.com>
@@ -73,68 +72,36 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The cache may be flushed to the nonvolatile storage by writing to
-FLUSH_CACHE byte (EXT_CSD byte [32]). When in command queueing mode, the
-cache may be flushed by issuing a CMDQ_TASK_ DEV_MGMT (CMD48) with a
-FLUSH_CACHE op-code.  Either way, verify that The cache function is
-turned ON before doing so.
+The cache function can be turned ON and OFF by writing to the CACHE_CTRL
+byte (EXT_CSD byte [33]).  However,  card->ext_csd.cache_ctrl is only
+set on init if cache size > 0.
 
-fixes: 1e8e55b67030 (mmc: block: Add CQE support)
+Fix that by explicitly setting ext_csd.cache_ctrl on ext-csd write.
 
-Reported-by: Brendan Peter <bpeter@lytx.com>
-Tested-by: Brendan Peter <bpeter@lytx.com>
 Signed-off-by: Avri Altman <avri.altman@wdc.com>
 ---
- drivers/mmc/core/block.c   | 3 +++
- drivers/mmc/core/mmc_ops.c | 4 +---
- drivers/mmc/core/mmc_ops.h | 5 +++++
- 3 files changed, 9 insertions(+), 3 deletions(-)
+ drivers/mmc/core/block.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 42e27a298218..a93c66aa91db 100644
+index a93c66aa91db..4c816d001ac1 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
-@@ -1473,6 +1473,9 @@ static int mmc_blk_cqe_issue_flush(struct mmc_queue *mq, struct request *req)
- 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
- 	struct mmc_request *mrq = mmc_blk_cqe_prep_dcmd(mqrq, req);
+@@ -571,6 +571,14 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 		main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
+ 	}
  
-+	if (mmc_card_mmc(mq->card) && !mmc_flush_allowed(mq->card))
-+		return 0;
++	/* Make sure to update CACHE_CTRL in case it was changed */
++	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_CACHE_CTRL) &&
++	    (cmd.opcode == MMC_SWITCH)) {
++		u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg) & 1;
 +
- 	mrq->cmd->opcode = MMC_SWITCH;
- 	mrq->cmd->arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
- 			(EXT_CSD_FLUSH_CACHE << 16) |
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index baa6314f69b4..b8a0c9ac8a20 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -988,9 +988,7 @@ int mmc_flush_cache(struct mmc_card *card)
- {
- 	int err = 0;
- 
--	if (mmc_card_mmc(card) &&
--			(card->ext_csd.cache_size > 0) &&
--			(card->ext_csd.cache_ctrl & 1)) {
-+	if (mmc_card_mmc(card) && mmc_flush_allowed(card)) {
- 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
- 				 EXT_CSD_FLUSH_CACHE, 1,
- 				 MMC_CACHE_FLUSH_TIMEOUT_MS);
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index 632009260e51..bf2b315addd7 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -19,6 +19,11 @@ enum mmc_busy_cmd {
- struct mmc_host;
- struct mmc_card;
- 
-+static inline bool mmc_flush_allowed(struct mmc_card *card)
-+{
-+	return card->ext_csd.cache_size > 0 && (card->ext_csd.cache_ctrl & 1);
-+}
++		card->ext_csd.cache_ctrl = value;
++	}
 +
- int mmc_select_card(struct mmc_card *card);
- int mmc_deselect_cards(struct mmc_host *host);
- int mmc_set_dsr(struct mmc_host *host);
+ 	/*
+ 	 * According to the SD specs, some commands require a delay after
+ 	 * issuing the command.
 -- 
 2.25.1
 
