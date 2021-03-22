@@ -5,47 +5,46 @@ X-Spam-Level:
 X-Spam-Status: No, score=-19.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2903EC433E1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BB3FC433E5
 	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:00:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DBFCA619A0
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:00:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1062E61994
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:00:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231643AbhCVS76 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Mar 2021 14:59:58 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40248 "EHLO mail.kernel.org"
+        id S232245AbhCVS77 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Mar 2021 14:59:59 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40266 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232164AbhCVS73 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 22 Mar 2021 14:59:29 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B935D619A8;
-        Mon, 22 Mar 2021 18:59:26 +0000 (UTC)
+        id S232292AbhCVS7g (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 22 Mar 2021 14:59:36 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E84396199F;
+        Mon, 22 Mar 2021 18:59:29 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1616439569;
-        bh=3WJZ+xKT9j6gw9UE+xMc27OkZKOFyhJ+cIpSqbqXuBs=;
+        s=k20201202; t=1616439572;
+        bh=s6ymiQxwePb20Kp2RAPsG0nP87bGAxMicsdfeJT0mC0=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=EKELXgM3XqhR4YSRZUHp5ZU6eoD1pjbdwmVJcdeBhnjS6ry1K/Zby/24yCwTti9tC
-         49eVr4lL9glgiM0uCESrbFBnqB3BDEE5nlOIl2RXQjFgebnynbMb/dOQZOv65rYyFf
-         B1C6TuoB6PfEsXbCR+wvFspZy7Vt7m8sTxlvADHvo8g4t1uZRdEmCUq4n7lkzklP4/
-         17o5pgqN5D4ce2YUnXcVrUE7fu8iqUESqsfX6Xwn7k5WzM3xUMz9c515t5Zs3J+IX6
-         iJ4IxHf67yTSbrML4p5LpYTZMwfXX5+Oj29sAys1IKKYMLUy5cnQhUMzyyUEkcKknc
-         zNI95nDugy+xg==
+        b=ihW3OvOyJmZH+nfKxl3tTK7pmHcaotogYNZlucLYTpV+bfEmX8LFahc17He9AAf/m
+         JYU76wRHhuZgoXBcm81UnVqOTWBZ7QZThqPjO/4o4m2uv3HZ6WNpmnNdzByFxdAbOa
+         pCwMes1lQIQe1TQCu8sZKhVP9oXMINdp0rSi2DAkN+ZCzhG9xl1FueQeS7894UsLjE
+         WRKkaByrfxKF3JudCMmXsq/0BfMly+vdsq6CPGsIJg2k7fJ8HB1lR1B5s5AgCPSPIY
+         EPehDR2OZqWhTDuYF86UL5dX8fuH5bVa4VQo97ErS7g8gf1X86AP/Ax1gzrlWGgzvc
+         unuKPEE9P1JFQ==
 From:   Nicolas Saenz Julienne <nsaenz@kernel.org>
 To:     linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
         linux-rpi-kernel@lists.infradead.org,
         Saenz Julienne <nsaenz@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>
+        Rob Herring <robh+dt@kernel.org>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 Cc:     f.fainelli@gmail.com, phil@raspberrypi.com,
-        tim.gover@raspberrypi.com, alcooperx@gmail.com,
-        nsaenzjulienne@suse.de, linux-kernel@vger.kernel.org,
-        ulf.hansson@linaro.org
-Subject: [PATCH 3/4] mmc: sdhci-iproc: Set clock frequency as per DT
-Date:   Mon, 22 Mar 2021 19:58:16 +0100
-Message-Id: <20210322185816.27582-4-nsaenz@kernel.org>
+        tim.gover@raspberrypi.com, adrian.hunter@intel.com,
+        sbranden@broadcom.com, alcooperx@gmail.com,
+        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org
+Subject: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
+Date:   Mon, 22 Mar 2021 19:58:17 +0100
+Message-Id: <20210322185816.27582-5-nsaenz@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210322185816.27582-1-nsaenz@kernel.org>
 References: <20210322185816.27582-1-nsaenz@kernel.org>
@@ -57,35 +56,33 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
 
-devicetree might request a clock frequency different from whatever is
-set-up by the bootloader. Make sure to setup the new rate.
+Force emmc2's frequency to 150MHz as the default 100MHz (set by FW)
+seems to interfere with the VPU clock when setup at frequencies bigger
+than 500MHz (a pretty common case). This ends up causing unwarranted
+SDHCI CMD hangs  when no SD card is present.
 
 Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
 ---
- drivers/mmc/host/sdhci-iproc.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+ arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index ddeaf8e1f72f..536c382e2486 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -358,6 +358,16 @@ static int sdhci_iproc_probe(struct platform_device *pdev)
- 			ret = PTR_ERR(pltfm_host->clk);
- 			goto err;
- 		}
-+
-+		if (pltfm_host->clock) {
-+			ret = clk_set_rate(pltfm_host->clk, pltfm_host->clock);
-+			if (ret) {
-+				dev_err(dev, "failed to set host clk at %u Hz\n",
-+					pltfm_host->clock);
-+				goto err;
-+			}
-+		}
-+
- 		ret = clk_prepare_enable(pltfm_host->clk);
- 		if (ret) {
- 			dev_err(dev, "failed to enable host clk\n");
+diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+index 3b4ab947492a..9aa8408d9960 100644
+--- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
++++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+@@ -257,6 +257,12 @@ &emmc2 {
+ 	vqmmc-supply = <&sd_io_1v8_reg>;
+ 	vmmc-supply = <&sd_vcc_reg>;
+ 	broken-cd;
++	/*
++	 * Force the frequency to 150MHz as the default 100MHz seems to
++	 * interfere with the VPU clock when setup at frequencies bigger than
++	 * 500MHz, causing unwarranted CMD hangs.
++	 */
++	clock-frequency = <150000000>;
+ 	status = "okay";
+ };
+ 
 -- 
 2.30.2
 
