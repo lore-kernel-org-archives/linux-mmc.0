@@ -8,118 +8,211 @@ X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D7C4C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:06:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B37B1C433C1
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:12:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D6FDA61998
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:06:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7167B619A2
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 19:12:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231618AbhCVTG0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Mar 2021 15:06:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52940 "EHLO
+        id S231167AbhCVTLs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Mar 2021 15:11:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231253AbhCVTGN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2021 15:06:13 -0400
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4999DC061756
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2021 12:06:13 -0700 (PDT)
-Received: by mail-pj1-x1035.google.com with SMTP id cl21-20020a17090af695b02900c61ac0f0e9so31215pjb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2021 12:06:13 -0700 (PDT)
+        with ESMTP id S231782AbhCVTLe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Mar 2021 15:11:34 -0400
+Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8F84C061762
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2021 12:11:33 -0700 (PDT)
+Received: by mail-pg1-x529.google.com with SMTP id h25so9293255pgm.3
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Mar 2021 12:11:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=broadcom.com; s=google;
         h=subject:to:cc:references:from:message-id:date:user-agent
          :mime-version:in-reply-to;
-        bh=ZRowNjk/xMieAA7W2drwgVFJpnilXGfSNNiSue5vzQ4=;
-        b=d8hg3vm8tcFnppaYz2kL9psnwElqyI+k/KVnuEugIWPSebO3EksNWnYN4FYVCI6dlj
-         wnCfWqF238oagWBrPqpxvAHlE8rwECFlNnpFkvQst5kjmWXSgOPKpAFPAZabmsxJj+lQ
-         BvGkz3ZuLlIiKGCct6zyZudMQRazsq+Lvz1i0=
+        bh=9mOgSi4XDt8veEJ/AaUA6R1PR+tNshXPcnc1TiZlfns=;
+        b=Uat4yS8OY5vuZtQBhCsjMBha1TputZoLiXCUY45xl5JN2toOR79Hz7SEJIKzzlayUf
+         S/WhF9UV59INAdK7kINVUphe8zn3aDJZpHnavUd2a3U59JVH6IH6IaQVcDFvjJsMl+t+
+         91kKBDTQk09nrqyZSEKJbKxZComgaYn9ckO48=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to;
-        bh=ZRowNjk/xMieAA7W2drwgVFJpnilXGfSNNiSue5vzQ4=;
-        b=T0BtZE0uuBwXsftQJklreyPcR+YRDn8HS4G7MiO53b4EM6wilicZpYiKHdRNTv11K5
-         tdVoMiqNtVkE7jqd+mOKRzpA3egLmZBhLu60QJcNk8mK3VA7wWA358qygRYyZlQWlT9n
-         DnJ7g04FIP1Kwf7PtTuY24sxTotENGW6i6tOWilU7w/SlHsZXQrDnxonZEO4WhJlY8lP
-         zbWoHO6jPv+2Ft8x85bRWBSY25SqWoFXq00KTwazvWjsZmbgSvf9AJ5rqirKwQp2x0Dp
-         KGnOGBxQigw1bdF9LnOr1k2PcK6PsXHfmo9lU8U8tgk3BNLEXI7FlsVUD2EKqsuxBmuU
-         xv0g==
-X-Gm-Message-State: AOAM530G38D7eE52BappP6s6d7zwPu5ZTi7Lo4T6P01qgY/eiRNN+weU
-        AHBZQqxdzNfBiYbspRfynyMohA==
-X-Google-Smtp-Source: ABdhPJwZKLhJH6vEg/ZBa9OyV5Sj3naM9N3w0pZGLkXe8xOxjHZPVMOigyYte4yl/PUVeNYNR02b0Q==
-X-Received: by 2002:a17:90a:f2d5:: with SMTP id gt21mr540085pjb.197.1616439972571;
-        Mon, 22 Mar 2021 12:06:12 -0700 (PDT)
+        bh=9mOgSi4XDt8veEJ/AaUA6R1PR+tNshXPcnc1TiZlfns=;
+        b=VmSNLq2ShhrM9nr3tVblMm0/umZAdI6D5adKj/JX+sU7D7ykRozQ/J2i5jUYpnMnQ1
+         6uFtsx3Ju0C3VYt8Ea3eqCV3Q2WCoRjqf9BRDNTM0jL+WJ+LfVaNWoTtqWZLG03DPmzY
+         9yNfAEEifJc5WJGgGK+rsy6YcIC51Ji7pLQN4jPKs7ElLHlz0AfwvehnTnI9Itzv0CtE
+         KpxJvJMlj2/StVu/ORWjqo+cWCTQCvRGdFH+EHJa8ySO5tXAxBDKAAK9nl7b1JdKRMYg
+         boSameAV+Q0gzWSuvIp7u6rnctrmmykLIQU91U5TOmFrHRVUJdb88F4RZj2FIp8eNlic
+         pgww==
+X-Gm-Message-State: AOAM533at8MFPPPHIOEcwsJTyPC+eDDJ4xJzU0tgaNdy+rBRoBi496lj
+        D47dYz164tmJmoFJnp7tn+HawA==
+X-Google-Smtp-Source: ABdhPJyNmFSj5zo/68O1/44yaGHaf2Hen3v/j9Fyi4nQm9MM+qVOfEt1gseSGe7p58iLf707jVXgeQ==
+X-Received: by 2002:aa7:8dda:0:b029:1fa:19b3:7ed9 with SMTP id j26-20020aa78dda0000b02901fa19b37ed9mr979527pfr.32.1616440293076;
+        Mon, 22 Mar 2021 12:11:33 -0700 (PDT)
 Received: from lbrmn-lnxub113.ric.broadcom.net ([192.19.228.250])
-        by smtp.gmail.com with ESMTPSA id z18sm14002873pfa.39.2021.03.22.12.06.10
+        by smtp.gmail.com with ESMTPSA id y19sm15681558pfo.0.2021.03.22.12.11.30
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 22 Mar 2021 12:06:11 -0700 (PDT)
-Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
+        Mon, 22 Mar 2021 12:11:32 -0700 (PDT)
+Subject: Re: [PATCH 1/4] dt-bindings: mmc: iproc-sdhci: Convert to json-schema
 To:     Nicolas Saenz Julienne <nsaenz@kernel.org>,
         linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
         linux-rpi-kernel@lists.infradead.org,
-        Rob Herring <robh+dt@kernel.org>,
-        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>
 Cc:     f.fainelli@gmail.com, phil@raspberrypi.com,
         tim.gover@raspberrypi.com, adrian.hunter@intel.com,
-        sbranden@broadcom.com, alcooperx@gmail.com,
-        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org
+        alcooperx@gmail.com, nsaenzjulienne@suse.de,
+        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>
 References: <20210322185816.27582-1-nsaenz@kernel.org>
- <20210322185816.27582-5-nsaenz@kernel.org>
+ <20210322185816.27582-2-nsaenz@kernel.org>
 From:   Scott Branden <scott.branden@broadcom.com>
-Message-ID: <13a62975-23a4-60d3-a740-9ef44edc74c3@broadcom.com>
-Date:   Mon, 22 Mar 2021 12:06:09 -0700
+Message-ID: <0e98588e-65f1-6839-1fcd-584b480a31bd@broadcom.com>
+Date:   Mon, 22 Mar 2021 12:11:29 -0700
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20210322185816.27582-5-nsaenz@kernel.org>
+In-Reply-To: <20210322185816.27582-2-nsaenz@kernel.org>
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="00000000000064da9705be24c29c"
+        boundary="0000000000007e52a505be24d538"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---00000000000064da9705be24c29c
+--0000000000007e52a505be24d538
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 
-1st line of commit should be ARM: dts: bcm2711
-
 On 2021-03-22 11:58 a.m., Nicolas Saenz Julienne wrote:
-> From: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-> 
-> Force emmc2's frequency to 150MHz as the default 100MHz (set by FW)
-> seems to interfere with the VPU clock when setup at frequencies bigger
-> than 500MHz (a pretty common case). This ends up causing unwarranted
-> SDHCI CMD hangs  when no SD card is present.
+> Convert the brcm,iproc-sdhci binding to DT schema format using json-schema
 > 
 > Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
 > ---
->  arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 6 ++++++
->  1 file changed, 6 insertions(+)
+>  .../bindings/mmc/brcm,iproc-sdhci.yaml        | 58 +++++++++++++++++++
+>  .../bindings/mmc/brcm,sdhci-iproc.txt         | 37 ------------
+>  2 files changed, 58 insertions(+), 37 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
 > 
-> diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
-> index 3b4ab947492a..9aa8408d9960 100644
-> --- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
-> +++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
-> @@ -257,6 +257,12 @@ &emmc2 {
->  	vqmmc-supply = <&sd_io_1v8_reg>;
->  	vmmc-supply = <&sd_vcc_reg>;
->  	broken-cd;
-> +	/*
-> +	 * Force the frequency to 150MHz as the default 100MHz seems to
-> +	 * interfere with the VPU clock when setup at frequencies bigger than
-> +	 * 500MHz, causing unwarranted CMD hangs.
-> +	 */
-> +	clock-frequency = <150000000>;
->  	status = "okay";
->  };
->  
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+> new file mode 100644
+> index 000000000000..19d84f3ef9e6
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+> @@ -0,0 +1,58 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/brcm,iproc-sdhci.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Broadcom IPROC SDHCI controller
+> +
+> +maintainers:
+> +  - Nicolas Saenz Julienne <nsaenz@kernel.org>
+This is already covered in the MAINTAINERS section via "N:	iproc".
+M:	Ray Jui <ray.jui@broadcom.com>
+
+M:	Scott Branden <scott.branden@broadcom.com>
+
+M:	bcm-kernel-feedback-list@broadcom.com
+> +
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - brcm,bcm2835-sdhci
+> +      - brcm,bcm2711-emmc2
+> +      - brcm,sdhci-iproc-cygnus
+> +      - brcm,sdhci-iproc
+> +
+> +  reg:
+> +    minItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 1
+> +    description:
+> +      Handle to core clock for the sdhci controller.
+> +
+> +  sdhci,auto-cmd12:
+> +    type: boolean
+> +    description: Specifies that controller should use auto CMD12
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    sdhci0: sdhci@18041000 {
+> +      compatible = "brcm,sdhci-iproc-cygnus";
+> +      reg = <0x18041000 0x100>;
+> +      interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_HIGH>;
+> +      clocks = <&lcpll0_clks BCM_CYGNUS_LCPLL0_SDIO_CLK>;
+> +      bus-width = <4>;
+> +      sdhci,auto-cmd12;
+> +      no-1-8-v;
+> +    };
+> +
+> +...
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt b/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> deleted file mode 100644
+> index 09d87cc1182a..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> +++ /dev/null
+> @@ -1,37 +0,0 @@
+> -Broadcom IPROC SDHCI controller
+> -
+> -This file documents differences between the core properties described
+> -by mmc.txt and the properties that represent the IPROC SDHCI controller.
+> -
+> -Required properties:
+> -- compatible : Should be one of the following
+> -	       "brcm,bcm2835-sdhci"
+> -	       "brcm,bcm2711-emmc2"
+> -	       "brcm,sdhci-iproc-cygnus"
+> -	       "brcm,sdhci-iproc"
+> -
+> -Use brcm2835-sdhci for the eMMC controller on the BCM2835 (Raspberry Pi) and
+> -bcm2711-emmc2 for the additional eMMC2 controller on BCM2711.
+> -
+> -Use sdhci-iproc-cygnus for Broadcom SDHCI Controllers
+> -restricted to 32bit host accesses to SDHCI registers.
+> -
+> -Use sdhci-iproc for Broadcom SDHCI Controllers that allow standard
+> -8, 16, 32-bit host access to SDHCI register.
+> -
+> -- clocks : The clock feeding the SDHCI controller.
+> -
+> -Optional properties:
+> -  - sdhci,auto-cmd12: specifies that controller should use auto CMD12.
+> -
+> -Example:
+> -
+> -sdhci0: sdhci@18041000 {
+> -	compatible = "brcm,sdhci-iproc-cygnus";
+> -	reg = <0x18041000 0x100>;
+> -	interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_HIGH>;
+> -	clocks = <&lcpll0_clks BCM_CYGNUS_LCPLL0_SDIO_CLK>;
+> -	bus-width = <4>;
+> -	sdhci,auto-cmd12;
+> -	no-1-8-v;
+> -};
 > 
 
 
---00000000000064da9705be24c29c
+--0000000000007e52a505be24d538
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -190,13 +283,13 @@ lLX9hl3iEj5SBgkQqCbbnoE+ZjjKfqt7ED166WhgyQWNrl39yLcvLj+JRUB3RuvXKZjH0NQEEBII
 wZBDSkyneykLt3CBNIhSCTxKM6OWxVp936ALSa5K9FNy00TeWSpokR6NmzaW8VD/EjTgvqAxggJt
 MIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYD
 VQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgx9oXSJpKniO4dS
-Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIFxtmIoPIXbgQgXXpj7OjPv55e1R
-1v1GDBdwE4yfyp26MBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
-MDMyMjE5MDYxM1owaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
+Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIOWPHTI6WFm46vYwtXzDzhjEvRKB
+QUCOxZBQZeEi+SZSMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
+MDMyMjE5MTEzM1owaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
 CWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFl
-AwQCATANBgkqhkiG9w0BAQEFAASCAQBzOfeijSqJL7snXvhoQnw5NlM6hRUWkJ8XT/SW7hutVvrb
-ZhbLaBxbUh3+Iim0FzL5jo+fJTKk9b0TFobyx+mK9x396i7oP0UfXSv0OfrleI5uzNzolX0k0YPX
-NUcNUhYlcfIDr2xR+089s7zFE9qRaBxgyDxVNmHwMvF8UIxtK1bAO7FL6OJ4B7wyBSFBaoHQK6Nc
-/4MQNJhzN86vXzvRy9on2IR98gIqhQSCpjGjQJbPuN3ba44ZTW5J1gGITzJDYN0X69GQ1t3UewI6
-kRR216+4APOA+lsd8gwdcBw1XY+8ZqlSPVWBahHFylTfitNjHeSbq6jmZ1neomR7FJq3
---00000000000064da9705be24c29c--
+AwQCATANBgkqhkiG9w0BAQEFAASCAQAcBVN7TzFd+H/VaeODheWtIQRjRtsZWkHawVO6aG0qftcD
+eKo95jY1oYmOSg90caJ3joWIIsKB26aWcHJiy+V37/6YG1W/Avg62CEzgOrxTOmgLgFRwjRKa9xr
+Q3Jhv9bUg8McqpzeppVsWQ3Lunrb8CqbU6dyW8lgwTBRxkIzH3mEBqMETILbeIle8v0s6XGA0khG
+AxcO4FdM4q2RDXOwowbxujX2rggnaYd7+Kp1sNwW+r6g6Wh7jwS/HMJObyH6HCKttTlikmFoVOi1
+D//h9nq2N8O6lEVmpENqYyEGPfweFBOn3qo2V9MyssvmZqs8w1e/wblmmL+pUm/vf84q
+--0000000000007e52a505be24d538--
