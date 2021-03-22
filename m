@@ -5,360 +5,80 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98996C433C1
-	for <linux-mmc@archiver.kernel.org>; Sat, 20 Mar 2021 18:18:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D3A6C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 05:54:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A9DC6193B
-	for <linux-mmc@archiver.kernel.org>; Sat, 20 Mar 2021 18:18:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C3EE61966
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Mar 2021 05:54:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbhCTSSG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 20 Mar 2021 14:18:06 -0400
-Received: from alexa-out.qualcomm.com ([129.46.98.28]:32819 "EHLO
-        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229883AbhCTSSC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Mar 2021 14:18:02 -0400
-Received: from ironmsg-lv-alpha.qualcomm.com ([10.47.202.13])
-  by alexa-out.qualcomm.com with ESMTP; 20 Mar 2021 11:18:01 -0700
-X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg-lv-alpha.qualcomm.com with ESMTP/TLS/AES256-SHA; 20 Mar 2021 11:17:59 -0700
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 20 Mar 2021 23:47:08 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 793EE4AE7; Sat, 20 Mar 2021 23:47:07 +0530 (IST)
-From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, rampraka@codeaurora.org,
-        sayalil@codeaurora.org, sartgarg@codeaurora.org,
-        rnayak@codeaurora.org, saiprakash.ranjan@codeaurora.org,
-        sibis@codeaurora.org, cang@codeaurora.org, pragalla@codeaurora.org,
-        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Subject: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
-Date:   Sat, 20 Mar 2021 23:47:00 +0530
-Message-Id: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
-X-Mailer: git-send-email 2.7.4
+        id S229715AbhCVFyW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Mar 2021 01:54:22 -0400
+Received: from mga01.intel.com ([192.55.52.88]:40812 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229930AbhCVFxt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 22 Mar 2021 01:53:49 -0400
+IronPort-SDR: a0crUhNE8wvv5YVq+Q21P+lP1MEmDUDfcWZ7/lVNT6H/9XfnAvv6voARtF8fd25CfSCFNuXieb
+ JuFrOxAVOeqg==
+X-IronPort-AV: E=McAfee;i="6000,8403,9930"; a="210271055"
+X-IronPort-AV: E=Sophos;i="5.81,268,1610438400"; 
+   d="scan'208";a="210271055"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Mar 2021 22:53:49 -0700
+IronPort-SDR: NtcBJDDTSOuQLdMjWJevcCmBndx/orvY2ZT/T3eEidr6sCoWGyjfv5T2pHGukwFkGP9xR0uD4A
+ hfexdVh8PFCQ==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.81,268,1610438400"; 
+   d="scan'208";a="407666389"
+Received: from ahunter-desktop.fi.intel.com ([10.237.72.174])
+  by fmsmga008.fm.intel.com with ESMTP; 21 Mar 2021 22:53:48 -0700
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Subject: [PATCH] mmc: sdhci-pci: Add PCI IDs for Intel LKF
+Date:   Mon, 22 Mar 2021 07:53:56 +0200
+Message-Id: <20210322055356.24923-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.17.1
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add nodes for eMMC and SD card on sc7280.
+Add PCI IDs for Intel LKF eMMC and SD card host controllers.
 
-Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-
+Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
-This change is depends on the below patch series:
-https://lore.kernel.org/patchwork/project/lkml/list/?series=488871
-https://lore.kernel.org/patchwork/project/lkml/list/?series=489530
-https://lore.kernel.org/patchwork/project/lkml/list/?series=488429
+ drivers/mmc/host/sdhci-pci-core.c | 2 ++
+ drivers/mmc/host/sdhci-pci.h      | 2 ++
+ 2 files changed, 4 insertions(+)
 
-Changes since V1:
-	- Moved SDHC nodes as suggested by Bjorn Andersson.
-	- Dropped "pinconf-" prefix as suggested by Bjorn Andersson.
-	- Removed extra newlines as suggested by Konrad Dybcio.
-	- Changed sd-cd pin to bias-pull-up in sdc2_off as suggested by
-	  Veerabhadrarao Badiganti.
-	- Added bandwidth votes for eMMC and SD card.
----
- arch/arm64/boot/dts/qcom/sc7280-idp.dts |  25 ++++
- arch/arm64/boot/dts/qcom/sc7280.dtsi    | 213 ++++++++++++++++++++++++++++++++
- 2 files changed, 238 insertions(+)
-
-diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
-index 54d2cb3..4105263 100644
---- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
-+++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
-@@ -8,6 +8,7 @@
- /dts-v1/;
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 62799c1d9c0c..b3caa174effe 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -1903,6 +1903,8 @@ static const struct pci_device_id pci_ids[] = {
+ 	SDHCI_PCI_DEVICE(INTEL, CMLH_SD,   intel_byt_sd),
+ 	SDHCI_PCI_DEVICE(INTEL, JSL_EMMC,  intel_glk_emmc),
+ 	SDHCI_PCI_DEVICE(INTEL, JSL_SD,    intel_byt_sd),
++	SDHCI_PCI_DEVICE(INTEL, LKF_EMMC,  intel_glk_emmc),
++	SDHCI_PCI_DEVICE(INTEL, LKF_SD,    intel_byt_sd),
+ 	SDHCI_PCI_DEVICE(O2, 8120,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8220,     o2),
+ 	SDHCI_PCI_DEVICE(O2, 8221,     o2),
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index d0ed232af0eb..8f90c4163bb5 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -57,6 +57,8 @@
+ #define PCI_DEVICE_ID_INTEL_CMLH_SD	0x06f5
+ #define PCI_DEVICE_ID_INTEL_JSL_EMMC	0x4dc4
+ #define PCI_DEVICE_ID_INTEL_JSL_SD	0x4df8
++#define PCI_DEVICE_ID_INTEL_LKF_EMMC	0x98c4
++#define PCI_DEVICE_ID_INTEL_LKF_SD	0x98f8
  
- #include "sc7280.dtsi"
-+#include <dt-bindings/gpio/gpio.h>
- 
- / {
- 	model = "Qualcomm Technologies, Inc. sc7280 IDP platform";
-@@ -242,6 +243,30 @@
- 	status = "okay";
- };
- 
-+&sdhc_1 {
-+	status = "okay";
-+
-+	pinctrl-names = "default", "sleep";
-+	pinctrl-0 = <&sdc1_on>;
-+	pinctrl-1 = <&sdc1_off>;
-+
-+	vmmc-supply = <&vreg_l7b_2p9>;
-+	vqmmc-supply = <&vreg_l19b_1p8>;
-+};
-+
-+&sdhc_2 {
-+	status = "okay";
-+
-+	pinctrl-names = "default","sleep";
-+	pinctrl-0 = <&sdc2_on>;
-+	pinctrl-1 = <&sdc2_off>;
-+
-+	vmmc-supply = <&vreg_l9c_2p9>;
-+	vqmmc-supply = <&vreg_l6c_2p9>;
-+
-+	cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
-+};
-+
- /* PINCTRL - additions to nodes defined in sc7280.dtsi */
- 
- &qup_uart5_default {
-diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi b/arch/arm64/boot/dts/qcom/sc7280.dtsi
-index 8f6b569..69eb064 100644
---- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
-@@ -20,6 +20,11 @@
- 
- 	chosen { };
- 
-+	aliases {
-+		mmc1 = &sdhc_1;
-+		mmc2 = &sdhc_2;
-+	};
-+
- 	clocks {
- 		xo_board: xo-board {
- 			compatible = "fixed-clock";
-@@ -305,6 +310,64 @@
- 			#power-domain-cells = <1>;
- 		};
- 
-+		sdhc_1: sdhci@7c4000 {
-+			compatible = "qcom,sdhci-msm-v5";
-+			reg = <0 0x7c4000 0 0x1000>,
-+					<0 0x7c5000 0 0x1000>;
-+			reg-names = "hc", "cqhci";
-+
-+			iommus = <&apps_smmu 0xC0 0x0>;
-+			interrupts = <GIC_SPI 652 IRQ_TYPE_LEVEL_HIGH>,
-+					<GIC_SPI 656 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-+					<&gcc GCC_SDCC1_AHB_CLK>,
-+					<&rpmhcc RPMH_CXO_CLK>;
-+			clock-names = "core", "iface", "xo";
-+			interconnects = <&aggre1_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
-+					<&gem_noc MASTER_APPSS_PROC 0 &cnoc2 SLAVE_SDCC_1 0>;
-+			interconnect-names = "sdhc-ddr","cpu-sdhc";
-+			power-domains = <&rpmhpd SC7280_CX>;
-+			operating-points-v2 = <&sdhc1_opp_table>;
-+
-+			bus-width = <8>;
-+			non-removable;
-+			supports-cqe;
-+			no-sd;
-+			no-sdio;
-+
-+			max-frequency = <192000000>;
-+
-+			qcom,dll-config = <0x0007642c>;
-+			qcom,ddr-config = <0x80040868>;
-+
-+			mmc-ddr-1_8v;
-+			mmc-hs200-1_8v;
-+			mmc-hs400-1_8v;
-+			mmc-hs400-enhanced-strobe;
-+
-+			status = "disabled";
-+
-+			sdhc1_opp_table: sdhc1-opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-100000000 {
-+					opp-hz = /bits/ 64 <100000000>;
-+					required-opps = <&rpmhpd_opp_low_svs>;
-+					opp-peak-kBps = <1200000 76000>;
-+					opp-avg-kBps = <1200000 50000>;
-+				};
-+
-+				opp-384000000 {
-+					opp-hz = /bits/ 64 <384000000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+					opp-peak-kBps = <5400000 1600000>;
-+					opp-avg-kBps = <6000000 300000>;
-+				};
-+			};
-+		};
-+
- 		qupv3_id_0: geniqup@9c0000 {
- 			compatible = "qcom,geni-se-qup";
- 			reg = <0 0x009c0000 0 0x2000>;
-@@ -328,6 +391,54 @@
- 			};
- 		};
- 
-+		sdhc_2: sdhci@8804000 {
-+			compatible = "qcom,sdhci-msm-v5";
-+			reg = <0 0x08804000 0 0x1000>;
-+
-+			iommus = <&apps_smmu 0x100 0x0>;
-+			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-+					<GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-+					<&gcc GCC_SDCC2_AHB_CLK>,
-+					<&rpmhcc RPMH_CXO_CLK>;
-+			clock-names = "core", "iface", "xo";
-+			interconnects = <&aggre1_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
-+					<&gem_noc MASTER_APPSS_PROC 0 &cnoc2 SLAVE_SDCC_2 0>;
-+			interconnect-names = "sdhc-ddr","cpu-sdhc";
-+			power-domains = <&rpmhpd SC7280_CX>;
-+			operating-points-v2 = <&sdhc2_opp_table>;
-+
-+			bus-width = <4>;
-+
-+			no-mmc;
-+			no-sdio;
-+
-+			max-frequency = <202000000>;
-+
-+			qcom,dll-config = <0x0007642c>;
-+
-+			status = "disabled";
-+
-+			sdhc2_opp_table: sdhc2-opp-table {
-+					compatible = "operating-points-v2";
-+
-+					opp-100000000 {
-+						opp-hz =/bits/ 64 <100000000>;
-+						required-opps = <&rpmhpd_opp_low_svs>;
-+						opp-peak-kBps = <1200000 76000>;
-+						opp-avg-kBps = <1200000 50000>;
-+					};
-+					opp-202000000 {
-+						opp-hz = /bits/ 64 <202000000>;
-+						required-opps = <&rpmhpd_opp_nom>;
-+						opp-peak-kBps = <3500000 1200000>;
-+						opp-avg-kBps = <5000000 100000>;
-+					};
-+				};
-+		};
-+
- 		pdc: interrupt-controller@b220000 {
- 			compatible = "qcom,sc7280-pdc", "qcom,pdc";
- 			reg = <0 0x0b220000 0 0x30000>;
-@@ -374,6 +485,108 @@
- 				pins = "gpio46", "gpio47";
- 				function = "qup13";
- 			};
-+
-+			sdc1_on: sdc1-on {
-+				clk {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+
-+				cmd {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				data {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				rclk {
-+					pins = "sdc1_rclk";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc1_off: sdc1-off {
-+				clk {
-+					pins = "sdc1_clk";
-+					bias-disable;
-+					drive-strength = <2>;
-+				};
-+
-+				cmd {
-+					pins = "sdc1_cmd";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				data {
-+					pins = "sdc1_data";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				rclk {
-+					pins = "sdc1_rclk";
-+					bias-pull-down;
-+				};
-+			};
-+
-+			sdc2_on: sdc2-on {
-+				clk {
-+					pins = "sdc2_clk";
-+					bias-disable;
-+					drive-strength = <16>;
-+				};
-+
-+				cmd {
-+					pins = "sdc2_cmd";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				data {
-+					pins = "sdc2_data";
-+					bias-pull-up;
-+					drive-strength = <10>;
-+				};
-+
-+				sd-cd {
-+					pins = "gpio91";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+			};
-+
-+			sdc2_off: sdc2-off {
-+				clk {
-+					pins = "sdc2_clk";
-+					bias-disable;
-+					drive-strength = <2>;
-+				};
-+
-+				cmd {
-+					pins = "sdc2_cmd";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				data {
-+					pins = "sdc2_data";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+
-+				sd-cd {
-+					pins = "gpio91";
-+					bias-pull-up;
-+					drive-strength = <2>;
-+				};
-+			};
- 		};
- 
- 		apps_smmu: iommu@15000000 {
+ #define PCI_DEVICE_ID_SYSKONNECT_8000	0x8000
+ #define PCI_DEVICE_ID_VIA_95D0		0x95d0
 -- 
-2.7.4
+2.17.1
 
