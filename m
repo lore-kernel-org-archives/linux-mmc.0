@@ -2,114 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 869A0C433E1
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 10:54:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3891C433DB
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 11:21:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3E98A619BA
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 10:54:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 94C34619BA
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 11:21:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230290AbhCWKxp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Mar 2021 06:53:45 -0400
-Received: from wout4-smtp.messagingengine.com ([64.147.123.20]:59967 "EHLO
-        wout4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229482AbhCWKxY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 06:53:24 -0400
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.west.internal (Postfix) with ESMTP id 0C9C6128C;
-        Tue, 23 Mar 2021 06:53:23 -0400 (EDT)
-Received: from mailfrontend2 ([10.202.2.163])
-  by compute4.internal (MEProxy); Tue, 23 Mar 2021 06:53:24 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=cerno.tech; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:content-transfer-encoding:in-reply-to; s=fm2; bh=b
-        F2ZJHjpCDRG6YL3M/WZ6toZgNvLcne9zlEm4BRKu9A=; b=lvOEsqWbAy8n1Xy2H
-        VqMsi68JRSgxuGbIDo/g6xeWUbVk16kkfo+t2ULSuxhZwuDPkcfqZFGL63nDK277
-        qKnXH7+tQZBxXM/Nr/N5ggsXubpomnJWUkzEZ4DPd3jWivqt8byjYmNCNmDB+D1F
-        mCODzyKwLwLlNlTwd0sXMzYxDdku0kB08O4Kd0+A1esOXHLIQYI3HO5TQNtepmMX
-        AKiE/KOMHta+B+SrN8qKUpEuhlBZrHs5NHeIehdzWll0/EEpp2bkgf4GO9+c1G/5
-        NvKyyd3vI1JfwRuWzKr6eDTasDNmkBIaiSRCIL9MuIUqGj5k178dfYW59JQ7RLtK
-        23sDg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:content-type
-        :date:from:in-reply-to:message-id:mime-version:references
-        :subject:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm2; bh=bF2ZJHjpCDRG6YL3M/WZ6toZgNvLcne9zlEm4BRKu
-        9A=; b=idGy1fPIBLYn4KgfEcLGM5JIuSr6lyS75Qhkf2oLmzMA7JEBopzIfKcGa
-        5cn09xy0Ie2J1cM2QA4K4agK+nxUMx68VSmiahgEl46ALMMkapbEDLKVqcjsygP/
-        wuVhMOSuWBWEBZ5jSlx5fDEjFbUmn6cVcCqcTFzLiGS7bIMHTGxfd9eR9QSs6nhs
-        8vxUc1a9DxOyG6hz1STt6yhpnf5VC2QIgDz9mIblLRSXl/+RiKMH8h5J8DCCB3/8
-        NDDMWG6BsgCpjuQgPhATiDcxds7mBw69j3j2O5GoUgG+Eq3mjW+0/78Xgu8arYZq
-        JEuWBCSDlcOKMow61E9y59NwmDCnQ==
-X-ME-Sender: <xms:o8hZYLg4M-vw2Z2Filb6x0CfDh6_JbfkFpLsX6MIrO4PP302RM6evg>
-    <xme:o8hZYH_32WtpdRUEzdL56QayGoSvtNLWGzrJeZnXO0sYVfEEI-X998kLNmSK0X0w7
-    ONGbtGNyl5R33j0ddE>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrudegiedgvddvucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepfffhvffukfhfgggtugfgjgesthhqredttddtvdenucfhrhhomhepofgrgihi
-    mhgvucftihhprghrugcuoehmrgigihhmvgestggvrhhnohdrthgvtghhqeenucggtffrrg
-    htthgvrhhnpefgjeettdejgffgffdvteeutdehtdehgeehueetkeefgefhtdetjeekledu
-    gedvudenucfkphepledtrdekledrieekrdejieenucevlhhushhtvghrufhiiigvpedtne
-    curfgrrhgrmhepmhgrihhlfhhrohhmpehmrgigihhmvgestggvrhhnohdrthgvtghh
-X-ME-Proxy: <xmx:o8hZYH9wY6wTBfNiVo752vSTWMmpxyRw4dIwdqsH73ZkCvi46DECKg>
-    <xmx:o8hZYADtJ1YiWdSq-b6OlUh6FvJmJoEn3UNv04Hb3IJWvcziYVvUmg>
-    <xmx:o8hZYHzy7BgBfns_p8ViHRO9LF9XsiM7qnWAzTewcFioHDhYQahBjw>
-    <xmx:o8hZYAyib5j-JKVf6gt4eSJBMzqy0nXR-xpvkIuU4_RTvXeTVzf74A>
-Received: from localhost (lfbn-tou-1-1502-76.w90-89.abo.wanadoo.fr [90.89.68.76])
-        by mail.messagingengine.com (Postfix) with ESMTPA id 292531080054;
-        Tue, 23 Mar 2021 06:53:23 -0400 (EDT)
-Date:   Tue, 23 Mar 2021 11:53:20 +0100
-From:   Maxime Ripard <maxime@cerno.tech>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: Help with eMMC inline encryption
-Message-ID: <20210323105320.ximbrvy6biwfvsue@gilmour>
-References: <20210317171554.a4vgihqfjq2xa5cb@gilmour>
- <YFJLipl1CzTJ/B7/@sol.localdomain>
- <20210322155318.yg4u634a7fxg2yiq@gilmour>
- <YFjNvGAu8M/+ERCo@gmail.com>
+        id S230147AbhCWLUi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Mar 2021 07:20:38 -0400
+Received: from szxga07-in.huawei.com ([45.249.212.35]:14846 "EHLO
+        szxga07-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230450AbhCWLUM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 07:20:12 -0400
+Received: from DGGEMS401-HUB.china.huawei.com (unknown [172.30.72.60])
+        by szxga07-in.huawei.com (SkyGuard) with ESMTP id 4F4TPb1kWQz92t4;
+        Tue, 23 Mar 2021 19:18:11 +0800 (CST)
+Received: from localhost.localdomain (10.175.102.38) by
+ DGGEMS401-HUB.china.huawei.com (10.3.19.201) with Microsoft SMTP Server id
+ 14.3.498.0; Tue, 23 Mar 2021 19:20:00 +0800
+From:   'w00385741 <weiyongjun1@huawei.com>
+To:     <weiyongjun1@huawei.com>, Adrian Hunter <adrian.hunter@intel.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+CC:     <linux-mmc@vger.kernel.org>, <kernel-janitors@vger.kernel.org>,
+        Hulk Robot <hulkci@huawei.com>
+Subject: [PATCH -next] mmc: sdhci-of-dwcmshc: fix error return code in dwcmshc_probe()
+Date:   Tue, 23 Mar 2021 11:29:56 +0000
+Message-ID: <20210323112956.1016884-1-weiyongjun1@huawei.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <YFjNvGAu8M/+ERCo@gmail.com>
+Content-Type:   text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+X-Originating-IP: [10.175.102.38]
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Eric,
+From: Wei Yongjun <weiyongjun1@huawei.com>
 
-On Mon, Mar 22, 2021 at 10:02:52AM -0700, Eric Biggers wrote:
-> On Mon, Mar 22, 2021 at 04:53:18PM +0100, Maxime Ripard wrote:
-> >=20
-> > Indeed, I somehow missed that you were setting the DUN in
-> > cqhci_crypto_prep_task_desc, and I'm guessing that's where my issue
-> > lies: it doesn't look like there's any field to set the DUN in the
-> > controller, which doesn't make much sense to me.
-> >=20
-> > The documentation is pretty short, but it looks like it might be
-> > inferred from the MMC commands arguments (the Access Mode bit in the MMC
-> > controller, page 517). Would that make sense?
-> >=20
->=20
-> If your hardware has no way to specify a starting DUN (or starting IV) fo=
-r each
-> request, then presumably it automatically chooses IVs based on the locati=
-on of
-> the data on-disk.
->=20
-> This way of IV generation is problematic for several reasons, and it does=
-n't
-> match the UFS and eMMC standards.  So blk-crypto and fscrypt don't suppor=
-t this
-> type of hardware.
+Fix to return negative error code -ENOMEM from the error handling
+case instead of 0, as done elsewhere in this function.
 
-Too bad then :)
+Fixes: c2c4da37837e ("mmc: sdhci-of-dwcmshc: add rockchip platform support")
+Reported-by: Hulk Robot <hulkci@huawei.com>
+Signed-off-by: Wei Yongjun <weiyongjun1@huawei.com>
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Thanks for your help
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 06873686d5e9..e96c628aeeeb 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -383,8 +383,10 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 
+ 	if (pltfm_data == &sdhci_dwcmshc_rk3568_pdata) {
+ 		rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk3568_priv), GFP_KERNEL);
+-		if (!rk_priv)
++		if (!rk_priv) {
++			err = -ENOMEM;
+ 			goto err_clk;
++		}
+ 
+ 		priv->priv = rk_priv;
+ 
 
-Maxime
