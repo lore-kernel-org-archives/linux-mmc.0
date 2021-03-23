@@ -2,147 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,
-	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57A68C433C1
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 13:10:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFDB1C433E2
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 13:39:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 118D9619B9
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 13:10:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B90C61983
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 13:39:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231414AbhCWNJl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Mar 2021 09:09:41 -0400
-Received: from mail-eopbgr1320099.outbound.protection.outlook.com ([40.107.132.99]:2461
-        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231446AbhCWNJU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 23 Mar 2021 09:09:20 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=VwWbWHz18xBpPW4ukHou7gOGcPc5AdQ5fXmOhb6k0UADJNP+2V9EAillcwmnCaTVcJ+IhKzlpcqfAsQtcN0+5rxXFmiCPwKTO/HpLLgmLswjAj/KlQrCOkJXYvy7mYOtWghi0JXBTIqOvlSEZM9w200M26EJRsQqExJv8R5hpgS/I4tvue8AcV0DK9uwAzUnCGHLZzjlk9VwPAQJXi99o1QlnPpCWpRUudMv8qHKGNNu5Qg2SKtdPz3vZp4PuMeDe6sfbcep8XsGwd+4zPWojGddTJjQOJ/vhEaMAhFw+w7ZyI2fhJqumTrmD5gTHgtyYnrI0y8PxEFv4nsSkkLjCg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=xn866kONo186EMcdOQUqMi2Ua0Zne7ePU78TRdLivUU=;
- b=nIUC/keDrWSEPVBXULAYOTR2zeatU0D3R7pvZoxkocvahcwUIcyldbovUJXoBCYrXS/u/tHW+84Wx+tN7wSVmYICA5aOK2Fp55vcGQ7A3Y+/eW6CVd+5AQyWRXp/C2KlJTpo+EUWV1sl++lmpJIE58gGJPJll9A4A+8j5Ui0rrlJlOXEjnA1K29o7zp7eKwNtw5CDg8iOQbOdAuGOo5eHASeDmN/f1DgMB8UHeZLOUirqKqdmz98nafDForwcKB9/eIZhB4iiWYu5oLTU2w4muJWOx88zt8FAHM54ciCcD5kMh853gHF+LIg+ceISI4CFbHnkI1dT3u0rG+5DBMW6Q==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S231583AbhCWNi2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Mar 2021 09:38:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37504 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231312AbhCWNiN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 09:38:13 -0400
+Received: from mail-vk1-xa31.google.com (mail-vk1-xa31.google.com [IPv6:2607:f8b0:4864:20::a31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9183EC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 06:38:13 -0700 (PDT)
+Received: by mail-vk1-xa31.google.com with SMTP id k76so4619076vkk.10
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 06:38:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=xn866kONo186EMcdOQUqMi2Ua0Zne7ePU78TRdLivUU=;
- b=PlRkB7ZxsILGlkWaW5O0zHwxLNzJn189chTBewR9bsKr0Nze9smYuls2nozp0KR+WEDO71gw3FVjkVB6afyccjRa70LnNVeJuZNS6rI/UMnTP+YO1cwcs8t8UefeOY4zB3JZKWv3GWUxIi6h5tRi6ZjG+QkWgTYhZ+DEaDcQcMw=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TY2PR01MB3514.jpnprd01.prod.outlook.com (2603:1096:404:e0::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3955.18; Tue, 23 Mar
- 2021 13:09:17 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::cb4:9680:bb26:8f3f]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::cb4:9680:bb26:8f3f%4]) with mapi id 15.20.3955.025; Tue, 23 Mar 2021
- 13:09:17 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH RFT 0/2] mmc: tmio: make resets more robust
-Thread-Topic: [PATCH RFT 0/2] mmc: tmio: make resets more robust
-Thread-Index: AQHXGkJkh6Wtpwh1wUCOWBmMcBi/kqqRkGgg
-Date:   Tue, 23 Mar 2021 13:09:17 +0000
-Message-ID: <TY2PR01MB3692FCF477321C7323DE41BDD8649@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210316085717.7276-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210316085717.7276-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 66c1b83c-70bd-4b25-acdb-08d8edfcdd74
-x-ms-traffictypediagnostic: TY2PR01MB3514:
-x-microsoft-antispam-prvs: <TY2PR01MB3514A0F654628B8170BA415ED8649@TY2PR01MB3514.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8273;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: SzyAz8Zm1PpJHDTVJ2tUZz5mPO66LW8lRX9AG57G2Hw5wq5W3+8jx4B2bxb7yPrl/qSt5DETQdYX2HFG+roLAIvjaAWmY8SeHdi7L9iBfYBVjwM25hu1KfOIar+d78iXB0AWp+i/4SGPgbARkT8AajwoBV90Md/8V3+DXNjoo+VWEzhwgbJme2IEQaWCHOhcb9AVAodP1/yPLnUEUY7m+flZYrZli2AjZGdR3gc6GVwIQ62BgO5qQ++Ews/xw/+a6dr/Rd3/eRxT4nZTOQBwJgpE0CnnzgQgkrizbE3g4jeGbOSbM/8dqmNE4Te/0Sp3L//hRtmnq64D6/yruPMIzKsEDd7t0/feiKPPoRuH0wCFDp7RYQOPgZHI6hxisqzoT+PSDyutpzFfH+oKvHF4KiF+eOPHzpbyeOIdZA8w9b/MjroCVn5iO1Rd56A6xUQiTH0aHVdrCu29QUA6swoR/vQyASxI6lY77Lu9R2u2+gEOQRNmcDfuf4qJyfmHhDai09uztdaisNIyYdSuwOctkaKE9Y77NaK3N9B5wy1qcbTAmKbnwuf6zeMO2xQCnrvMgmJV2pgKSgbIXkjKImhPiL/J+YM2dneuAaSin+Lfd7kPd6Pe8Qf97xqReiBhdGPqK8gdMRp4ZvWmBOC3TJz7h1fagcm//j6yonYrXuYNVb8=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(376002)(396003)(346002)(39850400004)(366004)(316002)(5660300002)(4326008)(52536014)(86362001)(2906002)(55016002)(54906003)(38100700001)(4744005)(9686003)(478600001)(66946007)(64756008)(6506007)(186003)(26005)(66446008)(8936002)(71200400001)(66556008)(7696005)(66476007)(55236004)(8676002)(76116006)(33656002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?F99zI/xHxiJbeDDd1nva3mduMANIyQZHKV8aIod+m28AALg8yqrEqHLwlFdL?=
- =?us-ascii?Q?KuhTOyniFAcyGzioJ5EwPKXsjkmK+J0xagOyGCevbDn8djsHtH8LKykZXsC+?=
- =?us-ascii?Q?9GWFhM9jU5YfcLTyMs2rY2k9GgcRtO/IWunrUQLO5txxvGxPKKnA7HFR90Nk?=
- =?us-ascii?Q?plw8WsZQEkjtDGx8BT2Aex3o7ihLY5/HiYijZTEa49GG2Iek99zei0RXTtGn?=
- =?us-ascii?Q?0sKpB8VBzFY4jr2ocS0TnNpjJwcJYZclnBVNWlhQedoa9/kl6IJ0mMwxbM7d?=
- =?us-ascii?Q?ejTh9yAIbGqU1WOTBTfhj+DcEuFYLnX+jGvQvP4Zo3Jw2frxnbYAeiErtqFX?=
- =?us-ascii?Q?FMcxDHusiem4fIuASwKFRrLlDnyadnVUx8M8slCqubGsymyKydMvMN0+0Lq4?=
- =?us-ascii?Q?oBxkg1K2ZnTKT3uzNTh5sAjCQcNzzEv61IBk3EdFY/yuymI9La2c/tNumhuD?=
- =?us-ascii?Q?I3spR9vL4fDgch+j81HD9ZWwep2dP360gt+xYqG8MYVuKJ7HGfPSDTcZDrD/?=
- =?us-ascii?Q?yqQitcWvOOFWsLZLzsOyZtRs7t/d+pkci8muR/ITy2BzNkIdk6m7j9todXJu?=
- =?us-ascii?Q?k2ALmd7oypugsXMaHCUhJEA6S/JHIZiLaQ0JumI1XgA127jx68fl8KMFK5nu?=
- =?us-ascii?Q?ewlUrj3rhNUL8M2tADYYZELsW4Pzl/FCaXBd3bfqBt1zl4mG2Erx4/zEgII3?=
- =?us-ascii?Q?yLjpfpgbn3nuU/aKkrcmgnvJIq5cw3Gv2hDe1gtVT5sZFSX/CM/H3ot0Izgj?=
- =?us-ascii?Q?7VoAA9cb3OBXJ89HtLae8XM061J30gxV7Z79fwhEzk2XtMEtKpgrQlLkQLfB?=
- =?us-ascii?Q?rPwhG9BRY4p3stu+TyhkPCQyCVzj6lVLlDX9JS29S5Gbdo/3JXEbF5CRF2xu?=
- =?us-ascii?Q?mpAPUDtfqrS7Gz8HIMXSRt5OwS4Ch+Pp3LEeUgmy9AmazOLLs7uH5P3trgMv?=
- =?us-ascii?Q?GVBkqxZOHMq+DaayDJ5jmVCi9Yl7UTdZAWQBA156pUv26HJaW2DtBFLKILio?=
- =?us-ascii?Q?eySFJ22fBhdqj2zWBGaSLBKDocJiyrs4WnCcIxSxU04p3fsauWTtVf43gUIK?=
- =?us-ascii?Q?2Oyr2KOmHpQFXnQiFVCDZlw7mMOvZt2o7ad2h5SewkmorWBYrGe7H+Y3ZVgA?=
- =?us-ascii?Q?LPNzrboh9+YtiG/YxMOoycPGQw98DcjcHl0TU4imEBc6KWPVnebFYFfFxE5s?=
- =?us-ascii?Q?UFRGRL7fMmK7LOv0/gtPGhbYU1EKmqBrnrFsBLKAxNzAiQEUujPMZlFQVfYY?=
- =?us-ascii?Q?nSi0ZK8V6E1d4YsGjpLfA7/YMnwijv0mHQSwtLzIBNO0/Ie9XZW1/E2mI93R?=
- =?us-ascii?Q?G189obOrAreU2KddKDQhAzcA?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Oh8GJQVSl1PJxaKgrZv7bYmOGictbqv/x3tJgCJgmNY=;
+        b=hXeRdtOg6s6oCUh964ZpAQTncTbLLJXrp/kU0meqsqiV9FkKkuyt1xzKm5e1OkRKMk
+         NyuRM5Ah6fUdbC9IncKfYuDUY34v0kGDvZgEh66BykgceGA/7P7V21k/slrNFQJlOzNI
+         xwP93/HiMS7DK+7fxU4SBf1rFgs6FOMR/pxPVAkxATZi35imXsLrTVQxqxlvPiS0aSp8
+         6MOyQLghm+S1uE97UnEr3vPmMtszLGLNzmBNrvQKnkXC1st1mQAHijvS9JHDHoWTnD1O
+         KBHyxHMKcT2kLYCqfCyDkrrtbCBgG4SJhrK1sry5qrfSq93yb2uZ7f/ihzRzKKH89uAr
+         ASGg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Oh8GJQVSl1PJxaKgrZv7bYmOGictbqv/x3tJgCJgmNY=;
+        b=aRoV9nFKyLqMBDzWRA4KPrvPkqu6l8eijMpOzTjVhU2BZWcsDk/18p/Em3Mp2Jxa2r
+         YGqzz8pWbW1sxf6XZp0R8nDGgRA0XylmHlxN/ygSEvKb554KQlS9Ka5aIPa/tbPyGF+O
+         mb5JDj7BmuaCb4IAPMg5z8PskL4LGqMQjk82JPTRYte3DyksG52nyzGXtdN2sDwhrYfw
+         SNjC4VSnkNG2CVEt+q9LwNyBAt6/OUS8P6/ebzpN9qLDaQyWf8GA1FN03SNcqzIqzcIN
+         yC7C5kBRYsgCX6KjXQmGSqVemrE1ql9MSE+D/x+ncLTIT4ImrqlpPCcMWiSyOgx1Jmak
+         9DxA==
+X-Gm-Message-State: AOAM530D0FwABuELSFdAWkGqCzePJs5iCBAZ/nURzB4VCpPmMvA8j7ih
+        1qqulfx2IBfEWlpnk2+NX3P1vuKknSIl5MIU831llA==
+X-Google-Smtp-Source: ABdhPJzHVz6S/kvCdH7mWuoFkpqTLaGBI2y1Hi+RhDqPCnK9CqSxiUwvz72xiMlX2kMOYZEhRIQX4DXsvqOcSbETtB4=
+X-Received: by 2002:a1f:2c58:: with SMTP id s85mr3271635vks.15.1616506692244;
+ Tue, 23 Mar 2021 06:38:12 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 66c1b83c-70bd-4b25-acdb-08d8edfcdd74
-X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Mar 2021 13:09:17.4698
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: jjXKBG5+ky88ujj2Q03CR+8Xc6vBTkvRqb+1ItO3bAqv19o+XDRj/FvMnLZxV9Ww/P7QCxC1eB9DZhfL3KtwR6/4uJsygcWBtWucKPMK4hiR7xMUc/i3cwATwsovynYW
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB3514
+References: <20210309015750.6283-1-peng.zhou@mediatek.com> <CACRpkdYTkW7b9SFEY6Ubq4NicgR_5ewQMjE2zHvGbgxYadhHQQ@mail.gmail.com>
+ <YEpqkAq6wOZ+TpR9@gmail.com> <CAPDyKFoWg7HYHAbxYJRbOad5kqm+rzVLVQ0O3g76ROO5Z+MF3Q@mail.gmail.com>
+ <1615884533.21508.118.camel@mbjsdccf07> <CAPDyKFqtjYVAAe_wUKQC3n3ok5bUpGtpu=TUiOgFmbb6+Qkg=A@mail.gmail.com>
+ <1615893329.21508.128.camel@mbjsdccf07> <CAPDyKFqaFbviwxQ8U_X8U64F7OwNaxXde6XdUcGPeGg8k9MWWg@mail.gmail.com>
+ <CACRpkdapAOq7NtZDOgnugvTmO0+Yh+EoCVod-s_akPfs2=Sj9Q@mail.gmail.com>
+In-Reply-To: <CACRpkdapAOq7NtZDOgnugvTmO0+Yh+EoCVod-s_akPfs2=Sj9Q@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 23 Mar 2021 14:37:35 +0100
+Message-ID: <CAPDyKFoCjv7S_2yyVZOAgwbEEZV5H_dmQxQGFVTt7awSE3Ss8Q@mail.gmail.com>
+Subject: Re: [PATCH v2 2/4] mmc: Mediatek: enable crypto hardware engine
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     "Peng.Zhou" <peng.zhou@mediatek.com>,
+        Eric Biggers <ebiggers@kernel.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Satya Tangirala <satyat@google.com>,
+        Wulin Li <wulin.li@mediatek.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Sudeep Holla <sudeep.holla@arm.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+On Mon, 22 Mar 2021 at 14:45, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> On Tue, Mar 16, 2021 at 2:56 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> > It looks like we have a couple of options to support this. I suggest
+> > we consider the two below, but perhaps others (Arnd/Linus?) have
+> > better ideas?
+>
+> Admittedly it's a bit hard to shoehorn this in as it is not a standard
+> resource (clk, regulator, genpd, reset, gpio...)
 
-> From: Wolfram Sang, Sent: Tuesday, March 16, 2021 5:57 PM
->=20
-> Here are two more patches improving the robustness of resetting the IP
-> core. Patches are on top of mmc/next and this series "[PATCH v2 0/3]
-> mmc: renesas_sdhi: reset via reset controller", especially "[PATCH v2
-> 1/3] mmc: tmio: abort DMA before reset".
->=20
-> Tested on Salvator-XS with H3 ES2.0 and M3-N. A branch for testing can
-> be found here:
->=20
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/=
-for-5.13
->=20
-> Some additional testing by Shimoda-san or the BSP team would be much
-> appreciated!
+In my opinion, I wouldn't object if we would model this as phy, simply
+because I think it would be the easiest way. Although, I agree, it's
+not a perfect fit.
 
-Thank you for the patch!
+>
+> There is drivers/soc and then you end up with the same custom
+> abstraction that qcom is using. The upside to using that
+> is that we can #ifdef it to static stubs in the .h file if this SoC
+> is not used, so I would go for that.
+>
+> See for example qcom_scm_ice_invalidate_key() used from
+> drivers/firmware/qcom_scm.c, header is at
+> include/linux/qcom_scm.h and here you find:
+> #if IS_ENABLED(CONFIG_QCOM_SCM)
+> and if not, there are some stubs.
 
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Please, no. As discussed and also pointed out by Arnd in another
+thread, generic drivers must remain portable and must not get
+sprinkled with SoC specific code. If not, we would be moving backwards
+and increasing the fragmentation of the kernel.
 
-And, I tested on H3 ES3.0 and then I didn't observe any regression.
-So,
+The qcom case is about programming a crypto key, which seems rather
+specific to me. I can't figure out another generic way to support
+this, but using the SoC specific calls.
 
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+The Mediatek case is about turning on/off a resource to activate the
+device. If the phy framework doesn't work for us (or another), then at
+least we should fall back to use runtime PM + PM domain provider
+(genpd), because this would solve the problem. SoC specific code, like
+the SMC call can then be called from the genpd provider driver and
+abstracted from generic drivers.
 
-Best regards,
-Yoshihiro Shimoda
+Additionally, in this case the mmc driver has already runtime PM
+support deployed, which means some of the work has already been
+completed.
 
+>
+> Yours,
+> Linus Walleij
+
+Kind regards
+Uffe
