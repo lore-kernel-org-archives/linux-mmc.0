@@ -2,196 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46900C433C1
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 19:13:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72F7AC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 20:17:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1568961923
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 19:13:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 33129619CE
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 20:17:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233262AbhCWTNM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Mar 2021 15:13:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54234 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233044AbhCWTMo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 15:12:44 -0400
-Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04CF6C0613D8
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 12:12:43 -0700 (PDT)
-Received: by mail-vs1-xe30.google.com with SMTP id v2so9989404vsq.11
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 12:12:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=NziR4wdTwbPmQRK5YhnnRmXhP9symav7D77le3H4K+M=;
-        b=PMVJrfgoW6IO/eykiWrjsd3M2rhVX4YPMZxActq4wpEAmRKoODLJqZ5eOI8hAd3Ui/
-         kSzrQ3FuaOzZIBiwn4SSeTiH56nva7fJ7jwJArxrKBI9I08bC2iOW/X4AFzNtLAsNXVw
-         fIdYVNCx+ySgZrYUG4o13ipFMssy5VH6uWnpKJyoinFpA+/8heYRsB9WTXd4ONt/Bv7O
-         +LCu9D9LBylKYOceGf33CRSQzA3Vf9iXuF4A9rSuewX9xMRvJ+rKmskixMa6u1701MFN
-         KAZ3CnQdmXTvVit/bpC9d7KazulRxJUeQ0HNNX5bneUJLaxYamCbK0WSNJFdJKmbm+5W
-         bGZQ==
+        id S233110AbhCWURH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Mar 2021 16:17:07 -0400
+Received: from mail-io1-f50.google.com ([209.85.166.50]:46748 "EHLO
+        mail-io1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233252AbhCWUQv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 16:16:51 -0400
+Received: by mail-io1-f50.google.com with SMTP id j26so19069713iog.13;
+        Tue, 23 Mar 2021 13:16:51 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=NziR4wdTwbPmQRK5YhnnRmXhP9symav7D77le3H4K+M=;
-        b=lrZEaI1RCSpN77WxLeWy9BMaHaltLxPHP9DQEZ9wPwG092IJiQhFa7LUA9ePPBulFj
-         TAXVsKxKsFyt7IBlMkatoCfgXmmBAR9K9s5jaK9KIfIY+UQMwTOv812eoxEvS45pgEQ/
-         1Y7/WK+1bD5jbUnwNvCUmPP4MnYJq2eIlBSPIBS+OK1nkBHNEO6U5nP7nolA0p0QteGl
-         OtREgSzUVBw5dIjEwsnJbXi3/JBBRRBMmBosQ/n9BSPEOS7jCgKo4xKWsn76b280LHn1
-         NMI1QcIAi+FOO8/pCNCujc6h/znqCECCqTn2WF5a1nMSwyPq5rRFZf59xV8d2xgdZAWk
-         7Qpg==
-X-Gm-Message-State: AOAM5314QoSv+TvHiGf5AvRmgBLviTxEvTGR8WLZJC/4leeId4vHzmdG
-        V1+8tgmUnHUG3u78Xccv3IANxEINuY5EV+DDmuf7Yw==
-X-Google-Smtp-Source: ABdhPJzXFydY5TcCz9J1Or2xn4GBkykV9ba3oKyGbccCBa4HxmuOl+Gv/PYBfFODfgfgi/kqTbKgrJDTOyQZhsuqwfY=
-X-Received: by 2002:a67:77c1:: with SMTP id s184mr4758525vsc.55.1616526762989;
- Tue, 23 Mar 2021 12:12:42 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210315132501.441681-1-Jerome.Pouiller@silabs.com>
- <4503971.bAhddQ8uqO@pc-42> <CAPDyKFoXgV3m-rMKfjqRj91PNjOGaWg6odWG-EGdFKkL+dGWoA@mail.gmail.com>
- <5713463.b6Cmjs1FeV@pc-42>
-In-Reply-To: <5713463.b6Cmjs1FeV@pc-42>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Mar 2021 20:12:06 +0100
-Message-ID: <CAPDyKFrONrUvbVVVF9iy4P17jZ_Fq+1pGMmsqM6C1hOXOWQnBw@mail.gmail.com>
-Subject: Re: [PATCH v5 08/24] wfx: add bus_sdio.c
-To:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>
-Cc:     linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        driverdevel <devel@driverdev.osuosl.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        DTML <devicetree@vger.kernel.org>,
+        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
+         :message-id;
+        bh=2Xsddl20fBjvfqqLCcwceEr+314gBRXnBcSQaiPmnEQ=;
+        b=rSpwkLjvIcMyzepR1bw9U61ggdwnTLqs98O9lfsw7Kz6PHWX4yVG/SZpJAJeWHCZ4v
+         L6zbliO9Q5kzydKP/aSJh3lx9PtZsAzapXF7dUfbnxYbmyab+cM65ZNE74hoEkoxRb+k
+         efJd9w5o2L+NjmXWA66VDqWNTZmMpOwtu8rUHafIlJIz2dRMXJsIavOgnofHcjCYFXun
+         603fit4Jgc1Lq/I4Wmz/vnWWpRUYew87oGFS7GeUWX1G7Dkq9WaxYgmRCBOw0p5pe+QY
+         QFQJPBJBE4rHkklBlhSClr0jmHWHZSRl8zTAkv+2HwvT7VTyb1bvkBGW/gc+9ser2ZZ0
+         kJJg==
+X-Gm-Message-State: AOAM531YqdiquXUZn6AsMGMKPNi7y9qyHb+4q9+km+bt+143d6Ds+++9
+        gPg4dO65l621FNDwnp+Qjf4GH6kaJg==
+X-Google-Smtp-Source: ABdhPJzawX8tfIo854j5immXLxsifbRwp8DwYYTmDA5IrkQdtI5aK3gjoHoK3ViTYHg2qW6qkWk4ww==
+X-Received: by 2002:a02:605d:: with SMTP id d29mr6160144jaf.81.1616530610967;
+        Tue, 23 Mar 2021 13:16:50 -0700 (PDT)
+Received: from robh.at.kernel.org ([64.188.179.253])
+        by smtp.gmail.com with ESMTPSA id b20sm9552288iod.22.2021.03.23.13.16.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 23 Mar 2021 13:16:50 -0700 (PDT)
+Received: (nullmailer pid 1244762 invoked by uid 1000);
+        Tue, 23 Mar 2021 20:16:47 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Nicolas Saenz Julienne <nsaenz@kernel.org>
+Cc:     f.fainelli@gmail.com, alcooperx@gmail.com,
         Rob Herring <robh+dt@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org, adrian.hunter@intel.com,
+        Ulf Hansson <ulf.hansson@linaro.org>, nsaenzjulienne@suse.de,
+        linux-arm-kernel@lists.infradead.org, Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        tim.gover@raspberrypi.com, linux-kernel@vger.kernel.org,
+        phil@raspberrypi.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+In-Reply-To: <20210322185816.27582-2-nsaenz@kernel.org>
+References: <20210322185816.27582-1-nsaenz@kernel.org> <20210322185816.27582-2-nsaenz@kernel.org>
+Subject: Re: [PATCH 1/4] dt-bindings: mmc: iproc-sdhci: Convert to json-schema
+Date:   Tue, 23 Mar 2021 14:16:47 -0600
+Message-Id: <1616530607.384911.1244761.nullmailer@robh.at.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 23 Mar 2021 at 18:53, J=C3=A9r=C3=B4me Pouiller
-<jerome.pouiller@silabs.com> wrote:
->
-> On Tuesday 23 March 2021 15:11:56 CET Ulf Hansson wrote:
-> > On Mon, 22 Mar 2021 at 18:14, J=C3=A9r=C3=B4me Pouiller <jerome.pouille=
-r@silabs.com> wrote:
-> > > On Monday 22 March 2021 13:20:35 CET Ulf Hansson wrote:
-> > > > On Mon, 15 Mar 2021 at 14:25, Jerome Pouiller <Jerome.Pouiller@sila=
-bs.com> wrote:
-> > > > >
-> > > > > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
-> > > > >
-> > > > > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.=
-com>
-> > > > > ---
-> > > > >  drivers/net/wireless/silabs/wfx/bus_sdio.c | 259 +++++++++++++++=
-++++++
-> > > > >  1 file changed, 259 insertions(+)
-> > > > >  create mode 100644 drivers/net/wireless/silabs/wfx/bus_sdio.c
-> > > >
-> > > > [...]
-> > > >
-> > > > > +static const struct sdio_device_id wfx_sdio_ids[] =3D {
-> > > > > +       { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILAB=
-S_WF200) },
-> > > > > +       { },
-> > > > > +};
-> > > > > +MODULE_DEVICE_TABLE(sdio, wfx_sdio_ids);
-> > > > > +
-> > > > > +struct sdio_driver wfx_sdio_driver =3D {
-> > > > > +       .name =3D "wfx-sdio",
-> > > > > +       .id_table =3D wfx_sdio_ids,
-> > > > > +       .probe =3D wfx_sdio_probe,
-> > > > > +       .remove =3D wfx_sdio_remove,
-> > > > > +       .drv =3D {
-> > > > > +               .owner =3D THIS_MODULE,
-> > > > > +               .of_match_table =3D wfx_sdio_of_match,
-> > > >
-> > > > It's not mandatory to support power management, like system
-> > > > suspend/resume. However, as this looks like this is a driver for an
-> > > > embedded SDIO device, you probably want this.
-> > > >
-> > > > If that is the case, please assign the dev_pm_ops here and implemen=
-t
-> > > > the ->suspend|resume() callbacks.
-> > >
-> > > I have no platform to test suspend/resume, so I have only a
-> > > theoretical understanding of this subject.
-> >
-> > I see.
-> >
-> > >
-> > > I understanding is that with the current implementation, the
-> > > device will be powered off on suspend and then totally reset
-> > > (including reloading of the firmware) on resume. I am wrong?
-> >
-> > You are correct, for a *removable* SDIO card. In this case, the
-> > mmc/sdio core will remove the corresponding SDIO card/device and its
-> > corresponding SDIO func devices at system suspend. It will then be
-> > redetected at system resume (and the SDIO func driver re-probed).
-> >
-> > Although, as this is an embedded SDIO device, per definition it's not
-> > a removable card (MMC_CAP_NONREMOVABLE should be set for the
-> > corresponding mmc host), the SDIO card will stick around and instead
-> > the ->suspend|resume() callback needs to be implemented for the SDIO
-> > func driver.
->
-> If I follow what has been done in other drivers I would write something
-> like:
->
->   static int wfx_sdio_suspend(struct device *dev)
->   {
->           struct sdio_func *func =3D dev_to_sdio_func(dev);
->           struct wfx_sdio_priv *bus =3D sdio_get_drvdata(func);
->
->           config_reg_write_bits(bus->core, CFG_IRQ_ENABLE_DATA, 0);
->           // Necessary to keep device firmware in RAM
->           return sdio_set_host_pm_flags(func, MMC_PM_KEEP_POWER);
+On Mon, 22 Mar 2021 19:58:14 +0100, Nicolas Saenz Julienne wrote:
+> Convert the brcm,iproc-sdhci binding to DT schema format using json-schema
+> 
+> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> ---
+>  .../bindings/mmc/brcm,iproc-sdhci.yaml        | 58 +++++++++++++++++++
+>  .../bindings/mmc/brcm,sdhci-iproc.txt         | 37 ------------
+>  2 files changed, 58 insertions(+), 37 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> 
 
-This will tell the mmc/sdio core to keep the SDIO card powered on
-during system suspend. Thus, it doesn't need to re-initialize it at
-system resume - and the firmware should not need to be re-programmed.
+My bot found errors running 'make dt_binding_check' on your patch:
 
-On the other hand, if you don't plan to support system wakeups, it
-would probably be better to power off the card, to avoid wasting
-energy while the system is suspended. I assume that means you need to
-re-program the firmware as well. Normally, it's these kinds of things
-that need to be managed from a ->resume() callback.
+yamllint warnings/errors:
 
->   }
->
-> However, why not the implementation below?
->
->   static int wfx_sdio_suspend(struct device *dev)
->   {
->           struct sdio_func *func =3D dev_to_sdio_func(dev);
->
->           wfx_sdio_remove(func);
+dtschema/dtc warnings/errors:
+Error: Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.example.dts:22.25-26 syntax error
+FATAL ERROR: Unable to parse input tree
+make[1]: *** [scripts/Makefile.lib:349: Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.example.dt.yaml] Error 1
+make: *** [Makefile:1380: dt_binding_check] Error 2
 
-I don't know what wfx_sdio_remove() does, but for sure you would need
-a ->resume() callback to make it possible to restore power/firmware.
+See https://patchwork.ozlabs.org/patch/1456815
 
->           return 0;
->   }
->
-> In both cases, I worry to provide these functions without being able to
-> test them.
+This check can fail if there are any dependencies. The base for a patch
+series is generally the most recent rc1.
 
-Alright, let's simply leave this driver without having the PM
-callbacks assigned. I guess we can revisit this at some later point.
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
 
-The mmc core will log a message about the missing callbacks, in case
-someone tries to execute system suspend/resume when the driver has
-been probed.
+pip3 install dtschema --upgrade
 
-Kind regards
-Uffe
+Please check and re-submit.
+
