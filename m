@@ -4,171 +4,149 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0125C433C1
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 14:02:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97A18C433C1
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 14:13:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8A3AB6199F
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 14:02:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5B021619A9
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 Mar 2021 14:13:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231871AbhCWOCC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 23 Mar 2021 10:02:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42862 "EHLO
+        id S232142AbhCWONF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 23 Mar 2021 10:13:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232057AbhCWOBe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 10:01:34 -0400
-Received: from mail-ua1-x92a.google.com (mail-ua1-x92a.google.com [IPv6:2607:f8b0:4864:20::92a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F41B5C061764
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 07:01:33 -0700 (PDT)
-Received: by mail-ua1-x92a.google.com with SMTP id x8so6719537ual.6
-        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 07:01:33 -0700 (PDT)
+        with ESMTP id S232209AbhCWOMr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 23 Mar 2021 10:12:47 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE123C061764
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 07:12:35 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id q29so26690897lfb.4
+        for <linux-mmc@vger.kernel.org>; Tue, 23 Mar 2021 07:12:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc:content-transfer-encoding;
-        bh=EFM8vj54tYKb1Jf8bEnuuvv/LY9C1ofZG/2jctBPMnI=;
-        b=zqmUyKoJFPC8TdMrKTiIDMwIaUgF9x15Z+0hCvB4ZRJFRt86l737p/WyEUPJYTATkP
-         g8NN5+n4vYOXnyjS50D/et/YnT7b5vq4Netv/bp1hgbau1DWDUnlXsIdXClA6mdRwPEb
-         JAgSB9/am/t5ifJw0YMb/8jIM+WHoY6/KTi9hwfhW+J+mO7e7OY0Nr2vb42L7uRPoOz+
-         3A9K0jkts+XWogYM8oWCO2U4h3kXwsvZwkF2fnTV6uJAQfIo7zIoGMuanyJpcq+Bhh9w
-         BJ0b7YiOqQl8Zn0AJy2wCie7GTrMIJERWIQodppGLzdwNcsO1faV0tEtC/5+IPQuDgF+
-         y2cw==
+        bh=l19bR+nFxXiu4GIfVq6f/m3LcDLqMDiNOa9Zpl4Ovvc=;
+        b=K2WN6O0RNtylg2y5kj+7tUO3G3Ow+0lo/9Kbfq2doL0HIfUyReVmwWRdhF0uGNJ2OX
+         Sf9sQUS2cU+99jYx7m3iFdK6k47YBGTOsnDBoiJD97coMPMO/lhH3U2sptWPOEIKO4H7
+         YKr76EcmmC4dtIC8svew3hPv2dkrnaPY/Lq4EyGjEcvwN9FoVLvmOC/7dMwxApzKoebv
+         SNkM+3naV4PXRdlZ/+86gfwzP06/2XLnnBDnSB/PWjL2e1cGIZAgoKHGTGQy8UxmfpbI
+         qszWcnijbnse7HrTyooN+GkyEGYI6hkC3TXrEPzfmKXfvlr8EjllH/lgx+m5Xjj/4kQ9
+         swaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc:content-transfer-encoding;
-        bh=EFM8vj54tYKb1Jf8bEnuuvv/LY9C1ofZG/2jctBPMnI=;
-        b=b/n2nw9wBJXk/0C+oyP2oFurAwujwq9zJyUPIF60MQE2TzJQvXfRpnrNt4tllgXs1K
-         LCYPsTcUEI7X9wTQa8o5Dm4duSxle9C7yqqovCbxfrxERWUwWJqgjsfEEOie3h6b/hNC
-         O/BRHM8TDOQPadRIacI37gaHLSQGDhQS1HuaH8lF37Ler2Jrav42QJlmCMfBaApnB1Rh
-         gHkIip7D+lLMkkwFz+h1dOayAG02j3XisGOxVmZlBiaZWYWK1FpoUSVynlefWDKeOYmY
-         IBXMcX9SE0r4Vo5974oS3QCLuatkwNVjU/f2vhtYww4B+pFStaBrFIWcF+1zgVPdSYuN
-         G8lQ==
-X-Gm-Message-State: AOAM533aBTIteSI0eDFGH5BtMAgku+gdeLsfdUhWQf53rPEHY5DIIYrC
-        X3zKdm5b9CQkjizToMPi7ZGRI0R/qyOLIBaF0v6U+A==
-X-Google-Smtp-Source: ABdhPJxJAHbpX2/GRwhTQQeCW9lCgzMQUr9j/i2dfLh16Z4eXb8X6W27BLfYs5/5U0eQBdvrp+jI+sIJSFo5rHkdYrI=
-X-Received: by 2002:ab0:7a68:: with SMTP id c8mr3397238uat.104.1616508093043;
- Tue, 23 Mar 2021 07:01:33 -0700 (PDT)
+        bh=l19bR+nFxXiu4GIfVq6f/m3LcDLqMDiNOa9Zpl4Ovvc=;
+        b=D21D3YB5EDFKLOUaUQ5HQa9v5KSQkZAOKQ9no2zJEgOzn0DdARC7dYbAmwxz5l0L4q
+         V8ISD5FjJ4zHyyNMvtcX2ojUHZ6bIinhdYiXi/1ESXCMk+/W+HlfLYm8eiPCqkGgsU57
+         p+B2qh5YEjyBKmFK7dPgHZcWf3l/eYr3afGiFDcRklnBfWFooQXZoYcz9pguOiKs1yVw
+         yz31ggVNCTG6xI+GsQ0AWAkD77WRk1EwWz2jX90Vl/j8mDBch4d+jL3IiT37Z6vlPoT9
+         wdECSoM/Y9hi5oW621ndnnvUI4r3I+LsKB9MpWSD4dsKCjkS0ZetNX66JfH7ZCYSg0d5
+         kZiA==
+X-Gm-Message-State: AOAM530Vy4IF9tKS0pU+3TZ1vyyh+4aZvHdPiJkyIM7J9WeWCimActoe
+        3IP8/s9FP/cUL09qjcRRkn50FKCWBTFYWwNPcuEGVw==
+X-Google-Smtp-Source: ABdhPJzly95nqr4yJOsMgNbyvkzewf61fS24O2skNJrtHSN97B0AO6qNDxBBBfq6gMyuY4h8Z8m/nW9MARYn+j3bS1I=
+X-Received: by 2002:a19:501b:: with SMTP id e27mr2822930lfb.584.1616508753810;
+ Tue, 23 Mar 2021 07:12:33 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210320045720.11872-1-chgokhl@gmail.com> <CAPDyKFqXtKPngfnQZXXaF=rvqw0=nWzDc7P++QxNHPwGHHSxUA@mail.gmail.com>
- <CAMjpFAW0D12vxNSYLcwSWxf-zB+toT5cmiQ8mtUUE+nzWMJZ3g@mail.gmail.com>
-In-Reply-To: <CAMjpFAW0D12vxNSYLcwSWxf-zB+toT5cmiQ8mtUUE+nzWMJZ3g@mail.gmail.com>
+References: <20210315132501.441681-1-Jerome.Pouiller@silabs.com>
+ <20210315132501.441681-9-Jerome.Pouiller@silabs.com> <CAPDyKFqJf=vUqpQg3suDCadKrFTkQWFTY_qp=+yDK=_Lu9gJGg@mail.gmail.com>
+ <4503971.bAhddQ8uqO@pc-42>
+In-Reply-To: <4503971.bAhddQ8uqO@pc-42>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 23 Mar 2021 15:00:56 +0100
-Message-ID: <CAPDyKFqqRY3rj9zzzDvPTCO68abfQ+G-siAJVgdPuESUwko28A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Mark mmc_host device with pm_runtime_no_callbacks
-To:     chgokhl@163.com
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+Date:   Tue, 23 Mar 2021 15:11:56 +0100
+Message-ID: <CAPDyKFoXgV3m-rMKfjqRj91PNjOGaWg6odWG-EGdFKkL+dGWoA@mail.gmail.com>
+Subject: Re: [PATCH v5 08/24] wfx: add bus_sdio.c
+To:     =?UTF-8?B?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>
+Cc:     linux-wireless <linux-wireless@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>,
+        driverdevel <devel@driverdev.osuosl.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kehuanlin@fishsemi.com
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S . Miller" <davem@davemloft.net>,
+        DTML <devicetree@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 23 Mar 2021 at 11:49, hieagle <chgokhl@gmail.com> wrote:
+On Mon, 22 Mar 2021 at 18:14, J=C3=A9r=C3=B4me Pouiller
+<jerome.pouiller@silabs.com> wrote:
 >
-> We encounter a resume issue in our device sometimes. The mmc device's
-> parent list is
-> mmc0:0001->mmc_host mmc0->fa630000.mmc->soc in our soc. We found in the b=
-low
-> case with mmc0->power.disable_depth=3D0 the mmc_runtime_resume will be sk=
-ipped,
-> which cause subsequent mmc command fail.
+> Hello Ulf,
 >
-> mmc_get_card(mmc0:0001)->pm_runtime_get_sync->rpm_resume(mmc0:0001)->rpm_=
-resume(mmc0)
-> The rpm_resume(mmc0) return -ENOSYS due to no callback and
-> mmc0->power.runtime_status
-> keep RPM_SUSPENDED. This lead to rpm_resume(mmc0:0001) return -EBUSY and =
-skip
-> rpm_callback which call mmc_runtime_resume, the mmc is still in
-> suspended and the
-> subsequent mmc command fail.
+> On Monday 22 March 2021 13:20:35 CET Ulf Hansson wrote:
+> > On Mon, 15 Mar 2021 at 14:25, Jerome Pouiller
+> > <Jerome.Pouiller@silabs.com> wrote:
+> > >
+> > > From: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> > >
+> > > Signed-off-by: J=C3=A9r=C3=B4me Pouiller <jerome.pouiller@silabs.com>
+> > > ---
+> > >  drivers/net/wireless/silabs/wfx/bus_sdio.c | 259 +++++++++++++++++++=
+++
+> > >  1 file changed, 259 insertions(+)
+> > >  create mode 100644 drivers/net/wireless/silabs/wfx/bus_sdio.c
+> >
+> > [...]
+> >
+> > > +static const struct sdio_device_id wfx_sdio_ids[] =3D {
+> > > +       { SDIO_DEVICE(SDIO_VENDOR_ID_SILABS, SDIO_DEVICE_ID_SILABS_WF=
+200) },
+> > > +       { },
+> > > +};
+> > > +MODULE_DEVICE_TABLE(sdio, wfx_sdio_ids);
+> > > +
+> > > +struct sdio_driver wfx_sdio_driver =3D {
+> > > +       .name =3D "wfx-sdio",
+> > > +       .id_table =3D wfx_sdio_ids,
+> > > +       .probe =3D wfx_sdio_probe,
+> > > +       .remove =3D wfx_sdio_remove,
+> > > +       .drv =3D {
+> > > +               .owner =3D THIS_MODULE,
+> > > +               .of_match_table =3D wfx_sdio_of_match,
+> >
+> > It's not mandatory to support power management, like system
+> > suspend/resume. However, as this looks like this is a driver for an
+> > embedded SDIO device, you probably want this.
+> >
+> > If that is the case, please assign the dev_pm_ops here and implement
+> > the ->suspend|resume() callbacks.
 >
-> [  198.856157] Call trace:
-> [  198.858917] [<ffffff800808bd9c>] dump_backtrace+0x0/0x1cc
-> [  198.864966] [<ffffff800808bf7c>] show_stack+0x14/0x1c
-> [  198.870627] [<ffffff8008400e88>] dump_stack+0xa8/0xe0
-> [  198.876288] [<ffffff800854d38c>] rpm_resume+0x850/0x938
-> [  198.882141] [<ffffff800854cd8c>] rpm_resume+0x250/0x938
-> [  198.887994] [<ffffff800854d4c4>] __pm_runtime_resume+0x50/0x74
-> [  198.894530] [<ffffff80087b9e64>] mmc_get_card+0x3c/0xb8
-> [  198.900388] [<ffffff80087cd2e0>] mmc_blk_issue_rq+0x2b0/0x4d8
-> [  198.906824] [<ffffff80087cd5e4>] mmc_queue_thread+0xdc/0x198
-> [  198.913165] [<ffffff80080d4b2c>] kthread+0xec/0x100
-> [  198.918632] [<ffffff8008083890>] ret_from_fork+0x10/0x40
-> [  198.924582] mmc0  callback           (null)
-> [  198.935837] mmcblk mmc0:0001: __pm_runtime_resume ret -16
->
-> Mark mmc_host device with pm_runtime_no_callbacks will solve the issue.
-> Thanks.
-> Huanlin Ke
+> I have no platform to test suspend/resume, so I have only a
+> theoretical understanding of this subject.
 
-Thanks for sharing more details! I have to admit, that this sounds
-quite weird to me. I wonder if this is a problem that deserves to be
-fixed in the runtime PM core....
+I see.
 
-Let me have a closer look a get back to you again. Please be patient
-though, I have a busy week in front of me.
+>
+> I understanding is that with the current implementation, the
+> device will be powered off on suspend and then totally reset
+> (including reloading of the firmware) on resume. I am wrong?
+
+You are correct, for a *removable* SDIO card. In this case, the
+mmc/sdio core will remove the corresponding SDIO card/device and its
+corresponding SDIO func devices at system suspend. It will then be
+redetected at system resume (and the SDIO func driver re-probed).
+
+Although, as this is an embedded SDIO device, per definition it's not
+a removable card (MMC_CAP_NONREMOVABLE should be set for the
+corresponding mmc host), the SDIO card will stick around and instead
+the ->suspend|resume() callback needs to be implemented for the SDIO
+func driver.
+
+>
+> This behavior sounds correct to me. You would expect something
+> more?
+
+Yes, see above.
 
 Kind regards
 Uffe
-
->
-> Ulf Hansson <ulf.hansson@linaro.org> =E4=BA=8E2021=E5=B9=B43=E6=9C=8822=
-=E6=97=A5=E5=91=A8=E4=B8=80 =E4=B8=8B=E5=8D=886:26=E5=86=99=E9=81=93=EF=BC=
-=9A
-> >
-> > On Sat, 20 Mar 2021 at 05:57, kehuanlin <chgokhl@gmail.com> wrote:
-> > >
-> > > The rpm_resume() will call parent's resume callback recursively.
-> > > Since mmc_host has no its own pm_runtime callbacks, the mmc devices
-> > > may fail to resume (-ENOSYS in rpm_callback) sometimes. Mark mmc_host
-> > > device with pm_runtime_no_callbacks can fix the issue.
-> >
-> > Can you please elaborate more on this? What do you mean by "sometimes"?
-> >
-> > More precisely, how do you trigger the rpm_callback() for mmc class
-> > device to return -ENOSYS?
-> >
-> > Don't get me wrong, the patch is fine, but I want to understand if it
-> > actually solves a problem for you - or that it's better considered as
-> > an optimization?
-> >
-> > Kind regards
-> > Uffe
-> >
-> > >
-> > > Signed-off-by: kehuanlin <chgokhl@gmail.com>
-> > > ---
-> > >  drivers/mmc/core/host.c | 2 ++
-> > >  1 file changed, 2 insertions(+)
-> > >
-> > > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > > index 9b89a91b6b47..177bebd9a6c4 100644
-> > > --- a/drivers/mmc/core/host.c
-> > > +++ b/drivers/mmc/core/host.c
-> > > @@ -15,6 +15,7 @@
-> > >  #include <linux/of.h>
-> > >  #include <linux/of_gpio.h>
-> > >  #include <linux/pagemap.h>
-> > > +#include <linux/pm_runtime.h>
-> > >  #include <linux/pm_wakeup.h>
-> > >  #include <linux/export.h>
-> > >  #include <linux/leds.h>
-> > > @@ -480,6 +481,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct=
- device *dev)
-> > >         host->class_dev.class =3D &mmc_host_class;
-> > >         device_initialize(&host->class_dev);
-> > >         device_enable_async_suspend(&host->class_dev);
-> > > +       pm_runtime_no_callbacks(&host->class_dev);
-> > >
-> > >         if (mmc_gpio_alloc(host)) {
-> > >                 put_device(&host->class_dev);
-> > > --
-> > > 2.30.0
-> > >
