@@ -2,320 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 014CAC433E0
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 15:25:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA2BC433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 15:35:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D26DB61A12
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 15:25:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C96C0619FF
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 15:35:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236665AbhCXPY2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Mar 2021 11:24:28 -0400
-Received: from so254-9.mailgun.net ([198.61.254.9]:19195 "EHLO
-        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236645AbhCXPYG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 11:24:06 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1616599446; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=HDux/XTBGz9rixeIAR9DvVOHlS+cOR0uxaUvQO8w8bE=;
- b=fL/eSOUOi6oGl4kzbPHO/Quo3jUInaTe6/Z54F5s8YjsDlLx3iNkK8JrVfxAbJX+Wq+KQa7t
- tM9tOYFn2uvzBr18pXQjeN9OatWVfgYIBe1Q2z2ohJsW54aBEBvUhIHcmUenaggOfJfY1O2G
- oL0TLuS759eSgcFR/M6iEfb2K6Q=
-X-Mailgun-Sending-Ip: 198.61.254.9
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n03.prod.us-east-1.postgun.com with SMTP id
- 605b598e4db3bb68015fe4bc (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 24 Mar 2021 15:23:58
- GMT
-Sender: sbhanu=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 21226C43464; Wed, 24 Mar 2021 15:23:58 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id B0F0DC433CA;
-        Wed, 24 Mar 2021 15:23:55 +0000 (UTC)
+        id S236699AbhCXPep (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Mar 2021 11:34:45 -0400
+Received: from mx2.suse.de ([195.135.220.15]:45108 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236629AbhCXPeM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 Mar 2021 11:34:12 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id C2AD5AD9F;
+        Wed, 24 Mar 2021 15:34:10 +0000 (UTC)
+Message-ID: <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
+Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     f.fainelli@gmail.com, phil@raspberrypi.com,
+        tim.gover@raspberrypi.com, adrian.hunter@intel.com,
+        sbranden@broadcom.com, alcooperx@gmail.com,
+        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org
+Date:   Wed, 24 Mar 2021 16:34:09 +0100
+In-Reply-To: <401100ea-90ad-57b1-50da-967118a090da@i2se.com>
+References: <20210322185816.27582-1-nsaenz@kernel.org>
+         <20210322185816.27582-5-nsaenz@kernel.org>
+         <401100ea-90ad-57b1-50da-967118a090da@i2se.com>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-FFEARCZYyZSHobHLGWfZ"
+User-Agent: Evolution 3.38.4 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Wed, 24 Mar 2021 20:53:55 +0530
-From:   sbhanu@codeaurora.org
-To:     Stephen Boyd <swboyd@chromium.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, vbadigan@codeaurora.org,
-        rampraka@codeaurora.org, sayalil@codeaurora.org,
-        sartgarg@codeaurora.org, rnayak@codeaurora.org,
-        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
-        cang@codeaurora.org, pragalla@codeaurora.org,
-        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
- card
-In-Reply-To: <161648289959.3012082.11356063123403968180@swboyd.mtv.corp.google.com>
-References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
- <161648289959.3012082.11356063123403968180@swboyd.mtv.corp.google.com>
-Message-ID: <363c5b7d9baca5a010552137f80a1cf4@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-03-23 12:31, Stephen Boyd wrote:
-> Quoting Shaik Sajida Bhanu (2021-03-20 11:17:00)
->> diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts 
->> b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->> index 54d2cb3..4105263 100644
->> --- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->> +++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->> @@ -8,6 +8,7 @@
->>  /dts-v1/;
->> 
->>  #include "sc7280.dtsi"
->> +#include <dt-bindings/gpio/gpio.h>
-> 
-> Please include this before sc7280.dtsi
-> 
-Sure
->> 
->>  / {
->>         model = "Qualcomm Technologies, Inc. sc7280 IDP platform";
->> @@ -242,6 +243,30 @@
->>         status = "okay";
->>  };
->> 
->> +&sdhc_1 {
->> +       status = "okay";
->> +
->> +       pinctrl-names = "default", "sleep";
->> +       pinctrl-0 = <&sdc1_on>;
->> +       pinctrl-1 = <&sdc1_off>;
->> +
->> +       vmmc-supply = <&vreg_l7b_2p9>;
->> +       vqmmc-supply = <&vreg_l19b_1p8>;
->> +};
->> +
->> +&sdhc_2 {
->> +       status = "okay";
->> +
->> +       pinctrl-names = "default","sleep";
-> 
-> Please add a space after the comma ^
-Sure
-> 
->> +       pinctrl-0 = <&sdc2_on>;
->> +       pinctrl-1 = <&sdc2_off>;
->> +
->> +       vmmc-supply = <&vreg_l9c_2p9>;
->> +       vqmmc-supply = <&vreg_l6c_2p9>;
->> +
->> +       cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
->> +};
->> +
->>  /* PINCTRL - additions to nodes defined in sc7280.dtsi */
->> 
->>  &qup_uart5_default {
->> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi 
->> b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> index 8f6b569..69eb064 100644
->> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> @@ -20,6 +20,11 @@
->> 
->>         chosen { };
->> 
->> +       aliases {
->> +               mmc1 = &sdhc_1;
->> +               mmc2 = &sdhc_2;
->> +       };
->> +
->>         clocks {
->>                 xo_board: xo-board {
->>                         compatible = "fixed-clock";
->> @@ -305,6 +310,64 @@
->>                         #power-domain-cells = <1>;
->>                 };
->> 
->> +               sdhc_1: sdhci@7c4000 {
->> +                       compatible = "qcom,sdhci-msm-v5";
->> +                       reg = <0 0x7c4000 0 0x1000>,
-> 
-> Please add leading zeroes to the physical address, i.e. 0x007c4000
-Sure
-> 
->> +                                       <0 0x7c5000 0 0x1000>;
->> +                       reg-names = "hc", "cqhci";
->> +
->> +                       iommus = <&apps_smmu 0xC0 0x0>;
-> 
-> Lowercase hex please.
-Sure
-> 
->> +                       interrupts = <GIC_SPI 652 
->> IRQ_TYPE_LEVEL_HIGH>,
->> +                                       <GIC_SPI 656 
->> IRQ_TYPE_LEVEL_HIGH>;
->> +                       interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +                       clocks = <&gcc GCC_SDCC1_APPS_CLK>,
->> +                                       <&gcc GCC_SDCC1_AHB_CLK>,
->> +                                       <&rpmhcc RPMH_CXO_CLK>;
->> +                       clock-names = "core", "iface", "xo";
->> +                       interconnects = <&aggre1_noc MASTER_SDCC_1 0 
->> &mc_virt SLAVE_EBI1 0>,
->> +                                       <&gem_noc MASTER_APPSS_PROC 0 
->> &cnoc2 SLAVE_SDCC_1 0>;
->> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +                       power-domains = <&rpmhpd SC7280_CX>;
->> +                       operating-points-v2 = <&sdhc1_opp_table>;
->> +
->> +                       bus-width = <8>;
->> +                       non-removable;
->> +                       supports-cqe;
->> +                       no-sd;
->> +                       no-sdio;
->> +
->> +                       max-frequency = <192000000>;
-> 
-> Is this necessary?
-yes, to avoid lower speed modes running with high clock rates.
-> 
->> +
->> +                       qcom,dll-config = <0x0007642c>;
->> +                       qcom,ddr-config = <0x80040868>;
->> +
->> +                       mmc-ddr-1_8v;
->> +                       mmc-hs200-1_8v;
->> +                       mmc-hs400-1_8v;
->> +                       mmc-hs400-enhanced-strobe;
->> +
->> +                       status = "disabled";
-> 
-> Can this be near the compatible string?
-Sure
-> 
->> +
->> +                       sdhc1_opp_table: sdhc1-opp-table {
->> +                               compatible = "operating-points-v2";
->> +
->> +                               opp-100000000 {
->> +                                       opp-hz = /bits/ 64 
->> <100000000>;
->> +                                       required-opps = 
->> <&rpmhpd_opp_low_svs>;
->> +                                       opp-peak-kBps = <1200000 
->> 76000>;
->> +                                       opp-avg-kBps = <1200000 
->> 50000>;
->> +                               };
->> +
->> +                               opp-384000000 {
->> +                                       opp-hz = /bits/ 64 
->> <384000000>;
->> +                                       required-opps = 
->> <&rpmhpd_opp_nom>;
->> +                                       opp-peak-kBps = <5400000 
->> 1600000>;
->> +                                       opp-avg-kBps = <6000000 
->> 300000>;
->> +                               };
->> +                       };
->> +               };
->> +
->>                 qupv3_id_0: geniqup@9c0000 {
->>                         compatible = "qcom,geni-se-qup";
->>                         reg = <0 0x009c0000 0 0x2000>;
->> @@ -328,6 +391,54 @@
->>                         };
->>                 };
->> 
->> +               sdhc_2: sdhci@8804000 {
->> +                       compatible = "qcom,sdhci-msm-v5";
->> +                       reg = <0 0x08804000 0 0x1000>;
-> 
-> This has leading zeroes, great!
-> 
->> +
->> +                       iommus = <&apps_smmu 0x100 0x0>;
->> +                       interrupts = <GIC_SPI 207 
->> IRQ_TYPE_LEVEL_HIGH>,
->> +                                       <GIC_SPI 223 
->> IRQ_TYPE_LEVEL_HIGH>;
->> +                       interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +                       clocks = <&gcc GCC_SDCC2_APPS_CLK>,
->> +                                       <&gcc GCC_SDCC2_AHB_CLK>,
->> +                                       <&rpmhcc RPMH_CXO_CLK>;
-> 
-> Is this aligned properly?
-yes
-> 
->> +                       clock-names = "core", "iface", "xo";
->> +                       interconnects = <&aggre1_noc MASTER_SDCC_2 0 
->> &mc_virt SLAVE_EBI1 0>,
->> +                                       <&gem_noc MASTER_APPSS_PROC 0 
->> &cnoc2 SLAVE_SDCC_2 0>;
->> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +                       power-domains = <&rpmhpd SC7280_CX>;
->> +                       operating-points-v2 = <&sdhc2_opp_table>;
->> +
->> +                       bus-width = <4>;
->> +
->> +                       no-mmc;
->> +                       no-sdio;
->> +
->> +                       max-frequency = <202000000>;
-> 
-> Is this necessary?
-yes, to avoid clock running more than required clock rate.
-> 
->> +
->> +                       qcom,dll-config = <0x0007642c>;
->> +
->> +                       status = "disabled";
-> 
-> Move up near compatible?
-sure
-> 
->> +
->> +                       sdhc2_opp_table: sdhc2-opp-table {
->> +                                       compatible = 
->> "operating-points-v2";
->> +
->> +                                       opp-100000000 {
->> +                                               opp-hz =/bits/ 64 
->> <100000000>;
->> +                                               required-opps = 
->> <&rpmhpd_opp_low_svs>;
->> +                                               opp-peak-kBps = 
->> <1200000 76000>;
->> +                                               opp-avg-kBps = 
->> <1200000 50000>;
->> +                                       };
->> +                                       opp-202000000 {
->> +                                               opp-hz = /bits/ 64 
->> <202000000>;
->> +                                               required-opps = 
->> <&rpmhpd_opp_nom>;
->> +                                               opp-peak-kBps = 
->> <3500000 1200000>;
->> +                                               opp-avg-kBps = 
->> <5000000 100000>;
->> +                                       };
->> +                               };
->> +               };
->> +
->>                 pdc: interrupt-controller@b220000 {
->>                         compatible = "qcom,sc7280-pdc", "qcom,pdc";
->>                         reg = <0 0x0b220000 0 0x30000>;
+
+--=-FFEARCZYyZSHobHLGWfZ
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Stefan,
+
+On Wed, 2021-03-24 at 16:16 +0100, Stefan Wahren wrote:
+> Hi Nicolas,
+>=20
+> Am 22.03.21 um 19:58 schrieb Nicolas Saenz Julienne:
+> > From: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+> >=20
+> > Force emmc2's frequency to 150MHz as the default 100MHz (set by FW)
+> > seems to interfere with the VPU clock when setup at frequencies bigger
+> > than 500MHz (a pretty common case). This ends up causing unwarranted
+> > SDHCI CMD hangs  when no SD card is present.
+> >=20
+> > Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> > ---
+> > =C2=A0arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 6 ++++++
+> > =C2=A01 file changed, 6 insertions(+)
+> >=20
+> > diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/=
+bcm2711-rpi-4-b.dts
+> > index 3b4ab947492a..9aa8408d9960 100644
+> > --- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> > +++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> > @@ -257,6 +257,12 @@ &emmc2 {
+> > =C2=A0	vqmmc-supply =3D <&sd_io_1v8_reg>;
+> > =C2=A0	vmmc-supply =3D <&sd_vcc_reg>;
+> > =C2=A0	broken-cd;
+> > +	/*
+> > +	 * Force the frequency to 150MHz as the default 100MHz seems to
+> > +	 * interfere with the VPU clock when setup at frequencies bigger than
+> > +	 * 500MHz, causing unwarranted CMD hangs.
+> > +	 */
+> > +	clock-frequency =3D <150000000>;
+>=20
+> i don't want to bike-shed here, but is there any chance to solve this in
+> clk-bcm2835 in a less hacky way?
+
+What do you have in mind?
+
+All I can think of is adding some kind of heuristic to the clock's prepare(=
+)
+callback. That said, I don't feel it would be a better solution than this.
+
+Regards,
+Nicolas
+
+
+
+--=-FFEARCZYyZSHobHLGWfZ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBbW/EACgkQlfZmHno8
+x/67jAgAkEAjGxqXoq4Ga/ry0PqEcfUiGD4+CRAlqZtglOAj2WqZ5z6CRwxg6Xt5
+LYDxIoLjBAENrkkjbMv4nQPdLLDvf3UjBeRTK70mfsON7Pt6HLk3fxAws/36/1DK
+AAMprq5BVCTNY04+tjdQvV0A/w6o71aQF74ghlytDlP2fm7jS6WcEqRLIkuGqe7U
+dXtOGwt7SPJGevPbktCQff7xLJ5Aw4W0+JHoM3nxDIdiA3hpOFvuQSQbn90OpCTf
+P4O9cbCFQ4Am60dYBmGAIuV3jGpkB4PZk8wJms+ePiTGtZBso5eorU1jyqKbZAOd
+kB4wrjXd1OrQbZB87A5SELjhUUa1FQ==
+=qWwb
+-----END PGP SIGNATURE-----
+
+--=-FFEARCZYyZSHobHLGWfZ--
+
