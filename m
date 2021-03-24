@@ -2,103 +2,153 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D075FC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:29:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87663C433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:36:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AD9E661A14
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:29:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 63E6061A15
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:36:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235370AbhCXQ26 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Mar 2021 12:28:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47678 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235956AbhCXQ2p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 12:28:45 -0400
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33D7DC0613DE
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 09:28:34 -0700 (PDT)
-Received: by mail-pj1-x1033.google.com with SMTP id x7-20020a17090a2b07b02900c0ea793940so1455761pjc.2
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 09:28:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:content-transfer-encoding:in-reply-to:references
-         :subject:from:cc:to:date:message-id:user-agent;
-        bh=4FDhjn8F4kjGyuKc/8jnoebjpeHUlznny+1iTWmt3ik=;
-        b=TsY3yix9JYzH9w3GsTijlIfU1RaQvEgi29AWErS4Jf2CJ+LRh2RS5MRGum9KTPZeh5
-         n8Rgd7/OQWrK3EUcsmZGsxYj6SPrutAl8757HR/y91vPaLdSIR9ucCTRCChPPaKt2D8T
-         P1t8JOb8u8zBUa3QAgunbfIujMIWqdvvU5vzg=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:content-transfer-encoding
-         :in-reply-to:references:subject:from:cc:to:date:message-id
-         :user-agent;
-        bh=4FDhjn8F4kjGyuKc/8jnoebjpeHUlznny+1iTWmt3ik=;
-        b=P/13B9ZzW3s7RPu1s1glbjlpRuDKM16seu3ZTmomnlXhg2k8ukVFHod0GB1LAgfD6x
-         oR6vUP4puJ/LP3QlSqPFmv5hBqlfziCGCHoe2ShXAsYAcZ6V34gRJl/YC6hO5anVQlDD
-         ZK5HQK6je8XGCcWN132toq+LD92tncMFDVz1rbPWfp7N/Qk70IMSRdVGkc8V/i3rdVj6
-         Xo5Ax3dOd708m+5kGVMhQ6JqaxCv38ZAr0lHXhNQeSDGtT3ccyur4JWqV4n2NxNJX1uZ
-         +YM+2Kb57ylpdw7v9PHRWuoKqLRWjacTIyuzQtiwozqGk570G9CC/EQe+cPYgvKJIpYD
-         NH/Q==
-X-Gm-Message-State: AOAM533HGTksrXXDH5r2WNj4Gl4V9sQV31Cy1OlnQ1DLSFBi+Am8Ogov
-        Fg8A9KHPxVa3Y1rc9Jh5AfNrHg==
-X-Google-Smtp-Source: ABdhPJxx95a8sKxKKG8ygLhnz44Vegp79a4ZrQl5c7JYQE9fIBD844QAoFXVlnijFAUrY29+54rBLQ==
-X-Received: by 2002:a17:902:d2c7:b029:e6:34e2:7a83 with SMTP id n7-20020a170902d2c7b02900e634e27a83mr4444859plc.60.1616603313667;
-        Wed, 24 Mar 2021 09:28:33 -0700 (PDT)
-Received: from chromium.org ([2620:15c:202:201:84ac:62f7:16a8:ccc7])
-        by smtp.gmail.com with ESMTPSA id c6sm2963022pfj.99.2021.03.24.09.28.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Mar 2021 09:28:33 -0700 (PDT)
-Content-Type: text/plain; charset="utf-8"
+        id S236364AbhCXQfl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Mar 2021 12:35:41 -0400
+Received: from mx2.suse.de ([195.135.220.15]:33682 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229653AbhCXQfa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 24 Mar 2021 12:35:30 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 5B282AC1D;
+        Wed, 24 Mar 2021 16:35:28 +0000 (UTC)
+Message-ID: <9de20a5960e029b8842dc026be3be85295647175.camel@suse.de>
+Subject: Re: [PATCH 1/4] dt-bindings: mmc: iproc-sdhci: Convert to
+ json-schema
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     Scott Branden <scott.branden@broadcom.com>,
+        Rob Herring <robh@kernel.org>
+Cc:     Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>, f.fainelli@gmail.com,
+        phil@raspberrypi.com, tim.gover@raspberrypi.com,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        linux-kernel@vger.kernel.org
+Date:   Wed, 24 Mar 2021 17:35:26 +0100
+In-Reply-To: <28a133d2-c713-4bce-271c-5fa228d830ca@broadcom.com>
+References: <20210322185816.27582-1-nsaenz@kernel.org>
+         <20210322185816.27582-2-nsaenz@kernel.org>
+         <0e98588e-65f1-6839-1fcd-584b480a31bd@broadcom.com>
+         <20210323210812.GA1318204@robh.at.kernel.org>
+         <c1989e31501ccfb6e1350d467d4f26089bfcfb64.camel@suse.de>
+         <28a133d2-c713-4bce-271c-5fa228d830ca@broadcom.com>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-ViNOE93gnirGk1EY9hs7"
+User-Agent: Evolution 3.38.4 
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <161660145349.3012082.16210818967187877873@swboyd.mtv.corp.google.com>
-References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org> <161648289959.3012082.11356063123403968180@swboyd.mtv.corp.google.com> <363c5b7d9baca5a010552137f80a1cf4@codeaurora.org> <161660145349.3012082.16210818967187877873@swboyd.mtv.corp.google.com>
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
-From:   Stephen Boyd <swboyd@chromium.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, vbadigan@codeaurora.org,
-        rampraka@codeaurora.org, sayalil@codeaurora.org,
-        sartgarg@codeaurora.org, rnayak@codeaurora.org,
-        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
-        cang@codeaurora.org, pragalla@codeaurora.org,
-        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org
-To:     sbhanu@codeaurora.org
-Date:   Wed, 24 Mar 2021 09:28:31 -0700
-Message-ID: <161660331135.3012082.15196616622122288364@swboyd.mtv.corp.google.com>
-User-Agent: alot/0.9.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Stephen Boyd (2021-03-24 08:57:33)
-> Quoting sbhanu@codeaurora.org (2021-03-24 08:23:55)
-> > On 2021-03-23 12:31, Stephen Boyd wrote:
-> > > Quoting Shaik Sajida Bhanu (2021-03-20 11:17:00)
-> > >> +
-> > >> +                       bus-width =3D <8>;
-> > >> +                       non-removable;
-> > >> +                       supports-cqe;
-> > >> +                       no-sd;
-> > >> +                       no-sdio;
-> > >> +
-> > >> +                       max-frequency =3D <192000000>;
-> > >=20
-> > > Is this necessary?
-> > yes, to avoid lower speed modes running with high clock rates.
->=20
-> Is it part of the DT binding? I don't see any mention of it.
 
-Nevermind, found it in mmc-controller.yaml. But I think this is to work
-around some problem with the clk driver picking lower speeds than
-requested? That has been fixed on the clk driver side (see commit like
-148ddaa89d4a "clk: qcom: gcc-sc7180: Use floor ops for the correct sdcc1
-clk") so ideally this property can be omitted.
+--=-ViNOE93gnirGk1EY9hs7
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, 2021-03-24 at 09:27 -0700, Scott Branden wrote:
+> On 2021-03-23 2:24 p.m., Nicolas Saenz Julienne wrote:
+> > On Tue, 2021-03-23 at 15:08 -0600, Rob Herring wrote:
+> > > On Mon, Mar 22, 2021 at 12:11:29PM -0700, Scott Branden wrote:
+> > > > On 2021-03-22 11:58 a.m., Nicolas Saenz Julienne wrote:
+> > > > > Convert the brcm,iproc-sdhci binding to DT schema format using js=
+on-schema
+> > > > >=20
+> > > > > Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> > > > > ---
+> > > > > =C2=A0.../bindings/mmc/brcm,iproc-sdhci.yaml        | 58 ++++++++=
++++++++++++
+> > > > > =C2=A0.../bindings/mmc/brcm,sdhci-iproc.txt         | 37 --------=
+----
+> > > > > =C2=A02 files changed, 58 insertions(+), 37 deletions(-)
+> > > > > =C2=A0create mode 100644 Documentation/devicetree/bindings/mmc/br=
+cm,iproc-sdhci.yaml
+> > > > > =C2=A0delete mode 100644 Documentation/devicetree/bindings/mmc/br=
+cm,sdhci-iproc.txt
+> > > > >=20
+> > > > > diff --git a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdh=
+ci.yaml b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+> > > > > new file mode 100644
+> > > > > index 000000000000..19d84f3ef9e6
+> > > > > --- /dev/null
+> > > > > +++ b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+> > > > > @@ -0,0 +1,58 @@
+> > > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > > +%YAML 1.2
+> > > > > +---
+> > > > > +$id: http://devicetree.org/schemas/mmc/brcm,iproc-sdhci.yaml#
+> > > > > +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> > > > > +
+> > > > > +title: Broadcom IPROC SDHCI controller
+> > > > > +
+> > > > > +maintainers:
+> > > > > +  - Nicolas Saenz Julienne <nsaenz@kernel.org>
+> > > > This is already covered in the MAINTAINERS section via "N:	iproc".
+> > > > M:	Ray Jui <ray.jui@broadcom.com>
+> > > >=20
+> > > > M:	Scott Branden <scott.branden@broadcom.com>
+> > > >=20
+> > > > M:	bcm-kernel-feedback-list@broadcom.com
+> > >=20
+> > > Maybe so, but still required here. The problem is there is no=20
+> > > MAINTAINERS file in the DT only tree[1].
+> >=20
+> > Well in that case, if Scott and Ray are OK with it I'll add them.
+> I do not know what the "maintainers" section in the yaml file is used to =
+indicate.
+> If it is maintainer for the driver then please add the duplicate of what =
+is
+> already in the MAINTAINERS file.  If it is for maintainer of devicetrees =
+that
+> use this driver then no need to add us.
+
+=46rom the dt bindings documentation:
+
+maintainers
+  A DT specific property. Contains a list of email address(es)
+  for maintainers of this binding.
+
+That's the maintainers for the bindings, not the devicetrees consuming them=
+. I
+belive it makes sense for you guys to maintain it as it has a strong
+relationship to driver changes. But if you're not interested I'll do it mys=
+elf.
+
+Regards,
+Nicolas
+
+
+
+--=-ViNOE93gnirGk1EY9hs7
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBbak8ACgkQlfZmHno8
+x/7auwf/XiiMWtXMCFAncrVyJbJGU9nIKnVNg3g4XCQqTXHbYDcZ6bf1OIk7/Xst
+dr++njCcrrXqXUyT0gersWwdU9Bhk3tBJ1BPzUjIeieD2GrbdzAm2bs/9WNVkFjg
+4mf8DAx0Mhj8aWa4SKRBZL//2L3QzlbQmmHj6hJPpHWcR5CbYxMc4LSEPQMyD1Tu
++t1TfsHckWyMfkwCfzal/7Tk0H1SW7wXRVM0xzOS+2t3gqZZYn4L1+Va0/NNgsQ6
+qoLIL9qIIPxMpCLgCNsXgx47pFozZTvGvM08fxe5I92ZDQ+6Bx+5joYutjk53xS/
+wtLTUFS4dCSrLkj2joyZdr7A0sBbYA==
+=w+e4
+-----END PGP SIGNATURE-----
+
+--=-ViNOE93gnirGk1EY9hs7--
+
