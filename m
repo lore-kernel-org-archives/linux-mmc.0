@@ -2,237 +2,318 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1F5AC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:44:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB383C433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:46:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6865C61A0E
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:44:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8AB161A0E
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:46:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236462AbhCXQnv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Mar 2021 12:43:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51014 "EHLO
+        id S236897AbhCXQp7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Mar 2021 12:45:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51380 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235878AbhCXQnu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 12:43:50 -0400
-Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41D61C0613DE
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 09:43:50 -0700 (PDT)
-Received: by mail-pg1-x52d.google.com with SMTP id v186so14993230pgv.7
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 09:43:50 -0700 (PDT)
+        with ESMTP id S236580AbhCXQpa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 12:45:30 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2AEDC061763;
+        Wed, 24 Mar 2021 09:45:29 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id x21so28405152eds.4;
+        Wed, 24 Mar 2021 09:45:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=broadcom.com; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to;
-        bh=Og+eaH+C21j3XxDw4GXv3pRXoz9LnSyCv3cCFzbgmms=;
-        b=hUER4Il0T2kikT8+/b4jYt0kMWtcyCwkxmHhyof2ZQro3Cpt1JxzIM/WctboyoU1t0
-         IsNX6DC5++fXQdzmZqdJK5hspWLPjrsYSmSFaZKAzB5bgqJMvoi9pZ/GeS5UACo0Jfsm
-         WqHnSV54Y1x0QM6K/fURQV5IfcMaM8QzpEzkM=
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=25OUVuiTG0J8rQw9wxGkkZPwxHQF7p/PB2qLPPS2uA0=;
+        b=uh8soqsM4U9j8UWk8aKLYbdf17naDaGvGL62awRPI8EpbFXriK6ien98AVks5DF5sl
+         1Fg3fnAevnp+/SLJg6OsLKEpYtmwKhktgrfkDkxAyYdZ0pjvFAvtERhrC03U/YwGWbfO
+         kMmKDuKpbxA+SGJuL2PnsoFe2k9l3iU1/OqmEgrX+WW8HltwEEtZH8Wbkdr2FUm1PuHb
+         jh9Sk5Bz967c/ag7sTd8ey7hduNJUn8HB++uQ2361oKUyt8SiBp+DnuDUk3anVxbAVz4
+         MfnbTkc4OxhFFgnpHAnkQv70qNlngTl/pWm8yJCIgtIrOjzzWv4Si2I0KTVOkq1YrDk2
+         HBdg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to;
-        bh=Og+eaH+C21j3XxDw4GXv3pRXoz9LnSyCv3cCFzbgmms=;
-        b=q4eJdCVP9jNbv31fynSBPZxfAKvTCkMoh/eUKT2yfWsa3zkSGX8VpkXyHf6MuHJOGO
-         0q9zzxQ88ci2396qJFw3b8OG6B61cv7HNJAUWRZgiY01uHdwBcxk8r4NdSHaTcA3cFUO
-         o/BREz3SnEt7bke/98mBa82r5/4exreoMNiqGDDG7kdYQ8Ux+ju8iUKECcJjeuTZOxXI
-         QIbzRDQMYpjIltWftZ+DW0sbYFls444GtJ3vYCJv2rjAJ7YNicpCgOpO6SFPNhz9b4Eh
-         Ncd/bsXFGT/NcrbVjbJLtuuAM0YrfoiNoPx8TqXnWYvfQGsmGVueTXSUBd6lwAZ9uLqx
-         06GA==
-X-Gm-Message-State: AOAM531mjHsFzByXn8/ItB71on6zW0q5hNjRUSrxHu2gOgxhEjs2kZi1
-        Wdj2SUnYwNaszs0fXosJnBIQfg==
-X-Google-Smtp-Source: ABdhPJy9oB6kLzcAg1sewJLV1RILKrMKpLEU6QhO81UMhCYhgQ/e+CubBnLh6m1Z81OYwzB8g7HTkQ==
-X-Received: by 2002:a65:4782:: with SMTP id e2mr3883245pgs.93.1616604229355;
-        Wed, 24 Mar 2021 09:43:49 -0700 (PDT)
-Received: from lbrmn-lnxub113.ric.broadcom.net ([192.19.228.250])
-        by smtp.gmail.com with ESMTPSA id x190sm3099541pfx.166.2021.03.24.09.43.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 24 Mar 2021 09:43:48 -0700 (PDT)
-Subject: Re: [PATCH 1/4] dt-bindings: mmc: iproc-sdhci: Convert to json-schema
-To:     Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
-        Rob Herring <robh@kernel.org>
-Cc:     Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
-        linux-rpi-kernel@lists.infradead.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>, f.fainelli@gmail.com,
-        phil@raspberrypi.com, tim.gover@raspberrypi.com,
-        adrian.hunter@intel.com, alcooperx@gmail.com,
-        linux-kernel@vger.kernel.org
-References: <20210322185816.27582-1-nsaenz@kernel.org>
- <20210322185816.27582-2-nsaenz@kernel.org>
- <0e98588e-65f1-6839-1fcd-584b480a31bd@broadcom.com>
- <20210323210812.GA1318204@robh.at.kernel.org>
- <c1989e31501ccfb6e1350d467d4f26089bfcfb64.camel@suse.de>
- <28a133d2-c713-4bce-271c-5fa228d830ca@broadcom.com>
- <9de20a5960e029b8842dc026be3be85295647175.camel@suse.de>
-From:   Scott Branden <scott.branden@broadcom.com>
-Message-ID: <bacfa0ef-dcb1-150a-4d10-46524a0a7082@broadcom.com>
-Date:   Wed, 24 Mar 2021 09:43:45 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=25OUVuiTG0J8rQw9wxGkkZPwxHQF7p/PB2qLPPS2uA0=;
+        b=DMQ6ONDfXoPwE9CGceRh+Yfof2Lbi19O5bHXSQ21td/iucMKYD3Zd10L3p1wU2m3L0
+         YS1yH0S2R1FlSIEXqcdO6PZdyy8P4dtoxrDOZIWbiA1VFnuGGpkAv1sh1C355uj4chrV
+         9YQBx05iV5+NOVZlHOgCMXYxBaXXyIMk34zQs3deHsp+0AL7UcAzZhum+iOZW3x+wgbw
+         437t/eFyb2CznBGEbV87KXAXgaQmLdNN/RNoduf3FvSNtnu1/UAZMPTPogcJjHVqpXR0
+         80lQMpY7VEVDuxLa95JzcZ8+qWbZjal+IrJf1i7qHAxLp7kkijvWVZ79C2gXvN2w8Sro
+         f2Ew==
+X-Gm-Message-State: AOAM532ma+mLtNvTYMyGbUnJ2iF6U3ScZOX1jdUjfTKQ8fxsZ8iRSUdM
+        BIP6o5wbxGDx5um79OcRc7s=
+X-Google-Smtp-Source: ABdhPJzvaRNDn9n6WOzSdQSobTj9liGJlJTQVQkrmQSOXukA1ZrZNg4oCTgvbhZC6ZXmPzOUURVVaA==
+X-Received: by 2002:a05:6402:1545:: with SMTP id p5mr4356696edx.155.1616604328510;
+        Wed, 24 Mar 2021 09:45:28 -0700 (PDT)
+Received: from localhost.localdomain (ip5f5bec5d.dynamic.kabel-deutschland.de. [95.91.236.93])
+        by smtp.gmail.com with ESMTPSA id r19sm1206759ejr.55.2021.03.24.09.45.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 24 Mar 2021 09:45:28 -0700 (PDT)
+From:   Bean Huo <huobean@gmail.com>
+To:     beanhuo@micron.com, kenny.gibbons@oracle.com,
+        kimito.sakata@oracle.com, rkamdar@micron.com, chris@printf.net,
+        ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc-utils: Add eMMC erase command support
+Date:   Wed, 24 Mar 2021 17:44:08 +0100
+Message-Id: <20210324164408.14722-1-huobean@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <9de20a5960e029b8842dc026be3be85295647175.camel@suse.de>
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="000000000000ddaa7605be4b002d"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---000000000000ddaa7605be4b002d
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+From: Kimito Sakata <kimito.sakata@oracle.com>
 
-On 2021-03-24 9:35 a.m., Nicolas Saenz Julienne wrote:
-> On Wed, 2021-03-24 at 09:27 -0700, Scott Branden wrote:
->> On 2021-03-23 2:24 p.m., Nicolas Saenz Julienne wrote:
->>> On Tue, 2021-03-23 at 15:08 -0600, Rob Herring wrote:
->>>> On Mon, Mar 22, 2021 at 12:11:29PM -0700, Scott Branden wrote:
->>>>> On 2021-03-22 11:58 a.m., Nicolas Saenz Julienne wrote:
->>>>>> Convert the brcm,iproc-sdhci binding to DT schema format using json-schema
->>>>>>
->>>>>> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
->>>>>> ---
->>>>>>  .../bindings/mmc/brcm,iproc-sdhci.yaml        | 58 +++++++++++++++++++
->>>>>>  .../bindings/mmc/brcm,sdhci-iproc.txt         | 37 ------------
->>>>>>  2 files changed, 58 insertions(+), 37 deletions(-)
->>>>>>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
->>>>>>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
->>>>>>
->>>>>> diff --git a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
->>>>>> new file mode 100644
->>>>>> index 000000000000..19d84f3ef9e6
->>>>>> --- /dev/null
->>>>>> +++ b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
->>>>>> @@ -0,0 +1,58 @@
->>>>>> +# SPDX-License-Identifier: GPL-2.0
->>>>>> +%YAML 1.2
->>>>>> +---
->>>>>> +$id: http://devicetree.org/schemas/mmc/brcm,iproc-sdhci.yaml#
->>>>>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->>>>>> +
->>>>>> +title: Broadcom IPROC SDHCI controller
->>>>>> +
->>>>>> +maintainers:
->>>>>> +  - Nicolas Saenz Julienne <nsaenz@kernel.org>
->>>>> This is already covered in the MAINTAINERS section via "N:	iproc".
->>>>> M:	Ray Jui <ray.jui@broadcom.com>
->>>>>
->>>>> M:	Scott Branden <scott.branden@broadcom.com>
->>>>>
->>>>> M:	bcm-kernel-feedback-list@broadcom.com
->>>>
->>>> Maybe so, but still required here. The problem is there is no 
->>>> MAINTAINERS file in the DT only tree[1].
->>>
->>> Well in that case, if Scott and Ray are OK with it I'll add them.
->> I do not know what the "maintainers" section in the yaml file is used to indicate.
->> If it is maintainer for the driver then please add the duplicate of what is
->> already in the MAINTAINERS file.  If it is for maintainer of devicetrees that
->> use this driver then no need to add us.
-> 
-> From the dt bindings documentation:
-> 
-> maintainers
->   A DT specific property. Contains a list of email address(es)
->   for maintainers of this binding.
-> 
-> That's the maintainers for the bindings, not the devicetrees consuming them. I
-> belive it makes sense for you guys to maintain it as it has a strong
-> relationship to driver changes. But if you're not interested I'll do it myself.
-Sure, you can add us as well.
-> 
-> Regards,
-> Nicolas
-> 
+we have been using this erase feature for a while, but it is
+still not merged into the upstream mmc-utils. Especially, for
+the customer, every time when they update the mmc-utils, they
+should re-install this patch again, let's try to make this
+erase command upstreamed in the mmc-utils.
 
+Co-developed-by: Bean Huo <beanhuo@micron.com>
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+Reviewed-by: Kenneth Gibbons <kenny.gibbons@oracle.com>
+---
 
---000000000000ddaa7605be4b002d
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
+Hi Ulf,
+Please help us review this mmc-utils patch, and if agree, it is
+possible to make it merged in the official mmc-utils.
 
-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
-cRe0CRXA7ypOJSgxO/nOOyQoaJxT7CGg1npOeSpPjEuc3fE4xum3l0nvU85hj6MlKZu43hokdBh0
-D0nLyyhEwlR3AC/msdff/UGbM/JR9vk812RP4m/aNWZFJwIDAQABo4IB2zCCAdcwDgYDVR0PAQH/
-BAQDAgWgMIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9i
-YWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUF
-BzABhjVodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAy
-MDBNBgNVHSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xv
-YmFsc2lnbi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRw
-Oi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAlBgNV
-HREEHjAcgRpzY290dC5icmFuZGVuQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAf
-BgNVHSMEGDAWgBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUOhjEpl04Sz9dh5MI82E1
-V39lM/owDQYJKoZIhvcNAQELBQADggEBAA7Rlypx/esz/iq1yA4+KW7uwV/aBY344BWcXt6I+SNK
-VwFBgFWfLj5vaEud9TVv2fPSiaHJo0umemOJk+43QD+bsoqmgcFXd21PrOt7Jjs+jjVED9VC5kJq
-S4NNKUkS+BqijJwSegtVygrc/atrIlJbjI21q4qpemUo5fgwqCNm++BmBGTI8yA09vtGSNDRN42k
-lLX9hl3iEj5SBgkQqCbbnoE+ZjjKfqt7ED166WhgyQWNrl39yLcvLj+JRUB3RuvXKZjH0NQEEBII
-wZBDSkyneykLt3CBNIhSCTxKM6OWxVp936ALSa5K9FNy00TeWSpokR6NmzaW8VD/EjTgvqAxggJt
-MIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYD
-VQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgx9oXSJpKniO4dS
-Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIBnv6igRHhmDbuAl73NW7VJttv36
-iz9mgBr+KhkZnktaMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
-MDMyNDE2NDM0OVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
-CWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFl
-AwQCATANBgkqhkiG9w0BAQEFAASCAQBlOuuoo8vxCD9xrAq/CWVbt8vHcjmT9fLh+zQPqIaQv3Q9
-VF6E8S3v7v/RaQftxerqgXkRbJLz/1HnfbPaqLXXNIwksv98F6vZlSoVEvSK5GWwxpB8RGSE4bv8
-Rh7iprxuZkiNBem/8qJQc3tpVFcYxFMWzqmQibu2UZwhGWbqZcVVc9bhtrBb23GQhhwjt9RPuulW
-7QBG0XJ0as2mO8vriFO1oT14BwlgNYS5nZ1I6o+7m/QbJn7PMxVu5t0kkxeomqL1klUD2wxZ/3mw
-wcPsaUEoic+7FiE03dT+ij6q8sR4t6Pz8qUsZ9S7UQ/+5Faxz6R9gmLSfi06ypOEvRUa
---000000000000ddaa7605be4b002d--
+Changelog:
+
+V1--V2:
+    1. refactor Kimito's original patch
+    2. change to use MMC_IOC_MULTI_CMD
+    3. add checkup if eMMC devie supports secure erase/trim
+
+---
+ mmc.c      |   8 ++++
+ mmc.h      |  13 +++++-
+ mmc_cmds.c | 135 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |   1 +
+ 4 files changed, 156 insertions(+), 1 deletion(-)
+
+diff --git a/mmc.c b/mmc.c
+index 50c9c9e..cb29a65 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -215,6 +215,14 @@ static struct Command commands[] = {
+ 		"Run Field Firmware Update with <image name> on <device>.\n",
+ 	  NULL
+ 	},
++	{ do_erase, -4,
++	"erase", "<type> " "<start address> " "<end address> " "<device>\n"
++		"Send Erase CMD38 with specific argument to the <device>\n\n"
++		"NOTE!: This will delete all user data in the specified region of the device\n"
++		"<type> must be: legacy | discard | secure-erase | "
++		"secure-trim1 | secure-trim2 | trim \n",
++	NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
+ 
+diff --git a/mmc.h b/mmc.h
+index 648fb26..90b7fb5 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -34,7 +34,15 @@
+ #define MMC_SET_WRITE_PROT	28    /* ac   [31:0] data addr   R1b */
+ #define MMC_CLEAR_WRITE_PROT	29    /* ac   [31:0] data addr   R1b */
+ #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
+-
++#define MMC_ERASE_GROUP_START	35    /* ac   [31:0] data addr   R1  */
++#define MMC_ERASE_GROUP_END	36    /* ac   [31:0] data addr   R1  */
++#define MMC_ERASE		38    /* ac   [31] Secure request
++					      [30:16] set to 0
++					      [15] Force Garbage Collect request
++					      [14:2] set to 0
++					      [1] Discard Enable
++					      [0] Identify Write Blocks for
++					      Erase (or TRIM Enable)  R1b */
+ /*
+  * EXT_CSD fields
+  */
+@@ -61,6 +69,7 @@
+ #define EXT_CSD_CACHE_SIZE_2		251
+ #define EXT_CSD_CACHE_SIZE_1		250
+ #define EXT_CSD_CACHE_SIZE_0		249
++#define EXT_CSD_SEC_FEATURE_SUPPORT	231
+ #define EXT_CSD_BOOT_INFO		228	/* R/W */
+ #define EXT_CSD_HC_ERASE_GRP_SIZE	224
+ #define EXT_CSD_HC_WP_GRP_SIZE		221
+@@ -177,6 +186,8 @@
+ #define EXT_CSD_REV_V4_2		2
+ #define EXT_CSD_REV_V4_1		1
+ #define EXT_CSD_REV_V4_0		0
++#define EXT_CSD_SEC_GB_CL_EN		(1<<4)
++#define EXT_CSD_SEC_ER_EN		(1<<0)
+ 
+ 
+ /* From kernel linux/mmc/core.h */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index fb37189..17986e3 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2435,6 +2435,141 @@ int do_cache_dis(int nargs, char **argv)
+ 	return do_cache_ctrl(0, nargs, argv);
+ }
+ 
++static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
++{
++#ifndef MMC_IOC_MULTI_CMD
++	fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
++			" support, needed by erase.\n");
++	return -ENOTSUP;
++#else
++	int ret = 0;
++	struct mmc_ioc_multi_cmd *multi_cmd;
++
++	multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
++			   3 * sizeof(struct mmc_ioc_cmd));
++	if (!multi_cmd) {
++		perror("Failed to allocate memory");
++		return -ENOMEM;
++	}
++
++	multi_cmd->num_of_cmds = 3;
++	/* Set erase start address */
++	multi_cmd->cmds[0].opcode = MMC_ERASE_GROUP_START;
++	multi_cmd->cmds[0].arg = start;
++	multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++	multi_cmd->cmds[0].write_flag = 1;
++
++	/* Set erase end address */
++	multi_cmd->cmds[1].opcode = MMC_ERASE_GROUP_END;
++	multi_cmd->cmds[1].arg = end;
++	multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
++	multi_cmd->cmds[1].write_flag = 1;
++
++	/* Send Erase Command */
++	multi_cmd->cmds[2].opcode = MMC_ERASE;
++	multi_cmd->cmds[2].arg = argin;
++	multi_cmd->cmds[2].cmd_timeout_ms = 300*255*255;
++	multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++	multi_cmd->cmds[2].write_flag = 1;
++
++	/* send erase cmd with multi-cmd */
++	ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
++	if (ret)
++		perror("Erase multi-cmd ioctl");
++
++	free(multi_cmd);
++	return ret;
++#endif
++}
++
++int do_erase(int nargs, char **argv)
++{
++	int dev_fd, ret;
++	char *print_str;
++	char **eptr = NULL;
++	__u8 ext_csd[512], checkup_mask = 0;
++	__u32 arg, start, end;
++
++	if (nargs != 5) {
++		fprintf(stderr, "Usage: erase <type> <start addr> <end addr> </path/to/mmcblkX>\n");
++		exit(1);
++	}
++
++	if (strstr(argv[2], "0x") || strstr(argv[2], "0X"))
++		start = strtol(argv[2], eptr, 16);
++	else
++		start = strtol(argv[2], eptr, 10);
++
++	if (strstr(argv[3], "0x") || strstr(argv[3], "0X"))
++		end = strtol(argv[3], eptr, 16);
++	else
++		end = strtol(argv[3], eptr, 10);
++
++	if (end < start) {
++		fprintf(stderr, "erase start [0x%08x] > erase end [0x%08x]\n",
++			start, end);
++		exit(1);
++	}
++
++	if (strcmp(argv[1], "legacy") == 0) {
++		arg = 0x00000000;
++		print_str = "Legacy Erase";
++	} else if (strcmp(argv[1], "discard") == 0) {
++		arg = 0x00000003;
++		print_str = "Discard";
++	} else if (strcmp(argv[1], "secure-erase") == 0) {
++		print_str = "Secure Erase";
++		checkup_mask = EXT_CSD_SEC_ER_EN;
++		arg = 0x80000000;
++	} else if (strcmp(argv[1], "secure-trim1") == 0) {
++		print_str = "Secure Trim Step 1";
++		checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
++		arg = 0x80000001;
++	} else if (strcmp(argv[1], "secure-trim2") == 0) {
++		print_str = "Secure Trim Step 2";
++		checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
++		arg = 0x80008000;
++	} else if (strcmp(argv[1], "trim") == 0) {
++		print_str = "Trim";
++		checkup_mask = EXT_CSD_SEC_GB_CL_EN;
++		arg = 0x00000001;
++	} else {
++		fprintf(stderr, "Unknown erase type: %s\n", argv[1]);
++		exit(1);
++	}
++
++	dev_fd = open(argv[4], O_RDWR);
++	if (dev_fd < 0) {
++		perror(argv[4]);
++		exit(1);
++	}
++
++	if (checkup_mask) {
++		ret = read_extcsd(dev_fd, ext_csd);
++		if (ret) {
++			fprintf(stderr, "Could not read EXT_CSD from %s\n",
++				argv[4]);
++			goto out;
++		}
++		if ((checkup_mask & ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) !=
++								checkup_mask) {
++			fprintf(stderr, "%s is not supported in %s\n",
++				print_str, argv[4]);
++			ret = -ENOTSUP;
++			goto out;
++		}
++
++	}
++	printf("Executing %s from 0x%08x to 0x%08x\n", print_str, start, end);
++
++	ret = erase(dev_fd, arg, start, end);
++out:
++	printf(" %s %s!\n\n", print_str, ret ? "Failed" : "Succeed");
++	close(dev_fd);
++	return ret;
++}
++
++
+ int do_ffu(int nargs, char **argv)
+ {
+ #ifndef MMC_IOC_MULTI_CMD
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index 9d3246c..8331ab2 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -45,3 +45,4 @@ int do_ffu(int nargs, char **argv);
+ int do_read_scr(int argc, char **argv);
+ int do_read_cid(int argc, char **argv);
+ int do_read_csd(int argc, char **argv);
++int do_erase(int nargs, char **argv);
+-- 
+2.25.1
+
