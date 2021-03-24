@@ -2,96 +2,221 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82D17C433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 15:58:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 02741C433C1
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:28:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 535F061A09
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 15:58:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B6D8161A0D
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 16:28:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236520AbhCXP5z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Mar 2021 11:57:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40922 "EHLO
+        id S235330AbhCXQ1y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Mar 2021 12:27:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236815AbhCXP5g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 11:57:36 -0400
-Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2EFBC061763
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 08:57:35 -0700 (PDT)
-Received: by mail-pg1-x52a.google.com with SMTP id e33so14926307pgm.13
-        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 08:57:35 -0700 (PDT)
+        with ESMTP id S235956AbhCXQ13 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 12:27:29 -0400
+Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BD03C061763
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 09:27:29 -0700 (PDT)
+Received: by mail-pg1-x531.google.com with SMTP id r17so14978517pgi.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 Mar 2021 09:27:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:content-transfer-encoding:in-reply-to:references
-         :subject:from:cc:to:date:message-id:user-agent;
-        bh=vkGG8bUzJ/OVR7TWK+g6aM9CPt6H+03+5FXXpdHLRXs=;
-        b=mFfsg9CAhQ7vrBj3AZE/UKgwUhB0vOhtTEJxJtcvtrmX5cDKoWu7XdE57pPpInQOZf
-         xCeMurZmoMNVn9ddCq4uCcfafMu9J6oj8FV5hE8C6qU0sFzWz1Iu6vzIVha3BM9rGmqt
-         1EMaYSdqLIjIECrj4UXq2PinIH4dQ0qlvl/FY=
+        d=broadcom.com; s=google;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to;
+        bh=bmi5+hAfmBJISlgg2GeOc/9xX6gyqA3K+XokMJ70vY0=;
+        b=YgES7getfU3k4xRrftkBqEPwMJ3YOA5oOiB2mrspJsNv/hnniVmP3dQOBc7J55C2ZJ
+         pn7GhSTn/NyzFRiGVqF2Df+ctOMFUSfStQmu8FtfFON7l1iUD7o8Ln7OUE5+dNpwjaJV
+         SWOE+wmUslKlWkBB0SoCHWAGr8QoenTtnYUG0=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:content-transfer-encoding
-         :in-reply-to:references:subject:from:cc:to:date:message-id
-         :user-agent;
-        bh=vkGG8bUzJ/OVR7TWK+g6aM9CPt6H+03+5FXXpdHLRXs=;
-        b=e6Qn+lqRTK7laliMrpfEJgW10IgtR/wT6GeoQHCG/qJXhRvy5SzvfNi8FwvcmdN0eP
-         K4VPERzzEd2QGKx7wI6P0gA9i0Wj8u0gQtcdnVOBmtKE7pK9kfxzz+32aYDArWLV629y
-         rcDw5paXZ6138i4kMq2P3NnEXUtiTDB4QaR0jMNEC8yb8TiisCIkk29i5CagGJjHKWca
-         xvrDY5ZM5AakV5UvXEO6v8rrHT13h5bd9XOU7X4f3uRJOWfLbTnyrFMpRpHg8qsAeMiO
-         m6K9b4X2pv1TpCF3gx3Hy2x6SgXcAk4EJvn3come8z9iLTl3IjlJdOMneiJiqy+m8gYY
-         uZVg==
-X-Gm-Message-State: AOAM532N/GcZymjWnmByOx73kNcsr+/V2d80R47ymVQJ8Uga0yHP6m1D
-        9LoizZYF5kVno3pLzbzaznJuLYrUQYGX6A==
-X-Google-Smtp-Source: ABdhPJzq3OI2MiKQe4UaXXrUM7c98RiM4f9SWoEhpyTP/B/upNfcZwdR113tblS99Z4fyKv3gVr5dQ==
-X-Received: by 2002:a62:3085:0:b029:1ec:a570:682c with SMTP id w127-20020a6230850000b02901eca570682cmr3868415pfw.28.1616601455443;
-        Wed, 24 Mar 2021 08:57:35 -0700 (PDT)
-Received: from chromium.org ([2620:15c:202:201:84ac:62f7:16a8:ccc7])
-        by smtp.gmail.com with ESMTPSA id j3sm3055731pfi.74.2021.03.24.08.57.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Mar 2021 08:57:35 -0700 (PDT)
-Content-Type: text/plain; charset="utf-8"
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to;
+        bh=bmi5+hAfmBJISlgg2GeOc/9xX6gyqA3K+XokMJ70vY0=;
+        b=DAiyB6LuSugznZYYSlX56tbzftgZYAbgCyZFwlrdfsuNi31woOjg5D4FHogq5BA32+
+         YMc4UCJM6uSdYnNcFL2x8gjkb/lV31bCcM0CyWPgiRikHYOoFGqrT6Rv5zsVvg6yFfru
+         u2Sdfn2Txx4Eh2IJ+RPl/en4jLc2ZuF1Ckk++IdWfclOMs8xBtBlfxFkVcqOG+0jqyQY
+         8ZSORzwIq428WL2M0RyAfOFYkBZ3A/B1sp3m9NYLwx2umgzvQki2L9aN5Yc4jTyG1LHR
+         a8gICfVqXiOqLZa8tvrqFRCUbPCbbHtO8U6UO3xMRiX+h+Uwf2SZ54R4Fwc8z3RT5my4
+         2jGA==
+X-Gm-Message-State: AOAM5301Y5w0scMn/bS+fsCYC6hrvR4PyWwYIvwbhlkpTuyzEScJ3VAT
+        OdTKE94DBBW/NEMrK6buHXU+GQ==
+X-Google-Smtp-Source: ABdhPJxmQO4QXQ4Kt4HYXBsaCuFCgdM77gvXHWkwygd5CHN695hk/jO2yQIry713/1RvXaSavf12Eg==
+X-Received: by 2002:a62:f244:0:b029:1f8:40aa:8d64 with SMTP id y4-20020a62f2440000b02901f840aa8d64mr3709802pfl.81.1616603248639;
+        Wed, 24 Mar 2021 09:27:28 -0700 (PDT)
+Received: from lbrmn-lnxub113.ric.broadcom.net ([192.19.228.250])
+        by smtp.gmail.com with ESMTPSA id j20sm2846254pjn.27.2021.03.24.09.27.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 24 Mar 2021 09:27:27 -0700 (PDT)
+Subject: Re: [PATCH 1/4] dt-bindings: mmc: iproc-sdhci: Convert to json-schema
+To:     Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        Rob Herring <robh@kernel.org>
+Cc:     Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>, f.fainelli@gmail.com,
+        phil@raspberrypi.com, tim.gover@raspberrypi.com,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        linux-kernel@vger.kernel.org
+References: <20210322185816.27582-1-nsaenz@kernel.org>
+ <20210322185816.27582-2-nsaenz@kernel.org>
+ <0e98588e-65f1-6839-1fcd-584b480a31bd@broadcom.com>
+ <20210323210812.GA1318204@robh.at.kernel.org>
+ <c1989e31501ccfb6e1350d467d4f26089bfcfb64.camel@suse.de>
+From:   Scott Branden <scott.branden@broadcom.com>
+Message-ID: <28a133d2-c713-4bce-271c-5fa228d830ca@broadcom.com>
+Date:   Wed, 24 Mar 2021 09:27:16 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <363c5b7d9baca5a010552137f80a1cf4@codeaurora.org>
-References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org> <161648289959.3012082.11356063123403968180@swboyd.mtv.corp.google.com> <363c5b7d9baca5a010552137f80a1cf4@codeaurora.org>
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
-From:   Stephen Boyd <swboyd@chromium.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, vbadigan@codeaurora.org,
-        rampraka@codeaurora.org, sayalil@codeaurora.org,
-        sartgarg@codeaurora.org, rnayak@codeaurora.org,
-        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
-        cang@codeaurora.org, pragalla@codeaurora.org,
-        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org
-To:     sbhanu@codeaurora.org
-Date:   Wed, 24 Mar 2021 08:57:33 -0700
-Message-ID: <161660145349.3012082.16210818967187877873@swboyd.mtv.corp.google.com>
-User-Agent: alot/0.9.1
+In-Reply-To: <c1989e31501ccfb6e1350d467d4f26089bfcfb64.camel@suse.de>
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+        boundary="00000000000068c09b05be4ac6f0"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting sbhanu@codeaurora.org (2021-03-24 08:23:55)
-> On 2021-03-23 12:31, Stephen Boyd wrote:
-> > Quoting Shaik Sajida Bhanu (2021-03-20 11:17:00)
-> >> +
-> >> +                       bus-width =3D <8>;
-> >> +                       non-removable;
-> >> +                       supports-cqe;
-> >> +                       no-sd;
-> >> +                       no-sdio;
-> >> +
-> >> +                       max-frequency =3D <192000000>;
-> >=20
-> > Is this necessary?
-> yes, to avoid lower speed modes running with high clock rates.
+--00000000000068c09b05be4ac6f0
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 
-Is it part of the DT binding? I don't see any mention of it.
+On 2021-03-23 2:24 p.m., Nicolas Saenz Julienne wrote:
+> On Tue, 2021-03-23 at 15:08 -0600, Rob Herring wrote:
+>> On Mon, Mar 22, 2021 at 12:11:29PM -0700, Scott Branden wrote:
+>>> On 2021-03-22 11:58 a.m., Nicolas Saenz Julienne wrote:
+>>>> Convert the brcm,iproc-sdhci binding to DT schema format using json-schema
+>>>>
+>>>> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+>>>> ---
+>>>>  .../bindings/mmc/brcm,iproc-sdhci.yaml        | 58 +++++++++++++++++++
+>>>>  .../bindings/mmc/brcm,sdhci-iproc.txt         | 37 ------------
+>>>>  2 files changed, 58 insertions(+), 37 deletions(-)
+>>>>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>>>>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>>>> new file mode 100644
+>>>> index 000000000000..19d84f3ef9e6
+>>>> --- /dev/null
+>>>> +++ b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>>>> @@ -0,0 +1,58 @@
+>>>> +# SPDX-License-Identifier: GPL-2.0
+>>>> +%YAML 1.2
+>>>> +---
+>>>> +$id: http://devicetree.org/schemas/mmc/brcm,iproc-sdhci.yaml#
+>>>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>>>> +
+>>>> +title: Broadcom IPROC SDHCI controller
+>>>> +
+>>>> +maintainers:
+>>>> +  - Nicolas Saenz Julienne <nsaenz@kernel.org>
+>>> This is already covered in the MAINTAINERS section via "N:	iproc".
+>>> M:	Ray Jui <ray.jui@broadcom.com>
+>>>
+>>> M:	Scott Branden <scott.branden@broadcom.com>
+>>>
+>>> M:	bcm-kernel-feedback-list@broadcom.com
+>>
+>> Maybe so, but still required here. The problem is there is no 
+>> MAINTAINERS file in the DT only tree[1].
+> 
+> Well in that case, if Scott and Ray are OK with it I'll add them.
+I do not know what the "maintainers" section in the yaml file is used to indicate.
+If it is maintainer for the driver then please add the duplicate of what is already in the MAINTAINERS file.
+If it is for maintainer of devicetrees that use this driver then no need to add us.
+> 
+> Regards,
+> Nicolas
+> 
+
+
+--00000000000068c09b05be4ac6f0
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+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
+cRe0CRXA7ypOJSgxO/nOOyQoaJxT7CGg1npOeSpPjEuc3fE4xum3l0nvU85hj6MlKZu43hokdBh0
+D0nLyyhEwlR3AC/msdff/UGbM/JR9vk812RP4m/aNWZFJwIDAQABo4IB2zCCAdcwDgYDVR0PAQH/
+BAQDAgWgMIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9i
+YWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUF
+BzABhjVodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAy
+MDBNBgNVHSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xv
+YmFsc2lnbi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRw
+Oi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAlBgNV
+HREEHjAcgRpzY290dC5icmFuZGVuQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAf
+BgNVHSMEGDAWgBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUOhjEpl04Sz9dh5MI82E1
+V39lM/owDQYJKoZIhvcNAQELBQADggEBAA7Rlypx/esz/iq1yA4+KW7uwV/aBY344BWcXt6I+SNK
+VwFBgFWfLj5vaEud9TVv2fPSiaHJo0umemOJk+43QD+bsoqmgcFXd21PrOt7Jjs+jjVED9VC5kJq
+S4NNKUkS+BqijJwSegtVygrc/atrIlJbjI21q4qpemUo5fgwqCNm++BmBGTI8yA09vtGSNDRN42k
+lLX9hl3iEj5SBgkQqCbbnoE+ZjjKfqt7ED166WhgyQWNrl39yLcvLj+JRUB3RuvXKZjH0NQEEBII
+wZBDSkyneykLt3CBNIhSCTxKM6OWxVp936ALSa5K9FNy00TeWSpokR6NmzaW8VD/EjTgvqAxggJt
+MIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYD
+VQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgx9oXSJpKniO4dS
+Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIHTQvCc2Mu3LC08KJGhICs/SS/M5
+fsmNHVCpalqgObGuMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
+MDMyNDE2MjcyOVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
+CWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFl
+AwQCATANBgkqhkiG9w0BAQEFAASCAQCj2hjAZkyq9pLrKY+U1hDoXPuYjj+O8H+F6ivCqrNiHOEK
+JVX7JVtvnXlB2V2Cxj/qTM0+ujwQLXqlLpaa6wr1CTF1CYhm9iNMHDuHVZLHGqYK1uQWm+OFy1jT
+cslPJ8924oqFEocMIcFXXvgBjgXnwehjkpp5cHLwKYxgl6sXPVST8OXD6jOgyL0TdE3LT/FnHaI0
+cCvFlGgu5HbrCtXQdarevoMZeXfrApB3/uY7AnJujvdGBlo7mnmNzJqpnpaNcXZ1fLZD9Oyss5SG
+qHUke9yrhKYtXLCdbAYm/8B0gkf6qhkRjs67n7vhScxYdeAjLKkVdq5NutKbENYVzUU1
+--00000000000068c09b05be4ac6f0--
