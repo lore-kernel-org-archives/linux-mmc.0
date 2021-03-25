@@ -2,113 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63484C433E2
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 17:48:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0F3FC433DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Mar 2021 03:37:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3317361A29
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 Mar 2021 17:48:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 67FD2619EE
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Mar 2021 03:37:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237071AbhCXRsE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 Mar 2021 13:48:04 -0400
-Received: from mail-il1-f169.google.com ([209.85.166.169]:37880 "EHLO
-        mail-il1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237051AbhCXRrm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 13:47:42 -0400
-Received: by mail-il1-f169.google.com with SMTP id z9so22140620ilb.4;
-        Wed, 24 Mar 2021 10:47:42 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=6sFpKFDAR45P8qdi3OXzURHMKJVWv82SmLUCIRQWPIM=;
-        b=tEUSalxjzLbJRqlkvRF/242P0N4t1rAcOV2uussJQGKuj1xX4JGERmuVPtva3qvWFv
-         KX3u6D6xnXW2dGY+SMNgbTT0N1pPoNtp0NvJhhg/wyNe38yVYSsA5q2ijQO0Zhs0uBm6
-         //gwe4syjZf1TJY8tHXNswJxS+se2RlUT3KVUrNmklFwo6rmjDmSOfiIcH76Pvlb/inE
-         JytSJOLhihD4qhQqmDGQW6BcDvH06tg2+yV21h6ZxzCUozcbywaWf0fCYALssCVY/SKY
-         L7nuNYet57NZZibiX0eV9aAN+5UmKKe6M4kW+eA0FC4WUJkjbYqjRPQ8znd+/HP0SPf8
-         Ig9A==
-X-Gm-Message-State: AOAM531dQ6lP35OWvGyschT9ipX+BHo3r+cgORY7neymIHFWJtoXUjEG
-        /GeCIkzVw768LXIASXfnlw==
-X-Google-Smtp-Source: ABdhPJyqrL3BcB/i265I4XT5qqsYGCd20UIfjpbAzrPNcmR+MMZccTtSqfNzzFe8IkqMWqfZzrbLyA==
-X-Received: by 2002:a05:6e02:1a68:: with SMTP id w8mr3731496ilv.129.1616608062252;
-        Wed, 24 Mar 2021 10:47:42 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.253])
-        by smtp.gmail.com with ESMTPSA id c18sm1429263ild.37.2021.03.24.10.47.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 24 Mar 2021 10:47:40 -0700 (PDT)
-Received: (nullmailer pid 3319752 invoked by uid 1000);
-        Wed, 24 Mar 2021 17:47:37 -0000
-Date:   Wed, 24 Mar 2021 11:47:37 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org,
-        Wright Feng <wright.feng@infineon.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
-        Julian Calaby <julian.calaby@gmail.com>,
-        SHA-cyfmac-dev-list@infineon.com,
-        Arend van Spriel <aspriel@gmail.com>,
-        devicetree@vger.kernel.org,
-        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>,
-        brcm80211-dev-list.pdl@broadcom.com,
-        Franky Lin <franky.lin@broadcom.com>
-Subject: Re: [PATCH v2] dt-bindings: Convert the BCM4329 bindings to YAML and
- extend
-Message-ID: <20210324174737.GA3319687@robh.at.kernel.org>
-References: <20210315105911.138553-1-linus.walleij@linaro.org>
+        id S230022AbhCYDhH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 Mar 2021 23:37:07 -0400
+Received: from so254-9.mailgun.net ([198.61.254.9]:15513 "EHLO
+        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229734AbhCYDgw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 Mar 2021 23:36:52 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1616643411; h=Content-Transfer-Encoding: Content-Type:
+ In-Reply-To: MIME-Version: Date: Message-ID: From: References: Cc: To:
+ Subject: Sender; bh=gIiZOo+rQG4ZKk1TVmSGdcjoWQ9eXC7zr1XIk8x6G40=; b=qlUEWkEG2CV0kX51nb/e00Vn1d9lbotDqNIEx2M+0LYiZPOgi8Z4vKrQ2oaXbUdMEnxsE+Fm
+ BDjptvrh+r9V4wkusF+HxjZ2pKzUH7jLD57InfLZJxRgAfJy9+6+nBubyaf8Gjrifbg7l90e
+ rqGSfi2MJ1H/6Ez95xT2qDAeOv0=
+X-Mailgun-Sending-Ip: 198.61.254.9
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n01.prod.us-east-1.postgun.com with SMTP id
+ 605c05539a60a4db7c636192 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 25 Mar 2021 03:36:51
+ GMT
+Sender: vbadigan=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id B29A5C433CA; Thu, 25 Mar 2021 03:36:50 +0000 (UTC)
+Received: from [192.168.0.102] (unknown [49.205.242.72])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: vbadigan)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 78DC0C433C6;
+        Thu, 25 Mar 2021 03:36:41 +0000 (UTC)
+DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 78DC0C433C6
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
+Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=vbadigan@codeaurora.org
+Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
+ card
+To:     Stephen Boyd <swboyd@chromium.org>, sbhanu@codeaurora.org
+Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
+        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, sartgarg@codeaurora.org,
+        rnayak@codeaurora.org, saiprakash.ranjan@codeaurora.org,
+        sibis@codeaurora.org, cang@codeaurora.org, pragalla@codeaurora.org,
+        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org
+References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
+ <161648289959.3012082.11356063123403968180@swboyd.mtv.corp.google.com>
+ <363c5b7d9baca5a010552137f80a1cf4@codeaurora.org>
+ <161660145349.3012082.16210818967187877873@swboyd.mtv.corp.google.com>
+ <161660331135.3012082.15196616622122288364@swboyd.mtv.corp.google.com>
+From:   Veerabhadrarao Badiganti <vbadigan@codeaurora.org>
+Message-ID: <781df94a-b916-76eb-10c9-e95ba789f0b7@codeaurora.org>
+Date:   Thu, 25 Mar 2021 09:06:33 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210315105911.138553-1-linus.walleij@linaro.org>
+In-Reply-To: <161660331135.3012082.15196616622122288364@swboyd.mtv.corp.google.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 15 Mar 2021 11:59:11 +0100, Linus Walleij wrote:
-> This converts the BCM4329 family bindings to YAML schema, and
-> extends and fixes the bindings like this:
-> 
-> - Name the bindings after the first chip (BCM4329) since
->   wildcards like 43xx are nowadays frowned upon by the DT
->   binding reviewers. We call this the "BCM4329 family"
-> - Add compatible strings for all the variants that seem to
->   exist in the wild. (Derived from firmware listings.)
-> - Support specific-to-generic compatible strings (as already
->   in use in DTS files).
-> - Add required reg property (SDIO function number)
-> - Add reset-gpios property (some systems wire this to a GPIO
->   line).
-> - I have only listed Arend as maintainer for now, volunteers
->   can be added.
-> 
-> Cc: Arend van Spriel <aspriel@gmail.com>
-> Cc: Franky Lin <franky.lin@broadcom.com>
-> Cc: Hante Meuleman <hante.meuleman@broadcom.com>
-> Cc: Chi-hsien Lin <chi-hsien.lin@infineon.com>
-> Cc: Wright Feng <wright.feng@infineon.com>
-> Cc: Chung-hsien Hsu <chung-hsien.hsu@infineon.com>
-> Cc: Julian Calaby <julian.calaby@gmail.com>
-> Cc: brcm80211-dev-list.pdl@broadcom.com
-> Cc: SHA-cyfmac-dev-list@infineon.com
-> Cc: linux-mmc@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - Specify specific-to-generic compatible strings such as
->   "brcm,bcm4334-fmac", "brcm,bcm4329-fmac"
-> - Also allow just "brcm,bcm4329-fmac" for legacy platforms.
-> - Use this scheme in the example.
-> ---
->  .../net/wireless/brcm,bcm4329-fmac.yaml       | 101 ++++++++++++++++++
->  .../net/wireless/brcm,bcm43xx-fmac.txt        |  38 -------
->  2 files changed, 101 insertions(+), 38 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm4329-fmac.yaml
->  delete mode 100644 Documentation/devicetree/bindings/net/wireless/brcm,bcm43xx-fmac.txt
-> 
 
-Applied, thanks!
+On 3/24/2021 9:58 PM, Stephen Boyd wrote:
+> Quoting Stephen Boyd (2021-03-24 08:57:33)
+>> Quoting sbhanu@codeaurora.org (2021-03-24 08:23:55)
+>>> On 2021-03-23 12:31, Stephen Boyd wrote:
+>>>> Quoting Shaik Sajida Bhanu (2021-03-20 11:17:00)
+>>>>> +
+>>>>> +                       bus-width = <8>;
+>>>>> +                       non-removable;
+>>>>> +                       supports-cqe;
+>>>>> +                       no-sd;
+>>>>> +                       no-sdio;
+>>>>> +
+>>>>> +                       max-frequency = <192000000>;
+>>>> Is this necessary?
+>>> yes, to avoid lower speed modes running with high clock rates.
+>> Is it part of the DT binding? I don't see any mention of it.
+> Nevermind, found it in mmc-controller.yaml. But I think this is to work
+> around some problem with the clk driver picking lower speeds than
+> requested? That has been fixed on the clk driver side (see commit like
+> 148ddaa89d4a "clk: qcom: gcc-sc7180: Use floor ops for the correct sdcc1
+> clk") so ideally this property can be omitted.
+This is a good have dt node.
+
+This will align clock requests between mmc core layer and sdhci-msm
+platform driver. Say, for HS200/HS400 modes of eMMC, mmc-core layer
+tries to set clock at 200Mhz, whereas sdhci-msm expects 192Mhz for
+these modes. So we have to rely on clock driver floor/ceil values.
+By having this property, mmc-core layer itself request for 192Mhz.
+
+Same is for SD card SDR104 mode, core layer expects clock at 208Mhz
+whereas sdhci-msm can max operate only at 202Mhz. By having this
+property, core layer requests only for 202Mhz for SDR104 mode.
+
+BTW, this helps only for max possible speed modes.
+In case of lower-speed modes (for DDR52) we still need to rely on clock
+floor rounding.
+
