@@ -2,93 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 10B0DC433E0
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Mar 2021 11:03:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F2B1C433E0
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Mar 2021 16:18:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CB5DA61A38
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Mar 2021 11:03:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 16C0F61A44
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Mar 2021 16:18:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229904AbhCZLCk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Mar 2021 07:02:40 -0400
-Received: from mail-pf1-f178.google.com ([209.85.210.178]:34567 "EHLO
-        mail-pf1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229946AbhCZLCZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Mar 2021 07:02:25 -0400
-Received: by mail-pf1-f178.google.com with SMTP id y5so4659844pfn.1
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Mar 2021 04:02:24 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id;
-        bh=rumfRvhUhVyWj59sOnuaUTFipCqEyTwMs3xoCRgrClA=;
-        b=KkkwIf6lF3sieHvNfsdYsHy4KympMHLZMTuHb+S9x5cl1wm4muiWhJ4+SVOKphKuDN
-         m98VVTRTTX15d2Ma2ZFL4mCQZjeET8jk7JdYMDtbJq0fDIjZoR9HAxBi9JEadKVqg2/8
-         tJyu9q+9k7uzrf9E/u18l5jfteg8DseszZxsom3bEuTDHf9Z2BIWnAV+cxIltYjAkbFM
-         5SnZvLQLryJZ/kbKOHHR7m/G/A1h7KD2Fq+byMpW4s+7X2LboD9dLsEzFazBqm6ZOS6c
-         CYD/RkmKji4o0urgmNT4nj+KsHA+Rvxj9hvmh/F4lT2APSIpcKYwZ+CBsmnf8vu5OWbA
-         vwyw==
-X-Gm-Message-State: AOAM533dtTmMAM391DX+P9B+d+cVp4HLH5bEfzHYOJNdmF/TJHcjiNKw
-        PULOjjWadDwVALQ2azNlGzstTQ==
-X-Google-Smtp-Source: ABdhPJz4hhWiURI73CG1edc9x87HhwvY+cn1dgGBvb7rky7Y5ER1ntb0nbUUWamBm5AB5rrCD56izg==
-X-Received: by 2002:a63:7a07:: with SMTP id v7mr11429029pgc.26.1616756544679;
-        Fri, 26 Mar 2021 04:02:24 -0700 (PDT)
-Received: from localhost.localdomain (80.251.214.228.16clouds.com. [80.251.214.228])
-        by smtp.gmail.com with ESMTPSA id i13sm8092521pgi.3.2021.03.26.04.02.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 26 Mar 2021 04:02:24 -0700 (PDT)
-From:   Shawn Guo <shawnguo@kernel.org>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Haibo Chen <haibo.chen@nxp.com>,
-        Dong Aisheng <aisheng.dong@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Shawn Guo <shawn.guo@linaro.org>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: separate 100/200 MHz pinctrl states check
-Date:   Fri, 26 Mar 2021 19:02:14 +0800
-Message-Id: <20210326110214.28416-1-shawnguo@kernel.org>
-X-Mailer: git-send-email 2.17.1
+        id S230179AbhCZQSH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Mar 2021 12:18:07 -0400
+Received: from mx2.suse.de ([195.135.220.15]:35182 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230138AbhCZQRj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 26 Mar 2021 12:17:39 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 1D57AAC6A;
+        Fri, 26 Mar 2021 16:17:38 +0000 (UTC)
+Message-ID: <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
+Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org, f.fainelli@gmail.com,
+        phil@raspberrypi.com, Tim Gover <tim.gover@raspberrypi.com>,
+        sbranden@broadcom.com, alcooperx <alcooperx@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-kernel@vger.kernel.org,
+        ulf.hansson@linaro.org, Rob Herring <robh+dt@kernel.org>
+Date:   Fri, 26 Mar 2021 17:17:36 +0100
+In-Reply-To: <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com>
+References: <20210322185816.27582-1-nsaenz@kernel.org>
+         <20210322185816.27582-5-nsaenz@kernel.org>
+         <401100ea-90ad-57b1-50da-967118a090da@i2se.com>
+         <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
+         <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-Zt3yxDeLYD9K7yjMoxO4"
+User-Agent: Evolution 3.38.4 
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Shawn Guo <shawn.guo@linaro.org>
 
-As indicated by function esdhc_change_pinstate(), SDR50 and DDR50
-require pins_100mhz, while SDR104 and HS400 require pins_200mhz.  Some
-system design may support SDR50 and DDR50 with 100mhz pin state only
-(without 200mhz one).  Currently the combined 100/200 MHz pinctrl state
-check prevents such system from running SDR50 and DDR50.  Separate the
-check to support such system design.
+--=-Zt3yxDeLYD9K7yjMoxO4
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+On Thu, 2021-03-25 at 20:11 +0100, Stefan Wahren wrote:
+> Am 24.03.21 um 16:34 schrieb Nicolas Saenz Julienne:
+> > Hi Stefan,
+> >=20
+> > On Wed, 2021-03-24 at 16:16 +0100, Stefan Wahren wrote:
+> > > Hi Nicolas,
+> > >=20
+> > > Am 22.03.21 um 19:58 schrieb Nicolas Saenz Julienne:
+> > > > From: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+> > > >=20
+> > > > Force emmc2's frequency to 150MHz as the default 100MHz (set by FW)
+> > > > seems to interfere with the VPU clock when setup at frequencies big=
+ger
+> > > > than 500MHz (a pretty common case). This ends up causing unwarrante=
+d
+> > > > SDHCI CMD hangs  when no SD card is present.
+> > > >=20
+> > > > Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> > > > ---
+> > > > =C2=A0arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 6 ++++++
+> > > > =C2=A01 file changed, 6 insertions(+)
+> > > >=20
+> > > > diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/=
+dts/bcm2711-rpi-4-b.dts
+> > > > index 3b4ab947492a..9aa8408d9960 100644
+> > > > --- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> > > > +++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+> > > > @@ -257,6 +257,12 @@ &emmc2 {
+> > > > =C2=A0	vqmmc-supply =3D <&sd_io_1v8_reg>;
+> > > > =C2=A0	vmmc-supply =3D <&sd_vcc_reg>;
+> > > > =C2=A0	broken-cd;
+> > > > +	/*
+> > > > +	 * Force the frequency to 150MHz as the default 100MHz seems to
+> > > > +	 * interfere with the VPU clock when setup at frequencies bigger =
+than
+> > > > +	 * 500MHz, causing unwarranted CMD hangs.
+> > > > +	 */
+> > > > +	clock-frequency =3D <150000000>;
+> > > i don't want to bike-shed here, but is there any chance to solve this=
+ in
+> > > clk-bcm2835 in a less hacky way?
+> > What do you have in mind?
+> Sorry, nothing specific.
+> >=20
+> > All I can think of is adding some kind of heuristic to the clock's prep=
+are()
+> > callback. That said, I don't feel it would be a better solution than th=
+is.
+>=20
+> Based on my limited knowledge and an old SD card specification, all
+> possibly connected devices could have different frequencies. So my
+> concern here is, that in case we limit the frequency to a specific value
+> we could break things just to suppress a warning.
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a20459744d21..aa45901325b9 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -434,10 +434,10 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- 			 * Do not advertise faster UHS modes if there are no
- 			 * pinctrl states for 100MHz/200MHz.
- 			 */
--			if (IS_ERR_OR_NULL(imx_data->pins_100mhz) ||
--			    IS_ERR_OR_NULL(imx_data->pins_200mhz))
--				val &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50
--					 | SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_HS400);
-+			if (IS_ERR_OR_NULL(imx_data->pins_100mhz))
-+				val &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
-+			if (IS_ERR_OR_NULL(imx_data->pins_200mhz))
-+				val &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_HS400);
- 		}
- 	}
- 
--- 
-2.17.1
+SDHCI should be able to handle up to 233MHz IIRC, and there are divisors
+available, it depends on the implementation but the worst kind provide /2^n=
+.
+Not perfect, but good enough for things to work.
+
+Now, I've been having a deeper look into how clocks are handled, and found =
+two
+new clues:
+
+ - First of all RPi4's sdhci-iproc needs SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+   that is, the controller isn't properly identifying the clock frequency f=
+ed
+   into it, and defaults to saying it's configured at 100MHz. I'm not an SD=
+HCI
+   expert, so it's possible changing frequencies also needs a special opera=
+tion
+   to recalculate this variable. But this was making all internal calculati=
+ons
+   wrong when paired with this series.
+
+ - With this flag set SDHCI's core now properly calculates divisor values b=
+ased
+   on whatever clock frequency I set in DT. And guess what, the issue reapp=
+ears
+   even when running on 150MHz. It turns out, as I had some debugging enabl=
+ed,
+   the issue only happens when the controller is configured at 100KHz (that
+   only happens while running the card detect thread).
+
+So, I can now do this (note that for card detection try to communicate with=
+ the
+card starting at 400KHz down to 100KHz in 100KHz steps):
+
+----->8-----
+
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.=
+c
+index 536c382e2486..e5a5de63f347 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -173,6 +173,11 @@ static unsigned int sdhci_iproc_get_max_clock(struct s=
+dhci_host *host)
+                return pltfm_host->clock;
+ }
+=20
++static unsigned int sdhci_iproc_bcm2711_get_min_clock(struct sdhci_host *h=
+ost)
++{
++       return 200000;
++}
++
+ static const struct sdhci_ops sdhci_iproc_ops =3D {
+        .set_clock =3D sdhci_set_clock,
+        .get_max_clock =3D sdhci_iproc_get_max_clock,
+@@ -271,13 +276,15 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_ops=
+ =3D {
+        .set_clock =3D sdhci_set_clock,
+        .set_power =3D sdhci_set_power_and_bus_voltage,
+        .get_max_clock =3D sdhci_iproc_get_max_clock,
++       .get_min_clock =3D sdhci_iproc_bcm2711_get_min_clock,
+        .set_bus_width =3D sdhci_set_bus_width,
+        .reset =3D sdhci_reset,
+        .set_uhs_signaling =3D sdhci_set_uhs_signaling,
+ };
+
+----->8-----
+
+ Which is rather nicer than what this series introduces. But I can't still
+ explain why configuring the controller at 100KHz is causing the hangs (whi=
+le
+ having the core clock setup at 500MHz), and I'm not sure if excluding 100K=
+Hz
+ from the polling frequency list is going to break support for older SD car=
+ds.
+
+ Regards,
+ Nicolas
+
+
+
+--=-Zt3yxDeLYD9K7yjMoxO4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBeCSAACgkQlfZmHno8
+x/5RLwgAleM4SzPVpZZVff99Y7DvLl81vOMya3W5BxzUM+K5zSlWx3ICg79A01KZ
+ruxfEP4X7tmbS6TsjQemKN8lzTXErmkUxH7uHVhVLP13AQg4gIbmgvk0oSTEKKx5
+iglhU0VMURq+BzGEF/Uc6+kenKfQ1zf3U0USNQCRQTUx7d6mY//ToSWLkNNPwJ+T
+GPWLWk/ieEjoUzQ0XqZPRSXNfMYqdsXXSWlOTF1zpvuO4zGlVBuYcpP7tJZXjQ0X
+pIAbwmQdl6ikoNcbhLNT9mT/r6CraPF1Wt6cGRvV1d7EUyYJGb6A9i73EScXVO6o
+9591pHhkseO3d7kdp7MCAsG6ccyZhw==
+=Lzpt
+-----END PGP SIGNATURE-----
+
+--=-Zt3yxDeLYD9K7yjMoxO4--
 
