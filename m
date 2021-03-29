@@ -2,94 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-14.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AC3EC433E1
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 10:45:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11435C433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 11:53:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9B0C61969
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 10:45:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D53F361927
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 11:53:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231889AbhC2KpV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Mar 2021 06:45:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52208 "EHLO
+        id S230506AbhC2LxR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Mar 2021 07:53:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39346 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231569AbhC2KpK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Mar 2021 06:45:10 -0400
-Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F915C061574;
-        Mon, 29 Mar 2021 03:45:09 -0700 (PDT)
-Received: by mail-pf1-x433.google.com with SMTP id c204so9622193pfc.4;
-        Mon, 29 Mar 2021 03:45:09 -0700 (PDT)
+        with ESMTP id S231388AbhC2Lw6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Mar 2021 07:52:58 -0400
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E1D0C061574;
+        Mon, 29 Mar 2021 04:52:58 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id k8so12564515wrc.3;
+        Mon, 29 Mar 2021 04:52:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=17mD/N+pfRdGqAXjZreT7ERVYLzrgDL4pkzCjHv2FHk=;
-        b=NjcF+H6F89m+oC1rb8okcXNxFSNarVxUtJM13eV6dFF6t32uarJFCUirsN3XcPZhjm
-         f+lYGA53V+7OMPjsIpw6EsccyM8QxXPK5ykZ7/SGqd8D/XxtpyMFJufPdJveDwn5jqhi
-         FKQ/NyDLvVvABOtAE0IEZyzdlKsSb6E4KeqT1PH9Yd1efW/owjfA+UKHXvRnlcqyJ8qr
-         ztQ9fiulSlx8pki8kl7+ceDYOA4wNtQXnbhxJepxOqVEJyQdWfkmX8kXz2FF9T/ZN7gQ
-         JVfDzb2BfvrSqxR/Z0bbLp35ol58BdW+qTYR8ksngfEELPFgLrrvfFuLzCW1yCHwxny7
-         y0iw==
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=rLsjhcNIwCmODv/MBaqanwexjHXK2SK1mKLiMmip+x4=;
+        b=obVQCkr8uCkYLUv2yZfq8PuHxS3ElI8SIHyQRK2mmjbLl/TugiURrhBXWJw+5UFo4X
+         qI0nOMkSDuhXVZ7doMZd5LSiKTnqoA5gIcywuw9Ke6UjEuevL2XtT5DhpiGaMfO+9OxZ
+         HZSJXLF7qf2iv72kc0kxMyTMfam4e6n7dxSqNbzVJwaF4WzVuFHUFKz1k7uSQ9TuIdj7
+         dl63qYplwjTtkATlI4Nu0LquEeOrQALCMslTOalYH2hwG0yJyblAk27PDzr3R9m48px8
+         pQCfhmN3IJ56MM4ffdEfudrTzuZgmv7+jM9Vd1eJOxvnRk/asB1vc/w5IZunkmcftpRw
+         4yrw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=17mD/N+pfRdGqAXjZreT7ERVYLzrgDL4pkzCjHv2FHk=;
-        b=o5cTfijEtIrjKPfO/DoIiXFhOtsxtZ00yQjbrii2yCMfFjTZeOa6ty6It351W77Mam
-         J4coHjFt/mnX7lDNQrxxHtieBe4+iDKkoJVIAfitS4/rxEJ7+qS8Y2dINFD9OuGSWPSS
-         RSNRfk2B4rGVGQcJyjXACFqNKs5Snap+w1Qc461GnX1wcLcXpsEJuuGuFQXy3+wApzAF
-         V2oYXlld+rMg/28Pq3pbd75N2GmIYxxywVAhHCLN/OSt5jrXL28b4gzFpqaoKjHUlTUg
-         sdibkbq29ZfgJqU8Zjj3yJxlZYI9PydjNwcesxFRkSrEOUZ8cEfiWYhfk+bLhwuKnH3P
-         OP0g==
-X-Gm-Message-State: AOAM533Nop5MEfPg2nzb3k3DGl6WX4RaqaMwb7Z8278Ou5ZCh+7BKn7G
-        xghTOS3b5CSplhM/J+3L+Em/d1OyTQbTDCO0/Jo=
-X-Google-Smtp-Source: ABdhPJwHP92tSdGuwxvDa7ZvxKqFLAgsKmi0yOXZW1Io7claGA7iF/5M81+skP6F8dxf5Er/8ioTSsxl1BauSsg1VFQ=
-X-Received: by 2002:a62:7c43:0:b029:1ef:20ce:ba36 with SMTP id
- x64-20020a627c430000b02901ef20ceba36mr25100902pfc.40.1617014709016; Mon, 29
- Mar 2021 03:45:09 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210329015938.20316-1-brad@pensando.io> <20210329015938.20316-5-brad@pensando.io>
-In-Reply-To: <20210329015938.20316-5-brad@pensando.io>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Mon, 29 Mar 2021 13:44:53 +0300
-Message-ID: <CAHp75VeQmc5ZyQV9AHcq2wm0xxBXb7by7RhidrRyCzmtRkXBAg@mail.gmail.com>
-Subject: Re: [PATCH v2 04/13] spidev: Add Pensando CPLD compatible
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=rLsjhcNIwCmODv/MBaqanwexjHXK2SK1mKLiMmip+x4=;
+        b=pymkqgen/5WcqfuTMG0UJu06GAkn9CaGkstP5WgkG1CjO1AADENEynBPwy6qYifSbN
+         IS3+5yY9B092zIf+QQrBrrqnPuFKpydtYtBum6Q+W2YhlzR79RlBMH9Nt17bnwz3UKPY
+         oc/XIRgIp+VWrPPQGzJ6xb4qsqksp9703VXeHsIfFy+aEgzRzSj8T6NrvWdOERZU5lx1
+         SfAi2YBv/N5iLFJKUIX1i/HnYFnFXU9ICbZxGEQnAxlrdNRFrzwhQZgNVnWXPlw1KKrD
+         KiX+CMdCc4OwaPwOsdM7uTbtTlLkqCertD/GiTdg/iQ2yGn06d2Ldsaqq61GUc4jbDgE
+         rtiw==
+X-Gm-Message-State: AOAM532EtkxnNMoN1Q2cm9sYAbxNd+NcSn/CPIpUG+VVgtExbATTKH5J
+        SzujGsebXIUXNwybM3eEoNw=
+X-Google-Smtp-Source: ABdhPJzbEfFbXJ9fbqn8X3nAKteEObCciLIv/SGMQ5u1ubGJRiRxl62orHY58t646W11wQ7rTr7+rw==
+X-Received: by 2002:adf:d1cd:: with SMTP id b13mr27974972wrd.47.1617018777293;
+        Mon, 29 Mar 2021 04:52:57 -0700 (PDT)
+Received: from ziggy.stardust (80.174.240.175.dyn.user.ono.com. [80.174.240.175])
+        by smtp.gmail.com with ESMTPSA id u17sm29691663wrw.51.2021.03.29.04.52.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 29 Mar 2021 04:52:56 -0700 (PDT)
+Subject: Re: [PATCH v2 1/8] dt-bindings: timer: Add compatible for Mediatek
+ MT8195
+To:     Seiya Wang <seiya.wang@mediatek.com>,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Peter Meerwald-Stadler <pmeerw@pmeerw.net>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Chunfeng Yun <chunfeng.yun@mediatek.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
+        Hsin-Yi Wang <hsinyi@chromium.org>,
+        Fabien Parent <fparent@baylibre.com>,
+        Sean Wang <sean.wang@mediatek.com>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Stanley Chu <stanley.chu@mediatek.com>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-serial@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, srv_heupstream@mediatek.com
+References: <20210319023427.16711-1-seiya.wang@mediatek.com>
+ <20210319023427.16711-3-seiya.wang@mediatek.com>
+From:   Matthias Brugger <matthias.bgg@gmail.com>
+Message-ID: <bf7ad31e-974a-3e0a-12bd-32973c7c3cbd@gmail.com>
+Date:   Mon, 29 Mar 2021 13:52:55 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
+MIME-Version: 1.0
+In-Reply-To: <20210319023427.16711-3-seiya.wang@mediatek.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Mar 29, 2021 at 5:01 AM Brad Larson <brad@pensando.io> wrote:
->
-> Pensando Elba SoC platforms have a SPI connected CPLD
-> for platform management.
 
-And? It's not a good justification to spread the (debugging only)
-spidev interface.
 
-What tool is going to use it? Why can't you have a driver for that in
-the kernel?
+On 19/03/2021 03:34, Seiya Wang wrote:
+> This commit adds dt-binding documentation of timer for Mediatek MT8195 SoC
+> Platform.
+> 
+> Signed-off-by: Seiya Wang <seiya.wang@mediatek.com>
 
--- 
-With Best Regards,
-Andy Shevchenko
+Applied to v5.12-next/dts64
+
+Thanks!
+
+> ---
+>  Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+> index 690a9c0966ac..e5c57d6e0186 100644
+> --- a/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+> +++ b/Documentation/devicetree/bindings/timer/mediatek,mtk-timer.txt
+> @@ -23,6 +23,7 @@ Required properties:
+>  	For those SoCs that use SYST
+>  	* "mediatek,mt8183-timer" for MT8183 compatible timers (SYST)
+>  	* "mediatek,mt8192-timer" for MT8192 compatible timers (SYST)
+> +	* "mediatek,mt8195-timer" for MT8195 compatible timers (SYST)
+>  	* "mediatek,mt7629-timer" for MT7629 compatible timers (SYST)
+>  	* "mediatek,mt6765-timer" for MT6765 and all above compatible timers (SYST)
+>  
+> 
