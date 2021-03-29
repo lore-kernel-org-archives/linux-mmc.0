@@ -4,56 +4,56 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD001C433E3
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 02:00:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E622C433E9
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 02:00:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9A1D561958
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 02:00:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1C1AB6195E
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 02:00:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230331AbhC2CAL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 28 Mar 2021 22:00:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51250 "EHLO
+        id S230385AbhC2CAM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 28 Mar 2021 22:00:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230303AbhC2B7r (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Mar 2021 21:59:47 -0400
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75F2CC061764
-        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:59:47 -0700 (PDT)
-Received: by mail-pl1-x62c.google.com with SMTP id h20so3663580plr.4
-        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:59:47 -0700 (PDT)
+        with ESMTP id S230377AbhC2B7v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Mar 2021 21:59:51 -0400
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BED13C0613B6
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:59:51 -0700 (PDT)
+Received: by mail-pl1-x631.google.com with SMTP id v8so3660497plz.10
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:59:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references;
-        bh=lEonPZwEeXmihKSqYcFtnrjNQ7/tLKbXJpP3Rx+HiqM=;
-        b=F23cGbG1YwLdAFMDZO0iYBH+K1d7cy6+GJAoRwQhgiDV6iW+BNyqo+iYPnqYQUOTQ2
-         tfj14BHwgnjBcjAQ4cw70MDvX88g+74TtcbfnNSE+dyubGZEY+Uf9+OMpM5R1TQYzDi8
-         uFK/zUUDomBnWEtnEY4WbAGVHyJRfqhlCZAN0J/KVj/k9maJlzhNu3wYCgVktMOYlNfx
-         E8fzVcfAWuVzW2WYuSS3BbED01DkDpLjNgmR5M/vzla9E7bH2jTv1P3BrbweArvDM/W3
-         TOfzt356v3DpyQ1NRMnJ7svnGW10AIZL4dWAxPjngFvx7atofvsiD74RveOKU/3QbU86
-         RDeg==
+        bh=5evIgUHLH3iE2TL4J3188f+WN89LXupcPiWpSn3upRg=;
+        b=mkI2MNoS6Q/el56D1urQ3F/hxkgi9Cc4jGujWEDbWa8KukNyFknpaqsBvLradFPCCh
+         82Ajpw67gaE153YzbCFi+OZ7H3Y/JMaHNrphjBkXxNEJclXuWsBO0Qw/xBNAf3FMELPL
+         vwNOq6BkK8fRMhkZeUp6pLGT6wsCBweI1AEYLBLoQHMObN4PMcxw+5XAw6BFLi7RR7NR
+         8WaQ3l00nfuAHdb7GqPsXpyNFWE/ooiXYRksjlFwUKfw07uzx5TNIujOO8DZA20mKAor
+         XhqIQuWMRN58d4Yhdyaisit7OyaUddCcZfH4JFlvCd0DiTwSHzCpqqHtU1E3IRb67s5/
+         J8/g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references;
-        bh=lEonPZwEeXmihKSqYcFtnrjNQ7/tLKbXJpP3Rx+HiqM=;
-        b=PRz67EC4jHkSfvhI0qdvz0Z0W85tb7WeUL8ru8v7yfxL8UrpqnHLikCZqRVVHE/lPI
-         7L1aFyMBLQ1YQlOau3HNuSI0iQhNkpN2oBZW5i4jU2S9sUee7Gn36OcuNNhNyQ1Ky4WP
-         /ZCUFzf6r7fRljOadopejaaQM9KYaYpaYzFVIxHbpZbe4cIZ2f2L3deglszXOX70PpxA
-         o/GYyHZCRf+6aOqimWFsXtvMRXut8SiIlTYKTq+WIJW6sIkJS4WBYZfcq4BCc2YJ+Rsl
-         d+vnwik76CUFqKBEfxPs15G2Sxai9HZdQpENf7+FF5zBXYIn53pXeG7Y5Bps1xmFIMu1
-         gqew==
-X-Gm-Message-State: AOAM531wDncc6fGbKqEPwqJq24TR1aFKUkMe8tLAtQ3/kV4iCdVCRqvC
-        e4B135Pjr7MIYp6l8o5ShrHqkA==
-X-Google-Smtp-Source: ABdhPJxcWKYSx3w7OxCzzLFtQDbCo5dvZARVQLq0d3ra/WqqivMK3AukxhkoGQW2jbtlRAqfLkfLrw==
-X-Received: by 2002:a17:902:7792:b029:e6:caba:f836 with SMTP id o18-20020a1709027792b02900e6cabaf836mr26264364pll.41.1616983186960;
-        Sun, 28 Mar 2021 18:59:46 -0700 (PDT)
+        bh=5evIgUHLH3iE2TL4J3188f+WN89LXupcPiWpSn3upRg=;
+        b=ZqO2p7btkO0njad6nXeg/c3RdvabCRsebisvURY1USJmGGoMwUDaTmp1Fhwd1/+/HC
+         WjL6HbEsrW21xh3JBXNHgczBt2wjyCQr0xkcwq4HWbm0Oj0Mn6gY8Kh/fjsF0uDPOoG+
+         1yfr4IHnbpWjBzmpqj76V/7uXV7Eir9iip2i7YhPv8JSS6dRojgv7rQGSMh2C4ZM8Dxa
+         +J4ZQApQsTyYvhXyY2nniAqwjl2cD0eErzNW0POxKV1ehyQ8ZzyJWy8/UK2YKinEA2+k
+         C9ZJPnnq1e/fmp+4y8l1vHjdBcIjikk/oMkZRhUVhc1D1qYq0piDWyTMONUIXxnQW5Qp
+         2m3Q==
+X-Gm-Message-State: AOAM530Ecpri+oWqwyrO12dQ+jAQjWrGORPmMaG4tMtCCfwC6WKW2rHM
+        j9l7ufqtZSzhBaH8mhRxw8AEdw==
+X-Google-Smtp-Source: ABdhPJzWcGlzZINaB0Jap/R7CzqpkSL0r8aRD9sbvqRTrnAhOddv0gNrJo7sUNFfZii8t877KZMCiQ==
+X-Received: by 2002:a17:90a:77c5:: with SMTP id e5mr6189926pjs.189.1616983191306;
+        Sun, 28 Mar 2021 18:59:51 -0700 (PDT)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id w37sm14728027pgl.13.2021.03.28.18.59.45
+        by smtp.gmail.com with ESMTPSA id w37sm14728027pgl.13.2021.03.28.18.59.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 28 Mar 2021 18:59:46 -0700 (PDT)
+        Sun, 28 Mar 2021 18:59:50 -0700 (PDT)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com,
@@ -62,9 +62,9 @@ Cc:     arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com,
         brad@pensando.io, linux-gpio@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v2 01/13] gpio: Add Elba SoC gpio driver for spi cs control
-Date:   Sun, 28 Mar 2021 18:59:26 -0700
-Message-Id: <20210329015938.20316-2-brad@pensando.io>
+Subject: [PATCH v2 04/13] spidev: Add Pensando CPLD compatible
+Date:   Sun, 28 Mar 2021 18:59:29 -0700
+Message-Id: <20210329015938.20316-5-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210329015938.20316-1-brad@pensando.io>
 References: <20210329015938.20316-1-brad@pensando.io>
@@ -72,166 +72,26 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This GPIO driver is for the Pensando Elba SoC which
-provides control of four chip selects on two SPI busses.
+Pensando Elba SoC platforms have a SPI connected CPLD
+for platform management.
 
 Signed-off-by: Brad Larson <brad@pensando.io>
 ---
- drivers/gpio/Kconfig           |   6 ++
- drivers/gpio/Makefile          |   1 +
- drivers/gpio/gpio-elba-spics.c | 114 +++++++++++++++++++++++++++++++++
- 3 files changed, 121 insertions(+)
- create mode 100644 drivers/gpio/gpio-elba-spics.c
+ drivers/spi/spidev.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
-index e3607ec4c2e8..4720459b24f5 100644
---- a/drivers/gpio/Kconfig
-+++ b/drivers/gpio/Kconfig
-@@ -241,6 +241,12 @@ config GPIO_EIC_SPRD
- 	help
- 	  Say yes here to support Spreadtrum EIC device.
- 
-+config GPIO_ELBA_SPICS
-+	bool "Pensando Elba SPI chip-select"
-+	depends on (ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST)
-+	help
-+	  Say yes here to support the Penasndo Elba SoC SPI chip-select driver
-+
- config GPIO_EM
- 	tristate "Emma Mobile GPIO"
- 	depends on (ARCH_EMEV2 || COMPILE_TEST) && OF_GPIO
-diff --git a/drivers/gpio/Makefile b/drivers/gpio/Makefile
-index c58a90a3c3b1..c5c7acad371b 100644
---- a/drivers/gpio/Makefile
-+++ b/drivers/gpio/Makefile
-@@ -54,6 +54,7 @@ obj-$(CONFIG_GPIO_DAVINCI)		+= gpio-davinci.o
- obj-$(CONFIG_GPIO_DLN2)			+= gpio-dln2.o
- obj-$(CONFIG_GPIO_DWAPB)		+= gpio-dwapb.o
- obj-$(CONFIG_GPIO_EIC_SPRD)		+= gpio-eic-sprd.o
-+obj-$(CONFIG_GPIO_ELBA_SPICS)		+= gpio-elba-spics.o
- obj-$(CONFIG_GPIO_EM)			+= gpio-em.o
- obj-$(CONFIG_GPIO_EP93XX)		+= gpio-ep93xx.o
- obj-$(CONFIG_GPIO_EXAR)			+= gpio-exar.o
-diff --git a/drivers/gpio/gpio-elba-spics.c b/drivers/gpio/gpio-elba-spics.c
-new file mode 100644
-index 000000000000..351bbaeea033
---- /dev/null
-+++ b/drivers/gpio/gpio-elba-spics.c
-@@ -0,0 +1,114 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Pensando Elba SoC SPI chip select driver
-+ *
-+ * Copyright (c) 2020-2021, Pensando Systems Inc.
-+ */
-+
-+#include <linux/err.h>
-+#include <linux/gpio.h>
-+#include <linux/module.h>
-+#include <linux/io.h>
-+#include <linux/init.h>
-+//#include <linux/of.h>
-+#include <linux/platform_device.h>
-+#include <linux/spinlock.h>
-+#include <linux/types.h>
-+
-+/*
-+ * pin:	     3		  2	   |	   1		0
-+ * bit:	 7------6------5------4----|---3------2------1------0
-+ *	cs1  cs1_ovr  cs0  cs0_ovr |  cs1  cs1_ovr  cs0	 cs0_ovr
-+ *		   ssi1		   |		 ssi0
-+ */
-+#define SPICS_PIN_SHIFT(pin)	(2 * (pin))
-+#define SPICS_MASK(pin)		(0x3 << SPICS_PIN_SHIFT(pin))
-+#define SPICS_SET(pin, val)	((((val) << 1) | 0x1) << SPICS_PIN_SHIFT(pin))
-+
-+struct elba_spics_priv {
-+	void __iomem *base;
-+	spinlock_t lock;
-+	struct gpio_chip chip;
-+};
-+
-+static int elba_spics_get_value(struct gpio_chip *chip, unsigned int pin)
-+{
-+	return -ENOTSUPP;
-+}
-+
-+static void elba_spics_set_value(struct gpio_chip *chip,
-+		unsigned int pin, int value)
-+{
-+	struct elba_spics_priv *p = gpiochip_get_data(chip);
-+	unsigned long flags;
-+	u32 tmp;
-+
-+	/* select chip select from register */
-+	spin_lock_irqsave(&p->lock, flags);
-+	tmp = readl_relaxed(p->base);
-+	tmp = (tmp & ~SPICS_MASK(pin)) | SPICS_SET(pin, value);
-+	writel_relaxed(tmp, p->base);
-+	spin_unlock_irqrestore(&p->lock, flags);
-+}
-+
-+static int elba_spics_direction_input(struct gpio_chip *chip, unsigned int pin)
-+{
-+	return -ENOTSUPP;
-+}
-+
-+static int elba_spics_direction_output(struct gpio_chip *chip,
-+		unsigned int pin, int value)
-+{
-+	elba_spics_set_value(chip, pin, value);
-+	return 0;
-+}
-+
-+static int elba_spics_probe(struct platform_device *pdev)
-+{
-+	struct elba_spics_priv *p;
-+	struct resource *res;
-+	int ret = 0;
-+
-+	p = devm_kzalloc(&pdev->dev, sizeof(*p), GFP_KERNEL);
-+	if (!p)
-+		return -ENOMEM;
-+
-+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-+	p->base = devm_ioremap_resource(&pdev->dev, res);
-+	if (IS_ERR(p->base))
-+		return PTR_ERR(p->base);
-+	spin_lock_init(&p->lock);
-+	platform_set_drvdata(pdev, p);
-+
-+	p->chip.ngpio = 4;	/* 2 cs pins for spi0, and 2 for spi1 */
-+	p->chip.base = -1;
-+	p->chip.direction_input = elba_spics_direction_input;
-+	p->chip.direction_output = elba_spics_direction_output;
-+	p->chip.get = elba_spics_get_value;
-+	p->chip.set = elba_spics_set_value;
-+	p->chip.label = dev_name(&pdev->dev);
-+	p->chip.parent = &pdev->dev;
-+	p->chip.owner = THIS_MODULE;
-+
-+	ret = devm_gpiochip_add_data(&pdev->dev, &p->chip, p);
-+	if (ret)
-+		dev_err(&pdev->dev, "unable to add gpio chip\n");
-+	return ret;
-+}
-+
-+static const struct of_device_id elba_spics_of_match[] = {
-+	{ .compatible = "pensando,elba-spics" },
-+	{}
-+};
-+
-+static struct platform_driver elba_spics_driver = {
-+	.probe = elba_spics_probe,
-+	.driver = {
-+		.name = "pensando-elba-spics",
-+		.of_match_table = elba_spics_of_match,
-+	},
-+};
-+module_platform_driver(elba_spics_driver);
-+
-+MODULE_LICENSE("GPL v2");
-+MODULE_DESCRIPTION("Pensando Elba SoC SPI chip-select driver");
+diff --git a/drivers/spi/spidev.c b/drivers/spi/spidev.c
+index 8cb4d923aeaa..8b285852ce82 100644
+--- a/drivers/spi/spidev.c
++++ b/drivers/spi/spidev.c
+@@ -683,6 +683,7 @@ static const struct of_device_id spidev_dt_ids[] = {
+ 	{ .compatible = "dh,dhcom-board" },
+ 	{ .compatible = "menlo,m53cpld" },
+ 	{ .compatible = "cisco,spi-petra" },
++	{ .compatible = "pensando,cpld" },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, spidev_dt_ids);
 -- 
 2.17.1
 
