@@ -2,79 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF8CDC433DB
-	for <linux-mmc@archiver.kernel.org>; Sat, 27 Mar 2021 17:14:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3660C433C1
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 00:55:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 98339619BB
-	for <linux-mmc@archiver.kernel.org>; Sat, 27 Mar 2021 17:14:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C3D816193F
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 00:55:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230105AbhC0ROL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 27 Mar 2021 13:14:11 -0400
-Received: from mail-oi1-f181.google.com ([209.85.167.181]:42863 "EHLO
-        mail-oi1-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230015AbhC0ROK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Mar 2021 13:14:10 -0400
-Received: by mail-oi1-f181.google.com with SMTP id n140so9004850oig.9;
-        Sat, 27 Mar 2021 10:14:10 -0700 (PDT)
+        id S231641AbhC2AzJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 28 Mar 2021 20:55:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37378 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230167AbhC2Ay7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Mar 2021 20:54:59 -0400
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 665BBC061762
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 17:54:59 -0700 (PDT)
+Received: by mail-ed1-x536.google.com with SMTP id x21so12385139eds.4
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 17:54:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pensando.io; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=yVAc9b+mBnGmiPe0hQUBS5bq7gPTXTsIqeLgC0QKuYo=;
+        b=NoS1GIebv3iSWHAId4v66ODhmcXKQ/qQgeX+r/F705yNSzRoWkVkukYHE2U4SXzj7l
+         3idkz2/42j4ZbHW78CX53X7tItXmV94qnWB5OdZOyQnbEsoGPsYkSWpOSMDnWm16M77n
+         hxLk9rcJsK2WKGOofwpCR6fzZNHzRZZeic4Bas0Ki4nLhez/wE3QZpZS5gvML/zDm3gi
+         g9leOVIkOl3WZlwloo/rXhtFJIOSID1WTvNwZfezLQYLQIB7EwNVLn3S61HwpAQcPDRX
+         zaOUJcL6r/q364sBH0DBnzDGmlTYrO8r0TFMDJUmBAMxfPzwh2rVjOLSrojRZRucPjUH
+         TVZg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=hTVQjGeLjaxzwSPabxK/lSxnQipUu7ywlyHTCGDIzb0=;
-        b=YBQeb+mmgtKHsredeS9HMjTDjTuIhzqk1ti3LsCrO0LHMb3+BvB/npM0NzATKa++Wj
-         ldCezCrokc3MxO/s3W6iCzy2O7S+kedAOQV94F9EGdVB1uuUvnYS7sMABaNYFB/2auLN
-         IstHaukYMc0vn0ZU9JLk2wx3dHm75r6gm9wpnUOGrOv57YxV+QGPNOVVzG4bwgCER71b
-         VuGzvdnuPrAdnkfHa2qXh2+O6IYkbh51/P6r7ZlUiDwIBcrbqcrPpSsvR7AitH3jZDTK
-         SvByQlUZq4ZwhlwYR40rZil2IgAvZZ9WA6n6YAY+etkazxwCGhyfU/ZT4xmkpo4bKk0w
-         FI6A==
-X-Gm-Message-State: AOAM532habjVpaUrVMK0OQzCqsDX4cKn5COS6m3F4SUVMI1r1PEkwMg+
-        sqohTxNybN2NZE9PeN7/vg==
-X-Google-Smtp-Source: ABdhPJysnxJuGbIjzhHQGpKpMMLNMlCrnFroN50uzagvg0gQqa0wa4rMWoFHTa1tiUVAuY5SpENrBw==
-X-Received: by 2002:a54:408a:: with SMTP id i10mr14082034oii.141.1616865250282;
-        Sat, 27 Mar 2021 10:14:10 -0700 (PDT)
-Received: from robh.at.kernel.org ([172.58.107.88])
-        by smtp.gmail.com with ESMTPSA id m19sm2656074oop.6.2021.03.27.10.14.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 27 Mar 2021 10:14:09 -0700 (PDT)
-Received: (nullmailer pid 262112 invoked by uid 1000);
-        Sat, 27 Mar 2021 17:14:04 -0000
-Date:   Sat, 27 Mar 2021 11:14:04 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Nicolas Saenz Julienne <nsaenz@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
-        adrian.hunter@intel.com, bcm-kernel-feedback-list@broadcom.com,
-        alcooperx@gmail.com, Ulf Hansson <ulf.hansson@linaro.org>,
-        Scott Branden <sbranden@broadcom.com>, phil@raspberrypi.com,
-        linux-mmc@vger.kernel.org, Ray Jui <rjui@broadcom.com>,
-        nsaenzjulienne@suse.de, linux-kernel@vger.kernel.org,
-        f.fainelli@gmail.com, tim.gover@raspberrypi.com,
-        linux-rpi-kernel@lists.infradead.org
-Subject: Re: [PATCH 2/4] dt-bindings: mmc: iproc-sdhci: Add clock-frequency
- support
-Message-ID: <20210327171404.GA262081@robh.at.kernel.org>
-References: <20210322185816.27582-1-nsaenz@kernel.org>
- <20210322185816.27582-3-nsaenz@kernel.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=yVAc9b+mBnGmiPe0hQUBS5bq7gPTXTsIqeLgC0QKuYo=;
+        b=sxiz2JKl1oMt1sSTteBegUpxnBn3ZEWuS1G2HQiATq3HcfHU1VbFFQyK/1Hop9Dahu
+         A2U6fFTaLy4s9MxRXc4VGmYDO378lXP6oVOicMc8vWq3fv7j5rn5yLBaz38EYcYUP6kN
+         OIAYuwmG4cJ2jBm/uyb3+Mav6I1Of+/23N9LAVOUJNGVjmaMrXbngLJpQijH/9fPzdbt
+         R13h5Uyc4+fJaYZaKlicuCFQNflU5SWwLjjHrC8nEI0ws0ddQ95q1+Z3l9DIlAGPc3Fj
+         7klmS6ktRVxe7Z86o/5ePiq681lT4nuHUd4LfCg4K1ovOMuGtgk4ayMFs0Mr0YHhRgr2
+         5aaA==
+X-Gm-Message-State: AOAM530n7CzwkbbOFvVI+7xBi6GBx1OQG/3YijxD5c+cbuihAG1hGjMh
+        UEDM12px5JfJJzAum2M2SDpQfqx0S2inCAJAC4xv1A==
+X-Google-Smtp-Source: ABdhPJx+4A/Txkzyq838knHsu1E43Gon6mva2bR+kHkuk+1ju7bFnu+zuJhSeTQ6qkrvnEusq0RO4FBMrBSodVEvcoE=
+X-Received: by 2002:a05:6402:10c9:: with SMTP id p9mr26382778edu.268.1616979297849;
+ Sun, 28 Mar 2021 17:54:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210322185816.27582-3-nsaenz@kernel.org>
+References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-8-brad@pensando.io>
+ <CACRpkdZr8qrQ+b15z_zRP3wAntQeW7T0Z515sUv6e2gL9GzDyg@mail.gmail.com>
+In-Reply-To: <CACRpkdZr8qrQ+b15z_zRP3wAntQeW7T0Z515sUv6e2gL9GzDyg@mail.gmail.com>
+From:   Brad Larson <brad@pensando.io>
+Date:   Sun, 28 Mar 2021 17:54:47 -0700
+Message-ID: <CAK9rFnw6cM9UsNoD1-37JfM0n2h6fATSTZYqAP0DBhwwigqBzA@mail.gmail.com>
+Subject: Re: [PATCH 7/8] arm64: dts: Add Pensando Elba SoC support
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 22 Mar 2021 19:58:15 +0100, Nicolas Saenz Julienne wrote:
-> Users might want to choose a different clock frequency than whatever the
-> bootloader provided at probe time. Add 'clock-frequency' bindings.
-> 
-> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
-> ---
->  Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
+On Thu, Mar 4, 2021 at 12:52 AM Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> On Thu, Mar 4, 2021 at 4:42 AM Brad Larson <brad@pensando.io> wrote:
+>
+> > Add Pensando common and Elba SoC specific device nodes
+> > and corresponding binding documentation.
+> >
+> > Signed-off-by: Brad Larson <brad@pensando.io>
+> (...)
+> >  .../bindings/gpio/pensando,elba-spics.txt     |  24 ++
+>
+> Please use YAML schema for this.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+In patchset v2 changed to YAML schema and passed dt_binding_check and
+dtbs_check.
