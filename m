@@ -2,87 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DA22C433E0
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 06:49:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CEDFC433E0
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 10:41:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0FA5761976
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 06:49:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EFA6F61933
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 10:41:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229655AbhC2Gsl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Mar 2021 02:48:41 -0400
-Received: from mail.kernel.org ([198.145.29.99]:58632 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229630AbhC2GsY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 29 Mar 2021 02:48:24 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id E3B9A61477;
-        Mon, 29 Mar 2021 06:48:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1617000504;
-        bh=h/GwI4je/YXpz4hXP9RoUzOScRxDivdynZC4pYA87lU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=p7PSQ3PL3rGnjcHpBzXguJXeMXQMF6Jb8aDMhETkcC8D+Z76b3Ljn1RUr68ftdJTr
-         bQFniod4V7RyREQLJ7iTkS0ZReQakkZ9n4lyJUmLMgTuLCZWSLf5TFoom6zP0ZfRgT
-         k0Ybj8elR9zQl6q4lKMeuvKvJQYPDyO2K1y9Qsmk=
-Date:   Mon, 29 Mar 2021 08:48:22 +0200
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
-        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
-        broonie@kernel.org, fancer.lancer@gmail.com,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net,
-        linux-gpio@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 13/13] gpio: Use linux/gpio/driver.h
-Message-ID: <YGF4Ns8+S9I9Za33@kroah.com>
-References: <20210329015938.20316-1-brad@pensando.io>
- <20210329015938.20316-14-brad@pensando.io>
+        id S231971AbhC2Kkd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Mar 2021 06:40:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51102 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231451AbhC2KkB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Mar 2021 06:40:01 -0400
+Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BEC9C061574;
+        Mon, 29 Mar 2021 03:40:01 -0700 (PDT)
+Received: by mail-pl1-x635.google.com with SMTP id e14so4193202plj.2;
+        Mon, 29 Mar 2021 03:40:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=v6A8lkGT7qlDfG5OHFA7dTWCjZVRjtLZtjsAR4wx34Y=;
+        b=o15S4Oc4W6Wisr5EVArkn/MoM98iA9zt3Z7a9BPfcrkZuwq/IjnGzlwFxOZELQiVxv
+         4uP8RbtXTVyaYb7xFT5oVNy8SwZ1kxh8r/wb10klTriK+oztFTTMOMBpohkVP7C0awWK
+         Rdqev+mG3mOq1807VMYcQhUGLBlCYwVOGNOYtGNLjGQuIlN0cQ/u4JN3veExuvqD7BDR
+         AIIudAb8hzETq6PXf4rrMPyp+X1Sdityk8cED4+ry00dU3ner0HmgunrQ0rAAaduU1ww
+         8NESqpfusXX2QDUQJaNYHwCxwaj0G1ggEjsm2j5unfuLQDIF0443zj2tcA0ciPD4D4ES
+         c8nw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=v6A8lkGT7qlDfG5OHFA7dTWCjZVRjtLZtjsAR4wx34Y=;
+        b=WUvGL6xE/pHaHH9mqLeI6VT5zG3pWnuRDuXEtbkgLGBJw7qKO9XBCZeiCs7SEHEDVi
+         g8gIgcf8rbsfQwHSM20umNKeeQ19+EfyhDKZZOlBnRPn+6nPSlhwkQLtQkXR66VwvVfO
+         p1ukoWEBNGk7T3b9pYHfDWUexWA+VmKRVIqvByrVu5vsz78HKRKIY2DkPIz9eWfRGaBj
+         i8S7fwNADg4uuBFiWXsEf7PSZkH1FjR2hY58L5zVRON8jVA9FXXtfJzJ/sU4N/237hn+
+         feFXq9HTUAPa9wI5gLf5bNi60l6hbGedObzZT8xfWNF7SCLIxfSzZTdwlYnOHQmAhbnY
+         D2Fw==
+X-Gm-Message-State: AOAM533qmcWbtiGBvLD2e7L5AYhk7XF3eLx7bVg/DL3oGiiJMvjZWxC1
+        gJzfUOlOQrJXkNm/zWn0wSi3P8ZcdENSsIRw1gU=
+X-Google-Smtp-Source: ABdhPJxMqjp3WRvYACSDA9CGb4Oltl2JpPqKhGqAKCml3IGmC6SV9SabeXywKUP5qljAGJbNZQYUbFqOZS08vWp6gWA=
+X-Received: by 2002:a17:90a:b311:: with SMTP id d17mr26467330pjr.228.1617014400860;
+ Mon, 29 Mar 2021 03:40:00 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210329015938.20316-14-brad@pensando.io>
+References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
+ <CAHp75VcG9KajNpDbewDq7QzotB6t7MfwiGk15FaobX+cmMVSzg@mail.gmail.com> <CAK9rFnwrA=W2Vk5yFwG4N_WS=eBXXnhtexA+tqgAYb6xOAO4oQ@mail.gmail.com>
+In-Reply-To: <CAK9rFnwrA=W2Vk5yFwG4N_WS=eBXXnhtexA+tqgAYb6xOAO4oQ@mail.gmail.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Mon, 29 Mar 2021 13:39:44 +0300
+Message-ID: <CAHp75VdfrJ3JV_gL3xCLHOiw6Tj-5Ep7z5JKWUFKFbUt8gobcw@mail.gmail.com>
+Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        devicetree <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Mar 28, 2021 at 06:59:38PM -0700, Brad Larson wrote:
-> New drivers should include <linux/gpio/driver.h> instead
-> of legacy <linux/gpio.h>.
-> 
-> Signed-off-by: Brad Larson <brad@pensando.io>
-> ---
->  drivers/gpio/gpio-elba-spics.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
-> 
-> diff --git a/drivers/gpio/gpio-elba-spics.c b/drivers/gpio/gpio-elba-spics.c
-> index 351bbaeea033..c0dce5333f35 100644
-> --- a/drivers/gpio/gpio-elba-spics.c
-> +++ b/drivers/gpio/gpio-elba-spics.c
-> @@ -6,11 +6,10 @@
->   */
->  
->  #include <linux/err.h>
-> -#include <linux/gpio.h>
-> +#include <linux/gpio/driver.h>
->  #include <linux/module.h>
->  #include <linux/io.h>
->  #include <linux/init.h>
-> -//#include <linux/of.h>
->  #include <linux/platform_device.h>
->  #include <linux/spinlock.h>
->  #include <linux/types.h>
-> -- 
-> 2.17.1
-> 
+On Mon, Mar 29, 2021 at 4:19 AM Brad Larson <brad@pensando.io> wrote:
+> On Sun, Mar 7, 2021 at 11:21 AM Andy Shevchenko
+> <andy.shevchenko@gmail.com> wrote:
+> > On Thu, Mar 4, 2021 at 4:40 PM Brad Larson <brad@pensando.io> wrote:
 
-This should be part of patch 1/13, do not add a problem and then fix it
-up in the same patch series.
+...
 
-thanks,
+> > > +config GPIO_ELBA_SPICS
+> > > +       bool "Pensando Elba SPI chip-select"
+> >
+> > Can't it be a module? Why?
+>
+> All Elba SoC based platforms require this driver to be built-in to boot and
+> removing the module would result in a variety of exceptions/errors.
 
-greg k-h
+Needs to be at least in the commit message.
+
+> > > +       depends on ARCH_PENSANDO_ELBA_SOC
+> > > +       help
+> > > +         Say yes here to support the Pensndo Elba SoC SPI chip-select driver
+> >
+> > Please give more explanation what it is and why users might need it,
+> > and also tell users how the module will be named (if there is no
+> > strong argument why it can't be a  module).
+> >
+> Fixed the typo.
+
+Yeah, according to the above, you better elaborate what this module is
+and why people would need it.
+Also can be a good hint to add
+default ARCH_MY_COOL_PLATFORM
+
+...
+
+> > > +#include <linux/of.h>
+> >
+> > It's not used here, but you missed mod_devicetable.h.
+>
+> Removed <linux/of.h>.  There is no dependency on mod_devicetable.h.
+
+What do you mean? You don't use data structures from that?
+of_device_id or other ID structures are defined there. Your module
+works without them?
+
+...
+
+> > > +       res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> > > +       p->base = devm_ioremap_resource(&pdev->dev, res);
+> >
+> > p->base = devm_platform_ioremap_resource(pdev, 0);
+>
+> Implementation follows devm_ioremap_resource() example in lib/devres.c.
+
+So? How does this make it impossible to address my comment?
+
+> > > +       if (IS_ERR(p->base)) {
+> >
+> > > +               dev_err(&pdev->dev, "failed to remap I/O memory\n");
+> >
+> > Duplicate noisy message.
+> >
+> > > +               return PTR_ERR(p->base);
+> > > +       }
+
+-- 
+With Best Regards,
+Andy Shevchenko
