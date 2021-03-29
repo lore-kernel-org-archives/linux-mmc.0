@@ -2,129 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC3C7C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 14:57:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2512C433C1
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 15:59:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C97C61981
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 14:57:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9E4B161924
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 15:59:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229711AbhC2O5T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 Mar 2021 10:57:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51382 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231253AbhC2O5E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 Mar 2021 10:57:04 -0400
-Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9315AC061574
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Mar 2021 07:57:04 -0700 (PDT)
-Received: by mail-yb1-xb29.google.com with SMTP id x189so14060030ybg.5
-        for <linux-mmc@vger.kernel.org>; Mon, 29 Mar 2021 07:57:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=kKi8HN+bpgIonbipayQY6bUaqDWQRM56PWjQCa1XcVc=;
-        b=QHeXTIE0ojKJtQ0VDW1civaMMSYxCTYIxgjq32eR6dbldNbJ7h34t8c01oC8YDfRcV
-         +VfX7+582QTTxV7FU2T+0vinC8y9SAnTAPI2oyf4H2fJoytHlIUn/HU1KebfH/VjGAOA
-         gUDS5T0FIs1S8Hyvg6Iw76337LbQmKY4tI39R/AtDZoGCVkZy+8FqZDzE0eArbRy39Ua
-         DPUVqWL1FDXXwDvhxpJZ8HpSprI9KioF7qtuh+GGsZ09Gst3MBl6CyJigBzZRWpk4aF7
-         /ExD1o3GqUcKDji/hVdsgRgXcEjq/aY3FAb/1WNU6JDHKh4f6xlC3SviRJ/gTj51od+O
-         juqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=kKi8HN+bpgIonbipayQY6bUaqDWQRM56PWjQCa1XcVc=;
-        b=um64gatC6F3vBqMW2quMQN5RKz7Y0QQyO70j0vVeIZuE6boA6BrNHh680vJYIjuhRM
-         Hc6kgv2falkuwZ+pfIzw47vXnHmtsNCi5PKxDg0vU1mynkqLSSA9wKMqSSbt3CNCijXS
-         jn+inLHB81R6w8QvVPVFrJf+vlNP09sRSsVVWnHkTqPVP5IORg/2yeE/0VI6lqYU8n+O
-         UruF+YgdQGDjAsBmmwiR/rX9CnLjph/iZfokfkM80GLi54Eq4RimEMrGUTc8hPNhG6tL
-         sCT77pfX1XknEB6VSpEOczBS2zFP0MRp/+cetXsNsAp/FkzIVIcyox2hB2hzMy+K+gqr
-         rgmQ==
-X-Gm-Message-State: AOAM533ziz3NX5kLW3MF8e+pTSOivL7dj21QZygMbJqWUgLvKegcj15P
-        eRMId9dsGo+FKd14Tx4BKJup/t5thzfZvjFw3xtAgA==
-X-Google-Smtp-Source: ABdhPJzu5ULT+omARvahbH1jKInTaaNAdmdNq4fRz3u1JYVIeDwdMailkmG8CbM4ZA/xaEU/YPrnxVrzakIRb4bNgp0=
-X-Received: by 2002:a25:69c1:: with SMTP id e184mr38733388ybc.345.1617029823530;
- Mon, 29 Mar 2021 07:57:03 -0700 (PDT)
+        id S229674AbhC2P7T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 Mar 2021 11:59:19 -0400
+Received: from mail.kernel.org ([198.145.29.99]:34356 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229709AbhC2P6y (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 29 Mar 2021 11:58:54 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4717B6148E;
+        Mon, 29 Mar 2021 15:58:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1617033533;
+        bh=NnjETCPQpSIHF+fPiignvyEBk3xGcXLngA81Rv7A/3w=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=bpwP2d991M4o1SHyIp0bfBts73Vu1kWY5jw1JFxHh2cwKsDBbhJtodPxCYUO0gIAG
+         iEBQcUphAXrNgM2jcCMB5vcMwxO46gd7BC6muPaG5EG3T2rYHMYwOMOWdvL1jcS+Rg
+         IWOXvyJpjBtl1jyCSjl2vr0ZNIEK2QzFjS4bLY46PusaL+sTTDtw5b+Ljjy9UGGwCO
+         sEY13lYr3Lpv8wXZK9tk1gYuLNreehI546NKSoba6Ur452JlliE6ILPDFCRDVZQ85H
+         5DUFu2zueiaXUdzWx8Ca9HKvFTO3pPGzDP4NHQiBIJxpvj4hvzAjBTHg2O4Mm0oQVf
+         3F2vo+2R90JXA==
+Date:   Mon, 29 Mar 2021 16:58:43 +0100
+From:   Mark Brown <broonie@kernel.org>
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        fancer.lancer@gmail.com, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, olof@lixom.net, linux-gpio@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 03/13] spi: dw: Add support for Pensando Elba SoC SPI
+Message-ID: <20210329155843.GD5166@sirena.org.uk>
+References: <20210329015938.20316-1-brad@pensando.io>
+ <20210329015938.20316-4-brad@pensando.io>
 MIME-Version: 1.0
-References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
- <CAD=FV=WLZCSd6D5VFyD+1KBp5n1qyszER2EVaEMwYjQfPSSDnA@mail.gmail.com>
- <b77f207b-2d90-3c8b-857f-625bd3867ed1@codeaurora.org> <6fdf704c4716f5873d413229ca8adc57@codeaurora.org>
-In-Reply-To: <6fdf704c4716f5873d413229ca8adc57@codeaurora.org>
-From:   Doug Anderson <dianders@google.com>
-Date:   Mon, 29 Mar 2021 07:56:52 -0700
-Message-ID: <CAD=FV=Wa4fT5wZgd0==8kLy_tzTLgdZ-HwdfOEAM9pMeMjjFyg@mail.gmail.com>
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        sartgarg@codeaurora.org, Rajendra Nayak <rnayak@codeaurora.org>,
-        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
-        Sibi Sankar <sibis@codeaurora.org>, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="KdquIMZPjGJQvRdI"
+Content-Disposition: inline
+In-Reply-To: <20210329015938.20316-4-brad@pensando.io>
+X-Cookie: Never give an inch!
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
 
-On Thu, Mar 25, 2021 at 11:57 PM <sbhanu@codeaurora.org> wrote:
->
-> >>> +                       max-frequency = <192000000>;
-> >> Why do you need to specify this?
-> This helps to avoid lower speed modes running in high clock rate,
-> and As Veerabhadrarao Badiganti mentioned
+--KdquIMZPjGJQvRdI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Just to be clear, both Stephen and I agree that you should remove
-"max-frequency" here (see previous discussion). Bjorn is, of course,
-the file decision maker. However, unless he says "yeah, totally keep
-it in" I'd suggest dropping it from the next version.
+On Sun, Mar 28, 2021 at 06:59:28PM -0700, Brad Larson wrote:
 
+> @@ -56,7 +56,7 @@ struct dw_spi_mscc {
+>  /*
+>   * The Designware SPI controller (referred to as master in the documenta=
+tion)
+>   * automatically deasserts chip select when the tx fifo is empty. The ch=
+ip
+> - * selects then needs to be either driven as GPIOs or, for the first 4 u=
+sing the
+> + * selects then needs to be either driven as GPIOs or, for the first 4 u=
+sing
+>   * the SPI boot controller registers. the final chip select is an OR gate
+>   * between the Designware SPI controller and the SPI boot controller.
+>   */
 
-> >>> +                                       required-opps =
-> >>> <&rpmhpd_opp_low_svs>;
-> >>> +                                       opp-peak-kBps = <1200000
-> >>> 76000>;
-> >>> +                                       opp-avg-kBps = <1200000
-> >>> 50000>;
-> >> Why are the kBps numbers so vastly different than the ones on sc7180
-> >> for the same OPP point. That implies:
-> >>
-> >> a) sc7180 is wrong.
-> >>
-> >> b) This patch is wrong.
-> >>
-> >> c) The numbers are essentially random and don't really matter.
-> >>
-> >> Can you identify which of a), b), or c) is correct, or propose an
-> >> alternate explanation of the difference?
-> >>
->
-> We calculated bus votes values for both sc7180 and sc7280 with ICB tool,
-> above mentioned values we got for sc7280.
+This is an unrelated fix, please send as a separate patch as covered in
+submitting-patches.rst.
 
-I don't know what an ICB tool is. Please clarify.
+> @@ -237,6 +237,31 @@ static int dw_spi_canaan_k210_init(struct platform_d=
+evice *pdev,
+>  	return 0;
+>  }
+> =20
+> +static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
+> +{
+> +	struct dw_spi *dws =3D spi_master_get_devdata(spi->master);
+> +
+> +	if (!enable) {
+> +		/*
+> +		 * Using a GPIO-based chip-select, the DW SPI
+> +		 * controller still needs its own CS bit selected
+> +		 * to start the serial engine.  On Elba the specific
+> +		 * CS doesn't matter to start the serial engine,
+> +		 * so using CS0.
+> +		 */
 
-Also: just because a tool spits out numbers that doesn't mean it's
-correct. Presumably the tool could be wrong or incorrectly configured.
-We need to understand why these numbers are different.
+Why does this comment only apply to one branch of the conditional?
 
--Doug
+--KdquIMZPjGJQvRdI
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmBh+TIACgkQJNaLcl1U
+h9AT8Af/XdN+n+l5mAqCUJXpWq/mDrkEBdZmfQE2koLvAsnVW0/Z9eaodG0TkxrP
+bTvF8W1AUheE0TQ/szrur71ck/fldoZX2xnc6OKhwO18e5rr1sVnoqCIIyqlvdJ6
+HPeGsJ9XWXWx/NZIV7Z3XaQxFV6c/L8ySwYbAy8iAkcr/WUYVThji4DddHgtSYkC
+0WIxxF5HvRjz9TcGCvf7LdeX3k9kqgT2esVALZ+HMbRkB0iMQAkL53hziP/xVl45
+5kyX5G+2mUE2bpxLX3Y9akKSvk5lj2fH2tBbLTjiFDiLVq4Kg8kMGvGscnQwqRL6
+kDe1GVPDkT7ZxqfuUX7w1OAD1SZ5Og==
+=vwts
+-----END PGP SIGNATURE-----
+
+--KdquIMZPjGJQvRdI--
