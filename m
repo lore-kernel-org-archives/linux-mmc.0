@@ -2,69 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3660C433C1
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 00:55:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFA3AC433DB
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 01:08:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C3D816193F
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 00:55:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 776DD61878
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 01:08:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231641AbhC2AzJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 28 Mar 2021 20:55:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37378 "EHLO
+        id S231693AbhC2BIT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 28 Mar 2021 21:08:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230167AbhC2Ay7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Mar 2021 20:54:59 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 665BBC061762
-        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 17:54:59 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id x21so12385139eds.4
-        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 17:54:59 -0700 (PDT)
+        with ESMTP id S231657AbhC2BIC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Mar 2021 21:08:02 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F9A1C061756
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:08:02 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id jy13so16892111ejc.2
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:08:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=yVAc9b+mBnGmiPe0hQUBS5bq7gPTXTsIqeLgC0QKuYo=;
-        b=NoS1GIebv3iSWHAId4v66ODhmcXKQ/qQgeX+r/F705yNSzRoWkVkukYHE2U4SXzj7l
-         3idkz2/42j4ZbHW78CX53X7tItXmV94qnWB5OdZOyQnbEsoGPsYkSWpOSMDnWm16M77n
-         hxLk9rcJsK2WKGOofwpCR6fzZNHzRZZeic4Bas0Ki4nLhez/wE3QZpZS5gvML/zDm3gi
-         g9leOVIkOl3WZlwloo/rXhtFJIOSID1WTvNwZfezLQYLQIB7EwNVLn3S61HwpAQcPDRX
-         zaOUJcL6r/q364sBH0DBnzDGmlTYrO8r0TFMDJUmBAMxfPzwh2rVjOLSrojRZRucPjUH
-         TVZg==
+        bh=349fMBgcvLa2+pNSfzfycVChb5yT8zGK3bjeXkh2b54=;
+        b=tYAV3AJw8goKt1/I7O4N9gCWAgwEW8sSZRa14XT9mZfyxwEeObMDl3W42OIKtzffuv
+         hU4x0UFkFi8+rMG3TDwCTx3teYcimezXli/2hwxG0Q2DxNIRn5b697BGR1AIzhlrC3xd
+         X2UxFk3DpKTYoYgAbJUWRKnszi8byKrP6EDHBMYS2BLEUN80cmWm+KjJZyYtfjLgZePW
+         Vuuvf2SDnJJ14TroALOxjjQEqhnZe5Q9qqrfXSQjR6BM4oC0QryXWiTXQA9AbisGjsc/
+         NFRXKpaM31T02m1hkP+9CX+F+RsEb4rigy77KDGuIdsJ8HQzes+kWnK4njaFgdwZwWu1
+         y1GQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=yVAc9b+mBnGmiPe0hQUBS5bq7gPTXTsIqeLgC0QKuYo=;
-        b=sxiz2JKl1oMt1sSTteBegUpxnBn3ZEWuS1G2HQiATq3HcfHU1VbFFQyK/1Hop9Dahu
-         A2U6fFTaLy4s9MxRXc4VGmYDO378lXP6oVOicMc8vWq3fv7j5rn5yLBaz38EYcYUP6kN
-         OIAYuwmG4cJ2jBm/uyb3+Mav6I1Of+/23N9LAVOUJNGVjmaMrXbngLJpQijH/9fPzdbt
-         R13h5Uyc4+fJaYZaKlicuCFQNflU5SWwLjjHrC8nEI0ws0ddQ95q1+Z3l9DIlAGPc3Fj
-         7klmS6ktRVxe7Z86o/5ePiq681lT4nuHUd4LfCg4K1ovOMuGtgk4ayMFs0Mr0YHhRgr2
-         5aaA==
-X-Gm-Message-State: AOAM530n7CzwkbbOFvVI+7xBi6GBx1OQG/3YijxD5c+cbuihAG1hGjMh
-        UEDM12px5JfJJzAum2M2SDpQfqx0S2inCAJAC4xv1A==
-X-Google-Smtp-Source: ABdhPJx+4A/Txkzyq838knHsu1E43Gon6mva2bR+kHkuk+1ju7bFnu+zuJhSeTQ6qkrvnEusq0RO4FBMrBSodVEvcoE=
-X-Received: by 2002:a05:6402:10c9:: with SMTP id p9mr26382778edu.268.1616979297849;
- Sun, 28 Mar 2021 17:54:57 -0700 (PDT)
+        bh=349fMBgcvLa2+pNSfzfycVChb5yT8zGK3bjeXkh2b54=;
+        b=sHIWDRFhDKKB46ZYln+kgZX4bVU8tuHNAgQYtJ6U5i42YiaaKRxFtSVremO2jq3faF
+         PMjoG9TR/FLsNdzqeftipiFxXPqXpMPMhRk41fHs8/wNIrMRsy4huPxl85VA0rEIZBrO
+         FQq2IzDJ704WN31ZXFYpm1Dysub7Sy2eHLAXvxQsttn3nZiMfINhDz2SjQ33GJ6MM6Zk
+         4uPEX9wG8VKaQLSnCYjXQY7P303+SxM225ff0+ugbTMwteKVVoxV4L8QUCBavptNtMuG
+         nS05rZRDj/13oxbmwolyBKKf7QzjAZok1eXI3bgt1g7N4+El052wmdvV25hp1ahScF6m
+         BeXA==
+X-Gm-Message-State: AOAM532/jtnyq+lmVWTGmkTJK4RX3JHUGf9oZ/tzDT3x1v4HxJ4EQHf2
+        9TqZrafDdNT1EzqOCy4OtT7cLyXtXhrhmJ2u/4Q4Bw==
+X-Google-Smtp-Source: ABdhPJzkNiPyCnBppUUGbv5MVnPLDaLWeyH5f2w/Q4QJP77DBRiwNOzHDtPrBNoUB6HHPhXJcxOs61+ET0MKzh7YrWk=
+X-Received: by 2002:a17:906:52d0:: with SMTP id w16mr25994658ejn.172.1616980080843;
+ Sun, 28 Mar 2021 18:08:00 -0700 (PDT)
 MIME-Version: 1.0
 References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-8-brad@pensando.io>
- <CACRpkdZr8qrQ+b15z_zRP3wAntQeW7T0Z515sUv6e2gL9GzDyg@mail.gmail.com>
-In-Reply-To: <CACRpkdZr8qrQ+b15z_zRP3wAntQeW7T0Z515sUv6e2gL9GzDyg@mail.gmail.com>
+ <20210304080355.cc37g7jagswro3dg@mobilestation>
+In-Reply-To: <20210304080355.cc37g7jagswro3dg@mobilestation>
 From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 28 Mar 2021 17:54:47 -0700
-Message-ID: <CAK9rFnw6cM9UsNoD1-37JfM0n2h6fATSTZYqAP0DBhwwigqBzA@mail.gmail.com>
+Date:   Sun, 28 Mar 2021 18:07:50 -0700
+Message-ID: <CAK9rFnwwo6Ww_r4rxcs+QHev4DtqZ-46BTyr3TkePZuoc=fUbw@mail.gmail.com>
 Subject: Re: [PATCH 7/8] arm64: dts: Add Pensando Elba SoC support
-To:     Linus Walleij <linus.walleij@linaro.org>
+To:     Serge Semin <fancer.lancer@gmail.com>
 Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
         Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Olof Johansson <olof@lixom.net>,
@@ -72,25 +71,54 @@ Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
         linux-spi <linux-spi@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
         "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+        <devicetree@vger.kernel.org>, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 4, 2021 at 12:52 AM Linus Walleij <linus.walleij@linaro.org> wrote:
+On Thu, Mar 4, 2021 at 12:03 AM Serge Semin <fancer.lancer@gmail.com> wrote:
 >
-> On Thu, Mar 4, 2021 at 4:42 AM Brad Larson <brad@pensando.io> wrote:
->
+> On Wed, Mar 03, 2021 at 07:41:40PM -0800, Brad Larson wrote:
 > > Add Pensando common and Elba SoC specific device nodes
 > > and corresponding binding documentation.
-> >
-> > Signed-off-by: Brad Larson <brad@pensando.io>
-> (...)
-> >  .../bindings/gpio/pensando,elba-spics.txt     |  24 ++
 >
-> Please use YAML schema for this.
+> This also needs to be split up into sub-patches seeing these are
+> unrelated changes like device bindings update, new platform DT file.
 
-In patchset v2 changed to YAML schema and passed dt_binding_check and
-dtbs_check.
+In patchset v2 this is split into sub-patches.
+
+> What about converting this file to DT-schema and adding new HW
+> bindings in there?
+
+Converted existing file devicetree/bindings/spi/cadence-quadspi.txt to
+YAML schema.
+
+> > +&spi0 {
+> > +     num-cs = <4>;
+>
+> > +     cs-gpios = <&spics 0 0>, <&spics 1 0>, <&porta 1 0>, <&porta 7 0>;
+>
+> Oh, you've got four peripheral SPI devices connected with only two native CS
+> available. Hmm, then I don't really know a better way, but just to forget about
+> the native DW APB CS functionality and activate the direct driving of
+> all the CS-pins at the moment of the DW APB SPI controller probe
+> procedure. Then indeed you'll need a custom CS function defined in the DW APB
+> SPI driver to handle that.
+
+Yes, with an Elba SoC specific gpio driver.
+
+> So that GPIO-controller is just a single register which provides a way
+> to toggle the DW APB SPI CS-mode together with their output value.
+> If so and seeing there are a few more tiny spaces of config
+> registers added to eMMC, PCI, etc DT node, I suppose all of them
+> belong to some bigger config space of the SoC. Thus I'd suggest to at
+> least implement them as part of a System Controller DT node. Then use
+> that device service to switch on/off corresponding functionality.
+> See [2] and the rest of added to the kernel DTS files with
+> syscon-nodes for example.
+>
+> [2] Documentation/devicetree/bindings/mfd/syscon.yaml
+
+To us it was more understandable to implement a standard gpio driver
+for the spi chip-selects.
