@@ -2,379 +2,236 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE592C433DB
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 01:51:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD001C433E3
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 02:00:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6E27661942
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 01:51:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9A1D561958
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 Mar 2021 02:00:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230258AbhC2BvE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 28 Mar 2021 21:51:04 -0400
-Received: from mail-db8eur05on2062.outbound.protection.outlook.com ([40.107.20.62]:31341
-        "EHLO EUR05-DB8-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229822AbhC2BvD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 28 Mar 2021 21:51:03 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=id8lNfW1KckoYgQZgvg5jsM5Fj9nottCsNqNr2d2P2ZADI/LmAfd8s3Ki6A+wf8G8GacBLCj/QQwfags8xwK5De5gyR7UfL71U1fb6rYCSWt3Jnjg07gTcgZTh8QgX7JwOc5IQsMRh3ktM32bEHersgkRc9VP175CUVmlevE7K/x0gtvsfJxWa+VHO3wb664MLb6KQ2vS/ng0INkvHvJmPW6T9MpZgTzT6KKSFVyHgYP4Ez+K23kROSfagnXunI1AsJGvqljS0PnN2OBzGZ2J/xfyz96FNZu0rxLZuAGC6TDDz8pkSA+NnwDEOTDHdIo91cKm/E2xA6nXxKyXzx89A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=IHdN3tsPddxmdodcP0og8zcHWvDOVCiIpKwugiCuReI=;
- b=NXSeD5obX17WWs1YOqoN+/j91UU4l/NKWs8N0EN20kUk6slr1yfRWjoqj/JYe+ibLwiLPtK7YLpSqHM30LQ7sXgr1rOBNWLx14Z0jkZe6DOhLoHCvZav8vH+WJ/vECy0BV7+QZBI8WVdOuByjprb5CTxvDZR4AmCRPO2gD5Hq2zceZSgr7e58mYHEZAzsknirlbDevHEfUowy302I/EUzgLturnNiY0NuBFcPCp5SGiR7aaimtmX+QRoF+nKYNSrqoJhCjvPEzAXKl6RclgZ9EiZ1NdFd9f/dhWqEuAbjGgh5IBI0J3HqXewS0vPPLWPFvnbkys2s7vWuk6Wxl741A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=IHdN3tsPddxmdodcP0og8zcHWvDOVCiIpKwugiCuReI=;
- b=lWZsXD7MAmyB31jdNq+rP7Q0d4fMBuVgs0wr/hbhMAJLfh9RYEQgiOA4QGMTjPAelA3+AdM5aYYl0CsuiWPRYwrR/IMM/OxTlPMSuKGH3eFSODGy2mkU2VwwSh0/nPivCLUcMImQ3YXryC3n+dH7m7ZiQ8LUsqCIyN8ZAZDv+gc=
-Received: from VI1PR04MB5294.eurprd04.prod.outlook.com (2603:10a6:803:5a::22)
- by VE1PR04MB7326.eurprd04.prod.outlook.com (2603:10a6:800:1b0::20) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3977.29; Mon, 29 Mar
- 2021 01:50:59 +0000
-Received: from VI1PR04MB5294.eurprd04.prod.outlook.com
- ([fe80::f856:6f38:c795:8da]) by VI1PR04MB5294.eurprd04.prod.outlook.com
- ([fe80::f856:6f38:c795:8da%3]) with mapi id 15.20.3977.033; Mon, 29 Mar 2021
- 01:50:58 +0000
-From:   Bough Chen <haibo.chen@nxp.com>
-To:     Shawn Guo <shawnguo@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Aisheng Dong <aisheng.dong@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        Shawn Guo <shawn.guo@linaro.org>
-Subject: RE: [PATCH] mmc: sdhci-esdhc-imx: separate 100/200 MHz pinctrl states
- check
-Thread-Topic: [PATCH] mmc: sdhci-esdhc-imx: separate 100/200 MHz pinctrl
- states check
-Thread-Index: AQHXIi+Ca0SBwAA+nUyC8gEWs7Q7/qqaN1iw
-Date:   Mon, 29 Mar 2021 01:50:58 +0000
-Message-ID: <VI1PR04MB529497E846BFADA3A55F2230907E9@VI1PR04MB5294.eurprd04.prod.outlook.com>
-References: <20210326110214.28416-1-shawnguo@kernel.org>
-In-Reply-To: <20210326110214.28416-1-shawnguo@kernel.org>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: yes
-X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=nxp.com;
-x-originating-ip: [119.31.174.71]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-ht: Tenant
-x-ms-office365-filtering-correlation-id: 721251d0-f07a-491b-a1fc-08d8f25519a2
-x-ms-traffictypediagnostic: VE1PR04MB7326:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <VE1PR04MB73265FBD52AABBA71BAFDE71907E9@VE1PR04MB7326.eurprd04.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:4714;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: Ipc2d4SAr8hQPjCdtM65wpTuZeM2Y+tFgdWrOfBPuO1o/ctrd8Afe7VnWxD028KGH+UKkWG1DKzYOKV+zCkEWgSQ0PTSPfuxDgcBpRYLzwLF5lp9wDla6WreaKN/J9CujGu+8if24afaaN2sVHC1LdDwslTP3QlSxfFpMDNQavpG0rWGVWSWUYWIqrsVbxnEYjgxzmfbKPgnfn34BDYcUAQ1A3CKyXiOVy021fyaoaUxI8O0kY8WQlNwrFOmRTfXJ/Kt2fwt6Lm/f0llM0/yFkIKHzm4XXdZo2/XqZZT87ab11kNaLwfyey93uhYvIiR6qFBjwmiLv5RLjZtMvd9yTPLfylFEFxpt3C6056eB/rnY58jQPxhIlbGBZj8ggk87E1nVr1ERoEqvyL+Zyqr0y0puuM0RFqT5KtiI9zl/bPXyLqjhBiF62Kr9ChlayVKdpuYSi/oYtXz9AoNsyJWv46Z+/sfUzv3JR/KrHX3LbEhEyRgvV5QEIMTwz+PqC0cU/nMvmswOeVvL6gMyAcctA3qPjIxjtQOKfUNoCuDAsIEWImixS0TRYyOc+JKnAt3gvjUqnNI1zNQJ5/l/wCeLZmChBQD76le/VxxiT46CO39PlpxIj1HR+XO8OitWYzfB1hY/+c291x+smFK3LJefYqtSnrLsT9HB+JLmrBX4ig=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR04MB5294.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(366004)(376002)(39860400002)(346002)(396003)(478600001)(86362001)(33656002)(52536014)(6506007)(53546011)(8936002)(186003)(66476007)(66556008)(66946007)(66446008)(26005)(76116006)(7696005)(64756008)(2906002)(66616009)(83380400001)(99936003)(55016002)(4326008)(71200400001)(38100700001)(110136005)(5660300002)(54906003)(9686003)(316002)(8676002);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata: =?gb2312?B?cXRjWml0UnE1M29rSVFZTklrRVpNS2RVZVZpVHlUMXJ6c29sSTJJUHArRE1a?=
- =?gb2312?B?L0pDY3ExOUlRZXNHc1hzY25RT1F3V1VOOHBZTXpJcWJHVkhvbEdIUkRFdUdt?=
- =?gb2312?B?OUcybFp0dGIrMytSeTVqL09CSHp1MjVyRnZFaUlXa3M3VlNHNXNBR1JWQnVr?=
- =?gb2312?B?MC96YzBBdG5lMlZWOUtseHovbU81UVV5STFkbTRBZXdtTHRIS1BDd2lhYjJ4?=
- =?gb2312?B?cE92WmFoQzJQRGFkTGNwc0JpeTduMlQxalB5Um0wQmVtcEYxdE9aVDcwcUVO?=
- =?gb2312?B?YUo3YU9zVk0vOXRNbldtVElCR3BCYlBhVzlJMTZBbmJmTGdvV3FpT1c0b2Vz?=
- =?gb2312?B?Z0NJZUNveDNtWVJrdVg5ZlB5a1VCbnprUnMwVnM5YWRWcHYwYUkzSFB0S3du?=
- =?gb2312?B?bTBvLzBTNFBnWVdDekphWW1NeE54VTdpVGI0ZldHODN4dHdTSHY4MFgxK2lx?=
- =?gb2312?B?VityZ05HTW9TYUtNV2NQQjVhMzVoQzA0WEZsdXIzZ2cya1h0d3ZldncxaFJD?=
- =?gb2312?B?S29OS3ozQmZPSmRkQTBoU29aWTZKVGVCZEduamZudmtsUWNxbGxwMENFNkdy?=
- =?gb2312?B?Slh5MFdBWjVvelFPQWpJb2RDMU91RHhiZmE1Q3h6TTB4cDBFL0tsd2Q4Nlp3?=
- =?gb2312?B?Vm4xOFBuUmR4Ukwweldpdm8rWklXYlhIeHBPMm5zNU5QTWxXSmlMRjFrVHVZ?=
- =?gb2312?B?eGtxZUNFVFB0TG9taUJmT0l0WWFqVi8wVWJ2aWpIZHJmanJVWTIwRmdYWUoz?=
- =?gb2312?B?Tk9xNlpQZjVOOHh1cVVDK1hiNFMrMkRqR0xjSUM1N0dDdHJyZ2tTNmdBSTFX?=
- =?gb2312?B?RVBtOHh0YkJveUxMRzJXQ1RYMmpSdmUzcWJFN1RBV3NSOWEvRWRGdDV6MS9i?=
- =?gb2312?B?UXp5L2NOQWhtUVFTRVpRVVNGVVJScjFTUzAwdCtxYnZyQXBJTS9JMTJhM29n?=
- =?gb2312?B?VkpzRGdWUlJIRmFpUkJDTWoyQU9NbGU4d0REa3ZNSldIM2lhcWhBNWw0WCs2?=
- =?gb2312?B?SUY5cHVPUExkRVZPWXliMDlkYldtRHlMK1JXYlV0aU94OTdjRldNUk1SRGpX?=
- =?gb2312?B?TThoNllOdldTVlhZSEJ0WXVsdnJBS1E4b0xUdjVwbXd2VmszMEI3VDVCcnRs?=
- =?gb2312?B?Q1poa1o4Nm4rdWE3VTZ6TkMxRFNQaTROR3l5V3N6K3NBRnBObDJFT3pFSUc0?=
- =?gb2312?B?VDBwS3FyOTlCcHl6czRVZzRFbFd4VnlKS3ZZT3lzeEtERDF2K1NIZFluV0xW?=
- =?gb2312?B?bTg5MlUzNFh6TmJvbG14aEM4dlh3bW1pd0hTOFZ2U1ZPNDJzQm5aenpiQjJ4?=
- =?gb2312?B?SzVhcGxMKy9TM0M0Y1FoQUxxUmtaLy9laGd5N2R3OG42bXZGWHRqNzZYMFZU?=
- =?gb2312?B?d1N1eWFBcXIyZnh3ZXNzQmp1dlBjSTRpVTJYcnNpcHpRM3ltL1FONXRGeTg4?=
- =?gb2312?B?SVRaZC9sdXBCOXpHZ1g3Z0lyRGxhWTFZMTdXc0wyT01pNUVVTnB6ODhrcjBH?=
- =?gb2312?B?TDNpN3cwSGpONy9rbnVHdDlwdnkvREhJbHlPK3prUmpBOUNIb255YjB1a0tS?=
- =?gb2312?B?dm5mOHJNaUZ3bHRjTGc2Q1h0YXY0Ym1FYlBmR2ZNQjRZZ1gxUHlqcHJ1ait0?=
- =?gb2312?B?aVFpRXNHVUQwSGpJUHAwVTdISFp4K3JyRXJTRTNYT0RIWEU5RThML3pUY2x4?=
- =?gb2312?B?bWwrYVlHUHNEM1NxNXFDcmtmQkhnZ3NqSkhYVTNweGVRMmVxa09rWDFnREFu?=
- =?gb2312?Q?qJnMSGayMi/7z2dakymd9uK6K0bypnoJq8X91a/?=
-Content-Type: multipart/signed;
-        protocol="application/x-pkcs7-signature";
-        micalg=2.16.840.1.101.3.4.2.1;
-        boundary="----=_NextPart_000_0066_01D72481.03D3EB00"
-MIME-Version: 1.0
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: VI1PR04MB5294.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 721251d0-f07a-491b-a1fc-08d8f25519a2
-X-MS-Exchange-CrossTenant-originalarrivaltime: 29 Mar 2021 01:50:58.7826
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: CXI8tIruKveNoO6nR96VYVrDX8hbiO8QFcxZVQRfuVuNBu1bBhH1lqkBtfi24yZqlFicXkkWsVY7TvAI41i3BQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VE1PR04MB7326
+        id S230331AbhC2CAL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 28 Mar 2021 22:00:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51250 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230303AbhC2B7r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 28 Mar 2021 21:59:47 -0400
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75F2CC061764
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:59:47 -0700 (PDT)
+Received: by mail-pl1-x62c.google.com with SMTP id h20so3663580plr.4
+        for <linux-mmc@vger.kernel.org>; Sun, 28 Mar 2021 18:59:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=pensando.io; s=google;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references;
+        bh=lEonPZwEeXmihKSqYcFtnrjNQ7/tLKbXJpP3Rx+HiqM=;
+        b=F23cGbG1YwLdAFMDZO0iYBH+K1d7cy6+GJAoRwQhgiDV6iW+BNyqo+iYPnqYQUOTQ2
+         tfj14BHwgnjBcjAQ4cw70MDvX88g+74TtcbfnNSE+dyubGZEY+Uf9+OMpM5R1TQYzDi8
+         uFK/zUUDomBnWEtnEY4WbAGVHyJRfqhlCZAN0J/KVj/k9maJlzhNu3wYCgVktMOYlNfx
+         E8fzVcfAWuVzW2WYuSS3BbED01DkDpLjNgmR5M/vzla9E7bH2jTv1P3BrbweArvDM/W3
+         TOfzt356v3DpyQ1NRMnJ7svnGW10AIZL4dWAxPjngFvx7atofvsiD74RveOKU/3QbU86
+         RDeg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references;
+        bh=lEonPZwEeXmihKSqYcFtnrjNQ7/tLKbXJpP3Rx+HiqM=;
+        b=PRz67EC4jHkSfvhI0qdvz0Z0W85tb7WeUL8ru8v7yfxL8UrpqnHLikCZqRVVHE/lPI
+         7L1aFyMBLQ1YQlOau3HNuSI0iQhNkpN2oBZW5i4jU2S9sUee7Gn36OcuNNhNyQ1Ky4WP
+         /ZCUFzf6r7fRljOadopejaaQM9KYaYpaYzFVIxHbpZbe4cIZ2f2L3deglszXOX70PpxA
+         o/GYyHZCRf+6aOqimWFsXtvMRXut8SiIlTYKTq+WIJW6sIkJS4WBYZfcq4BCc2YJ+Rsl
+         d+vnwik76CUFqKBEfxPs15G2Sxai9HZdQpENf7+FF5zBXYIn53pXeG7Y5Bps1xmFIMu1
+         gqew==
+X-Gm-Message-State: AOAM531wDncc6fGbKqEPwqJq24TR1aFKUkMe8tLAtQ3/kV4iCdVCRqvC
+        e4B135Pjr7MIYp6l8o5ShrHqkA==
+X-Google-Smtp-Source: ABdhPJxcWKYSx3w7OxCzzLFtQDbCo5dvZARVQLq0d3ra/WqqivMK3AukxhkoGQW2jbtlRAqfLkfLrw==
+X-Received: by 2002:a17:902:7792:b029:e6:caba:f836 with SMTP id o18-20020a1709027792b02900e6cabaf836mr26264364pll.41.1616983186960;
+        Sun, 28 Mar 2021 18:59:46 -0700 (PDT)
+Received: from platform-dev1.pensando.io ([12.226.153.42])
+        by smtp.gmail.com with ESMTPSA id w37sm14728027pgl.13.2021.03.28.18.59.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 28 Mar 2021 18:59:46 -0700 (PDT)
+From:   Brad Larson <brad@pensando.io>
+To:     linux-arm-kernel@lists.infradead.org
+Cc:     arnd@arndb.de, linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, fancer.lancer@gmail.com,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net,
+        brad@pensando.io, linux-gpio@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2 01/13] gpio: Add Elba SoC gpio driver for spi cs control
+Date:   Sun, 28 Mar 2021 18:59:26 -0700
+Message-Id: <20210329015938.20316-2-brad@pensando.io>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210329015938.20316-1-brad@pensando.io>
+References: <20210329015938.20316-1-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-------=_NextPart_000_0066_01D72481.03D3EB00
-Content-Type: text/plain;
-	charset="gb2312"
-Content-Transfer-Encoding: quoted-printable
+This GPIO driver is for the Pensando Elba SoC which
+provides control of four chip selects on two SPI busses.
 
+Signed-off-by: Brad Larson <brad@pensando.io>
+---
+ drivers/gpio/Kconfig           |   6 ++
+ drivers/gpio/Makefile          |   1 +
+ drivers/gpio/gpio-elba-spics.c | 114 +++++++++++++++++++++++++++++++++
+ 3 files changed, 121 insertions(+)
+ create mode 100644 drivers/gpio/gpio-elba-spics.c
 
-> -----Original Message-----
-> From: Shawn Guo [mailto:shawnguo@kernel.org]
-> Sent: 2021=C4=EA3=D4=C226=C8=D5 19:02
-> To: Adrian Hunter <adrian.hunter@intel.com>; Ulf Hansson
-> <ulf.hansson@linaro.org>
-> Cc: Bough Chen <haibo.chen@nxp.com>; Aisheng Dong
-> <aisheng.dong@nxp.com>; Pengutronix Kernel Team
-> <kernel@pengutronix.de>; dl-linux-imx <linux-imx@nxp.com>;
-> linux-mmc@vger.kernel.org; linux-arm-kernel@lists.infradead.org; Shawn =
-Guo
-> <shawn.guo@linaro.org>
-> Subject: [PATCH] mmc: sdhci-esdhc-imx: separate 100/200 MHz pinctrl =
-states
-> check
->=20
-> From: Shawn Guo <shawn.guo@linaro.org>
->=20
-> As indicated by function esdhc_change_pinstate(), SDR50 and DDR50 =
-require
-> pins_100mhz, while SDR104 and HS400 require pins_200mhz.  Some system
-> design may support SDR50 and DDR50 with 100mhz pin state only (without
-> 200mhz one).  Currently the combined 100/200 MHz pinctrl state check
-> prevents such system from running SDR50 and DDR50.  Separate the check =
-to
-> support such system design.
->=20
-> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
+diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
+index e3607ec4c2e8..4720459b24f5 100644
+--- a/drivers/gpio/Kconfig
++++ b/drivers/gpio/Kconfig
+@@ -241,6 +241,12 @@ config GPIO_EIC_SPRD
+ 	help
+ 	  Say yes here to support Spreadtrum EIC device.
+ 
++config GPIO_ELBA_SPICS
++	bool "Pensando Elba SPI chip-select"
++	depends on (ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST)
++	help
++	  Say yes here to support the Penasndo Elba SoC SPI chip-select driver
++
+ config GPIO_EM
+ 	tristate "Emma Mobile GPIO"
+ 	depends on (ARCH_EMEV2 || COMPILE_TEST) && OF_GPIO
+diff --git a/drivers/gpio/Makefile b/drivers/gpio/Makefile
+index c58a90a3c3b1..c5c7acad371b 100644
+--- a/drivers/gpio/Makefile
++++ b/drivers/gpio/Makefile
+@@ -54,6 +54,7 @@ obj-$(CONFIG_GPIO_DAVINCI)		+= gpio-davinci.o
+ obj-$(CONFIG_GPIO_DLN2)			+= gpio-dln2.o
+ obj-$(CONFIG_GPIO_DWAPB)		+= gpio-dwapb.o
+ obj-$(CONFIG_GPIO_EIC_SPRD)		+= gpio-eic-sprd.o
++obj-$(CONFIG_GPIO_ELBA_SPICS)		+= gpio-elba-spics.o
+ obj-$(CONFIG_GPIO_EM)			+= gpio-em.o
+ obj-$(CONFIG_GPIO_EP93XX)		+= gpio-ep93xx.o
+ obj-$(CONFIG_GPIO_EXAR)			+= gpio-exar.o
+diff --git a/drivers/gpio/gpio-elba-spics.c b/drivers/gpio/gpio-elba-spics.c
+new file mode 100644
+index 000000000000..351bbaeea033
+--- /dev/null
++++ b/drivers/gpio/gpio-elba-spics.c
+@@ -0,0 +1,114 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Pensando Elba SoC SPI chip select driver
++ *
++ * Copyright (c) 2020-2021, Pensando Systems Inc.
++ */
++
++#include <linux/err.h>
++#include <linux/gpio.h>
++#include <linux/module.h>
++#include <linux/io.h>
++#include <linux/init.h>
++//#include <linux/of.h>
++#include <linux/platform_device.h>
++#include <linux/spinlock.h>
++#include <linux/types.h>
++
++/*
++ * pin:	     3		  2	   |	   1		0
++ * bit:	 7------6------5------4----|---3------2------1------0
++ *	cs1  cs1_ovr  cs0  cs0_ovr |  cs1  cs1_ovr  cs0	 cs0_ovr
++ *		   ssi1		   |		 ssi0
++ */
++#define SPICS_PIN_SHIFT(pin)	(2 * (pin))
++#define SPICS_MASK(pin)		(0x3 << SPICS_PIN_SHIFT(pin))
++#define SPICS_SET(pin, val)	((((val) << 1) | 0x1) << SPICS_PIN_SHIFT(pin))
++
++struct elba_spics_priv {
++	void __iomem *base;
++	spinlock_t lock;
++	struct gpio_chip chip;
++};
++
++static int elba_spics_get_value(struct gpio_chip *chip, unsigned int pin)
++{
++	return -ENOTSUPP;
++}
++
++static void elba_spics_set_value(struct gpio_chip *chip,
++		unsigned int pin, int value)
++{
++	struct elba_spics_priv *p = gpiochip_get_data(chip);
++	unsigned long flags;
++	u32 tmp;
++
++	/* select chip select from register */
++	spin_lock_irqsave(&p->lock, flags);
++	tmp = readl_relaxed(p->base);
++	tmp = (tmp & ~SPICS_MASK(pin)) | SPICS_SET(pin, value);
++	writel_relaxed(tmp, p->base);
++	spin_unlock_irqrestore(&p->lock, flags);
++}
++
++static int elba_spics_direction_input(struct gpio_chip *chip, unsigned int pin)
++{
++	return -ENOTSUPP;
++}
++
++static int elba_spics_direction_output(struct gpio_chip *chip,
++		unsigned int pin, int value)
++{
++	elba_spics_set_value(chip, pin, value);
++	return 0;
++}
++
++static int elba_spics_probe(struct platform_device *pdev)
++{
++	struct elba_spics_priv *p;
++	struct resource *res;
++	int ret = 0;
++
++	p = devm_kzalloc(&pdev->dev, sizeof(*p), GFP_KERNEL);
++	if (!p)
++		return -ENOMEM;
++
++	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
++	p->base = devm_ioremap_resource(&pdev->dev, res);
++	if (IS_ERR(p->base))
++		return PTR_ERR(p->base);
++	spin_lock_init(&p->lock);
++	platform_set_drvdata(pdev, p);
++
++	p->chip.ngpio = 4;	/* 2 cs pins for spi0, and 2 for spi1 */
++	p->chip.base = -1;
++	p->chip.direction_input = elba_spics_direction_input;
++	p->chip.direction_output = elba_spics_direction_output;
++	p->chip.get = elba_spics_get_value;
++	p->chip.set = elba_spics_set_value;
++	p->chip.label = dev_name(&pdev->dev);
++	p->chip.parent = &pdev->dev;
++	p->chip.owner = THIS_MODULE;
++
++	ret = devm_gpiochip_add_data(&pdev->dev, &p->chip, p);
++	if (ret)
++		dev_err(&pdev->dev, "unable to add gpio chip\n");
++	return ret;
++}
++
++static const struct of_device_id elba_spics_of_match[] = {
++	{ .compatible = "pensando,elba-spics" },
++	{}
++};
++
++static struct platform_driver elba_spics_driver = {
++	.probe = elba_spics_probe,
++	.driver = {
++		.name = "pensando-elba-spics",
++		.of_match_table = elba_spics_of_match,
++	},
++};
++module_platform_driver(elba_spics_driver);
++
++MODULE_LICENSE("GPL v2");
++MODULE_DESCRIPTION("Pensando Elba SoC SPI chip-select driver");
+-- 
+2.17.1
 
-Reviewed-by: Haibo Chen <haibo.chen@nxp.com>
-
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
-> b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index a20459744d21..aa45901325b9 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -434,10 +434,10 @@ static u32 esdhc_readl_le(struct sdhci_host =
-*host,
-> int reg)
->  			 * Do not advertise faster UHS modes if there are no
->  			 * pinctrl states for 100MHz/200MHz.
->  			 */
-> -			if (IS_ERR_OR_NULL(imx_data->pins_100mhz) ||
-> -			    IS_ERR_OR_NULL(imx_data->pins_200mhz))
-> -				val &=3D ~(SDHCI_SUPPORT_SDR50 |
-> SDHCI_SUPPORT_DDR50
-> -					 | SDHCI_SUPPORT_SDR104 |
-> SDHCI_SUPPORT_HS400);
-> +			if (IS_ERR_OR_NULL(imx_data->pins_100mhz))
-> +				val &=3D ~(SDHCI_SUPPORT_SDR50 |
-> SDHCI_SUPPORT_DDR50);
-> +			if (IS_ERR_OR_NULL(imx_data->pins_200mhz))
-> +				val &=3D ~(SDHCI_SUPPORT_SDR104 |
-> SDHCI_SUPPORT_HS400);
->  		}
->  	}
->=20
-> --
-> 2.17.1
-
-
-------=_NextPart_000_0066_01D72481.03D3EB00
-Content-Type: application/pkcs7-signature;
-	name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
-	filename="smime.p7s"
-
-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
-U2VydmljZXMsQ049U2VydmljZXMsQ049Q29uZmlndXJhdGlvbixEQz13YmksREM9bnhwLERDPWNv
-bT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0
-aW9uUG9pbnSGL2h0dHA6Ly9ud3cucGtpLm54cC5jb20vY3JsL05YUEVudGVycHJpc2VDQTUuY3Js
-hi9odHRwOi8vd3d3LnBraS5ueHAuY29tL2NybC9OWFBFbnRlcnByaXNlQ0E1LmNybDCCARAGCCsG
-AQUFBwEBBIIBAjCB/zCBuwYIKwYBBQUHMAKGga5sZGFwOi8vL0NOPU5YUCUyMEVudGVycHJpc2Ul
-MjBDQSUyMDUsQ049QUlBLENOPVB1YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENO
-PUNvbmZpZ3VyYXRpb24sREM9d2JpLERDPW54cCxEQz1jb20/Y0FDZXJ0aWZpY2F0ZT9iYXNlP29i
-amVjdENsYXNzPWNlcnRpZmljYXRpb25BdXRob3JpdHkwPwYIKwYBBQUHMAKGM2h0dHA6Ly9ud3cu
-cGtpLm54cC5jb20vY2VydHMvTlhQLUVudGVycHJpc2UtQ0E1LmNydDBBBgNVHREEOjA4oCIGCisG
-AQQBgjcUAgOgFAwSaGFpYm8uY2hlbkBueHAuY29tgRJoYWliby5jaGVuQG54cC5jb20wDQYJKoZI
-hvcNAQELBQADggEBAAbO3KB4UPjzcz8dqs00dc1WxVm1GGcg29yJnKejuwv95IGs8TmqHcXZ3zot
-7J4cDniEn2Pdvjfw3tVoykkz7vT/JkS5QfOgUeQX7GAKMe2AT17e9VskzipZ+37vsDPfW1XPVRn4
-WMgJUHLRad79yO/ojeTPavpUFtAY3wlI4B8dT7du7ibI4Zokemv0PvTpanmUY+V+EjibmoXDTbXm
-VJEG965sDuYYeh40QeE5siWSSoDA0yHxRb0TvMBbbkR406oUSSIEZyR4a6iGRgsXral8LULemoOx
-N6HCSMmhyGdWXJOMFhbLkPEZQkOXpUCdzwJnG8X3hPnlRNp1qEeIXoQwggfrMIIG06ADAgECAhMt
-AAC+6uSCGwwZxWD/AAAAAL7qMA0GCSqGSIb3DQEBCwUAMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJw
-cmlzZSBDQSA1MQswCQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRo
-b3ZlbjEWMBQGA1UECAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmS
-JomT8ixkARkWA254cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwwHhcNMTkxMDMx
-MDEyNzM1WhcNMjExMDMwMDEyNzM1WjCBmjETMBEGCgmSJomT8ixkARkWA2NvbTETMBEGCgmSJomT
-8ixkARkWA254cDETMBEGCgmSJomT8ixkARkWA3diaTEMMAoGA1UECxMDTlhQMQswCQYDVQQLEwJD
-TjEWMBQGA1UECxMNTWFuYWdlZCBVc2VyczETMBEGA1UECxMKRGV2ZWxvcGVyczERMA8GA1UEAxMI
-bnhhMTI5MzcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDE9+2XERF+z26pPnpECTBk
-Qd8RJomqRzsIUDwr4pXlYguj7693YrAllPcn16SP/HlCQLOV73S/EQlQ22fHiv8Op3odseIduNQt
-qSaD65NFnj1wOvsidBPwP6GeSk4ZE4lWZYVAE/UT8bT6dDNgM3NDoCEPRSNnJwsp4qGlyFYpl1wa
-JuNyF/crQt8c0HZ7IZmcpMSdywmmWhYQOjDg+GzDdHfFSK1EmFf15IgYh/S0iKjwZXcohqRSFh4/
-Y9O+PqQ8tRuuIh/nZMK9E8tT/WIFd2kWe2dR1TbcyTpXEPrCNZiYj5LV6dPVJuQsCWwy6evTzLkU
-rqcPsCky/loDLZ7NAgMBAAGjggQKMIIEBjA8BgkrBgEEAYI3FQcELzAtBiUrBgEEAYI3FQiFgsB+
-gY70VYbthTiC65lLmpJWP4Xmim6EteF+AgFkAgE6MBMGA1UdJQQMMAoGCCsGAQUFBwMEMA4GA1Ud
-DwEB/wQEAwIFIDAMBgNVHRMBAf8EAjAAMBsGCSsGAQQBgjcVCgQOMAwwCgYIKwYBBQUHAwQwgZQG
-CSqGSIb3DQEJDwSBhjCBgzALBglghkgBZQMEASowCwYJYIZIAWUDBAEtMAsGCWCGSAFlAwQBFjAL
-BglghkgBZQMEARkwCwYJYIZIAWUDBAECMAsGCWCGSAFlAwQBBTAKBggqhkiG9w0DBzAHBgUrDgMC
-BzAOBggqhkiG9w0DAgICAIAwDgYIKoZIhvcNAwQCAgIAMB0GA1UdDgQWBBTlL+2gnauehNbF4Mck
-cbLTqj/vJTAfBgNVHSMEGDAWgBRYlWDuTnTvZSKqve0ZqSt6jhedBzCCAUYGA1UdHwSCAT0wggE5
-MIIBNaCCATGgggEthoHIbGRhcDovLy9DTj1OWFAlMjBFbnRlcnByaXNlJTIwQ0ElMjA1LENOPW5s
-YW1zcGtpMDAwNSxDTj1DRFAsQ049UHVibGljJTIwS2V5JTIwU2VydmljZXMsQ049U2VydmljZXMs
-Q049Q29uZmlndXJhdGlvbixEQz13YmksREM9bnhwLERDPWNvbT9jZXJ0aWZpY2F0ZVJldm9jYXRp
-b25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0aW9uUG9pbnSGL2h0dHA6Ly9ud3cu
-cGtpLm54cC5jb20vY3JsL05YUEVudGVycHJpc2VDQTUuY3Jshi9odHRwOi8vd3d3LnBraS5ueHAu
-Y29tL2NybC9OWFBFbnRlcnByaXNlQ0E1LmNybDCCARAGCCsGAQUFBwEBBIIBAjCB/zCBuwYIKwYB
-BQUHMAKGga5sZGFwOi8vL0NOPU5YUCUyMEVudGVycHJpc2UlMjBDQSUyMDUsQ049QUlBLENOPVB1
-YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENOPUNvbmZpZ3VyYXRpb24sREM9d2Jp
-LERDPW54cCxEQz1jb20/Y0FDZXJ0aWZpY2F0ZT9iYXNlP29iamVjdENsYXNzPWNlcnRpZmljYXRp
-b25BdXRob3JpdHkwPwYIKwYBBQUHMAKGM2h0dHA6Ly9ud3cucGtpLm54cC5jb20vY2VydHMvTlhQ
-LUVudGVycHJpc2UtQ0E1LmNydDBBBgNVHREEOjA4oCIGCisGAQQBgjcUAgOgFAwSaGFpYm8uY2hl
-bkBueHAuY29tgRJoYWliby5jaGVuQG54cC5jb20wDQYJKoZIhvcNAQELBQADggEBAHNaESyBZSXf
-2VjPBOZH2PR/VsyRkmOCEkPU1uxvKTFAYPwmzTsnlPgU4OK9G3DLFpZhrUFfoz2G5Z9lHxrOftqX
-lCk7OQpEtEom0dbQN/ZCAmsMIfweppoH+zVGjO45OVI1W+qlQcNhdSV5sylHjD5Gg1GF/DOL4koc
-vFlMhaX/MQ7vNrRO6KI7vTl5mcObxpfWVdPT3D8RgKml2n8xTLi7jiIII8rgWexZYlx3ukUBWRJb
-ZgDGZ+bOPl0EK26M1ELLUTT/uAxPifKlj1Ls37bW+h3GhgsiW+lZVN7qZWar54TIpAogfVOIaip3
-BeirywBeJLBrgkFfD8yA9JvyFNQxggTDMIIEvwIBATCBzjCBtjEcMBoGA1UEAwwTTlhQIEVudGVy
-cHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoMCE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5k
-aG92ZW4xFjAUBgNVBAgMDU5vb3JkLUJyYWJhbnQxEzARBgoJkiaJk/IsZAEZFgN3YmkxEzARBgoJ
-kiaJk/IsZAEZFgNueHAxEzARBgoJkiaJk/IsZAEZFgNjb20xCzAJBgNVBAYTAk5MAhMtAAC+69VX
-9gixtDt/AAAAAL7rMA0GCWCGSAFlAwQCAQUAoIICxTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcB
-MBwGCSqGSIb3DQEJBTEPFw0yMTAzMjkwMTUwNTZaMC8GCSqGSIb3DQEJBDEiBCD03IAPWLvcwVuT
-q90bT9peRsY+WOl461NzXkcDCjxJfzCBkwYJKoZIhvcNAQkPMYGFMIGCMAsGCWCGSAFlAwQBKjAL
-BglghkgBZQMEARYwCgYIKoZIhvcNAwcwCwYJYIZIAWUDBAECMA4GCCqGSIb3DQMCAgIAgDANBggq
-hkiG9w0DAgIBQDALBglghkgBZQMEAgEwCwYJYIZIAWUDBAIDMAsGCWCGSAFlAwQCAjAHBgUrDgMC
-GjCB3wYJKwYBBAGCNxAEMYHRMIHOMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJwcmlzZSBDQSA1MQsw
-CQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3ZlbjEWMBQGA1UE
-CAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT8ixkARkWA254
-cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwCEy0AAL7q5IIbDBnFYP8AAAAAvuow
-geEGCyqGSIb3DQEJEAILMYHRoIHOMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJwcmlzZSBDQSA1MQsw
-CQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3ZlbjEWMBQGA1UE
-CAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT8ixkARkWA254
-cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwCEy0AAL7q5IIbDBnFYP8AAAAAvuow
-DQYJKoZIhvcNAQEBBQAEggEAGBfQ1AjypEg3DEhMaBvqGilgp4BId3nFgtCifPTG78AaRDQk1kMH
-h/kxYHgXVQ2qt/ujyFjm2EQbq13m+qNgFsBAXDXO52xuxjns+++ERMo45EGBjz8TZl3hFB0OdUTL
-irQ1xiE7ox/rPxfg84VRVfcUW132qljcsF8j9T28QlrSWa+1ehR/cDJXFeVpIJaPbSTaHIv1cB6A
-bO31IvUecdDIe5ifeKFLZmh6YVseX1SbqRAAa0ucWRZHN5jH6CE5Z//8kqBXoy/ZjxIW1AOZ0GbD
-0J2qt4l5PyJ0W+NsSEno3SgIIV9TzJLnVEms+xRG8+rlVffMko+431snIoHqmwAAAAAAAA==
-
-------=_NextPart_000_0066_01D72481.03D3EB00--
