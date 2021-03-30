@@ -2,107 +2,202 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D60A5C433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 10:46:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84D49C433C1
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 11:13:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9D5BF619C2
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 10:46:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3DC6661922
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 11:13:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231154AbhC3Kpq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Mar 2021 06:45:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53204 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231810AbhC3KpO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 06:45:14 -0400
-Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C07A3C061762
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Mar 2021 03:45:13 -0700 (PDT)
-Received: by mail-ua1-x92e.google.com with SMTP id h34so4898334uah.5
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Mar 2021 03:45:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=KA1n+JDKnSeg05rDwCgfj3wTUCCEx1+ImjZuwoLRDgY=;
-        b=lqUF3G4msKNfNioFzkAXbXB/9SAof6IGX3RHcUtvUDyiOczBnzb74KMfGN73L0n+xl
-         +Se0QtBcMXYJsRztsfF7UOrqpJcXMix3jUmxYGXYBwMvUjxhAosMPd0YaWls14J+9ANl
-         GaK5tcXcd5mIypluCcqcK4PQy1ft21EGdDt7j5z7/IP3zhrd4qIVi8d1BhF5HblUYoZV
-         MjXT4fuSXdkkda9Ww+nJ9klfpNfIQKXQgtk/swh/XaQP/z4febyDjOF4Ac1+InpHBsAQ
-         bI5cCyFV0IdLGZLKKRLNSjKljsWzLSnkaLORsyASIJ86v2v/KoEQDfoAEVIh14IXUoiT
-         60GQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=KA1n+JDKnSeg05rDwCgfj3wTUCCEx1+ImjZuwoLRDgY=;
-        b=UBNt9HHitoN9KtSd6ZPwbPfn+hjYr0DXCWkPrtqep/HWIZnbRdk9scz+L3mNPJQZ9M
-         cYp0cq0XDmh2dsTQd2sqE9OplYgE94SfPfUZq8SJg8E2tKamAgKONqaxjfthCwxUIvos
-         +xhTZEmR7t6lg5xWGCTtBD6PkqDkTZMZH95gIQXnQmRrQz5ABVLZWrVYtseNc0w4KKTC
-         9XAtwvVnSMOD26W7ytn3E2rWCwrGC3ifPMCCgJJhlRB9FWisc5kwbmlkqiR1aYky77ij
-         9EFNnj39Q/uNKvOtXCZmCdg6KtlvyXgsneldJl7wElaIUkvW4dg/Ulhqa0mnzu02mR/i
-         hT6w==
-X-Gm-Message-State: AOAM533uEl9Hb8PHL/qytRw0sOSvG2WlJZ60ChCktefwesGZzX1Pjp8E
-        eluvQZIZY+50+DBE7NIcqjw7XbR4Ec3VIBspbn0lxQtuG4kf0g==
-X-Google-Smtp-Source: ABdhPJyOR+5TV2pxTV236HAkY2P9NZKgB08njxIqK1Qk0yQRhxuPkc+j+UWrnhJN6Tf+QS2H0FpObL5nq6gOoxKOZXE=
-X-Received: by 2002:a9f:2843:: with SMTP id c61mr16130295uac.129.1617101112887;
- Tue, 30 Mar 2021 03:45:12 -0700 (PDT)
+        id S231574AbhC3LNU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Mar 2021 07:13:20 -0400
+Received: from fllv0016.ext.ti.com ([198.47.19.142]:53974 "EHLO
+        fllv0016.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231529AbhC3LM6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 07:12:58 -0400
+Received: from fllv0035.itg.ti.com ([10.64.41.0])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 12UBCjWB121772;
+        Tue, 30 Mar 2021 06:12:45 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1617102765;
+        bh=0jsNhfSoifLEWewqdcDh7xBYegM4KuhxB82BTLmVoVo=;
+        h=Date:From:To:CC:Subject:References:In-Reply-To;
+        b=cjna9/KcnapfdqfPLrvwkD6j4MjVFD3XEV/FNBoJ017JJZTqil+fNY7myyIctc48e
+         4CiR3WZr9npN+y6hplMahkPO1XBGlSWjQ777xUGTKf+dcXFeNbp2EFilcwXQqlVtIk
+         jT0ewhPx900xQKrBJSNT4vjB3hKhDnptsXJi0RAg=
+Received: from DLEE100.ent.ti.com (dlee100.ent.ti.com [157.170.170.30])
+        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 12UBCjOa028187
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Tue, 30 Mar 2021 06:12:45 -0500
+Received: from DLEE102.ent.ti.com (157.170.170.32) by DLEE100.ent.ti.com
+ (157.170.170.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Tue, 30
+ Mar 2021 06:12:44 -0500
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE102.ent.ti.com
+ (157.170.170.32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2 via
+ Frontend Transport; Tue, 30 Mar 2021 06:12:44 -0500
+Received: from localhost (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 12UBCilE054537;
+        Tue, 30 Mar 2021 06:12:44 -0500
+Date:   Tue, 30 Mar 2021 16:42:43 +0530
+From:   Pratyush Yadav <p.yadav@ti.com>
+To:     Brad Larson <brad@pensando.io>
+CC:     <linux-arm-kernel@lists.infradead.org>, <arnd@arndb.de>,
+        <linus.walleij@linaro.org>, <bgolaszewski@baylibre.com>,
+        <broonie@kernel.org>, <fancer.lancer@gmail.com>,
+        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <olof@lixom.net>, <linux-gpio@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH v2 10/13] dt-bindings: spi: cadence-qspi: Add support for
+ Pensando Elba SoC
+Message-ID: <20210330111243.ne23j7ycsvy634rw@ti.com>
+References: <20210329015938.20316-1-brad@pensando.io>
+ <20210329015938.20316-11-brad@pensando.io>
 MIME-Version: 1.0
-References: <20210325192834.42955-1-alcooperx@gmail.com>
-In-Reply-To: <20210325192834.42955-1-alcooperx@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 30 Mar 2021 12:44:36 +0200
-Message-ID: <CAPDyKFpNB6-=35FqM=74Obv1KEDJg-XC9kgegQbCA0Q+rKT4_g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Remove CQE quirk
-To:     Al Cooper <alcooperx@gmail.com>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <20210329015938.20316-11-brad@pensando.io>
+User-Agent: NeoMutt/20171215
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 25 Mar 2021 at 20:28, Al Cooper <alcooperx@gmail.com> wrote:
->
-> Remove the CQHCI_QUIRK_SHORT_TXFR_DESC_SZ quirk because the
-> latest chips have this fixed and earlier chips have other
-> CQE problems that prevent the feature from being enabled.
->
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+Hi Brad,
 
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+On 28/03/21 06:59PM, Brad Larson wrote:
+> Add new vendor Pensando Systems Elba SoC compatible
+> string and convert to json-schema.
+> 
+> Signed-off-by: Brad Larson <brad@pensando.io>
 > ---
->  drivers/mmc/host/sdhci-brcmstb.c | 1 -
->  1 file changed, 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index f9780c65ebe9..f24623aac2db 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -199,7 +199,6 @@ static int sdhci_brcmstb_add_host(struct sdhci_host *host,
->         if (dma64) {
->                 dev_dbg(mmc_dev(host->mmc), "Using 64 bit DMA\n");
->                 cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
-> -               cq_host->quirks |= CQHCI_QUIRK_SHORT_TXFR_DESC_SZ;
->         }
->
->         ret = cqhci_init(cq_host, host->mmc, dma64);
->
-> base-commit: e138138003eb3b3d06cc91cf2e8c5dec77e2a31e
-> --
-> 2.17.1
->
+>  .../bindings/spi/cadence-quadspi.txt          |  68 --------
+>  .../bindings/spi/cadence-quadspi.yaml         | 153 ++++++++++++++++++
+>  2 files changed, 153 insertions(+), 68 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/spi/cadence-quadspi.txt
+>  create mode 100644 Documentation/devicetree/bindings/spi/cadence-quadspi.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/spi/cadence-quadspi.txt b/Documentation/devicetree/bindings/spi/cadence-quadspi.txt
+> deleted file mode 100644
+> index 8ace832a2d80..000000000000
+> --- a/Documentation/devicetree/bindings/spi/cadence-quadspi.txt
+> +++ /dev/null
+> @@ -1,68 +0,0 @@
+> -* Cadence Quad SPI controller
+> -
+> -Required properties:
+> -- compatible : should be one of the following:
+> -	Generic default - "cdns,qspi-nor".
+> -	For TI 66AK2G SoC - "ti,k2g-qspi", "cdns,qspi-nor".
+> -	For TI AM654 SoC  - "ti,am654-ospi", "cdns,qspi-nor".
+> -	For Intel LGM SoC - "intel,lgm-qspi", "cdns,qspi-nor".
+> -- reg : Contains two entries, each of which is a tuple consisting of a
+> -	physical address and length. The first entry is the address and
+> -	length of the controller register set. The second entry is the
+> -	address and length of the QSPI Controller data area.
+> -- interrupts : Unit interrupt specifier for the controller interrupt.
+> -- clocks : phandle to the Quad SPI clock.
+> -- cdns,fifo-depth : Size of the data FIFO in words.
+> -- cdns,fifo-width : Bus width of the data FIFO in bytes.
+> -- cdns,trigger-address : 32-bit indirect AHB trigger address.
+> -
+> -Optional properties:
+> -- cdns,is-decoded-cs : Flag to indicate whether decoder is used or not.
+> -- cdns,rclk-en : Flag to indicate that QSPI return clock is used to latch
+> -  the read data rather than the QSPI clock. Make sure that QSPI return
+> -  clock is populated on the board before using this property.
+> -
+> -Optional subnodes:
+> -Subnodes of the Cadence Quad SPI controller are spi slave nodes with additional
+> -custom properties:
+> -- cdns,read-delay : Delay for read capture logic, in clock cycles
+> -- cdns,tshsl-ns : Delay in nanoseconds for the length that the master
+> -                  mode chip select outputs are de-asserted between
+> -		  transactions.
+> -- cdns,tsd2d-ns : Delay in nanoseconds between one chip select being
+> -                  de-activated and the activation of another.
+> -- cdns,tchsh-ns : Delay in nanoseconds between last bit of current
+> -                  transaction and deasserting the device chip select
+> -		  (qspi_n_ss_out).
+> -- cdns,tslch-ns : Delay in nanoseconds between setting qspi_n_ss_out low
+> -                  and first bit transfer.
+> -- resets	: Must contain an entry for each entry in reset-names.
+> -		  See ../reset/reset.txt for details.
+> -- reset-names	: Must include either "qspi" and/or "qspi-ocp".
+> -
+> -Example:
+> -
+> -	qspi: spi@ff705000 {
+> -		compatible = "cdns,qspi-nor";
+> -		#address-cells = <1>;
+> -		#size-cells = <0>;
+> -		reg = <0xff705000 0x1000>,
+> -		      <0xffa00000 0x1000>;
+> -		interrupts = <0 151 4>;
+> -		clocks = <&qspi_clk>;
+> -		cdns,is-decoded-cs;
+> -		cdns,fifo-depth = <128>;
+> -		cdns,fifo-width = <4>;
+> -		cdns,trigger-address = <0x00000000>;
+> -		resets = <&rst QSPI_RESET>, <&rst QSPI_OCP_RESET>;
+> -		reset-names = "qspi", "qspi-ocp";
+> -
+> -		flash0: n25q00@0 {
+> -			...
+> -			cdns,read-delay = <4>;
+> -			cdns,tshsl-ns = <50>;
+> -			cdns,tsd2d-ns = <50>;
+> -			cdns,tchsh-ns = <4>;
+> -			cdns,tslch-ns = <4>;
+> -		};
+> -	};
+> diff --git a/Documentation/devicetree/bindings/spi/cadence-quadspi.yaml b/Documentation/devicetree/bindings/spi/cadence-quadspi.yaml
+> new file mode 100644
+> index 000000000000..94d631045153
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/spi/cadence-quadspi.yaml
+> @@ -0,0 +1,153 @@
+> +# SPDX-License-Identifier: GPL-2.0-only
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/spi/cadence-quadspi.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Cadence Quad SPI controller
+> +
+> +maintainers:
+> +  - Ramuthevar Vadivel Murugan <vadivel.muruganx.ramuthevar@linux.intel.com>
+> +  - Brad Larson <brad@pensando.io>
+> +
+> +properties:
+> +  compatible:
+> +    contains:
+> +      enum:
+> +        - cdns,qspi-nor       # Generic default
+> +        - ti,k2g-qspi         # TI 66AK2G SoC
+> +        - ti,am654-ospi       # TI AM654 SoC
+> +        - intel,lgm-qspi      # Intel LGM SoC
+> +        - pensando,cdns-qspi  # Pensando Elba SoC
+
+Wouldn't this allow any combination of all 5 strings? So for example 
+this would allow "ti,am654-ospi", "pensando,cdns-qspi" which is 
+obviously not correct.
+
+I sent a patch recently [0] that does this correctly and it has gotten 
+Rob's blessing. So I suggest you build your patch on top of that.
+
+[...]
+
+[0] https://patchwork.kernel.org/project/spi-devel-general/patch/20210326130034.15231-5-p.yadav@ti.com/
+
+-- 
+Regards,
+Pratyush Yadav
+Texas Instruments Inc.
