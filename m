@@ -2,288 +2,880 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9100C433DB
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 21:37:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8560EC433E0
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 21:56:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B597961953
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 21:37:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 609C161990
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 21:56:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232750AbhC3VhD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Mar 2021 17:37:03 -0400
-Received: from userp2120.oracle.com ([156.151.31.85]:46810 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232607AbhC3Vgb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 17:36:31 -0400
-Received: from pps.filterd (userp2120.oracle.com [127.0.0.1])
-        by userp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 12ULOe5q011567;
-        Tue, 30 Mar 2021 21:36:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
- references : from : message-id : date : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2020-01-29;
- bh=VVmQMCfDGZcQiW8suG6MkAFcPAGlGxOFMJHLB/Rc6mU=;
- b=l621/FfT2J36RA+lqg7dFd3e9VEPYRjKgf0lEXF7ShPkl6Wlcb/M5WUanJQ6OKJRjM+J
- mau4kbcSLb8Mt9RI56agI6fMnp78ihTWRr6uIuZBKQTJ54TJPb3spqTq1mBQzYnqI/Yt
- msaDzNy4hOJa057ognDz9Utl1rkAdXfA6nORHMZwq9n1+x5ID+p9JVn01Yi82Yrq6miG
- f0T7rhgwtoyXkWUHk2eHrY4xQFdSgE69ikAL58d0J+XDqWK06hGxK6/Qt9qwbEWIx/Wa
- 9fajqpqd/MpjCxBzaHxdJZTaqqi+/ho9pIrsi5tftJdtnuf9/F0fbrblqK5LX6NUwxex zg== 
-Received: from userp3030.oracle.com (userp3030.oracle.com [156.151.31.80])
-        by userp2120.oracle.com with ESMTP id 37mab3g9hy-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 30 Mar 2021 21:36:18 +0000
-Received: from pps.filterd (userp3030.oracle.com [127.0.0.1])
-        by userp3030.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 12ULPR5p105742;
-        Tue, 30 Mar 2021 21:36:17 GMT
-Received: from nam10-mw2-obe.outbound.protection.outlook.com (mail-mw2nam10lp2108.outbound.protection.outlook.com [104.47.55.108])
-        by userp3030.oracle.com with ESMTP id 37mabkbmu7-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 30 Mar 2021 21:36:17 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=mU6IL7tnxL1HZYM7o2XrLXUvEWCW1sRWxj0pCD/Qs/LpoFGBg7O8jNyBWp7h2Gy3ZrVdpTuvWI6OMWt6Bp8xebW24zLa2xBr3fC+YbKUzxv0ngAa6Re4dBj5KQWrYG1LWKGu3YT3e6ZZ3szhzq1byyPoNj3IGYCxyLvcOVFgAzNfLXf9Koeers6R7iPR//KWdigSGo2Y1wDcEryzzc07ge5SiPNWb/MuKiCAHDOBio+W4wwHM0f7DcKu5NiKSo9mUkP6mu5S9jhLSBG6A5xO0y0K9Nqk4e28xiB24JDT3gg+RWqCKiCIdbrbacqZrHfnxqTLAvzc/MYiNuq0CW4weA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=VVmQMCfDGZcQiW8suG6MkAFcPAGlGxOFMJHLB/Rc6mU=;
- b=oY3ii5t8e0iJvW3CXnCYh6b0t9Uve0FHV9PEKO87bcgx7AcL7mdVpbNlYGbl99eFKfLmjt1r+GprGf5pkUhkFyLlTeC1RUyZVjRyNIk+Azk/L1LGOLZTaSe/FxmdNTk5Df492LKuQdmj3hTgJnj0qquuGvqGIWdzwboTJoKo/9YCY4/1nJJBk+9uGrPnSG6uFK9cph9/srbFDTBhtFwU9i99vT+LXcIFwr8YRcAVlS00/FG9H09Nk0ONoUksgHQVLvrKpTrL3K2l0++TniBqUdl2V70vFr+0cU7gfphRhqsFktlx+VQl1K2DXMk7xB+RFY4EoTgb2QZCmes8UKFSDw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=VVmQMCfDGZcQiW8suG6MkAFcPAGlGxOFMJHLB/Rc6mU=;
- b=Iz2Bs6qX8WMKvlEYf1YGNdic3+z46e0FR8RQM/GF0Za+felZXZMl17jdNe0tHztuFwU8oFMsoDLrXwM/AXcc3lEwrXfTla+Fzj2MRmTRRaKebMqZEzeqp3G40U1DyWUo+KhHVal1AMhrlsoNJG81SmJ3YfK9w9XsFZOTw3p43Vs=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=oracle.com;
-Received: from CY4PR10MB1815.namprd10.prod.outlook.com (2603:10b6:903:125::10)
- by CY4PR1001MB2261.namprd10.prod.outlook.com (2603:10b6:910:41::14) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3977.29; Tue, 30 Mar
- 2021 21:36:13 +0000
-Received: from CY4PR10MB1815.namprd10.prod.outlook.com
- ([fe80::79ca:ca5b:119d:e873]) by CY4PR10MB1815.namprd10.prod.outlook.com
- ([fe80::79ca:ca5b:119d:e873%5]) with mapi id 15.20.3977.033; Tue, 30 Mar 2021
- 21:36:13 +0000
-Subject: Re: [External] : Re: [PATCH v2] mmc-utils: Add eMMC erase command
- support
-To:     Ulf Hansson <ulf.hansson@linaro.org>, Bean Huo <huobean@gmail.com>
-Cc:     "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        kenny.gibbons@oracle.com, rkamdar@micron.com,
-        Chris Ball <chris@printf.net>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-References: <20210324164408.14722-1-huobean@gmail.com>
- <CAPDyKFq8oMH-qga_d+EP2T1xbCbq7PHK=ZkrUp0JaWmdcHYvRg@mail.gmail.com>
-From:   kimito.sakata@oracle.com
-Message-ID: <7a774027-ad2c-21bf-8cb0-eaa92a76bad7@oracle.com>
-Date:   Tue, 30 Mar 2021 15:36:11 -0600
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.9.0
-In-Reply-To: <CAPDyKFq8oMH-qga_d+EP2T1xbCbq7PHK=ZkrUp0JaWmdcHYvRg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
-X-Originating-IP: [73.243.79.162]
-X-ClientProxiedBy: SA9PR13CA0143.namprd13.prod.outlook.com
- (2603:10b6:806:27::28) To CY4PR10MB1815.namprd10.prod.outlook.com
- (2603:10b6:903:125::10)
+        id S232469AbhC3V4M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Mar 2021 17:56:12 -0400
+Received: from mail-ot1-f46.google.com ([209.85.210.46]:37515 "EHLO
+        mail-ot1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229734AbhC3Vzo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 17:55:44 -0400
+Received: by mail-ot1-f46.google.com with SMTP id t23-20020a0568301e37b02901b65ab30024so17035369otr.4;
+        Tue, 30 Mar 2021 14:55:44 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=2YL7MfkfU9pvp2Z2gQyXkORByhXwBoo3PRAs4RGTpKg=;
+        b=B5XwfglMosMbQXP7x9eV0nta16fh6Nboafc0Ro4fdn7G5m0VrdImMhFXwNGX4cKwBK
+         PFvjf48FqABVpKIWyNNitscmCWSd+1YuDiptAGQq6KiPhHy7AoweVR4orIfJMYallJWA
+         mOGqC+7R1BCuaymERqrUSO+rjFXS5qnKkWFcwdLCl3K5s5EbpPnYd0gbWZlywccg0Tb4
+         ys16f/q4gUOzbrHI6MSIF4XeT3F/n0yFs8yZ/HCU7AqvU7LfrffmnqqdTGpzpdhg/hD6
+         UQHNPWafvByhU7c+qYy3LbrsfAtMWaMPt133pydv0TDjlnQRUd3o0lv8E7VIcc81r7mS
+         RuBA==
+X-Gm-Message-State: AOAM530fhmoQgRgUe8PCWo11gypCmTdxV/ibLNvTgCbrHeY9BZY/Xkis
+        vppBpYdSZjokupUKtjJyCqNqlEY/Sw==
+X-Google-Smtp-Source: ABdhPJxfAybMNcEyiChm9K9/O+BaVTetbAGdT1C/y5ztfQMjF2iC4YwZti+Aa5FDQpRnjF1GoyxJog==
+X-Received: by 2002:a9d:3a4a:: with SMTP id j68mr53392otc.4.1617141343796;
+        Tue, 30 Mar 2021 14:55:43 -0700 (PDT)
+Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id f8sm73086oij.4.2021.03.30.14.55.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 30 Mar 2021 14:55:43 -0700 (PDT)
+Received: (nullmailer pid 782988 invoked by uid 1000);
+        Tue, 30 Mar 2021 21:55:41 -0000
+Date:   Tue, 30 Mar 2021 16:55:41 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm-kernel@lists.infradead.org, arnd@arndb.de,
+        linus.walleij@linaro.org, bgolaszewski@baylibre.com,
+        broonie@kernel.org, fancer.lancer@gmail.com,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org, olof@lixom.net,
+        linux-gpio@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2 07/13] arm64: dts: Add Pensando Elba SoC support
+Message-ID: <20210330215541.GA729679@robh.at.kernel.org>
+References: <20210329015938.20316-1-brad@pensando.io>
+ <20210329015938.20316-8-brad@pensando.io>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from [192.168.0.208] (73.243.79.162) by SA9PR13CA0143.namprd13.prod.outlook.com (2603:10b6:806:27::28) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3999.16 via Frontend Transport; Tue, 30 Mar 2021 21:36:13 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: fb7724a2-d2a3-4f49-d78e-08d8f3c3d7bb
-X-MS-TrafficTypeDiagnostic: CY4PR1001MB2261:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <CY4PR1001MB22613943C31C6980366F12609D7D9@CY4PR1001MB2261.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:10000;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: jp89kCsCPJfnuCdzLdk3JIZmqx66l/uUmYW869F8312omKBWzywgiS0Xbbj4AZTD/uj4O1/89yeCE4nCJK6oGiYpgkf4BONfgbsqV4mFqgjvMSGX/eTQ0zHdYxLQJSmSZelwmvhWjY2CWwpSZS30fI/wH8jRM2qmiLvcSswx2Go34ua0FWq7ge0u6GL/p+8LM+2JCcacK4m94ABKu+A4rNRguXtMH263Q2YqV7aFwEqgA6+kCSuEVMGD2VGBcGNhBBdp3Cl8jW+09api97U3SNqbDw9dFSRQdlAg7X/n3d8bj2BEhx0NbtBvOYNhSY7UaVt/83Vp+igqXtQE3CeNA53mue097Ey8pJbZI8HTUOwufmeYG/OR5JKMedDFKqEgMsTZgBuy0j+gM2j/8PDOuhLdmfCFzmj3nE2fj/PlYMAMHMLs1kfnFqT3xg8lGUGj7laVa0QITtd2CIV2ZGpd8H6Yg38vVQgMeZsTI+TpvCjo4q63hGRafQu0simmIdPilPVBPCVnjSc0TjjnYjXIPfOYhyKHDq3Yj5BOBei4MMqKTBWlYeXMVj4wU5tKiWnAEl08NlN+Qo1dFEj5PjUv6k+X5JoPlgmPU8LTNCxeaaTae+/xKF9zw2yoaeOrnMbWEEDgQntCA35EFdRBJoVf8CJARNVz0UOaLtELj9gbA6nvDR1ARTaZyxcexzTltD0N
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CY4PR10MB1815.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(136003)(346002)(39860400002)(396003)(366004)(376002)(66476007)(316002)(2616005)(956004)(8676002)(83380400001)(8936002)(478600001)(66556008)(110136005)(16576012)(9686003)(31686004)(4326008)(66946007)(86362001)(5660300002)(36756003)(2906002)(53546011)(6486002)(26005)(31696002)(54906003)(186003)(16526019)(38100700001)(43740500002);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?utf-8?B?Qjg3TDA0OHlhd1JYTlVNNEFIa2hJbEJ4eUs2RTlEeEQ4R0ZEcEN2WTVnN0xB?=
- =?utf-8?B?RkM4Q1VScXJWdjQzcUdHSllJcFR0WVFKaDZsR0h6SVlJU3R2Yy9FU1hFNld3?=
- =?utf-8?B?bnFQb0JaaFEzTkdmMkhQMGJSOWVjS0pXMXV5aXBqRmRVUGJUQXV0RFVwSUd0?=
- =?utf-8?B?TDNKQnE1N3R2N2N3K0xQRE03MzQ4a3BBUGl3Wk5jc2E0eFdtL0pDM2JaOVF0?=
- =?utf-8?B?cTdheHNSUmR0MTdGbDVLeDU2SnFJM1lSMVhKOUhTamNWZzdTZmVJd21jQjNN?=
- =?utf-8?B?M2FpeHRFejVyRWo4VERPVkV3L0JqRzdGaXM5dEN0MHhlSGhpcjRJZlcvUW9D?=
- =?utf-8?B?M1hTaGhDN2JwYjZob0FHZTJBVWxNWS8wZlZOa1JtZVN6azVEZUhjd0JRWGVQ?=
- =?utf-8?B?c1FJSDdJeTVmcjZVU3FLZWovZS9LaWF4UExHTFZMK3dXcEtTQzBPL1JESldS?=
- =?utf-8?B?QVBORG5lalN0NkY3MC9QU0IxWGVRNDRPeHIrWXRhT0FucWNxaHpyc3g3NklT?=
- =?utf-8?B?UVRYcEd1OFZlMU1BMkFjMGtrUmthSFJ4STV1MUtQVWR3bUNXaEhjUjZWMlVs?=
- =?utf-8?B?VDNtMndYaDR3aGlINFczL2pRQTlXSTZlYnp6cDI2azVDL3F5aldXekVXR3hT?=
- =?utf-8?B?TTUvSU5ITkQ3WTA4ZHFGT0xGb2Uvb0J2dGxRcllYSUgxQXFmRkw0M29BelhS?=
- =?utf-8?B?K3p1WFlmcFREQ0JyYjczc2RFelpqdlUxc1l4NmJ2MVF3aGx3K3hOekpUNU1k?=
- =?utf-8?B?bWJBV0dyNitIdXdxNXR5dHpKVm81dWVxYnJ2SldnWTVhWEQ3OFNzZm5Edmx3?=
- =?utf-8?B?QVNRV1ZzTlZOZElvd1Q5WlFidFBRSEJlMm9sRmlNWHpnQ2ZHNWJwNFlXZFdJ?=
- =?utf-8?B?UUhKVmt2SzEyZ2pQSWtPcnhLdFNqUHdvTnR3ZkRjQTN2Zm5BdUFiaVltdnFx?=
- =?utf-8?B?Zm1WTjA0YWw5aDVNdE44dXAwTkQ1MlZpWXhGZkIvU1FtaE9PcG5UUEZJd3Qz?=
- =?utf-8?B?aU5SaGk0bkg1UHhlS3dCeGV6UmtKOFBhY0UzanVLNHFPbVlPcFpMYlRuTmla?=
- =?utf-8?B?dkVvRnBpLytiOXErWWxiQStQc1FZUmRWMGtEelFtYTdMT1dxK3d4a1hPNWxV?=
- =?utf-8?B?ajR3ZktaQnc5eVJJZnF0c3hVQjdEWWhCa3lQY1o2RDF3L2EyT2R4dkdsd1By?=
- =?utf-8?B?UktQNzNLa1NNTEpEaHdsOEc2dHcrUU5keGVPZzY2S3NRTWRCT3o3ODZUVWsr?=
- =?utf-8?B?YWcvcm1RaHpReXgzVHJ1dnlRN2Q2VGp3RHI0QXlUOGpVV3ZEakVRcDdYNUNi?=
- =?utf-8?B?U3d1ZnM3d3NSZkxMRUNCaFg2MDNLdm5yNDJoaTFwKzJrY2JNbS9oSEMyQzdM?=
- =?utf-8?B?eWpOT092ZFdqZUk5cERDVHIyY1ZnQzY1L1Q4RDlqRTlvU3BSTXRWM25qeXJJ?=
- =?utf-8?B?Qm8vVlQ3QTQzZ1dMeXhob1FPbzkvNEJTQTQ0aThvTlpOblFYNjVrMHRnQ0kr?=
- =?utf-8?B?ZUVjVzNUMGdMdWU0UjREdUlGMFl1WnNBWStGeVUzZXdIaG02NGRNaGZhUE9q?=
- =?utf-8?B?YkpEdFhlbE9YM2w4dEQybHpSVUcxdDdxTnNlNG9SSVdBQlM0MmMzazczcWp0?=
- =?utf-8?B?elF0M1BMSXFvY0xSZGpZSk9jOGRkYVA0UUVVRnVkNWp0SUJ5ME9QdmZRaHcy?=
- =?utf-8?B?ZXp5c2ZlUCtwVHRmUEFqODZSMVdKTS82ekRUOXFZS0FlRkg2VHJWZkVTaEF6?=
- =?utf-8?Q?Tz17iqZAkpc1ppd12DYizL7YCnWwA8Rqf5kl7ca?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: fb7724a2-d2a3-4f49-d78e-08d8f3c3d7bb
-X-MS-Exchange-CrossTenant-AuthSource: CY4PR10MB1815.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Mar 2021 21:36:13.7808
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: py9PswGdKQVDQSh1PyfebxxHVfk3OoANgAP+Hve9WLQRxR3j/03+9rQKpbUY3RhcYee/uEAGDofrUrQI/qAwfajXrFt8/+XW34z34AJdEJk=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY4PR1001MB2261
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9939 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 malwarescore=0
- mlxlogscore=999 phishscore=0 suspectscore=0 spamscore=0 adultscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2103300000 definitions=main-2103300156
-X-Proofpoint-ORIG-GUID: RsTbwtpiyZSYQVlF5t7mgWcTcZQTO5Nn
-X-Proofpoint-GUID: RsTbwtpiyZSYQVlF5t7mgWcTcZQTO5Nn
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9939 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxscore=0 lowpriorityscore=0
- spamscore=0 priorityscore=1501 phishscore=0 malwarescore=0 suspectscore=0
- clxscore=1011 impostorscore=0 adultscore=0 bulkscore=0 mlxlogscore=999
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2103300000
- definitions=main-2103300156
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210329015938.20316-8-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Sun, Mar 28, 2021 at 06:59:32PM -0700, Brad Larson wrote:
+> Add Pensando common and Elba SoC specific device nodes
 
+Build your dtb with W=1 and 'make dtbs_check' and fix warnings.
 
-On 3/30/2021 6:39 AM, Ulf Hansson wrote:
-> On Wed, 24 Mar 2021 at 17:45, Bean Huo <huobean@gmail.com> wrote:
->> From: Kimito Sakata <kimito.sakata@oracle.com>
->>
->> we have been using this erase feature for a while, but it is
->> still not merged into the upstream mmc-utils. Especially, for
->> the customer, every time when they update the mmc-utils, they
->> should re-install this patch again, let's try to make this
->> erase command upstreamed in the mmc-utils.
->>
->> Co-developed-by: Bean Huo <beanhuo@micron.com>
->> Signed-off-by: Bean Huo <beanhuo@micron.com>
->> Reviewed-by: Kenneth Gibbons <kenny.gibbons@oracle.com>
->> ---
->>
->> Hi Ulf,
->> Please help us review this mmc-utils patch, and if agree, it is
->> possible to make it merged in the official mmc-utils.
->>
->> Changelog:
->>
->> V1--V2:
->>      1. refactor Kimito's original patch
->>      2. change to use MMC_IOC_MULTI_CMD
->>      3. add checkup if eMMC devie supports secure erase/trim
->>
->> ---
->>   mmc.c      |   8 ++++
->>   mmc.h      |  13 +++++-
->>   mmc_cmds.c | 135 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>   mmc_cmds.h |   1 +
->>   4 files changed, 156 insertions(+), 1 deletion(-)
->>
->> diff --git a/mmc.c b/mmc.c
->> index 50c9c9e..cb29a65 100644
->> --- a/mmc.c
->> +++ b/mmc.c
->> @@ -215,6 +215,14 @@ static struct Command commands[] = {
->>                  "Run Field Firmware Update with <image name> on <device>.\n",
->>            NULL
->>          },
->> +       { do_erase, -4,
->> +       "erase", "<type> " "<start address> " "<end address> " "<device>\n"
->> +               "Send Erase CMD38 with specific argument to the <device>\n\n"
->> +               "NOTE!: This will delete all user data in the specified region of the device\n"
->> +               "<type> must be: legacy | discard | secure-erase | "
->> +               "secure-trim1 | secure-trim2 | trim \n",
->> +       NULL
->> +       },
->>          { 0, 0, 0, 0 }
->>   };
->>
->> diff --git a/mmc.h b/mmc.h
->> index 648fb26..90b7fb5 100644
->> --- a/mmc.h
->> +++ b/mmc.h
->> @@ -34,7 +34,15 @@
->>   #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
->>   #define MMC_CLEAR_WRITE_PROT   29    /* ac   [31:0] data addr   R1b */
->>   #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
->> -
->> +#define MMC_ERASE_GROUP_START  35    /* ac   [31:0] data addr   R1  */
->> +#define MMC_ERASE_GROUP_END    36    /* ac   [31:0] data addr   R1  */
->> +#define MMC_ERASE              38    /* ac   [31] Secure request
->> +                                             [30:16] set to 0
->> +                                             [15] Force Garbage Collect request
->> +                                             [14:2] set to 0
->> +                                             [1] Discard Enable
->> +                                             [0] Identify Write Blocks for
->> +                                             Erase (or TRIM Enable)  R1b */
->>   /*
->>    * EXT_CSD fields
->>    */
->> @@ -61,6 +69,7 @@
->>   #define EXT_CSD_CACHE_SIZE_2           251
->>   #define EXT_CSD_CACHE_SIZE_1           250
->>   #define EXT_CSD_CACHE_SIZE_0           249
->> +#define EXT_CSD_SEC_FEATURE_SUPPORT    231
->>   #define EXT_CSD_BOOT_INFO              228     /* R/W */
->>   #define EXT_CSD_HC_ERASE_GRP_SIZE      224
->>   #define EXT_CSD_HC_WP_GRP_SIZE         221
->> @@ -177,6 +186,8 @@
->>   #define EXT_CSD_REV_V4_2               2
->>   #define EXT_CSD_REV_V4_1               1
->>   #define EXT_CSD_REV_V4_0               0
->> +#define EXT_CSD_SEC_GB_CL_EN           (1<<4)
->> +#define EXT_CSD_SEC_ER_EN              (1<<0)
->>
->>
->>   /* From kernel linux/mmc/core.h */
->> diff --git a/mmc_cmds.c b/mmc_cmds.c
->> index fb37189..17986e3 100644
->> --- a/mmc_cmds.c
->> +++ b/mmc_cmds.c
->> @@ -2435,6 +2435,141 @@ int do_cache_dis(int nargs, char **argv)
->>          return do_cache_ctrl(0, nargs, argv);
->>   }
->>
->> +static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
->> +{
->> +#ifndef MMC_IOC_MULTI_CMD
-> In kernel v4.4 we added the multi cmd support, which is quite some
-> time ago. So, I think it's time to drop these ifdef hackary from the
-> userland tool. At least, we shouldn't need it for new kinds of
-> features that we add.
-Ulf
-Do you want us to take out the  MMC_IOC_MULTI_CMD ifdef and resubmit?
-Kimito
+> 
+> Signed-off-by: Brad Larson <brad@pensando.io>
+> ---
+>  arch/arm64/boot/dts/Makefile                  |   1 +
+>  arch/arm64/boot/dts/pensando/Makefile         |   6 +
+>  arch/arm64/boot/dts/pensando/elba-16core.dtsi | 170 ++++++++++
+>  .../boot/dts/pensando/elba-asic-common.dtsi   | 112 +++++++
+>  arch/arm64/boot/dts/pensando/elba-asic.dts    |   7 +
+>  .../boot/dts/pensando/elba-flash-parts.dtsi   |  78 +++++
+>  arch/arm64/boot/dts/pensando/elba.dtsi        | 310 ++++++++++++++++++
+>  7 files changed, 684 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/pensando/Makefile
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-16core.dtsi
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-asic.dts
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
+>  create mode 100644 arch/arm64/boot/dts/pensando/elba.dtsi
+> 
+> diff --git a/arch/arm64/boot/dts/Makefile b/arch/arm64/boot/dts/Makefile
+> index f1173cd93594..c85db0a097fe 100644
+> --- a/arch/arm64/boot/dts/Makefile
+> +++ b/arch/arm64/boot/dts/Makefile
+> @@ -19,6 +19,7 @@ subdir-y += marvell
+>  subdir-y += mediatek
+>  subdir-y += microchip
+>  subdir-y += nvidia
+> +subdir-y += pensando
+>  subdir-y += qcom
+>  subdir-y += realtek
+>  subdir-y += renesas
+> diff --git a/arch/arm64/boot/dts/pensando/Makefile b/arch/arm64/boot/dts/pensando/Makefile
+> new file mode 100644
+> index 000000000000..0c2c0961e64a
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/Makefile
+> @@ -0,0 +1,6 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +dtb-$(CONFIG_ARCH_PENSANDO_ELBA_SOC) += elba-asic.dtb
+> +
+> +always-y	:= $(dtb-y)
+> +subdir-y	:= $(dts-dirs)
+> +clean-files	:= *.dtb
+> diff --git a/arch/arm64/boot/dts/pensando/elba-16core.dtsi b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
+> new file mode 100644
+> index 000000000000..a6c47899b69a
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-16core.dtsi
+> @@ -0,0 +1,170 @@
+> +
+> +/ {
+> +	cpus {
+> +		#address-cells = <2>;
+> +		#size-cells = <0>;
+> +
+> +		cpu-map {
+> +			cluster0 {
+> +				core0 { cpu = <&cpu0>; };
+> +				core1 { cpu = <&cpu1>; };
+> +				core2 { cpu = <&cpu2>; };
+> +				core3 { cpu = <&cpu3>; };
+> +			};
+> +			cluster1 {
+> +				core0 { cpu = <&cpu4>; };
+> +				core1 { cpu = <&cpu5>; };
+> +				core2 { cpu = <&cpu6>; };
+> +				core3 { cpu = <&cpu7>; };
+> +			};
+> +			cluster2 {
+> +				core0 { cpu = <&cpu8>; };
+> +				core1 { cpu = <&cpu9>; };
+> +				core2 { cpu = <&cpu10>; };
+> +				core3 { cpu = <&cpu11>; };
+> +			};
+> +			cluster3 {
+> +				core0 { cpu = <&cpu12>; };
+> +				core1 { cpu = <&cpu13>; };
+> +				core2 { cpu = <&cpu14>; };
+> +				core3 { cpu = <&cpu15>; };
+> +			};
+> +		};
+> +
+> +		// CLUSTER 0
+> +		cpu0: cpu@0 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
 
->
->> +       fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
->> +                       " support, needed by erase.\n");
->> +       return -ENOTSUP;
->> +#else
->> +       int ret = 0;
->> +       struct mmc_ioc_multi_cmd *multi_cmd;
->> +
-> [...]
->
-> Kind regards
-> Uffe
+This should give you a warning.
 
+> +			reg = <0 0x0>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +		cpu1: cpu@1 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x1>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +		cpu2: cpu@2 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x2>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +		cpu3: cpu@3 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x3>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_0>;
+> +		};
+> +
+> +		l2_0: l2-cache0 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		// CLUSTER 1
+> +		cpu4: cpu@100 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x100>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +		cpu5: cpu@101 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x101>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +		cpu6: cpu@102 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x102>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +		cpu7: cpu@103 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x103>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_1>;
+> +		};
+> +
+> +		l2_1: l2-cache1 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		// CLUSTER 2
+> +		cpu8: cpu@200 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x200>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +		cpu9: cpu@201 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x201>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +		cpu10: cpu@202 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x202>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +		cpu11: cpu@203 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x203>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_2>;
+> +		};
+> +
+> +		l2_2: l2-cache2 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		// CLUSTER 3
+> +		cpu12: cpu@300 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x300>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +		cpu13: cpu@301 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x301>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +		cpu14: cpu@302 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x302>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +		cpu15: cpu@303 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72", "arm,armv8";
+> +			reg = <0 0x303>;
+> +			enable-method = "spin-table";
+> +			next-level-cache = <&l2_3>;
+> +		};
+> +
+> +		l2_3: l2-cache3 {
+> +			compatible = "cache";
+> +		};
+> +	};
+> +};
+> diff --git a/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+> new file mode 100644
+> index 000000000000..7de2c35e7fcc
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-asic-common.dtsi
+> @@ -0,0 +1,112 @@
+> +
+> +/ {
+> +	model = "Elba ASIC Board";
+> +
+> +	aliases {
+> +		serial0 = &uart0;
+> +                spi0 = &spi0;
+> +                spi1 = &qspi;
+> +	};
+> +
+> +	chosen {
+> +		stdout-path = "serial0:19200n8";
+> +	};
+> +};
+> +
+> +&ahb_clk {
+> +	clock-frequency = <400000000>;
+> +};
+> +
+> +&emmc_clk {
+> +	clock-frequency = <200000000>;
+> +};
+> +
+> +&flash_clk {
+> +	clock-frequency = <400000000>;
+> +};
+> +
+> +&ref_clk {
+> +	clock-frequency = <156250000>;
+> +};
+> +
+> +&qspi {
+> +	status = "okay";
+> +	flash0: mt25q@0 {
+
+flash@0
+
+> +		compatible = "jdec,spi-nor";
+
+jedec,spi-nor
+
+> +		reg = <0>;
+> +		spi-max-frequency = <40000000>;
+> +		spi-rx-bus-width = <2>;
+> +		m25p,fast-read;
+> +		cdns,read-delay = <0>;
+> +		cdns,tshsl-ns = <0>;
+> +		cdns,tsd2d-ns = <0>;
+> +		cdns,tchsh-ns = <0>;
+> +		cdns,tslch-ns = <0>;
+> +	};
+> +};
+> +
+> +&gpio0 {
+> +	status = "ok";
+> +};
+> +
+> +&emmc {
+> +	bus-width = <8>;
+> +	status = "ok";
+> +};
+> +
+> +&wdt0 {
+> +	status = "okay";
+> +};
+> +
+> +&i2c0 {
+> +	clock-frequency = <100000>;
+> +	status = "okay";
+> +	tmp451@4c {
+> +		compatible = "ti,tmp451";
+> +		reg = <0x4c>;
+> +	};
+> +	tps53659@62 {
+> +		compatible = "ti,tps53659";
+> +		reg = <0x62>;
+> +	};
+> +	pcf85263@51 {
+> +		compatible = "nxp,pcf85263";
+> +		reg = <0x51>;
+> +	};
+> +};
+> +
+> +&spi0 {
+> +	num-cs = <4>;
+> +	cs-gpios = <&spics 0 0>, <&spics 1 0>, <&porta 1 0>, <&porta 7 0>;
+> +	status = "okay";
+> +	spi@0 {
+
+'spi@' is reserved for SPI controllers.
+
+> +		compatible = "pensando,cpld";
+
+Any new compatibles need to be documented with schema.
+
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <0>;
+> +	};
+> +	spi@1 {
+> +		compatible = "pensando,cpld";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <1>;
+> +	};
+> +	spi@2 {
+> +		compatible = "pensando,cpld-rd1173";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <2>;
+> +		interrupt-parent = <&porta>;
+> +		interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+> +	};
+> +	spi@3 {
+> +		compatible = "pensando,cpld";
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		spi-max-frequency = <12000000>;
+> +		reg = <3>;
+> +	};
+> +};
+> diff --git a/arch/arm64/boot/dts/pensando/elba-asic.dts b/arch/arm64/boot/dts/pensando/elba-asic.dts
+> new file mode 100644
+> index 000000000000..d074b1f1574a
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-asic.dts
+> @@ -0,0 +1,7 @@
+> +
+> +/dts-v1/;
+> +
+> +#include "elba.dtsi"
+> +#include "elba-16core.dtsi"
+> +#include "elba-asic-common.dtsi"
+> +#include "elba-flash-parts.dtsi"
+> diff --git a/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi b/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
+> new file mode 100644
+> index 000000000000..7fff1d653592
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba-flash-parts.dtsi
+> @@ -0,0 +1,78 @@
+> +&flash0 {
+> +	partitions {
+> +		compatible = "fixed-partitions";
+
+This should just be moved into elba-asic-common.dtsi IMO unless you have 
+good reasons to keep it separate.
+
+> +		#address-cells = <1>;
+> +		#size-cells = <1>;
+> +		partition@0 {
+> +			label = "flash";
+> +			reg = <0x00010000 0x0fff0000>;
+> +		};
+> +		partition@f0000 {
+> +			label = "golduenv";
+> +			reg = <0x000f0000 0x00010000>;
+> +		};
+> +		partition@100000 {
+> +			label = "boot0";
+> +			reg = <0x00100000 0x00080000>;
+> +		};
+> +		partition@180000 {
+> +			label = "golduboot";
+> +			reg = <0x00180000 0x00200000>;
+> +		};
+> +		partition@400000 {
+> +			label = "goldfw";
+> +			reg = <0x00400000 0x03c00000>;
+> +		};
+> +		partition@4010000 {
+> +			label = "fwmap";
+> +			reg = <0x04010000 0x00020000>;
+> +		};
+> +		partition@4030000 {
+> +			label = "fwsel";
+> +			reg = <0x04030000 0x00020000>;
+> +		};
+> +		partition@4090000 {
+> +			label = "bootlog";
+> +			reg = <0x04090000 0x00020000>;
+> +		};
+> +		partition@40b0000 {
+> +			label = "panicbuf";
+> +			reg = <0x040b0000 0x00020000>;
+> +		};
+> +		partition@40d0000 {
+> +			label = "uservars";
+> +			reg = <0x040d0000 0x00020000>;
+> +		};
+> +		partition@4200000 {
+> +			label = "uboota";
+> +			reg = <0x04200000 0x00400000>;
+> +		};
+> +		partition@4600000 {
+> +			label = "ubootb";
+> +			reg = <0x04600000 0x00400000>;
+> +		};
+> +		partition@4a00000 {
+> +			label = "mainfwa";
+> +			reg = <0x04a00000 0x01000000>;
+> +		};
+> +		partition@5a00000 {
+> +			label = "mainfwb";
+> +			reg = <0x05a00000 0x01000000>;
+> +		};
+> +		partition@8000000 {
+> +			label = "diagfw";
+> +			reg = <0x08000000 0x07fe0000>;
+> +		};
+> +		partition@ffe0000 {
+> +			label = "ubootenv";
+> +			reg = <0x0ffe0000 0x00010000>;
+> +		};
+> +	};
+> +};
+> +
+> +&soc {
+> +	panicdump@740b0000 {
+> +		compatible = "pensando,capri-crash";
+> +		reg = <0x0 0x740b0000 0x0 0x00020000>;
+> +	};
+> +};
+> diff --git a/arch/arm64/boot/dts/pensando/elba.dtsi b/arch/arm64/boot/dts/pensando/elba.dtsi
+> new file mode 100644
+> index 000000000000..6f6cfab2b502
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/pensando/elba.dtsi
+> @@ -0,0 +1,310 @@
+> +
+
+You need SPDX license tags at the top of each file. checkpatch.pl should 
+tell you this.
+
+> +/*
+> + * Copyright (c) 2019, Pensando Systems Inc.
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
+> +
+> +#include "dt-bindings/interrupt-controller/arm-gic.h"
+> +
+> +/ {
+> +	compatible = "pensando,elba";
+
+This needs an SoC family schema.
+
+Generally this and 'model' should be in the same file (the board file).
+
+> +
+> +	interrupt-parent = <&gic>;
+> +	#address-cells = <2>;
+> +	#size-cells = <2>;
+> +
+> +	clocks {
+
+Drop this container node.
+
+> +		ahb_clk: oscillator0 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +		emmc_clk: oscillator2 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +		flash_clk: oscillator3 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +		ref_clk: oscillator4 {
+> +			compatible = "fixed-clock";
+> +			#clock-cells = <0>;
+> +		};
+> +	};
+> +
+> +	timer {
+> +		compatible = "arm,armv8-timer";
+> +		interrupts = <GIC_PPI 13 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>,
+> +			     <GIC_PPI 14 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>,
+> +			     <GIC_PPI 11 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>,
+> +			     <GIC_PPI 10 (GIC_CPU_MASK_SIMPLE(1) |
+> +					IRQ_TYPE_LEVEL_LOW)>;
+> +	};
+> +
+> +	pmu {
+> +		compatible = "arm,cortex-a72-pmu";
+> +		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(1) |
+> +				IRQ_TYPE_LEVEL_LOW)>;
+> +	};
+> +
+> +	/* Common UIO device for MSI drivers */
+> +	uio_penmsi {
+> +		compatible = "pensando,uio_penmsi";
+> +		name = "uio_penmsi";
+
+No. What's UIO?
+
+> +	};
+> +
+> +
+> +	soc: soc {
+> +		compatible = "simple-bus";
+> +		#address-cells = <2>;
+> +		#size-cells = <2>;
+> +		ranges;
+> +
+> +		gic: interrupt-controller@800000 {
+
+Order nodes by increasing unit address.
+
+> +			compatible = "arm,gic-v3";
+> +			#interrupt-cells = <3>;
+> +			#address-cells = <2>;
+> +			#size-cells = <2>;
+> +			ranges;
+> +			interrupt-controller;
+> +			reg = <0x0 0x800000 0x0 0x200000>,	// GICD
+> +			      <0x0 0xa00000 0x0 0x200000>;	// GICR
+> +			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
+> +
+> +			its: interrupt-controller@820000 {
+> +				compatible = "arm,gic-v3-its";
+> +				msi-controller;
+> +				#msi-cells = <1>;
+> +				reg = <0x0 0x820000 0x0 0x10000>;
+> +				socionext,synquacer-pre-its =
+> +							<0xc00000 0x1000000>;
+> +			};
+> +		};
+> +
+> +		/*
+> +		 * Until we  know the interrupt domain following this, we
+> +		 * are forced to use this is the place where interrupts from
+> +		 * PCI converge. In the ideal case, we use one domain higher,
+> +		 * where the PCI-ness has been shed.
+> +		 */
+> +		pxc0_intr: intc@20102200 {
+
+interrupt-controller@...
+
+> +			compatible = "pensando,soc-ictlr-csrintr";
+> +			interrupt-controller;
+> +			reg = <0x0 0x20102200 0x0 0x4>;
+> +			#interrupt-cells = <3>;
+> +			interrupt-parent = <&gic>;
+> +			interrupts = <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "pxc0_intr";
+> +		};
+> +
+> +		uart0: serial@4800 {
+> +			device_type = "serial";
+
+Drop 'device_type'. It's deprecated for all but memory and pci.
+
+> +			compatible = "ns16550a";
+> +			reg = <0x0 0x4800 0x0 0x100>;
+> +			clocks = <&ref_clk>;
+> +			interrupts = <GIC_SPI 2 IRQ_TYPE_LEVEL_HIGH>;
+> +			reg-shift = <2>;
+> +			reg-io-width = <4>;
+> +		};
+> +
+> +		qspi: spi@2400 {
+> +			compatible = "pensando,cdns-qspi";
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			reg = <0x0 0x2400 0x0 0x400>,
+> +			      <0x0 0x7fff0000 0x0 0x1000>;
+> +			interrupts = <GIC_SPI 0 IRQ_TYPE_LEVEL_HIGH>;
+> +			clocks = <&flash_clk>;
+> +			cdns,fifo-depth = <1024>;
+> +			cdns,fifo-width = <4>;
+> +			cdns,trigger-address = <0x7fff0000>;
+> +			status = "disabled";
+> +		};
+> +
+> +		gpio0: gpio@4000 {
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			compatible = "snps,dw-apb-gpio";
+> +			reg = <0x0 0x4000 0x0 0x78>;
+> +			status = "disabled";
+> +
+> +			porta: gpio-controller@0 {
+
+gpio@0
+
+> +				compatible = "snps,dw-apb-gpio-port";
+> +				reg = <0>;
+> +				gpio-controller;
+> +				#gpio-cells = <2>;
+> +				ngpios = <8>;
+> +				interrupts = <GIC_SPI 1 IRQ_TYPE_LEVEL_HIGH>;
+> +				interrupt-controller;
+> +				interrupt-parent = <&gic>;
+> +				#interrupt-cells = <2>;
+> +			};
+> +			portb: gpio-controller@1 {
+> +				compatible = "snps,dw-apb-gpio-port";
+> +				reg = <1>;
+> +				gpio-controller;
+> +				#gpio-cells = <2>;
+> +				ngpios = <8>;
+> +			};
+> +		};
+> +
+> +		i2c0: i2c@400 {
+> +			compatible = "snps,designware-i2c";
+> +			reg = <0x0 0x400 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			i2c-sda-hold-time-ns = <480>;
+> +			snps,sda-timeout-ms = <750>;
+> +			interrupts = <GIC_SPI 4 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +
+> +		/* UIO device using interrupt line PCIEMAC */
+
+UIO is a kernel thing. It doesn't belong in DT.
+
+> +		pciemac@20102200 {
+> +			#address-cells = <2>;
+> +			#size-cells = <2>;
+> +			#interrupt-cells = <3>;
+> +
+> +			compatible = "pensando,uio_pciemac";
+> +			register-type = "csr-interrupt";
+> +			interrupt-parent = <&pxc0_intr>;
+> +			interrupts = <GIC_SPI 0 IRQ_TYPE_LEVEL_HIGH>;
+> +			reg = <0x0 0x20102200 0x0 0x10>; /* pxc0_intr */
+> +
+> +			enable_csr_paddr = <0x0 0x20102200 0x0 0x10>;
+> +			enable_mask = <(1 << 0)>;
+> +		};
+
+This needs some work, but no idea what the h/w is to give any guidance.
+
+> +
+> +		/* MSI UIO device 1 */
+> +		uio_penmsi1@520000 {
+> +			compatible = "pensando,uio_penmsi1";
+> +			reg = <0x0 0x520000 0x0 0x10000>;
+> +			msi-parent = <&its 0xa>;
+> +			num-interrupts = <16>;  /* # MSI interrupts to get */
+> +		};
+> +
+> +		spics: spics@307c2468 {
+> +			compatible = "pensando,elba-spics";
+> +			reg = <0x0 0x307c2468 0x0 0x4>;
+> +			gpio-controller;
+> +			#gpio-cells = <2>;
+> +		};
+> +
+> +		spi0: spi@2800 {
+> +			compatible = "pensando,elba-spi";
+> +			reg = <0x0 0x2800 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
+> +			#address-cells = <1>;
+> +			#size-cells = <0>;
+> +			num-cs = <2>;
+> +			status = "disabled";
+> +		};
+> +
+> +		wdt0: watchdog@1400 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x1400 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +		wdt1: watchdog@1800 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x1800 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +		wdt2: watchdog@1c00 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x1c00 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+> +		wdt3: watchdog@2000 {
+> +			compatible = "snps,dw-wdt";
+> +			reg = <0x0 0x2000 0x0 0x100>;
+> +			clocks = <&ahb_clk>;
+> +			interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
+> +			status = "disabled";
+> +		};
+
+4 watchdogs? Hope that's enough... ;)
+
+> +
+> +		emmc: mmc@30440000 {
+> +			compatible = "pensando,elba-emmc", "cdns,sd4hc";
+> +			clocks = <&emmc_clk>;
+> +			interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
+> +			reg = <0x0 0x30440000 0x0 0x10000
+> +			       0x0 0x30480044 0x0 0x4>;
+
+Use <> around each entry.
+
+> +			cdns,phy-input-delay-sd-highspeed = <0x4>;
+> +			cdns,phy-input-delay-legacy = <0x4>;
+> +			cdns,phy-input-delay-sd-uhs-sdr50 = <0x6>;
+> +			cdns,phy-input-delay-sd-uhs-ddr50 = <0x16>;
+> +			cdns,mmc-ddr-1_8v;
+> +			status = "disabled";
+> +		} ;
+> +
+> +		pcie@307c2480 {
+> +			compatible = "pensando,pcie";
+> +			reg = <0x0 0x307c2480 0x0 0x4   /* MS CFG_WDT */
+> +			       0x0 0x00001400 0x0 0x10  /* WDT0 */
+> +			       0x0 0x20000000 0x0 0x00380000>; /* PXB Base */
+> +		};
+> +
+> +		panic: panicdump@0 {
+> +			compatible = "pensando,pen-crash";
+> +			status = "disabled";
+> +		};
+> +
+> +		bsm@307c2080 {
+> +			compatible = "pensando,bsm";
+> +			reg = <0x0 0x307c2080 0x0 0x4>;
+> +		};
+> +	};
+> +	mnet0: mnet0 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x0>;
+> +	};
+> +	mnet1: mnet1 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x1>;
+> +	};
+> +	mnet2: mnet2 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x2>;
+> +	};
+> +	mnet3: mnet3 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x3>;
+> +	};
+> +	mnet4: mnet4 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x4>;
+> +	};
+> +	mnet5: mnet5 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x5>;
+> +	};
+> +	mnet6: mnet6 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x6>;
+> +	};
+> +	mnet7: mnet7 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x7>;
+> +	};
+> +	mnet8: mnet8 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x8>;
+> +	};
+> +	mnet9: mnet9 {
+> +		compatible = "pensando,mnet";
+> +		msi-parent = <&its 0x9>;
+> +	};
+> +};
+> -- 
+> 2.17.1
+> 
