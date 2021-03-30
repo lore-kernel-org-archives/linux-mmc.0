@@ -5,101 +5,115 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34FDAC433DB
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 10:40:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6E8BC433C1
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 10:46:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DA2E26198A
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 10:40:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7932C619AA
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 10:46:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231269AbhC3Kjr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Mar 2021 06:39:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51978 "EHLO
+        id S231689AbhC3Kpq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 Mar 2021 06:45:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231719AbhC3Kjd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 06:39:33 -0400
-Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66E87C061762
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Mar 2021 03:39:32 -0700 (PDT)
-Received: by mail-vk1-xa29.google.com with SMTP id u144so3437296vkb.13
-        for <linux-mmc@vger.kernel.org>; Tue, 30 Mar 2021 03:39:32 -0700 (PDT)
+        with ESMTP id S231607AbhC3KpS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 06:45:18 -0400
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE238C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Mar 2021 03:45:17 -0700 (PDT)
+Received: by mail-vs1-xe29.google.com with SMTP id b5so7869616vsl.9
+        for <linux-mmc@vger.kernel.org>; Tue, 30 Mar 2021 03:45:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Fx+qunAgeaKNzL/3vPJGFvdOm7PGo9OLfJ6hKlJPmiE=;
-        b=kI5FFf3THdLIjOHzOjtIhhe00n2B3q6Tr0GaFLMTyppf+VBJ57i/smGoRVF+UFkdAX
-         Wo0iXNy6Afvc+PPUqmzTLbO6FvNqEbb231rlN1GKiotRSwA2zNkNazyilIcVKiKSvy+N
-         KR9k5fycIyRtmjdD6OU29//Ta4JOLoLOeHlZ7Sr4UDaF2dm+X+Ars7TgLaqDanRu2qMm
-         DKnIMuNXvMMdowm9Vo3vc6/8YA1GRXhAliaTUKDoX1Za4NYWdhI9nWBHnk7bAztXsaRY
-         0LK00BCHMbP9z0eBcwo5uyU//2AgP7AdBMqgWdx1QyY/pj1EBjewLx3NocixinBOauzA
-         TGWQ==
+        bh=HrP51yULiHG27SeEXJDFbTG58PKXRH+WhzM+ZrVVbzw=;
+        b=XBn46g9AsX4KNUkiKNMCAHxQKzR3/PDY/ubXJQov8rSYHbVI+zQh8cT11T22S2Rwn0
+         HhMLUvF6bmJ5J8VbV4QQUZiu3E4A21/5NDrBY4+eAamDR3UlL/cstlYOpG56CzkI7D9g
+         1aoz4SNAW5Ze9gMKyhyBiE9aLGISNIKCCsVkf9dYgGBxelrs26nYyd7qlZYmQ1TLfLhA
+         0TTrE3jpIPTDJtc6q8FQCXi+p3nQjZwQ7HwFtETf9Pl+7n0x07bJRlDjQqlj/Z/gB+53
+         Yf63W9o/LgpbmAFt4jM3odJ1jjh5W7DUSGikWb4l3pL8e/pikTHjE1FdSKtobHI500Ut
+         7zvw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Fx+qunAgeaKNzL/3vPJGFvdOm7PGo9OLfJ6hKlJPmiE=;
-        b=fUfqIPgZ2V/opdbVMS6Q+8BLvcxl1B5LMmPz+evEgSlK5Wkxr0Xic7/DjYZepJZdDS
-         a901hGoaucTOdOnDRoJNyW3KQ7bDSQPsKpZXzh0P6ayw94EWwHoW9f+577IiLL/DSXjI
-         wdicslNuFOakRQlMmX2qzqGM4Zev+JRiP7vJy/I7EBPaLgHkPap/3JQk+jUDKeKyyT/J
-         3oL8FcneIOmcMKbTCoMebSaUxxF7zArAMOFhnElAUZV8s3aoJIyrUNvf87R76gnz+0JJ
-         esHCFbHHEVm6eyDLktSbQtxPnNxZqlN2l9GGjXNv5xQSRoHaKzNaEimj8V7lksljju+K
-         YE9Q==
-X-Gm-Message-State: AOAM5305ywHfHuSHJiFlYpXqm0Fh3vdUzMnemId5TDAjYAlS5g2bvGY0
-        pu4qHcLKQyRZuokeC8eh2K+TsFB9u57ve2nBX4POEQ==
-X-Google-Smtp-Source: ABdhPJwp6Yp7RPHEVG9ZmngWfrWlYd1ALHAiwdqzhYpcPJDe2HYa5uuEsgtTfkkdE0xa/zFeWHhuvpX+9E1QgqiUxPs=
-X-Received: by 2002:a1f:5504:: with SMTP id j4mr17032947vkb.7.1617100771387;
- Tue, 30 Mar 2021 03:39:31 -0700 (PDT)
+        bh=HrP51yULiHG27SeEXJDFbTG58PKXRH+WhzM+ZrVVbzw=;
+        b=swSchb0E3Z298OsacH16C8tQF1cxYVvjSLZASiEMExmHWxlxLu+lycnPC8BxD0BxwW
+         rKWw56Ty1BqgFpuIqQUqVF24BInkJ9Q8JWn37q+QNrlBYE1TQpFdZ9Ja+1ooC0OhM+k7
+         xj4rC13qleJNtx5bysSonSKvlMKU+NYDppQwNd25pRs/4GmCeWYoYVoRnbxf8Q7QXjlJ
+         O440u+5fPcuVLiSxVO0cchVEMqXPM1ssNr3CxFhXcnl3o8Jtjdi7QHJM1cOHOCPe4BFJ
+         G6T3unYmkNw/bhfEXlpuB4UsLcLn2A2F3DAcmhdoSWTmag/pj5/RGW1RYPzpuvSm68yO
+         dAPw==
+X-Gm-Message-State: AOAM533F2+sQBwYWx+ZVJcQ40r6TWsN7WI13KYhQpVFbmhzkp2wMzJsf
+        gi8Q4knAVDHRJzgDEAHTkRBEMNRTgeH5mn0BRwhDzQ==
+X-Google-Smtp-Source: ABdhPJyU/ZLT8FCbPEzLuXWbGCHBJ/uI6+dgGhldthovHGOf5d1xr2PmlFG8gkEsO0GDTPPt6bc/waT2mzHA3lRDsug=
+X-Received: by 2002:a67:77c1:: with SMTP id s184mr16252854vsc.55.1617101117087;
+ Tue, 30 Mar 2021 03:45:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <1617086448-51054-1-git-send-email-fanghao11@huawei.com>
-In-Reply-To: <1617086448-51054-1-git-send-email-fanghao11@huawei.com>
+References: <20210326110214.28416-1-shawnguo@kernel.org>
+In-Reply-To: <20210326110214.28416-1-shawnguo@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 30 Mar 2021 12:38:55 +0200
-Message-ID: <CAPDyKFoUUu=Rb0pHMZb+gKXPsKESBnXG=4U=n_XFMZJLHyY7kA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc-k3: use the correct HiSilicon copyright
-To:     Hao Fang <fanghao11@huawei.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+Date:   Tue, 30 Mar 2021 12:44:41 +0200
+Message-ID: <CAPDyKFq2dQ3zpwgxeekHoBQyeKOOAr8aAM_7dRxasWt2fVgC5A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: separate 100/200 MHz pinctrl states check
+To:     Shawn Guo <shawnguo@kernel.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Dong Aisheng <aisheng.dong@nxp.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        NXP Linux Team <linux-imx@nxp.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        prime.zeng@hisilicon.com
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Shawn Guo <shawn.guo@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 30 Mar 2021 at 08:43, Hao Fang <fanghao11@huawei.com> wrote:
+On Fri, 26 Mar 2021 at 12:02, Shawn Guo <shawnguo@kernel.org> wrote:
 >
-> s/Hisilicon/HiSilicon/g.
-> It should use capital S, according to
-> https://www.hisilicon.com/en/terms-of-use.
+> From: Shawn Guo <shawn.guo@linaro.org>
 >
-> Signed-off-by: Hao Fang <fanghao11@huawei.com>
-> ---
->  drivers/mmc/host/dw_mmc-k3.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> As indicated by function esdhc_change_pinstate(), SDR50 and DDR50
+> require pins_100mhz, while SDR104 and HS400 require pins_200mhz.  Some
+> system design may support SDR50 and DDR50 with 100mhz pin state only
+> (without 200mhz one).  Currently the combined 100/200 MHz pinctrl state
+> check prevents such system from running SDR50 and DDR50.  Separate the
+> check to support such system design.
 >
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 29d2494..0311a37 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -1,7 +1,7 @@
->  // SPDX-License-Identifier: GPL-2.0-or-later
->  /*
->   * Copyright (c) 2013 Linaro Ltd.
-> - * Copyright (c) 2013 Hisilicon Limited.
-> + * Copyright (c) 2013 HiSilicon Limited.
+> Signed-off-by: Shawn Guo <shawn.guo@linaro.org>
 
-This change looks really silly to me, but I am not a lawyer - so I
-can't tell if this makes sense or not.
-
-In any case, "Hisilicon" is being used all over the kernel - do you
-intend to patch all places with similar changes like this one? Perhaps
-just send a big tree-wide-patch instead and see what people think?
-
->   */
->
->  #include <linux/bitops.h>
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index a20459744d21..aa45901325b9 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -434,10 +434,10 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+>                          * Do not advertise faster UHS modes if there are no
+>                          * pinctrl states for 100MHz/200MHz.
+>                          */
+> -                       if (IS_ERR_OR_NULL(imx_data->pins_100mhz) ||
+> -                           IS_ERR_OR_NULL(imx_data->pins_200mhz))
+> -                               val &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50
+> -                                        | SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_HS400);
+> +                       if (IS_ERR_OR_NULL(imx_data->pins_100mhz))
+> +                               val &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_DDR50);
+> +                       if (IS_ERR_OR_NULL(imx_data->pins_200mhz))
+> +                               val &= ~(SDHCI_SUPPORT_SDR104 | SDHCI_SUPPORT_HS400);
+>                 }
+>         }
+>
+> --
+> 2.17.1
+>
