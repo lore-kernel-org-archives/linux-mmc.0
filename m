@@ -2,75 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A2CCC433E0
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 21:57:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD03EC433C1
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 07:00:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E07D6619CD
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 Mar 2021 21:57:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B2A0619CA
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 07:00:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232865AbhC3V5Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 Mar 2021 17:57:16 -0400
-Received: from mail-ot1-f44.google.com ([209.85.210.44]:45698 "EHLO
-        mail-ot1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232495AbhC3V4p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 Mar 2021 17:56:45 -0400
-Received: by mail-ot1-f44.google.com with SMTP id 91-20020a9d08640000b0290237d9c40382so16993880oty.12;
-        Tue, 30 Mar 2021 14:56:45 -0700 (PDT)
+        id S233906AbhCaG7s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 02:59:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32830 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233892AbhCaG7X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 02:59:23 -0400
+Received: from mail-pg1-x529.google.com (mail-pg1-x529.google.com [IPv6:2607:f8b0:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EFB3C061574;
+        Tue, 30 Mar 2021 23:59:23 -0700 (PDT)
+Received: by mail-pg1-x529.google.com with SMTP id p12so8868295pgj.10;
+        Tue, 30 Mar 2021 23:59:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=UJOBofPObDNYMGsBSlhGej7Cpe8ovuQ3/ENLYS3IMVQ=;
+        b=MTHH0ApwlbyIykIs64IpY5gSDyGQts/pyHYUmrlhRKLt3YIP35F36aeqR6Zc0PONd/
+         huPaVqNR2lkG6Eopm8qlahqemxdn0crCmMjmAQejTQIcqKudX8KWMcIjwZJq2+K6Yl62
+         XptbiXh7LQMScWgepLmKWplHHu4JLsScfmexXfFFipp948HHEWACTPRYX2jNYPSnkl2j
+         nLthNM9Dd7NVSSh9b01Y/2VlbeflcjHJs5AaC+ibRA4xSMz1GG46lH9OEgMWNBPb8+TV
+         kzOg8zGe8p9IuDycQX/4NKtlnyXx5veHCCfxuifA9u48b2l+bWqMypDLkaP6Bqu+8asZ
+         5lnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Yiq9zqr2bF1ffZG3y1lOgUUQqwpPi4Zm0SgUG1ke18U=;
-        b=uIzlXuMkDA/OfFodXXzBLsB4AmmV0n2LUUHMMA7cQnEq/dj8rCZXqeO4Vo0ofexFpC
-         9F5L4T5TFYHS6y6d8SSpn2T4Ng95q8CsN0vOl7psmA9TmQJ6J2OE03NC2X9TELD5qLLB
-         LR1uIzBn54wdvpxvENFM9z5s2P5M0Kvd7wYOCC7oMoVHW5744z+tp2qqnF6/AjsvNt97
-         msYiXdwk3j/0BAuHfqVWXhHRM7FEMHJ9N1odi6TYGan0fiABdCNwkhU1jQDqX0QSsInO
-         mLF7zWgEt0G5DFSxvrcW7vHQzrTPGFZ3Dg3z746Gg0LsAOffpOUmc8RyoglA8Cfbm88r
-         5Y+Q==
-X-Gm-Message-State: AOAM532uhZ3DqC4V6UCIupAeiUufLQnVBz1qHDm0T69tH/5HBHSPp0PS
-        1M9ZuF9iCkiI7kCodslZ4g==
-X-Google-Smtp-Source: ABdhPJwNlwYSDo4wS09iYDx0X9S9ybh8fkN2i3UtF95xNCpFkA8/O/K3511GPZe3IXS/6f3B0THymQ==
-X-Received: by 2002:a05:6830:1506:: with SMTP id k6mr59564otp.26.1617141404438;
-        Tue, 30 Mar 2021 14:56:44 -0700 (PDT)
-Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id 101sm24475otj.44.2021.03.30.14.56.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 Mar 2021 14:56:44 -0700 (PDT)
-Received: (nullmailer pid 784491 invoked by uid 1000);
-        Tue, 30 Mar 2021 21:56:42 -0000
-Date:   Tue, 30 Mar 2021 16:56:42 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-spi@vger.kernel.org, bgolaszewski@baylibre.com,
-        ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        broonie@kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        olof@lixom.net, fancer.lancer@gmail.com, adrian.hunter@intel.com,
-        arnd@arndb.de, linux-gpio@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v2 09/13] dt-bindings: mmc: Add Pensando Elba SoC binding
-Message-ID: <20210330215642.GA784437@robh.at.kernel.org>
-References: <20210329015938.20316-1-brad@pensando.io>
- <20210329015938.20316-10-brad@pensando.io>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=UJOBofPObDNYMGsBSlhGej7Cpe8ovuQ3/ENLYS3IMVQ=;
+        b=VF+P3dScT9XVA84rNnvgxgb4ep0pzo+DUm9rJQO2lK2Kb8CPuM1dweVpJAJMiZl5zq
+         2BmXBrmYcydFtZ98LLiJYrFwXLLZHxt1uR6nirNxu07OGzVnoS4SCsGdK5PmMHinIUNI
+         FN8dql/Ms0emJcrmvMwm/pqOQTBKOlUIHp2Fhcw66ab/5uxYKsQwGSTkMORPWt+oSPM/
+         ECPps2pI/6iytRwdF20YP8FfZlaoXPzqmZQI2COrEH3/tOyKHgNvmdY4DqpHjRMl9Rb2
+         jOizVUboP6GsCXyCCvEB9qNyV9QGAzqFX3i+C6iB5Cr+KVd7XDw2qhFUAYw+Yail86+h
+         DfGQ==
+X-Gm-Message-State: AOAM530cWGGOhoKQZfdWJpwxee7BvP5CVxoPXPymTB69iLbzppMFZdjb
+        Ru96K1VFi/YLCMH0RWfXvm06wVjwLkXWG8czEMs=
+X-Google-Smtp-Source: ABdhPJx0/mRvSYPq3REz2mXyxcPF6tbk9kRbQksLbTIpgbKUzsHjVll09iDn811ekJYlT5uB4STSeVkjXl7Xb2AvKm8=
+X-Received: by 2002:a63:cc:: with SMTP id 195mr1878785pga.282.1617173962706;
+ Tue, 30 Mar 2021 23:59:22 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210329015938.20316-10-brad@pensando.io>
+References: <1617086448-51054-1-git-send-email-fanghao11@huawei.com>
+In-Reply-To: <1617086448-51054-1-git-send-email-fanghao11@huawei.com>
+From:   Zhangfei Gao <zhangfei.gao@gmail.com>
+Date:   Wed, 31 Mar 2021 14:59:11 +0800
+Message-ID: <CAMj5BkjT7nBst4pa+Z6WKtfxhOYPLr3wcSU2ONoOqscu5uqCHg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc-k3: use the correct HiSilicon copyright
+To:     Hao Fang <fanghao11@huawei.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        prime.zeng@hisilicon.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 28 Mar 2021 18:59:34 -0700, Brad Larson wrote:
-> Pensando Elba ARM 64-bit SoC is integrated with this IP
-> 
-> Signed-off-by: Brad Larson <brad@pensando.io>
-> ---
->  Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
+On Tue, Mar 30, 2021 at 2:46 PM Hao Fang <fanghao11@huawei.com> wrote:
+>
+> s/Hisilicon/HiSilicon/g.
+> It should use capital S, according to
+> https://www.hisilicon.com/en/terms-of-use.
+>
+> Signed-off-by: Hao Fang <fanghao11@huawei.com>
 
-Acked-by: Rob Herring <robh@kernel.org>
+Thanks for the fix.
+
+Acked-by: Zhangfei Gao <zhangfei.gao@linaro.org>
+
+> ---
+>  drivers/mmc/host/dw_mmc-k3.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+> index 29d2494..0311a37 100644
+> --- a/drivers/mmc/host/dw_mmc-k3.c
+> +++ b/drivers/mmc/host/dw_mmc-k3.c
+> @@ -1,7 +1,7 @@
+>  // SPDX-License-Identifier: GPL-2.0-or-later
+>  /*
+>   * Copyright (c) 2013 Linaro Ltd.
+> - * Copyright (c) 2013 Hisilicon Limited.
+> + * Copyright (c) 2013 HiSilicon Limited.
+>   */
+>
+>  #include <linux/bitops.h>
+> --
+> 2.8.1
+>
