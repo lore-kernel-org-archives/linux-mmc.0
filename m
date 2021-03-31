@@ -2,117 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D76BC433DB
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 10:35:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAF89C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 12:53:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EA9BA60C3D
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 10:35:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB66961969
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 12:53:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234956AbhCaKfC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 Mar 2021 06:35:02 -0400
-Received: from gli-ex.genesyslogic.com.tw ([60.251.58.171]:50696 "EHLO
-        gli-ex.genesyslogic.com.tw" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234855AbhCaKeo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 06:34:44 -0400
-X-Greylist: delayed 330 seconds by postgrey-1.27 at vger.kernel.org; Wed, 31 Mar 2021 06:34:43 EDT
-Received: from GLI-MBX02.genesyslogic.com.tw ([fe80::a40e:dfe0:3e41:3fd8]) by
- Gli-CASHT02.genesyslogic.com.tw ([fe80::ad9a:493d:feca:6cb7%10]) with mapi id
- 14.02.0387.000; Wed, 31 Mar 2021 18:26:57 +0800
-From:   =?utf-8?B?UmVuaXVzQ2hlblvpmbPlu7rlro9d?= 
-        <Renius.Chen@genesyslogic.com.tw>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        =?utf-8?B?R3JlZ1R1W+adnOWVn+i7kl0=?= <Greg.Tu@genesyslogic.com.tw>,
-        "Masami Hiramatsu" <masami.hiramatsu@linaro.org>,
-        Takao Orito <orito.takao@socionext.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        =?utf-8?B?QmVuQ2h1YW5nW+iOiuaZuumHj10=?= 
-        <Ben.Chuang@genesyslogic.com.tw>,
-        Renius Chen <reniuschengl@gmail.com>
-Subject: RE: [PATCH 0/4] mmc: core: Preparations to support SD UHS-II cards
-Thread-Topic: [PATCH 0/4] mmc: core: Preparations to support SD UHS-II cards
-Thread-Index: AQHXC5hCBaLnPEhAx02zG+hoO5yy16qdiysAgACJIJA=
-Date:   Wed, 31 Mar 2021 10:26:55 +0000
-Message-ID: <FDA815A8963C6B43ABF06E8A34984F99F9B709BB@Gli-MBX02.genesyslogic.com.tw>
-References: <20210225170352.76872-1-ulf.hansson@linaro.org>
- <CAPDyKFp0+jBDcJnxbvdkZWo6jmSa-CdT6RNbH2hmrWnXEqU0=w@mail.gmail.com>
-In-Reply-To: <CAPDyKFp0+jBDcJnxbvdkZWo6jmSa-CdT6RNbH2hmrWnXEqU0=w@mail.gmail.com>
-Accept-Language: zh-TW, en-US
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.17.107.84]
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S235707AbhCaMxG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 08:53:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53108 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235568AbhCaMwg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 08:52:36 -0400
+Received: from mail-vk1-xa2e.google.com (mail-vk1-xa2e.google.com [IPv6:2607:f8b0:4864:20::a2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03808C06175F
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 05:52:34 -0700 (PDT)
+Received: by mail-vk1-xa2e.google.com with SMTP id f11so4323832vkl.9
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 05:52:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=kPvXXseEpD2+fM2KlQVwvHu1Vje5yvkbBF9+RP8/HAA=;
+        b=sD2xbR4YTENyWYZk9KTr3Wf8CRnxVIJX/BAtt37d84OnI3R5V8uJsENiOB5gBdsU+b
+         yTc7ANohquY+qCloNr5l3cOVqihteofMluuXbs6n2F2djUus+jJ1RHTm2KVwa3yWJ11C
+         KSCwkgQjM7t1UAEu/on0ge7x2zuQwy9ca6W1zPeihmWLzq+OGyKjTBxbgJZ9U1QsWYxu
+         zIeHAe8tFh5eBArHYqsVMfR13ylqYZbRkPaT9r8I14c6E+Vi67N+5vun45xBlDKMWTy8
+         E9XuPHwih3Ji74OpmPY+J4XxMtl9vuGWGPRq9L19oVevaOSY4vUDzMNa4bKbtNv++Fwe
+         R7xQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=kPvXXseEpD2+fM2KlQVwvHu1Vje5yvkbBF9+RP8/HAA=;
+        b=YuOid7GdYO9ff2zs5j2RkpYH1ND9u8OOWjib9p2AEzDzbWZfM6hA+9yHQMZBMY67wn
+         LvSrjdn+nFHGQ9tXgoVO6PGSmZIA1C91CtImTvo/boo7fMvwZ+xjrNxSbX92/mT1g+PY
+         P1z/9v5tOCqi7lyEB4mxHhPsuvNhOtXKNQkpSzZTfgVhAOvaEel05ucfSKVYq09boM7H
+         7kzU21nRPtiutStesS/teIZGadZcGxTEfHByX3TnwJ71AwNMRV4P00FMeb3NLxUZqYrj
+         VXPnvrW3BuMQ4ay/FO+74cS5rrhr7jJusSwQF+r63CwmPmsylPn4D7mldSLQ5KSIvlOv
+         jvrg==
+X-Gm-Message-State: AOAM533AobCQ6hNuJSGT1B/bU0pLtK1WwM9VGdfuowwS/2RXd8G83BCz
+        zYzjYpm6Y3iz/dN9bPRF7C+LYQpGeQ8kK1KzNPrcHQ==
+X-Google-Smtp-Source: ABdhPJxrnJkDppvk4DzcmI3MgfWa/Hoom+SuJ4TqLBMA1p5Wo4adkOmEJO3ZUT4HN72lFYFnHmzNUkN9EWWWzMTvF9Q=
+X-Received: by 2002:a1f:2a95:: with SMTP id q143mr1437575vkq.8.1617195153188;
+ Wed, 31 Mar 2021 05:52:33 -0700 (PDT)
 MIME-Version: 1.0
+References: <20210331081752.23621-1-adrian.hunter@intel.com>
+In-Reply-To: <20210331081752.23621-1-adrian.hunter@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 31 Mar 2021 14:51:56 +0200
+Message-ID: <CAPDyKFpbA4x33yr4s7+csATm6zgsx=NA4Ya-_QZBUPzNqEGoqQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Fix initialization of some SD cards for
+ Intel BYT-based controllers
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgVWxmLA0KDQoNCkknbSBjdXJyZW50bHkgdHJ5aW5nIHRvIHRha2Ugb3ZlciBhbmQgcmVmYWN0
-b3IgdGhlIHRhc2sgcmVmZXIgdG8geW91ciBzZXJpZXMuDQpBbmQgdGhlcmUgaGFzbid0IGJlZW4g
-bXVjaCBwcm9ncmVzcyByZWNlbnRseSBiZWNhdXNlIEknbSBidXN5IHdpdGggb3RoZXIgd29yay4N
-Cg0KDQpSZWdhcmRzLA0KDQpSZW5pdXMNCg0KPi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+
-RnJvbTogVWxmIEhhbnNzb24gW21haWx0bzp1bGYuaGFuc3NvbkBsaW5hcm8ub3JnXQ0KPlNlbnQ6
-IFdlZG5lc2RheSwgTWFyY2ggMzEsIDIwMjEgNTo1NyBQTQ0KPlRvOiBCZW5DaHVhbmdb6I6K5pm6
-6YePXTsgUmVuaXVzIENoZW4NCj5DYzogQUtBU0hJIFRha2FoaXJvOyBHcmVnVHVb5p2c5ZWf6LuS
-XTsgTWFzYW1pIEhpcmFtYXRzdTsgVGFrYW8gT3JpdG87IExpbnV4DQo+S2VybmVsIE1haWxpbmcg
-TGlzdDsgVWxmIEhhbnNzb247IEFkcmlhbiBIdW50ZXI7IGxpbnV4LW1tYw0KPlN1YmplY3Q6IFJl
-OiBbUEFUQ0ggMC80XSBtbWM6IGNvcmU6IFByZXBhcmF0aW9ucyB0byBzdXBwb3J0IFNEIFVIUy1J
-SSBjYXJkcw0KPg0KPkhpIEJlbiwgUmVuaXVzLA0KPg0KPk9uIFRodSwgMjUgRmViIDIwMjEgYXQg
-MTg6MDQsIFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5hcm8ub3JnPiB3cm90ZToNCj4+DQo+
-PiBBIHNlcmllcyBbMV0gdGhhdCBoYXMgYmVlbiBjb2xsYWJvcmF0aXZlIHdvcmtlZCB1cG9uIGJ5
-IFRha2FoaXJvIEFrYXNoaQ0KPj4gKExpbmFybykgYW5kIEJlbiBDaHVhbmcgKEdlbmVzeXMgTG9n
-aWMpIGlzIHRhcmdldGluZyB0byBhZGQgU0QgVUhTLUlJIHN1cHBvcnQNCj4+IHRvIHRoZSBtbWMg
-c3Vic3lzdGVtLg0KPj4NCj4+IFRocm91Z2hvdXQgdGhlIHJldmlld3MsIHdlIHJlYWxpemVkIHRo
-YXQgdGhlIGNoYW5nZXMgYWZmZWN0aW5nIHRoZSBtbWMgY29yZQ0KPnRvDQo+PiBzdXBwb3J0IHRo
-ZSBVSFMtSUkgaW50ZXJmYWNlL3Byb3RvY29sIG1pZ2h0IG5vdCBiZSBlbnRpcmVseSBzdHJhaWdo
-dGZvcndhcmQgdG8NCj4+IGltcGxlbWVudC4gRXNwZWNpYWxseSwgSSBleHByZXNzZWQgc29tZSBj
-b25jZXJucyBhYm91dCB0aGUgY29kZSB0aGF0DQo+bWFuYWdlcw0KPj4gcG93ZXIgb24vb2ZmLCBp
-bml0aWFsaXphdGlvbiBhbmQgcG93ZXIgbWFuYWdlbWVudCBvZiBhIFNEIFVIUy1JSSBjYXJkLg0K
-Pj4NCj4+IFRoZXJlZm9yZSwgSSBoYXZlIHBvc3RlZCB0aGlzIHNtYWxsIHNlcmllcyB0byB0cnkg
-dG8gaGVscCB0byBwdXQgc29tZSBvZiB0aGUNCj4+IGZvdW5kYXRpb24gaW4gdGhlIG1tYyBjb3Jl
-IGluIHBsYWNlLiBIb3BlZnVsbHkgdGhpcyBjYW4gcHJvdmlkZSBzb21lDQo+Z3VpZGFuY2UNCj4+
-IGFuZCBhbiBvdmVyYWxsIHN0cnVjdHVyZSwgb2YgaG93IEkgdGhpbmsgdGhlIGNvZGUgY291bGQg
-ZXZvbHZlLg0KPj4NCj4+IE1vcmUgZGV0YWlscyBhcmUgYXZhaWxhYmxlIGluIHRoZSBjb21taXQg
-bWVzc2FnZXMgYW5kIHRocm91Z2ggY29tbWVudHMgaW4NCj50aGUNCj4+IGNvZGUsIGZvciBlYWNo
-IHBhdGguDQo+Pg0KPj4gS2luZCByZWdhcmRzDQo+PiBVZmZlDQo+DQo+SSBqdXN0IHdhbnRlZCB0
-byBnZXQgYW4gdXBkYXRlIGZyb20geW91ciBzaWRlLiBEaWQgJHN1YmplY3Qgc2VyaWVzDQo+aGVs
-cCB0byBtb3ZlIHRoaW5ncyBmb3J3YXJkPw0KPg0KPklmIHRoZXJlIGlzIGFueXRoaW5nIGVsc2Ug
-SSBjYW4gaGVscCB3aXRoLCB0aGVuIHBsZWFzZSBwaW5nIG1lLg0KPg0KPktpbmQgcmVnYXJkcw0K
-PlVmZmUNCj4NCj4+DQo+PiBbMV0NCj4+IGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDIwLzExLzUv
-MTQ3Mg0KPj4NCj4+DQo+PiBVbGYgSGFuc3NvbiAoNCk6DQo+PiAgIG1tYzogY29yZTogQ2xlYW51
-cCBwcmludGluZyBvZiBzcGVlZCBtb2RlIGF0IGNhcmQgaW5zZXJ0aW9uDQo+PiAgIG1tYzogY29y
-ZTogUHJlcGFyZSB0byBzdXBwb3J0IFNEIFVIUy1JSSBjYXJkcw0KPj4gICBtbWM6IGNvcmU6IEFu
-bm91bmNlIHN1Y2Nlc3NmdWwgaW5zZXJ0aW9uIG9mIGFuIFNEIFVIUy1JSSBjYXJkDQo+PiAgIG1t
-YzogY29yZTogRXh0ZW5kIHN1cHBvcnQgZm9yIG1tYyByZWd1bGF0b3JzIHdpdGggYSB2cW1tYzIN
-Cj4+DQo+PiAgZHJpdmVycy9tbWMvY29yZS9NYWtlZmlsZSAgICB8ICAgMiArLQ0KPj4gIGRyaXZl
-cnMvbW1jL2NvcmUvYnVzLmMgICAgICAgfCAgMzggKysrLS0NCj4+ICBkcml2ZXJzL21tYy9jb3Jl
-L2NvcmUuYyAgICAgIHwgIDE3ICsrLQ0KPj4gIGRyaXZlcnMvbW1jL2NvcmUvY29yZS5oICAgICAg
-fCAgIDEgKw0KPj4gIGRyaXZlcnMvbW1jL2NvcmUvaG9zdC5oICAgICAgfCAgIDUgKw0KPj4gIGRy
-aXZlcnMvbW1jL2NvcmUvcmVndWxhdG9yLmMgfCAgMzQgKysrKysNCj4+ICBkcml2ZXJzL21tYy9j
-b3JlL3NkX3VoczIuYyAgIHwgMjg5DQo+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysNCj4+ICBpbmNsdWRlL2xpbnV4L21tYy9jYXJkLmggICAgIHwgICA2ICsNCj4+ICBpbmNsdWRl
-L2xpbnV4L21tYy9ob3N0LmggICAgIHwgIDMwICsrKysNCj4+ICA5IGZpbGVzIGNoYW5nZWQsIDQw
-NCBpbnNlcnRpb25zKCspLCAxOCBkZWxldGlvbnMoLSkNCj4+ICBjcmVhdGUgbW9kZSAxMDA2NDQg
-ZHJpdmVycy9tbWMvY29yZS9zZF91aHMyLmMNCj4+DQo+PiAtLQ0KPj4gMi4yNS4xDQo+Pg0KX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX18NCg0KR2VuZXN5cyBMb2dpYyBFbWFpbCBDb25m
-aWRlbnRpYWxpdHkgTm90aWNlOg0KVGhpcyBtYWlsIGFuZCBhbnkgYXR0YWNobWVudHMgbWF5IGNv
-bnRhaW4gaW5mb3JtYXRpb24gdGhhdCBpcyBjb25maWRlbnRpYWwsIHByb3ByaWV0YXJ5LCBwcml2
-aWxlZ2VkIG9yIG90aGVyd2lzZSBwcm90ZWN0ZWQgYnkgbGF3LiBUaGUgbWFpbCBpcyBpbnRlbmRl
-ZCBzb2xlbHkgZm9yIHRoZSBuYW1lZCBhZGRyZXNzZWUgKG9yIGEgcGVyc29uIHJlc3BvbnNpYmxl
-IGZvciBkZWxpdmVyaW5nIGl0IHRvIHRoZSBhZGRyZXNzZWUpLiBJZiB5b3UgYXJlIG5vdCB0aGUg
-aW50ZW5kZWQgcmVjaXBpZW50IG9mIHRoaXMgbWFpbCwgeW91IGFyZSBub3QgYXV0aG9yaXplZCB0
-byByZWFkLCBwcmludCwgY29weSBvciBkaXNzZW1pbmF0ZSB0aGlzIG1haWwuDQoNCklmIHlvdSBo
-YXZlIHJlY2VpdmVkIHRoaXMgZW1haWwgaW4gZXJyb3IsIHBsZWFzZSBub3RpZnkgdXMgaW1tZWRp
-YXRlbHkgYnkgcmVwbHkgZW1haWwgYW5kIGltbWVkaWF0ZWx5IGRlbGV0ZSB0aGlzIG1lc3NhZ2Ug
-YW5kIGFueSBhdHRhY2htZW50cyBmcm9tIHlvdXIgc3lzdGVtLiBQbGVhc2UgYmUgbm90ZWQgdGhh
-dCBhbnkgdW5hdXRob3JpemVkIHVzZSwgZGlzc2VtaW5hdGlvbiwgZGlzdHJpYnV0aW9uIG9yIGNv
-cHlpbmcgb2YgdGhpcyBlbWFpbCBpcyBzdHJpY3RseSBwcm9oaWJpdGVkLg0KX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18NCg==
+On Wed, 31 Mar 2021 at 10:17, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> Bus power may control card power, but the full reset done by SDHCI at
+> initialization still may not reset the power, whereas a direct write to
+> SDHCI_POWER_CONTROL can. That might be needed to initialize correctly, if
+> the card was left powered on previously.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: stable@vger.kernel.org
+
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 27 +++++++++++++++++++++++++++
+>  1 file changed, 27 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index b3caa174effe..be19785227fe 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -516,6 +516,7 @@ struct intel_host {
+>         int     drv_strength;
+>         bool    d3_retune;
+>         bool    rpm_retune_ok;
+> +       bool    needs_pwr_off;
+>         u32     glk_rx_ctrl1;
+>         u32     glk_tun_val;
+>         u32     active_ltr;
+> @@ -643,9 +644,25 @@ static int bxt_get_cd(struct mmc_host *mmc)
+>  static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
+>                                   unsigned short vdd)
+>  {
+> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
+> +       struct intel_host *intel_host = sdhci_pci_priv(slot);
+>         int cntr;
+>         u8 reg;
+>
+> +       /*
+> +        * Bus power may control card power, but a full reset still may not
+> +        * reset the power, whereas a direct write to SDHCI_POWER_CONTROL can.
+> +        * That might be needed to initialize correctly, if the card was left
+> +        * powered on previously.
+> +        */
+> +       if (intel_host->needs_pwr_off) {
+> +               intel_host->needs_pwr_off = false;
+> +               if (mode != MMC_POWER_OFF) {
+> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+> +                       usleep_range(10000, 12500);
+> +               }
+> +       }
+> +
+>         sdhci_set_power(host, mode, vdd);
+>
+>         if (mode == MMC_POWER_OFF)
+> @@ -1135,6 +1152,14 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
+>         return 0;
+>  }
+>
+> +static void byt_needs_pwr_off(struct sdhci_pci_slot *slot)
+> +{
+> +       struct intel_host *intel_host = sdhci_pci_priv(slot);
+> +       u8 reg = sdhci_readb(slot->host, SDHCI_POWER_CONTROL);
+> +
+> +       intel_host->needs_pwr_off = reg  & SDHCI_POWER_ON;
+> +}
+> +
+>  static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+>  {
+>         byt_probe_slot(slot);
+> @@ -1152,6 +1177,8 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
+>             slot->chip->pdev->subsystem_device == PCI_SUBDEVICE_ID_NI_78E3)
+>                 slot->host->mmc->caps2 |= MMC_CAP2_AVOID_3_3V;
+>
+> +       byt_needs_pwr_off(slot);
+> +
+>         return 0;
+>  }
+>
+> --
+> 2.17.1
+>
