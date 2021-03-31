@@ -7,79 +7,77 @@ X-Spam-Status: No, score=-20.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AF9BC433E1
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2C97C433C1
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:43:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 40F0B619C1
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 925F2619BD
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:43:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234871AbhCaJmB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 Mar 2021 05:42:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40010 "EHLO
+        id S235201AbhCaJmd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 05:42:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40076 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234812AbhCaJle (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:41:34 -0400
-Received: from mail-ua1-x929.google.com (mail-ua1-x929.google.com [IPv6:2607:f8b0:4864:20::929])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACCB9C061574
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:33 -0700 (PDT)
-Received: by mail-ua1-x929.google.com with SMTP id y20so5746958uay.6
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:33 -0700 (PDT)
+        with ESMTP id S235037AbhCaJlv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:41:51 -0400
+Received: from mail-ua1-x932.google.com (mail-ua1-x932.google.com [IPv6:2607:f8b0:4864:20::932])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DFACC06174A
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:51 -0700 (PDT)
+Received: by mail-ua1-x932.google.com with SMTP id q18so5924968uas.11
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=cqSVyx6IfZiNsTA4tIIoWXj6mim+5+/341jQX3JUpQU=;
-        b=o/bCBMs7fN/z3Lrzm5a1KDBl8l2hJWqLZc+1RUehKMpZiJB5qWgJNpra/qo3HR4MLH
-         bTz+74eNLn9tQ9XbF+WGsJvTAFuwoNzyji01IzMJtpAhPc+HpwDbcyBHL1zRnM9++S5V
-         YSDDFzleUjWfquMk7nTVnOsq9RnMkUrZ7wanCG6RlJ1WVV7hwvllLOmWXI6uRYP5zDJY
-         YtoLV98j1+qh0gad32LTLlP8QaHV2MAdWL+UQF93ioNMtcVC7WyoRMxrlmwMoD/PFkBR
-         qlndJFQHRWg5PwBSeIpfHlcwXI1TTNOeOSm7ViGYCXHtMk1YxCMlCnWmG2xWpU2vLJpk
-         SL7w==
+        bh=OKe3IgKQ1DyHwWEmeyynFwG3j1ESWshkgj42VJBCW9g=;
+        b=bXtuCwlhJ1Zlobw/ajgZAQjX2St2EoM6EArGxmk/B5gazdKGKDyXYbLpOwrJpFPMg4
+         K3lI8helKiyyoOZoOxFqaeOwfHd6YFTtIfhsv7ER1zpX/0uJluKdfNoN1r3Ayk68peRP
+         ato4/279FjYRu3N7sSLE/hMYxhZYgsFqac2KaV+APP4de6+79+XieTxXMqJP2BU025pW
+         afbL+/nFUJY8/tY4IDojHROZq9YILAE52o0hPBS7phZZsq2/1RFiWEY0sUfULrRoRz1h
+         ojwSIfyQk/ISouEmCdWgSbeXTfQU4B3jG5JzoAVbZcO0ptNa7HdY9YM4osOqSQ0/O5ye
+         IXGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=cqSVyx6IfZiNsTA4tIIoWXj6mim+5+/341jQX3JUpQU=;
-        b=p+1lrHybEeNP8cP+VgwP1UHJY/azm4INDRdxoshnyT/y2UgBJ8b8N9RD7gDaXCmEet
-         sWYjwLe9C20rIk0eoPZaxDI1iXUOGpOYV2ZhPXYrgQ0uSclhOL7+EfBTj4RegwZUZjtg
-         mOKlL4hlIuxGcGL80h8WVYwmoLTZpQBbn9Qjuot4HygFk1dh2uBuu2zIRFK7W39gheix
-         5hNhr/oAZNo2XeiW373tUhEXLghtor5lhRTWP+FVMynnOR/ZziMv2PKP8u3oPrIdcjrX
-         g8trsjdsNRp/EVVbKN5QpJFMv/4NZ5IF/g9utV0rnkGlrkX8cM6WhaiZXeCwvoujoqoT
-         T9bg==
-X-Gm-Message-State: AOAM530U2ogMPpipOJ44lmGBfZsOItEXvLrU3BVqE0hXfsvc5TgLLGpc
-        F14Q/b9ky8uhbhr0CJCdGtIsry62NZBAouqp3/sVVA==
-X-Google-Smtp-Source: ABdhPJzPSBs9PuV/3K4Grr9lPb1TZW7aHAAmv+/IPFG1vOWszMZ/wct8QvdJUIDccR5mVBf3ejrwoaUY3T6q8yfH7Ss=
-X-Received: by 2002:ab0:2c16:: with SMTP id l22mr816434uar.100.1617183692953;
- Wed, 31 Mar 2021 02:41:32 -0700 (PDT)
+        bh=OKe3IgKQ1DyHwWEmeyynFwG3j1ESWshkgj42VJBCW9g=;
+        b=mRJFRS91zaXGjiiBSO0ww++pG1utVdWtL77F6dnEsxDVQwm9t7Z2cj/uRSxClg2sEA
+         a8IYODlxYPzrCa9rz396eTjF98YxQAnoEUBkyebKYDCGJrm1QN0+KYGgSW2s4GPXOtXy
+         +ZCVeu8TEuxBoonKG85M/olu+ciefmakxwab/or7WhLJXt/4AIHcAOKIWQN9dvmWYYe9
+         8yAMTzslwg8wF9tYhumZrNDU2JZBmEMjOHYDpQhyJZ2bTy3NJbuybZ3oFy/igHZaqdag
+         fhLQmbUUu1h9BUlN0IEquYx69JIUtFgM2lkjL7TC0FiyAPmURUMyFBzG3dvtnw76hUf9
+         /8MA==
+X-Gm-Message-State: AOAM531PRfWMW2WmMsn/dEhHy4PF2ao9ZcDKkhVi6ZnbhYQNdDkPtNRz
+        8gHjfwNZ/ttGZLx+tbAjc74hNI8RFhmZnMnsdLyu1GAge9/1LQ==
+X-Google-Smtp-Source: ABdhPJzLaMiQ9oeEbPJ0xGEaNeaEoTNPkMRL0SciRWxlCafZrhcU6tDzxDRbSwrqShPH2Y+XFxnbnUdyDaViKW/aFvI=
+X-Received: by 2002:ab0:12a:: with SMTP id 39mr766022uak.19.1617183710525;
+ Wed, 31 Mar 2021 02:41:50 -0700 (PDT)
 MIME-Version: 1.0
-References: <20190928185107.21125-1-fontaine.fabrice@gmail.com>
-In-Reply-To: <20190928185107.21125-1-fontaine.fabrice@gmail.com>
+References: <761908730.16636212.1547560102824.JavaMail.root@zimbra64-e11.priv.proxad.net>
+ <886907785.16708970.1547560575203.JavaMail.root@zimbra64-e11.priv.proxad.net>
+In-Reply-To: <886907785.16708970.1547560575203.JavaMail.root@zimbra64-e11.priv.proxad.net>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 31 Mar 2021 11:40:56 +0200
-Message-ID: <CAPDyKFpHCvVOWpFmFX9=GpPbcgCLMKi338JP-x_K545sOa4E9Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc_cmds.c: fix build with gcc 4.9
-To:     Fabrice Fontaine <fontaine.fabrice@gmail.com>
+Date:   Wed, 31 Mar 2021 11:41:13 +0200
+Message-ID: <CAPDyKFp5MM8m7DtH2REgsf83S9r5P56_JNToX2b-w2G1VVtE7w@mail.gmail.com>
+Subject: Re: [PATCH mmc-utils] Add various SD/eMMC vendors to table
+To:     Stephane Fillod <f8cfe@free.fr>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Avri Altman <avri.altman@wdc.com>
+        Avri Altman <avri.altman@wdc.com>,
+        Luca Porzio <porzio@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Avri
++ Avri, Luca
 
-On Sat, 28 Sept 2019 at 20:50, Fabrice Fontaine
-<fontaine.fabrice@gmail.com> wrote:
+
+On Tue, 15 Jan 2019 at 14:56, Stephane Fillod <f8cfe@free.fr> wrote:
 >
-> Fix following error with gcc 4.9:
+> Part if this list update comes from a compilation of this web site[1].
 >
-> mmc_cmds.c:1918:9: error: missing braces around initializer [-Werror=missing-braces]
->   struct rpmb_frame frame_status = {0};
+> [1] https://www.cameramemoryspeed.com/sd-memory-card-faq/reading-sd-card-cid-serial-psn-internal-numbers/
 >
-> Fixes:
->  - http://autobuild.buildroot.org/results/bf3b6f9f6ef39b99842b3c92495b7bf359c68158
->
-> Signed-off-by: Fabrice Fontaine <fontaine.fabrice@gmail.com>
+> Signed-off-by: Stephane Fillod <f8cfe@free.fr>
 
 Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
@@ -88,24 +86,89 @@ Uffe
 
 
 > ---
->  mmc_cmds.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index fb37189..6b09f26 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -1915,7 +1915,9 @@ static int do_rpmb_op(int fd,
->         u_int16_t rpmb_type;
->         struct mmc_ioc_multi_cmd *mioc;
->         struct mmc_ioc_cmd *ioc;
-> -       struct rpmb_frame frame_status = {0};
-> +       struct rpmb_frame frame_status;
-> +
-> +       memset(&frame_status, 0, sizeof(frame_status));
+> Apparently, the list of Manufacturer ID's (MID) is kind of "not public".
+> To make things confusing, one MID may be used by several manufacturer's
+> (unless reading oid, etc. ?).
+> Hence the table has to be compiled manually.
 >
->         if (!frame_in || !frame_out || !out_cnt)
->                 return -EINVAL;
-> --
-> 2.23.0
+> diff --git a/lsmmc.c b/lsmmc.c
+> index 9737b37..98c0c4d 100644
+> --- a/lsmmc.c
+> +++ b/lsmmc.c
+> @@ -112,7 +112,7 @@ struct ids_database database[] = {
+>         {
+>                 .type = "sd",
+>                 .id = 0x1b,
+> -               .manufacturer = "Transcend",
+> +               .manufacturer = "Transcend/Samsung",
+>         },
+>         {
+>                 .type = "sd",
+> @@ -122,7 +122,7 @@ struct ids_database database[] = {
+>         {
+>                 .type = "sd",
+>                 .id = 0x1d,
+> -               .manufacturer = "Corsair",
+> +               .manufacturer = "Corsair/AData",
+>         },
+>         {
+>                 .type = "sd",
+> @@ -134,6 +134,11 @@ struct ids_database database[] = {
+>                 .id = 0x1f,
+>                 .manufacturer = "Kingston",
+>         },
+> +       {
+> +               .type = "sd",
+> +               .id = 0x27,
+> +               .manufacturer = "Delkin/Phison",
+> +       },
+>         {
+>                 .type = "sd",
+>                 .id = 0x28,
+> @@ -144,6 +149,11 @@ struct ids_database database[] = {
+>                 .id = 0x30,
+>                 .manufacturer = "SanDisk",
+>         },
+> +       {
+> +               .type = "sd",
+> +               .id = 0x31,
+> +               .manufacturer = "Silicon Power",
+> +       },
+>         {
+>                 .type = "sd",
+>                 .id = 0x33,
+> @@ -159,6 +169,21 @@ struct ids_database database[] = {
+>                 .id = 0x6f,
+>                 .manufacturer = "STMicroelectronics",
+>         },
+> +       {
+> +               .type = "sd",
+> +               .id = 0x74,
+> +               .manufacturer = "Transcend",
+> +       },
+> +       {
+> +               .type = "sd",
+> +               .id = 0x76,
+> +               .manufacturer = "Patriot",
+> +       },
+> +       {
+> +               .type = "sd",
+> +               .id = 0x82,
+> +               .manufacturer = "Gobe/Sony",
+> +       },
+>         {
+>                 .type = "sd",
+>                 .id = 0x89,
+> @@ -219,6 +244,11 @@ struct ids_database database[] = {
+>                 .id = 0x70,
+>                 .manufacturer = "Kingston",
+>         },
+> +       {
+> +               .type = "mmc",
+> +               .id = 0xfe,
+> +               .manufacturer = "Micron",
+> +       },
+>  };
 >
+>  /* Command line parsing functions */
