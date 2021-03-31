@@ -2,204 +2,268 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-20.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 995CEC433C1
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:31:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1AC7C433DB
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A12461606
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:31:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 83D6161981
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230385AbhCaJbK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 Mar 2021 05:31:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37592 "EHLO
+        id S234991AbhCaJl0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 05:41:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39828 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234553AbhCaJbA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:31:00 -0400
-Received: from mail-vk1-xa2c.google.com (mail-vk1-xa2c.google.com [IPv6:2607:f8b0:4864:20::a2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AFF0C061574
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:31:00 -0700 (PDT)
-Received: by mail-vk1-xa2c.google.com with SMTP id u144so4196697vkb.13
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:31:00 -0700 (PDT)
+        with ESMTP id S234826AbhCaJk6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:40:58 -0400
+Received: from mail-vk1-xa36.google.com (mail-vk1-xa36.google.com [IPv6:2607:f8b0:4864:20::a36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34CFBC06175F
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:40:58 -0700 (PDT)
+Received: by mail-vk1-xa36.google.com with SMTP id d82so4213162vkd.3
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:40:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=B206DLBs5pNzOwU/8DxV6d6XKC69s62Sja9FabTzXRo=;
-        b=rd5DW/59utrI6rSPrKyItHnZ8jcE7fbzh9HSRXXS+BFXi6Uzs9L3FSenKBvw4p/DmM
-         WZjqXbOYlMzcgJZGa5lQmfNGtRqkgX0UtFoL3RV2cn1HzKuI5/3ew6783VTrfTK3zHcr
-         gfthtb2mIrkLucKN9IShoh/R/To/dTaMGl32A8yDorl7xw8xXRJ7goDshqoYlOqAK6iA
-         YRIMC43MfLQMY2CJgmDyfeJgKKUbplul9i+bDorUKe9BLt1SsEVwJByDahBaObXU2E8M
-         tKMVw3TtxABveMyyRhB1KP+OwFBdTQUYsq0vBWiDMLjMKiHXRSTHcTntkKJgVc0PL8VS
-         BR2g==
+        bh=MPKXCbBQ6MLmvA2x0+kwnCnmEII6VuYmlVud9KJPlFE=;
+        b=wIxhXR+vq1j188ZifHBHYW73Sv2mGWYukQBhrCK52oU9TkK/w98T/bWNngw/RrSl0G
+         C3TjDccbbd9Y9faFUsZ4SQ3S6Ea1pmhu/ANGqr5X5sl6STd9xXJqNdSh3GBGQFGVNnTQ
+         AcRQPLwaWpBmAHXi8KcxqXqgzrh4ZDgVNKFZomEkT67MZAEqm1aH7SCd/6iw7871JXDw
+         wAQj6GSd/Z8FwbtaS8crmsjUtPLy0aMQBRTFz4lcb2uQGCXl2yi6ervZAukD6+m2jYg1
+         OHJpiMUl3URiVLq/1jC31d9Q7ZviSljMqkesj1SHHb3ToxOMclLcHhwrFxtrIymYqQ0s
+         ZXAA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=B206DLBs5pNzOwU/8DxV6d6XKC69s62Sja9FabTzXRo=;
-        b=FNGyve3oYJPMMIpQydb3FzTNeY8JBDEj2SRdO27x078QxTHeTXx/uVebcn4wIpKLDY
-         wyzY0GfeS5mINIZ7nXlW6fnGTKZmn9WHKuXXoPiT0I4QAPDtJi//NqufAxVUc/WsVXAl
-         ry9UQiw5gAGsCpEskXGXgYKIy/5a2ApLVfSkbARVah7FStLRRq14DsYSl5Lpn6Mlb13r
-         9BhkX1sDxFQDwZn5iDDN9jxRNmpAxmKzk+MooxrV1cxBQ80xTupYwcCbbQW5/bVS76IX
-         CY6yBVbI/5QuS2WNDWZLpj2lw+ZMv0W8SvBE1zIsRl8f5p+ZVVYd2X6PMUBKEwIMU92g
-         KlFw==
-X-Gm-Message-State: AOAM533tl0/lSHR2G2UUX+HXALBviTARv2PbvjfR5iZgPtB1a33Ew6A8
-        oB2hWh3YNFneiRUx/YydIRsxwUlDRZ0y/Uuq9b+NmA==
-X-Google-Smtp-Source: ABdhPJzFbprNq/7lspfkQH7+GKX9EQmI1MVogRrAG3+QjqvUOu0V1N8mI6de1OSSr9hdfTgjuHGrSuxzjwpwvt7RMok=
-X-Received: by 2002:a1f:2a95:: with SMTP id q143mr1010157vkq.8.1617183059626;
- Wed, 31 Mar 2021 02:30:59 -0700 (PDT)
+        bh=MPKXCbBQ6MLmvA2x0+kwnCnmEII6VuYmlVud9KJPlFE=;
+        b=aQyesWvjven8M33/YyEgRt+backIUTbiJNG0ccDUfjZHPnalUtMpLRBgFnGlaBnb9C
+         CaceSw9N/zF4fJ2Lv07ijnemgos5w/rKa00KudGE5efOGAmLEj5jlHc6rBY/wXxvFIkB
+         TLukt32QozmgaQ0jdKmBK+yALd9wF8lP/W/hbdMeo3xb/0s+5gIGF1mh33ik09LwZxyj
+         xkk1/HcNO1EoeT0jWzT/9DXS3pRRFv0kBZPPEaZl7rJcN714Ai4gT0bImMutIoEcvrKJ
+         SmXReF8dCi7Ft6Aw+uLiBjHX6YUkzmsGTl+3vKl1h7NPBBEjLUGpsqLBTmN5qaP+192v
+         oT4w==
+X-Gm-Message-State: AOAM532ejgHJ3rBolLqLZZ/HsqqsO5IiSX4OHzCbchnpr4E1pGhz31JM
+        SRSwWAWcZvkU9o/POvAX2QMysRtdB1OWR/foBV2mqg==
+X-Google-Smtp-Source: ABdhPJxt7GqwyVdgobABm5+hXR4HenXY2A8WM1pKxhHTLliNI5QlwVBMjeDGHnB/apShkjdLsbf6wxl7YbEAF15LwG0=
+X-Received: by 2002:a1f:5504:: with SMTP id j4mr976300vkb.7.1617183657318;
+ Wed, 31 Mar 2021 02:40:57 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210324164408.14722-1-huobean@gmail.com> <CAPDyKFq8oMH-qga_d+EP2T1xbCbq7PHK=ZkrUp0JaWmdcHYvRg@mail.gmail.com>
- <7a774027-ad2c-21bf-8cb0-eaa92a76bad7@oracle.com>
-In-Reply-To: <7a774027-ad2c-21bf-8cb0-eaa92a76bad7@oracle.com>
+References: <MN2PR08MB63973BF8F3C6959487BF5707B86A9@MN2PR08MB6397.namprd08.prod.outlook.com>
+In-Reply-To: <MN2PR08MB63973BF8F3C6959487BF5707B86A9@MN2PR08MB6397.namprd08.prod.outlook.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 31 Mar 2021 11:30:23 +0200
-Message-ID: <CAPDyKFqva-50WytCMRfaFALf_Cy9xoce8pHBBTX7XXirqRKkqQ@mail.gmail.com>
-Subject: Re: [External] : Re: [PATCH v2] mmc-utils: Add eMMC erase command support
-To:     kimito.sakata@oracle.com
-Cc:     Bean Huo <huobean@gmail.com>,
+Date:   Wed, 31 Mar 2021 11:40:20 +0200
+Message-ID: <CAPDyKFr1E+MTi2G8Zkp_H8c_6BOaP3mpV90pJ3qaqoTyoc-Gwg@mail.gmail.com>
+Subject: Re: [PATCH RESEND V4] mmc-utils: let FFU mode use CMD23 and CMD25
+To:     "Shivamurthy Shastri (sshivamurthy)" <sshivamurthy@micron.com>
+Cc:     Chris Ball <chris@printf.net>, Avri Altman <Avri.Altman@wdc.com>,
         "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        kenny.gibbons@oracle.com, rkamdar@micron.com,
-        Chris Ball <chris@printf.net>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 30 Mar 2021 at 23:36, <kimito.sakata@oracle.com> wrote:
+On Wed, 17 Mar 2021 at 11:42, Shivamurthy Shastri (sshivamurthy)
+<sshivamurthy@micron.com> wrote:
 >
+> As per specification, the host can use either CMD24 or CMD25 in
+> closed-ended or open-ended way.
+> CMD25 is better option as it can flash the firmware image in one go.
 >
->
-> On 3/30/2021 6:39 AM, Ulf Hansson wrote:
-> > On Wed, 24 Mar 2021 at 17:45, Bean Huo <huobean@gmail.com> wrote:
-> >> From: Kimito Sakata <kimito.sakata@oracle.com>
-> >>
-> >> we have been using this erase feature for a while, but it is
-> >> still not merged into the upstream mmc-utils. Especially, for
-> >> the customer, every time when they update the mmc-utils, they
-> >> should re-install this patch again, let's try to make this
-> >> erase command upstreamed in the mmc-utils.
-> >>
-> >> Co-developed-by: Bean Huo <beanhuo@micron.com>
-> >> Signed-off-by: Bean Huo <beanhuo@micron.com>
-> >> Reviewed-by: Kenneth Gibbons <kenny.gibbons@oracle.com>
-> >> ---
-> >>
-> >> Hi Ulf,
-> >> Please help us review this mmc-utils patch, and if agree, it is
-> >> possible to make it merged in the official mmc-utils.
-> >>
-> >> Changelog:
-> >>
-> >> V1--V2:
-> >>      1. refactor Kimito's original patch
-> >>      2. change to use MMC_IOC_MULTI_CMD
-> >>      3. add checkup if eMMC devie supports secure erase/trim
-> >>
-> >> ---
-> >>   mmc.c      |   8 ++++
-> >>   mmc.h      |  13 +++++-
-> >>   mmc_cmds.c | 135 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >>   mmc_cmds.h |   1 +
-> >>   4 files changed, 156 insertions(+), 1 deletion(-)
-> >>
-> >> diff --git a/mmc.c b/mmc.c
-> >> index 50c9c9e..cb29a65 100644
-> >> --- a/mmc.c
-> >> +++ b/mmc.c
-> >> @@ -215,6 +215,14 @@ static struct Command commands[] = {
-> >>                  "Run Field Firmware Update with <image name> on <device>.\n",
-> >>            NULL
-> >>          },
-> >> +       { do_erase, -4,
-> >> +       "erase", "<type> " "<start address> " "<end address> " "<device>\n"
-> >> +               "Send Erase CMD38 with specific argument to the <device>\n\n"
-> >> +               "NOTE!: This will delete all user data in the specified region of the device\n"
-> >> +               "<type> must be: legacy | discard | secure-erase | "
-> >> +               "secure-trim1 | secure-trim2 | trim \n",
-> >> +       NULL
-> >> +       },
-> >>          { 0, 0, 0, 0 }
-> >>   };
-> >>
-> >> diff --git a/mmc.h b/mmc.h
-> >> index 648fb26..90b7fb5 100644
-> >> --- a/mmc.h
-> >> +++ b/mmc.h
-> >> @@ -34,7 +34,15 @@
-> >>   #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
-> >>   #define MMC_CLEAR_WRITE_PROT   29    /* ac   [31:0] data addr   R1b */
-> >>   #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
-> >> -
-> >> +#define MMC_ERASE_GROUP_START  35    /* ac   [31:0] data addr   R1  */
-> >> +#define MMC_ERASE_GROUP_END    36    /* ac   [31:0] data addr   R1  */
-> >> +#define MMC_ERASE              38    /* ac   [31] Secure request
-> >> +                                             [30:16] set to 0
-> >> +                                             [15] Force Garbage Collect request
-> >> +                                             [14:2] set to 0
-> >> +                                             [1] Discard Enable
-> >> +                                             [0] Identify Write Blocks for
-> >> +                                             Erase (or TRIM Enable)  R1b */
-> >>   /*
-> >>    * EXT_CSD fields
-> >>    */
-> >> @@ -61,6 +69,7 @@
-> >>   #define EXT_CSD_CACHE_SIZE_2           251
-> >>   #define EXT_CSD_CACHE_SIZE_1           250
-> >>   #define EXT_CSD_CACHE_SIZE_0           249
-> >> +#define EXT_CSD_SEC_FEATURE_SUPPORT    231
-> >>   #define EXT_CSD_BOOT_INFO              228     /* R/W */
-> >>   #define EXT_CSD_HC_ERASE_GRP_SIZE      224
-> >>   #define EXT_CSD_HC_WP_GRP_SIZE         221
-> >> @@ -177,6 +186,8 @@
-> >>   #define EXT_CSD_REV_V4_2               2
-> >>   #define EXT_CSD_REV_V4_1               1
-> >>   #define EXT_CSD_REV_V4_0               0
-> >> +#define EXT_CSD_SEC_GB_CL_EN           (1<<4)
-> >> +#define EXT_CSD_SEC_ER_EN              (1<<0)
-> >>
-> >>
-> >>   /* From kernel linux/mmc/core.h */
-> >> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> >> index fb37189..17986e3 100644
-> >> --- a/mmc_cmds.c
-> >> +++ b/mmc_cmds.c
-> >> @@ -2435,6 +2435,141 @@ int do_cache_dis(int nargs, char **argv)
-> >>          return do_cache_ctrl(0, nargs, argv);
-> >>   }
-> >>
-> >> +static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
-> >> +{
-> >> +#ifndef MMC_IOC_MULTI_CMD
-> > In kernel v4.4 we added the multi cmd support, which is quite some
-> > time ago. So, I think it's time to drop these ifdef hackary from the
-> > userland tool. At least, we shouldn't need it for new kinds of
-> > features that we add.
-> Ulf
-> Do you want us to take out the  MMC_IOC_MULTI_CMD ifdef and resubmit?
+> Signed-off-by: Shivamurthy Shastri <sshivamurthy@micron.com>
+> Reviewed-by: Avri Altman <avri.altman@wdc.com>
+> Reviewed-by: Bean Huo <beanhuo@micron.com>
+> Tested-by: Bean Huo <beanhuo@micron.com>
 
-Yes, please.
-
-Moreover, we should probably also remove all the other #ifndef
-MMC_IOC_MULTI_CMD hacks that we currently have in the code. But that's
-a separate patch.
-
-> Kimito
->
-> >
-> >> +       fprintf(stderr, "mmc-utils has been compiled without MMC_IOC_MULTI_CMD"
-> >> +                       " support, needed by erase.\n");
-> >> +       return -ENOTSUP;
-> >> +#else
-> >> +       int ret = 0;
-> >> +       struct mmc_ioc_multi_cmd *multi_cmd;
-> >> +
-> > [...]
+Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> V4:
+>    - Removed MMC_STOP_TRANSMISSION, as it is not used in this patch
+>    - Added reviewed and tested by from Bean Huo
+> V3:
+>    - Checking the firmware size with MMC_IOC_MAX_BYTES
+> V2:
+>    - Removed optional parameter '-c'
+>    - FFU mode use CMD25 instead of CMD24
+>    - CMD25 used as closed-ended
+>
+>  mmc.h      |  1 +
+>  mmc_cmds.c | 70 ++++++++++++++++++++++++++++++------------------------
+>  2 files changed, 40 insertions(+), 31 deletions(-)
+>
+> diff --git a/mmc.h b/mmc.h
+> index 648fb2672d6f..cf2d4766a16d 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -29,6 +29,7 @@
+>  #define R1_SWITCH_ERROR   (1 << 7)  /* sx, c */
+>  #define MMC_SWITCH_MODE_WRITE_BYTE     0x03    /* Set target to value */
+>  #define MMC_READ_MULTIPLE_BLOCK  18   /* adtc [31:0] data addr   R1  */
+> +#define MMC_SET_BLOCK_COUNT      23   /* adtc [31:0] data addr   R1  */
+>  #define MMC_WRITE_BLOCK                24      /* adtc [31:0] data addr        R1  */
+>  #define MMC_WRITE_MULTIPLE_BLOCK 25   /* adtc                    R1  */
+>  #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index fb371892c521..6e6c09ae3b85 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2446,12 +2446,13 @@ int do_ffu(int nargs, char **argv)
+>         int sect_done = 0, retry = 3, ret = -EINVAL;
+>         unsigned int sect_size;
+>         __u8 ext_csd[512];
+> -       __u8 *buf;
+> +       __u8 *buf = NULL;
+>         __u32 arg;
+>         off_t fw_size;
+>         ssize_t chunk_size;
+>         char *device;
+> -       struct mmc_ioc_multi_cmd *multi_cmd;
+> +       struct mmc_ioc_multi_cmd *multi_cmd = NULL;
+> +       __u32 blocks = 1;
+>
+>         if (nargs != 3) {
+>                 fprintf(stderr, "Usage: ffu <image name> </path/to/mmcblkX> \n");
+> @@ -2471,14 +2472,6 @@ int do_ffu(int nargs, char **argv)
+>                 exit(1);
+>         }
+>
+> -       buf = malloc(512);
+> -       multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> -                               3 * sizeof(struct mmc_ioc_cmd));
+> -       if (!buf || !multi_cmd) {
+> -               perror("failed to allocate memory");
+> -               goto out;
+> -       }
+> -
+>         ret = read_extcsd(dev_fd, ext_csd);
+>         if (ret) {
+>                 fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
+> @@ -2503,9 +2496,17 @@ int do_ffu(int nargs, char **argv)
+>         }
+>
+>         fw_size = lseek(img_fd, 0, SEEK_END);
+> +       if (fw_size > MMC_IOC_MAX_BYTES || fw_size == 0) {
+> +               fprintf(stderr, "Wrong firmware size");
+> +               goto out;
+> +       }
+>
+> -       if (fw_size == 0) {
+> -               fprintf(stderr, "Firmware image is empty");
+> +       /* allocate maximum required */
+> +       buf = malloc(fw_size);
+> +       multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> +                               4 * sizeof(struct mmc_ioc_cmd));
+> +       if (!buf || !multi_cmd) {
+> +               perror("failed to allocate memory");
+>                 goto out;
+>         }
+>
+> @@ -2515,14 +2516,19 @@ int do_ffu(int nargs, char **argv)
+>                 goto out;
+>         }
+>
+> +       /* calculate required fw blocks for CMD25 */
+> +       blocks = fw_size / sect_size;
+> +
+>         /* set CMD ARG */
+>         arg = ext_csd[EXT_CSD_FFU_ARG_0] |
+>                 ext_csd[EXT_CSD_FFU_ARG_1] << 8 |
+>                 ext_csd[EXT_CSD_FFU_ARG_2] << 16 |
+>                 ext_csd[EXT_CSD_FFU_ARG_3] << 24;
+>
+> +       /* prepare multi_cmd for FFU based on cmd to be used */
+> +
+>         /* prepare multi_cmd to be sent */
+> -       multi_cmd->num_of_cmds = 3;
+> +       multi_cmd->num_of_cmds = 4;
+>
+>         /* put device into ffu mode */
+>         multi_cmd->cmds[0].opcode = MMC_SWITCH;
+> @@ -2533,37 +2539,42 @@ int do_ffu(int nargs, char **argv)
+>         multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+>         multi_cmd->cmds[0].write_flag = 1;
+>
+> +       /* send block count */
+> +       multi_cmd->cmds[1].opcode = MMC_SET_BLOCK_COUNT;
+> +       multi_cmd->cmds[1].arg = blocks;
+> +       multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +
+>         /* send image chunk */
+> -       multi_cmd->cmds[1].opcode = MMC_WRITE_BLOCK;
+> -       multi_cmd->cmds[1].blksz = sect_size;
+> -       multi_cmd->cmds[1].blocks = 1;
+> -       multi_cmd->cmds[1].arg = arg;
+> -       multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+> -       multi_cmd->cmds[1].write_flag = 1;
+> -       mmc_ioc_cmd_set_data(multi_cmd->cmds[1], buf);
+> +       multi_cmd->cmds[2].opcode = MMC_WRITE_MULTIPLE_BLOCK;
+> +       multi_cmd->cmds[2].blksz = sect_size;
+> +       multi_cmd->cmds[2].blocks = blocks;
+> +       multi_cmd->cmds[2].arg = arg;
+> +       multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+> +       multi_cmd->cmds[2].write_flag = 1;
+> +       mmc_ioc_cmd_set_data(multi_cmd->cmds[2], buf);
+>
+>         /* return device into normal mode */
+> -       multi_cmd->cmds[2].opcode = MMC_SWITCH;
+> -       multi_cmd->cmds[2].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+> +       multi_cmd->cmds[3].opcode = MMC_SWITCH;
+> +       multi_cmd->cmds[3].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+>                         (EXT_CSD_MODE_CONFIG << 16) |
+>                         (EXT_CSD_NORMAL_MODE << 8) |
+>                         EXT_CSD_CMD_SET_NORMAL;
+> -       multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> -       multi_cmd->cmds[2].write_flag = 1;
+> +       multi_cmd->cmds[3].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +       multi_cmd->cmds[3].write_flag = 1;
+>
+>  do_retry:
+>         /* read firmware chunk */
+>         lseek(img_fd, 0, SEEK_SET);
+> -       chunk_size = read(img_fd, buf, 512);
+> +       chunk_size = read(img_fd, buf, fw_size);
+>
+> -       while (chunk_size > 0) {
+> +       if (chunk_size > 0) {
+>                 /* send ioctl with multi-cmd */
+>                 ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+>
+>                 if (ret) {
+>                         perror("Multi-cmd ioctl");
+>                         /* In case multi-cmd ioctl failed before exiting from ffu mode */
+> -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[2]);
+> +                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+>                         goto out;
+>                 }
+>
+> @@ -2590,9 +2601,6 @@ do_retry:
+>                 } else {
+>                         fprintf(stderr, "Programmed %d/%jd bytes\r", sect_done * sect_size, (intmax_t)fw_size);
+>                 }
+> -
+> -               /* read the next firmware chunk (if any) */
+> -               chunk_size = read(img_fd, buf, 512);
+>         }
+>
+>         if ((sect_done * sect_size) == fw_size) {
+> @@ -2629,7 +2637,7 @@ do_retry:
+>                 if (ret) {
+>                         perror("Multi-cmd ioctl failed setting install mode");
+>                         /* In case multi-cmd ioctl failed before exiting from ffu mode */
+> -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[2]);
+> +                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+>                         goto out;
+>                 }
+>
+> --
+> 2.25.1
+>
