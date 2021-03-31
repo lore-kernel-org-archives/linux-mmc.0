@@ -7,81 +7,74 @@ X-Spam-Status: No, score=-20.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F042EC433E3
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 58CBCC433C1
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B0DBA61981
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E2A461981
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234121AbhCaJlg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 Mar 2021 05:41:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39920 "EHLO
+        id S234792AbhCaJmB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 05:42:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234952AbhCaJlR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:41:17 -0400
-Received: from mail-vk1-xa31.google.com (mail-vk1-xa31.google.com [IPv6:2607:f8b0:4864:20::a31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3864C061760
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:15 -0700 (PDT)
-Received: by mail-vk1-xa31.google.com with SMTP id d82so4213360vkd.3
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:15 -0700 (PDT)
+        with ESMTP id S235002AbhCaJlp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:41:45 -0400
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF209C061574
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:44 -0700 (PDT)
+Received: by mail-vs1-xe32.google.com with SMTP id a15so9587464vsi.0
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Fd8jBA8I9u/EGaDkiHtzB7rTMkP1PjvtPxjlz3UgGqc=;
-        b=sx7PN7n6fSeOBjqHjBWqV90nesMPPZHM3qtSjAN0coYTkO/40NfErfTntMRxIH1myK
-         Ue1nIX45zU5X0J9W2p5fjw9uzn07+bLvi4UDgkNG8GS4BLu1+tZWo7GyIN0gduuNaUt3
-         cbz++KoJ6LOBPb6sBcYbnegsRulu+C9x1zIsbrutkmsQsInx2mZRCqEDcOxTfEoLh0gx
-         +MYS/cQwkxWu6D6Sqlgsu8jaIYaWJOER+vESrV9TPH30EqFH5rTnQneiflrmvPQZovvf
-         NRxpr116QUXOY8YQuygI3qG6AeuWIVbhwDi6MlvxxbcU5rRKL23GyrbDaCF9k3o6rmi+
-         /DWA==
+        bh=CyV5l/qSm/ag0naSSeMCM51DYTUF9l9ZCJDa+1CrGYI=;
+        b=I0U0pnY4a7V0lhAlSeDo+FioSEBLfG93+/WFF4IoPAw7hUMJL913zYOl8b86poCEGx
+         /LZWV7x5ytOCG9+azc7DyLT7cU4i/UpD+AF9K7CR7kt3dd+cPFHailo3cIxhX7zAkHAD
+         2lXyZJQqAuuD2t56FR/p64z6I3NXQTMaV8yomothj9rJZDxsq7Dr3cDrEqd5n92I3d19
+         YKYbV1VTN6AY6xc+KuZVKuLwkpfD9ok82Ju1S9gL7JhKmdAYRL0o6EltEFicnxfQ4eaY
+         JgY/88nPEnxOaBnRhn2L25kk+JZCYTKJUvkdKGQ2dqHYsUOrtAtwBjyegwgejVoYx8Ow
+         jthw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Fd8jBA8I9u/EGaDkiHtzB7rTMkP1PjvtPxjlz3UgGqc=;
-        b=M7ltsDpePuf90/Gvwu89GajYvPxaCvXCGgbGEcvanjTkzDMzoiiJfJk4bqqzCNHXtr
-         t7eblQGpAtYUJf+iMaVhjxfN19bfyFieZhoTUZzOKVhg0W/RseSkierMq4y7fE+pfjPJ
-         mEakCOyVAOlLl7/WcfeEjiijQOS+gDow3fo/nupfOo9mmEU8rvF59FDUMF6H6LrNQm/h
-         mVkDW90xvkXnhwgY+f8xkmhZRn9WhaTotWts60oq830e2XTkHzcnqsa9ED+rvn9CyYlB
-         nkPzdalUjzBavxRSdccCnlZC2+VicERgBitAYpXqEpkMj9hR94FC1PCm7jy2/lillRix
-         b2/w==
-X-Gm-Message-State: AOAM531SGM64WBPqGfLoaT5M6W4hZ6J79PhEMxdie4LFQEjJVYEV/Kke
-        QVndrqJvwK4/nBguKfWZSOU05Q567mzL2rsnIWYzyQ==
-X-Google-Smtp-Source: ABdhPJxLDId5VTO4oEjTDELLkH8WswLPJe+6FghXvz5tWfHFwN1I/s5EqT41Yt8d8JL/UUEypBdRnLDBKLOUZyDj8QI=
-X-Received: by 2002:a1f:2c58:: with SMTP id s85mr1045350vks.15.1617183674911;
- Wed, 31 Mar 2021 02:41:14 -0700 (PDT)
+        bh=CyV5l/qSm/ag0naSSeMCM51DYTUF9l9ZCJDa+1CrGYI=;
+        b=aH3PvhbXQUNwTiYPfcwD99gbOuflBt4bFX8efTF6QUHc9+AKxgiOW6xicl8ouYopEM
+         +v4f7rIa1Bly1Sx1AvT9bhAKxT/obyGj6LcLeTEyHkKVBlJbc+S49pokXzo5Q0iw7gXs
+         yi1wTQZW7BkQ9htr8T+pITtyQXTI5L2byNg1rYJzr6+f5O8OJPrDtcbGNh6ACKnGKPFj
+         aSBdSItwjoVe291wBDcIb6WD7kjcF2Jz1cF9b0lgqp/6BSI449OhZ7/iS25GMwjMIi/3
+         gwd3wD4N+HnAi8YoumtzMCgpmtQ2wKnaJlgAKKV3pfTFaqNuydh0cQXHBq2IBwDN9dZZ
+         uwbw==
+X-Gm-Message-State: AOAM533AbEvyLAJQSZ1AAfzk4QkaIilkufBHLzBVG+ju85VM5urltkQv
+        xUC2ksrSptDP+Ivtr8HUpYbU97uH9VEXT+co+vMcRA==
+X-Google-Smtp-Source: ABdhPJwFevTv9+zgThvrOEwWcCAYGexwuMe4G4wnz72ZHFbdhEkqxc3wB3Cr1Dq0wLLgQ5+kITUAPm38iaD9Xo1MjJA=
+X-Received: by 2002:a05:6102:21d1:: with SMTP id r17mr932535vsg.19.1617183704054;
+ Wed, 31 Mar 2021 02:41:44 -0700 (PDT)
 MIME-Version: 1.0
-References: <CAPDyKFrW6tXMVa_P=iAPk4FurH9+MGOvJiT7m8B72kz7p0-BnQ@mail.gmail.com>
- <20200401221453.267360-1-patrick.oppenlander@gmail.com>
-In-Reply-To: <20200401221453.267360-1-patrick.oppenlander@gmail.com>
+References: <1351172418.3304142.1547483917896.JavaMail.root@zimbra64-e11.priv.proxad.net>
+ <1823652044.3512532.1547484650178.JavaMail.root@zimbra64-e11.priv.proxad.net> <SN6PR04MB49257FCC0D21341EDB735C1FFC810@SN6PR04MB4925.namprd04.prod.outlook.com>
+In-Reply-To: <SN6PR04MB49257FCC0D21341EDB735C1FFC810@SN6PR04MB4925.namprd04.prod.outlook.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 31 Mar 2021 11:40:38 +0200
-Message-ID: <CAPDyKFqWrmOt4JQ+uqGKJBf7YxSOFf8JCe=cSLS-i7bhvKdi_A@mail.gmail.com>
-Subject: Re: [PATCH] mmc-utils: Fix scaling of cache size
-To:     Patrick Oppenlander <patrick.oppenlander@gmail.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Avri Altman <avri.altman@wdc.com>
+Date:   Wed, 31 Mar 2021 11:41:06 +0200
+Message-ID: <CAPDyKFp-eeAHizorBASn=rbKcYOX+1QjtK5qXcpiNHfny4=2ZA@mail.gmail.com>
+Subject: Re: [PATCH mmc-utils] Fix parsing of Product Revision and Serial Number
+To:     Stephane Fillod <f8cfe@free.fr>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Avri Altman <Avri.Altman@wdc.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2 Apr 2020 at 00:15, <patrick.oppenlander@gmail.com> wrote:
+On Tue, 15 Jan 2019 at 11:38, Avri Altman <Avri.Altman@wdc.com> wrote:
 >
-> From: Patrick Oppenlander <patrick.oppenlander@gmail.com>
+> >
+> > According to MMC Standard (similar to SDCard Standard).
+> >
+> > Signed-off-by: Stephane Fillod <f8cfe@free.fr>
+> Acked-by: Avri Altman <avri.altman@wdc.com>
 >
-> Resend requested by Uffe.
->
-> ===8<===
->
-> JESD84-B51 7.4.30 CACHE_SIZE [252:249] states that "the size is
-> indicated as multiple of kilobits". This is also supported by Table 39,
-> "e.MMC internal sizes and related Units / Granularities" which lists
-> "32Kb (=4KB)" as the cache size granularity for 4KiB native devices.
->
-> Signed-off-by: Patrick Oppenlander <patrick.oppenlander@gmail.com>
-> Reviewed-by: Avri Altman <avri.altman@wdc.com>
 
 Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
@@ -89,25 +82,20 @@ Kind regards
 Uffe
 
 
-> ---
->  mmc_cmds.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index fb37189..a1b1d75 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -1419,8 +1419,8 @@ int do_read_extcsd(int nargs, char **argv)
->                 printf("Power off notification [POWER_OFF_LONG_TIME: 0x%02x]\n",
->                         ext_csd[247]);
->                 printf("Cache Size [CACHE_SIZE] is %d KiB\n",
-> -                       ext_csd[249] << 0 | (ext_csd[250] << 8) |
-> -                       (ext_csd[251] << 16) | (ext_csd[252] << 24));
-> +                       (ext_csd[249] << 0 | (ext_csd[250] << 8) |
-> +                       (ext_csd[251] << 16) | (ext_csd[252] << 24)) / 8);
->         }
->
->         /* A441: Reserved [501:247]
-> --
-> 2.26.0
->
+> > ---
+> >
+> > Rem: the field parsing order is fine in print_sd_cid().
+> >
+> > diff --git a/lsmmc.c b/lsmmc.c
+> > index 9737b37..98c0c4d 100644
+> > --- a/lsmmc.c
+> > +++ b/lsmmc.c
+> > @@ -550,7 +582,7 @@ void print_mmc_cid(struct config *config, char *cid)
+> >       unsigned int crc;
+> >
+> >       parse_bin(cid, "8u6r2u8u48a4u4u32u4u4u7u1r",
+> > -             &mid, &cbx, &oid, &pnm[0], &psn, &prv_major, &prv_minor,
+> > +             &mid, &cbx, &oid, &pnm[0], &prv_major, &prv_minor, &psn,
+> >               &mdt_year, &mdt_month, &crc);
+> >
+> >       pnm[6] = '\0';
