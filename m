@@ -7,72 +7,79 @@ X-Spam-Status: No, score=-20.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09C42C433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AF9BC433E1
 	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE60E619BC
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40F0B619C1
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 09:42:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235060AbhCaJmA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 Mar 2021 05:42:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39978 "EHLO
+        id S234871AbhCaJmB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 05:42:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40010 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234990AbhCaJl0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:41:26 -0400
-Received: from mail-vs1-xe35.google.com (mail-vs1-xe35.google.com [IPv6:2607:f8b0:4864:20::e35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 676DBC061574
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:26 -0700 (PDT)
-Received: by mail-vs1-xe35.google.com with SMTP id f19so4762557vsl.10
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:26 -0700 (PDT)
+        with ESMTP id S234812AbhCaJle (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 05:41:34 -0400
+Received: from mail-ua1-x929.google.com (mail-ua1-x929.google.com [IPv6:2607:f8b0:4864:20::929])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACCB9C061574
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:33 -0700 (PDT)
+Received: by mail-ua1-x929.google.com with SMTP id y20so5746958uay.6
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 02:41:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=7thnfOhrpF9CIgHxhgC8Pn3ZLLp6FVJXN1H55WEU4Sg=;
-        b=dkwJmJvYqtDNF0OT8MyIlr3AwemDo35Aa/kVjCumWODJnNCU6pqgwbF0AGyzTmFqwV
-         mmNTSnbwTzdnMJIIkb0yTpQvWCYGEtOXQPMot7GtJiaewb+rl+1++qmgA+4GLpsAFphU
-         OP29G7NF7R6oUdM5sO7gToab7aQlb1vIpkW8oAbYksdLE/KjEDQw819WBZYge5BXIalh
-         2Ggl27VisRbzV+NSwj8shty853O2kAFYlKpmzaTu8DHxnK154dEdJ4U4diwGAhe+rjVw
-         9M4sgphHddPBShXr8jSpanGAaztgGW5tR8dZ8R/elOfXncVg8dtz7N3B3BVN+jyZajwI
-         /bbw==
+        bh=cqSVyx6IfZiNsTA4tIIoWXj6mim+5+/341jQX3JUpQU=;
+        b=o/bCBMs7fN/z3Lrzm5a1KDBl8l2hJWqLZc+1RUehKMpZiJB5qWgJNpra/qo3HR4MLH
+         bTz+74eNLn9tQ9XbF+WGsJvTAFuwoNzyji01IzMJtpAhPc+HpwDbcyBHL1zRnM9++S5V
+         YSDDFzleUjWfquMk7nTVnOsq9RnMkUrZ7wanCG6RlJ1WVV7hwvllLOmWXI6uRYP5zDJY
+         YtoLV98j1+qh0gad32LTLlP8QaHV2MAdWL+UQF93ioNMtcVC7WyoRMxrlmwMoD/PFkBR
+         qlndJFQHRWg5PwBSeIpfHlcwXI1TTNOeOSm7ViGYCXHtMk1YxCMlCnWmG2xWpU2vLJpk
+         SL7w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=7thnfOhrpF9CIgHxhgC8Pn3ZLLp6FVJXN1H55WEU4Sg=;
-        b=fiYkDUopZnA/b4GA8Fk0zVqvvuI9kBuygwsFii1goJmw222Ho9+QJDn3dqQMgElSkd
-         zVdwitaeyU4HqXHpPKnBljMuKRTS7a4URRI9DQ53w8e5aPlLPLk2lX60HxjNO7Xy2dWj
-         n+IcZ4bX6ulzSHjf3XeZSX2fWHL8dif8v6ivz9AkXJ1grjl6slmNl0LdGU8pbn1a8aai
-         ehNETrF38Ey+ToZ28rGm52T2P8iPkqc+nti40jQDWghu0M83qedBJUw0W/oUHdayiTsW
-         j0Yega/38lwAPhAmyrqpMN72eDb8dFAz0GQwkqwKZPejbzspF0M61E7uA8b6fn6ab2Ai
-         B5KA==
-X-Gm-Message-State: AOAM533FhpjCu33LYfCUmxU7w8pmWm/ZomZXpo/zGbDJJ3/GXroBk31s
-        BqQZodiO+DozBdLSM9k5Wp1x9FpInbNoh4uw8j2dKg==
-X-Google-Smtp-Source: ABdhPJxlaXkg7/5TFDOMAFCEWssugW2x48TMbMANaRHoraS+DljFUJ9YK9xcB0KCpPb7ph8upJ0NEw0eZzYrZBBd6XM=
-X-Received: by 2002:a67:77c1:: with SMTP id s184mr928170vsc.55.1617183685612;
- Wed, 31 Mar 2021 02:41:25 -0700 (PDT)
+        bh=cqSVyx6IfZiNsTA4tIIoWXj6mim+5+/341jQX3JUpQU=;
+        b=p+1lrHybEeNP8cP+VgwP1UHJY/azm4INDRdxoshnyT/y2UgBJ8b8N9RD7gDaXCmEet
+         sWYjwLe9C20rIk0eoPZaxDI1iXUOGpOYV2ZhPXYrgQ0uSclhOL7+EfBTj4RegwZUZjtg
+         mOKlL4hlIuxGcGL80h8WVYwmoLTZpQBbn9Qjuot4HygFk1dh2uBuu2zIRFK7W39gheix
+         5hNhr/oAZNo2XeiW373tUhEXLghtor5lhRTWP+FVMynnOR/ZziMv2PKP8u3oPrIdcjrX
+         g8trsjdsNRp/EVVbKN5QpJFMv/4NZ5IF/g9utV0rnkGlrkX8cM6WhaiZXeCwvoujoqoT
+         T9bg==
+X-Gm-Message-State: AOAM530U2ogMPpipOJ44lmGBfZsOItEXvLrU3BVqE0hXfsvc5TgLLGpc
+        F14Q/b9ky8uhbhr0CJCdGtIsry62NZBAouqp3/sVVA==
+X-Google-Smtp-Source: ABdhPJzPSBs9PuV/3K4Grr9lPb1TZW7aHAAmv+/IPFG1vOWszMZ/wct8QvdJUIDccR5mVBf3ejrwoaUY3T6q8yfH7Ss=
+X-Received: by 2002:ab0:2c16:: with SMTP id l22mr816434uar.100.1617183692953;
+ Wed, 31 Mar 2021 02:41:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <20191111110051.16490-1-lapeddk@gmail.com>
-In-Reply-To: <20191111110051.16490-1-lapeddk@gmail.com>
+References: <20190928185107.21125-1-fontaine.fabrice@gmail.com>
+In-Reply-To: <20190928185107.21125-1-fontaine.fabrice@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 31 Mar 2021 11:40:49 +0200
-Message-ID: <CAPDyKFpPUbwPVZOtvLrjzv5GBASbDhHS1fj2FRVqAKczEwYTTw@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc-utils: Add AUTO_EN support in the BKOPS_EN
-To:     Lars Pedersen <lapeddk@gmail.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>, michael.heimpold@i2se.com,
+Date:   Wed, 31 Mar 2021 11:40:56 +0200
+Message-ID: <CAPDyKFpHCvVOWpFmFX9=GpPbcgCLMKi338JP-x_K545sOa4E9Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc_cmds.c: fix build with gcc 4.9
+To:     Fabrice Fontaine <fontaine.fabrice@gmail.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         Avri Altman <avri.altman@wdc.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 11 Nov 2019 at 12:01, Lars Pedersen <lapeddk@gmail.com> wrote:
++ Avri
+
+On Sat, 28 Sept 2019 at 20:50, Fabrice Fontaine
+<fontaine.fabrice@gmail.com> wrote:
 >
-> This patch adds support to enable auto(AUTO_EN) and
-> manual(MANUAL_EN) in BKOPS_EN register. Auto bkops
-> can only be used on eMMC 5.0 or newer.
+> Fix following error with gcc 4.9:
 >
-> Signed-off-by: Lars Pedersen <lapeddk@gmail.com>
+> mmc_cmds.c:1918:9: error: missing braces around initializer [-Werror=missing-braces]
+>   struct rpmb_frame frame_status = {0};
+>
+> Fixes:
+>  - http://autobuild.buildroot.org/results/bf3b6f9f6ef39b99842b3c92495b7bf359c68158
+>
+> Signed-off-by: Fabrice Fontaine <fontaine.fabrice@gmail.com>
 
 Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
@@ -81,104 +88,24 @@ Uffe
 
 
 > ---
-> v3:
->  - Simplified setting of auto and manual BKOPS into old
->    bkops_en function.
+>  mmc_cmds.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> v2:
-> - Added signed-off-by for patches
-> - Dropped patch for BKOPS start support, since its already
->   controlled in the host controller. (mmc_run_bkops)
->
->  mmc.c      |  9 ++++++---
->  mmc.h      |  5 +++--
->  mmc_cmds.c | 23 ++++++++++++++++-------
->  3 files changed, 25 insertions(+), 12 deletions(-)
->
-> diff --git a/mmc.c b/mmc.c
-> index 50c9c9e..513fb78 100644
-> --- a/mmc.c
-> +++ b/mmc.c
-> @@ -120,9 +120,12 @@ static struct Command commands[] = {
->           "<boot_bus_width> must be \"x1|x4|x8\"",
->           NULL
->         },
-> -       { do_write_bkops_en, -1,
-> -         "bkops enable", "<device>\n"
-> -               "Enable the eMMC BKOPS feature on <device>.\nNOTE!  This is a one-time programmable (unreversible) change.",
-> +       { do_write_bkops_en, -2,
-> +         "bkops_en", "<auto|manual> <device>\n"
-> +               "Enable the eMMC BKOPS feature on <device>.\n"
-> +               "The auto (AUTO_EN) setting is only supported on eMMC 5.0 or newer.\n"
-> +               "Setting auto won't have any effect if manual is set.\n"
-> +               "NOTE!  Setting manual (MANUAL_EN) is one-time programmable (unreversible) change.",
->           NULL
->         },
->         { do_hwreset_en, -1,
-> diff --git a/mmc.h b/mmc.h
-> index 648fb26..027cf57 100644
-> --- a/mmc.h
-> +++ b/mmc.h
-> @@ -126,9 +126,10 @@
->  #define EN_REL_WR      (1<<2)
->
->  /*
-> - * BKOPS_EN field definition
-> + * BKOPS_EN field definitions
->   */
-> -#define BKOPS_ENABLE   (1<<0)
-> +#define BKOPS_MAN_ENABLE       (1<<0)
-> +#define BKOPS_AUTO_ENABLE      (1<<1)
->
->  /*
->   * EXT_CSD field definitions
 > diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index fb37189..f433f6f 100644
+> index fb37189..6b09f26 100644
 > --- a/mmc_cmds.c
 > +++ b/mmc_cmds.c
-> @@ -734,13 +734,15 @@ int do_write_bkops_en(int nargs, char **argv)
->         __u8 ext_csd[512], value = 0;
->         int fd, ret;
->         char *device;
-> +       char *en_type;
+> @@ -1915,7 +1915,9 @@ static int do_rpmb_op(int fd,
+>         u_int16_t rpmb_type;
+>         struct mmc_ioc_multi_cmd *mioc;
+>         struct mmc_ioc_cmd *ioc;
+> -       struct rpmb_frame frame_status = {0};
+> +       struct rpmb_frame frame_status;
+> +
+> +       memset(&frame_status, 0, sizeof(frame_status));
 >
-> -       if (nargs != 2) {
-> -              fprintf(stderr, "Usage: mmc bkops enable </path/to/mmcblkX>\n");
-> -              exit(1);
-> +       if (nargs != 3) {
-> +               fprintf(stderr, "Usage: mmc bkops_en <auto|manual> </path/to/mmcblkX>\n");
-> +               exit(1);
->         }
->
-> -       device = argv[1];
-> +       en_type = argv[1];
-> +       device = argv[2];
->
->         fd = open(device, O_RDWR);
->         if (fd < 0) {
-> @@ -754,12 +756,19 @@ int do_write_bkops_en(int nargs, char **argv)
->                 exit(1);
->         }
->
-> -       if (!(ext_csd[EXT_CSD_BKOPS_SUPPORT] & 0x1)) {
-> -               fprintf(stderr, "%s doesn't support BKOPS\n", device);
-> +       if (strcmp(en_type, "auto") == 0) {
-> +               if (ext_csd[EXT_CSD_REV] < EXT_CSD_REV_V5_0) {
-> +                       fprintf(stderr, "%s doesn't support AUTO_EN in the BKOPS_EN register\n", device);
-> +                       exit(1);
-> +               }
-> +               ret = write_extcsd_value(fd, EXT_CSD_BKOPS_EN, BKOPS_AUTO_ENABLE);
-> +       } else if (strcmp(en_type, "manual") == 0) {
-> +               ret = write_extcsd_value(fd, EXT_CSD_BKOPS_EN, BKOPS_MAN_ENABLE);
-> +       } else {
-> +               fprintf(stderr, "%s invalid mode for BKOPS_EN requested: %s. Valid options: auto or manual\n", en_type, device);
->                 exit(1);
->         }
->
-> -       ret = write_extcsd_value(fd, EXT_CSD_BKOPS_EN, BKOPS_ENABLE);
->         if (ret) {
->                 fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
->                         value, EXT_CSD_BKOPS_EN, device);
+>         if (!frame_in || !frame_out || !out_cnt)
+>                 return -EINVAL;
 > --
 > 2.23.0
 >
