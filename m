@@ -7,147 +7,121 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EAF89C433B4
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 12:53:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0BD0BC433ED
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 12:53:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB66961969
+	by mail.kernel.org (Postfix) with ESMTP id CB6AB6198F
 	for <linux-mmc@archiver.kernel.org>; Wed, 31 Mar 2021 12:53:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235707AbhCaMxG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 Mar 2021 08:53:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53108 "EHLO
+        id S235536AbhCaMxF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 Mar 2021 08:53:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235568AbhCaMwg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 08:52:36 -0400
-Received: from mail-vk1-xa2e.google.com (mail-vk1-xa2e.google.com [IPv6:2607:f8b0:4864:20::a2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03808C06175F
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 05:52:34 -0700 (PDT)
-Received: by mail-vk1-xa2e.google.com with SMTP id f11so4323832vkl.9
-        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 05:52:33 -0700 (PDT)
+        with ESMTP id S235470AbhCaMwe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 Mar 2021 08:52:34 -0400
+Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F325C06174A
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 05:52:30 -0700 (PDT)
+Received: by mail-vk1-xa29.google.com with SMTP id o4so4318652vka.12
+        for <linux-mmc@vger.kernel.org>; Wed, 31 Mar 2021 05:52:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=kPvXXseEpD2+fM2KlQVwvHu1Vje5yvkbBF9+RP8/HAA=;
-        b=sD2xbR4YTENyWYZk9KTr3Wf8CRnxVIJX/BAtt37d84OnI3R5V8uJsENiOB5gBdsU+b
-         yTc7ANohquY+qCloNr5l3cOVqihteofMluuXbs6n2F2djUus+jJ1RHTm2KVwa3yWJ11C
-         KSCwkgQjM7t1UAEu/on0ge7x2zuQwy9ca6W1zPeihmWLzq+OGyKjTBxbgJZ9U1QsWYxu
-         zIeHAe8tFh5eBArHYqsVMfR13ylqYZbRkPaT9r8I14c6E+Vi67N+5vun45xBlDKMWTy8
-         E9XuPHwih3Ji74OpmPY+J4XxMtl9vuGWGPRq9L19oVevaOSY4vUDzMNa4bKbtNv++Fwe
-         R7xQ==
+        bh=WqfmSnt4f/2ks+8X8RLAsKNXjo55vFKKYygsPeyt/Q0=;
+        b=zEe0ReG8A6GKYusCinRNutkOo2zpEvXkGYjR2vB1KDpivEBahfIESl0a+D7NxYjmrG
+         STztw17dFIURGSwU/bptahfd0wiARagvJUd/FfcagLXLK6LURwhkW9y9/D04M+tIVz0h
+         vlEKGjYablpZRmiSw4o2swcZupxYlJpoqp7Dv2Q0HmBGUe/zrGTs2B28HVNbGbJykSFf
+         Cii7HQkJ1ly06yYdw8+Ow3rP4vSxszICdEexB5O0CqWqvCZPk1YjxzYF05CcZ/npt0WT
+         xnq9wQr5TUtBgwTFEFDMSDQP4SgqKlYu6Yim+7mGwIzYcYis4b8fVaMrFZLRO5k2erNM
+         YHeA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=kPvXXseEpD2+fM2KlQVwvHu1Vje5yvkbBF9+RP8/HAA=;
-        b=YuOid7GdYO9ff2zs5j2RkpYH1ND9u8OOWjib9p2AEzDzbWZfM6hA+9yHQMZBMY67wn
-         LvSrjdn+nFHGQ9tXgoVO6PGSmZIA1C91CtImTvo/boo7fMvwZ+xjrNxSbX92/mT1g+PY
-         P1z/9v5tOCqi7lyEB4mxHhPsuvNhOtXKNQkpSzZTfgVhAOvaEel05ucfSKVYq09boM7H
-         7kzU21nRPtiutStesS/teIZGadZcGxTEfHByX3TnwJ71AwNMRV4P00FMeb3NLxUZqYrj
-         VXPnvrW3BuMQ4ay/FO+74cS5rrhr7jJusSwQF+r63CwmPmsylPn4D7mldSLQ5KSIvlOv
-         jvrg==
-X-Gm-Message-State: AOAM533AobCQ6hNuJSGT1B/bU0pLtK1WwM9VGdfuowwS/2RXd8G83BCz
-        zYzjYpm6Y3iz/dN9bPRF7C+LYQpGeQ8kK1KzNPrcHQ==
-X-Google-Smtp-Source: ABdhPJxrnJkDppvk4DzcmI3MgfWa/Hoom+SuJ4TqLBMA1p5Wo4adkOmEJO3ZUT4HN72lFYFnHmzNUkN9EWWWzMTvF9Q=
-X-Received: by 2002:a1f:2a95:: with SMTP id q143mr1437575vkq.8.1617195153188;
- Wed, 31 Mar 2021 05:52:33 -0700 (PDT)
+        bh=WqfmSnt4f/2ks+8X8RLAsKNXjo55vFKKYygsPeyt/Q0=;
+        b=XLtS3qLPLho+cLLQ61Szs8FkEalYq6Saz28apynUFDZemrrAz/Z8vRDU52nSjOz6gB
+         OAfaiei7Sd5rN7Qvz7aC73RP1vQ8PEY+o1izH+h4USt6d3bKGT3W4DhtkV/OHE7K34+h
+         n+ADByj1IqjX2WJuxRAtTgth0accDkZXe2LTHn8SPzoUsDhkS5DEOxSZmS/PscUjCqfH
+         +cyyvBOKLXm1POl1VDMFwh7l+KIXckkNQLzxPbovoMDJYNEO8r9U2aMjeJT/Ed2l5blO
+         +aZCJdFk+56njaoTLX7KECguLr1iorz9C2FftlKu+aI6xIdcqmMECZeO+k3tps73SDiD
+         P4gQ==
+X-Gm-Message-State: AOAM533/gZO8ice581ZS8mU/w/aU/JNSfp/fyakYeTJSmhI65fiwm+CR
+        QUn63O4d4fa4rwaFYma4APBvqibjFuLy9v+EfxeXbM1m9G9fnw==
+X-Google-Smtp-Source: ABdhPJybHkcf/fzBx1R1+Nm9EN+RW07PpD3Xak3KMuTBuzRpcreHlpvaSKJnQa82dAU9Mw2nN45mYuhtro90ztYBcr0=
+X-Received: by 2002:a1f:b689:: with SMTP id g131mr1434777vkf.6.1617195149483;
+ Wed, 31 Mar 2021 05:52:29 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210331081752.23621-1-adrian.hunter@intel.com>
-In-Reply-To: <20210331081752.23621-1-adrian.hunter@intel.com>
+References: <1617086448-51054-1-git-send-email-fanghao11@huawei.com>
+ <CAPDyKFoUUu=Rb0pHMZb+gKXPsKESBnXG=4U=n_XFMZJLHyY7kA@mail.gmail.com> <c5284747-95dd-a4d5-0027-4da09bb56117@huawei.com>
+In-Reply-To: <c5284747-95dd-a4d5-0027-4da09bb56117@huawei.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 31 Mar 2021 14:51:56 +0200
-Message-ID: <CAPDyKFpbA4x33yr4s7+csATm6zgsx=NA4Ya-_QZBUPzNqEGoqQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-pci: Fix initialization of some SD cards for
- Intel BYT-based controllers
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>
+Date:   Wed, 31 Mar 2021 14:51:52 +0200
+Message-ID: <CAPDyKFrBh+nMUB62nzTS4_6dVjEV9gVPP-X3un_DQ7rGLw2vUA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: dw_mmc-k3: use the correct HiSilicon copyright
+To:     "fanghao (A)" <fanghao11@huawei.com>
+Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        prime.zeng@hisilicon.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 31 Mar 2021 at 10:17, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Tue, 30 Mar 2021 at 16:27, fanghao (A) <fanghao11@huawei.com> wrote:
 >
-> Bus power may control card power, but the full reset done by SDHCI at
-> initialization still may not reset the power, whereas a direct write to
-> SDHCI_POWER_CONTROL can. That might be needed to initialize correctly, if
-> the card was left powered on previously.
 >
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> Cc: stable@vger.kernel.org
+>
+> On 2021/3/30 18:38, Ulf Hansson wrote:
+> > On Tue, 30 Mar 2021 at 08:43, Hao Fang <fanghao11@huawei.com> wrote:
+> >>
+> >> s/Hisilicon/HiSilicon/g.
+> >> It should use capital S, according to
+> >> https://www.hisilicon.com/en/terms-of-use.
+> >>
+> >> Signed-off-by: Hao Fang <fanghao11@huawei.com>
+> >> ---
+> >>  drivers/mmc/host/dw_mmc-k3.c | 2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
+> >> index 29d2494..0311a37 100644
+> >> --- a/drivers/mmc/host/dw_mmc-k3.c
+> >> +++ b/drivers/mmc/host/dw_mmc-k3.c
+> >> @@ -1,7 +1,7 @@
+> >>  // SPDX-License-Identifier: GPL-2.0-or-later
+> >>  /*
+> >>   * Copyright (c) 2013 Linaro Ltd.
+> >> - * Copyright (c) 2013 Hisilicon Limited.
+> >> + * Copyright (c) 2013 HiSilicon Limited.
+> >
+> > This change looks really silly to me, but I am not a lawyer - so I
+> > can't tell if this makes sense or not.
+> >
+> > In any case, "Hisilicon" is being used all over the kernel - do you
+> > intend to patch all places with similar changes like this one? Perhaps
+> > just send a big tree-wide-patch instead and see what people think?
+> >
+>
+> Although HiSilicon has applied for two trademarks Hisilicon/HiSilicon,
+> there is only one English name for the company. We have consulted with
+> company's lawyer who suggested that should use a copyright statement
+> consistent with the official website.
+>
+> Though the kernel has tons of "Hisilicon", I just fix the copyright,
+> and plan to send a commit to each subsystem where is uncorrect. Fortunately,
+> there are not many modules that have the problem, this is one of them.
 
-Applied for next, thanks!
+git grep Hisilicon | grep Copyright | nl
+gives 159 cases.
+
+Although if you make one patch per subsystem that should be a lot
+less, which seems like a reasonable approach to me.
+
+[...]
+
+So, applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/sdhci-pci-core.c | 27 +++++++++++++++++++++++++++
->  1 file changed, 27 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index b3caa174effe..be19785227fe 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -516,6 +516,7 @@ struct intel_host {
->         int     drv_strength;
->         bool    d3_retune;
->         bool    rpm_retune_ok;
-> +       bool    needs_pwr_off;
->         u32     glk_rx_ctrl1;
->         u32     glk_tun_val;
->         u32     active_ltr;
-> @@ -643,9 +644,25 @@ static int bxt_get_cd(struct mmc_host *mmc)
->  static void sdhci_intel_set_power(struct sdhci_host *host, unsigned char mode,
->                                   unsigned short vdd)
->  {
-> +       struct sdhci_pci_slot *slot = sdhci_priv(host);
-> +       struct intel_host *intel_host = sdhci_pci_priv(slot);
->         int cntr;
->         u8 reg;
->
-> +       /*
-> +        * Bus power may control card power, but a full reset still may not
-> +        * reset the power, whereas a direct write to SDHCI_POWER_CONTROL can.
-> +        * That might be needed to initialize correctly, if the card was left
-> +        * powered on previously.
-> +        */
-> +       if (intel_host->needs_pwr_off) {
-> +               intel_host->needs_pwr_off = false;
-> +               if (mode != MMC_POWER_OFF) {
-> +                       sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
-> +                       usleep_range(10000, 12500);
-> +               }
-> +       }
-> +
->         sdhci_set_power(host, mode, vdd);
->
->         if (mode == MMC_POWER_OFF)
-> @@ -1135,6 +1152,14 @@ static int byt_sdio_probe_slot(struct sdhci_pci_slot *slot)
->         return 0;
->  }
->
-> +static void byt_needs_pwr_off(struct sdhci_pci_slot *slot)
-> +{
-> +       struct intel_host *intel_host = sdhci_pci_priv(slot);
-> +       u8 reg = sdhci_readb(slot->host, SDHCI_POWER_CONTROL);
-> +
-> +       intel_host->needs_pwr_off = reg  & SDHCI_POWER_ON;
-> +}
-> +
->  static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
->  {
->         byt_probe_slot(slot);
-> @@ -1152,6 +1177,8 @@ static int byt_sd_probe_slot(struct sdhci_pci_slot *slot)
->             slot->chip->pdev->subsystem_device == PCI_SUBDEVICE_ID_NI_78E3)
->                 slot->host->mmc->caps2 |= MMC_CAP2_AVOID_3_3V;
->
-> +       byt_needs_pwr_off(slot);
-> +
->         return 0;
->  }
->
-> --
-> 2.17.1
->
