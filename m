@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
 	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8AF5C43616
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 17:46:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C35FCC43460
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 17:46:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A569D613C7
+	by mail.kernel.org (Postfix) with ESMTP id D0C8D613B5
 	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 17:46:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235669AbhDARpz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Apr 2021 13:45:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57144 "EHLO
+        id S236052AbhDARp6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Apr 2021 13:45:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234793AbhDARkN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Apr 2021 13:40:13 -0400
-Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CD6DC0610E1;
-        Thu,  1 Apr 2021 05:43:56 -0700 (PDT)
-Received: by mail-ej1-x630.google.com with SMTP id e14so2644438ejz.11;
-        Thu, 01 Apr 2021 05:43:56 -0700 (PDT)
+        with ESMTP id S234844AbhDARlI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Apr 2021 13:41:08 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 085E6C08EA73;
+        Thu,  1 Apr 2021 06:29:06 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id w3so2899114ejc.4;
+        Thu, 01 Apr 2021 06:29:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=buOWgrok9xQ6w8escBaxSF0zvdMNz30efkWYf8lA40s=;
-        b=H2F/cOwF+EAGvL/Lwd5xsF2FjGePibzwK3H1SeN6EAkw2FSi7HcuX8EDEy4VFu1dTZ
-         XvvqmYn0KCA3Tj4CxK46mJ7CBCLVgYxgvwysUFmcu6hTzqOtM4/IfsVKJauCdTYQ9Bn7
-         C6Q84NqIs3Cf5t8MrdbM6WTRVCDSI0p/Q8lN9QeyHigU3JNKOinqUoiQ/S85lc28K7fl
-         fHSVqvgbYC48cakqXxtWQ4Ahk/Dh+fKBc08nAgO2olA4IwUxyGv5simkNSmO4+ck9YVJ
-         0j3TQ7CVGTi2FzLziv5oK/oHPnaHP3lH3sXcdj5cB7M+OWnSXlSoabZPgi7B9CpsTJwi
-         3WAw==
+        bh=3C/8w0Oq23IlaDr+0olxaSwiV+3StuYv3XHg10ymev4=;
+        b=RP1PAnEzs3I1gIv4VtVwrIL4OQbh03W5MMpW/kq7vtKg9rvRJVhUXdtcXf7MR1V3Yy
+         HmJZ+oWUmWk1shbnkMbS4jm82TGis98IVx+6CpiIcKt8Wa/HNozMWePmGBszgMWR1GNP
+         1V3ONyvrqYkBxB+RNbGI4nKFORKbmQ42I70FBcKZbNFAyUNtAGx+L+3XdrccNG7bkXTS
+         ldCc2zToTSsh5GYwpCym+3n9j8Jm5FcMhLHYhsmect3KfFbLJzT/j+Ku6MiqkVVwR5yP
+         OY9498xQJi1PzeOQB8Ip6cSEAyIBagMEYpS7stT2JhXL1j7KFwpLge9jFnj5ugaZIS/v
+         HRWA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=buOWgrok9xQ6w8escBaxSF0zvdMNz30efkWYf8lA40s=;
-        b=WqxCYzDwxqNsKc3gN275ufH75cBHcMWG3vKlph/cn1Q6Xq9Xcv+b5xUuI7fHI3rfEJ
-         I+/R7c+eK/amrULtx/j62hQ/BwYckYvTZYFyq836AvG9gMAldVcw1SK1t8OMnuovj5f+
-         PPavhAaxRx6td322vuGWiaNCLI2kRcCkfSfDXTuOJLlcSZZ9LAJe8NDF2lOotRw6nxv4
-         oq0+KeZjFdJVxY3tpN3XfOYsKa7FddV+Pf/mjhT9j8zqgifLLKr4YKLRV4YYAGF5uBfT
-         tpQSphXVYMUk0oIYnoTyjM5/n+e0+kxx5iQLsyMk560cq6EPretOaCyOp/maTbjf1MuE
-         fIFg==
-X-Gm-Message-State: AOAM530WPHfgNs4BOE5H5qXLCrPYuwtCB0L9QK+wlN0UPZ2B+ypKUVBU
-        tYzQ+ur8hcY10iNmo5eOqnk=
-X-Google-Smtp-Source: ABdhPJyc4psJFL+mmCL37/Gm4CTMFihfHukdt4NgnETOOPIEi71kElhm3hTb2OWyumTKhhAFVc7G9A==
-X-Received: by 2002:a17:907:3353:: with SMTP id yr19mr9012221ejb.8.1617281034908;
-        Thu, 01 Apr 2021 05:43:54 -0700 (PDT)
+        bh=3C/8w0Oq23IlaDr+0olxaSwiV+3StuYv3XHg10ymev4=;
+        b=hexl4Uj3j1Ht6GjprKQkwr/rdeST38iqwH8Jt/95sCSZ9e407q5oqZtguY7tmVZbyC
+         4VeH6V/z0hXgC/M0m1DJGD4ls1VmLUS8qkRZGtjVIUIKq3WhakIoD+2lv7KtxEfHfOYp
+         42HPl6pDGYkseLvBLP7q9jkx5qtwvN2eYKUNCTSpAkhyfFsRogf3vwu9ksfwSk7FJwJV
+         m2952imU21TKAu1N/+GYWPesWSiSTfpgCYSKmP67bdUMaDHr8w4i8Oj5ljHBHFiaqjkp
+         Er91hUO+wjUocvpKrd64N/ySkPCbO3pbYu76jIAqcEOAW/MMTZGBPNSWcNuSjOIuRe0M
+         Qoiw==
+X-Gm-Message-State: AOAM530AqHDoAf+bVFIjzcQsuUkbMKsHsGh1BcD4F34wCvhQ16K8kI2n
+        HAcsEjgA0QzlD9hEP3TBvyU=
+X-Google-Smtp-Source: ABdhPJww5vZj916OtK5+KOAeNxWqr8Jg1m5uOz8H9Vo+c/fR/UzLdpkfT/IkvCSsBfvT1Erx/zf7CQ==
+X-Received: by 2002:a17:906:ae88:: with SMTP id md8mr8775042ejb.264.1617283744717;
+        Thu, 01 Apr 2021 06:29:04 -0700 (PDT)
 Received: from localhost.localdomain (ip5f5bec5d.dynamic.kabel-deutschland.de. [95.91.236.93])
-        by smtp.gmail.com with ESMTPSA id v8sm3469939edq.76.2021.04.01.05.43.54
+        by smtp.gmail.com with ESMTPSA id cf4sm3488399edb.19.2021.04.01.06.29.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Apr 2021 05:43:54 -0700 (PDT)
+        Thu, 01 Apr 2021 06:29:04 -0700 (PDT)
 From:   Bean Huo <huobean@gmail.com>
 To:     ulf.hansson@linaro.org, yoshihiro.shimoda.uh@renesas.com,
         wsa+renesas@sang-engineering.com, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Bean Huo <beanhuo@micron.com>
-Subject: [PATCH v1 2/2] mmc: core: Let sanitize not retry in case of timeout/failure
-Date:   Thu,  1 Apr 2021 14:43:43 +0200
-Message-Id: <20210401124343.102915-3-huobean@gmail.com>
+Subject: [PATCH v2 2/2] mmc: core: Let sanitize not retry in case timeout
+Date:   Thu,  1 Apr 2021 15:28:53 +0200
+Message-Id: <20210401132853.105448-3-huobean@gmail.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210401124343.102915-1-huobean@gmail.com>
-References: <20210401124343.102915-1-huobean@gmail.com>
+In-Reply-To: <20210401132853.105448-1-huobean@gmail.com>
+References: <20210401132853.105448-1-huobean@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
@@ -143,10 +143,10 @@ index fe5892d30778..e123be6c6a0f 100644
  				goto out_retry;
  		}
 diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 4e4b3592d3d6..eefb48191e6c 100644
+index 3885cc1780ac..26d9b904dfae 100644
 --- a/drivers/mmc/core/mmc.c
 +++ b/drivers/mmc/core/mmc.c
-@@ -964,7 +964,8 @@ static int __mmc_select_powerclass(struct mmc_card *card,
+@@ -965,7 +965,8 @@ static int __mmc_select_powerclass(struct mmc_card *card,
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  				 EXT_CSD_POWER_CLASS,
  				 pwrclass_val,
@@ -156,7 +156,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	}
  
  	return err;
-@@ -1061,7 +1062,8 @@ static int mmc_select_bus_width(struct mmc_card *card)
+@@ -1062,7 +1063,8 @@ static int mmc_select_bus_width(struct mmc_card *card)
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  				 EXT_CSD_BUS_WIDTH,
  				 ext_csd_bits[idx],
@@ -166,7 +166,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  		if (err)
  			continue;
  
-@@ -1100,7 +1102,7 @@ static int mmc_select_hs(struct mmc_card *card)
+@@ -1101,7 +1103,7 @@ static int mmc_select_hs(struct mmc_card *card)
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
  			   card->ext_csd.generic_cmd6_time, MMC_TIMING_MMC_HS,
@@ -175,7 +175,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err)
  		pr_warn("%s: switch to high-speed failed, err:%d\n",
  			mmc_hostname(card->host), err);
-@@ -1132,7 +1134,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
+@@ -1133,7 +1135,7 @@ static int mmc_select_hs_ddr(struct mmc_card *card)
  			   ext_csd_bits,
  			   card->ext_csd.generic_cmd6_time,
  			   MMC_TIMING_MMC_DDR52,
@@ -184,7 +184,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to bus width %d ddr failed\n",
  			mmc_hostname(host), 1 << bus_width);
-@@ -1200,7 +1202,7 @@ static int mmc_select_hs400(struct mmc_card *card)
+@@ -1201,7 +1203,7 @@ static int mmc_select_hs400(struct mmc_card *card)
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			   EXT_CSD_HS_TIMING, val,
  			   card->ext_csd.generic_cmd6_time, 0,
@@ -193,7 +193,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to high-speed from hs200 failed, err:%d\n",
  			mmc_hostname(host), err);
-@@ -1229,7 +1231,8 @@ static int mmc_select_hs400(struct mmc_card *card)
+@@ -1230,7 +1232,8 @@ static int mmc_select_hs400(struct mmc_card *card)
  	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			 EXT_CSD_BUS_WIDTH,
  			 EXT_CSD_DDR_BUS_WIDTH_8,
@@ -203,7 +203,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to bus width for hs400 failed, err:%d\n",
  			mmc_hostname(host), err);
-@@ -1242,7 +1245,7 @@ static int mmc_select_hs400(struct mmc_card *card)
+@@ -1243,7 +1246,7 @@ static int mmc_select_hs400(struct mmc_card *card)
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			   EXT_CSD_HS_TIMING, val,
  			   card->ext_csd.generic_cmd6_time, 0,
@@ -212,7 +212,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to hs400 failed, err:%d\n",
  			 mmc_hostname(host), err);
-@@ -1288,7 +1291,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+@@ -1289,7 +1292,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
  	val = EXT_CSD_TIMING_HS;
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
  			   val, card->ext_csd.generic_cmd6_time, 0,
@@ -221,7 +221,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err)
  		goto out_err;
  
-@@ -1304,7 +1307,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+@@ -1305,7 +1308,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
  	/* Switch HS DDR to HS */
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_BUS_WIDTH,
  			   EXT_CSD_BUS_WIDTH_8, card->ext_csd.generic_cmd6_time,
@@ -230,7 +230,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err)
  		goto out_err;
  
-@@ -1319,7 +1322,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
+@@ -1320,7 +1323,7 @@ int mmc_hs400_to_hs200(struct mmc_card *card)
  	      card->drive_strength << EXT_CSD_DRV_STR_SHIFT;
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_HS_TIMING,
  			   val, card->ext_csd.generic_cmd6_time, 0,
@@ -239,7 +239,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err)
  		goto out_err;
  
-@@ -1403,7 +1406,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
+@@ -1404,7 +1407,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			   EXT_CSD_HS_TIMING, EXT_CSD_TIMING_HS,
  			   card->ext_csd.generic_cmd6_time, 0,
@@ -248,7 +248,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to hs for hs400es failed, err:%d\n",
  			mmc_hostname(host), err);
-@@ -1422,7 +1425,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
+@@ -1423,7 +1426,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
  	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			 EXT_CSD_BUS_WIDTH,
  			 val,
@@ -257,7 +257,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to bus width for hs400es failed, err:%d\n",
  			mmc_hostname(host), err);
-@@ -1437,7 +1440,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
+@@ -1438,7 +1441,7 @@ static int mmc_select_hs400es(struct mmc_card *card)
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			   EXT_CSD_HS_TIMING, val,
  			   card->ext_csd.generic_cmd6_time, 0,
@@ -266,7 +266,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  	if (err) {
  		pr_err("%s: switch to hs400es failed, err:%d\n",
  			mmc_hostname(host), err);
-@@ -1502,7 +1505,7 @@ static int mmc_select_hs200(struct mmc_card *card)
+@@ -1503,7 +1506,7 @@ static int mmc_select_hs200(struct mmc_card *card)
  		err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  				   EXT_CSD_HS_TIMING, val,
  				   card->ext_csd.generic_cmd6_time, 0,
@@ -275,7 +275,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  		if (err)
  			goto err;
  		old_timing = host->ios.timing;
-@@ -1731,7 +1734,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -1732,7 +1735,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
  	if (card->ext_csd.rev >= 3) {
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  				 EXT_CSD_ERASE_GROUP_DEF, 1,
@@ -285,7 +285,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  
  		if (err && err != -EBADMSG)
  			goto free_card;
-@@ -1762,7 +1766,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -1763,7 +1767,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
  		card->ext_csd.part_config &= ~EXT_CSD_PART_CONFIG_ACC_MASK;
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_PART_CONFIG,
  				 card->ext_csd.part_config,
@@ -294,7 +294,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  		if (err && err != -EBADMSG)
  			goto free_card;
  	}
-@@ -1774,7 +1778,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -1775,7 +1779,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  				 EXT_CSD_POWER_OFF_NOTIFICATION,
  				 EXT_CSD_POWER_ON,
@@ -304,7 +304,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  		if (err && err != -EBADMSG)
  			goto free_card;
  
-@@ -1834,7 +1839,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -1835,7 +1840,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
  	if (card->ext_csd.hpi) {
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  				EXT_CSD_HPI_MGMT, 1,
@@ -314,7 +314,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  		if (err && err != -EBADMSG)
  			goto free_card;
  		if (err) {
-@@ -1858,7 +1864,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+@@ -1859,7 +1865,8 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
  
  		timeout_ms = max(card->ext_csd.generic_cmd6_time, timeout_ms);
  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
@@ -324,7 +324,7 @@ index 4e4b3592d3d6..eefb48191e6c 100644
  		if (err && err != -EBADMSG)
  			goto free_card;
  
-@@ -2008,7 +2015,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
+@@ -2009,7 +2016,7 @@ static int mmc_poweroff_notify(struct mmc_card *card, unsigned int notify_type)
  
  	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
  			EXT_CSD_POWER_OFF_NOTIFICATION,
