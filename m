@@ -2,222 +2,212 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C121C43461
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 18:27:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4C52C433B4
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 22:49:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 292D7601FC
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 18:27:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74796610F7
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Apr 2021 22:49:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236278AbhDAS1X (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Apr 2021 14:27:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37852 "EHLO
+        id S234043AbhDAWtC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Apr 2021 18:49:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234651AbhDASVF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Apr 2021 14:21:05 -0400
-Received: from mail-io1-xd33.google.com (mail-io1-xd33.google.com [IPv6:2607:f8b0:4864:20::d33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7774C02259A;
-        Thu,  1 Apr 2021 08:23:32 -0700 (PDT)
-Received: by mail-io1-xd33.google.com with SMTP id b10so2585657iot.4;
-        Thu, 01 Apr 2021 08:23:32 -0700 (PDT)
+        with ESMTP id S234850AbhDAWtC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Apr 2021 18:49:02 -0400
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDFFBC0613E6
+        for <linux-mmc@vger.kernel.org>; Thu,  1 Apr 2021 15:49:00 -0700 (PDT)
+Received: by mail-vs1-xe32.google.com with SMTP id h23so1984536vsj.8
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Apr 2021 15:49:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=vx2Zm40GpoQXIGWSyhXgEsbGdSJ2UlNy5Co5SqD5faA=;
-        b=cPACo/4g9NO8OMR7+5BrAd5ie57tOrjM7cwUv7G6r12qP6IK3RyjsYVegXy5ekvk2D
-         GPpLT+REh/4iKj0swU9PpgBkWlaUla2ZBVNri/8N8v6Y3RqCXSlrWJQ+MAIqKfr5oubv
-         38y6+mrNoY527f+1Goub7+MaF+DqLgNIo4XSquc97l7dahtFTR1s3myaTkrn292Ju7PE
-         lS/b7ukSmNa1y+XqY27eiY8E0D0ZcEes5GG1vb3ufwq4GjozuyvWazdlwWUQdwR2HXAz
-         svJsfHahHNBbIwgMyyDzOOoLiwIxWMOwUkTYdAQkbOf8xm79M9DeU3AtomQzSuW7ET0d
-         d2zA==
+        bh=CuQ+fCWT1rB0+aM1K1k9N1tiDK8VwSM2eHjqwE/nxl4=;
+        b=NgEFUiTAnq7fFFmR24/kSiMIspDQaRD7nNmLUnNyKOeW+G7lpmB+ONc5P+2KgMxBYI
+         /ZX3auaZZMpq+VpOTviFa1VUNFiAc2DjCwrO4KcfwEyDgqEoyZW7UBlVPP4ubw4GjUzv
+         BL18fLWz1/rsIafumpOMnTAD24pdNJHlV+SluJpL3Ve6gZDzFMUdRq5ov3ZJ61MoORy3
+         GO7ZjIhQv6xkN1wD/FeI46rPxqEcGtXRkmez1C5hmU/SQHlK1Wn6JRsEZXSM8VhKy6r9
+         glg0xX6ZrJm57eqjA/FUUt2xj7qmDxXIhgdXt9lHSIAwsr5dboaC1UFNjwiAkm9/Cn7Q
+         vlEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=vx2Zm40GpoQXIGWSyhXgEsbGdSJ2UlNy5Co5SqD5faA=;
-        b=LnJXJ0zAAmLIyyfgDktM63TfuYKVdAX2LZE+dYNLxQCGEszQC9z1LurjHPvOOJkh2U
-         5HGO3rOQ0gSp0kEFELpQ4gfTSfk9+CCARdzYDkSrJlIPxpOMjjTHpfbPBN4amrJUMjIc
-         wcxatLHG0R8kSsbwZz41sFo6n+atdDQ+h3TrV+da7kY8cJAPm9CojNmzpHgbSO8N9YF3
-         ALKMgHULLG3+jW8BWC19mxEmHnWViHC6YDXW5cxMGAG7CWhjjDOGs+z3ui6NKa9Icsf7
-         EBVVa9reUdHWUt1EOauKlga7c+qP7GwM3OMDRPNxutVdt6xfH/sVKvWB0MhzXw5fTbZm
-         cZPA==
-X-Gm-Message-State: AOAM532ydVZYvmhZ2Jb6NlxXtIm6y51GwXxkmFVALq9gaPrlF68TEaKE
-        si8rRiwTn5KLIvsp5nRpaol2eg2fTmkpMacNiq8=
-X-Google-Smtp-Source: ABdhPJwZpj7cQXPzU+FufA5B4amLrzxDD62b8BAP9GW38X1JPaYKGXOU0i40Mj7ZBNv3Y5B3gUSqFvh+tBSfbCr5akM=
-X-Received: by 2002:a5d:9d01:: with SMTP id j1mr7105410ioj.195.1617290612006;
- Thu, 01 Apr 2021 08:23:32 -0700 (PDT)
+        bh=CuQ+fCWT1rB0+aM1K1k9N1tiDK8VwSM2eHjqwE/nxl4=;
+        b=ODIQb0b8Du+GGGOhyzdHFEfhpAZ1lzz379pfH4OPu5K7S6BS9scCXzS0RrV2tZItkg
+         HvSejiccTcefD1ZGNx6cPmsPY0+Y0m1l3WlkDNKVqxlgp+RulKX2J2Sgp/qIvK/1jDjr
+         lPCBKuh4Knfep02MDnkv4ZuO6kphZcCvF3Dqq0xJBDjjedRbmRKFtcwxGTZeoz+YT5ng
+         QKKoPmTi2b1I+Ectm/zhbjtChc+zvDukR8BgCgckG8Rfh7JjfiRjefBXE/aOfE3N0mMO
+         SeJ6lM1Lz8nJBgYtVSiRh1z6pmmWgBe5PH7q5QTAeevGwCJ8iGUwJ0ko5Nr5gLias2pU
+         CUsw==
+X-Gm-Message-State: AOAM533tGZnEBHOcbqmmJuoZGLW2I0lH/zKzAMILlw/B8HTCmd0nLv+W
+        9n8gScezSxPIRchYPzGCkVysRJGOZbK1RKDfCSg9Pw==
+X-Google-Smtp-Source: ABdhPJwill4W10z/Ga/+bumBJjZA3QHLAb8FZsvb3UhGM9uwOTbbQbgn4xGXcBQ+inOX2S61q3PNdujrjRQ0yX/e+6I=
+X-Received: by 2002:a67:6942:: with SMTP id e63mr7698810vsc.48.1617317340138;
+ Thu, 01 Apr 2021 15:49:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210322185816.27582-1-nsaenz@kernel.org> <20210322185816.27582-5-nsaenz@kernel.org>
- <401100ea-90ad-57b1-50da-967118a090da@i2se.com> <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
- <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com> <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
-In-Reply-To: <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
-From:   Alan Cooper <alcooperx@gmail.com>
-Date:   Thu, 1 Apr 2021 11:23:20 -0400
-Message-ID: <CAOGqxeUxOA_s6=KUh_XWFtRF_EWZgQH_y2MEdxUeDQTYMeb+3A@mail.gmail.com>
-Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
-To:     Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        linux-rpi-kernel@lists.infradead.org,
-        Florian Fainelli <f.fainelli@gmail.com>, phil@raspberrypi.com,
-        Tim Gover <tim.gover@raspberrypi.com>,
-        Scott Branden <sbranden@broadcom.com>,
+References: <20210401132853.105448-1-huobean@gmail.com> <20210401132853.105448-2-huobean@gmail.com>
+In-Reply-To: <20210401132853.105448-2-huobean@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 2 Apr 2021 00:48:23 +0200
+Message-ID: <CAPDyKFryYbahsR4PzFg3JAtSDZr-=cB0+XpgVQ2YJgZgiy9OXg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/2] mmc: core: Let sanitize timeout readable/writable
+ via sysfs
+To:     Bean Huo <huobean@gmail.com>
+Cc:     "Shimoda, Yoshihiro" <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        ": Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Bean Huo <beanhuo@micron.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Nicolas,
+On Thu, 1 Apr 2021 at 15:29, Bean Huo <huobean@gmail.com> wrote:
+>
+> From: Bean Huo <beanhuo@micron.com>
+>
+> As the density increases, the 4-minute timeout value for
+> sanitize is no longer feasible. At the same time, devices
+> of different densities have different timeout values, and it is
+> difficult to obtain a unified standard timeout value. Therefore,
+> it is better to let the user explicitly change  sanitize timeout
+> value according to the eMMC density on the board.
 
-Sorry, I just noticed this thread.
-This is a known bug in some newer Arasan cores.
-The problem happens when the difference between the core clock and the
-bus clock is too great.
-Limiting the clock to 200KHz minimum should be a good fix.
-In my experience, it's only eMMC that needs the clock to be retried
-below 400KHz and not SD or SDIO. That's because the CMD signal for
-eMMC starts out as open-drain during identification and the size of
-the pull-up on the CMD signal can require the <400KHz clock. Once eMMC
-is out of identification mode the CMD signal is switched to push-pull
-and can run at much higher clock rates.
-I don't think that SD and SDIO have any open-drain signals, so they
-shouldn't need to retry at slower clock speeds.
-I'm trying to get more detail on the bug, like the exact ratio of core
-clock to bus clock that causes the problem. When I first found this
-bug I was told that the failure would not happen at 200KHz, but we
-were using a 405MHz core clock.
+This makes sense. The current timeout in the mmc core isn't good
+enough. However, I think there is a better option than inventing a
+sysfs node to allow userspace to specify the timeout.
 
-One other question. Why are you using polling for the SD card, this
-newer controller supports the interrupt driven "Card Inserted" signal
-and avoids wasting time polling?
+First, we have the card quirks that the mmc core uses to allow us to
+modify a common behaviour (in this case timeouts values for sanitize
+operations). This can be used to enforce a specific timeout for the
+eMMC card. I think this should take precedence over anything else.
 
-Al
+Second, the ioctl command allows you to specify a specific command
+timeout in the struct mmc_ioc_cmd (.cmd_timeout_ms). If this is
+specified from user space we could forward it to mmc_santize() and use
+that rather than the default MMC_SANITIZE_TIMEOUT_MS.
 
+Would this satisfy your needs?
 
-On Fri, Mar 26, 2021 at 12:17 PM Nicolas Saenz Julienne
-<nsaenzjulienne@suse.de> wrote:
+Kind regards
+Uffe
+
 >
-> On Thu, 2021-03-25 at 20:11 +0100, Stefan Wahren wrote:
-> > Am 24.03.21 um 16:34 schrieb Nicolas Saenz Julienne:
-> > > Hi Stefan,
-> > >
-> > > On Wed, 2021-03-24 at 16:16 +0100, Stefan Wahren wrote:
-> > > > Hi Nicolas,
-> > > >
-> > > > Am 22.03.21 um 19:58 schrieb Nicolas Saenz Julienne:
-> > > > > From: Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-> > > > >
-> > > > > Force emmc2's frequency to 150MHz as the default 100MHz (set by FW)
-> > > > > seems to interfere with the VPU clock when setup at frequencies bigger
-> > > > > than 500MHz (a pretty common case). This ends up causing unwarranted
-> > > > > SDHCI CMD hangs  when no SD card is present.
-> > > > >
-> > > > > Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
-> > > > > ---
-> > > > >  arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 6 ++++++
-> > > > >  1 file changed, 6 insertions(+)
-> > > > >
-> > > > > diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
-> > > > > index 3b4ab947492a..9aa8408d9960 100644
-> > > > > --- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
-> > > > > +++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
-> > > > > @@ -257,6 +257,12 @@ &emmc2 {
-> > > > >         vqmmc-supply = <&sd_io_1v8_reg>;
-> > > > >         vmmc-supply = <&sd_vcc_reg>;
-> > > > >         broken-cd;
-> > > > > +       /*
-> > > > > +        * Force the frequency to 150MHz as the default 100MHz seems to
-> > > > > +        * interfere with the VPU clock when setup at frequencies bigger than
-> > > > > +        * 500MHz, causing unwarranted CMD hangs.
-> > > > > +        */
-> > > > > +       clock-frequency = <150000000>;
-> > > > i don't want to bike-shed here, but is there any chance to solve this in
-> > > > clk-bcm2835 in a less hacky way?
-> > > What do you have in mind?
-> > Sorry, nothing specific.
-> > >
-> > > All I can think of is adding some kind of heuristic to the clock's prepare()
-> > > callback. That said, I don't feel it would be a better solution than this.
-> >
-> > Based on my limited knowledge and an old SD card specification, all
-> > possibly connected devices could have different frequencies. So my
-> > concern here is, that in case we limit the frequency to a specific value
-> > we could break things just to suppress a warning.
+> Signed-off-by: Bean Huo <beanhuo@micron.com>
+> ---
+>  drivers/mmc/core/mmc.c     | 34 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/mmc_ops.c |  3 +--
+>  include/linux/mmc/card.h   |  1 +
+>  3 files changed, 36 insertions(+), 2 deletions(-)
 >
-> SDHCI should be able to handle up to 233MHz IIRC, and there are divisors
-> available, it depends on the implementation but the worst kind provide /2^n.
-> Not perfect, but good enough for things to work.
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 8741271d3971..3885cc1780ac 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -28,6 +28,7 @@
 >
-> Now, I've been having a deeper look into how clocks are handled, and found two
-> new clues:
+>  #define DEFAULT_CMD6_TIMEOUT_MS        500
+>  #define MIN_CACHE_EN_TIMEOUT_MS 1600
+> +#define MMC_SANITIZE_TIMEOUT_MS        (240 * 1000) /* 240s */
 >
->  - First of all RPi4's sdhci-iproc needs SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
->    that is, the controller isn't properly identifying the clock frequency fed
->    into it, and defaults to saying it's configured at 100MHz. I'm not an SDHCI
->    expert, so it's possible changing frequencies also needs a special operation
->    to recalculate this variable. But this was making all internal calculations
->    wrong when paired with this series.
+>  static const unsigned int tran_exp[] = {
+>         10000,          100000,         1000000,        10000000,
+> @@ -835,6 +836,37 @@ static ssize_t mmc_dsr_show(struct device *dev,
 >
->  - With this flag set SDHCI's core now properly calculates divisor values based
->    on whatever clock frequency I set in DT. And guess what, the issue reappears
->    even when running on 150MHz. It turns out, as I had some debugging enabled,
->    the issue only happens when the controller is configured at 100KHz (that
->    only happens while running the card detect thread).
+>  static DEVICE_ATTR(dsr, S_IRUGO, mmc_dsr_show, NULL);
 >
-> So, I can now do this (note that for card detection try to communicate with the
-> card starting at 400KHz down to 100KHz in 100KHz steps):
->
-> ----->8-----
->
-> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-> index 536c382e2486..e5a5de63f347 100644
-> --- a/drivers/mmc/host/sdhci-iproc.c
-> +++ b/drivers/mmc/host/sdhci-iproc.c
-> @@ -173,6 +173,11 @@ static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
->                 return pltfm_host->clock;
->  }
->
-> +static unsigned int sdhci_iproc_bcm2711_get_min_clock(struct sdhci_host *host)
+> +static ssize_t sanitize_timeout_ms_show(struct device *dev,
+> +                                       struct device_attribute *attr,
+> +                                       char *buf)
 > +{
-> +       return 200000;
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +
+> +       return sysfs_emit(buf, "%d\n", card->sanitize_timeout_ms);
 > +}
 > +
->  static const struct sdhci_ops sdhci_iproc_ops = {
->         .set_clock = sdhci_set_clock,
->         .get_max_clock = sdhci_iproc_get_max_clock,
-> @@ -271,13 +276,15 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
->         .set_clock = sdhci_set_clock,
->         .set_power = sdhci_set_power_and_bus_voltage,
->         .get_max_clock = sdhci_iproc_get_max_clock,
-> +       .get_min_clock = sdhci_iproc_bcm2711_get_min_clock,
->         .set_bus_width = sdhci_set_bus_width,
->         .reset = sdhci_reset,
->         .set_uhs_signaling = sdhci_set_uhs_signaling,
+> +static ssize_t sanitize_timeout_ms_store(struct device *dev,
+> +                                        struct device_attribute *attr,
+> +                                        const char *buf, size_t len)
+> +{
+> +       struct mmc_card *card = mmc_dev_to_card(dev);
+> +       unsigned int new;
+> +       int ret;
+> +
+> +       ret = kstrtouint(buf, 0, &new);
+> +       if (ret < 0)
+> +               return ret;
+> +
+> +       if (new == 0)
+> +               return -EINVAL;
+> +
+> +       card->sanitize_timeout_ms = new;
+> +
+> +       return len;
+> +}
+> +static DEVICE_ATTR_RW(sanitize_timeout_ms);
+> +
+> +
+>  static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_cid.attr,
+>         &dev_attr_csd.attr,
+> @@ -861,6 +893,7 @@ static struct attribute *mmc_std_attrs[] = {
+>         &dev_attr_rca.attr,
+>         &dev_attr_dsr.attr,
+>         &dev_attr_cmdq_en.attr,
+> +       &dev_attr_sanitize_timeout_ms.attr,
+>         NULL,
 >  };
+>  ATTRIBUTE_GROUPS(mmc_std);
+> @@ -1623,6 +1656,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>                 card->ocr = ocr;
+>                 card->type = MMC_TYPE_MMC;
+>                 card->rca = 1;
+> +               card->sanitize_timeout_ms = MMC_SANITIZE_TIMEOUT_MS;
+>                 memcpy(card->raw_cid, cid, sizeof(card->raw_cid));
+>         }
 >
-> ----->8-----
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index f413474f0f80..40a4f9e22d30 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -21,7 +21,6 @@
 >
->  Which is rather nicer than what this series introduces. But I can't still
->  explain why configuring the controller at 100KHz is causing the hangs (while
->  having the core clock setup at 500MHz), and I'm not sure if excluding 100KHz
->  from the polling frequency list is going to break support for older SD cards.
+>  #define MMC_BKOPS_TIMEOUT_MS           (120 * 1000) /* 120s */
+>  #define MMC_CACHE_FLUSH_TIMEOUT_MS     (30 * 1000) /* 30s */
+> -#define MMC_SANITIZE_TIMEOUT_MS                (240 * 1000) /* 240s */
 >
->  Regards,
->  Nicolas
+>  static const u8 tuning_blk_pattern_4bit[] = {
+>         0xff, 0x0f, 0xff, 0x00, 0xff, 0xcc, 0xc3, 0xcc,
+> @@ -1025,7 +1024,7 @@ int mmc_sanitize(struct mmc_card *card)
+>         mmc_retune_hold(host);
 >
+>         err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_SANITIZE_START,
+> -                        1, MMC_SANITIZE_TIMEOUT_MS);
+> +                        1, card->sanitize_timeout_ms);
+>         if (err)
+>                 pr_err("%s: Sanitize failed err=%d\n", mmc_hostname(host), err);
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index f9ad35dd6012..9db0dcd9661e 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -273,6 +273,7 @@ struct mmc_card {
+>
+>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+>
+> +       unsigned int            sanitize_timeout_ms;
+>         unsigned int            erase_size;     /* erase size in sectors */
+>         unsigned int            erase_shift;    /* if erase unit is power 2 */
+>         unsigned int            pref_erase;     /* in sectors */
+> --
+> 2.25.1
 >
