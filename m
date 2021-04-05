@@ -2,123 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDD2AC43460
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Apr 2021 20:33:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31006C43460
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Apr 2021 08:45:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5E5C160231
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Apr 2021 20:33:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EECBA613A1
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Apr 2021 08:45:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231445AbhDDUdk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Apr 2021 16:33:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35010 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231476AbhDDUdi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Apr 2021 16:33:38 -0400
-Received: from mail-wr1-x435.google.com (mail-wr1-x435.google.com [IPv6:2a00:1450:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78FF9C061788
-        for <linux-mmc@vger.kernel.org>; Sun,  4 Apr 2021 13:33:31 -0700 (PDT)
-Received: by mail-wr1-x435.google.com with SMTP id j18so9264213wra.2
-        for <linux-mmc@vger.kernel.org>; Sun, 04 Apr 2021 13:33:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=qLAy95bvS1zAnYuhC/w4xxxlm+O0tzNR1N2BJpqbw5w=;
-        b=Uj0Y5h5dAclSEpTTchKZoN6d6/X2/jxuIIdiY2TiTyk3Va6KgXWEIR7nXrbx2G6DmG
-         DEj8NTV0WHUfrymtdaelg8IdCSbFubY9BkAoUgH6qQf8EqAg7oNdPZikt1hBXz6v20zs
-         A8AaPWXWp0Z2jemWr2KvX3VEPPGU3IlyIZPwCyiC+SenicBH6/PCmHtanTK6GQ1U+Ifg
-         VY2SBWvWpq0G2yymbRGsBY5fsQ3VQ4aGS/FzsLk9krR6A4W7hb8uudpCoMiP1AUhW51x
-         KAc2oi6Fi2BSvj3YthT1WKevVUyAKnRg3u5L4ySofPzK4gqEB2ss/pH/Whz46Pfeo62Z
-         VcVg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=qLAy95bvS1zAnYuhC/w4xxxlm+O0tzNR1N2BJpqbw5w=;
-        b=Bm1NLobrRg+7Tq0orI09+E5DjjhZKuC+R+eF/h9WfLFU9J+F8nVybe1TB4cYf7V3gH
-         tckhIm2ZZYFhZMhXItdHtItJhuH/qJ/ahGmb2R4dDd40+fJQZVa+ehLYljLbzBaAXvVI
-         GtQqlYmAacoglQwwPqA3Hw6Or2OxEnizgU0ytZwm1Xp44ZPh9WboQcGFO+AqhN7j7g84
-         lbpOp1dfwCuW8tBVvn7rlGVTKHE04heLHwxPLqyYtsqQhjdMsUGAHlhpVAGPJtfCEgtQ
-         B8tazB0CH+l7iGzeQGje979is6YnkzUZgzW49yg1IV5IUgN6ArDt3D3009DgIM1bWeu8
-         tp7w==
-X-Gm-Message-State: AOAM532gIQ6V9c3JPe+p+j3L4SIVc0zK+3Mg0hABy9k/4E6BFddmVo3f
-        GjCVnV65C1XnJupKxWZgSZW/XQ==
-X-Google-Smtp-Source: ABdhPJyhT6Ya2IgUD2RMKPgOE6BwHgGaUQpbUoSsELec3O9UxvF/KjbQKc6zYs03mvxBXK/bekFFsg==
-X-Received: by 2002:a05:6000:10c4:: with SMTP id b4mr8456271wrx.386.1617568410016;
-        Sun, 04 Apr 2021 13:33:30 -0700 (PDT)
-Received: from ?IPv6:2a01:e34:ed2f:f020:6d68:6b9a:7a3c:4a9f? ([2a01:e34:ed2f:f020:6d68:6b9a:7a3c:4a9f])
-        by smtp.googlemail.com with ESMTPSA id u19sm8383785wml.28.2021.04.04.13.33.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 04 Apr 2021 13:33:29 -0700 (PDT)
-Subject: Re: [PATCH v2 1/8] dt-bindings: timer: Add compatible for Mediatek
- MT8195
-To:     Matthias Brugger <matthias.bgg@gmail.com>,
-        Seiya Wang <seiya.wang@mediatek.com>,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Peter Meerwald-Stadler <pmeerw@pmeerw.net>,
+        id S232570AbhDEIpi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Apr 2021 04:45:38 -0400
+Received: from mx2.suse.de ([195.135.220.15]:36444 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231979AbhDEIpi (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 5 Apr 2021 04:45:38 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 163A1B12D;
+        Mon,  5 Apr 2021 08:45:31 +0000 (UTC)
+Message-ID: <4d4e3de99dbee711cf47878bf98a7cc34c3f1e65.camel@suse.de>
+Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     Alan Cooper <alcooperx@gmail.com>
+Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        linux-rpi-kernel@lists.infradead.org,
+        Florian Fainelli <f.fainelli@gmail.com>, phil@raspberrypi.com,
+        Tim Gover <tim.gover@raspberrypi.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        ": Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Chunfeng Yun <chunfeng.yun@mediatek.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Enric Balletbo i Serra <enric.balletbo@collabora.com>,
-        Hsin-Yi Wang <hsinyi@chromium.org>,
-        Fabien Parent <fparent@baylibre.com>,
-        Sean Wang <sean.wang@mediatek.com>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Stanley Chu <stanley.chu@mediatek.com>,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-serial@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, srv_heupstream@mediatek.com
-References: <20210319023427.16711-1-seiya.wang@mediatek.com>
- <20210319023427.16711-3-seiya.wang@mediatek.com>
- <bf7ad31e-974a-3e0a-12bd-32973c7c3cbd@gmail.com>
-From:   Daniel Lezcano <daniel.lezcano@linaro.org>
-Message-ID: <11bf6761-8902-bfa5-8577-d397846e7638@linaro.org>
-Date:   Sun, 4 Apr 2021 22:33:26 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Rob Herring <robh+dt@kernel.org>
+Date:   Mon, 05 Apr 2021 10:45:29 +0200
+In-Reply-To: <CAOGqxeUxOA_s6=KUh_XWFtRF_EWZgQH_y2MEdxUeDQTYMeb+3A@mail.gmail.com>
+References: <20210322185816.27582-1-nsaenz@kernel.org>
+         <20210322185816.27582-5-nsaenz@kernel.org>
+         <401100ea-90ad-57b1-50da-967118a090da@i2se.com>
+         <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
+         <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com>
+         <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
+         <CAOGqxeUxOA_s6=KUh_XWFtRF_EWZgQH_y2MEdxUeDQTYMeb+3A@mail.gmail.com>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-38waL8wK1Aj1RRmL0Xy5"
+User-Agent: Evolution 3.38.4 
 MIME-Version: 1.0
-In-Reply-To: <bf7ad31e-974a-3e0a-12bd-32973c7c3cbd@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/03/2021 13:52, Matthias Brugger wrote:
-> 
-> 
-> On 19/03/2021 03:34, Seiya Wang wrote:
->> This commit adds dt-binding documentation of timer for Mediatek MT8195 SoC
->> Platform.
->>
->> Signed-off-by: Seiya Wang <seiya.wang@mediatek.com>
-> 
-> Applied to v5.12-next/dts64
 
-Usually bindings go through the subsystem maintainer.
+--=-38waL8wK1Aj1RRmL0Xy5
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Hi Alan,
+
+On Thu, 2021-04-01 at 11:23 -0400, Alan Cooper wrote:
+> Nicolas,
+>=20
+> Sorry, I just noticed this thread.
+> This is a known bug in some newer Arasan cores.
+> The problem happens when the difference between the core clock and the bu=
+s
+> clock is too great.
+> Limiting the clock to 200KHz minimum should be a good fix.
+
+Great, that's what I was hoping to hear :). Out of curiosity, can you share
+more details on how the failure occurs?
+
+> In my experience, it's only eMMC that needs the clock to be retried
+
+> below 400KHz and not SD or SDIO. That's because the CMD signal for
+> eMMC starts out as open-drain during identification and the size of
+> the pull-up on the CMD signal can require the <400KHz clock. Once eMMC
+> is out of identification mode the CMD signal is switched to push-pull
+> and can run at much higher clock rates.
+
+Fair enough, I need to do some tests, some of the compute modules use an eM=
+MC.
+
+> I don't think that SD and SDIO have any open-drain signals, so they
+> shouldn't need to retry at slower clock speeds.
+
+Noted.
+
+> I'm trying to get more detail on the bug, like the exact ratio of core
+> clock to bus clock that causes the problem. When I first found this
+> bug I was told that the failure would not happen at 200KHz, but we
+> were using a 405MHz core clock.
+
+That would be nice to have.
+
+> One other question. Why are you using polling for the SD card, this
+> newer controller supports the interrupt driven "Card Inserted" signal
+> and avoids wasting time polling?
+
+I believe the line isn't routed on RPi4.
+
+> Al
 
 
--- 
-<http://www.linaro.org/> Linaro.org │ Open source software for ARM SoCs
+--=-38waL8wK1Aj1RRmL0Xy5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
 
-Follow Linaro:  <http://www.facebook.com/pages/Linaro> Facebook |
-<http://twitter.com/#!/linaroorg> Twitter |
-<http://www.linaro.org/linaro-blog/> Blog
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBqzikACgkQlfZmHno8
+x/5vvAf+LwODH29W1eKi1mUblY7T8nHOw5yF+PQbXyMex7hzFkTJYqotZkZnT4RS
++RAKLLEH8r+drFB3D2hz/TJEazqr6fvhiJMQlE5mZMsAY4fUhDJUcKuuPLgXidXM
+vDNEVEFnoshhZnX/cTNVaxdNBKEzUPCD85kbqZNScQFifR2BtiTFMcebavyVJHP2
+ELOLaKtx1XaqEmtfxufzh6lFAHR9WTIRZffL4c+b8a90kdiApV8NV9RLILO5KIzx
+XNA+Zi0L0vfAGEGrNu397g9lkZPYq6VKOy/cwB9hmI1yiJOxLLeqaY5yQb96NtaY
+sZwwA0sB1TKPJXGdQVsX1Kt1+1SqIA==
+=H6cA
+-----END PGP SIGNATURE-----
+
+--=-38waL8wK1Aj1RRmL0Xy5--
+
