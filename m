@@ -2,230 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 710FFC43460
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 08:47:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7896C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 08:47:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4463A6124B
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 08:47:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC3F3611CC
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 08:47:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349655AbhDGIrO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Apr 2021 04:47:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56478 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349652AbhDGIqZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2021 04:46:25 -0400
-Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1BF1C061761
-        for <linux-mmc@vger.kernel.org>; Wed,  7 Apr 2021 01:45:24 -0700 (PDT)
-Received: by mail-wm1-x333.google.com with SMTP id u5-20020a7bcb050000b029010e9316b9d5so731149wmj.2
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Apr 2021 01:45:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=subject:from:to:cc:references:organization:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=qxDdi7+Pa9mI4uigqB3W47xkaolm+nq86ZXwnoIyQRM=;
-        b=mS5HUd6HTMn7Fr3mXLNbOMZh208zPqvzzD278g7XVsd5VK36R6VAIdXkrPMdCnZ4qX
-         43U0SyUPlE1xJLVidhagnCRm9euCFfjqA2TmxzEZy5sZdBbUNSOrCIihuDyOcxaVy1He
-         RQQSF5NmLquSbLaXuJ7Dr1wgyeDsdiCrp6B67gm0Vkt9xCRC4VNviMHQLATdras4ECTv
-         u3atG7Gkkq820VoM5C4feUm6ab37LnRdwJFScEC84UW+b2JIQiZrtPeWCyK37Pfwxiyi
-         OItS8dWUdt19lzr84Pfuzlaeo6pS+vRwWgFNg/htvxItUHC449M7S0zHdvErWBNiCBhO
-         BGvQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:from:to:cc:references:organization
-         :message-id:date:user-agent:mime-version:in-reply-to
-         :content-language:content-transfer-encoding;
-        bh=qxDdi7+Pa9mI4uigqB3W47xkaolm+nq86ZXwnoIyQRM=;
-        b=NJpZRGhI9zq9XFCSVuACusFq9AacAFkTMFKZD7heSmCRFL7D8/AfYFKCo0MV/kA1Hf
-         64+cLcLcW8QLV/MXsaVNrD5DY/QUPpgMfaQieqkQwGLZFzNP6j+pnUMkO8+RL1yCK/Mr
-         h8qlwP9ux5C/GLFoxaLJ/6axD3JakQ0t8QmeNe+aIdgVm8YBMbUH5Mw0ct3j4im4eQMP
-         QEuXYmfRTP5ke4WMAALM6XJXV/kHExpABJd2tpfpL6p4V7fhtmR76snszOa42tpkDDae
-         3QZqgyjVdABjMo8UGrR3PZsQ9wI47WPbJlUwXYmIvKpKZ5JLxKmu9AW82oVGCHK9dLf5
-         F3zw==
-X-Gm-Message-State: AOAM532gume6WZZSaBFEsUvj7Ma4TrDWyO0gZOFu+zwBjlNj0ZVdPzE5
-        eo1pm4gpX0tgM8L+LfZBddBaig==
-X-Google-Smtp-Source: ABdhPJwcJ5uKyBrMz5SrcTpL/fHDZaB+rje4huK8/j3jT5LSRRnBYyGPpLjbOF18aLrBL5PwqPt2CA==
-X-Received: by 2002:a05:600c:4f94:: with SMTP id n20mr2018474wmq.18.1617785123299;
-        Wed, 07 Apr 2021 01:45:23 -0700 (PDT)
-Received: from ?IPv6:2a01:e0a:90c:e290:1202:4b29:31f6:551c? ([2a01:e0a:90c:e290:1202:4b29:31f6:551c])
-        by smtp.gmail.com with ESMTPSA id u9sm6936551wmc.38.2021.04.07.01.45.21
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 07 Apr 2021 01:45:22 -0700 (PDT)
-Subject: Re: brcmfmac and unaligned sdio access on Khadas VIM3L
-From:   Neil Armstrong <narmstrong@baylibre.com>
-To:     Marek Szyprowski <m.szyprowski@samsung.com>,
-        linux-wireless@vger.kernel.org,
-        brcm80211-dev-list.pdl@broadcom.com,
-        linux-amlogic@lists.infradead.org,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc:     Arend van Spriel <aspriel@gmail.com>,
-        Chung-hsien Hsu <chung-hsien.hsu@infineon.com>,
-        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>,
-        martin.blumenstingl@googlemail.com,
-        Dmitry Lebed <lebed.dmitry@gmail.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Wright Feng <wright.feng@infineon.com>,
-        Chi-hsien Lin <chi-hsien.lin@infineon.com>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>
-References: <CGME20210209124819eucas1p29c9b481ef524a753ce79aa6ab580d0a7@eucas1p2.samsung.com>
- <967b6bfe-a612-707f-583e-c45d61acffe0@samsung.com>
- <ab81cc00-049f-67a5-bc97-417d7cd2fa44@baylibre.com>
- <1e55e4cf-3ed6-0506-2e17-b94ca8043008@samsung.com>
- <459fb404-7370-190f-379d-751956e887df@baylibre.com>
-Organization: Baylibre
-Message-ID: <aa920eb6-788d-b0b8-c99a-839d73a8c748@baylibre.com>
-Date:   Wed, 7 Apr 2021 10:45:20 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.7.1
+        id S1349657AbhDGIrQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Apr 2021 04:47:16 -0400
+Received: from mx2.suse.de ([195.135.220.15]:36716 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1349662AbhDGIqo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 7 Apr 2021 04:46:44 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 8FC34AFAA;
+        Wed,  7 Apr 2021 08:44:41 +0000 (UTC)
+Message-ID: <25e9fc3bedd8f97dd151b1f36d752f032c6ec628.camel@suse.de>
+Subject: Re: [PATCH 2/3] mmc: sdhci-iproc: Cap min clock frequency on BCM2711
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, bcm-kernel-feedback-list@broadcom.com,
+        linux-rpi-kernel@lists.infradead.org,
+        Ray Jui <ray.jui@broadcom.com>,
+        Scott Branden <scott.branden@broadcom.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Stefan Wahren <wahrenst@gmx.net>,
+        Matthias Brugger <mbrugger@suse.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>
+Cc:     f.fainelli@gmail.com, phil@raspberrypi.com,
+        tim.gover@raspberrypi.com, alcooperx@gmail.com,
+        linux-kernel@vger.kernel.org, robh@kernel.org
+Date:   Wed, 07 Apr 2021 10:44:39 +0200
+In-Reply-To: <2d40b062-5809-15ce-b9d1-651644ff6e22@i2se.com>
+References: <20210406104802.20898-1-nsaenz@kernel.org>
+         <20210406104802.20898-3-nsaenz@kernel.org>
+         <2d40b062-5809-15ce-b9d1-651644ff6e22@i2se.com>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-tGvxp0AIZJH+Ku21vLzc"
+User-Agent: Evolution 3.40.0 
 MIME-Version: 1.0
-In-Reply-To: <459fb404-7370-190f-379d-751956e887df@baylibre.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-Hi Marek,
-On 10/02/2021 09:52, Neil Armstrong wrote:
-> On 10/02/2021 09:45, Marek Szyprowski wrote:
->> Hi Neil,
->>
->> On 10.02.2021 09:17, Neil Armstrong wrote:
->>> On 09/02/2021 13:48, Marek Szyprowski wrote:
->>>> I've noticed that the Broadcom Wifi chip performs unaligned SDIO access
->>>> during the station scan on Khadas VIM3l board. This issue went unnoticed
->>>> so far, because there was a workaround in the meson MMC driver, which
->>>> has been recently disabled by commit e085b51c74cc ("mmc: meson-gx: check
->>>> for scatterlist size alignment in block mode") from current linux-next.
->>>>
->>>> I can easily reproduce this issue with the following commands:
->>>>
->>>> # dmesg | grep brcm
->>>> [   11.659351] Bluetooth: hci0: BCM4359C0 'brcm/BCM4359C0.hcd' Patch
->>>> [   13.079767] brcmfmac: brcmf_fw_alloc_request: using
->>>> brcm/brcmfmac4359-sdio for chip BCM4359/9
->>>> [   13.527363] brcmfmac: brcmf_fw_alloc_request: using
->>>> brcm/brcmfmac4359-sdio for chip BCM4359/9
->>>> [   13.601269] brcmfmac: brcmf_c_process_clm_blob: no clm_blob available
->>>> (err=-11), device may have limited channels available
->>>> [   13.619414] brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4359/9 wl0:
->>>> Mar  6 2017 10:16:06 version 9.87.51.7 (r686312) FWID 01-4dcc75d9
->>>> # ifconfig wlan0 up
->>>> [  208.052058] ieee80211 phy0: brcmf_dongle_roam: WLC_SET_ROAM_TRIGGER
->>>> error (-52)
->>>> # iw wlan0 scan >/dev/null
->>>> [  218.148345] ------------[ cut here ]------------
->>>> [  218.148501] unaligned sg len 504 blksize 256
->>>> [  218.153712] WARNING: CPU: 1 PID: 75 at
->>>> drivers/mmc/host/meson-gx-mmc.c:251
->>>> meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
->>>> [  218.162616] Modules linked in: ipv6 brcmfmac brcmutil cfg80211
->>>> dw_hdmi_cec dw_hdmi_i2s_audio hci_uart btqca btbcm bluetooth
->>>> ecdh_generic ecc crct10dif_ce rfkill panfrost
->>>> snd_soc_meson_axg_sound_card snd_soc_meson_card_utils gpu_sched
->>>> meson_gxbb_wdt rtc_hym8563 pwm_meson meson_gxl rtc_meson_vrtc rc_khadas
->>>> meson_ir reset_meson_audio_arb realtek snd_soc_meson_g12a_tohdmitx
->>>> snd_soc_meson_codec_glue snd_soc_meson_axg_tdmout
->>>> snd_soc_meson_axg_frddr snd_soc_meson_axg_fifo axg_audio sclk_div
->>>> clk_phase mdio_mux_meson_g12a meson_dw_hdmi meson_drm meson_rng
->>>> dwmac_generic snd_soc_meson_axg_tdm_interface meson_canvas rng_core
->>>> dw_hdmi snd_soc_meson_axg_tdm_formatter dwmac_meson8b stmmac_platform
->>>> stmmac display_connector adc_keys pcs_xpcs nvmem_meson_efuse
->>>> [  218.228329] CPU: 1 PID: 75 Comm: kworker/u8:2 Not tainted
->>>> 5.11.0-rc6-next-20210208 #2492
->>>> [  218.236343] Hardware name: Khadas VIM3L (DT)
->>>> [  218.240579] Workqueue: brcmf_wq/mmc2:0001:1 brcmf_sdio_dataworker
->>>> [brcmfmac]
->>>> [  218.247559] pstate: 60400009 (nZCv daif +PAN -UAO -TCO BTYPE=--)
->>>> [  218.253506] pc : meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
->>>> [  218.259372] lr : meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
->>>> [  218.265237] sp : ffff80001327b870
->>>> [  218.268514] x29: ffff80001327b870 x28: 0000000000000003
->>>> [  218.273776] x27: 0000000000000218 x26: 0000000000000600
->>>> [  218.279036] x25: ffff000003a17678 x24: 0000000000000000
->>>> [  218.284296] x23: ffff8000121cfae8 x22: ffff800011b54000
->>>> [  218.289559] x21: ffff80001327bb18 x20: ffff00000277d000
->>>> [  218.294819] x19: ffff80001327ba40 x18: 00000002faf07f80
->>>> [  218.300081] x17: 0000000000004000 x16: 0000000000000000
->>>> [  218.305341] x15: 0000000000000380 x14: 0000000000000000
->>>> [  218.310603] x13: 0000000000000080 x12: 0000000000000000
->>>> [  218.315865] x11: 0000000000000000 x10: 0000000000001370
->>>> [  218.321125] x9 : ffff00006f995258 x8 : 000000009e0e7ca7
->>>> [  218.326387] x7 : ffff80001327b4a0 x6 : 0000000000000001
->>>> [  218.331648] x5 : 0000000000000001 x4 : 0000000000000000
->>>> [  218.336912] x3 : 0000000000000002 x2 : ffff8000121f4768
->>>> [  218.342171] x1 : 42fe1bd05e5eaa00 x0 : 0000000000000000
->>>> [  218.347435] Call trace:
->>>> [  218.349854]  meson_mmc_get_transfer_mode.isra.10+0xf8/0x130
->>>> [  218.355368]  meson_mmc_request+0x74/0xb0
->>>> [  218.359250]  __mmc_start_request+0xa4/0x2b0
->>>> [  218.363390]  mmc_start_request+0x80/0xa8
->>>> [  218.367272]  mmc_wait_for_req+0x68/0xd8
->>>> [  218.371066]  mmc_submit_one.isra.17+0x78/0x148 [brcmfmac]
->>>> [  218.376416]  brcmf_sdiod_sglist_rw+0x324/0x4a8 [brcmfmac]
->>>> [  218.381762]  brcmf_sdiod_recv_chain+0x70/0x140 [brcmfmac]
->>>> [  218.387110]  brcmf_sdio_dataworker+0x614/0x17d0 [brcmfmac]
->>>> [  218.392545]  process_one_work+0x2a8/0x728
->>>> [  218.396510]  worker_thread+0x48/0x460
->>>> [  218.400132]  kthread+0x134/0x160
->>>> [  218.403323]  ret_from_fork+0x10/0x18
->>>> [  218.406862] irq event stamp: 15834
->>>> [  218.410222] hardirqs last  enabled at (15833): [<ffff800010f95804>]
->>>> _raw_spin_unlock_irq+0x3c/0x80
->>>> [  218.419107] hardirqs last disabled at (15834): [<ffff800010f895ac>]
->>>> el1_dbg+0x24/0x50
->>>> [  218.426869] softirqs last  enabled at (15828): [<ffff800010010508>]
->>>> _stext+0x508/0x638
->>>> [  218.434717] softirqs last disabled at (15823): [<ffff8000100952ec>]
->>>> irq_exit+0x19c/0x1a8
->>>> [  218.442739] ---[ end trace dfc38bb4458b4c37 ]---
->>>> #
->>>>
->>>> Surprisingly the same commands executed on the Khadas VIM3 board with
->>>> the same kernel don't trigger the warning.
->>> This may be because the VIM3 (G12A & G12B) has a broken SDIO controller using
->>> an internal SRAM as bounce buffer instead of the scatter/gather DMA, cf amlogic,dram-access-quirk.
->> Good to know, this explains why it works without an issue on VIM3.
->>>> Let me know if I can help debugging this issue.
->>> Simply remove the WARN_ONCE()...
->>
->> Well, that WARN is not a big issue for me. I just wanted to help fixing 
->> the real issue. If I understand right, the brcmfmac driver queues 
->> incorrectly prepared sd list for the given transfer mode, what should be 
->> fixed there.
-> 
-> I think the issue comes from brcmfmac that should not provide unaligned data,
-> but I think it's a global issue where these kind of details aren't specified/enforced.
-> 
->>
->> On the other hand, if this is just a limitation of the meson mmc 
->> controller on SM1/VIM3l, then imho there should not be a WARN there and 
->> maybe the mentioned 'amlogic,dram-access-quirk' could be used to fix the 
->> issue on VIM3l too. I've checked and it indeed 'fixes' the issue on that 
->> board.
-> 
-> This fix severely limits the performance so it's not a good fix here,
-> the only fix I see here is to remove the WARN because the fact is that the DMA cannot handle
-> unaligned data, and the SDIO device drivers should be fixed in order to achieve max
-> performance on SDIO host drivers with DMA (it's usual to not support unaligned data
-> when dealing with a DMA).
+--=-tGvxp0AIZJH+Ku21vLzc
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Do you plan to remove the warning ? I can push a quick patch if not.
+On Tue, 2021-04-06 at 19:59 +0200, Stefan Wahren wrote:
+> Hi Nicolas,
+>=20
+> Am 06.04.21 um 12:48 schrieb Nicolas Saenz Julienne:
+> > There is a known bug on BCM2711's SDHCI core integration where the
+> > controller will hang when the difference between the core clock and the
+> > bus clock is too great. Specifically this can be reproduced under the
+> > following conditions:
+> >=20
+> > - No SD card plugged in, polling thread is running, probing cards at
+> > =C2=A0=C2=A0100KHz.
+> > - BCM2711's core clock configured at 500MHz or more.
+> >=20
+> > So set 200MHz as the minimum clock frequency available for that board.
+> i think it should be 200 kHz?
 
-> 
-> Neil
-> 
->>
->> Best regards
->>
-> 
+Of course... Sorry for that.
+
+Regards,
+Nicolas
+
+> >=20
+> > For more information on the issue see this:
+> > https://lore.kernel.org/linux-mmc/20210322185816.27582-1-nsaenz@kernel.=
+org/T/#m11f2783a09b581da6b8a15f302625b43a6ecdeca
+> >=20
+> > Fixes: f84e411c85be ("mmc: sdhci-iproc: Add support for emmc2 of the BC=
+M2711")
+> > Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> > ---
+> > =C2=A0drivers/mmc/host/sdhci-iproc.c | 18 ++++++++++++++++++
+> > =C2=A01 file changed, 18 insertions(+)
+> >=20
+> > diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-ip=
+roc.c
+> > index ddeaf8e1f72f..1ef888e91f73 100644
+> > --- a/drivers/mmc/host/sdhci-iproc.c
+> > +++ b/drivers/mmc/host/sdhci-iproc.c
+> > @@ -173,6 +173,23 @@ static unsigned int sdhci_iproc_get_max_clock(stru=
+ct sdhci_host *host)
+> > =C2=A0		return pltfm_host->clock;
+> > =C2=A0}
+> > =C2=A0
+> >=20
+> > +/*
+> > + * There is a known bug on BCM2711's SDHCI core integration where the
+> > + * controller will hang when the difference between the core clock and=
+ the bus
+> > + * clock is too great. Specifically this can be reproduced under the f=
+ollowing
+> > + * conditions:
+> > + *
+> > + *  - No SD card plugged in, polling thread is running, probing cards =
+at
+> > + *    100KHz.
+> > + *  - BCM2711's core clock configured at 500MHz or more
+> > + *
+> > + * So we set 200MHz as the minimum clock frequency available for that =
+SoC.
+> > + */
+> > +static unsigned int sdhci_iproc_bcm2711_get_min_clock(struct sdhci_hos=
+t *host)
+> > +{
+> > +	return 200000;
+> > +}
+> > +
+> > =C2=A0static const struct sdhci_ops sdhci_iproc_ops =3D {
+> > =C2=A0	.set_clock =3D sdhci_set_clock,
+> > =C2=A0	.get_max_clock =3D sdhci_iproc_get_max_clock,
+> > @@ -271,6 +288,7 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_o=
+ps =3D {
+> > =C2=A0	.set_clock =3D sdhci_set_clock,
+> > =C2=A0	.set_power =3D sdhci_set_power_and_bus_voltage,
+> > =C2=A0	.get_max_clock =3D sdhci_iproc_get_max_clock,
+> > +	.get_min_clock =3D sdhci_iproc_bcm2711_get_min_clock,
+> > =C2=A0	.set_bus_width =3D sdhci_set_bus_width,
+> > =C2=A0	.reset =3D sdhci_reset,
+> > =C2=A0	.set_uhs_signaling =3D sdhci_set_uhs_signaling,
+
+
+
+--=-tGvxp0AIZJH+Ku21vLzc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBtcPcACgkQlfZmHno8
+x/52Jgf+N8kWfn+v2p/Ij2knXikk1L0/UbLfSkffUvHLSJ3lSSqzbHoS5cWE5cWT
+Bw1ln4+GmxoCVmJcBlHwsML5w+IgV5mw5AhYnnGLVfb9kAKyxDKupRdE2GcrKMA7
+dYPd4Pd6vzGl244qEcHC2If/zy3oEoWrRs/Kci/6lvithzqxB4IOPV3aKRIEc+sS
+PRKt2j+jEv3NO9r08YvnU9shK4muX5VH29gp+x8s+VlW1yRKCj0L5PJ1Au5y7AcF
+gX8IvW+YVRY8z7fYhh8MnKEk0WVV1qvOk3Zyfut4P/wfwCzIcA2Yb7/Bvd7EgXz0
+NTKjPFG+Fhc4l1TuNoc4xmR1eFKDKA==
+=afNN
+-----END PGP SIGNATURE-----
+
+--=-tGvxp0AIZJH+Ku21vLzc--
 
