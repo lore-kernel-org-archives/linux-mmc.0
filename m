@@ -2,124 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5419BC433ED
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 15:07:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FC47C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 15:31:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 30DA86136A
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 15:07:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A62661284
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 15:31:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353344AbhDGPHW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Apr 2021 11:07:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56462 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242586AbhDGPHW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2021 11:07:22 -0400
-Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24AC8C061756;
-        Wed,  7 Apr 2021 08:07:12 -0700 (PDT)
-Received: by mail-ej1-x633.google.com with SMTP id mh7so18276451ejb.12;
-        Wed, 07 Apr 2021 08:07:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=DMi90Bi1B5eEKIW6qtlBkubiu414LxmGczys0i5jgMk=;
-        b=gNQG8lxuAYON632rgm2noHLWPLKbWXU1NsupWZu/radPDfcVLuWIS5qmXS44L9v2pN
-         atrveYSKSIzIijbETOpwSGofIs1jknTltXodL17PT24VLRLG7TvYNvXiqeoES/Gz++PH
-         wQfUaKUeenkEEWqix0/iDqFIQi4D92OVV26MqG5Q4mZIn0Z9l0OcZJNURrezdd1nek0J
-         /39PUdT8YTHGPe4FvrSurEHrtbIIjMWICrK3pszRTyde/bq+V0DjeWZi0+IHPvx3ob5j
-         hjqo3AUDukUSs8wbqcY8WgoZ/jeyRAs7n/OEt0w+I6/6OPdTnNnS4eN4WsDygvQLOvDZ
-         lPiQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=DMi90Bi1B5eEKIW6qtlBkubiu414LxmGczys0i5jgMk=;
-        b=dk1zntqabD8KxlpNg2TaH4t5ocGWLjwU9Qx+3BX5pSmPUV41Vy1XAWhhEDlvED3ejV
-         bD9Y8p7XbyenZtuaMFRZUISgwBuXGyoQ0EJ+3fAWJFFjpgscezrZQs437aGHVg3hr1NX
-         /upIg/9HucgFW1Gg115L6/0DJZRtSBAHiMY2bXthsYS95exqt0vhhKUnZHCPVJDBycex
-         Iufu2rrwu3/b4/BFzZFg70G5EADh8MKttx0WdamzfPsp/J3GFuwT4asbxGNJF4zE/rZq
-         N+GOTYBuTSqCVCVOAZFYdrGJzuhtOb9LuHeyLfpgwcR4B+EdCDmtAJ32+dc/OtBSuxoP
-         HknQ==
-X-Gm-Message-State: AOAM531J8+hOYVrH91sMn0bRBPXDkmZLjDbvdHzYP4+A4HAiY66/jw3h
-        R6uS3jsBiKe4Ow4Cr0BYNBg=
-X-Google-Smtp-Source: ABdhPJzjG5+vMalTo5MF4+sxjPdA2bO0Qz5I9laTTPnuMeEiykLdz9SCx7bfzkG4imeHbwoJ/is/2Q==
-X-Received: by 2002:a17:906:4e8a:: with SMTP id v10mr4170803eju.6.1617808030878;
-        Wed, 07 Apr 2021 08:07:10 -0700 (PDT)
-Received: from localhost ([62.96.65.119])
-        by smtp.gmail.com with ESMTPSA id gn19sm12436243ejc.4.2021.04.07.08.07.09
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 07 Apr 2021 08:07:09 -0700 (PDT)
-Date:   Wed, 7 Apr 2021 17:07:44 +0200
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Jon Hunter <jonathanh@nvidia.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        Aniruddha Tvs Rao <anrao@nvidia.com>,
-        Kamal Mostafa <kamal@canonical.com>
-Subject: Re: [PATCH] mmc: sdhci-tegra: Add required callbacks to set/clear
- CQE_EN bit
-Message-ID: <YG3KwJdljfJdawDQ@orome.fritz.box>
-References: <20210407094617.770495-1-jonathanh@nvidia.com>
+        id S241851AbhDGPbv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Apr 2021 11:31:51 -0400
+Received: from www.zeus03.de ([194.117.254.33]:54062 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S243334AbhDGPbr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 7 Apr 2021 11:31:47 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=TSBi4Hp2iAdobCMDwLoeX9jHcig
+        wAxZHbE83WS1g+pk=; b=EXE6QkbEbRYsT4QeIrn5Byi9XgB2XGT/ZZb/4hMDwiF
+        WhfsxuEySGKSUEb56BB0UdlLmKNAxbj1mKBpjyu1+Y+ayxinhHna0f58DuajYIFL
+        QbHyO1SlZwvpSMMRSqOhVq1cffqBbBExOxsGe/Agoay7SX5MsaGC77WEbi204rXs
+        =
+Received: (qmail 3067501 invoked from network); 7 Apr 2021 17:31:30 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 7 Apr 2021 17:31:30 +0200
+X-UD-Smtp-Session: l3s3148p1@fh7zn2O/cKogARa4RYN4AS31iQ6IViUK
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [PATCH RFC/RFT] mmc: tmio: always restore irq register
+Date:   Wed,  7 Apr 2021 17:31:26 +0200
+Message-Id: <20210407153126.37285-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="MLJd7CPH3Lqt6IQZ"
-Content-Disposition: inline
-In-Reply-To: <20210407094617.770495-1-jonathanh@nvidia.com>
-User-Agent: Mutt/2.0.6 (98f8cb83) (2021-03-06)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Currently, only SDHI on R-Car Gen2+ reinitializes the irq register
+during reset but it should be done on all instances. We can move it from
+the SDHI driver to the TMIO core, because we now have the
+'sd_irq_mask_all' variable which carries the proper value to use. That
+also means we can remove the initialization from tmio_mmc_probe()
+because it calls tmio_mmc_reset(), too. We only move that
+tmio_mmc_reset() call there a little to ensure 'sd_irq_mask_all' is
+properly set.
 
---MLJd7CPH3Lqt6IQZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-On Wed, Apr 07, 2021 at 10:46:17AM +0100, Jon Hunter wrote:
-> From: Aniruddha Tvs Rao <anrao@nvidia.com>
->=20
-> CMD8 is not supported with Command Queue Enabled. Add required callback
-> to clear CQE_EN and CQE_INTR fields in the host controller register
-> before sending CMD8. Add corresponding callback in the CQHCI resume path
-> to re-enable CQE_EN and CQE_INTR fields.
->=20
-> Reported-by: Kamal Mostafa <kamal@canonical.com>
-> Tested-by: Kamal Mostafa <kamal@canonical.com>
-> Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
-> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 32 ++++++++++++++++++++++++++++++++
->  1 file changed, 32 insertions(+)
+Shimoda-san, I think this is the implementation of what we discussed. It
+passes my tests on a Renesas H3 ES2.0. I'd be happy if you or the BSP
+team could run their additional checks with this patch. Thank you and
+kind regards!
 
-Acked-by: Thierry Reding <treding@nvidia.com>
+ drivers/mmc/host/renesas_sdhi_core.c |  2 --
+ drivers/mmc/host/tmio_mmc_core.c     | 11 ++++++-----
+ 2 files changed, 6 insertions(+), 7 deletions(-)
 
---MLJd7CPH3Lqt6IQZ
-Content-Type: application/pgp-signature; name="signature.asc"
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index d36181b6f687..635bf31a6735 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -588,8 +588,6 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+ 		renesas_sdhi_scc_reset(host, priv);
+ 	}
+ 
+-	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_ALL_RCAR2);
+-
+ 	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
+ 		val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
+ 		val |= CARD_OPT_EXTOP;
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index 0c474d78b186..bcd26056d47a 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -192,6 +192,9 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+ 	if (host->reset)
+ 		host->reset(host);
+ 
++	host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(host, CTL_IRQ_MASK);
++	tmio_mmc_disable_mmc_irqs(host, host->sdcard_irq_mask_all);
++
+ 	tmio_mmc_set_bus_width(host, host->mmc->ios.bus_width);
+ 
+ 	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
+@@ -1176,13 +1179,11 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+ 	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+ 		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+ 
+-	_host->set_clock(_host, 0);
+-	tmio_mmc_reset(_host);
+-
+-	_host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(_host, CTL_IRQ_MASK);
+ 	if (!_host->sdcard_irq_mask_all)
+ 		_host->sdcard_irq_mask_all = TMIO_MASK_ALL;
+-	tmio_mmc_disable_mmc_irqs(_host, _host->sdcard_irq_mask_all);
++
++	_host->set_clock(_host, 0);
++	tmio_mmc_reset(_host);
+ 
+ 	if (_host->native_hotplug)
+ 		tmio_mmc_enable_mmc_irqs(_host,
+-- 
+2.30.0
 
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmBtyr8ACgkQ3SOs138+
-s6Gc3A/+OGjGBSu6DmmRhG25bPJqJTS6udCn0nIbbTgme6IMj4BvdH7z4GxX3viH
-yGeKA2Ws3vv71lOST//HqJlUnVlcVC1y/vLlC07NnQ8a+csVehGF/1SOW/hmc3Vw
-wF5nAKSTdzttlLm0j3yxsfIaw7l2JXh3Q4Snd/Nj0jR6fhw3dFcwTcn4RGI+qbbt
-O30+luDa0U4vmlVPyzlkabF1A28YfJ7lzE6bbFslwwyBDirJEwBvipG+1ys4ARU5
-A/XoDF03V2NMxY5LceHf/Ef6UbWOsV1+BDFC01k7roQKVeYmLa6oA7PMT9e9uR03
-2Ejb5SOAcLuc/BQTHoaQxLJaHUiBipYgw5JO+IGq36CSxH1OnYbT2rTZv1A7btq4
-bFiT4CeORks3d6fWsm0UFUyvNAGoCx9JnVnxIWJPXNQNccF/MAA8SUFMQjW6HTyG
-mba4A3HGK3SjNn31Cl2y+fYDj8sQhYz3FUvtH/PPZOpgmIA95VLRSeV0sUzB5Dgn
-8129mHHTQR+stlzmkDVcyjtvTXnORXGvDiDX7JVChky0OQLQBGxM7WU814EYmSaV
-5m2OflVzRkb6pFlRsuXShqEZwvMbysrwbci5vXKJ6fh2SD1z/RNqtiomeTum6vj0
-YlK4VsCK0VPJseFxu/NVEw2CJ7/GXo9Erm0+jAkixfUK9VjUXoM=
-=JaU+
------END PGP SIGNATURE-----
-
---MLJd7CPH3Lqt6IQZ--
