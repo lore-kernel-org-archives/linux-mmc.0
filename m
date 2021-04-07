@@ -2,108 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82D0AC433B4
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 12:00:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5419BC433ED
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 15:07:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5D3A261074
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 12:00:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 30DA86136A
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 15:07:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351961AbhDGMA4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Apr 2021 08:00:56 -0400
-Received: from so254-9.mailgun.net ([198.61.254.9]:40215 "EHLO
-        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235980AbhDGMAx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2021 08:00:53 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1617796844; h=Content-Type: MIME-Version: Message-ID:
- In-Reply-To: Date: References: Subject: Cc: To: From: Sender;
- bh=dRkaKojvnawlYO3e1C9wxx79COw07pLsiCqaSEnReIk=; b=veu3quoti3INewFeTEH+d2XlX7KPy9fWyZsM8s0BRWXU4DS2itR9RnhVKCkynWAoJ5FuONMU
- 5b6mp7zPV1HHgk4lJtZXePwZ4HH84/RCFjM/YugbhdbJH1AAMqe2OnQSO7xEQ5xe29sY/ceq
- ndJD7wBsJKLnnBv7/NuYbzk34JA=
-X-Mailgun-Sending-Ip: 198.61.254.9
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n04.prod.us-east-1.postgun.com with SMTP id
- 606d9ed78166b7eff70a4f4c (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 07 Apr 2021 12:00:23
- GMT
-Sender: kvalo=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 0381BC43464; Wed,  7 Apr 2021 12:00:22 +0000 (UTC)
-Received: from potku.adurom.net (88-114-240-156.elisa-laajakaista.fi [88.114.240.156])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: kvalo)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 53876C433CA;
-        Wed,  7 Apr 2021 12:00:19 +0000 (UTC)
-DMARC-Filter: OpenDMARC Filter v1.3.2 smtp.codeaurora.org 53876C433CA
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; dmarc=none (p=none dis=none) header.from=codeaurora.org
-Authentication-Results: aws-us-west-2-caf-mail-1.web.codeaurora.org; spf=fail smtp.mailfrom=kvalo@codeaurora.org
-From:   Kalle Valo <kvalo@codeaurora.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     =?utf-8?B?SsOpcsO0bWU=?= Pouiller <jerome.pouiller@silabs.com>,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>,
-        driverdevel <devel@driverdev.osuosl.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        DTML <devicetree@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Pali =?utf-8?Q?Roh=C3=A1r?= <pali@kernel.org>
-Subject: Re: [PATCH v5 08/24] wfx: add bus_sdio.c
-References: <20210315132501.441681-1-Jerome.Pouiller@silabs.com>
-        <4503971.bAhddQ8uqO@pc-42>
-        <CAPDyKFoXgV3m-rMKfjqRj91PNjOGaWg6odWG-EGdFKkL+dGWoA@mail.gmail.com>
-        <5713463.b6Cmjs1FeV@pc-42>
-        <CAPDyKFrONrUvbVVVF9iy4P17jZ_Fq+1pGMmsqM6C1hOXOWQnBw@mail.gmail.com>
-Date:   Wed, 07 Apr 2021 15:00:17 +0300
-In-Reply-To: <CAPDyKFrONrUvbVVVF9iy4P17jZ_Fq+1pGMmsqM6C1hOXOWQnBw@mail.gmail.com>
-        (Ulf Hansson's message of "Tue, 23 Mar 2021 20:12:06 +0100")
-Message-ID: <87pmz6mhim.fsf@codeaurora.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/24.5 (gnu/linux)
+        id S1353344AbhDGPHW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Apr 2021 11:07:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56462 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242586AbhDGPHW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2021 11:07:22 -0400
+Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24AC8C061756;
+        Wed,  7 Apr 2021 08:07:12 -0700 (PDT)
+Received: by mail-ej1-x633.google.com with SMTP id mh7so18276451ejb.12;
+        Wed, 07 Apr 2021 08:07:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=DMi90Bi1B5eEKIW6qtlBkubiu414LxmGczys0i5jgMk=;
+        b=gNQG8lxuAYON632rgm2noHLWPLKbWXU1NsupWZu/radPDfcVLuWIS5qmXS44L9v2pN
+         atrveYSKSIzIijbETOpwSGofIs1jknTltXodL17PT24VLRLG7TvYNvXiqeoES/Gz++PH
+         wQfUaKUeenkEEWqix0/iDqFIQi4D92OVV26MqG5Q4mZIn0Z9l0OcZJNURrezdd1nek0J
+         /39PUdT8YTHGPe4FvrSurEHrtbIIjMWICrK3pszRTyde/bq+V0DjeWZi0+IHPvx3ob5j
+         hjqo3AUDukUSs8wbqcY8WgoZ/jeyRAs7n/OEt0w+I6/6OPdTnNnS4eN4WsDygvQLOvDZ
+         lPiQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=DMi90Bi1B5eEKIW6qtlBkubiu414LxmGczys0i5jgMk=;
+        b=dk1zntqabD8KxlpNg2TaH4t5ocGWLjwU9Qx+3BX5pSmPUV41Vy1XAWhhEDlvED3ejV
+         bD9Y8p7XbyenZtuaMFRZUISgwBuXGyoQ0EJ+3fAWJFFjpgscezrZQs437aGHVg3hr1NX
+         /upIg/9HucgFW1Gg115L6/0DJZRtSBAHiMY2bXthsYS95exqt0vhhKUnZHCPVJDBycex
+         Iufu2rrwu3/b4/BFzZFg70G5EADh8MKttx0WdamzfPsp/J3GFuwT4asbxGNJF4zE/rZq
+         N+GOTYBuTSqCVCVOAZFYdrGJzuhtOb9LuHeyLfpgwcR4B+EdCDmtAJ32+dc/OtBSuxoP
+         HknQ==
+X-Gm-Message-State: AOAM531J8+hOYVrH91sMn0bRBPXDkmZLjDbvdHzYP4+A4HAiY66/jw3h
+        R6uS3jsBiKe4Ow4Cr0BYNBg=
+X-Google-Smtp-Source: ABdhPJzjG5+vMalTo5MF4+sxjPdA2bO0Qz5I9laTTPnuMeEiykLdz9SCx7bfzkG4imeHbwoJ/is/2Q==
+X-Received: by 2002:a17:906:4e8a:: with SMTP id v10mr4170803eju.6.1617808030878;
+        Wed, 07 Apr 2021 08:07:10 -0700 (PDT)
+Received: from localhost ([62.96.65.119])
+        by smtp.gmail.com with ESMTPSA id gn19sm12436243ejc.4.2021.04.07.08.07.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Apr 2021 08:07:09 -0700 (PDT)
+Date:   Wed, 7 Apr 2021 17:07:44 +0200
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Jon Hunter <jonathanh@nvidia.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
+        Aniruddha Tvs Rao <anrao@nvidia.com>,
+        Kamal Mostafa <kamal@canonical.com>
+Subject: Re: [PATCH] mmc: sdhci-tegra: Add required callbacks to set/clear
+ CQE_EN bit
+Message-ID: <YG3KwJdljfJdawDQ@orome.fritz.box>
+References: <20210407094617.770495-1-jonathanh@nvidia.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="MLJd7CPH3Lqt6IQZ"
+Content-Disposition: inline
+In-Reply-To: <20210407094617.770495-1-jonathanh@nvidia.com>
+User-Agent: Mutt/2.0.6 (98f8cb83) (2021-03-06)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ulf Hansson <ulf.hansson@linaro.org> writes:
 
->> If I follow what has been done in other drivers I would write something
->> like:
->>
->>   static int wfx_sdio_suspend(struct device *dev)
->>   {
->>           struct sdio_func *func = dev_to_sdio_func(dev);
->>           struct wfx_sdio_priv *bus = sdio_get_drvdata(func);
->>
->>           config_reg_write_bits(bus->core, CFG_IRQ_ENABLE_DATA, 0);
->>           // Necessary to keep device firmware in RAM
->>           return sdio_set_host_pm_flags(func, MMC_PM_KEEP_POWER);
->
-> This will tell the mmc/sdio core to keep the SDIO card powered on
-> during system suspend. Thus, it doesn't need to re-initialize it at
-> system resume - and the firmware should not need to be re-programmed.
->
-> On the other hand, if you don't plan to support system wakeups, it
-> would probably be better to power off the card, to avoid wasting
-> energy while the system is suspended. I assume that means you need to
-> re-program the firmware as well. Normally, it's these kinds of things
-> that need to be managed from a ->resume() callback.
+--MLJd7CPH3Lqt6IQZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Many mac80211 drivers do so that the device is powered off during
-interface down (ifconfig wlan0 down), and as mac80211 does interface
-down automatically during suspend, suspend then works without extra
-handlers.
+On Wed, Apr 07, 2021 at 10:46:17AM +0100, Jon Hunter wrote:
+> From: Aniruddha Tvs Rao <anrao@nvidia.com>
+>=20
+> CMD8 is not supported with Command Queue Enabled. Add required callback
+> to clear CQE_EN and CQE_INTR fields in the host controller register
+> before sending CMD8. Add corresponding callback in the CQHCI resume path
+> to re-enable CQE_EN and CQE_INTR fields.
+>=20
+> Reported-by: Kamal Mostafa <kamal@canonical.com>
+> Tested-by: Kamal Mostafa <kamal@canonical.com>
+> Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
+> Signed-off-by: Jon Hunter <jonathanh@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 32 ++++++++++++++++++++++++++++++++
+>  1 file changed, 32 insertions(+)
 
--- 
-https://patchwork.kernel.org/project/linux-wireless/list/
+Acked-by: Thierry Reding <treding@nvidia.com>
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
+--MLJd7CPH3Lqt6IQZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmBtyr8ACgkQ3SOs138+
+s6Gc3A/+OGjGBSu6DmmRhG25bPJqJTS6udCn0nIbbTgme6IMj4BvdH7z4GxX3viH
+yGeKA2Ws3vv71lOST//HqJlUnVlcVC1y/vLlC07NnQ8a+csVehGF/1SOW/hmc3Vw
+wF5nAKSTdzttlLm0j3yxsfIaw7l2JXh3Q4Snd/Nj0jR6fhw3dFcwTcn4RGI+qbbt
+O30+luDa0U4vmlVPyzlkabF1A28YfJ7lzE6bbFslwwyBDirJEwBvipG+1ys4ARU5
+A/XoDF03V2NMxY5LceHf/Ef6UbWOsV1+BDFC01k7roQKVeYmLa6oA7PMT9e9uR03
+2Ejb5SOAcLuc/BQTHoaQxLJaHUiBipYgw5JO+IGq36CSxH1OnYbT2rTZv1A7btq4
+bFiT4CeORks3d6fWsm0UFUyvNAGoCx9JnVnxIWJPXNQNccF/MAA8SUFMQjW6HTyG
+mba4A3HGK3SjNn31Cl2y+fYDj8sQhYz3FUvtH/PPZOpgmIA95VLRSeV0sUzB5Dgn
+8129mHHTQR+stlzmkDVcyjtvTXnORXGvDiDX7JVChky0OQLQBGxM7WU814EYmSaV
+5m2OflVzRkb6pFlRsuXShqEZwvMbysrwbci5vXKJ6fh2SD1z/RNqtiomeTum6vj0
+YlK4VsCK0VPJseFxu/NVEw2CJ7/GXo9Erm0+jAkixfUK9VjUXoM=
+=JaU+
+-----END PGP SIGNATURE-----
+
+--MLJd7CPH3Lqt6IQZ--
