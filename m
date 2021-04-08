@@ -2,143 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3D8AC433B4
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 20:37:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B24ADC433B4
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Apr 2021 02:24:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8DAAC61205
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Apr 2021 20:37:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 78876610D2
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Apr 2021 02:24:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233083AbhDGUhy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Apr 2021 16:37:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44672 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230049AbhDGUhx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2021 16:37:53 -0400
-Received: from mail-io1-xd32.google.com (mail-io1-xd32.google.com [IPv6:2607:f8b0:4864:20::d32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB1E1C061760;
-        Wed,  7 Apr 2021 13:37:41 -0700 (PDT)
-Received: by mail-io1-xd32.google.com with SMTP id e186so20826942iof.7;
-        Wed, 07 Apr 2021 13:37:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=FCpElm+uN0nKlaXcOWhtgRYdg8EWv7jaC5fSZFSUuVQ=;
-        b=eeKK+hokZ78lIxpp1CJIqB/m3pYB/VQl9FlwjgwATA2DUVH+a93H0Nh3eo7Roa7d46
-         oNwonyszu29BCWeqrzKTM46Ihh52BB/4JqlOOwzuvYvBIcVTHYatWmyKmv8IXt7MzNz8
-         NUJJQCkh4n9rwO/HDB9lBrhWN3pmrjJow3aYE00+NcNsSEpB3wlLLid/bk5aYzaBY1p8
-         mpgzTkWZQfy8f+NmJjfq1nxguLl37vdqRZuaVZYI8iT3t9d6qHsEDJ7rLZu9iMcRRw5t
-         BS0IaSi6iqb67W8ebB6vbyaeh2/gFjF5FRD/zrvR2qI0Y2+LwMqyre6ZzvZo8vAwTEYN
-         lGzg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=FCpElm+uN0nKlaXcOWhtgRYdg8EWv7jaC5fSZFSUuVQ=;
-        b=KzQFPhy97lg8/ckcpvE3t+6zl1+39KJ7xKHbgRZt/8yfDlDrsKA2KLRSb1MAHr4gl+
-         6yiyrqBDR8oXJvbTiIcE1NN4hmh0fKxCN4m3Vq1kg4P3Q+BDs+6DUZY6OZPXpDrAVlOy
-         aNCdMI/id4mZPAuAalEzkVXXOmzyuSuXKzJea64JeXYrk75IjmtthPZACssgYnaeCPrU
-         Tkj0Ret5A0qFxp9kHRNHSYjLWVHGO5BEy5HEs0tms4qiZdkYT6iSzCKxRdrqrxrrDJHn
-         +Glo5nhSmG5cvqlVRTxLxm/E47y24tNhI/WPkKVw1FSJnb/Iz3jCrz6orJBWAuBdXr/b
-         HhMA==
-X-Gm-Message-State: AOAM5309n5VKhTG87U9uflA4uObxvH8iOjfO+YoApU0FNWqf0s/w7W/C
-        T14aK7cw0l8VNixSE0M2gAKR7/V9HQoVlAJmeJo=
-X-Google-Smtp-Source: ABdhPJxm7xRmu9Llm1HKwK5Mfz4r5Kj77R/0UlJokS2jCKML85l6w6O1YFI2dH2GFwI2ZtvpbwbH1cZDERodEXGgrZE=
-X-Received: by 2002:a05:6638:2209:: with SMTP id l9mr5297192jas.13.1617827860500;
- Wed, 07 Apr 2021 13:37:40 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210322185816.27582-1-nsaenz@kernel.org> <20210322185816.27582-5-nsaenz@kernel.org>
- <401100ea-90ad-57b1-50da-967118a090da@i2se.com> <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
- <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com> <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
- <CAOGqxeUxOA_s6=KUh_XWFtRF_EWZgQH_y2MEdxUeDQTYMeb+3A@mail.gmail.com> <4d4e3de99dbee711cf47878bf98a7cc34c3f1e65.camel@suse.de>
-In-Reply-To: <4d4e3de99dbee711cf47878bf98a7cc34c3f1e65.camel@suse.de>
-From:   Alan Cooper <alcooperx@gmail.com>
-Date:   Wed, 7 Apr 2021 16:37:29 -0400
-Message-ID: <CAOGqxeWzjn70A_gP4Eh_ZLW0H3KkE_wA7QzeGRqU1u7xtJr-+Q@mail.gmail.com>
-Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
-To:     Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        linux-rpi-kernel@lists.infradead.org,
-        Florian Fainelli <f.fainelli@gmail.com>, phil@raspberrypi.com,
-        Tim Gover <tim.gover@raspberrypi.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        ": Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        id S230405AbhDHCYK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Apr 2021 22:24:10 -0400
+Received: from twspam01.aspeedtech.com ([211.20.114.71]:37764 "EHLO
+        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230366AbhDHCYJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Apr 2021 22:24:09 -0400
+X-Greylist: delayed 1815 seconds by postgrey-1.27 at vger.kernel.org; Wed, 07 Apr 2021 22:24:09 EDT
+Received: from twspam01.aspeedtech.com (localhost [127.0.0.2] (may be forged))
+        by twspam01.aspeedtech.com with ESMTP id 1381hdTs042163;
+        Thu, 8 Apr 2021 09:43:39 +0800 (GMT-8)
+        (envelope-from steven_lee@aspeedtech.com)
+Received: from mail.aspeedtech.com ([192.168.0.24])
+        by twspam01.aspeedtech.com with ESMTP id 1381gIKx042077;
+        Thu, 8 Apr 2021 09:42:18 +0800 (GMT-8)
+        (envelope-from steven_lee@aspeedtech.com)
+Received: from localhost.localdomain (192.168.100.253) by TWMBX02.aspeed.com
+ (192.168.0.24) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 8 Apr
+ 2021 09:52:23 +0800
+From:   Steven Lee <steven_lee@aspeedtech.com>
+To:     Andrew Jeffery <andrew@aj.id.au>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Rob Herring <robh+dt@kernel.org>,
+        Joel Stanley <joel@jms.id.au>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        Ryan Chen <ryanchen.aspeed@gmail.com>,
+        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        "open list:ASPEED SD/MMC DRIVER" <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        open list <linux-kernel@vger.kernel.org>
+CC:     <ryan_chen@aspeedtech.com>, <chin-ting_kuo@aspeedtech.com>
+Subject: [PATCH v1 1/2] dt-bindings: mmc: sdhci-of-aspeed: Add power-gpio and power-switch-gpio
+Date:   Thu, 8 Apr 2021 09:52:17 +0800
+Message-ID: <20210408015218.20560-2-steven_lee@aspeedtech.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210408015218.20560-1-steven_lee@aspeedtech.com>
+References: <20210408015218.20560-1-steven_lee@aspeedtech.com>
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Originating-IP: [192.168.100.253]
+X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
+ (192.168.0.24)
+X-DNSRBL: 
+X-MAIL: twspam01.aspeedtech.com 1381gIKx042077
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Nicolas,
+AST2600-A2 EVB provides the reference design for enabling SD bus power
+and toggling SD bus signal voltage by GPIO pins.
+Add the definition and example for power-gpio and power-switch-gpio
+properties.
 
-I got a better description of the failure and it looks like the bus
-clock needs to be limited to 300KHz for a 500MHz core clock.
-What's happening is that an internal reset sequence is needed after a
-command timeout and the reset signal needs to be asserted for at least
-2 ticks of the bus clock. This is done using a 12 bit counter clocked
-by the core clock. That means a 500MHz core clock produces a 122KHz
-reset signal which is too fast for 2 ticks of the 200KHz bus clock
-(100KHz) but is okay for the 300KHz (150Khz) bus clock.
+In the reference design, GPIOV0 of AST2600-A2 EVB is connected to power
+load switch that providing 3.3v to SD1 bus vdd. GPIOV1 is connected to
+a 1.8v and a 3.3v power load switch that providing signal voltage to
+SD1 bus.
+If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
+disabled.
+If GPIOV1 is active high, 3.3v power load switch is enabled, SD1 signal
+voltage is 3.3v. Otherwise, 1.8v power load switch will be enabled, SD1
+signal voltage becomes 1.8v.
 
-Al
+AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
+The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and GPIOV3
+as power-switch-gpio.
 
-On Mon, Apr 5, 2021 at 4:45 AM Nicolas Saenz Julienne
-<nsaenzjulienne@suse.de> wrote:
->
-> Hi Alan,
->
-> On Thu, 2021-04-01 at 11:23 -0400, Alan Cooper wrote:
-> > Nicolas,
-> >
-> > Sorry, I just noticed this thread.
-> > This is a known bug in some newer Arasan cores.
-> > The problem happens when the difference between the core clock and the bus
-> > clock is too great.
-> > Limiting the clock to 200KHz minimum should be a good fix.
->
-> Great, that's what I was hoping to hear :). Out of curiosity, can you share
-> more details on how the failure occurs?
->
-> > In my experience, it's only eMMC that needs the clock to be retried
->
-> > below 400KHz and not SD or SDIO. That's because the CMD signal for
-> > eMMC starts out as open-drain during identification and the size of
-> > the pull-up on the CMD signal can require the <400KHz clock. Once eMMC
-> > is out of identification mode the CMD signal is switched to push-pull
-> > and can run at much higher clock rates.
->
-> Fair enough, I need to do some tests, some of the compute modules use an eMMC.
->
-> > I don't think that SD and SDIO have any open-drain signals, so they
-> > shouldn't need to retry at slower clock speeds.
->
-> Noted.
->
-> > I'm trying to get more detail on the bug, like the exact ratio of core
-> > clock to bus clock that causes the problem. When I first found this
-> > bug I was told that the failure would not happen at 200KHz, but we
-> > were using a 405MHz core clock.
->
-> That would be nice to have.
->
-> > One other question. Why are you using polling for the SD card, this
-> > newer controller supports the interrupt driven "Card Inserted" signal
-> > and avoids wasting time polling?
->
-> I believe the line isn't routed on RPi4.
->
-> > Al
->
+Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
+---
+ .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 25 +++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+index 987b287f3bff..515a74614f3c 100644
+--- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+@@ -37,6 +37,14 @@ properties:
+   clocks:
+     maxItems: 1
+     description: The SD/SDIO controller clock gate
++  power-gpio:
++    description:
++      The GPIO for enabling/disabling SD bus power.
++    maxItems: 1
++  power-switch-gpio:
++    description:
++      The GPIO for toggling the signal voltage between 3.3v and 1.8v.
++    maxItems: 1
+ 
+ patternProperties:
+   "^sdhci@[0-9a-f]+$":
+@@ -61,6 +69,14 @@ patternProperties:
+       sdhci,auto-cmd12:
+         type: boolean
+         description: Specifies that controller should use auto CMD12
++      power-gpio:
++        description:
++          The GPIO for enabling/disabling SD bus power.
++        maxItems: 1
++      power-switch-gpio:
++        description:
++          The GPIO for toggling the signal voltage between 3.3v and 1.8v.
++        maxItems: 1
+     required:
+       - compatible
+       - reg
+@@ -80,6 +96,7 @@ required:
+ examples:
+   - |
+     #include <dt-bindings/clock/aspeed-clock.h>
++    #include <dt-bindings/gpio/aspeed-gpio.h>
+     sdc@1e740000 {
+             compatible = "aspeed,ast2500-sd-controller";
+             reg = <0x1e740000 0x100>;
+@@ -94,6 +111,10 @@ examples:
+                     interrupts = <26>;
+                     sdhci,auto-cmd12;
+                     clocks = <&syscon ASPEED_CLK_SDIO>;
++                    power-gpio = <&gpio0 ASPEED_GPIO(V, 0)
++                                     GPIO_ACTIVE_HIGH>;
++                    power-switch-gpio = <&gpio0 ASPEED_GPIO(V, 1)
++                                     GPIO_ACTIVE_HIGH>;
+             };
+ 
+             sdhci1: sdhci@200 {
+@@ -102,5 +123,9 @@ examples:
+                     interrupts = <26>;
+                     sdhci,auto-cmd12;
+                     clocks = <&syscon ASPEED_CLK_SDIO>;
++                    power-gpio = <&gpio0 ASPEED_GPIO(V, 2)
++                                     GPIO_ACTIVE_HIGH>;
++                    power-switch-gpio = <&gpio0 ASPEED_GPIO(V, 3)
++                                     GPIO_ACTIVE_HIGH>;
+             };
+     };
+-- 
+2.17.1
+
