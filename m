@@ -2,105 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UPPERCASE_50_75 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFA0BC43460
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 09:28:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD582C433ED
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 09:37:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6907E6101E
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 09:28:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 92D22611BE
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 09:37:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232292AbhDIJ3K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Apr 2021 05:29:10 -0400
-Received: from mx2.suse.de ([195.135.220.15]:48686 "EHLO mx2.suse.de"
+        id S232395AbhDIJho (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Apr 2021 05:37:44 -0400
+Received: from www.zeus03.de ([194.117.254.33]:47010 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232795AbhDIJ3E (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Apr 2021 05:29:04 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id D2F35AFF4;
-        Fri,  9 Apr 2021 09:28:50 +0000 (UTC)
-Message-ID: <a046159f5feb2ad777a35f109a19edeb294c7027.camel@suse.de>
-Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
-From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
-To:     Alan Cooper <alcooperx@gmail.com>
-Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        DTML <devicetree@vger.kernel.org>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        linux-rpi-kernel@lists.infradead.org,
-        Florian Fainelli <f.fainelli@gmail.com>, phil@raspberrypi.com,
-        Tim Gover <tim.gover@raspberrypi.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        ": Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-Date:   Fri, 09 Apr 2021 11:28:48 +0200
-In-Reply-To: <CAOGqxeWzjn70A_gP4Eh_ZLW0H3KkE_wA7QzeGRqU1u7xtJr-+Q@mail.gmail.com>
-References: <20210322185816.27582-1-nsaenz@kernel.org>
-         <20210322185816.27582-5-nsaenz@kernel.org>
-         <401100ea-90ad-57b1-50da-967118a090da@i2se.com>
-         <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
-         <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com>
-         <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
-         <CAOGqxeUxOA_s6=KUh_XWFtRF_EWZgQH_y2MEdxUeDQTYMeb+3A@mail.gmail.com>
-         <4d4e3de99dbee711cf47878bf98a7cc34c3f1e65.camel@suse.de>
-         <CAOGqxeWzjn70A_gP4Eh_ZLW0H3KkE_wA7QzeGRqU1u7xtJr-+Q@mail.gmail.com>
-Content-Type: multipart/signed; micalg="pgp-sha256";
-        protocol="application/pgp-signature"; boundary="=-Ym8B8RdTuXiurQ06o0vs"
-User-Agent: Evolution 3.40.0 
+        id S230181AbhDIJho (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Apr 2021 05:37:44 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=C3Hrh9uQqNgl/Dm9ETQHS0pl2/Qn
+        lcWtGE9+76bqfuk=; b=dFcbLLf8Tc2b9ZOAs6VLqcvIhm/SbnJUYUnBCHZrII/o
+        TPxpPJgpCLXcUpHDiLERVIZDOvsqhCtt3ub1ayoGAHH0Q19OUN8QqZXcHgAGYYGg
+        Ovg5rOtZrwOfgcaWuqnZelSNNGhZXIHQ4mpDpedVEx0TlYoqPlTGk7SrywjAkhk=
+Received: (qmail 3721288 invoked from network); 9 Apr 2021 11:37:29 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Apr 2021 11:37:29 +0200
+X-UD-Smtp-Session: l3s3148p1@mYpt6Ya/drMgARa4RVM+AT5wAMFZBfoZ
+Date:   Fri, 9 Apr 2021 11:37:26 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH RFT] mmc: renesas_sdhi: enable WAIT_WHILE_BUSY
+Message-ID: <20210409093726.GA879@ninjato>
+References: <20210408133420.2900-1-wsa+renesas@sang-engineering.com>
+ <TY2PR01MB36920CDE15B59DD55825B2E5D8739@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="0F1p//8PRICkK4MW"
+Content-Disposition: inline
+In-Reply-To: <TY2PR01MB36920CDE15B59DD55825B2E5D8739@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---=-Ym8B8RdTuXiurQ06o0vs
-Content-Type: text/plain; charset="UTF-8"
+--0F1p//8PRICkK4MW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi Al,
 
-On Wed, 2021-04-07 at 16:37 -0400, Alan Cooper wrote:
-> Nicolas,
+> > +			  TMIO_MMC_HAVE_CBSY | MMC_CAP_WAIT_WHILE_BUSY,
 >=20
-> I got a better description of the failure and it looks like the bus
-> clock needs to be limited to 300KHz for a 500MHz core clock.
-> What's happening is that an internal reset sequence is needed after a
-> command timeout and the reset signal needs to be asserted for at least
-> 2 ticks of the bus clock. This is done using a 12 bit counter clocked
-> by the core clock. That means a 500MHz core clock produces a 122KHz
-> reset signal which is too fast for 2 ticks of the 200KHz bus clock
-> (100KHz) but is okay for the 300KHz (150Khz) bus clock.
+> We should add MMC_CAP_WAIT_WHILE_BUSY to .capabilities, not .tmio_flags.
 
-Thanks for the info. I'll work something out.
+Ouch, can I have a brown paper bag, please!
 
-Regards,
-Nicolas
+>=20
+> >  	.tmio_ocr_mask	=3D MMC_VDD_32_33,
+> >  	.capabilities	=3D MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+> >  			  MMC_CAP_CMD23,
+> > @@ -111,7 +111,7 @@ static const struct renesas_sdhi_of_data of_rcar_ge=
+n3_compatible =3D {
+> >  	.tmio_flags	=3D TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
+> >  			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
+> >  	.capabilities	=3D MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
+> > -			  MMC_CAP_CMD23,
+> > +			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
+
+At least for the machines I could test, I did it correctly :/
 
 
---=-Ym8B8RdTuXiurQ06o0vs
+--0F1p//8PRICkK4MW
 Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
 
 -----BEGIN PGP SIGNATURE-----
 
-iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBwHlAACgkQlfZmHno8
-x/4gRQgAqmBf1qUXbQh2Hj7zqrgMN3ckta7yGgR0oNhkpCmRGRatEwSCgxH13qs8
-EaRs7buxvfuE9DnBBbJJk6PYaX5WMzeLQSInVFFFVInlpP2ElyAvRWICqV11bjHr
-ZjUOPsZW+vQfgGDBB4FedDI5htLwgDp63/mPfgJwM/qDd6kbgFENXnidO3y3PSEK
-64PHea0sjHLNSitCQlWjfi/XAst+vIl6O2mTbzzdQtGgt2+2fCaST5cbGPsi7Re9
-mY1J3T2IfibcBQg/yV8h7pIPPkqMfK4IQFOSG1Tpunvviz7ABCfccuNgbLcNg6LC
-a8mHlp+jb+4LKg5ENQxkBMCSOWMIRw==
-=H6Ip
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmBwIFIACgkQFA3kzBSg
+KbZECRAAhx6oFb29Lf8U2obo70DKsKAsfUHSoqzI30tCcyT06/VN+JMvGaUBG8id
+T5hOKT8GgIr4HquqOXFBXkX/iX6E0GYOYnN2FOumM6zs5AcqffDgn7fJNW5mv3rq
+OMghxEAVQC5ssFO6M7UnrhXE84yGAqdTeItlzqNcxS9W93vQXepsrU9eQ/MiXIRh
+Xt/xYs4sH3u6RFaYeDeaqnvuKk8lfAzEYrP1PoHGwHohj+pq4lAT6Yw65WWsNMqJ
+22iHknB/SLUrk7q/1h6Xr7tKpwnDe2L6ApJabFMuDSuoAUWmHcTeWjMh9OOSjQkx
+lDDM+3SPWtWSyxfTJSS6XnPYfEQ5QDb10r3zi1GC0i0dOYhzu8mGG0xHzH76IH22
+Koe0+pvvJcgJAVxP39JSsLpzcZDwblordt4mw5hi/g9rGFkcdpJzRmiI5X3ATdVC
+WzpAbMy3kyAgxJWCJ+iF2OXxe+lMVKvV7JVj+DXj8hcTfgo65wet/sBW8hlUDbxZ
+Zkro/JjQ2nBrARFqgXYzLPcJ82boN/gznwnmC2CALoeZNCrO92v0z9tyOMQwbHBE
+oWk3j3w8jdVVLnPXliHPsMugKeBF7/x/73H3RkHEGpN6Nn29ZJOvODgOkTd5N+uG
+og4hL4EVWq4qBHDtFr08WQoFWpq/QiLqAcHLnEufYWmPdgcjbxw=
+=ggzD
 -----END PGP SIGNATURE-----
 
---=-Ym8B8RdTuXiurQ06o0vs--
-
+--0F1p//8PRICkK4MW--
