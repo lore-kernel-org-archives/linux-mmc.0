@@ -2,188 +2,489 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77F22C433B4
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 02:41:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B0DBC43460
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 04:15:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3D31E610C9
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 02:41:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D701861178
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 04:15:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232688AbhDIClv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Apr 2021 22:41:51 -0400
-Received: from mail-eopbgr1400111.outbound.protection.outlook.com ([40.107.140.111]:30426
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S232616AbhDIClv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 8 Apr 2021 22:41:51 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=i7UjrHNZbHyRx1M3LwVuJij22AKNIgajsKu73EFZ5RCx87GE8B+NE3VwJoo0RMOswX9km2b2sgNWr5+uTG6x97Y75FEVsXuiNnBYwQ482gqEAGA46m1DWfW01HtA9hh9HGAP/+hQmpjtok+eH2GOQUHNBGiSn5FN/kgoygEKaCJ3iAEOUoqWzYcNHvbu9CWsfxYoeK6PYkS62lRnTpJ4rkcmc7OU5RKOkL+/0eGl8et2Dz9BQuOsTzz5vTc0L/E8F2q8Sv23MRnHYTeMI0ezJNUi53lR3KrGD8R2hQ/z0O/ViQr+NAx1Ji4mOFwnhjx1+ndRQn/mi/q/IruxP4CQoQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Fo0VDCCUrXnQLtMotYrCIjpWDnyG3gMZgROnjiBNS24=;
- b=dB3CPohfzQXWNcX1916CJOVGfB8Ylon/TTy8pevixGwwZHnveTRzvngnX4HR5v/Rm685smMeC4zGMweeafhbtq5k1XV8tAWQpBOEEgRaIbz6I6CPJA0umbUHdCP/TN0eMcG3H45i8ljW8H0a54/C/Oxtbd8wnaMmcFTmn+ZX7q1y/qjSkH+zd7SelNFrJ8ta/MAslWsPS/g39apdACG5yW1E0nXWIAddsdiuksv6mex1dSjN0oQjL4DVDZKjm/Slw6BSNlfBo1ztMse/DLl2FfEQ7LcmSG/iWJOvWmsnJmx/mUk9zelgOKN5JX9xtJfIL9k8T3Gr/vudbqLSjQ8K/A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Fo0VDCCUrXnQLtMotYrCIjpWDnyG3gMZgROnjiBNS24=;
- b=GaV8O2F24mip/VLDlJnBvIOQEDJwo9cRXUZm9LiTpJ4iBqoHqNfHkCzHe1DK3sDljv1UihabRbO87b1YXdL+ey+kO7DjuYqXQewRsoR+PSkhv56OyFzzva+wX79dIp3icyBjW5VCwkJKUNAY8n9oVb+UzLCzAy3YbcgwGly7l3g=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYXPR01MB1549.jpnprd01.prod.outlook.com (2603:1096:403:c::23) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3999.29; Fri, 9 Apr
- 2021 02:41:34 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::e413:c5f8:a40a:a349]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::e413:c5f8:a40a:a349%4]) with mapi id 15.20.3999.032; Fri, 9 Apr 2021
- 02:41:34 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH RFC/RFT] mmc: tmio: always restore irq register
-Thread-Topic: [PATCH RFC/RFT] mmc: tmio: always restore irq register
-Thread-Index: AQHXK8MZX5fXt7xro0uB46211W0EZqqrejvA
-Date:   Fri, 9 Apr 2021 02:41:34 +0000
-Message-ID: <TY2PR01MB3692C98A87BA89D0E910807ED8739@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210407153126.37285-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210407153126.37285-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 95d6460c-5374-4bfa-3b41-08d8fb00fd83
-x-ms-traffictypediagnostic: TYXPR01MB1549:
-x-microsoft-antispam-prvs: <TYXPR01MB154961377C3BCE24EFB59030D8739@TYXPR01MB1549.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: PBBhCtQgTHu4XmJ9YNfY2YQLIAggzxmXqm6+qUnGFoUshLKl1M2dQgAbQBuyJbP18cW8TRnywgEWJKREhO/70Bhxz3AU86znQ0GcmsEtWt1XWo1m4KznfulPd6oqX4qj3m79hpyUNbkPxmz5ljh59FHF3NecYD7YLlbRtjwm2bOMaty8enRWKFhAItHt/Idx+Ufbuj5vSwnFcJNbxLMkXjBCP6FLm0Jzoe8MXhcqFa2lXvmksRz9TbSGuLAZpBCGKKPkpddBSycPKXNLSZuQIkhWkwn+CSWUwVMKmdAleSXirAq+VN6wz1tp8oIH1xUPTm6O7sFWHtQjUUcVqFCGMqd1jk8kiXB9ZF4eWf/Nc9lZBNMrAPtZuu0DErvFfYejHPK1t005PJKbe2tat1SJMgz47TTE0rr0A+CpK8J/qKbqawg10e47TRx8ay7JzmDQokjsVipoiSkKqOThK4sgafA0JE98XYRL1jd8akZceURpZER1ORwpxCtCR3f+E1mR+GYsB99ZlM5VHS1LGR+DQZGc1DlHmwlA4faOmHUOjxcb1qYmkNR3nNQnZFhm1PS4Yk1LVggKaCpcAwlHWFPZrHjKaH2cK6rsECnF6ZNExUDdRztMkOaTMsXNQ5Qw4Q2A0OdVKinAOvm5H5UWashVoygKAIaV4WmXSHXALexrmBc=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(396003)(39860400002)(346002)(136003)(366004)(66476007)(66446008)(6506007)(66556008)(2906002)(64756008)(26005)(38100700001)(66946007)(52536014)(186003)(4326008)(7696005)(316002)(86362001)(54906003)(55016002)(55236004)(8936002)(71200400001)(76116006)(83380400001)(33656002)(9686003)(478600001)(8676002)(5660300002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?JIaAYtreK40GcphHH9QOGveT+h/onVVp6VGO3ni/yw/EjpkTLxm7JxhMz9oy?=
- =?us-ascii?Q?5azfF9pWltnziTlczryyNulhUSyxcVMOf313FToVoHUtkahp/6pzuHUH6X4Z?=
- =?us-ascii?Q?/4EKJZ+gbYJ2+R+P6gOo3apxrItg53335xObHVIrbhUvxVM5ai+G8uwqd2e/?=
- =?us-ascii?Q?u0L/+ijWQU6o3lQ9UitgsqtIPdiOYC0T44+miRaX2R2JC5HnGBXBzkoMmxqF?=
- =?us-ascii?Q?TjNLkg4ppvDlJeHB076wuzKDNMUj9cmGdZtL4hT36Y8Ibws/9e5SfmfdiSbV?=
- =?us-ascii?Q?S+NVk5x1T4EOYZk5j7xdF+ODMxmN79nalqmvO/6cWLppnoz7UdL6uz3B+Iqv?=
- =?us-ascii?Q?8dKAb5yswKiAM5T2R9+vn13UnD8mRk6znJThM0Byxw6f/rMvGeDoDmDLtKIB?=
- =?us-ascii?Q?akIEYaf/1x4HbQa8ICMon5C58Dfr2o9WVwPTPWO8ATvTPtTuFyQ8lt+ZDPHQ?=
- =?us-ascii?Q?hsd5x7pnDJhn1wMLQDLx74X4G9kpIlgemUvZ5OcXn3/1naiMa4A0MIxlDiN6?=
- =?us-ascii?Q?thGzUwRFalrAqHqyM6NHnCx20/zu7cUemxwQqJ/4vGt/A8TVf1zvIlIy5l0N?=
- =?us-ascii?Q?GWoPb3Elzv/DtjjLkio/9eMBULhBYNUWBS9PZUrgJcHSB/ap8hnqDvshE09/?=
- =?us-ascii?Q?88ObXHXGnUyrKHyClpk6tWKozwTHmNHIQly4ogh0hfmF/vXdeFDs/e+B1WZB?=
- =?us-ascii?Q?OWF+KaXZrefvWlv2LLXcW3aHOFAT0fi+Nz35ymC7bPhtjbCeDA7NW91DPsZU?=
- =?us-ascii?Q?ztOMwzQJ0tzkuuwVYSMNX22k53Ca7aDwALBXCbOrl/D1mVPmzl6KSu3GYIWj?=
- =?us-ascii?Q?gisPHqNzC0QUyU7wgX3k21AJu5bEkvN9GHfeMOa01Ef0H8MWVD1xPviKxd/7?=
- =?us-ascii?Q?PtkxbA/K3M7PI8fGtIz7D6NAAUae+sfSz5GdHQCGWItZvsGOlrPOKXDskffe?=
- =?us-ascii?Q?imVIQwE2Ey8NHUF4KTi0/tTvfkIbDQshFVxsi4qfNFadz/3y8urOAofDhpR/?=
- =?us-ascii?Q?y6qNt8Xqul7YjM5se5lcmooNlfVHMc0hdrR9nSfRqjGMBuhCr7tyerBa/Vmp?=
- =?us-ascii?Q?KD0Opoo5KqGMtDzBKZl9L3C7NIJ4Meh8tRB7qDiKI2QxQF3bF/F5x6GeDReB?=
- =?us-ascii?Q?wxv0ML9pknBiS8xYek3WIeO0Z5fSCUJerEGNESKiBBifZ0c20t/EtCSuYYoy?=
- =?us-ascii?Q?hT34yefC6HrwtAAP/lZVK/o3ETJz6f2suCG5wrvFVNAX5ibQDp9uY5wrCgeJ?=
- =?us-ascii?Q?2yEvlU695n9Vyk30SqLZUnxKNzWF6aE5Co8oMWogi7GRlc+t3ZZ04Qv9II1T?=
- =?us-ascii?Q?i7vbgb3SCSHsIipC0kZQkVPR?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
-MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 95d6460c-5374-4bfa-3b41-08d8fb00fd83
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Apr 2021 02:41:34.3463
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Kjff0f+pRiR+rlsCjqEi8Vc3csHRpxIG5UPMmMftAz+YVDV3yoMkJeDGE9UW0L9Pdb129GRs3yXXtjtphKTrxJv5AaPDmAfVDrUAdP1t8ZadZy5Uci0jsEr//dlS8ZZ5
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYXPR01MB1549
+        id S229715AbhDIEPi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Apr 2021 00:15:38 -0400
+Received: from new1-smtp.messagingengine.com ([66.111.4.221]:46673 "EHLO
+        new1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229526AbhDIEPh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Apr 2021 00:15:37 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.nyi.internal (Postfix) with ESMTP id CF1A35807C8;
+        Fri,  9 Apr 2021 00:15:22 -0400 (EDT)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Fri, 09 Apr 2021 00:15:22 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm2; bh=gqg+/R6RU8NejdnoHxfJV2sw/qz3bOa
+        Hj31Bqhy60NA=; b=seLuiLdDp0isq59r8jPaJbV6pfFa/HajfztUwOyW6tvYKYQ
+        ecba+ZNRLVrc9AP8b+bNLxEhcx1AoA9kTDvuXbEumt98vuzYTHhpaAceOLVKiN7y
+        UdGwiD/ob83vU5g+ftgDGObSgnPxb5UpQ4z2EGoqyhQ5R8CKaAHw0a7ssQil/VMV
+        /cpECG9TyfD9p7zfSPceAmFvIgaaKW73mLKpH6TM4h7TmKr+/aQ19CieOwG62QGF
+        /hLFMBue+BVucwVe9jPE7ihwaixSNRRzBk1whD7KevhrZMRTl5kJW0hixTFrXfSJ
+        N7xfYLf0q+irJdvW0dPYDe1/xFypf6QIp0exqMA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=gqg+/R
+        6RU8NejdnoHxfJV2sw/qz3bOaHj31Bqhy60NA=; b=hU5h+IvW3DEiEYJkX9D0pW
+        EvewEK7lQFM/55eBn5skSVc7jtNE3bM24XSykf2ao5jOH/iGdYKV/kDWpmC4Demj
+        bF9KETzuvNazgiMdlcWW2dX+15NIvkohR5pwsfh94YRUZRmktWwAC5g330O+8KwB
+        H5kRH5RIYzbynkWu3Y9RICYiIvFFtFKzBYf8bfb5m8Kslfbfi4+GBymWrkHMfnBq
+        eEVGM8A4FhSXEqnfssJRPRlMtuHrfPDHzWiFfj2g2TI+kc4YXtblc28Yn9IMpk3I
+        BikIrOEsZI6IiNZ38RQR9y5ojN0hbjO1FdhzcLTZ2kTFtUpz1GaqSHO9K9fUwiSA
+        ==
+X-ME-Sender: <xms:2dRvYBOIh4Goxd4cQOW8iQ8BSdHiH6m4exFJX19kMQGVz7XV1-AqYw>
+    <xme:2dRvYD8ecB5Kf3qxUzVxr1PJjEvgzf7NW1fJydFlPGSSIRFNCsECIfP_AHqQSKW3J
+    2EwG0fuTokI2z2hbQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrudektddgjeelucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
+    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:2dRvYATTXSyD78zPKjeifkjfAfu306EbUQm3Uv-DMLMeb-9oAJbSyg>
+    <xmx:2dRvYNvcG3SqXBoEo_pWAyMhP8tPH0y5Qx0k6fmEDDlT9HekLy3ITw>
+    <xmx:2dRvYJePcTiStkO2lDnNb8c8arCQ3xJV4Xn0KXeMbcZ3BG8UoC3JTQ>
+    <xmx:2tRvYJ0dniXqk_rqTCGA3uilCHkW658ZYD51ezry5N-KT5lq7tvDyw>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 68912A0007C; Fri,  9 Apr 2021 00:15:21 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-273-g8500d2492d-fm-20210323.002-g8500d249
+Mime-Version: 1.0
+Message-Id: <acaa2cc2-9b12-442e-a767-3c4b41affa21@www.fastmail.com>
+In-Reply-To: <20210408015218.20560-3-steven_lee@aspeedtech.com>
+References: <20210408015218.20560-1-steven_lee@aspeedtech.com>
+ <20210408015218.20560-3-steven_lee@aspeedtech.com>
+Date:   Fri, 09 Apr 2021 13:44:25 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Steven Lee" <steven_lee@aspeedtech.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Ryan Chen" <ryanchen.aspeed@gmail.com>,
+        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list" <linux-kernel@vger.kernel.org>
+Cc:     "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>,
+        "Ryan Chen" <ryan_chen@aspeedtech.com>
+Subject: =?UTF-8?Q?Re:_[PATCH_v1_2/2]_mmc:_sdhci-of-aspeed:_Support_toggling_SD_b?=
+ =?UTF-8?Q?us_signal_voltage_by_GPIO?=
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+Hi Steven,
 
-Thank you for the patch!
+On Thu, 8 Apr 2021, at 11:22, Steven Lee wrote:
+> AST2600-A2 EVB provides reference design to support toggling signal
+> voltage between 3.3v and 1.8v by power-switch-gpio pin that defined in
+> the device tree.
 
-> From: Wolfram Sang, Sent: Thursday, April 8, 2021 12:31 AM
->=20
-> Currently, only SDHI on R-Car Gen2+ reinitializes the irq register
-> during reset but it should be done on all instances. We can move it from
-> the SDHI driver to the TMIO core, because we now have the
-> 'sd_irq_mask_all' variable which carries the proper value to use. That
-> also means we can remove the initialization from tmio_mmc_probe()
-> because it calls tmio_mmc_reset(), too. We only move that
-> tmio_mmc_reset() call there a little to ensure 'sd_irq_mask_all' is
-> properly set.
+Is this something you think we need support for beyond the EVB? It 
+sounds a lot like a knob to enable testing of different SD/MMC power 
+configurations and not something that you'd otherwise see in a system 
+design.
 
-Yes, this is my expectation. However...
+> It also supporting enabling/disabling SD bus power by
+> power-gpio.
 
-> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+This sounds like it could be useful but I'll defer to Ulf with regards 
+to the binding.
+
+> 
+> In the reference design, GPIOV0 of AST2600-A2 EVB is connected to power
+> load switch that providing 3.3v to SD1 bus vdd. GPIOV1 is connected to
+> a 1.8v and a 3.3v power load switch that providing signal voltage to
+> SD1 bus.
+> If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
+> disabled.
+> If GPIOV1 is active high, 3.3v power load switch is enabled, SD1 signal
+> voltage is 3.3v, otherwise, 1.8v power load switch will be enabled, SD1
+> signal voltage becomes 1.8v.
+> 
+> AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
+> The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and
+> GPIOV3 as power-switch-gpio.
+> 
+> Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
 > ---
->=20
-> Shimoda-san, I think this is the implementation of what we discussed. It
-> passes my tests on a Renesas H3 ES2.0. I'd be happy if you or the BSP
-> team could run their additional checks with this patch. Thank you and
-> kind regards!
->=20
->  drivers/mmc/host/renesas_sdhi_core.c |  2 --
->  drivers/mmc/host/tmio_mmc_core.c     | 11 ++++++-----
->  2 files changed, 6 insertions(+), 7 deletions(-)
->=20
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
-sas_sdhi_core.c
-> index d36181b6f687..635bf31a6735 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -588,8 +588,6 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *=
-host)
->  		renesas_sdhi_scc_reset(host, priv);
->  	}
->=20
-> -	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_ALL_RCAR2);
+>  drivers/mmc/host/sdhci-of-aspeed.c | 155 +++++++++++++++++++++++++----
+>  1 file changed, 137 insertions(+), 18 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c 
+> b/drivers/mmc/host/sdhci-of-aspeed.c
+> index 7d8692e90996..a74a03d37915 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -5,6 +5,7 @@
+>  #include <linux/clk.h>
+>  #include <linux/delay.h>
+>  #include <linux/device.h>
+> +#include <linux/gpio/consumer.h>
+>  #include <linux/io.h>
+>  #include <linux/math64.h>
+>  #include <linux/mmc/host.h>
+> @@ -30,6 +31,7 @@
+>  #define   ASPEED_SDC_S0_PHASE_IN_EN	BIT(2)
+>  #define   ASPEED_SDC_S0_PHASE_OUT_EN	GENMASK(1, 0)
+>  #define   ASPEED_SDC_PHASE_MAX		31
+> +#define ASPEED_CLOCK_PHASE 0xf4
+
+This isn't related to the power GPIOs, and we already have phase 
+support as suggested by the macros immediately above the one you've 
+added here.
+
+Please remove it and make use of the existing mmc phase devicetree 
+binding and driver support.
+
+>  
+>  struct aspeed_sdc {
+>  	struct clk *clk;
+> @@ -58,18 +60,21 @@ struct aspeed_sdhci_phase_desc {
+>  	struct aspeed_sdhci_tap_desc out;
+>  };
+>  
+> -struct aspeed_sdhci_pdata {
+> +struct aspeed_sdhci_data {
+
+Why are we renaming this? It looks like it creates a lot of noise in 
+the patch. The data it captured was platform data, hence 'pdata' in the 
+name. In my opinon it's fine if we also have a member called pdata.
+
+>  	unsigned int clk_div_start;
+>  	const struct aspeed_sdhci_phase_desc *phase_desc;
+>  	size_t nr_phase_descs;
+> +	const struct sdhci_pltfm_data *pdata;
+>  };
+>  
+>  struct aspeed_sdhci {
+> -	const struct aspeed_sdhci_pdata *pdata;
+> +	const struct aspeed_sdhci_data *data;
+>  	struct aspeed_sdc *parent;
+>  	u32 width_mask;
+>  	struct mmc_clk_phase_map phase_map;
+>  	const struct aspeed_sdhci_phase_desc *phase_desc;
+> +	struct gpio_desc *pwr_pin;
+> +	struct gpio_desc *pwr_sw_pin;
+>  };
+>  
+>  static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
+> @@ -209,7 +214,6 @@ static void aspeed_sdhci_set_clock(struct 
+> sdhci_host *host, unsigned int clock)
+>  	sdhci = sdhci_pltfm_priv(pltfm_host);
+>  
+>  	parent = clk_get_rate(pltfm_host->clk);
 > -
->  	if (sd_ctrl_read16(host, CTL_VERSION) >=3D SDHI_VER_GEN3_SD) {
->  		val =3D sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
->  		val |=3D CARD_OPT_EXTOP;
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc=
-_core.c
-> index 0c474d78b186..bcd26056d47a 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -192,6 +192,9 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host=
-)
->  	if (host->reset)
->  		host->reset(host);
->=20
-> +	host->sdcard_irq_mask =3D sd_ctrl_read16_and_16_as_32(host, CTL_IRQ_MAS=
-K);
-> +	tmio_mmc_disable_mmc_irqs(host, host->sdcard_irq_mask_all);
+
+Unrelated whitespace cleanup.
+
+>  	sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+>  
+>  	if (clock == 0)
+> @@ -234,14 +238,13 @@ static void aspeed_sdhci_set_clock(struct 
+> sdhci_host *host, unsigned int clock)
+>  	 * supporting the value 0 in (EMMC12C[7:6], EMMC12C[15:8]), and 
+> capture
+>  	 * the 0-value capability in clk_div_start.
+>  	 */
+> -	for (div = sdhci->pdata->clk_div_start; div < 256; div *= 2) {
+> +	for (div = sdhci->data->clk_div_start; div < 256; div *= 2) {
+>  		bus = parent / div;
+>  		if (bus <= clock)
+>  			break;
+>  	}
+>  
+>  	div >>= 1;
+> -
+
+Unrelated whitespace cleanup.
+
+>  	clk = div << SDHCI_DIVIDER_SHIFT;
+>  
+>  	aspeed_sdhci_configure_phase(host, bus);
+> @@ -292,8 +295,78 @@ static u32 aspeed_sdhci_readl(struct sdhci_host 
+> *host, int reg)
+>  	return val;
+>  }
+>  
+> +static void sdhci_aspeed_set_power(struct sdhci_host *host, unsigned char mode,
+> +				   unsigned short vdd)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
+> +	struct aspeed_sdhci *dev = sdhci_pltfm_priv(pltfm_priv);
+> +	u8 pwr = 0;
 > +
+> +	if (!dev->pwr_pin)
+> +		return sdhci_set_power(host, mode, vdd);
+> +
+> +	if (mode != MMC_POWER_OFF) {
+> +		switch (1 << vdd) {
+> +		case MMC_VDD_165_195:
+> +		/*
+> +		 * Without a regulator, SDHCI does not support 2.0v
+> +		 * so we only get here if the driver deliberately
+> +		 * added the 2.0v range to ocr_avail. Map it to 1.8v
+> +		 * for the purpose of turning on the power.
+> +		 */
+> +		case MMC_VDD_20_21:
+> +				pwr = SDHCI_POWER_180;
+> +				break;
+> +		case MMC_VDD_29_30:
+> +		case MMC_VDD_30_31:
+> +				pwr = SDHCI_POWER_300;
+> +				break;
+> +		case MMC_VDD_32_33:
+> +		case MMC_VDD_33_34:
+> +				pwr = SDHCI_POWER_330;
+> +				break;
+> +		default:
+> +				WARN(1, "%s: Invalid vdd %#x\n",
+> +				     mmc_hostname(host->mmc), vdd);
+> +				break;
+> +		}
+> +	}
+> +
+> +	if (host->pwr == pwr)
+> +		return;
+> +
+> +	host->pwr = pwr;
+> +
+> +	if (pwr == 0) {
 
-This code could not resolve my concern. This code still read
-CTL_IRQ_MASK at first. So, if the register value is incorrect
-(when "host->reset" didn't exist), the sdcard_irq_mask value
-will be not expected value.
+Shouldn't we be testing against an SDHCI_POWER_* macro?
 
-So, I'm thinking we should write CTL_IRQ_MASK with sdcard_irq_mask_all
-by using sd_ctrl_write32_as_16_and_16() instead of using
-tmio_mmc_disable_mmc_irqs() at first.
+> +		gpiod_set_value(dev->pwr_pin, 0);
+> +		sdhci_writeb(host, 0, SDHCI_POWER_CONTROL);
+> +	} else {
+> +		gpiod_set_value(dev->pwr_pin, 1);
+> +
+> +		if (dev->pwr_sw_pin) {
+> +			if (pwr & SDHCI_POWER_330)
+> +				gpiod_set_value(dev->pwr_sw_pin, 1);
+> +			else if (pwr & SDHCI_POWER_180)
+> +				gpiod_set_value(dev->pwr_sw_pin, 0);
+> +		}
+> +		pwr |= SDHCI_POWER_ON;
+> +		sdhci_writeb(host, pwr, SDHCI_POWER_CONTROL);
+> +	}
+> +}
+> +
+> +static void aspeed_sdhci_voltage_switch(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_priv = sdhci_priv(host);
+> +	struct aspeed_sdhci *dev = sdhci_pltfm_priv(pltfm_priv);
+> +
+> +	if (dev->pwr_sw_pin)
+> +		gpiod_set_value(dev->pwr_sw_pin, 0);
+> +}
+> +
+>  static const struct sdhci_ops aspeed_sdhci_ops = {
+>  	.read_l = aspeed_sdhci_readl,
+> +	.set_power = sdhci_aspeed_set_power,
+> +	.voltage_switch = aspeed_sdhci_voltage_switch,
+>  	.set_clock = aspeed_sdhci_set_clock,
+>  	.get_max_clock = aspeed_sdhci_get_max_clock,
+>  	.set_bus_width = aspeed_sdhci_set_bus_width,
+> @@ -302,9 +375,14 @@ static const struct sdhci_ops aspeed_sdhci_ops = {
+>  	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>  };
+>  
+> -static const struct sdhci_pltfm_data aspeed_sdhci_pdata = {
+> +static const struct sdhci_pltfm_data ast2400_sdhci_pdata = {
+>  	.ops = &aspeed_sdhci_ops,
+>  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> +	.quirks2 = SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN | 
+> SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +};
+> +
+> +static const struct sdhci_pltfm_data ast2600_sdhci_pdata = {
+> +	.ops = &aspeed_sdhci_ops,
+>  };
+>  
+>  static inline int aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
+> @@ -327,27 +405,28 @@ static inline int 
+> aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
+>  
+>  static int aspeed_sdhci_probe(struct platform_device *pdev)
+>  {
+> -	const struct aspeed_sdhci_pdata *aspeed_pdata;
+> +	const struct aspeed_sdhci_data *aspeed_data;
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct aspeed_sdhci *dev;
+>  	struct sdhci_host *host;
+>  	struct resource *res;
+> +	u32 reg_val;
+>  	int slot;
+>  	int ret;
+>  
+> -	aspeed_pdata = of_device_get_match_data(&pdev->dev);
+> -	if (!aspeed_pdata) {
+> +	aspeed_data = of_device_get_match_data(&pdev->dev);
+> +	if (!aspeed_data) {
+>  		dev_err(&pdev->dev, "Missing platform configuration data\n");
+>  		return -EINVAL;
+>  	}
+>  
+> -	host = sdhci_pltfm_init(pdev, &aspeed_sdhci_pdata, sizeof(*dev));
+> +	host = sdhci_pltfm_init(pdev, aspeed_data->pdata, sizeof(*dev));
+>  	if (IS_ERR(host))
+>  		return PTR_ERR(host);
+>  
+>  	pltfm_host = sdhci_priv(host);
+>  	dev = sdhci_pltfm_priv(pltfm_host);
+> -	dev->pdata = aspeed_pdata;
+> +	dev->data = aspeed_data;
+>  	dev->parent = dev_get_drvdata(pdev->dev.parent);
+>  
+>  	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> @@ -358,8 +437,8 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+>  	else if (slot >= 2)
+>  		return -EINVAL;
+>  
+> -	if (slot < dev->pdata->nr_phase_descs) {
+> -		dev->phase_desc = &dev->pdata->phase_desc[slot];
+> +	if (slot < dev->data->nr_phase_descs) {
+> +		dev->phase_desc = &dev->data->phase_desc[slot];
+>  	} else {
+>  		dev_info(&pdev->dev,
+>  			 "Phase control not supported for slot %d\n", slot);
+> @@ -372,6 +451,23 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+>  
+>  	sdhci_get_of_property(pdev);
+>  
+> +	if (of_property_read_bool(pdev->dev.parent->of_node, "mmc-hs200-1_8v") ||
+> +	    of_property_read_bool(pdev->dev.parent->of_node, "sd-uhs-sdr104")) {
+> +		reg_val = readl(host->ioaddr + 0x40);
 
-Best regards,
-Yoshihiro Shimoda
+Shouldn't this use  sdhci_readl()?
 
+> +		/* support 1.8V */
+> +		reg_val |= BIT(26);
+> +		/* write to sdhci140 or sdhci240 mirror register */
+> +		writel(reg_val, dev->parent->regs + (0x10 * (slot + 1)));
+
+I think I prefer a helper for this, like 
+aspeed_sdc_set_slot_capability(dev->parent, reg_val, slot, cap_idx), 
+rather than poking the global SD controller config space from the SDHCI 
+driver.
+
+> +	}
+> +
+> +	if (of_property_read_bool(pdev->dev.parent->of_node, "sd-uhs-sdr104")) {
+> +		reg_val = readl(host->ioaddr + 0x44);
+> +		/* SDR104 */
+> +		reg_val |= BIT(1);
+> +		/* write to sdhci144 or sdhci244 mirror register */
+> +		writel(reg_val, dev->parent->regs + (0x04 + (slot + 1) * 0x10));
+
+As above.
+
+> +	}
+> +
+>  	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+>  	if (IS_ERR(pltfm_host->clk))
+>  		return PTR_ERR(pltfm_host->clk);
+> @@ -389,6 +485,22 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+>  	if (dev->phase_desc)
+>  		mmc_of_parse_clk_phase(host->mmc, &dev->phase_map);
+>  
+> +	dev->pwr_pin = devm_gpiod_get(&pdev->dev, "power", GPIOD_OUT_HIGH);
+
+Shouldn't this use devm_gpiod_get_optional()?
+
+> +	if (!IS_ERR(dev->pwr_pin)) {
+> +		gpiod_set_consumer_name(dev->pwr_pin, "mmc_pwr");
+> +		gpiod_direction_output(dev->pwr_pin, 1);
+> +	} else {
+> +		dev->pwr_pin = NULL;
+> +	}
+> +
+> +	dev->pwr_sw_pin = devm_gpiod_get(&pdev->dev, "power-switch", GPIOD_OUT_HIGH);
+
+Shouldn't this use devm_gpiod_get_optional()?
+
+> +	if (!IS_ERR(dev->pwr_sw_pin)) {
+> +		gpiod_set_consumer_name(dev->pwr_sw_pin, "mmc_pwr_sw");
+> +		gpiod_direction_output(dev->pwr_sw_pin, 0);
+> +	} else {
+> +		dev->pwr_sw_pin = NULL;
+> +	}
+> +
+>  	ret = sdhci_add_host(host);
+>  	if (ret)
+>  		goto err_sdhci_add;
+> @@ -420,8 +532,9 @@ static int aspeed_sdhci_remove(struct platform_device *pdev)
+>  	return 0;
+>  }
+>  
+> -static const struct aspeed_sdhci_pdata ast2400_sdhci_pdata = {
+> +static const struct aspeed_sdhci_data ast2400_sdhci_data = {
+>  	.clk_div_start = 2,
+> +	.pdata = &ast2400_sdhci_pdata,
+>  };
+>  
+>  static const struct aspeed_sdhci_phase_desc ast2600_sdhci_phase[] = {
+> @@ -453,16 +566,17 @@ static const struct aspeed_sdhci_phase_desc 
+> ast2600_sdhci_phase[] = {
+>  	},
+>  };
+>  
+> -static const struct aspeed_sdhci_pdata ast2600_sdhci_pdata = {
+> +static const struct aspeed_sdhci_data ast2600_sdhci_data = {
+>  	.clk_div_start = 1,
+>  	.phase_desc = ast2600_sdhci_phase,
+>  	.nr_phase_descs = ARRAY_SIZE(ast2600_sdhci_phase),
+> +	.pdata = &ast2600_sdhci_pdata,
+>  };
+>  
+>  static const struct of_device_id aspeed_sdhci_of_match[] = {
+> -	{ .compatible = "aspeed,ast2400-sdhci", .data = &ast2400_sdhci_pdata, },
+> -	{ .compatible = "aspeed,ast2500-sdhci", .data = &ast2400_sdhci_pdata, },
+> -	{ .compatible = "aspeed,ast2600-sdhci", .data = &ast2600_sdhci_pdata, },
+> +	{ .compatible = "aspeed,ast2400-sdhci", .data = &ast2400_sdhci_data, },
+> +	{ .compatible = "aspeed,ast2500-sdhci", .data = &ast2400_sdhci_data, },
+> +	{ .compatible = "aspeed,ast2600-sdhci", .data = &ast2600_sdhci_data, },
+>  	{ }
+>  };
+>  
+> @@ -482,6 +596,7 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>  	struct device_node *parent, *child;
+>  	struct aspeed_sdc *sdc;
+>  	int ret;
+> +	u32 timing_phase;
+>  
+>  	sdc = devm_kzalloc(&pdev->dev, sizeof(*sdc), GFP_KERNEL);
+>  	if (!sdc)
+> @@ -506,6 +621,10 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>  		goto err_clk;
+>  	}
+>  
+> +	if (!of_property_read_u32(pdev->dev.of_node,
+> +				  "timing-phase", &timing_phase))
+> +		writel(timing_phase, sdc->regs + ASPEED_CLOCK_PHASE);
+
+As mentioned at the top, please use the existing phase bindings.
+
+Cheers,
+
+Andrew
