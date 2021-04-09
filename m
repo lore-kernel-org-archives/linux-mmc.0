@@ -2,113 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C51DC433ED
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 09:46:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DA62C433ED
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 10:54:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 727FF61108
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 09:46:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4ADA4610CF
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 10:54:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231621AbhDIJq0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Apr 2021 05:46:26 -0400
-Received: from www.zeus03.de ([194.117.254.33]:49648 "EHLO mail.zeus03.de"
+        id S233506AbhDIKym (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Apr 2021 06:54:42 -0400
+Received: from mx2.suse.de ([195.135.220.15]:59252 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231127AbhDIJqX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Apr 2021 05:46:23 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=0Mu+/ALnJs4s2b3c+YHbQJNQv4k
-        +Ikwow96fnquIaUw=; b=sVVlDbV55MjRLh5C6H2SJPshtWuvzaUc//CQMhBMhG3
-        7kGEsmDfU1ZEZ39S+7g5Eki9DSZ+16V7/Nnx866SGRlPjW5rnj+pNjbKGAwfH1e6
-        MaUKUc6fHnq0ZQQjEGcz1UVmHZGJ1LPck4D6cHUCutakOJck1Y+8YUtPBdz+nDBI
-        =
-Received: (qmail 3723855 invoked from network); 9 Apr 2021 11:46:09 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Apr 2021 11:46:09 +0200
-X-UD-Smtp-Session: l3s3148p1@/82SCIe/6LMgARa4RVM+AT5wAMFZBfoZ
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH RFT v2] mmc: renesas_sdhi: enable WAIT_WHILE_BUSY
-Date:   Fri,  9 Apr 2021 11:46:06 +0200
-Message-Id: <20210409094606.4317-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.0
+        id S232087AbhDIKym (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Apr 2021 06:54:42 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id 875E9AF9E;
+        Fri,  9 Apr 2021 10:54:28 +0000 (UTC)
+Message-ID: <2dbb9e8c1f1e107712b05e36aa1b244329381425.camel@suse.de>
+Subject: Re: [PATCH 4/4] ARM: dts: Fix-up EMMC2 controller's frequency
+From:   Nicolas Saenz Julienne <nsaenzjulienne@suse.de>
+To:     Alan Cooper <alcooperx@gmail.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Scott Branden <sbranden@broadcom.com>
+Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        "moderated list:BROADCOM BCM7XXX ARM ARCHITECTURE" 
+        <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        linux-rpi-kernel@lists.infradead.org,
+        Florian Fainelli <f.fainelli@gmail.com>, phil@raspberrypi.com,
+        Tim Gover <tim.gover@raspberrypi.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+Date:   Fri, 09 Apr 2021 12:54:26 +0200
+In-Reply-To: <CAOGqxeWzjn70A_gP4Eh_ZLW0H3KkE_wA7QzeGRqU1u7xtJr-+Q@mail.gmail.com>
+References: <20210322185816.27582-1-nsaenz@kernel.org>
+         <20210322185816.27582-5-nsaenz@kernel.org>
+         <401100ea-90ad-57b1-50da-967118a090da@i2se.com>
+         <78dec30c052e9bb76e52c38f3da5af371e5d65f5.camel@suse.de>
+         <2d2a2638-8213-5d6e-0a3a-927ed5bb2ed7@i2se.com>
+         <c7c8e20d3d11c7d6cd203797c5faffa8a4d202a6.camel@suse.de>
+         <CAOGqxeUxOA_s6=KUh_XWFtRF_EWZgQH_y2MEdxUeDQTYMeb+3A@mail.gmail.com>
+         <4d4e3de99dbee711cf47878bf98a7cc34c3f1e65.camel@suse.de>
+         <CAOGqxeWzjn70A_gP4Eh_ZLW0H3KkE_wA7QzeGRqU1u7xtJr-+Q@mail.gmail.com>
+Content-Type: multipart/signed; micalg="pgp-sha256";
+        protocol="application/pgp-signature"; boundary="=-KxZS3sx9rZTVwyYp0yY2"
+User-Agent: Evolution 3.40.0 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Now that we got the timeout handling in the driver correct, we can use
-this capability to avoid polling via the MMC core.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+--=-KxZS3sx9rZTVwyYp0yY2
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Change since v1:
-* moved wrongly set flags from tmio_flags to capabilities
+Hi again,
 
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 4 ++--
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      | 8 +++++---
- 2 files changed, 7 insertions(+), 5 deletions(-)
+On Wed, 2021-04-07 at 16:37 -0400, Alan Cooper wrote:
+> Nicolas,
+>=20
+> I got a better description of the failure and it looks like the bus
+> clock needs to be limited to 300KHz for a 500MHz core clock.
+> What's happening is that an internal reset sequence is needed after a
+> command timeout and the reset signal needs to be asserted for at least
+> 2 ticks of the bus clock. This is done using a 12 bit counter clocked
+> by the core clock. That means a 500MHz core clock produces a 122KHz
+> reset signal which is too fast for 2 ticks of the 200KHz bus clock
+> (100KHz) but is okay for the 300KHz (150Khz) bus clock.
 
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index ff97f15e317c..e8f4863d8f1a 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -97,7 +97,7 @@ static const struct renesas_sdhi_of_data of_rza2_compatible = {
- 			  TMIO_MMC_HAVE_CBSY,
- 	.tmio_ocr_mask	= MMC_VDD_32_33,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
--			  MMC_CAP_CMD23,
-+			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
- 	.bus_shift	= 2,
- 	.scc_offset	= 0 - 0x1000,
- 	.taps		= rcar_gen3_scc_taps,
-@@ -111,7 +111,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
--			  MMC_CAP_CMD23,
-+			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT | MMC_CAP2_MERGE_CAPABLE,
- 	.bus_shift	= 2,
- 	.scc_offset	= 0x1000,
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index c5f789675302..ffa64211f4de 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -33,12 +33,14 @@ static const struct renesas_sdhi_of_data of_rz_compatible = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_32BIT_DATA_PORT |
- 			  TMIO_MMC_HAVE_CBSY,
- 	.tmio_ocr_mask	= MMC_VDD_32_33,
--	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
-+	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-+			  MMC_CAP_WAIT_WHILE_BUSY,
- };
- 
- static const struct renesas_sdhi_of_data of_rcar_gen1_compatible = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL,
--	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ,
-+	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-+			  MMC_CAP_WAIT_WHILE_BUSY,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT,
- };
- 
-@@ -58,7 +60,7 @@ static const struct renesas_sdhi_of_data of_rcar_gen2_compatible = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
--			  MMC_CAP_CMD23,
-+			  MMC_CAP_CMD23 | MMC_CAP_WAIT_WHILE_BUSY,
- 	.capabilities2	= MMC_CAP2_NO_WRITE_PROTECT,
- 	.dma_buswidth	= DMA_SLAVE_BUSWIDTH_4_BYTES,
- 	.dma_rx_offset	= 0x2000,
--- 
-2.30.0
+Is there any value in implementing this in a generic way? That is, will a S=
+oC
+other than BCM2711 ever need this? Otherwise I can simply limit BCM2711's
+sdhci-iproc min clk frequency to 300KHz and call it a day.
+
+The alternative is something the likes of:
+
+	min_clk =3D clk_get_rate(core_bus) >> 11;
+
+But it involves updating the bindings and DT.
+
+Regards,
+Nicolas
+
+
+
+
+--=-KxZS3sx9rZTVwyYp0yY2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCAAdFiEErOkkGDHCg2EbPcGjlfZmHno8x/4FAmBwMmIACgkQlfZmHno8
+x/7ntQgAiD7GcI2zPvYkkdlBBtohEpENZTydgEPLuTHhXzablbGyC/GT5EJ5Pr+K
+iXL1Qlv5xpovPxWIx5hGdFLY/RbFSI4s4C7f2HYoPgRwwwn5AuCmuVwcL+tKkJ6d
+sD1dmGUJo/uMQ/P3oT0G0Ea4yuz2LSIXeq/K8PEqWLEl+Aaw3ciINqYeUlWOuGcB
+jPTJlSOgYj5rzYAskiRKcTiUp1fVbe9hiMi5ppft4fnJ1nYIU6wQcDxCo1WUUDhe
+Op/DdFTTzW+JP3mSmtr/EzVp5ldrupNFTcOzQODhDb4lEsO/ALBMMiKKhAlJVh0j
+0NofzFbS3vtJ0ffpD7TnoQlkKSIE7g==
+=pOg3
+-----END PGP SIGNATURE-----
+
+--=-KxZS3sx9rZTVwyYp0yY2--
 
