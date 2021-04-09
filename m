@@ -2,107 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC929C433B4
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 15:22:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A9DAC433ED
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 16:19:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AFFE3610E5
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 15:22:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 523B96103E
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Apr 2021 16:19:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234126AbhDIPWv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Apr 2021 11:22:51 -0400
-Received: from mga06.intel.com ([134.134.136.31]:40763 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234059AbhDIPWv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Apr 2021 11:22:51 -0400
-IronPort-SDR: 2CsknCs59MWanh2O6j+eoy/aHGpJyrfaoULmsy4XK0T41ZelLCA3BOrOxplBSpjbD8Q1F9QcaC
- JAbN0DjSbBDA==
-X-IronPort-AV: E=McAfee;i="6000,8403,9949"; a="255113669"
-X-IronPort-AV: E=Sophos;i="5.82,209,1613462400"; 
-   d="scan'208";a="255113669"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Apr 2021 08:22:37 -0700
-IronPort-SDR: kAvV8NPktXh4c7UroL3NZQ457zgZALtZQMDKg2EkFAp9dUEvqtVNl/kk1htgb6HxNSeEPI8Z1R
- 93C6w3IBviYA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.82,209,1613462400"; 
-   d="scan'208";a="520317158"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
-  by fmsmga001.fm.intel.com with ESMTP; 09 Apr 2021 08:22:36 -0700
-Subject: Re: Question on HS400 timing sequence
-To:     "Shah, Nehal-bakulchandra" <nehal-bakulchandra.shah@amd.com>
-Cc:     linux-mmc@vger.kernel.org, Jasbeer.Singh@amd.com,
-        Sudheesh.Mavila@amd.com
-References: <e990824b-28c6-3624-3973-4f54c5764e44@amd.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <0c27d8cd-a102-8daa-dcd4-57647fff0f25@intel.com>
-Date:   Fri, 9 Apr 2021 18:22:55 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.1
+        id S233837AbhDIQTM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Apr 2021 12:19:12 -0400
+Received: from mail-ot1-f46.google.com ([209.85.210.46]:39804 "EHLO
+        mail-ot1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229665AbhDIQTL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Apr 2021 12:19:11 -0400
+Received: by mail-ot1-f46.google.com with SMTP id 65-20020a9d03470000b02902808b4aec6dso1471108otv.6;
+        Fri, 09 Apr 2021 09:18:57 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=V6+t5pl9yiZgeYjahPqpAZZKi8bWzrvkcd68BkJAc7U=;
+        b=QOSMadggEbwUvDatFQVMgcfCeqHuEUdzAoLbk4d+UGmNhV9sgbANb93n3S0l1rjU4P
+         6vtEZn9kOmBbo+s/q8kf7amgxVi2FBRumaoXk9LWAPzMySrf6GQeGUFlwkJDMYm8Q7QN
+         nFiNDZg1wXZSH1Td8Hr+KKhZqSmfhrJgcbtAWgbJloXxKpNucUwayGnst8ARTxxwBzvv
+         AT6UCGkvHez8vxZUOgCjRlGBA0MAF/UF2gASn80daYMmV1Z5TLrG9c3s1Gd56ALs8cpB
+         KZqzqjhxC9P4MyXnDNtnUp1bngbHS5B8QDvIhj9jdZBPhu0p4VIokHFXeDfOYPZwejAF
+         fk5A==
+X-Gm-Message-State: AOAM531AgYLA7b8N1q9iPCZs86WWj9ahDIR9dnrHy54Eo629n7hkvEYB
+        Pwlg7uW8ZfQRmK/D54Pgmw==
+X-Google-Smtp-Source: ABdhPJyrAOG2bnJLeYmCGUVGO7oqCy02r/oDqFq2pcAf7aThY3BxjjJpxNkuNlfg2ZoZct6bMj2b6w==
+X-Received: by 2002:a9d:591:: with SMTP id 17mr12521855otd.115.1617985137160;
+        Fri, 09 Apr 2021 09:18:57 -0700 (PDT)
+Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id n13sm676778otk.61.2021.04.09.09.18.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 09 Apr 2021 09:18:56 -0700 (PDT)
+Received: (nullmailer pid 3750799 invoked by uid 1000);
+        Fri, 09 Apr 2021 16:18:55 -0000
+Date:   Fri, 9 Apr 2021 11:18:55 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Nicolas Saenz Julienne <nsaenz@kernel.org>
+Cc:     Scott Branden <scott.branden@broadcom.com>, stefan.wahren@i2se.com,
+        Matthias Brugger <mbrugger@suse.com>,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Scott Branden <sbranden@broadcom.com>,
+        Ray Jui <rjui@broadcom.com>, phil@raspberrypi.com,
+        adrian.hunter@intel.com, linux-rpi-kernel@lists.infradead.org,
+        Stefan Wahren <wahrenst@gmx.net>, nsaenzjulienne@suse.de,
+        tim.gover@raspberrypi.com, f.fainelli@gmail.com,
+        bcm-kernel-feedback-list@broadcom.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org, alcooperx@gmail.com,
+        Ray Jui <ray.jui@broadcom.com>, linux-kernel@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: iproc-sdhci: Convert to json-schema
+Message-ID: <20210409161855.GA3750765@robh.at.kernel.org>
+References: <20210406104802.20898-1-nsaenz@kernel.org>
+ <20210406104802.20898-2-nsaenz@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <e990824b-28c6-3624-3973-4f54c5764e44@amd.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210406104802.20898-2-nsaenz@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/04/21 5:19 pm, Shah, Nehal-bakulchandra wrote:
-> Hi Adrian,
+On Tue, 06 Apr 2021 12:48:01 +0200, Nicolas Saenz Julienne wrote:
+> Convert the brcm,iproc-sdhci binding to DT schema format using json-schema
 > 
-> as per JESD84-B50 spec for EMMC 5.0 , HS400 timing sequence is following
+> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
 > 
-> In order to switch to HS400 mode, host should perform the following steps:
-> 1) Initialize device with “Backward Compatible Timings”
-> 2) Select the device with CMD7.
-> 3) Read the DEVICE_TYPE [196] field of the Extended CSD register to validate whether the device supports HS400
-> 4) Read the DRIVER_STRENGTH [197] field of the Extended CSD register to find the supported device Driver Strengths. (Note: This step may be skipped if changes of driver strength is not needed)
-> 5) Set the “Selected Driver Strength” parameter in the HS_TIMING [185] field of the Extended CSD register to the appropriate driver strength for HS400 operation and set the “Timing Interface”
-> parameter to 0x2 to switch to HS200 mode.
-> 6) Perform the Tuning Process at the HS400 target operating frequency (Note: tuning process in HS200 mode is required to synchronize the command response on the CMD line to CLK for HS400 operation).
-> 7) After the Tuning Process has completed, set the “Timing Interface” parameter in the HS_TIMING [185] field of the Extended CSD register to 0x3 to switch to HS400 mode.
+> ---
 > 
-> But in case of JESD84-B51 spec  EMMC 5.1, HS400 timing sequence is following
+>  .../bindings/mmc/brcm,iproc-sdhci.yaml        | 63 +++++++++++++++++++
+>  .../bindings/mmc/brcm,sdhci-iproc.txt         | 37 -----------
+>  2 files changed, 63 insertions(+), 37 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
 > 
-> 1 )Initialize device with “Backward Compatible Timings”,
-> 2) Select the device with CMD7,
-> 3) Read the DEVICE_TYPE [196] field of the Extended CSD register to validate whether the device
-> supports HS400,
-> 4) Read the DRIVER_STRENGTH [197] field of the Extended CSD register to find the supported
-> device Driver Strengths,
-> NOTE This step may be skipped if changes of driver strength is not needed.
-> 5) Set the “Selected Driver Strength” parameter in the HS_TIMING [185] field of the Extended CSD
-> register to the appropriate driver strength for HS400 operation and set the “Timing Interface”
-> parameter to 0x2 to switch to HS200 mode,
-> 6) Perform the Tuning Process at the HS400 target operating frequency,
-> NOTE Tuning process in HS200 mode is required to synchronize the command response on the CMD line to
-> CLK for HS400 operation.
-> 7) Set the “Timing Interface” parameter in the HS_TIMING [185] field of the Extended CSD register to
-> 0x1 to switch to High Speed mode and then set the clock frequency to a value not greater than 52
-> MHz,
-> 8) Set BUS_WIDTH[183] to 0x06 to select the dual data rate x8 bus mode,
-> 9) Set the “Timing Interface” parameter in the HS_TIMING [185] field of the Extended CSD register to
-> 0x3 to switch to HS400 mode.
-> 
-> So basically in case EMMC5.1 for HS400 mode selection, there is some difference after tuning. However driver
-> existing driver always follow spec of EMMC5.1 . Is there any specific reason for the same? So on our some AMD platforms
-> with EMMC5.0 driver is failing but if we modify the driver as per EMCC5.0 sequencing it is passing. So can you please provide
-> your inputs?
 
-Hi Nehal Shah
-
-There was another specification between those two, namely JESD84-B50.1 eMMC 5.01 which has the same procedure as eMMC 5.1
-
-AFAICT the 5.0 text was almost immediately "clarified" in 5.01 to match the 5.1 text.
-
-So we have only 1 HS400 sequence.  But some host controllers do have issues, which is why there are additional hooks like ->hs400_downgrade() and ->hs400_prepare_ddr()
-
-Regards
-Adrian
-
+Reviewed-by: Rob Herring <robh@kernel.org>
