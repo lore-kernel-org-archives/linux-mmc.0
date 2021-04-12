@@ -7,141 +7,216 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7ACF9C433B4
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:52:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA1DAC43470
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:52:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5639A61358
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:52:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 983AD61369
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:52:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237150AbhDLHw4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Apr 2021 03:52:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51852 "EHLO
+        id S237151AbhDLHxC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Apr 2021 03:53:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51874 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237148AbhDLHwz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Apr 2021 03:52:55 -0400
-Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F17A6C06138D
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:52:37 -0700 (PDT)
-Received: by mail-vs1-xe2a.google.com with SMTP id l8so6168570vsj.13
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:52:37 -0700 (PDT)
+        with ESMTP id S237158AbhDLHxA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Apr 2021 03:53:00 -0400
+Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3032C06138D
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:52:42 -0700 (PDT)
+Received: by mail-vs1-xe32.google.com with SMTP id x14so1473808vsc.5
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:52:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=UryxrO6clAQ+gSWPF8aTxV/VWh5eKXZIooN3CCW0R4g=;
-        b=TuDxfi1mXRUdhJSc3QJpNmZ8vGtbRzg8k2p2+0RRPD1K5s7IhlkIIPMOtxtyuAsU7v
-         8cR4i98UmepF5NZmKf0d5X1zzczYr2hrXxmZEN7PgkZ5r6+IM+rRLdkNTJFrCfLA0y/x
-         COhUHWky1wfHQJJnnSoVq+1he/7ZvJRcKrSdBuf6uLUvZAqqOIOe0FvFRvY9Unj5Ty51
-         LSLH2DBMMk/hzPSCgv0ZkmtQY0wnCaok0XPYsAsq+RlxxLVWplIBxyxw2FzYWKoZ5dr8
-         ynZ+bforMuTdLnwIbdxZOxMPf2GKeFsl2kwl3iqg4dXrjFYRbE/xGNA+QXwF6OkI3EMH
-         YxkA==
+         :cc;
+        bh=v5tAIOEut2G3054EIg7bCkBctd6yDH8+rLtfOUTR48o=;
+        b=cduuulxv3IgOu/JFsYqCWwmrm4ce7vjhwSGEoKc4uIlkMddY+8BkXOeKKSpaSU47vf
+         2O83a1wjyYwcssEZ/JMduP3zZy2mANCZWRr3RxBn70eJo//NFRB2CxWWlRJqjOXotiyU
+         cYRW+Pe+yDEYMiAqA1HOHRO4Ta+JkT1D63LFBMoR/RnUtFqZBwynWPv84NO4nbgCQIyh
+         tm2XnzbnkxtTAqh8vGdwvwRI3kwl1fHatXFJR+qG+lti91uwj+T042w5Hr22N2H9RuCl
+         berBPZUNKVsulEF7gof4UBGQvj3Yc6JvFUQF4XpclNCZcXxGiSGGWTNWjuMK+XiHBuXw
+         EoXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=UryxrO6clAQ+gSWPF8aTxV/VWh5eKXZIooN3CCW0R4g=;
-        b=d5PFAt3wwqovhYAMmcBobUXA6DsXPwP2KCD4YXfQPIG65L+AbrlvB2jucLZEQl2fg3
-         xYa5F7GqvhjsLFCsPEfKke+6/2B1ZVLguEF7wazRML87eESgIZWpvAuzaf7zpEyiXQYy
-         cAMAc21CHEBRnJY16+FFi6uc31sshY13tYRRURqaBexnlxOaCT+QGV1g2AW4wA8JIwV7
-         bHoV1orxI0s53Gam5lou4P9cImiTqZ2Rs6EYqNtMY/d82AfXOctfev6lVytN3nOJHMYJ
-         viYSucBiSbvmCzeezjz4eHgX0Gj4+faA1CCTKA7Je2TKhxFCMaKFNaKdl7drAuBRfYPz
-         Fuqg==
-X-Gm-Message-State: AOAM5323YO+PwxNEnzH2+6RBZu6Pmfb+3sWAIE3tdqARfM6ru1oEGP8U
-        RHrAXVREh3zEbMqxWfRjs16D1Cf7LeyP7pXb5GoPzw==
-X-Google-Smtp-Source: ABdhPJzWl7Po07WGGfuJIiEPv1l3UTq9CYPhDiXD0mbXnG84E2RBmxoc8zaKS/4Vy8JG/5vNIvERv/uPJgB2vIgM8IE=
-X-Received: by 2002:a67:fd48:: with SMTP id g8mr11938720vsr.55.1618213957148;
- Mon, 12 Apr 2021 00:52:37 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=v5tAIOEut2G3054EIg7bCkBctd6yDH8+rLtfOUTR48o=;
+        b=m6k4LfdDwh6RP9lVphONnegogUfKd7OGDiwcSpai/vT6GUDIYMTPp6T0sA5kvKT4nf
+         oBnpTRn/yITNOmww0qQ7AKLnn6XdcgpAL0whg9jaVY2wmyrfKJe8MWTTN6YOce0jUTdv
+         ll+pPNJiX3QRKNhIZ/Zsgrlq4DPp4yh9klIUU6WFZk23zwvIarWrpWESHdOecfsLT+qU
+         5B8oLb6oQvM3Q3R8CxFU6OeG9WEY8ya2P3mAz741gwrspBZkLTWl60CiTi0IPdSCy5SM
+         uqumAxT8hPftzAtKS9zllimLPtM1jxiKvLrIg25I7CJMv/UP53go8lkUC9zuPcXv5HuS
+         s0iw==
+X-Gm-Message-State: AOAM5320pgOeF0RlZwUI3voUwLBEKl0hPBohIivpIwfP2IhJKpw5KLe0
+        fIkLn5VJzteTE6q9WuS3BRod/RRni7tsL20f9Jh1DA==
+X-Google-Smtp-Source: ABdhPJzXQko4Oa+rMCddcEjm7TcxUwBYD8Kc0TwBwRCdXEiz6L/2LDfgzl6WaOH9+tda91Ys1YWRlU/NO9d4qZtoooM=
+X-Received: by 2002:a05:6102:21d1:: with SMTP id r17mr18456961vsg.19.1618213961994;
+ Mon, 12 Apr 2021 00:52:41 -0700 (PDT)
 MIME-Version: 1.0
-References: <1617357231-93064-1-git-send-email-yang.lee@linux.alibaba.com>
-In-Reply-To: <1617357231-93064-1-git-send-email-yang.lee@linux.alibaba.com>
+References: <20210406104802.20898-1-nsaenz@kernel.org> <20210406104802.20898-2-nsaenz@kernel.org>
+In-Reply-To: <20210406104802.20898-2-nsaenz@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 12 Apr 2021 09:52:00 +0200
-Message-ID: <CAPDyKFrptDsdyUoJaSz9F1iYgW_02Kj6ay5X+oFCmJp2Hg=RWQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: moxart: Remove unused variable 'dma_time' and 'pio_time'
-To:     Yang Li <yang.lee@linux.alibaba.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Mon, 12 Apr 2021 09:52:04 +0200
+Message-ID: <CAPDyKFrBSVooaNNiVgr12o9OLZ_3_0OExKBoW+QyLXftzR+8cw@mail.gmail.com>
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: iproc-sdhci: Convert to json-schema
+To:     Nicolas Saenz Julienne <nsaenz@kernel.org>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        "moderated list:BROADCOM BCM2835..." 
+        <linux-rpi-kernel@lists.infradead.org>,
+        Ray Jui <ray.jui@broadcom.com>,
+        Scott Branden <scott.branden@broadcom.com>,
+        Stefan Wahren <wahrenst@gmx.net>,
+        Matthias Brugger <mbrugger@suse.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Florian Fainelli <f.fainelli@gmail.com>, phil@raspberrypi.com,
+        tim.gover@raspberrypi.com, Adrian Hunter <adrian.hunter@intel.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Nicolas Saenz Julienne <nsaenzjulienne@suse.de>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Rob Herring <robh@kernel.org>,
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        Rob Herring <robh+dt@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2 Apr 2021 at 11:53, Yang Li <yang.lee@linux.alibaba.com> wrote:
+On Tue, 6 Apr 2021 at 12:48, Nicolas Saenz Julienne <nsaenz@kernel.org> wrote:
 >
-> Fixes the following W=3D1 kernel build warning(s):
+> Convert the brcm,iproc-sdhci binding to DT schema format using json-schema
 >
-> drivers/mmc/host/moxart-mmc.c:257:7: warning: variable =E2=80=98dma_time=
-=E2=80=99 set
-> but not used
-> drivers/mmc/host/moxart-mmc.c:395:7: warning: variable =E2=80=98pio_time=
-=E2=80=99 set
-> but not used
->
-> Reported-by: Abaci Robot <abaci@linux.alibaba.com>
-> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
 
-Applied for next, thanks!
+Applied for next, thanks! (I guess patch2 and patch3 needs a re-spin?)
 
 Kind regards
 Uffe
 
 
+>
 > ---
->  drivers/mmc/host/moxart-mmc.c | 10 ++++------
->  1 file changed, 4 insertions(+), 6 deletions(-)
 >
-> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.=
-c
-> index 89bff4e..bde2988 100644
-> --- a/drivers/mmc/host/moxart-mmc.c
-> +++ b/drivers/mmc/host/moxart-mmc.c
-> @@ -257,7 +257,6 @@ static void moxart_dma_complete(void *param)
->  static void moxart_transfer_dma(struct mmc_data *data, struct moxart_hos=
-t *host)
->  {
->         u32 len, dir_slave;
-> -       long dma_time;
->         struct dma_async_tx_descriptor *desc =3D NULL;
->         struct dma_chan *dma_chan;
+>  .../bindings/mmc/brcm,iproc-sdhci.yaml        | 63 +++++++++++++++++++
+>  .../bindings/mmc/brcm,sdhci-iproc.txt         | 37 -----------
+>  2 files changed, 63 insertions(+), 37 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
 >
-> @@ -294,8 +293,8 @@ static void moxart_transfer_dma(struct mmc_data *data=
-, struct moxart_host *host)
->
->         data->bytes_xfered +=3D host->data_remain;
->
-> -       dma_time =3D wait_for_completion_interruptible_timeout(
-> -                  &host->dma_complete, host->timeout);
-> +       wait_for_completion_interruptible_timeout(&host->dma_complete,
-> +                                                 host->timeout);
->
->         dma_unmap_sg(dma_chan->device->dev,
->                      data->sg, data->sg_len,
-> @@ -395,7 +394,6 @@ static void moxart_prepare_data(struct moxart_host *h=
-ost)
->  static void moxart_request(struct mmc_host *mmc, struct mmc_request *mrq=
-)
->  {
->         struct moxart_host *host =3D mmc_priv(mmc);
-> -       long pio_time;
->         unsigned long flags;
->         u32 status;
->
-> @@ -431,8 +429,8 @@ static void moxart_request(struct mmc_host *mmc, stru=
-ct mmc_request *mrq)
->                         spin_unlock_irqrestore(&host->lock, flags);
->
->                         /* PIO transfers start from interrupt. */
-> -                       pio_time =3D wait_for_completion_interruptible_ti=
-meout(
-> -                                  &host->pio_complete, host->timeout);
-> +                       wait_for_completion_interruptible_timeout(&host->=
-pio_complete,
-> +                                                                 host->t=
-imeout);
->
->                         spin_lock_irqsave(&host->lock, flags);
->                 }
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+> new file mode 100644
+> index 000000000000..6f569fbfa134
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
+> @@ -0,0 +1,63 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/brcm,iproc-sdhci.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Broadcom IPROC SDHCI controller
+> +
+> +maintainers:
+> +  - Ray Jui <ray.jui@broadcom.com>
+> +  - Scott Branden <scott.branden@broadcom.com>
+> +  - Nicolas Saenz Julienne <nsaenz@kernel.org>
+> +
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - brcm,bcm2835-sdhci
+> +      - brcm,bcm2711-emmc2
+> +      - brcm,sdhci-iproc-cygnus
+> +      - brcm,sdhci-iproc
+> +
+> +  reg:
+> +    minItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 1
+> +    description:
+> +      Handle to core clock for the sdhci controller.
+> +
+> +  sdhci,auto-cmd12:
+> +    type: boolean
+> +    description: Specifies that controller should use auto CMD12
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    #include <dt-bindings/clock/bcm-cygnus.h>
+> +
+> +    mmc@18041000 {
+> +      compatible = "brcm,sdhci-iproc-cygnus";
+> +      reg = <0x18041000 0x100>;
+> +      interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_HIGH>;
+> +      clocks = <&lcpll0_clks BCM_CYGNUS_LCPLL0_SDIO_CLK>;
+> +      bus-width = <4>;
+> +      sdhci,auto-cmd12;
+> +      no-1-8-v;
+> +    };
+> +...
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt b/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> deleted file mode 100644
+> index 09d87cc1182a..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
+> +++ /dev/null
+> @@ -1,37 +0,0 @@
+> -Broadcom IPROC SDHCI controller
+> -
+> -This file documents differences between the core properties described
+> -by mmc.txt and the properties that represent the IPROC SDHCI controller.
+> -
+> -Required properties:
+> -- compatible : Should be one of the following
+> -              "brcm,bcm2835-sdhci"
+> -              "brcm,bcm2711-emmc2"
+> -              "brcm,sdhci-iproc-cygnus"
+> -              "brcm,sdhci-iproc"
+> -
+> -Use brcm2835-sdhci for the eMMC controller on the BCM2835 (Raspberry Pi) and
+> -bcm2711-emmc2 for the additional eMMC2 controller on BCM2711.
+> -
+> -Use sdhci-iproc-cygnus for Broadcom SDHCI Controllers
+> -restricted to 32bit host accesses to SDHCI registers.
+> -
+> -Use sdhci-iproc for Broadcom SDHCI Controllers that allow standard
+> -8, 16, 32-bit host access to SDHCI register.
+> -
+> -- clocks : The clock feeding the SDHCI controller.
+> -
+> -Optional properties:
+> -  - sdhci,auto-cmd12: specifies that controller should use auto CMD12.
+> -
+> -Example:
+> -
+> -sdhci0: sdhci@18041000 {
+> -       compatible = "brcm,sdhci-iproc-cygnus";
+> -       reg = <0x18041000 0x100>;
+> -       interrupts = <GIC_SPI 108 IRQ_TYPE_LEVEL_HIGH>;
+> -       clocks = <&lcpll0_clks BCM_CYGNUS_LCPLL0_SDIO_CLK>;
+> -       bus-width = <4>;
+> -       sdhci,auto-cmd12;
+> -       no-1-8-v;
+> -};
 > --
-> 1.8.3.1
+> 2.30.2
 >
