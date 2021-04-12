@@ -4,184 +4,166 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7DB6C433B4
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:39:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7DBEC433B4
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:44:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A8FA61221
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:39:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 79368600CD
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Apr 2021 07:44:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236892AbhDLHjg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Apr 2021 03:39:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48868 "EHLO
+        id S236905AbhDLHpM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Apr 2021 03:45:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236866AbhDLHjf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Apr 2021 03:39:35 -0400
-Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A89F6C06138D
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:39:17 -0700 (PDT)
-Received: by mail-vs1-xe2e.google.com with SMTP id l8so6152051vsj.13
-        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:39:17 -0700 (PDT)
+        with ESMTP id S230034AbhDLHpL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Apr 2021 03:45:11 -0400
+Received: from mail-vs1-xe2f.google.com (mail-vs1-xe2f.google.com [IPv6:2607:f8b0:4864:20::e2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 372B0C061574
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:44:54 -0700 (PDT)
+Received: by mail-vs1-xe2f.google.com with SMTP id k124so6187062vsk.3
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Apr 2021 00:44:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=+ExoxKCgaqdCsDepfvxx4zot0Xxz7DmLhOne1aZN2lc=;
-        b=uQWrxcfVq6tfFk45Dsu1M+8DO7/Y3gkFEqjkH08QcNmmKLD8MMRYdhz1uYrJfFXUR8
-         Ag7+QypWcgC7ioD1+aBvgrup18mKd563yDSy5jIK7AZEwztzNDB7RlHt+virdnOASLe4
-         zVXEBJxMmOwQfyhEhHuJQOmWK98iYJmSOV0kKNATYMEili8QMEamRMMEYXKTF5quQc2f
-         kZOpdTyUEmV0sOAI+Ff7bKlti9lucQgPmGGVnBJi6bNubf0CnO7FF4ruawkLQIIXp6AZ
-         MDjy24sd1F4eS+GzFpPuYxUCJqYNaC975P/rB38ekIY7Qy1WVBo/z8lVjIuvlywVPLgV
-         Pu/w==
+        bh=Rux4LnTGd+o0ZDkm2rK5JaA4uc/5P3BY5Hh01flfgVc=;
+        b=XN7GE3HPB/zIHqp9TleM31A6+vpyl/Dg/vnZN6HK2s+9PkKLajabN2lpRqdsOBJXsz
+         QaR0mofVP0quxYWicwDOSCuESVHgMoOfxAiDiFaKe5FqFMADNv4pCrmsp4XJmetNOmj6
+         1L+VboBeRrm6W4gJWarEfmu79SWrXFaRjhL3tWXwhb+HGLQ20UqwAuw5p9Qoh94Obs42
+         obZKjde53LJDy2unGq/WGI+CniTW9lrTDO46MLQj/yZ6WWDFs21c4U61RDyph2d0TaOt
+         At+JXTc68JZfmYSxlNHn6U1l3pjjLIgvvv1kS7G2iOF5iaYem5h2ZFm/FOFB2jzsq6Fx
+         N9GA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=+ExoxKCgaqdCsDepfvxx4zot0Xxz7DmLhOne1aZN2lc=;
-        b=Rc5DqhlRTE12QMSZYbB5MZ91ERE/C443jmBzDTr556jBOShiRuz4hUsmDUA9rV6GaK
-         pqU1Rw+xmLwyfXXg7K/QjqyAsUJhvBVWrbmXVTMsmigQ9rCZTcT6MagQJVopS3lGibDf
-         epj9vYUzzH54GtXclBxB2SHIYq8r8/MSudh/GJCp7Mj8YTMpWckAdNsAQLAvddXjJocO
-         3cq+ZHpF/qTKISLpktChbw/BhUhdMpLbM7j8KkRtxbZ5mTRl1bokF2XPObP3J4DPMrlD
-         bbb5zQWiqzbYGGkTgzbJGnDbsQB2J9stpk7KfOJtZpo/zReAQV3KnIwA8PRRrsKjvYDy
-         S1mg==
-X-Gm-Message-State: AOAM530DY9RvT1kcx7Fu0kOttp1krXMzLMSgE/mRrdpK/8YS8oarPBzP
-        Q/5qH+kmnEQuE/uFOGK8P6WBawn/cpDtIa7OWu91UIx9MJ8xGA==
-X-Google-Smtp-Source: ABdhPJy3atKJOCw7R/9czTlSfDsNIyt3sFse/HJpxmIRKKl4EAag4GD6AjYNfHVS688ENiFwU5SbPJxcoVpMTnEjNso=
-X-Received: by 2002:a67:fe05:: with SMTP id l5mr18228581vsr.34.1618213156719;
- Mon, 12 Apr 2021 00:39:16 -0700 (PDT)
+        bh=Rux4LnTGd+o0ZDkm2rK5JaA4uc/5P3BY5Hh01flfgVc=;
+        b=LiRu1vdRpapWYOiN4nsSpxhyQVs9LButvIOPSU73gh5YNRC3+FdcgXtYBDvOqrdWCy
+         IQvEsRZnw/IYXE+jBrBPa4lS/b8nztY1IWbr2siP2X5RqFZJIaJS882R5aQs9+eVPMTD
+         JoypHIEZqgMqdTpjfJvLYe5QfWupIEqCKgXi2ny6f0wiGWC/GhQ7tcN07wtXz24Sopxj
+         6cpfl/TT5AQ3yLdMmoRfVNucIyT/9OQKtDAmzsVJtHriBfKZ/YPWmaXDbORBETdHK6xC
+         hkdDXsUsKWaU3Kla/Nysa5atu+wnoJjgncLmE+nIrdqOutC3zLP+lZh+s237jHqKP3Fn
+         ZSUA==
+X-Gm-Message-State: AOAM531c+8eP5MdhEh7AqfOfxnVlwD3lQbGGvnuMikUb2qptozSSABXm
+        /akxQCdiCV+iaO8ZZse6hdZUFS9pa7YUIxG+BnN0bg==
+X-Google-Smtp-Source: ABdhPJz0HNH8WN3/vlJYhiWeOmnVuF1SVVIi/Mn4Q0PBGv4sP7ZUhhvE4Vz3Vm656OYqrfJ858yqMvbog0eLDFBwt9g=
+X-Received: by 2002:a67:6942:: with SMTP id e63mr19255741vsc.48.1618213493418;
+ Mon, 12 Apr 2021 00:44:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210408015218.20560-1-steven_lee@aspeedtech.com> <20210408015218.20560-2-steven_lee@aspeedtech.com>
-In-Reply-To: <20210408015218.20560-2-steven_lee@aspeedtech.com>
+References: <20210408175951.22450-1-scott.branden@broadcom.com>
+In-Reply-To: <20210408175951.22450-1-scott.branden@broadcom.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 12 Apr 2021 09:38:40 +0200
-Message-ID: <CAPDyKFr=Gtwu4v22FBaax5EjRbXTNez1N2ZQxP=v0LKGFTCovw@mail.gmail.com>
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: sdhci-of-aspeed: Add power-gpio
- and power-switch-gpio
-To:     Steven Lee <steven_lee@aspeedtech.com>
-Cc:     Andrew Jeffery <andrew@aj.id.au>, Rob Herring <robh+dt@kernel.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ryan Chen <ryanchen.aspeed@gmail.com>,
-        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
-        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
-        "open list:ASPEED SD/MMC DRIVER" <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-arm-kernel@lists.infradead.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        ryan_chen@aspeedtech.com, chin-ting_kuo@aspeedtech.com
+Date:   Mon, 12 Apr 2021 09:44:17 +0200
+Message-ID: <CAPDyKFrBMGjCFCwgaJ1D5f+VJSenp369MDP7KS_PY9JaPYA0Hg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: add quirk to disable eMMC cache for Micron eMMC v5.0 cards
+To:     Scott Branden <scott.branden@broadcom.com>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
+        "Luca Porzio (lporzio)" <lporzio@micron.com>
+Cc:     BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 8 Apr 2021 at 03:52, Steven Lee <steven_lee@aspeedtech.com> wrote:
->
-> AST2600-A2 EVB provides the reference design for enabling SD bus power
-> and toggling SD bus signal voltage by GPIO pins.
-> Add the definition and example for power-gpio and power-switch-gpio
-> properties.
->
-> In the reference design, GPIOV0 of AST2600-A2 EVB is connected to power
-> load switch that providing 3.3v to SD1 bus vdd. GPIOV1 is connected to
-> a 1.8v and a 3.3v power load switch that providing signal voltage to
-> SD1 bus.
-> If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
-> disabled.
-> If GPIOV1 is active high, 3.3v power load switch is enabled, SD1 signal
-> voltage is 3.3v. Otherwise, 1.8v power load switch will be enabled, SD1
-> signal voltage becomes 1.8v.
->
-> AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
-> The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and GPIOV3
-> as power-switch-gpio.
++ Bean Huo, Luca Porzio
 
-Thanks for sharing the details, it certainly helps while reviewing.
+On Thu, 8 Apr 2021 at 19:59, Scott Branden <scott.branden@broadcom.com> wrote:
+>
+> From: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+>
+> In certain rare combination of operations, Micron eMMC v5.0 cards
+> may experience data errors if internal cache is enabled.
+> This may lead to eMMC related data errors.
+> Introduce a quirk to disable cache on these eMMC cards.
+
+Can you please elaborate on this, what combinations of operations are
+you referring to - and what kind of data errors?
+
+I have also looped in some of the Micron guys, to let them chim in.
 
 >
-> Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
-> ---
->  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 25 +++++++++++++++++++
->  1 file changed, 25 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> index 987b287f3bff..515a74614f3c 100644
-> --- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> @@ -37,6 +37,14 @@ properties:
->    clocks:
->      maxItems: 1
->      description: The SD/SDIO controller clock gate
-> +  power-gpio:
-> +    description:
-> +      The GPIO for enabling/disabling SD bus power.
-> +    maxItems: 1
-> +  power-switch-gpio:
-> +    description:
-> +      The GPIO for toggling the signal voltage between 3.3v and 1.8v.
-> +    maxItems: 1
-
-
->
->  patternProperties:
->    "^sdhci@[0-9a-f]+$":
-> @@ -61,6 +69,14 @@ patternProperties:
->        sdhci,auto-cmd12:
->          type: boolean
->          description: Specifies that controller should use auto CMD12
-> +      power-gpio:
-> +        description:
-> +          The GPIO for enabling/disabling SD bus power.
-> +        maxItems: 1
-> +      power-switch-gpio:
-> +        description:
-> +          The GPIO for toggling the signal voltage between 3.3v and 1.8v.
-> +        maxItems: 1
->      required:
-
-Please do not model these as GPIO pins like this. Instead, it's better
-to model them as gpio regulators, since the mmc core manages them as
-regulators.
-
-We have a vmmc regulator (corresponding to vdd) and a vqmmc regulator
-(corresponding the signal-voltage level). These are also described in
-the common mmc DT bindings, see
-Documentation/devicetree/bindings/mmc/mmc-controller.yaml.
-
->        - compatible
->        - reg
-> @@ -80,6 +96,7 @@ required:
->  examples:
->    - |
->      #include <dt-bindings/clock/aspeed-clock.h>
-> +    #include <dt-bindings/gpio/aspeed-gpio.h>
->      sdc@1e740000 {
->              compatible = "aspeed,ast2500-sd-controller";
->              reg = <0x1e740000 0x100>;
-> @@ -94,6 +111,10 @@ examples:
->                      interrupts = <26>;
->                      sdhci,auto-cmd12;
->                      clocks = <&syscon ASPEED_CLK_SDIO>;
-> +                    power-gpio = <&gpio0 ASPEED_GPIO(V, 0)
-> +                                     GPIO_ACTIVE_HIGH>;
-> +                    power-switch-gpio = <&gpio0 ASPEED_GPIO(V, 1)
-> +                                     GPIO_ACTIVE_HIGH>;
->              };
->
->              sdhci1: sdhci@200 {
-> @@ -102,5 +123,9 @@ examples:
->                      interrupts = <26>;
->                      sdhci,auto-cmd12;
->                      clocks = <&syscon ASPEED_CLK_SDIO>;
-> +                    power-gpio = <&gpio0 ASPEED_GPIO(V, 2)
-> +                                     GPIO_ACTIVE_HIGH>;
-> +                    power-switch-gpio = <&gpio0 ASPEED_GPIO(V, 3)
-> +                                     GPIO_ACTIVE_HIGH>;
->              };
->      };
+> Signed-off-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
 
 Kind regards
 Uffe
+
+> ---
+>  drivers/mmc/core/card.h   | 5 +++++
+>  drivers/mmc/core/mmc.c    | 4 ++--
+>  drivers/mmc/core/quirks.h | 8 ++++++++
+>  include/linux/mmc/card.h  | 1 +
+>  4 files changed, 16 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index 7bd392d55cfa..22cea63ac359 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -222,4 +222,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+>         return c->quirks & MMC_QUIRK_BROKEN_HPI;
+>  }
+>
+> +static inline int mmc_card_broken_cache(const struct mmc_card *c)
+> +{
+> +       return c->quirks & MMC_QUIRK_BROKEN_CACHE;
+> +}
+> +
+>  #endif
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 8741271d3971..cd83b7f0e59c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1820,12 +1820,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>          * sudden power failure tests. Let's extend the timeout to a minimum of
+>          * DEFAULT_CACHE_EN_TIMEOUT_MS and do it for all cards.
+>          */
+> -       if (card->ext_csd.cache_size > 0) {
+> +       if (!mmc_card_broken_cache(card) && card->ext_csd.cache_size > 0) {
+>                 unsigned int timeout_ms = MIN_CACHE_EN_TIMEOUT_MS;
+>
+>                 timeout_ms = max(card->ext_csd.generic_cmd6_time, timeout_ms);
+>                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+> -                               EXT_CSD_CACHE_CTRL, 1, timeout_ms);
+> +                                EXT_CSD_CACHE_CTRL, 1, timeout_ms);
+>                 if (err && err != -EBADMSG)
+>                         goto free_card;
+>
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index d68e6e513a4f..23972d87c82a 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -116,6 +116,14 @@ static const struct mmc_fixup __maybe_unused mmc_ext_csd_fixups[] = {
+>         MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_NUMONYX,
+>                               0x014e, add_quirk, MMC_QUIRK_BROKEN_HPI, 6),
+>
+> +       /*
+> +        * In certain rare combination of operations, Micron eMMC v5.0 cards
+> +        * may experience data errors if internal cache is enabled.
+> +        * Disabling cache for these cards eliminates the issue.
+> +        */
+> +       MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_MICRON,
+> +                             0x014e, add_quirk, MMC_QUIRK_BROKEN_CACHE, 7),
+> +
+>         END_FIXUP
+>  };
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index f9ad35dd6012..22f256a4e54e 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -270,6 +270,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
+>  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
+> +#define MMC_QUIRK_BROKEN_CACHE (1<<14)         /* Disable broken cache */
+>
+>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+>
+> --
+> 2.17.1
+>
