@@ -8,185 +8,187 @@ X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45059C433ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:44:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99CEBC433B4
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:46:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 031A661221
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:44:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74B5A6128C
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:46:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232221AbhDMPo6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Apr 2021 11:44:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47842 "EHLO
+        id S237624AbhDMPqi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Apr 2021 11:46:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232184AbhDMPo6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2021 11:44:58 -0400
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7030EC061574
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:44:36 -0700 (PDT)
-Received: by mail-pf1-x42e.google.com with SMTP id p67so6730385pfp.10
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:44:36 -0700 (PDT)
+        with ESMTP id S237575AbhDMPqh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2021 11:46:37 -0400
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC3DEC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:46:17 -0700 (PDT)
+Received: by mail-pg1-x533.google.com with SMTP id q10so12222380pgj.2
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:46:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=broadcom.com; s=google;
-        h=subject:to:cc:references:from:message-id:date:user-agent
+        h=subject:from:to:cc:references:message-id:date:user-agent
          :mime-version:in-reply-to;
-        bh=6QXKqh4iAknKzHknyKmDgPNAk4ykgSh5I8O8twOY8Fs=;
-        b=CVU8bnrZ5wc44WdnmmXVPvUZGrbnRxM+yux6/m2WfgT+s8QaAkvYSIpjmVzIym7nOL
-         03tvzezVjkMvO24uNX75x9Q0Ns1HAl3eGqbTGx4842okIp2mD1Xt6qlJbIyKdKWP7RzZ
-         9NOKelHAn9yeHF1eqES81+zJpoKughXJSdVRY=
+        bh=+epr+Md7e+4ldnLXtrOsqpImiIy0tcAwu9c9G5nl71Q=;
+        b=FhNzs2ybhyu8wPNhs/IYduNdFxJDZM1Q8toPquWS/qwmq8pK3axGBA6Prc1qB1n8Oz
+         enrrR/TjJIJJpkxYTahzrIzAo5GOeL9jYyf977uVieGy1uc5aKUgvxSZ+ZVSHLoDKQqS
+         maogoUWR78gLpXTpWVhPP71gjrQmpanisgaFk=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+        h=x-gm-message-state:subject:from:to:cc:references:message-id:date
          :user-agent:mime-version:in-reply-to;
-        bh=6QXKqh4iAknKzHknyKmDgPNAk4ykgSh5I8O8twOY8Fs=;
-        b=HuIbt6WPQc6eEU9mE2WM+12gSqEqSEoNVAwqs3QS7G5ZyI1xurlBnTfYBJIXpj46gW
-         8q3alS4Q4rfH62guHZlJpkHjcBII3Ne0HImpc679VHr31WlDn526PBWGPttdJ5xXfgFr
-         PU5KooaPcdzkp07pVnrpZz7KV4WTQHOG+EcmwpE92A3KzvCyOcx0TXytitvUdugxhB+Q
-         RyTTTlnldbsNx7iyuK5zmEHVHry2fiJ2TwlEu76+OSVdI1JMawqdQcB0R+VFxDJNVhnn
-         2ivzB84ntx94XGYz0cDOjSsI3/l8KgEEM+tsZbNK+o/0CP1lBEfTiwP9fdAoz8GO2wHE
-         W60Q==
-X-Gm-Message-State: AOAM5304QMopI0tB4ZsSTYewdCgaAK94jo7CKPgD3nWVc6nLxaQeXpig
-        lw5atHGxYVBblqE1RnMQe/vpBA==
-X-Google-Smtp-Source: ABdhPJyvCft98/r91xeCIRrdIaJeN+oMeCuIxDyV4Tphx7ApoWllzUd0eEjOgjvp47r9mg7NazpwiA==
-X-Received: by 2002:a62:77c1:0:b029:244:4080:8c7b with SMTP id s184-20020a6277c10000b029024440808c7bmr25247867pfc.69.1618328675697;
-        Tue, 13 Apr 2021 08:44:35 -0700 (PDT)
+        bh=+epr+Md7e+4ldnLXtrOsqpImiIy0tcAwu9c9G5nl71Q=;
+        b=dcAhgeLXhiTj8QXZl/0LbVCKy1x3wEOH6zlLmlwUssn3tq15Oj/lvC0wHT5KWqM50k
+         tx8/dPlu0bERBgBTn+wBH1vFHVKr58quuT8nG4nr8rfSaDx8GsSIFW0D+niGtYbQLPKy
+         +X+ehMjZiOcJh78ebEkqtnRhi3a8fWFxoVmruXqMrElZfvp6UpwNeIW9n1+zmVyCsNm0
+         Rpyrt3g3XagHUKHT/NJcJ5Q+o/SQrAU4j+1ohDAIbQnEqLfON7bj1qQ9ShfxLshfDz1A
+         DFvES0aTfsdrpQOphXzmt5ikY7pOXgJTFpeim+g/CPNbs/ASltaZyp9OKAaAaHfrzRsQ
+         KqRA==
+X-Gm-Message-State: AOAM531qh1IPBLHmg8unYOX0gMzhAnt7CdRsyem/4Fn8SlibNr7wME5C
+        3oSph6fEjsb9MQWuzaTyK9kDzw==
+X-Google-Smtp-Source: ABdhPJxiHjXNvTKsnCQeq4c9psrd9T56j7RbpcvssiLA/o++FZoK83eEMGRyT4AJNhvFB0J4PHGuiQ==
+X-Received: by 2002:a63:510f:: with SMTP id f15mr32776528pgb.390.1618328777295;
+        Tue, 13 Apr 2021 08:46:17 -0700 (PDT)
 Received: from lbrmn-lnxub113.ric.broadcom.net ([192.19.228.250])
-        by smtp.gmail.com with ESMTPSA id u18sm12874349pfm.4.2021.04.13.08.44.31
+        by smtp.gmail.com with ESMTPSA id k20sm12549212pfa.34.2021.04.13.08.46.12
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 13 Apr 2021 08:44:35 -0700 (PDT)
+        Tue, 13 Apr 2021 08:46:16 -0700 (PDT)
 Subject: Re: [PATCH] mmc: add quirk to disable eMMC cache for Micron eMMC v5.0
  cards
+From:   Scott Branden <scott.branden@broadcom.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        "Luca Porzio (lporzio)" <lporzio@micron.com>, tedirks@micron.com
+        "Luca Porzio (lporzio)" <lporzio@micron.com>, tedirkes@micron.com
 Cc:     BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
 References: <20210408175951.22450-1-scott.branden@broadcom.com>
  <CAPDyKFrBMGjCFCwgaJ1D5f+VJSenp369MDP7KS_PY9JaPYA0Hg@mail.gmail.com>
-From:   Scott Branden <scott.branden@broadcom.com>
-Message-ID: <90d986f4-bf72-64a6-62ce-cddcf6da43a9@broadcom.com>
-Date:   Tue, 13 Apr 2021 08:44:27 -0700
+ <90d986f4-bf72-64a6-62ce-cddcf6da43a9@broadcom.com>
+Message-ID: <74343d16-9894-f203-1401-8fa44d19bac7@broadcom.com>
+Date:   Tue, 13 Apr 2021 08:46:09 -0700
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFrBMGjCFCwgaJ1D5f+VJSenp369MDP7KS_PY9JaPYA0Hg@mail.gmail.com>
+In-Reply-To: <90d986f4-bf72-64a6-62ce-cddcf6da43a9@broadcom.com>
 Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="000000000000e0a8de05bfdc81f6"
+        boundary="000000000000ec7d8d05bfdc8771"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---000000000000e0a8de05bfdc81f6
+--000000000000ec7d8d05bfdc8771
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 
-+Travis Dirkes,
++Travis Dirkes (with corrected email),
+ 
+ Could you provide more details on the Micron data error.
+ 
+> On 2021-04-12 12:44 a.m., Ulf Hansson wrote:
+>> + Bean Huo, Luca Porzio
+>>
+>> On Thu, 8 Apr 2021 at 19:59, Scott Branden <scott.branden@broadcom.com> wrote:
+>>>
+>>> From: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+>>>
+>>> In certain rare combination of operations, Micron eMMC v5.0 cards
+>>> may experience data errors if internal cache is enabled.
+>>> This may lead to eMMC related data errors.
+>>> Introduce a quirk to disable cache on these eMMC cards.
+>>
+>> Can you please elaborate on this, what combinations of operations are
+>> you referring to - and what kind of data errors?
+>>
+>> I have also looped in some of the Micron guys, to let them chim in.
+>>
+>>>
+>>> Signed-off-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+>>> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+>>
+>> Kind regards
+>> Uffe
+>>
+>>> ---
+>>>  drivers/mmc/core/card.h   | 5 +++++
+>>>  drivers/mmc/core/mmc.c    | 4 ++--
+>>>  drivers/mmc/core/quirks.h | 8 ++++++++
+>>>  include/linux/mmc/card.h  | 1 +
+>>>  4 files changed, 16 insertions(+), 2 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+>>> index 7bd392d55cfa..22cea63ac359 100644
+>>> --- a/drivers/mmc/core/card.h
+>>> +++ b/drivers/mmc/core/card.h
+>>> @@ -222,4 +222,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+>>>         return c->quirks & MMC_QUIRK_BROKEN_HPI;
+>>>  }
+>>>
+>>> +static inline int mmc_card_broken_cache(const struct mmc_card *c)
+>>> +{
+>>> +       return c->quirks & MMC_QUIRK_BROKEN_CACHE;
+>>> +}
+>>> +
+>>>  #endif
+>>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>>> index 8741271d3971..cd83b7f0e59c 100644
+>>> --- a/drivers/mmc/core/mmc.c
+>>> +++ b/drivers/mmc/core/mmc.c
+>>> @@ -1820,12 +1820,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>>          * sudden power failure tests. Let's extend the timeout to a minimum of
+>>>          * DEFAULT_CACHE_EN_TIMEOUT_MS and do it for all cards.
+>>>          */
+>>> -       if (card->ext_csd.cache_size > 0) {
+>>> +       if (!mmc_card_broken_cache(card) && card->ext_csd.cache_size > 0) {
+>>>                 unsigned int timeout_ms = MIN_CACHE_EN_TIMEOUT_MS;
+>>>
+>>>                 timeout_ms = max(card->ext_csd.generic_cmd6_time, timeout_ms);
+>>>                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>>> -                               EXT_CSD_CACHE_CTRL, 1, timeout_ms);
+>>> +                                EXT_CSD_CACHE_CTRL, 1, timeout_ms);
+>>>                 if (err && err != -EBADMSG)
+>>>                         goto free_card;
+>>>
+>>> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+>>> index d68e6e513a4f..23972d87c82a 100644
+>>> --- a/drivers/mmc/core/quirks.h
+>>> +++ b/drivers/mmc/core/quirks.h
+>>> @@ -116,6 +116,14 @@ static const struct mmc_fixup __maybe_unused mmc_ext_csd_fixups[] = {
+>>>         MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_NUMONYX,
+>>>                               0x014e, add_quirk, MMC_QUIRK_BROKEN_HPI, 6),
+>>>
+>>> +       /*
+>>> +        * In certain rare combination of operations, Micron eMMC v5.0 cards
+>>> +        * may experience data errors if internal cache is enabled.
+>>> +        * Disabling cache for these cards eliminates the issue.
+>>> +        */
+>>> +       MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_MICRON,
+>>> +                             0x014e, add_quirk, MMC_QUIRK_BROKEN_CACHE, 7),
+>>> +
+>>>         END_FIXUP
+>>>  };
+>>>
+>>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>>> index f9ad35dd6012..22f256a4e54e 100644
+>>> --- a/include/linux/mmc/card.h
+>>> +++ b/include/linux/mmc/card.h
+>>> @@ -270,6 +270,7 @@ struct mmc_card {
+>>>  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>>>  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
+>>>  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
+>>> +#define MMC_QUIRK_BROKEN_CACHE (1<<14)         /* Disable broken cache */
+>>>
+>>>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+>>>
+>>> --
+>>> 2.17.1
+>>>
+> 
 
-Could you provide more details on the Micron data error.
 
-On 2021-04-12 12:44 a.m., Ulf Hansson wrote:
-> + Bean Huo, Luca Porzio
-> 
-> On Thu, 8 Apr 2021 at 19:59, Scott Branden <scott.branden@broadcom.com> wrote:
->>
->> From: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
->>
->> In certain rare combination of operations, Micron eMMC v5.0 cards
->> may experience data errors if internal cache is enabled.
->> This may lead to eMMC related data errors.
->> Introduce a quirk to disable cache on these eMMC cards.
-> 
-> Can you please elaborate on this, what combinations of operations are
-> you referring to - and what kind of data errors?
-> 
-> I have also looped in some of the Micron guys, to let them chim in.
-> 
->>
->> Signed-off-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
->> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
-> 
-> Kind regards
-> Uffe
-> 
->> ---
->>  drivers/mmc/core/card.h   | 5 +++++
->>  drivers/mmc/core/mmc.c    | 4 ++--
->>  drivers/mmc/core/quirks.h | 8 ++++++++
->>  include/linux/mmc/card.h  | 1 +
->>  4 files changed, 16 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
->> index 7bd392d55cfa..22cea63ac359 100644
->> --- a/drivers/mmc/core/card.h
->> +++ b/drivers/mmc/core/card.h
->> @@ -222,4 +222,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
->>         return c->quirks & MMC_QUIRK_BROKEN_HPI;
->>  }
->>
->> +static inline int mmc_card_broken_cache(const struct mmc_card *c)
->> +{
->> +       return c->quirks & MMC_QUIRK_BROKEN_CACHE;
->> +}
->> +
->>  #endif
->> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
->> index 8741271d3971..cd83b7f0e59c 100644
->> --- a/drivers/mmc/core/mmc.c
->> +++ b/drivers/mmc/core/mmc.c
->> @@ -1820,12 +1820,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
->>          * sudden power failure tests. Let's extend the timeout to a minimum of
->>          * DEFAULT_CACHE_EN_TIMEOUT_MS and do it for all cards.
->>          */
->> -       if (card->ext_csd.cache_size > 0) {
->> +       if (!mmc_card_broken_cache(card) && card->ext_csd.cache_size > 0) {
->>                 unsigned int timeout_ms = MIN_CACHE_EN_TIMEOUT_MS;
->>
->>                 timeout_ms = max(card->ext_csd.generic_cmd6_time, timeout_ms);
->>                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
->> -                               EXT_CSD_CACHE_CTRL, 1, timeout_ms);
->> +                                EXT_CSD_CACHE_CTRL, 1, timeout_ms);
->>                 if (err && err != -EBADMSG)
->>                         goto free_card;
->>
->> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
->> index d68e6e513a4f..23972d87c82a 100644
->> --- a/drivers/mmc/core/quirks.h
->> +++ b/drivers/mmc/core/quirks.h
->> @@ -116,6 +116,14 @@ static const struct mmc_fixup __maybe_unused mmc_ext_csd_fixups[] = {
->>         MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_NUMONYX,
->>                               0x014e, add_quirk, MMC_QUIRK_BROKEN_HPI, 6),
->>
->> +       /*
->> +        * In certain rare combination of operations, Micron eMMC v5.0 cards
->> +        * may experience data errors if internal cache is enabled.
->> +        * Disabling cache for these cards eliminates the issue.
->> +        */
->> +       MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_MICRON,
->> +                             0x014e, add_quirk, MMC_QUIRK_BROKEN_CACHE, 7),
->> +
->>         END_FIXUP
->>  };
->>
->> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->> index f9ad35dd6012..22f256a4e54e 100644
->> --- a/include/linux/mmc/card.h
->> +++ b/include/linux/mmc/card.h
->> @@ -270,6 +270,7 @@ struct mmc_card {
->>  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
->>  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
->>  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
->> +#define MMC_QUIRK_BROKEN_CACHE (1<<14)         /* Disable broken cache */
->>
->>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
->>
->> --
->> 2.17.1
->>
-
-
---000000000000e0a8de05bfdc81f6
+--000000000000ec7d8d05bfdc8771
 Content-Type: application/pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -257,13 +259,13 @@ lLX9hl3iEj5SBgkQqCbbnoE+ZjjKfqt7ED166WhgyQWNrl39yLcvLj+JRUB3RuvXKZjH0NQEEBII
 wZBDSkyneykLt3CBNIhSCTxKM6OWxVp936ALSa5K9FNy00TeWSpokR6NmzaW8VD/EjTgvqAxggJt
 MIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYD
 VQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgx9oXSJpKniO4dS
-Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIF2h0DTytCMkWXA3CrAoruFrD5nc
-BTlF1YpLTj8VyTQHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
-MDQxMzE1NDQzNlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
+Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIHLDQJPxzEURitblVMuciMYfYVF2
+LidFifR9K47RqRWSMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
+MDQxMzE1NDYxN1owaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
 CWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFl
-AwQCATANBgkqhkiG9w0BAQEFAASCAQATPCDlzrvzzeb8uxuOPG9+suv2VKMWCHBknHYtE2UZgGzQ
-jYe9w8PV9p4fxKcfcluRFR9crRYIqyt6xHpOQz4ZX0xa8tzpazo0QJdwlhsOnv41PPQGGn+BC9dh
-yyvPMb+ewryxH/3DsN3aKmKtGf+LBPy+gh3p2eHeKFPLOxdKQ2oXVo17wfJv9pFiHjdbrOKnIHx+
-Ry6NJEInuNVbg2z4pjzJGSqzWIhbbB6TZRM96ZglVkZCM1QLuU6/upvEzKPeMYgimH/W8hfRSHwa
-B+8pTKHqER4jT4dFR2GlpJKtjxQzgn+EzKoxBCTNiB2KhldFTNTURho9dcBlGXvD8IF6
---000000000000e0a8de05bfdc81f6--
+AwQCATANBgkqhkiG9w0BAQEFAASCAQA41G/V0RxS+ni4RlisoTHDc1JOy4eBJlchQyzYiaWMu7ru
+6i8Xr/RpGpGxC55Az66owcJxAnOuUC46r1bG5+Qo3e+uDYO3WGcAvle2wzUWQfcLckDm28RPD+HV
+W3i69z/zf8Pvof6epaYqIBtTn5Wz8fBabWZMrmT0xwhZqwXWgSWUfgziU4W3GbfzmoXvHKE6LwmQ
+WYb2/7YvRQkHJWCi2FDOXcaN0H9xlCM1QYl+t7pww7nKmfcUbvD4fIs4gKLJnkLHwI7/SF7o5mNq
+6J5EminHzdybdbQER8yk/pLMuvnDyr0pRdgld3KcQsIvzwYvfrHTUy2MV8sBcg/SH5et
+--000000000000ec7d8d05bfdc8771--
