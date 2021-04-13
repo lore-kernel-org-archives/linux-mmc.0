@@ -2,157 +2,268 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 764B1C43460
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:37:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45059C433ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:44:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 515E5613B3
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:37:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 031A661221
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:44:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229886AbhDMPiB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Apr 2021 11:38:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46356 "EHLO
+        id S232221AbhDMPo6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Apr 2021 11:44:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47842 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231684AbhDMPh7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2021 11:37:59 -0400
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74F8FC061756
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:37:39 -0700 (PDT)
-Received: by mail-lj1-x231.google.com with SMTP id u4so19855971ljo.6
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:37:39 -0700 (PDT)
+        with ESMTP id S232184AbhDMPo6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2021 11:44:58 -0400
+Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7030EC061574
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:44:36 -0700 (PDT)
+Received: by mail-pf1-x42e.google.com with SMTP id p67so6730385pfp.10
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:44:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=5/FrSblRNF16xo12z2HXymizhLrS+DD0LJX4Kh417pE=;
-        b=nyk6OmlI78zH/+ehzoCzVD7l2s4uZ2l/xDGYYMH4G3CTs2X16wNS4OC6u8u274LuId
-         cPvKviltOINNN6L+IwS+4T0FbvVGvtpR7wuIoJlVCwfqCkTk0m4nSlB9she3hsoddYfT
-         EYPUeMAcSrMI+OZaloGdmIzP598JLEfyMK7F8CUzdOeXVZrxJaGhdgMaOdwWkhcT8Bcs
-         0QCO2JfF4VT6fWl8YxfL01dyf0UoxfFaOPc00sqN4DuqDfz94K+rYHIQ/KyT86xAVo8H
-         tPrZrjnqW9ETMlXj9hd4A71YGA/kzguhLnN9GzWZKSZGg0w4UKntAtbvmv2lmzwq+k4K
-         JB2w==
+        d=broadcom.com; s=google;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to;
+        bh=6QXKqh4iAknKzHknyKmDgPNAk4ykgSh5I8O8twOY8Fs=;
+        b=CVU8bnrZ5wc44WdnmmXVPvUZGrbnRxM+yux6/m2WfgT+s8QaAkvYSIpjmVzIym7nOL
+         03tvzezVjkMvO24uNX75x9Q0Ns1HAl3eGqbTGx4842okIp2mD1Xt6qlJbIyKdKWP7RzZ
+         9NOKelHAn9yeHF1eqES81+zJpoKughXJSdVRY=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=5/FrSblRNF16xo12z2HXymizhLrS+DD0LJX4Kh417pE=;
-        b=SEEtuQp4vS7ZvRQ0t5Qes7GGSfV1Xe7Yb8QjyXXGwvt9tQkH3IXc1xpao/5HuaGcb2
-         HzeEnmvCONF0a5cYpCGK/qrKwTeKyS8Esgi7i1ibefUprMP3wa0ryKYZsToheSKV+NQ4
-         QNx1wZo9/oVvGS11oMG3ywJMWp+jPVMq5/K+kuF0NT4RreHXeEKh/x5iVrdCL0P6RsI7
-         MidtNfBZ7CS37XcdhOgFWYNuJkM8dJdXAxTg1yhtlN0xOPE/m85wWlBqdWtaPD4dDSu4
-         EULywLfqCxpPmfp2GAvIv6Zqc2AY7jwgpgTG70j8U64bCbs2MEjsp41v2A0TUYiOWWo4
-         fzeQ==
-X-Gm-Message-State: AOAM531Q+5N8+CIIVSinju5nZFqdu1v5UpKHrdSHGX7ZzCxqA/PdSwjL
-        38TkNVPGPjWSrtAUeJRoDaNE8N8ig9+fhA==
-X-Google-Smtp-Source: ABdhPJy5CTxHJJZ7rBDm7c1bgdcR01FgpP/HfEVuSUpsxCQM9v+AoVVEDk9jsd0deSXnO0Hvm2D0pw==
-X-Received: by 2002:a2e:a7d2:: with SMTP id x18mr4962085ljp.335.1618328257833;
-        Tue, 13 Apr 2021 08:37:37 -0700 (PDT)
-Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
-        by smtp.gmail.com with ESMTPSA id g29sm3487663lfj.267.2021.04.13.08.37.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Apr 2021 08:37:37 -0700 (PDT)
-Date:   Tue, 13 Apr 2021 17:37:36 +0200
-From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
-        <niklas.soderlund@ragnatech.se>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH v2] mmc: tmio: always restore irq register
-Message-ID: <YHW6wD1XmeYV6L5M@oden.dyn.berto.se>
-References: <20210413083137.11171-1-wsa+renesas@sang-engineering.com>
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to;
+        bh=6QXKqh4iAknKzHknyKmDgPNAk4ykgSh5I8O8twOY8Fs=;
+        b=HuIbt6WPQc6eEU9mE2WM+12gSqEqSEoNVAwqs3QS7G5ZyI1xurlBnTfYBJIXpj46gW
+         8q3alS4Q4rfH62guHZlJpkHjcBII3Ne0HImpc679VHr31WlDn526PBWGPttdJ5xXfgFr
+         PU5KooaPcdzkp07pVnrpZz7KV4WTQHOG+EcmwpE92A3KzvCyOcx0TXytitvUdugxhB+Q
+         RyTTTlnldbsNx7iyuK5zmEHVHry2fiJ2TwlEu76+OSVdI1JMawqdQcB0R+VFxDJNVhnn
+         2ivzB84ntx94XGYz0cDOjSsI3/l8KgEEM+tsZbNK+o/0CP1lBEfTiwP9fdAoz8GO2wHE
+         W60Q==
+X-Gm-Message-State: AOAM5304QMopI0tB4ZsSTYewdCgaAK94jo7CKPgD3nWVc6nLxaQeXpig
+        lw5atHGxYVBblqE1RnMQe/vpBA==
+X-Google-Smtp-Source: ABdhPJyvCft98/r91xeCIRrdIaJeN+oMeCuIxDyV4Tphx7ApoWllzUd0eEjOgjvp47r9mg7NazpwiA==
+X-Received: by 2002:a62:77c1:0:b029:244:4080:8c7b with SMTP id s184-20020a6277c10000b029024440808c7bmr25247867pfc.69.1618328675697;
+        Tue, 13 Apr 2021 08:44:35 -0700 (PDT)
+Received: from lbrmn-lnxub113.ric.broadcom.net ([192.19.228.250])
+        by smtp.gmail.com with ESMTPSA id u18sm12874349pfm.4.2021.04.13.08.44.31
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 13 Apr 2021 08:44:35 -0700 (PDT)
+Subject: Re: [PATCH] mmc: add quirk to disable eMMC cache for Micron eMMC v5.0
+ cards
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
+        "Luca Porzio (lporzio)" <lporzio@micron.com>, tedirks@micron.com
+Cc:     BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+References: <20210408175951.22450-1-scott.branden@broadcom.com>
+ <CAPDyKFrBMGjCFCwgaJ1D5f+VJSenp369MDP7KS_PY9JaPYA0Hg@mail.gmail.com>
+From:   Scott Branden <scott.branden@broadcom.com>
+Message-ID: <90d986f4-bf72-64a6-62ce-cddcf6da43a9@broadcom.com>
+Date:   Tue, 13 Apr 2021 08:44:27 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210413083137.11171-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <CAPDyKFrBMGjCFCwgaJ1D5f+VJSenp369MDP7KS_PY9JaPYA0Hg@mail.gmail.com>
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+        boundary="000000000000e0a8de05bfdc81f6"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+--000000000000e0a8de05bfdc81f6
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 
-Thanks for your work.
++Travis Dirkes,
 
-On 2021-04-13 10:31:37 +0200, Wolfram Sang wrote:
-> Currently, only SDHI on R-Car Gen2+ reinitializes the irq register
-> during reset but it should be done on all instances. We can move it from
-> the SDHI driver to the TMIO core, because we now have the
-> 'sd_irq_mask_all' variable which carries the proper value to use. That
-> also means we can remove the initialization from tmio_mmc_probe()
-> because it calls tmio_mmc_reset(), too. We only move that
-> tmio_mmc_reset() call there a little to ensure 'sd_irq_mask_all' is
-> properly set.
-> 
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Could you provide more details on the Micron data error.
 
-I like patches like this.
+On 2021-04-12 12:44 a.m., Ulf Hansson wrote:
+> + Bean Huo, Luca Porzio
+> 
+> On Thu, 8 Apr 2021 at 19:59, Scott Branden <scott.branden@broadcom.com> wrote:
+>>
+>> From: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+>>
+>> In certain rare combination of operations, Micron eMMC v5.0 cards
+>> may experience data errors if internal cache is enabled.
+>> This may lead to eMMC related data errors.
+>> Introduce a quirk to disable cache on these eMMC cards.
+> 
+> Can you please elaborate on this, what combinations of operations are
+> you referring to - and what kind of data errors?
+> 
+> I have also looped in some of the Micron guys, to let them chim in.
+> 
+>>
+>> Signed-off-by: Vladimir Olovyannikov <vladimir.olovyannikov@broadcom.com>
+>> Signed-off-by: Scott Branden <scott.branden@broadcom.com>
+> 
+> Kind regards
+> Uffe
+> 
+>> ---
+>>  drivers/mmc/core/card.h   | 5 +++++
+>>  drivers/mmc/core/mmc.c    | 4 ++--
+>>  drivers/mmc/core/quirks.h | 8 ++++++++
+>>  include/linux/mmc/card.h  | 1 +
+>>  4 files changed, 16 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+>> index 7bd392d55cfa..22cea63ac359 100644
+>> --- a/drivers/mmc/core/card.h
+>> +++ b/drivers/mmc/core/card.h
+>> @@ -222,4 +222,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+>>         return c->quirks & MMC_QUIRK_BROKEN_HPI;
+>>  }
+>>
+>> +static inline int mmc_card_broken_cache(const struct mmc_card *c)
+>> +{
+>> +       return c->quirks & MMC_QUIRK_BROKEN_CACHE;
+>> +}
+>> +
+>>  #endif
+>> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+>> index 8741271d3971..cd83b7f0e59c 100644
+>> --- a/drivers/mmc/core/mmc.c
+>> +++ b/drivers/mmc/core/mmc.c
+>> @@ -1820,12 +1820,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+>>          * sudden power failure tests. Let's extend the timeout to a minimum of
+>>          * DEFAULT_CACHE_EN_TIMEOUT_MS and do it for all cards.
+>>          */
+>> -       if (card->ext_csd.cache_size > 0) {
+>> +       if (!mmc_card_broken_cache(card) && card->ext_csd.cache_size > 0) {
+>>                 unsigned int timeout_ms = MIN_CACHE_EN_TIMEOUT_MS;
+>>
+>>                 timeout_ms = max(card->ext_csd.generic_cmd6_time, timeout_ms);
+>>                 err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>> -                               EXT_CSD_CACHE_CTRL, 1, timeout_ms);
+>> +                                EXT_CSD_CACHE_CTRL, 1, timeout_ms);
+>>                 if (err && err != -EBADMSG)
+>>                         goto free_card;
+>>
+>> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+>> index d68e6e513a4f..23972d87c82a 100644
+>> --- a/drivers/mmc/core/quirks.h
+>> +++ b/drivers/mmc/core/quirks.h
+>> @@ -116,6 +116,14 @@ static const struct mmc_fixup __maybe_unused mmc_ext_csd_fixups[] = {
+>>         MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_NUMONYX,
+>>                               0x014e, add_quirk, MMC_QUIRK_BROKEN_HPI, 6),
+>>
+>> +       /*
+>> +        * In certain rare combination of operations, Micron eMMC v5.0 cards
+>> +        * may experience data errors if internal cache is enabled.
+>> +        * Disabling cache for these cards eliminates the issue.
+>> +        */
+>> +       MMC_FIXUP_EXT_CSD_REV(CID_NAME_ANY, CID_MANFID_MICRON,
+>> +                             0x014e, add_quirk, MMC_QUIRK_BROKEN_CACHE, 7),
+>> +
+>>         END_FIXUP
+>>  };
+>>
+>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+>> index f9ad35dd6012..22f256a4e54e 100644
+>> --- a/include/linux/mmc/card.h
+>> +++ b/include/linux/mmc/card.h
+>> @@ -270,6 +270,7 @@ struct mmc_card {
+>>  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>>  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
+>>  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
+>> +#define MMC_QUIRK_BROKEN_CACHE (1<<14)         /* Disable broken cache */
+>>
+>>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+>>
+>> --
+>> 2.17.1
+>>
 
-Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
 
-> ---
-> 
-> Changes since v1:
-> 
-> * use direct register write to initialize irq register instead of
->   masking bits. Also initialize the cache variable directly.
-> 
->  drivers/mmc/host/renesas_sdhi_core.c |  2 --
->  drivers/mmc/host/tmio_mmc_core.c     | 11 ++++++-----
->  2 files changed, 6 insertions(+), 7 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index d36181b6f687..635bf31a6735 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -588,8 +588,6 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
->  		renesas_sdhi_scc_reset(host, priv);
->  	}
->  
-> -	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_ALL_RCAR2);
-> -
->  	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
->  		val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
->  		val |= CARD_OPT_EXTOP;
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index 0c474d78b186..7dfc26f48c18 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -192,6 +192,9 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
->  	if (host->reset)
->  		host->reset(host);
->  
-> +	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
-> +	host->sdcard_irq_mask = host->sdcard_irq_mask_all;
-> +
->  	tmio_mmc_set_bus_width(host, host->mmc->ios.bus_width);
->  
->  	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
-> @@ -1176,13 +1179,11 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
->  	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
->  		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
->  
-> -	_host->set_clock(_host, 0);
-> -	tmio_mmc_reset(_host);
-> -
-> -	_host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(_host, CTL_IRQ_MASK);
->  	if (!_host->sdcard_irq_mask_all)
->  		_host->sdcard_irq_mask_all = TMIO_MASK_ALL;
-> -	tmio_mmc_disable_mmc_irqs(_host, _host->sdcard_irq_mask_all);
-> +
-> +	_host->set_clock(_host, 0);
-> +	tmio_mmc_reset(_host);
->  
->  	if (_host->native_hotplug)
->  		tmio_mmc_enable_mmc_irqs(_host,
-> -- 
-> 2.30.0
-> 
+--000000000000e0a8de05bfdc81f6
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
 
--- 
-Regards,
-Niklas Söderlund
+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
+cRe0CRXA7ypOJSgxO/nOOyQoaJxT7CGg1npOeSpPjEuc3fE4xum3l0nvU85hj6MlKZu43hokdBh0
+D0nLyyhEwlR3AC/msdff/UGbM/JR9vk812RP4m/aNWZFJwIDAQABo4IB2zCCAdcwDgYDVR0PAQH/
+BAQDAgWgMIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9i
+YWxzaWduLmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUF
+BzABhjVodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAy
+MDBNBgNVHSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xv
+YmFsc2lnbi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRw
+Oi8vY3JsLmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAlBgNV
+HREEHjAcgRpzY290dC5icmFuZGVuQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAf
+BgNVHSMEGDAWgBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQUOhjEpl04Sz9dh5MI82E1
+V39lM/owDQYJKoZIhvcNAQELBQADggEBAA7Rlypx/esz/iq1yA4+KW7uwV/aBY344BWcXt6I+SNK
+VwFBgFWfLj5vaEud9TVv2fPSiaHJo0umemOJk+43QD+bsoqmgcFXd21PrOt7Jjs+jjVED9VC5kJq
+S4NNKUkS+BqijJwSegtVygrc/atrIlJbjI21q4qpemUo5fgwqCNm++BmBGTI8yA09vtGSNDRN42k
+lLX9hl3iEj5SBgkQqCbbnoE+ZjjKfqt7ED166WhgyQWNrl39yLcvLj+JRUB3RuvXKZjH0NQEEBII
+wZBDSkyneykLt3CBNIhSCTxKM6OWxVp936ALSa5K9FNy00TeWSpokR6NmzaW8VD/EjTgvqAxggJt
+MIICaQIBATBrMFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYD
+VQQDEyhHbG9iYWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgx9oXSJpKniO4dS
+Gk8wDQYJYIZIAWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIF2h0DTytCMkWXA3CrAoruFrD5nc
+BTlF1YpLTj8VyTQHMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIx
+MDQxMzE1NDQzNlowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsG
+CWCGSAFlAwQBAjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFl
+AwQCATANBgkqhkiG9w0BAQEFAASCAQATPCDlzrvzzeb8uxuOPG9+suv2VKMWCHBknHYtE2UZgGzQ
+jYe9w8PV9p4fxKcfcluRFR9crRYIqyt6xHpOQz4ZX0xa8tzpazo0QJdwlhsOnv41PPQGGn+BC9dh
+yyvPMb+ewryxH/3DsN3aKmKtGf+LBPy+gh3p2eHeKFPLOxdKQ2oXVo17wfJv9pFiHjdbrOKnIHx+
+Ry6NJEInuNVbg2z4pjzJGSqzWIhbbB6TZRM96ZglVkZCM1QLuU6/upvEzKPeMYgimH/W8hfRSHwa
+B+8pTKHqER4jT4dFR2GlpJKtjxQzgn+EzKoxBCTNiB2KhldFTNTURho9dcBlGXvD8IF6
+--000000000000e0a8de05bfdc81f6--
