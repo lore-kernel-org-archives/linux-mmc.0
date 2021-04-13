@@ -2,134 +2,157 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEDFFC43462
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 10:59:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 764B1C43460
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:37:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8934B613C0
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 10:59:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 515E5613B3
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Apr 2021 15:37:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344710AbhDMK7o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Apr 2021 06:59:44 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:54598 "EHLO m43-7.mailgun.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1344723AbhDMK7m (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 13 Apr 2021 06:59:42 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1618311561; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=m0BphGKv3ot9eovnDlG46kpvyBSpZUYgaoAjCjQNs8M=;
- b=mQrxWmMxcg0qEjQ4MsSDxRaxrHWpI8F8RtJBnaki/Mbi9IlkfGGu/4Uf6GG873jskcH1Bt41
- U9Te8kSIGpScNI1dfi1RMPnT8UYaaxQh0+EJkTGkMdP32yYI3+gB+QyFkdDP+8JRQJIsIYjp
- EWZuntBGimocM0h6lmRscrqLTqA=
-X-Mailgun-Sending-Ip: 69.72.43.7
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n02.prod.us-east-1.postgun.com with SMTP id
- 6075798574f773a6645a8d76 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Tue, 13 Apr 2021 10:59:17
- GMT
-Sender: sbhanu=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 40986C43462; Tue, 13 Apr 2021 10:59:17 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 2D468C433CA;
-        Tue, 13 Apr 2021 10:59:16 +0000 (UTC)
+        id S229886AbhDMPiB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Apr 2021 11:38:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46356 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231684AbhDMPh7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Apr 2021 11:37:59 -0400
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74F8FC061756
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:37:39 -0700 (PDT)
+Received: by mail-lj1-x231.google.com with SMTP id u4so19855971ljo.6
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Apr 2021 08:37:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=5/FrSblRNF16xo12z2HXymizhLrS+DD0LJX4Kh417pE=;
+        b=nyk6OmlI78zH/+ehzoCzVD7l2s4uZ2l/xDGYYMH4G3CTs2X16wNS4OC6u8u274LuId
+         cPvKviltOINNN6L+IwS+4T0FbvVGvtpR7wuIoJlVCwfqCkTk0m4nSlB9she3hsoddYfT
+         EYPUeMAcSrMI+OZaloGdmIzP598JLEfyMK7F8CUzdOeXVZrxJaGhdgMaOdwWkhcT8Bcs
+         0QCO2JfF4VT6fWl8YxfL01dyf0UoxfFaOPc00sqN4DuqDfz94K+rYHIQ/KyT86xAVo8H
+         tPrZrjnqW9ETMlXj9hd4A71YGA/kzguhLnN9GzWZKSZGg0w4UKntAtbvmv2lmzwq+k4K
+         JB2w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=5/FrSblRNF16xo12z2HXymizhLrS+DD0LJX4Kh417pE=;
+        b=SEEtuQp4vS7ZvRQ0t5Qes7GGSfV1Xe7Yb8QjyXXGwvt9tQkH3IXc1xpao/5HuaGcb2
+         HzeEnmvCONF0a5cYpCGK/qrKwTeKyS8Esgi7i1ibefUprMP3wa0ryKYZsToheSKV+NQ4
+         QNx1wZo9/oVvGS11oMG3ywJMWp+jPVMq5/K+kuF0NT4RreHXeEKh/x5iVrdCL0P6RsI7
+         MidtNfBZ7CS37XcdhOgFWYNuJkM8dJdXAxTg1yhtlN0xOPE/m85wWlBqdWtaPD4dDSu4
+         EULywLfqCxpPmfp2GAvIv6Zqc2AY7jwgpgTG70j8U64bCbs2MEjsp41v2A0TUYiOWWo4
+         fzeQ==
+X-Gm-Message-State: AOAM531Q+5N8+CIIVSinju5nZFqdu1v5UpKHrdSHGX7ZzCxqA/PdSwjL
+        38TkNVPGPjWSrtAUeJRoDaNE8N8ig9+fhA==
+X-Google-Smtp-Source: ABdhPJy5CTxHJJZ7rBDm7c1bgdcR01FgpP/HfEVuSUpsxCQM9v+AoVVEDk9jsd0deSXnO0Hvm2D0pw==
+X-Received: by 2002:a2e:a7d2:: with SMTP id x18mr4962085ljp.335.1618328257833;
+        Tue, 13 Apr 2021 08:37:37 -0700 (PDT)
+Received: from localhost (h-209-203.A463.priv.bahnhof.se. [155.4.209.203])
+        by smtp.gmail.com with ESMTPSA id g29sm3487663lfj.267.2021.04.13.08.37.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 13 Apr 2021 08:37:37 -0700 (PDT)
+Date:   Tue, 13 Apr 2021 17:37:36 +0200
+From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH v2] mmc: tmio: always restore irq register
+Message-ID: <YHW6wD1XmeYV6L5M@oden.dyn.berto.se>
+References: <20210413083137.11171-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Tue, 13 Apr 2021 16:29:16 +0530
-From:   sbhanu@codeaurora.org
-To:     Doug Anderson <dianders@google.com>
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        sartgarg@codeaurora.org, Rajendra Nayak <rnayak@codeaurora.org>,
-        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
-        Sibi Sankar <sibis@codeaurora.org>, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
- card
-In-Reply-To: <CAD=FV=Wa4fT5wZgd0==8kLy_tzTLgdZ-HwdfOEAM9pMeMjjFyg@mail.gmail.com>
-References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
- <CAD=FV=WLZCSd6D5VFyD+1KBp5n1qyszER2EVaEMwYjQfPSSDnA@mail.gmail.com>
- <b77f207b-2d90-3c8b-857f-625bd3867ed1@codeaurora.org>
- <6fdf704c4716f5873d413229ca8adc57@codeaurora.org>
- <CAD=FV=Wa4fT5wZgd0==8kLy_tzTLgdZ-HwdfOEAM9pMeMjjFyg@mail.gmail.com>
-Message-ID: <8126e130e5c0ea1e7ea867414f0510c0@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210413083137.11171-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-03-29 20:26, Doug Anderson wrote:
-> Hi,
-> 
-> On Thu, Mar 25, 2021 at 11:57 PM <sbhanu@codeaurora.org> wrote:
->> 
->> >>> +                       max-frequency = <192000000>;
->> >> Why do you need to specify this?
->> This helps to avoid lower speed modes running in high clock rate,
->> and As Veerabhadrarao Badiganti mentioned
-> 
-> Just to be clear, both Stephen and I agree that you should remove
-> "max-frequency" here (see previous discussion). Bjorn is, of course,
-> the file decision maker. However, unless he says "yeah, totally keep
-> it in" I'd suggest dropping it from the next version.
-> 
-sure will drop in next version.
-> 
->> >>> +                                       required-opps =
->> >>> <&rpmhpd_opp_low_svs>;
->> >>> +                                       opp-peak-kBps = <1200000
->> >>> 76000>;
->> >>> +                                       opp-avg-kBps = <1200000
->> >>> 50000>;
->> >> Why are the kBps numbers so vastly different than the ones on sc7180
->> >> for the same OPP point. That implies:
->> >>
->> >> a) sc7180 is wrong.
->> >>
->> >> b) This patch is wrong.
->> >>
->> >> c) The numbers are essentially random and don't really matter.
->> >>
->> >> Can you identify which of a), b), or c) is correct, or propose an
->> >> alternate explanation of the difference?
->> >>
->> 
->> We calculated bus votes values for both sc7180 and sc7280 with ICB 
->> tool,
->> above mentioned values we got for sc7280.
-> 
-> I don't know what an ICB tool is. Please clarify.
-> 
-> Also: just because a tool spits out numbers that doesn't mean it's
-> correct. Presumably the tool could be wrong or incorrectly configured.
-> We need to understand why these numbers are different.
-> 
-we checked with ICB tool team on this they conformed as Rennell & Kodiak 
-are different chipsets,
-we might see delta in ib/ab values due to delta in scaling factors.
+Hi Wolfram,
 
-> -Doug
+Thanks for your work.
+
+On 2021-04-13 10:31:37 +0200, Wolfram Sang wrote:
+> Currently, only SDHI on R-Car Gen2+ reinitializes the irq register
+> during reset but it should be done on all instances. We can move it from
+> the SDHI driver to the TMIO core, because we now have the
+> 'sd_irq_mask_all' variable which carries the proper value to use. That
+> also means we can remove the initialization from tmio_mmc_probe()
+> because it calls tmio_mmc_reset(), too. We only move that
+> tmio_mmc_reset() call there a little to ensure 'sd_irq_mask_all' is
+> properly set.
+> 
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+I like patches like this.
+
+Reviewed-by: Niklas Söderlund <niklas.soderlund+renesas@ragnatech.se>
+
+> ---
+> 
+> Changes since v1:
+> 
+> * use direct register write to initialize irq register instead of
+>   masking bits. Also initialize the cache variable directly.
+> 
+>  drivers/mmc/host/renesas_sdhi_core.c |  2 --
+>  drivers/mmc/host/tmio_mmc_core.c     | 11 ++++++-----
+>  2 files changed, 6 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index d36181b6f687..635bf31a6735 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -588,8 +588,6 @@ static void renesas_sdhi_reset(struct tmio_mmc_host *host)
+>  		renesas_sdhi_scc_reset(host, priv);
+>  	}
+>  
+> -	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, TMIO_MASK_ALL_RCAR2);
+> -
+>  	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
+>  		val = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
+>  		val |= CARD_OPT_EXTOP;
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index 0c474d78b186..7dfc26f48c18 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -192,6 +192,9 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
+>  	if (host->reset)
+>  		host->reset(host);
+>  
+> +	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
+> +	host->sdcard_irq_mask = host->sdcard_irq_mask_all;
+> +
+>  	tmio_mmc_set_bus_width(host, host->mmc->ios.bus_width);
+>  
+>  	if (host->pdata->flags & TMIO_MMC_SDIO_IRQ) {
+> @@ -1176,13 +1179,11 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
+>  	if (pdata->flags & TMIO_MMC_SDIO_IRQ)
+>  		_host->sdio_irq_mask = TMIO_SDIO_MASK_ALL;
+>  
+> -	_host->set_clock(_host, 0);
+> -	tmio_mmc_reset(_host);
+> -
+> -	_host->sdcard_irq_mask = sd_ctrl_read16_and_16_as_32(_host, CTL_IRQ_MASK);
+>  	if (!_host->sdcard_irq_mask_all)
+>  		_host->sdcard_irq_mask_all = TMIO_MASK_ALL;
+> -	tmio_mmc_disable_mmc_irqs(_host, _host->sdcard_irq_mask_all);
+> +
+> +	_host->set_clock(_host, 0);
+> +	tmio_mmc_reset(_host);
+>  
+>  	if (_host->native_hotplug)
+>  		tmio_mmc_enable_mmc_irqs(_host,
+> -- 
+> 2.30.0
+> 
+
+-- 
+Regards,
+Niklas Söderlund
