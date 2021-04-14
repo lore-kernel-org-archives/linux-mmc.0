@@ -2,137 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_IN_DEF_DKIM_WL autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF0C0C43460
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 20:26:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 696E4C43461
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 21:22:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A520A6044F
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 20:26:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4B63F600D1
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 21:22:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349860AbhDNU0e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Apr 2021 16:26:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56144 "EHLO
+        id S232307AbhDNVXP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Apr 2021 17:23:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349844AbhDNU0c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2021 16:26:32 -0400
-Received: from mail-yb1-xb30.google.com (mail-yb1-xb30.google.com [IPv6:2607:f8b0:4864:20::b30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 022E1C061574
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Apr 2021 13:26:11 -0700 (PDT)
-Received: by mail-yb1-xb30.google.com with SMTP id x8so18449068ybx.2
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Apr 2021 13:26:10 -0700 (PDT)
+        with ESMTP id S232036AbhDNVXO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2021 17:23:14 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6341FC061574;
+        Wed, 14 Apr 2021 14:22:51 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id w3so33621928ejc.4;
+        Wed, 14 Apr 2021 14:22:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=uXB/h0HritpGaogqR4MZ0Syh5r+OFtVKW/hzSi9q7iw=;
-        b=gmTqsMWsFi+G0V3Us4qP+jMCjW/ogfkX9UIVn0orHc7UWb0Tdbd6S6ynCZhGYn9aB/
-         JeiCFwrlqgLREEJfzkhy0CThiuhlTxiASsKxMsaV5ccjx22BZVUAG0cPPFjIfLvyVPYw
-         Rm7x8aX3VOAZBSbD5Bu3gokPJUUyNB4VWJXC7FF3hkZQv3CZgqFG887jNDLndyiMd0iB
-         j5ryaMtSsP5zWVdGzfES+axDLqO5sTTnJDJXUzzVQxmGHsgsS7Ap99VjSQdFLbFf6MUf
-         vsC9bzC2+Ip+qx5eZj8PN7i5JJdQ0wDd7A8qQrDvgubwEhzZ/0IR29/WspIfz9gdP1IE
-         AOTg==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=L8jfAogNeKCWWv1zaa7om4rEu/mAS7YNOdM/85EuRkA=;
+        b=Ap2aOflASrspeVeXAvULF6WN1yH4NdL+eDp0qD/X2fuimESfwiAimvQhAwSHbi7szR
+         uZCgSMI3repBxlgBe8x8Jf6AGffcXhlpHlR6mGheX/sbBoR0EsPS73u2Z/VDFnyWL4y3
+         UMGTi/U+66z2tDq8zv3g492xZguOi1bHkNnpIo9vDZnAxCvcmKADELdal1v/3gphTY8d
+         jiD0iq5NGTlTAGpn31IRTyvu1y2+isNH6hcdy3yowH/0+tF/IwdA158xfmygpp2iHiSd
+         GLgLltz1DD52TBcaiGVQfsRn14NI0pgX4P+dAJLIsI6rrDCg59rFqJ2obuD01II+X/7z
+         syxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=uXB/h0HritpGaogqR4MZ0Syh5r+OFtVKW/hzSi9q7iw=;
-        b=QPPCoFcamaGhwWeKcnaxej0VOkhDIctnDEAwIorrA/QDM7lfMV1JE8vnMXDkGhQMsQ
-         ubqLFw6mByIpx2mxfCTeTV0E1k+tb6bE0V5zxzPfMd1b3tLp42BVs1aWF1ovdEyeaKkO
-         PIG5MJYPiINBbC79DYlYTQALvg8e6Q0zXTHh8WwS0Bg/RRtIx5UWwBfayXXD+QqYKh+A
-         vlJz7G7QFZY4V2/b412VE7Ug8aNRJ/p1c9co2LnpQUSQKCtYYWwzqVO8V8tbC71RZUYf
-         OTGqiKps6GNAGNK/B3dlrtzNsWSycnY2G0rT+A/TnMCkVCFsuXIHgT/QtNdPEpV2kOkR
-         BYiw==
-X-Gm-Message-State: AOAM532ru8O+ZLQfy6J7hUxbOSSqiJ7u0jpMsN1GouXUUGK3C+uJ5vhn
-        Z1OwQ9voZWSUmRjchf0sixdo7z75yASGs5e8lPrRCA==
-X-Google-Smtp-Source: ABdhPJy68/JQ2akezNu6ZdB4kqML+b9w63gefQDDXSh7QMIsi4KZSHn4ZxpYoICD3BhsO3PYRnXFJtwrAc0x2iTGIIg=
-X-Received: by 2002:a25:6088:: with SMTP id u130mr56279885ybb.257.1618431970036;
- Wed, 14 Apr 2021 13:26:10 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=L8jfAogNeKCWWv1zaa7om4rEu/mAS7YNOdM/85EuRkA=;
+        b=EFNL9dlQjQyuwgS3LLPHyFzrMtACYchP7PTgtXgvuDsJspj30lEkWLoRqIXz51TdGD
+         fxRSCuzZdhQCZMLNRU5ZLyvMeiCX32+o8XqhX99DngJJprz2ZiZY0BZ24K29AohvgZ22
+         G4ykDqpgjil2yUMXSg68MFUOLrcuiHYUJfnlOoNoRm/c1tc3TpuEXK+s+diAWzJ/R9Ik
+         Wm+paUOwho7EYeWnu6T467TpyuPGTP9jbI/dsTFmt+dTYyXULMsLCcvvf8QUn7wQXFOn
+         6F5F31DFujhCyMtlUByQ6g1vP3PaqOOKXGoOqNWBgjfHAixCIsmK1Ez46xiFh7n2bMfQ
+         9vNg==
+X-Gm-Message-State: AOAM533ppVUDmdweBq1jmCpkGNvlnSlWokKRoLcjdUzuckHG0iyTJ5ny
+        ODcMwJX9BE1BQlxbUQgkLeviTKWdgrsifBIn
+X-Google-Smtp-Source: ABdhPJyhnIM/TVGVyeHj2rd2daFjwSwt0tqMcoJ49N04lvb8YO1MbOJ6zdT+H/+POTsRRX2cqVQI1w==
+X-Received: by 2002:a17:907:3f08:: with SMTP id hq8mr116060ejc.90.1618435370199;
+        Wed, 14 Apr 2021 14:22:50 -0700 (PDT)
+Received: from localhost.localdomain (ip5f5bec5d.dynamic.kabel-deutschland.de. [95.91.236.93])
+        by smtp.gmail.com with ESMTPSA id t7sm586187edq.42.2021.04.14.14.22.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 14 Apr 2021 14:22:49 -0700 (PDT)
+From:   Bean Huo <huobean@gmail.com>
+To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com,
+        adrian.hunter@intel.com, yoshihiro.shimoda.uh@renesas.com
+Cc:     beanhuo@micron.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v1 0/2] Let sanitize not retry in case of timeout/failure
+Date:   Wed, 14 Apr 2021 23:22:34 +0200
+Message-Id: <20210414212236.346813-1-huobean@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
- <CAD=FV=WLZCSd6D5VFyD+1KBp5n1qyszER2EVaEMwYjQfPSSDnA@mail.gmail.com>
- <b77f207b-2d90-3c8b-857f-625bd3867ed1@codeaurora.org> <6fdf704c4716f5873d413229ca8adc57@codeaurora.org>
- <CAD=FV=Wa4fT5wZgd0==8kLy_tzTLgdZ-HwdfOEAM9pMeMjjFyg@mail.gmail.com> <8126e130e5c0ea1e7ea867414f0510c0@codeaurora.org>
-In-Reply-To: <8126e130e5c0ea1e7ea867414f0510c0@codeaurora.org>
-From:   Doug Anderson <dianders@google.com>
-Date:   Wed, 14 Apr 2021 13:25:58 -0700
-Message-ID: <CAD=FV=XavWbf_b7-=JT6V5_RNA8CjdK4oRu7H719AaPDJ5tsqQ@mail.gmail.com>
-Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        sartgarg@codeaurora.org, Rajendra Nayak <rnayak@codeaurora.org>,
-        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
-        Sibi Sankar <sibis@codeaurora.org>, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Evan Green <evgreen@chromium.org>,
-        Georgi Djakov <georgi.djakov@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+From: Bean Huo <beanhuo@micron.com>
 
-On Tue, Apr 13, 2021 at 3:59 AM <sbhanu@codeaurora.org> wrote:
->
-> >> >>> +                                       required-opps =
-> >> >>> <&rpmhpd_opp_low_svs>;
-> >> >>> +                                       opp-peak-kBps = <1200000
-> >> >>> 76000>;
-> >> >>> +                                       opp-avg-kBps = <1200000
-> >> >>> 50000>;
-> >> >> Why are the kBps numbers so vastly different than the ones on sc7180
-> >> >> for the same OPP point. That implies:
-> >> >>
-> >> >> a) sc7180 is wrong.
-> >> >>
-> >> >> b) This patch is wrong.
-> >> >>
-> >> >> c) The numbers are essentially random and don't really matter.
-> >> >>
-> >> >> Can you identify which of a), b), or c) is correct, or propose an
-> >> >> alternate explanation of the difference?
-> >> >>
-> >>
-> >> We calculated bus votes values for both sc7180 and sc7280 with ICB
-> >> tool,
-> >> above mentioned values we got for sc7280.
-> >
-> > I don't know what an ICB tool is. Please clarify.
-> >
-> > Also: just because a tool spits out numbers that doesn't mean it's
-> > correct. Presumably the tool could be wrong or incorrectly configured.
-> > We need to understand why these numbers are different.
-> >
-> we checked with ICB tool team on this they conformed as Rennell & Kodiak
-> are different chipsets,
-> we might see delta in ib/ab values due to delta in scaling factors.
 
-...but these numbers are in kbps, aren't they? As I understand it
-these aren't supposed to be random numbers spit out by a tool but are
-supposed to be understandable by how much bandwidth an IP block (like
-MMC) needs from the busses it's connected to. Since the MMC IP block
-on sc7180 and sc7280 is roughly the same there shouldn't be a big
-difference in numbers.
+Bean Huo (2):
+  mmc: core: Add a retries parameter to __mmc_switch function
+  mmc: core: Let sanitize not retry in case of timeout/failure
 
-Something smells wrong.
+ drivers/mmc/core/mmc.c     | 22 +++++++++++-----------
+ drivers/mmc/core/mmc_ops.c | 11 ++++++-----
+ drivers/mmc/core/mmc_ops.h |  2 +-
+ 3 files changed, 18 insertions(+), 17 deletions(-)
 
-Adding a few people who understand interconnects better than I do, though.
+-- 
+2.25.1
 
--Doug
