@@ -5,35 +5,35 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,MIME_BASE64_TEXT,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 478EDC43460
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 08:06:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E875C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 08:14:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 22912613C7
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 08:06:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 01398613C4
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 08:14:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244737AbhDNIGT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Apr 2021 04:06:19 -0400
-Received: from Mailgw01.mediatek.com ([1.203.163.78]:57060 "EHLO
+        id S1349991AbhDNIPQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Apr 2021 04:15:16 -0400
+Received: from Mailgw01.mediatek.com ([1.203.163.78]:27970 "EHLO
         mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S232048AbhDNIGT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2021 04:06:19 -0400
-X-UUID: 49bc2d400a3c42c4a45ca341a2c9bc8e-20210414
+        with ESMTP id S1349976AbhDNIPQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2021 04:15:16 -0400
+X-UUID: 3e77cca882a5461691b34b970da324e2-20210414
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
         h=Content-Transfer-Encoding:Content-Type:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=SR+2bsnHh4dFe1R8uWU6d+m3fg1wXapqvWwCeQj8FGo=;
-        b=gLd6kfvcdR0Kzb0NdG7QTjkYMPcjdXWysM6EjUm/81bqP3BYUieYO6qYY2gbazVCGqxie5qwvrkSjUwnlJg14Kf/SXQ7kT9WUPwpMMR3tj3mJM90YDU9tptynTVXgHU8oqbV5VejTaAikdeaigJSv+jTNbCYdlbhJKJCt9yWBkc=;
-X-UUID: 49bc2d400a3c42c4a45ca341a2c9bc8e-20210414
-Received: from mtkcas32.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
+        b=kb+8LsdqxPgku8xLln2tEPQDEchiqz6mAMas35BL2Jo3RmTX4DfCFzjHf0MJ5qfa7RcYZpjddPFb81rvMjl+GBzEyS9+Wtg6tnqRtn/tUsyZmxJSMhe1t1Lace70yqE2b/Mzl6QMMLjUk8EN/qD6SF61DhYsOUJ+vp3aHlALovM=;
+X-UUID: 3e77cca882a5461691b34b970da324e2-20210414
+Received: from mtkcas36.mediatek.inc [(172.27.4.253)] by mailgw01.mediatek.com
         (envelope-from <peng.zhou@mediatek.com>)
         (mailgw01.mediatek.com ESMTP with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 201428904; Wed, 14 Apr 2021 16:05:54 +0800
+        with ESMTP id 1259542541; Wed, 14 Apr 2021 16:14:53 +0800
 Received: from MTKCAS06.mediatek.inc (172.21.101.30) by
- MTKMBS32N2.mediatek.inc (172.27.4.72) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Wed, 14 Apr 2021 16:05:51 +0800
+ MTKMBS32N1.mediatek.inc (172.27.4.71) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Wed, 14 Apr 2021 16:14:50 +0800
 Received: from localhost.localdomain (10.15.20.246) by MTKCAS06.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Wed, 14 Apr 2021 16:05:50 +0800
+ Transport; Wed, 14 Apr 2021 16:14:49 +0800
 From:   Peng Zhou <peng.zhou@mediatek.com>
 To:     Eric Biggers <ebiggers@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -46,12 +46,12 @@ CC:     Adrian Hunter <adrian.hunter@intel.com>,
         Peng Zhou <peng.zhou@mediatek.com>,
         <devicetree@vger.kernel.org>
 Subject: [PATCH RESEND v3 0/3] MediaTek eMMC inline encryption support
-Date:   Wed, 14 Apr 2021 15:55:25 +0800
-Message-ID: <20210414075527.8905-1-peng.zhou@mediatek.com>
+Date:   Wed, 14 Apr 2021 16:04:25 +0800
+Message-ID: <20210414080427.21272-1-peng.zhou@mediatek.com>
 X-Mailer: git-send-email 2.18.0
 MIME-Version: 1.0
 Content-Type: text/plain
-X-TM-SNTS-SMTP: E4547FA58093102DDDE1F016597B83FD337CF612C3F79802C651396C269F5F3A2000:8
+X-TM-SNTS-SMTP: A32B45636681855B0151D35AC01ADB2025DEA10857F23CED61C88119DCE5496B2000:8
 X-MTK:  N
 Content-Transfer-Encoding: base64
 Precedence: bulk
