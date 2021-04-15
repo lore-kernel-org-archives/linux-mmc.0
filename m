@@ -2,113 +2,300 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNWANTED_LANGUAGE_BODY autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0449BC433ED
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:03:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB005C433B4
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:33:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C1C09613B6
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:03:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B8D1D61166
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:33:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232718AbhDOMD4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Apr 2021 08:03:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34502 "EHLO
+        id S232701AbhDOMdj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Apr 2021 08:33:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232739AbhDOMD4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 08:03:56 -0400
-Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15DFEC06175F
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:03:33 -0700 (PDT)
-Received: by mail-ua1-x934.google.com with SMTP id s2so7420540uap.1
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:03:33 -0700 (PDT)
+        with ESMTP id S232678AbhDOMdj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 08:33:39 -0400
+Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 204BEC061574
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:33:16 -0700 (PDT)
+Received: by mail-vs1-xe31.google.com with SMTP id l11so3587215vsr.10
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:33:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=yP0jz0gWkwE8Z2s8JJsAXu8+mr7EF1nBBjJ+JwFWlP8=;
-        b=uLpZrxzEdpeuw9cGVX7JzwCGHIlkkbMCfghz7I83e0yN87+IwyKf4Q5nclwCchMPyE
-         tayKdLL4rXlZIG3q7KwuItxAaWaD1rQGb6TUi2iuLVwZQde4OvPUYGBC5IYuMBEfudiB
-         dv4ZCxBDDP2zMlWvHlyaqouhqCvnNHL0DFe0oYMshWnyeGmxooU8bZn4HE17LS6z4Ws+
-         jaBP5y6764Hz8TcUO7vhOBs2Wr+t1ZJFDbPSByc6GaLI6P1FeCO9TLEcvqK2Fhtg2PHT
-         yXs/HwPjC5icGgpEtEjVoo89UE9WesoQCvlmXq67kuhzvAfERZBD2HfPIfzpgTerog90
-         oySQ==
+        bh=cn61o3l+cQhuqA8gP7u3apjojEDo5OUcEov4kpx8ITg=;
+        b=aFLAzVsGTqdAyT89VvUVPZMDzJ2TWCVoxlBxLbWtJLNY091tzshEX80XxYWSKVAgrh
+         lGqNFLzcv2Gi1yEHbNedzyXs3TLXnOh+28JTUTqROTeVNytVZirmo16oFzXh8sTyHUUZ
+         0wx75rkVYb0ygzgej5zNHRbo4x9Fuh2uziUVMroDwnYsW7u+TNy9zLpOMp4AUqIc0gCO
+         97iwKJvtGqJZahDVUtsH8UK7MbhiRyBq04m6ovQcA7gcse5xEe3UxNKogCMelcyxq8N1
+         XcV38Y9/yANrf07XhXxYxTtgBC0+G+RoXlFDSaTfOkBDBlW/qV8z95YMBLaKhVegppPH
+         JXYg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=yP0jz0gWkwE8Z2s8JJsAXu8+mr7EF1nBBjJ+JwFWlP8=;
-        b=j3r7OUb2gA8H+/+8sOMdNIqWxoIm2KMNDpjAI9ooTdX/ezUxjN1jvYa+6mXOetvFmI
-         1VBos3DnUl/wSMIUwiPytQl5Hih35W+YO5wMLeZoFLwerZ44a/JhwfF6lL0TeN7kjLnD
-         3n8GVZ3A3kC6OzGk34Du+mhbsD5SsXuenWoOEzkwnvVmKaW7sOJ569dHRhB+u+LWH4HB
-         aQWoxZ9Y3tFo4ItwBIaa5406oDdvGzbPeUUBeExnMj/rhaVP0uuHMBYE7m/MpfzfPztb
-         6fMtepkwU5tyHRNgOraWqVhliwUdP2nIQe6vNefoxtcAq0Ul8tj8zUAPeP5sOgIKZ0ZX
-         SNBw==
-X-Gm-Message-State: AOAM530t3tUHLYjHKKghwREXP3BizKxtmpwIXGskcO2Luw1FEU6a7Jzg
-        75w3vPvSq/O5ws+zlAmQVM6HwM87dT/bHXVg1RDMzg==
-X-Google-Smtp-Source: ABdhPJzVPPBgXqqGAHLGxvLYlWpW0KUEuaGUllP9CGqxUWae4Hpv3Y7hZ4LtsuEO2vPqMLHpuyRlWLYJskPJ65NAspA=
-X-Received: by 2002:ab0:4322:: with SMTP id k31mr1351719uak.15.1618488207953;
- Thu, 15 Apr 2021 05:03:27 -0700 (PDT)
+        bh=cn61o3l+cQhuqA8gP7u3apjojEDo5OUcEov4kpx8ITg=;
+        b=ZnbfNdQmzX8tOuYTFhK2LK29KYDBrCdbEe1aj+rn3qtMH16nuo2UR5Oj02zuQNrfN2
+         UP+QLlugmq66ZG2COuMFbdsbSroMXI+gGTm2+a0coXzZ17juvfZyz87eJdr5CIMtyTjc
+         kCCaHi9FK8M+inpYU6VJKAOtC257AJ8RsTrunxTltn8GGc6XhtfUMDYjFPXD7bu9Kl7t
+         sc82CMQGTRRdDZNdLBZuoOz7mfBj+jRwfo5i32hx88mkJWMWg/Yxrmda3uKfA8m6bmlA
+         Vc+/kqmSnR30DqNyKW5flRmWe2JH1yDbuEJ5/Nf2GMOJJJ/V36KIm+qXoZ+6kBN1PnF0
+         HBHA==
+X-Gm-Message-State: AOAM533FApE+luQ0M7m+P8kTL9Da7cRXke4U0wUujT2UHwFjvYeFP/So
+        kaowRM6u7ut2YCaGISdyKwiQvL8mh4u38StpYYyHlB6ShEKxow==
+X-Google-Smtp-Source: ABdhPJyukeR2yBo7fgb1puieSQLzNGAskdjLyUz7e3Da1oSPXpu3mc9ujLE8b6uhI4Psx+RP3cDkJRevTtrSdprzwSU=
+X-Received: by 2002:a67:cf41:: with SMTP id f1mr1879671vsm.42.1618489995214;
+ Thu, 15 Apr 2021 05:33:15 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210415084412.51125-1-krzysztof.kozlowski@canonical.com> <20210415084412.51125-2-krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20210415084412.51125-2-krzysztof.kozlowski@canonical.com>
+References: <20210401230221.12532-1-luserhker@gmail.com>
+In-Reply-To: <20210401230221.12532-1-luserhker@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 15 Apr 2021 14:02:49 +0200
-Message-ID: <CAPDyKFog3OA3YJVQ8D4mw4N5K0Mk53BWBqJEhp2+M2geueFL5w@mail.gmail.com>
-Subject: Re: [PATCH v2 2/3] mmc: sdhci-s3c: correct kerneldoc of sdhci_s3c_drv_data
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Cc:     Ben Dooks <ben-linux@fluff.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
+Date:   Thu, 15 Apr 2021 14:32:38 +0200
+Message-ID: <CAPDyKFpjTikAzDqkcbyxa1Y918OevojZYhREPsmQgeo_Sd0xgA@mail.gmail.com>
+Subject: Re: [PATCH v3] Re-submit of the erase command addition plus removal
+ of MMC_IOC_MULTI_CMD ifndef for erase. Author=Kimito Sakata <kimito.sakata@oracle.com>
+To:     luserhker@gmail.com, Avri Altman <avri.altman@wdc.com>
+Cc:     "Bean Huo (beanhuo)" <beanhuo@micron.com>,
+        kenny.gibbons@oracle.com, kimito.sakata@oracle.com,
+        rkamdar@micron.com, linux-mmc <linux-mmc@vger.kernel.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Sylwester Nawrocki <snawrocki@kernel.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>
+        Kimito Sakata <ksakata@kimitos-mbp.hsd1.co.comcast.net>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 15 Apr 2021 at 10:44, Krzysztof Kozlowski
-<krzysztof.kozlowski@canonical.com> wrote:
->
-> Correct the name of sdhci_s3c_drv_data structure in kerneldoc:
->
->   drivers/mmc/host/sdhci-s3c.c:143: warning:
->     expecting prototype for struct sdhci_s3c_driver_data. Prototype was for struct sdhci_s3c_drv_data instead
->
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
->
++ Avri
 
-Applied for next, thanks!
+On Fri, 2 Apr 2021 at 01:02, <luserhker@gmail.com> wrote:
+>
+> From: Kimito Sakata <kimito.sakata@oracle.com>
+>
+> Signed-off-by: Kimito Sakata <ksakata@Kimitos-MBP.hsd1.co.comcast.net>
+
+This looks okay to me, but I have looped in Avri who might have some comments.
 
 Kind regards
 Uffe
 
-
 > ---
+>  mmc.c      |   8 ++++
+>  mmc.h      |  13 +++++-
+>  mmc_cmds.c | 129 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  mmc_cmds.h |   1 +
+>  4 files changed, 150 insertions(+), 1 deletion(-)
 >
-> Changes since v1:
-> 1. None
-> ---
->  drivers/mmc/host/sdhci-s3c.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-> index 8e1dca625620..a07a8f011741 100644
-> --- a/drivers/mmc/host/sdhci-s3c.c
-> +++ b/drivers/mmc/host/sdhci-s3c.c
-> @@ -130,7 +130,7 @@ struct sdhci_s3c {
+> diff --git a/mmc.c b/mmc.c
+> index f3d724b..eb2638b 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -229,6 +229,14 @@ static struct Command commands[] = {
+>                 "Run Field Firmware Update with <image name> on <device>.\n",
+>           NULL
+>         },
+> +       { do_erase, -4,
+> +       "erase", "<type> " "<start address> " "<end address> " "<device>\n"
+> +               "Send Erase CMD38 with specific argument to the <device>\n\n"
+> +               "NOTE!: This will delete all user data in the specified region of the device\n"
+> +               "<type> must be: legacy | discard | secure-erase | "
+> +               "secure-trim1 | secure-trim2 | trim \n",
+> +       NULL
+> +       },
+>         { 0, 0, 0, 0 }
 >  };
 >
->  /**
-> - * struct sdhci_s3c_driver_data - S3C SDHCI platform specific driver data
-> + * struct sdhci_s3c_drv_data - S3C SDHCI platform specific driver data
->   * @sdhci_quirks: sdhci host specific quirks.
->   * @no_divider: no or non-standard internal clock divider.
->   *
+> diff --git a/mmc.h b/mmc.h
+> index 5754a9d..e9766d7 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -35,7 +35,15 @@
+>  #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
+>  #define MMC_CLEAR_WRITE_PROT   29    /* ac   [31:0] data addr   R1b */
+>  #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
+> -
+> +#define MMC_ERASE_GROUP_START  35    /* ac   [31:0] data addr   R1  */
+> +#define MMC_ERASE_GROUP_END    36    /* ac   [31:0] data addr   R1  */
+> +#define MMC_ERASE              38    /* ac   [31] Secure request
+> +                                             [30:16] set to 0
+> +                                             [15] Force Garbage Collect request
+> +                                             [14:2] set to 0
+> +                                             [1] Discard Enable
+> +                                             [0] Identify Write Blocks for
+> +                                             Erase (or TRIM Enable)  R1b */
+>  /*
+>   * EXT_CSD fields
+>   */
+> @@ -62,6 +70,7 @@
+>  #define EXT_CSD_CACHE_SIZE_2           251
+>  #define EXT_CSD_CACHE_SIZE_1           250
+>  #define EXT_CSD_CACHE_SIZE_0           249
+> +#define EXT_CSD_SEC_FEATURE_SUPPORT    231
+>  #define EXT_CSD_BOOT_INFO              228     /* R/W */
+>  #define EXT_CSD_HC_ERASE_GRP_SIZE      224
+>  #define EXT_CSD_HC_WP_GRP_SIZE         221
+> @@ -190,6 +199,8 @@
+>  #define EXT_CSD_REV_V4_2               2
+>  #define EXT_CSD_REV_V4_1               1
+>  #define EXT_CSD_REV_V4_0               0
+> +#define EXT_CSD_SEC_GB_CL_EN           (1<<4)
+> +#define EXT_CSD_SEC_ER_EN              (1<<0)
+>
+>
+>  /* From kernel linux/mmc/core.h */
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 6c24cea..3e36ff2 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2514,6 +2514,135 @@ int do_cache_dis(int nargs, char **argv)
+>         return do_cache_ctrl(0, nargs, argv);
+>  }
+>
+> +static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
+> +{
+> +       int ret = 0;
+> +       struct mmc_ioc_multi_cmd *multi_cmd;
+> +
+> +       multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> +                          3 * sizeof(struct mmc_ioc_cmd));
+> +       if (!multi_cmd) {
+> +               perror("Failed to allocate memory");
+> +               return -ENOMEM;
+> +       }
+> +
+> +       multi_cmd->num_of_cmds = 3;
+> +       /* Set erase start address */
+> +       multi_cmd->cmds[0].opcode = MMC_ERASE_GROUP_START;
+> +       multi_cmd->cmds[0].arg = start;
+> +       multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       multi_cmd->cmds[0].write_flag = 1;
+> +
+> +       /* Set erase end address */
+> +       multi_cmd->cmds[1].opcode = MMC_ERASE_GROUP_END;
+> +       multi_cmd->cmds[1].arg = end;
+> +       multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       multi_cmd->cmds[1].write_flag = 1;
+> +
+> +       /* Send Erase Command */
+> +       multi_cmd->cmds[2].opcode = MMC_ERASE;
+> +       multi_cmd->cmds[2].arg = argin;
+> +       multi_cmd->cmds[2].cmd_timeout_ms = 300*255*255;
+> +       multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +       multi_cmd->cmds[2].write_flag = 1;
+> +
+> +       /* send erase cmd with multi-cmd */
+> +       ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +       if (ret)
+> +               perror("Erase multi-cmd ioctl");
+> +
+> +       free(multi_cmd);
+> +       return ret;
+> +}
+> +
+> +int do_erase(int nargs, char **argv)
+> +{
+> +       int dev_fd, ret;
+> +       char *print_str;
+> +       char **eptr = NULL;
+> +       __u8 ext_csd[512], checkup_mask = 0;
+> +       __u32 arg, start, end;
+> +
+> +       if (nargs != 5) {
+> +               fprintf(stderr, "Usage: erase <type> <start addr> <end addr> </path/to/mmcblkX>\n");
+> +               exit(1);
+> +       }
+> +
+> +       if (strstr(argv[2], "0x") || strstr(argv[2], "0X"))
+> +               start = strtol(argv[2], eptr, 16);
+> +       else
+> +               start = strtol(argv[2], eptr, 10);
+> +
+> +       if (strstr(argv[3], "0x") || strstr(argv[3], "0X"))
+> +               end = strtol(argv[3], eptr, 16);
+> +       else
+> +               end = strtol(argv[3], eptr, 10);
+> +
+> +       if (end < start) {
+> +               fprintf(stderr, "erase start [0x%08x] > erase end [0x%08x]\n",
+> +                       start, end);
+> +               exit(1);
+> +       }
+> +
+> +       if (strcmp(argv[1], "legacy") == 0) {
+> +               arg = 0x00000000;
+> +               print_str = "Legacy Erase";
+> +       } else if (strcmp(argv[1], "discard") == 0) {
+> +               arg = 0x00000003;
+> +               print_str = "Discard";
+> +       } else if (strcmp(argv[1], "secure-erase") == 0) {
+> +               print_str = "Secure Erase";
+> +               checkup_mask = EXT_CSD_SEC_ER_EN;
+> +               arg = 0x80000000;
+> +       } else if (strcmp(argv[1], "secure-trim1") == 0) {
+> +               print_str = "Secure Trim Step 1";
+> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
+> +               arg = 0x80000001;
+> +       } else if (strcmp(argv[1], "secure-trim2") == 0) {
+> +               print_str = "Secure Trim Step 2";
+> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
+> +               arg = 0x80008000;
+> +       } else if (strcmp(argv[1], "trim") == 0) {
+> +               print_str = "Trim";
+> +               checkup_mask = EXT_CSD_SEC_GB_CL_EN;
+> +               arg = 0x00000001;
+> +       } else {
+> +               fprintf(stderr, "Unknown erase type: %s\n", argv[1]);
+> +               exit(1);
+> +       }
+> +
+> +       dev_fd = open(argv[4], O_RDWR);
+> +       if (dev_fd < 0) {
+> +               perror(argv[4]);
+> +               exit(1);
+> +       }
+> +
+> +       if (checkup_mask) {
+> +               ret = read_extcsd(dev_fd, ext_csd);
+> +               if (ret) {
+> +                       fprintf(stderr, "Could not read EXT_CSD from %s\n",
+> +                               argv[4]);
+> +                       goto out;
+> +               }
+> +               if ((checkup_mask & ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) !=
+> +                                                               checkup_mask) {
+> +                       fprintf(stderr, "%s is not supported in %s\n",
+> +                               print_str, argv[4]);
+> +                       ret = -ENOTSUP;
+> +                       goto out;
+> +               }
+> +
+> +       }
+> +       printf("Executing %s from 0x%08x to 0x%08x\n", print_str, start, end);
+> +
+> +       ret = erase(dev_fd, arg, start, end);
+> +out:
+> +       printf(" %s %s!\n\n", print_str, ret ? "Failed" : "Succeed");
+> +       close(dev_fd);
+> +       return ret;
+> +}
+> +
+> +
+>  int do_ffu(int nargs, char **argv)
+>  {
+>  #ifndef MMC_IOC_MULTI_CMD
+> diff --git a/mmc_cmds.h b/mmc_cmds.h
+> index 9d3246c..8331ab2 100644
+> --- a/mmc_cmds.h
+> +++ b/mmc_cmds.h
+> @@ -45,3 +45,4 @@ int do_ffu(int nargs, char **argv);
+>  int do_read_scr(int argc, char **argv);
+>  int do_read_cid(int argc, char **argv);
+>  int do_read_csd(int argc, char **argv);
+> +int do_erase(int nargs, char **argv);
 > --
-> 2.25.1
+> 2.24.1 (Apple Git-126)
 >
