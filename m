@@ -8,100 +8,149 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CB89C43470
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 21:22:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B94A5C433ED
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 03:23:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D3FD600D1
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Apr 2021 21:22:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9DF55611AB
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 03:23:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232710AbhDNVXQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Apr 2021 17:23:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40248 "EHLO
+        id S230056AbhDODYN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Apr 2021 23:24:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33440 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232559AbhDNVXQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2021 17:23:16 -0400
-Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FF8DC061761;
-        Wed, 14 Apr 2021 14:22:52 -0700 (PDT)
-Received: by mail-ed1-x52a.google.com with SMTP id x4so25466630edd.2;
-        Wed, 14 Apr 2021 14:22:52 -0700 (PDT)
+        with ESMTP id S229975AbhDODYK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Apr 2021 23:24:10 -0400
+Received: from mail-pg1-x530.google.com (mail-pg1-x530.google.com [IPv6:2607:f8b0:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EFE9C061574;
+        Wed, 14 Apr 2021 20:23:46 -0700 (PDT)
+Received: by mail-pg1-x530.google.com with SMTP id j7so6511428pgi.3;
+        Wed, 14 Apr 2021 20:23:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Jb2njQFqh1J5ySivjLPwo4s6Cj9FjUtmZEwE7V7CR88=;
-        b=a8uCBdhRzHnkjLZ5iCuIGdQ1dD6Zak7cm+An6QzdWX6YKJeHoGyDKqjJZshI/6ezlQ
-         V+hFWU7MjzgRajmdmzxa2RhZK0fLmOqwErcVU8RQsVDSFk3rqdacvLMtYH/YWmtD2Pvq
-         xwS0t0SmojfCFbzD6T+aVYh4196e2vJlQXAR+Q2I/KAZXPfI1KFTbG0dcyDAYXAqQ+3u
-         kGNR7jnASChXRfg8JE53/YbXd8ZhG8XMfZ3oWphKEN3HBj42WRcOrSbwNvE0X+0lMigc
-         u7NpL5jhMyd13ac2wPnxBuYViLvJYpYV1LWZvELlY0ZztefDjfZoTm3MrThqAnedH6N8
-         B2IA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Pxhi9rtG2283Pz3XgVn14Yp9v+vQoGK61+2yLSidhSg=;
+        b=ZwsIfymgJ1AfhORBtxmbDezZEHneak2bkZkALQpIB5ZCQD6FJpqDrTfgtKnTw/R3K9
+         u0xy4Zb7Zlw/cvFhVUva7/9bvHXvFBSw9R2KuwEneGoBsxFO8cz64usBMFcInDjeO9o7
+         aer0ks07JysLwB8ds7vy/m3Rdcy6mNWWKffwfJzi0VH9AnAtNWEsRZV2kxDSMZR5V74V
+         UW1NbYYwHch25hC4VFZ5RiFhLHIJveHi6Ls2LZnCfbd0EtS5FAAG60FgZzRJ8V6Ugvga
+         FwLS0NQTLYix6cQz1wje4pdvAdT7FtcCOG3q+MQx8NgNliKVpND/XCn2HyM/t1mhXnDu
+         cJLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Jb2njQFqh1J5ySivjLPwo4s6Cj9FjUtmZEwE7V7CR88=;
-        b=bqJrM5z1WAR1badyZNala95hK+KnK6CL3MFpSdpxgSTCSHtgOu7W4LEeXlbia7nFXw
-         ffXn8ZOB24u2wRybFW9hg+q6U0hQXnccEkmHcXZlwNDhswVqeDD46JA2i/qN9z5sGZUA
-         4rICju33o6rqsD5Sws9DNClwH7A9k0XIBaDbCw4NhdFToM+inVQwt+79PVPHAH9TiZlj
-         3LATZaHoX3NyrX873ULMgxHoSBCEHDFzMq5QLFrMEcPPsQCqO4dc2aZ9JC8sNg7YSSJf
-         d06Qymw1LeaKuXdirRMnJxOLxlwBnAUpKjrSe7KV1tAa4mwQ4jHJOfX542GAfye2CkiQ
-         B3Mg==
-X-Gm-Message-State: AOAM530ZC1SVvDYVO58P0w08i4bE+N92RSbMun72zF+jmrgExU6GbKO+
-        GDX8JsCiM20VqMGqIApGTNQ2flPokw+6hIZ2
-X-Google-Smtp-Source: ABdhPJzopybsU5t9L35TApEQhlKL6BV3DHt+PoFmes+lTWIt3hsCmfp+AaX1Dh75q8VbiitKwJ7hWw==
-X-Received: by 2002:a05:6402:354b:: with SMTP id f11mr221195edd.361.1618435371392;
-        Wed, 14 Apr 2021 14:22:51 -0700 (PDT)
-Received: from localhost.localdomain (ip5f5bec5d.dynamic.kabel-deutschland.de. [95.91.236.93])
-        by smtp.gmail.com with ESMTPSA id t7sm586187edq.42.2021.04.14.14.22.50
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Pxhi9rtG2283Pz3XgVn14Yp9v+vQoGK61+2yLSidhSg=;
+        b=rDYEnSZBzX290iRr59cXbJDsMjbrsnzsM1gitwSMSLbMNm9szxVLAugt3HFtivBX1A
+         dV9EXEuYJmkVShEH3CifgKKT6pPpqzOAKe6iDvnJOfQFIMIZ/pWdTdmgs4ftIPz6Ohle
+         Sz/qsq2EDPxFnX3zoZgwuZEGTSvbV5q8unaz53y5ml4qaCwg7j5ycrQvzTrVJfTWdbc6
+         E5tqKD6wciVyL2xNC42iJw1oifavQl5KE38X+TZR8W2l6V84/jWqEJorD3ahUxiHXJcq
+         SdMnfW9JSJnyBNUDDUIc3J39SewlbhzGRJdilxHcFcGYI18Fd+JAvHSKdY6EaTCTTuht
+         YRHg==
+X-Gm-Message-State: AOAM532d7JM6XfCNoS5xE3X1FV//mA6OMxmmSeiEvVF9b/Wx63GaEZB3
+        x5zEEGbRQjGpORSIQ21qXg0=
+X-Google-Smtp-Source: ABdhPJw2qvc9j4KRbMtmFetqeelnOwvSAkO6zvU2LV3luboukEt0iHJIzWx4hKaYj5P6fDwvI6H7KA==
+X-Received: by 2002:a65:4d4c:: with SMTP id j12mr1499644pgt.346.1618457025606;
+        Wed, 14 Apr 2021 20:23:45 -0700 (PDT)
+Received: from localhost.localdomain (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
+        by smtp.gmail.com with ESMTPSA id g24sm624909pfh.164.2021.04.14.20.23.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 Apr 2021 14:22:51 -0700 (PDT)
-From:   Bean Huo <huobean@gmail.com>
-To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com,
-        adrian.hunter@intel.com, yoshihiro.shimoda.uh@renesas.com
-Cc:     beanhuo@micron.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v1 2/2] mmc: core: Let sanitize not retry in case of timeout/failure
-Date:   Wed, 14 Apr 2021 23:22:36 +0200
-Message-Id: <20210414212236.346813-3-huobean@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210414212236.346813-1-huobean@gmail.com>
-References: <20210414212236.346813-1-huobean@gmail.com>
+        Wed, 14 Apr 2021 20:23:45 -0700 (PDT)
+From:   Ben Chuang <benchuanggli@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        SeanHY.Chen@genesyslogic.com.tw, Renius.Chen@genesyslogic.com.tw,
+        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
+        Ben Chuang <benchuanggli@gmail.com>
+Subject: [PATCH] mmc: sdhci-pci-gli: Enlarge ASPM L1 entry delay of GL975x
+Date:   Thu, 15 Apr 2021 11:26:37 +0800
+Message-Id: <20210415032637.5219-1-benchuanggli@gmail.com>
+X-Mailer: git-send-email 2.30.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Bean Huo <beanhuo@micron.com>
+GL975x enters ASPM L1 state after a short idle in default.
+Enlarge the idle period to 7.9us for improving the R/W performance.
 
-Not any commands need to retry in case of timeout/failure.
-Currently, the sanitize command is issued by the IOCTL interface,
-and once its timeouts, the user normally decides to retry or not .
-Just blindly retry three times sanitize in the driver, it doesn't
-help sanitize retry succeed in the end, on the contrary, it only
-makes the user feel sanitize timeouts after 12 minutes.
-
-Signed-off-by: Bean Huo <beanhuo@micron.com>
+Signed-off-by: Ben Chuang <benchuanggli@gmail.com>
 ---
- drivers/mmc/core/mmc_ops.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-pci-gli.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 1ca0c89081be..cdf02d88fe92 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -1028,8 +1028,8 @@ int mmc_sanitize(struct mmc_card *card, unsigned int timeout_ms)
+diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
+index eb1ebb67e113..592d79082f58 100644
+--- a/drivers/mmc/host/sdhci-pci-gli.c
++++ b/drivers/mmc/host/sdhci-pci-gli.c
+@@ -22,6 +22,10 @@
+ #define   GLI_9750_WT_EN_ON	    0x1
+ #define   GLI_9750_WT_EN_OFF	    0x0
  
- 	mmc_retune_hold(host);
++#define SDHCI_GLI_9750_CFG2          0x848
++#define   SDHCI_GLI_9750_CFG2_L1DLY    GENMASK(28, 24)
++#define   GLI_9750_CFG2_L1DLY_VALUE    0x1F
++
+ #define SDHCI_GLI_9750_DRIVING      0x860
+ #define   SDHCI_GLI_9750_DRIVING_1    GENMASK(11, 0)
+ #define   SDHCI_GLI_9750_DRIVING_2    GENMASK(27, 26)
+@@ -113,6 +117,10 @@
+ #define   PCI_GLI_9755_LFCLK    GENMASK(14, 12)
+ #define   PCI_GLI_9755_DMACLK   BIT(29)
  
--	err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_SANITIZE_START,
--			 1, timeout_ms);
-+	err = __mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_SANITIZE_START,
-+			   1, timeout_ms, 0, true, false, 0);
- 	if (err)
- 		pr_err("%s: Sanitize failed err=%d\n", mmc_hostname(host), err);
++#define PCI_GLI_9755_CFG2          0x48
++#define   PCI_GLI_9755_CFG2_L1DLY    GENMASK(28, 24)
++#define   GLI_9755_CFG2_L1DLY_VALUE  0x1F
++
+ #define PCI_GLI_9755_PLL            0x64
+ #define   PCI_GLI_9755_PLL_LDIV       GENMASK(9, 0)
+ #define   PCI_GLI_9755_PLL_PDIV       GENMASK(14, 12)
+@@ -408,6 +416,22 @@ static void sdhci_gl9750_set_clock(struct sdhci_host *host, unsigned int clock)
+ 	sdhci_enable_clk(host, clk);
+ }
  
++static void gl9750_hw_setting(struct sdhci_host *host)
++{
++	u32 value;
++
++	gl9750_wt_on(host);
++
++	value = sdhci_readl(host, SDHCI_GLI_9750_CFG2);
++	value &= ~SDHCI_GLI_9750_CFG2_L1DLY;
++	/* set ASPM L1 entry delay to 7.9us */
++	value |= FIELD_PREP(SDHCI_GLI_9750_CFG2_L1DLY,
++			    GLI_9750_CFG2_L1DLY_VALUE);
++	sdhci_writel(host, value, SDHCI_GLI_9750_CFG2);
++
++	gl9750_wt_off(host);
++}
++
+ static void gli_pcie_enable_msi(struct sdhci_pci_slot *slot)
+ {
+ 	int ret;
+@@ -555,6 +579,13 @@ static void gl9755_hw_setting(struct sdhci_pci_slot *slot)
+ 	value &= ~PCI_GLI_9755_SCP_DIS;
+ 	pci_write_config_dword(pdev, PCI_GLI_9755_SerDes, value);
+ 
++	pci_read_config_dword(pdev, PCI_GLI_9755_CFG2, &value);
++	value &= ~PCI_GLI_9755_CFG2_L1DLY;
++	/* set ASPM L1 entry delay to 7.9us */
++	value |= FIELD_PREP(PCI_GLI_9755_CFG2_L1DLY,
++			    GLI_9755_CFG2_L1DLY_VALUE);
++	pci_write_config_dword(pdev, PCI_GLI_9755_CFG2, value);
++
+ 	gl9755_wt_off(pdev);
+ }
+ 
+@@ -562,6 +593,7 @@ static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
+ {
+ 	struct sdhci_host *host = slot->host;
+ 
++	gl9750_hw_setting(host);
+ 	gli_pcie_enable_msi(slot);
+ 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
+ 	sdhci_enable_v4_mode(host);
 -- 
-2.25.1
+2.30.0
 
