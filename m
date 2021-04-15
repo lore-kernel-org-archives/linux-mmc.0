@@ -2,300 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNWANTED_LANGUAGE_BODY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EB005C433B4
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:33:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B864C433ED
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 19:29:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B8D1D61166
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:33:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE1A261152
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 19:29:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232701AbhDOMdj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Apr 2021 08:33:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41276 "EHLO
+        id S234918AbhDOT3s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Apr 2021 15:29:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47966 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232678AbhDOMdj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 08:33:39 -0400
-Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 204BEC061574
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:33:16 -0700 (PDT)
-Received: by mail-vs1-xe31.google.com with SMTP id l11so3587215vsr.10
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:33:16 -0700 (PDT)
+        with ESMTP id S234716AbhDOT3r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 15:29:47 -0400
+Received: from mail-pg1-x52b.google.com (mail-pg1-x52b.google.com [IPv6:2607:f8b0:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54509C061574
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 12:29:24 -0700 (PDT)
+Received: by mail-pg1-x52b.google.com with SMTP id w10so17599555pgh.5
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 12:29:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=cn61o3l+cQhuqA8gP7u3apjojEDo5OUcEov4kpx8ITg=;
-        b=aFLAzVsGTqdAyT89VvUVPZMDzJ2TWCVoxlBxLbWtJLNY091tzshEX80XxYWSKVAgrh
-         lGqNFLzcv2Gi1yEHbNedzyXs3TLXnOh+28JTUTqROTeVNytVZirmo16oFzXh8sTyHUUZ
-         0wx75rkVYb0ygzgej5zNHRbo4x9Fuh2uziUVMroDwnYsW7u+TNy9zLpOMp4AUqIc0gCO
-         97iwKJvtGqJZahDVUtsH8UK7MbhiRyBq04m6ovQcA7gcse5xEe3UxNKogCMelcyxq8N1
-         XcV38Y9/yANrf07XhXxYxTtgBC0+G+RoXlFDSaTfOkBDBlW/qV8z95YMBLaKhVegppPH
-         JXYg==
+        d=chromium.org; s=google;
+        h=mime-version:content-transfer-encoding:in-reply-to:references
+         :subject:from:cc:to:date:message-id:user-agent;
+        bh=pTfQ6ElRzveMYG+4596oXssVf3HOzO8PnlrFcsbFyCE=;
+        b=cU0QWLPJUSXRvzfmbNk9HCE5aMOlZjb8eV/vJBp6qdInriisRqlBZqvSY2oSUBxZa6
+         PHKU8vK49Ow6ZFlN6/6BhLhHoWh1hr3TKSUSkBHcw18xoKyrEcHAIyPnDTDv8ZCfS8tp
+         LHtXLbBq5484UHUfM54Bf8LqRKD2anjHyeF3U=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=cn61o3l+cQhuqA8gP7u3apjojEDo5OUcEov4kpx8ITg=;
-        b=ZnbfNdQmzX8tOuYTFhK2LK29KYDBrCdbEe1aj+rn3qtMH16nuo2UR5Oj02zuQNrfN2
-         UP+QLlugmq66ZG2COuMFbdsbSroMXI+gGTm2+a0coXzZ17juvfZyz87eJdr5CIMtyTjc
-         kCCaHi9FK8M+inpYU6VJKAOtC257AJ8RsTrunxTltn8GGc6XhtfUMDYjFPXD7bu9Kl7t
-         sc82CMQGTRRdDZNdLBZuoOz7mfBj+jRwfo5i32hx88mkJWMWg/Yxrmda3uKfA8m6bmlA
-         Vc+/kqmSnR30DqNyKW5flRmWe2JH1yDbuEJ5/Nf2GMOJJJ/V36KIm+qXoZ+6kBN1PnF0
-         HBHA==
-X-Gm-Message-State: AOAM533FApE+luQ0M7m+P8kTL9Da7cRXke4U0wUujT2UHwFjvYeFP/So
-        kaowRM6u7ut2YCaGISdyKwiQvL8mh4u38StpYYyHlB6ShEKxow==
-X-Google-Smtp-Source: ABdhPJyukeR2yBo7fgb1puieSQLzNGAskdjLyUz7e3Da1oSPXpu3mc9ujLE8b6uhI4Psx+RP3cDkJRevTtrSdprzwSU=
-X-Received: by 2002:a67:cf41:: with SMTP id f1mr1879671vsm.42.1618489995214;
- Thu, 15 Apr 2021 05:33:15 -0700 (PDT)
+        h=x-gm-message-state:mime-version:content-transfer-encoding
+         :in-reply-to:references:subject:from:cc:to:date:message-id
+         :user-agent;
+        bh=pTfQ6ElRzveMYG+4596oXssVf3HOzO8PnlrFcsbFyCE=;
+        b=NFtp0nkBcSIEUmb2iYhiBv0it61QgrGQIi50C4/Kt370ZGuKXaDMEb31En0/VheIEF
+         9M6EKqsSvO6WpQQ3bDBI9uT6cV2VVuJqbnVb1VYsRKCzJstGh96ks/trGvM31EyoPdlC
+         LM1rygES8cEraFQaUIWSw6mJAqQq1CUVrPkM8FETs8hl2sH0D5xZmJkpK7e3bsiesbqb
+         AxC4wSsLJLkDp63MLL5IOxDWI04ne7XDiCbLLhJUO7agiSMvxq/lvatsHd7I/LUJji0h
+         qcG+TrmC58dFaYZUDZsaWWwySpQvA0x1I2GB4ej2fjWzXoarhpJGzCK/XdH7lL/hzTVR
+         I3MQ==
+X-Gm-Message-State: AOAM5318mm1j9R4HMX2sc0L817SKJ4e+gxZwJDVlQvApIU56CShsx6WR
+        jVuf/9OEn0QGA0kshp0t7otghw==
+X-Google-Smtp-Source: ABdhPJyFAir0xQ7Bx7udarkpRVTWcbD4vVqKoIrN3fLlVVlZsf0M9MTUiwhBqi8oUnZvJZ08VuJ/uQ==
+X-Received: by 2002:a63:ee42:: with SMTP id n2mr4787985pgk.37.1618514963771;
+        Thu, 15 Apr 2021 12:29:23 -0700 (PDT)
+Received: from chromium.org ([2620:15c:202:201:1ddc:37d8:5171:510d])
+        by smtp.gmail.com with ESMTPSA id i9sm3699276pjh.9.2021.04.15.12.29.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 15 Apr 2021 12:29:23 -0700 (PDT)
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-References: <20210401230221.12532-1-luserhker@gmail.com>
-In-Reply-To: <20210401230221.12532-1-luserhker@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 15 Apr 2021 14:32:38 +0200
-Message-ID: <CAPDyKFpjTikAzDqkcbyxa1Y918OevojZYhREPsmQgeo_Sd0xgA@mail.gmail.com>
-Subject: Re: [PATCH v3] Re-submit of the erase command addition plus removal
- of MMC_IOC_MULTI_CMD ifndef for erase. Author=Kimito Sakata <kimito.sakata@oracle.com>
-To:     luserhker@gmail.com, Avri Altman <avri.altman@wdc.com>
-Cc:     "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        kenny.gibbons@oracle.com, kimito.sakata@oracle.com,
-        rkamdar@micron.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Kimito Sakata <ksakata@kimitos-mbp.hsd1.co.comcast.net>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <CAPDyKFquhnG1tGAx+GGNKM7_haThSa34FcONHGhdBwFYuryeag@mail.gmail.com>
+References: <20210413003621.1403300-1-swboyd@chromium.org> <CAPDyKFquhnG1tGAx+GGNKM7_haThSa34FcONHGhdBwFYuryeag@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Don't allocate IDA for OF aliases
+From:   Stephen Boyd <swboyd@chromium.org>
+Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Sujit Kautkar <sujitka@chromium.org>,
+        Zubin Mithra <zsm@chromium.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 15 Apr 2021 12:29:21 -0700
+Message-ID: <161851496169.46595.399410018266490859@swboyd.mtv.corp.google.com>
+User-Agent: alot/0.9.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Avri
+Quoting Ulf Hansson (2021-04-15 01:56:12)
+> On Tue, 13 Apr 2021 at 02:36, Stephen Boyd <swboyd@chromium.org> wrote:
+> >
+> > -       err =3D ida_simple_get(&mmc_host_ida, min_idx, max_idx, GFP_KER=
+NEL);
+> > -       if (err < 0) {
+> > -               kfree(host);
+> > -               return NULL;
+> > +               index =3D ida_simple_get(&mmc_host_ida, min_idx, max_id=
+x, GFP_KERNEL);
+> > +               if (index < 0) {
+> > +                       kfree(host);
+> > +                       return NULL;
+> > +               }
+>=20
+> This means that a DTB that is screwed up in a way that it has two mmc
+> aliases with the same index, would be allowed to use the same index.
+>=20
+> What will happen when we continue the probe sequence in such a case?
 
-On Fri, 2 Apr 2021 at 01:02, <luserhker@gmail.com> wrote:
->
-> From: Kimito Sakata <kimito.sakata@oracle.com>
->
-> Signed-off-by: Kimito Sakata <ksakata@Kimitos-MBP.hsd1.co.comcast.net>
+Yeah I thought about this after sending the patch. So the problem would
+be like this right?
 
-This looks okay to me, but I have looped in Avri who might have some comments.
+	aliases {
+		mmc1 =3D &sdhci0;
+		mmc1 =3D &sdhci1;
+	};
 
-Kind regards
-Uffe
+I have good news! DT won't compile it because it saw the same alias
+assigned to twice. I tried it on my sc7180 board.=20
 
-> ---
->  mmc.c      |   8 ++++
->  mmc.h      |  13 +++++-
->  mmc_cmds.c | 129 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  mmc_cmds.h |   1 +
->  4 files changed, 150 insertions(+), 1 deletion(-)
->
-> diff --git a/mmc.c b/mmc.c
-> index f3d724b..eb2638b 100644
-> --- a/mmc.c
-> +++ b/mmc.c
-> @@ -229,6 +229,14 @@ static struct Command commands[] = {
->                 "Run Field Firmware Update with <image name> on <device>.\n",
->           NULL
->         },
-> +       { do_erase, -4,
-> +       "erase", "<type> " "<start address> " "<end address> " "<device>\n"
-> +               "Send Erase CMD38 with specific argument to the <device>\n\n"
-> +               "NOTE!: This will delete all user data in the specified region of the device\n"
-> +               "<type> must be: legacy | discard | secure-erase | "
-> +               "secure-trim1 | secure-trim2 | trim \n",
-> +       NULL
-> +       },
->         { 0, 0, 0, 0 }
->  };
->
-> diff --git a/mmc.h b/mmc.h
-> index 5754a9d..e9766d7 100644
-> --- a/mmc.h
-> +++ b/mmc.h
-> @@ -35,7 +35,15 @@
->  #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
->  #define MMC_CLEAR_WRITE_PROT   29    /* ac   [31:0] data addr   R1b */
->  #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
-> -
-> +#define MMC_ERASE_GROUP_START  35    /* ac   [31:0] data addr   R1  */
-> +#define MMC_ERASE_GROUP_END    36    /* ac   [31:0] data addr   R1  */
-> +#define MMC_ERASE              38    /* ac   [31] Secure request
-> +                                             [30:16] set to 0
-> +                                             [15] Force Garbage Collect request
-> +                                             [14:2] set to 0
-> +                                             [1] Discard Enable
-> +                                             [0] Identify Write Blocks for
-> +                                             Erase (or TRIM Enable)  R1b */
->  /*
->   * EXT_CSD fields
->   */
-> @@ -62,6 +70,7 @@
->  #define EXT_CSD_CACHE_SIZE_2           251
->  #define EXT_CSD_CACHE_SIZE_1           250
->  #define EXT_CSD_CACHE_SIZE_0           249
-> +#define EXT_CSD_SEC_FEATURE_SUPPORT    231
->  #define EXT_CSD_BOOT_INFO              228     /* R/W */
->  #define EXT_CSD_HC_ERASE_GRP_SIZE      224
->  #define EXT_CSD_HC_WP_GRP_SIZE         221
-> @@ -190,6 +199,8 @@
->  #define EXT_CSD_REV_V4_2               2
->  #define EXT_CSD_REV_V4_1               1
->  #define EXT_CSD_REV_V4_0               0
-> +#define EXT_CSD_SEC_GB_CL_EN           (1<<4)
-> +#define EXT_CSD_SEC_ER_EN              (1<<0)
->
->
->  /* From kernel linux/mmc/core.h */
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index 6c24cea..3e36ff2 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -2514,6 +2514,135 @@ int do_cache_dis(int nargs, char **argv)
->         return do_cache_ctrl(0, nargs, argv);
->  }
->
-> +static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
-> +{
-> +       int ret = 0;
-> +       struct mmc_ioc_multi_cmd *multi_cmd;
-> +
-> +       multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
-> +                          3 * sizeof(struct mmc_ioc_cmd));
-> +       if (!multi_cmd) {
-> +               perror("Failed to allocate memory");
-> +               return -ENOMEM;
-> +       }
-> +
-> +       multi_cmd->num_of_cmds = 3;
-> +       /* Set erase start address */
-> +       multi_cmd->cmds[0].opcode = MMC_ERASE_GROUP_START;
-> +       multi_cmd->cmds[0].arg = start;
-> +       multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-> +       multi_cmd->cmds[0].write_flag = 1;
-> +
-> +       /* Set erase end address */
-> +       multi_cmd->cmds[1].opcode = MMC_ERASE_GROUP_END;
-> +       multi_cmd->cmds[1].arg = end;
-> +       multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
-> +       multi_cmd->cmds[1].write_flag = 1;
-> +
-> +       /* Send Erase Command */
-> +       multi_cmd->cmds[2].opcode = MMC_ERASE;
-> +       multi_cmd->cmds[2].arg = argin;
-> +       multi_cmd->cmds[2].cmd_timeout_ms = 300*255*255;
-> +       multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-> +       multi_cmd->cmds[2].write_flag = 1;
-> +
-> +       /* send erase cmd with multi-cmd */
-> +       ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-> +       if (ret)
-> +               perror("Erase multi-cmd ioctl");
-> +
-> +       free(multi_cmd);
-> +       return ret;
-> +}
-> +
-> +int do_erase(int nargs, char **argv)
-> +{
-> +       int dev_fd, ret;
-> +       char *print_str;
-> +       char **eptr = NULL;
-> +       __u8 ext_csd[512], checkup_mask = 0;
-> +       __u32 arg, start, end;
-> +
-> +       if (nargs != 5) {
-> +               fprintf(stderr, "Usage: erase <type> <start addr> <end addr> </path/to/mmcblkX>\n");
-> +               exit(1);
-> +       }
-> +
-> +       if (strstr(argv[2], "0x") || strstr(argv[2], "0X"))
-> +               start = strtol(argv[2], eptr, 16);
-> +       else
-> +               start = strtol(argv[2], eptr, 10);
-> +
-> +       if (strstr(argv[3], "0x") || strstr(argv[3], "0X"))
-> +               end = strtol(argv[3], eptr, 16);
-> +       else
-> +               end = strtol(argv[3], eptr, 10);
-> +
-> +       if (end < start) {
-> +               fprintf(stderr, "erase start [0x%08x] > erase end [0x%08x]\n",
-> +                       start, end);
-> +               exit(1);
-> +       }
-> +
-> +       if (strcmp(argv[1], "legacy") == 0) {
-> +               arg = 0x00000000;
-> +               print_str = "Legacy Erase";
-> +       } else if (strcmp(argv[1], "discard") == 0) {
-> +               arg = 0x00000003;
-> +               print_str = "Discard";
-> +       } else if (strcmp(argv[1], "secure-erase") == 0) {
-> +               print_str = "Secure Erase";
-> +               checkup_mask = EXT_CSD_SEC_ER_EN;
-> +               arg = 0x80000000;
-> +       } else if (strcmp(argv[1], "secure-trim1") == 0) {
-> +               print_str = "Secure Trim Step 1";
-> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
-> +               arg = 0x80000001;
-> +       } else if (strcmp(argv[1], "secure-trim2") == 0) {
-> +               print_str = "Secure Trim Step 2";
-> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
-> +               arg = 0x80008000;
-> +       } else if (strcmp(argv[1], "trim") == 0) {
-> +               print_str = "Trim";
-> +               checkup_mask = EXT_CSD_SEC_GB_CL_EN;
-> +               arg = 0x00000001;
-> +       } else {
-> +               fprintf(stderr, "Unknown erase type: %s\n", argv[1]);
-> +               exit(1);
-> +       }
-> +
-> +       dev_fd = open(argv[4], O_RDWR);
-> +       if (dev_fd < 0) {
-> +               perror(argv[4]);
-> +               exit(1);
-> +       }
-> +
-> +       if (checkup_mask) {
-> +               ret = read_extcsd(dev_fd, ext_csd);
-> +               if (ret) {
-> +                       fprintf(stderr, "Could not read EXT_CSD from %s\n",
-> +                               argv[4]);
-> +                       goto out;
-> +               }
-> +               if ((checkup_mask & ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) !=
-> +                                                               checkup_mask) {
-> +                       fprintf(stderr, "%s is not supported in %s\n",
-> +                               print_str, argv[4]);
-> +                       ret = -ENOTSUP;
-> +                       goto out;
-> +               }
-> +
-> +       }
-> +       printf("Executing %s from 0x%08x to 0x%08x\n", print_str, start, end);
-> +
-> +       ret = erase(dev_fd, arg, start, end);
-> +out:
-> +       printf(" %s %s!\n\n", print_str, ret ? "Failed" : "Succeed");
-> +       close(dev_fd);
-> +       return ret;
-> +}
-> +
-> +
->  int do_ffu(int nargs, char **argv)
->  {
->  #ifndef MMC_IOC_MULTI_CMD
-> diff --git a/mmc_cmds.h b/mmc_cmds.h
-> index 9d3246c..8331ab2 100644
-> --- a/mmc_cmds.h
-> +++ b/mmc_cmds.h
-> @@ -45,3 +45,4 @@ int do_ffu(int nargs, char **argv);
->  int do_read_scr(int argc, char **argv);
->  int do_read_cid(int argc, char **argv);
->  int do_read_csd(int argc, char **argv);
-> +int do_erase(int nargs, char **argv);
-> --
-> 2.24.1 (Apple Git-126)
->
+arch/arm64/boot/dts/qcom/sc7180.dtsi:35.3-18:
+ERROR (duplicate_property_names): /aliases:mmc1: Duplicate property name
+ERROR: Input tree has errors, aborting (use -f to force output)
+arch/arm64/boot/dts/qcom/sc7180-idp.dtb] Error 2
+
+I suppose if someone forced the compilation it may be bad, but do we
+really care?
+
+TL;DR: this seems like it isn't a problem.
+
+>=20
+> >         }
+> >
+> > -       host->index =3D err;
+> > +       host->index =3D index;
+> >
+> >         dev_set_name(&host->class_dev, "mmc%d", host->index);
+> >         host->ws =3D wakeup_source_register(NULL, dev_name(&host->class=
+_dev));
+>=20
+> Another concern that could potentially be a problem, is that the
+> "thread" that holds the reference that prevents ida from being
+> removed, how would that react to a new mmc device to become
+> re-registered with the same index?
+>=20
+> I wonder if we perhaps should return -EPROBE_DEFER instead, when
+> ida_simple_get() fails?
+>=20
+
+Don't think so. The device (with the kobject inside) is removed, and
+thus the mmc1 device will be removed, but the kobject's release function
+is delayed due to the config. This means that
+mmc_host_classdev_release() is called at a later time. The only thing
+inside that function is the IDA removal and the kfree of the container
+object. Given that nothing else is in that release function I believe it
+is safe to skip IDA allocation as it won't be blocking anything in the
+reserved alias case.=20
+
+Furthermore, when the device is deleted in mmc_remove_host() there could
+be other users of the device that haven't called put_device() yet.
+Either way, those other users are keeping the device memory alive, but
+otherwise device_del() has unlinked it from the various driver core
+lists and sysfs has removed it too so it's in a state where code may be
+referencing it but it's on the way out so users of the device will not
+be able to do much with it during this time.
+
+This sort of problem (if it exists which I don't think it does) would
+have been there all along and can't be fixed at this level. When a
+device that has an alias calls the mmc_alloc_host() function twice it
+gets two different device structures created so there are two distinct
+kobjects that will need to be released at some point. The index is
+usually different for those two kobjects, but with aliases it turns out
+it is the same. When it comes to registering that device with the same
+name the second one will fail because a device with that name already
+exists on the bus. This would be really hard to do given that it would
+need to be the same aliased device in DT calling the mmc_add_host()
+function without calling mmc_remove_host() for the first one it added in
+between.
+
+(Sorry if that is long. I'm sort of stream of conciousness writing it to
+you here and not rewriting it to be more concise)
