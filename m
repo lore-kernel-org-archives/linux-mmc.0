@@ -7,49 +7,49 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16EEDC43460
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 08:44:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DFE25C43461
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 08:44:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E9EEE6124B
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 08:44:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AC980611F1
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 08:44:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232000AbhDOIol (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Apr 2021 04:44:41 -0400
-Received: from youngberry.canonical.com ([91.189.89.112]:38422 "EHLO
+        id S232006AbhDOIom (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Apr 2021 04:44:42 -0400
+Received: from youngberry.canonical.com ([91.189.89.112]:38425 "EHLO
         youngberry.canonical.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231720AbhDOIok (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 04:44:40 -0400
-Received: from mail-ed1-f72.google.com ([209.85.208.72])
+        with ESMTP id S231996AbhDOIol (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 04:44:41 -0400
+Received: from mail-ed1-f69.google.com ([209.85.208.69])
         by youngberry.canonical.com with esmtps (TLS1.2:ECDHE_RSA_AES_128_GCM_SHA256:128)
         (Exim 4.86_2)
         (envelope-from <krzysztof.kozlowski@canonical.com>)
-        id 1lWxbk-0000JQ-Rt
-        for linux-mmc@vger.kernel.org; Thu, 15 Apr 2021 08:44:16 +0000
-Received: by mail-ed1-f72.google.com with SMTP id w15-20020a056402268fb02903828f878ec5so4789170edd.5
-        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 01:44:16 -0700 (PDT)
+        id 1lWxbl-0000Jo-LI
+        for linux-mmc@vger.kernel.org; Thu, 15 Apr 2021 08:44:17 +0000
+Received: by mail-ed1-f69.google.com with SMTP id m2-20020aa7c4820000b0290382b0bad9e7so4790574edq.9
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 01:44:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=9YAO2kP+UwcFk07vAzhKIghy5JKErNSIyCSfT/ZaQms=;
-        b=NzZH8vza7BZ9qWRslB8GsSulQCyxMG+6K52IGsWEhTUIifmPph30JVmf1DkCJ8Bep7
-         tqSxYP7+TmiCxc7QTcj09LJnl+fU7CWN/4IjqWmrMTqeTdW/g4qwLhN6N3ICj/KlXjiI
-         2CJLer1ODBef7oc5POiuJP79Fo8eoNDraXJjWTKxBBSwDBh0d7d2KIp1z4xqfSUfJr4Z
-         2ldtIXWP/ELPl2MGendsCvc00b31hc02CG4lRR38yTBSOmn+VCa7BN5jD71r38zajBcb
-         4jELA3hlU3mlzNbwnPBEBXZeMTqTk2ysWKRp3GdQMQNrZJOX1K5uuYIE/YEYP5LkSWz6
-         gmVg==
-X-Gm-Message-State: AOAM533kZwFsJKWTZEVx7pXGaib65SULbnPUCqru5Tx6W2z1RvfXOdaX
-        nkytxw9JKfBvwimTRxqibBqjF/TM/okq50v8omEioV37/KuwTbWwSrc8A8/SGVEH1NvdY9/VgQ7
-        tPqYwbHLGbNPKYAWk6AmDIDEA9bgatA4wCva9xw==
-X-Received: by 2002:aa7:d84b:: with SMTP id f11mr2762945eds.149.1618476256233;
-        Thu, 15 Apr 2021 01:44:16 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxZkslZUZjN5xuGAWGmBMeXcV0Db6KIDdfQofIUygJyUe1yu2Eif2ogeojONnfAUrCCjyD9tQ==
-X-Received: by 2002:aa7:d84b:: with SMTP id f11mr2762931eds.149.1618476256083;
-        Thu, 15 Apr 2021 01:44:16 -0700 (PDT)
+        bh=C3RZMclgxc1FxJU/OrPHbJLizxo8O9HUjZmngSIwkM0=;
+        b=MjOer3vpkEjegZAH4EqwDl7vB5GH0NlDEIU0dvVBXmoi9iHRqzx1F36ZALoWlE5+Eo
+         3C7F4HKw7TyUc1R8DFlm+ptiTyFDvQ9wvdZIkz10qjUyTvxswZ+mxLaPwpKxVqoNxZOU
+         SDtY0a1SqniHKV75BliQ3krW7ZvPZzOIlUUxlE5FBIX0PgJ+8uPNOQISxP0Mrd930Sq9
+         ZyfLeXuNZKFk4+43891K1hieNoSnYZ6IpVDgXTnK/EZ92RK9NCe5R3OA4gdJmYa9v6AX
+         5AKV+xbJ1Xn95pGycBGWIoS5poBRc00Ee7gFgHsBY0Zw3ijUrmT+LO6iNsd63c9+FAsA
+         +5RQ==
+X-Gm-Message-State: AOAM531l+SwT6qP60Gc7Upq1vHp/M1ptVkyoq4mf75N4NfWiBlAIrFZH
+        FcNS5gMaoDYkb0+mCviREmKNY0mxRPTax2eP5dP/XiF/wyAIx2zLCZMD9XBY1aC9unVo0AzcYFD
+        RHgwyHPIuQ45oa3cnMwprommqb76Tn87AZtB9vA==
+X-Received: by 2002:a17:906:d04d:: with SMTP id bo13mr2252569ejb.157.1618476257343;
+        Thu, 15 Apr 2021 01:44:17 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwL1iqD0K8UraIVtQPabESHzQRRgghEweHqa35iG9WZz8DZdnZL+3UB1rriHafe5y+OdtromA==
+X-Received: by 2002:a17:906:d04d:: with SMTP id bo13mr2252555ejb.157.1618476257184;
+        Thu, 15 Apr 2021 01:44:17 -0700 (PDT)
 Received: from localhost.localdomain (xdsl-188-155-192-147.adslplus.ch. [188.155.192.147])
-        by smtp.gmail.com with ESMTPSA id k26sm1419360ejk.29.2021.04.15.01.44.15
+        by smtp.gmail.com with ESMTPSA id k26sm1419360ejk.29.2021.04.15.01.44.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Apr 2021 01:44:15 -0700 (PDT)
+        Thu, 15 Apr 2021 01:44:16 -0700 (PDT)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 To:     Ben Dooks <ben-linux@fluff.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
@@ -59,9 +59,9 @@ To:     Ben Dooks <ben-linux@fluff.org>,
 Cc:     Sylwester Nawrocki <snawrocki@kernel.org>,
         Marek Szyprowski <m.szyprowski@samsung.com>,
         Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Subject: [PATCH v2 2/3] mmc: sdhci-s3c: correct kerneldoc of sdhci_s3c_drv_data
-Date:   Thu, 15 Apr 2021 10:44:11 +0200
-Message-Id: <20210415084412.51125-2-krzysztof.kozlowski@canonical.com>
+Subject: [PATCH v2 3/3] mmc: sdhci-s3c: constify uses of driver/match data
+Date:   Thu, 15 Apr 2021 10:44:12 +0200
+Message-Id: <20210415084412.51125-3-krzysztof.kozlowski@canonical.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20210415084412.51125-1-krzysztof.kozlowski@canonical.com>
 References: <20210415084412.51125-1-krzysztof.kozlowski@canonical.com>
@@ -71,10 +71,10 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Correct the name of sdhci_s3c_drv_data structure in kerneldoc:
-
-  drivers/mmc/host/sdhci-s3c.c:143: warning:
-    expecting prototype for struct sdhci_s3c_driver_data. Prototype was for struct sdhci_s3c_drv_data instead
+The driver data (struct sdhci_s3c_drv_data) stored in of_device_id
+table is allocated as const and used only in const-way.  Skip
+unnecessary const-away casts and convert all users to work with pointer
+to const.  This is both more logical and safer.
 
 Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 
@@ -83,22 +83,48 @@ Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 Changes since v1:
 1. None
 ---
- drivers/mmc/host/sdhci-s3c.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-s3c.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 8e1dca625620..a07a8f011741 100644
+index a07a8f011741..862f033d235d 100644
 --- a/drivers/mmc/host/sdhci-s3c.c
 +++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -130,7 +130,7 @@ struct sdhci_s3c {
+@@ -462,21 +462,21 @@ static int sdhci_s3c_parse_dt(struct device *dev,
+ }
+ #endif
+ 
+-static inline struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
++static inline const struct sdhci_s3c_drv_data *sdhci_s3c_get_driver_data(
+ 			struct platform_device *pdev)
+ {
+ #ifdef CONFIG_OF
+ 	if (pdev->dev.of_node)
+-		return (struct sdhci_s3c_drv_data *)of_device_get_match_data(&pdev->dev);
++		return of_device_get_match_data(&pdev->dev);
+ #endif
+-	return (struct sdhci_s3c_drv_data *)
++	return (const struct sdhci_s3c_drv_data *)
+ 			platform_get_device_id(pdev)->driver_data;
+ }
+ 
+ static int sdhci_s3c_probe(struct platform_device *pdev)
+ {
+ 	struct s3c_sdhci_platdata *pdata;
+-	struct sdhci_s3c_drv_data *drv_data;
++	const struct sdhci_s3c_drv_data *drv_data;
+ 	struct device *dev = &pdev->dev;
+ 	struct sdhci_host *host;
+ 	struct sdhci_s3c *sc;
+@@ -761,7 +761,7 @@ static const struct platform_device_id sdhci_s3c_driver_ids[] = {
+ MODULE_DEVICE_TABLE(platform, sdhci_s3c_driver_ids);
+ 
+ #ifdef CONFIG_OF
+-static struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
++static const struct sdhci_s3c_drv_data exynos4_sdhci_drv_data = {
+ 	.no_divider = true,
  };
  
- /**
-- * struct sdhci_s3c_driver_data - S3C SDHCI platform specific driver data
-+ * struct sdhci_s3c_drv_data - S3C SDHCI platform specific driver data
-  * @sdhci_quirks: sdhci host specific quirks.
-  * @no_divider: no or non-standard internal clock divider.
-  *
 -- 
 2.25.1
 
