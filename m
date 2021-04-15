@@ -2,145 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E52FBC433ED
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 11:54:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F6F4C433B4
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:03:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A8FC0611CD
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 11:54:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21DB461139
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Apr 2021 12:03:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230260AbhDOLzC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Apr 2021 07:55:02 -0400
-Received: from mail-eopbgr1400103.outbound.protection.outlook.com ([40.107.140.103]:8292
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229943AbhDOLzC (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 15 Apr 2021 07:55:02 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=C0mU0TA+2K2AunOp3Rzqf2FNiWKtUxVzfohM7lgDlKJxkhYaYAm45Qufdi4yw6+cQfvmSPPEI0QF6nHI45W2mZ2WDhmPnhwJ7MSoLNdY6v3KH9A/B5UWL9w6QaLOAAPQOInAEdSF2CZMpC1FFsbZOBJhyz9WlNf4tPbvj82Kj6nJu1/Wpi7W0QuuFLrlcSwlCMCwriMt6sBSkvE8TB3wlsH70TUE6R8LydGtiplTV7r0up4YWMhLJJ5upq6qQ+y8kh1supIpRygscAia2RTdVj673hMZmDKZrXMyZs3cF/ngvkCUrs2dnZJXrYTYvurqdnciYq3Te66yn79f3F3x+A==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=eZTCS0epOydhrHsGVTCzZsVE1gd9yUiRqyHWBNBGUxM=;
- b=kC4Nn7gn0ti3li3VY1qNtYfMS1qSMuEBNGTIDT2VSPDa5au6u6rgbXFY8Sa+7B0awvlHiUGsdU3PODnlrSFdZ1W09RQ7GNXas8UMHJq2Vzg3nW7Z6isd6jubtP/sKEGbJxMIu9p0t76yFSxupvhDsX8JmKvOa9h47yM/2UyKF2Enbmgn3Y1ua/nzYIes25uXNOurUxOADo2A4r97L6+YCXqtBShFzfj6eDg2nDeN6/bURnutGuF+lMvgs95p38LL0X/+/12S+4dIpcr6fNRv5Rfo5PHitV2R53NBPgJXoL+ih6QFAyXyq/Ut4X1r81YEwOZ1Xy2sgC+F33U5PGCynQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
+        id S231531AbhDOMDb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Apr 2021 08:03:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34376 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231482AbhDOMDa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Apr 2021 08:03:30 -0400
+Received: from mail-vk1-xa32.google.com (mail-vk1-xa32.google.com [IPv6:2607:f8b0:4864:20::a32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6803AC061756
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:03:07 -0700 (PDT)
+Received: by mail-vk1-xa32.google.com with SMTP id o2so3290494vkn.1
+        for <linux-mmc@vger.kernel.org>; Thu, 15 Apr 2021 05:03:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=eZTCS0epOydhrHsGVTCzZsVE1gd9yUiRqyHWBNBGUxM=;
- b=n4iTuod3MGmReIhTyAP/0zdNS0sWNqe70V9nEHlyR3IUol9yV8gm1rFbz9LAcQI9z7f3YDYo+2NRAt3hyFjo/2ulKSujCg/2KP6TQrLzV86egBjQnTRsL3SeSNrEaHkVJ8E5YG0S1Pc1teANnLPIg1ik2LJ4SPUzAalaLoIPKHQ=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYAPR01MB4079.jpnprd01.prod.outlook.com (2603:1096:404:bc::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4042.16; Thu, 15 Apr
- 2021 11:54:37 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::e413:c5f8:a40a:a349]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::e413:c5f8:a40a:a349%4]) with mapi id 15.20.4020.023; Thu, 15 Apr 2021
- 11:54:36 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [PATCH v2] mmc: tmio: always restore irq register
-Thread-Topic: [PATCH v2] mmc: tmio: always restore irq register
-Thread-Index: AQHXMD9wAhm4FLaGeU+PLzAooKgQQ6q1e1WQ
-Date:   Thu, 15 Apr 2021 11:54:36 +0000
-Message-ID: <TY2PR01MB36929D80E62B2C1563886C74D84D9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210413083137.11171-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210413083137.11171-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 31917b8a-107c-40ed-f208-08d900053e42
-x-ms-traffictypediagnostic: TYAPR01MB4079:
-x-microsoft-antispam-prvs: <TYAPR01MB4079FF651D624EAAE7E43BC8D84D9@TYAPR01MB4079.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: eZDoCVq2eSoZpHZuMdQ2TUi9fJSpWYx/XMrtSdcKuFeeb+GY0aYjdeEjANm6yV0lp7AO909TnYfgSy/ZQBpYz3/4CRw+9rZWS7Kas6DtceFc+gg+ILslAScCDPixZIzIN4es11u1VNdo87mNSUyQYacHv7FyTM1zI1vd1Xv9CGE7IvMGGdnvjdB2Fhaa6spueUD8/5eQt5rTegg/lQZUVa+KYK5ulAgg3v+KUZx3vrMPn1gSWA488QuoQzQze4I1SuGi6GJZLnYGwu6JsoDiFuOLr88bLttRUqcooZvlPktexHr48l1JvHy3cjCLjch7W1M3Auk3/DJlu0KX1zWzv8ceIqiyMxYsKun3+J6WHbFjwv5sYLgI/wTTLw46cMtuNIfs99kFtNG6PZyzx8X5VqJlMB65nyBmnT0K8wAFBy2Kcr2xseuZyMo4mF05jUQWvRZQP0zzhkZviEUNYlb/QI/5rsGAHlYAijRUHuLpIt4wIU5nk95cXiVyyj1COvrkrxt65vJ37b3C59UU+rnUjke1HyBnd2R1+yMXp6cYDp286ylI7CJC1SLh/axHTYuMecccJTrmJsIoLon3CpopZ9AlvCiJOBp02qNHFjLgwkM=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(376002)(136003)(366004)(39860400002)(346002)(7696005)(86362001)(66476007)(76116006)(5660300002)(478600001)(66556008)(8936002)(71200400001)(186003)(66446008)(64756008)(6506007)(9686003)(2906002)(26005)(33656002)(316002)(52536014)(66946007)(8676002)(4326008)(122000001)(55236004)(38100700002)(110136005)(55016002)(4744005);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?NYPK9yadRIXzuJnGgjq54gRaiNXiJ5ILGfLqBX8u/Sbk32B+SxvhO+/XSLot?=
- =?us-ascii?Q?GS8K0Wp9M/4m17llQBB+7tlVAkG2A31FSVrqN5Yxeum8LPw8nfTtWxDhahkU?=
- =?us-ascii?Q?FNB+D75TKEfG0Ygk+wqendnoZ41x7zoNPp7M682es7kcAlZEFX47dPcM2gBQ?=
- =?us-ascii?Q?kboB9ekX0eoyyS58ECfzpXNz+161GX7ZyOm47HNPQ0w3gZDlpOJk65Boqbsj?=
- =?us-ascii?Q?DeojrgRWTWjZTAac7QsbmfxCF16SXnyWyXpY757Nug/lBotSOLfr6FvsxhYp?=
- =?us-ascii?Q?NMEREWKuEb/KMVU2+UXRfRmjpg8pBYiufvCNtTVL3ZIejNaNWlGM7HAi4h0r?=
- =?us-ascii?Q?hsT69boyucUBlOeN72kqXXmuWh8z8ZD/CTbfTuugMdOviY+pTFA+MoyDgX4i?=
- =?us-ascii?Q?k3JaWD+VIJ8s9NsThB74kQDq/e6coiNWr3Cl2R33rOOvKjmKQ1cj+TDXsBvl?=
- =?us-ascii?Q?9LXGIxBrlRE3ZvD7oA0DpaD52yRfwhXPrMrysaqOSEKDGR1wgcdTu9v9wUHH?=
- =?us-ascii?Q?58CQPt7MEMboYzZo1H/Xq/hinQO8dLT3Ukdr2RoV5SqQTIg+vQ/a3AzQLVKJ?=
- =?us-ascii?Q?LWCLbV8mzermM3QncMOBZZp+uO8i26DhayrddQOYlhgvDleYWQNzvlDRr5+6?=
- =?us-ascii?Q?SLqIHRce91wT9Yf9s/zlklqpFUOLl4HGZxicStSh55dYOWT0eBSV6amHK+ic?=
- =?us-ascii?Q?NW18sUmwVy64ZBMpY6Lt5rKMsQ5z7ZaadFOuLjVtJEJyLFm1rIlvPuetgcga?=
- =?us-ascii?Q?VmOsz4SQ7dy0KHSxRkE25yYfsf2lAksWl/Y5b1MhP7W+Rx2nAqWt9vqgq1NS?=
- =?us-ascii?Q?kHZ3eDI+Sn9IYlh+Ru67d9ct1JiwxMfjh9dmhSS/iXVjF4FqqjQMdR3XeUyf?=
- =?us-ascii?Q?8nNikrRmuKO/m1H7pFl62a0cSMGF3byxIpGmYoxF8TQ0klbo3k3N2pQp94z2?=
- =?us-ascii?Q?4Jge8tcYYf8F94+p9PXZ/Hu1u+LAuQAotchLd8g1BLfxD4qGlNwCUGEuttG0?=
- =?us-ascii?Q?Bbr+lSZ7+kiedfvMclI1TRsfBliWYobSzFyjheognU4ReBOKHlwnEb1J6ocD?=
- =?us-ascii?Q?28n+d9lndGKxh5JWqOFRl+GU4ADRE3jjIbtTjZLutzodFZNqYiRU0juZBWIB?=
- =?us-ascii?Q?TpdPTvxmC6+1eXn1dTjquzKs3ua8uDJ9q7GbW1LuL1FgNh0MbO7h0spepn0h?=
- =?us-ascii?Q?I1ntN+yzBUGU2G/EKP3rLilzwnXNifRCV5JS5JSsMJx+afDrZqDnYfXGVqxc?=
- =?us-ascii?Q?5BscKhCYYv+h/PJJbA1QEPuYtfLJdMaWZjVPLx9KibduKFrEwnSuelWCwP6B?=
- =?us-ascii?Q?6YK/dF1gd3QcRMINLl64llYG?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=3QIBHoMu5EbRCWYG2M6emH3zmg/eaWsR3cuaHJ11glI=;
+        b=dCq0K9/n/8M3yF4cCAveE3AoMzabLitZqdBYH8zNnSq6DC+oQNf/94IpSchjfwNDO8
+         +TgGhKuYLKQa13hgyOXoNdvK+QhiJIrY2Zcj/+NPHSp53nvLwJUdJhKimCFzoZWW/t3B
+         SG9rm31+d8AsTFrq7l4Vm6zCTBfIosV4/z0x35vT7qHU5dHJus6S2xTGOJxpWBhDDB9G
+         ILR6H+W12/pQX1if/0zUZve7ibqCQ6JG149oFGqQkIA5k+Wy2KFwQimHF6qA3ZyADtDY
+         Wrls8HjwC1XTNFoLIpYNPBBHQ3hevtDYd678PXyh808MaPKbPpuhAdvrnne85j2m7Sjf
+         ypVg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=3QIBHoMu5EbRCWYG2M6emH3zmg/eaWsR3cuaHJ11glI=;
+        b=m9sJrDQYfWpKBgV+suhV3qyQFF7/119vQNGaY5COhy+wyhulDlVW7FjBXfHAPXKDaH
+         OKfAM07XQcpbfEyBBEAQmn28cF2z/OEP54vk6qQ//RCaZkpTtKyfttMyIHw+P/GAxqPU
+         kluUqsy9+IHkoK1XNJ1QraWCj7rMxcGEGiz70kXfMK2QzC8AaNkDUoJH16gUGDU4TDhw
+         q8Gz7BCTiPBC3tT9FghPf3Ba4djArN+sM8+G6kzLLwDabmS8j/nlM502iYdyB5ANwhEL
+         NlC1wRZ3laEyiqGhYH7qgsaZSgKORFZrOFdXwQh+D+2tSEdh/AAMXF6+OhSaSUhIEZJ+
+         H6Tg==
+X-Gm-Message-State: AOAM5327I01qiaqUNbmGI7/9jLfoHAbU2GpXi+RByJPH4hxKGsBabaoC
+        LxJ2H1Ag62cyPFbB35Lzl/Xi4oFQN4xFqQBO5BNqVw==
+X-Google-Smtp-Source: ABdhPJyyNe77t41hhK2Coubzx2cqNjbIKfBKN8GPSKlWdgisgvTh30oPYop2+OGDM1PqxdlkQwlJ3uQ66XA4eW6cLr4=
+X-Received: by 2002:a1f:8d14:: with SMTP id p20mr1432935vkd.6.1618488186344;
+ Thu, 15 Apr 2021 05:03:06 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 31917b8a-107c-40ed-f208-08d900053e42
-X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Apr 2021 11:54:36.7288
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: QHjhmex+WRcdydWdd9Tf0d8jxwcRixOqH1vfvCqOUU7EhbMQ3LDra75vkL8qM/Pf5cCz6Y2em3OM6ms4XZJ0WdbcMLQwpuvo0XxNkIWpXOM9Z2s43lkjzAPAhm97zZ52
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4079
+References: <1618366903-94346-1-git-send-email-jiapeng.chong@linux.alibaba.com>
+In-Reply-To: <1618366903-94346-1-git-send-email-jiapeng.chong@linux.alibaba.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 15 Apr 2021 14:02:29 +0200
+Message-ID: <CAPDyKFr_Rnds6=W-TpOMhVcO9aP9OLapqCy1rFp8EHriWuQbuw@mail.gmail.com>
+Subject: Re: [PATCH] memstick: r592: remove unused variable
+To:     Jiapeng Chong <jiapeng.chong@linux.alibaba.com>
+Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+On Wed, 14 Apr 2021 at 04:21, Jiapeng Chong
+<jiapeng.chong@linux.alibaba.com> wrote:
+>
+> Fix the following clang warning:
+>
+> drivers/memstick/host/r592.c:363:6: warning: variable =E2=80=98len=E2=80=
+=99 set but not
+> used [-Wunused-but-set-variable].
+>
+> Reported-by: Abaci Robot <abaci@linux.alibaba.com>
+> Signed-off-by: Jiapeng Chong <jiapeng.chong@linux.alibaba.com>
 
-> From: Wolfram Sang, Sent: Tuesday, April 13, 2021 5:32 PM
->=20
-> Currently, only SDHI on R-Car Gen2+ reinitializes the irq register
-> during reset but it should be done on all instances. We can move it from
-> the SDHI driver to the TMIO core, because we now have the
-> 'sd_irq_mask_all' variable which carries the proper value to use. That
-> also means we can remove the initialization from tmio_mmc_probe()
-> because it calls tmio_mmc_reset(), too. We only move that
-> tmio_mmc_reset() call there a little to ensure 'sd_irq_mask_all' is
-> properly set.
->=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
 > ---
-
-Thank you for the patch!
-
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-I tested on my environment (R-Car H3 ES3.0) and I didn't observe any regres=
-sion.
-So,
-
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-
-Best regards,
-Yoshihiro Shimoda
-
+>  drivers/memstick/host/r592.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>
+> diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+> index d2ef463..026fada 100644
+> --- a/drivers/memstick/host/r592.c
+> +++ b/drivers/memstick/host/r592.c
+> @@ -360,12 +360,11 @@ static void r592_write_fifo_pio(struct r592_device =
+*dev,
+>  static void r592_flush_fifo_write(struct r592_device *dev)
+>  {
+>         u8 buffer[4] =3D { 0 };
+> -       int len;
+>
+>         if (kfifo_is_empty(&dev->pio_fifo))
+>                 return;
+>
+> -       len =3D kfifo_out(&dev->pio_fifo, buffer, 4);
+> +       kfifo_out(&dev->pio_fifo, buffer, 4);
+>         r592_write_reg_raw_be(dev, R592_FIFO_PIO, *(u32 *)buffer);
+>  }
+>
+> --
+> 1.8.3.1
+>
