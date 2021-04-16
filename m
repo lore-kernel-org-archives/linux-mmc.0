@@ -2,113 +2,162 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 345BEC433B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 09:43:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61169C433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 09:52:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1441061184
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 09:43:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 376356117A
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 09:52:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242004AbhDPJoW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Apr 2021 05:44:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36220 "EHLO
+        id S238093AbhDPJwd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Apr 2021 05:52:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242080AbhDPJoR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Apr 2021 05:44:17 -0400
-Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6119AC061574
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 02:43:51 -0700 (PDT)
-Received: by mail-wm1-x330.google.com with SMTP id t14-20020a05600c198eb029012eeb3edfaeso3815375wmq.2
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 02:43:51 -0700 (PDT)
+        with ESMTP id S242188AbhDPJwb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Apr 2021 05:52:31 -0400
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4A5FC06175F
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 02:52:06 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id r7so14070517wrm.1
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 02:52:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=DNXIm2x7iZSWnu0rM9rcYpiEEBJSY5oANhLVzMZb7Z0=;
-        b=q77MX6rw0CxCVzhn54CaK3fTSKcDS/VmNVRWaiJrxjlc73ODQGuA0kPcuxTeehAp+b
-         eyF/YaOS9NO+KUSeUvdAv13pS8+uUCzDm/2e6EzsbOAHlGjs4d5zCLJTNEIF6FkzT0bT
-         nHvq1U+y9VsfVoaAqx2ohwND3YHlZYOrkgK2CwG4Y2QJoEBCfFP+ZmPBvFmyMf4yNILz
-         J6jEjQC6HrPoiZIUfna7bOwushYp43o8QWLzYIEWxFKBOlOM9JORGa+iwiktmmpAMcln
-         VevKA1SAjVSwaUFikbBNgYuKhtQGjgjo/m2nscUXfsiJ5MTSBgRvt1aLqEitmzyuvD0C
-         Rvag==
+        d=linaro.org; s=google;
+        h=subject:to:cc:references:from:message-id:date:mime-version
+         :in-reply-to:content-language:content-transfer-encoding;
+        bh=/JSJp+Tkpj2oHC+t+aQ3pMzn5E4MQekWdcaHODVVDPs=;
+        b=Zd2CpPg+2KjAqulL9Rnwmz6bHroGJTQVRiJWLNk6QjtL+9aK70oyA+gP4hUZ+xNgCX
+         pblmTtjslgvg8A8RxjsWDlJEFQMqHBya+h5w7Rm7lasOTgQ9+vpvbBBQMs3jcUk3PjkT
+         iLnDhBZbsW7QPC1t+byTsyp9j+4phtKgSYLmbZdM8wSxjwCbl1lz2MArmvahFC70AXZW
+         7Su7vcoeaspUdvfq681Z9k8KOmn/m1Cnv6y/9qacbQQCd/mTmGwxhY3Tf3TFePhfx6Qp
+         jsDLIv5iTGqcB1UdAuEykG5TfmkdzTUy0XxwkqpSjNuEK1JU9Y+WPf3GdnHJnw2gHU5a
+         acyg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=DNXIm2x7iZSWnu0rM9rcYpiEEBJSY5oANhLVzMZb7Z0=;
-        b=O3jsH5AHLXAGuYOZDf107SVvt1HFTWGT+JaLVJ4CCdGwgLHGDIHpL8IxaHPhSStMjH
-         BpIXgOg7ZEkWAS28g/PPjqzY25mmJzx6/b+RTF1+52zyquxGiWyfruRqTCC/hAC+YDN5
-         LzT+vUbzjEWg1FvvF5z52pspVd/2b5VDxESl+Kc3cKHZ4+jb/1Ua714IbMIikmfvOsfs
-         bPKRdwsMM0ZoIUygQdb7IjoYC95lyVbs4IsUAQGBJSB1PtjGVwZNhTipe2ghUxnPz8ee
-         Y5NNLpzAIub0ddErm0iokfmKzkDd+FiBfqeUqFkgwovqhu8XtMc59j5mJ+RNwwIoybR2
-         O0IQ==
-X-Gm-Message-State: AOAM531voSLP+RjSBlDAW/ou+G/RBwQZPZcBynQJ8eAxVPa7lUwSrK9I
-        X2mW0o4qBETrbK3EBt5MmUnjXA==
-X-Google-Smtp-Source: ABdhPJy38WGnMQGvcGAZDuyAQHhopBQibip3naXYdj9nO3tbNM9T2pB/fanWPEG67HAB1uIMne2+dA==
-X-Received: by 2002:a05:600c:3541:: with SMTP id i1mr7316584wmq.97.1618566230000;
-        Fri, 16 Apr 2021 02:43:50 -0700 (PDT)
-Received: from localhost.localdomain ([2a01:e0a:90c:e290:6e70:fd4e:dfdb:68d7])
-        by smtp.gmail.com with ESMTPSA id e9sm9585744wrs.84.2021.04.16.02.43.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Apr 2021 02:43:49 -0700 (PDT)
-From:   Neil Armstrong <narmstrong@baylibre.com>
-To:     ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        lebed.dmitry@gmail.com, Neil Armstrong <narmstrong@baylibre.com>,
-        Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH v2] mmc: meson-gx: replace WARN_ONCE with dev_warn_once about scatterlist size alignment in block mode
-Date:   Fri, 16 Apr 2021 11:43:47 +0200
-Message-Id: <20210416094347.2015896-1-narmstrong@baylibre.com>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=/JSJp+Tkpj2oHC+t+aQ3pMzn5E4MQekWdcaHODVVDPs=;
+        b=EirDQo9Yqtv8qfExTKefw2aPkdiO5QL1C4soXeAays9FNlewsw2f34tPyZ9zAC1+cn
+         g9VvmHvVOZe4mM6kiHXfllDf01MPXffARDPYpEXLmajrA/tWxcLrz2VrHC+ZVNNsU6fO
+         7DM5MnLAYLOe03aEpFb2c3d1IHfHkMeOEX3Q9u7KEDdZtUXcFAppSOdmVF9xDmC31xR8
+         oxQLuQAOOnubdhvMLap70PK6cfDsnVdxGp4G+G8wfyuDEMQuteQsT9dLpNBefDCY1iJX
+         ZWZkIHTtln/mysLalIgMYVoMcleF0NQeTgo/aHiZC+zrvbp1O/SuTK7VU4kOSGZWLhLt
+         f++w==
+X-Gm-Message-State: AOAM5325yA2wX7hh/viO2njRGgiWcV92bJPJHuW4lenR2N5WGQnEppYM
+        BfpEi/Vgi4wWFx0qDlAul9IPyg==
+X-Google-Smtp-Source: ABdhPJwLeVjxevDvuRkaNwCHgSj2pf06ftSAwKCQNXwuAPm7bmGh/kmcoaI44wdJF08QBoLbr7t2yQ==
+X-Received: by 2002:adf:fbcc:: with SMTP id d12mr8031032wrs.151.1618566725566;
+        Fri, 16 Apr 2021 02:52:05 -0700 (PDT)
+Received: from MacBook-Pro.local ([212.45.67.2])
+        by smtp.googlemail.com with ESMTPSA id h17sm9483596wru.67.2021.04.16.02.52.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 16 Apr 2021 02:52:05 -0700 (PDT)
+Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
+ card
+To:     Doug Anderson <dianders@google.com>,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
+        Sayali Lokhande <sayalil@codeaurora.org>,
+        sartgarg@codeaurora.org, Rajendra Nayak <rnayak@codeaurora.org>,
+        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
+        Sibi Sankar <sibis@codeaurora.org>, cang@codeaurora.org,
+        pragalla@codeaurora.org, nitirawa@codeaurora.org,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Evan Green <evgreen@chromium.org>, okukatla@codeaurora.org
+References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
+ <CAD=FV=WLZCSd6D5VFyD+1KBp5n1qyszER2EVaEMwYjQfPSSDnA@mail.gmail.com>
+ <b77f207b-2d90-3c8b-857f-625bd3867ed1@codeaurora.org>
+ <6fdf704c4716f5873d413229ca8adc57@codeaurora.org>
+ <CAD=FV=Wa4fT5wZgd0==8kLy_tzTLgdZ-HwdfOEAM9pMeMjjFyg@mail.gmail.com>
+ <8126e130e5c0ea1e7ea867414f0510c0@codeaurora.org>
+ <CAD=FV=XavWbf_b7-=JT6V5_RNA8CjdK4oRu7H719AaPDJ5tsqQ@mail.gmail.com>
+From:   Georgi Djakov <georgi.djakov@linaro.org>
+Message-ID: <bdda73d8-0ba4-92e7-b4ae-ed05cc9a9f55@linaro.org>
+Date:   Fri, 16 Apr 2021 12:52:02 +0300
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAD=FV=XavWbf_b7-=JT6V5_RNA8CjdK4oRu7H719AaPDJ5tsqQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Since commit e085b51c74cc ("mmc: meson-gx: check for scatterlist size alignment in block mode"),
-support for SDIO SD_IO_RW_EXTENDED transferts are properly filtered but some driver
-like brcmfmac still gives a block sg buffer size not aligned with SDIO block,
-triggerring a WARN_ONCE() with scary stacktrace even if the transfer works fine
-but with possible degraded performances.
+Hi,
 
-Simply replace with dev_warn_once() to inform user this should be fixed to avoid
-degraded performance.
+On 14.04.21 23:25, Doug Anderson wrote:
+> Hi,
+> 
+> On Tue, Apr 13, 2021 at 3:59 AM <sbhanu@codeaurora.org> wrote:
+>>
+>>>>>>> +                                       required-opps =
+>>>>>>> <&rpmhpd_opp_low_svs>;
+>>>>>>> +                                       opp-peak-kBps = <1200000
+>>>>>>> 76000>;
+>>>>>>> +                                       opp-avg-kBps = <1200000
+>>>>>>> 50000>;
+>>>>>> Why are the kBps numbers so vastly different than the ones on sc7180
+>>>>>> for the same OPP point. That implies:
+>>>>>>
+>>>>>> a) sc7180 is wrong.
+>>>>>>
+>>>>>> b) This patch is wrong.
+>>>>>>
+>>>>>> c) The numbers are essentially random and don't really matter.
+>>>>>>
+>>>>>> Can you identify which of a), b), or c) is correct, or propose an
+>>>>>> alternate explanation of the difference?
+>>>>>>
+>>>>
+>>>> We calculated bus votes values for both sc7180 and sc7280 with ICB
+>>>> tool,
+>>>> above mentioned values we got for sc7280.
+>>>
+>>> I don't know what an ICB tool is. Please clarify.
+>>>
+>>> Also: just because a tool spits out numbers that doesn't mean it's
+>>> correct. Presumably the tool could be wrong or incorrectly configured.
+>>> We need to understand why these numbers are different.
+>>>
+>> we checked with ICB tool team on this they conformed as Rennell & Kodiak
+>> are different chipsets,
+>> we might see delta in ib/ab values due to delta in scaling factors.
 
-This should be ultimately fixed in brcmfmac, but since it's only a performance issue
-the warning should be removed.
+If the scaling factor is different, maybe this should be reflected
+in the BCM data, where we have the following:
+     @vote_scale: scaling factor for vote_x and vote_y
 
-Fixes: e085b51c74cc ("mmc: meson-gx: check for scatterlist size alignment in block mode")
-Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
----
-Changes since v1:
-- replace WARN_ONCE with dev_warn_once and explicit the warning message
+This is 1000 by default, but maybe we should set it to some
+different value for some of the BCMs?
 
- drivers/mmc/host/meson-gx-mmc.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+I'm adding Odelu, who is more familiar with this platform.
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index eb6c02bc4a02..b8b771b643cc 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -247,8 +247,9 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
- 		 */
- 		for_each_sg(data->sg, sg, data->sg_len, i) {
- 			if (sg->length % data->blksz) {
--				WARN_ONCE(1, "unaligned sg len %u blksize %u\n",
--					  sg->length, data->blksz);
-+				dev_warn_once(mmc_dev(mmc),
-+					      "unaligned sg len %u blksize %u, disabling descriptor DMA for transfer\n",
-+					      sg->length, data->blksz);
- 				return;
- 			}
- 		}
--- 
-2.25.1
+> 
+> ...but these numbers are in kbps, aren't they? As I understand it
+> these aren't supposed to be random numbers spit out by a tool but are
+> supposed to be understandable by how much bandwidth an IP block (like
+> MMC) needs from the busses it's connected to. Since the MMC IP block
+> on sc7180 and sc7280 is roughly the same there shouldn't be a big
+> difference in numbers.
+> 
+> Something smells wrong.
+> 
+> Adding a few people who understand interconnects better than I do, though.
+> 
 
+Thanks!
+Georgi
