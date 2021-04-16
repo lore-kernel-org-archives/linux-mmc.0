@@ -2,189 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 22BFBC433B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 07:17:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C742C433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 09:33:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DF10961153
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 07:17:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EF0A161166
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Apr 2021 09:33:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234688AbhDPHSN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Apr 2021 03:18:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60242 "EHLO
+        id S237554AbhDPJeD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Apr 2021 05:34:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234010AbhDPHSM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Apr 2021 03:18:12 -0400
-Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E59FC061756
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 00:17:48 -0700 (PDT)
-Received: by mail-vk1-xa29.google.com with SMTP id s190so1361986vkd.6
-        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 00:17:48 -0700 (PDT)
+        with ESMTP id S241022AbhDPJeC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Apr 2021 05:34:02 -0400
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E4F6C061756
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 02:33:37 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id w4so22290768wrt.5
+        for <linux-mmc@vger.kernel.org>; Fri, 16 Apr 2021 02:33:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gl5+NOKWMEE1assjztlhUD+W7foevJhGIs8QyGLYzSI=;
-        b=yycJUhrrIgOseu1XG8h/LbCBaxuYWRZ6CsOUprPnVWY7FhK8Q55edVa0O7UQdT/1c1
-         qWsBVf4tuqzZIqLG2onQBytehefSPD9yCOarMek/xu8nN2EhdVjEk2cbiV+k7+M8/Nz6
-         kpNJq3/mx6UOxeNOrYB4FhgCC8mEsC8+aNHcH9X9IVbQTpqljMIWNQrh6k4OCHxHfd6b
-         OM/k9BhOoW/MN7GPfS1QuuzAQ4+NvoF9zwx5chnJguUHi50MbblS4VQti7Poixsc2bjd
-         Saev//94EFkrXCWaY3XHy5jSqha1z/KApEyLHR9W4FoH1rcJr2+IUhtKRkF/4ASsumku
-         4grg==
+        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:organization:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=Y6UyUK/PLZR7RRPxa5IwMOvQk8P6IAfMpv+pLHnWIWk=;
+        b=QZQkZJdBI8z4aSv5GPjE/sdUZF5KNDwCq5LFScZU1aQwxesSrQTgs2rloNEdifvRkG
+         kutHzoba1sPCUsWxZjyPd2edgncUU/2Qdt9sFwNZxbEF/1AErUeJce7TeCo0pSweY58F
+         sRTu860WAz3M8uM6/XAdDMy37xtCeDXbzcYA4VB33RITm7AgkBtdz6HoJzEcpvxdPbLG
+         6VszU67q5srWYwsySecPDR5vGbtoUxsQgBhu1aR08i9iuDhhJLiIrAbvsw6Jp+K38Pnf
+         O0fxY7RTMTlhQ6p9NrrYcoaNPcY6+cIWLP6ln+KF4a9iWUuZqCUIWK/lyj7Occ3Y3Hwz
+         bTkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gl5+NOKWMEE1assjztlhUD+W7foevJhGIs8QyGLYzSI=;
-        b=t4gDgTVX//MoD4TGd+2kkFm7tqcHFVcU14FkAcbaC7MjaeIPxjWoys5DCK20YeMvnU
-         syGWGG17OOCEcMNG06/WFZxIbSBp9uptSv8cjSZMhh/IgZkfkAvLZOrZStFy++8nYK+Z
-         RZRrDkAAyJP6ewq66X2ylobLGWYbHwPw1G/+7E0W5QFWDQJxFnnfM2f1pTfPDwcewUf5
-         gAf5GTtoTa92H1LC+0HNwajCoJVAbJQCx5bgtaNOAcdWcyFoQx2UAE/qlQbP6azTE+cH
-         NTAV3XWYbD+n/lUUe9H7GdcZMHRKBgC6jxLIKrpzdHI7FvgXJ1bm2GFl3/iNqUqEfEVB
-         oJsg==
-X-Gm-Message-State: AOAM531WlsPn4sojE5OnhskBQXP1H7LQzJk//5zq6Z4C/aQO/6lqYFiz
-        rR1i2qt1tKL/oYV05/yYE8dec56pYT4zLD9hwqGkiQ==
-X-Google-Smtp-Source: ABdhPJzxU3pnEUtkDwHbGXzel9y4sOTkeW68dwqJ4ESuKIQVN+AaSgG5kC3B41yKYCRtLqvAGN7VlIw1FZsi9NqFRuQ=
-X-Received: by 2002:a1f:1f81:: with SMTP id f123mr5572708vkf.6.1618557466977;
- Fri, 16 Apr 2021 00:17:46 -0700 (PDT)
+        h=x-gm-message-state:subject:to:cc:references:from:organization
+         :message-id:date:user-agent:mime-version:in-reply-to
+         :content-language:content-transfer-encoding;
+        bh=Y6UyUK/PLZR7RRPxa5IwMOvQk8P6IAfMpv+pLHnWIWk=;
+        b=cNbAiHPJFyt+4atusYAB1/fP8th7iOsTyJ65ZrhwwQqcW1NZdbMglBTC+5CQon10HP
+         pRjqRp44LltLhiwiUxgw4yFBZBfSwSJfMrGWi/GefKnDXFlzjBc1uC6vy6U+o85wZ7Qy
+         Nnn1EoHqsbnt0p9Y3CCp1Uj4fTa97aKk5cba9pa0yOKG6mSZv4htDL80pNRnMeV1VNiL
+         xFoXShMw8LklRYRnxgzePR7H1Q1Ms2FLHHOlYE1zGmu1/4pfZBXEwKIAWgdJiOD8qRW5
+         1UQameIgj0lRMwCIXo0tatmW8lXPFYm113H7wDrRhhDo2X28yvQxGiuLFPl0LHsqZd8i
+         Dp9w==
+X-Gm-Message-State: AOAM5333D/u/nsORKspMgzRa9c7bKce/lKrbydCIiIhTjplnkK0KOL+5
+        VJrgHFTa5rwiiyLohaGYx7xw6A==
+X-Google-Smtp-Source: ABdhPJyi9TudN5b27GdAZGQawwbe7hN4TWTVODnrXz7f90bs+B7teKNt5eKgfJN+j0eEBk4vPKX/tg==
+X-Received: by 2002:a05:6000:118c:: with SMTP id g12mr8068180wrx.241.1618565615984;
+        Fri, 16 Apr 2021 02:33:35 -0700 (PDT)
+Received: from ?IPv6:2a01:e0a:90c:e290:6e70:fd4e:dfdb:68d7? ([2a01:e0a:90c:e290:6e70:fd4e:dfdb:68d7])
+        by smtp.gmail.com with ESMTPSA id s14sm9473716wrm.51.2021.04.16.02.33.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 16 Apr 2021 02:33:35 -0700 (PDT)
+Subject: Re: [PATCH] mmc: meson-gx: remove useless warning about scatterlist
+ size alignment in block mode
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Dmitry Lebed <lebed.dmitry@gmail.com>,
+        Marek Szyprowski <m.szyprowski@samsung.com>
+References: <20210414100010.3877669-1-narmstrong@baylibre.com>
+ <CAPDyKFpNLu3R+7ODZaC7yWMYbSOujswgLTkN97FQNg5zhwSxgw@mail.gmail.com>
+From:   Neil Armstrong <narmstrong@baylibre.com>
+Organization: Baylibre
+Message-ID: <ff1d8605-4f45-c272-9bd6-e55ea8a9c68c@baylibre.com>
+Date:   Fri, 16 Apr 2021 11:33:34 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.7.1
 MIME-Version: 1.0
-References: <20210413003621.1403300-1-swboyd@chromium.org> <CAPDyKFquhnG1tGAx+GGNKM7_haThSa34FcONHGhdBwFYuryeag@mail.gmail.com>
- <161851496169.46595.399410018266490859@swboyd.mtv.corp.google.com>
-In-Reply-To: <161851496169.46595.399410018266490859@swboyd.mtv.corp.google.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 16 Apr 2021 09:17:10 +0200
-Message-ID: <CAPDyKFoZL6mygBQZiU329nagPJQzELPiFYjuJ0V3PfvaiJRv2w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Don't allocate IDA for OF aliases
-To:     Stephen Boyd <swboyd@chromium.org>
-Cc:     Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
-        Sujit Kautkar <sujitka@chromium.org>,
-        Zubin Mithra <zsm@chromium.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <CAPDyKFpNLu3R+7ODZaC7yWMYbSOujswgLTkN97FQNg5zhwSxgw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 15 Apr 2021 at 21:29, Stephen Boyd <swboyd@chromium.org> wrote:
->
-> Quoting Ulf Hansson (2021-04-15 01:56:12)
-> > On Tue, 13 Apr 2021 at 02:36, Stephen Boyd <swboyd@chromium.org> wrote:
-> > >
-> > > -       err = ida_simple_get(&mmc_host_ida, min_idx, max_idx, GFP_KERNEL);
-> > > -       if (err < 0) {
-> > > -               kfree(host);
-> > > -               return NULL;
-> > > +               index = ida_simple_get(&mmc_host_ida, min_idx, max_idx, GFP_KERNEL);
-> > > +               if (index < 0) {
-> > > +                       kfree(host);
-> > > +                       return NULL;
-> > > +               }
-> >
-> > This means that a DTB that is screwed up in a way that it has two mmc
-> > aliases with the same index, would be allowed to use the same index.
-> >
-> > What will happen when we continue the probe sequence in such a case?
->
-> Yeah I thought about this after sending the patch. So the problem would
-> be like this right?
->
->         aliases {
->                 mmc1 = &sdhci0;
->                 mmc1 = &sdhci1;
->         };
+On 15/04/2021 11:07, Ulf Hansson wrote:
+> On Wed, 14 Apr 2021 at 12:00, Neil Armstrong <narmstrong@baylibre.com> wrote:
+>>
+>> Since commit e085b51c74cc ("mmc: meson-gx: check for scatterlist size alignment in block mode"),
+>> support for SDIO SD_IO_RW_EXTENDED transferts are properly filtered but some driver
+>> like brcmfmac still gives a block sg buffer size not aligned with SDIO block,
+>> triggerring a warning even if the transfer works in degraded mode.
+>>
+>> This should be ultimately fixed in brcmfmac, but since it's only a performance issue
+>> the warning should be removed.
+>>
+>> Fixes: e085b51c74cc ("mmc: meson-gx: check for scatterlist size alignment in block mode")
+>> Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
+>> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+>> ---
+>>  drivers/mmc/host/meson-gx-mmc.c | 5 +----
+>>  1 file changed, 1 insertion(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+>> index eb6c02bc4a02..6bc151045843 100644
+>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>> @@ -246,11 +246,8 @@ static void meson_mmc_get_transfer_mode(struct mmc_host *mmc,
+>>                  * size, otherwise chain mode could not be used.
+>>                  */
+>>                 for_each_sg(data->sg, sg, data->sg_len, i) {
+>> -                       if (sg->length % data->blksz) {
+>> -                               WARN_ONCE(1, "unaligned sg len %u blksize %u\n",
+>> -                                         sg->length, data->blksz);
+> 
+> Rather than removing this warning, perhaps an option could be to use
+> dev_warn_once() instead?
 
-Correct.
 
->
-> I have good news! DT won't compile it because it saw the same alias
-> assigned to twice. I tried it on my sc7180 board.
->
-> arch/arm64/boot/dts/qcom/sc7180.dtsi:35.3-18:
-> ERROR (duplicate_property_names): /aliases:mmc1: Duplicate property name
-> ERROR: Input tree has errors, aborting (use -f to force output)
-> arch/arm64/boot/dts/qcom/sc7180-idp.dtb] Error 2
->
-> I suppose if someone forced the compilation it may be bad, but do we
-> really care?
->
-> TL;DR: this seems like it isn't a problem.
+Yep, I'll re-spin.
 
-Yep, I definitely tend to agree with you here. Thanks for doing the
-test and sharing the result.
+Neil
 
->
-> >
-> > >         }
-> > >
-> > > -       host->index = err;
-> > > +       host->index = index;
-> > >
-> > >         dev_set_name(&host->class_dev, "mmc%d", host->index);
-> > >         host->ws = wakeup_source_register(NULL, dev_name(&host->class_dev));
-> >
-> > Another concern that could potentially be a problem, is that the
-> > "thread" that holds the reference that prevents ida from being
-> > removed, how would that react to a new mmc device to become
-> > re-registered with the same index?
-> >
-> > I wonder if we perhaps should return -EPROBE_DEFER instead, when
-> > ida_simple_get() fails?
-> >
->
-> Don't think so. The device (with the kobject inside) is removed, and
-> thus the mmc1 device will be removed, but the kobject's release function
-> is delayed due to the config. This means that
-> mmc_host_classdev_release() is called at a later time. The only thing
-> inside that function is the IDA removal and the kfree of the container
-> object. Given that nothing else is in that release function I believe it
-> is safe to skip IDA allocation as it won't be blocking anything in the
-> reserved alias case.
->
-> Furthermore, when the device is deleted in mmc_remove_host() there could
-> be other users of the device that haven't called put_device() yet.
-> Either way, those other users are keeping the device memory alive, but
-> otherwise device_del() has unlinked it from the various driver core
-> lists and sysfs has removed it too so it's in a state where code may be
-> referencing it but it's on the way out so users of the device will not
-> be able to do much with it during this time.
+> 
+>> +                       if (sg->length % data->blksz)
+>>                                 return;
+>> -                       }
+>>                 }
+>>         }
+>>
+> 
+> Kind regards
+> Uffe
+> 
 
-Right, but see more below.
-
->
-> This sort of problem (if it exists which I don't think it does) would
-> have been there all along and can't be fixed at this level. When a
-> device that has an alias calls the mmc_alloc_host() function twice it
-> gets two different device structures created so there are two distinct
-> kobjects that will need to be released at some point. The index is
-> usually different for those two kobjects, but with aliases it turns out
-> it is the same. When it comes to registering that device with the same
-> name the second one will fail because a device with that name already
-> exists on the bus. This would be really hard to do given that it would
-> need to be the same aliased device in DT calling the mmc_add_host()
-> function without calling mmc_remove_host() for the first one it added in
-> between.
-
-In fact, we have a few rare corner cases that can trigger KASAN splats
-when mmc_remove_host() gets executed. Similar splats can be triggered
-by just doing a sudden card removal. It's especially related to the
-cases, where a thread holds a reference to the card/host object when
-it's being removed. I am working on patches to fix these cases, but
-haven't yet decided on the best solution.
-
-That's the reason why I was thinking that maybe returning
--EPROBE_DEFER could be an option, but certainly I need to think more
-about this.
-
->
-> (Sorry if that is long. I'm sort of stream of conciousness writing it to
-> you here and not rewriting it to be more concise)
-
-No worries, thanks a lot for sharing your thoughts!
-
-Kind regards
-Uffe
