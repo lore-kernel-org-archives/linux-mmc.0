@@ -2,110 +2,223 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D7DEC433B4
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Apr 2021 06:00:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8590DC43470
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 04:27:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE30C61207
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Apr 2021 06:00:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5FB4560FEE
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 04:27:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229935AbhDRGBB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 18 Apr 2021 02:01:01 -0400
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:20872 "EHLO
-        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232833AbhDRGA6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Apr 2021 02:00:58 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1618725630; x=1650261630;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=ILy/1Ka5cRDk4OaWwBFmwqsPK2xE2M4mVMhdCRatg5E=;
-  b=ZmIvw1wVD3M0ktO+z77ue0EIVUk3H3hIKuItBoj4pXCKFUQC2tYFF4S8
-   bzrZW9NLTEjG0E/CroL98I2CGzrimCtyr8AGzcFiMrKmeTZdfQhfkDz+K
-   Oe7H0SpnLHOx1LFuuwhYkhk313FtewxFA8WSTOX+2MlLl2OIUVWYg9d9J
-   /mV3a/D/XBj5nrsh8ezXngU/TD9A7yyD+illWjvr3tAtAcCDPbGkebwKy
-   pJiWHLy0L3N6IGojz4EM4Yn8xTPKRJuzgruQuMXAm7Zcf20a6WB6a2K66
-   6hTUt9dwB4Puep5n0MFhcoBuYXP6yYHwpDQaoKpHxxvJljcdQGYl6/9Yc
-   w==;
-IronPort-SDR: HgHwxLmavdS4hymMN/PG9SPVCaBF01QIbNKGKVCH5xbfZpehW4YQB/FmcnlrJr8pf5Uulh09sD
- GjGsdTtXdPr4j0OlvUsTKe8BNl+X9YvfqEC0J9KdVQdpSGfZUg3qCQ8owynIL5Rwxxh7r97x+9
- OUUXIXUhypMv7iLcPgYF0lGiIRr8ENrHqvzu7uP6NIy/NbmqAVU1bdLOtVIK7divROGUbS1PEx
- td5f8iVy9mIKTBIfrux1l1VVClnql6TQj39qSPjrlFwW4k/dwqptlRADtTJuMoy8IS1C0IQRyE
- Cbc=
-X-IronPort-AV: E=Sophos;i="5.82,231,1613404800"; 
-   d="scan'208";a="165325940"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 18 Apr 2021 14:00:30 +0800
-IronPort-SDR: s5VEf+h1tfIFhADcOGlYrMya5ufLkqficZSZ8qLi9+b55AjvelViMaegxOOhuSEjQmfMAsEi28
- lo4esMpChsNhHnKkh6v6PDzxAj7v5ILDqbXA/HmZiFliuE6lS4gI2/PQG6PwP7xWKc/FJ3ur0K
- wb4Q3YTo+c65dKnkkkuwzDGr8sYGYavro12yuWfH4W+B8D7JRxHkq56MF7x+XzRhbV7Re8GFfl
- AqS8tZLhNuBc8I5u2ZnKwlWIGnI8hMbb3wOfvABDhl4snBvqJe7poFfSy0p3trPb+0vROAu3+h
- 2v68HjEPzyBImYTmZDNuqtF2
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Apr 2021 22:41:17 -0700
-IronPort-SDR: 6uvZh02vxWp+6R7jRXQrNcr8pbxoVEP+QIOLZ/0/tAi7DzZrPR+LWngIYjHlEiJ67yrKYbgWUH
- keoSm6+JGA3gybd/dLs/TnUYpdAnEabcd6stPVgmdeJ+AiHTVHIX0hASUlzJaCkEd2ihgu6LC5
- opzMvL+xRCgDyYrf+u5n7k9pPVQJ2uD6MzrGsR/UJw1EH5tFWShf+jWNIMdODmE+bUtMDX4HpL
- HULceDUWv59gt1RLuBxdrC8TOFCEscKWI9gPUX1d4u+2prNHD+5NOHS+bxfLbTcMPEwy9/ODUu
- fW0=
-WDCIronportException: Internal
-Received: from bxygm33.sdcorp.global.sandisk.com ([10.0.231.247])
-  by uls-op-cesaip02.wdc.com with ESMTP; 17 Apr 2021 23:00:29 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v2 2/2] mmc: block: Update ext_csd.cache_ctrl if it was written
-Date:   Sun, 18 Apr 2021 08:59:53 +0300
-Message-Id: <20210418055953.26959-3-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210418055953.26959-1-avri.altman@wdc.com>
-References: <20210418055953.26959-1-avri.altman@wdc.com>
-MIME-Version: 1.0
+        id S230179AbhDSE2F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Apr 2021 00:28:05 -0400
+Received: from mail-eopbgr00061.outbound.protection.outlook.com ([40.107.0.61]:63985
+        "EHLO EUR02-AM5-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S229473AbhDSE2C (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 19 Apr 2021 00:28:02 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=BIfUylbF1u6g42Ih0vw50xP6D7xRSLWW2I9zIv8xpPfI+8QTA+Yvqs8rcEhgkShhN1F5VCTfikyuN00lU7MYQpLyAi61zSBXde+lBtKtZ91KF4JkDryrkKImQc4jtArTgkvv22rGSlWBi+316rG07ozzVX8yH+lrNaB4Y76q0iQ4zUQW6K3d9JzIJkWsU1QsvjfqMy2v6XzsDlch5VnExSBZi1Fditx7GwrKrLI7E/sfpEmjrnivx/IpLa9EXSocY6lD/yML7X4WAKNF1EY300fyMYpWitucXgZ/XL8CLbbwDx1OQw7Fi2QoTb2TSXTWyC1GIFPgb1qOvwl4cLPWlA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=EGsFEeNS52w1ZRf0E7RmTdDzsa/XGegT9oBy+olcLfY=;
+ b=hGFFrgJo2nl82ALdcCWukVL33RkUM6iFcTbkS0Q6cbKM62pdvYnFsqLLOtlF+2o2VdYauLw4dwP2SOeHtc3aZK7MlLjtddm7LhJTrWTkIj6VkevHMcvevTOm0Iaa1xW8T6J+3i8PR8ODJ/vsRcMpNN5h52SiwRYematUkUoYYgadgMtAVfcWh/leBm2L8Tg51aG1SFFROj7+y2jsXIW81DOM/gOKW31vHMKMqX6qmnynX8F75iYwa4zb9oeycrCf1V0DNBxu5cGiiQ81HZj1l4KbQ6UDlERn6Pd76e3un4zKWXsAtWQNRqdFc0IAvJ55fTvey3xfXI4mXsOkubJDog==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector2-NXP1-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=EGsFEeNS52w1ZRf0E7RmTdDzsa/XGegT9oBy+olcLfY=;
+ b=j+dOYrXfIk7Kfa0Fobi8pj2zSP1kRkdYvZPRfIcM8F+/XY2p5O6m146Lg8uw11qr8f1XCxfgzTkNhGiUBKIwzqfro+IOGzrsiOB/EFGQjxCT+tmokcK5gMw090mHbYn4cAawbUShERe9QsYw1J905qk2uPKxj/G1mOjHNwIbMt4=
+Authentication-Results: linuxfoundation.org; dkim=none (message not signed)
+ header.d=none;linuxfoundation.org; dmarc=none action=none
+ header.from=oss.nxp.com;
+Received: from AM6PR04MB6053.eurprd04.prod.outlook.com (2603:10a6:20b:b9::10)
+ by AS8PR04MB7912.eurprd04.prod.outlook.com (2603:10a6:20b:2ae::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4042.16; Mon, 19 Apr
+ 2021 04:27:06 +0000
+Received: from AM6PR04MB6053.eurprd04.prod.outlook.com
+ ([fe80::b034:690:56aa:7b18]) by AM6PR04MB6053.eurprd04.prod.outlook.com
+ ([fe80::b034:690:56aa:7b18%4]) with mapi id 15.20.4042.024; Mon, 19 Apr 2021
+ 04:26:59 +0000
+From:   "Alice Guo (OSS)" <alice.guo@oss.nxp.com>
+To:     gregkh@linuxfoundation.org, rafael@kernel.org,
+        horia.geanta@nxp.com, aymen.sghaier@nxp.com,
+        herbert@gondor.apana.org.au, davem@davemloft.net, tony@atomide.com,
+        geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
+        vkoul@kernel.org, peter.ujfalusi@gmail.com, a.hajda@samsung.com,
+        narmstrong@baylibre.com, robert.foss@linaro.org, airlied@linux.ie,
+        daniel@ffwll.ch, khilman@baylibre.com, tomba@kernel.org,
+        jyri.sarha@iki.fi, joro@8bytes.org, will@kernel.org,
+        mchehab@kernel.org, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com, kishon@ti.com, kuba@kernel.org,
+        linus.walleij@linaro.org, Roy.Pledge@nxp.com, leoyang.li@nxp.com,
+        ssantosh@kernel.org, matthias.bgg@gmail.com, edubezval@gmail.com,
+        j-keerthy@ti.com, balbi@kernel.org, linux@prisktech.co.nz,
+        stern@rowland.harvard.edu, wim@linux-watchdog.org,
+        linux@roeck-us.net
+Cc:     linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-clk@vger.kernel.org, dmaengine@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-amlogic@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        iommu@lists.linux-foundation.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-gpio@vger.kernel.org,
+        linuxppc-dev@lists.ozlabs.org, linux-staging@lists.linux.dev,
+        linux-mediatek@lists.infradead.org, linux-pm@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
+Subject: [RFC v1 PATCH 0/3] support soc_device_match to return -EPROBE_DEFER
+Date:   Mon, 19 Apr 2021 12:27:19 +0800
+Message-Id: <20210419042722.27554-1-alice.guo@oss.nxp.com>
+X-Mailer: git-send-email 2.17.1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-Originating-IP: [119.31.174.71]
+X-ClientProxiedBy: AM0PR02CA0207.eurprd02.prod.outlook.com
+ (2603:10a6:20b:28f::14) To AM6PR04MB6053.eurprd04.prod.outlook.com
+ (2603:10a6:20b:b9::10)
+MIME-Version: 1.0
+X-MS-Exchange-MessageSentRepresentingType: 1
+Received: from nxf55104-OptiPlex-7060.ap.freescale.net (119.31.174.71) by AM0PR02CA0207.eurprd02.prod.outlook.com (2603:10a6:20b:28f::14) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4042.19 via Frontend Transport; Mon, 19 Apr 2021 04:26:40 +0000
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 9896ff12-c5b4-421f-f9a1-08d902eb5f30
+X-MS-TrafficTypeDiagnostic: AS8PR04MB7912:
+X-MS-Exchange-SharedMailbox-RoutingAgent-Processed: True
+X-MS-Exchange-Transport-Forked: True
+X-Microsoft-Antispam-PRVS: <AS8PR04MB7912513CE4C6A5F1A16187D3A3499@AS8PR04MB7912.eurprd04.prod.outlook.com>
+X-MS-Oob-TLC-OOBClassifiers: OLM:8882;
+X-MS-Exchange-SenderADCheck: 1
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: AK1XnEs7EIU/2ApqujL4ENEsdD7cfE1FbgcvAaPgea6Hbv0vJgmkFlrJQc9Zwe0hRvg6ODWJqw7DeYSJRkwBUI6Dg9CvBg76tQsc/zECgFN9N0rU1PraAub2z1SmPXooxUEKWedxX5mry6PHesrXtLa56siBXEvmuwr/ay92Ty2P7nHxHjCjlwvncBhFzscBGAd2Tlz6ly4vsWI7jjwFt5zemq9s1tZzujO+pRaFFN0jLicObMUjXbOCYpNjld7qp3nLx4wkcfdipmjFsCJXiTk+x7LXtjQ3SFz3tJFe1/gciMsGU9oMwC2wF7hUdL1RdpiZLDgJVep6zFnA56/ISZh0nJOUfxYyH5cueA1KZK3QNB6PMI7kZ0ex8+hoQL0dXjtTG6c4tOkauz1CuRnqiQ/2rBiwXb+SekuC44XZa1J4ady1C9t8Mg9honhFO5TtLtkNxiEbL90A14r7TxjM2Q61qy6OxOtFSpF1+lPl2Gkvxu+yivq0TNugxczd2YY6WAE1PONiwqP0D3oJlk28nEJrxZ1QsCEJrWIDpRmBdvt7cHDmn2IGnX0rbRNtHwm5Vj50Bwo2EmrqFvgMs/NwPESfADARD49yW+UCIFJAQxRl681Nbj7s55lka7wcQkZinoUggVYz1CbaryPIzm2Z/V/Nb1WtEpnxWWjL8aF5R7M=
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM6PR04MB6053.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(346002)(136003)(396003)(366004)(39860400002)(1076003)(66946007)(7406005)(478600001)(52116002)(66556008)(66476007)(2906002)(7366002)(7416002)(8936002)(921005)(8676002)(4326008)(5660300002)(16526019)(26005)(38100700002)(83380400001)(956004)(2616005)(38350700002)(6486002)(6666004)(6506007)(6512007)(186003)(316002)(86362001);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData: =?utf-8?B?aVdtSGVXV002Y2NaaDlsL2RhYzBTbFFsLzI0RnNqcmI3U2hjTTg1LzQvMEFx?=
+ =?utf-8?B?VE0ySXJiSmRSNEVPMG9SZ1p4OUxzb3hSbGkwK1VuZmJzcExSUkVXbmp1dUR1?=
+ =?utf-8?B?WlNoVFVCdmFpdEZ5KzNjV3ZhdkwrUG10L3IzQ3ViMndabVJPMHVjTUlLb210?=
+ =?utf-8?B?OTdnNFhLVUd6TEpwajVpdzdFaFRzVTVaTXUvMWFwa1J3V0RuS3FBalV6bkMw?=
+ =?utf-8?B?REtXbEh0RGR4cGlxMHpxN1ZmNFBmT3dBR285Q2k2QjZUSU9mUDZ4VzgvelpR?=
+ =?utf-8?B?bVhwVGZsT0hITTdha09TVnoyYnZCWVQvdUFhemJibnB4UXp1UTd3Z21xWHNO?=
+ =?utf-8?B?S2VDRm1oandzWHpTVjc0Qks2NFpuYmsxaUpRRlMyTTVhVHNvTXVJN0cvZURD?=
+ =?utf-8?B?c294ODZVaDdHb2ZRaVRNQXV4N1B4dmgxcHM5NXh4UFRVYWlGdTRmeTYwVjRX?=
+ =?utf-8?B?elpNU3VUMzNud2UrNFlxRFpQUytHVmorOFRRb2N6dlVMQ0t4Vmdua2lVQy80?=
+ =?utf-8?B?dWRZMDBJdWNZRjJZRlVRWlZKczdaK1hPSFlxOWJ0cC94aFo0eEk4czhkZDA2?=
+ =?utf-8?B?Q0NCdExiWXFGb1B3U3YyeXFRYjZjdmpTM1RJYTZIaVhiY1JTRDFVcXNobUIr?=
+ =?utf-8?B?Q3dDS2xHTHNZd1A5dy9rS29Jc0MvSVhMeU9LeFU1WllrSi9ZVFNoQWJvcHNw?=
+ =?utf-8?B?NlpKOFZXdnd1Y2YzcEJoOW1JYTVMRFhwcjdJQUlKRUp1S1RPUmd5L0R5cXAz?=
+ =?utf-8?B?WVRSbnRsNmZUM2hTeVRHdFdpdCtIMkJkZ0x2aitSdTJPVjNCTVRaU0w1dzBR?=
+ =?utf-8?B?SnNqZHBVREdVb25lVHVzTlpZSFcxMjRGb2JZNFhvU1hjc0tXWHk3clJMTEt5?=
+ =?utf-8?B?YVdqNEp0NENmT0RTcTNFZ3dWUjc4Z0UwUkdTSGdKeUNXRi94ZEI0RFQrTTdW?=
+ =?utf-8?B?UVVZY1pTSVpyMkg5VEZVM1hMUmdXTWF4WDJ3UTN3dEZzRmpEQUhrMTNtY2tM?=
+ =?utf-8?B?dHVOSitKdWpYWWcybmprNUl1N2Eyclp1T29rUlRsVnNIdzJmeVBSdjloTVhN?=
+ =?utf-8?B?RXk2cXZIR2RsQ2pBMHRreUw1TnBLYUZOWENzSGtTUXlnZlFnSDJUNXR1QzVV?=
+ =?utf-8?B?YVJlbXZFMFVFTXZjOVRtQlJlMkJXTzNad0NPRjlkRGd5UzlXdGRMd2FEdUFk?=
+ =?utf-8?B?bTJSVGVueTk1Q290MmFSN1dkSzlCYWxhVnhqZUdYb3Q1RTQ1eldkbkdVa1N6?=
+ =?utf-8?B?TXovZERmclBxY0xjemkrbUNHVjRNMU1GOW4vMXFjc3pnR0wrd201dmpqSllU?=
+ =?utf-8?B?SVIxV2Y2MlhaU2svdzVvMldRcUdyK2hRVitkUUpPeVd1S2hNNlRxMkpSUDE1?=
+ =?utf-8?B?OUY0UEFoUmNEMWVCdS9aeUFURG56bngrYWVSMUJoTFhSMmVqdjAvM05mblVn?=
+ =?utf-8?B?bVYxYm5LeWNXbWNGeHFZQXdBZlZHd2JXbTFhWVNWR2taTzZnQTZQV2hVOFhJ?=
+ =?utf-8?B?QjMyYXNTcy9ab0x3eHdhS3lUd2pQUkJZWXFocU14Q2tTTGFwY3ZvZWlzYkpk?=
+ =?utf-8?B?ZkFwMXI0VHlxRXZ5SkdtZW1iMW04blZWTlVuWWRtV1MydkdTYUp4UDF0ZkVq?=
+ =?utf-8?B?V3hJSm1UQ0Jqc2xqSkNXZ2ZWT05JdVBKQStUVzI5RWRwU2dvRVcybXh5cWFy?=
+ =?utf-8?B?TllJSDNqVENVSExBZmVSd3g0NzJvenVsUUZVU3dpbGhISjd6WmlmYytnNEpN?=
+ =?utf-8?Q?QGHOnxCgvOAwMkAbgHRHefjr/WYqcT969phCLa9?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 9896ff12-c5b4-421f-f9a1-08d902eb5f30
+X-MS-Exchange-CrossTenant-AuthSource: AM6PR04MB6053.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Apr 2021 04:26:59.4616
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: 1IYHRUj96ZFPUGM224m5kKukwj6GivUjSaU/anOesbfoQxqSi1R6BEaAG0+PdVaFc474JX9J+PecEtTuEmLjOw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB7912
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The cache function can be turned ON and OFF by writing to the CACHE_CTRL
-byte (EXT_CSD byte [33]).  However,  card->ext_csd.cache_ctrl is only
-set on init if cache size > 0.
+From: Alice Guo <alice.guo@nxp.com>
 
-Fix that by explicitly setting ext_csd.cache_ctrl on ext-csd write.
+In patch "soc: imx8m: change to use platform driver", change soc-imx8m.c to use
+module platform driver and use NVMEM APIs to ocotp register, the reason is that
+directly reading ocotp egister causes kexec kernel hang because kernel will
+disable unused clks after kernel boots up. This patch makes the SoC driver
+ready. This patch makes the SoC driver ready later than before, and causes device
+depends on soc_device_match() for initialization are affected, resulting in
+kernel boot error.
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/block.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+CAAM driver is one of these affected drivers. It uses soc_device_match() to find
+the first matching entry of caam_imx_soc_table, if none of them match, the next
+instruction will be executed without any processing because CAAM driver is used
+not only on i.MX and LS, but also PPC and Vybrid. We hope that
+soc_device_match() could support to return -EPROBE_DEFER(or some other error
+code, e.g. -ENODEV, but not NULL) in case of “no SoC device registered” to SoC
+bus. We tried it and updated all the code that is using soc_device_match()
+throughout the tree.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 6800feb70c92..0372702231ce 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -572,6 +572,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 		main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
- 	}
- 
-+	/*
-+	 * Make sure to update CACHE_CTRL in case it was changed. The cache
-+	 * will get turned back on if the card is re-initialized, e.g.
-+	 * suspend/resume or hw reset in recovery.
-+	 */
-+	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_CACHE_CTRL) &&
-+	    (cmd.opcode == MMC_SWITCH)) {
-+		u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg) & 1;
-+
-+		card->ext_csd.cache_ctrl = value;
-+	}
-+
- 	/*
- 	 * According to the SD specs, some commands require a delay after
- 	 * issuing the command.
+Alice Guo (3):
+  drivers: soc: add support for soc_device_match returning -EPROBE_DEFER
+  caam: add defer probe when the caam driver cannot identify SoC
+  driver: update all the code that use soc_device_match
+
+ drivers/base/soc.c                            |  5 +++++
+ drivers/bus/ti-sysc.c                         |  2 +-
+ drivers/clk/renesas/r8a7795-cpg-mssr.c        |  4 +++-
+ drivers/clk/renesas/rcar-gen2-cpg.c           |  2 +-
+ drivers/clk/renesas/rcar-gen3-cpg.c           |  2 +-
+ drivers/crypto/caam/ctrl.c                    |  3 +++
+ drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c       |  7 ++++++-
+ drivers/dma/ti/k3-psil.c                      |  3 +++
+ drivers/dma/ti/k3-udma.c                      |  2 +-
+ drivers/gpu/drm/bridge/nwl-dsi.c              |  2 +-
+ drivers/gpu/drm/meson/meson_drv.c             |  4 +++-
+ drivers/gpu/drm/omapdrm/dss/dispc.c           |  2 +-
+ drivers/gpu/drm/omapdrm/dss/dpi.c             |  4 +++-
+ drivers/gpu/drm/omapdrm/dss/dsi.c             |  3 +++
+ drivers/gpu/drm/omapdrm/dss/dss.c             |  3 +++
+ drivers/gpu/drm/omapdrm/dss/hdmi4_core.c      |  3 +++
+ drivers/gpu/drm/omapdrm/dss/venc.c            |  4 +++-
+ drivers/gpu/drm/omapdrm/omap_drv.c            |  3 +++
+ drivers/gpu/drm/rcar-du/rcar_du_crtc.c        |  4 +++-
+ drivers/gpu/drm/rcar-du/rcar_lvds.c           |  2 +-
+ drivers/gpu/drm/tidss/tidss_dispc.c           |  4 +++-
+ drivers/iommu/ipmmu-vmsa.c                    |  7 +++++--
+ drivers/media/platform/rcar-vin/rcar-core.c   |  2 +-
+ drivers/media/platform/rcar-vin/rcar-csi2.c   |  2 +-
+ drivers/media/platform/vsp1/vsp1_uif.c        |  4 +++-
+ drivers/mmc/host/renesas_sdhi_core.c          |  2 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c |  2 +-
+ drivers/mmc/host/sdhci-of-esdhc.c             | 21 ++++++++++++++-----
+ drivers/mmc/host/sdhci-omap.c                 |  2 +-
+ drivers/mmc/host/sdhci_am654.c                |  2 +-
+ drivers/net/ethernet/renesas/ravb_main.c      |  4 +++-
+ drivers/net/ethernet/ti/am65-cpsw-nuss.c      |  2 +-
+ drivers/net/ethernet/ti/cpsw.c                |  2 +-
+ drivers/net/ethernet/ti/cpsw_new.c            |  2 +-
+ drivers/phy/ti/phy-omap-usb2.c                |  4 +++-
+ drivers/pinctrl/renesas/core.c                |  2 +-
+ drivers/pinctrl/renesas/pfc-r8a7790.c         |  5 ++++-
+ drivers/pinctrl/renesas/pfc-r8a7794.c         |  5 ++++-
+ drivers/soc/fsl/dpio/dpio-driver.c            | 13 ++++++++----
+ drivers/soc/renesas/r8a774c0-sysc.c           |  5 ++++-
+ drivers/soc/renesas/r8a7795-sysc.c            |  2 +-
+ drivers/soc/renesas/r8a77990-sysc.c           |  5 ++++-
+ drivers/soc/ti/k3-ringacc.c                   |  2 +-
+ drivers/staging/mt7621-pci/pci-mt7621.c       |  2 +-
+ drivers/thermal/rcar_gen3_thermal.c           |  4 +++-
+ drivers/thermal/ti-soc-thermal/ti-bandgap.c   | 10 +++++++--
+ drivers/usb/gadget/udc/renesas_usb3.c         |  2 +-
+ drivers/usb/host/ehci-platform.c              |  4 +++-
+ drivers/usb/host/xhci-rcar.c                  |  2 +-
+ drivers/watchdog/renesas_wdt.c                |  2 +-
+ 50 files changed, 139 insertions(+), 52 deletions(-)
+
 -- 
-2.25.1
+2.17.1
 
