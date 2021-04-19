@@ -2,157 +2,247 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73BB8C43470
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 12:17:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B443EC433ED
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 12:30:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 58BB6611CE
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 12:17:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 90A706101E
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 12:30:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239107AbhDSMRj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Apr 2021 08:17:39 -0400
-Received: from mout.kundenserver.de ([212.227.126.133]:49693 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239056AbhDSMRg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Apr 2021 08:17:36 -0400
-Received: from mail-wr1-f45.google.com ([209.85.221.45]) by
- mrelayeu.kundenserver.de (mreue012 [213.165.67.97]) with ESMTPSA (Nemesis) id
- 1McIYO-1m4VGN1dSm-00cdhN; Mon, 19 Apr 2021 14:17:03 +0200
-Received: by mail-wr1-f45.google.com with SMTP id a4so33804401wrr.2;
-        Mon, 19 Apr 2021 05:17:03 -0700 (PDT)
-X-Gm-Message-State: AOAM530v/yBC/2XYq7ELiJsOKT38utH8V09hnr+DbReIt0QSUowLKCu9
-        qzJPWUNHn5H0Tj77oevy9M0tidTBIegyWgN+ZY8=
-X-Google-Smtp-Source: ABdhPJw4F20QerTwfst1rAMwc6NWiXDSUWeUkZ8E4j2sezaYrIv6atAni45jIwUzsYws7AyLO9D3pu8QFGIGztgXd7o=
-X-Received: by 2002:a05:6000:1843:: with SMTP id c3mr14679907wri.361.1618834612186;
- Mon, 19 Apr 2021 05:16:52 -0700 (PDT)
+        id S233780AbhDSMaa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Apr 2021 08:30:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47700 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229790AbhDSMa3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Apr 2021 08:30:29 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 075DFC06174A
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Apr 2021 05:29:59 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id h36so1484685lfv.7
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Apr 2021 05:29:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ceVsjztUkjkjgdJT/9OnFlYTCetL4aB8s6SCxtd3uSM=;
+        b=HEWlImLWkr4Q/N+F5Q1IILtXLfTt/msC7DflWzk05hi4BZoB5jZGHZYcRM7oAfumGG
+         5Dd/KEkfsUhIOyNwsQSqOH9sEgzr1Xpc+qJZwko9eXcZU1jynwhxF2O8iBvLRaY+f/uT
+         SRf9mRbvtijLKzczjDcR8+nm3ba9aVvGyczlVkhqJmHqMsV7sQx76YffdWX9k0Vz4Jh8
+         ar+MX/WsSTDRJrkKob88ud+bf8mwFnnHcRI8HZjkMIDBGmvEm9e+jFZeZV1Xdr2y9G1x
+         mQIhVvg/AIzWdiu3xcHcz8H1siI/K2cYKk1mPORjyilZ+0N6LvOkbLhkWjOLf6N8SUNr
+         Pg1Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ceVsjztUkjkjgdJT/9OnFlYTCetL4aB8s6SCxtd3uSM=;
+        b=QpLzJKB9Isby4ywBIGdwEs/vEsC3KKU5cMzq0qOBLyicCYOaPDCk/WADs+AL1qyeaZ
+         iHQ9jLnCh00xToghUh1lOABgpAytGjSYx92F0M1bdZo34vRgWedE4BInSZmntdBRQ3X8
+         fm6wN8sROAEzCUSMlNZXLIvQfui1Hn3CJtVKyECjiIqyTu030Lmwh5JLwWDApfifptg8
+         k7HhN4VaMpVTVoHaXZn4lpF7NsjcHLGYIzbb5l0I5EeCNXLL25+kh6EXtqt3F836MlrU
+         +3Bu677BynAnPdrUC+2hinFI6Govf9hnZkUQ45iALnpGJFABcs1MvErdW4DB1tl56MzY
+         wBfA==
+X-Gm-Message-State: AOAM533DJfBw0YxLtNwRYTDYOOL1R0atbUJbJFh9ld9QDYVF7Sd4jeCr
+        5mOqPvYqkEQiaXFKiOikxI3FtpvTapkRwFzO
+X-Google-Smtp-Source: ABdhPJw+JtarImMdnuQlmAPIbiSUBWZSPasiV4JgqFZPQL/vVWFs1nr58W+SA5rV5M+NtqnEMtbakQ==
+X-Received: by 2002:a05:6512:238e:: with SMTP id c14mr11960357lfv.124.1618835390404;
+        Mon, 19 Apr 2021 05:29:50 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
+        by smtp.gmail.com with ESMTPSA id y7sm410988lfl.233.2021.04.19.05.29.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Apr 2021 05:29:49 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: core: Move eMMC cache flushing to a new bus_ops callback
+Date:   Mon, 19 Apr 2021 14:29:43 +0200
+Message-Id: <20210419122943.68234-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20210419042722.27554-1-alice.guo@oss.nxp.com> <20210419042722.27554-4-alice.guo@oss.nxp.com>
- <YH0O907dfGY9jQRZ@atmark-techno.com> <CAMuHMdVY1SLZ0K30T2pimyrR6Mm=VoSTO=L-xxCy2Bj7_kostw@mail.gmail.com>
- <YH1OeFy+SepIYYG0@atmark-techno.com>
-In-Reply-To: <YH1OeFy+SepIYYG0@atmark-techno.com>
-From:   Arnd Bergmann <arnd@arndb.de>
-Date:   Mon, 19 Apr 2021 14:16:36 +0200
-X-Gmail-Original-Message-ID: <CAK8P3a1Mu2F0irDDCL-50HiHth29iYFL5b7WHZ=UX6W7zzoxAg@mail.gmail.com>
-Message-ID: <CAK8P3a1Mu2F0irDDCL-50HiHth29iYFL5b7WHZ=UX6W7zzoxAg@mail.gmail.com>
-Subject: Re: [RFC v1 PATCH 3/3] driver: update all the code that use soc_device_match
-To:     Dominique MARTINET <dominique.martinet@atmark-techno.com>
-Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
-        "Alice Guo (OSS)" <alice.guo@oss.nxp.com>,
-        gregkh <gregkh@linuxfoundation.org>,
-        Rafael Wysocki <rafael@kernel.org>,
-        =?UTF-8?Q?Horia_Geant=C4=83?= <horia.geanta@nxp.com>,
-        aymen.sghaier@nxp.com, Herbert Xu <herbert@gondor.apana.org.au>,
-        David Miller <davem@davemloft.net>,
-        Tony Lindgren <tony@atomide.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>, Vinod Koul <vkoul@kernel.org>,
-        peter.ujfalusi@gmail.com, Andrzej Hajda <a.hajda@samsung.com>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Robert Foss <robert.foss@linaro.org>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>,
-        Kevin Hilman <khilman@baylibre.com>, tomba@kernel.org,
-        jyri.sarha@iki.fi, Joerg Roedel <joro@8bytes.org>,
-        Will Deacon <will@kernel.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Kishon <kishon@ti.com>, Jakub Kicinski <kuba@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Roy Pledge <Roy.Pledge@nxp.com>, Leo Li <leoyang.li@nxp.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Eduardo Valentin <edubezval@gmail.com>,
-        Keerthy <j-keerthy@ti.com>, Felipe Balbi <balbi@kernel.org>,
-        Tony Prisk <linux@prisktech.co.nz>,
-        Alan Stern <stern@rowland.harvard.edu>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
-        <linux-crypto@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>, dmaengine@vger.kernel.org,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        "open list:ARM/Amlogic Meson SoC support" 
-        <linux-amlogic@lists.infradead.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Networking <netdev@vger.kernel.org>,
-        linux-phy@lists.infradead.org,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
-        linux-staging@lists.linux.dev,
-        "moderated list:ARM/Mediatek SoC..." 
-        <linux-mediatek@lists.infradead.org>,
-        Linux PM list <linux-pm@vger.kernel.org>,
-        USB list <linux-usb@vger.kernel.org>,
-        LINUXWATCHDOG <linux-watchdog@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-X-Provags-ID: V03:K1:P71GUur0c8Et4KTdfK062CelxJMlxDzHdi6foeZVMrh68Tz4kVO
- xXC4vz+qe3LvNC/lTgY8q6jr08cIcxgzzrqqwLuy4gBjPze3CRaFI6Tn0ivsylYkqTjCGCd
- UznPeEk90qstnxb0iWNZx7FG5N+vrUigS/VNsT3W/kFEpTHiyw396kNMzzFJBTjXO+naZJ+
- Cfu35e3pJq/mHwP5LQM/Q==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:Tj0dSv4OACg=:QLuHKXqc+6Lj41NGnufoGl
- N+UnlZp25078q227oT0o/4kxbd0mQOAoQ/NCUKgnVsoYmGtmK6mEBskoottCNbYunStcV9NF4
- wE8ToQWQ05B3nZv4Vjj9qNbaiSwQl2/EIEpHx8+6DQaiGM4h6uplPIOIDeaZjltt02tsjjmk7
- kxpSU+zIeAbNwqmXYSk5Vm3CpYS1xMcDA6Eiv0+uZeBUE0kKjN4jwkU6+BKG/eaq+T9ufKwnD
- crSJLI+V67wSaKUzbHccJ3EU1Sb6dMM2cPoEC3Av6tRhuAXiX84+lOxtkljO1IFE9iL1JBVn5
- CjGxqnLONV0vManrkRS3zSk/dqMTqKx9iNczeHNAz+sKCK3kGK1HvvAI82zCriMShj36q2Yiu
- latEFCHqqv6CzIpzD2Q+F98/Rh3nVZdyFAqvuM6r16X0t/3dzAs72dYw+jzCHok5qetil5Q2V
- 5rdGScTR8+ZhGbwiKRQyQ6I2CQTnccKZ549zJci96NqNdfUe5jbzVwZOI0walCavZ7GVu0d2F
- jvOU246bo6oNPkDzH9c2gJBnZtcrzAKb4pwtF9+3cOiLZPnCE0nY+1vjm75YQHDBCyxvLdR64
- g4tTIuRlUg3P8XaXbJiPp80y/nkM8kt4yG+up76tnDKMDxMpP5a+pkpQ1YQ2I6y3uojN6bE8n
- CFp8=
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 19, 2021 at 11:33 AM Dominique MARTINET
-<dominique.martinet@atmark-techno.com> wrote:
-> Geert Uytterhoeven wrote on Mon, Apr 19, 2021 at 11:03:24AM +0200:
->
-> > soc_device_match() should only be used as a last resort, to identify
-> > systems that cannot be identified otherwise.  Typically this is used for
-> > quirks, which should only be enabled on a very specific subset of
-> > systems.  IMHO such systems should make sure soc_device_match()
-> > is available early, by registering their SoC device early.
->
-> I definitely agree there, my suggestion to defer was only because I know
-> of no other way to influence the ordering of drivers loading reliably
-> and gave up on soc being init'd early.
+To prepare to add internal cache management for SD cards, let's start by
+moving the eMMC specific code into a new ->flush_cache() bus_ops callback.
 
-In some cases, you can use the device_link infrastructure to deal
-with dependencies between devices. Not sure if this would help
-in your case, but have a look at device_link_add() etc in drivers/base/core.c
+In this way, it becomes more straight-forward to add the SD specific parts,
+as subsequent changes are about to show.
 
-> In this particular case the problem is that since 7d981405d0fd ("soc:
-> imx8m: change to use platform driver") the soc probe tries to use the
-> nvmem driver for ocotp fuses for imx8m devices, which isn't ready yet.
-> So soc loading gets pushed back to the end of the list because it gets
-> defered and other drivers relying on soc_device_match get confused
-> because they wrongly think a device doesn't match a quirk when it
-> actually does.
->
-> If there is a way to ensure the nvmem driver gets loaded before the soc,
-> that would also solve the problem nicely, and avoid the need to mess
-> with all the ~50 drivers which use it.
->
-> Is there a way to control in what order drivers get loaded? Something in
-> the dtb perhaps?
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/core.c    | 11 +++++++++++
+ drivers/mmc/core/core.h    |  2 ++
+ drivers/mmc/core/mmc.c     | 25 +++++++++++++++++++++++--
+ drivers/mmc/core/mmc_ops.c | 23 -----------------------
+ drivers/mmc/core/mmc_ops.h |  1 -
+ 5 files changed, 36 insertions(+), 26 deletions(-)
 
-For built-in drivers, load order depends on the initcall level and
-link order (how things are lined listed in the Makefile hierarchy).
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f194940c5974..64eb3c8f0d15 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2044,6 +2044,17 @@ int mmc_sw_reset(struct mmc_host *host)
+ }
+ EXPORT_SYMBOL(mmc_sw_reset);
+ 
++int mmc_flush_cache(struct mmc_card *card)
++{
++	const struct mmc_bus_ops *bus_ops = card->host->bus_ops;
++
++	if (bus_ops->flush_cache)
++		return bus_ops->flush_cache(card);
++
++	return 0;
++}
++EXPORT_SYMBOL(mmc_flush_cache);
++
+ static int mmc_rescan_try_freq(struct mmc_host *host, unsigned freq)
+ {
+ 	host->f_init = freq;
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index 8032451abaea..b00012f14671 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -20,6 +20,7 @@ struct mmc_request;
+ struct mmc_bus_ops {
+ 	void (*remove)(struct mmc_host *);
+ 	void (*detect)(struct mmc_host *);
++	int (*flush_cache)(struct mmc_card *);
+ 	int (*pre_suspend)(struct mmc_host *);
+ 	int (*suspend)(struct mmc_host *);
+ 	int (*resume)(struct mmc_host *);
+@@ -98,6 +99,7 @@ bool mmc_is_req_done(struct mmc_host *host, struct mmc_request *mrq);
+ 
+ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq);
+ 
++int mmc_flush_cache(struct mmc_card *card);
+ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 		unsigned int arg);
+ int mmc_can_erase(struct mmc_card *card);
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 8741271d3971..77c9ca024285 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -28,6 +28,7 @@
+ 
+ #define DEFAULT_CMD6_TIMEOUT_MS	500
+ #define MIN_CACHE_EN_TIMEOUT_MS 1600
++#define CACHE_FLUSH_TIMEOUT_MS 30000 /* 30s */
+ 
+ static const unsigned int tran_exp[] = {
+ 	10000,		100000,		1000000,	10000000,
+@@ -2029,6 +2030,25 @@ static void mmc_detect(struct mmc_host *host)
+ 	}
+ }
+ 
++/*
++ * Flush the internal cache of the eMMC to non-volatile storage.
++ */
++static int _mmc_flush_cache(struct mmc_card *card)
++{
++	int err = 0;
++
++	if (card->ext_csd.cache_size > 0 && card->ext_csd.cache_ctrl & 1) {
++		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
++				 EXT_CSD_FLUSH_CACHE, 1,
++				 CACHE_FLUSH_TIMEOUT_MS);
++		if (err)
++			pr_err("%s: cache flush error %d\n",
++					mmc_hostname(card->host), err);
++	}
++
++	return err;
++}
++
+ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ {
+ 	int err = 0;
+@@ -2040,7 +2060,7 @@ static int _mmc_suspend(struct mmc_host *host, bool is_suspend)
+ 	if (mmc_card_suspended(host->card))
+ 		goto out;
+ 
+-	err = mmc_flush_cache(host->card);
++	err = _mmc_flush_cache(host->card);
+ 	if (err)
+ 		goto out;
+ 
+@@ -2181,7 +2201,7 @@ static int _mmc_hw_reset(struct mmc_host *host)
+ 	 * In the case of recovery, we can't expect flushing the cache to work
+ 	 * always, but we have a go and ignore errors.
+ 	 */
+-	mmc_flush_cache(host->card);
++	_mmc_flush_cache(host->card);
+ 
+ 	if ((host->caps & MMC_CAP_HW_RESET) && host->ops->hw_reset &&
+ 	     mmc_can_reset(card)) {
+@@ -2201,6 +2221,7 @@ static int _mmc_hw_reset(struct mmc_host *host)
+ static const struct mmc_bus_ops mmc_ops = {
+ 	.remove = mmc_remove,
+ 	.detect = mmc_detect,
++	.flush_cache = _mmc_flush_cache,
+ 	.suspend = mmc_suspend,
+ 	.resume = mmc_resume,
+ 	.runtime_suspend = mmc_runtime_suspend,
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index f413474f0f80..b03e3cf5dab4 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -20,7 +20,6 @@
+ #include "mmc_ops.h"
+ 
+ #define MMC_BKOPS_TIMEOUT_MS		(120 * 1000) /* 120s */
+-#define MMC_CACHE_FLUSH_TIMEOUT_MS	(30 * 1000) /* 30s */
+ #define MMC_SANITIZE_TIMEOUT_MS		(240 * 1000) /* 240s */
+ 
+ static const u8 tuning_blk_pattern_4bit[] = {
+@@ -960,28 +959,6 @@ void mmc_run_bkops(struct mmc_card *card)
+ }
+ EXPORT_SYMBOL(mmc_run_bkops);
+ 
+-/*
+- * Flush the cache to the non-volatile storage.
+- */
+-int mmc_flush_cache(struct mmc_card *card)
+-{
+-	int err = 0;
+-
+-	if (mmc_card_mmc(card) &&
+-			(card->ext_csd.cache_size > 0) &&
+-			(card->ext_csd.cache_ctrl & 1)) {
+-		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+-				 EXT_CSD_FLUSH_CACHE, 1,
+-				 MMC_CACHE_FLUSH_TIMEOUT_MS);
+-		if (err)
+-			pr_err("%s: cache flush error %d\n",
+-					mmc_hostname(card->host), err);
+-	}
+-
+-	return err;
+-}
+-EXPORT_SYMBOL(mmc_flush_cache);
+-
+ static int mmc_cmdq_switch(struct mmc_card *card, bool enable)
+ {
+ 	u8 val = enable ? EXT_CSD_CMDQ_MODE_ENABLED : 0;
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 632009260e51..c155ff7b9989 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -43,7 +43,6 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ int mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+ 		unsigned int timeout_ms);
+ void mmc_run_bkops(struct mmc_card *card);
+-int mmc_flush_cache(struct mmc_card *card);
+ int mmc_cmdq_enable(struct mmc_card *card);
+ int mmc_cmdq_disable(struct mmc_card *card);
+ int mmc_sanitize(struct mmc_card *card);
+-- 
+2.25.1
 
-For loadable modules, this is up to user space in the end.
-
-Which of the drivers in this scenario are loadable modules?
-
-        Arnd
