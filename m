@@ -2,92 +2,157 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19191C4360C
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 11:25:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73BB8C43470
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 12:17:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED9606108B
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 11:25:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 58BB6611CE
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 12:17:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238617AbhDSLZo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Apr 2021 07:25:44 -0400
-Received: from mga05.intel.com ([192.55.52.43]:39485 "EHLO mga05.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S238087AbhDSLZh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 19 Apr 2021 07:25:37 -0400
-IronPort-SDR: YEPCT3euedHbJ1OYmVbj7DtQ+k+P3X0cWE/IeYeAlzrnEbiL9iXjkkrmjoyGbtK5kB4AZkZUcy
- BK0zdO8k/nJg==
-X-IronPort-AV: E=McAfee;i="6200,9189,9958"; a="280632663"
-X-IronPort-AV: E=Sophos;i="5.82,234,1613462400"; 
-   d="scan'208";a="280632663"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2021 04:25:06 -0700
-IronPort-SDR: Ji0kWO+86DKcA/iebLwOxA9FA1uLhGHlOiR8QcUV7NllFz+EXDF3YSkzS2Hv1PA/7LwwinrkGM
- t91Cl3TpkWig==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.82,234,1613462400"; 
-   d="scan'208";a="454267724"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga002.fm.intel.com with ESMTP; 19 Apr 2021 04:25:02 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id 8BE0A1FC; Mon, 19 Apr 2021 14:25:19 +0300 (EEST)
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Yangbo Lu <yangbo.lu@nxp.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-spi@vger.kernel.org
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Mark Brown <broonie@kernel.org>
-Subject: [PATCH v1 5/6] mmc: mmc_spi: Use already parsed IRQ
-Date:   Mon, 19 Apr 2021 14:24:58 +0300
-Message-Id: <20210419112459.25241-5-andriy.shevchenko@linux.intel.com>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210419112459.25241-1-andriy.shevchenko@linux.intel.com>
-References: <20210419112459.25241-1-andriy.shevchenko@linux.intel.com>
+        id S239107AbhDSMRj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Apr 2021 08:17:39 -0400
+Received: from mout.kundenserver.de ([212.227.126.133]:49693 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239056AbhDSMRg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Apr 2021 08:17:36 -0400
+Received: from mail-wr1-f45.google.com ([209.85.221.45]) by
+ mrelayeu.kundenserver.de (mreue012 [213.165.67.97]) with ESMTPSA (Nemesis) id
+ 1McIYO-1m4VGN1dSm-00cdhN; Mon, 19 Apr 2021 14:17:03 +0200
+Received: by mail-wr1-f45.google.com with SMTP id a4so33804401wrr.2;
+        Mon, 19 Apr 2021 05:17:03 -0700 (PDT)
+X-Gm-Message-State: AOAM530v/yBC/2XYq7ELiJsOKT38utH8V09hnr+DbReIt0QSUowLKCu9
+        qzJPWUNHn5H0Tj77oevy9M0tidTBIegyWgN+ZY8=
+X-Google-Smtp-Source: ABdhPJw4F20QerTwfst1rAMwc6NWiXDSUWeUkZ8E4j2sezaYrIv6atAni45jIwUzsYws7AyLO9D3pu8QFGIGztgXd7o=
+X-Received: by 2002:a05:6000:1843:: with SMTP id c3mr14679907wri.361.1618834612186;
+ Mon, 19 Apr 2021 05:16:52 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210419042722.27554-1-alice.guo@oss.nxp.com> <20210419042722.27554-4-alice.guo@oss.nxp.com>
+ <YH0O907dfGY9jQRZ@atmark-techno.com> <CAMuHMdVY1SLZ0K30T2pimyrR6Mm=VoSTO=L-xxCy2Bj7_kostw@mail.gmail.com>
+ <YH1OeFy+SepIYYG0@atmark-techno.com>
+In-Reply-To: <YH1OeFy+SepIYYG0@atmark-techno.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Mon, 19 Apr 2021 14:16:36 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a1Mu2F0irDDCL-50HiHth29iYFL5b7WHZ=UX6W7zzoxAg@mail.gmail.com>
+Message-ID: <CAK8P3a1Mu2F0irDDCL-50HiHth29iYFL5b7WHZ=UX6W7zzoxAg@mail.gmail.com>
+Subject: Re: [RFC v1 PATCH 3/3] driver: update all the code that use soc_device_match
+To:     Dominique MARTINET <dominique.martinet@atmark-techno.com>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        "Alice Guo (OSS)" <alice.guo@oss.nxp.com>,
+        gregkh <gregkh@linuxfoundation.org>,
+        Rafael Wysocki <rafael@kernel.org>,
+        =?UTF-8?Q?Horia_Geant=C4=83?= <horia.geanta@nxp.com>,
+        aymen.sghaier@nxp.com, Herbert Xu <herbert@gondor.apana.org.au>,
+        David Miller <davem@davemloft.net>,
+        Tony Lindgren <tony@atomide.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, Vinod Koul <vkoul@kernel.org>,
+        peter.ujfalusi@gmail.com, Andrzej Hajda <a.hajda@samsung.com>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Robert Foss <robert.foss@linaro.org>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Kevin Hilman <khilman@baylibre.com>, tomba@kernel.org,
+        jyri.sarha@iki.fi, Joerg Roedel <joro@8bytes.org>,
+        Will Deacon <will@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Kishon <kishon@ti.com>, Jakub Kicinski <kuba@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Roy Pledge <Roy.Pledge@nxp.com>, Leo Li <leoyang.li@nxp.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Eduardo Valentin <edubezval@gmail.com>,
+        Keerthy <j-keerthy@ti.com>, Felipe Balbi <balbi@kernel.org>,
+        Tony Prisk <linux@prisktech.co.nz>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
+        <linux-crypto@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>, dmaengine@vger.kernel.org,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        "open list:ARM/Amlogic Meson SoC support" 
+        <linux-amlogic@lists.infradead.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Networking <netdev@vger.kernel.org>,
+        linux-phy@lists.infradead.org,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
+        linux-staging@lists.linux.dev,
+        "moderated list:ARM/Mediatek SoC..." 
+        <linux-mediatek@lists.infradead.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        LINUXWATCHDOG <linux-watchdog@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:P71GUur0c8Et4KTdfK062CelxJMlxDzHdi6foeZVMrh68Tz4kVO
+ xXC4vz+qe3LvNC/lTgY8q6jr08cIcxgzzrqqwLuy4gBjPze3CRaFI6Tn0ivsylYkqTjCGCd
+ UznPeEk90qstnxb0iWNZx7FG5N+vrUigS/VNsT3W/kFEpTHiyw396kNMzzFJBTjXO+naZJ+
+ Cfu35e3pJq/mHwP5LQM/Q==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:Tj0dSv4OACg=:QLuHKXqc+6Lj41NGnufoGl
+ N+UnlZp25078q227oT0o/4kxbd0mQOAoQ/NCUKgnVsoYmGtmK6mEBskoottCNbYunStcV9NF4
+ wE8ToQWQ05B3nZv4Vjj9qNbaiSwQl2/EIEpHx8+6DQaiGM4h6uplPIOIDeaZjltt02tsjjmk7
+ kxpSU+zIeAbNwqmXYSk5Vm3CpYS1xMcDA6Eiv0+uZeBUE0kKjN4jwkU6+BKG/eaq+T9ufKwnD
+ crSJLI+V67wSaKUzbHccJ3EU1Sb6dMM2cPoEC3Av6tRhuAXiX84+lOxtkljO1IFE9iL1JBVn5
+ CjGxqnLONV0vManrkRS3zSk/dqMTqKx9iNczeHNAz+sKCK3kGK1HvvAI82zCriMShj36q2Yiu
+ latEFCHqqv6CzIpzD2Q+F98/Rh3nVZdyFAqvuM6r16X0t/3dzAs72dYw+jzCHok5qetil5Q2V
+ 5rdGScTR8+ZhGbwiKRQyQ6I2CQTnccKZ549zJci96NqNdfUe5jbzVwZOI0walCavZ7GVu0d2F
+ jvOU246bo6oNPkDzH9c2gJBnZtcrzAKb4pwtF9+3cOiLZPnCE0nY+1vjm75YQHDBCyxvLdR64
+ g4tTIuRlUg3P8XaXbJiPp80y/nkM8kt4yG+up76tnDKMDxMpP5a+pkpQ1YQ2I6y3uojN6bE8n
+ CFp8=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SPI core already parses and maps IRQ for us if provided.
-Use it instead of double parsing in mmc_spi_get_pdata().
+On Mon, Apr 19, 2021 at 11:33 AM Dominique MARTINET
+<dominique.martinet@atmark-techno.com> wrote:
+> Geert Uytterhoeven wrote on Mon, Apr 19, 2021 at 11:03:24AM +0200:
+>
+> > soc_device_match() should only be used as a last resort, to identify
+> > systems that cannot be identified otherwise.  Typically this is used for
+> > quirks, which should only be enabled on a very specific subset of
+> > systems.  IMHO such systems should make sure soc_device_match()
+> > is available early, by registering their SoC device early.
+>
+> I definitely agree there, my suggestion to defer was only because I know
+> of no other way to influence the ordering of drivers loading reliably
+> and gave up on soc being init'd early.
 
-Due to above, change condition, since SPI core can hold
-an error pointer as invalid IRQ.
+In some cases, you can use the device_link infrastructure to deal
+with dependencies between devices. Not sure if this would help
+in your case, but have a look at device_link_add() etc in drivers/base/core.c
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/mmc/host/of_mmc_spi.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+> In this particular case the problem is that since 7d981405d0fd ("soc:
+> imx8m: change to use platform driver") the soc probe tries to use the
+> nvmem driver for ocotp fuses for imx8m devices, which isn't ready yet.
+> So soc loading gets pushed back to the end of the list because it gets
+> defered and other drivers relying on soc_device_match get confused
+> because they wrongly think a device doesn't match a quirk when it
+> actually does.
+>
+> If there is a way to ensure the nvmem driver gets loaded before the soc,
+> that would also solve the problem nicely, and avoid the need to mess
+> with all the ~50 drivers which use it.
+>
+> Is there a way to control in what order drivers get loaded? Something in
+> the dtb perhaps?
 
-diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 0b038f5c392a..009c3885f6ba 100644
---- a/drivers/mmc/host/of_mmc_spi.c
-+++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -64,8 +64,8 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
- 	if (mmc_of_parse_voltage(mmc, &oms->pdata.ocr_mask) < 0)
- 		goto err_ocr;
- 
--	oms->detect_irq = irq_of_parse_and_map(np, 0);
--	if (oms->detect_irq != 0) {
-+	oms->detect_irq = spi->irq;
-+	if (oms->detect_irq > 0) {
- 		oms->pdata.init = of_mmc_spi_init;
- 		oms->pdata.exit = of_mmc_spi_exit;
- 	} else {
--- 
-2.30.2
+For built-in drivers, load order depends on the initcall level and
+link order (how things are lined listed in the Makefile hierarchy).
 
+For loadable modules, this is up to user space in the end.
+
+Which of the drivers in this scenario are loadable modules?
+
+        Arnd
