@@ -7,34 +7,34 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 107A7C43460
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6948FC43470
 	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 11:25:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E67D761157
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 11:25:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F9236108B
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Apr 2021 11:25:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238606AbhDSLZm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Apr 2021 07:25:42 -0400
-Received: from mga01.intel.com ([192.55.52.88]:58397 "EHLO mga01.intel.com"
+        id S238629AbhDSLZo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Apr 2021 07:25:44 -0400
+Received: from mga02.intel.com ([134.134.136.20]:42345 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S238468AbhDSLZh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S238543AbhDSLZh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Mon, 19 Apr 2021 07:25:37 -0400
-IronPort-SDR: WbWUKjv9tKT27BaUp66kGoVid5pvZGd08zVQRQhk2jlEp/8dluMmtGKMy+fbsgxXqMUxofTWR1
- wf8J3czQeNuA==
-X-IronPort-AV: E=McAfee;i="6200,9189,9958"; a="215887025"
+IronPort-SDR: zbbmBSk3Vh8WrJLBdvEle6br+/zAqWcwhaHGiqOXwu0eWTZ29WT6FFWoAzX49AJ1R78SIH8dEb
+ N0hw1QwMD22w==
+X-IronPort-AV: E=McAfee;i="6200,9189,9958"; a="182440445"
 X-IronPort-AV: E=Sophos;i="5.82,234,1613462400"; 
-   d="scan'208";a="215887025"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2021 04:25:05 -0700
-IronPort-SDR: 3SGx1v6CSuYIqnQ9Q/IBN1+ZLngsQIeyBqEi4sJv8Vu5Y6y0SKIACd+H/ZvzDlslq5Qk2eGkjo
- bmteP/tNAesw==
+   d="scan'208";a="182440445"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2021 04:25:06 -0700
+IronPort-SDR: EmRQL1vW1CXPQXX7Ep5JqVxyjxNTf+NHB5aERjWSoOjAFGTYYnA8wVJBSzlK7ZZZK60cL4u5kf
+ 1qLryOMjfKdw==
 X-ExtLoop1: 1
 X-IronPort-AV: E=Sophos;i="5.82,234,1613462400"; 
-   d="scan'208";a="616565518"
+   d="scan'208";a="422657726"
 Received: from black.fi.intel.com ([10.237.72.28])
-  by fmsmga005.fm.intel.com with ESMTP; 19 Apr 2021 04:25:01 -0700
+  by orsmga007.jf.intel.com with ESMTP; 19 Apr 2021 04:25:02 -0700
 Received: by black.fi.intel.com (Postfix, from userid 1003)
-        id EB04F1A1; Mon, 19 Apr 2021 14:25:18 +0300 (EEST)
+        id 1E7BC2B8; Mon, 19 Apr 2021 14:25:20 +0300 (EEST)
 From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -50,9 +50,9 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
         NXP Linux Team <linux-imx@nxp.com>,
         Mark Brown <broonie@kernel.org>
-Subject: [PATCH v1 4/6] mmc: mmc_spi: Drop unused NO_IRQ definition
-Date:   Mon, 19 Apr 2021 14:24:57 +0300
-Message-Id: <20210419112459.25241-4-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v1 6/6] mmc: mmc_spi: Make of_mmc_spi.c resource provider agnostic
+Date:   Mon, 19 Apr 2021 14:24:59 +0300
+Message-Id: <20210419112459.25241-6-andriy.shevchenko@linux.intel.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210419112459.25241-1-andriy.shevchenko@linux.intel.com>
 References: <20210419112459.25241-1-andriy.shevchenko@linux.intel.com>
@@ -62,31 +62,79 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-After the commit 073350f7b562 ("mmc: mmc_spi: Fix return value evaluation of
-irq_of_parse_and_map()") the NO_IRQ is not used anymore, drop it for good.
+In order to use the same driver on non-OF platforms, make
+of_mmc_spi.c resource provider agnostic.
 
-Fixes: 073350f7b562 ("mmc: mmc_spi: Fix return value evaluation of irq_of_parse_and_map()")
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- drivers/mmc/host/of_mmc_spi.c | 5 -----
- 1 file changed, 5 deletions(-)
+ drivers/mmc/host/Makefile     | 2 --
+ drivers/mmc/host/of_mmc_spi.c | 6 ++----
+ include/linux/spi/mmc_spi.h   | 9 ---------
+ 3 files changed, 2 insertions(+), 15 deletions(-)
 
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 6df5c4774260..14004cc09aaa 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -34,9 +34,7 @@ obj-$(CONFIG_MMC_TIFM_SD)	+= tifm_sd.o
+ obj-$(CONFIG_MMC_MVSDIO)	+= mvsdio.o
+ obj-$(CONFIG_MMC_DAVINCI)       += davinci_mmc.o
+ obj-$(CONFIG_MMC_SPI)		+= mmc_spi.o
+-ifeq ($(CONFIG_OF),y)
+ obj-$(CONFIG_MMC_SPI)		+= of_mmc_spi.o
+-endif
+ obj-$(CONFIG_MMC_S3C)   	+= s3cmci.o
+ obj-$(CONFIG_MMC_SDRICOH_CS)	+= sdricoh_cs.o
+ obj-$(CONFIG_MMC_TMIO)		+= tmio_mmc.o
 diff --git a/drivers/mmc/host/of_mmc_spi.c b/drivers/mmc/host/of_mmc_spi.c
-index 843ec3db891b..0b038f5c392a 100644
+index 009c3885f6ba..9d480a05f655 100644
 --- a/drivers/mmc/host/of_mmc_spi.c
 +++ b/drivers/mmc/host/of_mmc_spi.c
-@@ -19,11 +19,6 @@
- #include <linux/mmc/core.h>
- #include <linux/mmc/host.h>
+@@ -51,10 +51,9 @@ struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi)
+ {
+ 	struct mmc_host *mmc = dev_get_drvdata(&spi->dev);
+ 	struct device *dev = &spi->dev;
+-	struct device_node *np = dev->of_node;
+ 	struct of_mmc_spi *oms;
  
--/* For archs that don't support NO_IRQ (such as mips), provide a dummy value */
--#ifndef NO_IRQ
--#define NO_IRQ 0
--#endif
--
- MODULE_LICENSE("GPL");
+-	if (dev->platform_data || !np)
++	if (dev->platform_data || !dev_fwnode(dev))
+ 		return dev->platform_data;
  
- struct of_mmc_spi {
+ 	oms = kzalloc(sizeof(*oms), GFP_KERNEL);
+@@ -83,10 +82,9 @@ EXPORT_SYMBOL(mmc_spi_get_pdata);
+ void mmc_spi_put_pdata(struct spi_device *spi)
+ {
+ 	struct device *dev = &spi->dev;
+-	struct device_node *np = dev->of_node;
+ 	struct of_mmc_spi *oms = to_of_mmc_spi(dev);
+ 
+-	if (!dev->platform_data || !np)
++	if (!dev->platform_data || !dev_fwnode(dev))
+ 		return;
+ 
+ 	kfree(oms);
+diff --git a/include/linux/spi/mmc_spi.h b/include/linux/spi/mmc_spi.h
+index 778ae8eb1f3e..9ad9a06e488d 100644
+--- a/include/linux/spi/mmc_spi.h
++++ b/include/linux/spi/mmc_spi.h
+@@ -35,16 +35,7 @@ struct mmc_spi_platform_data {
+ 	void (*setpower)(struct device *, unsigned int maskval);
+ };
+ 
+-#ifdef CONFIG_OF
+ extern struct mmc_spi_platform_data *mmc_spi_get_pdata(struct spi_device *spi);
+ extern void mmc_spi_put_pdata(struct spi_device *spi);
+-#else
+-static inline struct mmc_spi_platform_data *
+-mmc_spi_get_pdata(struct spi_device *spi)
+-{
+-	return spi->dev.platform_data;
+-}
+-static inline void mmc_spi_put_pdata(struct spi_device *spi) {}
+-#endif /* CONFIG_OF */
+ 
+ #endif /* __LINUX_SPI_MMC_SPI_H */
 -- 
 2.30.2
 
