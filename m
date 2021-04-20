@@ -2,97 +2,167 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07C2EC433B4
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 11:21:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EE6DC43461
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 11:57:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BDEC16139A
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 11:21:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6778613C3
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 11:57:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232018AbhDTLW1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Apr 2021 07:22:27 -0400
-Received: from mga18.intel.com ([134.134.136.126]:40728 "EHLO mga18.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232000AbhDTLWZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 20 Apr 2021 07:22:25 -0400
-IronPort-SDR: stH7R77hV4DwLsNxmd9/vu/UFlE6hQQFxN4OglmJ4YsYFqPKGs5FmHgqEIYR9qEScqZxx+c2/+
- D8U0oACPfkZA==
-X-IronPort-AV: E=McAfee;i="6200,9189,9959"; a="182981076"
-X-IronPort-AV: E=Sophos;i="5.82,236,1613462400"; 
-   d="scan'208";a="182981076"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Apr 2021 04:21:52 -0700
-IronPort-SDR: vl9U8bhnqc/0zKk91IktvaYMeMqYtqWUgYPaZ9mmG5KNuzUjLVds+NqDeAyOR4hM4Fnq3A/+E9
- Ppbky0DBSdxw==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.82,236,1613462400"; 
-   d="scan'208";a="445480363"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
-  by fmsmga004.fm.intel.com with ESMTP; 20 Apr 2021 04:21:50 -0700
-Subject: Re: [PATCH v3 2/2] mmc: block: Update ext_csd.cache_ctrl if it was
- written
-To:     Avri Altman <avri.altman@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org
-References: <20210420055306.4858-1-avri.altman@wdc.com>
- <20210420055306.4858-3-avri.altman@wdc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <abd1ad9a-7ddf-b967-aea1-f268ba385661@intel.com>
-Date:   Tue, 20 Apr 2021 14:22:05 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.1
+        id S231956AbhDTL5i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Apr 2021 07:57:38 -0400
+Received: from mx0b-00069f02.pphosted.com ([205.220.177.32]:58890 "EHLO
+        mx0b-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231709AbhDTL5h (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Apr 2021 07:57:37 -0400
+X-Greylist: delayed 1986 seconds by postgrey-1.27 at vger.kernel.org; Tue, 20 Apr 2021 07:57:36 EDT
+Received: from pps.filterd (m0246632.ppops.net [127.0.0.1])
+        by mx0b-00069f02.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 13KBMmuM012376;
+        Tue, 20 Apr 2021 11:22:48 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=corp-2020-01-29;
+ bh=R7JGUmF3J71wLA6dPwUce8FwqmxU6JTnhs1XaoTWtpc=;
+ b=mzrAyP3z3vTbOYF05fKTtm1FSfsRhaXIMtNI32junvaq2xixqdu4DFtiOEnKHMCjmDAu
+ pzOmg6bFqIFulJfFAK3gAc4G1ubri2zL7y+ukl2ZTNZd4enmkHEeJ6kOxa09vXbI9Cau
+ pxckDe5aQNXRp1SihBx1WvxHHU5bOAl0qwzbdRlKb6bAcGZRRvbBEvMsbe3h/AM/l6mO
+ 6K0B0emzos5cXJDAWeD+zogdWeN4yukpTfk465biG7Agf/JhaT7Tq2FLJjNIss62qUS9
+ j74qQsLbz2k9Dn5eRznUZ+6NPhFOVGc2XKyCruqh+CG4TG6qi4y3ofFXm87t+4F6DYgG CQ== 
+Received: from oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by mx0b-00069f02.pphosted.com with ESMTP id 381bjn86tg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 20 Apr 2021 11:22:48 +0000
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [127.0.0.1])
+        by pps.podrdrct (8.16.0.36/8.16.0.36) with SMTP id 13KBKXsp006877;
+        Tue, 20 Apr 2021 11:22:47 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+        by aserp3020.oracle.com with ESMTP id 3809k06m19-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 20 Apr 2021 11:22:47 +0000
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [127.0.0.1])
+        by pps.reinject (8.16.0.36/8.16.0.36) with SMTP id 13KBKAbB005467;
+        Tue, 20 Apr 2021 11:22:46 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by aserp3020.oracle.com with ESMTP id 3809k06m07-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Tue, 20 Apr 2021 11:22:46 +0000
+Received: from abhmp0005.oracle.com (abhmp0005.oracle.com [141.146.116.11])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 13KBMEHV030572;
+        Tue, 20 Apr 2021 11:22:18 GMT
+Received: from kadam (/102.36.221.92)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Tue, 20 Apr 2021 04:22:13 -0700
+Date:   Tue, 20 Apr 2021 14:21:52 +0300
+From:   Dan Carpenter <dan.carpenter@oracle.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     "Alice Guo (OSS)" <alice.guo@oss.nxp.com>,
+        gregkh@linuxfoundation.org, rafael@kernel.org,
+        horia.geanta@nxp.com, aymen.sghaier@nxp.com,
+        herbert@gondor.apana.org.au, davem@davemloft.net, tony@atomide.com,
+        geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
+        vkoul@kernel.org, peter.ujfalusi@gmail.com, a.hajda@samsung.com,
+        narmstrong@baylibre.com, robert.foss@linaro.org, airlied@linux.ie,
+        daniel@ffwll.ch, khilman@baylibre.com, tomba@kernel.org,
+        jyri.sarha@iki.fi, joro@8bytes.org, will@kernel.org,
+        mchehab@kernel.org, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com, kishon@ti.com, kuba@kernel.org,
+        linus.walleij@linaro.org, Roy.Pledge@nxp.com, leoyang.li@nxp.com,
+        ssantosh@kernel.org, matthias.bgg@gmail.com, edubezval@gmail.com,
+        j-keerthy@ti.com, balbi@kernel.org, linux@prisktech.co.nz,
+        stern@rowland.harvard.edu, wim@linux-watchdog.org,
+        linux@roeck-us.net, linux-kernel@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-omap@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org, linux-clk@vger.kernel.org,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-amlogic@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        iommu@lists.linux-foundation.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-gpio@vger.kernel.org,
+        linuxppc-dev@lists.ozlabs.org, linux-staging@lists.linux.dev,
+        linux-mediatek@lists.infradead.org, linux-pm@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [RFC v1 PATCH 1/3] drivers: soc: add support for
+ soc_device_match returning -EPROBE_DEFER
+Message-ID: <20210420112151.GE1981@kadam>
+References: <20210419042722.27554-1-alice.guo@oss.nxp.com>
+ <20210419042722.27554-2-alice.guo@oss.nxp.com>
+ <CAMuHMdUbrPxtJ9DCP0_nFrReuuO4vFY2J79LrKY82D7bCOfzRw@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20210420055306.4858-3-avri.altman@wdc.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdUbrPxtJ9DCP0_nFrReuuO4vFY2J79LrKY82D7bCOfzRw@mail.gmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-GUID: e0r_GcH24oUhB4PQiI_vI2-dauff_ZRM
+X-Proofpoint-ORIG-GUID: e0r_GcH24oUhB4PQiI_vI2-dauff_ZRM
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/04/21 8:53 am, Avri Altman wrote:
-> The cache function can be turned ON and OFF by writing to the CACHE_CTRL
-> byte (EXT_CSD byte [33]).  However,  card->ext_csd.cache_ctrl is only
-> set on init if cache size > 0.
+On Mon, Apr 19, 2021 at 10:20:13AM +0200, Geert Uytterhoeven wrote:
+> Hi Alice,
 > 
-> Fix that by explicitly setting ext_csd.cache_ctrl on ext-csd write.
+> CC Arnd (soc_device_match() author)
 > 
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> On Mon, Apr 19, 2021 at 6:28 AM Alice Guo (OSS) <alice.guo@oss.nxp.com> wrote:
+> > From: Alice Guo <alice.guo@nxp.com>
+> >
+> > In i.MX8M boards, the registration of SoC device is later than caam
+> > driver which needs it. Caam driver needs soc_device_match to provide
+> > -EPROBE_DEFER when no SoC device is registered and no
+> > early_soc_dev_attr.
+> 
+> I'm wondering if this is really a good idea: soc_device_match() is a
+> last-resort low-level check, and IMHO should be made available early on,
+> so there is no need for -EPROBE_DEFER.
+> 
+> >
+> > Signed-off-by: Alice Guo <alice.guo@nxp.com>
+> 
+> Thanks for your patch!
+> 
+> > --- a/drivers/base/soc.c
+> > +++ b/drivers/base/soc.c
+> > @@ -110,6 +110,7 @@ static void soc_release(struct device *dev)
+> >  }
+> >
+> >  static struct soc_device_attribute *early_soc_dev_attr;
+> > +static bool soc_dev_attr_init_done = false;
+> 
+> Do you need this variable?
+> 
+> >
+> >  struct soc_device *soc_device_register(struct soc_device_attribute *soc_dev_attr)
+> >  {
+> > @@ -157,6 +158,7 @@ struct soc_device *soc_device_register(struct soc_device_attribute *soc_dev_attr
+> >                 return ERR_PTR(ret);
+> >         }
+> >
+> > +       soc_dev_attr_init_done = true;
+> >         return soc_dev;
+> >
+> >  out3:
+> > @@ -246,6 +248,9 @@ const struct soc_device_attribute *soc_device_match(
+> >         if (!matches)
+> >                 return NULL;
+> >
+> > +       if (!soc_dev_attr_init_done && !early_soc_dev_attr)
+> 
+> if (!soc_bus_type.p && !early_soc_dev_attr)
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+There is one place checking this already.  We could wrap it in a helper
+function:
 
-> ---
->  drivers/mmc/core/block.c | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 5b6501fc9fb7..8b07ed5e08de 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -572,6 +572,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
->  		main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
->  	}
->  
-> +	/*
-> +	 * Make sure to update CACHE_CTRL in case it was changed. The cache
-> +	 * will get turned back on if the card is re-initialized, e.g.
-> +	 * suspend/resume or hw reset in recovery.
-> +	 */
-> +	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_CACHE_CTRL) &&
-> +	    (cmd.opcode == MMC_SWITCH)) {
-> +		u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg) & 1;
-> +
-> +		card->ext_csd.cache_ctrl = value;
-> +	}
-> +
->  	/*
->  	 * According to the SD specs, some commands require a delay after
->  	 * issuing the command.
-> 
+static bool device_init_done(void)
+{
+	return soc_bus_type.p ? true : false;
+}
 
+regards,
+dan carpenter
