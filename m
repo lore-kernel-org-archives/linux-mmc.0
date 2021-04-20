@@ -2,110 +2,158 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 61AF7C433B4
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 05:54:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF0E0C43603
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 09:07:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3F2F161104
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 05:54:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ACB6B613AE
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 09:07:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230030AbhDTFyd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Apr 2021 01:54:33 -0400
-Received: from esa6.hgst.iphmx.com ([216.71.154.45]:50509 "EHLO
-        esa6.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229895AbhDTFyc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Apr 2021 01:54:32 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1618898042; x=1650434042;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=ZvCgV9eVozx0O2riMmwZl8ZdBJ84xKKq5cbsop8x1Ws=;
-  b=C1JDFUbMafufuOcPaHUVdGRsnbNMEobYf5MPZozGQCsroKwrugGR4VK0
-   VE0LZDBeOrNNTQYjvN9k0PFx32qIGZaOThiqHoxlReKUGLsQVdpJfHZgc
-   NufGOpIPvsaDXDhlPNZeZHqD3cf7e4Je7h4YHovTVshV/P+ka9GgpkoqG
-   HHxAWk1oyqDZHCGN4KI+UL5DILmCys6IGmN1GXRq4je8VaeTRGNlkI256
-   N9WckJkfJRHtqB2l2R/u0OiQwXacMb+H9fOcBIQMcDqpc4S90IQmoLD1O
-   f8XMTnRN0QKEVQT8H9S+RVuEuQQfYNcKZQgBOLX/skXbbpIcCkPZJkbFR
-   w==;
-IronPort-SDR: rvOgPxmw97kUcWLv//lQt5Wz4qtQg2DP1WCNflEX9s5dfbjJxNnQ113nmF0DjNZAc1OD813msJ
- 8eWMhzkbLpyR3cbiFr/5AfdmVbWwWTppPjV9KNV5R1vKSNgh0KlBKayIDNAVj3Moas/46AzITB
- qonUOd34Ls22nLrt4/TSxIswoxYfupwuxGxAQVcyl9UZ+ZpVvCX3vYbU4qoVUJ3QbRS7Nb16dg
- l9Xn4Q1bazmvNFnCEsr08UTDpcQrnvr3iySbi0DWosdr0k2ALDxhNthRHBUELGTZWrmxHv/BUy
- KTw=
-X-IronPort-AV: E=Sophos;i="5.82,236,1613404800"; 
-   d="scan'208";a="166063859"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 20 Apr 2021 13:54:01 +0800
-IronPort-SDR: TC1piOpen1fkFj8UXC2tZt/YKuA1/szdPzK9Vw9ZKxP7YrYJE3glnF2f48VlKoL/x5mSeO+wuZ
- j19Env1vpS52FW2A+n2Ag8Ah792QEWTogSXNFZYFmtMFONajxjguGvr0/W0kF8N/jwAiJ7sCxC
- oE552T3z1sb1aFLRmURtev3nsD+nArXgqj/MRely//Ri+l/YYde6cbuHOutx+1MKmh13luh498
- 4WBQRQazODfllOeYS/Nwk4GBgOY49YRC3pN+1Dwe92HwmBNfKy5P5lUHlL61Km4Phx0e6AcXgv
- 1F4MgREPp6vY7AMM5j6WNG9R
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2021 22:34:41 -0700
-IronPort-SDR: brC9mzmUaNmjcemcaXfMYkx3U9LhKqXystImI44IstD23P/GMQk6tROmxcUCtRQyuhA7aSf1wX
- a0Lq0rEUs2763lrxvgJJT5d5p9EjLR4Gt1zwG1sOCJHhchmtdsGgkeaLYmZv9366wcsoYdm6/D
- lWtJBaW9PCo/Gqa1/GEb2tOflz3OyuSnGTTHGjqQg95qsgoLgvOrjXwLnBVca2UTa2YdEVz4lh
- o0+FONwCXMCuobyJ/8rLnpD0lQ2YnXECCaqcsATT7G33R0NwbSpQoEFCG9qlwqt/TfeaK9frcW
- 7yk=
-WDCIronportException: Internal
-Received: from bxygm33.sdcorp.global.sandisk.com ([10.0.231.247])
-  by uls-op-cesaip01.wdc.com with ESMTP; 19 Apr 2021 22:53:59 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v3 2/2] mmc: block: Update ext_csd.cache_ctrl if it was written
-Date:   Tue, 20 Apr 2021 08:53:06 +0300
-Message-Id: <20210420055306.4858-3-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210420055306.4858-1-avri.altman@wdc.com>
-References: <20210420055306.4858-1-avri.altman@wdc.com>
+        id S231260AbhDTJIT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Apr 2021 05:08:19 -0400
+Received: from mout.kundenserver.de ([217.72.192.73]:42069 "EHLO
+        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231250AbhDTJIS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Apr 2021 05:08:18 -0400
+Received: from mail-wr1-f47.google.com ([209.85.221.47]) by
+ mrelayeu.kundenserver.de (mreue106 [213.165.67.113]) with ESMTPSA (Nemesis)
+ id 1M3lLh-1lYVNL03GN-000snS; Tue, 20 Apr 2021 11:07:44 +0200
+Received: by mail-wr1-f47.google.com with SMTP id e7so27820771wrs.11;
+        Tue, 20 Apr 2021 02:07:43 -0700 (PDT)
+X-Gm-Message-State: AOAM530bK2/Zhpk5hISNbBeQuJc8bwXLZL3Op5+Z3jB4wVxrjl+Sao6S
+        C+gjr8AN0THF/N2eQjocMKwjVco4O5LSgtigO90=
+X-Google-Smtp-Source: ABdhPJwSiNwlZ27l6d0oeVOJMjBIBpaEf6fV+Kr02yQOCGa6DdHdokE+eIs4+TiyDD+ybgS8jO4hGYikHl0QAhmuRDs=
+X-Received: by 2002:adf:db4f:: with SMTP id f15mr19571156wrj.99.1618909652608;
+ Tue, 20 Apr 2021 02:07:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210419042722.27554-1-alice.guo@oss.nxp.com> <20210419042722.27554-4-alice.guo@oss.nxp.com>
+ <YH0O907dfGY9jQRZ@atmark-techno.com> <CAMuHMdVY1SLZ0K30T2pimyrR6Mm=VoSTO=L-xxCy2Bj7_kostw@mail.gmail.com>
+ <YH1OeFy+SepIYYG0@atmark-techno.com> <CAK8P3a1Mu2F0irDDCL-50HiHth29iYFL5b7WHZ=UX6W7zzoxAg@mail.gmail.com>
+ <YH4VdPNO9cdzc5MD@atmark-techno.com>
+In-Reply-To: <YH4VdPNO9cdzc5MD@atmark-techno.com>
+From:   Arnd Bergmann <arnd@arndb.de>
+Date:   Tue, 20 Apr 2021 11:07:16 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a1GjeHyMCworQYVtp5U0uu2B9VBHmf9y0hGn-o8aKSJZw@mail.gmail.com>
+Message-ID: <CAK8P3a1GjeHyMCworQYVtp5U0uu2B9VBHmf9y0hGn-o8aKSJZw@mail.gmail.com>
+Subject: Re: [RFC v1 PATCH 3/3] driver: update all the code that use soc_device_match
+To:     Dominique MARTINET <dominique.martinet@atmark-techno.com>
+Cc:     Geert Uytterhoeven <geert@linux-m68k.org>,
+        "Alice Guo (OSS)" <alice.guo@oss.nxp.com>,
+        gregkh <gregkh@linuxfoundation.org>,
+        Rafael Wysocki <rafael@kernel.org>,
+        =?UTF-8?Q?Horia_Geant=C4=83?= <horia.geanta@nxp.com>,
+        aymen.sghaier@nxp.com, Herbert Xu <herbert@gondor.apana.org.au>,
+        David Miller <davem@davemloft.net>,
+        Tony Lindgren <tony@atomide.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>, Vinod Koul <vkoul@kernel.org>,
+        peter.ujfalusi@gmail.com, Andrzej Hajda <a.hajda@samsung.com>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Robert Foss <robert.foss@linaro.org>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Kevin Hilman <khilman@baylibre.com>, tomba@kernel.org,
+        jyri.sarha@iki.fi, Joerg Roedel <joro@8bytes.org>,
+        Will Deacon <will@kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Kishon <kishon@ti.com>, Jakub Kicinski <kuba@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Roy Pledge <Roy.Pledge@nxp.com>, Leo Li <leoyang.li@nxp.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Eduardo Valentin <edubezval@gmail.com>,
+        Keerthy <j-keerthy@ti.com>, Felipe Balbi <balbi@kernel.org>,
+        Tony Prisk <linux@prisktech.co.nz>,
+        Alan Stern <stern@rowland.harvard.edu>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" 
+        <linux-crypto@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>, dmaengine@vger.kernel.org,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        "open list:ARM/Amlogic Meson SoC support" 
+        <linux-amlogic@lists.infradead.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        "open list:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Networking <netdev@vger.kernel.org>,
+        linux-phy@lists.infradead.org,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
+        linux-staging@lists.linux.dev,
+        "moderated list:ARM/Mediatek SoC..." 
+        <linux-mediatek@lists.infradead.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        LINUXWATCHDOG <linux-watchdog@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+X-Provags-ID: V03:K1:ltcVWPzbOzdUu0wQVBbKGnNxKoc98HAW0duSMZcYgv925OTLSOo
+ ZELSDbcdcLSNH6jcDj67BsKk30EPrQcQ8Efw82x799k6bMj9s2S+m69ZiBVlhuvUlnJi1KE
+ D7RnoNvLskVAUP5tUpp+AzAQkOM4ikGI/bBCnIU1DkH5GwBwAgWr5giBTyb98Y4I7MSVa9V
+ glR/dmIR70ry9QtHaxTJQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:m62Jwkt4Q9A=:KANWiBROdRHMBQ5xLHe3U2
+ hzC4pqyCkSOIDCpwHHpdfePw/DSVMWP11cjA9UAjvJaYaBXCZ5ZviOUZuds+WAtiQuHxsqgvG
+ nZi4yzXKiBDbdqpDmqSnJSLdXBr5QaacWl8ByR2QA/IPJEKeZxqlFpXmUIRvvw9yILmSAgAwm
+ kTxiSk1xsoLYt4eUP9X1BKjgUadX4/EsohQRwshD6awFocrh/vn5To8p+UeSEy9M6vG6ayoc3
+ KzloVi0GVUYRFc1NPbKUAVnYQJMIhG77x+Cm3slvPquhclTau9xa2jEDlsYf9AmTY1xTPSiJr
+ /g5TniSnhP8grlfVciwqdoi923h7Wd+xuUOomDfXdzWsGmOnj0YXIDpS+jnskS4OcxhO+FRMn
+ FzZZ9kkBvKQlYDBBlVJSIXMDuM+k11tV7v8z5yaqgg7dlymVRjd+HCL64OR8G/W0vIDw4rPr2
+ pp7HSGeYD00x82SkyzleiGe82V3CUweY4dnSbInIp/X4AIhFXsZWIlACLNsg0WEDBBic9FOVB
+ pe4HnvYTumVgpgOpu+WBCL4nBvUWvDUeLp2H0ZtwDqDlJhW2cPSYgGYmEkc9JgZOSAjBhucWB
+ ySMJnPpH3XQziDvSrylbWsiz0S5V3jaD6fnbfN05zGkdzDFwrWIH2hlbOI7PqXh7Y+r9HScxY
+ jsF4=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The cache function can be turned ON and OFF by writing to the CACHE_CTRL
-byte (EXT_CSD byte [33]).  However,  card->ext_csd.cache_ctrl is only
-set on init if cache size > 0.
+On Tue, Apr 20, 2021 at 1:44 AM Dominique MARTINET
+<dominique.martinet@atmark-techno.com> wrote:
+> Arnd Bergmann wrote on Mon, Apr 19, 2021 at 02:16:36PM +0200:
+> > For built-in drivers, load order depends on the initcall level and
+> > link order (how things are lined listed in the Makefile hierarchy).
+> >
+> > For loadable modules, this is up to user space in the end.
+> >
+> > Which of the drivers in this scenario are loadable modules?
+>
+> All the drivers involved in my case are built-in (nvmem, soc and final
+> soc_device_match consumer e.g. caam_jr that crashes the kernel if soc is
+> not identified properly).
 
-Fix that by explicitly setting ext_csd.cache_ctrl on ext-csd write.
+Ok, in that case you may have a chance to just adapt the initcall
+levels. This is somewhat fragile if someone else already relies
+on a particular order, but it's an easy one-line change to change
+a driver e.g. from module_init() or device_initcall() to arch_initcall().
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/block.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+> I frankly don't like the idea of moving nvmem/ above soc/ in
+> drivers/Makefile as a "solution" to this (especially as there is one
+> that seems to care about what soc they run on...), so I'll have a look
+> at links first, hopefully that will work out.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 5b6501fc9fb7..8b07ed5e08de 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -572,6 +572,18 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 		main_md->part_curr = value & EXT_CSD_PART_CONFIG_ACC_MASK;
- 	}
- 
-+	/*
-+	 * Make sure to update CACHE_CTRL in case it was changed. The cache
-+	 * will get turned back on if the card is re-initialized, e.g.
-+	 * suspend/resume or hw reset in recovery.
-+	 */
-+	if ((MMC_EXTRACT_INDEX_FROM_ARG(cmd.arg) == EXT_CSD_CACHE_CTRL) &&
-+	    (cmd.opcode == MMC_SWITCH)) {
-+		u8 value = MMC_EXTRACT_VALUE_FROM_ARG(cmd.arg) & 1;
-+
-+		card->ext_csd.cache_ctrl = value;
-+	}
-+
- 	/*
- 	 * According to the SD specs, some commands require a delay after
- 	 * issuing the command.
--- 
-2.25.1
+Right, that would be way more fragile.
 
+I think the main problem in this case is the caam driver that really
+should not look into the particular SoC type or even machine
+compatible string. This is something we can do as a last resort
+for compatibility with busted devicetree files, but it appears that
+this driver does it as the primary method for identifying different
+hardware revisions. I would suggest fixing the binding so that
+each SoC that includes one of these devices has a soc specific
+compatible string associated with the device that the driver can
+use as the primary way of identifying the device.
+
+We probably need to keep the old logic around for old dtb files,
+but there can at least be a comment next to that table that
+discourages people from adding more entries there.
+
+      Arnd
