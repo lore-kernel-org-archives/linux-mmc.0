@@ -2,96 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98F20C433B4
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 05:53:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AFC45C433ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 05:53:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 73A8861104
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 05:53:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8B9C3613AB
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 05:53:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229523AbhDTFyL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Apr 2021 01:54:11 -0400
-Received: from esa5.hgst.iphmx.com ([216.71.153.144]:12062 "EHLO
-        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230027AbhDTFyD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Apr 2021 01:54:03 -0400
+        id S229903AbhDTFyX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Apr 2021 01:54:23 -0400
+Received: from esa2.hgst.iphmx.com ([68.232.143.124]:2495 "EHLO
+        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229895AbhDTFyW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Apr 2021 01:54:22 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
   d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1618898012; x=1650434012;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=JFUux4KVzDdP8Fih8AzvsE90HWHsIn+1zpR633Gfcc8=;
-  b=QMyDZrv12gzY1rXiSof0He5YNuPkdnMhiSDIPsRMX3JTZ/bjnI1I2xO6
-   W64UG9UzSExtdxcPW7kDXyG/lyGw1w2xGX+Ywtg9CTpXLvMAWNK/OPPX9
-   TYKOn1S6tlZmB3usmHaNWICe93etfbpz5tChFbE3VqLWqLkPMIvsLzQwu
-   BMT0rp+BCQUcj00zRSrWETdExM1295lgR+NlMDCKEWOj2jQ3yFqC9AfVK
-   iKbU7YNPcFyFcXmzE/echdpYZR657iBNJ7yDfu/UkqNL1exM/yr089Rlq
-   ysaaAltC7vVYTsqE5sieh9JSEv0nqYaX1DcnNt289X9Ch94jbFULfSQcx
+  t=1618898033; x=1650434033;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=++qeqI9b7eA/m4ALuAHxHKzYKebd2W2eMSbBxA7Ug8o=;
+  b=DKkz4WumpsjVtAp7P15pwA6dcCzq3Iw9+I0F9a8Ku1VUE3RfmOvlbsFc
+   h01rau703XH2zu1kg7Xh0Yxnhyk3zYdbFQ9ZNa2A5roi5rR0Ue6FMdgwP
+   1hzToT1oI992J0aQHTmqDxTqbAK6jFUqlGnfQXWHToxTam19WkprkWAKh
+   So+wE7BGg117215mxd94Aj7bs9uiEUaDiYTu+3KoEbizHX+wKsftd/5sc
+   PodABuVbO/qQXtz1o0RCr6AuZIb2kMY4j0lvnC6bS5HvcTxF+Zonq5+S9
+   gAyacoVCpIB4qRIiH4GGB/9ZzrS17NNtOM6KblCfpc7nfMYK8cL7fw8VT
    A==;
-IronPort-SDR: 9yNgFEZc3sHAYB4pXh83QI8fe7ZKb3XYp5u4HT1GgVwBzljCRW/Dn/MLUALmIGOQjmNopjqQYB
- POMy5oMpot4QIWw6pvDWzqCRhlrtV8oRlLaHWt/46WSZtEt/gO3tZhDOaegxmMJqrFkVTsJWhV
- DghwjnJ9wObhf3jVPPbSXmuMr8T2sr7tEWvDX6ecm3MfCU5E6F+dzAegXnkFvpDr1H59ifpknV
- P3/kEQFCOqd6VZNu1zKUr7hB1bjAyGpH4syy7woAWXJxu/+IdwQ0B08ndkpQO9LhBEK7f+F/pD
- aMI=
+IronPort-SDR: XnjCdqp9hV2W37s1lbN523WxVYG2WHZtyuqimhtWZMZ2JiOLhlGrcEqPjvx25YymKk1JPORBfO
+ vN1sElhLSZuMZ1juJu6p9SPatoONNjBbNffWkatqjd+C1l0aXCZImkjQZ3C31UycqdNvZ55IEF
+ FQh9dJIKAHL5+CF7JQqAF7ODzaBGboeV0wtDwPiPeZd2+YgageIu26FnCFJLva2qWpz1Q11A/S
+ Byxojt1lOfRE/JVKnXrzXH56xPLsKmY3Im//vbaL5kOPtfdovCSJwiXgyWV0lYPbDfRLFQz9L6
+ uIM=
 X-IronPort-AV: E=Sophos;i="5.82,236,1613404800"; 
-   d="scan'208";a="165514333"
-Received: from h199-255-45-15.hgst.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
-  by ob1.hgst.iphmx.com with ESMTP; 20 Apr 2021 13:53:32 +0800
-IronPort-SDR: tnHWxLFFuoZiKJaZs5skVN2hKCjWP7qvYbjgHmlFuQ1ThueQlyCxinvqeAlzrrtZbcTumt0f/z
- Uxd9bskig3K/9OkIhLA8ITtp6e34F8Pc5q7IUMzubx12KzyMFI2aq7QjgqPcg7DwHViMl7MPqu
- 9ZbJNTKFLo8BpTThKO2+JPWRimaQvP5RbgC7pZJT8h9JKcLdLMR8rVLSWJqOkP/2+9XgT7bFjD
- vVttYVsB77x0N9xgCXCbor12L8FUf1+CG7snfJgudMLWOeCT6fQ0zba6euUEB+VzL8c38cBGPg
- 9U9kFTKrPGKXoqGiapc5kpQW
+   d="scan'208";a="269437636"
+Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
+  by ob1.hgst.iphmx.com with ESMTP; 20 Apr 2021 13:53:52 +0800
+IronPort-SDR: ZW3RNp6tbr2w+5fsT76ggG7COcc145PRIPzF5WseehGyhVilZmEtX6Y6k9fWRZL73jCU7yDjGL
+ jr1nUgQ03ImqxEkKlyIbA4+ofGFD6n1gaOwQhjqo8ZEDLhd9jj0vegwRijyHnOfUYdUpNGmPi7
+ haD3GSFcQA/PycoDSQA1YXQn4EjbIjf0nl2D4V4vwO3eN5aMPqLETKs2mcWTahpDGYCWBsjLTv
+ ZgYhWSDK/9fu/TOQtgm36fgwK+kddF9/lAtCFjMf3oPzaSBLM/Foda4CGFx/ojvb3EjSPuJcTP
+ E6vGyE4U82ZlDUqkwzLWJs8C
 Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2021 22:32:39 -0700
-IronPort-SDR: PANqtgwPXzfIIHQNwVNg8ZtYYTEwduwvMNVlo8WsFgTiU5VWHQYgJysY0vqvSVekqjA16dA2Do
- t/4TjaTTYnJrv+2agkMpzCZD8xMtrgVda3n1JY+GqzqqOfkGFfdlLQbkCVnDDA8wV1fgeWlnIx
- yZauTkF4qB4o7Z3AaPvVzBOAMc25UVQ/HzvZMKCPp4FKS3Qhoc0qoJqHDgButQQVXridGmEO8v
- 4km6sPgKpcwuQcP/1RbZoAYL9MdezM+wGLwuE/5k4h5xPBEd0B9QgFfkx4nfeJLhmCda3/HMk5
- AIU=
+  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Apr 2021 22:34:31 -0700
+IronPort-SDR: 6L/qkuUpRLpq5j7Us88MNbIeaasBDhxW4R5pOXqumpUPDYK6dV8wJa1xdir7E7Jb+O35z2TsQi
+ 6bcJzzfyCjpS8ijVqPGz4NuUBXaRwJFfhSSi30ssUsGKVYVy0J8qYysmc09mS/zoHhWE72/BB8
+ 7P2FGFC1O9hmghq4d1cV2JzCSeeq91R90q960+Eh7I1Fsj8HTsZdFP+uIUqqtF0wg3mAIP5NYN
+ +Cm6IR3zFOBh7JzFDrY30QMLVIEHF6t7yfccekYFy0aEZ3G45+vibgztnnqxpHXfW5v1ZumIK6
+ rvs=
 WDCIronportException: Internal
 Received: from bxygm33.sdcorp.global.sandisk.com ([10.0.231.247])
-  by uls-op-cesaip01.wdc.com with ESMTP; 19 Apr 2021 22:53:30 -0700
+  by uls-op-cesaip01.wdc.com with ESMTP; 19 Apr 2021 22:53:49 -0700
 From:   Avri Altman <avri.altman@wdc.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
         Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH v3 0/2] Do not flush cache when it is disabled
-Date:   Tue, 20 Apr 2021 08:53:04 +0300
-Message-Id: <20210420055306.4858-1-avri.altman@wdc.com>
+Cc:     linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>,
+        Brendan Peter <bpeter@lytx.com>
+Subject: [PATCH v3 1/2] mmc: block: Issue flush only if allowed
+Date:   Tue, 20 Apr 2021 08:53:05 +0300
+Message-Id: <20210420055306.4858-2-avri.altman@wdc.com>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20210420055306.4858-1-avri.altman@wdc.com>
+References: <20210420055306.4858-1-avri.altman@wdc.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-v2 -> v3:
- - rebase onto recent cache changes
+The cache may be flushed to the nonvolatile storage by writing to
+FLUSH_CACHE byte (EXT_CSD byte [32]). When in command queueing mode, the
+cache may be flushed by issuing a CMDQ_TASK_ DEV_MGMT (CMD48) with a
+FLUSH_CACHE op-code.  Either way, verify that The cache function is
+turned ON before doing so.
 
-v1 -> v2:
- - Attend Adrian's comments
+fixes: 1e8e55b67030 (mmc: block: Add CQE support)
 
-Cache is a temporary storage space in an eMMC device. Volatile by
-nature, the cache should in typical case reduce the access time compared
-to an access to the main nonvolatile storage.
+Reported-by: Brendan Peter <bpeter@lytx.com>
+Tested-by: Brendan Peter <bpeter@lytx.com>
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
+---
+ drivers/mmc/core/block.c   | 7 +++++++
+ drivers/mmc/core/mmc.c     | 2 +-
+ drivers/mmc/core/mmc_ops.h | 5 +++++
+ 3 files changed, 13 insertions(+), 1 deletion(-)
 
-The cache function can be turned ON and OFF. Once OFF, the host is not
-expected to issue a flush-cache command to the device.
-
-Avri Altman (2):
-  mmc: block: Issue flush only if allowed
-  mmc: block: Update ext_csd.cache_ctrl if it was written
-
- drivers/mmc/core/block.c   | 19 +++++++++++++++++++
- drivers/mmc/core/mmc.c     |  2 +-
- drivers/mmc/core/mmc_ops.h |  5 +++++
- 3 files changed, 25 insertions(+), 1 deletion(-)
-
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 8bfd4d95b386..5b6501fc9fb7 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1476,6 +1476,11 @@ static int mmc_blk_cqe_issue_flush(struct mmc_queue *mq, struct request *req)
+ 	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+ 	struct mmc_request *mrq = mmc_blk_cqe_prep_dcmd(mqrq, req);
+ 
++	if (mmc_card_mmc(mq->card) && !mmc_flush_allowed(mq->card)) {
++		blk_mq_end_request(req, BLK_STS_OK);
++		return -EPERM;
++	}
++
+ 	mrq->cmd->opcode = MMC_SWITCH;
+ 	mrq->cmd->arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+ 			(EXT_CSD_FLUSH_CACHE << 16) |
+@@ -2226,6 +2231,8 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
+ 		switch (req_op(req)) {
+ 		case REQ_OP_FLUSH:
+ 			ret = mmc_blk_cqe_issue_flush(mq, req);
++			if (ret == -EPERM)
++				return MMC_REQ_FINISHED;
+ 			break;
+ 		case REQ_OP_READ:
+ 		case REQ_OP_WRITE:
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 9ad4aa537867..e3da62ffcb5e 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -2037,7 +2037,7 @@ static int _mmc_flush_cache(struct mmc_card *card)
+ {
+ 	int err = 0;
+ 
+-	if (card->ext_csd.cache_size > 0 && card->ext_csd.cache_ctrl & 1) {
++	if (mmc_flush_allowed(card)) {
+ 		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+ 				 EXT_CSD_FLUSH_CACHE, 1,
+ 				 CACHE_FLUSH_TIMEOUT_MS);
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index 5782fdf4e8e9..2682bf66708a 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -19,6 +19,11 @@ enum mmc_busy_cmd {
+ struct mmc_host;
+ struct mmc_card;
+ 
++static inline bool mmc_flush_allowed(struct mmc_card *card)
++{
++	return card->ext_csd.cache_size > 0 && card->ext_csd.cache_ctrl & 1;
++}
++
+ int mmc_select_card(struct mmc_card *card);
+ int mmc_deselect_cards(struct mmc_host *host);
+ int mmc_set_dsr(struct mmc_host *host);
 -- 
 2.25.1
 
