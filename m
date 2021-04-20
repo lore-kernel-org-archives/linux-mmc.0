@@ -2,194 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C486C43462
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 09:39:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DB95C43461
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 11:20:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 05D8761164
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 09:39:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 635026139A
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Apr 2021 11:20:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231231AbhDTJjg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Apr 2021 05:39:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43508 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229878AbhDTJjf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Apr 2021 05:39:35 -0400
-Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B974BC06174A;
-        Tue, 20 Apr 2021 02:39:03 -0700 (PDT)
-Received: by mail-lj1-x22d.google.com with SMTP id a5so5785428ljk.0;
-        Tue, 20 Apr 2021 02:39:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=to:cc:references:from:subject:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=0cgFeiaCJmuEwdxXqsfxCg9P2r8ydkzAaV1kqEK2h0w=;
-        b=gvB2Kjtuq3c6hDrfV3q09iYFnvk6b3RYxllwzrHlnk+X8nahI/9ZgjrPXry5x6L08J
-         ZqUJbyfgrU/17jihKD9RUFrWkKnPLnaOIz5SfrAgdH3V6GQqhJBsJvkRB5ags8nff6/g
-         3cv4VDvDqV2sSqUfb8205g5G7kjLsdASVbSOa0/k/nLxNeajkm1KtVIIys66vWeGWX+c
-         R9IfZtnbhr3czfjp/hluYCcP4dflvCu/ccDgljZf5znlxpNeSE4/7JXLhxawyn0f1SMK
-         6r42KR2eqy29tw7Neimeshqmq4hBcMWCqRWk5EiKSmXItxwa+o1xYehRrMSSHpcpkKnQ
-         slWw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:to:cc:references:from:subject:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=0cgFeiaCJmuEwdxXqsfxCg9P2r8ydkzAaV1kqEK2h0w=;
-        b=ZDyLVsvmS97vdLdIHk4HltbWTD7b7zNTv5Zv0eN2YlpxyPpgmErFv5kZu8skEq6pfh
-         vxq+1aU7NReOTmNoutWjs4XfTqwvTH3xkbbVBRfJIZJmdDIO8eAy4OzzydSGRHx2EKmi
-         YCxZohN5vmAuAHhdwG3sQihnF9/FpLz5SAmy9PRVEhD360VKL/zfOUzhAx5QDLXNc87a
-         9ybsBVfOZbIl03G6Eq328W7XZ7KS5ODOvs8lwti3F26LVWd9FmHCpM3iy0PDsS2Bg6xH
-         EV9ZaKPAs6WxNStDYBX/CPFnurowIFpHvg+lf5O6j35v8H7kOGR8KN4r+woc3lrLJAa9
-         MaUw==
-X-Gm-Message-State: AOAM533MPVJGV9S8bJbfOTifeiRiknGlJ/Pqt+FLZodPoLAIaJLX6Q5b
-        pyUfyQt8fzdBkHSm6ylFSFaH1cah+qHUdqvm
-X-Google-Smtp-Source: ABdhPJxU9OnhgUvmhfsaX0XQNxKFEPf1HsBVx73r0wgo9gbzwsyEGSVJJz6LhIbQa4C3GIRFxd4WnA==
-X-Received: by 2002:a2e:9f49:: with SMTP id v9mr14102607ljk.44.1618911541931;
-        Tue, 20 Apr 2021 02:39:01 -0700 (PDT)
-Received: from [10.0.0.42] (91-155-111-71.elisa-laajakaista.fi. [91.155.111.71])
-        by smtp.gmail.com with ESMTPSA id n22sm723197lfu.144.2021.04.20.02.38.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 20 Apr 2021 02:39:01 -0700 (PDT)
-To:     "Alice Guo (OSS)" <alice.guo@oss.nxp.com>,
-        gregkh@linuxfoundation.org, rafael@kernel.org,
-        horia.geanta@nxp.com, aymen.sghaier@nxp.com,
-        herbert@gondor.apana.org.au, davem@davemloft.net, tony@atomide.com,
-        geert+renesas@glider.be, mturquette@baylibre.com, sboyd@kernel.org,
-        vkoul@kernel.org, a.hajda@samsung.com, narmstrong@baylibre.com,
-        robert.foss@linaro.org, airlied@linux.ie, daniel@ffwll.ch,
-        khilman@baylibre.com, tomba@kernel.org, jyri.sarha@iki.fi,
-        joro@8bytes.org, will@kernel.org, mchehab@kernel.org,
-        ulf.hansson@linaro.org, adrian.hunter@intel.com, kishon@ti.com,
-        kuba@kernel.org, linus.walleij@linaro.org, Roy.Pledge@nxp.com,
-        leoyang.li@nxp.com, ssantosh@kernel.org, matthias.bgg@gmail.com,
-        edubezval@gmail.com, j-keerthy@ti.com, balbi@kernel.org,
-        linux@prisktech.co.nz, stern@rowland.harvard.edu,
-        wim@linux-watchdog.org, linux@roeck-us.net
-Cc:     linux-kernel@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-omap@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-clk@vger.kernel.org, dmaengine@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-amlogic@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org,
-        iommu@lists.linux-foundation.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, netdev@vger.kernel.org,
-        linux-phy@lists.infradead.org, linux-gpio@vger.kernel.org,
-        linuxppc-dev@lists.ozlabs.org, linux-staging@lists.linux.dev,
-        linux-mediatek@lists.infradead.org, linux-pm@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org
-References: <20210419042722.27554-1-alice.guo@oss.nxp.com>
- <20210419042722.27554-4-alice.guo@oss.nxp.com>
-From:   =?UTF-8?Q?P=c3=a9ter_Ujfalusi?= <peter.ujfalusi@gmail.com>
-Subject: Re: [RFC v1 PATCH 3/3] driver: update all the code that use
- soc_device_match
-Message-ID: <2924b8af-d176-01b1-a221-5219c1128494@gmail.com>
-Date:   Tue, 20 Apr 2021 12:40:13 +0300
+        id S231415AbhDTLU6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Apr 2021 07:20:58 -0400
+Received: from mga01.intel.com ([192.55.52.88]:11105 "EHLO mga01.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231423AbhDTLUx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 20 Apr 2021 07:20:53 -0400
+IronPort-SDR: bUMuiejOobdeT6p0bpkTVEuMnb3w3Zj705ysIBwgJBCCWtEXrphLKV70JHTuJ1XOzWUROOvAna
+ FHnmgVruqC1w==
+X-IronPort-AV: E=McAfee;i="6200,9189,9959"; a="216076753"
+X-IronPort-AV: E=Sophos;i="5.82,236,1613462400"; 
+   d="scan'208";a="216076753"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Apr 2021 04:20:19 -0700
+IronPort-SDR: 5AFkbkHfoktgcXQ8OkfPAaIJ9aTf4U/QmckPA2ECRvzI0WfMQAM5YHQ7EEsqqy9VRNsLQYDRTq
+ 0ZTLz8IdKWxA==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.82,236,1613462400"; 
+   d="scan'208";a="445480041"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
+  by fmsmga004.fm.intel.com with ESMTP; 20 Apr 2021 04:20:15 -0700
+Subject: Re: [PATCH v3 1/2] mmc: block: Issue flush only if allowed
+To:     Avri Altman <avri.altman@wdc.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, Brendan Peter <bpeter@lytx.com>
+References: <20210420055306.4858-1-avri.altman@wdc.com>
+ <20210420055306.4858-2-avri.altman@wdc.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <a55b7fe7-0d84-a9a6-8f64-6f1632cffcc4@intel.com>
+Date:   Tue, 20 Apr 2021 14:20:30 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.9.1
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-In-Reply-To: <20210419042722.27554-4-alice.guo@oss.nxp.com>
+In-Reply-To: <20210420055306.4858-2-avri.altman@wdc.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Alice,
-
-On 4/19/21 7:27 AM, Alice Guo (OSS) wrote:
-> From: Alice Guo <alice.guo@nxp.com>
+On 20/04/21 8:53 am, Avri Altman wrote:
+> The cache may be flushed to the nonvolatile storage by writing to
+> FLUSH_CACHE byte (EXT_CSD byte [32]). When in command queueing mode, the
+> cache may be flushed by issuing a CMDQ_TASK_ DEV_MGMT (CMD48) with a
+> FLUSH_CACHE op-code.  Either way, verify that The cache function is
+> turned ON before doing so.
 > 
-> Update all the code that use soc_device_match because add support for
-> soc_device_match returning -EPROBE_DEFER.
+> fixes: 1e8e55b67030 (mmc: block: Add CQE support)
 > 
-> Signed-off-by: Alice Guo <alice.guo@nxp.com>
+> Reported-by: Brendan Peter <bpeter@lytx.com>
+> Tested-by: Brendan Peter <bpeter@lytx.com>
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 > ---
->  drivers/bus/ti-sysc.c                         |  2 +-
->  drivers/clk/renesas/r8a7795-cpg-mssr.c        |  4 +++-
->  drivers/clk/renesas/rcar-gen2-cpg.c           |  2 +-
->  drivers/clk/renesas/rcar-gen3-cpg.c           |  2 +-
->  drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c       |  7 ++++++-
->  drivers/dma/ti/k3-psil.c                      |  3 +++
->  drivers/dma/ti/k3-udma.c                      |  2 +-
->  drivers/gpu/drm/bridge/nwl-dsi.c              |  2 +-
->  drivers/gpu/drm/meson/meson_drv.c             |  4 +++-
->  drivers/gpu/drm/omapdrm/dss/dispc.c           |  2 +-
->  drivers/gpu/drm/omapdrm/dss/dpi.c             |  4 +++-
->  drivers/gpu/drm/omapdrm/dss/dsi.c             |  3 +++
->  drivers/gpu/drm/omapdrm/dss/dss.c             |  3 +++
->  drivers/gpu/drm/omapdrm/dss/hdmi4_core.c      |  3 +++
->  drivers/gpu/drm/omapdrm/dss/venc.c            |  4 +++-
->  drivers/gpu/drm/omapdrm/omap_drv.c            |  3 +++
->  drivers/gpu/drm/rcar-du/rcar_du_crtc.c        |  4 +++-
->  drivers/gpu/drm/rcar-du/rcar_lvds.c           |  2 +-
->  drivers/gpu/drm/tidss/tidss_dispc.c           |  4 +++-
->  drivers/iommu/ipmmu-vmsa.c                    |  7 +++++--
->  drivers/media/platform/rcar-vin/rcar-core.c   |  2 +-
->  drivers/media/platform/rcar-vin/rcar-csi2.c   |  2 +-
->  drivers/media/platform/vsp1/vsp1_uif.c        |  4 +++-
->  drivers/mmc/host/renesas_sdhi_core.c          |  2 +-
->  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  2 +-
->  drivers/mmc/host/sdhci-of-esdhc.c             | 21 ++++++++++++++-----
->  drivers/mmc/host/sdhci-omap.c                 |  2 +-
->  drivers/mmc/host/sdhci_am654.c                |  2 +-
->  drivers/net/ethernet/renesas/ravb_main.c      |  4 +++-
->  drivers/net/ethernet/ti/am65-cpsw-nuss.c      |  2 +-
->  drivers/net/ethernet/ti/cpsw.c                |  2 +-
->  drivers/net/ethernet/ti/cpsw_new.c            |  2 +-
->  drivers/phy/ti/phy-omap-usb2.c                |  4 +++-
->  drivers/pinctrl/renesas/core.c                |  2 +-
->  drivers/pinctrl/renesas/pfc-r8a7790.c         |  5 ++++-
->  drivers/pinctrl/renesas/pfc-r8a7794.c         |  5 ++++-
->  drivers/soc/fsl/dpio/dpio-driver.c            | 13 ++++++++----
->  drivers/soc/renesas/r8a774c0-sysc.c           |  5 ++++-
->  drivers/soc/renesas/r8a7795-sysc.c            |  2 +-
->  drivers/soc/renesas/r8a77990-sysc.c           |  5 ++++-
->  drivers/soc/ti/k3-ringacc.c                   |  2 +-
->  drivers/staging/mt7621-pci/pci-mt7621.c       |  2 +-
->  drivers/thermal/rcar_gen3_thermal.c           |  4 +++-
->  drivers/thermal/ti-soc-thermal/ti-bandgap.c   | 10 +++++++--
->  drivers/usb/gadget/udc/renesas_usb3.c         |  2 +-
->  drivers/usb/host/ehci-platform.c              |  4 +++-
->  drivers/usb/host/xhci-rcar.c                  |  2 +-
->  drivers/watchdog/renesas_wdt.c                |  2 +-
->  48 files changed, 131 insertions(+), 52 deletions(-)
+>  drivers/mmc/core/block.c   | 7 +++++++
+>  drivers/mmc/core/mmc.c     | 2 +-
+>  drivers/mmc/core/mmc_ops.h | 5 +++++
+>  3 files changed, 13 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 8bfd4d95b386..5b6501fc9fb7 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1476,6 +1476,11 @@ static int mmc_blk_cqe_issue_flush(struct mmc_queue *mq, struct request *req)
+>  	struct mmc_queue_req *mqrq = req_to_mmc_queue_req(req);
+>  	struct mmc_request *mrq = mmc_blk_cqe_prep_dcmd(mqrq, req);
+>  
+> +	if (mmc_card_mmc(mq->card) && !mmc_flush_allowed(mq->card)) {
+> +		blk_mq_end_request(req, BLK_STS_OK);
+> +		return -EPERM;
+> +	}
+> +
+>  	mrq->cmd->opcode = MMC_SWITCH;
+>  	mrq->cmd->arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+>  			(EXT_CSD_FLUSH_CACHE << 16) |
+> @@ -2226,6 +2231,8 @@ enum mmc_issued mmc_blk_mq_issue_rq(struct mmc_queue *mq, struct request *req)
+>  		switch (req_op(req)) {
+>  		case REQ_OP_FLUSH:
+>  			ret = mmc_blk_cqe_issue_flush(mq, req);
+> +			if (ret == -EPERM)
+> +				return MMC_REQ_FINISHED;
+
+Using an error code for this case seems a little fragile.
+
+How about something like:
+
+ 		case REQ_OP_FLUSH:
+			if (mmc_blk_cache_disabled(mq->card)) {
+				blk_mq_end_request(req, BLK_STS_OK);
+				return MMC_REQ_FINISHED;
+			}
+ 			ret = mmc_blk_cqe_issue_flush(mq, req);
+
+
+static bool mmc_blk_cache_disabled(struct mmc_card *card)
+{
+	return mmc_card_mmc(mq->card) && !mmc_flush_allowed(card);
+}
+
+>  			break;
+>  		case REQ_OP_READ:
+>  		case REQ_OP_WRITE:
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 9ad4aa537867..e3da62ffcb5e 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -2037,7 +2037,7 @@ static int _mmc_flush_cache(struct mmc_card *card)
+>  {
+>  	int err = 0;
+>  
+> -	if (card->ext_csd.cache_size > 0 && card->ext_csd.cache_ctrl & 1) {
+> +	if (mmc_flush_allowed(card)) {
+>  		err = mmc_switch(card, EXT_CSD_CMD_SET_NORMAL,
+>  				 EXT_CSD_FLUSH_CACHE, 1,
+>  				 CACHE_FLUSH_TIMEOUT_MS);
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index 5782fdf4e8e9..2682bf66708a 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -19,6 +19,11 @@ enum mmc_busy_cmd {
+>  struct mmc_host;
+>  struct mmc_card;
+>  
+> +static inline bool mmc_flush_allowed(struct mmc_card *card)
+> +{
+> +	return card->ext_csd.cache_size > 0 && card->ext_csd.cache_ctrl & 1;
+> +}
+> +
+>  int mmc_select_card(struct mmc_card *card);
+>  int mmc_deselect_cards(struct mmc_host *host);
+>  int mmc_set_dsr(struct mmc_host *host);
 > 
 
-...
-
-> diff --git a/drivers/dma/ti/k3-udma.c b/drivers/dma/ti/k3-udma.c
-> index 96ad21869ba7..50a4c8f0993d 100644
-> --- a/drivers/dma/ti/k3-udma.c
-> +++ b/drivers/dma/ti/k3-udma.c
-> @@ -5188,7 +5188,7 @@ static int udma_probe(struct platform_device *pdev)
->  	ud->match_data = match->data;
->  
->  	soc = soc_device_match(k3_soc_devices);
-> -	if (!soc) {
-> +	if (!IS_ERR(soc) && !soc) {
-
-this does not sound right...
-
-if (!soc || IS_ERR(soc))
-or
-if (IS_ERR_OR_NULL(soc))
-is even better.
-
->  		dev_err(dev, "No compatible SoC found\n");
->  		return -ENODEV;
-
-There might be a clever macro for it, but:
-
-return soc ? PTR_ERR(soc) : -ENODEV;
-
->  	}
-
--- 
-Péter
