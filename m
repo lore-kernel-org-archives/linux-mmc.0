@@ -2,183 +2,608 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B3BBC43600
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 10:32:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F766C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 10:38:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 561D36144B
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 10:32:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2FE9261454
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 10:38:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235791AbhDUKcy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Apr 2021 06:32:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33084 "EHLO
+        id S237591AbhDUKiu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Apr 2021 06:38:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34394 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235295AbhDUKcv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Apr 2021 06:32:51 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C28C3C06138F
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Apr 2021 03:32:15 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id n138so66247540lfa.3
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Apr 2021 03:32:15 -0700 (PDT)
+        with ESMTP id S234705AbhDUKir (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Apr 2021 06:38:47 -0400
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4791AC06174A;
+        Wed, 21 Apr 2021 03:38:13 -0700 (PDT)
+Received: by mail-ej1-x632.google.com with SMTP id w3so62822826ejc.4;
+        Wed, 21 Apr 2021 03:38:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=bcsktzE2LmD65+1hOHiSw/mP2z1mU2lSfJMjIjsWTl8=;
-        b=MeDREFOXhXuJmdNkZlfNo6r09BtFQhtpatiA2dLOAjjAx9WJX57MEqtOeMptwJzzxg
-         KcFM8UVx0SBV4dYxGqW+lMn/XOuElbSINB3SPmjzyeEr36jWpVyIwgfPxwa8ssflH2mJ
-         Oxolx5TZP8FqxdkDpcOeNYrs4SB5XroN/kGPdRGF9BF/qijCo8EDgYg6VMySHJfVq2hA
-         z29f+TyFBf1pCEfF7kx9mvQBUWc32kJJuNY5XG87OR7ZsqmuKlJ0GbDGfTS98sSe2gAb
-         i8ZRbFepki5l8v/b9AHTV32HDeKv1wZbpuFH0314bcqBTpdBW9PE+iVZ4ltSbO6R/x/G
-         M/Pw==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=86K3DqgdI6PmMZ1PotS8DuNX9pS7zE6BvMTj90x596g=;
+        b=Y659qs29TOqgE5P8ePUqNq3xMEK+Hfto4RTgCeuc6yKZSA042xIEOSavqdhqNA+WlA
+         hbLa2lQVcYvcKrVKWr4GDPwXqwEIHhiBrEcdyuwWJEPzWVW3aJZ03ssIT9WfvwmLR5vv
+         mDQVnxws/7vsIqTf9yKf3UZmv2Q/hO1gIK+2IylUX+w4zw6YeW6Kk9Q9LwYXEh+k03lv
+         xIGEW5KU6ahDwsYzX9MXs9Kr+daYmwi3UmT0JHukNJ0NhXFkg2RI6uaXGRAxvldJmEip
+         1rMogEwFf0YcRhimbh66dNfRGXeWj6zBgrQjELAxQfDy5H1ZOWy3rSueEF2xNPUfrGik
+         OxKQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=bcsktzE2LmD65+1hOHiSw/mP2z1mU2lSfJMjIjsWTl8=;
-        b=plhxfObAy5LGeWFsNeoKKQe/Mto+tMjrh7zdD0q4hz5k1lmYxUUWtyU4p4TxauEnPV
-         f5jt7jZIRfC6wITXG+DB26Ms0RlAfMgzSgLeDbXF1JcRoqPwT3kU77gphu//91chuFtl
-         3h5VvxtGAajZQVjgOHGMSpRe7pOzkkP5GPNBBnEzyIkmsxnUNFLeg5oAQZX9WmqYHypI
-         ISxf7XdV0TfkdyAEVFfLFSUAM1FL7+OuZQ1g7xoEN7da/BQGGsV1DsD2v0EBkS2lIF7S
-         7RN4xeO2Se6ZYFpI7zqnyWxSvMaZq60i1O0hJ6y+cO3Tc20C1Iv+AifG0oLXC6bIVgi2
-         hgdQ==
-X-Gm-Message-State: AOAM533Exa3TKJh2dRvL615Kbb38m2N3HXdWFoYCnRCU+QSs4VCGojsb
-        qRwWoPbMCfN2RBJ0r5FAj+My5ajTGEey8cd+
-X-Google-Smtp-Source: ABdhPJxV6dxPVTt9qygoUmgvT6O4ATvKPQcYo7j/3FM4lE7OAyE15x7FJ/923njgXMQ0S3Iy0/lpcQ==
-X-Received: by 2002:a05:6512:12c3:: with SMTP id p3mr12128089lfg.595.1619001133570;
-        Wed, 21 Apr 2021 03:32:13 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
-        by smtp.gmail.com with ESMTPSA id u13sm170603lfg.139.2021.04.21.03.32.11
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Apr 2021 03:32:12 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Shawn Lin <shawn.lin@rock-chips.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 4/4] mmc: core: Read performance enhancements registers for SD cards
-Date:   Wed, 21 Apr 2021 12:31:54 +0200
-Message-Id: <20210421103154.169410-5-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210421103154.169410-1-ulf.hansson@linaro.org>
-References: <20210421103154.169410-1-ulf.hansson@linaro.org>
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=86K3DqgdI6PmMZ1PotS8DuNX9pS7zE6BvMTj90x596g=;
+        b=frnJL3BYqU+vr+R5GDcNVY5QGEbYULyjazGTT8TQoJ4/BF7iwCaesJVcMjk6k6773a
+         yguX5r/b3yv9ZbYji9dCD2ScwYAPpYcFwRdfVOATPfbBCVEa0VjqJv465o8Mc1keEmr4
+         Z1U0aCUx9+2+hiabJKwaVMBTrSju99GQWp/cOcOBSQit6oAT+4FDszrL/ExA6ZbkQo31
+         JkH2He1QKvCXNIIjJo4JS9JSyxT7qMX2MYoFcidDUPf9QWdUj6ql8UJjsv+EWVVXHzws
+         2kuqZqRUANsrMwrttl7PPXr9zWZV7tLLfiN7g8sKomiN+7B/tfQ4kFz/On9tu1K61Jgk
+         e+GA==
+X-Gm-Message-State: AOAM530IulNyLvDytffph1NtzSWWbQBG6z0fGaoWc+r0PQ6w33zfiqqj
+        xwnCP1VCbuaykhbDLIck82U=
+X-Google-Smtp-Source: ABdhPJwbWWZmQM6tijiQ0M4mvq1Y/300ScRabGg7M6edrJdQUrXFbai/lLfbmMBXv0T9CVtVwOzGBQ==
+X-Received: by 2002:a17:906:85cb:: with SMTP id i11mr31118454ejy.311.1619001491938;
+        Wed, 21 Apr 2021 03:38:11 -0700 (PDT)
+Received: from [192.168.2.2] (81-204-249-205.fixed.kpn.net. [81.204.249.205])
+        by smtp.gmail.com with ESMTPSA id y11sm2789410eds.10.2021.04.21.03.38.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 21 Apr 2021 03:38:11 -0700 (PDT)
+Subject: Re: [PATCH v1 5/5] arm64: dts: rockchip: add basic dts for RK3568 EVB
+To:     cl@rock-chips.com, heiko@sntech.de
+Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
+        uwe@kleine-koenig.org, mail@david-bauer.net,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
+        cnsztl@gmail.com, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
+        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
+        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
+        zhangqing@rock-chips.com, huangtao@rock-chips.com
+References: <20210421065921.23917-1-cl@rock-chips.com>
+ <20210421070115.24000-1-cl@rock-chips.com>
+From:   Johan Jonker <jbx6244@gmail.com>
+Message-ID: <cfc45d41-d16b-a643-4d13-5ff898739f02@gmail.com>
+Date:   Wed, 21 Apr 2021 12:38:07 +0200
+User-Agent: Mozilla/5.0 (X11; Linux i686; rv:68.0) Gecko/20100101
+ Thunderbird/68.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210421070115.24000-1-cl@rock-chips.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In SD spec v6.x the SD function extension registers for performance
-enhancements were introduced. These registers let the SD card announce
-supports for various performance related features, like "self-maintenance",
-"cache" and "command queuing".
+Hi Liang,
 
-Let's extend the parsing of SD function extension registers and store the
-information in the struct mmc_card. This allows subsequent changes to
-easier implement the complete support for new the performance enhancement
-features.
+Add and convert a few more documents.
 
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/sd.c    | 46 ++++++++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h |  7 ++++++
- 2 files changed, 53 insertions(+)
+> cat rk3568.dtsi | grep compatible | sort -u
+> 		compatible = "arm,armv8-timer";
+> 			compatible = "arm,cortex-a55";
+> 		compatible = "arm,cortex-a55-pmu", "arm,armv8-pmuv3";
+> 		compatible = "arm,gic-v3";
+> 		compatible = "arm,pl330", "arm,primecell";
+> 		compatible = "arm,psci-1.0";
+> 		compatible = "arm,scmi-shmem";
+> 			compatible = "arm,scmi-smc";
+> 		compatible = "fixed-clock";
+> 		compatible = "operating-points-v2";
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index d6e838b7c895..0e946afd6d22 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1063,6 +1063,48 @@ static int sd_decode_ext_reg_power(struct mmc_card *card, u8 fno, u32 reg_addr)
- 	return 0;
- }
- 
-+static int sd_decode_ext_reg_perf(struct mmc_card *card, u8 fno, u32 reg_addr)
-+{
-+	int err;
-+	u8 *reg_buf;
-+
-+	err = sd_read_ext_reg_fno(card, fno, reg_addr, &reg_buf);
-+	if (err) {
-+		pr_warn("%s: error %d reading PERF func of ext reg\n",
-+			mmc_hostname(card->host), err);
-+		return err;
-+	}
-+
-+	/* PERF revision. */
-+	card->ext_perf.rev = reg_buf[0];
-+
-+	/* FX_EVENT support at bit 0. */
-+	if (reg_buf[1] & 0x1)
-+		card->ext_perf.feature_support |= SD_EXT_PERF_FX_EVENT;
-+
-+	/* Card initiated self-maintenance support at bit 0. */
-+	if (reg_buf[2] & 0x1)
-+		card->ext_perf.feature_support |= SD_EXT_PERF_CARD_MAINT;
-+
-+	/* Host initiated self-maintenance support at bit 1. */
-+	if (reg_buf[2] & 0x2)
-+		card->ext_perf.feature_support |= SD_EXT_PERF_HOST_MAINT;
-+
-+	/* Cache support at bit 0. */
-+	if (reg_buf[4] & 0x1)
-+		card->ext_perf.feature_support |= SD_EXT_PERF_CACHE;
-+
-+	/* Command queue support indicated via queue depth bits (0 to 4). */
-+	if (reg_buf[6] & 0x1f)
-+		card->ext_perf.feature_support |= SD_EXT_PERF_CMD_QUEUE;
-+
-+	card->ext_perf.reg_addr = reg_addr;
-+	card->ext_perf.fno = fno;
-+
-+	kfree(reg_buf);
-+	return 0;
-+}
-+
- static int sd_decode_ext_reg(struct mmc_card *card, u8 *gen_info_buf,
- 			     u16 *next_ext_addr)
- {
-@@ -1103,6 +1145,10 @@ static int sd_decode_ext_reg(struct mmc_card *card, u8 *gen_info_buf,
- 	if (sfc == 0x1)
- 		return sd_decode_ext_reg_power(card, fno, reg_addr);
- 
-+	/* Standard Function Code for performance enhancement. */
-+	if (sfc == 0x2)
-+		return sd_decode_ext_reg_perf(card, fno, reg_addr);
-+
- 	return 0;
- }
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 6a1d64fba0f3..8e21eebe704d 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -200,6 +200,12 @@ struct sd_ext_reg {
- #define SD_EXT_POWER_OFF_NOTIFY	(1<<0)
- #define SD_EXT_POWER_SUSTENANCE	(1<<1)
- #define SD_EXT_POWER_DOWN_MODE	(1<<2)
-+/* Performance Enhancement Function. */
-+#define SD_EXT_PERF_FX_EVENT	(1<<0)
-+#define SD_EXT_PERF_CARD_MAINT	(1<<1)
-+#define SD_EXT_PERF_HOST_MAINT	(1<<2)
-+#define SD_EXT_PERF_CACHE	(1<<3)
-+#define SD_EXT_PERF_CMD_QUEUE	(1<<4)
- };
- 
- struct sdio_cccr {
-@@ -304,6 +310,7 @@ struct mmc_card {
- 	struct sd_ssr		ssr;		/* yet more SD information */
- 	struct sd_switch_caps	sw_caps;	/* switch (CMD6) caps */
- 	struct sd_ext_reg	ext_power;	/* SD extension reg for PM */
-+	struct sd_ext_reg	ext_perf;	/* SD extension reg for PERF */
- 
- 	unsigned int		sdio_funcs;	/* number of SDIO functions */
- 	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
--- 
-2.25.1
+> 			compatible = "rockchip,gpio-bank";
+
+pending
+
+> 	compatible = "rockchip,rk3568";
+> 		compatible = "rockchip,rk3568-cru";
+
+pending
+
+> 		compatible = "rockchip,rk3568-dwcmshc", "snps,dwcmshc-sdhci";
+> 		compatible = "rockchip,rk3568-dw-mshc",
+
+Keep string in one line for sdmmcX.
+
+> 		compatible = "rockchip,rk3568-grf", "syscon", "simple-mfd";
+> 		compatible = "rockchip,rk3568-i2c", "rockchip,rk3399-i2c";
+
+> 		compatible = "rockchip,rk3568-pinctrl";
+
+pending
+
+> 		compatible = "rockchip,rk3568-pmucru";
+> 		compatible = "rockchip,rk3568-pmugrf", "syscon", "simple-mfd";
+> 		compatible = "rockchip,rk3568-pwm", "rockchip,rk3328-pwm";
+> 		compatible = "rockchip,rk3568-uart", "snps,dw-apb-uart";
+
+> 		compatible = "snps,dw-wdt";
+
+Change this to:
+              "rockchip,rk3568-wdt", "snps,dw-wdt"
+
+Compatible strings should be SoC orientated.
+
+> 			compatible = "syscon-reboot-mode";
+
+
+On 4/21/21 9:01 AM, cl@rock-chips.com wrote:
+> From: Liang Chen <cl@rock-chips.com>
+> 
+> This patch add rk3568-evb1-v10.dts for RK3568 evaluation board.
+> add uart/emmc/i2c/rk809 node for basic function.
+> 
+> Signed-off-by: Liang Chen <cl@rock-chips.com>
+> ---
+>  .../devicetree/bindings/arm/rockchip.yaml     |   5 +
+>  arch/arm64/boot/dts/rockchip/Makefile         |   1 +
+>  .../boot/dts/rockchip/rk3568-evb1-v10.dts     | 382 ++++++++++++++++++
+>  3 files changed, 388 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+> 
+> diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
+> index 4a6f772c1043..d26b062a9f0e 100644
+> --- a/Documentation/devicetree/bindings/arm/rockchip.yaml
+> +++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
+> @@ -560,6 +560,11 @@ properties:
+>            - const: rockchip,rk3368-evb-act8846
+>            - const: rockchip,rk3368
+>  
+
+> +      - description: Rockchip RK3568 Evaluation board
+> +        items:
+> +          - const: rockchip,rk3568-evb1-v10
+> +          - const: rockchip,rk3568
+> +
+
+Move this below rockchip,rk3399-evb board.
+
+>        - description: Rockchip RK3399 Evaluation board
+>          items:
+>            - const: rockchip,rk3399-evb
+> diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
+> index c3e00c0e2db7..7fdb41de01ec 100644
+> --- a/arch/arm64/boot/dts/rockchip/Makefile
+> +++ b/arch/arm64/boot/dts/rockchip/Makefile
+> @@ -51,3 +51,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
+>  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
+>  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
+>  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-rock-pi-n10.dtb
+> +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
+> diff --git a/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+> new file mode 100644
+> index 000000000000..be8aae2e8c67
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+> @@ -0,0 +1,382 @@
+> +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+> +/*
+> + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
+> + *
+> + */
+> +
+> +/dts-v1/;
+> +#include <dt-bindings/gpio/gpio.h>
+> +#include <dt-bindings/pinctrl/rockchip.h>
+> +#include "rk3568.dtsi"
+> +
+> +/ {
+> +	model = "Rockchip RK3568 EVB1 DDR4 V10 Board";
+> +	compatible = "rockchip,rk3568-evb1-v10", "rockchip,rk3568";
+> +
+> +	chosen: chosen {
+> +		stdout-path = "serial2:1500000n8";
+> +	};
+> +
+> +	dc_12v: dc-12v {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "dc_12v";
+> +		regulator-always-on;
+> +		regulator-boot-on;
+> +		regulator-min-microvolt = <12000000>;
+> +		regulator-max-microvolt = <12000000>;
+> +	};
+> +
+> +	vcc3v3_sys: vcc3v3-sys {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "vcc3v3_sys";
+> +		regulator-always-on;
+> +		regulator-boot-on;
+> +		regulator-min-microvolt = <3300000>;
+> +		regulator-max-microvolt = <3300000>;
+> +		vin-supply = <&dc_12v>;
+> +	};
+> +
+> +	vcc5v0_sys: vcc5v0-sys {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "vcc5v0_sys";
+> +		regulator-always-on;
+> +		regulator-boot-on;
+> +		regulator-min-microvolt = <5000000>;
+> +		regulator-max-microvolt = <5000000>;
+> +		vin-supply = <&dc_12v>;
+> +	};
+> +
+> +	vcc5v0_host: vcc5v0-host-regulator {
+> +		compatible = "regulator-fixed";
+> +		enable-active-high;
+> +		gpio = <&gpio0 RK_PA6 GPIO_ACTIVE_HIGH>;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&vcc5v0_host_en>;
+> +		regulator-name = "vcc5v0_host";
+> +		regulator-always-on;
+> +	};
+> +
+> +	vcc5v0_otg: vcc5v0-otg-regulator {
+> +		compatible = "regulator-fixed";
+> +		enable-active-high;
+> +		gpio = <&gpio0 RK_PA5 GPIO_ACTIVE_HIGH>;
+> +		pinctrl-names = "default";
+> +		pinctrl-0 = <&vcc5v0_otg_en>;
+> +		regulator-name = "vcc5v0_otg";
+> +	};
+> +
+> +	vcc3v3_lcd0_n: vcc3v3-lcd0-n {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "vcc3v3_lcd0_n";
+> +		regulator-boot-on;
+
+Add empty line between a node.
+Change all of them.
+
+> +		regulator-state-mem {
+> +			regulator-off-in-suspend;
+> +		};
+> +	};
+> +
+> +	vcc3v3_lcd1_n: vcc3v3-lcd1-n {
+> +		compatible = "regulator-fixed";
+> +		regulator-name = "vcc3v3_lcd1_n";
+> +		regulator-boot-on;
+
+dito
+
+> +		regulator-state-mem {
+> +			regulator-off-in-suspend;
+> +		};
+> +	};
+> +};
+> +
+> +&i2c0 {
+> +	status = "okay";
+> +
+> +	rk809: pmic@20 {
+> +		compatible = "rockchip,rk809";
+> +		reg = <0x20>;
+> +		interrupt-parent = <&gpio0>;
+> +		interrupts = <3 IRQ_TYPE_LEVEL_LOW>;
+> +
+> +		pinctrl-names = "default", "pmic-sleep",
+> +				"pmic-power-off", "pmic-reset";
+> +		pinctrl-0 = <&pmic_int>;
+> +		pinctrl-1 = <&soc_slppin_slp>, <&rk817_slppin_slp>;
+> +		pinctrl-2 = <&soc_slppin_gpio>, <&rk817_slppin_pwrdn>;
+> +		pinctrl-3 = <&soc_slppin_gpio>, <&rk817_slppin_rst>;
+> +
+> +		rockchip,system-power-controller;
+> +		wakeup-source;
+> +		#clock-cells = <1>;
+> +		clock-output-names = "rk808-clkout1", "rk808-clkout2";
+
+> +		//fb-inner-reg-idxs = <2>;
+> +		/* 1: rst regs (default in codes), 0: rst the pmic */
+
+Where is documented?
+
+> +		pmic-reset-func = <0>;
+
+Where is documented?
+
+> +
+> +		vcc1-supply = <&vcc3v3_sys>;
+> +		vcc2-supply = <&vcc3v3_sys>;
+> +		vcc3-supply = <&vcc3v3_sys>;
+> +		vcc4-supply = <&vcc3v3_sys>;
+> +		vcc5-supply = <&vcc3v3_sys>;
+> +		vcc6-supply = <&vcc3v3_sys>;
+> +		vcc7-supply = <&vcc3v3_sys>;
+> +		vcc8-supply = <&vcc3v3_sys>;
+> +		vcc9-supply = <&vcc3v3_sys>;
+> +
+
+> +		pwrkey {
+> +			status = "okay";
+> +		};
+> +
+
+Where is documented?
+
+> +		pinctrl_rk8xx: pinctrl_rk8xx {
+> +			gpio-controller;
+> +			#gpio-cells = <2>;
+> +
+> +			rk817_slppin_null: rk817_slppin_null {
+> +				pins = "gpio_slp";
+> +				function = "pin_fun0";
+> +			};
+> +
+> +			rk817_slppin_slp: rk817_slppin_slp {
+> +				pins = "gpio_slp";
+> +				function = "pin_fun1";
+> +			};
+> +
+> +			rk817_slppin_pwrdn: rk817_slppin_pwrdn {
+> +				pins = "gpio_slp";
+> +				function = "pin_fun2";
+> +			};
+> +
+> +			rk817_slppin_rst: rk817_slppin_rst {
+> +				pins = "gpio_slp";
+> +				function = "pin_fun3";
+> +			};
+> +		};
+
+
+Where is documented?
+
+> +
+> +		regulators {
+> +			vdd_logic: DCDC_REG1 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <500000>;
+> +				regulator-max-microvolt = <1350000>;
+> +				regulator-init-microvolt = <900000>;
+> +				regulator-ramp-delay = <6001>;
+> +				regulator-initial-mode = <0x2>;
+
+> +				regulator-name = "vdd_logic";
+
+regulator-name above all other regulator properties.
+Change all of them.
+
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vdd_gpu: DCDC_REG2 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <500000>;
+> +				regulator-max-microvolt = <1350000>;
+> +				regulator-init-microvolt = <900000>;
+> +				regulator-ramp-delay = <6001>;
+> +				regulator-initial-mode = <0x2>;
+> +				regulator-name = "vdd_gpu";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vcc_ddr: DCDC_REG3 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-initial-mode = <0x2>;
+> +				regulator-name = "vcc_ddr";
+> +				regulator-state-mem {
+> +					regulator-on-in-suspend;
+> +				};
+> +			};
+> +
+> +			vdd_npu: DCDC_REG4 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <500000>;
+> +				regulator-max-microvolt = <1350000>;
+> +				regulator-init-microvolt = <900000>;
+> +				regulator-ramp-delay = <6001>;
+> +				regulator-initial-mode = <0x2>;
+> +				regulator-name = "vdd_npu";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vdda0v9_image: LDO_REG1 {
+> +				regulator-boot-on;
+> +				regulator-always-on;
+> +				regulator-min-microvolt = <900000>;
+> +				regulator-max-microvolt = <900000>;
+> +				regulator-name = "vdda0v9_image";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vdda_0v9: LDO_REG2 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <900000>;
+> +				regulator-max-microvolt = <900000>;
+> +				regulator-name = "vdda_0v9";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vdda0v9_pmu: LDO_REG3 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <900000>;
+> +				regulator-max-microvolt = <900000>;
+> +				regulator-name = "vdda0v9_pmu";
+> +				regulator-state-mem {
+> +					regulator-on-in-suspend;
+> +					regulator-suspend-microvolt = <900000>;
+> +				};
+> +			};
+> +
+> +			vccio_acodec: LDO_REG4 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <3300000>;
+> +				regulator-max-microvolt = <3300000>;
+> +				regulator-name = "vccio_acodec";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vccio_sd: LDO_REG5 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <1800000>;
+> +				regulator-max-microvolt = <3300000>;
+> +				regulator-name = "vccio_sd";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vcc3v3_pmu: LDO_REG6 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <3300000>;
+> +				regulator-max-microvolt = <3300000>;
+> +				regulator-name = "vcc3v3_pmu";
+> +				regulator-state-mem {
+> +					regulator-on-in-suspend;
+> +					regulator-suspend-microvolt = <3300000>;
+> +				};
+> +			};
+> +
+> +			vcca_1v8: LDO_REG7 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <1800000>;
+> +				regulator-max-microvolt = <1800000>;
+> +				regulator-name = "vcca_1v8";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vcca1v8_pmu: LDO_REG8 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <1800000>;
+> +				regulator-max-microvolt = <1800000>;
+> +				regulator-name = "vcca1v8_pmu";
+> +				regulator-state-mem {
+> +					regulator-on-in-suspend;
+> +					regulator-suspend-microvolt = <1800000>;
+> +				};
+> +			};
+> +
+> +			vcca1v8_image: LDO_REG9 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <1800000>;
+> +				regulator-max-microvolt = <1800000>;
+> +				regulator-name = "vcca1v8_image";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vcc_1v8: DCDC_REG5 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-min-microvolt = <1800000>;
+> +				regulator-max-microvolt = <1800000>;
+> +				regulator-name = "vcc_1v8";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vcc_3v3: SWITCH_REG1 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-name = "vcc_3v3";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +
+> +			vcc3v3_sd: SWITCH_REG2 {
+> +				regulator-always-on;
+> +				regulator-boot-on;
+> +				regulator-name = "vcc3v3_sd";
+> +				regulator-state-mem {
+> +					regulator-off-in-suspend;
+> +				};
+> +			};
+> +		};
+> +	};
+> +};
+> +
+> +
+> +&pinctrl {
+> +	pmic {
+> +		pmic_int: pmic_int {
+> +			rockchip,pins =
+> +				<0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
+> +		};
+> +
+> +		soc_slppin_gpio: soc_slppin_gpio {
+> +			rockchip,pins =
+> +				<0 RK_PA2 RK_FUNC_GPIO &pcfg_output_low>;
+> +		};
+> +
+> +		soc_slppin_slp: soc_slppin_slp {
+> +			rockchip,pins =
+> +				<0 RK_PA2 1 &pcfg_pull_none>;
+> +		};
+> +
+> +		soc_slppin_rst: soc_slppin_rst {
+> +			rockchip,pins =
+> +				<0 RK_PA2 2 &pcfg_pull_none>;
+> +		};
+> +	};
+> +
+> +	usb {
+
+> +		vcc5v0_host_en: vcc5v0-host-en {
+> +			rockchip,pins = <0 RK_PA6 RK_FUNC_GPIO &pcfg_pull_none>;
+> +		};
+> +
+> +		vcc5v0_otg_en: vcc5v0-otg-en {
+> +			rockchip,pins = <0 RK_PA5 RK_FUNC_GPIO &pcfg_pull_none>;
+
+
+Keep the same indent as in pmic and rk3568.dtsi for rockchip,pins
+
+> +		};
+> +	};
+> +};
+> +
+> +&sdhci {
+> +	bus-width = <8>;
+
+> +	non-removable;
+> +	rockchip,txclk-tapnum = <0x8>;
+> +	max-frequency = <200000000>;
+
+sort
+
+> +	status = "okay";
+> +};
+> +
+> +&uart2 {
+> +	status = "okay";
+> +};
+> 
 
