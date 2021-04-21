@@ -2,153 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DBB1C433ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 09:27:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 992ACC43460
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 10:32:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA94D6144B
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 09:27:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6674D61427
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Apr 2021 10:32:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238147AbhDUJ1h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Apr 2021 05:27:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46796 "EHLO
+        id S234431AbhDUKco (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Apr 2021 06:32:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230516AbhDUJ1g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Apr 2021 05:27:36 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4B34C06174A;
-        Wed, 21 Apr 2021 02:27:02 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id bx20so47384636edb.12;
-        Wed, 21 Apr 2021 02:27:02 -0700 (PDT)
+        with ESMTP id S234167AbhDUKcl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Apr 2021 06:32:41 -0400
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7207C06138B
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Apr 2021 03:32:07 -0700 (PDT)
+Received: by mail-lj1-x232.google.com with SMTP id u20so47098452lja.13
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Apr 2021 03:32:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=/hH6gOY5Krjw8Rc2Sxt75fVQdHpdQjhafzlD6HdCfVc=;
-        b=hJNclq7CenzlSQ5Zhk5Ww/3t0wzxy9F/QcPiPW4f0ljxEUi2HXp8kTEaZdeUDawaLe
-         dkhPonR9EENLcqruGCcYlhDBX10TWvnKCLkuSdwin4DSt3D88dhN2bhnoibh1FZO7HXW
-         GcvBpik5Eht2Tx5XeM+HkiQbJKz7Q7SaSYCHdmPxCNpYpyfN30/SXnpMvGsH/2qJGkT2
-         gvFuah46Fe6/S91lMoV0wa8PvdWDVY+aRjpu1fldBQ4f7tmAQ5ztfmqGtT13IdXyRqIo
-         I2xkmlcEH8lwPoTu8Xdx1SjFRr8jw4tIYsL5bqOxNbWxRg+wh/m0TOhAtzNsPx2xsZGc
-         rBzQ==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=fBQWyNtRNzkXZ2Gc9WUvzsz7njLiu60umO7wwJKluZY=;
+        b=LKOFJpHSObmujmQdunPXOFFv/fgR3WYfzBlUopgCGKd3UJChtrfRG0BfGIocMOYwhy
+         p+JGmUdiga+COnlSgspTSEEmLIIB851zeucmhnQ3rGwPYlLIJ3uJOJC6nybTICFpq9AT
+         jRbghH9a23GbT/Brtcm9voCyswA0OIAvk3oWea5cq4SNq480J0zPKeHpm2sdppSPhW+8
+         /0JPkyATAZa8OXpNB0ePQqks8jjWwnEWhWhmzVdTS4klK5r8bB6Wz6Fqee6Lf5FSEsGi
+         ZKaAiXmU5O28U261JKx1Nf4k3+LQoLgDVYS07XXOuIaoJua9cwp2PZuJPo3OhSKNr0ns
+         Vvqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=/hH6gOY5Krjw8Rc2Sxt75fVQdHpdQjhafzlD6HdCfVc=;
-        b=fnumQGvn4iLtIRdeysVXfJVMuUaek+5HHmUAzhOmzji2EVk23BJLJFxmC7DzDPS+w5
-         QLpaBHT6WPxgJIgJTvzfs7RCz/6KR/WG1/Td5UNvGNdUwaWvdjRVfTiDI+TTXd4DPrxy
-         i6SFhHTzZFqQLkTsLaLmGSHXBIcXl45jleZf0txEQ+yfi/IWZEWTQZ1OSt2tCdhylaJv
-         B6eHdRIYyWj9EhlK0o8uSuCvpmFwx7ZL7osXAhqE1frgJ5ze2ckaEVBC0af/TjLl5Teq
-         PACbd69sE8Q4R5C0LdKJ8GCm1NgnzAAa1vkO2+jeIN2BxSzi1iIthtYT2PijGE36FFwb
-         p71w==
-X-Gm-Message-State: AOAM532NFE6IOObHUqZW8vj5ZHHWDLMgqGpvQU4/mFvcet1WxMOMpdLA
-        nDPtcaKmS/ER5rnfNkQZ2g4=
-X-Google-Smtp-Source: ABdhPJyhKDP7bQ6iqb8kCTWEN9iCqDKVLP4xB+AE90OA08e7doKGYDxLySzFZ32pdT5LcVqvSNVmZQ==
-X-Received: by 2002:a05:6402:350:: with SMTP id r16mr29860142edw.227.1618997221534;
-        Wed, 21 Apr 2021 02:27:01 -0700 (PDT)
-Received: from [192.168.2.2] (81-204-249-205.fixed.kpn.net. [81.204.249.205])
-        by smtp.gmail.com with ESMTPSA id j9sm2496474eds.71.2021.04.21.02.26.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 21 Apr 2021 02:27:01 -0700 (PDT)
-Subject: Re: [PATCH v1 3/5] dt-bindings: mmc: rockchip-dw-mshc: add
- description for rk3568
-To:     cl@rock-chips.com, heiko@sntech.de
-Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
-        uwe@kleine-koenig.org, mail@david-bauer.net,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com
-References: <20210421065921.23917-1-cl@rock-chips.com>
- <20210421065921.23917-4-cl@rock-chips.com>
-From:   Johan Jonker <jbx6244@gmail.com>
-Message-ID: <7dde9617-9d71-9fdd-6f91-3fc327fa9bc1@gmail.com>
-Date:   Wed, 21 Apr 2021 11:26:58 +0200
-User-Agent: Mozilla/5.0 (X11; Linux i686; rv:68.0) Gecko/20100101
- Thunderbird/68.11.0
+        bh=fBQWyNtRNzkXZ2Gc9WUvzsz7njLiu60umO7wwJKluZY=;
+        b=Lw857m4sbuE7iCxwRPfQL8vDCKrh9cMKvn+XMmef5k10YMgJKg3y7wnsqh/sOZDq4E
+         3k1FRBpklB+8SDH6mP1/HLSK/+vXHuk8qqurowSuFEgTzF9gYmKnrm+pq1MY3Ev0ECrG
+         7nQR5umL8r+cwC//9FRpsD1p1u7otMcUpPoxSfC9gzJZlEfeBe2SQoNtXaV9NzrE35Wa
+         S1FyQbGwITL5q15Ue/N778bszR9amJp20/n4OOnHImKevRDwXGxPFJM7JBE3VuVxaRoK
+         T10mG1FpCyfPSeroiEATSd+hpwOW6IpOW+aKzmPTABK469zcrH5rgCQ/yeb+cRq5ifeb
+         b7rw==
+X-Gm-Message-State: AOAM532OC/BzQe5xYuKCCq4pEduLtI6DMtIh6DR4SG+o780M5CeijfS4
+        MwRh19FQjGfKVw+O6WTo0FE4MaNLaTP0+VBf
+X-Google-Smtp-Source: ABdhPJy2QAMm2KR9a2HuLbV6o3dBB1eV4thW4JJzL9UYl4tSBGf5+jl5vFKnquBcNTYNJBkExFvAfQ==
+X-Received: by 2002:a2e:7817:: with SMTP id t23mr17354186ljc.240.1619001125567;
+        Wed, 21 Apr 2021 03:32:05 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-129-234.NA.cust.bahnhof.se. [155.4.129.234])
+        by smtp.gmail.com with ESMTPSA id u13sm170603lfg.139.2021.04.21.03.32.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 Apr 2021 03:32:04 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 0/4] mmc: core: Read/parse SD function extension registers
+Date:   Wed, 21 Apr 2021 12:31:50 +0200
+Message-Id: <20210421103154.169410-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-In-Reply-To: <20210421065921.23917-4-cl@rock-chips.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/21/21 8:59 AM, cl@rock-chips.com wrote:
-> From: Liang Chen <cl@rock-chips.com>
-> 
-> add "rockchip,rk3568-dwcmshc", "snps,dwcmshc-sdhci" for mmc nodes on
-> a rk3568 platform to rockchip-dw-mshc.yaml.
-> 
-> Signed-off-by: Liang Chen <cl@rock-chips.com>
-> ---
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index 3762f1c8de96..2a6c1cee4887 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -27,6 +27,8 @@ properties:
->        - const: rockchip,rk2928-dw-mshc
->        # for Rockchip RK3288
->        - const: rockchip,rk3288-dw-mshc
+In the SD spec v4.x the SD function extension registers were introduced,
+together with a new set of commands (CMD48/49 and CMD58/59) to read and write
+to them.
 
-> +      # for Rockchip RK3568
-> +      - const: rockchip,rk3568-dwcmshc
+Moreover, in v4.x a new standard function for power management features were
+added, while in v6.x a new standard function for performance enhancements
+features were added.
 
-Remove.
-This would create two descriptions.
-"rockchip,rk3568-dwcmshc"
-"rockchip,rk3568-dwcmshc", "snps,dwcmshc-sdhci"
+This series doesn't implement the complete support for any of the new
+power/perf features, but starts out by reading and parsing the new registers
+and stores the information in the struct mmc_card about what features the SD
+card supports.
 
->        - items:
->            - enum:
+Note that, there are no HW updates need for the host to support reading/parsing
+of the these new SD registers.
 
->              # for Rockchip PX30
+Tested with a 64GB Sandisk Extreme PRO UHS-I A2 card. Additional tests and
+reviews are of course greatly appreciated.
 
-Remove comments.
+Kind regards
+Ulf Hansson
 
-> @@ -41,6 +43,8 @@ properties:
->                - rockchip,rk3328-dw-mshc
 
->              # for Rockchip RK3368
+Ulf Hansson (4):
+  mmc: core: Parse the SD SCR register for support of CMD48/49 and
+    CMD58/59
+  mmc: core: Prepare mmc_send_cxd_data() to be used for CMD48 for SD
+    cards
+  mmc: core: Read the SD function extension registers for power
+    management
+  mmc: core: Read performance enhancements registers for SD cards
 
-Remove comments.
+ drivers/mmc/core/mmc_ops.c |  11 +-
+ drivers/mmc/core/mmc_ops.h |   2 +
+ drivers/mmc/core/sd.c      | 222 ++++++++++++++++++++++++++++++++++++-
+ include/linux/mmc/card.h   |  21 ++++
+ include/linux/mmc/sd.h     |   3 +
+ 5 files changed, 252 insertions(+), 7 deletions(-)
 
->                - rockchip,rk3368-dw-mshc
-
-> +            # for Rockchip RK3568
-
-Maybe remove the "#" comments in this enum part too.
-This was one of the first Rockchip documents that was converted, but is
-not really needed, as it both mentions the soc name.
-
-> +              - rockchip,rk3568-dw-mshc
-
-Sort this below rockchip,rk3399-dw-mshc
-
->              # for Rockchip RK3399
-
-Remove comments.
->                - rockchip,rk3399-dw-mshc
-
->              # for Rockchip RV1108
-
-Remove comments.
-
-> 
+-- 
+2.25.1
 
