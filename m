@@ -2,176 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0179AC433ED
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Apr 2021 07:02:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EBE1C433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Apr 2021 08:00:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B069961445
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Apr 2021 07:02:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F1957611C2
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Apr 2021 08:00:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240524AbhDWHDA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Apr 2021 03:03:00 -0400
-Received: from de-smtp-1.mimecast.com ([62.140.10.21]:49125 "EHLO
-        de-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229456AbhDWHDA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Apr 2021 03:03:00 -0400
-X-Greylist: delayed 63440 seconds by postgrey-1.27 at vger.kernel.org; Fri, 23 Apr 2021 03:02:59 EDT
-Received: from GBR01-CWL-obe.outbound.protection.outlook.com
- (mail-cwlgbr01lp2052.outbound.protection.outlook.com [104.47.20.52]) (Using
- TLS) by relay.mimecast.com with ESMTP id de-mta-6-CNr2JSzWMFO53KZdK8lLYg-1;
- Fri, 23 Apr 2021 09:02:21 +0200
-X-MC-Unique: CNr2JSzWMFO53KZdK8lLYg-1
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
- by CWLP265MB2244.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:61::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4042.24; Fri, 23 Apr
- 2021 07:02:20 +0000
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::a91f:361d:5554:3958]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::a91f:361d:5554:3958%5]) with mapi id 15.20.4042.024; Fri, 23 Apr 2021
- 07:02:20 +0000
-From:   =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>
-To:     Shawn Lin <shawn.lin@rock-chips.com>
-CC:     "pali@kernel.org" <pali@kernel.org>,
-        "huyue2@yulong.com" <huyue2@yulong.com>,
-        "tiantao6@hisilicon.com" <tiantao6@hisilicon.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Subject: =?utf-8?B?UmU6IFtQQVRDSF0gbW1jOiBlbmFibGUgVUhTIHZvbHRhZ2Ugc3dpdGNoIGZv?=
- =?utf-8?B?ciBTRFNDIGlmIHN1cHBvcnRlZOOAkOivt+azqOaEj++8jOmCruS7tueUsWxp?=
- =?utf-8?B?bnV4LW1tYy1vd25lckB2Z2VyLmtlcm5lbC5vcmfku6Plj5HjgJE=?=
-Thread-Topic: =?utf-8?B?W1BBVENIXSBtbWM6IGVuYWJsZSBVSFMgdm9sdGFnZSBzd2l0Y2ggZm9yIFNE?=
- =?utf-8?B?U0MgaWYgc3VwcG9ydGVk44CQ6K+35rOo5oSP77yM6YKu5Lu255SxbGludXgt?=
- =?utf-8?B?bW1jLW93bmVyQHZnZXIua2VybmVsLm9yZ+S7o+WPkeOAkQ==?=
-Thread-Index: AQHXN+FTXUcmKL1cg0aJQqpoaGswk6rBpbamgAAEsACAAADN5w==
-Date:   Fri, 23 Apr 2021 07:02:20 +0000
-Message-ID: <CWXP265MB26807BB4A57D0CD3B2CAC4D2C4459@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-References: <CWXP265MB2680766F673A99D2F296B878C4469@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
- <35677467-4ccd-9eae-3800-2bc7597cfa0f@rock-chips.com>
- <CWXP265MB2680E0D998AF13C041D18859C4459@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<61bea021-2fe7-4f1e-6eef-4a5a9a0233c9@rock-chips.com>
-In-Reply-To: <61bea021-2fe7-4f1e-6eef-4a5a9a0233c9@rock-chips.com>
-Accept-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [185.80.168.10]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 1ac32431-0e0e-43e8-d3df-08d90625bd4c
-x-ms-traffictypediagnostic: CWLP265MB2244:
-x-microsoft-antispam-prvs: <CWLP265MB224469E9342A3947B8E2A126C4459@CWLP265MB2244.GBRP265.PROD.OUTLOOK.COM>
-x-ms-oob-tlc-oobclassifiers: OLM:5236
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0
-x-microsoft-antispam-message-info: scewZrhENHNDyUhThJVXsaVFueXaAnZxKZciOTDvnobWd6eqZWFGaTW46aRioLxbouIgH9W+3LWAyUNtrhx1Fk+CqcmdgSs/POpoloT7/z1Z3PLjZZ1yvfASRLih14mBVB8yZ+volat3Btf1U1idi79u82djvoaBpVcM41oSWJmmsQURNBxBid4VpetRM/YL+4vPqsxqobS8rAd6TEvB+frQUCdldXzNrVrc/oTPaUqxYgad/vsWzTovSgxk95nGqsmCgyaZL/2XtsEm+J2WA39KpD7gsEeOVZCvpWxTUvmoAvATzTtrgqgY0wQy+4FmsedPpXHXTflS0k/RCZVRoAEa+ggZTPTVDYXmtqJX90O9nje3dalzr8VISda5WhIyXMEl+eDrRW+XoryT3x/jlDm/gd8yL/LtbEGTHGpwyh7sGjbyUo1AiVRdsnA+ENIvTSUjRDiLLGoxwUYKoie5vBJ71pUc6XEfv9mz20/vIBs3dvhM9CsgyOUKjM90dWjK7xUctzBwNzWaXc2WfU3DfjDlhXKi0unTlNQtWPynC+WqGmzTqTNCZb8eT/PeJw6f7fEoMjRSVKjKgXSyFh7llHbHM3hJqcf/0yxakJZWhY3mFbCKXkSugD3wfSW2Qv713djvybASCsSEhdo/vSXo2O83VwjMBno4sB5+Xl8okxT0nprkGtCJi5B3kA+OFczd
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(136003)(39830400003)(396003)(366004)(346002)(376002)(85202003)(54906003)(6916009)(316002)(85182001)(6506007)(83380400001)(2906002)(224303003)(71200400001)(55016002)(86362001)(53546011)(33656002)(9686003)(7696005)(66574015)(38100700002)(122000001)(52536014)(4326008)(26005)(186003)(66446008)(5660300002)(478600001)(64756008)(8936002)(66946007)(66556008)(76116006)(91956017)(66476007)(966005);DIR:OUT;SFP:1101
-x-ms-exchange-antispam-messagedata: =?utf-8?B?QTg2akFXbXNQUzFhbTAxQURUUjV2ekwwaDJsYUpVM3dZVTJITSt4NkxYVWNJ?=
- =?utf-8?B?NEpEcWlkTXdnNnUxNnZYVG40L3ZzTjI3VHB2NmZxbk5sR2F4TDFWcFdpL25l?=
- =?utf-8?B?WHFBVW83dU5YZlB1bVNSMjdVTURQRTd0V0dLNG1BaHlnczZ1ZXVjM0d2cHJh?=
- =?utf-8?B?U1hpSE5HK3BuVEZsRjZaRmFQWExHYUN5UEhrQjFyUk9JSTZKdU0vTEo4VG1D?=
- =?utf-8?B?ZStzMGxIOVhmSC9pd2dJRHNSL2R4VjZpbXpxbmNZN21kS05idkhNeWY5RE5D?=
- =?utf-8?B?SDJXc3dtUVB5U0VsejZQdW4xcTBwTURCcFVEd3g1dzBrQnZMdy8yQ2lwcm9C?=
- =?utf-8?B?c2NzeG0yU3p5VWVuUGUraElrQVMvaERab093VkxhdWpEbXpXU3Jjd3d3bTFN?=
- =?utf-8?B?YlJ3cmhOd0Z1VXgrVjNYNGVwUk03RVVtb2lneGViMEE5VlFlYUhqK21qWTVu?=
- =?utf-8?B?YzdheUFnKzNxZU0vNHJ6eG1sUlJwYW1QMHU2bGZ2eHhYZ3JNVE1XRXU1UFlw?=
- =?utf-8?B?NGMvR0VVSHN3NXJOZGZ0OEx3ME0rTDVEdkNnbW00SjQvak1UZGk5dVhWaTJI?=
- =?utf-8?B?cXNwTWxxMDRRTEY3Q2FVMVBRbXhZOGVwVURGNWphNHd4Ulk0c0dUS1F6UW90?=
- =?utf-8?B?bWVFV2NnNlBmcWF1REd3SEk5L2x4VTR1aHdGMHNqd1ZVdHBEa0JwY2plNzZ0?=
- =?utf-8?B?ek1hdFNqN3dONXVaSE1VMFQ5MDZndWcwTUhBbjVEUk1lU2xvTlRBVUJKUEZD?=
- =?utf-8?B?bDQ4YUoxWU00SU1TczRiRUs4UVplYnk4bmpDRVJEVXJYU3drMUlTNnlLMFhl?=
- =?utf-8?B?WTVBdnZycnh4aUU5dlgxSWRqa3FvUjhEMnZuWFp3Sm9jeUhNajU4cHVYQzB0?=
- =?utf-8?B?UnZhN3VQYkdYT1Y3blJmaE5kNVhBaS82QUJFdnVGMExkUjF5TzZ2WnpZbDFo?=
- =?utf-8?B?Zk1IK0FEZ21TdlJEakt5UFd1TGN6c1JDM3dvczFoYWV0azlWYmFhZk4rY3Fx?=
- =?utf-8?B?d3E5aG5WSHJ6SmFFcUh2anhHcnlBd0pNS3gyRnFZNm5hK1NGdURENTNlalND?=
- =?utf-8?B?YlJFUk5FZU10RWc3YUZac1Y1WmxjKzg2U1VPTThQQ3pUMm9ZaUIyUE9DSjln?=
- =?utf-8?B?cmNVMVhTMU55WmpJY0F2eUtuMjVuZFlHajNUcVdYaENRUEpFNm5qYVArbmY0?=
- =?utf-8?B?aWMrd3lVdXhINFJJTVkvMnl0WWplS3VDNlhXSEhrenVHaGxhZ1B3ak1sd28w?=
- =?utf-8?B?RyttK3RkczVLVzd4dnBQMllZY082emhOQWlXbGtoclN5QjErdUpxd3dsWG1k?=
- =?utf-8?B?SVFqcWJmV2RMNWJhSmM0dFVjUVc4TXRKdGthcmdCOW53ZVJkbjJxM05hNG1l?=
- =?utf-8?B?UWZRcmxWcHFIM2RJWjlhK01FQnhvRTUrYWJBSFFlaGVHd2dpVmlEckRaNEZV?=
- =?utf-8?B?L0FtNFNHWlRtTkhoVXJTNjdLU1dNaWJaYmJiNVk5M3lzQmFJQ3Z1bk1KZXdu?=
- =?utf-8?B?RWdPOVlLKy9ZcHRBeE41b3pBZVZmaHIvb3VENlY5YzhHZm5WZnJMVFNmaVN3?=
- =?utf-8?B?ZEw1REhzb20yaC9JVm1Zd0dXR3RBMjFSTXUrMTlxVllnL0xFU2E2UVNmS1BM?=
- =?utf-8?B?d2g2eHd0Z2FnbHBIRmtHeXQ0Y3BlTTJ1S0FWY3F5Vm5xbEZLekp5Q29udWZz?=
- =?utf-8?B?OWpmUnF2dXJvZTdGWVlUb05SUW8vV3lIT1ZydVNrS3JCYUZpcVdjYVRtWitK?=
- =?utf-8?Q?XnPkDAh2UyjV5HaUGQ=3D?=
-x-ms-exchange-transport-forked: True
+        id S229982AbhDWIAi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Apr 2021 04:00:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40992 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229456AbhDWIAh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Apr 2021 04:00:37 -0400
+Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52C8FC061574
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Apr 2021 01:00:01 -0700 (PDT)
+Received: by mail-vs1-xe33.google.com with SMTP id u22so13249104vsu.6
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Apr 2021 01:00:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=pmtAlemk9SkQiMZDpYGCeEcDtc4HAQA190oHucpZ6SI=;
+        b=GxfOAh/M/OMPoZSX6vx3Y/rchiyiDt/hPaZ5VKds+a9vdawKMk+Hmy5u/asG8VI3LO
+         we3/vg/JR9S0cIilK4a4sOuOE6wjMP/nDaQJkB1m/icFjhCxVvOcUd5ch0mrAEIMbpZz
+         vtoZdDvHo5JeD6bmQT03VXdw4A+iSH4q5BRQWzPEtSy79W2Sixw4baXFX/jHtnoGdrit
+         G+y8ubozgRrzmU7v22jIkAqlNIVmnfXrWvQf+AkAEX/YjqjPtnhvaXQLK163f8NG8i1j
+         50EqzRglaKnOArkqsYhHouaDe48OxH4koVEZadnoa7fPuGnOj1S3C6NUq8i4gy7I0x30
+         SS8g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=pmtAlemk9SkQiMZDpYGCeEcDtc4HAQA190oHucpZ6SI=;
+        b=Fz70wNZX8aZh7aqjsZKTEyK4Y1geUab1nUW1AlLuMznTRulYGxAWt3QuimP4DX3Bxr
+         5qG7MokD4qnM6vTHKIXSECHnQwN5GPjDLi0xy8wEHV8YAvPYN5fKUzJnMB/qUOOMBgkw
+         vkGq1d9pk+p6w7p6cDdFTJMum2kNjyyl5gwhZ+4ZL9y/fsCb4LzBQvrRdrFGkMi9a0MJ
+         F1W6zDFn+/MAKs2ycw1k3fDFD0U/wHMVBlSKB1AE7UKhApi5vzaK920KAtbZSC7mPsa6
+         spjl2tLFFlzBMGDVD/OkjTmnYJhvfrEA+5ijyj6c2AD8N30VnTnG5zEbrf8umGjp1zFJ
+         6eSw==
+X-Gm-Message-State: AOAM531qdrJt59LplcBWm3DsCF13jaKCFQA7ukKhGZhFm91MOQd+o/PF
+        LTPhMg08RhEibW8w33W9huV2XHiADnvWbcbfNfnh8g==
+X-Google-Smtp-Source: ABdhPJw1eb9lAuquyTjGTAeDhOqfXxVOUgDPREXGno3kNAY+lV6q3CImbRpUTYs6UqoM7kV4bUn3Ho8EuYgbNwIiYy8=
+X-Received: by 2002:a67:e902:: with SMTP id c2mr2022417vso.42.1619164800544;
+ Fri, 23 Apr 2021 01:00:00 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: hyperstone.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: 1ac32431-0e0e-43e8-d3df-08d90625bd4c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Apr 2021 07:02:20.8523
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: cLRIjgcWoVCacg//+1kCecY+K1iv/yuGuaMUM3aDGMVhW58rGg8GZUkBg441gyBLH+MBtpZ4KyqB5LDxLf3mDQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWLP265MB2244
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: hyperstone.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: base64
+References: <20210421135215.3414589-1-arnd@kernel.org>
+In-Reply-To: <20210421135215.3414589-1-arnd@kernel.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 23 Apr 2021 09:59:24 +0200
+Message-ID: <CAPDyKFqy_yqYNjBykv7L3Cbs_bRh78O4tQdf-8+W08yRzyFNOA@mail.gmail.com>
+Subject: Re: [PATCH] memstick: r592: ignore kfifo_out() return code again
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, Arnd Bergmann <arnd@arndb.de>,
+        Nathan Chancellor <nathan@kernel.org>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Jing Xiangfeng <jingxiangfeng@huawei.com>,
+        Jiapeng Chong <jiapeng.chong@linux.alibaba.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        clang-built-linux@googlegroups.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-QXMgSSBzYWlkIEkgZG8gbm90IG93biB0aGlzIHBhcnRpY3VsYXIgR29vZHJhbSAyR0IgcFNMQyBk
-ZXZpY2UsCmJ1dCB0aGUgcHJvZHVjdCBpbmZvcm1hdGlvbiBzaGVldCBwZXJmZWN0bHkgaWxsdXN0
-cmF0ZXMgbXkgcG9pbnQ6Cmh0dHBzOi8vd3d3LnRtZS5ldS9Eb2N1bWVudC83M2RiYzEyMjE2MTlj
-NjI3YzUyYmY4ZGQzNTg1OWU1NS9wU0xDJTIwU0QlMjBpbmR1c3RyaWFsJTIwR29sZC1EaWFtb25k
-LkVOLnBkZgooUGFnZSAxMCkKVGhleSBjbGFpbSB1cCB0byA5ME1CL3MgZm9yIGV2ZXJ5dGhpbmcg
-U0RIQywgYnV0IGZvciAyR0IgdGhleSBvbmx5CmNsYWltIDIwTUIvcyBhbmQgTm9uLVVIUyBtb2Rl
-LgpTbyBpZiB0aGUgZmlybXdhcmUgd2FzIG5vdCBzcGVjaWZpY2FsbHkgYnVpbHQgd2l0aG91dCBy
-ZXBvcnRpbmcgYW55IFVIUwpzdXBwb3J0LCBqdXN0IGZvciB0aGUgMkdCIHZlcnNpb24uCkJ1dCB0
-aGVyZSBhcmUgcXVpdGUgc29tZSBTTEMgZGV2aWNlcyB3aXRoIDJHQiB0aGF0IGNsYWltIG92ZXIg
-MjVNQi9zLAp3aXRob3V0IG1lbnRpb25pbmcgVUhTLUkgc3BlY2lmaWNhbGx5LiBCdXQgY2xlYXJs
-eSwgZWl0aGVyIHRoZXkgYXJlIGx5aW5nLApvciBoYXZlIHRoaXMgbm9uLXN0YW5kYXJkIFNEU0Mg
-VUhTIHN1cHBvcnQuCgpGcm9tOiBTaGF3biBMaW4gPHNoYXduLmxpbkByb2NrLWNoaXBzLmNvbT4K
-U2VudDogRnJpZGF5LCBBcHJpbCAyMywgMjAyMSA4OjUxIEFNClRvOiBDaHJpc3RpYW4gTMO2aGxl
-IDxDTG9laGxlQGh5cGVyc3RvbmUuY29tPgpDYzogc2hhd24ubGluQHJvY2stY2hpcHMuY29tIDxz
-aGF3bi5saW5Acm9jay1jaGlwcy5jb20+OyBwYWxpQGtlcm5lbC5vcmcgPHBhbGlAa2VybmVsLm9y
-Zz47IGh1eXVlMkB5dWxvbmcuY29tIDxodXl1ZTJAeXVsb25nLmNvbT47IHRpYW50YW82QGhpc2ls
-aWNvbi5jb20gPHRpYW50YW82QGhpc2lsaWNvbi5jb20+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwu
-b3JnIDxsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnPjsgbGludXgta2VybmVsQHZnZXIua2VybmVs
-Lm9yZyA8bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZz47IHVsZi5oYW5zc29uQGxpbmFyby5v
-cmcgPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+ClN1YmplY3Q6IFJlOiBbUEFUQ0hdIG1tYzogZW5h
-YmxlIFVIUyB2b2x0YWdlIHN3aXRjaCBmb3IgU0RTQyBpZiBzdXBwb3J0ZWTjgJDor7fms6jmhI/v
-vIzpgq7ku7bnlLFsaW51eC1tbWMtb3duZXJAdmdlci5rZXJuZWwub3Jn5Luj5Y+R44CRIArCoApP
-biAyMDIxLzQvMjMgMTQ6MzgsIENocmlzdGlhbiBMw7ZobGUgd3JvdGU6Cj4gQ2xhaW1pbmcgVUhT
-LUkgc3VwcG9ydCB3aXRoIFNEU0MgaXMgcHJldHR5IHJhcmUsIGZvciBvYnZpb3VzIHJlYXNvbnMg
-KG5hbWVseSB0aGV5IGFyZSBub24tc3RhbmRhcmQsIHNvIGl0J3MgYSBnYW1ibGUgaWYgYSBob3N0
-IG1ha2VzIHVzZSBvZiBpdCksIGJ1dCBoZXJlIHlvdSBnbzoKPiBodHRwczovL2RlLnJzLW9ubGlu
-ZS5jb20vd2ViL3AvbWljcm8tc2Qta2FydGVuLzg3NDM5MTAvCj4gKHNvcnJ5IGZvciB0aGUgZ2Vy
-bWFuLCB0aGUgc2l0ZSBoYXMgYSBlbi4gc3VicGFnZSwgYnV0IGl0J3MgY2VydGlmaWNhdGUgc2Vl
-bSB1bnRydXN0ZWQuKQo+IFRoZSBtb3JlIGxpa2VseSBjYXNlIGlzIHRoYXQgdGhleSBkbyBub3Qg
-YWR2ZXJ0aXNlIFVIUy1JIHRvIGN1c3RvbWVycywKPiBidXQgdGhlIGNhcmQgd2lsbCBzaG93IHN1
-cHBvcnQgdG8gdGhlIGhvc3QuCj4gTGV0J3MgbG9vayBhdCB0aGlzIHByb2R1Y3QsIGp1c3QgYXMg
-YW4gZXhhbXBsZS4KPiBodHRwczovL3d3dy50bWUuZXUvaHRtbC9FTi9nb29kcmFtLWluZHVzdHJp
-YWwtaW5kdXN0cmlhbC1zZC1zZC1taWNyby1tZW1vcnktY2FyZHMvcmFta2FfMTUyNDJfRU5fcGVs
-bnkuaHRtbAo+IFRoZXkgcHJvdmlkZSBhbiBNTEMgYW5kIHBTTEMgdmVyc2lvbiBvZiBlYWNoIGRl
-dmljZSwgd2l0aCBoYWxmIHRoZSBjYXBhY2l0eSBuYXR1cmFsbHkuCj4gVGhlIDRHQiBNTEMgY2xh
-aW1zIFVIUy1JIHN1cHBvcnQsIHRoZSAyR0IgcFNMQyBpcyB2ZXJ5IGxpa2VseSB0byBiZSB0aGUg
-c2FtZSBjb250cm9sbGVyLAo+IGl0IG9ubHkgY2xhaW1zIENsYXNzIDYuCj4gU28gZWl0aGVyIHRo
-ZXkgc3BlY2lmaWNhbGx5IGNoYW5nZWQgdGhlIGZpcm13YXJlIHRvIHJlbW92ZSBhbnkgVUhTIHN1
-cHBvcnQgaW5kaWNhdGlvbiwKPiBvciwgbW9yZSBsaWtlbHkgSU1PLCB0aGUgY2FyZCBzdGlsbCBy
-ZXBvcnRzIFVIUyBzdXBwb3J0IHRvIHRoZSBob3N0Lgo+IFN1Y2ggYSBjYXJkIHdvdWxkIGJlbmVm
-aXQgZnJvbSB0aGlzIHBhdGNoLgo+IAo+IERpc2NsYWltZXI6IEkgZG8gbm90IG93biB0aGUgcHJv
-ZHVjdCBhbmQgaGF2ZSBub3QgY29uZmlybWVkIHRoaXMgZGV2aWNlIGluIGFueSB3YXksCj4gYnV0
-IEkgaGF2ZSBzZWVuIFVIUyBzdXBwb3J0IG9uIG90aGVyIGRldmljZXMgdGhhdCBkbyBub3QgYWR2
-ZXJ0aXNlIGl0IGZvciB0aGVpcgo+IFNEU0MgdmVyc2lvbnMuCj4gSWYgdGhlIG1haWxpbmcgbGlz
-dCB3b3VsZCBiZSBpbnRlcmVzdGVkLCBJIGNhbiB0cnkgdG8gYWNxdWlyZSBzdWNoIGRldmljZXMs
-IGxpc3RlZCBpbgo+IHB1YmxpYyBvcGVuIHN0b3Jlcy4gTW9kZXJuLCBwb3RlbnRpYWxseSBVSFMg
-c3VwcG9ydGluZyBjYXJkcy4gYXJlLAo+IGFzIG1lbnRpb25lZCBpbiB0aGUgaW5pdGlhbCBNYWls
-LCBvZnRlbiBTTEMgb3IgcFNMQyBhbmQgb2Z0ZW4gYXJlIG1hZGUgb24KPiBhIGN1c3RvbWVycyBy
-ZXF1ZXN0Lgo+IAo+IAoKVGhhbmtzIGZvciBzaGFyaW5nIHRoZXNlLCBidXQgZnJvbSB0aGUgZGF0
-YXNoZWV0cywgdGhlc2UgU0RTQyBjYXJkcwpjbGFpbXMgdGhlaXIgdGhyb3VnaHQgdXAgdG8gMjBN
-Qi9zLiBTbywgSSBndWVzcyBoaWdocHNlZWQgbW9kZSBpcyBlbm91Z2gKZm9yIHRoZW0/IHdoYXQg
-ZG8geW91IHRoaW5rPwoNCkh5cGVyc3RvbmUgR21iSCB8IExpbmUtRWlkLVN0cmFzc2UgMyB8IDc4
-NDY3IEtvbnN0YW56DQpNYW5hZ2luZyBEaXJlY3RvcnM6IERyLiBKYW4gUGV0ZXIgQmVybnMuDQpD
-b21tZXJjaWFsIHJlZ2lzdGVyIG9mIGxvY2FsIGNvdXJ0czogRnJlaWJ1cmcgSFJCMzgxNzgyDQo=
+On Wed, 21 Apr 2021 at 15:52, Arnd Bergmann <arnd@kernel.org> wrote:
+>
+> From: Arnd Bergmann <arnd@arndb.de>
+>
+> A minor cleanup to address a clang warning removed an assigned
+> but unused local variable, but this now caused a gcc warning as
+> kfifo_out() is annotated to require checking its return code:
+>
+> In file included from drivers/memstick/host/r592.h:13,
+>                  from drivers/memstick/host/r592.c:21:
+> drivers/memstick/host/r592.c: In function 'r592_flush_fifo_write':
+> include/linux/kfifo.h:588:1: error: ignoring return value of '__kfifo_uint_must_check_helper' declared with attribute 'warn_unused_result' [-Werror=unused-result]
+>   588 | __kfifo_uint_must_check_helper( \
+>       | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   589 | ({ \
+>       | ~~~~
+>   590 |         typeof((fifo) + 1) __tmp = (fifo); \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   591 |         typeof(__tmp->ptr) __buf = (buf); \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   592 |         unsigned long __n = (n); \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   593 |         const size_t __recsize = sizeof(*__tmp->rectype); \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   594 |         struct __kfifo *__kfifo = &__tmp->kfifo; \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   595 |         (__recsize) ?\
+>       |         ~~~~~~~~~~~~~~
+>   596 |         __kfifo_out_r(__kfifo, __buf, __n, __recsize) : \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   597 |         __kfifo_out(__kfifo, __buf, __n); \
+>       |         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+>   598 | }) \
+>       | ~~~~
+>   599 | )
+>       | ~
+> drivers/memstick/host/r592.c:367:9: note: in expansion of macro 'kfifo_out'
+>   367 |         kfifo_out(&dev->pio_fifo, buffer, 4);
+>       |         ^~~~~~~~~
+>
+> The value was never checked here, and the purpose of the function
+> is only to flush the contents, so restore the old behavior but
+> add a cast to void and a comment, which hopefully warns with neither
+> gcc nor clang now.
+>
+> If anyone has an idea for how to fix it without ignoring the return
+> code, that is probably better.
 
+Perhaps, if you can't do anything with return value, why is kfifo_out
+declared like this?
+
+>
+> Fixes: 4b00ed3c5072 ("memstick: r592: remove unused variable")
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/memstick/host/r592.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+> index 026fadaa1d5d..615a83782e55 100644
+> --- a/drivers/memstick/host/r592.c
+> +++ b/drivers/memstick/host/r592.c
+> @@ -359,12 +359,15 @@ static void r592_write_fifo_pio(struct r592_device *dev,
+>  /* Flushes the temporary FIFO used to make aligned DWORD writes */
+>  static void r592_flush_fifo_write(struct r592_device *dev)
+>  {
+> +       int ret;
+>         u8 buffer[4] = { 0 };
+>
+>         if (kfifo_is_empty(&dev->pio_fifo))
+>                 return;
+>
+> -       kfifo_out(&dev->pio_fifo, buffer, 4);
+> +       ret = kfifo_out(&dev->pio_fifo, buffer, 4);
+> +       /* intentionally ignore __must_check return code */
+> +       (void)ret;
+>         r592_write_reg_raw_be(dev, R592_FIFO_PIO, *(u32 *)buffer);
+>  }
+>
+> --
+> 2.29.2
+>
