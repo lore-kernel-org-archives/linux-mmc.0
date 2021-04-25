@@ -7,21 +7,21 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FAD2C43603
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 194C9C4361A
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E5DA561288
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F3F2C611BD
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229906AbhDYJnP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 25 Apr 2021 05:43:15 -0400
-Received: from lucky1.263xmail.com ([211.157.147.131]:35250 "EHLO
+        id S229960AbhDYJnR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Apr 2021 05:43:17 -0400
+Received: from lucky1.263xmail.com ([211.157.147.130]:32958 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229668AbhDYJnO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Apr 2021 05:43:14 -0400
+        with ESMTP id S229559AbhDYJnP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Apr 2021 05:43:15 -0400
 Received: from localhost (unknown [192.168.167.225])
-        by lucky1.263xmail.com (Postfix) with ESMTP id D1686BA17D;
-        Sun, 25 Apr 2021 17:42:29 +0800 (CST)
+        by lucky1.263xmail.com (Postfix) with ESMTP id 9B4D8D188D;
+        Sun, 25 Apr 2021 17:42:26 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
 X-ADDR-CHECKED4: 1
@@ -29,9 +29,9 @@ X-ANTISPAM-LEVEL: 2
 X-ABS-CHECKED: 0
 Received: from localhost.localdomain (unknown [58.22.7.114])
         by smtp.263.net (postfix) whith ESMTP id P3565T140663333058304S1619343740259115_;
-        Sun, 25 Apr 2021 17:42:29 +0800 (CST)
+        Sun, 25 Apr 2021 17:42:25 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <c564d83e13081dd2f7d1b66cbde91b62>
+X-UNIQUE-TAG: <0283a0a77b3882e71481c7371a03fe2b>
 X-RL-SENDER: cl@rock-chips.com
 X-SENDER: cl@rock-chips.com
 X-LOGIN-NAME: cl@rock-chips.com
@@ -55,9 +55,9 @@ Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
         zhangqing@rock-chips.com, huangtao@rock-chips.com,
         cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
         jamie@jamieiles.com, linux-watchdog@vger.kernel.org
-Subject: [PATCH v2 4/7] dt-bindings: watchdog: dw-wdt: add description for rk3568
-Date:   Sun, 25 Apr 2021 17:42:13 +0800
-Message-Id: <20210425094216.25724-5-cl@rock-chips.com>
+Subject: [PATCH v2 2/7] dt-bindings: serial: snps-dw-apb-uart: add description for rk3568
+Date:   Sun, 25 Apr 2021 17:42:11 +0800
+Message-Id: <20210425094216.25724-3-cl@rock-chips.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210425094216.25724-1-cl@rock-chips.com>
 References: <20210425094216.25724-1-cl@rock-chips.com>
@@ -67,26 +67,26 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Liang Chen <cl@rock-chips.com>
 
-add "rockchip,rk3568-wdt", "snps,dw-wdt" for watchdog nodes on
-a rk3568 platform to snps,dw-wdt.yaml.
+add "rockchip,rk3568-uart", "snps,dw-apb-uart" for uart nodes on
+a rk3568 platform to snps-dw-apb-uart.yaml.
 
 Signed-off-by: Liang Chen <cl@rock-chips.com>
 ---
- Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml | 1 +
+ Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml b/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
-index b58596b1831d..6461eb4f4a27 100644
---- a/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
-+++ b/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
-@@ -27,6 +27,7 @@ properties:
-               - rockchip,rk3328-wdt
-               - rockchip,rk3368-wdt
-               - rockchip,rk3399-wdt
-+              - rockchip,rk3568-wdt
-               - rockchip,rv1108-wdt
-           - const: snps,dw-wdt
- 
+diff --git a/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml b/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml
+index 87ef1e218152..97debbf68748 100644
+--- a/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml
++++ b/Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml
+@@ -31,6 +31,7 @@ properties:
+               - rockchip,rk3328-uart
+               - rockchip,rk3368-uart
+               - rockchip,rk3399-uart
++              - rockchip,rk3568-uart
+               - rockchip,rv1108-uart
+           - const: snps,dw-apb-uart
+       - items:
 -- 
 2.17.1
 
