@@ -2,26 +2,26 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCEBFC43616
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2E53C4363F
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA5DF613E4
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C6E61611BD
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Apr 2021 09:42:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229949AbhDYJnR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 25 Apr 2021 05:43:17 -0400
-Received: from lucky1.263xmail.com ([211.157.147.132]:58844 "EHLO
+        id S229973AbhDYJnS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Apr 2021 05:43:18 -0400
+Received: from lucky1.263xmail.com ([211.157.147.135]:54192 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229849AbhDYJnO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Apr 2021 05:43:14 -0400
+        with ESMTP id S229874AbhDYJnP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Apr 2021 05:43:15 -0400
 Received: from localhost (unknown [192.168.167.225])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 03FCAF345D;
-        Sun, 25 Apr 2021 17:42:28 +0800 (CST)
+        by lucky1.263xmail.com (Postfix) with ESMTP id 3248EAB633;
+        Sun, 25 Apr 2021 17:42:23 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
 X-ADDR-CHECKED4: 1
@@ -29,9 +29,9 @@ X-ANTISPAM-LEVEL: 2
 X-ABS-CHECKED: 0
 Received: from localhost.localdomain (unknown [58.22.7.114])
         by smtp.263.net (postfix) whith ESMTP id P3565T140663333058304S1619343740259115_;
-        Sun, 25 Apr 2021 17:42:27 +0800 (CST)
+        Sun, 25 Apr 2021 17:42:22 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <b34712a409caeea03319e7029cda6d55>
+X-UNIQUE-TAG: <c756feb8cf8e1bf199ae898dc058cfda>
 X-RL-SENDER: cl@rock-chips.com
 X-SENDER: cl@rock-chips.com
 X-LOGIN-NAME: cl@rock-chips.com
@@ -55,53 +55,50 @@ Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
         zhangqing@rock-chips.com, huangtao@rock-chips.com,
         cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
         jamie@jamieiles.com, linux-watchdog@vger.kernel.org
-Subject: [PATCH v2 3/7] dt-bindings: mmc: rockchip-dw-mshc: add description for rk3568
-Date:   Sun, 25 Apr 2021 17:42:12 +0800
-Message-Id: <20210425094216.25724-4-cl@rock-chips.com>
+Subject: [PATCH v2 0/7] arm64: dts: rockchip: add basic dtsi/dts files for RK3568 SoC
+Date:   Sun, 25 Apr 2021 17:42:09 +0800
+Message-Id: <20210425094216.25724-1-cl@rock-chips.com>
 X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210425094216.25724-1-cl@rock-chips.com>
-References: <20210425094216.25724-1-cl@rock-chips.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Liang Chen <cl@rock-chips.com>
 
-add "rockchip,rk3568-dwcmshc", "snps,dwcmshc-sdhci" for mmc nodes on
-a rk3568 platform to rockchip-dw-mshc.yaml.
+v1:
+1. add some dt-bindings for RK3568 devices.
+2. add core dtsi for RK3568 SoC.
+3. add basic dts for RK3568 EVB
 
-Signed-off-by: Liang Chen <cl@rock-chips.com>
----
- .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml        | 9 +--------
- 1 file changed, 1 insertion(+), 8 deletions(-)
+v2:
+1. sort device nodes by some rules.
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-index 3762f1c8de96..eaa3b0ef24f6 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-@@ -29,21 +29,14 @@ properties:
-       - const: rockchip,rk3288-dw-mshc
-       - items:
-           - enum:
--            # for Rockchip PX30
-               - rockchip,px30-dw-mshc
--            # for Rockchip RK3036
-               - rockchip,rk3036-dw-mshc
--            # for Rockchip RK322x
-               - rockchip,rk3228-dw-mshc
--            # for Rockchip RK3308
-               - rockchip,rk3308-dw-mshc
--            # for Rockchip RK3328
-               - rockchip,rk3328-dw-mshc
--            # for Rockchip RK3368
-               - rockchip,rk3368-dw-mshc
--            # for Rockchip RK3399
-               - rockchip,rk3399-dw-mshc
--            # for Rockchip RV1108
-+              - rockchip,rk3568-dw-mshc
-               - rockchip,rv1108-dw-mshc
-           - const: rockchip,rk3288-dw-mshc
- 
+Liang Chen (7):
+  dt-bindings: i2c: i2c-rk3x: add description for rk3568
+  dt-bindings: serial: snps-dw-apb-uart: add description for rk3568
+  dt-bindings: mmc: rockchip-dw-mshc: add description for rk3568
+  dt-bindings: watchdog: dw-wdt: add description for rk3568
+  arm64: dts: rockchip: add generic pinconfig settings used by most
+    Rockchip socs
+  arm64: dts: rockchip: add core dtsi for RK3568 SoC
+  arm64: dts: rockchip: add basic dts for RK3568 EVB
+
+ .../devicetree/bindings/arm/rockchip.yaml     |    5 +
+ .../devicetree/bindings/i2c/i2c-rk3x.yaml     |    1 +
+ .../bindings/mmc/rockchip-dw-mshc.yaml        |    9 +-
+ .../bindings/serial/snps-dw-apb-uart.yaml     |    1 +
+ .../bindings/watchdog/snps,dw-wdt.yaml        |    1 +
+ arch/arm64/boot/dts/rockchip/Makefile         |    1 +
+ .../boot/dts/rockchip/rk3568-evb1-v10.dts     |   80 +
+ .../boot/dts/rockchip/rk3568-pinctrl.dtsi     | 3119 +++++++++++++++++
+ arch/arm64/boot/dts/rockchip/rk3568.dtsi      |  812 +++++
+ .../boot/dts/rockchip/rockchip-pinconf.dtsi   |  345 ++
+ 10 files changed, 4366 insertions(+), 8 deletions(-)
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-pinctrl.dtsi
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3568.dtsi
+ create mode 100644 arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
+
 -- 
 2.17.1
 
