@@ -2,104 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73D20C433ED
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 08:25:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2754FC43461
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 09:21:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 42398610C8
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 08:25:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E2F686100B
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 09:21:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232235AbhDZI0S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Apr 2021 04:26:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50476 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232227AbhDZI0R (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2021 04:26:17 -0400
-Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 328B6C061574;
-        Mon, 26 Apr 2021 01:25:34 -0700 (PDT)
-Received: by mail-pg1-x532.google.com with SMTP id w20so698436pge.13;
-        Mon, 26 Apr 2021 01:25:34 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=jQWKwPGTMFGJm+uWgEIF87JnJjFNAJL/m8Q6ObzH+Yk=;
-        b=YTLVEqNZnFp898icZZIjFJYPF1GwzfEQ2oQbBZUDecL/Zs7+lYJjHRhYQlKttdHbR1
-         JRqITjQR4nTBHUtFNvt2t3SdZ2lvDCeTdZ0SJGM+DNI/KYpZBhTYFRMy2d+4iYp6Txr/
-         o9OlNjYjQL330HE9TVy26wcj9nCpenHBsy7C/PahCeuQE02XjeE/fD54gKI4sbloSBZ6
-         WuQ5rLHkso8g/Wx2up/GgsCXMVjlsb1h7M0rBQhXLyDubpqFdZJCnH/TL42iHPKKUDva
-         QAY0BtYv9Dbnewm6cuvyjTpkg67Oj+9G+iTnikXX15WvAYU+6g7k4IBdWThBTrIZAiHg
-         frCA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=jQWKwPGTMFGJm+uWgEIF87JnJjFNAJL/m8Q6ObzH+Yk=;
-        b=Q0nMAdTQE9XLm6lAiuoepqpcLFkI5e7BUkPGD+9dcA28FSvLrKNrEODuZdh8M7dgNi
-         E9ZKp3MZojlDCIpFtgUvoO+cBDHceOx0QZaDQyg+235R0iuWLhGqHoT1uynrzYciDQEC
-         ATvVLqNlZoIvVyUuOFCglq+dgwUvTWnpi90pcuNWOSqKNz0fJIoJh5eMhiX99I3dWm9B
-         A/XoWgcoxfmn9OyugzSNMMryso2CiUm0NQ7CbZdUbb+pOBLA6dHTUijNuP2S/+gAIx0N
-         Bz4LESj7ABSwqB8CHhmmpsQbsXFRs/GZbK9mNX5cg3bvltObOpEgPix37bOQRA58uUfY
-         mtIQ==
-X-Gm-Message-State: AOAM5323NL/4UpTHDS9KLPLc1o9yumwYi72jw3yJdN7VUoLnWQbjf/R+
-        wVVlSmbqPFKSriHajKjU+7I=
-X-Google-Smtp-Source: ABdhPJzg+FvvaI1gfWjnjrqTCUdrmfoILYPZaaXfOkn59Rn+vg5oqctdgdIKYxmDJjFpODrKYohpxQ==
-X-Received: by 2002:a63:3c59:: with SMTP id i25mr15573515pgn.366.1619425533827;
-        Mon, 26 Apr 2021 01:25:33 -0700 (PDT)
-Received: from soma ([121.99.145.49])
-        by smtp.gmail.com with ESMTPSA id n25sm10558132pff.154.2021.04.26.01.25.29
-        (version=TLS1 cipher=AES128-SHA bits=128/128);
-        Mon, 26 Apr 2021 01:25:33 -0700 (PDT)
-Received: by soma (sSMTP sendmail emulation); Mon, 26 Apr 2021 20:25:26 +1200
-Date:   Mon, 26 Apr 2021 20:25:26 +1200
-From:   Daniel Beer <dlbeer@gmail.com>
-To:     Ben Chuang <benchuanggli@gmail.com>
-Cc:     adrian.hunter@intel.com, ben.chuang@genesyslogic.com.tw,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        ulf.hansson@linaro.org
-Subject: Re: [PATCH] mmc: sdhci-pci-gli: increase 1.8V regulator wait
-Message-ID: <20210426082526.GA16240@nyquist.nev>
-References: <20210424081652.GA16047@nyquist.nev>
- <20210426073251.7726-1-benchuanggli@gmail.com>
+        id S232647AbhDZJWh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Apr 2021 05:22:37 -0400
+Received: from regular1.263xmail.com ([211.150.70.205]:59360 "EHLO
+        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232161AbhDZJWg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2021 05:22:36 -0400
+Received: from localhost (unknown [192.168.167.235])
+        by regular1.263xmail.com (Postfix) with ESMTP id 6A2857D3;
+        Mon, 26 Apr 2021 17:21:37 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-SKE-CHECKED: 1
+X-ABS-CHECKED: 1
+Received: from [172.16.12.151] (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P2752T140649347385088S1619428893484164_;
+        Mon, 26 Apr 2021 17:21:35 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <0b6518d01a4b44141c73aba3d00c4597>
+X-RL-SENDER: cl@rock-chips.com
+X-SENDER: cl@rock-chips.com
+X-LOGIN-NAME: cl@rock-chips.com
+X-FST-TO: linux-watchdog@vger.kernel.org
+X-RCPT-COUNT: 30
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+Cc:     cl@rock-chips.com, heiko@sntech.de, robh+dt@kernel.org,
+        jagan@amarulasolutions.com, wens@csie.org, uwe@kleine-koenig.org,
+        mail@david-bauer.net, jbx6244@gmail.com,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
+        cnsztl@gmail.com, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
+        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
+        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
+        zhangqing@rock-chips.com, huangtao@rock-chips.com,
+        wim@linux-watchdog.org, linux@roeck-us.net, jamie@jamieiles.com,
+        linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH v2 6/7] arm64: dts: rockchip: add core dtsi for RK3568 SoC
+To:     Marc Zyngier <maz@kernel.org>
+References: <20210425094216.25724-1-cl@rock-chips.com>
+ <20210425094439.25895-1-cl@rock-chips.com> <87mttmslni.wl-maz@kernel.org>
+From:   =?UTF-8?B?6ZmI5Lqu?= <cl@rock-chips.com>
+Message-ID: <ee4172da-13a4-2a94-446f-cfdd937574c3@rock-chips.com>
+Date:   Mon, 26 Apr 2021 17:21:33 +0800
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210426073251.7726-1-benchuanggli@gmail.com>
+In-Reply-To: <87mttmslni.wl-maz@kernel.org>
+Content-Type: text/plain; charset=gbk; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 26, 2021 at 03:32:51PM +0800, Ben Chuang wrote:
-> > The driver currently waits 5ms after switching on the 1.8V regulator for
-> > it to become stable. Increasing this to 10ms gets rid of the warning
-> > about stability, but most cards still fail. Increasing it to 20ms gets
-> > some cards working (a 32GB Samsung micro SD works, a 128GB ADATA
-> > doesn't). At 50ms, the ADATA works most of the time, and at 100ms both
-> > cards work reliably.
-> 
-> If it is convenient, can you provide the appearance pictures and product
-> links of these two cards? We want to buy them.
+Hi Marc,
 
-Hi Ben,
+ÔÚ 2021/4/25 ÏÂÎç6:28, Marc Zyngier Ð´µÀ:
+> As I reviewed a previous version of this series, please have the
+> courtesy of cc'ing me on further revisions of this series.
+I am really sorry, i will add you to the cc list on further revisions.
+>
+> On Sun, 25 Apr 2021 10:44:39 +0100,
+> <cl@rock-chips.com> wrote:
+>> From: Liang Chen <cl@rock-chips.com>
+>>
+>> RK3568 is a high-performance and low power quad-core application processor
+>> designed for personal mobile internet device and AIoT equipments. This patch
+>> add basic core dtsi file for it.
+>>
+>> We use scmi_clk for cortex-a55 instead of standard ARMCLK, so that
+>> kernel/uboot/rtos can change cpu clk with the same code in ATF, and we will
+>> enalbe a special high-performacne PLL when high frequency is required. The
+>> smci_clk code is in ATF, and clkid for cpu is 0, as below:
+>>
+>>      cpu0: cpu@0 {
+>>          device_type = "cpu";
+>>          compatible = "arm,cortex-a55";
+>>          reg = <0x0 0x0>;
+>>          clocks = <&scmi_clk 0>;
+>>      };
+>>
+>> Signed-off-by: Liang Chen <cl@rock-chips.com>
+>> ---
+>>   .../boot/dts/rockchip/rk3568-pinctrl.dtsi     | 3119 +++++++++++++++++
+>>   arch/arm64/boot/dts/rockchip/rk3568.dtsi      |  812 +++++
+>>   2 files changed, 3931 insertions(+)
+>>   create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-pinctrl.dtsi
+>>   create mode 100644 arch/arm64/boot/dts/rockchip/rk3568.dtsi
+> [...]
+>
+>> diff --git a/arch/arm64/boot/dts/rockchip/rk3568.dtsi b/arch/arm64/boot/dts/rockchip/rk3568.dtsi
+>> new file mode 100644
+>> index 000000000000..66cb50218ca1
+>> --- /dev/null
+>> +++ b/arch/arm64/boot/dts/rockchip/rk3568.dtsi
+>> @@ -0,0 +1,812 @@
+> [...]
+>
+>> +	timer {
+>> +		compatible = "arm,armv8-timer";
+>> +		interrupts = <GIC_PPI 13 IRQ_TYPE_LEVEL_HIGH>,
+>> +			     <GIC_PPI 14 IRQ_TYPE_LEVEL_HIGH>,
+>> +			     <GIC_PPI 11 IRQ_TYPE_LEVEL_HIGH>,
+>> +			     <GIC_PPI 10 IRQ_TYPE_LEVEL_HIGH>;
+>> +		arm,no-tick-in-suspend;
+> My questions on this property still stand [1].
 
-The first is a Samsung EVO microSDXC 32GB:
+Yes, rk3568 will lose the system counter in suspend mode, we must 
+retrieve system time from RTC.
 
-    https://www.samsung.com/nz/memory-storage/memory-card/evo-plus-microsd-card-95-mbs-sd-adapter-32gb-mb-mc32ga-apc/
+rk3588 will fix this issue.
 
-The second is an ADATA Premier Pro SDXC UHS-I U3 Class 10 (V30S) 128GB:
+>
+>> +	};
+>> +
+>> +	xin24m: xin24m {
+>> +		compatible = "fixed-clock";
+>> +		clock-frequency = <24000000>;
+>> +		clock-output-names = "xin24m";
+>> +		#clock-cells = <0>;
+>> +	};
+>> +
+>> +	xin32k: xin32k {
+>> +		compatible = "fixed-clock";
+>> +		clock-frequency = <32768>;
+>> +		clock-output-names = "xin32k";
+>> +		pinctrl-0 = <&clk32k_out0>;
+>> +		pinctrl-names = "default";
+>> +		#clock-cells = <0>;
+>> +	};
+>> +
+>> +	gic: interrupt-controller@fd400000 {
+>> +		compatible = "arm,gic-v3";
+>> +		reg = <0x0 0xfd400000 0 0x10000>, /* GICD */
+>> +		      <0x0 0xfd460000 0 0xc0000>; /* GICR */
+>> +		interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
+>> +		interrupt-controller;
+>> +		#interrupt-cells = <3>;
+>> +		#address-cells = <2>;
+>> +		#size-cells = <2>;
+>> +		ranges;
+> My request for a full description of the GICA region still stands [1].
+Thanks, i will test MSIs with "mbi-alias", then add relative property in 
+the next version.
+>
+> Thanks,
+>
+> 	M.
+>
+> [1] https://lore.kernel.org/r/87o8e2sm1u.wl-maz@kernel.org
+>
 
-    https://www.adata.com/us/consumer/289
 
-The images on those two pages match what I have in front of me here.
-
-Cheers,
-Daniel
-
--- 
-Daniel Beer <dlbeer@gmail.com> http://dlbeer.co.nz/
-PGP: BA6E 0B26 1F89 246C E3F3  C910 1E58 C43A 160A 553B
