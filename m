@@ -2,173 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2754FC43461
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 09:21:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBF54C433B4
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 09:36:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E2F686100B
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 09:21:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 918C761363
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 09:36:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232647AbhDZJWh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Apr 2021 05:22:37 -0400
-Received: from regular1.263xmail.com ([211.150.70.205]:59360 "EHLO
-        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232161AbhDZJWg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2021 05:22:36 -0400
-Received: from localhost (unknown [192.168.167.235])
-        by regular1.263xmail.com (Postfix) with ESMTP id 6A2857D3;
-        Mon, 26 Apr 2021 17:21:37 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-SKE-CHECKED: 1
-X-ABS-CHECKED: 1
-Received: from [172.16.12.151] (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P2752T140649347385088S1619428893484164_;
-        Mon, 26 Apr 2021 17:21:35 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <0b6518d01a4b44141c73aba3d00c4597>
-X-RL-SENDER: cl@rock-chips.com
-X-SENDER: cl@rock-chips.com
-X-LOGIN-NAME: cl@rock-chips.com
-X-FST-TO: linux-watchdog@vger.kernel.org
-X-RCPT-COUNT: 30
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-Cc:     cl@rock-chips.com, heiko@sntech.de, robh+dt@kernel.org,
-        jagan@amarulasolutions.com, wens@csie.org, uwe@kleine-koenig.org,
-        mail@david-bauer.net, jbx6244@gmail.com,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        wim@linux-watchdog.org, linux@roeck-us.net, jamie@jamieiles.com,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH v2 6/7] arm64: dts: rockchip: add core dtsi for RK3568 SoC
-To:     Marc Zyngier <maz@kernel.org>
-References: <20210425094216.25724-1-cl@rock-chips.com>
- <20210425094439.25895-1-cl@rock-chips.com> <87mttmslni.wl-maz@kernel.org>
-From:   =?UTF-8?B?6ZmI5Lqu?= <cl@rock-chips.com>
-Message-ID: <ee4172da-13a4-2a94-446f-cfdd937574c3@rock-chips.com>
-Date:   Mon, 26 Apr 2021 17:21:33 +0800
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        id S232161AbhDZJhA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Apr 2021 05:37:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38038 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232068AbhDZJg7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2021 05:36:59 -0400
+Received: from mail-ej1-x634.google.com (mail-ej1-x634.google.com [IPv6:2a00:1450:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C196C061574;
+        Mon, 26 Apr 2021 02:36:18 -0700 (PDT)
+Received: by mail-ej1-x634.google.com with SMTP id n21so7221398eji.1;
+        Mon, 26 Apr 2021 02:36:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=z9OfI7Gg8z0z7FNzTAb0WQZ6OZrp5p/pY11xr6JmEak=;
+        b=LtY+4GWa+gPJ2svm57w5ffrD9eqlgxCDKoAEcGY4NSEtNZKaCTYMcIOv/Qj5tq/hju
+         PUpBoPpLl+RMj3WzUmaehVmqEQsdMMaCtArV5P3i3TZekW8c5KhzmjQOz2bd+oateLPK
+         5Xzq1THHEAZdnKqtMGtiPA94T4NEZsjHPdBgLz5/SC2EncFdrsGF6IZU6C/0yyqdiVH0
+         dRQvz08GiQdv6vo6yoxJEqI4tE7FtrBA3S3te1p9naPx+os3Zl8p/U3fcU7fmTqpwH0O
+         bMYi/VFjGCzzpyog4Och8f4/mWPQtrMeZeZGuxNG6DHPElKPtdMRGdtwgnsnfzxq6KUe
+         B5QA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=z9OfI7Gg8z0z7FNzTAb0WQZ6OZrp5p/pY11xr6JmEak=;
+        b=C94S1iNxSgVNVCJIJfyZtSHpiS4fsqK2F08OocPKcOsPVELI5vVJXW1A4szCXlzQIg
+         IgkIn6opwvCWFwN0EQKbqVT8SLo/s557/w8ydORgwwPzYKcTWc/mwmk7a6mL4bi6hDnU
+         c28CNJi3vSpJv/yv5FC+M5DSg1Gj9PYV2AwFTzlVWh3vVTKwWfHR8w5UFD5J4Hs1CaX4
+         fuhWANgVZdG6c4Qpjv6n9HEuIWtvDwfhFFXcV2jKy7aMxnwhmnGqmiKKzd67nfpKxbOE
+         jBYieFw8qc3zPknd5lRzHvu+1gDFte/b3txdxFuULf6PrnWOHZ5oejDqHjBKZJQ9+m3q
+         fPog==
+X-Gm-Message-State: AOAM533d6prQzqTcC0j724ygwboOoBdKLU7wi+jRFgJ/5GZ3J/gEPZWG
+        scXyt+8iQmXCVIe1qDhRfvg=
+X-Google-Smtp-Source: ABdhPJxnCx9QHe/B4XTJXqdM2K58vPYypO29YzrRVPEdHIir1aXHX2bUyGXZ/K62pLLHSwikGCSB/Q==
+X-Received: by 2002:a17:906:b191:: with SMTP id w17mr17828574ejy.200.1619429777239;
+        Mon, 26 Apr 2021 02:36:17 -0700 (PDT)
+Received: from ubuntu-laptop (ip5f5bec5d.dynamic.kabel-deutschland.de. [95.91.236.93])
+        by smtp.googlemail.com with ESMTPSA id r18sm11155609ejd.106.2021.04.26.02.36.16
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 26 Apr 2021 02:36:16 -0700 (PDT)
+Message-ID: <4140ef6b0fa84a5096a697ce4afea51b16e53045.camel@gmail.com>
+Subject: Re: [PATCH RESEND v3] mmc-utils: Re-submit of the erase command
+ addition plus remval of MMC_IOC_MULTI_CMD ifndef for erase. Re-committing
+ the change per request by Avir.
+From:   Bean Huo <huobean@gmail.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        "luserhker@gmail.com" <luserhker@gmail.com>,
+        "beanhuo@micron.com" <beanhuo@micron.com>,
+        "kenny.gibbons@oracle.com" <kenny.gibbons@oracle.com>,
+        "kimito.sakata@oracle.com" <kimito.sakata@oracle.com>,
+        "rkamdar@micron.com" <rkamdar@micron.com>,
+        "chris@printf.net" <chris@printf.net>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Kimito Sakata <ksakata@Kimitos-MBP.hsd1.co.comcast.net>
+Date:   Mon, 26 Apr 2021 11:36:15 +0200
+In-Reply-To: <DM6PR04MB6575ABF56616177093F75D80FC459@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20210422161255.4610-1-luserhker@gmail.com>
+         <DM6PR04MB657557ACD70FF26950CF0B0AFC459@DM6PR04MB6575.namprd04.prod.outlook.com>
+         <DM6PR04MB6575ABF56616177093F75D80FC459@DM6PR04MB6575.namprd04.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.4-0ubuntu1 
 MIME-Version: 1.0
-In-Reply-To: <87mttmslni.wl-maz@kernel.org>
-Content-Type: text/plain; charset=gbk; format=flowed
-Content-Transfer-Encoding: 8bit
-Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Marc,
-
-ÔÚ 2021/4/25 ÏÂÎç6:28, Marc Zyngier Ð´µÀ:
-> As I reviewed a previous version of this series, please have the
-> courtesy of cc'ing me on further revisions of this series.
-I am really sorry, i will add you to the cc list on further revisions.
->
-> On Sun, 25 Apr 2021 10:44:39 +0100,
-> <cl@rock-chips.com> wrote:
->> From: Liang Chen <cl@rock-chips.com>
->>
->> RK3568 is a high-performance and low power quad-core application processor
->> designed for personal mobile internet device and AIoT equipments. This patch
->> add basic core dtsi file for it.
->>
->> We use scmi_clk for cortex-a55 instead of standard ARMCLK, so that
->> kernel/uboot/rtos can change cpu clk with the same code in ATF, and we will
->> enalbe a special high-performacne PLL when high frequency is required. The
->> smci_clk code is in ATF, and clkid for cpu is 0, as below:
->>
->>      cpu0: cpu@0 {
->>          device_type = "cpu";
->>          compatible = "arm,cortex-a55";
->>          reg = <0x0 0x0>;
->>          clocks = <&scmi_clk 0>;
->>      };
->>
->> Signed-off-by: Liang Chen <cl@rock-chips.com>
->> ---
->>   .../boot/dts/rockchip/rk3568-pinctrl.dtsi     | 3119 +++++++++++++++++
->>   arch/arm64/boot/dts/rockchip/rk3568.dtsi      |  812 +++++
->>   2 files changed, 3931 insertions(+)
->>   create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-pinctrl.dtsi
->>   create mode 100644 arch/arm64/boot/dts/rockchip/rk3568.dtsi
-> [...]
->
->> diff --git a/arch/arm64/boot/dts/rockchip/rk3568.dtsi b/arch/arm64/boot/dts/rockchip/rk3568.dtsi
->> new file mode 100644
->> index 000000000000..66cb50218ca1
->> --- /dev/null
->> +++ b/arch/arm64/boot/dts/rockchip/rk3568.dtsi
->> @@ -0,0 +1,812 @@
-> [...]
->
->> +	timer {
->> +		compatible = "arm,armv8-timer";
->> +		interrupts = <GIC_PPI 13 IRQ_TYPE_LEVEL_HIGH>,
->> +			     <GIC_PPI 14 IRQ_TYPE_LEVEL_HIGH>,
->> +			     <GIC_PPI 11 IRQ_TYPE_LEVEL_HIGH>,
->> +			     <GIC_PPI 10 IRQ_TYPE_LEVEL_HIGH>;
->> +		arm,no-tick-in-suspend;
-> My questions on this property still stand [1].
-
-Yes, rk3568 will lose the system counter in suspend mode, we must 
-retrieve system time from RTC.
-
-rk3588 will fix this issue.
-
->
->> +	};
->> +
->> +	xin24m: xin24m {
->> +		compatible = "fixed-clock";
->> +		clock-frequency = <24000000>;
->> +		clock-output-names = "xin24m";
->> +		#clock-cells = <0>;
->> +	};
->> +
->> +	xin32k: xin32k {
->> +		compatible = "fixed-clock";
->> +		clock-frequency = <32768>;
->> +		clock-output-names = "xin32k";
->> +		pinctrl-0 = <&clk32k_out0>;
->> +		pinctrl-names = "default";
->> +		#clock-cells = <0>;
->> +	};
->> +
->> +	gic: interrupt-controller@fd400000 {
->> +		compatible = "arm,gic-v3";
->> +		reg = <0x0 0xfd400000 0 0x10000>, /* GICD */
->> +		      <0x0 0xfd460000 0 0xc0000>; /* GICR */
->> +		interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
->> +		interrupt-controller;
->> +		#interrupt-cells = <3>;
->> +		#address-cells = <2>;
->> +		#size-cells = <2>;
->> +		ranges;
-> My request for a full description of the GICA region still stands [1].
-Thanks, i will test MSIs with "mbi-alias", then add relative property in 
-the next version.
->
+On Fri, 2021-04-23 at 05:31 +0000, Avri Altman wrote:
+> +Bean
+> 
+> > > From: Kimito Sakata <kimito.sakata@oracle.com>
+> > > 
+> > > Signed-off-by: Kimito Sakata <
+> > > ksakata@Kimitos-MBP.hsd1.co.comcast.net>
+> > Hi Kimito,
+> > Please use a proper subject and commit log body.
+> > If you don't understand the difference between those two - please
+> > ask.
+> > Also for consistency, you might want to use your oracle mail for
+> > your Signed-
+> > off-by tag.
+> > You need to change your git configs for that.
+> Also, can you refer to this patch submitted by Bean - 
+> https://www.spinics.net/lists/linux-mmc/msg63582.html
+> Are you co-developing this together?
+> 
 > Thanks,
->
-> 	M.
->
-> [1] https://lore.kernel.org/r/87o8e2sm1u.wl-maz@kernel.org
->
+> Avri
+> 
+> > Thanks,
+> > Avri
+> 
 
+Kimito,
+If you need my support as before. ping me.
+
+Bean
 
