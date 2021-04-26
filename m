@@ -2,133 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50103C433ED
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 07:30:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73D20C433ED
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 08:25:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 18EE16105A
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 07:30:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 42398610C8
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Apr 2021 08:25:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232062AbhDZHap (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Apr 2021 03:30:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37670 "EHLO
+        id S232235AbhDZI0S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Apr 2021 04:26:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50476 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231171AbhDZHao (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2021 03:30:44 -0400
-Received: from mail-pl1-x62b.google.com (mail-pl1-x62b.google.com [IPv6:2607:f8b0:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A530BC061574;
-        Mon, 26 Apr 2021 00:30:03 -0700 (PDT)
-Received: by mail-pl1-x62b.google.com with SMTP id n10so17301827plc.0;
-        Mon, 26 Apr 2021 00:30:03 -0700 (PDT)
+        with ESMTP id S232227AbhDZI0R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Apr 2021 04:26:17 -0400
+Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 328B6C061574;
+        Mon, 26 Apr 2021 01:25:34 -0700 (PDT)
+Received: by mail-pg1-x532.google.com with SMTP id w20so698436pge.13;
+        Mon, 26 Apr 2021 01:25:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=wSkcP15Ns1kAwtVg2PMjnrCnhxuuDVvHOr4fXBeFdqg=;
-        b=VuSwlwaAvTv4k9aLudb9CtzbPfwVFEjOREgZfC1AjSkvb99bD/m3qlCa56eHkJRKqO
-         plD6aq5i01LC9JcilJJoclpgkRoqvvRGiA5R82LoGLd/e4bt7fouki4lkQJ6yP/vLbvo
-         ZVFlwB6my/tFm4Al9m6NvJ3c8iiBspM07sTTUkLJsQ2rHqmxGHhf2xGJyS/HxqHIIJX/
-         p4G3At/lODq6wXS5rMC130rhnubK9QGjHTfbOsmYXOzYkwePzvctipCSt6vn0GqihbIJ
-         E3fsB+qek82N120kx3nUeeJc6Yajzc28nc349a++gH5v794zA53qrm8F0O0G8/C7t+Tc
-         5lNA==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=jQWKwPGTMFGJm+uWgEIF87JnJjFNAJL/m8Q6ObzH+Yk=;
+        b=YTLVEqNZnFp898icZZIjFJYPF1GwzfEQ2oQbBZUDecL/Zs7+lYJjHRhYQlKttdHbR1
+         JRqITjQR4nTBHUtFNvt2t3SdZ2lvDCeTdZ0SJGM+DNI/KYpZBhTYFRMy2d+4iYp6Txr/
+         o9OlNjYjQL330HE9TVy26wcj9nCpenHBsy7C/PahCeuQE02XjeE/fD54gKI4sbloSBZ6
+         WuQ5rLHkso8g/Wx2up/GgsCXMVjlsb1h7M0rBQhXLyDubpqFdZJCnH/TL42iHPKKUDva
+         QAY0BtYv9Dbnewm6cuvyjTpkg67Oj+9G+iTnikXX15WvAYU+6g7k4IBdWThBTrIZAiHg
+         frCA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=wSkcP15Ns1kAwtVg2PMjnrCnhxuuDVvHOr4fXBeFdqg=;
-        b=ugNZKSZpsUczE4xSUZ1fv9x2+26ea4X/8qaoZ3L2f9kMW5/8VdUqQUUgaE3GqcIE3G
-         TkHCEbVaXqUe+3EJIh8jnxhDLCU5JpHJnN/h96zvWI2hUY5xnnz1/nQoBS0tT9SbwLw9
-         3AV65+Kqd8gXHXGC4bniFU2PvLzwVX9HZTRA5xsPlBcYlbJpMLoz1TxJga7nIycYGjxa
-         oy5FQ4DRN1sHQ7HdjpA6gF3he5ZThxVuv8rRRxaseAYpghIGIoFDgpvAnfQHniOY4mLQ
-         ZwExlUp+06RfAeVTcGNR8QYyNCWX6c+no0XXAwm3jg0jaYG81pDpmBdhsIDTwdPObgar
-         dZzQ==
-X-Gm-Message-State: AOAM532lOjkpagVwwYwzWuUGMQ2H6q7vsFMX+XtexN22IpgaMDzWxEpD
-        Gx+wjftf34UdjjADlytw0bw=
-X-Google-Smtp-Source: ABdhPJw0wyrQebS7h0snSgJTDJtgFjSeLVyIGfV5I0nCe7nxR7VMU2oU7pmJp+WtFSIiR5m7MVAdzQ==
-X-Received: by 2002:a17:90b:1e01:: with SMTP id pg1mr21310323pjb.156.1619422203240;
-        Mon, 26 Apr 2021 00:30:03 -0700 (PDT)
-Received: from gli-arch.genesyslogic.com.tw ([122.146.30.3])
-        by smtp.gmail.com with ESMTPSA id m11sm10487246pgs.4.2021.04.26.00.30.00
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 26 Apr 2021 00:30:02 -0700 (PDT)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     dlbeer@gmail.com
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=jQWKwPGTMFGJm+uWgEIF87JnJjFNAJL/m8Q6ObzH+Yk=;
+        b=Q0nMAdTQE9XLm6lAiuoepqpcLFkI5e7BUkPGD+9dcA28FSvLrKNrEODuZdh8M7dgNi
+         E9ZKp3MZojlDCIpFtgUvoO+cBDHceOx0QZaDQyg+235R0iuWLhGqHoT1uynrzYciDQEC
+         ATvVLqNlZoIvVyUuOFCglq+dgwUvTWnpi90pcuNWOSqKNz0fJIoJh5eMhiX99I3dWm9B
+         A/XoWgcoxfmn9OyugzSNMMryso2CiUm0NQ7CbZdUbb+pOBLA6dHTUijNuP2S/+gAIx0N
+         Bz4LESj7ABSwqB8CHhmmpsQbsXFRs/GZbK9mNX5cg3bvltObOpEgPix37bOQRA58uUfY
+         mtIQ==
+X-Gm-Message-State: AOAM5323NL/4UpTHDS9KLPLc1o9yumwYi72jw3yJdN7VUoLnWQbjf/R+
+        wVVlSmbqPFKSriHajKjU+7I=
+X-Google-Smtp-Source: ABdhPJzg+FvvaI1gfWjnjrqTCUdrmfoILYPZaaXfOkn59Rn+vg5oqctdgdIKYxmDJjFpODrKYohpxQ==
+X-Received: by 2002:a63:3c59:: with SMTP id i25mr15573515pgn.366.1619425533827;
+        Mon, 26 Apr 2021 01:25:33 -0700 (PDT)
+Received: from soma ([121.99.145.49])
+        by smtp.gmail.com with ESMTPSA id n25sm10558132pff.154.2021.04.26.01.25.29
+        (version=TLS1 cipher=AES128-SHA bits=128/128);
+        Mon, 26 Apr 2021 01:25:33 -0700 (PDT)
+Received: by soma (sSMTP sendmail emulation); Mon, 26 Apr 2021 20:25:26 +1200
+Date:   Mon, 26 Apr 2021 20:25:26 +1200
+From:   Daniel Beer <dlbeer@gmail.com>
+To:     Ben Chuang <benchuanggli@gmail.com>
 Cc:     adrian.hunter@intel.com, ben.chuang@genesyslogic.com.tw,
         linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        ulf.hansson@linaro.org, benchuanggli@gmail.com
+        ulf.hansson@linaro.org
 Subject: Re: [PATCH] mmc: sdhci-pci-gli: increase 1.8V regulator wait
-Date:   Mon, 26 Apr 2021 15:32:51 +0800
-Message-Id: <20210426073251.7726-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210424081652.GA16047@nyquist.nev>
+Message-ID: <20210426082526.GA16240@nyquist.nev>
 References: <20210424081652.GA16047@nyquist.nev>
+ <20210426073251.7726-1-benchuanggli@gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210426073251.7726-1-benchuanggli@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Daniel,
-
-> Inserting an SD-card on an Intel NUC10i3FNK4 (which contains a GL9755)
-> results in the message:
+On Mon, Apr 26, 2021 at 03:32:51PM +0800, Ben Chuang wrote:
+> > The driver currently waits 5ms after switching on the 1.8V regulator for
+> > it to become stable. Increasing this to 10ms gets rid of the warning
+> > about stability, but most cards still fail. Increasing it to 20ms gets
+> > some cards working (a 32GB Samsung micro SD works, a 128GB ADATA
+> > doesn't). At 50ms, the ADATA works most of the time, and at 100ms both
+> > cards work reliably.
 > 
->     mmc0: 1.8V regulator output did not become stable
-> 
-> Following this message, some cards work (sometimes), but most cards fail
-> with EILSEQ. This behaviour is observed on Debian 10 running kernel
-> 4.19.188, but also with 5.8.18 and 5.11.15.
+> If it is convenient, can you provide the appearance pictures and product
+> links of these two cards? We want to buy them.
 
-Glad to receive your report. Thanks.
+Hi Ben,
 
-> 
-> The driver currently waits 5ms after switching on the 1.8V regulator for
-> it to become stable. Increasing this to 10ms gets rid of the warning
-> about stability, but most cards still fail. Increasing it to 20ms gets
-> some cards working (a 32GB Samsung micro SD works, a 128GB ADATA
-> doesn't). At 50ms, the ADATA works most of the time, and at 100ms both
-> cards work reliably.
+The first is a Samsung EVO microSDXC 32GB:
 
-If it is convenient, can you provide the appearance pictures and product
-links of these two cards? We want to buy them.
+    https://www.samsung.com/nz/memory-storage/memory-card/evo-plus-microsd-card-95-mbs-sd-adapter-32gb-mb-mc32ga-apc/
 
-> 
-> Signed-off-by: Daniel Beer <dlbeer@gmail.com>
-> ---
->  drivers/mmc/host/sdhci-pci-gli.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index 592d79082f58..061618aa247f 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -627,8 +627,13 @@ static void sdhci_gli_voltage_switch(struct sdhci_host *host)
->  	 *
->  	 * Wait 5ms after set 1.8V signal enable in Host Control 2 register
->  	 * to ensure 1.8V signal enable bit is set by GL9750/GL9755.
-> +	 *
-> +	 * ...however, the controller in the NUC10i3FNK4 (a 9755) requires
-> +	 * slightly longer than 5ms before the control register reports that
-> +	 * 1.8V is ready, and far longer still before the card will actually
-> +	 * work reliably.
->  	 */
-> -	usleep_range(5000, 5500);
-> +	usleep_range(100000, 110000);
+The second is an ADATA Premier Pro SDXC UHS-I U3 Class 10 (V30S) 128GB:
 
-Looks good for me.
+    https://www.adata.com/us/consumer/289
 
->  }
->  
->  static void sdhci_gl9750_reset(struct sdhci_host *host, u8 mask)
-> -- 
-> 2.20.1
-> 
-> 
+The images on those two pages match what I have in front of me here.
 
-Best regards,
-Ben
+Cheers,
+Daniel
+
+-- 
+Daniel Beer <dlbeer@gmail.com> http://dlbeer.co.nz/
+PGP: BA6E 0B26 1F89 246C E3F3  C910 1E58 C43A 160A 553B
