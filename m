@@ -2,25 +2,26 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CA7DBC433ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 13:48:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17D35C4363C
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 13:48:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9829F61447
+	by mail.kernel.org (Postfix) with ESMTP id E7F4A61445
 	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 13:48:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239947AbhD1Ntc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Apr 2021 09:49:32 -0400
-Received: from lucky1.263xmail.com ([211.157.147.131]:41978 "EHLO
+        id S229928AbhD1Ntb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Apr 2021 09:49:31 -0400
+Received: from lucky1.263xmail.com ([211.157.147.132]:53392 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239304AbhD1Nta (ORCPT
+        with ESMTP id S239675AbhD1Nta (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2021 09:49:30 -0400
 Received: from localhost (unknown [192.168.167.235])
-        by lucky1.263xmail.com (Postfix) with ESMTP id EDA42B9FF2;
-        Wed, 28 Apr 2021 21:48:03 +0800 (CST)
+        by lucky1.263xmail.com (Postfix) with ESMTP id A8E5FF3822;
+        Wed, 28 Apr 2021 21:48:10 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
 X-ADDR-CHECKED4: 1
@@ -28,9 +29,9 @@ X-ANTISPAM-LEVEL: 2
 X-ABS-CHECKED: 0
 Received: from localhost.localdomain (unknown [58.22.7.114])
         by smtp.263.net (postfix) whith ESMTP id P2750T140649007400704S1619617681633012_;
-        Wed, 28 Apr 2021 21:48:03 +0800 (CST)
+        Wed, 28 Apr 2021 21:48:10 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <9f4b7bf97fe250e292465ec654eab734>
+X-UNIQUE-TAG: <7185ae63b5b0517c005d303060098782>
 X-RL-SENDER: cl@rock-chips.com
 X-SENDER: cl@rock-chips.com
 X-LOGIN-NAME: cl@rock-chips.com
@@ -54,63 +55,38 @@ Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
         zhangqing@rock-chips.com, huangtao@rock-chips.com,
         cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
         jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: [PATCH v3 00/10] arm64: dts: rockchip: add basic dtsi/dts files for RK3568 SoC
-Date:   Wed, 28 Apr 2021 21:47:49 +0800
-Message-Id: <20210428134759.22076-1-cl@rock-chips.com>
+Subject: [PATCH v3 04/10] dt-bindings: watchdog: dw-wdt: add description for rk3568
+Date:   Wed, 28 Apr 2021 21:47:53 +0800
+Message-Id: <20210428134759.22076-5-cl@rock-chips.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210428134759.22076-1-cl@rock-chips.com>
+References: <20210428134759.22076-1-cl@rock-chips.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Liang Chen <cl@rock-chips.com>
 
-v1:
-1. add some dt-bindings for RK3568 devices.
-2. add core dtsi for RK3568 SoC.
-3. add basic dts for RK3568 EVB
+add "rockchip,rk3568-wdt", "snps,dw-wdt" for watchdog nodes on
+a rk3568 platform to snps,dw-wdt.yaml.
 
-v2:
-1. sort device nodes by some rules.
+Signed-off-by: Liang Chen <cl@rock-chips.com>
+---
+ Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-v3:
-1. make ARCH=arm64 dtbs_check, then fix some errors and add some documents.
-
-Liang Chen (10):
-  dt-bindings: i2c: i2c-rk3x: add description for rk3568
-  dt-bindings: serial: snps-dw-apb-uart: add description for rk3568
-  dt-bindings: mmc: rockchip-dw-mshc: add description for rk3568
-  dt-bindings: watchdog: dw-wdt: add description for rk3568
-  dt-bindings: pwm: rockchip: add description for rk3568
-  dt-bindings: gpio: change items restriction of clock for
-    rockchip,gpio-bank
-  dt-bindings: soc: rockchip: Convert grf.txt to YAML
-  arm64: dts: rockchip: add generic pinconfig settings used by most
-    Rockchip socs
-  arm64: dts: rockchip: add core dtsi for RK3568 SoC
-  arm64: dts: rockchip: add basic dts for RK3568 EVB
-
- .../devicetree/bindings/arm/rockchip.yaml     |    5 +
- .../bindings/gpio/rockchip,gpio-bank.yaml     |    3 +-
- .../devicetree/bindings/i2c/i2c-rk3x.yaml     |    1 +
- .../bindings/mmc/rockchip-dw-mshc.yaml        |    9 +-
- .../devicetree/bindings/pwm/pwm-rockchip.yaml |    1 +
- .../bindings/serial/snps-dw-apb-uart.yaml     |    1 +
- .../devicetree/bindings/soc/rockchip/grf.txt  |   61 -
- .../devicetree/bindings/soc/rockchip/grf.yaml |   58 +
- .../bindings/watchdog/snps,dw-wdt.yaml        |    1 +
- arch/arm64/boot/dts/rockchip/Makefile         |    1 +
- .../boot/dts/rockchip/rk3568-evb1-v10.dts     |   80 +
- .../boot/dts/rockchip/rk3568-pinctrl.dtsi     | 3111 +++++++++++++++++
- arch/arm64/boot/dts/rockchip/rk3568.dtsi      |  789 +++++
- .../boot/dts/rockchip/rockchip-pinconf.dtsi   |  344 ++
- 14 files changed, 4395 insertions(+), 70 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/soc/rockchip/grf.txt
- create mode 100644 Documentation/devicetree/bindings/soc/rockchip/grf.yaml
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-pinctrl.dtsi
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568.dtsi
- create mode 100644 arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
-
+diff --git a/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml b/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
+index b58596b1831d..6461eb4f4a27 100644
+--- a/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
++++ b/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
+@@ -27,6 +27,7 @@ properties:
+               - rockchip,rk3328-wdt
+               - rockchip,rk3368-wdt
+               - rockchip,rk3399-wdt
++              - rockchip,rk3568-wdt
+               - rockchip,rv1108-wdt
+           - const: snps,dw-wdt
+ 
 -- 
 2.17.1
 
