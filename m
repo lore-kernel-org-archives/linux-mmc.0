@@ -2,195 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9FF3C43461
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 13:50:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 037F5C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 14:36:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7541861107
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 13:50:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BE3D061434
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 14:36:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240032AbhD1NvN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Apr 2021 09:51:13 -0400
-Received: from lucky1.263xmail.com ([211.157.147.135]:46800 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231327AbhD1NvK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2021 09:51:10 -0400
-Received: from localhost (unknown [192.168.167.139])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 6A7C8AB8ED;
-        Wed, 28 Apr 2021 21:50:18 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-ABS-CHECKED: 0
-Received: from localhost.localdomain (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P12770T140230526973696S1619617815817424_;
-        Wed, 28 Apr 2021 21:50:17 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <c3bba5f15271e6e891445d12a788c6d1>
-X-RL-SENDER: cl@rock-chips.com
-X-SENDER: cl@rock-chips.com
-X-LOGIN-NAME: cl@rock-chips.com
-X-FST-TO: heiko@sntech.de
-X-RCPT-COUNT: 30
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-From:   <cl@rock-chips.com>
-To:     heiko@sntech.de
-Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
-        uwe@kleine-koenig.org, mail@david-bauer.net, jbx6244@gmail.com,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
-        jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: [PATCH v3 10/10] arm64: dts: rockchip: add basic dts for RK3568 EVB
-Date:   Wed, 28 Apr 2021 21:50:14 +0800
-Message-Id: <20210428135014.22593-1-cl@rock-chips.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210428134759.22076-1-cl@rock-chips.com>
-References: <20210428134759.22076-1-cl@rock-chips.com>
+        id S235864AbhD1OhO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Apr 2021 10:37:14 -0400
+Received: from mail-ua1-f46.google.com ([209.85.222.46]:46673 "EHLO
+        mail-ua1-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239209AbhD1OhO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2021 10:37:14 -0400
+Received: by mail-ua1-f46.google.com with SMTP id v23so19788244uaq.13;
+        Wed, 28 Apr 2021 07:36:29 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=ebn3gqZWholSixRs2pG5TobMq2hnLDUwAQR5/Khu4nc=;
+        b=eERugtZFOP202OCD0PCAyD9C1KtmD7aER2U+q92/oQJ2JXfDZuUy+y1OFVroMn6oK1
+         /q1mlp2G/pYu/UW5W4y4QVN8edtDHgCzq1K2czuWC2rHen0EilVxqqI5kXL6QxJ72jnv
+         C4OSMe/wJINpsTdRee9ASX2LW5tcB8n5+iwwfORrut8KFRxWxAyq4cofTs28l3kyLLi5
+         fGQ2rfFBuKPrgfbsuO742anqpVeV+qkrH1ppc2zX100XgG91z5L0bl0pvG/lR0qDH5SO
+         RzQDluk/oCzatRR0XBzpzj7NkVBJ6oMdR2bHDD5ajRwMYuhK2Jd2KzVkpwgDAYR5AIsr
+         VLdA==
+X-Gm-Message-State: AOAM532nXTDc3boUiqQDRz+qO/ZSNX08dMAqPjse9ocNAP2vo2Y6ET+R
+        AnVtaj9AXfB+ov8Jv8BMZr97raJTInYPikT9tve95ysR5PU=
+X-Google-Smtp-Source: ABdhPJwUatWDsVLWaKfcODXGfntt6k65wAc/HgmLKSVwqyayTIfPoUGtSH7CGqXabeNrvPeitGp/bA9yp0EYJcGcyD4=
+X-Received: by 2002:a9f:262c:: with SMTP id 41mr24223522uag.4.1619620588733;
+ Wed, 28 Apr 2021 07:36:28 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210317091622.31890-1-wsa+renesas@sang-engineering.com> <20210317091622.31890-4-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210317091622.31890-4-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 28 Apr 2021 16:36:17 +0200
+Message-ID: <CAMuHMdU6=rTHjvcgK8GBzd3OL_9YFqV77=KsAEGJvAVapnhsOQ@mail.gmail.com>
+Subject: Re: [PATCH v3 3/3] mmc: renesas_sdhi: do hard reset if possible
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Liang Chen <cl@rock-chips.com>
+Hi Wolfram,
 
-This patch add rk3568-evb1-v10.dts for RK3568 evaluation board.
-add uart/emmc/i2c/rk809 node for basic function.
+On Wed, Mar 17, 2021 at 10:17 AM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> All recent SDHI instances can be reset via the reset controller. If one
+> is found, use it instead of the open coded reset. This is to get a
+> future-proof sane reset state.
+>
+> Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-Signed-off-by: Liang Chen <cl@rock-chips.com>
----
- .../devicetree/bindings/arm/rockchip.yaml     |  5 ++
- arch/arm64/boot/dts/rockchip/Makefile         |  1 +
- .../boot/dts/rockchip/rk3568-evb1-v10.dts     | 80 +++++++++++++++++++
- 3 files changed, 86 insertions(+)
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+Thanks for your patch, which is now commit b4d86f37eacb7246 ("mmc:
+renesas_sdhi: do hard reset if possible") in mmc/next.
 
-diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
-index 4a6f772c1043..6546b015fc62 100644
---- a/Documentation/devicetree/bindings/arm/rockchip.yaml
-+++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
-@@ -600,6 +600,11 @@ properties:
-           - const: zkmagic,a95x-z2
-           - const: rockchip,rk3318
- 
-+      - description: Rockchip RK3568 Evaluation board
-+        items:
-+          - const: rockchip,rk3568-evb1-v10
-+          - const: rockchip,rk3568
-+
- additionalProperties: true
- 
- ...
-diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
-index c3e00c0e2db7..7fdb41de01ec 100644
---- a/arch/arm64/boot/dts/rockchip/Makefile
-+++ b/arch/arm64/boot/dts/rockchip/Makefile
-@@ -51,3 +51,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-rock-pi-n10.dtb
-+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
-diff --git a/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
-new file mode 100644
-index 000000000000..33a97ce03c84
---- /dev/null
-+++ b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
-@@ -0,0 +1,80 @@
-+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-+/*
-+ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
-+ *
-+ */
-+
-+/dts-v1/;
-+#include <dt-bindings/gpio/gpio.h>
-+#include <dt-bindings/pinctrl/rockchip.h>
-+#include "rk3568.dtsi"
-+
-+/ {
-+	model = "Rockchip RK3568 EVB1 DDR4 V10 Board";
-+	compatible = "rockchip,rk3568-evb1-v10", "rockchip,rk3568";
-+
-+	chosen: chosen {
-+		stdout-path = "serial2:1500000n8";
-+	};
-+
-+	dc_12v: dc-12v {
-+		compatible = "regulator-fixed";
-+		regulator-name = "dc_12v";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <12000000>;
-+		regulator-max-microvolt = <12000000>;
-+	};
-+
-+	vcc3v3_sys: vcc3v3-sys {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3_sys";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		vin-supply = <&dc_12v>;
-+	};
-+
-+	vcc5v0_sys: vcc5v0-sys {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc5v0_sys";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <5000000>;
-+		regulator-max-microvolt = <5000000>;
-+		vin-supply = <&dc_12v>;
-+	};
-+
-+	vcc3v3_lcd0_n: vcc3v3-lcd0-n {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3_lcd0_n";
-+		regulator-boot-on;
-+
-+		regulator-state-mem {
-+			regulator-off-in-suspend;
-+		};
-+	};
-+
-+	vcc3v3_lcd1_n: vcc3v3-lcd1-n {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3_lcd1_n";
-+		regulator-boot-on;
-+
-+		regulator-state-mem {
-+			regulator-off-in-suspend;
-+		};
-+	};
-+};
-+
-+&sdhci {
-+	bus-width = <8>;
-+	max-frequency = <200000000>;
-+	non-removable;
-+	rockchip,txclk-tapnum = <0x8>;
-+	status = "okay";
-+};
-+
-+&uart2 {
-+	status = "okay";
-+};
+This breaks SDHI on koelsch (R-Car M2-W).
+In v5.10, v5.11, and v512, it works fine:
+
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    mmc0: new ultra high speed SDR104 SDHC card at address aaaa
+    mmcblk0: mmc0:aaaa SM32G 29.7 GiB
+      mmcblk0: p1
+
+Note that I do see one timeout during identification.
+
+After b4d86f37eacb7246 (bisected), it fails:
+
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    [...]
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    mmc0: tuning execution failed: -5
+    mmc0: error -5 whilst initialising SD card
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    [...]
+
+Given the single timeout I see with older kernels, the issue may be that the
+harder reset causes that timeout to repeat ad infinitum?
+
+With renesas-drivers-2021-04-27-v5.12, I saw various different timeouts:
+
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD0)
+    sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+    sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD52)
+    sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+    sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD8)
+
+(ee100000 is the SD104 slot, ee140000 is the SDR50 slot).
+
+The card is a brand new SanDisk Extreme 32GB A1 microSD card in the
+microSD adapter that came with the card (Conrad 1553726).
+
+On R-Car H3 ES2.0 (Salvator-XS), the card works fine, without any timeouts:
+
+    mmc1: new ultra high speed SDR104 SDHC card at address aaaa
+    mmcblk1: mmc1:aaaa SM32G 29.7 GiB
+     mmcblk1: p1
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
 -- 
-2.17.1
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-
-
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
