@@ -2,344 +2,208 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3FBBC433B4
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 08:48:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EB3FC433B4
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 10:47:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6E0A361407
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 08:48:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 320CE613C5
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Apr 2021 10:47:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237870AbhD1ItY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Apr 2021 04:49:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42488 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237685AbhD1ItX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2021 04:49:23 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46553C061574
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Apr 2021 01:48:37 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id n138so98075404lfa.3
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Apr 2021 01:48:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Xo1DQZgkZFuQ8qcL0iDQe+mzarmHAfHBfy6FMT32uN8=;
-        b=ZCe24t63LrE2Zt7czAXkPoibg/ftyHq4H8W31NN7UtYST0kZApMBtb7vB18kAQTruQ
-         8OmHSCzUlgI4dzJwlNDrvBUFZv2RFWdnACZ7E+0GtWuSgvkrjxpGImkgisGcV2QoTfOu
-         6f8Y99vzub4bDqqgIi2pT+7CNg96bDvmd+VGWfauYmiREru9Qk92rhn4kndVOcxKtAWE
-         P9xAnW78/aJAhgZeBf9dUYWnOUHaEEkKISwLQ5+PKmb8hdfwODS4V6QzQ1T+Z8BYMbOf
-         QUbPGEcd2vybyjgzlZklFmpX1PSJSupGmMvqVeplskHQK3ooFdae5uTy4cLTnxdcaDZW
-         ZBVQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Xo1DQZgkZFuQ8qcL0iDQe+mzarmHAfHBfy6FMT32uN8=;
-        b=fpxxM8/Fse77e0E1b8vPaTU5Cl0K7Wh5EiVGzgIDjZC/WBBTimaCQ0eAsAXqYK+8vv
-         O4ynJnMI6NYg+j8Jo6eyw6pvyR4oTZ1Yv3xEoPTFIG2Mc2hiWrVnecR/6t54OJLN4tVJ
-         /aPlw3xR5b/vMMypDzWcnVfwyummxfC2STCDgpg0mkE6rrY3lXZmYANW3O4yKdqcas40
-         jQ0FxSJuFs8j02FxqpwZRXbffNqVT+qLKbjIKmN8NVWgtNbKUWxA3wK4dw2YAqUHd3KX
-         4cRnTqeoLvYAPw32QcIcJfHlS5TptiMCPWpkENGA8bOQSiIH30SSdqs3kYrSjjIb6Kus
-         MYSA==
-X-Gm-Message-State: AOAM533R5idgeedKL5BJKcrf7Rq2H7rfIub9Zp8g9j2iNBQBAzGeCcuI
-        AjGU/8ogh0uF3TzWu7qitsdi/w==
-X-Google-Smtp-Source: ABdhPJxN0rtLcbEMFpBx84Gdm7fr+i47C4h5Ue2THwSeUqFEhB+yGLy8TJxAPNJQHixLeClbU9jTXQ==
-X-Received: by 2002:a05:6512:12c3:: with SMTP id p3mr20234712lfg.595.1619599715737;
-        Wed, 28 Apr 2021 01:48:35 -0700 (PDT)
-Received: from localhost.localdomain (h-98-128-180-197.NA.cust.bahnhof.se. [98.128.180.197])
-        by smtp.gmail.com with ESMTPSA id p23sm564702lfc.210.2021.04.28.01.48.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Apr 2021 01:48:34 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v5.13
-Date:   Wed, 28 Apr 2021 10:48:33 +0200
-Message-Id: <20210428084833.72831-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        id S239541AbhD1KsS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Apr 2021 06:48:18 -0400
+Received: from so254-9.mailgun.net ([198.61.254.9]:29685 "EHLO
+        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239520AbhD1KsR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Apr 2021 06:48:17 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1619606853; h=Message-ID: References: In-Reply-To: Subject:
+ Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Sender; bh=ZuI/K9+NXDRWXfsFMoJzLU4sqRFnGeuqVbmpRUnN4cQ=;
+ b=dFcU5s80ms6SnbY70ulMr1CxaWsSYLvg2MWv0SxEP7egl1XRotSHBwYYcAOLycjK1R0q21SX
+ i4QidXzjqYGLzyeu6VMdKdVmikio3Y/c1vUwmIs1KaBM4vt5s1gOfF8oa85o1ge1C16VESKd
+ hyBkqdhDjrvOmjpEGn1fG0Augts=
+X-Mailgun-Sending-Ip: 198.61.254.9
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n02.prod.us-east-1.postgun.com with SMTP id
+ 60893d3574f773a6645c15cc (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Wed, 28 Apr 2021 10:47:17
+ GMT
+Sender: sbhanu=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 9839CC433F1; Wed, 28 Apr 2021 10:47:16 +0000 (UTC)
+Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
+        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: sbhanu)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id 84A91C433D3;
+        Wed, 28 Apr 2021 10:47:15 +0000 (UTC)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date:   Wed, 28 Apr 2021 16:17:15 +0530
+From:   sbhanu@codeaurora.org
+To:     Doug Anderson <dianders@google.com>
+Cc:     Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Asutosh Das <asutoshd@codeaurora.org>,
+        Sahitya Tummala <stummala@codeaurora.org>,
+        Ram Prakash Gupta <rampraka@codeaurora.org>,
+        Sayali Lokhande <sayalil@codeaurora.org>,
+        sartgarg@codeaurora.org, Rajendra Nayak <rnayak@codeaurora.org>,
+        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
+        Sibi Sankar <sibis@codeaurora.org>, cang@codeaurora.org,
+        pragalla@codeaurora.org, nitirawa@codeaurora.org,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Evan Green <evgreen@chromium.org>,
+        Georgi Djakov <georgi.djakov@linaro.org>,
+        Odelu Kukatla <okukatla@codeaurora.org>
+Subject: Re: [PATCH V2] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
+ card
+In-Reply-To: <CAD=FV=U0zEDi1Xn3OmVFA3h3maVWS_o2FXOW9qDEzTf1Moja=A@mail.gmail.com>
+References: <1616264220-25825-1-git-send-email-sbhanu@codeaurora.org>
+ <CAD=FV=WLZCSd6D5VFyD+1KBp5n1qyszER2EVaEMwYjQfPSSDnA@mail.gmail.com>
+ <b77f207b-2d90-3c8b-857f-625bd3867ed1@codeaurora.org>
+ <6fdf704c4716f5873d413229ca8adc57@codeaurora.org>
+ <CAD=FV=Wa4fT5wZgd0==8kLy_tzTLgdZ-HwdfOEAM9pMeMjjFyg@mail.gmail.com>
+ <8126e130e5c0ea1e7ea867414f0510c0@codeaurora.org>
+ <CAD=FV=XavWbf_b7-=JT6V5_RNA8CjdK4oRu7H719AaPDJ5tsqQ@mail.gmail.com>
+ <32096a375966e1fcc149016df012c445@codeaurora.org>
+ <CAD=FV=U0zEDi1Xn3OmVFA3h3maVWS_o2FXOW9qDEzTf1Moja=A@mail.gmail.com>
+Message-ID: <7c6805abf9c1f590bc4d66d625152f22@codeaurora.org>
+X-Sender: sbhanu@codeaurora.org
+User-Agent: Roundcube Webmail/1.3.9
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 2021-04-21 01:44, Doug Anderson wrote:
+> Hi,
+> 
+> On Tue, Apr 20, 2021 at 10:21 AM <sbhanu@codeaurora.org> wrote:
+>> 
+>> On 2021-04-15 01:55, Doug Anderson wrote:
+>> > Hi,
+>> >
+>> > On Tue, Apr 13, 2021 at 3:59 AM <sbhanu@codeaurora.org> wrote:
+>> >>
+>> >> >> >>> +                                       required-opps =
+>> >> >> >>> <&rpmhpd_opp_low_svs>;
+>> >> >> >>> +                                       opp-peak-kBps = <1200000
+>> >> >> >>> 76000>;
+>> >> >> >>> +                                       opp-avg-kBps = <1200000
+>> >> >> >>> 50000>;
+>> >> >> >> Why are the kBps numbers so vastly different than the ones on sc7180
+>> >> >> >> for the same OPP point. That implies:
+>> >> >> >>
+>> >> >> >> a) sc7180 is wrong.
+>> >> >> >>
+>> >> >> >> b) This patch is wrong.
+>> >> >> >>
+>> >> >> >> c) The numbers are essentially random and don't really matter.
+>> >> >> >>
+>> >> >> >> Can you identify which of a), b), or c) is correct, or propose an
+>> >> >> >> alternate explanation of the difference?
+>> >> >> >>
+>> >> >>
+>> >> >> We calculated bus votes values for both sc7180 and sc7280 with ICB
+>> >> >> tool,
+>> >> >> above mentioned values we got for sc7280.
+>> >> >
+>> >> > I don't know what an ICB tool is. Please clarify.
+>> >> >
+>> >> > Also: just because a tool spits out numbers that doesn't mean it's
+>> >> > correct. Presumably the tool could be wrong or incorrectly configured.
+>> >> > We need to understand why these numbers are different.
+>> >> >
+>> >> we checked with ICB tool team on this they conformed as Rennell &
+>> >> Kodiak
+>> >> are different chipsets,
+>> >> we might see delta in ib/ab values due to delta in scaling factors.
+>> >
+>> > ...but these numbers are in kbps, aren't they? As I understand it
+>> > these aren't supposed to be random numbers spit out by a tool but are
+>> > supposed to be understandable by how much bandwidth an IP block (like
+>> > MMC) needs from the busses it's connected to. Since the MMC IP block
+>> > on sc7180 and sc7280 is roughly the same there shouldn't be a big
+>> > difference in numbers.
+>> >
+>> > Something smells wrong.
+>> >
+>> > Adding a few people who understand interconnects better than I do,
+>> > though.
+>> >
+>> 
+>> ICB team has re-checked the Rennell ICB tool and they confirmed that
+>> some configs were wrong in Rennell ICB tool and they corrected it.With
+>> the new updated Rennell ICB tool below are the values :
+>> 
+>> 
+>> Rennell LC:(Sc7180)
+>> 
+>> opp-384000000 {
+>>               opp-hz = /bits/ 64 <384000000>;
+>>               required-opps = <&rpmhpd_opp_nom>;
+>>               opp-peak-kBps = <5400000 490000>;
+>>               opp-avg-kBps = <6600000 300000>;
+>> };
+>> 
+>> 
+>> And now, these values are near to Kodaik LC values:
+>> 
+>> Kodaik LC:(SC7280)
+>> 
+>> opp-384000000 {
+>>             opp-hz = /bits/ 64 <384000000>;
+>>             required-opps = <&rpmhpd_opp_nom>;
+>>             opp-peak-kBps = <5400000 399000>;
+>>             opp-avg-kBps = <6000000 300000>;
+>> };
+> 
+> This still isn't making sense to me.
+> 
+> * sc7180 and sc7280 are running at the same speed. I'm glad the
+> numbers are closer now, but I would have thought they'd be exactly the
+> same.
+> 
+> * Aren't these supposed to be sensible? This is eMMC that does max
+> transfer rates of 400 megabytes / second to the external device. You
+> have bandwidths listed here of 5,400,000 kBps = 5,400,000 kilobytes /
+> second = 5400 megabytes / second. I can imagine there being some
+> overhead where an internal bus might need to be faster but that seems
+> excessive. This is 13.5x!
+> 
 
-Here's the PR with updates for MMC and MEMSTICK for v5.13. Details about the
-highlights are as usual found in the signed tag.
+These numbers are not related to SDCC bandwidth, these are the values 
+needed for the NOC's to run in nominal voltage corners (internal to 
+hardware) and
+thus it helps SDCC to run in nominal to get required through put 
+(384MBps).So above calculation mentioned by you is not applicable here.
 
-Please pull this in!
-
-Kind regards
-Ulf Hansson
+> * I can't see how it can make sense that "average" values are higher
+> than "peak" values.
 
 
-The following changes since commit 7412dee9f1fd3e224202b633fdfa6eeaebe0307e:
+Here actual peak = peak number * 2
+actual average = average number
 
-  mmc: meson-gx: replace WARN_ONCE with dev_warn_once about scatterlist size alignment in block mode (2021-04-19 09:49:27 +0200)
+and this multiplication is taken care by ICC driver, so technically 
+actual peak is still high than average.
 
-are available in the Git repository at:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.13
-
-for you to fetch changes up to 97fce126e279690105ee15be652b465fd96f9997:
-
-  mmc: block: Issue a cache flush only when it's enabled (2021-04-26 11:37:23 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Fix hanging on I/O during system suspend for removable cards
- - Set read only for SD cards with permanent write protect bit
- - Power cycle the SD/SDIO card if CMD11 fails for UHS voltage
- - Issue a cache flush for eMMC only when it's enabled
- - Adopt to updated cache ctrl settings for eMMC from MMC ioctls
- - Use use device property API when parsing voltages
- - Don't retry eMMC sanitize cmds
- - Use the timeout from the MMC ioctl for eMMC santize cmds
-
-MMC host:
- - mmc_spi: Make of_mmc_spi.c resource provider agnostic
- - mmc_spi: Use polling for card detect even without voltage-ranges
- - sdhci: Check for reset prior to DMA address unmap
- - sdhci-acpi: Add support for the AMDI0041 eMMC controller variant
- - sdhci-esdhc-imx: Depending on OF Kconfig and cleanup code
- - sdhci-pci: Add PCI IDs for Intel LKF
- - sdhci-pci: Fix initialization of some SD cards for Intel BYT
- - sdhci-pci-gli: Various improvements for GL97xx variants
- - sdhci-of-dwcmshc: Enable support for MMC_CAP_WAIT_WHILE_BUSY
- - sdhci-of-dwcmshc: Add ACPI support for BlueField-3 SoC
- - sdhci-of-dwcmshc: Add Rockchip platform support
- - tmio/renesas_sdhi: Extend support for reset and use a reset controller
- - tmio/renesas_sdhi: Enable support for MMC_CAP_WAIT_WHILE_BUSY
- - tmio/renesas_sdhi: Various improvements
-
-MEMSTICK:
- - Minor improvements/cleanups.
-
-----------------------------------------------------------------
-Adrian Hunter (2):
-      mmc: sdhci-pci: Add PCI IDs for Intel LKF
-      mmc: sdhci-pci: Fix initialization of some SD cards for Intel BYT-based controllers
-
-Al Cooper (1):
-      mmc: sdhci-brcmstb: Remove CQE quirk
-
-Andy Shevchenko (6):
-      mmc: core: Correct descriptions in mmc_of_parse()
-      mmc: core: Convert mmc_of_parse_voltage() to use device property API
-      mmc: mmc_spi: Set up polling even if voltage-ranges is not present
-      mmc: mmc_spi: Drop unused NO_IRQ definition
-      mmc: mmc_spi: Use already parsed IRQ
-      mmc: mmc_spi: Make of_mmc_spi.c resource provider agnostic
-
-Aniruddha Tvs Rao (1):
-      mmc: sdhci-tegra: Add required callbacks to set/clear CQE_EN bit
-
-Arnd Bergmann (1):
-      memstick: r592: ignore kfifo_out() return code again
-
-Avri Altman (2):
-      mmc: block: Update ext_csd.cache_ctrl if it was written
-      mmc: block: Issue a cache flush only when it's enabled
-
-Bean Huo (4):
-      mmc: cavium: Use '"%s...", __func__' to print function name
-      mmc: core: Use userland specified timeout value for eMMC sanitize
-      mmc: core: Add a retries parameter to __mmc_switch function
-      mmc: core: Let eMMC sanitize not retry in case of timeout/failure
-
-Ben Chuang (2):
-      mmc: sdhci-pci-gli: Improve GL9763E L1 entry delay to increase battery life
-      mmc: sdhci-pci-gli: Enlarge ASPM L1 entry delay of GL975x
-
-Christophe JAILLET (2):
-      mmc: uniphier-sd: Fix an error handling path in uniphier_sd_probe()
-      mmc: uniphier-sd: Fix a resource leak in the remove function
-
-Dinghao Liu (1):
-      mmc: sdhci-pci-o2micro: Add missing checks in sdhci_pci_o2_probe
-
-DooHyun Hwang (1):
-      mmc: core: Do a power cycle when the CMD11 fails
-
-Fabio Estevam (2):
-      mmc: sdhci-esdhc-imx: Remove non-DT stub
-      mmc: sdhci-esdhc-imx: Use device_get_match_data()
-
-Hao Fang (1):
-      mmc: dw_mmc-k3: use the correct HiSilicon copyright
-
-James Young (1):
-      mmc: sdhci-acpi: Add device ID for the AMDI0041 variant of the AMD eMMC controller.
-
-Jia Yang (1):
-      mmc: sdhci-msm: Remove unnecessary error log
-
-Jia-Ju Bai (1):
-      memstick: core: Assign error code of mspro_block_resume()
-
-Jiapeng Chong (1):
-      memstick: r592: remove unused variable
-
-Jisheng Zhang (5):
-      mmc: sdhci-pci: Avoid comma separated statements
-      mmc: sdhci: Use "mmc" directly rather than "host->mmc"
-      mmc: sdio: fix a typo in the comment of SDIO_SD_REV_3_00
-      mmc: sdhci-of-dwcmshc: set MMC_CAP_WAIT_WHILE_BUSY
-      mmc: sdhci: replace mmc->parent with mmc_dev() for consistency
-
-Joey Pabalan (1):
-      memstick: Remove useless else branch
-
-Krzysztof Kozlowski (3):
-      mmc: sdhci-s3c: simplify getting of_device_id match data
-      mmc: sdhci-s3c: correct kerneldoc of sdhci_s3c_drv_data
-      mmc: sdhci-s3c: constify uses of driver/match data
-
-Laibin Qiu (2):
-      mmc: owl-mmc: Remove unnecessary error log
-      mmc: sdhci-st: Remove unnecessary error log
-
-Liming Sun (1):
-      mmc: sdhci-of-dwcmshc: add ACPI support for BlueField-3 SoC
-
-Luca Porzio (1):
-      mmc: core: Remove mq->use_cqe from the struct mmc_queue
-
-Nicolas Saenz Julienne (1):
-      dt-bindings: mmc: iproc-sdhci: Convert to json-schema
-
-Peng Fan (3):
-      dt-bindings: mmc: fsl-imx-esdhc: add pinctrl bindings
-      dt-bindings: mmc: fsl-imx-esdhc: add clock bindings
-      mmc: sdhci-esdhc-imx: validate pinctrl before use it
-
-Philipp Zabel (2):
-      mmc: sdhci-st: simplify optional reset handling
-      mmc: dw_mmc: simplify optional reset handling
-
-Pradeep P V K (1):
-      mmc: sdhci: Check for reset prior to DMA address unmap
-
-Renius Chen (1):
-      mmc: sdhci-pci-gli: Enable short circuit protection mechanism of GL9755
-
-Seiya Wang (1):
-      dt-bindings: mmc: Add compatible for Mediatek MT8195
-
-Seunghui Lee (1):
-      mmc: core: Set read only for SD cards with permanent write protect bit
-
-Shawn Guo (1):
-      mmc: sdhci-esdhc-imx: separate 100/200 MHz pinctrl states check
-
-Shawn Lin (4):
-      dt-bindings: mmc: sdhci-of-dwcmhsc: Convert to yaml file
-      dt-bindings: mmc: sdhci-of-dwcmhsc: Add rockchip support
-      mmc: sdhci-of-dwcmshc: add rockchip platform support
-      mmc: dw_mmc-rockchip: Just set default sample value for legacy mode
-
-Takeshi Saito (1):
-      mmc: tmio: restore bus width when resetting
-
-Ulf Hansson (8):
-      mmc: core: Drop superfluous validations in mmc_hw|sw_reset()
-      mmc: core: Drop reference counting of the bus_ops
-      mmc: dw_mmc: Drop redundant call to ->card_event callback
-      mmc: block: Drop use of unlikely() in mmc_blk_probe()
-      mmc: block: Simplify logging during probe about added partitions
-      mmc: block: Fix error path in mmc_blk_probe()
-      mmc: core: Fix hanging on I/O during system suspend for removable cards
-      Merge branch 'fixes' into next
-
-Wei Yongjun (1):
-      mmc: sdhci-of-dwcmshc: fix error return code in dwcmshc_probe()
-
-Wolfram Sang (9):
-      mmc: tmio: remove workaround for NON_REMOVABLE
-      mmc: tmio: support custom irq masks
-      mmc: renesas_sdhi: use custom mask for TMIO_MASK_ALL
-      mmc: tmio: abort DMA before reset
-      mmc: renesas_sdhi: break SCC reset into own function
-      mmc: renesas_sdhi: do hard reset if possible
-      mmc: tmio: always flag retune when resetting and a card is present
-      mmc: renesas_sdhi: enable WAIT_WHILE_BUSY
-      mmc: tmio: always restore irq register
-
-Yang Li (2):
-      mmc: via-sdmmc: remove unneeded variable 'ret'
-      mmc: moxart: Remove unused variable 'dma_time' and 'pio_time'
-
-Yue Hu (1):
-      mmc: core: Reduce code duplication to mmc_spi_send_{csd|cid}
-
- .../devicetree/bindings/mmc/brcm,iproc-sdhci.yaml  |  63 +++++
- .../devicetree/bindings/mmc/brcm,sdhci-iproc.txt   |  37 ---
- .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |  20 ++
- .../devicetree/bindings/mmc/mmc-spi-slot.txt       |   6 +-
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |   1 +
- .../devicetree/bindings/mmc/sdhci-of-dwcmshc.txt   |  20 --
- .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |  87 ++++++
- drivers/memstick/core/memstick.c                   |  21 +-
- drivers/memstick/core/mspro_block.c                |   3 +-
- drivers/memstick/host/r592.c                       |   6 +-
- drivers/mmc/core/block.c                           |  76 +++--
- drivers/mmc/core/core.c                            | 186 +-----------
- drivers/mmc/core/core.h                            |  17 +-
- drivers/mmc/core/host.c                            |  90 ++++--
- drivers/mmc/core/mmc.c                             |  29 +-
- drivers/mmc/core/mmc_ops.c                         |  59 ++--
- drivers/mmc/core/mmc_ops.h                         |   4 +-
- drivers/mmc/core/queue.c                           |  11 +-
- drivers/mmc/core/queue.h                           |   1 -
- drivers/mmc/core/sd.c                              |   6 +
- drivers/mmc/core/sdio.c                            |  28 +-
- drivers/mmc/host/Kconfig                           |   2 +
- drivers/mmc/host/Makefile                          |   2 -
- drivers/mmc/host/cavium.c                          |   3 +-
- drivers/mmc/host/dw_mmc-k3.c                       |   2 +-
- drivers/mmc/host/dw_mmc-rockchip.c                 |   2 +-
- drivers/mmc/host/dw_mmc.c                          |  16 +-
- drivers/mmc/host/mmc_spi.c                         |   8 +-
- drivers/mmc/host/moxart-mmc.c                      |  10 +-
- drivers/mmc/host/of_mmc_spi.c                      |  18 +-
- drivers/mmc/host/owl-mmc.c                         |   1 -
- drivers/mmc/host/renesas_sdhi.h                    |   2 +
- drivers/mmc/host/renesas_sdhi_core.c               |  38 ++-
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   4 +-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   8 +-
- drivers/mmc/host/sdhci-acpi.c                      |   2 +
- drivers/mmc/host/sdhci-brcmstb.c                   |   1 -
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  26 +-
- drivers/mmc/host/sdhci-esdhc-mcf.c                 |   8 +-
- drivers/mmc/host/sdhci-msm.c                       |   8 +-
- drivers/mmc/host/sdhci-of-aspeed.c                 |   2 +-
- drivers/mmc/host/sdhci-of-dwcmshc.c                | 313 +++++++++++++++++++--
- drivers/mmc/host/sdhci-of-esdhc.c                  |   2 +-
- drivers/mmc/host/sdhci-pci-core.c                  |  31 +-
- drivers/mmc/host/sdhci-pci-gli.c                   |  46 ++-
- drivers/mmc/host/sdhci-pci-o2micro.c               |   8 +
- drivers/mmc/host/sdhci-pci.h                       |   2 +
- drivers/mmc/host/sdhci-s3c.c                       |  22 +-
- drivers/mmc/host/sdhci-st.c                        |  23 +-
- drivers/mmc/host/sdhci-tegra.c                     |  66 +++--
- drivers/mmc/host/sdhci.c                           | 113 ++++----
- drivers/mmc/host/sdhci_am654.c                     |   2 +-
- drivers/mmc/host/tmio_mmc.h                        |   3 +-
- drivers/mmc/host/tmio_mmc_core.c                   |  61 ++--
- drivers/mmc/host/uniphier-sd.c                     |   5 +-
- drivers/mmc/host/via-sdmmc.c                       |   3 +-
- include/linux/mmc/host.h                           |   7 +-
- include/linux/mmc/sdio.h                           |   2 +-
- include/linux/spi/mmc_spi.h                        |   9 -
- 59 files changed, 1010 insertions(+), 642 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/mmc/brcm,iproc-sdhci.yaml
- delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,sdhci-iproc.txt
- delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-of-dwcmshc.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> 
+> It still feels like there's a misconfiguration somewhere.
+> 
+> -Doug
