@@ -2,163 +2,333 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F67C433B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 10:45:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E5DDC43461
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 10:58:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7D68613D9
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 10:45:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6CA76147E
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 10:58:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229898AbhD3Kp4 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Apr 2021 06:45:56 -0400
-Received: from de-smtp-delivery-1.mimecast.com ([62.140.7.241]:40201 "EHLO
-        de-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S229849AbhD3Kpz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2021 06:45:55 -0400
-Received: from GBR01-CWL-obe.outbound.protection.outlook.com
- (mail-cwlgbr01lp2053.outbound.protection.outlook.com [104.47.20.53]) (Using
- TLS) by relay.mimecast.com with ESMTP id de-mta-6-Fbehm8RlMRmkeoOgjm058Q-1;
- Fri, 30 Apr 2021 12:45:04 +0200
-X-MC-Unique: Fbehm8RlMRmkeoOgjm058Q-1
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
- by CWXP265MB4008.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:126::8) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4065.25; Fri, 30 Apr
- 2021 10:45:02 +0000
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::a91f:361d:5554:3958]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::a91f:361d:5554:3958%5]) with mapi id 15.20.4065.027; Fri, 30 Apr 2021
- 10:45:02 +0000
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-CC:     "pali@kernel.org" <pali@kernel.org>,
-        "huyue2@yulong.com" <huyue2@yulong.com>,
-        "tiantao6@hisilicon.com" <tiantao6@hisilicon.com>
-Subject: Re: [PATCH] mmc: enable UHS voltage switch for SDSC if supported
-Thread-Topic: [PATCH] mmc: enable UHS voltage switch for SDSC if supported
-Thread-Index: AQHXN3kp02z8n6vh+UmW3TCHxA6qwqrM7HJ8
-Date:   Fri, 30 Apr 2021 10:45:02 +0000
-Message-ID: <CWXP265MB2680E13C9509570773ABD792C45E9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-References: <CWXP265MB2680766F673A99D2F296B878C4469@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-In-Reply-To: <CWXP265MB2680766F673A99D2F296B878C4469@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-Accept-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [185.80.168.10]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 5e42933d-171c-4a8e-3be2-08d90bc50293
-x-ms-traffictypediagnostic: CWXP265MB4008:
-x-microsoft-antispam-prvs: <CWXP265MB400826F3FF040DD4D01BBBF6C45E9@CWXP265MB4008.GBRP265.PROD.OUTLOOK.COM>
-x-ms-oob-tlc-oobclassifiers: OLM:9508
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0
-x-microsoft-antispam-message-info: N/wVmkxVh3JuA3Bk6+BFGRj/kVRuO5fE1LtabCiH1P00q5hKw184dgVjsXsAxAErV9M+d5aZM7FSKduTiGQuZFkCAF1ErOHwRwE9tNbroqHhUiBuV1yq4R/+ZbBFJnkFHmvO0WV32pZF5pyKm8BTcu9HlXH5Hk28C6lrTMCqB7HyuRwm4nxRRdGFour2NvAWqXqBjeoyApoqvx3kIBQt3e40BDyzmt5AAdpmjupRb38gejikHu/vd847aOlN6yic4rsQaFxqmIDrY+tlCsgtmrRngNpR68JofMsx5UTgeoS+6LM+pWwsbV6uqxNvMZHD6a83yhlitzZUhskR2NS0bF5S6DCP7hVWHL7bNYE5OFAv5Qf3Pzh3L0vSHTs6KE9NETF9at+jCwnaO76L5Hc+hlefkD6DpQD4KOrqTTZpi1lOZfQSp6ZnlV8TOQlXqqPu+3nn7n8kNCgIS3s8CNcZiQxyEb4lwTHf8NAx3aAOHBh1J6Mo93FYHp0+kahrP4wHj6jLh9qMZa9wK4eYcEtDO+bWsmKviwDyUA9x3+GlY52QtsytrMWB69Ps+QiPLZwxnNCIxy/3w5YxZ94bdkadpfj/8fwO8g8mcgcjFwF+xX4=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(39830400003)(346002)(136003)(396003)(366004)(376002)(7696005)(122000001)(66556008)(9686003)(66446008)(8936002)(71200400001)(64756008)(38100700002)(110136005)(52536014)(55016002)(316002)(66476007)(5660300002)(91956017)(4326008)(54906003)(76116006)(26005)(66946007)(6506007)(33656002)(478600001)(83380400001)(86362001)(53546011)(186003)(8676002)(2906002);DIR:OUT;SFP:1101
-x-ms-exchange-antispam-messagedata: =?iso-8859-1?Q?yOTuETUOzMb1oyHekb8DKCbq97XZMsew2lku6CKunKzVyA9ZCz5wIhAX76?=
- =?iso-8859-1?Q?SrGyczuHKXn8fo+AVZ4nUPG3mt+vo6a7MXcTudXHmDq9WIgxdYX6S8L23/?=
- =?iso-8859-1?Q?W8uyfft9nhy4KGwlUxgcnV+At5UBRzZlO3ye5KyN4B0RyRlo+w54h36nbY?=
- =?iso-8859-1?Q?U1epG6yitwwTjFNCg1O8jk4Nb+PNCBdixZ4oTHzZDL3yHDfiT73Vm+fkCM?=
- =?iso-8859-1?Q?T1zuT8qex8N8AgXRDMGuJ/cz7baIvzjetib++Z0wii6be7wCprYN4QVjlR?=
- =?iso-8859-1?Q?9Wjzdg9sCvnZbuBs4yiTCCbYGhe57ltVIYLX6gCZ/g/cZge9skufBPi84+?=
- =?iso-8859-1?Q?SQMPsrA6HU7Hu1ikwdE/u6CTBrS8nncwBMrbekIVfOWZDPcfrI4NM14/zx?=
- =?iso-8859-1?Q?OSp6OdnpuuXnmNnrgBsrok3f7HW27prnbSY/v80JupLs5lCTdWq0QtjG9b?=
- =?iso-8859-1?Q?gx/7vGdmOE6pEKHuoFU2fxh36qe5swV4P0E7sPmD/Ztu6WNKvxozzlAwYu?=
- =?iso-8859-1?Q?8ogC0qeWXAzlDO8Wmrt8T3K6aKxyuWPXLdKrCOnP4j2Zkv1b0k5ZxIQs7X?=
- =?iso-8859-1?Q?40VpyImxDX5lIIcc1q/NtLmU13HjcFFfhpf5lieYQsmfisYYNU0mFFmUXI?=
- =?iso-8859-1?Q?2xrSLLE8ZBCREUAh9cf3cNvPiKZ4ROGRUqbVnc21WWMV3fB+63tbBODA8q?=
- =?iso-8859-1?Q?ak2BI84DC2ilNtxjvadkbFBKKlLAut1RxWIteRlE4t29yUD//avmi2/w+N?=
- =?iso-8859-1?Q?OcTdNsEi0SVmkKLT+1BWRgklgut3Kcf+H2pOV14QJxYMJk3E3NqzjI6zGb?=
- =?iso-8859-1?Q?Y68IEN8d+3Futoo3aWTTEdPh2Wa5xTmIQFMG4nuSsJ8pwyw8EyRLQcb3yK?=
- =?iso-8859-1?Q?o5zNGE+SAJW26cHh+sjBP5rK/CgpA5O9JimrdSBSYqIC+KdFuzC8a1v1eO?=
- =?iso-8859-1?Q?/d4ZF60+gA35U/drhBDNnfUWlFDFmwbpYpUmGC6mvpJbiLhro2PQiHJ7t/?=
- =?iso-8859-1?Q?flqNocOa5CcxPjHyTx0i659ollyxOV0ny8ZrPrN5RjFw/G+PSeixPEOkkQ?=
- =?iso-8859-1?Q?7knmIapw3F4XFphaoA3g4BDL0nz1u/6QkO7EBgU2wdIdqy4LD4I3RT7m8w?=
- =?iso-8859-1?Q?B6It+qaB+vxdEbycWaYMyouzX5DffKFl8kdcxS49Ne5RB9Em060EKfCQpj?=
- =?iso-8859-1?Q?XgBjBN5UIfKc6RyUXFkrzWs38SoNpMrH4dda8b4XNTSLAD6OV4IYuNxqP4?=
- =?iso-8859-1?Q?t70oO/WhugY4P9qVsckmhJEwTb/ikGquWHiw8tKooYYBHSDVxxu4O/vN/4?=
- =?iso-8859-1?Q?E0eokmPYWv3a74bBXng4Dt3hJXX1T7ttxgMnhP161/ERZoU=3D?=
-x-ms-exchange-transport-forked: True
+        id S229958AbhD3K70 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Apr 2021 06:59:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56376 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229543AbhD3K7Z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2021 06:59:25 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB70AC06174A;
+        Fri, 30 Apr 2021 03:58:35 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id i24so22531560edy.8;
+        Fri, 30 Apr 2021 03:58:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=8xWBaV10Gk5zTcf0lrE/jDunsZwOFiT6TlpRJiJ0iIY=;
+        b=aQFnixQurTO584qp0DZsR5R/Wc5Z5fm7hR/X9+wixuIhA95Wmy8ZO3VszL+nU52Um3
+         k+4Wwry05NUwbcBYvNWxfTfwUoLSnLyHxUP+JlMTJmDJ1SRsIqlhGQiL1ZMD/knFFeal
+         8V9PqpbAaVGwSB3dTSeMWooBGFGpujnkjOtwZ0oVkscjSMheVFewo6JDphhpWVJR9/Fu
+         16/0MH2Y9cKnJTGrLRMK/+yxg9ST5mQMWiUtMFazg8syjjnpAeg3IjEgBPIuxjWGDLJd
+         QUMUSUG2EwU7iO6UNSnMT2H03vXyDCbKGw+Bth0FaviumTUDEOwNGydzkQiQtP7gMj3j
+         F+ag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=8xWBaV10Gk5zTcf0lrE/jDunsZwOFiT6TlpRJiJ0iIY=;
+        b=bucUEJUixXj/MDdSlDscUMoUi9TE94YHq7wXPoUf0DFQ2t/PetpIgFqjlVKrc2dYhy
+         CCUkYZohIToPBaoM34jFmN51NvQ0HQCt2AKxFooGcm7vA4VGtNcnozi+cfXdvkiINjxW
+         ycIy3GUqoWVgutWq9L9Swr08GvseaSZxtgzBrM7PnX+dCfefWYlWGU5IpfgQn8F0sdfY
+         cbXoivpZizXNIib9CFCY8hqu9S6RM9qNyzGBIWZSGNN04F6iHTL23UeTu+uJaZymT0Lt
+         xF3oLGIf80brfjSQplXXEvo7aBPZMoIKVBHw34gONn0Tf+ZaMw79JgntMALUIPZD/lvr
+         P7Gg==
+X-Gm-Message-State: AOAM531BuyQIRYa6W14OsWreOJyoR92/TVmlGpvjGhpC2cPg5Pd+bY6q
+        XwTNtIxVWYWmC2cVQCK7pGI=
+X-Google-Smtp-Source: ABdhPJzEZgBgxrLbBy1c75XIgzs3f76jZHE+f6Wo2RFq5MUv8/4LZSZg2o9jG/a8kIGmh/jVYiWidA==
+X-Received: by 2002:a05:6402:3109:: with SMTP id dc9mr5137491edb.13.1619780314537;
+        Fri, 30 Apr 2021 03:58:34 -0700 (PDT)
+Received: from [192.168.2.2] (81-204-249-205.fixed.kpn.net. [81.204.249.205])
+        by smtp.gmail.com with ESMTPSA id x20sm958240edd.58.2021.04.30.03.58.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 30 Apr 2021 03:58:34 -0700 (PDT)
+Subject: Re: [RESEND PATCH v4 07/10] dt-bindings: soc: rockchip: Convert
+ grf.txt to YAML
+To:     cl@rock-chips.com, heiko@sntech.de
+Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
+        uwe@kleine-koenig.org, mail@david-bauer.net,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
+        cnsztl@gmail.com, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
+        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
+        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
+        zhangqing@rock-chips.com, huangtao@rock-chips.com,
+        wim@linux-watchdog.org, linux@roeck-us.net, jamie@jamieiles.com,
+        linux-watchdog@vger.kernel.org, maz@kernel.org
+References: <20210429081151.17558-1-cl@rock-chips.com>
+ <20210430005708.1821-1-cl@rock-chips.com>
+From:   Johan Jonker <jbx6244@gmail.com>
+Message-ID: <953e4240-77ea-ce1c-00a5-0625111ab2cd@gmail.com>
+Date:   Fri, 30 Apr 2021 12:58:30 +0200
+User-Agent: Mozilla/5.0 (X11; Linux i686; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.0
 MIME-Version: 1.0
-X-OriginatorOrg: hyperstone.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: 5e42933d-171c-4a8e-3be2-08d90bc50293
-X-MS-Exchange-CrossTenant-originalarrivaltime: 30 Apr 2021 10:45:02.8157
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 58Q5ehqJPvhSbUhQcLaiRYlyEtKxY/y8i7FSktB7BUVBaz6zAKonV/H9J6QsJs2of0NQ6zdT5KNX95ENnDOy9w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWXP265MB4008
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: hyperstone.com
+In-Reply-To: <20210430005708.1821-1-cl@rock-chips.com>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-So are there any other concerns, comments or opinions about this?
+Hi Liang,
+
+On 4/30/21 2:57 AM, cl@rock-chips.com wrote:
+> From: Liang Chen <cl@rock-chips.com>
+> 
+> Current dts files with 'grf' nodes are manually verified. In order to
+> automate this process grf.txt has to be converted to YAML.
+> 
+> Add new descriptions for:
+> "rockchip,rk3568-grf", "syscon", "simple-mfd"
+> "rockchip,rk3568-pmugrf", "syscon", "simple-mfd"
+
+"rockchip,rv1108-pmugrf", "syscon"
+
+> 
+> Signed-off-by: Liang Chen <cl@rock-chips.com>
+> ---
+>  .../devicetree/bindings/soc/rockchip/grf.txt  | 61 -------------------
+>  .../devicetree/bindings/soc/rockchip/grf.yaml | 60 ++++++++++++++++++
+>  2 files changed, 60 insertions(+), 61 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/soc/rockchip/grf.txt
+>  create mode 100644 Documentation/devicetree/bindings/soc/rockchip/grf.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.txt b/Documentation/devicetree/bindings/soc/rockchip/grf.txt
+> deleted file mode 100644
+> index f96511aa3897..000000000000
+> --- a/Documentation/devicetree/bindings/soc/rockchip/grf.txt
+> +++ /dev/null
+> @@ -1,61 +0,0 @@
+> -* Rockchip General Register Files (GRF)
+> -
+> -The general register file will be used to do static set by software, which
+> -is composed of many registers for system control.
+> -
+> -From RK3368 SoCs, the GRF is divided into two sections,
+> -- GRF, used for general non-secure system,
+> -- SGRF, used for general secure system,
+> -- PMUGRF, used for always on system
+> -
+> -On RK3328 SoCs, the GRF adds a section for USB2PHYGRF,
+> -
+> -ON RK3308 SoC, the GRF is divided into four sections:
+> -- GRF, used for general non-secure system,
+> -- SGRF, used for general secure system,
+> -- DETECTGRF, used for audio codec system,
+> -- COREGRF, used for pvtm,
+> -
+> -Required Properties:
+> -
+> -- compatible: GRF should be one of the following:
+> -   - "rockchip,px30-grf", "syscon": for px30
+> -   - "rockchip,rk3036-grf", "syscon": for rk3036
+> -   - "rockchip,rk3066-grf", "syscon": for rk3066
+> -   - "rockchip,rk3188-grf", "syscon": for rk3188
+> -   - "rockchip,rk3228-grf", "syscon": for rk3228
+> -   - "rockchip,rk3288-grf", "syscon": for rk3288
+> -   - "rockchip,rk3308-grf", "syscon": for rk3308
+> -   - "rockchip,rk3328-grf", "syscon": for rk3328
+> -   - "rockchip,rk3368-grf", "syscon": for rk3368
+> -   - "rockchip,rk3399-grf", "syscon": for rk3399
+> -   - "rockchip,rv1108-grf", "syscon": for rv1108
+> -- compatible: DETECTGRF should be one of the following:
+> -   - "rockchip,rk3308-detect-grf", "syscon": for rk3308
+> -- compatilbe: COREGRF should be one of the following:
+> -   - "rockchip,rk3308-core-grf", "syscon": for rk3308
+> -- compatible: PMUGRF should be one of the following:
+> -   - "rockchip,px30-pmugrf", "syscon": for px30
+> -   - "rockchip,rk3368-pmugrf", "syscon": for rk3368
+> -   - "rockchip,rk3399-pmugrf", "syscon": for rk3399
+> -- compatible: SGRF should be one of the following:
+> -   - "rockchip,rk3288-sgrf", "syscon": for rk3288
+> -- compatible: USB2PHYGRF should be one of the following:
+> -   - "rockchip,px30-usb2phy-grf", "syscon": for px30
+> -   - "rockchip,rk3328-usb2phy-grf", "syscon": for rk3328
+> -- compatible: USBGRF should be one of the following:
+> -   - "rockchip,rv1108-usbgrf", "syscon": for rv1108
+> -- reg: physical base address of the controller and length of memory mapped
+> -  region.
+> -
+> -Example: GRF and PMUGRF of RK3399 SoCs
+> -
+> -	pmugrf: syscon@ff320000 {
+> -		compatible = "rockchip,rk3399-pmugrf", "syscon";
+> -		reg = <0x0 0xff320000 0x0 0x1000>;
+> -	};
+> -
+> -	grf: syscon@ff770000 {
+> -		compatible = "rockchip,rk3399-grf", "syscon";
+> -		reg = <0x0 0xff770000 0x0 0x10000>;
+> -	};
+> diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.yaml b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
+> new file mode 100644
+> index 000000000000..21a67b9ae59c
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
+> @@ -0,0 +1,60 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/soc/rockchip/grf.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Rockchip General Register Files
+> +
+> +maintainers:
+> +  - Heiko Stuebner <heiko@sntech.de>
+> +
+
+syscon.yaml uses select if compatible contains "syscon", so use select
+here too ??
+
+> +properties:
+
+> +  compatible:
+> +    items:
+
+When there are no other combinations then with syscon and simple-mfd
+then there's no need for "oneOf", but a look in the build log shows
+there are 2 (3) exceptions:
+
+#cat build-dtbs-1471909.log | grep short
+rv1108-elgin-r1.dt.yaml: syscon@202a0000: compatible:
+['rockchip,rv1108-usbgrf', 'syscon'] is too short
+rk3288-evb-act8846.dt.yaml: syscon@ff740000: compatible:
+['rockchip,rk3288-sgrf', 'syscon'] is too short
+
+https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20210430005708.1821-1-cl@rock-chips.com/
+
+===
 
 
-From: Christian Löhle <CLoehle@hyperstone.com>
-Sent: Thursday, April 22, 2021 3:18 PM
-To: linux-kernel@vger.kernel.org <linux-kernel@vger.kernel.org>; linux-mmc@vger.kernel.org <linux-mmc@vger.kernel.org>; Christian Löhle <CLoehle@hyperstone.com>; ulf.hansson@linaro.org <ulf.hansson@linaro.org>
-Cc: pali@kernel.org <pali@kernel.org>; huyue2@yulong.com <huyue2@yulong.com>; tiantao6@hisilicon.com <tiantao6@hisilicon.com>
-Subject: [PATCH] mmc: enable UHS voltage switch for SDSC if supported 
- 
-Ignore the reported capacity if the card otherwise reports UHS support.
+	pmugrf: syscon@20060000 {
 
-Currently SDSC cards reporting UHS support except for the CCS do not run
-through the voltage switch.
-While strictly speaking a SDSC card cannot support UHS in compliance
-with the standard, there is no good reason to throttle them that way.
-Especially for pSLCs in practice such cards benefit greatly by this patch,
-as they can be new and UHS supporting, but must not lie about their CCS.
-The behaviour of linux-mmc for SDSC is deviating from the standard anyway
-in such a case, as the card is treated as UHS card not supporting the
-voltage switch in general.
-Such a card will come up as
-mmc0: new ultra high speed SDR25 SD card at address 0001.
-Thus the subsystem will support CMD23 and others to the card.
-But if we deviate from the standard anyway, then we might as well
-not throttle SDSC to 25MB/s.
+		compatible = "rockchip,rv1108-pmugrf", "syscon";
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/sd.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+rockchip,rv1108-pmugrf was never added to a document.
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 6fa51a6ed058..281ca2da8e0b 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -841,11 +841,10 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
-                 return err;
- 
-         /*
--        * In case CCS and S18A in the response is set, start Signal Voltage
--        * Switch procedure. SPI mode doesn't support CMD11.
-+        * In case S18A in the response is set, start Signal Voltage Switch
-+        * procedure. SPI mode doesn't support CMD11.
-          */
--       if (!mmc_host_is_spi(host) && rocr &&
--          ((*rocr & 0x41000000) == 0x41000000)) {
-+       if (!mmc_host_is_spi(host) && rocr && (*rocr & 0x01000000)) {
-                 err = mmc_set_uhs_voltage(host, pocr);
-                 if (err == -EAGAIN) {
-                         retries--;
--- 
-2.31.1
-Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
-Managing Directors: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+		reg = <0x20060000 0x1000>;
+	};
 
+	usbgrf: syscon@202a0000 {
+		compatible = "rockchip,rv1108-usbgrf", "syscon";
+		reg = <0x202a0000 0x1000>;
+	};
+===
+
+  compatible:
+    oneOf:
+      - items:
+          - enum:
+              - rockchip,rk3288-sgrf
+===
+              - rockchip,rv1108-pmugrf
+===
+              - rockchip,rv1108-usbgrf
+          - const: syscon
+      - items:
+          - enum:
+              - rockchip,px30-grf
+              - rockchip,px30-pmugrf
+              - rockchip,px30-usb2phy-grf
+              - rockchip,rk3036-grf
+              - rockchip,rk3066-grf
+              - rockchip,rk3188-grf
+              - rockchip,rk3228-grf
+              - rockchip,rk3288-grf
+              - rockchip,rk3308-core-grf
+              - rockchip,rk3308-detect-grf
+              - rockchip,rk3308-grf
+              - rockchip,rk3328-grf
+              - rockchip,rk3328-usb2phy-grf
+              - rockchip,rk3368-grf
+              - rockchip,rk3368-pmugrf
+              - rockchip,rk3399-grf
+              - rockchip,rk3399-pmugrf
+              - rockchip,rk3568-grf
+              - rockchip,rk3568-pmugrf
+              - rockchip,rv1108-grf
+          - const: syscon
+          - const: simple-mfd
+
+> +      - enum:
+> +          - rockchip,px30-grf
+> +          - rockchip,px30-pmugrf
+> +          - rockchip,px30-usb2phy-grf
+> +          - rockchip,rk3036-grf
+> +          - rockchip,rk3066-grf
+> +          - rockchip,rk3188-grf
+> +          - rockchip,rk3228-grf
+> +          - rockchip,rk3288-grf
+> +          - rockchip,rk3288-sgrf
+> +          - rockchip,rk3308-core-grf
+> +          - rockchip,rk3308-detect-grf
+> +          - rockchip,rk3308-grf
+> +          - rockchip,rk3328-grf
+> +          - rockchip,rk3328-usb2phy-grf
+> +          - rockchip,rk3368-grf
+> +          - rockchip,rk3368-pmugrf
+> +          - rockchip,rk3399-grf
+> +          - rockchip,rk3399-pmugrf
+> +          - rockchip,rk3568-grf
+> +          - rockchip,rk3568-pmugrf
+> +          - rockchip,rv1108-grf
+> +          - rockchip,rv1108-usbgrf
+> +      - const: syscon
+> +      - const: simple-mfd
+
+> +
+> +  reg:> +    maxItems: 1
+
+"#address-cells":
+  const: 1
+
+"#size-cells":
+  const: 1
+
+rk3228-evb.dt.yaml: syscon@11000000: '#address-cells', '#size-cells',
+'io-domains', 'usb2-phy@760', 'usb2-phy@800' do not match any of the
+regexes: 'pinctrl-[0-9]+'
+
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +
+
+> +additionalProperties: false
+
+additionalProperties: true
+
+> +
+> +examples:
+> +  - |
+> +    pmugrf: syscon@ff320000 {
+> +       compatible = "rockchip,rk3399-pmugrf", "syscon", "simple-mfd";
+> +       reg = <0xff320000 0x1000>;
+> +    };
+> +
+> +    grf: syscon@ff770000 {
+> +       compatible = "rockchip,rk3399-grf", "syscon", "simple-mfd";
+> +       reg = <0xff770000 0x10000>;
+> +    };
+> 
