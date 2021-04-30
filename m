@@ -2,221 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EA46C433ED
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 00:57:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F8A6C43460
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 07:21:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 334D9613EA
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 00:57:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6F4F66128C
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Apr 2021 07:21:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229713AbhD3A6L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Apr 2021 20:58:11 -0400
-Received: from lucky1.263xmail.com ([211.157.147.134]:34590 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229519AbhD3A6K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Apr 2021 20:58:10 -0400
-Received: from localhost (unknown [192.168.167.235])
-        by lucky1.263xmail.com (Postfix) with ESMTP id AB885C8384;
-        Fri, 30 Apr 2021 08:57:13 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-ABS-CHECKED: 0
-Received: from localhost.localdomain (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P2750T140649254856448S1619744230489242_;
-        Fri, 30 Apr 2021 08:57:12 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <c119bfe221fbe0f0567aca69b659593d>
-X-RL-SENDER: cl@rock-chips.com
-X-SENDER: cl@rock-chips.com
-X-LOGIN-NAME: cl@rock-chips.com
-X-FST-TO: heiko@sntech.de
-X-RCPT-COUNT: 30
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-From:   <cl@rock-chips.com>
+        id S229628AbhD3HWg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Apr 2021 03:22:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37126 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229590AbhD3HWg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Apr 2021 03:22:36 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00A9DC06174A;
+        Fri, 30 Apr 2021 00:21:47 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id j28so17421982edy.9;
+        Fri, 30 Apr 2021 00:21:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id;
+        bh=HpxUMjyXbZkzEt83poK9Tqo10qlhUK6WE4i1dvnGncw=;
+        b=ZsHFvBVbicZVJzVSsqNQid4JAMFYeUIOyZkOT+udNp/f2A7H3Ir3UKS53jJytqxmv8
+         iJG2ptyRSUGte9cJhvHEHulQvv7oUkBSztznpLxf2vnpsCQ1sne0057OgdNPYLDB/NsA
+         yXSWowl3PYQpJRyTe9JppcrjzdDsShy6T79ti+2NEPRIpcy+fy5SAAMmo/6W6tb04euY
+         HymDgJeREiYV1PeQxBcBiILvEIgwZpkIqexAR+AM+S+3uTKXXm3zZifVPM1F+Fxoo7Oz
+         ahqqY704luqoKc5s8jniTuMFq/z8a6qRykKvsn/rVTzpmoeMleaQ7qhtp0JuA9j9cA3a
+         PSfA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=HpxUMjyXbZkzEt83poK9Tqo10qlhUK6WE4i1dvnGncw=;
+        b=XocVrZnguNp/dhH4ZoMu0jKV2FTakvZsDd2BYY/DbNWYvpjUG0SjqT27bJcW40xOf6
+         0T8BWth2kZAparHRMbfcCEVkvh4UjtVI/J+ROqcZxDgyHKMirYbdtyCHOixa7OokyjlK
+         2dkDCO7BNzwHvyA5P0wlpA9xijQB+u/AXlpW8/Ezi0IuQT3SbPFDvN8uuXyRq09q4vG3
+         WBizpg1YRoqf5rLN1QvoOC0KCmIRd8sCG0z/e1mP02wWx4+08y2MLr8mGwTaAzRn8LDd
+         BRKGgMje/RJGEBuZOL+nT6gEowvqPFOJVHmvUx3TqHhJiksu0WkYKZaElhd0FiRxIsjV
+         a88A==
+X-Gm-Message-State: AOAM533B/VjgsUigVNR/T0NNL+4T0IpRJiUZdSGMNLQWO7OYPtnfATSL
+        +6vi9mCFNcfRmEjaYr1eOks=
+X-Google-Smtp-Source: ABdhPJxdQhNnPfC5GJPB2i3YmP+3TesomiWl9A9y9B69mHJpWDPDlaPa7tM76eTnXZ2arO7+qw1GHw==
+X-Received: by 2002:a50:eb47:: with SMTP id z7mr2208979edp.68.1619767306753;
+        Fri, 30 Apr 2021 00:21:46 -0700 (PDT)
+Received: from debian.home (81-204-249-205.fixed.kpn.net. [81.204.249.205])
+        by smtp.gmail.com with ESMTPSA id cw13sm1378858ejb.113.2021.04.30.00.21.45
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 30 Apr 2021 00:21:46 -0700 (PDT)
+From:   Johan Jonker <jbx6244@gmail.com>
 To:     heiko@sntech.de
-Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
-        uwe@kleine-koenig.org, mail@david-bauer.net, jbx6244@gmail.com,
+Cc:     shawn.lin@rock-chips.com, robh+dt@kernel.org,
+        ulf.hansson@linaro.org, Jisheng.Zhang@synaptics.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
-        jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: [RESEND PATCH v4 07/10] dt-bindings: soc: rockchip: Convert grf.txt to YAML
-Date:   Fri, 30 Apr 2021 08:57:08 +0800
-Message-Id: <20210430005708.1821-1-cl@rock-chips.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210429081151.17558-1-cl@rock-chips.com>
-References: <20210429081151.17558-1-cl@rock-chips.com>
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [RFC PATCH v1] dt-bindings: mmc: snps,dwcmshc-sdhci: fix rockchip,txclk-tapnum
+Date:   Fri, 30 Apr 2021 09:21:38 +0200
+Message-Id: <20210430072138.6537-1-jbx6244@gmail.com>
+X-Mailer: git-send-email 2.11.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Liang Chen <cl@rock-chips.com>
+A test with the command below gives this error:
+mmc@fe310000: rockchip,txclk-tapnum: missing size tag in [[8]]
 
-Current dts files with 'grf' nodes are manually verified. In order to
-automate this process grf.txt has to be converted to YAML.
+With this added to a dts file:
+rockchip,txclk-tapnum = <0x8>;
 
-Add new descriptions for:
-"rockchip,rk3568-grf", "syscon", "simple-mfd"
-"rockchip,rk3568-pmugrf", "syscon", "simple-mfd"
+A look at the driver shows that:
+DLL_TXCLK_TAPNUM_DEFAULT	0x8
 
-Signed-off-by: Liang Chen <cl@rock-chips.com>
+Adding the default value to the dts files is not needed.
+Every clock is divided into 32 taps equally and
+the max value is 31.
+
+Fix rockchip,txclk-tapnum property in snps,dwcmshc-sdhci.yaml by
+adding a minimum, maximum and default.
+
+In the driver the function of_property_read_u8() is used,
+but with dtbs_check the notifications only disappear in YAML
+by changing uint8 to uint32.
+The driver has no limit check for rockchip,txclk-tapnum.
+
+make ARCH=arm64 dtbs_check
+
+Signed-off-by: Johan Jonker <jbx6244@gmail.com>
 ---
- .../devicetree/bindings/soc/rockchip/grf.txt  | 61 -------------------
- .../devicetree/bindings/soc/rockchip/grf.yaml | 60 ++++++++++++++++++
- 2 files changed, 60 insertions(+), 61 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/soc/rockchip/grf.txt
- create mode 100644 Documentation/devicetree/bindings/soc/rockchip/grf.yaml
+ Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.txt b/Documentation/devicetree/bindings/soc/rockchip/grf.txt
-deleted file mode 100644
-index f96511aa3897..000000000000
---- a/Documentation/devicetree/bindings/soc/rockchip/grf.txt
-+++ /dev/null
-@@ -1,61 +0,0 @@
--* Rockchip General Register Files (GRF)
--
--The general register file will be used to do static set by software, which
--is composed of many registers for system control.
--
--From RK3368 SoCs, the GRF is divided into two sections,
--- GRF, used for general non-secure system,
--- SGRF, used for general secure system,
--- PMUGRF, used for always on system
--
--On RK3328 SoCs, the GRF adds a section for USB2PHYGRF,
--
--ON RK3308 SoC, the GRF is divided into four sections:
--- GRF, used for general non-secure system,
--- SGRF, used for general secure system,
--- DETECTGRF, used for audio codec system,
--- COREGRF, used for pvtm,
--
--Required Properties:
--
--- compatible: GRF should be one of the following:
--   - "rockchip,px30-grf", "syscon": for px30
--   - "rockchip,rk3036-grf", "syscon": for rk3036
--   - "rockchip,rk3066-grf", "syscon": for rk3066
--   - "rockchip,rk3188-grf", "syscon": for rk3188
--   - "rockchip,rk3228-grf", "syscon": for rk3228
--   - "rockchip,rk3288-grf", "syscon": for rk3288
--   - "rockchip,rk3308-grf", "syscon": for rk3308
--   - "rockchip,rk3328-grf", "syscon": for rk3328
--   - "rockchip,rk3368-grf", "syscon": for rk3368
--   - "rockchip,rk3399-grf", "syscon": for rk3399
--   - "rockchip,rv1108-grf", "syscon": for rv1108
--- compatible: DETECTGRF should be one of the following:
--   - "rockchip,rk3308-detect-grf", "syscon": for rk3308
--- compatilbe: COREGRF should be one of the following:
--   - "rockchip,rk3308-core-grf", "syscon": for rk3308
--- compatible: PMUGRF should be one of the following:
--   - "rockchip,px30-pmugrf", "syscon": for px30
--   - "rockchip,rk3368-pmugrf", "syscon": for rk3368
--   - "rockchip,rk3399-pmugrf", "syscon": for rk3399
--- compatible: SGRF should be one of the following:
--   - "rockchip,rk3288-sgrf", "syscon": for rk3288
--- compatible: USB2PHYGRF should be one of the following:
--   - "rockchip,px30-usb2phy-grf", "syscon": for px30
--   - "rockchip,rk3328-usb2phy-grf", "syscon": for rk3328
--- compatible: USBGRF should be one of the following:
--   - "rockchip,rv1108-usbgrf", "syscon": for rv1108
--- reg: physical base address of the controller and length of memory mapped
--  region.
--
--Example: GRF and PMUGRF of RK3399 SoCs
--
--	pmugrf: syscon@ff320000 {
--		compatible = "rockchip,rk3399-pmugrf", "syscon";
--		reg = <0x0 0xff320000 0x0 0x1000>;
--	};
--
--	grf: syscon@ff770000 {
--		compatible = "rockchip,rk3399-grf", "syscon";
--		reg = <0x0 0xff770000 0x0 0x10000>;
--	};
-diff --git a/Documentation/devicetree/bindings/soc/rockchip/grf.yaml b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
-new file mode 100644
-index 000000000000..21a67b9ae59c
---- /dev/null
-+++ b/Documentation/devicetree/bindings/soc/rockchip/grf.yaml
-@@ -0,0 +1,60 @@
-+# SPDX-License-Identifier: GPL-2.0
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/soc/rockchip/grf.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Rockchip General Register Files
-+
-+maintainers:
-+  - Heiko Stuebner <heiko@sntech.de>
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - rockchip,px30-grf
-+          - rockchip,px30-pmugrf
-+          - rockchip,px30-usb2phy-grf
-+          - rockchip,rk3036-grf
-+          - rockchip,rk3066-grf
-+          - rockchip,rk3188-grf
-+          - rockchip,rk3228-grf
-+          - rockchip,rk3288-grf
-+          - rockchip,rk3288-sgrf
-+          - rockchip,rk3308-core-grf
-+          - rockchip,rk3308-detect-grf
-+          - rockchip,rk3308-grf
-+          - rockchip,rk3328-grf
-+          - rockchip,rk3328-usb2phy-grf
-+          - rockchip,rk3368-grf
-+          - rockchip,rk3368-pmugrf
-+          - rockchip,rk3399-grf
-+          - rockchip,rk3399-pmugrf
-+          - rockchip,rk3568-grf
-+          - rockchip,rk3568-pmugrf
-+          - rockchip,rv1108-grf
-+          - rockchip,rv1108-usbgrf
-+      - const: syscon
-+      - const: simple-mfd
-+
-+  reg:
-+    maxItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    pmugrf: syscon@ff320000 {
-+       compatible = "rockchip,rk3399-pmugrf", "syscon", "simple-mfd";
-+       reg = <0xff320000 0x1000>;
-+    };
-+
-+    grf: syscon@ff770000 {
-+       compatible = "rockchip,rk3399-grf", "syscon", "simple-mfd";
-+       reg = <0xff770000 0x10000>;
-+    };
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index e6c9a2f77..f43d8d829 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -48,7 +48,10 @@ properties:
+ 
+   rockchip,txclk-tapnum:
+     description: Specify the number of delay for tx sampling.
+-    $ref: /schemas/types.yaml#/definitions/uint8
++    $ref: /schemas/types.yaml#/definitions/uint32
++    minimum: 0
++    maximum: 31
++    default: 8
+ 
+ 
+ required:
 -- 
-2.17.1
-
-
+2.11.0
 
