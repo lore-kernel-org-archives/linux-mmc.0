@@ -2,95 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB296C43461
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 16:50:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 441F1C433B4
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 22:41:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A56A8613F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 16:50:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1439D61177
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 22:41:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232295AbhECQuv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 May 2021 12:50:51 -0400
-Received: from mail.kernel.org ([198.145.29.99]:32786 "EHLO mail.kernel.org"
+        id S229623AbhECWlz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 May 2021 18:41:55 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40602 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233826AbhECQtb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 3 May 2021 12:49:31 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 2A39061625;
-        Mon,  3 May 2021 16:40:24 +0000 (UTC)
+        id S229497AbhECWlz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 3 May 2021 18:41:55 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 61CC461177;
+        Mon,  3 May 2021 22:41:01 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620060025;
-        bh=mXsDBeuUMPBFRFVJrs9IFZVcnbArBC21XvWEUdKywGw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=VJ4Sp457wMfBgOa5zABk9MIBBIuvS2IVpPMuROFh2cIB7masPWSIT7EUMsrytWUpz
-         zY0vesQ38hhMYm4oGmSzWveUa+YpoecoZP4yseUzpcyyOlFPQC6cnZP9r7NZOiGpW+
-         W+qNZOuRRDf2gZrM1N1ceA4o6Zo/WubwX/fbruDqA3R+n/y9wHI1n7G35+mLznDIHl
-         N9yCa8W4Y2hMSSxNfkWO7Fi4exflgujjgQ9EXXzl9CkrQzq7GPecpQr+MBeGXv2iYx
-         wQ8F/x7rpBc/NxjXvVTd5LLjvQE/e7ilUXHN1PxsK9PCeNmYJj7Qocoo09kBO7fQce
-         otUoCyUhqYGRQ==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 28/57] mmc: sdhci-pci: Add PCI IDs for Intel LKF
-Date:   Mon,  3 May 2021 12:39:12 -0400
-Message-Id: <20210503163941.2853291-28-sashal@kernel.org>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210503163941.2853291-1-sashal@kernel.org>
-References: <20210503163941.2853291-1-sashal@kernel.org>
+        s=k20201202; t=1620081661;
+        bh=LdKcAT7K/DkFCaR8C88qu25r0RUNHy4L1uLPd9vMTLI=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=fMOxt4XTJq8QaONd21MjjLpWV5DQlfdSxxAV2eXl8FbyHRkeJvO56XumU3XpRXF52
+         HCr7aVusik/ed/f22iZeKCNMOge1hSJ1T575aWlK43zXUfWcXxieF6EMwaANifIFF3
+         MOy8nRIh7V0YNi14Q6o2QnJUMnt1qCU2l9fIn0mL6oxaxjJ0V82WvAgqlsCVnBsW4t
+         Vtph0NE+/Hh/ZgQn+qMteKZA8RpusiMn8Ad8w4s/qMvZkjfbO5m4pUCP9CdniQNJHG
+         9DkBQCdF9DwlrcLoI/1K3nJKh6vF+PrPB8h77x8YBQhwPRYTHm0vaGhc7jTslAyzWo
+         BxzDfLtMt4A5w==
+Received: by mail-ed1-f53.google.com with SMTP id g14so8226030edy.6;
+        Mon, 03 May 2021 15:41:01 -0700 (PDT)
+X-Gm-Message-State: AOAM532dxrh92hkkNBPj1NdRQ3Ryk08EEHatzWOSYbZ1CARXlkKzTWuf
+        ATeVNU/wNdnO4RtpjfoHjyFtsdIX3/sds5wuKg==
+X-Google-Smtp-Source: ABdhPJyjJlgMbAtLNrpOWXXUCdw8kmlr4Vuzf1SyEuSlHgUsi/v06FB7HcrfsvgPMlZb6Hd+aFb75+cVfhZiRbfIRi8=
+X-Received: by 2002:a05:6402:234b:: with SMTP id r11mr22579121eda.137.1620081659993;
+ Mon, 03 May 2021 15:40:59 -0700 (PDT)
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+References: <20210430072138.6537-1-jbx6244@gmail.com>
+In-Reply-To: <20210430072138.6537-1-jbx6244@gmail.com>
+From:   Rob Herring <robh+dt@kernel.org>
+Date:   Mon, 3 May 2021 17:40:48 -0500
+X-Gmail-Original-Message-ID: <CAL_JsqKnD1t7oRDY5sTi3TjJ0vbFK0tQcVj1qCw_jiOfOQh=mA@mail.gmail.com>
+Message-ID: <CAL_JsqKnD1t7oRDY5sTi3TjJ0vbFK0tQcVj1qCw_jiOfOQh=mA@mail.gmail.com>
+Subject: Re: [RFC PATCH v1] dt-bindings: mmc: snps,dwcmshc-sdhci: fix rockchip,txclk-tapnum
+To:     Johan Jonker <jbx6244@gmail.com>
+Cc:     heiko@sntech.de, shawn.lin@rock-chips.com, ulf.hansson@linaro.org,
+        Jisheng.Zhang@synaptics.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Adrian Hunter <adrian.hunter@intel.com>
+On Fri, Apr 30, 2021 at 2:21 AM Johan Jonker <jbx6244@gmail.com> wrote:
+>
+> A test with the command below gives this error:
+> mmc@fe310000: rockchip,txclk-tapnum: missing size tag in [[8]]
+>
+> With this added to a dts file:
+> rockchip,txclk-tapnum = <0x8>;
+>
+> A look at the driver shows that:
+> DLL_TXCLK_TAPNUM_DEFAULT        0x8
+>
+> Adding the default value to the dts files is not needed.
+> Every clock is divided into 32 taps equally and
+> the max value is 31.
+>
+> Fix rockchip,txclk-tapnum property in snps,dwcmshc-sdhci.yaml by
+> adding a minimum, maximum and default.
+>
+> In the driver the function of_property_read_u8() is used,
+> but with dtbs_check the notifications only disappear in YAML
+> by changing uint8 to uint32.
 
-[ Upstream commit ee629112be8b4eff71d4d3d108a28bc7dc877e13 ]
+Did you check what value the driver sees when you put 8 in the dts. I
+expect it will be 0 because you are reading the 1st byte in big
+endian.
 
-Add PCI IDs for Intel LKF eMMC and SD card host controllers.
-
-Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-Link: https://lore.kernel.org/r/20210322055356.24923-1-adrian.hunter@intel.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/sdhci-pci-core.c | 2 ++
- drivers/mmc/host/sdhci-pci.h      | 2 ++
- 2 files changed, 4 insertions(+)
-
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index afbccfceaaf8..3bfe5406a686 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1907,6 +1907,8 @@ static const struct pci_device_id pci_ids[] = {
- 	SDHCI_PCI_DEVICE(INTEL, CMLH_SD,   intel_byt_sd),
- 	SDHCI_PCI_DEVICE(INTEL, JSL_EMMC,  intel_glk_emmc),
- 	SDHCI_PCI_DEVICE(INTEL, JSL_SD,    intel_byt_sd),
-+	SDHCI_PCI_DEVICE(INTEL, LKF_EMMC,  intel_glk_emmc),
-+	SDHCI_PCI_DEVICE(INTEL, LKF_SD,    intel_byt_sd),
- 	SDHCI_PCI_DEVICE(O2, 8120,     o2),
- 	SDHCI_PCI_DEVICE(O2, 8220,     o2),
- 	SDHCI_PCI_DEVICE(O2, 8221,     o2),
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 981bbbe63aff..779156ce1ee1 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -57,6 +57,8 @@
- #define PCI_DEVICE_ID_INTEL_CMLH_SD	0x06f5
- #define PCI_DEVICE_ID_INTEL_JSL_EMMC	0x4dc4
- #define PCI_DEVICE_ID_INTEL_JSL_SD	0x4df8
-+#define PCI_DEVICE_ID_INTEL_LKF_EMMC	0x98c4
-+#define PCI_DEVICE_ID_INTEL_LKF_SD	0x98f8
- 
- #define PCI_DEVICE_ID_SYSKONNECT_8000	0x8000
- #define PCI_DEVICE_ID_VIA_95D0		0x95d0
--- 
-2.30.2
-
+> The driver has no limit check for rockchip,txclk-tapnum.
+>
+> make ARCH=arm64 dtbs_check
+>
+> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> index e6c9a2f77..f43d8d829 100644
+> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> @@ -48,7 +48,10 @@ properties:
+>
+>    rockchip,txclk-tapnum:
+>      description: Specify the number of delay for tx sampling.
+> -    $ref: /schemas/types.yaml#/definitions/uint8
+> +    $ref: /schemas/types.yaml#/definitions/uint32
+> +    minimum: 0
+> +    maximum: 31
+> +    default: 8
+>
+>
+>  required:
+> --
+> 2.11.0
+>
