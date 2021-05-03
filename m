@@ -2,92 +2,271 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 038A8C433ED
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 09:22:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9558EC433ED
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 09:41:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CBE35611BE
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 09:22:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5FFEE61353
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 09:41:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231531AbhECJWz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 May 2021 05:22:55 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([216.205.24.124]:54844 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231523AbhECJWz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 May 2021 05:22:55 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1620033722;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=vcyQRtRsM37goxV5DGkNo9BAHkn8V/njhLa1npQUZP4=;
-        b=FyqLuWirZtX8TIqbcBrklFxNJUHz72RepnmojJ3MqZ/YX9bcPPhPcMLAS3xXgdWgsluy9B
-        qzpSKeeujUmzppb+0Cv2lhm577w15AakqlNJ5stlYmMl0qQhfEd2V2AYHia3axtbFDx7cJ
-        KmZyX5dNm0PHrDlFB/mKS4iV6FqtaMk=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-339-zKQ43IkDNteEpI0HsU4D8g-1; Mon, 03 May 2021 05:22:00 -0400
-X-MC-Unique: zKQ43IkDNteEpI0HsU4D8g-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 03E3F6123C;
-        Mon,  3 May 2021 09:21:59 +0000 (UTC)
-Received: from x1.localdomain (ovpn-114-176.ams2.redhat.com [10.36.114.176])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 1838C60C0F;
-        Mon,  3 May 2021 09:21:57 +0000 (UTC)
-From:   Hans de Goede <hdegoede@redhat.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Hans de Goede <hdegoede@redhat.com>, linux-mmc@vger.kernel.org
-Subject: [PATCH] mmc: sdhci-acpi: Disable write protect detection on Toshiba Encore 2 WT8-B
-Date:   Mon,  3 May 2021 11:21:57 +0200
-Message-Id: <20210503092157.5689-1-hdegoede@redhat.com>
+        id S232960AbhECJl5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 May 2021 05:41:57 -0400
+Received: from twspam01.aspeedtech.com ([211.20.114.71]:22164 "EHLO
+        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231523AbhECJl4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 May 2021 05:41:56 -0400
+Received: from mail.aspeedtech.com ([192.168.0.24])
+        by twspam01.aspeedtech.com with ESMTP id 1439TKIo029925;
+        Mon, 3 May 2021 17:29:20 +0800 (GMT-8)
+        (envelope-from steven_lee@aspeedtech.com)
+Received: from aspeedtech.com (192.168.100.253) by TWMBX02.aspeed.com
+ (192.168.0.24) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Mon, 3 May
+ 2021 17:40:58 +0800
+Date:   Mon, 3 May 2021 17:40:55 +0800
+From:   Steven Lee <steven_lee@aspeedtech.com>
+To:     Andrew Jeffery <andrew@aj.id.au>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Joel Stanley <joel@jms.id.au>,
+        Ryan Chen <ryanchen.aspeed@gmail.com>,
+        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        Hongwei Zhang <Hongweiz@ami.com>,
+        Ryan Chen <ryan_chen@aspeedtech.com>,
+        Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: sdhci-of-aspeed: Add
+ description for AST2600 EVB.
+Message-ID: <20210503094054.GA12520@aspeedtech.com>
+References: <20210503014336.20256-1-steven_lee@aspeedtech.com>
+ <20210503014336.20256-2-steven_lee@aspeedtech.com>
+ <75226402-503c-4e9b-96dc-e4bd74cf20ac@www.fastmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
+In-Reply-To: <75226402-503c-4e9b-96dc-e4bd74cf20ac@www.fastmail.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Originating-IP: [192.168.100.253]
+X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
+ (192.168.0.24)
+X-DNSRBL: 
+X-MAIL: twspam01.aspeedtech.com 1439TKIo029925
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On the Toshiba Encore 2 WT8-B the  microSD slot always reports the card
-being write-protected even though microSD cards do not have a write-protect
-switch at all.
+The 05/03/2021 12:19, Andrew Jeffery wrote:
+> Hi Steven,
+> 
+> On Mon, 3 May 2021, at 11:13, Steven Lee wrote:
+> > Add the description for describing the AST 2600 EVB reference design of
+> > GPIO regulators and provide the example in the document.
+> > 
+> > AST2600-A2 EVB has the reference design for enabling SD bus
+> > power and toggling SD bus signal voltage by GPIO pins.
+> > 
+> > In the reference design, GPIOV0 of AST2600-A2 EVB is connected to
+> > power load switch that providing 3.3v to SD1 bus vdd. GPIOV1 is
+> > connected to a 1.8v and a 3.3v power load switch that providing
+> > signal voltage to
+> > SD1 bus.
+> > 
+> > If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
+> > disabled.
+> > If GPIOV1 is active high, 3.3v power load switch is enabled, SD1
+> > signal voltage is 3.3v. Otherwise, 1.8v power load switch will be
+> > enabled, SD1 signal voltage becomes 1.8v.
+> > 
+> > AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
+> > The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and
+> > GPIOV3 as power-switch-gpio.
+> > 
+> > Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
+> > ---
+> >  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 99 +++++++++++++++++++
+> >  1 file changed, 99 insertions(+)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml 
+> > b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > index 987b287f3bff..dd894aba0bb7 100644
+> > --- a/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> > @@ -20,6 +20,19 @@ description: |+
+> >    the slots are dependent on the common configuration area, they are 
+> > described
+> >    as child nodes.
+> >  
+> > +  The signal voltage of SDHCIs on AST2600-A2 EVB is able to be toggled 
+> > by GPIO
+> > +  pins. In the reference design, GPIOV0 of AST2600-A2 EVB is connected 
+> > to the
+> > +  power load switch that providing 3.3v to SD1 bus vdd, GPIOV1 is 
+> > connected to
+> > +  a 1.8v and a 3.3v power load switch that providing signal voltage to
+> > +  SD1 bus.
+> > +  If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
+> > +  disabled. If GPIOV1 is active high, 3.3v power load switch is 
+> > enabled, SD1
+> > +  signal voltage is 3.3v. Otherwise, 1.8v power load switch will be 
+> > enabled, SD1
+> > +  signal voltage becomes 1.8v.
+> > +  AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
+> > +  The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and 
+> > GPIOV3
+> > +  as power-switch-gpio.
+> 
+> I don't think we should be describing design-specific details in the 
+> binding document. However, I think this would be a great comment in the 
+> AST2600 EVB devicetree. Can you please move it there?
+> 
 
-Add a new DMI_QUIRK_SD_NO_WRITE_PROTECT quirk entry to sdhci-acpi.c's
-DMI quirk table for this.
+Ok, I will move it to the device tree.
 
-Signed-off-by: Hans de Goede <hdegoede@redhat.com>
----
- drivers/mmc/host/sdhci-acpi.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+I was wondering if the following place is a good place to put the
+comment
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index b6574e7fd26b..9e4358d7a0a6 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -820,6 +820,17 @@ static const struct dmi_system_id sdhci_acpi_quirks[] = {
- 		},
- 		.driver_data = (void *)DMI_QUIRK_SD_NO_WRITE_PROTECT,
- 	},
-+	{
-+		/*
-+		 * The Toshiba WT8-B's microSD slot always reports the card being
-+		 * write-protected.
-+		 */
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "TOSHIBA"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "TOSHIBA ENCORE 2 WT8-B"),
-+		},
-+		.driver_data = (void *)DMI_QUIRK_SD_NO_WRITE_PROTECT,
-+	},
- 	{} /* Terminating entry */
- };
- 
--- 
-2.31.1
+at line 534 of aspeed-g6.dtsi
+sdc: sdc@1e740000 {
+	// Comment here...
 
+	compatible = "aspeed,ast2600-sd-controller";
+	reg = <0x1e740000 0x100>;
+
+	sdhci0: sdhci@1e740100 {
+		compatible = "aspeed,ast2600-sdhci", "sdhci";
+		reg = <0x100 0x100>;
+		interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+...
+}
+
+> > +
+> >  properties:
+> >    compatible:
+> >      enum:
+> > @@ -78,6 +91,7 @@ required:
+> >    - clocks
+> >  
+> >  examples:
+> > +  //Example 1
+> >    - |
+> >      #include <dt-bindings/clock/aspeed-clock.h>
+> >      sdc@1e740000 {
+> > @@ -104,3 +118,88 @@ examples:
+> >                      clocks = <&syscon ASPEED_CLK_SDIO>;
+> >              };
+> >      };
+> > +
+> > +  //Example 2 (AST2600EVB with GPIO regulator)
+> 
+> I feel you didn't test this with `make dt_binding_check` as `//` isn't
+> a valid YAML comment token. You need to use `#` for comments (
+> https://yaml.org/spec/1.2/spec.html#id2780069 ).
+> 
+
+Sorry, I don't know that there is a binding check command for valiating
+YAML document.
+Regardless, thanks for the reference link.
+I will test with dt_binding_check.
+
+> > +  - |
+> > +    #include <dt-bindings/clock/aspeed-clock.h>
+> > +    #include <dt-bindings/gpio/aspeed-gpio.h>
+> > +    vcc_sdhci0: regulator-vcc-sdhci0 {
+> > +            compatible = "regulator-fixed";
+> > +
+> > +            regulator-name = "SDHCI0 Vcc";
+> > +            regulator-min-microvolt = <3300000>;
+> > +            regulator-max-microvolt = <3300000>;
+> > +            gpios = <&gpio0 ASPEED_GPIO(V, 0)
+> > +                            GPIO_ACTIVE_HIGH>;
+> > +            enable-active-high;
+> > +    };
+> > +
+> > +    vccq_sdhci0: regulator-vccq-sdhci0 {
+> > +            compatible = "regulator-gpio";
+> > +
+> > +            regulator-name = "SDHCI0 VccQ";
+> > +            regulator-min-microvolt = <1800000>;
+> > +            regulator-max-microvolt = <3300000>;
+> > +            gpios = <&gpio0 ASPEED_GPIO(V, 1)
+> > +                            GPIO_ACTIVE_HIGH>;
+> > +            gpios-states = <1>;
+> > +            states = <3300000 1
+> > +                      1800000 0>;
+> > +    };
+> > +
+> > +    vcc_sdhci1: regulator-vcc-sdhci1 {
+> > +            compatible = "regulator-fixed";
+> > +
+> > +            regulator-name = "SDHCI1 Vcc";
+> > +            regulator-min-microvolt = <3300000>;
+> > +            regulator-max-microvolt = <3300000>;
+> > +            gpios = <&gpio0 ASPEED_GPIO(V, 2)
+> > +                            GPIO_ACTIVE_HIGH>;
+> > +            enable-active-high;
+> > +    };
+> > +
+> > +    vccq_sdhci1: regulator-vccq-sdhci1 {
+> > +            compatible = "regulator-gpio";
+> > +
+> > +            regulator-name = "SDHCI1 VccQ";
+> > +            regulator-min-microvolt = <1800000>;
+> > +            regulator-max-microvolt = <3300000>;
+> > +            gpios = <&gpio0 ASPEED_GPIO(V, 3)
+> > +                            GPIO_ACTIVE_HIGH>;
+> > +            gpios-states = <1>;
+> > +            states = <3300000 1
+> > +                      1800000 0>;
+> > +    };
+> > +
+> > +    sdc@1e740000 {
+> > +            compatible = "aspeed,ast2600-sd-controller";
+> > +            reg = <0x1e740000 0x100>;
+> > +            #address-cells = <1>;
+> > +            #size-cells = <1>;
+> > +            ranges = <0 0x1e740000 0x20000>;
+> > +            clocks = <&syscon ASPEED_CLK_GATE_SDCLK>;
+> > +
+> > +            sdhci0: sdhci@100 {
+> > +                    compatible = "aspeed,ast2600-sdhci", "sdhci";
+> > +                    reg = <0x100 0x100>;
+> > +                    interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+> > +                    sdhci,auto-cmd12;
+> > +                    clocks = <&syscon ASPEED_CLK_SDIO>;
+> > +                    vmmc-supply = <&vcc_sdhci0>;
+> > +                    vqmmc-supply = <&vccq_sdhci0>;
+> > +                    sd-uhs-sdr104;
+> > +                    clk-phase-uhs-sdr104 = <180>, <180>;
+> > +            };
+> > +
+> > +            sdhci1: sdhci@200 {
+> > +                    compatible = "aspeed,ast2600-sdhci", "sdhci";
+> > +                    reg = <0x200 0x100>;
+> > +                    interrupts = <GIC_SPI 43 IRQ_TYPE_LEVEL_HIGH>;
+> > +                    sdhci,auto-cmd12;
+> > +                    clocks = <&syscon ASPEED_CLK_SDIO>;
+> > +                    vmmc-supply = <&vcc_sdhci1>;
+> > +                    vqmmc-supply = <&vccq_sdhci1>;
+> > +                    sd-uhs-sdr104;
+> > +                    clk-phase-uhs-sdr104 = <0>, <0>;
+> > +            };
+> > +    };
+> 
+> This is a good example, so can we keep this and just drop the comment 
+> from the binding document?
+
+Ok, I will remove the comment.
+
+> 
+> Cheers,
+> 
+> Andrew
