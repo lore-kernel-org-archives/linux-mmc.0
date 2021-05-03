@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A124C43616
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 16:39:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17A0DC433B4
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 16:44:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 011D6613C4
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 16:39:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D7EDD6054E
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 16:44:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232259AbhECQjz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 May 2021 12:39:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39896 "EHLO mail.kernel.org"
+        id S231659AbhECQpo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 May 2021 12:45:44 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50734 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231975AbhECQif (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 3 May 2021 12:38:35 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5D96F613B3;
-        Mon,  3 May 2021 16:36:51 +0000 (UTC)
+        id S232777AbhECQmn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 3 May 2021 12:42:43 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E1CD8601FC;
+        Mon,  3 May 2021 16:38:20 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620059812;
+        s=k20201202; t=1620059902;
         bh=fh8NTrcVEp7XEynMX0wepwrZy+rJKZt3MliX/P9XDEE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=tCBpXsKMKNmzWfh/GCR+5Haci9uCINm6Lahldm4U3rV0fxCRtqt25oENQu22PKj9r
-         HY/dJbNmICn9zUcQf4JyBMjq2VZxLbCBYovIXSLyfpysHWtYHmkkE5/N5qwL3VlddT
-         Nl3+gKW+f9VSmQBXeTIUZRKs+yx0Qa4rN0lK5tFRPKrKTNLt1sE+JSWxjghhkCBanJ
-         RC+ZYDJi5MAutQPMLFuCbbyT0PrRxDg5nMZ0je6wmKsMPRxMpbLdZis3E7qkdCUXBf
-         4HHm4Utjg6vgt0iIh6+BXPfcbmsc1db1NRFufwKs55ug1Gmdp19DGevUdnymQLLpk0
-         52gjO6XEGTzVA==
+        b=H4TLQnjtqjraRYrQniMl/CLekNzEAnp3yKpTTeuL7+v0jNXrLNntNaX4o/iARAaoG
+         X1aCWlj2//4LPg/xq7Le6yMwbhf6cjksElincKCnAki33SORvrjimwD143vZrnKZzP
+         lQkKKqLTNjP2qdFkPYoJce/yd+5tCLjGvEpDOcXsGoRT2LwuuUjDzYCCahoB97BktA
+         dW/ID6uIooBBFzN4oFXE4bNVZ1hSKzwPJYYRuQK4I0NBGZgvqhspY7pQ7KHbKfhDU6
+         F+UuJcApkjzksmDgP0JnMNINAmq5aqHfSJp4aDYLQFXf/a4Zht/80O8PRzhGQM/Gw/
+         Yc1fEBpyBrb/g==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Peng Fan <peng.fan@nxp.com>, Bough Chen <haobo.chen@nxp.com>,
@@ -38,12 +38,12 @@ Cc:     Peng Fan <peng.fan@nxp.com>, Bough Chen <haobo.chen@nxp.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org
-Subject: [PATCH AUTOSEL 5.12 063/134] mmc: sdhci-esdhc-imx: validate pinctrl before use it
-Date:   Mon,  3 May 2021 12:34:02 -0400
-Message-Id: <20210503163513.2851510-63-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.11 053/115] mmc: sdhci-esdhc-imx: validate pinctrl before use it
+Date:   Mon,  3 May 2021 12:35:57 -0400
+Message-Id: <20210503163700.2852194-53-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210503163513.2851510-1-sashal@kernel.org>
-References: <20210503163513.2851510-1-sashal@kernel.org>
+In-Reply-To: <20210503163700.2852194-1-sashal@kernel.org>
+References: <20210503163700.2852194-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
