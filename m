@@ -2,146 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E77B8C433B4
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 May 2021 01:48:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEA66C433ED
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 May 2021 16:12:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0CD4610A0
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 May 2021 01:48:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A3BC0610A7
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 May 2021 16:12:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229488AbhEDBtD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 May 2021 21:49:03 -0400
-Received: from twspam01.aspeedtech.com ([211.20.114.71]:11938 "EHLO
-        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbhEDBtD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 May 2021 21:49:03 -0400
-Received: from mail.aspeedtech.com ([192.168.0.24])
-        by twspam01.aspeedtech.com with ESMTP id 1441YjVt019378;
-        Tue, 4 May 2021 09:34:45 +0800 (GMT-8)
-        (envelope-from steven_lee@aspeedtech.com)
-Received: from aspeedtech.com (192.168.100.253) by TWMBX02.aspeed.com
- (192.168.0.24) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 4 May
- 2021 09:46:26 +0800
-Date:   Tue, 4 May 2021 09:46:23 +0800
-From:   Steven Lee <steven_lee@aspeedtech.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
-        "Ryan Chen" <ryanchen.aspeed@gmail.com>,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Ryan Chen <ryan_chen@aspeedtech.com>,
-        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:ASPEED SD/MMC DRIVER" <linux-mmc@vger.kernel.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Rob Herring <robh+dt@kernel.org>,
-        Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>,
-        "Hongweiz@ami.com" <Hongweiz@ami.com>
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: sdhci-of-aspeed: Add
- description for AST2600 EVB.
-Message-ID: <20210504014622.GB20079@aspeedtech.com>
-References: <20210503014336.20256-1-steven_lee@aspeedtech.com>
- <20210503014336.20256-2-steven_lee@aspeedtech.com>
- <1620055245.319540.1846827.nullmailer@robh.at.kernel.org>
+        id S231726AbhEDQNb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 May 2021 12:13:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53040 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231719AbhEDQNa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 May 2021 12:13:30 -0400
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8304FC061574
+        for <linux-mmc@vger.kernel.org>; Tue,  4 May 2021 09:12:34 -0700 (PDT)
+Received: by mail-lf1-x130.google.com with SMTP id c3so10056210lfs.7
+        for <linux-mmc@vger.kernel.org>; Tue, 04 May 2021 09:12:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=7lkJK3ZMQxyrUYaqzq8/RCOAe7M9iq9dnCm7X+7Tk6w=;
+        b=Tct+1MB0IFW/9oXqyLhJenJz+W3OxAZ87NhH7cnhGgVMgNaYUzAvGLFV5TamrGpII3
+         RWUeihnmK/zl5oRlUjqrx8IWtoNhLBWtXnwMtkJBdYXEwPd0YmwBk2rFGPSEOKf5gj4z
+         zM96lEiFyGoiqXzHwz8XD+goa17A3MQ0L1dek03mlWH1VFHsJp8CD7jMf1AheKzR859i
+         bLXgyjsidOSLeqV38gHLR7r44tUixeTmGosF+CdqA8EL6b9XeVAGGfEW05KBUa4Ta60G
+         tRCHjh8QlGZlA8xa3yzu+laXXqqcNdgh3BPpJSr45VFaW+wTVMnKsUpSvLTEowQm/Drq
+         iIUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=7lkJK3ZMQxyrUYaqzq8/RCOAe7M9iq9dnCm7X+7Tk6w=;
+        b=ij9ZikTPdTgaT2sbEZ8+iMs4mwNANr21QtmV8t82GRh9iRDXEpfalcv+j5sXvcStzs
+         tDNBuwuseTHlnwY5I0bHRycvpgN3qHx1GWETc7stFy17OvKlGrK4fb2b7QAt5k9Fc47M
+         CydyRRETwphWW4sXKv+JKXEQK3jeBl2YBxWGkWDjV1EXgKRg1Cy3ZtgwX6A5acU4RFOc
+         l3exJ504APXdX1Fk/mJqKk2Wyg/NDO6nT75L51UFTuab0U5sS0tLXdxzBqm/7hKzqzfY
+         HAEkrqu1RNSwGJ7O904sirHl3kUlASWdnqS9U2aQRbpRuPfMFug2eS9HZ5G4SWWKAasx
+         xG4g==
+X-Gm-Message-State: AOAM531yePB4P4gjYCzFxI33KpPZX3/mEnPyxkPQFjnXagmSuOQVc3Hq
+        W/Itdw3R9Y4NsmTbXUEtkBBSsjtNaFDNFNg8
+X-Google-Smtp-Source: ABdhPJysYt8OkmHwrobuZn1T35XlaRK5aGAipkn4MC0S4T0NJEqylzAwDppNwaSwpmVNWjJJByPTQw==
+X-Received: by 2002:ac2:44da:: with SMTP id d26mr16518818lfm.522.1620144751714;
+        Tue, 04 May 2021 09:12:31 -0700 (PDT)
+Received: from localhost.localdomain (h-98-128-180-197.NA.cust.bahnhof.se. [98.128.180.197])
+        by smtp.gmail.com with ESMTPSA id s20sm164193ljs.116.2021.05.04.09.12.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 May 2021 09:12:30 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 00/11] Initital support for new power/perf features for SD cards
+Date:   Tue,  4 May 2021 18:12:11 +0200
+Message-Id: <20210504161222.101536-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Disposition: inline
-In-Reply-To: <1620055245.319540.1846827.nullmailer@robh.at.kernel.org>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Originating-IP: [192.168.100.253]
-X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
- (192.168.0.24)
-X-DNSRBL: 
-X-MAIL: twspam01.aspeedtech.com 1441YjVt019378
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The 05/03/2021 23:20, Rob Herring wrote:
-> On Mon, 03 May 2021 09:43:34 +0800, Steven Lee wrote:
-> > Add the description for describing the AST 2600 EVB reference design of
-> > GPIO regulators and provide the example in the document.
-> > 
-> > AST2600-A2 EVB has the reference design for enabling SD bus
-> > power and toggling SD bus signal voltage by GPIO pins.
-> > 
-> > In the reference design, GPIOV0 of AST2600-A2 EVB is connected to
-> > power load switch that providing 3.3v to SD1 bus vdd. GPIOV1 is
-> > connected to a 1.8v and a 3.3v power load switch that providing
-> > signal voltage to
-> > SD1 bus.
-> > 
-> > If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
-> > disabled.
-> > If GPIOV1 is active high, 3.3v power load switch is enabled, SD1
-> > signal voltage is 3.3v. Otherwise, 1.8v power load switch will be
-> > enabled, SD1 signal voltage becomes 1.8v.
-> > 
-> > AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
-> > The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and
-> > GPIOV3 as power-switch-gpio.
-> > 
-> > Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
-> > ---
-> >  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 99 +++++++++++++++++++
-> >  1 file changed, 99 insertions(+)
-> > 
-> 
-> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-> on your patch (DT_CHECKER_FLAGS is new in v5.13):
-> 
-> yamllint warnings/errors:
-> ./Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml:97:5: [error] syntax error: expected <block end>, but found '<scalar>' (syntax)
-> 
-> dtschema/dtc warnings/errors:
-> make[1]: *** Deleting file 'Documentation/devicetree/bindings/mmc/aspeed,sdhci.example.dts'
-> Traceback (most recent call last):
->   File "/usr/local/bin/dt-extract-example", line 45, in <module>
->     binding = yaml.load(open(args.yamlfile, encoding='utf-8').read())
->   File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/main.py", line 421, in load
->     return constructor.get_single_data()
->   File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 109, in get_single_data
->     node = self.composer.get_single_node()
->   File "_ruamel_yaml.pyx", line 706, in _ruamel_yaml.CParser.get_single_node
->   File "_ruamel_yaml.pyx", line 724, in _ruamel_yaml.CParser._compose_document
->   File "_ruamel_yaml.pyx", line 775, in _ruamel_yaml.CParser._compose_node
->   File "_ruamel_yaml.pyx", line 891, in _ruamel_yaml.CParser._compose_mapping_node
->   File "_ruamel_yaml.pyx", line 904, in _ruamel_yaml.CParser._parse_next_event
-> ruamel.yaml.parser.ParserError: while parsing a block mapping
->   in "<unicode string>", line 5, column 1
-> did not find expected key
->   in "<unicode string>", line 97, column 5
-> make[1]: *** [Documentation/devicetree/bindings/Makefile:20: Documentation/devicetree/bindings/mmc/aspeed,sdhci.example.dts] Error 1
-> make[1]: *** Waiting for unfinished jobs....
-> ./Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml:  while parsing a block mapping
->   in "<unicode string>", line 5, column 1
-> did not find expected key
->   in "<unicode string>", line 97, column 5
-> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml: ignoring, error parsing file
-> warning: no schema found in file: ./Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
-> make: *** [Makefile:1414: dt_binding_check] Error 2
-> 
-> See https://patchwork.ozlabs.org/patch/1472993
-> 
-> This check can fail if there are any dependencies. The base for a patch
-> series is generally the most recent rc1.
-> 
-> If you already ran 'make dt_binding_check' and didn't see the above
-> error(s), then make sure 'yamllint' is installed and dt-schema is up to
-> date:
-> 
-> pip3 install dtschema --upgrade
-> 
-> Please check and re-submit.
-> 
+In the SD spec v4.x the SD function extension registers were introduced,
+together with a new set of commands (CMD48/49 and CMD58/59) to read and write
+to them.
 
-Thanks for the log and the information, I will install the package
-and do the check before re-submiting the patch.
+Moreover, in v4.x a new standard function for power management features were
+added, while in v6.x a new standard function for performance enhancements
+features were added.
+
+This series implement the basics to add support for these new features (and
+includes some additional preparations in patch 1->7), by adding support for
+reading and parsing these new SD registers. In the final patch we add support
+for the SD poweroff notification feature, which also add a function to write to
+these registers.
+
+Note that, there are no HW updates need for the host to support reading/parsing
+of the these new SD registers. This has been tested with a 64GB Sandisk Extreme
+PRO UHS-I A2 card.
+
+Tests and reviews are of course greatly appreciated!
+
+Kind regards
+Ulf Hansson
+
+Ulf Hansson (11):
+  mmc: core: Drop open coding when preparing commands with busy
+    signaling
+  mmc: core: Take into account MMC_CAP_NEED_RSP_BUSY for eMMC HPI
+    commands
+  mmc: core: Re-structure some code in __mmc_poll_for_busy()
+  mmc: core: Extend re-use of __mmc_poll_for_busy()
+  mmc: core: Enable eMMC sleep commands to use HW busy polling
+  mmc: core: Prepare mmc_send_cxd_data() to be re-used for additional
+    cmds
+  mmc: core: Drop open coding in mmc_sd_switch()
+  mmc: core: Parse the SD SCR register for support of CMD48/49 and
+    CMD58/59
+  mmc: core: Read the SD function extension registers for power
+    management
+  mmc: core: Read performance enhancements registers for SD cards
+  mmc: core: Add support for Power Off Notification for SD cards
+
+ drivers/mmc/core/core.c    |  22 +--
+ drivers/mmc/core/mmc.c     |  43 ++---
+ drivers/mmc/core/mmc_ops.c | 137 +++++++-------
+ drivers/mmc/core/mmc_ops.h |  10 +-
+ drivers/mmc/core/sd.c      | 371 ++++++++++++++++++++++++++++++++++++-
+ drivers/mmc/core/sd_ops.c  |  38 +---
+ include/linux/mmc/card.h   |  22 +++
+ include/linux/mmc/sd.h     |   4 +
+ 8 files changed, 504 insertions(+), 143 deletions(-)
+
+-- 
+2.25.1
 
