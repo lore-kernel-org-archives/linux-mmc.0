@@ -2,111 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 441F1C433B4
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 22:41:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E77B8C433B4
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 May 2021 01:48:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1439D61177
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 May 2021 22:41:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C0CD4610A0
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 May 2021 01:48:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229623AbhECWlz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 May 2021 18:41:55 -0400
-Received: from mail.kernel.org ([198.145.29.99]:40602 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229497AbhECWlz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 3 May 2021 18:41:55 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 61CC461177;
-        Mon,  3 May 2021 22:41:01 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1620081661;
-        bh=LdKcAT7K/DkFCaR8C88qu25r0RUNHy4L1uLPd9vMTLI=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=fMOxt4XTJq8QaONd21MjjLpWV5DQlfdSxxAV2eXl8FbyHRkeJvO56XumU3XpRXF52
-         HCr7aVusik/ed/f22iZeKCNMOge1hSJ1T575aWlK43zXUfWcXxieF6EMwaANifIFF3
-         MOy8nRIh7V0YNi14Q6o2QnJUMnt1qCU2l9fIn0mL6oxaxjJ0V82WvAgqlsCVnBsW4t
-         Vtph0NE+/Hh/ZgQn+qMteKZA8RpusiMn8Ad8w4s/qMvZkjfbO5m4pUCP9CdniQNJHG
-         9DkBQCdF9DwlrcLoI/1K3nJKh6vF+PrPB8h77x8YBQhwPRYTHm0vaGhc7jTslAyzWo
-         BxzDfLtMt4A5w==
-Received: by mail-ed1-f53.google.com with SMTP id g14so8226030edy.6;
-        Mon, 03 May 2021 15:41:01 -0700 (PDT)
-X-Gm-Message-State: AOAM532dxrh92hkkNBPj1NdRQ3Ryk08EEHatzWOSYbZ1CARXlkKzTWuf
-        ATeVNU/wNdnO4RtpjfoHjyFtsdIX3/sds5wuKg==
-X-Google-Smtp-Source: ABdhPJyjJlgMbAtLNrpOWXXUCdw8kmlr4Vuzf1SyEuSlHgUsi/v06FB7HcrfsvgPMlZb6Hd+aFb75+cVfhZiRbfIRi8=
-X-Received: by 2002:a05:6402:234b:: with SMTP id r11mr22579121eda.137.1620081659993;
- Mon, 03 May 2021 15:40:59 -0700 (PDT)
+        id S229488AbhEDBtD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 May 2021 21:49:03 -0400
+Received: from twspam01.aspeedtech.com ([211.20.114.71]:11938 "EHLO
+        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229603AbhEDBtD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 May 2021 21:49:03 -0400
+Received: from mail.aspeedtech.com ([192.168.0.24])
+        by twspam01.aspeedtech.com with ESMTP id 1441YjVt019378;
+        Tue, 4 May 2021 09:34:45 +0800 (GMT-8)
+        (envelope-from steven_lee@aspeedtech.com)
+Received: from aspeedtech.com (192.168.100.253) by TWMBX02.aspeed.com
+ (192.168.0.24) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 4 May
+ 2021 09:46:26 +0800
+Date:   Tue, 4 May 2021 09:46:23 +0800
+From:   Steven Lee <steven_lee@aspeedtech.com>
+To:     Rob Herring <robh@kernel.org>
+CC:     "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        "Ryan Chen" <ryanchen.aspeed@gmail.com>,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, Ryan Chen <ryan_chen@aspeedtech.com>,
+        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:ASPEED SD/MMC DRIVER" <linux-mmc@vger.kernel.org>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Rob Herring <robh+dt@kernel.org>,
+        Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        Joel Stanley <joel@jms.id.au>,
+        "Hongweiz@ami.com" <Hongweiz@ami.com>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: sdhci-of-aspeed: Add
+ description for AST2600 EVB.
+Message-ID: <20210504014622.GB20079@aspeedtech.com>
+References: <20210503014336.20256-1-steven_lee@aspeedtech.com>
+ <20210503014336.20256-2-steven_lee@aspeedtech.com>
+ <1620055245.319540.1846827.nullmailer@robh.at.kernel.org>
 MIME-Version: 1.0
-References: <20210430072138.6537-1-jbx6244@gmail.com>
-In-Reply-To: <20210430072138.6537-1-jbx6244@gmail.com>
-From:   Rob Herring <robh+dt@kernel.org>
-Date:   Mon, 3 May 2021 17:40:48 -0500
-X-Gmail-Original-Message-ID: <CAL_JsqKnD1t7oRDY5sTi3TjJ0vbFK0tQcVj1qCw_jiOfOQh=mA@mail.gmail.com>
-Message-ID: <CAL_JsqKnD1t7oRDY5sTi3TjJ0vbFK0tQcVj1qCw_jiOfOQh=mA@mail.gmail.com>
-Subject: Re: [RFC PATCH v1] dt-bindings: mmc: snps,dwcmshc-sdhci: fix rockchip,txclk-tapnum
-To:     Johan Jonker <jbx6244@gmail.com>
-Cc:     heiko@sntech.de, shawn.lin@rock-chips.com, ulf.hansson@linaro.org,
-        Jisheng.Zhang@synaptics.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Disposition: inline
+In-Reply-To: <1620055245.319540.1846827.nullmailer@robh.at.kernel.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Originating-IP: [192.168.100.253]
+X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
+ (192.168.0.24)
+X-DNSRBL: 
+X-MAIL: twspam01.aspeedtech.com 1441YjVt019378
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Apr 30, 2021 at 2:21 AM Johan Jonker <jbx6244@gmail.com> wrote:
->
-> A test with the command below gives this error:
-> mmc@fe310000: rockchip,txclk-tapnum: missing size tag in [[8]]
->
-> With this added to a dts file:
-> rockchip,txclk-tapnum = <0x8>;
->
-> A look at the driver shows that:
-> DLL_TXCLK_TAPNUM_DEFAULT        0x8
->
-> Adding the default value to the dts files is not needed.
-> Every clock is divided into 32 taps equally and
-> the max value is 31.
->
-> Fix rockchip,txclk-tapnum property in snps,dwcmshc-sdhci.yaml by
-> adding a minimum, maximum and default.
->
-> In the driver the function of_property_read_u8() is used,
-> but with dtbs_check the notifications only disappear in YAML
-> by changing uint8 to uint32.
+The 05/03/2021 23:20, Rob Herring wrote:
+> On Mon, 03 May 2021 09:43:34 +0800, Steven Lee wrote:
+> > Add the description for describing the AST 2600 EVB reference design of
+> > GPIO regulators and provide the example in the document.
+> > 
+> > AST2600-A2 EVB has the reference design for enabling SD bus
+> > power and toggling SD bus signal voltage by GPIO pins.
+> > 
+> > In the reference design, GPIOV0 of AST2600-A2 EVB is connected to
+> > power load switch that providing 3.3v to SD1 bus vdd. GPIOV1 is
+> > connected to a 1.8v and a 3.3v power load switch that providing
+> > signal voltage to
+> > SD1 bus.
+> > 
+> > If GPIOV0 is active high, SD1 bus is enabled. Otherwise, SD1 bus is
+> > disabled.
+> > If GPIOV1 is active high, 3.3v power load switch is enabled, SD1
+> > signal voltage is 3.3v. Otherwise, 1.8v power load switch will be
+> > enabled, SD1 signal voltage becomes 1.8v.
+> > 
+> > AST2600-A2 EVB also support toggling signal voltage for SD2 bus.
+> > The design is the same as SD1 bus. It uses GPIOV2 as power-gpio and
+> > GPIOV3 as power-switch-gpio.
+> > 
+> > Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
+> > ---
+> >  .../devicetree/bindings/mmc/aspeed,sdhci.yaml | 99 +++++++++++++++++++
+> >  1 file changed, 99 insertions(+)
+> > 
+> 
+> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> 
+> yamllint warnings/errors:
+> ./Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml:97:5: [error] syntax error: expected <block end>, but found '<scalar>' (syntax)
+> 
+> dtschema/dtc warnings/errors:
+> make[1]: *** Deleting file 'Documentation/devicetree/bindings/mmc/aspeed,sdhci.example.dts'
+> Traceback (most recent call last):
+>   File "/usr/local/bin/dt-extract-example", line 45, in <module>
+>     binding = yaml.load(open(args.yamlfile, encoding='utf-8').read())
+>   File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/main.py", line 421, in load
+>     return constructor.get_single_data()
+>   File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 109, in get_single_data
+>     node = self.composer.get_single_node()
+>   File "_ruamel_yaml.pyx", line 706, in _ruamel_yaml.CParser.get_single_node
+>   File "_ruamel_yaml.pyx", line 724, in _ruamel_yaml.CParser._compose_document
+>   File "_ruamel_yaml.pyx", line 775, in _ruamel_yaml.CParser._compose_node
+>   File "_ruamel_yaml.pyx", line 891, in _ruamel_yaml.CParser._compose_mapping_node
+>   File "_ruamel_yaml.pyx", line 904, in _ruamel_yaml.CParser._parse_next_event
+> ruamel.yaml.parser.ParserError: while parsing a block mapping
+>   in "<unicode string>", line 5, column 1
+> did not find expected key
+>   in "<unicode string>", line 97, column 5
+> make[1]: *** [Documentation/devicetree/bindings/Makefile:20: Documentation/devicetree/bindings/mmc/aspeed,sdhci.example.dts] Error 1
+> make[1]: *** Waiting for unfinished jobs....
+> ./Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml:  while parsing a block mapping
+>   in "<unicode string>", line 5, column 1
+> did not find expected key
+>   in "<unicode string>", line 97, column 5
+> /builds/robherring/linux-dt-review/Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml: ignoring, error parsing file
+> warning: no schema found in file: ./Documentation/devicetree/bindings/mmc/aspeed,sdhci.yaml
+> make: *** [Makefile:1414: dt_binding_check] Error 2
+> 
+> See https://patchwork.ozlabs.org/patch/1472993
+> 
+> This check can fail if there are any dependencies. The base for a patch
+> series is generally the most recent rc1.
+> 
+> If you already ran 'make dt_binding_check' and didn't see the above
+> error(s), then make sure 'yamllint' is installed and dt-schema is up to
+> date:
+> 
+> pip3 install dtschema --upgrade
+> 
+> Please check and re-submit.
+> 
 
-Did you check what value the driver sees when you put 8 in the dts. I
-expect it will be 0 because you are reading the 1st byte in big
-endian.
+Thanks for the log and the information, I will install the package
+and do the check before re-submiting the patch.
 
-> The driver has no limit check for rockchip,txclk-tapnum.
->
-> make ARCH=arm64 dtbs_check
->
-> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
-> ---
->  Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index e6c9a2f77..f43d8d829 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -48,7 +48,10 @@ properties:
->
->    rockchip,txclk-tapnum:
->      description: Specify the number of delay for tx sampling.
-> -    $ref: /schemas/types.yaml#/definitions/uint8
-> +    $ref: /schemas/types.yaml#/definitions/uint32
-> +    minimum: 0
-> +    maximum: 31
-> +    default: 8
->
->
->  required:
-> --
-> 2.11.0
->
