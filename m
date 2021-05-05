@@ -2,153 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E309C433ED
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 May 2021 13:14:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BB55C433B4
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 May 2021 14:21:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C748A610F7
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 May 2021 13:14:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0ACEC61029
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 May 2021 14:21:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232382AbhEENO7 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 May 2021 09:14:59 -0400
-Received: from de-smtp-delivery-105.mimecast.com ([194.104.109.105]:25053 "EHLO
-        de-smtp-delivery-105.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231769AbhEENO6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2021 09:14:58 -0400
-Received: from GBR01-CWL-obe.outbound.protection.outlook.com
- (mail-cwlgbr01lp2054.outbound.protection.outlook.com [104.47.20.54]) (Using
- TLS) by relay.mimecast.com with ESMTP id
- de-mta-16-5x0DRsBjNEetHI0xb1Ekkg-1; Wed, 05 May 2021 15:12:31 +0200
-X-MC-Unique: 5x0DRsBjNEetHI0xb1Ekkg-1
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
- by CWXP265MB2309.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:78::6) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4087.41; Wed, 5 May
- 2021 13:12:30 +0000
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::a91f:361d:5554:3958]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::a91f:361d:5554:3958%5]) with mapi id 15.20.4108.025; Wed, 5 May 2021
- 13:12:30 +0000
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "axboe@kernel.dk" <axboe@kernel.dk>,
-        "zliua@micron.com" <zliua@micron.com>
-Subject: [PATCH] mmc: block: ioctl: No busywaiting of non-TRAN CMDs
-Thread-Topic: [PATCH] mmc: block: ioctl: No busywaiting of non-TRAN CMDs
-Thread-Index: AQHXQa/VaowbfC/8SUWt8lUpDQ+oaw==
-Date:   Wed, 5 May 2021 13:12:30 +0000
-Message-ID: <CWXP265MB2680DC98B32CD4B49AA8A224C4599@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-Accept-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [185.80.168.10]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: f3e305a4-8f3a-4416-e8f1-08d90fc7702d
-x-ms-traffictypediagnostic: CWXP265MB2309:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <CWXP265MB23091BA1A49BE8A546E2F827C4599@CWXP265MB2309.GBRP265.PROD.OUTLOOK.COM>
-x-ms-oob-tlc-oobclassifiers: OLM:4303
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0
-x-microsoft-antispam-message-info: xxYAFvQNC7tyJ/qrBCRUR/kb1SDrSA+D6e6nJ51Npcf8u8IqWOSsPi8A6IkciS0MvjTi4idJVNqljrtdZm5771iEV80ez2upixCK12wCF7oSO4/Lpq8a7WWyYtG6/BR+AnD5lJRVp7HcHw/OKDvITvBI+rMoi/zL2h/6vFsKpgsF5YB6RhWRlPfaU/ZKpcR70lt6oyASPh1H2QbZJFU4J36b9K5YsT0fcsTNH7wqUaJ1PPAtGHhXfYIrQXgC8UhFtR4twSh2WfTYAkvx0arCy67ZFEwdRsElRrI87yAkB4d0E9JQ4w1OjYiUtlPjc0dwWZQWe1kpkQZ93bTc7SAa468knN6gVSqqpy7q3u+QkWT3Zm5N9uQfqnlTTk+g9ztflUPa0oOovKjQVGFiTeOxVndQmuwiXdGEsi6XxbGVvWI9j3HZCBAfvGLdUWS6X/cPTndj8w1CIj2kCJtCII6rVUUSqFOaKihBK5Dbt0087q3lQKvhX9Kss5/aQHw3WRQz5hF8SdTCuWqbSs0tIYH3jsW48D1OBAtsjIsXbtqA2Ahm5z/POnZ7uj8IQRYJ4Biy830shTfhwA61Mz94Fxad8+XSdoy8jkWrHDRMfTI7Y6I=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(346002)(136003)(376002)(39830400003)(366004)(396003)(38100700002)(66476007)(64756008)(76116006)(8936002)(71200400001)(66446008)(2906002)(186003)(83380400001)(66946007)(6506007)(91956017)(26005)(478600001)(8676002)(4326008)(7696005)(54906003)(33656002)(86362001)(122000001)(5660300002)(110136005)(316002)(55016002)(9686003)(66556008)(52536014);DIR:OUT;SFP:1101
-x-ms-exchange-antispam-messagedata: =?iso-8859-1?Q?n47ho6qMpjdwXArIqAZ5A9kIuh9lT+FHqNgMPrQBgLLQeS0Lp1QLa+9aLL?=
- =?iso-8859-1?Q?POXTPFep935/FQrDGJgsBnRc8n6+3jQgr1MkK5A4WoLxFytUFdHjBHrK9H?=
- =?iso-8859-1?Q?SPnKPEUeGWWB6th2D+iuELcGYxtDJ9xSNUAjUBcHWEzvEh06Ii9MD1dTwl?=
- =?iso-8859-1?Q?+CmGm+k2+FZMaxsyrcCB1aZOH4Hi4H9ExWa5k6j123uFpi6A6TgkY6Tbax?=
- =?iso-8859-1?Q?JHtuX7TNtUQidaTjjLVsBAliVGfYuhQ1FpuP3jx9SCKxo51GWOZ48T8Fro?=
- =?iso-8859-1?Q?H0AcmtUHHtbkWWqzmKTShN8n+/iOVKr6Z2pebBz9UYEO8VT4xAHshKZC0x?=
- =?iso-8859-1?Q?mhES/n8UIKzjD1aj9rsOwZLSKE4gRkY/JJye08kUF7rUPpTXg5oQPQsVuJ?=
- =?iso-8859-1?Q?ulUSCkjqKZicFPlMhi99I/KkPeOo/LMY8HPdf0FreCj9zlFyQLN7cU4vyU?=
- =?iso-8859-1?Q?unHKIZxyYlAnXl7y7M1fqeCZLjW/U9SddzhmBO8SPy7vcdxIcOjMMv1cac?=
- =?iso-8859-1?Q?Z+RWfHd0mFFi2DN191HDyoamrVsLkWMvBIOxMksxbB1i0Shwe3+Xv3CHYu?=
- =?iso-8859-1?Q?dofLVTXI6hxZ0egDL+QmKXmzaVCKVY/PC9mvLzxdztDSParJXYovEIz0+U?=
- =?iso-8859-1?Q?BUbnSlSAs1YUm4ZNgoxdlJzi9DLNePXGEegtZ3CZWRaM5LRbd3djiJg6ty?=
- =?iso-8859-1?Q?/+FfTubrShQHjr/akaYLJA93Ukqi6O56/KLhpoRqE19In4UDX1n7aVoPV/?=
- =?iso-8859-1?Q?MGCKIwUUX/t/RZS89A6G+xQlD8TRp8ZPMW5DO8am75AMs+1p7Ub8q8tSpS?=
- =?iso-8859-1?Q?5p9gBEceT+5RBOmJNTWoqHf8sYhCIVhHCc+1G4xCxNknnVfdGMSL7YkYw2?=
- =?iso-8859-1?Q?h8TAWJK7Ti6JVh/9+58aJClhW3nyzFjVZLrCL7b9vDfWbpZkDo+Kpl4WNT?=
- =?iso-8859-1?Q?+lM5fEoSeScBDvFBCvNifjEVhuT4vVsjMEuG84CrEXVF726sJYKCS9nISe?=
- =?iso-8859-1?Q?NveJvzcJ1GS5sUPNKw5tcNQmPv8MB1fizwLF39afZbvWWfNDefZiq7GWsM?=
- =?iso-8859-1?Q?eVVe+PhW19AZbvojwJu7g25rgBa8GdFxwYxynJsWTZ1hMe5uRaOyfF/UMW?=
- =?iso-8859-1?Q?MeVZi1E5w0bJTkNcpMlRPN9DTX5SAbMVANrDLx3RAwHfcPN4oEC5geWpo6?=
- =?iso-8859-1?Q?Wie0PLR6Rw6DwFVpt6DYpcP9ZXF7Bks+9gOkybk0nhKJGV03xXXjjGsh1y?=
- =?iso-8859-1?Q?+TWLitKFZi1xdPdegiFXgUnlzqlBESMqYuTzKpcb4tWnKj/qVc7NtyFY7N?=
- =?iso-8859-1?Q?zmSmaSQjR6TyQFsLLZLdmr6QInH6SR4oK3QZi8Mm0crHPE4=3D?=
+        id S232122AbhEEOWU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 May 2021 10:22:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36398 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232096AbhEEOWT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 May 2021 10:22:19 -0400
+Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36582C06174A
+        for <linux-mmc@vger.kernel.org>; Wed,  5 May 2021 07:21:23 -0700 (PDT)
+Received: by mail-ua1-x934.google.com with SMTP id s2so617501uap.1
+        for <linux-mmc@vger.kernel.org>; Wed, 05 May 2021 07:21:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=/Wu8vERRRHj1yfHNyqIZ+kRPILPBuDDMmiP0sI9Ob1U=;
+        b=pENhDxjMvrSRzMPuhjbacNdKdYJ72YA1v9v0Z0whgh7BTf476C7y7StlKeUkdzxAae
+         FHowL7xqeqnM25IM116+IjEyBKR8BJpIm9N6IKq2BLNegqMykNjuQHGDA7Y3HDWfpBac
+         qBCxnRHU7RKFN5vEkxH0aVnB0lQK5PKpCC1Vtd0qwgKf6JsHQgxKB71rTm79H1Py1eQf
+         3wpnazxlxQzp+pldM9X6q8uV+LpyTCocXyIh9SBYct3PyWJnN2U1uhrkaHcokGsTlNnD
+         QSSB/GAsU+e7uTICyCyrAXnyTSUoryJOq8YhUTlRywMUl18DHjdXdSZL9cocHjtVgaEc
+         oP5A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=/Wu8vERRRHj1yfHNyqIZ+kRPILPBuDDMmiP0sI9Ob1U=;
+        b=UCMChDNU0cFmsoUyQruxIRBihd43g83rfep5MVu6Cfnb43XBLxz0sMMqFoy/i4QV23
+         InQY1DNaUezbnOmw4S8dMS7g4FnxpoqTp5gdUPfDdVK735doXsW6heITImmAmJKB/T1C
+         2VS8KxlHwCRpCnEoICj1VbA6BM0pCLHGl3JbSu+GibPWexbt4vPPrweXedbMVNmzy8I9
+         JFaTroMR+Z0g8pKEop14nuhMCs8wKUZ0Gf7kpV+exb7dD9LvSMW9zGH5uGoC2TfKP+qx
+         jAWCtE5vWt59MMfFon9b0vYCXFXtjgWQFt7mlHYRm/AGu7Ditc6r47UEh+Hib9mvscLj
+         ECFQ==
+X-Gm-Message-State: AOAM533SrjnCa0+rlDE5RzQJP0DQbp/4/p0WZsTXbFCKRWAjJXGBw+5S
+        s5ilfuhY9lCZ0s0fwjKTzdFBYwFbfdfhrXPlAOjcsA==
+X-Google-Smtp-Source: ABdhPJzAWoFEJUmSWxg4AyDlsdoyNVvtBfuivPA5CSNlOvVlhVTuqEnC6EZZbrgwOILBcrqWK3cXNnX23NMnNYfDqRI=
+X-Received: by 2002:a9f:37c8:: with SMTP id q66mr25624095uaq.129.1620224482345;
+ Wed, 05 May 2021 07:21:22 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: hyperstone.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: f3e305a4-8f3a-4416-e8f1-08d90fc7702d
-X-MS-Exchange-CrossTenant-originalarrivaltime: 05 May 2021 13:12:30.3446
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: K3XCgngGRH6v2OqmBQRn8LGtRWIIE0a5RplK1osLQoKyIP+LKiq9T/bVMj7PfUCKyN1OHnOcDMFzzDOO0rB1UA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWXP265MB2309
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: hyperstone.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+References: <CWXP265MB2680766F673A99D2F296B878C4469@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <CAPDyKFqvTgRZ0QEgBXJgbhbEmQvxBqzZuGh2MrZGS1mRyYz9mg@mail.gmail.com> <CWXP265MB26802E4E0F1AE7B6FE2836AAC4599@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+In-Reply-To: <CWXP265MB26802E4E0F1AE7B6FE2836AAC4599@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 5 May 2021 16:20:45 +0200
+Message-ID: <CAPDyKFrAS8SP5AMX2fi_ZbsmGm49ZFo4YKcczwYZOmN-AnPn7A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: enable UHS voltage switch for SDSC if supported
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "pali@kernel.org" <pali@kernel.org>,
+        "huyue2@yulong.com" <huyue2@yulong.com>,
+        "tiantao6@hisilicon.com" <tiantao6@hisilicon.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Prevent busywaiting for TRAN state indication
-after issuing a command that will not transition
-to TRAN state.
+On Wed, 5 May 2021 at 14:13, Christian L=C3=B6hle <CLoehle@hyperstone.com> =
+wrote:
+>
+> So two cards that advertise UHS:
+> https://www.euric.de/de/flash-speicher/sd-microsd/sd/
+> Model SDI790
+> and
+> https://na.industrial.panasonic.com/products/storage-media/industrial-sd-=
+cards/lineup/industrial-grade-2d-nand/series/71695
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/block.c | 3 ++-
- drivers/mmc/core/block.h | 5 +++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+Thanks for the links!
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 689eb9afeeed..9baf95639688 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -593,7 +593,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 
- 	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
- 
--	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
-+	if ((idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B)
-+			&& TRAN_TRANSITION_CMD(cmd.opcode)) {
- 		/*
- 		 * Ensure RPMB/R1B command has completed by polling CMD13
- 		 * "Send Status".
-diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
-index 31153f656f41..51b806384ab0 100644
---- a/drivers/mmc/core/block.h
-+++ b/drivers/mmc/core/block.h
-@@ -17,4 +17,9 @@ struct work_struct;
- 
- void mmc_blk_mq_complete_work(struct work_struct *work);
- 
-+#define TRAN_TRANSITION_CMD(cmd) !(cmd == MMC_SEND_STATUS \
-+				       || cmd == MMC_SEND_CID \
-+				       || cmd == MMC_ALL_SEND_CID \
-+				       || cmd == MMC_SEND_CSD)
-+
- #endif
--- 
-2.31.1
+Are these the ones that you have been using for testing?
 
-Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
-Managing Directors: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+> Hopefully that suffices as a couple, otherwise I would buy some
+> that do not advertise it and actually check if they support it anyway.
+> But 2GB SLC listings are kind of rare these days, so it's not as
+> easy to find many that are still sold and available.
 
+Right. I have a whole bunch of old SD cards that I can test. I will
+let you know when I have got some time to test some of them.
+
+The main worry (but I may be wrong) I have with the patch is that it
+could cause problems for other older SDSC cards, which happens to
+incorrectly set the S18A bit. I mean, before UHS-I was introduced in
+the SD spec, this bit was just being reserved and potentially it could
+have *any* value by the card manufacturer. As I said, let me do some
+tests of my older SD cards.
+
+>
+> My point about deviating from the standard was that these cards
+> are already initialized as UHS, they just don't do the voltage switch.
+> So anything reserved for UHS-I (e.g. CMD23 )is already being done
+> by the host with the current linux-mmc,
+> so the standard deviation is already there.
+> Just the voltage switch is missing.
+
+Ah, yes you are right!
+
+We call mmc_sd_init_uhs_card() no matter whether the CCS bit is set.
+Certainly this is a bug. Both the card and host aren't designed to
+work under these conditions/timings.
+
+>
+> Regards,
+> Christian
+>
+
+Kind regards
+Uffe
+
+>
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Sent: Wednesday, May 5, 2021 12:09 PM
+> To: Christian L=C3=B6hle <CLoehle@hyperstone.com>
+> Subject: Re: [PATCH] mmc: enable UHS voltage switch for SDSC if supported
+>
+> On Thu, 22 Apr 2021 at 15:18, Christian L=C3=B6hle <CLoehle@hyperstone.co=
+m> wrote:
+> >
+> > Ignore the reported capacity if the card otherwise reports UHS support.
+> >
+> > Currently SDSC cards reporting UHS support except for the CCS do not ru=
+n
+> > through the voltage switch.
+> > While strictly speaking a SDSC card cannot support UHS in compliance
+> > with the standard, there is no good reason to throttle them that way.
+>
+> Maybe not, but I think the code just tries to conform to the SD spec.
+>
+> > Especially for pSLCs in practice such cards benefit greatly by this pat=
+ch,
+> > as they can be new and UHS supporting, but must not lie about their CCS=
+.
+>
+> Can you provide some concrete examples of SDSC cards that support UHS-I?
+>
+> > The behaviour of linux-mmc for SDSC is deviating from the standard anyw=
+ay
+> > in such a case, as the card is treated as UHS card not supporting the
+> > voltage switch in general.
+> > Such a card will come up as
+> > mmc0: new ultra high speed SDR25 SD card at address 0001.
+> > Thus the subsystem will support CMD23 and others to the card.
+> > But if we deviate from the standard anyway, then we might as well
+> > not throttle SDSC to 25MB/s.
+>
+> Not sure I understand this correctly? Can you elaborate a bit more, so
+> I understand how we deviate from the SD spec here?
+>
+> As far as I understand the spec, SDSC cards shouldn't support UHS-I.
+> If we decide to deviate from the spec to support this anyway, at least
+> we need to know about a couple of cards that actually supports this.
+>
+> Kind regards
+> Uffe
+>
+> >
+> > Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> > ---
+> >  drivers/mmc/core/sd.c | 7 +++----
+> >  1 file changed, 3 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> > index 6fa51a6ed058..281ca2da8e0b 100644
+> > --- a/drivers/mmc/core/sd.c
+> > +++ b/drivers/mmc/core/sd.c
+> > @@ -841,11 +841,10 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr=
+, u32 *cid, u32 *rocr)
+> >                 return err;
+> >
+> >         /*
+> > -        * In case CCS and S18A in the response is set, start Signal Vo=
+ltage
+> > -        * Switch procedure. SPI mode doesn't support CMD11.
+> > +        * In case S18A in the response is set, start Signal Voltage Sw=
+itch
+> > +        * procedure. SPI mode doesn't support CMD11.
+> >          */
+> > -       if (!mmc_host_is_spi(host) && rocr &&
+> > -          ((*rocr & 0x41000000) =3D=3D 0x41000000)) {
+> > +       if (!mmc_host_is_spi(host) && rocr && (*rocr & 0x01000000)) {
+> >                 err =3D mmc_set_uhs_voltage(host, pocr);
+> >                 if (err =3D=3D -EAGAIN) {
+> >                         retries--;
+> > --
+> > 2.31.1
+> >
+> > Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+> > Managing Directors: Dr. Jan Peter Berns.
+> > Commercial register of local courts: Freiburg HRB381782
+> >
+>
+> Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+> Managing Directors: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+>
