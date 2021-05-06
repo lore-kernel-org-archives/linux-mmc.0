@@ -4,61 +4,61 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C049C433B4
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:01:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49FECC433ED
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:04:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8600610A1
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:01:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1654361042
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:04:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233053AbhEFNCN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 May 2021 09:02:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55544 "EHLO
+        id S233233AbhEFNFZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 May 2021 09:05:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233020AbhEFNCN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 09:02:13 -0400
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6611C061763
-        for <linux-mmc@vger.kernel.org>; Thu,  6 May 2021 06:01:14 -0700 (PDT)
-Received: by mail-lj1-x22b.google.com with SMTP id u20so6888295lja.13
-        for <linux-mmc@vger.kernel.org>; Thu, 06 May 2021 06:01:14 -0700 (PDT)
+        with ESMTP id S232985AbhEFNFY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 09:05:24 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74DEFC061763
+        for <linux-mmc@vger.kernel.org>; Thu,  6 May 2021 06:04:26 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id y9so6945211ljn.6
+        for <linux-mmc@vger.kernel.org>; Thu, 06 May 2021 06:04:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=1o9YU1cRcYXzkHmKraCEMWOkwDyM4TPN0AO5wmmdGTY=;
-        b=QGh/DMr3YWyJIdVxRuhgHcwYIwiGHeFKTvJnh/dtmauMQqI1wHd5Evea76xe9greed
-         XtlHlw0rF6mL92DCBVZeB2+U7xlO0HJJZqamj5hTGEMkci98EHlifnwnNF0IiKcVuXgf
-         cBmN3x8SvgbS7DWu+3Vun+cEPE6P/0YkUqjtLY6Se4NZ9vXx+dAfER56e+NsAzxJFHpl
-         Wy/VupXQjfBonvEZeg3XnOwVi/P0sWXhuzY+txk2/wjJOva2ppjDV86zKuVu95wVUgBL
-         lZL3AKRPWncJSitolznnmAbmQV7ZDE5fPfQfBgaxygmNRphn0k0jk7jGCdSoqvhkWfQy
-         ZC+Q==
+        bh=hLhu4a2qeeKN1ThghHVgWBhHswj+unmP67cSTUVDirw=;
+        b=JXcpFGSsXkuwB65R3OnXVCm0UFidSXxrn6blltm71bquZl9btHIMhI9GAQYYzSaLeI
+         xgea5q7+rY4XwJmcP9mtlaCMnDA83ceyMo6JrHum1coXn3p37qE9U56lv5OIqSsaxbi9
+         DU/ImjVgNR4X2YxaJiMt51dcjYeUDG4lVvJpsdksMADuvyLmNPbpWleWToY0IdzwE6tF
+         MtfY64u//1KbZ12PZwct/ury/h9OOWaVaJh5L/AZhg+xeYJBhxqg/0QoovcSTRxEQtcn
+         ZlK49trxBeYvOAUG2zFOe1Wx9qLNB8my0Haj49rwJqN/h3Vu7yrELBe6J5tmjUeRg8tg
+         6rAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=1o9YU1cRcYXzkHmKraCEMWOkwDyM4TPN0AO5wmmdGTY=;
-        b=VBp+5/dq5ovChZujsgjiyxsDLLVBVScpU6Do04r6yPDE9DidVJz3WgV2lbXB4V0uMW
-         wCBqHoL9zk9xwn9iDBEBcFHnfX1aN7St50g+noVG/kI8Ie9SlhMpV8Z1U8FwJf0bFKFI
-         UxHmT24UJN+5AnfjcWBVgGHu4lSwaE+7tNOw8Dw3pFRJRcokn9hUleiU5QmXnmvXxp+8
-         oSbcZcZX9HpVw7PkXn+TJiCiyspCrs55tWYK9nmveGtIdDHKWmjdVD0RAmL5R9tUz1ey
-         ql8hheK1Uz/UwfkXDMhGwYpqMkLPIg8Qp+wXYxe41XDYg7aLF2+YvlCbm191yDedkFBq
-         C0oA==
-X-Gm-Message-State: AOAM531hdx37CIEnBqFaXQ2pvgJzYXm7Nj9yfrhyyLDSeuAR2ZMRSM2u
-        yhWphEP6gpTiszWuwtXVddVwDuEzeeSYjNFFgGyctg==
-X-Google-Smtp-Source: ABdhPJxumvyre7G9VDri6pSA5PmkdD26UhUC2qL62jApVicOYFEU8vPDiZEavFOFM6F7HT1ITASFFaIz9QjawzPlJys=
-X-Received: by 2002:a2e:889a:: with SMTP id k26mr3177134lji.438.1620306071975;
- Thu, 06 May 2021 06:01:11 -0700 (PDT)
+        bh=hLhu4a2qeeKN1ThghHVgWBhHswj+unmP67cSTUVDirw=;
+        b=a2nq0Z68CZQTW0MQqq1kf6nfftQj/Pn7ApHVj0bTUCU27P0PpTyGak9SIA5Et6U+dg
+         rSfo2SgMNuEDvKqaa2KKjeUNfVNJ9e0sfvGA/gfQrmqqeyqbB1kL2/mwJADtR+22K1fn
+         sEmV9mT/g+SiYC16BSk5YO6ksoXlTYP42ayqyPHXGXXuLOaixyN56+6OKQp7NVJLCPWA
+         oFV07kYi1VaFLogwR+jY7ekrcC1o/KVzA4rbTq+V8UJK+J2TXUpJv/lvaLuxzg4qFZu3
+         qJ2zgRKPto+DYm8P9tS419qvwGkXpW1jVpd/TfrT+cYzAGtOOH9fJxAG/gJh11YIGkuK
+         fVdQ==
+X-Gm-Message-State: AOAM532P/78W+fpdTUU5vgzbi9LHE+F2/JwOPC/RXrYpk1Yjk7PabnDV
+        lIxePA6/+3b/UN2DsH03ItBaiDjWWI/Rn0Kku2E2gQ==
+X-Google-Smtp-Source: ABdhPJwyHJtAXrS4OXMtzTzkXb2QMw08W7FLMIWBQGmGPNPCLKn10DtCdbNkaX4ss2LpI4zkSHvC3xbWLsqrLSX844Y=
+X-Received: by 2002:a2e:a369:: with SMTP id i9mr3212788ljn.273.1620306263997;
+ Thu, 06 May 2021 06:04:23 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210504161222.101536-1-ulf.hansson@linaro.org> <20210504161222.101536-9-ulf.hansson@linaro.org>
-In-Reply-To: <20210504161222.101536-9-ulf.hansson@linaro.org>
+References: <20210504161222.101536-1-ulf.hansson@linaro.org> <20210504161222.101536-10-ulf.hansson@linaro.org>
+In-Reply-To: <20210504161222.101536-10-ulf.hansson@linaro.org>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 6 May 2021 15:01:01 +0200
-Message-ID: <CACRpkda9fWzeqLvSX4-fr1hcP7KqWrRQGSFvCM2STYNM_FkL9Q@mail.gmail.com>
-Subject: Re: [PATCH 08/11] mmc: core: Parse the SD SCR register for support of
- CMD48/49 and CMD58/59
+Date:   Thu, 6 May 2021 15:04:12 +0200
+Message-ID: <CACRpkdb_qqJJ2aXb+bCxzm1yoeAy0qeUitCVByFNKinAa4zGhw@mail.gmail.com>
+Subject: Re: [PATCH 09/11] mmc: core: Read the SD function extension registers
+ for power management
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
@@ -75,13 +75,20 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Tue, May 4, 2021 at 6:12 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-> In SD spec v4.x the support for CMD48/49 and CMD58/59 were introduced as
-> optional features. To let the card announce whether it supports the
-> commands, the SCR register has been extended with corresponding support
-> bits. Let's parse and store this information for later use.
+> In SD spec v4.x the SD function extension registers were introduced. A
+> specific function register were added to let the card announce support for
+> optional features in regards to power management. The features that were
+> added are "Power Off Notification", "Power Down Mode" and "Power
+> Sustenance".
+>
+> As a first step, let's read and parse this register for power management
+> during the SD card initialization and store the information about the
+> supported features in the struct mmc_card. In this way, we prepare for
+> subsequent changes to implement the complete support for the new features.
 >
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
+Looks to me like it will work just fine.
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
