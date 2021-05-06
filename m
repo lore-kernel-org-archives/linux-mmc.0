@@ -7,58 +7,58 @@ X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49FECC433ED
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:04:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6DB3C433B4
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:05:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1654361042
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:04:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 846B0610FC
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 May 2021 13:05:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233233AbhEFNFZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 May 2021 09:05:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56236 "EHLO
+        id S231839AbhEFNGO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 May 2021 09:06:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232985AbhEFNFY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 09:05:24 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74DEFC061763
-        for <linux-mmc@vger.kernel.org>; Thu,  6 May 2021 06:04:26 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id y9so6945211ljn.6
-        for <linux-mmc@vger.kernel.org>; Thu, 06 May 2021 06:04:26 -0700 (PDT)
+        with ESMTP id S233115AbhEFNGN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 09:06:13 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D58EC061574
+        for <linux-mmc@vger.kernel.org>; Thu,  6 May 2021 06:05:15 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id 124so7689842lff.5
+        for <linux-mmc@vger.kernel.org>; Thu, 06 May 2021 06:05:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=hLhu4a2qeeKN1ThghHVgWBhHswj+unmP67cSTUVDirw=;
-        b=JXcpFGSsXkuwB65R3OnXVCm0UFidSXxrn6blltm71bquZl9btHIMhI9GAQYYzSaLeI
-         xgea5q7+rY4XwJmcP9mtlaCMnDA83ceyMo6JrHum1coXn3p37qE9U56lv5OIqSsaxbi9
-         DU/ImjVgNR4X2YxaJiMt51dcjYeUDG4lVvJpsdksMADuvyLmNPbpWleWToY0IdzwE6tF
-         MtfY64u//1KbZ12PZwct/ury/h9OOWaVaJh5L/AZhg+xeYJBhxqg/0QoovcSTRxEQtcn
-         ZlK49trxBeYvOAUG2zFOe1Wx9qLNB8my0Haj49rwJqN/h3Vu7yrELBe6J5tmjUeRg8tg
-         6rAQ==
+        bh=TuRMg/p3XcDliVBSgwL/6V4gjxClpTJd4DW+g4l8Xng=;
+        b=tY+IThXQYOpe6FQ492ndMN8tzQu2mNCijbG2rwp5heuJDJq5LUmUtVtReXzJpH+u7F
+         p//mzGeN8KObivJXyDIhwX04m3RygLMWCBcV3bL04diWQjaKe5uDGfWjQlVQ/3qg1rMV
+         Gd2kZhwaJIzAwLAMLSpY1dl54VDQymjcVxOvD2QWyHTiRueiwbz9cO6cbPPKXkSqtFZp
+         iVK8Q3/btQM5gDAy6LlvIT9swLzP+qARz3ioMeduP3rMplhFgP7c80zm5Woclb0+7BcQ
+         TT/vKeT+F/0svsfArijPMxaGvAlBTlVN01DMxcl2qh9LyPH0ovQ91xgI1nySphIM1z1u
+         oicw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=hLhu4a2qeeKN1ThghHVgWBhHswj+unmP67cSTUVDirw=;
-        b=a2nq0Z68CZQTW0MQqq1kf6nfftQj/Pn7ApHVj0bTUCU27P0PpTyGak9SIA5Et6U+dg
-         rSfo2SgMNuEDvKqaa2KKjeUNfVNJ9e0sfvGA/gfQrmqqeyqbB1kL2/mwJADtR+22K1fn
-         sEmV9mT/g+SiYC16BSk5YO6ksoXlTYP42ayqyPHXGXXuLOaixyN56+6OKQp7NVJLCPWA
-         oFV07kYi1VaFLogwR+jY7ekrcC1o/KVzA4rbTq+V8UJK+J2TXUpJv/lvaLuxzg4qFZu3
-         qJ2zgRKPto+DYm8P9tS419qvwGkXpW1jVpd/TfrT+cYzAGtOOH9fJxAG/gJh11YIGkuK
-         fVdQ==
-X-Gm-Message-State: AOAM532P/78W+fpdTUU5vgzbi9LHE+F2/JwOPC/RXrYpk1Yjk7PabnDV
-        lIxePA6/+3b/UN2DsH03ItBaiDjWWI/Rn0Kku2E2gQ==
-X-Google-Smtp-Source: ABdhPJwyHJtAXrS4OXMtzTzkXb2QMw08W7FLMIWBQGmGPNPCLKn10DtCdbNkaX4ss2LpI4zkSHvC3xbWLsqrLSX844Y=
-X-Received: by 2002:a2e:a369:: with SMTP id i9mr3212788ljn.273.1620306263997;
- Thu, 06 May 2021 06:04:23 -0700 (PDT)
+        bh=TuRMg/p3XcDliVBSgwL/6V4gjxClpTJd4DW+g4l8Xng=;
+        b=fvEC7Us2zAEB39jtd73V5m2ieAF/KLSJW0t5c2cihI7vGAcOp5MwbHm7fH8Ng9V1pt
+         BPDccO7h1Oq6O50VWFAVnBlUspGnb/CAHjTIE3MYyUG/jKCXdoFS6nTHASCpvFWteIB5
+         X/s9APAaqPb204ayR3MdYbrREoesz5XnzN1LEVnicnAiCd4tZiqh9DdGuvDueZfwBkIk
+         +HkVNfa9HugdMsEpbHA9m/icCoX5TWMgM75eKkQiDqQqmmE7eltSTfP9Xmu/d/ev16ah
+         ZmFXWo/uHGKNThXaZRvXjvzq1ZUNeSAHUPrTzAUHjyoA+3Dz/U4BSLSB1IXzbVbvG5SE
+         TwJw==
+X-Gm-Message-State: AOAM533rAits8030qo0v/3zg9cnQisnbyg0k/1dlD4j8nskTnGg2fpm1
+        q86RzbgiyNfN1PIFqjgAv1pKZlBdHEjjgObDNXTgXw==
+X-Google-Smtp-Source: ABdhPJyUGRSu7ce4hdQJtL6n62WTj9npsWK0hdYAHjTMtnVkF0ZjJGViA4xhHzR1vUmUsDTkrNKtph4dSkX1R94xwPg=
+X-Received: by 2002:a05:6512:6d5:: with SMTP id u21mr2857313lff.586.1620306313768;
+ Thu, 06 May 2021 06:05:13 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210504161222.101536-1-ulf.hansson@linaro.org> <20210504161222.101536-10-ulf.hansson@linaro.org>
-In-Reply-To: <20210504161222.101536-10-ulf.hansson@linaro.org>
+References: <20210504161222.101536-1-ulf.hansson@linaro.org> <20210504161222.101536-11-ulf.hansson@linaro.org>
+In-Reply-To: <20210504161222.101536-11-ulf.hansson@linaro.org>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 6 May 2021 15:04:12 +0200
-Message-ID: <CACRpkdb_qqJJ2aXb+bCxzm1yoeAy0qeUitCVByFNKinAa4zGhw@mail.gmail.com>
-Subject: Re: [PATCH 09/11] mmc: core: Read the SD function extension registers
- for power management
+Date:   Thu, 6 May 2021 15:05:02 +0200
+Message-ID: <CACRpkdaUVx3mRkTbRki1vXDpP7Cjvj_tYiR0iefjjX6=uGeDfA@mail.gmail.com>
+Subject: Re: [PATCH 10/11] mmc: core: Read performance enhancements registers
+ for SD cards
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
@@ -75,20 +75,18 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 On Tue, May 4, 2021 at 6:12 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 
-> In SD spec v4.x the SD function extension registers were introduced. A
-> specific function register were added to let the card announce support for
-> optional features in regards to power management. The features that were
-> added are "Power Off Notification", "Power Down Mode" and "Power
-> Sustenance".
+> In SD spec v6.x the SD function extension registers for performance
+> enhancements were introduced. These registers let the SD card announce
+> supports for various performance related features, like "self-maintenance",
+> "cache" and "command queuing".
 >
-> As a first step, let's read and parse this register for power management
-> during the SD card initialization and store the information about the
-> supported features in the struct mmc_card. In this way, we prepare for
-> subsequent changes to implement the complete support for the new features.
+> Let's extend the parsing of SD function extension registers and store the
+> information in the struct mmc_card. This prepares for subsequent changes to
+> implement the complete support for new the performance enhancement
+> features.
 >
 > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Looks to me like it will work just fine.
 Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
 Yours,
