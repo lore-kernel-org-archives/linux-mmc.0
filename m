@@ -2,335 +2,254 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 432C3C433B4
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 02:06:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F13BC433ED
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 02:14:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 022FF6113D
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 02:06:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E4B5561157
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 02:14:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232927AbhEGCHO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 May 2021 22:07:14 -0400
-Received: from regular1.263xmail.com ([211.150.70.202]:41736 "EHLO
-        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231288AbhEGCHN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 22:07:13 -0400
-Received: from localhost (unknown [192.168.167.235])
-        by regular1.263xmail.com (Postfix) with ESMTP id 5E1E76F2;
-        Fri,  7 May 2021 10:06:12 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-SKE-CHECKED: 1
-X-ABS-CHECKED: 1
-Received: from [172.16.12.64] (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P2749T140649141618432S1620353171069780_;
-        Fri, 07 May 2021 10:06:11 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <f07ac2728411d57c85dcecad5e32dbc2>
-X-RL-SENDER: shawn.lin@rock-chips.com
-X-SENDER: lintao@rock-chips.com
-X-LOGIN-NAME: shawn.lin@rock-chips.com
-X-FST-TO: linux-kernel@vger.kernel.org
-X-RCPT-COUNT: 10
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-Message-ID: <1a4227c1-4d55-b55f-2fc6-9f9562ef02e5@rock-chips.com>
-Date:   Fri, 7 May 2021 10:06:11 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101
- Thunderbird/87.0
-Cc:     shawn.lin@rock-chips.com, Linus Walleij <linus.walleij@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 09/11] mmc: core: Read the SD function extension registers
- for power management
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>
-References: <20210504161222.101536-1-ulf.hansson@linaro.org>
- <20210504161222.101536-10-ulf.hansson@linaro.org>
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <20210504161222.101536-10-ulf.hansson@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        id S230072AbhEGCPM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 May 2021 22:15:12 -0400
+Received: from new1-smtp.messagingengine.com ([66.111.4.221]:33147 "EHLO
+        new1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230019AbhEGCPM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 22:15:12 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.nyi.internal (Postfix) with ESMTP id DE7BB581013;
+        Thu,  6 May 2021 22:14:12 -0400 (EDT)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Thu, 06 May 2021 22:14:12 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm2; bh=8US/FJXWvzXli0qVPTXQtzYtNN8GfR+
+        Rd/DBBdsQDOU=; b=ABCX2VIlaxgv6fmVYZqhYciuL0pnba2JJR4jyn9sC1tqCoY
+        uY9odhr4vFeNh7apkKAZSrnvtnvwNMpP9Rh/5ILnCf6evnsWvLQtVFepEnc9MDjz
+        NcrLsEgFTkIZdMFOR9qBYRIgMN4YXsSikdICedlMEpZH0i/HVgIlAMYRCq2Imlj5
+        yTLaYGudFProF0KNZcDLoD2o43A0gNul9hijJyh+oPO/edY7Rs5WefNGzHRygWQc
+        7FKdPUa4qXxi6QEloh9mmvwBURJy34HX7abTCJvo8vyF6Jxbx4Mz9nakdaUqSUGf
+        mseNKEcXYnYDwQ7hRIHrUJvNjsyKSoF/6C6YM7g==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=8US/FJ
+        XWvzXli0qVPTXQtzYtNN8GfR+Rd/DBBdsQDOU=; b=jigSVRzEaV+GHWRtNmkZNB
+        XHgBICfB7AVc2fNowNYCMpFeeUTfJphXVku0gDJgIRFmAN0otoFekDDmGTmWfYCz
+        vUjCVKT+Q6XH4r5k3kX1vPJpUb1Nl3OinfKS5twXRgczWZox70T3uQSv3WB7m+mr
+        pWgCkyFXm5Y3TRdPbM3ztM5Fge/waSbM8w7ySh7P9Cji5dEIKbMtAOPmm7MeO+CV
+        E2JqT49ho5pooNNthF7X96uS6NCov+QeSGRYOIWpPJKPj8trCJBN7cB/QwLsSnr/
+        j8wv6VJInN4pjrwulNRSAxM7Svbioe0GRgEfr/8deWhfnRx18Hk+Zzf6qIph2riQ
+        ==
+X-ME-Sender: <xms:cqKUYKfwNnA-nK8XG7gvlQKJHAK_r1ZKeO8juJ3GKkK1AzUkAQxQwA>
+    <xme:cqKUYEOdhBdmoc1kAfSkgVimZ0_geYg2FBzt1vn5GYc8avQqbKxYgjVA0_3ieg3OI
+    gulNu7HSdwYlVnn2Q>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdeguddgheduucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
+    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:cqKUYLh_5TPtFEMPLP2QEjFWwCNvkPn2Wxd0RENrHQ8nhejy6KDcjg>
+    <xmx:cqKUYH8d-ttfrB0I4BUVFTbgA8VFjlTfUpVDSjUCPktym4bJ8h7ebA>
+    <xmx:cqKUYGttVu9CDhjP0V0L_Im3zp15es4rKycxphqlcwD9CosTC_Irtg>
+    <xmx:dKKUYLPPSdkMUApAbllqTyL7xZXf7HOEyPQeSKOyy9boN4VzVyTsQg>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 93D0CA00079; Thu,  6 May 2021 22:14:10 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-448-gae190416c7-fm-20210505.004-gae190416
+Mime-Version: 1.0
+Message-Id: <fecc9021-ab4b-4047-a664-47b1bd867cb3@www.fastmail.com>
+In-Reply-To: <20210506100312.1638-5-steven_lee@aspeedtech.com>
+References: <20210506100312.1638-1-steven_lee@aspeedtech.com>
+ <20210506100312.1638-5-steven_lee@aspeedtech.com>
+Date:   Fri, 07 May 2021 11:43:49 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Steven Lee" <steven_lee@aspeedtech.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Philipp Zabel" <p.zabel@pengutronix.de>,
+        "Ryan Chen" <ryanchen.aspeed@gmail.com>,
+        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list" <linux-kernel@vger.kernel.org>
+Cc:     "Hongwei Zhang" <Hongweiz@ami.com>,
+        "Ryan Chen" <ryan_chen@aspeedtech.com>,
+        "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>
+Subject: =?UTF-8?Q?Re:_[PATCH_v3_4/5]_mmc:_sdhci-of-aspeed:_Add_a_helper_for_upda?=
+ =?UTF-8?Q?ting_capability_register.?=
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Steven,
 
-On 2021/5/5 0:12, Ulf Hansson wrote:
-> In SD spec v4.x the SD function extension registers were introduced. A
+I have some minor comments. I expect you're going to do a v4 of the 
+series, so if you'd like to clean them up in the process I'd appreciate 
+it.
 
-I have a v4.0 spec and it doesn't state that v4.0 suppports reading
-extension registers but just says TBD instead.  So I guess v4.x doesn't
-include v4.0 ?
+However, from a pragmatic standpoint I think the patch is in good shape.
 
-> specific function register were added to let the card announce support for
-> optional features in regards to power management. The features that were
-> added are "Power Off Notification", "Power Down Mode" and "Power
-> Sustenance".
+On Thu, 6 May 2021, at 19:33, Steven Lee wrote:
+> The patch add a new function aspeed_sdc_set_slot_capability() for
+> updating sdhci capability register.
+
+The commit message should explain why the patch is necessary and not 
+what it does, as what it does is contained in the diff.
+
+It's okay to explain *how* the patch acheives its goals if the 
+implementation is subtle or complex.
+
+Maybe the commit message could be something like:
+
+
+```
+Configure the SDHCIs as specified by the devicetree.
+
+The hardware provides capability configuration registers for each SDHCI 
+in the global configuration space for the SD controller. Writes to the 
+global capability registers are mirrored to the capability registers in 
+the associated SDHCI. Configuration of the capabilities must be written 
+through the mirror registers prior to initialisation of the SDHCI.
+```
+
 > 
-> As a first step, let's read and parse this register for power management
-> during the SD card initialization and store the information about the
-> supported features in the struct mmc_card. In this way, we prepare for
-> subsequent changes to implement the complete support for the new features.
-> 
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
 > ---
->   drivers/mmc/core/sd.c    | 178 +++++++++++++++++++++++++++++++++++++++
->   include/linux/mmc/card.h |  13 +++
->   include/linux/mmc/sd.h   |   3 +
->   3 files changed, 194 insertions(+)
+>  drivers/mmc/host/sdhci-of-aspeed.c | 57 ++++++++++++++++++++++++++++++
+>  1 file changed, 57 insertions(+)
 > 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index de7b5f8df550..cb5e8b2fc32f 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -996,6 +996,177 @@ static bool mmc_sd_card_using_v18(struct mmc_card *card)
->   	       (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
->   }
->   
-> +static int sd_read_ext_reg(struct mmc_card *card, u8 fno, u8 page,
-> +			   u16 offset, u16 len, u8 *reg_buf)
-> +{
-> +	u32 cmd_args;
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c 
+> b/drivers/mmc/host/sdhci-of-aspeed.c
+> index d001c51074a0..4979f98ffb52 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -31,6 +31,11 @@
+>  #define   ASPEED_SDC_S0_PHASE_OUT_EN	GENMASK(1, 0)
+>  #define   ASPEED_SDC_PHASE_MAX		31
+>  
+> +/* SDIO{10,20} */
+> +#define ASPEED_SDC_CAP1_1_8V           (0 * 32 + 26)
+> +/* SDIO{14,24} */
+> +#define ASPEED_SDC_CAP2_SDR104         (1 * 32 + 1)
 > +
-> +	/*
-> +	 * Command arguments of CMD48:
-> +	 * [31:31] MIO (0 = memory).
-> +	 * [30:27] FNO (function number).
-> +	 * [26:26] reserved (0).
-> +	 * [25:18] page number.
-> +	 * [17:9] offset address.
-> +	 * [8:0] length (0 = 1 byte, 1ff = 512 bytes).
-> +	 */
-> +	cmd_args = fno << 27 | page << 18 | offset << 9 | (len -1);
+>  struct aspeed_sdc {
+>  	struct clk *clk;
+>  	struct resource *res;
+> @@ -70,8 +75,42 @@ struct aspeed_sdhci {
+>  	u32 width_mask;
+>  	struct mmc_clk_phase_map phase_map;
+>  	const struct aspeed_sdhci_phase_desc *phase_desc;
 > +
-> +	return mmc_send_adtc_data(card, card->host, SD_READ_EXTR_SINGLE,
-> +				  cmd_args, reg_buf, 512);
-> +}
-> +
-> +static int sd_parse_ext_reg_power(struct mmc_card *card, u8 fno, u8 page,
-> +				  u16 offset)
-> +{
-> +	int err;
-> +	u8 *reg_buf;
-> +
-> +	reg_buf = kzalloc(512, GFP_KERNEL);
-> +	if (!reg_buf)
-> +		return -ENOMEM;
-> +
-> +	/* Read the extension register for power management function. */
-> +	err = sd_read_ext_reg(card, fno, page, offset, 512, reg_buf);
-> +	if (err) {
-> +		pr_warn("%s: error %d reading PM func of ext reg\n",
-> +			mmc_hostname(card->host), err);
-> +		goto out;
-> +	}
-> +
-> +	/* PM revision consists of 4 bits. */
-> +	card->ext_power.rev = reg_buf[0] & 0xf;
-> +
-> +	/* Power Off Notification support at bit 4. */
-> +	if (reg_buf[1] & 0x10)
-> +		card->ext_power.feature_support |= SD_EXT_POWER_OFF_NOTIFY;
-> +
-> +	/* Power Sustenance support at bit 5. */
-> +	if (reg_buf[1] & 0x20)
-> +		card->ext_power.feature_support |= SD_EXT_POWER_SUSTENANCE;
-> +
-> +	/* Power Down Mode support at bit 6. */
-> +	if (reg_buf[1] & 0x40)
-> +		card->ext_power.feature_support |= SD_EXT_POWER_DOWN_MODE;
-> +
-> +	card->ext_power.fno = fno;
-> +	card->ext_power.page = page;
-> +	card->ext_power.offset = offset;
-> +
-> +out:
-> +	kfree(reg_buf);
-> +	return err;
-> +}
-> +
-> +static int sd_parse_ext_reg(struct mmc_card *card, u8 *gen_info_buf,
-> +			    u16 *next_ext_addr)
-> +{
-> +	u8 num_regs, fno, page;
-> +	u16 sfc, offset, ext = *next_ext_addr;
-> +	u32 reg_addr;
-> +
-> +	/*
-> +	 * Parse only one register set per extension, as that is sufficient to
-> +	 * support the standard functions. This means another 48 bytes in the
-> +	 * buffer must be available.
-> +	 */
-> +	if (ext + 48 > 512)
-> +		return -EFAULT;
-> +
-> +	/* Standard Function Code */
-> +	memcpy(&sfc, &gen_info_buf[ext], 2);
-> +
-> +	/* Address to the next extension. */
-> +	memcpy(next_ext_addr, &gen_info_buf[ext + 40], 2);
-> +
-> +	/* Number of registers for this extension. */
-> +	num_regs = gen_info_buf[ext + 42];
-> +
-> +	/* We support only one register per extension. */
-> +	if (num_regs != 1)
-> +		return 0;
-> +
-> +	/* Extension register address. */
-> +	memcpy(&reg_addr, &gen_info_buf[ext + 44], 4);
-> +
-> +	/* 9 bits (0 to 8) contains the offset address. */
-> +	offset = reg_addr & 0x1ff;
-> +
-> +	/* 8 bits (9 to 16) contains the page number. */
-> +	page = reg_addr >> 9 & 0xff ;
-> +
-> +	/* 4 bits (18 to 21) contains the function number. */
-> +	fno = reg_addr >> 18 & 0xf;
-> +
-> +	/* Standard Function Code for power management. */
-> +	if (sfc == 0x1)
-> +		return sd_parse_ext_reg_power(card, fno, page, offset);
-> +
-> +	return 0;
-> +}
-> +
-> +static int sd_read_ext_regs(struct mmc_card *card)
-> +{
-> +	int err, i;
-> +	u8 num_ext, *gen_info_buf;
-> +	u16 rev, len, next_ext_addr;
-> +
-> +	if (mmc_host_is_spi(card->host))
-> +		return 0;
-> +
-> +	if (!(card->scr.cmds & SD_SCR_CMD48_SUPPORT))
-> +		return 0;
-> +
-> +	gen_info_buf = kzalloc(512, GFP_KERNEL);
-> +	if (!gen_info_buf)
-> +		return -ENOMEM;
-> +
-> +	/*
-> +	 * Read 512 bytes of general info, which is found at function number 0,
-> +	 * at page 0 and with no offset.
-> +	 */
-> +	err = sd_read_ext_reg(card, 0, 0, 0, 512, gen_info_buf);
-> +	if (err) {
-> +		pr_warn("%s: error %d reading general info of SD ext reg\n",
-> +			mmc_hostname(card->host), err);
-> +		goto out;
-> +	}
-> +
-> +	/* General info structure revision. */
-> +	memcpy(&rev, &gen_info_buf[0], 2);
-> +
-> +	/* Length of general info in bytes. */
-> +	memcpy(&len, &gen_info_buf[2], 2);
-> +
-> +	/* Number of extensions to be find. */
-> +	num_ext = gen_info_buf[4];
-> +
-> +	/* We support revision 0, but limit it to 512 bytes for simplicity. */
-> +	if (rev != 0 || len > 512) {
-> +		pr_warn("%s: non-supported SD ext reg layout\n",
-> +			mmc_hostname(card->host));
-> +		goto out;
-> +	}
-> +
-> +	/*
-> +	 * Parse the extension registers. The first extension should start
-> +	 * immediately after the general info header (16 bytes).
-> +	 */
-> +	next_ext_addr = 16;
-> +	for (i = 0; i < num_ext; i++) {
-> +		err = sd_parse_ext_reg(card, gen_info_buf, &next_ext_addr);
-> +		if (err) {
-> +			pr_warn("%s: error %d parsing SD ext reg\n",
-> +				mmc_hostname(card->host), err);
-> +			goto out;
-> +		}
-> +	}
-> +
-> +out:
-> +	kfree(gen_info_buf);
-> +	return err;
-> +}
-> +
->   /*
->    * Handle the detection and initialisation of a card.
->    *
-> @@ -1144,6 +1315,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->   		}
->   	}
->   
-> +	if (!oldcard) {
-> +		/* Read/parse the extension registers. */
-> +		err = sd_read_ext_regs(card);
-> +		if (err)
-> +			goto free_card;
-> +	}
-> +
->   	if (host->cqe_ops && !host->cqe_enabled) {
->   		err = host->cqe_ops->cqe_enable(host, card);
->   		if (!err) {
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 858fc4d11240..03a862e93594 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -191,6 +191,18 @@ struct sd_switch_caps {
->   #define SD_MAX_CURRENT_800	(1 << SD_SET_CURRENT_LIMIT_800)
->   };
->   
-> +struct sd_ext_reg {
-> +	u8			fno;
-> +	u8			page;
-> +	u16			offset;
-> +	u8			rev;
-> +	u8			feature_support;
-> +/* Power Management Function. */
-> +#define SD_EXT_POWER_OFF_NOTIFY	(1<<0)
-> +#define SD_EXT_POWER_SUSTENANCE	(1<<1)
-> +#define SD_EXT_POWER_DOWN_MODE	(1<<2)
-> +};
-> +
->   struct sdio_cccr {
->   	unsigned int		sdio_vsn;
->   	unsigned int		sd_vsn;
-> @@ -292,6 +304,7 @@ struct mmc_card {
->   	struct sd_scr		scr;		/* extra SD information */
->   	struct sd_ssr		ssr;		/* yet more SD information */
->   	struct sd_switch_caps	sw_caps;	/* switch (CMD6) caps */
-> +	struct sd_ext_reg	ext_power;	/* SD extension reg for PM */
->   
->   	unsigned int		sdio_funcs;	/* number of SDIO functions */
->   	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
-> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
-> index 2236aa540faa..43bfc5c39ad4 100644
-> --- a/include/linux/mmc/sd.h
-> +++ b/include/linux/mmc/sd.h
-> @@ -29,6 +29,9 @@
->   #define SD_APP_OP_COND           41   /* bcr  [31:0] OCR         R3  */
->   #define SD_APP_SEND_SCR          51   /* adtc                    R1  */
->   
-> +  /* class 11 */
-> +#define SD_READ_EXTR_SINGLE      48   /* adtc [31:0]             R1  */
-> +
->   /* OCR bit definitions */
->   #define SD_OCR_S18R		(1 << 24)    /* 1.8V switching request */
->   #define SD_ROCR_S18A		SD_OCR_S18R  /* 1.8V switching accepted by card */
-> 
+>  };
+>  
+> +/*
+> + * The function sets the mirror register for updating
+> + * capbilities of the current slot.
+> + *
+> + *   slot | capability  | caps_reg | mirror_reg
+> + *   -----|-------------|----------|------------
+> + *     0  | CAP1_1_8V   | SDIO140  |   SDIO10
+> + *     0  | CAP2_SDR104 | SDIO144  |   SDIO14
+> + *     1  | CAP1_1_8V   | SDIO240  |   SDIO20
+> + *     1  | CAP2_SDR104 | SDIO244  |   SDIO24
 
+It would be nice to align the columns to improve readability.
 
+> + */
+> +static void aspeed_sdc_set_slot_capability(struct sdhci_host *host,
+> +					   struct aspeed_sdc *sdc,
+> +					   int capability,
+> +					   bool enable,
+> +					   u8 slot)
+
+I prefer we don't take up so much vertical space here. I think this 
+could be just a couple of lines with multiple variables per line. We 
+can go to 100 chars per line.
+
+> +{
+> +	u8 cap_reg;
+> +	u32 mirror_reg_offset, cap_val;
+
+The rest of the driver follows "reverse christmas tree" (longest to 
+shortest declaration) style, so I prefer we try to maintain consistency 
+where we can. Essentially, declare them in this order:
+
+u32 mirror_reg_offset;
+u32 cap_val;
+u8 cap_reg;
+
+> +
+> +	if (slot > 1)
+> +		return;
+> +
+> +	cap_reg = capability / 32;
+> +	cap_val = sdhci_readl(host, 0x40 + (cap_reg * 4));
+> +	if (enable)
+> +		cap_val |= BIT(capability % 32);
+> +	else
+> +		cap_val &= ~BIT(capability % 32);
+> +	mirror_reg_offset = ((slot + 1) * 0x10) + (cap_reg * 4);
+> +	writel(cap_val, sdc->regs + mirror_reg_offset);
+> +}
+> +
+>  static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
+>  					   struct aspeed_sdhci *sdhci,
+>  					   bool bus8)
+> @@ -329,6 +368,7 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+>  {
+>  	const struct aspeed_sdhci_pdata *aspeed_pdata;
+>  	struct sdhci_pltfm_host *pltfm_host;
+> +	struct device_node *np = pdev->dev.of_node;
+
+Again here with the reverse-christmas-tree style, so:
+
+const struct aspeed_sdhci_pdata *aspeed_pdata;
+struct device_node *np = pdev->dev.of_node;
+struct sdhci_pltfm_host *pltfm_host;
+...
+
+>  	struct aspeed_sdhci *dev;
+>  	struct sdhci_host *host;
+>  	struct resource *res;
+> @@ -372,6 +412,23 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
+>  
+>  	sdhci_get_of_property(pdev);
+>  
+> +	if (of_property_read_bool(np, "mmc-hs200-1_8v") ||
+> +	    of_property_read_bool(np, "sd-uhs-sdr104")) {
+> +		aspeed_sdc_set_slot_capability(host,
+> +					       dev->parent,
+> +					       ASPEED_SDC_CAP1_1_8V,
+> +					       true,
+> +					       slot);
+
+Again, this would be nicer if we compress it to as few lines as possible.
+
+> +	}
+> +
+> +	if (of_property_read_bool(np, "sd-uhs-sdr104")) {
+> +		aspeed_sdc_set_slot_capability(host,
+> +					       dev->parent,
+> +					       ASPEED_SDC_CAP2_SDR104,
+> +					       true,
+> +					       slot);
+
+As above.
+
+Cheers,
+
+Andrew
