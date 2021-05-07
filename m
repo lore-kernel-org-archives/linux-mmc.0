@@ -2,139 +2,263 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 871F0C433B4
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 01:40:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 525DCC433ED
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 01:42:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3DA79613B9
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 01:40:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1897561132
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 01:42:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232391AbhEGBlv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 May 2021 21:41:51 -0400
-Received: from new1-smtp.messagingengine.com ([66.111.4.221]:58385 "EHLO
-        new1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229801AbhEGBlu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 21:41:50 -0400
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailnew.nyi.internal (Postfix) with ESMTP id 57279581171;
-        Thu,  6 May 2021 21:40:51 -0400 (EDT)
-Received: from imap2 ([10.202.2.52])
-  by compute3.internal (MEProxy); Thu, 06 May 2021 21:40:51 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
-        mime-version:message-id:in-reply-to:references:date:from:to:cc
-        :subject:content-type; s=fm2; bh=4uW9jOMoITdaAvwQyvfGU+oL6PMdn7o
-        JQL0rT3U+CBY=; b=hvFNRdFlIfXCWEteGHIMGamk7VtyaLR4+TmQByhOt3QFSc6
-        keFzQiqUFFy2GeFAM5Rns8CLA1V1zlnMHbrrBncnW4AEfwl0YiOSQ/fnq9m8NtbW
-        9rkDgiF2glUgKPFj/w5vfd5qzTCLdBnSrmYAVxUOyataboXuaqB6BXWKJOhItMLC
-        bUdKiWOB3y2hMUG+9DR3BlFzLiZGd2xi5jAgpGD43Wc/z9t0BM5GTyTi9fFml/FC
-        YjHGeJYMRhGAMtMGWjOfhiuFdI/IgeLRR/39MHIkHcp1UAcqiPSga+J6V2Aq3eBB
-        8/VnaSv/5INQxpcBF0MIYj47awt9RBhNaeoeqOA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=4uW9jO
-        MoITdaAvwQyvfGU+oL6PMdn7oJQL0rT3U+CBY=; b=D9lU4DHOT71DwkCU/OS8gc
-        xFbih9sFE3tuzLCcwZJNQ8ZOvkGLAQlPdVXTGBGzeQjD1zoHWls01fwHAlkputEU
-        fETzfWVvLDr3A9D8klywJ5FAPlQJMaKt9H5azbkjfqvfi/pRSoiulcuqpGREzt4f
-        AHKGq4iyjqdhz4AMNUL/RQ7LSW6pA02pVz9I4jC5FdEMfRSwWYLLyVsJv6waOCQ3
-        7aL4gBU2K56cV3i92nEwKjNBJNp5fIboP7LniCv2ZvdoHhUzG4AGeN3A2R8LiQTF
-        kY5wWVIz4VEJPvTxf5c2qF84G7wOrwlcAuNCycl7Eu0iVFzu+fHJCrRjD0eJLRgQ
-        ==
-X-ME-Sender: <xms:oJqUYJZ1sf_VXlAk7Pyf54fYQfxtJfvMHLQZorq-XHcDrTM5oKAc0A>
-    <xme:oJqUYAbxcRAsIFE7GqAB6_MaBwOItwg1AXHzEYz6l8DiLrq0CwnIMjy6ln8coOnH0
-    fJEWJao52JrLOqF4Q>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdeguddggeegucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
-    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
-    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
-    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
-    eprghnughrvgifsegrjhdrihgurdgruh
-X-ME-Proxy: <xmx:oJqUYL9b97uLezl4Krp4-FlBWFPVQSYT91oiEyphCrIa2D56p7I9_w>
-    <xmx:oJqUYHoWt7-dZLn2fnli76GX-6Qv0Ao1IEKZhxw98t5BpkGvfzwHFA>
-    <xmx:oJqUYEry4d8qlgD_Kr8jcnp7pOSh8c5jMKhd2RM8z3X-4iJBMfFAAQ>
-    <xmx:o5qUYB4-opMRfOD9borLcXLUj8KgGrgniu7WBNvdUPxeow44caUgAA>
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id E7C5FA00079; Thu,  6 May 2021 21:40:48 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.5.0-alpha0-448-gae190416c7-fm-20210505.004-gae190416
-Mime-Version: 1.0
-Message-Id: <8611c4a7-8c65-4d7d-90d5-37c80faa3142@www.fastmail.com>
-In-Reply-To: <20210506100312.1638-3-steven_lee@aspeedtech.com>
-References: <20210506100312.1638-1-steven_lee@aspeedtech.com>
- <20210506100312.1638-3-steven_lee@aspeedtech.com>
-Date:   Fri, 07 May 2021 11:10:28 +0930
-From:   "Andrew Jeffery" <andrew@aj.id.au>
-To:     "Steven Lee" <steven_lee@aspeedtech.com>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Rob Herring" <robh+dt@kernel.org>,
-        "Joel Stanley" <joel@jms.id.au>,
-        "Adrian Hunter" <adrian.hunter@intel.com>,
-        "Philipp Zabel" <p.zabel@pengutronix.de>,
-        "Ryan Chen" <ryanchen.aspeed@gmail.com>,
-        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
-        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list" <linux-kernel@vger.kernel.org>
-Cc:     "Ryan Chen" <ryan_chen@aspeedtech.com>,
-        "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>,
-        "Hongwei Zhang" <Hongweiz@ami.com>
-Subject: =?UTF-8?Q?Re:_[PATCH_v3_2/5]_ARM:_dts:_aspeed:_ast2600evb:_Add_comment_f?=
- =?UTF-8?Q?or_gpio_regulator_of_sdhci?=
-Content-Type: text/plain
+        id S230433AbhEGBnm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 May 2021 21:43:42 -0400
+Received: from regular1.263xmail.com ([211.150.70.202]:57614 "EHLO
+        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229801AbhEGBnm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 May 2021 21:43:42 -0400
+Received: from localhost (unknown [192.168.167.32])
+        by regular1.263xmail.com (Postfix) with ESMTP id 51C0A694;
+        Fri,  7 May 2021 09:42:21 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-ANTISPAM-LEVEL: 2
+X-SKE-CHECKED: 1
+X-ABS-CHECKED: 1
+Received: from [172.16.12.64] (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P18566T140528133846784S1620351738235284_;
+        Fri, 07 May 2021 09:42:19 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <a10d003676044a432ba5bce4c0d3867d>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: linux-kernel@vger.kernel.org
+X-RCPT-COUNT: 10
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+Message-ID: <64729494-6a61-99f9-db08-ab9d5f6af4cf@rock-chips.com>
+Date:   Fri, 7 May 2021 09:42:18 +0800
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101
+ Thunderbird/87.0
+Cc:     shawn.lin@rock-chips.com, Linus Walleij <linus.walleij@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 01/11] mmc: core: Drop open coding when preparing commands
+ with busy signaling
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>
+References: <20210504161222.101536-1-ulf.hansson@linaro.org>
+ <20210504161222.101536-2-ulf.hansson@linaro.org>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <20210504161222.101536-2-ulf.hansson@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 2021/5/5 0:12, Ulf Hansson wrote:
+> Similar code for validating the host->max_busy_timeout towards the current
+> command's busy timeout, exists in mmc_do_erase(), mmc_sleep() and
+> __mmc_switch(). Let's move the common code into a helper function.
 
+Looks nice.
 
-On Thu, 6 May 2021, at 19:33, Steven Lee wrote:
-> Add the description for describing the AST2600-A2 EVB reference design of
-> GPIO regulators.
+Reviewed-by: Shawn Lin <shawn.lin@rock-chips.com>
+
 > 
-> Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 > ---
->  arch/arm/boot/dts/aspeed-ast2600-evb.dts | 15 +++++++++++++++
->  1 file changed, 15 insertions(+)
+>   drivers/mmc/core/core.c    | 20 ++----------------
+>   drivers/mmc/core/mmc.c     | 20 +++---------------
+>   drivers/mmc/core/mmc_ops.c | 42 +++++++++++++++++++++-----------------
+>   drivers/mmc/core/mmc_ops.h |  3 +++
+>   4 files changed, 31 insertions(+), 54 deletions(-)
 > 
-> diff --git a/arch/arm/boot/dts/aspeed-ast2600-evb.dts 
-> b/arch/arm/boot/dts/aspeed-ast2600-evb.dts
-> index 2772796e215e..1ae0facc3d5f 100644
-> --- a/arch/arm/boot/dts/aspeed-ast2600-evb.dts
-> +++ b/arch/arm/boot/dts/aspeed-ast2600-evb.dts
-> @@ -104,6 +104,21 @@
->  	status = "okay";
->  };
->  
-> +/*
-> + * The signal voltage of sdhci0 and sdhci1 on AST2600-A2 EVB is able to be
-> + * toggled by GPIO pins.
-> + * In the reference design, GPIOV0 of AST2600-A2 EVB is connected to the
-> + * power load switch that providing 3.3v to sdhci0 vdd, GPIOV1 is connected to
-> + * a 1.8v and a 3.3v power load switch that providing signal voltage to
-> + * sdhci0 bus.
-> + * If GPIOV0 is active high, sdhci0 is enabled, otherwise, sdhci0 is disabled.
-> + * If GPIOV1 is active high, 3.3v power load switch is enabled, sdhci0 signal
-> + * voltage is 3.3v, otherwise, 1.8v power load switch will be enabled,
-> + * sdhci0 signal voltage becomes 1.8v.
-> + * AST2600-A2 EVB also support toggling signal voltage for sdhci1.
-> + * The design is the same as sdhci0, it uses GPIOV2 as power-gpio and GPIOV3
-> + * as power-switch-gpio.
-> + */
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index f194940c5974..b00c84ea8441 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1582,7 +1582,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>   {
+>   	struct mmc_command cmd = {};
+>   	unsigned int qty = 0, busy_timeout = 0;
+> -	bool use_r1b_resp = false;
+> +	bool use_r1b_resp;
+>   	int err;
+>   
+>   	mmc_retune_hold(card->host);
+> @@ -1650,23 +1650,7 @@ static int mmc_do_erase(struct mmc_card *card, unsigned int from,
+>   	cmd.opcode = MMC_ERASE;
+>   	cmd.arg = arg;
+>   	busy_timeout = mmc_erase_timeout(card, arg, qty);
+> -	/*
+> -	 * If the host controller supports busy signalling and the timeout for
+> -	 * the erase operation does not exceed the max_busy_timeout, we should
+> -	 * use R1B response. Or we need to prevent the host from doing hw busy
+> -	 * detection, which is done by converting to a R1 response instead.
+> -	 * Note, some hosts requires R1B, which also means they are on their own
+> -	 * when it comes to deal with the busy timeout.
+> -	 */
+> -	if (!(card->host->caps & MMC_CAP_NEED_RSP_BUSY) &&
+> -	    card->host->max_busy_timeout &&
+> -	    busy_timeout > card->host->max_busy_timeout) {
+> -		cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> -	} else {
+> -		cmd.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> -		cmd.busy_timeout = busy_timeout;
+> -		use_r1b_resp = true;
+> -	}
+> +	use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout);
+>   
+>   	err = mmc_wait_for_cmd(card->host, &cmd, 0);
+>   	if (err) {
+> diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+> index 8674c3e0c02c..63a7bd0b239c 100644
+> --- a/drivers/mmc/core/mmc.c
+> +++ b/drivers/mmc/core/mmc.c
+> @@ -1910,6 +1910,7 @@ static int mmc_sleep(struct mmc_host *host)
+>   	struct mmc_command cmd = {};
+>   	struct mmc_card *card = host->card;
+>   	unsigned int timeout_ms = DIV_ROUND_UP(card->ext_csd.sa_timeout, 10000);
+> +	bool use_r1b_resp;
+>   	int err;
+>   
+>   	/* Re-tuning can't be done once the card is deselected */
+> @@ -1922,22 +1923,7 @@ static int mmc_sleep(struct mmc_host *host)
+>   	cmd.opcode = MMC_SLEEP_AWAKE;
+>   	cmd.arg = card->rca << 16;
+>   	cmd.arg |= 1 << 15;
+> -
+> -	/*
+> -	 * If the max_busy_timeout of the host is specified, validate it against
+> -	 * the sleep cmd timeout. A failure means we need to prevent the host
+> -	 * from doing hw busy detection, which is done by converting to a R1
+> -	 * response instead of a R1B. Note, some hosts requires R1B, which also
+> -	 * means they are on their own when it comes to deal with the busy
+> -	 * timeout.
+> -	 */
+> -	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && host->max_busy_timeout &&
+> -	    (timeout_ms > host->max_busy_timeout)) {
+> -		cmd.flags = MMC_RSP_R1 | MMC_CMD_AC;
+> -	} else {
+> -		cmd.flags = MMC_RSP_R1B | MMC_CMD_AC;
+> -		cmd.busy_timeout = timeout_ms;
+> -	}
+> +	use_r1b_resp = mmc_prepare_busy_cmd(host, &cmd, timeout_ms);
+>   
+>   	err = mmc_wait_for_cmd(host, &cmd, 0);
+>   	if (err)
+> @@ -1949,7 +1935,7 @@ static int mmc_sleep(struct mmc_host *host)
+>   	 * SEND_STATUS command to poll the status because that command (and most
+>   	 * others) is invalid while the card sleeps.
+>   	 */
+> -	if (!cmd.busy_timeout || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+> +	if (!use_r1b_resp || !(host->caps & MMC_CAP_WAIT_WHILE_BUSY))
+>   		mmc_delay(timeout_ms);
+>   
+>   out_release:
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 5756781fef37..025a4134d5c7 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -521,6 +521,27 @@ int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>   	return __mmc_poll_for_busy(card, timeout_ms, true, false, busy_cmd);
+>   }
+>   
+> +bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command *cmd,
+> +			  unsigned int timeout_ms)
+> +{
+> +	/*
+> +	 * If the max_busy_timeout of the host is specified, make sure it's
+> +	 * enough to fit the used timeout_ms. In case it's not, let's instruct
+> +	 * the host to avoid HW busy detection, by converting to a R1 response
+> +	 * instead of a R1B. Note, some hosts requires R1B, which also means
+> +	 * they are on their own when it comes to deal with the busy timeout.
+> +	 */
+> +	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && host->max_busy_timeout &&
+> +	    (timeout_ms > host->max_busy_timeout)) {
+> +		cmd->flags = MMC_CMD_AC | MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> +		return false;
+> +	}
+> +
+> +	cmd->flags = MMC_CMD_AC | MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+> +	cmd->busy_timeout = timeout_ms;
+> +	return true;
+> +}
+> +
+>   /**
+>    *	__mmc_switch - modify EXT_CSD register
+>    *	@card: the MMC card associated with the data transfer
+> @@ -543,7 +564,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>   	struct mmc_host *host = card->host;
+>   	int err;
+>   	struct mmc_command cmd = {};
+> -	bool use_r1b_resp = true;
+> +	bool use_r1b_resp;
+>   	unsigned char old_timing = host->ios.timing;
+>   
+>   	mmc_retune_hold(host);
+> @@ -554,29 +575,12 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+>   		timeout_ms = card->ext_csd.generic_cmd6_time;
+>   	}
+>   
+> -	/*
+> -	 * If the max_busy_timeout of the host is specified, make sure it's
+> -	 * enough to fit the used timeout_ms. In case it's not, let's instruct
+> -	 * the host to avoid HW busy detection, by converting to a R1 response
+> -	 * instead of a R1B. Note, some hosts requires R1B, which also means
+> -	 * they are on their own when it comes to deal with the busy timeout.
+> -	 */
+> -	if (!(host->caps & MMC_CAP_NEED_RSP_BUSY) && host->max_busy_timeout &&
+> -	    (timeout_ms > host->max_busy_timeout))
+> -		use_r1b_resp = false;
+> -
+>   	cmd.opcode = MMC_SWITCH;
+>   	cmd.arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+>   		  (index << 16) |
+>   		  (value << 8) |
+>   		  set;
+> -	cmd.flags = MMC_CMD_AC;
+> -	if (use_r1b_resp) {
+> -		cmd.flags |= MMC_RSP_SPI_R1B | MMC_RSP_R1B;
+> -		cmd.busy_timeout = timeout_ms;
+> -	} else {
+> -		cmd.flags |= MMC_RSP_SPI_R1 | MMC_RSP_R1;
+> -	}
+> +	use_r1b_resp = mmc_prepare_busy_cmd(host, &cmd, timeout_ms);
+>   
+>   	err = mmc_wait_for_cmd(host, &cmd, retries);
+>   	if (err)
+> diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+> index 7bc1cfb0654c..ba898c435658 100644
+> --- a/drivers/mmc/core/mmc_ops.h
+> +++ b/drivers/mmc/core/mmc_ops.h
+> @@ -18,6 +18,7 @@ enum mmc_busy_cmd {
+>   
+>   struct mmc_host;
+>   struct mmc_card;
+> +struct mmc_command;
+>   
+>   int mmc_select_card(struct mmc_card *card);
+>   int mmc_deselect_cards(struct mmc_host *host);
+> @@ -35,6 +36,8 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width);
+>   int mmc_can_ext_csd(struct mmc_card *card);
+>   int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
+>   int mmc_switch_status(struct mmc_card *card, bool crc_err_fatal);
+> +bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command *cmd,
+> +			  unsigned int timeout_ms);
+>   int mmc_poll_for_busy(struct mmc_card *card, unsigned int timeout_ms,
+>   		      enum mmc_busy_cmd busy_cmd);
+>   int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
+> 
 
-Okay, I think the comment is in the right place, but I feel this patch 
-should also add the regulator nodes and hook them up to the SDHCIs.
 
-Given Rob isn't super keen on a second example in the binding document 
-I think you can just cut the example out and paste it in here.
-
-Andrew
