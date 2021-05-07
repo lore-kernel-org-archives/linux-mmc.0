@@ -2,369 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 799DAC433B4
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 07:48:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3949DC433B4
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 10:34:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 43F3E610A7
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 07:48:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 051A16143F
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 May 2021 10:34:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231422AbhEGHtq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 May 2021 03:49:46 -0400
-Received: from regular1.263xmail.com ([211.150.70.200]:45966 "EHLO
-        regular1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232704AbhEGHtq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 May 2021 03:49:46 -0400
-Received: from localhost (unknown [192.168.167.223])
-        by regular1.263xmail.com (Postfix) with ESMTP id EC5921DB0;
-        Fri,  7 May 2021 15:48:12 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-ANTISPAM-LEVEL: 2
-X-SKE-CHECKED: 1
-X-ABS-CHECKED: 1
-Received: from [172.16.12.64] (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P22002T139994528495360S1620373687641165_;
-        Fri, 07 May 2021 15:48:08 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <57d47a615c0b9b3e5d279cb0b2b78764>
-X-RL-SENDER: shawn.lin@rock-chips.com
-X-SENDER: lintao@rock-chips.com
-X-LOGIN-NAME: shawn.lin@rock-chips.com
-X-FST-TO: linux-kernel@vger.kernel.org
-X-RCPT-COUNT: 10
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-Message-ID: <dc1d03ed-c8ab-468c-e602-938e92322fa8@rock-chips.com>
-Date:   Fri, 7 May 2021 15:48:08 +0800
+        id S229679AbhEGKfk convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 May 2021 06:35:40 -0400
+Received: from de-smtp-delivery-105.mimecast.com ([194.104.111.105]:21589 "EHLO
+        de-smtp-delivery-105.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234025AbhEGKfj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 May 2021 06:35:39 -0400
+X-Greylist: delayed 163329 seconds by postgrey-1.27 at vger.kernel.org; Fri, 07 May 2021 06:35:38 EDT
+Received: from GBR01-CWL-obe.outbound.protection.outlook.com
+ (mail-cwlgbr01lp2050.outbound.protection.outlook.com [104.47.20.50]) (Using
+ TLS) by relay.mimecast.com with ESMTP id de-mta-2-H4yoEehHO2qEoq8kqoV5Sg-1;
+ Fri, 07 May 2021 12:34:34 +0200
+X-MC-Unique: H4yoEehHO2qEoq8kqoV5Sg-1
+Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
+ by CWXP265MB2023.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:87::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4108.25; Fri, 7 May
+ 2021 10:34:33 +0000
+Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+ ([fe80::a91f:361d:5554:3958]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+ ([fe80::a91f:361d:5554:3958%5]) with mapi id 15.20.4108.027; Fri, 7 May 2021
+ 10:34:33 +0000
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+CC:     "axboe@kernel.dk" <axboe@kernel.dk>,
+        "zliua@micron.com" <zliua@micron.com>
+Subject: [PATCH v2] mmc: block: ioctl: No busywaiting of non-TRAN CMDs
+Thread-Topic: [PATCH v2] mmc: block: ioctl: No busywaiting of non-TRAN CMDs
+Thread-Index: AQHXQyyR8BdSxkDtf0eUDDANXygamQ==
+Date:   Fri, 7 May 2021 10:34:33 +0000
+Message-ID: <CWXP265MB2680A8DD0FFA6FECBFDFB027C4579@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+References: <CWXP265MB2680DC98B32CD4B49AA8A224C4599@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<DM6PR04MB657570DB58E7ABBE2C3B0449FC589@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB657570DB58E7ABBE2C3B0449FC589@DM6PR04MB6575.namprd04.prod.outlook.com>
+Accept-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [185.80.168.10]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 7c35fc60-a2be-4eb9-4ae5-08d91143b47e
+x-ms-traffictypediagnostic: CWXP265MB2023:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <CWXP265MB2023B2ADBC12E84EDE7B06C2C4579@CWXP265MB2023.GBRP265.PROD.OUTLOOK.COM>
+x-ms-oob-tlc-oobclassifiers: OLM:3968
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0
+x-microsoft-antispam-message-info: bcRk+beRpWZ8b03Diocr8d9L03lQFvJnybq5wpdafqmUYj2/LeTFqXZwMp9ScWHpuM3snJkfuwxAVIs943n/KI7TMx8CylhApU9r95v8I4sa6g4NUPADxwlEQh7qypGsE1mhZxNt5HPc8n3R7m13bBVNlZpMB4u9pFxHGEp7QCCcA6Xxd2BCrzMCHaZxp8/3oYhAgiJloKcsF0BjXKGpLVrD5Hr2oxV16ARNKm/EfhsUjJx4Hb+gvLgefPCv+jJ9Ea1PGI/+twrniLed6rG/V2M2aYTUtueR7FKPXVNccvHxxfANfHwNhmFJF50czLRym7mm1Fyw3s1AaN0Cj7uw3lLXfijs90IquvBlbCpGIQcO8doZr+hM4AIWwdFbPXZRg9SrZiqoUuJfZ3SeHxgTArsydsBnIpkC4W2aTO+KidQr+uoMQt0mNOMZbXAVEORBTYrdl3ICAw4s5oMaY15EBVHgjfHIIHsDvtgkg0laoMAMCbDtX8JpwxNeWD/dPwcUL6eJngIFl9XLyMK7TDGq817WpCBZtrHt3y2bSXbaHQGgW8s87CXEgdNv9KHFUFx4UI1n1YYD0L2YNaVuAMQTWGpsRDNpANxTT5WyOKA0KVQ=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(396003)(376002)(346002)(366004)(136003)(39830400003)(4326008)(33656002)(5660300002)(38100700002)(8936002)(122000001)(316002)(86362001)(8676002)(71200400001)(110136005)(54906003)(2906002)(66556008)(76116006)(91956017)(66446008)(6506007)(9686003)(186003)(66946007)(66476007)(26005)(7696005)(55016002)(478600001)(83380400001)(64756008)(52536014);DIR:OUT;SFP:1101
+x-ms-exchange-antispam-messagedata: =?iso-8859-1?Q?9bhfBi66zGn8O8ep3YFtf4WpgXAIgAK7UEZL491XGIbMrPdYB1OD2R08TM?=
+ =?iso-8859-1?Q?cVEiq2hNJSiOopC7CWjEW53xgaUIA5J4vQRBiGJutnOF7LeEfKECdJg727?=
+ =?iso-8859-1?Q?/HpAUvT+WbKAP3O/LsapFFWfAhcA3OOd0Sf/HIyuz/nefzkMpM92n7ungg?=
+ =?iso-8859-1?Q?r6rXa6YckH/3xyajncdgHE2qpX8NZkrRHK91uTuMxy6yg0YWh6AHamKmeO?=
+ =?iso-8859-1?Q?XtpZKlxt8HiHc2ZwC+TDJirNLidYIHmNydWXuhtWhQg0cSDJSRj5zidc0i?=
+ =?iso-8859-1?Q?mReuoRKBQ0bL7aKg18+EbdWfHu+1ktHLmxgA8k8OpNzYsFAp7iEcBCTGve?=
+ =?iso-8859-1?Q?K9KdpI7mP4J6WgfNSOUWO0QUG3ECgBaXuBX++pPBLMflIKTvNiKKjB4EiI?=
+ =?iso-8859-1?Q?oj/mGWhb97X+wi8SjV9ua3ASeiB6PDlAr1zqSWt6MBKBwpr+AjD/7eR2Nu?=
+ =?iso-8859-1?Q?EdHgp/FhNEpnT2PIlzqKvU0J/ZHDPIwr8nsAhSJ5EC22K0ETJ6tXaCFTxR?=
+ =?iso-8859-1?Q?UIjQ6ZymEo5v7s7pG+hDUZ7aQdeOPKHTOyiqRSpPbj2+kabjTf4JJ3Ka3M?=
+ =?iso-8859-1?Q?x6lRur646WavYrH8YRBxL5l7wpbXqmrxoMcMqZIaMBvNGk24i0oQ/ydOxx?=
+ =?iso-8859-1?Q?c6K/n3TS8t0T8PA+NaT9EaJ9lBae8GZGMR+iMoBFXlSKjcyNz7rzIxMWuo?=
+ =?iso-8859-1?Q?Isy6aPKDPiphl1xCVVu5NtSGBEW8IUzVGoOb4pJ1CUFLWOEcbU3U/eyVum?=
+ =?iso-8859-1?Q?q2LgSlgYVoZaqPgqCVLLQfnqbkpXqGXsbCuouu1iDUe5bsFk1R30JW5LJ1?=
+ =?iso-8859-1?Q?cg/UNBmmGN7gZ1IiplN52ezJ9D4WwGACDRZIRqKkyIf8R5f75FmDOqeadO?=
+ =?iso-8859-1?Q?i0rEJbKQpmcMvTTAKbBTV9F7wP64LeafZy46y0vC9l2R8lZFMv2lR/Semb?=
+ =?iso-8859-1?Q?qkQv5OJga2UFgyJm2DLjgXJYAytaW6b9zjTy55OuTVPf0JiouXdBfqwHMs?=
+ =?iso-8859-1?Q?wK2w3sTuGRwjEv8N2WIzRUvETZKoP8MNE3dJQIfQ3fvJjwYUqqisFbZAe0?=
+ =?iso-8859-1?Q?GxDwUczN36j5FTQvAMfv3B4IC0uXgx2iGYeKhYMEQ30nbe3SbmvNH2g5kQ?=
+ =?iso-8859-1?Q?gh5d/MYM3Fnmlyl/QDvvvPFSjBXBUGW8D+kNJQsfKV5ng5DFZ1M/d3JhRs?=
+ =?iso-8859-1?Q?m2lP+4cmpcW+9X9evdb2FLiAMtQOrmoV+WuseVwx6i8TtOuda4Typzj8n6?=
+ =?iso-8859-1?Q?Cl48xoHklvgrJxJlXX5ZGglfStAg40/S+dAXDYZzQ8U8fEbT/P5rdKZkQQ?=
+ =?iso-8859-1?Q?4dCBdZ1aszseRh4IfN6TK34oAFgWLSrCf/zU7oSmVSWskOo=3D?=
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:87.0) Gecko/20100101
- Thunderbird/87.0
-Cc:     shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH 09/11] mmc: core: Read the SD function extension registers
- for power management
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-References: <20210504161222.101536-1-ulf.hansson@linaro.org>
- <20210504161222.101536-10-ulf.hansson@linaro.org>
- <1a4227c1-4d55-b55f-2fc6-9f9562ef02e5@rock-chips.com>
- <CAPDyKFqVuuVnntRHQ-8hWjyJ5Kzj9DzkjQ=mknQxzRTH1og+xw@mail.gmail.com>
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <CAPDyKFqVuuVnntRHQ-8hWjyJ5Kzj9DzkjQ=mknQxzRTH1og+xw@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+X-OriginatorOrg: hyperstone.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7c35fc60-a2be-4eb9-4ae5-08d91143b47e
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 May 2021 10:34:33.7037
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 0lMvsNVOkTeAxmV2FKD8zlNfoSnCuLVUdcytuwugkraKZvZnDpXx9EYF/6InDAKVHHXEwhtc53asDyZ7FmDswg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWXP265MB2023
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: hyperstone.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021/5/7 15:27, Ulf Hansson wrote:
-> On Fri, 7 May 2021 at 04:06, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>
->>
->> On 2021/5/5 0:12, Ulf Hansson wrote:
->>> In SD spec v4.x the SD function extension registers were introduced. A
->>
->> I have a v4.0 spec and it doesn't state that v4.0 suppports reading
->> extension registers but just says TBD instead.  So I guess v4.x doesn't
->> include v4.0 ?
-> 
-> Good question. The v4.0 spec introduces the CMD48/49 and CMD58/59,
-> while in v4.10 the spec adds the power management extensions.
-> 
-> I can update the commit message to better reflect this, if you prefer!?
+Prevent busywaiting for TRAN state indication
+after issuing a command that will not transition
+to TRAN state.
 
-It would be better.
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ drivers/mmc/core/block.c | 17 ++++++++++++++++-
+ 1 file changed, 16 insertions(+), 1 deletion(-)
 
-And I downloaded the latest v8.00 spec, checked carefully with the new
-features there to make sure we don't make any misinterpretations at
-first.
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 689eb9afeeed..48be2ca5e3d1 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -446,6 +446,20 @@ static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+ 	return err;
+ }
+ 
++static inline bool is_tran_transition_cmd(struct mmc_command *cmd,
++					  struct mmc_card *card)
++{
++	/* Cards will not be in TRAN after completing identification commands
++	 * or MMC_SEND_STATUS if they are not selected.
++	 */
++	return !(cmd->opcode == MMC_SEND_CID
++			|| cmd->opcode == MMC_ALL_SEND_CID
++			|| cmd->opcode == MMC_SEND_CSD
++			|| (cmd->opcode == MMC_SEND_STATUS &&
++			 MMC_EXTRACT_INDEX_FROM_ARG(cmd->arg) != card->rca));
++
++}
++
+ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 			       struct mmc_blk_ioc_data *idata)
+ {
+@@ -593,7 +607,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 
+ 	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
+ 
+-	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
++	if ((idata->rpmb || (cmd.flags & MMC_RSP_R1B))
++			&& is_tran_transition_cmd(&cmd, card)) {
+ 		/*
+ 		 * Ensure RPMB/R1B command has completed by polling CMD13
+ 		 * "Send Status".
+-- 
+2.31.1
 
-For patch 9 -11 as well,
-
-Reviewed-by: Shawn Lin <shawn.lin@rock-chips.con>
-
-> 
-> Thanks a lot for reviewing!
-> 
-> Kind regards
-> Uffe
-> 
->>
->>> specific function register were added to let the card announce support for
->>> optional features in regards to power management. The features that were
->>> added are "Power Off Notification", "Power Down Mode" and "Power
->>> Sustenance".
->>>
->>> As a first step, let's read and parse this register for power management
->>> during the SD card initialization and store the information about the
->>> supported features in the struct mmc_card. In this way, we prepare for
->>> subsequent changes to implement the complete support for the new features.
->>>
->>> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
->>> ---
->>>    drivers/mmc/core/sd.c    | 178 +++++++++++++++++++++++++++++++++++++++
->>>    include/linux/mmc/card.h |  13 +++
->>>    include/linux/mmc/sd.h   |   3 +
->>>    3 files changed, 194 insertions(+)
->>>
->>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
->>> index de7b5f8df550..cb5e8b2fc32f 100644
->>> --- a/drivers/mmc/core/sd.c
->>> +++ b/drivers/mmc/core/sd.c
->>> @@ -996,6 +996,177 @@ static bool mmc_sd_card_using_v18(struct mmc_card *card)
->>>               (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
->>>    }
->>>
->>> +static int sd_read_ext_reg(struct mmc_card *card, u8 fno, u8 page,
->>> +                        u16 offset, u16 len, u8 *reg_buf)
->>> +{
->>> +     u32 cmd_args;
->>> +
->>> +     /*
->>> +      * Command arguments of CMD48:
->>> +      * [31:31] MIO (0 = memory).
->>> +      * [30:27] FNO (function number).
->>> +      * [26:26] reserved (0).
->>> +      * [25:18] page number.
->>> +      * [17:9] offset address.
->>> +      * [8:0] length (0 = 1 byte, 1ff = 512 bytes).
->>> +      */
->>> +     cmd_args = fno << 27 | page << 18 | offset << 9 | (len -1);
->>> +
->>> +     return mmc_send_adtc_data(card, card->host, SD_READ_EXTR_SINGLE,
->>> +                               cmd_args, reg_buf, 512);
->>> +}
->>> +
->>> +static int sd_parse_ext_reg_power(struct mmc_card *card, u8 fno, u8 page,
->>> +                               u16 offset)
->>> +{
->>> +     int err;
->>> +     u8 *reg_buf;
->>> +
->>> +     reg_buf = kzalloc(512, GFP_KERNEL);
->>> +     if (!reg_buf)
->>> +             return -ENOMEM;
->>> +
->>> +     /* Read the extension register for power management function. */
->>> +     err = sd_read_ext_reg(card, fno, page, offset, 512, reg_buf);
->>> +     if (err) {
->>> +             pr_warn("%s: error %d reading PM func of ext reg\n",
->>> +                     mmc_hostname(card->host), err);
->>> +             goto out;
->>> +     }
->>> +
->>> +     /* PM revision consists of 4 bits. */
->>> +     card->ext_power.rev = reg_buf[0] & 0xf;
->>> +
->>> +     /* Power Off Notification support at bit 4. */
->>> +     if (reg_buf[1] & 0x10)
->>> +             card->ext_power.feature_support |= SD_EXT_POWER_OFF_NOTIFY;
->>> +
->>> +     /* Power Sustenance support at bit 5. */
->>> +     if (reg_buf[1] & 0x20)
->>> +             card->ext_power.feature_support |= SD_EXT_POWER_SUSTENANCE;
->>> +
->>> +     /* Power Down Mode support at bit 6. */
->>> +     if (reg_buf[1] & 0x40)
->>> +             card->ext_power.feature_support |= SD_EXT_POWER_DOWN_MODE;
->>> +
->>> +     card->ext_power.fno = fno;
->>> +     card->ext_power.page = page;
->>> +     card->ext_power.offset = offset;
->>> +
->>> +out:
->>> +     kfree(reg_buf);
->>> +     return err;
->>> +}
->>> +
->>> +static int sd_parse_ext_reg(struct mmc_card *card, u8 *gen_info_buf,
->>> +                         u16 *next_ext_addr)
->>> +{
->>> +     u8 num_regs, fno, page;
->>> +     u16 sfc, offset, ext = *next_ext_addr;
->>> +     u32 reg_addr;
->>> +
->>> +     /*
->>> +      * Parse only one register set per extension, as that is sufficient to
->>> +      * support the standard functions. This means another 48 bytes in the
->>> +      * buffer must be available.
->>> +      */
->>> +     if (ext + 48 > 512)
->>> +             return -EFAULT;
->>> +
->>> +     /* Standard Function Code */
->>> +     memcpy(&sfc, &gen_info_buf[ext], 2);
->>> +
->>> +     /* Address to the next extension. */
->>> +     memcpy(next_ext_addr, &gen_info_buf[ext + 40], 2);
->>> +
->>> +     /* Number of registers for this extension. */
->>> +     num_regs = gen_info_buf[ext + 42];
->>> +
->>> +     /* We support only one register per extension. */
->>> +     if (num_regs != 1)
->>> +             return 0;
->>> +
->>> +     /* Extension register address. */
->>> +     memcpy(&reg_addr, &gen_info_buf[ext + 44], 4);
->>> +
->>> +     /* 9 bits (0 to 8) contains the offset address. */
->>> +     offset = reg_addr & 0x1ff;
->>> +
->>> +     /* 8 bits (9 to 16) contains the page number. */
->>> +     page = reg_addr >> 9 & 0xff ;
->>> +
->>> +     /* 4 bits (18 to 21) contains the function number. */
->>> +     fno = reg_addr >> 18 & 0xf;
->>> +
->>> +     /* Standard Function Code for power management. */
->>> +     if (sfc == 0x1)
->>> +             return sd_parse_ext_reg_power(card, fno, page, offset);
->>> +
->>> +     return 0;
->>> +}
->>> +
->>> +static int sd_read_ext_regs(struct mmc_card *card)
->>> +{
->>> +     int err, i;
->>> +     u8 num_ext, *gen_info_buf;
->>> +     u16 rev, len, next_ext_addr;
->>> +
->>> +     if (mmc_host_is_spi(card->host))
->>> +             return 0;
->>> +
->>> +     if (!(card->scr.cmds & SD_SCR_CMD48_SUPPORT))
->>> +             return 0;
->>> +
->>> +     gen_info_buf = kzalloc(512, GFP_KERNEL);
->>> +     if (!gen_info_buf)
->>> +             return -ENOMEM;
->>> +
->>> +     /*
->>> +      * Read 512 bytes of general info, which is found at function number 0,
->>> +      * at page 0 and with no offset.
->>> +      */
->>> +     err = sd_read_ext_reg(card, 0, 0, 0, 512, gen_info_buf);
->>> +     if (err) {
->>> +             pr_warn("%s: error %d reading general info of SD ext reg\n",
->>> +                     mmc_hostname(card->host), err);
->>> +             goto out;
->>> +     }
->>> +
->>> +     /* General info structure revision. */
->>> +     memcpy(&rev, &gen_info_buf[0], 2);
->>> +
->>> +     /* Length of general info in bytes. */
->>> +     memcpy(&len, &gen_info_buf[2], 2);
->>> +
->>> +     /* Number of extensions to be find. */
->>> +     num_ext = gen_info_buf[4];
->>> +
->>> +     /* We support revision 0, but limit it to 512 bytes for simplicity. */
->>> +     if (rev != 0 || len > 512) {
->>> +             pr_warn("%s: non-supported SD ext reg layout\n",
->>> +                     mmc_hostname(card->host));
->>> +             goto out;
->>> +     }
->>> +
->>> +     /*
->>> +      * Parse the extension registers. The first extension should start
->>> +      * immediately after the general info header (16 bytes).
->>> +      */
->>> +     next_ext_addr = 16;
->>> +     for (i = 0; i < num_ext; i++) {
->>> +             err = sd_parse_ext_reg(card, gen_info_buf, &next_ext_addr);
->>> +             if (err) {
->>> +                     pr_warn("%s: error %d parsing SD ext reg\n",
->>> +                             mmc_hostname(card->host), err);
->>> +                     goto out;
->>> +             }
->>> +     }
->>> +
->>> +out:
->>> +     kfree(gen_info_buf);
->>> +     return err;
->>> +}
->>> +
->>>    /*
->>>     * Handle the detection and initialisation of a card.
->>>     *
->>> @@ -1144,6 +1315,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
->>>                }
->>>        }
->>>
->>> +     if (!oldcard) {
->>> +             /* Read/parse the extension registers. */
->>> +             err = sd_read_ext_regs(card);
->>> +             if (err)
->>> +                     goto free_card;
->>> +     }
->>> +
->>>        if (host->cqe_ops && !host->cqe_enabled) {
->>>                err = host->cqe_ops->cqe_enable(host, card);
->>>                if (!err) {
->>> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
->>> index 858fc4d11240..03a862e93594 100644
->>> --- a/include/linux/mmc/card.h
->>> +++ b/include/linux/mmc/card.h
->>> @@ -191,6 +191,18 @@ struct sd_switch_caps {
->>>    #define SD_MAX_CURRENT_800  (1 << SD_SET_CURRENT_LIMIT_800)
->>>    };
->>>
->>> +struct sd_ext_reg {
->>> +     u8                      fno;
->>> +     u8                      page;
->>> +     u16                     offset;
->>> +     u8                      rev;
->>> +     u8                      feature_support;
->>> +/* Power Management Function. */
->>> +#define SD_EXT_POWER_OFF_NOTIFY      (1<<0)
->>> +#define SD_EXT_POWER_SUSTENANCE      (1<<1)
->>> +#define SD_EXT_POWER_DOWN_MODE       (1<<2)
->>> +};
->>> +
->>>    struct sdio_cccr {
->>>        unsigned int            sdio_vsn;
->>>        unsigned int            sd_vsn;
->>> @@ -292,6 +304,7 @@ struct mmc_card {
->>>        struct sd_scr           scr;            /* extra SD information */
->>>        struct sd_ssr           ssr;            /* yet more SD information */
->>>        struct sd_switch_caps   sw_caps;        /* switch (CMD6) caps */
->>> +     struct sd_ext_reg       ext_power;      /* SD extension reg for PM */
->>>
->>>        unsigned int            sdio_funcs;     /* number of SDIO functions */
->>>        atomic_t                sdio_funcs_probed; /* number of probed SDIO funcs */
->>> diff --git a/include/linux/mmc/sd.h b/include/linux/mmc/sd.h
->>> index 2236aa540faa..43bfc5c39ad4 100644
->>> --- a/include/linux/mmc/sd.h
->>> +++ b/include/linux/mmc/sd.h
->>> @@ -29,6 +29,9 @@
->>>    #define SD_APP_OP_COND           41   /* bcr  [31:0] OCR         R3  */
->>>    #define SD_APP_SEND_SCR          51   /* adtc                    R1  */
->>>
->>> +  /* class 11 */
->>> +#define SD_READ_EXTR_SINGLE      48   /* adtc [31:0]             R1  */
->>> +
->>>    /* OCR bit definitions */
->>>    #define SD_OCR_S18R         (1 << 24)    /* 1.8V switching request */
->>>    #define SD_ROCR_S18A                SD_OCR_S18R  /* 1.8V switching accepted by card */
->>>
->>
->>
-> 
-> 
-> 
-
+Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+Managing Directors: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
