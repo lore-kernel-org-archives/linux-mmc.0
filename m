@@ -2,142 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42DD0C433B4
-	for <linux-mmc@archiver.kernel.org>; Sun,  9 May 2021 19:02:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB542C433ED
+	for <linux-mmc@archiver.kernel.org>; Sun,  9 May 2021 21:54:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0801A6105A
-	for <linux-mmc@archiver.kernel.org>; Sun,  9 May 2021 19:02:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9AC366128E
+	for <linux-mmc@archiver.kernel.org>; Sun,  9 May 2021 21:54:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229853AbhEITCp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 9 May 2021 15:02:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60702 "EHLO
+        id S229815AbhEIVzu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 9 May 2021 17:55:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41898 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229693AbhEITCo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 May 2021 15:02:44 -0400
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B730EC06175F
-        for <linux-mmc@vger.kernel.org>; Sun,  9 May 2021 12:01:40 -0700 (PDT)
-Received: by mail-lj1-x230.google.com with SMTP id f12so5510555ljp.2
-        for <linux-mmc@vger.kernel.org>; Sun, 09 May 2021 12:01:40 -0700 (PDT)
+        with ESMTP id S229662AbhEIVzt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 May 2021 17:55:49 -0400
+Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29247C061573;
+        Sun,  9 May 2021 14:54:46 -0700 (PDT)
+Received: by mail-pg1-x52c.google.com with SMTP id m124so11874216pgm.13;
+        Sun, 09 May 2021 14:54:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=gKQhzQ0P4XyQz90sgnwAHoDnS29R/uNtlMfJta0NT4E=;
-        b=dWDqSKTe3nZml1msjJQErs0BtDMqlsiQNWe0ZBwXAzTUZ0QIbPG0MToiUvfbzYs6F0
-         2SsrqFpVLZVtskz5MEennoADCCmTOqdta8BZe7PUGW/gpdO/Xmt75iQ855UIDkpwycGc
-         apt1Deib0Etzm6NjIxxV3fUfaq/iBXOW92uNoATb76zFuadg49eXGSZ+fFENll38Cngo
-         tBmEndDuGmXm8R4O9K8k/Dn8qoO8Spcc6OjS6WLZZMiYpozbTn7m0l8HA39rVpBrv6oG
-         IEAkSNM6s01oNV4Hf/Avmirecv4vSqMlbjGFPUkRAMWtzHBpa1P/tmhfCQ8esaL1nPdX
-         dWtA==
+        d=gmail.com; s=20161025;
+        h=from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6NGZNDXjQL+muSyzj7U9/zaOUo2jeB+uihkrcejFFks=;
+        b=Ey1YI8NSGJiM++MiPWJX82SDjc3T0sX6aV0gSg38rRA2Bvob/gy7/GtSC3bXsbJvPK
+         l3QBAS8geCEGY0UaxTZBMXAi5fRrVlEKaMcuGNxIt5hHNhNVCbqPvwp/wZ0bprZa2aCU
+         S28hxWXPb7XkWDBhy6bcxM0UzXkB3PC3SHT36djMetJQqZ2QyRaeV+f2NW/RgHBiSrKT
+         HeBiuk1HWV0iqgDEOm7kg8LPuIO59lZBxY1nRyFTtaXxpXDtb+001pmfsgeyOjunBEli
+         1S+fom3zKoT2EPdMhXdU81Y+4LbFWkju4yImWkFriptGupG2fV3peLMUsiN9Oz+1C0Na
+         3kXQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=gKQhzQ0P4XyQz90sgnwAHoDnS29R/uNtlMfJta0NT4E=;
-        b=e0nEIoYIpVZv9KUUeiaX516UgY8uiV7hEIbxmKxXRzThC61/Vadpoc+03cptB9ioLi
-         /i7nkWaKibjFKDZVS8wCPKnd3qiItl5trN3P/GoxyfD5G7zML4Fx5rO5yJH+GAcwiIl1
-         ZcnWBZrjbf2Bi403Hmz5mknYsi73MTC5EnStZphbdZbQ3QBp5Va5iwe8FM9eNZi1HIed
-         srCWxnYgUwBreYzB6oL43jNzXODhezM04JhNhNOGMNMMZQjUaxuFxYxL9mwV4tjoNAwq
-         tUn6zlp/YNsI/sWhRX7Vo+eY+XE1lJqL96lQVZ3Pb/BKcKzL/W5yHrduI+EDUoT2fR7V
-         Tg9Q==
-X-Gm-Message-State: AOAM532urJSAPeSUOGBUIVFUrZPmg/UAK4IvP5FbIXc+lZfRAGuEKkGT
-        riDB1W7l9ZoiqTXDbp8V4ASGRZQMy+3LNgQsuolInw==
-X-Google-Smtp-Source: ABdhPJyoCmWHi8Zg5PHJoV7Fv2YfnjZwSqEOiUjlpvSiMSAsck8eA1iEmA0fiSAB2taTJS7a4yULRAZ4AgkhIJP16H4=
-X-Received: by 2002:a2e:889a:: with SMTP id k26mr17085100lji.438.1620586899039;
- Sun, 09 May 2021 12:01:39 -0700 (PDT)
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=6NGZNDXjQL+muSyzj7U9/zaOUo2jeB+uihkrcejFFks=;
+        b=GesScBFfY40+ECaQeYJY3VMGjrOM+2pjJlMHKIsQYmvO3GaHXy1Fy9PIb7+DqiuKPA
+         9qchzmVDezsxIoh5rxnfwaJMbYPJkChzAOs4rzOaOGPecmNXyCht+ogtv1dD5WfvBSV7
+         Hm/iGoMF35VbT/GL4SXq9Yz1GOSUzHU4XhG6p2BHwA0YohtE9yo3tBBuDOc01/wo50qU
+         mtgD/7D/WoJqfRslTOFklUjD1HtBc10FsQenTalsn9T72miaqUqn9Swqyt8ejGiNzzh9
+         xn9zVEbzSEchcfDgzAjgHvDCWhQb5jR8k3xeEEW/Unyqt5Bu7NUudXA3VtEHg5ZHKY/V
+         zedQ==
+X-Gm-Message-State: AOAM530F5fu5yPm4ZGvvW/y9WpH25Q0axmj4EM6hSpwSCDutDz+6Yrve
+        2QHdiNG7AppgbCzV7bzxIpfgiQImAZV0d7We
+X-Google-Smtp-Source: ABdhPJwfdTl0DTeerlW7AtkhO6PFzt7sSRmPovjkDNawfc1OOO7pMip+13y1wCgCcUcd773cbN0VLw==
+X-Received: by 2002:a62:3815:0:b029:28e:8c94:e1ad with SMTP id f21-20020a6238150000b029028e8c94e1admr22030836pfa.56.1620597285489;
+        Sun, 09 May 2021 14:54:45 -0700 (PDT)
+Received: from tong-desktop.local ([2601:647:4200:13:8589:d56e:ef4e:6a])
+        by smtp.googlemail.com with ESMTPSA id k7sm9561263pfc.16.2021.05.09.14.54.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 09 May 2021 14:54:45 -0700 (PDT)
+From:   Tong Zhang <ztong0001@gmail.com>
+To:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Tong Zhang <ztong0001@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH] memstick: rtsx_usb_ms: fix UAF
+Date:   Sun,  9 May 2021 17:54:15 -0400
+Message-Id: <20210509215416.950337-1-ztong0001@gmail.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20210506145829.198823-1-ulf.hansson@linaro.org> <20210506145829.198823-3-ulf.hansson@linaro.org>
-In-Reply-To: <20210506145829.198823-3-ulf.hansson@linaro.org>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sun, 9 May 2021 21:01:27 +0200
-Message-ID: <CACRpkdZ2JRapr5x2zn3ABwiGJw-8kbfG4K2oZVD0Lfr7KHG8Jw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: core: Add support for cache ctrl for SD cards
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, May 6, 2021 at 4:58 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+This patch fixes the following issues:
+1. memstick_free_host() will free the host, so the use of ms_dev(host) after
+it will be a problem. To fix this, move memstick_free_host() after when we
+are done with ms_dev(host).
+2. if something bad happens in memstick_add_host() and we end up taking
+err_out in rtsx_usb_ms_drv_probe(), we'd better avoid running rtsx_usb_ms_drv_remove()
+3. In rtsx_usb_ms_drv_remove(), pm need to be disabled before we remove
+and free host otherwise memstick_check will be called and UAF will
+happen.
 
-> In SD spec v6.x the SD function extension registers for performance
-> enhancements were introduced. As a part of this an optional internal cache
-> on the SD card, can be used to improve performance.
->
-> The let the SD card use the cache, the host needs to enable it and manage
-> flushing of the cache, so let's add support for this.
->
-> Note that for an SD card supporting the cache it's mandatory for it, to
-> also support the poweroff notification feature. According to the SD spec,
-> if the cache has been enabled and a poweroff notification is sent to the
-> card, that implicitly also means that the card should flush its internal
-> cache. Therefore, dealing with cache flushing for REQ_OP_FLUSH block
-> requests is sufficient.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-(...)
+[   11.351173] BUG: KASAN: use-after-free in rtsx_usb_ms_drv_remove+0x94/0x140 [rtsx_usb_ms]
+[   11.357077]  rtsx_usb_ms_drv_remove+0x94/0x140 [rtsx_usb_ms]
+[   11.357376]  platform_remove+0x2a/0x50
+[   11.367531] Freed by task 298:
+[   11.368537]  kfree+0xa4/0x2a0
+[   11.368711]  device_release+0x51/0xe0
+[   11.368905]  kobject_put+0xa2/0x120
+[   11.369090]  rtsx_usb_ms_drv_remove+0x8c/0x140 [rtsx_usb_ms]
+[   11.369386]  platform_remove+0x2a/0x50
 
-> +       /*
-> +        * Set the Flush Cache bit in the performance enhancement register at
-> +        * 261 bytes offset.
-> +        */
-> +       fno = card->ext_perf.fno;
-> +       page = card->ext_perf.page;
-> +       offset = card->ext_perf.offset + 261;
+[   12.038408] BUG: KASAN: use-after-free in __mutex_lock.isra.0+0x3ec/0x7c0
+[   12.045432]  mutex_lock+0xc9/0xd0
+[   12.046080]  memstick_check+0x6a/0x578 [memstick]
+[   12.046509]  process_one_work+0x46d/0x750
+[   12.052107] Freed by task 297:
+[   12.053115]  kfree+0xa4/0x2a0
+[   12.053272]  device_release+0x51/0xe0
+[   12.053463]  kobject_put+0xa2/0x120
+[   12.053647]  rtsx_usb_ms_drv_remove+0xc4/0x140 [rtsx_usb_ms]
+[   12.053939]  platform_remove+0x2a/0x50
 
-261 looks a bit magic, can we add a define of some sort?
-I guess it has a name in the spec?
+Signed-off-by: Tong Zhang <ztong0001@gmail.com>
+---
+ drivers/memstick/host/rtsx_usb_ms.c | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-> +       err = sd_write_ext_reg(card, fno, page, offset, 0x1);
-> +       if (err) {
-> +               pr_warn("%s: error %d writing Cache Flush bit\n",
-> +                       mmc_hostname(host), err);
-> +               goto out;
-> +       }
+diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
+index 102dbb8080da..851643d007b7 100644
+--- a/drivers/memstick/host/rtsx_usb_ms.c
++++ b/drivers/memstick/host/rtsx_usb_ms.c
+@@ -799,9 +799,10 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
+ 
+ 	return 0;
+ err_out:
+-	memstick_free_host(msh);
+ 	pm_runtime_disable(ms_dev(host));
+ 	pm_runtime_put_noidle(ms_dev(host));
++	memstick_free_host(msh);
++	platform_set_drvdata(pdev, NULL);
+ 	return err;
+ }
+ 
+@@ -811,6 +812,8 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+ 	struct memstick_host *msh = host->msh;
+ 	int err;
+ 
++	if (!host)
++		return 0;
+ 	host->eject = true;
+ 	cancel_work_sync(&host->handle_req);
+ 
+@@ -828,9 +831,6 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+ 	}
+ 	mutex_unlock(&host->host_mutex);
+ 
+-	memstick_remove_host(msh);
+-	memstick_free_host(msh);
+-
+ 	/* Balance possible unbalanced usage count
+ 	 * e.g. unconditional module removal
+ 	 */
+@@ -838,10 +838,11 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+ 		pm_runtime_put(ms_dev(host));
+ 
+ 	pm_runtime_disable(ms_dev(host));
+-	platform_set_drvdata(pdev, NULL);
+-
++	memstick_remove_host(msh);
+ 	dev_dbg(ms_dev(host),
+ 		": Realtek USB Memstick controller has been removed\n");
++	memstick_free_host(msh);
++	platform_set_drvdata(pdev, NULL);
+ 
+ 	return 0;
+ }
+-- 
+2.25.1
 
-So this offset contains a single bit.
-
-> +       if (reg_buf[0] & 0x1)
-> +               err = -ETIMEDOUT;
-
-And that same bit is checked here.
-
-Is it always going to be one bit only or do we want to
-
-#include <linux/bits.h>
-#define SD_CACHE_FLUSH_FLAG BIT(0)
-
-Does it have a name in the spec we can use?
-
-> +       /*
-> +        * Set the Cache Enable bit in the performance enhancement register at
-> +        * 260 bytes offset.
-> +        */
-> +       err = sd_write_ext_reg(card, card->ext_perf.fno, card->ext_perf.page,
-> +                              card->ext_perf.offset + 260, 0x1);
-
-Same here we want to #define 260 to something symbolic,
-
-And here some define for BIT(0) as well. At least with BIT(0)
-in the call to sd_write_ext_reg() rather than 0x1 if I can say
-something.
-
-With the above nitpicking fixed up (I trust you):
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-
-Yours,
-Linus Walleij
