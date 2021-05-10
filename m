@@ -2,198 +2,206 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 50830C43618
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 10:44:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A22DC04FCF
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 13:30:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1491861984
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 10:44:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 576E061359
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 13:30:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232397AbhEJKqB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 May 2021 06:46:01 -0400
-Received: from esa3.hgst.iphmx.com ([216.71.153.141]:34086 "EHLO
-        esa3.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232055AbhEJKmn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 06:42:43 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1620643298; x=1652179298;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=tPesVSfhAAkOQKv89Y/bnNcKLxWS0QTNcaCN84Elras=;
-  b=g6bwo4XGCgu0ele1otW1gvjJvYrm2IM56N49ILM08663LreioYvc1nXB
-   VkXFiKInxCqxZjawAyoolUopM+wIjnEmTzShV69NfkWlefy7bBPSUlQha
-   Hpyt7NmA5ZOwXBWB31xaJqpUljmbbYXeiL1NZRSvK+VeJ8gMjol3ahoMo
-   3ZKtPOWegmX4qEKWA9bHhKv3YYo+qHhUnollou2naG+MK/WZYsYOXas+u
-   Kqth2tD5HRAFp/GmWL/7YmtEixVxI5TfBpkjMK1e7hHQ0KtFMWY6RBxzt
-   0nTodQEDSDc75PLN6tA8PXVqwWXwUnD1F6LEve6r8WOvNFaTCe2LzJzfS
-   A==;
-IronPort-SDR: dO626D+qe7JfNuO9RaYBDytqi8zE0woQQ0EhT1WM/rLfaacxIVzoWVGr2qHDJRXzyOKRfAw7Hi
- 0SIvGgahYBU/BcXoOTeJph2c1/JGFiqWpR8fSpWVYVyfMCbky02OLc8L6LqajvXmL05PxoNsxZ
- 0y62vtMM6Ca5X6Lm0QO8vqo9CKbDDL+olcB3SaJGRlivSQxMSCO2J/9WbxverscHw0eLtcZvRn
- 14UinTDrUaXFsFvHomP+cR8nbfNtA8A1AXeWIp9XGfUBErHV4QgOmB0aT9jMR6RSYN25h7zjK2
- R8w=
-X-IronPort-AV: E=Sophos;i="5.82,287,1613404800"; 
-   d="scan'208";a="172190042"
-Received: from mail-co1nam11lp2169.outbound.protection.outlook.com (HELO NAM11-CO1-obe.outbound.protection.outlook.com) ([104.47.56.169])
-  by ob1.hgst.iphmx.com with ESMTP; 10 May 2021 18:41:36 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WInW6hxVGYPSi7ouC6gi4lOGwWhY35X9lgq3ok91SQrIp6rZbFXjiJzAhmoHUWq0HJVMbFpEUT+T5W+M9+3VBksaIvw0nlOm4VrgmMBvGREOlvlrY/CsPZILvtwup256WC8KB6XqeOoMY7xEaYIzwcjkM9kulI0dMwFzY8mvnin7UjO30AoDIL6KXai9eNGEhMN3P3HAEms4qzzwTPjjpsncnj6543eoLyGI9zYaAzZlxf4vOqgHWcuMNn3EsrSYnta9e9Blj0D8PyVVIq5nMAOQqdi3GCW+8UcXHoYn0+1+81ajTpY1saBx+9BKBpSir+rN/0EGpyuvLxl8Fmoehw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=vEUJ9FU1bqV7YHn//mLhXxm63Sg8URrDwQWqZSB2KNA=;
- b=i4Q0RgqR/jcQ0iKHCXabwmPZAkjUDomEIRCBhbJbUof1dWWp5ele+ZujBZDXeR0Iru/wpPpZuHECb8QJT2SdwfD5+YcVRglobs6KYwWnNIIGf3x4NvJVs4roaEo40HcsdiU/Jnk5HBsTiW08FIA8QZwSpy9T0luuzG+xycfvsYTHVxIHTjLfQkxlzEKFmRJXFZZL5mKq111GNw1u/4VcxpNZGKjlV2qFsSOjlA6Se/6Bc1R5/+8mXi22KcOLYMxeojZNHMGto0mvGmc/d5d29nAkJ1Y2Adj99RJ2+71gIHRYMftyCLTgbNaIjFzngM8DzuHW+IJKB5YL9q8rl3yRiw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+        id S234924AbhEJNbE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 May 2021 09:31:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58284 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244598AbhEJL7d (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 07:59:33 -0400
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34AF9C061574
+        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 04:58:26 -0700 (PDT)
+Received: by mail-lj1-x231.google.com with SMTP id p12so20480043ljg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 04:58:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=vEUJ9FU1bqV7YHn//mLhXxm63Sg8URrDwQWqZSB2KNA=;
- b=wBKFVrje9vuKiuDueOHachCEMx3Q+bCBRVOdXOTPUg5r8Pl5iPU566zjFxfOH/D33XlBiGovRihX5ES9YcJRq56FLAVxZTPyrXE2GeNxhl+eME7sBGMGnDN7Dz+Yioh1JSnR250V5OqmN5S2Mj3wLrQU0hNF/t4Z6a8EDINIkkM=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM6PR04MB4153.namprd04.prod.outlook.com (2603:10b6:5:a0::21) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4108.25; Mon, 10 May 2021 10:41:34 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::ed2d:4ccc:f42b:9966]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::ed2d:4ccc:f42b:9966%7]) with mapi id 15.20.4108.031; Mon, 10 May 2021
- 10:41:34 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-CC:     Linus Walleij <linus.walleij@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH 2/2] mmc: core: Add support for cache ctrl for SD cards
-Thread-Topic: [PATCH 2/2] mmc: core: Add support for cache ctrl for SD cards
-Thread-Index: AQHXQohQmJ5aCkIH3kCczJUde/3xEqrcbNXwgAAf84A=
-Date:   Mon, 10 May 2021 10:41:34 +0000
-Message-ID: <DM6PR04MB6575FC67AED514877921AC99FC549@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20210506145829.198823-1-ulf.hansson@linaro.org>
- <20210506145829.198823-3-ulf.hansson@linaro.org>
- <DM6PR04MB6575E3D63982278D2F1CA022FC549@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB6575E3D63982278D2F1CA022FC549@DM6PR04MB6575.namprd04.prod.outlook.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=wdc.com;
-x-originating-ip: [212.25.79.133]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: cdd1877a-76ed-40dd-3234-08d913a02e83
-x-ms-traffictypediagnostic: DM6PR04MB4153:
-x-microsoft-antispam-prvs: <DM6PR04MB4153C4182A1B6F5960754446FC549@DM6PR04MB4153.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: /PliomfHk3+hoivP9oNYWbtcRJKihsZliDyLhKdCnV3rP0nApH84MgTPNVX07cMSNHgqkwdTcRcbksN+UIY1xgwz4b2kq+RnvF/FTlxlT9wGzWEuD4uxTw/41TzVm2XmbMZjJVVf9LtzWEfqgtiOkQHZFLQ0Kikdzg6JJ+m0Paxy4MLPejyDF0u2QlD6O/S+uFHEMgNVvw9Zz3B/uXDS5uHDMSKqreUgtlxntLqVHGi0WJ/k50+b697sS8ryNpzKdKxI6Va7sWdkOpdWRpSq7BSGK1KOGKZR9QdqKMHVW2VaozJfiiql9nS49hAKugx1PebQLcm2kRqJ1RVBkZqdIwLzIEErwDOGE79RII9rUo5A+3sTw+a+zoALJbJ2zn+qNjuPTnzv+4NcaiSWHDTAFPj5cAQnFuk20jy9J6J0NopWF3nNthh7jIsaYP/JltXdggG1Dm3/B9hqiJ7P0rHMBIpFNWA8ZsDR2gNDyvVN8xk+voQk4guATub5ul6GX/PMW3OoXLWHHv/umNZCtQc1MBDkHOwoFCBzb92G+D+CefH6x9KxHWJJdvfBnPDZPt/xt4DYz5AZlJwchyXy+QPZYm5TrSKr4dpKLpYu/GaY/Ao=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(86362001)(76116006)(71200400001)(6506007)(498600001)(55016002)(83380400001)(52536014)(66556008)(66946007)(66446008)(64756008)(66476007)(2906002)(2940100002)(33656002)(5660300002)(7696005)(9686003)(26005)(4326008)(186003)(54906003)(110136005)(38100700002)(8936002)(122000001)(8676002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata: =?us-ascii?Q?173bWsZecGbli7GtW0o27nqrpIUqa4Gu9EtIx/g63ie+RLIE7QMErO8a9w+6?=
- =?us-ascii?Q?3CZqqGjqRjVrdLjKXk3fXY9X4Bz/197OQgiWlUsiFq1IrjaTrU82A2O86ivq?=
- =?us-ascii?Q?lABzWgG0eqsdEXvD4UJiHBQZfUuscpDoQEf9EvZXtmKosZIu7zkepOjkank/?=
- =?us-ascii?Q?jXO6aEHcJlzqKO6z0dEtze3CLPXc9IaQcdzv2CTQd85lEscSQbk4cJXF9hAP?=
- =?us-ascii?Q?Oe9hfzuZkHEfVRL7GgDR74ijesExBLLjAs4iaKxmD7LNQ/n3CSN/PCyg26Ow?=
- =?us-ascii?Q?zTbl102pNw4tPr+t9ad6B4vb2zFBZhM+49baUyu0wTm2Rgv/Jo76vF5ahhnK?=
- =?us-ascii?Q?YX2r8/I+UN6pzKHp/D5rOfX/0TWj8va24ooB/suZ5TBasDN6NImxiFUMyTXl?=
- =?us-ascii?Q?vOb0xrLNSi8tt2bcX0DrcxEXIstYsF0mRv85z/sQbR1vQL/sC1cS+PPqWD/O?=
- =?us-ascii?Q?KUu4kAMrwxDLwoYY6pz4BteD00bYRQqKbNDlrF+7860iI/Y3H/oSOhd+CrHR?=
- =?us-ascii?Q?ccD7nDlKYjp31e5+mt5RaGh5qAD2fIlcEoabo8K3V8PRi8zOZhSeG601UQX7?=
- =?us-ascii?Q?CMwntHzLxWG5b61PZM6371h9L1qox07/8gkeps4cQMjv+3KrydVCs/StdUQj?=
- =?us-ascii?Q?hc2+3jVFuIUQ+Qkl2r+QvRdENGaK4/Cny4UTou2dVRYfGX2B2f2pkuspHK93?=
- =?us-ascii?Q?i3vr9xC9utfXqJM2IQJbueSqFO84xVI5darHooHV+KOrfRHv+HbEpE5XuShv?=
- =?us-ascii?Q?pBtc81jGEGaCLn8lsPPuYcY3UkoV8/JkS1zgAOz+TZq7q977LGNNZ5RLWhNt?=
- =?us-ascii?Q?D3ASCS07KqJJOWo2mPbE79IOOSZDFaTQfWz0Q6ImIQWBu2KEWMIdu37BR6d4?=
- =?us-ascii?Q?2Udp2UFdELRoErjkz4P2K3l/TboCWP0TL1Q/kC1PwYgbis0bvwVImMQxQXau?=
- =?us-ascii?Q?pho0lzTHIZA8PkIrGUkABRcMhW7IGtWSsWnA8spztfxmR1S4h7AElq3pGrR9?=
- =?us-ascii?Q?/KN1W8101SAzN+SVVIBQE9h4AYVZ4ZnBtrQCDG4qgdP5KYCqjipyBVpg848Z?=
- =?us-ascii?Q?Ch3qQhafp5zjiDxi7bW0kB+S0AmfQO+IxwJJaiwObCIBrOHriPb1B4PbeyOU?=
- =?us-ascii?Q?Nn4Rg4H2K5xis1beToEFAA1CBj0mAbgX1MWN5kKLsDSUC84+rdm/I71fwNGP?=
- =?us-ascii?Q?uQeeIfbD7UmdKku3IS2KGtgNdTfoLIv4QgwnzWPqv8wmFIUZR6aZ950Em393?=
- =?us-ascii?Q?Q8YK0PR7/vvv6KPW7yDjAoYjYYo/QcrKoAbE++OilnXbThGEw3h4DNQUCqRL?=
- =?us-ascii?Q?q0jzjPBi8SepKfbQrxuHu9Wd?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=dFRQ/drBdPg7ZZp1TCqbFVmnAdonsbp2deXEgt0fqmw=;
+        b=vq5PpmaeU3MP6Sy8enG8y49x3jq0MrmAGFgas9S689VjzeIJJhbgOUnkK0h/sA3gLe
+         zKv9EP40lHnoRD+F/p2BJfMPWO3JURaD0hyUxH7KKv6ipGN92GvQ+1DgFDf8nP4HZW91
+         uQHm2dU4528BB5uBe4S3EGB8Ok/iqxN2+FiAFPPTgPqoLzrruDGnIllsVwmAxnlRcbiN
+         tJxa/xAcTxsAiCAnGQSmFH91rA0/NHbv/HKqAp/2acCEsCLlxHezX11rT8zG+JZFAOa2
+         /UX7wjiqccvw0ohdqZMNmmo9kbcdJdps0HZ70TYgc0PrhNCmOWFXv/SeMWCVjIrnKAwG
+         /bYg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=dFRQ/drBdPg7ZZp1TCqbFVmnAdonsbp2deXEgt0fqmw=;
+        b=mpGG0J5+fUbJp9VPfjiFYTNP9D7PmaMRuyhRQwFeBLxK17YzhYU1WMPtmXeedSu0ms
+         +JNqijtnwDpdDERBgKFp9q6qGPyCei1Jlp4eM82iJdGIONXHFWo7rAjQQzHWXMnX1RHL
+         bX3SKshVf+5KrsZ+LdB64axoK+244GiYXIdzjjVyzYiRnKJFjhMKjdm9kZgiUsDDj0EI
+         T5NA0QObolxFq17hoV4wGXF2GAzewpt0ku2k/T1qWpgZItpH3CG0Y41zRSfxPOnAZxIV
+         H1F9B4NShnguj9IarK0pyP7MWDOHP3XkSjpEv1nW0G0+d/E5V5HToyFogMdeSiApZ00x
+         HVeA==
+X-Gm-Message-State: AOAM5310I+8ePl2lrSUR7gdjLnzNPn5WgDbX1otVSe0X2/RnAaQooJHi
+        7lOpMLtoziHT6YOC4WGdIclV9P40x5aZ5Ex8FYEIzg==
+X-Google-Smtp-Source: ABdhPJz+qnPc2pLYqjAXrtHKfZd3fBdOtz1Tm6Tvo+o4U9Zg+CZ7jom1nqDxFJCpWbD7JQkfUcvWMQhXu1j/pp3thu0=
+X-Received: by 2002:a2e:7f1c:: with SMTP id a28mr20039955ljd.341.1620647904669;
+ Mon, 10 May 2021 04:58:24 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: cdd1877a-76ed-40dd-3234-08d913a02e83
-X-MS-Exchange-CrossTenant-originalarrivaltime: 10 May 2021 10:41:34.5068
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: e4N+D2Fzj956D9MKKfA+UB1GJ4w1cMUm5VymxUfPCfm1qIhzwvSjsa+07cAxiD1ytj0eM3CTke4S8PT6QneZcQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB4153
+References: <20210414085121.28951-1-peng.zhou@mediatek.com> <20210414085121.28951-2-peng.zhou@mediatek.com>
+In-Reply-To: <20210414085121.28951-2-peng.zhou@mediatek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 10 May 2021 13:57:48 +0200
+Message-ID: <CAPDyKFpOzmYxstRwSrD6tWKLMwxFPvHNfpDPDCrogzRah5iZtA@mail.gmail.com>
+Subject: Re: [PATCH RESEND v3 1/3] mmc: Mediatek: add Inline Crypto Engine support
+To:     Peng Zhou <peng.zhou@mediatek.com>
+Cc:     Eric Biggers <ebiggers@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Satya Tangirala <satyat@google.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Wulin Li <wulin.li@mediatek.com>,
+        DTML <devicetree@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> > +       if (!err)
-> > +               card->ext_perf.feature_enabled |=3D SD_EXT_PERF_CACHE;
-> Maybe
-> If (err)
->     card->ext_perf.feature_enabled &=3D ~SD_EXT_PERF_CACHE;
->=20
-> and move to out: to catch the sd_write_ext_reg err ?
-Please ignore - got mixed up with card->ext_perf.feature_support...
+On Wed, 14 Apr 2021 at 11:12, Peng Zhou <peng.zhou@mediatek.com> wrote:
+>
+> From: Peng Zhou <Peng.Zhou@mediatek.com>
+>
+> 1. add crypto clock control and ungate it before CQHCI init
+>
+> 2. set MMC_CAP2_CRYPTO property of eMMC
+>
+> Signed-off-by: Peng Zhou <Peng.Zhou@mediatek.com>
 
-Sorry,
-Avri
+As discussed [1], I think the ARM SMC call should be managed together
+with the crypto clock, from a PM domain (a genpd provider).
 
->=20
-> > +
-> > +out:
-> > +       kfree(reg_buf);
-> > +       return err;
-> > +}
-> > +
-> >  /*
-> >   * Handle the detection and initialisation of a card.
-> >   *
-> > @@ -1442,6 +1531,13 @@ static int mmc_sd_init_card(struct mmc_host
-> > *host, u32 ocr,
-> >                         goto free_card;
-> >         }
-> >
-> > +       /* Enable internal SD cache if supported. */
-> > +       if (card->ext_perf.feature_support & SD_EXT_PERF_CACHE) {
-> > +               err =3D sd_enable_cache(card);
-> > +               if (err)
-> > +                       goto free_card;
-> If cache enablement failed, is it worthwhile to bail out?
-> Maybe disabling the cache with the appropriate message is enough?
->=20
-> > +       }
-> > +
-> >         if (host->cqe_ops && !host->cqe_enabled) {
-> >                 err =3D host->cqe_ops->cqe_enable(host, card);
-> >                 if (!err) {
-> > @@ -1694,6 +1790,8 @@ static const struct mmc_bus_ops mmc_sd_ops =3D
-> {
-> >         .alive =3D mmc_sd_alive,
-> >         .shutdown =3D mmc_sd_suspend,
-> >         .hw_reset =3D mmc_sd_hw_reset,
-> > +       .cache_enabled =3D sd_cache_enabled,
-> > +       .flush_cache =3D sd_flush_cache,
-> >  };
->=20
-> I would expect 2 more patches in this series:
->  - flush cache on power down
->  - cache disablement events?
->=20
-> Thanks,
-> Avri
+These are the steps I think should help to get this supported:
+
+1)
+Add a new generic mmc DT property for crypto support. Make it being
+parsed from mmc_of_parse() and let it set MMC_CAP2_CRYPTO.
+
+2)
+Start by adding a genpd provider in DT and implement support for it in
+drivers/soc/*. See
+Documentation/devicetree/bindings/power/power-domain.yaml, for generic
+DT bindings.
+
+If you already have a genpd provider for the device, you may either
+extend it to cope with the below or implement a new and model the it
+as a child (subdomain) of the existing one.
+
+3)
+To fetch the crypto clock during probe, the genpd provider should
+implement the ->attach|detach_dev() callbacks. The ->attach_dev()
+callback is invoked from genpd_add_device(), which is called while
+probing the device. Vice verse for the ->detach_dev() callback.
+
+4)
+Ungating/gating the clock should be implemented from the genpd
+provider's ->start|stop() callbacks. These callbacks are called from
+genpd_runtime_suspend|resume(), thus when the device gets runtime
+suspended/resumed. As the mmc host driver already supports runtime PM,
+only a minor update in the driver's ->probe() is needed, which is to
+call dev_pm_domain_start(). This turns on the crypto clock and allows
+its registers to be accessed.
+
+5)
+Add also the ARM SMC calls to the genpd provider's ->start|stop()
+callbacks. This means those gets called from SoC specific code, which
+helps to keep the driver portable.
+
+6)
+Add the crypto clock DT binding for the mmc host.
+
+7)
+Wire up the mmc host device node in DT to be attached to the genpd
+provider (see power-domains and power-domain-names properties). Make
+sure to also specify the crypto clock and the new mmc crypto property
+for it.
+
+Please, just ask if there is anything unclear. I will do my best to help!
+
+Kind regards
+Uffe
+
+[1]
+https://patchwork.kernel.org/project/linux-mmc/patch/20210309015750.6283-1-peng.zhou@mediatek.com/
+
+> ---
+>  drivers/mmc/host/mtk-sd.c | 15 ++++++++++++++-
+>  1 file changed, 14 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index 898ed1b023df..1c90360d6cf2 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -442,6 +442,7 @@ struct msdc_host {
+>         struct clk *src_clk_cg; /* msdc source clock control gate */
+>         struct clk *sys_clk_cg; /* msdc subsys clock control gate */
+>         struct clk_bulk_data bulk_clks[MSDC_NR_CLOCKS];
+> +       struct clk *crypto_clk; /* msdc crypto clock */
+>         u32 mclk;               /* mmc subsystem clock frequency */
+>         u32 src_clk_freq;       /* source clock frequency */
+>         unsigned char timing;
+> @@ -802,6 +803,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
+>
+>  static void msdc_gate_clock(struct msdc_host *host)
+>  {
+> +       clk_disable_unprepare(host->crypto_clk);
+>         clk_bulk_disable_unprepare(MSDC_NR_CLOCKS, host->bulk_clks);
+>         clk_disable_unprepare(host->src_clk_cg);
+>         clk_disable_unprepare(host->src_clk);
+> @@ -822,6 +824,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
+>                 dev_err(host->dev, "Cannot enable pclk/axi/ahb clock gates\n");
+>                 return;
+>         }
+> +       clk_prepare_enable(host->crypto_clk);
+>
+>         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+>                 cpu_relax();
+> @@ -2512,6 +2515,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 goto host_free;
+>         }
+>
+> +       /* only eMMC has crypto property */
+> +       if ((mmc->caps2 & MMC_CAP2_NO_SD) && (mmc->caps2 & MMC_CAP2_NO_SDIO)) {
+> +               host->crypto_clk = devm_clk_get(&pdev->dev, "crypto");
+> +               if (IS_ERR(host->crypto_clk))
+> +                       host->crypto_clk = NULL;
+> +               else
+> +                       mmc->caps2 |= MMC_CAP2_CRYPTO;
+> +       }
+> +
+>         host->irq = platform_get_irq(pdev, 0);
+>         if (host->irq < 0) {
+>                 ret = -EINVAL;
+> @@ -2582,6 +2594,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>                 host->dma_mask = DMA_BIT_MASK(32);
+>         mmc_dev(mmc)->dma_mask = &host->dma_mask;
+>
+> +       /* here ungate due to cqhci init will access registers */
+> +       msdc_ungate_clock(host);
+>         if (mmc->caps2 & MMC_CAP2_CQE) {
+>                 host->cq_host = devm_kzalloc(mmc->parent,
+>                                              sizeof(*host->cq_host),
+> @@ -2618,7 +2632,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+>         spin_lock_init(&host->lock);
+>
+>         platform_set_drvdata(pdev, mmc);
+> -       msdc_ungate_clock(host);
+>         msdc_init_hw(host);
+>
+>         ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> --
+> 2.18.0
