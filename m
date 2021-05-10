@@ -2,147 +2,369 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 681D7C433ED
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 06:04:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75496C433B4
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 06:29:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3218A613DC
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 06:04:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3FDF461421
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 06:29:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229943AbhEJGF6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 May 2021 02:05:58 -0400
-Received: from twspam01.aspeedtech.com ([211.20.114.71]:55259 "EHLO
-        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229608AbhEJGF5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 02:05:57 -0400
-Received: from mail.aspeedtech.com ([192.168.0.24])
-        by twspam01.aspeedtech.com with ESMTP id 14A5pcM7033952;
-        Mon, 10 May 2021 13:51:39 +0800 (GMT-8)
-        (envelope-from steven_lee@aspeedtech.com)
-Received: from aspeedtech.com (192.168.100.253) by TWMBX02.aspeed.com
- (192.168.0.24) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Mon, 10 May
- 2021 14:03:41 +0800
-Date:   Mon, 10 May 2021 14:03:39 +0800
-From:   Steven Lee <steven_lee@aspeedtech.com>
-To:     Andrew Jeffery <andrew@aj.id.au>
-CC:     Philipp Zabel <p.zabel@pengutronix.de>,
+        id S230002AbhEJGah (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 May 2021 02:30:37 -0400
+Received: from mail-eopbgr60065.outbound.protection.outlook.com ([40.107.6.65]:20312
+        "EHLO EUR04-DB3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S229863AbhEJGag (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 10 May 2021 02:30:36 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=TDLoL1ae8M40wira7SM68zeusZRW1k6JgEvocQNondpY5TgnPVJFkndcaVSiljbxK1lOqP6RY3OhxdUTyi0U4Jmt4mkgV2i4CLi2FEgzxRWC2lDvWL1IdKMRXxZRi8Ty1brO2GJIBKUwrLfuv5byUh/8OtIA9lkQ+lJngoEWEhMKAksT++JYMUf3xUii1vDaYaG0Lp6WcH6sM49PDA59LZant2w2rObut5Rm9+C7I99EN8/0oDld3E4MIAKKJc9zvoD7bTZFFB8YIlgBG5QwtomChceMz8us/9RhYO0mVxD2EEAsvJ1IdcNSvoz5HK38SwViVyQlGfl2Uh37MKa7Yw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=6t/D3kESFknaKumLQc5ifNkQL/fnFOUqZuTI+pz0Z4M=;
+ b=odkLwDl00kUQ2+Swi2KUrV+cHNb2uFRb+DwDFEhXulC8HtoTBp54k+79gab/30z682gwvjfP3/c/4T++NuOIOXuDgiTi5IyX94sScpYnxwLTdg9APNB24FbiS3Zg1w0mMpoG6AYDedJGwXo74D7QuUkspuaj3ZUhYbq4WUPnq/ZGMgJ9WAraVz0qVQkGJCMDOaBdnTON8LCtUBN5WvyvGS1Rhmqcvs2gwub0+EwOPrGvMOLrq2LDo3mLgJEu0N3lI04iKkTw9LH8d9a8dtKz3euV5K5HQAH02cMK3fW7XnaW78pRfRmminHzqQmnctZGTDnMxILd7dd413atGF+HYg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=6t/D3kESFknaKumLQc5ifNkQL/fnFOUqZuTI+pz0Z4M=;
+ b=ilVzhgYj9H2O0RGSA+7g2aKzB4Rsc0P10yATb3Hz3RGJ/WFH+UmfpXzxbPYvpBXTuysYV9fk+VegBOC+XX53zuKfhqmJr+UqOoq7ZW1Nt+iw2TReO+2WQsFAg7oC0eA/xO+poyjDxY1WWNvDW5b9IqEBD1VfXeM+xPqqGV6BObQ=
+Received: from VI1PR04MB5294.eurprd04.prod.outlook.com (2603:10a6:803:5a::22)
+ by VI1PR04MB3071.eurprd04.prod.outlook.com (2603:10a6:802:3::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4108.28; Mon, 10 May
+ 2021 06:29:29 +0000
+Received: from VI1PR04MB5294.eurprd04.prod.outlook.com
+ ([fe80::ed5a:8f34:39b:db40]) by VI1PR04MB5294.eurprd04.prod.outlook.com
+ ([fe80::ed5a:8f34:39b:db40%3]) with mapi id 15.20.4108.031; Mon, 10 May 2021
+ 06:29:29 +0000
+From:   Bough Chen <haibo.chen@nxp.com>
+To:     Lucas Stach <dev@lynxeye.de>, Rob Herring <robh+dt@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Joel Stanley <joel@jms.id.au>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ryan Chen <ryanchen.aspeed@gmail.com>,
-        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
-        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-arm-kernel@lists.infradead.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        Hongwei Zhang <Hongweiz@ami.com>,
-        Ryan Chen <ryan_chen@aspeedtech.com>,
-        Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
-Subject: Re: [PATCH v3 5/5] mmc: sdhci-of-aspeed: Assert/Deassert reset
- signal before probing eMMC
-Message-ID: <20210510060338.GB6883@aspeedtech.com>
-References: <20210506100312.1638-1-steven_lee@aspeedtech.com>
- <20210506100312.1638-6-steven_lee@aspeedtech.com>
- <20210506102458.GA20777@pengutronix.de>
- <19a81e25-dfa1-4ad3-9628-19f43f4230d2@www.fastmail.com>
- <20210507062416.GD23749@aspeedtech.com>
- <2a339218-19d7-4eea-a734-8053dd553dbb@www.fastmail.com>
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+Subject: RE: [PATCH 2/2] mmc: sdhci-esdhc-imx: add support for disabling HS400
+ mode via DT
+Thread-Topic: [PATCH 2/2] mmc: sdhci-esdhc-imx: add support for disabling
+ HS400 mode via DT
+Thread-Index: AQHXRE4bZH5hFejoHkSPETS6Q9d9AarcQeSA
+Date:   Mon, 10 May 2021 06:29:28 +0000
+Message-ID: <VI1PR04MB5294AAF9BCC449636C6EC5CE90549@VI1PR04MB5294.eurprd04.prod.outlook.com>
+References: <20210508205658.91105-1-dev@lynxeye.de>
+ <20210508205658.91105-2-dev@lynxeye.de>
+In-Reply-To: <20210508205658.91105-2-dev@lynxeye.de>
+Accept-Language: zh-CN, en-US
+Content-Language: en-US
+X-MS-Has-Attach: yes
+X-MS-TNEF-Correlator: 
+authentication-results: lynxeye.de; dkim=none (message not signed)
+ header.d=none;lynxeye.de; dmarc=none action=none header.from=nxp.com;
+x-originating-ip: [119.31.174.71]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 3607c012-3627-4cca-1d1e-08d9137cf6fc
+x-ms-traffictypediagnostic: VI1PR04MB3071:
+x-microsoft-antispam-prvs: <VI1PR04MB3071F34B098381C1BD67FE7E90549@VI1PR04MB3071.eurprd04.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:3276;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: U0a/mWN8+HuqB5heCg+3qWNj4fhE+49Qo8RCnTWt/OFmIxUfeoRYr5Hjt67SunqNIImIq2hWplF6ltfvi7QfFIM2hFABLq6LU84INPWCYddfiQ+p8BQzGOFydGLT11SESnp9ATt+VDAMMPrOKAbrVaqFsM4nXId6YEZPi1wvJJTDTA2JrMlX/UJhOZUSdLTtIHyOq2LGd5a9QJG6TC27jh0Uk8AszFn9TwidtHeMPfKYpAy6wkBXFFrjn21rljQNaWfMIhQwy4BmaiDUuQG6oVbUSYj2B9IZBiJk4sHZdGq6GiHUZeq6m8Yr7RgJAWD8F/m/RyWmnDyA32CovLW3UX7iqsCoknqfEwTCXKMzYx77BTKFHdO66nzho4v1pd1gxR5lA1y/3URhEbl0iQFvd7V87FaWlgdLoZCgs7lG0Cyg1+rPyY9VRkptPmD+G+zN8NZzCjaC2BmRUYY6ufbkhWqiXl0zQSpmn37SRN5MkdhUZrD3ZpTbBjlfAS5EQH9lGE5P6D0MfmoMmiYMWVTgcfWrmNQYBnuOE5xEhqGun6L5A+IwlcNqDvB2YRXrb4luPzXwDrPcRrjaGtIYOJUpsIJJg8M5Y0ajysRKC3zaQnk=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1PR04MB5294.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(136003)(366004)(396003)(39860400002)(346002)(8936002)(76116006)(9686003)(122000001)(54906003)(83380400001)(33656002)(2906002)(66616009)(66946007)(66446008)(186003)(55016002)(66556008)(8676002)(66476007)(64756008)(7696005)(99936003)(4326008)(26005)(52536014)(5660300002)(53546011)(6506007)(316002)(71200400001)(478600001)(86362001)(110136005)(38100700002);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata: =?gb2312?B?UE9GaU83MUFmVHQ1ZlY2UWhNN3BsWjlSVnM5K3hQQ2NaNkdTUm9Cc29LbEdI?=
+ =?gb2312?B?ajl6OVNwZ0hhaTVTZmxJejA5YklKTlNsQXdKL1duUGlrczh1d0preHRrVU52?=
+ =?gb2312?B?d0ZSOWk0Y1BnQ09MMGI3c2t0WkJwSlJtT1RRcTAzV1NObDlyOFBObTd5K1A1?=
+ =?gb2312?B?c2dDNVIwSjd4Y2lyRy8yUDV4VGdBRFpiLzVITWtKR3diN1l3TUZEcjl5Tk9j?=
+ =?gb2312?B?YW9adXBBWWRJcTROZ2Zxclhpb2ZyTDVGbmdXckdEdHZoV1RvbC94NThqU0Zu?=
+ =?gb2312?B?R0JZVGMyQitDSmdGNnE2eG1jUDlMc2Y0MkUzbXhxdmpvRTVQeW5BMFJWa1Rz?=
+ =?gb2312?B?MHF2bDM2SUNRVGZ1NzF0NjFDWUIxSk1scTJXTklaOE5abHdVcHFlSGR1MXJo?=
+ =?gb2312?B?UHRUMFlmbkdjZ3Y2YnRkckhrZDlXN2oyRWdLdk9pL1JSNUpuUW5vU25meEN3?=
+ =?gb2312?B?NmNSVHM0OHRVRGJ1cUdDdjViRitZNjVrU2swRFFrZUhLcEpjdXp1MTZVdmdv?=
+ =?gb2312?B?dlVsZjAyUWZSTldMZTZubmZIM3V0T0szeUI2YXVsYkdFVzJabENnbXAzazg4?=
+ =?gb2312?B?cGtnY2NBdk0rZ1I3aWF2NDhXbjkvaVk5eXBWbGtoR20zcW9jMU44MTZ2aFlS?=
+ =?gb2312?B?TzJVWElTNE4xaTI2TEdtNzhvVytZdEJldjJKa2l1K0srenc2a2U3NWF6aUMr?=
+ =?gb2312?B?MFFTZDlNZnBlR29WR0REcHh5dk9TNFBRQ2xrQ1g4MmVGR1V3dVpIQVV3R04x?=
+ =?gb2312?B?QlZUMGNMYjltWm1YTVdRUW84SHpKU1BOTGQxQzJobHBMeDlGbHhscDhEVzdr?=
+ =?gb2312?B?UzdzbjlQWU9qT1k5Yk5tWjY0eFUyQjJ6NWJnMkU3Uk96YmtseEpyVTl0ZDNi?=
+ =?gb2312?B?eFRPT3dvWDVyU2lRaHZaTGF3UjI0citPR0lPZlJ2N1ZsQUZzU0tIMDdnZW1j?=
+ =?gb2312?B?SmZ6YmJZMEt1L3NIRFBsU21IalczQUx4cFMxUWQ1YXZ5TlhaUHlQcUgyRXMy?=
+ =?gb2312?B?dWZndWhwQ29pbGc2YVUwcnlWdExiRUQrekV2ajVtVnJJQndZR04wNng3aFJQ?=
+ =?gb2312?B?TkpRcDV6UVkyMDhOUXMrS21aNW9JM2ZQZ1ZxRERSdzR3Q0c0ZmpaWTJndWkv?=
+ =?gb2312?B?M0RLQnhEekJZYnZudW9XV2U2bGJzUVREY0J3VFRodnNYL2JBUStSRjE4by9E?=
+ =?gb2312?B?bGliNXpiZU03YW9CZEJNUDZkZzVvVHphbStPR1ExQzh0NWdRdHJhYU00N2Np?=
+ =?gb2312?B?LzdNNEVNR05McWdrMkZ6NDhleGlFOHd4aFRqc3NnajFpcnZIdjRITnY0VTZi?=
+ =?gb2312?B?Mnl6U3pIbGxnU0dTVUg5ZVZhWkNiR1ZyZ1ZjTDRheXdsWEkrOXZaaGlwTTkw?=
+ =?gb2312?B?UkNNcENXS0QrK0lGMnp3bmRuZ2RQMUQyRUVFdXlsZjQ5SVNSektNL1JCZHZq?=
+ =?gb2312?B?WlVjbEF4ZlltK3lvb0thZzBLK3daWklqWDkwaEhML2prYmdGcTBrOHdoOGEy?=
+ =?gb2312?B?REFCR1N6WnNUL0cvU3NqSHljRGZ0SWZjekZ3LzZhMTdLZ1FwcTBvZjR2OElR?=
+ =?gb2312?B?dWYxUDBXOUpxczVoVjM0ZGhaaitGZ2I5Y2FSNCtPREgrakZmVFJWTWZKYnR1?=
+ =?gb2312?B?RllGWGdSN2Z5QXZvVEYrRHlwNTAydE80M0Q1eG1wbFoydmFPYnF1Zjg5MDhW?=
+ =?gb2312?B?QWQwNU85VUtNNS90bmZDdHRZRC9ZL1FxV2FYUG1oMkFQT0hMaFJ3dlRaQnVX?=
+ =?gb2312?Q?SKdW+gveV1ANg6wod8PDO1lwRaWc4oCaCjBW6Zi?=
+x-ms-exchange-transport-forked: True
+Content-Type: multipart/signed;
+        protocol="application/x-pkcs7-signature";
+        micalg=2.16.840.1.101.3.4.2.1;
+        boundary="----=_NextPart_000_026A_01D745A8.E03019F0"
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Disposition: inline
-In-Reply-To: <2a339218-19d7-4eea-a734-8053dd553dbb@www.fastmail.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Originating-IP: [192.168.100.253]
-X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
- (192.168.0.24)
-X-DNSRBL: 
-X-MAIL: twspam01.aspeedtech.com 14A5pcM7033952
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: VI1PR04MB5294.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3607c012-3627-4cca-1d1e-08d9137cf6fc
+X-MS-Exchange-CrossTenant-originalarrivaltime: 10 May 2021 06:29:28.9236
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 5if83i4H/sCGBgKN88bp1VTWqxJY4ypDTTZ9yYqXx7X8iFz5d8hF43eqr0k/f6qqutcRChOyNESb75l6bTSTxw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR04MB3071
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The 05/07/2021 15:36, Andrew Jeffery wrote:
-> 
-> 
-> On Fri, 7 May 2021, at 15:54, Steven Lee wrote:
-> > The 05/07/2021 09:32, Andrew Jeffery wrote:
-> > > 
-> > > 
-> > > On Thu, 6 May 2021, at 19:54, Philipp Zabel wrote:
-> > > > Hi Steven,
-> > > > 
-> > > > On Thu, May 06, 2021 at 06:03:12PM +0800, Steven Lee wrote:
-> > > > > +	if (info) {
-> > > > > +		if (info->flag & PROBE_AFTER_ASSET_DEASSERT) {
-> > > > > +			sdc->rst = devm_reset_control_get(&pdev->dev, NULL);
-> > > > 
-> > > > Please use devm_reset_control_get_exclusive() or
-> > > > devm_reset_control_get_optional_exclusive().
-> > > > 
-> > > > > +			if (!IS_ERR(sdc->rst)) {
-> > > > 
-> > > > Please just return errors here instead of ignoring them.
-> > > > The reset_control_get_optional variants return NULL in case the
-> > > > device node doesn't contain a resets phandle, in case you really
-> > > > consider this reset to be optional even though the flag is set?
-> > > 
-> > > It feels like we should get rid of the flag and leave it to the 
-> > > devicetree.
-> > > 
-> > 
-> > Do you mean adding a flag, for instance, "mmc-reset" in the
-> > device tree and call of_property_read_bool() in aspeed_sdc_probe()?
-> > 
-> > > I'm still kind of surprised it's not something we want to do for the 
-> > > 2400 and 2500 as well.
-> > > 
-> > 
-> > Per discussion with the chip designer, AST2400 and AST2500 doesn't need
-> > this implementation since the chip design is different to AST2600.
-> 
-> So digging a bit more deeply on this, it looks like the reset is 
-> already taken care of by drivers/clk/clk-ast2600.c in the 
-> clk_prepare_enable() path.
-> 
-> clk-ast2600 handles resets when enabling the clock for most peripherals:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n276
-> 
-> and this is true for both the SD controller and the eMMC controller:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n94
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n88
-> 
-> If this weren't the case you'd specify a reset property in the SD/eMMC 
-> devicetree nodes for the 2600 and then use 
-> devm_reset_control_get_optional_exclusive() as Philipp suggested. See 
-> the reset binding here:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/devicetree/bindings/reset/reset.txt?h=v5.12
-> 
-> So on the surface it seems the reset handling in this patch is 
-> unnecessary. Have you observed an issue with the SoC that means it's 
-> required?
-> 
+------=_NextPart_000_026A_01D745A8.E03019F0
+Content-Type: text/plain;
+	charset="gb2312"
+Content-Transfer-Encoding: quoted-printable
 
-Yes, you are right, aspeed_sdc_probe() calls clk_prepare_enable(),
-aspeed_g6_clk_enable() does reset eMMC.
+> -----Original Message-----
+> From: Lucas Stach [mailto:dev@lynxeye.de]
+> Sent: 2021=C4=EA5=D4=C29=C8=D5 4:57
+> To: Rob Herring <robh+dt@kernel.org>; Ulf Hansson
+<ulf.hansson@linaro.org>;
+> Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Pengutronix Kernel Team <kernel@pengutronix.de>; Fabio Estevam
+> <festevam@gmail.com>; linux-mmc@vger.kernel.org;
+> devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org
+> Subject: [PATCH 2/2] mmc: sdhci-esdhc-imx: add support for disabling =
+HS400
+> mode via DT
+>=20
+> On some boards the data strobe line isn't wired up, rendering HS400
+support
+> broken, even if both the controller and the eMMC claim to support it.
+Allow to
+> disable HS400 mode via DT.
+>=20
+> Signed-off-by: Lucas Stach <dev@lynxeye.de>
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 3 +++
+>  1 file changed, 3 insertions(+)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index a20459744d21..1d6068507fb6 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1483,6 +1483,9 @@ sdhci_esdhc_imx_probe_dt(struct platform_device
+> *pdev,
+>  	if (of_find_property(np, "no-1-8-v", NULL))
+>  		host->quirks2 |=3D SDHCI_QUIRK2_NO_1_8_V;
+>=20
+> +	if (of_find_property(np, "no-mmc-hs400", NULL))
+> +		host->quirks2 &=3D ~SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400;
+> +
 
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/mmc/host/sdhci-of-aspeed.c#n496
+Hi Lucas
 
-However, the clock of eMMC is enabled in my u-boot(2019.04).
-So it is retruned in the condition of aspeed_g6_clk_is_enabled() below
-and doesn't reset eMMC.
+I suggest you move the change to mmc_of_parse() in =
+drivers/mmc/core/host.c
+You also need to take care of the HS400ES mode.
 
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n285
+Regards
+Haibo Chen
 
 
-> Andrew
+>  	if (of_property_read_u32(np, "fsl,delay-line",
+&boarddata->delay_line))
+>  		boarddata->delay_line =3D 0;
+>=20
+> --
+> 2.31.1
+
+
+------=_NextPart_000_026A_01D745A8.E03019F0
+Content-Type: application/pkcs7-signature;
+	name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename="smime.p7s"
+
+MIAGCSqGSIb3DQEHAqCAMIACAQExDzANBglghkgBZQMEAgEFADCABgkqhkiG9w0BBwEAAKCCIF4w
+ggVNMIIDNaADAgECAggS5FlmZd/gxTANBgkqhkiG9w0BAQsFADBlMSIwIAYDVQQDDBlOWFAgSW50
+ZXJuYWwgUG9saWN5IENBIEcyMQswCQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNV
+BAcMCUVpbmRob3ZlbjELMAkGA1UEBhMCTkwwHhcNMTYwNDA4MDkxNTA0WhcNMjQwNDA4MDkxNTA0
+WjCBtjEcMBoGA1UEAwwTTlhQIEVudGVycHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoM
+CE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5kaG92ZW4xFjAUBgNVBAgMDU5vb3JkLUJyYWJhbnQxEzAR
+BgoJkiaJk/IsZAEZFgN3YmkxEzARBgoJkiaJk/IsZAEZFgNueHAxEzARBgoJkiaJk/IsZAEZFgNj
+b20xCzAJBgNVBAYTAk5MMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwFq50pGD+tAP
+MI+ADpAEw4523YC7+sGhX8lxP4b2rXVs9mGLW9WEkYuf8F1vj8/K7E5ko+4rrCPhXCz/FhGjFS5+
+LBCEGDSPCiVAs9tbbCAK2LNITChFBXgqt5sUyXz6s3Y/QhMSQZWeb1kuHq/HiSPFPJGa7eAqGOw3
+tBXSYd+T4uUBs1BZhbmi4F31dTecrpE8xIas9+pDg6EkcPngxx/WKm83n8xByvXfd0zYi2lZZZ+N
+jtKmiDJsStWjXGcfp0JBbBf1a1fTPYixgPkG/zBZkdtDCQFOZERpCdv0M4FUDNzZZqf2xf9x1jid
+o9pqYGsb88RzTfua0jb5Btr0qQIDAQABo4GuMIGrMB0GA1UdDgQWBBRYlWDuTnTvZSKqve0ZqSt6
+jhedBzASBgNVHRMBAf8ECDAGAQH/AgEAMEUGA1UdHwQ+MDwwOqA4oDaGNGh0dHA6Ly9ud3cucGtp
+Lm54cC5jb20vY3JsL05YUEludGVybmFsUG9saWN5Q0FHMi5jcmwwHwYDVR0jBBgwFoAUeeFJAeB7
+zjQ5KUMZMmVhPAbYVaswDgYDVR0PAQH/BAQDAgEGMA0GCSqGSIb3DQEBCwUAA4ICAQAGzlH41kw4
+/oQci9bjY1nKYu/LQczr5bZGuRHygo/Lrr9VkFX77oBdEbKs6YH1jMI/xJ01Rx6zPvmr7lLWqaLs
+qpKu8/MQRaVmvZ7IPL75shzwh6EHQahWiB4wjPxq+o1QdW6AVmkEzK/BRBuwx5YTm7IZZt8xduop
+eTYwEhocK8syYw+v6B8iosNQUsR74aT3NNXuZ3plz19wtKWN7XA9S2Lqxg1rxh1Ux9QSDKDpJk2t
+RF3KLz91sH0rxEAZzOGXLvEyK0m/sbuBrrT1zOkfRtL64MiS1HANy6k4a+LmeYQDYywgs5jEYjiz
+ymx3zlAkviS2nboVb9AX39gF2NnDnE3SBWIMFHgEa4Mcgk48aCzWPel0Rs6XRGYVFt/68I62WyAT
+FL8nPMjjXIvmHtR3fhUSFcA8kZxzs/yksL4HSF3C5Tf2yieHsNMVWFvWNJhmFoLJh6UGGeTMpxoZ
+5sMbXRjGz8j3oZQUtnS24QACmKC/nmqFDqp44pXZNsA+oBYNduaA8rDgKi8cit1WPZAeWfFY4d9C
+5OQebju6MZN/4RvKBHZ+Ks+tZUZezfEw4QTR3CgJvpbOQQamVLDjQEnmx4T/Mi5EvaSlzHuW47nS
+5NV1b3ErJv4iESWJHW3k14qQbuIIzEPzgpfkKhasnQ70XvQkHcz6lIa/D4McYMrECTCCBawwggOU
+oAMCAQICCE5+BsxlkQBIMA0GCSqGSIb3DQEBCwUAMFoxFzAVBgNVBAMMDk5YUCBST09UIENBIEcy
+MQswCQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3ZlbjELMAkG
+A1UEBhMCTkwwHhcNMTYwMTI5MTI0MDIzWhcNMzYwMTI0MTI0MDIzWjBaMRcwFQYDVQQDDA5OWFAg
+Uk9PVCBDQSBHMjELMAkGA1UECwwCSVQxETAPBgNVBAoMCE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5k
+aG92ZW4xCzAJBgNVBAYTAk5MMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAo+z+9o6n
+82Bqvyeo8HsZ5Tn2RsUcMMWLvU5b1vKTNXUAI4V0YsUQRITB+QD22YPq2Km6i0DIyPdR1NbnisNp
+DQmVE27srtduRpB8lvZgOODX/3hhjeTWRZ22PAII57gIvKqZCMUWvYRdYZsSKP+4Q+lEks89ys95
+3tp3PI8EeUztT3qUTfs7TbgD5A9s+1zCPqI7b/XmXTrkWBmwmmqDHBijwIvzy5uE3MTBunVZFAl2
+kD/jiBgdj+4O4u593Ny1c9c4If6Xvz3+DEIjdvbULrUyGIatwJdvw6FxRt5znmYKe3VyzsY7Zk/8
+MsOZvzoSPBMSZBWSHj/e8fBwDEDKf6XQ0BD7Z27AWTUcddk1sphn38HHOwEpjKfOxNGX7fSXqz2J
+aRtlamvSoCrd4zrH5f94hcSVFcP9nF9m3JqRzAmbGYTdzgAjKjPRVWAgaZGF8b/laK5Ai8gCEi76
+7DuzMsXkvj9/BQw8fyn5xOY55zRmFo2jU8/blWy/jsAwUeEBDo4KPRAuPbSiOt8Jf8NbDOvDGPKw
+EC8de76SxPi3ulhuFb0Qzxsbk39+ET3Ixy347MAZTji/a87GeIDWi+nCWHwZPQSEg0e0LVh7uRNN
+b1clWILEF/bSMe3zT3rWKWDmzCiTn3+PicqvYM7cWiZi3srlCkIAeaiav9tMaAZ3XG8CAwEAAaN2
+MHQwHQYDVR0OBBYEFJBIUyMqeeqEmz0+uQ7omXRAXqC2MA8GA1UdEwEB/wQFMAMBAf8wEQYDVR0g
+BAowCDAGBgRVHSAAMB8GA1UdIwQYMBaAFJBIUyMqeeqEmz0+uQ7omXRAXqC2MA4GA1UdDwEB/wQE
+AwIBBjANBgkqhkiG9w0BAQsFAAOCAgEAhIKiXslbxr5W1LZDMqxPd9IepFkQ0DJP8/CNm5OqyBgf
+JeKJKZMiPBNxx/UF9m6IAqJtNy98t1GPHmp/ikJ2jmqVqT0INUt79KLP7HVr3/t2SpIJbWzpx8ZQ
+PG+QJV4i1kSwNfk3gUDKC3hR7+rOD+iSO5163Myz/CzzjN1+syWRVenpbizPof8iE9ckZnD9V05/
+IL88alSHINotbq+o0tbNhoCHdEu7u/e7MdVIT1eHt8fub5M10Rhzg5p/rEuzr1AqiEOAGYcVvJDn
+rI8mY3Mc18RLScBiVHp/Gqkf3SFiWvi//okLIQGMus1G0CVNqrwrK/6JPB9071FzZjo5S1jiV5/U
+NhzLykSngcaE3+0/zKiAP2vkimfHHQ72SJk4QI0KOvRB1GGeF6UrXROwk6NPYEFixwTdVzHJ2hOm
+qJx5SRXEyttNN12BT8wQOlYpUmXpaad/Ej2vnVsS5nHcYbRn2Avm/DgmsAJ/0IpNaMHiAzXZm2Cp
+C0c8SGi4mWYVA7Pax+PnGXBbZ9wtKxvRrkVpiNGpuXDCWZvXEkx118x+A1SqINon8DS5tbrkfP2T
+Lep7wzZgE6aFN2QxyXdHs4k7gQlTqG04Lf7oo2sHSbO5kAbU44KYw5fBtLpG7pxlyV5fr+okL70a
+5SWYTPPsochDqyaHeAWghx/a4++FRjQwggX8MIID5KADAgECAgg1lzuwn2Gf8DANBgkqhkiG9w0B
+AQsFADBaMRcwFQYDVQQDDA5OWFAgUk9PVCBDQSBHMjELMAkGA1UECwwCSVQxETAPBgNVBAoMCE5Y
+UCBCLlYuMRIwEAYDVQQHDAlFaW5kaG92ZW4xCzAJBgNVBAYTAk5MMB4XDTE2MDMxODEwNTIxNloX
+DTI2MDMxODEwNTIxNlowZTEiMCAGA1UEAwwZTlhQIEludGVybmFsIFBvbGljeSBDQSBHMjELMAkG
+A1UECwwCSVQxETAPBgNVBAoMCE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5kaG92ZW4xCzAJBgNVBAYT
+Ak5MMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEApcu/gliwg0dn1d35U0pZLMvwbNGN
+1WW/15pqzBcpG/ZBq5q+ygq4/zkEqQAM3cZsSi2U2tjiKZOEfj4csyEJVZFQiwXMptsmErfk7BMo
+LtaIN79vFOd1bzdjW0HaSTb9GkJ7CTcb7z/FKKiwc2j53VVNDR1xVBnUNEaB1AzQOkp6hgupCgnl
+kw9X+/2+i7UCipk2JWLspg9srFaH0vwrgMFxEfs41y6iBVD70R/4+suoatXvgFv3ltGZ3x/hak3N
+1hHkjJq3oa1jSkLmp6KoQAqbcHTkeKomMOmPUJK1YqDkpdbGuuRkYU3IvCW5OZgldrkigcOTaMNU
+aeZUAv8P3TTtqN4jIp/Hls/26VR+CqdoAtmzypBEyvOFDtzqPqVzFXfkUl2HZ0JGTYEXUEfnI0sU
+JCyLpcLO1DjnwEp8A+ueolYIpLASupGzGMGZ5I5Ou1RoF2buesEgwb+WV7HRNAXTmezUh3rWLm4f
+AoUwv1lysICOfGGJQ2VkNe5OXzObvzjl30FYdDWb6F+xIDyG0Awxft4cXZcpFOGR3FH4ZZ5OH+UN
+l1IxnNwVpGSqmzEU7xnoTXlyVH3Q/jYDG27HSoILQp/yRMJXWx/Xn57ZVXNm63YrZ35XsX91pMHD
+RoQdJBMKkya813dggmhEszSIBYKqoiFt1HaMK/KnPwSSLO8CAwEAAaOBujCBtzAdBgNVHQ4EFgQU
+eeFJAeB7zjQ5KUMZMmVhPAbYVaswEgYDVR0TAQH/BAgwBgEB/wIBATAUBgNVHSABAf8ECjAIMAYG
+BFUdIAAwOwYDVR0fBDQwMjAwoC6gLIYqaHR0cDovL253dy5wa2kubnhwLmNvbS9jcmwvTlhQUm9v
+dENBRzIuY3JsMB8GA1UdIwQYMBaAFJBIUyMqeeqEmz0+uQ7omXRAXqC2MA4GA1UdDwEB/wQEAwIB
+BjANBgkqhkiG9w0BAQsFAAOCAgEAh6/N13Geu64yCb21EO8YEFm8MnFrkIkQA8sJKgdZsQIRuj7e
+KzabqQ/7dwbR/6AMs/oMRixASz9qix9JDLxoU4+HAsipFuhJFMZT/VNThmKmlNLPML90p8oWw9wa
+0jR6OAafhRgm/ICxzBkHbZj/QN8GXUPPbcrviY32+nXQ2MmQ9VxWlWArNPHQycazfsbj7/r5nz/N
+JKg707i07Xmm7CU58fAWzvuVo842jiXINqOk7Oq3y90L7aSHZrpRC1k4n+gv+dHmW58mhxk8Imba
+Uf6GJZANDNrufwC8/2skvmq9PSUXO5atGld6/CCG2Ej1vlsoJoO5v3ElDCRTMj1hMVvyKmyL9eib
+tehGz2kDM1LEW62CYsL/Z7leqJIQBrrXbcNKSEOzwpLXKKAGoCuBFGj7sGHypZkGpmhfIHi18+ON
+FpgibCxlbYgEQDJRZX+czbjPj70syjnnS0CXptCF9FIWWmoNBy1MNwoYVXzMQMwVHgKvSsVmshpz
+wNAGWQ5scOhMX1ajVrjzK4SBSS+2jBrnoDvjV1fCuSyP2Zp0ZNoc2YUhm6QoP3QKeb5bt/NGS+dm
+7F3iZENHD9x+RWehGU1ZxTp0QgirGyUZsDDJfht7AkLAhtxYtCW3r6bmGwzubm463fYnelwDHtvX
+fFLchYKl4EQOI4GbGSDnSKTVCdEwggdqMIIGUqADAgECAhMtAAC+69VX9gixtDt/AAAAAL7rMA0G
+CSqGSIb3DQEBCwUAMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJwcmlzZSBDQSA1MQswCQYDVQQLDAJJ
+VDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3ZlbjEWMBQGA1UECAwNTm9vcmQt
+QnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT8ixkARkWA254cDETMBEGCgmS
+JomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwwHhcNMTkxMDMxMDEyNzM2WhcNMjExMDMwMDEyNzM2
+WjCBmjETMBEGCgmSJomT8ixkARkWA2NvbTETMBEGCgmSJomT8ixkARkWA254cDETMBEGCgmSJomT
+8ixkARkWA3diaTEMMAoGA1UECxMDTlhQMQswCQYDVQQLEwJDTjEWMBQGA1UECxMNTWFuYWdlZCBV
+c2VyczETMBEGA1UECxMKRGV2ZWxvcGVyczERMA8GA1UEAxMIbnhhMTI5MzcwggEiMA0GCSqGSIb3
+DQEBAQUAA4IBDwAwggEKAoIBAQC5Fs2nsaFqYnhLqrOb1eg4KkvzdU5iYj5YPHLrYNLQAiPoLHYg
+Eq55ndyFExyVHuaKeFASgGgf/lquXabym0KaHwZGTQoGHfHd2A3Hi6Yf246V1SUR2gxB8iB5o+9G
+wFbVFAsTkPeVeGsNMMBFfVu68PGszY0azrROLz+Y11CZ6rtin2hs91uP57OMg6ovaOeGcLm9iKt+
+KnGbIcdKb3eQYbHvDPPnq9mglU/H6VKPQodNTZ2D2H23aHjziXKpZN8+/n3St+XPP571V4GJFD6u
+rlBvmC9UotMDAI1I9C88LuuDzNdXTu+25bmORqBv/ARu1EdT9KBxpUoT5V1WpenxAgMBAAGjggOJ
+MIIDhTA8BgkrBgEEAYI3FQcELzAtBiUrBgEEAYI3FQiFgsB+gY70VYbthTiC65lLmpJWP4Of3RqF
+qL5FAgFkAgE2MB0GA1UdJQQWMBQGCCsGAQUFBwMEBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCB4Aw
+DAYDVR0TAQH/BAIwADAnBgkrBgEEAYI3FQoEGjAYMAoGCCsGAQUFBwMEMAoGCCsGAQUFBwMCMB0G
+A1UdDgQWBBRpVCNcf3T46yO3gIgMS+MnJjiCazAfBgNVHSMEGDAWgBRYlWDuTnTvZSKqve0ZqSt6
+jhedBzCCAUYGA1UdHwSCAT0wggE5MIIBNaCCATGgggEthoHIbGRhcDovLy9DTj1OWFAlMjBFbnRl
+cnByaXNlJTIwQ0ElMjA1LENOPW5sYW1zcGtpMDAwNSxDTj1DRFAsQ049UHVibGljJTIwS2V5JTIw
+U2VydmljZXMsQ049U2VydmljZXMsQ049Q29uZmlndXJhdGlvbixEQz13YmksREM9bnhwLERDPWNv
+bT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0
+aW9uUG9pbnSGL2h0dHA6Ly9ud3cucGtpLm54cC5jb20vY3JsL05YUEVudGVycHJpc2VDQTUuY3Js
+hi9odHRwOi8vd3d3LnBraS5ueHAuY29tL2NybC9OWFBFbnRlcnByaXNlQ0E1LmNybDCCARAGCCsG
+AQUFBwEBBIIBAjCB/zCBuwYIKwYBBQUHMAKGga5sZGFwOi8vL0NOPU5YUCUyMEVudGVycHJpc2Ul
+MjBDQSUyMDUsQ049QUlBLENOPVB1YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENO
+PUNvbmZpZ3VyYXRpb24sREM9d2JpLERDPW54cCxEQz1jb20/Y0FDZXJ0aWZpY2F0ZT9iYXNlP29i
+amVjdENsYXNzPWNlcnRpZmljYXRpb25BdXRob3JpdHkwPwYIKwYBBQUHMAKGM2h0dHA6Ly9ud3cu
+cGtpLm54cC5jb20vY2VydHMvTlhQLUVudGVycHJpc2UtQ0E1LmNydDBBBgNVHREEOjA4oCIGCisG
+AQQBgjcUAgOgFAwSaGFpYm8uY2hlbkBueHAuY29tgRJoYWliby5jaGVuQG54cC5jb20wDQYJKoZI
+hvcNAQELBQADggEBAAbO3KB4UPjzcz8dqs00dc1WxVm1GGcg29yJnKejuwv95IGs8TmqHcXZ3zot
+7J4cDniEn2Pdvjfw3tVoykkz7vT/JkS5QfOgUeQX7GAKMe2AT17e9VskzipZ+37vsDPfW1XPVRn4
+WMgJUHLRad79yO/ojeTPavpUFtAY3wlI4B8dT7du7ibI4Zokemv0PvTpanmUY+V+EjibmoXDTbXm
+VJEG965sDuYYeh40QeE5siWSSoDA0yHxRb0TvMBbbkR406oUSSIEZyR4a6iGRgsXral8LULemoOx
+N6HCSMmhyGdWXJOMFhbLkPEZQkOXpUCdzwJnG8X3hPnlRNp1qEeIXoQwggfrMIIG06ADAgECAhMt
+AAC+6uSCGwwZxWD/AAAAAL7qMA0GCSqGSIb3DQEBCwUAMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJw
+cmlzZSBDQSA1MQswCQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRo
+b3ZlbjEWMBQGA1UECAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmS
+JomT8ixkARkWA254cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwwHhcNMTkxMDMx
+MDEyNzM1WhcNMjExMDMwMDEyNzM1WjCBmjETMBEGCgmSJomT8ixkARkWA2NvbTETMBEGCgmSJomT
+8ixkARkWA254cDETMBEGCgmSJomT8ixkARkWA3diaTEMMAoGA1UECxMDTlhQMQswCQYDVQQLEwJD
+TjEWMBQGA1UECxMNTWFuYWdlZCBVc2VyczETMBEGA1UECxMKRGV2ZWxvcGVyczERMA8GA1UEAxMI
+bnhhMTI5MzcwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDE9+2XERF+z26pPnpECTBk
+Qd8RJomqRzsIUDwr4pXlYguj7693YrAllPcn16SP/HlCQLOV73S/EQlQ22fHiv8Op3odseIduNQt
+qSaD65NFnj1wOvsidBPwP6GeSk4ZE4lWZYVAE/UT8bT6dDNgM3NDoCEPRSNnJwsp4qGlyFYpl1wa
+JuNyF/crQt8c0HZ7IZmcpMSdywmmWhYQOjDg+GzDdHfFSK1EmFf15IgYh/S0iKjwZXcohqRSFh4/
+Y9O+PqQ8tRuuIh/nZMK9E8tT/WIFd2kWe2dR1TbcyTpXEPrCNZiYj5LV6dPVJuQsCWwy6evTzLkU
+rqcPsCky/loDLZ7NAgMBAAGjggQKMIIEBjA8BgkrBgEEAYI3FQcELzAtBiUrBgEEAYI3FQiFgsB+
+gY70VYbthTiC65lLmpJWP4Xmim6EteF+AgFkAgE6MBMGA1UdJQQMMAoGCCsGAQUFBwMEMA4GA1Ud
+DwEB/wQEAwIFIDAMBgNVHRMBAf8EAjAAMBsGCSsGAQQBgjcVCgQOMAwwCgYIKwYBBQUHAwQwgZQG
+CSqGSIb3DQEJDwSBhjCBgzALBglghkgBZQMEASowCwYJYIZIAWUDBAEtMAsGCWCGSAFlAwQBFjAL
+BglghkgBZQMEARkwCwYJYIZIAWUDBAECMAsGCWCGSAFlAwQBBTAKBggqhkiG9w0DBzAHBgUrDgMC
+BzAOBggqhkiG9w0DAgICAIAwDgYIKoZIhvcNAwQCAgIAMB0GA1UdDgQWBBTlL+2gnauehNbF4Mck
+cbLTqj/vJTAfBgNVHSMEGDAWgBRYlWDuTnTvZSKqve0ZqSt6jhedBzCCAUYGA1UdHwSCAT0wggE5
+MIIBNaCCATGgggEthoHIbGRhcDovLy9DTj1OWFAlMjBFbnRlcnByaXNlJTIwQ0ElMjA1LENOPW5s
+YW1zcGtpMDAwNSxDTj1DRFAsQ049UHVibGljJTIwS2V5JTIwU2VydmljZXMsQ049U2VydmljZXMs
+Q049Q29uZmlndXJhdGlvbixEQz13YmksREM9bnhwLERDPWNvbT9jZXJ0aWZpY2F0ZVJldm9jYXRp
+b25MaXN0P2Jhc2U/b2JqZWN0Q2xhc3M9Y1JMRGlzdHJpYnV0aW9uUG9pbnSGL2h0dHA6Ly9ud3cu
+cGtpLm54cC5jb20vY3JsL05YUEVudGVycHJpc2VDQTUuY3Jshi9odHRwOi8vd3d3LnBraS5ueHAu
+Y29tL2NybC9OWFBFbnRlcnByaXNlQ0E1LmNybDCCARAGCCsGAQUFBwEBBIIBAjCB/zCBuwYIKwYB
+BQUHMAKGga5sZGFwOi8vL0NOPU5YUCUyMEVudGVycHJpc2UlMjBDQSUyMDUsQ049QUlBLENOPVB1
+YmxpYyUyMEtleSUyMFNlcnZpY2VzLENOPVNlcnZpY2VzLENOPUNvbmZpZ3VyYXRpb24sREM9d2Jp
+LERDPW54cCxEQz1jb20/Y0FDZXJ0aWZpY2F0ZT9iYXNlP29iamVjdENsYXNzPWNlcnRpZmljYXRp
+b25BdXRob3JpdHkwPwYIKwYBBQUHMAKGM2h0dHA6Ly9ud3cucGtpLm54cC5jb20vY2VydHMvTlhQ
+LUVudGVycHJpc2UtQ0E1LmNydDBBBgNVHREEOjA4oCIGCisGAQQBgjcUAgOgFAwSaGFpYm8uY2hl
+bkBueHAuY29tgRJoYWliby5jaGVuQG54cC5jb20wDQYJKoZIhvcNAQELBQADggEBAHNaESyBZSXf
+2VjPBOZH2PR/VsyRkmOCEkPU1uxvKTFAYPwmzTsnlPgU4OK9G3DLFpZhrUFfoz2G5Z9lHxrOftqX
+lCk7OQpEtEom0dbQN/ZCAmsMIfweppoH+zVGjO45OVI1W+qlQcNhdSV5sylHjD5Gg1GF/DOL4koc
+vFlMhaX/MQ7vNrRO6KI7vTl5mcObxpfWVdPT3D8RgKml2n8xTLi7jiIII8rgWexZYlx3ukUBWRJb
+ZgDGZ+bOPl0EK26M1ELLUTT/uAxPifKlj1Ls37bW+h3GhgsiW+lZVN7qZWar54TIpAogfVOIaip3
+BeirywBeJLBrgkFfD8yA9JvyFNQxggTDMIIEvwIBATCBzjCBtjEcMBoGA1UEAwwTTlhQIEVudGVy
+cHJpc2UgQ0EgNTELMAkGA1UECwwCSVQxETAPBgNVBAoMCE5YUCBCLlYuMRIwEAYDVQQHDAlFaW5k
+aG92ZW4xFjAUBgNVBAgMDU5vb3JkLUJyYWJhbnQxEzARBgoJkiaJk/IsZAEZFgN3YmkxEzARBgoJ
+kiaJk/IsZAEZFgNueHAxEzARBgoJkiaJk/IsZAEZFgNjb20xCzAJBgNVBAYTAk5MAhMtAAC+69VX
+9gixtDt/AAAAAL7rMA0GCWCGSAFlAwQCAQUAoIICxTAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcB
+MBwGCSqGSIb3DQEJBTEPFw0yMTA1MTAwNjI5MjRaMC8GCSqGSIb3DQEJBDEiBCA0G0LHXm5l8SHI
+FaJ6FWrFcsv0MDM0VXXSQgFBoH/EXzCBkwYJKoZIhvcNAQkPMYGFMIGCMAsGCWCGSAFlAwQBKjAL
+BglghkgBZQMEARYwCgYIKoZIhvcNAwcwCwYJYIZIAWUDBAECMA4GCCqGSIb3DQMCAgIAgDANBggq
+hkiG9w0DAgIBQDALBglghkgBZQMEAgEwCwYJYIZIAWUDBAIDMAsGCWCGSAFlAwQCAjAHBgUrDgMC
+GjCB3wYJKwYBBAGCNxAEMYHRMIHOMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJwcmlzZSBDQSA1MQsw
+CQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3ZlbjEWMBQGA1UE
+CAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT8ixkARkWA254
+cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwCEy0AAL7q5IIbDBnFYP8AAAAAvuow
+geEGCyqGSIb3DQEJEAILMYHRoIHOMIG2MRwwGgYDVQQDDBNOWFAgRW50ZXJwcmlzZSBDQSA1MQsw
+CQYDVQQLDAJJVDERMA8GA1UECgwITlhQIEIuVi4xEjAQBgNVBAcMCUVpbmRob3ZlbjEWMBQGA1UE
+CAwNTm9vcmQtQnJhYmFudDETMBEGCgmSJomT8ixkARkWA3diaTETMBEGCgmSJomT8ixkARkWA254
+cDETMBEGCgmSJomT8ixkARkWA2NvbTELMAkGA1UEBhMCTkwCEy0AAL7q5IIbDBnFYP8AAAAAvuow
+DQYJKoZIhvcNAQEBBQAEggEAAsuvwwg7C5MN+jjWbSD182zNX88PJYxSveldVxIjBcsz/TDPfqDo
+drlNiuUg71CpE25kZT+ssb0lm0xmgY+Vl7aDZ3dF0j4hmkONgijA1UXtNb8XlyHPsjrNzdIQgAHl
+RN/Etewf5U8jGZkG5xc6ctlfJ4nCu/3tENhcCbnzYI3iqAt0SX82EIu+NCHRMkw4RR6jSXx/QN9M
+/MI0fw5We8tJGC0hZr+DSNQnX0XWHZwdWrfFBxc4A+erHVyYPtMMMe9JsM9hJzMy/0vYDExA0Q8P
+GFthwvw8scfVn2IJUfivpRi8Gas/Am1/8HvmWe4Vxo/lNCO+lXKshvxEE9boVQAAAAAAAA==
+
+------=_NextPart_000_026A_01D745A8.E03019F0--
