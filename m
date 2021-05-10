@@ -2,140 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B54A7C433ED
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 14:44:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10A76C43470
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 15:15:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 88F64613C0
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 14:44:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C92786147F
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 15:15:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232900AbhEJOpQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 May 2021 10:45:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37840 "EHLO
+        id S238964AbhEJPQK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 May 2021 11:16:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233638AbhEJOnD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 10:43:03 -0400
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E317C08EACB
-        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 07:01:50 -0700 (PDT)
-Received: by mail-lj1-x22f.google.com with SMTP id y9so20945509ljn.6
-        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 07:01:49 -0700 (PDT)
+        with ESMTP id S239210AbhEJPOU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 11:14:20 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9745EC03462C
+        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 07:33:01 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id r5so6485929lfr.5
+        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 07:33:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=DQsuL10ttGgvUSSdwEEABCcNLhZF92QzGWTDfsTdZC0=;
-        b=qNtWaLjGIXQMeTIChrMNYPp2/WjHnGPearQQprE05w3lsIY390FY2r1cFDsNdyxCNZ
-         jrXtwIa2MpTAokF2DjIfBEnGEnFcNeKYhs/jcoPOwoWKck8/JKhBYwPkLF+7hPxoCSie
-         WvdtEleVqiDOuLhvesR3tOU4j8ErY0Hxzn6dCO2MZ8Pr0I7BabiZpd1qQwKAE/+hxSY3
-         nknoLINClx20aEJImVjqx37XthuTT1uHfzMX2Tt5c37QBi00j991nCh0BrlPoRevPo55
-         I4W84RAKkx+qkHsUG7mmdZpFhUW4jCYGkFJ0Nxhg+ZFFjj6pOIzn5jPKD89sKNyn1/xB
-         z6kg==
+        bh=TD4F9oa3VitNBzFXjP4uGUFTgbLeIBvDuQfeO7iSJY8=;
+        b=E/AVuCxqIjpRB0+97YiL29NgoO40mm0LemOYWr0wXSq8+huvTkRQzmYbXLpUpjnzTW
+         DTd/i6sw7eW12OSeunmEp9C7EC9xGVmvUgzxnfduX/ZuXLne5SBkQqqNlhwHj9UJPEl4
+         vROzCfpAZvTTkTnvLfomnlGIH3VFuxwbR5+4TlffIdAnC/KmOjV0QJ9CV5z9VviMtOgb
+         QKr667wwvXurnBzzNn5Mn7mB/u4mbet24esfg81vJ6i0/da+V/svnOI3/0kuYvgJZ9wt
+         2yPrxpX9mwqhNgdSRtlZONIV6fXHZW0bUjJ/N4AyJb7abtn06WELrTBGdjKBmhL+DFGH
+         4T+Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=DQsuL10ttGgvUSSdwEEABCcNLhZF92QzGWTDfsTdZC0=;
-        b=TOyJ8oLXUft3LI2pPDcsXk2xRD0ZX8R1z6PFdaw1R4FFa5LulGlsyuq4nl/pxVQyNU
-         pswb+L/z8r30fmGLKsAOVFmQfYEbv3HAwjyvwks+a8f2tlF4EVfrSnhU442kmBojR2mK
-         mA2oMBavcQA5/PiKR4eB4Le6bJDI6dM0F4MS62vULzfT1bguom4vxyKb0T+T5WlE0AkJ
-         2oz1rXknbBB+G6HbkAUMW1Kq+SDdhbemn+J5OiIgJnCOimRVuQgarCwWIZ1J9vnhdGQt
-         6NJmBzzEBdsTDmv64Y5r72E3jl54MLp97qcl9CiMpFRr+Z7iZqST+2zmtVsWCsWX2fZ0
-         ArMw==
-X-Gm-Message-State: AOAM533iErKBWaShqeW1RF3QE1gKys6I2/sN9pfjXrtyK+zMn9DR8LLV
-        01MJ6Nwm1zdHToSaEv/Xaau/0NrQZAlKhML4SPN7mQ==
-X-Google-Smtp-Source: ABdhPJzTAghL8Sdb1Gw9MPXcbmOW24XGnOJcMCgtYTxm5f97ovoej8TmEINBWT+FiI25beskbGWOdasTt0AKNmWY6l8=
-X-Received: by 2002:a05:651c:22b:: with SMTP id z11mr19730326ljn.182.1620655306896;
- Mon, 10 May 2021 07:01:46 -0700 (PDT)
+        bh=TD4F9oa3VitNBzFXjP4uGUFTgbLeIBvDuQfeO7iSJY8=;
+        b=Z2lrS8f5b7vDeaNHMmgYrLGFaN32tF8B06bVI6AYiKZY1lBnhzOOTE5qDZAKTcaz6e
+         7A9TslluljbvK9ISvtEEQKhBeE4BP3hK6mJiFGcgzd+/IuJEXS3WYBfGP7kJ30fy+fZe
+         YfrXOUifrCE8YMx9z3RJuvPU2Z3DihWM1DcGhxYYSPzV3QNXeBmrRYVVy5ME1KGXNXBD
+         bk/mtHiwoqVm3EspdKO81EZi8XUkw02XX9IX95gobEiX86K0/HvID5XSfqa8F5fTUBZX
+         GxYiidWg/Llaue4jCqATJdovI9k6xWxgbht4lPYIPTRvvh7T8Ebmtorc/E/TSRJxLfEw
+         r2ww==
+X-Gm-Message-State: AOAM53257EpleCs9XTXsyHZ8+kKqyd0ZVKemFSgtWDFcADyOnRAQOHof
+        5BUOm889rqF60qrG7ft/bHMw1UGvc9/Se4e77n6R1A==
+X-Google-Smtp-Source: ABdhPJwkl4uaiRO8zDucHIXDoAr9bPah/2qvkFw0x4qRgxXcIfiLsPizRjl4ovVfsUxSnLSBQKUZrYUi+VGBuItVfn0=
+X-Received: by 2002:a05:6512:24b:: with SMTP id b11mr16869562lfo.486.1620657179908;
+ Mon, 10 May 2021 07:32:59 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210319121357.255176-1-huobean@gmail.com> <20210319121357.255176-3-huobean@gmail.com>
- <CAPDyKFrU591aeH5GyuuQW8tPeNc9wav=t8wqF1EdTBbCc9xheg@mail.gmail.com>
- <79ec60974875d4ac17589ea4575e36ec1204f881.camel@gmail.com> <9b7ecf8a74e7e04174181aed0c5f0e356d0ed280.camel@gmail.com>
-In-Reply-To: <9b7ecf8a74e7e04174181aed0c5f0e356d0ed280.camel@gmail.com>
+References: <20210506145829.198823-1-ulf.hansson@linaro.org>
+ <20210506145829.198823-3-ulf.hansson@linaro.org> <CACRpkdZ2JRapr5x2zn3ABwiGJw-8kbfG4K2oZVD0Lfr7KHG8Jw@mail.gmail.com>
+In-Reply-To: <CACRpkdZ2JRapr5x2zn3ABwiGJw-8kbfG4K2oZVD0Lfr7KHG8Jw@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 10 May 2021 16:01:10 +0200
-Message-ID: <CAPDyKFqd03GZVtxmoiY3NFS_EggLQLMGk62AneZLoOn_20BDJQ@mail.gmail.com>
-Subject: Re: [PATCH v1 2/2] mmc: cavium: Remove redundant if-statement checkup
-To:     Bean Huo <huobean@gmail.com>
-Cc:     rric@kernel.org, Linus Walleij <linus.walleij@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        "# 4.0+" <stable@vger.kernel.org>
+Date:   Mon, 10 May 2021 16:32:22 +0200
+Message-ID: <CAPDyKFqPhSSP1TBite3dcBd7W2x2=c-xH=_M=udzBiMs95bkjw@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: core: Add support for cache ctrl for SD cards
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 29 Apr 2021 at 22:30, Bean Huo <huobean@gmail.com> wrote:
+On Sun, 9 May 2021 at 21:01, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> On Fri, 2021-03-19 at 16:42 +0100, Bean Huo wrote:
-> > On Fri, 2021-03-19 at 15:09 +0100, Ulf Hansson wrote:
-> >
-> > > On Fri, 19 Mar 2021 at 13:14, Bean Huo <huobean@gmail.com> wrote:
-> > > > From: Bean Huo <beanhuo@micron.com>
-> > > > Currently, we have two ways to issue multiple-block read/write
-> > > > the
-> > > > command to the eMMC. One is by normal IO request path fs->block-
-> > > > > mmc.
-> > > > Another one is that we can issue multiple-block read/write
-> > > > through
-> > > > MMC ioctl interface. For the first path, mrq->stop, and mrq-
-> > > > >stop-
-> > > > > opcode
-> > > > will be initialized in mmc_blk_data_prep(). However, for the
-> > > > second
-> > > > IO
-> > > > path, mrq->stop is not initialized since it is a pre-defined
-> > > > multiple
-> > > > blocks read/write.
-> > > As a matter of fact this way is also supported for the regular
-> > > block
-> > > I/O path. To make the mmc block driver to use it, mmc host drivers
-> > > need to announce that it's supported by setting MMC_CAP_CMD23.
-> > > It looks like that is what your patch should be targeted towards,
-> > > can
-> > > you have a look at this instead?
-> >
-> >
-> > Hi Ulf,
-> >
-> > Thanks for your comments. I will look at that as your suggestion.
-> >
-> > The patch [1/2] is accepted, so I will just update this patch to
-> >
-> > the next version.
-> >
-> >
-> >
-> > Kind regards,
-> >
-> > Bean
+> On Thu, May 6, 2021 at 4:58 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
+> > In SD spec v6.x the SD function extension registers for performance
+> > enhancements were introduced. As a part of this an optional internal cache
+> > on the SD card, can be used to improve performance.
+> >
+> > The let the SD card use the cache, the host needs to enable it and manage
+> > flushing of the cache, so let's add support for this.
+> >
+> > Note that for an SD card supporting the cache it's mandatory for it, to
+> > also support the poweroff notification feature. According to the SD spec,
+> > if the cache has been enabled and a poweroff notification is sent to the
+> > card, that implicitly also means that the card should flush its internal
+> > cache. Therefore, dealing with cache flushing for REQ_OP_FLUSH block
+> > requests is sufficient.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> (...)
 >
-> Hi Uffe,
-> Could you please firstly accept this patch? let the customer update
-> their kernel. As I tried to develop the next version of the patch
-> according to your suggestion, more changes will be involved. Also, no
-> matter how to make the change general, below mrq->stop checkup should
-> be deleted since it is obsolete. In the data transmission completion
-> interrupt, mrq->stop will be checked again.
+> > +       /*
+> > +        * Set the Flush Cache bit in the performance enhancement register at
+> > +        * 261 bytes offset.
+> > +        */
+> > +       fno = card->ext_perf.fno;
+> > +       page = card->ext_perf.page;
+> > +       offset = card->ext_perf.offset + 261;
 >
-> -       if (!mrq->data || !mrq->data->sg || !mrq->data->sg_len ||
-> -           !mrq->stop || mrq->stop->opcode != MMC_STOP_TRANSMISSION) {
-> +       if (!mrq->data || !mrq->data->sg || !mrq->data->sg_len) {
->
+> 261 looks a bit magic, can we add a define of some sort?
 
-Well, I don't think the above checks are incorrect. Instead I think it
-points out that the cavium mmc driver lacks support for CMD23, while
-only open ended data transfers are supported.
+We could, but I am not sure it really improves things. At least it
+would not be consistent with the way we treat other magic numbers.
 
-The proper way forward is instead to implement CMD23 support to the
-cavium mmc driver. In the same patch adding that support, you should
-be able to remove the above checks.
+I think it's better to look into this as wider cleanup instead.
+
+> I guess it has a name in the spec?
+
+It's called the "Power Management Setting Register".
+
+>
+> > +       err = sd_write_ext_reg(card, fno, page, offset, 0x1);
+> > +       if (err) {
+> > +               pr_warn("%s: error %d writing Cache Flush bit\n",
+> > +                       mmc_hostname(host), err);
+> > +               goto out;
+> > +       }
+>
+> So this offset contains a single bit.
+>
+> > +       if (reg_buf[0] & 0x1)
+> > +               err = -ETIMEDOUT;
+>
+> And that same bit is checked here.
+
+Correct.
+
+>
+> Is it always going to be one bit only or do we want to
+>
+> #include <linux/bits.h>
+> #define SD_CACHE_FLUSH_FLAG BIT(0)
+>
+> Does it have a name in the spec we can use?
+
+Well, it just says "Cache Flush" bit.
+
+It seems to be one bit always for these features. The remaining bits
+in the same byte are unused/reserved.
+
+Each feature has at least one dedicated byte, so there are no bytes
+being shared between features.
+
+>
+> > +       /*
+> > +        * Set the Cache Enable bit in the performance enhancement register at
+> > +        * 260 bytes offset.
+> > +        */
+> > +       err = sd_write_ext_reg(card, card->ext_perf.fno, card->ext_perf.page,
+> > +                              card->ext_perf.offset + 260, 0x1);
+>
+> Same here we want to #define 260 to something symbolic,
+>
+> And here some define for BIT(0) as well. At least with BIT(0)
+> in the call to sd_write_ext_reg() rather than 0x1 if I can say
+> something.
+
+The conversion to BIT(0) in the argument is clearly an improvement. I
+do that change when applying, but leave the defines for the other
+magics to be considered as a future cleanup.
+
+>
+> With the above nitpicking fixed up (I trust you):
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+
+Thanks!
 
 Kind regards
 Uffe
