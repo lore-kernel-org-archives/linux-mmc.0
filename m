@@ -2,206 +2,274 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE autolearn=unavailable
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A22DC04FCF
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 13:30:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BDEDC433B4
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 13:30:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 576E061359
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 13:30:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E91A61359
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 May 2021 13:30:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234924AbhEJNbE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 May 2021 09:31:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58284 "EHLO
+        id S233842AbhEJNbG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 May 2021 09:31:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244598AbhEJL7d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 07:59:33 -0400
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34AF9C061574
-        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 04:58:26 -0700 (PDT)
-Received: by mail-lj1-x231.google.com with SMTP id p12so20480043ljg.1
-        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 04:58:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=dFRQ/drBdPg7ZZp1TCqbFVmnAdonsbp2deXEgt0fqmw=;
-        b=vq5PpmaeU3MP6Sy8enG8y49x3jq0MrmAGFgas9S689VjzeIJJhbgOUnkK0h/sA3gLe
-         zKv9EP40lHnoRD+F/p2BJfMPWO3JURaD0hyUxH7KKv6ipGN92GvQ+1DgFDf8nP4HZW91
-         uQHm2dU4528BB5uBe4S3EGB8Ok/iqxN2+FiAFPPTgPqoLzrruDGnIllsVwmAxnlRcbiN
-         tJxa/xAcTxsAiCAnGQSmFH91rA0/NHbv/HKqAp/2acCEsCLlxHezX11rT8zG+JZFAOa2
-         /UX7wjiqccvw0ohdqZMNmmo9kbcdJdps0HZ70TYgc0PrhNCmOWFXv/SeMWCVjIrnKAwG
-         /bYg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=dFRQ/drBdPg7ZZp1TCqbFVmnAdonsbp2deXEgt0fqmw=;
-        b=mpGG0J5+fUbJp9VPfjiFYTNP9D7PmaMRuyhRQwFeBLxK17YzhYU1WMPtmXeedSu0ms
-         +JNqijtnwDpdDERBgKFp9q6qGPyCei1Jlp4eM82iJdGIONXHFWo7rAjQQzHWXMnX1RHL
-         bX3SKshVf+5KrsZ+LdB64axoK+244GiYXIdzjjVyzYiRnKJFjhMKjdm9kZgiUsDDj0EI
-         T5NA0QObolxFq17hoV4wGXF2GAzewpt0ku2k/T1qWpgZItpH3CG0Y41zRSfxPOnAZxIV
-         H1F9B4NShnguj9IarK0pyP7MWDOHP3XkSjpEv1nW0G0+d/E5V5HToyFogMdeSiApZ00x
-         HVeA==
-X-Gm-Message-State: AOAM5310I+8ePl2lrSUR7gdjLnzNPn5WgDbX1otVSe0X2/RnAaQooJHi
-        7lOpMLtoziHT6YOC4WGdIclV9P40x5aZ5Ex8FYEIzg==
-X-Google-Smtp-Source: ABdhPJz+qnPc2pLYqjAXrtHKfZd3fBdOtz1Tm6Tvo+o4U9Zg+CZ7jom1nqDxFJCpWbD7JQkfUcvWMQhXu1j/pp3thu0=
-X-Received: by 2002:a2e:7f1c:: with SMTP id a28mr20039955ljd.341.1620647904669;
- Mon, 10 May 2021 04:58:24 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210414085121.28951-1-peng.zhou@mediatek.com> <20210414085121.28951-2-peng.zhou@mediatek.com>
-In-Reply-To: <20210414085121.28951-2-peng.zhou@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 10 May 2021 13:57:48 +0200
-Message-ID: <CAPDyKFpOzmYxstRwSrD6tWKLMwxFPvHNfpDPDCrogzRah5iZtA@mail.gmail.com>
-Subject: Re: [PATCH RESEND v3 1/3] mmc: Mediatek: add Inline Crypto Engine support
-To:     Peng Zhou <peng.zhou@mediatek.com>
-Cc:     Eric Biggers <ebiggers@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Satya Tangirala <satyat@google.com>,
+        with ESMTP id S1343821AbhEJMOc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 May 2021 08:14:32 -0400
+Received: from michel.telenet-ops.be (michel.telenet-ops.be [IPv6:2a02:1800:110:4::f00:18])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCAB9C061574
+        for <linux-mmc@vger.kernel.org>; Mon, 10 May 2021 05:13:25 -0700 (PDT)
+Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed20:f937:4595:45ff:bcbf])
+        by michel.telenet-ops.be with bizsmtp
+        id 30DQ250044jQ7kl060DQJ9; Mon, 10 May 2021 14:13:24 +0200
+Received: from rox.of.borg ([192.168.97.57])
+        by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.93)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1lg4mp-004QhA-OV; Mon, 10 May 2021 14:13:23 +0200
+Received: from geert by rox.of.borg with local (Exim 4.93)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1lg4mp-00HQJc-9l; Mon, 10 May 2021 14:13:23 +0200
+From:   Geert Uytterhoeven <geert+renesas@glider.be>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Wulin Li <wulin.li@mediatek.com>,
-        DTML <devicetree@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Rob Herring <robh@kernel.org>
+Subject: [PATCH v2] dt-bindings: mmc: renesas,mmcif: Convert to json-schema
+Date:   Mon, 10 May 2021 14:13:21 +0200
+Message-Id: <04b97315fed0f4f512356b68f9f5bb6ed7adc41f.1620648698.git.geert+renesas@glider.be>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 14 Apr 2021 at 11:12, Peng Zhou <peng.zhou@mediatek.com> wrote:
->
-> From: Peng Zhou <Peng.Zhou@mediatek.com>
->
-> 1. add crypto clock control and ungate it before CQHCI init
->
-> 2. set MMC_CAP2_CRYPTO property of eMMC
->
-> Signed-off-by: Peng Zhou <Peng.Zhou@mediatek.com>
+Convert the Renesas Multi Media Card Interface (MMCIF) Device Tree
+binding documentation to json-schema.
 
-As discussed [1], I think the ARM SMC call should be managed together
-with the crypto clock, from a PM domain (a genpd provider).
+Document missing properties.
+Update the example to match reality.
 
-These are the steps I think should help to get this supported:
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Reviewed-by: Rob Herring <robh@kernel.org>
+---
+v2:
+  - Drop unneeded oneOf,
+  - Add Reviewed-by.
+---
+ .../devicetree/bindings/mmc/renesas,mmcif.txt |  53 -------
+ .../bindings/mmc/renesas,mmcif.yaml           | 135 ++++++++++++++++++
+ 2 files changed, 135 insertions(+), 53 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml
 
-1)
-Add a new generic mmc DT property for crypto support. Make it being
-parsed from mmc_of_parse() and let it set MMC_CAP2_CRYPTO.
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+deleted file mode 100644
+index 291532ac0446fc71..0000000000000000
+--- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
++++ /dev/null
+@@ -1,53 +0,0 @@
+-* Renesas Multi Media Card Interface (MMCIF) Controller
+-
+-This file documents differences between the core properties in mmc.txt
+-and the properties used by the MMCIF device.
+-
+-
+-Required properties:
+-
+-- compatible: should be "renesas,mmcif-<soctype>", "renesas,sh-mmcif" as a
+-  fallback. Examples with <soctype> are:
+-	- "renesas,mmcif-r7s72100" for the MMCIF found in r7s72100 SoCs
+-	- "renesas,mmcif-r8a73a4" for the MMCIF found in r8a73a4 SoCs
+-	- "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+-	- "renesas,mmcif-r8a7742" for the MMCIF found in r8a7742 SoCs
+-	- "renesas,mmcif-r8a7743" for the MMCIF found in r8a7743 SoCs
+-	- "renesas,mmcif-r8a7744" for the MMCIF found in r8a7744 SoCs
+-	- "renesas,mmcif-r8a7745" for the MMCIF found in r8a7745 SoCs
+-	- "renesas,mmcif-r8a7778" for the MMCIF found in r8a7778 SoCs
+-	- "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
+-	- "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
+-	- "renesas,mmcif-r8a7793" for the MMCIF found in r8a7793 SoCs
+-	- "renesas,mmcif-r8a7794" for the MMCIF found in r8a7794 SoCs
+-	- "renesas,mmcif-sh73a0" for the MMCIF found in sh73a0 SoCs
+-
+-- interrupts: Some SoCs have only 1 shared interrupt, while others have either
+-  2 or 3 individual interrupts (error, int, card detect). Below is the number
+-  of interrupts for each SoC:
+-    1: r8a73a4, r8a7742, r8a7743, r8a7744, r8a7745, r8a7778, r8a7790, r8a7791,
+-       r8a7793, r8a7794
+-    2: r8a7740, sh73a0
+-    3: r7s72100
+-
+-- clocks: reference to the functional clock
+-
+-- dmas: reference to the DMA channels, one per channel name listed in the
+-  dma-names property.
+-- dma-names: must contain "tx" for the transmit DMA channel and "rx" for the
+-  receive DMA channel.
+-- max-frequency: Maximum operating clock frequency, driver uses default clock
+-  frequency if it is not set.
+-
+-
+-Example: R8A7790 (R-Car H2) MMCIF0
+-
+-	mmcif0: mmc@ee200000 {
+-		compatible = "renesas,mmcif-r8a7790", "renesas,sh-mmcif";
+-		reg = <0 0xee200000 0 0x80>;
+-		interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&mstp3_clks R8A7790_CLK_MMCIF0>;
+-		dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
+-		dma-names = "tx", "rx";
+-		max-frequency = <97500000>;
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml b/Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml
+new file mode 100644
+index 0000000000000000..c36ba561c3875ad3
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml
+@@ -0,0 +1,135 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/renesas,mmcif.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Renesas Multi Media Card Interface (MMCIF) Controller
++
++maintainers:
++  - Wolfram Sang <wsa+renesas@sang-engineering.com>
++
++allOf:
++  - $ref: "mmc-controller.yaml"
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - renesas,mmcif-r7s72100 # RZ/A1H
++          - renesas,mmcif-r8a73a4  # R-Mobile APE6
++          - renesas,mmcif-r8a7740  # R-Mobile A1
++          - renesas,mmcif-r8a7742  # RZ/G1H
++          - renesas,mmcif-r8a7743  # RZ/G1M
++          - renesas,mmcif-r8a7744  # RZ/G1N
++          - renesas,mmcif-r8a7745  # RZ/G1E
++          - renesas,mmcif-r8a7778  # R-Car M1A
++          - renesas,mmcif-r8a7790  # R-Car H2
++          - renesas,mmcif-r8a7791  # R-Car M2-W
++          - renesas,mmcif-r8a7793  # R-Car M2-N
++          - renesas,mmcif-r8a7794  # R-Car E2
++          - renesas,mmcif-sh73a0   # SH-Mobile AG5
++      - const: renesas,sh-mmcif
++
++  reg:
++    maxItems: 1
++
++  interrupts: true
++
++  clocks:
++    maxItems: 1
++
++  power-domains:
++    maxItems: 1
++
++  resets:
++    maxItems: 1
++
++  dmas:
++    minItems: 2
++    maxItems: 4
++    description:
++      Must contain a list of pairs of references to DMA specifiers, one for
++      transmission, and one for reception.
++
++  dma-names:
++    minItems: 2
++    maxItems: 4
++    items:
++      enum:
++        - tx
++        - rx
++
++  max-frequency: true
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - power-domains
++
++if:
++  properties:
++    compatible:
++      contains:
++        const: renesas,mmcif-r7s72100
++then:
++  properties:
++    interrupts:
++      items:
++        - description: Error interrupt
++        - description: Normal operation interrupt
++        - description: Card detection interrupt
++else:
++  if:
++    properties:
++      compatible:
++        contains:
++          enum:
++            - renesas,mmcif-r8a7740
++            - renesas,mmcif-sh73a0
++  then:
++    properties:
++      interrupts:
++        items:
++          - description: Error interrupt
++          - description: Normal operation interrupt
++  else:
++    if:
++      properties:
++        compatible:
++          contains:
++            enum:
++              - renesas,mmcif-r8a73a4
++              - renesas,mmcif-r8a7778
++    then:
++      properties:
++        interrupts:
++          maxItems: 1
++    else:
++      properties:
++        interrupts:
++          maxItems: 1
++      required:
++        - resets
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/clock/r8a7790-cpg-mssr.h>
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++    #include <dt-bindings/power/r8a7790-sysc.h>
++
++    mmcif0: mmc@ee200000 {
++            compatible = "renesas,mmcif-r8a7790", "renesas,sh-mmcif";
++            reg = <0xee200000 0x80>;
++            interrupts = <GIC_SPI 169 IRQ_TYPE_LEVEL_HIGH>;
++            clocks = <&cpg CPG_MOD 315>;
++            power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
++            resets = <&cpg 315>;
++            dmas = <&dmac0 0xd1>, <&dmac0 0xd2>, <&dmac1 0xd1>, <&dmac1 0xd2>;
++            dma-names = "tx", "rx", "tx", "rx";
++            max-frequency = <97500000>;
++    };
+-- 
+2.25.1
 
-2)
-Start by adding a genpd provider in DT and implement support for it in
-drivers/soc/*. See
-Documentation/devicetree/bindings/power/power-domain.yaml, for generic
-DT bindings.
-
-If you already have a genpd provider for the device, you may either
-extend it to cope with the below or implement a new and model the it
-as a child (subdomain) of the existing one.
-
-3)
-To fetch the crypto clock during probe, the genpd provider should
-implement the ->attach|detach_dev() callbacks. The ->attach_dev()
-callback is invoked from genpd_add_device(), which is called while
-probing the device. Vice verse for the ->detach_dev() callback.
-
-4)
-Ungating/gating the clock should be implemented from the genpd
-provider's ->start|stop() callbacks. These callbacks are called from
-genpd_runtime_suspend|resume(), thus when the device gets runtime
-suspended/resumed. As the mmc host driver already supports runtime PM,
-only a minor update in the driver's ->probe() is needed, which is to
-call dev_pm_domain_start(). This turns on the crypto clock and allows
-its registers to be accessed.
-
-5)
-Add also the ARM SMC calls to the genpd provider's ->start|stop()
-callbacks. This means those gets called from SoC specific code, which
-helps to keep the driver portable.
-
-6)
-Add the crypto clock DT binding for the mmc host.
-
-7)
-Wire up the mmc host device node in DT to be attached to the genpd
-provider (see power-domains and power-domain-names properties). Make
-sure to also specify the crypto clock and the new mmc crypto property
-for it.
-
-Please, just ask if there is anything unclear. I will do my best to help!
-
-Kind regards
-Uffe
-
-[1]
-https://patchwork.kernel.org/project/linux-mmc/patch/20210309015750.6283-1-peng.zhou@mediatek.com/
-
-> ---
->  drivers/mmc/host/mtk-sd.c | 15 ++++++++++++++-
->  1 file changed, 14 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 898ed1b023df..1c90360d6cf2 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -442,6 +442,7 @@ struct msdc_host {
->         struct clk *src_clk_cg; /* msdc source clock control gate */
->         struct clk *sys_clk_cg; /* msdc subsys clock control gate */
->         struct clk_bulk_data bulk_clks[MSDC_NR_CLOCKS];
-> +       struct clk *crypto_clk; /* msdc crypto clock */
->         u32 mclk;               /* mmc subsystem clock frequency */
->         u32 src_clk_freq;       /* source clock frequency */
->         unsigned char timing;
-> @@ -802,6 +803,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
->
->  static void msdc_gate_clock(struct msdc_host *host)
->  {
-> +       clk_disable_unprepare(host->crypto_clk);
->         clk_bulk_disable_unprepare(MSDC_NR_CLOCKS, host->bulk_clks);
->         clk_disable_unprepare(host->src_clk_cg);
->         clk_disable_unprepare(host->src_clk);
-> @@ -822,6 +824,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
->                 dev_err(host->dev, "Cannot enable pclk/axi/ahb clock gates\n");
->                 return;
->         }
-> +       clk_prepare_enable(host->crypto_clk);
->
->         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
->                 cpu_relax();
-> @@ -2512,6 +2515,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 goto host_free;
->         }
->
-> +       /* only eMMC has crypto property */
-> +       if ((mmc->caps2 & MMC_CAP2_NO_SD) && (mmc->caps2 & MMC_CAP2_NO_SDIO)) {
-> +               host->crypto_clk = devm_clk_get(&pdev->dev, "crypto");
-> +               if (IS_ERR(host->crypto_clk))
-> +                       host->crypto_clk = NULL;
-> +               else
-> +                       mmc->caps2 |= MMC_CAP2_CRYPTO;
-> +       }
-> +
->         host->irq = platform_get_irq(pdev, 0);
->         if (host->irq < 0) {
->                 ret = -EINVAL;
-> @@ -2582,6 +2594,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 host->dma_mask = DMA_BIT_MASK(32);
->         mmc_dev(mmc)->dma_mask = &host->dma_mask;
->
-> +       /* here ungate due to cqhci init will access registers */
-> +       msdc_ungate_clock(host);
->         if (mmc->caps2 & MMC_CAP2_CQE) {
->                 host->cq_host = devm_kzalloc(mmc->parent,
->                                              sizeof(*host->cq_host),
-> @@ -2618,7 +2632,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
->         spin_lock_init(&host->lock);
->
->         platform_set_drvdata(pdev, mmc);
-> -       msdc_ungate_clock(host);
->         msdc_init_hw(host);
->
->         ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
-> --
-> 2.18.0
