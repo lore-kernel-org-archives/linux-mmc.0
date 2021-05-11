@@ -2,136 +2,132 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79751C433ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0DE5C433ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 521F16128C
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BDC0F61946
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231480AbhEKK6a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 06:58:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57212 "EHLO
+        id S231500AbhEKK6d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 06:58:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231484AbhEKK6W (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:22 -0400
-Received: from mail-vs1-xe32.google.com (mail-vs1-xe32.google.com [IPv6:2607:f8b0:4864:20::e32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1AA3FC061760
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:15 -0700 (PDT)
-Received: by mail-vs1-xe32.google.com with SMTP id j128so9980444vsc.5
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:15 -0700 (PDT)
+        with ESMTP id S231506AbhEKK63 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:29 -0400
+Received: from mail-vk1-xa32.google.com (mail-vk1-xa32.google.com [IPv6:2607:f8b0:4864:20::a32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9F47C06138F
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:19 -0700 (PDT)
+Received: by mail-vk1-xa32.google.com with SMTP id y12so1578043vkn.8
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=B87i3Oa6xMCU9YtCHJvcY9CfMfp14jmlxZEy1wOAtO8=;
-        b=qoVNtKHlb34ZCkHkI5bASg5apG9Td2/enRlbvfW/GfadtXg+xAde42utpjilMCWisK
-         ZF4Youv0ZFdCv8cIYgVV/qp4ODYiXgAgGngo3w3wPAvuls6fKFOP5Uu5P/RGeRubBvRE
-         lgyozLkgvZ0U70JdWMPR7+Ge1cK7350ka2M7xqOBDzWB2bClNxiNpaX2b9tt9k6ZK4GT
-         DDfkmTKJFxNpEYt59hL6fyk9L6Gtt++nz/qGdH3qf/Sddrg81Vn8D/R9TmIG/7QWCFNX
-         ti2kzqesbuQlrHjigc5QjiMPj+pUV71RPeGkR0LFqjRBX9/H71oje970CMxfyz/x4/tC
-         +1yw==
+         :cc;
+        bh=s01uOIcuSIPW14/XjmL0MpDTagmvSwwBs/Gv3lf9fjA=;
+        b=rlYrysJdl1Mda+GvFMoWJ+uhaHtunkkcNcwp3qyEx1f8RvU7lBZGUYL/OBd6YKoMF9
+         +brKcWimXGAv5F0Cxktj75n2FQQbgnuxJ23z7vGlfDj2dZf+7uJ1dpux6Y7WDgo7RJOV
+         XWi+Kc7B+Q91D7tsLNInzeMRlo3Xv3Z2pkqgoTQh1Jeg2yheV2/1NWhRfp/YLyVtDrg7
+         gApejY358tx771oxvH4gr2u/3XQQxIuTt3khlLuXPZtIehgORak0q5uS2RsBO5/AXGZu
+         EeSoyYb93n/7H9VogQVrr8YQOaeLvxYtZZ4ziWRvV1Ya3CH5rdDpUTNxP0ji68gRdwgG
+         7aug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=B87i3Oa6xMCU9YtCHJvcY9CfMfp14jmlxZEy1wOAtO8=;
-        b=CqrQvu4VOCwIWnQCVd9sAD/kLJRghELFhYLNaVqAeR6oQ3YgmR106ErDVlkjvlCGP+
-         1QpNvykTpyxxdvhFsZFei1V8hKGsQl8gIGf2Qv5uHYmwG5Srh12I8mUO4rhQdizyhkS5
-         P4CWwZK4+Wu2aB5x7wDwreq+2OFhZrpfw7uBdjSR8zKeY4hNE49W0NIT504Kd1OS0KZC
-         IYgHqxGfCNDf/727nERsQn3hJ9LmKrs9mBoUh20MtUlIoX4EoySS3TG6AfCq/19sC5R6
-         urSCSmiZFUzgJQY9G7gWJ5Q9u7csdFTqdBsuO91wxIkzGycV8Rb8+E6utt0mBmpb9F9F
-         t0Pg==
-X-Gm-Message-State: AOAM5329qO2NYDvFnT5kKN9GVZNxyqMnsLM2f+WUbTuDXuoPNVBiwJSU
-        Vaj0G7e9AjAACnOjvp8M+10ViWnIsFkixuBQ9hg+7A==
-X-Google-Smtp-Source: ABdhPJz+PiEzDQL3eclDugXhEH4Et/OShZWE5XPY9Y5wuzjF0QenUZi8BQTWG6efS/ZDfiab8yHeeRd/wIv9FcQ1PEQ=
-X-Received: by 2002:a05:6102:7c1:: with SMTP id y1mr24494399vsg.34.1620730634292;
- Tue, 11 May 2021 03:57:14 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=s01uOIcuSIPW14/XjmL0MpDTagmvSwwBs/Gv3lf9fjA=;
+        b=ESHy6QPEa4XgvJa3W6QpcPF8cx/f00Wl02oCfcIJ/Wz2+NZl8pShSWntmGS0einFxq
+         HZ5jgLDLmZqNEqj7AU9k8WiC51Q6VrI5OTUYqgyHiwZUh4RGv3OcuvaX5dgCV6wp1J6j
+         Jjyq0KNQyoUBXIL5os4+1x8KYJ+4SeazHWthgRtsUqVukLnibYaKAHk3FvR9/fkQ+PyC
+         n7j0PCn2lfgKnBZ0rhQSsoLgRNkT5334PRhNA5ZCI4ZBVXpC1bEI9FN0xvqCMWP243iK
+         kDYKZ6zoCb/BW1Vw4lKWCaVQ0YP3HxKezFxbBjlX1ues2MvymKlhAoCxoAQToBZ+7i+k
+         cBlg==
+X-Gm-Message-State: AOAM532heVoHJybTfU83Miso67Dy1aykp9QroJvuwTZvAUvV/adTR7+o
+        ly7AbH5SRzbpcvFopWC4+SmvZShA7MXy37DZAPXkak8R+6CmBw==
+X-Google-Smtp-Source: ABdhPJxcZ+ban6aleEJNN92j4tJgm89AUsY95SJ6/sPp/ktWdNTXalV0FrL6eyMT/qwmXBOjvVbf4PfARqT6Iyjlvbg=
+X-Received: by 2002:a1f:aecf:: with SMTP id x198mr21864792vke.6.1620730637975;
+ Tue, 11 May 2021 03:57:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210504203209.361597-1-huobean@gmail.com>
-In-Reply-To: <20210504203209.361597-1-huobean@gmail.com>
+References: <20210504161222.101536-1-ulf.hansson@linaro.org>
+In-Reply-To: <20210504161222.101536-1-ulf.hansson@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 11 May 2021 12:56:37 +0200
-Message-ID: <CAPDyKFq-9G9M0HZjdBgCbrfPJTvq35eqy4NazsJeG8PH5YioPw@mail.gmail.com>
-Subject: Re: [PATCH v1] mmc: block: Disable CMDQ on the ioctl path
-To:     Bean Huo <huobean@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Bean Huo <beanhuo@micron.com>,
-        Michael Brunner <Michael.Brunner@kontron.com>
+Date:   Tue, 11 May 2021 12:56:41 +0200
+Message-ID: <CAPDyKFqNS9MYJwF7VdGtbNuoULd-xwcR8obUwARVOVBtH7AnPQ@mail.gmail.com>
+Subject: Re: [PATCH 00/11] Initital support for new power/perf features for SD cards
+To:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        linux-block <linux-block@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 4 May 2021 at 22:32, Bean Huo <huobean@gmail.com> wrote:
+On Tue, 4 May 2021 at 18:12, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> From: Bean Huo <beanhuo@micron.com>
+> In the SD spec v4.x the SD function extension registers were introduced,
+> together with a new set of commands (CMD48/49 and CMD58/59) to read and write
+> to them.
 >
-> According to the eMMC Spec:
-> "When command queuing is enabled (CMDQ Mode En bit in CMDQ_MODE_EN
-> field is set to =E2=80=981=E2=80=99) class 11 commands are the only metho=
-d through
-> which data transfer tasks can be issued. Existing data transfer
-> commands, namely CMD18/CMD17 and CMD25/CMD24, are not supported when
-> command queuing is enabled."
-> which means if CMDQ is enabled, the FFU commands will not be supported.
-> To fix this issue, just simply disable CMDQ on the ioctl path, and
-> re-enable CMDQ once ioctl request is completed.
+> Moreover, in v4.x a new standard function for power management features were
+> added, while in v6.x a new standard function for performance enhancements
+> features were added.
 >
-> Tested-by: Michael Brunner <Michael.Brunner@kontron.com>
-> Signed-off-by: Bean Huo <beanhuo@micron.com>
+> This series implement the basics to add support for these new features (and
+> includes some additional preparations in patch 1->7), by adding support for
+> reading and parsing these new SD registers. In the final patch we add support
+> for the SD poweroff notification feature, which also add a function to write to
+> these registers.
+>
+> Note that, there are no HW updates need for the host to support reading/parsing
+> of the these new SD registers. This has been tested with a 64GB Sandisk Extreme
+> PRO UHS-I A2 card.
+>
+> Tests and reviews are of course greatly appreciated!
+>
+> Kind regards
+> Ulf Hansson
+>
+> Ulf Hansson (11):
+>   mmc: core: Drop open coding when preparing commands with busy
+>     signaling
+>   mmc: core: Take into account MMC_CAP_NEED_RSP_BUSY for eMMC HPI
+>     commands
+>   mmc: core: Re-structure some code in __mmc_poll_for_busy()
+>   mmc: core: Extend re-use of __mmc_poll_for_busy()
+>   mmc: core: Enable eMMC sleep commands to use HW busy polling
+>   mmc: core: Prepare mmc_send_cxd_data() to be re-used for additional
+>     cmds
+>   mmc: core: Drop open coding in mmc_sd_switch()
+>   mmc: core: Parse the SD SCR register for support of CMD48/49 and
+>     CMD58/59
+>   mmc: core: Read the SD function extension registers for power
+>     management
+>   mmc: core: Read performance enhancements registers for SD cards
+>   mmc: core: Add support for Power Off Notification for SD cards
+>
+>  drivers/mmc/core/core.c    |  22 +--
+>  drivers/mmc/core/mmc.c     |  43 ++---
+>  drivers/mmc/core/mmc_ops.c | 137 +++++++-------
+>  drivers/mmc/core/mmc_ops.h |  10 +-
+>  drivers/mmc/core/sd.c      | 371 ++++++++++++++++++++++++++++++++++++-
+>  drivers/mmc/core/sd_ops.c  |  38 +---
+>  include/linux/mmc/card.h   |  22 +++
+>  include/linux/mmc/sd.h     |   4 +
+>  8 files changed, 504 insertions(+), 143 deletions(-)
 
-Applied for next and by adding a fixes/stable tag, thanks!
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/block.c | 7 +++++++
->  1 file changed, 7 insertions(+)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 689eb9afeeed..21fb99883b1e 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1004,6 +1004,11 @@ static void mmc_blk_issue_drv_op(struct mmc_queue =
-*mq, struct request *req)
->
->         switch (mq_rq->drv_op) {
->         case MMC_DRV_OP_IOCTL:
-> +               if (card->ext_csd.cmdq_en) {
-> +                       ret =3D mmc_cmdq_disable(card);
-> +                       if (ret)
-> +                               break;
-> +               }
-
-This should have a "fallthrough;" statement. No need for a respin, I
-have amended the change this time.
-
->         case MMC_DRV_OP_IOCTL_RPMB:
->                 idata =3D mq_rq->drv_op_data;
->                 for (i =3D 0, ret =3D 0; i < mq_rq->ioc_count; i++) {
-> @@ -1014,6 +1019,8 @@ static void mmc_blk_issue_drv_op(struct mmc_queue *=
-mq, struct request *req)
->                 /* Always switch back to main area after RPMB access */
->                 if (rpmb_ioctl)
->                         mmc_blk_part_switch(card, 0);
-> +               else if (card->reenable_cmdq && !card->ext_csd.cmdq_en)
-> +                       mmc_cmdq_enable(card);
->                 break;
->         case MMC_DRV_OP_BOOT_WP:
->                 ret =3D mmc_switch(card, EXT_CSD_CMD_SET_NORMAL, EXT_CSD_=
-BOOT_WP,
-> --
-> 2.25.1
->
+FYI, this series has been applied for next, with some minor
+modifications according to review comments. Thanks!
 
 Kind regards
 Uffe
