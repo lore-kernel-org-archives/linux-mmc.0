@@ -2,428 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-22.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,MSGID_FROM_MTA_HEADER,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A9B1C433ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 14:33:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C336C433B4
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 16:07:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 41BCB611F1
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 14:33:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 65AD761278
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 16:07:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231779AbhEKOeq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 10:34:46 -0400
-Received: from mx0a-00069f02.pphosted.com ([205.220.165.32]:62960 "EHLO
-        mx0a-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231760AbhEKOep (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 10:34:45 -0400
-Received: from pps.filterd (m0246617.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 14BEFk1G005177;
-        Tue, 11 May 2021 14:33:36 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=subject : to : cc :
- references : from : message-id : date : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=corp-2020-01-29;
- bh=3p/q/qHrzOOK6gTsvHCtXjimLltMeSrIJKZyHBnEWjo=;
- b=CLkRBIaXl/2P3HvQYIJ3xzMdk0QtLz5lrWwMOEdl5ltjE1hfrkSU6x5EWmYakqAqO5R0
- qHo6olPlLnVWQ2RYPtcCMgltxTNmNfcbXVTDvBqHQz5MXa0I0Jw/gCQFuXV0/7eIfn/q
- id81z/v0s+aOebutTM5il9euAa0tDznYi+gwNMPt5Gw6veK88DGhqOUB+y3WwjgcYcDp
- CP5eVfyQ0JSlRkO539ivD0jgc4uqhUHm7sZagsumSXA2yjk+FUnTH5S1C82/lKo3+rmq
- QrPeB+DryF5HvblL9SqpC7SpHWiD7Q7OomIQzqBpwxFAHv0oW9lnvyPO7Z6VesPTjxzR OA== 
-Received: from oracle.com (userp3030.oracle.com [156.151.31.80])
-        by mx0b-00069f02.pphosted.com with ESMTP id 38f5ag8a43-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 11 May 2021 14:33:35 +0000
-Received: from userp3030.oracle.com (userp3030.oracle.com [127.0.0.1])
-        by pps.podrdrct (8.16.0.36/8.16.0.36) with SMTP id 14BEXYXC004455;
-        Tue, 11 May 2021 14:33:34 GMT
-Received: from nam11-co1-obe.outbound.protection.outlook.com (mail-co1nam11lp2168.outbound.protection.outlook.com [104.47.56.168])
-        by userp3030.oracle.com with ESMTP id 38dfrxbwy2-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Tue, 11 May 2021 14:33:33 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=dHPwVZcYSYh082Q5XraRdNcPi5kQaRQuO2E+ztx5u3/IW0fRKovaV3e1ANMJulbvXcgorV3GAnUAM4eSNTrX+HCfmHB49Oi9ERsL4XtG2ifRkOIxm+M3ta4z4Otqfa5Dy9dnPQ6q4448NwsMcFiETDhq89IfsmjOnBCy9DcQobF2xoRege5w3e+ZiCt8z0QD80CxIHpY/ceVHyqWV4kdwaoI6gxlh5eS5zLuDPGrimKCB+gV3xh6+gwb8T0f6dxIVYgmO/DAXUxcQ1qz0UIs+yGl+Vxg6CB0vlATWWr9p020cnP8QfQFw//ASR6SuJ7DvSt1EutrG2pixPTfmrRMfQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3p/q/qHrzOOK6gTsvHCtXjimLltMeSrIJKZyHBnEWjo=;
- b=HMJ4u87SN4GZczThIEBNKYLjV6SkrPztOJDFiVBQnwk3ezD4fRz/bvL8g/oFfRAlL2VSKO8KpM0QNewkevKJGfTgwWpDw9BU7oHGeXYCx0co5cuCf2CXCczMMXWq5UxmF9Wmpx8m/G0F0Dv9gmqBZBN8dXDmEw8h3MCXuPtfzzjgWXKsECyjjYoeqRIiRHeX3PiWwAGrjlVS/sFKBAhHZ6nsXqCtHlxLvIlQlK1dhk/jLPUNLFsUbXiFYr8h5SjKVVkfi02///p0PJGLZxhDRk11mo3BhybAkl/++yncR1O2fuLalHQfKj3zTngg7+CSW1i1/anM39HZJZvQJ9ux6w==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3p/q/qHrzOOK6gTsvHCtXjimLltMeSrIJKZyHBnEWjo=;
- b=sY5akQjTUumnS0LiC8+HNy5F4Qt6TGi2tujqfpLbWZmfj0bliC+LRDjQjLTLLbBRTpX9QQQ00gSapgPhXycKGDWUc4fXA7K+Ya7RlhstGIB+DvMhEcSe4VyQQdsk4M6rFguykrh//m6qyYsQZEacRerrPjG9wN8izmi6lO9Io4I=
-Authentication-Results: wdc.com; dkim=none (message not signed)
- header.d=none;wdc.com; dmarc=none action=none header.from=oracle.com;
-Received: from CY4PR10MB1815.namprd10.prod.outlook.com (2603:10b6:903:125::10)
- by CY4PR10MB1446.namprd10.prod.outlook.com (2603:10b6:903:28::17) with
+        id S231939AbhEKQIP convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 12:08:15 -0400
+Received: from de-smtp-delivery-105.mimecast.com ([194.104.109.105]:56730 "EHLO
+        de-smtp-delivery-105.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231908AbhEKQIN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 12:08:13 -0400
+Received: from GBR01-LO2-obe.outbound.protection.outlook.com
+ (mail-lo2gbr01lp2056.outbound.protection.outlook.com [104.47.21.56]) (Using
+ TLS) by relay.mimecast.com with ESMTP id
+ de-mta-35-9c7pdnARP3assXMDarw6Yg-1; Tue, 11 May 2021 18:07:04 +0200
+X-MC-Unique: 9c7pdnARP3assXMDarw6Yg-1
+Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
+ by CWLP265MB2450.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:92::5) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4129.25; Tue, 11 May
- 2021 14:33:31 +0000
-Received: from CY4PR10MB1815.namprd10.prod.outlook.com
- ([fe80::1405:2af1:a195:63cc]) by CY4PR10MB1815.namprd10.prod.outlook.com
- ([fe80::1405:2af1:a195:63cc%6]) with mapi id 15.20.4129.025; Tue, 11 May 2021
- 14:33:31 +0000
-Subject: Re: [External] : Re: [PATCH v4] mmc-utils: Add eMMC erase command
- support
-To:     Ulf Hansson <ulf.hansson@linaro.org>, oracleks043021@gmail.com
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Bean Huo <beanhuo@micron.com>,
-        Kenneth Gibbons <kenny.gibbons@oracle.com>,
-        Avri Altman <avri.altman@wdc.com>
-References: <20210506191041.1178-1-oracleks043021@gmail.com>
- <CAPDyKFrj6LAEZq6+8vcXTU1TH=yq7+k9FoWX6TDEVB+NSa=KEQ@mail.gmail.com>
-From:   Kimito Sakata <kimito.sakata@oracle.com>
-Organization: Oracle Corporation
-Message-ID: <4a46ec8d-8fd9-14c1-d84d-b1adc56d8f23@oracle.com>
-Date:   Tue, 11 May 2021 08:33:27 -0600
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
-In-Reply-To: <CAPDyKFrj6LAEZq6+8vcXTU1TH=yq7+k9FoWX6TDEVB+NSa=KEQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
-X-Originating-IP: [73.243.79.162]
-X-ClientProxiedBy: BYAPR11CA0097.namprd11.prod.outlook.com
- (2603:10b6:a03:f4::38) To CY4PR10MB1815.namprd10.prod.outlook.com
- (2603:10b6:903:125::10)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4108.25; Tue, 11 May
+ 2021 16:07:02 +0000
+Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+ ([fe80::a91f:361d:5554:3958]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+ ([fe80::a91f:361d:5554:3958%5]) with mapi id 15.20.4129.025; Tue, 11 May 2021
+ 16:07:02 +0000
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Avri Altman <Avri.Altman@wdc.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH v2] mmc: block: ioctl: No busywaiting of non-TRAN CMDs
+Thread-Topic: [PATCH v2] mmc: block: ioctl: No busywaiting of non-TRAN CMDs
+Thread-Index: AQHXQyyR8BdSxkDtf0eUDDANXygamarX43qAgAaVTzw=
+Date:   Tue, 11 May 2021 16:07:02 +0000
+Message-ID: <CWXP265MB2680EC0A980A794C3B520DBBC4539@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+References: <CWXP265MB2680DC98B32CD4B49AA8A224C4599@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <DM6PR04MB657570DB58E7ABBE2C3B0449FC589@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <CWXP265MB2680A8DD0FFA6FECBFDFB027C4579@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<CAPDyKFqZ580uHgfob5wfn7a_+Y-q3h0YrvirrNYSFT5Q_St2SA@mail.gmail.com>
+In-Reply-To: <CAPDyKFqZ580uHgfob5wfn7a_+Y-q3h0YrvirrNYSFT5Q_St2SA@mail.gmail.com>
+Accept-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [185.80.168.10]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 99e004ca-937f-4469-ef7d-08d91496d08d
+x-ms-traffictypediagnostic: CWLP265MB2450:
+x-microsoft-antispam-prvs: <CWLP265MB2450A02188DEB7F1C50134BBC4539@CWLP265MB2450.GBRP265.PROD.OUTLOOK.COM>
+x-ms-oob-tlc-oobclassifiers: OLM:7219
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0
+x-microsoft-antispam-message-info: O6WnOLj6U7AuYflxhn0LuLvLxDnDg/C/f1qaJ1MK3mb46FwWcw85s5EVHs5gO7vTs7LXTJILvKv7KCIPU0OKgg9mF/heEDPZoX0jvG0V1TXTkFSltP6atM7qeEYWlmg78RIrZrhtiOp1SVNmT1il0pjFPytzs3y0v92QOVRiUz6JTD4ic7GGSZrWh9/PZEf0zQCX/btUQZq8Qk7gySTm3lFkkVoyFfNBnSKnfPSHNHLE6iaygmcHS1+i7Ya2PqE2dsdG4HD/dpXDdMOmR6bPq8nUrwE7qWwaSVWFVDYD0TdXz8o4v7rensDYDUbsT907iyOuWePAAfU/bpLaZn53DYzjZnYB+amCKam5AvF3M0Cm2WBnI8VmxtYowsKJDQ20UbAVCWXyF2nCjWQY7adjFRIp6EEJuEU6wuIVVov66kYqfWSHKXwRKg8bD0QiHDPgQxBEzF0HJT+EiwrqHX+VwrxERSDWoihHF+Go2j+kYD10RPpLvOyNKAKE1wNsEt7KO0VTklw01atAr+ewQBesswsYA5ppNc7n+JHlcEP41l6KBLOHAwIPqOrw1PAaVpw1NSrPrqw+ByJBIAvDVWKOilzfoP/PuhkDRFB/7UiM9p4=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(366004)(346002)(66446008)(4326008)(54906003)(6506007)(33656002)(53546011)(86362001)(186003)(38100700002)(5660300002)(4744005)(122000001)(71200400001)(64756008)(26005)(8676002)(76116006)(7696005)(508600001)(55016002)(2906002)(66556008)(66476007)(8936002)(6916009)(66946007)(91956017)(52536014)(9686003);DIR:OUT;SFP:1101
+x-ms-exchange-antispam-messagedata: =?iso-8859-1?Q?MvIvAHmadLXiA9f7jzMO0H8mKkTpr+ozSwylT73njW7LOEeBtw9nlFUjUW?=
+ =?iso-8859-1?Q?c/hII55SBNjzt4MIQu+t5LDREIqwnYcZyW0b1+MyQtxz9PrkEezIxJwH2J?=
+ =?iso-8859-1?Q?ZW131ZL0bN3mXSClqu9aughazd1OpW9t8cDThKRXnzt6U9Qtq3rZaXmbeh?=
+ =?iso-8859-1?Q?pgMM1efxh+2HCbQ59Rwc1f3BnBHrxd7khegMppR54Kcitc+4kbzHtllW+U?=
+ =?iso-8859-1?Q?B9mNyCNuRysjmGLceVwebYdNHOQc3g0TL7OPz7zP3+n+LHFi6YRh9Ho1Ey?=
+ =?iso-8859-1?Q?t/9uZbine0DX9kHA0ooIAVPYWhnEedL1qAj+j4uqQDCB4PSOYIJG+7vF2Q?=
+ =?iso-8859-1?Q?fhfbMqAu0ljYRJ3Gc2ZYvEzWgIwmaMHfIRJ4kqJSKFLkVl7bCf8D6GK4vK?=
+ =?iso-8859-1?Q?CZ9Gby9Gm0EZuUMWk4gdCInzF+Mba+JFCDbUE/Yuuw/uG9KxoZ/NRug9bj?=
+ =?iso-8859-1?Q?rws11a6c7D8KKgI0C//T42Ww9o94n9BqPeJScsk7vAAv2mAk4Z6xG+kJFi?=
+ =?iso-8859-1?Q?AJVCZrTVUxl6SEELxlhP3+G2GYPOH4527sn/ssnzLxMUv/rD4mfC+JBYkU?=
+ =?iso-8859-1?Q?R0HrwekMjWzigB+kBBASYVFUnpaf+aHRWnsI/VMgqltatmEBcJwPCvItfv?=
+ =?iso-8859-1?Q?4plB3pDq6CbjPB9sqYckmPoqu7ySwlDpaLTR0eHmvD3DAVgF3tq6HO2vFK?=
+ =?iso-8859-1?Q?/NJAs3IfwQbu3HGTpQlYOPEl+jW0TAZVbmeQh3qlWVIB96tsBCJNXnfrW6?=
+ =?iso-8859-1?Q?DnT9Y0Y4mnU2XuSwqrBfz2vqW6rEYIYgWCFHlsci49Bol6IWO78NSRv6F3?=
+ =?iso-8859-1?Q?X3xEfkFKncLow8AgoACNzQWQNulu8fO8j74amOZ+HVaoAegTaOnC5s27h1?=
+ =?iso-8859-1?Q?6q8h4dtvdRMJLx7trxlZiA37hvaBCwDSI5nUJBE8tE+g4JjmR7OeRyPUoG?=
+ =?iso-8859-1?Q?MhQY2aayywT4kE5dSBHDtNlX3I4/WMTTRngvqbzNnQBiyR6rSq8JsHxMNR?=
+ =?iso-8859-1?Q?hzGqju1rr4JqXt99ktU7sVLkScRBdSEHvG1RtEufk1LN66HDm3sy6+iayB?=
+ =?iso-8859-1?Q?eEc2BNYcex3To+7rCqMTIc70ala8rz6aGpSeIKFy07Ovfhns/rjlYvX1hh?=
+ =?iso-8859-1?Q?aCHLtQFOJBtY1P+VP7iFDTinHxrzsKEpGdnG9agfM5kY4fHeU3+xkND5Fa?=
+ =?iso-8859-1?Q?0u1x3pUZJdcdls3XhOaIGRoX6KnDrpb3YnOkOKpsg7ZlLNwSo9BMlGZJzE?=
+ =?iso-8859-1?Q?rE/kOmsYyOf1Y7WNJWz+o6qhJSXKRVVen6k/sG1qrJZHwABH11TuqT84Af?=
+ =?iso-8859-1?Q?4kn0Jc3Tysla45NmtP2AZew3JjCssRTD9cZCVgoopQIquHA=3D?=
+x-ms-exchange-transport-forked: True
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from [192.168.0.208] (73.243.79.162) by BYAPR11CA0097.namprd11.prod.outlook.com (2603:10b6:a03:f4::38) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4108.25 via Frontend Transport; Tue, 11 May 2021 14:33:30 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: e5ed11f4-2f86-4f50-56c7-08d91489bfe4
-X-MS-TrafficTypeDiagnostic: CY4PR10MB1446:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <CY4PR10MB1446A1BB3BB672F9B35960C39D539@CY4PR10MB1446.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:6790;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: SDLqIJHlFU4umV1QS7Yf+A9l6rCSv+ok7QgOByEgxAHQ0jvhpik6uoJ/NzckeNZie7y5a2bX+Q6KnJtvfCP2yp7LW4z4huc8RcAUPtedCf4VgAVGwUTwz/d97DT+FlZn3y7tROHuwS38CkrmT1Ioj6TYcIRLYZfEtDR6gg5T3hyvbixc5B8+tdynjScZNWzttLebdg127BBXMC2EywkuPRr9j5NCdAt0F8xheffPHekja02QJiAi3PO6L5vhZCGjPEmXprOmM/WMVSpz43IPz7MH4Rf9n8gGEl8Tb06ttK1XRZWzkNow2JJz9ofO7qEIT7YzHbnxKefqDDw9g5jTOpC6M+xtcWksei+Xy8pCEACy+UT4hPLbm8WahwPtDkx6jz7iTU4P1qK6chOUEie7n5iX+CMfX3CRjNC79fJStcClgb61NwG+gGFjPet4zNKIqtkxlenf8Rd20wd/VD+kR5lJ3rNyaAxg7UpL2BEyWqzb0bh9e80gCfGlgT7p5TzmR/kifgsef7Z5CC998FiNirk2NpU6Qt7amJXl2unvNPoTCYjwrlEF9t7xM6qu6Ps3XhVtJaD7+F0P8zTqknB+mTGmPcKZm0O73jdxv/QDilgvCzYapZvIPPzuKKGRn/9dZLg6M8mvpFYPXxlyYqZXfrCZc3zhS+Mlb6+srsQwbQyRuPmfSw+vlA37PgtMtsEG
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CY4PR10MB1815.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(376002)(346002)(39860400002)(396003)(366004)(136003)(956004)(44832011)(2616005)(31686004)(6486002)(16526019)(5660300002)(36756003)(45080400002)(8936002)(54906003)(478600001)(186003)(316002)(83380400001)(16576012)(2906002)(38100700002)(26005)(66476007)(6666004)(53546011)(36916002)(8676002)(4326008)(86362001)(66556008)(31696002)(66946007)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData: =?utf-8?B?Mk1BeHFITm5ocGYzWTZhWGxiQ3NCNCtxSXkybEgxVE9WRFBiOEJTamUzNjll?=
- =?utf-8?B?bnorRUtnU1p1em9MK2NJQXlPNVVCU2krK05UTHlXQWZiMnFGNnIrME9tUUJX?=
- =?utf-8?B?a01nTEhrTVVoc2pjWEk4QzJHaUg5N1lIaU01dG5ZME5NZDFmeUpZZE5TWGdS?=
- =?utf-8?B?THI0cFdHcktTM21ta1B0MmhvSjA0TzNKK2JRVGxqZjVzam9QZ1d4ZUgvLzZT?=
- =?utf-8?B?bVhPZVQ4T1l3TXlHN0lSUE5VRDNDSVZ5K3BTL1cxaEV1d2xEOFZhUUJiTVVj?=
- =?utf-8?B?bUlGTDBuTlBtdVlYbDNOcXRaYlBteG5KUTk0U0p3cjhwVGpVUFA0Z0dDOEZr?=
- =?utf-8?B?MlN2YUdYeHhzOHZoeHdIUGlvdXR3UnFZa2lkR1BZdlR2aEwxZ2NuY2x3anNE?=
- =?utf-8?B?azlTd05BZ2VSbzdyZmJ6aDhDN3ErTFFKMUR5M0JZUkRtaUlqMHI0MmFFSUVj?=
- =?utf-8?B?eW9UNmpkNW84N0k3YWZNZmN6V2JCeGdvQjViWDliN0VGeWNSdE5aYlF6Qnp5?=
- =?utf-8?B?WU0vcExlYnp0Y3NrdG90cUgvYy82U3RETmJOZllOQWVGbmxIem04OEdIaExR?=
- =?utf-8?B?R1NqdS80eXRhb3UxemtYMFRkUmlsb3FZd2RRQ0k1SWVScWoxOGttVDBtaHI3?=
- =?utf-8?B?dU1NMVViSW1tUlUvbU9FUS9laHlZSmljcGx6VmlCN2pRYVV0N2VVUWtTQlpT?=
- =?utf-8?B?ZWRWdG04T0YvMTJFdEIrSnRBQnY5eGxNT1g5ZDhOMXJyazZkVmdkQitHZG1T?=
- =?utf-8?B?dEdVcmFtQlNvWXltL3pvWXNPWnFCSlhrVkt4MTJIdnpKWk5MNy9wcEhwaHlo?=
- =?utf-8?B?MytvU0JzbXJQWGRJOGVIdUcxbTVZaHh4VXhnSTNEREU5WUtyLytPK2NqbldX?=
- =?utf-8?B?c2gyYVJxQVZQdU05b25CUGNEOHF0RUJEWGtxMDlwU2syZmxEY2YvRlVLMTZa?=
- =?utf-8?B?SWFoRmx0UVNNS3dHeWN2UVNCQzZURDR6VWt5Z2QvMlYxbVl4QStYcFJwUlEr?=
- =?utf-8?B?WHAxNjNnMkhvTWFiS1dQSjRqOVF1dGNGcWVLSTd1eDhSTVg3ektjUjZ5OE41?=
- =?utf-8?B?UzJqRVhPTFZtUllpeWNST0xtOFVyWHRBbktGaUgvSm01aWdTMVJHa1Fjd21n?=
- =?utf-8?B?aDc3N0ZSUkFqcjlCZkJGVFVzeDRaV0xCeWFkMHgzUEloSmUxT2pzNlJacUFC?=
- =?utf-8?B?cmMyZHhqQmo2Vmo2cjZmOTFQQXVvZFh2NEp2amJlV3VNUGpmQnRITlk1VFZr?=
- =?utf-8?B?Tit2Mk5QVHpsL0lwSXBGTVJSYm1jbVl2RnFYalE5NGdEc1cyYzhpaVNqSVk0?=
- =?utf-8?B?cWZZUGRCMFNoYU5WZGpQZ00reXk4d2xQTmZnMk5pVkhCeVhjcVBwTWdPYWtM?=
- =?utf-8?B?dFJRNkhTdEhrdndORkY1dG9Tdnc5QUdWd3BMS2RXM1IwNWNpOS9FQUpyUDlr?=
- =?utf-8?B?aWI5eExieXpHNmQ4T1pjOGdST0FVL3pHNjhxaGcwb0dsKzRvblk1LzZPZXcr?=
- =?utf-8?B?UmNxcXg0WVFETURJbnd4SW9idDNvcktFN01JckRLSnBTd05PTjd2RnR3TzRC?=
- =?utf-8?B?ZjB5R2g3bEpzeWpVUXFpL1VRZTZqTDhwN0lYZzR6TG9TR2lXV2s3Nk8yNExj?=
- =?utf-8?B?eHNsbGoydFdSUTIvRi9xbm9YclhSbGcrN1JUdFZzWGF6VFBLTXJYbnU1cGN5?=
- =?utf-8?B?WVdkS3VDWW1VWk5JZ2VSeVIrQ29BU0JCNTQxcVh1c20zbmZrMGVRUStHanBQ?=
- =?utf-8?Q?wcxXrx9Yoi3f/ZShF0evLfBng6u1/lo2GTTBURO?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: e5ed11f4-2f86-4f50-56c7-08d91489bfe4
-X-MS-Exchange-CrossTenant-AuthSource: CY4PR10MB1815.namprd10.prod.outlook.com
+X-OriginatorOrg: hyperstone.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 11 May 2021 14:33:31.3762
+X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: 99e004ca-937f-4469-ef7d-08d91496d08d
+X-MS-Exchange-CrossTenant-originalarrivaltime: 11 May 2021 16:07:02.5242
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 0jUbQExly8fiXscQk0qVY8yIgi0lF+hGBpW4dzjbtebqfEJedy59M25Py/uJi0UobSllxb1vqZC7nW9w089DBFgZbdwGUt35f72jijiabGc=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY4PR10MB1446
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9981 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=999 phishscore=0
- adultscore=0 bulkscore=0 mlxscore=0 suspectscore=0 malwarescore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2104190000 definitions=main-2105110109
-X-Proofpoint-GUID: diMp9GIS3NAwgNYDLzc3jyTalPX01TT0
-X-Proofpoint-ORIG-GUID: diMp9GIS3NAwgNYDLzc3jyTalPX01TT0
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: CnOaCYyBN3fOq4cCAOkzoy956pwPl88zc7kaJ70pmk6virhLgyeElPBXK8CFCgZuSEA3Daq++oCHG4+FABjnzA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWLP265MB2450
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: hyperstone.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Thank you!
+On Friday, May 7, 2021 1:34 PM,Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> None of the commands you are checking for should have an R1B response
+> according to the spec, I think.
+> 
+> That said, I don't think we should do these kinds of sanity checks in
+> the kernel for the mmc ioctls, that just doesn't scale.
 
-On 5/11/2021 4:57 AM, Ulf Hansson wrote:
-> On Thu, 6 May 2021 at 21:10, <oracleks043021@gmail.com> wrote:
->> From: Kimito Sakata <kimito.sakata@oracle.com>
->>
->> we have been using this erase feature for a while, but it is
->> still not merged into the upstream mmc-utils. Especially, for
->> the customer, every time when they update the mmc-utils, they
->> should re-install this patch again, let's try to make this
->> erase command upstreamed in the mmc-utils.
->>
->> We need to send 3 MMC commands and it is important that they
->> stay in sequence. Therefore we are using MMC_IOC_MULTI_CMD.
->>
->> Co-developed-by: Bean Huo <beanhuo@micron.com>
->> Signed-off-by: Bean Huo <beanhuo@micron.com>
->> Signed-off-by: Kimito Sakata <kimito.sakata@oracle.com>
->> Reviewed-by: Kenneth Gibbons <kenny.gibbons@oracle.com>
->> Reviewed-by: Avri Altman <avri.altman@wdc.com>
-> Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
->
-> Kind regards
-> Uffe
->
->
->> Changelog:
->> v3--v4:
->>      1. Replace unused pointer var with NULL.
->>      2. Added msg if ERASE_GROUP_DEF enabled for HC.
->> v2--v3:
->>      1. Remove redundant ifndef
->>
->> V1--V2:
->>      1. refactor Kimito's original patch
->>      2. change to use MMC_IOC_MULTI_CMD
->>      3. add checkup if eMMC devie supports secure erase/trim
->> ---
->>   mmc.c      |   8 +++
->>   mmc.h      |  13 ++++-
->>   mmc_cmds.c | 144 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>   mmc_cmds.h |   1 +
->>   4 files changed, 165 insertions(+), 1 deletion(-)
->>
->> diff --git a/mmc.c b/mmc.c
->> index f3d724b..eb2638b 100644
->> --- a/mmc.c
->> +++ b/mmc.c
->> @@ -229,6 +229,14 @@ static struct Command commands[] = {
->>                  "Run Field Firmware Update with <image name> on <device>.\n",
->>            NULL
->>          },
->> +       { do_erase, -4,
->> +       "erase", "<type> " "<start address> " "<end address> " "<device>\n"
->> +               "Send Erase CMD38 with specific argument to the <device>\n\n"
->> +               "NOTE!: This will delete all user data in the specified region of the device\n"
->> +               "<type> must be: legacy | discard | secure-erase | "
->> +               "secure-trim1 | secure-trim2 | trim \n",
->> +       NULL
->> +       },
->>          { 0, 0, 0, 0 }
->>   };
->>
->> diff --git a/mmc.h b/mmc.h
->> index 5754a9d..e9766d7 100644
->> --- a/mmc.h
->> +++ b/mmc.h
->> @@ -35,7 +35,15 @@
->>   #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
->>   #define MMC_CLEAR_WRITE_PROT   29    /* ac   [31:0] data addr   R1b */
->>   #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
->> -
->> +#define MMC_ERASE_GROUP_START  35    /* ac   [31:0] data addr   R1  */
->> +#define MMC_ERASE_GROUP_END    36    /* ac   [31:0] data addr   R1  */
->> +#define MMC_ERASE              38    /* ac   [31] Secure request
->> +                                             [30:16] set to 0
->> +                                             [15] Force Garbage Collect request
->> +                                             [14:2] set to 0
->> +                                             [1] Discard Enable
->> +                                             [0] Identify Write Blocks for
->> +                                             Erase (or TRIM Enable)  R1b */
->>   /*
->>    * EXT_CSD fields
->>    */
->> @@ -62,6 +70,7 @@
->>   #define EXT_CSD_CACHE_SIZE_2           251
->>   #define EXT_CSD_CACHE_SIZE_1           250
->>   #define EXT_CSD_CACHE_SIZE_0           249
->> +#define EXT_CSD_SEC_FEATURE_SUPPORT    231
->>   #define EXT_CSD_BOOT_INFO              228     /* R/W */
->>   #define EXT_CSD_HC_ERASE_GRP_SIZE      224
->>   #define EXT_CSD_HC_WP_GRP_SIZE         221
->> @@ -190,6 +199,8 @@
->>   #define EXT_CSD_REV_V4_2               2
->>   #define EXT_CSD_REV_V4_1               1
->>   #define EXT_CSD_REV_V4_0               0
->> +#define EXT_CSD_SEC_GB_CL_EN           (1<<4)
->> +#define EXT_CSD_SEC_ER_EN              (1<<0)
->>
->>
->>   /* From kernel linux/mmc/core.h */
->> diff --git a/mmc_cmds.c b/mmc_cmds.c
->> index 6c24cea..afa85b7 100644
->> --- a/mmc_cmds.c
->> +++ b/mmc_cmds.c
->> @@ -2514,6 +2514,150 @@ int do_cache_dis(int nargs, char **argv)
->>          return do_cache_ctrl(0, nargs, argv);
->>   }
->>
->> +static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
->> +{
->> +       int ret = 0;
->> +       struct mmc_ioc_multi_cmd *multi_cmd;
->> +       __u8 ext_csd[512];
->> +
->> +
->> +       ret = read_extcsd(dev_fd, ext_csd);
->> +       if (ret) {
->> +               fprintf(stderr, "Could not read EXT_CSD\n");
->> +               exit(1);
->> +       }
->> +       if (ext_csd[EXT_CSD_ERASE_GROUP_DEF] & 0x01) {
->> +         fprintf(stderr, "High Capacity Erase Unit Size=%d bytes\n" \
->> +                          "High Capacity Erase Timeout=%d ms\n" \
->> +                          "High Capacity Write Protect Group Size=%d bytes\n",
->> +                          ext_csd[224]*0x80000,
->> +                          ext_csd[223]*300,
->> +                           ext_csd[221]*ext_csd[224]*0x80000);
->> +       }
->> +
->> +       multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
->> +                          3 * sizeof(struct mmc_ioc_cmd));
->> +       if (!multi_cmd) {
->> +               perror("Failed to allocate memory");
->> +               return -ENOMEM;
->> +       }
->> +
->> +       multi_cmd->num_of_cmds = 3;
->> +       /* Set erase start address */
->> +       multi_cmd->cmds[0].opcode = MMC_ERASE_GROUP_START;
->> +       multi_cmd->cmds[0].arg = start;
->> +       multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
->> +       multi_cmd->cmds[0].write_flag = 1;
->> +
->> +       /* Set erase end address */
->> +       multi_cmd->cmds[1].opcode = MMC_ERASE_GROUP_END;
->> +       multi_cmd->cmds[1].arg = end;
->> +       multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
->> +       multi_cmd->cmds[1].write_flag = 1;
->> +
->> +       /* Send Erase Command */
->> +       multi_cmd->cmds[2].opcode = MMC_ERASE;
->> +       multi_cmd->cmds[2].arg = argin;
->> +       multi_cmd->cmds[2].cmd_timeout_ms = 300*255*255;
->> +       multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
->> +       multi_cmd->cmds[2].write_flag = 1;
->> +
->> +       /* send erase cmd with multi-cmd */
->> +       ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
->> +       if (ret)
->> +               perror("Erase multi-cmd ioctl");
->> +
->> +       free(multi_cmd);
->> +       return ret;
->> +}
->> +
->> +int do_erase(int nargs, char **argv)
->> +{
->> +       int dev_fd, ret;
->> +       char *print_str;
->> +       __u8 ext_csd[512], checkup_mask = 0;
->> +       __u32 arg, start, end;
->> +
->> +       if (nargs != 5) {
->> +               fprintf(stderr, "Usage: erase <type> <start addr> <end addr> </path/to/mmcblkX>\n");
->> +               exit(1);
->> +       }
->> +
->> +       if (strstr(argv[2], "0x") || strstr(argv[2], "0X"))
->> +               start = strtol(argv[2], NULL, 16);
->> +       else
->> +               start = strtol(argv[2], NULL, 10);
->> +
->> +       if (strstr(argv[3], "0x") || strstr(argv[3], "0X"))
->> +               end = strtol(argv[3], NULL, 16);
->> +       else
->> +               end = strtol(argv[3], NULL, 10);
->> +
->> +       if (end < start) {
->> +               fprintf(stderr, "erase start [0x%08x] > erase end [0x%08x]\n",
->> +                       start, end);
->> +               exit(1);
->> +       }
->> +
->> +       if (strcmp(argv[1], "legacy") == 0) {
->> +               arg = 0x00000000;
->> +               print_str = "Legacy Erase";
->> +       } else if (strcmp(argv[1], "discard") == 0) {
->> +               arg = 0x00000003;
->> +               print_str = "Discard";
->> +       } else if (strcmp(argv[1], "secure-erase") == 0) {
->> +               print_str = "Secure Erase";
->> +               checkup_mask = EXT_CSD_SEC_ER_EN;
->> +               arg = 0x80000000;
->> +       } else if (strcmp(argv[1], "secure-trim1") == 0) {
->> +               print_str = "Secure Trim Step 1";
->> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
->> +               arg = 0x80000001;
->> +       } else if (strcmp(argv[1], "secure-trim2") == 0) {
->> +               print_str = "Secure Trim Step 2";
->> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
->> +               arg = 0x80008000;
->> +       } else if (strcmp(argv[1], "trim") == 0) {
->> +               print_str = "Trim";
->> +               checkup_mask = EXT_CSD_SEC_GB_CL_EN;
->> +               arg = 0x00000001;
->> +       } else {
->> +               fprintf(stderr, "Unknown erase type: %s\n", argv[1]);
->> +               exit(1);
->> +       }
->> +
->> +       dev_fd = open(argv[4], O_RDWR);
->> +       if (dev_fd < 0) {
->> +               perror(argv[4]);
->> +               exit(1);
->> +       }
->> +
->> +       if (checkup_mask) {
->> +               ret = read_extcsd(dev_fd, ext_csd);
->> +               if (ret) {
->> +                       fprintf(stderr, "Could not read EXT_CSD from %s\n",
->> +                               argv[4]);
->> +                       goto out;
->> +               }
->> +               if ((checkup_mask & ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) !=
->> +                                                               checkup_mask) {
->> +                       fprintf(stderr, "%s is not supported in %s\n",
->> +                               print_str, argv[4]);
->> +                       ret = -ENOTSUP;
->> +                       goto out;
->> +               }
->> +
->> +       }
->> +       printf("Executing %s from 0x%08x to 0x%08x\n", print_str, start, end);
->> +
->> +       ret = erase(dev_fd, arg, start, end);
->> +out:
->> +       printf(" %s %s!\n\n", print_str, ret ? "Failed" : "Succeed");
->> +       close(dev_fd);
->> +       return ret;
->> +}
->> +
->> +
->>   int do_ffu(int nargs, char **argv)
->>   {
->>   #ifndef MMC_IOC_MULTI_CMD
->> diff --git a/mmc_cmds.h b/mmc_cmds.h
->> index 9d3246c..8331ab2 100644
->> --- a/mmc_cmds.h
->> +++ b/mmc_cmds.h
->> @@ -45,3 +45,4 @@ int do_ffu(int nargs, char **argv);
->>   int do_read_scr(int argc, char **argv);
->>   int do_read_cid(int argc, char **argv);
->>   int do_read_csd(int argc, char **argv);
->> +int do_erase(int nargs, char **argv);
->> --
->> 2.31.1
->>
+You are absolutely correct, my bad, I had a userspace program setting the
+flags wrong.
+Even for a SEND_STATUS R1B is only expected if the card was not selected
+and should be set accordingly by the userspace.
+
+Regards,
+Christian
+Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+Managing Directors: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
