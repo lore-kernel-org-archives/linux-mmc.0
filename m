@@ -4,138 +4,114 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD52AC433ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E21FFC433B4
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7B3AB61480
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:16 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B0C716128C
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231454AbhEKK6T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 06:58:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57174 "EHLO
+        id S231510AbhEKK63 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 06:58:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231407AbhEKK6P (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:15 -0400
-Received: from mail-ua1-x92a.google.com (mail-ua1-x92a.google.com [IPv6:2607:f8b0:4864:20::92a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC719C06175F
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:08 -0700 (PDT)
-Received: by mail-ua1-x92a.google.com with SMTP id x22so6199771uav.8
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:08 -0700 (PDT)
+        with ESMTP id S231424AbhEKK6R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:17 -0400
+Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5E2FC06174A
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:11 -0700 (PDT)
+Received: by mail-vs1-xe31.google.com with SMTP id s15so7141939vsi.4
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=H3TFuIrc3Mj7EWsSB5KHDQrg/psdazR0cVvA5Agy22s=;
-        b=BI5betzphHV53YRAHo1kbf3qtN5EZ+oJQvqpn4XXUNTvjtju9UI5Wxwcu/qn0vpzMa
-         l8lD+g5mD22XYfa4O8a/DkbtdqMxftpPoCgk3EzFxlgMa9475q6tweCGnyLgcCpSu8ue
-         poRgY190B4IYUbsx23WRK7dsxuPfKqFzfOElVB1Ti0fK7UgpND6B/TIlH7Ez2Ztt/UZw
-         X9ChYwX5o5XMrZarBxHM9k9fuDXw7GeXfg0wQeftAJktbg8FdqoErJmdZxTz9ySB9ljp
-         5kzgCqLZ8a1IL5VP4fZ8V/3eoLv/D//8lDoYt4CeIJg/ADMwinFvoAgj3MdlTZUA2vJ8
-         V+KQ==
+        bh=ojLzUpP6F+Lkt3eqb6PEiJPewxNNPw/DbAO6AffxN7Q=;
+        b=KrU081NfAptCNrbrWUx78l1oOfIjCpGIS1ZxXaxKWRfbVKo33BsO//YaRbJ7T0bHOB
+         k7nCASHflgnd7JckNq6jz54unMJhyWEHI8NtR8IEgwgGUbe0ShHDbhc86PBEwaCIFAhU
+         HoEjbGTC83hdQENRy0EShqo5clFQrICDDIwu8RoQYgRHkqYao2GUTuKgjMln0E7uR/Sn
+         8Luq0NktXRsIflsmSJyyNm1yl5fPUSf29d8NVPcYhIXpciFFc9MVMvG5X6Gvpx6AgO/z
+         2yLAARhdDiogEXFlqYx/gkrkae2jyeY9CtbZ2zpOcKsBhhkX09c5wTX8pFUL/PrAzDNT
+         cAKQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=H3TFuIrc3Mj7EWsSB5KHDQrg/psdazR0cVvA5Agy22s=;
-        b=pDp1JW+ZEQjSeK7q+r0cjfTfTVGVR2xtE1DbbRzhdKnjyVA2mPKkqVf70+DBNdUSsj
-         /BUQuHlI8s2KUMWPsRx58pmK9s7mu/PuMlAOeJcH0DLqeeg4NYMlCrug1biGUQnEeoTw
-         O9OWRa6Y8m65QbHNOaIHHPH7omNmxXsmzGXhb1iHfi+HRux7gmB/ImXj7WE4f1L6fEwj
-         /Ru7FIJ9xVjOtuiIYOd9mEwEWcz5XElJE5TB1OE8ov1cicqjkfxzqi56K6KL2v838Lpk
-         D0V15kyvfdBBAoT88J3dJ1PotCtkwkqoZA3Dk0VXZ6wBH+khdszi+5HzdvGCZknF/RXu
-         RKrw==
-X-Gm-Message-State: AOAM532IPxWKjb3BGJQy8xdDbRC2kYVJZWd5fDGrcIjnh2IO3SBe2NcT
-        /7JYx7aenVYu+fhcNzG66pqBn82vHjIvwzMPcy+GAA==
-X-Google-Smtp-Source: ABdhPJwynumHCSzbxs9fEYhSTsTQNyquQmA9nby0MfgarYqJoMGRF7eJ8B5GdcKLxBd8RzpG4b/jdGZAXltAK2YZE4E=
-X-Received: by 2002:ab0:7002:: with SMTP id k2mr25127013ual.104.1620730627962;
- Tue, 11 May 2021 03:57:07 -0700 (PDT)
+        bh=ojLzUpP6F+Lkt3eqb6PEiJPewxNNPw/DbAO6AffxN7Q=;
+        b=hM84YntWoDLkm0qpbuk5wBUOdHD+DvTx4vy8nmFk6nIrjtIxBccq6MVuWmxa/tbBRS
+         MIhWkw15y+dLpGvEEd4N8oRmm5rVn6+M9iLodeegyoaUmEsTTZjQroMS2MBXUjeJJyRA
+         gOtkPBZFmNiadrvt5pVs+mtFM1FZnyw4kOdxlhUroJefFRffrxZdYB8t6dGXuj3fxNqD
+         c8pzeLS+NjLo58qH85nATND8lv47RR75V+APkisB+KsaYmGHFZfF3jCTpgF628Y+omKd
+         xemB+D4CjaORcoVawqZNzG2HZ04vfwioXoN89H+HlKTJf86SAXR5+XahKg++Nl6HCte2
+         GbLQ==
+X-Gm-Message-State: AOAM533ZHcTWhnjsfxpfd52kWTHFE+Uyxw9ZY4+zH9ntSh4VIO2qmZnY
+        ifVDGJAHn4xpW7R0QHfaTXT45NRwTPwWqNytSdKVbQ==
+X-Google-Smtp-Source: ABdhPJyN6CpwxDdnej+v959iqJCgLgyjBS8Ht01Ocwh5gsCH3FP+0wTEx3rSG/aUXiQCN60cyPMdg3wOIdajtn6xEV8=
+X-Received: by 2002:a67:64c5:: with SMTP id y188mr23398053vsb.19.1620730630938;
+ Tue, 11 May 2021 03:57:10 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210429081151.17558-1-cl@rock-chips.com> <20210429081151.17558-4-cl@rock-chips.com>
-In-Reply-To: <20210429081151.17558-4-cl@rock-chips.com>
+References: <20210503092157.5689-1-hdegoede@redhat.com>
+In-Reply-To: <20210503092157.5689-1-hdegoede@redhat.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 11 May 2021 12:56:29 +0200
-Message-ID: <CAPDyKFr3cpARwxZPUfnFfJT-=UMynUNK-Jb0NLNJG=k9O-=R9g@mail.gmail.com>
-Subject: Re: [PATCH v4 03/10] dt-bindings: mmc: rockchip-dw-mshc: add
- description for rk3568
-To:     cl@rock-chips.com
-Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
-        Jagan Teki <jagan@amarulasolutions.com>,
-        Chen-Yu Tsai <wens@csie.org>, uwe@kleine-koenig.org,
-        mail@david-bauer.net, Johan Jonker <jbx6244@gmail.com>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        jensenhuang@friendlyarm.com,
-        Michael Trimarchi <michael@amarulasolutions.com>,
-        cnsztl@gmail.com, DTML <devicetree@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-serial@vger.kernel.org, linux-i2c@vger.kernel.org,
-        Jianqun Xu <jay.xu@rock-chips.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        David Wu <david.wu@rock-chips.com>,
-        zhangqing <zhangqing@rock-chips.com>,
-        Tao Huang <huangtao@rock-chips.com>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Jamie Iles <jamie@jamieiles.com>,
-        linux-watchdog@vger.kernel.org, Marc Zyngier <maz@kernel.org>
+Date:   Tue, 11 May 2021 12:56:33 +0200
+Message-ID: <CAPDyKFq2+SgWE7XAMWAQsC4Ud5YNx0E-CCsMgeDzN3b_wvwL-g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-acpi: Disable write protect detection on
+ Toshiba Encore 2 WT8-B
+To:     Hans de Goede <hdegoede@redhat.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 29 Apr 2021 at 10:12, <cl@rock-chips.com> wrote:
+On Mon, 3 May 2021 at 11:22, Hans de Goede <hdegoede@redhat.com> wrote:
 >
-> From: Liang Chen <cl@rock-chips.com>
+> On the Toshiba Encore 2 WT8-B the  microSD slot always reports the card
+> being write-protected even though microSD cards do not have a write-protect
+> switch at all.
 >
-> add "rockchip,rk3568-dw-mshc", "rockchip,rk3288-dw-mshc" for mmc nodes on
-> a rk3568 platform to rockchip-dw-mshc.yaml.
+> Add a new DMI_QUIRK_SD_NO_WRITE_PROTECT quirk entry to sdhci-acpi.c's
+> DMI quirk table for this.
 >
-> Signed-off-by: Liang Chen <cl@rock-chips.com>
+> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
 
-Applied for next (and by amending the commit message according to
-Rob's suggestion), thanks!
+Applied for next, thanks!
+
+Should we tag this for stable?
 
 Kind regards
 Uffe
 
 
 > ---
->  .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml        | 9 +--------
->  1 file changed, 1 insertion(+), 8 deletions(-)
+>  drivers/mmc/host/sdhci-acpi.c | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index 3762f1c8de96..eaa3b0ef24f6 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -29,21 +29,14 @@ properties:
->        - const: rockchip,rk3288-dw-mshc
->        - items:
->            - enum:
-> -            # for Rockchip PX30
->                - rockchip,px30-dw-mshc
-> -            # for Rockchip RK3036
->                - rockchip,rk3036-dw-mshc
-> -            # for Rockchip RK322x
->                - rockchip,rk3228-dw-mshc
-> -            # for Rockchip RK3308
->                - rockchip,rk3308-dw-mshc
-> -            # for Rockchip RK3328
->                - rockchip,rk3328-dw-mshc
-> -            # for Rockchip RK3368
->                - rockchip,rk3368-dw-mshc
-> -            # for Rockchip RK3399
->                - rockchip,rk3399-dw-mshc
-> -            # for Rockchip RV1108
-> +              - rockchip,rk3568-dw-mshc
->                - rockchip,rv1108-dw-mshc
->            - const: rockchip,rk3288-dw-mshc
+> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+> index b6574e7fd26b..9e4358d7a0a6 100644
+> --- a/drivers/mmc/host/sdhci-acpi.c
+> +++ b/drivers/mmc/host/sdhci-acpi.c
+> @@ -820,6 +820,17 @@ static const struct dmi_system_id sdhci_acpi_quirks[] = {
+>                 },
+>                 .driver_data = (void *)DMI_QUIRK_SD_NO_WRITE_PROTECT,
+>         },
+> +       {
+> +               /*
+> +                * The Toshiba WT8-B's microSD slot always reports the card being
+> +                * write-protected.
+> +                */
+> +               .matches = {
+> +                       DMI_MATCH(DMI_SYS_VENDOR, "TOSHIBA"),
+> +                       DMI_MATCH(DMI_PRODUCT_NAME, "TOSHIBA ENCORE 2 WT8-B"),
+> +               },
+> +               .driver_data = (void *)DMI_QUIRK_SD_NO_WRITE_PROTECT,
+> +       },
+>         {} /* Terminating entry */
+>  };
 >
 > --
-> 2.17.1
->
->
+> 2.31.1
 >
