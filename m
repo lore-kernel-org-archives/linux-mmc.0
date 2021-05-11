@@ -2,280 +2,175 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 603EDC433B4
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:14:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A835C433ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:40:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1A317610C9
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:14:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EFA3E615FF
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:40:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231360AbhEKKPO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 06:15:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47416 "EHLO
+        id S230343AbhEKKlp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 06:41:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53202 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231177AbhEKKPO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:15:14 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8175C061760
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:14:07 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id c3so27834413lfs.7
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:14:07 -0700 (PDT)
+        with ESMTP id S230401AbhEKKl3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:41:29 -0400
+Received: from mail-vs1-xe36.google.com (mail-vs1-xe36.google.com [IPv6:2607:f8b0:4864:20::e36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A070CC061763
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:40:23 -0700 (PDT)
+Received: by mail-vs1-xe36.google.com with SMTP id x17so5627882vsc.0
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:40:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vvnmS1XNpYi/1Cs5zdQrt1BI+Y4XJuywPnU5ry3BGJw=;
-        b=Ga33qqoqQpQYHEJ9OCV813urk8/X4ETDke9bsUDntYHxsvNx4fxYT1DJJALFLwhtgm
-         TER2U3K8IO5ycBsuJsUyE77paYSwwMAsd/RWk68+G9oe02jJQMfjF6sI2mbuCA3APJBX
-         NcR5Pr8GMcPOXLNGY/X43rTfFnnV6MozNDuKukxVfSq8lXF0OkI7M/X7e+q7HrcV1Pyl
-         GQlIBoxb7NoHAp5uq/RBNlSmHLhuOJYc5J/xvX55eOVlvHUOiQSUxbB2vV/6d53XDrS3
-         VVpfOGPLY0DqJxW1sDJrtlf10LSinw2uKN0i+N+TTHF8BHhlDE/XGFF9/qkkcqT2C35d
-         h7qA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=NwwYKeNCyndTNAvylWwyrfKxcbGHa+q5RnfN1gDWsBE=;
+        b=YUPYL0EFXqzYf8ADC9pMn6hkPniLYqWvu7nESNOp0DPCAuu8nluHe1zegt0ol++M1J
+         ctjHeaw2hwb09kotwIWX/aq5BgxTgX3SdU/7r1SYkkoQ4Ko9RHtBbscvvyeNNo42ew8W
+         24RGW2YffArnU3p0tVNxsRsXaIdruS9V1E+g1x7dRxds6iX0lo8Nti6oTT+LMiXgy4SE
+         VLXuVyb02Lnin3tHTlClA++jE907u45LQpLDwrKAM6Ww0YRJ/e39c/F1dGucWkDRCEQ0
+         vXbsZhzdmlIhckeihIjRldg5UYQkrbO2cAlgssIkYyurCu9ISrLSXVreUnlmZ2TyM/mO
+         FAJg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vvnmS1XNpYi/1Cs5zdQrt1BI+Y4XJuywPnU5ry3BGJw=;
-        b=JYWuDCtBRcQpGjzcLq4TWPqI+35t8Xg71BabIaCc8AAALR/W67VWtbgY4JaKB5f1jU
-         KCN8hq0Tks0WZ8947SkgbghsWmWSZJC3wYtgNEpDYDo1Qb6xeTm5CTx1iATt0OlaTY8e
-         vwl+xefk9QODcgT69CrqHXPMT+coebGGBO96XYu3f0OO2kI5DGILZbrNY3sF+C6mWHCz
-         0tTyZxy6aymiZVGEYPIR2xxqlDC6Ma5mWc+SY+kO/6RdjFK61U5PEGY67wF+ebRQDer1
-         5rK4sV75ii0jqywvnSKvB5Uc66/Ovgt/U1vNIpJYM9XOs4SOreuz1+GlvfNzlj8WI0j5
-         hL5w==
-X-Gm-Message-State: AOAM532R91bf4TSsWDXLbkFXCusJmqjUBbCWLrMEf+XuTwbYe015gAkL
-        MX4Q5kSkZCcnj9XxhCtu8KLAZA0plylN1LrO
-X-Google-Smtp-Source: ABdhPJwl4rNi9VWZDhhm6VA5/PkL5tMu1aDKCgx4P2kmP6mUPTQN+h5SaBJOOuaZUqW5BYx3COPDUw==
-X-Received: by 2002:a05:6512:239b:: with SMTP id c27mr12988472lfv.284.1620728045362;
-        Tue, 11 May 2021 03:14:05 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-129-146.NA.cust.bahnhof.se. [155.4.129.146])
-        by smtp.gmail.com with ESMTPSA id y13sm2570660lfl.252.2021.05.11.03.14.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 May 2021 03:14:04 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v2] mmc: core: Add support for cache ctrl for SD cards
-Date:   Tue, 11 May 2021 12:13:59 +0200
-Message-Id: <20210511101359.83521-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=NwwYKeNCyndTNAvylWwyrfKxcbGHa+q5RnfN1gDWsBE=;
+        b=lms5QcDdBPxQGmm/o6gHQ1WI1oy5yLM//o7HJKL1xwMSeWdjDb1yG89VHUCnDJwnYc
+         EtCY+TZkoQbCfoRdwRr3FAHa8DK2KbOlp9osdvfUx0LsZ1s8NBS+SXv3XidAAXrTr1Nu
+         UjbMJMb1p44E0/D9cauEnYhyJL4d1mTzE8+whWudveOtZ8chs8m3+vMfs+fMoCNhYJKE
+         JmnzJ6TSw3xM8GLal/hjo7AZ99ixxiBpvwnGh2qudxQ+aCLfUZiLrwEQSRe/7eGWcd2V
+         2w1h8RZIfzbKMS6c0kJNLdfZWyIoLf4mg/GMhNkSp5Su1cjS67XPs8n7MB9CYPr4EJkM
+         4mvg==
+X-Gm-Message-State: AOAM530yY8NalR8AKi5D6pkCuQ0D8/uUw06qsYXgneA+xoR7Q7U4dtgY
+        BvAiI/umRfV6aJpGF/VXjXYHBgQ6HoY/b3KK3cEdXQ==
+X-Google-Smtp-Source: ABdhPJxo1S0gZcAzYHlpyqqsVcd7walSOA63q4+N7ZZdgxKV0Dv5LEaFEs1fc2CPPn/jgbWVrlWAAG8CBMyIA4H+pWc=
+X-Received: by 2002:a67:2c03:: with SMTP id s3mr24276088vss.42.1620729622695;
+ Tue, 11 May 2021 03:40:22 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210509215416.950337-1-ztong0001@gmail.com>
+In-Reply-To: <20210509215416.950337-1-ztong0001@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 11 May 2021 12:39:46 +0200
+Message-ID: <CAPDyKFrFGo9gmG+EH2hS4oXPn5Jx9v8Pk8jKgvm9KW4Mdk+85A@mail.gmail.com>
+Subject: Re: [PATCH] memstick: rtsx_usb_ms: fix UAF
+To:     Tong Zhang <ztong0001@gmail.com>
+Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In SD spec v6.x the SD function extension registers for performance
-enhancements were introduced. As a part of this an optional internal cache
-on the SD card, can be used to improve performance.
+On Sun, 9 May 2021 at 23:54, Tong Zhang <ztong0001@gmail.com> wrote:
+>
+> This patch fixes the following issues:
+> 1. memstick_free_host() will free the host, so the use of ms_dev(host) after
+> it will be a problem. To fix this, move memstick_free_host() after when we
+> are done with ms_dev(host).
+> 2. if something bad happens in memstick_add_host() and we end up taking
+> err_out in rtsx_usb_ms_drv_probe(), we'd better avoid running rtsx_usb_ms_drv_remove()
 
-The let the SD card use the cache, the host needs to enable it and manage
-flushing of the cache, so let's add support for this.
+If the ->probe() function returns a negative error code, the driver
+core will not invoke the corresponding ->remove() callback.
 
-Note that for an SD card supporting the cache it's mandatory for it, to
-also support the poweroff notification feature. According to the SD spec,
-if the cache has been enabled and a poweroff notification is sent to the
-card, that implicitly also means that the card should flush its internal
-cache. Therefore, dealing with cache flushing for REQ_OP_FLUSH block
-requests is sufficient.
+Looks like you may want to double check that ->probe() doesn't return
+0, even in case of failure.
 
-Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
+> 3. In rtsx_usb_ms_drv_remove(), pm need to be disabled before we remove
+> and free host otherwise memstick_check will be called and UAF will
+> happen.
+>
+> [   11.351173] BUG: KASAN: use-after-free in rtsx_usb_ms_drv_remove+0x94/0x140 [rtsx_usb_ms]
+> [   11.357077]  rtsx_usb_ms_drv_remove+0x94/0x140 [rtsx_usb_ms]
+> [   11.357376]  platform_remove+0x2a/0x50
+> [   11.367531] Freed by task 298:
+> [   11.368537]  kfree+0xa4/0x2a0
+> [   11.368711]  device_release+0x51/0xe0
+> [   11.368905]  kobject_put+0xa2/0x120
+> [   11.369090]  rtsx_usb_ms_drv_remove+0x8c/0x140 [rtsx_usb_ms]
+> [   11.369386]  platform_remove+0x2a/0x50
+>
+> [   12.038408] BUG: KASAN: use-after-free in __mutex_lock.isra.0+0x3ec/0x7c0
+> [   12.045432]  mutex_lock+0xc9/0xd0
+> [   12.046080]  memstick_check+0x6a/0x578 [memstick]
+> [   12.046509]  process_one_work+0x46d/0x750
+> [   12.052107] Freed by task 297:
+> [   12.053115]  kfree+0xa4/0x2a0
+> [   12.053272]  device_release+0x51/0xe0
+> [   12.053463]  kobject_put+0xa2/0x120
+> [   12.053647]  rtsx_usb_ms_drv_remove+0xc4/0x140 [rtsx_usb_ms]
+> [   12.053939]  platform_remove+0x2a/0x50
+>
+> Signed-off-by: Tong Zhang <ztong0001@gmail.com>
+> ---
+>  drivers/memstick/host/rtsx_usb_ms.c | 13 +++++++------
+>  1 file changed, 7 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
+> index 102dbb8080da..851643d007b7 100644
+> --- a/drivers/memstick/host/rtsx_usb_ms.c
+> +++ b/drivers/memstick/host/rtsx_usb_ms.c
+> @@ -799,9 +799,10 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
+>
+>         return 0;
+>  err_out:
+> -       memstick_free_host(msh);
+>         pm_runtime_disable(ms_dev(host));
+>         pm_runtime_put_noidle(ms_dev(host));
+> +       memstick_free_host(msh);
+> +       platform_set_drvdata(pdev, NULL);
+>         return err;
+>  }
+>
+> @@ -811,6 +812,8 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+>         struct memstick_host *msh = host->msh;
+>         int err;
+>
+> +       if (!host)
+> +               return 0;
 
-Changes in v2:
- - Converted to use the BIT() macro for clarification, as suggested by Linus.
- - Reset SD_EXT_PERF_CACHE bit when cache enable fails, as suggested by Avri.
+According to my comment above. You should not reach this point, unless
+->probe() was successful and returned 0.
 
-Note that:
- - I decided to keep the error path when failing to enable the cache. It's
-seems more robust, as it's unclear what happens with the SD card at failure.
-Additionally, if improvements are needed we can make it on top.
+>         host->eject = true;
+>         cancel_work_sync(&host->handle_req);
+>
+> @@ -828,9 +831,6 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+>         }
+>         mutex_unlock(&host->host_mutex);
+>
+> -       memstick_remove_host(msh);
+> -       memstick_free_host(msh);
+> -
+>         /* Balance possible unbalanced usage count
+>          * e.g. unconditional module removal
+>          */
+> @@ -838,10 +838,11 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
+>                 pm_runtime_put(ms_dev(host));
+>
+>         pm_runtime_disable(ms_dev(host));
+> -       platform_set_drvdata(pdev, NULL);
+> -
+> +       memstick_remove_host(msh);
+>         dev_dbg(ms_dev(host),
+>                 ": Realtek USB Memstick controller has been removed\n");
+> +       memstick_free_host(msh);
+> +       platform_set_drvdata(pdev, NULL);
+>
+>         return 0;
+>  }
+> --
+> 2.25.1
+>
 
----
- drivers/mmc/core/mmc_ops.c |   1 +
- drivers/mmc/core/mmc_ops.h |   1 +
- drivers/mmc/core/sd.c      | 100 +++++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h   |   1 +
- 4 files changed, 103 insertions(+)
+Besides the above, the change looks reasonable to me.
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index af423acc4c88..3c58f6d0f482 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -456,6 +456,7 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
- 		err = R1_STATUS(status) ? -EIO : 0;
- 		break;
- 	case MMC_BUSY_HPI:
-+	case MMC_BUSY_EXTR_SINGLE:
- 		break;
- 	default:
- 		err = -EINVAL;
-diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-index c3c1d9c2577e..41ab4f573a31 100644
---- a/drivers/mmc/core/mmc_ops.h
-+++ b/drivers/mmc/core/mmc_ops.h
-@@ -14,6 +14,7 @@ enum mmc_busy_cmd {
- 	MMC_BUSY_CMD6,
- 	MMC_BUSY_ERASE,
- 	MMC_BUSY_HPI,
-+	MMC_BUSY_EXTR_SINGLE,
- };
- 
- struct mmc_host;
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index bd40c682d264..781c1e24308c 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -67,6 +67,7 @@ static const unsigned int sd_au_size[] = {
- 	})
- 
- #define SD_POWEROFF_NOTIFY_TIMEOUT_MS 2000
-+#define SD_WRITE_EXTR_SINGLE_TIMEOUT_MS 1000
- 
- struct sd_busy_data {
- 	struct mmc_card *card;
-@@ -1287,6 +1288,96 @@ static int sd_read_ext_regs(struct mmc_card *card)
- 	return err;
- }
- 
-+static bool sd_cache_enabled(struct mmc_host *host)
-+{
-+	return host->card->ext_perf.feature_enabled & SD_EXT_PERF_CACHE;
-+}
-+
-+static int sd_flush_cache(struct mmc_host *host)
-+{
-+	struct mmc_card *card = host->card;
-+	u8 *reg_buf, fno, page;
-+	u16 offset;
-+	int err;
-+
-+	if (!sd_cache_enabled(host))
-+		return 0;
-+
-+	reg_buf = kzalloc(512, GFP_KERNEL);
-+	if (!reg_buf)
-+		return -ENOMEM;
-+
-+	/*
-+	 * Set Flush Cache at bit 0 in the performance enhancement register at
-+	 * 261 bytes offset.
-+	 */
-+	fno = card->ext_perf.fno;
-+	page = card->ext_perf.page;
-+	offset = card->ext_perf.offset + 261;
-+
-+	err = sd_write_ext_reg(card, fno, page, offset, BIT(0));
-+	if (err) {
-+		pr_warn("%s: error %d writing Cache Flush bit\n",
-+			mmc_hostname(host), err);
-+		goto out;
-+	}
-+
-+	err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
-+				MMC_BUSY_EXTR_SINGLE);
-+	if (err)
-+		goto out;
-+
-+	/*
-+	 * Read the Flush Cache bit. The card shall reset it, to confirm that
-+	 * it's has completed the flushing of the cache.
-+	 */
-+	err = sd_read_ext_reg(card, fno, page, offset, 1, reg_buf);
-+	if (err) {
-+		pr_warn("%s: error %d reading Cache Flush bit\n",
-+			mmc_hostname(host), err);
-+		goto out;
-+	}
-+
-+	if (reg_buf[0] & BIT(0))
-+		err = -ETIMEDOUT;
-+out:
-+	kfree(reg_buf);
-+	return err;
-+}
-+
-+static int sd_enable_cache(struct mmc_card *card)
-+{
-+	u8 *reg_buf;
-+	int err;
-+
-+	card->ext_perf.feature_enabled &= ~SD_EXT_PERF_CACHE;
-+
-+	reg_buf = kzalloc(512, GFP_KERNEL);
-+	if (!reg_buf)
-+		return -ENOMEM;
-+
-+	/*
-+	 * Set Cache Enable at bit 0 in the performance enhancement register at
-+	 * 260 bytes offset.
-+	 */
-+	err = sd_write_ext_reg(card, card->ext_perf.fno, card->ext_perf.page,
-+			       card->ext_perf.offset + 260, BIT(0));
-+	if (err) {
-+		pr_warn("%s: error %d writing Cache Enable bit\n",
-+			mmc_hostname(card->host), err);
-+		goto out;
-+	}
-+
-+	err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
-+				MMC_BUSY_EXTR_SINGLE);
-+	if (!err)
-+		card->ext_perf.feature_enabled |= SD_EXT_PERF_CACHE;
-+
-+out:
-+	kfree(reg_buf);
-+	return err;
-+}
-+
- /*
-  * Handle the detection and initialisation of a card.
-  *
-@@ -1442,6 +1533,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 			goto free_card;
- 	}
- 
-+	/* Enable internal SD cache if supported. */
-+	if (card->ext_perf.feature_support & SD_EXT_PERF_CACHE) {
-+		err = sd_enable_cache(card);
-+		if (err)
-+			goto free_card;
-+	}
-+
- 	if (host->cqe_ops && !host->cqe_enabled) {
- 		err = host->cqe_ops->cqe_enable(host, card);
- 		if (!err) {
-@@ -1694,6 +1792,8 @@ static const struct mmc_bus_ops mmc_sd_ops = {
- 	.alive = mmc_sd_alive,
- 	.shutdown = mmc_sd_suspend,
- 	.hw_reset = mmc_sd_hw_reset,
-+	.cache_enabled = sd_cache_enabled,
-+	.flush_cache = sd_flush_cache,
- };
- 
- /*
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 2867af0635f8..74e6c0624d27 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -196,6 +196,7 @@ struct sd_ext_reg {
- 	u8			page;
- 	u16			offset;
- 	u8			rev;
-+	u8			feature_enabled;
- 	u8			feature_support;
- /* Power Management Function. */
- #define SD_EXT_POWER_OFF_NOTIFY	(1<<0)
--- 
-2.25.1
-
+Kind regards
+Uffe
