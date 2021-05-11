@@ -2,297 +2,339 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+X-Spam-Status: No, score=-18.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84AA0C433B4
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AE23CC433ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 582D561183
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7382E60FEB
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231586AbhEKK6z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 06:58:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57348 "EHLO
+        id S231604AbhEKK7E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 06:59:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57368 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230399AbhEKK6r (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:47 -0400
-Received: from mail-vk1-xa30.google.com (mail-vk1-xa30.google.com [IPv6:2607:f8b0:4864:20::a30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33CEBC06138C
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:41 -0700 (PDT)
-Received: by mail-vk1-xa30.google.com with SMTP id q135so3962644vke.1
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:41 -0700 (PDT)
+        with ESMTP id S231574AbhEKK6w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:52 -0400
+Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 397AAC06138B
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:46 -0700 (PDT)
+Received: by mail-ua1-x92c.google.com with SMTP id x9so6222226uao.3
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Src+3+3h0ibymDTZkXaqOGd8iBEIrlfTZTvmjldZejk=;
-        b=ezXUEtlEWRFaXFXFayEb4McCrhZNZQMExlKd/oA0YxqXmvwHtJhioWNhkaKyo0TBi0
-         C3rGMXuAPv2mG5l7zmJULtePhTP2eaVBfwIY1wxrlqH8D6EDlwQ1O718e7VQwdgRFTnu
-         AG5JQID5NEZlHt3QqC/DsGUD+clbGlEV7C0qWZQLUlgvEJswfXwHL9NIBzCR1/f0jEN9
-         Y6d0yewWeVpRxQWfrQF7iWngo+qi8wo3hQJgxgvqyslG2VkGGXHDg66SWVg2MAYg7ApO
-         cfVrrjtLEhF2oS+AU53K6CDWuU89cbDkn65fixR6Ky/jQq27V5YBkK6sJxYBvicD00PM
-         kXBA==
+        bh=0dQLh7ulQxrcPQdRhm6wGUlhB32iv1EZMkZwKEwgCJU=;
+        b=WvcHMldyVDvwiqm1HUeAMbJZPKFEuJRL+A5XIUHRwjAVRsiWYrE2y73UP44OmaHAkL
+         goM0hl+m6/5hua8ty1ojdWawy2TEK//avbY4lyxwEpnOTk7+t+slbc3lr36dKkV7gnyB
+         lZ9nYsbRUtJsp0LQSXXFHOVxdG7pD1Urit6aNrWU8hU4dVSS+8FE7jb3QuNe7iXhsnM/
+         IlaNAsd98Wx/K4UyDc65WaNJCdMbteiFkI5V+/s0kuNsZsFV5B/yG/O+zG0QtyfA/hGe
+         0BFDkpu21OtCG6QRVimgZY8nbzordwLxch6PE21k+TkgbxAfjqTEbI1dIyjmBSDj0qP4
+         bDBQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Src+3+3h0ibymDTZkXaqOGd8iBEIrlfTZTvmjldZejk=;
-        b=cg8ot5V8C1HJn85G4DtqvmQVS7raWjalcpttKcmTJhzfKIPWTg1mofsrC1+ArLnTC+
-         feifYWLa3rZVG1KojJAPXb2rTS6RpVAphAHUhDlHDyogjvHQxhd7/VEFK8MTes4C8Cqo
-         csU0QGV1w/cWPehwcb6UQByHbsUjpjJfjg1I0welLKKosWAU6uubHVVJTMkT/UEXLW3z
-         ItEsIrkywvvUEKND0ScOE8kiFl440HTEC9Rjbn5HNH+7h0XYKUIt4P/SILcixSqFadPM
-         g3ybtIEHAWrDx5kmfkXKnP3hYd0ohDe+m2xPTN55/Zic64qLg0A0ZPwtqeJN7/N363Xh
-         uzlg==
-X-Gm-Message-State: AOAM530c+WvsccTYY/217SziYq1b+MJgKCbQf0gm5VB93xNJzvUXXWKZ
-        35+wgJKBIYLN3gNnCLfYBQAK0bn+a6l0kKgCBzdcOQ==
-X-Google-Smtp-Source: ABdhPJxPjVkzKrtg8VoYUfVnvI+2BvYyDFi2MuPdbYN6B2mOt31jI9vyT27GHQoOdLJo4YiDh/dGrKgAVwU+fAo8NVc=
-X-Received: by 2002:a1f:2a95:: with SMTP id q143mr21572667vkq.8.1620730660367;
- Tue, 11 May 2021 03:57:40 -0700 (PDT)
+        bh=0dQLh7ulQxrcPQdRhm6wGUlhB32iv1EZMkZwKEwgCJU=;
+        b=rSpqzdANBLwH/pwqjkIrVbK2qvZwBwnOwhziDbvLdMG1fycsL9mKIVtnN1RM8AHmTj
+         KTPCz41/spNt+LJvkS/J8QpH52x9KDer5LMp6wr5kwoaAcycFxiZfNVmS+jqHo/yDM/T
+         OxgaEwQ4mQ1m6/lZ/jzPjQnR2fp1gEkRL+DfEgSadhqYgFWEF0GyOA4oJgqXwo0UdIiC
+         s3NJ/i6SThl2QOa9jStv0/CgGC9+fByoEJjXp3lIIlDLQ8Fe2N0lmpU3+LAeQgFM6ANy
+         G341u6BbMe9sUrP8QYGxmmDrWkzWHWztZlerfcfkn0AOP669fOUJ93ixGH2mRdvDXGPm
+         GxdA==
+X-Gm-Message-State: AOAM532eNg+fKI2OW/TAuo8bNKSPhgpOAzFiChVYMsOM0LSLrsTw4j4U
+        jE9JSVxkRyY+2d3BnYtRu+deRCJbWQOcKrkVNoKKypo0g0j7TA==
+X-Google-Smtp-Source: ABdhPJxIXlIGWzCEHazFyvLpehQ6g/CtXTyOTmia3tpq9zLAWW3lctIdgvfxYJPragunaXfGGmCH1JsfI+4jMxlVQuE=
+X-Received: by 2002:a9f:35b3:: with SMTP id t48mr6631015uad.129.1620730665356;
+ Tue, 11 May 2021 03:57:45 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210511101359.83521-1-ulf.hansson@linaro.org> <DM6PR04MB6575686B680A115571EBB015FC539@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB6575686B680A115571EBB015FC539@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20210506191041.1178-1-oracleks043021@gmail.com>
+In-Reply-To: <20210506191041.1178-1-oracleks043021@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 11 May 2021 12:57:03 +0200
-Message-ID: <CAPDyKFp3zzCLuRfwY39DgNuWnte-ti6SFaxwuDw3T5UDvXVsLQ@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: core: Add support for cache ctrl for SD cards
-To:     Avri Altman <Avri.Altman@wdc.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Date:   Tue, 11 May 2021 12:57:07 +0200
+Message-ID: <CAPDyKFrj6LAEZq6+8vcXTU1TH=yq7+k9FoWX6TDEVB+NSa=KEQ@mail.gmail.com>
+Subject: Re: [PATCH v4] mmc-utils: Add eMMC erase command support
+To:     oracleks043021@gmail.com
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Kimito Sakata <kimito.sakata@oracle.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Kenneth Gibbons <kenny.gibbons@oracle.com>,
+        Avri Altman <avri.altman@wdc.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 11 May 2021 at 12:40, Avri Altman <Avri.Altman@wdc.com> wrote:
+On Thu, 6 May 2021 at 21:10, <oracleks043021@gmail.com> wrote:
 >
-> > In SD spec v6.x the SD function extension registers for performance
-> > enhancements were introduced. As a part of this an optional internal cache
-> > on the SD card, can be used to improve performance.
-> >
-> > The let the SD card use the cache, the host needs to enable it and manage
-> > flushing of the cache, so let's add support for this.
-> >
-> > Note that for an SD card supporting the cache it's mandatory for it, to
-> > also support the poweroff notification feature. According to the SD spec,
-> > if the cache has been enabled and a poweroff notification is sent to the
-> > card, that implicitly also means that the card should flush its internal
-> > cache. Therefore, dealing with cache flushing for REQ_OP_FLUSH block
-> > requests is sufficient.
-> >
-> > Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> From: Kimito Sakata <kimito.sakata@oracle.com>
+>
+> we have been using this erase feature for a while, but it is
+> still not merged into the upstream mmc-utils. Especially, for
+> the customer, every time when they update the mmc-utils, they
+> should re-install this patch again, let's try to make this
+> erase command upstreamed in the mmc-utils.
+>
+> We need to send 3 MMC commands and it is important that they
+> stay in sequence. Therefore we are using MMC_IOC_MULTI_CMD.
+>
+> Co-developed-by: Bean Huo <beanhuo@micron.com>
+> Signed-off-by: Bean Huo <beanhuo@micron.com>
+> Signed-off-by: Kimito Sakata <kimito.sakata@oracle.com>
+> Reviewed-by: Kenneth Gibbons <kenny.gibbons@oracle.com>
 > Reviewed-by: Avri Altman <avri.altman@wdc.com>
 
-Thanks!
-
-FYI the SD cache ctrl patches have been applied on next.
+Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
 Kind regards
 Uffe
 
 
 >
-> > ---
-> >
-> > Changes in v2:
-> >  - Converted to use the BIT() macro for clarification, as suggested by Linus.
-> >  - Reset SD_EXT_PERF_CACHE bit when cache enable fails, as suggested by
-> > Avri.
-> >
-> > Note that:
-> >  - I decided to keep the error path when failing to enable the cache. It's
-> > seems more robust, as it's unclear what happens with the SD card at failure.
-> > Additionally, if improvements are needed we can make it on top.
-> >
-> > ---
-> >  drivers/mmc/core/mmc_ops.c |   1 +
-> >  drivers/mmc/core/mmc_ops.h |   1 +
-> >  drivers/mmc/core/sd.c      | 100
-> > +++++++++++++++++++++++++++++++++++++
-> >  include/linux/mmc/card.h   |   1 +
-> >  4 files changed, 103 insertions(+)
-> >
-> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> > index af423acc4c88..3c58f6d0f482 100644
-> > --- a/drivers/mmc/core/mmc_ops.c
-> > +++ b/drivers/mmc/core/mmc_ops.c
-> > @@ -456,6 +456,7 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
-> >                 err = R1_STATUS(status) ? -EIO : 0;
-> >                 break;
-> >         case MMC_BUSY_HPI:
-> > +       case MMC_BUSY_EXTR_SINGLE:
-> >                 break;
-> >         default:
-> >                 err = -EINVAL;
-> > diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
-> > index c3c1d9c2577e..41ab4f573a31 100644
-> > --- a/drivers/mmc/core/mmc_ops.h
-> > +++ b/drivers/mmc/core/mmc_ops.h
-> > @@ -14,6 +14,7 @@ enum mmc_busy_cmd {
-> >         MMC_BUSY_CMD6,
-> >         MMC_BUSY_ERASE,
-> >         MMC_BUSY_HPI,
-> > +       MMC_BUSY_EXTR_SINGLE,
-> >  };
-> >
-> >  struct mmc_host;
-> > diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> > index bd40c682d264..781c1e24308c 100644
-> > --- a/drivers/mmc/core/sd.c
-> > +++ b/drivers/mmc/core/sd.c
-> > @@ -67,6 +67,7 @@ static const unsigned int sd_au_size[] = {
-> >         })
-> >
-> >  #define SD_POWEROFF_NOTIFY_TIMEOUT_MS 2000
-> > +#define SD_WRITE_EXTR_SINGLE_TIMEOUT_MS 1000
-> >
-> >  struct sd_busy_data {
-> >         struct mmc_card *card;
-> > @@ -1287,6 +1288,96 @@ static int sd_read_ext_regs(struct mmc_card
-> > *card)
-> >         return err;
-> >  }
-> >
-> > +static bool sd_cache_enabled(struct mmc_host *host)
-> > +{
-> > +       return host->card->ext_perf.feature_enabled & SD_EXT_PERF_CACHE;
-> > +}
-> > +
-> > +static int sd_flush_cache(struct mmc_host *host)
-> > +{
-> > +       struct mmc_card *card = host->card;
-> > +       u8 *reg_buf, fno, page;
-> > +       u16 offset;
-> > +       int err;
-> > +
-> > +       if (!sd_cache_enabled(host))
-> > +               return 0;
-> > +
-> > +       reg_buf = kzalloc(512, GFP_KERNEL);
-> > +       if (!reg_buf)
-> > +               return -ENOMEM;
-> > +
-> > +       /*
-> > +        * Set Flush Cache at bit 0 in the performance enhancement register at
-> > +        * 261 bytes offset.
-> > +        */
-> > +       fno = card->ext_perf.fno;
-> > +       page = card->ext_perf.page;
-> > +       offset = card->ext_perf.offset + 261;
-> > +
-> > +       err = sd_write_ext_reg(card, fno, page, offset, BIT(0));
-> > +       if (err) {
-> > +               pr_warn("%s: error %d writing Cache Flush bit\n",
-> > +                       mmc_hostname(host), err);
-> > +               goto out;
-> > +       }
-> > +
-> > +       err = mmc_poll_for_busy(card,
-> > SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
-> > +                               MMC_BUSY_EXTR_SINGLE);
-> > +       if (err)
-> > +               goto out;
-> > +
-> > +       /*
-> > +        * Read the Flush Cache bit. The card shall reset it, to confirm that
-> > +        * it's has completed the flushing of the cache.
-> > +        */
-> > +       err = sd_read_ext_reg(card, fno, page, offset, 1, reg_buf);
-> > +       if (err) {
-> > +               pr_warn("%s: error %d reading Cache Flush bit\n",
-> > +                       mmc_hostname(host), err);
-> > +               goto out;
-> > +       }
-> > +
-> > +       if (reg_buf[0] & BIT(0))
-> > +               err = -ETIMEDOUT;
-> > +out:
-> > +       kfree(reg_buf);
-> > +       return err;
-> > +}
-> > +
-> > +static int sd_enable_cache(struct mmc_card *card)
-> > +{
-> > +       u8 *reg_buf;
-> > +       int err;
-> > +
-> > +       card->ext_perf.feature_enabled &= ~SD_EXT_PERF_CACHE;
-> > +
-> > +       reg_buf = kzalloc(512, GFP_KERNEL);
-> > +       if (!reg_buf)
-> > +               return -ENOMEM;
-> > +
-> > +       /*
-> > +        * Set Cache Enable at bit 0 in the performance enhancement register at
-> > +        * 260 bytes offset.
-> > +        */
-> > +       err = sd_write_ext_reg(card, card->ext_perf.fno, card->ext_perf.page,
-> > +                              card->ext_perf.offset + 260, BIT(0));
-> > +       if (err) {
-> > +               pr_warn("%s: error %d writing Cache Enable bit\n",
-> > +                       mmc_hostname(card->host), err);
-> > +               goto out;
-> > +       }
-> > +
-> > +       err = mmc_poll_for_busy(card,
-> > SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
-> > +                               MMC_BUSY_EXTR_SINGLE);
-> > +       if (!err)
-> > +               card->ext_perf.feature_enabled |= SD_EXT_PERF_CACHE;
-> > +
-> > +out:
-> > +       kfree(reg_buf);
-> > +       return err;
-> > +}
-> > +
-> >  /*
-> >   * Handle the detection and initialisation of a card.
-> >   *
-> > @@ -1442,6 +1533,13 @@ static int mmc_sd_init_card(struct mmc_host
-> > *host, u32 ocr,
-> >                         goto free_card;
-> >         }
-> >
-> > +       /* Enable internal SD cache if supported. */
-> > +       if (card->ext_perf.feature_support & SD_EXT_PERF_CACHE) {
-> > +               err = sd_enable_cache(card);
-> > +               if (err)
-> > +                       goto free_card;
-> > +       }
-> > +
-> >         if (host->cqe_ops && !host->cqe_enabled) {
-> >                 err = host->cqe_ops->cqe_enable(host, card);
-> >                 if (!err) {
-> > @@ -1694,6 +1792,8 @@ static const struct mmc_bus_ops mmc_sd_ops = {
-> >         .alive = mmc_sd_alive,
-> >         .shutdown = mmc_sd_suspend,
-> >         .hw_reset = mmc_sd_hw_reset,
-> > +       .cache_enabled = sd_cache_enabled,
-> > +       .flush_cache = sd_flush_cache,
-> >  };
-> >
-> >  /*
-> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> > index 2867af0635f8..74e6c0624d27 100644
-> > --- a/include/linux/mmc/card.h
-> > +++ b/include/linux/mmc/card.h
-> > @@ -196,6 +196,7 @@ struct sd_ext_reg {
-> >         u8                      page;
-> >         u16                     offset;
-> >         u8                      rev;
-> > +       u8                      feature_enabled;
-> >         u8                      feature_support;
-> >  /* Power Management Function. */
-> >  #define SD_EXT_POWER_OFF_NOTIFY        (1<<0)
-> > --
-> > 2.25.1
+> Changelog:
+> v3--v4:
+>     1. Replace unused pointer var with NULL.
+>     2. Added msg if ERASE_GROUP_DEF enabled for HC.
+> v2--v3:
+>     1. Remove redundant ifndef
+>
+> V1--V2:
+>     1. refactor Kimito's original patch
+>     2. change to use MMC_IOC_MULTI_CMD
+>     3. add checkup if eMMC devie supports secure erase/trim
+> ---
+>  mmc.c      |   8 +++
+>  mmc.h      |  13 ++++-
+>  mmc_cmds.c | 144 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  mmc_cmds.h |   1 +
+>  4 files changed, 165 insertions(+), 1 deletion(-)
+>
+> diff --git a/mmc.c b/mmc.c
+> index f3d724b..eb2638b 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -229,6 +229,14 @@ static struct Command commands[] = {
+>                 "Run Field Firmware Update with <image name> on <device>.\n",
+>           NULL
+>         },
+> +       { do_erase, -4,
+> +       "erase", "<type> " "<start address> " "<end address> " "<device>\n"
+> +               "Send Erase CMD38 with specific argument to the <device>\n\n"
+> +               "NOTE!: This will delete all user data in the specified region of the device\n"
+> +               "<type> must be: legacy | discard | secure-erase | "
+> +               "secure-trim1 | secure-trim2 | trim \n",
+> +       NULL
+> +       },
+>         { 0, 0, 0, 0 }
+>  };
+>
+> diff --git a/mmc.h b/mmc.h
+> index 5754a9d..e9766d7 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -35,7 +35,15 @@
+>  #define MMC_SET_WRITE_PROT     28    /* ac   [31:0] data addr   R1b */
+>  #define MMC_CLEAR_WRITE_PROT   29    /* ac   [31:0] data addr   R1b */
+>  #define MMC_SEND_WRITE_PROT_TYPE 31   /* ac   [31:0] data addr   R1  */
+> -
+> +#define MMC_ERASE_GROUP_START  35    /* ac   [31:0] data addr   R1  */
+> +#define MMC_ERASE_GROUP_END    36    /* ac   [31:0] data addr   R1  */
+> +#define MMC_ERASE              38    /* ac   [31] Secure request
+> +                                             [30:16] set to 0
+> +                                             [15] Force Garbage Collect request
+> +                                             [14:2] set to 0
+> +                                             [1] Discard Enable
+> +                                             [0] Identify Write Blocks for
+> +                                             Erase (or TRIM Enable)  R1b */
+>  /*
+>   * EXT_CSD fields
+>   */
+> @@ -62,6 +70,7 @@
+>  #define EXT_CSD_CACHE_SIZE_2           251
+>  #define EXT_CSD_CACHE_SIZE_1           250
+>  #define EXT_CSD_CACHE_SIZE_0           249
+> +#define EXT_CSD_SEC_FEATURE_SUPPORT    231
+>  #define EXT_CSD_BOOT_INFO              228     /* R/W */
+>  #define EXT_CSD_HC_ERASE_GRP_SIZE      224
+>  #define EXT_CSD_HC_WP_GRP_SIZE         221
+> @@ -190,6 +199,8 @@
+>  #define EXT_CSD_REV_V4_2               2
+>  #define EXT_CSD_REV_V4_1               1
+>  #define EXT_CSD_REV_V4_0               0
+> +#define EXT_CSD_SEC_GB_CL_EN           (1<<4)
+> +#define EXT_CSD_SEC_ER_EN              (1<<0)
+>
+>
+>  /* From kernel linux/mmc/core.h */
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 6c24cea..afa85b7 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2514,6 +2514,150 @@ int do_cache_dis(int nargs, char **argv)
+>         return do_cache_ctrl(0, nargs, argv);
+>  }
+>
+> +static int erase(int dev_fd, __u32 argin, __u32 start, __u32 end)
+> +{
+> +       int ret = 0;
+> +       struct mmc_ioc_multi_cmd *multi_cmd;
+> +       __u8 ext_csd[512];
+> +
+> +
+> +       ret = read_extcsd(dev_fd, ext_csd);
+> +       if (ret) {
+> +               fprintf(stderr, "Could not read EXT_CSD\n");
+> +               exit(1);
+> +       }
+> +       if (ext_csd[EXT_CSD_ERASE_GROUP_DEF] & 0x01) {
+> +         fprintf(stderr, "High Capacity Erase Unit Size=%d bytes\n" \
+> +                          "High Capacity Erase Timeout=%d ms\n" \
+> +                          "High Capacity Write Protect Group Size=%d bytes\n",
+> +                          ext_csd[224]*0x80000,
+> +                          ext_csd[223]*300,
+> +                           ext_csd[221]*ext_csd[224]*0x80000);
+> +       }
+> +
+> +       multi_cmd = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
+> +                          3 * sizeof(struct mmc_ioc_cmd));
+> +       if (!multi_cmd) {
+> +               perror("Failed to allocate memory");
+> +               return -ENOMEM;
+> +       }
+> +
+> +       multi_cmd->num_of_cmds = 3;
+> +       /* Set erase start address */
+> +       multi_cmd->cmds[0].opcode = MMC_ERASE_GROUP_START;
+> +       multi_cmd->cmds[0].arg = start;
+> +       multi_cmd->cmds[0].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       multi_cmd->cmds[0].write_flag = 1;
+> +
+> +       /* Set erase end address */
+> +       multi_cmd->cmds[1].opcode = MMC_ERASE_GROUP_END;
+> +       multi_cmd->cmds[1].arg = end;
+> +       multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
+> +       multi_cmd->cmds[1].write_flag = 1;
+> +
+> +       /* Send Erase Command */
+> +       multi_cmd->cmds[2].opcode = MMC_ERASE;
+> +       multi_cmd->cmds[2].arg = argin;
+> +       multi_cmd->cmds[2].cmd_timeout_ms = 300*255*255;
+> +       multi_cmd->cmds[2].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +       multi_cmd->cmds[2].write_flag = 1;
+> +
+> +       /* send erase cmd with multi-cmd */
+> +       ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +       if (ret)
+> +               perror("Erase multi-cmd ioctl");
+> +
+> +       free(multi_cmd);
+> +       return ret;
+> +}
+> +
+> +int do_erase(int nargs, char **argv)
+> +{
+> +       int dev_fd, ret;
+> +       char *print_str;
+> +       __u8 ext_csd[512], checkup_mask = 0;
+> +       __u32 arg, start, end;
+> +
+> +       if (nargs != 5) {
+> +               fprintf(stderr, "Usage: erase <type> <start addr> <end addr> </path/to/mmcblkX>\n");
+> +               exit(1);
+> +       }
+> +
+> +       if (strstr(argv[2], "0x") || strstr(argv[2], "0X"))
+> +               start = strtol(argv[2], NULL, 16);
+> +       else
+> +               start = strtol(argv[2], NULL, 10);
+> +
+> +       if (strstr(argv[3], "0x") || strstr(argv[3], "0X"))
+> +               end = strtol(argv[3], NULL, 16);
+> +       else
+> +               end = strtol(argv[3], NULL, 10);
+> +
+> +       if (end < start) {
+> +               fprintf(stderr, "erase start [0x%08x] > erase end [0x%08x]\n",
+> +                       start, end);
+> +               exit(1);
+> +       }
+> +
+> +       if (strcmp(argv[1], "legacy") == 0) {
+> +               arg = 0x00000000;
+> +               print_str = "Legacy Erase";
+> +       } else if (strcmp(argv[1], "discard") == 0) {
+> +               arg = 0x00000003;
+> +               print_str = "Discard";
+> +       } else if (strcmp(argv[1], "secure-erase") == 0) {
+> +               print_str = "Secure Erase";
+> +               checkup_mask = EXT_CSD_SEC_ER_EN;
+> +               arg = 0x80000000;
+> +       } else if (strcmp(argv[1], "secure-trim1") == 0) {
+> +               print_str = "Secure Trim Step 1";
+> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
+> +               arg = 0x80000001;
+> +       } else if (strcmp(argv[1], "secure-trim2") == 0) {
+> +               print_str = "Secure Trim Step 2";
+> +               checkup_mask = EXT_CSD_SEC_ER_EN | EXT_CSD_SEC_GB_CL_EN;
+> +               arg = 0x80008000;
+> +       } else if (strcmp(argv[1], "trim") == 0) {
+> +               print_str = "Trim";
+> +               checkup_mask = EXT_CSD_SEC_GB_CL_EN;
+> +               arg = 0x00000001;
+> +       } else {
+> +               fprintf(stderr, "Unknown erase type: %s\n", argv[1]);
+> +               exit(1);
+> +       }
+> +
+> +       dev_fd = open(argv[4], O_RDWR);
+> +       if (dev_fd < 0) {
+> +               perror(argv[4]);
+> +               exit(1);
+> +       }
+> +
+> +       if (checkup_mask) {
+> +               ret = read_extcsd(dev_fd, ext_csd);
+> +               if (ret) {
+> +                       fprintf(stderr, "Could not read EXT_CSD from %s\n",
+> +                               argv[4]);
+> +                       goto out;
+> +               }
+> +               if ((checkup_mask & ext_csd[EXT_CSD_SEC_FEATURE_SUPPORT]) !=
+> +                                                               checkup_mask) {
+> +                       fprintf(stderr, "%s is not supported in %s\n",
+> +                               print_str, argv[4]);
+> +                       ret = -ENOTSUP;
+> +                       goto out;
+> +               }
+> +
+> +       }
+> +       printf("Executing %s from 0x%08x to 0x%08x\n", print_str, start, end);
+> +
+> +       ret = erase(dev_fd, arg, start, end);
+> +out:
+> +       printf(" %s %s!\n\n", print_str, ret ? "Failed" : "Succeed");
+> +       close(dev_fd);
+> +       return ret;
+> +}
+> +
+> +
+>  int do_ffu(int nargs, char **argv)
+>  {
+>  #ifndef MMC_IOC_MULTI_CMD
+> diff --git a/mmc_cmds.h b/mmc_cmds.h
+> index 9d3246c..8331ab2 100644
+> --- a/mmc_cmds.h
+> +++ b/mmc_cmds.h
+> @@ -45,3 +45,4 @@ int do_ffu(int nargs, char **argv);
+>  int do_read_scr(int argc, char **argv);
+>  int do_read_cid(int argc, char **argv);
+>  int do_read_csd(int argc, char **argv);
+> +int do_erase(int nargs, char **argv);
+> --
+> 2.31.1
 >
