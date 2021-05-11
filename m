@@ -4,133 +4,124 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB12EC433B4
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 11:03:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F579C433ED
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 11:15:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8DF3B6134F
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 11:03:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 495D761625
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 11:15:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230399AbhEKLEf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 07:04:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58622 "EHLO
+        id S231404AbhEKLQ2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 07:16:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230382AbhEKLEf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 07:04:35 -0400
-Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45B60C061574
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 04:03:29 -0700 (PDT)
-Received: by mail-ua1-x92f.google.com with SMTP id n61so6203775uan.2
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 04:03:29 -0700 (PDT)
+        with ESMTP id S230237AbhEKLQ1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 07:16:27 -0400
+Received: from mail-vk1-xa31.google.com (mail-vk1-xa31.google.com [IPv6:2607:f8b0:4864:20::a31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F16E5C06174A
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 04:15:20 -0700 (PDT)
+Received: by mail-vk1-xa31.google.com with SMTP id 31so2792730vkl.12
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 04:15:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Kja24isdbSJM03sWOU5N8MqOAw88tKizKWVVTvrDIFc=;
-        b=tAdGF1M6J6WM4HSd/CmesutyIqQI28NWdwO8LZL2lkMGy51NTr1ILsSF5HejRQyswP
-         lkKbouWCsOGbjGA5cuXJ6j2F8Bx3trcfYtZ5BeUwLf9Z6UNNQFcQWrr4DHVFA+uIpA95
-         B5dv1cbhryiOt6uurQ1IiSu94eoYTNjsS1vIopQA48/oD0knrBoWVaaNYqOgGOFpuQ83
-         WnaOiPwblY7gab+HWd1JI8IkU1y5/98+e5k8VEOknjoNGZzGl0TfBYgfUDdK8dmGtAtF
-         dcapXcNw9ITy9Spg2n/IoiqeE2HgSF+qavFYA/dJ7B9q/CJMCop5iLuMePAFnZX9nfof
-         DZ8Q==
+        bh=hHAQPVzBsVWn5SIpJgCp6vriYjWaGYRU2fNUBN0wdpw=;
+        b=o+S/wjsPy/FGxRO/OYk6oXHPiTIptpc5DQdLEJLZDMeyGJLtpaH9D4X3Oy69dI/DKh
+         W6SmuaZ2/PT/d/P7p40GeqWIgudOzlm5zoiV6AQ6Z1t8cq+maDbGzvNUM6L8nv7xZH2U
+         XSqX3QmG5TGZk/orIoOidfCyS3GrbtCCNTOBFUcv/bVctmUbL2t+CTHIPUu+Jx3B7bdc
+         EpV+95xKr2FS5xTWZkljH9d6ZtUOAWDCaU47nKNXWZO5scDai2sv1bkxUzcUZ6Z9/RYD
+         9ZGm+4GkWNZQKHsPtjkUf+9zvRhQEeUKKPRj5o25OogUkb1o+k+csM17ltTp56AAZ30J
+         Jfig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Kja24isdbSJM03sWOU5N8MqOAw88tKizKWVVTvrDIFc=;
-        b=XjxJZvm9v/o/C9oUlxE4naamxNtsN04bUTP1ojRtk+RflrJlMotgl226zpCOznM6Pv
-         9a/pKkgnbuONt3yI5H65FqgfTMVHeHIAiRYOQFHeR4B2ylm7W6sQD1//SFo8wISyqHlT
-         xyFNDRnmc7H+87dkMCFPGXDHgoT3HBrT5DSxZ7yLnCWAJR0HA4wFzmI/+u7X9AoCfhao
-         YsFtEWol42P+MeurtF9TU/sp6MnWr9mxllIGHHCaw3zzK0wIs3vDrlybinEGzcb5xNgE
-         qdzGMxrngVg1zAxzLcp3Ys6pIWISbB2haAFgGjgH4IY6+DlJRjPYS3upDp4QMpmysxB5
-         dP/Q==
-X-Gm-Message-State: AOAM5336SX9uRQae+RezSQMSaUtq6S+FoAGuDl3oikzbYtzdHDszoyOK
-        uHCJ7KfI4JYgFbP50dMa/uaGUTRmZQnH4xnpr7MCxw==
-X-Google-Smtp-Source: ABdhPJy8wuHnHRd7WhDwoOy5q9mSDiib2vWilJ/HOSveVa4OyPdn9x91QjAyH7cYwHrdBblz+kPFIaeH17fZIkjTVfo=
-X-Received: by 2002:a9f:35b3:: with SMTP id t48mr6657459uad.129.1620731008424;
- Tue, 11 May 2021 04:03:28 -0700 (PDT)
+        bh=hHAQPVzBsVWn5SIpJgCp6vriYjWaGYRU2fNUBN0wdpw=;
+        b=iqVhnxNTXzSTfWy1l3P6JpnoUgp+cUo45iZzypWUgGSkQ+JQTLy2J6eM7dktELFJgI
+         0i3j4z7ziNehxDJVqPqlz00lOtHWKPGF3IVvO6y1zhHZJ0ntc7b6Cxv9H0avEqYoQfCq
+         vXv/iWaDfuNTZvWU+qUDpUfbAj38/bCtJLkOFRrVQ+gnocuJ42DIaE1Ejm78t+5/ryyM
+         WMoHSrbV0fgRcLZs858GqkQjprzFunSDkTLhR3UjCM3Xt7gK2W9K5LinxQhXQqPq4Ubv
+         ZJdFgGWFEGqa0VVeStTQ7J2PiacVjgvshD72V+x7gwhsymPR2tF3B1grdhhP8R1sfbSA
+         dBVQ==
+X-Gm-Message-State: AOAM530+RVcs71ck+RQYCtBPPVjQfSW0zedjJC0kOS/ZXEYOadjMP2mp
+        L8XJA3TAwnxNaL9HXKatoM8eX1ZdV1QFJT3K5YRjnQ==
+X-Google-Smtp-Source: ABdhPJxYxWbFj2qO8+8U3f8oWGl4hGBN1E219YphlbQgPjhS4n0vUXrkjDTIzdBj9d6FR8xgDoHg7YisbPO/vyknD2Q=
+X-Received: by 2002:a1f:f2ce:: with SMTP id q197mr21391439vkh.15.1620731720168;
+ Tue, 11 May 2021 04:15:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210503092157.5689-1-hdegoede@redhat.com> <CAPDyKFq2+SgWE7XAMWAQsC4Ud5YNx0E-CCsMgeDzN3b_wvwL-g@mail.gmail.com>
- <7c72c70b-8e5c-77e1-70c2-bf93e66fb407@redhat.com>
-In-Reply-To: <7c72c70b-8e5c-77e1-70c2-bf93e66fb407@redhat.com>
+References: <20210510190400.105162-1-l.stach@pengutronix.de> <20210510190400.105162-3-l.stach@pengutronix.de>
+In-Reply-To: <20210510190400.105162-3-l.stach@pengutronix.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 11 May 2021 13:02:52 +0200
-Message-ID: <CAPDyKFoa2w8BvXjphxSfzSWC6UFbBhxdzp5LRbg34hy_GoqO-g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-acpi: Disable write protect detection on
- Toshiba Encore 2 WT8-B
-To:     Hans de Goede <hdegoede@redhat.com>
+Date:   Tue, 11 May 2021 13:14:44 +0200
+Message-ID: <CAPDyKFrAe-+CENhXkY2fGNw04g-zn+ebcAXSVGa9Td5pJcsujA@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] mmc: core: add support for disabling HS400 mode
+ via DT
+To:     Lucas Stach <l.stach@pengutronix.de>,
+        Chris Ruehl <chris.ruehl@gtsys.com.hk>
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>
+        Haibo Chen <haibo.chen@nxp.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 11 May 2021 at 12:58, Hans de Goede <hdegoede@redhat.com> wrote:
->
-> Hi,
->
-> On 5/11/21 12:56 PM, Ulf Hansson wrote:
-> > On Mon, 3 May 2021 at 11:22, Hans de Goede <hdegoede@redhat.com> wrote:
-> >>
-> >> On the Toshiba Encore 2 WT8-B the  microSD slot always reports the card
-> >> being write-protected even though microSD cards do not have a write-protect
-> >> switch at all.
-> >>
-> >> Add a new DMI_QUIRK_SD_NO_WRITE_PROTECT quirk entry to sdhci-acpi.c's
-> >> DMI quirk table for this.
-> >>
-> >> Signed-off-by: Hans de Goede <hdegoede@redhat.com>
-> >
-> > Applied for next, thanks!
-> >
-> > Should we tag this for stable?
->
-> Yes please.
++ Chris Ruehl
 
-Done, thanks!
+On Mon, 10 May 2021 at 21:04, Lucas Stach <l.stach@pengutronix.de> wrote:
+>
+> From: Lucas Stach <dev@lynxeye.de>
+>
+> On some boards the data strobe line isn't wired up, rendering HS400
+> support broken, even if both the controller and the eMMC claim to
+> support it. Allow to disable HS400 mode via DT.
+
+Before I review the series, I just wanted to highlight that quite
+recently we got a related series posted from Chris [1]. I made some
+comments, but he hasn't replied yet.
+
+In any case, if I understood it correctly, it looks like some
+controllers may support HS400 ES, but not HS200. Could that be the
+case here as well? Or is this a different problem?
 
 Kind regards
 Uffe
 
+[1]
+https://patchwork.kernel.org/project/linux-mmc/patch/20201208061839.21163-7-chris.ruehl@gtsys.com.hk/
+
 >
-> Thanks & Regards,
+> Signed-off-by: Lucas Stach <dev@lynxeye.de>
+> ---
+> v2:
+> - move to core
+> - actually disable all HS400 modes
+> ---
+>  drivers/mmc/core/host.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> Hans
+> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> index 9b89a91b6b47..0e066c5f5243 100644
+> --- a/drivers/mmc/core/host.c
+> +++ b/drivers/mmc/core/host.c
+> @@ -351,6 +351,9 @@ int mmc_of_parse(struct mmc_host *host)
+>                 host->caps2 |= MMC_CAP2_NO_SD;
+>         if (device_property_read_bool(dev, "no-mmc"))
+>                 host->caps2 |= MMC_CAP2_NO_MMC;
+> +       if (device_property_read_bool(dev, "no-mmc-hs400"))
+> +               host->caps2 &= ~(MMC_CAP2_HS400_1_8V | MMC_CAP2_HS400_1_2V |
+> +                                MMC_CAP2_HS400_ES);
 >
->
->
->
-> >> ---
-> >>  drivers/mmc/host/sdhci-acpi.c | 11 +++++++++++
-> >>  1 file changed, 11 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> >> index b6574e7fd26b..9e4358d7a0a6 100644
-> >> --- a/drivers/mmc/host/sdhci-acpi.c
-> >> +++ b/drivers/mmc/host/sdhci-acpi.c
-> >> @@ -820,6 +820,17 @@ static const struct dmi_system_id sdhci_acpi_quirks[] = {
-> >>                 },
-> >>                 .driver_data = (void *)DMI_QUIRK_SD_NO_WRITE_PROTECT,
-> >>         },
-> >> +       {
-> >> +               /*
-> >> +                * The Toshiba WT8-B's microSD slot always reports the card being
-> >> +                * write-protected.
-> >> +                */
-> >> +               .matches = {
-> >> +                       DMI_MATCH(DMI_SYS_VENDOR, "TOSHIBA"),
-> >> +                       DMI_MATCH(DMI_PRODUCT_NAME, "TOSHIBA ENCORE 2 WT8-B"),
-> >> +               },
-> >> +               .driver_data = (void *)DMI_QUIRK_SD_NO_WRITE_PROTECT,
-> >> +       },
-> >>         {} /* Terminating entry */
-> >>  };
-> >>
-> >> --
-> >> 2.31.1
-> >>
-> >
+>         /* Must be after "non-removable" check */
+>         if (device_property_read_u32(dev, "fixed-emmc-driver-type", &drv_type) == 0) {
+> --
+> 2.31.1
 >
