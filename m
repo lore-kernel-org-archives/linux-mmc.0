@@ -2,75 +2,280 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D8A3C433ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 09:33:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 603EDC433B4
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:14:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5AC9C6192A
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 09:33:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1A317610C9
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:14:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231272AbhEKJev (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 05:34:51 -0400
-Received: from szxga06-in.huawei.com ([45.249.212.32]:2625 "EHLO
-        szxga06-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231220AbhEKJev (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 05:34:51 -0400
-Received: from DGGEMS409-HUB.china.huawei.com (unknown [172.30.72.58])
-        by szxga06-in.huawei.com (SkyGuard) with ESMTP id 4FfXjw3krfzlZTt;
-        Tue, 11 May 2021 17:31:32 +0800 (CST)
-Received: from thunder-town.china.huawei.com (10.174.177.72) by
- DGGEMS409-HUB.china.huawei.com (10.3.19.209) with Microsoft SMTP Server id
- 14.3.498.0; Tue, 11 May 2021 17:33:35 +0800
-From:   Zhen Lei <thunder.leizhen@huawei.com>
-To:     Paul Cercueil <paul@crapouillou.net>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mips <linux-mips@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
-CC:     Zhen Lei <thunder.leizhen@huawei.com>
-Subject: [PATCH 1/1] mmc: jz4740: Remove redundant error printing in jz4740_mmc_probe()
-Date:   Tue, 11 May 2021 17:33:29 +0800
-Message-ID: <20210511093329.4670-1-thunder.leizhen@huawei.com>
-X-Mailer: git-send-email 2.26.0.windows.1
+        id S231360AbhEKKPO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 06:15:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47416 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231177AbhEKKPO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:15:14 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8175C061760
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:14:07 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id c3so27834413lfs.7
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:14:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=vvnmS1XNpYi/1Cs5zdQrt1BI+Y4XJuywPnU5ry3BGJw=;
+        b=Ga33qqoqQpQYHEJ9OCV813urk8/X4ETDke9bsUDntYHxsvNx4fxYT1DJJALFLwhtgm
+         TER2U3K8IO5ycBsuJsUyE77paYSwwMAsd/RWk68+G9oe02jJQMfjF6sI2mbuCA3APJBX
+         NcR5Pr8GMcPOXLNGY/X43rTfFnnV6MozNDuKukxVfSq8lXF0OkI7M/X7e+q7HrcV1Pyl
+         GQlIBoxb7NoHAp5uq/RBNlSmHLhuOJYc5J/xvX55eOVlvHUOiQSUxbB2vV/6d53XDrS3
+         VVpfOGPLY0DqJxW1sDJrtlf10LSinw2uKN0i+N+TTHF8BHhlDE/XGFF9/qkkcqT2C35d
+         h7qA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=vvnmS1XNpYi/1Cs5zdQrt1BI+Y4XJuywPnU5ry3BGJw=;
+        b=JYWuDCtBRcQpGjzcLq4TWPqI+35t8Xg71BabIaCc8AAALR/W67VWtbgY4JaKB5f1jU
+         KCN8hq0Tks0WZ8947SkgbghsWmWSZJC3wYtgNEpDYDo1Qb6xeTm5CTx1iATt0OlaTY8e
+         vwl+xefk9QODcgT69CrqHXPMT+coebGGBO96XYu3f0OO2kI5DGILZbrNY3sF+C6mWHCz
+         0tTyZxy6aymiZVGEYPIR2xxqlDC6Ma5mWc+SY+kO/6RdjFK61U5PEGY67wF+ebRQDer1
+         5rK4sV75ii0jqywvnSKvB5Uc66/Ovgt/U1vNIpJYM9XOs4SOreuz1+GlvfNzlj8WI0j5
+         hL5w==
+X-Gm-Message-State: AOAM532R91bf4TSsWDXLbkFXCusJmqjUBbCWLrMEf+XuTwbYe015gAkL
+        MX4Q5kSkZCcnj9XxhCtu8KLAZA0plylN1LrO
+X-Google-Smtp-Source: ABdhPJwl4rNi9VWZDhhm6VA5/PkL5tMu1aDKCgx4P2kmP6mUPTQN+h5SaBJOOuaZUqW5BYx3COPDUw==
+X-Received: by 2002:a05:6512:239b:: with SMTP id c27mr12988472lfv.284.1620728045362;
+        Tue, 11 May 2021 03:14:05 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-129-146.NA.cust.bahnhof.se. [155.4.129.146])
+        by smtp.gmail.com with ESMTPSA id y13sm2570660lfl.252.2021.05.11.03.14.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 11 May 2021 03:14:04 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Linus Walleij <linus.walleij@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Masami Hiramatsu <masami.hiramatsu@linaro.org>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: core: Add support for cache ctrl for SD cards
+Date:   Tue, 11 May 2021 12:13:59 +0200
+Message-Id: <20210511101359.83521-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.174.177.72]
-X-CFilter-Loop: Reflected
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When devm_ioremap_resource() fails, a clear enough error message will be
-printed by its subfunction __devm_ioremap_resource(). The error
-information contains the device name, failure cause, and possibly resource
-information.
+In SD spec v6.x the SD function extension registers for performance
+enhancements were introduced. As a part of this an optional internal cache
+on the SD card, can be used to improve performance.
 
-Therefore, remove the error printing here to simplify code and reduce the
-binary size.
+The let the SD card use the cache, the host needs to enable it and manage
+flushing of the cache, so let's add support for this.
 
-Reported-by: Hulk Robot <hulkci@huawei.com>
-Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
+Note that for an SD card supporting the cache it's mandatory for it, to
+also support the poweroff notification feature. According to the SD spec,
+if the cache has been enabled and a poweroff notification is sent to the
+card, that implicitly also means that the card should flush its internal
+cache. Therefore, dealing with cache flushing for REQ_OP_FLUSH block
+requests is sufficient.
+
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/jz4740_mmc.c | 1 -
- 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index b3c636edbb4610d..861ff6d9661a908 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -1013,7 +1013,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
- 	host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
- 	if (IS_ERR(host->base)) {
- 		ret = PTR_ERR(host->base);
--		dev_err(&pdev->dev, "Failed to ioremap base memory\n");
- 		goto err_free_host;
+Changes in v2:
+ - Converted to use the BIT() macro for clarification, as suggested by Linus.
+ - Reset SD_EXT_PERF_CACHE bit when cache enable fails, as suggested by Avri.
+
+Note that:
+ - I decided to keep the error path when failing to enable the cache. It's
+seems more robust, as it's unclear what happens with the SD card at failure.
+Additionally, if improvements are needed we can make it on top.
+
+---
+ drivers/mmc/core/mmc_ops.c |   1 +
+ drivers/mmc/core/mmc_ops.h |   1 +
+ drivers/mmc/core/sd.c      | 100 +++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h   |   1 +
+ 4 files changed, 103 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index af423acc4c88..3c58f6d0f482 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -456,6 +456,7 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
+ 		err = R1_STATUS(status) ? -EIO : 0;
+ 		break;
+ 	case MMC_BUSY_HPI:
++	case MMC_BUSY_EXTR_SINGLE:
+ 		break;
+ 	default:
+ 		err = -EINVAL;
+diff --git a/drivers/mmc/core/mmc_ops.h b/drivers/mmc/core/mmc_ops.h
+index c3c1d9c2577e..41ab4f573a31 100644
+--- a/drivers/mmc/core/mmc_ops.h
++++ b/drivers/mmc/core/mmc_ops.h
+@@ -14,6 +14,7 @@ enum mmc_busy_cmd {
+ 	MMC_BUSY_CMD6,
+ 	MMC_BUSY_ERASE,
+ 	MMC_BUSY_HPI,
++	MMC_BUSY_EXTR_SINGLE,
+ };
+ 
+ struct mmc_host;
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index bd40c682d264..781c1e24308c 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -67,6 +67,7 @@ static const unsigned int sd_au_size[] = {
+ 	})
+ 
+ #define SD_POWEROFF_NOTIFY_TIMEOUT_MS 2000
++#define SD_WRITE_EXTR_SINGLE_TIMEOUT_MS 1000
+ 
+ struct sd_busy_data {
+ 	struct mmc_card *card;
+@@ -1287,6 +1288,96 @@ static int sd_read_ext_regs(struct mmc_card *card)
+ 	return err;
+ }
+ 
++static bool sd_cache_enabled(struct mmc_host *host)
++{
++	return host->card->ext_perf.feature_enabled & SD_EXT_PERF_CACHE;
++}
++
++static int sd_flush_cache(struct mmc_host *host)
++{
++	struct mmc_card *card = host->card;
++	u8 *reg_buf, fno, page;
++	u16 offset;
++	int err;
++
++	if (!sd_cache_enabled(host))
++		return 0;
++
++	reg_buf = kzalloc(512, GFP_KERNEL);
++	if (!reg_buf)
++		return -ENOMEM;
++
++	/*
++	 * Set Flush Cache at bit 0 in the performance enhancement register at
++	 * 261 bytes offset.
++	 */
++	fno = card->ext_perf.fno;
++	page = card->ext_perf.page;
++	offset = card->ext_perf.offset + 261;
++
++	err = sd_write_ext_reg(card, fno, page, offset, BIT(0));
++	if (err) {
++		pr_warn("%s: error %d writing Cache Flush bit\n",
++			mmc_hostname(host), err);
++		goto out;
++	}
++
++	err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
++				MMC_BUSY_EXTR_SINGLE);
++	if (err)
++		goto out;
++
++	/*
++	 * Read the Flush Cache bit. The card shall reset it, to confirm that
++	 * it's has completed the flushing of the cache.
++	 */
++	err = sd_read_ext_reg(card, fno, page, offset, 1, reg_buf);
++	if (err) {
++		pr_warn("%s: error %d reading Cache Flush bit\n",
++			mmc_hostname(host), err);
++		goto out;
++	}
++
++	if (reg_buf[0] & BIT(0))
++		err = -ETIMEDOUT;
++out:
++	kfree(reg_buf);
++	return err;
++}
++
++static int sd_enable_cache(struct mmc_card *card)
++{
++	u8 *reg_buf;
++	int err;
++
++	card->ext_perf.feature_enabled &= ~SD_EXT_PERF_CACHE;
++
++	reg_buf = kzalloc(512, GFP_KERNEL);
++	if (!reg_buf)
++		return -ENOMEM;
++
++	/*
++	 * Set Cache Enable at bit 0 in the performance enhancement register at
++	 * 260 bytes offset.
++	 */
++	err = sd_write_ext_reg(card, card->ext_perf.fno, card->ext_perf.page,
++			       card->ext_perf.offset + 260, BIT(0));
++	if (err) {
++		pr_warn("%s: error %d writing Cache Enable bit\n",
++			mmc_hostname(card->host), err);
++		goto out;
++	}
++
++	err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
++				MMC_BUSY_EXTR_SINGLE);
++	if (!err)
++		card->ext_perf.feature_enabled |= SD_EXT_PERF_CACHE;
++
++out:
++	kfree(reg_buf);
++	return err;
++}
++
+ /*
+  * Handle the detection and initialisation of a card.
+  *
+@@ -1442,6 +1533,13 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
+ 			goto free_card;
  	}
  
++	/* Enable internal SD cache if supported. */
++	if (card->ext_perf.feature_support & SD_EXT_PERF_CACHE) {
++		err = sd_enable_cache(card);
++		if (err)
++			goto free_card;
++	}
++
+ 	if (host->cqe_ops && !host->cqe_enabled) {
+ 		err = host->cqe_ops->cqe_enable(host, card);
+ 		if (!err) {
+@@ -1694,6 +1792,8 @@ static const struct mmc_bus_ops mmc_sd_ops = {
+ 	.alive = mmc_sd_alive,
+ 	.shutdown = mmc_sd_suspend,
+ 	.hw_reset = mmc_sd_hw_reset,
++	.cache_enabled = sd_cache_enabled,
++	.flush_cache = sd_flush_cache,
+ };
+ 
+ /*
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 2867af0635f8..74e6c0624d27 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -196,6 +196,7 @@ struct sd_ext_reg {
+ 	u8			page;
+ 	u16			offset;
+ 	u8			rev;
++	u8			feature_enabled;
+ 	u8			feature_support;
+ /* Power Management Function. */
+ #define SD_EXT_POWER_OFF_NOTIFY	(1<<0)
 -- 
-2.26.0.106.g9fadedd
-
+2.25.1
 
