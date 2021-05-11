@@ -2,83 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3467CC43462
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89358C43462
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 001F86134F
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5E44961183
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 10:57:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231506AbhEKK6l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 06:58:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57280 "EHLO
+        id S231521AbhEKK6m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 06:58:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231511AbhEKK6g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:36 -0400
-Received: from mail-vs1-xe2c.google.com (mail-vs1-xe2c.google.com [IPv6:2607:f8b0:4864:20::e2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42466C0613ED
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:30 -0700 (PDT)
-Received: by mail-vs1-xe2c.google.com with SMTP id l4so3121153vsa.1
-        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:30 -0700 (PDT)
+        with ESMTP id S231442AbhEKK6k (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 06:58:40 -0400
+Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7DF4C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:33 -0700 (PDT)
+Received: by mail-vs1-xe2e.google.com with SMTP id 66so9958649vsk.9
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 03:57:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=7o/ikX3x+zDUi58t05jzcL4qo+BzUZcNfm/BTBIB96w=;
-        b=V/hTWex6YSV2t9lnBUj+fn2bFebn4jwj9DPXV3B6vvpNl2EFm31ncCrDVzotRumQAc
-         futXSOX0oSovFZpnj6YIPojyjmtJmZBWYLUMhkLPgpesEqfqbzdN2nWkPun+QLRPmB6T
-         mFL+c2ImRjnVKp+K/DA8vnL56NjXkDfvdPgjTZRQPN90uz8Bet8cIiR0Q7yF8zmK+G7M
-         IbK+nM7rn0Bx2cu8R7UM0y9yqfOr07NPL7qfua09fjWp0UYsn1U+khdScCPnti5UbT8H
-         7PkNb/oltTZD3RKOEAb3VVTSFxMSEVJ2gJlqjlWbOg6KczPCIhaOzbwWrtTzJVgEv8+x
-         hxuQ==
+        bh=Ey6AztPlStF+EHQEBxICZNmYDnr7gnn/OgJP3awQWRU=;
+        b=oBVycJADQl/R5cnvsrr+Iz1eB2LUXKXbtFN1CtmKUyBBleJ3AaSHFTqOMlRm61ep+d
+         t+fgqWs8hxLoMkEncV29fIoYT0KLNxabEEK6s8lR3JXoVjjdObh0M9dZYrMMrnuxIAP/
+         FoNtO6b4CONjz5w8Bt0ICUDEqATkvImXskCsDCC38MoyeljVXvKiP5GdDqebduvs1T39
+         e8DKD/GPyw+P+WlmPn+pHt2DqX9bdH0vL18slkSIwuChEaTsfEImeonmeJU3yDC6Jma2
+         B61O/leBSgC3tdeb4t1Pdm+LyLdo7Ca+UUzNfXVY0osjoB7dG8gqI4IN9/6f1Ng4t4xt
+         IwHg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=7o/ikX3x+zDUi58t05jzcL4qo+BzUZcNfm/BTBIB96w=;
-        b=KmdX/refzZ691UHwyTfr0zZFHhswSq3Orz+GGLCq5AoKJnSvyABqjmI39jMTfY2o/u
-         f5j01xwsyG9VdNYNGA16Y/gGbl8eEwHvR3XYuQig07dJh34HcT09D6xwF4VR7a+MlC3o
-         ZwlWP56UVBuYB3VLR2BaENHFKdJ3ZII49gdxwE2DGkjZoxPfoar4oqLoYGqHNmiSSFPg
-         osgyJ3lKJrLZBWbxu0ayglvnpM+AfGR4q+7qWW/Tb20Ye14WXoOyo5irx9J3yl4eiTVT
-         pPQ0VNH3IGA53AlqJ192NL+ESmJbC2OWgvBAQXRURYUjViIXOMtMij3DuAz8U2Y4hKS3
-         3ZdA==
-X-Gm-Message-State: AOAM530ogGwW82f1uFfsYTa0ilwHecfc+uJgrDhZSXWK+Ar4WxOS2q7e
-        IS+nDfpi/QUuIQ3CzQPlj5+o9fii+lNRAs7q7aqeMARyarLvyQ==
-X-Google-Smtp-Source: ABdhPJxRa+22rNW41DGohHhO1QfeEsKMuDsW1BAxDLntQzm+NjcIn4whYfjMX0lVdHeGw3dKIlwbB8P3aHC/Q3xmYtY=
-X-Received: by 2002:a67:2c03:: with SMTP id s3mr24305260vss.42.1620730649508;
- Tue, 11 May 2021 03:57:29 -0700 (PDT)
+        bh=Ey6AztPlStF+EHQEBxICZNmYDnr7gnn/OgJP3awQWRU=;
+        b=WPOm+OWlizM5k7WgdhbmIcC0Fc6Jqb8BItsJtGdr/Syf71k053y82PxvaRTm+zMcPe
+         8dcHGWjvfMrT3jQDNFpbOfHYjNPtXp5WjgwgHRpCq3N0GBXZibSmapm+QUjPBikBq6Qv
+         QCY5IPcT3zgnF2hwgSYyZJVRYGj6UPWIJruI9ELGkHtmc4Y4e0aODPGwUIoAPcrsZElh
+         YZUGvZfEMUfjri8rvwOF30X+x5ch0SuZSpWrF+L4BNwmld+8Fd54uK8ze/dNplTWgWtV
+         cl14gZg1FZXE2R44vQZgIWZ/MtnaSZsDcgsyo0wLnkysIOkpjTNLk7vGGAuDz7KfUQAh
+         lnZg==
+X-Gm-Message-State: AOAM532xGFTQ417HAcxjouMR3D/1UB5Z+xbwrK12BpXdVkoayp06bf3A
+        37KVK+OPgl1DGvgt733lWwXQviZ/vqftqps99BVzLA==
+X-Google-Smtp-Source: ABdhPJw3qzDFl/gzmZd3gitN57mXa5ygDpx3w85ykxyCQl8YfsZ3EEzsfVHZ1UeVnTiS8kESOiSjCdHDQF6QIXii014=
+X-Received: by 2002:a05:6102:505:: with SMTP id l5mr20495237vsa.55.1620730652897;
+ Tue, 11 May 2021 03:57:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210511093329.4670-1-thunder.leizhen@huawei.com>
-In-Reply-To: <20210511093329.4670-1-thunder.leizhen@huawei.com>
+References: <04b97315fed0f4f512356b68f9f5bb6ed7adc41f.1620648698.git.geert+renesas@glider.be>
+In-Reply-To: <04b97315fed0f4f512356b68f9f5bb6ed7adc41f.1620648698.git.geert+renesas@glider.be>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 11 May 2021 12:56:52 +0200
-Message-ID: <CAPDyKFp8rNurj9m45-223mzfihEuVesi3boY1E6VByCiHbbD6g@mail.gmail.com>
-Subject: Re: [PATCH 1/1] mmc: jz4740: Remove redundant error printing in jz4740_mmc_probe()
-To:     Zhen Lei <thunder.leizhen@huawei.com>
-Cc:     Paul Cercueil <paul@crapouillou.net>,
-        linux-mips <linux-mips@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>
+Date:   Tue, 11 May 2021 12:56:55 +0200
+Message-ID: <CAPDyKFqO6fkiwAmrGibpeZAyyeGbDHD03GVc34CPJhEWS2O9XQ@mail.gmail.com>
+Subject: Re: [PATCH v2] dt-bindings: mmc: renesas,mmcif: Convert to json-schema
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Rob Herring <robh@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 11 May 2021 at 11:33, Zhen Lei <thunder.leizhen@huawei.com> wrote:
+On Mon, 10 May 2021 at 14:13, Geert Uytterhoeven
+<geert+renesas@glider.be> wrote:
 >
-> When devm_ioremap_resource() fails, a clear enough error message will be
-> printed by its subfunction __devm_ioremap_resource(). The error
-> information contains the device name, failure cause, and possibly resource
-> information.
+> Convert the Renesas Multi Media Card Interface (MMCIF) Device Tree
+> binding documentation to json-schema.
 >
-> Therefore, remove the error printing here to simplify code and reduce the
-> binary size.
+> Document missing properties.
+> Update the example to match reality.
 >
-> Reported-by: Hulk Robot <hulkci@huawei.com>
-> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Reviewed-by: Rob Herring <robh@kernel.org>
 
 Applied for next, thanks!
 
@@ -87,22 +89,216 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/jz4740_mmc.c | 1 -
->  1 file changed, 1 deletion(-)
+> v2:
+>   - Drop unneeded oneOf,
+>   - Add Reviewed-by.
+> ---
+>  .../devicetree/bindings/mmc/renesas,mmcif.txt |  53 -------
+>  .../bindings/mmc/renesas,mmcif.yaml           | 135 ++++++++++++++++++
+>  2 files changed, 135 insertions(+), 53 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml
 >
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index b3c636edbb4610d..861ff6d9661a908 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -1013,7 +1013,6 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
->         host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
->         if (IS_ERR(host->base)) {
->                 ret = PTR_ERR(host->base);
-> -               dev_err(&pdev->dev, "Failed to ioremap base memory\n");
->                 goto err_free_host;
->         }
->
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt b/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> deleted file mode 100644
+> index 291532ac0446fc71..0000000000000000
+> --- a/Documentation/devicetree/bindings/mmc/renesas,mmcif.txt
+> +++ /dev/null
+> @@ -1,53 +0,0 @@
+> -* Renesas Multi Media Card Interface (MMCIF) Controller
+> -
+> -This file documents differences between the core properties in mmc.txt
+> -and the properties used by the MMCIF device.
+> -
+> -
+> -Required properties:
+> -
+> -- compatible: should be "renesas,mmcif-<soctype>", "renesas,sh-mmcif" as a
+> -  fallback. Examples with <soctype> are:
+> -       - "renesas,mmcif-r7s72100" for the MMCIF found in r7s72100 SoCs
+> -       - "renesas,mmcif-r8a73a4" for the MMCIF found in r8a73a4 SoCs
+> -       - "renesas,mmcif-r8a7740" for the MMCIF found in r8a7740 SoCs
+> -       - "renesas,mmcif-r8a7742" for the MMCIF found in r8a7742 SoCs
+> -       - "renesas,mmcif-r8a7743" for the MMCIF found in r8a7743 SoCs
+> -       - "renesas,mmcif-r8a7744" for the MMCIF found in r8a7744 SoCs
+> -       - "renesas,mmcif-r8a7745" for the MMCIF found in r8a7745 SoCs
+> -       - "renesas,mmcif-r8a7778" for the MMCIF found in r8a7778 SoCs
+> -       - "renesas,mmcif-r8a7790" for the MMCIF found in r8a7790 SoCs
+> -       - "renesas,mmcif-r8a7791" for the MMCIF found in r8a7791 SoCs
+> -       - "renesas,mmcif-r8a7793" for the MMCIF found in r8a7793 SoCs
+> -       - "renesas,mmcif-r8a7794" for the MMCIF found in r8a7794 SoCs
+> -       - "renesas,mmcif-sh73a0" for the MMCIF found in sh73a0 SoCs
+> -
+> -- interrupts: Some SoCs have only 1 shared interrupt, while others have either
+> -  2 or 3 individual interrupts (error, int, card detect). Below is the number
+> -  of interrupts for each SoC:
+> -    1: r8a73a4, r8a7742, r8a7743, r8a7744, r8a7745, r8a7778, r8a7790, r8a7791,
+> -       r8a7793, r8a7794
+> -    2: r8a7740, sh73a0
+> -    3: r7s72100
+> -
+> -- clocks: reference to the functional clock
+> -
+> -- dmas: reference to the DMA channels, one per channel name listed in the
+> -  dma-names property.
+> -- dma-names: must contain "tx" for the transmit DMA channel and "rx" for the
+> -  receive DMA channel.
+> -- max-frequency: Maximum operating clock frequency, driver uses default clock
+> -  frequency if it is not set.
+> -
+> -
+> -Example: R8A7790 (R-Car H2) MMCIF0
+> -
+> -       mmcif0: mmc@ee200000 {
+> -               compatible = "renesas,mmcif-r8a7790", "renesas,sh-mmcif";
+> -               reg = <0 0xee200000 0 0x80>;
+> -               interrupts = <0 169 IRQ_TYPE_LEVEL_HIGH>;
+> -               clocks = <&mstp3_clks R8A7790_CLK_MMCIF0>;
+> -               dmas = <&dmac0 0xd1>, <&dmac0 0xd2>;
+> -               dma-names = "tx", "rx";
+> -               max-frequency = <97500000>;
+> -       };
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml b/Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml
+> new file mode 100644
+> index 0000000000000000..c36ba561c3875ad3
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,mmcif.yaml
+> @@ -0,0 +1,135 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/renesas,mmcif.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Renesas Multi Media Card Interface (MMCIF) Controller
+> +
+> +maintainers:
+> +  - Wolfram Sang <wsa+renesas@sang-engineering.com>
+> +
+> +allOf:
+> +  - $ref: "mmc-controller.yaml"
+> +
+> +properties:
+> +  compatible:
+> +    items:
+> +      - enum:
+> +          - renesas,mmcif-r7s72100 # RZ/A1H
+> +          - renesas,mmcif-r8a73a4  # R-Mobile APE6
+> +          - renesas,mmcif-r8a7740  # R-Mobile A1
+> +          - renesas,mmcif-r8a7742  # RZ/G1H
+> +          - renesas,mmcif-r8a7743  # RZ/G1M
+> +          - renesas,mmcif-r8a7744  # RZ/G1N
+> +          - renesas,mmcif-r8a7745  # RZ/G1E
+> +          - renesas,mmcif-r8a7778  # R-Car M1A
+> +          - renesas,mmcif-r8a7790  # R-Car H2
+> +          - renesas,mmcif-r8a7791  # R-Car M2-W
+> +          - renesas,mmcif-r8a7793  # R-Car M2-N
+> +          - renesas,mmcif-r8a7794  # R-Car E2
+> +          - renesas,mmcif-sh73a0   # SH-Mobile AG5
+> +      - const: renesas,sh-mmcif
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts: true
+> +
+> +  clocks:
+> +    maxItems: 1
+> +
+> +  power-domains:
+> +    maxItems: 1
+> +
+> +  resets:
+> +    maxItems: 1
+> +
+> +  dmas:
+> +    minItems: 2
+> +    maxItems: 4
+> +    description:
+> +      Must contain a list of pairs of references to DMA specifiers, one for
+> +      transmission, and one for reception.
+> +
+> +  dma-names:
+> +    minItems: 2
+> +    maxItems: 4
+> +    items:
+> +      enum:
+> +        - tx
+> +        - rx
+> +
+> +  max-frequency: true
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - power-domains
+> +
+> +if:
+> +  properties:
+> +    compatible:
+> +      contains:
+> +        const: renesas,mmcif-r7s72100
+> +then:
+> +  properties:
+> +    interrupts:
+> +      items:
+> +        - description: Error interrupt
+> +        - description: Normal operation interrupt
+> +        - description: Card detection interrupt
+> +else:
+> +  if:
+> +    properties:
+> +      compatible:
+> +        contains:
+> +          enum:
+> +            - renesas,mmcif-r8a7740
+> +            - renesas,mmcif-sh73a0
+> +  then:
+> +    properties:
+> +      interrupts:
+> +        items:
+> +          - description: Error interrupt
+> +          - description: Normal operation interrupt
+> +  else:
+> +    if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - renesas,mmcif-r8a73a4
+> +              - renesas,mmcif-r8a7778
+> +    then:
+> +      properties:
+> +        interrupts:
+> +          maxItems: 1
+> +    else:
+> +      properties:
+> +        interrupts:
+> +          maxItems: 1
+> +      required:
+> +        - resets
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/clock/r8a7790-cpg-mssr.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    #include <dt-bindings/power/r8a7790-sysc.h>
+> +
+> +    mmcif0: mmc@ee200000 {
+> +            compatible = "renesas,mmcif-r8a7790", "renesas,sh-mmcif";
+> +            reg = <0xee200000 0x80>;
+> +            interrupts = <GIC_SPI 169 IRQ_TYPE_LEVEL_HIGH>;
+> +            clocks = <&cpg CPG_MOD 315>;
+> +            power-domains = <&sysc R8A7790_PD_ALWAYS_ON>;
+> +            resets = <&cpg 315>;
+> +            dmas = <&dmac0 0xd1>, <&dmac0 0xd2>, <&dmac1 0xd1>, <&dmac1 0xd2>;
+> +            dma-names = "tx", "rx", "tx", "rx";
+> +            max-frequency = <97500000>;
+> +    };
 > --
-> 2.26.0.106.g9fadedd
->
+> 2.25.1
 >
