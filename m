@@ -2,105 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 801FCC433ED
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 06:15:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D82A3C433B4
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 08:19:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5F09B6192C
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 06:15:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9CD3B61001
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 May 2021 08:19:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230293AbhEKGQ3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 May 2021 02:16:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49836 "EHLO
+        id S229995AbhEKIUF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 May 2021 04:20:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49374 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230196AbhEKGQ2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 02:16:28 -0400
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE18AC061574;
-        Mon, 10 May 2021 23:15:22 -0700 (PDT)
-Received: by mail-pl1-x630.google.com with SMTP id b21so10350745plz.0;
-        Mon, 10 May 2021 23:15:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=6A6E9MTW1MHNUC2nN6QJOAjOuzbJNdMNuOZ2OzhYPWA=;
-        b=QMu3bVdiofnGIcrTUh0VWhIiuTEXXro/9HwKc3kFM0rELSAIAwygfORFTZCXud0Li2
-         2J24bhSxcqeZ+YpPzVlRaZPB/V3fUICc+Ie0lumMcNXOkiu3pay1peeKK6HJ3ZfbGYRQ
-         QBAavlfOh8HrgDMTwhc92sLzudl2uSvRWXo3whVzyf7a1Ma7VHpCdB4b7fbw6r5R7/3G
-         ViUpwbgtQSBYY+jdfC5SJoSugEVaVk5tF8i7CjQKPKmFLvQ4cV4Kh9Kd5sdLyp7lQCni
-         WMUvLoAPcKYalE/SyaARazRc9f9WlWWRGh9k4ccPnW/0w8ecYqdy3O2p+/jJcwKiXKNU
-         x+Gw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=6A6E9MTW1MHNUC2nN6QJOAjOuzbJNdMNuOZ2OzhYPWA=;
-        b=V4QNW9PePRlvVc410PEQRo1OYpxvBVRWxKtYF/PVUyGr+KHdjgs5YtnQVq0dPkFoUG
-         DiSB28H25hYPR86CQEXbUjvXa4pTSphS+MYzz96wnyEQGFJqoseRDjeVpjE0aOKPVKBi
-         SRtK5qLeOEO9zx8zdGWhw3nzFiuFyHB5CxbI0y5OOabocxAh50MYFV+lAlumIg2eWuVN
-         7BoNkBmiIrx963205tWkwfoevwVyFeVlzDVEsstgjmAWIbvKqyXI04roS+ld6xu6CbUZ
-         78k3gaCTpM3DyqazOJhs9ltLl76kNyn8djMHlck+PrZ4gxhBjtyRR3qqwhGYXW0XYRci
-         tAWA==
-X-Gm-Message-State: AOAM531KSzPNT1fWEzpzT9Wpu+JFUEF+Aq4uUOURP8mWuFwnRyL4IU9k
-        hlv53oFVCyAs/OoA6rwWcj8=
-X-Google-Smtp-Source: ABdhPJzGW+N/VJcxl1EDqEBKM5imkz4+bs46geaqKQO5odkYN3jPyvW5zM2Oqp60eBuD+Nyjy/yzKQ==
-X-Received: by 2002:a17:902:dccc:b029:ed:32ed:e7d0 with SMTP id t12-20020a170902dcccb02900ed32ede7d0mr28204569pll.79.1620713721798;
-        Mon, 10 May 2021 23:15:21 -0700 (PDT)
-Received: from gli-arch.genesyslogic.com.tw (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id j2sm1140795pji.34.2021.05.10.23.15.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 May 2021 23:15:21 -0700 (PDT)
-From:   Ben Chuang <benchuanggli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        renius.chen@genesyslogic.com.tw, ben.chuang@genesyslogic.com.tw,
-        seanhy.chen@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
-        totti.yan@genesyslogic.com.tw, Ben Chuang <benchuanggli@gmail.com>
-Subject: [PATCH] mmc: sdhci-pci-gli: Fine tune GL9763E L1 entry delay
-Date:   Tue, 11 May 2021 14:18:35 +0800
-Message-Id: <20210511061835.5559-1-benchuanggli@gmail.com>
-X-Mailer: git-send-email 2.31.1
+        with ESMTP id S230157AbhEKIUF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 May 2021 04:20:05 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F639C061574
+        for <linux-mmc@vger.kernel.org>; Tue, 11 May 2021 01:18:59 -0700 (PDT)
+Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[IPv6:::1])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <l.stach@pengutronix.de>)
+        id 1lgNbR-0002sT-6E; Tue, 11 May 2021 10:18:53 +0200
+Message-ID: <8b7ab5139fea41caf15b398ec975ed71229dfd5d.camel@pengutronix.de>
+Subject: Re: [PATCH v2 2/3] mmc: sdhci-esdhc-imx: advertise HS400 mode
+ through MMC caps
+From:   Lucas Stach <l.stach@pengutronix.de>
+To:     Bough Chen <haibo.chen@nxp.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Rob Herring <robh+dt@kernel.org>, dl-linux-imx <linux-imx@nxp.com>,
+        "kernel@pengutronix.de" <kernel@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+Date:   Tue, 11 May 2021 10:18:47 +0200
+In-Reply-To: <VI1PR04MB5294AF754C68D41C844083A990539@VI1PR04MB5294.eurprd04.prod.outlook.com>
+References: <20210510190400.105162-1-l.stach@pengutronix.de>
+         <20210510190400.105162-2-l.stach@pengutronix.de>
+         <VI1PR04MB5294AF754C68D41C844083A990539@VI1PR04MB5294.eurprd04.prod.outlook.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.40.1 (3.40.1-1.fc34) 
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
+X-SA-Exim-Mail-From: l.stach@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fine tune the value to 21us in order to improve read/write performance.
+Am Dienstag, dem 11.05.2021 um 03:00 +0000 schrieb Bough Chen:
+> > -----Original Message-----
+> > From: Lucas Stach [mailto:l.stach@pengutronix.de]
+> > Sent: 2021年5月11日 3:04
+> > To: Ulf Hansson <ulf.hansson@linaro.org>; Adrian Hunter
+> > <adrian.hunter@intel.com>; Bough Chen <haibo.chen@nxp.com>
+> > Cc: Rob Herring <robh+dt@kernel.org>; dl-linux-imx <linux-imx@nxp.com>;
+> > kernel@pengutronix.de; linux-mmc@vger.kernel.org;
+> > devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org
+> > Subject: [PATCH v2 2/3] mmc: sdhci-esdhc-imx: advertise HS400 mode through
+> > MMC caps
+> > 
+> > Instead of having an indirection through the SDHCI layer and emulating a
+> > capability bit, that isn't there in hardware, do the same same thing as
+> with
+> > HS400_ES and advertise the support for HS400 directly through the MMC
+> caps.
+> > 
+> > Signed-off-by: Lucas Stach <l.stach@pengutronix.de>
+> > ---
+> >  drivers/mmc/host/sdhci-esdhc-imx.c | 5 +----
+> >  1 file changed, 1 insertion(+), 4 deletions(-)
+> > 
+> > diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > index a20459744d21..65a52586db36 100644
+> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> > @@ -427,9 +427,6 @@ static u32 esdhc_readl_le(struct sdhci_host *host, int
+> > reg)
+> >  					|
+> FIELD_PREP(SDHCI_RETUNING_MODE_MASK,
+> >  						     SDHCI_TUNING_MODE_3);
+> > 
+> > -			if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+> > -				val |= SDHCI_SUPPORT_HS400;
+> > -
+> >  			/*
+> >  			 * Do not advertise faster UHS modes if there are no
+> >  			 * pinctrl states for 100MHz/200MHz.
+> > @@ -1603,7 +1600,7 @@ static int sdhci_esdhc_imx_probe(struct
+> > platform_device *pdev)
+> >  		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+> > 
+> >  	if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+> > -		host->quirks2 |= SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400;
+> > +		host->mmc->caps2 |= MMC_CAP2_HS400;
+> 
+> Hi Lucas,
+> 
+> I think patch1 and patch 2 are enough to cover your requirement.
+> For this patch, I think it's unnecessary, sdhci-esdhc-imx.c need to reuse
+> sdhci.c as much as possible.
+> In sdhci.c, already contain the following logic. 
+> 
+>          if (host->quirks2 & SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400 &&
+>              (host->caps1 & SDHCI_SUPPORT_HS400))
+>                  mmc->caps2 |= MMC_CAP2_HS400;
+> 
+> The reason why we directly use host->mmc->caps2 for HS400ES mode is that
+> sdhci.c do not contain the similar logic.
 
-Signed-off-by: Ben Chuang <benchuanggli@gmail.com>
----
- drivers/mmc/host/sdhci-pci-gli.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+No, it's not enough. We call mmc_of_parse(), which clears the HS400
+flags, before sdhci_setup_host() is called, which will then add the
+HS400 flags again. So either I still need to evaluate the DT property
+in the esdhc driver to make it return the right emulated SDHCI caps bit
+for the HS400 case, or do it like in this patch.
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 592d79082f58..73e01c3480a3 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -94,7 +94,7 @@
- 
- #define PCIE_GLI_9763E_CFG2      0x8A4
- #define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
--#define   GLI_9763E_CFG2_L1DLY_MID 0x50
-+#define   GLI_9763E_CFG2_L1DLY_MID 0x54
- 
- #define PCIE_GLI_9763E_MMC_CTRL  0x960
- #define   GLI_9763E_HS400_SLOW     BIT(3)
-@@ -842,7 +842,7 @@ static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
- 
- 	pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG2, &value);
- 	value &= ~GLI_9763E_CFG2_L1DLY;
--	/* set ASPM L1 entry delay to 20us */
-+	/* set ASPM L1 entry delay to 21us */
- 	value |= FIELD_PREP(GLI_9763E_CFG2_L1DLY, GLI_9763E_CFG2_L1DLY_MID);
- 	pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG2, value);
- 
--- 
-2.31.1
+While the way it is done here is a bit of a layering violation between
+SDHCI and MMC, it still feels like the cleaner and more straight
+forward solution.
+
+Regards,
+Lucas
 
