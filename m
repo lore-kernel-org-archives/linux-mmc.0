@@ -2,197 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4CEAC43460
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 00:45:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ECFC1C433B4
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 02:37:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 92FC2613CA
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 00:45:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B9AAA613FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 02:37:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234623AbhEMAq7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 May 2021 20:46:59 -0400
-Received: from new3-smtp.messagingengine.com ([66.111.4.229]:54905 "EHLO
-        new3-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234800AbhEMAnu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 May 2021 20:43:50 -0400
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailnew.nyi.internal (Postfix) with ESMTP id B8F90580A07;
-        Wed, 12 May 2021 20:42:35 -0400 (EDT)
-Received: from imap2 ([10.202.2.52])
-  by compute3.internal (MEProxy); Wed, 12 May 2021 20:42:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
-        mime-version:message-id:in-reply-to:references:date:from:to:cc
-        :subject:content-type; s=fm2; bh=U2X5Fpp7WurHFYDNULPr4jvqE4TsMUm
-        xiyWg3py93w8=; b=XVZ5zUun+J8kNtm16npj5cy/yOsiK0aYW0vQkn+vQOuAlpB
-        Jw3w+CkO+EYR8fcIYtbbSRS3P411bMTRY6IErCor9kjdOje8RlFdAEYd2BnvVA+v
-        a3OAGdDE/J0HJbXUwolQ0D/mrhds69RpGKkqwknfEPKzrQFlWvBIjco5u1gL3lAV
-        W0eygYx/EtCkioJ1xcvppYI39um3N4YtK1WzFGOkqlXpGwebUF6I7DvpfOwe9z25
-        nhr1LmR3ozI3sBcBJ01DIn3M2GD60RFxRQE7o/jW3neDdv26j1EM9SLZMIK06+n2
-        9LlqhouyBzu3reDVOBhCUosJzEp78isDmTj9Qfg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=U2X5Fp
-        p7WurHFYDNULPr4jvqE4TsMUmxiyWg3py93w8=; b=kI6Th+LNaqueEK780/gRVm
-        L4Df3QC0tHEQM8ktCkfU6kQ74TUaGB2R6yE1l3z88iBwadwWkqWUfJxDwDtEgX2U
-        abY28k1Yul0ZLGwJ0bOnt/ixmIIsh8h0iW44CObsiC5OshtCCpJvcFf5/QOWfMBw
-        vrxC5P+L0Kwai4fuN0QoGPhmsrQFRKNuLsEbbR6CYOgFxY9KQsoMXtCyzmmjA0OJ
-        yc0q51FDmeneqp2mV/IScDWBmljK7N2+AUO2/hFtU94nVnL1qPYo0KBn5oMMoILT
-        Gq9ipWlu1cIfZac7FQStQ6R+RhEGqnn/YxAcgr0YWTS/XRgStg9w9boQwc8KSk1g
-        ==
-X-ME-Sender: <xms:-nWcYJnsNIx34myGzV_hJAvbc4t_5W7nnS8_B_i0mTQxUuF_JIb4NA>
-    <xme:-nWcYE1PHFLkDEAk3JvXiXdcVI56hUPN5_SBM80ojRgNJN9fuRqyokXPiz9LC-Atv
-    GP2-Yn1AZNNKAxelQ>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdehfedgfeefucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
-    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
-    grthhtvghrnhepudehtddtleektedvfeeitdeljeekveelkeegvdfhtdejhefgfedtfedv
-    jeejledtnecuffhomhgrihhnpehkvghrnhgvlhdrohhrghenucevlhhushhtvghrufhiii
-    gvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrnhgurhgvfiesrghjrdhiugdrrghu
-X-ME-Proxy: <xmx:-nWcYPpJqT2JssuVBrRMYEQbDzrEsIOTv6oKlGWqA8smhzKzFOQlYQ>
-    <xmx:-nWcYJmH5pwea_mGu6F6FOtoFZfEw-C-4bYH-RR6E7XlgMEoPGVO0A>
-    <xmx:-nWcYH32SteuOJUYYZTSkQdJbfYTnpjtngb440WEGVG0muJ1CEhSLQ>
-    <xmx:-3WcYO1jLHcooSYkIm7L3VluPPwGPznABBOBxi1wK6U9ASzk7D7cBw>
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 3581CA00079; Wed, 12 May 2021 20:42:34 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.5.0-alpha0-448-gae190416c7-fm-20210505.004-gae190416
-Mime-Version: 1.0
-Message-Id: <f063cb34-9a42-4373-a333-cad1d8a9c37b@www.fastmail.com>
-In-Reply-To: <20210510060338.GB6883@aspeedtech.com>
-References: <20210506100312.1638-1-steven_lee@aspeedtech.com>
- <20210506100312.1638-6-steven_lee@aspeedtech.com>
- <20210506102458.GA20777@pengutronix.de>
- <19a81e25-dfa1-4ad3-9628-19f43f4230d2@www.fastmail.com>
- <20210507062416.GD23749@aspeedtech.com>
- <2a339218-19d7-4eea-a734-8053dd553dbb@www.fastmail.com>
- <20210510060338.GB6883@aspeedtech.com>
-Date:   Thu, 13 May 2021 10:12:12 +0930
-From:   "Andrew Jeffery" <andrew@aj.id.au>
-To:     "Steven Lee" <steven_lee@aspeedtech.com>
-Cc:     "Philipp Zabel" <p.zabel@pengutronix.de>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Rob Herring" <robh+dt@kernel.org>,
-        "Joel Stanley" <joel@jms.id.au>,
-        "Adrian Hunter" <adrian.hunter@intel.com>,
-        "Ryan Chen" <ryanchen.aspeed@gmail.com>,
-        "moderated list:ASPEED SD/MMC DRIVER" <linux-aspeed@lists.ozlabs.org>,
-        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list" <linux-kernel@vger.kernel.org>,
-        "Hongwei Zhang" <Hongweiz@ami.com>,
-        "Ryan Chen" <ryan_chen@aspeedtech.com>,
-        "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>
-Subject: =?UTF-8?Q?Re:_[PATCH_v3_5/5]_mmc:_sdhci-of-aspeed:_Assert/Deassert_reset?=
- =?UTF-8?Q?_signal_before_probing_eMMC?=
-Content-Type: text/plain
+        id S230326AbhEMCjB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 May 2021 22:39:01 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:22978 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230385AbhEMCjA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 May 2021 22:39:00 -0400
+Received: from epcas1p4.samsung.com (unknown [182.195.41.48])
+        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20210513023750epoutp04ab32f82d8d852dd4bedc502526ef188d~_f9VcUJ2e0168201682epoutp04k
+        for <linux-mmc@vger.kernel.org>; Thu, 13 May 2021 02:37:50 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20210513023750epoutp04ab32f82d8d852dd4bedc502526ef188d~_f9VcUJ2e0168201682epoutp04k
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1620873470;
+        bh=YwYqzf4migoNc3CLffZtdmBl6XUsE0z40O9rpgKoT8k=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=Gpbk0fa9WRLiKzoO5e4MR6Cm1o7v0aou9ClfQePPV6YAUAhq4iEwRF64Nb0cZVjz0
+         ybGFUkPkgCGMYJU6cvkv+yDW0nu+uiIvWvty4gYU2JupwGpfLsqdFQyM3fZNqfwTIa
+         SRXSuNilDBH4n0mYZ3lE/9az3kOjRfM85H5Q91Lg=
+Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
+        epcas1p4.samsung.com (KnoxPortal) with ESMTP id
+        20210513023749epcas1p46be1e76873d0804f5ddac25b97d08461~_f9UV-1kl1954819548epcas1p4H;
+        Thu, 13 May 2021 02:37:49 +0000 (GMT)
+Received: from epsmges1p4.samsung.com (unknown [182.195.40.163]) by
+        epsnrtp3.localdomain (Postfix) with ESMTP id 4FgbRb4z2fz4x9Q0; Thu, 13 May
+        2021 02:37:47 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+        epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
+        15.E5.10258.BF09C906; Thu, 13 May 2021 11:37:47 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20210513023747epcas1p23502f390781d1a5a8f6512982af1fd65~_f9Sbcz9s2434224342epcas1p2H;
+        Thu, 13 May 2021 02:37:47 +0000 (GMT)
+Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20210513023747epsmtrp151e4711383e4cc6bee433bdb75095065~_f9San5XD0351503515epsmtrp1t;
+        Thu, 13 May 2021 02:37:47 +0000 (GMT)
+X-AuditID: b6c32a38-42fff70000002812-3a-609c90fb4ba8
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        53.5E.08163.AF09C906; Thu, 13 May 2021 11:37:46 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.253.100.232]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20210513023746epsmtip27f714062765237453d4d854d326f237b~_f9SK5uV02662926629epsmtip2t;
+        Thu, 13 May 2021 02:37:46 +0000 (GMT)
+From:   Chanwoo Lee <cw9316.lee@samsung.com>
+To:     adrian.hunter@intel.com, riteshh@codeaurora.org,
+        asutoshd@codeaurora.org, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     grant.jung@samsung.com, jt77.jang@samsung.com,
+        dh0421.hwang@samsung.com, sh043.lee@samsung.com,
+        cw9316.lee@samsung.com
+Subject: [PATCH] Unnecessary code change in spin_lock section.
+Date:   Thu, 13 May 2021 11:33:07 +0900
+Message-Id: <20210513023307.12435-1-cw9316.lee@samsung.com>
+X-Mailer: git-send-email 2.29.0
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprKJsWRmVeSWpSXmKPExsWy7bCmvu7vCXMSDG59UbY4+WQNm8XethPs
+        FjNOtbFa7Lt2kt3i19/17BY7np9ht7i8aw6bxZH//YwW+19fYLVo+rOPxeL42nAHbo/Lfb1M
+        Hov3vGTyuHNtD5tH35ZVjB6fN8kFsEbl2GSkJqakFimk5iXnp2TmpdsqeQfHO8ebmhkY6hpa
+        WpgrKeQl5qbaKrn4BOi6ZeYAXaakUJaYUwoUCkgsLlbSt7Mpyi8tSVXIyC8usVVKLUjJKTA0
+        KNArTswtLs1L10vOz7UyNDAwMgWqTMjJ+NV+jrngGFvFgmvr2RoYD7N2MXJySAiYSGxc1MPS
+        xcjFISSwg1Fi39z1zBDOJ0aJ9s1T2SCcz4wSH9acZ4Rp2ftrGlRiF6PE/LWnwRJCAl8YJd5O
+        0Oti5OBgE9CSuH3MG6RGRGAho8TynhlsIDXMAjUS8xZ8ZwaxhQXsJG4f3s4EYrMIqEosavsM
+        NodXwFpi+84l7BDL5CX+3O9hhogLSpyc+YQFYo68RPPW2WCnSgh8ZJdYsekpM0SDi8Sm1ceY
+        IGxhiVfHt0ANkpJ42d/GDtHQzChxavY5KKeFUeL1lRtQVcYSnz6DnMEBtEJTYv0ufYiwosTO
+        33MZITbzSbz72sMKUiIhwCvR0SYEUaIiMafrHBvMro83HkMD2ENiRtcFVkgAxUrs7F7KMoFR
+        fhaSf2Yh+WcWwuIFjMyrGMVSC4pz01OLDQtMkKN1EyM4fWpZ7GCc+/aD3iFGJg7GQ4wSHMxK
+        IrxiSbMThHhTEiurUovy44tKc1KLDzGaAkN4IrOUaHI+MIHnlcQbmhoZGxtbmJiZm5kaK4nz
+        pjtXJwgJpCeWpGanphakFsH0MXFwSjUwZTBuPFp36X76ktqle158f8F4ODPd/sSlsrzwd4an
+        V/r7NJ2S8Hgu53OSt6Ao9cyO39Wvp4gc2S0RbD7j7czY5O+M1ez/zt37dWBGa9fC6x9T5j9d
+        L62dOX0q70WmWTbnapY7HQy9oLDLbv+MmrmbUrK+zLh/t+ibmLrUxSVOzYx3e0JUV91/F+9T
+        ttQ+LS14dX+hXt6GSJ9tXDYnVZxu/2JWPaD7YrNZaOTbgvvuIam3C19KN+pNFK+W9F0mmCKx
+        a+UnKe9ioxVFXz1P/+814ppuw7BWN7z5fHfPN12mDxoGQrd9/nYxXHx1eNOrxVMyWqV0goUX
+        czZcvvZqVYx4leGkXXKzl/58P/8p8wu3HUosxRmJhlrMRcWJABUXuqcoBAAA
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrELMWRmVeSWpSXmKPExsWy7bCSvO6vCXMSDCbMM7M4+WQNm8XethPs
+        FjNOtbFa7Lt2kt3i19/17BY7np9ht7i8aw6bxZH//YwW+19fYLVo+rOPxeL42nAHbo/Lfb1M
+        Hov3vGTyuHNtD5tH35ZVjB6fN8kFsEZx2aSk5mSWpRbp2yVwZfxqP8dccIytYsG19WwNjIdZ
+        uxg5OSQETCT2/prG1sXIxSEksINRYs/PKYwQCSmJ3fvPAyU4gGxhicOHiyFqPjFKrH66lhEk
+        ziagJXH7mDdIXERgOaPEr+07mUEcZoEmRomjBzrANggL2EncPrydCcRmEVCVWNT2GWwBr4C1
+        xPadS9ghlslL/LnfwwwRF5Q4OfMJC4jNDBRv3jqbeQIj3ywkqVlIUgsYmVYxSqYWFOem5xYb
+        FhjlpZbrFSfmFpfmpesl5+duYgQHs5bWDsY9qz7oHWJk4mA8xCjBwawkwiuWNDtBiDclsbIq
+        tSg/vqg0J7X4EKM0B4uSOO+FrpPxQgLpiSWp2ampBalFMFkmDk6pBqbzBzvurb2Z4OPALvL8
+        S9uMO7fWM7maZRwTWphzL6Q+s/DFhl3XF7jtdjFIdMxW9j7/8Ugi17KHz64wRnH+vnf18oGJ
+        e61Fnhae1TQse1Z2cEnK8/W7FeLZ63M/zJl797NAwXfljZw+PvkOvRn/Nu5UFpWp/Ot5XLrz
+        zIJtTA8nyjL3nzf/4cGpeXCD9JMNRgfXCO9u5JzpYaJ+Z721/feH1+sSnPgd6rZd6Go5+/gu
+        l03Cn++yui1dcYdmSpUmSn/Mq3dXKNqlOHFq6bx21l8eO3md93Eb6P6uv/Lyq43zZ7bIfUq6
+        fNXJ7Ouitv7nkq03PJF7+uOVa3xG20Q6LTTuWBU673193dGyf95hJz8lluKMREMt5qLiRABp
+        f4lV1QIAAA==
+X-CMS-MailID: 20210513023747epcas1p23502f390781d1a5a8f6512982af1fd65
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20210513023747epcas1p23502f390781d1a5a8f6512982af1fd65
+References: <CGME20210513023747epcas1p23502f390781d1a5a8f6512982af1fd65@epcas1p2.samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: ChanWoo Lee <cw9316.lee@samsung.com>
 
+This is the spin_lock section for cq_host, and mmc setting is unnecessary.
 
-On Mon, 10 May 2021, at 15:33, Steven Lee wrote:
-> The 05/07/2021 15:36, Andrew Jeffery wrote:
-> > 
-> > 
-> > On Fri, 7 May 2021, at 15:54, Steven Lee wrote:
-> > > The 05/07/2021 09:32, Andrew Jeffery wrote:
-> > > > 
-> > > > 
-> > > > On Thu, 6 May 2021, at 19:54, Philipp Zabel wrote:
-> > > > > Hi Steven,
-> > > > > 
-> > > > > On Thu, May 06, 2021 at 06:03:12PM +0800, Steven Lee wrote:
-> > > > > > +	if (info) {
-> > > > > > +		if (info->flag & PROBE_AFTER_ASSET_DEASSERT) {
-> > > > > > +			sdc->rst = devm_reset_control_get(&pdev->dev, NULL);
-> > > > > 
-> > > > > Please use devm_reset_control_get_exclusive() or
-> > > > > devm_reset_control_get_optional_exclusive().
-> > > > > 
-> > > > > > +			if (!IS_ERR(sdc->rst)) {
-> > > > > 
-> > > > > Please just return errors here instead of ignoring them.
-> > > > > The reset_control_get_optional variants return NULL in case the
-> > > > > device node doesn't contain a resets phandle, in case you really
-> > > > > consider this reset to be optional even though the flag is set?
-> > > > 
-> > > > It feels like we should get rid of the flag and leave it to the 
-> > > > devicetree.
-> > > > 
-> > > 
-> > > Do you mean adding a flag, for instance, "mmc-reset" in the
-> > > device tree and call of_property_read_bool() in aspeed_sdc_probe()?
-> > > 
-> > > > I'm still kind of surprised it's not something we want to do for the 
-> > > > 2400 and 2500 as well.
-> > > > 
-> > > 
-> > > Per discussion with the chip designer, AST2400 and AST2500 doesn't need
-> > > this implementation since the chip design is different to AST2600.
-> > 
-> > So digging a bit more deeply on this, it looks like the reset is 
-> > already taken care of by drivers/clk/clk-ast2600.c in the 
-> > clk_prepare_enable() path.
-> > 
-> > clk-ast2600 handles resets when enabling the clock for most peripherals:
-> > 
-> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n276
-> > 
-> > and this is true for both the SD controller and the eMMC controller:
-> > 
-> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n94
-> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n88
-> > 
-> > If this weren't the case you'd specify a reset property in the SD/eMMC 
-> > devicetree nodes for the 2600 and then use 
-> > devm_reset_control_get_optional_exclusive() as Philipp suggested. See 
-> > the reset binding here:
-> > 
-> > https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/devicetree/bindings/reset/reset.txt?h=v5.12
-> > 
-> > So on the surface it seems the reset handling in this patch is 
-> > unnecessary. Have you observed an issue with the SoC that means it's 
-> > required?
-> > 
-> 
-> Yes, you are right, aspeed_sdc_probe() calls clk_prepare_enable(),
-> aspeed_g6_clk_enable() does reset eMMC.
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/mmc/host/sdhci-of-aspeed.c#n496
-> 
-> However, the clock of eMMC is enabled in my u-boot(2019.04).
-> So it is retruned in the condition of aspeed_g6_clk_is_enabled() below
-> and doesn't reset eMMC.
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/clk/clk-ast2600.c?h=v5.12#n285
+Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+---
+ drivers/mmc/host/cqhci-core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Okay, so what's the issue that the patch addresses? Is there a bug? 
-Presumably if u-boot isn't making use of the eMMC the clock won't be 
-on, so we'll do the reset if the kernel wants to make use of the 
-device. If u-boot _is_ using the eMMC, u-boot will have done the 
-correct clock enable/reset sequence and so the controller should be 
-ready to go?
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index 93b0432bb601..4d76c858d45f 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -1090,8 +1090,8 @@ static void cqhci_recovery_finish(struct mmc_host *mmc)
+ 	spin_lock_irqsave(&cq_host->lock, flags);
+ 	cq_host->qcnt = 0;
+ 	cq_host->recovery_halt = false;
+-	mmc->cqe_on = false;
+ 	spin_unlock_irqrestore(&cq_host->lock, flags);
++	mmc->cqe_on = false;
+ 
+ 	/* Ensure all writes are done before interrupts are re-enabled */
+ 	wmb();
+-- 
+2.29.0
 
-The only potential issue remaining is u-boot leaving the controller in 
-a configuration the kernel isn't expecting when handing over. If that's 
-the issue then we've forgotten to do some specific initialisation (i.e. 
-not just reset the entire thing) of the controller in the driver probe 
-path, right?
-
-FWIW I haven't recently seen any poor behaviour from the controller or 
-driver. For us (IBM) it seems to be working well since we sorted out 
-the phase configuration.
-
-Andrew
