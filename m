@@ -2,36 +2,36 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6568C43461
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 03:34:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59080C43460
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 06:46:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8CE88611AC
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 03:34:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 39FCC61433
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 06:46:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230247AbhEMDfQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 May 2021 23:35:16 -0400
-Received: from lucky1.263xmail.com ([211.157.147.131]:43542 "EHLO
+        id S231420AbhEMGrg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 May 2021 02:47:36 -0400
+Received: from lucky1.263xmail.com ([211.157.147.134]:51266 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230018AbhEMDfP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 May 2021 23:35:15 -0400
-Received: from localhost (unknown [192.168.167.224])
-        by lucky1.263xmail.com (Postfix) with ESMTP id D0640BA0CE;
-        Thu, 13 May 2021 11:33:58 +0800 (CST)
+        with ESMTP id S230063AbhEMGrf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 May 2021 02:47:35 -0400
+Received: from localhost (unknown [192.168.167.223])
+        by lucky1.263xmail.com (Postfix) with ESMTP id 87E12C8699;
+        Thu, 13 May 2021 14:46:11 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
 X-ADDR-CHECKED4: 1
 X-ANTISPAM-LEVEL: 2
 X-ABS-CHECKED: 0
 Received: from localhost.localdomain (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P12381T139987660035840S1620876834871090_;
-        Thu, 13 May 2021 11:33:57 +0800 (CST)
+        by smtp.263.net (postfix) whith ESMTP id P22004T139994226214656S1620888367858788_;
+        Thu, 13 May 2021 14:46:10 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <9e628830b7c19a64fdc016674d074f56>
+X-UNIQUE-TAG: <33e9ab100598d444a69fb444c920c885>
 X-RL-SENDER: cl@rock-chips.com
 X-SENDER: cl@rock-chips.com
 X-LOGIN-NAME: cl@rock-chips.com
@@ -56,8 +56,8 @@ Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
         cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
         jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
 Subject: [RESEND PATCH v4 06/10] dt-bindings: gpio: change items restriction of clock for rockchip,gpio-bank
-Date:   Thu, 13 May 2021 11:33:51 +0800
-Message-Id: <20210513033351.17879-1-cl@rock-chips.com>
+Date:   Thu, 13 May 2021 14:46:06 +0800
+Message-Id: <20210513064606.18397-1-cl@rock-chips.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210429081151.17558-1-cl@rock-chips.com>
 References: <20210429081151.17558-1-cl@rock-chips.com>
@@ -71,20 +71,19 @@ The clock property need 2 items on some rockchip chips.
 
 Signed-off-by: Liang Chen <cl@rock-chips.com>
 ---
- Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml b/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
-index d993e00..0df147f 100644
+index d993e00..0d62c28 100644
 --- a/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
 +++ b/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
-@@ -22,7 +22,11 @@ properties:
+@@ -22,7 +22,10 @@ properties:
      maxItems: 1
  
    clocks:
 -    maxItems: 1
 +    minItems: 1
-+    maxItems: 2
 +    items:
 +      - description: APB interface clock source
 +      - description: GPIO debounce reference clock source
