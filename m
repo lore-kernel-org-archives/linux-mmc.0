@@ -2,162 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-26.3 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB730C433B4
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 19:36:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 087D1C433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 May 2021 01:56:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8A45361404
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 May 2021 19:36:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D5FB8613C8
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 May 2021 01:56:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231199AbhEMTha (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 May 2021 15:37:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55376 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231205AbhEMThZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 May 2021 15:37:25 -0400
-Received: from mail-qt1-x84a.google.com (mail-qt1-x84a.google.com [IPv6:2607:f8b0:4864:20::84a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBEE8C061756
-        for <linux-mmc@vger.kernel.org>; Thu, 13 May 2021 12:36:13 -0700 (PDT)
-Received: by mail-qt1-x84a.google.com with SMTP id 1-20020aed31010000b029019d1c685840so18667561qtg.3
-        for <linux-mmc@vger.kernel.org>; Thu, 13 May 2021 12:36:13 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20161025;
-        h=date:in-reply-to:message-id:mime-version:references:subject:from:to
-         :cc;
-        bh=mKHn5nW8hMSnIzbkNUA9bgAI/5jrfrz+RnfoZbF6j1k=;
-        b=NxbyH77uCpX5jHPLaIxntl4MMEN72o3nW4IkVxd/s3G+RDesqezz14zIzof8/hNPe5
-         bs0sPo+sfbA/DkdAe5qwND2yDe8Q64E5hUI4+AlxryJRLiGkfRkjlkEyaeLS0d71adGe
-         EqppPm6oUyDCv9k3uQh/y6lgpmsdCDlIbWeyBJwuntF8gv+cgoXCeMogRGjMI3rhvHiU
-         idKnSaGs+vEa/rnr4VhDzukE8dvmoHkR0nl+RncsQ8iu8K1NZakuYD3gCSj7JWp3xwB/
-         9z6F4Y/tGgPWGTtRj7Gf2L8/2hhiBm1mowzmxrLDhi1u0Lyaki06ZcxNxWrNj5V5IMuB
-         4KtQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:in-reply-to:message-id:mime-version
-         :references:subject:from:to:cc;
-        bh=mKHn5nW8hMSnIzbkNUA9bgAI/5jrfrz+RnfoZbF6j1k=;
-        b=WdC32BSmlaJ0B7OiM7pCCvTkf7MwZHxEGL7kL3vndviLZIVP6zWdhC6n21EBfjCTZ/
-         Mokkk70N5WiHKiQOrQ9dQQJ+XiXHUL3CXcJZ/3kEqJUjbE4nR7P6MKYzTnQIqMF948s6
-         IcpTmRHE00EyuuQt3+XopAtCeiFK/MHa18UIjhXOdOsSl5LcmVtX+0YwIo2ZEzIqVO0H
-         jjmOXUHmVfIc1yhEmlPbbkOnDzoBEXl9OXEZfRyM71igdiMe1wCQ0J6IEOkDmbz3z55l
-         XRhXh74m3IYAu9osKwYLzY97L58iysYgyt90EiE7CZTv4PvdXCpm9u/a2jp788gDaz8I
-         0WdQ==
-X-Gm-Message-State: AOAM530LvhKMBT5xiARFl/0eWy32gcc2WaVjTqAojn+Jydr3JGe/NhTX
-        ueqcqeWrgEWpynj0N3ZtMp2JjEF2gcSnPA==
-X-Google-Smtp-Source: ABdhPJzOzRUMhMpdqg5s7k2XyPDWGEgOheQSp/nxRF00tQp7xZJniBllI4qoqrF0m6c5fppZqVcMeF2SI9GnNQ==
-X-Received: from spirogrip.svl.corp.google.com ([2620:15c:2cb:201:5f61:8ca4:879b:809e])
- (user=davidgow job=sendgmr) by 2002:a05:6214:373:: with SMTP id
- t19mr9320953qvu.45.1620934573116; Thu, 13 May 2021 12:36:13 -0700 (PDT)
-Date:   Thu, 13 May 2021 12:32:00 -0700
-In-Reply-To: <20210513193204.816681-1-davidgow@google.com>
-Message-Id: <20210513193204.816681-6-davidgow@google.com>
+        id S232244AbhENB5Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 May 2021 21:57:25 -0400
+Received: from new4-smtp.messagingengine.com ([66.111.4.230]:57523 "EHLO
+        new4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232197AbhENB5Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 May 2021 21:57:24 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.nyi.internal (Postfix) with ESMTP id B07A1580E97;
+        Thu, 13 May 2021 21:56:13 -0400 (EDT)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Thu, 13 May 2021 21:56:13 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm2; bh=yu5svNfn1bqCNsbfoBd3B8VenMeM5wJ
+        vXsoRZy33RJA=; b=sRiS9No7laMnkVWC+PL33B3RejcHw8dL1u+8PUJScroHf9E
+        k4Zc3xUR2/uFRcyg9N4igSn5oTjwFqRFsODDNVb/6wmCdBGC+gJXcttsUairUKee
+        Vu6ut2MCxjMcdEStGsHIUsXh2C0A/RT1KXXyJ4UCj2ACdYtloDorAyEC9S23L5cm
+        51WAfxEqU1oVM8SJo+uYPge+L4Emv8R8mRgtdYgkHXjx+Quu2c2odiUo9tT9zEz7
+        IYmx9hnWgTxbIuyo3fkUa0BGoc2H6tn+DV8jedlDoqqdWmJfgFEYNJUpyH09RiqF
+        MdfOoTvh03DqychHNsVm4yvSv+dTWmqiTS/CXyA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=yu5svN
+        fn1bqCNsbfoBd3B8VenMeM5wJvXsoRZy33RJA=; b=RBOXLkE9mJ0hLWvdDFSgel
+        R0zOLc438Kpj8pRr5xuCIl0RtMLExMP7uBvf1ogUi1RTl4pR5OOMD/QBwaFcpa4x
+        xHWXcSv01ZWniDgNkdGoI9z+P2UkP4j+GeNzRN/5Mc/Hqm0PJdY2H+DWP2VxkX6h
+        4ctlcciTV1/73nUfBBLQc0TSaMB1zBkb+9L8GBJGlrZTUy575pPt3Ff0bQaGJyXD
+        k8/xiq62Jvp+8i1e7jEB//9foQPYEZ+30mPHoHOex3gEB33PuICBndPnJZ5bnW/P
+        kz9I4oW+gYQbgUKrc4S5NLhzKc5eBnlmoELlTqv5ceEzoiDl6OnS8oXgJ0MVi//Q
+        ==
+X-ME-Sender: <xms:vNidYD6BrVjO_32DFMfMIivyLKxZAbcI1HuG3QlC3WP6Dks279E_Xg>
+    <xme:vNidYI7XG9Wt7Cq6TMhfTqTlY33ohwDCtz9zBpYn6L3tzk0rLfhgBoOag_aH1ACkk
+    PufarDMWYKDQjahUw>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdehhedghedvucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
+    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:vNidYKezzJIYiAZoVPdgRscAUA0MC0PWtN6oMRmU5m5a4M1Z0Hk1WA>
+    <xmx:vNidYEL0Zx-HTb5zDmJ7oPF_7up0mZCNaW-ewcEXGnhvDFFwNQ-heg>
+    <xmx:vNidYHIQ0mnaQjVVJBvmBFrSfLELjySORBi9dmw3iuVQgvRDqEWD2A>
+    <xmx:vdidYJwKEEuhRERg2Et6jkBZsQx1cRKEtvEL5yWhXGhBiRHLgfJK3g>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 7EBCAA00079; Thu, 13 May 2021 21:56:12 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-448-gae190416c7-fm-20210505.004-gae190416
 Mime-Version: 1.0
+Message-Id: <24e8c5e8-d1eb-4e42-b8de-c60c5cceaf85@www.fastmail.com>
+In-Reply-To: <20210513193204.816681-6-davidgow@google.com>
 References: <20210513193204.816681-1-davidgow@google.com>
-X-Mailer: git-send-email 2.31.1.751.gd2f1c929bd-goog
-Subject: [PATCH v2 06/10] mmc: sdhci-of-aspeed: Remove some unnecessary casts
- from KUnit tests
-From:   David Gow <davidgow@google.com>
-To:     Brendan Higgins <brendanhiggins@google.com>,
-        Daniel Latypov <dlatypov@google.com>,
-        Shuah Khan <skhan@linuxfoundation.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Joel Stanley <joel@jms.id.au>
-Cc:     David Gow <davidgow@google.com>, kunit-dev@googlegroups.com,
-        linux-kselftest@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-aspeed@lists.ozlabs.org,
-        openbmc@lists.ozlabs.org, linux-arm-kernel@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+ <20210513193204.816681-6-davidgow@google.com>
+Date:   Fri, 14 May 2021 11:25:51 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "David Gow" <davidgow@google.com>,
+        "Brendan Higgins" <brendanhiggins@google.com>,
+        "Daniel Latypov" <dlatypov@google.com>,
+        "Shuah Khan" <skhan@linuxfoundation.org>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Joel Stanley" <joel@jms.id.au>
+Cc:     kunit-dev@googlegroups.com, linux-kselftest@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: =?UTF-8?Q?Re:_[PATCH_v2_06/10]_mmc:_sdhci-of-aspeed:_Remove_some_unneces?=
+ =?UTF-8?Q?sary_casts_from_KUnit_tests?=
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-With KUnit's EXPECT macros no longer typechecking arguments as strictly,
-get rid of a number of now unnecessary casts.
 
-Signed-off-by: David Gow <davidgow@google.com>
----
-This should be a no-op functionality wise, and while it depends on the
-first couple of patches in this series, it's otherwise independent from
-the others. I think this makes the test more readable, but if you
-particularly dislike it, I'm happy to drop it.
 
- drivers/mmc/host/sdhci-of-aspeed-test.c | 34 ++++++++++++-------------
- 1 file changed, 17 insertions(+), 17 deletions(-)
+On Fri, 14 May 2021, at 05:02, David Gow wrote:
+> With KUnit's EXPECT macros no longer typechecking arguments as strictly,
+> get rid of a number of now unnecessary casts.
+> 
+> Signed-off-by: David Gow <davidgow@google.com>
+> ---
+> This should be a no-op functionality wise, and while it depends on the
+> first couple of patches in this series, it's otherwise independent from
+> the others. I think this makes the test more readable, but if you
+> particularly dislike it, I'm happy to drop it.
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
-index bb67d159b7d8..1ed4f86291f2 100644
---- a/drivers/mmc/host/sdhci-of-aspeed-test.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
-@@ -26,23 +26,23 @@ static void aspeed_sdhci_phase_ddr52(struct kunit *test)
- 	KUNIT_EXPECT_EQ(test, 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 25));
- 
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 180));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 181));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 182));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 183));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 2,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 2,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 184));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 3,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 3,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 185));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 203));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 204));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 205));
- }
- 
-@@ -67,21 +67,21 @@ static void aspeed_sdhci_phase_hs200(struct kunit *test)
- 	KUNIT_EXPECT_EQ(test, 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 96));
- 
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 180));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 185));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 186));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 187));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 269));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 270));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 271));
--	KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
-+	KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
- 			aspeed_sdhci_phase_to_tap(NULL, rate, 276));
- }
- 
--- 
-2.31.1.751.gd2f1c929bd-goog
+No, happy to have that cleaned up.
 
+Thanks David.
+
+Acked-by: Andrew Jeffery <andrew@aj.id.au>
