@@ -2,111 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7F7AC433ED
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 May 2021 15:56:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D24E5C433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 May 2021 17:12:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BA73661285
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 May 2021 15:56:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AF4D96144B
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 May 2021 17:12:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234825AbhENP5n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 May 2021 11:57:43 -0400
-Received: from mo4-p00-ob.smtp.rzone.de ([85.215.255.20]:28917 "EHLO
-        mo4-p00-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231840AbhENP5m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 May 2021 11:57:42 -0400
-ARC-Seal: i=1; a=rsa-sha256; t=1621007605; cv=none;
-    d=strato.com; s=strato-dkim-0002;
-    b=C4MrA3vome47a+ac6S5FU8cV3uHSTucUPG55PGiSEg+BfOCCS85nqBlqXHQSaZyZMp
-    9nfC2vJFvBMJ0nDPXS/RkyBCyGKzV6GmyYWwKrfcACQzti684FlQcuLfIJYeQNc2nOn0
-    WMfhM0Uln4g+kG9LrmLG5G2isdT9P8MZ9EPXPN7Y3ZsAPk1hpCam7Uns9CZEi97TtFbS
-    7+thtUixNkyBiXPcpqrJsz/bTeqrjq4J6mcsAfm0ZUq43XCPkiXrmJXXe/n/ygozNrs6
-    Z9R6RpYO9LFEurLn2jEkpXJ0YX3zzdgdHIUW74qeIrbK/6DlEogEwxOQOuT6HX4ds0w9
-    r1xw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1621007605;
-    s=strato-dkim-0002; d=strato.com;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=tur7A0kVwKDrMD3sFXmJgneyeEJDMFyMOdHGfAiq8ws=;
-    b=FEA/Hccheo8sP7nhqoeOb7HePeUo3ayXYT3c/+vqjRCQQWYQFmGP+pWd1Us+zhCo7H
-    GoRpvNFr70Ax1hx/h1FOg0ANHCWC6QIh8s2aMF5exq+f6pHof/qgPPja7cWP+xkqrvtL
-    6vrx2MaIWLKEhypXUnXAdtxl2QXCCKhWhXwpO4Jbi/pxnq3+LZVPFwNc1EARtfGoEU5w
-    TPomgvI5vN1F5eYne3wTB2WSePhD5AoWXF/NO9Cy/Am7ojXbvvi/PbFQVcF6TM4UBb0J
-    BIIR4P6okSc9qRYnwiigKxIFBexxNa23xGxv4la/bF7uAOfqSUZwkCmx3OjjPXL+rd/H
-    wcaw==
-ARC-Authentication-Results: i=1; strato.com;
-    dkim=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1621007605;
-    s=strato-dkim-0002; d=fpond.eu;
-    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
-    bh=tur7A0kVwKDrMD3sFXmJgneyeEJDMFyMOdHGfAiq8ws=;
-    b=d1ST0JRe+mfG9OyswOIog6RrKbIAnD0QbefBGMxF7OSb4AMdRbA0ifRAyT84Dyh4by
-    XKUb/9XDgN1HkvqrBLQHEDtt/BmVvOW3gckOrm6Vbode+O/IK0uudkM6oS861QSQoCxc
-    XTbfYMIbmdw1gqdNdZgHnaqUAnpHyN0BKzfxS1A0F/93oLglI5kDVvMoXsYu1uhFFJm3
-    bavg9hZl4JmYf7+OYLvaF7AZZ5h8D8F1tkfa+13C96QfXXKwlr3QLahw0FGxHs8ItU2k
-    FGrsO25jEHznJdi1DqaTZ0Ujfyb7ProBBnQ8Em+2PxYY3eM06DbIabdtBBIx86rjnFv9
-    MZZg==
-Authentication-Results: strato.com;
-    dkim=none
-X-RZG-AUTH: ":OWANVUa4dPFUgKR/3dpvnYP0Np73dmm4I5W0/AvA67Ot4fvR82tZd8hHUZE="
-X-RZG-CLASS-ID: mo00
-Received: from groucho.site
-    by smtp.strato.de (RZmta 47.25.8 DYNA|AUTH)
-    with ESMTPSA id 5052b9x4EFrP0Iy
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
-        (Client did not present a certificate);
-    Fri, 14 May 2021 17:53:25 +0200 (CEST)
-From:   Ulrich Hecht <uli+renesas@fpond.eu>
-To:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org
-Cc:     wsa@kernel.org, ulf.hansson@linaro.org,
-        Ulrich Hecht <uli+renesas@fpond.eu>
-Subject: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
-Date:   Fri, 14 May 2021 17:53:18 +0200
-Message-Id: <20210514155318.16812-1-uli+renesas@fpond.eu>
-X-Mailer: git-send-email 2.20.1
+        id S233527AbhENRNr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 May 2021 13:13:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50746 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230063AbhENRNr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 14 May 2021 13:13:47 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B0EA96143F
+        for <linux-mmc@vger.kernel.org>; Fri, 14 May 2021 17:12:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1621012355;
+        bh=kO1BWCUm/KVo8tNHV6fkCoeL9RGH70Zpj7Xs2sR0KX4=;
+        h=Date:From:To:Subject:From;
+        b=ACDb56yE1UdV/YIdVR0Hxf1TMwikfa1TqFNNwRM54fXpYENSe5zveec7jKfZ0wrVq
+         NMntGRMxo5kBMC/zQmzYWQAF7GvHoLfpzSZkM98eihyFy3R0gCL/ZgcxjqcvWEZzG3
+         Bjn8RGdHeZ4x8DRHlqE85ch9r6FEH8ACICXlX7ZVMf8eOM4ccJ38Uf+1nNpEPu0Psy
+         9qsDC4abBRslxAuBZhi8TyEfvWZtW4EY85F7dqqqfo02Y4w4mwvIaum0X7sS17oakl
+         eoV8nQCX0Vg986UELFA/AC84qwHQqz0P2V1A/vkl733Pf8FH7ySfxUCNI0OQ0oBFNm
+         uQvrJE2muVxng==
+Received: by pali.im (Postfix)
+        id 3B3D173A; Fri, 14 May 2021 19:12:33 +0200 (CEST)
+Date:   Fri, 14 May 2021 19:12:33 +0200
+From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Subject: Who assigns SDIO vendor IDs?
+Message-ID: <20210514171233.qerhkjn3redivien@pali>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: NeoMutt/20180716
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The TMIO core sets a very low latency limit (100 us), but when using R-Car
-SDHI hosts with SD cards, I have observed typical latencies of around 20-30
-ms. This prevents runtime PM from working properly, and the devices remain
-on continuously.
+Hello!
 
-This patch sets the default latency limit to 100 ms to avoid that.
+I would like to ask if somebody knows who assigns SDIO vendor IDs?
 
-Signed-off-by: Ulrich Hecht <uli+renesas@fpond.eu>
----
- drivers/mmc/host/renesas_sdhi_core.c | 4 ++++
- 1 file changed, 4 insertions(+)
+In SDIO Simplified Specification Version 3.00 available from website
+https://www.sdcard.org/downloads/pls/ in section 16.6 CISTPL_MANFID is:
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 635bf31a6735..4f41616cc6bb 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -32,6 +32,7 @@
- #include <linux/pinctrl/pinctrl-state.h>
- #include <linux/platform_device.h>
- #include <linux/pm_domain.h>
-+#include <linux/pm_qos.h>
- #include <linux/regulator/consumer.h>
- #include <linux/reset.h>
- #include <linux/sh_dma.h>
-@@ -1147,6 +1148,9 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 		host->ops.hs400_complete = renesas_sdhi_hs400_complete;
- 	}
- 
-+	/* keep tmio_mmc_host_probe() from setting latency limit too low */
-+	dev_pm_qos_expose_latency_limit(&pdev->dev, 100000);
-+
- 	ret = tmio_mmc_host_probe(host);
- 	if (ret < 0)
- 		goto edisclk;
--- 
-2.20.1
+  The TPLMID_MANF field identifies the SDIO Card's manufacturer. New
+  codes are assigned by both PCMCIA and JEIDA. The first 256 identifiers
+  (0000h through 00FFh) are reserved for manufacturers who have JEDEC
+  IDs assigned by JEDEC Publication 106. Manufacturers with JEDEC IDs
+  may use their eight-bit JEDEC manufacturer code as the least
+  significant eight bits of their SDIO Card manufacturer code. In this
+  case, the most significant eight bits shall be zero (0).  For example,
+  if a JEDEC manufacturer code is 89h, their SDIO Card manufacturer code
+  is 0089h. If a SDIO card manufacturer does not currently have a
+  TPLMID_MANF assigned, one can be obtained at little or no cost from
+  the PCMCIA.
 
+So IDs 0x0000 - 0x00FF are assigned by JEDEC 106 and because JEDEC 106
+contains one parity bit, it means that only 128-reserved IDs are
+available for SDIO vendor ids and they were already assigned. This is
+basically clear and list of these (id, vendor) tuples can be find in
+JEDEC 106 publication.
+
+But who assigns remaining SDIO vendor IDs 0x0100 - 0xFFFF? PCMCIA
+website http://www.pcmcia.org/ is already down and according to USB-IF
+press information found in document USB_IF_01212010.pdf from archive
+https://web.archive.org/web/20160304121938if_/http://www.usb.org/press/USB_IF_01212010.pdf
+USB-IF acquired PCMCIA assets which probably means also assigning PCMCIA
+vendor IDs.
+
+In archive of www.pcmcia.org is available very old list of vendor IDs:
+https://web.archive.org/web/20051202104141/http://www.pcmcia.org/tupleid.htm
+
+I have tried to find some information about PCMCIA or SDIO vendors and
+IDs assignment on USB-IF website https://www.usb.org/ but there is
+absolutely nothing.
+
+So has somebody any clue what happened with PCMCIA and its relation with
+SDIO vendor IDs?
