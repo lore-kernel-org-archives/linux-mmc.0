@@ -2,67 +2,171 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 386CEC43603
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 May 2021 23:06:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 24152C433B4
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 May 2021 09:23:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16BF661182
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 May 2021 23:06:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05F1A611CA
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 May 2021 09:23:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231776AbhEPXHl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 16 May 2021 19:07:41 -0400
-Received: from mx2.suse.de ([195.135.220.15]:44054 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231968AbhEPXHh (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 16 May 2021 19:07:37 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id 27C66B1EA;
-        Sun, 16 May 2021 23:06:21 +0000 (UTC)
-From:   =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>
-To:     linux-rockchip@lists.infradead.org
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Heiko Stuebner <heiko@sntech.de>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org
-Subject: [PATCH 6/9] dt-bindings: mmc: rockchip-dw-mshc: Add Rockchip RK1808
-Date:   Mon, 17 May 2021 01:05:48 +0200
-Message-Id: <20210516230551.12469-7-afaerber@suse.de>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210516230551.12469-1-afaerber@suse.de>
-References: <20210516230551.12469-1-afaerber@suse.de>
+        id S235956AbhEQJYl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 May 2021 05:24:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55908 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235820AbhEQJYl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 May 2021 05:24:41 -0400
+Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E75EFC061756
+        for <linux-mmc@vger.kernel.org>; Mon, 17 May 2021 02:23:24 -0700 (PDT)
+Received: by mail-vs1-xe33.google.com with SMTP id 66so2746973vsk.9
+        for <linux-mmc@vger.kernel.org>; Mon, 17 May 2021 02:23:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=kzYVzmT+Y8ce2flyvbSSPdmquvI+WpoScVhmf9xFNfc=;
+        b=wZE8pBAqeARtQbwh+YWftfz+pAOAl52rdskfYBROlX2BYGzyiP8jIhVMX2ZLlI/5TN
+         2h55vokvcNd9L9wocrsTfFNSZ7mvGTPvyT6ydg0YrjKHLTUBuhbjdOqBt6BcYgzbTu4z
+         CJC7/JcgyYbA8qJyYy52Qlnrl5Ks8rBSWSII4TJUN/iauAg9QqBcUXZ3Uc46G84x0Wqi
+         7EJaqNos/h447r9ZfuhH/fMb87/SWTIRaTqJufYy20AjL2e6KGye9jf84Rmi4O/7MYAE
+         1JPV3hD1j6WJmF5EQD0WwU2Wke0Zt5Bbr1TPruhZr+U9SyoLJj18Xh+kzPIbsZqQnpMc
+         7cvg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=kzYVzmT+Y8ce2flyvbSSPdmquvI+WpoScVhmf9xFNfc=;
+        b=UU/K6VAPaNExoEiI0fygevBbTAhAyAVXPCnE0fXGKrmZS47FZ30LhxsZV7SAz38nRR
+         4UXGeXooff355PybMjjF2Pko5zcFXnXa4tS8bl8jiKofP0QQAJjcGB/AZc3xyjA1Dj9b
+         YrQ2CE5bRiUbRk8/GElYnxnRInLgYX8Un1uLW/pKyot1+zefJKYSYPdPeXRiKzSn1Ft3
+         5ogN+8PCLpYhxkrAypQ3JO8GezfLEitW1E69xrOz6/Sye2NTuTHKrqX5n0Hsu1UZKl7L
+         HfYmvxvvaK1ZZxPHTcsUzKqZ1JkIeIJLJG0mTcTtY2ZHxYr/9KJQNt2lYX4LKqS+xuBF
+         fjtw==
+X-Gm-Message-State: AOAM530LNFSA6UD6kN6yPkwWkU6o81i+8zEOW+UTIi7sWtvqtYpXwaO1
+        trU9MCI82ODAaLSZdZfbuU02aTMpnFdDDICGvJBf7A==
+X-Google-Smtp-Source: ABdhPJyXKhN5EScVDwjR162oOK33ajPAKsDnGAYw4sYWr1DOTQym8W+LchIR8j6ixX6JvWzsFngChaUy9M79BpaoBus=
+X-Received: by 2002:a05:6102:7b4:: with SMTP id x20mr3923640vsg.48.1621243403858;
+ Mon, 17 May 2021 02:23:23 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20210513193204.816681-1-davidgow@google.com> <20210513193204.816681-6-davidgow@google.com>
+In-Reply-To: <20210513193204.816681-6-davidgow@google.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 17 May 2021 11:22:47 +0200
+Message-ID: <CAPDyKFoEeRUjHLZ3iSvPT4_0X107G3Xw+ujxJ9zsDk06dTxo7w@mail.gmail.com>
+Subject: Re: [PATCH v2 06/10] mmc: sdhci-of-aspeed: Remove some unnecessary
+ casts from KUnit tests
+To:     David Gow <davidgow@google.com>
+Cc:     Brendan Higgins <brendanhiggins@google.com>,
+        Daniel Latypov <dlatypov@google.com>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Joel Stanley <joel@jms.id.au>, kunit-dev@googlegroups.com,
+        linux-kselftest@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        OpenBMC Maillist <openbmc@lists.ozlabs.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a compatible string for Rockchip RK1808 SoC.
+On Thu, 13 May 2021 at 21:36, David Gow <davidgow@google.com> wrote:
+>
+> With KUnit's EXPECT macros no longer typechecking arguments as strictly,
+> get rid of a number of now unnecessary casts.
+>
+> Signed-off-by: David Gow <davidgow@google.com>
 
-Signed-off-by: Andreas Färber <afaerber@suse.de>
----
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
- 1 file changed, 1 insertion(+)
+I guess you will funnel this via another tree than the mmc?
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-index eaa3b0ef24f6..54fb59820d2b 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-@@ -30,6 +30,7 @@ properties:
-       - items:
-           - enum:
-               - rockchip,px30-dw-mshc
-+              - rockchip,rk1808-dw-mshc
-               - rockchip,rk3036-dw-mshc
-               - rockchip,rk3228-dw-mshc
-               - rockchip,rk3308-dw-mshc
--- 
-2.31.1
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
+Kind regards
+Uffe
+
+> ---
+> This should be a no-op functionality wise, and while it depends on the
+> first couple of patches in this series, it's otherwise independent from
+> the others. I think this makes the test more readable, but if you
+> particularly dislike it, I'm happy to drop it.
+>
+>  drivers/mmc/host/sdhci-of-aspeed-test.c | 34 ++++++++++++-------------
+>  1 file changed, 17 insertions(+), 17 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed-test.c b/drivers/mmc/host/sdhci-of-aspeed-test.c
+> index bb67d159b7d8..1ed4f86291f2 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed-test.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed-test.c
+> @@ -26,23 +26,23 @@ static void aspeed_sdhci_phase_ddr52(struct kunit *test)
+>         KUNIT_EXPECT_EQ(test, 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 25));
+>
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 180));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 0,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 181));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 182));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 183));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 2,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 2,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 184));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 3,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 3,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 185));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 203));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 204));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 205));
+>  }
+>
+> @@ -67,21 +67,21 @@ static void aspeed_sdhci_phase_hs200(struct kunit *test)
+>         KUNIT_EXPECT_EQ(test, 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 96));
+>
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 180));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 185));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 186));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 1,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 187));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 14,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 269));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 270));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 271));
+> -       KUNIT_EXPECT_EQ(test, (int)ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+> +       KUNIT_EXPECT_EQ(test, ASPEED_SDHCI_TAP_PARAM_INVERT_CLK | 15,
+>                         aspeed_sdhci_phase_to_tap(NULL, rate, 276));
+>  }
+>
+> --
+> 2.31.1.751.gd2f1c929bd-goog
+>
