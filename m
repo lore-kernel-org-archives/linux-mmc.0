@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00461C433ED
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 May 2021 10:09:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A233C433ED
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 May 2021 10:55:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE30B61242
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 May 2021 10:09:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0E59C611C2
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 May 2021 10:55:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235911AbhEQKKb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 May 2021 06:10:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38204 "EHLO
+        id S236488AbhEQK41 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 May 2021 06:56:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230157AbhEQKKa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 May 2021 06:10:30 -0400
-Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F32BC06175F;
-        Mon, 17 May 2021 03:09:14 -0700 (PDT)
-Received: by mail-pg1-x534.google.com with SMTP id y32so4285901pga.11;
-        Mon, 17 May 2021 03:09:14 -0700 (PDT)
+        with ESMTP id S236500AbhEQK4W (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 May 2021 06:56:22 -0400
+Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D3FFC06174A;
+        Mon, 17 May 2021 03:54:47 -0700 (PDT)
+Received: by mail-pl1-x629.google.com with SMTP id t21so2924110plo.2;
+        Mon, 17 May 2021 03:54:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=hoXZ4vHVHP8vrBjP/Y8D4xxfMB8OzgmtkMwcyzbeX0Q=;
-        b=h39floIVlsNNX7rbb5fFw7ehnpgjfPOlxxaXmiu51qMlFCa3eNTyBkCKghenPFtHot
-         w22KYex6j6RTa2dpp4oky4+HF+lkye0N/S64nsQNkdtytq4BaWHVsRVge/HXgYX+Pql/
-         Y0pgyImyC76QyFhtFSnA+gyPo7Uvx0khpY64YIqQUlfuEnoSUpxguLwk14ctfaXxUTpY
-         q9A6FLnhCK22PO1amOYRWJyHNqFwMDxjFbb4FxBTE6UpYTHsTc/RTW2RfFRqQIwc6kAS
-         6x+3BbYBjYQvpbEXB/xvy/Dedk9VG/kkdN3VIGEmWO0Jdb4SFiA3mlGAWK6Lsvyu+krQ
-         WNbA==
+        bh=yzBuMiC2XaLs/j1LpNGe2K8TP7QRiNZvMg2908xwCXA=;
+        b=ZRu4cOsTud8oyRg8K/dNWXVOFRjhDkEt6GER7grMfhXnJs1Oe2H0kBBbDt7DdT7bXb
+         7BYgb+0rL9PrK/4hWSLNuM1XWyontoVNyc0e1t51rEA1r3t3wzzxsTN9g/4CDJSGODQk
+         fzknAvXky0Jj5hN5zKWjFt32Yg9z/EzGxlagzAhOMkA2s4gYrA3SrX2H3CvE8uqVdYyt
+         JlI4DuQ7MteCjHcXQhO/2lk05O2qxHZSK90Aa6GSfnbFeUptfOdTXX6x2BDZL4GFAjD2
+         dZqbel5mgzh7EcPF64NZTP6l8Iuu2m6KoE87aC8BmdKQqIMAgyniPIJZ8Cr0cYobs67t
+         W0tg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=hoXZ4vHVHP8vrBjP/Y8D4xxfMB8OzgmtkMwcyzbeX0Q=;
-        b=qAIkWEB+mJR5qmAwWt81UgP1Zb6b0gPIU0ctlXzxqULns6fliIceFAglxXfpmzvx7s
-         77rbO82orNp/ZjQoJCVwTM5VGFcDQJCA8+85N6/ynRU040zxy37CVPRJ5cJ1fWoJbaJV
-         3/oeUj/vjICMCgLr5RKNNDY9LcktnYIKKBJLS6SsU9mCi8RlabaL3+qqxYQnrwYDAgTG
-         NE/99TECk8I3q9WeVJgCVrDbcx/U4TBSLIazYkZ4D84zY3UcIYKvqZciUN3eSYUpoGBx
-         1tousm15tgypxyFvMp0QiRpnnLOwO64ZLNBvvjmxz5U9ahPnpVjwT3snzZKEEA/L/6QM
-         ufVQ==
-X-Gm-Message-State: AOAM5303ygvZoEDfCisJJX5cH2T7R53uAlLOvHYnTxaIuFDLs+QXAXdP
-        0vRKE+4fz5xfhOZcsRg/22eXVjeRLZY=
-X-Google-Smtp-Source: ABdhPJz+0UcZFt4a1N9fMPs8K+Ea3wAXhWg1UaC49Ex05b9KOIstw3tWn11ldE1N2/QCo+g6qsCZ3w==
-X-Received: by 2002:a63:334b:: with SMTP id z72mr31953889pgz.46.1621246153590;
-        Mon, 17 May 2021 03:09:13 -0700 (PDT)
+        bh=yzBuMiC2XaLs/j1LpNGe2K8TP7QRiNZvMg2908xwCXA=;
+        b=HOW+YElIoRGnRII3KrDg4s5eke2KIt7Wx8Phrzm0ZXcSSLWUHFZq/WjbVvNlJXPe2d
+         TPm6192L6oyrSpGd50dn7oggb/8Nwu/hV9L3y6sssqR9Fb3zlW5VOTbsrUjZQIcuDodH
+         KxRkCLq/lRE1ZWt9KbbfRYYTkKpHfEq4/EBMynH91egTVDP5/Xy6V/DfhtxrUMTATaFT
+         oEyoq8+DHLyqPI6UdPTafsT+Vg1eQ4yzLL9jrMKI6hg7FLwH+F1da9RrNulSKXc4WIaJ
+         w8d0EeTgiN7TieEYfmmtD1XTwYs/M4KIqCL4ZYBfV5j8L7dDCG2oT6u6WfwsGmp6hhQz
+         XXIA==
+X-Gm-Message-State: AOAM531APC+QMDjaf6QCBUZcIJRmFmK+3GJPyBER1dce5a4SiQRjALVd
+        YdTWLwaN7p/gtY9hrA4OoaM=
+X-Google-Smtp-Source: ABdhPJwkEw1HtZdsBPLVsJMejfuHolPdJBtBxADQ2kfLqLczA1fjfWTMnR8aQE8eC/N6TVolDm43GA==
+X-Received: by 2002:a17:90b:fc5:: with SMTP id gd5mr24334538pjb.99.1621248887281;
+        Mon, 17 May 2021 03:54:47 -0700 (PDT)
 Received: from tj.ccdomain.com ([103.220.76.197])
-        by smtp.gmail.com with ESMTPSA id u1sm1471193pfc.63.2021.05.17.03.09.11
+        by smtp.gmail.com with ESMTPSA id w8sm10855074pgf.81.2021.05.17.03.54.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 May 2021 03:09:13 -0700 (PDT)
+        Mon, 17 May 2021 03:54:46 -0700 (PDT)
 From:   Yue Hu <zbestahu@gmail.com>
 To:     chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
         matthias.bgg@gmail.com
 Cc:     linux-mmc@vger.kernel.org, linux-mediatek@lists.infradead.org,
         linux-kernel@vger.kernel.org, huyue2@yulong.com, zbestahu@163.com
-Subject: [PATCH] mmc: mediatek: use data instead of mrq parameter from msdc_{un}prepare_data()
-Date:   Mon, 17 May 2021 18:09:00 +0800
-Message-Id: <20210517100900.1620-1-zbestahu@gmail.com>
+Subject: [PATCH] mmc: mediatek: remove useless data parameter from msdc_data_xfer_next()
+Date:   Mon, 17 May 2021 18:54:32 +0800
+Message-Id: <20210517105432.1682-1-zbestahu@gmail.com>
 X-Mailer: git-send-email 2.29.2.windows.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -73,88 +73,36 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yue Hu <huyue2@yulong.com>
 
-We already have 'mrq->data' before calling these two functions, no
-need to find it again via 'mrq->data' internally. Also remove local
-data variable accordingly.
+We do not use the 'data' in msdc_data_xfer_next().
 
 Signed-off-by: Yue Hu <huyue2@yulong.com>
 ---
- drivers/mmc/host/mtk-sd.c | 20 ++++++++------------
- 1 file changed, 8 insertions(+), 12 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 898ed1b..c4db944 100644
+index c4db944..4dfc246 100644
 --- a/drivers/mmc/host/mtk-sd.c
 +++ b/drivers/mmc/host/mtk-sd.c
-@@ -724,10 +724,8 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
- 	writel(lower_32_bits(dma->gpd_addr), host->base + MSDC_DMA_SA);
- }
- 
--static void msdc_prepare_data(struct msdc_host *host, struct mmc_request *mrq)
-+static void msdc_prepare_data(struct msdc_host *host, struct mmc_data *data)
- {
--	struct mmc_data *data = mrq->data;
--
- 	if (!(data->host_cookie & MSDC_PREPARE_FLAG)) {
- 		data->host_cookie |= MSDC_PREPARE_FLAG;
- 		data->sg_count = dma_map_sg(host->dev, data->sg, data->sg_len,
-@@ -735,10 +733,8 @@ static void msdc_prepare_data(struct msdc_host *host, struct mmc_request *mrq)
+@@ -1347,8 +1347,7 @@ static void msdc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
  	}
  }
  
--static void msdc_unprepare_data(struct msdc_host *host, struct mmc_request *mrq)
-+static void msdc_unprepare_data(struct msdc_host *host, struct mmc_data *data)
+-static void msdc_data_xfer_next(struct msdc_host *host,
+-				struct mmc_request *mrq, struct mmc_data *data)
++static void msdc_data_xfer_next(struct msdc_host *host, struct mmc_request *mrq)
  {
--	struct mmc_data *data = mrq->data;
--
- 	if (data->host_cookie & MSDC_ASYNC_FLAG)
- 		return;
+ 	if (mmc_op_multi(mrq->cmd->opcode) && mrq->stop && !mrq->stop->error &&
+ 	    !mrq->sbc)
+@@ -1407,7 +1406,7 @@ static bool msdc_data_xfer_done(struct msdc_host *host, u32 events,
+ 				(int)data->error, data->bytes_xfered);
+ 		}
  
-@@ -1140,7 +1136,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
- 
- 	msdc_track_cmd_data(host, mrq->cmd, mrq->data);
- 	if (mrq->data)
--		msdc_unprepare_data(host, mrq);
-+		msdc_unprepare_data(host, mrq->data);
- 	if (host->error)
- 		msdc_reset_hw(host);
- 	mmc_request_done(mmc_from_priv(host), mrq);
-@@ -1311,7 +1307,7 @@ static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
- 	host->mrq = mrq;
- 
- 	if (mrq->data)
--		msdc_prepare_data(host, mrq);
-+		msdc_prepare_data(host, mrq->data);
- 
- 	/* if SBC is required, we have HW option and SW option.
- 	 * if HW option is enabled, and SBC does not have "special" flags,
-@@ -1332,7 +1328,7 @@ static void msdc_pre_req(struct mmc_host *mmc, struct mmc_request *mrq)
- 	if (!data)
- 		return;
- 
--	msdc_prepare_data(host, mrq);
-+	msdc_prepare_data(host, data);
- 	data->host_cookie |= MSDC_ASYNC_FLAG;
- }
- 
-@@ -1340,14 +1336,14 @@ static void msdc_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
- 		int err)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
--	struct mmc_data *data;
-+	struct mmc_data *data = mrq->data;
- 
--	data = mrq->data;
- 	if (!data)
- 		return;
-+
- 	if (data->host_cookie) {
- 		data->host_cookie &= ~MSDC_ASYNC_FLAG;
--		msdc_unprepare_data(host, mrq);
-+		msdc_unprepare_data(host, data);
+-		msdc_data_xfer_next(host, mrq, data);
++		msdc_data_xfer_next(host, mrq);
+ 		done = true;
  	}
- }
- 
+ 	return done;
 -- 
 1.9.1
 
