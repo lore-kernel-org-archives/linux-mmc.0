@@ -2,113 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E104C433ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 May 2021 12:57:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 319F7C433ED
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 May 2021 14:26:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0150361353
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 May 2021 12:57:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1018361184
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 May 2021 14:26:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1353481AbhESM7F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 May 2021 08:59:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48378 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232671AbhESM7E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 May 2021 08:59:04 -0400
-Received: from mail-qk1-x72f.google.com (mail-qk1-x72f.google.com [IPv6:2607:f8b0:4864:20::72f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04F22C06175F;
-        Wed, 19 May 2021 05:57:45 -0700 (PDT)
-Received: by mail-qk1-x72f.google.com with SMTP id 124so243083qkh.10;
-        Wed, 19 May 2021 05:57:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=sender:date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=aipg9oIDAuCQSbPEUtZjOrYb0WaeP7Y8nbKSRmG50Bc=;
-        b=Pa4ogUhOF7OBZJ6ZHNl0MgR59SkKIlnoGrDNn/lcOBGbuPpPz34+2AOEpjE6KcRep0
-         3rhPml2WgX1tHOgnE1NyFZrFzIlt51EJmUSsfjrkf10trdA60D+Zcz73YlqdI0rdL3D0
-         KrGwfkNaKB0U/YzFPmg3WUmOjWMfEjOBenyI3ohJ8Lx3B0u5X/nxD0NtpdaB9371Y0md
-         dCOkLqkLT/f7QItk5bUjTi6/SI7VFvvOngKItIaipenTMH6IuuHpoeOaIaVv7YRKCb5q
-         /YNW293ujFUdLxhJ07r8jesWtFVEBcPP9Nu7eWr+ikxPxIpnIJhQQ8mwpXU3mKa6ib6s
-         AOpQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
-         :references:mime-version:content-disposition:in-reply-to;
-        bh=aipg9oIDAuCQSbPEUtZjOrYb0WaeP7Y8nbKSRmG50Bc=;
-        b=aitEj7gaMK7SlQFHyL4ZJqICAwNKQ8/sAH8Lajw2UpHAEgDNDm2hvNEGfuZgUfSXZL
-         HF1NM1kZiMEB/drVjZMKQPhtzjqojO97eKKQIPJunGa7Q5rAQa4T26kAxV9j+ihMuYnu
-         rtmhDLYJzbjg9FbQms9XTW/oJgVmNFGucR7LFXvV72Kvsn8/N3RzDKMbQCdlBYRiP1XI
-         zz5W5anZx81TjtZfM3JIZ0EE1bwd7IyAxauDTCiAQc1wiKtuWBbS6kwFcz8H7b3BneO1
-         ZW9XJP8HMu5joxpXGamBK0jbnAXRl7kmLU4lfgt2RVhWmNx23M8p2LuenJ+vMyxUM9X2
-         eGrw==
-X-Gm-Message-State: AOAM531KaiNXRANXgkNXuWTshkUt3O6hLowmUpJIOR2SnLM1OUcBhIzh
-        Uq/3tjjYpriObzEYbYfcPDI=
-X-Google-Smtp-Source: ABdhPJzaymXiwmNRUJ76y5xNhS+pauWT0YHJrip4/vT9Q++zTymq3niN2b7yOKjYqwJx982fyC8aoA==
-X-Received: by 2002:ae9:c016:: with SMTP id u22mr11911036qkk.114.1621429063845;
-        Wed, 19 May 2021 05:57:43 -0700 (PDT)
-Received: from localhost ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id d11sm15252598qke.61.2021.05.19.05.57.42
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 May 2021 05:57:42 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date:   Wed, 19 May 2021 05:57:41 -0700
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     cl@rock-chips.com
-Cc:     heiko@sntech.de, robh+dt@kernel.org, jagan@amarulasolutions.com,
-        wens@csie.org, uwe@kleine-koenig.org, mail@david-bauer.net,
-        jbx6244@gmail.com, linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        wim@linux-watchdog.org, jamie@jamieiles.com,
-        linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: Re: [PATCH v4 04/10] dt-bindings: watchdog: dw-wdt: add description
- for rk3568
-Message-ID: <20210519125741.GA2241939@roeck-us.net>
-References: <20210429081151.17558-1-cl@rock-chips.com>
- <20210429081151.17558-5-cl@rock-chips.com>
+        id S241749AbhESO1U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 May 2021 10:27:20 -0400
+Received: from mail.kernel.org ([198.145.29.99]:49628 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S240243AbhESO1U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 19 May 2021 10:27:20 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id BCFD4611BD;
+        Wed, 19 May 2021 14:25:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1621434360;
+        bh=6yfdFVgTRSm3LiFgn0MQ2bYc4DYpvun17cnYBqZ0po0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=bVDzAPD17U8TZ7Bz3V6QJiduJoagQ7QcsSdO/BSjLz7KWTnpa5iVe9R98WccROWwU
+         Gu80MgVPSwZo4NygXSTHe+uGwEFf0J7pVZMACfoR8PvROJnVmkUv0RGlJUNsEmrR1U
+         QRZzeVT2b4DpeiDwgYHmEQfz+cRc2z0JgT8N1tuEZMxFh6iyqS/C4VtGwFw76Zw3X1
+         sUDcI1QeMBEez7O9KVFENU8PhMRRbDxNPb7rc0qvqkDApCBL7AlUuvRpsKXHjyVDVy
+         Cfoi++iG2FXNsCra1m/yy3X7wMZH5vLPp0IWP+rJdSLx0aGDVEVPsDbp3flcBRCXq8
+         bRpGBY/h336Gw==
+Date:   Wed, 19 May 2021 16:25:57 +0200
+From:   Wolfram Sang <wsa@kernel.org>
+To:     Ulrich Hecht <uli+renesas@fpond.eu>
+Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
+Message-ID: <YKUf9TVcKetApd1J@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="9gvrP1qfpxRahseQ"
 Content-Disposition: inline
-In-Reply-To: <20210429081151.17558-5-cl@rock-chips.com>
+In-Reply-To: <20210514155318.16812-1-uli+renesas@fpond.eu>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Apr 29, 2021 at 04:11:45PM +0800, cl@rock-chips.com wrote:
-> From: Liang Chen <cl@rock-chips.com>
-> 
-> add "rockchip,rk3568-wdt", "snps,dw-wdt" for watchdog nodes on
-> a rk3568 platform to snps,dw-wdt.yaml.
-> 
-> Signed-off-by: Liang Chen <cl@rock-chips.com>
-> Acked-by: Rob Herring <robh@kernel.org>
 
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+--9gvrP1qfpxRahseQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> ---
->  Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml b/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
-> index b58596b1831d..6461eb4f4a27 100644
-> --- a/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
-> +++ b/Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml
-> @@ -27,6 +27,7 @@ properties:
->                - rockchip,rk3328-wdt
->                - rockchip,rk3368-wdt
->                - rockchip,rk3399-wdt
-> +              - rockchip,rk3568-wdt
->                - rockchip,rv1108-wdt
->            - const: snps,dw-wdt
->  
+Hi Uli,
+
+On Fri, May 14, 2021 at 05:53:18PM +0200, Ulrich Hecht wrote:
+> The TMIO core sets a very low latency limit (100 us), but when using R-Car
+> SDHI hosts with SD cards, I have observed typical latencies of around 20-=
+30
+> ms. This prevents runtime PM from working properly, and the devices remain
+> on continuously.
+>=20
+> This patch sets the default latency limit to 100 ms to avoid that.
+>=20
+> Signed-off-by: Ulrich Hecht <uli+renesas@fpond.eu>
+
+Well, yes, I can confirm that this helps wrt the "always-enabled" clock.
+However, when removing UHS cards, I now see this regression:
+
+[    8.659916] mmcblk2: mmc2:0001 00000 29.8 GiB=20
+[    8.677304]  mmcblk2: p1
+[    9.622918] mmc2: tuning execution failed: -5
+[    9.627385] mmc2: card 0001 removed
+
+It is interesting to see the "execution failed" error when *removing*
+the card. Before removing, access to the card seems fine. I haven't
+checked further, so I can't say yet if this is a related or seperate but
+now undiscovered issue.
+
+Thanks for the work so far!
+
+   Wolfram
+
+--9gvrP1qfpxRahseQ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmClH/EACgkQFA3kzBSg
+KbYNGhAAoeW+mQOJt9GrEDU3PzlG21py9TLWf/+zFylvZ496n8/PjjiUhAlfrQyB
+8H/0TVPhwnql952CNljp7XTlvwrVy3I24EpdS67PXSPr5G73ZEDGEOcs70A2XDnn
+WZTgk2s08KEnxOjfezStkHpeqs9VzpN2N1Le1jme7VniBQDlwAG+2WF2yk/UiQy3
+gmZXiT74F/a51L/+0Gz0P/WLwcVvsXP5FhRI6ZzfP5Y1UB23Q0z80k/BRmm7DbsI
+XZwhyPm3xinZsRg2Lr6H2vz5AZbRsbnN8PRa7MlsCIkoYBid9T31drOAfL3xS0Pn
+TgA/MJ6f3TuhneKvtkt/Ue6vPmTPLlDdv0ngesIq3kBwKHofkuUqDNkw3s+JfOmA
+hprFhPzqNilkFix227bTaxIHV+Ez0D45S2R+Q/gg2vNlEeryhdZ5pfkXBxQbJnTn
+1DnKPFjNhuD7KTd3d9/jxBVacYK4aAqNlyzh0+o+qU0A1LZhTcNjDjcZlbxT2wdr
+ok3OmIwDcULmaKl5Flmv1+06HeMa7kM/sP+78/AG/tNrVqAe1fHlHF/8/tllGbUa
+i3/sPJhqDeKgT/BYCW5PcFdfmkvUOU35T5331oXti0WRbf0IYRpDaVgT2h/Q6C+k
+LjMDFj2Hxx6qC7wFgfir0v3AsH3D8qrMZ6OepZKcl9JZxHaEZE4=
+=0fIV
+-----END PGP SIGNATURE-----
+
+--9gvrP1qfpxRahseQ--
