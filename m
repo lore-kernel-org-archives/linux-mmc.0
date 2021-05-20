@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9A4EC433ED
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 May 2021 07:38:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C78DC433B4
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 May 2021 08:28:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C3C2560FE6
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 May 2021 07:38:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E991A610A2
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 May 2021 08:28:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229953AbhETHkQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 May 2021 03:40:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48056 "EHLO
+        id S231163AbhETIaM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 May 2021 04:30:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229534AbhETHkQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 May 2021 03:40:16 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78AF3C061574;
-        Thu, 20 May 2021 00:38:55 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id gb21-20020a17090b0615b029015d1a863a91so4976305pjb.2;
-        Thu, 20 May 2021 00:38:55 -0700 (PDT)
+        with ESMTP id S230102AbhETIaM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 May 2021 04:30:12 -0400
+Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 399CDC061574;
+        Thu, 20 May 2021 01:28:50 -0700 (PDT)
+Received: by mail-pg1-x534.google.com with SMTP id l70so11341844pga.1;
+        Thu, 20 May 2021 01:28:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=oiPsJNGM4sCbj6djsRajsc6kTack1LF/u3c+wT1/9g0=;
-        b=tH68u/7OQRmhRmsRDWCeJIPONTuTrp73VMorKn+Thvup8aVIhdrDz2fBa2k2JuQAjs
-         6ab1GxZIqkJMGgOV/GWmQgF5pUJrRr2m6s+w6aOxOGJXFD64Lcm7jCWKk5Dgsxys25LS
-         PliVWS/5IBWHQnAGBsIFl/7pbAwXOSHqCqu0h3Yn/U4iOO+yDbb5cbplgwc6VV9KhLMu
-         zAuHTvaGy8snYnucg0bRHbf+CTUIO9keVY+uVwPc/FIbSCcT/MT6+aS2GbafviZDx/3K
-         3962eWM7JAw8q2CcsU7YWaXU0IbpHLK57kIvNphJfSU0XjQa7ZIRswlYhBLAA1hzcDdi
-         Jv5w==
+        bh=fNwm3g2gLFqW8k/J4MYUNInnUysaFCvyxZVIOLPuoQA=;
+        b=ZFaDgpVXYaNuSzlkV41plByij9nWPuAmXof4XR1HU6+duXJoJBuV84GJ01CBhu2DXO
+         933HcUeKHcxoefuhn0we4XLpvgN75gjSnrxn4dz1FB4zttZDm/cE7/fGbP38Yc+nBor1
+         L69JxyKZmd6paywpYWgSbwfLbJVvKGlgjQQM83bZRa3StxCsgfE3F4DVOS2mSFHqY031
+         OMGtz9ZyL3q/0jffnUVOeDJAdaJ9v4DAlXEFChMHqqFmfGzpl7hMQD9PQheoKsxbOSUK
+         x/Y/qDMDdp/ebhsmCo92XvHvthdIb0m9qLqMqEYkFu9ExZ6wjFHFvGNeZW6uE+rwO2MH
+         cIKg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=oiPsJNGM4sCbj6djsRajsc6kTack1LF/u3c+wT1/9g0=;
-        b=Y0Ndh8ZkdccvF5UwlrLhkL1py/T0Bs/tXcnsWRRS3ZPlHCkIR1Rjp4guNDUBSTqLYb
-         sdI6AOj30B045/c1WBaZ3X25gb1r1Y5luWLJgPuvXhI2/Z+Mg/PLbf/bPucTAwvoUCsv
-         swjw7A007jpL5Pzn2aZs2xSDeRdUMCnAglygPI4shoodK4zxa1fU0QpFiPUA2uNw9Rhb
-         LLeQY9vMBLjzbG4Z6u9ltTenBNXQ9FD7Wr1J8EjwwWoHJi6VIGQGddGTTX0RM+iR6SXZ
-         SlKuVtroT36PhQy2oKuEqKDFIearbszduv8UHP/Pz5XREFjoslySWc380yc9/Xf3wAVa
-         inlw==
-X-Gm-Message-State: AOAM530ub1EuwukG+4HjAqZm7TUh6tiINGncLgwrSK7N2oD/XKPWmgcz
-        9KGf8n3RiYQpQW1f8j8gg+s=
-X-Google-Smtp-Source: ABdhPJzJZ1O/rsUSwqE7oxekfDWUS/KFyIrVfXdIVoDq8locd+XLepYve+7fFVvZrNb2dfxqcDK+EA==
-X-Received: by 2002:a17:90a:c7d5:: with SMTP id gf21mr3820930pjb.87.1621496334941;
-        Thu, 20 May 2021 00:38:54 -0700 (PDT)
+        bh=fNwm3g2gLFqW8k/J4MYUNInnUysaFCvyxZVIOLPuoQA=;
+        b=UmqdcxaBHGn1ulZDAD5O/2tBPoOoe5pj2FpScqdsjRugnICrdEArMt71I35S3MpGPz
+         Z8pwh6jEz68BWKmps7EHErb/I19tMh3E+FE5L8xHccTsifdqM0bBxhjrIXTvQfKZZQAL
+         2+OlqI3qFhta3sDpjIGE47wEvtbHuhkuG5KyWOYCm3qqb7USvD1wmRXhaBfl5+8cjQ2n
+         HSHKXinxodcfD9BHo4oZ/DT9CvFm/2qLJD/X4yzdfI06baUzEb1OA2DiFrA/2uq8OkrX
+         IgTWiKYKxAULwglNeiVxZSp8v/3+qgSUzqSlbmWw2SDPVF+6Cg3sANAM2k3BT/2sdkuV
+         1g0w==
+X-Gm-Message-State: AOAM531NtDjOQh/92EPQdzbSlj74LJ/YE1+J1gi7DntlHkzRjMkjljBu
+        MZaF0v3x3qptuHVuJlf3xWI=
+X-Google-Smtp-Source: ABdhPJxKUqhNAMI/a9ElcGAkHhLNDjlzSXgYUbm339j9dziYqgOM6jnbw17qfzJG1YvxI726dIqk5w==
+X-Received: by 2002:aa7:8d46:0:b029:2de:75aa:1964 with SMTP id s6-20020aa78d460000b02902de75aa1964mr3345424pfe.61.1621499329670;
+        Thu, 20 May 2021 01:28:49 -0700 (PDT)
 Received: from tj.ccdomain.com ([103.220.76.197])
-        by smtp.gmail.com with ESMTPSA id g4sm1289746pgu.46.2021.05.20.00.38.53
+        by smtp.gmail.com with ESMTPSA id r11sm1427887pgl.34.2021.05.20.01.28.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 May 2021 00:38:54 -0700 (PDT)
+        Thu, 20 May 2021 01:28:49 -0700 (PDT)
 From:   Yue Hu <zbestahu@gmail.com>
 To:     ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         huyue2@yulong.com, zbestahu@163.com
-Subject: [PATCH] mmc: core: Return err directly if mmc_wait_for_cmd() fails
-Date:   Thu, 20 May 2021 15:38:46 +0800
-Message-Id: <20210520073846.1920-1-zbestahu@gmail.com>
+Subject: [PATCH] mmc: core: Use ternery for return value in mmc_vdd_to_ocrbitnum()
+Date:   Thu, 20 May 2021 16:28:37 +0800
+Message-Id: <20210520082837.2129-1-zbestahu@gmail.com>
 X-Mailer: git-send-email 2.29.2.windows.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -72,35 +72,28 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yue Hu <huyue2@yulong.com>
 
-We do not care the '*rocr' when mmc_send_op_cond() fails.
+Just simplify the code.
 
 Signed-off-by: Yue Hu <huyue2@yulong.com>
 ---
- drivers/mmc/core/mmc_ops.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/core/core.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 5756781..b282998 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -180,7 +180,7 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 	for (i = 100; i; i--) {
- 		err = mmc_wait_for_cmd(host, &cmd, 0);
- 		if (err)
--			break;
-+			goto out;
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index f194940..600543c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1028,9 +1028,7 @@ static int mmc_vdd_to_ocrbitnum(int vdd, bool low_bits)
  
- 		/* wait until reset completes */
- 		if (mmc_host_is_spi(host)) {
-@@ -208,7 +208,7 @@ int mmc_send_op_cond(struct mmc_host *host, u32 ocr, u32 *rocr)
- 
- 	if (rocr && !mmc_host_is_spi(host))
- 		*rocr = cmd.resp[0];
--
-+out:
- 	return err;
+ 	/* Base 2000 mV, step 100 mV, bit's base 8. */
+ 	bit = (vdd - 2000) / 100 + 8;
+-	if (bit > max_bit)
+-		return max_bit;
+-	return bit;
++	return (bit > max_bit) ? max_bit : bit;
  }
  
+ /**
 -- 
 1.9.1
 
