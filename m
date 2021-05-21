@@ -2,128 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CDFBC433B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 03:44:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7683CC433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:51:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 044CE61074
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 03:44:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A80660FD8
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:51:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238854AbhEUDqK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 May 2021 23:46:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37298 "EHLO
+        id S234048AbhEUFxF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 May 2021 01:53:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37182 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236995AbhEUDqJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 May 2021 23:46:09 -0400
-Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DFCCC061574;
-        Thu, 20 May 2021 20:44:45 -0700 (PDT)
-Received: by mail-pl1-x633.google.com with SMTP id b7so6084960plg.0;
-        Thu, 20 May 2021 20:44:45 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=z0iuTAtArXUnn+cQyamTGlq74FP5MQC6oeVD30RjaVI=;
-        b=awAEFn7OK+ophw7i2hWOTlvDf8ox4NW/Yyoisu4q1iAy9cDIelHE7tW1eDvQrvuqkj
-         asWWM5QGdMQg0iI4KlxN04kViyi7abl9h/gN+2JDhpcp34I6VDXKJz6n7Lx4lIJd/+Ra
-         bqoWrBVcv0k57V09brPLAEEmXR0CiGukIe2YGZpfpASj5YzeXqsTQz1smO3hZgHdbLER
-         oyIZJedDzfrJ+rkJDFMcUodKgKfXpqWLlp5D6qLDdI9aDcAql6creXT5sMN025hwHlWA
-         KPXQasJi+L/Aa5cEsf09+w0fhHW2Z1HAQCbYHLoB/rupL8CrbcsFn/eJRmCXXx380Ezx
-         OyFg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=z0iuTAtArXUnn+cQyamTGlq74FP5MQC6oeVD30RjaVI=;
-        b=aB6LZb1ql9UKq0B26jKexKlo4g5Pkdg1eySOpLrjpKAYqQghUMWemxV6pZBCYlMbAk
-         GzCIBTXcJdlg3r5InhjoNY2MfMbnDfZlZ0XKv2UKVUak3GgRn+CddawmJHD/kJYTrrI0
-         LuLka5a0F1iZAoGfiS+wmRtDLhuET9wcy4qPOMAkYqei8wlzahGqu28JI0iM+nv8E9bh
-         FxGKXqFmj963A99aRjuz8/84VqMMepynNFnub4qAZ6tzU2AYNp2iZ+1OdcUtrmbjdfxh
-         2lNLkpLVgQnlRPrYYMze/xNstRUl/RQAYFq6jfriePgiv3kx6M5Dpsgooq5I24kGbJEm
-         GMFg==
-X-Gm-Message-State: AOAM533UXWWiGikqMlsmCjUecPTQnYufnx9qkXHVtDqFyL1kkUyB9Chp
-        YGUJqZ5QbR6JeRvP/7kAiQhhz4wRpU7dPQ==
-X-Google-Smtp-Source: ABdhPJyJJMoaM1CdO00dK9FS2DVD1M7xBI4mTCj2qczhECDgxrXrtXWc2ec4/5WSZspKV+FAHumfgg==
-X-Received: by 2002:a17:90a:db51:: with SMTP id u17mr8444329pjx.222.1621568684410;
-        Thu, 20 May 2021 20:44:44 -0700 (PDT)
-Received: from tj.ccdomain.com ([103.220.76.197])
-        by smtp.gmail.com with ESMTPSA id y20sm2495501pfn.164.2021.05.20.20.44.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 20 May 2021 20:44:43 -0700 (PDT)
-From:   Yue Hu <zbestahu@gmail.com>
-To:     adrian.hunter@intel.com, riteshh@codeaurora.org,
-        asutoshd@codeaurora.org, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        huyue2@yulong.com, zbestahu@163.com
-Subject: [PATCH] mmc: cqhci: introduce get_trans_desc_offset()
-Date:   Fri, 21 May 2021 11:44:32 +0800
-Message-Id: <20210521034432.2321-1-zbestahu@gmail.com>
-X-Mailer: git-send-email 2.29.2.windows.3
+        with ESMTP id S232090AbhEUFxF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 01:53:05 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5FA8C061574;
+        Thu, 20 May 2021 22:51:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:
+        Content-ID:Content-Description:In-Reply-To:References;
+        bh=1uf84BS8Q7NSBXg1yQR5EC+qaCg2ZgLYmuXoDkaPjCQ=; b=yVac5N8yUOzpUTxL5O1tvL86te
+        m3UAUEPJY/af59veHnMPwBOnJ7BRLcZrKIKt8Dh7YPbjkftLfLGTS4VhKOyyyjq3VjpC44ktitdB9
+        IGcelhE3Oa213g7yVLse3bazcfqBPE0AjzvZkAoIGc9XTXbidpJpsbluOmOOc3JrOP6KXc8MYblK4
+        oHQQgY+u4rceYmhcSMGEEbuC03JwZPicLhzcbKv5cdyhrdklHJY1gLYGuEEO6TAkLoGvvppviy5Hp
+        K3tkB8PLSkhH6CJEnd2fuR+rb3FAaFtYutga3kk4PwncNu4+e+dofRaE7iKfkJNVvZr+BYooXFvLx
+        bVfJReyA==;
+Received: from [2001:4bb8:180:5add:4fd7:4137:d2f2:46e6] (helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.94 #2 (Red Hat Linux))
+        id 1ljy3s-00Gpw6-Eq; Fri, 21 May 2021 05:51:04 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Chris Zankel <chris@zankel.net>,
+        Max Filippov <jcmvbkbc@gmail.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Lars Ellenberg <lars.ellenberg@linbit.com>,
+        Jim Paris <jim@jtan.com>,
+        Joshua Morris <josh.h.morris@us.ibm.com>,
+        Philip Kelleher <pjk1939@linux.ibm.com>,
+        Minchan Kim <minchan@kernel.org>,
+        Nitin Gupta <ngupta@vflare.org>,
+        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
+        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>
+Cc:     linux-block@vger.kernel.org, dm-devel@redhat.com,
+        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
+        drbd-dev@lists.linbit.com,
+        linuxppc-dev@lists.ozlabs.org (open list:PS3 PLATFORM SUPPORT),
+        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
+        linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
+        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
+Subject: simplify gendisk and request_queue allocation for bio based drivers
+Date:   Fri, 21 May 2021 07:50:35 +0200
+Message-Id: <20210521055102.1053529-1-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Yue Hu <huyue2@yulong.com>
+Hi all,
 
-The same calculation to get transfer descriptor offset is already used
-at 3 different locations. Let's create a new helper to simplify code.
+this series is the first part of cleaning up lifetimes and allocation of
+the gendisk and request_queue structure.  It adds a new interface to
+allocate the disk and queue together for bio based drivers, and a helper
+for cleanup/free them when a driver is unloaded or a device is removed.
 
-Signed-off-by: Yue Hu <huyue2@yulong.com>
----
- drivers/mmc/host/cqhci-core.c | 19 ++++++++++++-------
- 1 file changed, 12 insertions(+), 7 deletions(-)
+Together this removes the need to treat the gendisk and request_queue
+as separate entities for bio based drivers.
 
-diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-index c237b6e..1128dd5 100644
---- a/drivers/mmc/host/cqhci-core.c
-+++ b/drivers/mmc/host/cqhci-core.c
-@@ -45,17 +45,23 @@ static inline u8 *get_link_desc(struct cqhci_host *cq_host, u8 tag)
- 	return desc + cq_host->task_desc_len;
- }
- 
-+static inline size_t get_trans_desc_offset(struct cqhci_host *cq_host, u8 tag)
-+{
-+	return cq_host->trans_desc_len * cq_host->mmc->max_segs * tag;
-+}
-+
- static inline dma_addr_t get_trans_desc_dma(struct cqhci_host *cq_host, u8 tag)
- {
--	return cq_host->trans_desc_dma_base +
--		(cq_host->mmc->max_segs * tag *
--		 cq_host->trans_desc_len);
-+	size_t offset = get_trans_desc_offset(cq_host, tag);
-+
-+	return cq_host->trans_desc_dma_base + offset;
- }
- 
- static inline u8 *get_trans_desc(struct cqhci_host *cq_host, u8 tag)
- {
--	return cq_host->trans_desc_base +
--		(cq_host->trans_desc_len * cq_host->mmc->max_segs * tag);
-+	size_t offset = get_trans_desc_offset(cq_host, tag);
-+
-+	return cq_host->trans_desc_base + offset;
- }
- 
- static void setup_trans_desc(struct cqhci_host *cq_host, u8 tag)
-@@ -194,8 +200,7 @@ static int cqhci_host_alloc_tdl(struct cqhci_host *cq_host)
- 
- 	cq_host->desc_size = cq_host->slot_sz * cq_host->num_slots;
- 
--	cq_host->data_size = cq_host->trans_desc_len * cq_host->mmc->max_segs *
--		cq_host->mmc->cqe_qdepth;
-+	cq_host->data_size = get_trans_desc_offset(cq_host, cq_host->mmc->cqe_qdepth);
- 
- 	pr_debug("%s: cqhci: desc_size: %zu data_sz: %zu slot-sz: %d\n",
- 		 mmc_hostname(cq_host->mmc), cq_host->desc_size, cq_host->data_size,
--- 
-1.9.1
-
+Diffstat:
+ arch/m68k/emu/nfblock.c             |   20 +---
+ arch/xtensa/platforms/iss/simdisk.c |   29 +------
+ block/blk-core.c                    |    1 
+ block/blk.h                         |    6 -
+ block/genhd.c                       |  149 +++++++++++++++++++-----------------
+ block/partitions/core.c             |   19 ++--
+ drivers/block/brd.c                 |   94 +++++++---------------
+ drivers/block/drbd/drbd_main.c      |   23 +----
+ drivers/block/n64cart.c             |    8 -
+ drivers/block/null_blk/main.c       |   38 ++++-----
+ drivers/block/pktcdvd.c             |   11 --
+ drivers/block/ps3vram.c             |   31 +------
+ drivers/block/rsxx/dev.c            |   39 +++------
+ drivers/block/rsxx/rsxx_priv.h      |    1 
+ drivers/block/zram/zram_drv.c       |   19 ----
+ drivers/lightnvm/core.c             |   24 +----
+ drivers/md/bcache/super.c           |   15 ---
+ drivers/md/dm.c                     |   16 +--
+ drivers/md/md.c                     |   25 ++----
+ drivers/memstick/core/ms_block.c    |    1 
+ drivers/nvdimm/blk.c                |   27 +-----
+ drivers/nvdimm/btt.c                |   25 +-----
+ drivers/nvdimm/btt.h                |    2 
+ drivers/nvdimm/pmem.c               |   17 +---
+ drivers/nvme/host/core.c            |    1 
+ drivers/nvme/host/multipath.c       |   46 +++--------
+ drivers/s390/block/dcssblk.c        |   26 +-----
+ drivers/s390/block/xpram.c          |   26 ++----
+ include/linux/blkdev.h              |    1 
+ include/linux/genhd.h               |   23 +++++
+ 30 files changed, 297 insertions(+), 466 deletions(-)
