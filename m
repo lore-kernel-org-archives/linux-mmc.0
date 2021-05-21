@@ -7,35 +7,36 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C634FC433B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 00:59:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D8EAC433ED
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 01:02:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9607060200
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 00:59:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E6C061355
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 01:02:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235805AbhEUBBC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 May 2021 21:01:02 -0400
-Received: from szxga05-in.huawei.com ([45.249.212.191]:3607 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235596AbhEUBBC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 May 2021 21:01:02 -0400
-Received: from dggems702-chm.china.huawei.com (unknown [172.30.72.60])
-        by szxga05-in.huawei.com (SkyGuard) with ESMTP id 4FmSpb19dgzQnbq;
-        Fri, 21 May 2021 08:56:07 +0800 (CST)
+        id S235875AbhEUBEM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 May 2021 21:04:12 -0400
+Received: from szxga04-in.huawei.com ([45.249.212.190]:5706 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235865AbhEUBEM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 May 2021 21:04:12 -0400
+Received: from dggems705-chm.china.huawei.com (unknown [172.30.72.58])
+        by szxga04-in.huawei.com (SkyGuard) with ESMTP id 4FmStF2257zqVWP;
+        Fri, 21 May 2021 08:59:17 +0800 (CST)
 Received: from dggeme759-chm.china.huawei.com (10.3.19.105) by
- dggems702-chm.china.huawei.com (10.3.19.179) with Microsoft SMTP Server
+ dggems705-chm.china.huawei.com (10.3.19.182) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id
- 15.1.2176.2; Fri, 21 May 2021 08:59:38 +0800
+ 15.1.2176.2; Fri, 21 May 2021 09:02:48 +0800
 Received: from localhost.localdomain (10.69.192.56) by
  dggeme759-chm.china.huawei.com (10.3.19.105) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2176.2; Fri, 21 May 2021 08:59:38 +0800
+ 15.1.2176.2; Fri, 21 May 2021 09:02:48 +0800
 From:   Tian Tao <tiantao6@hisilicon.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>
+To:     <kishon@ti.com>, <adrian.hunter@intel.com>,
+        <ulf.hansson@linaro.org>
 CC:     <linux-mmc@vger.kernel.org>, Tian Tao <tiantao6@hisilicon.com>
-Subject: [PATCH] mmc: sdhci_am654: Use pm_runtime_resume_and_get() to replace open coding
-Date:   Fri, 21 May 2021 08:59:35 +0800
-Message-ID: <1621558775-31185-1-git-send-email-tiantao6@hisilicon.com>
+Subject: [PATCH] mmc: sdhci-omap: Use pm_runtime_resume_and_get() to replace open coding
+Date:   Fri, 21 May 2021 09:02:45 +0800
+Message-ID: <1621558965-34077-1-git-send-email-tiantao6@hisilicon.com>
 X-Mailer: git-send-email 2.7.4
 MIME-Version: 1.0
 Content-Type: text/plain
@@ -53,27 +54,26 @@ actual functional changes.
 
 Signed-off-by: Tian Tao <tiantao6@hisilicon.com>
 ---
- drivers/mmc/host/sdhci_am654.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/host/sdhci-omap.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 1fad6e4..f654afb 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -809,11 +809,9 @@ static int sdhci_am654_probe(struct platform_device *pdev)
- 
- 	/* Clocks are enabled using pm_runtime */
+diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+index 7893fd3..8f4d1f0 100644
+--- a/drivers/mmc/host/sdhci-omap.c
++++ b/drivers/mmc/host/sdhci-omap.c
+@@ -1173,10 +1173,9 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+ 	 * as part of pm_runtime_get_sync.
+ 	 */
  	pm_runtime_enable(dev);
 -	ret = pm_runtime_get_sync(dev);
 -	if (ret < 0) {
--		pm_runtime_put_noidle(dev);
 +	ret = pm_runtime_resume_and_get(dev);
-+	if (ret)
- 		goto pm_runtime_disable;
--	}
++	if (ret) {
+ 		dev_err(dev, "pm_runtime_get_sync failed\n");
+-		pm_runtime_put_noidle(dev);
+ 		goto err_rpm_disable;
+ 	}
  
- 	base = devm_platform_ioremap_resource(pdev, 1);
- 	if (IS_ERR(base)) {
 -- 
 2.7.4
 
