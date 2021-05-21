@@ -7,34 +7,34 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DD41C43617
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:52:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1C43C18E7B
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:53:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74CA5613B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:52:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 82A20613B6
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:53:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237212AbhEUFyR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 May 2021 01:54:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37406 "EHLO
+        id S236436AbhEUFyU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 May 2021 01:54:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37340 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235804AbhEUFxv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 01:53:51 -0400
+        with ESMTP id S235760AbhEUFyI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 01:54:08 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C588C06138F;
-        Thu, 20 May 2021 22:52:29 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A30EAC061574;
+        Thu, 20 May 2021 22:52:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=Dqzt1SgIuEv7176F2n2goXjtUgv5IYzpCnDSj1m18LI=; b=zbuRIfQxiNNx1Xt4keqjwvqG5+
-        GpYWX+tYMl+zszl52DxPUhNljjrHazBTMZAsVnGGdP7pTPmVqt8MOybyaoFJ2sZ2WnpP09U+9rq2W
-        kAR9KJuaSq8hqiT8PfZbqlpDd7Yu9tLXZxXNzJ1OlIomaoDXWhS1BIrrDbOu5sJL3RkgOM81Ee79j
-        Ftg0HdTx2tJqsgrNqv8ugfIYFFqJCJFQO837B5dgogpmBiwJWJ3Yl7YOHQ6g/qHWYzhhe7MJZOPsj
-        d6S5vZ60k9oOpp3j45PrXSGfcrmSAFFLyW+IkR1IijgDzLCdYYPyAdPt/Qsol4+8QJzXgwbvQoZss
-        3hrezbFA==;
+        bh=vGGmPVsg0Hwe3PzyV/3vzWDaoNkxLSJwA2Ye8FU/Xsg=; b=IhLQ/YsNSSUaMfPV9LePQHzZG2
+        Iy11LbmI1sSm+9idhhzNqC6Gfvduf0n7DD/sJemhA0c1G6gZtAPG+NgPwB14oKpDsHbFSv6wqBGYD
+        z9NlRBYO7hqe4boYDX3qNLCP4SbaTEyoaFArMuKVD/E5z3RyTZPfs0Ksre+VjArTMK0OCsTLRsl3e
+        k+gZcg+pC3d86mLa4BbUNZHOAO14SQUeiC907RPGSCiihb8QAhmciozca1qxluSs9Fr70l2NacxpU
+        YduJVosXj+jsBg92Mla8olP9CbCdZKujA0wBD8gEQetNm/e7QvJTi8aCRsmG8S2/DYpea4hjHjssP
+        FETQIesg==;
 Received: from [2001:4bb8:180:5add:4fd7:4137:d2f2:46e6] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94 #2 (Red Hat Linux))
-        id 1ljy50-00Gq7o-Ng; Fri, 21 May 2021 05:52:15 +0000
+        id 1ljy5C-00GqC1-R7; Fri, 21 May 2021 05:52:27 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
@@ -64,9 +64,9 @@ Cc:     linux-block@vger.kernel.org, dm-devel@redhat.com,
         linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
         linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
         linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
-Subject: [PATCH 18/26] nvme-multipath: convert to blk_alloc_disk/blk_cleanup_disk
-Date:   Fri, 21 May 2021 07:51:08 +0200
-Message-Id: <20210521055116.1053587-19-hch@lst.de>
+Subject: [PATCH 21/26] n64cart: convert to blk_alloc_disk
+Date:   Fri, 21 May 2021 07:51:11 +0200
+Message-Id: <20210521055116.1053587-22-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210521055116.1053587-1-hch@lst.de>
 References: <20210521055116.1053587-1-hch@lst.de>
@@ -77,104 +77,34 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the nvme-multipath driver to use the blk_alloc_disk and
-blk_cleanup_disk helpers to simplify gendisk and request_queue
-allocation.
+Convert the n64cart driver to use the blk_alloc_disk helper to simplify
+gendisk and request_queue allocation.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/nvdimm/pmem.c         |  1 -
- drivers/nvme/host/multipath.c | 45 ++++++++++-------------------------
- 2 files changed, 13 insertions(+), 33 deletions(-)
+ drivers/block/n64cart.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
-diff --git a/drivers/nvdimm/pmem.c b/drivers/nvdimm/pmem.c
-index 9fcd05084564..31f3c4bd6f72 100644
---- a/drivers/nvdimm/pmem.c
-+++ b/drivers/nvdimm/pmem.c
-@@ -472,7 +472,6 @@ static int pmem_attach_disk(struct device *dev,
- 		blk_queue_flag_set(QUEUE_FLAG_DAX, q);
+diff --git a/drivers/block/n64cart.c b/drivers/block/n64cart.c
+index 3dae4b631dea..7b4dd10af9ec 100644
+--- a/drivers/block/n64cart.c
++++ b/drivers/block/n64cart.c
+@@ -132,14 +132,10 @@ static int __init n64cart_probe(struct platform_device *pdev)
+ 	if (!reg_base)
+ 		return -EINVAL;
  
- 	disk->fops		= &pmem_fops;
--	disk->queue		= q;
- 	disk->private_data	= pmem;
- 	nvdimm_namespace_disk_name(ndns, disk->disk_name);
- 	set_capacity(disk, (pmem->size - pmem->pfn_pad - pmem->data_offset)
-diff --git a/drivers/nvme/host/multipath.c b/drivers/nvme/host/multipath.c
-index a5d02f236cca..b5fbdb416022 100644
---- a/drivers/nvme/host/multipath.c
-+++ b/drivers/nvme/host/multipath.c
-@@ -427,7 +427,6 @@ static void nvme_requeue_work(struct work_struct *work)
+-	disk = alloc_disk(0);
++	disk = blk_alloc_disk(NUMA_NO_NODE);
+ 	if (!disk)
+ 		return -ENOMEM;
  
- int nvme_mpath_alloc_disk(struct nvme_ctrl *ctrl, struct nvme_ns_head *head)
- {
--	struct request_queue *q;
- 	bool vwc = false;
- 
- 	mutex_init(&head->lock);
-@@ -443,33 +442,24 @@ int nvme_mpath_alloc_disk(struct nvme_ctrl *ctrl, struct nvme_ns_head *head)
- 	if (!(ctrl->subsys->cmic & NVME_CTRL_CMIC_MULTI_CTRL) || !multipath)
- 		return 0;
- 
--	q = blk_alloc_queue(ctrl->numa_node);
--	if (!q)
--		goto out;
--	blk_queue_flag_set(QUEUE_FLAG_NONROT, q);
--	/* set to a default value for 512 until disk is validated */
--	blk_queue_logical_block_size(q, 512);
--	blk_set_stacking_limits(&q->limits);
+-	disk->queue = blk_alloc_queue(NUMA_NO_NODE);
+-	if (!disk->queue)
+-		return -ENOMEM;
 -
--	/* we need to propagate up the VMC settings */
--	if (ctrl->vwc & NVME_CTRL_VWC_PRESENT)
--		vwc = true;
--	blk_queue_write_cache(q, vwc, vwc);
--
--	head->disk = alloc_disk(0);
-+	head->disk = blk_alloc_disk(ctrl->numa_node);
- 	if (!head->disk)
--		goto out_cleanup_queue;
-+		return -ENOMEM;
- 	head->disk->fops = &nvme_ns_head_ops;
- 	head->disk->private_data = head;
--	head->disk->queue = q;
- 	sprintf(head->disk->disk_name, "nvme%dn%d",
- 			ctrl->subsys->instance, head->instance);
--	return 0;
- 
--out_cleanup_queue:
--	blk_cleanup_queue(q);
--out:
--	return -ENOMEM;
-+	blk_queue_flag_set(QUEUE_FLAG_NONROT, head->disk->queue);
-+	/* set to a default value of 512 until the disk is validated */
-+	blk_queue_logical_block_size(head->disk->queue, 512);
-+	blk_set_stacking_limits(&head->disk->queue->limits);
-+
-+	/* we need to propagate up the VMC settings */
-+	if (ctrl->vwc & NVME_CTRL_VWC_PRESENT)
-+		vwc = true;
-+	blk_queue_write_cache(head->disk->queue, vwc, vwc);
-+	return 0;
- }
- 
- static void nvme_mpath_set_live(struct nvme_ns *ns)
-@@ -768,16 +758,7 @@ void nvme_mpath_remove_disk(struct nvme_ns_head *head)
- 	/* make sure all pending bios are cleaned up */
- 	kblockd_schedule_work(&head->requeue_work);
- 	flush_work(&head->requeue_work);
--	blk_cleanup_queue(head->disk->queue);
--	if (!test_bit(NVME_NSHEAD_DISK_LIVE, &head->flags)) {
--		/*
--		 * if device_add_disk wasn't called, prevent
--		 * disk release to put a bogus reference on the
--		 * request queue
--		 */
--		head->disk->queue = NULL;
--	}
--	put_disk(head->disk);
-+	blk_cleanup_disk(head->disk);
- }
- 
- void nvme_mpath_init_ctrl(struct nvme_ctrl *ctrl)
+ 	disk->first_minor = 0;
+ 	disk->flags = GENHD_FL_NO_PART_SCAN;
+ 	disk->fops = &n64cart_fops;
 -- 
 2.30.2
 
