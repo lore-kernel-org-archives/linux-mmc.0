@@ -2,63 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 126A1C47078
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 16:34:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1614C4707C
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 17:16:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D7D20613C8
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 16:34:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9562261163
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 17:16:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237549AbhEUQgM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 May 2021 12:36:12 -0400
-Received: from mail.kernel.org ([198.145.29.99]:37738 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237395AbhEUQgL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 21 May 2021 12:36:11 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPS id 16CDB613E6;
-        Fri, 21 May 2021 16:34:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1621614888;
-        bh=xYpb4gyKseV64RajILMPIRDgYSNJeMMS1yswPaXbBWE=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=hlfIv3CYLw2lBlf6O4trnR+KCKxuKWBgAtULNtrN2SvVUPz840kkm1UoqAMXA306T
-         KxB6vLCynMLn6cdqC9DYBD6E9s3JbaCIbrKkFzSR38eR44W9LKbqfu0wjw4QugjjAS
-         eu9rL8JGRQ+bYelHqnJsbATAUmkhKOg+me2qOtq2dNoCz+c2yq6psPKW14jCLuia/f
-         csHgs608uTPM81nU0FWpMMlra9tYQn1sRLMGakeglKD6KP/9UdKuyMvrKNEbRyC+Ml
-         2xbjlCRvVC4vWSTzFbP53kpIMXre95uWNbXPv1lQr9Joold+pQMXksRFGls2LOOWEQ
-         AfEPhaoqYMtfg==
-Subject: Re: [GIT PULL] MMC fixes for v5.13-rc3
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20210521102540.104166-1-ulf.hansson@linaro.org>
-References: <20210521102540.104166-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20210521102540.104166-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.13-rc1
-X-PR-Tracked-Commit-Id: a1149a6c06ee094a6e62886b0c0e8e66967a728a
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 011ff616ffe8df6b86ee54d14a43c8d1a96a6325
-Message-Id: <162161488804.28405.14172591769191127057.pr-tracker-bot@kernel.org>
-Date:   Fri, 21 May 2021 16:34:48 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        id S229865AbhEURSN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 May 2021 13:18:13 -0400
+Received: from mail-pl1-f173.google.com ([209.85.214.173]:34801 "EHLO
+        mail-pl1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230051AbhEURSM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 13:18:12 -0400
+Received: by mail-pl1-f173.google.com with SMTP id e15so4699241plh.1;
+        Fri, 21 May 2021 10:16:49 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=/6CTfoP+3YhIDA2Sa2Vg3MwIl/4IQc5OvLMHtpk2uwk=;
+        b=uUL5NavBU2xwKN6mGV5kA8d9Gkt0Qux+tv7X+/hrXJEiwJ7untsMp6/UHMOsol0vL2
+         G7yCZX8gj9KJHM6rmUoAV50awHqUUJukNvIO97PoZUpu+zbghal5o14wiNL+QIfvkuS3
+         a0D+IDDgTh+Eb9+5cHAcLa5XNhdiDPE2Db6QkN1h0R8ro07UlNrfjvyA53+4ldUQ2CIN
+         mV2X+6CWXii9CDqEQ1d2N1LprWXbQD1yRn55G/pNWU2O0iVChlquXdgFYnxEMMvR3gn4
+         McUhkITWDOI693qGYEhDc35FYa/UUte8Woo8IeCJKL4AYBafGN/UomaezUAERf9smzSE
+         rA8w==
+X-Gm-Message-State: AOAM5330YeP/FhjIlTGl3J32VNv4eXihG3L574df9UhrEyNGL81wlcGT
+        xm9IW8IQnhiBHGoujk+DcSw=
+X-Google-Smtp-Source: ABdhPJxtynqdEQ1F/D+2PqiHL9NmQC5jqLXgWhG+E7yzr8uLp59ObRLAPQ67LxwzZAhslkMqhOa4cA==
+X-Received: by 2002:a17:90a:590d:: with SMTP id k13mr12082927pji.68.1621617409049;
+        Fri, 21 May 2021 10:16:49 -0700 (PDT)
+Received: from 42.do-not-panic.com (42.do-not-panic.com. [157.230.128.187])
+        by smtp.gmail.com with ESMTPSA id q24sm4964064pgb.19.2021.05.21.10.16.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 May 2021 10:16:47 -0700 (PDT)
+Received: by 42.do-not-panic.com (Postfix, from userid 1000)
+        id 6461E423A3; Fri, 21 May 2021 17:16:46 +0000 (UTC)
+Date:   Fri, 21 May 2021 17:16:46 +0000
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Chris Zankel <chris@zankel.net>,
+        Max Filippov <jcmvbkbc@gmail.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Lars Ellenberg <lars.ellenberg@linbit.com>,
+        Jim Paris <jim@jtan.com>,
+        Joshua Morris <josh.h.morris@us.ibm.com>,
+        Philip Kelleher <pjk1939@linux.ibm.com>,
+        Minchan Kim <minchan@kernel.org>,
+        Nitin Gupta <ngupta@vflare.org>,
+        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
+        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        linux-xtensa@linux-xtensa.org, linux-m68k@vger.kernel.org,
+        linux-raid@vger.kernel.org, nvdimm@lists.linux.dev,
+        linux-s390@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-bcache@vger.kernel.org, linux-nvme@lists.infradead.org,
+        linux-block@vger.kernel.org, dm-devel@redhat.com,
+        drbd-dev@tron.linbit.com, linuxppc-dev@lists.ozlabs.org
+Subject: Re: [dm-devel] [PATCH 01/26] block: refactor device number setup in
+ __device_add_disk
+Message-ID: <20210521171646.GA25017@42.do-not-panic.com>
+References: <20210521055116.1053587-1-hch@lst.de>
+ <20210521055116.1053587-2-hch@lst.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210521055116.1053587-2-hch@lst.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 21 May 2021 12:25:40 +0200:
+On Fri, May 21, 2021 at 07:50:51AM +0200, Christoph Hellwig wrote:
+> diff --git a/block/genhd.c b/block/genhd.c
+> index 39ca97b0edc6..2c00bc3261d9 100644
+> --- a/block/genhd.c
+> +++ b/block/genhd.c
+> @@ -335,52 +335,22 @@ static int blk_mangle_minor(int minor)
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.13-rc1
+<-- snip -->
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/011ff616ffe8df6b86ee54d14a43c8d1a96a6325
+> -int blk_alloc_devt(struct block_device *bdev, dev_t *devt)
+> +int blk_alloc_ext_minor(void)
+>  {
+> -	struct gendisk *disk = bdev->bd_disk;
+>  	int idx;
+>  
+> -	/* in consecutive minor range? */
+> -	if (bdev->bd_partno < disk->minors) {
+> -		*devt = MKDEV(disk->major, disk->first_minor + bdev->bd_partno);
+> -		return 0;
+> -	}
+> -
 
-Thank you!
+It is not obviously clear to me, why this was part of add_disk()
+path, and ...
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+> diff --git a/block/partitions/core.c b/block/partitions/core.c
+> index dc60ecf46fe6..504297bdc8bf 100644
+> --- a/block/partitions/core.c
+> +++ b/block/partitions/core.c
+> @@ -379,9 +380,15 @@ static struct block_device *add_partition(struct gendisk *disk, int partno,
+>  	pdev->type = &part_type;
+>  	pdev->parent = ddev;
+>  
+> -	err = blk_alloc_devt(bdev, &devt);
+> -	if (err)
+> -		goto out_put;
+> +	/* in consecutive minor range? */
+> +	if (bdev->bd_partno < disk->minors) {
+> +		devt = MKDEV(disk->major, disk->first_minor + bdev->bd_partno);
+> +	} else {
+> +		err = blk_alloc_ext_minor();
+> +		if (err < 0)
+> +			goto out_put;
+> +		devt = MKDEV(BLOCK_EXT_MAJOR, err);
+> +	}
+>  	pdev->devt = devt;
+>  
+>  	/* delay uevent until 'holders' subdir is created */
+
+... and why we only add this here now.
+
+Other than that, this looks like a super nice cleanup!
+
+Reviewed-by: Luis Chamberlain <mcgrof@kernel.org>
+
+  Luis
