@@ -2,90 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12306C433ED
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 12:36:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BED8CC433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 13:30:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E4DF7613B6
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 12:36:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F4E561164
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 13:30:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233930AbhEUMiM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 May 2021 08:38:12 -0400
-Received: from smtp02.smtpout.orange.fr ([80.12.242.124]:33067 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234102AbhEUMiI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 08:38:08 -0400
-Received: from localhost.localdomain ([86.243.172.93])
-        by mwinf5d78 with ME
-        id 7Qcg2500H21Fzsu03Qchxh; Fri, 21 May 2021 14:36:44 +0200
-X-ME-Helo: localhost.localdomain
-X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
-X-ME-Date: Fri, 21 May 2021 14:36:44 +0200
-X-ME-IP: 86.243.172.93
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-To:     ulf.hansson@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, wsa+renesas@sang-engineering.com,
-        dianders@chromium.org, rmfrfs@gmail.com, cjb@laptop.org,
-        linux-arm-kernel@lists.infradead.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Subject: [PATCH] mmc: mxs-mmc: Disable the 'reg_vmmc' regulator when needed
-Date:   Fri, 21 May 2021 14:36:39 +0200
-Message-Id: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
-X-Mailer: git-send-email 2.30.2
+        id S234749AbhEUNbw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 May 2021 09:31:52 -0400
+Received: from mail.kernel.org ([198.145.29.99]:47658 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232172AbhEUNbw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 21 May 2021 09:31:52 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 061EF610CB;
+        Fri, 21 May 2021 13:30:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1621603829;
+        bh=DgSfnqgX8iAJF8CgJVRj6UxP6HXcUcoeisNmrM46YX8=;
+        h=From:To:Cc:Subject:Date:From;
+        b=g7OtleNjz6iGFBsYuSb4zRjfyQz9uUglSD21ywr0RyMPosjj6n5UlIP54yur6orbo
+         E2lzAOQzz43sex9CLMHDPZnu6Ar9+Jwm6tpNYQInhIxDJyzN34XxSnSIEcNXPE/M2J
+         Atf7YvlkvzPkbvwtlhXNndUeKLlYR+rchs7mb8yN/NnpcyRDTCkJAZ2Fq5+H7Va1M2
+         CpOukwWo3RGWl40nh5f5cLaFLB3vvGeyhrODLrG/UwUtdxwml/JBCEq6UTRbQzWDu5
+         /1CZPykn3tdxUF2qg5j0glxpdr4nVHZE/lQR5K5HwNDBRAvB1sc1gD399MdwmMf0rX
+         x6/X3jI4Dykdw==
+Received: from johan by xi.lan with local (Exim 4.94.2)
+        (envelope-from <johan@kernel.org>)
+        id 1lk5EU-0004Vh-44; Fri, 21 May 2021 15:30:30 +0200
+From:   Johan Hovold <johan@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Johan Hovold <johan@kernel.org>,
+        stable@vger.kernel.org
+Subject: [PATCH] mmc: vub3000: fix control-request direction
+Date:   Fri, 21 May 2021 15:30:26 +0200
+Message-Id: <20210521133026.17296-1-johan@kernel.org>
+X-Mailer: git-send-email 2.26.3
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The 'reg_vmmc' regulator is never disabled. Neither in the error handling
-of the probe, nor in the remove function.
+The direction of the pipe argument must match the request-type direction
+bit or control requests may fail depending on the host-controller-driver
+implementation.
 
-Add a managed action to do the required clean-up before a 'regulator_put()'
-call.
+Fix the SET_ROM_WAIT_STATES request which erroneously used
+usb_rcvctrlpipe().
 
-Fixes: 4dc5a79f1350 ("mmc: mxs-mmc: enable regulator for mmc slot")
-Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
+Cc: stable@vger.kernel.org      # 3.0
+Signed-off-by: Johan Hovold <johan@kernel.org>
 ---
- drivers/mmc/host/mxs-mmc.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ drivers/mmc/host/vub300.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-index 947581de7860..b043d53dd728 100644
---- a/drivers/mmc/host/mxs-mmc.c
-+++ b/drivers/mmc/host/mxs-mmc.c
-@@ -552,6 +552,13 @@ static const struct of_device_id mxs_mmc_dt_ids[] = {
- };
- MODULE_DEVICE_TABLE(of, mxs_mmc_dt_ids);
- 
-+static void regulator_disable_action(void *_data)
-+{
-+	struct regulator *regulator = _data;
-+
-+	regulator_disable(regulator);
-+}
-+
- static int mxs_mmc_probe(struct platform_device *pdev)
- {
- 	struct device_node *np = pdev->dev.of_node;
-@@ -591,6 +598,10 @@ static int mxs_mmc_probe(struct platform_device *pdev)
- 				"Failed to enable vmmc regulator: %d\n", ret);
- 			goto out_mmc_free;
- 		}
-+		ret = devm_add_action_or_reset(&pdev->dev,
-+					regulator_disable_action, reg_vmmc);
-+		if (ret)
-+			goto out_mmc_free;
- 	}
- 
- 	ssp->clk = devm_clk_get(&pdev->dev, NULL);
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index 739cf63ef6e2..4950d10d3a19 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -2279,7 +2279,7 @@ static int vub300_probe(struct usb_interface *interface,
+ 	if (retval < 0)
+ 		goto error5;
+ 	retval =
+-		usb_control_msg(vub300->udev, usb_rcvctrlpipe(vub300->udev, 0),
++		usb_control_msg(vub300->udev, usb_sndctrlpipe(vub300->udev, 0),
+ 				SET_ROM_WAIT_STATES,
+ 				USB_DIR_OUT | USB_TYPE_VENDOR | USB_RECIP_DEVICE,
+ 				firmware_rom_wait_states, 0x0000, NULL, 0, HZ);
 -- 
-2.30.2
+2.26.3
 
