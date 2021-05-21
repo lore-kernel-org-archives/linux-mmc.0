@@ -5,36 +5,36 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC0C5C43460
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:52:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B90DEC433B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:52:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9B2DE6128A
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:52:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9811F613B4
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 May 2021 05:52:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236584AbhEUFyG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 May 2021 01:54:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37274 "EHLO
+        id S234907AbhEUFyS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 May 2021 01:54:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235392AbhEUFxr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 01:53:47 -0400
+        with ESMTP id S236436AbhEUFyE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 May 2021 01:54:04 -0400
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C0BAC061574;
-        Thu, 20 May 2021 22:52:25 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20772C061343;
+        Thu, 20 May 2021 22:52:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=g6mwX33ahW71DGgnPUME24YpEPNX8JCGIKMP7GFikH8=; b=Ojb1aPpUmy5x20RnAmlaDjjEz1
-        NzzFmwp0AIDELm+ERd+5ViA9IzzZL0NGnqRzmEuITVf8aN5M3VQxEivnv9uPf4nBBoBsxuXaDWgF9
-        0Lw6H/Exx3/WCugOlNZaufDJm1g1gcGl9DsKL0R9wpwZD+uISbj/KqCluMqgOTNgYQ2maN7cCa1Uo
-        BEyumLPUo+vofFGSTu9gFU3M7kqQmbHhzhcQcBs+lfxXeLzKOOdg/om1KizP5/BYXT5oZnbzIZWpT
-        aiebHpDuqdWpspS9rn+bhM1dfQOJMUqAGH2Uz2G1QcW/Okmpd+dKBrZuM1LNQ9aXsBqj+Ya+Hnvhl
-        09pbWjfg==;
+        bh=ZAV8JJrVAUnXoR6OurR4mkqtEg3WMlk+fF6tHo9g/7A=; b=RQ5YIAs+5mbK/6S6SBFGzZCoIL
+        klS1hFKw/i99aVf05vtzIoxFkY9Pr4PV68y0ey4X1pxQeLS1H2oxzRVBvyxMkzTmtQ8Tjd+4x9Khu
+        K6yj+9nam8JNpySJVCeLpQQSqwCFPjU4PCDX/OdiMX4O3i7h4UdjcJoKBF+x5YUvGod3RZR/ri1u2
+        BqvyxGfPsXvxjbaujNo64BgtrBXZUF8OftT5Zr2U7XTw//ip/+RAmDe/baxIm9bt/TI8qX8nkYqhH
+        q1Vso2McvdCTWgsaaG1voMKJyWtCve2lkdzuSMfNcr5tHawk3RWp5284MWXyV/KmX6NvgUxNrY5hk
+        1N9pV/6A==;
 Received: from [2001:4bb8:180:5add:4fd7:4137:d2f2:46e6] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94 #2 (Red Hat Linux))
-        id 1ljy4x-00Gq6W-0f; Fri, 21 May 2021 05:52:11 +0000
+        id 1ljy58-00GqAV-Tf; Fri, 21 May 2021 05:52:23 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Jens Axboe <axboe@kernel.dk>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
@@ -64,9 +64,9 @@ Cc:     linux-block@vger.kernel.org, dm-devel@redhat.com,
         linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
         linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
         linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
-Subject: [PATCH 17/26] nvdimm-pmem: convert to blk_alloc_disk/blk_cleanup_disk
-Date:   Fri, 21 May 2021 07:51:07 +0200
-Message-Id: <20210521055116.1053587-18-hch@lst.de>
+Subject: [PATCH 20/26] simdisk: convert to blk_alloc_disk/blk_cleanup_disk
+Date:   Fri, 21 May 2021 07:51:10 +0200
+Message-Id: <20210521055116.1053587-21-hch@lst.de>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210521055116.1053587-1-hch@lst.de>
 References: <20210521055116.1053587-1-hch@lst.de>
@@ -77,71 +77,79 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the nvdimm-pmem driver to use the blk_alloc_disk and
-blk_cleanup_disk helpers to simplify gendisk and request_queue
-allocation.
+Convert the simdisk driver to use the blk_alloc_disk and blk_cleanup_disk
+helpers to simplify gendisk and request_queue allocation.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/nvdimm/pmem.c | 15 +++++----------
- 1 file changed, 5 insertions(+), 10 deletions(-)
+ arch/xtensa/platforms/iss/simdisk.c | 29 +++++++----------------------
+ 1 file changed, 7 insertions(+), 22 deletions(-)
 
-diff --git a/drivers/nvdimm/pmem.c b/drivers/nvdimm/pmem.c
-index 968b8483c763..9fcd05084564 100644
---- a/drivers/nvdimm/pmem.c
-+++ b/drivers/nvdimm/pmem.c
-@@ -338,7 +338,7 @@ static void pmem_pagemap_cleanup(struct dev_pagemap *pgmap)
- 	struct request_queue *q =
- 		container_of(pgmap->ref, struct request_queue, q_usage_counter);
+diff --git a/arch/xtensa/platforms/iss/simdisk.c b/arch/xtensa/platforms/iss/simdisk.c
+index fc09be7b1347..3cdfa00738e0 100644
+--- a/arch/xtensa/platforms/iss/simdisk.c
++++ b/arch/xtensa/platforms/iss/simdisk.c
+@@ -27,7 +27,6 @@
+ struct simdisk {
+ 	const char *filename;
+ 	spinlock_t lock;
+-	struct request_queue *queue;
+ 	struct gendisk *gd;
+ 	struct proc_dir_entry *procfile;
+ 	int users;
+@@ -266,21 +265,13 @@ static int __init simdisk_setup(struct simdisk *dev, int which,
+ 	spin_lock_init(&dev->lock);
+ 	dev->users = 0;
  
--	blk_cleanup_queue(q);
-+	blk_cleanup_disk(queue_to_disk(q));
- }
- 
- static void pmem_release_queue(void *pgmap)
-@@ -361,7 +361,6 @@ static void pmem_release_disk(void *__pmem)
- 	kill_dax(pmem->dax_dev);
- 	put_dax(pmem->dax_dev);
- 	del_gendisk(pmem->disk);
--	put_disk(pmem->disk);
- }
- 
- static const struct dev_pagemap_ops fsdax_pagemap_ops = {
-@@ -422,10 +421,12 @@ static int pmem_attach_disk(struct device *dev,
- 		return -EBUSY;
- 	}
- 
--	q = blk_alloc_queue(dev_to_node(dev));
--	if (!q)
-+	disk = blk_alloc_disk(nid);
-+	if (!disk)
- 		return -ENOMEM;
-+	q = disk->queue;
- 
-+	pmem->disk = disk;
- 	pmem->pfn_flags = PFN_DEV;
- 	pmem->pgmap.ref = &q->q_usage_counter;
- 	if (is_nd_pfn(dev)) {
-@@ -470,11 +471,6 @@ static int pmem_attach_disk(struct device *dev,
- 	if (pmem->pfn_flags & PFN_MAP)
- 		blk_queue_flag_set(QUEUE_FLAG_DAX, q);
- 
--	disk = alloc_disk_node(0, nid);
--	if (!disk)
--		return -ENOMEM;
--	pmem->disk = disk;
+-	dev->queue = blk_alloc_queue(NUMA_NO_NODE);
+-	if (dev->queue == NULL) {
+-		pr_err("blk_alloc_queue failed\n");
+-		goto out_alloc_queue;
+-	}
 -
- 	disk->fops		= &pmem_fops;
- 	disk->queue		= q;
- 	disk->private_data	= pmem;
-@@ -490,7 +486,6 @@ static int pmem_attach_disk(struct device *dev,
- 		flags = DAXDEV_F_SYNC;
- 	dax_dev = alloc_dax(pmem, disk->disk_name, &pmem_dax_ops, flags);
- 	if (IS_ERR(dax_dev)) {
--		put_disk(disk);
- 		return PTR_ERR(dax_dev);
- 	}
- 	dax_write_cache(dax_dev, nvdimm_has_cache(nd_region));
+-	dev->gd = alloc_disk(SIMDISK_MINORS);
+-	if (dev->gd == NULL) {
+-		pr_err("alloc_disk failed\n");
+-		goto out_alloc_disk;
+-	}
++	dev->gd = blk_alloc_disk(NUMA_NO_NODE);
++	if (!dev->gd)
++		return -ENOMEM;
+ 	dev->gd->major = simdisk_major;
+ 	dev->gd->first_minor = which;
++	dev->gd->minors = SIMDISK_MINORS;
+ 	dev->gd->fops = &simdisk_ops;
+-	dev->gd->queue = dev->queue;
+ 	dev->gd->private_data = dev;
+ 	snprintf(dev->gd->disk_name, 32, "simdisk%d", which);
+ 	set_capacity(dev->gd, 0);
+@@ -288,12 +279,6 @@ static int __init simdisk_setup(struct simdisk *dev, int which,
+ 
+ 	dev->procfile = proc_create_data(tmp, 0644, procdir, &simdisk_proc_ops, dev);
+ 	return 0;
+-
+-out_alloc_disk:
+-	blk_cleanup_queue(dev->queue);
+-	dev->queue = NULL;
+-out_alloc_queue:
+-	return -ENOMEM;
+ }
+ 
+ static int __init simdisk_init(void)
+@@ -343,10 +328,10 @@ static void simdisk_teardown(struct simdisk *dev, int which,
+ 	char tmp[2] = { '0' + which, 0 };
+ 
+ 	simdisk_detach(dev);
+-	if (dev->gd)
++	if (dev->gd) {
+ 		del_gendisk(dev->gd);
+-	if (dev->queue)
+-		blk_cleanup_queue(dev->queue);
++		blk_cleanup_disk(dev->gd);
++	}
+ 	remove_proc_entry(tmp, procdir);
+ }
+ 
 -- 
 2.30.2
 
