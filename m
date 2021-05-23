@@ -2,93 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 525CAC47080
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 May 2021 16:00:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97019C47083
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 May 2021 16:20:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2995F61244
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 May 2021 16:00:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 780396128A
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 May 2021 16:20:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231800AbhEWQBw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 23 May 2021 12:01:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44478 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231789AbhEWQBw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 23 May 2021 12:01:52 -0400
-Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03198C061574;
-        Sun, 23 May 2021 09:00:25 -0700 (PDT)
-Received: by mail-pl1-x632.google.com with SMTP id b7so9222179plg.0;
-        Sun, 23 May 2021 09:00:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=oC5or6EpgtPu4x49zJiMjr/Omc2prcbu5PDvMBZoEIA=;
-        b=jJuwepxuS8nZyB26SWi2G2vhP0j0BaHbWmGQ5ymJhAo5TnPQcQZeIVmPMRkhBLeB6y
-         Qw6i6qHsCQdRf6xsdHyseqqOqa39Dl+KosFWJJDKhcZ05768VdR4CK/baAofg5HwcuKz
-         i/0U3ZP+yono1JRqgzGZaD5/T6TDxcOIc8nMcwxbz6S3ULdutW9Duzyp0Kye/bPzopPW
-         4PpkkynIkbRCQ6k7+7nhAU5GQ1/qSrKHCIh/PCr5113q4fCS9Zr1c8FhKD1DqpHvaKYI
-         DV8wOXSRDp/wUKRw86r4DjeA82aNQW5Za0mgy+hfcSiRugRIpTNc/balTODoUFqZfRcl
-         icaw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=oC5or6EpgtPu4x49zJiMjr/Omc2prcbu5PDvMBZoEIA=;
-        b=obYIVSwHYBaAypRtuDerdEIhK/nWo9VWABWhIyOg8hM9RDWClYrJDmMBBKr8rV6VcX
-         UtTqnfXOxoAEb9vei0K1cGblD13gWxlEIdDx83OQb+NTSaMW04EqmE4UeRiNDfGtOemA
-         tdr/7DZM6w8p28cME+iuLibbGDzQ7DtKVTPagkATBWhnWtJ+hutPpaUGcR5CJcD+3QkE
-         IhEKdW94HKuim7d/NqvubOW9aZLEonZ9KKztDgy0le5s1LrZ1BDU+ZFGaRRKbHDoZ22M
-         idHSFc+SityfvC2wHLQ960NMblXHw28rOlLxcVfFg8/is1jmW/KzRuj52GzmsBNe7XZz
-         Ur8Q==
-X-Gm-Message-State: AOAM531UmDcOr7Pql+mxZzp55a6F/A8YAW/UqiRq0kpfuvlnhyM20ppo
-        UT8lWB6aBGlHDFmZlsOvGH+YmxahknCmButK
-X-Google-Smtp-Source: ABdhPJxwadCDZro6DUvfxY6FnUXQ2Ra8rRYKiU7+oqwa1IGjRsWjveG4muEEQaKHNAiqWq8eOjt1Eg==
-X-Received: by 2002:a17:902:9001:b029:ee:f24a:7e7d with SMTP id a1-20020a1709029001b02900eef24a7e7dmr21221610plp.42.1621785624317;
-        Sun, 23 May 2021 09:00:24 -0700 (PDT)
-Received: from localhost.localdomain ([139.167.199.48])
-        by smtp.gmail.com with ESMTPSA id p17sm8192940pjg.54.2021.05.23.09.00.16
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 23 May 2021 09:00:23 -0700 (PDT)
-From:   Aviral Gupta <shiv14112001@gmail.com>
-To:     ulf.hansson@linaro.org, axboe@kernel.dk, adrian.hunter@intel.com,
-        zliua@micron.com, avri.altman@wdc.com, beanhuo@micron.com,
-        porzio@gmail.com, ebiggers@google.com
-Cc:     Aviral Gupta <shiv14112001@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] This commit fixes the Error or Warning  about missing or incorrect SPDX license headers.
-Date:   Sun, 23 May 2021 21:29:15 +0530
-Message-Id: <20210523155914.5200-1-shiv14112001@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        id S231861AbhEWQWO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 23 May 2021 12:22:14 -0400
+Received: from mx2.suse.de ([195.135.220.15]:40046 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231841AbhEWQWN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 23 May 2021 12:22:13 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1621786845; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=iFkWHMko4nu73I8bffz46LtF778hJacVhJlqbZzQwF8=;
+        b=xIMCLEuwtEJ3ZYLVT1jAFLSlmekHbIbar2TdYds2f7pJgux+ASXt64k09tx/I3VzYVSQbd
+        jYbEua8uhBBK1QtJJhgUBirelGonk+/REbn1EZdyuTOztWNmc/243wGZRrn0BpiSJnEF/k
+        3o6nC8QrS3eMOcehdY1jqcN3GUtqNzU=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1621786845;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=iFkWHMko4nu73I8bffz46LtF778hJacVhJlqbZzQwF8=;
+        b=OjWXQORh1AHg1yI5pLimYhJCE0/GNAVfRs6jLZKfmf7Vpd71K+gfdYi9LvcDAJhupXh6Tf
+        ZrcrurNwYt+dptBg==
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id DA2BFAAFD;
+        Sun, 23 May 2021 16:20:44 +0000 (UTC)
+Subject: Re: [PATCH 12/26] bcache: convert to blk_alloc_disk/blk_cleanup_disk
+To:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Chris Zankel <chris@zankel.net>,
+        Max Filippov <jcmvbkbc@gmail.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Lars Ellenberg <lars.ellenberg@linbit.com>,
+        Jim Paris <jim@jtan.com>,
+        Joshua Morris <josh.h.morris@us.ibm.com>,
+        Philip Kelleher <pjk1939@linux.ibm.com>,
+        Minchan Kim <minchan@kernel.org>,
+        Nitin Gupta <ngupta@vflare.org>,
+        Matias Bjorling <mb@lightnvm.io>,
+        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>
+Cc:     linux-block@vger.kernel.org, dm-devel@redhat.com,
+        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
+        drbd-dev@lists.linbit.com, linuxppc-dev@lists.ozlabs.org,
+        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
+        linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
+        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
+References: <20210521055116.1053587-1-hch@lst.de>
+ <20210521055116.1053587-13-hch@lst.de>
+From:   Coly Li <colyli@suse.de>
+Message-ID: <19e05358-abc2-a577-d3bd-d4ae89f6316e@suse.de>
+Date:   Mon, 24 May 2021 00:20:34 +0800
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.10.2
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210521055116.1053587-13-hch@lst.de>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-By adding missing SPDX-License-Identifier tag line in drivers/mmc/core/block.c this issue is fixed.
+On 5/21/21 1:51 PM, Christoph Hellwig wrote:
+> Convert the bcache driver to use the blk_alloc_disk and blk_cleanup_disk
+> helpers to simplify gendisk and request_queue allocation.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+Acked-by: Coly Li <colyli@suse.de>
+
+Thanks.
 
 
-Signed-off-by: Aviral Gupta <shiv14112001@gmail.com>
----
- drivers/mmc/core/block.c | 1 +
- 1 file changed, 1 insertion(+)
+Coly Li
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 689eb9afeeed..266d62f9dbc8 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1,3 +1,4 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Block driver for media (i.e., flash cards)
-  *
--- 
-2.25.1
+> ---
+>  drivers/md/bcache/super.c | 15 ++++-----------
+>  1 file changed, 4 insertions(+), 11 deletions(-)
+> 
+> diff --git a/drivers/md/bcache/super.c b/drivers/md/bcache/super.c
+> index bea8c4429ae8..185246a0d855 100644
+> --- a/drivers/md/bcache/super.c
+> +++ b/drivers/md/bcache/super.c
+> @@ -890,13 +890,9 @@ static void bcache_device_free(struct bcache_device *d)
+>  		if (disk_added)
+>  			del_gendisk(disk);
+>  
+> -		if (disk->queue)
+> -			blk_cleanup_queue(disk->queue);
+> -
+> +		blk_cleanup_disk(disk);
+>  		ida_simple_remove(&bcache_device_idx,
+>  				  first_minor_to_idx(disk->first_minor));
+> -		if (disk_added)
+> -			put_disk(disk);
+>  	}
+>  
+>  	bioset_exit(&d->bio_split);
+> @@ -946,7 +942,7 @@ static int bcache_device_init(struct bcache_device *d, unsigned int block_size,
+>  			BIOSET_NEED_BVECS|BIOSET_NEED_RESCUER))
+>  		goto err;
+>  
+> -	d->disk = alloc_disk(BCACHE_MINORS);
+> +	d->disk = blk_alloc_disk(NUMA_NO_NODE);
+>  	if (!d->disk)
+>  		goto err;
+>  
+> @@ -955,14 +951,11 @@ static int bcache_device_init(struct bcache_device *d, unsigned int block_size,
+>  
+>  	d->disk->major		= bcache_major;
+>  	d->disk->first_minor	= idx_to_first_minor(idx);
+> +	d->disk->minors		= BCACHE_MINORS;
+>  	d->disk->fops		= ops;
+>  	d->disk->private_data	= d;
+>  
+> -	q = blk_alloc_queue(NUMA_NO_NODE);
+> -	if (!q)
+> -		return -ENOMEM;
+> -
+> -	d->disk->queue			= q;
+> +	q = d->disk->queue;
+>  	q->limits.max_hw_sectors	= UINT_MAX;
+>  	q->limits.max_sectors		= UINT_MAX;
+>  	q->limits.max_segment_size	= UINT_MAX;
+> 
 
