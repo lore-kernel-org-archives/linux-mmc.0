@@ -2,156 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B069C04FF3
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 07:33:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82F2BC47086
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 08:27:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03EED6100B
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 07:33:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A80C61151
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 08:27:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232254AbhEXHfI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 May 2021 03:35:08 -0400
-Received: from twspam01.aspeedtech.com ([211.20.114.71]:17832 "EHLO
-        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232382AbhEXHfI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 03:35:08 -0400
-Received: from mail.aspeedtech.com ([192.168.0.24])
-        by twspam01.aspeedtech.com with ESMTP id 14O7KiKJ005067;
-        Mon, 24 May 2021 15:20:44 +0800 (GMT-8)
-        (envelope-from steven_lee@aspeedtech.com)
-Received: from slee-VirtualBox.localdomain (192.168.100.253) by
- TWMBX02.aspeed.com (192.168.0.24) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Mon, 24 May 2021 15:33:38 +0800
-From:   Steven Lee <steven_lee@aspeedtech.com>
-To:     Rob Herring <robh+dt@kernel.org>, Joel Stanley <joel@jms.id.au>,
-        "Andrew Jeffery" <andrew@aj.id.au>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
-        <linux-aspeed@lists.ozlabs.org>,
-        open list <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>
-CC:     <steven_lee@aspeedtech.com>, <Hongweiz@ami.com>,
-        <ryan_chen@aspeedtech.com>, <chin-ting_kuo@aspeedtech.com>
-Subject: [PATCH v5 4/4] mmc: sdhci-of-aspeed: Configure the SDHCIs as specified by the devicetree.
-Date:   Mon, 24 May 2021 15:32:56 +0800
-Message-ID: <20210524073308.9328-5-steven_lee@aspeedtech.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210524073308.9328-1-steven_lee@aspeedtech.com>
-References: <20210524073308.9328-1-steven_lee@aspeedtech.com>
+        id S232389AbhEXI2s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 May 2021 04:28:48 -0400
+Received: from mx2.suse.de ([195.135.220.15]:43162 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232311AbhEXI2r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 24 May 2021 04:28:47 -0400
+X-Virus-Scanned: by amavisd-new at test-mx.suse.de
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1621844838; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Q1F35rBDncf+ODcVO5jTKQ+c6J+Bpaijj4tb+WLiO1U=;
+        b=hWbnJCzrn8D8sq7QiamSboM/nv6TN+2iWleusnloao35oVE4OyeDX0eKAMzya8OGGThQFh
+        zl1nxRchNuFxstuajSgFtmryku8O1hRGBIRcM0SbrM2Dt3hLAz/KodIIf9vgrdWDs21AJk
+        09tFtAADDGOyfSpK1oh2IZudvgHfbuQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1621844838;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=Q1F35rBDncf+ODcVO5jTKQ+c6J+Bpaijj4tb+WLiO1U=;
+        b=/Ey/RBTrd/apAViE3Xd9DP0Lfre1LBpPPlJZl5IzG70TmMypTfoLUolyItvUQoIO9R6YkJ
+        B6psOuCyZCUW50Cw==
+Received: from relay2.suse.de (unknown [195.135.221.27])
+        by mx2.suse.de (Postfix) with ESMTP id CBD6EAB6D;
+        Mon, 24 May 2021 08:27:17 +0000 (UTC)
+Subject: Re: [PATCH 14/26] md: convert to blk_alloc_disk/blk_cleanup_disk
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Chris Zankel <chris@zankel.net>,
+        Max Filippov <jcmvbkbc@gmail.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Lars Ellenberg <lars.ellenberg@linbit.com>,
+        Jim Paris <jim@jtan.com>,
+        Joshua Morris <josh.h.morris@us.ibm.com>,
+        Philip Kelleher <pjk1939@linux.ibm.com>,
+        Minchan Kim <minchan@kernel.org>,
+        Nitin Gupta <ngupta@vflare.org>,
+        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
+        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        linux-block@vger.kernel.org, dm-devel@redhat.com,
+        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
+        drbd-dev@lists.linbit.com, linuxppc-dev@lists.ozlabs.org,
+        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
+        linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
+        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
+References: <20210521055116.1053587-1-hch@lst.de>
+ <20210521055116.1053587-15-hch@lst.de>
+ <e65de9e6-337c-3e41-b5c2-d033ff236582@suse.de>
+ <20210524072642.GF23890@lst.de>
+From:   Hannes Reinecke <hare@suse.de>
+Message-ID: <1360c598-44a9-e0c5-dd81-695cb1ec8ccf@suse.de>
+Date:   Mon, 24 May 2021 10:27:16 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.0
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [192.168.100.253]
-X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
- (192.168.0.24)
-X-DNSRBL: 
-X-MAIL: twspam01.aspeedtech.com 14O7KiKJ005067
+In-Reply-To: <20210524072642.GF23890@lst.de>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The hardware provides capability configuration registers for each SDHCI
-in the global configuration space for the SD controller. Writes to the
-global capability registers are mirrored to the capability registers in
-the associated SDHCI. Configuration of the capabilities must be written
-through the mirror registers prior to initialisation of the SDHCI.
+On 5/24/21 9:26 AM, Christoph Hellwig wrote:
+> On Sun, May 23, 2021 at 10:12:49AM +0200, Hannes Reinecke wrote:
+>>> +	blk_set_stacking_limits(&mddev->queue->limits);
+>>>    	blk_queue_write_cache(mddev->queue, true, true);
+>>>    	/* Allow extended partitions.  This makes the
+>>>    	 * 'mdp' device redundant, but we can't really
+>>>
+>> Wouldn't it make sense to introduce a helper 'blk_queue_from_disk()' or
+>> somesuch to avoid having to keep an explicit 'queue' pointer?
+> 
+> My rought plan is that a few series from now bio based drivers will
+> never directly deal with the request_queue at all.
+> 
+Go for it.
 
-Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
-Reviewed-by: Andrew Jeffery <andrew@aj.id.au>
-Reviewed-by: Joel Stanley <joel@jms.id.au>
----
- drivers/mmc/host/sdhci-of-aspeed.c | 48 ++++++++++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
+Reviewed-by: Hannes Reinecke <hare@suse.de>
 
-diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
-index d001c51074a0..65b5685f6c15 100644
---- a/drivers/mmc/host/sdhci-of-aspeed.c
-+++ b/drivers/mmc/host/sdhci-of-aspeed.c
-@@ -31,6 +31,11 @@
- #define   ASPEED_SDC_S0_PHASE_OUT_EN	GENMASK(1, 0)
- #define   ASPEED_SDC_PHASE_MAX		31
- 
-+/* SDIO{10,20} */
-+#define ASPEED_SDC_CAP1_1_8V           (0 * 32 + 26)
-+/* SDIO{14,24} */
-+#define ASPEED_SDC_CAP2_SDR104         (1 * 32 + 1)
-+
- struct aspeed_sdc {
- 	struct clk *clk;
- 	struct resource *res;
-@@ -72,6 +77,37 @@ struct aspeed_sdhci {
- 	const struct aspeed_sdhci_phase_desc *phase_desc;
- };
- 
-+/*
-+ * The function sets the mirror register for updating
-+ * capbilities of the current slot.
-+ *
-+ *   slot | capability  | caps_reg | mirror_reg
-+ *   -----|-------------|----------|------------
-+ *     0  | CAP1_1_8V   | SDIO140  |   SDIO10
-+ *     0  | CAP2_SDR104 | SDIO144  |   SDIO14
-+ *     1  | CAP1_1_8V   | SDIO240  |   SDIO20
-+ *     1  | CAP2_SDR104 | SDIO244  |   SDIO24
-+ */
-+static void aspeed_sdc_set_slot_capability(struct sdhci_host *host, struct aspeed_sdc *sdc,
-+					   int capability, bool enable, u8 slot)
-+{
-+	u32 mirror_reg_offset;
-+	u32 cap_val;
-+	u8 cap_reg;
-+
-+	if (slot > 1)
-+		return;
-+
-+	cap_reg = capability / 32;
-+	cap_val = sdhci_readl(host, 0x40 + (cap_reg * 4));
-+	if (enable)
-+		cap_val |= BIT(capability % 32);
-+	else
-+		cap_val &= ~BIT(capability % 32);
-+	mirror_reg_offset = ((slot + 1) * 0x10) + (cap_reg * 4);
-+	writel(cap_val, sdc->regs + mirror_reg_offset);
-+}
-+
- static void aspeed_sdc_configure_8bit_mode(struct aspeed_sdc *sdc,
- 					   struct aspeed_sdhci *sdhci,
- 					   bool bus8)
-@@ -328,6 +364,7 @@ static inline int aspeed_sdhci_calculate_slot(struct aspeed_sdhci *dev,
- static int aspeed_sdhci_probe(struct platform_device *pdev)
- {
- 	const struct aspeed_sdhci_pdata *aspeed_pdata;
-+	struct device_node *np = pdev->dev.of_node;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct aspeed_sdhci *dev;
- 	struct sdhci_host *host;
-@@ -372,6 +409,17 @@ static int aspeed_sdhci_probe(struct platform_device *pdev)
- 
- 	sdhci_get_of_property(pdev);
- 
-+	if (of_property_read_bool(np, "mmc-hs200-1_8v") ||
-+	    of_property_read_bool(np, "sd-uhs-sdr104")) {
-+		aspeed_sdc_set_slot_capability(host, dev->parent, ASPEED_SDC_CAP1_1_8V,
-+					       true, slot);
-+	}
-+
-+	if (of_property_read_bool(np, "sd-uhs-sdr104")) {
-+		aspeed_sdc_set_slot_capability(host, dev->parent, ASPEED_SDC_CAP2_SDR104,
-+					       true, slot);
-+	}
-+
- 	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
- 	if (IS_ERR(pltfm_host->clk))
- 		return PTR_ERR(pltfm_host->clk);
+Cheers,
+
+Hannes
 -- 
-2.17.1
-
+Dr. Hannes Reinecke                Kernel Storage Architect
+hare@suse.de                              +49 911 74053 688
+SUSE Software Solutions GmbH, Maxfeldstr. 5, 90409 Nürnberg
+HRB 36809 (AG Nürnberg), Geschäftsführer: Felix Imendörffer
