@@ -2,115 +2,58 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82F2BC47086
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 08:27:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBDD5C04FF3
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 11:43:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A80C61151
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 08:27:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 905D361244
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 11:43:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232389AbhEXI2s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 May 2021 04:28:48 -0400
-Received: from mx2.suse.de ([195.135.220.15]:43162 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232311AbhEXI2r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 May 2021 04:28:47 -0400
-X-Virus-Scanned: by amavisd-new at test-mx.suse.de
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1621844838; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Q1F35rBDncf+ODcVO5jTKQ+c6J+Bpaijj4tb+WLiO1U=;
-        b=hWbnJCzrn8D8sq7QiamSboM/nv6TN+2iWleusnloao35oVE4OyeDX0eKAMzya8OGGThQFh
-        zl1nxRchNuFxstuajSgFtmryku8O1hRGBIRcM0SbrM2Dt3hLAz/KodIIf9vgrdWDs21AJk
-        09tFtAADDGOyfSpK1oh2IZudvgHfbuQ=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1621844838;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=Q1F35rBDncf+ODcVO5jTKQ+c6J+Bpaijj4tb+WLiO1U=;
-        b=/Ey/RBTrd/apAViE3Xd9DP0Lfre1LBpPPlJZl5IzG70TmMypTfoLUolyItvUQoIO9R6YkJ
-        B6psOuCyZCUW50Cw==
-Received: from relay2.suse.de (unknown [195.135.221.27])
-        by mx2.suse.de (Postfix) with ESMTP id CBD6EAB6D;
-        Mon, 24 May 2021 08:27:17 +0000 (UTC)
-Subject: Re: [PATCH 14/26] md: convert to blk_alloc_disk/blk_cleanup_disk
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Chris Zankel <chris@zankel.net>,
-        Max Filippov <jcmvbkbc@gmail.com>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Lars Ellenberg <lars.ellenberg@linbit.com>,
-        Jim Paris <jim@jtan.com>,
-        Joshua Morris <josh.h.morris@us.ibm.com>,
-        Philip Kelleher <pjk1939@linux.ibm.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Nitin Gupta <ngupta@vflare.org>,
-        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
-        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Vasily Gorbik <gor@linux.ibm.com>,
-        Christian Borntraeger <borntraeger@de.ibm.com>,
-        linux-block@vger.kernel.org, dm-devel@redhat.com,
-        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
-        drbd-dev@lists.linbit.com, linuxppc-dev@lists.ozlabs.org,
-        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
-        linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
-References: <20210521055116.1053587-1-hch@lst.de>
- <20210521055116.1053587-15-hch@lst.de>
- <e65de9e6-337c-3e41-b5c2-d033ff236582@suse.de>
- <20210524072642.GF23890@lst.de>
-From:   Hannes Reinecke <hare@suse.de>
-Message-ID: <1360c598-44a9-e0c5-dd81-695cb1ec8ccf@suse.de>
-Date:   Mon, 24 May 2021 10:27:16 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.0
+        id S232651AbhEXLod (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 May 2021 07:44:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50824 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232670AbhEXLoa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 07:44:30 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1DDEC061574;
+        Mon, 24 May 2021 04:43:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=P9kzVkpH6K+dRhisEWwKagVuKYKm8ZedPldptcbJ5EU=; b=JMI7yDmehfFgOO6K1lO8bw7rxR
+        1jXqcIv4JSaz0HwjVnCJv1HPvIQk0NG4ks1n//hnn9dqPHeKcLSKRwxdqFQYaTCeXEKV6qjEyIx2N
+        O8d8JkNaLZTVN5/0JthMbpwxtn7hsbsdBG4cw6IwLo49RD4kECQSZKha7QfSkRoFVQbmUvJ1+zS6B
+        uJLYhyNlofZDbmeHpRZ+ltW/w4or3WE8vrkZaIJyJlvCpG0+cacFrDg3axMdRguJA79LGDiZV2gLB
+        1hAD9QbIjmBQg4q68YyXWbobccjIoEeSaoG9duiWG6+vm1BOK43J3d6nvp4Bt2ZhA/1ecm6OV2J9F
+        TUnCCVFg==;
+Received: from hch by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
+        id 1ll8yr-002K2i-AJ; Mon, 24 May 2021 11:42:49 +0000
+Date:   Mon, 24 May 2021 12:42:45 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Yue Hu <zbestahu@gmail.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, huyue2@yulong.com, zbestahu@163.com
+Subject: Re: [PATCH] mmc: core: Use ternery for return value in
+ mmc_vdd_to_ocrbitnum()
+Message-ID: <YKuRNRbsHtoD4LFi@infradead.org>
+References: <20210520082837.2129-1-zbestahu@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20210524072642.GF23890@lst.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210520082837.2129-1-zbestahu@gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 5/24/21 9:26 AM, Christoph Hellwig wrote:
-> On Sun, May 23, 2021 at 10:12:49AM +0200, Hannes Reinecke wrote:
->>> +	blk_set_stacking_limits(&mddev->queue->limits);
->>>    	blk_queue_write_cache(mddev->queue, true, true);
->>>    	/* Allow extended partitions.  This makes the
->>>    	 * 'mdp' device redundant, but we can't really
->>>
->> Wouldn't it make sense to introduce a helper 'blk_queue_from_disk()' or
->> somesuch to avoid having to keep an explicit 'queue' pointer?
+On Thu, May 20, 2021 at 04:28:37PM +0800, Yue Hu wrote:
+> From: Yue Hu <huyue2@yulong.com>
 > 
-> My rought plan is that a few series from now bio based drivers will
-> never directly deal with the request_queue at all.
-> 
-Go for it.
+> Just simplify the code.
 
-Reviewed-by: Hannes Reinecke <hare@suse.de>
-
-Cheers,
-
-Hannes
--- 
-Dr. Hannes Reinecke                Kernel Storage Architect
-hare@suse.de                              +49 911 74053 688
-SUSE Software Solutions GmbH, Maxfeldstr. 5, 90409 Nürnberg
-HRB 36809 (AG Nürnberg), Geschäftsführer: Felix Imendörffer
+The original version is way easier to read.
