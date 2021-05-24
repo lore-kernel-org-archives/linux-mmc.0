@@ -2,58 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBDD5C04FF3
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 11:43:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C583C47084
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 14:00:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 905D361244
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 11:43:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4958A61370
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 14:00:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232651AbhEXLod (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 May 2021 07:44:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50824 "EHLO
+        id S232955AbhEXOCG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 May 2021 10:02:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232670AbhEXLoa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 07:44:30 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1DDEC061574;
-        Mon, 24 May 2021 04:43:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=P9kzVkpH6K+dRhisEWwKagVuKYKm8ZedPldptcbJ5EU=; b=JMI7yDmehfFgOO6K1lO8bw7rxR
-        1jXqcIv4JSaz0HwjVnCJv1HPvIQk0NG4ks1n//hnn9dqPHeKcLSKRwxdqFQYaTCeXEKV6qjEyIx2N
-        O8d8JkNaLZTVN5/0JthMbpwxtn7hsbsdBG4cw6IwLo49RD4kECQSZKha7QfSkRoFVQbmUvJ1+zS6B
-        uJLYhyNlofZDbmeHpRZ+ltW/w4or3WE8vrkZaIJyJlvCpG0+cacFrDg3axMdRguJA79LGDiZV2gLB
-        1hAD9QbIjmBQg4q68YyXWbobccjIoEeSaoG9duiWG6+vm1BOK43J3d6nvp4Bt2ZhA/1ecm6OV2J9F
-        TUnCCVFg==;
-Received: from hch by casper.infradead.org with local (Exim 4.94 #2 (Red Hat Linux))
-        id 1ll8yr-002K2i-AJ; Mon, 24 May 2021 11:42:49 +0000
-Date:   Mon, 24 May 2021 12:42:45 +0100
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Yue Hu <zbestahu@gmail.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, huyue2@yulong.com, zbestahu@163.com
-Subject: Re: [PATCH] mmc: core: Use ternery for return value in
- mmc_vdd_to_ocrbitnum()
-Message-ID: <YKuRNRbsHtoD4LFi@infradead.org>
-References: <20210520082837.2129-1-zbestahu@gmail.com>
+        with ESMTP id S232916AbhEXOCD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 10:02:03 -0400
+Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50DE2C061756
+        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 07:00:34 -0700 (PDT)
+Received: by mail-ua1-x92c.google.com with SMTP id z14so8257218uan.7
+        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 07:00:34 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=bhZvYF2rrfsZa6Xf7+GPLv45uKVXrZPOlQNANCKECQI=;
+        b=QFwnDovX8FbineGyWDzBEnowUBB99r0szO6EctLouJ+VM2LiCGRhsvhsWGG63bQ38u
+         L8737OQdQqtbmzB2DOFHbAMHFz4mbgFynB6Hr6LEPzS2NlZebCoksFMUbpIrF5cEwx7B
+         T/9TaMS4c84GbC8mE2fvp1gao9RKc70VhhCRbiSPgOwHjT4x4MyLQ3y1AeJYjQvkEDI3
+         hTtFD7vvnj9PNncgtHBXpOzlA5KQG9P4JKmzwSe61ZYFSHnEWhrel6yZkKW/kbqSnTbg
+         QZOdLzAcRz1zB3xj9RzYvlmwEpHqCOREpVzye076+kpjJ8eDCQmKr6UsQZJa1pqzWEHI
+         lPEg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=bhZvYF2rrfsZa6Xf7+GPLv45uKVXrZPOlQNANCKECQI=;
+        b=jwqt6xbAK1Hzf1YnDQXWklRINmmLIOhEzXFzl6SXc5Qkt51TPmeu0If9XRCYZGloOm
+         WD0+gyOYdJzrmhsE+N5bkDQ5mlOaYATC8Jnsop7TFJsGcJ632oesvLkKn1m242BkUZnC
+         07WuP3IV1GAIiv5nF0QtihMEgvbLXl6A+8nWl/rz9qo1VvzXjbz/1ViBlEhR6Jq4mtP/
+         IsCeBKSvZI5s9EJ3jyBKoVhwUpXwZbFDXcvkYnPe4lw9VhihFWoMtifBxJX4KbGOZmWO
+         Tw+qp3LMsn0rpUkIVPCcjSL7CUjAvabg9E9XX0+0SEVRcfo+Ut3uSbwbPIR4qUA+0ARz
+         Reog==
+X-Gm-Message-State: AOAM530ca0DbxEExsoWXYit+91Kg/+uJg7DHFBR5Dtx3WUgFCB1MqJHT
+        UciPq8sfXInAwmH2/uJTpMlMucXLCYF3E/Up5/e4Fw==
+X-Google-Smtp-Source: ABdhPJyTkuNIXW/4VTeu46rTAPJNrdcFFBw/FDfMkyZ8gV3dDP2TWej1nRS1wo4Y1zZF3ITB+QVUCzn16nazwshQD3Y=
+X-Received: by 2002:a9f:24b4:: with SMTP id 49mr12816796uar.100.1621864832999;
+ Mon, 24 May 2021 07:00:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210520082837.2129-1-zbestahu@gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+References: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
+In-Reply-To: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 24 May 2021 15:59:56 +0200
+Message-ID: <CAPDyKFrS3wdYs3AQtjZEOsLzNvxgy1n3EfxZ+a8w8J8rH8kQ-w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mxs-mmc: Disable the 'reg_vmmc' regulator when needed
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Doug Anderson <dianders@chromium.org>,
+        Rui Miguel Silva <rmfrfs@gmail.com>,
+        Chris Ball <cjb@laptop.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, May 20, 2021 at 04:28:37PM +0800, Yue Hu wrote:
-> From: Yue Hu <huyue2@yulong.com>
-> 
-> Just simplify the code.
+On Fri, 21 May 2021 at 14:36, Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
+>
+> The 'reg_vmmc' regulator is never disabled. Neither in the error handling
+> of the probe, nor in the remove function.
+>
+> Add a managed action to do the required clean-up before a 'regulator_put()'
+> call.
+>
+> Fixes: 4dc5a79f1350 ("mmc: mxs-mmc: enable regulator for mmc slot")
+> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+> ---
+>  drivers/mmc/host/mxs-mmc.c | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
+>
+> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
+> index 947581de7860..b043d53dd728 100644
+> --- a/drivers/mmc/host/mxs-mmc.c
+> +++ b/drivers/mmc/host/mxs-mmc.c
+> @@ -552,6 +552,13 @@ static const struct of_device_id mxs_mmc_dt_ids[] = {
+>  };
+>  MODULE_DEVICE_TABLE(of, mxs_mmc_dt_ids);
+>
+> +static void regulator_disable_action(void *_data)
+> +{
+> +       struct regulator *regulator = _data;
+> +
+> +       regulator_disable(regulator);
+> +}
+> +
+>  static int mxs_mmc_probe(struct platform_device *pdev)
+>  {
+>         struct device_node *np = pdev->dev.of_node;
+> @@ -591,6 +598,10 @@ static int mxs_mmc_probe(struct platform_device *pdev)
+>                                 "Failed to enable vmmc regulator: %d\n", ret);
+>                         goto out_mmc_free;
+>                 }
+> +               ret = devm_add_action_or_reset(&pdev->dev,
+> +                                       regulator_disable_action, reg_vmmc);
+> +               if (ret)
+> +                       goto out_mmc_free;
 
-The original version is way easier to read.
+Even if this improves the behaviour, there is a standardized way for
+how we deal with regulators for mmc.
+
+1. Call mmc_regulator_get_supply() during probe to fetch the optional
+regulator. If a regulator is found a corresponding OCR mask, in
+host->ocr_avail is assigned.
+
+2. In the ->set_ios() callback, invoke mmc_regulator_set_ocr(). This
+will also set the correct voltage-level and turn on/off the regulator,
+depending on the requested OCR/voltage-level.
+
+>         }
+>
+>         ssp->clk = devm_clk_get(&pdev->dev, NULL);
+> --
+> 2.30.2
+>
+
+Kind regards
+Uffe
