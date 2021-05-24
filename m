@@ -2,73 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5269DC47080
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 07:29:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CE1AC47083
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 07:33:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3100B60E0B
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 07:29:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 65CBA61028
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 07:33:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232307AbhEXHbX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 May 2021 03:31:23 -0400
-Received: from verein.lst.de ([213.95.11.211]:53535 "EHLO verein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232300AbhEXHbX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 24 May 2021 03:31:23 -0400
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 025C467373; Mon, 24 May 2021 09:29:50 +0200 (CEST)
-Date:   Mon, 24 May 2021 09:29:50 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     Hannes Reinecke <hare@suse.de>
-Cc:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Chris Zankel <chris@zankel.net>,
-        Max Filippov <jcmvbkbc@gmail.com>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Lars Ellenberg <lars.ellenberg@linbit.com>,
-        Jim Paris <jim@jtan.com>,
-        Philip Kelleher <pjk1939@linux.ibm.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Nitin Gupta <ngupta@vflare.org>,
-        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
-        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Vasily Gorbik <gor@linux.ibm.com>,
-        Christian Borntraeger <borntraeger@de.ibm.com>,
-        linux-block@vger.kernel.org, dm-devel@redhat.com,
-        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
-        drbd-dev@lists.linbit.com, linuxppc-dev@lists.ozlabs.org,
-        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
-        linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
-Subject: Re: [PATCH 18/26] nvme-multipath: convert to
- blk_alloc_disk/blk_cleanup_disk
-Message-ID: <20210524072950.GG23890@lst.de>
-References: <20210521055116.1053587-1-hch@lst.de> <20210521055116.1053587-19-hch@lst.de> <1a771bf9-5083-c440-f0e1-5f6920b5b017@suse.de>
+        id S232276AbhEXHeo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 May 2021 03:34:44 -0400
+Received: from twspam01.aspeedtech.com ([211.20.114.71]:38581 "EHLO
+        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232254AbhEXHen (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 03:34:43 -0400
+Received: from mail.aspeedtech.com ([192.168.0.24])
+        by twspam01.aspeedtech.com with ESMTP id 14O7KFQR005012;
+        Mon, 24 May 2021 15:20:15 +0800 (GMT-8)
+        (envelope-from steven_lee@aspeedtech.com)
+Received: from slee-VirtualBox.localdomain (192.168.100.253) by
+ TWMBX02.aspeed.com (192.168.0.24) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Mon, 24 May 2021 15:33:09 +0800
+From:   Steven Lee <steven_lee@aspeedtech.com>
+To:     Rob Herring <robh+dt@kernel.org>, Joel Stanley <joel@jms.id.au>,
+        "Andrew Jeffery" <andrew@aj.id.au>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-aspeed@lists.ozlabs.org>,
+        open list <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>
+CC:     <steven_lee@aspeedtech.com>, <Hongweiz@ami.com>,
+        <ryan_chen@aspeedtech.com>, <chin-ting_kuo@aspeedtech.com>
+Subject: [PATCH v5 0/4] mmc: sdhci-of-aspeed: Support toggling SD bus signal
+Date:   Mon, 24 May 2021 15:32:52 +0800
+Message-ID: <20210524073308.9328-1-steven_lee@aspeedtech.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1a771bf9-5083-c440-f0e1-5f6920b5b017@suse.de>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Type: text/plain
+X-Originating-IP: [192.168.100.253]
+X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
+ (192.168.0.24)
+X-DNSRBL: 
+X-MAIL: twspam01.aspeedtech.com 14O7KFQR005012
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, May 23, 2021 at 10:20:27AM +0200, Hannes Reinecke wrote:
-> What about the check for GENHD_FL_UP a bit further up in line 766?
-> Can this still happen with the new allocation scheme, ie is there still a 
-> difference in lifetime between ->disk and ->disk->queue?
+AST2600-A2 EVB has the reference design for enabling SD bus
+power and toggling SD bus signal voltage between 3.3v and 1.8v by
+GPIO regulators.
+This patch series adds sdhci node and gpio regulators in a new dts file
+for AST2600-A2 EVB.
+The description of the reference design of AST2600-A2 EVB is added
+in the new dts file.
 
-Yes, nvme_free_ns_head can still be called before device_add_disk was
-called for an allocated nshead gendisk during error handling of the
-setup path.  There is still a difference in the lifetime in that they
-are separately refcounted, but it does not matter to the driver.
+This patch also include a helper for updating AST2600 sdhci capability
+registers.
+
+Changes from v4:
+* Move sdhci node and gpio regulator from aspeed-ast2600-evb-a2.dts
+  to aspeed-ast2600-evb.dts. Now aspeed-ast2600-evb.dts only supports
+  A2(or newer) evbs.
+* Remove aspeed-ast2600-evb-a2.dts since sdhci nodes were moved to
+  aspeed-ast2600-evb.dts.
+* Add aspeed-ast2600-evb-a1.dts for A1 and A0 evbs.
+
+Changes from v3:
+* Remove the example of gpio regulator from dt-bindings.
+* Add sdhci node and gpio regulators to a new dts file.
+* Move the comment of the reference design to the new
+  dts file.
+* Modify commit message of sdhci-of-aspeed.c.
+* Fix coding style issues of sdhci-of-aspeed.c.
+* Remove the implementation of eMMC resetc since it has no relevance to
+  the goal that this patch series want to achieve and it may needs further
+  discussion about the design of reset behavior.
+
+Changes from v2:
+* Move the comment of the reference design from dt-bindings to device tree.
+* Add clk-phase binding for eMMC controller.
+* Reimplement aspeed_sdc_set_slot_capability().
+* Separate the implementation of eMMC reset to another patch file.
+* Fix yaml document error per the report of dt_binding_check and
+  dtbs_check.
+
+Changes from v1:
+* Add the device tree example for AST2600 A2 EVB in dt-bindings
+  document
+* Add timing-phase for eMMC controller.
+* Remove power-gpio and power-switch-gpio from sdhci driver, they should
+  be handled by regulator.
+* Add a helper to update capability registers in the driver.
+* Sync sdhci settings from device tree to SoC capability registers.
+* Sync timing-phase from device tree to SoC Clock Phase Control
+  register
+
+Please help to review.
+
+Regards,
+Steven
+
+Steven Lee (4):
+  ARM: dts: aspeed: ast2600evb: Add sdhci node and gpio regulator for A2
+    evb.
+  ARM: dts: aspeed: ast2600evb: Add phase correction for emmc
+    controller.
+  ARM: dts: aspeed: ast2600evb: Add dts file for A1 and A0.
+  mmc: sdhci-of-aspeed: Configure the SDHCIs as specified by the
+    devicetree.
+
+ arch/arm/boot/dts/aspeed-ast2600-evb-a1.dts | 15 ++++
+ arch/arm/boot/dts/aspeed-ast2600-evb.dts    | 87 ++++++++++++++++++++-
+ drivers/mmc/host/sdhci-of-aspeed.c          | 48 ++++++++++++
+ 3 files changed, 149 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/boot/dts/aspeed-ast2600-evb-a1.dts
+
+-- 
+2.17.1
+
