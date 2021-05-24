@@ -7,135 +7,110 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C583C47084
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 14:00:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC01CC2B9F8
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 14:10:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4958A61370
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 14:00:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C5D886108E
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 14:10:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232955AbhEXOCG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 May 2021 10:02:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54484 "EHLO
+        id S232774AbhEXOMW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 May 2021 10:12:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232916AbhEXOCD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 10:02:03 -0400
-Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50DE2C061756
-        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 07:00:34 -0700 (PDT)
-Received: by mail-ua1-x92c.google.com with SMTP id z14so8257218uan.7
-        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 07:00:34 -0700 (PDT)
+        with ESMTP id S232486AbhEXOMW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 10:12:22 -0400
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14CE3C061756
+        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 07:10:54 -0700 (PDT)
+Received: by mail-vs1-xe29.google.com with SMTP id m9so4640981vsq.5
+        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 07:10:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=bhZvYF2rrfsZa6Xf7+GPLv45uKVXrZPOlQNANCKECQI=;
-        b=QFwnDovX8FbineGyWDzBEnowUBB99r0szO6EctLouJ+VM2LiCGRhsvhsWGG63bQ38u
-         L8737OQdQqtbmzB2DOFHbAMHFz4mbgFynB6Hr6LEPzS2NlZebCoksFMUbpIrF5cEwx7B
-         T/9TaMS4c84GbC8mE2fvp1gao9RKc70VhhCRbiSPgOwHjT4x4MyLQ3y1AeJYjQvkEDI3
-         hTtFD7vvnj9PNncgtHBXpOzlA5KQG9P4JKmzwSe61ZYFSHnEWhrel6yZkKW/kbqSnTbg
-         QZOdLzAcRz1zB3xj9RzYvlmwEpHqCOREpVzye076+kpjJ8eDCQmKr6UsQZJa1pqzWEHI
-         lPEg==
+        bh=l5h+WQ0oEWo38CL1jqONencxRgJu9VTR6nMezb6lhhU=;
+        b=GUwyy8oLVtvgR/eVwjg9YG73fIlQJGj74auOljdnWJShozK2XxEvHWunJzAd9tyAB8
+         JXwELDLtm525q0YbcH1QKAWHDpwkvrNYimXaPuxKgYG+L/3DBPg6PgiaHmB5IS6zRMHr
+         8c7x+GALzPTPJHEQiyYu4W8Nsm5+fGArsEPhmCMTMkG0ylHyRhpXRFtdcXZ49P6IkRtR
+         XcqquB1KrkUNuJ3dmRvJMX9qQyoXxH8iCq9Nly2mhS3Xm3/jQn0A8ZXMW76crG+Lg79T
+         a0iHkN4ZAPHXMN4vBESk0Blnt5eO8iZft9p+8JY+IrlMH5muNLQuMdaH8VzUsi+tG/UN
+         bEFQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=bhZvYF2rrfsZa6Xf7+GPLv45uKVXrZPOlQNANCKECQI=;
-        b=jwqt6xbAK1Hzf1YnDQXWklRINmmLIOhEzXFzl6SXc5Qkt51TPmeu0If9XRCYZGloOm
-         WD0+gyOYdJzrmhsE+N5bkDQ5mlOaYATC8Jnsop7TFJsGcJ632oesvLkKn1m242BkUZnC
-         07WuP3IV1GAIiv5nF0QtihMEgvbLXl6A+8nWl/rz9qo1VvzXjbz/1ViBlEhR6Jq4mtP/
-         IsCeBKSvZI5s9EJ3jyBKoVhwUpXwZbFDXcvkYnPe4lw9VhihFWoMtifBxJX4KbGOZmWO
-         Tw+qp3LMsn0rpUkIVPCcjSL7CUjAvabg9E9XX0+0SEVRcfo+Ut3uSbwbPIR4qUA+0ARz
-         Reog==
-X-Gm-Message-State: AOAM530ca0DbxEExsoWXYit+91Kg/+uJg7DHFBR5Dtx3WUgFCB1MqJHT
-        UciPq8sfXInAwmH2/uJTpMlMucXLCYF3E/Up5/e4Fw==
-X-Google-Smtp-Source: ABdhPJyTkuNIXW/4VTeu46rTAPJNrdcFFBw/FDfMkyZ8gV3dDP2TWej1nRS1wo4Y1zZF3ITB+QVUCzn16nazwshQD3Y=
-X-Received: by 2002:a9f:24b4:: with SMTP id 49mr12816796uar.100.1621864832999;
- Mon, 24 May 2021 07:00:32 -0700 (PDT)
+        bh=l5h+WQ0oEWo38CL1jqONencxRgJu9VTR6nMezb6lhhU=;
+        b=oqlC/i3X4bP4XJ3JB+UTFJlgGVIxwvRPltaX3otpTJ6NgUheTBRqeBNg0WDqZQwHJo
+         7/qvJNhZSy74BJljFksesVFymW34yI5v+Fsv7FWMyI+K1AtmrchxBFylXViB95kUSxgK
+         KLd1HJ80RLh4SCX+L3gMTw/W8Ey/MJ9TpwQBSueL0PnI7qi37X7CweJ8gXz5f1mxaLAU
+         kCY+KMOfarnSREE2htfHLoqT/g9Wf6yy7ybvFaBCQj4g0KXmZT9tbPqMJjcmM5jxCjVC
+         dXt10u3Hg/LD6VZqsAHP6PU65Exkiwj8Ze4e378ylRQFSkNgz2Rbli1y5EAyqsi4bv4H
+         TuMA==
+X-Gm-Message-State: AOAM533md8+UmwaD0lCGw7jyApynaulxBfAlODm2w44xXAhRcNzl9viL
+        nUuTwJVNFLZ8o/gpuKT9n3Wb6uBbylg6wizel8W4Rw==
+X-Google-Smtp-Source: ABdhPJwtziN/FCGvgGw4/XlFkWpcDdnay97ug47LPV8fFhhcyAayvbokIVDoG13Dji6ETVLY30FzGOnySJip8KB3INs=
+X-Received: by 2002:a67:1087:: with SMTP id 129mr20524337vsq.42.1621865453208;
+ Mon, 24 May 2021 07:10:53 -0700 (PDT)
 MIME-Version: 1.0
-References: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
-In-Reply-To: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
+References: <20210510190400.105162-1-l.stach@pengutronix.de>
+In-Reply-To: <20210510190400.105162-1-l.stach@pengutronix.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 24 May 2021 15:59:56 +0200
-Message-ID: <CAPDyKFrS3wdYs3AQtjZEOsLzNvxgy1n3EfxZ+a8w8J8rH8kQ-w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mxs-mmc: Disable the 'reg_vmmc' regulator when needed
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
+Date:   Mon, 24 May 2021 16:10:15 +0200
+Message-ID: <CAPDyKFqL+7dgBaYL5ozrsB2U-+FEERx6MgAoAib6YdmAN6hHDg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: add no-mmc-hs400 flag
+To:     Lucas Stach <l.stach@pengutronix.de>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
         Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Doug Anderson <dianders@chromium.org>,
-        Rui Miguel Silva <rmfrfs@gmail.com>,
-        Chris Ball <cjb@laptop.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 21 May 2021 at 14:36, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
+On Mon, 10 May 2021 at 21:04, Lucas Stach <l.stach@pengutronix.de> wrote:
 >
-> The 'reg_vmmc' regulator is never disabled. Neither in the error handling
-> of the probe, nor in the remove function.
+> From: Lucas Stach <dev@lynxeye.de>
 >
-> Add a managed action to do the required clean-up before a 'regulator_put()'
-> call.
+> HS400 requires a data strobe line in addition to the usual MMC signal
+> lines. If a board design neglects to wire up this signal, HS400 mode is
+> not available, even if both the controller and the eMMC are claiming to
+> support this mode. Add a DT flag to allow boards to disable the HS400
+> support in this case.
 >
-> Fixes: 4dc5a79f1350 ("mmc: mxs-mmc: enable regulator for mmc slot")
-> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-> ---
->  drivers/mmc/host/mxs-mmc.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
->
-> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> index 947581de7860..b043d53dd728 100644
-> --- a/drivers/mmc/host/mxs-mmc.c
-> +++ b/drivers/mmc/host/mxs-mmc.c
-> @@ -552,6 +552,13 @@ static const struct of_device_id mxs_mmc_dt_ids[] = {
->  };
->  MODULE_DEVICE_TABLE(of, mxs_mmc_dt_ids);
->
-> +static void regulator_disable_action(void *_data)
-> +{
-> +       struct regulator *regulator = _data;
-> +
-> +       regulator_disable(regulator);
-> +}
-> +
->  static int mxs_mmc_probe(struct platform_device *pdev)
->  {
->         struct device_node *np = pdev->dev.of_node;
-> @@ -591,6 +598,10 @@ static int mxs_mmc_probe(struct platform_device *pdev)
->                                 "Failed to enable vmmc regulator: %d\n", ret);
->                         goto out_mmc_free;
->                 }
-> +               ret = devm_add_action_or_reset(&pdev->dev,
-> +                                       regulator_disable_action, reg_vmmc);
-> +               if (ret)
-> +                       goto out_mmc_free;
+> Signed-off-by: Lucas Stach <dev@lynxeye.de>
+> Acked-by: Rob Herring <robh@kernel.org>
 
-Even if this improves the behaviour, there is a standardized way for
-how we deal with regulators for mmc.
-
-1. Call mmc_regulator_get_supply() during probe to fetch the optional
-regulator. If a regulator is found a corresponding OCR mask, in
-host->ocr_avail is assigned.
-
-2. In the ->set_ios() callback, invoke mmc_regulator_set_ocr(). This
-will also set the correct voltage-level and turn on/off the regulator,
-depending on the requested OCR/voltage-level.
-
->         }
->
->         ssp->clk = devm_clk_get(&pdev->dev, NULL);
-> --
-> 2.30.2
->
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index e141330c1114..ac80d09df3a9 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -220,6 +220,11 @@ properties:
+>      description:
+>        eMMC HS400 enhanced strobe mode is supported
+>
+> +  no-mmc-hs400:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      All eMMC HS400 modes are not supported.
+> +
+>    dsr:
+>      description:
+>        Value the card Driver Stage Register (DSR) should be programmed
+> --
+> 2.31.1
+>
