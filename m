@@ -2,163 +2,153 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91D71C47086
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 May 2021 22:48:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FB94C4707F
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 May 2021 23:00:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 71550613CC
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 May 2021 22:48:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 80F0E6142E
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 May 2021 23:00:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231848AbhEYWuD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 May 2021 18:50:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47330 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230465AbhEYWuD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 May 2021 18:50:03 -0400
-Received: from mail-ua1-x930.google.com (mail-ua1-x930.google.com [IPv6:2607:f8b0:4864:20::930])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77697C061574
-        for <linux-mmc@vger.kernel.org>; Tue, 25 May 2021 15:48:32 -0700 (PDT)
-Received: by mail-ua1-x930.google.com with SMTP id x1so11011553uau.1
-        for <linux-mmc@vger.kernel.org>; Tue, 25 May 2021 15:48:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=bACz+uWUWzOp4UEC6O9uu3jXtuOafDPeE6VNUTx5ei0=;
-        b=UzDE7fC0O77x6tkWPluXHZp3DSFJALRojTENB9zST/zQFLyTsk9wiQ7/eLkkWPVcEM
-         vAZxYS1XH35fxaajf5sIA2/4sLzZ+YdUFxA+78qZbQ1ISnOsj6+L5oDaEvISAVUyRjnU
-         6ZQQL0w3x6TtzbRBhhjXNmG5P3sPmbLBqlvmz6gQi5lLlFdaMQgcua9GSCQOjtFf1Q2j
-         dVL0zxRbVi4d3I31g7PrNuTCYYCN29ecbdGN+wM4qYTfWXbZyPVMcaYZY7TvgCTU0+Zg
-         +nsgNw81NoQDlLDgKDfAGB6NFt9SjdGuEUHRGTs5RGBClOpZq7MtwnioMYl7yXyhqk0C
-         Mevw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=bACz+uWUWzOp4UEC6O9uu3jXtuOafDPeE6VNUTx5ei0=;
-        b=VUuw7qjfR7y9/VuT3TJz3WiYRcEd8jrtmVXfI5e8ixG0H8q2XBV4BGBBoSBWoWo15Q
-         uMCeaIc4ktL1VJcOn4zVTZp8c/aDJ0mAZ969P16uZ2Mqtd+TMRZfHCy6gm1iwuXSwRWb
-         GPoFfdhLcDb/p3wtlytmwxQuwOT7Nvg7fb41HNAPCfmxLHcdfsWsexv6snh2AAsn6oyA
-         Fqs5JM/poAh6wRd3D3uzXWBkKCp4EAqB2ov82hBomM7TtV/6WuZTzujLxcjHKZOLwAeL
-         Jx7AXBBzoN5yAkfHxyz2oqNjGTpTWU7M1k47IGjMC1lCJIekIp1Y3qwWiiDH8o4AdR3E
-         O1cw==
-X-Gm-Message-State: AOAM533jk4XukqIU/CzQnlkZyHNdCwKP9E5pn+HSOYAKdwxMsDyLVQeY
-        cm+q6mB4ZC/wtbbRRT5aELdMShsAAFBIi0lGBQIYJw==
-X-Google-Smtp-Source: ABdhPJyme8DOfut1deY3oWH9+ZvPbcbZ8DL6LY3gvwTY3/NOWOaJNwqpxMlWwT9iFXPtMIPXMHDmL+3y1f8kIeHD0R4=
-X-Received: by 2002:ab0:d8f:: with SMTP id i15mr11170948uak.104.1621982911286;
- Tue, 25 May 2021 15:48:31 -0700 (PDT)
-MIME-Version: 1.0
-References: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
- <CAPDyKFrS3wdYs3AQtjZEOsLzNvxgy1n3EfxZ+a8w8J8rH8kQ-w@mail.gmail.com> <7c973bfd-8fc3-026d-351c-dc00e92c8b01@wanadoo.fr>
-In-Reply-To: <7c973bfd-8fc3-026d-351c-dc00e92c8b01@wanadoo.fr>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 26 May 2021 00:47:54 +0200
-Message-ID: <CAPDyKFptO4PRc=kxd9k8CkofGfyfJB6pdxP-wzrNpSHv0+ya0Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mxs-mmc: Disable the 'reg_vmmc' regulator when needed
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Doug Anderson <dianders@chromium.org>,
-        Rui Miguel Silva <rmfrfs@gmail.com>,
-        Chris Ball <cjb@laptop.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        id S232114AbhEYXBm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 May 2021 19:01:42 -0400
+Received: from new4-smtp.messagingengine.com ([66.111.4.230]:48719 "EHLO
+        new4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230097AbhEYXBi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 May 2021 19:01:38 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.nyi.internal (Postfix) with ESMTP id 08757580F64;
+        Tue, 25 May 2021 19:00:04 -0400 (EDT)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Tue, 25 May 2021 19:00:04 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm2; bh=k2E6Xl2OGkKHi1Co9wKE/zYBcsaaJtP
+        CLHu3XoEVoQ0=; b=r+Ba5JSfHnYEVlp/TkUTUnYG03Qko6M6XZGkGlDC6YcunKf
+        BHWlxaBLNmYkqWyR36EMS+hW/z3uQfM439RN4++ABiAzQDLFOAAiWudJRqpxMH6J
+        lkEwppBtDbcXRzKaTCSFVxcQh8EB+kzSbOJ2EqdmCyy4PLXeT5N1CbAxRADLCIde
+        er8+tAw/sdHdbJnOxoeSjdGuVqB8/VU4vGiVg8uN51zalxvra21PM5iF5CVK4Qbw
+        IodHaj4AY2mY+DCsicOEWt/mTq9vWpYx+gnghHgrDkNIRoT31CkeOSs8nBTL3Rl7
+        pirZlfhAYnHp+cF+29zgtjTMAb9aRshlz5O90xQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=k2E6Xl
+        2OGkKHi1Co9wKE/zYBcsaaJtPCLHu3XoEVoQ0=; b=j/tvEBgcYT6NruAOEo3pmY
+        NFb2EXKVliDobySmbPRtNYOyV1iIUzK1TKy4x/RWO85Ehi7yeLPyWjPT/4LqJ5kM
+        tT75MNO8RJ+xkmG+WE+sT9aS42wi9qbN7S8B0X6+bEQy7+MabqEKyiwiDbcARWBS
+        zU3jptQswjST6QeAGjqNYjREgPUmk8A+o5cQbIF/NyYA9eVxmV3V3XNmKNko3mWh
+        lOsBOW5wpb0TdeO7+BUvROO+GKlOUgUqI3+UhDkpp0w1cux/ESh4hDeaXWzUjNwo
+        t0iLJ1dmo+WjC7Tub1KqwQrTSMOQHH+fAV5IPXOiUTjvbbg7wmsV3YJE/hQAGSKw
+        ==
+X-ME-Sender: <xms:coGtYGCUw_IwHteOiD36wp6XozWVtIrqrZEQR6pmnzy2hZWcm0s56g>
+    <xme:coGtYAiJCmUqHCyBkbEi-cGrKurmv-_JD49TRsgimGYLHezCwQ6Q8tluCrAoXDN1H
+    tiQCitaXuXEu-iTeA>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdekvddgudeiucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhepkeekteekuddvffeigeetkeegudduffejfffguedvveffvdekheeivdet
+    hefftefhnecuffhomhgrihhnpehlkhhmlhdrohhrghenucevlhhushhtvghrufhiiigvpe
+    dtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrnhgurhgvfiesrghjrdhiugdrrghu
+X-ME-Proxy: <xmx:coGtYJngWbcMwKlahILBMLZx3vkNJjDejNejGHrMeWeEqwvPh7m-9w>
+    <xmx:coGtYEyD_dC7VoMgHak49JjdCvUWccHAklJzntTLHG7mlGK5DGQ41g>
+    <xmx:coGtYLTzOu7698bAdzm07BYsxnElSqI1BLC96NBw9gLMSRUbnR4TMA>
+    <xmx:dIGtYDYUKATlHWFKXDhHESTfJoCiGjHfn1sIw-EOM3IEM8KuwvywoQ>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 159C4A00079; Tue, 25 May 2021 19:00:02 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-448-gae190416c7-fm-20210505.004-gae190416
+Mime-Version: 1.0
+Message-Id: <e95c5263-d50f-4316-bb93-e14449559b1b@www.fastmail.com>
+In-Reply-To: <CACPK8XfdYAcx=RX07hf1ar8A7th8G8390exvKbgh92X=ov8u2A@mail.gmail.com>
+References: <20210524073308.9328-1-steven_lee@aspeedtech.com>
+ <CACPK8XcfvUQD5xwb=2Va5Sr+bmaWfJMZkh61HK1=J1qLYc84zQ@mail.gmail.com>
+ <20210525094815.GA8757@aspeedtech.com>
+ <CACPK8XfdYAcx=RX07hf1ar8A7th8G8390exvKbgh92X=ov8u2A@mail.gmail.com>
+Date:   Wed, 26 May 2021 08:29:41 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Joel Stanley" <joel@jms.id.au>,
+        "Steven Lee" <steven_lee@aspeedtech.com>
+Cc:     "Rob Herring" <robh+dt@kernel.org>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-aspeed@lists.ozlabs.org>,
+        "open list" <linux-kernel@vger.kernel.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        "Hongwei Zhang" <Hongweiz@ami.com>,
+        "Ryan Chen" <ryan_chen@aspeedtech.com>,
+        "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>
+Subject: =?UTF-8?Q?Re:_[PATCH_v5_0/4]_mmc:_sdhci-of-aspeed:_Support_toggling_SD_b?=
+ =?UTF-8?Q?us_signal?=
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 25 May 2021 at 21:31, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
->
-> Le 24/05/2021 =C3=A0 15:59, Ulf Hansson a =C3=A9crit :
-> > On Fri, 21 May 2021 at 14:36, Christophe JAILLET
-> > <christophe.jaillet@wanadoo.fr> wrote:
-> >>
-> >> The 'reg_vmmc' regulator is never disabled. Neither in the error handl=
-ing
-> >> of the probe, nor in the remove function.
-> >>
-> >> Add a managed action to do the required clean-up before a 'regulator_p=
-ut()'
-> >> call.
-> >>
-> >> Fixes: 4dc5a79f1350 ("mmc: mxs-mmc: enable regulator for mmc slot")
-> >> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-> >> ---
-> >>   drivers/mmc/host/mxs-mmc.c | 11 +++++++++++
-> >>   1 file changed, 11 insertions(+)
-> >>
-> >> diff --git a/drivers/mmc/host/mxs-mmc.c b/drivers/mmc/host/mxs-mmc.c
-> >> index 947581de7860..b043d53dd728 100644
-> >> --- a/drivers/mmc/host/mxs-mmc.c
-> >> +++ b/drivers/mmc/host/mxs-mmc.c
-> >> @@ -552,6 +552,13 @@ static const struct of_device_id mxs_mmc_dt_ids[]=
- =3D {
-> >>   };
-> >>   MODULE_DEVICE_TABLE(of, mxs_mmc_dt_ids);
-> >>
-> >> +static void regulator_disable_action(void *_data)
-> >> +{
-> >> +       struct regulator *regulator =3D _data;
-> >> +
-> >> +       regulator_disable(regulator);
-> >> +}
-> >> +
-> >>   static int mxs_mmc_probe(struct platform_device *pdev)
-> >>   {
-> >>          struct device_node *np =3D pdev->dev.of_node;
-> >> @@ -591,6 +598,10 @@ static int mxs_mmc_probe(struct platform_device *=
-pdev)
-> >>                                  "Failed to enable vmmc regulator: %d\=
-n", ret);
-> >>                          goto out_mmc_free;
-> >>                  }
-> >> +               ret =3D devm_add_action_or_reset(&pdev->dev,
-> >> +                                       regulator_disable_action, reg_=
-vmmc);
-> >> +               if (ret)
-> >> +                       goto out_mmc_free;
+
+
+On Tue, 25 May 2021, at 22:26, Joel Stanley wrote:
+> On Tue, 25 May 2021 at 09:48, Steven Lee <steven_lee@aspeedtech.com> wrote:
 > >
-> > Even if this improves the behaviour, there is a standardized way for
-> > how we deal with regulators for mmc.
+> > The 05/25/2021 15:55, Joel Stanley wrote:
+> > > When I was testing on my A2 EVB I saw this:
+> > >
+> > > [    1.436219] sdhci-aspeed 1e750100.sdhci: Requested out of range
+> > > phase tap 192 for 9 degrees of phase compensation at 1562500Hz,
+> > > clamping to tap 15
+> > > [    1.450913] sdhci-aspeed 1e750100.sdhci: Requested out of range
+> > > phase tap 963 for 45 degrees of phase compensation at 1562500Hz,
+> > > clamping to tap 15
+> > >
+> > > Do you know what is happening there?
+> > >
 > >
-> > 1. Call mmc_regulator_get_supply() during probe to fetch the optional
-> > regulator. If a regulator is found a corresponding OCR mask, in
-> > host->ocr_avail is assigned.
+> > Per MMC spec, eMMC bus speed is set as legacy mode(0~26MHz) at startup of
+> > eMMC initializtion flow. Clock phase calculation is triggered in set_clock()
+> > and it calculates taps based on phase_deg(<9>, <225>) in the dts file and the
+> > current speed(1562500Hz), which causes the warning message you mentioned.
+> > As the phase_deg in the dts file should be calculated with 100MHz.
 > >
-> > 2. In the ->set_ios() callback, invoke mmc_regulator_set_ocr(). This
-> > will also set the correct voltage-level and turn on/off the regulator,
-> > depending on the requested OCR/voltage-level.
->
-> Hi,
-> I don't know this API.
-> I've tried to look at a few drivers to see how it was used, but it
-> didn't help me either.
+> > https://lkml.org/lkml/2021/5/24/95
+> >
+> > But after some initialization flow, eMMC bus speed will be set to
+> > correct speed(100MHz).
+> > Clock phase calculation will be triggered again to get correct taps.
+> 
+> Thanks for the explanation. I added another debug print and I can see
+> it doing what you describe:
+> 
+> [    1.465904] sdhci-aspeed 1e750100.sdhci: Requested out of range
+> phase tap 192 for 9 degrees of phase compensation at 1562500Hz,
+> clamping to tap 15
+> [    1.480598] sdhci-aspeed 1e750100.sdhci: rate 1562500 phase 9 tap 15
+> [    1.490316] sdhci-aspeed 1e750100.sdhci: Requested out of range
+> phase tap 963 for 45 degrees of phase compensation at 1562500Hz,
+> clamping to tap 15
+> [    1.505077] sdhci-aspeed 1e750100.sdhci: rate 1562500 phase 45 tap 15
+> [    1.515059] sdhci-aspeed 1e750100.sdhci: rate 100000000 phase 9 tap 3
+> [    1.524886] sdhci-aspeed 1e750100.sdhci: rate 100000000 phase 45 tap 15
+> [    1.534904] sdhci-aspeed 1e750100.sdhci: rate 100000000 phase 9 tap 3
+> [    1.544713] sdhci-aspeed 1e750100.sdhci: rate 100000000 phase 45 tap 15
+> 
+> We should change the "out of range" message to be dev_dbg, as it is
+> expected on a normal boot.
 
-Okay.
+I would think the issue is rather that we shouldn't be applying a phase 
+correction for a bus speed that isn't what the correction was specified 
+for.
 
->
-> So, I won't be able to provide any other proposal on this. It would only
-> be trial/error.
-> It is yours if something needs to be fixed here.
->
-> Anyway, thanks for your time for answering and trying to show the right
-> direction.
+Let me look at this a bit further.
 
-If I put together some patch and submit it, would you be able help to
-run some tests of it, as I don't have access to HW?
-
-Kind regards
-Uffe
+Andrew
