@@ -2,130 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DABEC2B9F7
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 16:26:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06E3BC2B9F7
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 May 2021 01:00:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4419261413
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 May 2021 16:26:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E18C3613D6
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 May 2021 01:00:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233516AbhEXQ1c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 May 2021 12:27:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59122 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233353AbhEXQ1c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 12:27:32 -0400
-Received: from mail-vk1-xa29.google.com (mail-vk1-xa29.google.com [IPv6:2607:f8b0:4864:20::a29])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BFA5C06138A
-        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 09:26:03 -0700 (PDT)
-Received: by mail-vk1-xa29.google.com with SMTP id 184so5522092vkz.13
-        for <linux-mmc@vger.kernel.org>; Mon, 24 May 2021 09:26:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SP2BZdKlThSu6kHqkbL0f8O39z75p93t1CFSSb6kP6A=;
-        b=AMwhxlfvIPT1+cn4mQwMmez18R53eNYMW3kdqz/2K5bTXja+CsDaiMHjH87B9vs63T
-         vKcqORytD70hSj5y2ACajmqJVgY//3TpVjprFsek6Rl8xt+Qn5T63rZvuqH9j1UnEgZJ
-         74TBP8KAQY3Km93Wi1us0ke7foZFeFkMY4skhhC+LOBI2T7NBg6ZP4UMR9k8AyhbvkhU
-         YzjV50TNAJMHjPL/4PDR6iadZrMPBjQrkNNxwdJMDoW9tBXcgY0WvgA48SavEVckIlfE
-         qAOaRvRfDBx9m0MQhdu4XfDwWZecalIlcHWHEdQr97WEOYPgSWN66mMU3bdT0y1nP46m
-         hjdQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SP2BZdKlThSu6kHqkbL0f8O39z75p93t1CFSSb6kP6A=;
-        b=tfcIfmvZqSpN52c+tp3nY8xtIkECW0AQvjRLbPSY6XgX+rVKX6ncmWXElYhh5xkL8x
-         OC8eKuTJJvug+a3pe69pvJwGeejf08gLpxizC1/ovQuJJH9PFeYPR1DeEk+4M/P5njPQ
-         hOc6g/s79Rcc8XTH1JJTyiNV2yLR+bqbuWLZ8Ft6UKLLkGLP58xFxZ06BF5QxTj1sp5j
-         8AgNvczUwb3bjqz3MsOPxeheBFdxaikeZpisRLk1kDEWESq6JhYamtUyyDV0DfO3w3FZ
-         5sWLJkBew4InTVHAFgmDXhNGuxsWSR5RfS4HrOc0LZETYKFJ4UaJKqWCBYKHeTOh81LJ
-         gBMQ==
-X-Gm-Message-State: AOAM532PISU8LjVcnOpWyFM9SCmPfoYsrZmA1iStGX9G6ZNiHFy0463M
-        +XY9BRm3W6FNe4OKlAnOiBrrjx704GRKyzBW03zgFQ==
-X-Google-Smtp-Source: ABdhPJwsNXBFGmRL6Qdv650SNJwagPUuG24dNMJGtpBJZ+17nxPEg4Pylgky7K5gV81D6DSkM24pcShGa9M1j9LcCzI=
-X-Received: by 2002:a1f:9542:: with SMTP id x63mr22199896vkd.15.1621873562173;
- Mon, 24 May 2021 09:26:02 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210520133908.98891-1-damtev@yandex-team.ru> <20210520133908.98891-2-damtev@yandex-team.ru>
- <YKu4Qovv1KMplifY@stefanha-x1.localdomain> <20210524145654.GA2632@lst.de>
-In-Reply-To: <20210524145654.GA2632@lst.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 24 May 2021 18:25:24 +0200
-Message-ID: <CAPDyKFpHeiyLxU1H_gZuxivkiZCKhZ_igsbx_TxSWzUhyaEufQ@mail.gmail.com>
-Subject: Re: [PATCH 1/1] virtio: disable partitions scanning for no partitions block
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Stefan Hajnoczi <stefanha@redhat.com>,
-        Yury Kamenev <damtev@yandex-team.ru>,
-        Jens Axboe <axboe@kernel.dk>, mst@redhat.com,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        virtualization@lists.linux-foundation.org,
-        linux-block <linux-block@vger.kernel.org>, pbonzini@redhat.com,
-        Lauri Kasanen <cand@gmx.com>
-Content-Type: text/plain; charset="UTF-8"
+        id S229586AbhEYBBx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 May 2021 21:01:53 -0400
+Received: from new2-smtp.messagingengine.com ([66.111.4.224]:57075 "EHLO
+        new2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229587AbhEYBBx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 May 2021 21:01:53 -0400
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailnew.nyi.internal (Postfix) with ESMTP id 3760C580B59;
+        Mon, 24 May 2021 21:00:24 -0400 (EDT)
+Received: from imap2 ([10.202.2.52])
+  by compute3.internal (MEProxy); Mon, 24 May 2021 21:00:24 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=
+        mime-version:message-id:in-reply-to:references:date:from:to:cc
+        :subject:content-type; s=fm2; bh=MuuXmIqjs2b9Wql+ivIaAaXhuLI9xH3
+        VV1Cqz+QjxZs=; b=LorQqEfF7U396gS162c09TdyeNqdizOd6xeH/vNcBbyROHg
+        J/rvox01HTmL0jc9JsOt/vfWVXKOLiF8F36nnN7AcrG7vhRA/liF7PLsFpCsMdyr
+        KpFcnt3Fmem2gak6MKB+qcVZ8Y8oJNAZKBr6c9Sb0NP0Eb4G8QjlC/NGri3iKt0J
+        cU3ICrNfe+Wcv05d4d0X03U9H6im5dN45TT18GK6LVKxPobbLB0l7ooeocSw4gNu
+        UVz/J/MP8zKzCRofVUGlKIyUZjrZZA3Yl7qsEdcqm1U8j0em/NfAkVEejWpf0il1
+        1Cj3fEqU11N207Ux0ksiZm0rHKsYOkFgRmFh4KA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm2; bh=MuuXmI
+        qjs2b9Wql+ivIaAaXhuLI9xH3VV1Cqz+QjxZs=; b=EiWSMMf/E4LAR9llQaNh+d
+        kDFyDuFh7nbbOYr+s758MyQhrnIE6KkWLflZlJYefI9GLL50m/lwWMXMgNFHZ5fq
+        5Uy/ayzVKLRj35ddWMu03G75EJMJG5v4KFTXpxhrTiFEX+VexABUp4+R2Ow0MSU9
+        xZJxgnHCkWNtUiCme32H1XQqeCewAL2kFmpVG/H0DllNIkeVjULFs69b0SNDj9hs
+        KUNoGtNhSV29XPZaBm2wtSdeYEODX2yGaM2UxrrId81re1BIMhD3ZaHSIsJm+ho9
+        9O5KWm1JEGg3Aq7GJKdbWq80BkxmF9JcD0Tg6Cp4yA3x34GwOCd7oXGsu1xmPITg
+        ==
+X-ME-Sender: <xms:JkysYD7VveHzst7SikTrfhAk1N1oIVYzNMMsY8nH7Few6CpOZQ-tcg>
+    <xme:JkysYI6bh0zzqNdyCP36eLTrILmeD_H-9NDCWoKdNYxTG4Tvv3ZgsihUS6B4kAznp
+    gBDmuy7FeQlFwxnHQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgeduledrvdektddgfeelucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvffutgesthdtredtreerjeenucfhrhhomhepfdetnhgu
+    rhgvficulfgvfhhfvghrhidfuceorghnughrvgifsegrjhdrihgurdgruheqnecuggftrf
+    grthhtvghrnhepuddttdekueeggedvtddtueekiedutdfguedutdefieeuteefieelteet
+    vddthfeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomh
+    eprghnughrvgifsegrjhdrihgurdgruh
+X-ME-Proxy: <xmx:JkysYKcnx-2Fx7u0ClcsPOOGOLS-Cyi2bgrJATWsZn8IU1fQCZEo6Q>
+    <xmx:JkysYEJYQ9DxTgDevycBMeAnRWYPaqZ2SeyHXihKiAedy-xmpPNdOA>
+    <xmx:JkysYHKkEwOjefxvQhvIrajJM97BudoR3o8a4wha3GNoyIx9R9t5sw>
+    <xmx:KEysYJwO_XcoVHP6N8odCGVRBGr2k0FiTRDxNzRrvv_rsuG5sDMHLw>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id AFDC7A00079; Mon, 24 May 2021 21:00:22 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-448-gae190416c7-fm-20210505.004-gae190416
+Mime-Version: 1.0
+Message-Id: <5c4988d5-1928-449e-8eaa-e16448f820fe@www.fastmail.com>
+In-Reply-To: <20210524073308.9328-2-steven_lee@aspeedtech.com>
+References: <20210524073308.9328-1-steven_lee@aspeedtech.com>
+ <20210524073308.9328-2-steven_lee@aspeedtech.com>
+Date:   Tue, 25 May 2021 10:30:02 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "Steven Lee" <steven_lee@aspeedtech.com>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Adrian Hunter" <adrian.hunter@intel.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "moderated list:ARM/ASPEED MACHINE SUPPORT" 
+        <linux-aspeed@lists.ozlabs.org>,
+        "open list" <linux-kernel@vger.kernel.org>,
+        "moderated list:ASPEED SD/MMC DRIVER" <openbmc@lists.ozlabs.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>
+Cc:     "Hongwei Zhang" <Hongweiz@ami.com>,
+        "Ryan Chen" <ryan_chen@aspeedtech.com>,
+        "Chin-Ting Kuo" <chin-ting_kuo@aspeedtech.com>
+Subject: =?UTF-8?Q?Re:_[PATCH_v5_1/4]_ARM:_dts:_aspeed:_ast2600evb:_Add_sdhci_nod?=
+ =?UTF-8?Q?e_and_gpio_regulator_for_A2_evb.?=
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 24 May 2021 at 16:57, Christoph Hellwig <hch@lst.de> wrote:
->
-> On Mon, May 24, 2021 at 03:29:22PM +0100, Stefan Hajnoczi wrote:
-> > GENHD_FL_NO_PART_SCAN is not used much in other drivers. This makes me
-> > wonder if the same use case is addressed through other means with SCSI,
-> > NVMe, etc devices. Maybe Christoph or Jens can weigh in on whether
-> > adding a bit to disable partition scanning for a virtio-blk fits into
-> > the big picture?
-> >
-> > Is your goal to avoid accidentally detecting partitions because it's
-> > confusing when that happens?
->
-> I'm really confused what the use case is here.  GENHD_FL_NO_PART_SCAN
-> has four users:
->
->  - the block core setting it for hidden devices, for which the concept
->    of paritions doesn't make sense.  Looking back this should have never
->    used GENHD_FL_NO_PART_SCAN, and instead the partition scanning code
->    should just check GENHD_FL_HIDDEN as well.
->  - mmc uses it for boot partitions and rpmb.  I'm not even sure how
->    these can be exposed as block devices as they don't require block
->    granularity access IIRC, but if the allow block layer access there
->    is no reason to ever set these flags.
 
-For RPMB, we have converted them into char devices, thus
-GENHD_FL_NO_PART_SCAN is never set for them. The code needs a cleanup
-to clarify this.
 
-When it comes to eMMC boot partitions, those can be read/written to as
-any other block device. Although, it's unlikely that they need
-partitions as they are usually very small, 512Kb or 2MB in that
-ballpark. At least, that was the thinking behind it when we added
-GENHD_FL_NO_PART_SCAN for them.
+On Mon, 24 May 2021, at 17:02, Steven Lee wrote:
+> AST2600 A2(or newer) EVB has gpio regulators for toggling signal voltage
+> between 3.3v and 1.8v, the patch adds sdhci node and gpio regulator in the
+> dts file and adds comment for describing the reference design.
+> 
+> Signed-off-by: Steven Lee <steven_lee@aspeedtech.com>
 
-If you want to drop GENHD_FL_NO_PART_SCAN for eMMC boot partitions, I
-don't think it will be an issue.
-
->  - loop is a bit of a mess.  IIRC the story is that originally the
->    loop device did not support partitions, then in 2008 support for
->    partitions was added by partitioning the minor number space, and
->    then in 2011 support for partitions without that parameter was
->    added using a new flag in the loop device creation ioctl that uses
->    the extended dev_t space added since.  But even that might be
->    something we can handled without that flag without breaking the
->    userspace ABI
->  - m64card sets it for no good reason at all
->
-> In other words: in a perfect would GENHD_FL_NO_PART_SCAN would not
-> exist, and it certainly should not be added to a new driver, never
-> mind a protocol.
-> _______________________________________________
-> Virtualization mailing list
-> Virtualization@lists.linux-foundation.org
-> https://lists.linuxfoundation.org/mailman/listinfo/virtualization
-
-Kind regards
-Uffe
+Acked-by: Andrew Jeffery <andrew@aj.id.au>
