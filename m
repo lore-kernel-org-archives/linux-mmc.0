@@ -2,78 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3621BC2B9F7
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 07:46:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE43C2B9F7
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 08:08:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0745E610A0
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 07:46:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 47C5C6143E
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 08:08:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233044AbhEZHsI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 May 2021 03:48:08 -0400
-Received: from smtp12.smtpout.orange.fr ([80.12.242.134]:45840 "EHLO
-        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233042AbhEZHsI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2021 03:48:08 -0400
-Received: from [192.168.1.18] ([86.243.172.93])
-        by mwinf5d47 with ME
-        id 9KmY2500h21Fzsu03KmZ7X; Wed, 26 May 2021 09:46:35 +0200
-X-ME-Helo: [192.168.1.18]
-X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
-X-ME-Date: Wed, 26 May 2021 09:46:35 +0200
-X-ME-IP: 86.243.172.93
-Subject: Re: [PATCH] mmc: mxs-mmc: Disable the 'reg_vmmc' regulator when
- needed
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Doug Anderson <dianders@chromium.org>,
-        Rui Miguel Silva <rmfrfs@gmail.com>,
-        Chris Ball <cjb@laptop.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kernel-janitors@vger.kernel.org
-References: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
- <CAPDyKFrS3wdYs3AQtjZEOsLzNvxgy1n3EfxZ+a8w8J8rH8kQ-w@mail.gmail.com>
- <7c973bfd-8fc3-026d-351c-dc00e92c8b01@wanadoo.fr>
- <CAPDyKFptO4PRc=kxd9k8CkofGfyfJB6pdxP-wzrNpSHv0+ya0Q@mail.gmail.com>
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Message-ID: <fa7e957e-4b3d-6ff6-1f72-e630eda2960d@wanadoo.fr>
-Date:   Wed, 26 May 2021 09:46:32 +0200
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.2
+        id S232568AbhEZIJk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 May 2021 04:09:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58674 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229594AbhEZIJj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2021 04:09:39 -0400
+Received: from mail-ua1-x935.google.com (mail-ua1-x935.google.com [IPv6:2607:f8b0:4864:20::935])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFA7BC061574
+        for <linux-mmc@vger.kernel.org>; Wed, 26 May 2021 01:08:08 -0700 (PDT)
+Received: by mail-ua1-x935.google.com with SMTP id h26so287487uab.13
+        for <linux-mmc@vger.kernel.org>; Wed, 26 May 2021 01:08:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=GrfL+UvsoUYJEVH3FOBXMPqeLzeAwHNpUWgDzMspWKw=;
+        b=woqt8BnxKZukeBLeJd4w4lKnQ3cKCzoRk7QnVN0RWefRH0Lak2HbQbLhx/frNziCrW
+         vzOd63E9Idh6uhMeJbijddzANEGlwhq2a94sp+UT6X33w/HJrP0R4Xxsur3qtd3UJ9V3
+         RXhO2WmDqsPWGOOFe4Z1vXtU3Ajlf9H69hO1WGEkh2/q7XWi3knfCY64J+SzmkNKOe36
+         kp6uvOs+ndgfRymDdtUOUv9NQPYP8RiXXMABsN8MVSRmmehasPQ8UDsDcWRSt1e77qBG
+         1jHw1+BN8mfEhYZIvRTg/wyYkLYEyw3TBricpiOdb+JF5bZQWiaQ0RSSDpINkEteioTM
+         z8Uw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=GrfL+UvsoUYJEVH3FOBXMPqeLzeAwHNpUWgDzMspWKw=;
+        b=KyImplYsIttPx3QKpwB4bX+9zIQaOuKI0axmjFCkVMwpqLSKnOIdKFhBTl7pf8eRZd
+         wgqaFTW8n4xvAuTS1aCt/hV8x+YzcwI6nG91AKZ7dpUPkBaN5uOxGXvto6+vw/uc1iMW
+         j/uVtdw3ssbY7GSbIk+rh0qFtMTazBHPekXFkLUTw8TH/NVTLFEJP58xgXsKiuupfMOz
+         OWFkMbiM/xz8Fqg0hzZrryL/6/qcDJvUTPs3N2e8FZTTPZ07/3m+KqjKfYWqPDFGUCwl
+         MgWxhOAlRgkj7ouXeDd5Bz9LUT0886ilb5gbgbNzWqvloQjR+p0lGMhBEIg9ATcTncJE
+         0Ktg==
+X-Gm-Message-State: AOAM530DvQSNGDCgUrIoBW/rBMtL3wLlATTip2GlTVkxV1oq6O8BzjCM
+        BknEO+IKyrghwvQiOTlDhbHawf9q291fQLaRjiDF0Q==
+X-Google-Smtp-Source: ABdhPJxEKZ+yyN+wbXXVH9CKQ94TxTUrIX6SVT7ztQ9Bwftr62IUqVIB3GNBh5QlN3mdzVdDkjsC7QK+8McmDny5XO0=
+X-Received: by 2002:ab0:3351:: with SMTP id h17mr31776765uap.15.1622016487939;
+ Wed, 26 May 2021 01:08:07 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFptO4PRc=kxd9k8CkofGfyfJB6pdxP-wzrNpSHv0+ya0Q@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <20210521055116.1053587-1-hch@lst.de> <CAPDyKFpqdSYeA+Zg=9Ewi46CmSWNpXQbju6HQo7aviCcRzyAAg@mail.gmail.com>
+ <20210526044943.GA28551@lst.de>
+In-Reply-To: <20210526044943.GA28551@lst.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 26 May 2021 10:07:31 +0200
+Message-ID: <CAPDyKFpR0maO_Dj6bxWSLvh_jcGnrcZ=na42atXfNdkmMkmdig@mail.gmail.com>
+Subject: Re: simplify gendisk and request_queue allocation for bio based drivers
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Chris Zankel <chris@zankel.net>,
+        Max Filippov <jcmvbkbc@gmail.com>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Lars Ellenberg <lars.ellenberg@linbit.com>,
+        Jim Paris <jim@jtan.com>,
+        Joshua Morris <josh.h.morris@us.ibm.com>,
+        Philip Kelleher <pjk1939@linux.ibm.com>,
+        Minchan Kim <minchan@kernel.org>,
+        Nitin Gupta <ngupta@vflare.org>,
+        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
+        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        linux-block <linux-block@vger.kernel.org>, dm-devel@redhat.com,
+        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
+        drbd-dev@lists.linbit.com,
+        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
+        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
+        linux-mmc <linux-mmc@vger.kernel.org>, nvdimm@lists.linux.dev,
+        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Le 26/05/2021 à 00:47, Ulf Hansson a écrit :
-> If I put together some patch and submit it, would you be able help to
-> run some tests of it, as I don't have access to HW?
+On Wed, 26 May 2021 at 06:49, Christoph Hellwig <hch@lst.de> wrote:
+>
+> On Wed, May 26, 2021 at 12:41:37AM +0200, Ulf Hansson wrote:
+> > On Fri, 21 May 2021 at 07:51, Christoph Hellwig <hch@lst.de> wrote:
+> > >
+> > > Hi all,
+> > >
+> > > this series is the first part of cleaning up lifetimes and allocation of
+> > > the gendisk and request_queue structure.  It adds a new interface to
+> > > allocate the disk and queue together for bio based drivers, and a helper
+> > > for cleanup/free them when a driver is unloaded or a device is removed.
+> >
+> > May I ask what else you have in the pipe for the next steps?
+> >
+> > The reason why I ask is that I am looking into some issues related to
+> > lifecycle problems of gendisk/mmc, typically triggered at SD/MMC card
+> > removal.
+>
+> In the short run not much more than superficial cleanups.  Eventually
+> I want bio based drivers to not require a separate request_queue, leaving
+> that purely as a data structure for blk-mq based drivers.  But it will
+> take a while until we get there, so it should not block any fixes.
 
-No, I won't be able to help.
-This only got triggered by a static analysis checker (a own made 
-coccinelle script) and I don't have the hardware to test anything.
+Alright, thanks for clarifying.
 
-This is why I can't propose an updated proposal. Trial & error 
-development when you can't test by yourself is only counterproductive.
+>
+> For hot unplug handling it might be worth to take a look at nvme, as it
+> is tested a lot for that case.
 
-CJ
+Okay, thanks for the hint.
 
-> 
-> Kind regards
-> Uffe
-> 
-
+Kind regards
+Uffe
