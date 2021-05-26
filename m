@@ -3,87 +3,77 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
 X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44488C47088
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 04:49:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3621BC2B9F7
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 07:46:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16616613BC
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 04:49:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0745E610A0
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 May 2021 07:46:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229752AbhEZEvU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 May 2021 00:51:20 -0400
-Received: from verein.lst.de ([213.95.11.211]:33194 "EHLO verein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229604AbhEZEvU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 26 May 2021 00:51:20 -0400
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 3ADA76736F; Wed, 26 May 2021 06:49:44 +0200 (CEST)
-Date:   Wed, 26 May 2021 06:49:43 +0200
-From:   Christoph Hellwig <hch@lst.de>
+        id S233044AbhEZHsI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 May 2021 03:48:08 -0400
+Received: from smtp12.smtpout.orange.fr ([80.12.242.134]:45840 "EHLO
+        smtp.smtpout.orange.fr" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233042AbhEZHsI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 May 2021 03:48:08 -0400
+Received: from [192.168.1.18] ([86.243.172.93])
+        by mwinf5d47 with ME
+        id 9KmY2500h21Fzsu03KmZ7X; Wed, 26 May 2021 09:46:35 +0200
+X-ME-Helo: [192.168.1.18]
+X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
+X-ME-Date: Wed, 26 May 2021 09:46:35 +0200
+X-ME-IP: 86.243.172.93
+Subject: Re: [PATCH] mmc: mxs-mmc: Disable the 'reg_vmmc' regulator when
+ needed
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Chris Zankel <chris@zankel.net>,
-        Max Filippov <jcmvbkbc@gmail.com>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Lars Ellenberg <lars.ellenberg@linbit.com>,
-        Jim Paris <jim@jtan.com>,
-        Joshua Morris <josh.h.morris@us.ibm.com>,
-        Philip Kelleher <pjk1939@linux.ibm.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Nitin Gupta <ngupta@vflare.org>,
-        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
-        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Vasily Gorbik <gor@linux.ibm.com>,
-        Christian Borntraeger <borntraeger@de.ibm.com>,
-        linux-block <linux-block@vger.kernel.org>, dm-devel@redhat.com,
-        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
-        drbd-dev@lists.linbit.com,
-        linuxppc-dev <linuxppc-dev@lists.ozlabs.org>,
-        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
-        linux-mmc <linux-mmc@vger.kernel.org>, nvdimm@lists.linux.dev,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
-Subject: Re: simplify gendisk and request_queue allocation for bio based
- drivers
-Message-ID: <20210526044943.GA28551@lst.de>
-References: <20210521055116.1053587-1-hch@lst.de> <CAPDyKFpqdSYeA+Zg=9Ewi46CmSWNpXQbju6HQo7aviCcRzyAAg@mail.gmail.com>
+Cc:     Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Sascha Hauer <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        dl-linux-imx <linux-imx@nxp.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Doug Anderson <dianders@chromium.org>,
+        Rui Miguel Silva <rmfrfs@gmail.com>,
+        Chris Ball <cjb@laptop.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel-janitors@vger.kernel.org
+References: <d05074c11962a046ff9c2f457c240432ca8a7194.1621600443.git.christophe.jaillet@wanadoo.fr>
+ <CAPDyKFrS3wdYs3AQtjZEOsLzNvxgy1n3EfxZ+a8w8J8rH8kQ-w@mail.gmail.com>
+ <7c973bfd-8fc3-026d-351c-dc00e92c8b01@wanadoo.fr>
+ <CAPDyKFptO4PRc=kxd9k8CkofGfyfJB6pdxP-wzrNpSHv0+ya0Q@mail.gmail.com>
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Message-ID: <fa7e957e-4b3d-6ff6-1f72-e630eda2960d@wanadoo.fr>
+Date:   Wed, 26 May 2021 09:46:32 +0200
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpqdSYeA+Zg=9Ewi46CmSWNpXQbju6HQo7aviCcRzyAAg@mail.gmail.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <CAPDyKFptO4PRc=kxd9k8CkofGfyfJB6pdxP-wzrNpSHv0+ya0Q@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, May 26, 2021 at 12:41:37AM +0200, Ulf Hansson wrote:
-> On Fri, 21 May 2021 at 07:51, Christoph Hellwig <hch@lst.de> wrote:
-> >
-> > Hi all,
-> >
-> > this series is the first part of cleaning up lifetimes and allocation of
-> > the gendisk and request_queue structure.  It adds a new interface to
-> > allocate the disk and queue together for bio based drivers, and a helper
-> > for cleanup/free them when a driver is unloaded or a device is removed.
-> 
-> May I ask what else you have in the pipe for the next steps?
-> 
-> The reason why I ask is that I am looking into some issues related to
-> lifecycle problems of gendisk/mmc, typically triggered at SD/MMC card
-> removal.
+Le 26/05/2021 à 00:47, Ulf Hansson a écrit :
+> If I put together some patch and submit it, would you be able help to
+> run some tests of it, as I don't have access to HW?
 
-In the short run not much more than superficial cleanups.  Eventually
-I want bio based drivers to not require a separate request_queue, leaving
-that purely as a data structure for blk-mq based drivers.  But it will
-take a while until we get there, so it should not block any fixes.
+No, I won't be able to help.
+This only got triggered by a static analysis checker (a own made 
+coccinelle script) and I don't have the hardware to test anything.
 
-For hot unplug handling it might be worth to take a look at nvme, as it
-is tested a lot for that case.
+This is why I can't propose an updated proposal. Trial & error 
+development when you can't test by yourself is only counterproductive.
+
+CJ
+
+> 
+> Kind regards
+> Uffe
+> 
+
