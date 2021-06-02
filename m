@@ -2,74 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EE18C4708F
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 07:49:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FA86C4708F
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 12:05:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 539EF61042
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 07:49:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05C7E613DB
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 12:04:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232239AbhFBHvX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Jun 2021 03:51:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60840 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232233AbhFBHvW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jun 2021 03:51:22 -0400
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71724C061574
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Jun 2021 00:49:39 -0700 (PDT)
-Received: by mail-ed1-x535.google.com with SMTP id w21so1670137edv.3
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Jun 2021 00:49:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=IviQGHXbohDYlY4Kaxm/cxlbY44V3tAurEYksJ8dtbE=;
-        b=jCNYXrovW1sUHaOT/+lw4PCDhP0eyRFf+ELw7YXWBCDBnLin+ptT9Qqbj9mRkWWaUg
-         wGBYm/DlmYSjFuDFdCiAFeYUhwBx3bN1zWIfEq4U/R6NzUaRvMrhsPRnKTgM5MVFJVxB
-         CmVxljvKTCN3ZyT1LwzUVWKZgE4x9cRuQaj0TjoJvUnlN68E3Mt+4zAfSoenpZB5Ofxb
-         0XLwmhqFLm1lOHsISGA/CxlwAihZibid3kenEAmMklVKKOHOy1nSq3KrSTTjFuaKWHai
-         u516kaTGPG4uhGM5WuZ/+lvOuzezIo89jko54Ak3T4r5ol1iQsDze8x0V5mTappbPtSr
-         aaWg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=IviQGHXbohDYlY4Kaxm/cxlbY44V3tAurEYksJ8dtbE=;
-        b=TUOMsInpObCUN3eLbhkNYZcUyUloyOfuvGV0a4Z0C3kRoDqDblTjuanxfXF+hR3sSW
-         XgI/GHXd35uLrhAxGYxqDusC62UEPigdk9WZ+GNyxaD3uIyj5ls4HB0ehnCq5roogxCo
-         9kadjMcl2qdmYR/TwzTIAcMJHhwpGpntPdK6pANZJYJzsbgeWhr8utW4PMUcVJGbuPUh
-         v33FmgcGq7N4H2petBPhb1Xf0kH+LKwf4IDhGutXKrmAEnQsRqHQxp3Jv/YO9WpGRNLy
-         qasuHIM7fdgONYWDCF7bcxPivn3LhqQv0/5Ca4PE1RU8Hq9aZs0gPHkGU8DHn+hBL9tW
-         Y1kg==
-X-Gm-Message-State: AOAM531SuikAMaK2wXgDs1IDnN0IxzR60nqVpRMvsGU28YEFaY5dOAff
-        r6XsDqVt1oMwQ0CjFUxLUJgsXkqEvJTAPNvcjvMlWQ==
-X-Google-Smtp-Source: ABdhPJzRCVGimPnGT3qQlEAMsZsY3IxcZZF186UcWgTyI7ay8iWe4IlRIEG5WowCojeDoPju71hCmgBQ+xR7PgbbWL0=
-X-Received: by 2002:aa7:c693:: with SMTP id n19mr33130385edq.35.1622620178044;
- Wed, 02 Jun 2021 00:49:38 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210602065345.355274-1-hch@lst.de> <20210602065345.355274-24-hch@lst.de>
-In-Reply-To: <20210602065345.355274-24-hch@lst.de>
-From:   Jinpu Wang <jinpu.wang@ionos.com>
-Date:   Wed, 2 Jun 2021 09:49:27 +0200
-Message-ID: <CAMGffEn7aCmTOTsuzbSr=DwomFKfizkNhzsZnAONHBq1neW2Og@mail.gmail.com>
-Subject: Re: [PATCH 23/30] rnbd: use blk_mq_alloc_disk and blk_cleanup_disk
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Jens Axboe <axboe@kernel.dk>, Justin Sanders <justin@coraid.com>,
+        id S229938AbhFBMGk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Jun 2021 08:06:40 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:16118 "EHLO
+        mx0b-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S229844AbhFBMGi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jun 2021 08:06:38 -0400
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 152C2cPO189409;
+        Wed, 2 Jun 2021 08:03:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=message-id : subject :
+ from : to : cc : date : in-reply-to : references : content-type :
+ mime-version : content-transfer-encoding; s=pp1;
+ bh=7wC8Y59HiMIthB9xfz5dL+I0HD65zOwRPB4cvu5JQYY=;
+ b=QRLGyPounpLaRIZgsSUK1LazhFSMWWWVFIpjfvUyvXqdSXI7p94FVQMtSFG3bMtHNL86
+ rLVrJ3SvpT994x2pe7o0yL3iXXDeNBst8Q4A8KEa89vx85ZQSTDkkYsEjLQaMo+eb8VZ
+ +GFr8IfErHwDLNlYl+L0v9/qNIinOxFcyNlMJhpRMjSZcskv/o9bM0Y0jNVwjZETIKG0
+ IXpmjsLB5CkqOhxt84ImzKiTyn/t0QZlZGbbzTco4+M0nPgqtd7mDQbl31t9d+7DOxJc
+ iYhombbX7dZq4eRMaB6F1ITduKcVH4H0X0f5lSV3QvlOH2CDPoe61GoP3QIOjHTOkYh/ DA== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 38x7kr3h5n-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 02 Jun 2021 08:03:00 -0400
+Received: from m0098417.ppops.net (m0098417.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 152C2cNZ189527;
+        Wed, 2 Jun 2021 08:02:59 -0400
+Received: from ppma05fra.de.ibm.com (6c.4a.5195.ip4.static.sl-reverse.com [149.81.74.108])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 38x7kr3h4k-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 02 Jun 2021 08:02:59 -0400
+Received: from pps.filterd (ppma05fra.de.ibm.com [127.0.0.1])
+        by ppma05fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 152BwHfr023191;
+        Wed, 2 Jun 2021 12:02:57 GMT
+Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
+        by ppma05fra.de.ibm.com with ESMTP id 38ud87s9cx-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 02 Jun 2021 12:02:56 +0000
+Received: from d06av23.portsmouth.uk.ibm.com (d06av23.portsmouth.uk.ibm.com [9.149.105.59])
+        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 152C2r4H26280248
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 2 Jun 2021 12:02:53 GMT
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id A0364A405F;
+        Wed,  2 Jun 2021 12:02:53 +0000 (GMT)
+Received: from d06av23.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id 479C3A4040;
+        Wed,  2 Jun 2021 12:02:52 +0000 (GMT)
+Received: from sig-9-145-17-43.uk.ibm.com (unknown [9.145.17.43])
+        by d06av23.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Wed,  2 Jun 2021 12:02:52 +0000 (GMT)
+Message-ID: <e4891689c7651611020bdf3b4db9895819da345a.camel@linux.ibm.com>
+Subject: Re: [PATCH 27/30] scm_blk: use blk_mq_alloc_disk and
+ blk_cleanup_disk
+From:   Niklas Schnelle <schnelle@linux.ibm.com>
+To:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+Cc:     Justin Sanders <justin@coraid.com>,
         Denis Efremov <efremov@linux.com>,
         Josef Bacik <josef@toxicpanda.com>,
         Tim Waugh <tim@cyberelk.net>,
         Geoff Levand <geoff@infradead.org>,
         Ilya Dryomov <idryomov@gmail.com>,
         "Md. Haris Iqbal" <haris.iqbal@ionos.com>,
+        Jack Wang <jinpu.wang@ionos.com>,
         "Michael S. Tsirkin" <mst@redhat.com>,
         Jason Wang <jasowang@redhat.com>,
         Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
-        =?UTF-8?Q?Roger_Pau_Monn=C3=A9?= <roger.pau@citrix.com>,
+        Roger Pau =?ISO-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>,
         Mike Snitzer <snitzer@redhat.com>,
         Maxim Levitsky <maximlevitsky@gmail.com>,
         Alex Dubov <oakad@yahoo.com>,
@@ -79,110 +88,108 @@ Cc:     Jens Axboe <axboe@kernel.dk>, Justin Sanders <justin@coraid.com>,
         Heiko Carstens <hca@linux.ibm.com>,
         Vasily Gorbik <gor@linux.ibm.com>,
         Christian Borntraeger <borntraeger@de.ibm.com>,
-        device-mapper development <dm-devel@redhat.com>,
-        linux-block <linux-block@vger.kernel.org>, nbd@other.debian.org,
-        linuxppc-dev@lists.ozlabs.org,
-        Ceph Development <ceph-devel@vger.kernel.org>,
+        dm-devel@redhat.com, linux-block@vger.kernel.org,
+        nbd@other.debian.org, linuxppc-dev@lists.ozlabs.org,
+        ceph-devel@vger.kernel.org,
         virtualization@lists.linux-foundation.org,
         xen-devel@lists.xenproject.org, linux-mmc@vger.kernel.org,
         linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
+Date:   Wed, 02 Jun 2021 14:02:51 +0200
+In-Reply-To: <20210602065345.355274-28-hch@lst.de>
+References: <20210602065345.355274-1-hch@lst.de>
+         <20210602065345.355274-28-hch@lst.de>
 Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5 (3.28.5-16.el8) 
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-GUID: 9Pi9MTQ_S8CJ1ewvOnGa4xYgtn5KH1ib
+X-Proofpoint-ORIG-GUID: -LAzjZA1VGIxMM3aVX5RPubiT3GLOjUz
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.761
+ definitions=2021-06-02_06:2021-06-02,2021-06-02 signatures=0
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 malwarescore=0
+ priorityscore=1501 lowpriorityscore=0 adultscore=0 bulkscore=0
+ mlxlogscore=999 spamscore=0 clxscore=1011 suspectscore=0 phishscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2104190000 definitions=main-2106020078
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jun 2, 2021 at 8:55 AM Christoph Hellwig <hch@lst.de> wrote:
->
+On Wed, 2021-06-02 at 09:53 +0300, Christoph Hellwig wrote:
 > Use blk_mq_alloc_disk and blk_cleanup_disk to simplify the gendisk and
 > request_queue allocation.
->
+> 
 > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->  drivers/block/rnbd/rnbd-clt.c | 35 ++++++++---------------------------
->  1 file changed, 8 insertions(+), 27 deletions(-)
->
-> diff --git a/drivers/block/rnbd/rnbd-clt.c b/drivers/block/rnbd/rnbd-clt.c
-> index c604a402cd5c..f4fa45d24c0b 100644
-> --- a/drivers/block/rnbd/rnbd-clt.c
-> +++ b/drivers/block/rnbd/rnbd-clt.c
-> @@ -1353,18 +1353,6 @@ static void rnbd_init_mq_hw_queues(struct rnbd_clt_dev *dev)
->         }
->  }
->
-> -static int setup_mq_dev(struct rnbd_clt_dev *dev)
-> -{
-> -       dev->queue = blk_mq_init_queue(&dev->sess->tag_set);
-> -       if (IS_ERR(dev->queue)) {
-> -               rnbd_clt_err(dev, "Initializing multiqueue queue failed, err: %ld\n",
-> -                             PTR_ERR(dev->queue));
-> -               return PTR_ERR(dev->queue);
-> -       }
-> -       rnbd_init_mq_hw_queues(dev);
-> -       return 0;
-> -}
-> -
->  static void setup_request_queue(struct rnbd_clt_dev *dev)
+>  drivers/s390/block/scm_blk.c | 21 ++++++---------------
+>  1 file changed, 6 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/s390/block/scm_blk.c b/drivers/s390/block/scm_blk.c
+> index a4f6f2e62b1d..88cba6212ee2 100644
+> --- a/drivers/s390/block/scm_blk.c
+> +++ b/drivers/s390/block/scm_blk.c
+> @@ -462,12 +462,12 @@ int scm_blk_dev_setup(struct scm_blk_dev *bdev, struct scm_device *scmdev)
+>  	if (ret)
+>  		goto out;
+>  
+> -	rq = blk_mq_init_queue(&bdev->tag_set);
+> -	if (IS_ERR(rq)) {
+> -		ret = PTR_ERR(rq);
+> +	bdev->gendisk = blk_mq_alloc_disk(&bdev->tag_set, scmdev);
+> +	if (IS_ERR(bdev->gendisk)) {
+> +		ret = PTR_ERR(bdev->gendisk);
+>  		goto out_tag;
+>  	}
+> -	bdev->rq = rq;
+> +	rq = bdev->rq = bdev->gendisk->queue;
+>  	nr_max_blk = min(scmdev->nr_max_block,
+>  			 (unsigned int) (PAGE_SIZE / sizeof(struct aidaw)));
+>  
+> @@ -477,17 +477,11 @@ int scm_blk_dev_setup(struct scm_blk_dev *bdev, struct scm_device *scmdev)
+>  	blk_queue_flag_set(QUEUE_FLAG_NONROT, rq);
+>  	blk_queue_flag_clear(QUEUE_FLAG_ADD_RANDOM, rq);
+>  
+> -	bdev->gendisk = alloc_disk(SCM_NR_PARTS);
+> -	if (!bdev->gendisk) {
+> -		ret = -ENOMEM;
+> -		goto out_queue;
+> -	}
+> -	rq->queuedata = scmdev;
+>  	bdev->gendisk->private_data = scmdev;
+>  	bdev->gendisk->fops = &scm_blk_devops;
+> -	bdev->gendisk->queue = rq;
+>  	bdev->gendisk->major = scm_major;
+>  	bdev->gendisk->first_minor = devindex * SCM_NR_PARTS;
+> +	bdev->gendisk->minors = SCM_NR_PARTS;
+>  
+>  	len = snprintf(bdev->gendisk->disk_name, DISK_NAME_LEN, "scm");
+>  	if (devindex > 25) {
+> @@ -504,8 +498,6 @@ int scm_blk_dev_setup(struct scm_blk_dev *bdev, struct scm_device *scmdev)
+>  	device_add_disk(&scmdev->dev, bdev->gendisk, NULL);
+>  	return 0;
+>  
+> -out_queue:
+> -	blk_cleanup_queue(rq);
+>  out_tag:
+>  	blk_mq_free_tag_set(&bdev->tag_set);
+>  out:
+> @@ -516,9 +508,8 @@ int scm_blk_dev_setup(struct scm_blk_dev *bdev, struct scm_device *scmdev)
+>  void scm_blk_dev_cleanup(struct scm_blk_dev *bdev)
 >  {
->         blk_queue_logical_block_size(dev->queue, dev->logical_block_size);
-> @@ -1393,13 +1381,13 @@ static void setup_request_queue(struct rnbd_clt_dev *dev)
->         blk_queue_io_opt(dev->queue, dev->sess->max_io_size);
->         blk_queue_virt_boundary(dev->queue, SZ_4K - 1);
->         blk_queue_write_cache(dev->queue, dev->wc, dev->fua);
-> -       dev->queue->queuedata = dev;
+>  	del_gendisk(bdev->gendisk);
+> -	blk_cleanup_queue(bdev->gendisk->queue);
+> +	blk_cleanup_disk(bdev->gendisk);
+>  	blk_mq_free_tag_set(&bdev->tag_set);
+> -	put_disk(bdev->gendisk);
 >  }
->
->  static void rnbd_clt_setup_gen_disk(struct rnbd_clt_dev *dev, int idx)
->  {
->         dev->gd->major          = rnbd_client_major;
->         dev->gd->first_minor    = idx << RNBD_PART_BITS;
-> +       dev->gd->minors         = 1 << RNBD_PART_BITS;
->         dev->gd->fops           = &rnbd_client_ops;
->         dev->gd->queue          = dev->queue;
->         dev->gd->private_data   = dev;
-> @@ -1426,24 +1414,18 @@ static void rnbd_clt_setup_gen_disk(struct rnbd_clt_dev *dev, int idx)
->
->  static int rnbd_client_setup_device(struct rnbd_clt_dev *dev)
->  {
-> -       int err, idx = dev->clt_device_id;
-> +       int idx = dev->clt_device_id;
->
->         dev->size = dev->nsectors * dev->logical_block_size;
->
-> -       err = setup_mq_dev(dev);
-> -       if (err)
-> -               return err;
-> +       dev->gd = blk_mq_alloc_disk(&dev->sess->tag_set, dev);
-> +       if (IS_ERR(dev->gd))
-> +               return PTR_ERR(dev->gd);
-> +       dev->queue = dev->gd->queue;
-> +       rnbd_init_mq_hw_queues(dev);
->
->         setup_request_queue(dev);
-> -
-> -       dev->gd = alloc_disk_node(1 << RNBD_PART_BITS,  NUMA_NO_NODE);
-> -       if (!dev->gd) {
-> -               blk_cleanup_queue(dev->queue);
-> -               return -ENOMEM;
-> -       }
-> -
->         rnbd_clt_setup_gen_disk(dev, idx);
-> -
->         return 0;
->  }
->
-> @@ -1650,8 +1632,7 @@ struct rnbd_clt_dev *rnbd_clt_map_device(const char *sessname,
->  static void destroy_gen_disk(struct rnbd_clt_dev *dev)
->  {
->         del_gendisk(dev->gd);
-> -       blk_cleanup_queue(dev->queue);
-> -       put_disk(dev->gd);
-> +       blk_cleanup_disk(dev->gd);
->  }
->
->  static void destroy_sysfs(struct rnbd_clt_dev *dev,
-> --
-> 2.30.2
+>  
+>  void scm_blk_set_available(struct scm_blk_dev *bdev)
 
-Looks good to me, thx!
-Reviewed-by: Jack Wang <jinpu.wang@ionos.com>
->
+Not an expert on SCM or this code but I gave this a quick test and it
+seems to work fine.
+
+Tested-by: Niklas Schnelle <schnelle@linux.ibm.com>
+
+
+
