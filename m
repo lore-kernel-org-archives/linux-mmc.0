@@ -2,166 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,TVD_SPACE_RATIO,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE0F0C47242
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 15:43:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41EF9C47083
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 15:46:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A637A6140A
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 15:43:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2C85261438
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 15:46:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232054AbhFBPpQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Jun 2021 11:45:16 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46810 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232363AbhFBPpG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 2 Jun 2021 11:45:06 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 749A96140A;
-        Wed,  2 Jun 2021 15:43:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1622648602;
-        bh=j4vbbGMmkpw6vv8LF4aIg9gX2V7O+Y4hZhiS1MaxEmc=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=AB7FT6nD0+rEQCgHBe5Cc5z4DRLD3icjFOBiw6oUwpll2X2vUmNqYYA86Mis0nQok
-         GUVdVQnl5wZ5UdKS1IFtwJmMOJbRm/TuUiIAkVHY4l1NYVVQAn1lpXU4WDZAJjZiIt
-         Zj3vPyUaPqYduitPsdm0HQRG0b4aNL/BErsSx7TEcKpEaV42FMxSH3GWTMWGTilfOy
-         EIHbJD4Wjmd3Kx44o49Q3rESdin3UZo0Het2NItM/PG8dKGKjyvqsS87KI7Dshih5t
-         LrRX46kAZV/zWvGzK5YQGEZTeNLdZD56yEF4sDICfrD6yFi4PlcnBGdp103t4oyP/V
-         easJ3WNVtDkDA==
-Received: by mail.kernel.org with local (Exim 4.94.2)
-        (envelope-from <mchehab@kernel.org>)
-        id 1loT1b-006Xbn-D0; Wed, 02 Jun 2021 17:43:19 +0200
-From:   Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
-To:     Linux Doc Mailing List <linux-doc@vger.kernel.org>
-Cc:     Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        "Jonathan Corbet" <corbet@lwn.net>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Jakub Kicinski <kuba@kernel.org>, Keerthy <j-keerthy@ti.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Marc Kleine-Budde <mkl@pengutronix.de>,
-        Mark Brown <broonie@kernel.org>, Nishanth Menon <nm@ti.com>,
-        Rob Herring <robh+dt@kernel.org>, Sekhar Nori <nsekhar@ti.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Tero Kristo <kristo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wolfgang Grandegger <wg@grandegger.com>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-can@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        netdev@vger.kernel.org
-Subject: [PATCH 04/12] dt-bindings: clock: update ti,sci-clk.yaml references
-Date:   Wed,  2 Jun 2021 17:43:10 +0200
-Message-Id: <0fae687366c09dfb510425b3c88316a727b27d6d.1622648507.git.mchehab+huawei@kernel.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <cover.1622648507.git.mchehab+huawei@kernel.org>
-References: <cover.1622648507.git.mchehab+huawei@kernel.org>
+        id S231204AbhFBPr7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Jun 2021 11:47:59 -0400
+Received: from mo4-p00-ob.smtp.rzone.de ([85.215.255.22]:19593 "EHLO
+        mo4-p00-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231837AbhFBPr6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jun 2021 11:47:58 -0400
+X-Greylist: delayed 356 seconds by postgrey-1.27 at vger.kernel.org; Wed, 02 Jun 2021 11:47:58 EDT
+ARC-Seal: i=1; a=rsa-sha256; t=1622648414; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=MOeEg3PdjT7RW5v2yDR5IZhxOchWfZW+M6fkOrZo+qm1bQa5Jqm4iwhxSl0SCy4QNT
+    MXJBuTBvaw7e4olKfBVYsv375UP0C+wk44hAaJJ9XgDkxsA4WH9xBhgqgwQeYnppErAd
+    9Y2+/PiMCQu5xQVf9fG0fkcsCTCXWPGoiKev85FpvguQEwpAEYdkHAtFzQ8xHIsUlVYd
+    dva/0MNjtj/Ur85gV6rtYEDDsSxNUeC20TCH28cALeucLcGGOqYLC2E+Vy9x/F9IeUsE
+    o8lL4jX5sc6jZV7vWwyUVO8CAZ/5MdzHSlorjMI/iM4gHP+2BrsSz//R57ZxZiRY/p+b
+    MIGw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1622648414;
+    s=strato-dkim-0002; d=strato.com;
+    h=Subject:References:In-Reply-To:Message-ID:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=T4QFjJdjTOLIaLLvxn3bSUlN+BqUHhpZL0mv+OCU+tA=;
+    b=SgKckdaj8BMTHedAfNfdeQNtu6kak4D5nheH9oEvY6HKyTRNqT1xphU+3kD/ftDOE2
+    7I21A4QmR2y0bFa+iK4KPaLt6V+MCpjptkh0HL7grQxkWoBW0U2FdMQ6pehuM0ztlfjf
+    muUzmuLWlcdjG+oyyv1u5phzKCb9wrfOVdZX52zlLqPE9h/TRDMBo2ygC6dpb/bBEh0Q
+    3Mx6dtSx5Rdbv8Td/4j0D6drINkOSJAmyn3RnZyD5la/OscJSjPUISC0+aOIif+15mcR
+    3/8QEryo+DKgitEzR4wSTzHtgrGO234EbLo6fZeI1uWIdY8/wIjVVAGTQctZNmT5H2Oa
+    VhQA==
+ARC-Authentication-Results: i=1; strato.com;
+    dkim=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1622648414;
+    s=strato-dkim-0002; d=fpond.eu;
+    h=Subject:References:In-Reply-To:Message-ID:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=T4QFjJdjTOLIaLLvxn3bSUlN+BqUHhpZL0mv+OCU+tA=;
+    b=EP2sfYBaJEVUqBw0x0FpFA4d6Iu9VUynV2QUoLWby8Hl7oWxzO4TtloqA+cBd5Qyfl
+    FEFD2fF52wlgjQAm7/ooG63zRlBukzvNRgB0cJZFF7668pT2QTyuVVgOodwRVyp8L+8m
+    I7Vj+k0qKT0m7CjWfXTggytC8+qMy5/K0MajyAYUY3qohXwMM8PO4duWOZ9o6vFbnBZE
+    AIeYsj/ArS0p21WtnFlya+GQy8kAY7G611q1h3DjLmMZsYyXFJIxo8IDBouE0gpUrykV
+    PDjG5vYiR5gzSJODOZJxUHkzEqHF675D3TSkrh45F4S2JqG3jiRwdr+bBTFESwEp+BcH
+    1XrQ==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":OWANVUa4dPFUgKR/3dpvnYP0Np73amq+g13rqGzvv3qxio1R8fCt/7B6PNk="
+X-RZG-CLASS-ID: mo00
+Received: from oxapp04-01.back.ox.d0m.de
+    by smtp-ox.front (RZmta 47.27.2 AUTH)
+    with ESMTPSA id j09f72x52FeE44n
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Wed, 2 Jun 2021 17:40:14 +0200 (CEST)
+Date:   Wed, 2 Jun 2021 17:40:14 +0200 (CEST)
+From:   Ulrich Hecht <uli@fpond.eu>
+To:     Wolfram Sang <wsa@kernel.org>, Ulrich Hecht <uli+renesas@fpond.eu>
+Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+Message-ID: <461686971.488794.1622648414815@webmail.strato.com>
+In-Reply-To: <YKUf9TVcKetApd1J@ninjato>
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
+ <YKUf9TVcKetApd1J@ninjato>
+Subject: Re: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency
+ limit
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+Importance: Normal
+X-Mailer: Open-Xchange Mailer v7.10.4-Rev24
+X-Originating-Client: open-xchange-appsuite
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Changeset a7dbfa6f3877 ("dt-bindings: clock: Convert ti,sci-clk to json schema")
-renamed: Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-to: Documentation/devicetree/bindings/clock/ti,sci-clk.yaml.
 
-Update the cross-references accordingly.
+> On 05/19/2021 4:25 PM Wolfram Sang <wsa@kernel.org> wrote:
+> On Fri, May 14, 2021 at 05:53:18PM +0200, Ulrich Hecht wrote:
+> > The TMIO core sets a very low latency limit (100 us), but when using R-Car
+> > SDHI hosts with SD cards, I have observed typical latencies of around 20-30
+> > ms. This prevents runtime PM from working properly, and the devices remain
+> > on continuously.
+> > 
+> > This patch sets the default latency limit to 100 ms to avoid that.
+> > 
+> > Signed-off-by: Ulrich Hecht <uli+renesas@fpond.eu>
+> 
+> Well, yes, I can confirm that this helps wrt the "always-enabled" clock.
+> However, when removing UHS cards, I now see this regression:
+> 
+> [    8.659916] mmcblk2: mmc2:0001 00000 29.8 GiB 
+> [    8.677304]  mmcblk2: p1
+> [    9.622918] mmc2: tuning execution failed: -5
+> [    9.627385] mmc2: card 0001 removed
+> 
+> It is interesting to see the "execution failed" error when *removing*
+> the card. Before removing, access to the card seems fine. I haven't
+> checked further, so I can't say yet if this is a related or seperate but
+> now undiscovered issue.
 
-Fixes: a7dbfa6f3877 ("dt-bindings: clock: Convert ti,sci-clk to json schema")
-Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
----
- Documentation/devicetree/bindings/gpio/gpio-davinci.txt | 2 +-
- Documentation/devicetree/bindings/i2c/i2c-davinci.txt   | 2 +-
- Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt | 2 +-
- Documentation/devicetree/bindings/net/can/c_can.txt     | 2 +-
- Documentation/devicetree/bindings/spi/spi-davinci.txt   | 2 +-
- MAINTAINERS                                             | 2 +-
- 6 files changed, 6 insertions(+), 6 deletions(-)
+I have traced this, and it seems to be triggered by mmc_sd_detect(), which is called by mmc_rescan() and does this:
 
-diff --git a/Documentation/devicetree/bindings/gpio/gpio-davinci.txt b/Documentation/devicetree/bindings/gpio/gpio-davinci.txt
-index 696ea46227d1..8ad4fd9aaffd 100644
---- a/Documentation/devicetree/bindings/gpio/gpio-davinci.txt
-+++ b/Documentation/devicetree/bindings/gpio/gpio-davinci.txt
-@@ -32,7 +32,7 @@ Required Properties:
-           Documentation/devicetree/bindings/clock/keystone-gate.txt
-                             for 66AK2HK/66AK2L/66AK2E SoCs or,
- 
--          Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-+          Documentation/devicetree/bindings/clock/ti,sci-clk.yaml
-                             for 66AK2G SoCs
- 
- - clock-names: Name should be "gpio";
-diff --git a/Documentation/devicetree/bindings/i2c/i2c-davinci.txt b/Documentation/devicetree/bindings/i2c/i2c-davinci.txt
-index b35ad748ed68..6590501c53d4 100644
---- a/Documentation/devicetree/bindings/i2c/i2c-davinci.txt
-+++ b/Documentation/devicetree/bindings/i2c/i2c-davinci.txt
-@@ -8,7 +8,7 @@ Required properties:
- - reg : Offset and length of the register set for the device
- - clocks: I2C functional clock phandle.
- 	  For 66AK2G this property should be set per binding,
--	  Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-+	  Documentation/devicetree/bindings/clock/ti,sci-clk.yaml
- 
- SoC-specific Required Properties:
- 
-diff --git a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-index 0663e7648ef9..57d077c0b7c1 100644
---- a/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-+++ b/Documentation/devicetree/bindings/mmc/ti-omap-hsmmc.txt
-@@ -28,7 +28,7 @@ The following are mandatory properties for 66AK2G SoCs only:
- 		Documentation/devicetree/bindings/soc/ti/sci-pm-domain.yaml
- - clocks:	Must contain an entry for each entry in clock-names. Should
- 		be defined as per the he appropriate clock bindings consumer
--		usage in Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-+		usage in Documentation/devicetree/bindings/clock/ti,sci-clk.yaml
- - clock-names:	Shall be "fck" for the functional clock,
- 		and "mmchsdb_fck" for the debounce clock.
- 
-diff --git a/Documentation/devicetree/bindings/net/can/c_can.txt b/Documentation/devicetree/bindings/net/can/c_can.txt
-index febd2cc1ca14..366479806acb 100644
---- a/Documentation/devicetree/bindings/net/can/c_can.txt
-+++ b/Documentation/devicetree/bindings/net/can/c_can.txt
-@@ -22,7 +22,7 @@ The following are mandatory properties for Keystone 2 66AK2G SoCs only:
- 			  Documentation/devicetree/bindings/soc/ti/sci-pm-domain.yaml
- - clocks		: CAN functional clock phandle. This property is as per the
- 			  binding,
--			  Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-+			  Documentation/devicetree/bindings/clock/ti,sci-clk.yaml
- 
- Optional properties:
- - syscon-raminit	: Handle to system control region that contains the
-diff --git a/Documentation/devicetree/bindings/spi/spi-davinci.txt b/Documentation/devicetree/bindings/spi/spi-davinci.txt
-index e2198a389484..200c7fc7b089 100644
---- a/Documentation/devicetree/bindings/spi/spi-davinci.txt
-+++ b/Documentation/devicetree/bindings/spi/spi-davinci.txt
-@@ -25,7 +25,7 @@ Required properties:
- - interrupts: interrupt number mapped to CPU.
- - clocks: spi clk phandle
-           For 66AK2G this property should be set per binding,
--          Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-+          Documentation/devicetree/bindings/clock/ti,sci-clk.yaml
- 
- SoC-specific Required Properties:
- 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 0f0a01b54c1b..790eff88b53e 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -18193,7 +18193,7 @@ L:	linux-arm-kernel@lists.infradead.org
- S:	Maintained
- F:	Documentation/devicetree/bindings/arm/keystone/ti,k3-sci-common.yaml
- F:	Documentation/devicetree/bindings/arm/keystone/ti,sci.txt
--F:	Documentation/devicetree/bindings/clock/ti,sci-clk.txt
-+F:	Documentation/devicetree/bindings/clock/ti,sci-clk.yaml
- F:	Documentation/devicetree/bindings/interrupt-controller/ti,sci-inta.yaml
- F:	Documentation/devicetree/bindings/interrupt-controller/ti,sci-intr.yaml
- F:	Documentation/devicetree/bindings/reset/ti,sci-reset.txt
--- 
-2.31.1
+[...]
+        /*
+         * Just check if our card has been removed.
+         */
+        err = _mmc_detect_card_removed(host);
 
+        mmc_put_card(host->card, NULL);
+
+        if (err) {
+                mmc_sd_remove(host);
+[...]
+
+_mmc_detect_card_removed() calls mmc_sd_alive(), which tries to send a command to the SD card to see if it's still there, which in turn triggers the retune. IOW, this is expected to fail, and the error message is misleading.
+
+CU
+Uli
