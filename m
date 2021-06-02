@@ -2,118 +2,159 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB07BC47092
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Jun 2021 13:48:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AE27C4708F
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 06:54:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8626661376
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Jun 2021 13:48:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 80BE961359
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Jun 2021 06:54:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234082AbhFANtx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Jun 2021 09:49:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44802 "EHLO
+        id S230230AbhFBG4E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Jun 2021 02:56:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234074AbhFANtw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Jun 2021 09:49:52 -0400
-Received: from mail-oi1-x22c.google.com (mail-oi1-x22c.google.com [IPv6:2607:f8b0:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B443BC061574
-        for <linux-mmc@vger.kernel.org>; Tue,  1 Jun 2021 06:48:10 -0700 (PDT)
-Received: by mail-oi1-x22c.google.com with SMTP id h9so15555952oih.4
-        for <linux-mmc@vger.kernel.org>; Tue, 01 Jun 2021 06:48:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kernel-dk.20150623.gappssmtp.com; s=20150623;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=QlGkt7fWsHM9mcKdq1bDx/YwBl/iUUk0WEjc5rg04fY=;
-        b=SJMAgBW5mswAe1ZmlZlRdAFuvYPDEVLqi723Nnx1S4FLz3Yy3Tj3lQWVdZ0F6Qr4eS
-         SMIy05Vpx5EU+XswU9cem+w+MzG0a62ahvk23Tf2SUyNvaWPkh1rlmu3OkVCdEssPf8k
-         xwwmCV/LazyU6UjgCMJxdw//dP9UOpzUM54yyNCR3QG30hScN/IqdhxGg71hNvOalyX+
-         pO6I2f3s4rBYqGHOnzUAspl9mEOwDLA0qywJ9pSLvD5fVKPzw+UNtHhfYY4OA0aw1ASO
-         zcdxwDDiGjJD5VEZLuOr0Rlq6ubnYTbGW3SYaGllJ+Xvfy3vmm5YD3DkNvXi1rVEGPqw
-         8g9A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=QlGkt7fWsHM9mcKdq1bDx/YwBl/iUUk0WEjc5rg04fY=;
-        b=UBE4Kqh2KsRcBibwhfAEDCFX/ZHVsxJ+q3qYjCQiknDyHbrzdPWdEh7l97PNlj+ETK
-         LLXa6aVYtTczj/dQHBVTMC5uNVl0+r3FOVBw8Uh8Zxo5GSBiyRGJvwkmB3PsbRG6u2G7
-         Hw67rQAjvb6gflXTpMlrvNyHki4GT4ae7D46EKcf/AbMUwmgyKrXSM90EBGN3DqIFaSM
-         axajurpWmFkvz+NuInUdnVutVkBTlR9w5I3libAMpfe8BV4l+qRZzShGPvJO3S24bBEt
-         X+NLJqX8ESbok9iQy7z+GyW7pS2X+7/sLR+4HuJB93A0bwk5waCXXvuUavUV+UnD4TO/
-         kpUA==
-X-Gm-Message-State: AOAM530/nO3CQdamfEQTRzb6kUgaxtDuuPL571WgM8SxamXuLo4yPATk
-        DjbItCNy9PtzG3LQehCzaPCnJg==
-X-Google-Smtp-Source: ABdhPJyRtEOQYxSXItYfv2Xv0el0nwhIYWVK6zfd5YIEz7fo5+/L3t2bxzT7qaz6PyG5RR7CPJmZJA==
-X-Received: by 2002:a05:6808:245:: with SMTP id m5mr18302900oie.6.1622555290008;
-        Tue, 01 Jun 2021 06:48:10 -0700 (PDT)
-Received: from [192.168.1.134] ([198.8.77.61])
-        by smtp.gmail.com with ESMTPSA id i4sm3456045oih.13.2021.06.01.06.48.07
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 01 Jun 2021 06:48:09 -0700 (PDT)
-Subject: Re: simplify gendisk and request_queue allocation for bio based
- drivers
-To:     Christoph Hellwig <hch@lst.de>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Chris Zankel <chris@zankel.net>,
-        Max Filippov <jcmvbkbc@gmail.com>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Lars Ellenberg <lars.ellenberg@linbit.com>,
-        Jim Paris <jim@jtan.com>,
-        Joshua Morris <josh.h.morris@us.ibm.com>,
-        Philip Kelleher <pjk1939@linux.ibm.com>,
-        Minchan Kim <minchan@kernel.org>,
-        Nitin Gupta <ngupta@vflare.org>,
-        Matias Bjorling <mb@lightnvm.io>, Coly Li <colyli@suse.de>,
-        Mike Snitzer <snitzer@redhat.com>, Song Liu <song@kernel.org>,
+        with ESMTP id S230075AbhFBG4D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Jun 2021 02:56:03 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D682C06174A;
+        Tue,  1 Jun 2021 23:54:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
+        :Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=SnRF2RasuO3TzWzCcWD7psRmahwH4O2DjzNGyzgJCxM=; b=RfiXqx1buYxjqGM6Ru6s2uXbtK
+        szP8Lp35KdwoBLpRViL7iCBQHBOTXZ4Qu5LJOvN43OaaHCTJwbYuBSl2SqXNEe3Ty441iVm62zV/q
+        FK7bqtRTYnR/sNzxWhxA2AWxTTSYR0R47li/OgrbNqJ/z/C247XNi+vyVCBUJz2HWLNRhHDg9jROf
+        W37wVhanz0woIFa4DI1Hiypd6xGuMEzMDW+t6oSvgQDur5ioE4KQTAUXWM04CshX1rW4l4k5bAsYt
+        fMWsLaqDTkxSQegnpPyUc9dgQ8DJelIKHSJsddjUREuKapJzcCJM+AP8gSr/w6bRFlEnBsoDVPXvd
+        WWIbvGOQ==;
+Received: from shol69.static.otenet.gr ([83.235.170.67] helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1loKlG-0025Fb-J7; Wed, 02 Jun 2021 06:53:55 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Justin Sanders <justin@coraid.com>,
+        Denis Efremov <efremov@linux.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Tim Waugh <tim@cyberelk.net>,
+        Geoff Levand <geoff@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        "Md. Haris Iqbal" <haris.iqbal@ionos.com>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
+        =?UTF-8?q?Roger=20Pau=20Monn=C3=A9?= <roger.pau@citrix.com>,
+        Mike Snitzer <snitzer@redhat.com>,
         Maxim Levitsky <maximlevitsky@gmail.com>,
         Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
         Heiko Carstens <hca@linux.ibm.com>,
         Vasily Gorbik <gor@linux.ibm.com>,
-        Christian Borntraeger <borntraeger@de.ibm.com>
-Cc:     linux-block@vger.kernel.org, dm-devel@redhat.com,
-        linux-m68k@lists.linux-m68k.org, linux-xtensa@linux-xtensa.org,
-        drbd-dev@lists.linbit.com, linuxppc-dev@lists.ozlabs.org,
-        linux-bcache@vger.kernel.org, linux-raid@vger.kernel.org,
-        linux-mmc@vger.kernel.org, nvdimm@lists.linux.dev,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org
-References: <20210521055116.1053587-1-hch@lst.de>
-From:   Jens Axboe <axboe@kernel.dk>
-Message-ID: <a5d7127f-b422-5556-6810-cf4c98c038ac@kernel.dk>
-Date:   Tue, 1 Jun 2021 07:48:09 -0600
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        dm-devel@redhat.com, linux-block@vger.kernel.org,
+        nbd@other.debian.org, linuxppc-dev@lists.ozlabs.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org
+Subject: [PATCH 01/30] blk-mq: factor out a blk_mq_alloc_sq_tag_set helper
+Date:   Wed,  2 Jun 2021 09:53:16 +0300
+Message-Id: <20210602065345.355274-2-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20210602065345.355274-1-hch@lst.de>
+References: <20210602065345.355274-1-hch@lst.de>
 MIME-Version: 1.0
-In-Reply-To: <20210521055116.1053587-1-hch@lst.de>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 5/20/21 11:50 PM, Christoph Hellwig wrote:
-> Hi all,
-> 
-> this series is the first part of cleaning up lifetimes and allocation of
-> the gendisk and request_queue structure.  It adds a new interface to
-> allocate the disk and queue together for bio based drivers, and a helper
-> for cleanup/free them when a driver is unloaded or a device is removed.
-> 
-> Together this removes the need to treat the gendisk and request_queue
-> as separate entities for bio based drivers.
+Factour out a helper to initialize a simple single hw queue tag_set from
+blk_mq_init_sq_queue.  This will allow to phase out blk_mq_init_sq_queue
+in favor of a more symmetric and general API.
 
-Applied, thanks.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ block/blk-mq.c         | 32 ++++++++++++++++++--------------
+ include/linux/blk-mq.h |  3 +++
+ 2 files changed, 21 insertions(+), 14 deletions(-)
 
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index f11d4018ce2e..eaacfa963a73 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -3152,24 +3152,12 @@ struct request_queue *blk_mq_init_sq_queue(struct blk_mq_tag_set *set,
+ 	struct request_queue *q;
+ 	int ret;
+ 
+-	memset(set, 0, sizeof(*set));
+-	set->ops = ops;
+-	set->nr_hw_queues = 1;
+-	set->nr_maps = 1;
+-	set->queue_depth = queue_depth;
+-	set->numa_node = NUMA_NO_NODE;
+-	set->flags = set_flags;
+-
+-	ret = blk_mq_alloc_tag_set(set);
++	ret = blk_mq_alloc_sq_tag_set(set, ops, queue_depth, set_flags);
+ 	if (ret)
+ 		return ERR_PTR(ret);
+-
+ 	q = blk_mq_init_queue(set);
+-	if (IS_ERR(q)) {
++	if (IS_ERR(q))
+ 		blk_mq_free_tag_set(set);
+-		return q;
+-	}
+-
+ 	return q;
+ }
+ EXPORT_SYMBOL(blk_mq_init_sq_queue);
+@@ -3589,6 +3577,22 @@ int blk_mq_alloc_tag_set(struct blk_mq_tag_set *set)
+ }
+ EXPORT_SYMBOL(blk_mq_alloc_tag_set);
+ 
++/* allocate and initialize a tagset for a simple single-queue device */
++int blk_mq_alloc_sq_tag_set(struct blk_mq_tag_set *set,
++		const struct blk_mq_ops *ops, unsigned int queue_depth,
++		unsigned int set_flags)
++{
++	memset(set, 0, sizeof(*set));
++	set->ops = ops;
++	set->nr_hw_queues = 1;
++	set->nr_maps = 1;
++	set->queue_depth = queue_depth;
++	set->numa_node = NUMA_NO_NODE;
++	set->flags = set_flags;
++	return blk_mq_alloc_tag_set(set);
++}
++EXPORT_SYMBOL_GPL(blk_mq_alloc_sq_tag_set);
++
+ void blk_mq_free_tag_set(struct blk_mq_tag_set *set)
+ {
+ 	int i, j;
+diff --git a/include/linux/blk-mq.h b/include/linux/blk-mq.h
+index 359486940fa0..bb950fc669ef 100644
+--- a/include/linux/blk-mq.h
++++ b/include/linux/blk-mq.h
+@@ -439,6 +439,9 @@ struct request_queue *blk_mq_init_sq_queue(struct blk_mq_tag_set *set,
+ void blk_mq_unregister_dev(struct device *, struct request_queue *);
+ 
+ int blk_mq_alloc_tag_set(struct blk_mq_tag_set *set);
++int blk_mq_alloc_sq_tag_set(struct blk_mq_tag_set *set,
++		const struct blk_mq_ops *ops, unsigned int queue_depth,
++		unsigned int set_flags);
+ void blk_mq_free_tag_set(struct blk_mq_tag_set *set);
+ 
+ void blk_mq_flush_plug_list(struct blk_plug *plug, bool from_schedule);
 -- 
-Jens Axboe
+2.30.2
 
