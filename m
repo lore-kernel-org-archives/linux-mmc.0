@@ -2,92 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9179C47097
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Jun 2021 18:22:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54548C4709D
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Jun 2021 20:00:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9968613B1
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Jun 2021 18:22:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3904661405
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Jun 2021 20:00:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229934AbhFCSYn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Jun 2021 14:24:43 -0400
-Received: from mga02.intel.com ([134.134.136.20]:6082 "EHLO mga02.intel.com"
+        id S230116AbhFCUC2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Jun 2021 16:02:28 -0400
+Received: from mail.kernel.org ([198.145.29.99]:37486 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229888AbhFCSYn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 3 Jun 2021 14:24:43 -0400
-IronPort-SDR: aOcLcuL9OYIw11QK0I8CT7L6vbX0EzEPzJrgTtWTyFiTDXyZK/vBdmJK+eOj+d8u7TCqBzyWCO
- 7/st+1mK75CQ==
-X-IronPort-AV: E=McAfee;i="6200,9189,10004"; a="191222693"
-X-IronPort-AV: E=Sophos;i="5.83,246,1616482800"; 
-   d="scan'208";a="191222693"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Jun 2021 11:22:58 -0700
-IronPort-SDR: D+avzjsf6I/iFZiMJ35B0jk7tlOXafIUv+nJ6XVxw3UrSMKNG5PqDekxYZ9JyFZYSGRNTfOpzm
- 0+k8jS4ZCyzQ==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.83,246,1616482800"; 
-   d="scan'208";a="636326876"
-Received: from coresw01.iind.intel.com ([10.223.252.64])
-  by fmsmga005.fm.intel.com with ESMTP; 03 Jun 2021 11:22:54 -0700
-From:   rashmi.a@intel.com
-To:     linux-drivers-review-request@eclists.intel.com,
-        michal.simek@xilinx.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, kishon@ti.com, vkoul@kernel.org,
-        andriy.shevchenko@linux.intel.com, linux-phy@lists.infradead.org
-Cc:     mgross@linux.intel.com, kris.pan@linux.intel.com,
-        furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
-        adrian.hunter@intel.com, mahesh.r.vaidya@intel.com,
-        nandhini.srikandan@intel.com,
-        lakshmi.bai.raja.subramanian@intel.com, rashmi.a@intel.com
-Subject: =?utf-8?q?=5B=E2=80=9CPATCH=E2=80=9D=202/2=5D=20phy=3A=20intel=3A=20Fix=20for=20warnings=20due=20to=20EMMC=20clock=20175Mhz=20change=20in=20FIP?=
-Date:   Thu,  3 Jun 2021 23:52:42 +0530
-Message-Id: <20210603182242.25733-3-rashmi.a@intel.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210603182242.25733-1-rashmi.a@intel.com>
-References: <20210603182242.25733-1-rashmi.a@intel.com>
+        id S230078AbhFCUC1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 3 Jun 2021 16:02:27 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E5E226140A;
+        Thu,  3 Jun 2021 20:00:41 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1622750441;
+        bh=bL91cu6ogtTyGxRPIZri6Ql+FCiu+SF6QSQHbM1zYpU=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=Tr2eRL2ruuI3sDRg5RflhkOkyV9mFTujf1VRSwWuWzGKIhZvbVCaAxYpgxsOn967z
+         NSAD7IYMIoOO8cgexRa8htj5TMa5JoT3Wkv0szF26PJNQMzsXvJWAGYrsny6UgxWOB
+         0DSG8won1tshR1VxRhArAz/SO25OQjYrnL5dyQS242aahuCLuEtgIYx6YTOuGDajz0
+         VHL9LXHRxKII0rPps4b8g2l1RYIZFPwbgL/Xx11gmnvOpzM53mf3Uy04x4VbkhOV+Z
+         glYdnkCOfixzeKFSHUpB7CAwyKWxHMoZF81Ql2bUy103FcIKpKZNrY/s3wN0K43mHs
+         i4TDGELShuacg==
+Received: by mail-ej1-f51.google.com with SMTP id a11so10323612ejf.3;
+        Thu, 03 Jun 2021 13:00:41 -0700 (PDT)
+X-Gm-Message-State: AOAM532vyxjdQayA5RHN/BZ3eSM5VLUqqhLnZp8Z0LjUv6v41+SWwB5I
+        gzz1Ys23MifmIGCwdrRsLZQ4Ow6jF77dUPl5Hg==
+X-Google-Smtp-Source: ABdhPJw+IpYqfuukI2sJnNmANmuAWrENFVxO3xUzzlu0fu/6+LhA82SGF/btdHtPoNYDNnkITP5uV0NhDBINu7IILPI=
+X-Received: by 2002:a17:906:1d0a:: with SMTP id n10mr868094ejh.341.1622750440433;
+ Thu, 03 Jun 2021 13:00:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+References: <cover.1622648507.git.mchehab+huawei@kernel.org>
+In-Reply-To: <cover.1622648507.git.mchehab+huawei@kernel.org>
+From:   Rob Herring <robh+dt@kernel.org>
+Date:   Thu, 3 Jun 2021 15:00:29 -0500
+X-Gmail-Original-Message-ID: <CAL_JsqKLwfgj1khYFxTykjaYPjbNRd=Ajr-bfEnNYY0cu0Z18A@mail.gmail.com>
+Message-ID: <CAL_JsqKLwfgj1khYFxTykjaYPjbNRd=Ajr-bfEnNYY0cu0Z18A@mail.gmail.com>
+Subject: Re: [PATCH 00/12] Fix broken docs references at next-20210602
+To:     Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+Cc:     Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        linux-kernel@vger.kernel.org, Jonathan Corbet <corbet@lwn.net>,
+        "David S. Miller" <davem@davemloft.net>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Keerthy <j-keerthy@ti.com>, Lars-Peter Clausen <lars@metafoo.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        Mark Brown <broonie@kernel.org>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Peter Rosin <peda@axentia.se>,
+        Peter Ujfalusi <peter.ujfalusi@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        devicetree@vger.kernel.org, dmaengine@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-can@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-remoteproc@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org, netdev@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Rashmi A <rashmi.a@intel.com>
+On Wed, Jun 2, 2021 at 10:43 AM Mauro Carvalho Chehab
+<mchehab+huawei@kernel.org> wrote:
+>
+> There are some broken references at today's linux-next with regards
+> to files inside Documentation/.
+>
+> Address them.
 
-Since the EMMC clock was changed from 200Mhz to 175Mhz in FIP,
-there were some warnings introduced, as the frequency values
-being checked was still wrt 200Mhz in code. Hence, the frequency
-checks are now updated based on the current 175Mhz EMMC clock changed
-in FIP.
+I've finally added this to my automated checks, so now anyone that
+breaks this on binding schema patches should get notified (with the
+exception of patches not Cc'ed to the DT list).
 
-Spamming kernel log msg:
-"phy phy-20290000.mmc_phy.2: Unsupported rate: 43750000"
-
-Signed-off-by: Rashmi A <rashmi.a@intel.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/phy/intel/phy-intel-keembay-emmc.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/phy/intel/phy-intel-keembay-emmc.c b/drivers/phy/intel/phy-intel-keembay-emmc.c
-index eb7c635ed89a..0eb11ac7c2e2 100644
---- a/drivers/phy/intel/phy-intel-keembay-emmc.c
-+++ b/drivers/phy/intel/phy-intel-keembay-emmc.c
-@@ -95,7 +95,8 @@ static int keembay_emmc_phy_power(struct phy *phy, bool on_off)
- 	else
- 		freqsel = 0x0;
- 
--	if (mhz < 50 || mhz > 200)
-+	/* Check for EMMC clock rate*/
-+	if (mhz > 175)
- 		dev_warn(&phy->dev, "Unsupported rate: %d MHz\n", mhz);
- 
- 	/*
--- 
-2.17.1
-
+Rob
