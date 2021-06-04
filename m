@@ -2,98 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFB92C4708F
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Jun 2021 13:00:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1850C47083
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Jun 2021 13:16:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9CDA061090
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Jun 2021 13:00:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 83181613E7
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Jun 2021 13:16:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230108AbhFDNBr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Jun 2021 09:01:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56194 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230025AbhFDNBr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Jun 2021 09:01:47 -0400
-Received: from michel.telenet-ops.be (michel.telenet-ops.be [IPv6:2a02:1800:110:4::f00:18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A816DC061763
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Jun 2021 06:00:00 -0700 (PDT)
-Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed20:f130:bbcb:eb08:8a92])
-        by michel.telenet-ops.be with bizsmtp
-        id D0zr2500K2NEgeT060zrLR; Fri, 04 Jun 2021 14:59:58 +0200
-Received: from rox.of.borg ([192.168.97.57])
-        by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.93)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1lp9QV-00Cebz-6V; Fri, 04 Jun 2021 14:59:51 +0200
-Received: from geert by rox.of.borg with local (Exim 4.93)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1lp9QU-001tMr-Ga; Fri, 04 Jun 2021 14:59:50 +0200
-From:   Geert Uytterhoeven <geert+renesas@glider.be>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Takeshi Saito <takeshi.saito.xv@renesas.com>,
+        id S230313AbhFDNSg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Jun 2021 09:18:36 -0400
+Received: from www.zeus03.de ([194.117.254.33]:57226 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230019AbhFDNSf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 4 Jun 2021 09:18:35 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=GJ6mYVey0kuWXGMwYlHVXTGba1FE
+        PLY/KPOqrPz2Tmw=; b=m5Gxj19J5ohjqR1UMCHl5IU+fhoStfW6W4/otHhzhvkg
+        bUeU3PXM5zfLGfymWMSxtVdqbHf4CriJ6NiDEN3G/yhOeqXpZfNB/rB83emHx2T0
+        9tyH4ufc4HkCC2Q7H1FQoEShVx8QsKcC15Rd5tRQ8/qRCmh5QB6rnZFxZwJaXjM=
+Received: (qmail 1372524 invoked from network); 4 Jun 2021 15:16:47 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 4 Jun 2021 15:16:47 +0200
+X-UD-Smtp-Session: l3s3148p1@VpvRgPDDsKVUhs97
+Date:   Fri, 4 Jun 2021 15:16:44 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] mmc: renesas_sdhi: Fix HS400 on R-Car M3-W+
-Date:   Fri,  4 Jun 2021 14:59:43 +0200
-Message-Id: <ee8af5d631f5331139ffea714539030d97352e93.1622811525.git.geert+renesas@glider.be>
-X-Mailer: git-send-email 2.25.1
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: Fix HS400 on R-Car M3-W+
+Message-ID: <YLonvKsHCjtE9W9x@kunai>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <ee8af5d631f5331139ffea714539030d97352e93.1622811525.git.geert+renesas@glider.be>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="V029sdB+NFooXkMl"
+Content-Disposition: inline
+In-Reply-To: <ee8af5d631f5331139ffea714539030d97352e93.1622811525.git.geert+renesas@glider.be>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-R-Car M3-W ES3.0 is marketed as R-Car M3-W+ (R8A77961), and has its own
-compatible value "renesas,r8a77961".
 
-Hence using soc_device_match() with soc_id = "r8a7796" and revision =
-"ES3.*" does not actually match running on an R-Car M3-W+ SoC.
+--V029sdB+NFooXkMl
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Fix this by matching with soc_id = "r8a77961" instead.
+On Fri, Jun 04, 2021 at 02:59:43PM +0200, Geert Uytterhoeven wrote:
+> R-Car M3-W ES3.0 is marketed as R-Car M3-W+ (R8A77961), and has its own
+> compatible value "renesas,r8a77961".
+>=20
+> Hence using soc_device_match() with soc_id =3D "r8a7796" and revision =3D
+> "ES3.*" does not actually match running on an R-Car M3-W+ SoC.
+>=20
+> Fix this by matching with soc_id =3D "r8a77961" instead.
+>=20
+> Fixes: a38c078fea0b1393 ("mmc: renesas_sdhi: Avoid bad TAP in HS400")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Fixes: a38c078fea0b1393 ("mmc: renesas_sdhi: Avoid bad TAP in HS400")
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
-Boot-tested on Salvator-XS with R-Car M3-W+ ES3.0.
-No difference seen in eMMC/SHHC detection:
+Great, thanks for this fix!
 
-    mmc0: new HS400 MMC card at address 0001
-    mmcblk0: mmc0:0001 BGSD4R 29.1 GiB
-    mmcblk0boot0: mmc0:0001 BGSD4R 31.9 MiB
-    mmcblk0boot1: mmc0:0001 BGSD4R 31.9 MiB
-    mmcblk0rpmb: mmc0:0001 BGSD4R 4.00 MiB, chardev (247:0)
-     mmcblk0: p1
-    mmc1: new ultra high speed SDR104 SDHC card at address aaaa
-    mmcblk1: mmc1:aaaa SL16G 14.8 GiB
-     mmcblk1: p1
-    mmc2: new ultra high speed SDR104 SDHC card at address aaaa
-    mmcblk2: mmc2:aaaa SL32G 29.7 GiB
-     mmcblk2: p1
----
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> Boot-tested on Salvator-XS with R-Car M3-W+ ES3.0.
+> No difference seen in eMMC/SHHC detection:
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index 635bf31a67359f10..b719eda6b8619453 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -939,7 +939,7 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
- 	{ .soc_id = "r8a7795", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps2367 },
- 	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
- 	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
--	{ .soc_id = "r8a7796", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps1357 },
-+	{ .soc_id = "r8a77961", .data = &sdhi_quirks_bad_taps1357 },
- 	{ .soc_id = "r8a77965", .data = &sdhi_quirks_r8a77965 },
- 	{ .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
- 	{ .soc_id = "r8a77990", .data = &sdhi_quirks_r8a77990 },
--- 
-2.25.1
+You'd need some stress testing plus debug output of the TAPs chosen to
+actually see a difference. However, the patch is obviously correct.
+Testing if soc_id actually matches now is good enough.
 
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+
+--V029sdB+NFooXkMl
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmC6J7gACgkQFA3kzBSg
+Kba9fg/9G492nlxXSXGTiKoz/SO/SZzQ6tnz8V6xN/hhtUzhAAxx0rtF2WVlgaJ7
+bDatxxd38ZfneHbaP4uYpPhcfEifMXkUIyw006JTWEzKlCIOLgjGikDT13vBM0ed
+bXI6zUkciSTmjL+rFkY2AF3N9jfb4G9Y4bBWW0i83VgkuAR2pkueOS/QpE5g0ZZq
+8jxQt5tUT/dmx6Jb9Bd1EhUXx3ZurKmroG5s8Tw/G8s/bEA4fniDHu1dHZKwVPs9
+Gvl/+RttmtPmltjEUyyG4MGeUBeVbi6XHs6E18boEZAoaFDNGxcRzN4Mtm6+xgAo
+Vbgg7W4WIFtOpMC9yYyFxwuYj6NjlePY1kzlG3S0Tjc/NiVVte2dielsbw9BD9/v
+HpfFwH3oh0H5tsi05oazlixmPNfUtWi0TvB+ypr+OhVLwcwt2X0XMmMrLQm7P/XD
+kNkoa/CkHF4cUZ3gYgjFQN6xEi189HvFN0r8zV6Dh3av1p6YbkjtPvgBZIhkIE8Y
+SlXUntzfdj5vl/oRqumt/sWXzYN7tbKryqWf9D5qm995mJgMp49viJiAqNyhZ8tA
+Fh3KfwLHJLReDpjlxAURgEYKd0DmTIMMPr9e+ai/QjFlTIW88YQKnREXNtgVTpfR
+EKA3rWC9WiHIDGYTr1NWfnCCUyQcS3wIzGmLeDEfBFSkmBDBeZc=
+=tvKF
+-----END PGP SIGNATURE-----
+
+--V029sdB+NFooXkMl--
