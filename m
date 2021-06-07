@@ -2,62 +2,57 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00AD7C47082
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Jun 2021 11:19:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C59D8C47082
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Jun 2021 12:37:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D215F61105
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Jun 2021 11:19:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A5AD161260
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Jun 2021 12:37:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231220AbhFGLVC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Jun 2021 07:21:02 -0400
-Received: from mail-ua1-f47.google.com ([209.85.222.47]:37835 "EHLO
-        mail-ua1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230139AbhFGLVB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jun 2021 07:21:01 -0400
-Received: by mail-ua1-f47.google.com with SMTP id w28so9475857uae.4
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Jun 2021 04:19:00 -0700 (PDT)
+        id S231208AbhFGMjK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Jun 2021 08:39:10 -0400
+Received: from mx0b-0016f401.pphosted.com ([67.231.156.173]:62814 "EHLO
+        mx0b-0016f401.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S230254AbhFGMjJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Jun 2021 08:39:09 -0400
+Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
+        by mx0b-0016f401.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 157CVU0n007466;
+        Mon, 7 Jun 2021 05:37:10 -0700
+Received: from nam12-mw2-obe.outbound.protection.outlook.com (mail-mw2nam12lp2048.outbound.protection.outlook.com [104.47.66.48])
+        by mx0b-0016f401.pphosted.com with ESMTP id 391ecv13f3-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 07 Jun 2021 05:37:10 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=HgDqbW39gRk5EHplGtKbyBRuHOWoTRkN4I3iUUkgCzXbyuDKT89D1AzE9jgTj7SCXkom/HyHHBMkPY3RRDVocnu+0x8ASXK9PpjehiaR27k/+1SwYrVVZ5h5Nl9HgDbCtg0F+6IfQss6lu8KM34Xhz63Y6N+GiUQl20suF/QzO7jr8XM2KzbAvBmgpbZ2a+FUSBElwlZ1F5iokZqWjmtgKoBa1cpQKS741oK9eubh3yfk/KTxWpooBC5WCAFQvli9Ix9l1FzdFYQvC76/3WBTDsbq8A7RsYGPJR3+uIX/y+Mv+4JOFY5oguksu6WYigJ0evLqrnI9QN4TkBxuRftag==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=9XK89bvZ6DeV9hcMPa/U5hpX63afl6s2VfJmbyfi1I8=;
+ b=K6g3wanzC9DDSsRzABELuIFmZHjqk/ucP+Pf+b3zvHGrZpS7o+Cz0F8Eyr2kOEiPsnf6qhK+PtYtcrdWdvZD9ARHbKIRlcjDm1QAH4Af4bChdH/6eF5FsxwhgXMeVZgOcy5DCmiW11JVpCpNLV+1lQSEvDfVJrBjy5M4GiI7GCDCi2G02DoNb1BgIdGcXgOuRSVDz58WYFETn8bcP9Q+IN2Sd5q0X0uB3P6FzHvz23y4MWzIyRWAiBv51UR+yVsKANjmmv6W7VUTqSaFwwV+oncqa3eNUwsmQZTWVgDnEmagnotdsin51EOcPSiqN8oyhTXgpB8LfaZjm3nCkkSJBw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=marvell.com; dmarc=pass action=none header.from=marvell.com;
+ dkim=pass header.d=marvell.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=y/5i5bpc7ixLhZUjMUOg33ul4jZmR+QFPeRh5P0htgc=;
-        b=vVxkYQ9eXiEr9STNA7rUsJImVbLBX20E77jJO5QGvqv017E+1h0omzbsKrjDkO9QzT
-         Pj9amLm6hgjrWw2au4zBSYpQW3cbVnf+BQAyoh/yrXbasUw91E3+IFQ6Wg0NORZy/H3O
-         WdPO+ox7Umtoxse034Lqhspgp/devs5wudZBFRAq33t8gpC3DdfjqarmJfta8oEPYnxh
-         X1CWAKgDD1vWFJhpnsZj8BxKmN5IlmDNz0iul1LapBAIh/lRchK9GhUVzaTRy3rr1rNq
-         mC/pVyhT7KWVDjuMAmBYB70FfYGVbcGq7Z+VOLSnpKOvfwVweA07aP2YLXWMEczaQrS+
-         cAKg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=y/5i5bpc7ixLhZUjMUOg33ul4jZmR+QFPeRh5P0htgc=;
-        b=P3cjeatkz7S4fvZfttNJ2fkElkojuoTeg6ycOmL1OP7hscrPYO6NlRVXNIiyN2MLGX
-         EG7NBa7LljJ/PaOgZLd0ioFiIpQhZ3e2n8uOOXc3907Mjv05+UEz16Z9v2GFeN4dPyMC
-         SO21EQ+EDNV9gfzURS4ZuanDHaPShBY9UiwzGJOu+dzYIB6rcg+RsBmw1QpA4kbxSx0A
-         5hhKpTaBA722G63rFGESEnu+FWFd7kvuSf0MuZps3jhFuMwFBvoNSBM65PMmMw97lPAX
-         sft5ovi5aPdMtWMCJ73LdcNjmEytgK+pUvHhrySNIvT7F9a1hmb/mtMnAcgwc8QCH4VI
-         Qrdw==
-X-Gm-Message-State: AOAM533ZZudzDqulM4HpaI75btl/ARERPNawhkLerQaec+w+1YPKHrby
-        zBiwB1nY9FUwfAewvRrXlOFw5Z1U3/Y+C/tUuvqVvRI+L5MAsw==
-X-Google-Smtp-Source: ABdhPJw+MbXtgyuuQHVZwpp8KLbqarm/BN41ckUSCBV2FZwS231/MD0P5D/z3UtVg+hAVXa2tf0PnRwTLHEtzZieaf4=
-X-Received: by 2002:ab0:100f:: with SMTP id f15mr8831881uab.100.1623064680257;
- Mon, 07 Jun 2021 04:18:00 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210120121047.2601-1-bbudiredla@marvell.com> <20210120121047.2601-2-bbudiredla@marvell.com>
- <CAPDyKFoF7jz-mbsY8kPUGca5civFKRRyPpHbRkj9P=xevRRfbA@mail.gmail.com> <CY4PR1801MB2070F43EFCB9139D8168164FDE3A9@CY4PR1801MB2070.namprd18.prod.outlook.com>
-In-Reply-To: <CY4PR1801MB2070F43EFCB9139D8168164FDE3A9@CY4PR1801MB2070.namprd18.prod.outlook.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 7 Jun 2021 13:17:23 +0200
-Message-ID: <CAPDyKFrVQbALjSeFBckaZQgkgwcBVuwHy563pdBxHQNA7bxRnQ@mail.gmail.com>
-Subject: Re: [EXT] Re: [PATCH v5 1/2] mmc: Support kmsg dumper based on pstore/blk
-To:     Bhaskara Budiredla <bbudiredla@marvell.com>
-Cc:     Kees Cook <keescook@chromium.org>,
+ d=marvell.onmicrosoft.com; s=selector1-marvell-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=9XK89bvZ6DeV9hcMPa/U5hpX63afl6s2VfJmbyfi1I8=;
+ b=L+uY7rlup41k//8BQpf/MxON4xk4y7jG49Iahn8S2wKU0i2MFc0CfiQ6fxllntsOZQqWlGxVRJDzIRgu/x72IxY8sKnzvsrlIoLMFa6jLavCsancLdgPQzR1+guwcK/puBmL56jYOetbKihd2lDalQTKuib3MJGTTKyBkr8PXaU=
+Received: from CY4PR1801MB2070.namprd18.prod.outlook.com
+ (2603:10b6:910:7e::28) by CY4PR18MB0933.namprd18.prod.outlook.com
+ (2603:10b6:903:a6::13) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4195.22; Mon, 7 Jun
+ 2021 12:37:07 +0000
+Received: from CY4PR1801MB2070.namprd18.prod.outlook.com
+ ([fe80::496d:7cd5:45e8:cae]) by CY4PR1801MB2070.namprd18.prod.outlook.com
+ ([fe80::496d:7cd5:45e8:cae%3]) with mapi id 15.20.4195.030; Mon, 7 Jun 2021
+ 12:37:07 +0000
+From:   Bhaskara Budiredla <bbudiredla@marvell.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Kees Cook <keescook@chromium.org>,
         Colin Cross <ccross@android.com>,
         Tony Luck <tony.luck@intel.com>,
         Sunil Kovvuri Goutham <sgoutham@marvell.com>,
@@ -65,559 +60,485 @@ Cc:     Kees Cook <keescook@chromium.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-block <linux-block@vger.kernel.org>,
         Jens Axboe <axboe@kernel.dk>, Christoph Hellwig <hch@lst.de>
-Content-Type: text/plain; charset="UTF-8"
+Subject: RE: [EXT] Re: [PATCH v5 1/2] mmc: Support kmsg dumper based on
+ pstore/blk
+Thread-Topic: [EXT] Re: [PATCH v5 1/2] mmc: Support kmsg dumper based on
+ pstore/blk
+Thread-Index: AQHW7yVWdu744GVm7EWWpwnjNVLaQKownUuAgNVtmFCAAzQygIAAFgCw
+Date:   Mon, 7 Jun 2021 12:37:07 +0000
+Message-ID: <CY4PR1801MB2070B09D27404F8B7A84D446DE389@CY4PR1801MB2070.namprd18.prod.outlook.com>
+References: <20210120121047.2601-1-bbudiredla@marvell.com>
+ <20210120121047.2601-2-bbudiredla@marvell.com>
+ <CAPDyKFoF7jz-mbsY8kPUGca5civFKRRyPpHbRkj9P=xevRRfbA@mail.gmail.com>
+ <CY4PR1801MB2070F43EFCB9139D8168164FDE3A9@CY4PR1801MB2070.namprd18.prod.outlook.com>
+ <CAPDyKFrVQbALjSeFBckaZQgkgwcBVuwHy563pdBxHQNA7bxRnQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFrVQbALjSeFBckaZQgkgwcBVuwHy563pdBxHQNA7bxRnQ@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: linaro.org; dkim=none (message not signed)
+ header.d=none;linaro.org; dmarc=none action=none header.from=marvell.com;
+x-originating-ip: [183.83.172.179]
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: dc377424-72c6-4985-28a9-08d929b0f647
+x-ms-traffictypediagnostic: CY4PR18MB0933:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <CY4PR18MB09335111899288F7ED60217BDE389@CY4PR18MB0933.namprd18.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:3968;
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: VvsiqgVSMxoD57SH7bGMgdGz5phqujwCzqW5YWBNiogXrd/YBQiigGkUE8IXRUp/Rl+XOF6Su9wcX0dtsFN7BCY/CRbMUklgNKq4SWtorArCORcYIoQBzux1qYdDhG4eTSMjEAS7a7V6oUZj2wN8zfgaapVyGjm14Br3iaZg1D48ESqB2a78uhhha4e40RRxpj0MAO65LdwkLitYzRO+ovk1tuuNVvPnqUZRqhW+5IRETa9hKZ2zjuN4sYvQaKvFyCh41kW95eyBdbaix+BqPg4WnGgyD5ieNVKQHHjReYb9NJVDmyL6ueaEFdG53jQ6JOjJVqCKHsYmGSfilfVLYXfj8BlZDPVrEPp1yj3FN4QOrw6dbwpHOXha1NVAETWZ9TuLudcKrvtKoT2j9Bjci7HJvHl2aG231JY1y61nOdaV6kjLThlYWfg+lNj2nNzrPzCkKnai/EQtvHo7q8VywZi/co8/jj5xuTQ4hhxUjPRZUqCk+zYDtWDw4bZH1qhjLa/QCM6YSdaVAAHS7+96+U7TyKF5SMKfhrx5YVWx6xDEg2038GDQDFjVmK9wuyhPlCe2Se3NbFdVpmhFb8X6IDGCw7UIGp9aLQf6rCziwzJxk/SFwkRrOFfu6BMOwBwmZNVJqhc8+pGJ84VypShSFUOKBU4MyYvdEZzU4OLzgkgOGOfzaL3g9vJwVOc4Egy08uiATZiqLmgWyQCSsDIUZw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CY4PR1801MB2070.namprd18.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(346002)(39860400002)(396003)(366004)(376002)(478600001)(71200400001)(122000001)(966005)(4326008)(5660300002)(33656002)(6506007)(30864003)(52536014)(55016002)(86362001)(54906003)(316002)(7696005)(76116006)(9686003)(64756008)(66476007)(66446008)(66946007)(66556008)(8936002)(83380400001)(8676002)(186003)(6916009)(38100700002)(2906002)(26005)(579004);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata: =?utf-8?B?ZVB6WWVreXFseUZIYm4yV2duOGhTakk5ckg2enhveWVlZjcyejdVdkNjYlkz?=
+ =?utf-8?B?bUo5QkFNWllQYzBvLzV1bHpUemRZYlNaY0o4Yk1aeHNQL0ZWdDdQbS9LNVIv?=
+ =?utf-8?B?UkFzZi9TUGl6emdES1VGUG9wYkFvMFNUNFYvZnRUK0tHWVk1ZEd2VFZmVFVK?=
+ =?utf-8?B?SlI0UVJTdWQwUkt1ZlR2cEliRWVadlQxWUp5NTNsdGlzN2xlcnJCOXpQWFlp?=
+ =?utf-8?B?YXB0UVhDZXlYTHNET29XYnBnMUVzRGZqQTNwMGp4NGh4TEt1N0swRXB2VFRU?=
+ =?utf-8?B?SFFwY2NJVVBFalZubThTbHB3YnVlWWMrcTJzSklFYkxsYTNxcmdoWXo5QXpM?=
+ =?utf-8?B?dXp4UlhoT2VxYW5Gc2tQOXBmZ21lV2oyMXgvcFFoR0ozMktzZ3hzL0lpa3Bi?=
+ =?utf-8?B?MGhYTHh0MEl0ZHJFTFhaYTEwVndwNGE5Lyt6emlGZ1Z5WHB5akxBRHFWbmg1?=
+ =?utf-8?B?REkzZDJXYzRXOVRodzFzRG9kMCs2d3ZlUnRlS0ZjVmhYTUJaRmQxVkhIekhu?=
+ =?utf-8?B?UTl6TXk0RDVqTzhoZm1GNWZzb1FIckR1OXI1WE1tNUpZcC83L294TDRzMnM5?=
+ =?utf-8?B?L2ttVE9Nd2hON0Z6bGF0OXd1R1pwS25GK3JMdGZLSFk1STdiOXVEWmtCa29a?=
+ =?utf-8?B?Wml4eTdOdkxGY0V6MGkxL29La01ZZW9yWStDdFVQckI0YytlZFFzKzNEV0th?=
+ =?utf-8?B?ZHBDNElyNm5lYTlCeS9oeGNCSVp6aTRxN2hQcEVzWEFHVXFadDdjUmUrRFRS?=
+ =?utf-8?B?TW50TFJWbk14aG55bEt5RUtiQ01LVjk3NWxVQXcrUVAyb2QvQ2ZjVVh5Y3V5?=
+ =?utf-8?B?d0h5L2cxQnMzS2kyTmRBNmo4QWp5NU55K2orRkRTNHoxRHQvLzVRM0g0YlRo?=
+ =?utf-8?B?ai9QRzBNZE4wVjh2L1lmbXE2WFFlS1lxZnBZMUlodVdnTXkvWWVsSHM5Wno2?=
+ =?utf-8?B?T2UzL0hUUnZFMzNZNFdHeXErRTFtcEYzeDU0eDZTSWcwWGdUY05JN0RJelhj?=
+ =?utf-8?B?d0JaRkpNazFGNlZ1eVQ3RE9uMHRCOGhCZVpyRWJhcUNuZE0yQTdkRzRpd2ZP?=
+ =?utf-8?B?VmlFYm5EYnFTemwwd285ZVMzamRJRGpUTjNYc1JScDNseHNmQWozZHozc1ZF?=
+ =?utf-8?B?NDh4Y29tdGdOb21lRnp5OVltcFRuWXZpcjR2MERaeGtlZG1YcG9LWXBXUzQr?=
+ =?utf-8?B?Yk1qWnpXRm1mMUJDRGtOQTdKNENQa2p1ZHFVMDI5N3BYNjBxbUZOQTlMOVdy?=
+ =?utf-8?B?T0VxRTNidWZhUDFGLzFuSHVyMzdVeEllbmN6a3FXejhtTkpvaGdJVzEva0dn?=
+ =?utf-8?B?NGkrcGhCMlJOUjFkN25DekgyUXVUaFRDVjh5Yi9pR0NHTitORXNUMU9kMmxD?=
+ =?utf-8?B?UDh5d2s3T2dPNU9XTlVUMWliWnQyNm1SY2RONElDUnlwdC8xdzJidmZSVXFm?=
+ =?utf-8?B?cFpUUG5JdjVaTlJlc2NTcUpjL3V5WVNORWhWYmo3V1JUakZOUUY2QnpabFR0?=
+ =?utf-8?B?RWFlQlZLdWJRQkxxN2M1UGhXbVMvdkZyUmtEY0hRR1BiODVjemtXcUE5WHpP?=
+ =?utf-8?B?VXdFZWJnL01ncWNjVzhsRFh5dTFZekg4TmJkZzdqekVzM2NTbDBhekIrUHUv?=
+ =?utf-8?B?N1NvaWxpbUhTdzA2T2VKZE41d2g1NnRSSnBwbWozSTlkV2FibFpNUlhNRTBB?=
+ =?utf-8?B?Nld6UE5vK05hQW1VVkFnbmpyMWFzV013ZEZNSjNnRm1IY0JFUFNXeFZ0Z1c1?=
+ =?utf-8?Q?hRKfYZMmnMWgHx24L3C+eaeWoFWBug1U/dpa+Kv?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-OriginatorOrg: marvell.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: CY4PR1801MB2070.namprd18.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: dc377424-72c6-4985-28a9-08d929b0f647
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jun 2021 12:37:07.0675
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 70e1fb47-1155-421d-87fc-2e58f638b6e0
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 9IlIHiRfKqHmNonKQnk4vNSwplHkv719V8LWNYqpM5E8LEHgmnxw31m5L6vGN6Qn/9gZRMUBrY3vhAoyd+a+jw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY4PR18MB0933
+X-Proofpoint-GUID: 028YIM1t-sQKQCXrb00310pdZC3VLHDW
+X-Proofpoint-ORIG-GUID: 028YIM1t-sQKQCXrb00310pdZC3VLHDW
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.761
+ definitions=2021-06-07_10:2021-06-04,2021-06-07 signatures=0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 5 Jun 2021 at 12:31, Bhaskara Budiredla <bbudiredla@marvell.com> wrote:
->
-> Hi Uffe,
->
-> With due respect to pstore/blk subsystem changes we have been waiting since long time to see Christoph patches taken.
-
-What patches are you referring to?
-
-> But unfortunately it is still finding at that same stage only. Can you please take up my patch in the current form
-> (which is based on current pstore/blk framework) instead of waiting indefinitely. If pstore/blk comes up with the changes
-> that has been discussed by you previously, I will further submit the corresponding changes for eMMC devices.
-
-No, I am sorry, but that's not the way it works.
-
-If you really want to move things forward, I would suggest that you
-try to implement something along the lines of what I have suggested.
-Another option is to post an RFD/RFC so as solution can be discussed
-with the relevant people.
-
-Kind regards
-Uffe
-
->
-> Thanks,
-> Bhaskara
->
-> >-----Original Message-----
-> >From: Ulf Hansson <ulf.hansson@linaro.org>
-> >Sent: Wednesday, January 20, 2021 8:36 PM
-> >To: Bhaskara Budiredla <bbudiredla@marvell.com>; Kees Cook
-> ><keescook@chromium.org>
-> >Cc: Colin Cross <ccross@android.com>; Tony Luck <tony.luck@intel.com>;
-> >Sunil Kovvuri Goutham <sgoutham@marvell.com>; linux-
-> >mmc@vger.kernel.org; Linux Kernel Mailing List <linux-
-> >kernel@vger.kernel.org>; linux-block <linux-block@vger.kernel.org>; Jens
-> >Axboe <axboe@kernel.dk>; Christoph Hellwig <hch@lst.de>
-> >Subject: [EXT] Re: [PATCH v5 1/2] mmc: Support kmsg dumper based on
-> >pstore/blk
-> >
-> >External Email
-> >
-> >----------------------------------------------------------------------
-> >+ linux-block, Jens, Christoph
-> >
-> >On Wed, 20 Jan 2021 at 13:11, Bhaskara Budiredla
-> ><bbudiredla@marvell.com> wrote:
-> >>
-> >> This patch introduces to mmcpstore. The functioning of mmcpstore is
-> >> similar to mtdpstore. mmcpstore works on FTL based flash devices
-> >> whereas mtdpstore works on raw flash devices. When the system crashes,
-> >> mmcpstore stores the kmsg panic and oops logs to a user specified MMC
-> >> device.
-> >>
-> >> It collects the details about the host MMC device through pstore/blk
-> >> "blkdev" parameter. The user can specify the MMC device in many ways
-> >> by checking in Documentation/admin-guide/pstore-blk.rst.
-> >>
-> >> The individual mmc host drivers have to define suitable polling and
-> >> cleanup subroutines to write kmsg panic/oops logs through mmcpstore.
-> >> These new host operations are needed as pstore panic write runs with
-> >> interrupts disabled.
-> >
-> >Okay, let me again try to clarify on how I see this to move this forward.
-> >
-> >1)
-> >In my opinion, pstore shouldn't be using callbacks for *regular* I/O
-> >read/writes. It's upside-down of how the storage stack is designed to work.
-> >
-> >Instead, pstore should be implemented as a regular filesystem, that can be
-> >mounted on top of a regular block device partition. In this way, the lower
-> >layer block device drivers (as mmc), don't need special support for pstore, the
-> >regular I/O block read/write path will just work as is.
-> >
-> >2)
-> >When it comes to supporting *panic* writes for pstore, things become a bit
-> >more complicated. For sure some adaptations are needed in each block device
-> >driver to support this.
-> >
-> >However, the current method means relying on the lower level block device
-> >driver to figure out the pstore partition. Based on that, it should then register
-> >itself for pstore support and hook up callbacks for the corresponding block
-> >device driver instance, at least that is what it looks like to me. Again, I think
-> >this is upside-down from the storage stack perspective. The partition to use
-> >for pstore, should be based upon its file system mount point.
-> >
-> >Furthermore, I think the responsibility for lower layer block device drivers
-> >should instead be to just "register/announce" themselves as capable of
-> >supporting "panic writes", if they can. Exactly how to best do this, probably
-> >needs to be discussed further with the block device people, I think. I have
-> >looped in Jens and Christoph, perhaps they can share their opinion in this.
-> >
-> >That said, it looks to me that pstore needs more work before it's ready to be
-> >adopted for generic support in block device drivers.
-> >
-> >Kind regards
-> >Uffe
-> >
-> >>
-> >> Signed-off-by: Bhaskara Budiredla <bbudiredla@marvell.com>
-> >> ---
-> >>  drivers/mmc/core/Kconfig     |  14 ++-
-> >>  drivers/mmc/core/Makefile    |   1 +
-> >>  drivers/mmc/core/block.c     |  19 +++
-> >>  drivers/mmc/core/block.h     |   9 ++
-> >>  drivers/mmc/core/core.c      |  44 +++++++
-> >>  drivers/mmc/core/mmcpstore.c | 227
-> >+++++++++++++++++++++++++++++++++++
-> >>  include/linux/mmc/core.h     |   5 +
-> >>  include/linux/mmc/host.h     |  12 ++
-> >>  8 files changed, 330 insertions(+), 1 deletion(-)  create mode 100644
-> >> drivers/mmc/core/mmcpstore.c
-> >>
-> >> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig index
-> >> c12fe13e4b14..4c651da4f2d2 100644
-> >> --- a/drivers/mmc/core/Kconfig
-> >> +++ b/drivers/mmc/core/Kconfig
-> >> @@ -34,9 +34,22 @@ config PWRSEQ_SIMPLE
-> >>           This driver can also be built as a module. If so, the module
-> >>           will be called pwrseq_simple.
-> >>
-> >> +config MMC_PSTORE_BACKEND
-> >> +       bool "Log panic/oops to a MMC buffer"
-> >> +       depends on MMC_BLOCK
-> >> +       help
-> >> +         This option will let you create platform backend to store kmsg
-> >> +         crash dumps to a user specified MMC device. This is primarily
-> >> +         based on pstore/blk.
-> >> +
-> >> +config MMC_PSTORE
-> >> +       tristate
-> >> +       select PSTORE_BLK
-> >> +
-> >>  config MMC_BLOCK
-> >>         tristate "MMC block device driver"
-> >>         depends on BLOCK
-> >> +       select MMC_PSTORE if MMC_PSTORE_BACKEND=y
-> >>         default y
-> >>         help
-> >>           Say Y here to enable the MMC block device driver support.
-> >> @@ -80,4 +93,3 @@ config MMC_TEST
-> >>
-> >>           This driver is only of interest to those developing or
-> >>           testing a host driver. Most people should say N here.
-> >> -
-> >> diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-> >> index 95ffe008ebdf..7cb9a3af4827 100644
-> >> --- a/drivers/mmc/core/Makefile
-> >> +++ b/drivers/mmc/core/Makefile
-> >> @@ -16,5 +16,6 @@ obj-$(CONFIG_PWRSEQ_EMMC)     += pwrseq_emmc.o
-> >>  mmc_core-$(CONFIG_DEBUG_FS)    += debugfs.o
-> >>  obj-$(CONFIG_MMC_BLOCK)                += mmc_block.o
-> >>  mmc_block-objs                 := block.o queue.o
-> >> +mmc_block-$(CONFIG_MMC_PSTORE) += mmcpstore.o
-> >>  obj-$(CONFIG_MMC_TEST)         += mmc_test.o
-> >>  obj-$(CONFIG_SDIO_UART)                += sdio_uart.o
-> >> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
-> >> 42e27a298218..6592722cd7b2 100644
-> >> --- a/drivers/mmc/core/block.c
-> >> +++ b/drivers/mmc/core/block.c
-> >> @@ -2870,6 +2870,21 @@ static void mmc_blk_remove_debugfs(struct
-> >> mmc_card *card,
-> >>
-> >>  #endif /* CONFIG_DEBUG_FS */
-> >>
-> >> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-> >> +sector_t mmc_blk_get_part(struct mmc_card *card, int part_num,
-> >> +sector_t *size) {
-> >> +       struct mmc_blk_data *md = dev_get_drvdata(&card->dev);
-> >> +       struct gendisk *disk = md->disk;
-> >> +       struct disk_part_tbl *part_tbl = disk->part_tbl;
-> >> +
-> >> +       if (part_num < 0 || part_num >= part_tbl->len)
-> >> +               return 0;
-> >> +
-> >> +       *size = part_tbl->part[part_num]->nr_sects << SECTOR_SHIFT;
-> >> +       return part_tbl->part[part_num]->start_sect;
-> >> +}
-> >> +#endif
-> >> +
-> >>  static int mmc_blk_probe(struct mmc_card *card)  {
-> >>         struct mmc_blk_data *md, *part_md; @@ -2913,6 +2928,9 @@
-> >> static int mmc_blk_probe(struct mmc_card *card)
-> >>                         goto out;
-> >>         }
-> >>
-> >> +       if (mmc_card_mmc(card) || mmc_card_sd(card))
-> >> +               mmcpstore_card_set(card, md->disk->disk_name);
-> >> +
-> >>         /* Add two debugfs entries */
-> >>         mmc_blk_add_debugfs(card, md);
-> >>
-> >> @@ -3060,6 +3078,7 @@ static void __exit mmc_blk_exit(void)
-> >>         unregister_blkdev(MMC_BLOCK_MAJOR, "mmc");
-> >>         unregister_chrdev_region(mmc_rpmb_devt, MAX_DEVICES);
-> >>         bus_unregister(&mmc_rpmb_bus_type);
-> >> +       unregister_mmcpstore();
-> >>  }
-> >>
-> >>  module_init(mmc_blk_init);
-> >> diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h index
-> >> 31153f656f41..2a4ee5568194 100644
-> >> --- a/drivers/mmc/core/block.h
-> >> +++ b/drivers/mmc/core/block.h
-> >> @@ -16,5 +16,14 @@ void mmc_blk_mq_recovery(struct mmc_queue
-> >*mq);
-> >> struct work_struct;
-> >>
-> >>  void mmc_blk_mq_complete_work(struct work_struct *work);
-> >> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-> >> +sector_t mmc_blk_get_part(struct mmc_card *card, int part_num,
-> >> +sector_t *size); void mmcpstore_card_set(struct mmc_card *card, const
-> >> +char *disk_name); void unregister_mmcpstore(void); #else static
-> >> +inline void mmcpstore_card_set(struct mmc_card *card,
-> >> +                                       const char *disk_name) {}
-> >> +static inline void unregister_mmcpstore(void) {} #endif
-> >>
-> >>  #endif
-> >> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index
-> >> 19f1ee57fb34..7ad7ff1cab8c 100644
-> >> --- a/drivers/mmc/core/core.c
-> >> +++ b/drivers/mmc/core/core.c
-> >> @@ -569,6 +569,30 @@ int mmc_cqe_recovery(struct mmc_host *host)  }
-> >> EXPORT_SYMBOL(mmc_cqe_recovery);
-> >>
-> >> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-> >> +/**
-> >> + *     mmc_wait_for_pstore_req - initiate a blocking mmc request
-> >> + *     @host: MMC host to start command
-> >> + *     @mrq: MMC request to start
-> >> + *
-> >> + *     Start a blocking MMC request for a host and wait for the request
-> >> + *     to complete that is based on polling and timeout.
-> >> + */
-> >> +void mmc_wait_for_pstore_req(struct mmc_host *host, struct
-> >> +mmc_request *mrq) {
-> >> +       unsigned int timeout;
-> >> +
-> >> +       host->ops->req_cleanup_pending(host);
-> >> +       mmc_start_request(host, mrq);
-> >> +
-> >> +       if (mrq->data) {
-> >> +               timeout = mrq->data->timeout_ns / NSEC_PER_MSEC;
-> >> +               host->ops->req_completion_poll(host, timeout);
-> >> +       }
-> >> +}
-> >> +EXPORT_SYMBOL(mmc_wait_for_pstore_req);
-> >> +#endif
-> >> +
-> >>  /**
-> >>   *     mmc_is_req_done - Determine if a 'cap_cmd_during_tfr' request is
-> >done
-> >>   *     @host: MMC host
-> >> @@ -817,6 +841,26 @@ int __mmc_claim_host(struct mmc_host *host,
-> >> struct mmc_ctx *ctx,  }  EXPORT_SYMBOL(__mmc_claim_host);
-> >>
-> >> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-> >> +/**
-> >> + *     mmc_claim_host_async - claim host in atomic context
-> >> + *     @host: mmc host to claim
-> >> + *
-> >> + *     This routine may be called in panic/oops scenarios.
-> >> + *     Return zero with host claim success, else busy status.
-> >> + */
-> >> +int mmc_claim_host_async(struct mmc_host *host) {
-> >> +       if (!host->claimed && pm_runtime_active(mmc_dev(host))) {
-> >> +               host->claimed = 1;
-> >> +               return 0;
-> >> +       }
-> >> +
-> >> +       return -EBUSY;
-> >> +}
-> >> +EXPORT_SYMBOL(mmc_claim_host_async);
-> >> +#endif
-> >> +
-> >>  /**
-> >>   *     mmc_release_host - release a host
-> >>   *     @host: mmc host to release
-> >> diff --git a/drivers/mmc/core/mmcpstore.c
-> >> b/drivers/mmc/core/mmcpstore.c new file mode 100644 index
-> >> 000000000000..f783ea215f18
-> >> --- /dev/null
-> >> +++ b/drivers/mmc/core/mmcpstore.c
-> >> @@ -0,0 +1,227 @@
-> >> +// SPDX-License-Identifier: GPL-2.0
-> >> +/*
-> >> + * MMC pstore support based on pstore/blk
-> >> + *
-> >> + * Copyright (c) 2020 Marvell.
-> >> + * Author: Bhaskara Budiredla <bbudiredla@marvell.com>  */
-> >> +
-> >> +#define pr_fmt(fmt) "mmcpstore: " fmt
-> >> +
-> >> +#include <linux/kernel.h>
-> >> +#include <linux/module.h>
-> >> +#include <linux/pstore_blk.h>
-> >> +#include <linux/blkdev.h>
-> >> +#include <linux/mount.h>
-> >> +#include <linux/slab.h>
-> >> +#include <linux/mmc/mmc.h>
-> >> +#include <linux/mmc/host.h>
-> >> +#include <linux/mmc/card.h>
-> >> +#include <linux/scatterlist.h>
-> >> +#include "block.h"
-> >> +#include "card.h"
-> >> +#include "core.h"
-> >> +
-> >> +static struct mmcpstore_context {
-> >> +       char dev_name[BDEVNAME_SIZE];
-> >> +       int partno;
-> >> +       sector_t start_sect;
-> >> +       sector_t size;
-> >> +       struct pstore_blk_config conf;
-> >> +       struct pstore_blk_info info;
-> >> +
-> >> +       struct mmc_card *card;
-> >> +       struct mmc_request *mrq;
-> >> +} oops_cxt;
-> >> +
-> >> +static void mmc_prep_req(struct mmc_request *mrq,
-> >> +               unsigned int sect_offset, unsigned int nsects,
-> >> +               struct scatterlist *sg, u32 opcode, unsigned int
-> >> +flags) {
-> >> +       mrq->cmd->opcode = opcode;
-> >> +       mrq->cmd->arg = sect_offset;
-> >> +       mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
-> >> +
-> >> +       if (nsects == 1) {
-> >> +               mrq->stop = NULL;
-> >> +       } else {
-> >> +               mrq->stop->opcode = MMC_STOP_TRANSMISSION;
-> >> +               mrq->stop->arg = 0;
-> >> +               mrq->stop->flags = MMC_RSP_R1B | MMC_CMD_AC;
-> >> +       }
-> >> +
-> >> +       mrq->data->blksz = SECTOR_SIZE;
-> >> +       mrq->data->blocks = nsects;
-> >> +       mrq->data->flags = flags;
-> >> +       mrq->data->sg = sg;
-> >> +       mrq->data->sg_len = 1;
-> >> +}
-> >> +
-> >> +static int mmcpstore_panic_write_req(const char *buf,
-> >> +               unsigned int nsects, unsigned int sect_offset) {
-> >> +       struct mmcpstore_context *cxt = &oops_cxt;
-> >> +       struct mmc_request *mrq = cxt->mrq;
-> >> +       struct mmc_card *card = cxt->card;
-> >> +       struct mmc_host *host = card->host;
-> >> +       struct scatterlist sg;
-> >> +       u32 opcode;
-> >> +       int ret;
-> >> +
-> >> +       opcode = (nsects > 1) ? MMC_WRITE_MULTIPLE_BLOCK :
-> >MMC_WRITE_BLOCK;
-> >> +       mmc_prep_req(mrq, sect_offset, nsects, &sg, opcode,
-> >MMC_DATA_WRITE);
-> >> +       sg_init_one(&sg, buf, (nsects << SECTOR_SHIFT));
-> >> +       mmc_set_data_timeout(mrq->data, cxt->card);
-> >> +
-> >> +       ret = mmc_claim_host_async(host);
-> >> +       if (ret)
-> >> +               return ret;
-> >> +
-> >> +       mmc_wait_for_pstore_req(host, mrq);
-> >> +       return 0;
-> >> +}
-> >> +
-> >> +static int mmcpstore_panic_write(const char *buf, sector_t off,
-> >> +sector_t sects) {
-> >> +       struct mmcpstore_context *cxt = &oops_cxt;
-> >> +       int ret;
-> >> +
-> >> +       ret = mmcpstore_panic_write_req(buf, sects, cxt->start_sect + off);
-> >> +       if (ret)
-> >> +               return ret;
-> >> +
-> >> +       return 0;
-> >> +}
-> >> +
-> >> +static struct block_device *mmcpstore_open_backend(const char
-> >> +*device) {
-> >> +       struct block_device *bdev;
-> >> +       dev_t devt;
-> >> +
-> >> +       bdev = blkdev_get_by_path(device, FMODE_READ, NULL);
-> >> +       if (IS_ERR(bdev)) {
-> >> +               devt = name_to_dev_t(device);
-> >> +               if (devt == 0)
-> >> +                       return ERR_PTR(-ENODEV);
-> >> +
-> >> +               bdev = blkdev_get_by_dev(devt, FMODE_READ, NULL);
-> >> +               if (IS_ERR(bdev))
-> >> +                       return bdev;
-> >> +       }
-> >> +
-> >> +       return bdev;
-> >> +}
-> >> +
-> >> +static void mmcpstore_close_backend(struct block_device *bdev) {
-> >> +       if (!bdev)
-> >> +               return;
-> >> +       blkdev_put(bdev, FMODE_READ);
-> >> +}
-> >> +
-> >> +void mmcpstore_card_set(struct mmc_card *card, const char *disk_name)
-> >> +{
-> >> +       struct mmcpstore_context *cxt = &oops_cxt;
-> >> +       struct pstore_blk_config *conf = &cxt->conf;
-> >> +       struct pstore_blk_info *info = &cxt->info;
-> >> +       struct block_device *bdev;
-> >> +       struct mmc_command *stop;
-> >> +       struct mmc_command *cmd;
-> >> +       struct mmc_request *mrq;
-> >> +       struct mmc_data *data;
-> >> +       int ret;
-> >> +
-> >> +       ret = pstore_blk_get_config(conf);
-> >> +       if (!conf->device[0]) {
-> >> +               pr_debug("psblk backend is empty\n");
-> >> +               return;
-> >> +       }
-> >> +
-> >> +       /* Multiple backend devices not allowed */
-> >> +       if (cxt->dev_name[0])
-> >> +               return;
-> >> +
-> >> +       bdev =  mmcpstore_open_backend(conf->device);
-> >> +       if (IS_ERR(bdev)) {
-> >> +               pr_err("%s failed to open with %ld\n",
-> >> +                               conf->device, PTR_ERR(bdev));
-> >> +               return;
-> >> +       }
-> >> +
-> >> +       bdevname(bdev, cxt->dev_name);
-> >> +       cxt->partno = bdev->bd_part->partno;
-> >> +       mmcpstore_close_backend(bdev);
-> >> +
-> >> +       if (strncmp(cxt->dev_name, disk_name, strlen(disk_name)))
-> >> +               return;
-> >> +
-> >> +       cxt->start_sect = mmc_blk_get_part(card, cxt->partno, &cxt->size);
-> >> +       if (!cxt->start_sect) {
-> >> +               pr_err("Non-existent partition %d selected\n", cxt->partno);
-> >> +               return;
-> >> +       }
-> >> +
-> >> +       /* Check for host mmc panic write polling function definitions */
-> >> +       if (!card->host->ops->req_cleanup_pending ||
-> >> +                       !card->host->ops->req_completion_poll)
-> >> +               return;
-> >> +
-> >> +       cxt->card = card;
-> >> +
-> >> +       mrq = kzalloc(sizeof(struct mmc_request), GFP_KERNEL);
-> >> +       if (!mrq)
-> >> +               goto out;
-> >> +
-> >> +       cmd = kzalloc(sizeof(struct mmc_command), GFP_KERNEL);
-> >> +       if (!cmd)
-> >> +               goto free_mrq;
-> >> +
-> >> +       stop = kzalloc(sizeof(struct mmc_command), GFP_KERNEL);
-> >> +       if (!stop)
-> >> +               goto free_cmd;
-> >> +
-> >> +       data = kzalloc(sizeof(struct mmc_data), GFP_KERNEL);
-> >> +       if (!data)
-> >> +               goto free_stop;
-> >> +
-> >> +       mrq->cmd = cmd;
-> >> +       mrq->data = data;
-> >> +       mrq->stop = stop;
-> >> +       cxt->mrq = mrq;
-> >> +
-> >> +       info->major = MMC_BLOCK_MAJOR;
-> >> +       info->flags = PSTORE_FLAGS_DMESG;
-> >> +       info->panic_write = mmcpstore_panic_write;
-> >> +       ret = register_pstore_blk(info);
-> >> +       if (ret) {
-> >> +               pr_err("%s registering with psblk failed (%d)\n",
-> >> +                               cxt->dev_name, ret);
-> >> +               goto free_data;
-> >> +       }
-> >> +
-> >> +       pr_info("%s registered as psblk backend\n", cxt->dev_name);
-> >> +       return;
-> >> +
-> >> +free_data:
-> >> +       kfree(data);
-> >> +free_stop:
-> >> +       kfree(stop);
-> >> +free_cmd:
-> >> +       kfree(cmd);
-> >> +free_mrq:
-> >> +       kfree(mrq);
-> >> +out:
-> >> +       return;
-> >> +}
-> >> +
-> >> +void unregister_mmcpstore(void)
-> >> +{
-> >> +       struct mmcpstore_context *cxt = &oops_cxt;
-> >> +
-> >> +       unregister_pstore_blk(MMC_BLOCK_MAJOR);
-> >> +       kfree(cxt->mrq->data);
-> >> +       kfree(cxt->mrq->stop);
-> >> +       kfree(cxt->mrq->cmd);
-> >> +       kfree(cxt->mrq);
-> >> +       cxt->card = NULL;
-> >> +}
-> >> diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h index
-> >> 29aa50711626..53840a361b5a 100644
-> >> --- a/include/linux/mmc/core.h
-> >> +++ b/include/linux/mmc/core.h
-> >> @@ -166,6 +166,11 @@ struct mmc_request {
-> >>
-> >>  struct mmc_card;
-> >>
-> >> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-> >> +void mmc_wait_for_pstore_req(struct mmc_host *host, struct
-> >> +mmc_request *mrq); int mmc_claim_host_async(struct mmc_host *host);
-> >> +#endif
-> >> +
-> >>  void mmc_wait_for_req(struct mmc_host *host, struct mmc_request
-> >> *mrq);  int mmc_wait_for_cmd(struct mmc_host *host, struct
-> >mmc_command *cmd,
-> >>                 int retries);
-> >> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h index
-> >> 01bba36545c5..ba9001498e03 100644
-> >> --- a/include/linux/mmc/host.h
-> >> +++ b/include/linux/mmc/host.h
-> >> @@ -178,6 +178,18 @@ struct mmc_host_ops {
-> >>
-> >>         /* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
-> >>         int     (*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
-> >> +
-> >> +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-> >> +       /*
-> >> +        * The following two APIs are introduced to support mmcpstore
-> >> +        * functionality. Cleanup API to terminate the ongoing and
-> >> +        * pending requests before a panic write post, and polling API
-> >> +        * to ensure that write succeeds before the Kernel dies.
-> >> +        */
-> >> +       void    (*req_cleanup_pending)(struct mmc_host *host);
-> >> +       int     (*req_completion_poll)(struct mmc_host *host,
-> >> +                                      unsigned long timeout); #endif
-> >>  };
-> >>
-> >>  struct mmc_cqe_ops {
-> >> --
-> >> 2.17.1
-> >>
+Wy4uLl0NCj5XaGF0IHBhdGNoZXMgYXJlIHlvdSByZWZlcnJpbmcgdG8/DQoNCkkgd2FzIHJlZmVy
+cmluZyB0byB0aGlzIHBhdGNoLg0KaHR0cDovL2dpdC5pbmZyYWRlYWQub3JnL3VzZXJzL2hjaC9t
+aXNjLmdpdC9zaG9ydGxvZy9yZWZzL2hlYWRzL3BzdG9yZQ0KDQpUaGFua3MsDQpCaGFza2FyYQ0K
+DQo+LS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj5Gcm9tOiBVbGYgSGFuc3NvbiA8dWxmLmhh
+bnNzb25AbGluYXJvLm9yZz4NCj5TZW50OiBNb25kYXksIEp1bmUgNywgMjAyMSA0OjQ3IFBNDQo+
+VG86IEJoYXNrYXJhIEJ1ZGlyZWRsYSA8YmJ1ZGlyZWRsYUBtYXJ2ZWxsLmNvbT4NCj5DYzogS2Vl
+cyBDb29rIDxrZWVzY29va0BjaHJvbWl1bS5vcmc+OyBDb2xpbiBDcm9zcw0KPjxjY3Jvc3NAYW5k
+cm9pZC5jb20+OyBUb255IEx1Y2sgPHRvbnkubHVja0BpbnRlbC5jb20+OyBTdW5pbCBLb3Z2dXJp
+DQo+R291dGhhbSA8c2dvdXRoYW1AbWFydmVsbC5jb20+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwu
+b3JnOyBMaW51eA0KPktlcm5lbCBNYWlsaW5nIExpc3QgPGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5l
+bC5vcmc+OyBsaW51eC1ibG9jayA8bGludXgtDQo+YmxvY2tAdmdlci5rZXJuZWwub3JnPjsgSmVu
+cyBBeGJvZSA8YXhib2VAa2VybmVsLmRrPjsgQ2hyaXN0b3BoIEhlbGx3aWcNCj48aGNoQGxzdC5k
+ZT4NCj5TdWJqZWN0OiBSZTogW0VYVF0gUmU6IFtQQVRDSCB2NSAxLzJdIG1tYzogU3VwcG9ydCBr
+bXNnIGR1bXBlciBiYXNlZCBvbg0KPnBzdG9yZS9ibGsNCj4NCj5PbiBTYXQsIDUgSnVuIDIwMjEg
+YXQgMTI6MzEsIEJoYXNrYXJhIEJ1ZGlyZWRsYSA8YmJ1ZGlyZWRsYUBtYXJ2ZWxsLmNvbT4NCj53
+cm90ZToNCj4+DQo+PiBIaSBVZmZlLA0KPj4NCj4+IFdpdGggZHVlIHJlc3BlY3QgdG8gcHN0b3Jl
+L2JsayBzdWJzeXN0ZW0gY2hhbmdlcyB3ZSBoYXZlIGJlZW4gd2FpdGluZw0KPnNpbmNlIGxvbmcg
+dGltZSB0byBzZWUgQ2hyaXN0b3BoIHBhdGNoZXMgdGFrZW4uDQo+DQo+V2hhdCBwYXRjaGVzIGFy
+ZSB5b3UgcmVmZXJyaW5nIHRvPw0KPg0KPj4gQnV0IHVuZm9ydHVuYXRlbHkgaXQgaXMgc3RpbGwg
+ZmluZGluZyBhdCB0aGF0IHNhbWUgc3RhZ2Ugb25seS4gQ2FuIHlvdQ0KPj4gcGxlYXNlIHRha2Ug
+dXAgbXkgcGF0Y2ggaW4gdGhlIGN1cnJlbnQgZm9ybSAod2hpY2ggaXMgYmFzZWQgb24gY3VycmVu
+dA0KPj4gcHN0b3JlL2JsayBmcmFtZXdvcmspIGluc3RlYWQgb2Ygd2FpdGluZyBpbmRlZmluaXRl
+bHkuIElmIHBzdG9yZS9ibGsgY29tZXMgdXANCj53aXRoIHRoZSBjaGFuZ2VzIHRoYXQgaGFzIGJl
+ZW4gZGlzY3Vzc2VkIGJ5IHlvdSBwcmV2aW91c2x5LCBJIHdpbGwgZnVydGhlcg0KPnN1Ym1pdCB0
+aGUgY29ycmVzcG9uZGluZyBjaGFuZ2VzIGZvciBlTU1DIGRldmljZXMuDQo+DQo+Tm8sIEkgYW0g
+c29ycnksIGJ1dCB0aGF0J3Mgbm90IHRoZSB3YXkgaXQgd29ya3MuDQo+DQo+SWYgeW91IHJlYWxs
+eSB3YW50IHRvIG1vdmUgdGhpbmdzIGZvcndhcmQsIEkgd291bGQgc3VnZ2VzdCB0aGF0IHlvdSB0
+cnkgdG8NCj5pbXBsZW1lbnQgc29tZXRoaW5nIGFsb25nIHRoZSBsaW5lcyBvZiB3aGF0IEkgaGF2
+ZSBzdWdnZXN0ZWQuDQo+QW5vdGhlciBvcHRpb24gaXMgdG8gcG9zdCBhbiBSRkQvUkZDIHNvIGFz
+IHNvbHV0aW9uIGNhbiBiZSBkaXNjdXNzZWQgd2l0aCB0aGUNCj5yZWxldmFudCBwZW9wbGUuDQo+
+DQo+S2luZCByZWdhcmRzDQo+VWZmZQ0KPg0KPj4NCj4+IFRoYW5rcywNCj4+IEJoYXNrYXJhDQo+
+Pg0KPj4gPi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+PiA+RnJvbTogVWxmIEhhbnNzb24g
+PHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+PiA+U2VudDogV2VkbmVzZGF5LCBKYW51YXJ5IDIw
+LCAyMDIxIDg6MzYgUE0NCj4+ID5UbzogQmhhc2thcmEgQnVkaXJlZGxhIDxiYnVkaXJlZGxhQG1h
+cnZlbGwuY29tPjsgS2VlcyBDb29rDQo+PiA+PGtlZXNjb29rQGNocm9taXVtLm9yZz4NCj4+ID5D
+YzogQ29saW4gQ3Jvc3MgPGNjcm9zc0BhbmRyb2lkLmNvbT47IFRvbnkgTHVjaw0KPj4gPjx0b255
+Lmx1Y2tAaW50ZWwuY29tPjsgU3VuaWwgS292dnVyaSBHb3V0aGFtIDxzZ291dGhhbUBtYXJ2ZWxs
+LmNvbT47DQo+PiA+bGludXgtIG1tY0B2Z2VyLmtlcm5lbC5vcmc7IExpbnV4IEtlcm5lbCBNYWls
+aW5nIExpc3QgPGxpbnV4LQ0KPj4gPmtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+OyBsaW51eC1ibG9j
+ayA8bGludXgtYmxvY2tAdmdlci5rZXJuZWwub3JnPjsNCj4+ID5KZW5zIEF4Ym9lIDxheGJvZUBr
+ZXJuZWwuZGs+OyBDaHJpc3RvcGggSGVsbHdpZyA8aGNoQGxzdC5kZT4NCj4+ID5TdWJqZWN0OiBb
+RVhUXSBSZTogW1BBVENIIHY1IDEvMl0gbW1jOiBTdXBwb3J0IGttc2cgZHVtcGVyIGJhc2VkIG9u
+DQo+PiA+cHN0b3JlL2Jsaw0KPj4gPg0KPj4gPkV4dGVybmFsIEVtYWlsDQo+PiA+DQo+PiA+LS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tDQo+PiA+LQ0KPj4gPisgbGludXgtYmxvY2ssIEplbnMsIENocmlzdG9waA0KPj4g
+Pg0KPj4gPk9uIFdlZCwgMjAgSmFuIDIwMjEgYXQgMTM6MTEsIEJoYXNrYXJhIEJ1ZGlyZWRsYQ0K
+Pj4gPjxiYnVkaXJlZGxhQG1hcnZlbGwuY29tPiB3cm90ZToNCj4+ID4+DQo+PiA+PiBUaGlzIHBh
+dGNoIGludHJvZHVjZXMgdG8gbW1jcHN0b3JlLiBUaGUgZnVuY3Rpb25pbmcgb2YgbW1jcHN0b3Jl
+IGlzDQo+PiA+PiBzaW1pbGFyIHRvIG10ZHBzdG9yZS4gbW1jcHN0b3JlIHdvcmtzIG9uIEZUTCBi
+YXNlZCBmbGFzaCBkZXZpY2VzDQo+PiA+PiB3aGVyZWFzIG10ZHBzdG9yZSB3b3JrcyBvbiByYXcg
+Zmxhc2ggZGV2aWNlcy4gV2hlbiB0aGUgc3lzdGVtDQo+PiA+PiBjcmFzaGVzLCBtbWNwc3RvcmUg
+c3RvcmVzIHRoZSBrbXNnIHBhbmljIGFuZCBvb3BzIGxvZ3MgdG8gYSB1c2VyDQo+PiA+PiBzcGVj
+aWZpZWQgTU1DIGRldmljZS4NCj4+ID4+DQo+PiA+PiBJdCBjb2xsZWN0cyB0aGUgZGV0YWlscyBh
+Ym91dCB0aGUgaG9zdCBNTUMgZGV2aWNlIHRocm91Z2gNCj4+ID4+IHBzdG9yZS9ibGsgImJsa2Rl
+diIgcGFyYW1ldGVyLiBUaGUgdXNlciBjYW4gc3BlY2lmeSB0aGUgTU1DIGRldmljZQ0KPj4gPj4g
+aW4gbWFueSB3YXlzIGJ5IGNoZWNraW5nIGluIERvY3VtZW50YXRpb24vYWRtaW4tZ3VpZGUvcHN0
+b3JlLWJsay5yc3QuDQo+PiA+Pg0KPj4gPj4gVGhlIGluZGl2aWR1YWwgbW1jIGhvc3QgZHJpdmVy
+cyBoYXZlIHRvIGRlZmluZSBzdWl0YWJsZSBwb2xsaW5nIGFuZA0KPj4gPj4gY2xlYW51cCBzdWJy
+b3V0aW5lcyB0byB3cml0ZSBrbXNnIHBhbmljL29vcHMgbG9ncyB0aHJvdWdoIG1tY3BzdG9yZS4N
+Cj4+ID4+IFRoZXNlIG5ldyBob3N0IG9wZXJhdGlvbnMgYXJlIG5lZWRlZCBhcyBwc3RvcmUgcGFu
+aWMgd3JpdGUgcnVucw0KPj4gPj4gd2l0aCBpbnRlcnJ1cHRzIGRpc2FibGVkLg0KPj4gPg0KPj4g
+Pk9rYXksIGxldCBtZSBhZ2FpbiB0cnkgdG8gY2xhcmlmeSBvbiBob3cgSSBzZWUgdGhpcyB0byBt
+b3ZlIHRoaXMgZm9yd2FyZC4NCj4+ID4NCj4+ID4xKQ0KPj4gPkluIG15IG9waW5pb24sIHBzdG9y
+ZSBzaG91bGRuJ3QgYmUgdXNpbmcgY2FsbGJhY2tzIGZvciAqcmVndWxhciogSS9PDQo+PiA+cmVh
+ZC93cml0ZXMuIEl0J3MgdXBzaWRlLWRvd24gb2YgaG93IHRoZSBzdG9yYWdlIHN0YWNrIGlzIGRl
+c2lnbmVkIHRvIHdvcmsuDQo+PiA+DQo+PiA+SW5zdGVhZCwgcHN0b3JlIHNob3VsZCBiZSBpbXBs
+ZW1lbnRlZCBhcyBhIHJlZ3VsYXIgZmlsZXN5c3RlbSwgdGhhdA0KPj4gPmNhbiBiZSBtb3VudGVk
+IG9uIHRvcCBvZiBhIHJlZ3VsYXIgYmxvY2sgZGV2aWNlIHBhcnRpdGlvbi4gSW4gdGhpcw0KPj4g
+PndheSwgdGhlIGxvd2VyIGxheWVyIGJsb2NrIGRldmljZSBkcml2ZXJzIChhcyBtbWMpLCBkb24n
+dCBuZWVkDQo+PiA+c3BlY2lhbCBzdXBwb3J0IGZvciBwc3RvcmUsIHRoZSByZWd1bGFyIEkvTyBi
+bG9jayByZWFkL3dyaXRlIHBhdGggd2lsbCBqdXN0DQo+d29yayBhcyBpcy4NCj4+ID4NCj4+ID4y
+KQ0KPj4gPldoZW4gaXQgY29tZXMgdG8gc3VwcG9ydGluZyAqcGFuaWMqIHdyaXRlcyBmb3IgcHN0
+b3JlLCB0aGluZ3MgYmVjb21lDQo+PiA+YSBiaXQgbW9yZSBjb21wbGljYXRlZC4gRm9yIHN1cmUg
+c29tZSBhZGFwdGF0aW9ucyBhcmUgbmVlZGVkIGluIGVhY2gNCj4+ID5ibG9jayBkZXZpY2UgZHJp
+dmVyIHRvIHN1cHBvcnQgdGhpcy4NCj4+ID4NCj4+ID5Ib3dldmVyLCB0aGUgY3VycmVudCBtZXRo
+b2QgbWVhbnMgcmVseWluZyBvbiB0aGUgbG93ZXIgbGV2ZWwgYmxvY2sNCj4+ID5kZXZpY2UgZHJp
+dmVyIHRvIGZpZ3VyZSBvdXQgdGhlIHBzdG9yZSBwYXJ0aXRpb24uIEJhc2VkIG9uIHRoYXQsIGl0
+DQo+PiA+c2hvdWxkIHRoZW4gcmVnaXN0ZXIgaXRzZWxmIGZvciBwc3RvcmUgc3VwcG9ydCBhbmQg
+aG9vayB1cCBjYWxsYmFja3MNCj4+ID5mb3IgdGhlIGNvcnJlc3BvbmRpbmcgYmxvY2sgZGV2aWNl
+IGRyaXZlciBpbnN0YW5jZSwgYXQgbGVhc3QgdGhhdCBpcw0KPj4gPndoYXQgaXQgbG9va3MgbGlr
+ZSB0byBtZS4gQWdhaW4sIEkgdGhpbmsgdGhpcyBpcyB1cHNpZGUtZG93biBmcm9tIHRoZQ0KPj4g
+PnN0b3JhZ2Ugc3RhY2sgcGVyc3BlY3RpdmUuIFRoZSBwYXJ0aXRpb24gdG8gdXNlIGZvciBwc3Rv
+cmUsIHNob3VsZCBiZSBiYXNlZA0KPnVwb24gaXRzIGZpbGUgc3lzdGVtIG1vdW50IHBvaW50Lg0K
+Pj4gPg0KPj4gPkZ1cnRoZXJtb3JlLCBJIHRoaW5rIHRoZSByZXNwb25zaWJpbGl0eSBmb3IgbG93
+ZXIgbGF5ZXIgYmxvY2sgZGV2aWNlDQo+PiA+ZHJpdmVycyBzaG91bGQgaW5zdGVhZCBiZSB0byBq
+dXN0ICJyZWdpc3Rlci9hbm5vdW5jZSIgdGhlbXNlbHZlcyBhcw0KPj4gPmNhcGFibGUgb2Ygc3Vw
+cG9ydGluZyAicGFuaWMgd3JpdGVzIiwgaWYgdGhleSBjYW4uIEV4YWN0bHkgaG93IHRvDQo+PiA+
+YmVzdCBkbyB0aGlzLCBwcm9iYWJseSBuZWVkcyB0byBiZSBkaXNjdXNzZWQgZnVydGhlciB3aXRo
+IHRoZSBibG9jaw0KPj4gPmRldmljZSBwZW9wbGUsIEkgdGhpbmsuIEkgaGF2ZSBsb29wZWQgaW4g
+SmVucyBhbmQgQ2hyaXN0b3BoLCBwZXJoYXBzIHRoZXkNCj5jYW4gc2hhcmUgdGhlaXIgb3Bpbmlv
+biBpbiB0aGlzLg0KPj4gPg0KPj4gPlRoYXQgc2FpZCwgaXQgbG9va3MgdG8gbWUgdGhhdCBwc3Rv
+cmUgbmVlZHMgbW9yZSB3b3JrIGJlZm9yZSBpdCdzDQo+PiA+cmVhZHkgdG8gYmUgYWRvcHRlZCBm
+b3IgZ2VuZXJpYyBzdXBwb3J0IGluIGJsb2NrIGRldmljZSBkcml2ZXJzLg0KPj4gPg0KPj4gPktp
+bmQgcmVnYXJkcw0KPj4gPlVmZmUNCj4+ID4NCj4+ID4+DQo+PiA+PiBTaWduZWQtb2ZmLWJ5OiBC
+aGFza2FyYSBCdWRpcmVkbGEgPGJidWRpcmVkbGFAbWFydmVsbC5jb20+DQo+PiA+PiAtLS0NCj4+
+ID4+ICBkcml2ZXJzL21tYy9jb3JlL0tjb25maWcgICAgIHwgIDE0ICsrLQ0KPj4gPj4gIGRyaXZl
+cnMvbW1jL2NvcmUvTWFrZWZpbGUgICAgfCAgIDEgKw0KPj4gPj4gIGRyaXZlcnMvbW1jL2NvcmUv
+YmxvY2suYyAgICAgfCAgMTkgKysrDQo+PiA+PiAgZHJpdmVycy9tbWMvY29yZS9ibG9jay5oICAg
+ICB8ICAgOSArKw0KPj4gPj4gIGRyaXZlcnMvbW1jL2NvcmUvY29yZS5jICAgICAgfCAgNDQgKysr
+KysrKw0KPj4gPj4gIGRyaXZlcnMvbW1jL2NvcmUvbW1jcHN0b3JlLmMgfCAyMjcNCj4+ID4rKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKw0KPj4gPj4gIGluY2x1ZGUvbGludXgvbW1j
+L2NvcmUuaCAgICAgfCAgIDUgKw0KPj4gPj4gIGluY2x1ZGUvbGludXgvbW1jL2hvc3QuaCAgICAg
+fCAgMTIgKysNCj4+ID4+ICA4IGZpbGVzIGNoYW5nZWQsIDMzMCBpbnNlcnRpb25zKCspLCAxIGRl
+bGV0aW9uKC0pICBjcmVhdGUgbW9kZQ0KPj4gPj4gMTAwNjQ0IGRyaXZlcnMvbW1jL2NvcmUvbW1j
+cHN0b3JlLmMNCj4+ID4+DQo+PiA+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9LY29u
+ZmlnIGIvZHJpdmVycy9tbWMvY29yZS9LY29uZmlnDQo+PiA+PiBpbmRleA0KPj4gPj4gYzEyZmUx
+M2U0YjE0Li40YzY1MWRhNGYyZDIgMTAwNjQ0DQo+PiA+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3Jl
+L0tjb25maWcNCj4+ID4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvS2NvbmZpZw0KPj4gPj4gQEAg
+LTM0LDkgKzM0LDIyIEBAIGNvbmZpZyBQV1JTRVFfU0lNUExFDQo+PiA+PiAgICAgICAgICAgVGhp
+cyBkcml2ZXIgY2FuIGFsc28gYmUgYnVpbHQgYXMgYSBtb2R1bGUuIElmIHNvLCB0aGUgbW9kdWxl
+DQo+PiA+PiAgICAgICAgICAgd2lsbCBiZSBjYWxsZWQgcHdyc2VxX3NpbXBsZS4NCj4+ID4+DQo+
+PiA+PiArY29uZmlnIE1NQ19QU1RPUkVfQkFDS0VORA0KPj4gPj4gKyAgICAgICBib29sICJMb2cg
+cGFuaWMvb29wcyB0byBhIE1NQyBidWZmZXIiDQo+PiA+PiArICAgICAgIGRlcGVuZHMgb24gTU1D
+X0JMT0NLDQo+PiA+PiArICAgICAgIGhlbHANCj4+ID4+ICsgICAgICAgICBUaGlzIG9wdGlvbiB3
+aWxsIGxldCB5b3UgY3JlYXRlIHBsYXRmb3JtIGJhY2tlbmQgdG8gc3RvcmUga21zZw0KPj4gPj4g
+KyAgICAgICAgIGNyYXNoIGR1bXBzIHRvIGEgdXNlciBzcGVjaWZpZWQgTU1DIGRldmljZS4gVGhp
+cyBpcyBwcmltYXJpbHkNCj4+ID4+ICsgICAgICAgICBiYXNlZCBvbiBwc3RvcmUvYmxrLg0KPj4g
+Pj4gKw0KPj4gPj4gK2NvbmZpZyBNTUNfUFNUT1JFDQo+PiA+PiArICAgICAgIHRyaXN0YXRlDQo+
+PiA+PiArICAgICAgIHNlbGVjdCBQU1RPUkVfQkxLDQo+PiA+PiArDQo+PiA+PiAgY29uZmlnIE1N
+Q19CTE9DSw0KPj4gPj4gICAgICAgICB0cmlzdGF0ZSAiTU1DIGJsb2NrIGRldmljZSBkcml2ZXIi
+DQo+PiA+PiAgICAgICAgIGRlcGVuZHMgb24gQkxPQ0sNCj4+ID4+ICsgICAgICAgc2VsZWN0IE1N
+Q19QU1RPUkUgaWYgTU1DX1BTVE9SRV9CQUNLRU5EPXkNCj4+ID4+ICAgICAgICAgZGVmYXVsdCB5
+DQo+PiA+PiAgICAgICAgIGhlbHANCj4+ID4+ICAgICAgICAgICBTYXkgWSBoZXJlIHRvIGVuYWJs
+ZSB0aGUgTU1DIGJsb2NrIGRldmljZSBkcml2ZXIgc3VwcG9ydC4NCj4+ID4+IEBAIC04MCw0ICs5
+MywzIEBAIGNvbmZpZyBNTUNfVEVTVA0KPj4gPj4NCj4+ID4+ICAgICAgICAgICBUaGlzIGRyaXZl
+ciBpcyBvbmx5IG9mIGludGVyZXN0IHRvIHRob3NlIGRldmVsb3Bpbmcgb3INCj4+ID4+ICAgICAg
+ICAgICB0ZXN0aW5nIGEgaG9zdCBkcml2ZXIuIE1vc3QgcGVvcGxlIHNob3VsZCBzYXkgTiBoZXJl
+Lg0KPj4gPj4gLQ0KPj4gPj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvTWFrZWZpbGUg
+Yi9kcml2ZXJzL21tYy9jb3JlL01ha2VmaWxlDQo+PiA+PiBpbmRleCA5NWZmZTAwOGViZGYuLjdj
+YjlhM2FmNDgyNyAxMDA2NDQNCj4+ID4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvTWFrZWZpbGUN
+Cj4+ID4+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvTWFrZWZpbGUNCj4+ID4+IEBAIC0xNiw1ICsx
+Niw2IEBAIG9iai0kKENPTkZJR19QV1JTRVFfRU1NQykgICAgICs9DQo+cHdyc2VxX2VtbWMubw0K
+Pj4gPj4gIG1tY19jb3JlLSQoQ09ORklHX0RFQlVHX0ZTKSAgICArPSBkZWJ1Z2ZzLm8NCj4+ID4+
+ICBvYmotJChDT05GSUdfTU1DX0JMT0NLKSAgICAgICAgICAgICAgICArPSBtbWNfYmxvY2subw0K
+Pj4gPj4gIG1tY19ibG9jay1vYmpzICAgICAgICAgICAgICAgICA6PSBibG9jay5vIHF1ZXVlLm8N
+Cj4+ID4+ICttbWNfYmxvY2stJChDT05GSUdfTU1DX1BTVE9SRSkgKz0gbW1jcHN0b3JlLm8NCj4+
+ID4+ICBvYmotJChDT05GSUdfTU1DX1RFU1QpICAgICAgICAgKz0gbW1jX3Rlc3Qubw0KPj4gPj4g
+IG9iai0kKENPTkZJR19TRElPX1VBUlQpICAgICAgICAgICAgICAgICs9IHNkaW9fdWFydC5vDQo+
+PiA+PiBkaWZmIC0tZ2l0IGEvZHJpdmVycy9tbWMvY29yZS9ibG9jay5jIGIvZHJpdmVycy9tbWMv
+Y29yZS9ibG9jay5jDQo+PiA+PiBpbmRleA0KPj4gPj4gNDJlMjdhMjk4MjE4Li42NTkyNzIyY2Q3
+YjIgMTAwNjQ0DQo+PiA+PiAtLS0gYS9kcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmMNCj4+ID4+ICsr
+KyBiL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suYw0KPj4gPj4gQEAgLTI4NzAsNiArMjg3MCwyMSBA
+QCBzdGF0aWMgdm9pZCBtbWNfYmxrX3JlbW92ZV9kZWJ1Z2ZzKHN0cnVjdA0KPj4gPj4gbW1jX2Nh
+cmQgKmNhcmQsDQo+PiA+Pg0KPj4gPj4gICNlbmRpZiAvKiBDT05GSUdfREVCVUdfRlMgKi8NCj4+
+ID4+DQo+PiA+PiArI2lmIElTX0VOQUJMRUQoQ09ORklHX01NQ19QU1RPUkUpDQo+PiA+PiArc2Vj
+dG9yX3QgbW1jX2Jsa19nZXRfcGFydChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIGludCBwYXJ0X251
+bSwNCj4+ID4+ICtzZWN0b3JfdCAqc2l6ZSkgew0KPj4gPj4gKyAgICAgICBzdHJ1Y3QgbW1jX2Js
+a19kYXRhICptZCA9IGRldl9nZXRfZHJ2ZGF0YSgmY2FyZC0+ZGV2KTsNCj4+ID4+ICsgICAgICAg
+c3RydWN0IGdlbmRpc2sgKmRpc2sgPSBtZC0+ZGlzazsNCj4+ID4+ICsgICAgICAgc3RydWN0IGRp
+c2tfcGFydF90YmwgKnBhcnRfdGJsID0gZGlzay0+cGFydF90Ymw7DQo+PiA+PiArDQo+PiA+PiAr
+ICAgICAgIGlmIChwYXJ0X251bSA8IDAgfHwgcGFydF9udW0gPj0gcGFydF90YmwtPmxlbikNCj4+
+ID4+ICsgICAgICAgICAgICAgICByZXR1cm4gMDsNCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgKnNp
+emUgPSBwYXJ0X3RibC0+cGFydFtwYXJ0X251bV0tPm5yX3NlY3RzIDw8IFNFQ1RPUl9TSElGVDsN
+Cj4+ID4+ICsgICAgICAgcmV0dXJuIHBhcnRfdGJsLT5wYXJ0W3BhcnRfbnVtXS0+c3RhcnRfc2Vj
+dDsNCj4+ID4+ICt9DQo+PiA+PiArI2VuZGlmDQo+PiA+PiArDQo+PiA+PiAgc3RhdGljIGludCBt
+bWNfYmxrX3Byb2JlKHN0cnVjdCBtbWNfY2FyZCAqY2FyZCkgIHsNCj4+ID4+ICAgICAgICAgc3Ry
+dWN0IG1tY19ibGtfZGF0YSAqbWQsICpwYXJ0X21kOyBAQCAtMjkxMyw2ICsyOTI4LDkgQEANCj4+
+ID4+IHN0YXRpYyBpbnQgbW1jX2Jsa19wcm9iZShzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQpDQo+PiA+
+PiAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4+ID4+ICAgICAgICAgfQ0KPj4g
+Pj4NCj4+ID4+ICsgICAgICAgaWYgKG1tY19jYXJkX21tYyhjYXJkKSB8fCBtbWNfY2FyZF9zZChj
+YXJkKSkNCj4+ID4+ICsgICAgICAgICAgICAgICBtbWNwc3RvcmVfY2FyZF9zZXQoY2FyZCwgbWQt
+PmRpc2stPmRpc2tfbmFtZSk7DQo+PiA+PiArDQo+PiA+PiAgICAgICAgIC8qIEFkZCB0d28gZGVi
+dWdmcyBlbnRyaWVzICovDQo+PiA+PiAgICAgICAgIG1tY19ibGtfYWRkX2RlYnVnZnMoY2FyZCwg
+bWQpOw0KPj4gPj4NCj4+ID4+IEBAIC0zMDYwLDYgKzMwNzgsNyBAQCBzdGF0aWMgdm9pZCBfX2V4
+aXQgbW1jX2Jsa19leGl0KHZvaWQpDQo+PiA+PiAgICAgICAgIHVucmVnaXN0ZXJfYmxrZGV2KE1N
+Q19CTE9DS19NQUpPUiwgIm1tYyIpOw0KPj4gPj4gICAgICAgICB1bnJlZ2lzdGVyX2NocmRldl9y
+ZWdpb24obW1jX3JwbWJfZGV2dCwgTUFYX0RFVklDRVMpOw0KPj4gPj4gICAgICAgICBidXNfdW5y
+ZWdpc3RlcigmbW1jX3JwbWJfYnVzX3R5cGUpOw0KPj4gPj4gKyAgICAgICB1bnJlZ2lzdGVyX21t
+Y3BzdG9yZSgpOw0KPj4gPj4gIH0NCj4+ID4+DQo+PiA+PiAgbW9kdWxlX2luaXQobW1jX2Jsa19p
+bml0KTsNCj4+ID4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2Jsb2NrLmggYi9kcml2
+ZXJzL21tYy9jb3JlL2Jsb2NrLmgNCj4+ID4+IGluZGV4DQo+PiA+PiAzMTE1M2Y2NTZmNDEuLjJh
+NGVlNTU2ODE5NCAxMDA2NDQNCj4+ID4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvYmxvY2suaA0K
+Pj4gPj4gKysrIGIvZHJpdmVycy9tbWMvY29yZS9ibG9jay5oDQo+PiA+PiBAQCAtMTYsNSArMTYs
+MTQgQEAgdm9pZCBtbWNfYmxrX21xX3JlY292ZXJ5KHN0cnVjdCBtbWNfcXVldWUNCj4+ID4qbXEp
+Ow0KPj4gPj4gc3RydWN0IHdvcmtfc3RydWN0Ow0KPj4gPj4NCj4+ID4+ICB2b2lkIG1tY19ibGtf
+bXFfY29tcGxldGVfd29yayhzdHJ1Y3Qgd29ya19zdHJ1Y3QgKndvcmspOw0KPj4gPj4gKyNpZiBJ
+U19FTkFCTEVEKENPTkZJR19NTUNfUFNUT1JFKQ0KPj4gPj4gK3NlY3Rvcl90IG1tY19ibGtfZ2V0
+X3BhcnQoc3RydWN0IG1tY19jYXJkICpjYXJkLCBpbnQgcGFydF9udW0sDQo+PiA+PiArc2VjdG9y
+X3QgKnNpemUpOyB2b2lkIG1tY3BzdG9yZV9jYXJkX3NldChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQs
+DQo+PiA+PiArY29uc3QgY2hhciAqZGlza19uYW1lKTsgdm9pZCB1bnJlZ2lzdGVyX21tY3BzdG9y
+ZSh2b2lkKTsgI2Vsc2UNCj4+ID4+ICtzdGF0aWMgaW5saW5lIHZvaWQgbW1jcHN0b3JlX2NhcmRf
+c2V0KHN0cnVjdCBtbWNfY2FyZCAqY2FyZCwNCj4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICBjb25zdCBjaGFyICpkaXNrX25hbWUpIHt9DQo+PiA+PiArc3RhdGlj
+IGlubGluZSB2b2lkIHVucmVnaXN0ZXJfbW1jcHN0b3JlKHZvaWQpIHt9ICNlbmRpZg0KPj4gPj4N
+Cj4+ID4+ICAjZW5kaWYNCj4+ID4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL2NvcmUu
+YyBiL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+PiA+PiBpbmRleCAxOWYxZWU1N2ZiMzQuLjdh
+ZDdmZjFjYWI4YyAxMDA2NDQNCj4+ID4+IC0tLSBhL2RyaXZlcnMvbW1jL2NvcmUvY29yZS5jDQo+
+PiA+PiArKysgYi9kcml2ZXJzL21tYy9jb3JlL2NvcmUuYw0KPj4gPj4gQEAgLTU2OSw2ICs1Njks
+MzAgQEAgaW50IG1tY19jcWVfcmVjb3Zlcnkoc3RydWN0IG1tY19ob3N0ICpob3N0KQ0KPn0NCj4+
+ID4+IEVYUE9SVF9TWU1CT0wobW1jX2NxZV9yZWNvdmVyeSk7DQo+PiA+Pg0KPj4gPj4gKyNpZiBJ
+U19FTkFCTEVEKENPTkZJR19NTUNfUFNUT1JFKQ0KPj4gPj4gKy8qKg0KPj4gPj4gKyAqICAgICBt
+bWNfd2FpdF9mb3JfcHN0b3JlX3JlcSAtIGluaXRpYXRlIGEgYmxvY2tpbmcgbW1jIHJlcXVlc3QN
+Cj4+ID4+ICsgKiAgICAgQGhvc3Q6IE1NQyBob3N0IHRvIHN0YXJ0IGNvbW1hbmQNCj4+ID4+ICsg
+KiAgICAgQG1ycTogTU1DIHJlcXVlc3QgdG8gc3RhcnQNCj4+ID4+ICsgKg0KPj4gPj4gKyAqICAg
+ICBTdGFydCBhIGJsb2NraW5nIE1NQyByZXF1ZXN0IGZvciBhIGhvc3QgYW5kIHdhaXQgZm9yIHRo
+ZSByZXF1ZXN0DQo+PiA+PiArICogICAgIHRvIGNvbXBsZXRlIHRoYXQgaXMgYmFzZWQgb24gcG9s
+bGluZyBhbmQgdGltZW91dC4NCj4+ID4+ICsgKi8NCj4+ID4+ICt2b2lkIG1tY193YWl0X2Zvcl9w
+c3RvcmVfcmVxKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgc3RydWN0DQo+PiA+PiArbW1jX3JlcXVl
+c3QgKm1ycSkgew0KPj4gPj4gKyAgICAgICB1bnNpZ25lZCBpbnQgdGltZW91dDsNCj4+ID4+ICsN
+Cj4+ID4+ICsgICAgICAgaG9zdC0+b3BzLT5yZXFfY2xlYW51cF9wZW5kaW5nKGhvc3QpOw0KPj4g
+Pj4gKyAgICAgICBtbWNfc3RhcnRfcmVxdWVzdChob3N0LCBtcnEpOw0KPj4gPj4gKw0KPj4gPj4g
+KyAgICAgICBpZiAobXJxLT5kYXRhKSB7DQo+PiA+PiArICAgICAgICAgICAgICAgdGltZW91dCA9
+IG1ycS0+ZGF0YS0+dGltZW91dF9ucyAvIE5TRUNfUEVSX01TRUM7DQo+PiA+PiArICAgICAgICAg
+ICAgICAgaG9zdC0+b3BzLT5yZXFfY29tcGxldGlvbl9wb2xsKGhvc3QsIHRpbWVvdXQpOw0KPj4g
+Pj4gKyAgICAgICB9DQo+PiA+PiArfQ0KPj4gPj4gK0VYUE9SVF9TWU1CT0wobW1jX3dhaXRfZm9y
+X3BzdG9yZV9yZXEpOw0KPj4gPj4gKyNlbmRpZg0KPj4gPj4gKw0KPj4gPj4gIC8qKg0KPj4gPj4g
+ICAqICAgICBtbWNfaXNfcmVxX2RvbmUgLSBEZXRlcm1pbmUgaWYgYSAnY2FwX2NtZF9kdXJpbmdf
+dGZyJyByZXF1ZXN0IGlzDQo+PiA+ZG9uZQ0KPj4gPj4gICAqICAgICBAaG9zdDogTU1DIGhvc3QN
+Cj4+ID4+IEBAIC04MTcsNiArODQxLDI2IEBAIGludCBfX21tY19jbGFpbV9ob3N0KHN0cnVjdCBt
+bWNfaG9zdCAqaG9zdCwNCj4+ID4+IHN0cnVjdCBtbWNfY3R4ICpjdHgsICB9ICBFWFBPUlRfU1lN
+Qk9MKF9fbW1jX2NsYWltX2hvc3QpOw0KPj4gPj4NCj4+ID4+ICsjaWYgSVNfRU5BQkxFRChDT05G
+SUdfTU1DX1BTVE9SRSkNCj4+ID4+ICsvKioNCj4+ID4+ICsgKiAgICAgbW1jX2NsYWltX2hvc3Rf
+YXN5bmMgLSBjbGFpbSBob3N0IGluIGF0b21pYyBjb250ZXh0DQo+PiA+PiArICogICAgIEBob3N0
+OiBtbWMgaG9zdCB0byBjbGFpbQ0KPj4gPj4gKyAqDQo+PiA+PiArICogICAgIFRoaXMgcm91dGlu
+ZSBtYXkgYmUgY2FsbGVkIGluIHBhbmljL29vcHMgc2NlbmFyaW9zLg0KPj4gPj4gKyAqICAgICBS
+ZXR1cm4gemVybyB3aXRoIGhvc3QgY2xhaW0gc3VjY2VzcywgZWxzZSBidXN5IHN0YXR1cy4NCj4+
+ID4+ICsgKi8NCj4+ID4+ICtpbnQgbW1jX2NsYWltX2hvc3RfYXN5bmMoc3RydWN0IG1tY19ob3N0
+ICpob3N0KSB7DQo+PiA+PiArICAgICAgIGlmICghaG9zdC0+Y2xhaW1lZCAmJiBwbV9ydW50aW1l
+X2FjdGl2ZShtbWNfZGV2KGhvc3QpKSkgew0KPj4gPj4gKyAgICAgICAgICAgICAgIGhvc3QtPmNs
+YWltZWQgPSAxOw0KPj4gPj4gKyAgICAgICAgICAgICAgIHJldHVybiAwOw0KPj4gPj4gKyAgICAg
+ICB9DQo+PiA+PiArDQo+PiA+PiArICAgICAgIHJldHVybiAtRUJVU1k7DQo+PiA+PiArfQ0KPj4g
+Pj4gK0VYUE9SVF9TWU1CT0wobW1jX2NsYWltX2hvc3RfYXN5bmMpOw0KPj4gPj4gKyNlbmRpZg0K
+Pj4gPj4gKw0KPj4gPj4gIC8qKg0KPj4gPj4gICAqICAgICBtbWNfcmVsZWFzZV9ob3N0IC0gcmVs
+ZWFzZSBhIGhvc3QNCj4+ID4+ICAgKiAgICAgQGhvc3Q6IG1tYyBob3N0IHRvIHJlbGVhc2UNCj4+
+ID4+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tY3BzdG9yZS5jDQo+PiA+PiBiL2Ry
+aXZlcnMvbW1jL2NvcmUvbW1jcHN0b3JlLmMgbmV3IGZpbGUgbW9kZSAxMDA2NDQgaW5kZXgNCj4+
+ID4+IDAwMDAwMDAwMDAwMC4uZjc4M2VhMjE1ZjE4DQo+PiA+PiAtLS0gL2Rldi9udWxsDQo+PiA+
+PiArKysgYi9kcml2ZXJzL21tYy9jb3JlL21tY3BzdG9yZS5jDQo+PiA+PiBAQCAtMCwwICsxLDIy
+NyBAQA0KPj4gPj4gKy8vIFNQRFgtTGljZW5zZS1JZGVudGlmaWVyOiBHUEwtMi4wDQo+PiA+PiAr
+LyoNCj4+ID4+ICsgKiBNTUMgcHN0b3JlIHN1cHBvcnQgYmFzZWQgb24gcHN0b3JlL2Jsaw0KPj4g
+Pj4gKyAqDQo+PiA+PiArICogQ29weXJpZ2h0IChjKSAyMDIwIE1hcnZlbGwuDQo+PiA+PiArICog
+QXV0aG9yOiBCaGFza2FyYSBCdWRpcmVkbGEgPGJidWRpcmVkbGFAbWFydmVsbC5jb20+ICAqLw0K
+Pj4gPj4gKw0KPj4gPj4gKyNkZWZpbmUgcHJfZm10KGZtdCkgIm1tY3BzdG9yZTogIiBmbXQNCj4+
+ID4+ICsNCj4+ID4+ICsjaW5jbHVkZSA8bGludXgva2VybmVsLmg+DQo+PiA+PiArI2luY2x1ZGUg
+PGxpbnV4L21vZHVsZS5oPg0KPj4gPj4gKyNpbmNsdWRlIDxsaW51eC9wc3RvcmVfYmxrLmg+DQo+
+PiA+PiArI2luY2x1ZGUgPGxpbnV4L2Jsa2Rldi5oPg0KPj4gPj4gKyNpbmNsdWRlIDxsaW51eC9t
+b3VudC5oPg0KPj4gPj4gKyNpbmNsdWRlIDxsaW51eC9zbGFiLmg+DQo+PiA+PiArI2luY2x1ZGUg
+PGxpbnV4L21tYy9tbWMuaD4NCj4+ID4+ICsjaW5jbHVkZSA8bGludXgvbW1jL2hvc3QuaD4NCj4+
+ID4+ICsjaW5jbHVkZSA8bGludXgvbW1jL2NhcmQuaD4NCj4+ID4+ICsjaW5jbHVkZSA8bGludXgv
+c2NhdHRlcmxpc3QuaD4NCj4+ID4+ICsjaW5jbHVkZSAiYmxvY2suaCINCj4+ID4+ICsjaW5jbHVk
+ZSAiY2FyZC5oIg0KPj4gPj4gKyNpbmNsdWRlICJjb3JlLmgiDQo+PiA+PiArDQo+PiA+PiArc3Rh
+dGljIHN0cnVjdCBtbWNwc3RvcmVfY29udGV4dCB7DQo+PiA+PiArICAgICAgIGNoYXIgZGV2X25h
+bWVbQkRFVk5BTUVfU0laRV07DQo+PiA+PiArICAgICAgIGludCBwYXJ0bm87DQo+PiA+PiArICAg
+ICAgIHNlY3Rvcl90IHN0YXJ0X3NlY3Q7DQo+PiA+PiArICAgICAgIHNlY3Rvcl90IHNpemU7DQo+
+PiA+PiArICAgICAgIHN0cnVjdCBwc3RvcmVfYmxrX2NvbmZpZyBjb25mOw0KPj4gPj4gKyAgICAg
+ICBzdHJ1Y3QgcHN0b3JlX2Jsa19pbmZvIGluZm87DQo+PiA+PiArDQo+PiA+PiArICAgICAgIHN0
+cnVjdCBtbWNfY2FyZCAqY2FyZDsNCj4+ID4+ICsgICAgICAgc3RydWN0IG1tY19yZXF1ZXN0ICpt
+cnE7DQo+PiA+PiArfSBvb3BzX2N4dDsNCj4+ID4+ICsNCj4+ID4+ICtzdGF0aWMgdm9pZCBtbWNf
+cHJlcF9yZXEoc3RydWN0IG1tY19yZXF1ZXN0ICptcnEsDQo+PiA+PiArICAgICAgICAgICAgICAg
+dW5zaWduZWQgaW50IHNlY3Rfb2Zmc2V0LCB1bnNpZ25lZCBpbnQgbnNlY3RzLA0KPj4gPj4gKyAg
+ICAgICAgICAgICAgIHN0cnVjdCBzY2F0dGVybGlzdCAqc2csIHUzMiBvcGNvZGUsIHVuc2lnbmVk
+IGludA0KPj4gPj4gK2ZsYWdzKSB7DQo+PiA+PiArICAgICAgIG1ycS0+Y21kLT5vcGNvZGUgPSBv
+cGNvZGU7DQo+PiA+PiArICAgICAgIG1ycS0+Y21kLT5hcmcgPSBzZWN0X29mZnNldDsNCj4+ID4+
+ICsgICAgICAgbXJxLT5jbWQtPmZsYWdzID0gTU1DX1JTUF9SMSB8IE1NQ19DTURfQURUQzsNCj4+
+ID4+ICsNCj4+ID4+ICsgICAgICAgaWYgKG5zZWN0cyA9PSAxKSB7DQo+PiA+PiArICAgICAgICAg
+ICAgICAgbXJxLT5zdG9wID0gTlVMTDsNCj4+ID4+ICsgICAgICAgfSBlbHNlIHsNCj4+ID4+ICsg
+ICAgICAgICAgICAgICBtcnEtPnN0b3AtPm9wY29kZSA9IE1NQ19TVE9QX1RSQU5TTUlTU0lPTjsN
+Cj4+ID4+ICsgICAgICAgICAgICAgICBtcnEtPnN0b3AtPmFyZyA9IDA7DQo+PiA+PiArICAgICAg
+ICAgICAgICAgbXJxLT5zdG9wLT5mbGFncyA9IE1NQ19SU1BfUjFCIHwgTU1DX0NNRF9BQzsNCj4+
+ID4+ICsgICAgICAgfQ0KPj4gPj4gKw0KPj4gPj4gKyAgICAgICBtcnEtPmRhdGEtPmJsa3N6ID0g
+U0VDVE9SX1NJWkU7DQo+PiA+PiArICAgICAgIG1ycS0+ZGF0YS0+YmxvY2tzID0gbnNlY3RzOw0K
+Pj4gPj4gKyAgICAgICBtcnEtPmRhdGEtPmZsYWdzID0gZmxhZ3M7DQo+PiA+PiArICAgICAgIG1y
+cS0+ZGF0YS0+c2cgPSBzZzsNCj4+ID4+ICsgICAgICAgbXJxLT5kYXRhLT5zZ19sZW4gPSAxOw0K
+Pj4gPj4gK30NCj4+ID4+ICsNCj4+ID4+ICtzdGF0aWMgaW50IG1tY3BzdG9yZV9wYW5pY193cml0
+ZV9yZXEoY29uc3QgY2hhciAqYnVmLA0KPj4gPj4gKyAgICAgICAgICAgICAgIHVuc2lnbmVkIGlu
+dCBuc2VjdHMsIHVuc2lnbmVkIGludCBzZWN0X29mZnNldCkgew0KPj4gPj4gKyAgICAgICBzdHJ1
+Y3QgbW1jcHN0b3JlX2NvbnRleHQgKmN4dCA9ICZvb3BzX2N4dDsNCj4+ID4+ICsgICAgICAgc3Ry
+dWN0IG1tY19yZXF1ZXN0ICptcnEgPSBjeHQtPm1ycTsNCj4+ID4+ICsgICAgICAgc3RydWN0IG1t
+Y19jYXJkICpjYXJkID0gY3h0LT5jYXJkOw0KPj4gPj4gKyAgICAgICBzdHJ1Y3QgbW1jX2hvc3Qg
+Kmhvc3QgPSBjYXJkLT5ob3N0Ow0KPj4gPj4gKyAgICAgICBzdHJ1Y3Qgc2NhdHRlcmxpc3Qgc2c7
+DQo+PiA+PiArICAgICAgIHUzMiBvcGNvZGU7DQo+PiA+PiArICAgICAgIGludCByZXQ7DQo+PiA+
+PiArDQo+PiA+PiArICAgICAgIG9wY29kZSA9IChuc2VjdHMgPiAxKSA/IE1NQ19XUklURV9NVUxU
+SVBMRV9CTE9DSyA6DQo+PiA+TU1DX1dSSVRFX0JMT0NLOw0KPj4gPj4gKyAgICAgICBtbWNfcHJl
+cF9yZXEobXJxLCBzZWN0X29mZnNldCwgbnNlY3RzLCAmc2csIG9wY29kZSwNCj4+ID5NTUNfREFU
+QV9XUklURSk7DQo+PiA+PiArICAgICAgIHNnX2luaXRfb25lKCZzZywgYnVmLCAobnNlY3RzIDw8
+IFNFQ1RPUl9TSElGVCkpOw0KPj4gPj4gKyAgICAgICBtbWNfc2V0X2RhdGFfdGltZW91dChtcnEt
+PmRhdGEsIGN4dC0+Y2FyZCk7DQo+PiA+PiArDQo+PiA+PiArICAgICAgIHJldCA9IG1tY19jbGFp
+bV9ob3N0X2FzeW5jKGhvc3QpOw0KPj4gPj4gKyAgICAgICBpZiAocmV0KQ0KPj4gPj4gKyAgICAg
+ICAgICAgICAgIHJldHVybiByZXQ7DQo+PiA+PiArDQo+PiA+PiArICAgICAgIG1tY193YWl0X2Zv
+cl9wc3RvcmVfcmVxKGhvc3QsIG1ycSk7DQo+PiA+PiArICAgICAgIHJldHVybiAwOw0KPj4gPj4g
+K30NCj4+ID4+ICsNCj4+ID4+ICtzdGF0aWMgaW50IG1tY3BzdG9yZV9wYW5pY193cml0ZShjb25z
+dCBjaGFyICpidWYsIHNlY3Rvcl90IG9mZiwNCj4+ID4+ICtzZWN0b3JfdCBzZWN0cykgew0KPj4g
+Pj4gKyAgICAgICBzdHJ1Y3QgbW1jcHN0b3JlX2NvbnRleHQgKmN4dCA9ICZvb3BzX2N4dDsNCj4+
+ID4+ICsgICAgICAgaW50IHJldDsNCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgcmV0ID0gbW1jcHN0
+b3JlX3BhbmljX3dyaXRlX3JlcShidWYsIHNlY3RzLCBjeHQtPnN0YXJ0X3NlY3QgKyBvZmYpOw0K
+Pj4gPj4gKyAgICAgICBpZiAocmV0KQ0KPj4gPj4gKyAgICAgICAgICAgICAgIHJldHVybiByZXQ7
+DQo+PiA+PiArDQo+PiA+PiArICAgICAgIHJldHVybiAwOw0KPj4gPj4gK30NCj4+ID4+ICsNCj4+
+ID4+ICtzdGF0aWMgc3RydWN0IGJsb2NrX2RldmljZSAqbW1jcHN0b3JlX29wZW5fYmFja2VuZChj
+b25zdCBjaGFyDQo+PiA+PiArKmRldmljZSkgew0KPj4gPj4gKyAgICAgICBzdHJ1Y3QgYmxvY2tf
+ZGV2aWNlICpiZGV2Ow0KPj4gPj4gKyAgICAgICBkZXZfdCBkZXZ0Ow0KPj4gPj4gKw0KPj4gPj4g
+KyAgICAgICBiZGV2ID0gYmxrZGV2X2dldF9ieV9wYXRoKGRldmljZSwgRk1PREVfUkVBRCwgTlVM
+TCk7DQo+PiA+PiArICAgICAgIGlmIChJU19FUlIoYmRldikpIHsNCj4+ID4+ICsgICAgICAgICAg
+ICAgICBkZXZ0ID0gbmFtZV90b19kZXZfdChkZXZpY2UpOw0KPj4gPj4gKyAgICAgICAgICAgICAg
+IGlmIChkZXZ0ID09IDApDQo+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gRVJS
+X1BUUigtRU5PREVWKTsNCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgICAgICAgICBiZGV2ID0gYmxr
+ZGV2X2dldF9ieV9kZXYoZGV2dCwgRk1PREVfUkVBRCwgTlVMTCk7DQo+PiA+PiArICAgICAgICAg
+ICAgICAgaWYgKElTX0VSUihiZGV2KSkNCj4+ID4+ICsgICAgICAgICAgICAgICAgICAgICAgIHJl
+dHVybiBiZGV2Ow0KPj4gPj4gKyAgICAgICB9DQo+PiA+PiArDQo+PiA+PiArICAgICAgIHJldHVy
+biBiZGV2Ow0KPj4gPj4gK30NCj4+ID4+ICsNCj4+ID4+ICtzdGF0aWMgdm9pZCBtbWNwc3RvcmVf
+Y2xvc2VfYmFja2VuZChzdHJ1Y3QgYmxvY2tfZGV2aWNlICpiZGV2KSB7DQo+PiA+PiArICAgICAg
+IGlmICghYmRldikNCj4+ID4+ICsgICAgICAgICAgICAgICByZXR1cm47DQo+PiA+PiArICAgICAg
+IGJsa2Rldl9wdXQoYmRldiwgRk1PREVfUkVBRCk7IH0NCj4+ID4+ICsNCj4+ID4+ICt2b2lkIG1t
+Y3BzdG9yZV9jYXJkX3NldChzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIGNvbnN0IGNoYXINCj4+ID4+
+ICsqZGlza19uYW1lKSB7DQo+PiA+PiArICAgICAgIHN0cnVjdCBtbWNwc3RvcmVfY29udGV4dCAq
+Y3h0ID0gJm9vcHNfY3h0Ow0KPj4gPj4gKyAgICAgICBzdHJ1Y3QgcHN0b3JlX2Jsa19jb25maWcg
+KmNvbmYgPSAmY3h0LT5jb25mOw0KPj4gPj4gKyAgICAgICBzdHJ1Y3QgcHN0b3JlX2Jsa19pbmZv
+ICppbmZvID0gJmN4dC0+aW5mbzsNCj4+ID4+ICsgICAgICAgc3RydWN0IGJsb2NrX2RldmljZSAq
+YmRldjsNCj4+ID4+ICsgICAgICAgc3RydWN0IG1tY19jb21tYW5kICpzdG9wOw0KPj4gPj4gKyAg
+ICAgICBzdHJ1Y3QgbW1jX2NvbW1hbmQgKmNtZDsNCj4+ID4+ICsgICAgICAgc3RydWN0IG1tY19y
+ZXF1ZXN0ICptcnE7DQo+PiA+PiArICAgICAgIHN0cnVjdCBtbWNfZGF0YSAqZGF0YTsNCj4+ID4+
+ICsgICAgICAgaW50IHJldDsNCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgcmV0ID0gcHN0b3JlX2Js
+a19nZXRfY29uZmlnKGNvbmYpOw0KPj4gPj4gKyAgICAgICBpZiAoIWNvbmYtPmRldmljZVswXSkg
+ew0KPj4gPj4gKyAgICAgICAgICAgICAgIHByX2RlYnVnKCJwc2JsayBiYWNrZW5kIGlzIGVtcHR5
+XG4iKTsNCj4+ID4+ICsgICAgICAgICAgICAgICByZXR1cm47DQo+PiA+PiArICAgICAgIH0NCj4+
+ID4+ICsNCj4+ID4+ICsgICAgICAgLyogTXVsdGlwbGUgYmFja2VuZCBkZXZpY2VzIG5vdCBhbGxv
+d2VkICovDQo+PiA+PiArICAgICAgIGlmIChjeHQtPmRldl9uYW1lWzBdKQ0KPj4gPj4gKyAgICAg
+ICAgICAgICAgIHJldHVybjsNCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgYmRldiA9ICBtbWNwc3Rv
+cmVfb3Blbl9iYWNrZW5kKGNvbmYtPmRldmljZSk7DQo+PiA+PiArICAgICAgIGlmIChJU19FUlIo
+YmRldikpIHsNCj4+ID4+ICsgICAgICAgICAgICAgICBwcl9lcnIoIiVzIGZhaWxlZCB0byBvcGVu
+IHdpdGggJWxkXG4iLA0KPj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25m
+LT5kZXZpY2UsIFBUUl9FUlIoYmRldikpOw0KPj4gPj4gKyAgICAgICAgICAgICAgIHJldHVybjsN
+Cj4+ID4+ICsgICAgICAgfQ0KPj4gPj4gKw0KPj4gPj4gKyAgICAgICBiZGV2bmFtZShiZGV2LCBj
+eHQtPmRldl9uYW1lKTsNCj4+ID4+ICsgICAgICAgY3h0LT5wYXJ0bm8gPSBiZGV2LT5iZF9wYXJ0
+LT5wYXJ0bm87DQo+PiA+PiArICAgICAgIG1tY3BzdG9yZV9jbG9zZV9iYWNrZW5kKGJkZXYpOw0K
+Pj4gPj4gKw0KPj4gPj4gKyAgICAgICBpZiAoc3RybmNtcChjeHQtPmRldl9uYW1lLCBkaXNrX25h
+bWUsIHN0cmxlbihkaXNrX25hbWUpKSkNCj4+ID4+ICsgICAgICAgICAgICAgICByZXR1cm47DQo+
+PiA+PiArDQo+PiA+PiArICAgICAgIGN4dC0+c3RhcnRfc2VjdCA9IG1tY19ibGtfZ2V0X3BhcnQo
+Y2FyZCwgY3h0LT5wYXJ0bm8sICZjeHQtPnNpemUpOw0KPj4gPj4gKyAgICAgICBpZiAoIWN4dC0+
+c3RhcnRfc2VjdCkgew0KPj4gPj4gKyAgICAgICAgICAgICAgIHByX2VycigiTm9uLWV4aXN0ZW50
+IHBhcnRpdGlvbiAlZCBzZWxlY3RlZFxuIiwgY3h0LT5wYXJ0bm8pOw0KPj4gPj4gKyAgICAgICAg
+ICAgICAgIHJldHVybjsNCj4+ID4+ICsgICAgICAgfQ0KPj4gPj4gKw0KPj4gPj4gKyAgICAgICAv
+KiBDaGVjayBmb3IgaG9zdCBtbWMgcGFuaWMgd3JpdGUgcG9sbGluZyBmdW5jdGlvbiBkZWZpbml0
+aW9ucyAqLw0KPj4gPj4gKyAgICAgICBpZiAoIWNhcmQtPmhvc3QtPm9wcy0+cmVxX2NsZWFudXBf
+cGVuZGluZyB8fA0KPj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgIWNhcmQtPmhvc3QtPm9w
+cy0+cmVxX2NvbXBsZXRpb25fcG9sbCkNCj4+ID4+ICsgICAgICAgICAgICAgICByZXR1cm47DQo+
+PiA+PiArDQo+PiA+PiArICAgICAgIGN4dC0+Y2FyZCA9IGNhcmQ7DQo+PiA+PiArDQo+PiA+PiAr
+ICAgICAgIG1ycSA9IGt6YWxsb2Moc2l6ZW9mKHN0cnVjdCBtbWNfcmVxdWVzdCksIEdGUF9LRVJO
+RUwpOw0KPj4gPj4gKyAgICAgICBpZiAoIW1ycSkNCj4+ID4+ICsgICAgICAgICAgICAgICBnb3Rv
+IG91dDsNCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgY21kID0ga3phbGxvYyhzaXplb2Yoc3RydWN0
+IG1tY19jb21tYW5kKSwgR0ZQX0tFUk5FTCk7DQo+PiA+PiArICAgICAgIGlmICghY21kKQ0KPj4g
+Pj4gKyAgICAgICAgICAgICAgIGdvdG8gZnJlZV9tcnE7DQo+PiA+PiArDQo+PiA+PiArICAgICAg
+IHN0b3AgPSBremFsbG9jKHNpemVvZihzdHJ1Y3QgbW1jX2NvbW1hbmQpLCBHRlBfS0VSTkVMKTsN
+Cj4+ID4+ICsgICAgICAgaWYgKCFzdG9wKQ0KPj4gPj4gKyAgICAgICAgICAgICAgIGdvdG8gZnJl
+ZV9jbWQ7DQo+PiA+PiArDQo+PiA+PiArICAgICAgIGRhdGEgPSBremFsbG9jKHNpemVvZihzdHJ1
+Y3QgbW1jX2RhdGEpLCBHRlBfS0VSTkVMKTsNCj4+ID4+ICsgICAgICAgaWYgKCFkYXRhKQ0KPj4g
+Pj4gKyAgICAgICAgICAgICAgIGdvdG8gZnJlZV9zdG9wOw0KPj4gPj4gKw0KPj4gPj4gKyAgICAg
+ICBtcnEtPmNtZCA9IGNtZDsNCj4+ID4+ICsgICAgICAgbXJxLT5kYXRhID0gZGF0YTsNCj4+ID4+
+ICsgICAgICAgbXJxLT5zdG9wID0gc3RvcDsNCj4+ID4+ICsgICAgICAgY3h0LT5tcnEgPSBtcnE7
+DQo+PiA+PiArDQo+PiA+PiArICAgICAgIGluZm8tPm1ham9yID0gTU1DX0JMT0NLX01BSk9SOw0K
+Pj4gPj4gKyAgICAgICBpbmZvLT5mbGFncyA9IFBTVE9SRV9GTEFHU19ETUVTRzsNCj4+ID4+ICsg
+ICAgICAgaW5mby0+cGFuaWNfd3JpdGUgPSBtbWNwc3RvcmVfcGFuaWNfd3JpdGU7DQo+PiA+PiAr
+ICAgICAgIHJldCA9IHJlZ2lzdGVyX3BzdG9yZV9ibGsoaW5mbyk7DQo+PiA+PiArICAgICAgIGlm
+IChyZXQpIHsNCj4+ID4+ICsgICAgICAgICAgICAgICBwcl9lcnIoIiVzIHJlZ2lzdGVyaW5nIHdp
+dGggcHNibGsgZmFpbGVkICglZClcbiIsDQo+PiA+PiArICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgIGN4dC0+ZGV2X25hbWUsIHJldCk7DQo+PiA+PiArICAgICAgICAgICAgICAgZ290byBm
+cmVlX2RhdGE7DQo+PiA+PiArICAgICAgIH0NCj4+ID4+ICsNCj4+ID4+ICsgICAgICAgcHJfaW5m
+bygiJXMgcmVnaXN0ZXJlZCBhcyBwc2JsayBiYWNrZW5kXG4iLCBjeHQtPmRldl9uYW1lKTsNCj4+
+ID4+ICsgICAgICAgcmV0dXJuOw0KPj4gPj4gKw0KPj4gPj4gK2ZyZWVfZGF0YToNCj4+ID4+ICsg
+ICAgICAga2ZyZWUoZGF0YSk7DQo+PiA+PiArZnJlZV9zdG9wOg0KPj4gPj4gKyAgICAgICBrZnJl
+ZShzdG9wKTsNCj4+ID4+ICtmcmVlX2NtZDoNCj4+ID4+ICsgICAgICAga2ZyZWUoY21kKTsNCj4+
+ID4+ICtmcmVlX21ycToNCj4+ID4+ICsgICAgICAga2ZyZWUobXJxKTsNCj4+ID4+ICtvdXQ6DQo+
+PiA+PiArICAgICAgIHJldHVybjsNCj4+ID4+ICt9DQo+PiA+PiArDQo+PiA+PiArdm9pZCB1bnJl
+Z2lzdGVyX21tY3BzdG9yZSh2b2lkKQ0KPj4gPj4gK3sNCj4+ID4+ICsgICAgICAgc3RydWN0IG1t
+Y3BzdG9yZV9jb250ZXh0ICpjeHQgPSAmb29wc19jeHQ7DQo+PiA+PiArDQo+PiA+PiArICAgICAg
+IHVucmVnaXN0ZXJfcHN0b3JlX2JsayhNTUNfQkxPQ0tfTUFKT1IpOw0KPj4gPj4gKyAgICAgICBr
+ZnJlZShjeHQtPm1ycS0+ZGF0YSk7DQo+PiA+PiArICAgICAgIGtmcmVlKGN4dC0+bXJxLT5zdG9w
+KTsNCj4+ID4+ICsgICAgICAga2ZyZWUoY3h0LT5tcnEtPmNtZCk7DQo+PiA+PiArICAgICAgIGtm
+cmVlKGN4dC0+bXJxKTsNCj4+ID4+ICsgICAgICAgY3h0LT5jYXJkID0gTlVMTDsNCj4+ID4+ICt9
+DQo+PiA+PiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9tbWMvY29yZS5oIGIvaW5jbHVkZS9s
+aW51eC9tbWMvY29yZS5oDQo+PiA+PiBpbmRleCAyOWFhNTA3MTE2MjYuLjUzODQwYTM2MWI1YSAx
+MDA2NDQNCj4+ID4+IC0tLSBhL2luY2x1ZGUvbGludXgvbW1jL2NvcmUuaA0KPj4gPj4gKysrIGIv
+aW5jbHVkZS9saW51eC9tbWMvY29yZS5oDQo+PiA+PiBAQCAtMTY2LDYgKzE2NiwxMSBAQCBzdHJ1
+Y3QgbW1jX3JlcXVlc3Qgew0KPj4gPj4NCj4+ID4+ICBzdHJ1Y3QgbW1jX2NhcmQ7DQo+PiA+Pg0K
+Pj4gPj4gKyNpZiBJU19FTkFCTEVEKENPTkZJR19NTUNfUFNUT1JFKQ0KPj4gPj4gK3ZvaWQgbW1j
+X3dhaXRfZm9yX3BzdG9yZV9yZXEoc3RydWN0IG1tY19ob3N0ICpob3N0LCBzdHJ1Y3QNCj4+ID4+
+ICttbWNfcmVxdWVzdCAqbXJxKTsgaW50IG1tY19jbGFpbV9ob3N0X2FzeW5jKHN0cnVjdCBtbWNf
+aG9zdA0KPj4gPj4gKypob3N0KTsgI2VuZGlmDQo+PiA+PiArDQo+PiA+PiAgdm9pZCBtbWNfd2Fp
+dF9mb3JfcmVxKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgc3RydWN0IG1tY19yZXF1ZXN0DQo+PiA+
+PiAqbXJxKTsgIGludCBtbWNfd2FpdF9mb3JfY21kKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCwgc3Ry
+dWN0DQo+PiA+bW1jX2NvbW1hbmQgKmNtZCwNCj4+ID4+ICAgICAgICAgICAgICAgICBpbnQgcmV0
+cmllcyk7DQo+PiA+PiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51eC9tbWMvaG9zdC5oIGIvaW5j
+bHVkZS9saW51eC9tbWMvaG9zdC5oDQo+PiA+PiBpbmRleA0KPj4gPj4gMDFiYmEzNjU0NWM1Li5i
+YTkwMDE0OThlMDMgMTAwNjQ0DQo+PiA+PiAtLS0gYS9pbmNsdWRlL2xpbnV4L21tYy9ob3N0LmgN
+Cj4+ID4+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaA0KPj4gPj4gQEAgLTE3OCw2ICsx
+NzgsMTggQEAgc3RydWN0IG1tY19ob3N0X29wcyB7DQo+PiA+Pg0KPj4gPj4gICAgICAgICAvKiBJ
+bml0aWFsaXplIGFuIFNEIGV4cHJlc3MgY2FyZCwgbWFuZGF0b3J5IGZvciBNTUNfQ0FQMl9TRF9F
+WFAuDQo+Ki8NCj4+ID4+ICAgICAgICAgaW50ICAgICAoKmluaXRfc2RfZXhwcmVzcykoc3RydWN0
+IG1tY19ob3N0ICpob3N0LCBzdHJ1Y3QgbW1jX2lvcw0KPippb3MpOw0KPj4gPj4gKw0KPj4gPj4g
+KyNpZiBJU19FTkFCTEVEKENPTkZJR19NTUNfUFNUT1JFKQ0KPj4gPj4gKyAgICAgICAvKg0KPj4g
+Pj4gKyAgICAgICAgKiBUaGUgZm9sbG93aW5nIHR3byBBUElzIGFyZSBpbnRyb2R1Y2VkIHRvIHN1
+cHBvcnQgbW1jcHN0b3JlDQo+PiA+PiArICAgICAgICAqIGZ1bmN0aW9uYWxpdHkuIENsZWFudXAg
+QVBJIHRvIHRlcm1pbmF0ZSB0aGUgb25nb2luZyBhbmQNCj4+ID4+ICsgICAgICAgICogcGVuZGlu
+ZyByZXF1ZXN0cyBiZWZvcmUgYSBwYW5pYyB3cml0ZSBwb3N0LCBhbmQgcG9sbGluZyBBUEkNCj4+
+ID4+ICsgICAgICAgICogdG8gZW5zdXJlIHRoYXQgd3JpdGUgc3VjY2VlZHMgYmVmb3JlIHRoZSBL
+ZXJuZWwgZGllcy4NCj4+ID4+ICsgICAgICAgICovDQo+PiA+PiArICAgICAgIHZvaWQgICAgKCpy
+ZXFfY2xlYW51cF9wZW5kaW5nKShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QpOw0KPj4gPj4gKyAgICAg
+ICBpbnQgICAgICgqcmVxX2NvbXBsZXRpb25fcG9sbCkoc3RydWN0IG1tY19ob3N0ICpob3N0LA0K
+Pj4gPj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdW5zaWduZWQgbG9u
+ZyB0aW1lb3V0KTsNCj4+ID4+ICsjZW5kaWYNCj4+ID4+ICB9Ow0KPj4gPj4NCj4+ID4+ICBzdHJ1
+Y3QgbW1jX2NxZV9vcHMgew0KPj4gPj4gLS0NCj4+ID4+IDIuMTcuMQ0KPj4gPj4NCg==
