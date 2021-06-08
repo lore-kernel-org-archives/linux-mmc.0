@@ -5,93 +5,120 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2EF8C4743E
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:17:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ABB43C47082
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:18:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 805C161249
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:17:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 92CBC6100A
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:18:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232910AbhFHNTv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Jun 2021 09:19:51 -0400
-Received: from mail-ua1-f44.google.com ([209.85.222.44]:34639 "EHLO
+        id S232844AbhFHNUB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Jun 2021 09:20:01 -0400
+Received: from mail-ua1-f44.google.com ([209.85.222.44]:34642 "EHLO
         mail-ua1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232903AbhFHNTu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jun 2021 09:19:50 -0400
-Received: by mail-ua1-f44.google.com with SMTP id c17so11576488uao.1
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jun 2021 06:17:57 -0700 (PDT)
+        with ESMTP id S232917AbhFHNTy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jun 2021 09:19:54 -0400
+Received: by mail-ua1-f44.google.com with SMTP id c17so11576566uao.1
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Jun 2021 06:18:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=O/G9l7SZvoUdCJxEXjuBblAs730rAEGTbJM8qPA6QnU=;
-        b=VgUbGyWA5w4WVmAe9n8s36mYEbTWqRLHWDBYfnzcrwv7u8Q13KXHzmh8sVX93mWvIB
-         pDw3LNkobVwjNadgKKbR9ciXt9GJdirirQT3tKqeg3SGMlx74RbbrKY8/gvILsY83QoF
-         WIsfKE8y2EWlPIYIYolXxZE4LapDijyU3xDhsE0WwDYN0M8H1W1DeRF3GDgANY6jO1eJ
-         emwiO0I8sSUoqmLQdL1sd8aXa1Xw0XxpARyWm1EdzGk+XsIspjT1QnYdE+ob2ulc+tRn
-         McoKCBRtA7C2v4JRCnYjPZtOpOhKe/KUm1Zf8k4pL71gd2zYxqYue5fs+LYVSqc2h7Hl
-         uXow==
+        bh=tO3BohwnkUKnYIuONkUA0L73DP8nymMxh+DI7cdhd4w=;
+        b=jMly9y0B/5qY0PR8RSddHqssiLIzHRTUAldUlCQQXlTwxHzxbXAEg0kxUaWtHKX+CH
+         hUGuCTUIU5E8EXPZJefrrrEmI35XCFPNbkFZmuR8yJwC2hMXFfuq5XOk2bSbu40lRmi1
+         TmnLRH9FtGL6QDNz4dVrVOKcgjSu6B/Va4gQrKGuEM+VOeJqmjmL0PwfvCKIR3WOCoL/
+         hYn77PUX0xAfXLGrhlUj1DKOAJFUJlQPjuMAwqTj6DrgANK+k8TMWGWmiKCXehiiPDM3
+         z+5u9kzzS6pECCG9zAgo/dvij0jNBbOdpJBQE0lb78qDygAee15OUFirubMn/ufI22K+
+         Ugug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=O/G9l7SZvoUdCJxEXjuBblAs730rAEGTbJM8qPA6QnU=;
-        b=Me9399qpmsbC1sFQ0VfqipZM4BGwFDmwlqjlBe3X/LPdLE0Tkk4B8CDUM4mHNVg29Q
-         yNDmEWYxgyShV6BI3r59cBUdPyHJs68HMN6Gld3wTZW2SBvMT+82uIVR3mSXjGoY4xim
-         Q3fxNRGsX6F1nDbg6KNZ6FgsJTzALO0BKFjmS9z5niyC3HRCgEKTTicIwWMU0TDlCdta
-         1wIFg4pUDGXF+FI8oRFXO4Y8In+FPOSkidejZ71im8bptZSujatyNTrUG6/QVOTmCC+1
-         fz129ApY32HdpOPIqnXYLzoQNOBiG6PWUSUy656Hrd1LwjWyLiz6nPJ2uxEMNh5FMaUr
-         PDPQ==
-X-Gm-Message-State: AOAM531wQ2p5fSvSqS/Wa4W+YQHTBy2qo7lJeASpAEi9fEgtn0+Ps2PM
-        b0nkFbv2/W69NoVh7KIkKGCQDoyfhgQ86/6I3hd2vw==
-X-Google-Smtp-Source: ABdhPJw6Z7tEwu1v/VB/4p+MORZ0ZMJRvQwsN15C2gwVElhiBFHlbN9EVF81SFiKHxUf9+L9SMq/DikLEI/mGwTxoBc=
-X-Received: by 2002:ab0:484b:: with SMTP id c11mr3218881uad.100.1623158216958;
- Tue, 08 Jun 2021 06:16:56 -0700 (PDT)
+        bh=tO3BohwnkUKnYIuONkUA0L73DP8nymMxh+DI7cdhd4w=;
+        b=YEMflBR+0Nu0EDUMNsQuiNOw4JTvxSzB0PxP8XzPXDTAN5Pb96GReUL7Qf5ymzEoGM
+         EJQVTpdwKtBweIMVhW79A0616MxITs1jzqXq3fV82K+4KBh0uG+acf+AiUqyHNQnfaOS
+         oU0SuiTv2wd9cgJimVhch4oyvbH60xhFP8/Or9oWibDogaqPkU5skd527DJZScKB/mja
+         hzDEb1SE2b/S3tgyBzX4sEjlqvXW5MBztJirjb8AMdfo+EQR1Hgvr8F53GaTgtqGK5iq
+         hviYJX5kIcBHO9dYw2sMYG592NdpqSBo2/M6vs56iG2KkRfbGK/Amq6VOLhK2rddwYsp
+         Xk8w==
+X-Gm-Message-State: AOAM533TBr8velZQMTFzrfTqvZI3rjJnranJrTfPUCeqL5sYgzbyzCnt
+        2YLOqegltOvafL6lGYI/bOD+5GCSZ7z5zfEn+MSO+A==
+X-Google-Smtp-Source: ABdhPJxpMbI86j1ktkn7vwGdS6ghdFwZJ7dwIbr0IxePCkJHK9etSF1AgQY3m9fL2SZjr5Ui6IAsBEGWj3JiPCPA17Q=
+X-Received: by 2002:ab0:7c5b:: with SMTP id d27mr12469684uaw.15.1623158221026;
+ Tue, 08 Jun 2021 06:17:01 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210604104459.7574-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210604104459.7574-1-wsa+renesas@sang-engineering.com>
+References: <ee8af5d631f5331139ffea714539030d97352e93.1622811525.git.geert+renesas@glider.be>
+In-Reply-To: <ee8af5d631f5331139ffea714539030d97352e93.1622811525.git.geert+renesas@glider.be>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 8 Jun 2021 15:16:20 +0200
-Message-ID: <CAPDyKFpX+n1R4fuiS-sVjXyiA392roRjL0th_fpvv3sGGF7h9g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: debugfs: add description for module parameter
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Date:   Tue, 8 Jun 2021 15:16:23 +0200
+Message-ID: <CAPDyKFo8U0SAuocTTznASBNMEzxm3HHbjfdG6E3dkHWjOR9kqw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: Fix HS400 on R-Car M3-W+
+To:     Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Takeshi Saito <takeshi.saito.xv@renesas.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 4 Jun 2021 at 12:45, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Fri, 4 Jun 2021 at 14:59, Geert Uytterhoeven <geert+renesas@glider.be> wrote:
 >
-> Make it obvious what this is for.
+> R-Car M3-W ES3.0 is marketed as R-Car M3-W+ (R8A77961), and has its own
+> compatible value "renesas,r8a77961".
 >
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Hence using soc_device_match() with soc_id = "r8a7796" and revision =
+> "ES3.*" does not actually match running on an R-Car M3-W+ SoC.
+>
+> Fix this by matching with soc_id = "r8a77961" instead.
+>
+> Fixes: a38c078fea0b1393 ("mmc: renesas_sdhi: Avoid bad TAP in HS400")
+> Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/core/debugfs.c | 1 +
->  1 file changed, 1 insertion(+)
+> Boot-tested on Salvator-XS with R-Car M3-W+ ES3.0.
+> No difference seen in eMMC/SHHC detection:
 >
-> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
-> index 9ec84c86c46a..3fdbc801e64a 100644
-> --- a/drivers/mmc/core/debugfs.c
-> +++ b/drivers/mmc/core/debugfs.c
-> @@ -26,6 +26,7 @@
->  static DECLARE_FAULT_ATTR(fail_default_attr);
->  static char *fail_request;
->  module_param(fail_request, charp, 0);
-> +MODULE_PARM_DESC(fail_request, "default fault injection attributes");
+>     mmc0: new HS400 MMC card at address 0001
+>     mmcblk0: mmc0:0001 BGSD4R 29.1 GiB
+>     mmcblk0boot0: mmc0:0001 BGSD4R 31.9 MiB
+>     mmcblk0boot1: mmc0:0001 BGSD4R 31.9 MiB
+>     mmcblk0rpmb: mmc0:0001 BGSD4R 4.00 MiB, chardev (247:0)
+>      mmcblk0: p1
+>     mmc1: new ultra high speed SDR104 SDHC card at address aaaa
+>     mmcblk1: mmc1:aaaa SL16G 14.8 GiB
+>      mmcblk1: p1
+>     mmc2: new ultra high speed SDR104 SDHC card at address aaaa
+>     mmcblk2: mmc2:aaaa SL32G 29.7 GiB
+>      mmcblk2: p1
+> ---
+>  drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
->  #endif /* CONFIG_FAIL_MMC_REQUEST */
->
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+> index 635bf31a67359f10..b719eda6b8619453 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -939,7 +939,7 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
+>         { .soc_id = "r8a7795", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps2367 },
+>         { .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
+> -       { .soc_id = "r8a7796", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps1357 },
+> +       { .soc_id = "r8a77961", .data = &sdhi_quirks_bad_taps1357 },
+>         { .soc_id = "r8a77965", .data = &sdhi_quirks_r8a77965 },
+>         { .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
+>         { .soc_id = "r8a77990", .data = &sdhi_quirks_r8a77990 },
 > --
-> 2.30.2
+> 2.25.1
 >
