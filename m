@@ -5,126 +5,246 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02BC3C4743D
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:17:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A20D3C4743E
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:17:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DC56761249
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:17:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8B0D46124B
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Jun 2021 13:17:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232874AbhFHNTA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Jun 2021 09:19:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43494 "EHLO
+        id S232607AbhFHNTY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Jun 2021 09:19:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43600 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232854AbhFHNS7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jun 2021 09:18:59 -0400
-Received: from mail-ua1-x931.google.com (mail-ua1-x931.google.com [IPv6:2607:f8b0:4864:20::931])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 66EB0C061787
-        for <linux-mmc@vger.kernel.org>; Tue,  8 Jun 2021 06:16:50 -0700 (PDT)
-Received: by mail-ua1-x931.google.com with SMTP id 68so11541410uao.11
-        for <linux-mmc@vger.kernel.org>; Tue, 08 Jun 2021 06:16:50 -0700 (PDT)
+        with ESMTP id S232839AbhFHNTX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Jun 2021 09:19:23 -0400
+Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE99BC06178B
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Jun 2021 06:17:13 -0700 (PDT)
+Received: by mail-vs1-xe2d.google.com with SMTP id z15so10811301vsn.13
+        for <linux-mmc@vger.kernel.org>; Tue, 08 Jun 2021 06:17:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=4sO61Fkn/5IZX7W/Hmal8+XrneLbVYOvRH8YqKEmick=;
-        b=u5X7PMHHxL3yE7d6dDQP52QGHBPyUln/TF1+tYPm7hIJV5NS/siaFMa+EJvG5B6SUv
-         9uWqqz1mLMoL9FiF0M8alQtkXuCYj7Ak4B2NjW8L2fZ5fthcJdI0alkX2JaQ8hpFBuCd
-         roWb/7b6b5KtalM2aHBlCnUP1FjtpZmC6P4lfu8fOUKqmTZfCxGHCySaGXM6SLN9l1ov
-         KY7RdtDwBuhsCYifz5RpCYX9ZA3cxGRvFdocWq971svs+ClMMn5A3kurizygj9cVYJME
-         wcbdjgJ5cDNYoTZnyddLArCEAJ/k0jDU4lztqSKQPjnUH8hZ2Z9GdI7ZLNQD/hlvJ63c
-         hR9A==
+         :cc:content-transfer-encoding;
+        bh=IBlaigZjV5sq8STNj0id8/6Cg17DTXWl1Q3IQsLPB3A=;
+        b=v8xYVwI7sysXcu+xETCr1LbUTUYskjilN0Dg2uGSzOZodjApeA0q7FxdkOCkGMS0N3
+         ILr8bflMTzoCZUlQPLEclNbKHkn3uceD9K4vKih6eInxNapCN9NGHEP4n8r6Ah0zY43d
+         82nctpPmnvPljQQClDLAZ8f7c9U6IwEnrDZ4FbAAHQCq9oWdXwMZK46B8CA9etPJ+W3V
+         AaOz/Wzi5FjceFevb7GqFolzXDWwpOh9BV2QtiM3zFiLUz6hmozVELcNEJC64OQNsc7D
+         xBjfbYRlLzuygibOaMaCq6N7oEDk53x4R9i+fQwmndXKdMnrOFRwoZBxOjxR8A6KyrGg
+         usoA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=4sO61Fkn/5IZX7W/Hmal8+XrneLbVYOvRH8YqKEmick=;
-        b=J6yLKO5pmiVLFcXV1v5cI8kQauPlbjrupaBM53BUrKQ/kSarGkxtHNWxFyMkgd8i7d
-         ej4i85wfSb+4J/nQp7AsUeksMn4fpmFSKbuYa2+RKbXfQi3kLyo0ZO2dYQgjaFEELtqA
-         ZSMlqcbK5RfZSMQDjV/ZEpglWAevbHmVbf8yTbPrV7mvGXA4/KBwoQziyHyOsxaWQZkS
-         E4qyhGidL4KybYcWM9IbDBbxJFLHh389d+WjZPndbWasISk3VDZBRJu9E3MRYjj92J6+
-         hfF23a+ZulylY1SJhg4TvvSJUR52/KMIRS89W+xYIaixG2SVLI8NIj1wjn0U3jORTmbB
-         i/kw==
-X-Gm-Message-State: AOAM532H+qKGIIkL8/m4YDJ1nXyJY19motf+3WwzyrFhdMroEsWL9ztF
-        2fxLFFmV/PPjTjh0GyUCzTDpVKC1YB8LJUleLEso87kifl4nbg==
-X-Google-Smtp-Source: ABdhPJxbw2jKLpHRrw+vUe65U9pKZtC9zHtDLfFBHJxqmwFLCCreieH+pOXs86lypO+JJcM7bCuwjtDO0H6EO9ZZjVU=
-X-Received: by 2002:ab0:d8f:: with SMTP id i15mr12633857uak.104.1623158209542;
- Tue, 08 Jun 2021 06:16:49 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=IBlaigZjV5sq8STNj0id8/6Cg17DTXWl1Q3IQsLPB3A=;
+        b=pZ79HNnRCzodsuWZfjshkuUt2mURDEU0ENB513NoGMYIBcP1adHu/LFosNrcBUX3HM
+         31aXiq/+NDnihTtYLwQvpnI1FkCXRYLEWv74mkTytrVNrVgxWZPN5+5Kc93a1L3NuHr8
+         JOppDS16tXyeukxuiUXk9Sa3CDdvb1Y0jmOjwJSauRRcXrxW1SZxJvXwSF4A+RvwZRNx
+         5Xtwfv9aVJ6h/FTL2pYyFYysgch3Qzrh/1bTBPGvBaD6E8FyWYXeNeQkgNwpkrnK3dQ2
+         NuWTTrv1tg+7ZC+FzqQzlYfEbi50NCfJFqCMWvAMircavcTwURZYmueLX41BxyS66T6+
+         l9vg==
+X-Gm-Message-State: AOAM531isfBP4YkebuIaNYSF9cEgO/9BarMvFBULt2mqIFOyXtKKsXCM
+        C0onB8hSzNakqFDmrnmvNCCMmeWz8uhA1wFh7nq8ocNeUtiaUw==
+X-Google-Smtp-Source: ABdhPJxay7JnvbyravvhaZyhK6CMPilmQ9CWkeUrB1ld1S7WrWJelrVoiHD/h4dAW2M4pQKzXjKANWYFeGYiPvyjMxI=
+X-Received: by 2002:a67:e359:: with SMTP id s25mr11902381vsm.55.1623158227317;
+ Tue, 08 Jun 2021 06:17:07 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210602073435.5955-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210602073435.5955-1-wsa+renesas@sang-engineering.com>
+References: <1623002884-57244-1-git-send-email-zhouyanjie@wanyeetech.com> <1623002884-57244-3-git-send-email-zhouyanjie@wanyeetech.com>
+In-Reply-To: <1623002884-57244-3-git-send-email-zhouyanjie@wanyeetech.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 8 Jun 2021 15:16:12 +0200
-Message-ID: <CAPDyKFo0jP-0yZd-89J7v4xdcBnH5H5yGa_s4a-hw=mkHxOrxg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: renesas_sdhi: abort tuning when timeout detected
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Date:   Tue, 8 Jun 2021 15:16:30 +0200
+Message-ID: <CAPDyKFpQcoyu1Fg46XgyCcgTxLaN1Ez29F1URRaEd4ZHZmuUhg@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: JZ4740: Add support for JZ4775 and rename
+ unreasonable array name.
+To:     =?UTF-8?B?5ZGo55Cw5p2wIChaaG91IFlhbmppZSk=?= 
+        <zhouyanjie@wanyeetech.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        linux-mips <linux-mips@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        DTML <devicetree@vger.kernel.org>, dongsheng.qiu@ingenic.com,
+        aric.pzqi@ingenic.com, rick.tyliu@ingenic.com,
+        sihui.liu@ingenic.com, jun.jiang@ingenic.com,
+        sernia.zhou@foxmail.com, Paul Cercueil <paul@crapouillou.net>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2 Jun 2021 at 09:34, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Sun, 6 Jun 2021 at 20:08, =E5=91=A8=E7=90=B0=E6=9D=B0 (Zhou Yanjie)
+<zhouyanjie@wanyeetech.com> wrote:
 >
-> We have to bring the eMMC from sending-data state back to transfer state
-> once we detected a CRC error (timeout) during tuning. So, send a stop
-> command via mmc_abort_tuning().
+> 1.Add support for probing mmc driver on the JZ4775 SoC from Ingenic.
+> 2.When the support for JZ4775 SoC is added, there will be six compatible
+>   strings, so renaming "jz4740_mmc_of_match[]" to "jz4740_mmc_of_matches[=
+]"
+>   is more reasonable.
 >
-> Fixes: 4f11997773b6 ("mmc: tmio: Add tuning support")
-> Reported-by Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Signed-off-by: =E5=91=A8=E7=90=B0=E6=9D=B0 (Zhou Yanjie) <zhouyanjie@wany=
+eetech.com>
 
-Applied for fixes and by adding a stable tag, thanks!
-
-> ---
->
-> Ulf, I'd think that mmc_abort_tuning() should be named
-> mmc_abort_tuning_cmd() instead. Because we don't actually abort the
-> tuning as a whole in this function. What do you think? I can prepare a
-> patch if you agree.
-
-Good point.
-
-I have no strong opinion, but perhaps mmc_send_abort_tuning() is more
-consistent with other function names?
+Applied for next, with a minor change, see below, thanks!
 
 Kind regards
 Uffe
 
+> ---
+>  drivers/mmc/host/jz4740_mmc.c | 25 ++++++++++++++-----------
+>  1 file changed, 14 insertions(+), 11 deletions(-)
+>
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.=
+c
+> index b3c636e..ea8434f 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -2,6 +2,7 @@
+>  /*
+>   *  Copyright (C) 2009-2010, Lars-Peter Clausen <lars@metafoo.de>
+>   *  Copyright (C) 2013, Imagination Technologies
+> + *  Copyright (C) 2021, =E5=91=A8=E7=90=B0=E6=9D=B0 (Zhou Yanjie) <zhouy=
+anjie@wanyeetech.com>
 
+I am dropping this as it's pointless, because of your "Signed-off-by" tag.
+
+If you want more explanation, please have a look at
+Documentation/process/submitting-patches.rst. It should explain more
+about "Signed-off-by" tags.
+
+
+>   *
+>   *  JZ4740 SD/MMC controller driver
+>   */
+> @@ -114,6 +115,7 @@ enum jz4740_mmc_version {
+>         JZ_MMC_JZ4740,
+>         JZ_MMC_JZ4725B,
+>         JZ_MMC_JZ4760,
+> +       JZ_MMC_JZ4775,
+>         JZ_MMC_JZ4780,
+>         JZ_MMC_X1000,
+>  };
+> @@ -138,7 +140,7 @@ enum jz4740_mmc_state {
+>   * COOKIE_MAPPED: the request was mapped in the irq handler,
+>   * and should be unmapped before mmc_request_done is called..
+>   */
+> -enum jz4780_cookie {
+> +enum jz4775_cookie {
+>         COOKIE_UNMAPPED =3D 0,
+>         COOKIE_PREMAPPED,
+>         COOKIE_MAPPED,
+> @@ -194,7 +196,7 @@ static void jz4740_mmc_write_irq_mask(struct jz4740_m=
+mc_host *host,
+>  static void jz4740_mmc_write_irq_reg(struct jz4740_mmc_host *host,
+>                                      uint32_t val)
+>  {
+> -       if (host->version >=3D JZ_MMC_JZ4780)
+> +       if (host->version >=3D JZ_MMC_JZ4775)
+>                 writel(val, host->base + JZ_REG_MMC_IREG);
+>         else
+>                 writew(val, host->base + JZ_REG_MMC_IREG);
+> @@ -202,7 +204,7 @@ static void jz4740_mmc_write_irq_reg(struct jz4740_mm=
+c_host *host,
 >
->  drivers/mmc/host/renesas_sdhi_core.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+>  static uint32_t jz4740_mmc_read_irq_reg(struct jz4740_mmc_host *host)
+>  {
+> -       if (host->version >=3D JZ_MMC_JZ4780)
+> +       if (host->version >=3D JZ_MMC_JZ4775)
+>                 return readl(host->base + JZ_REG_MMC_IREG);
+>         else
+>                 return readw(host->base + JZ_REG_MMC_IREG);
+> @@ -674,7 +676,7 @@ static void jz4740_mmc_send_command(struct jz4740_mmc=
+_host *host,
+>                         cmdat |=3D JZ_MMC_CMDAT_WRITE;
+>                 if (host->use_dma) {
+>                         /*
+> -                        * The 4780's MMC controller has integrated DMA a=
+bility
+> +                        * The JZ4775's MMC controller has integrated DMA=
+ ability
+>                          * in addition to being able to use the external =
+DMA
+>                          * controller. It moves DMA control bits to a sep=
+arate
+>                          * register. The DMA_SEL bit chooses the external
+> @@ -682,13 +684,13 @@ static void jz4740_mmc_send_command(struct jz4740_m=
+mc_host *host,
+>                          * can only use the external controller, and have=
+ a
+>                          * single DMA enable bit in CMDAT.
+>                          */
+> -                       if (host->version >=3D JZ_MMC_JZ4780) {
+> +                       if (host->version >=3D JZ_MMC_JZ4775) {
+>                                 writel(JZ_MMC_DMAC_DMA_EN | JZ_MMC_DMAC_D=
+MA_SEL,
+>                                        host->base + JZ_REG_MMC_DMAC);
+>                         } else {
+>                                 cmdat |=3D JZ_MMC_CMDAT_DMA_EN;
+>                         }
+> -               } else if (host->version >=3D JZ_MMC_JZ4780) {
+> +               } else if (host->version >=3D JZ_MMC_JZ4775) {
+>                         writel(0, host->base + JZ_REG_MMC_DMAC);
+>                 }
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 635bf31a6735..9029308c4a0f 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -692,14 +692,19 @@ static int renesas_sdhi_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> @@ -866,7 +868,7 @@ static int jz4740_mmc_set_clock_rate(struct jz4740_mm=
+c_host *host, int rate)
+>         writew(div, host->base + JZ_REG_MMC_CLKRT);
 >
->         /* Issue CMD19 twice for each tap */
->         for (i = 0; i < 2 * priv->tap_num; i++) {
-> +               int cmd_error;
-> +
->                 /* Set sampling clock position */
->                 sd_scc_write32(host, priv, SH_MOBILE_SDHI_SCC_TAPSET, i % priv->tap_num);
+>         if (real_rate > 25000000) {
+> -               if (host->version >=3D JZ_MMC_X1000) {
+> +               if (host->version >=3D JZ_MMC_JZ4775) {
+>                         writel(JZ_MMC_LPM_DRV_RISING_QTR_PHASE_DLY |
+>                                    JZ_MMC_LPM_SMP_RISING_QTR_OR_HALF_PHAS=
+E_DLY |
+>                                    JZ_MMC_LPM_LOW_POWER_MODE_EN,
+> @@ -955,15 +957,16 @@ static const struct mmc_host_ops jz4740_mmc_ops =3D=
+ {
+>         .enable_sdio_irq =3D jz4740_mmc_enable_sdio_irq,
+>  };
 >
-> -               if (mmc_send_tuning(mmc, opcode, NULL) == 0)
-> +               if (mmc_send_tuning(mmc, opcode, &cmd_error) == 0)
->                         set_bit(i, priv->taps);
+> -static const struct of_device_id jz4740_mmc_of_match[] =3D {
+> +static const struct of_device_id jz4740_mmc_of_matches[] =3D {
+>         { .compatible =3D "ingenic,jz4740-mmc", .data =3D (void *) JZ_MMC=
+_JZ4740 },
+>         { .compatible =3D "ingenic,jz4725b-mmc", .data =3D (void *)JZ_MMC=
+_JZ4725B },
+>         { .compatible =3D "ingenic,jz4760-mmc", .data =3D (void *) JZ_MMC=
+_JZ4760 },
+> +       { .compatible =3D "ingenic,jz4775-mmc", .data =3D (void *) JZ_MMC=
+_JZ4775 },
+>         { .compatible =3D "ingenic,jz4780-mmc", .data =3D (void *) JZ_MMC=
+_JZ4780 },
+>         { .compatible =3D "ingenic,x1000-mmc", .data =3D (void *) JZ_MMC_=
+X1000 },
+>         {},
+>  };
+> -MODULE_DEVICE_TABLE(of, jz4740_mmc_of_match);
+> +MODULE_DEVICE_TABLE(of, jz4740_mmc_of_matches);
 >
->                 if (sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_SMPCMP) == 0)
->                         set_bit(i, priv->smpcmp);
-> +
-> +               if (cmd_error)
-> +                       mmc_abort_tuning(mmc, opcode);
->         }
+>  static int jz4740_mmc_probe(struct platform_device* pdev)
+>  {
+> @@ -980,7 +983,7 @@ static int jz4740_mmc_probe(struct platform_device* p=
+dev)
 >
->         ret = renesas_sdhi_select_tuning(host);
+>         host =3D mmc_priv(mmc);
+>
+> -       match =3D of_match_device(jz4740_mmc_of_match, &pdev->dev);
+> +       match =3D of_match_device(jz4740_mmc_of_matches, &pdev->dev);
+>         if (match) {
+>                 host->version =3D (enum jz4740_mmc_version)match->data;
+>         } else {
+> @@ -1124,7 +1127,7 @@ static struct platform_driver jz4740_mmc_driver =3D=
+ {
+>         .driver =3D {
+>                 .name =3D "jz4740-mmc",
+>                 .probe_type =3D PROBE_PREFER_ASYNCHRONOUS,
+> -               .of_match_table =3D of_match_ptr(jz4740_mmc_of_match),
+> +               .of_match_table =3D of_match_ptr(jz4740_mmc_of_matches),
+>                 .pm =3D pm_ptr(&jz4740_mmc_pm_ops),
+>         },
+>  };
 > --
-> 2.30.2
+> 2.7.4
 >
