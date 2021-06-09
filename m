@@ -2,35 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,USER_AGENT_SANE_1
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A2F5C48BD1
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 15:30:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF5D7C48BCD
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 20:54:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 53FCC613C5
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 15:30:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C5532613C7
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 20:54:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232507AbhFIPcR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Jun 2021 11:32:17 -0400
-Received: from alexa-out.qualcomm.com ([129.46.98.28]:4608 "EHLO
-        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232656AbhFIPcO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2021 11:32:14 -0400
-Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
-  by alexa-out.qualcomm.com with ESMTP; 09 Jun 2021 08:30:20 -0700
-X-QCInternal: smtphost
-Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
-  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 09 Jun 2021 08:30:17 -0700
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg01-blr.qualcomm.com with ESMTP; 09 Jun 2021 20:59:24 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id A42384DDE; Wed,  9 Jun 2021 20:59:23 +0530 (IST)
-From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org
+        id S229638AbhFIU4c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Jun 2021 16:56:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39514 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229527AbhFIU4b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2021 16:56:31 -0400
+X-Greylist: delayed 524 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 09 Jun 2021 13:54:36 PDT
+Received: from relay06.th.seeweb.it (relay06.th.seeweb.it [IPv6:2001:4b7a:2000:18::167])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA554C061574
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Jun 2021 13:54:36 -0700 (PDT)
+Received: from [192.168.1.101] (83.6.168.161.neoplus.adsl.tpnet.pl [83.6.168.161])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by m-r2.th.seeweb.it (Postfix) with ESMTPSA id BAA023EBC3;
+        Wed,  9 Jun 2021 22:45:44 +0200 (CEST)
+Subject: Re: [PATCH V3] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
+ card
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
+        adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org
 Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
         vbadigan@codeaurora.org, rampraka@codeaurora.org,
         sayalil@codeaurora.org, sartgarg@codeaurora.org,
@@ -40,36 +42,166 @@ Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
         nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
         devicetree@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Subject: [PATCH V1 2/2] dt-bindings: mmc: sdhci-msm: Add compatible string for sc7280
-Date:   Wed,  9 Jun 2021 20:59:09 +0530
-Message-Id: <1623252549-32687-1-git-send-email-sbhanu@codeaurora.org>
-X-Mailer: git-send-email 2.7.4
+        bjorn.andersson@linaro.org
+References: <1623252028-20467-1-git-send-email-sbhanu@codeaurora.org>
+From:   Konrad Dybcio <konrad.dybcio@somainline.org>
+Message-ID: <793c9596-73f3-42b2-291e-1c728e279e28@somainline.org>
+Date:   Wed, 9 Jun 2021 22:45:43 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
+MIME-Version: 1.0
+In-Reply-To: <1623252028-20467-1-git-send-email-sbhanu@codeaurora.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add sc7280 SoC specific compatible strings for qcom-sdhci controller.
+Hi,
 
-Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
----
- Documentation/devicetree/bindings/mmc/sdhci-msm.txt | 1 +
- 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-index 4c7fa6a..365c3fc 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.txt
-@@ -19,6 +19,7 @@ Required properties:
- 		"qcom,msm8996-sdhci", "qcom,sdhci-msm-v4"
- 		"qcom,qcs404-sdhci", "qcom,sdhci-msm-v5"
- 		"qcom,sc7180-sdhci", "qcom,sdhci-msm-v5";
-+		"qcom,sc7280-sdhci", "qcom,sdhci-msm-v5";
- 		"qcom,sdm845-sdhci", "qcom,sdhci-msm-v5"
- 		"qcom,sdx55-sdhci", "qcom,sdhci-msm-v5";
- 		"qcom,sm8250-sdhci", "qcom,sdhci-msm-v5"
--- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
+> diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+> index 3900cfc..8b159d1 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+> +++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
+> @@ -11,6 +11,7 @@
+>  #include <dt-bindings/iio/qcom,spmi-adc7-pmr735b.h>
+>  #include <dt-bindings/iio/qcom,spmi-adc7-pm8350.h>
+>  #include <dt-bindings/iio/qcom,spmi-adc7-pmk8350.h>
+> +#include <dt-bindings/gpio/gpio.h>
+>  #include "sc7280.dtsi"
+>  #include "pm7325.dtsi"
+>  #include "pmr735a.dtsi"
+> @@ -272,6 +273,36 @@
+>  	status = "okay";
+>  };
+>  
+> +&sdhc_1 {
+> +	status = "okay";
+> +
+> +	pinctrl-names = "default", "sleep";
+> +	pinctrl-0 = <&sdc1_clk &sdc1_cmd &sdc1_data &sdc1_rclk>;
+> +	pinctrl-1 = <&sdc1_clk_sleep &sdc1_cmd_sleep &sdc1_data_sleep &sdc1_rclk_sleep>;
+
+Please condense these pins into a since sdc1_on_state/sdc1_off_state (check sdc1_state_on in [1])
+
+
+
+> +
+> +	non-removable;
+> +	no-sd;
+> +	no-sdio;
+> +
+> +	vmmc-supply = <&vreg_l7b_2p9>;
+> +	vqmmc-supply = <&vreg_l19b_1p8>;
+> +
+> +};
+> +
+> +&sdhc_2 {
+> +	status = "okay";
+> +
+> +	pinctrl-names = "default", "sleep";
+> +	pinctrl-0 = <&sdc2_clk &sdc2_cmd &sdc2_data &sd_cd>;
+> +	pinctrl-1 = <&sdc2_clk_sleep &sdc2_cmd_sleep &sdc2_data_sleep>;
+
+Ditto
+
+
+
+> +&tlmm {
+> +	sdc1_clk: sdc1-clk {
+> +		pins = "sdc1_clk";
+> +		bias-disable;
+> +		drive-strength = <16>;
+> +	};
+> +
+> +	sdc1_cmd: sdc1-cmd {
+> +		pins = "sdc1_cmd";
+> +		bias-pull-up;
+> +		drive-strength = <10>;
+> +	};
+> +
+> +	sdc1_data: sdc1-data {
+> +		pins = "sdc1_data";
+> +		bias-pull-up;
+> +		drive-strength = <10>;
+> +	};
+> +	sdc1_rclk: sdc1-rclk {
+> +		pins = "sdc1_rclk";
+> +		bias-pull-down;
+> +	};
+> +
+> +	sdc2_clk: sdc2-clk {
+> +		pins = "sdc2_clk";
+> +		bias-disable;
+> +		drive-strength = <16>;
+> +	};
+> +
+> +	sdc2_cmd: sdc2-cmd {
+> +		pins = "sdc2_cmd";
+> +		bias-pull-up;
+> +		drive-strength = <10>;
+> +	};
+> +
+> +	sdc2_data: sdc2-data {
+> +		pins = "sdc2_data";
+> +		bias-pull-up;
+> +		drive-strength = <10>;
+> +	};
+> +
+> +	sd_cd: sd-cd {
+
+Please make it sdc2 to keep things coherent.
+
+
+
+> +		pins = "gpio91";
+> +		bias-pull-up;
+> +	};
+> +
+> +};
+
+Why are you defining on_state pins in the device dt and sleep state in the SoC one?
+
+Most devices share a common config for these, often coming from MTP or QRD boards
+
+and it makes little to no sense to define these separately every time, because if you hit the
+
+rare case of needing to make a change against that, it's probably just drive-strength.
+
+
+
+> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+> index 0b6f119..eab6f7b 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+> @@ -24,6 +24,11 @@
+>  
+>  	chosen { };
+>  
+> +	aliases {
+> +		mmc1 = &sdhc_1;
+> +		mmc2 = &sdhc_2;
+> +	};
+
+This is board specific. Something might have a SDIO Wi-Fi card on it.
+
+
+
+> +			mmc-ddr-1_8v;
+> +			mmc-hs200-1_8v;
+> +			mmc-hs400-1_8v;
+> +			mmc-hs400-enhanced-strobe;
+
+These properties should probably be in the device DT, unless the SoC controller
+
+can only support these speeds and only at 1.8v
+
+
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/qcom/linux.git/commit/?h=for-next&id=35a4a8b6e9b133cf3a7d059ad4cf0e24cb4bd029
+
+
+Konrad
 
