@@ -2,142 +2,203 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEEE1C48BCF
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 11:31:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CFC8DC48BCF
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 13:08:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A528761364
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 11:31:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B5EFD6139A
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Jun 2021 13:08:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234611AbhFILdi convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Jun 2021 07:33:38 -0400
-Received: from de-smtp-delivery-105.mimecast.com ([194.104.111.105]:25757 "EHLO
-        de-smtp-delivery-105.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234243AbhFILdh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2021 07:33:37 -0400
-Received: from GBR01-LO2-obe.outbound.protection.outlook.com
- (mail-lo2gbr01lp2053.outbound.protection.outlook.com [104.47.21.53]) (Using
- TLS) by relay.mimecast.com with ESMTP id
- de-mta-12-tCTfXPlNPPOsvIjlie_uXw-1; Wed, 09 Jun 2021 13:31:40 +0200
-X-MC-Unique: tCTfXPlNPPOsvIjlie_uXw-1
-Received: from LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM (2603:10a6:600:143::6)
- by LO2P265MB2576.GBRP265.PROD.OUTLOOK.COM (2603:10a6:600:13d::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4195.24; Wed, 9 Jun
- 2021 11:31:39 +0000
-Received: from LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM
- ([fe80::4c99:397e:488f:4c60]) by LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM
- ([fe80::4c99:397e:488f:4c60%7]) with mapi id 15.20.4195.030; Wed, 9 Jun 2021
- 11:31:39 +0000
-From:   =?Windows-1252?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Avri Altman <Avri.Altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: block: ioctl: Poll for TRAN if possible
-Thread-Topic: [PATCH] mmc: block: ioctl: Poll for TRAN if possible
-Thread-Index: AQHXXSMDiXAg1fej0U+LBOvD9D6/9Q==
-Date:   Wed, 9 Jun 2021 11:31:39 +0000
-Message-ID: <LO2P265MB26880B222999818677722528C4369@LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM>
-Accept-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [185.80.168.10]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: c7a4fc51-2b96-4015-a474-08d92b3a2636
-x-ms-traffictypediagnostic: LO2P265MB2576:
-x-microsoft-antispam-prvs: <LO2P265MB2576E323839B235D58569814C4369@LO2P265MB2576.GBRP265.PROD.OUTLOOK.COM>
-x-ms-oob-tlc-oobclassifiers: OLM:10000
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0
-x-microsoft-antispam-message-info: 3KtiNIlB99AvE4kMKPZfL2ACnBzKKDbce843UMHbtXZbb+Vqw+eGFlQcnuWWKsMaBiyYzUP1mnkC4w/n6kU3C49xKscuWprzYpyjGfJaRIZQtPqYSYlAOf9dyATTsd4gRFVQSgJpd0Ky8a3yRRBA51guaEMBmOZad9khhm12u/ITBC6W0mL3n04z2HwE+CIZmqEOwzZgmqhesaFLiIaWYf9ocAer++yUcwU1a2jGhcuI6OL1Ttx2/A58WlrPTiAZeuYYD+h9G6+v39KLu6sBZb3gKn+FCBd0kxqUFz3ibQP/oTMu+VSxZhlCFQZ2PG4xEQtMEey6+/fO/4lulkBlQ9PEduX6NfVkE9L/ahZOC/fO3GTWrRvzQa07wpnPhCZn+ArwxIsGxcAeOXnvmwOpID08eIRO7BEu1q+d4R0fIkTB8Wa6wXNsWSCSQLVvSsPauwydlbrDzduMolFEOajh2UoqM4K1JkLK5AyEtvRC9RAqeEUJXku9Fn+z4DBNLFM0tY0ct3tL2Eiad2YibSyldAUXANZoFFtr+anx97CTJw8vEnePc3JkseBMjPgBYzn7dRYnLB3NwDpQxoQa2LctW8ahw5hOhqv9X15uMKOCTLY=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(346002)(396003)(39840400004)(376002)(136003)(366004)(66946007)(478600001)(86362001)(76116006)(2906002)(7696005)(71200400001)(122000001)(186003)(66446008)(64756008)(91956017)(316002)(110136005)(5660300002)(26005)(33656002)(66476007)(9686003)(8936002)(8676002)(52536014)(38100700002)(66556008)(55016002)(6506007);DIR:OUT;SFP:1101
-x-ms-exchange-antispam-messagedata: =?Windows-1252?Q?DhPZdkG0rEZhjzSYZLq7pZhQQJXPB0HjMVkLAxxuYF9LDBdA6ijq6/BQ?=
- =?Windows-1252?Q?xSYeHp5VcAMXpGMzLjLwmRKLAB3L42gRk4d7xHhLEK+2vOPKVC7ZmAQQ?=
- =?Windows-1252?Q?pnL64/XIGi/UnAahQ7W0Aw4TfbGcYNvI0bSu2jl1WDbcZNrvYzmAM22x?=
- =?Windows-1252?Q?FczOMtI2Rle0liW4fdEnFqz56dYq1UtjrSx73SJ3A55BoiOLvJofYmKJ?=
- =?Windows-1252?Q?rpM9CfTIKAuOxg+CJsvPgb1prkRrFEUwPfKrTRjj+3bBonylKzmfxme7?=
- =?Windows-1252?Q?Ah3jKe4Mxhq+9Yp8lea7RRVkB/iqZPeXcMRQ8p/fNpUXg6bR+dO6iR2p?=
- =?Windows-1252?Q?wy2nWMebf9j11A5FvYerYpBPYwFggmylgYLebwwBdlTTAMyzHB//JGJL?=
- =?Windows-1252?Q?UZIbld7FnfcrnEgk8HXMCLIEl1j20KaaWkK1GYubawWxQcXt7pRViHCb?=
- =?Windows-1252?Q?NOdibhquNlBcCNdFysZ7OiaxrVe+eWHkkEu1Cek+rxG77hFJwCzvUYtA?=
- =?Windows-1252?Q?dQ4ch4dcvTplk7YAKXzD0mj3GsTfyEfKA2dNj61a3NVpGnPDA4d9+Tme?=
- =?Windows-1252?Q?bQBdehOhUMnQJfoqaTytw/tpR3d5opNsLlxUG/NDweapHFd9A6nZ/TAr?=
- =?Windows-1252?Q?LyiCSVF7qLYaTRXNqWBxwQRBNV4ZyJW7kTL6NdbjRW4Rl8mNi8wLv8R8?=
- =?Windows-1252?Q?m55PWQmfEOjKHgapHyUbO0OgCCr/HXKPpHZhNMHqerCMI3hpA7QqBVOx?=
- =?Windows-1252?Q?IEj1cdIRNokciuGNz6ayhbZ2kZOkqmOlVCYzjtxmFVAMajQKh5OPo/rZ?=
- =?Windows-1252?Q?BUvvNWBWLXfXnCcK9iKM/PHxO8VypNZh6TvSyrXUMd/MP23BjuNllvc/?=
- =?Windows-1252?Q?ZE3iLSQszpWUZDH2CPtrlk01s4lvfjpEl/UVb07NHPM/fGSnWtIcQrIE?=
- =?Windows-1252?Q?JksEL6WLXRM01R3RBGiqRHC6V/zlhCC4SM5GCVQZEk1CqFLAKxvbUei6?=
- =?Windows-1252?Q?RnsZCLTCCCd1NOUY0cGzDkefms4OJF7coUkydbt9xiuqfZKyVCxPLisA?=
- =?Windows-1252?Q?UZb4/k4s6tlthP56v633/97gn/mRQ2G/nW1wxkgFYFpeBCWxRnbRK5Ex?=
- =?Windows-1252?Q?+WlkqIaUIoXJ70USkS5EWZpZ0jXohNZ8BQIAgRdBSwx0wl+lPwZwIArK?=
- =?Windows-1252?Q?KN18AyXV9x7uI9LiiuBDio8r+tsu/oixcFcoS9P8pVHvQGZM77yVtNjM?=
- =?Windows-1252?Q?+Q9bTf+vk5Uk6PXfLXBt9eXAYzREgP1lUx4G4ANxIct2LRGa9LeayicV?=
- =?Windows-1252?Q?PICZJiNQMKF83ou7ROQLLOVYXg0Fz7QtWjOqeC7ZwHUXzdfPSFrheLbh?=
- =?Windows-1252?Q?xLtxI36LwouQrCx2paiGjrURlgOu//ywANg=3D?=
-x-ms-exchange-transport-forked: True
+        id S231536AbhFINKB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Jun 2021 09:10:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48722 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230261AbhFINKA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Jun 2021 09:10:00 -0400
+Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E770C061574
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Jun 2021 06:07:58 -0700 (PDT)
+Received: by mail-wr1-x432.google.com with SMTP id y7so20776844wrh.7
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Jun 2021 06:07:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20150623.gappssmtp.com; s=20150623;
+        h=subject:to:cc:references:from:organization:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=kEJI7UvKz+ACKbMHESfgG5FvPLQQKWlKNyAxgiMp+mE=;
+        b=dAKRH9HkKHdZdIBpdDI+4WBmuXPHtENaNb3y2Z1eb82lIpZwJgEwsmru32SRmv5Qof
+         yCFdYzVIC5oeY0iOdRfh4A7nCNuVRIltVb8eHnDuJ2mJfcDb+26G0KsOK1+mm/Zd301T
+         8B9c1zwR7JKbbaEr7OZwxfTOKlGvGLLmFcj9yBxnPFJc1wETQbw7ksssupVKwVhf/4KP
+         G9rRq5NEq4SNjXA/Mnlw7qJmSyxg/ZLfEu3YDSGITTUzrYV+jPgWdEnNd4im0mOpfPwz
+         /On9gcLgBx0voRGMSnzTKA9nrHoGh42VGhCtkes7tL8t3xqzX/frcJ82BJpwxbmbUCsG
+         jIAg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:organization
+         :message-id:date:user-agent:mime-version:in-reply-to
+         :content-language:content-transfer-encoding;
+        bh=kEJI7UvKz+ACKbMHESfgG5FvPLQQKWlKNyAxgiMp+mE=;
+        b=C0DICf+ezzuLi7aN7StzEDdE1ew+inlu3bMCJb247ndLe5x6lAUiKrUXP7gA2bvQqq
+         MvoqjUyx/aGoYNj3zA4Y+BZ4QnBqwvCyOCmY8/wcdCxClqAKyAaWsvJlUKAj2se4BZuV
+         b8URuSJ8iJ5zsO2+Y6wiQhjYteCM0IdmYfTC20Y1qEHluuRhmaNmHWuTYfzirlLAWZim
+         JcVnRTAtBFfX/z43wkYX8g7mb3eE5B3w0IMnPpAcvVNguDRcjodWeSR3/rngiNQog2hl
+         2SiCN3LIx4HBwRXfnge6pnAI3hIQn61GvgyNAEKNYX1i0057JE5rhAex5How6EFFMEMF
+         Ye5g==
+X-Gm-Message-State: AOAM530eKqX4FAxbZMP0oRYH77jdIQFwiw0Lt+O5vL40WsSenwdgeEPn
+        qAXpuohFd6LVWSjtGVa0Hjwjhg==
+X-Google-Smtp-Source: ABdhPJyEzA2Ttg+fe3SSs/W6tnxSyhgY4k+sIdj5FY05CPkcMvpVPQXJGhWZKXhJKz8WYw3MOYSMig==
+X-Received: by 2002:adf:ec02:: with SMTP id x2mr24425435wrn.156.1623244076710;
+        Wed, 09 Jun 2021 06:07:56 -0700 (PDT)
+Received: from ?IPv6:2a01:e0a:90c:e290:f5b2:1a3b:b4d:517c? ([2a01:e0a:90c:e290:f5b2:1a3b:b4d:517c])
+        by smtp.gmail.com with ESMTPSA id b15sm22391505wru.64.2021.06.09.06.07.55
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 09 Jun 2021 06:07:56 -0700 (PDT)
+Subject: Re: [RFC] mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk
+To:     Marek Szyprowski <m.szyprowski@samsung.com>, ulf.hansson@linaro.org
+Cc:     khilman@baylibre.com, jbrunet@baylibre.com,
+        martin.blumenstingl@googlemail.com, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Mark Rutland <mark.rutland@arm.com>,
+        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+References: <CGME20210608153357eucas1p24cbc7a2ddb00beada8cdd51ae2337c53@eucas1p2.samsung.com>
+ <20210608153344.3813661-1-narmstrong@baylibre.com>
+ <e9f057f6-324e-0637-b57a-cc2f87e0d108@samsung.com>
+From:   Neil Armstrong <narmstrong@baylibre.com>
+Organization: Baylibre
+Message-ID: <ebb1421c-e55c-eee3-ea42-09ae051659d4@baylibre.com>
+Date:   Wed, 9 Jun 2021 15:07:54 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-X-OriginatorOrg: hyperstone.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: c7a4fc51-2b96-4015-a474-08d92b3a2636
-X-MS-Exchange-CrossTenant-originalarrivaltime: 09 Jun 2021 11:31:39.7444
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: aSHQl+QK5kZEfVsmbDcvu6iMlTdjz9cWy6wTqP78MyGX7vDpZuGlLE2f7oCmODNPINOnOvkIdDoPOzUYwvmINA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: LO2P265MB2576
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
-X-Mimecast-Spam-Score: 1
-X-Mimecast-Originator: hyperstone.com
+In-Reply-To: <e9f057f6-324e-0637-b57a-cc2f87e0d108@samsung.com>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
->> +        */
->> +       return !(cmd->opcode == MMC_SEND_CID
->> +                       || cmd->opcode == MMC_ALL_SEND_CID
->> +                       || cmd->opcode == MMC_SEND_CSD
->> +                       || cmd->opcode == MMC_SEND_STATUS
->> +                       || cmd->opcode == MMC_SELECT_CARD
->> +                       || cmd->opcode == MMC_APP_CMD
->> +                       || cmd->opcode == MMC_GO_INACTIVE_STATE
->> +                       || cmd->opcode == MMC_GO_IDLE_STATE);
+Hi,
+
+On 08/06/2021 17:50, Marek Szyprowski wrote:
+> Hi
+> 
+> On 08.06.2021 17:33, Neil Armstrong wrote:
+>> It has been reported that usage of memcpy() to/from an iomem mapping is invalid,
+>> and and recent arm64 memcpy update [1] triggers a memory abort when dram-access-quirk
+>> is used on the G12A/G12B platforms.
+>>
+>> This adds a local sg_copy_to_buffer which makes usage of io versions of memcpy
+>> when dram-access-quirk is enabled.
+>>
+>> Fixes: acdc8e71d9bb ("mmc: meson-gx: add dram-access-quirk")
+>> Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
+>> Suggested-by: Mark Rutland <mark.rutland@arm.com>
+>> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+>>
+>> [1] 285133040e6c ("arm64: Import latest memcpy()/memmove() implementation")
+>>
+>> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+>> ---
+>> Hi Ulf, Marek, Mark,
+>>
+>> I haven't tested the patch yet, but should fix issue reported at [2].
+> 
+> Works fine here and fixed the issue.
+> 
+> Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
+
+Thanks, I'll need to rework to pass an __iomem pointer to memcpy_to/fromio so sparse doesn't scream anymore.
+
+Neil
+
+> 
+>> Neil
+>>
+>> [2] https://lore.kernel.org/r/acb244ad-0759-5a96-c659-5c23003d3dcd@samsung.com
+>>
+>>   drivers/mmc/host/meson-gx-mmc.c | 48 ++++++++++++++++++++++++++++++---
+>>   1 file changed, 44 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+>> index b8b771b643cc..89ff6038092d 100644
+>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>> @@ -742,6 +742,48 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
+>>   	writel(start, host->regs + SD_EMMC_START);
+>>   }
+>>   
+>> +/* local sg copy to buffer version with _to/fromio usage for dram_access_quirk */
+>> +static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data,
+>> +				  size_t buflen, bool to_buffer)
+>> +{
+>> +	unsigned int sg_flags = SG_MITER_ATOMIC;
+>> +	struct scatterlist *sgl = data->sg;
+>> +	unsigned int nents = data->sg_len;
+>> +	struct sg_mapping_iter miter;
+>> +	void *buf = host->bounce_buf;
+>> +	unsigned int offset = 0;
 >> +
->Aren’t you only interested in cmds that move to tran state from other state?
->According to the Device state transitions (table 61 in eMMC5.1) it only concern
->cmd7 (stby->tran), cmd12 (data->tran), and cmd14 (btst->tran).
->
->Thanks,
->Avri
-
-No, I'd poll for any command where this is possible, so I only exclude the
-ones not ending up in TRAN.
-The TRAN->RCV->PRG->TRAN commands are the ones that need polling
-to be race condition free.
-Technically CMD16, 23  and so on (TRAN->TRAN directly) don't need the
-CMD13 polling but it does not hurt either, especially because the cmd->opcode
-itself overlaps for general and sd commands.
-Tracking whether CMD55 was the last command would have been awkward and
-CMD13 polling wherever possible seems the more sane option.
-If adding a flag to disable any inter-CMD13 polling of none-R1b commands is
-desired, I can add that, but I did not see a good reason for that right now.
-
-Regards,
-Christian
-Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
-Managing Directors: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+>> +	if (to_buffer)
+>> +		sg_flags |= SG_MITER_FROM_SG;
+>> +	else
+>> +		sg_flags |= SG_MITER_TO_SG;
+>> +
+>> +	sg_miter_start(&miter, sgl, nents, sg_flags);
+>> +
+>> +	while ((offset < buflen) && sg_miter_next(&miter)) {
+>> +		unsigned int len;
+>> +
+>> +		len = min(miter.length, buflen - offset);
+>> +
+>> +		/* When dram_access_quirk, the bounce buffer is a iomem mapping */
+>> +		if (host->dram_access_quirk) {
+>> +			if (to_buffer)
+>> +				memcpy_toio(buf + offset, miter.addr, len);
+>> +			else
+>> +				memcpy_fromio(miter.addr, buf + offset, len);
+>> +		} else {
+>> +			if (to_buffer)
+>> +				memcpy(buf + offset, miter.addr, len);
+>> +			else
+>> +				memcpy(miter.addr, buf + offset, len);
+>> +		}
+>> +
+>> +		offset += len;
+>> +	}
+>> +
+>> +	sg_miter_stop(&miter);
+>> +}
+>> +
+>>   static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>>   {
+>>   	struct meson_host *host = mmc_priv(mmc);
+>> @@ -785,8 +827,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
+>>   		if (data->flags & MMC_DATA_WRITE) {
+>>   			cmd_cfg |= CMD_CFG_DATA_WR;
+>>   			WARN_ON(xfer_bytes > host->bounce_buf_size);
+>> -			sg_copy_to_buffer(data->sg, data->sg_len,
+>> -					  host->bounce_buf, xfer_bytes);
+>> +			meson_mmc_copy_buffer(host, data, xfer_bytes, true);
+>>   			dma_wmb();
+>>   		}
+>>   
+>> @@ -955,8 +996,7 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
+>>   	if (meson_mmc_bounce_buf_read(data)) {
+>>   		xfer_bytes = data->blksz * data->blocks;
+>>   		WARN_ON(xfer_bytes > host->bounce_buf_size);
+>> -		sg_copy_from_buffer(data->sg, data->sg_len,
+>> -				    host->bounce_buf, xfer_bytes);
+>> +		meson_mmc_copy_buffer(host, data, xfer_bytes, false);
+>>   	}
+>>   
+>>   	next_cmd = meson_mmc_get_next_command(cmd);
+> 
+> Best regards
+> 
 
