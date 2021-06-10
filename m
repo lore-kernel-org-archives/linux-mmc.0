@@ -2,148 +2,191 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-4.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8840AC47094
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Jun 2021 14:48:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F070C48BDF
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Jun 2021 15:59:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 700DB613E3
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Jun 2021 14:48:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 11474613F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Jun 2021 15:59:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231366AbhFJOuR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Jun 2021 10:50:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50010 "EHLO
+        id S230345AbhFJQB1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Jun 2021 12:01:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37564 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230298AbhFJOuP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2021 10:50:15 -0400
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8568C061574;
-        Thu, 10 Jun 2021 07:48:06 -0700 (PDT)
-Received: by mail-wm1-x329.google.com with SMTP id l18-20020a1ced120000b029014c1adff1edso6727390wmh.4;
-        Thu, 10 Jun 2021 07:48:06 -0700 (PDT)
+        with ESMTP id S230247AbhFJQB1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Jun 2021 12:01:27 -0400
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4096DC061574;
+        Thu, 10 Jun 2021 08:59:18 -0700 (PDT)
+Received: by mail-pg1-x52f.google.com with SMTP id l184so119957pgd.8;
+        Thu, 10 Jun 2021 08:59:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=D/ihjXO4RqE7jX7suSjDihZYCxFd3H0ms2fk8B+1vrY=;
-        b=r9aCM9AHb8JpMAdzpnuIG/pJhJkaOVrMX09Mz+tP7L5ahdd51MuGMJBZ7ltUxxNN32
-         kkmrAarwMbcwPlLQMDF9/+2/d5CudUoTqWLfobzSqEKEWITkDQnUpgq6I/bPmWAiUJxF
-         cHQwkZn6oYYYyENrQuX3xtQMLeMRhIILcyapldrzkApmrwTTJRRxb/EZb0WKv1+agi6y
-         Kzuv8ntPYyRGyNFesU+HYqB1cbFErbX13tEXxUOfRnSOGMF8DZPz2nGrIySRF86guCaj
-         eMy1FFOTD/L3mGHT/9usARui+NqlbvMZ1+TRBwO3liFoiUBXvwFwUUuNSvSQjo4+w/qT
-         NlGQ==
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=gEOhLn04ufSH/EYWeHJiDResBxu7Zjy3LEUOA404M9M=;
+        b=MvNErbbuJgsYARWhegkk6WNOEMgQbvVcbR6iy+mrAf8t7qZEQVAxp85okAny4keJwX
+         ktOiDfhx4YSPeOjaSjn/FAnDn1o1k0B1UQP3Pmrgpo6e9oiLdScB6ih72n/LORqPLHTx
+         2VUoOZ01+qKFp/xpD7TNsWYLe9AQEWeB7x1mZurgDS0W90mzURpQcKdKnd5lc7XTjStO
+         Y1TRsa3iOSUUbArQiTztEZzJ2UUUuih/Q2gM5x0OVoL9iH8CKLa2xlxm8qr0AgsOuW9B
+         K0DFR3SSjqIVPPZ7TDp8Ok8JzMstH0xwBLoUeElcE+B7PNX1GB4APwxDOjjLyKrdtljF
+         44xA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=D/ihjXO4RqE7jX7suSjDihZYCxFd3H0ms2fk8B+1vrY=;
-        b=X44iHVIQK7wE2KNKA0QP6/p/W8fm1BnOq5P/b3XU/jyFkELBppEKdi1hIof/w4qwCG
-         NPi90siFfZMM9Bd38cTzXjnCvsDoVYBlhu39T+h3yA996l2s6y/zm+KQBjsln/BqLGdQ
-         PkMmmWL0JROldglHXmIGlpYP02xDjUFJFf47W0/gc7PHtY01brNGECLUiTZMQb7UxVr8
-         LRDH4xrnt6tI20EDHI0kHk7b+Waq00lSJ6ynC7jHuIIK+8/Tsg/lY20qOSn/TS7WZL7H
-         7hTb+WWV+/+GaZiNKob2uWWqK1mgDwvGvCbk7/h+ZDwUHactIctsETEcMV027PBnxL/7
-         REYA==
-X-Gm-Message-State: AOAM532O3ZdFfwk6IoxvHAmr9GpenRyu8bzLdblzCVwR5Np7g2FXcbEk
-        xmoC9GlNxlMQafFQSdnzQIu9I6I6kgQ+1IUyz7I=
-X-Google-Smtp-Source: ABdhPJxs+Nw9AecB4n5d4NRAI3Sze1CREk1iqKnLbtL7oryF5BI7b2gh+Dmm/XxLsQJnB6KluTS30+Rjsn/w3RtRtPA=
-X-Received: by 2002:a05:600c:1c84:: with SMTP id k4mr15648966wms.164.1623336485064;
- Thu, 10 Jun 2021 07:48:05 -0700 (PDT)
-MIME-Version: 1.0
-References: <d60373362ed41b49f763cdb46c9973e2@codeaurora.com>
-In-Reply-To: <d60373362ed41b49f763cdb46c9973e2@codeaurora.com>
-From:   Rob Clark <robdclark@gmail.com>
-Date:   Thu, 10 Jun 2021 07:51:58 -0700
-Message-ID: <CAF6AEGui16Q9uDrkXNuDsi0Do-ZNDJa9aQGWhqG_tjV7O2DReg@mail.gmail.com>
-Subject: Re: Re : Query on UFS Lun detection
-To:     vhiren@codeaurora.com
-Cc:     Bjorn Andersson <bjorn.andersson@linaro.org>,
-        adrian.hunter@intel.com, Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Asutosh Das <asutoshd@codeaurora.org>, stummala@codeaurora.org,
-        sayalil@codeaurora.org, rampraka@codeaurora.org,
-        vbadigan@codeaurora.org, Stephen Boyd <sboyd@kernel.org>,
-        Georgi Djakov <georgi.djakov@linaro.org>,
-        Matthias Kaehlcke <mka@chromium.org>,
-        linux-mmc@vger.kernel.org,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=gEOhLn04ufSH/EYWeHJiDResBxu7Zjy3LEUOA404M9M=;
+        b=TNTkHt1N4yGdcNzVp26dIw6GlZs1UqX0iCA9APBeSK/P30n9o8z1+ZRRjDoU2lgkhf
+         6SIOViogWuiVTuk/Qj+o+fDl/Qp7X7ldPJ19HVDos8GyfrGVhCQgW1VDrVpVRoors1u+
+         6B/gnNXXaVlh97pSAYBorIqFFRXHXP8L/CWWqMWe0/8dx5m8JdusnWeLsarYmIJFgd8W
+         QubgUKegnCk2vsYvkx1HaAnX4p5T5KZLa8CBzQeg7bSU30h3j1Fj7/iFT5JGQLfTKBbm
+         INZjcDQ2ygtLVWg5CE/xgG3nC4f+As/Wx1xHWes2p3APkN11k+MOG4K0IDHUZzHSniyN
+         tgoA==
+X-Gm-Message-State: AOAM531DO0/FRlmzcoDacCGPZKaIDHpnbrBTlPeGFygqtMkXWxCBMyMB
+        LjziUGkX386yMTADVX8C6xQ=
+X-Google-Smtp-Source: ABdhPJx9vmsDtDTL4nbg98zKMRj7QHMyQ/zFV0vq4rlqsoMu8CSPycYkvg5HeWMzsT0A8Xewb8Gt3A==
+X-Received: by 2002:a63:ff1f:: with SMTP id k31mr5482804pgi.315.1623340757631;
+        Thu, 10 Jun 2021 08:59:17 -0700 (PDT)
+Received: from [10.230.29.202] ([192.19.223.252])
+        by smtp.gmail.com with ESMTPSA id p20sm2708534pff.204.2021.06.10.08.59.10
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 10 Jun 2021 08:59:17 -0700 (PDT)
+Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: Add support for the legacy sdhci
+ controller on the BCM7211
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Linux PM <linux-pm@vger.kernel.org>
+Cc:     Al Cooper <alcooperx@gmail.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>, Andy Gross <agross@kernel.org>,
-        linux-mmc-owner@vger.kernel.org, nitirawa@codeaurora.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Adrian Hunter <adrian.hunter@intel.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Ray Jui <rjui@broadcom.com>, Rob Herring <robh+dt@kernel.org>,
+        Scott Branden <sbranden@broadcom.com>
+References: <20210602192758.38735-1-alcooperx@gmail.com>
+ <20210602192758.38735-2-alcooperx@gmail.com>
+ <CAPDyKFrynST66yA_T3iroiJsfmNuBOEiiBnb=vNoyP6QpvZ7aQ@mail.gmail.com>
+ <fe956941-bb39-413e-f051-d9f353f64eda@gmail.com>
+ <CAPDyKFpEtvjS1mWC68gRBWD64dq2M1LO84UWE5uDLTzbGz1g8Q@mail.gmail.com>
+ <6acd480a-8928-89bb-0f40-d278294973a1@gmail.com>
+ <CAPDyKFqk23xg5R2k9GwQrnamwWYbMkmrbWYsHPF9VBQTAbvQHw@mail.gmail.com>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+Message-ID: <a1199e99-eb29-125b-2bac-f0abb4803c9b@gmail.com>
+Date:   Thu, 10 Jun 2021 08:59:07 -0700
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.10.2
+MIME-Version: 1.0
+In-Reply-To: <CAPDyKFqk23xg5R2k9GwQrnamwWYbMkmrbWYsHPF9VBQTAbvQHw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jun 10, 2021 at 6:28 AM <vhiren@codeaurora.com> wrote:
->
-> Hi Community,
->
-> We are using UFS as a boot device, and we encountered an error,
-> mentioned below while booting through UFS.
->
->
-> APPS Crash - Kernel panic - not syncing: VFS: Unable to mount root fs on
-> unknown-block(8,7)
->
-> Here in Kernel command line we are passing "root=3Dsda7", this is our
-> Filesystem partition to be mounted.
->
-> While debugging the same we observed the partition which is suppose to
-> be mounted as Filesystem is not enumerated  itself.
-> The reason behind not enumerating of partition is, the other Lun got
-> detected first instead of one which is having FS partition.
 
-Use the UUID or PARTUUID instead, ie:
 
-  root=3DUUID=3D13846802-672b-4a5d-9f0a-22d13957add3
+On 6/10/2021 1:49 AM, Ulf Hansson wrote:
+> On Thu, 10 Jun 2021 at 01:59, Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>
+>>
+>>
+>> On 6/9/2021 2:22 AM, Ulf Hansson wrote:
+>>> On Wed, 9 Jun 2021 at 05:07, Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>>>
+>>>>
+>>>>
+>>>> On 6/8/2021 5:40 AM, Ulf Hansson wrote:
+>>>>> On Wed, 2 Jun 2021 at 21:28, Al Cooper <alcooperx@gmail.com> wrote:
+>>>>>>
+>>>>>> Add support for the legacy Arasan sdhci controller on the BCM7211 and
+>>>>>> related SoC's. This includes adding a .shutdown callback to increase
+>>>>>> the power savings during S5.
+>>>>>
+>>>>> Please split this into two separate changes.
+>>>>>
+>>>>> May I also ask about the ->shutdown() callback and in relation to S5.
+>>>>> What makes the ->shutdown callback only being invoked for S5?
+>>>>
+>>>> It is not only called for S5 (entered via poweroff on a prompt) but also
+>>>> during kexec or reboot. The poweroff path is via:
+>>>>
+>>>> kernel_power_off() -> kernel_shutdown_prepare() -> device_shutdown() ->
+>>>> .shutdown()
+>>>>
+>>>> For kexec or reboot we do not really care about power savings since we
+>>>> are about to load a new image anyway, however for S5/poweroff we do care
+>>>> about quiescing the eMMC controller in a way that its clocks and the
+>>>> eMMC device can be put into low power mode since we will stay in that
+>>>> mode for seconds/hours/days until someone presses a button on their
+>>>> remote (or other wake-up sources).
+>>>
+>>> Hmm, I am not sure I understand correctly. At shutdown we don't care
+>>> about wake-up sources from the kernel point of view, instead we treat
+>>> everything as if it will be powered off.
+>>
+>> The same .shutdown() path is used whether you kexec, reboot or poweroff,
+>> but for poweroff we do care about allowing specific wake-up sources
+>> configured as such to wake-up the system at a later time, like GPIOs,
+>> RTC, etc.
+> 
+> That's true, but using the ->shutdown() callbacks in this way would
+> certainly be a new use case.
+> 
+> Most subsystems/drivers don't care about power management in those
+> callbacks, but rather just about managing a graceful shutdown.
+> 
+> It sounds to me like you should have a look at the hibernation
+> path/callbacks instead - or perhaps even the system suspend
+> path/callback. Normally, that's where we care about power management.
 
-(but you'd have to check the actual UUID of your partition with a tool
-like blkid
+The platforms we use do not support hibernation, keep in mind that these
+are embedded SoCs that support the S2 (standby), S3 (mem) and poweroff
+suspend states, hibernation is not something that we can support.
 
-BR,
--R
+> 
+> I have looped in Rafael, to allow him to share his opinion on this.
+> 
+>>
+>>>
+>>> We put devices into low power state at system suspend and potentially
+>>> also during some of the hibernation phases.
+>>>
+>>> Graceful shutdown of the eMMC is also managed by the mmc core.
+>>
+>> AFAICT that calls mmc_blk_shutdown() but that is pretty much it, the
+>> SDHCI platform_driver still needs to do something in order to conserve
+>> power including disabling host->clk, otherwise we would not have done
+>> that for sdhci-brcmstb.c.
+> 
+> That's not entirely correct. When mmc_bus_shutdown() is called for the
+> struct device* that belongs to an eMMC card, two actions are taken.
+> 
+> *) We call mmc_blk_shutdown(), to suspend the block device queue from
+> receiving new I/O requests.
+> **) We call host->bus_ops->shutdown(), which is an eMMC specific
+> callback set to mmc_shutdown(). In this step, we do a graceful
+> shutdown/power-off of the eMMC card.
+> 
+> When it comes to controller specific resources, like clocks and PM
+> domains, for example, those may very well stay turned on. Do deal with
+> these, then yes, you would need to implement the ->shutdown()
+> callback. But as I said above, I am not sure it's the right thing to
+> do.
 
-> We are using async probe, hence we know the detection will happen in
-> async way,
->
->
-> In working case :  it looks like below
->
-> sd 0:0:0:0: sda1 sda2 sda3 sda4 =E2=80=A6..sda8
->
-> sd 0:0:0:1: sdb1 sdb2
-> Here, sd 0:0:0:0 Lun got detected first and enumerated as "sdaN", we
-> have FS partition as "sda7" and so we don=E2=80=99t see above mentioned e=
-rror.
->
->
-> In non working case : it looks like below
->
-> sd 0:0:0:0: sdb1 sdb2 sdb3 sdb4 =E2=80=A6..sdb8
->
-> sd 0:0:0:1: sda1 sda2
-> Here, sd 0:0:0:1 Lun got detected first and enumerated as "sdaN" but we
-> don=E2=80=99t have FS partition in this Lun. Instead FS partition now bec=
-ame
-> "sdb7".
->
->
-> Observation here is, which ever Lun gets detected first it will have
-> "sda" enumeration and so on.
-> However, sdx=E2=80=99s driver scsi/sd.c uses async probe to improve perfo=
-rmance,
-> meaning sdx disks are created in parallel. Whoever calls
-> device_add_disk() first becomes sda, the next become sdb=E2=80=A6.
->
->
-> Is there any way, where we can fix this in the Lun detection part of
-> code?
->
-> Thank You,
-> Regards,
-> Hiren Gohel
+As explained before, we can enter S5 for an indefinite amount of time
+until a wake-up source wakes us up so we must conserve power, even if we
+happen to wake up the next second, we don't know that ahead of time. The
+point of calling sdhci_pltfm_suspend() here is to ensure that host->clk
+is turned off which cuts the eMMC controller digital clock, I forgot how
+much power we save by doing so, but every 10s of mW counts for us.
+-- 
+Florian
