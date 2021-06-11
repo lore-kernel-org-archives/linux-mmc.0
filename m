@@ -2,254 +2,245 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-4.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94C9FC48BD1
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 14:49:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DA0AC48BE0
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 16:56:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 770426124C
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 14:49:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8366B613C3
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 16:56:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231260AbhFKOvs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Jun 2021 10:51:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59094 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231230AbhFKOvr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2021 10:51:47 -0400
-X-Greylist: delayed 1594 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 11 Jun 2021 07:49:49 PDT
-Received: from viti.kaiser.cx (viti.kaiser.cx [IPv6:2a01:238:43fe:e600:cd0c:bd4a:7a3:8e9f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B417C061574
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Jun 2021 07:49:49 -0700 (PDT)
-Received: from dslb-188-096-148-249.188.096.pools.vodafone-ip.de ([188.96.148.249] helo=martin-debian-2.paytec.ch)
-        by viti.kaiser.cx with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <postmaster@kaiser.cx>)
-        id 1lri3n-0003wT-9l; Fri, 11 Jun 2021 16:22:59 +0200
-Received: from martin by martin-debian-2.paytec.ch with local (Exim 4.92)
-        (envelope-from <martin@martin-debian-2.paytec.ch>)
-        id 1lri3m-0005Kt-QR; Fri, 11 Jun 2021 16:22:58 +0200
-Date:   Fri, 11 Jun 2021 16:22:58 +0200
-From:   Martin Kaiser <martin@kaiser.cx>
-To:     Peng Fan <van.freenix@gmail.com>
-Cc:     Thomas Gleixner <tglx@linutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Russell King - ARM Linux <linux@arm.linux.org.uk>,
-        Haibo Chen <haibo.chen@nxp.com>,
+        id S229685AbhFKQ57 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Jun 2021 12:57:59 -0400
+Received: from mail-pg1-f170.google.com ([209.85.215.170]:34749 "EHLO
+        mail-pg1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229548AbhFKQ57 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2021 12:57:59 -0400
+Received: by mail-pg1-f170.google.com with SMTP id l1so2967004pgm.1;
+        Fri, 11 Jun 2021 09:55:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=eOlkoTfGj5WVDhRnQCIRockeDZbW6gvXOn1hNr+Rd2g=;
+        b=j+W9JDxX+UOqQOy1Rik3ezLT5/EwreVn5+ywE686P15vhF/BffKXoXFbwZiDEmcDJi
+         sOY61C+BiW2e1xKMbHa4JcY2ItvGJ01q6u379JhYfarZuKrvCzZURJrG6Zkq9o30uy4i
+         waP2xGRgt7ClLlo1ejFAsX/DEC+rIV8FZ8OKAcAk3VO4yk9iWotdOQ0nYcR67rLB1hkX
+         zBZ5qY14X2G24UKU9gM8pksq7LqnaJPZIihJ/tltwqdNmXg2xEZB0V4fqP2EzW/2Wu4S
+         TGABmAuxyGxc9TNkDuoXvaH6izjk0IXq65+QWFX708h0FHpLouv4us6O7NL/wwkWiqZi
+         irsA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=eOlkoTfGj5WVDhRnQCIRockeDZbW6gvXOn1hNr+Rd2g=;
+        b=qSaMOErsWzEL1wXIO3AQMLRSN65q6JefYkcQ7I5AKfw/hN+kx39sljNc0tpAmaAhzK
+         2LjjKysw/o/KH2fwcgS33TwlTUK6HTKfVyHSDPJQhkdhoDz850b4qj8nGrydfNZYhlf9
+         sMWimS9wEf9VL6N1g83/hWR9M5XCYzLfnsc6UcJXXoqlbotoEU/wMBknwb81MOQplZir
+         Ea5tGF1i+Ojl0vqHiCFY8J1pHMrAENTC0D/Rfkp4BUUr6JPIA/gfq2sz+YcQkjEn+8xe
+         RNqnuxglZQrhLuRQevwZpka63hfU/Y1BmMgTuwIEYnEXJRqbH/sexT43z664ffz+yshQ
+         kb+g==
+X-Gm-Message-State: AOAM532m/c7o5wRMujltARUfV/8xEbIkBDwvBh8eOwotw536cF17JKTh
+        Dq9hu0vMWp6yJQPfwYBUJgg=
+X-Google-Smtp-Source: ABdhPJz9kNGw9WY8PUrVoC4RNkOSJInnurD+RcgOjd2YX86UFEggs6C6s2CjLfa6jif3g9podQ29eA==
+X-Received: by 2002:a63:5522:: with SMTP id j34mr4537401pgb.148.1623430489795;
+        Fri, 11 Jun 2021 09:54:49 -0700 (PDT)
+Received: from [192.168.1.67] (99-44-17-11.lightspeed.irvnca.sbcglobal.net. [99.44.17.11])
+        by smtp.gmail.com with ESMTPSA id h12sm5829720pfq.72.2021.06.11.09.54.47
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 11 Jun 2021 09:54:49 -0700 (PDT)
+Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: Add support for the legacy sdhci
+ controller on the BCM7211
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Florian Fainelli <f.fainelli@gmail.com>
+Cc:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Al Cooper <alcooperx@gmail.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Jon Hunter <jonathanh@nvidia.com>, aisheng.dong@nxp.com
-Subject: Re: [PATCH] mmc: sdhci: disable irq in sdhci host suspend ranther
- than free this irq
-Message-ID: <20210611142251.GA20450@martin-debian-1.paytec.ch>
-References: <1453974146-20951-1-git-send-email-haibo.chen@nxp.com>
- <20160128102057.GJ10826@n2100.arm.linux.org.uk>
- <CAPDyKFr0t3BWXV9ip-DKeTXFqGxmK=i=T1UuK6qiu4ZuUJ+i=w@mail.gmail.com>
- <alpine.DEB.2.11.1601281719350.3886@nanos>
- <alpine.DEB.2.11.1601281723140.3886@nanos>
- <20171227025401.GA28360@shlinux2>
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Ray Jui <rjui@broadcom.com>, Rob Herring <robh+dt@kernel.org>,
+        Scott Branden <sbranden@broadcom.com>
+References: <20210602192758.38735-1-alcooperx@gmail.com>
+ <20210602192758.38735-2-alcooperx@gmail.com>
+ <CAPDyKFrynST66yA_T3iroiJsfmNuBOEiiBnb=vNoyP6QpvZ7aQ@mail.gmail.com>
+ <fe956941-bb39-413e-f051-d9f353f64eda@gmail.com>
+ <CAPDyKFpEtvjS1mWC68gRBWD64dq2M1LO84UWE5uDLTzbGz1g8Q@mail.gmail.com>
+ <6acd480a-8928-89bb-0f40-d278294973a1@gmail.com>
+ <CAPDyKFqk23xg5R2k9GwQrnamwWYbMkmrbWYsHPF9VBQTAbvQHw@mail.gmail.com>
+ <a1199e99-eb29-125b-2bac-f0abb4803c9b@gmail.com>
+ <CAPDyKFq-rofbCyAhcQGt2xZykip6Le+CUDXgDwAisVOj=Tt-uA@mail.gmail.com>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+Message-ID: <b4c36944-8f41-1f30-10b4-b3efe0aade01@gmail.com>
+Date:   Fri, 11 Jun 2021 09:54:46 -0700
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.10.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171227025401.GA28360@shlinux2>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-Sender: "Martin Kaiser,,," <martin@martin-debian-2.paytec.ch>
+In-Reply-To: <CAPDyKFq-rofbCyAhcQGt2xZykip6Le+CUDXgDwAisVOj=Tt-uA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dear all,
-
-I have to resurrect this discussion once again. The issue is still present
-in linux-next and can be reproduced easily on my imx25-based system.
-
-Thus wrote Peng Fan (van.freenix@gmail.com):
-
-> On Thu, Jan 28, 2016 at 05:27:46PM +0100, Thomas Gleixner wrote:
-> >On Thu, 28 Jan 2016, Thomas Gleixner wrote:
-> >> On Thu, 28 Jan 2016, Ulf Hansson wrote:
-> >> > Therefore, the only way we currently can make sure to don't get the
-> >> > IRQ is to free and later re-request it. Now, apparently that has
-> >> > issues when using threaded IRQ handlers.
-
-> >> What's the issue?
-
-> >Ah, you mean that one:
-
-> >> Currently sdhci driver free irq in host suspend, and call
-> >> request_threaded_irq() in host resume. But during host resume,
-> >> Ctrl+C can impact sdhci host resume, see the error log:
-
-> >> [...]
-
-My test setup uses rtc as a wakeup source. Additionally, I also define my
-console uart as wakeup source
-
-echo enabled > /sys/class/tty/ttymxc3/power/wakeup
-
-and then run rtcwake in a loop
-
-while true ; do rtcwake -s 2 -m mem ; done
-
-Pressing Ctrl-C while the system is sleeping reproduces the problem quickly.
-
-sdhci_resume_host fails because the kthread for the threaded irq can't be
-created.
-
-ps confirms that there's no [irq/25-mmc0] kernel thread any more and sdhci
-starts printing register dumps periodically
-
-[  101.603339] mmc0: Timeout waiting for hardware cmd interrupt.
-[  101.609225] mmc0: sdhci: ============ SDHCI REGISTER DUMP ===========
-[  101.615725] mmc0: sdhci: Sys addr:  0x00000008 | Version:  0x00001001
-...
-[  101.700086] mmc0: sdhci: Host ctl2: 0x00000000
-[  101.704568] mmc0: sdhci-esdhc-imx: ========= ESDHC IMX DEBUG STATUS DUMP =========
-[  101.712179] mmc0: sdhci-esdhc-imx: cmd debug status:  0x0000
-...
-[  101.746827] mmc0: sdhci-esdhc-imx: async fifo debug status:  0x0000
-[  101.753137] mmc0: sdhci: ============================================
 
 
-I guest that we're taking this path from sdhci_resume_host
+On 6/11/2021 3:23 AM, Ulf Hansson wrote:
+> On Thu, 10 Jun 2021 at 17:59, Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>
+>>
+>>
+>> On 6/10/2021 1:49 AM, Ulf Hansson wrote:
+>>> On Thu, 10 Jun 2021 at 01:59, Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>>>
+>>>>
+>>>>
+>>>> On 6/9/2021 2:22 AM, Ulf Hansson wrote:
+>>>>> On Wed, 9 Jun 2021 at 05:07, Florian Fainelli <f.fainelli@gmail.com> wrote:
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> On 6/8/2021 5:40 AM, Ulf Hansson wrote:
+>>>>>>> On Wed, 2 Jun 2021 at 21:28, Al Cooper <alcooperx@gmail.com> wrote:
+>>>>>>>>
+>>>>>>>> Add support for the legacy Arasan sdhci controller on the BCM7211 and
+>>>>>>>> related SoC's. This includes adding a .shutdown callback to increase
+>>>>>>>> the power savings during S5.
+>>>>>>>
+>>>>>>> Please split this into two separate changes.
+>>>>>>>
+>>>>>>> May I also ask about the ->shutdown() callback and in relation to S5.
+>>>>>>> What makes the ->shutdown callback only being invoked for S5?
+>>>>>>
+>>>>>> It is not only called for S5 (entered via poweroff on a prompt) but also
+>>>>>> during kexec or reboot. The poweroff path is via:
+>>>>>>
+>>>>>> kernel_power_off() -> kernel_shutdown_prepare() -> device_shutdown() ->
+>>>>>> .shutdown()
+>>>>>>
+>>>>>> For kexec or reboot we do not really care about power savings since we
+>>>>>> are about to load a new image anyway, however for S5/poweroff we do care
+>>>>>> about quiescing the eMMC controller in a way that its clocks and the
+>>>>>> eMMC device can be put into low power mode since we will stay in that
+>>>>>> mode for seconds/hours/days until someone presses a button on their
+>>>>>> remote (or other wake-up sources).
+>>>>>
+>>>>> Hmm, I am not sure I understand correctly. At shutdown we don't care
+>>>>> about wake-up sources from the kernel point of view, instead we treat
+>>>>> everything as if it will be powered off.
+>>>>
+>>>> The same .shutdown() path is used whether you kexec, reboot or poweroff,
+>>>> but for poweroff we do care about allowing specific wake-up sources
+>>>> configured as such to wake-up the system at a later time, like GPIOs,
+>>>> RTC, etc.
+>>>
+>>> That's true, but using the ->shutdown() callbacks in this way would
+>>> certainly be a new use case.
+>>>
+>>> Most subsystems/drivers don't care about power management in those
+>>> callbacks, but rather just about managing a graceful shutdown.
+>>>
+>>> It sounds to me like you should have a look at the hibernation
+>>> path/callbacks instead - or perhaps even the system suspend
+>>> path/callback. Normally, that's where we care about power management.
+>>
+>> The platforms we use do not support hibernation, keep in mind that these
+>> are embedded SoCs that support the S2 (standby), S3 (mem) and poweroff
+>> suspend states, hibernation is not something that we can support.
+>>
+>>>
+>>> I have looped in Rafael, to allow him to share his opinion on this.
+>>>
+>>>>
+>>>>>
+>>>>> We put devices into low power state at system suspend and potentially
+>>>>> also during some of the hibernation phases.
+>>>>>
+>>>>> Graceful shutdown of the eMMC is also managed by the mmc core.
+>>>>
+>>>> AFAICT that calls mmc_blk_shutdown() but that is pretty much it, the
+>>>> SDHCI platform_driver still needs to do something in order to conserve
+>>>> power including disabling host->clk, otherwise we would not have done
+>>>> that for sdhci-brcmstb.c.
+>>>
+>>> That's not entirely correct. When mmc_bus_shutdown() is called for the
+>>> struct device* that belongs to an eMMC card, two actions are taken.
+>>>
+>>> *) We call mmc_blk_shutdown(), to suspend the block device queue from
+>>> receiving new I/O requests.
+>>> **) We call host->bus_ops->shutdown(), which is an eMMC specific
+>>> callback set to mmc_shutdown(). In this step, we do a graceful
+>>> shutdown/power-off of the eMMC card.
+>>>
+>>> When it comes to controller specific resources, like clocks and PM
+>>> domains, for example, those may very well stay turned on. Do deal with
+>>> these, then yes, you would need to implement the ->shutdown()
+>>> callback. But as I said above, I am not sure it's the right thing to
+>>> do.
+>>
+>> As explained before, we can enter S5 for an indefinite amount of time
+>> until a wake-up source wakes us up so we must conserve power, even if we
+>> happen to wake up the next second, we don't know that ahead of time. The
+>> point of calling sdhci_pltfm_suspend() here is to ensure that host->clk
+>> is turned off which cuts the eMMC controller digital clock, I forgot how
+>> much power we save by doing so, but every 10s of mW counts for us.
+> 
+> I fully understand that you want to avoid draining energy, every
+> single uA certainly counts in cases like these.
+> 
+> What puzzles me, is that your platform seems to keep some resources
+> powered on (like device clocks) when entering the system wide low
+> power state, S5.
 
-request_threaded_irq
-   __setup_irq
-      setup_irq_thread
-         kthread_create
-            kthread_create_on_node
-               __kthread_create_on_node
-                  wake_up_process(kthreadd_task);
-                  if (unlikely(wait_for_completion_killable(&done))) {
-                     if (xchg(&create->done, NULL))
-                        return ERR_PTR(-EINTR);
+More on that below.
 
-I can confirm Peng's observation that current->pid in
-__kthread_create_on_node is the pid of the rtcwake process.
+> 
+> In principle, I am wondering if it would be possible to use S5 as the
+> system-wide low power state for the system suspend path, rather than
+> S3, for example? In this way, we would be able to re-use already
+> implemented ->suspend|resume callbacks from most subsystems/drivers, I
+> believe. Or is there a problem with that?
 
+The specific platform this driver is used on (BCM7211) is only capable
+of supporting S2 and S5. There is no S3 because we have no provision on
+the board to maintain the DRAM supplies on and preserve the DRAM
+contents. This is a design choice that is different from the other
+Broadcom STB platforms where we offer S2, S3 and S5 and we have an
+On/off domain which is shutdown by hardware upon S3 or S5 entry and a
+small always on domain which remains on to service wake-up sources
+(infrared, timer, gpio, UART, etc.). S2 on this platform is implemented
+entirely in software/firmware and does make use of the regular
+suspend/resume calls.
 
-This is an ftrace log of the error case, I used
-trace-cmd start -e task -e mmc -e power -e signal -p function -l tty_flip_buffer_push -l sdhci_resume_host -l __kthread_create_on_node
+S5 is implemented in part in software/firmware and with the help of the
+hardware that will turn off external board components. We do need the
+help of the various software drivers (PCIe, Ethernet, GPIO, USB, UART,
+RTC, eMMC, SPI, etc.) to do their job and conserve power when we enter
+S5, hence the reason why all of our drivers implement ->shutdown() (in
+addition to needing that for kexec and ensure no DMA is left running).
 
-         rtcwake-185     [000] .n..   321.166724: device_pm_callback_start: imx-uart 50008000.serial, parent: 50000000.spba, bus [resume]
-         rtcwake-185     [000] dnh.   321.166823: tty_flip_buffer_push <-__imx_uart_rxint.constprop.0
-         rtcwake-185     [000] .n..   321.166906: device_pm_callback_end: imx-uart 50008000.serial, err=0
-...
-         rtcwake-185     [000] .n..   321.167472: device_pm_callback_start: imx_rngc 53fb0000.rngb, parent: 53f00000.bus, bus [resume]
-         rtcwake-185     [000] .n..   321.167486: device_pm_callback_end: imx_rngc 53fb0000.rngb, err=0
-         rtcwake-185     [000] .n..   321.167502: device_pm_callback_start: sdhci-esdhc-imx 53fb4000.mmc, parent: 53f00000.bus, bus [resume]
-         rtcwake-185     [000] .n..   321.167516: sdhci_resume_host <-sdhci_esdhc_resume
-         rtcwake-185     [000] .n..   321.167584: __kthread_create_on_node <-kthread_create_on_node
-         rtcwake-185     [000] .n..   321.167652: device_pm_callback_end: sdhci-esdhc-imx 53fb4000.mmc, err=-4
-         rtcwake-185     [000] .n..   321.167922: device_pm_callback_start: imx-fb 53fbc000.lcdc, parent: 53f00000.bus, bus [resume]
-         rtcwake-185     [000] .n..   321.167978: device_pm_callback_end: imx-fb 53fbc000.lcdc, err=0
+> 
+> I think we need an opinion from Rafel to move forward.
 
-If wakeup is successful, the irq's thread is created
+There is already an identical change done for sdhci-brcmstb.c, and the
+exact same rationale applied there since both sdhci-iproc.c and
+sdhci-brcmstb.c are used on this BCM7211 platform.
 
-         rtcwake-168     [000] .n..   320.566614: device_pm_callback_start: imx-uart 50008000.serial, parent: 50000000.spba, bus [resume]
-         rtcwake-168     [000] dnh.   320.566718: tty_flip_buffer_push <-__imx_uart_rxint.constprop.0
-         rtcwake-168     [000] .n..   320.566808: device_pm_callback_end: imx-uart 50008000.serial, err=0
-...
-         rtcwake-168     [000] .n..   320.567359: device_pm_callback_start: imx_rngc 53fb0000.rngb, parent: 53f00000.bus, bus [resume]
-         rtcwake-168     [000] .n..   320.567372: device_pm_callback_end: imx_rngc 53fb0000.rngb, err=0
-         rtcwake-168     [000] .n..   320.567386: device_pm_callback_start: sdhci-esdhc-imx 53fb4000.mmc, parent: 53f00000.bus, bus [resume]
-         rtcwake-168     [000] .n..   320.567402: sdhci_resume_host <-sdhci_esdhc_resume
-         rtcwake-168     [000] .n..   320.567460: __kthread_create_on_node <-kthread_create_on_node
-        kthreadd-2       [000] ....   320.567922: task_newtask: pid=174 comm=kthreadd clone_flags=800700 oom_score_adj=0
-    kworker/u2:3-173     [000] ....   320.568183: __kthread_create_on_node <-kthread_create_on_node
-        kthreadd-2       [000] ....   320.568504: task_newtask: pid=175 comm=kthreadd clone_flags=800700 oom_score_adj=0
-         rtcwake-168     [000] ....   320.568659: task_rename: pid=174 oldcomm=kthreadd newcomm=irq/25-mmc0 oom_score_adj=0
-         rtcwake-168     [000] .n..   320.568824: device_pm_callback_end: sdhci-esdhc-imx 53fb4000.mmc, err=0
+In all honesty, I am a bit surprised that the Linux device driver model
+does not try to default the absence of a ->shutdown() to a ->suspend()
+call since in most cases they are functionally equivalent, or should be,
+in that they need to save power and quiesce the hardware, or leave
+enough running to support a wake-up event.
 
-> >In request_threaded_irq-> __setup_irq-> kthread_create
-> >->kthread_create_on_node, the comment shows that SIGKILLed will
-> >impact the kthread create, and return -EINTR.
-
-> >And how should that thread be SIGKILLed? Hitting Ctrl+C on the console does
-> >not affect any kernel internal thread. Hitting Ctrl+C affects solely the
-> >process which is running on that console.
-
-> >And if it would, then that would be a completely different, serious bug which
-> >needs to be fixed.
-
-> >How was verified, that the thread was not created and that the creation failed
-> >due to a SIGKILL?
-
-See above, the irq thread is missing, it was running before the
-suspend+wakeup. I hope that the ftrace output confirms my assumption about
-the code path that was taken. I didn't find any other way we could return
--EINTR in sdhci_resume_host.
-
-> My understanding is:
-> The issue is during suspend resume, it is in rtwakeup.out process space,
-> during resume, "get_current()->comm" shows "rtcwakeup.out", so if we
-> send SIGKILL from userspace, a interrupt will occur, interrupt
-> handler will directly return to kernel space to continue resuming.
-
-> __setup_irq->kthread_create->wait_for_completion_killable, here
-> wait_for_completion_killable see SIGKILL pending and return -EINTR,
-> then sdhci resume process failure, because of sdhci interrupt thread
-> not created.
-
-> During suspend/resume, OOM Killer will be disabled and enalbed. When
-> request_threaded_irq in sdhci resume, OOM Killer is still disabled.
-> According to kthread_create comments for wait_for_completion_killable,
-> using killable is to catch OOM sigkill. But during resume, OOM Killer
-> is disabled, So how about the following patch to disable SIGKILL for
-> a short while?
-
-I tried this patch, it didn't fix the problem for me.
-
-I could make the problem disappear if I moved sdhci_resume_host's
-request_threaded_irq call into a worker. Instead of calling
-request_threaded_irq, I'd schedule the work on system_unbound_wq. The new
-thread for sdhci's irq is then requested by someone other than rtcwake.
-
-Generally, it makes sense to me that kthreadd aborts a request for a new
-thread if the requester is killed during the request. However, in the case
-of sdhci resume, the thread should always be created, regardless of the
-requester's state...
-
-Of course, the workqueue hack is not an acceptable way to fix this. I'd
-appreciate if anyone could point me in the right direction for a proper fix.
-
-Thanks in advance for your help,
-
-   Martin
-
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index e9290a3439d5..84c4c99b1acb 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -19,6 +19,7 @@
->  #include <linux/io.h>
->  #include <linux/module.h>
->  #include <linux/dma-mapping.h>
-> +#include <linux/signal.h>
->  #include <linux/slab.h>
->  #include <linux/scatterlist.h>
->  #include <linux/swiotlb.h>
-> @@ -2895,9 +2896,11 @@ int sdhci_resume_host(struct sdhci_host *host)
->  	}
-
->  	if (!device_may_wakeup(mmc_dev(host->mmc))) {
-> +		disallow_signal(SIGKILL);
->  		ret = request_threaded_irq(host->irq, sdhci_irq,
->  					   sdhci_thread_irq, IRQF_SHARED,
->  					   mmc_hostname(host->mmc), host);
-> +		allow_signal(SIGKILL);
->  		if (ret)
->  			return ret;
->  	} else {
-
-> Thanks,
-> Peng.
-
-
-> >Thanks,
-
-> >	tglx
-
-> -- 
+Cheers
+-- 
+Florian
