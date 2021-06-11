@@ -7,75 +7,82 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CFDDCC4743D
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 07:41:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3D0FC48BE0
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 07:41:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B26DD6023B
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 07:41:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D8E6E61078
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 07:41:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231579AbhFKHnu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Jun 2021 03:43:50 -0400
-Received: from mail-vs1-f45.google.com ([209.85.217.45]:47048 "EHLO
-        mail-vs1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231161AbhFKHns (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2021 03:43:48 -0400
-Received: by mail-vs1-f45.google.com with SMTP id z15so3276038vsn.13
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Jun 2021 00:41:51 -0700 (PDT)
+        id S231161AbhFKHnz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Jun 2021 03:43:55 -0400
+Received: from mail-vk1-f170.google.com ([209.85.221.170]:38459 "EHLO
+        mail-vk1-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231578AbhFKHny (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2021 03:43:54 -0400
+Received: by mail-vk1-f170.google.com with SMTP id 27so2339999vkl.5
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Jun 2021 00:41:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=ItJJSNuQsGI7g+61IE0nIMwufekmSSXpX5M+4Ge5lPM=;
-        b=NhZmebdmXt14NUAm6K+GwxAb4Or7vkn+QV8AkNDxLXuXtdZhqwhirm8XIHm/2f24PQ
-         mxIsKDA7C7KxWYr2YMMI8SuOP71c2ZpmyCnLS6f+/tmdQJ5zaiDgP9fv0MV5qjUeUo39
-         9KaBOXw4Z7pELSDTqjeY+UngElOBwqJLKXAkAI+9Ll9bFfnM15uSB2xl7YpftayVdpPG
-         SXNvonn+oBsqVx3h/5Eb2uvpAzNAhyimra/LEFoxN/kZfwBs6qSMSjOSSIvzbOWJmCY8
-         wBqM5efzz//eoHGAXSnqMFB+zsekI768hdAStpdzlxdmUEsUSx7RrzRXIuaoeBS9+s7X
-         00BA==
+         :cc:content-transfer-encoding;
+        bh=7BMBgcaQkIy6hi8BSu350kxdTkBNAY3Dq0E/7PDsLj8=;
+        b=iG1cQQIMcHuwSWQ+rNsUs9g7wtXLSpwIinjlEQ8VM1UofbRvvDwgkCbkyfezeYtr1a
+         22zlobVGclILohJ7MizBhY6PpUGOctvY19f0ssO/lNLwiVgCtNdb1ZKXeV39JmrMHGN4
+         KnsxW1NfQ2pbq69yRsPOm6VCSHLq53nEXLKYa5bRzZSuybdUVMjZzeno1MYtqqVTbhKF
+         YTl78XXAbNcQWcOGrzbyUXyFjxSvH6How0CYwgz4CQB3lKAw6HToDQDpRnds/1Z/mN9G
+         VaWbwcAcLnstIbmS3007HYqXrxaCk8O7BGYNZTYAC3HU40fM1XBcPb+DSYMJf+WzUVwP
+         671A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ItJJSNuQsGI7g+61IE0nIMwufekmSSXpX5M+4Ge5lPM=;
-        b=Trbq/HSJkKTK9xcRADwOiqBPO2f/hFDdrByQlox3VGk0lbOPTVMpO09MMvPEAmrA7w
-         xbGi9EyW+kLnAzf9E6IvLvT+gdDCObwIZM9Olfuzq9vxX/R/lO5pkUsXjms/A/B8REnG
-         YHm/ZFHrpj83VyQqZcFHjFbFchkEHfnC1cmasvpB5yJTzb4Tdib+J7KoibuWd+JbTKBd
-         FyxgRWr/XTTXrMJ0HIKifBzkyuU596AxK0NOi0FcDO6lVd8h3P8PJhSK/z2Mm5XJrPan
-         PkqKjwwuuzYsuIQM2WnNQwoL6nXaqPQY8AMYVIK5/IojLqg1rBmqcQYbvU85lfBC8qZH
-         4Mxw==
-X-Gm-Message-State: AOAM530b/65tXOaNnfnBjySYbWqxfww0SEo2m570ejo6SpEFW1qQHjA2
-        sHYWmc2ZZWs0LI6jzPCsHU0oGDL/phryzIRq7rxHVw==
-X-Google-Smtp-Source: ABdhPJzZrz6377BlNablRXtpMWoILLXWjH9VFtrOZKjUjwQRHdJBitABCAFPPYIsfLClWBYetNlTcXZW/j70PpOokM0=
-X-Received: by 2002:a05:6102:386:: with SMTP id m6mr5477821vsq.48.1623397251183;
- Fri, 11 Jun 2021 00:40:51 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=7BMBgcaQkIy6hi8BSu350kxdTkBNAY3Dq0E/7PDsLj8=;
+        b=HDh8FcIrUJEVhj6l6FvJHtqIcegCt6FV7c5FH/Cv0XH8flTNbKC1KSUbx5+TeTdadj
+         rnFYqYvThnwsR0vEVCT90pmeR6nO7YopqLbFaQEjNblNfaSHmQtnxqkrqTPkFIPD/p3P
+         s92wpxEX0jjpC5ig5IOv5qY658Cj2WqUDBhY62lhyFqJiSV40DR5FecxV26u9Bf0aCeK
+         oP7aMu+Rwgzl0kZcHEoQNWZHCcdTKkH2zWxjfkNleNkJx4OnqCU3g2Pc03MQvxwAWTNN
+         TcoDBaaxizGtm45oOZYrwwdXNzkt3dc8OnNaOn14T2dMZvZE6TMQjpYvw1ZCH7mNcokc
+         r9KA==
+X-Gm-Message-State: AOAM5334FN5fPQilswNe3edLa7VmKXdGxMg9kxY0kLcZZ9XWW2Jl4sPZ
+        Ewuq/VjAKFN11+vralUkWEa2pnHKc1Snj+eAK92Owg==
+X-Google-Smtp-Source: ABdhPJzYFjnUJfjcecFeffgyAl+T1TTZtfAeYeSZF4bDlzBX1j7sW3LDiD+cf0qyzf++dPRhruwXOCBYPAB7oVBgQZI=
+X-Received: by 2002:ac5:c7c3:: with SMTP id e3mr8051851vkn.6.1623397256690;
+ Fri, 11 Jun 2021 00:40:56 -0700 (PDT)
 MIME-Version: 1.0
-References: <1623326486-25275-1-git-send-email-haibo.chen@nxp.com>
-In-Reply-To: <1623326486-25275-1-git-send-email-haibo.chen@nxp.com>
+References: <20210608180620.40059-1-wsa+renesas@sang-engineering.com> <YL/voNtxiqvoQYOS@oden.dyn.berto.se>
+In-Reply-To: <YL/voNtxiqvoQYOS@oden.dyn.berto.se>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 11 Jun 2021 09:40:15 +0200
-Message-ID: <CAPDyKFqipvEu0y=2jzxbW7WwXURqZoRZbjYJTQnVE-_L0zLi9w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: add sdio wakeup feature
-To:     Haibo Chen <haibo.chen@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
+Date:   Fri, 11 Jun 2021 09:40:20 +0200
+Message-ID: <CAPDyKFqEzvCibcNBK5vUYHA=x981PrANPUUWReX6jXaYAD65Eg@mail.gmail.com>
+Subject: Re: [RFC PATCH] mmc: improve function name when aborting a tuning cmd
+To:     =?UTF-8?Q?Niklas_S=C3=B6derlund?= <niklas.soderlund@ragnatech.se>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 10 Jun 2021 at 14:19, <haibo.chen@nxp.com> wrote:
+On Wed, 9 Jun 2021 at 00:33, Niklas S=C3=B6derlund
+<niklas.soderlund@ragnatech.se> wrote:
 >
-> From: Haibo Chen <haibo.chen@nxp.com>
+> Hallo Wolfram,
 >
-> Set the wakeup capability for the SDIO device which can wakeup system.
-> And user can enable this wakeup through sysfs interface.
+> Thanks for your work.
 >
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> On 2021-06-08 20:06:20 +0200, Wolfram Sang wrote:
+> > 'mmc_abort_tuning()' made me think tuning gets completely aborted.
+> > However, it sends only a STOP cmd to cancel the current tuning cmd.
+> > Tuning process may still continue after that. So, rename the function t=
+o
+> > 'mmc_send_abort_tuning()' to better reflect all this.
+> >
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>
+> Reviewed-by: Niklas S=C3=B6derlund <niklas.soderlund+renesas@ragnatech.se=
+>
 
 Applied for next, thanks!
 
@@ -83,29 +90,89 @@ Kind regards
 Uffe
 
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 7336ae749137..72c0bf0c1887 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1620,6 +1620,14 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
->         if (err)
->                 goto disable_ahb_clk;
+> > ---
+> >
+> > Ulf, here is the patch we discussed earlier today. Based on mmc/next.
+> >
+> >  drivers/mmc/core/mmc_ops.c           | 4 ++--
+> >  drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+> >  drivers/mmc/host/sdhci.c             | 2 +-
+> >  include/linux/mmc/host.h             | 2 +-
+> >  4 files changed, 5 insertions(+), 5 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> > index 3c58f6d0f482..973756ed4016 100644
+> > --- a/drivers/mmc/core/mmc_ops.c
+> > +++ b/drivers/mmc/core/mmc_ops.c
+> > @@ -700,7 +700,7 @@ int mmc_send_tuning(struct mmc_host *host, u32 opco=
+de, int *cmd_error)
+> >  }
+> >  EXPORT_SYMBOL_GPL(mmc_send_tuning);
+> >
+> > -int mmc_abort_tuning(struct mmc_host *host, u32 opcode)
+> > +int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode)
+> >  {
+> >       struct mmc_command cmd =3D {};
+> >
+> > @@ -723,7 +723,7 @@ int mmc_abort_tuning(struct mmc_host *host, u32 opc=
+ode)
+> >
+> >       return mmc_wait_for_cmd(host, &cmd, 0);
+> >  }
+> > -EXPORT_SYMBOL_GPL(mmc_abort_tuning);
+> > +EXPORT_SYMBOL_GPL(mmc_send_abort_tuning);
+> >
+> >  static int
+> >  mmc_send_bus_test(struct mmc_card *card, struct mmc_host *host, u8 opc=
+ode,
+> > diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/re=
+nesas_sdhi_core.c
+> > index baab4c2e1b53..e49ca0f7fe9a 100644
+> > --- a/drivers/mmc/host/renesas_sdhi_core.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> > @@ -704,7 +704,7 @@ static int renesas_sdhi_execute_tuning(struct mmc_h=
+ost *mmc, u32 opcode)
+> >                       set_bit(i, priv->smpcmp);
+> >
+> >               if (cmd_error)
+> > -                     mmc_abort_tuning(mmc, opcode);
+> > +                     mmc_send_abort_tuning(mmc, opcode);
+> >       }
+> >
+> >       ret =3D renesas_sdhi_select_tuning(host);
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index bf238ade1602..6aaf5c3ce34c 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -2680,7 +2680,7 @@ void sdhci_abort_tuning(struct sdhci_host *host, =
+u32 opcode)
+> >
+> >       sdhci_end_tuning(host);
+> >
+> > -     mmc_abort_tuning(host->mmc, opcode);
+> > +     mmc_send_abort_tuning(host->mmc, opcode);
+> >  }
+> >  EXPORT_SYMBOL_GPL(sdhci_abort_tuning);
+> >
+> > diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> > index c7e7b43600e9..0abd47e9ef9b 100644
+> > --- a/include/linux/mmc/host.h
+> > +++ b/include/linux/mmc/host.h
+> > @@ -632,6 +632,6 @@ static inline enum dma_data_direction mmc_get_dma_d=
+ir(struct mmc_data *data)
+> >  }
+> >
+> >  int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error)=
+;
+> > -int mmc_abort_tuning(struct mmc_host *host, u32 opcode);
+> > +int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
+> >
+> >  #endif /* LINUX_MMC_HOST_H */
+> > --
+> > 2.30.2
+> >
 >
-> +       /*
-> +        * Setup the wakeup capability here, let user to decide
-> +        * whether need to enable this wakeup through sysfs interface.
-> +        */
-> +       if ((host->mmc->pm_caps & MMC_PM_KEEP_POWER) &&
-> +                       (host->mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ))
-> +               device_set_wakeup_capable(&pdev->dev, true);
-> +
->         pm_runtime_set_active(&pdev->dev);
->         pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
->         pm_runtime_use_autosuspend(&pdev->dev);
 > --
-> 2.17.1
->
+> Regards,
+> Niklas S=C3=B6derlund
