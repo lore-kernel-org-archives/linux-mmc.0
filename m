@@ -2,107 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26122C48BE0
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 10:06:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93670C48BD1
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 10:19:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0EAD9611CD
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 10:06:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 78A22613E9
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Jun 2021 10:19:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231482AbhFKKIf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Jun 2021 06:08:35 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:56976 "EHLO
+        id S230356AbhFKKVu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Jun 2021 06:21:50 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:59300 "EHLO
         smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231140AbhFKKI3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2021 06:08:29 -0400
+        with ESMTP id S230272AbhFKKVt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Jun 2021 06:21:49 -0400
 Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out2.suse.de (Postfix) with ESMTP id 2CD7A1FD3F;
-        Fri, 11 Jun 2021 10:06:29 +0000 (UTC)
+        by smtp-out2.suse.de (Postfix) with ESMTP id 58A911FD6C;
+        Fri, 11 Jun 2021 10:19:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1623405989; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=pLj8OXME0mT2ROZvbeRx1HoinugDdpFHAO6g1llgaoA=;
-        b=iH77XjfGNlgMfoPDedBGhwwKevWKQ5/A0k5LDJ/NYrIynGojevq/03H1TncJXGA9tJbcZd
-        NeH5rPh4NituxzpFwB8rg8X7mhbbozoVvz3U237L/4c/8ArYg7zXFEqj+O/4ON9MnSCI2G
-        oaDOz2m+VBBcPF1Ey9ByKTHY7fPRfTI=
+        t=1623406791; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=EEVv8+Y68AKuFcnRR39WUeUcighivtR1a//+t2osEQQ=;
+        b=jB/WKsg3tkJNnhcuOxRbJRTWJRVVt8Norn4wRUbtQnh+EcuII3j3KwN/1afeJNOUOrzFwc
+        CZDGIMOtD5xTvxc+i75dJwpt481GGMRGx5Ro4Mekh+NcMGH7niEV20Wwzu7OAc6YaXW5L5
+        fMDxL540q6wy22TOEzRBpLvk3TCA4Vo=
 DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1623405989;
+        s=susede2_ed25519; t=1623406791;
         h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=pLj8OXME0mT2ROZvbeRx1HoinugDdpFHAO6g1llgaoA=;
-        b=NNsCjE5z7SmDmDqjcK15BBlKLhji0BWI27diN6tDNer3Fq+2LjOkn/oHZiJ05PaqmErDUG
-        lnXImGv160VAY0Dg==
-Received: from alsa1.suse.de (alsa1.suse.de [10.160.4.42])
-        by relay2.suse.de (Postfix) with ESMTP id 26E43A3B84;
-        Fri, 11 Jun 2021 10:06:29 +0000 (UTC)
-Date:   Fri, 11 Jun 2021 12:06:29 +0200
-Message-ID: <s5ho8cc7m1m.wl-tiwai@suse.de>
+         mime-version:mime-version:  content-transfer-encoding:content-transfer-encoding;
+        bh=EEVv8+Y68AKuFcnRR39WUeUcighivtR1a//+t2osEQQ=;
+        b=W0eCPVfLqLCax/n1FI+p7ycQseWODwo8MORQ8PEtlAcn1nE9if7x97JRpp28PKPOaiIasD
+        2kFwUEhzD3SSSoBA==
+Received: from alsa1.nue.suse.com (alsa1.suse.de [10.160.4.42])
+        by relay2.suse.de (Postfix) with ESMTP id 46B5EA3BAA;
+        Fri, 11 Jun 2021 10:19:51 +0000 (UTC)
 From:   Takashi Iwai <tiwai@suse.de>
 To:     Adrian Hunter <adrian.hunter@intel.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: sdhci: Clear unused bounce buffer at DMA mmap error path
-In-Reply-To: <98f90fcb-1134-f90b-db42-29f9505de046@intel.com>
-References: <20210611090330.13039-1-tiwai@suse.de>
-        <98f90fcb-1134-f90b-db42-29f9505de046@intel.com>
-User-Agent: Wanderlust/2.15.9 (Almost Unreal) SEMI/1.14.6 (Maruoka)
- FLIM/1.14.9 (=?UTF-8?B?R29qxY0=?=) APEL/10.8 Emacs/25.3
- (x86_64-suse-linux-gnu) MULE/6.0 (HANACHIRUSATO)
-MIME-Version: 1.0 (generated by SEMI 1.14.6 - "Maruoka")
-Content-Type: text/plain; charset=US-ASCII
+Subject: [PATCH v2] mmc: sdhci: Clear unused bounce buffer at DMA mmap error path
+Date:   Fri, 11 Jun 2021 12:19:48 +0200
+Message-Id: <20210611101948.18972-1-tiwai@suse.de>
+X-Mailer: git-send-email 2.26.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 11 Jun 2021 11:56:16 +0200,
-Adrian Hunter wrote:
-> 
-> On 11/06/21 12:03 pm, Takashi Iwai wrote:
-> > When DMA-mapping of the bounce buffer fails, the driver tries to fall
-> > back, but it leaves the allocated host->bounce_buffer although its
-> > size is zero.  Later on, the driver checks the use of bounce buffer
-> > with host->bounce_buffer pointer, and it tries to use the buffer
-> > incorrectly, resulting in Oops.
-> > 
-> > This patch clears the release the unused buffer and clears the
-> > bounce_buffer pointer for addressing the problem.
-> > 
-> > Signed-off-by: Takashi Iwai <tiwai@suse.de>
-> 
-> One minor comment below, otherwise:
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> 
-> > ---
-> >  drivers/mmc/host/sdhci.c | 6 +++++-
-> >  1 file changed, 5 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index bf238ade1602..5f467b98ca88 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -4072,9 +4072,13 @@ static void sdhci_allocate_bounce_buffer(struct sdhci_host *host)
-> >  					   bounce_size,
-> >  					   DMA_BIDIRECTIONAL);
-> >  	ret = dma_mapping_error(mmc_dev(mmc), host->bounce_addr);
-> > -	if (ret)
-> > +	if (ret) {
-> > +		devm_kfree(mmc->parent, host->bounce_buffer);
-> 
-> Everywhere else in this function mmc_dev(mmc) is used, so maybe
-> use it here too instead of mmc->parent.
+When DMA-mapping of the bounce buffer fails, the driver tries to fall
+back, but it leaves the allocated host->bounce_buffer although its
+size is zero.  Later on, the driver checks the use of bounce buffer
+with host->bounce_buffer pointer, and it tries to use the buffer
+incorrectly, resulting in Oops.
 
-Doh, right, I wrote a patch based on the older kernel and refreshed
-afterwards, but I forgot correcting this place.  Will resubmit the
-fixed version.
+This patch clears the release the unused buffer and clears the
+bounce_buffer pointer for addressing the problem.
 
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
+---
+v1->v2: correct the device pointer to mmc_dev(mmc)
 
-thanks,
+ drivers/mmc/host/sdhci.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-Takashi
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index bf238ade1602..c80bc6c4ebf3 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -4072,9 +4072,13 @@ static void sdhci_allocate_bounce_buffer(struct sdhci_host *host)
+ 					   bounce_size,
+ 					   DMA_BIDIRECTIONAL);
+ 	ret = dma_mapping_error(mmc_dev(mmc), host->bounce_addr);
+-	if (ret)
++	if (ret) {
++		devm_kfree(mmc_dev(mmc), host->bounce_buffer);
++		host->bounce_buffer = NULL;
+ 		/* Again fall back to max_segs == 1 */
+ 		return;
++	}
++
+ 	host->bounce_buffer_size = bounce_size;
+ 
+ 	/* Lie about this since we're bouncing */
+-- 
+2.26.2
+
