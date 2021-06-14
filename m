@@ -2,193 +2,257 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C6D6C2B9F4
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Jun 2021 12:07:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D02BDC2B9F4
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Jun 2021 13:21:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 129D56120E
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Jun 2021 12:07:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B8CB961245
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Jun 2021 13:21:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233276AbhFNMJj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Jun 2021 08:09:39 -0400
-Received: from mail-vs1-f50.google.com ([209.85.217.50]:34577 "EHLO
-        mail-vs1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232809AbhFNMJi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jun 2021 08:09:38 -0400
-Received: by mail-vs1-f50.google.com with SMTP id q2so7649435vsr.1
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Jun 2021 05:07:35 -0700 (PDT)
+        id S233202AbhFNNXV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Jun 2021 09:23:21 -0400
+Received: from mail-vs1-f54.google.com ([209.85.217.54]:44698 "EHLO
+        mail-vs1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233361AbhFNNXU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Jun 2021 09:23:20 -0400
+Received: by mail-vs1-f54.google.com with SMTP id x13so7743406vsf.11
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Jun 2021 06:21:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=JNFrwknP/IvmdiYbxnPdakNn1lYk7LNQWog91LXNo7Q=;
-        b=bkOlRcuUaxZHRKE5Ob/q8HPJ/Uxgg6tBZ1/p/y9i3DSMI0lkRwBSsKQSahwQw0TCze
-         srD62FvqpXbiECHAhVhf6F5PaaG3pv5EH3pgw+P6vKJJgcRLApb23H3Y8qeRx+TevmSI
-         vggUQFQ1wkXLoe/QqZPP6QNjQaWnt9S9tGlND99XR4G/Jn8Zl656r5d7aaG1W9g3Sa/l
-         DEuGooPcK5lfUq3J4QofTxeICnES3axLNmLRZ2QowxfOAZHfCJ3i+TDTD+14hxxwP/aC
-         zvwvrdidrtPuigAwhl6oxt9zEDsgJeII8HtyAbYec7bU9pjrTt+Rqs+rhXQOeiPO9umf
-         2jRA==
+        bh=hznYiY/yIaLIQ43u53uPpsgJQvFToxlc5/LKCrV5tj4=;
+        b=pSej7L+/yh7aHpv6cKak9q+IbtY9RGMVlvK97EenQ6HD7xsp5T2aRatHSgXKEpdtbP
+         yzHCmiYa9ZVambvZ3DmtHHOf9OIJ8V4aLEPQ/0ELAwHy4J/1l7s6z2SXIGiuUetPrtBV
+         Ii8dFN5p3Tvf/kjC8QFuUKl5jGzQN6i8vW0HbjGuoxenTeH/cQgGOjejuZHXHPxzM3uJ
+         7YVyuAgbGtOtWqtPPDBFK9/r3CDPEzRmxe8QfBtGMlEeog/rvIpz2uMdCWsLDMEDtYhM
+         gZHGVBVkpqGp7IfeS7V4Y/z3I+hQk/mH8ldymrL4Zq3udYAyPOZ+vpYKGDuw63cqei7+
+         MWQg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=JNFrwknP/IvmdiYbxnPdakNn1lYk7LNQWog91LXNo7Q=;
-        b=bfRNyohLYmQwQIiL9/2YSZBHfGaV63OAmznSJHihb5j5+we53b+VAl7ns4wsFCBxHG
-         3v54tNXeCcss0maNVmiTqxUDY6nMHipMb/i3Utv7Il23o22ItFdvcWSKWVOFiQpkM4l1
-         VrPifQIxVAn21JPA7saE7a1uY2eaxR1czGzxGSHTtriWD7RigotlXdqe4Jbz0yDyUPdj
-         325RINfVkLtMpQWJLazeefa9fZQpummyApQXdsfbO7GV9AB7fy/5ZNNzcm5Psowiwx72
-         a+hZhDjid4MVT/inYtLDj0fuEDPA87/WcGkSGIUMo6FgRr+Z32EI2IBbwp4Aw5wNf1il
-         UKqg==
-X-Gm-Message-State: AOAM530Jj0z2hMgbqlR3hIWPKjU1jHolOeGnXP+2tF0c2F3kB0Ueaf4k
-        9t3IZU5KW+muq9ZhQA+fBxidC8pvwstxit3190ayvQ==
-X-Google-Smtp-Source: ABdhPJxLCHU0MQYVgc/uBXpq+K6HD33HgyiCFz2GIJd2VMmVokwPgYtlhEF5G0gY2l4CgowoEB3IVV4/5rAmM8IINuc=
-X-Received: by 2002:a67:e359:: with SMTP id s25mr16473866vsm.55.1623672395365;
- Mon, 14 Jun 2021 05:06:35 -0700 (PDT)
+        bh=hznYiY/yIaLIQ43u53uPpsgJQvFToxlc5/LKCrV5tj4=;
+        b=EKNOfgK8wDl2aN89BVDj9bAgqWcLlyJ9u5qIFTPUv4W5ekN/ZyDp79AgEuhu7OGaFx
+         Teoz+3AerEHpHIeczPm9zvvvkCo1Q7zcGfRUOqr36CQqOmy6rkT+UlQT5Ha/2URKXxBm
+         FaZ1kR+Fe/V072E/60Tf2l5H1cg6yLHCB7Ob+3nLjncPlmKjesnefaj9QWXq4wRD7+Fb
+         i3JnetTyf5LcSi1fxDSoWGDqOrpzEfrs6ooCpS+IsghGLFYA9FY991hZCgvi/jFGuuGx
+         x788/klzGtbEsKX3YKo3FFD0L2dmwNz5jyqBcJAaOLRtH7B7lLdvCe/1IHkhUbn8gpWy
+         iqPg==
+X-Gm-Message-State: AOAM531fwCwmq7qSbxcTEV05K7uS6dRSniYXoFRJTtjTWq4k94yT11ws
+        hcibDPr2IZrHIyP/4eTAiazOc3+OYEYzzgkCJ1VB0A==
+X-Google-Smtp-Source: ABdhPJyI0OLl9c6qznSTU52N5rNTrdJ8c9JnIs+9ZEOaxUDrCelrmpXu4s6Fk3Gylc+zmtGqoXFYqHYOs74dp6Gr9LI=
+X-Received: by 2002:a67:e359:: with SMTP id s25mr16904297vsm.55.1623676802028;
+ Mon, 14 Jun 2021 06:20:02 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210609150230.9291-1-narmstrong@baylibre.com>
-In-Reply-To: <20210609150230.9291-1-narmstrong@baylibre.com>
+References: <20210602192758.38735-1-alcooperx@gmail.com> <20210602192758.38735-2-alcooperx@gmail.com>
+ <CAPDyKFrynST66yA_T3iroiJsfmNuBOEiiBnb=vNoyP6QpvZ7aQ@mail.gmail.com>
+ <fe956941-bb39-413e-f051-d9f353f64eda@gmail.com> <CAPDyKFpEtvjS1mWC68gRBWD64dq2M1LO84UWE5uDLTzbGz1g8Q@mail.gmail.com>
+ <6acd480a-8928-89bb-0f40-d278294973a1@gmail.com> <CAPDyKFqk23xg5R2k9GwQrnamwWYbMkmrbWYsHPF9VBQTAbvQHw@mail.gmail.com>
+ <a1199e99-eb29-125b-2bac-f0abb4803c9b@gmail.com> <CAPDyKFq-rofbCyAhcQGt2xZykip6Le+CUDXgDwAisVOj=Tt-uA@mail.gmail.com>
+ <b4c36944-8f41-1f30-10b4-b3efe0aade01@gmail.com>
+In-Reply-To: <b4c36944-8f41-1f30-10b4-b3efe0aade01@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 14 Jun 2021 14:05:59 +0200
-Message-ID: <CAPDyKFqRZJ=OvxKJu_0O+JLM0fYf2NQSsQvSXvVojWsaeMpDUA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk
-To:     Neil Armstrong <narmstrong@baylibre.com>
-Cc:     Marek Szyprowski <m.szyprowski@samsung.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Mon, 14 Jun 2021 15:19:25 +0200
+Message-ID: <CAPDyKFpR1GZcqCO5=-h7jvG0TysPLfJOP6rDJBagHvg9HFxnSQ@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: Add support for the legacy sdhci
+ controller on the BCM7211
+To:     Florian Fainelli <f.fainelli@gmail.com>
+Cc:     "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Al Cooper <alcooperx@gmail.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Mark Rutland <mark.rutland@arm.com>
+        Adrian Hunter <adrian.hunter@intel.com>,
+        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
+        DTML <devicetree@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Ray Jui <rjui@broadcom.com>, Rob Herring <robh+dt@kernel.org>,
+        Scott Branden <sbranden@broadcom.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 9 Jun 2021 at 17:02, Neil Armstrong <narmstrong@baylibre.com> wrote:
+On Fri, 11 Jun 2021 at 18:54, Florian Fainelli <f.fainelli@gmail.com> wrote:
 >
-> It has been reported that usage of memcpy() to/from an iomem mapping is invalid,
-> and a recent arm64 memcpy update [1] triggers a memory abort when dram-access-quirk
-> is used on the G12A/G12B platforms.
 >
-> This adds a local sg_copy_to_buffer which makes usage of io versions of memcpy
-> when dram-access-quirk is enabled.
 >
-> Fixes: acdc8e71d9bb ("mmc: meson-gx: add dram-access-quirk")
-> Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
-> Suggested-by: Mark Rutland <mark.rutland@arm.com>
-> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
-> Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
+> On 6/11/2021 3:23 AM, Ulf Hansson wrote:
+> > On Thu, 10 Jun 2021 at 17:59, Florian Fainelli <f.fainelli@gmail.com> wrote:
+> >>
+> >>
+> >>
+> >> On 6/10/2021 1:49 AM, Ulf Hansson wrote:
+> >>> On Thu, 10 Jun 2021 at 01:59, Florian Fainelli <f.fainelli@gmail.com> wrote:
+> >>>>
+> >>>>
+> >>>>
+> >>>> On 6/9/2021 2:22 AM, Ulf Hansson wrote:
+> >>>>> On Wed, 9 Jun 2021 at 05:07, Florian Fainelli <f.fainelli@gmail.com> wrote:
+> >>>>>>
+> >>>>>>
+> >>>>>>
+> >>>>>> On 6/8/2021 5:40 AM, Ulf Hansson wrote:
+> >>>>>>> On Wed, 2 Jun 2021 at 21:28, Al Cooper <alcooperx@gmail.com> wrote:
+> >>>>>>>>
+> >>>>>>>> Add support for the legacy Arasan sdhci controller on the BCM7211 and
+> >>>>>>>> related SoC's. This includes adding a .shutdown callback to increase
+> >>>>>>>> the power savings during S5.
+> >>>>>>>
+> >>>>>>> Please split this into two separate changes.
+> >>>>>>>
+> >>>>>>> May I also ask about the ->shutdown() callback and in relation to S5.
+> >>>>>>> What makes the ->shutdown callback only being invoked for S5?
+> >>>>>>
+> >>>>>> It is not only called for S5 (entered via poweroff on a prompt) but also
+> >>>>>> during kexec or reboot. The poweroff path is via:
+> >>>>>>
+> >>>>>> kernel_power_off() -> kernel_shutdown_prepare() -> device_shutdown() ->
+> >>>>>> .shutdown()
+> >>>>>>
+> >>>>>> For kexec or reboot we do not really care about power savings since we
+> >>>>>> are about to load a new image anyway, however for S5/poweroff we do care
+> >>>>>> about quiescing the eMMC controller in a way that its clocks and the
+> >>>>>> eMMC device can be put into low power mode since we will stay in that
+> >>>>>> mode for seconds/hours/days until someone presses a button on their
+> >>>>>> remote (or other wake-up sources).
+> >>>>>
+> >>>>> Hmm, I am not sure I understand correctly. At shutdown we don't care
+> >>>>> about wake-up sources from the kernel point of view, instead we treat
+> >>>>> everything as if it will be powered off.
+> >>>>
+> >>>> The same .shutdown() path is used whether you kexec, reboot or poweroff,
+> >>>> but for poweroff we do care about allowing specific wake-up sources
+> >>>> configured as such to wake-up the system at a later time, like GPIOs,
+> >>>> RTC, etc.
+> >>>
+> >>> That's true, but using the ->shutdown() callbacks in this way would
+> >>> certainly be a new use case.
+> >>>
+> >>> Most subsystems/drivers don't care about power management in those
+> >>> callbacks, but rather just about managing a graceful shutdown.
+> >>>
+> >>> It sounds to me like you should have a look at the hibernation
+> >>> path/callbacks instead - or perhaps even the system suspend
+> >>> path/callback. Normally, that's where we care about power management.
+> >>
+> >> The platforms we use do not support hibernation, keep in mind that these
+> >> are embedded SoCs that support the S2 (standby), S3 (mem) and poweroff
+> >> suspend states, hibernation is not something that we can support.
+> >>
+> >>>
+> >>> I have looped in Rafael, to allow him to share his opinion on this.
+> >>>
+> >>>>
+> >>>>>
+> >>>>> We put devices into low power state at system suspend and potentially
+> >>>>> also during some of the hibernation phases.
+> >>>>>
+> >>>>> Graceful shutdown of the eMMC is also managed by the mmc core.
+> >>>>
+> >>>> AFAICT that calls mmc_blk_shutdown() but that is pretty much it, the
+> >>>> SDHCI platform_driver still needs to do something in order to conserve
+> >>>> power including disabling host->clk, otherwise we would not have done
+> >>>> that for sdhci-brcmstb.c.
+> >>>
+> >>> That's not entirely correct. When mmc_bus_shutdown() is called for the
+> >>> struct device* that belongs to an eMMC card, two actions are taken.
+> >>>
+> >>> *) We call mmc_blk_shutdown(), to suspend the block device queue from
+> >>> receiving new I/O requests.
+> >>> **) We call host->bus_ops->shutdown(), which is an eMMC specific
+> >>> callback set to mmc_shutdown(). In this step, we do a graceful
+> >>> shutdown/power-off of the eMMC card.
+> >>>
+> >>> When it comes to controller specific resources, like clocks and PM
+> >>> domains, for example, those may very well stay turned on. Do deal with
+> >>> these, then yes, you would need to implement the ->shutdown()
+> >>> callback. But as I said above, I am not sure it's the right thing to
+> >>> do.
+> >>
+> >> As explained before, we can enter S5 for an indefinite amount of time
+> >> until a wake-up source wakes us up so we must conserve power, even if we
+> >> happen to wake up the next second, we don't know that ahead of time. The
+> >> point of calling sdhci_pltfm_suspend() here is to ensure that host->clk
+> >> is turned off which cuts the eMMC controller digital clock, I forgot how
+> >> much power we save by doing so, but every 10s of mW counts for us.
+> >
+> > I fully understand that you want to avoid draining energy, every
+> > single uA certainly counts in cases like these.
+> >
+> > What puzzles me, is that your platform seems to keep some resources
+> > powered on (like device clocks) when entering the system wide low
+> > power state, S5.
 >
-> [1] 285133040e6c ("arm64: Import latest memcpy()/memmove() implementation")
+> More on that below.
+>
+> >
+> > In principle, I am wondering if it would be possible to use S5 as the
+> > system-wide low power state for the system suspend path, rather than
+> > S3, for example? In this way, we would be able to re-use already
+> > implemented ->suspend|resume callbacks from most subsystems/drivers, I
+> > believe. Or is there a problem with that?
+>
+> The specific platform this driver is used on (BCM7211) is only capable
+> of supporting S2 and S5. There is no S3 because we have no provision on
+> the board to maintain the DRAM supplies on and preserve the DRAM
+> contents. This is a design choice that is different from the other
+> Broadcom STB platforms where we offer S2, S3 and S5 and we have an
+> On/off domain which is shutdown by hardware upon S3 or S5 entry and a
+> small always on domain which remains on to service wake-up sources
+> (infrared, timer, gpio, UART, etc.). S2 on this platform is implemented
+> entirely in software/firmware and does make use of the regular
+> suspend/resume calls.
+>
+> S5 is implemented in part in software/firmware and with the help of the
+> hardware that will turn off external board components. We do need the
+> help of the various software drivers (PCIe, Ethernet, GPIO, USB, UART,
+> RTC, eMMC, SPI, etc.) to do their job and conserve power when we enter
+> S5, hence the reason why all of our drivers implement ->shutdown() (in
+> addition to needing that for kexec and ensure no DMA is left running).
+>
+> >
+> > I think we need an opinion from Rafel to move forward.
+>
+> There is already an identical change done for sdhci-brcmstb.c, and the
+> exact same rationale applied there since both sdhci-iproc.c and
+> sdhci-brcmstb.c are used on this BCM7211 platform.
 
-Applied for fixes and by adding a stable tag, thanks!
+Right, thanks for the pointer. Looks like we should have taken this
+discussion back then, but better late than never.
+
+>
+> In all honesty, I am a bit surprised that the Linux device driver model
+> does not try to default the absence of a ->shutdown() to a ->suspend()
+> call since in most cases they are functionally equivalent, or should be,
+> in that they need to save power and quiesce the hardware, or leave
+> enough running to support a wake-up event.
+
+Well, the generall assumption is that the platform is going to be
+entirely powered off, thus moving things into a low power state would
+just be a waste of execution cycles. Of course, that's not the case
+for your platform.
+
+As I have stated earlier, to me it looks a bit questionable to use the
+kernel_power_off() path to support the use case you describe. On the
+other hand, we may not have a better option at this point.
+
+Just a few things, from the top of my head, that we certainly are
+missing to support your use case through kernel_power_off() path
+(there are certainly more):
+1. In general, subsystems/drivers don't care about moving things into
+lower power modes from their ->shutdown() callbacks.
+2. System wakeups and devices being affected in the wakeup path, needs
+to be respected properly. Additionally, userspace should be able to
+decide if system wakeups should be enabled or not.
+3. PM domains don't have ->shutdown() callbacks, thus it's likely that
+they remain powered on.
+4. Etc...
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 50 +++++++++++++++++++++++++++++----
->  1 file changed, 45 insertions(+), 5 deletions(-)
->
->
-> Changes since RFC:
-> - moved iomem address to bounce_iomem_buf otherwise sparse screamed when feeding memcpy_to/fromio with non iomem pointer
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index b8b771b643cc..3e9b28f18c70 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -165,6 +165,7 @@ struct meson_host {
->
->         unsigned int bounce_buf_size;
->         void *bounce_buf;
-> +       void __iomem *bounce_iomem_buf;
->         dma_addr_t bounce_dma_addr;
->         struct sd_emmc_desc *descs;
->         dma_addr_t descs_dma_addr;
-> @@ -742,6 +743,47 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
->         writel(start, host->regs + SD_EMMC_START);
->  }
->
-> +/* local sg copy to buffer version with _to/fromio usage for dram_access_quirk */
-> +static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data,
-> +                                 size_t buflen, bool to_buffer)
-> +{
-> +       unsigned int sg_flags = SG_MITER_ATOMIC;
-> +       struct scatterlist *sgl = data->sg;
-> +       unsigned int nents = data->sg_len;
-> +       struct sg_mapping_iter miter;
-> +       unsigned int offset = 0;
-> +
-> +       if (to_buffer)
-> +               sg_flags |= SG_MITER_FROM_SG;
-> +       else
-> +               sg_flags |= SG_MITER_TO_SG;
-> +
-> +       sg_miter_start(&miter, sgl, nents, sg_flags);
-> +
-> +       while ((offset < buflen) && sg_miter_next(&miter)) {
-> +               unsigned int len;
-> +
-> +               len = min(miter.length, buflen - offset);
-> +
-> +               /* When dram_access_quirk, the bounce buffer is a iomem mapping */
-> +               if (host->dram_access_quirk) {
-> +                       if (to_buffer)
-> +                               memcpy_toio(host->bounce_iomem_buf + offset, miter.addr, len);
-> +                       else
-> +                               memcpy_fromio(miter.addr, host->bounce_iomem_buf + offset, len);
-> +               } else {
-> +                       if (to_buffer)
-> +                               memcpy(host->bounce_buf + offset, miter.addr, len);
-> +                       else
-> +                               memcpy(miter.addr, host->bounce_buf + offset, len);
-> +               }
-> +
-> +               offset += len;
-> +       }
-> +
-> +       sg_miter_stop(&miter);
-> +}
-> +
->  static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->  {
->         struct meson_host *host = mmc_priv(mmc);
-> @@ -785,8 +827,7 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->                 if (data->flags & MMC_DATA_WRITE) {
->                         cmd_cfg |= CMD_CFG_DATA_WR;
->                         WARN_ON(xfer_bytes > host->bounce_buf_size);
-> -                       sg_copy_to_buffer(data->sg, data->sg_len,
-> -                                         host->bounce_buf, xfer_bytes);
-> +                       meson_mmc_copy_buffer(host, data, xfer_bytes, true);
->                         dma_wmb();
->                 }
->
-> @@ -955,8 +996,7 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
->         if (meson_mmc_bounce_buf_read(data)) {
->                 xfer_bytes = data->blksz * data->blocks;
->                 WARN_ON(xfer_bytes > host->bounce_buf_size);
-> -               sg_copy_from_buffer(data->sg, data->sg_len,
-> -                                   host->bounce_buf, xfer_bytes);
-> +               meson_mmc_copy_buffer(host, data, xfer_bytes, false);
->         }
->
->         next_cmd = meson_mmc_get_next_command(cmd);
-> @@ -1176,7 +1216,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
->                  * instead of the DDR memory
->                  */
->                 host->bounce_buf_size = SD_EMMC_SRAM_DATA_BUF_LEN;
-> -               host->bounce_buf = host->regs + SD_EMMC_SRAM_DATA_BUF_OFF;
-> +               host->bounce_iomem_buf = host->regs + SD_EMMC_SRAM_DATA_BUF_OFF;
->                 host->bounce_dma_addr = res->start + SD_EMMC_SRAM_DATA_BUF_OFF;
->         } else {
->                 /* data bounce buffer */
-> --
-> 2.25.1
->
