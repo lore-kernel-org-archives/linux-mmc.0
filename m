@@ -2,167 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4935EC48BDF
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Jun 2021 15:58:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59C24C48BE5
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Jun 2021 15:59:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 334BE6148E
-	for <linux-mmc@archiver.kernel.org>; Tue, 15 Jun 2021 15:58:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 460B46148E
+	for <linux-mmc@archiver.kernel.org>; Tue, 15 Jun 2021 15:59:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231757AbhFOQAS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Jun 2021 12:00:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59856 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233060AbhFOP7a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Jun 2021 11:59:30 -0400
-Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BE2BC061D7C;
-        Tue, 15 Jun 2021 08:51:38 -0700 (PDT)
-Received: by mail-pg1-x52d.google.com with SMTP id t9so11810816pgn.4;
-        Tue, 15 Jun 2021 08:51:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=k2dNOWTNlbIdh5i+8Nsx9KpD00S4Gm6luTuaXTJKuvA=;
-        b=ChZgBAMq1DPAkCXl3o9ThacQ8Rn81K9UwoROidAaA54sYtZ8SM0GPS9Tnm9zH2xNpq
-         C8oeufkZzN7UGlvaq8W0w//ODCeHnzdzCEdXWAlbrsoKfjPM2cQ8mFBBojKuw82QMs3K
-         EYctZLOzMqS4QJel5Al5+H0jc8AWYDnl4Ch7CgkuQbrR6EQbAwsg2hNKzdDSbkoPLUuT
-         ohrGaEoIapADit3oW3Y2OlIgcwPGab3JDsMeGCqnVe+AGCcwhq7vZVbLkLIOM9rmzAad
-         43B1O1cUuacPjpsWlnJDpczV0tN28HgiuUd6rRNTUdOEFU89xtDN5SPDxx4GACuBtAdg
-         +tDQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=k2dNOWTNlbIdh5i+8Nsx9KpD00S4Gm6luTuaXTJKuvA=;
-        b=RFjImuFurH6xs1CxdnsImGccgREm/HBuZSq5WuSDCyzqSUC14Ftj17WArx/JfkSRIq
-         xaqeplr+5lvn8Qqj0xiUxgbpBUw4vg7NGOcqwKD9jK5iOveFedRSvabBeqZMa6aYhZEx
-         X7f/p/ht53D3skKiExzXTsTbfuuJFALdB2dNQFzNf+GoZupy6g+Q4ZTEVXodPPkusq8C
-         WUDzdF4D5mLc/z9eefu5EiWBUbOhU118i5kiBS4fCCn5J5OYWU2+QTZvQGTnZ9DGx8kL
-         NQxqHTlfaS4l/9h9/y7C9KgDvGdTeay/j6pPLBtLYOmwmP0esCxWjuho5D94ssZSiZUG
-         OCGQ==
-X-Gm-Message-State: AOAM532cdm5unLRWKSppIRg1ijVudacz7WmIulzEL8bsNfuiw3t7l3g2
-        mQiY20/intwXyZ8JxCZJCVA=
-X-Google-Smtp-Source: ABdhPJzxd+19YUuuC7dp7PSqpG6zMz1GjqbkKB8x0UgFg+bpPlGxhB5l+HFRsBM/nFelIuD3dWFT/w==
-X-Received: by 2002:a63:5c4e:: with SMTP id n14mr196153pgm.192.1623772297831;
-        Tue, 15 Jun 2021 08:51:37 -0700 (PDT)
-Received: from [10.230.29.202] ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id k18sm3013838pff.63.2021.06.15.08.51.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 15 Jun 2021 08:51:36 -0700 (PDT)
-Subject: Re: [PATCH 2/2] mmc: sdhci-iproc: Add support for the legacy sdhci
- controller on the BCM7211
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linux PM <linux-pm@vger.kernel.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Al Cooper <alcooperx@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        BCM Kernel Feedback <bcm-kernel-feedback-list@broadcom.com>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        Ray Jui <rjui@broadcom.com>, Rob Herring <robh+dt@kernel.org>,
-        Scott Branden <sbranden@broadcom.com>
-References: <20210602192758.38735-1-alcooperx@gmail.com>
- <20210602192758.38735-2-alcooperx@gmail.com>
- <CAPDyKFrynST66yA_T3iroiJsfmNuBOEiiBnb=vNoyP6QpvZ7aQ@mail.gmail.com>
- <fe956941-bb39-413e-f051-d9f353f64eda@gmail.com>
- <CAPDyKFpEtvjS1mWC68gRBWD64dq2M1LO84UWE5uDLTzbGz1g8Q@mail.gmail.com>
- <6acd480a-8928-89bb-0f40-d278294973a1@gmail.com>
- <CAPDyKFqk23xg5R2k9GwQrnamwWYbMkmrbWYsHPF9VBQTAbvQHw@mail.gmail.com>
- <a1199e99-eb29-125b-2bac-f0abb4803c9b@gmail.com>
- <CAPDyKFq-rofbCyAhcQGt2xZykip6Le+CUDXgDwAisVOj=Tt-uA@mail.gmail.com>
- <b4c36944-8f41-1f30-10b4-b3efe0aade01@gmail.com>
- <CAPDyKFpR1GZcqCO5=-h7jvG0TysPLfJOP6rDJBagHvg9HFxnSQ@mail.gmail.com>
- <e25164b4-fa0c-b1c1-e40b-0f0c71641976@gmail.com>
- <CAPDyKFq92mp4CXj8-QHw=DEQ8bcAjtrmLyowrGKSJL2Fch1cJQ@mail.gmail.com>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-Message-ID: <c356986f-08de-e8d5-5d1e-f4e13c77648f@gmail.com>
-Date:   Tue, 15 Jun 2021 08:51:26 -0700
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.10.2
+        id S232249AbhFOQBI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Jun 2021 12:01:08 -0400
+Received: from verein.lst.de ([213.95.11.211]:50038 "EHLO verein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231899AbhFOQA1 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 15 Jun 2021 12:00:27 -0400
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 757AD67373; Tue, 15 Jun 2021 17:58:17 +0200 (CEST)
+Date:   Tue, 15 Jun 2021 17:58:17 +0200
+From:   Christoph Hellwig <hch@lst.de>
+To:     Marek Szyprowski <m.szyprowski@samsung.com>
+Cc:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>,
+        Justin Sanders <justin@coraid.com>,
+        Denis Efremov <efremov@linux.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Tim Waugh <tim@cyberelk.net>,
+        Geoff Levand <geoff@infradead.org>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        "Md. Haris Iqbal" <haris.iqbal@ionos.com>,
+        Jack Wang <jinpu.wang@ionos.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Jason Wang <jasowang@redhat.com>,
+        Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>,
+        Roger Pau =?iso-8859-1?Q?Monn=E9?= <roger.pau@citrix.com>,
+        Mike Snitzer <snitzer@redhat.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        dm-devel@redhat.com, linux-block@vger.kernel.org,
+        nbd@other.debian.org, linuxppc-dev@lists.ozlabs.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-s390@vger.kernel.org,
+        Bartlomiej Zolnierkiewicz <b.zolnierkie@samsung.com>
+Subject: Re: [PATCH 09/30] mtd_blkdevs: use blk_mq_alloc_disk
+Message-ID: <20210615155817.GA31047@lst.de>
+References: <20210602065345.355274-1-hch@lst.de> <20210602065345.355274-10-hch@lst.de> <CGME20210615154746eucas1p1321b6f1cf38d21899632e132cf025e61@eucas1p1.samsung.com> <13b21a07-b7c7-37db-fdc9-77bf174b6f8f@samsung.com>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFq92mp4CXj8-QHw=DEQ8bcAjtrmLyowrGKSJL2Fch1cJQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <13b21a07-b7c7-37db-fdc9-77bf174b6f8f@samsung.com>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-On 6/15/2021 8:30 AM, Ulf Hansson wrote:
-> [...]
+On Tue, Jun 15, 2021 at 05:47:44PM +0200, Marek Szyprowski wrote:
+> Hi,
 > 
->>>
->>>>
->>>> In all honesty, I am a bit surprised that the Linux device driver model
->>>> does not try to default the absence of a ->shutdown() to a ->suspend()
->>>> call since in most cases they are functionally equivalent, or should be,
->>>> in that they need to save power and quiesce the hardware, or leave
->>>> enough running to support a wake-up event.
->>>
->>> Well, the generall assumption is that the platform is going to be
->>> entirely powered off, thus moving things into a low power state would
->>> just be a waste of execution cycles. Of course, that's not the case
->>> for your platform.
->>
->> That assumption may hold true for ACPI-enabled machines but power off is
->> offered as a general function towards other more flexible and snowflaky
->> systems (read embedded) as well.
->>
->>>
->>> As I have stated earlier, to me it looks a bit questionable to use the
->>> kernel_power_off() path to support the use case you describe. On the
->>> other hand, we may not have a better option at this point.
->>
->> Correct, there is not really anything better and I am not sure what the
->> semantics of something better could be anyway.
->>
->>>
->>> Just a few things, from the top of my head, that we certainly are
->>> missing to support your use case through kernel_power_off() path
->>> (there are certainly more):
->>> 1. In general, subsystems/drivers don't care about moving things into
->>> lower power modes from their ->shutdown() callbacks.
->>> 2. System wakeups and devices being affected in the wakeup path, needs
->>> to be respected properly. Additionally, userspace should be able to
->>> decide if system wakeups should be enabled or not.
->>> 3. PM domains don't have ->shutdown() callbacks, thus it's likely that
->>> they remain powered on.
->>> 4. Etc...
->>
->> For the particular eMMC driver being discussed here this is a no-brainer
->  > because  it is not a wake-up source, therefore there is no reason not to
->> power if off if we can. It also seems proper to have it done by the
->> kernel as opposed to firmware.
+> On 02.06.2021 08:53, Christoph Hellwig wrote:
+> > Use the blk_mq_alloc_disk API to simplify the gendisk and request_queue
+> > allocation.
+> >
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > 
-> Okay, I have applied the $subject patch onto my next branch, along
-> with patch 1/2 (the DT doc change).
-> 
-> However, I still think we should look for a proper long term solution,
-> because the kernel_power_off() path does not currently support your
-> use case, with system wakeups etc.
+> This patch landed in linux-next as commit 6966bb921def ("mtd_blkdevs: 
+> use blk_mq_alloc_disk"). It causes the following regression on my QEMU 
+> arm64 setup:
 
-Not really, it does work fine, some drivers like gpio-keys.c or
-gpio-brcmstb.c will ensure that the GPIOs that are enabled as wake-up
-interrupts are configured that way during kernel_power_off() and the
-various interrupt controllers like irq-brcmstb-l2.c will make sure they
-don't mask wake-up interrupts.
+Please try the patch below:
 
-> 
-> I guess it could be a topic that is easier to bring up at the Linux
-> Plumbers Conf, for example.
-
-OK, not sure if I will be able to attend, but would definitively try to.
--- 
-Florian
+diff --git a/drivers/mtd/mtd_blkdevs.c b/drivers/mtd/mtd_blkdevs.c
+index 5dc4c966ea73..6ce4bc57f919 100644
+--- a/drivers/mtd/mtd_blkdevs.c
++++ b/drivers/mtd/mtd_blkdevs.c
+@@ -382,6 +382,7 @@ int add_mtd_blktrans_dev(struct mtd_blktrans_dev *new)
+ 	}
+ 
+ 	new->disk = gd;
++	new->rq = new->disk->queue;
+ 	gd->private_data = new;
+ 	gd->major = tr->major;
+ 	gd->first_minor = (new->devnum) << tr->part_bits;
