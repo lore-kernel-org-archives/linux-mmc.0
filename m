@@ -2,114 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8E79C48BE8
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 09:26:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE82C48BE8
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 10:35:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AE15B61356
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 09:26:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F26F613BF
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 10:35:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231772AbhFPJ2a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Jun 2021 05:28:30 -0400
-Received: from alexa-out.qualcomm.com ([129.46.98.28]:24816 "EHLO
-        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231316AbhFPJ23 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jun 2021 05:28:29 -0400
-Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
-  by alexa-out.qualcomm.com with ESMTP; 16 Jun 2021 02:26:23 -0700
-X-QCInternal: smtphost
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 16 Jun 2021 02:26:20 -0700
-X-QCInternal: smtphost
-Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 16 Jun 2021 14:55:38 +0530
-Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
-        id 1B6244CFC; Wed, 16 Jun 2021 14:55:37 +0530 (IST)
-From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, rampraka@codeaurora.org,
-        sayalil@codeaurora.org, sartgarg@codeaurora.org,
-        rnayak@codeaurora.org, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, robh+dt@kernel.org,
-        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Subject: [PATCH V1] mmc: sdhci: Update the software timeout value for sdhc
-Date:   Wed, 16 Jun 2021 14:55:35 +0530
-Message-Id: <1623835535-30871-1-git-send-email-sbhanu@codeaurora.org>
-X-Mailer: git-send-email 2.7.4
+        id S232498AbhFPKh1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Jun 2021 06:37:27 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50158 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232370AbhFPKhA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 16 Jun 2021 06:37:00 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 998E661107;
+        Wed, 16 Jun 2021 10:34:50 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1623839691;
+        bh=uJEv3OvJMqswalWvG2rx1DCmioR+VtUOrO7CZGR2Ajw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=A6wsFevRhS9CeafwlT529v2rV3Gm9GGwn4GGkmYDghQBgvSltNdLhA2d1VwUgm9YV
+         V+BZ/Z7dkVuRC9jA+aF8uUIN4oppwPSoc0YE3UC/NPxsGiCugwhXT7XZEbbeh2pmB/
+         M4rdDOJ4s0X9LmiRn4axjJlxF+T4B+Wd1HYLAz0MgEG64RvZ+ZZaXxAxnqcCDwPJej
+         pW3zx7fe6lsVprl/vQScwg/OlH7/cEN61iAlussljsV2mRmi/pOkb0n3FbRiUdCHAK
+         H6X3SZGPBKP1nePHfXCLHq/6yaW3vQZyt5NRvZBipljaN3xhgyRVkvGP83STRQZ1Xh
+         jhhQBOeaewbeQ==
+Date:   Wed, 16 Jun 2021 16:04:47 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     Rob Herring <robh@kernel.org>
+Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, dmaengine@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org,
+        alsa-devel@alsa-project.org, iommu@lists.linux-foundation.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, linux-can@vger.kernel.org,
+        linux-pci@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-remoteproc@vger.kernel.org, linux-riscv@lists.infradead.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>, Joerg Roedel <joro@8bytes.org>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Vivien Didelot <vivien.didelot@gmail.com>,
+        Vladimir Oltean <olteanv@gmail.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH] dt-bindings: Drop redundant minItems/maxItems
+Message-ID: <YMnTx4GqTWu75o2n@vkoul-mobl>
+References: <20210615191543.1043414-1-robh@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210615191543.1043414-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Whenever SDHC run at clock rate 50MHZ or below, the hardware data
-timeout value will be 21.47secs, which is approx. 22secs and we have
-a current software timeout value as 10secs. We have to set software
-timeout value more than the hardware data timeout value to avioid seeing
-the below register dumps.
+On 15-06-21, 13:15, Rob Herring wrote:
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooling
+> will fixup the final schema adding any unspecified minItems/maxItems.
+> 
+> This condition is partially checked with the meta-schema already, but
+> only if both 'minItems' and 'maxItems' are equal to the 'items' length.
+> An improved meta-schema is pending.
 
-[  332.953670] mmc2: Timeout waiting for hardware interrupt.
-[  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-[  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
-[  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
-[  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
-[  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
-[  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
-[  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
-[  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
-[  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
-[  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-[  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
-[  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
-[  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
-[  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-[  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
-[  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
-0x0000000ffffff218
-[  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
------------
-[  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
-0x6000642c | DLL cfg2: 0x0020a000
-[  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
-0x00000000 | DDR cfg: 0x80040873
-[  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
-0xf88218a8 Vndr func3: 0x02626040
-[  333.102371] mmc2: sdhci: ============================================
+>  .../devicetree/bindings/dma/renesas,rcar-dmac.yaml          | 1 -
 
-So, set software timeout value more than hardware timeout value.
+>  Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml    | 1 -
+>  Documentation/devicetree/bindings/phy/mediatek,tphy.yaml    | 2 --
+>  .../devicetree/bindings/phy/phy-cadence-sierra.yaml         | 2 --
+>  .../devicetree/bindings/phy/phy-cadence-torrent.yaml        | 4 ----
+>  .../devicetree/bindings/phy/qcom,ipq806x-usb-phy-hs.yaml    | 1 -
+>  .../devicetree/bindings/phy/qcom,ipq806x-usb-phy-ss.yaml    | 1 -
+>  Documentation/devicetree/bindings/phy/qcom,qmp-phy.yaml     | 1 -
+>  Documentation/devicetree/bindings/phy/qcom,qusb2-phy.yaml   | 2 --
+>  Documentation/devicetree/bindings/phy/renesas,usb2-phy.yaml | 2 --
+>  Documentation/devicetree/bindings/phy/renesas,usb3-phy.yaml | 1 -
 
-Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
----
- drivers/mmc/host/sdhci.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+Acked-By: Vinod Koul <vkoul@kernel.org>
 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index bf238ad..1386f7d 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1670,7 +1670,14 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 	else if (!cmd->data && cmd->busy_timeout > 9000)
- 		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
- 	else
--		timeout += 10 * HZ;
-+	       /*
-+		* In some of the conditions hardware data timeout value could be
-+		* approx 21.5 seconds and driver is setting software data timeout
-+		* value less than the hardware data timeout value and software data
-+		* timeout value should be more than the hardware data timeout value.
-+		* So, set software data timeout value more than 21.5 sec i.e. 22sec.
-+		*/
-+		timeout += 22 * HZ;
- 	sdhci_mod_timer(host, cmd->mrq, timeout);
- 
- 	if (host->use_external_dma)
 -- 
-QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
-of Code Aurora Forum, hosted by The Linux Foundation
-
+~Vinod
