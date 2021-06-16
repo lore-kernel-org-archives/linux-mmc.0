@@ -2,154 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE7AEC49EAF
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 06:06:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80358C48BE8
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 09:18:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BF2FC61369
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 06:06:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6659961359
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Jun 2021 09:18:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231133AbhFPGIF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Jun 2021 02:08:05 -0400
-Received: from mail.kernel.org ([198.145.29.99]:59250 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229543AbhFPGIE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 16 Jun 2021 02:08:04 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 6BD9161350;
-        Wed, 16 Jun 2021 06:05:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1623823558;
-        bh=wj+fnX135Oi/RuBZlfcRXEj82T4M+/zm2RKoeLfcdHI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=gHZLhaFOGuJEdFzGD8ad6/WT9r+ZqPlWGvOwJoE3JRn+pqz1O74eBVMbWjjeG87Dj
-         TPvrvUCNWbz/7lixm1DsLz03lLNe9Um44ZNofR+Fgv+slwMtNQEfvKCMrcTThWdf6e
-         F+7I/PxIo72YidQoQbZHHngOc0S41uEQR6nyNaRA=
-Date:   Wed, 16 Jun 2021 08:05:52 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Rob Herring <robh@kernel.org>
-Cc:     devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-crypto@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, dmaengine@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org,
-        alsa-devel@alsa-project.org, iommu@lists.linux-foundation.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-pci@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>, Vinod Koul <vkoul@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>, Joerg Roedel <joro@8bytes.org>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Wolfgang Grandegger <wg@grandegger.com>,
-        Marc Kleine-Budde <mkl@pengutronix.de>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Vivien Didelot <vivien.didelot@gmail.com>,
-        Vladimir Oltean <olteanv@gmail.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Mark Brown <broonie@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [PATCH] dt-bindings: Drop redundant minItems/maxItems
-Message-ID: <YMmUwCsdy4OaQCiU@kroah.com>
-References: <20210615191543.1043414-1-robh@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210615191543.1043414-1-robh@kernel.org>
+        id S231336AbhFPJUr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Jun 2021 05:20:47 -0400
+Received: from alexa-out.qualcomm.com ([129.46.98.28]:17117 "EHLO
+        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231524AbhFPJUq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Jun 2021 05:20:46 -0400
+Received: from ironmsg08-lv.qualcomm.com ([10.47.202.152])
+  by alexa-out.qualcomm.com with ESMTP; 16 Jun 2021 02:18:41 -0700
+X-QCInternal: smtphost
+Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
+  by ironmsg08-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 16 Jun 2021 02:18:38 -0700
+X-QCInternal: smtphost
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg01-blr.qualcomm.com with ESMTP; 16 Jun 2021 14:47:42 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id 0DB0A4CFC; Wed, 16 Jun 2021 14:47:41 +0530 (IST)
+From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org, robh+dt@kernel.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, sartgarg@codeaurora.org,
+        rnayak@codeaurora.org, saiprakash.ranjan@codeaurora.org,
+        sibis@codeaurora.org, okukatla@codeaurora.org, djakov@kernel.org,
+        cang@codeaurora.org, pragalla@codeaurora.org,
+        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Subject: [PATCH V2] arm64: dts: qcom: sc7180: Add xo clock for eMMC and Sd card
+Date:   Wed, 16 Jun 2021 14:47:39 +0530
+Message-Id: <1623835059-29302-1-git-send-email-sbhanu@codeaurora.org>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jun 15, 2021 at 01:15:43PM -0600, Rob Herring wrote:
-> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
-> same size as the list is redundant and can be dropped. Note that is DT
-> schema specific behavior and not standard json-schema behavior. The tooling
-> will fixup the final schema adding any unspecified minItems/maxItems.
-> 
-> This condition is partially checked with the meta-schema already, but
-> only if both 'minItems' and 'maxItems' are equal to the 'items' length.
-> An improved meta-schema is pending.
-> 
-> Cc: Jens Axboe <axboe@kernel.dk>
-> Cc: Stephen Boyd <sboyd@kernel.org>
-> Cc: Herbert Xu <herbert@gondor.apana.org.au>
-> Cc: "David S. Miller" <davem@davemloft.net>
-> Cc: David Airlie <airlied@linux.ie>
-> Cc: Daniel Vetter <daniel@ffwll.ch>
-> Cc: Vinod Koul <vkoul@kernel.org>
-> Cc: Bartosz Golaszewski <bgolaszewski@baylibre.com>
-> Cc: Kamal Dasu <kdasu.kdev@gmail.com>
-> Cc: Jonathan Cameron <jic23@kernel.org>
-> Cc: Lars-Peter Clausen <lars@metafoo.de>
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Marc Zyngier <maz@kernel.org>
-> Cc: Joerg Roedel <joro@8bytes.org>
-> Cc: Jassi Brar <jassisinghbrar@gmail.com>
-> Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
-> Cc: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Jakub Kicinski <kuba@kernel.org>
-> Cc: Wolfgang Grandegger <wg@grandegger.com>
-> Cc: Marc Kleine-Budde <mkl@pengutronix.de>
-> Cc: Andrew Lunn <andrew@lunn.ch>
-> Cc: Vivien Didelot <vivien.didelot@gmail.com>
-> Cc: Vladimir Oltean <olteanv@gmail.com>
-> Cc: Bjorn Helgaas <bhelgaas@google.com>
-> Cc: Kishon Vijay Abraham I <kishon@ti.com>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: "Uwe Kleine-König" <u.kleine-koenig@pengutronix.de>
-> Cc: Lee Jones <lee.jones@linaro.org>
-> Cc: Ohad Ben-Cohen <ohad@wizery.com>
-> Cc: Mathieu Poirier <mathieu.poirier@linaro.org>
-> Cc: Philipp Zabel <p.zabel@pengutronix.de>
-> Cc: Paul Walmsley <paul.walmsley@sifive.com>
-> Cc: Palmer Dabbelt <palmer@dabbelt.com>
-> Cc: Albert Ou <aou@eecs.berkeley.edu>
-> Cc: Alessandro Zummo <a.zummo@towertech.it>
-> Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Mark Brown <broonie@kernel.org>
-> Cc: Zhang Rui <rui.zhang@intel.com>
-> Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
-> Cc: Wim Van Sebroeck <wim@linux-watchdog.org>
-> Cc: Guenter Roeck <linux@roeck-us.net>
-> Signed-off-by: Rob Herring <robh@kernel.org>
-> ---
+Add XO clock for eMMC and SDCard as it would help in calculating dll
+register values.
 
-Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Reviewed-by: Konrad Dybcio <konrad.dybcio@somainline.org>
+---
+
+Changes since V1:
+	- Updated commit message as suggested by Bjorn Andersson.
+	- Added space after before xo clock name as suggested by
+	  Konrad Dybcio.
+---
+ arch/arm64/boot/dts/qcom/sc7180.dtsi | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/sc7180.dtsi b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+index 52115e0..fb1d9ad 100644
+--- a/arch/arm64/boot/dts/qcom/sc7180.dtsi
++++ b/arch/arm64/boot/dts/qcom/sc7180.dtsi
+@@ -701,8 +701,9 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 
+ 			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+-					<&gcc GCC_SDCC1_AHB_CLK>;
+-			clock-names = "core", "iface";
++				 <&gcc GCC_SDCC1_AHB_CLK>,
++				 <&rpmhcc RPMH_CXO_CLK>;
++			clock-names = "core", "iface", "xo";
+ 			interconnects = <&aggre1_noc MASTER_EMMC 0 &mc_virt SLAVE_EBI1 0>,
+ 					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_EMMC_CFG 0>;
+ 			interconnect-names = "sdhc-ddr","cpu-sdhc";
+@@ -2564,8 +2565,9 @@
+ 			interrupt-names = "hc_irq", "pwr_irq";
+ 
+ 			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+-					<&gcc GCC_SDCC2_AHB_CLK>;
+-			clock-names = "core", "iface";
++				 <&gcc GCC_SDCC2_AHB_CLK>,
++				 <&rpmhcc RPMH_CXO_CLK>;
++			clock-names = "core", "iface", "xo";
+ 
+ 			interconnects = <&aggre1_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
+ 					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDCC_2 0>;
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+of Code Aurora Forum, hosted by The Linux Foundation
+
