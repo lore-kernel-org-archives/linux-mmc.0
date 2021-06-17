@@ -2,212 +2,288 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_RED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 678A4C48BE5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 10:18:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DA0CC49EAF
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 13:39:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4AFCF613D5
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 10:18:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37892613CE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 13:39:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230269AbhFQKUU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Jun 2021 06:20:20 -0400
-Received: from mail-dm6nam10on2084.outbound.protection.outlook.com ([40.107.93.84]:39265
-        "EHLO NAM10-DM6-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231654AbhFQKUT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 17 Jun 2021 06:20:19 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=B0nF835jbJoay1oJ8ZT1TsTolouJyVsi1OK2yxilnhFmOJT1zZM+7paAcz99GI2RIwKwH632u7cqLVCCQLamB9y6Pt2Iv3H3UmjPpAKhJprnb3TTcQBs77ETX5almIfuxqhtUa8SN00P9NiwxImkiJNCEXQc9mhCk9sNfB6VVmbTdFMS1pM1bS90iFK0UuyVhA5VjAJ88iJMwZd/Zpq5t+Z0RAnjnUrivooOGGVF9TKBW5KgVW7xK6WWFsYkamGPsaKBZdrkYlec+RPEoLGnAXotLIJD3ibewDVk/0wue9cllzbjQIZYV6lOdOdIyZ4vbSx1EoFCkdW4Cnt91sh1yg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=TZHgkZIqjcUuIBpJoPKgNsyTBKyX3owKbFZk70oDUS0=;
- b=CtTu9Fb9SppwrXemH9ZGQlS44WoveF7LYud9CRQ7g1WtCkEzwgHjzkBVM2fP7PM9loCeX6LMAPueckH/lDaIgoqKR871z3pwIgwH90en3xj/FcAnD7X5RJea+SsaCv/Tixd78YSCVzHUAtVMBe6+YC6qWWbhES1cmWzFDiAyYg5b+IcBNXkKLA8K7tobEe/DjwEsUMcZJeWw+nZlu0X6iLwuuf0ktW88u7pIMaN5PmB/SHeXOnCgWl/GNHnrZs5sNmnF02o/o8uJgW/oMo06McfyIyHACkYrq1HXmsRz5Uh/wBZAdToexUKIDaj2yNUeqMLp8q03qx0IViKerOxxnw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=xilinx.com; dmarc=pass action=none header.from=xilinx.com;
- dkim=pass header.d=xilinx.com; arc=none
+        id S232887AbhFQNl0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Jun 2021 09:41:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53008 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231454AbhFQNlY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2021 09:41:24 -0400
+Received: from mail-io1-xd31.google.com (mail-io1-xd31.google.com [IPv6:2607:f8b0:4864:20::d31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A1D8C061574;
+        Thu, 17 Jun 2021 06:39:16 -0700 (PDT)
+Received: by mail-io1-xd31.google.com with SMTP id a6so3225210ioe.0;
+        Thu, 17 Jun 2021 06:39:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=xilinx.onmicrosoft.com; s=selector2-xilinx-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=TZHgkZIqjcUuIBpJoPKgNsyTBKyX3owKbFZk70oDUS0=;
- b=egPrgoq16P27Q2se6nmbCHxXxV59X2Fgrdg5V5lFV6VN4Z/o0cNhnd2A2hmedWVYwfrjWTKF7SsexaexivR8kCId7FviEXjvdoVaqgm2IOxuqroztVqrcZPnb/nk3I7UxbLSg8ngevasja8IhxdOYZLy+ZnoUaurp37MfyCdvTo=
-Received: from DM5PR02MB3877.namprd02.prod.outlook.com (2603:10b6:4:b9::34) by
- DM6PR02MB5354.namprd02.prod.outlook.com (2603:10b6:5:4c::22) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4219.22; Thu, 17 Jun 2021 10:18:11 +0000
-Received: from DM5PR02MB3877.namprd02.prod.outlook.com
- ([fe80::53:31a3:2e23:75e1]) by DM5PR02MB3877.namprd02.prod.outlook.com
- ([fe80::53:31a3:2e23:75e1%5]) with mapi id 15.20.4242.021; Thu, 17 Jun 2021
- 10:18:10 +0000
-From:   Sai Krishna Potthuri <lakshmis@xilinx.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Michal Simek <michals@xilinx.com>,
-        Manish Narani <MNARANI@xilinx.com>
-CC:     "rashmi.a@intel.com" <rashmi.a@intel.com>,
-        "linux-drivers-review-request@eclists.intel.com" 
-        <linux-drivers-review-request@eclists.intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Kishon <kishon@ti.com>, Vinod Koul <vkoul@kernel.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        "linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>,
-        Mark Gross <mgross@linux.intel.com>,
-        "kris.pan@linux.intel.com" <kris.pan@linux.intel.com>,
-        "furong.zhou@intel.com" <furong.zhou@intel.com>,
-        "mallikarjunappa.sangannavar@intel.com" 
-        <mallikarjunappa.sangannavar@intel.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "mahesh.r.vaidya@intel.com" <mahesh.r.vaidya@intel.com>,
-        "nandhini.srikandan@intel.com" <nandhini.srikandan@intel.com>,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>
-Subject: =?utf-8?B?UkU6IFvigJxQQVRDSOKAnSAxLzJdIG1tYzogc2RoY2ktb2YtYXJhc2FuOiBV?=
- =?utf-8?Q?se_clock-frequency_property_to_update_clk=5Fxin?=
-Thread-Topic: =?utf-8?B?W+KAnFBBVENI4oCdIDEvMl0gbW1jOiBzZGhjaS1vZi1hcmFzYW46IFVzZSBj?=
- =?utf-8?Q?lock-frequency_property_to_update_clk=5Fxin?=
-Thread-Index: AQHXWQjG8dfTI+uYIUesoYUB049ZoasYDjKAgAACAAA=
-Date:   Thu, 17 Jun 2021 10:18:10 +0000
-Message-ID: <DM5PR02MB3877417CC8D3AE42226AE2DBBD0E9@DM5PR02MB3877.namprd02.prod.outlook.com>
-References: <20210603182242.25733-1-rashmi.a@intel.com>
- <20210603182242.25733-2-rashmi.a@intel.com>
- <397dc803-f4ea-e8d3-9956-de8b3f537e2f@xilinx.com>
- <CAPDyKFpTf8DvauD17JR+jMH1TypgPiNs86k3YtaD4g10fRp65Q@mail.gmail.com>
-In-Reply-To: <CAPDyKFpTf8DvauD17JR+jMH1TypgPiNs86k3YtaD4g10fRp65Q@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-Auto-Response-Suppress: DR, RN, NRN, OOF, AutoReply
-X-MS-TNEF-Correlator: 
-authentication-results: linaro.org; dkim=none (message not signed)
- header.d=none;linaro.org; dmarc=none action=none header.from=xilinx.com;
-x-originating-ip: [149.199.50.130]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 2e45a186-f9d9-4902-3d03-08d931793596
-x-ms-traffictypediagnostic: DM6PR02MB5354:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <DM6PR02MB5354D6FEE80D652775904681BD0E9@DM6PR02MB5354.namprd02.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:6108;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: hAm+BX8UUb6GeOIa/fceJUDkEewBsrscwSdTXswuVBF5IHYTnS6e3dCwQQGqC7OO+FZ6gkNncOnlQCGSRhZtS9JbWzYai9gVmzjtXEzOuqsTgasKrjAjW1BlDpyxbpoUHnv+W4rRsqR5KqqIpMFDd84DL08WcuMKz92zKRw0g1hDlJnsOJgf8eG7uaevVJPSkzAHnhvvaM7tSsz8Fuy6W6dWc8y6aEDaQIKSkaFiSsGD0qu7XlchTR6zXzDH8wtDXhCzBbmjzIS4HBf1sc9SYLsdsOFEN73FWwoBEOSvgvZDKLmYLrdtRZOGhsFaxWGp3X6paCergGiqzciPeOLaGR6KP82nz13DvTstPFHQjZr6aLgwWBlqAPUiWOPf3FTf1fi7nAQU6GI0jK9Pr4BwAuwRJUsnE9/G8v7i0Z8PM1e/tNFWG6ihhlReHPKrM/p7tZEnDBuauEp++/qroMh+gRVMPuhiSDVVR0RCpEoGz+iY+K+PT5hLMqr+cwMs5+wApmSN9C10X54syyLXYlZZhSl+lwgUByi5OaRApQgM9nPfcmrabcXE9ltTeVG3/FVIqsucxOKv8kyC+3o1qAFpdW/kXkCyhfAAnFOFTRqL9nc=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM5PR02MB3877.namprd02.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(366004)(39860400002)(136003)(346002)(376002)(478600001)(110136005)(54906003)(71200400001)(66946007)(316002)(186003)(66446008)(38100700002)(64756008)(66476007)(8936002)(66556008)(9686003)(33656002)(55016002)(122000001)(53546011)(6636002)(2906002)(5660300002)(6506007)(4326008)(83380400001)(7416002)(7696005)(26005)(86362001)(52536014)(76116006)(15650500001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?Wkd4aFZaeEg1b3NtUG92WjJwa0tqM0FWd2g2VHNIUmtFMGFwbmRVbUY0czM2?=
- =?utf-8?B?ODA4REkyQ2tERXdzZkJuaTN5U0NCeDU4Tnlwc3M3dmIwdHU1enNIejZnWEdX?=
- =?utf-8?B?bCttNjRTalFGcUZNUzhMMmNUYkprcEJXT2lSQTFYbE1jQmY1RUxLYUZhTzBY?=
- =?utf-8?B?R2xVdTdOU0JDeGZWS1c5MEc2ejlmY3cyOTNlNnNMaVhGMy9FOS9hN3FYaWxS?=
- =?utf-8?B?Nk12WnQ5YnE2dXVnWVVrMXNaRFhFN2ZlZythMmhoajYzUjlqSHZkTjFMZWV3?=
- =?utf-8?B?R3pBY2IrbnRxOHdGY3lBZEhpbHY0R0hXd0I1RlErVmxYaWRSZ0RuQmU0Tm9Y?=
- =?utf-8?B?YllKS2k2Ym1RdnVmSlNFaHJkMlFZbTF1R3NGSUI2ejNhRGFUS1hucXpjdHRs?=
- =?utf-8?B?VzcrdTg2UDJtUmduZGxQL0Q0VkxiTXNEZk90by9qZmw5WTRCby94TStCWEM5?=
- =?utf-8?B?SUkyMFo4L1hWTENtWmxXbDZGVnI1bFgxenduUDdxcFRaWUoxLzRlaVJreHJx?=
- =?utf-8?B?TEF4aHkyRDVWRFFibTB2U2Y0LzV3Uk1ZNlI5enpwa1RUUXhBQlcvS2pZWDR0?=
- =?utf-8?B?czhnOUZLdGgySm5zT0pndmgxQlZwdm1yQWhVNEEvUzZEenlncFpqNUJxQzl6?=
- =?utf-8?B?Z0Nzbmk1Y1BOSEdnU3lVRjFucDBKdEQ4d3hRR0VrS2h6aU1XWitFQUJxelV0?=
- =?utf-8?B?eHJnRUZHTVNmMFJpUk1Jd05EYm10VzlUY3MxK2NSQnlHSS85QUZuN3hodzFW?=
- =?utf-8?B?eVlHOGp1NHRGS3Q2dStOTFdxeStGbExxblgvWk8zMjJKenlEVXAwNzkrQ0Rk?=
- =?utf-8?B?NUVVSDVhYlVvaU8xdzJ6dUM2ekhGWU9xcE5EQ2RUNjk2eXBlQmdSemoxVkdJ?=
- =?utf-8?B?ZFlxcjI0VUMrcVlIaTVlY3hvNnoxUW1JbWNqb01kcURwblVyMTEwbERhaHJv?=
- =?utf-8?B?OHRmV0VjWUM0M01LejdBSlBmNXhkM2owN0h4bHZFU2NiUC9zMXluT1psOEYx?=
- =?utf-8?B?L2ljQTgwejduZFI5WTlKSno4UkVFYjZubllxYVA2Z0Fid21NcjlSNHE0b0cy?=
- =?utf-8?B?bG1paEhJM09vMjQ1SDR4Y2ExTktNdEQ2akcwMkJxSVNmSWhUS3NScldxTTRl?=
- =?utf-8?B?QTJGVTJTa3Bxdk1HejRKMVJRaHREY3d3b2FwVVZtbHBNOCtJYTF0NTFNaUJr?=
- =?utf-8?B?ejhEQ1lkWFRtWTVrbWQ3ZC9DalVFNE5VT2p3RnI5QzNGUWtZMzlrSEJFdEVV?=
- =?utf-8?B?dVNmeXhOeXBRYUhxOVU1d2ZBaE9kdk1PNWhLV2FZOHFqZTZWV3paZGw5Rzh1?=
- =?utf-8?B?NTY3ZjlOYjQ2SHh1OTEyUy9HUjVHS04yTGg2RlpiNzI4UDJ1Sjdua1hQK05S?=
- =?utf-8?B?d090eVFJSmYxK3RNVXdXTkxnL0c0d05FS0NZN2FoZU1FZ2xYb04zYmN1WHJU?=
- =?utf-8?B?dFBNNXQzK09ja09LaklHUmNpR2I3c3h1b1NoRjQ1Y1VpN1J5TC9zVitQK084?=
- =?utf-8?B?ajF6TlVWM2E5RjZwcjRvUkcwa1ZSd2lWMnlkWU1OZ2JHTkVFOEwwQnRYbWVS?=
- =?utf-8?B?ZG1hcDVKRCtBSThCdGFRUU52T256bjJPMUMrTU1ycVJjeVB4TzIvcG9YN2JP?=
- =?utf-8?B?azV4ZmE0VGJaM0J4SDJlY1crYldJbjlZbE9PSlZWcCtncmRjN1hTY3ZMQm80?=
- =?utf-8?B?TWs1bDJJVG0rVW1EaU9kemJ4eHgrSHFWQlJQc0NmMk1iTkh2RmJlamNsK1NO?=
- =?utf-8?Q?Ih1nzf2Qo8BL78kHH7bB/iIHxolToikvBHYo8DW?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=8uLouHcYHuvh5T6xM8yIVrzF523FcxAB8VCcMY44PSs=;
+        b=DrkJglOKwg+WmIiFFG6K712yfI6x/RLf5UEIcKJydGaOBMRZNFam7wWwsGYeL6N5JC
+         40XbFWouWd4QbPoLw8juqNhDZjeFW8IIRYwllHXIDFq7EEBSOdqop4JrK/NiPWcrxHZP
+         /7Xin9xwWygH3SObqeMvZKjZ2iaQKa1insYgEv0RWSpNGlKsE4RoDeEL46eBil9pauhu
+         NNEsvRKP+YC8j+BjCLOuR9lNaBR92oHV3zowMDb2lWi+WdOnuqIjH2NQUK2KvphQxb1t
+         hK2dV+lsVMmfmM0S2aVlI4PLW+ESdaXkuzI8NPiT9kFyN0CohBvacdSflevgnk8XhAvL
+         2/nA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=8uLouHcYHuvh5T6xM8yIVrzF523FcxAB8VCcMY44PSs=;
+        b=UmvHzrrm1XoMTphnbEhgZho3vQQozBoUG9e497vImcNb7/N4rrHRPh0us3T5opzGKG
+         c25fJdQQfCNQkdhSMg4WZBNDtBB4kajxQxmwi8hQMqiQK9KK8ptyfxkXOPJGvXLp7Iqd
+         Ahclu1nWudjxZaPwpn0MkbnC0QkrIcmHX5ufGppAkoWJHzNq4D9jWT1Zbn+ze66QMKyE
+         k/6bn41x8pLJ2i8yWRjJMSNw1uZMJHRx3IzNUumuzXCXFQzlQn7plorqLVJX32361Hav
+         +peDKGXiI7oRpp5hmPwiCJkuRmwyFti1qpVcolsWjAdapHlSmW0nGkXuOEwjC3H7Omek
+         y9pA==
+X-Gm-Message-State: AOAM531q429JijDXscApyyjVwEp0RhfgdwpFDsH1d0jDZOoO6md27W0D
+        1go6JUQNmEoLhtr3Ku9vOorpIgpj4rVsNxfJdYo=
+X-Google-Smtp-Source: ABdhPJxnfkeEWGUJgQcDn0I2Ve0wSFkY7REYvBKyja2+qam6LK577H+YFA9dEQrKZJ960bwwySGIDnthxfzoxsKE1u0=
+X-Received: by 2002:a5d:97d9:: with SMTP id k25mr3918157ios.197.1623937155671;
+ Thu, 17 Jun 2021 06:39:15 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: xilinx.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM5PR02MB3877.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2e45a186-f9d9-4902-3d03-08d931793596
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Jun 2021 10:18:10.7779
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 657af505-d5df-48d0-8300-c31994686c5c
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: NIuAyUh2QF0nH0kALS9A9kd1PKwdr+9z0HkwgJWHyAz5E28ljTGrdkIiT5/mmAB4bhoPXH7KNDc8lJicCjRUKA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR02MB5354
+References: <20210615191543.1043414-1-robh@kernel.org>
+In-Reply-To: <20210615191543.1043414-1-robh@kernel.org>
+From:   Jassi Brar <jassisinghbrar@gmail.com>
+Date:   Thu, 17 Jun 2021 08:39:04 -0500
+Message-ID: <CABb+yY1hR8=7Bc7tw8koqNd2_r0-P6HiHkoyb0j=C7QbN4Dvrw@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: Drop redundant minItems/maxItems
+To:     Rob Herring <robh@kernel.org>
+Cc:     Devicetree List <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-crypto@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, alsa-devel@alsa-project.org,
+        iommu@lists.linux-foundation.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        "<netdev@vger.kernel.org>" <netdev@vger.kernel.org>,
+        linux-can@vger.kernel.org, linux-pci@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-gpio@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-remoteproc@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-rtc@vger.kernel.org,
+        linux-serial@vger.kernel.org,
+        linux-spi <linux-spi@vger.kernel.org>, linux-pm@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>, Vinod Koul <vkoul@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>, Joerg Roedel <joro@8bytes.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Vivien Didelot <vivien.didelot@gmail.com>,
+        Vladimir Oltean <olteanv@gmail.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGksDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogVWxmIEhhbnNzb24g
-PHVsZi5oYW5zc29uQGxpbmFyby5vcmc+DQo+IFNlbnQ6IFRodXJzZGF5LCBKdW5lIDE3LCAyMDIx
-IDM6MzQgUE0NCj4gVG86IE1pY2hhbCBTaW1layA8bWljaGFsc0B4aWxpbnguY29tPjsgTWFuaXNo
-IE5hcmFuaQ0KPiA8TU5BUkFOSUB4aWxpbnguY29tPjsgU2FpIEtyaXNobmEgUG90dGh1cmkgPGxh
-a3NobWlzQHhpbGlueC5jb20+DQo+IENjOiByYXNobWkuYUBpbnRlbC5jb207IGxpbnV4LWRyaXZl
-cnMtcmV2aWV3LXJlcXVlc3RAZWNsaXN0cy5pbnRlbC5jb207DQo+IGxpbnV4LW1tYyA8bGludXgt
-bW1jQHZnZXIua2VybmVsLm9yZz47IExpbnV4IEFSTSA8bGludXgtYXJtLQ0KPiBrZXJuZWxAbGlz
-dHMuaW5mcmFkZWFkLm9yZz47IExpbnV4IEtlcm5lbCBNYWlsaW5nIExpc3QgPGxpbnV4LQ0KPiBr
-ZXJuZWxAdmdlci5rZXJuZWwub3JnPjsgS2lzaG9uIDxraXNob25AdGkuY29tPjsgVmlub2QgS291
-bA0KPiA8dmtvdWxAa2VybmVsLm9yZz47IEFuZHkgU2hldmNoZW5rbw0KPiA8YW5kcml5LnNoZXZj
-aGVua29AbGludXguaW50ZWwuY29tPjsgbGludXgtcGh5QGxpc3RzLmluZnJhZGVhZC5vcmc7IE1h
-cmsNCj4gR3Jvc3MgPG1ncm9zc0BsaW51eC5pbnRlbC5jb20+OyBrcmlzLnBhbkBsaW51eC5pbnRl
-bC5jb207DQo+IGZ1cm9uZy56aG91QGludGVsLmNvbTsgbWFsbGlrYXJqdW5hcHBhLnNhbmdhbm5h
-dmFyQGludGVsLmNvbTsgQWRyaWFuDQo+IEh1bnRlciA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+
-OyBtYWhlc2guci52YWlkeWFAaW50ZWwuY29tOw0KPiBuYW5kaGluaS5zcmlrYW5kYW5AaW50ZWwu
-Y29tOyBSYWphIFN1YnJhbWFuaWFuLCBMYWtzaG1pIEJhaQ0KPiA8bGFrc2htaS5iYWkucmFqYS5z
-dWJyYW1hbmlhbkBpbnRlbC5jb20+DQo+IFN1YmplY3Q6IFJlOiBb4oCcUEFUQ0jigJ0gMS8yXSBt
-bWM6IHNkaGNpLW9mLWFyYXNhbjogVXNlIGNsb2NrLWZyZXF1ZW5jeQ0KPiBwcm9wZXJ0eSB0byB1
-cGRhdGUgY2xrX3hpbg0KPiANCj4gT24gRnJpLCA0IEp1biAyMDIxIGF0IDA4OjEzLCBNaWNoYWwg
-U2ltZWsgPG1pY2hhbC5zaW1la0B4aWxpbnguY29tPiB3cm90ZToNCj4gPg0KPiA+DQo+ID4NCj4g
-PiBPbiA2LzMvMjEgODoyMiBQTSwgcmFzaG1pLmFAaW50ZWwuY29tIHdyb3RlOg0KPiA+ID4gRnJv
-bTogUmFzaG1pIEEgPHJhc2htaS5hQGludGVsLmNvbT4NCj4gPiA+DQo+ID4gPiBJZiBjbG9jay1m
-cmVxdWVuY3kgcHJvcGVydHkgaXMgc2V0IGFuZCBpdCBpcyBub3QgdGhlIHNhbWUgYXMgdGhlDQo+
-ID4gPiBjdXJyZW50IGNsb2NrIHJhdGUgb2YgY2xrX3hpbihiYXNlIGNsb2NrIGZyZXF1ZW5jeSks
-IHNldCBjbGtfeGluIHRvDQo+ID4gPiB1c2UgdGhlIHByb3ZpZGVkIGNsb2NrIHJhdGUuDQo+ID4g
-Pg0KPiA+ID4gU2lnbmVkLW9mZi1ieTogUmFzaG1pIEEgPHJhc2htaS5hQGludGVsLmNvbT4NCj4g
-PiA+IFJldmlld2VkLWJ5OiBBZHJpYW4gSHVudGVyIDxhZHJpYW4uaHVudGVyQGludGVsLmNvbT4N
-Cj4gPiA+IC0tLQ0KPiA+ID4gIGRyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2YtYXJhc2FuLmMgfCAx
-NCArKysrKysrKysrKystLQ0KPiA+ID4gIDEgZmlsZSBjaGFuZ2VkLCAxMiBpbnNlcnRpb25zKCsp
-LCAyIGRlbGV0aW9ucygtKQ0KPiA+ID4NCj4gPiA+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9o
-b3N0L3NkaGNpLW9mLWFyYXNhbi5jDQo+ID4gPiBiL2RyaXZlcnMvbW1jL2hvc3Qvc2RoY2ktb2Yt
-YXJhc2FuLmMNCj4gPiA+IGluZGV4IDgzOTk2NWY3YzcxNy4uMGU3YzA3ZWQ5NjkwIDEwMDY0NA0K
-PiA+ID4gLS0tIGEvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYw0KPiA+ID4gKysr
-IGIvZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1vZi1hcmFzYW4uYw0KPiA+ID4gQEAgLTE1NDIsNiAr
-MTU0Miw4IEBAIHN0YXRpYyBpbnQgc2RoY2lfYXJhc2FuX3Byb2JlKHN0cnVjdA0KPiBwbGF0Zm9y
-bV9kZXZpY2UgKnBkZXYpDQo+ID4gPiAgICAgICAgICAgICAgIH0NCj4gPiA+ICAgICAgIH0NCj4g
-PiA+DQo+ID4gPiArICAgICBzZGhjaV9nZXRfb2ZfcHJvcGVydHkocGRldik7DQo+ID4gPiArDQo+
-ID4gPiAgICAgICBzZGhjaV9hcmFzYW4tPmNsa19haGIgPSBkZXZtX2Nsa19nZXQoZGV2LCAiY2xr
-X2FoYiIpOw0KPiA+ID4gICAgICAgaWYgKElTX0VSUihzZGhjaV9hcmFzYW4tPmNsa19haGIpKSB7
-DQo+ID4gPiAgICAgICAgICAgICAgIHJldCA9IGRldl9lcnJfcHJvYmUoZGV2LA0KPiA+ID4gUFRS
-X0VSUihzZGhjaV9hcmFzYW4tPmNsa19haGIpLCBAQCAtMTU2MSwxNCArMTU2MywyMiBAQCBzdGF0
-aWMgaW50DQo+IHNkaGNpX2FyYXNhbl9wcm9iZShzdHJ1Y3QgcGxhdGZvcm1fZGV2aWNlICpwZGV2
-KQ0KPiA+ID4gICAgICAgICAgICAgICBnb3RvIGVycl9wbHRmbV9mcmVlOw0KPiA+ID4gICAgICAg
-fQ0KPiA+ID4NCj4gPiA+ICsgICAgIC8qIElmIGNsb2NrLWZyZXF1ZW5jeSBwcm9wZXJ0eSBpcyBz
-ZXQsIHVzZSB0aGUgcHJvdmlkZWQgdmFsdWUgKi8NCj4gPiA+ICsgICAgIGlmIChwbHRmbV9ob3N0
-LT5jbG9jayAmJg0KPiA+ID4gKyAgICAgICAgIHBsdGZtX2hvc3QtPmNsb2NrICE9IGNsa19nZXRf
-cmF0ZShjbGtfeGluKSkgew0KPiA+ID4gKyAgICAgICAgICAgICByZXQgPSBjbGtfc2V0X3JhdGUo
-Y2xrX3hpbiwgcGx0Zm1faG9zdC0+Y2xvY2spOw0KPiA+ID4gKyAgICAgICAgICAgICBpZiAocmV0
-KSB7DQo+ID4gPiArICAgICAgICAgICAgICAgICAgICAgZGV2X2VycigmcGRldi0+ZGV2LCAiRmFp
-bGVkIHRvIHNldCBTRCBjbG9jayByYXRlXG4iKTsNCj4gPiA+ICsgICAgICAgICAgICAgICAgICAg
-ICBnb3RvIGNsa19kaXNfYWhiOw0KPiA+ID4gKyAgICAgICAgICAgICB9DQo+ID4gPiArICAgICB9
-DQo+ID4gPiArDQo+ID4gPiAgICAgICByZXQgPSBjbGtfcHJlcGFyZV9lbmFibGUoY2xrX3hpbik7
-DQo+ID4gPiAgICAgICBpZiAocmV0KSB7DQo+ID4gPiAgICAgICAgICAgICAgIGRldl9lcnIoZGV2
-LCAiVW5hYmxlIHRvIGVuYWJsZSBTRCBjbG9jay5cbiIpOw0KPiA+ID4gICAgICAgICAgICAgICBn
-b3RvIGNsa19kaXNfYWhiOw0KPiA+ID4gICAgICAgfQ0KPiA+ID4NCj4gPiA+IC0gICAgIHNkaGNp
-X2dldF9vZl9wcm9wZXJ0eShwZGV2KTsNCj4gPiA+IC0NCj4gPiA+ICAgICAgIGlmIChvZl9wcm9w
-ZXJ0eV9yZWFkX2Jvb2wobnAsICJ4bG54LGZhaWxzLXdpdGhvdXQtdGVzdC1jZCIpKQ0KPiA+ID4g
-ICAgICAgICAgICAgICBzZGhjaV9hcmFzYW4tPnF1aXJrcyB8PQ0KPiA+ID4gU0RIQ0lfQVJBU0FO
-X1FVSVJLX0ZPUkNFX0NEVEVTVDsNCj4gPiA+DQo+ID4gPg0KPiA+DQo+ID4gTWFuaXNoL1NhaTog
-UGxlYXNlIHJldGVzdCB0aGlzIG9uIFhpbGlueCBTT0MuDQo+ID4NCj4gPiBUaGFua3MsDQo+ID4g
-TWljaGFsDQo+IA0KPiBJIGFtIGFib3V0IHRvIHF1ZXVlIHRoaXMgcGF0Y2gsIGJ1dCBpdCB3b3Vs
-ZCBiZSBuaWNlIHRvIGdldCB5b3VyIGNvbmZpcm1hdGlvbg0KPiBhbmQgdGVzdGVkLWJ5IHRhZ3Mg
-YmVmb3JlIGRvaW5nIHNvLiBXb3VsZCB0aGF0IGJlIHBvc3NpYmxlIHdpdGhpbiB0aGUgbmV4dA0K
-PiBjb3VwbGUgb2YgZGF5cz8NClRlc3RlZCB0aGlzIHBhdGNoIG9uIFhpbGlueCBwbGF0Zm9ybXMu
-DQpUZXN0ZWQtYnk6IFNhaSBLcmlzaG5hIFBvdHRodXJpIDxsYWtzaG1pLnNhaS5rcmlzaG5hLnBv
-dHRodXJpQHhpbGlueC5jb20+DQoNClJlZ2FyZHMNClNhaSBLcmlzaG5hDQo=
+On Tue, Jun 15, 2021 at 2:15 PM Rob Herring <robh@kernel.org> wrote:
+>
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with t=
+he
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooli=
+ng
+> will fixup the final schema adding any unspecified minItems/maxItems.
+>
+> This condition is partially checked with the meta-schema already, but
+> only if both 'minItems' and 'maxItems' are equal to the 'items' length.
+> An improved meta-schema is pending.
+>
+> Cc: Jens Axboe <axboe@kernel.dk>
+> Cc: Stephen Boyd <sboyd@kernel.org>
+> Cc: Herbert Xu <herbert@gondor.apana.org.au>
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: David Airlie <airlied@linux.ie>
+> Cc: Daniel Vetter <daniel@ffwll.ch>
+> Cc: Vinod Koul <vkoul@kernel.org>
+> Cc: Bartosz Golaszewski <bgolaszewski@baylibre.com>
+> Cc: Kamal Dasu <kdasu.kdev@gmail.com>
+> Cc: Jonathan Cameron <jic23@kernel.org>
+> Cc: Lars-Peter Clausen <lars@metafoo.de>
+> Cc: Thomas Gleixner <tglx@linutronix.de>
+> Cc: Marc Zyngier <maz@kernel.org>
+> Cc: Joerg Roedel <joro@8bytes.org>
+> Cc: Jassi Brar <jassisinghbrar@gmail.com>
+> Cc: Mauro Carvalho Chehab <mchehab@kernel.org>
+> Cc: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Jakub Kicinski <kuba@kernel.org>
+> Cc: Wolfgang Grandegger <wg@grandegger.com>
+> Cc: Marc Kleine-Budde <mkl@pengutronix.de>
+> Cc: Andrew Lunn <andrew@lunn.ch>
+> Cc: Vivien Didelot <vivien.didelot@gmail.com>
+> Cc: Vladimir Oltean <olteanv@gmail.com>
+> Cc: Bjorn Helgaas <bhelgaas@google.com>
+> Cc: Kishon Vijay Abraham I <kishon@ti.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: "Uwe Kleine-K=C3=B6nig" <u.kleine-koenig@pengutronix.de>
+> Cc: Lee Jones <lee.jones@linaro.org>
+> Cc: Ohad Ben-Cohen <ohad@wizery.com>
+> Cc: Mathieu Poirier <mathieu.poirier@linaro.org>
+> Cc: Philipp Zabel <p.zabel@pengutronix.de>
+> Cc: Paul Walmsley <paul.walmsley@sifive.com>
+> Cc: Palmer Dabbelt <palmer@dabbelt.com>
+> Cc: Albert Ou <aou@eecs.berkeley.edu>
+> Cc: Alessandro Zummo <a.zummo@towertech.it>
+> Cc: Alexandre Belloni <alexandre.belloni@bootlin.com>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Mark Brown <broonie@kernel.org>
+> Cc: Zhang Rui <rui.zhang@intel.com>
+> Cc: Daniel Lezcano <daniel.lezcano@linaro.org>
+> Cc: Wim Van Sebroeck <wim@linux-watchdog.org>
+> Cc: Guenter Roeck <linux@roeck-us.net>
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+>  .../devicetree/bindings/ata/nvidia,tegra-ahci.yaml          | 1 -
+>  .../devicetree/bindings/clock/allwinner,sun4i-a10-ccu.yaml  | 2 --
+>  .../devicetree/bindings/clock/qcom,gcc-apq8064.yaml         | 1 -
+>  Documentation/devicetree/bindings/clock/qcom,gcc-sdx55.yaml | 2 --
+>  .../devicetree/bindings/clock/qcom,gcc-sm8350.yaml          | 2 --
+>  .../devicetree/bindings/clock/sprd,sc9863a-clk.yaml         | 1 -
+>  .../devicetree/bindings/crypto/allwinner,sun8i-ce.yaml      | 2 --
+>  Documentation/devicetree/bindings/crypto/fsl-dcp.yaml       | 1 -
+>  .../display/allwinner,sun4i-a10-display-backend.yaml        | 6 ------
+>  .../bindings/display/allwinner,sun6i-a31-mipi-dsi.yaml      | 1 -
+>  .../bindings/display/allwinner,sun8i-a83t-dw-hdmi.yaml      | 4 ----
+>  .../bindings/display/allwinner,sun8i-a83t-hdmi-phy.yaml     | 2 --
+>  .../bindings/display/allwinner,sun8i-r40-tcon-top.yaml      | 2 --
+>  .../devicetree/bindings/display/bridge/cdns,mhdp8546.yaml   | 2 --
+>  .../bindings/display/rockchip/rockchip,dw-hdmi.yaml         | 2 --
+>  Documentation/devicetree/bindings/display/st,stm32-dsi.yaml | 2 --
+>  .../devicetree/bindings/display/st,stm32-ltdc.yaml          | 1 -
+>  .../devicetree/bindings/display/xlnx/xlnx,zynqmp-dpsub.yaml | 4 ----
+>  .../devicetree/bindings/dma/renesas,rcar-dmac.yaml          | 1 -
+>  .../devicetree/bindings/edac/amazon,al-mc-edac.yaml         | 2 --
+>  Documentation/devicetree/bindings/eeprom/at24.yaml          | 1 -
+>  Documentation/devicetree/bindings/example-schema.yaml       | 2 --
+>  Documentation/devicetree/bindings/gpu/brcm,bcm-v3d.yaml     | 1 -
+>  Documentation/devicetree/bindings/gpu/vivante,gc.yaml       | 1 -
+>  Documentation/devicetree/bindings/i2c/brcm,brcmstb-i2c.yaml | 1 -
+>  .../devicetree/bindings/i2c/marvell,mv64xxx-i2c.yaml        | 2 --
+>  .../devicetree/bindings/i2c/mellanox,i2c-mlxbf.yaml         | 1 -
+>  .../devicetree/bindings/iio/adc/amlogic,meson-saradc.yaml   | 1 -
+>  .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml     | 2 --
+>  .../bindings/interrupt-controller/fsl,irqsteer.yaml         | 1 -
+>  .../bindings/interrupt-controller/loongson,liointc.yaml     | 1 -
+>  Documentation/devicetree/bindings/iommu/arm,smmu-v3.yaml    | 1 -
+>  .../devicetree/bindings/iommu/renesas,ipmmu-vmsa.yaml       | 1 -
+>  .../devicetree/bindings/mailbox/st,stm32-ipcc.yaml          | 2 --
+>  .../devicetree/bindings/media/amlogic,gx-vdec.yaml          | 1 -
+>  Documentation/devicetree/bindings/media/i2c/adv7604.yaml    | 1 -
+>  .../devicetree/bindings/media/marvell,mmp2-ccic.yaml        | 1 -
+>  .../devicetree/bindings/media/qcom,sc7180-venus.yaml        | 1 -
+>  .../devicetree/bindings/media/qcom,sdm845-venus-v2.yaml     | 1 -
+>  .../devicetree/bindings/media/qcom,sm8250-venus.yaml        | 1 -
+>  Documentation/devicetree/bindings/media/renesas,drif.yaml   | 1 -
+>  .../bindings/memory-controllers/mediatek,smi-common.yaml    | 6 ++----
+>  .../bindings/memory-controllers/mediatek,smi-larb.yaml      | 1 -
+>  .../devicetree/bindings/mmc/allwinner,sun4i-a10-mmc.yaml    | 2 --
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml    | 1 -
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml           | 2 --
+>  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml     | 2 --
+>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml      | 1 -
+>  Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml        | 1 -
+>  .../devicetree/bindings/net/amlogic,meson-dwmac.yaml        | 2 --
+>  .../devicetree/bindings/net/brcm,bcm4908-enet.yaml          | 2 --
+>  Documentation/devicetree/bindings/net/can/bosch,m_can.yaml  | 2 --
+>  Documentation/devicetree/bindings/net/dsa/brcm,sf2.yaml     | 2 --
+>  Documentation/devicetree/bindings/net/snps,dwmac.yaml       | 2 --
+>  Documentation/devicetree/bindings/net/stm32-dwmac.yaml      | 1 -
+>  Documentation/devicetree/bindings/pci/brcm,stb-pcie.yaml    | 2 --
+>  Documentation/devicetree/bindings/pci/loongson.yaml         | 1 -
+>  .../devicetree/bindings/pci/mediatek-pcie-gen3.yaml         | 1 -
+>  .../devicetree/bindings/pci/microchip,pcie-host.yaml        | 2 --
+>  Documentation/devicetree/bindings/perf/arm,cmn.yaml         | 1 -
+>  .../devicetree/bindings/phy/brcm,bcm63xx-usbh-phy.yaml      | 1 -
+>  .../devicetree/bindings/phy/brcm,brcmstb-usb-phy.yaml       | 3 ---
+>  Documentation/devicetree/bindings/phy/brcm,sata-phy.yaml    | 1 -
+>  Documentation/devicetree/bindings/phy/mediatek,tphy.yaml    | 2 --
+>  .../devicetree/bindings/phy/phy-cadence-sierra.yaml         | 2 --
+>  .../devicetree/bindings/phy/phy-cadence-torrent.yaml        | 4 ----
+>  .../devicetree/bindings/phy/qcom,ipq806x-usb-phy-hs.yaml    | 1 -
+>  .../devicetree/bindings/phy/qcom,ipq806x-usb-phy-ss.yaml    | 1 -
+>  Documentation/devicetree/bindings/phy/qcom,qmp-phy.yaml     | 1 -
+>  Documentation/devicetree/bindings/phy/qcom,qusb2-phy.yaml   | 2 --
+>  Documentation/devicetree/bindings/phy/renesas,usb2-phy.yaml | 2 --
+>  Documentation/devicetree/bindings/phy/renesas,usb3-phy.yaml | 1 -
+>  .../devicetree/bindings/pinctrl/actions,s500-pinctrl.yaml   | 1 -
+>  .../devicetree/bindings/power/amlogic,meson-ee-pwrc.yaml    | 1 -
+>  .../devicetree/bindings/pwm/allwinner,sun4i-a10-pwm.yaml    | 1 -
+>  .../devicetree/bindings/remoteproc/st,stm32-rproc.yaml      | 2 --
+>  .../devicetree/bindings/remoteproc/ti,k3-dsp-rproc.yaml     | 1 -
+>  .../devicetree/bindings/remoteproc/ti,omap-remoteproc.yaml  | 1 -
+>  Documentation/devicetree/bindings/reset/fsl,imx-src.yaml    | 1 -
+>  .../devicetree/bindings/riscv/sifive-l2-cache.yaml          | 1 -
+>  .../devicetree/bindings/rtc/allwinner,sun6i-a31-rtc.yaml    | 1 -
+>  Documentation/devicetree/bindings/rtc/imxdi-rtc.yaml        | 1 -
+>  Documentation/devicetree/bindings/serial/fsl-lpuart.yaml    | 2 --
+>  Documentation/devicetree/bindings/serial/samsung_uart.yaml  | 1 -
+>  .../devicetree/bindings/soc/qcom/qcom,geni-se.yaml          | 1 -
+>  Documentation/devicetree/bindings/soc/ti/ti,pruss.yaml      | 2 --
+>  .../bindings/sound/nvidia,tegra-audio-graph-card.yaml       | 1 -
+>  .../devicetree/bindings/sound/nvidia,tegra210-i2s.yaml      | 2 --
+>  Documentation/devicetree/bindings/sound/st,stm32-sai.yaml   | 3 ---
+>  .../devicetree/bindings/spi/amlogic,meson-gx-spicc.yaml     | 1 -
+>  .../devicetree/bindings/spi/brcm,spi-bcm-qspi.yaml          | 2 --
+>  .../bindings/thermal/allwinner,sun8i-a83t-ths.yaml          | 2 --
+>  Documentation/devicetree/bindings/thermal/qcom-tsens.yaml   | 1 -
+>  .../bindings/timer/allwinner,sun5i-a13-hstimer.yaml         | 1 -
+>  Documentation/devicetree/bindings/timer/arm,arch_timer.yaml | 1 -
+>  .../devicetree/bindings/timer/arm,arch_timer_mmio.yaml      | 2 --
+>  .../devicetree/bindings/timer/intel,ixp4xx-timer.yaml       | 1 -
+>  .../devicetree/bindings/usb/maxim,max3420-udc.yaml          | 2 --
+>  .../devicetree/bindings/usb/nvidia,tegra-xudc.yaml          | 4 ----
+>  Documentation/devicetree/bindings/usb/renesas,usbhs.yaml    | 3 ---
+>  .../devicetree/bindings/watchdog/st,stm32-iwdg.yaml         | 1 -
+>  101 files changed, 2 insertions(+), 163 deletions(-)
+>
+mailbox stuff
+Acked-by: Jassi Brar <jassisinghbrar@gmail.com>
+
+thanks.
