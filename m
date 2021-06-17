@@ -2,63 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37A95C49EA2
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 09:55:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3BCDC49EA2
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 09:59:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1A6E46140F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 09:55:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8E4CF61410
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Jun 2021 09:59:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232010AbhFQJ5y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Jun 2021 05:57:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59052 "EHLO
+        id S231511AbhFQKBM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Jun 2021 06:01:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230288AbhFQJ5x (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2021 05:57:53 -0400
-Received: from mail-ua1-x933.google.com (mail-ua1-x933.google.com [IPv6:2607:f8b0:4864:20::933])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FBC7C06175F
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Jun 2021 02:55:46 -0700 (PDT)
-Received: by mail-ua1-x933.google.com with SMTP id f1so1862663uaj.10
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Jun 2021 02:55:46 -0700 (PDT)
+        with ESMTP id S232144AbhFQKBG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Jun 2021 06:01:06 -0400
+Received: from mail-vk1-xa2e.google.com (mail-vk1-xa2e.google.com [IPv6:2607:f8b0:4864:20::a2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71133C061574
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Jun 2021 02:58:57 -0700 (PDT)
+Received: by mail-vk1-xa2e.google.com with SMTP id l7so1246825vkk.2
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Jun 2021 02:58:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=QjFXbUwZdM69ztcT9AcRv1Hn3FWXXKyc+J0Uj0oNjDc=;
-        b=O1sM7f0zEO6vRAY8YQGOlhPt9dHd1/Aco0jAT+B7g2nAnZOeIWKaS0Sou+jIwYbFJR
-         Nq2I6PPT7UVDJ5y3lfE8PLa37/F7WMwbtsPf8y3UaqqdejYA58XBtRYVIrcJDL43d0kL
-         jd0FHMeFXxSQ/e6hZzFCB+Jxx1FKhAcQWvkvOMIostToVlLMqLISIJHkD5kadYe2jdTF
-         qVpOLZ35FAAGTSKAaPkOIOC1ayxbg3EGbnbgebZ6voHbhtNbWa4UnioMOa1HgbqCEJs8
-         8QcZHPiBFk4oK0T6t3o7rUaoQ2iIH6VbU/QvI9K6qOcAYrKVLcy7BFpV4xYanTB/sk9s
-         ddaQ==
+        bh=OYaWFAmTtxmIx4SKywhtr8a4SqDaDzqjBCGGtLGU/+0=;
+        b=fUo7M6mqD7YawUEwJgqJhK4QCX7qicV+JHxE6Mz0lXGSaBU31SAJMVRa7XGotjPjMU
+         +8Al2APuUOPSIOVVFcgiDqUsyr2SvVrnMW+CMK1u7Bi7V4baL9c9qktdkFy084SnMhO6
+         yGF3Kx3cToUXzpZCKmQI3i9OHv9jyd07uvM0p7ZjzX/Bkb45W8tTFFBRTdxiTWIwKaHJ
+         lYZ0H80ZT1ddFwbXLLqpJWs6jLi6ZTphvA/h+WBQtBhTAH7+vJaWd5P7hk1gGRlayBzm
+         CpzV8VeO8RBkgBXCxGugW2iOzuyhq1EZmMdxq+VsL0cG1ZfevF6UDS0/E3vJZAbl29x/
+         EegQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=QjFXbUwZdM69ztcT9AcRv1Hn3FWXXKyc+J0Uj0oNjDc=;
-        b=rv14NCBWI1YFvx7m1T3CsN0VA0i3V7n+W3DX1AJqEEzj3qJMiqe213RPiP5NU2fxtF
-         3KzNOlGghZ0UJGaNdg16MqD0fLOnotBclpFxd7m7zTdebK0H5rB0yor7dmBqdIfHHizm
-         +Mt+dVpvPvlbiEkz+BmqR/jWNhXmTAJ99ZdEEYDZwIqvI1K/n8c7SFIa1JeCCOK90pQr
-         jsmAFjimPZPMuZ//uYTAd/sgOIPYUratW9i25KL7auAz2GQQ3yDlg54SgpFUZ+uZs8+H
-         RUx0m8PS2RN2vUMMQ46ZZ1CqPSPhZ7R3e7c1L0ML18YnDulBp62M7875MWZVeC8M+dLO
-         doSQ==
-X-Gm-Message-State: AOAM531RjARtYGYcTS3ZsCJIzhl37nMaMwTKajchKVffYnU+UpoETgWx
-        EF1tIOnAUwyT1ieEZuJXD2cem++zrnZJ7s9UoMzyjw==
-X-Google-Smtp-Source: ABdhPJxP1+HcBZP804uah7xfMMKsUK+ElLqb+W3pT/zaOiuVtYjBDI58XSdpf+GutFB0SWRYZgE4gumYDpYrOBBjzy0=
-X-Received: by 2002:ab0:4d49:: with SMTP id k9mr4066217uag.129.1623923745309;
- Thu, 17 Jun 2021 02:55:45 -0700 (PDT)
+        bh=OYaWFAmTtxmIx4SKywhtr8a4SqDaDzqjBCGGtLGU/+0=;
+        b=AOdNwl2d6XRYHUQh7DqnFKhJods9ODoykpCJqj+wlRAW1t+gnUZvI6n1WLktGHeG7t
+         IFkH3eGytcIXIShvL0A1aKSFdBilNtwYsiq08q9BoewDdL7oNXpExrmHxuEjunT8Cojz
+         o8F1ybuNG4yYtof/Iao4ONOb4xcCiezOSTpogu1/UKmcv6VNFO/LjmW5d1NDhbqzsIqI
+         AISYScdZ9huPHsTLt48cdMqASHIcrPnjBRueeI2EjVzx5G1lJ58snasKtC0h1mXunRHg
+         /zoz/9nU9U+QS+ef0lUXrfRsj3ntWL/0kXKqPT39TQZTxFUBXMbMKSIPGeninSNX6URH
+         KTzQ==
+X-Gm-Message-State: AOAM5302rrPW0JIQ1gUDQSB1tQ8jzl/CFpySdJk2YMqKC0vRgPFpvcoc
+        yVjmSnhWpIQJ4ikwsKRo9GE68gVtaysqa/XxxkFyYw==
+X-Google-Smtp-Source: ABdhPJyIZga3abYOI3nzgl4Yaha/nsc+4zOdXfgH0s0eyQC6r6mAcL/fEYaekMcxaUc/gITsdWnBqo6q89C6TK3jJ2c=
+X-Received: by 2002:a1f:9542:: with SMTP id x63mr3031503vkd.15.1623923936658;
+ Thu, 17 Jun 2021 02:58:56 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210616053934.880951-1-hch@lst.de> <20210616053934.880951-3-hch@lst.de>
-In-Reply-To: <20210616053934.880951-3-hch@lst.de>
+References: <20210616053934.880951-1-hch@lst.de>
+In-Reply-To: <20210616053934.880951-1-hch@lst.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 17 Jun 2021 11:55:08 +0200
-Message-ID: <CAPDyKFq6CsVf7_0CgddcZTQDwBbbGLqU4WGMg+es6YRhNQmomA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: switch to blk_mq_alloc_disk
-To:     Christoph Hellwig <hch@lst.de>
+Date:   Thu, 17 Jun 2021 11:58:20 +0200
+Message-ID: <CAPDyKFpAeUfMuXxbYE62Hjdjs==9zDZthvTDjBnrDd6v9iPGQQ@mail.gmail.com>
+Subject: Re: convert the mmc driver to use blk_mq_alloc_disk
+To:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         linux-block <linux-block@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
@@ -66,135 +66,27 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 16 Jun 2021 at 07:40, Christoph Hellwig <hch@lst.de> wrote:
->
-> Use the blk_mq_alloc_disk to allocate the request_queue and gendisk
-> together.
->
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
++ Jens
 
-Nice cleanup!
+On Wed, 16 Jun 2021 at 07:39, Christoph Hellwig <hch@lst.de> wrote:
+>
+> Hi Ulf,
+>
+> can you take a look at this series which converts the mmc driver to the
+> new blk_mq_alloc_disk interface.  It is based upon Jens' for-5.14/block
+> or for-next trees.
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+I don't see any issues with queuing this via Jens' tree, as I have
+only a few minor changes queued in my mmc tree that touch the
+corresponding files. None of which should cause a merge conflict, I
+think.
+
+>
+> Diffstat:
+>  block.c |   28 ++++------------------------
+>  queue.c |   23 ++++++++++-------------
+>  queue.h |    2 +-
+>  3 files changed, 15 insertions(+), 38 deletions(-)
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/core/block.c | 14 +++-----------
->  drivers/mmc/core/queue.c | 23 ++++++++++-------------
->  drivers/mmc/core/queue.h |  2 +-
->  3 files changed, 14 insertions(+), 25 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 947624e76c33..6652e1f1d4b2 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2310,27 +2310,21 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->          */
->         md->read_only = mmc_blk_readonly(card);
->
-> -       md->disk = alloc_disk(perdev_minors);
-> -       if (md->disk == NULL) {
-> -               ret = -ENOMEM;
-> +       md->disk = mmc_init_queue(&md->queue, card);
-> +       if (IS_ERR(md->disk)) {
-> +               ret = PTR_ERR(md->disk);
->                 goto err_kfree;
->         }
->
->         INIT_LIST_HEAD(&md->part);
->         INIT_LIST_HEAD(&md->rpmbs);
->         md->usage = 1;
-> -
-> -       ret = mmc_init_queue(&md->queue, card);
-> -       if (ret)
-> -               goto err_putdisk;
-> -
->         md->queue.blkdata = md;
->
->         md->disk->major = MMC_BLOCK_MAJOR;
->         md->disk->first_minor = devidx * perdev_minors;
->         md->disk->fops = &mmc_bdops;
->         md->disk->private_data = md;
-> -       md->disk->queue = md->queue.queue;
->         md->parent = parent;
->         set_disk_ro(md->disk, md->read_only || default_ro);
->         md->disk->flags = GENHD_FL_EXT_DEVT;
-> @@ -2379,8 +2373,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->
->         return md;
->
-> - err_putdisk:
-> -       put_disk(md->disk);
->   err_kfree:
->         kfree(md);
->   out:
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index d600e0a4a460..cc3261777637 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -424,9 +424,10 @@ static inline bool mmc_merge_capable(struct mmc_host *host)
->   *
->   * Initialise a MMC card request queue.
->   */
-> -int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
-> +struct gendisk *mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
->  {
->         struct mmc_host *host = card->host;
-> +       struct gendisk *disk;
->         int ret;
->
->         mq->card = card;
-> @@ -464,26 +465,22 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
->
->         ret = blk_mq_alloc_tag_set(&mq->tag_set);
->         if (ret)
-> -               return ret;
-> +               return ERR_PTR(ret);
-> +
->
-> -       mq->queue = blk_mq_init_queue(&mq->tag_set);
-> -       if (IS_ERR(mq->queue)) {
-> -               ret = PTR_ERR(mq->queue);
-> -               goto free_tag_set;
-> +       disk = blk_mq_alloc_disk(&mq->tag_set, mq);
-> +       if (IS_ERR(disk)) {
-> +               blk_mq_free_tag_set(&mq->tag_set);
-> +               return disk;
->         }
-> +       mq->queue = disk->queue;
->
->         if (mmc_host_is_spi(host) && host->use_spi_crc)
->                 blk_queue_flag_set(QUEUE_FLAG_STABLE_WRITES, mq->queue);
-> -
-> -       mq->queue->queuedata = mq;
->         blk_queue_rq_timeout(mq->queue, 60 * HZ);
->
->         mmc_setup_queue(mq, card);
-> -       return 0;
-> -
-> -free_tag_set:
-> -       blk_mq_free_tag_set(&mq->tag_set);
-> -       return ret;
-> +       return disk;
->  }
->
->  void mmc_queue_suspend(struct mmc_queue *mq)
-> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
-> index 3319d8ab57d0..9ade3bcbb714 100644
-> --- a/drivers/mmc/core/queue.h
-> +++ b/drivers/mmc/core/queue.h
-> @@ -94,7 +94,7 @@ struct mmc_queue {
->         struct work_struct      complete_work;
->  };
->
-> -extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *);
-> +struct gendisk *mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card);
->  extern void mmc_cleanup_queue(struct mmc_queue *);
->  extern void mmc_queue_suspend(struct mmc_queue *);
->  extern void mmc_queue_resume(struct mmc_queue *);
-> --
-> 2.30.2
->
