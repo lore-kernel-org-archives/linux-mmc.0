@@ -2,125 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7235C49EA2
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:46:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F3E9C48BE8
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:48:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9754C61003
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:46:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0ACCC61351
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:48:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231367AbhFRKsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Jun 2021 06:48:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51448 "EHLO
+        id S233044AbhFRKuL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Jun 2021 06:50:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51770 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231403AbhFRKsj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2021 06:48:39 -0400
-Received: from mail-ua1-x934.google.com (mail-ua1-x934.google.com [IPv6:2607:f8b0:4864:20::934])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50E07C06175F
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2021 03:46:30 -0700 (PDT)
-Received: by mail-ua1-x934.google.com with SMTP id e20so3232137ual.9
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2021 03:46:30 -0700 (PDT)
+        with ESMTP id S231403AbhFRKuK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2021 06:50:10 -0400
+Received: from mail-ua1-x92b.google.com (mail-ua1-x92b.google.com [IPv6:2607:f8b0:4864:20::92b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7523C06175F
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2021 03:48:01 -0700 (PDT)
+Received: by mail-ua1-x92b.google.com with SMTP id e20so3233545ual.9
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2021 03:48:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=CpD+Q5kU9ExZS+Yyb/2wyekLg8hGOlid4qrn2mysX88=;
-        b=B1WaCiqMIWHn+Py8IGz4tcQS5fMljich/pg8OBTFtWjfvMXfs2F/e8Va1oRtjm1L1k
-         mziLnN5BQllbtDJBWDfh6mR/hIBtN+f2I8yNZ/PUbASsXGVWiQMnbEvqHS+1hpnKFMee
-         hpsz38laqP3pHhInRWlurLlC2avT8Ct/f17rR1hNHg3k1jQQUc6Xxy1wfQAMHY69pzqJ
-         czn+C4yiXUFOJ69GA/ARtzct1dxKN3M8NL8Nn/6AHoWLXAsm0ogAaM7vrmymN6Flba31
-         l7hRiO6pM9xx5FUaqWDyobTCq1sgwn98yawH4na0fVwDDgcPpXQT/ozORDORiGsjlHO/
-         osOQ==
+         :cc:content-transfer-encoding;
+        bh=ya8vwRrjecoObdlsOLUUJ30LnN+duoFw+J3OVPTRUF0=;
+        b=o+GYjCGtWRIKz5X/yZwey8VX/VwQ1kNglvJ6anIhHFnbVoy6y8IpFZD/CmvxKvsnu4
+         7fMIqEGs7akx2UkVIENbeLCEqT4QWrzBe+XQy31HwEYJ8FPSziNwkx/TnSvXVMp6xlNi
+         3ByIgcP+aeWT3O/Mrb1RKmpjGldYTpc5uWg3xcdFzUwnkKeo0xd5IOl/TY+UuyRHOfPx
+         EkF0aKbwd7yRuNbV31tin3sDSdqgLv3S5B2uVnRccij9U9yroymYETDVM2hfxRl/E63T
+         MajJD7t3SNctRf3Z9QsSKWg9/endK9nKrPNaeNEyLZdvaJixCkdKyod7EsT+imw8fXf/
+         cvag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=CpD+Q5kU9ExZS+Yyb/2wyekLg8hGOlid4qrn2mysX88=;
-        b=TKgs9tL0xSC7UKWVsoXtGxTb0iSuxpxv/XuMHRq44fkkKz02CcgZ2dfl1DHPmeYln6
-         d/AR0+0hiXQpxJjt+Q7w9HzyzZk7yglJcNf/buMZ4PVd4Mt4cvvQep8032gYqHyB64HA
-         5ZSucpdncZJyE3TgctN49w2Lz2Fx+JcbJHbWWk8WJMZods9FNYnyefgtMv+Py57UIlgL
-         62dXeV2bNLE3WSXSHpwx739CBgq/V3U0STnaC6TjjB43rh44lo9BAkqqTOP+EFq1ePP8
-         opCBbQGmOeclYM1OOJzHXYje/YPfsOjukpRB5ZrXxuqYoGGI9LMbeDQj8hAgPPgl1aOR
-         RZIg==
-X-Gm-Message-State: AOAM530hWVHoTbPneel3RjhTf6Ms9mas4aIrAO5wG8d1O1xCJj75Tafs
-        kCnN27PXggGCQKS/kBs3ZHte3I6mBuH21XMT6qfr1w==
-X-Google-Smtp-Source: ABdhPJz5q6uSmZIgqvH4cM/wxmk7wx6QFt+Me6npRtBFZ8w2cwkJ4ghB58Q7g3uDPxZcnewIjO457WJRXdMtnZORwZo=
-X-Received: by 2002:ab0:d8f:: with SMTP id i15mr11168909uak.104.1624013189435;
- Fri, 18 Jun 2021 03:46:29 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=ya8vwRrjecoObdlsOLUUJ30LnN+duoFw+J3OVPTRUF0=;
+        b=e6T4Kxb/vyRu1ONvR8toH2u3FN5R/OgfdI/4HM7HspVOdAD7yLrPLK2ZOA5FQzaVDY
+         ym4B8e0JqFv/8MOk9Y+3fu5m/SUNO6jGroNG2eR1nt/wuvlkn9Dbvp379lUv2BDV6I1I
+         /4QCYHBcPsLn5fk1Kq1ENHOlUoHFUaes4uAW7ij95VJOLfSbYAe6zl3etyP0PC3Mg3tz
+         z4kvzOhiluT3LrfrMT4S1wnkSiAnCTvFtsrnD9xRdvufmuxV7AtzPuyCRbdW6MlASiDQ
+         5Ina1agEWQXq6TeV/kmxGhQL4upa1iWSSGj2yIo9es8W48/jVnc9592EnC88CCYZTy4U
+         5hCA==
+X-Gm-Message-State: AOAM533DHa7LetsfJlPNXva3lkffs4JFRvSFfXovqn7wSnxbCnkrDAOj
+        HnFaODpp2u0yn/jN/8cCU1kojP3/LOFTBgP4gltf8g==
+X-Google-Smtp-Source: ABdhPJzvdhXNK9nCo8mGufnqn1+1JRV4UhLNlnvq8xDijarv//1iFSjLa091BJv6MUg9sL9GbqqXUruK5kjlEG7d/7w=
+X-Received: by 2002:ab0:d8f:: with SMTP id i15mr11175274uak.104.1624013280934;
+ Fri, 18 Jun 2021 03:48:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210618073950.46154-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210618073950.46154-1-wsa+renesas@sang-engineering.com>
+References: <LO2P265MB26880B222999818677722528C4369@LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM>
+ <CWXP265MB26809CC8BCD8A0289697CBBDC40D9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+In-Reply-To: <CWXP265MB26809CC8BCD8A0289697CBBDC40D9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 18 Jun 2021 12:45:52 +0200
-Message-ID: <CAPDyKFqNcAomh145-MH8LMKnGDi3zCFASMh-U5DK-xM1rwJqHg@mail.gmail.com>
-Subject: Re: [RFC PATCH] mmc: disable retuning when tuning
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Date:   Fri, 18 Jun 2021 12:47:24 +0200
+Message-ID: <CAPDyKFr6bfcG+_3f+8ZYFFsuTA9reJ4Ykntxt=yh16-Z_6vxAg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: ioctl: Poll for TRAN if possible
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 18 Jun 2021 at 09:39, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Fri, 18 Jun 2021 at 12:00, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
+ wrote:
 >
-> It might be that something goes wrong during tuning so the MMC core will
-> immediately trigger a retune. In our case it was:
+> >Poll for TRAN state if the ioctl command will eventually return to TRAN
+> >
+> >The ioctl submitted command should not be considered completed until
+> >the card has returned back to TRAN state. Waiting just for the card
+> >to no longer signal busy is not enough as they might remain in a
+> >non-busy PROG state for a while after the command.
+> >Further commands requiring TRAN will fail then.
+> >It should not be the responsibility of the user to check if their comman=
+d
+> >has completed until sending the next via ioctl,
+> >instead the check should be made here.
+> >So now, in doubt, wait for TRAN except for the few commands that will
+> >never return to TRAN state.
 >
->  - we sent a tuning block
->  - there was an error so we need to send an abort cmd to the eMMC
->  - the abort cmd had a CRC error
->  - retune was set by the MMC core
->
-> This lead to a vicious circle causing a performance regression of 75%.
-> So, disable retuning while we tune. Let the tuning complete and see then
-> if it worked out or not.
->
-> Reported-by Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->
-> Hi Ulf, this patch is marked as RFC because I think this is a generic
-> issue. Lots of things could happen in the driver callback which cause a
-> retune, so I'd think it makes sense to deactivate it globally here. If
-> you think this is a driver specific issue, just let me know. I can
-> provide a small patch to create the issue for SDHI hardware, created
-> by Shimoda-san. We couldn't think of an easy way to reproduce it with
-> the fault injector, sadly. Let me know if you want to see that patch.
+> So apart from the fact that I missed a couple of non-TRAN returning MMC
+> commands, which I will add in v2, are there any other thoughts about this
+> patch? It would change the behavior of the ioctl interface, but I think i=
+t is
+> the only way to prevent race conditions here.
 
-This certainly makes sense to me! We should probably tag this (or
-something along this change) for stable.
-
-However, I would like to get some input from Adrian about this as
-well, so I have looped him in.
+I need some more time to review, but feel free to post a v2, I can
+look at that instead.
 
 Kind regards
 Uffe
 
 >
->  drivers/mmc/core/core.c | 2 ++
->  1 file changed, 2 insertions(+)
+> Best Regards,
+> Christian
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index b039dcff17f8..54f0814f110c 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -927,6 +927,8 @@ int mmc_execute_tuning(struct mmc_card *card)
->         if (!host->ops->execute_tuning)
->                 return 0;
->
-> +       mmc_retune_disable(host);
-> +
->         if (host->cqe_on)
->                 host->cqe_ops->cqe_off(host);
->
-> --
-> 2.30.2
+> Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+> Managing Directors: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
 >
