@@ -2,97 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81D98C49361
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:41:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6935BC48BDF
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:42:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6ADEA61003
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:41:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 54602613EC
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 10:42:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232880AbhFRKnJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Jun 2021 06:43:09 -0400
-Received: from mail.kernel.org ([198.145.29.99]:49146 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232317AbhFRKnJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Jun 2021 06:43:09 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id B8F40613EE;
-        Fri, 18 Jun 2021 10:40:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1624012860;
-        bh=97aa9h+v0rYjZf4kK6kzUPY706Shq0YBWoJvZidGtuY=;
-        h=Date:From:To:Subject:References:In-Reply-To:From;
-        b=U/DEuoneXf0sW5AiR03ACEfxxE+QNZcVHCnKIGSXTTIjjmWG56ozu5lr+bwB2FvrE
-         G7HzMf3DRj9tfP1n8RJ9H/YrtMlwfHm7gZ6qwjEoo964yxTgf0cggYJdl2+JBBBg2+
-         sWjiOgcDe4/D10m7qoTXZ+ii0Um3q2L8rbXfhjBa43/G70FBbfnrCQRjpjCk7ksqqC
-         XI3JG362XNhijcRK8FemWpMzXvdrfqjVO9f7ywFmDBzxtwggmbY38b4mNOg4oVCldw
-         fdBX6owB72i1Ad9a9J7LetwT5gSpACjgbY5s+wbY4NjWvTFHTDX8V6IRPX73/hKDJn
-         y3513mhwVvpEQ==
-Date:   Fri, 18 Jun 2021 12:40:49 +0200
-From:   Wolfram Sang <wsa@kernel.org>
-To:     Ulrich Hecht <uli@fpond.eu>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Ulrich Hecht <uli+renesas@fpond.eu>,
-        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
-        ulf.hansson@linaro.org
-Subject: Re: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
-Message-ID: <YMx4MSW6H6pH7GIv@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
-        Ulrich Hecht <uli@fpond.eu>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Ulrich Hecht <uli+renesas@fpond.eu>,
-        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
-        ulf.hansson@linaro.org
-References: <20210514155318.16812-1-uli+renesas@fpond.eu>
- <YKUf9TVcKetApd1J@ninjato>
- <461686971.488794.1622648414815@webmail.strato.com>
- <YMxWjsAQNt9DG0Ef@ninjato>
+        id S230476AbhFRKpH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Jun 2021 06:45:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50650 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230151AbhFRKpH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2021 06:45:07 -0400
+Received: from mail-vs1-xe29.google.com (mail-vs1-xe29.google.com [IPv6:2607:f8b0:4864:20::e29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EDF1C061574
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2021 03:42:57 -0700 (PDT)
+Received: by mail-vs1-xe29.google.com with SMTP id x8so4703939vso.5
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Jun 2021 03:42:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PltpfVsWYSYb83wtwKTYBy+0tqaIthqE9CaZ4SiNDcw=;
+        b=LzCYx9sJtWYCnQe39W4ypYY1HaZpTzOaNGgSjKgAbZbKHpoUjAYm1D6skpzrjnJ14d
+         OzHwTNNllYpvbE4ompxKWXqhPphY9pd8RxoizDyXN2AQPNa09x4Xp/b0dK6sYbycSO1/
+         3VfUf4oufQn6Ket+5XWDXKxMDStZDouBv1OA/T63b3e+8ZDQyZKd/lYwIcvvZWAOLGbn
+         NIGdgXfVGt2Z07ztLjzmSPAMEAWCBAQatBfPKE5j7szbfLnJYBZvlEkeyWoxQ54Yl6c4
+         DjTPo63DhC/6Avh291MgqF5QC0BC773trKQx+3hWdPje4D65v7GDu+N3U3hEGrKfHGqc
+         nutA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PltpfVsWYSYb83wtwKTYBy+0tqaIthqE9CaZ4SiNDcw=;
+        b=bRnQA4zQDZx9ikDne0W5N84jNN0qTJn5eVvgqFJIuRuRmnx7jySe9c5J+9+EL+3GqQ
+         VyzwHdhv2cO8iUxm6uIw/CaavI/Q2Lp8JBKCOGzRXFyPzABQd5dEWQNblslO3L3LwQem
+         HJBzcVtF6GjZ50bwCQEWN9TZ1m9q8M4xnxX//+JKT/npjHyPGSHtb+gp/6zvJUX/XqbL
+         hE+ZpNabdSlPnqM7Mb+6kOPPWnRp6J55rHb3RxM8weM1s86BZF7pFk2n2hpv1ApzgyPW
+         fkh+OmFe2UAiQDWg/TLPMCwwfkpMLJf5guY8wdjPI8vEAL1lkt4E9TS4AVNcXYOEjCik
+         pMSQ==
+X-Gm-Message-State: AOAM532VmcvfByxQw22le6hdMFKSgjD+r7SbS3mLntMONyy/MBZZfX1W
+        urXwRYg/B8mg04xxYOx8dKoOCv62UDNfRp5nxdvQhA==
+X-Google-Smtp-Source: ABdhPJwTo8gF8VInP0qhhqNy4ZFN8A/468CxnETPax0e+O/H/ER0VTWC7zyYFvMzggVTxrcAXIRdiyvbiSWHzvOaXHA=
+X-Received: by 2002:a67:1087:: with SMTP id 129mr5933112vsq.42.1624012976464;
+ Fri, 18 Jun 2021 03:42:56 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="vTTn4+9ekWgc4QDc"
-Content-Disposition: inline
-In-Reply-To: <YMxWjsAQNt9DG0Ef@ninjato>
+References: <20210618082317.58408-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210618082317.58408-1-wsa+renesas@sang-engineering.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 18 Jun 2021 12:42:19 +0200
+Message-ID: <CAPDyKFqkW9uwtJyWPFKggi2AJMtO4NJLW-6hviWgGSfoHyDm1A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: disable tuning when checking card presence
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Ulrich Hecht <uli+renesas@fpond.eu>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
++ Adrian
 
---vTTn4+9ekWgc4QDc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Fri, 18 Jun 2021 at 10:23, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> When we use the alive callback, we expect a command to fail if the card
+> is not present. We should not trigger a retune then which will confuse
+> users with a failed retune on a removed card:
+>
+>  mmc2: tuning execution failed: -5
+>  mmc2: card 0001 removed
+>
+> Disable retuning in this code path.
+>
+> Reported-by: Ulrich Hecht <uli+renesas@fpond.eu>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>  drivers/mmc/core/core.c | 5 +++++
+>  1 file changed, 5 insertions(+)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 54f0814f110c..eb792dd845a3 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2088,6 +2088,9 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+>         if (!host->card || mmc_card_removed(host->card))
+>                 return 1;
+>
+> +       /* we expect a failure if the card is removed */
+> +       mmc_retune_disable(host);
+> +
 
+Some controllers require a retune after it has been runtime suspended.
 
-> is finally suspending the device. I will also add do additional
-> suspend/resume tests before I say Tested-by.
+In the above path, when called via the bus_ops->detect() callback, it
+could be that the controller may have been runtime suspended and then
+got resumed by the call to mmc_get_card().
 
-So, I could not find a regression. I checked that RPM disables the clock
-between reads and reenables them properly when needed. Also,
-suspend/resume works, even when the resume happens in the middle of a
-transfer. No issues with bus width etc. Looks good.
+I think we need something more clever here, to make sure we don't end
+up in that situation. I have looped in Adrian, to see if has some
+ideas for how this can be fixed.
 
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+>         ret = host->bus_ops->alive(host);
+>
+>         /*
+> @@ -2107,6 +2110,8 @@ int _mmc_detect_card_removed(struct mmc_host *host)
+>                 pr_debug("%s: card remove detected\n", mmc_hostname(host));
+>         }
+>
+> +       mmc_retune_enable(host);
+> +
+>         return ret;
+>  }
+>
+> --
+> 2.30.2
+>
 
-
---vTTn4+9ekWgc4QDc
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDMeC0ACgkQFA3kzBSg
-Kbbxgw//ZhuXhhU4f8XYwqRGyfFgBUnfTZT5jJWOgMGYlR/5rUIQfOgKuoBJHmVS
-nZ45llnzYxUeiylBIUhhGSclwZLOrzP0IEt6fY4PyTxj6v4mGWmWk06svC+33Id8
-JhCMtiEYGh/QFaIaMRY0D9Ge8d2vRIxQgKjGPEfz7QLSY4WI29MWMMoC/ud7w2eP
-6VL0+AiTJ7CY+Ngu8yjSnh/GosVli5m48wWb12PmYB6tJVS9sbUiolySBveG9A33
-NrU98gBPvTMCQXeWl3ecBXKcBcMDHZEvldEJIvibuFLbba2FjflBeDdbHVgf+cPt
-F2AVGA6h8lLduRzvFGQ1wxWgnJarurbLca/y5qmX+ElgZW2XiwYrPzjUuD5r+uN7
-BpU95NMkMDKzSx2WNz/u9QveJS4kxG7B3ZMdYZ40+DCZ+DIkS4MyRMVoEo796YAU
-1/RV7hLvK4cMmsX03BgN7SUmhtVceSrGmsT1Bmh4E3AnaWnLHLxdPM4pkAEOzYTT
-f4hp0Yv85ev2XWrXOrY81pS9WHQ335n3weGGyqjoE0Oqi83/kOzZ9flY9zoFNEc6
-T9BlBM4l1w3nkJOVPJJF+bZ6qrZVaSpRDIzhxxPn0ZuTxlEsrD4M4gTUVjfr9Q/U
-NPJ8igoCPNuJMTTkQjsTzLypKW1yR4lSpoaWRmxtZIQHfPDW/ng=
-=ZjyO
------END PGP SIGNATURE-----
-
---vTTn4+9ekWgc4QDc--
+Kind regards
+Uffe
