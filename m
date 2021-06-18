@@ -2,88 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31BECC48BE8
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 07:39:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C52BCC49361
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:17:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03550613C1
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 07:39:56 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F42E6121D
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:17:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232009AbhFRHmE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Jun 2021 03:42:04 -0400
-Received: from www.zeus03.de ([194.117.254.33]:33114 "EHLO mail.zeus03.de"
+        id S231841AbhFRITa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Jun 2021 04:19:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38368 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230441AbhFRHmE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Jun 2021 03:42:04 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=M1/6jrE9gs9xYYoGvWvSGf2tW2G
-        9Il7kbShj7a94xqs=; b=DkEn+d62K/XzIoUZ2Ms7EFBJ6WpHbz5FEhE4KJ/RL5p
-        43rJy48WgLrtTWSJzqvk+dowxkHfMMIeAsN2a2+oM7InpEGNWI9t8uFpvIGQBx13
-        b4GY3ey2zRfCC1EKGDKH1f7ldwJ3/lCGFjDTLGY1uYAK3G4vsXxSN8CuyFfDWD74
-        =
-Received: (qmail 634354 invoked from network); 18 Jun 2021 09:39:54 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Jun 2021 09:39:54 +0200
-X-UD-Smtp-Session: l3s3148p1@o+f6bQXFqrIgAwDPXwaEABQIKHLDvKpZ
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
+        id S229848AbhFRIT3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 18 Jun 2021 04:19:29 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 67EBD6120D;
+        Fri, 18 Jun 2021 08:17:20 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1624004241;
+        bh=jqwS6iDBiJXSOWn/05eobs8QF6Gg9eW5WUiwoOfUIa4=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=jhf7C8VzVSchlCEIeQOR7U3OO6zieoOka6lQ8vvro2HaZT5jCj6eqCSB4qZvkH3Iv
+         fUY/47GwLxsXDGrHzTWYMlJWH9OrVqsufMvwysPKaNS5xv145buMHsToVnhHtpB9i6
+         3UMtrwjzWdUQYpuy83iqBvOdqnDpzTyBhbGgPqq1csUN6i6pyaEJqPjP4i2S7xOl8m
+         DG/R3KfaVT+RKXDUKd4Ie/tHBCvy9ueYIXHXG0LR06L7T3mZPGym50gK6kBkZnLyV/
+         lzXjdoOc0cx4QP77ybNxAUpoPQiZ0aFNLW8R9DiJ0Y6Ms1yt8rdCmmQxHjwqZPOBpJ
+         2+S88klk3Sb8g==
+Date:   Fri, 18 Jun 2021 10:17:18 +0200
+From:   Wolfram Sang <wsa@kernel.org>
+To:     Ulrich Hecht <uli@fpond.eu>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     Ulrich Hecht <uli+renesas@fpond.eu>,
+        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
+Message-ID: <YMxWjsAQNt9DG0Ef@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
+        Ulrich Hecht <uli@fpond.eu>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH] mmc: disable retuning when tuning
-Date:   Fri, 18 Jun 2021 09:39:50 +0200
-Message-Id: <20210618073950.46154-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.2
+        Ulrich Hecht <uli+renesas@fpond.eu>,
+        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
+ <YKUf9TVcKetApd1J@ninjato>
+ <461686971.488794.1622648414815@webmail.strato.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="SqUlJqbQK6D0nCb9"
+Content-Disposition: inline
+In-Reply-To: <461686971.488794.1622648414815@webmail.strato.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It might be that something goes wrong during tuning so the MMC core will
-immediately trigger a retune. In our case it was:
 
- - we sent a tuning block
- - there was an error so we need to send an abort cmd to the eMMC
- - the abort cmd had a CRC error
- - retune was set by the MMC core
+--SqUlJqbQK6D0nCb9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-This lead to a vicious circle causing a performance regression of 75%.
-So, disable retuning while we tune. Let the tuning complete and see then
-if it worked out or not.
+Hi Uli,
 
-Reported-by Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
+> _mmc_detect_card_removed() calls mmc_sd_alive(), which tries to send a
+> command to the SD card to see if it's still there, which in turn
+> triggers the retune. IOW, this is expected to fail, and the error
+> message is misleading.
 
-Hi Ulf, this patch is marked as RFC because I think this is a generic
-issue. Lots of things could happen in the driver callback which cause a
-retune, so I'd think it makes sense to deactivate it globally here. If
-you think this is a driver specific issue, just let me know. I can
-provide a small patch to create the issue for SDHI hardware, created
-by Shimoda-san. We couldn't think of an easy way to reproduce it with
-the fault injector, sadly. Let me know if you want to see that patch.
+This makes perfect sense to me. I disabled tuning in
+_mmc_detect_card_removed() and the message is gone, of course. I'll send
+a patch right away. With that sorted out, the patch works for me nicely
+and we have *finally* RPM kicking in for SDHI. Looks good to me.
 
- drivers/mmc/core/core.c | 2 ++
- 1 file changed, 2 insertions(+)
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index b039dcff17f8..54f0814f110c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -927,6 +927,8 @@ int mmc_execute_tuning(struct mmc_card *card)
- 	if (!host->ops->execute_tuning)
- 		return 0;
- 
-+	mmc_retune_disable(host);
-+
- 	if (host->cqe_on)
- 		host->cqe_ops->cqe_off(host);
- 
--- 
-2.30.2
+However, I'd appreciate if Shimoda-san could also test this against his
+test-suite to make sure there are no other issues unearthed now that RPM
+is finally suspending the device. I will also add do additional
+suspend/resume tests before I say Tested-by.
 
+Good work so far, thanks!
+
+
+--SqUlJqbQK6D0nCb9
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDMVooACgkQFA3kzBSg
+KbbUNw//bZOUNLwYhEu/NNPDSabO0WHMinTTgEGvHPbQCBLh60N/jSSo3+OeFOQx
+w+VO+ZMP1IU8woWU3x+f/M3VxTnNwOcMbfHoUsWMyLfJuwXtx0uPL70VdrH8u2ay
+VDs5uvbBasdaYYVbZIjvFRzpTKeyH528/Lup9BduLEXd0tRx97kTEthmGL+G0kfi
+H9TOASaAjoOneA8AxRQrYNvIOz62D6oALYqdku4hW0lpI5kG2+g+W+oC/Vk4pEhF
+ZD1IIldtmfITPpC4d+paCkOqHrXrK6aFnBqK89qjV5bHFvBFlb9URTDsnW+kh2DW
+PVcpC8GFC9vRo///KWtzYrAm8UBRkacVw/EN5vPZVV64vjJ2PVOWxoLaBxPmkQy/
+XO9Cs1wX4ZN80osuH+V2Jdix9nqI/x95n5BK4tkKpBk9YLqzOALsisYcy9bEdcSo
+eGdMNZrxaQ1GtrKaF4nU62tL3Sjsfbe3O149uYRSxid/0MF2HibtcUy7vXviZO9f
+cmlP34OXHY71N3hLTLKdO0n68RsCjfJPBUS63urevGM8YWznkSWKWmgWfxcuEmpO
+5JFEBMn6AqN2dgY6ggNSgspq01DUD+rLfJ+bct0nl9NQV8N26FmvUJeAXOd16ymI
+y3hylGAuu5ka937FpYxx1KRofbLMDh/n4g0Tab1d3aqYta3oGxc=
+=iLIO
+-----END PGP SIGNATURE-----
+
+--SqUlJqbQK6D0nCb9--
