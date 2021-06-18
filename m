@@ -2,139 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79A40C49EA3
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 07:02:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31BECC48BE8
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 07:39:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66D1F613B4
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 07:02:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 03550613C1
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 07:39:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232067AbhFRHEe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Jun 2021 03:04:34 -0400
-Received: from gloria.sntech.de ([185.11.138.130]:41946 "EHLO gloria.sntech.de"
+        id S232009AbhFRHmE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Jun 2021 03:42:04 -0400
+Received: from www.zeus03.de ([194.117.254.33]:33114 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231826AbhFRHEe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Jun 2021 03:04:34 -0400
-Received: from ip5f5aa64a.dynamic.kabel-deutschland.de ([95.90.166.74] helo=diego.localnet)
-        by gloria.sntech.de with esmtpsa (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <heiko@sntech.de>)
-        id 1lu8Vs-00006s-P5; Fri, 18 Jun 2021 09:02:00 +0200
-From:   Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-To:     cl <cl@rock-chips.com>,
-        "jay.xu@rock-chips.com" <jay.xu@rock-chips.com>
-Cc:     robh+dt <robh+dt@kernel.org>, jagan <jagan@amarulasolutions.com>,
-        wens <wens@csie.org>, uwe <uwe@kleine-koenig.org>,
-        mail <mail@david-bauer.net>, Johan Jonker <jbx6244@gmail.com>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        jensenhuang <jensenhuang@friendlyarm.com>,
-        michael <michael@amarulasolutions.com>,
-        cnsztl <cnsztl@gmail.com>,
-        devicetree <devicetree@vger.kernel.org>,
-        "ulf. hansson" <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        gregkh <gregkh@linuxfoundation.org>,
-        linux-serial <linux-serial@vger.kernel.org>,
-        linux-i2c <linux-i2c@vger.kernel.org>,
-        =?utf-8?B?5p6X5rabKOW6leWxguW5s+WPsCk=?= <shawn.lin@rock-chips.com>,
-        =?utf-8?B?5ZC06L6+6LaF?= <david.wu@rock-chips.com>,
-        zhangqing <zhangqing@rock-chips.com>,
-        Tao Huang <huangtao@rock-chips.com>, cl <cl@rock-chips.com>,
-        wim <wim@linux-watchdog.org>, linux <linux@roeck-us.net>,
-        jamie <jamie@jamieiles.com>,
-        linux-watchdog <linux-watchdog@vger.kernel.org>,
-        maz <maz@kernel.org>
-Subject: Re: [RESEND PATCH v4 06/10] dt-bindings: gpio: change items restriction of clock for rockchip,gpio-bank
-Date:   Fri, 18 Jun 2021 09:01:59 +0200
-Message-ID: <3493815.vrqWZg68TM@diego>
-In-Reply-To: <2021061814414460293612@rock-chips.com>
-References: <20210429081151.17558-1-cl@rock-chips.com> <5026524.44csPzL39Z@phil> <2021061814414460293612@rock-chips.com>
+        id S230441AbhFRHmE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 18 Jun 2021 03:42:04 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=M1/6jrE9gs9xYYoGvWvSGf2tW2G
+        9Il7kbShj7a94xqs=; b=DkEn+d62K/XzIoUZ2Ms7EFBJ6WpHbz5FEhE4KJ/RL5p
+        43rJy48WgLrtTWSJzqvk+dowxkHfMMIeAsN2a2+oM7InpEGNWI9t8uFpvIGQBx13
+        b4GY3ey2zRfCC1EKGDKH1f7ldwJ3/lCGFjDTLGY1uYAK3G4vsXxSN8CuyFfDWD74
+        =
+Received: (qmail 634354 invoked from network); 18 Jun 2021 09:39:54 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Jun 2021 09:39:54 +0200
+X-UD-Smtp-Session: l3s3148p1@o+f6bQXFqrIgAwDPXwaEABQIKHLDvKpZ
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Subject: [RFC PATCH] mmc: disable retuning when tuning
+Date:   Fri, 18 Jun 2021 09:39:50 +0200
+Message-Id: <20210618073950.46154-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Jay,
+It might be that something goes wrong during tuning so the MMC core will
+immediately trigger a retune. In our case it was:
 
-Am Freitag, 18. Juni 2021, 08:41:45 CEST schrieb jay.xu@rock-chips.com:
-> Hi Heiko
-> 
-> --------------
-> jay.xu@rock-chips.com
-> >Hi,
-> >
-> >Am Donnerstag, 13. Mai 2021, 08:46:06 CEST schrieb cl@rock-chips.com:
-> >> From: Liang Chen <cl@rock-chips.com>
-> >>
-> >> The clock property need 2 items on some rockchip chips.
-> >>
-> >> Signed-off-by: Liang Chen <cl@rock-chips.com>
-> >
-> >this patch should definitly move over to Jianquns gpio driver series,
-> >as it introduces the usage of these new clocks.
-> >
-> >Also while the single-clock variant definitly doesn't need it,
-> >I think we may want clock-names "apb_pclk", "debounce-ref" for the
-> >2-clock variants?
-> > 
-> Okay, I think it's very good idea, 
-> but is it possible to post the reg-name patch after these dts serial and gpio serial patches ?
+ - we sent a tuning block
+ - there was an error so we need to send an abort cmd to the eMMC
+ - the abort cmd had a CRC error
+ - retune was set by the MMC core
 
-You're already creating a new binding when changing the max-items.
-So when we change that again later, in theory you'd need to support both
-cases (with and without clock-names)
+This lead to a vicious circle causing a performance regression of 75%.
+So, disable retuning while we tune. Let the tuning complete and see then
+if it worked out or not.
 
-So I'd really prefer to get the binding right the first time and
-identifying multiple clocks by clock-names instead of an implicit ordering
-is way better in the long run as well.
+Reported-by Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-Heiko
+Hi Ulf, this patch is marked as RFC because I think this is a generic
+issue. Lots of things could happen in the driver callback which cause a
+retune, so I'd think it makes sense to deactivate it globally here. If
+you think this is a driver specific issue, just let me know. I can
+provide a small patch to create the issue for SDHI hardware, created
+by Shimoda-san. We couldn't think of an easy way to reproduce it with
+the fault injector, sadly. Let me know if you want to see that patch.
 
+ drivers/mmc/core/core.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-
-
-> 
-> >
-> >Heiko
-> >
-> >> ---
-> >>  Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml | 5 ++++-
-> >>  1 file changed, 4 insertions(+), 1 deletion(-)
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml b/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
-> >> index d993e00..0d62c28 100644
-> >> --- a/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
-> >> +++ b/Documentation/devicetree/bindings/gpio/rockchip,gpio-bank.yaml
-> >> @@ -22,7 +22,10 @@ properties:
-> >>      maxItems: 1
-> >> 
-> >>    clocks:
-> >> -    maxItems: 1
-> >> +    minItems: 1
-> >> +    items:
-> >> +      - description: APB interface clock source
-> >> +      - description: GPIO debounce reference clock source
-> >> 
-> >>    gpio-controller: true
-> >> 
-> >>
-> >
-> >
-> >
-> >
-> >
-> >
-> >
-> 
-
-
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index b039dcff17f8..54f0814f110c 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -927,6 +927,8 @@ int mmc_execute_tuning(struct mmc_card *card)
+ 	if (!host->ops->execute_tuning)
+ 		return 0;
+ 
++	mmc_retune_disable(host);
++
+ 	if (host->cqe_on)
+ 		host->cqe_ops->cqe_off(host);
+ 
+-- 
+2.30.2
 
