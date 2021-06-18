@@ -2,87 +2,147 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A5BDC49361
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:23:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B735FC49EAF
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:32:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CF03611ED
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:23:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4CE86121D
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:32:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233048AbhFRIZe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Jun 2021 04:25:34 -0400
-Received: from www.zeus03.de ([194.117.254.33]:45114 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232806AbhFRIZe (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 18 Jun 2021 04:25:34 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=EDKkxblE31HPghaYHC48NkPq20A
-        afB4OuEB4xnBpG/g=; b=HOGsIp6T1pLAQefA383uraryb6SpPevVrozyVl/DzKb
-        ADgAKfVqOZ95z4tbnX0YzmYhItZihLB2t0gcT7QyrlBGEJIk8J+6tl+1yAKvAsUo
-        JR6256Iv1WvpFr4LHh3BwOsYoB1gUaw5WsswBRBwAynzLZ36uqJqLvNB70erWqPw
-        =
-Received: (qmail 648657 invoked from network); 18 Jun 2021 10:23:23 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Jun 2021 10:23:23 +0200
-X-UD-Smtp-Session: l3s3148p1@TZN9CQbFdIJUhs4s
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulrich Hecht <uli+renesas@fpond.eu>
-Subject: [PATCH] mmc: disable tuning when checking card presence
-Date:   Fri, 18 Jun 2021 10:23:17 +0200
-Message-Id: <20210618082317.58408-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.2
+        id S233836AbhFRIey (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Jun 2021 04:34:54 -0400
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:10130 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S233809AbhFRIew (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2021 04:34:52 -0400
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15I8Cjxt029418;
+        Fri, 18 Jun 2021 10:32:39 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=tobkvdP0XEB3rizTcrRI77boeUhPqCNPjzbxlCZFFxA=;
+ b=X5X8I/QkX33NRBreeXhB2ivJwbQuY5nuHgNW56Uf80eHr1kpxFzJX/wxy30SZc3yHrRO
+ gxoRyWbYCAvnGgSb8aL8RUYEo+Lnc2jiUKv9J3aqrgQvmbAepjonsNVPl4jb5fZwrxQS
+ WRaNuhHVAs8RVOMDVNmyvf3h5FnSW9OUwOn94pr5kQC/EUAJ0ZiFwOfJLOLLnrCAYFUs
+ BZIaGP163AH9zXouCLD1bZlXEQSjs+vGTyV3+iVAhFNuSFJte2f9xJJLgimn2EW1nPti
+ xLNiTJugAuzBGR39U+LRrbT90wL6HdH/11sqQflFkResdNC8fu2/znIYJiJtvorF2b9Q Kw== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 3984bm6b7h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 18 Jun 2021 10:32:39 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 668DE10002A;
+        Fri, 18 Jun 2021 10:32:38 +0200 (CEST)
+Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id F05B921B501;
+        Fri, 18 Jun 2021 10:32:37 +0200 (CEST)
+Received: from lmecxl0889.lme.st.com (10.75.127.50) by SFHDAG2NODE3.st.com
+ (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Fri, 18 Jun
+ 2021 10:32:35 +0200
+Subject: Re: [PATCH] dt-bindings: Drop redundant minItems/maxItems
+To:     Rob Herring <robh@kernel.org>, <devicetree@vger.kernel.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-ide@vger.kernel.org>,
+        <linux-clk@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-crypto@vger.kernel.org>, <dri-devel@lists.freedesktop.org>,
+        <dmaengine@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
+        <linux-iio@vger.kernel.org>, <alsa-devel@alsa-project.org>,
+        <iommu@lists.linux-foundation.org>, <linux-media@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
+        <linux-can@vger.kernel.org>, <linux-pci@vger.kernel.org>,
+        <linux-phy@lists.infradead.org>, <linux-gpio@vger.kernel.org>,
+        <linux-pwm@vger.kernel.org>, <linux-remoteproc@vger.kernel.org>,
+        <linux-riscv@lists.infradead.org>, <linux-rtc@vger.kernel.org>,
+        <linux-serial@vger.kernel.org>, <linux-spi@vger.kernel.org>,
+        <linux-pm@vger.kernel.org>, <linux-usb@vger.kernel.org>,
+        <linux-watchdog@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>, Vinod Koul <vkoul@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>, Joerg Roedel <joro@8bytes.org>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Vivien Didelot <vivien.didelot@gmail.com>,
+        Vladimir Oltean <olteanv@gmail.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Lee Jones <lee.jones@linaro.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>
+References: <20210615191543.1043414-1-robh@kernel.org>
+From:   Arnaud POULIQUEN <arnaud.pouliquen@foss.st.com>
+Message-ID: <e61633b9-48d1-81bf-9ab2-59a7b64987f3@foss.st.com>
+Date:   Fri, 18 Jun 2021 10:32:35 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.8.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210615191543.1043414-1-robh@kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.50]
+X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE3.st.com
+ (10.75.127.6)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-06-17_17:2021-06-15,2021-06-17 signatures=0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When we use the alive callback, we expect a command to fail if the card
-is not present. We should not trigger a retune then which will confuse
-users with a failed retune on a removed card:
+Hello ROb,
 
- mmc2: tuning execution failed: -5
- mmc2: card 0001 removed
+On 6/15/21 9:15 PM, Rob Herring wrote:
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooling
+> will fixup the final schema adding any unspecified minItems/maxItems.
+> 
+> This condition is partially checked with the meta-schema already, but
+> only if both 'minItems' and 'maxItems' are equal to the 'items' length.
+> An improved meta-schema is pending.
+> 
+[...]
+>  .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml     | 2 --
+[...]
+>  .../devicetree/bindings/mailbox/st,stm32-ipcc.yaml          | 2 --
+[...]
+>  .../devicetree/bindings/remoteproc/st,stm32-rproc.yaml      | 2 --
+[...]
+>  Documentation/devicetree/bindings/sound/st,stm32-sai.yaml   | 3 ---
+Reviewed-by: Arnaud Pouliquen <arnaud.pouliquen@st.com>
 
-Disable retuning in this code path.
-
-Reported-by: Ulrich Hecht <uli+renesas@fpond.eu>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/core/core.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 54f0814f110c..eb792dd845a3 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2088,6 +2088,9 @@ int _mmc_detect_card_removed(struct mmc_host *host)
- 	if (!host->card || mmc_card_removed(host->card))
- 		return 1;
- 
-+	/* we expect a failure if the card is removed */
-+	mmc_retune_disable(host);
-+
- 	ret = host->bus_ops->alive(host);
- 
- 	/*
-@@ -2107,6 +2110,8 @@ int _mmc_detect_card_removed(struct mmc_host *host)
- 		pr_debug("%s: card remove detected\n", mmc_hostname(host));
- 	}
- 
-+	mmc_retune_enable(host);
-+
- 	return ret;
- }
- 
--- 
-2.30.2
-
+Thanks,
+Arnaud
