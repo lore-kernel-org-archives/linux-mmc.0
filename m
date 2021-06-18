@@ -2,147 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B735FC49EAF
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:32:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D159C48BE8
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 09:36:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A4CE86121D
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 08:32:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E9CBE613CB
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Jun 2021 09:36:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233836AbhFRIey (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Jun 2021 04:34:54 -0400
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:10130 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S233809AbhFRIew (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Jun 2021 04:34:52 -0400
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15I8Cjxt029418;
-        Fri, 18 Jun 2021 10:32:39 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=tobkvdP0XEB3rizTcrRI77boeUhPqCNPjzbxlCZFFxA=;
- b=X5X8I/QkX33NRBreeXhB2ivJwbQuY5nuHgNW56Uf80eHr1kpxFzJX/wxy30SZc3yHrRO
- gxoRyWbYCAvnGgSb8aL8RUYEo+Lnc2jiUKv9J3aqrgQvmbAepjonsNVPl4jb5fZwrxQS
- WRaNuhHVAs8RVOMDVNmyvf3h5FnSW9OUwOn94pr5kQC/EUAJ0ZiFwOfJLOLLnrCAYFUs
- BZIaGP163AH9zXouCLD1bZlXEQSjs+vGTyV3+iVAhFNuSFJte2f9xJJLgimn2EW1nPti
- xLNiTJugAuzBGR39U+LRrbT90wL6HdH/11sqQflFkResdNC8fu2/znIYJiJtvorF2b9Q Kw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 3984bm6b7h-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 18 Jun 2021 10:32:39 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 668DE10002A;
-        Fri, 18 Jun 2021 10:32:38 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id F05B921B501;
-        Fri, 18 Jun 2021 10:32:37 +0200 (CEST)
-Received: from lmecxl0889.lme.st.com (10.75.127.50) by SFHDAG2NODE3.st.com
- (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Fri, 18 Jun
- 2021 10:32:35 +0200
-Subject: Re: [PATCH] dt-bindings: Drop redundant minItems/maxItems
-To:     Rob Herring <robh@kernel.org>, <devicetree@vger.kernel.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-ide@vger.kernel.org>,
-        <linux-clk@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-crypto@vger.kernel.org>, <dri-devel@lists.freedesktop.org>,
-        <dmaengine@vger.kernel.org>, <linux-i2c@vger.kernel.org>,
-        <linux-iio@vger.kernel.org>, <alsa-devel@alsa-project.org>,
-        <iommu@lists.linux-foundation.org>, <linux-media@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <netdev@vger.kernel.org>,
-        <linux-can@vger.kernel.org>, <linux-pci@vger.kernel.org>,
-        <linux-phy@lists.infradead.org>, <linux-gpio@vger.kernel.org>,
-        <linux-pwm@vger.kernel.org>, <linux-remoteproc@vger.kernel.org>,
-        <linux-riscv@lists.infradead.org>, <linux-rtc@vger.kernel.org>,
-        <linux-serial@vger.kernel.org>, <linux-spi@vger.kernel.org>,
-        <linux-pm@vger.kernel.org>, <linux-usb@vger.kernel.org>,
-        <linux-watchdog@vger.kernel.org>, Jens Axboe <axboe@kernel.dk>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S. Miller" <davem@davemloft.net>,
-        David Airlie <airlied@linux.ie>,
-        Daniel Vetter <daniel@ffwll.ch>, Vinod Koul <vkoul@kernel.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Kamal Dasu <kdasu.kdev@gmail.com>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>, Joerg Roedel <joro@8bytes.org>,
-        Jassi Brar <jassisinghbrar@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Wolfgang Grandegger <wg@grandegger.com>,
-        Marc Kleine-Budde <mkl@pengutronix.de>,
-        Andrew Lunn <andrew@lunn.ch>,
-        Vivien Didelot <vivien.didelot@gmail.com>,
-        Vladimir Oltean <olteanv@gmail.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Lee Jones <lee.jones@linaro.org>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Mark Brown <broonie@kernel.org>,
-        Zhang Rui <rui.zhang@intel.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>
-References: <20210615191543.1043414-1-robh@kernel.org>
-From:   Arnaud POULIQUEN <arnaud.pouliquen@foss.st.com>
-Message-ID: <e61633b9-48d1-81bf-9ab2-59a7b64987f3@foss.st.com>
-Date:   Fri, 18 Jun 2021 10:32:35 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.8.1
+        id S232713AbhFRJjB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Jun 2021 05:39:01 -0400
+Received: from www.zeus03.de ([194.117.254.33]:38836 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232682AbhFRJjA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 18 Jun 2021 05:39:00 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=YPMwCSoOK4+3h4WMQzIehTDluXtP
+        Y4I7iaF3OF2jXBA=; b=cw6P9IiQE/OyhJE+SeEEfTd1t4zORN6DOjylUTc1J6zu
+        +IbWggJtuMu/7oOQ2LcjzqCnxyZwmzn+gBULJWTnTS0PbuUR44K7ZJ3ZwJvJmFbf
+        +zOEaNMMO22/e9zf9loYecP9dHYwfUsmJP9LCAJMroq72jxJizECMoCNfxn9q7o=
+Received: (qmail 671146 invoked from network); 18 Jun 2021 11:36:49 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Jun 2021 11:36:49 +0200
+X-UD-Smtp-Session: l3s3148p1@c3oaEAfFJLQgAwDPXwaEABQIKHLDvKpZ
+Date:   Fri, 18 Jun 2021 11:36:48 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH v3 3/3] mmc: renesas_sdhi: do hard reset if possible
+Message-ID: <YMxpMKH39aYs4Zaz@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20210317091622.31890-1-wsa+renesas@sang-engineering.com>
+ <20210317091622.31890-4-wsa+renesas@sang-engineering.com>
+ <CAMuHMdU6=rTHjvcgK8GBzd3OL_9YFqV77=KsAEGJvAVapnhsOQ@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20210615191543.1043414-1-robh@kernel.org>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.50]
-X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE3.st.com
- (10.75.127.6)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-06-17_17:2021-06-15,2021-06-17 signatures=0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="o+Y/X1RJGwghOxm6"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdU6=rTHjvcgK8GBzd3OL_9YFqV77=KsAEGJvAVapnhsOQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello ROb,
 
-On 6/15/21 9:15 PM, Rob Herring wrote:
-> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
-> same size as the list is redundant and can be dropped. Note that is DT
-> schema specific behavior and not standard json-schema behavior. The tooling
-> will fixup the final schema adding any unspecified minItems/maxItems.
-> 
-> This condition is partially checked with the meta-schema already, but
-> only if both 'minItems' and 'maxItems' are equal to the 'items' length.
-> An improved meta-schema is pending.
-> 
-[...]
->  .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml     | 2 --
-[...]
->  .../devicetree/bindings/mailbox/st,stm32-ipcc.yaml          | 2 --
-[...]
->  .../devicetree/bindings/remoteproc/st,stm32-rproc.yaml      | 2 --
-[...]
->  Documentation/devicetree/bindings/sound/st,stm32-sai.yaml   | 3 ---
-Reviewed-by: Arnaud Pouliquen <arnaud.pouliquen@st.com>
+--o+Y/X1RJGwghOxm6
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thanks,
-Arnaud
+Hi Geert,
+
+> In v5.10, v5.11, and v512, it works fine:
+>=20
+>     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (=
+CMD19)
+>     mmc0: new ultra high speed SDR104 SDHC card at address aaaa
+>     mmcblk0: mmc0:aaaa SM32G 29.7 GiB
+>       mmcblk0: p1
+>=20
+> Note that I do see one timeout during identification.
+>=20
+> After b4d86f37eacb7246 (bisected), it fails:
+>=20
+>     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (=
+CMD19)
+>     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (=
+CMD19)
+>     [...]
+>     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (=
+CMD19)
+>     mmc0: tuning execution failed: -5
+>     mmc0: error -5 whilst initialising SD card
+>     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (=
+CMD19)
+>     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (=
+CMD19)
+>     [...]
+>=20
+> Given the single timeout I see with older kernels, the issue may be that =
+the
+> harder reset causes that timeout to repeat ad infinitum?
+
+I can confirm this. I also found a SanDisk card which shows the same
+issue on my Lager board. However, I wouldn't say this patch breaks
+things in a way that a revert is a good solution.
+
+The card does not really work "fine". During probe we get one timeout,
+and when trying to read from the card, more follow. Already before this
+patch. There seems to be a state where an initial command fails and only
+the retry suceeds. The hard reset in deed seems to cause an endless loop
+here. However, the proper fix is to find out why this first command
+fails, especially only with some cards. My Samsung one works 100% fine.
+
+And if we fix this, then the hard reset is still good for Gen2 as well.
+
+Makes sense?
+
+All the best,
+
+   Wolfram
+
+
+--o+Y/X1RJGwghOxm6
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDMaTAACgkQFA3kzBSg
+KbaVPxAAmmy4USWZyF724xuUZFSzeCZmrYDczhaXPpF+Axx2e3+Vqq1kDMCxkxSy
+ZJa3nqZuY7adaPpbpCoKwMGT3BUgl9N39GkugclTCQ1rhnkr2TABlmlLGcd+68Kg
++ge2iDc27KRPd32istBEU7BNovfgWp9KfO0pfXQ6v+30VpIMjImdOueLe72fIlkR
+G/NAF1pye3SvwDCPlL9Im10IWd2RLy36rIeAq23m8Pcf0GtmT5M9jE5f87BsAWqW
+20Woa+zM8WTpl2p2sXTIg6gTUnc16kyrQ5hJf862WgA6xm0760BmjDmVVbOVzIkF
+Gg7yZkbdnoluhByeNICMKLVnNIf1NhoB6C34MBTsfp9/KW6Xf5A+Hsmmll7RO/yr
+2vqZji9CYRko08R9cgEhMOP8wK3rX4Kw2oBVzB9iNeRqFiR4c0lfTz3OEmMKGcRY
+1Hmv7Wth0nyciiGLnwSVeVvKONOa9wkr6214D3OxsjNuW3i/QTVRrfE2nGJmsSnQ
+lRdNWLCTNjr/1JeGp606+8a1H9W3Yy6XSGpOJy9WUbDmBsNSiodldyyRIqm5/gTJ
+me2Dbi58/+5tdnuhg4xr16PK59IxOqYdW+W44ii4ylxTmehmywMudSLxTNILAhqO
+fvqrd/7rCpeK650KxvDNJYDfmW23cdmJMq9WRUUx+lM4hh+RJN4=
+=iagi
+-----END PGP SIGNATURE-----
+
+--o+Y/X1RJGwghOxm6--
