@@ -2,76 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E5D8C49EA4
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 08:02:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAD43C49EA2
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 08:11:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 608E3610A3
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 08:02:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 86E3F610EA
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 08:11:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230075AbhFUIEf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Jun 2021 04:04:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55022 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230232AbhFUIEe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 04:04:34 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C90D0C061574;
-        Mon, 21 Jun 2021 01:02:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:In-Reply-To:References;
-        bh=JtH+BJ83UKkZsmM2/s6DGMHrwGxZ9Os/k7xFLgZ7ELk=; b=We8PqCjjv3Yo+mSm+mnxkdSBGc
-        JUfOpEJtP4XbbEWqDAQge8E/dVJqWaxld53jKJ65shwRsgn7RkTSQ4i23tFNowMxo8Iy3i+FWFD/6
-        gtAuPhWGhi8jJcNLVZ0Ec1La7OU88sGpkzvTRXC7z1vAh/LrFFZjb7T3IZeTyV1JZtPevMUWI1w9m
-        JzJZdBncNP+nyX8xj417jDn3HaintdGPjxx0GWVGGl38SbxtIfG4nNhMI2zzK4tC6pi2nu/4c2UQU
-        se6hdutLhX5bzw/Ikh8uh9SXd07LfaCWYEvA7fRl+bJfuAvXSKmvqCWnjzyH6aAKU2IrtYwR2QilH
-        IRjrpGXw==;
-Received: from [2001:4bb8:188:3e21:8988:c934:59d4:cfe6] (helo=localhost)
-        by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1lvEsL-00Crj9-NG; Mon, 21 Jun 2021 08:01:56 +0000
-From:   Christoph Hellwig <hch@lst.de>
-To:     axboe@kernel.dk, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        Marek Szyprowski <m.szyprowski@samsung.com>
-Subject: [PATCH] mmc: initialized disk->minors
-Date:   Mon, 21 Jun 2021 10:01:44 +0200
-Message-Id: <20210621080144.3655131-1-hch@lst.de>
-X-Mailer: git-send-email 2.30.2
+        id S229949AbhFUINo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 04:13:44 -0400
+Received: from www.zeus03.de ([194.117.254.33]:48668 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229943AbhFUINn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Jun 2021 04:13:43 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=6P9+vWbqpK4Rrc+xE41QtU8PsCye
+        vid6g3Ps1Xsxl3w=; b=EAsr5edO6ko2eeXYrDlF1fqJdY9o/v5oRHS5Ffrjs/FX
+        yY3eACzyHDPitCf+2AJQ2O3O6UfqBmv9vkJmZHm8sqPbdfzilxlUpGS0OVI9Sau2
+        DDOIFMDfGdBU8mDETOudPRN6o/pQKTpVVsE1qlqged6L+702uFA6Pje9rVK7umU=
+Received: (qmail 1677946 invoked from network); 21 Jun 2021 10:11:24 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Jun 2021 10:11:24 +0200
+X-UD-Smtp-Session: l3s3148p1@vDAiOELF1qEgAwDPXw0TAFEaPzFK4KbN
+Date:   Mon, 21 Jun 2021 10:11:23 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulrich Hecht <uli@fpond.eu>, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH] mmc: disable tuning when checking card presence
+Message-ID: <YNBJq7Lrtlc/qExN@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulrich Hecht <uli@fpond.eu>, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20210618082317.58408-1-wsa+renesas@sang-engineering.com>
+ <CAPDyKFqkW9uwtJyWPFKggi2AJMtO4NJLW-6hviWgGSfoHyDm1A@mail.gmail.com>
+ <bbfbed66-5058-1263-159c-dabd345286c8@intel.com>
+ <563832257.373371.1624260736936@webmail.strato.com>
+ <5adc8601-23c7-4378-94e2-cb3641d9039c@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="nzX32ayOEVmc3Wjk"
+Content-Disposition: inline
+In-Reply-To: <5adc8601-23c7-4378-94e2-cb3641d9039c@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fix a let hunk from the blk_mq_alloc_disk conversion.
 
-Fixes: 281ea6a5bfdc ("mmc: switch to blk_mq_alloc_disk")
-Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
-Signed-off-by: Christoph Hellwig <hch@lst.de>
-Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
----
- drivers/mmc/core/block.c | 1 +
- 1 file changed, 1 insertion(+)
+--nzX32ayOEVmc3Wjk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index e7f89cbf9232..9890a1532cb0 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2331,6 +2331,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	md->queue.blkdata = md;
- 
- 	md->disk->major	= MMC_BLOCK_MAJOR;
-+	md->disk->minors = perdev_minors;
- 	md->disk->first_minor = devidx * perdev_minors;
- 	md->disk->fops = &mmc_bdops;
- 	md->disk->private_data = md;
--- 
-2.30.2
 
+> +			pr_err("%s: tuning execution failed: %d (this is normal if card removed)\n",
+> +			       mmc_hostname(host), err);
+
+Hmm, an error message saying "this is normal" doesn't look like a good
+option to me. Can't we surpress the message somehow or even avoid tuning
+somehow if the card is removed? Sorry, I can't look this up myself right
+now, working on another task today.
+
+
+--nzX32ayOEVmc3Wjk
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDQSacACgkQFA3kzBSg
+KbbTCRAAkt8hmOhk5jAIg2gP+fbXHyL3dq+ylTr0TZCa6p1a48YDgw7j8vjGfohA
+ZdEacyhDJajo6ao8DAplxfMJ5BN+TH3dwXJGCA7hcXBQct8Y6MflYuttTau1PSVo
+PWjzvf3WfmU6879rzlellQ3ARdnLcEe9YBcbNMWy7nbNvCrPR6D9wLM2vnNA+dO6
+z/8dYw4iWAs6CU6ODIBDTez1jmeFexH3FPRvDyDD30Hevgz4VfXi1sISqNTAFRpl
+bFnkOdcEPm2xkR1A9OAkPZDenHf5uZ4fhugL5zpUy1o4GyzVDA/fYVXyM0dnTWzE
+0rJ1S0K1MR0ais2OyCtehYB8qIzcWX2tyyvoIAugy2+nOYVtmynENxFMv8W52kZ5
+nlW5P16lD36Wdfyp6qJqHlPOMAQNv2nAX1abyuvBlZHU8pjE0mFJdQ6HjZkiHsTi
+efRy5mkC7CMYas4qtblkUo37PxHAnRNKKp/JFZ7LN+vgrY+HZXXOkFm3KPm7heGm
+Z78A0PfqX8leCzBWz6UoFq4uMwNQ14aAMz8wqCDb+WrjJfduyy1XwwYpWkgI8r1S
+zLYQE1AxjZYpDTAAmK+elwWtQGydvI9yDKWth/HCENQpt63p3pdzSSaLjCKLgK/d
+THr7lQMpVuLKB4SAzBojZmpV9pEHw2nQifbf5C/sOogwfR7uiZ0=
+=EPNz
+-----END PGP SIGNATURE-----
+
+--nzX32ayOEVmc3Wjk--
