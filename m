@@ -2,67 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B7DDC48BE5
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 06:59:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71416C49EA2
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 07:00:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5F5EB61156
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 06:59:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 58DEE600D3
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 07:00:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229710AbhFUHBV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Jun 2021 03:01:21 -0400
-Received: from verein.lst.de ([213.95.11.211]:40759 "EHLO verein.lst.de"
+        id S229621AbhFUHCs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 03:02:48 -0400
+Received: from www.zeus03.de ([194.117.254.33]:56952 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229621AbhFUHBU (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Jun 2021 03:01:20 -0400
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 4AC9068BEB; Mon, 21 Jun 2021 08:59:04 +0200 (CEST)
-Date:   Mon, 21 Jun 2021 08:59:04 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     Marek Szyprowski <m.szyprowski@samsung.com>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
-Subject: Re: [PATCH 2/2] mmc: switch to blk_mq_alloc_disk
-Message-ID: <20210621065904.GA6198@lst.de>
-References: <20210616053934.880951-1-hch@lst.de> <20210616053934.880951-3-hch@lst.de> <CGME20210621062208eucas1p2949c830b948c3cf7b3d636c5c5746753@eucas1p2.samsung.com> <1c5b5018-f7ca-609b-b607-827cedc161e6@samsung.com>
+        id S229597AbhFUHCo (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 21 Jun 2021 03:02:44 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        from:to:cc:subject:date:message-id:mime-version
+        :content-transfer-encoding; s=k1; bh=A9dRsXCaYnIasu+H+nbPiLdt0Rm
+        bsXpIzdZ6dEsD4JA=; b=HbFbCXLo19D5ytdfWRObIuU7jALT/0KGcVbkEltCoQU
+        WUuB7rMaj+9e01fqMXku3uyKYm80CVDPxDPPMx5FgvTZjGXzVeJK6lqOxwwDE8SL
+        ekfcWMpDNqYyxULwG/UEs5ir9fivBoqpO4ARxAg05U4v9kBGJgNfEo7vCQrS46ko
+        =
+Received: (qmail 1651335 invoked from network); 21 Jun 2021 09:00:18 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 21 Jun 2021 09:00:18 +0200
+X-UD-Smtp-Session: l3s3148p1@7cClOUHF7r8gAwDPXwSyANzZOjko0laY
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH] mmc: renesas_sdhi: sys_dmac: abort DMA synced to avoid timeouts
+Date:   Mon, 21 Jun 2021 09:00:09 +0200
+Message-Id: <20210621070009.13655-1-wsa+renesas@sang-engineering.com>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1c5b5018-f7ca-609b-b607-827cedc161e6@samsung.com>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jun 21, 2021 at 08:22:07AM +0200, Marek Szyprowski wrote:
-> Hi
-> 
-> On 16.06.2021 07:39, Christoph Hellwig wrote:
-> > Use the blk_mq_alloc_disk to allocate the request_queue and gendisk
-> > together.
-> >
-> > Signed-off-by: Christoph Hellwig <hch@lst.de>
-> 
-> This patch landed recently in linux-next as commit 281ea6a5bfdc ("mmc: 
-> switch to blk_mq_alloc_disk"). It triggers the following warning during 
-> boot on all my systems with MMC devices:
+When aborting DMA, we terminate the transfer without waiting for it to
+succeed. This may lead to races which can e.g. lead to timeout problems
+when tuning. Remove the deprecated dmaengine_terminate_all() function
+and use the explicit dmaengine_terminate_sync().
 
-Please try this, I lost this hunk in the final cleanup, sorry:
+Fixes: e3de2be7368d ("mmc: tmio_mmc: fix card eject during IO with DMA")
+Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index e7f89cbf9232..9890a1532cb0 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2331,6 +2331,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	md->queue.blkdata = md;
+Geert, this fixes the issue you have seen on your Koelsch board on my
+Lager board. Can you test again with this patch please?
+
+I noticed that Renesas driver are quite an active user of this
+deprecated dmaengine function. I will audit and improve the other
+drivers meanwhile.
+
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+index ffa64211f4de..6956b83469c8 100644
+--- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
++++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+@@ -108,9 +108,9 @@ static void renesas_sdhi_sys_dmac_abort_dma(struct tmio_mmc_host *host)
+ 	renesas_sdhi_sys_dmac_enable_dma(host, false);
  
- 	md->disk->major	= MMC_BLOCK_MAJOR;
-+	md->disk->minors = perdev_minors;
- 	md->disk->first_minor = devidx * perdev_minors;
- 	md->disk->fops = &mmc_bdops;
- 	md->disk->private_data = md;
+ 	if (host->chan_rx)
+-		dmaengine_terminate_all(host->chan_rx);
++		dmaengine_terminate_sync(host->chan_rx);
+ 	if (host->chan_tx)
+-		dmaengine_terminate_all(host->chan_tx);
++		dmaengine_terminate_sync(host->chan_tx);
+ 
+ 	renesas_sdhi_sys_dmac_enable_dma(host, true);
+ }
+-- 
+2.30.2
+
