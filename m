@@ -2,162 +2,288 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-17.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BAE1C49EA3
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 01:38:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BB61C48BE5
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 06:22:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 67E0B61208
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 01:38:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 101FA6113C
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 06:22:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230040AbhFUBlB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 20 Jun 2021 21:41:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55396 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229899AbhFUBlB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Jun 2021 21:41:01 -0400
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07E66C061574;
-        Sun, 20 Jun 2021 18:38:47 -0700 (PDT)
-Received: by mail-lj1-x230.google.com with SMTP id s22so22788970ljg.5;
-        Sun, 20 Jun 2021 18:38:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
-         :subject:to:cc:content-transfer-encoding;
-        bh=Ucm3wibUKjyDXQlWvsaDkSdXqDbxxo3t9VSQN89L9Co=;
-        b=BTlxdwbuRpgVcK978ahZti3mOppExd/U6mwBAaLVrjhA5uQaZGlR3lBoODkFn0HOqk
-         62jBeVq9CY95Yu1xfBJlML0yHnMuCIP/9U+Ab1rxcGbgNG9ZBxEY2ag+aPPzUGR5otjs
-         aqSBMT8ME6WaVxbcKal9RcHhIHfn45KBkAUTPbEnnqR3InZkcSxrCjBbGq5KDNR+ffI4
-         le0n5y2SK01XdEdJ8n+8QazVPH7zorDXFaK3i5reARh0KcGNht2hlOLs2i0PB5aqs5eF
-         xuEZdk8zGXAz4FjopjVehUYszCezbBEMafTDgs4vVmk/UCRcCMFJiMa+kOo2BTRrB645
-         Al3A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
-         :from:date:message-id:subject:to:cc:content-transfer-encoding;
-        bh=Ucm3wibUKjyDXQlWvsaDkSdXqDbxxo3t9VSQN89L9Co=;
-        b=WG3EEpcRlvcCbG2oWS4mEhEb/P/P8IoBOtiwtFPJJlCxl0lmqFjx6HyzJY8nQoBevQ
-         a2/5F50c5pCJiKe2mla5kBwzIHfsFUA/sPGko3Hw2gbQKHpoEkepFkBXTksCusDw1zxD
-         y+Iua/MVdMJsN4XCmLPvXBvxDysmIpuPJgzFF5sVq6M4mmwy3jGg0iqanp8BU9uW3Is8
-         oiWOuznOx7Tngc4msmDdLPmnU3y01EjooBTIqnVwjJVo2HkOH8n+MfWr1GAq131CTedA
-         SgRYHjrcpTh54YK4G5efX3rDLSAoYOEaB8SCSZ5diZ+vyjqyCmKSf3KbAe3SEJItAdJL
-         vdDA==
-X-Gm-Message-State: AOAM5302RsQ+EDj2Zp0Qbk7n1TqYipk94LRSgN3AKQRTuU5j6EZ8S6ka
-        Nx5tz+Q4cDIKDFQ/9WClmrFTiuLyjoLJ5cPML/o=
-X-Google-Smtp-Source: ABdhPJxp1+mKBu76yS7r8Uyat0furanFf8Nvs2vaKaHNhbKYe6J5BU4yUx53dWxGthf7PEvqTxoM3LEIdEllBCywSug=
-X-Received: by 2002:a2e:8190:: with SMTP id e16mr19511865ljg.81.1624239525427;
- Sun, 20 Jun 2021 18:38:45 -0700 (PDT)
+        id S229663AbhFUGYi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 02:24:38 -0400
+Received: from mailout2.w1.samsung.com ([210.118.77.12]:55871 "EHLO
+        mailout2.w1.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229744AbhFUGYf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 02:24:35 -0400
+Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
+        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20210621062209euoutp02abc5fba20f13070f2eca8ef93baa10bc~KhLUth1ab1157011570euoutp022
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 06:22:09 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20210621062209euoutp02abc5fba20f13070f2eca8ef93baa10bc~KhLUth1ab1157011570euoutp022
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1624256529;
+        bh=gbPqD+sBunTmpz3Er2hHmw4y0PrpnmbBVQ75wBTV0T8=;
+        h=Subject:To:Cc:From:Date:In-Reply-To:References:From;
+        b=EE2tnOWwCsHngg7ACw8jWkqxp40qYYrWvo7oeUrhyC2jlqekJUnKnGbXEPlJpRfvg
+         LFNAqTGMsBHcpaONmejYIeHT0LZWNdSkoQmC7tJ+CWqHWoNgYGXDVpaLCeSXuFFIsa
+         4RKRlnECl2AeOid1pB1XNXnFmsQLCbvuT91kJ2xA=
+Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
+        eucas1p1.samsung.com (KnoxPortal) with ESMTP id
+        20210621062209eucas1p159284ab1fc51ddd67a945aa9b4a9d044~KhLUmXMs80238602386eucas1p1I;
+        Mon, 21 Jun 2021 06:22:09 +0000 (GMT)
+Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
+        eusmges2new.samsung.com (EUCPMTA) with SMTP id 6E.9B.42068.11030D06; Mon, 21
+        Jun 2021 07:22:09 +0100 (BST)
+Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
+        eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20210621062208eucas1p2949c830b948c3cf7b3d636c5c5746753~KhLULC0MI0792907929eucas1p2e;
+        Mon, 21 Jun 2021 06:22:08 +0000 (GMT)
+Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
+        eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
+        20210621062208eusmtrp228c98a69bd75086e64422a2276def14a~KhLUKVTmY2100721007eusmtrp2k;
+        Mon, 21 Jun 2021 06:22:08 +0000 (GMT)
+X-AuditID: cbfec7f4-c71ff7000002a454-d3-60d0301186b9
+Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
+        eusmgms2.samsung.com (EUCPMTA) with SMTP id E4.03.20981.01030D06; Mon, 21
+        Jun 2021 07:22:08 +0100 (BST)
+Received: from [106.210.134.192] (unknown [106.210.134.192]) by
+        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20210621062208eusmtip2f88fa1e93399c2450d16baf62235c854~KhLTxlLPi1379813798eusmtip2d;
+        Mon, 21 Jun 2021 06:22:08 +0000 (GMT)
+Subject: Re: [PATCH 2/2] mmc: switch to blk_mq_alloc_disk
+To:     Christoph Hellwig <hch@lst.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org
+From:   Marek Szyprowski <m.szyprowski@samsung.com>
+Message-ID: <1c5b5018-f7ca-609b-b607-827cedc161e6@samsung.com>
+Date:   Mon, 21 Jun 2021 08:22:07 +0200
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0)
+        Gecko/20100101 Thunderbird/78.11.0
 MIME-Version: 1.0
-References: <20210320045720.11872-1-chgokhl@gmail.com> <CAPDyKFqXtKPngfnQZXXaF=rvqw0=nWzDc7P++QxNHPwGHHSxUA@mail.gmail.com>
-In-Reply-To: <CAPDyKFqXtKPngfnQZXXaF=rvqw0=nWzDc7P++QxNHPwGHHSxUA@mail.gmail.com>
-Reply-To: chgokhl@163.com
-From:   hieagle <chgokhl@gmail.com>
-Date:   Mon, 21 Jun 2021 09:38:34 +0800
-Message-ID: <CAMjpFAUTsei-PWLDdM+_78qXTo=QFdw-Wbgo9QA2Jnss+i4yRA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Mark mmc_host device with pm_runtime_no_callbacks
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kehuanlin@fishsemi.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20210616053934.880951-3-hch@lst.de>
+Content-Transfer-Encoding: 8bit
+Content-Language: en-US
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpkleLIzCtJLcpLzFFi42LZduzneV1BgwsJBlMXslmsXH2UyWLvLW2L
+        I//7GS2Orw13YPG4c20Pm8fumw1sHp83yQUwR3HZpKTmZJalFunbJXBl9J2czFgwxahi6pNt
+        bA2MjzW7GDk5JARMJP5e2MHWxcjFISSwglGi4+VzdpCEkMAXRolZd5khEp8ZJTacucbYxcgB
+        1rHuRQZEfDmjRG/DAqjuj0BO13FWkG5hAUuJSedaWUBsEQEPib2n34JNZRawkji4r50NxGYT
+        MJToetsFZvMK2El8P7SDCcRmEVCVmPhvF9gcUYFkiffzZrBC1AhKnJz5BGwmJ1DvzzMHoWbK
+        SzRvnc0MYYtL3HoynwnkIAmBLRwSj/9eZYH400Xi36qHbBC2sMSr41vYIWwZif87YRqaGSUe
+        nlvLDuH0MEpcbprBCFFlLXHn3C82kP+ZBTQl1u/ShwSFo8TvbUUQJp/EjbeCEDfwSUzaNp0Z
+        Iswr0dEmBDFDTWLW8XVwWw9euMQ8gVFpFpLPZiH5ZhaSb2YhrF3AyLKKUTy1tDg3PbXYKC+1
+        XK84Mbe4NC9dLzk/dxMjMJWc/nf8yw7G5a8+6h1iZOJgPMQowcGsJMLLmXkmQYg3JbGyKrUo
+        P76oNCe1+BCjNAeLkjhv0pY18UIC6YklqdmpqQWpRTBZJg5OqQYmh7BnV+8pxJS0XWOQd3rE
+        seCBo7tDqZ73XNsJH7/5Fzwu21y0a9/KKsuEXV85uvnOn+5dLMEUomfucbkz0vISj2PeXLtD
+        vmoyT50MUjoT8pMeJp/RyWaxfZu6IeQb55F+TrbXtzXu7WwzufbhYOZXKZ/Gh4vvivmf8CiK
+        brq2TcfjwG9dict/rLNXvWc+oRbOr2if+Fl/5j/bJ98Fm7gOL6wVLPyvUG5neuj9z3cNPfO3
+        iC96+OnE6YijH7xbM79+Od1wvTsld5For0ZMxCYL7ZXN8q8Xr7S43TCv4h9/ssceP4Z85UWq
+        iXO2fl1xUfnl2eypZ3Z+YRY5bqPw0P/16//n0jUi59yYmM+cq+OsxFKckWioxVxUnAgAPRP3
+        EZQDAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprCIsWRmVeSWpSXmKPExsVy+t/xe7oCBhcSDB70qVusXH2UyWLvLW2L
+        I//7GS2Orw13YPG4c20Pm8fumw1sHp83yQUwR+nZFOWXlqQqZOQXl9gqRRtaGOkZWlroGZlY
+        6hkam8daGZkq6dvZpKTmZJalFunbJehl9J2czFgwxahi6pNtbA2MjzW7GDk4JARMJNa9yOhi
+        5OIQEljKKHG2ZQ5rFyMnUFxG4uS0BihbWOLPtS42iKL3jBJn1vewgSSEBSwlJp1rZQGxRQQ8
+        JPaefssOYjMLWEkc3NcOViMkEC5xedJqRhCbTcBQouttF1icV8BO4vuhHUwgNouAqsTEf7vA
+        lokKJEv8XN8OVSMocXLmE7D5nEC9P88chJpvJjFv80NmCFteonnrbChbXOLWk/lMExiFZiFp
+        n4WkZRaSlllIWhYwsqxiFEktLc5Nzy020itOzC0uzUvXS87P3cQIjJ5tx35u2cG48tVHvUOM
+        TByMhxglOJiVRHg5M88kCPGmJFZWpRblxxeV5qQWH2I0BfpnIrOUaHI+MH7zSuINzQxMDU3M
+        LA1MLc2MlcR5TY6siRcSSE8sSc1OTS1ILYLpY+LglGpgil3DHnT6yjvTp2nHEzx2CBVNuXop
+        pGVrPt/hb08MZ8kdCfy0nN/+uHmgR+SJh3YG1ztEGdpTlrqe7Wy3fKk+6cRTdf39ivwJWXIf
+        KuJN5hZMuGjKMH3+ucPr6x93pat0pud1PtxbYeC8Xit3/89HTVsC7nkrNK3WWi40+552qtGV
+        nmbB8hnHD95Ouq7h8InB/mlVQkHeiclvK564nK25lFUlVa+kWOCafuB6bodORO3Z/x9OMRww
+        m3f36U6Vh+cb/z6QtXAqVvv06e358rC/v28Kzd45YedFbZM76x84Hwn8I/lm4TnOrIiPhQ1l
+        y+1+NM7c3Xf07+1Zcwoe3P/TMT0ncpMK2wveA4f1qz8/rFNiKc5INNRiLipOBAAUy6faJwMA
+        AA==
+X-CMS-MailID: 20210621062208eucas1p2949c830b948c3cf7b3d636c5c5746753
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-RootMTR: 20210621062208eucas1p2949c830b948c3cf7b3d636c5c5746753
+X-EPHeader: CA
+CMS-TYPE: 201P
+X-CMS-RootMailID: 20210621062208eucas1p2949c830b948c3cf7b3d636c5c5746753
+References: <20210616053934.880951-1-hch@lst.de>
+        <20210616053934.880951-3-hch@lst.de>
+        <CGME20210621062208eucas1p2949c830b948c3cf7b3d636c5c5746753@eucas1p2.samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Sorry, I don't receive the reply email in my gmail.
+Hi
 
-Normally the mmc_host's power.disable_depth is large than zero, the
-rpm_resume(mmc:0001) will not be called recursively for parent. This is
-the most case.
-
-Although the mmc class device never calls pm_runtime_enable() directly,
-there are still some cases as below to call pm_runtime_enable(), which
-may cause it's power.disable_depth decremented to zero.
-  case1: device_resume_early->pm_runtime_enable
-  case2: device_resume->pm_runtime_enable
-
-Anything that can go wrong will go wrong. Unfortunately we meet the case.
-If you trigger to set the mmc_host's power.disable_depth value to zero
-after mmc suspended, you can find the issue.
-
-In our platform the mmc device's parent list is as below:
-     mmc0:0001->mmc_host mmc0->fa630000.mmc->soc.
-The rpm_resume call trace is as below in our scenario:
-
-rpm_resume(mmc0:0001)
-|
-if (!parent && dev->parent) //true
-if (!parent->power.disable_depth
-   && !parent->power.ignore_children) //true
-rpm_resume(parent, 0) --->  rpm_resume(mmc_host, 0)
-|                           |
-|                           callback =3D RPM_GET_CALLBACK(mmc_host, ...) =
-=3D NULL
-|                           retval =3D rpm_callback(callback, mmc_host) =3D=
- -ENOSYS
-|                           |
-|                           return retval =3D -ENOSYS
-if (retval) goto out; //skip rpm_callback()
-return retval =3D -ENOSYS
-
-The scenario is rare, but anything that can go wrong will go wrong.
-The patch can enhance the code to avoid this scenario.
-
-Ulf Hansson <ulf.hansson@linaro.org> =E4=BA=8E2021=E5=B9=B43=E6=9C=8822=E6=
-=97=A5=E5=91=A8=E4=B8=80 =E4=B8=8B=E5=8D=886:26=E5=86=99=E9=81=93=EF=BC=9A
+On 16.06.2021 07:39, Christoph Hellwig wrote:
+> Use the blk_mq_alloc_disk to allocate the request_queue and gendisk
+> together.
 >
-> On Sat, 20 Mar 2021 at 05:57, kehuanlin <chgokhl@gmail.com> wrote:
-> >
-> > The rpm_resume() will call parent's resume callback recursively.
-> > Since mmc_host has no its own pm_runtime callbacks, the mmc devices
-> > may fail to resume (-ENOSYS in rpm_callback) sometimes. Mark mmc_host
-> > device with pm_runtime_no_callbacks can fix the issue.
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+This patch landed recently in linux-next as commit 281ea6a5bfdc ("mmc: 
+switch to blk_mq_alloc_disk"). It triggers the following warning during 
+boot on all my systems with MMC devices:
+
+------------[ cut here ]------------
+WARNING: CPU: 0 PID: 10 at block/genhd.c:491 __device_add_disk+0x4e8/0x630
+Modules linked in:
+CPU: 0 PID: 10 Comm: kworker/0:1 Not tainted 
+5.13.0-rc3-00090-g281ea6a5bfdc #3542
+Hardware name: Samsung Exynos (Flattened Device Tree)
+Workqueue: events_freezable mmc_rescan
+[<c0111844>] (unwind_backtrace) from [<c010d014>] (show_stack+0x10/0x14)
+[<c010d014>] (show_stack) from [<c0b6f84c>] (dump_stack+0xa4/0xc4)
+[<c0b6f84c>] (dump_stack) from [<c0127630>] (__warn+0x118/0x11c)
+[<c0127630>] (__warn) from [<c01276e8>] (warn_slowpath_fmt+0xb4/0xbc)
+[<c01276e8>] (warn_slowpath_fmt) from [<c052a52c>] 
+(__device_add_disk+0x4e8/0x630)
+[<c052a52c>] (__device_add_disk) from [<c08a8e10>] (mmc_add_disk+0x24/0x120)
+[<c08a8e10>] (mmc_add_disk) from [<c08a9e68>] (mmc_blk_probe+0x420/0x65c)
+[<c08a9e68>] (mmc_blk_probe) from [<c06bece4>] (really_probe+0x250/0x4dc)
+[<c06bece4>] (really_probe) from [<c06beff4>] 
+(driver_probe_device+0x84/0x1e4)
+[<c06beff4>] (driver_probe_device) from [<c06bcc70>] 
+(bus_for_each_drv+0x78/0xbc)
+[<c06bcc70>] (bus_for_each_drv) from [<c06be9f4>] 
+(__device_attach+0xe8/0x180)
+[<c06be9f4>] (__device_attach) from [<c06bda1c>] 
+(bus_probe_device+0x88/0x90)
+[<c06bda1c>] (bus_probe_device) from [<c06bb5f0>] (device_add+0x4c8/0x874)
+[<c06bb5f0>] (device_add) from [<c089ac6c>] (mmc_add_card+0x110/0x2d0)
+[<c089ac6c>] (mmc_add_card) from [<c089ebd8>] (mmc_attach_mmc+0xc8/0x180)
+[<c089ebd8>] (mmc_attach_mmc) from [<c089a5c4>] (mmc_rescan+0x2ec/0x334)
+[<c089a5c4>] (mmc_rescan) from [<c014a994>] (process_one_work+0x30c/0x884)
+[<c014a994>] (process_one_work) from [<c014af64>] (worker_thread+0x58/0x594)
+[<c014af64>] (worker_thread) from [<c0151f34>] (kthread+0x154/0x19c)
+[<c0151f34>] (kthread) from [<c010011c>] (ret_from_fork+0x14/0x38)
+Exception stack(0xc1d25fb0 to 0xc1d25ff8)
+...
+irq event stamp: 3653
+hardirqs last  enabled at (3667): [<c0100b4c>] __irq_svc+0x8c/0xb0
+hardirqs last disabled at (3678): [<c0b749c4>] __schedule+0x54c/0x9dc
+softirqs last  enabled at (3648): [<c0101790>] __do_softirq+0x528/0x63c
+softirqs last disabled at (3641): [<c01311b8>] irq_exit+0x214/0x220
+---[ end trace e60288107691b657 ]---
+
+It looks that something is missing in this conversion.
+
+> ---
+>   drivers/mmc/core/block.c | 14 +++-----------
+>   drivers/mmc/core/queue.c | 23 ++++++++++-------------
+>   drivers/mmc/core/queue.h |  2 +-
+>   3 files changed, 14 insertions(+), 25 deletions(-)
 >
-> Can you please elaborate more on this? What do you mean by "sometimes"?
->
-> More precisely, how do you trigger the rpm_callback() for mmc class
-> device to return -ENOSYS?
->
-> Don't get me wrong, the patch is fine, but I want to understand if it
-> actually solves a problem for you - or that it's better considered as
-> an optimization?
->
-> Kind regards
-> Uffe
->
-> >
-> > Signed-off-by: kehuanlin <chgokhl@gmail.com>
-> > ---
-> >  drivers/mmc/core/host.c | 2 ++
-> >  1 file changed, 2 insertions(+)
-> >
-> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > index 9b89a91b6b47..177bebd9a6c4 100644
-> > --- a/drivers/mmc/core/host.c
-> > +++ b/drivers/mmc/core/host.c
-> > @@ -15,6 +15,7 @@
-> >  #include <linux/of.h>
-> >  #include <linux/of_gpio.h>
-> >  #include <linux/pagemap.h>
-> > +#include <linux/pm_runtime.h>
-> >  #include <linux/pm_wakeup.h>
-> >  #include <linux/export.h>
-> >  #include <linux/leds.h>
-> > @@ -480,6 +481,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct d=
-evice *dev)
-> >         host->class_dev.class =3D &mmc_host_class;
-> >         device_initialize(&host->class_dev);
-> >         device_enable_async_suspend(&host->class_dev);
-> > +       pm_runtime_no_callbacks(&host->class_dev);
-> >
-> >         if (mmc_gpio_alloc(host)) {
-> >                 put_device(&host->class_dev);
-> > --
-> > 2.30.0
-> >
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 947624e76c33..6652e1f1d4b2 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2310,27 +2310,21 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>   	 */
+>   	md->read_only = mmc_blk_readonly(card);
+>   
+> -	md->disk = alloc_disk(perdev_minors);
+> -	if (md->disk == NULL) {
+> -		ret = -ENOMEM;
+> +	md->disk = mmc_init_queue(&md->queue, card);
+> +	if (IS_ERR(md->disk)) {
+> +		ret = PTR_ERR(md->disk);
+>   		goto err_kfree;
+>   	}
+>   
+>   	INIT_LIST_HEAD(&md->part);
+>   	INIT_LIST_HEAD(&md->rpmbs);
+>   	md->usage = 1;
+> -
+> -	ret = mmc_init_queue(&md->queue, card);
+> -	if (ret)
+> -		goto err_putdisk;
+> -
+>   	md->queue.blkdata = md;
+>   
+>   	md->disk->major	= MMC_BLOCK_MAJOR;
+>   	md->disk->first_minor = devidx * perdev_minors;
+>   	md->disk->fops = &mmc_bdops;
+>   	md->disk->private_data = md;
+> -	md->disk->queue = md->queue.queue;
+>   	md->parent = parent;
+>   	set_disk_ro(md->disk, md->read_only || default_ro);
+>   	md->disk->flags = GENHD_FL_EXT_DEVT;
+> @@ -2379,8 +2373,6 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>   
+>   	return md;
+>   
+> - err_putdisk:
+> -	put_disk(md->disk);
+>    err_kfree:
+>   	kfree(md);
+>    out:
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index d600e0a4a460..cc3261777637 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -424,9 +424,10 @@ static inline bool mmc_merge_capable(struct mmc_host *host)
+>    *
+>    * Initialise a MMC card request queue.
+>    */
+> -int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
+> +struct gendisk *mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
+>   {
+>   	struct mmc_host *host = card->host;
+> +	struct gendisk *disk;
+>   	int ret;
+>   
+>   	mq->card = card;
+> @@ -464,26 +465,22 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card)
+>   
+>   	ret = blk_mq_alloc_tag_set(&mq->tag_set);
+>   	if (ret)
+> -		return ret;
+> +		return ERR_PTR(ret);
+> +		
+>   
+> -	mq->queue = blk_mq_init_queue(&mq->tag_set);
+> -	if (IS_ERR(mq->queue)) {
+> -		ret = PTR_ERR(mq->queue);
+> -		goto free_tag_set;
+> +	disk = blk_mq_alloc_disk(&mq->tag_set, mq);
+> +	if (IS_ERR(disk)) {
+> +		blk_mq_free_tag_set(&mq->tag_set);
+> +		return disk;
+>   	}
+> +	mq->queue = disk->queue;
+>   
+>   	if (mmc_host_is_spi(host) && host->use_spi_crc)
+>   		blk_queue_flag_set(QUEUE_FLAG_STABLE_WRITES, mq->queue);
+> -
+> -	mq->queue->queuedata = mq;
+>   	blk_queue_rq_timeout(mq->queue, 60 * HZ);
+>   
+>   	mmc_setup_queue(mq, card);
+> -	return 0;
+> -
+> -free_tag_set:
+> -	blk_mq_free_tag_set(&mq->tag_set);
+> -	return ret;
+> +	return disk;
+>   }
+>   
+>   void mmc_queue_suspend(struct mmc_queue *mq)
+> diff --git a/drivers/mmc/core/queue.h b/drivers/mmc/core/queue.h
+> index 3319d8ab57d0..9ade3bcbb714 100644
+> --- a/drivers/mmc/core/queue.h
+> +++ b/drivers/mmc/core/queue.h
+> @@ -94,7 +94,7 @@ struct mmc_queue {
+>   	struct work_struct	complete_work;
+>   };
+>   
+> -extern int mmc_init_queue(struct mmc_queue *, struct mmc_card *);
+> +struct gendisk *mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card);
+>   extern void mmc_cleanup_queue(struct mmc_queue *);
+>   extern void mmc_queue_suspend(struct mmc_queue *);
+>   extern void mmc_queue_resume(struct mmc_queue *);
+
+Best regards
+-- 
+Marek Szyprowski, PhD
+Samsung R&D Institute Poland
+
