@@ -2,105 +2,76 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45EB8C49EA2
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 07:54:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E5D8C49EA4
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 08:02:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24D766100B
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 07:54:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 608E3610A3
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 08:02:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229621AbhFUH4q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Jun 2021 03:56:46 -0400
-Received: from mga01.intel.com ([192.55.52.88]:29911 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229618AbhFUH4q (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 21 Jun 2021 03:56:46 -0400
-IronPort-SDR: H/YQgShm9N09fNoC+sCVqxZ4Nx+cSxoJzniiOsXRDE6EA95NiamVMxvvL5FqoHrnuMK5dBElQR
- R4ZJ2grZPCig==
-X-IronPort-AV: E=McAfee;i="6200,9189,10021"; a="228339714"
-X-IronPort-AV: E=Sophos;i="5.83,289,1616482800"; 
-   d="scan'208";a="228339714"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jun 2021 00:54:32 -0700
-IronPort-SDR: ePunD3aphre132Ee0xHHXqV5EuQ660HRoOOItg4ledEjyfdzsq1+kYisl0blsZbPURZ4uTtV+G
- Zoa9oPb8DbTA==
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.83,289,1616482800"; 
-   d="scan'208";a="405542812"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
-  by orsmga006.jf.intel.com with ESMTP; 21 Jun 2021 00:54:30 -0700
-Subject: Re: [PATCH] mmc: disable tuning when checking card presence
-To:     Ulrich Hecht <uli@fpond.eu>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-References: <20210618082317.58408-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFqkW9uwtJyWPFKggi2AJMtO4NJLW-6hviWgGSfoHyDm1A@mail.gmail.com>
- <bbfbed66-5058-1263-159c-dabd345286c8@intel.com>
- <563832257.373371.1624260736936@webmail.strato.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <5adc8601-23c7-4378-94e2-cb3641d9039c@intel.com>
-Date:   Mon, 21 Jun 2021 10:54:53 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S230075AbhFUIEf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 04:04:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55022 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230232AbhFUIEe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 04:04:34 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C90D0C061574;
+        Mon, 21 Jun 2021 01:02:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:MIME-Version:
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:In-Reply-To:References;
+        bh=JtH+BJ83UKkZsmM2/s6DGMHrwGxZ9Os/k7xFLgZ7ELk=; b=We8PqCjjv3Yo+mSm+mnxkdSBGc
+        JUfOpEJtP4XbbEWqDAQge8E/dVJqWaxld53jKJ65shwRsgn7RkTSQ4i23tFNowMxo8Iy3i+FWFD/6
+        gtAuPhWGhi8jJcNLVZ0Ec1La7OU88sGpkzvTRXC7z1vAh/LrFFZjb7T3IZeTyV1JZtPevMUWI1w9m
+        JzJZdBncNP+nyX8xj417jDn3HaintdGPjxx0GWVGGl38SbxtIfG4nNhMI2zzK4tC6pi2nu/4c2UQU
+        se6hdutLhX5bzw/Ikh8uh9SXd07LfaCWYEvA7fRl+bJfuAvXSKmvqCWnjzyH6aAKU2IrtYwR2QilH
+        IRjrpGXw==;
+Received: from [2001:4bb8:188:3e21:8988:c934:59d4:cfe6] (helo=localhost)
+        by casper.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1lvEsL-00Crj9-NG; Mon, 21 Jun 2021 08:01:56 +0000
+From:   Christoph Hellwig <hch@lst.de>
+To:     axboe@kernel.dk, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        Marek Szyprowski <m.szyprowski@samsung.com>
+Subject: [PATCH] mmc: initialized disk->minors
+Date:   Mon, 21 Jun 2021 10:01:44 +0200
+Message-Id: <20210621080144.3655131-1-hch@lst.de>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-In-Reply-To: <563832257.373371.1624260736936@webmail.strato.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/06/21 10:32 am, Ulrich Hecht wrote:
-> 
->> On 06/21/2021 9:15 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->> Can we clarify, is the only problem that the error message is confusing?
-> 
-> AFAICT there are no ill effects of the retune failing apart from the error message.
-> 
+Fix a let hunk from the blk_mq_alloc_disk conversion.
 
-So maybe the simplest thing to do is just amend the message:
-e.g.
+Fixes: 281ea6a5bfdc ("mmc: switch to blk_mq_alloc_disk")
+Reported-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
+---
+ drivers/mmc/core/block.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 4e52eb14198a..5cbf05e331c4 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -936,13 +936,22 @@ int mmc_execute_tuning(struct mmc_card *card)
- 		opcode = MMC_SEND_TUNING_BLOCK;
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index e7f89cbf9232..9890a1532cb0 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2331,6 +2331,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	md->queue.blkdata = md;
  
- 	err = host->ops->execute_tuning(host, opcode);
--
- 	if (err)
--		pr_err("%s: tuning execution failed: %d\n",
--			mmc_hostname(host), err);
--	else
--		mmc_retune_enable(host);
-+		goto out_err;
-+
-+	mmc_retune_enable(host);
- 
-+	return 0;
-+
-+out_err:
-+	if (mmc_card_is_removable(host)) {
-+		if (err != -ENOMEDIUM)
-+			pr_err("%s: tuning execution failed: %d (this is normal if card removed)\n",
-+			       mmc_hostname(host), err);
-+	} else {
-+		pr_err("%s: tuning execution failed: %d\n",
-+		       mmc_hostname(host), err);
-+	}
- 	return err;
- }
- 
-
+ 	md->disk->major	= MMC_BLOCK_MAJOR;
++	md->disk->minors = perdev_minors;
+ 	md->disk->first_minor = devidx * perdev_minors;
+ 	md->disk->fops = &mmc_bdops;
+ 	md->disk->private_data = md;
+-- 
+2.30.2
 
