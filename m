@@ -2,125 +2,203 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3308C48BE5
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 09:21:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57854C49361
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 09:43:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85B01611B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 09:21:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3923060C3F
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 09:43:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230268AbhFUJX2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Jun 2021 05:23:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44846 "EHLO
+        id S229621AbhFUJqF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 05:46:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230175AbhFUJX2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 05:23:28 -0400
-Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A623C061574
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 02:21:14 -0700 (PDT)
-Received: by mail-vs1-xe2a.google.com with SMTP id l26so674544vsm.9
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 02:21:14 -0700 (PDT)
+        with ESMTP id S229576AbhFUJqF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 05:46:05 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 325D6C061574
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 02:43:50 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id k8so24076568lja.4
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 02:43:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=1Vd+PiHe/bRMwnxiMCntHGnrHkv4JBBFa+zKaAXH/ik=;
-        b=o19037BEi9Dfo1ZRbE+9uwTl0qZClU4ImAXQTQPWpbRUvSpymIfO03q37ef6YgjjpX
-         IMFhFXsueQpoElj4cxKi959NDwhJQpkswzbWSAF+1DI470H1uHbfBh17femO8xSzr9E6
-         OshtcVwygLfmP8W0dR521utFAK/ugxiOq3aQB4rwy33SYAm0vtOAijsdpTObtSNimpK9
-         zzhhkM4MwyWav2y9BW0wumJdLbOa61PA1okKfXuqVDMwBrcIuL1LUtV2lk/Uhdwi0yja
-         gD6U9TdPK+GKQmETtWuUsL4dAu4M1+b72qVEeHW556tdMbnzl+X7FTdTzoZKSjzbVmiT
-         JZCQ==
+        d=ragnatech-se.20150623.gappssmtp.com; s=20150623;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=Sm0Lp6dINqoZXGOoGrE9UkgpSIbveZOVAGO/5YEr9hk=;
+        b=b9R8rgP7FnanRni4GCtZnM0xmpADAFMbu7VgeLkvQWGiV5Ar0fdjvjc5Bbz7rQouXP
+         o8PiXPyZeFOdT0hMVjM4rorSMKUoJp/PlIJQDtneImtsyKbI8ficTmkn1hKgkw4l1aXQ
+         LWoX5KxsP0aJpsSEi1IZBGtGzJZbSuyFD1k48HCWgauNqhbYoYL9e5FfVOO0Pvq8ZRh4
+         ckV7Pp0W4pD64LGjRJxYOE1h2B3y3wNYuw5uzpopEygJqHiuLuIEjQz+/O83TKlExsnh
+         FiOzsYmSQ92mHgQd6g+GxP8LVQ4AC8bSI8KlJYl9Oy3TrVrXQ2IICd/Iew9KAC1Bx2/F
+         Ry4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=1Vd+PiHe/bRMwnxiMCntHGnrHkv4JBBFa+zKaAXH/ik=;
-        b=tmkbQ2JUX7MDUxpF7nIt2UspfI+LDztip0D9DWAQBcCXjSHflODhR8QJuSzI8Df3Ci
-         DoF6PqeMJOlcQ9yrP56rT2znjQHMRTONYnRa1hR4KYaWhifnIGXaCwt7yAk04+Bq7KER
-         Tg6it+KCarFimSWRmihAfY3BJ5rApru8X4FxBfKLXuhpiWLeZL7V9UV2vpJ54TouXUaA
-         vW/h28YXzVl8CqyjTYyb0WXePxShgY24aivkV0CVb8GfXgVoXd2pD68lYdRguB+91AhP
-         WVCt8byCqamI/88v5Mu1Q3M65sCE5czqyjwfB4A5yA1KPWnEte5WKBJS9OlIqO+gl5Ge
-         NxSg==
-X-Gm-Message-State: AOAM5300uYeDX8WdEVkPJySzzFx9sWqDEkvGuUEsyiQ0/tLi8E6nCw/+
-        GD4doYQLsrYBiVseYK8CBpgqnIhIqeHC5HZYtcflBw==
-X-Google-Smtp-Source: ABdhPJyWynQJTb2V6t+oCYPeSuI9ZT9iQyheQZxOsYra5j4JCehtuF1qKlo0ua3FavFCXS9dY9cP3NthP6wRLhlbwhU=
-X-Received: by 2002:a05:6102:3a70:: with SMTP id bf16mr6298082vsb.48.1624267273523;
- Mon, 21 Jun 2021 02:21:13 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=Sm0Lp6dINqoZXGOoGrE9UkgpSIbveZOVAGO/5YEr9hk=;
+        b=aI+pq8OKlB889Mk6qdP+U0KWcthUmQgEL0iVibM/ZntBzXthTC5h2ldW02GJ6Qg3ei
+         Xm0WzM7GGgO6Bf8gH63KZLgK7kpxCwm6Ac8fX3llUdRacXU7i/gLb+BGw36ZI5o7wqof
+         BWeQpv0jixQ/Nmt6dy0WBu7tCPliJJHvzW5f2TY+P+8v+1FctInpxz0av87eH33LWk54
+         2QHd3f4JcUGsV4l0dq1Lhk6qVbwZShFVnZF/1UllADOSfuK20wfkIapYxERb6zQGCn3l
+         jpPvrQw0XkuI97+pQd6H3wrSENbefpymjauTaJ6vV61VImO+7iOhjyo3cWQLOz1S3YCf
+         5ohQ==
+X-Gm-Message-State: AOAM532JEx53yJxIz9a5b5RTNkEMU2vpZDqDbMoY0bcSwq9YjanqQh5U
+        ss+nFX5e94KyuHGQAhQ7JnWFYmIpQPB3MQ==
+X-Google-Smtp-Source: ABdhPJzfS/+HLprV4W9nlcZ1i6AvgaGeSH4MS6jiCIGPPzGJTlG0P6M9vzARI113kHHaHAtIaV/I5A==
+X-Received: by 2002:a2e:858a:: with SMTP id b10mr20562700lji.445.1624268628517;
+        Mon, 21 Jun 2021 02:43:48 -0700 (PDT)
+Received: from localhost (h-46-59-88-219.A463.priv.bahnhof.se. [46.59.88.219])
+        by smtp.gmail.com with ESMTPSA id w8sm505246lfq.27.2021.06.21.02.43.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 21 Jun 2021 02:43:48 -0700 (PDT)
+Date:   Mon, 21 Jun 2021 11:43:47 +0200
+From:   Niklas =?iso-8859-1?Q?S=F6derlund?= 
+        <niklas.soderlund@ragnatech.se>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: Re: [PATCH] mmc: renesas_sdhi: sys_dmac: abort DMA synced to avoid
+ timeouts
+Message-ID: <YNBfU1MLIjJJxmw3@oden.dyn.berto.se>
+References: <20210621070009.13655-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-References: <20210320045720.11872-1-chgokhl@gmail.com> <CAPDyKFqXtKPngfnQZXXaF=rvqw0=nWzDc7P++QxNHPwGHHSxUA@mail.gmail.com>
- <CAMjpFAUTsei-PWLDdM+_78qXTo=QFdw-Wbgo9QA2Jnss+i4yRA@mail.gmail.com>
-In-Reply-To: <CAMjpFAUTsei-PWLDdM+_78qXTo=QFdw-Wbgo9QA2Jnss+i4yRA@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 21 Jun 2021 11:20:36 +0200
-Message-ID: <CAPDyKFqUhx8SmpXj=kmxzEKLWt4RU8rTxiiQgAXWX=fzmL=J0Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Mark mmc_host device with pm_runtime_no_callbacks
-To:     chgokhl@163.com
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kehuanlin@fishsemi.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210621070009.13655-1-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 21 Jun 2021 at 03:38, hieagle <chgokhl@gmail.com> wrote:
->
-> Sorry, I don't receive the reply email in my gmail.
->
-> Normally the mmc_host's power.disable_depth is large than zero, the
-> rpm_resume(mmc:0001) will not be called recursively for parent. This is
-> the most case.
->
-> Although the mmc class device never calls pm_runtime_enable() directly,
-> there are still some cases as below to call pm_runtime_enable(), which
-> may cause it's power.disable_depth decremented to zero.
->   case1: device_resume_early->pm_runtime_enable
->   case2: device_resume->pm_runtime_enable
+Hi Wolfram,
 
-Those calls to pm_runtime_enable() are in balance with previous calls
-to __pm_runtime_disable and pm_runtime_disable(), in
-__device_suspend() and __device_suspend_late().
+Thanks for your work.
 
-In other words, the power.disable_depth is not being decremented to
-zero in any of those above path, I think.
+On 2021-06-21 09:00:09 +0200, Wolfram Sang wrote:
+> When aborting DMA, we terminate the transfer without waiting for it to
+> succeed. This may lead to races which can e.g. lead to timeout problems
+> when tuning. Remove the deprecated dmaengine_terminate_all() function
+> and use the explicit dmaengine_terminate_sync().
+> 
+> Fixes: e3de2be7368d ("mmc: tmio_mmc: fix card eject during IO with DMA")
+> Reported-by: Geert Uytterhoeven <geert+renesas@glider.be>
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+> 
+> Geert, this fixes the issue you have seen on your Koelsch board on my
+> Lager board. Can you test again with this patch please?
 
->
-> Anything that can go wrong will go wrong. Unfortunately we meet the case.
-> If you trigger to set the mmc_host's power.disable_depth value to zero
-> after mmc suspended, you can find the issue.
->
-> In our platform the mmc device's parent list is as below:
->      mmc0:0001->mmc_host mmc0->fa630000.mmc->soc.
-> The rpm_resume call trace is as below in our scenario:
->
-> rpm_resume(mmc0:0001)
-> |
-> if (!parent && dev->parent) //true
-> if (!parent->power.disable_depth
->    && !parent->power.ignore_children) //true
-> rpm_resume(parent, 0) --->  rpm_resume(mmc_host, 0)
-> |                           |
-> |                           callback = RPM_GET_CALLBACK(mmc_host, ...) = NULL
-> |                           retval = rpm_callback(callback, mmc_host) = -ENOSYS
-> |                           |
-> |                           return retval = -ENOSYS
-> if (retval) goto out; //skip rpm_callback()
-> return retval = -ENOSYS
->
-> The scenario is rare, but anything that can go wrong will go wrong.
-> The patch can enhance the code to avoid this scenario.
+I'm not exactly sure what problem Geert is experience but I 
+unfortunately have tuning problems on Koelsch. The problem is the same 
+with and without this patch however.
 
-Well, I am still not convinced as I don't see how the
-power.disable_depth can ever reach zero.
+I'm trying on-top of v5.13-rc7 with and without this patch and this is 
+what I experience.
 
-If you could provide a stack-trace of when power.disable_depth reaches
-zero, that would be helpful.
+# Insert card in SD0
+[   57.794238] mmc0: new ultra high speed SDR104 SDHC card at address aaaa
+[   57.801363] mmcblk0: mmc0:aaaa SL32G 29.7 GiB (ro)
+[   57.820427] GPT:partition_entry_array_crc32 values don't match: 0x9ad84b1 != 0xb110df4b
+[   57.828456] GPT:Primary header thinks Alt. header is not at the end of the disk.
+[   57.835901] GPT:11526300 != 62333951
+[   57.839484] GPT:Alternate GPT header not at the end of the disk.
+[   57.845514] GPT:11526300 != 62333951
+[   57.849093] GPT: Use GNU Parted to correct GPT errors.
+[   57.854306]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12
 
-[...]
+# Eject card and insert it in SD1
+[   70.261657] mmc0: tuning execution failed: -5
+[   70.266377] mmc0: card aaaa removed
+[   77.769959] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD52)
+[   82.889951] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD52)
+[   88.009948] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD0)
+[   93.129966] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD8)
+[   98.249955] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  103.369944] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  108.489946] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  113.609921] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  118.729885] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  123.849848] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  128.969823] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  134.089817] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  139.209774] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD1)
+[  144.409755] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD52)
+[  149.529735] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware 
+interrupt (CMD52)
+[  154.649720] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD0)
+[  159.769709] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD8)
+[  164.889693] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  170.009685] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  175.129729] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  180.249673] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  185.369656] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  190.489650] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  195.609654] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  200.729631] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+[  205.849630] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD1)
+[  211.049615] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD52)
+[  216.169621] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD52)
+[  221.289616] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD0)
+[  226.409611] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD8)
+[  231.529605] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  236.649600] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  241.769580] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  246.889543] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD5)
+[  252.009503] sh_mobile_sdhi ee140000.mmc: timeout waiting for hardware interrupt (CMD55)
+... timeout messages continue ...
 
-Kind regards
-Uffe
+The experience is the same if I directly insert the card in SD1 after a 
+reset, I only included the SD0 cycle to verify the card itself is good.
+
+I tested on v5.12 and there the card works but is identified as SDR50,
+
+# Insert into SD1
+[  102.667405] mmc0: new ultra high speed SDR50 SDHC card at address aaaa
+[  102.676211] mmcblk0: mmc0:aaaa SL32G 29.7 GiB (ro)
+[  102.695241] GPT:partition_entry_array_crc32 values don't match: 0x9ad84b1 != 0xb110df4b
+[  102.703312] GPT:Primary header thinks Alt. header is not at the end of the disk.
+[  102.710754] GPT:11526300 != 62333951
+[  102.714335] GPT:Alternate GPT header not at the end of the disk.
+[  102.720360] GPT:11526300 != 62333951
+[  102.723937] GPT: Use GNU Parted to correct GPT errors.
+[  102.729158]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12
+
+Maybe there are more then one patch needed to fix this? Should I rerun 
+my test on a different base?
+
+> 
+> I noticed that Renesas driver are quite an active user of this
+> deprecated dmaengine function. I will audit and improve the other
+> drivers meanwhile.
+> 
+>  drivers/mmc/host/renesas_sdhi_sys_dmac.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> index ffa64211f4de..6956b83469c8 100644
+> --- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
+> @@ -108,9 +108,9 @@ static void renesas_sdhi_sys_dmac_abort_dma(struct tmio_mmc_host *host)
+>  	renesas_sdhi_sys_dmac_enable_dma(host, false);
+>  
+>  	if (host->chan_rx)
+> -		dmaengine_terminate_all(host->chan_rx);
+> +		dmaengine_terminate_sync(host->chan_rx);
+>  	if (host->chan_tx)
+> -		dmaengine_terminate_all(host->chan_tx);
+> +		dmaengine_terminate_sync(host->chan_tx);
+>  
+>  	renesas_sdhi_sys_dmac_enable_dma(host, true);
+>  }
+> -- 
+> 2.30.2
+> 
+
+-- 
+Regards,
+Niklas Söderlund
