@@ -2,103 +2,162 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01378C48BE5
-	for <linux-mmc@archiver.kernel.org>; Sat, 19 Jun 2021 22:54:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BAE1C49EA3
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 01:38:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D65E7611CE
-	for <linux-mmc@archiver.kernel.org>; Sat, 19 Jun 2021 22:54:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 67E0B61208
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Jun 2021 01:38:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229522AbhFSW4X (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 19 Jun 2021 18:56:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48458 "EHLO
+        id S230040AbhFUBlB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 20 Jun 2021 21:41:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229683AbhFSW4U (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 19 Jun 2021 18:56:20 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1A63C061756
-        for <linux-mmc@vger.kernel.org>; Sat, 19 Jun 2021 15:54:08 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id m21so23206445lfg.13
-        for <linux-mmc@vger.kernel.org>; Sat, 19 Jun 2021 15:54:08 -0700 (PDT)
+        with ESMTP id S229899AbhFUBlB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 20 Jun 2021 21:41:01 -0400
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07E66C061574;
+        Sun, 20 Jun 2021 18:38:47 -0700 (PDT)
+Received: by mail-lj1-x230.google.com with SMTP id s22so22788970ljg.5;
+        Sun, 20 Jun 2021 18:38:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=J4O/PSg42XQGCFuaHFKksTpyRyVdPtGQ1Rdj/uH+UqA=;
-        b=nnYlDJV7lF+OmF4cNajdGrn/NgWZCzgPHuiMJ6lnF9trRrHXMMVKH3Oz5wxIAQ4wtL
-         yWDMKhycSDwRyaXkkqMbWfBNO8gx2Xb10I3oJj2DXSEfc4Savwni3KUB7Canea7IIxyV
-         GHzv/DnGmUTzfnEQQ+mktoaFSHMlikRuhnTYXhRAwFoQ+Fkjfuk/WIK6LQ263lLa9gB4
-         9IRJgsWJEh7YDr5C0W1QAXr9m/vcKluRI+zDHzXpo+lF+q+6abBuygU88yFGxUcbcmM+
-         qqxzA5BGaNVXOOhyVd+xQvd3JB6oIDmlxOcbtdJDczSa4Qhq9DKBGO2zYWBqTred8cdO
-         wxmw==
+        d=gmail.com; s=20161025;
+        h=mime-version:references:in-reply-to:reply-to:from:date:message-id
+         :subject:to:cc:content-transfer-encoding;
+        bh=Ucm3wibUKjyDXQlWvsaDkSdXqDbxxo3t9VSQN89L9Co=;
+        b=BTlxdwbuRpgVcK978ahZti3mOppExd/U6mwBAaLVrjhA5uQaZGlR3lBoODkFn0HOqk
+         62jBeVq9CY95Yu1xfBJlML0yHnMuCIP/9U+Ab1rxcGbgNG9ZBxEY2ag+aPPzUGR5otjs
+         aqSBMT8ME6WaVxbcKal9RcHhIHfn45KBkAUTPbEnnqR3InZkcSxrCjBbGq5KDNR+ffI4
+         le0n5y2SK01XdEdJ8n+8QazVPH7zorDXFaK3i5reARh0KcGNht2hlOLs2i0PB5aqs5eF
+         xuEZdk8zGXAz4FjopjVehUYszCezbBEMafTDgs4vVmk/UCRcCMFJiMa+kOo2BTRrB645
+         Al3A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=J4O/PSg42XQGCFuaHFKksTpyRyVdPtGQ1Rdj/uH+UqA=;
-        b=CD7dSJ7kkCpohzv0grRzbAbCqmPqDsknu2hkR3RnWfQG+XKU1AnmRatuLMKXEbNF23
-         Cwykw+s3xYv5QL1GWmE+Mwr+NnArZWwX9e/llHXNNrEh3CqKmxUWhPHMGJREE9Z4TtdY
-         ZWJ1GYdIZiLlBvfDZ37hkHMFqnYGd8lQ8rpqOfqtls2l7Mzp05rOaUKsriksRMrn/RHq
-         /jYDqS1hjaZmthe/4Egj/AvogmMdMKNWQ2bYHVO6Bir8lWJtT4AH4vTkSXOpiOn1XApE
-         DiMFdWvYLztriZRDANlBdt6JEmV0PNuAoJ+Ilo+soX1R2vEQXVWUpDPRsrSuxB5mHbmw
-         v/tg==
-X-Gm-Message-State: AOAM531aOKUhkKXZ+OHUaB3TR++25tVpfi442GN71jeJDhv6yqxQrPqE
-        IGjTWk9yEy2Ue80kaDWeBIqDwhvzcNN2Ug==
-X-Google-Smtp-Source: ABdhPJx/8BYkA1itRd9EkHdffaoBBmdv1/7DP9nf3fN3rbiSuIN5DO6SRDSexBhDEhX5N68VZ7w6+g==
-X-Received: by 2002:a19:c753:: with SMTP id x80mr6935805lff.200.1624143247150;
-        Sat, 19 Jun 2021 15:54:07 -0700 (PDT)
-Received: from localhost.localdomain (c-fdcc225c.014-348-6c756e10.bbcust.telenor.se. [92.34.204.253])
-        by smtp.gmail.com with ESMTPSA id y5sm1345349lfa.148.2021.06.19.15.54.06
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 19 Jun 2021 15:54:06 -0700 (PDT)
-From:   Linus Walleij <linus.walleij@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        Ludovic Barre <ludovic.barre@st.com>
-Subject: [PATCH 3/3] mmc: mmci: Add small comment about reset thread
-Date:   Sun, 20 Jun 2021 00:51:18 +0200
-Message-Id: <20210619225118.1862634-3-linus.walleij@linaro.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210619225118.1862634-1-linus.walleij@linaro.org>
-References: <20210619225118.1862634-1-linus.walleij@linaro.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:reply-to
+         :from:date:message-id:subject:to:cc:content-transfer-encoding;
+        bh=Ucm3wibUKjyDXQlWvsaDkSdXqDbxxo3t9VSQN89L9Co=;
+        b=WG3EEpcRlvcCbG2oWS4mEhEb/P/P8IoBOtiwtFPJJlCxl0lmqFjx6HyzJY8nQoBevQ
+         a2/5F50c5pCJiKe2mla5kBwzIHfsFUA/sPGko3Hw2gbQKHpoEkepFkBXTksCusDw1zxD
+         y+Iua/MVdMJsN4XCmLPvXBvxDysmIpuPJgzFF5sVq6M4mmwy3jGg0iqanp8BU9uW3Is8
+         oiWOuznOx7Tngc4msmDdLPmnU3y01EjooBTIqnVwjJVo2HkOH8n+MfWr1GAq131CTedA
+         SgRYHjrcpTh54YK4G5efX3rDLSAoYOEaB8SCSZ5diZ+vyjqyCmKSf3KbAe3SEJItAdJL
+         vdDA==
+X-Gm-Message-State: AOAM5302RsQ+EDj2Zp0Qbk7n1TqYipk94LRSgN3AKQRTuU5j6EZ8S6ka
+        Nx5tz+Q4cDIKDFQ/9WClmrFTiuLyjoLJ5cPML/o=
+X-Google-Smtp-Source: ABdhPJxp1+mKBu76yS7r8Uyat0furanFf8Nvs2vaKaHNhbKYe6J5BU4yUx53dWxGthf7PEvqTxoM3LEIdEllBCywSug=
+X-Received: by 2002:a2e:8190:: with SMTP id e16mr19511865ljg.81.1624239525427;
+ Sun, 20 Jun 2021 18:38:45 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210320045720.11872-1-chgokhl@gmail.com> <CAPDyKFqXtKPngfnQZXXaF=rvqw0=nWzDc7P++QxNHPwGHHSxUA@mail.gmail.com>
+In-Reply-To: <CAPDyKFqXtKPngfnQZXXaF=rvqw0=nWzDc7P++QxNHPwGHHSxUA@mail.gmail.com>
+Reply-To: chgokhl@163.com
+From:   hieagle <chgokhl@gmail.com>
+Date:   Mon, 21 Jun 2021 09:38:34 +0800
+Message-ID: <CAMjpFAUTsei-PWLDdM+_78qXTo=QFdw-Wbgo9QA2Jnss+i4yRA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Mark mmc_host device with pm_runtime_no_callbacks
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kehuanlin@fishsemi.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Put a small comment before assigning IRQ_WAKE_THREAD
-telling us what is going on.
+Sorry, I don't receive the reply email in my gmail.
 
-Cc: Russell King <linux@armlinux.org.uk>
-Cc: Yann Gautier <yann.gautier@foss.st.com>
-Cc: Ludovic Barre <ludovic.barre@st.com>
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
- drivers/mmc/host/mmci.c | 4 ++++
- 1 file changed, 4 insertions(+)
+Normally the mmc_host's power.disable_depth is large than zero, the
+rpm_resume(mmc:0001) will not be called recursively for parent. This is
+the most case.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 97fa5e67ca0c..b646ba7f4e10 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1394,6 +1394,10 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	} else if (host->variant->busy_timeout && busy_resp &&
- 		   status & MCI_DATATIMEOUT) {
- 		cmd->error = -ETIMEDOUT;
-+		/*
-+		 * This will wake up mmci_irq_thread() which will issue
-+		 * a hardware reset of the MMCI block.
-+		 */
- 		host->irq_action = IRQ_WAKE_THREAD;
- 	} else {
- 		cmd->resp[0] = readl(base + MMCIRESPONSE0);
--- 
-2.31.1
+Although the mmc class device never calls pm_runtime_enable() directly,
+there are still some cases as below to call pm_runtime_enable(), which
+may cause it's power.disable_depth decremented to zero.
+  case1: device_resume_early->pm_runtime_enable
+  case2: device_resume->pm_runtime_enable
 
+Anything that can go wrong will go wrong. Unfortunately we meet the case.
+If you trigger to set the mmc_host's power.disable_depth value to zero
+after mmc suspended, you can find the issue.
+
+In our platform the mmc device's parent list is as below:
+     mmc0:0001->mmc_host mmc0->fa630000.mmc->soc.
+The rpm_resume call trace is as below in our scenario:
+
+rpm_resume(mmc0:0001)
+|
+if (!parent && dev->parent) //true
+if (!parent->power.disable_depth
+   && !parent->power.ignore_children) //true
+rpm_resume(parent, 0) --->  rpm_resume(mmc_host, 0)
+|                           |
+|                           callback =3D RPM_GET_CALLBACK(mmc_host, ...) =
+=3D NULL
+|                           retval =3D rpm_callback(callback, mmc_host) =3D=
+ -ENOSYS
+|                           |
+|                           return retval =3D -ENOSYS
+if (retval) goto out; //skip rpm_callback()
+return retval =3D -ENOSYS
+
+The scenario is rare, but anything that can go wrong will go wrong.
+The patch can enhance the code to avoid this scenario.
+
+Ulf Hansson <ulf.hansson@linaro.org> =E4=BA=8E2021=E5=B9=B43=E6=9C=8822=E6=
+=97=A5=E5=91=A8=E4=B8=80 =E4=B8=8B=E5=8D=886:26=E5=86=99=E9=81=93=EF=BC=9A
+>
+> On Sat, 20 Mar 2021 at 05:57, kehuanlin <chgokhl@gmail.com> wrote:
+> >
+> > The rpm_resume() will call parent's resume callback recursively.
+> > Since mmc_host has no its own pm_runtime callbacks, the mmc devices
+> > may fail to resume (-ENOSYS in rpm_callback) sometimes. Mark mmc_host
+> > device with pm_runtime_no_callbacks can fix the issue.
+>
+> Can you please elaborate more on this? What do you mean by "sometimes"?
+>
+> More precisely, how do you trigger the rpm_callback() for mmc class
+> device to return -ENOSYS?
+>
+> Don't get me wrong, the patch is fine, but I want to understand if it
+> actually solves a problem for you - or that it's better considered as
+> an optimization?
+>
+> Kind regards
+> Uffe
+>
+> >
+> > Signed-off-by: kehuanlin <chgokhl@gmail.com>
+> > ---
+> >  drivers/mmc/core/host.c | 2 ++
+> >  1 file changed, 2 insertions(+)
+> >
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 9b89a91b6b47..177bebd9a6c4 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -15,6 +15,7 @@
+> >  #include <linux/of.h>
+> >  #include <linux/of_gpio.h>
+> >  #include <linux/pagemap.h>
+> > +#include <linux/pm_runtime.h>
+> >  #include <linux/pm_wakeup.h>
+> >  #include <linux/export.h>
+> >  #include <linux/leds.h>
+> > @@ -480,6 +481,7 @@ struct mmc_host *mmc_alloc_host(int extra, struct d=
+evice *dev)
+> >         host->class_dev.class =3D &mmc_host_class;
+> >         device_initialize(&host->class_dev);
+> >         device_enable_async_suspend(&host->class_dev);
+> > +       pm_runtime_no_callbacks(&host->class_dev);
+> >
+> >         if (mmc_gpio_alloc(host)) {
+> >                 put_device(&host->class_dev);
+> > --
+> > 2.30.0
+> >
