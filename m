@@ -2,25 +2,25 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EB80C48BE5
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 992E7C49EA4
 	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60C9061245
+	by mail.kernel.org (Postfix) with ESMTP id 773096128E
 	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231232AbhFVCIO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S231293AbhFVCIO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 21 Jun 2021 22:08:14 -0400
-Received: from lucky1.263xmail.com ([211.157.147.134]:49806 "EHLO
+Received: from lucky1.263xmail.com ([211.157.147.132]:35052 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230429AbhFVCIN (ORCPT
+        with ESMTP id S230006AbhFVCIN (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 22:08:13 -0400
 Received: from localhost (unknown [192.168.167.235])
-        by lucky1.263xmail.com (Postfix) with ESMTP id EB7FFCBBE5;
+        by lucky1.263xmail.com (Postfix) with ESMTP id DE416F785C;
         Tue, 22 Jun 2021 10:05:56 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
@@ -29,9 +29,9 @@ X-SKE-CHECKED: 1
 X-ANTISPAM-LEVEL: 2
 Received: from localhost.localdomain (unknown [58.22.7.114])
         by smtp.263.net (postfix) whith ESMTP id P14866T140098544858880S1624327520607083_;
-        Tue, 22 Jun 2021 10:05:22 +0800 (CST)
+        Tue, 22 Jun 2021 10:05:30 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <144f441584d62bcc554eeba1fed39432>
+X-UNIQUE-TAG: <b94a19a382e782910ba740070d4c8d35>
 X-RL-SENDER: cl@rock-chips.com
 X-SENDER: cl@rock-chips.com
 X-LOGIN-NAME: cl@rock-chips.com
@@ -55,54 +55,378 @@ Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
         zhangqing@rock-chips.com, huangtao@rock-chips.com,
         cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
         jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: [PATCH v5 0/4] arm64: dts: rockchip: add basic dtsi/dts files for RK3568 SoC
-Date:   Tue, 22 Jun 2021 10:05:13 +0800
-Message-Id: <20210622020517.13100-1-cl@rock-chips.com>
+Subject: [PATCH v5 2/4] arm64: dts: rockchip: add generic pinconfig settings used by most Rockchip socs
+Date:   Tue, 22 Jun 2021 10:05:15 +0800
+Message-Id: <20210622020517.13100-3-cl@rock-chips.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210622020517.13100-1-cl@rock-chips.com>
+References: <20210622020517.13100-1-cl@rock-chips.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Liang Chen <cl@rock-chips.com>
 
-v1:
-1. add some dt-bindings for RK3568 devices.
-2. add core dtsi for RK3568 SoC.
-3. add basic dts for RK3568 EVB
+The pinconfig settings for Rockchip SoCs are pretty similar on all socs,
+so move them to a shared dtsi to be included, instead of redefining them
+for each soc.
 
-v2:
-1. sort device nodes by some rules.
-
-v3:
-1. make ARCH=arm64 dtbs_check, then fix some errors and add some documents.
-
-v4:
-1. make ARCH=arm64 dt_binding_check, then fix grf.yaml.
-2. correct gic node.
-
-v5:
-1. remove some patchs already applied.
-
-Liang Chen (4):
-  dt-bindings: pwm: rockchip: add description for rk3568
-  arm64: dts: rockchip: add generic pinconfig settings used by most
-    Rockchip socs
-  arm64: dts: rockchip: add core dtsi for RK3568 SoC
-  arm64: dts: rockchip: add basic dts for RK3568 EVB
-
- .../devicetree/bindings/arm/rockchip.yaml     |    5 +
- .../devicetree/bindings/pwm/pwm-rockchip.yaml |    1 +
- arch/arm64/boot/dts/rockchip/Makefile         |    1 +
- .../boot/dts/rockchip/rk3568-evb1-v10.dts     |   79 +
- .../boot/dts/rockchip/rk3568-pinctrl.dtsi     | 3111 +++++++++++++++++
- arch/arm64/boot/dts/rockchip/rk3568.dtsi      |  777 ++++
- .../boot/dts/rockchip/rockchip-pinconf.dtsi   |  344 ++
- 7 files changed, 4318 insertions(+)
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-pinctrl.dtsi
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568.dtsi
+Signed-off-by: Liang Chen <cl@rock-chips.com>
+---
+ .../boot/dts/rockchip/rockchip-pinconf.dtsi   | 344 ++++++++++++++++++
+ 1 file changed, 344 insertions(+)
  create mode 100644 arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
 
+diff --git a/arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi b/arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
+new file mode 100644
+index 000000000000..5c645437b507
+--- /dev/null
++++ b/arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
+@@ -0,0 +1,344 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
++ */
++
++&pinctrl {
++	/omit-if-no-ref/
++	pcfg_pull_up: pcfg-pull-up {
++		bias-pull-up;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down: pcfg-pull-down {
++		bias-pull-down;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none: pcfg-pull-none {
++		bias-disable;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_0: pcfg-pull-none-drv-level-0 {
++		bias-disable;
++		drive-strength = <0>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_1: pcfg-pull-none-drv-level-1 {
++		bias-disable;
++		drive-strength = <1>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_2: pcfg-pull-none-drv-level-2 {
++		bias-disable;
++		drive-strength = <2>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_3: pcfg-pull-none-drv-level-3 {
++		bias-disable;
++		drive-strength = <3>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_4: pcfg-pull-none-drv-level-4 {
++		bias-disable;
++		drive-strength = <4>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_5: pcfg-pull-none-drv-level-5 {
++		bias-disable;
++		drive-strength = <5>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_6: pcfg-pull-none-drv-level-6 {
++		bias-disable;
++		drive-strength = <6>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_7: pcfg-pull-none-drv-level-7 {
++		bias-disable;
++		drive-strength = <7>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_8: pcfg-pull-none-drv-level-8 {
++		bias-disable;
++		drive-strength = <8>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_9: pcfg-pull-none-drv-level-9 {
++		bias-disable;
++		drive-strength = <9>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_10: pcfg-pull-none-drv-level-10 {
++		bias-disable;
++		drive-strength = <10>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_11: pcfg-pull-none-drv-level-11 {
++		bias-disable;
++		drive-strength = <11>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_12: pcfg-pull-none-drv-level-12 {
++		bias-disable;
++		drive-strength = <12>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_13: pcfg-pull-none-drv-level-13 {
++		bias-disable;
++		drive-strength = <13>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_14: pcfg-pull-none-drv-level-14 {
++		bias-disable;
++		drive-strength = <14>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_15: pcfg-pull-none-drv-level-15 {
++		bias-disable;
++		drive-strength = <15>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_0: pcfg-pull-up-drv-level-0 {
++		bias-pull-up;
++		drive-strength = <0>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_1: pcfg-pull-up-drv-level-1 {
++		bias-pull-up;
++		drive-strength = <1>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_2: pcfg-pull-up-drv-level-2 {
++		bias-pull-up;
++		drive-strength = <2>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_3: pcfg-pull-up-drv-level-3 {
++		bias-pull-up;
++		drive-strength = <3>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_4: pcfg-pull-up-drv-level-4 {
++		bias-pull-up;
++		drive-strength = <4>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_5: pcfg-pull-up-drv-level-5 {
++		bias-pull-up;
++		drive-strength = <5>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_6: pcfg-pull-up-drv-level-6 {
++		bias-pull-up;
++		drive-strength = <6>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_7: pcfg-pull-up-drv-level-7 {
++		bias-pull-up;
++		drive-strength = <7>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_8: pcfg-pull-up-drv-level-8 {
++		bias-pull-up;
++		drive-strength = <8>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_9: pcfg-pull-up-drv-level-9 {
++		bias-pull-up;
++		drive-strength = <9>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_10: pcfg-pull-up-drv-level-10 {
++		bias-pull-up;
++		drive-strength = <10>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_11: pcfg-pull-up-drv-level-11 {
++		bias-pull-up;
++		drive-strength = <11>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_12: pcfg-pull-up-drv-level-12 {
++		bias-pull-up;
++		drive-strength = <12>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_13: pcfg-pull-up-drv-level-13 {
++		bias-pull-up;
++		drive-strength = <13>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_14: pcfg-pull-up-drv-level-14 {
++		bias-pull-up;
++		drive-strength = <14>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_drv_level_15: pcfg-pull-up-drv-level-15 {
++		bias-pull-up;
++		drive-strength = <15>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_0: pcfg-pull-down-drv-level-0 {
++		bias-pull-down;
++		drive-strength = <0>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_1: pcfg-pull-down-drv-level-1 {
++		bias-pull-down;
++		drive-strength = <1>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_2: pcfg-pull-down-drv-level-2 {
++		bias-pull-down;
++		drive-strength = <2>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_3: pcfg-pull-down-drv-level-3 {
++		bias-pull-down;
++		drive-strength = <3>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_4: pcfg-pull-down-drv-level-4 {
++		bias-pull-down;
++		drive-strength = <4>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_5: pcfg-pull-down-drv-level-5 {
++		bias-pull-down;
++		drive-strength = <5>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_6: pcfg-pull-down-drv-level-6 {
++		bias-pull-down;
++		drive-strength = <6>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_7: pcfg-pull-down-drv-level-7 {
++		bias-pull-down;
++		drive-strength = <7>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_8: pcfg-pull-down-drv-level-8 {
++		bias-pull-down;
++		drive-strength = <8>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_9: pcfg-pull-down-drv-level-9 {
++		bias-pull-down;
++		drive-strength = <9>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_10: pcfg-pull-down-drv-level-10 {
++		bias-pull-down;
++		drive-strength = <10>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_11: pcfg-pull-down-drv-level-11 {
++		bias-pull-down;
++		drive-strength = <11>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_12: pcfg-pull-down-drv-level-12 {
++		bias-pull-down;
++		drive-strength = <12>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_13: pcfg-pull-down-drv-level-13 {
++		bias-pull-down;
++		drive-strength = <13>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_14: pcfg-pull-down-drv-level-14 {
++		bias-pull-down;
++		drive-strength = <14>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_drv_level_15: pcfg-pull-down-drv-level-15 {
++		bias-pull-down;
++		drive-strength = <15>;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_up_smt: pcfg-pull-up-smt {
++		bias-pull-up;
++		input-schmitt-enable;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_down_smt: pcfg-pull-down-smt {
++		bias-pull-down;
++		input-schmitt-enable;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_smt: pcfg-pull-none-smt {
++		bias-disable;
++		input-schmitt-enable;
++	};
++
++	/omit-if-no-ref/
++	pcfg_pull_none_drv_level_0_smt: pcfg-pull-none-drv-level-0-smt {
++		bias-disable;
++		drive-strength = <0>;
++		input-schmitt-enable;
++	};
++
++	/omit-if-no-ref/
++	pcfg_output_high: pcfg-output-high {
++		output-high;
++	};
++
++	/omit-if-no-ref/
++	pcfg_output_low: pcfg-output-low {
++		output-low;
++	};
++};
 -- 
 2.17.1
 
