@@ -2,91 +2,176 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E981C48BE5
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 07:47:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 355C3C49EBB
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 08:17:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 878ED611CE
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 07:47:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 09DFB61289
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 08:17:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229695AbhFVHtz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Jun 2021 03:49:55 -0400
-Received: from www.zeus03.de ([194.117.254.33]:43944 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230479AbhFVHty (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 22 Jun 2021 03:49:54 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=XmH2j7pggYs4YEXyqrjyv4sVnx8W
-        2DZpqhAPPW+51rw=; b=QqYImV8Up/AEkuXQXkYPqjPx9nhuCG8DeduCMNlJ8Jo/
-        FMnkwGZVmnUu67E30hLQNuRnq3hkQ5HKkHzkgwgscZ+NSJa39gaCEahsZx5mklq8
-        tEONbExCEskUrHjIti+5+VkQ3xnOppG56g+Dthp430NSUjR9Yesa4C+5AE2lX+M=
-Received: (qmail 2139775 invoked from network); 22 Jun 2021 09:47:37 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 22 Jun 2021 09:47:37 +0200
-X-UD-Smtp-Session: l3s3148p1@RAXqAFbFsKkgARa4RYg6AcaF9vCOUtT0
-Date:   Tue, 22 Jun 2021 09:47:36 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: Re: [PATCH] mmc: renesas_sdhi: sys_dmac: abort DMA synced to avoid
- timeouts
-Message-ID: <YNGVmDOzFzA9MMZU@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-References: <20210621070009.13655-1-wsa+renesas@sang-engineering.com>
- <CAMuHMdULBPfd97xqDaFOTmj-B2pBA=wSKz3iep6ujx47j1zyPg@mail.gmail.com>
+        id S230392AbhFVIUB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Jun 2021 04:20:01 -0400
+Received: from mail-vs1-f54.google.com ([209.85.217.54]:46782 "EHLO
+        mail-vs1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229844AbhFVIT7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jun 2021 04:19:59 -0400
+Received: by mail-vs1-f54.google.com with SMTP id z15so10758892vsn.13;
+        Tue, 22 Jun 2021 01:17:41 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=s0hVMlLFV5eIwzuXXBEJWEV7FxMfuDBGtQwv1PuAfDc=;
+        b=Yc8JShUBMH1dnjUYyQ4i3CS2+y2GF6q1YtRwv/bRUTq4JGwOzFH8jz0/QYnr8ZuDpr
+         HcEesiBUGFsp/umSzAQ1ucxKn54tANWqVfYyhNDVX62VWxoC03W6vKFzSWDS1INIUujo
+         EfpD0ZvANCW00iJ41ZnsyYqUYQ7WKnBJFLN0taGCgErNoNfbEbrJRexR6AwIwIKT2Knb
+         /0emor8cfQJbNOnIXhfpVS1iQMsX9FEwTZTkt2w2NsDGz2POO5RqhJxIgP7TG7ACSbj/
+         GkkcJgg3HdSB+eNLe7DKVV3GNyEiHob+PVe9RVIKAdqt1PMr45YhOFebl4O9XRmtiOlY
+         SQDQ==
+X-Gm-Message-State: AOAM530BLNzCLpsQ3ZsdxG/iSlElsnvEgk5f19JQOeLC0TziQs7pI7vp
+        kFMx7YZsKONrP5YDTSXRni3TndxcwI12ri99DDk=
+X-Google-Smtp-Source: ABdhPJz3clw2O8tsVFk5F4OGcaBfo9Z8eHqvoF8LwYXAPGollSTCOREHx1S0f08A9nsiznMjaM5G5srL4UVXlJSotsU=
+X-Received: by 2002:a05:6102:2011:: with SMTP id p17mr21421376vsr.40.1624349860512;
+ Tue, 22 Jun 2021 01:17:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="SfZT8+tHQGZ/bghR"
-Content-Disposition: inline
-In-Reply-To: <CAMuHMdULBPfd97xqDaFOTmj-B2pBA=wSKz3iep6ujx47j1zyPg@mail.gmail.com>
+References: <20210615191543.1043414-1-robh@kernel.org>
+In-Reply-To: <20210615191543.1043414-1-robh@kernel.org>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 22 Jun 2021 10:17:28 +0200
+Message-ID: <CAMuHMdUGXu8yj3JWKwM8mt7axkrzGMiowC1t0PHrbpxRCBME3w@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: Drop redundant minItems/maxItems
+To:     Rob Herring <robh@kernel.org>
+Cc:     "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-ide@vger.kernel.org, linux-clk <linux-clk@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
+        DRI Development <dri-devel@lists.freedesktop.org>,
+        dmaengine <dmaengine@vger.kernel.org>,
+        Linux I2C <linux-i2c@vger.kernel.org>,
+        linux-iio@vger.kernel.org,
+        ALSA Development Mailing List <alsa-devel@alsa-project.org>,
+        Linux IOMMU <iommu@lists.linux-foundation.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>, linux-can@vger.kernel.org,
+        linux-pci <linux-pci@vger.kernel.org>,
+        linux-phy@lists.infradead.org,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        Linux PWM List <linux-pwm@vger.kernel.org>,
+        "open list:REMOTE PROCESSOR (REMOTEPROC) SUBSYSTEM" 
+        <linux-remoteproc@vger.kernel.org>,
+        linux-riscv <linux-riscv@lists.infradead.org>,
+        linux-rtc@vger.kernel.org,
+        "open list:SERIAL DRIVERS" <linux-serial@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        Linux PM list <linux-pm@vger.kernel.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        Linux Watchdog Mailing List <linux-watchdog@vger.kernel.org>,
+        Jens Axboe <axboe@kernel.dk>, Stephen Boyd <sboyd@kernel.org>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Airlie <airlied@linux.ie>,
+        Daniel Vetter <daniel@ffwll.ch>, Vinod Koul <vkoul@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>, Joerg Roedel <joro@8bytes.org>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Wolfgang Grandegger <wg@grandegger.com>,
+        Marc Kleine-Budde <mkl@pengutronix.de>,
+        Andrew Lunn <andrew@lunn.ch>,
+        Vivien Didelot <vivien.didelot@gmail.com>,
+        Vladimir Oltean <olteanv@gmail.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Lee Jones <lee.jones@linaro.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Mark Brown <broonie@kernel.org>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Rob,
 
---SfZT8+tHQGZ/bghR
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+On Tue, Jun 15, 2021 at 9:16 PM Rob Herring <robh@kernel.org> wrote:
+> If a property has an 'items' list, then a 'minItems' or 'maxItems' with the
+> same size as the list is redundant and can be dropped. Note that is DT
+> schema specific behavior and not standard json-schema behavior. The tooling
+> will fixup the final schema adding any unspecified minItems/maxItems.
+>
+> This condition is partially checked with the meta-schema already, but
+> only if both 'minItems' and 'maxItems' are equal to the 'items' length.
+> An improved meta-schema is pending.
+
+> Signed-off-by: Rob Herring <robh@kernel.org>
+
+> --- a/Documentation/devicetree/bindings/net/stm32-dwmac.yaml
+> +++ b/Documentation/devicetree/bindings/net/stm32-dwmac.yaml
+> @@ -46,7 +46,6 @@ properties:
+>
+>    clocks:
+>      minItems: 3
+> -    maxItems: 5
+>      items:
+>        - description: GMAC main clock
+>        - description: MAC TX clock
+
+While resolving the conflict with commit fea99822914039c6
+("dt-bindings: net: document ptp_ref clk in dwmac") in soc/for-next,
+I noticed the following construct for clock-names:
+
+  clock-names:
+    minItems: 3
+    maxItems: 6
+    contains:
+      enum:
+        - stmmaceth
+        - mac-clk-tx
+        - mac-clk-rx
+        - ethstp
+        - eth-ck
+        - ptp_ref
+
+Should this use items instead of enum, and drop maxItems, or is this
+a valid construct to support specifying the clocks in random order?
+If the latter, it does mean that the order of clock-names may not
+match the order of the clock descriptions.
+
+Gr{oetje,eeting}s,
+
+                        Geert
 
 
-While the patch does not fix the timeout issue (also verified using an
-Alt board), it does fix this follow-up issue here:
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-[  191.485194] ------------[ cut here ]------------
-[  191.490296] WARNING: CPU: 0 PID: 698 at kernel/dma/debug.c:498 add_dma_entry+0x158/0x180
-[  191.499397] DMA-API: exceeded 7 overlapping mappings of cacheline 0x0117cc3a
-
-So, I think we want this patch nonetheless but I need to rephrase the
-commit message.
-
-
---SfZT8+tHQGZ/bghR
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDRlZQACgkQFA3kzBSg
-Kba59BAAgINGXbyn81hRTvY6MmSfNQMwXGVB5AGcBxsKh4uzg3rAaGoYWyZAs0ug
-H1QqL4SCvirD+rsepyEkEmwBzuQdK2c4g2rq2bby2lskjcTd4IK/xb+WSuCOi2/u
-RelREXxiPoYylNZxHSfBUmrbWxyxRz53i10OlCtslAkjtPrVyyMnIYP6925u3N/3
-IHYAXZIc9vmVi6uRIxHxxyJ1tdwhbYpamp/mQc+ajOKYGQDFuhKMLlO1mNpCkDL7
-WymowyFDSR1FoJBCF7yZvwZ2DoqLpOROy7Fj0XyA7c30H7xleuWS0oJQGhSghZaI
-OJf6Iy0aNxpfrCdtx6qB91oyBns13Ib0t/fHCUvrtIJ5RKdBTGqlZMwxqHkD+Bh2
-sBjxXlVzgLsNl09veMP6fgwzr0yKdyss9XY+/f6SYQjP+0W9ahkztEdoKWi32dNy
-1Epglb1imY6Myz8Ayx4BYKCKd5N3LrJNvkZOxItuzCp4i3XtmgFswxO1b/GSxrX2
-RDnGR/DVsjUhvxQB+mXrhWdTMX/E6+gm7+nj12qv/F5AhClXYmli1V9yzeUCGyzj
-gO+mKeNNjRVlstOdFpWYJFyKDf3vsGaE/h79G/YcV33+xJrpJ/k1JFQljHC26SaW
-7RDmzGwx6Q2E6NHbmXmFcYNpL+Zn4DYhuO7OcHMI0cYa9qtgdM4=
-=fdA/
------END PGP SIGNATURE-----
-
---SfZT8+tHQGZ/bghR--
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
