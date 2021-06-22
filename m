@@ -7,21 +7,21 @@ X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 992E7C49EA4
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC1B7C49EA2
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 773096128E
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A21D061003
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231293AbhFVCIO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Jun 2021 22:08:14 -0400
-Received: from lucky1.263xmail.com ([211.157.147.132]:35052 "EHLO
+        id S231477AbhFVCIb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 22:08:31 -0400
+Received: from lucky1.263xmail.com ([211.157.147.130]:38266 "EHLO
         lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230006AbhFVCIN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 22:08:13 -0400
+        with ESMTP id S231464AbhFVCI3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 22:08:29 -0400
 Received: from localhost (unknown [192.168.167.235])
-        by lucky1.263xmail.com (Postfix) with ESMTP id DE416F785C;
-        Tue, 22 Jun 2021 10:05:56 +0800 (CST)
+        by lucky1.263xmail.com (Postfix) with ESMTP id 7AFBCD31F5;
+        Tue, 22 Jun 2021 10:06:11 +0800 (CST)
 X-MAIL-GRAY: 0
 X-MAIL-DELIVERY: 1
 X-ADDR-CHECKED4: 1
@@ -29,9 +29,9 @@ X-SKE-CHECKED: 1
 X-ANTISPAM-LEVEL: 2
 Received: from localhost.localdomain (unknown [58.22.7.114])
         by smtp.263.net (postfix) whith ESMTP id P14866T140098544858880S1624327520607083_;
-        Tue, 22 Jun 2021 10:05:30 +0800 (CST)
+        Tue, 22 Jun 2021 10:05:34 +0800 (CST)
 X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <b94a19a382e782910ba740070d4c8d35>
+X-UNIQUE-TAG: <92165e3b04c47fd725e2744e8f5757b0>
 X-RL-SENDER: cl@rock-chips.com
 X-SENDER: cl@rock-chips.com
 X-LOGIN-NAME: cl@rock-chips.com
@@ -55,9 +55,9 @@ Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
         zhangqing@rock-chips.com, huangtao@rock-chips.com,
         cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
         jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: [PATCH v5 2/4] arm64: dts: rockchip: add generic pinconfig settings used by most Rockchip socs
-Date:   Tue, 22 Jun 2021 10:05:15 +0800
-Message-Id: <20210622020517.13100-3-cl@rock-chips.com>
+Subject: [PATCH v5 4/4] arm64: dts: rockchip: add basic dts for RK3568 EVB
+Date:   Tue, 22 Jun 2021 10:05:17 +0800
+Message-Id: <20210622020517.13100-5-cl@rock-chips.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20210622020517.13100-1-cl@rock-chips.com>
 References: <20210622020517.13100-1-cl@rock-chips.com>
@@ -67,365 +67,126 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Liang Chen <cl@rock-chips.com>
 
-The pinconfig settings for Rockchip SoCs are pretty similar on all socs,
-so move them to a shared dtsi to be included, instead of redefining them
-for each soc.
+This patch add rk3568-evb1-v10.dts for RK3568 evaluation board.
+add uart/emmc/i2c/rk809 node for basic function.
 
 Signed-off-by: Liang Chen <cl@rock-chips.com>
 ---
- .../boot/dts/rockchip/rockchip-pinconf.dtsi   | 344 ++++++++++++++++++
- 1 file changed, 344 insertions(+)
- create mode 100644 arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
+ .../devicetree/bindings/arm/rockchip.yaml     |  5 ++
+ arch/arm64/boot/dts/rockchip/Makefile         |  1 +
+ .../boot/dts/rockchip/rk3568-evb1-v10.dts     | 79 +++++++++++++++++++
+ 3 files changed, 85 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
 
-diff --git a/arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi b/arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
+diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
+index 4a6f772c1043..6546b015fc62 100644
+--- a/Documentation/devicetree/bindings/arm/rockchip.yaml
++++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
+@@ -600,6 +600,11 @@ properties:
+           - const: zkmagic,a95x-z2
+           - const: rockchip,rk3318
+ 
++      - description: Rockchip RK3568 Evaluation board
++        items:
++          - const: rockchip,rk3568-evb1-v10
++          - const: rockchip,rk3568
++
+ additionalProperties: true
+ 
+ ...
+diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
+index c3e00c0e2db7..7fdb41de01ec 100644
+--- a/arch/arm64/boot/dts/rockchip/Makefile
++++ b/arch/arm64/boot/dts/rockchip/Makefile
+@@ -51,3 +51,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
+ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-rock-pi-n10.dtb
++dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
+diff --git a/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
 new file mode 100644
-index 000000000000..5c645437b507
+index 000000000000..69786557093d
 --- /dev/null
-+++ b/arch/arm64/boot/dts/rockchip/rockchip-pinconf.dtsi
-@@ -0,0 +1,344 @@
++++ b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+@@ -0,0 +1,79 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
++ *
 + */
 +
-+&pinctrl {
-+	/omit-if-no-ref/
-+	pcfg_pull_up: pcfg-pull-up {
-+		bias-pull-up;
++/dts-v1/;
++#include <dt-bindings/gpio/gpio.h>
++#include <dt-bindings/pinctrl/rockchip.h>
++#include "rk3568.dtsi"
++
++/ {
++	model = "Rockchip RK3568 EVB1 DDR4 V10 Board";
++	compatible = "rockchip,rk3568-evb1-v10", "rockchip,rk3568";
++
++	chosen: chosen {
++		stdout-path = "serial2:1500000n8";
 +	};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_down: pcfg-pull-down {
-+		bias-pull-down;
++	dc_12v: dc-12v {
++		compatible = "regulator-fixed";
++		regulator-name = "dc_12v";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <12000000>;
++		regulator-max-microvolt = <12000000>;
 +	};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none: pcfg-pull-none {
-+		bias-disable;
++	vcc3v3_sys: vcc3v3-sys {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_sys";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		vin-supply = <&dc_12v>;
 +	};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_0: pcfg-pull-none-drv-level-0 {
-+		bias-disable;
-+		drive-strength = <0>;
++	vcc5v0_sys: vcc5v0-sys {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc5v0_sys";
++		regulator-always-on;
++		regulator-boot-on;
++		regulator-min-microvolt = <5000000>;
++		regulator-max-microvolt = <5000000>;
++		vin-supply = <&dc_12v>;
 +	};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_1: pcfg-pull-none-drv-level-1 {
-+		bias-disable;
-+		drive-strength = <1>;
++	vcc3v3_lcd0_n: vcc3v3-lcd0-n {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_lcd0_n";
++		regulator-boot-on;
++
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
 +	};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_2: pcfg-pull-none-drv-level-2 {
-+		bias-disable;
-+		drive-strength = <2>;
-+	};
++	vcc3v3_lcd1_n: vcc3v3-lcd1-n {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc3v3_lcd1_n";
++		regulator-boot-on;
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_3: pcfg-pull-none-drv-level-3 {
-+		bias-disable;
-+		drive-strength = <3>;
++		regulator-state-mem {
++			regulator-off-in-suspend;
++		};
 +	};
++};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_4: pcfg-pull-none-drv-level-4 {
-+		bias-disable;
-+		drive-strength = <4>;
-+	};
++&sdhci {
++	bus-width = <8>;
++	max-frequency = <200000000>;
++	non-removable;
++	status = "okay";
++};
 +
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_5: pcfg-pull-none-drv-level-5 {
-+		bias-disable;
-+		drive-strength = <5>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_6: pcfg-pull-none-drv-level-6 {
-+		bias-disable;
-+		drive-strength = <6>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_7: pcfg-pull-none-drv-level-7 {
-+		bias-disable;
-+		drive-strength = <7>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_8: pcfg-pull-none-drv-level-8 {
-+		bias-disable;
-+		drive-strength = <8>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_9: pcfg-pull-none-drv-level-9 {
-+		bias-disable;
-+		drive-strength = <9>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_10: pcfg-pull-none-drv-level-10 {
-+		bias-disable;
-+		drive-strength = <10>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_11: pcfg-pull-none-drv-level-11 {
-+		bias-disable;
-+		drive-strength = <11>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_12: pcfg-pull-none-drv-level-12 {
-+		bias-disable;
-+		drive-strength = <12>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_13: pcfg-pull-none-drv-level-13 {
-+		bias-disable;
-+		drive-strength = <13>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_14: pcfg-pull-none-drv-level-14 {
-+		bias-disable;
-+		drive-strength = <14>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_15: pcfg-pull-none-drv-level-15 {
-+		bias-disable;
-+		drive-strength = <15>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_0: pcfg-pull-up-drv-level-0 {
-+		bias-pull-up;
-+		drive-strength = <0>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_1: pcfg-pull-up-drv-level-1 {
-+		bias-pull-up;
-+		drive-strength = <1>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_2: pcfg-pull-up-drv-level-2 {
-+		bias-pull-up;
-+		drive-strength = <2>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_3: pcfg-pull-up-drv-level-3 {
-+		bias-pull-up;
-+		drive-strength = <3>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_4: pcfg-pull-up-drv-level-4 {
-+		bias-pull-up;
-+		drive-strength = <4>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_5: pcfg-pull-up-drv-level-5 {
-+		bias-pull-up;
-+		drive-strength = <5>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_6: pcfg-pull-up-drv-level-6 {
-+		bias-pull-up;
-+		drive-strength = <6>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_7: pcfg-pull-up-drv-level-7 {
-+		bias-pull-up;
-+		drive-strength = <7>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_8: pcfg-pull-up-drv-level-8 {
-+		bias-pull-up;
-+		drive-strength = <8>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_9: pcfg-pull-up-drv-level-9 {
-+		bias-pull-up;
-+		drive-strength = <9>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_10: pcfg-pull-up-drv-level-10 {
-+		bias-pull-up;
-+		drive-strength = <10>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_11: pcfg-pull-up-drv-level-11 {
-+		bias-pull-up;
-+		drive-strength = <11>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_12: pcfg-pull-up-drv-level-12 {
-+		bias-pull-up;
-+		drive-strength = <12>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_13: pcfg-pull-up-drv-level-13 {
-+		bias-pull-up;
-+		drive-strength = <13>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_14: pcfg-pull-up-drv-level-14 {
-+		bias-pull-up;
-+		drive-strength = <14>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_drv_level_15: pcfg-pull-up-drv-level-15 {
-+		bias-pull-up;
-+		drive-strength = <15>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_0: pcfg-pull-down-drv-level-0 {
-+		bias-pull-down;
-+		drive-strength = <0>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_1: pcfg-pull-down-drv-level-1 {
-+		bias-pull-down;
-+		drive-strength = <1>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_2: pcfg-pull-down-drv-level-2 {
-+		bias-pull-down;
-+		drive-strength = <2>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_3: pcfg-pull-down-drv-level-3 {
-+		bias-pull-down;
-+		drive-strength = <3>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_4: pcfg-pull-down-drv-level-4 {
-+		bias-pull-down;
-+		drive-strength = <4>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_5: pcfg-pull-down-drv-level-5 {
-+		bias-pull-down;
-+		drive-strength = <5>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_6: pcfg-pull-down-drv-level-6 {
-+		bias-pull-down;
-+		drive-strength = <6>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_7: pcfg-pull-down-drv-level-7 {
-+		bias-pull-down;
-+		drive-strength = <7>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_8: pcfg-pull-down-drv-level-8 {
-+		bias-pull-down;
-+		drive-strength = <8>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_9: pcfg-pull-down-drv-level-9 {
-+		bias-pull-down;
-+		drive-strength = <9>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_10: pcfg-pull-down-drv-level-10 {
-+		bias-pull-down;
-+		drive-strength = <10>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_11: pcfg-pull-down-drv-level-11 {
-+		bias-pull-down;
-+		drive-strength = <11>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_12: pcfg-pull-down-drv-level-12 {
-+		bias-pull-down;
-+		drive-strength = <12>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_13: pcfg-pull-down-drv-level-13 {
-+		bias-pull-down;
-+		drive-strength = <13>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_14: pcfg-pull-down-drv-level-14 {
-+		bias-pull-down;
-+		drive-strength = <14>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_drv_level_15: pcfg-pull-down-drv-level-15 {
-+		bias-pull-down;
-+		drive-strength = <15>;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_up_smt: pcfg-pull-up-smt {
-+		bias-pull-up;
-+		input-schmitt-enable;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_down_smt: pcfg-pull-down-smt {
-+		bias-pull-down;
-+		input-schmitt-enable;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_smt: pcfg-pull-none-smt {
-+		bias-disable;
-+		input-schmitt-enable;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_pull_none_drv_level_0_smt: pcfg-pull-none-drv-level-0-smt {
-+		bias-disable;
-+		drive-strength = <0>;
-+		input-schmitt-enable;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_output_high: pcfg-output-high {
-+		output-high;
-+	};
-+
-+	/omit-if-no-ref/
-+	pcfg_output_low: pcfg-output-low {
-+		output-low;
-+	};
++&uart2 {
++	status = "okay";
 +};
 -- 
 2.17.1
