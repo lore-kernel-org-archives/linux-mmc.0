@@ -2,194 +2,283 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.2 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_IN_DEF_DKIM_WL autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC1B7C49EA2
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 523F8C48BE5
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:56:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A21D061003
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:06:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3948660FF1
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 02:56:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231477AbhFVCIb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Jun 2021 22:08:31 -0400
-Received: from lucky1.263xmail.com ([211.157.147.130]:38266 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231464AbhFVCI3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 22:08:29 -0400
-Received: from localhost (unknown [192.168.167.235])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 7AFBCD31F5;
-        Tue, 22 Jun 2021 10:06:11 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-SKE-CHECKED: 1
-X-ANTISPAM-LEVEL: 2
-Received: from localhost.localdomain (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P14866T140098544858880S1624327520607083_;
-        Tue, 22 Jun 2021 10:05:34 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <92165e3b04c47fd725e2744e8f5757b0>
-X-RL-SENDER: cl@rock-chips.com
-X-SENDER: cl@rock-chips.com
-X-LOGIN-NAME: cl@rock-chips.com
-X-FST-TO: heiko@sntech.de
-X-RCPT-COUNT: 30
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-From:   <cl@rock-chips.com>
-To:     heiko@sntech.de
-Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
-        uwe@kleine-koenig.org, mail@david-bauer.net, jbx6244@gmail.com,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
-        jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: [PATCH v5 4/4] arm64: dts: rockchip: add basic dts for RK3568 EVB
-Date:   Tue, 22 Jun 2021 10:05:17 +0800
-Message-Id: <20210622020517.13100-5-cl@rock-chips.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210622020517.13100-1-cl@rock-chips.com>
-References: <20210622020517.13100-1-cl@rock-chips.com>
+        id S231381AbhFVC6u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Jun 2021 22:58:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57562 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231302AbhFVC6t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Jun 2021 22:58:49 -0400
+Received: from mail-qk1-x733.google.com (mail-qk1-x733.google.com [IPv6:2607:f8b0:4864:20::733])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20B63C061760
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 19:56:31 -0700 (PDT)
+Received: by mail-qk1-x733.google.com with SMTP id 22so14844994qkv.8
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Jun 2021 19:56:31 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20161025;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=o7WniBxc7u8I3jtLWFb2QyQubQrJgur3uSaTIY2hHpY=;
+        b=IlhIu8fFZb/00DISAJcThl4zsHWxZQu1Oa/M3ahKUhWaxlkRjELVIGBWjVa/lOqm5w
+         R8ijcCQtXUjJKTXjsyL8XC9IeSNYcoE/hXhy0707xoE6Bp7mwCrtqvMSIwg7XRSkNIE+
+         41oC8qsSXK/w+ICTlHHEk6csKeMmNkBnGKqC4mrBOzIjGGVZUX6Nspzkfc0P0dg2TAX0
+         qGjTjgj9xBimf62Siz9ycYnskVpQcN4f68bXYa47M7lrcmqv9sUfStAIPZ+oYS0gQPSS
+         axREBBohkOyHxdZVxh0tmhTQ6DCvRJCFxRlsELoVQjr6rZofiDiCLzoIC+fkMke5eZXb
+         KOyg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=o7WniBxc7u8I3jtLWFb2QyQubQrJgur3uSaTIY2hHpY=;
+        b=rAd1JggpNQGwZjxIwJnnyBu6IpntYdtF+pcKPGF+RU7sewuTZMZ/937Rz8+YiDoA/s
+         iC70Z9GMU0ySJewsFUltCufN1lNNbaNL58fMS2V9iP9J/FBKNU3KZrRrQwtgVIPZlkYp
+         LepwX5hIP0/0TO2rnmWx3gD/RpWGo9C4U7QJpwvI3ApC99BNehLmzH34A/1/bUmewwGO
+         dl3/UGEqUMncLwlSjcQyplPK5WDfrDQir+eq2WvgzgEK2wick7PR3DWaI+6GIJwpDOHc
+         qxc2KrW8C4pcllz7GLcLgs2s4ODrSSF5O4f3Zh6dVl7IysXjw3KZ5e084MbNwjwW2dJu
+         W2cw==
+X-Gm-Message-State: AOAM5316AUlMyVRZKtoOhYdrEqYiYu6Lw6wqA/uV0QxeNmZ2Hu108v00
+        XPsiUkf4O1pIkmLP9kAjIbyKFmRkWsnVfM7loEjd0A==
+X-Google-Smtp-Source: ABdhPJyQjeT6WzR5lehTnPxseq2wdji+PgNfDU28Fwy5MqjJ3yxJk8R8kSGnjCwg/Kmk7+Pz3hc0ucfFrwGQ91Xpnkk=
+X-Received: by 2002:a25:bcb:: with SMTP id 194mr1812975ybl.32.1624330590627;
+ Mon, 21 Jun 2021 19:56:30 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210621235248.2521620-1-dianders@chromium.org> <20210621165230.4.Id84a954e705fcad3fdb35beb2bc372e4bf2108c7@changeid>
+In-Reply-To: <20210621165230.4.Id84a954e705fcad3fdb35beb2bc372e4bf2108c7@changeid>
+From:   Saravana Kannan <saravanak@google.com>
+Date:   Mon, 21 Jun 2021 19:55:52 -0700
+Message-ID: <CAGETcx-dZ_Wwjafk+5akWJwbrFx2rYNKZAU8tWhFUunEyn8sqQ@mail.gmail.com>
+Subject: Re: [PATCH 4/6] iommu: Combine device strictness requests with the
+ global default
+To:     Douglas Anderson <dianders@chromium.org>
+Cc:     gregkh@linuxfoundation.org, rafael@kernel.org,
+        rafael.j.wysocki@intel.com, will@kernel.org, robin.murphy@arm.com,
+        joro@8bytes.org, bjorn.andersson@linaro.org,
+        ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        bhelgaas@google.com, robdclark@chromium.org,
+        linux-arm-msm@vger.kernel.org, linux-pci@vger.kernel.org,
+        quic_c_gdjako@quicinc.com, iommu@lists.linux-foundation.org,
+        sonnyrao@chromium.org, saiprakash.ranjan@codeaurora.org,
+        linux-mmc@vger.kernel.org, vbadigan@codeaurora.org,
+        rajatja@google.com, joel@joelfernandes.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Liang Chen <cl@rock-chips.com>
+On Mon, Jun 21, 2021 at 4:53 PM Douglas Anderson <dianders@chromium.org> wrote:
+>
+> In the patch ("drivers: base: Add bits to struct device to control
+> iommu strictness") we add the ability for devices to tell us about
+> their IOMMU strictness requirements. Let's now take that into account
+> in the IOMMU layer.
+>
+> A few notes here:
+> * Presumably this is always how iommu_get_dma_strict() was intended to
+>   behave. Had this not been the intention then it never would have
+>   taken a domain as a parameter.
+> * The iommu_set_dma_strict() feels awfully non-symmetric now. That
+>   function sets the _default_ strictness globally in the system
+>   whereas iommu_get_dma_strict() returns the value for a given domain
+>   (falling back to the default). Presumably, at least, the fact that
+>   iommu_set_dma_strict() doesn't take a domain makes this obvious.
+>
+> The function iommu_get_dma_strict() should now make it super obvious
+> where strictness comes from and who overides who. Though the function
+> changed a bunch to make the logic clearer, the only two new rules
+> should be:
+> * Devices can force strictness for themselves, overriding the cmdline
+>   "iommu.strict=0" or a call to iommu_set_dma_strict(false)).
+> * Devices can request non-strictness for themselves, assuming there
+>   was no cmdline "iommu.strict=1" or a call to
+>   iommu_set_dma_strict(true).
+>
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
+> ---
+>
+>  drivers/iommu/iommu.c | 56 +++++++++++++++++++++++++++++++++----------
+>  include/linux/iommu.h |  2 ++
+>  2 files changed, 45 insertions(+), 13 deletions(-)
+>
+> diff --git a/drivers/iommu/iommu.c b/drivers/iommu/iommu.c
+> index 808ab70d5df5..0c84a4c06110 100644
+> --- a/drivers/iommu/iommu.c
+> +++ b/drivers/iommu/iommu.c
+> @@ -28,8 +28,19 @@
+>  static struct kset *iommu_group_kset;
+>  static DEFINE_IDA(iommu_group_ida);
+>
+> +enum iommu_strictness {
+> +       IOMMU_DEFAULT_STRICTNESS = -1,
+> +       IOMMU_NOT_STRICT = 0,
+> +       IOMMU_STRICT = 1,
+> +};
+> +static inline enum iommu_strictness bool_to_strictness(bool strictness)
+> +{
+> +       return (enum iommu_strictness)strictness;
+> +}
+> +
+>  static unsigned int iommu_def_domain_type __read_mostly;
+> -static bool iommu_dma_strict __read_mostly = true;
+> +static enum iommu_strictness cmdline_dma_strict __read_mostly = IOMMU_DEFAULT_STRICTNESS;
+> +static enum iommu_strictness driver_dma_strict __read_mostly = IOMMU_DEFAULT_STRICTNESS;
+>  static u32 iommu_cmd_line __read_mostly;
+>
+>  struct iommu_group {
+> @@ -69,7 +80,6 @@ static const char * const iommu_group_resv_type_string[] = {
+>  };
+>
+>  #define IOMMU_CMD_LINE_DMA_API         BIT(0)
+> -#define IOMMU_CMD_LINE_STRICT          BIT(1)
+>
+>  static int iommu_alloc_default_domain(struct iommu_group *group,
+>                                       struct device *dev);
+> @@ -336,25 +346,38 @@ early_param("iommu.passthrough", iommu_set_def_domain_type);
+>
+>  static int __init iommu_dma_setup(char *str)
+>  {
+> -       int ret = kstrtobool(str, &iommu_dma_strict);
+> +       bool strict;
+> +       int ret = kstrtobool(str, &strict);
+>
+>         if (!ret)
+> -               iommu_cmd_line |= IOMMU_CMD_LINE_STRICT;
+> +               cmdline_dma_strict = bool_to_strictness(strict);
+>         return ret;
+>  }
+>  early_param("iommu.strict", iommu_dma_setup);
+>
+>  void iommu_set_dma_strict(bool strict)
+>  {
+> -       if (strict || !(iommu_cmd_line & IOMMU_CMD_LINE_STRICT))
+> -               iommu_dma_strict = strict;
+> +       /* A driver can request strictness but not the other way around */
+> +       if (driver_dma_strict != IOMMU_STRICT)
+> +               driver_dma_strict = bool_to_strictness(strict);
+>  }
+>
+>  bool iommu_get_dma_strict(struct iommu_domain *domain)
+>  {
+> -       /* only allow lazy flushing for DMA domains */
+> -       if (domain->type == IOMMU_DOMAIN_DMA)
+> -               return iommu_dma_strict;
+> +       /* Non-DMA domains or anyone forcing it to strict makes it strict */
+> +       if (domain->type != IOMMU_DOMAIN_DMA ||
+> +           cmdline_dma_strict == IOMMU_STRICT ||
+> +           driver_dma_strict == IOMMU_STRICT ||
+> +           domain->force_strict)
+> +               return true;
+> +
+> +       /* Anyone requesting non-strict (if no forces) makes it non-strict */
+> +       if (cmdline_dma_strict == IOMMU_NOT_STRICT ||
+> +           driver_dma_strict == IOMMU_NOT_STRICT ||
+> +           domain->request_non_strict)
+> +               return false;
+> +
+> +       /* Nobody said anything, so it's strict by default */
 
-This patch add rk3568-evb1-v10.dts for RK3568 evaluation board.
-add uart/emmc/i2c/rk809 node for basic function.
+If iommu.strict is not set in the command line, upstream treats it as
+iommu.strict=1. Meaning, no drivers can override it.
 
-Signed-off-by: Liang Chen <cl@rock-chips.com>
----
- .../devicetree/bindings/arm/rockchip.yaml     |  5 ++
- arch/arm64/boot/dts/rockchip/Makefile         |  1 +
- .../boot/dts/rockchip/rk3568-evb1-v10.dts     | 79 +++++++++++++++++++
- 3 files changed, 85 insertions(+)
- create mode 100644 arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
+If I understand it correctly, with your series, if iommu.strict=1 is
+not set, drivers can override the "default strict mode" and ask for
+non-strict mode for their domain. So if this series gets in and future
+driver changes start asking for non-strict mode, systems that are
+expected to operate in fully strict mode will now have devices
+operating in non-strict mode.
 
-diff --git a/Documentation/devicetree/bindings/arm/rockchip.yaml b/Documentation/devicetree/bindings/arm/rockchip.yaml
-index 4a6f772c1043..6546b015fc62 100644
---- a/Documentation/devicetree/bindings/arm/rockchip.yaml
-+++ b/Documentation/devicetree/bindings/arm/rockchip.yaml
-@@ -600,6 +600,11 @@ properties:
-           - const: zkmagic,a95x-z2
-           - const: rockchip,rk3318
- 
-+      - description: Rockchip RK3568 Evaluation board
-+        items:
-+          - const: rockchip,rk3568-evb1-v10
-+          - const: rockchip,rk3568
-+
- additionalProperties: true
- 
- ...
-diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
-index c3e00c0e2db7..7fdb41de01ec 100644
---- a/arch/arm64/boot/dts/rockchip/Makefile
-+++ b/arch/arm64/boot/dts/rockchip/Makefile
-@@ -51,3 +51,4 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-rockpro64.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399-sapphire-excavator.dtb
- dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3399pro-rock-pi-n10.dtb
-+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3568-evb1-v10.dtb
-diff --git a/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
-new file mode 100644
-index 000000000000..69786557093d
---- /dev/null
-+++ b/arch/arm64/boot/dts/rockchip/rk3568-evb1-v10.dts
-@@ -0,0 +1,79 @@
-+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-+/*
-+ * Copyright (c) 2021 Rockchip Electronics Co., Ltd.
-+ *
-+ */
-+
-+/dts-v1/;
-+#include <dt-bindings/gpio/gpio.h>
-+#include <dt-bindings/pinctrl/rockchip.h>
-+#include "rk3568.dtsi"
-+
-+/ {
-+	model = "Rockchip RK3568 EVB1 DDR4 V10 Board";
-+	compatible = "rockchip,rk3568-evb1-v10", "rockchip,rk3568";
-+
-+	chosen: chosen {
-+		stdout-path = "serial2:1500000n8";
-+	};
-+
-+	dc_12v: dc-12v {
-+		compatible = "regulator-fixed";
-+		regulator-name = "dc_12v";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <12000000>;
-+		regulator-max-microvolt = <12000000>;
-+	};
-+
-+	vcc3v3_sys: vcc3v3-sys {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3_sys";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <3300000>;
-+		regulator-max-microvolt = <3300000>;
-+		vin-supply = <&dc_12v>;
-+	};
-+
-+	vcc5v0_sys: vcc5v0-sys {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc5v0_sys";
-+		regulator-always-on;
-+		regulator-boot-on;
-+		regulator-min-microvolt = <5000000>;
-+		regulator-max-microvolt = <5000000>;
-+		vin-supply = <&dc_12v>;
-+	};
-+
-+	vcc3v3_lcd0_n: vcc3v3-lcd0-n {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3_lcd0_n";
-+		regulator-boot-on;
-+
-+		regulator-state-mem {
-+			regulator-off-in-suspend;
-+		};
-+	};
-+
-+	vcc3v3_lcd1_n: vcc3v3-lcd1-n {
-+		compatible = "regulator-fixed";
-+		regulator-name = "vcc3v3_lcd1_n";
-+		regulator-boot-on;
-+
-+		regulator-state-mem {
-+			regulator-off-in-suspend;
-+		};
-+	};
-+};
-+
-+&sdhci {
-+	bus-width = <8>;
-+	max-frequency = <200000000>;
-+	non-removable;
-+	status = "okay";
-+};
-+
-+&uart2 {
-+	status = "okay";
-+};
--- 
-2.17.1
+That's breaking backward compatibility for the kernel command line
+param. It looks like what you really need is to change iommu.strict
+from 0/1 to lazy (previously 0), strict preferred, strict enforced
+(previously 1) and you need to default it to "enforced".
+
+Alternately (and potentially a better option?), you really should be
+changing/extending dev_is_untrusted() so that it applies for any
+struct device (not just PCI device) and then have this overridden in
+DT (or ACPI or any firmware) to indicate a specific device is safe to
+use non-strict mode on. What you are trying to capture (if the device
+safe enough) really isn't a function of the DMA device's driver, but a
+function of the DMA device.
 
 
 
+>         return true;
+>  }
+>  EXPORT_SYMBOL_GPL(iommu_get_dma_strict);
+> @@ -1519,7 +1542,8 @@ static int iommu_get_def_domain_type(struct device *dev)
+>
+>  static int iommu_group_alloc_default_domain(struct bus_type *bus,
+>                                             struct iommu_group *group,
+> -                                           unsigned int type)
+> +                                           unsigned int type,
+> +                                           struct device *dev)
+>  {
+>         struct iommu_domain *dom;
+>
+> @@ -1534,6 +1558,12 @@ static int iommu_group_alloc_default_domain(struct bus_type *bus,
+>         if (!dom)
+>                 return -ENOMEM;
+>
+> +       /* Save the strictness requests from the device */
+> +       if (dev && type == IOMMU_DOMAIN_DMA) {
+> +               dom->request_non_strict = dev->request_non_strict_iommu;
+> +               dom->force_strict = dev->force_strict_iommu;
+> +       }
+> +
+>         group->default_domain = dom;
+>         if (!group->domain)
+>                 group->domain = dom;
+> @@ -1550,7 +1580,7 @@ static int iommu_alloc_default_domain(struct iommu_group *group,
+>
+>         type = iommu_get_def_domain_type(dev) ? : iommu_def_domain_type;
+>
+> -       return iommu_group_alloc_default_domain(dev->bus, group, type);
+> +       return iommu_group_alloc_default_domain(dev->bus, group, type, dev);
+>  }
+>
+>  /**
+> @@ -1721,7 +1751,7 @@ static void probe_alloc_default_domain(struct bus_type *bus,
+>         if (!gtype.type)
+>                 gtype.type = iommu_def_domain_type;
+>
+> -       iommu_group_alloc_default_domain(bus, group, gtype.type);
+> +       iommu_group_alloc_default_domain(bus, group, gtype.type, NULL);
+>
+>  }
+>
+> @@ -3130,7 +3160,7 @@ static int iommu_change_dev_def_domain(struct iommu_group *group,
+>         }
+>
+>         /* Sets group->default_domain to the newly allocated domain */
+> -       ret = iommu_group_alloc_default_domain(dev->bus, group, type);
+> +       ret = iommu_group_alloc_default_domain(dev->bus, group, type, dev);
+>         if (ret)
+>                 goto out;
+>
+> diff --git a/include/linux/iommu.h b/include/linux/iommu.h
+> index 32d448050bf7..0bddef77f415 100644
+> --- a/include/linux/iommu.h
+> +++ b/include/linux/iommu.h
+> @@ -81,6 +81,8 @@ struct iommu_domain_geometry {
+>
+>  struct iommu_domain {
+>         unsigned type;
+> +       bool force_strict:1;
+> +       bool request_non_strict:1;
+>         const struct iommu_ops *ops;
+>         unsigned long pgsize_bitmap;    /* Bitmap of page sizes in use */
+>         iommu_fault_handler_t handler;
+> --
+> 2.32.0.288.g62a8d224e6-goog
+>
