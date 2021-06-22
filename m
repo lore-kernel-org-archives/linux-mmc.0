@@ -2,102 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35BC8C2B9F4
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 10:53:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A2A5C48BDF
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 11:35:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1AB0F61352
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 10:53:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7D83F613C2
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Jun 2021 11:35:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229927AbhFVK4E convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Jun 2021 06:56:04 -0400
-Received: from gloria.sntech.de ([185.11.138.130]:42486 "EHLO gloria.sntech.de"
+        id S229682AbhFVLh4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Jun 2021 07:37:56 -0400
+Received: from foss.arm.com ([217.140.110.172]:47610 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229831AbhFVK4A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 22 Jun 2021 06:56:00 -0400
-Received: from ip5f5aa64a.dynamic.kabel-deutschland.de ([95.90.166.74] helo=diego.localnet)
-        by gloria.sntech.de with esmtpsa (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <heiko@sntech.de>)
-        id 1lve26-0003AI-SA; Tue, 22 Jun 2021 12:53:30 +0200
-From:   Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-To:     cl@rock-chips.com
-Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
-        uwe@kleine-koenig.org, mail@david-bauer.net, jbx6244@gmail.com,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
-        jamie@jamieiles.com, linux-watchdog@vger.kernel.org, maz@kernel.org
-Subject: Re: [PATCH v5 1/4] dt-bindings: pwm: rockchip: add description for rk3568
-Date:   Tue, 22 Jun 2021 12:53:29 +0200
-Message-ID: <4912561.MVdQ21Qd56@diego>
-In-Reply-To: <20210622020517.13100-2-cl@rock-chips.com>
-References: <20210622020517.13100-1-cl@rock-chips.com> <20210622020517.13100-2-cl@rock-chips.com>
+        id S229668AbhFVLh4 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 22 Jun 2021 07:37:56 -0400
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id F11DF31B;
+        Tue, 22 Jun 2021 04:35:39 -0700 (PDT)
+Received: from [10.57.9.136] (unknown [10.57.9.136])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id AFDAF3F694;
+        Tue, 22 Jun 2021 04:35:35 -0700 (PDT)
+Subject: Re: [PATCH 0/6] iommu: Enable devices to request non-strict DMA,
+ starting with QCom SD/MMC
+To:     Douglas Anderson <dianders@chromium.org>,
+        gregkh@linuxfoundation.org, rafael@kernel.org,
+        rafael.j.wysocki@intel.com, will@kernel.org, joro@8bytes.org,
+        bjorn.andersson@linaro.org, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com, bhelgaas@google.com
+Cc:     robdclark@chromium.org, linux-arm-msm@vger.kernel.org,
+        linux-pci@vger.kernel.org, quic_c_gdjako@quicinc.com,
+        iommu@lists.linux-foundation.org, sonnyrao@chromium.org,
+        saiprakash.ranjan@codeaurora.org, linux-mmc@vger.kernel.org,
+        vbadigan@codeaurora.org, rajatja@google.com, saravanak@google.com,
+        joel@joelfernandes.org, Andy Gross <agross@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        linux-kernel@vger.kernel.org
+References: <20210621235248.2521620-1-dianders@chromium.org>
+From:   Robin Murphy <robin.murphy@arm.com>
+Message-ID: <067dd86d-da7f-ac83-6ce6-b8fd5aba0b6f@arm.com>
+Date:   Tue, 22 Jun 2021 12:35:29 +0100
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8BIT
-Content-Type: text/plain; charset="iso-8859-1"
+In-Reply-To: <20210621235248.2521620-1-dianders@chromium.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Liang,
+Hi Doug,
 
-Am Dienstag, 22. Juni 2021, 04:05:14 CEST schrieb cl@rock-chips.com:
-> From: Liang Chen <cl@rock-chips.com>
+On 2021-06-22 00:52, Douglas Anderson wrote:
 > 
-> add "rockchip,rk3568-pwm", "rockchip,rk3328-pwm" for pwm nodes on
-> a rk3568 platform to pwm-rockchip.yaml.
+> This patch attempts to put forward a proposal for enabling non-strict
+> DMA on a device-by-device basis. The patch series requests non-strict
+> DMA for the Qualcomm SDHCI controller as a first device to enable,
+> getting a nice bump in performance with what's believed to be a very
+> small drop in security / safety (see the patch for the full argument).
 > 
-> Signed-off-by: Liang Chen <cl@rock-chips.com>
-
-$ scripts/get_maintainer.pl drivers/pwm
-
-returns
-
-Thierry Reding <thierry.reding@gmail.com> (maintainer:PWM SUBSYSTEM)
-"Uwe Kleine-König" <u.kleine-koenig@pengutronix.de> (reviewer:PWM SUBSYSTEM)
-Lee Jones <lee.jones@linaro.org> (maintainer:PWM SUBSYSTEM)
-linux-pwm@vger.kernel.org (open list:PWM SUBSYSTEM)
-linux-kernel@vger.kernel.org (open list)
-
-
-though I only see Uwe in the lists of recipients. You may want to resend
-the binding and maybe pick up the pwm node patch with it to keep them
-together.
-
-
-Heiko
-
-> ---
->  Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml | 1 +
->  1 file changed, 1 insertion(+)
+> As part of this patch series I am end up slightly cleaning up some of
+> the interactions between the PCI subsystem and the IOMMU subsystem but
+> I don't go all the way to fully remove all the tentacles. Specifically
+> this patch series only concerns itself with a single aspect: strict
+> vs. non-strict mode for the IOMMU. I'm hoping that this will be easier
+> to talk about / reason about for more subsystems compared to overall
+> deciding what it means for a device to be "external" or "untrusted".
 > 
-> diff --git a/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml b/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml
-> index 5596bee70509..81a54a4e8e3e 100644
-> --- a/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml
-> +++ b/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml
-> @@ -29,6 +29,7 @@ properties:
->            - enum:
->                - rockchip,px30-pwm
->                - rockchip,rk3308-pwm
-> +              - rockchip,rk3568-pwm
->            - const: rockchip,rk3328-pwm
->  
->    reg:
+> If something like this patch series ends up being landable, it will
+> undoubtedly need coordination between many maintainers to land. I
+> believe it's fully bisectable but later patches in the series
+> definitely depend on earlier ones. Sorry for the long CC list. :(
+
+Unfortunately, this doesn't work. In normal operation, the default 
+domains should be established long before individual drivers are even 
+loaded (if they are modules), let alone anywhere near probing. The fact 
+that iommu_probe_device() sometimes gets called far too late off the 
+back of driver probe is an unfortunate artefact of the original 
+probe-deferral scheme, and causes other problems like potentially 
+malformed groups - I've been forming a plan to fix that for a while now, 
+so I for one really can't condone anything trying to rely on it. 
+Non-deterministic behaviour based on driver probe order for multi-device 
+groups is part of the existing problem, and your proposal seems equally 
+vulnerable to that too.
+
+FWIW we already have a go-faster knob for people who want to tweak the 
+security/performance compromise for specific devices, namely the sysfs 
+interface for changing a group's domain type before binding the relevant 
+driver(s). Is that something you could use in your application, say from 
+an initramfs script?
+
+Thanks,
+Robin.
+
+> Douglas Anderson (6):
+>    drivers: base: Add the concept of "pre_probe" to drivers
+>    drivers: base: Add bits to struct device to control iommu strictness
+>    PCI: Indicate that we want to force strict DMA for untrusted devices
+>    iommu: Combine device strictness requests with the global default
+>    iommu: Stop reaching into PCIe devices to decide strict vs. non-strict
+>    mmc: sdhci-msm: Request non-strict IOMMU mode
 > 
-
-
-
-
+>   drivers/base/dd.c             | 10 +++++--
+>   drivers/iommu/dma-iommu.c     |  2 +-
+>   drivers/iommu/iommu.c         | 56 +++++++++++++++++++++++++++--------
+>   drivers/mmc/host/sdhci-msm.c  |  8 +++++
+>   drivers/pci/probe.c           |  4 ++-
+>   include/linux/device.h        | 11 +++++++
+>   include/linux/device/driver.h |  9 ++++++
+>   include/linux/iommu.h         |  2 ++
+>   8 files changed, 85 insertions(+), 17 deletions(-)
+> 
