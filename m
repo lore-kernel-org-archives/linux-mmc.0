@@ -2,160 +2,227 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C66D4C4743C
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 13:45:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE46BC48BC2
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 13:54:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AF1FD61075
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 13:45:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B3BF36024A
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 13:54:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230357AbhFWNrc convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Jun 2021 09:47:32 -0400
-Received: from de-smtp-delivery-105.mimecast.com ([194.104.109.105]:26474 "EHLO
-        de-smtp-delivery-105.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S230283AbhFWNrb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jun 2021 09:47:31 -0400
-Received: from GBR01-LO2-obe.outbound.protection.outlook.com
- (mail-lo2gbr01lp2053.outbound.protection.outlook.com [104.47.21.53]) (Using
- TLS) by relay.mimecast.com with ESMTP id
- de-mta-17-0SKPCipcMpilfm6lfumPyg-1; Wed, 23 Jun 2021 15:45:11 +0200
-X-MC-Unique: 0SKPCipcMpilfm6lfumPyg-1
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
- by CWXP265MB2901.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:c1::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4242.19; Wed, 23 Jun
- 2021 13:45:10 +0000
-Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::259d:65ac:ae6d:409d]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
- ([fe80::259d:65ac:ae6d:409d%9]) with mapi id 15.20.4242.024; Wed, 23 Jun 2021
- 13:45:10 +0000
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     Avri Altman <Avri.Altman@wdc.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "shawn.lin@rock-chips.com" <shawn.lin@rock-chips.com>
-Subject: Re: [PATCH] mmc: block: ioctl: Poll for TRAN if possible
-Thread-Topic: [PATCH] mmc: block: ioctl: Poll for TRAN if possible
-Thread-Index: AQHXXSMDiXAg1fej0U+LBOvD9D6/9asZlxVhgAANSQCAB8I3uA==
-Date:   Wed, 23 Jun 2021 13:45:10 +0000
-Message-ID: <CWXP265MB26809D4177534C6CDE0A902AC4089@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-References: <LO2P265MB26880B222999818677722528C4369@LO2P265MB2688.GBRP265.PROD.OUTLOOK.COM>
- <CWXP265MB26809CC8BCD8A0289697CBBDC40D9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<CAPDyKFr6bfcG+_3f+8ZYFFsuTA9reJ4Ykntxt=yh16-Z_6vxAg@mail.gmail.com>
-In-Reply-To: <CAPDyKFr6bfcG+_3f+8ZYFFsuTA9reJ4Ykntxt=yh16-Z_6vxAg@mail.gmail.com>
-Accept-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [185.80.168.10]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: f624bccc-0fd3-4358-4f27-08d9364d1e8e
-x-ms-traffictypediagnostic: CWXP265MB2901:
-x-microsoft-antispam-prvs: <CWXP265MB29015DE7E3A5A737605F91A1C4089@CWXP265MB2901.GBRP265.PROD.OUTLOOK.COM>
-x-ms-oob-tlc-oobclassifiers: OLM:10000
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0
-x-microsoft-antispam-message-info: qXtb1zS9FriuQ3oTmX3mCFuxFRz9qpSJYyHrWB4oMuXL2Co7E+U3BUABjUwnk3MoQloNXovNK5sEBJhuPvgfREgRcc4Ffo8AEND+o3jzDWskqFGNuXYCDFw8+9GWNw/azzgJ5fo3YQImvEzhQKhX/7u2oBrZ3T+IaVsEk1qTiTApUE7c5XjCOYcNGM4k4u/8AVQNY2bh1WLz7krn74dcmGaCzDr79nIJAm4Np2BxRFpKqz2Uyt7d2MysIeGH/KCVVbcLLX0bI3E4DfNaYTA3aoh9H9rVio9/dIcWyvUf0EVtJzqp06lHokZFKQebuChOUmt7E8tfdVScUcIdRtEQiQOZPpc7Yr1uQ9fobKHw2DRn49smJ8UzCWFoTD57ar6itqPE4lKnF5wGsvX5X6VUaxj5dDb4za8qCdklh0ymAO7pd3NFOEywJBSCo/uwAk+D8861MgSLFvFaQjRvbMTFKROOlF+WsrFjWCsdFbV951ihjiBFfq/bzyKPVMWm0lxo6pQbu1g3dWU1QQV6JUynr47p4ACKvPlm7/xr6pGb0fKQKvhNyrqdXB7LB/+86rbPVPDmfMTfcZ9uQLtkzYb/fywNOdzXkZQT0cU+cKbI8zM=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(39830400003)(396003)(366004)(346002)(376002)(136003)(7696005)(26005)(33656002)(6506007)(2906002)(186003)(83380400001)(86362001)(8676002)(71200400001)(8936002)(122000001)(55016002)(9686003)(38100700002)(478600001)(66946007)(5660300002)(52536014)(91956017)(76116006)(4326008)(316002)(64756008)(66446008)(54906003)(66476007)(110136005)(66556008);DIR:OUT;SFP:1101
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?NdQoLouhlSiOPoijfQEbpo3Y/jcsZ0Pbt/2yFtmhsHgNgeJ9UVXXa5H6oR?=
- =?iso-8859-1?Q?dqy5imrxNR93QlQoTEVaXMZhXHJUvyvdhpSAwecCG3V0Ek4WYJMOLAvtr2?=
- =?iso-8859-1?Q?fQjrKlovGzTLBLU7edWKVMEXczkE7ap6YJvF8ufM4sVxJG5SzG7h9JiHbk?=
- =?iso-8859-1?Q?gdjQpyDaQ9R17T4LAceo9AP0/oGbvF8WWcj+3H0h+vBgMz5x5WkNGZbqtf?=
- =?iso-8859-1?Q?DduZeaOu21jKuHAR8MG+hKsOqjCRP6ZlZ6TqfreDYraFs1NB8MC8J/Hb6C?=
- =?iso-8859-1?Q?IN83Qq018MqDP/MFpufaE5Em54WFwECwc7itEcbDo0K9+QzZGOIa5OV+n9?=
- =?iso-8859-1?Q?aMv74fOUU0CD52kdZy6nOtCP3r0rSTwBJ4xHGgnqXX+MwUw7WxV8ysbwlz?=
- =?iso-8859-1?Q?+yPA0P9Gp1tzsTa1tWp/3bYjxIdZjzG9/dfdIljznU0DIdUsGr4vL0yPgO?=
- =?iso-8859-1?Q?gt6pBnlzda+M3tOw8h8BaVsGPWZxuT8knOkcwCHM4WX1DrfmjyrMl2hlkF?=
- =?iso-8859-1?Q?DpLz6mDYgQPzeBgxxPw21aKpZ1DE3htiU2/zcQ+8CIduJclVEly1kAOeJg?=
- =?iso-8859-1?Q?yAX9YCuENH0tBo+6TYO/4DgeP0Vv3scYwQKgBXmfaDJ7E9CVouOC1NooXH?=
- =?iso-8859-1?Q?MNJxsjNMmQo903LrzpS8hGDJwoP/AInlH8YAyqyaNWFQ6VlEhh3c3HQVFo?=
- =?iso-8859-1?Q?rT0rA8DSHmar2Ty+o9UdFOIpYc4g93rlHLlBxwpJUXBpitIoELF1qt29X5?=
- =?iso-8859-1?Q?g4HVFmDmSAAdeH4T6bLPVBJDJQiSPZgNZvpVJhC5t5nwyyEGj5fUbP9zkI?=
- =?iso-8859-1?Q?XiYoa3CKeiSnxVc0V5wjcy1cjYTB33Q8t3Abn/+z9UnPkinSZeiaI3U+Ew?=
- =?iso-8859-1?Q?YSJfDugZ1Wn+kKuAWge5AhR2Cvy0AVAsE3KYV5KL67S69PTZNsdg+7x/DA?=
- =?iso-8859-1?Q?NolR2zflIlv6xk8U9J6BCGxvMpc3FJieRJ5fN4vQ9bEhw7TCtMyLxDXvp0?=
- =?iso-8859-1?Q?CNFHb0W/OMsMidmdHVE6njctSkl4kTXuyHId4sU12fymNdmkLjY3hV97n9?=
- =?iso-8859-1?Q?6CJ96owf1iGV/SJk2fkndehxS83NvpySwwwyVNyWvfQP+8Hy6llh4dodHU?=
- =?iso-8859-1?Q?1PLyCRBSo5d+OMQ6uQpXykD6iFetlJYu6klQJy9cn08h9P7Rc87ELBjucB?=
- =?iso-8859-1?Q?+eYi8ha4gRY1wHsk8MyF+y3EJKoAoEmk04SgIi8SzIWYx50K+7bnkN6ECz?=
- =?iso-8859-1?Q?L/HXd/oHXSc2b7mZz8CvAa5egClCt1x/gNp2gMl8H7f5tdBx8QyH+sdXy+?=
- =?iso-8859-1?Q?nKF2SUbObnAiXN3mMMtcLsPUOaQH4K80rJPky1QYlLF/rNE=3D?=
-x-ms-exchange-transport-forked: True
+        id S230304AbhFWN4r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Jun 2021 09:56:47 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48370 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230229AbhFWN4r (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Jun 2021 09:56:47 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C2E126120D;
+        Wed, 23 Jun 2021 13:54:29 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1624456469;
+        bh=hYyYMjvBoYqZUjc4iHoF9iZ8mlqdhcrrQvHE2YL+mXE=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=EMVeZtES9Vdre/xYD+DpqGJzCImQLmchVgaz7hkPA+UdrgT9GetR3qzqfRZ9Y0gDp
+         TZigkXB85apMaifPLs/XcwYyJjDdjooSEHBK0UsR2Knj8pxrI/0Yw2QMNpjqR6ggNL
+         BM/a4Vj4iO5echfTg4jSjx2nOHfQ10kOl2oyujDdFaM8xpaa5uEKZMOw6n6DfzAo6i
+         KX0kH23DnoUaQEnznOl/2s0Y8v7dwISnw5SsCwoig8LzpAV4rl6qLnkikJ/SNkmsJL
+         18b5YTBgI0aOt+C5RhTSIVk38bBW44PiIQhD/G4of8QSzPy/O7HPiOIcmO1n/1D82G
+         KB37tHT+twQGg==
+Received: by mail-ed1-f48.google.com with SMTP id c7so3603176edn.6;
+        Wed, 23 Jun 2021 06:54:29 -0700 (PDT)
+X-Gm-Message-State: AOAM53153QKo8TCyM0Lj2Ca54m+NGBnjGNVOb0lu1RbP3jiZh5u5lyu9
+        R3A3sW4yHWboXVOhCmWXPK60Lzj1BTp/ghbrpQ==
+X-Google-Smtp-Source: ABdhPJwO57L7q1ZW6hb5vFBrMlfu6LlMGUtDVePd2PAuwzCptiJNAQhwqNrtQ3rOJTwpyMKB6H7wOX+np7PdpfrG5GM=
+X-Received: by 2002:a05:6402:cb0:: with SMTP id cn16mr12468162edb.165.1624456468126;
+ Wed, 23 Jun 2021 06:54:28 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: hyperstone.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
-X-MS-Exchange-CrossTenant-Network-Message-Id: f624bccc-0fd3-4358-4f27-08d9364d1e8e
-X-MS-Exchange-CrossTenant-originalarrivaltime: 23 Jun 2021 13:45:10.1276
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: N0Tc65Y02NiC0SAvv8M5HOWVl5ihJ7DfiQS3GGVYByTklRvQPi2fHfYWi7llm8hrrKsZZ4ucj9XCQic5NhrJuw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWXP265MB2901
-Authentication-Results: relay.mimecast.com;
-        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
-X-Mimecast-Spam-Score: 0
-X-Mimecast-Originator: hyperstone.com
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+References: <20210621235248.2521620-1-dianders@chromium.org>
+ <067dd86d-da7f-ac83-6ce6-b8fd5aba0b6f@arm.com> <CAD=FV=Vg7kqhgxZppHXwMPMc0xATZ+MqbrXx-FB0eg7pHhNE8w@mail.gmail.com>
+ <20210622200219.GA28722@robh.at.kernel.org> <CAGETcx8Cpjvsr2K6f2oDNJDcGiu2T1fEf3D_2S4THduH4cPzKQ@mail.gmail.com>
+ <CAD=FV=Xw=NBkozOb4d4TM5DwBCSOG7v3ZA5ZgpcZqtQXE5UPsg@mail.gmail.com>
+In-Reply-To: <CAD=FV=Xw=NBkozOb4d4TM5DwBCSOG7v3ZA5ZgpcZqtQXE5UPsg@mail.gmail.com>
+From:   Rob Herring <robh@kernel.org>
+Date:   Wed, 23 Jun 2021 07:54:15 -0600
+X-Gmail-Original-Message-ID: <CAL_Jsq+3a0FZxNGoFqBWkj4kKDBB1YtjcY0h4tvbNPus9F4XOA@mail.gmail.com>
+Message-ID: <CAL_Jsq+3a0FZxNGoFqBWkj4kKDBB1YtjcY0h4tvbNPus9F4XOA@mail.gmail.com>
+Subject: Re: [PATCH 0/6] iommu: Enable devices to request non-strict DMA,
+ starting with QCom SD/MMC
+To:     Doug Anderson <dianders@chromium.org>
+Cc:     Saravana Kannan <saravanak@google.com>,
+        Robin Murphy <robin.murphy@arm.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>,
+        Will Deacon <will@kernel.org>, Joerg Roedel <joro@8bytes.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Rob Clark <robdclark@chromium.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        PCI <linux-pci@vger.kernel.org>, quic_c_gdjako@quicinc.com,
+        "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
+        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>,
+        Sonny Rao <sonnyrao@chromium.org>,
+        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Rajat Jain <rajatja@google.com>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Andy Gross <agross@kernel.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Sorry Uffe, Im not quite ready and need some more testing myself before v2.
-But I can outline and reason the need for a (now bigger) patch already.
-
-mmc_ready_for_data checks for R1_STATE_TRAN also, comment says something
-about cards abusing status bits, please warn me if this is an actual issue and in
-what direction (From the code I'm assuming R1_READY_FOR_DATA may be
-set when the card is not actually ready, but R1_READY_FOR_DATA is not unset
-'randomly')
-
-But for v2 I would keep the ready_for_data check on R1b commands,
-but actually only check for R1_READY_FOR_DATA without any state.
-(This could include Shawn's hardware busy_detect patch).
-Then afterwards, for return_to_tran commands, do additional CMD13 polling.
-
-I'm still struggling to get this 'clean' and race-condition free, because of e.g.
-CMD5 MMC_SLEEP_AWAKE always signals busy, but only transitions to TRAN if
-sleep bit is not set. Busy detection should be done in both cases, though.
-(I then should be able to send MMC_SLEEP_AWAKE sleep and
-MMC_SLEEP_AWAKE awake and MMC_SLEEP_AWAKE sleep in direct
-succession from user space through the ioctl interface without any further
-considerations from there.)
-But clearly MMC_SLEEP_AWAKE sleep will never respond to a CMD13 with
-busy bit unset, as it is in sleep then. (Shawns's hardware patch could be used
-as a best effort.)
-Maybe I'm overthinking this for an edge case of a rarely used ioctl interface,
-but that is my status so far.
-If I leave out perfect MMC_SLEEP_AWAKE behavior (and maybe something else)
-then:
-if (rpmb or R1b response)
-    card_busy_detect (status bit only)
-if (return_to_tran_cmd)
-    card_poll_until_tran (using cmd13)
-
-would be ideal.
-Feel free to comment on my thoughts so far, until I've tested it some more.
-
-Best Regards,
-Christian
-
-From: Ulf Hansson <ulf.hansson@linaro.org>
->I need some more time to review, but feel free to post a v2, I can
->look at that instead.
+On Tue, Jun 22, 2021 at 2:10 PM Doug Anderson <dianders@chromium.org> wrote:
 >
->Kind regards
->Uffe
+> Hi,
+>
+> On Tue, Jun 22, 2021 at 1:06 PM Saravana Kannan <saravanak@google.com> wrote:
+> >
+> > On Tue, Jun 22, 2021 at 1:02 PM Rob Herring <robh@kernel.org> wrote:
+> > >
+> > > On Tue, Jun 22, 2021 at 09:06:02AM -0700, Doug Anderson wrote:
+> > > > Hi,
+> > > >
+> > > > On Tue, Jun 22, 2021 at 4:35 AM Robin Murphy <robin.murphy@arm.com> wrote:
+> > > > >
+> > > > > Hi Doug,
+> > > > >
+> > > > > On 2021-06-22 00:52, Douglas Anderson wrote:
+> > > > > >
+> > > > > > This patch attempts to put forward a proposal for enabling non-strict
+> > > > > > DMA on a device-by-device basis. The patch series requests non-strict
+> > > > > > DMA for the Qualcomm SDHCI controller as a first device to enable,
+> > > > > > getting a nice bump in performance with what's believed to be a very
+> > > > > > small drop in security / safety (see the patch for the full argument).
+> > > > > >
+> > > > > > As part of this patch series I am end up slightly cleaning up some of
+> > > > > > the interactions between the PCI subsystem and the IOMMU subsystem but
+> > > > > > I don't go all the way to fully remove all the tentacles. Specifically
+> > > > > > this patch series only concerns itself with a single aspect: strict
+> > > > > > vs. non-strict mode for the IOMMU. I'm hoping that this will be easier
+> > > > > > to talk about / reason about for more subsystems compared to overall
+> > > > > > deciding what it means for a device to be "external" or "untrusted".
+> > > > > >
+> > > > > > If something like this patch series ends up being landable, it will
+> > > > > > undoubtedly need coordination between many maintainers to land. I
+> > > > > > believe it's fully bisectable but later patches in the series
+> > > > > > definitely depend on earlier ones. Sorry for the long CC list. :(
+> > > > >
+> > > > > Unfortunately, this doesn't work. In normal operation, the default
+> > > > > domains should be established long before individual drivers are even
+> > > > > loaded (if they are modules), let alone anywhere near probing. The fact
+> > > > > that iommu_probe_device() sometimes gets called far too late off the
+> > > > > back of driver probe is an unfortunate artefact of the original
+> > > > > probe-deferral scheme, and causes other problems like potentially
+> > > > > malformed groups - I've been forming a plan to fix that for a while now,
+> > > > > so I for one really can't condone anything trying to rely on it.
+> > > > > Non-deterministic behaviour based on driver probe order for multi-device
+> > > > > groups is part of the existing problem, and your proposal seems equally
+> > > > > vulnerable to that too.
+> > > >
+> > > > Doh! :( I definitely can't say I understand the iommu subsystem
+> > > > amazingly well. It was working for me, but I could believe that I was
+> > > > somehow violating a rule somewhere.
+> > > >
+> > > > I'm having a bit of a hard time understanding where the problem is
+> > > > though. Is there any chance that you missed the part of my series
+> > > > where I introduced a "pre_probe" step? Specifically, I see this:
+> > > >
+> > > > * really_probe() is called w/ a driver and a device.
+> > > > * -> calls dev->bus->dma_configure() w/ a "struct device *"
+> > > > * -> eventually calls iommu_probe_device() w/ the device.
+> > > > * -> calls iommu_alloc_default_domain() w/ the device
+> > > > * -> calls iommu_group_alloc_default_domain()
+> > > > * -> always allocates a new domain
+> > > >
+> > > > ...so we always have a "struct device" when a domain is allocated if
+> > > > that domain is going to be associated with a device.
+> > > >
+> > > > I will agree that iommu_probe_device() is called before the driver
+> > > > probe, but unless I missed something it's after the device driver is
+> > > > loaded.  ...and assuming something like patch #1 in this series looks
+> > > > OK then iommu_probe_device() will be called after "pre_probe".
+> > > >
+> > > > So assuming I'm not missing something, I'm not actually relying the
+> > > > IOMMU getting init off the back of driver probe.
+> > > >
+> > > >
+> > > > > FWIW we already have a go-faster knob for people who want to tweak the
+> > > > > security/performance compromise for specific devices, namely the sysfs
+> > > > > interface for changing a group's domain type before binding the relevant
+> > > > > driver(s). Is that something you could use in your application, say from
+> > > > > an initramfs script?
+> > > >
+> > > > We've never had an initramfs script in Chrome OS. I don't know all the
+> > > > history of why (I'm trying to check), but I'm nearly certain it was a
+> > > > conscious decision. Probably it has to do with the fact that we're not
+> > > > trying to build a generic distribution where a single boot source can
+> > > > boot a huge variety of hardware. We generally have one kernel for a
+> > > > class of devices. I believe avoiding the initramfs just keeps things
+> > > > simpler.
+> > > >
+> > > > I think trying to revamp Chrome OS to switch to an initramfs type
+> > > > system would be a pretty big undertaking since (as I understand it)
+> > > > you can't just run a little command and then return to the normal boot
+> > > > flow. Once you switch to initramfs you're committing to finding /
+> > > > setting up the rootfs yourself and on Chrome OS I believe that means a
+> > > > whole bunch of dm-verity work.
+> > > >
+> > > >
+> > > > ...so probably the initramfs is a no-go for me, but I'm still crossing
+> > > > my fingers that the pre_probe() might be legit if you take a second
+> > > > look at it?
+> > >
+> > > Couldn't you have a driver flag that has the same effect as twiddling
+> > > sysfs? At the being of probe, check the flag and go set the underlying
+> > > sysfs setting in the device.
+> >
+> > My understanding of what Robin is saying is that we'd need this info
+> > well before the driver is even available. The pre_probe() is
+> > effectively doing the same thing you are suggesting.
+>
+> Right, I was just about to respond with the same. ;-) So overall right
+> now we're blocked waiting for someone to point out the error in my
+> logic. ;-)
 
-Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
-Managing Directors: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+Okay, I don't see how sysfs would work in that case either. You can't
+assume the driver is not available until after sysfs. But I'll defer
+to others...
 
+> > > Though you may want this to be per device, not per driver. To do that
+> > > early, I think you'd need a DT property. I wouldn't be totally opposed
+> > > to that and I appreciate you not starting there. :)
+> >
+> > Which is what I'm suggest elsewhere in the thread:
+> >
+> > https://lore.kernel.org/lkml/CAGETcx83qCZF5JN5cqXxdSFiEgfc4jYESJg-RepL2wJXJv0Eww@mail.gmail.com/
+>
+> Rob: I'd be happy if you wanted to comment on that thread. If you say
+> that it's fine to add a generic device tree property to control
+> strictness then I'm more than happy to add support for it. I've been
+> going on the theory that you'd NAK such a property but I'm totally
+> good with being wrong. ;-)
+>
+> I'd be more than happy if you could suggest what you'd envision such a
+> property to be named.
+
+You want me to do the hard part? ;)
+
+Would this work as a flag in iommus cell (either another cell or bit
+in the existing cell)?
+
+You could go the compatible match list route as well. At least until
+you work out the kernel implementation.
+
+Rob
