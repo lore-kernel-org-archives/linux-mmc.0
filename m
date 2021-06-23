@@ -2,96 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 659EAC48BE5
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 02:13:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AB4DAC4743C
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 07:50:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 49ED661040
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 02:13:18 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8598F6128D
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 07:50:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230136AbhFWCPd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Jun 2021 22:15:33 -0400
-Received: from lucky1.263xmail.com ([211.157.147.134]:54220 "EHLO
-        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229955AbhFWCPd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Jun 2021 22:15:33 -0400
-Received: from localhost (unknown [192.168.167.130])
-        by lucky1.263xmail.com (Postfix) with ESMTP id 82696CEFFD;
-        Wed, 23 Jun 2021 10:13:08 +0800 (CST)
-X-MAIL-GRAY: 0
-X-MAIL-DELIVERY: 1
-X-ADDR-CHECKED4: 1
-X-SKE-CHECKED: 1
-X-ANTISPAM-LEVEL: 2
-Received: from localhost.localdomain (unknown [58.22.7.114])
-        by smtp.263.net (postfix) whith ESMTP id P12974T140333956974336S1624414385256154_;
-        Wed, 23 Jun 2021 10:13:07 +0800 (CST)
-X-IP-DOMAINF: 1
-X-UNIQUE-TAG: <3edf8aa85aeee3a88cab6900d58ac85a>
-X-RL-SENDER: cl@rock-chips.com
-X-SENDER: cl@rock-chips.com
-X-LOGIN-NAME: cl@rock-chips.com
-X-FST-TO: heiko@sntech.de
-X-RCPT-COUNT: 34
-X-SENDER-IP: 58.22.7.114
-X-ATTACHMENT-NUM: 0
-X-System-Flag: 0
-From:   <cl@rock-chips.com>
-To:     heiko@sntech.de
-Cc:     robh+dt@kernel.org, jagan@amarulasolutions.com, wens@csie.org,
-        uwe@kleine-koenig.org, mail@david-bauer.net, jbx6244@gmail.com,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
-        cnsztl@gmail.com, devicetree@vger.kernel.org,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
-        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
-        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
-        zhangqing@rock-chips.com, huangtao@rock-chips.com,
-        cl@rock-chips.com, wim@linux-watchdog.org, linux@roeck-us.net,
-        jamie@jamieiles.com, linux-watchdog@vger.kernel.org,
-        maz@kernel.org, thierry.reding@gmail.com,
-        u.kleine-koenig@pengutronix.de, lee.jones@linaro.org,
-        linux-pwm@vger.kernel.org
-Subject: [RESEND PATCH v5 1/4] dt-bindings: pwm: rockchip: add description for rk3568
-Date:   Wed, 23 Jun 2021 10:13:03 +0800
-Message-Id: <20210623021303.28015-1-cl@rock-chips.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210622020517.13100-1-cl@rock-chips.com>
-References: <20210622020517.13100-1-cl@rock-chips.com>
+        id S230049AbhFWHwX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Jun 2021 03:52:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53428 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229916AbhFWHwW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Jun 2021 03:52:22 -0400
+Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8EAEC061574
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Jun 2021 00:50:04 -0700 (PDT)
+Received: by mail-pj1-x1029.google.com with SMTP id h23so1038205pjv.2
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Jun 2021 00:50:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=qCWBbioEHtHJzv9+CJcDh4HpVJY4QYX5sGkNG1Q+JpY=;
+        b=CycEjqYrALZTqZwmi2GhplKGcGO3AgLKB7KOs55ZnNHyaUZ4yYKGyX9gdEyVGLoHF4
+         hbNwESHFpujY6WNiBV6UJ1rFS3jEcpnLloByEQVMCHxZlwHVmLZaOz8q0TJbnkv8zyFn
+         ZUb4aAnSP++Ho6TStCr5p9JMvHEhDht2A1ZZ0=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=qCWBbioEHtHJzv9+CJcDh4HpVJY4QYX5sGkNG1Q+JpY=;
+        b=jlEFqEifAO/XTNHLxMVCBACY/o9g7i9ZUdGBQuYSbWcTNNimwtP9yqjbWywDF+/Uvb
+         di4VThT8Aaf1akX56MKC2XwioqntPvgWSSluKZijETaX0GFHmDF+zeAqkWlN18uHqURN
+         whDL/2zmCHoQGcAB0iCIgqevJ0itZ5FYkL2NruKKvt6cflSmGkfScDcbhPEBUliJjB85
+         jNgf0oBOxG9LUE4mXzZ1C2eXds3JmvvfAkG2nSbu5icJuPtu4WeG7W87/S+O7qGJLseO
+         YUbKxwr2nueqMvrXZ6wM5eGM6mm0hufXx3+U5jTaYzmUollb9DQ/wB+eC1JX8JCZJusj
+         1QwQ==
+X-Gm-Message-State: AOAM532j4K+Oo8xNj1w3k7DXL9PhRVU/K+pvtqy6KOPkxfqZIqo/LPwp
+        JyamF0YNa2XipdSdAR+bJo7p0A==
+X-Google-Smtp-Source: ABdhPJymIdrXB1rmnc/2QWjH6a2YQ+H05IEkm6jQdByEZxAOxIYruKmHKw8lw+lX87It0FMaIBJDqQ==
+X-Received: by 2002:a17:90a:4592:: with SMTP id v18mr8181027pjg.132.1624434604167;
+        Wed, 23 Jun 2021 00:50:04 -0700 (PDT)
+Received: from smtp.gmail.com ([2620:15c:202:201:afc8:33fb:90fb:4110])
+        by smtp.gmail.com with ESMTPSA id m4sm4352625pjv.41.2021.06.23.00.50.03
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 23 Jun 2021 00:50:03 -0700 (PDT)
+From:   Stephen Boyd <swboyd@chromium.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>,
+        Sujit Kautkar <sujitka@chromium.org>,
+        Zubin Mithra <zsm@chromium.org>
+Subject: [PATCH 0/2] Two mmc fixes for IDA and KASAN issues
+Date:   Wed, 23 Jun 2021 00:50:00 -0700
+Message-Id: <20210623075002.1746924-1-swboyd@chromium.org>
+X-Mailer: git-send-email 2.32.0.288.g62a8d224e6-goog
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Liang Chen <cl@rock-chips.com>
+Here's a followup to a thread I sent a couple months ago[1]. They're only
+marginally related to each other, but I have bundled them here into one
+series to make it easier to track. Resending to restart the discussion.
 
-add "rockchip,rk3568-pwm", "rockchip,rk3328-pwm" for pwm nodes on
-a rk3568 platform to pwm-rockchip.yaml.
+Cc: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Cc: Sujit Kautkar <sujitka@chromium.org>
+Cc: Zubin Mithra <zsm@chromium.org>
 
-Signed-off-by: Liang Chen <cl@rock-chips.com>
----
- Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml | 1 +
- 1 file changed, 1 insertion(+)
+[1] https://lore.kernel.org/r/20210413003621.1403300-1-swboyd@chromium.org
 
-diff --git a/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml b/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml
-index 5596bee70509..81a54a4e8e3e 100644
---- a/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml
-+++ b/Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml
-@@ -29,6 +29,7 @@ properties:
-           - enum:
-               - rockchip,px30-pwm
-               - rockchip,rk3308-pwm
-+              - rockchip,rk3568-pwm
-           - const: rockchip,rk3328-pwm
- 
-   reg:
+Stephen Boyd (2):
+  mmc: block: Use kref in place of struct mmc_blk_data::usage
+  mmc: core: Don't allocate IDA for OF aliases
+
+ drivers/mmc/core/block.c | 35 +++++++++++++++++++++--------------
+ drivers/mmc/core/host.c  | 20 ++++++++++----------
+ 2 files changed, 31 insertions(+), 24 deletions(-)
+
+
+base-commit: d07f6ca923ea0927a1024dfccafc5b53b61cfecc
 -- 
-2.17.1
-
-
+https://chromeos.dev
 
