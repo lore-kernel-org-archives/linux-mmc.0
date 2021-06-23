@@ -4,39 +4,45 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6AEB2C49EA4
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:59:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63475C49EA6
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:59:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5737B6112D
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:59:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4C51A610C7
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:59:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231167AbhFWKCL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Jun 2021 06:02:11 -0400
-Received: from www.zeus03.de ([194.117.254.33]:50960 "EHLO mail.zeus03.de"
+        id S230518AbhFWKCK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Jun 2021 06:02:10 -0400
+Received: from www.zeus03.de ([194.117.254.33]:50914 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230526AbhFWKCG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 23 Jun 2021 06:02:06 -0400
+        id S230500AbhFWKCE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 23 Jun 2021 06:02:04 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=Tsy6U2g68Sud/3
-        KeD5XvqvjnXzM52XcXBTKsmPwfMsM=; b=X1TPNXfXDq99TWqydpdT/G6TheRPts
-        J89y8JlYaWk/HqsIi4mjLVWGFRRSlDqjy/n+JQ6rT8eSfLJwOGhIJi2dcmuCrI8t
-        OhK3hULYGnWjrPKN99n2JI0eLpYSgSBTld1nxsErdkIM+lVKVt4nJfvLDOGe6mNy
-        JD35kXnk01Cz4=
-Received: (qmail 2552076 invoked from network); 23 Jun 2021 11:59:46 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Jun 2021 11:59:46 +0200
-X-UD-Smtp-Session: l3s3148p1@IYFd92vFGqogARa4RfhaAavnjlTTqzSz
+        :mime-version:content-transfer-encoding; s=k1; bh=tlNjdlJGQTVahX
+        t3fq+jLObAGlqBZRvmoZLo/Q1OJRs=; b=runxqQxYQXRCXQNisM1nixlMjSP7JQ
+        bYV9JKgaDqXCz2/cE87bMvMCO2riqv3VkgrDWS6SxpcmM67QhpYn7v70ct+tA8b+
+        NW17bjrYfr7/zOmg0E/gmDziie8tG8ESCl10wHUPUBkVWT698+dVB0wipKd7/i1B
+        s/PIMPErQg/ZE=
+Received: (qmail 2552021 invoked from network); 23 Jun 2021 11:59:44 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Jun 2021 11:59:44 +0200
+X-UD-Smtp-Session: l3s3148p1@5DNL92vFFqogARa4RfhaAavnjlTTqzSz
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-i2c@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 5/7] i2c: rcar: : use proper DMAENGINE API for termination
-Date:   Wed, 23 Jun 2021 11:59:39 +0200
-Message-Id: <20210623095942.3325-6-wsa+renesas@sang-engineering.com>
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH 3/7] i2c: mxs: : use proper DMAENGINE API for termination
+Date:   Wed, 23 Jun 2021 11:59:37 +0200
+Message-Id: <20210623095942.3325-4-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210623095942.3325-1-wsa+renesas@sang-engineering.com>
 References: <20210623095942.3325-1-wsa+renesas@sang-engineering.com>
@@ -53,25 +59,30 @@ an async case.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/i2c/busses/i2c-rcar.c | 4 ++--
+ drivers/i2c/busses/i2c-mxs.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/i2c/busses/i2c-rcar.c b/drivers/i2c/busses/i2c-rcar.c
-index 327c092a4130..41ff327882ef 100644
---- a/drivers/i2c/busses/i2c-rcar.c
-+++ b/drivers/i2c/busses/i2c-rcar.c
-@@ -391,9 +391,9 @@ static void rcar_i2c_cleanup_dma(struct rcar_i2c_priv *priv)
- 	if (priv->dma_direction == DMA_NONE)
- 		return;
- 	else if (priv->dma_direction == DMA_FROM_DEVICE)
--		dmaengine_terminate_all(priv->dma_rx);
-+		dmaengine_terminate_sync(priv->dma_rx);
- 	else if (priv->dma_direction == DMA_TO_DEVICE)
--		dmaengine_terminate_all(priv->dma_tx);
-+		dmaengine_terminate_sync(priv->dma_tx);
+diff --git a/drivers/i2c/busses/i2c-mxs.c b/drivers/i2c/busses/i2c-mxs.c
+index f97243f02231..864a3f1bd4e1 100644
+--- a/drivers/i2c/busses/i2c-mxs.c
++++ b/drivers/i2c/busses/i2c-mxs.c
+@@ -290,14 +290,14 @@ static int mxs_i2c_dma_setup_xfer(struct i2c_adapter *adap,
+ select_init_dma_fail:
+ 	dma_unmap_sg(i2c->dev, &i2c->sg_io[0], 1, DMA_TO_DEVICE);
+ select_init_pio_fail:
+-	dmaengine_terminate_all(i2c->dmach);
++	dmaengine_terminate_sync(i2c->dmach);
+ 	return -EINVAL;
  
- 	rcar_i2c_dma_unmap(priv);
+ /* Write failpath. */
+ write_init_dma_fail:
+ 	dma_unmap_sg(i2c->dev, i2c->sg_io, 2, DMA_TO_DEVICE);
+ write_init_pio_fail:
+-	dmaengine_terminate_all(i2c->dmach);
++	dmaengine_terminate_sync(i2c->dmach);
+ 	return -EINVAL;
  }
+ 
 -- 
 2.30.2
 
