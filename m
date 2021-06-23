@@ -4,40 +4,40 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0CBEC49EA6
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:58:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B41DCC49EA7
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:58:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D88F46112D
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:58:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A1FE161185
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Jun 2021 09:58:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230380AbhFWKBE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S230409AbhFWKBE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Wed, 23 Jun 2021 06:01:04 -0400
-Received: from www.zeus03.de ([194.117.254.33]:50530 "EHLO mail.zeus03.de"
+Received: from www.zeus03.de ([194.117.254.33]:50538 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230170AbhFWKBD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        id S230290AbhFWKBD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
         Wed, 23 Jun 2021 06:01:03 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=E11OwyfOqdc0Pf
-        4bCuqrSIXsLfAF/1gZ/HldFNuzncU=; b=E1enCBCvPW9B12QyL0C9Kd/LH5jW+L
-        xxo1Tcpu9NbBDfGOCNVVcY83BielMruXQnB94l/7Il9Sbgdf5krvfA+v3yphFllu
-        3D10OWU9pGp6vI5hQtYPyfiXociXqCxjhO2jco/+PuCtYp23s0OH9xCt6FYg17bs
-        cCAhA1lXXIK6E=
-Received: (qmail 2551478 invoked from network); 23 Jun 2021 11:58:44 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Jun 2021 11:58:44 +0200
-X-UD-Smtp-Session: l3s3148p1@eBK082vFCqogARa4RfhaAavnjlTTqzSz
+        :mime-version:content-transfer-encoding; s=k1; bh=lAbSFZ8eh4pWJf
+        sVSlspybh6bhZ7rcs5PPFi2TFi8DE=; b=TweBTkQpZ7yWHm9u+UTDhFm42998MX
+        yt35erUF7v11QUUPMz6AdIX+MLP3/3ipcNMEcm9peJriqsTS42YvZj7/Yly1zOCh
+        Bj3mjadnyvRFJiMs6gstxPRc4ZRLdfXdMRPAltTBuMjA+26QtI7VI7eU+jBj/Ynx
+        l2X026Wd7QZSE=
+Received: (qmail 2551517 invoked from network); 23 Jun 2021 11:58:45 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 23 Jun 2021 11:58:45 +0200
+X-UD-Smtp-Session: l3s3148p1@hEm+82vFDKogARa4RfhaAavnjlTTqzSz
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Mark Brown <broonie@kernel.org>, linux-spi@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH 1/2] spi: spi-rspi: : use proper DMAENGINE API for termination
-Date:   Wed, 23 Jun 2021 11:58:42 +0200
-Message-Id: <20210623095843.3228-2-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 2/2] spi: spi-sh-msiof: : use proper DMAENGINE API for termination
+Date:   Wed, 23 Jun 2021 11:58:43 +0200
+Message-Id: <20210623095843.3228-3-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210623095843.3228-1-wsa+renesas@sang-engineering.com>
 References: <20210623095843.3228-1-wsa+renesas@sang-engineering.com>
@@ -54,34 +54,26 @@ an async case.
 
 Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 ---
- drivers/spi/spi-rspi.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ drivers/spi/spi-sh-msiof.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/spi/spi-rspi.c b/drivers/spi/spi-rspi.c
-index e39fd38f5180..d16ed88802d3 100644
---- a/drivers/spi/spi-rspi.c
-+++ b/drivers/spi/spi-rspi.c
-@@ -618,9 +618,9 @@ static int rspi_dma_transfer(struct rspi_data *rspi, struct sg_table *tx,
- 			ret = -ETIMEDOUT;
- 		}
- 		if (tx)
--			dmaengine_terminate_all(rspi->ctlr->dma_tx);
-+			dmaengine_terminate_sync(rspi->ctlr->dma_tx);
- 		if (rx)
--			dmaengine_terminate_all(rspi->ctlr->dma_rx);
-+			dmaengine_terminate_sync(rspi->ctlr->dma_rx);
- 	}
- 
- 	rspi_disable_irq(rspi, irq_mask);
-@@ -634,7 +634,7 @@ static int rspi_dma_transfer(struct rspi_data *rspi, struct sg_table *tx,
- 
+diff --git a/drivers/spi/spi-sh-msiof.c b/drivers/spi/spi-sh-msiof.c
+index 41ed9ff8fad0..f88d9acd20d9 100644
+--- a/drivers/spi/spi-sh-msiof.c
++++ b/drivers/spi/spi-sh-msiof.c
+@@ -853,10 +853,10 @@ static int sh_msiof_dma_once(struct sh_msiof_spi_priv *p, const void *tx,
+ 	sh_msiof_spi_stop(p, rx);
+ stop_dma:
+ 	if (tx)
+-		dmaengine_terminate_all(p->ctlr->dma_tx);
++		dmaengine_terminate_sync(p->ctlr->dma_tx);
  no_dma_tx:
  	if (rx)
--		dmaengine_terminate_all(rspi->ctlr->dma_rx);
-+		dmaengine_terminate_sync(rspi->ctlr->dma_rx);
- no_dma_rx:
- 	if (ret == -EAGAIN) {
- 		dev_warn_once(&rspi->ctlr->dev,
+-		dmaengine_terminate_all(p->ctlr->dma_rx);
++		dmaengine_terminate_sync(p->ctlr->dma_rx);
+ 	sh_msiof_write(p, SIIER, 0);
+ 	return ret;
+ }
 -- 
 2.30.2
 
