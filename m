@@ -2,233 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 269F8C48BDF
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 07:21:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 147B6C48BDF
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 12:21:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0D077613EB
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 07:21:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA21B61209
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 12:21:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231487AbhFXHX4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Jun 2021 03:23:56 -0400
-Received: from so254-9.mailgun.net ([198.61.254.9]:10374 "EHLO
-        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231464AbhFXHXy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jun 2021 03:23:54 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1624519294; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=iGAC6GkKId3YDE2wkWphfxN46sz4Sv37+aWq0hFm3fw=;
- b=fQ8FixCXbHpNQFwrnZZk3yO7Wil9obxLfzKzkQnrhsuSpIEp8DjzQbpd9qoSYXAhkCXygn7Y
- YdHgRV1fu+NDakHPFghz6Inhuh5tPX0OQg99xbF2sSaT/nYUuEcgmsl8ZaaUjvu9OYgguZBm
- KVwwbdfykLa9X/S7auEQqyahWmc=
-X-Mailgun-Sending-Ip: 198.61.254.9
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n06.prod.us-west-2.postgun.com with SMTP id
- 60d4327c638039e997a00fcb (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 24 Jun 2021 07:21:32
- GMT
-Sender: sbhanu=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 55078C4323A; Thu, 24 Jun 2021 07:21:32 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 72A6AC433F1;
-        Thu, 24 Jun 2021 07:21:31 +0000 (UTC)
+        id S230241AbhFXMX6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Jun 2021 08:23:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43230 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229448AbhFXMX6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Jun 2021 08:23:58 -0400
+Received: from mail-vk1-xa2a.google.com (mail-vk1-xa2a.google.com [IPv6:2607:f8b0:4864:20::a2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D00FC061756
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Jun 2021 05:21:38 -0700 (PDT)
+Received: by mail-vk1-xa2a.google.com with SMTP id c8so208422vkm.7
+        for <linux-mmc@vger.kernel.org>; Thu, 24 Jun 2021 05:21:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=isLCL8z1tmap8GWbdidUDZTyoK/UcjEM+jtMkwPkO5c=;
+        b=V8Z2rYP9OJTVNtXXqvE7v3Mf+0pfw7pZxjd2hjFHYBAGlPZI7b0WBqSos3Ef0BsgOP
+         en20p0dI5cuZ/PwM7pfgADeiNsApZAuDaJ6htITpk30b2NDSSEdt9MCuXdBYi0zVWifv
+         lXwPNcUEWKeu/U0rwA8JhX7MCTQrtQzM1N/YSt/5CxdrNpiTLj1J7xOJaOnIy5+OvqGs
+         oMJJLbE9TRGtS+hh3EMEnTA5dXw9jZ0YZ/OXnTzhbUW4Fw0cbRz5xnba39l3mm1ZoKWR
+         oBMNoXJiyRJRpoQ/9/OF3w3E3YPUkx/S4WbC0O/j1zMlMs7UT/HS3PXaGgd7bdEgb7y2
+         6rVw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=isLCL8z1tmap8GWbdidUDZTyoK/UcjEM+jtMkwPkO5c=;
+        b=FlGnUzLhzrq21L+W2uaUDRCPwDrppHsTluo/ShRj4LPmDkCO8xiSYJvp+YXUHq6Msk
+         bS19QhG6+Fy0E6xymlz0Bk3dkEAyy3NQWmN5d4GKDCAM/Ru17GMq6JAZRdea+V2Le/zY
+         izORxzNE3CSysRCHXoOEmyE1XukHt0m7yQnDe1GzPjeGSHrsBttr9WyvI0d5txZAe2Jm
+         00BDql90QrubwZ9VRnVLOF59ajywPYuYTgTQkH+2TlMPpxIgq9O6MYL0ngYU8CbnDjLb
+         ThUdiumVIXzMOTTd5JFAQZo90sa+WJXXn3wpnOj4cIYWhMKrtqZ9fEbHjlbxVZT/2FQs
+         cEuQ==
+X-Gm-Message-State: AOAM531o0o4E7c4gaygB4LvqkMcSZWxep7uPg8jwE9LDCwyG4I1k7iLJ
+        rOHxlVSPV8UafrlLUa0MJht2zlHGgzqYp9tUUVWAbIoWoPpXXQ==
+X-Google-Smtp-Source: ABdhPJz7GQQuIfdJYhmoRqROf007FYGiLEEBVLQ+2Zqf46YjLV1k6z7Zz8FTtSZ0eNS3xHebY9DAST1qB6OIyWnCIGc=
+X-Received: by 2002:a1f:9505:: with SMTP id x5mr2209916vkd.6.1624537297559;
+ Thu, 24 Jun 2021 05:21:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
-Content-Transfer-Encoding: 7bit
-Date:   Thu, 24 Jun 2021 12:51:31 +0530
-From:   sbhanu@codeaurora.org
-To:     Stephen Boyd <swboyd@chromium.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, vbadigan@codeaurora.org,
-        rampraka@codeaurora.org, sayalil@codeaurora.org,
-        sartgarg@codeaurora.org, rnayak@codeaurora.org,
-        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
-        okukatla@codeaurora.org, djakov@kernel.org, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, bjorn.andersson@linaro.org
-Subject: Re: [PATCH V4] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
- card
-In-Reply-To: <CAE-0n52KyStCcQ1QPFJBUvrTVB-NuBcQ9qnPhnzQj6PFiXPLGg@mail.gmail.com>
-References: <1623835381-29696-1-git-send-email-sbhanu@codeaurora.org>
- <CAE-0n52KyStCcQ1QPFJBUvrTVB-NuBcQ9qnPhnzQj6PFiXPLGg@mail.gmail.com>
-Message-ID: <d3322b244221be7cb4802d6448c7588c@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+References: <20210624061418.30361-1-tykwon@m2i.co.kr>
+In-Reply-To: <20210624061418.30361-1-tykwon@m2i.co.kr>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 24 Jun 2021 14:21:00 +0200
+Message-ID: <CAPDyKFrh9azyXNwFHxoe1svDQKRWbr5FpWz3V_JOD+Zv0cHcug@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Added support for LED trigger only when SD
+ card is connected
+To:     Kwon Tae-young <tykwon@m2i.co.kr>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-06-23 01:47, Stephen Boyd wrote:
-> Quoting Shaik Sajida Bhanu (2021-06-16 02:23:01)
->> diff --git a/arch/arm64/boot/dts/qcom/sc7280-idp.dts 
->> b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->> index 3900cfc..0f63cac 100644
->> --- a/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->> +++ b/arch/arm64/boot/dts/qcom/sc7280-idp.dts
->> @@ -11,6 +11,7 @@
->>  #include <dt-bindings/iio/qcom,spmi-adc7-pmr735b.h>
->>  #include <dt-bindings/iio/qcom,spmi-adc7-pm8350.h>
->>  #include <dt-bindings/iio/qcom,spmi-adc7-pmk8350.h>
->> +#include <dt-bindings/gpio/gpio.h>
-> 
-> The letter g comes before i, please move this higher in the list.
-Sure i will adrress this in my next patchset.
-> 
->>  #include "sc7280.dtsi"
->>  #include "pm7325.dtsi"
->>  #include "pmr735a.dtsi"
->> @@ -272,6 +273,34 @@
->>         status = "okay";
->>  };
->> 
->> +&sdhc_1 {
->> +       status = "okay";
->> +
->> +       pinctrl-names = "default", "sleep";
->> +       pinctrl-0 = <&sdc1_on>;
->> +       pinctrl-1 = <&sdc1_off>;
->> +
->> +       non-removable;
->> +       no-sd;
->> +       no-sdio;
->> +
->> +       vmmc-supply = <&vreg_l7b_2p9>;
->> +       vqmmc-supply = <&vreg_l19b_1p8>;
->> +};
->> +
->> +&sdhc_2 {
->> +       status = "okay";
->> +
->> +       pinctrl-names = "default", "sleep";
->> +       pinctrl-0 = <&sdc2_on>;
->> +       pinctrl-1 = <&sdc2_off>;
->> +
->> +       vmmc-supply = <&vreg_l9c_2p9>;
->> +       vqmmc-supply = <&vreg_l6c_2p9>;
->> +
->> +       cd-gpios = <&tlmm 91 GPIO_ACTIVE_LOW>;
->> +};
->> +
->>  &uart5 {
->>         status = "okay";
->>  };
->> @@ -291,3 +320,55 @@
->>                 bias-pull-up;
->>         };
->>  };
->> +
->> +&tlmm {
->> +       sdc1_on: sdc1-on {
->> +               clk {
->> +                       pins = "sdc1_clk";
-> 
-> Can the pins property at least be moved into sc7280.dtsi? Then this can
-> add bias and drive strength overrides in the board file?
-Sure i will adrress this in my next patchset.
-> 
->> +                       bias-disable;
->> +                       drive-strength = <16>;
->> +               };
->> +
->> +               cmd {
->> +                       pins = "sdc1_cmd";
->> +                       bias-pull-up;
->> +                       drive-strength = <10>;
->> +               };
->> +
->> +               data {
->> +                       pins = "sdc1_data";
->> +                       bias-pull-up;
->> +                       drive-strength = <10>;
->> +               };
->> +
->> +               rclk {
->> +                       pins = "sdc1_rclk";
->> +                       bias-pull-down;
->> +               };
->> +       };
->> +
->> +       sdc2_on: sdc2-on {
->> +               clk {
->> +                       pins = "sdc2_clk";
->> +                       bias-disable;
->> +                       drive-strength = <16>;
->> +               };
->> +
->> +               cmd {
->> +                       pins = "sdc2_cmd";
->> +                       bias-pull-up;
->> +                       drive-strength = <10>;
->> +               };
->> +
->> +               data {
->> +                       pins = "sdc2_data";
->> +                       bias-pull-up;
->> +                       drive-strength = <10>;
->> +               };
->> +
->> +               sd-cd {
->> +                       pins = "gpio91";
->> +                       bias-pull-up;
->> +               };
->> +       };
->> +};
->> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi 
->> b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> index d600bca..16d8e17 100644
->> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> @@ -974,6 +1033,51 @@
->>                         };
->>                 };
->> 
->> +               sdhc_2: sdhci@8804000 {
->> +                       compatible = "qcom,sc7280-sdhci", 
->> "qcom,sdhci-msm-v5";
->> +                       status = "disabled";
->> +
->> +                       reg = <0 0x08804000 0 0x1000>;
->> +
->> +                       iommus = <&apps_smmu 0x100 0x0>;
->> +                       interrupts = <GIC_SPI 207 
->> IRQ_TYPE_LEVEL_HIGH>,
->> +                                    <GIC_SPI 223 
->> IRQ_TYPE_LEVEL_HIGH>;
->> +                       interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +                       clocks = <&gcc GCC_SDCC2_APPS_CLK>,
->> +                                <&gcc GCC_SDCC2_AHB_CLK>,
->> +                                <&rpmhcc RPMH_CXO_CLK>;
->> +                       clock-names = "core", "iface", "xo";
->> +                       interconnects = <&aggre1_noc MASTER_SDCC_2 0 
->> &mc_virt SLAVE_EBI1 0>,
->> +                                       <&gem_noc MASTER_APPSS_PROC 0 
->> &cnoc2 SLAVE_SDCC_2 0>;
->> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +                       power-domains = <&rpmhpd SC7280_CX>;
->> +                       operating-points-v2 = <&sdhc2_opp_table>;
->> +
->> +                       bus-width = <4>;
->> +
->> +                       qcom,dll-config = <0x0007642c>;
->> +
->> +                       sdhc2_opp_table: sdhc2-opp-table {
-> 
-> Any reason the node shouldn't be called opp-table?
-Yes, it can be called but for consistency, we are using the same node 
-names as that on sc7180.
+On Thu, 24 Jun 2021 at 08:14, Kwon Tae-young <tykwon@m2i.co.kr> wrote:
+>
+> led_trigger_event() is always called.
+> In this case, if the LED trigger is set to the SD Card, the trigger
+> will occur even when the SD card is not connected and the LED will blink.
+>
+> In case of SD Card, it is judged based on Card Detection information and
+> changes to generate LED trigger only when SD Card is connected.
+>
+> Board tested: NXP i.MX 8M board
+>
+> Signed-off-by: Kwon Tae-young <tykwon@m2i.co.kr>
+> ---
+>  drivers/mmc/core/core.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index f194940c5974..b3156f6c5cfa 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -352,7 +352,11 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+>         if (err)
+>                 return err;
+>
+> -       led_trigger_event(host->led, LED_FULL);
+> +       if (host->ops->get_cd)
 
+No, this is not the right thing to do. Invoking the ->get_cd()
+callback, for every request is suboptimal and would likely have
+effects on performance.
+
+Moreover, I wonder how big an issue it is to use the led here. If the
+card is being removed, the request will fail anyway, so the led should
+soon stop flashing anyway, right?
+
+> +               host->ops->get_cd(host) ? led_trigger_event(host->led, LED_FULL) : NULL;
+> +       else
+> +               led_trigger_event(host->led, LED_FULL);
+> +
+>         __mmc_start_request(host, mrq);
+>
+>         return 0;
+> --
+> 2.17.1
+>
+
+Kind regards
+Uffe
