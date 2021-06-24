@@ -2,106 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59CC7C49EAF
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 15:16:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 747D0C49EA5
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 16:06:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3BB2B613DA
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 15:16:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5D46E613EA
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Jun 2021 16:06:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231942AbhFXPS6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Jun 2021 11:18:58 -0400
-Received: from www.zeus03.de ([194.117.254.33]:46224 "EHLO mail.zeus03.de"
+        id S229940AbhFXQJN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Jun 2021 12:09:13 -0400
+Received: from mga11.intel.com ([192.55.52.93]:60575 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232196AbhFXPSt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 24 Jun 2021 11:18:49 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=xUE4EbDuo9xFDk
-        J25+s0Hrzl6p4tAZUiuKfTE4SgLfQ=; b=o6fMjws2XkYqXy0bb2sZQknGOBuIlV
-        E2GfUNfPQANRPe7HJfiFz42J5UAu2V022FYTEOzsaW7aGK+MBP/DJ6yM36HYX8Mp
-        hcwMZkRG4squRvMt7mXNVi9o8wMY3PWcm9zuexYns5dDdHnej8PDNDkmDupp2c35
-        X+vz2lsWYoXqQ=
-Received: (qmail 3016735 invoked from network); 24 Jun 2021 17:16:27 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 24 Jun 2021 17:16:27 +0200
-X-UD-Smtp-Session: l3s3148p1@PNPBgYTFVskgARa4RWOqASgLlirhLBBp
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
+        id S232131AbhFXQJD (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 24 Jun 2021 12:09:03 -0400
+IronPort-SDR: DPRquJrvhgtI5ot/wsQPTq0z6LA/EjkjktQvlO8cWqq91gLJ4WuZZDypm7AoyM2VhiJqhyQTCF
+ mfHnwBvJmHTg==
+X-IronPort-AV: E=McAfee;i="6200,9189,10025"; a="204496095"
+X-IronPort-AV: E=Sophos;i="5.83,296,1616482800"; 
+   d="scan'208";a="204496095"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Jun 2021 09:06:42 -0700
+IronPort-SDR: 2YJhgaeXRUIK4z5GnFC1FH84EaTwiaLMqs7UxE3g3kkcuPXOKYf8PcesXiHY+RzhbCU/HocWlN
+ RL/ld5em7rhg==
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.83,296,1616482800"; 
+   d="scan'208";a="487818293"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
+  by orsmga001.jf.intel.com with ESMTP; 24 Jun 2021 09:06:37 -0700
+Subject: Re: [PATCH 0/3] mmc: avoid vicious circle when retuning
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 3/3] mmc: host: factor out clearing the retune state
-Date:   Thu, 24 Jun 2021 17:16:16 +0200
-Message-Id: <20210624151616.38770-4-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210624151616.38770-1-wsa+renesas@sang-engineering.com>
+        Ulf Hansson <ulf.hansson@linaro.org>
 References: <20210624151616.38770-1-wsa+renesas@sang-engineering.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <1741203b-c37e-fbc0-ef0b-bfd34f402e7d@intel.com>
+Date:   Thu, 24 Jun 2021 19:06:57 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210624151616.38770-1-wsa+renesas@sang-engineering.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-We have this in two places, so let's have a dedicated function. It is
-also more readable.
+On 24/06/21 6:16 pm, Wolfram Sang wrote:
+> See patch 1 for a description of the problem. This series implements the
+> alternative approach suggested by Adrian (thanks!). It also adds some
+> documentation and a minor cleanup which I came up with while working on
+> the fix. Patch 1 can go to stable as is, the rest built on top of that.
+> 
+> This series fixes the performance issue which we saw when injecting CRC
+> errors on Renesas R-Car Gen3 hardware.
+> 
+> Looking forward to comments!
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/core/core.c | 3 +--
- drivers/mmc/core/host.c | 3 +--
- drivers/mmc/core/host.h | 6 ++++++
- 3 files changed, 8 insertions(+), 4 deletions(-)
+Looks good to me.  For all 3 patches:
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f397cf051b8d..469bc58c2113 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -941,8 +941,7 @@ int mmc_execute_tuning(struct mmc_card *card)
- 		pr_err("%s: tuning execution failed: %d\n",
- 			mmc_hostname(host), err);
- 	} else {
--		host->retune_now = 0;
--		host->need_retune = 0;
-+		mmc_retune_clear(host);
- 		mmc_retune_enable(host);
- 	}
- 
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 0f084c9b2684..52d37587cf45 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -141,8 +141,7 @@ void mmc_retune_disable(struct mmc_host *host)
- 	mmc_retune_unpause(host);
- 	host->can_retune = 0;
- 	del_timer_sync(&host->retune_timer);
--	host->retune_now = 0;
--	host->need_retune = 0;
-+	mmc_retune_clear(host);
- }
- 
- void mmc_retune_timer_stop(struct mmc_host *host)
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index ba407617ed23..48c4952512a5 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -21,6 +21,12 @@ int mmc_retune(struct mmc_host *host);
- void mmc_retune_pause(struct mmc_host *host);
- void mmc_retune_unpause(struct mmc_host *host);
- 
-+static inline void mmc_retune_clear(struct mmc_host *host)
-+{
-+	host->retune_now = 0;
-+	host->need_retune = 0;
-+}
-+
- static inline void mmc_retune_hold_now(struct mmc_host *host)
- {
- 	host->retune_now = 0;
--- 
-2.30.2
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> 
+> 
+> Wolfram Sang (3):
+>   mmc: core: clear flags before allowing to retune
+>   mmc: host: add kdoc for mmc_retune_{en|dis}able
+>   mmc: host: factor out clearing the retune state
+> 
+>  drivers/mmc/core/core.c |  6 ++++--
+>  drivers/mmc/core/host.c | 13 +++++++++++--
+>  drivers/mmc/core/host.h |  6 ++++++
+>  3 files changed, 21 insertions(+), 4 deletions(-)
+> 
 
