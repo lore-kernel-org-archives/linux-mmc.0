@@ -2,150 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,PDS_BAD_THREAD_QP_64,SPF_HELO_NONE,SPF_PASS autolearn=no
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6383C49EA7
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Jun 2021 09:31:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98C02C49EA7
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Jun 2021 11:21:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8DDBA61409
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Jun 2021 09:31:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8376C6147E
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Jun 2021 11:21:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231150AbhFYJdY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Jun 2021 05:33:24 -0400
-Received: from mail-eopbgr1400097.outbound.protection.outlook.com ([40.107.140.97]:10432
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S230461AbhFYJdX (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 25 Jun 2021 05:33:23 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=XucEkuYfnjfx9+NhQ39SYB07C9X3Go0oDy0yMljNo9ldBc4EmU3EAl9PBEvL4fjQkCt9Kf3yveXaGq/JkGB+6Iefo5K70SPuMDVQ0HUKTDCopGzePFTwBpNSQsVsS1Zvq2V4nYoCL2PYDiv8EZnvNocnu9HSJhWfE+RxiHFZxBxTh+tpfxTG8BFpo5wBUxRXeHJou2RmjjBEb5v80Mt4f48E3PSM6t4DX2q/T9q1y9cUirKyrriLzBx/IE67rnjKwW5wzKC4+ffkewnPqKcYBwQyT6aMi5s2w1SqqOU4c9ad4E5tVGydv2ZSIli6vR8tw0BAB+lCqKew3LoweeezlA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YM+0pjVnytI9wBsWH2N7huR3YbivAhJmD4rOGyPKAng=;
- b=nHh2sVABdc5CY/YDz739pgnj46wxtPThSXqtpPIcqS9ElUDcAVqUstpWRD69MuqkQIfcKmprRXbMG/z6YY/h7kefA45MtuLiikejPo3u/qHkZU8VCZXjmNka12YSNasV/ZhG0FCt46TGG5WI74ZJrholXsGt5GCYB/NEJQILtc8sD7gxqMhhui/k+s7Q9Um9Z/tRFUdaKEj4bqQs9JexYNYjq66xLI4+GRkV5gvUM/JmCsdmN29b/apJSy3/4lpAU1strLKIDUaZOXU1T0eat57pIPjYOfUdQxGJY2N0i1XHaH10ut76TEvkCNkL43Sdsh/Zck9d0UsV9hWiOvsh+g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=YM+0pjVnytI9wBsWH2N7huR3YbivAhJmD4rOGyPKAng=;
- b=OHGR+O6HDscnCjyHCUa6Cr0YxpOobFlfkm+gln4CNZaY3ap17qpCvBZgTnn20JSRGymJU5wG0c6R0MmuR8AEBZabgzeCdTWvMClGZjAYuUsAxWeSy3C8r7y3Pz8SXTUxLSj0Z0yM+XXglsNl68U7/2+XYxCxY0VA5DZ/x44gcRc=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYAPR01MB2687.jpnprd01.prod.outlook.com (2603:1096:404:82::12) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4242.21; Fri, 25 Jun
- 2021 09:31:00 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::4c5d:66ee:883a:72a5]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::4c5d:66ee:883a:72a5%6]) with mapi id 15.20.4242.024; Fri, 25 Jun 2021
- 09:31:00 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Subject: RE: [PATCH 0/3] mmc: avoid vicious circle when retuning
-Thread-Topic: [PATCH 0/3] mmc: avoid vicious circle when retuning
-Thread-Index: AQHXaQvpsT6QxYEcWk2Y8L5XyXqCQqskcYZw
-Date:   Fri, 25 Jun 2021 09:31:00 +0000
-Message-ID: <TY2PR01MB3692F4994590D12B9C4DC0AAD8069@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210624151616.38770-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210624151616.38770-1-wsa+renesas@sang-engineering.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=renesas.com;
-x-originating-ip: [124.210.22.195]
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 4338dd38-fa76-447e-b474-08d937bbf1a2
-x-ms-traffictypediagnostic: TYAPR01MB2687:
-x-microsoft-antispam-prvs: <TYAPR01MB26877CDE031E1C201865FEFCD8069@TYAPR01MB2687.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:7691;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: dKsW3Xa7jW2bcpQWAQK03VVnaLx9ONIsSZFITYwUEYfATYIWqf40ksVQtRWpxaqVwvZbRaNNU/flyfYoEtLVWyQp49ss6QjpnK8ri0FTQbTbiggTVR0+lo5Tc7oBTX0GSW7h9SZL9VieDydU3NCosqW6G2xVG85YRMS/bvLkRrh58xMO6OQWZ9ZohbGByyLrtrLyhPXpZckNIUpZ4/e177LyPfA0XvR/OTjzPoA8PgDPfcAzEocQ1NXGWKIMPjmlebDSyqTg2f6siF9i3PzG43CjRqLLWtUjLdNhb2FuNX+/O82nSKOPPdxQcHVCu86n1e44KtwQQmcBS3GaQSnZFniiXEmk+H0LXTOhDTR2Nlw+Tx2huA4bkxScR2utdbDTNpgZhT/nn7oJ6t7ihM7YyTb7hsCS9JJ+n/HAjlorggsL3ATRVgG8vpcxnb76aJDGkDetcw+ikApXHrIVsYn07VkhJtmigTKikADYAH7Y5nOOLQ0XJNs1v9LR0lkXgCSmJQ1xlY7Fb/W1nJcLdjb/i20jFH/Ej0KuF4uHoJTYYx+YmgwCgBdtpnmXlPBRa3D3K6dz5o15pg465Lko5i7em+ARnlaWYGeJYPH5pwBJsP0=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(376002)(366004)(396003)(136003)(346002)(39850400004)(66946007)(38100700002)(66476007)(66446008)(66556008)(26005)(8936002)(7696005)(64756008)(2906002)(33656002)(6506007)(76116006)(122000001)(4744005)(55236004)(55016002)(478600001)(4326008)(9686003)(52536014)(110136005)(5660300002)(86362001)(71200400001)(8676002)(316002)(54906003)(186003);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?SAbgnIP6P+qqoiuCQWM8rbtFrW5wFRVwlX5Jgn6t0opL6iSWEd2lPC8cPCmy?=
- =?us-ascii?Q?qrAp0e667zeqMp+SkkuDzdFyKwlFsGuzEJo8hMbW932nGOjFv6FwlTIwzv5r?=
- =?us-ascii?Q?OGWQwq4cSLrcShuvhA4aHVsRtpPXSaQOmAfi3QJNm/mTjmTW7C3jm3N+X6ZI?=
- =?us-ascii?Q?F5fgd2qp0YSy2BBEWQkaIxYrfkMqWWieHRkGqNWyy/ow07mdzMSfVee7UpR/?=
- =?us-ascii?Q?LSe1B6W1pdROMq9rfqg8uRIFP0qKT0DMq5efv2nhRlAVQskER741WKnEPQvu?=
- =?us-ascii?Q?Gu/LyyQYhniHKL/6vsO1lu+hnHmZRYssMCp6hcZp9Kg/Rn3bFdXgI8dJl4L0?=
- =?us-ascii?Q?OIYiwbICfkN+HULMzHEyNcyQB9CuqKkYXsCh+zqU+yM9e3AFK6JT6hcI4JuJ?=
- =?us-ascii?Q?M5OEXPUhbScQb+FHb1eJbBWtJOG4F+Z+tQFLZCExkivSK2Me/rMhH62JNcKg?=
- =?us-ascii?Q?btZy1IBcNLKO+WrVoiutrWSG56AM4b71MP6AYcF6jFY9ilVXUkiuQMcAkoac?=
- =?us-ascii?Q?wRlcIuAY752m6vAhApl2btyHMMIm7dcv6lCEkhhmp1SZH+0AzQ70pgG9vUZA?=
- =?us-ascii?Q?M9d0pAzG1+cs35BLKnbmqIVUv4e8HcFeP4yeBpzvCCXo8kgbhBZ1LHEq/sNI?=
- =?us-ascii?Q?47t6+OxpAOb3252YHPMFPKrcvNk+h2DQ2bUIQmH4bpnIM14UrNfD3DcPthRZ?=
- =?us-ascii?Q?U+xPSQRek8QuzPY9zYKd0Dwws657FoUu1y0FzCWKJihnHDG9q8mopjj0FYrj?=
- =?us-ascii?Q?rYBarA0liGH9mfSv9GKLZGyfRR8GtM2ER0NtGJFFnjQmJzxbfbA9DGPZ17mr?=
- =?us-ascii?Q?YHwpfcyB1rCrhMK7fmfHePoLLKXybm1YcF1rnReWqBiljnPMgc7ID6Bvcs2/?=
- =?us-ascii?Q?2Y8kNxww0sEi1BVz08zI9BWZE1xQNoQ44DVgjhW5MIkubIHDz6M2KOQlZzCQ?=
- =?us-ascii?Q?FJibOAqtCta42ha2B+YtxZ6yJ8xcW5zCY/eUr5AVHSSK/V3YnlOXCLrKPard?=
- =?us-ascii?Q?s5bGYzJW6knijYi0eAkdz1fIOaE0jc57FEWmZ7YBetljgiIcCa5RW2KKoQU+?=
- =?us-ascii?Q?B77Ed+xRKiVtP04U9k1Ry629ddMYTtbolDLDL/Yctlxp4qchygufpE3hYx/R?=
- =?us-ascii?Q?TUTcasF7UstXTfD2BbrJHtX/+5A19yM3GcaPBZmJic0R7WzGMfU2Gq87lzpr?=
- =?us-ascii?Q?5WvJW9re+jQT9Lxc1jutMblKPJnIQ3APRJnEbpgT4/ZU1jvGCMkAe4KNu8RB?=
- =?us-ascii?Q?DItwl7eeMxTAENInS00WFixkvrOQYKKC8b4GaOaQPVAK85OZzvSzfJ6cIRhh?=
- =?us-ascii?Q?kBZGAT20GmKDw2GHXBDaHhRb?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        id S229498AbhFYLXc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Jun 2021 07:23:32 -0400
+Received: from mail-ua1-f53.google.com ([209.85.222.53]:33426 "EHLO
+        mail-ua1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229458AbhFYLXb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Jun 2021 07:23:31 -0400
+Received: by mail-ua1-f53.google.com with SMTP id x22so3437999uap.0;
+        Fri, 25 Jun 2021 04:21:11 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=N3qim+VC6+xUi6b8xxn/Fdr1qaUBAWRr1SNW9ZZVgm8=;
+        b=gfKp9P5od6E0Jzr92FFGq1w1UvoFyPdqGznLaGBSBTlKbAYW/i6T+SUfAb0YH/W2/f
+         puFwVf3bxnztVEmJ5bjOlvhg1UPtu++V0cDEsowIsV1ZhpMzqBE0aF6/6/JASAbkmUDt
+         QgzlH1HT4bD1Qpbd1N8E1IK+dpEL59EqGj+mb0ecekwj6kY8E2X3grB6T6PQupCzVPeW
+         0hg1ezB5sDS62z+HkvxURYaBctnUYTWNPN7O4tZFCrqrPLEUl2VPTMzBonTEc3WEMtEb
+         ViJW8fPDyLzQ6waSQN2l5vPxK6uW95ksI/SZsE8KBjkf2CSZ6sht3Ak80tcP+PEkwnNM
+         3gdA==
+X-Gm-Message-State: AOAM533NJBllwOmLFXqGN81xHK5QmrVAz9pHlBtrcywBqFeekldUyYlw
+        oWZEZn9g3g89gYvU/Flkln+LE3Yx3z4uygJqoMEv0TlkKybFaw==
+X-Google-Smtp-Source: ABdhPJyvtzCwpq2wCDVTh+VrObP6YMUDjEkEIr6xFlP5Dfv2wc0myxYnXqm4nGvFqgCpMmzFSYAz8KCZs/ULv2rQhrI=
+X-Received: by 2002:ab0:70b3:: with SMTP id q19mr10605166ual.2.1624620070853;
+ Fri, 25 Jun 2021 04:21:10 -0700 (PDT)
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 4338dd38-fa76-447e-b474-08d937bbf1a2
-X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Jun 2021 09:31:00.1210
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 3hwKPyvp/ssva7MYH9vSEQHQRUMvTF1Vcj1vJk243RdxrR04oAnA7o79OzlF6UARJSt0XdeLA1/heEmaMndsq5t6enKJi9M9FHTp3ASJuqXUwr3bMVZ3hfKfayO9xXZJ
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB2687
+References: <20210625075508.664674-1-yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <20210625075508.664674-1-yoshihiro.shimoda.uh@renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 25 Jun 2021 13:20:59 +0200
+Message-ID: <CAMuHMdWmM+d2V7miepoptmaP7mmbtaWNBkJp3LqbhaiQ+18JwA@mail.gmail.com>
+Subject: Re: [PATCH/RFC] mmc: host: renesas_sdhi: Refactor of_device_id.data
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram-san,
+Hi Shimoda-san,
 
-Thank you for the patches!
+On Fri, Jun 25, 2021 at 9:56 AM Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
+> Refactor of_device_id.data to avoid increasing numbers of
+> sdhi_quirks_match[] entry when we add other stable SoCs like
+> r8a779m*.
+>
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 
-> From: Wolfram Sang, Sent: Friday, June 25, 2021 12:16 AM
->=20
-> See patch 1 for a description of the problem. This series implements the
-> alternative approach suggested by Adrian (thanks!). It also adds some
-> documentation and a minor cleanup which I came up with while working on
-> the fix. Patch 1 can go to stable as is, the rest built on top of that.
+Thanks for your patch!
 
-Perhaps, we can add a Fixes tag into the patch 1 like below?
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -941,13 +910,8 @@ static const struct soc_device_attribute sdhi_quirks_match[]  = {
+>         { .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7795", .revision = "ES1.*", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
+> -       { .soc_id = "r8a7795", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps2367 },
+>         { .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
+>         { .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
+> -       { .soc_id = "r8a77961", .data = &sdhi_quirks_bad_taps1357 },
+> -       { .soc_id = "r8a77965", .data = &sdhi_quirks_r8a77965 },
+> -       { .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
+> -       { .soc_id = "r8a77990", .data = &sdhi_quirks_r8a77990 },
+>         { /* Sentinel. */ },
+>  };
+>
+> @@ -957,6 +921,7 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>         struct tmio_mmc_data *mmd = pdev->dev.platform_data;
+>         const struct renesas_sdhi_quirks *quirks = NULL;
+>         const struct renesas_sdhi_of_data *of_data;
+> +       const struct renesas_sdhi_of_data_with_quirks *of_data_quirks;
+>         const struct soc_device_attribute *attr;
+>         struct tmio_mmc_data *mmc_data;
+>         struct tmio_mmc_dma *dma_priv;
+> @@ -966,11 +931,14 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>         struct resource *res;
+>         u16 ver;
+>
+> -       of_data = of_device_get_match_data(&pdev->dev);
+> +       of_data_quirks = of_device_get_match_data(&pdev->dev);
+> +       of_data = of_data_quirks->of_data;
+>
+>         attr = soc_device_match(sdhi_quirks_match);
+>         if (attr)
+>                 quirks = attr->data;
+> +       else
+> +               quirks = of_data_quirks->quirks;
 
-Fixes: bd11e8bd03ca ("mmc: core: Flag re-tuning is needed on CRC errors")
+Please do not use "else" statements in soc_device_match()-based
+quirk handling, as that makes it less trivial to remove the quirk
+handling later.
 
-> This series fixes the performance issue which we saw when injecting CRC
-> errors on Renesas R-Car Gen3 hardware.
->=20
-> Looking forward to comments!
+I.e. move "quirks = of_data_quirks->quirks;" up, before the call
+to soc_device_match().
 
-The patches look good to me. So,
+>
+>         res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+>         if (!res)
 
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Gr{oetje,eeting}s,
 
-And, I tested on my environment (r8a77951-salvator-xs) with local error
-injection, and the performance issue disappeared. So,
+                        Geert
 
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-Best regards,
-Yoshihiro Shimoda
-
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
