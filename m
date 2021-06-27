@@ -2,122 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0066AC49EA5
-	for <linux-mmc@archiver.kernel.org>; Sat, 26 Jun 2021 18:58:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2648C49EAB
+	for <linux-mmc@archiver.kernel.org>; Sun, 27 Jun 2021 14:41:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D066F61C39
-	for <linux-mmc@archiver.kernel.org>; Sat, 26 Jun 2021 18:58:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B96B361C35
+	for <linux-mmc@archiver.kernel.org>; Sun, 27 Jun 2021 14:41:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230189AbhFZTAd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 26 Jun 2021 15:00:33 -0400
-Received: from www.zeus03.de ([194.117.254.33]:43672 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230180AbhFZTAd (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 26 Jun 2021 15:00:33 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=XguuJvFgAO1GBtu32ShPppLrE89U
-        UxsFvRw5mYKjLs0=; b=hwJhSFHlGlH0HbxYvNiMCJoXq8CdweZj8+hmhR2YCmar
-        MGPGjU/Bo+hpZJ1v6AwMU2jZXHRb5Sc4nZ/5U+n5DZkyOsshnBIdRk76IUXgpFFm
-        yz7AHmpvr3CNyn4ouIWcY1nVTKa3MjKy9W8kEs2wEjiqo6oyqNf4ELieOvkt6Yw=
-Received: (qmail 3686869 invoked from network); 26 Jun 2021 20:58:08 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 26 Jun 2021 20:58:08 +0200
-X-UD-Smtp-Session: l3s3148p1@TAML1q/FAoMgAwDPXx9NAPXRWcOdxyeY
-Date:   Sat, 26 Jun 2021 20:58:04 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ulrich Hecht <uli@fpond.eu>, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: Re: [PATCH] mmc: disable tuning when checking card presence
-Message-ID: <YNd4vIJjpaSmFD9t@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulrich Hecht <uli@fpond.eu>, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-References: <20210618082317.58408-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFqkW9uwtJyWPFKggi2AJMtO4NJLW-6hviWgGSfoHyDm1A@mail.gmail.com>
- <bbfbed66-5058-1263-159c-dabd345286c8@intel.com>
- <563832257.373371.1624260736936@webmail.strato.com>
- <5adc8601-23c7-4378-94e2-cb3641d9039c@intel.com>
- <YNBJq7Lrtlc/qExN@ninjato>
- <b5062770-ba5c-32d5-15f0-505a09bb4a2e@intel.com>
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="l9KduWXRzNiGaE7d"
-Content-Disposition: inline
-In-Reply-To: <b5062770-ba5c-32d5-15f0-505a09bb4a2e@intel.com>
+        id S230321AbhF0Onx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 27 Jun 2021 10:43:53 -0400
+Received: from alexa-out.qualcomm.com ([129.46.98.28]:32102 "EHLO
+        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230309AbhF0Onx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 27 Jun 2021 10:43:53 -0400
+Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
+  by alexa-out.qualcomm.com with ESMTP; 27 Jun 2021 07:41:29 -0700
+X-QCInternal: smtphost
+Received: from ironmsg01-blr.qualcomm.com ([10.86.208.130])
+  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 27 Jun 2021 07:41:27 -0700
+X-QCInternal: smtphost
+Received: from c-sbhanu-linux.qualcomm.com ([10.242.50.201])
+  by ironmsg01-blr.qualcomm.com with ESMTP; 27 Jun 2021 20:10:43 +0530
+Received: by c-sbhanu-linux.qualcomm.com (Postfix, from userid 2344807)
+        id B63A24E89; Sun, 27 Jun 2021 20:10:42 +0530 (IST)
+From:   Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, sartgarg@codeaurora.org,
+        rnayak@codeaurora.org, cang@codeaurora.org,
+        pragalla@codeaurora.org, nitirawa@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org, robh+dt@kernel.org,
+        Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Subject: [PATCH V2] mmc: sdhci: Update the software timeout value for sdhc
+Date:   Sun, 27 Jun 2021 20:10:40 +0530
+Message-Id: <1624804840-3479-1-git-send-email-sbhanu@codeaurora.org>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Whenever SDHC run at clock rate 50MHZ or below, the hardware data
+timeout value will be 21.47secs, which is approx. 22secs and we have
+a current software timeout value as 10secs. We have to set software
+timeout value more than the hardware data timeout value to avioid seeing
+the below register dumps.
 
---l9KduWXRzNiGaE7d
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+[  332.953670] mmc2: Timeout waiting for hardware interrupt.
+[  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
+[  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+[  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
+[  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
+[  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
+[  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+[  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+[  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
+[  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
+[  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
+[  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
+[  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
+[  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
+0x0000000ffffff218
+[  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
+-----------
+[  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+0x6000642c | DLL cfg2: 0x0020a000
+[  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+0x00000000 | DDR cfg: 0x80040873
+[  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
+0xf88218a8 Vndr func3: 0x02626040
+[  333.102371] mmc2: sdhci: ============================================
 
-Hi Adrian, Ulf, everyone,
+So, set software timeout value more than hardware timeout value.
 
-> With the code above, if the host controller knows the card has been
-> removed, it can return -ENOMEDIUM from ->execute_tuning() to suppress
-> the message.
+Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+---
 
-On second thought, I like the idea with -ENOMEDIUM. Because tuning can
-still fail for reasons other than a removed card and we want to see an
-error message then.
+Changes since V1:
+	- Moved software data timeout update part to qcom specific file as
+	  suggested by Veerabhadrarao Badiganti.
+---
+ drivers/mmc/host/sdhci-msm.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-So, I checked when/how to return -ENOMEDIUM for the SDHI driver but this
-lead me to more questions. The few driver which return this error code
-all follow a similar pattern:
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index e44b7a6..58e651e 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -2089,6 +2089,14 @@ static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
+ 	sdhci_cqe_disable(mmc, recovery);
+ }
+ 
++static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
++{
++
++	__sdhci_set_timeout(host, cmd);
++	if (cmd && (cmd->data) && (host->clock > 400000) && (host->clock <= 50000000))
++		host->data_timeout = 22 * NSEC_PER_SEC;
++}
++
+ static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+ 	.enable		= sdhci_msm_cqe_enable,
+ 	.disable	= sdhci_msm_cqe_disable,
+@@ -2438,6 +2446,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ 	.irq	= sdhci_msm_cqe_irq,
+ 	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
+ 	.set_power = sdhci_set_power_noreg,
++	.set_timeout = sdhci_msm_set_timeout,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+-- 
+QUALCOMM INDIA, on behalf of Qualcomm Innovation Center, Inc. is a member 
+of Code Aurora Forum, hosted by The Linux Foundation
 
-xxx_request()
-{
-	if (host->get_cd == 1)
-		submit_mrq
-	else
-		cmd->error = -ENOMEDIUM
-		mmc_request_done()
-}
-
-So, my first question would be if we can't apply this pattern in the
-core before calling the .request callback? A lot of drivers are not
-implementing this pattern although it seems useful. Is it required?
-Recommended? Nice to have? However, I could imagine an answer for moving
-it into the core is "no, that should be checked atomically"? E.g. sdhci
-does it, but atmel-mci and s3cmci do not. If I just look at moving the
-card detection call into the core, I don't really see the reason for
-atomic. Am I missing something?
-
-All the best,
-
-   Wolfram
-
-
---l9KduWXRzNiGaE7d
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDXeLYACgkQFA3kzBSg
-KbbgyA/9HmpIvbnoA25g3dRGHH7M/sZZCxVr5+S2ohmblm0ZYyiO60cMSl/ShAHD
-0kCOBPfXCelQ/SsC3okrg1bnd8vozKuKBrtaLcER5AREmOn1yEegf+rVX3FM4++8
-Nx2zH8rVjiyk5wv2fAcJXh+9YlnhPmZdFPSFf25dE6i5fOnTLSJeUl94YQTbESOS
-10i2bf3ZetrbMTLCRtwq/d0zqwPzxPd8jHalTP0DA4ltp/sNav5QTEK+fhKT0vL6
-GjFBMfWvAEj5sgnPCiErD/sXskm6HK7Z3fu+1DwBi0y/leMibkdPfcyXkjQWquDt
-p81gRdQdIoGGm64wf7J2cjma+QYKG6zrhuK40x1TRoKbar8ukbr0ZrWnf/m51ptU
-xzIEiol0X5BT/2QWbZ2Qiy1WS3LTHSXFwDMu0rVVQBvl+S4JLMMrrKs2QZxB2Ndc
-KVoPkiJhsSWMBsxduJ0YFmX+fHmhH4GGjDs44i6Q72xko+TRJfN/PY8Iu1XlMteL
-QPL625Sup1EOsc91s74Rg24wEIxpIJeoe5s/TTKT32pfwKU0Azw8e3weMzPw9ifA
-/0zU3x3VjZQ5IBYaPNdZi7I0IIzdHRNxC6f1vCeZxT/I6KK36oYR70f1j3DHZRpt
-dDaqbWlgsV8DXPsw1PTFTV4Muyr5CFMq4Tcw1F8rVtPSCCHX3O4=
-=Ulq5
------END PGP SIGNATURE-----
-
---l9KduWXRzNiGaE7d--
