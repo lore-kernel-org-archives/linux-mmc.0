@@ -2,145 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CF875C2B9F4
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Jun 2021 13:44:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69764C11F64
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Jun 2021 18:17:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B8E516128C
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Jun 2021 13:44:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5062D61C77
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Jun 2021 18:17:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232135AbhF1Nqx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Jun 2021 09:46:53 -0400
-Received: from foss.arm.com ([217.140.110.172]:59696 "EHLO foss.arm.com"
+        id S234890AbhF1STn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Jun 2021 14:19:43 -0400
+Received: from mail.kernel.org ([198.145.29.99]:59434 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232131AbhF1Nqw (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 28 Jun 2021 09:46:52 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id D5CD21042;
-        Mon, 28 Jun 2021 06:44:26 -0700 (PDT)
-Received: from [10.57.8.89] (unknown [10.57.8.89])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 1FF6D3F718;
-        Mon, 28 Jun 2021 06:44:24 -0700 (PDT)
-Subject: Re: [PATCH RFC 2/2] mmc: meson-gx: use sg_copy_to/from_io instead of
- local version
-To:     Neil Armstrong <narmstrong@baylibre.com>, jgg@ziepe.ca,
-        leon@kernel.org, m.szyprowski@samsung.com, ulf.hansson@linaro.org
-Cc:     torvalds@linux-foundation.org, khilman@baylibre.com,
-        jbrunet@baylibre.com, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20210628123411.119778-1-narmstrong@baylibre.com>
- <20210628123411.119778-3-narmstrong@baylibre.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-Message-ID: <cfd6c96a-b5eb-bc0b-1861-c409f0a7e4f0@arm.com>
-Date:   Mon, 28 Jun 2021 14:44:20 +0100
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
-MIME-Version: 1.0
-In-Reply-To: <20210628123411.119778-3-narmstrong@baylibre.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+        id S233965AbhF1STl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 28 Jun 2021 14:19:41 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPS id 084EC61C3D;
+        Mon, 28 Jun 2021 18:17:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1624904236;
+        bh=shqqhxSbfMHm6DFpnkFnzpy/2c6WbxJ44e8xJ8kV6nM=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=MUgLV4ruaYLyfPOsAQ0XDfUaviwUrZDFGjdtur60YErw+olk5tG9sbTO2+Y8OuVTQ
+         rfh3frZV6XoyweL8YoBiUqmf22IIpHhfdJ8luSchFhGW7i9qSEqlQ6GcSwu7nTme6k
+         +PLpLGnjjgs0tnW4h8AaUW6zI4/+6dSv7hvbsF6qC+LP850pvsn8FotWSe5CRsAtbb
+         Vm5Ix8pKBuvab4bbQprTHNSxalqsltyBfZ1FUfCnt63EQzaZZLn7UjD/cEEO+JMExE
+         OSnvcS6W9+Cvmp7K7HkDGHH2EVlx/umbLNGXcb7/Et0TXnm/0xRJuz73RTng2k/Y8W
+         HA00Dlv3e0hmA==
+Subject: Re: [GIT PULL] MMC and MEMSTICK updates for v5.14
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20210628101944.205357-1-ulf.hansson@linaro.org>
+References: <20210628101944.205357-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20210628101944.205357-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14
+X-PR-Tracked-Commit-Id: 98b5ce4c08ca85727888fdbd362d574bcfa18e3c
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: ef60eb0eb6e0aaf0aae302cb6362a81b2491e997
+Message-Id: <162490423589.3852.1520696636725472554.pr-tracker-bot@kernel.org>
+Date:   Mon, 28 Jun 2021 18:17:15 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-06-28 13:34, Neil Armstrong wrote:
-> Use the proper sg_copy_to_io & sg_copy_from_io instead of having a local
-> sg_copy_buffer variant to handle the I/O mapped buffer case.
-> 
-> Cc: Robin Murphy <robin.murphy@arm.com>
-> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
-> ---
->   drivers/mmc/host/meson-gx-mmc.c | 53 +++++++--------------------------
->   1 file changed, 10 insertions(+), 43 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 3f28eb4d17fe..c13436efb414 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -746,47 +746,6 @@ static void meson_mmc_desc_chain_transfer(struct mmc_host *mmc, u32 cmd_cfg)
->   	writel(start, host->regs + SD_EMMC_START);
->   }
->   
-> -/* local sg copy to buffer version with _to/fromio usage for dram_access_quirk */
-> -static void meson_mmc_copy_buffer(struct meson_host *host, struct mmc_data *data,
-> -				  size_t buflen, bool to_buffer)
-> -{
-> -	unsigned int sg_flags = SG_MITER_ATOMIC;
-> -	struct scatterlist *sgl = data->sg;
-> -	unsigned int nents = data->sg_len;
-> -	struct sg_mapping_iter miter;
-> -	unsigned int offset = 0;
-> -
-> -	if (to_buffer)
-> -		sg_flags |= SG_MITER_FROM_SG;
-> -	else
-> -		sg_flags |= SG_MITER_TO_SG;
-> -
-> -	sg_miter_start(&miter, sgl, nents, sg_flags);
-> -
-> -	while ((offset < buflen) && sg_miter_next(&miter)) {
-> -		unsigned int len;
-> -
-> -		len = min(miter.length, buflen - offset);
-> -
-> -		/* When dram_access_quirk, the bounce buffer is a iomem mapping */
-> -		if (host->dram_access_quirk) {
-> -			if (to_buffer)
-> -				memcpy_toio(host->bounce_iomem_buf + offset, miter.addr, len);
-> -			else
-> -				memcpy_fromio(miter.addr, host->bounce_iomem_buf + offset, len);
-> -		} else {
-> -			if (to_buffer)
-> -				memcpy(host->bounce_buf + offset, miter.addr, len);
-> -			else
-> -				memcpy(miter.addr, host->bounce_buf + offset, len);
-> -		}
-> -
-> -		offset += len;
-> -	}
-> -
-> -	sg_miter_stop(&miter);
-> -}
-> -
->   static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->   {
->   	struct meson_host *host = mmc_priv(mmc);
-> @@ -830,7 +789,12 @@ static void meson_mmc_start_cmd(struct mmc_host *mmc, struct mmc_command *cmd)
->   		if (data->flags & MMC_DATA_WRITE) {
->   			cmd_cfg |= CMD_CFG_DATA_WR;
->   			WARN_ON(xfer_bytes > host->bounce_buf_size);
-> -			meson_mmc_copy_buffer(host, data, xfer_bytes, true);
-> +			if (host->dram_access_quirk)
-> +				sg_copy_to_io(data->sg, data->sg_len,
-> +					      host->bounce_iomem_buf, xfer_bytes);
+The pull request you sent on Mon, 28 Jun 2021 12:19:44 +0200:
 
-Maybe you could just use host->regs + SD_EMMC_SRAM_DATA_BUF_OFF directly 
-here (and below) and save carrying host->bounce_iomem_buf around?
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14
 
-Robin.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/ef60eb0eb6e0aaf0aae302cb6362a81b2491e997
 
-> +			else
-> +				sg_copy_to_buffer(data->sg, data->sg_len,
-> +						  host->bounce_buf, xfer_bytes);
->   			dma_wmb();
->   		}
->   
-> @@ -999,7 +963,10 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
->   	if (meson_mmc_bounce_buf_read(data)) {
->   		xfer_bytes = data->blksz * data->blocks;
->   		WARN_ON(xfer_bytes > host->bounce_buf_size);
-> -		meson_mmc_copy_buffer(host, data, xfer_bytes, false);
-> +		if (host->dram_access_quirk)
-> +			sg_copy_from_io(data->sg, data->sg_len, host->bounce_iomem_buf, xfer_bytes);
-> +		else
-> +			sg_copy_from_buffer(data->sg, data->sg_len, host->bounce_buf, xfer_bytes);
->   	}
->   
->   	next_cmd = meson_mmc_get_next_command(cmd);
-> 
+Thank you!
+
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
