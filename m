@@ -2,116 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79338C11F67
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Jun 2021 15:09:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C2A11C11F6B
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Jun 2021 15:09:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5B2FA61DAC
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Jun 2021 15:09:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ABCE161D5E
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Jun 2021 15:09:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234665AbhF2PMC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Jun 2021 11:12:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54976 "EHLO
+        id S234679AbhF2PMF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Jun 2021 11:12:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234654AbhF2PMC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jun 2021 11:12:02 -0400
-Received: from mail-vs1-xe33.google.com (mail-vs1-xe33.google.com [IPv6:2607:f8b0:4864:20::e33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F13BEC061766
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Jun 2021 08:09:32 -0700 (PDT)
-Received: by mail-vs1-xe33.google.com with SMTP id v12so12274504vsg.10
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Jun 2021 08:09:32 -0700 (PDT)
+        with ESMTP id S234667AbhF2PMD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Jun 2021 11:12:03 -0400
+Received: from mail-ua1-x92f.google.com (mail-ua1-x92f.google.com [IPv6:2607:f8b0:4864:20::92f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07966C061766
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Jun 2021 08:09:36 -0700 (PDT)
+Received: by mail-ua1-x92f.google.com with SMTP id f34so8492099uae.4
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Jun 2021 08:09:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=Ei8DhtlygzR0YzhvSAOeJxbaayqBzli32veTEMkT6ts=;
-        b=KgCSN8MP8fJ6RDcn54L6DX3FgWWGlkmkFcMOPl4oYjR+d58BcJXY+kdqECuBlpC2q/
-         Zc9QzTM1DWkzKtufY4WNCpGcAk64qpkwDRDcSfo9xZUr1kY9tINWtT/fq8jSrFqi9DN2
-         zOZQDMuYG9BN2JbnQkr0pw3IKy8XsYEBMqOptpxnNb4ajTfOWiuQe9SXHmUXJ28Dbpg8
-         XLg54I0B0EkIlkUJAcEeHvS8TIRh7JEWrlfZYDW4dbWJuS923h+HF3c4OEZb2VJ2xw+g
-         krVEM/e0zj4PMxRLeHZPi814CtN/d0ZpQW931V6gCvWNUOSMCWPDJMahFGL6G2woinRi
-         5ApA==
+        bh=bWnyvaCFYrQUvUf/DppyzuRMkB2N+0Lh3KJRoVipZ24=;
+        b=vqoVo5UI+V43vKQ8qbyO4O/K/xl3pebszcvw5em50U51NIRcoB2sAxcrVlxPPr30Cv
+         8yP2Spsdk7oqeGV6rtB9Kxc0h4h2SAMyGZiIZs1Nncz+aZWpoJ19wth8nuUbbqE9P25L
+         TByfixycf4Xn0993xNiVWkTV1fdRtBpu9ad4kC5rBK4dVzMFJfcexcWT7sLj789GcMO/
+         dgm2FbOgOEOwyfvdY1M+CXWKTc/QP2AabI/3wX5S117giilCFSKfZCTpmCH1EdkW8tRX
+         cB4j7vfeZX+B7EWJoa55JXKqrpLsuciTPVu2iHNwFhTRNcmrwWptjZBuk4/gawtRHqMn
+         vDeg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=Ei8DhtlygzR0YzhvSAOeJxbaayqBzli32veTEMkT6ts=;
-        b=qg1bHvE2Lg8mT7Zq0g2u70KLbzx7Cpi1aRcOz1f6Dvaohj46j0jdejBreCLLYs2ofr
-         CAbVfAab+/2vyFA7lyrBIN9UJiFRvS8u0g13lNCh4H0XF53+IBD2wM4G8Mwmaiiyjgi4
-         7i/a7aAjpUuc2Di3zcTvtlq8F4V27+KQK+B/E/LPIhJ1rZVekIpFo7IbpI4687ILkA99
-         IS9r/VMcoPK04amuKomCuFhufAwCy5xMYPRsF+58BhDKCg3ry/AFEE4MZFqIc7P63Cst
-         Vm9E6HUUEtRlpC9/IN8dEdWK57fXXWVHzzu7zfEj+LjDA2aUJiVHPVh8mdwY4lDgfe0l
-         +Amw==
-X-Gm-Message-State: AOAM533qkx+ILdjNbzzbyXLFhwnyogy5Hx/Pv0qsnD24roSpM4b6yWf8
-        mZ94aSTePB1jLgFNXBFGXIRmEwVi6qBgtWSJNKTPcw==
-X-Google-Smtp-Source: ABdhPJwL/Tz4unVTR5YW3TPwtQhdejHIVarPlrmHY5dQZ9xC87opBGYtDHlgJBwMv9bg3bGpYPV+Vy5yzTNslaeT0ZM=
-X-Received: by 2002:a05:6102:3a70:: with SMTP id bf16mr26199022vsb.48.1624979372186;
- Tue, 29 Jun 2021 08:09:32 -0700 (PDT)
+        bh=bWnyvaCFYrQUvUf/DppyzuRMkB2N+0Lh3KJRoVipZ24=;
+        b=X7NODlFBiWnbo2iByAqjv0WnEFfg57NC/MnzbflnWnuYpCJU+H4w54hQxluacNvuHE
+         b9yBNmBvVHhCiZFsNqJQxnvsYKx1Z3yNO3UjZZUorjxmS55bpf7A+M9cZTFfQWEIuaiL
+         M2Gqf1buoLVhUSFVwPmsLg1uQDund5JEgPkrwDt1llqplTGdRkoimjmt2tLSam1YqZQH
+         3hSVr9MUSqEXHczCClQNR2kuaAgcWW1NBwj2np4pbDXcRAcCeNktwxA9MPk2x+P8Dy6d
+         Wr2FGbWFDaO+pJNbHNNiC8hi572XIzj0Il5SlRNhHRN/NvNHpu7eVNC0EDhxQh/wv+Ws
+         EPhw==
+X-Gm-Message-State: AOAM5328K8yxUFD6FsnfmFL1Aw+StR64ewGBUE5/KX1gzRP0pU4a+iN2
+        6MyO/AaYgct/3IVZwAlDk6U3KyGEW//zmUl9oMTbxg==
+X-Google-Smtp-Source: ABdhPJw4PLuYCh019JddZ2xmj3gq5hMooToY9sbdhNG5LzAFJ8NBGRt0DRgvO6olgaNzg+NxuxFSxx2ZyaGg5g9n06E=
+X-Received: by 2002:ab0:6296:: with SMTP id z22mr3693991uao.129.1624979375207;
+ Tue, 29 Jun 2021 08:09:35 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210603182242.25733-1-rashmi.a@intel.com>
-In-Reply-To: <20210603182242.25733-1-rashmi.a@intel.com>
+References: <20210611101948.18972-1-tiwai@suse.de>
+In-Reply-To: <20210611101948.18972-1-tiwai@suse.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 29 Jun 2021 17:08:55 +0200
-Message-ID: <CAPDyKFpr=jjcjK=c7-cifYdGBw7ywmLsuJWw=bE8ZYqGuiUSfA@mail.gmail.com>
-Subject: =?UTF-8?B?UmU6IFvigJxQQVRDSOKAnSAwLzJdIFtLTUJdIG1tYyBjbG9jay1mcmVxdWVuY3kgcHJvcA==?=
-        =?UTF-8?B?ZXJ0eSB1cGRhdGUgYW5k?=
-To:     rashmi.a@intel.com
-Cc:     linux-drivers-review-request@eclists.intel.com,
-        Michal Simek <michal.simek@xilinx.com>,
+Date:   Tue, 29 Jun 2021 17:08:58 +0200
+Message-ID: <CAPDyKFqeXERLc9=p79OVRjUfC+BM_5JqOWS+6Riuu0YRwvWOtQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci: Clear unused bounce buffer at DMA mmap
+ error path
+To:     Takashi Iwai <tiwai@suse.de>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Kishon <kishon@ti.com>, Vinod Koul <vkoul@kernel.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        linux-phy@lists.infradead.org, Mark Gross <mgross@linux.intel.com>,
-        kris.pan@linux.intel.com, furong.zhou@intel.com,
-        mallikarjunappa.sangannavar@intel.com,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        mahesh.r.vaidya@intel.com, nandhini.srikandan@intel.com,
-        "Raja Subramanian, Lakshmi Bai" 
-        <lakshmi.bai.raja.subramanian@intel.com>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 3 Jun 2021 at 20:22, <rashmi.a@intel.com> wrote:
+On Fri, 11 Jun 2021 at 12:19, Takashi Iwai <tiwai@suse.de> wrote:
 >
-> From: Rashmi A <rashmi.a@intel.com>
+> When DMA-mapping of the bounce buffer fails, the driver tries to fall
+> back, but it leaves the allocated host->bounce_buffer although its
+> size is zero.  Later on, the driver checks the use of bounce buffer
+> with host->bounce_buffer pointer, and it tries to use the buffer
+> incorrectly, resulting in Oops.
 >
-> Patch1: If clock-frequency property is set and it is not the same as the
->         current clock rate of clk_xin(base clock frequency), set clk_xin
->         to use the provided clock rate.
+> This patch clears the release the unused buffer and clears the
+> bounce_buffer pointer for addressing the problem.
 >
-> Patch2: Since the EMMC clock in KMB was changed from 200Mhz to 175Mhz in
->         FIP,there were some warnings introduced, as the frequency values
->         being checked was still wrt 200Mhz in code. Hence, the frequency
->         checks are now updated based on the current 175Mhz EMMC clock
->         changed in FIP.
->
-> Review comments from Adrian Hunter have been incorporated.
-> Above 2  patches are tested with Keem Bay evaluation module board.
->
-> Please help to review this patch set.
->
->
-> Rashmi A (2):
->   mmc: sdhci-of-arasan: Use clock-frequency property to update clk_xin
->   phy: intel: Fix for warnings due to EMMC clock 175Mhz change in FIP
->
->  drivers/mmc/host/sdhci-of-arasan.c         | 14 ++++++++++++--
->  drivers/phy/intel/phy-intel-keembay-emmc.c |  3 ++-
->  2 files changed, 14 insertions(+), 3 deletions(-)
->
-> --
-> 2.17.1
->
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Signed-off-by: Takashi Iwai <tiwai@suse.de>
 
 Applied for fixes, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> v1->v2: correct the device pointer to mmc_dev(mmc)
+>
+>  drivers/mmc/host/sdhci.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index bf238ade1602..c80bc6c4ebf3 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -4072,9 +4072,13 @@ static void sdhci_allocate_bounce_buffer(struct sdhci_host *host)
+>                                            bounce_size,
+>                                            DMA_BIDIRECTIONAL);
+>         ret = dma_mapping_error(mmc_dev(mmc), host->bounce_addr);
+> -       if (ret)
+> +       if (ret) {
+> +               devm_kfree(mmc_dev(mmc), host->bounce_buffer);
+> +               host->bounce_buffer = NULL;
+>                 /* Again fall back to max_segs == 1 */
+>                 return;
+> +       }
+> +
+>         host->bounce_buffer_size = bounce_size;
+>
+>         /* Lie about this since we're bouncing */
+> --
+> 2.26.2
+>
