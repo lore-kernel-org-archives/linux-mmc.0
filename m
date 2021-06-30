@@ -2,99 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C6A8C11F69
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 13:49:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B52FC11F69
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 14:08:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5909D61374
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 13:49:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0828F6144C
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 14:08:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235285AbhF3NwS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Jun 2021 09:52:18 -0400
-Received: from www.zeus03.de ([194.117.254.33]:53546 "EHLO mail.zeus03.de"
+        id S234882AbhF3OLJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Jun 2021 10:11:09 -0400
+Received: from mga04.intel.com ([192.55.52.120]:34140 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236026AbhF3NvB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Jun 2021 09:51:01 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=aZ8iO9XBy3P3r9iXiFyK52CCdtNx
-        JUEpRXml++Cfx6g=; b=aXzYKQ8Gkzzam+WMp5k1pRjO7qvLN91VBiIe35APextO
-        agZbM5Qf/IdCH8e44yA1B7PS+hpuFjJJs52twGzHC69ly+8o3rQzyNhX8FZd51rT
-        aRPm/lRoi3o6hjJs8/CVd9i/KcVpii2arlUgN1x0Hf31k6OcZzUuPMaJvO0XTaQ=
-Received: (qmail 885806 invoked from network); 30 Jun 2021 15:48:31 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jun 2021 15:48:31 +0200
-X-UD-Smtp-Session: l3s3148p1@Y8kk+vvFAuYgAwDPXwaiAGDoJRk6bv4I
-Date:   Wed, 30 Jun 2021 15:48:27 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Pierre-Yves MORDRET <pierre-yves.mordret@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-i2c@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 7/7] i2c: stm32f7: : use proper DMAENGINE API for
- termination
-Message-ID: <YNx2K7Eeqm09Vot6@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Pierre-Yves MORDRET <pierre-yves.mordret@foss.st.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-i2c@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20210623095942.3325-1-wsa+renesas@sang-engineering.com>
- <20210623095942.3325-8-wsa+renesas@sang-engineering.com>
- <YNM/TZMWwCLGSEJO@ninjato>
- <20210630131118.GB12109@gnbcxd0016.gnb.st.com>
+        id S234851AbhF3OLI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 30 Jun 2021 10:11:08 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10030"; a="206532524"
+X-IronPort-AV: E=Sophos;i="5.83,312,1616482800"; 
+   d="scan'208";a="206532524"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jun 2021 07:08:39 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.83,312,1616482800"; 
+   d="scan'208";a="419999203"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
+  by fmsmga007.fm.intel.com with ESMTP; 30 Jun 2021 07:08:35 -0700
+Subject: Re: [PATCH V2] mmc: sdhci: Update the software timeout value for sdhc
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>, ulf.hansson@linaro.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, sartgarg@codeaurora.org,
+        rnayak@codeaurora.org, cang@codeaurora.org,
+        pragalla@codeaurora.org, nitirawa@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org, robh+dt@kernel.org
+References: <1624804840-3479-1-git-send-email-sbhanu@codeaurora.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <3217c101-534b-bfcb-7ba9-5749d73cf242@intel.com>
+Date:   Wed, 30 Jun 2021 17:08:53 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="qWmVXpjpnw6hcZzE"
-Content-Disposition: inline
-In-Reply-To: <20210630131118.GB12109@gnbcxd0016.gnb.st.com>
+In-Reply-To: <1624804840-3479-1-git-send-email-sbhanu@codeaurora.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 27/06/21 5:40 pm, Shaik Sajida Bhanu wrote:
+> Whenever SDHC run at clock rate 50MHZ or below, the hardware data
+> timeout value will be 21.47secs, which is approx. 22secs and we have
+> a current software timeout value as 10secs. We have to set software
+> timeout value more than the hardware data timeout value to avioid seeing
+> the below register dumps.
+> 
+> [  332.953670] mmc2: Timeout waiting for hardware interrupt.
+> [  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
+> [  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+> [  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
+> [  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
+> [  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
+> [  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> [  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> [  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
+> [  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> [  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
+> [  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
+> [  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
+> [  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
+> [  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
+> 0x0000000ffffff218
+> [  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
+> -----------
+> [  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+> 0x6000642c | DLL cfg2: 0x0020a000
+> [  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+> 0x00000000 | DDR cfg: 0x80040873
+> [  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
+> 0xf88218a8 Vndr func3: 0x02626040
+> [  333.102371] mmc2: sdhci: ============================================
+> 
+> So, set software timeout value more than hardware timeout value.
+> 
+> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> ---
+> 
+> Changes since V1:
+> 	- Moved software data timeout update part to qcom specific file as
+> 	  suggested by Veerabhadrarao Badiganti.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e44b7a6..58e651e 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2089,6 +2089,14 @@ static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
+>  	sdhci_cqe_disable(mmc, recovery);
+>  }
+>  
+> +static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> +{
+> +
+> +	__sdhci_set_timeout(host, cmd);
+> +	if (cmd && (cmd->data) && (host->clock > 400000) && (host->clock <= 50000000))
 
---qWmVXpjpnw6hcZzE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+There are some redundant parenthesis there and cmd is never NULL i.e. could be:
 
-Hi Alain,
+	if (cmd->data && host->clock > 400000 && host->clock <= 50000000)
 
-> thanks for the update. If you are ok with that I modify the patch
-> to partially rely on _async / synchronize whenever needed and push it again
-> separately.
+> +		host->data_timeout = 22 * NSEC_PER_SEC;
 
-Perfect, thanks!
+That needs to be 22LL to make the compiler warning go away
 
-All the best,
+> +}
+> +
+>  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+>  	.enable		= sdhci_msm_cqe_enable,
+>  	.disable	= sdhci_msm_cqe_disable,
+> @@ -2438,6 +2446,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+>  	.irq	= sdhci_msm_cqe_irq,
+>  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
+>  	.set_power = sdhci_set_power_noreg,
+> +	.set_timeout = sdhci_msm_set_timeout,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+> 
 
-   Wolfram
-
-
---qWmVXpjpnw6hcZzE
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDcdicACgkQFA3kzBSg
-KbaXXhAAmxrPbldmgXhVpi+qevyfoKn/StAf2BS8zj+S+vIDRB2yAVQ/yM9t9ooX
-bwPOkJx2oGMcJ1uwFjbyTGvS47iHeW4KAbpIUxr5MmwW5QSXrfn42mfih94g9UaP
-HZzIaM3IY+2oP+0sJ4WrGGI0ZqDJ0ISTnGn/5q0jocO5LelzMMnE99qMw5Z7BsUF
-2Bi5AwaRzqAyDimWIhjktwNAJBDX+fBZcGpgYbmqVhF2R16UIoIVHCLcVumD23lA
-hDU/ows5Wp1bzdh38qadVkaOean/FPSERnTFDx/QkBaGhMc5tz5HQshx4ILGUKI7
-hJJsFjPUsi+6GFHoe5gv7sW948ONb48WxKzbhD10KS+D4k5pAzHWs1rmGgdA+UVD
-hA90vjuDoB9VIlhcTe6K4LIQGfJBzXZOpo4MYTqLxBAnPQF57GQWcdmH5vSlsxV2
-ALPwHYco8CRyxHzpzUU00Q+l/0T9vhuG1lE3LjSRETvUQjB2D4HznNhXqw7SpFxs
-vPfT0AodIvOZXEcCtZHCVXZjceBCoGFYKLXHzsM+XAG5XmwcrO9v1FlfTyTqNwr6
-EEzsUP+lRpEg1SWRlj00U7ckAkR4mo8CjpQwLGy4ilA74TuIFGI83ILuQ8hPBdS4
-Bxdmh62TR6fODqWc7pXdSFx8Jd2EcWqKDLaR6uMExB7XFrVelNU=
-=iyIW
------END PGP SIGNATURE-----
-
---qWmVXpjpnw6hcZzE--
