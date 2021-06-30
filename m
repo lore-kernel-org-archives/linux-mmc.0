@@ -2,108 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41F42C11F68
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 12:52:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25EDBC11F68
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 13:11:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 26FBA61435
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 12:52:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 08DFB6143C
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 13:11:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234785AbhF3Myy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Jun 2021 08:54:54 -0400
-Received: from mga06.intel.com ([134.134.136.31]:61720 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234761AbhF3Myy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Jun 2021 08:54:54 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10030"; a="269474314"
-X-IronPort-AV: E=Sophos;i="5.83,312,1616482800"; 
-   d="scan'208";a="269474314"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jun 2021 05:52:24 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.83,312,1616482800"; 
-   d="scan'208";a="419979517"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
-  by fmsmga007.fm.intel.com with ESMTP; 30 Jun 2021 05:52:22 -0700
-Subject: Re: [PATCH] mmc: sdhci: Fix warning message when accessing RPMB in
- HS400 mode
-To:     Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-References: <20210624163045.33651-1-alcooperx@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <a025f2b0-8353-3180-2724-9548e9c38349@intel.com>
-Date:   Wed, 30 Jun 2021 15:52:40 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S234775AbhF3NOG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Jun 2021 09:14:06 -0400
+Received: from mx07-00178001.pphosted.com ([185.132.182.106]:35560 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234481AbhF3NOF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jun 2021 09:14:05 -0400
+Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 15UCuWkL030029;
+        Wed, 30 Jun 2021 15:11:21 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=date : from : to :
+ subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=selector1; bh=H3KL+ZFSxOlQG3AC+pLdhHar+qjF/Zg5vofpMCp/YS4=;
+ b=BXeU0cVvxT3vr5DLBRkLa2pE+zO7mbFCgDTOfBV9xvbHbLuSwkO3liuisOGHiu5CPrUV
+ R7y34ZsaFQbzrjyBlh8Bd7WBWVN8DaiMGEwoSig03+3IegBK0Ts83HOfPz2mfMGpmzTS
+ ww6B+IOrJ44pbF3j9IqLSUnpOS7AqQ2hBSt9TAcAG+L7/e64VnIzgWKIwtsIT1Gf16Uk
+ 50pmQRG0mBirGlrSDYbX+qE9UGsvrvYbOPWdn2UmS2LJoRxqBW4ipsHSq71hnLYTQ9vM
+ O8T34vmSZxztK/Y4GOKcdI2Xzy6woBzkfitom1kCzgc9lbtANqf5sNm7VJhonTsWfl3Y uA== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 39g4kpxuat-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 30 Jun 2021 15:11:21 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 6D21F10002A;
+        Wed, 30 Jun 2021 15:11:20 +0200 (CEST)
+Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 5986222D61F;
+        Wed, 30 Jun 2021 15:11:20 +0200 (CEST)
+Received: from gnbcxd0016.gnb.st.com (10.75.127.50) by SFHDAG2NODE3.st.com
+ (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 30 Jun
+ 2021 15:11:19 +0200
+Date:   Wed, 30 Jun 2021 15:11:18 +0200
+From:   Alain Volmat <alain.volmat@foss.st.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        <linux-mmc@vger.kernel.org>, <linux-renesas-soc@vger.kernel.org>,
+        Pierre-Yves MORDRET <pierre-yves.mordret@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        <linux-i2c@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH 7/7] i2c: stm32f7: : use proper DMAENGINE API for
+ termination
+Message-ID: <20210630131118.GB12109@gnbcxd0016.gnb.st.com>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Pierre-Yves MORDRET <pierre-yves.mordret@foss.st.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        linux-i2c@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20210623095942.3325-1-wsa+renesas@sang-engineering.com>
+ <20210623095942.3325-8-wsa+renesas@sang-engineering.com>
+ <YNM/TZMWwCLGSEJO@ninjato>
 MIME-Version: 1.0
-In-Reply-To: <20210624163045.33651-1-alcooperx@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <YNM/TZMWwCLGSEJO@ninjato>
+X-Disclaimer: ce message est personnel / this message is private
+X-Originating-IP: [10.75.127.50]
+X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SFHDAG2NODE3.st.com
+ (10.75.127.6)
+X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
+ definitions=2021-06-30_05:2021-06-29,2021-06-30 signatures=0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/06/21 7:30 pm, Al Cooper wrote:
-> When an eMMC device is being run in HS400 mode, any access to the
-> RPMB device will cause the error message "mmc1: Invalid UHS-I mode
-> selected". This happens as a result of tuning being disabled before
-> RPMB access and then re-enabled after the RPMB access is complete.
-> When tuning is re-enabled, the system has to switch from HS400
-> to HS200 to do the tuning and then back to HS400. As part of
-> sequence to switch from HS400 to HS200 the system is temporarily
-> put into HS mode. When switching to HS mode, sdhci_get_preset_value()
-> is called and does not have support for HS mode and prints the warning
-> message and returns the preset for SDR12. The fix is to add support
-> for MMC and SD HS modes to sdhci_get_preset_value().
-> 
-> This can be reproduced on any system running eMMC in HS400 mode
-> (not HS400ES) by using the "mmc" utility to run the following
-> command: "mmc rpmb read-counter /dev/mmcblk0rpmb".
-> 
-> Signed-off-by: Al Cooper <alcooperx@gmail.com>
+Hi Wolfram,
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+thanks for the update. If you are ok with that I modify the patch
+to partially rely on _async / synchronize whenever needed and push it again
+separately.
 
-> ---
->  drivers/mmc/host/sdhci.c | 4 ++++
->  drivers/mmc/host/sdhci.h | 1 +
->  2 files changed, 5 insertions(+)
+Regards,
+Alain
+
+On Wed, Jun 23, 2021 at 04:03:57PM +0200, Wolfram Sang wrote:
+> On Wed, Jun 23, 2021 at 11:59:41AM +0200, Wolfram Sang wrote:
+> > dmaengine_terminate_all() is deprecated in favor of explicitly saying if
+> > it should be sync or async. Here, we want dmaengine_terminate_sync()
+> > because there is no other synchronization code in the driver to handle
+> > an async case.
+> > 
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 > 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index bf238ade1602..6b39126fbf06 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1812,6 +1812,10 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
->  	u16 preset = 0;
->  
->  	switch (host->timing) {
-> +	case MMC_TIMING_MMC_HS:
-> +	case MMC_TIMING_SD_HS:
-> +		preset = sdhci_readw(host, SDHCI_PRESET_FOR_HIGH_SPEED);
-> +		break;
->  	case MMC_TIMING_UHS_SDR12:
->  		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR12);
->  		break;
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 0770c036e2ff..960fed78529e 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -253,6 +253,7 @@
->  
->  /* 60-FB reserved */
->  
-> +#define SDHCI_PRESET_FOR_HIGH_SPEED	0x64
->  #define SDHCI_PRESET_FOR_SDR12 0x66
->  #define SDHCI_PRESET_FOR_SDR25 0x68
->  #define SDHCI_PRESET_FOR_SDR50 0x6A
+> Eeks, this is called from irq context as well. Broken patch :(
 > 
-> base-commit: 7426cedc7dad67bf3c71ea6cc29ab7822e1a453f
-> 
+
 
