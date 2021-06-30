@@ -6,103 +6,86 @@ X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E6E6C11F69
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 07:34:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0694C11F69
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 07:43:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E2B3561D01
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 07:34:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D576361D05
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 07:43:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232990AbhF3HhL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Jun 2021 03:37:11 -0400
-Received: from www.zeus03.de ([194.117.254.33]:47986 "EHLO mail.zeus03.de"
+        id S233058AbhF3Hpr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Jun 2021 03:45:47 -0400
+Received: from www.zeus03.de ([194.117.254.33]:49870 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232785AbhF3HhK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Jun 2021 03:37:10 -0400
+        id S233076AbhF3Hpq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 30 Jun 2021 03:45:46 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=e3WhkGIYMcElSQnusEm1KIiH96k4
-        ofQ6sXqx1VxCePM=; b=rtvJxbe0Y3Zh/NV80YYNYB/J79yk+h4rrXrHBJ2AeCTn
-        nzOSQI6q6Z+2q2jRVr/gg2nEMPMVnm+vXZJlwujFN+4nbsSEWOHdRsqDeNf3N8T8
-        wJKulVD5IynKY0l1mBS6IixMfFqeMYUFxLVu2GvmWFmAotnv3hhTvE53N0QoS4E=
-Received: (qmail 771211 invoked from network); 30 Jun 2021 09:34:40 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jun 2021 09:34:40 +0200
-X-UD-Smtp-Session: l3s3148p1@qNhdwfbFKOIgAwDPXwaiAGDoJRk6bv4I
-Date:   Wed, 30 Jun 2021 09:34:40 +0200
+        :content-type:in-reply-to; s=k1; bh=6uK9DRoREtGPKrcTebOsNOSCc3It
+        U31E6+dA2ivvjsg=; b=fJ4Op4AVm+MZ9evNRxgHugcY1w8o1mVU//3o9PGeYa2c
+        uNfa0Os16UgYnkgb2G+MWxKPiw2UkssTNl853KA8f582OJQtE2oUEvNUTBapxbbr
+        R1ZYlvtHGgUrnMyA/5LKQh3XywWgOvCO5AlHAcBhd9ZSOy37FsI0LDZF+AmePzk=
+Received: (qmail 773742 invoked from network); 30 Jun 2021 09:43:17 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jun 2021 09:43:17 +0200
+X-UD-Smtp-Session: l3s3148p1@eVAn4PbFsuIgAwDPXwaiAGDoJRk6bv4I
+Date:   Wed, 30 Jun 2021 09:43:16 +0200
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
         kernel test robot <lkp@intel.com>
 Subject: Re: [PATCH/RFC v2] mmc: host: renesas_sdhi: Refactor
  of_device_id.data
-Message-ID: <YNwekCB+GxPPjR8p@ninjato>
+Message-ID: <YNwglKoAiGaSM1DW@ninjato>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" <linux-renesas-soc@vger.kernel.org>,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
         kernel test robot <lkp@intel.com>
 References: <20210629102033.847369-1-yoshihiro.shimoda.uh@renesas.com>
- <YNv1/9WsdYu3ZwVv@ninjato>
- <TY2PR01MB369251254895EADB8CD6CC17D8019@TY2PR01MB3692.jpnprd01.prod.outlook.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="seCvDq5IsQrcGP7M"
+        protocol="application/pgp-signature"; boundary="aVJdi43/g2klazS4"
 Content-Disposition: inline
-In-Reply-To: <TY2PR01MB369251254895EADB8CD6CC17D8019@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+In-Reply-To: <20210629102033.847369-1-yoshihiro.shimoda.uh@renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---seCvDq5IsQrcGP7M
+--aVJdi43/g2klazS4
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-Hi Shimoda-san,
-
-> > I think this Rep-by can go. Test bot mentioned one build error of v1,
-> > but it didn't report that we should refactor this code.
->=20
-> You're correct. Perhaps, adding "# build fix on RFC" is better?
-> I checked the commit history, and I found such tags.
-
-Oh, I didn't know that way. It sounds good!
-
-> > You leave the quirk handling of different ES versions still in
-> > renesas_sdhi_core. I'd think this should also be moved to
-> > renesas_sdhi_internal_dmac? Then we have all the handling in one place.
->=20
-> I think so. So, I'll try this.
-
-Glad you like it :)
-
-Happy hacking,
-
-   Wolfram
 
 
---seCvDq5IsQrcGP7M
+>  [2]
+>  I tested sdhi ch0. But, with and without this patch, sdhi ch2 doesn't work
+>  correctly...
+
+Same problem with the Lager board/r8a7790. I suppose this is the same
+issue Geert was seeing during his regular tests.
+
+But this has nothing to do with this patch. The probing of the SDHI
+instances work fine.
+
+
+--aVJdi43/g2klazS4
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDcHpAACgkQFA3kzBSg
-KbYeOA//V2Zt0aeMQtkvlYlg3UhfTeHRPeC6upM8DTxH81XuQ+5PUyVOYpQY9upA
-3Js/2GTHJLJjJHA/4vUrl6vMQbw0TXW/gbEvPtL9sNzPSsUZ7rA+hlLOLS/u7b+P
-2P3zS/6OsAtJto5s/oujW7JFazUJm/njpAXgM8WaeYb6nSQZ3bhdLtwp/9BZ718i
-J2kf3zNHZNtkvvPYNfDJDjh7zJ5OJ4GUbJl1aJ/IFVJrMd44Yyj3DJP2zWib/92/
-BfSLHVj5Luokqb70AljTQm+Xto9zsXXwj7e+MwgvcQJ2AKoKCsnHjGWoP4YBgFqt
-iX5mZ92CfQN3W7X3tyd+3ZezVZbHe0wKro9NMsTVxjUJAA1yOS194z3EJm1Gtkyb
-vS7H50pc0e3op6A09f2TtfxIQdlb4HuEEP8tZ+XC4OYPQej+Xu3RQ/2fa1sskKHq
-EeSNBnmZ+SbctHIfWnfkP59MerPwtgQdymo47CToO0lCDTwBeshzKEB1D/tg4VNX
-d5IMy8exybM8A7KnkKp0s1t13XVzPuwpAXs1zBy2jwmM0LqHy6bqO3F1gI9uPjYR
-IBX8GuSsH4ug0RQ5Vyr7rOsiewiIqXfZ/mYCSfVEK2/SoDMZ3NGN4qCctcfTgG3w
-nGbQvMF2mbTo/wSiuANd0nr6JcVOapGxc7SCoB0frKd59OCzWnY=
-=yD9p
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDcIJQACgkQFA3kzBSg
+KbaTbA//SDJ5j7x46/1ifhEcf/QUPu//wg1cMGW3L0VHG/9ySIhspMmn9vh+IErx
+5IKHBbr0HE3FwaoacB+H92i3Pr7Kgq/iQmlw2SxbCohUlQL9GqIITEaKQRne8yMa
+0fZPWdvkggzHYnM3vUOSYFAsgI20JuTE8zFjfKa8mapqaz8lPYS3Q7OLl9AvOsBD
+z66EAI6gypzl9Y29EZYkaAGQ2pd8YBxUeZ+FmgZgg1GsX0KuigmxtfgK42Tko7yw
+xwI9OA62zW5FYADJYW3KEH1elAYvj8QZ8ILr+P5MDQjdvyHtzKakURY6jbAHZemt
+Cs1rJcRGrRvNHxV8yqKmaEKWGYLMQSZsYX67nIS+vlzLCu08GitJxvyJ5UuhgNXa
+ntDNV0dmOrcFio2mefL9GNTZIVg101EysYAX7PxVmEQ57Q+shQ3TatMP3xW/3raM
+ZN6CjnyfKMUpPNnl8aFUcqyHG3JBmpXqslfgpA6Yi9a7VQydm6Ktty05KBXfTvrb
++sY0Xnn9tnwVh4wzpiUAgv7pM9xmL3+SyhDzYl/3ZwUasx5aDwWPd7QpBLpqlzWk
+qEVFDpcZBNFPvC8aKMOEqQvC89rt3UJnSb6I0ZuLg5PanktrmuntsPMtltZtOgeD
+SQ+COfjCyx77TmBlKtbVAQssnpwQS+9HJMdzApB9OWiEAYlbkeM=
+=wzMZ
 -----END PGP SIGNATURE-----
 
---seCvDq5IsQrcGP7M--
+--aVJdi43/g2klazS4--
