@@ -2,90 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0694C11F69
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 07:43:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31130C11F65
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 10:17:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D576361D05
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 07:43:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0D36161CF6
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 10:17:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233058AbhF3Hpr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Jun 2021 03:45:47 -0400
-Received: from www.zeus03.de ([194.117.254.33]:49870 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233076AbhF3Hpq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Jun 2021 03:45:46 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=6uK9DRoREtGPKrcTebOsNOSCc3It
-        U31E6+dA2ivvjsg=; b=fJ4Op4AVm+MZ9evNRxgHugcY1w8o1mVU//3o9PGeYa2c
-        uNfa0Os16UgYnkgb2G+MWxKPiw2UkssTNl853KA8f582OJQtE2oUEvNUTBapxbbr
-        R1ZYlvtHGgUrnMyA/5LKQh3XywWgOvCO5AlHAcBhd9ZSOy37FsI0LDZF+AmePzk=
-Received: (qmail 773742 invoked from network); 30 Jun 2021 09:43:17 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jun 2021 09:43:17 +0200
-X-UD-Smtp-Session: l3s3148p1@eVAn4PbFsuIgAwDPXwaiAGDoJRk6bv4I
-Date:   Wed, 30 Jun 2021 09:43:16 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        kernel test robot <lkp@intel.com>
-Subject: Re: [PATCH/RFC v2] mmc: host: renesas_sdhi: Refactor
- of_device_id.data
-Message-ID: <YNwglKoAiGaSM1DW@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        kernel test robot <lkp@intel.com>
-References: <20210629102033.847369-1-yoshihiro.shimoda.uh@renesas.com>
+        id S234104AbhF3KUO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Jun 2021 06:20:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54968 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234169AbhF3KUJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jun 2021 06:20:09 -0400
+Received: from mail-vs1-xe35.google.com (mail-vs1-xe35.google.com [IPv6:2607:f8b0:4864:20::e35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB1ACC061768
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Jun 2021 03:17:36 -0700 (PDT)
+Received: by mail-vs1-xe35.google.com with SMTP id x141so1377609vsx.2
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Jun 2021 03:17:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=8XQq8LhZlNnALz3pFI8gIgvstZwDYOAnl3T8aM2MQRE=;
+        b=KRgV2hM6boFZ/d5kVntdo7xbG+zQLyxb+SKB/xdJ/H0JtBAFFrB1OK0lm+L4SijANG
+         io7nIdxsM1fC/K9P0D9WOQ41EFFUojUA3T+y9m6U6l47MAVFzj1duSjvYO9C/vgZuOTd
+         YEdJlkcfspG4aRGSsJ9ZBLJL7l0rTrVMJ1NPPu9Na7Ui0ye87v4As2KUcZJEIdRU/6V0
+         +B21B9CJS4k3I+zB979moUtcjh8nQShtnOeApr08SAngz5k9AcSmmzBWbTXrRV6v9bop
+         PCmZzgugAXvDcQiQ+RfJiOTO+6GYJC+Q6cs/c4liiGm52JaJAmj1qzcK6/IGy8bjfD6X
+         9tmg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=8XQq8LhZlNnALz3pFI8gIgvstZwDYOAnl3T8aM2MQRE=;
+        b=ZxumXozUcI6efcZB/wLrRbMHF18aXxfAt23ySFddo6eHD6vJwxGkUvp4TnRa2OpNgR
+         uH7rCbqq6WMQMrazZrlaq5JZVnhSRCt5ZH8aoGeVChH0prDVYPQZSxXq67Ega4zCPGps
+         HJnZxkAEmk9V7V7rTxEY86V32i0MaiAhb3dJjKbYRiitVZrJrtanW2h8ddfBt1mWbyhj
+         RNacUEPGooPxAQBjk1/b1kkRSDdCvceVU0iLLQMmzOF83CAWZWCdS5Z6QZkQhB1FWPBo
+         IakkiX7y42fLEHDFIFF+TJT69tdwRmroElyxopqXXv/qJUUH6fBGqK5JWSPe4cPSgTEn
+         LLig==
+X-Gm-Message-State: AOAM5323wOys4GcLtdmmmoYVYGpjIhEj+EZeP88+tBNUAa7gzEHVB3Az
+        rvOZgDx/tjp2v1dl1gk/w7k0eprqHyEFaB1LWxoXLw==
+X-Google-Smtp-Source: ABdhPJxhuEU0Oad9j/Ms149ah74go00YH1YXcXHKW2msldlNBvLDKm3iYjVsi0OHw5VL0DhegL7U8ZzvhsOjTRNf1uc=
+X-Received: by 2002:a67:6a85:: with SMTP id f127mr28499045vsc.34.1625048253862;
+ Wed, 30 Jun 2021 03:17:33 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="aVJdi43/g2klazS4"
-Content-Disposition: inline
-In-Reply-To: <20210629102033.847369-1-yoshihiro.shimoda.uh@renesas.com>
+References: <20210619225118.1862634-1-linus.walleij@linaro.org>
+ <20210619225118.1862634-2-linus.walleij@linaro.org> <CAPDyKFppUJWcmHHzP4V1WQPRmMYe50M721kwtaLkkp6M9rz2Gg@mail.gmail.com>
+ <CACRpkdahDF=fO8DZCCV+QhOjsG=NPB9WDEjsUrjOCUofgYriog@mail.gmail.com>
+In-Reply-To: <CACRpkdahDF=fO8DZCCV+QhOjsG=NPB9WDEjsUrjOCUofgYriog@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 30 Jun 2021 12:16:57 +0200
+Message-ID: <CAPDyKFoJorhoa0fn+8Jgj_Rm3v_bPCFMxP3-GqpML+bVMv3xyg@mail.gmail.com>
+Subject: Re: [PATCH 2/3] mmc: mmci: Implement .hw_reset() callback
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Ludovic Barre <ludovic.barre@st.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Wed, 30 Jun 2021 at 02:32, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> On Tue, Jun 29, 2021 at 1:47 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> > > +static void mmci_hw_reset(struct mmc_host *mmc)
+> > > +{
+> > > +       struct mmci_host *host = mmc_priv(mmc);
+> > > +
+> > > +       reset_control_assert(host->rst);
+> > > +       udelay(2);
+> > > +       reset_control_deassert(host->rst);
+> > > +}
+> >
+> > Unfortunately, this is not the purpose of the ->hw_reset() ops.
+> > Instead, it's supposed to be used to make a HW reset of the card, not
+> > the controller.
+>
+> OK I see, let's skip this patch.
+>
+> I think patch 1 & 3 should be fine though?
 
---aVJdi43/g2klazS4
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Yes. I have a minor comment on patch 1 though.
 
-
->  [2]
->  I tested sdhi ch0. But, with and without this patch, sdhi ch2 doesn't work
->  correctly...
-
-Same problem with the Lager board/r8a7790. I suppose this is the same
-issue Geert was seeing during his regular tests.
-
-But this has nothing to do with this patch. The probing of the SDHI
-instances work fine.
-
-
---aVJdi43/g2klazS4
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmDcIJQACgkQFA3kzBSg
-KbaTbA//SDJ5j7x46/1ifhEcf/QUPu//wg1cMGW3L0VHG/9ySIhspMmn9vh+IErx
-5IKHBbr0HE3FwaoacB+H92i3Pr7Kgq/iQmlw2SxbCohUlQL9GqIITEaKQRne8yMa
-0fZPWdvkggzHYnM3vUOSYFAsgI20JuTE8zFjfKa8mapqaz8lPYS3Q7OLl9AvOsBD
-z66EAI6gypzl9Y29EZYkaAGQ2pd8YBxUeZ+FmgZgg1GsX0KuigmxtfgK42Tko7yw
-xwI9OA62zW5FYADJYW3KEH1elAYvj8QZ8ILr+P5MDQjdvyHtzKakURY6jbAHZemt
-Cs1rJcRGrRvNHxV8yqKmaEKWGYLMQSZsYX67nIS+vlzLCu08GitJxvyJ5UuhgNXa
-ntDNV0dmOrcFio2mefL9GNTZIVg101EysYAX7PxVmEQ57Q+shQ3TatMP3xW/3raM
-ZN6CjnyfKMUpPNnl8aFUcqyHG3JBmpXqslfgpA6Yi9a7VQydm6Ktty05KBXfTvrb
-+sY0Xnn9tnwVh4wzpiUAgv7pM9xmL3+SyhDzYl/3ZwUasx5aDwWPd7QpBLpqlzWk
-qEVFDpcZBNFPvC8aKMOEqQvC89rt3UJnSb6I0ZuLg5PanktrmuntsPMtltZtOgeD
-SQ+COfjCyx77TmBlKtbVAQssnpwQS+9HJMdzApB9OWiEAYlbkeM=
-=wzMZ
------END PGP SIGNATURE-----
-
---aVJdi43/g2klazS4--
+Kind regards
+Uffe
