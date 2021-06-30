@@ -2,49 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83087C11F65
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 12:21:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41F42C11F68
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 12:52:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 58CC2613ED
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 12:21:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 26FBA61435
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 12:52:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234641AbhF3MYI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Jun 2021 08:24:08 -0400
-Received: from mga05.intel.com ([192.55.52.43]:11104 "EHLO mga05.intel.com"
+        id S234785AbhF3Myy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Jun 2021 08:54:54 -0400
+Received: from mga06.intel.com ([134.134.136.31]:61720 "EHLO mga06.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234627AbhF3MYI (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 30 Jun 2021 08:24:08 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10030"; a="293973846"
-X-IronPort-AV: E=Sophos;i="5.83,311,1616482800"; 
-   d="scan'208";a="293973846"
+        id S234761AbhF3Myy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 30 Jun 2021 08:54:54 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10030"; a="269474314"
+X-IronPort-AV: E=Sophos;i="5.83,312,1616482800"; 
+   d="scan'208";a="269474314"
 Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jun 2021 05:21:39 -0700
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jun 2021 05:52:24 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.83,311,1616482800"; 
-   d="scan'208";a="419972979"
+X-IronPort-AV: E=Sophos;i="5.83,312,1616482800"; 
+   d="scan'208";a="419979517"
 Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
-  by fmsmga007.fm.intel.com with ESMTP; 30 Jun 2021 05:21:37 -0700
-Subject: Re: [PATCH] [RESEND] mmc: sdhci-pci-gli: Improve Random 4K Read
- Performance of GL9763E
+  by fmsmga007.fm.intel.com with ESMTP; 30 Jun 2021 05:52:22 -0700
+Subject: Re: [PATCH] mmc: sdhci: Fix warning message when accessing RPMB in
+ HS400 mode
+To:     Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+References: <20210624163045.33651-1-alcooperx@gmail.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     Renius Chen <reniuschengl@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Ben.Chuang@genesyslogic.com.tw
-References: <20210624032543.101861-1-reniuschengl@gmail.com>
- <916ea01b-4265-0964-9139-8f50b80ea66e@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <9d720c5d-f15b-ff4f-ec42-77907b419f1b@intel.com>
-Date:   Wed, 30 Jun 2021 15:21:55 +0300
+Message-ID: <a025f2b0-8353-3180-2724-9548e9c38349@intel.com>
+Date:   Wed, 30 Jun 2021 15:52:40 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.11.0
 MIME-Version: 1.0
-In-Reply-To: <916ea01b-4265-0964-9139-8f50b80ea66e@intel.com>
+In-Reply-To: <20210624163045.33651-1-alcooperx@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -52,171 +50,60 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/06/21 3:18 pm, Adrian Hunter wrote:
-> On 24/06/21 6:25 am, Renius Chen wrote:
->> During a sequence of random 4K read operations, the performance will be
->> reduced due to spending much time on entering/exiting the low power state
->> between requests. We disable the low power state negotiation of GL9763E
->> during a sequence of random 4K read operations to improve the performance
->> and enable it again after the operations have finished.
->>
->> Signed-off-by: Renius Chen <reniuschengl@gmail.com>
->> ---
->>  drivers/mmc/host/sdhci-pci-gli.c | 86 ++++++++++++++++++++++++++++++++
->>  1 file changed, 86 insertions(+)
->>
->> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
->> index 302a7579a9b3..0105f728ccc4 100644
->> --- a/drivers/mmc/host/sdhci-pci-gli.c
->> +++ b/drivers/mmc/host/sdhci-pci-gli.c
->> @@ -88,6 +88,9 @@
->>  #define PCIE_GLI_9763E_SCR	 0x8E0
->>  #define   GLI_9763E_SCR_AXI_REQ	   BIT(9)
->>  
->> +#define PCIE_GLI_9763E_CFG       0x8A0
->> +#define   GLI_9763E_CFG_LPSN_DIS   BIT(12)
->> +
->>  #define PCIE_GLI_9763E_CFG2      0x8A4
->>  #define   GLI_9763E_CFG2_L1DLY     GENMASK(28, 19)
->>  #define   GLI_9763E_CFG2_L1DLY_MID 0x54
->> @@ -691,6 +694,86 @@ static void sdhci_gl9763e_dumpregs(struct mmc_host *mmc)
->>  	sdhci_dumpregs(mmc_priv(mmc));
->>  }
->>  
->> +static void gl9763e_request(struct mmc_host *mmc, struct mmc_request *mrq)
->> +{
->> +	struct sdhci_host *host = mmc_priv(mmc);
->> +	struct mmc_command *cmd;
->> +	struct sdhci_pci_slot *slot = sdhci_priv(host);
->> +	struct pci_dev *pdev = slot->chip->pdev;
->> +	u32 value;
->> +	static bool start_4k_r;
->> +	static int  continuous_4k_r;
+On 24/06/21 7:30 pm, Al Cooper wrote:
+> When an eMMC device is being run in HS400 mode, any access to the
+> RPMB device will cause the error message "mmc1: Invalid UHS-I mode
+> selected". This happens as a result of tuning being disabled before
+> RPMB access and then re-enabled after the RPMB access is complete.
+> When tuning is re-enabled, the system has to switch from HS400
+> to HS200 to do the tuning and then back to HS400. As part of
+> sequence to switch from HS400 to HS200 the system is temporarily
+> put into HS mode. When switching to HS mode, sdhci_get_preset_value()
+> is called and does not have support for HS mode and prints the warning
+> message and returns the preset for SDR12. The fix is to add support
+> for MMC and SD HS modes to sdhci_get_preset_value().
 > 
-> Please do not use static variables.  Instead define a struct for them and
-> set .priv_size in sdhci_pci_fixes e.g.
+> This can be reproduced on any system running eMMC in HS400 mode
+> (not HS400ES) by using the "mmc" utility to run the following
+> command: "mmc rpmb read-counter /dev/mmcblk0rpmb".
 > 
-> struct sdhci_pci_gli {
-> 	static bool start_4k_r;
-> 	static int  continuous_4k_r;
-> };
+> Signed-off-by: Al Cooper <alcooperx@gmail.com>
 
-Cut'n'pasted without paying attention.  This was meant to be:
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-struct sdhci_pci_gli {
-	bool start_4k_r;
-	int  continuous_4k_r;
-};
-
+> ---
+>  drivers/mmc/host/sdhci.c | 4 ++++
+>  drivers/mmc/host/sdhci.h | 1 +
+>  2 files changed, 5 insertions(+)
 > 
-> const struct sdhci_pci_fixes sdhci_gl9763e = {
-> 	.quirks		= SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> 	.probe_slot	= gli_probe_slot_gl9763e,
-> 	.ops            = &sdhci_gl9763e_ops,
-> #ifdef CONFIG_PM_SLEEP
-> 	.resume		= sdhci_cqhci_gli_resume,
-> 	.suspend	= sdhci_cqhci_gli_suspend,
-> #endif
-> 	.add_host       = gl9763e_add_host,
-> 	.priv_size      = sizeof(struct sdhci_pci_gli);
-> };
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index bf238ade1602..6b39126fbf06 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1812,6 +1812,10 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
+>  	u16 preset = 0;
+>  
+>  	switch (host->timing) {
+> +	case MMC_TIMING_MMC_HS:
+> +	case MMC_TIMING_SD_HS:
+> +		preset = sdhci_readw(host, SDHCI_PRESET_FOR_HIGH_SPEED);
+> +		break;
+>  	case MMC_TIMING_UHS_SDR12:
+>  		preset = sdhci_readw(host, SDHCI_PRESET_FOR_SDR12);
+>  		break;
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 0770c036e2ff..960fed78529e 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -253,6 +253,7 @@
+>  
+>  /* 60-FB reserved */
+>  
+> +#define SDHCI_PRESET_FOR_HIGH_SPEED	0x64
+>  #define SDHCI_PRESET_FOR_SDR12 0x66
+>  #define SDHCI_PRESET_FOR_SDR25 0x68
+>  #define SDHCI_PRESET_FOR_SDR50 0x6A
 > 
-> And then you can get a pointer to it:
-> 
-> struct sdhci_pci_gli *sdhci_pci_gli = sdhci_pci_priv(slot);
-> 
-> 
->> +
->> +	cmd = (mrq->sbc && !(host->flags & SDHCI_AUTO_CMD23)) ? mrq->sbc : mrq->cmd;
-> 
-> mrq->cmd is always the main command, so why look at mrq->sbc?
-> 
->> +
->> +	if (cmd->opcode == MMC_READ_MULTIPLE_BLOCK) {
->> +		if (cmd->data->blocks == 8) {
->> +			continuous_4k_r++;
->> +
->> +			if ((!start_4k_r) && (continuous_4k_r >= 3)) {
->> +				pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->> +				value &= ~GLI_9763E_VHS_REV;
->> +				value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
->> +				pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->> +
->> +				pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
->> +				value |= GLI_9763E_CFG_LPSN_DIS;
->> +				pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
->> +
->> +				pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->> +				value &= ~GLI_9763E_VHS_REV;
->> +				value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
->> +				pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->> +
->> +				start_4k_r = true;
->> +			}
->> +		} else {
->> +			continuous_4k_r = 0;
->> +
->> +			if (start_4k_r) {
->> +				pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->> +				value &= ~GLI_9763E_VHS_REV;
->> +				value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
->> +				pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->> +
->> +				pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
->> +				value &= ~GLI_9763E_CFG_LPSN_DIS;
->> +				pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
->> +
->> +				pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->> +				value &= ~GLI_9763E_VHS_REV;
->> +				value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
->> +				pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->> +
->> +				start_4k_r = false;
->> +			}
->> +		}
->> +	} else {
->> +		continuous_4k_r = 0;
->> +
->> +		if (start_4k_r)	{
->> +			pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->> +			value &= ~GLI_9763E_VHS_REV;
->> +			value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_W);
->> +			pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->> +
->> +			pci_read_config_dword(pdev, PCIE_GLI_9763E_CFG, &value);
->> +			value &= ~GLI_9763E_CFG_LPSN_DIS;
->> +			pci_write_config_dword(pdev, PCIE_GLI_9763E_CFG, value);
->> +
->> +			pci_read_config_dword(pdev, PCIE_GLI_9763E_VHS, &value);
->> +			value &= ~GLI_9763E_VHS_REV;
->> +			value |= FIELD_PREP(GLI_9763E_VHS_REV, GLI_9763E_VHS_REV_R);
->> +			pci_write_config_dword(pdev, PCIE_GLI_9763E_VHS, value);
->> +
->> +			start_4k_r = false;
->> +		}
-> 
-> The code chunk above is the same as the previous and almost
-> the same as the one before that.  Please make a separate function
-> 
->> +	}
->> +
->> +	sdhci_request(mmc, mrq);
->> +}
->> +
->> +
->>  static void sdhci_gl9763e_cqe_pre_enable(struct mmc_host *mmc)
->>  {
->>  	struct cqhci_host *cq_host = mmc->cqe_private;
->> @@ -848,6 +931,9 @@ static int gli_probe_slot_gl9763e(struct sdhci_pci_slot *slot)
->>  	gli_pcie_enable_msi(slot);
->>  	host->mmc_host_ops.hs400_enhanced_strobe =
->>  					gl9763e_hs400_enhanced_strobe;
->> +
->> +	host->mmc_host_ops.request = gl9763e_request;
->> +
->>  	gli_set_gl9763e(slot);
->>  	sdhci_enable_v4_mode(host);
->>  
->>
+> base-commit: 7426cedc7dad67bf3c71ea6cc29ab7822e1a453f
 > 
 
