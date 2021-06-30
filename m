@@ -2,64 +2,62 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31130C11F65
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 10:17:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D21CC11F65
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 10:18:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0D36161CF6
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 10:17:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 232B861992
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Jun 2021 10:18:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234104AbhF3KUO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Jun 2021 06:20:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54968 "EHLO
+        id S233994AbhF3KVO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Jun 2021 06:21:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55210 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234169AbhF3KUJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jun 2021 06:20:09 -0400
-Received: from mail-vs1-xe35.google.com (mail-vs1-xe35.google.com [IPv6:2607:f8b0:4864:20::e35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB1ACC061768
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Jun 2021 03:17:36 -0700 (PDT)
-Received: by mail-vs1-xe35.google.com with SMTP id x141so1377609vsx.2
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Jun 2021 03:17:36 -0700 (PDT)
+        with ESMTP id S233977AbhF3KVN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Jun 2021 06:21:13 -0400
+Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 042C7C061756
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Jun 2021 03:18:45 -0700 (PDT)
+Received: by mail-vs1-xe2a.google.com with SMTP id y25so1373847vsj.3
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Jun 2021 03:18:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=8XQq8LhZlNnALz3pFI8gIgvstZwDYOAnl3T8aM2MQRE=;
-        b=KRgV2hM6boFZ/d5kVntdo7xbG+zQLyxb+SKB/xdJ/H0JtBAFFrB1OK0lm+L4SijANG
-         io7nIdxsM1fC/K9P0D9WOQ41EFFUojUA3T+y9m6U6l47MAVFzj1duSjvYO9C/vgZuOTd
-         YEdJlkcfspG4aRGSsJ9ZBLJL7l0rTrVMJ1NPPu9Na7Ui0ye87v4As2KUcZJEIdRU/6V0
-         +B21B9CJS4k3I+zB979moUtcjh8nQShtnOeApr08SAngz5k9AcSmmzBWbTXrRV6v9bop
-         PCmZzgugAXvDcQiQ+RfJiOTO+6GYJC+Q6cs/c4liiGm52JaJAmj1qzcK6/IGy8bjfD6X
-         9tmg==
+        bh=B3TfIIYg3vn+J6tiH3SF2PxOwmaPFXWU1lVKNjspiEo=;
+        b=nPTpTlG2Esh5Isy38dB1J04N81iGkRiZyMpUtkaYPF6If1GeDOZfrjjOBUJ6MVqm6h
+         YbZK6kLK5acfVljbgFYprwG0Zo3SlTpbKeago+yWHKOZPxNO1uixQkmWzwmNPEDztC/O
+         jyqaRkixaacB0cxyFRriIIb1SY9o/rZCivVsr0mzTQ13NyS7V1bVilPinmX+b5YMJx8P
+         nD/lhDNFJWhaszF3T4h6KDoNFczKfijhOfuMAoZp54gdPxoXjoDFjIwhBPw6nyeMa76k
+         9nfO/NuZMyx16HRFkNrgzofINotHUjWRAXBAWgjMz8FNdh2I8s1cwjbUn2pTTv9Myoq+
+         XgVA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=8XQq8LhZlNnALz3pFI8gIgvstZwDYOAnl3T8aM2MQRE=;
-        b=ZxumXozUcI6efcZB/wLrRbMHF18aXxfAt23ySFddo6eHD6vJwxGkUvp4TnRa2OpNgR
-         uH7rCbqq6WMQMrazZrlaq5JZVnhSRCt5ZH8aoGeVChH0prDVYPQZSxXq67Ega4zCPGps
-         HJnZxkAEmk9V7V7rTxEY86V32i0MaiAhb3dJjKbYRiitVZrJrtanW2h8ddfBt1mWbyhj
-         RNacUEPGooPxAQBjk1/b1kkRSDdCvceVU0iLLQMmzOF83CAWZWCdS5Z6QZkQhB1FWPBo
-         IakkiX7y42fLEHDFIFF+TJT69tdwRmroElyxopqXXv/qJUUH6fBGqK5JWSPe4cPSgTEn
-         LLig==
-X-Gm-Message-State: AOAM5323wOys4GcLtdmmmoYVYGpjIhEj+EZeP88+tBNUAa7gzEHVB3Az
-        rvOZgDx/tjp2v1dl1gk/w7k0eprqHyEFaB1LWxoXLw==
-X-Google-Smtp-Source: ABdhPJxhuEU0Oad9j/Ms149ah74go00YH1YXcXHKW2msldlNBvLDKm3iYjVsi0OHw5VL0DhegL7U8ZzvhsOjTRNf1uc=
-X-Received: by 2002:a67:6a85:: with SMTP id f127mr28499045vsc.34.1625048253862;
- Wed, 30 Jun 2021 03:17:33 -0700 (PDT)
+        bh=B3TfIIYg3vn+J6tiH3SF2PxOwmaPFXWU1lVKNjspiEo=;
+        b=taT1jc3Zm2/S6lsbqwQqC/lBKGNZFgwd4d8qsUZ/iLZgcNI355o5rz+GvUJyUJTI15
+         xKNmWqykTxmbCLIO74YZQKyksY6FLANq1Lg72ZhN5dvC+x+P4fPdCHNMPcsn/+NRLGdC
+         0Arl7O5SAOs8eBEbeo2PK6MIOrCq9lfrSnez2uLOlPIZ28AuiXsHMkGRtuFwrj4VG7mD
+         X8psHrnOrf7he0fDvj65DTy9fEJhCyZYnHE2TDnfr1oTVu1RbTE+2JdEikdYQILk+85P
+         2fCFK9Hk6nMgR1rMrRgeBK+oQ+Oa+CwS1jep6QiZeVTA6BWB7wXCk5xJUs0TZw5BE4cU
+         wqQg==
+X-Gm-Message-State: AOAM531rYyYcVLVhrnxDa1wJhhUik5PKofw/q5NA3iU2Qa2eCY6Egtbt
+        vb/apg8ObFztYCkSeo0CdUpC/36whGTmoK8Km1Ircw==
+X-Google-Smtp-Source: ABdhPJyut0pFO0GAe/8vE/9kxOBes/ux+Fuz6dSryyj4FD05bGbR5kHMIXDXkfbEJQWc3NagZE35WYJNno2RWMs8/78=
+X-Received: by 2002:a67:ee54:: with SMTP id g20mr21891455vsp.55.1625048324201;
+ Wed, 30 Jun 2021 03:18:44 -0700 (PDT)
 MIME-Version: 1.0
 References: <20210619225118.1862634-1-linus.walleij@linaro.org>
- <20210619225118.1862634-2-linus.walleij@linaro.org> <CAPDyKFppUJWcmHHzP4V1WQPRmMYe50M721kwtaLkkp6M9rz2Gg@mail.gmail.com>
- <CACRpkdahDF=fO8DZCCV+QhOjsG=NPB9WDEjsUrjOCUofgYriog@mail.gmail.com>
-In-Reply-To: <CACRpkdahDF=fO8DZCCV+QhOjsG=NPB9WDEjsUrjOCUofgYriog@mail.gmail.com>
+In-Reply-To: <20210619225118.1862634-1-linus.walleij@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 30 Jun 2021 12:16:57 +0200
-Message-ID: <CAPDyKFoJorhoa0fn+8Jgj_Rm3v_bPCFMxP3-GqpML+bVMv3xyg@mail.gmail.com>
-Subject: Re: [PATCH 2/3] mmc: mmci: Implement .hw_reset() callback
+Date:   Wed, 30 Jun 2021 12:18:08 +0200
+Message-ID: <CAPDyKFpz77TJ2L5y4CQ6VAyuUdD_4sCmg4J8KTvG7H8QuPu8ZA@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc: mmci: De-assert reset on probe
 To:     Linus Walleij <linus.walleij@linaro.org>
 Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
         Russell King <linux@armlinux.org.uk>,
@@ -70,28 +68,42 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Jun 2021 at 02:32, Linus Walleij <linus.walleij@linaro.org> wrote:
+On Sun, 20 Jun 2021 at 00:53, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> On Tue, Jun 29, 2021 at 1:47 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> If we find a reset handle when probing the MMCI block,
+> make sure the reset is de-asserted. It could happen that
+> a hardware has reset asserted at boot.
 >
-> > > +static void mmci_hw_reset(struct mmc_host *mmc)
-> > > +{
-> > > +       struct mmci_host *host = mmc_priv(mmc);
-> > > +
-> > > +       reset_control_assert(host->rst);
-> > > +       udelay(2);
-> > > +       reset_control_deassert(host->rst);
-> > > +}
-> >
-> > Unfortunately, this is not the purpose of the ->hw_reset() ops.
-> > Instead, it's supposed to be used to make a HW reset of the card, not
-> > the controller.
+> Cc: Russell King <linux@armlinux.org.uk>
+> Cc: Yann Gautier <yann.gautier@foss.st.com>
+> Cc: Ludovic Barre <ludovic.barre@st.com>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+>  drivers/mmc/host/mmci.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
-> OK I see, let's skip this patch.
->
-> I think patch 1 & 3 should be fine though?
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 984d35055156..af2ed6013ef9 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -2125,6 +2125,10 @@ static int mmci_probe(struct amba_device *dev,
+>         if (IS_ERR(host->rst)) {
+>                 ret = PTR_ERR(host->rst);
+>                 goto clk_disable;
+> +       } else {
 
-Yes. I have a minor comment on patch 1 though.
+You can skip this "else", as reset_control_deassert() copes with a
+NULL pointer being passed to it.
+
+> +               ret = reset_control_deassert(host->rst);
+> +               if (ret)
+> +                       dev_err(mmc_dev(mmc), "failed to de-assert reset\n");
+>         }
+>
+>         /* Get regulators and the supported OCR mask */
+> --
+> 2.31.1
+>
 
 Kind regards
 Uffe
