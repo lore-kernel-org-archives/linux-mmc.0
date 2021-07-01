@@ -2,143 +2,177 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 476EAC11F69
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 15:53:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 061F1C11F64
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 16:58:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 248366141A
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 15:53:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAC9361400
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 16:58:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233658AbhGAPze (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jul 2021 11:55:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52102 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233239AbhGAPze (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2021 11:55:34 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A90C4C061762
-        for <linux-mmc@vger.kernel.org>; Thu,  1 Jul 2021 08:53:03 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id w11so9220234ljh.0
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Jul 2021 08:53:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=oHc2ICTREwq8ELgOSIh87j3E/E7rBMUWqfc5vu1EG64=;
-        b=t6k1rDpYHH9aC2qKj/DSzssytWqMmFWuqMS7VoTnm6hMwy728bOTsaJoOIpFQRWBo/
-         JBSy+G6OADx6Tpr2+2mWtVVZNTJ/WsSKHgCn2oCaptAqKv8mDKTOUCKr2NvAi448A0Jz
-         m7GiJg23ZZsccVx0wGIQ0rBf0n5/3S4rg1hlF9zIYv5A6DxUOuWhLze8cbUTB9xL1Zc2
-         baawV4e72JoLF48ywFcnzLuceMRRKe/+YJVu+145jEh6toO6nsH2r+v3V23vX0s4054k
-         y1H+kL1NwFvDDLh5Oj11fwWWFkRoASLnnogEB4cjHL0gke7kPF0LqN6mURuzS6MjNPtr
-         CjUw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=oHc2ICTREwq8ELgOSIh87j3E/E7rBMUWqfc5vu1EG64=;
-        b=oqwIv5Jy60XYslkaBdJ3ogdt2JQtULSficakgLM7zJan35hLfCPmfU5rL+doVKKT3B
-         kwd5st4vtdo1D4/BaXbbgUEjOSH0qge5uZYs7VAvUDHgDS+nDtg4Zddj32QJdoccL0+r
-         kmsAJFhRl1LdERSZ83YLWE4qH+A6I2CkAshKIada0C4i/iYtKqUsvyuJ/Pil88yu9/KK
-         rbKsIxZk9DHV/Qw6cDVeKt0ph14h1tTgo4kozEbRJzhIV0amBvUf+aw8/pgmqqRwMgAP
-         tTiIfy8upFofz5uIovo/Qc0dftDUI3SH2gy+/WaFcah1v3APG+LjccB6y2iEoR45sfcB
-         jS7w==
-X-Gm-Message-State: AOAM532Ew8LtCDxGwxX5PSHc8w39OurjmzBCXTaQEOwdTVUmAXpiBe1/
-        m8bvTMAvA52InQbSogbq/vzg4pUi3GgAs4jYuMs6PQ==
-X-Google-Smtp-Source: ABdhPJyI5Rrkz6yMXvWDNguDPZvnkUgTfKDTkqJq78HcCLmu9D/n2Z8ffm/3kXqy32+xzad4vstO3XBB66AObV2jiVg=
-X-Received: by 2002:a2e:8748:: with SMTP id q8mr176487ljj.438.1625154781956;
- Thu, 01 Jul 2021 08:53:01 -0700 (PDT)
+        id S230123AbhGARBZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jul 2021 13:01:25 -0400
+Received: from m43-7.mailgun.net ([69.72.43.7]:20273 "EHLO m43-7.mailgun.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229764AbhGARBZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Jul 2021 13:01:25 -0400
+DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
+ s=smtp; t=1625158734; h=Message-ID: References: In-Reply-To: Subject:
+ Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
+ MIME-Version: Sender; bh=agLYyqyNpahQTqyYE+kXTRB9MqtLj4QDQ7yqyGXwK4A=;
+ b=roIjtVKg5hZzSgMR+1QhnOqO2rNlb7xt5yFia/lKn7DhE9RsSbQ62TWXqSk39Z6R+bYOYN/A
+ Vfp8R+rNIL2XTx62gEAr51vCEPdRe2jpVkSBqqK4flZHK7rNiGgVaSBMRili2Rud0yK5Z2pf
+ CkmTFowuELsfSNKuy5o4Yb7ChBI=
+X-Mailgun-Sending-Ip: 69.72.43.7
+X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
+Received: from smtp.codeaurora.org
+ (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
+ smtp-out-n04.prod.us-west-2.postgun.com with SMTP id
+ 60ddf44ead0600eedef4c735 (version=TLS1.2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Thu, 01 Jul 2021 16:58:54
+ GMT
+Sender: sbhanu=codeaurora.org@mg.codeaurora.org
+Received: by smtp.codeaurora.org (Postfix, from userid 1001)
+        id 1338FC433F1; Thu,  1 Jul 2021 16:58:54 +0000 (UTC)
+Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
+        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: sbhanu)
+        by smtp.codeaurora.org (Postfix) with ESMTPSA id DA684C4338A;
+        Thu,  1 Jul 2021 16:58:48 +0000 (UTC)
 MIME-Version: 1.0
-References: <20210628232955.3327484-1-linus.walleij@linaro.org>
- <CAPDyKFpfJC=KAZ5dGAso2zcgBic4uCkOiDFQ0ZA5Zi7UDUeEug@mail.gmail.com>
- <CACRpkdY4kegTzeqPHNEd3=hOdqSXAvJq+LehLbf09mUybU0VfA@mail.gmail.com>
- <CAPDyKFoj47-4XuKbV6jYkJ2pesAfHK999vudWDGTQA-J5eQXrg@mail.gmail.com>
- <CACRpkdYX5RiUy7u_SeCqhytbyL1Ta9iVmx500uwAq8sNmW+3Ug@mail.gmail.com>
- <CAPDyKForEi09uyXL4nDn27bth+btEYAhzd6+YusMrRBygCdtEA@mail.gmail.com>
- <CACRpkda7m6HnA7y9coYoXd9YFNjSzAfuYiLNURHe1geb8rF++Q@mail.gmail.com> <CAPDyKFrK85hCTQwSy114JUqx+As_y6Z567a-Gvqdji7iN1=A-A@mail.gmail.com>
-In-Reply-To: <CAPDyKFrK85hCTQwSy114JUqx+As_y6Z567a-Gvqdji7iN1=A-A@mail.gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 1 Jul 2021 17:52:50 +0200
-Message-ID: <CACRpkdYB+GG0uUyYhPjcjXT=9fgjQBJDt4XMoh5gM-VZ3bEnqg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Add a card quirk for broken boot partitions
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Ludovic Barre <ludovic.Barre@st.com>,
-        Jean-Nicolas Graux <jean-nicolas.graux@st.com>,
-        phone-devel@vger.kernel.org, Stephan Gerhold <stephan@gerhold.net>,
-        newbyte@disroot.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Date:   Thu, 01 Jul 2021 22:28:48 +0530
+From:   sbhanu@codeaurora.org
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, asutoshd@codeaurora.org,
+        stummala@codeaurora.org, vbadigan@codeaurora.org,
+        rampraka@codeaurora.org, sayalil@codeaurora.org,
+        sartgarg@codeaurora.org, rnayak@codeaurora.org,
+        cang@codeaurora.org, pragalla@codeaurora.org,
+        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        agross@kernel.org, bjorn.andersson@linaro.org, robh+dt@kernel.org
+Subject: Re: [PATCH V2] mmc: sdhci: Update the software timeout value for sdhc
+In-Reply-To: <3217c101-534b-bfcb-7ba9-5749d73cf242@intel.com>
+References: <1624804840-3479-1-git-send-email-sbhanu@codeaurora.org>
+ <3217c101-534b-bfcb-7ba9-5749d73cf242@intel.com>
+Message-ID: <467960e793b39ffd13e8d5c5c3b87057@codeaurora.org>
+X-Sender: sbhanu@codeaurora.org
+User-Agent: Roundcube Webmail/1.3.9
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jul 1, 2021 at 4:27 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On Thu, 1 Jul 2021 at 00:33, Linus Walleij <linus.walleij@linaro.org> wrote:
-
-> > > It looks like there are some race conditions in the HW busy detection
-> > > path for mmci, which gets triggered by this eMMC card.
-> > (...)
-> > > Although, it's more optimal to receive an IRQ when busy on DAT0 is
-> > > de-asserted, rather than polling with ->card_busy(). Hence we also
-> > > have MMC_CAP_WAIT_WHILE_BUSY.
-> >
-> > Hmmmmm it kind of assumes that DAT0 will be de-asserted *before*
-> > we get a command response, never after. I think that is what the card
-> > is doing. If that is out-of-spec then we need to have a quirk like
-> > this but if it is legal behaviour, we rather need to fix the mmci driver.
->
-> That's correct and this could very well be the reason why polling
-> works better for this case.
->
-> On the other hand, I am still a bit puzzled why the mmci driver hangs,
-> waiting for the busy completion IRQ to be raised.
->
-> I did some more inspection of the code in ux500_busy_complete() and
-> found that there may be a potential race condition. I tried to fix it
-> up, but I don't know if it really makes any difference. Can you please
-> test the below patch and see if it helps.
-
-I tested it and sadly it does not help :(
-
-The system hangs on CMD6 after CMD18 as before.
-It looks like this with my debug prints:
-
-[   53.940399] mmc_host mmc2: start CMD13 arg 00010000
-[   53.940490] mmc_host mmc2: start CMD18 arg 0000d010
-[   53.940765] mmc_host mmc2: start CMD18 arg 0000d028
-[   53.941162] mmc_host mmc2: start CMD18 arg 0000d048
-[   53.941864] mmc_host mmc2: start CMD18 arg 0000d088
-[   53.943878] mmc_host mmc2: start CMD18 arg 0000d108
-[   53.946563] mmc_host mmc2: start CMD18 arg 00004810
-[   53.947174] mmc_host mmc2: start CMD18 arg 00015018
-[   53.947357] mmc_host mmc2: start CMD18 arg 0005e078
-[   53.947845] mmc2: modify EXT_CSD, index 179, value: 1, set 1, timing 0
-[   53.947875] mmc_host mmc2: start CMD6 arg 03b30101
-[   53.947937] mmc2 modify EXT_CSD completed (0)
-[   53.947967] mmc_host mmc2: start CMD13 arg 00010000
-[   53.948059] mmc_host mmc2: start CMD18 arg 00001c70
-[   53.948364] mmc2: modify EXT_CSD, index 179, value: 0, set 1, timing 0
-[   53.948394] mmc_host mmc2: start CMD6 arg 03b30001
-[   53.948455] mmc2 modify EXT_CSD completed (0)
-[   53.948486] mmc_host mmc2: start CMD13 arg 00010000
-[   53.948516] mmc_host mmc2: start CMD18 arg 00004ff8
-[   53.949005] mmc_host mmc2: start CMD18 arg 0005e010
-[   53.949340] mmc_host mmc2: start CMD18 arg 0005e028
-[   53.949707] mmc_host mmc2: start CMD18 arg 0005e048
-[   53.950378] mmc_host mmc2: start CMD18 arg 0005e088
-[   53.951812] mmc_host mmc2: start CMD18 arg 0005e108
-[   53.954589] mmc_host mmc2: start CMD18 arg 00015038
-[   53.955047] mmc2: modify EXT_CSD, index 179, value: 1, set 1, timing 0
-[   53.955078] mmc_host mmc2: start CMD6 arg 03b30101
-[   53.955169] mmc2 modify EXT_CSD completed (0)
-[   53.955169] mmc_host mmc2: start CMD13 arg 00010000
-[   53.955627] mmc_host mmc2: start CMD18 arg 00001c30
-[   53.956115] mmc2: modify EXT_CSD, index 179, value: 0, set 1, timing 0
-[   53.956146] mmc_host mmc2: start CMD6 arg 03b30001
-
-Here it hangs forever, this last CMD6 never completes.
-
-Yours,
-Linus Walleij
+On 2021-06-30 19:38, Adrian Hunter wrote:
+> On 27/06/21 5:40 pm, Shaik Sajida Bhanu wrote:
+>> Whenever SDHC run at clock rate 50MHZ or below, the hardware data
+>> timeout value will be 21.47secs, which is approx. 22secs and we have
+>> a current software timeout value as 10secs. We have to set software
+>> timeout value more than the hardware data timeout value to avioid 
+>> seeing
+>> the below register dumps.
+>> 
+>> [  332.953670] mmc2: Timeout waiting for hardware interrupt.
+>> [  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP 
+>> ===========
+>> [  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  
+>> 0x00007202
+>> [  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>> 0x00000001
+>> [  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 
+>> 0x00000027
+>> [  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 
+>> 0x0000001f
+>> [  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  
+>> 0x00000000
+>> [  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    
+>> 0x00000007
+>> [  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 
+>> 0x00000000
+>> [  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 
+>> 0x03ff100b
+>> [  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>> 0x00000000
+>> [  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   
+>> 0x0000808f
+>> [  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 
+>> 0x00000000
+>> [  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>> 0x00000000
+>> [  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>> 0x00000000
+>> [  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
+>> [  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
+>> 0x0000000ffffff218
+>> [  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
+>> -----------
+>> [  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+>> 0x6000642c | DLL cfg2: 0x0020a000
+>> [  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+>> 0x00000000 | DDR cfg: 0x80040873
+>> [  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
+>> 0xf88218a8 Vndr func3: 0x02626040
+>> [  333.102371] mmc2: sdhci: 
+>> ============================================
+>> 
+>> So, set software timeout value more than hardware timeout value.
+>> 
+>> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+>> ---
+>> 
+>> Changes since V1:
+>> 	- Moved software data timeout update part to qcom specific file as
+>> 	  suggested by Veerabhadrarao Badiganti.
+>> ---
+>>  drivers/mmc/host/sdhci-msm.c | 9 +++++++++
+>>  1 file changed, 9 insertions(+)
+>> 
+>> diff --git a/drivers/mmc/host/sdhci-msm.c 
+>> b/drivers/mmc/host/sdhci-msm.c
+>> index e44b7a6..58e651e 100644
+>> --- a/drivers/mmc/host/sdhci-msm.c
+>> +++ b/drivers/mmc/host/sdhci-msm.c
+>> @@ -2089,6 +2089,14 @@ static void sdhci_msm_cqe_disable(struct 
+>> mmc_host *mmc, bool recovery)
+>>  	sdhci_cqe_disable(mmc, recovery);
+>>  }
+>> 
+>> +static void sdhci_msm_set_timeout(struct sdhci_host *host, struct 
+>> mmc_command *cmd)
+>> +{
+>> +
+>> +	__sdhci_set_timeout(host, cmd);
+>> +	if (cmd && (cmd->data) && (host->clock > 400000) && (host->clock <= 
+>> 50000000))
+> 
+> There are some redundant parenthesis there and cmd is never NULL i.e. 
+> could be:
+> 
+> 	if (cmd->data && host->clock > 400000 && host->clock <= 50000000)
+Sure
+> 
+>> +		host->data_timeout = 22 * NSEC_PER_SEC;
+> 
+> That needs to be 22LL to make the compiler warning go away
+> 
+Sure
+>> +}
+>> +
+>>  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+>>  	.enable		= sdhci_msm_cqe_enable,
+>>  	.disable	= sdhci_msm_cqe_disable,
+>> @@ -2438,6 +2446,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+>>  	.irq	= sdhci_msm_cqe_irq,
+>>  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
+>>  	.set_power = sdhci_set_power_noreg,
+>> +	.set_timeout = sdhci_msm_set_timeout,
+>>  };
+>> 
+>>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+>> 
