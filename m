@@ -2,114 +2,176 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5DD71C11F64
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 12:39:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C291C11F67
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 14:27:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3BF13613D8
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 12:39:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 52F9661405
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 14:27:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236192AbhGAMlj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jul 2021 08:41:39 -0400
-Received: from mx07-00178001.pphosted.com ([185.132.182.106]:43850 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236442AbhGAMlj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2021 08:41:39 -0400
-Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 161CWjSG021859;
-        Thu, 1 Jul 2021 14:38:55 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=I92tEKdjU2/3eUXBZEGBNAcz/stz6aDX9ZsKTMc90nI=;
- b=bKqXB86krQLpoi43tcoPljU7mB77Vxwo33kZTF2NyEw3Yj9fiedLbCNNTZju8KXGHWSm
- Ttr1PL3DiyBFCwq8Dr5DZZk6iEeXwSbuZs4w+IQh9xc+/0GGqkTv97DRsOLWWCkPFlP1
- 6TAow97Bm5mlbuHRJLoBj9WxnEeanJUM99uxDERDGgiWZ9Vh8P3rWAvgpPPisomaa20G
- fCHpXNQbgXyJBex23Ia9/t8WHG3UDffnba7E2EZyzwx5cNsozVhGLAFH4bPV+L19yB1h
- HtVU7LVnhvBAgRF6CKyvuIG+geQvHrh8Bszw9X8SJCWu1wRWXpLhXftJBtx+F3G+SQe5 nA== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 39h1xqc649-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 01 Jul 2021 14:38:55 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 362DD10002A;
-        Thu,  1 Jul 2021 14:38:53 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 0C5D5222CA7;
-        Thu,  1 Jul 2021 14:38:53 +0200 (CEST)
-Received: from lmecxl0504.lme.st.com (10.75.127.47) by SFHDAG2NODE3.st.com
- (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 1 Jul
- 2021 14:38:52 +0200
-Subject: Re: [PATCH v2] mmc: mmci: De-assert reset on probe
-To:     Linus Walleij <linus.walleij@linaro.org>,
-        <linux-mmc@vger.kernel.org>, "Ulf Hansson" <ulf.hansson@linaro.org>
-CC:     Russell King <linux@armlinux.org.uk>,
-        Ludovic Barre <ludovic.barre@st.com>
-References: <20210630102408.3543024-1-linus.walleij@linaro.org>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-Message-ID: <4b20c870-ee41-6455-bc28-07f89591c3f9@foss.st.com>
-Date:   Thu, 1 Jul 2021 14:38:52 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S233169AbhGAO3b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jul 2021 10:29:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60992 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231698AbhGAO3a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jul 2021 10:29:30 -0400
+Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DEB3C061762
+        for <linux-mmc@vger.kernel.org>; Thu,  1 Jul 2021 07:27:00 -0700 (PDT)
+Received: by mail-vs1-xe34.google.com with SMTP id j8so3948212vsd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Jul 2021 07:27:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=CKb2oHuQtCvr34mVmTyYe9ky7YLvpZxG+hc+eutVly4=;
+        b=Vt7A98F42l3XzjBVe5ztEsvfLiMgYLNvCaiO/qKdvbcM0zWs/XGsIsZuwAgZqgOklw
+         7xFRG83syZF30OeyVUfjW1ni7Nq7KWQJs6kIrpi07yKDaxj1nAsD499riaJSQBpBRrrP
+         4T2S8xoCBHlh0zR0ORstFWcqY1GUxZIpYFkQs7MkTbD2b1EjrCXhoe+xUrnk3+sZm502
+         nAjJ5w/fyYhJX9bVwh4ZBezUxO+aIpcj3fa6k6OIyxdpal/MKqDVICz0w9yXXPiHqWV6
+         g71putydqhfp6DG3MdrOxYwFrJAsYM4TLpxKNBe8dgVE1mxpNOueTuFOD7PTswP/htKD
+         VsrA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=CKb2oHuQtCvr34mVmTyYe9ky7YLvpZxG+hc+eutVly4=;
+        b=MuTqRMewkdF5Xny4aQ1KS1w1t+yG2KSx/HFL/r6iN2gGdGf4T56ZEPxlp/PhuVZdsX
+         Kb4F462uWCjX1Ht+LkI63WYZT+Hoq66pBtCOzdwVvXC72/MsHw+EUUlp5ng75ezWTsRK
+         LApUbZj4klIo929rVN1QeIc5yoVmmn4PqopYaO6B0al7C0qMLzYMdzparmpNCp+TfjXr
+         3zFApSC212pN3ZxA8cVbPBJdYzSD7mLrVTmMiTQ+dEhHslWUXjR0wQizDauJRNSJN1DN
+         ZH86BMQN2CkbbUvtsQsWdHVem6fO0IOJlS3AqBcbuPpfAzNJrHkTRR3eHhLj/rfWHLuA
+         Q1sw==
+X-Gm-Message-State: AOAM532whZkjH+U67MyRGqLFBA84gTEeh4Eb3e4AEYbZGoN23hPToozz
+        QvPPPgi2FDYgm+74DCrAV3qsQfSuSfZk+wNCRywb8Q==
+X-Google-Smtp-Source: ABdhPJw2qr1UaeUQ4Cg/StVKeNkNBv115OPSju/bwFZjI+VwBWFkQHzeoCWEAGjur7XcRWUJ0rUl1/PhUDB+UFkb6rY=
+X-Received: by 2002:a67:8783:: with SMTP id j125mr436256vsd.42.1625149619142;
+ Thu, 01 Jul 2021 07:26:59 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20210630102408.3543024-1-linus.walleij@linaro.org>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.47]
-X-ClientProxiedBy: SFHDAG2NODE2.st.com (10.75.127.5) To SFHDAG2NODE3.st.com
- (10.75.127.6)
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-07-01_07:2021-07-01,2021-07-01 signatures=0
+References: <20210628232955.3327484-1-linus.walleij@linaro.org>
+ <CAPDyKFpfJC=KAZ5dGAso2zcgBic4uCkOiDFQ0ZA5Zi7UDUeEug@mail.gmail.com>
+ <CACRpkdY4kegTzeqPHNEd3=hOdqSXAvJq+LehLbf09mUybU0VfA@mail.gmail.com>
+ <CAPDyKFoj47-4XuKbV6jYkJ2pesAfHK999vudWDGTQA-J5eQXrg@mail.gmail.com>
+ <CACRpkdYX5RiUy7u_SeCqhytbyL1Ta9iVmx500uwAq8sNmW+3Ug@mail.gmail.com>
+ <CAPDyKForEi09uyXL4nDn27bth+btEYAhzd6+YusMrRBygCdtEA@mail.gmail.com> <CACRpkda7m6HnA7y9coYoXd9YFNjSzAfuYiLNURHe1geb8rF++Q@mail.gmail.com>
+In-Reply-To: <CACRpkda7m6HnA7y9coYoXd9YFNjSzAfuYiLNURHe1geb8rF++Q@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 1 Jul 2021 16:26:22 +0200
+Message-ID: <CAPDyKFrK85hCTQwSy114JUqx+As_y6Z567a-Gvqdji7iN1=A-A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Add a card quirk for broken boot partitions
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Ludovic Barre <ludovic.Barre@st.com>,
+        Jean-Nicolas Graux <jean-nicolas.graux@st.com>,
+        phone-devel@vger.kernel.org, Stephan Gerhold <stephan@gerhold.net>,
+        newbyte@disroot.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/30/21 12:24 PM, Linus Walleij wrote:
-> If we find a reset handle when probing the MMCI block,
-> make sure the reset is de-asserted. It could happen that
-> a hardware has reset asserted at boot. >
-Hi Linus,
++ Jean, Ludovic
 
-I was wondering on which HW you saw this issue?
-But I've seen this kind of thing is also done in some other drivers, so 
-maybe it is just an alignment?
+On Thu, 1 Jul 2021 at 00:33, Linus Walleij <linus.walleij@linaro.org> wrote:
+>
+> On Wed, Jun 30, 2021 at 5:28 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+>
+> > >         /* Handle busy detection on DAT0 if the variant supports it. */
+> > >         if (busy_resp && host->variant->busy_detect)
+> > >                 if (!host->ops->busy_complete(host, status, err_msk))
+> > >                         return;
+> > >
+> > > These seemed to be especially problematic to me.
+> >
+> > Yes, exactly. The IRQ based busy detection code gets disabled with my
+> > debug patch.
+> >
+> > It looks like there are some race conditions in the HW busy detection
+> > path for mmci, which gets triggered by this eMMC card.
+> (...)
+> > Although, it's more optimal to receive an IRQ when busy on DAT0 is
+> > de-asserted, rather than polling with ->card_busy(). Hence we also
+> > have MMC_CAP_WAIT_WHILE_BUSY.
+>
+> Hmmmmm it kind of assumes that DAT0 will be de-asserted *before*
+> we get a command response, never after. I think that is what the card
+> is doing. If that is out-of-spec then we need to have a quirk like
+> this but if it is legal behaviour, we rather need to fix the mmci driver.
 
-Anyway I tested it on STM32MP157C-EV1 board, so feel free to add my:
-Tested-by: Yann Gautier <yann.gautier@foss.st.com>
+That's correct and this could very well be the reason why polling
+works better for this case.
 
-Regards,
-Yann
+On the other hand, I am still a bit puzzled why the mmci driver hangs,
+waiting for the busy completion IRQ to be raised.
 
-> Cc: Russell King <linux@armlinux.org.uk>
-> Cc: Yann Gautier <yann.gautier@foss.st.com>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - Drop the else {} clause: reset_control_deassert() handles
->    NULL just fine.
-> ---
->   drivers/mmc/host/mmci.c | 3 +++
->   1 file changed, 3 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 984d35055156..3765e2f4ad98 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -2126,6 +2126,9 @@ static int mmci_probe(struct amba_device *dev,
->   		ret = PTR_ERR(host->rst);
->   		goto clk_disable;
->   	}
-> +	ret = reset_control_deassert(host->rst);
-> +	if (ret)
-> +		dev_err(mmc_dev(mmc), "failed to de-assert reset\n");
->   
->   	/* Get regulators and the supported OCR mask */
->   	ret = mmc_regulator_get_supply(mmc);
-> 
+I did some more inspection of the code in ux500_busy_complete() and
+found that there may be a potential race condition. I tried to fix it
+up, but I don't know if it really makes any difference. Can you please
+test the below patch and see if it helps.
 
+---
+
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Thu, 1 Jul 2021 13:12:48 +0200
+Subject: [PATCH] mmc: mmci: Fix busy detect completion
+
+One of the pre-conditions to set the ->busy_detect_mask in the MMCIMASK0
+register, is to first re-read the MMCISTATUS register to verify that the
+->busy_detect_flag is set. The intent is to avoid enabling IRQ based busy
+completion if the card does not signal busy.
+
+Assuming the busy_detect_flag is set, we enter a small window before the
+actual write of the ->busy_detect_mask hits the HW. In this window, the
+->busy_detect_flag in the MMCISTATUS register may change to not indicate
+busy any more. This could lead to that we end up waiting for a busy
+completion IRQ forever.
+
+Fix this, by writing the ->busy_detect_mask to the MMCIMASK0 first, but
+clear it if it turns out that the card wasn't signaling busy.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/host/mmci.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 984d35055156..122de99759a5 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -671,14 +671,20 @@ static bool ux500_busy_complete(struct mmci_host
+*host, u32 status, u32 err_msk)
+         * while, to allow it to be set, but tests indicates that it
+         * isn't needed.
+         */
+-       if (!host->busy_status && !(status & err_msk) &&
+-           (readl(base + MMCISTATUS) & host->variant->busy_detect_flag)) {
+-               writel(readl(base + MMCIMASK0) |
+-                      host->variant->busy_detect_mask,
++       if (!host->busy_status && !(status & err_msk)) {
++               u32 mask0 = readl(base + MMCIMASK0);
++
++               writel(mask0 | host->variant->busy_detect_mask,
+                       base + MMCIMASK0);
++               wmb();
+
+-               host->busy_status = status & (MCI_CMDSENT | MCI_CMDRESPEND);
+-               return false;
++               if (readl(base + MMCISTATUS) &
++                   host->variant->busy_detect_flag) {
++                       host->busy_status = status &
++                                           (MCI_CMDSENT | MCI_CMDRESPEND);
++                       return false;
++               }
++               writel(mask0, base + MMCIMASK0);
+        }
+
+        /*
+-- 
+
+
+Kind regards
+Uffe
