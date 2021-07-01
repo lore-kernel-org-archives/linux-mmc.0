@@ -2,120 +2,228 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF5BBC11F64
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 06:13:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62A22C11F64
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 08:05:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C70046148E
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 06:13:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 46B456148E
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 08:05:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234150AbhGAGPy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jul 2021 02:15:54 -0400
-Received: from mga03.intel.com ([134.134.136.65]:60333 "EHLO mga03.intel.com"
+        id S234882AbhGAIIJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jul 2021 04:08:09 -0400
+Received: from smtp1.axis.com ([195.60.68.17]:37090 "EHLO smtp1.axis.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234116AbhGAGPy (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Jul 2021 02:15:54 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10031"; a="208518347"
-X-IronPort-AV: E=Sophos;i="5.83,313,1616482800"; 
-   d="scan'208";a="208518347"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jun 2021 23:13:22 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.83,313,1616482800"; 
-   d="scan'208";a="420286456"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
-  by fmsmga007.fm.intel.com with ESMTP; 30 Jun 2021 23:13:21 -0700
-Subject: Re: eMMC CMDQ timeout issue
-To:     "huyue2@yulong.com" <huyue2@yulong.com>
-References: <2021070110250788349755@yulong.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <9c11a26a-7fb0-dcef-c5b6-76ca353a3b42@intel.com>
-Date:   Thu, 1 Jul 2021 09:13:38 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S234833AbhGAIIJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Jul 2021 04:08:09 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=axis.com; q=dns/txt; s=axis-central1; t=1625126739;
+  x=1656662739;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=b6eCm58koRg2hleF5/VCtCv9ol4aOKs+jQNpqEcbUro=;
+  b=nllmc62HzJuZfl2rPt0+SArbeY+FLIEIpMbrj3nEihtYfLuDa/D14E7t
+   n2khWFzFwY7JbcDEYdYOAb55r16QYdo6Kha28EKnleGrSRnzTJN7YdKWi
+   xyt/niXvJHf1ZD6Y2LfkDPeXg81sWTX8fKta77DdhjOrCVNO0EaeNVihz
+   9DdZDuPiRBkpj2XRR19kWLdfVhplvkKtAna4Wn/rzMB8q08gm8oBz6Y7H
+   ukXXXAkOaqAkruy/tyywi/1zAbbyddu8HQkFo0ZcgD0LlhkB3bQBvhtli
+   c8DqNKauUyuxKIthJvaMItJ2LRDKOFfLMsMD4WpPcZiXHE2nHxrQggweC
+   A==;
+From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
+To:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <kernel@axis.com>,
+        Vincent Whitchurch <vincent.whitchurch@axis.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH v2] mmc: dw_mmc: Add data CRC error injection
+Date:   Thu, 1 Jul 2021 10:05:34 +0200
+Message-ID: <20210701080534.23138-1-vincent.whitchurch@axis.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-In-Reply-To: <2021070110250788349755@yulong.com>
-Content-Type: text/plain; charset=windows-1252
-Content-Language: en-US
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gMS8wNy8yMSA1OjI1IGFtLCBodXl1ZTJAeXVsb25nLmNvbSB3cm90ZToNCj4gaGmgQWRy
-aWFuLA0KPiANCj4gSSdtIGEgZGV2ZWxvcGVyIG9mIExpbnV4IG1tYyBkcml2ZXIuIEkgaG9w
-ZSBpJ20gbm90IGJvdGhlcmluZyB5b3UuDQo+IEkgbWV0IGFuIG1tYyBDTURRIHRpbWVvdXQg
-aXNzdWUgaW4ga2VybmVsLTQuMTQgdW5kZXIgQW5kcm9pZCBNVEsgcGxhdGZvcm0uDQoNCkkg
-Y2FuJ3QgaGVscCB3aXRoIG9sZCBrZXJuZWxzLCBlc3BlY2lhbGx5IGN1c3RvbSBrZXJuZWxz
-Lg0KDQpJIGhhdmUgY2MnZWQgdGhlIGtlcm5lbCBtbWMgbWFpbGluZyBsaXN0IGJlY2F1c2Ug
-dGhlcmUgYXJlIG1hbnkgcGVvcGxlIHRoZXJlIHRoYXQgbWlnaHQgYmUgYWJsZSB0byBoZWxw
-Lg0KDQo+IEkgbmV2ZXIgbWV0IHRoaXMga2luZCBvZiBpc3N1ZSBiZWZvcmUgaW4gcHJvamVj
-dHMuDQo+IFNvIGkgY2hlY2tlZCB0aGUgcmVsYXRlZCBjb2RlIGFuZCBlTU1DIDUuMSBzdGFu
-ZGFyZChDTURRKSBkb2N1bWVudC4gQW5kIGZpbmQgdGhlIGJlbG93Og0KPiANCj4gaHR0cHM6
-Ly9sb3JlLmtlcm5lbC5vcmcvbGludXgtbW1jLzE1MDA2MzA1ODQtMjI4NTItMTAtZ2l0LXNl
-bmQtZW1haWwtYWRyaWFuLmh1bnRlckBpbnRlbC5jb20vIDxodHRwczovL2xvcmUua2VybmVs
-Lm9yZy9saW51eC1tbWMvMTUwMDYzMDU4NC0yMjg1Mi0xMC1naXQtc2VuZC1lbWFpbC1hZHJp
-YW4uaHVudGVyQGludGVsLmNvbS8+oA0KPiANCj4gVGhlbiBpIHRoaW5rIHRoZSBrZXkgcG9p
-bnQgc2hvdWxkIGJlIGFuYWx5emluZyB0aGUgQ01EUSByZWdpc3RlcnMgc3RhdHVzIGZpcnN0
-bHkuDQo+IA0KPiBUaGUgdGltZW91dCBsb2cgaSBtZXQgYXMgYmVsb3c6DQo+IA0KPiBgYGBs
-b2cNCj4gWzM4NDprd29ya2VyLzI6MUhdbW1jMDogcmVxdWVzdCB3aXRoIHRhZzogMjUgZmxh
-Z3M6IDB4MTAzMDAxIHRpbWVkIG91dA0KPiBbMzg0Omt3b3JrZXIvMjoxSF1jbWRxLWhvc3Q6
-ID09PT09PT09PT0gUkVHSVNURVIgRFVNUCAobW1jMCk9PT09PT09PT09DQo+IFszODQ6a3dv
-cmtlci8yOjFIXWNtZHEtaG9zdDogQ2FwczogMHgxMDAwMjBiNqAgfCBWZXJzaW9uOqAgMHgw
-MDAwMDUxMA0KPiBbMzg0Omt3b3JrZXIvMjoxSF1jbWRxLWhvc3Q6IFF1ZWluZyBjb25maWc6
-IDB4MDAwMDExMDOgIHwgUXVldWUgQ3RybDqgIDB4MDAwMDAwMDANCj4gWzM4NDprd29ya2Vy
-LzI6MUhdY21kcS1ob3N0OiBJbnQgc3RhdDogMHgwMDAwMDAwMKAgfCBJbnQgZW5hYjqgIDB4
-MDAwMDAwMGYNCj4gWzM4NDprd29ya2VyLzI6MUhdY21kcS1ob3N0OiBJbnQgc2lnOiAweDAw
-MDAwMDBmoCB8IEludCBDb2FsOqAgMHgwMDAwMDAwMA0KPiBbMzg0Omt3b3JrZXIvMjoxSF1j
-bWRxLWhvc3Q6IFRETCBiYXNlOiAweDlmZjk3MDAwoCB8IFRETCB1cDMyOqAgMHgwMDAwMDAw
-MA0KPiBbMzg0Omt3b3JrZXIvMjoxSF1jbWRxLWhvc3Q6IERvb3JiZWxsOiAweDNmZmZmZmZm
-oCB8IENvbXAgTm90aWY6oCAweDAwMDAwMDAwDQo+IFszODQ6a3dvcmtlci8yOjFIXWNtZHEt
-aG9zdDogRGV2IHF1ZXVlOiAweDAwMDAwMDAwoCB8IERldiBQZW5kOqAgMHgzZmZmZmZmZg0K
-PiBbMzg0Omt3b3JrZXIvMjoxSF1jbWRxLWhvc3Q6IFRhc2sgY2xyOiAweDAwMDAwMDAwoCB8
-IFNlbmQgc3RhdCAxOqAgMHgwMDAwMDA0MA0KPiBbMzg0Omt3b3JrZXIvMjoxSF1jbWRxLWhv
-c3Q6IFNlbmQgc3RhdCAyOiAweDAwMDAwMDAxoCB8IERDTUQgcmVzcDqgIDB4MDAwMDAwMDAN
-Cj4gWzM4NDprd29ya2VyLzI6MUhdY21kcS1ob3N0OiBSZXNwIGVyciBtYXNrOiAweGZkZjlh
-MDgwoCB8IFRhc2sgZXJyOqAgMHgwMDAwMDAwMA0KPiBbMzg0Omt3b3JrZXIvMjoxSF1jbWRx
-LWhvc3Q6IFJlc3AgaWR4IDB4MDAwMDAwMGSgIHwgUmVzcCBhcmc6oCAweDAwMDAwMDAwDQo+
-IFszODQ6a3dvcmtlci8yOjFIXWNtZHEtaG9zdDogVmVuZG9yIGNmZyAweDA4MDAxZjBhDQoN
-CllvdSByZWFsbHkgbmVlZCB0byBsb29rIGF0IHRoZSBTREhDSSByZWdpc3RlcnMgYWxzbyBi
-ZWNhdXNlIHRoZSBjb21tYW5kLCBhcmd1bWVudHMsIHJlc3BvbnNlLCBJUlEgc3RhdHVzIGV0
-YyBjYW4gZ2l2ZSBhIGNsdWUgdG8gd2hhdCB3ZW50IHdyb25nLg0KDQpZb3UgY291bGQgYWxz
-byBlbmFibGUgc29tZSBkeW5hbWljIGRlYnVnIG1lc3NhZ2VzDQoNCj4gYGBgDQo+IA0KPiBG
-cm9tIC9Eb29yYmVsbC9EZXYgUGVuZC8sIHdlIGNhbiBrbm93IHRoZSB0YXNrIDI1IGlzIGFs
-cmVhZHkgaW4gZU1NQyBxdWV1ZS4NCj4gQnV0IHRhc2sgMjUgaXMgbm90IHJlYWR5IHRvIGJl
-IGV4ZWN1dGVkIGJ5IGhvc3QgaW4gdGltZW91dCBzaW5jZSAvRGV2IHF1ZXVlLyBpcyB6ZXJv
-Lg0KPiBTbyB0aGUgdGltZW91dCBpc3N1ZSBzaG91bGQgYmUgZU1NQyBzaWRlIGlzc3VlLCBh
-bSBpIHJpZ2h0PyANCg0KSSBjYW4ndCB0ZWxsDQoNCj4gDQo+IENvdWxkIHlvdSBoZWxwIHRv
-IGNvbmZpcm0gbXkgYW5hbHlzaXMgaWYgeW91IHdpbGwgb3IgY29ycmVjdCBtZSBpZiBpJ20g
-d3Jvbmc/DQo+IGJ0dzogc2V2ZXJhbCBkZXZpY2VzIG1ldCB0aGUgaXNzdWUuIEkga25vdyBp
-dCdzIGEgZG93bnN0cmVhbSBpc3N1ZS4NCg0KSWYgdGhlIGlzc3VlIGRvZXMgbm90IGhhcHBl
-biB3aXRoIGFuIHVwc3RyZWFtIGtlcm5lbCwgdGhlbiB5b3UgY2FuIGVpdGhlcg0KdHJ5IHRv
-IGJpc2VjdCB0byBnZXQgY2xvc2VyIHRvIHdoZW4gdGhlIGlzc3VlIHdlbnQgYXdheSwgb3Ig
-dHJ5IHRvIGRldGVybWluZQ0KaWYgeW91ciBrZXJuZWwgaXMgbWlzc2luZyBhbnkgdXBzdHJl
-YW0gZml4ZXMuDQoNCj4gDQo+IFRoYW5rcyBpbiBhZHZhbmNlLg0KPiANCj4gLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tDQo+IGh1eXVlMkB5dWxvbmcuY29tDQoNCg==
+This driver has had problems when handling data errors.  Add fault
+injection support so that the abort handling can be easily triggered and
+regression-tested.  A hrtimer is used to indicate a data CRC error at
+various points during the data transfer.
+
+Note that for the recent problem with hangs in the case of some data CRC
+errors, a udelay(10) inserted at the start of send_stop_abort() greatly
+helped in triggering the error, but I've not included this as part of
+the fault injection support since it seemed too specific.
+
+Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+---
+
+Notes:
+    v2: Add missing includes.
+
+ drivers/mmc/host/dw_mmc.c | 73 +++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/dw_mmc.h |  7 ++++
+ 2 files changed, 80 insertions(+)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index d333130d1531..dbbb94e6ff4b 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -17,9 +17,11 @@
+ #include <linux/interrupt.h>
+ #include <linux/iopoll.h>
+ #include <linux/ioport.h>
++#include <linux/ktime.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
+ #include <linux/pm_runtime.h>
++#include <linux/prandom.h>
+ #include <linux/seq_file.h>
+ #include <linux/slab.h>
+ #include <linux/stat.h>
+@@ -181,6 +183,9 @@ static void dw_mci_init_debugfs(struct dw_mci_slot *slot)
+ 			   &host->pending_events);
+ 	debugfs_create_xul("completed_events", S_IRUSR, root,
+ 			   &host->completed_events);
++#ifdef CONFIG_FAULT_INJECTION
++	fault_create_debugfs_attr("fail_data_crc", root, &host->fail_data_crc);
++#endif
+ }
+ #endif /* defined(CONFIG_DEBUG_FS) */
+ 
+@@ -1788,6 +1793,68 @@ static const struct mmc_host_ops dw_mci_ops = {
+ 	.prepare_hs400_tuning	= dw_mci_prepare_hs400_tuning,
+ };
+ 
++#ifdef CONFIG_FAULT_INJECTION
++static enum hrtimer_restart dw_mci_fault_timer(struct hrtimer *t)
++{
++	struct dw_mci *host = container_of(t, struct dw_mci, fault_timer);
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->irq_lock, flags);
++
++	if (!host->data_status)
++		host->data_status = SDMMC_INT_DCRC;
++	set_bit(EVENT_DATA_ERROR, &host->pending_events);
++	tasklet_schedule(&host->tasklet);
++
++	spin_unlock_irqrestore(&host->irq_lock, flags);
++
++	return HRTIMER_NORESTART;
++}
++
++static void dw_mci_start_fault_timer(struct dw_mci *host)
++{
++	struct mmc_data *data = host->data;
++
++	if (!data || data->blocks <= 1)
++		return;
++
++	if (!should_fail(&host->fail_data_crc, 1))
++		return;
++
++	/*
++	 * Try to inject the error at random points during the data transfer.
++	 */
++	hrtimer_start(&host->fault_timer,
++		      ms_to_ktime(prandom_u32() % 25),
++		      HRTIMER_MODE_REL);
++}
++
++static void dw_mci_stop_fault_timer(struct dw_mci *host)
++{
++	hrtimer_cancel(&host->fault_timer);
++}
++
++static void dw_mci_init_fault(struct dw_mci *host)
++{
++	host->fail_data_crc = (struct fault_attr) FAULT_ATTR_INITIALIZER;
++
++	hrtimer_init(&host->fault_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
++	host->fault_timer.function = dw_mci_fault_timer;
++}
++#else
++static void dw_mci_init_fault(struct dw_mci *host)
++{
++}
++
++static void dw_mci_start_fault_timer(struct dw_mci *host)
++{
++}
++
++static void dw_mci_stop_fault_timer(struct dw_mci *host)
++{
++}
++#endif
++
+ static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
+ 	__releases(&host->lock)
+ 	__acquires(&host->lock)
+@@ -2102,6 +2169,7 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
+ 				break;
+ 			}
+ 
++			dw_mci_stop_fault_timer(host);
+ 			host->data = NULL;
+ 			set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
+ 			err = dw_mci_data_complete(host, data);
+@@ -2151,6 +2219,7 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
+ 			if (mrq->cmd->error && mrq->data)
+ 				dw_mci_reset(host);
+ 
++			dw_mci_stop_fault_timer(host);
+ 			host->cmd = NULL;
+ 			host->data = NULL;
+ 
+@@ -2600,6 +2669,8 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
+ 
+ 	set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
+ 	tasklet_schedule(&host->tasklet);
++
++	dw_mci_start_fault_timer(host);
+ }
+ 
+ static void dw_mci_handle_cd(struct dw_mci *host)
+@@ -3223,6 +3294,8 @@ int dw_mci_probe(struct dw_mci *host)
+ 	spin_lock_init(&host->irq_lock);
+ 	INIT_LIST_HEAD(&host->queue);
+ 
++	dw_mci_init_fault(host);
++
+ 	/*
+ 	 * Get the host data width - this assumes that HCON has been set with
+ 	 * the correct values.
+diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
+index da5923a92e60..ce05d81477d9 100644
+--- a/drivers/mmc/host/dw_mmc.h
++++ b/drivers/mmc/host/dw_mmc.h
+@@ -14,6 +14,8 @@
+ #include <linux/mmc/core.h>
+ #include <linux/dmaengine.h>
+ #include <linux/reset.h>
++#include <linux/fault-inject.h>
++#include <linux/hrtimer.h>
+ #include <linux/interrupt.h>
+ 
+ enum dw_mci_state {
+@@ -230,6 +232,11 @@ struct dw_mci {
+ 	struct timer_list       cmd11_timer;
+ 	struct timer_list       cto_timer;
+ 	struct timer_list       dto_timer;
++
++#ifdef CONFIG_FAULT_INJECTION
++	struct fault_attr	fail_data_crc;
++	struct hrtimer		fault_timer;
++#endif
+ };
+ 
+ /* DMA ops for Internal/External DMAC interface */
+-- 
+2.28.0
+
