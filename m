@@ -2,228 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNWANTED_LANGUAGE_BODY,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62A22C11F64
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 08:05:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D7894C11F64
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 09:06:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 46B456148E
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 08:05:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A99E461480
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jul 2021 09:06:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234882AbhGAIIJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jul 2021 04:08:09 -0400
-Received: from smtp1.axis.com ([195.60.68.17]:37090 "EHLO smtp1.axis.com"
+        id S235357AbhGAJJY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jul 2021 05:09:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44712 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234833AbhGAIIJ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 1 Jul 2021 04:08:09 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1625126739;
-  x=1656662739;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=b6eCm58koRg2hleF5/VCtCv9ol4aOKs+jQNpqEcbUro=;
-  b=nllmc62HzJuZfl2rPt0+SArbeY+FLIEIpMbrj3nEihtYfLuDa/D14E7t
-   n2khWFzFwY7JbcDEYdYOAb55r16QYdo6Kha28EKnleGrSRnzTJN7YdKWi
-   xyt/niXvJHf1ZD6Y2LfkDPeXg81sWTX8fKta77DdhjOrCVNO0EaeNVihz
-   9DdZDuPiRBkpj2XRR19kWLdfVhplvkKtAna4Wn/rzMB8q08gm8oBz6Y7H
-   ukXXXAkOaqAkruy/tyywi/1zAbbyddu8HQkFo0ZcgD0LlhkB3bQBvhtli
-   c8DqNKauUyuxKIthJvaMItJ2LRDKOFfLMsMD4WpPcZiXHE2nHxrQggweC
-   A==;
-From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
-To:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@axis.com>,
-        Vincent Whitchurch <vincent.whitchurch@axis.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-Subject: [PATCH v2] mmc: dw_mmc: Add data CRC error injection
-Date:   Thu, 1 Jul 2021 10:05:34 +0200
-Message-ID: <20210701080534.23138-1-vincent.whitchurch@axis.com>
-X-Mailer: git-send-email 2.28.0
+        id S235088AbhGAJJY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 1 Jul 2021 05:09:24 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 0BFF761490;
+        Thu,  1 Jul 2021 09:06:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1625130414;
+        bh=MaCv3p2s4Y+m8WXNbkHrFUHk0ZhDpOb3qUE9ihRrl/0=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=c+DfL8Vb3ANnCufs6Txm4ecndVtsg8++y0S7FGi7KkWB5l2EUJkUob9Up0bmRuPhM
+         QyRTy/wrRHTbO1HL0HNnsURaje6Zw8y/7J//yhF5pw2whv3X2zQ57Ww2xgIV7uB1do
+         bxspIRK6k+mQPR1Q5usAF9QvvZbA2ftu9qSVdQd4Ss6S1ylpDrLJZ1t3Nizpi+L/yr
+         yxtwpS+Pje33g5WFkopaHRBNMyWxUfsYKe5aloF6TLfFPCFL8bEaSIKwYnwHymvaR9
+         a2O7PryIvlYHbQ7vi/pxsK+33XKq9jjdjAuPkU7R0fgC/LgSvZSJtXEI6sbjFFr+Hh
+         k8cyRAYhFPjkw==
+Received: by mail-wr1-f43.google.com with SMTP id v5so7230861wrt.3;
+        Thu, 01 Jul 2021 02:06:53 -0700 (PDT)
+X-Gm-Message-State: AOAM532MBHqWZg7hvjJuCzX+RblOv9vFShJoh7l8nvlVfiNMqchwYapv
+        QGiuf+HIRG+3ZGzyDJZYmtT0Uh5IA8Y2a4xOeI8=
+X-Google-Smtp-Source: ABdhPJzAp2tTQfel9pBkdL6/k6elC9IBeuDeoYONmfsIcpyu4gDUEhBeE60t9Q/GBsjKzyMCavAkvXtHN60gwVXUnk0=
+X-Received: by 2002:adf:ee10:: with SMTP id y16mr7025006wrn.99.1625130412697;
+ Thu, 01 Jul 2021 02:06:52 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+References: <20210630122057.2795882-1-arnd@kernel.org> <202107010615.MzO98NWl-lkp@intel.com>
+In-Reply-To: <202107010615.MzO98NWl-lkp@intel.com>
+From:   Arnd Bergmann <arnd@kernel.org>
+Date:   Thu, 1 Jul 2021 11:06:36 +0200
+X-Gmail-Original-Message-ID: <CAK8P3a1XQKG-bEqbPnasDTKeymZYEkrFAi1XccTH9EK8OjuVaA@mail.gmail.com>
+Message-ID: <CAK8P3a1XQKG-bEqbPnasDTKeymZYEkrFAi1XccTH9EK8OjuVaA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: warn for invalid SDIO data buffers
+To:     kernel test robot <lkp@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, kbuild-all@lists.01.org,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This driver has had problems when handling data errors.  Add fault
-injection support so that the abort handling can be easily triggered and
-regression-tested.  A hrtimer is used to indicate a data CRC error at
-various points during the data transfer.
+On Thu, Jul 1, 2021 at 1:02 AM kernel test robot <lkp@intel.com> wrote:
+>
+> Hi Arnd,
+>
+> I love your patch! Yet something to improve:
+>
+> [auto build test ERROR on soc/for-next]
+> [also build test ERROR on linus/master v5.13 next-20210630]
+> [If your patch is applied to the wrong git tree, kindly drop us a note.
+> And when submitting patch, we suggest to use '--base' as documented in
+> https://git-scm.com/docs/git-format-patch]
+>
+> url:    https://github.com/0day-ci/linux/commits/Arnd-Bergmann/mmc-warn-for-invalid-SDIO-data-buffers/20210630-202237
+> base:   https://git.kernel.org/pub/scm/linux/kernel/git/soc/soc.git for-next
+> config: i386-randconfig-c001-20210630 (attached as .config)
+> compiler: gcc-9 (Debian 9.3.0-22) 9.3.0
+> reproduce (this is a W=1 build):
+>         # https://github.com/0day-ci/linux/commit/256b826ee105fe46723b99c3f128ea01aa3e7adf
+>         git remote add linux-review https://github.com/0day-ci/linux
+>         git fetch --no-tags linux-review Arnd-Bergmann/mmc-warn-for-invalid-SDIO-data-buffers/20210630-202237
+>         git checkout 256b826ee105fe46723b99c3f128ea01aa3e7adf
+>         # save the attached .config to linux build tree
+>         make W=1 ARCH=i386
+>
+> If you fix the issue, kindly add following tag as appropriate
+> Reported-by: kernel test robot <lkp@intel.com>
+>
+> All errors (new ones prefixed by >>, old ones prefixed by <<):
+>
+> >> ERROR: modpost: "is_vmalloc_or_module_addr" [drivers/mmc/core/mmc_core.ko] undefined!
 
-Note that for the recent problem with hangs in the case of some data CRC
-errors, a udelay(10) inserted at the start of send_stop_abort() greatly
-helped in triggering the error, but I've not included this as part of
-the fault injection support since it seemed too specific.
+Ah, I see that is_vmalloc_addr() is exported, but is_vmalloc_or_module_addr()
+is not. I assume it's ok to add a corresponding EXPORT_SYMBOL_GPL() for
+it as well. I'll wait for other comments before resending with that change.
 
-Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
----
-
-Notes:
-    v2: Add missing includes.
-
- drivers/mmc/host/dw_mmc.c | 73 +++++++++++++++++++++++++++++++++++++++
- drivers/mmc/host/dw_mmc.h |  7 ++++
- 2 files changed, 80 insertions(+)
-
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index d333130d1531..dbbb94e6ff4b 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -17,9 +17,11 @@
- #include <linux/interrupt.h>
- #include <linux/iopoll.h>
- #include <linux/ioport.h>
-+#include <linux/ktime.h>
- #include <linux/module.h>
- #include <linux/platform_device.h>
- #include <linux/pm_runtime.h>
-+#include <linux/prandom.h>
- #include <linux/seq_file.h>
- #include <linux/slab.h>
- #include <linux/stat.h>
-@@ -181,6 +183,9 @@ static void dw_mci_init_debugfs(struct dw_mci_slot *slot)
- 			   &host->pending_events);
- 	debugfs_create_xul("completed_events", S_IRUSR, root,
- 			   &host->completed_events);
-+#ifdef CONFIG_FAULT_INJECTION
-+	fault_create_debugfs_attr("fail_data_crc", root, &host->fail_data_crc);
-+#endif
- }
- #endif /* defined(CONFIG_DEBUG_FS) */
- 
-@@ -1788,6 +1793,68 @@ static const struct mmc_host_ops dw_mci_ops = {
- 	.prepare_hs400_tuning	= dw_mci_prepare_hs400_tuning,
- };
- 
-+#ifdef CONFIG_FAULT_INJECTION
-+static enum hrtimer_restart dw_mci_fault_timer(struct hrtimer *t)
-+{
-+	struct dw_mci *host = container_of(t, struct dw_mci, fault_timer);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->irq_lock, flags);
-+
-+	if (!host->data_status)
-+		host->data_status = SDMMC_INT_DCRC;
-+	set_bit(EVENT_DATA_ERROR, &host->pending_events);
-+	tasklet_schedule(&host->tasklet);
-+
-+	spin_unlock_irqrestore(&host->irq_lock, flags);
-+
-+	return HRTIMER_NORESTART;
-+}
-+
-+static void dw_mci_start_fault_timer(struct dw_mci *host)
-+{
-+	struct mmc_data *data = host->data;
-+
-+	if (!data || data->blocks <= 1)
-+		return;
-+
-+	if (!should_fail(&host->fail_data_crc, 1))
-+		return;
-+
-+	/*
-+	 * Try to inject the error at random points during the data transfer.
-+	 */
-+	hrtimer_start(&host->fault_timer,
-+		      ms_to_ktime(prandom_u32() % 25),
-+		      HRTIMER_MODE_REL);
-+}
-+
-+static void dw_mci_stop_fault_timer(struct dw_mci *host)
-+{
-+	hrtimer_cancel(&host->fault_timer);
-+}
-+
-+static void dw_mci_init_fault(struct dw_mci *host)
-+{
-+	host->fail_data_crc = (struct fault_attr) FAULT_ATTR_INITIALIZER;
-+
-+	hrtimer_init(&host->fault_timer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
-+	host->fault_timer.function = dw_mci_fault_timer;
-+}
-+#else
-+static void dw_mci_init_fault(struct dw_mci *host)
-+{
-+}
-+
-+static void dw_mci_start_fault_timer(struct dw_mci *host)
-+{
-+}
-+
-+static void dw_mci_stop_fault_timer(struct dw_mci *host)
-+{
-+}
-+#endif
-+
- static void dw_mci_request_end(struct dw_mci *host, struct mmc_request *mrq)
- 	__releases(&host->lock)
- 	__acquires(&host->lock)
-@@ -2102,6 +2169,7 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
- 				break;
- 			}
- 
-+			dw_mci_stop_fault_timer(host);
- 			host->data = NULL;
- 			set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
- 			err = dw_mci_data_complete(host, data);
-@@ -2151,6 +2219,7 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
- 			if (mrq->cmd->error && mrq->data)
- 				dw_mci_reset(host);
- 
-+			dw_mci_stop_fault_timer(host);
- 			host->cmd = NULL;
- 			host->data = NULL;
- 
-@@ -2600,6 +2669,8 @@ static void dw_mci_cmd_interrupt(struct dw_mci *host, u32 status)
- 
- 	set_bit(EVENT_CMD_COMPLETE, &host->pending_events);
- 	tasklet_schedule(&host->tasklet);
-+
-+	dw_mci_start_fault_timer(host);
- }
- 
- static void dw_mci_handle_cd(struct dw_mci *host)
-@@ -3223,6 +3294,8 @@ int dw_mci_probe(struct dw_mci *host)
- 	spin_lock_init(&host->irq_lock);
- 	INIT_LIST_HEAD(&host->queue);
- 
-+	dw_mci_init_fault(host);
-+
- 	/*
- 	 * Get the host data width - this assumes that HCON has been set with
- 	 * the correct values.
-diff --git a/drivers/mmc/host/dw_mmc.h b/drivers/mmc/host/dw_mmc.h
-index da5923a92e60..ce05d81477d9 100644
---- a/drivers/mmc/host/dw_mmc.h
-+++ b/drivers/mmc/host/dw_mmc.h
-@@ -14,6 +14,8 @@
- #include <linux/mmc/core.h>
- #include <linux/dmaengine.h>
- #include <linux/reset.h>
-+#include <linux/fault-inject.h>
-+#include <linux/hrtimer.h>
- #include <linux/interrupt.h>
- 
- enum dw_mci_state {
-@@ -230,6 +232,11 @@ struct dw_mci {
- 	struct timer_list       cmd11_timer;
- 	struct timer_list       cto_timer;
- 	struct timer_list       dto_timer;
-+
-+#ifdef CONFIG_FAULT_INJECTION
-+	struct fault_attr	fail_data_crc;
-+	struct hrtimer		fault_timer;
-+#endif
- };
- 
- /* DMA ops for Internal/External DMAC interface */
--- 
-2.28.0
-
+      Arnd
