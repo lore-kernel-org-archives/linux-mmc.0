@@ -2,97 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17137C11F6C
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jul 2021 08:00:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAA39C11F68
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jul 2021 08:15:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE96E613FB
-	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jul 2021 08:00:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8813C61420
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Jul 2021 08:15:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230234AbhGBIDB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 2 Jul 2021 04:03:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39214 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230245AbhGBIDA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jul 2021 04:03:00 -0400
-Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ED90C061762
-        for <linux-mmc@vger.kernel.org>; Fri,  2 Jul 2021 01:00:28 -0700 (PDT)
-Received: by mail-pj1-x102c.google.com with SMTP id n11so5912231pjo.1
-        for <linux-mmc@vger.kernel.org>; Fri, 02 Jul 2021 01:00:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=HMlqyUhnpsm9OXWKnTS1RpX8qdYsLnBSBouKvMJLUSE=;
-        b=RTivhvOWvVqbsIkxHVrJLb+T+trZ+bw0mG7IZbRRFFR6STFaeviWiaaVjjjIR/92Tt
-         C3u4t1s++66ZYYqn5hMQEKS8mV+RlYXWRyJWBjm/jTGhSS5YOHXKPzHhI9QEBJ6VW2NM
-         90gWCA3GSSPQ1hR3HlmcTCBhjvmRk8nHj2g2ZzkCRm1RyaC+Ft0IY53zQi/wIjd0rm3R
-         k5anpLzw1id+wYeUvITqo5dWWe+Z32EFewWq8HKCNjeQp64EpQsxyktYWifs+q8Ofov8
-         p3Fvd8YEKaC3DLSE+hPk2s7lTtRPxXVA8L/AS/D5ogwuxhOacsvJJSsrycEdNOHaXNi7
-         kcZA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=HMlqyUhnpsm9OXWKnTS1RpX8qdYsLnBSBouKvMJLUSE=;
-        b=Ie189yi1zC45fDEp2rM5t0EmeEnUWRFdsrzrDnh9wAY0EtirqQgyDw7eRl5UHHI3hD
-         BeA1fK0zQrUVOjjTl4Ar7aT4v7yF6mVyabhCq9FCV8d06mlUxaOfz0ymHunPoDGJDIai
-         T50Y7DhJPJwy5/eJlRu6RR0qcvNEYIbVze/J8sFWlhFTf3hA3E2IOzf9w0peANx9RW3K
-         Yh7BigQPYmD+E7ENvyYRW0YcdpK9A16f9KIBVnEsb1Ytx1n4qPQOwejhj/uggHK6lVx/
-         LIs7A7WEYMK2XJ2vIJbMN/dEkr+idGHayCQusCHSvxCbr6xuxnlWLZtLu/WqTQepITWf
-         EB0g==
-X-Gm-Message-State: AOAM531/d1snXhRGP4zAh78Fgak2WPH41XgCNqDAF/Nrw5m9LPW1nVwt
-        EvAt7nrZc+ioZkrE5SjbATpBFoy5viRTfQ==
-X-Google-Smtp-Source: ABdhPJy0Isp9tv41Tfvt/LhJ+sPff/04t+8YSoIrJKpQQ4PIXxuoGCfsExD0QSwUa00scSFuD1qAGA==
-X-Received: by 2002:a17:902:7d83:b029:11d:75c2:79a6 with SMTP id a3-20020a1709027d83b029011d75c279a6mr3275511plm.62.1625212827782;
-        Fri, 02 Jul 2021 01:00:27 -0700 (PDT)
-Received: from localhost.localdomain (218-35-143-223.cm.dynamic.apol.com.tw. [218.35.143.223])
-        by smtp.gmail.com with ESMTPSA id b6sm2508925pgw.67.2021.07.02.01.00.26
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Jul 2021 01:00:27 -0700 (PDT)
-From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Jason Lai <jasonlai.genesyslogic@gmail.com>,
-        AKASHI Takahiro <takahiro.akashi@linaro.org>,
-        Ben Chuang <benchuanggli@gmail.com>
-Subject: Re: [PATCH 2/4] mmc: core: Prepare to support SD UHS-II cards
-Date:   Fri,  2 Jul 2021 16:00:22 +0800
-Message-Id: <20210702080022.11235-1-jasonlai.genesyslogic@gmail.com>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20210225170352.76872-3-ulf.hansson@linaro.org>
-References: 
+        id S230149AbhGBISV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 2 Jul 2021 04:18:21 -0400
+Received: from lucky1.263xmail.com ([211.157.147.133]:59104 "EHLO
+        lucky1.263xmail.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229519AbhGBISU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 2 Jul 2021 04:18:20 -0400
+Received: from localhost (unknown [192.168.167.235])
+        by lucky1.263xmail.com (Postfix) with ESMTP id 522C7D5B08;
+        Fri,  2 Jul 2021 16:15:41 +0800 (CST)
+X-MAIL-GRAY: 0
+X-MAIL-DELIVERY: 1
+X-ADDR-CHECKED4: 1
+X-SKE-CHECKED: 0
+X-ANTISPAM-LEVEL: 2
+X-ABS-CHECKED: 0
+Received: from [172.16.12.64] (unknown [58.22.7.114])
+        by smtp.263.net (postfix) whith ESMTP id P5174T139827997558528S1625213740712327_;
+        Fri, 02 Jul 2021 16:15:41 +0800 (CST)
+X-IP-DOMAINF: 1
+X-UNIQUE-TAG: <10bccc0beac9a78a0800e5cc03c23b92>
+X-RL-SENDER: shawn.lin@rock-chips.com
+X-SENDER: lintao@rock-chips.com
+X-LOGIN-NAME: shawn.lin@rock-chips.com
+X-FST-TO: arnd@kernel.org
+X-RCPT-COUNT: 7
+X-SENDER-IP: 58.22.7.114
+X-ATTACHMENT-NUM: 0
+X-System-Flag: 0
+Message-ID: <69f14b04-2ffe-95e3-c6a2-ee6f2628144a@rock-chips.com>
+Date:   Fri, 2 Jul 2021 16:15:41 +0800
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101
+ Thunderbird/90.0
+Cc:     shawn.lin@rock-chips.com,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: =?UTF-8?Q?Re=3a_=5bPATCH=5d_mmc=3a_warn_for_invalid_SDIO_data_buffe?=
+ =?UTF-8?B?cnPjgJDor7fms6jmhI/vvIzpgq7ku7bnlLFsaW51eC1tbWMtb3duZXJAdmdlci5r?=
+ =?UTF-8?B?ZXJuZWwub3Jn5Luj5Y+R44CR?=
+To:     Arnd Bergmann <arnd@kernel.org>
+References: <20210630122057.2795882-1-arnd@kernel.org>
+ <6a5d06db-92af-7df0-2c71-e25bad08ee0c@rock-chips.com>
+ <CAK8P3a3UjLfKpsg2M-RP3AO3CVCnZrbD71uaLf0+iiJ9RJsHCQ@mail.gmail.com>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <CAK8P3a3UjLfKpsg2M-RP3AO3CVCnZrbD71uaLf0+iiJ9RJsHCQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-        You added one bit definition 'MMC_CAP2_SD_UHS2' in struct mmc_host.caps2.
-        But there already had a bit definition 'MMC_CAP_UHS2' in struct mmc_host.caps.
-                #define MMC_CAP_UHS2    (1 << 26)    /* Host supports UHS2 mode */
+On 2021/7/2 15:03, Arnd Bergmann wrote:
+> On Fri, Jul 2, 2021 at 3:02 AM Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>> On 2021/6/30 20:20, Arnd Bergmann wrote:
+>>> From: Arnd Bergmann <arnd@arndb.de>
+>>>
+>>> Jernej Skrabec reported a problem with the cw1200 driver failing on
+>>> arm64 systems with CONFIG_VMAP_STACK=y.
+>>>
+>>> The driver in this case passes a pointer to a stack variable (in vmalloc
+>>> space) into the sdio layer, which gets translated into an invalid DMA
+>>> address.
+>>>
+>>> Even without CONFIG_VMAP_STACK, the driver is still unreliable, as
+>>> cache invalidations on the DMA buffer may cause random data corruption
+>>> in adjacent stack slots.
+>>>
+>>> This could be worked around in the SDIO core, but in the discussion we
+>>> decided that passing a stack variable into SDIO should always be considered
+>>> a bug, as it is for USB drivers.
+>>>
+>>> Change the sdio core to produce a one-time warning for any on-stack
+>>> (both with and without CONFIG_VMAP_STACK) as well as any vmalloc
+>>> or module-local address that would have the same translation problem.
+>>
+>> This was the previous comment about the same topic.
+>> Should we check for mmc_io_rw_direct?
+>>
+>> https://www.spinics.net/lists/linux-mmc/msg41794.html
+> 
+> Hi Shawn,
+> 
+> thank you for remembering that previous discussion, that is a
+> good question. Looking at the code though, I don't actually
+> see any part of mmc_io_rw_direct() doing DMA on a caller-provided
+> buffer. The only thing I see in the code is a 'u8 *out' argument, but
+> that is just a pointer to a single byte that is set by this function.
+> 
 
-        This bit was first appearred in [RFC PATCH V3 01/21] mmc: add UHS-II related definitions in public headers.
-        These 2 bits seems to be defined for the same purpose, which one should I use?
+I didn't quite get the point we need check out for
+mmc_io_rw_direct() either. As I thought what Ulf was suggesting was some
+controllers might use data fifo to get cmd response and get DMA
+involved? But I don't see a explicit one.
 
-kindly regards,
-Jason Lai
+> Do you see any other issue with that function, or does that mean
+> we don't have to change it?
+> 
+>         Arnd
+> 
+> 
+> 
 
----
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index a001ad2f5f23..0a777caaf7f3 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -377,6 +393,7 @@ struct mmc_host {
- 				 MMC_CAP2_HS200_1_2V_SDR)
- #define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
- #define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
-+#define MMC_CAP2_SD_UHS2	(1 << 9)	/* SD UHS-II support */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
- #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
+
