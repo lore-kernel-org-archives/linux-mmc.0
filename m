@@ -7,41 +7,41 @@ X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 593E4C11F70
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:05:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89571C07E9C
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:07:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C7C761283
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:05:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 74E3C61951
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:07:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231208AbhGDXIb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jul 2021 19:08:31 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46062 "EHLO mail.kernel.org"
+        id S229793AbhGDXKc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jul 2021 19:10:32 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46816 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230417AbhGDXIH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 4 Jul 2021 19:08:07 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 0581B61951;
-        Sun,  4 Jul 2021 23:05:29 +0000 (UTC)
+        id S232198AbhGDXKF (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 4 Jul 2021 19:10:05 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A4CC261945;
+        Sun,  4 Jul 2021 23:07:23 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625439930;
-        bh=+0RmVVSDzLNt2nkptVlfGz2MqVzeDxn8hiCZHkPC86c=;
+        s=k20201202; t=1625440044;
+        bh=T+5K4vZ0zYT9jdq50clopOjfSKPueviGjMrL64xsLrg=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=d4JjJjzQQx2XASswXQLJ4hmO/jTrr5oou1N1kqhhm5KrnOoR3nN0pXVQko5BhhEV7
-         bvOo1s7Kl07EIMxtrPsrolwJ9lQmErjqlLox+aDx6HW1VZzIFo19MwlIR1TGvfUfYu
-         X21ouPkcKhfzZ+WlQtJfL37mVvYVuWDwKClPeTI4NreKkktDXo9cJolVG1nyVFrsLY
-         g+GUXd/poBt1fr4NqljZI4MN4cU9GpgJxXQkU8+OETvqvEZ+bfrS4hFMdUTMRhR8iy
-         5CKqwwflBsCx7rvkLuG6fbDqkmX8PBath0mZq3Caf+nctyDuE8fpPKTf7kVO4/p+7Y
-         6DybYkGAwzRJQ==
+        b=UdK37x3dsH0WneTjmExTKvI1+jM5FNrr5sw7WiowC5jDvCl8pxKFjVXeTIRDLTwyU
+         hMZ7YIiNIy2k76bvfxPcwwLNK/Y7SVWY3n0tC/GF2M5D6x9pALSmAUKsxTq3hRNxKn
+         R1/FCY7XG4r/8aZczx4HNyaWe3Qkj1cfN3KcejKxDIgupxDyJVvM6ZWepUP/WAADeh
+         tHXlr3vJgPt8M4XBVuF4+BVSpi/d2xQQw+ryshZN92J5QQCJXUQjzqv+ool5zKgkHG
+         wkMqrQjhbztvW1mNOftAdBwpDkz6SZKGgr3meDSboKFa+PEBIFpFfk+Ar+5S+W4rIb
+         tuXIm7HWzRNrw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Tong Zhang <ztong0001@gmail.com>,
+Cc:     Zheyu Ma <zheyuma97@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.13 51/85] memstick: rtsx_usb_ms: fix UAF
-Date:   Sun,  4 Jul 2021 19:03:46 -0400
-Message-Id: <20210704230420.1488358-51-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.12 50/80] mmc: via-sdmmc: add a check against NULL pointer dereference
+Date:   Sun,  4 Jul 2021 19:05:46 -0400
+Message-Id: <20210704230616.1489200-50-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210704230420.1488358-1-sashal@kernel.org>
-References: <20210704230420.1488358-1-sashal@kernel.org>
+In-Reply-To: <20210704230616.1489200-1-sashal@kernel.org>
+References: <20210704230616.1489200-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -50,87 +50,138 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Tong Zhang <ztong0001@gmail.com>
+From: Zheyu Ma <zheyuma97@gmail.com>
 
-[ Upstream commit 42933c8aa14be1caa9eda41f65cde8a3a95d3e39 ]
+[ Upstream commit 45c8ddd06c4b729c56a6083ab311bfbd9643f4a6 ]
 
-This patch fixes the following issues:
-1. memstick_free_host() will free the host, so the use of ms_dev(host) after
-it will be a problem. To fix this, move memstick_free_host() after when we
-are done with ms_dev(host).
-2. In rtsx_usb_ms_drv_remove(), pm need to be disabled before we remove
-and free host otherwise memstick_check will be called and UAF will
-happen.
+Before referencing 'host->data', the driver needs to check whether it is
+null pointer, otherwise it will cause a null pointer reference.
 
-[   11.351173] BUG: KASAN: use-after-free in rtsx_usb_ms_drv_remove+0x94/0x140 [rtsx_usb_ms]
-[   11.357077]  rtsx_usb_ms_drv_remove+0x94/0x140 [rtsx_usb_ms]
-[   11.357376]  platform_remove+0x2a/0x50
-[   11.367531] Freed by task 298:
-[   11.368537]  kfree+0xa4/0x2a0
-[   11.368711]  device_release+0x51/0xe0
-[   11.368905]  kobject_put+0xa2/0x120
-[   11.369090]  rtsx_usb_ms_drv_remove+0x8c/0x140 [rtsx_usb_ms]
-[   11.369386]  platform_remove+0x2a/0x50
+This log reveals it:
 
-[   12.038408] BUG: KASAN: use-after-free in __mutex_lock.isra.0+0x3ec/0x7c0
-[   12.045432]  mutex_lock+0xc9/0xd0
-[   12.046080]  memstick_check+0x6a/0x578 [memstick]
-[   12.046509]  process_one_work+0x46d/0x750
-[   12.052107] Freed by task 297:
-[   12.053115]  kfree+0xa4/0x2a0
-[   12.053272]  device_release+0x51/0xe0
-[   12.053463]  kobject_put+0xa2/0x120
-[   12.053647]  rtsx_usb_ms_drv_remove+0xc4/0x140 [rtsx_usb_ms]
-[   12.053939]  platform_remove+0x2a/0x50
+[   29.355199] BUG: kernel NULL pointer dereference, address:
+0000000000000014
+[   29.357323] #PF: supervisor write access in kernel mode
+[   29.357706] #PF: error_code(0x0002) - not-present page
+[   29.358088] PGD 0 P4D 0
+[   29.358280] Oops: 0002 [#1] PREEMPT SMP PTI
+[   29.358595] CPU: 2 PID: 0 Comm: swapper/2 Not tainted 5.12.4-
+g70e7f0549188-dirty #102
+[   29.359164] Hardware name: QEMU Standard PC (Q35 + ICH9, 2009),
+BIOS rel-1.12.0-59-gc9ba5276e321-prebuilt.qemu.org 04/01/2014
+[   29.359978] RIP: 0010:via_sdc_isr+0x21f/0x410
+[   29.360314] Code: ff ff e8 84 aa d0 fd 66 45 89 7e 28 66 41 f7 c4 00
+10 75 56 e8 72 aa d0 fd 66 41 f7 c4 00 c0 74 10 e8 65 aa d0 fd 48 8b 43
+18 <c7> 40 14 ac ff ff ff e8 55 aa d0 fd 48 89 df e8 ad fb ff ff e9 77
+[   29.361661] RSP: 0018:ffffc90000118e98 EFLAGS: 00010046
+[   29.362042] RAX: 0000000000000000 RBX: ffff888107d77880
+RCX: 0000000000000000
+[   29.362564] RDX: 0000000000000000 RSI: ffffffff835d20bb
+RDI: 00000000ffffffff
+[   29.363085] RBP: ffffc90000118ed8 R08: 0000000000000001
+R09: 0000000000000001
+[   29.363604] R10: 0000000000000000 R11: 0000000000000001
+R12: 0000000000008600
+[   29.364128] R13: ffff888107d779c8 R14: ffffc90009c00200
+R15: 0000000000008000
+[   29.364651] FS:  0000000000000000(0000) GS:ffff88817bc80000(0000)
+knlGS:0000000000000000
+[   29.365235] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   29.365655] CR2: 0000000000000014 CR3: 0000000005a2e000
+CR4: 00000000000006e0
+[   29.366170] DR0: 0000000000000000 DR1: 0000000000000000
+DR2: 0000000000000000
+[   29.366683] DR3: 0000000000000000 DR6: 00000000fffe0ff0
+DR7: 0000000000000400
+[   29.367197] Call Trace:
+[   29.367381]  <IRQ>
+[   29.367537]  __handle_irq_event_percpu+0x53/0x3e0
+[   29.367916]  handle_irq_event_percpu+0x35/0x90
+[   29.368247]  handle_irq_event+0x39/0x60
+[   29.368632]  handle_fasteoi_irq+0xc2/0x1d0
+[   29.368950]  __common_interrupt+0x7f/0x150
+[   29.369254]  common_interrupt+0xb4/0xd0
+[   29.369547]  </IRQ>
+[   29.369708]  asm_common_interrupt+0x1e/0x40
+[   29.370016] RIP: 0010:native_safe_halt+0x17/0x20
+[   29.370360] Code: 07 0f 00 2d db 80 43 00 f4 5d c3 0f 1f 84 00 00 00
+00 00 8b 05 c2 37 e5 01 55 48 89 e5 85 c0 7e 07 0f 00 2d bb 80 43 00 fb
+f4 <5d> c3 cc cc cc cc cc cc cc 55 48 89 e5 e8 67 53 ff ff 8b 0d f9 91
+[   29.371696] RSP: 0018:ffffc9000008fe90 EFLAGS: 00000246
+[   29.372079] RAX: 0000000000000000 RBX: 0000000000000002
+RCX: 0000000000000000
+[   29.372595] RDX: 0000000000000000 RSI: ffffffff854f67a4
+RDI: ffffffff85403406
+[   29.373122] RBP: ffffc9000008fe90 R08: 0000000000000001
+R09: 0000000000000001
+[   29.373646] R10: 0000000000000000 R11: 0000000000000001
+R12: ffffffff86009188
+[   29.374160] R13: 0000000000000000 R14: 0000000000000000
+R15: ffff888100258000
+[   29.374690]  default_idle+0x9/0x10
+[   29.374944]  arch_cpu_idle+0xa/0x10
+[   29.375198]  default_idle_call+0x6e/0x250
+[   29.375491]  do_idle+0x1f0/0x2d0
+[   29.375740]  cpu_startup_entry+0x18/0x20
+[   29.376034]  start_secondary+0x11f/0x160
+[   29.376328]  secondary_startup_64_no_verify+0xb0/0xbb
+[   29.376705] Modules linked in:
+[   29.376939] Dumping ftrace buffer:
+[   29.377187]    (ftrace buffer empty)
+[   29.377460] CR2: 0000000000000014
+[   29.377712] ---[ end trace 51a473dffb618c47 ]---
+[   29.378056] RIP: 0010:via_sdc_isr+0x21f/0x410
+[   29.378380] Code: ff ff e8 84 aa d0 fd 66 45 89 7e 28 66 41 f7 c4 00
+10 75 56 e8 72 aa d0 fd 66 41 f7 c4 00 c0 74 10 e8 65 aa d0 fd 48 8b 43
+18 <c7> 40 14 ac ff ff ff e8 55 aa d0 fd 48 89 df e8 ad fb ff ff e9 77
+[   29.379714] RSP: 0018:ffffc90000118e98 EFLAGS: 00010046
+[   29.380098] RAX: 0000000000000000 RBX: ffff888107d77880
+RCX: 0000000000000000
+[   29.380614] RDX: 0000000000000000 RSI: ffffffff835d20bb
+RDI: 00000000ffffffff
+[   29.381134] RBP: ffffc90000118ed8 R08: 0000000000000001
+R09: 0000000000000001
+[   29.381653] R10: 0000000000000000 R11: 0000000000000001
+R12: 0000000000008600
+[   29.382176] R13: ffff888107d779c8 R14: ffffc90009c00200
+R15: 0000000000008000
+[   29.382697] FS:  0000000000000000(0000) GS:ffff88817bc80000(0000)
+knlGS:0000000000000000
+[   29.383277] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[   29.383697] CR2: 0000000000000014 CR3: 0000000005a2e000
+CR4: 00000000000006e0
+[   29.384223] DR0: 0000000000000000 DR1: 0000000000000000
+DR2: 0000000000000000
+[   29.384736] DR3: 0000000000000000 DR6: 00000000fffe0ff0
+DR7: 0000000000000400
+[   29.385260] Kernel panic - not syncing: Fatal exception in interrupt
+[   29.385882] Dumping ftrace buffer:
+[   29.386135]    (ftrace buffer empty)
+[   29.386401] Kernel Offset: disabled
+[   29.386656] Rebooting in 1 seconds..
 
-Signed-off-by: Tong Zhang <ztong0001@gmail.com>
-Co-developed-by: Ulf Hansson <ulf.hansson@linaro.org>
-Link: https://lore.kernel.org/r/20210511163944.1233295-1-ztong0001@gmail.com
+Signed-off-by: Zheyu Ma <zheyuma97@gmail.com>
+Link: https://lore.kernel.org/r/1622727200-15808-1-git-send-email-zheyuma97@gmail.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/memstick/host/rtsx_usb_ms.c | 10 ++++------
- 1 file changed, 4 insertions(+), 6 deletions(-)
+ drivers/mmc/host/via-sdmmc.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/memstick/host/rtsx_usb_ms.c b/drivers/memstick/host/rtsx_usb_ms.c
-index 102dbb8080da..29271ad4728a 100644
---- a/drivers/memstick/host/rtsx_usb_ms.c
-+++ b/drivers/memstick/host/rtsx_usb_ms.c
-@@ -799,9 +799,9 @@ static int rtsx_usb_ms_drv_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
+index 4f4c0813f9fd..350e67056fa6 100644
+--- a/drivers/mmc/host/via-sdmmc.c
++++ b/drivers/mmc/host/via-sdmmc.c
+@@ -857,6 +857,9 @@ static void via_sdc_data_isr(struct via_crdr_mmc_host *host, u16 intmask)
+ {
+ 	BUG_ON(intmask == 0);
  
- 	return 0;
- err_out:
--	memstick_free_host(msh);
- 	pm_runtime_disable(ms_dev(host));
- 	pm_runtime_put_noidle(ms_dev(host));
-+	memstick_free_host(msh);
- 	return err;
- }
- 
-@@ -828,9 +828,6 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
- 	}
- 	mutex_unlock(&host->host_mutex);
- 
--	memstick_remove_host(msh);
--	memstick_free_host(msh);
--
- 	/* Balance possible unbalanced usage count
- 	 * e.g. unconditional module removal
- 	 */
-@@ -838,10 +835,11 @@ static int rtsx_usb_ms_drv_remove(struct platform_device *pdev)
- 		pm_runtime_put(ms_dev(host));
- 
- 	pm_runtime_disable(ms_dev(host));
--	platform_set_drvdata(pdev, NULL);
--
-+	memstick_remove_host(msh);
- 	dev_dbg(ms_dev(host),
- 		": Realtek USB Memstick controller has been removed\n");
-+	memstick_free_host(msh);
-+	platform_set_drvdata(pdev, NULL);
- 
- 	return 0;
- }
++	if (!host->data)
++		return;
++
+ 	if (intmask & VIA_CRDR_SDSTS_DT)
+ 		host->data->error = -ETIMEDOUT;
+ 	else if (intmask & (VIA_CRDR_SDSTS_RC | VIA_CRDR_SDSTS_WC))
 -- 
 2.30.2
 
