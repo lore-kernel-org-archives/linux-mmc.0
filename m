@@ -7,41 +7,41 @@ X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E408C07E9E
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:15:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30CA9C07E9A
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:15:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 785DA613F6
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:15:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1DE2A613E5
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:15:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232803AbhGDXSE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jul 2021 19:18:04 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50832 "EHLO mail.kernel.org"
+        id S232805AbhGDXSG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jul 2021 19:18:06 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50862 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234332AbhGDXPE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 4 Jul 2021 19:15:04 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 5CC2161405;
-        Sun,  4 Jul 2021 23:12:12 +0000 (UTC)
+        id S234511AbhGDXPM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 4 Jul 2021 19:15:12 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 3C87261283;
+        Sun,  4 Jul 2021 23:12:35 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625440333;
+        s=k20201202; t=1625440355;
         bh=MizJOt40eSFT2KNYAkVlwfO4pJmJMkjVesUYdvsuoxc=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Bc8g4/gwmQubVE/4GLkPOM9I+5SQOhb32/T9Is14X4rumtfI0Fb5rcWtKxpbypwDV
-         N8sZZcnHn0Sj5PHtgfd4cNgX60pnIRUnQQonqRtCKG3pqug+2MB5j2S30VZh/3Kfvm
-         qzuR1ziSY4RI4pX5HHNyX1/k59u8g4ciyKZLLFkhs01fLrYSWcSdiJUNpXbaEePZGf
-         x3WxAQZe4ViWjJESlIbpS6PedNd8WQxcojvq6YS84Vxpdg2VJUBXQf/A2hgTJX4Gj5
-         PeOko1oSeWhH4atdOEqbdF0AU3FPeJalruWLVNQ+mLd6cr6yK3ELUiCRMLqLmHeTVy
-         cocyhfKbUsHfA==
+        b=E9LpsBpZ9QVkK/bOcMwS6XiMT6hHviW2Un/Ycq8Ib5I0+fope1HZIBERhGzvkyS/F
+         bRhE/n4vbdgjo1x/0oJLuVQ6WV6TCL+mPU6X0GUQ5aoAb6hBx7YZkd1fmjE6zLIGvX
+         seVvSkzP4P8RxdpYzXJ2gaUW75pNEso6O35iPukHFX3wB1lC6sglPOhgg1g4yT3l3e
+         5oGkeTp/qrtRlabqiDMKT9Q5cXd1rmEOxmgrjEYQsnOi7tOXACIZsMNr+txfRZrNs1
+         ckTYJCBap4u8PosmzkZ8fZSn9KcaQYX1JUjpv309AHh0H+dYrHODcR8A9CwgmTRqvC
+         GR3Sw+QPLj3QA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Zheyu Ma <zheyuma97@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 13/20] mmc: via-sdmmc: add a check against NULL pointer dereference
-Date:   Sun,  4 Jul 2021 19:11:48 -0400
-Message-Id: <20210704231155.1491795-13-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 10/15] mmc: via-sdmmc: add a check against NULL pointer dereference
+Date:   Sun,  4 Jul 2021 19:12:16 -0400
+Message-Id: <20210704231222.1492037-10-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210704231155.1491795-1-sashal@kernel.org>
-References: <20210704231155.1491795-1-sashal@kernel.org>
+In-Reply-To: <20210704231222.1492037-1-sashal@kernel.org>
+References: <20210704231222.1492037-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
