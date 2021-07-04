@@ -7,41 +7,41 @@ X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30CA9C07E9A
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:15:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DC20C07E9A
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:17:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1DE2A613E5
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:15:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EDD9E60234
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:17:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232805AbhGDXSG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jul 2021 19:18:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50862 "EHLO mail.kernel.org"
+        id S231944AbhGDXUY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jul 2021 19:20:24 -0400
+Received: from mail.kernel.org ([198.145.29.99]:50832 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234511AbhGDXPM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 4 Jul 2021 19:15:12 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 3C87261283;
-        Sun,  4 Jul 2021 23:12:35 +0000 (UTC)
+        id S232679AbhGDXNQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 4 Jul 2021 19:13:16 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id BC08C61945;
+        Sun,  4 Jul 2021 23:09:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625440355;
-        bh=MizJOt40eSFT2KNYAkVlwfO4pJmJMkjVesUYdvsuoxc=;
+        s=k20201202; t=1625440147;
+        bh=mxQe9Fj1he7F+yRFlVg9J01sazLPflZ2lsIaOAnRvro=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=E9LpsBpZ9QVkK/bOcMwS6XiMT6hHviW2Un/Ycq8Ib5I0+fope1HZIBERhGzvkyS/F
-         bRhE/n4vbdgjo1x/0oJLuVQ6WV6TCL+mPU6X0GUQ5aoAb6hBx7YZkd1fmjE6zLIGvX
-         seVvSkzP4P8RxdpYzXJ2gaUW75pNEso6O35iPukHFX3wB1lC6sglPOhgg1g4yT3l3e
-         5oGkeTp/qrtRlabqiDMKT9Q5cXd1rmEOxmgrjEYQsnOi7tOXACIZsMNr+txfRZrNs1
-         ckTYJCBap4u8PosmzkZ8fZSn9KcaQYX1JUjpv309AHh0H+dYrHODcR8A9CwgmTRqvC
-         GR3Sw+QPLj3QA==
+        b=XGHmZECg6gJv2mJhaos8qGgD0HaWRvochxSjT8Tudmh/McnbMUrOTJqgMYZoOWg79
+         imL2g6oekddlmjwL9fa5qShIaawOg9BwuNq8qrztN0L1DpDy2UMeAT2xr+ByBU+zbQ
+         1p6ykmrz1v50EwKayBCCDKFpBTI+bEaGITJxfbIMNcyXePeyBjtfarK6KLUlnHxm9h
+         0u5f09TcauNT8/MzVObV4B+Lj+1iRzTHVcRsNo01J5EaCeGk4H+2ZLru36WAZ3UgBh
+         zXy1q4KSBXPyAn5jpUgLN9/O+VKsCof3ue75//YDQj1OVr15+V6Wc1Zy2YXgDRKRTM
+         VZq+fANzUYVpg==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Zheyu Ma <zheyuma97@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.4 10/15] mmc: via-sdmmc: add a check against NULL pointer dereference
-Date:   Sun,  4 Jul 2021 19:12:16 -0400
-Message-Id: <20210704231222.1492037-10-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.10 47/70] mmc: via-sdmmc: add a check against NULL pointer dereference
+Date:   Sun,  4 Jul 2021 19:07:40 -0400
+Message-Id: <20210704230804.1490078-47-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210704231222.1492037-1-sashal@kernel.org>
-References: <20210704231222.1492037-1-sashal@kernel.org>
+In-Reply-To: <20210704230804.1490078-1-sashal@kernel.org>
+References: <20210704230804.1490078-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -169,10 +169,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 insertions(+)
 
 diff --git a/drivers/mmc/host/via-sdmmc.c b/drivers/mmc/host/via-sdmmc.c
-index b455e9cf95af..a3472127bea3 100644
+index 9b755ea0fa03..f07c71db3caf 100644
 --- a/drivers/mmc/host/via-sdmmc.c
 +++ b/drivers/mmc/host/via-sdmmc.c
-@@ -859,6 +859,9 @@ static void via_sdc_data_isr(struct via_crdr_mmc_host *host, u16 intmask)
+@@ -857,6 +857,9 @@ static void via_sdc_data_isr(struct via_crdr_mmc_host *host, u16 intmask)
  {
  	BUG_ON(intmask == 0);
  
