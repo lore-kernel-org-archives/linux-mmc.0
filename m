@@ -2,44 +2,45 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-20.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY,
-	URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7334CC11F72
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F2DAC11F76
 	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:05:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 556ED61283
+	by mail.kernel.org (Postfix) with ESMTP id 736826192E
 	for <linux-mmc@archiver.kernel.org>; Sun,  4 Jul 2021 23:05:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231177AbhGDXI1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Jul 2021 19:08:27 -0400
-Received: from mail.kernel.org ([198.145.29.99]:46918 "EHLO mail.kernel.org"
+        id S231314AbhGDXI2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Jul 2021 19:08:28 -0400
+Received: from mail.kernel.org ([198.145.29.99]:46478 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231128AbhGDXIH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sun, 4 Jul 2021 19:08:07 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 316D261954;
-        Sun,  4 Jul 2021 23:05:31 +0000 (UTC)
+        id S231157AbhGDXIK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 4 Jul 2021 19:08:10 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 98B9161283;
+        Sun,  4 Jul 2021 23:05:33 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1625439932;
-        bh=nYZjtovbTvEXUjXwCxT6in8QL3EZuWYSvKmgcDiqPfg=;
+        s=k20201202; t=1625439934;
+        bh=g9qfdaST5Xg4hE7mjON8bksK/iUulk9ir5gSDX6PlSQ=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=pyzmFcPXjN+fTeBuXI6ohuZtTYf2UQSXaesEzReJs7/Krhp2T/hG4pfaJde412nk5
-         Y/Sp1DJvLYHpbznIvo+IRSwl61SflUgPwu4043ocvsMFFcK0sKUacBClQhveXeUwAq
-         4Tijn0R1BPCpqigU/SghY6l8bKDtu74DDcl8scsxJ2rCYvl+GNDDKLwNew+POEpyhg
-         OvwZxSOeTrYTslp77PWzlOpKuAhfhFKDdDyMVob9U+CGT4ZKUfNUDEwQMLt+kR7t+4
-         Mvw/+u2JQwNGpCKmx60kJq8flOgXwv9DHMQrSBU8S/qEZ7O33M9VyK1/n0yustpeNH
-         ae5eX42sth9oQ==
+        b=stK+WvIdpe0Iiat6uBMwOAGvASdKTq4SyEoEOxHocMXLRjhbkbZN2JVrUvZDDH3NC
+         UYiuxskOsTUZp5xm4pGPURboWVzNuEBMdCey6bi/jipweKi5EbrMln+iAgxCT85Nej
+         yNF5D2iRHy+p/W8d3/82E4cgrEkoxscpOYqeRwlQdsEJrU3uZdPH1UceohBawdbst5
+         yO90zs9wxgYPlxGTNZ+lKuj5Kl9mZRN28321BWZIvkPcST28fz0dLCgYyQre3IqoZ/
+         Sj6VUMKE8ZbIFTtZ7AMC1du4feuwSg0a9W+4VdKPSEhvPKumvQq4s1aTWkJKuU/bqu
+         ZhCx3SV3t+/tw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
-        kernel test robot <lkp@intel.com>,
+Cc:     Andrew Jeffery <andrew@aj.id.au>, Joel Stanley <joel@jms.id.au>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.13 52/85] mmc: sdhci-sprd: use sdhci_sprd_writew
-Date:   Sun,  4 Jul 2021 19:03:47 -0400
-Message-Id: <20210704230420.1488358-52-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>, linux-aspeed@lists.ozlabs.org,
+        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: [PATCH AUTOSEL 5.13 54/85] mmc: sdhci-of-aspeed: Turn down a phase correction warning
+Date:   Sun,  4 Jul 2021 19:03:49 -0400
+Message-Id: <20210704230420.1488358-54-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210704230420.1488358-1-sashal@kernel.org>
 References: <20210704230420.1488358-1-sashal@kernel.org>
@@ -51,35 +52,43 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+From: Andrew Jeffery <andrew@aj.id.au>
 
-[ Upstream commit 961470820021e6f9d74db4837bd6831a1a30341b ]
+[ Upstream commit a7ab186f60785850b5af1be183867000485ad491 ]
 
-The sdhci_sprd_writew() was defined by never used in sdhci_ops:
+The card timing and the bus frequency are not changed atomically with
+respect to calls to the set_clock() callback in the driver. The result
+is the driver sees a transient state where there's a mismatch between
+the two and thus the inputs to the phase correction calculation
+formula are garbage.
 
-    drivers/mmc/host/sdhci-sprd.c:134:20: warning: unused function 'sdhci_sprd_writew'
+Switch from dev_warn() to dev_dbg() to avoid noise in the normal case,
+though the change does make bad configurations less likely to be
+noticed.
 
-Reported-by: kernel test robot <lkp@intel.com>
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Link: https://lore.kernel.org/r/20210601095403.236007-2-krzysztof.kozlowski@canonical.com
+Reported-by: Joel Stanley <joel@jms.id.au>
+Signed-off-by: Andrew Jeffery <andrew@aj.id.au>
+Reviewed-by: Joel Stanley <joel@jms.id.au>
+Link: https://lore.kernel.org/r/20210607013020.85885-1-andrew@aj.id.au
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/sdhci-sprd.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/mmc/host/sdhci-of-aspeed.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index 5dc36efff47f..11e375579cfb 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -393,6 +393,7 @@ static void sdhci_sprd_request_done(struct sdhci_host *host,
- static struct sdhci_ops sdhci_sprd_ops = {
- 	.read_l = sdhci_sprd_readl,
- 	.write_l = sdhci_sprd_writel,
-+	.write_w = sdhci_sprd_writew,
- 	.write_b = sdhci_sprd_writeb,
- 	.set_clock = sdhci_sprd_set_clock,
- 	.get_max_clock = sdhci_sprd_get_max_clock,
+diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+index d001c51074a0..e4665a438ec5 100644
+--- a/drivers/mmc/host/sdhci-of-aspeed.c
++++ b/drivers/mmc/host/sdhci-of-aspeed.c
+@@ -150,7 +150,7 @@ static int aspeed_sdhci_phase_to_tap(struct device *dev, unsigned long rate_hz,
+ 
+ 	tap = div_u64(phase_period_ps, prop_delay_ps);
+ 	if (tap > ASPEED_SDHCI_NR_TAPS) {
+-		dev_warn(dev,
++		dev_dbg(dev,
+ 			 "Requested out of range phase tap %d for %d degrees of phase compensation at %luHz, clamping to tap %d\n",
+ 			 tap, phase_deg, rate_hz, ASPEED_SDHCI_NR_TAPS);
+ 		tap = ASPEED_SDHCI_NR_TAPS;
 -- 
 2.30.2
 
