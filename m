@@ -2,212 +2,172 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C609C11F6F
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jul 2021 09:56:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36BAAC07E96
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jul 2021 10:08:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5E81E619A1
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jul 2021 09:56:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 186C6619A5
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Jul 2021 10:08:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231309AbhGFJ7e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Jul 2021 05:59:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53532 "EHLO
+        id S231293AbhGFKLZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Jul 2021 06:11:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231181AbhGFJ7a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2021 05:59:30 -0400
-Received: from pandora.armlinux.org.uk (pandora.armlinux.org.uk [IPv6:2001:4d48:ad52:32c8:5054:ff:fe00:142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C838BC061760;
-        Tue,  6 Jul 2021 02:56:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=armlinux.org.uk; s=pandora-2019; h=Sender:In-Reply-To:
-        Content-Transfer-Encoding:Content-Type:MIME-Version:References:Message-ID:
-        Subject:Cc:To:From:Date:Reply-To:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-         bh=16iZcd8UM9edxy0w5wY5BQzXODSiQ7QkmW3vxkbk5D0=; b=a3mzSZ9zhXvQ7z72FKA8Fdnpk
-        LWcvpcuWofwRYcFCjviYZJk1oPXrs7M3uQJ+ywY1LHJEnj+NRwjgrzF1fC0F4Her/0HY+w0mU3H3Y
-        10CG8a1oWmfqpRlDsr7HNnDdAy6f+2/u33SyEsVG77yaTgZQwrs2MZiscSAA5F+AnLuDVz82jgC0J
-        lYqY2gLTqCI0RBtuMN88P4U2IEdFt2eygNpGPrRxU5Qv7iomPheSViajY02rYqXloTzTH8q6Js++w
-        YBqCoH4+kucnPqJUrbotraNf2h/vP6y9RzvkP75RGSjwQMJ9WI7C7sCONSx2yqdBujcUYV4c5FTfO
-        peWj6rYRg==;
-Received: from shell.armlinux.org.uk ([fd8f:7570:feb6:1:5054:ff:fe00:4ec]:45790)
-        by pandora.armlinux.org.uk with esmtpsa (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <linux@armlinux.org.uk>)
-        id 1m0hoi-0006RU-5N; Tue, 06 Jul 2021 10:56:36 +0100
-Received: from linux by shell.armlinux.org.uk with local (Exim 4.92)
-        (envelope-from <linux@shell.armlinux.org.uk>)
-        id 1m0hoO-0001sr-Ht; Tue, 06 Jul 2021 10:56:16 +0100
-Date:   Tue, 6 Jul 2021 10:56:16 +0100
-From:   "Russell King (Oracle)" <linux@armlinux.org.uk>
-To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        kernel@pengutronix.de, linux-kernel@vger.kernel.org,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        Helge Deller <deller@gmx.de>,
-        Geoff Levand <geoff@infradead.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Paul Mackerras <paulus@samba.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Alison Schofield <alison.schofield@intel.com>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Ira Weiny <ira.weiny@intel.com>,
-        Ben Widawsky <ben.widawsky@intel.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Stefan Richter <stefanr@s5r6.in-berlin.de>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        Cristian Marussi <cristian.marussi@arm.com>,
-        Wu Hao <hao.wu@intel.com>, Tom Rix <trix@redhat.com>,
-        Moritz Fischer <mdf@kernel.org>,
-        Jiri Kosina <jikos@kernel.org>,
-        Benjamin Tissoires <benjamin.tissoires@redhat.com>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        "K. Y. Srinivasan" <kys@microsoft.com>,
-        Haiyang Zhang <haiyangz@microsoft.com>,
-        Stephen Hemminger <sthemmin@microsoft.com>,
-        Wei Liu <wei.liu@kernel.org>, Dexuan Cui <decui@microsoft.com>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Wolfram Sang <wsa@kernel.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
-        Jens Taprogge <jens.taprogge@taprogge.org>,
-        Johannes Thumshirn <morbidrsa@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Maximilian Luz <luzmaximilian@gmail.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Mark Gross <mgross@linux.intel.com>,
-        Matt Porter <mporter@kernel.crashing.org>,
-        Alexandre Bounine <alex.bou9@gmail.com>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Thorsten Scherer <t.scherer@eckelmann.de>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>, Michael Buesch <m@bues.ch>,
-        Sven Van Asbroeck <TheSven73@gmail.com>,
-        Johan Hovold <johan@kernel.org>, Alex Elder <elder@kernel.org>,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Michael Jamet <michael.jamet@intel.com>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Yehezkel Bernat <YehezkelShB@gmail.com>,
-        Rob Herring <robh@kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Kirti Wankhede <kwankhede@nvidia.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Martyn Welch <martyn@welchs.me.uk>,
-        Manohar Vanga <manohar.vanga@gmail.com>,
-        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
-        Juergen Gross <jgross@suse.com>,
-        Stefano Stabellini <sstabellini@kernel.org>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>, Marc Zyngier <maz@kernel.org>,
-        Tyrel Datwyler <tyreld@linux.ibm.com>,
-        Vladimir Zapolskiy <vz@mleia.com>,
-        Samuel Holland <samuel@sholland.org>,
-        Qinglang Miao <miaoqinglang@huawei.com>,
-        Alexey Kardashevskiy <aik@ozlabs.ru>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Joey Pabalan <jpabalanb@gmail.com>,
-        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Frank Li <lznuaa@gmail.com>,
-        Mike Christie <michael.christie@oracle.com>,
-        Bodo Stroesser <bostroesser@gmail.com>,
-        Hannes Reinecke <hare@suse.de>,
-        David Woodhouse <dwmw@amazon.co.uk>,
-        SeongJae Park <sjpark@amazon.de>,
-        Julien Grall <jgrall@amazon.com>,
-        linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-        linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-acpi@vger.kernel.org, linux-wireless@vger.kernel.org,
-        linux-sunxi@lists.linux.dev, linux-cxl@vger.kernel.org,
-        nvdimm@lists.linux.dev, dmaengine@vger.kernel.org,
-        linux1394-devel@lists.sourceforge.net, linux-fpga@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-hyperv@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org,
-        industrypack-devel@lists.sourceforge.net,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, linux-ntb@googlegroups.com,
-        linux-pci@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-scsi@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-arm-msm@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
-        greybus-dev@lists.linaro.org, target-devel@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-serial@vger.kernel.org,
-        virtualization@lists.linux-foundation.org, kvm@vger.kernel.org,
-        xen-devel@lists.xenproject.org
-Subject: Re: [PATCH] bus: Make remove callback return void
-Message-ID: <20210706095616.GQ22278@shell.armlinux.org.uk>
-References: <20210706095037.1425211-1-u.kleine-koenig@pengutronix.de>
+        with ESMTP id S231284AbhGFKLZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Jul 2021 06:11:25 -0400
+Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16A67C061574
+        for <linux-mmc@vger.kernel.org>; Tue,  6 Jul 2021 03:08:46 -0700 (PDT)
+Received: by mail-vs1-xe30.google.com with SMTP id o7so11570468vss.5
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Jul 2021 03:08:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=PEeLkirnfCYQuHYnsGsdZPBzkk8jMtMxsiPF74aFxoU=;
+        b=lV08qaQEyrd56tWjENCu7ugufvgUr7HBL7oNTdTFz0/BrRJr1meUQ1LdLQm3dBXuki
+         Z0dpOKR7iFK7UxVMCCBvuKM3DW19IyWJKqMEfc09wqrbrDrmeVymbMJIcZrITV9YZUUf
+         Wlr6Rm0RsRZO++QhT5U6M6fD66yMlGWzCW4d4VRzUUEIKXMCgvDBxYFfiofbfESYgolm
+         GeCtUWklFwr6xz3pOUDO714+v5NgLt5PFcHs+LZACSdYSRePXOVVM+P8gFBb50yoxkio
+         VHvDBDAtM1FSYb/GjzAtwbwT9fIg/YsMrF8vBiKdO56Zs1osEYr6iIHe/p5fm7pmrdaz
+         IJYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=PEeLkirnfCYQuHYnsGsdZPBzkk8jMtMxsiPF74aFxoU=;
+        b=BEhEDif4hCUpy3eb4Bdp/m1p2ws1vbpWeFnlo/SvXWFYlWRYLe8QSX1m+QZ4W2yk4g
+         Uxtzzo8oE0u9gV7IPKtsYavzAgL5FzwpWvz0NGCVUsOc+g7psanMaQPryOV1E9mIfi1i
+         vFoIecwzr4dI04b4rSFzejXRnadEhYYhQhV+S92epIuKjilpq/poFfMIzsgHy1yx/nOb
+         WKD8PzesIW79K/2SZtdkKDE61afKkywk+igDMNknkb6NrMGh5rUyBrL1Qa3nJAe8JPJA
+         +KfIPUQDW3Srw+UkVVX1zab38JBJVHuxND1yxzLjiEZx2znwyMpHCbjI3riJrIPfYqxE
+         FAzw==
+X-Gm-Message-State: AOAM5301vHk8Tafok8cBXYK0jPZ4SHqUPX2zuknob4gW+ezB/ggWkucp
+        BmwpQmRE83PNNIVbVTkJIgUNIkP61PJYle0y59acYQ==
+X-Google-Smtp-Source: ABdhPJzpIivUn9UvwbUvVupnSMxfes8KAUG1L6DuN/3A5ndBfwCuMDkJBSZ1u8lYbldRIQOX0G6wA92ucPASKf925XM=
+X-Received: by 2002:a67:8095:: with SMTP id b143mr14129643vsd.48.1625566125254;
+ Tue, 06 Jul 2021 03:08:45 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210706095037.1425211-1-u.kleine-koenig@pengutronix.de>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-Sender: Russell King (Oracle) <linux@armlinux.org.uk>
+References: <20210705090050.15077-1-reniuschengl@gmail.com>
+ <CAPDyKFotmw-HQpZKCOD_8kThEa0_KSPnn36FNFLKRyUHYRHQjQ@mail.gmail.com>
+ <CAJU4x8u8JPBJ3V6MCi1XcO4Qim-COPuxOhTdUnor7JdNCUFb=w@mail.gmail.com>
+ <CAPDyKFqXsn91BvkJXMYSnc7X=RP9DXxXp2nKMmv+aMPoNdK2Tw@mail.gmail.com>
+ <CAJU4x8srB7skGFVcj1SPrzEZSnVkwKiW3OPN0GQxvgtRG7GAAQ@mail.gmail.com>
+ <CAPDyKFq0yHxX7wb4XGeiMiSGGiOf8RKJ5ahhFQ+_vodqnyPV9Q@mail.gmail.com> <CAJU4x8uGxb5VD1WVV5-QeLkVzuuR09-NacL-9nuXe8Zofzb2=w@mail.gmail.com>
+In-Reply-To: <CAJU4x8uGxb5VD1WVV5-QeLkVzuuR09-NacL-9nuXe8Zofzb2=w@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 6 Jul 2021 12:08:08 +0200
+Message-ID: <CAPDyKFpvCFYQVEp77hiRHY6CVDej-ffF5UE=LH=HSGcqMZA02w@mail.gmail.com>
+Subject: Re: [PATCH] [v2] mmc: sdhci-pci-gli: Improve Random 4K Read
+ Performance of GL9763E
+To:     Renius Chen <reniuschengl@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ben Chuang <Ben.Chuang@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jul 06, 2021 at 11:50:37AM +0200, Uwe Kleine-König wrote:
-> The driver core ignores the return value of this callback because there
-> is only little it can do when a device disappears.
-> 
-> This is the final bit of a long lasting cleanup quest where several
-> buses were converted to also return void from their remove callback.
-> Additionally some resource leaks were fixed that were caused by drivers
-> returning an error code in the expectation that the driver won't go
-> away.
-> 
-> With struct bus_type::remove returning void it's prevented that newly
-> implemented buses return an ignored error code and so don't anticipate
-> wrong expectations for driver authors.
-> 
-> Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
+[...]
 
-Yay! For ARM, Amba and related parts:
+> > > Thanks for your explanation.
+> > >
+> > > I think there may be some misunderstandings here.
+> >
+> > I fully understand what you want to do.
+> >
+> > >
+> > > Our purpose is to avoid our GL9763e from entering ASPM L1 state during
+> > > a sequence of 4K read requests. So we don't have to consider about the
+> > > behavior/performance of the eMMC/SD card and what eMMC/SD card that is
+> > > being used. We just need to know what kind of requests we are
+> > > receiving now from the PCIe root port.
+> > >
+> > > Besides, the APSM L1 is purely hardware behavior in GL9763e and has no
+> > > corresponding relationship with runtime PM. It's not activated by
+> > > driver and the behaviors are not handled by software. I think runtime
+> > > PM is used to handle the behaviors of D0/D3 of the device, but not the
+> > > link status of ASPM L0s, L1, etc.
+> >
+> > Maybe runtime PM isn't the perfect fit for this type of use case.
+> >
+> > That still doesn't matter to to me, I will not accept this kind of
+> > governor/policy based code for use cases, in drivers. It doesn't
+> > belong there.
+> >
+>
+> Hi Ulf,
+>
+> The behavior of this patch is to set the value of a GL9763e vendor
+> specified register. Why it doesn't belong to GL9763e driver but other
+> common codes?
 
-Acked-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk>
+Let me try one more time.
 
--- 
-RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
-FTTP is here! 40Mbps down 10Mbps up. Decent connectivity at last!
+The code that is needed to put the GL9763e HW into low power state
+(writing to GL9763e specific register) certainly belongs in the
+driver.
+
+The code that monitors for a specific use case does not.
+
+>
+> > >
+> > > I agree that the policy of balancing performance vs the energy cost is
+> > > a generic problem that all mmc drivers share. But our driver of
+> > > GL9763e is a host driver, the setting in this patch is also only for
+> > > GL9763e, could not be used by other devices. It depends on our
+> > > specific hardware design so that it is not a generic solution or
+> > > policy. So I think to implement such a patch in our specific GL9763e
+> > > driver to execute the specific actions just for our hardware design is
+> > > reasonable.
+> >
+> > From the use case point of view, the GL9763e hardware design isn't at
+> > all specific.
+> >
+> > In many cases, controllers/platforms have support for low power states
+> > that one want to enter to avoid wasting energy. The difficult part is
+> > to know *when* it makes sense to enter a low power state, as it also
+> > introduces a latency when the power needs to be restored for the
+> > device, to allow it to serve a new request.
+> >
+> > To me, it sounds like you may have been too aggressive on avoid
+> > wasting energy. If I understand correctly the idle period you use is
+> > 20/21 us, while most other drivers use 50-100 ms as idle period.
+> >
+>
+> Yes, according to our customer's test for the GL9763e, if the ASPM L1
+> entry delay of GL9763e, which is the idle period you mentioned, is
+> larger than 20/21 us, it will not pass the PLT test. The PLT is
+> requested by Google for evaluating the product's battery life. The
+> product won't be accepted by Google if it fails the PLT test. So we
+> set the ASPM L1 entry delay to 20/21us.
+>
+> With such a short idle period, during 4K reads, the idle time between
+> the read requests will be larger than 20/21us, so GL9763e will enter
+> ASPM L1 very frequently to impact the performance.
+>
+> The bad performance of 4K reads was highlighted by Google, too. Our
+> customer has to pass both the PLT test and 4K read performance test by
+> Google's request. So after some discussions with our customer and
+> Google, we decided to submit such a patch to get the best balance to
+> satisfy Google's requiremnet.
+>
+> The function and the register is vendor specified of GL9763e, so we
+> access it in the vendor driver of GL9763e. Add some functions in other
+> mmc general codes to do something only for GL9763e and can not be
+> applied by other devices might be a little bit strange and difficult
+> to implement and design?
+
+I haven't said implementation need to be easy, but suggest a few
+options to move forward.
+
+What did state and I am not going to change my opinion on this, is the
+governor code that monitors for use cases, don't belong in the driver.
+
+Kind regards
+Uffe
