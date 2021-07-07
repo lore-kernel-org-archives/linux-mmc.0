@@ -2,287 +2,261 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40859C07E95
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 14:25:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC14BC07E95
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 14:36:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1C46B61CC0
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 14:25:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9941761C37
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 14:36:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232012AbhGGO2K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Jul 2021 10:28:10 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:34134 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231849AbhGGO2J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2021 10:28:09 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1625667928;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=R1b1MmqRg+JjTb9SqE3N1oUES1jMyS6VpEEII2IWGuk=;
-        b=Iwo14BH06W//MgUJ/Dx5+0ggoObpPt3GMxyyQBWF8d1IHUVhouEMvKgsOvmGIh2+GywzJi
-        +s4nM2c/4yUcqqIk/5/D8RDL/iiZIxBG4fJxpGSUR0LCGQna8mc/ItGR3dWtwxL87y5tK5
-        gUfjwMS7Yp9iKOYkVjxwYcPjJSPj38k=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-248-3QQwLlOoP9Ouo1dOX0QIzg-1; Wed, 07 Jul 2021 10:25:27 -0400
-X-MC-Unique: 3QQwLlOoP9Ouo1dOX0QIzg-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id E5AAE9F93C;
-        Wed,  7 Jul 2021 14:25:20 +0000 (UTC)
-Received: from [10.36.112.61] (ovpn-112-61.ams2.redhat.com [10.36.112.61])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id E4E3919C66;
-        Wed,  7 Jul 2021 14:24:39 +0000 (UTC)
-Subject: Re: [PATCH v2 4/4] bus: Make remove callback return void
-To:     =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc:     kernel@pengutronix.de, Cornelia Huck <cohuck@redhat.com>,
-        linux-kernel@vger.kernel.org, Russell King <linux@armlinux.org.uk>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        Helge Deller <deller@gmx.de>,
-        Geoff Levand <geoff@infradead.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Paul Mackerras <paulus@samba.org>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        Len Brown <lenb@kernel.org>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        =?UTF-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Alison Schofield <alison.schofield@intel.com>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Ira Weiny <ira.weiny@intel.com>,
-        Ben Widawsky <ben.widawsky@intel.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Stefan Richter <stefanr@s5r6.in-berlin.de>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        Cristian Marussi <cristian.marussi@arm.com>,
-        Wu Hao <hao.wu@intel.com>, Tom Rix <trix@redhat.com>,
-        Moritz Fischer <mdf@kernel.org>,
-        Jiri Kosina <jikos@kernel.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        "K. Y. Srinivasan" <kys@microsoft.com>,
-        Haiyang Zhang <haiyangz@microsoft.com>,
-        Stephen Hemminger <sthemmin@microsoft.com>,
-        Wei Liu <wei.liu@kernel.org>, Dexuan Cui <decui@microsoft.com>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Wolfram Sang <wsa@kernel.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
-        Jens Taprogge <jens.taprogge@taprogge.org>,
-        Johannes Thumshirn <morbidrsa@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jon Mason <jdmason@kudzu.us>, Allen Hubbe <allenbh@gmail.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        =?UTF-8?Q?Krzysztof_Wilczy=c5=84ski?= <kw@linux.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Maximilian Luz <luzmaximilian@gmail.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Mark Gross <mgross@linux.intel.com>,
-        Matt Porter <mporter@kernel.crashing.org>,
-        Alexandre Bounine <alex.bou9@gmail.com>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Thorsten Scherer <t.scherer@eckelmann.de>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>, Michael Buesch <m@bues.ch>,
-        Sven Van Asbroeck <TheSven73@gmail.com>,
-        Johan Hovold <johan@kernel.org>, Alex Elder <elder@kernel.org>,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Michael Jamet <michael.jamet@intel.com>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Yehezkel Bernat <YehezkelShB@gmail.com>,
-        Rob Herring <robh@kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Jason Wang <jasowang@redhat.com>,
-        Kirti Wankhede <kwankhede@nvidia.com>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Martyn Welch <martyn@welchs.me.uk>,
-        Manohar Vanga <manohar.vanga@gmail.com>,
-        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
-        Juergen Gross <jgross@suse.com>,
-        Stefano Stabellini <sstabellini@kernel.org>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Takashi Iwai <tiwai@suse.com>, Marc Zyngier <maz@kernel.org>,
-        Tyrel Datwyler <tyreld@linux.ibm.com>,
-        Vladimir Zapolskiy <vz@mleia.com>,
-        Samuel Holland <samuel@sholland.org>,
-        Qinglang Miao <miaoqinglang@huawei.com>,
-        Alexey Kardashevskiy <aik@ozlabs.ru>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Joey Pabalan <jpabalanb@gmail.com>,
-        =?UTF-8?Q?Pali_Roh=c3=a1r?= <pali@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Frank Li <lznuaa@gmail.com>,
-        Mike Christie <michael.christie@oracle.com>,
-        Bodo Stroesser <bostroesser@gmail.com>,
-        Hannes Reinecke <hare@suse.de>,
-        David Woodhouse <dwmw@amazon.co.uk>,
-        SeongJae Park <sjpark@amazon.de>,
-        Julien Grall <jgrall@amazon.com>,
-        linux-arm-kernel@lists.infradead.org, linux-mips@vger.kernel.org,
-        linux-parisc@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-acpi@vger.kernel.org, linux-wireless@vger.kernel.org,
-        linux-sunxi@lists.linux.dev, linux-cxl@vger.kernel.org,
-        nvdimm@lists.linux.dev, dmaengine@vger.kernel.org,
-        linux1394-devel@lists.sourceforge.net, linux-fpga@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-hyperv@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org,
-        industrypack-devel@lists.sourceforge.net,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org, linux-ntb@googlegroups.com,
-        linux-pci@vger.kernel.org, platform-driver-x86@vger.kernel.org,
-        linux-remoteproc@vger.kernel.org, linux-scsi@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-arm-msm@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
-        greybus-dev@lists.linaro.org, target-devel@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-serial@vger.kernel.org,
-        virtualization@lists.linux-foundation.org, kvm@vger.kernel.org,
-        xen-devel@lists.xenproject.org,
-        Russell King <rmk+kernel@armlinux.org.uk>,
-        Johannes Thumshirn <jth@kernel.org>
-References: <20210706154803.1631813-1-u.kleine-koenig@pengutronix.de>
- <20210706154803.1631813-5-u.kleine-koenig@pengutronix.de>
-From:   Benjamin Tissoires <benjamin.tissoires@redhat.com>
-Message-ID: <5d3bf56e-285f-ecc1-ec64-384409645353@redhat.com>
-Date:   Wed, 7 Jul 2021 16:24:38 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.10.1
+        id S232042AbhGGOio convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Jul 2021 10:38:44 -0400
+Received: from de-smtp-delivery-105.mimecast.com ([194.104.111.105]:30059 "EHLO
+        de-smtp-delivery-105.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S231993AbhGGOio (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2021 10:38:44 -0400
+Received: from GBR01-LO2-obe.outbound.protection.outlook.com
+ (mail-lo2gbr01lp2056.outbound.protection.outlook.com [104.47.21.56]) (Using
+ TLS) by relay.mimecast.com with ESMTP id
+ de-mta-26-uJ57HpaDM66CVp4f0KSwog-1; Wed, 07 Jul 2021 16:36:01 +0200
+X-MC-Unique: uJ57HpaDM66CVp4f0KSwog-1
+Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:89::10)
+ by CWLP265MB3828.GBRP265.PROD.OUTLOOK.COM (2603:10a6:400:110::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4287.31; Wed, 7 Jul
+ 2021 14:36:01 +0000
+Received: from CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+ ([fe80::259d:65ac:ae6d:409d]) by CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+ ([fe80::259d:65ac:ae6d:409d%9]) with mapi id 15.20.4287.033; Wed, 7 Jul 2021
+ 14:36:01 +0000
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+CC:     Avri Altman <Avri.Altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "hch@infradead.org" <hch@infradead.org>
+Subject: Re: [PATCHv2] mmc: block: Differentiate busy and PROG state
+Thread-Topic: [PATCHv2] mmc: block: Differentiate busy and PROG state
+Thread-Index: AQHXcwny68++j12etUaztO/Yg7lHlas3aFYAgAAVZiM=
+Date:   Wed, 7 Jul 2021 14:36:00 +0000
+Message-ID: <CWXP265MB26804E1F676F532D08A9BBFBC41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+References: <CWXP265MB268049D9AB181062DA7F6DDBC4009@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <CWXP265MB26807AC3C130772D789D0AABC41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <CAPDyKFq44ZuXXUDQV34NSW-ixB9GAZfDx+dx-Kb8O7=LQ1TSHQ@mail.gmail.com>
+ <CWXP265MB26803EFAC659676EC0914F97C41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <DM6PR04MB6575B0049B98254E77BA447EFC1A9@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <CWXP265MB2680575489E508DC75D84857C41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<CAPDyKFrCtRTHZYRjUecvrqr=YyhrTw+HXtdLRHeOTxoK94iSRg@mail.gmail.com>
+In-Reply-To: <CAPDyKFrCtRTHZYRjUecvrqr=YyhrTw+HXtdLRHeOTxoK94iSRg@mail.gmail.com>
+Accept-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 95cc116b-e3d7-4cbf-cff4-08d941548aca
+x-ms-traffictypediagnostic: CWLP265MB3828:
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <CWLP265MB3828C706E56B8A2164AF8DA5C41A9@CWLP265MB3828.GBRP265.PROD.OUTLOOK.COM>
+x-ms-oob-tlc-oobclassifiers: OLM:10000
+x-ms-exchange-senderadcheck: 1
+x-microsoft-antispam: BCL:0
+x-microsoft-antispam-message-info: lKc8vMnqXpLcwkdZejwBnu278Uirr+aEbJ6MVBKobacyFBYV78BtBdVIwkPTgvNFRK5ngyKZzb5U64aHp3IM64+5qHpCj1dyYkrDjM71IT6WS+Myw+AdJfpV8lliZ502dVkD9Plz5WmBj79doTLFV4P3gqQPR9jNEXsOisYWJMEGdmYEk5Pa3c+crjdTLLMi9AAR2UJYlqDqex/55x75dYANyTqyzQhwcT3JEmDVl1dndUAH+WvqqK29OqDICbYaqRBLkj7jwH36WUBIXVk91LcyxK1hS1ckwB7ZdRPZQ1AGF5UdsnEBAJaMgEZ65cB4hSq43YQgNahSiofWw2iaUQFF3g/HaR73Sv+d9Mo6TvNhCMmXy4QI0se/KWHlRVxWPvSh3BznQjSTQySOgir6oP72i7Sy8NLvIAc93cV0jKrnymFz7RmDsy+9L7Z93D073V1pJw3cv+g+odWF/Hh4d4sCGgEHbb6QIEAwOtl2bP+wyVFvSWFDHCslRpXHgCSq7a7/mbF5s4Bklbwr9yPxgzIW94bhgb8QetVqzfanhBrGv4Frbv7BKHe8+p7PE3Zd8Ov/IAgwLUvcR57tT5Oax5NUpjIua7bQVy5AansJN86mYSnWCOBR59JWKpe9wwAz+1Eyrwh+KSzVOFm/rNMh3Q==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(366004)(39830400003)(346002)(396003)(376002)(136003)(83380400001)(110136005)(33656002)(122000001)(55016002)(71200400001)(38100700002)(86362001)(26005)(91956017)(6506007)(76116006)(8676002)(316002)(66946007)(64756008)(4326008)(66556008)(66476007)(2906002)(9686003)(478600001)(7696005)(5660300002)(66446008)(8936002)(186003)(54906003)(52536014);DIR:OUT;SFP:1101
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?e7WEYSuN+gO4q+naQQn1V9Wp/IGfrZPrlGGCBzavOYTRlASUSW9Dd1lnOE?=
+ =?iso-8859-1?Q?mkV5DoQd2kTUVzPyfVuZUl9b2A2mbx0PepENLKQwyX/9kHXlRrQ3kzbmGB?=
+ =?iso-8859-1?Q?LP6Ei6ToP8TmE8MKtkUhowzlJzHKHI3ziYR+jyyCwtuRIaxYD00zeTonK9?=
+ =?iso-8859-1?Q?DjliCfhck20oP5QC9I2Vy51EC3uISEkrRWmXjugEJGq3vHlO7YdF2HSUXK?=
+ =?iso-8859-1?Q?Tv9YXG0duf5SscbHO48w/mxhDjTe3umWSw9sdfyFxTh/xen/WBUKcG1Vpc?=
+ =?iso-8859-1?Q?vEkA5t1d5uOABFM0VKIjKq797le/jDbF3zWimP/A/VWOY4VeCf19BnKYOL?=
+ =?iso-8859-1?Q?BgvXwxfcHwr0gBXhJGe0NT7BJY1iKI4CdEAMwmFBmbMkLjr/i+f9XfdxWC?=
+ =?iso-8859-1?Q?TAvfGbMTKr8bE1TBSUrIsZ/1IGOVpLFA23b1/Uslh4bhh8pWmEZdAOEM75?=
+ =?iso-8859-1?Q?mOv4cnqZsolnuS1nOsLwdZd1Q31hoB/cdAxz3nPVpSuOkE4Hey9wJKVUDE?=
+ =?iso-8859-1?Q?t/+9ywTEdfEO3EofOsAAUvJhvi3TX+3rhhQGwA+oXj825qGq+AECrZJWsY?=
+ =?iso-8859-1?Q?PNZAzjpGT7ErsnEDtY1+8bBB0u/hnthVn05RJ5wec09lziEX5ScP97+d/u?=
+ =?iso-8859-1?Q?ll+Vmyp0lgzxJwop+kb/zWZ/M5s8/XjhH5TL65qLtjpEP23+eUJ5TU+I4j?=
+ =?iso-8859-1?Q?6HRHtrQjahv1lIlgwpueprUuboFJX98cAzEXNo7YUIYROwQhBsrA/hlfWt?=
+ =?iso-8859-1?Q?cgxWxZ+mFG2+Hpf+hR9uo36o9MRQPnRZ/CzkP6r68oIYb5H1CJSuCsdcmu?=
+ =?iso-8859-1?Q?NvBeavSalOiKMVqSqzvG1md0KbiflLz1lAtkSt/IH2XiQdDyJpz/3kclmR?=
+ =?iso-8859-1?Q?Mi+e8id+UWNUdwzbXnFKFcdDWqt/jpOCL805htiefoBf8MKvmxMlmJMwmp?=
+ =?iso-8859-1?Q?VWIzG32PGDNniU6AcDeqbRz7VJv3QbvOZPqbjqdYFF6MGjSPnebtHlhww7?=
+ =?iso-8859-1?Q?mX3tRM19/a2roBWpUJpj4X2uIrDDtr5lofAht25ETRdzHFwH6nQLkxES7x?=
+ =?iso-8859-1?Q?lcNt8QFxpwELa7QyMEQsDuPLVo4pe64NuYk72KEi2JJ1MojOFYIcNo6vdR?=
+ =?iso-8859-1?Q?2IqtoRzn3aCKpcDGbHXicGzmmZx66YjfEK6CouH7H14i4eKLnvRs/xz8uU?=
+ =?iso-8859-1?Q?ohukK33OzpCyPxzEt4FTezCe+iKIkhATujT32/DKEzCrb+yKFOBnbk0veg?=
+ =?iso-8859-1?Q?dLV+a1XjAyiM0rnz/6H7Dum0Iv+/mgIrjeLJuXnrspfwxnlFciQfpzJirf?=
+ =?iso-8859-1?Q?JqwbUcwItwPNC5B2rVkbXVSs0rEti8sW/1ZzoStXgTnfWTM=3D?=
 MIME-Version: 1.0
-In-Reply-To: <20210706154803.1631813-5-u.kleine-koenig@pengutronix.de>
-Content-Type: text/plain; charset=utf-8; format=flowed
+X-OriginatorOrg: hyperstone.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-Network-Message-Id: 95cc116b-e3d7-4cbf-cff4-08d941548aca
+X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jul 2021 14:36:01.0106
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 86f203eb-e878-4188-b297-34c118c18b11
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 4fbTkQRvZixSN8p9+xfqe8AvabnFUV3pOjCvavWGJ8w9megajrMfqVF9WCZ4sGNdU8R+1FXWNdD2XP9A3kVAkA==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CWLP265MB3828
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=CDE5A68 smtp.mailfrom=cloehle@hyperstone.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: hyperstone.com
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/6/21 5:48 PM, Uwe Kleine-König wrote:
-> The driver core ignores the return value of this callback because there
-> is only little it can do when a device disappears.
-> 
-> This is the final bit of a long lasting cleanup quest where several
-> buses were converted to also return void from their remove callback.
-> Additionally some resource leaks were fixed that were caused by drivers
-> returning an error code in the expectation that the driver won't go
-> away.
-> 
-> With struct bus_type::remove returning void it's prevented that newly
-> implemented buses return an ignored error code and so don't anticipate
-> wrong expectations for driver authors.
-> 
-> Acked-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk> (For ARM, Amba and related parts)
-> Acked-by: Mark Brown <broonie@kernel.org>
-> Acked-by: Chen-Yu Tsai <wens@csie.org> (for drivers/bus/sunxi-rsb.c)
-> Acked-by: Pali Rohár <pali@kernel.org>
-> Acked-by: Mauro Carvalho Chehab <mchehab@kernel.org> (for drivers/media)
-> Acked-by: Hans de Goede <hdegoede@redhat.com> (For drivers/platform)
-> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Acked-By: Vinod Koul <vkoul@kernel.org>
-> Acked-by: Juergen Gross <jgross@suse.com> (For Xen)
-> Acked-by: Lee Jones <lee.jones@linaro.org> (For drivers/mfd)
-> Acked-by: Johannes Thumshirn <jth@kernel.org> (For drivers/mcb)
-> Acked-by: Johan Hovold <johan@kernel.org>
-> Acked-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org> (For drivers/slimbus)
-> Acked-by: Kirti Wankhede <kwankhede@nvidia.com> (For drivers/vfio)
-> Acked-by: Maximilian Luz <luzmaximilian@gmail.com>
-> Acked-by: Heikki Krogerus <heikki.krogerus@linux.intel.com> (For ulpi and typec)
-> Acked-by: Samuel Iglesias Gonsálvez <siglesias@igalia.com> (For ipack)
-> Reviewed-by: Tom Rix <trix@redhat.com> (For fpga)
-> Acked-by: Geoff Levand <geoff@infradead.org> (For ps3)
-> Signed-off-by: Uwe Kleine-König <u.kleine-koenig@pengutronix.de>
-> ---
-> 
+>>
+>> Prevent race condition with ioctl commands
+>>
+>> To fully prevent a race condition where the next
+>> issued command will be rejected as the card is no
+>> longer signalling busy but not yet back in TRAN state.
+>> The card may be in PROG state without signalling busy,
+>> for some of the commands that are only R1, but also
+>> for R1b commands, the card will signal non-busy as soon
+>> as receive buffers are free again, but the card has
+>> not finished handling the command and may therefore be
+>> in PROG.
+>
+>Can you please point me to the corresponding information in the spec
+>that states that the above behavior is correct?
 
-[...]
+Sure, unfortunately it is blanked in the simplified spec so I (think I) cannot simply cite it now.
+If access to the full spec is a problem for many contributors of the list, I would reconsider the legal aspects.
+The part I'm referring to is the last (two) sentence(s) of the section "Single Block Write" in 4.12.3 Data Write.
+(Single Block Write is the correct section as all R1 (no b) commands with data behave like Single Block Write.
+This info itself is scattered throughout the (simplified) spec, but for CMD42 it is:
+"The card lock/unlock command has the structure and bus transaction type of a regular single block write command."
+For some other commands it is in the command description column of the 4.7.4)
 
->   drivers/hid/hid-core.c                    | 4 +---
->   drivers/hid/intel-ish-hid/ishtp/bus.c     | 4 +---
+>
+>In principle what you are saying is that busy signalling on DAT0 is
+>*entirely* broken, at least for some cards and some commands.
 
-[...]
+I wouldn't say broken, it seems to do what is described.
+But right now busy polling is essentially CMD13 polling, right? at least for card_busy_detect.
+So it doesn't hurt polling for TRAN.
 
-> diff --git a/drivers/hid/hid-core.c b/drivers/hid/hid-core.c
-> index 7db332139f7d..dbed2524fd47 100644
-> --- a/drivers/hid/hid-core.c
-> +++ b/drivers/hid/hid-core.c
-> @@ -2302,7 +2302,7 @@ static int hid_device_probe(struct device *dev)
->   	return ret;
->   }
->   
-> -static int hid_device_remove(struct device *dev)
-> +static void hid_device_remove(struct device *dev)
->   {
->   	struct hid_device *hdev = to_hid_device(dev);
->   	struct hid_driver *hdrv;
-> @@ -2322,8 +2322,6 @@ static int hid_device_remove(struct device *dev)
->   
->   	if (!hdev->io_started)
->   		up(&hdev->driver_input_lock);
-> -
-> -	return 0;
->   }
->   
->   static ssize_t modalias_show(struct device *dev, struct device_attribute *a,
-> diff --git a/drivers/hid/intel-ish-hid/ishtp/bus.c b/drivers/hid/intel-ish-hid/ishtp/bus.c
-> index f0802b047ed8..8a51bd9cd093 100644
-> --- a/drivers/hid/intel-ish-hid/ishtp/bus.c
-> +++ b/drivers/hid/intel-ish-hid/ishtp/bus.c
-> @@ -255,7 +255,7 @@ static int ishtp_cl_bus_match(struct device *dev, struct device_driver *drv)
->    *
->    * Return: Return value from driver remove() call.
->    */
-> -static int ishtp_cl_device_remove(struct device *dev)
-> +static void ishtp_cl_device_remove(struct device *dev)
->   {
->   	struct ishtp_cl_device *device = to_ishtp_cl_device(dev);
->   	struct ishtp_cl_driver *driver = to_ishtp_cl_driver(dev->driver);
-> @@ -267,8 +267,6 @@ static int ishtp_cl_device_remove(struct device *dev)
->   
->   	if (driver->remove)
->   		driver->remove(device);
-> -
-> -	return 0;
->   }
->   
->   /**
+But not for all commands busy signalling <=> PROG state is true:
+"The card may provide buffering for block write. This means that the next block can be sent to the card while the previous is being programmed." (4.3)
+"There is no buffering option for write CSD, write protection and erase. This means that while the card is busy servicing any one of these commands, no other data transfer commands will be accepted. DAT0 line will be kept low as long as the card is busy and in the Programming State." (4.3)
+Definitely leaves us with MMC_PROGRAM_CID, CMD20, CMD42, MMC_SET_TIME, MMC_GEN_CMD and both SD_WRITE_EXTR.
+Furthermore I think the cleaner solution is to poll for TRAN anyway. Just in theory there does not seem to be a timing constraint for when the card starts signalling busy for R1 (non-b) commands.
+Just in theory the ioctl handling could be done BEFORE the card ever moves to PROG and starts signalling busy. (Im not sure about this though)
 
-For the HID part:
+>>
+>> -static int card_busy_detect(struct mmc_card *card, unsigned int timeout_ms,
+>> +static int is_prog_cmd(struct mmc_command *cmd)
+>> +{
+>> +       /*
+>> +        * Cards will move to programming state (PROG) after these commands.
+>> +        * So we must not consider the command as completed until the card
+>> +        * has actually returned back to TRAN state.
+>> +        */
+>> +       switch (cmd->opcode) {
+>> +       case MMC_STOP_TRANSMISSION:
+>
+>This has an R1B response, hence we already do the proper polling that is needed.
+>
+>In other words, we don't need to explicitly check for this command
+>here, as we are already checking the response type (R1B) in
+>__mmc_blk_ioctl_cmd().
 
-Acked-by: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+Fair. I will happily remove any multi block write commands.
+Just seemed like the safer way to do so, but I have not specifically checked if any cards violate this here.
 
-Cheers,
-Benjamin
+>
+>> +       case MMC_WRITE_DAT_UNTIL_STOP:
+>
+>What's this used for? It's obsolete, at least in the eMMC spec. Please drop it.
+
+Okay.
+
+>> +       case MMC_WRITE_BLOCK:
+>> +       case MMC_WRITE_MULTIPLE_BLOCK:
+>
+>These are already supported via the generic block interface, please
+>drop the checks.
+
+Might make sense to let userspace issue read/write, too.
+But I understand if this is not desired.
+
+>> +       case MMC_PROGRAM_CID:
+>> +       case MMC_PROGRAM_CSD:
+>
+>Let's discuss these, since they have R1 responses.
+>
+>Although, according to the eMMC spec, the card moves to rcv state, not
+>the prg state as you refer to in the commit message. Normally, we
+>don't need to poll for busy/tran completion of these commands.
+
+Why not? Sure they move to rcv first, but if data stops they move to PROG.
+>
+>Have you observed through proper tests that this is actually needed?
+
+No, seems unlikely to hit this, as PROG will likely be shorter than getting a second command through.
+>
+>> +       case MMC_SET_WRITE_PROT:
+>> +       case MMC_CLR_WRITE_PROT:
+>> +       case MMC_ERASE:
+>
+>The three above have R1B, please drop them from here as they are
+>already supported correctly.
+>
+>> +       case MMC_LOCK_UNLOCK:
+>
+>Again, this has an R1 response and the card moves to rcv state.
+>Normally we shouldn't need to poll, but I have to admit that the eMMC
+>spec isn't really clear on what will happen when using the "forced
+>erase" argument. The spec mentions a 3 minute timeout....
+
+Again I don't know why you would not need to poll.
+The force erase has a good reason to remain in PROG for long, but whatever, a card may decide to just take 5 seconds in unlock PROG. (to prevent bruteforcing passwords lets say)(Not anything I have seen or expect to see)
+
+>
+>> +       case MMC_SET_TIME: /* Also covers SD_WRITE_EXTR_SINGLE */
+>> +       case MMC_GEN_CMD:
+>> +       case SD_WRITE_EXTR_MULTI:
+>
+>Are these actually being used? If not, please drop them from being
+>supported. I don't want to encourage crazy operations being issued
+>from userspace.
+
+GEN_CMD is extremly interesting for issuing vendor commands from user-space.
+Not sure if anyone uses it (yet), but if so it's unlikely to be seen in the wild.
+SD_WRITE_EXTR_MULTI is simply too new to really say.
+MMC_SET_TIME probably not used.
+
+
+>
+>Overall, it looks like we need to add a check for MMC_LOCK_UNLOCK to
+>poll for busy, but that's it, I think.
+
+See above.
+
+
+>>         } while (!mmc_ready_for_data(status));
+>
+>I don't quite understand what we accomplish with polling for TRAN
+>state in one case and in the other case, both TRAN and READY_FOR_DATA.
+>Why can't we always poll for TRAN and READY_FOR_DATA? It should work
+>for all cases, no?
+>
+
+Well in theory you're then dropping the buffered writing feature of the SD spec if waiting for TRAN, too.
+I'm fine with that, especially since it is not desired to be used through ioctl anyway?
+
+
+Kind Regards,
+Christian
+Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+Managing Directors: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
