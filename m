@@ -2,173 +2,346 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9EE3BC07E95
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 10:16:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1666DC07E95
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 11:57:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 81EAF61C92
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 10:16:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EE60161C78
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Jul 2021 11:57:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231344AbhGGKTZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Jul 2021 06:19:25 -0400
-Received: from esa4.hgst.iphmx.com ([216.71.154.42]:40734 "EHLO
-        esa4.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231259AbhGGKTY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2021 06:19:24 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1625653004; x=1657189004;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=Ufky/3jDzYOwvpOmTeQKOJRMjvMOgGuEdktqXHc5EBk=;
-  b=GoFIkNVlAgT012IHCF2j7Sf5H9kEN27no3v59d2tQVuWqrEEtUiAjU+o
-   TvYV7ULNkcOwf0ywNOWcW+t67x2xL6XYeVi0dU8O7GpAGfl4NwV6bIY4T
-   reeN086On72FGskGnrD1xjynY0USvf1q4VlONSSoNUoCFkIz1ypaD3xCJ
-   0i/4SloaqtSnAt8eOwZkFsjs0fQK2blR2xF8Ai/sW5IagyO5EokgX6TxV
-   w/Lrmqj6VsMzY0jcGoh3afEGgAfrhsFG0lRO47WczfsiB21iz6SQON8Pz
-   6mO0jMASt1IrzDNSNpKf9xgvQHdpWbxUdOglI7mYi+axvgNoW622sc+s5
-   A==;
-IronPort-SDR: PosUgqgWGT3SjAuQAfsDdO1IJdP0ax2rg/qVdwprA5QNmT+mCqYx/xy+ExOiIfFfRhOkBeJ0eI
- 9KKMr6cTHRnrL7/PDDh+5b5jh58PsXe65evvkHJWxygHH3Z0IQmKeun7d56DU1v0w5UJ/uyPw+
- XmxoJSCCi3pnjcYBQbDzCVf0Mf1bKRSJdp7NX8kOC1dd+bbnXZX6z2w1bkSbZen+GzB7x6jQom
- YIwk1PntlMacBZDqEDNTD0klPqo5usJtQsDUO/QH8hVMTBCrR/LX83UBPDGk8veMzfrcv0dZRC
- ZAo=
-X-IronPort-AV: E=Sophos;i="5.83,331,1616428800"; 
-   d="scan'208";a="173163333"
-Received: from mail-bn8nam11lp2170.outbound.protection.outlook.com (HELO NAM11-BN8-obe.outbound.protection.outlook.com) ([104.47.58.170])
-  by ob1.hgst.iphmx.com with ESMTP; 07 Jul 2021 18:16:43 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=g9THgX/+WMHG103+JZbxebvBmzcXj5WVjSyNUpLB86aIbRpOL7DXdlH43wpT8ezKcVoKEsHmsztNr+ApwprpalVcxyWBGsuNymcrnlkOO7XVUpax7Fr78jv+AF1sbafWvegg2ZYK0jaBhugkXX2hl1wAMV93o0W0Rebi5Y4iFf5/mH6o33BsxsFZxSCnB+PlR0wuDBwzA/PBr6Rf8/DZ0fDZ/PHitipr7Mk6VF0nqvoV/W6Ut7rp4gUA1DnbMwT40YGzWXxeWpiv7Ms960pdIjI/w1v5510lArDbObXPlijtTkGRe5bg1CfxpFjhCKURWe7Ac6CBenIhniRNrIK+IA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ufky/3jDzYOwvpOmTeQKOJRMjvMOgGuEdktqXHc5EBk=;
- b=le9TGhr1HC5VBFyEE191Ngb5/XXC7mOxVAo4CPtURSlq6KgSYbFLe4qUMg4q9ZgjD/1aR938gu6CjVxC6RSBfn/vOHrQh1Hb16ZkR1NjdXDVGq50nSeVMKjwvnCtZbTys5sBe4At6H1/PITcIK/iXd28K2eM19IcwBU5s2vjuf0OCRGMj3b1veaKGidcsNsqx+SqgCXvWAPrlGc2FVKG+fndYbCQy7IKdtP9K4RV2/OVxlz49W3a7oveoXt1zbW8wrbB9HzffJE45L0IxPB+2yNPsucfn3EDwnDO6BpwrApC8NMnWXIciY1nS4YJuLjiqUhTaVNAYnUgPsUs/0ObAA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
+        id S231405AbhGGMAZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Jul 2021 08:00:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34660 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231358AbhGGMAZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Jul 2021 08:00:25 -0400
+Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D8A8C06175F
+        for <linux-mmc@vger.kernel.org>; Wed,  7 Jul 2021 04:57:44 -0700 (PDT)
+Received: by mail-vs1-xe2e.google.com with SMTP id o7so1429827vss.5
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Jul 2021 04:57:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=Ufky/3jDzYOwvpOmTeQKOJRMjvMOgGuEdktqXHc5EBk=;
- b=HeWOnJpYBwzxel8CMbdIpCpObxjLz6vIShAq7EUKiCi5PF34qinPsQoZelW5nFJF8U0ubrK2t+pTcd1kwH4T6uUShgBbf7b/6W13pZD8en+ntfU3dWDkjUD5EtUQDctu12vULsLH8eRA982qj1lE1dPV6CSEh9r76EkxqVxhk48=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM6PR04MB7001.namprd04.prod.outlook.com (2603:10b6:5:24b::23) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4287.27; Wed, 7 Jul 2021 10:16:41 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::ccfd:eb59:ccfe:66e4]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::ccfd:eb59:ccfe:66e4%5]) with mapi id 15.20.4287.033; Wed, 7 Jul 2021
- 10:16:41 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=O3GY2fEQnMWGEIJc61SHZMVxw1rzAtXQZu5zS1i7KN4=;
+        b=zEkq6kuvDpttg+PECmsCahXUVcdX3MfVDpcfMsz1yDEslJX7uR+l24k6qX4F1pgJT2
+         naXQ8WV0/jqWfgFQ2aExdJexyM0Rqf7Yas197mi5RZVziC1f8R36dlCK7b1EkzkajgjD
+         Mb8NWN+62jc68bQy5wMZpIq76BaeLPPx7RTBFvf+NgFHDehLIoCuzw7XrWmrOlTNwjxz
+         eLN4N5Rm0ayxq2VOcN5LSoOYk4HG5aVy4KpcrRF8w2F6KSsD8u42RjtW2Mw1FxsdNT2G
+         owICGR7G5CfanycfPknlop6l1D2bvC+evqRNpCZn5Xq33BJARhQKXcW0iAlv7GllMOvH
+         TU/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=O3GY2fEQnMWGEIJc61SHZMVxw1rzAtXQZu5zS1i7KN4=;
+        b=o8jzJmo4DBO1s7HzrHLz/HIM6+POojEVkF+f3ngIa61PSGa2LubGNEecK8Xtnu+Gc/
+         cLPxgJR+V0BnpyEzHWYz9oEE0Q023nbe9S0+U+G6T/gpn2B6dYRA1sgFROkUFYI+JaFj
+         ilCAp986QVOogeaMbtH8H2y1MD++3CsF42bbwCOXsYHfSA6TJfjI7ELCYcF+6FTlWhMQ
+         tX1o/Yp7ZiRofDrfZmj+kF1A0y/R9ra2UsCx9ovm89uIj2IiM4jFPDHiN9iYeev0FubI
+         v7u2rInZnPY2jCCgbEN+3oOHnyagGtVWvC5O/TP/tGODzsQ2km5mDuWy/n8ERiStdOi/
+         v3Ng==
+X-Gm-Message-State: AOAM5316xbWh4CkvTheKzLD8nc80VTT6Oq1vxzK56wPmj/4QHitLwCKK
+        oORJ5+kOYNn41ohk4iULsiqKT+CM10w9kRv/du+849fi3OpN9Xew
+X-Google-Smtp-Source: ABdhPJxuS1nIy8es5nnvzwBpklq1CgC7HcO0aABRfqnbYWVWBpgtaLZhphDhqCH+Z5tU0MYozHNbz2X0lZVQXW8CMrY=
+X-Received: by 2002:a67:bd0f:: with SMTP id y15mr20279260vsq.19.1625659063379;
+ Wed, 07 Jul 2021 04:57:43 -0700 (PDT)
+MIME-Version: 1.0
+References: <CWXP265MB268049D9AB181062DA7F6DDBC4009@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <CWXP265MB26807AC3C130772D789D0AABC41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <CAPDyKFq44ZuXXUDQV34NSW-ixB9GAZfDx+dx-Kb8O7=LQ1TSHQ@mail.gmail.com>
+ <CWXP265MB26803EFAC659676EC0914F97C41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+ <DM6PR04MB6575B0049B98254E77BA447EFC1A9@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <CWXP265MB2680575489E508DC75D84857C41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+In-Reply-To: <CWXP265MB2680575489E508DC75D84857C41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 7 Jul 2021 13:57:06 +0200
+Message-ID: <CAPDyKFrCtRTHZYRjUecvrqr=YyhrTw+HXtdLRHeOTxoK94iSRg@mail.gmail.com>
+Subject: Re: [PATCHv2] mmc: block: Differentiate busy and PROG state
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         "hch@infradead.org" <hch@infradead.org>
-Subject: RE: [PATCH] mmc: block: Differentiate busy and non-TRAN state
-Thread-Topic: [PATCH] mmc: block: Differentiate busy and non-TRAN state
-Thread-Index: AQHXbl0Q77+Qfc7HWE6ez2HIF5qrJas1omGlgAAGD4CAAADv5IABbwLggAAg/s6AABt2cA==
-Date:   Wed, 7 Jul 2021 10:16:41 +0000
-Message-ID: <DM6PR04MB65751AF67891F655ABBAA7C6FC1A9@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <CWXP265MB268049D9AB181062DA7F6DDBC4009@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
- <CWXP265MB26807AC3C130772D789D0AABC41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<CAPDyKFq44ZuXXUDQV34NSW-ixB9GAZfDx+dx-Kb8O7=LQ1TSHQ@mail.gmail.com>
- <CWXP265MB26803EFAC659676EC0914F97C41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>,<DM6PR04MB6575B0049B98254E77BA447EFC1A9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <CWXP265MB2680AE8D71546A5656B410DCC41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-In-Reply-To: <CWXP265MB2680AE8D71546A5656B410DCC41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: hyperstone.com; dkim=none (message not signed)
- header.d=none;hyperstone.com; dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: d5a1c3f5-2385-487f-02e5-08d941305079
-x-ms-traffictypediagnostic: DM6PR04MB7001:
-x-ld-processed: b61c8803-16f3-4c35-9b17-6f65f441df86,ExtAddr
-x-microsoft-antispam-prvs: <DM6PR04MB7001BD7E03A1D8BEEDF306E1FC1A9@DM6PR04MB7001.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-ms-exchange-senderadcheck: 1
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: Ga9YH4mbKEDeMI+Qie2WGNgDNNbWdBYVXcMqWHui662MnECBVu0wUzUe0QBJjxZZdFO0+kGzeR69caQXhHD8o0QTy/fQAILax36lUFgvo61LdFqTGbxbEzpOnsVCKxcPbgSsP6tZnUpvYxMe25zqIN5x6N3l+mafATckVjVN9nKulIfLtBDf4Z60AwOPaRQKKbtT0FIqPDKV7I9Y0rctH4YUdPTze7Vm+YReyNCupxqTEpB+1dep9b9+010w1/dnFap9SzvXb27qJWxvD2fnbLWQBPlb0dTO5eHHhI7jb1g/I5dHn5a5r7zoPFxov4cobhy3zdpff6zW+TBtmohI4Xl4AMo+UstGXUhFI7ZsD+j9QRyOXheqF1TWNUk8gMHrhCDT53PgRrBB7pHMdk1GnUquh4IZ25I8rCYvARvyN5gHCq+IS3o0Hw0NJnE05utIhiTzgTeIv0T2v+CfUEvTQ3MANSUj0S0x3jJTOtWPHhF0wBBKzeAknJO1pLRG8bwnQlmVnj+V5tdvl7rzZtEwBm5Oqwd4JPJb/voIfRj5I/XIDYIX67VfpAe/VBWLjhbUmULyHBgoItCBioviWhILY/xfcyVJtS3TkXjq+B4/zDXhawoJ+Sp9P2JVTyHoyk5Xf+3+xDAv7rNb0Fe6hCreeg==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(376002)(346002)(396003)(39860400002)(366004)(26005)(8936002)(64756008)(2906002)(6506007)(86362001)(76116006)(55016002)(38100700002)(66446008)(9686003)(33656002)(71200400001)(122000001)(110136005)(66946007)(478600001)(186003)(7696005)(316002)(5660300002)(4326008)(66556008)(8676002)(54906003)(66476007)(52536014)(83380400001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?OFVSUys5WS93NFFEQ3RtS2lHWDVvc1JmMXg0OWpONWg2dnM2ci9qZFlhMmJW?=
- =?utf-8?B?RktmeXdLVHhyUXBodjZZTnNBWmFjUUZNZFdNeFMxVkJXR1ljTWxWZDBqR041?=
- =?utf-8?B?anRLRk9VWUIrN0VQVGE1R0VlclIybXJKdlgzWFlScnlGc2RHbUhLR2doazlN?=
- =?utf-8?B?elFwNHFieFo0MXhLR1BBMUwyRXU3Q01GbkhZYkVHb1U1Q3d0YmVBb09ENzBS?=
- =?utf-8?B?WVVmbTVBZkpLNXFnNDIwdXNUeEVuczdhdWtqNHVPRldBc1RIUDgybGFUaVRY?=
- =?utf-8?B?cUtIMmhzRy80Z2xybmNPbHRPRVdkeGZPQjI2VTdWY3Y0ZXFRcCtXZHdQbVNV?=
- =?utf-8?B?MXZYOXpZSzdjdUJUMzE0YlhDTjVGMUo0bGN3d0VFVTVxdTRzdmtBYnNyU012?=
- =?utf-8?B?OVduRVRqSmtzTlhoWmg1enRUVitWY3NnMTdMVGM2akEzMmhUeWdaSFpOM0gv?=
- =?utf-8?B?Z0RvMjRCTGZQVTQ2K1k5Ui9pWkY5cVEvekdiZWx6eE42K2xsWDNJNXErNlZN?=
- =?utf-8?B?akNoSUJEb1B1MDJIanV1SnFXaTFDMnljVk5zVTBoOC8vbC9BSExXSS82OXpy?=
- =?utf-8?B?K2FXZUNPNWhzQTdxbkJpM2FsdVZkWlFtKyt6NHpDVmxyWWVyeXRMSzIvWEZL?=
- =?utf-8?B?cDdGMSsyUDFsZFYvNExWMDNoWjFJZU5VTExLT01oWkQrSXNYbDlaRThwWUlY?=
- =?utf-8?B?YnQxZlpmeTJyMENna0kvdG9JbStUMEYrekMrdHF2aHp3M3RTNlQ2MkpHa3Vq?=
- =?utf-8?B?ZlJvU1NlazlDOWZ3Qlp5WWlFWlpINGFwMkJwVGx5VlYwTTF3YUVxWkdZc09H?=
- =?utf-8?B?UjNWMkVPRXhZK0RzV2F2bmFnaVpjUElZMG8wN3VwQUJDWEtqb0o0a1VEcnRt?=
- =?utf-8?B?ZFQ5dnYvMWYrMThtd2xpbEcvQjBtSHVmRzk1NWxCcStTTWtlUHJWcDJJVVg5?=
- =?utf-8?B?bjYxYkV0ZXdTb2hsYVpFV3BjT0xLV2lXREhWb1BkM055WFN6dzZiTXVrSWNs?=
- =?utf-8?B?bHpFNU51RThDZ0RnWUtjNUJ0SVBNUjMxMmdXUGE3M1VsRHAvZVRqdWllRExW?=
- =?utf-8?B?cmowckt6ODV0aXFBNHZYYnFOUG15ZGZkcXVJcTg3S2RtZjhXakI2MFJGNm05?=
- =?utf-8?B?UVVmQTRTTnRwSTRwVEt0OHAxSGxVWUR6eXJwYks1K1pTZkhJaDJ2VFVaMWl4?=
- =?utf-8?B?ZkowaEJKSW9vWTN4dng2VHMzZ0VReEg1UzMxdGUzTTZzQ1NVTU1ST2prWUov?=
- =?utf-8?B?NEVaNzdvK0ZzUmZZUnNCdW0xQlE3cE5uay85YVVaMk9iUWI3S21lMFpMeGl1?=
- =?utf-8?B?NmUzQklzV1Q0N0YzbE5uYTNZYTV3VlB6ckdMVVkvQlZISkVBTmZhN2s0V2lI?=
- =?utf-8?B?ZWRmUkNPWTdBKzQ5bG1RQkpqcHR5VFpLYkExd0JnN1MzdnR5YmNOMWNDQmts?=
- =?utf-8?B?SWdlSElSRzVGQWo3NkJFOHRGY0tpOGZ3dnk4dVBheURZbTZBZEJMQ0VyY0o3?=
- =?utf-8?B?Z09qcVNEdFl4a2VJU0FJWHgwR2UxNWFsQzZyeVZiU2hiU0FIOHNDZUcyek85?=
- =?utf-8?B?QUN1VndpUnJ2YTEyS0J3QUhib2x0VGtQOUdsaktXNXlocTJaYStHNjNHaW9Y?=
- =?utf-8?B?TW13cWZlMERuaVNHTWlnNFNxQ21mN1Bob0V1RVBicHdzZ3pYUGpUQm1SQSt2?=
- =?utf-8?B?VVdLVFZZUmJUSXdiMzZzbWlmNDFFMXhCa1VHSk56QVlpMTAxdFYvaGFlR01O?=
- =?utf-8?Q?JEC9zjnpseL6PtCJI/H6tiavsvy9cyjk+nseCrJ?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: d5a1c3f5-2385-487f-02e5-08d941305079
-X-MS-Exchange-CrossTenant-originalarrivaltime: 07 Jul 2021 10:16:41.3302
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 2c/ceWyCRp/qb1+4lpfvcKA5ZAXJ4Z2vbczgWpU5eUc7HyZ4Zg20OqzoTXgPvXLqBiKkGf13/MkXV7sfEwoIKw==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB7001
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiBIZXkgQXZyaSwNCj4gDQo+ID5BcmUgeW91IHVzaW5nIG1tYy11dGlscz8NCj4gTm8sIEltIGFj
-Y2Vzc2luZyB0aGUgaW9jdGwgaW50ZXJmYWNlIHdpdGggbXkgb3duIGFwcGxpY2F0aW9uLg0KPiAN
-Cj4gPkNhbiB5b3Ugc2hhcmUgZXhhY3RseSB0aGUgc2VxdWVuY2Ugb2YgY29tbWFuZHMgeW91IGFy
-ZSBzZW5kaW5nPw0KPiANCj4gVGhlIG9uZSBJIGluaXRpYWxseSBlbmNvdW50ZXJlZCB3YXMsIGFz
-IHN0YXRlZCBlYXJsaWVyLCBhIFVubG9jay1Gb3JjZSBFcmFzZQ0KPiBpbnRvIGEgbmV3IExvY2sg
-d2l0aCBzZXQgcGFzc3dvcmQuIEJhc2ljYWxseSBhbnkgUjEgKG5vIGIpIGNvbW1hbmQgdGhhdA0K
-PiB0cmFuc2l0aW9ucyB0byBQUk9HLCBzbyBiZWhhdmVzIGxpa2UgYSB3cml0ZSBjb21tYW5kLCBj
-b3VsZCB0cmlnZ2VyIHRoaXMuDQo+IEJ1dCBvYnZpb3VzbHkgVW5sb2NrIGZvcmNlIGVyYXNlIGlz
-IHRoZSBiZXN0IGV4YW1wbGUsIGFzIGEgZnVsbCBlcmFzZSB3aWxsDQo+IHRha2UgcXVpdGUgc29t
-ZSB0aW1lIGFuZCBtYW55IChhbGw/KSBjYXJkcyB3aWxsIG5vdCBhY2NlcHQgbmV3IGNvbW1hbmRz
-DQo+IChpLmUuIHN0YXkgaW4gUFJPRykgdW50aWwgdGhlIGVyYXNlIGhhcyBhY3R1YWxseSBjb21w
-bGV0ZWQuIFRoZSBjdXJyZW50DQo+IGNvZGUgd2lsbCBub3QgY2hlY2sgYW55dGhpbmcgZm9yIENN
-RDQyIGFmdGVyIHRoZSByZXNwb25zZS4NCj4gSSBoYXZlIG5vdCBoaXQgdGhlIHJhY2UgY29uZGl0
-aW9uIHdpdGggYW55dGhpbmcgYnV0IENNRDQyLg0KPiANCj4gU28gdG8gYmUgdmVyYm9zZToNCj4g
-Q01EMTYgLSBDTUQ0MiBTZXQgUFcgLSAoQ01EMTYpKiAtIENNRDQyIFVubG9jayBGb3JjZSBFcmFz
-ZSAtIChDTUQ0Mg0KPiBTZXQgUFcpKw0KPiAqIE1heSBiZSBvbWl0dGVkIGlmIHlvdSBjcmFmdCB0
-aGUgQ01ENDIgY2FyZWZ1bGx5IChpLmUuIGVxdWFsIGRhdGEgc2l6ZSkNCj4gKyBpcyBwcmV0dHkg
-bXVjaCBpcnJlbGV2YW50LCBjYW4gYmUgcmVwbGFjZWQgd2l0aCBhbnl0aGluZyB0aGF0IGlzIGls
-bGVnYWwgaW4NCj4gUFJPRy4NCk9oLCBPSy4gIEludGVyZXN0aW5nLg0KVGhpcyBmdW5jdGlvbmFs
-aXR5IGlzIG1pc3NpbmcgaW4gbW1jLXV0aWxzLg0KV2hpbGUgYXQgaXQsIEkgZW5jb3VyYWdlIHlv
-dSB0byBjb25zaWRlciBhZGRpbmcgaXQuDQoNClRoYW5rcywNCkF2cmkNCg0KDQo+IA0KPiA+QWdh
-aW4sIGNhbiB5b3Ugc2hhcmUgdGhlIHNlcXVlbmNlIG9mIHRoZSBjb21tYW5kcyB5b3UgYXJlIHVz
-aW5nPw0KPiA+DQo+ID5UaGFua3MsDQo+ID5BdnJpDQo+IEh5cGVyc3RvbmUgR21iSCB8IExpbmUt
-RWlkLVN0cmFzc2UgMyB8IDc4NDY3IEtvbnN0YW56DQo+IE1hbmFnaW5nIERpcmVjdG9yczogRHIu
-IEphbiBQZXRlciBCZXJucy4NCj4gQ29tbWVyY2lhbCByZWdpc3RlciBvZiBsb2NhbCBjb3VydHM6
-IEZyZWlidXJnIEhSQjM4MTc4Mg0KDQo=
+On Wed, 7 Jul 2021 at 10:27, Christian L=C3=B6hle <CLoehle@hyperstone.com> =
+wrote:
+>
+> Prevent race condition with ioctl commands
+>
+> To fully prevent a race condition where the next
+> issued command will be rejected as the card is no
+> longer signalling busy but not yet back in TRAN state.
+> The card may be in PROG state without signalling busy,
+> for some of the commands that are only R1, but also
+> for R1b commands, the card will signal non-busy as soon
+> as receive buffers are free again, but the card has
+> not finished handling the command and may therefore be
+> in PROG.
+
+Can you please point me to the corresponding information in the spec
+that states that the above behavior is correct?
+
+In principle what you are saying is that busy signalling on DAT0 is
+*entirely* broken, at least for some cards and some commands.
+
+> Since the next command is not known at the time of
+> completion we must assume that it may be one that can
+> only be accepted in TRAN state.
+> Therefore we only consider a PROG command completed
+> when we have polled for TRAN.
+
+Right. See more comments about this further below.
+
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/block.c   | 86 ++++++++++++++++++++++++++++++++++----
+>  drivers/mmc/core/mmc_ops.c |  2 +-
+>  include/linux/mmc/mmc.h    | 10 +++--
+>  include/linux/mmc/sd.h     |  3 ++
+>  4 files changed, 87 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 88f4c215caa6..cb78690647bf 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -411,7 +411,34 @@ static int mmc_blk_ioctl_copy_to_user(struct mmc_ioc=
+_cmd __user *ic_ptr,
+>         return 0;
+>  }
+>
+> -static int card_busy_detect(struct mmc_card *card, unsigned int timeout_=
+ms,
+> +static int is_prog_cmd(struct mmc_command *cmd)
+> +{
+> +       /*
+> +        * Cards will move to programming state (PROG) after these comman=
+ds.
+> +        * So we must not consider the command as completed until the car=
+d
+> +        * has actually returned back to TRAN state.
+> +        */
+> +       switch (cmd->opcode) {
+> +       case MMC_STOP_TRANSMISSION:
+
+This has an R1B response, hence we already do the proper polling that is ne=
+eded.
+
+In other words, we don't need to explicitly check for this command
+here, as we are already checking the response type (R1B) in
+__mmc_blk_ioctl_cmd().
+
+> +       case MMC_WRITE_DAT_UNTIL_STOP:
+
+What's this used for? It's obsolete, at least in the eMMC spec. Please drop=
+ it.
+
+> +       case MMC_WRITE_BLOCK:
+> +       case MMC_WRITE_MULTIPLE_BLOCK:
+
+These are already supported via the generic block interface, please
+drop the checks.
+
+> +       case MMC_PROGRAM_CID:
+> +       case MMC_PROGRAM_CSD:
+
+Let's discuss these, since they have R1 responses.
+
+Although, according to the eMMC spec, the card moves to rcv state, not
+the prg state as you refer to in the commit message. Normally, we
+don't need to poll for busy/tran completion of these commands.
+
+Have you observed through proper tests that this is actually needed?
+
+> +       case MMC_SET_WRITE_PROT:
+> +       case MMC_CLR_WRITE_PROT:
+> +       case MMC_ERASE:
+
+The three above have R1B, please drop them from here as they are
+already supported correctly.
+
+> +       case MMC_LOCK_UNLOCK:
+
+Again, this has an R1 response and the card moves to rcv state.
+Normally we shouldn't need to poll, but I have to admit that the eMMC
+spec isn't really clear on what will happen when using the "forced
+erase" argument. The spec mentions a 3 minute timeout....
+
+> +       case MMC_SET_TIME: /* Also covers SD_WRITE_EXTR_SINGLE */
+> +       case MMC_GEN_CMD:
+> +       case SD_WRITE_EXTR_MULTI:
+
+Are these actually being used? If not, please drop them from being
+supported. I don't want to encourage crazy operations being issued
+from userspace.
+
+> +               return true;
+> +       default:
+> +               return false;
+> +       }
+> +}
+
+Overall, it looks like we need to add a check for MMC_LOCK_UNLOCK to
+poll for busy, but that's it, I think.
+
+> +
+> +static int card_poll_until_tran(struct mmc_card *card, unsigned int time=
+out_ms,
+>                             u32 *resp_errs)
+>  {
+>         unsigned long timeout =3D jiffies + msecs_to_jiffies(timeout_ms);
+> @@ -433,8 +460,7 @@ static int card_busy_detect(struct mmc_card *card, un=
+signed int timeout_ms,
+>                         *resp_errs |=3D status;
+>
+>                 /*
+> -                * Timeout if the device never becomes ready for data and=
+ never
+> -                * leaves the program state.
+> +                * Timeout if the device never returns to TRAN state.
+>                  */
+>                 if (done) {
+>                         dev_err(mmc_dev(card->host),
+> @@ -442,6 +468,41 @@ static int card_busy_detect(struct mmc_card *card, u=
+nsigned int timeout_ms,
+>                                  __func__, status);
+>                         return -ETIMEDOUT;
+>                 }
+> +       } while (R1_CURRENT_STATE(status) !=3D R1_STATE_TRAN);
+> +
+> +       return err;
+> +}
+> +
+> +static int card_busy_detect(struct mmc_card *card, unsigned int timeout_=
+ms,
+> +                           u32 *resp_errs)
+> +{
+> +       unsigned long timeout =3D jiffies + msecs_to_jiffies(timeout_ms);
+> +       int err =3D 0;
+> +       u32 status;
+> +
+> +       do {
+> +               bool done =3D time_after(jiffies, timeout);
+> +
+> +               err =3D __mmc_send_status(card, &status, 5);
+> +               if (err) {
+> +                       dev_err(mmc_dev(card->host),
+> +                               "error %d requesting status\n", err);
+> +                       return err;
+> +               }
+> +
+> +               /* Accumulate any response error bits seen */
+> +               if (resp_errs)
+> +                       *resp_errs |=3D status;
+> +
+> +               /*
+> +                * Timeout if the device never becomes ready for data.
+> +                */
+> +               if (done) {
+> +                       dev_err(mmc_dev(card->host),
+> +                               "Card remained busy! %s status: %#x\n",
+> +                                __func__, status);
+> +                       return -ETIMEDOUT;
+> +               }
+>         } while (!mmc_ready_for_data(status));
+
+I don't quite understand what we accomplish with polling for TRAN
+state in one case and in the other case, both TRAN and READY_FOR_DATA.
+Why can't we always poll for TRAN and READY_FOR_DATA? It should work
+for all cases, no?
+
+>
+>         return err;
+> @@ -596,12 +657,19 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *car=
+d, struct mmc_blk_data *md,
+>
+>         if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) =3D=3D MMC_RSP_R1B) =
+{
+>                 /*
+> -                * Ensure RPMB/R1B command has completed by polling CMD13
+> -                * "Send Status".
+> +                * Ensure card is no longer signalling busy by polling CM=
+D13.
+>                  */
+>                 err =3D card_busy_detect(card, MMC_BLK_TIMEOUT_MS, NULL);
+>         }
+>
+> +       if (is_prog_cmd(&cmd)) {
+> +               /*
+> +                * Ensure card has returned back to TRAN state
+> +                * and is ready to accept a new command.
+> +                */
+> +               err =3D card_poll_until_tran(card, MMC_BLK_TIMEOUT_MS, NU=
+LL);
+> +       }
+> +
+>         return err;
+>  }
+>
+> @@ -1630,7 +1698,7 @@ static int mmc_blk_fix_state(struct mmc_card *card,=
+ struct request *req)
+>
+>         mmc_blk_send_stop(card, timeout);
+>
+> -       err =3D card_busy_detect(card, timeout, NULL);
+> +       err =3D card_poll_until_tran(card, timeout, NULL);
+>
+>         mmc_retune_release(card->host);
+>
+> @@ -1662,7 +1730,7 @@ static void mmc_blk_read_single(struct mmc_queue *m=
+q, struct request *req)
+>                         goto error_exit;
+>
+>                 if (!mmc_host_is_spi(host) &&
+> -                   !mmc_ready_for_data(status)) {
+> +                   !mmc_tran_and_ready_for_data(status)) {
+>                         err =3D mmc_blk_fix_state(card, req);
+>                         if (err)
+>                                 goto error_exit;
+> @@ -1784,7 +1852,7 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue=
+ *mq, struct request *req)
+>
+>         /* Try to get back to "tran" state */
+>         if (!mmc_host_is_spi(mq->card->host) &&
+> -           (err || !mmc_ready_for_data(status)))
+> +           (err || !mmc_tran_and_ready_for_data(status)))
+>                 err =3D mmc_blk_fix_state(mq->card, req);
+>
+>         /*
+> @@ -1854,7 +1922,7 @@ static int mmc_blk_card_busy(struct mmc_card *card,=
+ struct request *req)
+>         if (mmc_host_is_spi(card->host) || rq_data_dir(req) =3D=3D READ)
+>                 return 0;
+>
+> -       err =3D card_busy_detect(card, MMC_BLK_TIMEOUT_MS, &status);
+> +       err =3D card_poll_until_tran(card, MMC_BLK_TIMEOUT_MS, &status);
+>
+>         /*
+>          * Do not assume data transferred correctly if there are any erro=
+r bits
+> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+> index 973756ed4016..a0be45118a93 100644
+> --- a/drivers/mmc/core/mmc_ops.c
+> +++ b/drivers/mmc/core/mmc_ops.c
+> @@ -465,7 +465,7 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
+>         if (err)
+>                 return err;
+>
+> -       *busy =3D !mmc_ready_for_data(status);
+> +       *busy =3D !mmc_tran_and_ready_for_data(status);
+>         return 0;
+>  }
+
+Kind regards
+Uffe
