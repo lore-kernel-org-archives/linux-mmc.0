@@ -2,111 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71F86C07E96
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jul 2021 12:42:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89392C07E96
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jul 2021 12:50:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4792B61430
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jul 2021 12:42:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6413061452
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jul 2021 12:50:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231347AbhGHMpc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jul 2021 08:45:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53334 "EHLO
+        id S230254AbhGHMwy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jul 2021 08:52:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229659AbhGHMpc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2021 08:45:32 -0400
-Received: from mail-ua1-x933.google.com (mail-ua1-x933.google.com [IPv6:2607:f8b0:4864:20::933])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55F03C061574
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jul 2021 05:42:49 -0700 (PDT)
-Received: by mail-ua1-x933.google.com with SMTP id s13so2155732uao.1
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2021 05:42:49 -0700 (PDT)
+        with ESMTP id S229659AbhGHMwy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2021 08:52:54 -0400
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98F74C061574;
+        Thu,  8 Jul 2021 05:50:11 -0700 (PDT)
+Received: by mail-pj1-x1031.google.com with SMTP id p9so3460347pjl.3;
+        Thu, 08 Jul 2021 05:50:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20161025;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=w1gip1Uk8MQUVgAPkI0MwrFlp5H8jfx4T6GteoEJTIA=;
-        b=qH/VnH0xBTjPFk8PQnW+sDSzsqwos+OYGsAMVpqeKDShAlh+QAToHVUUWGz1Kzdoux
-         wbjp6HmZI1GYNDWGZfBxZy89G9hbB1k/qUyNLP5JjAHc/CiXo1ytXJ6qXz6icol4PFgM
-         e4Amu6xGvNDEYVIKgst+F0xhMKzN7iQJP6wwdTO1F8eXMmXS904ztprkjdfkkL1/TKMu
-         FPK6hiWhtNHSk4RLW0p69RrlT9rqza0UFkFd6Wp83hKLWcMbhYrc3w6tyM795t0Fu5Rb
-         8nV1OpcWfx+9xuNo4gLXqGDP1UsabFOZ1p0pCgmuMktJEw77NnzrydbtdzdFKOglri9O
-         TVsw==
+        bh=rcHQFi+8e8Mq6rFTSFUkcqHki4CDxOmVuk4mSIaVOt0=;
+        b=G9heB6AtU4IBxFLX15YdIRn8NIArvA1BL5bPy5MA0OEEqBBN/ha2edgEjlCRuHz79d
+         dL+kQmAeob0Wqr9XMjY4ctbPU+x3oYcQ8MNBSkVZvqkC94/g1UcSTozS1WjaYw1dbq0I
+         /NdqT1C82oGcHI5uefrB9ce/51vHgacWkQ0F2C7UKwhjqOp1Cc2NopWqP58C8bRoZWQr
+         IiTPjB8bEl2A0CrDdXRW6lxEWpQQZ6rebrHO0iA1b5wTmfAjG9cOkPmhzT+ypfacHiwr
+         sv957RNV8n8z3/DCShgxHR7zMIKwVvrzuPw00jVVdrw2lw376dfnqcLJXA08EBDOMEi9
+         LK8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=w1gip1Uk8MQUVgAPkI0MwrFlp5H8jfx4T6GteoEJTIA=;
-        b=oYpYOWkxC1UyVfQwLiFsSS2SrPSis7ciF29yefUIH8Utqhe+/SE2BkhcVK4y4i4FSa
-         X/puYFG5Ay0L6IQY0YNJlyjvRQ6Q1IW/Zz3rIsNVKiiFe7G1wRefuIroB8mhOsnIAIEp
-         oU/xTGI4Rxi8vK+zhT0v+cRVSyrEgYipsiqdHCxBUVtGEWjsXMcdIRszxhZIIzg9MKkE
-         /GFwcknYku7a93S7m556Z6/7YHkiE7ssY90Lglzwlorg1+ZzPU6d4is5bpTxJa1z8KoR
-         z9R2FnbKALZxpOxyrTlorNLHL0L2lTkbISCeYrPB6O9X0rElLWdFWXo+WSozibH0CDz9
-         pDEA==
-X-Gm-Message-State: AOAM533AZSn3sgHH0Pk615k/GPYQfucMUwQlty3bjVodqStNL1HyR4FW
-        482QayNVnyBZXhdlPWPmoFAhswtPQKzmREWI3aP+Lg==
-X-Google-Smtp-Source: ABdhPJx8t84YJgzE+nVy5Qz7a41B0D30tlomNTg8eVzqqkEMEENnhVNMzyKmEeYu+kJIEUMMfaZu96BQU0y7jus2oYA=
-X-Received: by 2002:ab0:12a:: with SMTP id 39mr29193957uak.19.1625748168546;
- Thu, 08 Jul 2021 05:42:48 -0700 (PDT)
+        bh=rcHQFi+8e8Mq6rFTSFUkcqHki4CDxOmVuk4mSIaVOt0=;
+        b=hTOZ7aVogQKmyFHvtpJdhnmzPKXjY+gE+K/Ttz2kshkFqf98OhGlhBwsmk0uxHLoil
+         QF5UTvU+Yeh02yPMRYlET6QwnObXsI+DG3w1nS/D7PeSVgxe9EEPubeddacCbNmWUJdo
+         +hIrpQUNJHOB70dBSpo+3AmsNiXpyDXhg+AFZyrtU7fIkWUVut1Rx0YleinhYQSWXn+g
+         w5qFkw3BS9jk4YkBXsEbXb1vPz7i+asrTjahhzSzRnnyVBgMLJ0oHQm3GoO5hIh/I/ew
+         OEWenKS+wG4by80ozbFFqJsxyaIGZduxhKxpuCP6Bj7AG+cpoizuUy6Z7UV3iQS+W96g
+         X83A==
+X-Gm-Message-State: AOAM531w1xPt659ewRnC4ig5Y/m6SB5k7uLE2MoaGHL13Wd2zpr5ANrB
+        9nzFw7IAPo7HIGuThmsHQrU0KUDWfTWD7JQ1iwhYAH6+o9U=
+X-Google-Smtp-Source: ABdhPJwXpIza/Rm0HTKf2QInQQ+egmaPF+Jp7aqI40ZSaTOv0R3uakOriHs76GSbk1t+9bnBVvGqVvkXJJjEhMUlfes=
+X-Received: by 2002:a17:902:b198:b029:11b:2246:e374 with SMTP id
+ s24-20020a170902b198b029011b2246e374mr25928208plr.17.1625748611098; Thu, 08
+ Jul 2021 05:50:11 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210630102408.3543024-1-linus.walleij@linaro.org>
-In-Reply-To: <20210630102408.3543024-1-linus.walleij@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 8 Jul 2021 14:42:12 +0200
-Message-ID: <CAPDyKFr1225F+yq7OS5pDn0LZS0pcpVveuhko9amQcykYt_1hg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmci: De-assert reset on probe
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        Ludovic Barre <ludovic.barre@st.com>
+References: <20210623101731.87885-1-andriy.shevchenko@linux.intel.com> <CAPDyKFoM-gkFPoFePbHS62r-HUpk6ipA5J-qPbQ8NWL9Mm_N2Q@mail.gmail.com>
+In-Reply-To: <CAPDyKFoM-gkFPoFePbHS62r-HUpk6ipA5J-qPbQ8NWL9Mm_N2Q@mail.gmail.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Thu, 8 Jul 2021 15:49:32 +0300
+Message-ID: <CAHp75VfdDXwboZWZgRdFNXLpONy8UgDryeZWd6UD2RaCXo=uOw@mail.gmail.com>
+Subject: Re: [PATCH v1 1/1] mmc: mmc_spi: Simplify busy loop in mmc_spi_skip()
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Jun 2021 at 12:26, Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> If we find a reset handle when probing the MMCI block,
-> make sure the reset is de-asserted. It could happen that
-> a hardware has reset asserted at boot.
->
-> Cc: Russell King <linux@armlinux.org.uk>
-> Cc: Yann Gautier <yann.gautier@foss.st.com>
-> Cc: Ludovic Barre <ludovic.barre@st.com>
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+On Thu, Jul 8, 2021 at 3:33 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On Wed, 23 Jun 2021 at 12:17, Andy Shevchenko
+> <andriy.shevchenko@linux.intel.com> wrote:
 
-Queued for v5.15 on my devel branch, thanks!
+...
 
-Kind regards
-Uffe
+> This certainly is an improvement.
+>
+> Although, what do you think of moving to readx_poll_timeout(), that
+> should allow even a better cleanup, don't you think?
 
+I believe you meant rather read_poll_timeout(). Either way I don't see
+the benefit of using that macro when you have to customize its body a
+lot. Besides that the macro doesn't use cond_sched() or even
+schedule() and I'm not sure it will be an equivalent change.
 
-> ---
-> ChangeLog v1->v2:
-> - Drop the else {} clause: reset_control_deassert() handles
->   NULL just fine.
-> ---
->  drivers/mmc/host/mmci.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 984d35055156..3765e2f4ad98 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -2126,6 +2126,9 @@ static int mmci_probe(struct amba_device *dev,
->                 ret = PTR_ERR(host->rst);
->                 goto clk_disable;
->         }
-> +       ret = reset_control_deassert(host->rst);
-> +       if (ret)
-> +               dev_err(mmc_dev(mmc), "failed to de-assert reset\n");
->
->         /* Get regulators and the supported OCR mask */
->         ret = mmc_regulator_get_supply(mmc);
-> --
-> 2.31.1
->
+That said, I prefer going this patch as is for the time being. We may
+adjust it later on.
+
+-- 
+With Best Regards,
+Andy Shevchenko
