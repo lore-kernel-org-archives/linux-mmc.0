@@ -2,204 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D3642C07E96
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jul 2021 14:41:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC86AC07E99
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 00:10:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B28D06162D
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Jul 2021 14:41:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8ED7661481
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 00:10:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231958AbhGHOo0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Jul 2021 10:44:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52122 "EHLO
+        id S229836AbhGIAMu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Jul 2021 20:12:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231933AbhGHOo0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2021 10:44:26 -0400
-Received: from mail-ot1-x32c.google.com (mail-ot1-x32c.google.com [IPv6:2607:f8b0:4864:20::32c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 76E02C061574
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Jul 2021 07:41:44 -0700 (PDT)
-Received: by mail-ot1-x32c.google.com with SMTP id l17-20020a9d6a910000b029048a51f0bc3cso6023561otq.13
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2021 07:41:44 -0700 (PDT)
+        with ESMTP id S229819AbhGIAMu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Jul 2021 20:12:50 -0400
+Received: from mail-oi1-x22f.google.com (mail-oi1-x22f.google.com [IPv6:2607:f8b0:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8976EC061760
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Jul 2021 17:10:07 -0700 (PDT)
+Received: by mail-oi1-x22f.google.com with SMTP id m3so10029942oig.10
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2021 17:10:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=72Nulo0ReEKh1o09njcEPjT3ZEsb/u/uPS+kUmVy8sU=;
-        b=FWRbODpJvUDW1Hvvw6jBbIxh3B4HQaPFbePSQUSLSnU3oLIOtqDyL5r0r30yICdLR5
-         yPDKdQ08N64edmb3D42lPuwAt1byFqGLzD6Q9oAWRnvo2NBTHJameLigCEbX0UTLUCUf
-         YeA2vARMIdIU5/CZ+Oz55gYoydq3XkuhCgH0U=
+        h=mime-version:in-reply-to:references:from:user-agent:date:message-id
+         :subject:to:cc;
+        bh=GWR42JbUy+/sIryqxS932MVNmOL/59t6cQ1xgosHWYc=;
+        b=d+jLMLzzzH3wdihqtdR4LfnXdFcCeRl6qODCxtVggS9Cs4IEsIxHJ3IDF3DcMh13Tw
+         +hKQ40Jh1LvI6+psU9W/OqkG/oWz56dN7Rcsbxshqger21NjX+7p8ZlA/3aKSZ3l+HVy
+         10hvfjXOxJX4XKHMOsaAwTm86fiNqbHw4xeNk=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=72Nulo0ReEKh1o09njcEPjT3ZEsb/u/uPS+kUmVy8sU=;
-        b=I+xTtP5BtZ1TWw0y5I4c4hEZACMI49DZzkvFvPQ2s5rPeY6HCz6I+5ceXOgNw1bukN
-         ruPu+k2Emz6j5/M0dh2h3T0+StUxl8WMFYmJ0NrZ4TNhPDMI2MRddFNqyvkEUOkwlUAx
-         LTIBstT5vm0noFCGfzLP76PheWM78rXSACWdc4aPZBDBuwVoVV04GO2+jwQRCDiqPGQ2
-         SLK4YLVhl1aMxZO/WT0F6AW6tjBOmqYDAWUnJGvMF8YtzNdrLhdcJStA6pM9n+Mm+TyU
-         KoQcy4BDg4k1dhs898V2uwlhz93sG9/dbimUgeijh7Fy4gPEm98JHtpZJtr0aoXUXtx/
-         S5Hw==
-X-Gm-Message-State: AOAM530zWPNNWfVEvte2VRWGmLwrkzCvG3oMJa/vjRTdcxEAEDB3VK/c
-        EukfAOWfxC2xmlAPjcI8xLRmCWC9WSVGsw==
-X-Google-Smtp-Source: ABdhPJzppK0u1zNsUw4he0OvlViVhsHBQJEdHU4umb7JM1atPi1goZZS1fn6F3JSAHY0OLKichUZQg==
-X-Received: by 2002:a9d:6508:: with SMTP id i8mr23121896otl.368.1625755303724;
-        Thu, 08 Jul 2021 07:41:43 -0700 (PDT)
-Received: from mail-ot1-f43.google.com (mail-ot1-f43.google.com. [209.85.210.43])
-        by smtp.gmail.com with ESMTPSA id o26sm579835oic.12.2021.07.08.07.41.43
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 08 Jul 2021 07:41:43 -0700 (PDT)
-Received: by mail-ot1-f43.google.com with SMTP id 59-20020a9d0ac10000b0290462f0ab0800so6022892otq.11
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Jul 2021 07:41:43 -0700 (PDT)
-X-Received: by 2002:a25:6088:: with SMTP id u130mr41384789ybb.257.1625754992872;
- Thu, 08 Jul 2021 07:36:32 -0700 (PDT)
+        h=x-gm-message-state:mime-version:in-reply-to:references:from
+         :user-agent:date:message-id:subject:to:cc;
+        bh=GWR42JbUy+/sIryqxS932MVNmOL/59t6cQ1xgosHWYc=;
+        b=BNbSRw+G04QqMaYRhZZDrgvBStc8BSiky595GrZRuUxJhFdf8uqtFO/lpc+WQnZFIW
+         Vfx/Fd7w4eFzWLMAJCrUaLceA07JkXKK17c0dMfee7Cvfp8Q9m+yvCz8Wp9rqeQp2+MA
+         pcw/I7WPVl2KiNinTDLgnNvjfLWd3J7Au58sS5urQJtvox57ncV74ign18rMB54ib4W4
+         O1jyQOzKhStdp9235dF5oo2+1cop8M4w+Fi+H5wF89attQgtejeZZLh2X0tiYC3NF89+
+         IC6txfJKeSL0SjncJBSjq0pi3eLyaQbQmjjfzo6VGFHLzHOr2X8daorU2OhtATsm3ZWX
+         xNeQ==
+X-Gm-Message-State: AOAM533uby6KyS19wWPcE1qgJtpfmZkOD2d6z5rS86g7oNsUw1KSmoY9
+        x51HfwX8kXayC9441e53Mfn+gF9qi5Yx76eImcfSUw==
+X-Google-Smtp-Source: ABdhPJwp8Fy4KSSWjfymFnPso5UygprvHCbrGwbbuEDy1H9gDn10d1CIud4wxkRzYmEAFidozPvTeWtMXCKaSRCFs9M=
+X-Received: by 2002:aca:3012:: with SMTP id w18mr5800184oiw.125.1625789406755;
+ Thu, 08 Jul 2021 17:10:06 -0700 (PDT)
+Received: from 753933720722 named unknown by gmailapi.google.com with
+ HTTPREST; Fri, 9 Jul 2021 00:10:06 +0000
 MIME-Version: 1.0
-References: <20210624171759.4125094-1-dianders@chromium.org>
- <YNXXwvuErVnlHt+s@8bytes.org> <CAD=FV=UFxZH7g8gH5+M=Fv4Y-e1bsLkNkPGJhNwhvVychcGQcQ@mail.gmail.com>
- <CAD=FV=W=HmgH3O3z+nThWL6U+X4Oh37COe-uTzVB9SanP2n86w@mail.gmail.com> <YOaymBHc4g2cIfRn@8bytes.org>
-In-Reply-To: <YOaymBHc4g2cIfRn@8bytes.org>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Thu, 8 Jul 2021 07:36:20 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=U_mKPaGfWyN1SVi9S2hPBpG=rE_p89+Jvjr95d0TvgsA@mail.gmail.com>
-Message-ID: <CAD=FV=U_mKPaGfWyN1SVi9S2hPBpG=rE_p89+Jvjr95d0TvgsA@mail.gmail.com>
-Subject: Re: [PATCH v2 0/3] iommu: Enable non-strict DMA on QCom SD/MMC
-To:     Joerg Roedel <joro@8bytes.org>
-Cc:     Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        John Garry <john.garry@huawei.com>,
-        Rob Clark <robdclark@chromium.org>, quic_c_gdjako@quicinc.com,
-        Saravana Kannan <saravanak@google.com>,
-        Rajat Jain <rajatja@google.com>,
-        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        linux-pci@vger.kernel.org,
-        "list@263.net:IOMMU DRIVERS <iommu@lists.linux-foundation.org>, Joerg
-        Roedel <joro@8bytes.org>," <iommu@lists.linux-foundation.org>,
-        Sonny Rao <sonnyrao@chromium.org>,
-        Joel Fernandes <joel@joelfernandes.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Jordan Crouse <jordan@cosmicpenguin.net>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Krishna Reddy <vdumpa@nvidia.com>,
-        "Maciej W. Rozycki" <macro@orcam.me.uk>,
-        Nicolin Chen <nicoleotsuka@gmail.com>,
-        "Paul E. McKenney" <paulmck@kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        LKML <linux-kernel@vger.kernel.org>
+In-Reply-To: <1624804950-3668-1-git-send-email-sbhanu@codeaurora.org>
+References: <1624804950-3668-1-git-send-email-sbhanu@codeaurora.org>
+From:   Stephen Boyd <swboyd@chromium.org>
+User-Agent: alot/0.9.1
+Date:   Fri, 9 Jul 2021 00:10:06 +0000
+Message-ID: <CAE-0n51KMizwJNTGJrD_HVVi2viZ8vh8OxE+N06Uv6p-MUd72w@mail.gmail.com>
+Subject: Re: [PATCH V5] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD card
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
+        adrian.hunter@intel.com, robh+dt@kernel.org, ulf.hansson@linaro.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, sartgarg@codeaurora.org,
+        rnayak@codeaurora.org, saiprakash.ranjan@codeaurora.org,
+        sibis@codeaurora.org, okukatla@codeaurora.org, djakov@kernel.org,
+        cang@codeaurora.org, pragalla@codeaurora.org,
+        nitirawa@codeaurora.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Thu, Jul 8, 2021 at 1:09 AM Joerg Roedel <joro@8bytes.org> wrote:
+Quoting Shaik Sajida Bhanu (2021-06-27 07:42:30)
+> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+> index a8c274a..c3e8740e 100644
+> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
+> @@ -436,6 +441,60 @@
+>                         #mbox-cells = <2>;
+>                 };
 >
-> On Wed, Jul 07, 2021 at 01:00:13PM -0700, Doug Anderson wrote:
-> > a) Nothing is inherently broken with my current approach.
-> >
-> > b) My current approach doesn't make anybody terribly upset even if
-> > nobody is totally in love with it.
+> +               sdhc_1: sdhci@7c4000 {
+> +                       compatible = "qcom,sc7280-sdhci", "qcom,sdhci-msm-v5";
+
+Is qcom,sc7280-sdhci compatible documented somewhere?
+
+> +                       status = "disabled";
+> +
+> +                       reg = <0 0x007c4000 0 0x1000>,
+> +                             <0 0x007c5000 0 0x1000>;
+> +                       reg-names = "hc", "cqhci";
+> +
+> +                       iommus = <&apps_smmu 0xc0 0x0>;
+> +                       interrupts = <GIC_SPI 652 IRQ_TYPE_LEVEL_HIGH>,
+> +                                    <GIC_SPI 656 IRQ_TYPE_LEVEL_HIGH>;
+> +                       interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +                       clocks = <&gcc GCC_SDCC1_APPS_CLK>,
+> +                                <&gcc GCC_SDCC1_AHB_CLK>,
+> +                                <&rpmhcc RPMH_CXO_CLK>;
+> +                       clock-names = "core", "iface", "xo";
+> +                       interconnects = <&aggre1_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
+> +                                       <&gem_noc MASTER_APPSS_PROC 0 &cnoc2 SLAVE_SDCC_1 0>;
+> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
+> +                       power-domains = <&rpmhpd SC7280_CX>;
+> +                       operating-points-v2 = <&sdhc1_opp_table>;
+> +
+> +                       bus-width = <8>;
+> +                       supports-cqe;
+> +
+> +                       qcom,dll-config = <0x0007642c>;
+> +                       qcom,ddr-config = <0x80040868>;
+> +
+> +                       mmc-ddr-1_8v;
+> +                       mmc-hs200-1_8v;
+> +                       mmc-hs400-1_8v;
+> +                       mmc-hs400-enhanced-strobe;
+> +
+> +                       sdhc1_opp_table: sdhc1-opp-table {
+
+Please make it
+
+	sdhc1_opp_table: opp-table {
+
+
+> +                               compatible = "operating-points-v2";
+> +
+> +                               opp-100000000 {
+> +                                       opp-hz = /bits/ 64 <100000000>;
+> +                                       required-opps = <&rpmhpd_opp_low_svs>;
+> +                                       opp-peak-kBps = <1800000 400000>;
+> +                                       opp-avg-kBps = <100000 0>;
+> +                               };
+> +
+> +                               opp-384000000 {
+> +                                       opp-hz = /bits/ 64 <384000000>;
+> +                                       required-opps = <&rpmhpd_opp_nom>;
+> +                                       opp-peak-kBps = <5400000 1600000>;
+> +                                       opp-avg-kBps = <390000 0>;
+> +                               };
+> +                       };
+> +
+> +               };
+> +
+>                 qupv3_id_0: geniqup@9c0000 {
+>                         compatible = "qcom,geni-se-qup";
+>                         reg = <0 0x009c0000 0 0x2000>;
+> @@ -1035,6 +1094,51 @@
+>                         };
+>                 };
 >
-> Well, no, sorry :)
->
-> I don't think it is a good idea to allow drivers to opt-out of the
-> strict-setting. This is a platform or user decision, and the driver
-> should accept whatever it gets.
+> +               sdhc_2: sdhci@8804000 {
+> +                       compatible = "qcom,sc7280-sdhci", "qcom,sdhci-msm-v5";
+> +                       status = "disabled";
+> +
+> +                       reg = <0 0x08804000 0 0x1000>;
+> +
+> +                       iommus = <&apps_smmu 0x100 0x0>;
+> +                       interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+> +                                    <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+> +                       interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +                       clocks = <&gcc GCC_SDCC2_APPS_CLK>,
+> +                                <&gcc GCC_SDCC2_AHB_CLK>,
+> +                                <&rpmhcc RPMH_CXO_CLK>;
+> +                       clock-names = "core", "iface", "xo";
+> +                       interconnects = <&aggre1_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
+> +                                       <&gem_noc MASTER_APPSS_PROC 0 &cnoc2 SLAVE_SDCC_2 0>;
+> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
+> +                       power-domains = <&rpmhpd SC7280_CX>;
+> +                       operating-points-v2 = <&sdhc2_opp_table>;
+> +
+> +                       bus-width = <4>;
+> +
+> +                       qcom,dll-config = <0x0007642c>;
+> +
+> +                       sdhc2_opp_table: sdhc2-opp-table {
 
-Sure, I agree with you there. The driver shouldn't ever be able to
-override and make things less strict than the user or platform wants.
-It feels like that can be accomplished. See below.
+Please make it
 
-
-> So the real question is still why strict is the default setting and how
-> to change that.
-
-I guess there are two strategies if we agree that there's a benefit to
-running some devices in strict and others in non-strict:
-
-* opt-in to strict: default is non-strict and we have to explicitly
-list what we want to be strict.
-
-* opt-out of strict: default is strict and we have to explicitly list
-what we want to be non-strict.
-
-I guess the question is: do we allow both strategies or only one of
-them? I think you are suggesting that the kernel should support
-"opt-in" to strict and that that matches the status quo with PCI on
-x86. I'm pushing for some type of "opt-out" of strict support. I have
-heard from security folks that they'd prefer "opt-out" of strict as
-well. If we're willing to accept more complex config options we could
-support both choosable by KConfig. How it'd all work in my mind:
-
-Command line:
-
-* iommu.strict=0 - suggest non-strict by default
-* iommu.strict=1 - force strict for all drivers
-* iommu.strict not specified - no opinion
-
-Kconfig:
-
-* IOMMU_DEFAULT_LAZY - suggest non-strict by default; drivers can
-opt-in to strict
-* IOMMU_DEFAULT_STRICT - force strict for all drivers
-* IOMMU_DEFAULT_LOOSE_STRICT - allow explicit suggestions for laziness
-but default to strict if no votes.
-
-Drivers:
-* suggest lazy - suggest non-strict
-* force strict - force strict
-* no vote
+	sdhc2_opp_table: opp-table {
 
 
-How the above work together:
-
-* if _any_ of the three things wants strict then it's strict.
-
-* if _all_ of the three things want lazy then it's lazy.
-
-* If the KConfig is "loose strict" and the command line is set to
-"lazy" then it's equivalent to the KConfig saying "lazy". In other
-words drivers could still "opt-in" to strict but otherwise we'd be
-lazy.
-
-* The only way for a driver's "suggest lazy" vote to have any effect
-at all is if "iommu.strict" wasn't specified on the command line _and_
-if the KConfig was "loose strict". This is effectively the "opt-out"
-of lazy.
-
-
-If you think the strategy I describe above is garbage then would you
-be OK if I re-worked my patchset to at least allow non-PCI drivers to
-"opt-in" to strict? Effectively I'd change patch #3 to list all of the
-peripherals on my SoC _except_ the USB and SD/MMC and request that
-they all be strict. If other people expressed their preference for the
-"opt-out" of strict strategy would that change your mind?
-
-
-> Or document for the users that want performance how to
-> change the setting, so that they can decide.
-
-Pushing this to the users can make sense for a Linux distribution but
-probably less sense for an embedded platform. So I'm happy to make
-some way for a user to override this (like via kernel command line),
-but I also strongly believe there should be a default that users don't
-have to futz with that we think is correct.
-
--Doug
+> +                               compatible = "operating-points-v2";
+> +
+> +                               opp-100000000 {
+> +                                       opp-hz = /bits/ 64 <100000000>;
+> +                                       required-opps = <&rpmhpd_opp_low_svs>;
+> +                                       opp-peak-kBps = <1800000 400000>;
+> +                                       opp-avg-kBps = <100000 0>;
+> +                               };
+> +
+> +                               opp-202000000 {
+> +                                       opp-hz = /bits/ 64 <202000000>;
+> +                                       required-opps = <&rpmhpd_opp_nom>;
+> +                                       opp-peak-kBps = <5400000 1600000>;
+> +                                       opp-avg-kBps = <200000 0>;
+> +                               };
+> +                       };
+> +
+> +               };
+> +
+>                 dc_noc: interconnect@90e0000 {
+>                         reg = <0 0x090e0000 0 0x5080>;
+>                         compatible = "qcom,sc7280-dc-noc";
