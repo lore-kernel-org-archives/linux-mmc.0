@@ -2,234 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 947ECC07E9E
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 16:03:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D9B7C07E9E
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 19:22:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7E829613B7
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 16:03:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E02EA613D1
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 19:21:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232484AbhGIQGW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jul 2021 12:06:22 -0400
-Received: from m43-7.mailgun.net ([69.72.43.7]:27872 "EHLO m43-7.mailgun.net"
+        id S231236AbhGITYl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Jul 2021 15:24:41 -0400
+Received: from foss.arm.com ([217.140.110.172]:58602 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232482AbhGIQGW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Jul 2021 12:06:22 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1625846618; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=IK9Kd76pLQ3Ln42D8e+6CnQbd+P/M6MyiIInApuyPDs=;
- b=ORj2OtiOthwFf3tzEyDorW3ZNgIJQze10WXXYjQNnWIN7JnzzP2GPUqw6HCwWAK0nFoZnw0X
- QCihQv08mrDTShe3L36Yo+gCE/8ELNVSiVWtMOYpYMgx4UNkeEyiDB2VHjNtkF81zSHVR2RK
- At5biTV99745aKxL7TF/PHO3WZ8=
-X-Mailgun-Sending-Ip: 69.72.43.7
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n02.prod.us-west-2.postgun.com with SMTP id
- 60e8731e3a8b6d0a45700dfd (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Fri, 09 Jul 2021 16:02:38
- GMT
-Sender: sbhanu=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 287C2C4323A; Fri,  9 Jul 2021 16:02:38 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 331E4C433D3;
-        Fri,  9 Jul 2021 16:02:37 +0000 (UTC)
+        id S229552AbhGITYl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 9 Jul 2021 15:24:41 -0400
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3396531B;
+        Fri,  9 Jul 2021 12:21:57 -0700 (PDT)
+Received: from [10.57.33.207] (unknown [10.57.33.207])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id B38DD3F66F;
+        Fri,  9 Jul 2021 12:21:52 -0700 (PDT)
+Subject: Re: [PATCH v2 0/3] iommu: Enable non-strict DMA on QCom SD/MMC
+To:     Joerg Roedel <joro@8bytes.org>,
+        Doug Anderson <dianders@chromium.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        linux-pci@vger.kernel.org,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Rajat Jain <rajatja@google.com>, Will Deacon <will@kernel.org>,
+        Rob Clark <robdclark@chromium.org>,
+        Saravana Kannan <saravanak@google.com>,
+        Jonathan Corbet <corbet@lwn.net>, quic_c_gdjako@quicinc.com,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        "Paul E. McKenney" <paulmck@kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Sonny Rao <sonnyrao@chromium.org>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        LKML <linux-kernel@vger.kernel.org>,
+        "list@263.net:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
+        Joerg Roedel <joro@8bytes.org>,
+        iommu@lists.linux-foundation.org,
+        Andrew Morton <akpm@linux-foundation.org>,
+        "Maciej W. Rozycki" <macro@orcam.me.uk>
+References: <20210624171759.4125094-1-dianders@chromium.org>
+ <YNXXwvuErVnlHt+s@8bytes.org>
+ <CAD=FV=UFxZH7g8gH5+M=Fv4Y-e1bsLkNkPGJhNwhvVychcGQcQ@mail.gmail.com>
+ <CAD=FV=W=HmgH3O3z+nThWL6U+X4Oh37COe-uTzVB9SanP2n86w@mail.gmail.com>
+ <YOaymBHc4g2cIfRn@8bytes.org>
+From:   Robin Murphy <robin.murphy@arm.com>
+Message-ID: <0a2042ff-1604-d32d-35a7-d4df8f591459@arm.com>
+Date:   Fri, 9 Jul 2021 20:21:46 +0100
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+In-Reply-To: <YOaymBHc4g2cIfRn@8bytes.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-Date:   Fri, 09 Jul 2021 21:32:37 +0530
-From:   sbhanu@codeaurora.org
-To:     Stephen Boyd <swboyd@chromium.org>
-Cc:     adrian.hunter@intel.com, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, asutoshd@codeaurora.org,
-        stummala@codeaurora.org, vbadigan@codeaurora.org,
-        rampraka@codeaurora.org, sayalil@codeaurora.org,
-        sartgarg@codeaurora.org, rnayak@codeaurora.org,
-        saiprakash.ranjan@codeaurora.org, sibis@codeaurora.org,
-        okukatla@codeaurora.org, djakov@kernel.org, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        agross@kernel.org, bjorn.andersson@linaro.org
-Subject: Re: [PATCH V5] arm64: dts: qcom: sc7280: Add nodes for eMMC and SD
- card
-In-Reply-To: <CAE-0n51KMizwJNTGJrD_HVVi2viZ8vh8OxE+N06Uv6p-MUd72w@mail.gmail.com>
-References: <1624804950-3668-1-git-send-email-sbhanu@codeaurora.org>
- <CAE-0n51KMizwJNTGJrD_HVVi2viZ8vh8OxE+N06Uv6p-MUd72w@mail.gmail.com>
-Message-ID: <5a5f7dc7b7312f25b6c37f95aceb0803@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-07-09 05:40, Stephen Boyd wrote:
-> Quoting Shaik Sajida Bhanu (2021-06-27 07:42:30)
->> diff --git a/arch/arm64/boot/dts/qcom/sc7280.dtsi 
->> b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> index a8c274a..c3e8740e 100644
->> --- a/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> +++ b/arch/arm64/boot/dts/qcom/sc7280.dtsi
->> @@ -436,6 +441,60 @@
->>                         #mbox-cells = <2>;
->>                 };
->> 
->> +               sdhc_1: sdhci@7c4000 {
->> +                       compatible = "qcom,sc7280-sdhci", 
->> "qcom,sdhci-msm-v5";
+On 2021-07-08 09:08, Joerg Roedel wrote:
+> On Wed, Jul 07, 2021 at 01:00:13PM -0700, Doug Anderson wrote:
+>> a) Nothing is inherently broken with my current approach.
+>>
+>> b) My current approach doesn't make anybody terribly upset even if
+>> nobody is totally in love with it.
 > 
-> Is qcom,sc7280-sdhci compatible documented somewhere?
-Yes, please find the link below:
-https://patchwork.kernel.org/project/linux-arm-msm/patch/1623835207-29462-1-git-send-email-sbhanu@codeaurora.org/
+> Well, no, sorry :)
 > 
->> +                       status = "disabled";
->> +
->> +                       reg = <0 0x007c4000 0 0x1000>,
->> +                             <0 0x007c5000 0 0x1000>;
->> +                       reg-names = "hc", "cqhci";
->> +
->> +                       iommus = <&apps_smmu 0xc0 0x0>;
->> +                       interrupts = <GIC_SPI 652 
->> IRQ_TYPE_LEVEL_HIGH>,
->> +                                    <GIC_SPI 656 
->> IRQ_TYPE_LEVEL_HIGH>;
->> +                       interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +                       clocks = <&gcc GCC_SDCC1_APPS_CLK>,
->> +                                <&gcc GCC_SDCC1_AHB_CLK>,
->> +                                <&rpmhcc RPMH_CXO_CLK>;
->> +                       clock-names = "core", "iface", "xo";
->> +                       interconnects = <&aggre1_noc MASTER_SDCC_1 0 
->> &mc_virt SLAVE_EBI1 0>,
->> +                                       <&gem_noc MASTER_APPSS_PROC 0 
->> &cnoc2 SLAVE_SDCC_1 0>;
->> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +                       power-domains = <&rpmhpd SC7280_CX>;
->> +                       operating-points-v2 = <&sdhc1_opp_table>;
->> +
->> +                       bus-width = <8>;
->> +                       supports-cqe;
->> +
->> +                       qcom,dll-config = <0x0007642c>;
->> +                       qcom,ddr-config = <0x80040868>;
->> +
->> +                       mmc-ddr-1_8v;
->> +                       mmc-hs200-1_8v;
->> +                       mmc-hs400-1_8v;
->> +                       mmc-hs400-enhanced-strobe;
->> +
->> +                       sdhc1_opp_table: sdhc1-opp-table {
+> I don't think it is a good idea to allow drivers to opt-out of the
+> strict-setting. This is a platform or user decision, and the driver
+> should accept whatever it gets.
 > 
-> Please make it
+> So the real question is still why strict is the default setting and how
+> to change that.
+
+It's occurred to me whilst hacking on the relevant area that there's an 
+important point I may have somewhat glossed over there: most of the 
+IOMMU drivers that are used for arm64 do not take advantage of 
+non-strict mode anyway. If anything it would be detrimental, since 
+iommu-dma would waste a bunch of time and memory managing flush queues 
+and firing off the batch invalidations while internally the drivers are 
+still invalidating each unmap synchronously.
+
+Those IOMMUs in mobile and embedded SoCs are also mostly used for media 
+devices, where the buffers are relatively large and change relatively 
+infrequently, so they are less likely to gain significantly from 
+supporting non-strict mode. It's primarily the Arm SMMUs which get used 
+in the more "x86-like" paradigm (especially in larger systems) of being 
+stuck in front of everything including networking/storage/PCIe/etc. 
+where the workloads are far more varied.
+
+Robin.
+
+> Or document for the users that want performance how to
+> change the setting, so that they can decide.
 > 
-> 	sdhc1_opp_table: opp-table {
-Sure
+> Regards,
 > 
+> 	Joerg
 > 
->> +                               compatible = "operating-points-v2";
->> +
->> +                               opp-100000000 {
->> +                                       opp-hz = /bits/ 64 
->> <100000000>;
->> +                                       required-opps = 
->> <&rpmhpd_opp_low_svs>;
->> +                                       opp-peak-kBps = <1800000 
->> 400000>;
->> +                                       opp-avg-kBps = <100000 0>;
->> +                               };
->> +
->> +                               opp-384000000 {
->> +                                       opp-hz = /bits/ 64 
->> <384000000>;
->> +                                       required-opps = 
->> <&rpmhpd_opp_nom>;
->> +                                       opp-peak-kBps = <5400000 
->> 1600000>;
->> +                                       opp-avg-kBps = <390000 0>;
->> +                               };
->> +                       };
->> +
->> +               };
->> +
->>                 qupv3_id_0: geniqup@9c0000 {
->>                         compatible = "qcom,geni-se-qup";
->>                         reg = <0 0x009c0000 0 0x2000>;
->> @@ -1035,6 +1094,51 @@
->>                         };
->>                 };
->> 
->> +               sdhc_2: sdhci@8804000 {
->> +                       compatible = "qcom,sc7280-sdhci", 
->> "qcom,sdhci-msm-v5";
->> +                       status = "disabled";
->> +
->> +                       reg = <0 0x08804000 0 0x1000>;
->> +
->> +                       iommus = <&apps_smmu 0x100 0x0>;
->> +                       interrupts = <GIC_SPI 207 
->> IRQ_TYPE_LEVEL_HIGH>,
->> +                                    <GIC_SPI 223 
->> IRQ_TYPE_LEVEL_HIGH>;
->> +                       interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +                       clocks = <&gcc GCC_SDCC2_APPS_CLK>,
->> +                                <&gcc GCC_SDCC2_AHB_CLK>,
->> +                                <&rpmhcc RPMH_CXO_CLK>;
->> +                       clock-names = "core", "iface", "xo";
->> +                       interconnects = <&aggre1_noc MASTER_SDCC_2 0 
->> &mc_virt SLAVE_EBI1 0>,
->> +                                       <&gem_noc MASTER_APPSS_PROC 0 
->> &cnoc2 SLAVE_SDCC_2 0>;
->> +                       interconnect-names = "sdhc-ddr","cpu-sdhc";
->> +                       power-domains = <&rpmhpd SC7280_CX>;
->> +                       operating-points-v2 = <&sdhc2_opp_table>;
->> +
->> +                       bus-width = <4>;
->> +
->> +                       qcom,dll-config = <0x0007642c>;
->> +
->> +                       sdhc2_opp_table: sdhc2-opp-table {
+> _______________________________________________
+> iommu mailing list
+> iommu@lists.linux-foundation.org
+> https://lists.linuxfoundation.org/mailman/listinfo/iommu
 > 
-> Please make it
-> 
-> 	sdhc2_opp_table: opp-table {
-Sure
-> 
-> 
->> +                               compatible = "operating-points-v2";
->> +
->> +                               opp-100000000 {
->> +                                       opp-hz = /bits/ 64 
->> <100000000>;
->> +                                       required-opps = 
->> <&rpmhpd_opp_low_svs>;
->> +                                       opp-peak-kBps = <1800000 
->> 400000>;
->> +                                       opp-avg-kBps = <100000 0>;
->> +                               };
->> +
->> +                               opp-202000000 {
->> +                                       opp-hz = /bits/ 64 
->> <202000000>;
->> +                                       required-opps = 
->> <&rpmhpd_opp_nom>;
->> +                                       opp-peak-kBps = <5400000 
->> 1600000>;
->> +                                       opp-avg-kBps = <200000 0>;
->> +                               };
->> +                       };
->> +
->> +               };
->> +
->>                 dc_noc: interconnect@90e0000 {
->>                         reg = <0 0x090e0000 0 0x5080>;
->>                         compatible = "qcom,sc7280-dc-noc";
