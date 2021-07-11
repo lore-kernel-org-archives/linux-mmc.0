@@ -2,121 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D9B7C07E9E
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 19:22:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF9C3C11F66
+	for <linux-mmc@archiver.kernel.org>; Sun, 11 Jul 2021 17:44:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E02EA613D1
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Jul 2021 19:21:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE27061159
+	for <linux-mmc@archiver.kernel.org>; Sun, 11 Jul 2021 17:44:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231236AbhGITYl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Jul 2021 15:24:41 -0400
-Received: from foss.arm.com ([217.140.110.172]:58602 "EHLO foss.arm.com"
+        id S232817AbhGKRra convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 11 Jul 2021 13:47:30 -0400
+Received: from gloria.sntech.de ([185.11.138.130]:53612 "EHLO gloria.sntech.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229552AbhGITYl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 9 Jul 2021 15:24:41 -0400
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3396531B;
-        Fri,  9 Jul 2021 12:21:57 -0700 (PDT)
-Received: from [10.57.33.207] (unknown [10.57.33.207])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id B38DD3F66F;
-        Fri,  9 Jul 2021 12:21:52 -0700 (PDT)
-Subject: Re: [PATCH v2 0/3] iommu: Enable non-strict DMA on QCom SD/MMC
-To:     Joerg Roedel <joro@8bytes.org>,
-        Doug Anderson <dianders@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
-        Peter Zijlstra <peterz@infradead.org>,
-        linux-pci@vger.kernel.org,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Joel Fernandes <joel@joelfernandes.org>,
-        Rajat Jain <rajatja@google.com>, Will Deacon <will@kernel.org>,
-        Rob Clark <robdclark@chromium.org>,
-        Saravana Kannan <saravanak@google.com>,
-        Jonathan Corbet <corbet@lwn.net>, quic_c_gdjako@quicinc.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        "Paul E. McKenney" <paulmck@kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Sonny Rao <sonnyrao@chromium.org>,
-        Vlastimil Babka <vbabka@suse.cz>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        LKML <linux-kernel@vger.kernel.org>,
-        "list@263.net:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
-        Joerg Roedel <joro@8bytes.org>,
-        iommu@lists.linux-foundation.org,
-        Andrew Morton <akpm@linux-foundation.org>,
-        "Maciej W. Rozycki" <macro@orcam.me.uk>
-References: <20210624171759.4125094-1-dianders@chromium.org>
- <YNXXwvuErVnlHt+s@8bytes.org>
- <CAD=FV=UFxZH7g8gH5+M=Fv4Y-e1bsLkNkPGJhNwhvVychcGQcQ@mail.gmail.com>
- <CAD=FV=W=HmgH3O3z+nThWL6U+X4Oh37COe-uTzVB9SanP2n86w@mail.gmail.com>
- <YOaymBHc4g2cIfRn@8bytes.org>
-From:   Robin Murphy <robin.murphy@arm.com>
-Message-ID: <0a2042ff-1604-d32d-35a7-d4df8f591459@arm.com>
-Date:   Fri, 9 Jul 2021 20:21:46 +0100
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        id S230353AbhGKRra (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sun, 11 Jul 2021 13:47:30 -0400
+Received: from ip5f5aa64a.dynamic.kabel-deutschland.de ([95.90.166.74] helo=diego.localnet)
+        by gloria.sntech.de with esmtpsa (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <heiko@sntech.de>)
+        id 1m2dV2-0008H7-WF; Sun, 11 Jul 2021 19:44:17 +0200
+From:   Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+To:     Lee Jones <lee.jones@linaro.org>,
+        Uwe =?ISO-8859-1?Q?Kleine=2DK=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>
+Cc:     cl@rock-chips.com, thierry.reding@gmail.com, robh+dt@kernel.org,
+        jagan@amarulasolutions.com, wens@csie.org, uwe@kleine-koenig.org,
+        mail@david-bauer.net, jbx6244@gmail.com,
+        linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        jensenhuang@friendlyarm.com, michael@amarulasolutions.com,
+        cnsztl@gmail.com, devicetree@vger.kernel.org,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        gregkh@linuxfoundation.org, linux-serial@vger.kernel.org,
+        linux-i2c@vger.kernel.org, jay.xu@rock-chips.com,
+        shawn.lin@rock-chips.com, david.wu@rock-chips.com,
+        zhangqing@rock-chips.com, huangtao@rock-chips.com,
+        wim@linux-watchdog.org, linux@roeck-us.net, jamie@jamieiles.com,
+        linux-watchdog@vger.kernel.org, maz@kernel.org,
+        linux-pwm@vger.kernel.org
+Subject: Re: [RESEND PATCH v5 1/4] dt-bindings: pwm: rockchip: add description for rk3568
+Date:   Sun, 11 Jul 2021 19:44:12 +0200
+Message-ID: <5069193.2yuIWEeYC1@diego>
+In-Reply-To: <20210705074405.uj62h4evd6htftf3@pengutronix.de>
+References: <20210622020517.13100-1-cl@rock-chips.com> <YOK1+pMy+N64eR75@dell> <20210705074405.uj62h4evd6htftf3@pengutronix.de>
 MIME-Version: 1.0
-In-Reply-To: <YOaymBHc4g2cIfRn@8bytes.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="iso-8859-1"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2021-07-08 09:08, Joerg Roedel wrote:
-> On Wed, Jul 07, 2021 at 01:00:13PM -0700, Doug Anderson wrote:
->> a) Nothing is inherently broken with my current approach.
->>
->> b) My current approach doesn't make anybody terribly upset even if
->> nobody is totally in love with it.
+Am Montag, 5. Juli 2021, 09:44:05 CEST schrieb Uwe Kleine-König:
+> Hello Lee,
 > 
-> Well, no, sorry :)
+> On Mon, Jul 05, 2021 at 08:34:18AM +0100, Lee Jones wrote:
+> > On Mon, 05 Jul 2021, Uwe Kleine-König wrote:
+> > > On Wed, Jun 23, 2021 at 10:13:03AM +0800, cl@rock-chips.com wrote:
+> > > > From: Liang Chen <cl@rock-chips.com>
+> > > > 
+> > > > add "rockchip,rk3568-pwm", "rockchip,rk3328-pwm" for pwm nodes on
+> > > > a rk3568 platform to pwm-rockchip.yaml.
+> > > 
+> > > [...]
+> > > 
+> > > Who is supposed to apply this patch? Does this need blessing by Rob?
+> > 
+> > There is no standard. [...]
 > 
-> I don't think it is a good idea to allow drivers to opt-out of the
-> strict-setting. This is a platform or user decision, and the driver
-> should accept whatever it gets.
-> 
-> So the real question is still why strict is the default setting and how
-> to change that.
+> I'm aware of that. That's why I asked to prevent that everybody thinks
+> some other maintainer will care for it.
 
-It's occurred to me whilst hacking on the relevant area that there's an 
-important point I may have somewhat glossed over there: most of the 
-IOMMU drivers that are used for arm64 do not take advantage of 
-non-strict mode anyway. If anything it would be detrimental, since 
-iommu-dma would waste a bunch of time and memory managing flush queues 
-and firing off the batch invalidations while internally the drivers are 
-still invalidating each unmap synchronously.
+I suppose Thierry would be the one responsible?
 
-Those IOMMUs in mobile and embedded SoCs are also mostly used for media 
-devices, where the buffers are relatively large and change relatively 
-infrequently, so they are less likely to gain significantly from 
-supporting non-strict mode. It's primarily the Arm SMMUs which get used 
-in the more "x86-like" paradigm (especially in larger systems) of being 
-stuck in front of everything including networking/storage/PCIe/etc. 
-where the workloads are far more varied.
+I.e. bindings normally go through the subsystem tree and
+	$ scripts/get_maintainer.pl drivers/pwm
+returns:
 
-Robin.
+Thierry Reding <thierry.reding@gmail.com> (maintainer:PWM SUBSYSTEM)
+"Uwe Kleine-König" <u.kleine-koenig@pengutronix.de> (reviewer:PWM SUBSYSTEM)
+Lee Jones <lee.jones@linaro.org> (maintainer:PWM SUBSYSTEM)
+linux-pwm@vger.kernel.org (open list:PWM SUBSYSTEM)
+linux-kernel@vger.kernel.org (open list)
 
-> Or document for the users that want performance how to
-> change the setting, so that they can decide.
-> 
-> Regards,
-> 
-> 	Joerg
-> 
-> _______________________________________________
-> iommu mailing list
-> iommu@lists.linux-foundation.org
-> https://lists.linuxfoundation.org/mailman/listinfo/iommu
-> 
+
+See my reply to the original pwm binding patch from 2021-06-21.
+
+Heiko
+
+
