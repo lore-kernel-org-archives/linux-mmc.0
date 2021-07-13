@@ -2,115 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4792C11F67
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jul 2021 09:11:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21A15C11F67
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jul 2021 18:07:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8C70561183
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jul 2021 09:11:22 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1220061369
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Jul 2021 18:07:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234902AbhGMJOK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Jul 2021 05:14:10 -0400
-Received: from verein.lst.de ([213.95.11.211]:57900 "EHLO verein.lst.de"
+        id S233634AbhGMSKC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Jul 2021 14:10:02 -0400
+Received: from foss.arm.com ([217.140.110.172]:48602 "EHLO foss.arm.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234916AbhGMJOK (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 13 Jul 2021 05:14:10 -0400
-Received: by verein.lst.de (Postfix, from userid 2407)
-        id 9AF1767373; Tue, 13 Jul 2021 11:11:14 +0200 (CEST)
-Date:   Tue, 13 Jul 2021 11:11:14 +0200
-From:   Christoph Hellwig <hch@lst.de>
-To:     "Russell King (Oracle)" <linux@armlinux.org.uk>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        "James E.J. Bottomley" <James.Bottomley@HansenPartnership.com>,
-        Guo Ren <guoren@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Nick Hu <nickhu@andestech.com>,
-        Greentime Hu <green.hu@gmail.com>,
-        Vincent Chen <deanbo422@gmail.com>,
-        Helge Deller <deller@gmx.de>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>,
-        Geoff Levand <geoff@infradead.org>,
-        Paul Cercueil <paul@crapouillou.net>,
+        id S229478AbhGMSKB (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 13 Jul 2021 14:10:01 -0400
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 243A61FB;
+        Tue, 13 Jul 2021 11:07:11 -0700 (PDT)
+Received: from [10.57.36.240] (unknown [10.57.36.240])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id C0FC43F7D8;
+        Tue, 13 Jul 2021 11:07:05 -0700 (PDT)
+Subject: Re: [PATCH v2 0/3] iommu: Enable non-strict DMA on QCom SD/MMC
+To:     Doug Anderson <dianders@chromium.org>,
+        Joerg Roedel <joro@8bytes.org>
+Cc:     Will Deacon <will@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Alex Shi <alexs@kernel.org>, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-csky@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-parisc@vger.kernel.org,
-        linux-sh@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-mm@kvack.org,
-        linux-doc@vger.kernel.org
-Subject: Re: flush_kernel_dcache_page fixes and removal
-Message-ID: <20210713091113.GA23518@lst.de>
-References: <20210712060928.4161649-1-hch@lst.de> <20210713084648.GF22278@shell.armlinux.org.uk>
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        John Garry <john.garry@huawei.com>,
+        Rob Clark <robdclark@chromium.org>, quic_c_gdjako@quicinc.com,
+        Saravana Kannan <saravanak@google.com>,
+        Rajat Jain <rajatja@google.com>,
+        Sai Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
+        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        linux-pci@vger.kernel.org,
+        "list@263.net:IOMMU DRIVERS" <iommu@lists.linux-foundation.org>,
+        Joerg Roedel <joro@8bytes.org>,
+        iommu@lists.linux-foundation.org,
+        Sonny Rao <sonnyrao@chromium.org>,
+        Joel Fernandes <joel@joelfernandes.org>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Jordan Crouse <jordan@cosmicpenguin.net>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Krishna Reddy <vdumpa@nvidia.com>,
+        "Maciej W. Rozycki" <macro@orcam.me.uk>,
+        Nicolin Chen <nicoleotsuka@gmail.com>,
+        "Paul E. McKenney" <paulmck@kernel.org>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Vlastimil Babka <vbabka@suse.cz>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        LKML <linux-kernel@vger.kernel.org>
+References: <20210624171759.4125094-1-dianders@chromium.org>
+ <YNXXwvuErVnlHt+s@8bytes.org>
+ <CAD=FV=UFxZH7g8gH5+M=Fv4Y-e1bsLkNkPGJhNwhvVychcGQcQ@mail.gmail.com>
+ <CAD=FV=W=HmgH3O3z+nThWL6U+X4Oh37COe-uTzVB9SanP2n86w@mail.gmail.com>
+ <YOaymBHc4g2cIfRn@8bytes.org>
+ <CAD=FV=U_mKPaGfWyN1SVi9S2hPBpG=rE_p89+Jvjr95d0TvgsA@mail.gmail.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+Message-ID: <e3555c49-2978-355f-93bb-dbfa7d09cab8@arm.com>
+Date:   Tue, 13 Jul 2021 19:07:00 +0100
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210713084648.GF22278@shell.armlinux.org.uk>
-User-Agent: Mutt/1.5.17 (2007-11-01)
+In-Reply-To: <CAD=FV=U_mKPaGfWyN1SVi9S2hPBpG=rE_p89+Jvjr95d0TvgsA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jul 13, 2021 at 09:46:48AM +0100, Russell King (Oracle) wrote:
-> I think you need to be careful - I seem to have a recollection that the
-> reason we ended up with flush_kernel_dcache_page() was the need to avoid
-> the taking of the mmap lock for 32-bit ARM VIVT based CPUs in
-> flush_dcache_page(). 32-bit ARM flush_dcache_page() can block.
-
-Where can arm32 flush_dcache_page block?  __flush_dcache_aliases does
-walk mapping->i_mmap, but using a spinlock hidden under
-flush_dcache_mmap_lock.  If flush_dcache_page did block plenty of code
-already calling it e.g. from interrupt and block submission contexts
-in various mmc/sdcard drivers would be rather unhappy.  Even today
-calls to flush_kernel_dcache_page page in the block I/O path are
-vastly outnumber by calls to flush_dcache_page.
-
-> The second issue I have is that, when we are reading a page into a page
-> cache page, how can that page be mapped to userspace? Isn't that a
-> violation of semantics? If the page is mapped to userspace but does not
-> contain data from the underlying storage device, then the page contains
-> stale data (if it's a new page, lets hope that's zeroed and not some
-> previous contents - which would be a massive security hole.)
-
-I did not come up with the rules, but these are the existing documented
-ones for flush_dcache_page:
-
-        Any time the kernel writes to a page cache page, _OR_
-	the kernel is about to read from a page cache page and
-	user space shared/writable mappings of this page potentially
-	exist, this routine is called.
-
-So writing to (aka reading into) a page cache page is not conditional
-on it being mapped yet.  Only the kernel reading from the page cache
-page has this condition.
-
-> As I
-> understand it, the flush_kernel_dcache_page() calls in the block layer
-> are primarily there to cope with drivers that do PIO read to write to a
-> page cache page to ensure that later userspace mappings can see the data
-> in the page cache page - by ensuring that the page cache pages are in
-> the same state as far as caches go as if they had been DMA'd to.
-
-PIO is one big case, but also kernel generated data and all kinds of
-bounce buffering schemes.
-
-> We know that the current implementation works fine - you're now
-> proposing to radically change it, asserting that it's buggy. I'm
-> nervous about this change.
-
-Do we know it works?  There are very few calls to
-flush_dcache_kernel_page and very few implementations that differ from
-flush_dcache_page.  For arm32 the relevant drivers would mostly be
-mmc drivers using the sg_miter interface, are they even used much on
-the platforms where the difference exists?
-
+On 2021-07-08 15:36, Doug Anderson wrote:
+[...]
+>> Or document for the users that want performance how to
+>> change the setting, so that they can decide.
 > 
-> -- 
-> RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
-> FTTP is here! 40Mbps down 10Mbps up. Decent connectivity at last!
----end quoted text---
+> Pushing this to the users can make sense for a Linux distribution but
+> probably less sense for an embedded platform. So I'm happy to make
+> some way for a user to override this (like via kernel command line),
+> but I also strongly believe there should be a default that users don't
+> have to futz with that we think is correct.
+
+FYI I did make progress on the "punt it to userspace" approach. I'm not 
+posting it even as an RFC yet because I still need to set up a machine 
+to try actually testing any of it (it's almost certainly broken 
+somewhere), but in the end it comes out looking surprisingly not too bad 
+overall. If you're curious to take a look in the meantime I put it here:
+
+https://gitlab.arm.com/linux-arm/linux-rm/-/commits/iommu/fq
+
+Cheers,
+Robin.
