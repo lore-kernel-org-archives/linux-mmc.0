@@ -2,153 +2,167 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.0 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95345C47E48
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jul 2021 21:47:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 526CAC07E96
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jul 2021 05:29:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7B70761358
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Jul 2021 21:47:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E6A361374
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Jul 2021 05:29:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231664AbhGNVuI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Jul 2021 17:50:08 -0400
-Received: from mailout3.samsung.com ([203.254.224.33]:59728 "EHLO
-        mailout3.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236097AbhGNVuI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Jul 2021 17:50:08 -0400
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
-        by mailout3.samsung.com (KnoxPortal) with ESMTP id 20210714214714epoutp030bf6e3158cc1fe474b98098501d40afa~Rxomnkceg1198511985epoutp03E
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Jul 2021 21:47:14 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout3.samsung.com 20210714214714epoutp030bf6e3158cc1fe474b98098501d40afa~Rxomnkceg1198511985epoutp03E
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1626299235;
-        bh=KJObnHtkeSAESc96eky/w3oBFrc7DK+2xxwelaEivVc=;
-        h=Subject:To:Cc:From:Date:In-Reply-To:References:From;
-        b=doqkHOxz536dJGyiJ1hiYwF8yq97+ZTGcoaqsrxg16ZC2sjHItIsZsF/6aqlIeqSP
-         ZoPsqkFHo6rqpURhVrXGXxJKyZzRH7mCs6NJKv+DKf8W+FvXFBbGmo4iW+stvQ57UP
-         W+oJzUuMLwrUYezTYOGP9HTL/N4HTjTo4OdNx5xs=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-        epcas1p3.samsung.com (KnoxPortal) with ESMTP id
-        20210714214714epcas1p35942ec8d6f502380c33127c219e021b7~RxomCnYZu1552915529epcas1p3w;
-        Wed, 14 Jul 2021 21:47:14 +0000 (GMT)
-Received: from epsmges1p4.samsung.com (unknown [182.195.40.153]) by
-        epsnrtp3.localdomain (Postfix) with ESMTP id 4GQB1D1pSsz4x9Pr; Wed, 14 Jul
-        2021 21:47:12 +0000 (GMT)
-Received: from epcas1p1.samsung.com ( [182.195.41.45]) by
-        epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
-        CB.3C.10119.06B5FE06; Thu, 15 Jul 2021 06:47:12 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-        epcas1p1.samsung.com (KnoxPortal) with ESMTPA id
-        20210714214711epcas1p10fa8cb60947338ae4a56f10f44ee709f~RxojvbhSX2183421834epcas1p1D;
-        Wed, 14 Jul 2021 21:47:11 +0000 (GMT)
-Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
-        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20210714214711epsmtrp1b461ec9fc390980faf0f9f99c7471903~RxojuwQDD3022630226epsmtrp17;
-        Wed, 14 Jul 2021 21:47:11 +0000 (GMT)
-X-AuditID: b6c32a38-965ff70000002787-2a-60ef5b60bfcd
-Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
-        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
-        5A.22.08289.F5B5FE06; Thu, 15 Jul 2021 06:47:11 +0900 (KST)
-Received: from [10.113.113.235] (unknown [10.113.113.235]) by
-        epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-        20210714214711epsmtip102ca87ea37b9433ee7d639cb792d9a87~RxojMaQLI0599205992epsmtip1H;
-        Wed, 14 Jul 2021 21:47:11 +0000 (GMT)
-Subject: Re: [PATCH] mmc: dw_mmc: Fix hang on data CRC error
-To:     Vincent Whitchurch <vincent.whitchurch@axis.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, kernel <kernel@axis.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-From:   Jaehoon Chung <jh80.chung@samsung.com>
-Message-ID: <4e24a4ce-9991-48c4-3192-78016f6cb217@samsung.com>
-Date:   Thu, 15 Jul 2021 06:48:04 +0900
+        id S239889AbhGOFcZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Jul 2021 01:32:25 -0400
+Received: from mga06.intel.com ([134.134.136.31]:65194 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S238709AbhGOFcZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 15 Jul 2021 01:32:25 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10045"; a="271585155"
+X-IronPort-AV: E=Sophos;i="5.84,240,1620716400"; 
+   d="scan'208";a="271585155"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 14 Jul 2021 22:29:32 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,240,1620716400"; 
+   d="scan'208";a="460238295"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.79]) ([10.237.72.79])
+  by orsmga008.jf.intel.com with ESMTP; 14 Jul 2021 22:29:27 -0700
+Subject: Re: [PATCH V3] mmc: sdhci-msm: Update the software timeout value for
+ sdhc
+To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>, ulf.hansson@linaro.org
+Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
+        vbadigan@codeaurora.org, rampraka@codeaurora.org,
+        sayalil@codeaurora.org, sartgarg@codeaurora.org,
+        rnayak@codeaurora.org, cang@codeaurora.org,
+        pragalla@codeaurora.org, nitirawa@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, agross@kernel.org,
+        bjorn.andersson@linaro.org, robh+dt@kernel.org
+References: <1625500253-12815-1-git-send-email-sbhanu@codeaurora.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <7bd56312-96ab-debe-0f80-112af994b233@intel.com>
+Date:   Thu, 15 Jul 2021 08:29:37 +0300
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
-        Thunderbird/78.11.0
+ Firefox/78.0 Thunderbird/78.11.0
 MIME-Version: 1.0
-In-Reply-To: <20210714114921.GA22706@axis.com>
+In-Reply-To: <1625500253-12815-1-git-send-email-sbhanu@codeaurora.org>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpkk+LIzCtJLcpLzFFi42LZdlhTVzch+n2CwYkV3BafWlQtLu+aw2Zx
-        5H8/o8XxteEW57f5O7B6XF8X4HHn2h42j8+b5AKYo7JtMlITU1KLFFLzkvNTMvPSbZW8g+Od
-        403NDAx1DS0tzJUU8hJzU22VXHwCdN0yc4DWKSmUJeaUAoUCEouLlfTtbIryS0tSFTLyi0ts
-        lVILUnIKLAv0ihNzi0vz0vWS83OtDA0MjEyBChOyM5Yt28pS0MxTcebVAaYGxu+cXYycHBIC
-        JhKLF19g6WLk4hAS2MEo0bpsIzOE84lRYt+kM1DOZ0aJ05dbmWBa+u+uZYRI7GKUWDXrMyuE
-        855R4knfRUaQKmEBG4mL966wgdgiQB3bJr8CK2IW2McocX5vOytIgk1AR2L7t+NAYzk4eAXs
-        JB7+5AAJswioSizfO5UdxBYViJQ4v3sBC4jNKyAocXLmEzCbU0BPYunKL8wgNrOAuMStJ/OZ
-        IGx5ie1v54CdLSHwll1iWU831NkuEtsOTmWBsIUlXh3fwg5hS0m87G+DsqsldjWfgWruYJS4
-        ta0JqtlYYv/SyWCHMgtoSqzfpQ8RVpTY+XsuI8RiPol3X3tYQUokBHglOtqEIEpUJC69fskE
-        s+ruk/+sELaHxKQlM1gmMCrOQvLaLCTvzELyziyExQsYWVYxiqUWFOempxYbFpggR/cmRnBa
-        1LLYwTj37Qe9Q4xMHIyHGCU4mJVEeJcavU0Q4k1JrKxKLcqPLyrNSS0+xGgKDOyJzFKiyfnA
-        xJxXEm9oamRsbGxhYmhmamioJM67k+1QgpBAemJJanZqakFqEUwfEwenVAOTXpnzi4udj1MY
-        Y1iutL6zXXd+qs8FkWUGG1my5a+IROv7lPz/nvzSuZbD+1La19wXjG9eOAQ65WQUHVyg9vpp
-        3Mdp7+9bP/Xflnr2hAqr9dQAIRb/I9M8szV//5tpLHh1zesdXJMkI1a77eu64D2dYatIkpyI
-        4LbnEU3t9ZM1GzlW2118xhQo0VhkXtL10yd7X6rKlUf7ftSYlOgY3Q5a73v1kYTyASWDDaKP
-        bZJbwv/b9Zlc8wo8mbNSMzs9eZFsuU7kI68XmmX5Hwu6e5+bG1qa9BvwL++ZY6Z17XV9iZm0
-        x7KDc/r+2HOdmuRfpZOYWbXJ7Zvi9itqm5adC2e+Z+ufH9kUt1F4UYSOhRJLcUaioRZzUXEi
-        AEGjbfIUBAAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrPLMWRmVeSWpSXmKPExsWy7bCSnG589PsEg/2zdSw+tahaXN41h83i
-        yP9+Rovja8Mtzm/zd2D1uL4uwOPOtT1sHp83yQUwR3HZpKTmZJalFunbJXBlLFu2laWgmafi
-        zKsDTA2M3zm7GDk5JARMJPrvrmXsYuTiEBLYwSjxuO0uC0RCSuLz06lsXYwcQLawxOHDxRA1
-        bxklPjXtYAWpERawkbh47wobiC0CNGjb5FesIEXMAvsYJV5s2M8C13H16xJGkCo2AR2J7d+O
-        M4FM5RWwk3j4kwMkzCKgKrF871R2EFtUIFLi84JXYAt4BQQlTs58AnYQp4CexNKVX5hBbGYB
-        dYk/8y5B2eISt57MZ4Kw5SW2v53DPIFRaBaS9llIWmYhaZmFpGUBI8sqRsnUguLc9NxiwwKj
-        vNRyveLE3OLSvHS95PzcTYzgONDS2sG4Z9UHvUOMTByMhxglOJiVRHiXGr1NEOJNSaysSi3K
-        jy8qzUktPsQozcGiJM57oetkvJBAemJJanZqakFqEUyWiYNTqoEpX2yN0C+mLdH73x+0fbJq
-        qnHh0Qnm/EpPzuU1fVonnZfELeTb6OJTevZiiMw+/vmhOavilZSmvjPL2M64WO7W0VDBK8yf
-        TL58fmB8SN352/eqWaei8rJiFu48vOFTdqyZeZI828bSadv61P5vcnlbrjjBoPV87cbMq3bC
-        vYElXDtlGI+22kyVs71aJV7TfyjtRsPdvbYhZxr8uhmfvzo+3Vl5S0Crw0be5ys/mVYyGm/h
-        WuXwdKL/j58zXopwVFVE88aE6avEvfi3UbCsZhtfzAX9NXm8TE77ecXso6W9TzlfO7MtZ13I
-        zWkn3pydNNVzNXuhkfjxL1e18iVjVQ9NiJIzl2G5uty3ah2j52QlluKMREMt5qLiRADakUNl
-        8gIAAA==
-X-CMS-MailID: 20210714214711epcas1p10fa8cb60947338ae4a56f10f44ee709f
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: SVC_REQ_APPROVE
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20210630102240epcas1p33bbdffb5eb553a49badaffab756d482c
-References: <CGME20210630102240epcas1p33bbdffb5eb553a49badaffab756d482c@epcas1p3.samsung.com>
-        <20210630102232.16011-1-vincent.whitchurch@axis.com>
-        <81c1b56d-e1be-b3fb-6b44-fc8054f1dd8b@samsung.com>
-        <20210714114921.GA22706@axis.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Vicent,
-
-On 7/14/21 8:49 PM, Vincent Whitchurch wrote:
-> On Thu, Jul 01, 2021 at 12:06:31AM +0200, Jaehoon Chung wrote:
->> On 6/30/21 7:22 PM, Vincent Whitchurch wrote:
->>> When a Data CRC interrupt is received, the driver disables the DMA, then
->>> sends the stop/abort command and then waits for Data Transfer Over.
->>>
->>> However, sometimes, when a data CRC error is received in the middle of a
->>> multi-block write transfer, the Data Transfer Over interrupt is never
->>> received, and the driver hangs and never completes the request.
->>>
->>> The driver sets the BMOD.SWR bit (SDMMC_IDMAC_SWRESET) when stopping the
->>> DMA, but according to the manual CMD.STOP_ABORT_CMD should be programmed
->>> "before assertion of SWR".  Do these operations in the recommended
->>> order.  With this change the Data Transfer Over is always received
->>> correctly in my tests.
->>
->> I will check with your patch. I didn't see any CRC error on my targets before.
+On 5/07/21 6:50 pm, Shaik Sajida Bhanu wrote:
+> Whenever SDHC run at clock rate 50MHZ or below, the hardware data
+> timeout value will be 21.47secs, which is approx. 22secs and we have
+> a current software timeout value as 10secs. We have to set software
+> timeout value more than the hardware data timeout value to avioid seeing
+> the below register dumps.
 > 
-> Have you had a chance to check it?  You can use the fault-injection
-> patch if you want to trigger aborted transfers without getting real CRC
-> errors:
-
-Sorry for too late. I did my other task. I will check yours on Today. 
-Anyway, Thanks for checking this issue.
-
-Best Regards,
-Jaehoon Chung
-
+> [  332.953670] mmc2: Timeout waiting for hardware interrupt.
+> [  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> [  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
+> [  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+> [  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
+> [  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
+> [  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
+> [  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> [  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> [  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
+> [  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> [  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
+> [  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
+> [  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
+> [  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> [  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
+> [  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
+> 0x0000000ffffff218
+> [  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
+> -----------
+> [  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+> 0x6000642c | DLL cfg2: 0x0020a000
+> [  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+> 0x00000000 | DDR cfg: 0x80040873
+> [  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
+> 0xf88218a8 Vndr func3: 0x02626040
+> [  333.102371] mmc2: sdhci: ============================================
 > 
->  https://protect2.fireeye.com/v1/url?k=96c33914-c958001f-96c2b25b-002590f5b904-9a89d187f33934b7&q=1&e=308eae3a-44b8-43d7-be54-24e9b850f4ad&u=https%3A%2F%2Flore.kernel.org%2Flinux-mmc%2F20210701080534.23138-1-vincent.whitchurch%40axis.com%2F
+> So, set software timeout value more than hardware timeout value.
+> 
+> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+
+A couple of minor nitpicks below.  Fix those and you can add:
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+> 
+> Changes since V2:
+> 	- Updated 22 with 22LL to avoid compiler warning as suggested by
+> 	  Adrian Hunter.
+> 	- Added a check to update software data timeout value if its value is
+> 	  less than the calculated hardware data timeout value as suggested
+> 	  by Veerabhadrarao Badiganti.
+> 
+> Changes since V1:
+> 	- Moved software data timeout update part to qcom specific file
+> 	  as suggested by Veerabhadrarao Badiganti.
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index e44b7a6..64fb85e 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2089,6 +2089,23 @@ static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
+>  	sdhci_cqe_disable(mmc, recovery);
+>  }
+>  
+> +static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> +{
+> +
+
+Unnecessary blank line.
+
+> +	u32 count, start = 15;
+> +
+> +	__sdhci_set_timeout(host, cmd);
+> +	count = sdhci_readb(host, SDHCI_TIMEOUT_CONTROL);
+> +	/*
+> +	 * Update software timeout value if its value is less than hardware data
+> +	 * timeout value. Qcom SoC hardware data timeout value was calculated
+> +	 * using 4 * MCLK * 2^(count + 13). where MCLK = 1 / host->clock.
+> +	 */
+> +	if (cmd && cmd->data && host->clock > 400000 && host->clock <= 50000000
+> +			&& ((1 << (count + start)) > (10 * host->clock)))
+
+'&&' is better at the end of the previous line
+
+Also fewer parenthesis is more readable e.g.
+
+	if (cmd && cmd->data && host->clock > 400000 &&
+	    host->clock <= 50000000 &&
+	    (1 << (count + start)) > (10 * host->clock))
+
+> +		host->data_timeout = 22LL * NSEC_PER_SEC;
+> +}
+> +
+>  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+>  	.enable		= sdhci_msm_cqe_enable,
+>  	.disable	= sdhci_msm_cqe_disable,
+> @@ -2438,6 +2455,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+>  	.irq	= sdhci_msm_cqe_irq,
+>  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
+>  	.set_power = sdhci_set_power_noreg,
+> +	.set_timeout = sdhci_msm_set_timeout,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
 > 
 
