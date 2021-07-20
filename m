@@ -2,144 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8634BC636CA
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 10:36:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE9D3C636C8
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 11:42:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6A3516113B
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 10:36:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B90636113A
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 11:42:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236206AbhGTJzk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Jul 2021 05:55:40 -0400
-Received: from mail-ua1-f50.google.com ([209.85.222.50]:42790 "EHLO
-        mail-ua1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237560AbhGTJya (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jul 2021 05:54:30 -0400
-Received: by mail-ua1-f50.google.com with SMTP id z3so4468176uao.9;
-        Tue, 20 Jul 2021 03:35:09 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=c2RB5e6rlnT9vl2laNQtwsgHtJrL2uS5bXejYhA1v8g=;
-        b=T/IZuaXbb8q7A1uhi9wZgGC7ZJeaRCuAwW8d2oNLsoj7AHAX1XV0YBrbcwof8gTN+/
-         lqXSTN09geegAferxbu0XHA7W8QXfEHM6b6kKXNR/BvMxHVYpq0hrVHd3ZJqwsTroAik
-         9/grKHk05VDyWjDtgcetVZ3akt96Qe47Lq/fjsQ0YJ09rZZWHmV3fTswUqBnXD3NqQzo
-         YMCurKyrayYiPQQwjWUD+o9YaEKu1tktjRgW5LX6tEWchYNrFhuxHyfRWu6nt2+zVIZ8
-         cmXF3Ecmm1VUEzU89UKN3lvMDNmvDnjdT1W+0eLsQen5OSpEoGaLPkbLfm6fnOz2q4/z
-         9Dxg==
-X-Gm-Message-State: AOAM531R+WgmN2AndSx3ms0zu1ITodDaNXlGmPrmTeeKQCPMbxCeAYt9
-        /SgzDVVfXJLxEKGGZFlA0gKJJofS8SKg37h8kzM=
-X-Google-Smtp-Source: ABdhPJyr9yLuIoB1k78ejPEkc4NzfhrPrV+fp7Gnyf1N6j6DHQDxoiWuqkVx7a2t2tsabdi/yHmjYJOzk8DRQs/o2Yw=
-X-Received: by 2002:ab0:5a2e:: with SMTP id l43mr30056692uad.4.1626777308746;
- Tue, 20 Jul 2021 03:35:08 -0700 (PDT)
+        id S236446AbhGTLCG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jul 2021 07:02:06 -0400
+Received: from mga09.intel.com ([134.134.136.24]:57865 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236474AbhGTLB7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 20 Jul 2021 07:01:59 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10050"; a="211218060"
+X-IronPort-AV: E=Sophos;i="5.84,254,1620716400"; 
+   d="scan'208";a="211218060"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Jul 2021 04:41:44 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,254,1620716400"; 
+   d="scan'208";a="510723705"
+Received: from coresw01.iind.intel.com ([10.223.252.64])
+  by fmsmga002.fm.intel.com with ESMTP; 20 Jul 2021 04:41:39 -0700
+From:   rashmi.a@intel.com
+To:     linux-drivers-review-request@eclists.intel.com,
+        michal.simek@xilinx.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, kishon@ti.com, vkoul@kernel.org,
+        andriy.shevchenko@linux.intel.com, linux-phy@lists.infradead.org
+Cc:     mgross@linux.intel.com, kris.pan@linux.intel.com,
+        furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
+        adrian.hunter@intel.com, mahesh.r.vaidya@intel.com,
+        nandhini.srikandan@intel.com, kenchappa.demakkanavar@intel.com,
+        rashmi.a@intel.com
+Subject: =?utf-8?q?=5B=E2=80=9CPATCH=E2=80=9D=201/3=5D=20dt-bindings=3A=20phy=3A=20intel=3A=20Add=20Thunder=20Bay=20eMMC=20PHY=20bindings?=
+Date:   Tue, 20 Jul 2021 17:11:31 +0530
+Message-Id: <20210720114133.8936-2-rashmi.a@intel.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210720114133.8936-1-rashmi.a@intel.com>
+References: <20210720114133.8936-1-rashmi.a@intel.com>
 MIME-Version: 1.0
-References: <20210702112956.1065875-1-yoshihiro.shimoda.uh@renesas.com>
-In-Reply-To: <20210702112956.1065875-1-yoshihiro.shimoda.uh@renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 20 Jul 2021 12:34:57 +0200
-Message-ID: <CAMuHMdVH+mBWQ1KBNcrhdxoHavWpytczZmUBR_0pXu5AoULgYg@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: host: renesas_sdhi: Refactor renesas_sdhi_probe()
-To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        kernel test robot <lkp@intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Shimoda-san,
+From: Rashmi A <rashmi.a@intel.com>
 
-Thanks for your patch!
+Binding description for Intel Thunder Bay eMMC PHY.
+Added the newly introduced files into MAINTAINERS file-list
 
-On Fri, Jul 2, 2021 at 1:31 PM Yoshihiro Shimoda
-<yoshihiro.shimoda.uh@renesas.com> wrote:
-> Refactor renesas_sdhi_probe() to avoid increasing numbers of
-> sdhi_quirks_match[] entry when we add other stable SoCs like
-> r8a779m*.
+Signed-off-by: Rashmi A <rashmi.a@intel.com>
+---
+ .../phy/intel,phy-thunderbay-emmc.yaml        | 49 +++++++++++++++++++
+ MAINTAINERS                                   |  7 +++
+ 2 files changed, 56 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
 
-Cool, then we won't need "[PATCH 04/14] mmc: renesas_sdhi: Add support
-for R-Car H3e-2G and M3e-2G"
-(https://lore.kernel.org/r/22b4c393bf5074b53791d2797d8fe74deb8ea9a7.1623315732.git.geert+renesas@glider.be).
+diff --git a/Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml b/Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
+new file mode 100644
+index 000000000000..5b764095746e
+--- /dev/null
++++ b/Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
+@@ -0,0 +1,49 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/phy/intel,phy-thunderbay-emmc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Intel Thunder Bay eMMC PHY bindings
++
++maintainers:
++  - Srikandan Nandhini <nandhini.srikandan@intel.com>
++
++properties:
++  compatible:
++    oneOf:
++      - const: intel,thunderbay-emmc-phy
++      - const: intel,thunderbay-sdhci-5.1
++      - const: intel,thunderbay-sd-phy
++
++  "#phy-cells":
++    const: 0
++
++  reg:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  clock-names:
++    items:
++      - const: emmcclk
++
++required:
++  - "#phy-cells"
++  - compatible
++  - reg
++  - clocks
++
++additionalProperties: false
++
++examples:
++  - |
++     mmc_phy@80440800 {
++     #phy-cells = <0x0>;
++     compatible = "intel,thunderbay-emmc-phy";
++     status = "okay";
++     reg = <0x80440800 0x100>;
++     clocks = <&emmc>;
++     clock-names = "emmcclk";
++     };
+diff --git a/MAINTAINERS b/MAINTAINERS
+index bd7aff0c120f..44533319c900 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -9278,6 +9278,13 @@ F:	drivers/crypto/keembay/keembay-ocs-hcu-core.c
+ F:	drivers/crypto/keembay/ocs-hcu.c
+ F:	drivers/crypto/keembay/ocs-hcu.h
+ 
++INTEL THUNDER BAY EMMC PHY DRIVER
++M:	Nandhini Srikandan <nandhini.srikandan@intel.com>
++M:	Rashmi A <rashmi.a@intel.com>
++S:	Maintained
++F:	Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
++F:	drivers/phy/intel/phy-intel-thunderbay-emmc.c
++
+ INTEL MANAGEMENT ENGINE (mei)
+ M:	Tomas Winkler <tomas.winkler@intel.com>
+ L:	linux-kernel@vger.kernel.org
+-- 
+2.17.1
 
->
-> Note that the sdhi_quirks_match[] is only needed on
-> renesas_sdhi_internal_dmac.c so that of_data of
-> renesas_sdhi_sys_dmac.c keeps as-is.
->
-> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Reported-by: kernel test robot <lkp@intel.com> # build fix on RFC
-
-I would drop this tag, as it is basically a test/review comment for
-an older version of a patch.
-
-> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-> @@ -406,15 +516,25 @@ static const struct soc_device_attribute soc_dma_quirks[] = {
->  static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
->  {
->         const struct soc_device_attribute *soc = soc_device_match(soc_dma_quirks);
-> +       const struct soc_device_attribute *attr = soc_device_match(sdhi_quirks_match);
-> +       const struct renesas_sdhi_of_data_with_quirks *of_data_quirks;
-> +       const struct renesas_sdhi_quirks *quirks = NULL;
->         struct device *dev = &pdev->dev;
->
->         if (soc)
->                 global_flags |= (unsigned long)soc->data;
->
-> +       of_data_quirks = of_device_get_match_data(&pdev->dev);
-> +
-> +       if (attr)
-> +               quirks = attr->data;
-> +
-
-I think the code would be easier to read without the interleaving of
-of_device_get_match_data() and soc_device_match() based matching, ...
-
->         /* value is max of SD_SECCNT. Confirmed by HW engineers */
->         dma_set_max_seg_size(dev, 0xffffffff);
->
-> -       return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops);
-> +       return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops,
-> +                                 of_data_quirks->of_data,
-> +                                 quirks ? : of_data_quirks->quirks);
-
-... and without using the ternary operator, like:
-
-    of_data_quirks = of_device_get_match_data(&pdev->dev);
-    quirks = of_data_quirks->quirks;
-
-    attr = soc_device_match(soc_dma_quirks);
-    if (attr)
-            global_flags |= (unsigned long)attr->data;
-
-    attr = soc_device_match(sdhi_quirks_match);
-    if (attr)
-            quirks = attr->data;
-
-    [...]
-
-    return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops,
-                              of_data_quirks->of_data, quirks);
-
-Regardless, as this doesn't impact functionality:
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
