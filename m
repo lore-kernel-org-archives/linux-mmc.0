@@ -2,184 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25DEDC07E9D
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jul 2021 23:16:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8634BC636CA
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 10:36:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E541860FE9
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Jul 2021 23:16:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6A3516113B
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 10:36:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1344181AbhGSWfp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Jul 2021 18:35:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41348 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1355759AbhGSSyO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Jul 2021 14:54:14 -0400
-Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 021EFC061574
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jul 2021 12:26:39 -0700 (PDT)
-Received: by mail-pj1-x102a.google.com with SMTP id cu14so12134581pjb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Jul 2021 12:34:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Col+Hohsx7xGEFrf+jrfKCvFuSmzDZVn/MQc+BnuW18=;
-        b=ZT8nCCynJcgM/7BgjAfxesuFgGNL50LCMscTSf6fn8k1AwHZfgUQ3wWLPLAWJMwjum
-         2LsJVROIPrnKzh59b2h4ZtRoip+/2nrcCaZhfFIuLqB5pe/p0kw58koBZbw8pdF5r4kg
-         Eh7IA2ZPNE5/rUi5IsV15of5/ViqpNcK53WbshmuTBZF84K39ZwzRxPTbFSwsqIkXf0J
-         +ujfaUthW26apXh7cQXrCuS1X2xZxKHjpzcNT1GFouVt8F/gw2usOrgeE0DhhulrS+nK
-         G9l5bzboo3o/slYTBvRhfZKPUZBNaHFoOJtSdCdiWaUJqIkcyUJxzVmKwLtzUkKWb7Os
-         OhiA==
+        id S236206AbhGTJzk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jul 2021 05:55:40 -0400
+Received: from mail-ua1-f50.google.com ([209.85.222.50]:42790 "EHLO
+        mail-ua1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237560AbhGTJya (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jul 2021 05:54:30 -0400
+Received: by mail-ua1-f50.google.com with SMTP id z3so4468176uao.9;
+        Tue, 20 Jul 2021 03:35:09 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=Col+Hohsx7xGEFrf+jrfKCvFuSmzDZVn/MQc+BnuW18=;
-        b=idkZf9WBunUFVSlh6JCwgPKf2yo76plqmCEiUh0vR6jxb9Fh1C9mHIMKOGV67wiI6X
-         X//cC/rM1p+2gmCDX/HgqrtrA2lDATW0TAE3qtBUR7CmD3mxhqXLcHXuEQ7mRaSa1vUP
-         Inqz7Xqrkx84clFsApn5mR87o/ijk9FpSinuWu34DCN+ulbbXme2nSwUtKWrPNgGGt40
-         S4vWmYxT+Vj1/j4WAGrZ1hCsW/kwbRQMUggliJ9cLnUnN5p5G9yQ6d/FYsYWuDJp3wzy
-         trKS6s43XYBJX/CXgXQMRB4mnLVeVxCyQNp2h+f3quLhDO1IUEGTpl5p1AYXPPOSbuLj
-         kpWg==
-X-Gm-Message-State: AOAM533tufIT9suL604hMhr8mARlpaGO7sbXXMNx5Z9o8V80j/wjnyMt
-        e9VBVM/iABImVDD5wQFMuf8=
-X-Google-Smtp-Source: ABdhPJwTXDrMxPjGHTUp5k1aFDZCklfmLjP3huiqCPmK7iC29tErG3i0xIncxJFBOLXOhP/xugPPJA==
-X-Received: by 2002:a17:90a:a117:: with SMTP id s23mr3532133pjp.229.1626723288741;
-        Mon, 19 Jul 2021 12:34:48 -0700 (PDT)
-Received: from localhost.localdomain ([2804:14c:485:504a:4236:c95f:1569:e13d])
-        by smtp.gmail.com with ESMTPSA id f17sm268204pjj.21.2021.07.19.12.34.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 19 Jul 2021 12:34:48 -0700 (PDT)
-From:   Fabio Estevam <festevam@gmail.com>
-To:     ulf.hansson@linaro.org
-Cc:     linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        Fabio Estevam <festevam@gmail.com>
-Subject: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded mmc-esdhc-imx.h header
-Date:   Mon, 19 Jul 2021 16:34:13 -0300
-Message-Id: <20210719193413.3792615-1-festevam@gmail.com>
-X-Mailer: git-send-email 2.25.1
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=c2RB5e6rlnT9vl2laNQtwsgHtJrL2uS5bXejYhA1v8g=;
+        b=T/IZuaXbb8q7A1uhi9wZgGC7ZJeaRCuAwW8d2oNLsoj7AHAX1XV0YBrbcwof8gTN+/
+         lqXSTN09geegAferxbu0XHA7W8QXfEHM6b6kKXNR/BvMxHVYpq0hrVHd3ZJqwsTroAik
+         9/grKHk05VDyWjDtgcetVZ3akt96Qe47Lq/fjsQ0YJ09rZZWHmV3fTswUqBnXD3NqQzo
+         YMCurKyrayYiPQQwjWUD+o9YaEKu1tktjRgW5LX6tEWchYNrFhuxHyfRWu6nt2+zVIZ8
+         cmXF3Ecmm1VUEzU89UKN3lvMDNmvDnjdT1W+0eLsQen5OSpEoGaLPkbLfm6fnOz2q4/z
+         9Dxg==
+X-Gm-Message-State: AOAM531R+WgmN2AndSx3ms0zu1ITodDaNXlGmPrmTeeKQCPMbxCeAYt9
+        /SgzDVVfXJLxEKGGZFlA0gKJJofS8SKg37h8kzM=
+X-Google-Smtp-Source: ABdhPJyr9yLuIoB1k78ejPEkc4NzfhrPrV+fp7Gnyf1N6j6DHQDxoiWuqkVx7a2t2tsabdi/yHmjYJOzk8DRQs/o2Yw=
+X-Received: by 2002:ab0:5a2e:: with SMTP id l43mr30056692uad.4.1626777308746;
+ Tue, 20 Jul 2021 03:35:08 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210702112956.1065875-1-yoshihiro.shimoda.uh@renesas.com>
+In-Reply-To: <20210702112956.1065875-1-yoshihiro.shimoda.uh@renesas.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 20 Jul 2021 12:34:57 +0200
+Message-ID: <CAMuHMdVH+mBWQ1KBNcrhdxoHavWpytczZmUBR_0pXu5AoULgYg@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: host: renesas_sdhi: Refactor renesas_sdhi_probe()
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        kernel test robot <lkp@intel.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-After the i.MX conversion to a DT-only platform, the mmc-esdhc-imx.h
-header file is no longer used outside the driver, so move its content
-to the sdhci-esdhc-imx driver and remove the header.
+Hi Shimoda-san,
 
-Signed-off-by: Fabio Estevam <festevam@gmail.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c          | 33 +++++++++++++++-
- include/linux/platform_data/mmc-esdhc-imx.h | 42 ---------------------
- 2 files changed, 32 insertions(+), 43 deletions(-)
- delete mode 100644 include/linux/platform_data/mmc-esdhc-imx.h
+Thanks for your patch!
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 72c0bf0c1887..57b19ca1ad6d 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -24,7 +24,6 @@
- #include <linux/of.h>
- #include <linux/of_device.h>
- #include <linux/pinctrl/consumer.h>
--#include <linux/platform_data/mmc-esdhc-imx.h>
- #include <linux/pm_runtime.h>
- #include "sdhci-pltfm.h"
- #include "sdhci-esdhc.h"
-@@ -191,6 +190,38 @@
-  */
- #define ESDHC_FLAG_BROKEN_AUTO_CMD23	BIT(16)
- 
-+enum wp_types {
-+	ESDHC_WP_NONE,		/* no WP, neither controller nor gpio */
-+	ESDHC_WP_CONTROLLER,	/* mmc controller internal WP */
-+	ESDHC_WP_GPIO,		/* external gpio pin for WP */
-+};
-+
-+enum cd_types {
-+	ESDHC_CD_NONE,		/* no CD, neither controller nor gpio */
-+	ESDHC_CD_CONTROLLER,	/* mmc controller internal CD */
-+	ESDHC_CD_GPIO,		/* external gpio pin for CD */
-+	ESDHC_CD_PERMANENT,	/* no CD, card permanently wired to host */
-+};
-+
-+/*
-+ * struct esdhc_platform_data - platform data for esdhc on i.MX
-+ *
-+ * ESDHC_WP(CD)_CONTROLLER type is not available on i.MX25/35.
-+ *
-+ * @wp_type:	type of write_protect method (see wp_types enum above)
-+ * @cd_type:	type of card_detect method (see cd_types enum above)
-+ */
-+
-+struct esdhc_platform_data {
-+	enum wp_types wp_type;
-+	enum cd_types cd_type;
-+	int max_bus_width;
-+	unsigned int delay_line;
-+	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
-+	unsigned int tuning_start_tap;	/* The start delay cell point in tuning procedure */
-+	unsigned int strobe_dll_delay_target;	/* The delay cell for strobe pad (read clock) */
-+};
-+
- struct esdhc_soc_data {
- 	u32 flags;
- };
-diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
-deleted file mode 100644
-index cba1184b364c..000000000000
---- a/include/linux/platform_data/mmc-esdhc-imx.h
-+++ /dev/null
-@@ -1,42 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0-only */
--/*
-- * Copyright 2010 Wolfram Sang <kernel@pengutronix.de>
-- */
--
--#ifndef __ASM_ARCH_IMX_ESDHC_H
--#define __ASM_ARCH_IMX_ESDHC_H
--
--#include <linux/types.h>
--
--enum wp_types {
--	ESDHC_WP_NONE,		/* no WP, neither controller nor gpio */
--	ESDHC_WP_CONTROLLER,	/* mmc controller internal WP */
--	ESDHC_WP_GPIO,		/* external gpio pin for WP */
--};
--
--enum cd_types {
--	ESDHC_CD_NONE,		/* no CD, neither controller nor gpio */
--	ESDHC_CD_CONTROLLER,	/* mmc controller internal CD */
--	ESDHC_CD_GPIO,		/* external gpio pin for CD */
--	ESDHC_CD_PERMANENT,	/* no CD, card permanently wired to host */
--};
--
--/**
-- * struct esdhc_platform_data - platform data for esdhc on i.MX
-- *
-- * ESDHC_WP(CD)_CONTROLLER type is not available on i.MX25/35.
-- *
-- * @wp_type:	type of write_protect method (see wp_types enum above)
-- * @cd_type:	type of card_detect method (see cd_types enum above)
-- */
--
--struct esdhc_platform_data {
--	enum wp_types wp_type;
--	enum cd_types cd_type;
--	int max_bus_width;
--	unsigned int delay_line;
--	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
--	unsigned int tuning_start_tap;	/* The start delay cell point in tuning procedure */
--	unsigned int strobe_dll_delay_target;	/* The delay cell for strobe pad (read clock) */
--};
--#endif /* __ASM_ARCH_IMX_ESDHC_H */
--- 
-2.25.1
+On Fri, Jul 2, 2021 at 1:31 PM Yoshihiro Shimoda
+<yoshihiro.shimoda.uh@renesas.com> wrote:
+> Refactor renesas_sdhi_probe() to avoid increasing numbers of
+> sdhi_quirks_match[] entry when we add other stable SoCs like
+> r8a779m*.
 
+Cool, then we won't need "[PATCH 04/14] mmc: renesas_sdhi: Add support
+for R-Car H3e-2G and M3e-2G"
+(https://lore.kernel.org/r/22b4c393bf5074b53791d2797d8fe74deb8ea9a7.1623315732.git.geert+renesas@glider.be).
+
+>
+> Note that the sdhi_quirks_match[] is only needed on
+> renesas_sdhi_internal_dmac.c so that of_data of
+> renesas_sdhi_sys_dmac.c keeps as-is.
+>
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Reported-by: kernel test robot <lkp@intel.com> # build fix on RFC
+
+I would drop this tag, as it is basically a test/review comment for
+an older version of a patch.
+
+> --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> @@ -406,15 +516,25 @@ static const struct soc_device_attribute soc_dma_quirks[] = {
+>  static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
+>  {
+>         const struct soc_device_attribute *soc = soc_device_match(soc_dma_quirks);
+> +       const struct soc_device_attribute *attr = soc_device_match(sdhi_quirks_match);
+> +       const struct renesas_sdhi_of_data_with_quirks *of_data_quirks;
+> +       const struct renesas_sdhi_quirks *quirks = NULL;
+>         struct device *dev = &pdev->dev;
+>
+>         if (soc)
+>                 global_flags |= (unsigned long)soc->data;
+>
+> +       of_data_quirks = of_device_get_match_data(&pdev->dev);
+> +
+> +       if (attr)
+> +               quirks = attr->data;
+> +
+
+I think the code would be easier to read without the interleaving of
+of_device_get_match_data() and soc_device_match() based matching, ...
+
+>         /* value is max of SD_SECCNT. Confirmed by HW engineers */
+>         dma_set_max_seg_size(dev, 0xffffffff);
+>
+> -       return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops);
+> +       return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops,
+> +                                 of_data_quirks->of_data,
+> +                                 quirks ? : of_data_quirks->quirks);
+
+... and without using the ternary operator, like:
+
+    of_data_quirks = of_device_get_match_data(&pdev->dev);
+    quirks = of_data_quirks->quirks;
+
+    attr = soc_device_match(soc_dma_quirks);
+    if (attr)
+            global_flags |= (unsigned long)attr->data;
+
+    attr = soc_device_match(sdhi_quirks_match);
+    if (attr)
+            quirks = attr->data;
+
+    [...]
+
+    return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops,
+                              of_data_quirks->of_data, quirks);
+
+Regardless, as this doesn't impact functionality:
+Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
