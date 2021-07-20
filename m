@@ -2,316 +2,416 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16EB0C07E9B
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 15:14:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E639C07E95
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 20:46:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EFDCF61009
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 15:14:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2ABB4610A7
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 20:46:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239092AbhGTOdK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Jul 2021 10:33:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46762 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238818AbhGTOLY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Jul 2021 10:11:24 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A093C05BD1A
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jul 2021 07:43:22 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id f30so29587891lfv.10
-        for <linux-mmc@vger.kernel.org>; Tue, 20 Jul 2021 07:43:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=hbN53T14Om4XknjkJRRVEnLWblLyHxtME7moXS4dvr8=;
-        b=tlOG8c948eVNBqB5DFbLF1JTo1JHNM+WESED4vAIJ0j9Tr9Kn+rfZa/ImxE4Zldh7e
-         8izJwYmxskV71iIv8NJSH6ZvcBLSYCwbdyZG9qw32PCu/z+XMVPYe93voY1/lHu3nHQP
-         sgriZwFWtZvAAy49neXdcLaPqzB+Fbx2zuFmYgBDpq8IPyW8G7ZwNgQAqS9rsPfNjMJx
-         D2gLslwsyfrPkPf3pZWFFZ8mU267MOw/t7UEcMfaeTa0i5G5IeeTsgxCadu4X3idVVMf
-         xN0mVgSENErsiijghiUBl+Va0Mibjo8dLQNXWmCe2coM3PVCdBPBVIReSszb6FtU/+J3
-         joxA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=hbN53T14Om4XknjkJRRVEnLWblLyHxtME7moXS4dvr8=;
-        b=V5JH66GN+CHIYr58xUGraVal3I0pMzKgL61FNHbm9TqRbs31Nf0wB/bW0D6PAwbzT9
-         7wArygD/KzXw130CECukB7ID8PxDuDHBYoewL30mx152+lGMRPCTG6/FuAR3li4NwAXk
-         f0kLZLRZZcBDhWGArLsjOEcnYUOk7o6a+fbKly8A1A0CDROcfJ4tmCqU+DblE6OzpUpX
-         cHeGKwcDoGyiAt4ocNbKS4vKSXtHXJbT1VWEvPGpWb4cwIv/qtBHbfdpa/jGa4hImrly
-         MXJW9wcw+lf6g19NlSKn8pd50zoXAXHuUdestfgg71/Q1mciy2tr8pkYzLIbu+qMrs/+
-         JGMg==
-X-Gm-Message-State: AOAM533BL5fjrbviNOvnywRFbGAKqP6tp6pFTgiRtGiEE69Xs5VoZeih
-        cQcJ6UHd2+gMu4MURsTStBXuxdlIpFVD6A==
-X-Google-Smtp-Source: ABdhPJzy9iOAFQqSn9ImdQm0c07+kEoyTOFN9XM67N75/kdIayCJfde4b2bt+IHSdnu5AkeS+yaYeA==
-X-Received: by 2002:a05:6512:92d:: with SMTP id f13mr21954565lft.186.1626792200415;
-        Tue, 20 Jul 2021 07:43:20 -0700 (PDT)
-Received: from localhost.localdomain (c-fdcc225c.014-348-6c756e10.bbcust.telenor.se. [92.34.204.253])
-        by smtp.gmail.com with ESMTPSA id g14sm1536550lfv.213.2021.07.20.07.43.19
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Jul 2021 07:43:20 -0700 (PDT)
-From:   Linus Walleij <linus.walleij@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus Walleij <linus.walleij@linaro.org>, stable@vger.kernel.org,
-        phone-devel@vger.kernel.org, Ludovic Barre <ludovic.barre@st.com>,
-        Stephan Gerhold <stephan@gerhold.net>, newbyte@disroot.org
-Subject: [PATCH v3] mmc: core: Add a card quirk for non-hw busy detection
-Date:   Tue, 20 Jul 2021 16:41:15 +0200
-Message-Id: <20210720144115.1525257-1-linus.walleij@linaro.org>
-X-Mailer: git-send-email 2.31.1
+        id S234475AbhGTUFS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Jul 2021 16:05:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:60814 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236897AbhGTTpQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 20 Jul 2021 15:45:16 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 56E9760BBB;
+        Tue, 20 Jul 2021 20:25:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1626812753;
+        bh=l5xDkWzCR3urdpTjqmcMUpN6o09NewdpR8Jc68Liw0U=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=VBe4HBaGXZMGD0ZdODVsdKbrJ8SORqt3SuXaX37yK3AHshxYDbXGRQXluA6mx7jW3
+         pTBW48mt4sopqYvfTU+bZO/p3bIz4jENtO9uPBTi0SuDufiC+I7vrG7Ce/qo8tgdbL
+         Vv6L36N+yjTOuiDCZaFxIklqrdMuw+BZDERVBNSuKxTccmMm+0DpHaq2hVxlihY0dP
+         QgyoMfzVLFJnhH8igTsTFxC4OBQeb5IzLYxfferXAP0fHcTPB3F6Yr+8KbAgAJLPf2
+         a0unVf6CWv1kUs6z+N9Cr2G8gL44dgqsGt8dlJjFYXR6m7PEcLW13zfgVQ2ipy0CDg
+         OpoYDDMZUiahA==
+Date:   Tue, 20 Jul 2021 22:25:42 +0200
+From:   Wolfram Sang <wsa@kernel.org>
+To:     Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        kernel@pengutronix.de,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Alexandre Bounine <alex.bou9@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Alison Schofield <alison.schofield@intel.com>,
+        Allen Hubbe <allenbh@gmail.com>,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Benjamin Tissoires <benjamin.tissoires@redhat.com>,
+        Ben Widawsky <ben.widawsky@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Bodo Stroesser <bostroesser@gmail.com>,
+        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Cristian Marussi <cristian.marussi@arm.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Woodhouse <dwmw@amazon.co.uk>,
+        Dexuan Cui <decui@microsoft.com>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Finn Thain <fthain@linux-m68k.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Frank Li <lznuaa@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Geoff Levand <geoff@infradead.org>,
+        Haiyang Zhang <haiyangz@microsoft.com>,
+        Hannes Reinecke <hare@suse.de>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Harald Freudenberger <freude@linux.ibm.com>,
+        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Helge Deller <deller@gmx.de>, Ira Weiny <ira.weiny@intel.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Jason Wang <jasowang@redhat.com>,
+        Jens Taprogge <jens.taprogge@taprogge.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Jiri Kosina <jikos@kernel.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Joey Pabalan <jpabalanb@gmail.com>,
+        Johan Hovold <johan@kernel.org>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Johannes Thumshirn <morbidrsa@gmail.com>,
+        Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>,
+        Julien Grall <jgrall@amazon.com>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Kirti Wankhede <kwankhede@nvidia.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+        "K. Y. Srinivasan" <kys@microsoft.com>,
+        Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>,
+        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
+        Manohar Vanga <manohar.vanga@gmail.com>,
+        Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>,
+        Mark Gross <mgross@linux.intel.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Martyn Welch <martyn@welchs.me.uk>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Matt Porter <mporter@kernel.crashing.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        Maximilian Luz <luzmaximilian@gmail.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Michael Buesch <m@bues.ch>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Michael Jamet <michael.jamet@intel.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Mike Christie <michael.christie@oracle.com>,
+        Moritz Fischer <mdf@kernel.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>,
+        Paul Mackerras <paulus@samba.org>,
+        Peter Oberparleiter <oberpar@linux.ibm.com>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
+        Rich Felker <dalias@libc.org>,
+        Rikard Falkeborn <rikard.falkeborn@gmail.com>,
+        Rob Herring <robh@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>,
+        Samuel Holland <samuel@sholland.org>,
+        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
+        SeongJae Park <sjpark@amazon.de>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        Stefano Stabellini <sstabellini@kernel.org>,
+        Stefan Richter <stefanr@s5r6.in-berlin.de>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Stephen Hemminger <sthemmin@microsoft.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        Sven Van Asbroeck <TheSven73@gmail.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thorsten Scherer <t.scherer@eckelmann.de>,
+        Tomas Winkler <tomas.winkler@intel.com>,
+        Tom Rix <trix@redhat.com>,
+        Tyrel Datwyler <tyreld@linux.ibm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Vineeth Vijayan <vneethv@linux.ibm.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Wei Liu <wei.liu@kernel.org>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Wu Hao <hao.wu@intel.com>,
+        Yehezkel Bernat <YehezkelShB@gmail.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        YueHaibing <yuehaibing@huawei.com>,
+        Yufen Yu <yuyufen@huawei.com>, alsa-devel@alsa-project.org,
+        dmaengine@vger.kernel.org, greybus-dev@lists.linaro.org,
+        industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org,
+        linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-cxl@vger.kernel.org,
+        linux-fpga@vger.kernel.org, linux-hyperv@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org,
+        linux-input@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-m68k@lists.linux-m68k.org, linux-media@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-ntb@googlegroups.com, linux-parisc@vger.kernel.org,
+        linux-pci@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        linux-remoteproc@vger.kernel.org, linux-s390@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-sh@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-sunxi@lists.linux.dev,
+        linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org, nvdimm@lists.linux.dev,
+        platform-driver-x86@vger.kernel.org, sparclinux@vger.kernel.org,
+        target-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org,
+        Johannes Thumshirn <jth@kernel.org>,
+        "Rafael J . Wysocki" <rafael@kernel.org>
+Subject: Re: [PATCH v4 5/5] bus: Make remove callback return void
+Message-ID: <YPcxRgfZymtjJ4ih@kunai>
+Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        kernel@pengutronix.de,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Alexandre Bounine <alex.bou9@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Alison Schofield <alison.schofield@intel.com>,
+        Allen Hubbe <allenbh@gmail.com>,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Benjamin Tissoires <benjamin.tissoires@redhat.com>,
+        Ben Widawsky <ben.widawsky@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Bodo Stroesser <bostroesser@gmail.com>,
+        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Cristian Marussi <cristian.marussi@arm.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Woodhouse <dwmw@amazon.co.uk>,
+        Dexuan Cui <decui@microsoft.com>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Finn Thain <fthain@linux-m68k.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Frank Li <lznuaa@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Geoff Levand <geoff@infradead.org>,
+        Haiyang Zhang <haiyangz@microsoft.com>,
+        Hannes Reinecke <hare@suse.de>, Hans de Goede <hdegoede@redhat.com>,
+        Harald Freudenberger <freude@linux.ibm.com>,
+        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>, Helge Deller <deller@gmx.de>,
+        Ira Weiny <ira.weiny@intel.com>, Jakub Kicinski <kuba@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Jaroslav Kysela <perex@perex.cz>, Jason Wang <jasowang@redhat.com>,
+        Jens Taprogge <jens.taprogge@taprogge.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Jiri Kosina <jikos@kernel.org>, Jiri Slaby <jirislaby@kernel.org>,
+        Joey Pabalan <jpabalanb@gmail.com>, Johan Hovold <johan@kernel.org>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Johannes Thumshirn <morbidrsa@gmail.com>,
+        Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>,
+        Julien Grall <jgrall@amazon.com>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Kirti Wankhede <kwankhede@nvidia.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+        "K. Y. Srinivasan" <kys@microsoft.com>,
+        Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>,
+        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
+        Manohar Vanga <manohar.vanga@gmail.com>,
+        Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>,
+        Mark Gross <mgross@linux.intel.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Martyn Welch <martyn@welchs.me.uk>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Matt Porter <mporter@kernel.crashing.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        Maximilian Luz <luzmaximilian@gmail.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Michael Buesch <m@bues.ch>, Michael Ellerman <mpe@ellerman.id.au>,
+        Michael Jamet <michael.jamet@intel.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Mike Christie <michael.christie@oracle.com>,
+        Moritz Fischer <mdf@kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>,
+        Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>,
+        Paul Mackerras <paulus@samba.org>,
+        Peter Oberparleiter <oberpar@linux.ibm.com>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
+        Rich Felker <dalias@libc.org>,
+        Rikard Falkeborn <rikard.falkeborn@gmail.com>,
+        Rob Herring <robh@kernel.org>, Russell King <linux@armlinux.org.uk>,
+        "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>,
+        Samuel Holland <samuel@sholland.org>,
+        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
+        SeongJae Park <sjpark@amazon.de>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        Stefano Stabellini <sstabellini@kernel.org>,
+        Stefan Richter <stefanr@s5r6.in-berlin.de>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Stephen Hemminger <sthemmin@microsoft.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        Sven Van Asbroeck <TheSven73@gmail.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thorsten Scherer <t.scherer@eckelmann.de>,
+        Tomas Winkler <tomas.winkler@intel.com>, Tom Rix <trix@redhat.com>,
+        Tyrel Datwyler <tyreld@linux.ibm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Vineeth Vijayan <vneethv@linux.ibm.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Wei Liu <wei.liu@kernel.org>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Wu Hao <hao.wu@intel.com>, Yehezkel Bernat <YehezkelShB@gmail.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        YueHaibing <yuehaibing@huawei.com>, Yufen Yu <yuyufen@huawei.com>,
+        alsa-devel@alsa-project.org, dmaengine@vger.kernel.org,
+        greybus-dev@lists.linaro.org,
+        industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org,
+        linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org,
+        linux-cxl@vger.kernel.org, linux-fpga@vger.kernel.org,
+        linux-hyperv@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-i3c@lists.infradead.org, linux-input@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-m68k@lists.linux-m68k.org,
+        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com,
+        linux-parisc@vger.kernel.org, linux-pci@vger.kernel.org,
+        linuxppc-dev@lists.ozlabs.org, linux-remoteproc@vger.kernel.org,
+        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-sh@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
+        linux-sunxi@lists.linux.dev, linux-usb@vger.kernel.org,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
+        nvdimm@lists.linux.dev, platform-driver-x86@vger.kernel.org,
+        sparclinux@vger.kernel.org, target-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org, Johannes Thumshirn <jth@kernel.org>,
+        "Rafael J . Wysocki" <rafael@kernel.org>
+References: <20210713193522.1770306-1-u.kleine-koenig@pengutronix.de>
+ <20210713193522.1770306-6-u.kleine-koenig@pengutronix.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="o9Bjd73EPYzHYRI8"
+Content-Disposition: inline
+In-Reply-To: <20210713193522.1770306-6-u.kleine-koenig@pengutronix.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some boot partitions on the Samsung 4GB KLM4G1YE4C "4YMD1R" and "M4G1YC"
-cards appear broken when accessed randomly. CMD6 to switch back to the main
-partition randomly stalls after CMD18 access to the boot partition 1, and
-the card never comes back online. The accesses to the boot partitions work
-several times before this happens, but eventually the card access hangs
-while initializing the card.
 
-Some problematic eMMC cards are found in the Samsung GT-S7710 (Skomer)
-and SGH-I407 (Kyle) mobile phones.
+--o9Bjd73EPYzHYRI8
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-I tried using only single blocks with CMD17 on the boot partitions with the
-result that it crashed even faster.
+On Tue, Jul 13, 2021 at 09:35:22PM +0200, Uwe Kleine-K=C3=B6nig wrote:
+> The driver core ignores the return value of this callback because there
+> is only little it can do when a device disappears.
+>=20
+> This is the final bit of a long lasting cleanup quest where several
+> buses were converted to also return void from their remove callback.
+> Additionally some resource leaks were fixed that were caused by drivers
+> returning an error code in the expectation that the driver won't go
+> away.
+>=20
+> With struct bus_type::remove returning void it's prevented that newly
+> implemented buses return an ignored error code and so don't anticipate
+> wrong expectations for driver authors.
+>=20
+> Acked-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk> (For ARM, Am=
+ba and related parts)
+> Acked-by: Mark Brown <broonie@kernel.org>
+> Acked-by: Chen-Yu Tsai <wens@csie.org> (for sunxi-rsb)
+> Acked-by: Pali Roh=C3=A1r <pali@kernel.org>
+> Acked-by: Mauro Carvalho Chehab <mchehab@kernel.org> (for media)
+> Acked-by: Hans de Goede <hdegoede@redhat.com> (For drivers/platform)
+> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
+> Acked-By: Vinod Koul <vkoul@kernel.org>
+> Acked-by: Juergen Gross <jgross@suse.com> (For xen)
+> Acked-by: Lee Jones <lee.jones@linaro.org> (For mfd)
+> Acked-by: Johannes Thumshirn <jth@kernel.org> (For mcb)
+> Acked-by: Johan Hovold <johan@kernel.org>
+> Acked-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org> (For slimb=
+us)
+> Acked-by: Kirti Wankhede <kwankhede@nvidia.com> (For vfio)
+> Acked-by: Maximilian Luz <luzmaximilian@gmail.com>
+> Acked-by: Heikki Krogerus <heikki.krogerus@linux.intel.com> (For ulpi and=
+ typec)
+> Acked-by: Samuel Iglesias Gons=C3=A1lvez <siglesias@igalia.com> (For ipac=
+k)
+> Reviewed-by: Tom Rix <trix@redhat.com> (For fpga)
+> Acked-by: Geoff Levand <geoff@infradead.org> (For ps3)
+> Acked-by: Yehezkel Bernat <YehezkelShB@gmail.com> (For thunderbolt)
+> Reviewed-by: Mathieu Poirier <mathieu.poirier@linaro.org>
+> Acked-by: Alexander Shishkin <alexander.shishkin@linux.intel.com> (For in=
+tel_th)
+> Acked-by: Dominik Brodowski <linux@dominikbrodowski.net> (For pcmcia)
+> Reviewed-by: Cornelia Huck <cohuck@redhat.com> (For drivers/s390 and driv=
+ers/vfio)
+> Acked-by: Rafael J. Wysocki <rafael@kernel.org> (For ACPI)
+> Acked-by: Bjorn Andersson <bjorn.andersson@linaro.org> (rpmsg and apr)
+> Acked-by: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com> (For =
+intel-ish-hid)
+> Acked-by: Dan Williams <dan.j.williams@intel.com> (For CXL, DAX, and NVDI=
+MM)
+> Acked-by: William Breathitt Gray <vilhelm.gray@gmail.com> (For isa)
+> Acked-by: Stefan Richter <stefanr@s5r6.in-berlin.de> (For firewire)
+> Acked-by: Benjamin Tissoires <benjamin.tissoires@redhat.com> (For hid)
+> Acked-by: Thorsten Scherer <t.scherer@eckelmann.de> (For siox)
+> Acked-by: Sven Van Asbroeck <TheSven73@gmail.com> (For anybuss)
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org> (For MMC)
+> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
 
-After a bit of root cause analysis it turns out that these old eMMC cards
-probably cannot do hardware busy detection (monitoring DAT0) properly.
+Acked-by: Wolfram Sang <wsa@kernel.org> # for I2C
 
-The card survives on older kernels, but this is because recent kernels have
-added busy detection handling for the SoC used in these phones, exposing
-the issue.
+Thanks, Uwe!
 
-Construct a quirk that makes the MMC cord avoid using the ->card_busy()
-callback if the card is listed with MMC_QUIRK_BROKEN_HW_BUSY_DETECT and
-register the known problematic cards. The core changes are pretty
-straight-forward with a helper inline to check of we can use hardware
-busy detection.
 
-On the MMCI host we have to counter the fact that if the host was able to
-use busy detect, it would be used unsolicited in the command IRQ callback.
-Rewrite this so that MMCI will not attempt to use hardware busy detection
-in the command IRQ until:
-- A card is attached to the host and
-- We know that the card can handle this busy detection
+--o9Bjd73EPYzHYRI8
+Content-Type: application/pgp-signature; name="signature.asc"
 
-I have glanced over the ->card_busy() callbacks on some other hosts and
-they seem to mostly read a register reflecting the value of DAT0 for this
-which works fine with the quirk in this patch. However if the error appear
-on other hosts they might need additional fixes.
+-----BEGIN PGP SIGNATURE-----
 
-After applying this patch, the main partition can be accessed and mounted
-without problems on Samsung GT-S7710 and SGH-I407.
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmD3MUIACgkQFA3kzBSg
+KbYzoQ//fHsReQ7gV79Uj6MfHENOZAAxSFMd8yIWNeX0Ug8crVQ2fzQgvlotUS1y
+62KPO9MFbi37+nfCWwl5uNEiDPwYjpB+jM/jfqJ849ngfiIQyUqCK7qr5b1FIWkp
+TuEV1Rx/wlpmxMEjKFAuo+/5OkXVwvpxQGiqBemOeTmOKjqITCpXEBkYqDqqI/MY
+lnzwpE8R30sf8IH/aThtb9dZBz+8y2mry6nVtSbMMmZ0VAYgwEPmuPLfa9CIhaCJ
+Oqe6Uf+sJs/emp0nfyZ5IDXvO8vE5kgPoy0l/smHEtejHLUkHBKf4MusKOzDdbax
+Uk48fnhKgbhxbVN0guT7IzWvRG+80hU4Ns9YPjmHYNXr4Wg03//hoAv4otMAAqXU
+Tjk9sEMBGHasqHZ0e1j3xTRhxQOwTJjzwVNhkrTX4HIZ/k0gXQK0ojBXxGvWeds2
+yQ7FUakyf1LQBmrLwssWSXbyp+W6tVodIUmnebSK1IpVd7YK4NZPf796yD44Ckzd
+XM4O5xTksxr5X+cEsNNLxhXFMohR/BOpLCj4R1+vpRNyMTHLIqfsI7GL+TJh+Mri
++kuq0TQgbTRlrIw/jfTcenYmXhQte4oeFQa3uVwGY2b+5kB/zRMTKThU0e2Vpd+8
+Kifz6u9a8LEGAMrLNXVd1B/uHQSOMYeeIzsuZ+BHqVxDsyNvJds=
+=zPVh
+-----END PGP SIGNATURE-----
 
-Fixes: cb0335b778c7 ("mmc: mmci: add busy_complete callback")
-Cc: stable@vger.kernel.org
-Cc: phone-devel@vger.kernel.org
-Cc: Ludovic Barre <ludovic.barre@st.com>
-Cc: Stephan Gerhold <stephan@gerhold.net>
-Reported-by: newbyte@disroot.org
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v2->v3:
-- Rebase on v5.14-rc1
-- Reword the commit message slightly.
-ChangeLog v1->v2:
-- Rewrite to reflect the actual problem of broken busy detection.
----
- drivers/mmc/core/core.c    |  8 ++++----
- drivers/mmc/core/core.h    | 17 +++++++++++++++++
- drivers/mmc/core/mmc_ops.c |  4 ++--
- drivers/mmc/core/quirks.h  | 21 +++++++++++++++++++++
- drivers/mmc/host/mmci.c    | 22 ++++++++++++++++++++--
- include/linux/mmc/card.h   |  1 +
- 6 files changed, 65 insertions(+), 8 deletions(-)
-
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 95fedcf56e4a..e08dd9ea3d46 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -232,7 +232,7 @@ static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
- 	 * And bypass I/O abort, reset and bus suspend operations.
- 	 */
- 	if (sdio_is_io_busy(mrq->cmd->opcode, mrq->cmd->arg) &&
--	    host->ops->card_busy) {
-+	    mmc_hw_busy_detect(host)) {
- 		int tries = 500; /* Wait aprox 500ms at maximum */
- 
- 		while (host->ops->card_busy(host) && --tries)
-@@ -1200,7 +1200,7 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
- 	 */
- 	if (!host->ops->start_signal_voltage_switch)
- 		return -EPERM;
--	if (!host->ops->card_busy)
-+	if (!mmc_hw_busy_detect(host))
- 		pr_warn("%s: cannot verify signal voltage switch\n",
- 			mmc_hostname(host));
- 
-@@ -1220,7 +1220,7 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
- 	 * after the response of cmd11, but wait 1 ms to be sure
- 	 */
- 	mmc_delay(1);
--	if (host->ops->card_busy && !host->ops->card_busy(host)) {
-+	if (mmc_hw_busy_detect(host) && !host->ops->card_busy(host)) {
- 		err = -EAGAIN;
- 		goto power_cycle;
- 	}
-@@ -1241,7 +1241,7 @@ int mmc_set_uhs_voltage(struct mmc_host *host, u32 ocr)
- 	 * Failure to switch is indicated by the card holding
- 	 * dat[0:3] low
- 	 */
--	if (host->ops->card_busy && host->ops->card_busy(host))
-+	if (mmc_hw_busy_detect(host) && host->ops->card_busy(host))
- 		err = -EAGAIN;
- 
- power_cycle:
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index 0c4de2030b3f..6a5619eed4a6 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -181,4 +181,21 @@ static inline int mmc_flush_cache(struct mmc_host *host)
- 	return 0;
- }
- 
-+/**
-+ * mmc_hw_busy_detect() - Can we use hw busy detection?
-+ * @host: the host in question
-+ */
-+static inline bool mmc_hw_busy_detect(struct mmc_host *host)
-+{
-+	struct mmc_card *card = host->card;
-+	bool has_ops;
-+	bool able = true;
-+
-+	has_ops = (host->ops->card_busy != NULL);
-+	if (card)
-+		able = !(card->quirks & MMC_QUIRK_BROKEN_HW_BUSY_DETECT);
-+
-+	return (has_ops && able);
-+}
-+
- #endif
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 973756ed4016..546fc799a8e5 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -435,7 +435,7 @@ static int mmc_busy_cb(void *cb_data, bool *busy)
- 	u32 status = 0;
- 	int err;
- 
--	if (host->ops->card_busy) {
-+	if (mmc_hw_busy_detect(host)) {
- 		*busy = host->ops->card_busy(host);
- 		return 0;
- 	}
-@@ -597,7 +597,7 @@ int __mmc_switch(struct mmc_card *card, u8 set, u8 index, u8 value,
- 	 * when it's not allowed to poll by using CMD13, then we need to rely on
- 	 * waiting the stated timeout to be sufficient.
- 	 */
--	if (!send_status && !host->ops->card_busy) {
-+	if (!send_status && !mmc_hw_busy_detect(host)) {
- 		mmc_delay(timeout_ms);
- 		goto out_tim;
- 	}
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index d68e6e513a4f..8da6526f0eb0 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -99,6 +99,27 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_TRIM_BROKEN),
- 
-+	/*
-+	 * Some older Samsung eMMCs have broken hardware busy detection.
-+	 * Enabling this feature in the host controller can make the card
-+	 * accesses lock up completely.
-+	 */
-+	MMC_FIXUP("4YMD1R", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+	/* Samsung KLMxGxxE4x eMMCs from 2012: 4, 8, 16, 32 and 64 GB */
-+	MMC_FIXUP("M4G1YC", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+	MMC_FIXUP("M8G1WA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+	MMC_FIXUP("MAG2WA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+	MMC_FIXUP("MBG4WA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+	MMC_FIXUP("MAG2WA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+	MMC_FIXUP("MCG8WA", CID_MANFID_SAMSUNG, CID_OEMID_ANY, add_quirk_mmc,
-+		  MMC_QUIRK_BROKEN_HW_BUSY_DETECT),
-+
- 	END_FIXUP
- };
- 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 984d35055156..3046917b2b67 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -347,6 +347,24 @@ static int mmci_card_busy(struct mmc_host *mmc)
- 	return busy;
- }
- 
-+/* Use this if the MMCI variant AND the card supports it */
-+static bool mmci_use_busy_detect(struct mmci_host *host)
-+{
-+	struct mmc_card *card = host->mmc->card;
-+
-+	if (!host->variant->busy_detect)
-+		return false;
-+
-+	/* We don't allow this until we know that the card can handle it */
-+	if (!card)
-+		return false;
-+
-+	if (card->quirks & MMC_QUIRK_BROKEN_HW_BUSY_DETECT)
-+		return false;
-+
-+	return true;
-+}
-+
- static void mmci_reg_delay(struct mmci_host *host)
- {
- 	/*
-@@ -1381,7 +1399,7 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 		return;
- 
- 	/* Handle busy detection on DAT0 if the variant supports it. */
--	if (busy_resp && host->variant->busy_detect)
-+	if (busy_resp && mmci_use_busy_detect(host))
- 		if (!host->ops->busy_complete(host, status, err_msk))
- 			return;
- 
-@@ -1725,7 +1743,7 @@ static void mmci_set_max_busy_timeout(struct mmc_host *mmc)
- 	struct mmci_host *host = mmc_priv(mmc);
- 	u32 max_busy_timeout = 0;
- 
--	if (!host->variant->busy_detect)
-+	if (!mmci_use_busy_detect(host))
- 		return;
- 
- 	if (host->variant->busy_timeout && mmc->actual_clock)
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 74e6c0624d27..525a39951c6d 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -280,6 +280,7 @@ struct mmc_card {
- 						/* for byte mode */
- #define MMC_QUIRK_NONSTD_SDIO	(1<<2)		/* non-standard SDIO card attached */
- 						/* (missing CIA registers) */
-+#define MMC_QUIRK_BROKEN_HW_BUSY_DETECT (1<<3)	/* Disable hardware busy detection on DAT0 */
- #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
- #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
- #define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
--- 
-2.31.1
-
+--o9Bjd73EPYzHYRI8--
