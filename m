@@ -2,416 +2,304 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E639C07E95
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 20:46:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 516FFC07E9B
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 05:24:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2ABB4610A7
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Jul 2021 20:46:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 256F760FF2
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 05:24:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234475AbhGTUFS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Jul 2021 16:05:18 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60814 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236897AbhGTTpQ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 20 Jul 2021 15:45:16 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 56E9760BBB;
-        Tue, 20 Jul 2021 20:25:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1626812753;
-        bh=l5xDkWzCR3urdpTjqmcMUpN6o09NewdpR8Jc68Liw0U=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=VBe4HBaGXZMGD0ZdODVsdKbrJ8SORqt3SuXaX37yK3AHshxYDbXGRQXluA6mx7jW3
-         pTBW48mt4sopqYvfTU+bZO/p3bIz4jENtO9uPBTi0SuDufiC+I7vrG7Ce/qo8tgdbL
-         Vv6L36N+yjTOuiDCZaFxIklqrdMuw+BZDERVBNSuKxTccmMm+0DpHaq2hVxlihY0dP
-         QgyoMfzVLFJnhH8igTsTFxC4OBQeb5IzLYxfferXAP0fHcTPB3F6Yr+8KbAgAJLPf2
-         a0unVf6CWv1kUs6z+N9Cr2G8gL44dgqsGt8dlJjFYXR6m7PEcLW13zfgVQ2ipy0CDg
-         OpoYDDMZUiahA==
-Date:   Tue, 20 Jul 2021 22:25:42 +0200
-From:   Wolfram Sang <wsa@kernel.org>
-To:     Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        kernel@pengutronix.de,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Alexandre Bounine <alex.bou9@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Alison Schofield <alison.schofield@intel.com>,
-        Allen Hubbe <allenbh@gmail.com>,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Benjamin Tissoires <benjamin.tissoires@redhat.com>,
-        Ben Widawsky <ben.widawsky@intel.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Bodo Stroesser <bostroesser@gmail.com>,
-        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Christian Borntraeger <borntraeger@de.ibm.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Cristian Marussi <cristian.marussi@arm.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        David Woodhouse <dwmw@amazon.co.uk>,
-        Dexuan Cui <decui@microsoft.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Finn Thain <fthain@linux-m68k.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Frank Li <lznuaa@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Geoff Levand <geoff@infradead.org>,
-        Haiyang Zhang <haiyangz@microsoft.com>,
-        Hannes Reinecke <hare@suse.de>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Harald Freudenberger <freude@linux.ibm.com>,
-        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Helge Deller <deller@gmx.de>, Ira Weiny <ira.weiny@intel.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Jaroslav Kysela <perex@perex.cz>,
-        Jason Wang <jasowang@redhat.com>,
-        Jens Taprogge <jens.taprogge@taprogge.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Jiri Kosina <jikos@kernel.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Joey Pabalan <jpabalanb@gmail.com>,
-        Johan Hovold <johan@kernel.org>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Johannes Thumshirn <morbidrsa@gmail.com>,
-        Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>,
-        Julien Grall <jgrall@amazon.com>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Kirti Wankhede <kwankhede@nvidia.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
-        "K. Y. Srinivasan" <kys@microsoft.com>,
-        Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        Manohar Vanga <manohar.vanga@gmail.com>,
-        Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>,
-        Mark Gross <mgross@linux.intel.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Martyn Welch <martyn@welchs.me.uk>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Matt Porter <mporter@kernel.crashing.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Maximilian Luz <luzmaximilian@gmail.com>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Michael Buesch <m@bues.ch>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Michael Jamet <michael.jamet@intel.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Mike Christie <michael.christie@oracle.com>,
-        Moritz Fischer <mdf@kernel.org>,
-        Ohad Ben-Cohen <ohad@wizery.com>,
-        Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>,
-        Paul Mackerras <paulus@samba.org>,
-        Peter Oberparleiter <oberpar@linux.ibm.com>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
-        Rich Felker <dalias@libc.org>,
-        Rikard Falkeborn <rikard.falkeborn@gmail.com>,
-        Rob Herring <robh@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>,
-        Samuel Holland <samuel@sholland.org>,
-        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
-        SeongJae Park <sjpark@amazon.de>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        Stefano Stabellini <sstabellini@kernel.org>,
-        Stefan Richter <stefanr@s5r6.in-berlin.de>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Stephen Hemminger <sthemmin@microsoft.com>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        Sven Van Asbroeck <TheSven73@gmail.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Thorsten Scherer <t.scherer@eckelmann.de>,
-        Tomas Winkler <tomas.winkler@intel.com>,
-        Tom Rix <trix@redhat.com>,
-        Tyrel Datwyler <tyreld@linux.ibm.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vasily Gorbik <gor@linux.ibm.com>,
-        Vineeth Vijayan <vneethv@linux.ibm.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Wei Liu <wei.liu@kernel.org>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Wu Hao <hao.wu@intel.com>,
-        Yehezkel Bernat <YehezkelShB@gmail.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
-        YueHaibing <yuehaibing@huawei.com>,
-        Yufen Yu <yuyufen@huawei.com>, alsa-devel@alsa-project.org,
-        dmaengine@vger.kernel.org, greybus-dev@lists.linaro.org,
-        industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org,
-        linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-cxl@vger.kernel.org,
-        linux-fpga@vger.kernel.org, linux-hyperv@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org,
-        linux-input@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-m68k@lists.linux-m68k.org, linux-media@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-ntb@googlegroups.com, linux-parisc@vger.kernel.org,
-        linux-pci@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-remoteproc@vger.kernel.org, linux-s390@vger.kernel.org,
-        linux-scsi@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-sh@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-sunxi@lists.linux.dev,
-        linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org, nvdimm@lists.linux.dev,
-        platform-driver-x86@vger.kernel.org, sparclinux@vger.kernel.org,
-        target-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        xen-devel@lists.xenproject.org,
-        Johannes Thumshirn <jth@kernel.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH v4 5/5] bus: Make remove callback return void
-Message-ID: <YPcxRgfZymtjJ4ih@kunai>
-Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        kernel@pengutronix.de,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Alexandre Bounine <alex.bou9@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>,
-        Alex Williamson <alex.williamson@redhat.com>,
-        Alison Schofield <alison.schofield@intel.com>,
-        Allen Hubbe <allenbh@gmail.com>,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Benjamin Tissoires <benjamin.tissoires@redhat.com>,
-        Ben Widawsky <ben.widawsky@intel.com>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Bodo Stroesser <bostroesser@gmail.com>,
-        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Christian Borntraeger <borntraeger@de.ibm.com>,
-        Cornelia Huck <cohuck@redhat.com>,
-        Cristian Marussi <cristian.marussi@arm.com>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Dave Jiang <dave.jiang@intel.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        David Woodhouse <dwmw@amazon.co.uk>,
-        Dexuan Cui <decui@microsoft.com>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Dominik Brodowski <linux@dominikbrodowski.net>,
-        Finn Thain <fthain@linux-m68k.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Frank Li <lznuaa@gmail.com>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Geoff Levand <geoff@infradead.org>,
-        Haiyang Zhang <haiyangz@microsoft.com>,
-        Hannes Reinecke <hare@suse.de>, Hans de Goede <hdegoede@redhat.com>,
-        Harald Freudenberger <freude@linux.ibm.com>,
-        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
-        Heiko Carstens <hca@linux.ibm.com>, Helge Deller <deller@gmx.de>,
-        Ira Weiny <ira.weiny@intel.com>, Jakub Kicinski <kuba@kernel.org>,
-        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Jaroslav Kysela <perex@perex.cz>, Jason Wang <jasowang@redhat.com>,
-        Jens Taprogge <jens.taprogge@taprogge.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Jiri Kosina <jikos@kernel.org>, Jiri Slaby <jirislaby@kernel.org>,
-        Joey Pabalan <jpabalanb@gmail.com>, Johan Hovold <johan@kernel.org>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Johannes Thumshirn <morbidrsa@gmail.com>,
-        Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>,
-        Julien Grall <jgrall@amazon.com>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Kirti Wankhede <kwankhede@nvidia.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
-        "K. Y. Srinivasan" <kys@microsoft.com>,
-        Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>,
-        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
-        Manohar Vanga <manohar.vanga@gmail.com>,
-        Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>,
-        Mark Gross <mgross@linux.intel.com>,
-        "Martin K. Petersen" <martin.petersen@oracle.com>,
-        Martyn Welch <martyn@welchs.me.uk>,
-        Mathieu Poirier <mathieu.poirier@linaro.org>,
-        Matt Porter <mporter@kernel.crashing.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Maxime Ripard <mripard@kernel.org>,
-        Maximilian Luz <luzmaximilian@gmail.com>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Michael Buesch <m@bues.ch>, Michael Ellerman <mpe@ellerman.id.au>,
-        Michael Jamet <michael.jamet@intel.com>,
-        "Michael S. Tsirkin" <mst@redhat.com>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Mike Christie <michael.christie@oracle.com>,
-        Moritz Fischer <mdf@kernel.org>, Ohad Ben-Cohen <ohad@wizery.com>,
-        Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>,
-        Paul Mackerras <paulus@samba.org>,
-        Peter Oberparleiter <oberpar@linux.ibm.com>,
-        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
-        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
-        Rich Felker <dalias@libc.org>,
-        Rikard Falkeborn <rikard.falkeborn@gmail.com>,
-        Rob Herring <robh@kernel.org>, Russell King <linux@armlinux.org.uk>,
-        "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>,
-        Samuel Holland <samuel@sholland.org>,
-        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
-        SeongJae Park <sjpark@amazon.de>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
-        Stefano Stabellini <sstabellini@kernel.org>,
-        Stefan Richter <stefanr@s5r6.in-berlin.de>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Stephen Hemminger <sthemmin@microsoft.com>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        Sven Van Asbroeck <TheSven73@gmail.com>,
-        Takashi Iwai <tiwai@suse.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Thorsten Scherer <t.scherer@eckelmann.de>,
-        Tomas Winkler <tomas.winkler@intel.com>, Tom Rix <trix@redhat.com>,
-        Tyrel Datwyler <tyreld@linux.ibm.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vasily Gorbik <gor@linux.ibm.com>,
-        Vineeth Vijayan <vneethv@linux.ibm.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Vishal Verma <vishal.l.verma@intel.com>,
-        Wei Liu <wei.liu@kernel.org>,
-        William Breathitt Gray <vilhelm.gray@gmail.com>,
-        Wu Hao <hao.wu@intel.com>, Yehezkel Bernat <YehezkelShB@gmail.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
-        YueHaibing <yuehaibing@huawei.com>, Yufen Yu <yuyufen@huawei.com>,
-        alsa-devel@alsa-project.org, dmaengine@vger.kernel.org,
-        greybus-dev@lists.linaro.org,
-        industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org,
-        linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-arm-msm@vger.kernel.org,
-        linux-cxl@vger.kernel.org, linux-fpga@vger.kernel.org,
-        linux-hyperv@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-i3c@lists.infradead.org, linux-input@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-m68k@lists.linux-m68k.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-ntb@googlegroups.com,
-        linux-parisc@vger.kernel.org, linux-pci@vger.kernel.org,
-        linuxppc-dev@lists.ozlabs.org, linux-remoteproc@vger.kernel.org,
-        linux-s390@vger.kernel.org, linux-scsi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-sh@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-staging@lists.linux.dev,
-        linux-sunxi@lists.linux.dev, linux-usb@vger.kernel.org,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org,
-        nvdimm@lists.linux.dev, platform-driver-x86@vger.kernel.org,
-        sparclinux@vger.kernel.org, target-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        xen-devel@lists.xenproject.org, Johannes Thumshirn <jth@kernel.org>,
-        "Rafael J . Wysocki" <rafael@kernel.org>
-References: <20210713193522.1770306-1-u.kleine-koenig@pengutronix.de>
- <20210713193522.1770306-6-u.kleine-koenig@pengutronix.de>
+        id S232749AbhGUEnt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 00:43:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45116 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231219AbhGUEnq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 00:43:46 -0400
+Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2272C061574;
+        Tue, 20 Jul 2021 22:24:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=4w4Rr+K4p1voERuiNUi/I4B9P8DpL0Nk0BxmYqhBMeQ=; b=VaB3KcdIdumCUAwL1TVaTjvXcr
+        VJecuz66bDlqj1EFyZ4N9x9QWajVfFwLbpwRABcr2d2EdqOS2XvW/x+env9olwWdBh8ZsltJC/dxq
+        IdG39jldxjtT7WkQP4LLzM+p8XFPfnwyVFZ8O8ai5kmvrF4FbcKrvDwh8kkFpKjNJyCQ5JPjkFce1
+        meAot8ytW//A1sb7LEkOlFh6da+4Jey72v8bEgMD/Go0vbHNWlpJ3MY2prWvisFdRDoZ4PdLM3ZWX
+        NDUhAQ8V85wzbV89zFaLpAzk5Um+1lWgodFILXA8EvWKITFr4GkGVDHcZtnk1hxRh4z46fCQi+qNy
+        x+w/EtfQ==;
+Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1m64i7-008pFT-7V; Wed, 21 Jul 2021 05:24:00 +0000
+Date:   Wed, 21 Jul 2021 06:23:59 +0100
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     axboe@kernel.dk, hare@suse.de, bvanassche@acm.org,
+        ming.lei@redhat.com, hch@infradead.org, jack@suse.cz,
+        osandov@fb.com, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 3/5] mmc/core/block: replace GENHD_FL_UP with
+ GENHD_FL_DISK_ADDED
+Message-ID: <YPevb5SpgBX6eWEZ@infradead.org>
+References: <20210720182048.1906526-1-mcgrof@kernel.org>
+ <20210720182048.1906526-4-mcgrof@kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="o9Bjd73EPYzHYRI8"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20210713193522.1770306-6-u.kleine-koenig@pengutronix.de>
+In-Reply-To: <20210720182048.1906526-4-mcgrof@kernel.org>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Jul 20, 2021 at 11:20:46AM -0700, Luis Chamberlain wrote:
+> The GENHD_FL_DISK_ADDED flag is what we really want, as the
+> flag GENHD_FL_UP could be set on a semi-initialized device.
+> 
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> ---
+>  drivers/mmc/core/block.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ce8aed562929..e9818c79fa59 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2644,7 +2644,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+>  		 * from being accepted.
+>  		 */
+>  		card = md->queue.card;
+> -		if (md->disk->flags & GENHD_FL_UP) {
+> +		if (blk_disk_added(md->disk)) {
+>  			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+>  			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+>  					card->ext_csd.boot_ro_lockable)
+> -- 
 
---o9Bjd73EPYzHYRI8
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, Jul 13, 2021 at 09:35:22PM +0200, Uwe Kleine-K=C3=B6nig wrote:
-> The driver core ignores the return value of this callback because there
-> is only little it can do when a device disappears.
->=20
-> This is the final bit of a long lasting cleanup quest where several
-> buses were converted to also return void from their remove callback.
-> Additionally some resource leaks were fixed that were caused by drivers
-> returning an error code in the expectation that the driver won't go
-> away.
->=20
-> With struct bus_type::remove returning void it's prevented that newly
-> implemented buses return an ignored error code and so don't anticipate
-> wrong expectations for driver authors.
->=20
-> Acked-by: Russell King (Oracle) <rmk+kernel@armlinux.org.uk> (For ARM, Am=
-ba and related parts)
-> Acked-by: Mark Brown <broonie@kernel.org>
-> Acked-by: Chen-Yu Tsai <wens@csie.org> (for sunxi-rsb)
-> Acked-by: Pali Roh=C3=A1r <pali@kernel.org>
-> Acked-by: Mauro Carvalho Chehab <mchehab@kernel.org> (for media)
-> Acked-by: Hans de Goede <hdegoede@redhat.com> (For drivers/platform)
-> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Acked-By: Vinod Koul <vkoul@kernel.org>
-> Acked-by: Juergen Gross <jgross@suse.com> (For xen)
-> Acked-by: Lee Jones <lee.jones@linaro.org> (For mfd)
-> Acked-by: Johannes Thumshirn <jth@kernel.org> (For mcb)
-> Acked-by: Johan Hovold <johan@kernel.org>
-> Acked-by: Srinivas Kandagatla <srinivas.kandagatla@linaro.org> (For slimb=
-us)
-> Acked-by: Kirti Wankhede <kwankhede@nvidia.com> (For vfio)
-> Acked-by: Maximilian Luz <luzmaximilian@gmail.com>
-> Acked-by: Heikki Krogerus <heikki.krogerus@linux.intel.com> (For ulpi and=
- typec)
-> Acked-by: Samuel Iglesias Gons=C3=A1lvez <siglesias@igalia.com> (For ipac=
-k)
-> Reviewed-by: Tom Rix <trix@redhat.com> (For fpga)
-> Acked-by: Geoff Levand <geoff@infradead.org> (For ps3)
-> Acked-by: Yehezkel Bernat <YehezkelShB@gmail.com> (For thunderbolt)
-> Reviewed-by: Mathieu Poirier <mathieu.poirier@linaro.org>
-> Acked-by: Alexander Shishkin <alexander.shishkin@linux.intel.com> (For in=
-tel_th)
-> Acked-by: Dominik Brodowski <linux@dominikbrodowski.net> (For pcmcia)
-> Reviewed-by: Cornelia Huck <cohuck@redhat.com> (For drivers/s390 and driv=
-ers/vfio)
-> Acked-by: Rafael J. Wysocki <rafael@kernel.org> (For ACPI)
-> Acked-by: Bjorn Andersson <bjorn.andersson@linaro.org> (rpmsg and apr)
-> Acked-by: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com> (For =
-intel-ish-hid)
-> Acked-by: Dan Williams <dan.j.williams@intel.com> (For CXL, DAX, and NVDI=
-MM)
-> Acked-by: William Breathitt Gray <vilhelm.gray@gmail.com> (For isa)
-> Acked-by: Stefan Richter <stefanr@s5r6.in-berlin.de> (For firewire)
-> Acked-by: Benjamin Tissoires <benjamin.tissoires@redhat.com> (For hid)
-> Acked-by: Thorsten Scherer <t.scherer@eckelmann.de> (For siox)
-> Acked-by: Sven Van Asbroeck <TheSven73@gmail.com> (For anybuss)
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org> (For MMC)
-> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
-
-Acked-by: Wolfram Sang <wsa@kernel.org> # for I2C
-
-Thanks, Uwe!
+I think the proper fix here is to just unwind the mmc initialization,
+something like this untested patch:
 
 
---o9Bjd73EPYzHYRI8
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmD3MUIACgkQFA3kzBSg
-KbYzoQ//fHsReQ7gV79Uj6MfHENOZAAxSFMd8yIWNeX0Ug8crVQ2fzQgvlotUS1y
-62KPO9MFbi37+nfCWwl5uNEiDPwYjpB+jM/jfqJ849ngfiIQyUqCK7qr5b1FIWkp
-TuEV1Rx/wlpmxMEjKFAuo+/5OkXVwvpxQGiqBemOeTmOKjqITCpXEBkYqDqqI/MY
-lnzwpE8R30sf8IH/aThtb9dZBz+8y2mry6nVtSbMMmZ0VAYgwEPmuPLfa9CIhaCJ
-Oqe6Uf+sJs/emp0nfyZ5IDXvO8vE5kgPoy0l/smHEtejHLUkHBKf4MusKOzDdbax
-Uk48fnhKgbhxbVN0guT7IzWvRG+80hU4Ns9YPjmHYNXr4Wg03//hoAv4otMAAqXU
-Tjk9sEMBGHasqHZ0e1j3xTRhxQOwTJjzwVNhkrTX4HIZ/k0gXQK0ojBXxGvWeds2
-yQ7FUakyf1LQBmrLwssWSXbyp+W6tVodIUmnebSK1IpVd7YK4NZPf796yD44Ckzd
-XM4O5xTksxr5X+cEsNNLxhXFMohR/BOpLCj4R1+vpRNyMTHLIqfsI7GL+TJh+Mri
-+kuq0TQgbTRlrIw/jfTcenYmXhQte4oeFQa3uVwGY2b+5kB/zRMTKThU0e2Vpd+8
-Kifz6u9a8LEGAMrLNXVd1B/uHQSOMYeeIzsuZ+BHqVxDsyNvJds=
-=zPVh
------END PGP SIGNATURE-----
-
---o9Bjd73EPYzHYRI8--
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 9890a1532cb0..982f0198d8ff 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2283,7 +2283,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 					      sector_t size,
+ 					      bool default_ro,
+ 					      const char *subname,
+-					      int area_type)
++					      int area_type,
++					      unsigned int part_type)
+ {
+ 	struct mmc_blk_data *md;
+ 	int devidx, ret;
+@@ -2329,6 +2330,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	INIT_LIST_HEAD(&md->rpmbs);
+ 	md->usage = 1;
+ 	md->queue.blkdata = md;
++	md->part_type = part_type;
+ 
+ 	md->disk->major	= MMC_BLOCK_MAJOR;
+ 	md->disk->minors = perdev_minors;
+@@ -2381,8 +2383,43 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
+ 		cap_str, md->read_only ? "(ro)" : "");
+ 
++	device_add_disk(md->parent, md->disk, NULL);
++	md->force_ro.show = force_ro_show;
++	md->force_ro.store = force_ro_store;
++	sysfs_attr_init(&md->force_ro.attr);
++	md->force_ro.attr.name = "force_ro";
++	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
++	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
++	if (ret)
++		goto force_ro_fail;
++
++	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
++	     card->ext_csd.boot_ro_lockable) {
++		umode_t mode;
++
++		if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_DIS)
++			mode = S_IRUGO;
++		else
++			mode = S_IRUGO | S_IWUSR;
++
++		md->power_ro_lock.show = power_ro_lock_show;
++		md->power_ro_lock.store = power_ro_lock_store;
++		sysfs_attr_init(&md->power_ro_lock.attr);
++		md->power_ro_lock.attr.mode = mode;
++		md->power_ro_lock.attr.name =
++					"ro_lock_until_next_power_on";
++		ret = device_create_file(disk_to_dev(md->disk),
++				&md->power_ro_lock);
++		if (ret)
++			goto power_ro_lock_fail;
++	}
+ 	return md;
+ 
++ power_ro_lock_fail:
++	device_remove_file(disk_to_dev(md->disk), &md->force_ro);
++ force_ro_fail:
++	del_gendisk(md->disk);
++ 	// XXX: undo mmc_init_queue
+  err_kfree:
+ 	kfree(md);
+  out:
+@@ -2410,7 +2447,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
+ 	}
+ 
+ 	return mmc_blk_alloc_req(card, &card->dev, size, false, NULL,
+-					MMC_BLK_DATA_AREA_MAIN);
++					MMC_BLK_DATA_AREA_MAIN, 0);
+ }
+ 
+ static int mmc_blk_alloc_part(struct mmc_card *card,
+@@ -2424,10 +2461,9 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
+ 	struct mmc_blk_data *part_md;
+ 
+ 	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size, default_ro,
+-				    subname, area_type);
++				    subname, area_type, part_type);
+ 	if (IS_ERR(part_md))
+ 		return PTR_ERR(part_md);
+-	part_md->part_type = part_type;
+ 	list_add(&part_md->part, &md->part);
+ 
+ 	return 0;
+@@ -2628,27 +2664,23 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
+ 
+ static void mmc_blk_remove_req(struct mmc_blk_data *md)
+ {
+-	struct mmc_card *card;
++	struct mmc_card *card = md->queue.card;
+ 
+-	if (md) {
+-		/*
+-		 * Flush remaining requests and free queues. It
+-		 * is freeing the queue that stops new requests
+-		 * from being accepted.
+-		 */
+-		card = md->queue.card;
+-		if (md->disk->flags & GENHD_FL_UP) {
+-			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+-			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+-					card->ext_csd.boot_ro_lockable)
+-				device_remove_file(disk_to_dev(md->disk),
+-					&md->power_ro_lock);
+-
+-			del_gendisk(md->disk);
+-		}
+-		mmc_cleanup_queue(&md->queue);
+-		mmc_blk_put(md);
++	/*
++	 * Flush remaining requests and free queues. It is freeing the queue
++	 * that stops new requests from being accepted.
++	 */
++	if (md->disk->flags & GENHD_FL_UP) {
++		device_remove_file(disk_to_dev(md->disk), &md->force_ro);
++		if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
++				card->ext_csd.boot_ro_lockable)
++			device_remove_file(disk_to_dev(md->disk),
++				&md->power_ro_lock);
++
++		del_gendisk(md->disk);
+ 	}
++	mmc_cleanup_queue(&md->queue);
++	mmc_blk_put(md);
+ }
+ 
+ static void mmc_blk_remove_parts(struct mmc_card *card,
+@@ -2672,51 +2704,6 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
+ 	}
+ }
+ 
+-static int mmc_add_disk(struct mmc_blk_data *md)
+-{
+-	int ret;
+-	struct mmc_card *card = md->queue.card;
+-
+-	device_add_disk(md->parent, md->disk, NULL);
+-	md->force_ro.show = force_ro_show;
+-	md->force_ro.store = force_ro_store;
+-	sysfs_attr_init(&md->force_ro.attr);
+-	md->force_ro.attr.name = "force_ro";
+-	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
+-	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
+-	if (ret)
+-		goto force_ro_fail;
+-
+-	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
+-	     card->ext_csd.boot_ro_lockable) {
+-		umode_t mode;
+-
+-		if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_DIS)
+-			mode = S_IRUGO;
+-		else
+-			mode = S_IRUGO | S_IWUSR;
+-
+-		md->power_ro_lock.show = power_ro_lock_show;
+-		md->power_ro_lock.store = power_ro_lock_store;
+-		sysfs_attr_init(&md->power_ro_lock.attr);
+-		md->power_ro_lock.attr.mode = mode;
+-		md->power_ro_lock.attr.name =
+-					"ro_lock_until_next_power_on";
+-		ret = device_create_file(disk_to_dev(md->disk),
+-				&md->power_ro_lock);
+-		if (ret)
+-			goto power_ro_lock_fail;
+-	}
+-	return ret;
+-
+-power_ro_lock_fail:
+-	device_remove_file(disk_to_dev(md->disk), &md->force_ro);
+-force_ro_fail:
+-	del_gendisk(md->disk);
+-
+-	return ret;
+-}
+-
+ #ifdef CONFIG_DEBUG_FS
+ 
+ static int mmc_dbg_card_status_get(void *data, u64 *val)
+@@ -2882,7 +2869,7 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
+ 
+ static int mmc_blk_probe(struct mmc_card *card)
+ {
+-	struct mmc_blk_data *md, *part_md;
++	struct mmc_blk_data *md;
+ 	int ret = 0;
+ 
+ 	/*
+@@ -2900,6 +2887,8 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 		return -ENOMEM;
+ 	}
+ 
++	dev_set_drvdata(&card->dev, md);
++
+ 	md = mmc_blk_alloc(card);
+ 	if (IS_ERR(md)) {
+ 		ret = PTR_ERR(md);
+@@ -2910,18 +2899,6 @@ static int mmc_blk_probe(struct mmc_card *card)
+ 	if (ret)
+ 		goto out;
+ 
+-	dev_set_drvdata(&card->dev, md);
+-
+-	ret = mmc_add_disk(md);
+-	if (ret)
+-		goto out;
+-
+-	list_for_each_entry(part_md, &md->part, part) {
+-		ret = mmc_add_disk(part_md);
+-		if (ret)
+-			goto out;
+-	}
+-
+ 	/* Add two debugfs entries */
+ 	mmc_blk_add_debugfs(card, md);
+ 
