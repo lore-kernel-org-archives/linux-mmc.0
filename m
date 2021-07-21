@@ -2,90 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.3 required=3.0 tests=BAYES_00,FSL_HELO_FAKE,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39AFFC6377B
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 20:06:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA501C6377C
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 21:08:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 207ED60FE9
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 20:06:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 96F5361411
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 21:08:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232403AbhGUTZw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 15:25:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49016 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232338AbhGUTZv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 15:25:51 -0400
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1849DC061575;
-        Wed, 21 Jul 2021 13:06:27 -0700 (PDT)
-Received: by mail-pj1-x1036.google.com with SMTP id j8-20020a17090aeb08b0290173bac8b9c9so551855pjz.3;
-        Wed, 21 Jul 2021 13:06:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=/AaS5KY/bo1OIoNKCjxhZJGyqFcDDWuLo00WRrLsa/Y=;
-        b=Mg3/Rj5afIxOy+l05SmTRU7jEajYS0jZmYJdGL4IuakOsiEyy/ILv3wOdeEfSRjdhz
-         jujfRnMRvlonm31+5pgem11mGp6yLoJeNMCArJg1A9eRI0l/G3+8Rk1QhfTlWTvcTxAA
-         onCPNG/YGfZuvvHJMEpFxezxdQZw8IMX7SrqhLW9F8VjxObascjceXgqYGegTdpw0SSf
-         rQ97XSeV7+MNOEsB86GqMndm65lbCm+JD0WvMQ7IsQgepf3hop3TLJY1Op3b1n6lLIym
-         FYainSqflnnHCOe1Do2kiJ/LJCXW2yGkPlDEO5OUsDXOe/zcd6MNDorjd+dlI0ciSe9k
-         ZhCA==
+        id S230058AbhGUU1t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 16:27:49 -0400
+Received: from mail-io1-f44.google.com ([209.85.166.44]:37566 "EHLO
+        mail-io1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229992AbhGUU1q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 16:27:46 -0400
+Received: by mail-io1-f44.google.com with SMTP id r18so3954831iot.4;
+        Wed, 21 Jul 2021 14:08:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=/AaS5KY/bo1OIoNKCjxhZJGyqFcDDWuLo00WRrLsa/Y=;
-        b=F/c1suw2h8utEW5x+JC5cI5SdiH1R2K6yMCTz/LnDPCSrlxo81QVBOxqRehnJKN4Yz
-         QyvfPkXL0O0L7DuXA9fUKwLMWHkYZ0lzW9sa1Ef/Sue4ZcFMoTtUMmuUTKQK/wTeM5bn
-         sH5q7vBouVU1LlbYJwmlsGs58NE8T7R20zpvRHOmaQaCwpqzoc6GiMK7vARcs46aWcUa
-         LVJlyJoIrRrKXmpNqrZwqFQtlWJe5oiBeu/4HiN+4yyVYvRVPvvG5niTSK0O0vzX1WOJ
-         Bt0cjWKa3c1CsifSBvHn2NY7iP59qXdGl7LD2TeXdV/MKUnjPeJT/+KkhMgMdlYVPRls
-         mIsQ==
-X-Gm-Message-State: AOAM532jGJSPpVZgWwFEh6B4KSNrjRiU6yycpEchqBj6nyCwJFSjQRJW
-        VZBoH1l5o+rIkrvudQKV943Vagm4woV+c++BHrs=
-X-Google-Smtp-Source: ABdhPJzbp8o/mdExhTOAtvDecgv14SGtgQwIBCFnzz8vuEb5lFWK7wToC21bZAGt4lm7WFsyFsXzwjl2xuRxOf9/UWk=
-X-Received: by 2002:a63:5a5b:: with SMTP id k27mr37865362pgm.74.1626897986596;
- Wed, 21 Jul 2021 13:06:26 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=y7heAi6SLnU26NM0WzqQ+MseadYPmrRZaOm1kRLvtmk=;
+        b=hF2TrfaMVaxTs2SJZrCBHDc3HtmS/clWu9GfKp7Aa/jxQqj7KRqiDeveAUlRY+Yl9c
+         ppco9UMJsf/IEgUFnOAh5M6IQALNd5AQfbxE/AGVhWzLIEg20V2KbVxe2s2TMoVdWZF+
+         9LWQjHJxnE9rMZ9z6utu99hMWazKhj2jL3Ph1j11KBY1kyqBUrwROlCJ+odPGXA+wWJQ
+         luG4OpbS1lbppQvcaYV0J9wssUWh7gtQenQRGztHDM3Pv5J3JWM0T94sigUMydLfPQa9
+         2x1QNBPybQq4mimHAJH9aS9t5O01Huvuy18TiHbkxJn3BwIIY+hNsngcpV0cl6O8eD+q
+         6u8w==
+X-Gm-Message-State: AOAM533zUO3293QCm1wErcn3oSpnJ0FmSLxCdxMM0V/zA3L2Ks39ndek
+        trpg3hhsAL6W/pQZZ1hksho=
+X-Google-Smtp-Source: ABdhPJzcyDiP+EZD0ff1DA+BbajK/V110cX7YnJzs6CDyhedpltAd+hOS3MwoMTMMcSKOVSVE0VsaA==
+X-Received: by 2002:a05:6638:1608:: with SMTP id x8mr12026410jas.115.1626901701770;
+        Wed, 21 Jul 2021 14:08:21 -0700 (PDT)
+Received: from google.com (243.199.238.35.bc.googleusercontent.com. [35.238.199.243])
+        by smtp.gmail.com with ESMTPSA id l11sm15495000ios.8.2021.07.21.14.07.11
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 21 Jul 2021 14:07:59 -0700 (PDT)
+Date:   Wed, 21 Jul 2021 21:07:08 +0000
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Yury Norov <yury.norov@gmail.com>
+Cc:     linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+        linux-mmc@vger.kernel.org,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Petr Mladek <pmladek@suse.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Tejun Heo <tj@kernel.org>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Christoph Lameter <cl@linux.com>,
+        Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH 1/4] mm/percpu: micro-optimize pcpu_is_populated()
+Message-ID: <YPiMUF/sYpjPSADv@google.com>
+References: <20210719021755.883182-1-yury.norov@gmail.com>
+ <20210719021755.883182-2-yury.norov@gmail.com>
 MIME-Version: 1.0
-References: <mvmtukn6bmu.fsf@suse.de> <YPgwHcbK7XoXL/mD@smile.fi.intel.com>
- <mvmpmvb68cg.fsf@suse.de> <YPg3VS/Ure6VRsuJ@smile.fi.intel.com>
- <mvmlf5z66l9.fsf@suse.de> <CAHp75VeFKn=--PuF6deOp6H-j7z8PXgkXA5PeSftiK5LWX30Qw@mail.gmail.com>
- <mvmh7gn649v.fsf@suse.de> <YPhT1APE8QweDCoP@smile.fi.intel.com> <87lf5zo34l.fsf@igel.home>
-In-Reply-To: <87lf5zo34l.fsf@igel.home>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Wed, 21 Jul 2021 23:05:50 +0300
-Message-ID: <CAHp75VcWfqZLGv9N9k6bUhJ3zyDS=y_L93BcbsbRO=Gsu---Pg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmc_spi: add spi:mmc-spi-slot alias
-To:     Andreas Schwab <schwab@suse.de>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Tobias Schramm <t.schramm@manjaro.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210719021755.883182-2-yury.norov@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 21, 2021 at 10:53 PM Andreas Schwab <schwab@suse.de> wrote:
->
-> On Jul 21 2021, Andy Shevchenko wrote:
->
-> > I have counted 89 device drivers in the kernel that have OF ID table without
-> > SPI ID table. I'm wondering if all of them need to be fixed.
->
-> How does a SPI ID table look like?
+Hello,
 
-Plenty examples [1], like [2].
+On Sun, Jul 18, 2021 at 07:17:52PM -0700, Yury Norov wrote:
+> bitmap_next_clear_region() calls find_next_zero_bit() and find_next_bit()
+> sequentially to find a range of clear bits. In case of pcpu_is_populated()
+> there's a chance to return earlier if bitmap has all bits set.
+> 
+> Signed-off-by: Yury Norov <yury.norov@gmail.com>
+> ---
+>  mm/percpu.c | 15 ++++++++-------
+>  1 file changed, 8 insertions(+), 7 deletions(-)
+> 
+> diff --git a/mm/percpu.c b/mm/percpu.c
+> index 7f2e0151c4e2..25461571dcc5 100644
+> --- a/mm/percpu.c
+> +++ b/mm/percpu.c
+> @@ -1071,17 +1071,18 @@ static void pcpu_block_update_hint_free(struct pcpu_chunk *chunk, int bit_off,
+>  static bool pcpu_is_populated(struct pcpu_chunk *chunk, int bit_off, int bits,
+>  			      int *next_off)
+>  {
+> -	unsigned int page_start, page_end, rs, re;
+> +	unsigned int start, end;
+>  
+> -	page_start = PFN_DOWN(bit_off * PCPU_MIN_ALLOC_SIZE);
+> -	page_end = PFN_UP((bit_off + bits) * PCPU_MIN_ALLOC_SIZE);
+> +	start = PFN_DOWN(bit_off * PCPU_MIN_ALLOC_SIZE);
+> +	end = PFN_UP((bit_off + bits) * PCPU_MIN_ALLOC_SIZE);
+>  
+> -	rs = page_start;
+> -	bitmap_next_clear_region(chunk->populated, &rs, &re, page_end);
+> -	if (rs >= page_end)
+> +	start = find_next_zero_bit(chunk->populated, end, start);
+> +	if (start >= end)
+>  		return true;
+>  
+> -	*next_off = re * PAGE_SIZE / PCPU_MIN_ALLOC_SIZE;
+> +	end = find_next_bit(chunk->populated, end, start + 1);
+> +
+> +	*next_off = end * PAGE_SIZE / PCPU_MIN_ALLOC_SIZE;
+>  	return false;
+>  }
+>  
+> -- 
+> 2.30.2
+> 
 
-[1]: https://elixir.bootlin.com/linux/latest/A/ident/spi_device_id
-[2]: https://elixir.bootlin.com/linux/latest/source/drivers/gpu/drm/tiny/mi0283qt.c#L174
+Sorry for the delay.
 
--- 
-With Best Regards,
-Andy Shevchenko
+Acked-by: Dennis Zhou <dennis@kernel.org>
+
+Thanks,
+Dennis
