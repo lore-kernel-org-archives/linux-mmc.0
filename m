@@ -2,304 +2,214 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 516FFC07E9B
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 05:24:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8C35C07E9B
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 09:02:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 256F760FF2
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 05:24:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C29CB60C40
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 09:02:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232749AbhGUEnt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 00:43:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45116 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231219AbhGUEnq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 00:43:46 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2272C061574;
-        Tue, 20 Jul 2021 22:24:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=4w4Rr+K4p1voERuiNUi/I4B9P8DpL0Nk0BxmYqhBMeQ=; b=VaB3KcdIdumCUAwL1TVaTjvXcr
-        VJecuz66bDlqj1EFyZ4N9x9QWajVfFwLbpwRABcr2d2EdqOS2XvW/x+env9olwWdBh8ZsltJC/dxq
-        IdG39jldxjtT7WkQP4LLzM+p8XFPfnwyVFZ8O8ai5kmvrF4FbcKrvDwh8kkFpKjNJyCQ5JPjkFce1
-        meAot8ytW//A1sb7LEkOlFh6da+4Jey72v8bEgMD/Go0vbHNWlpJ3MY2prWvisFdRDoZ4PdLM3ZWX
-        NDUhAQ8V85wzbV89zFaLpAzk5Um+1lWgodFILXA8EvWKITFr4GkGVDHcZtnk1hxRh4z46fCQi+qNy
-        x+w/EtfQ==;
-Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1m64i7-008pFT-7V; Wed, 21 Jul 2021 05:24:00 +0000
-Date:   Wed, 21 Jul 2021 06:23:59 +0100
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     axboe@kernel.dk, hare@suse.de, bvanassche@acm.org,
-        ming.lei@redhat.com, hch@infradead.org, jack@suse.cz,
-        osandov@fb.com, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 3/5] mmc/core/block: replace GENHD_FL_UP with
- GENHD_FL_DISK_ADDED
-Message-ID: <YPevb5SpgBX6eWEZ@infradead.org>
-References: <20210720182048.1906526-1-mcgrof@kernel.org>
- <20210720182048.1906526-4-mcgrof@kernel.org>
+        id S236045AbhGUIVl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 04:21:41 -0400
+Received: from mail-eopbgr1320103.outbound.protection.outlook.com ([40.107.132.103]:54928
+        "EHLO APC01-PU1-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S235987AbhGUILV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 21 Jul 2021 04:11:21 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=kCp3/RGx2A3Lq7X0kw9qmCXNffgJ5OZm2CB+lThv3LLP3szTdc10/YMe9qwAgkaj+oDevyQthxr73ww7COQnwkn1+I+zfGm16YwUgT70RaZdupr11H7rYpslCVuvDXrBxcPImsUBWua2ZAwa40YTxtDxB7h9/m9Bh+jFqtSq3+oKmWS0QlH+pWsNsrrejHDoY+f5UkVgQiutTGi1zV+rqHKRaxMNZmqMIEzGmYkVwAegY5MY12lIIsN3wgZKiFBFIqHeZVMqL9grQrDlLWD8g9gYX91qy/fivf8QHgZT/tJgKRwRakX5Vk9b7eQ7Uyd4+EB9ZoIBFRSnKdPHNhVb+Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=wxp11Vme7NDguyhhgLefz+fYAqbJCnz1EcPBokyp5cQ=;
+ b=REREEJJ738J7fkl2cZi/oxse8wBdFsAACoXzCsCMf0Bt3UGfrOJqFKyfsOMhQI0FyPyWLgMytwz1GvruV/mJXj6dfp2xEI+72nlYe7NRa3n1a15LX0CDcjz9bWGQZ8ixxJKRZLBZYNZ0R8aFbn3dp3Km+XUnEvNguu5Sc8KewH40d43E504krRGw0HVcBYMOnM9oHl2vhrNKI5J/HBN7BgC++M4ratiNjAj86Ytr+zzTfP5P2D5EOfhJdNwAVo9zcXjwXS07VTrvWhwWYbSgBzAsGwMz2iud0LOeqeohs8dWHHajIY6MwhvuHD5nwyZ7nXbLCesYJnF82bzJFBs6JQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=wxp11Vme7NDguyhhgLefz+fYAqbJCnz1EcPBokyp5cQ=;
+ b=FnNmcOChqWv4ofixeE2uOI6FYdRXKqMdee7Wb3SCSoQ5JBi8gNe4FwS4VJGZQ/gN93C+/OPQy6Tqpysw3/RBU+roOa4sRdPcT5Si37mZnBJAVHQPu2NYINZMlsQ856+NmDQ3t/mvM6fr9p7Ske9FElCkVo8EaxUcYJ5RXAgjl20=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TY2PR01MB2059.jpnprd01.prod.outlook.com (2603:1096:404:e::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4331.26; Wed, 21 Jul
+ 2021 08:51:52 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::7db6:310f:a5ed:82f6]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::7db6:310f:a5ed:82f6%3]) with mapi id 15.20.4331.034; Wed, 21 Jul 2021
+ 08:51:52 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        kernel test robot <lkp@intel.com>
+Subject: RE: [PATCH v3] mmc: host: renesas_sdhi: Refactor renesas_sdhi_probe()
+Thread-Topic: [PATCH v3] mmc: host: renesas_sdhi: Refactor
+ renesas_sdhi_probe()
+Thread-Index: AQHXbzWgd7f4fd1HoEmGRyh7c9qLRqtLx1mAgAF06+A=
+Date:   Wed, 21 Jul 2021 08:51:52 +0000
+Message-ID: <TY2PR01MB3692421AECFC48530C19A16CD8E39@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20210702112956.1065875-1-yoshihiro.shimoda.uh@renesas.com>
+ <CAMuHMdVH+mBWQ1KBNcrhdxoHavWpytczZmUBR_0pXu5AoULgYg@mail.gmail.com>
+In-Reply-To: <CAMuHMdVH+mBWQ1KBNcrhdxoHavWpytczZmUBR_0pXu5AoULgYg@mail.gmail.com>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: linux-m68k.org; dkim=none (message not signed)
+ header.d=none;linux-m68k.org; dmarc=none action=none header.from=renesas.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 8bf2f4d4-0dc6-4d9d-ef2f-08d94c24c91b
+x-ms-traffictypediagnostic: TY2PR01MB2059:
+x-microsoft-antispam-prvs: <TY2PR01MB20591B4E81B4DFB9667B1C05D8E39@TY2PR01MB2059.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:9508;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: W0uz6/cQP5oV5wgysHUb1WIXGoygS4EIRi3kLrYFZdJaUnvDncyIkdevUFoht6jfcF1RH++PGOcWa/ntkAQR78WCE39gF2qeoPsEx7IsOjS8sAZ0Cr3ZIGfZ88aBMVFFkfxAiLASPKorBAzTM0w3T01aKaCTJU+xmrMlRMXtL+uLQcnLhCyzQCWtapyThTJmHsgvFcj/J9GJfJ2xPN+vt9R0OVSoIWtiZ07OdwwSm7aW71fPCWzQM2kdsDfNn6LC4h+/g31hsjNP9PBqmwRxYGEU4ctWIff2iY/c7NqGkMT+lkYVLZ+IQIG255YPg2sQgKEXp5FvKWEhlzE0mfPEt0o5xG11N6KkvFAwaUcs1JtAPUpveGxC9+uvc7ZuXhUTGJnW1TyLa63XqjPAsvdFFXXv9gpsjYOV9cYvmIfH426D7d2PlMpi+GbXA3FHjV7U/re+RGqs49VEwugo50WUq7MjDcWd3LV31XwOivUxILtWqnj8HPWxMaVERACVkZiPUUYfr3KrG2xUiM9D98Q8RRhzpL/R5gkj5s8dXZUF0GN4ZqrZtnaInXnrRh629a29WFNlJs4I/yVoiWpxVuSXhoNTYGBXFYY2LSiq9qNxsvKO/lI70mGk0NuKtAq3W6cJpNgVZNKm/rc7jnraY5pSSrcIaFYrPw+qqm+Ltkb8AOGgBdtblTYE7ryDaxHCdT8QBKQpV26lfcx3jRCQMTeNbQ==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(86362001)(54906003)(316002)(66476007)(53546011)(71200400001)(55016002)(38100700002)(122000001)(9686003)(8676002)(5660300002)(83380400001)(6506007)(186003)(508600001)(8936002)(2906002)(6916009)(33656002)(76116006)(64756008)(52536014)(66556008)(7696005)(66946007)(4326008)(66446008)(38070700004);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?xQHcb0J94J+Io26nobcm0Qm+H5SvPDHK17GNVPog3SJRska6jNPr5BztIJNV?=
+ =?us-ascii?Q?547tBl2RMcFNEDexSvnt/guINk+nxL0VSETZP3jsY1rG9RkfAAJRkyfLN850?=
+ =?us-ascii?Q?96XJug3YZYJXM9JJJw2NJr9YU/UXbK0rf6P44moPhfsccfBOfN1eU/oLZy+v?=
+ =?us-ascii?Q?DFj5sK0MMH8JcWkLauXyEnrVPMxtjzGzspwhP3EtzdDlicPFq2ubgQLXts9a?=
+ =?us-ascii?Q?R1zJJb8uaFnRJjQKxuWi2hMeFZFhMRgUKJnj3GowLbjIsGp0jx430nDwSg31?=
+ =?us-ascii?Q?0VUotvUcYRRtqtvvUWQF7pYcyNpVBN+gdWybILdbBY+8qMP4BVczlLYg/VKC?=
+ =?us-ascii?Q?v/56U4E0/JT06iBCMAmzfMFUWGWKqkhN03ae/VdfNNYpHTUgantqQc8O9Gbk?=
+ =?us-ascii?Q?3uXzjZBldeWeXv1qG509VbpnBbPJuH3h0cRARihX6IZeE0iXCSyKFyBIhYrr?=
+ =?us-ascii?Q?ZVV5WeYNkKK1TeM50wJx9+iH3S618ycF9F90mhsojbYtvPhORmH3edpjZuFo?=
+ =?us-ascii?Q?Tz+IgcCAd2Wv/7P93mpEzZFiJp5q+hBQQOwf0N19KwPKO8SPYnlJYS/Axlwe?=
+ =?us-ascii?Q?Z7Cq5M8DCrrx2/XoriyQrg5jQGduvNhJtwEXGeao5wiBNU+rsNLncADkz6uz?=
+ =?us-ascii?Q?PjV3ov1ytdqPjeIFAEtGbPYFwYREYbh4oBw774aVXTmYtMAcfQKwr2vms5Gz?=
+ =?us-ascii?Q?EPG+h44fWsGyo8HZwfFhs5HD+LOvjv+gYzwX2LGxTTqoWWjuX6whdCAqWu+9?=
+ =?us-ascii?Q?PFQnUg7OWpv0sosda0hNozpqk+iLpzjuEiKnnNZ4FR2zR/sdTi6E9c5Jl8Jc?=
+ =?us-ascii?Q?kCY3K/cwJ8Yg9i2LCqC/qbRtZDrsyncZXkg+QWbcTDnRk3dLInlscAG2ykDb?=
+ =?us-ascii?Q?BtkTJchd2JDVVgWr60JjLoLUIi1xkGytOl5u/cY62R1rt44BYo63PwV9Ph1U?=
+ =?us-ascii?Q?jr8DME5l2kYj1NCRcq5WlfCRAuJBnPZ635OmHBYxOkY7O9RKspeD2ZezQ+ls?=
+ =?us-ascii?Q?VE+YY4LMzqwlCHbgdqHPDM7IQxMg3mg6azY6xFzLtHakS98iLT7LfltGztY/?=
+ =?us-ascii?Q?hArwY6oKjdPesbej9ixvh6Bi58vueA98dYtKI08Wv9daJZE0+XOZ0nIFLrnK?=
+ =?us-ascii?Q?u/H0ooK6KYaAf00ywScluqrADGJuCpA3U3ahZ6qN7GjIg4d7EJnREbec38HA?=
+ =?us-ascii?Q?O0sL11HEPjIpt1BcoGAVhkQJh+eZrn6m+C5bKdnRRW89Hv23CGYBoDW9HdC1?=
+ =?us-ascii?Q?9Lm1pcAEiD/LRCrvTez14TVRMDOucCsDqJ8wZIIPBZSHJcLsDPM2zfXRze9Z?=
+ =?us-ascii?Q?BoEfX04dTRLe7pDk4Z1LWNQJ/bhGD2+gsKRg4W1UOgypBrrz55Mj+LV2dSNE?=
+ =?us-ascii?Q?MyCc+XI=3D?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210720182048.1906526-4-mcgrof@kernel.org>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8bf2f4d4-0dc6-4d9d-ef2f-08d94c24c91b
+X-MS-Exchange-CrossTenant-originalarrivaltime: 21 Jul 2021 08:51:52.4941
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: unbXqb6vd/ufcza2FhB9l4YrLsTv+hH104BSmBn/EJsz1Bc5YFgjBOJDvHIcvOS5bZKSEf/8EcvxdmA21jX1pJivQKrxiQhrdhXI+8PM021mw+wG8uJYa/m3cWC6kco8
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY2PR01MB2059
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Jul 20, 2021 at 11:20:46AM -0700, Luis Chamberlain wrote:
-> The GENHD_FL_DISK_ADDED flag is what we really want, as the
-> flag GENHD_FL_UP could be set on a semi-initialized device.
-> 
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
->  drivers/mmc/core/block.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ce8aed562929..e9818c79fa59 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2644,7 +2644,7 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
->  		 * from being accepted.
->  		 */
->  		card = md->queue.card;
-> -		if (md->disk->flags & GENHD_FL_UP) {
-> +		if (blk_disk_added(md->disk)) {
->  			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
->  			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
->  					card->ext_csd.boot_ro_lockable)
-> -- 
-
-I think the proper fix here is to just unwind the mmc initialization,
-something like this untested patch:
+Hi Geert-san,
 
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 9890a1532cb0..982f0198d8ff 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2283,7 +2283,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 					      sector_t size,
- 					      bool default_ro,
- 					      const char *subname,
--					      int area_type)
-+					      int area_type,
-+					      unsigned int part_type)
- {
- 	struct mmc_blk_data *md;
- 	int devidx, ret;
-@@ -2329,6 +2330,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	INIT_LIST_HEAD(&md->rpmbs);
- 	md->usage = 1;
- 	md->queue.blkdata = md;
-+	md->part_type = part_type;
- 
- 	md->disk->major	= MMC_BLOCK_MAJOR;
- 	md->disk->minors = perdev_minors;
-@@ -2381,8 +2383,43 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 		md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
- 		cap_str, md->read_only ? "(ro)" : "");
- 
-+	device_add_disk(md->parent, md->disk, NULL);
-+	md->force_ro.show = force_ro_show;
-+	md->force_ro.store = force_ro_store;
-+	sysfs_attr_init(&md->force_ro.attr);
-+	md->force_ro.attr.name = "force_ro";
-+	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
-+	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
-+	if (ret)
-+		goto force_ro_fail;
-+
-+	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-+	     card->ext_csd.boot_ro_lockable) {
-+		umode_t mode;
-+
-+		if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_DIS)
-+			mode = S_IRUGO;
-+		else
-+			mode = S_IRUGO | S_IWUSR;
-+
-+		md->power_ro_lock.show = power_ro_lock_show;
-+		md->power_ro_lock.store = power_ro_lock_store;
-+		sysfs_attr_init(&md->power_ro_lock.attr);
-+		md->power_ro_lock.attr.mode = mode;
-+		md->power_ro_lock.attr.name =
-+					"ro_lock_until_next_power_on";
-+		ret = device_create_file(disk_to_dev(md->disk),
-+				&md->power_ro_lock);
-+		if (ret)
-+			goto power_ro_lock_fail;
-+	}
- 	return md;
- 
-+ power_ro_lock_fail:
-+	device_remove_file(disk_to_dev(md->disk), &md->force_ro);
-+ force_ro_fail:
-+	del_gendisk(md->disk);
-+ 	// XXX: undo mmc_init_queue
-  err_kfree:
- 	kfree(md);
-  out:
-@@ -2410,7 +2447,7 @@ static struct mmc_blk_data *mmc_blk_alloc(struct mmc_card *card)
- 	}
- 
- 	return mmc_blk_alloc_req(card, &card->dev, size, false, NULL,
--					MMC_BLK_DATA_AREA_MAIN);
-+					MMC_BLK_DATA_AREA_MAIN, 0);
- }
- 
- static int mmc_blk_alloc_part(struct mmc_card *card,
-@@ -2424,10 +2461,9 @@ static int mmc_blk_alloc_part(struct mmc_card *card,
- 	struct mmc_blk_data *part_md;
- 
- 	part_md = mmc_blk_alloc_req(card, disk_to_dev(md->disk), size, default_ro,
--				    subname, area_type);
-+				    subname, area_type, part_type);
- 	if (IS_ERR(part_md))
- 		return PTR_ERR(part_md);
--	part_md->part_type = part_type;
- 	list_add(&part_md->part, &md->part);
- 
- 	return 0;
-@@ -2628,27 +2664,23 @@ static int mmc_blk_alloc_parts(struct mmc_card *card, struct mmc_blk_data *md)
- 
- static void mmc_blk_remove_req(struct mmc_blk_data *md)
- {
--	struct mmc_card *card;
-+	struct mmc_card *card = md->queue.card;
- 
--	if (md) {
--		/*
--		 * Flush remaining requests and free queues. It
--		 * is freeing the queue that stops new requests
--		 * from being accepted.
--		 */
--		card = md->queue.card;
--		if (md->disk->flags & GENHD_FL_UP) {
--			device_remove_file(disk_to_dev(md->disk), &md->force_ro);
--			if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
--					card->ext_csd.boot_ro_lockable)
--				device_remove_file(disk_to_dev(md->disk),
--					&md->power_ro_lock);
--
--			del_gendisk(md->disk);
--		}
--		mmc_cleanup_queue(&md->queue);
--		mmc_blk_put(md);
-+	/*
-+	 * Flush remaining requests and free queues. It is freeing the queue
-+	 * that stops new requests from being accepted.
-+	 */
-+	if (md->disk->flags & GENHD_FL_UP) {
-+		device_remove_file(disk_to_dev(md->disk), &md->force_ro);
-+		if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
-+				card->ext_csd.boot_ro_lockable)
-+			device_remove_file(disk_to_dev(md->disk),
-+				&md->power_ro_lock);
-+
-+		del_gendisk(md->disk);
- 	}
-+	mmc_cleanup_queue(&md->queue);
-+	mmc_blk_put(md);
- }
- 
- static void mmc_blk_remove_parts(struct mmc_card *card,
-@@ -2672,51 +2704,6 @@ static void mmc_blk_remove_parts(struct mmc_card *card,
- 	}
- }
- 
--static int mmc_add_disk(struct mmc_blk_data *md)
--{
--	int ret;
--	struct mmc_card *card = md->queue.card;
--
--	device_add_disk(md->parent, md->disk, NULL);
--	md->force_ro.show = force_ro_show;
--	md->force_ro.store = force_ro_store;
--	sysfs_attr_init(&md->force_ro.attr);
--	md->force_ro.attr.name = "force_ro";
--	md->force_ro.attr.mode = S_IRUGO | S_IWUSR;
--	ret = device_create_file(disk_to_dev(md->disk), &md->force_ro);
--	if (ret)
--		goto force_ro_fail;
--
--	if ((md->area_type & MMC_BLK_DATA_AREA_BOOT) &&
--	     card->ext_csd.boot_ro_lockable) {
--		umode_t mode;
--
--		if (card->ext_csd.boot_ro_lock & EXT_CSD_BOOT_WP_B_PWR_WP_DIS)
--			mode = S_IRUGO;
--		else
--			mode = S_IRUGO | S_IWUSR;
--
--		md->power_ro_lock.show = power_ro_lock_show;
--		md->power_ro_lock.store = power_ro_lock_store;
--		sysfs_attr_init(&md->power_ro_lock.attr);
--		md->power_ro_lock.attr.mode = mode;
--		md->power_ro_lock.attr.name =
--					"ro_lock_until_next_power_on";
--		ret = device_create_file(disk_to_dev(md->disk),
--				&md->power_ro_lock);
--		if (ret)
--			goto power_ro_lock_fail;
--	}
--	return ret;
--
--power_ro_lock_fail:
--	device_remove_file(disk_to_dev(md->disk), &md->force_ro);
--force_ro_fail:
--	del_gendisk(md->disk);
--
--	return ret;
--}
--
- #ifdef CONFIG_DEBUG_FS
- 
- static int mmc_dbg_card_status_get(void *data, u64 *val)
-@@ -2882,7 +2869,7 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
- 
- static int mmc_blk_probe(struct mmc_card *card)
- {
--	struct mmc_blk_data *md, *part_md;
-+	struct mmc_blk_data *md;
- 	int ret = 0;
- 
- 	/*
-@@ -2900,6 +2887,8 @@ static int mmc_blk_probe(struct mmc_card *card)
- 		return -ENOMEM;
- 	}
- 
-+	dev_set_drvdata(&card->dev, md);
-+
- 	md = mmc_blk_alloc(card);
- 	if (IS_ERR(md)) {
- 		ret = PTR_ERR(md);
-@@ -2910,18 +2899,6 @@ static int mmc_blk_probe(struct mmc_card *card)
- 	if (ret)
- 		goto out;
- 
--	dev_set_drvdata(&card->dev, md);
--
--	ret = mmc_add_disk(md);
--	if (ret)
--		goto out;
--
--	list_for_each_entry(part_md, &md->part, part) {
--		ret = mmc_add_disk(part_md);
--		if (ret)
--			goto out;
--	}
--
- 	/* Add two debugfs entries */
- 	mmc_blk_add_debugfs(card, md);
- 
+> From: Geert Uytterhoeven, Sent: Tuesday, July 20, 2021 7:35 PM
+>=20
+> On Fri, Jul 2, 2021 at 1:31 PM Yoshihiro Shimoda
+> <yoshihiro.shimoda.uh@renesas.com> wrote:
+> > Refactor renesas_sdhi_probe() to avoid increasing numbers of
+> > sdhi_quirks_match[] entry when we add other stable SoCs like
+> > r8a779m*.
+>=20
+> Cool, then we won't need "[PATCH 04/14] mmc: renesas_sdhi: Add support
+> for R-Car H3e-2G and M3e-2G".
+
+Indeed!
+
+> > Note that the sdhi_quirks_match[] is only needed on
+> > renesas_sdhi_internal_dmac.c so that of_data of
+> > renesas_sdhi_sys_dmac.c keeps as-is.
+> >
+> > Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> > Reported-by: kernel test robot <lkp@intel.com> # build fix on RFC
+>=20
+> I would drop this tag, as it is basically a test/review comment for
+> an older version of a patch.
+
+I got it. I'll drop it.
+
+> > --- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > +++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
+> > @@ -406,15 +516,25 @@ static const struct soc_device_attribute soc_dma_=
+quirks[] =3D {
+> >  static int renesas_sdhi_internal_dmac_probe(struct platform_device *pd=
+ev)
+> >  {
+> >         const struct soc_device_attribute *soc =3D soc_device_match(soc=
+_dma_quirks);
+> > +       const struct soc_device_attribute *attr =3D soc_device_match(sd=
+hi_quirks_match);
+> > +       const struct renesas_sdhi_of_data_with_quirks *of_data_quirks;
+> > +       const struct renesas_sdhi_quirks *quirks =3D NULL;
+> >         struct device *dev =3D &pdev->dev;
+> >
+> >         if (soc)
+> >                 global_flags |=3D (unsigned long)soc->data;
+> >
+> > +       of_data_quirks =3D of_device_get_match_data(&pdev->dev);
+> > +
+> > +       if (attr)
+> > +               quirks =3D attr->data;
+> > +
+>=20
+> I think the code would be easier to read without the interleaving of
+> of_device_get_match_data() and soc_device_match() based matching, ...
+>=20
+> >         /* value is max of SD_SECCNT. Confirmed by HW engineers */
+> >         dma_set_max_seg_size(dev, 0xffffffff);
+> >
+> > -       return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma=
+_ops);
+> > +       return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma=
+_ops,
+> > +                                 of_data_quirks->of_data,
+> > +                                 quirks ? : of_data_quirks->quirks);
+>=20
+> ... and without using the ternary operator, like:
+>=20
+>     of_data_quirks =3D of_device_get_match_data(&pdev->dev);
+>     quirks =3D of_data_quirks->quirks;
+>=20
+>     attr =3D soc_device_match(soc_dma_quirks);
+>     if (attr)
+>             global_flags |=3D (unsigned long)attr->data;
+>=20
+>     attr =3D soc_device_match(sdhi_quirks_match);
+>     if (attr)
+>             quirks =3D attr->data;
+>=20
+>     [...]
+>=20
+>     return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops,
+>                               of_data_quirks->of_data, quirks);
+
+Thank you for your suggestion! I'll update this patch.
+
+> Regardless, as this doesn't impact functionality:
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Thank you for your review!
+
+Best regards,
+Yoshihiro Shimoda
+
