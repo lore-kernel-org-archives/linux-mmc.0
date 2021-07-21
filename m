@@ -2,87 +2,145 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F866C12002
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 15:45:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29FA7C636C9
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 15:48:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EFA0561003
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 15:45:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0073E6120C
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 15:48:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238276AbhGUPFE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 11:05:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45464 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238980AbhGUPFE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 11:05:04 -0400
-Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4A1EC061575;
-        Wed, 21 Jul 2021 08:45:40 -0700 (PDT)
-Received: by mail-pg1-x534.google.com with SMTP id j73so2295915pge.1;
-        Wed, 21 Jul 2021 08:45:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=teG+LurOZIg9Q9LM4TLdK2ZjAJcZFHHEl+srrKcW/+Y=;
-        b=PqvSEfFLx4ubxnV97UYRdrbXX0iFW2Mam57QGZeIl7HGrUoZvBYgWxeDLmE9LshRwk
-         OLmsGsTxZKFJgt1Xd0VubM5PLzgRcVrVpSW/Bks6WaSWpbt+rPrsbe1exFIuIGBGmfNj
-         f93zGIy8U4R/ndf/s6gwM97iBiPjWap1Qxe8v3E6OcnZxy0It9MTrrtLsrUwR5hoRmGm
-         e0yYEBIoKgJGtDi1GwfN2gcaJTzk/KLWgRZ0OGvgpW4Lza4em1R5ANk9KRkK/XifYI58
-         /3k0jI95PNf4yCkqbP8gbEXlBCJ9WFRQ0mUXZIKwiSEOLYe/EQuaL0pQ6LdqMVMLyWwm
-         lv5w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=teG+LurOZIg9Q9LM4TLdK2ZjAJcZFHHEl+srrKcW/+Y=;
-        b=TH84Bz/MPjPWPrDk+MYvwGx35RK2bKCNt2z+CYMD0udVcZiwWOq5fapKR4bO7YnS0h
-         xF00GPuGKz7YIYMfiAsAk9eSe7ChJPUfzwPMxSM1lhYWtSPK3kXFfb1q1TweeUaAlnNu
-         Kq7N3ycbCoBKO6pmu2Pp+sVC0Tt7o627tMRE7Z8MFuASPkd6jbdyV9Xi6VEmhIDqfDEo
-         dqM4CG14Fepb0CgM+xhXEB1d4CR9m273XNImFW52j8m7IGUjwYmvaOQxarhWA2BT3Sdu
-         78l+ftSPFOwTKLeDYGtK4LDLYUgKlKfQHWwyF8K6OpFcnS9I5/2oHuLkqnv3NdpT0bg5
-         oSpw==
-X-Gm-Message-State: AOAM5319Dwbmir0YiyCwnsczsEMx9t2jjutJTLfyyJbw9PzBeQZkjith
-        5cRdGaZAnEXxTBfOFqtxyqIh9P0DAUPEan4J8rU=
-X-Google-Smtp-Source: ABdhPJxKFMFeSHs7BQ6U6M3uOBpNyZrn+gq4G9IJFgTVWlXxn5ZidPmHbZ9H46Il3RS7DpJqkKkb+QGEVqRergHYx2I=
-X-Received: by 2002:aa7:8a04:0:b029:332:950e:d976 with SMTP id
- m4-20020aa78a040000b0290332950ed976mr37767197pfa.40.1626882340196; Wed, 21
- Jul 2021 08:45:40 -0700 (PDT)
+        id S238011AbhGUPIH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 11:08:07 -0400
+Received: from mail.kernel.org ([198.145.29.99]:45612 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232494AbhGUPIG (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 21 Jul 2021 11:08:06 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 699DC6120C;
+        Wed, 21 Jul 2021 15:48:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1626882523;
+        bh=mrPjsA0yCAegR3ChJLMs51IGaXnxCJWanSvEqImq3Ow=;
+        h=From:To:Cc:Subject:Date:From;
+        b=IAnUlgzw2Kjf9X6uIsNSbtgm5qHiXHI2doykRpYDPZ0dwaiNW3riOX0YVejp6xEOV
+         mfiIeM/u3JI7Fiz7ElTqdRAXt4a9dNmD63ZwzVhnA4tA+ShXdC6X11gfMhpSEMwCZg
+         2+V8fE4zQGAcJnfnduViyyblkR9eRxRSINWksZh44ldcISpEC/wyp/hZgEK46Y4f6u
+         S2aKRLdAKi5r8bafQGFINTaY2xVu19gU7teLcZbvhlHRAHNZaPM7LSjvbuZLmmkefa
+         L8364R1fp15mXsBZ0DuBRmyATIkyRSYbqqmPD0qahCezaDbr6CDynxBH8fxE7PRDLQ
+         vrP4luJYHqrgQ==
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     linux-mmc@vger.kernel.org
+Cc:     Satya Tangirala <satyaprateek2357@gmail.com>
+Subject: [PATCH] mmc: store pointer to bio_crypt_ctx in mmc_request
+Date:   Wed, 21 Jul 2021 08:47:38 -0700
+Message-Id: <20210721154738.3966463-1-ebiggers@kernel.org>
+X-Mailer: git-send-email 2.32.0.402.g57bb445576-goog
 MIME-Version: 1.0
-References: <mvmtukn6bmu.fsf@suse.de> <YPgwHcbK7XoXL/mD@smile.fi.intel.com>
- <mvmpmvb68cg.fsf@suse.de> <YPg3VS/Ure6VRsuJ@smile.fi.intel.com> <mvmlf5z66l9.fsf@suse.de>
-In-Reply-To: <mvmlf5z66l9.fsf@suse.de>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Wed, 21 Jul 2021 18:45:00 +0300
-Message-ID: <CAHp75VeFKn=--PuF6deOp6H-j7z8PXgkXA5PeSftiK5LWX30Qw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmc_spi: add spi:mmc-spi-slot alias
-To:     Andreas Schwab <schwab@suse.de>
-Cc:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Tobias Schramm <t.schramm@manjaro.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 21, 2021 at 6:16 PM Andreas Schwab <schwab@suse.de> wrote:
-> On Jul 21 2021, Andy Shevchenko wrote:
-> > Can you explain what is the _practical_ issue here?
-> The module is not loaded by udev.
->
-> > What is your HW setup and what you are trying to do?
->
-> Booting the HiFive board without having to force loading the mmc_spi
-> module.
+From: Eric Biggers <ebiggers@google.com>
 
-What is your DT excerpt for it?
+Make 'struct mmc_request' contain a pointer to the request's
+'struct bio_crypt_ctx' directly, instead of extracting a 32-bit DUN from
+it which is a cqhci-crypto specific detail.
 
+This keeps the cqhci crypto specific details in the cqhci module, and it
+makes mmc_core and mmc_block ready for MMC crypto hardware that accepts
+the DUN and/or key in a way that is more flexible than that which will
+be specified by the eMMC v5.2 standard.  Exynos SoCs are an example of
+such hardware, as their inline encryption hardware takes keys directly
+(it has no concept of keyslots) and supports 128-bit DUNs.
+
+Note that the 32-bit DUN length specified by the standard is very
+restrictive, so it is likely that more hardware will support longer DUNs
+despite it not following the standard.  Thus, limiting the scope of the
+32-bit DUN assumption to the place that actually needs it is warranted.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+
+This patch is already being carried in the Android Common Kernels, due
+to it being needed by Exynos SoCs.  Unfortunately I have no way to
+upstream Exynos eMMC inline encryption support at the moment, so this
+patch isn't strictly required upstream at the moment.  But it may be
+worthwhile as a cleanup regardless; it arguably fixes a layering
+violation (mmc_core knowing about the details of cqhci crypto).
+
+ drivers/mmc/core/crypto.c       | 15 ++++-----------
+ drivers/mmc/host/cqhci-crypto.h |  7 +++++--
+ include/linux/mmc/core.h        |  3 +--
+ 3 files changed, 10 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/core/crypto.c b/drivers/mmc/core/crypto.c
+index 419a368f8402..67557808cada 100644
+--- a/drivers/mmc/core/crypto.c
++++ b/drivers/mmc/core/crypto.c
+@@ -31,18 +31,11 @@ void mmc_crypto_prepare_req(struct mmc_queue_req *mqrq)
+ 	struct request *req = mmc_queue_req_to_req(mqrq);
+ 	struct mmc_request *mrq = &mqrq->brq.mrq;
+ 
+-	if (!req->crypt_keyslot)
++	if (!req->crypt_ctx)
+ 		return;
+ 
+-	mrq->crypto_enabled = true;
+-	mrq->crypto_key_slot = blk_ksm_get_slot_idx(req->crypt_keyslot);
+-
+-	/*
+-	 * For now we assume that all MMC drivers set max_dun_bytes_supported=4,
+-	 * which is the limit for CQHCI crypto.  So all DUNs should be 32-bit.
+-	 */
+-	WARN_ON_ONCE(req->crypt_ctx->bc_dun[0] > U32_MAX);
+-
+-	mrq->data_unit_num = req->crypt_ctx->bc_dun[0];
++	mrq->crypto_ctx = req->crypt_ctx;
++	if (req->crypt_keyslot)
++		mrq->crypto_key_slot = blk_ksm_get_slot_idx(req->crypt_keyslot);
+ }
+ EXPORT_SYMBOL_GPL(mmc_crypto_prepare_req);
+diff --git a/drivers/mmc/host/cqhci-crypto.h b/drivers/mmc/host/cqhci-crypto.h
+index 60b58ee0e625..d7fb084f563b 100644
+--- a/drivers/mmc/host/cqhci-crypto.h
++++ b/drivers/mmc/host/cqhci-crypto.h
+@@ -22,12 +22,15 @@ int cqhci_crypto_init(struct cqhci_host *host);
+  */
+ static inline u64 cqhci_crypto_prep_task_desc(struct mmc_request *mrq)
+ {
+-	if (!mrq->crypto_enabled)
++	if (!mrq->crypto_ctx)
+ 		return 0;
+ 
++	/* We set max_dun_bytes_supported=4, so all DUNs should be 32-bit. */
++	WARN_ON_ONCE(mrq->crypto_ctx->bc_dun[0] > U32_MAX);
++
+ 	return CQHCI_CRYPTO_ENABLE_BIT |
+ 	       CQHCI_CRYPTO_KEYSLOT(mrq->crypto_key_slot) |
+-	       mrq->data_unit_num;
++	       mrq->crypto_ctx->bc_dun[0];
+ }
+ 
+ #else /* CONFIG_MMC_CRYPTO */
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index ab19245e9945..71101d1ec825 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -164,9 +164,8 @@ struct mmc_request {
+ 	int			tag;
+ 
+ #ifdef CONFIG_MMC_CRYPTO
+-	bool			crypto_enabled;
++	const struct bio_crypt_ctx *crypto_ctx;
+ 	int			crypto_key_slot;
+-	u32			data_unit_num;
+ #endif
+ };
+ 
 -- 
-With Best Regards,
-Andy Shevchenko
+2.32.0.402.g57bb445576-goog
+
