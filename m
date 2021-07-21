@@ -2,87 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2ACE4C636C9
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 14:37:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56EEFC636CA
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 15:04:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 13C77608FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 14:37:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 422A56120E
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Jul 2021 15:04:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238646AbhGUN5Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 09:57:16 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:56586 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233064AbhGUN5Q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 09:57:16 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id D788A2255A;
-        Wed, 21 Jul 2021 14:37:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1626878271; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=eN44dIX8eTpjHono1WIQrZzm8Y1UwDC5+yNmFTgedG4=;
-        b=wwkkTZicIkiUQYWl35KTgyWCTCMUwwUy9vZAPSLbLIK0lF4mO9+JdHpcSjlE3KcyZUYtzL
-        5w2iPtrPd4fjWhEtXnmd065QALviRwUtxEErW2xC8Yv9h+PvSvmKAYk4LEMZqjgKqSwbRt
-        eW0UhD2EECW4nr3emPQ8VT+9w7CjZg0=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1626878271;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=eN44dIX8eTpjHono1WIQrZzm8Y1UwDC5+yNmFTgedG4=;
-        b=kTKu7JQBgwLtaB2FnfyImXgleYuL9s6zE3rnn3mV+A1YPiCms9y7e/kXNZJ6bRbFyfB1Oh
-        gvBoRt3Uevw1itAA==
-Received: from hawking.suse.de (hawking.suse.de [10.160.4.0])
-        by relay2.suse.de (Postfix) with ESMTP id D00B0A3B87;
-        Wed, 21 Jul 2021 14:37:51 +0000 (UTC)
-Received: by hawking.suse.de (Postfix, from userid 17005)
-        id BCD22446119; Wed, 21 Jul 2021 16:37:51 +0200 (CEST)
-From:   Andreas Schwab <schwab@suse.de>
-To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+        id S239459AbhGUOX1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 10:23:27 -0400
+Received: from mga09.intel.com ([134.134.136.24]:4035 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239462AbhGUOXW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 21 Jul 2021 10:23:22 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10052"; a="211450913"
+X-IronPort-AV: E=Sophos;i="5.84,258,1620716400"; 
+   d="scan'208";a="211450913"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jul 2021 08:03:57 -0700
+X-IronPort-AV: E=Sophos;i="5.84,258,1620716400"; 
+   d="scan'208";a="501315527"
+Received: from smile.fi.intel.com (HELO smile) ([10.237.68.40])
+  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Jul 2021 08:03:55 -0700
+Received: from andy by smile with local (Exim 4.94.2)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1m6DlF-00GgaQ-GI; Wed, 21 Jul 2021 18:03:49 +0300
+Date:   Wed, 21 Jul 2021 18:03:49 +0300
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Andreas Schwab <schwab@suse.de>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Tobias Schramm <t.schramm@manjaro.org>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Subject: Re: [PATCH] mmc: mmc_spi: add spi:mmc-spi-slot alias
-References: <mvmtukn6bmu.fsf@suse.de> <YPgwHcbK7XoXL/mD@smile.fi.intel.com>
-X-Yow:  How's the wife?  Is she at home enjoying capitalism?
-Date:   Wed, 21 Jul 2021 16:37:51 +0200
-In-Reply-To: <YPgwHcbK7XoXL/mD@smile.fi.intel.com> (Andy Shevchenko's message
-        of "Wed, 21 Jul 2021 17:33:01 +0300")
-Message-ID: <mvmpmvb68cg.fsf@suse.de>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/27.1 (gnu/linux)
+Message-ID: <YPg3VS/Ure6VRsuJ@smile.fi.intel.com>
+References: <mvmtukn6bmu.fsf@suse.de>
+ <YPgwHcbK7XoXL/mD@smile.fi.intel.com>
+ <mvmpmvb68cg.fsf@suse.de>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <mvmpmvb68cg.fsf@suse.de>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Jul 21 2021, Andy Shevchenko wrote:
+On Wed, Jul 21, 2021 at 04:37:51PM +0200, Andreas Schwab wrote:
+> On Jul 21 2021, Andy Shevchenko wrote:
+> 
+> > The driver has OF compatible strings and should be loaded automatically.
+> 
+> They are never being used.
 
-> The driver has OF compatible strings and should be loaded automatically.
+What do you mean by that?
 
-They are never being used.
+Can you explain what is the _practical_ issue here? What is your HW setup and
+what you are trying to do?
 
-# udevadm info /sys/devices/platform/soc/10050000.spi/spi_master/spi1/spi1.0
-P: /devices/platform/soc/10050000.spi/spi_master/spi1/spi1.0
-L: 0
-E: DEVPATH=/devices/platform/soc/10050000.spi/spi_master/spi1/spi1.0
-E: DRIVER=mmc_spi
-E: OF_NAME=mmc
-E: OF_FULLNAME=/soc/spi@10050000/mmc@0
-E: OF_COMPATIBLE_0=mmc-spi-slot
-E: OF_COMPATIBLE_N=1
-E: MODALIAS=spi:mmc-spi-slot
-E: SUBSYSTEM=spi
-
-Andreas.
+> # udevadm info /sys/devices/platform/soc/10050000.spi/spi_master/spi1/spi1.0
+> P: /devices/platform/soc/10050000.spi/spi_master/spi1/spi1.0
+> L: 0
+> E: DEVPATH=/devices/platform/soc/10050000.spi/spi_master/spi1/spi1.0
+> E: DRIVER=mmc_spi
+> E: OF_NAME=mmc
+> E: OF_FULLNAME=/soc/spi@10050000/mmc@0
+> E: OF_COMPATIBLE_0=mmc-spi-slot
+> E: OF_COMPATIBLE_N=1
+> E: MODALIAS=spi:mmc-spi-slot
+> E: SUBSYSTEM=spi
 
 -- 
-Andreas Schwab, SUSE Labs, schwab@suse.de
-GPG Key fingerprint = 0196 BAD8 1CE9 1970 F4BE  1748 E4D4 88E3 0EEA B9D7
-"And now for something completely different."
+With Best Regards,
+Andy Shevchenko
+
+
