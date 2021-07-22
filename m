@@ -8,63 +8,63 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8F44C636C8
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:01:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E24FBC6377D
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8431361244
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:01:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CDC14608FC
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229905AbhGVDVW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 23:21:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43712 "EHLO
+        id S230106AbhGVDVY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 23:21:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43722 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229977AbhGVDVV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 23:21:21 -0400
-Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B225C0613C1;
-        Wed, 21 Jul 2021 21:01:57 -0700 (PDT)
-Received: by mail-pj1-x102a.google.com with SMTP id p4-20020a17090a9304b029016f3020d867so3686111pjo.3;
-        Wed, 21 Jul 2021 21:01:57 -0700 (PDT)
+        with ESMTP id S230166AbhGVDVX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 23:21:23 -0400
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9D43C061575;
+        Wed, 21 Jul 2021 21:01:58 -0700 (PDT)
+Received: by mail-pj1-x102e.google.com with SMTP id a17-20020a17090abe11b0290173ce472b8aso2384221pjs.2;
+        Wed, 21 Jul 2021 21:01:58 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=TtTlmiOOwP/kifcL3jT81MRGQUXvmXHChazVkWTU6qM=;
-        b=Qy7ys9tujk9AZ1EG3DwpC2b2wx7wIFQIDGYkUq5YV9czDjcN8Tbe/ZT6f+e5Npz1xs
-         8QeunHq0aGbxOykDJueV5O4kV/64flhSlUL3Nu7hgmtzByv/bglveFepc8lQhBROjMC/
-         u2TBkVC2JGPVlXCEqotbh5g321qft3NnmJsneV4ebxEOADQgLeEiOQtKUkErW7a0ywdm
-         A5corv29xheef2oeyhZxg7Bglg5eqhomuTtk3WC8mlCYVqpf6ySPhnPuxuH9gRkAztif
-         sY1APAYmE2bQVwU8Mevj3h/cne0ig0XA+VbS0xTGGYChvHeHddYwfVgLAs4OESsuMtAr
-         uuXQ==
+        bh=HCiki6s3bkhDr8HEItmgJdP7VpsDfkf2iN/pIhh62EA=;
+        b=FncgS1G79piW939Bxd70JAWZ8JZOH0CifGlRy1g7+k+j3wPx3dkb3ra583JuB8oWNA
+         J7B4+9TOGs2ff8msj9H1NXmaU0kVrf+8M1uYGjDo/0YBTBaD7e8nBbAVlCKU791Pe+oh
+         2Dkx82WxfutR71Mrrv3bsSnxV/Tzj0ePzA9/nfpFF/Ml4D8cUrkKJa7CgcZ3NZzbbqHe
+         wF9VVL9xM2M8w3vWkcLxsuQbw4xJavF0s4XAkF0ql+N1FpE0uctglb6ZPv0XANh6J71p
+         CcuCpH5LnCEtxdwJtRJDOw84RqBHJFZ1LIDokeRM5Mle/PwZZphmmW7EbtBWtZ0jTxWu
+         bIaw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=TtTlmiOOwP/kifcL3jT81MRGQUXvmXHChazVkWTU6qM=;
-        b=kd4kIXSAON6ZMosTqpHHFWI/dcBaxicBGFhQwCBcnhBilWjTrgU5Vd6VuJBaiUya9Q
-         yzK7jeGBYYjpKzvjexQ0dwX4f9VMIWEgwhO6LyWHrMmAflOBSFLPKfBjveXuvunYlfoM
-         6ANatHwKxpUMUW3xkafiss6/m6x2ezqTdH+jhQtpLCFX8exiCRjSvgQuNDZ2ICduW7Ah
-         RC3LwYOW7HY0C0rWGxw/y0o1L4vlov0iHMu+Te+xDQS6y/8BXy8YLtziD2Oao+tSJhnW
-         CnD7+mKrHisUwKmDBxYsKziLYSQBSVy5Pxl6W+wEV+s1sA/6kaVx10d8wdhEvnU8b7jc
-         792g==
-X-Gm-Message-State: AOAM5326bhotGbc/89zR8Qx/jzD5kNyt//CXak92N+QTKdO0dV4pyUgi
-        2kajvCjfnans1590iTM3W4l0shIUb6zCOQ==
-X-Google-Smtp-Source: ABdhPJxg2Yto7mp3a7TrVIaYsjoCj9NFCmUhe5HMCNvlPjX/PnU4uhC+MYscZS/kVgqA67fOZOoNWQ==
-X-Received: by 2002:a17:902:db0c:b029:12b:8daa:cf8c with SMTP id m12-20020a170902db0cb029012b8daacf8cmr13852586plx.78.1626926516586;
-        Wed, 21 Jul 2021 21:01:56 -0700 (PDT)
+        bh=HCiki6s3bkhDr8HEItmgJdP7VpsDfkf2iN/pIhh62EA=;
+        b=iZ0W9qOyKICO7jeAGfb0hyZd6P4QCEo2fCbFyi/wlbX7/nqs7tSPl/CJrrsysj/tJH
+         lhTfmn6noE548K8V1OZW+GmFIzkfH8CHXfPPwB2oyb4JFwgKQ+zcIunwaP3s1kWiyB7D
+         O7GXgMNluqqIRovPhnnvz3QmsSmenroElcaD2WopgDLLucJ02R5A07+tIXLblkhE5ipm
+         ChPrm7rk4MCGrBQ4TdmTubNs5cTGxIo9N67TpQXb6v1OWpGcw14apIEw7P7tiK3l9yFG
+         zb77sgYgIMa4XbSixL7m/cwyk1gWktKX1Pbq8qe0e5KlWNZ6RJXNnL9qDvnsyJFNcSJL
+         g4SA==
+X-Gm-Message-State: AOAM531nRxbUjj4yngwvY6yOhzXOStaxNP5f2/CgJuPGXBHq6TrLBrqZ
+        2ACRSSbYTRCRbhzI60AW9MA=
+X-Google-Smtp-Source: ABdhPJypAdbwOLhqudXCRiHkNrQh4VT+ulwNpjfrp2tOc7CWFz3DRS2p0hC/oBMSjNuusZKORdVIXg==
+X-Received: by 2002:a17:902:d681:b029:12b:381c:c86 with SMTP id v1-20020a170902d681b029012b381c0c86mr30345901ply.46.1626926518357;
+        Wed, 21 Jul 2021 21:01:58 -0700 (PDT)
 Received: from jason-z170xgaming7.mshome.net (218-35-143-223.cm.dynamic.apol.com.tw. [218.35.143.223])
-        by smtp.gmail.com with ESMTPSA id c19sm1663479pfp.184.2021.07.21.21.01.55
+        by smtp.gmail.com with ESMTPSA id c19sm1663479pfp.184.2021.07.21.21.01.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Jul 2021 21:01:56 -0700 (PDT)
+        Wed, 21 Jul 2021 21:01:58 -0700 (PDT)
 From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         jason.lai@genesyslogiv.com.tw,
         AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: [RFC PATCH v3.2 02/29] mmc: core: UHS-II support, modify power-up sequence
-Date:   Thu, 22 Jul 2021 12:00:57 +0800
-Message-Id: <20210722040124.7573-2-jasonlai.genesyslogic@gmail.com>
+Subject: [RFC PATCH v3.2 03/29] mmc: core: UHS-II support, skip set_chip_select()
+Date:   Thu, 22 Jul 2021 12:00:58 +0800
+Message-Id: <20210722040124.7573-3-jasonlai.genesyslogic@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210722040124.7573-1-jasonlai.genesyslogic@gmail.com>
 References: <20210722040124.7573-1-jasonlai.genesyslogic@gmail.com>
@@ -74,137 +74,32 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-According to Fig. 3-35 in "SD Host Controller Simplified Spec. Ver4.20":
-- Prepare vdd1, vdd2 and ios.timing for using after/in step (2)
-- chip_select is not used in UHS-II, used to return to the legacy flow
+mmc_set_chip_select() should be called only in UHS-II mode,
+and not for UHS-II mode.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 ---
- drivers/mmc/core/core.c      | 61 +++++++++++++++++++++++++-----------
- drivers/mmc/core/regulator.c | 14 +++++++++
- 2 files changed, 56 insertions(+), 19 deletions(-)
+ drivers/mmc/core/core.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index f194940c5974..722b61811f1e 100644
+index 722b61811f1e..3da7b7e321a0 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
-@@ -1318,33 +1318,52 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	if (host->ios.power_mode == MMC_POWER_ON)
- 		return;
-
--	mmc_pwrseq_pre_power_on(host);
-+	if (host->flags & MMC_UHS2_SUPPORT) {
-+		/* TODO: handle 'ocr' parameter */
-+		host->ios.vdd = fls(host->ocr_avail) - 1;
-+		host->ios.vdd2 = fls(host->ocr_avail_uhs2) - 1;
-+		if (mmc_host_is_spi(host))
-+			host->ios.chip_select = MMC_CS_HIGH;
-+		else
-+			host->ios.chip_select = MMC_CS_DONTCARE;
-+		host->ios.timing = MMC_TIMING_UHS2;
-+	} else {
-+		mmc_pwrseq_pre_power_on(host);
-
--	host->ios.vdd = fls(ocr) - 1;
--	host->ios.power_mode = MMC_POWER_UP;
--	/* Set initial state and call mmc_set_ios */
--	mmc_set_initial_state(host);
-+		host->ios.vdd = fls(ocr) - 1;
-+		host->ios.power_mode = MMC_POWER_UP;
-+		/* Set initial state and call mmc_set_ios */
-+		mmc_set_initial_state(host);
-
--	mmc_set_initial_signal_voltage(host);
-+		mmc_set_initial_signal_voltage(host);
-
--	/*
--	 * This delay should be sufficient to allow the power supply
--	 * to reach the minimum voltage.
--	 */
--	mmc_delay(host->ios.power_delay_ms);
-+		/*
-+		 * This delay should be sufficient to allow the power supply
-+		 * to reach the minimum voltage.
-+		 */
-+		mmc_delay(host->ios.power_delay_ms);
-
--	mmc_pwrseq_post_power_on(host);
-+		mmc_pwrseq_post_power_on(host);
-
+@@ -899,8 +899,10 @@ static inline void mmc_set_ios(struct mmc_host *host)
+  */
+ void mmc_set_chip_select(struct mmc_host *host, int mode)
+ {
+-	host->ios.chip_select = mode;
+-	mmc_set_ios(host);
++	if (!(host->flags & MMC_UHS2_INITIALIZED)) {
++		host->ios.chip_select = mode;
++		mmc_set_ios(host);
 +	}
- 	host->ios.clock = host->f_init;
--
- 	host->ios.power_mode = MMC_POWER_ON;
-+
- 	mmc_set_ios(host);
-
--	/*
--	 * This delay must be at least 74 clock sizes, or 1 ms, or the
--	 * time required to reach a stable voltage.
--	 */
--	mmc_delay(host->ios.power_delay_ms);
-+	if (host->flags & MMC_UHS2_SUPPORT)
-+		/*
-+		 * This delay should be sufficient to allow the power supply
-+		 * to reach the minimum voltage.
-+		 */
-+		/*  TODO: avoid an immediate value */
-+		mmc_delay(10);
-+	else
-+		/*
-+		 * This delay must be at least 74 clock sizes, or 1 ms, or the
-+		 * time required to reach a stable voltage.
-+		 */
-+		mmc_delay(host->ios.power_delay_ms);
  }
 
- void mmc_power_off(struct mmc_host *host)
-@@ -2233,7 +2252,11 @@ void mmc_start_host(struct mmc_host *host)
-
- 	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
- 		mmc_claim_host(host);
--		mmc_power_up(host, host->ocr_avail);
-+
-+		/* Power up here will make UHS2 init ugly. */
-+		if (!(host->caps & MMC_CAP_UHS2))
-+			mmc_power_up(host, host->ocr_avail);
-+
- 		mmc_release_host(host);
- 	}
-
-diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
-index 609201a467ef..629e25bc8cb7 100644
---- a/drivers/mmc/core/regulator.c
-+++ b/drivers/mmc/core/regulator.c
-@@ -249,6 +249,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
-
- 	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
- 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
-+	mmc->supply.vmmc2 = devm_regulator_get_optional(dev, "vmmc2");
-
- 	if (IS_ERR(mmc->supply.vmmc)) {
- 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
-@@ -268,6 +269,19 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
- 		dev_dbg(dev, "No vqmmc regulator found\n");
- 	}
-
-+	if (IS_ERR(mmc->supply.vmmc2)) {
-+		if (PTR_ERR(mmc->supply.vmmc2) == -EPROBE_DEFER)
-+			return -EPROBE_DEFER;
-+		dev_dbg(dev, "No vmmc2 regulator found\n");
-+	} else {
-+		ret = mmc_regulator_get_ocrmask(mmc->supply.vmmc2);
-+		if (ret > 0)
-+			mmc->ocr_avail_uhs2 = ret;
-+		else
-+			dev_warn(dev, "Failed getting UHS2 OCR mask: %d\n",
-+				 ret);
-+	}
-+
- 	return 0;
- }
- EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
+ /*
 --
 2.32.0
 
