@@ -2,249 +2,363 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-27.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E780AC6377D
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 05:14:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 523F8C63799
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 08:46:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BE5F0610F7
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 05:14:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3A8686128E
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 08:46:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229529AbhGVEdq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Jul 2021 00:33:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59768 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229488AbhGVEdq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Jul 2021 00:33:46 -0400
-Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FEA3C061575;
-        Wed, 21 Jul 2021 22:14:20 -0700 (PDT)
-Received: by mail-pj1-x1036.google.com with SMTP id gx2so4542185pjb.5;
-        Wed, 21 Jul 2021 22:14:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=3MLoHPY/BKKpARCnz/Nckf/Xx9l64kVuw21hTvGX+yE=;
-        b=u31vQ5W50Z5yO48MmBB8DsPt2Fn0cWGmzzoaVIdIRT9wqHYUyz1sGLev0EaavkLnoA
-         9nYMk7B/89fhbARV8RkZzWo3sjKaR0rxsgj7nXXvE3wIO7o11NEHjpYZ5+f8bs3Fd6nb
-         8mDxo+KFltMT5zggWjLzKM5k2N7AgPavhrC/QAWEGdFoYx2t7UhjMMOEef3xZkuoFaLW
-         q+Dn/T2G/wEPJExlust4+hf4RGOS60djtln2elBWbrJRC5xVkDj+xNEoPKacgYovULXD
-         mhhLJ84NXvkWs9Y+aRqZFYVe5VcHxN3A5t30YB1VVGVR948ir26R/K57rcXFYPwWUCV6
-         IuYA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=3MLoHPY/BKKpARCnz/Nckf/Xx9l64kVuw21hTvGX+yE=;
-        b=DPpFDav86t/gnmM64ePq9D8iERgEzorK1erkBZp6Xvt/8khpur/s52N3PvZkRNbAu9
-         fXF2JzYIy6jhXWNGo/8m3FOQqhl3bT0RBeycVPyC/8CCYh+XGacdjztwL1ZF+DeAMOge
-         szRVVJYLo7krgap03P+ioa91z4aV0GHYn7okBlm2nfrCqZ/utC3Y1CaTExR3c0PUcEt0
-         nJ8lfI+xOCpLtQK7Q+wY2Bc+lfyBPItMqQG/MM/p0+rv5cGk6GL4prFFgZ0eNUP6U/FS
-         7FIj8tR+yiJhUVqnwUZu0IHePrJrkvSPzro2N3Y0ZmV0XHi70LbgqFUty+GmhcOGdPuc
-         DjoA==
-X-Gm-Message-State: AOAM531I62UMaB3THlssqKGzOsDbB5lD5eK+OIiC/yHhDoDqvSf+WsUQ
-        G9ziMVuapA+kHNjcJGagnFQ=
-X-Google-Smtp-Source: ABdhPJyxZg6FdXMQlHy54LOacNr7B9DuuDjSqbXnOmOctgRy09ntCxJ++Y5kWG/gfiBlWraPCKBLPw==
-X-Received: by 2002:a17:90a:7442:: with SMTP id o2mr7344612pjk.47.1626930859949;
-        Wed, 21 Jul 2021 22:14:19 -0700 (PDT)
-Received: from jason-z170xgaming7.mshome.net (218-35-143-223.cm.dynamic.apol.com.tw. [218.35.143.223])
-        by smtp.gmail.com with ESMTPSA id g141sm28696962pfb.210.2021.07.21.22.14.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Jul 2021 22:14:19 -0700 (PDT)
-From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
-        AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: [RFC PATCH v3.2 00/29] Add support UHS-II for GL9755
-Date:   Thu, 22 Jul 2021 13:14:14 +0800
-Message-Id: <20210722051414.8331-1-jasonlai.genesyslogic@gmail.com>
-X-Mailer: git-send-email 2.32.0
+        id S231316AbhGVIF3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Jul 2021 04:05:29 -0400
+Received: from mail.kernel.org ([198.145.29.99]:55882 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231189AbhGVIFZ (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 22 Jul 2021 04:05:25 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id A43AE6128C;
+        Thu, 22 Jul 2021 08:45:57 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1626943559;
+        bh=iHEKpKP05yPtSDo0WVw13tR4OsPIw3x7iurEQu7Pc7Q=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=d2l4V14jYNVya/romP2w2ezg4x2LnX47K9dLSJmCxQOKyIqkdonEoIsuSyzycFfD4
+         aHamBXJweC7B8K4Qi3lPBaud6oc7vHctb7fViEzj6oXWZWpeL9VSuOZpThr23TyNei
+         Kh7xAATxCTMeB2NBX21iFqK668swZChaCi9FSwpo=
+Date:   Thu, 22 Jul 2021 10:45:55 +0200
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= 
+        <u.kleine-koenig@pengutronix.de>
+Cc:     kernel@pengutronix.de,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Alexandre Bounine <alex.bou9@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>, Alex Elder <elder@kernel.org>,
+        Alex Williamson <alex.williamson@redhat.com>,
+        Alison Schofield <alison.schofield@intel.com>,
+        Allen Hubbe <allenbh@gmail.com>,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Andy Gross <agross@kernel.org>, Arnd Bergmann <arnd@arndb.de>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Benjamin Tissoires <benjamin.tissoires@redhat.com>,
+        Ben Widawsky <ben.widawsky@intel.com>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Bodo Stroesser <bostroesser@gmail.com>,
+        Boris Ostrovsky <boris.ostrovsky@oracle.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Christian Borntraeger <borntraeger@de.ibm.com>,
+        Cornelia Huck <cohuck@redhat.com>,
+        Cristian Marussi <cristian.marussi@arm.com>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Dave Jiang <dave.jiang@intel.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        David Woodhouse <dwmw@amazon.co.uk>,
+        Dexuan Cui <decui@microsoft.com>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        Eric Farman <farman@linux.ibm.com>,
+        Finn Thain <fthain@linux-m68k.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Frank Li <lznuaa@gmail.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Geoff Levand <geoff@infradead.org>,
+        Haiyang Zhang <haiyangz@microsoft.com>,
+        Halil Pasic <pasic@linux.ibm.com>,
+        Hannes Reinecke <hare@suse.de>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Harald Freudenberger <freude@linux.ibm.com>,
+        Heikki Krogerus <heikki.krogerus@linux.intel.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Helge Deller <deller@gmx.de>, Ira Weiny <ira.weiny@intel.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Jaroslav Kysela <perex@perex.cz>,
+        Jason Wang <jasowang@redhat.com>,
+        Jens Taprogge <jens.taprogge@taprogge.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Jiri Kosina <jikos@kernel.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Joey Pabalan <jpabalanb@gmail.com>,
+        Johan Hovold <johan@kernel.org>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Johannes Thumshirn <morbidrsa@gmail.com>,
+        Jon Mason <jdmason@kudzu.us>, Juergen Gross <jgross@suse.com>,
+        Julien Grall <jgrall@amazon.com>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Kirti Wankhede <kwankhede@nvidia.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+        "K. Y. Srinivasan" <kys@microsoft.com>,
+        Lee Jones <lee.jones@linaro.org>, Len Brown <lenb@kernel.org>,
+        Lorenzo Pieralisi <lorenzo.pieralisi@arm.com>,
+        Manohar Vanga <manohar.vanga@gmail.com>,
+        Marc Zyngier <maz@kernel.org>, Mark Brown <broonie@kernel.org>,
+        Mark Gross <mgross@linux.intel.com>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Martyn Welch <martyn@welchs.me.uk>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Matthew Rosato <mjrosato@linux.ibm.com>,
+        Matt Porter <mporter@kernel.crashing.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Maxime Ripard <mripard@kernel.org>,
+        Maximilian Luz <luzmaximilian@gmail.com>,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Michael Buesch <m@bues.ch>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Michael Jamet <michael.jamet@intel.com>,
+        "Michael S. Tsirkin" <mst@redhat.com>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Mike Christie <michael.christie@oracle.com>,
+        Moritz Fischer <mdf@kernel.org>,
+        Ohad Ben-Cohen <ohad@wizery.com>,
+        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
+        Paul Mackerras <paulus@samba.org>,
+        Peter Oberparleiter <oberpar@linux.ibm.com>,
+        "Rafael J. Wysocki" <rjw@rjwysocki.net>,
+        =?utf-8?B?UmFmYcWCIE1pxYJlY2tp?= <zajec5@gmail.com>,
+        Rich Felker <dalias@libc.org>,
+        Rikard Falkeborn <rikard.falkeborn@gmail.com>,
+        Rob Herring <robh@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        "Russell King (Oracle)" <rmk+kernel@armlinux.org.uk>,
+        Samuel Holland <samuel@sholland.org>,
+        Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
+        SeongJae Park <sjpark@amazon.de>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>,
+        Stefano Stabellini <sstabellini@kernel.org>,
+        Stefan Richter <stefanr@s5r6.in-berlin.de>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Stephen Hemminger <sthemmin@microsoft.com>,
+        Sudeep Holla <sudeep.holla@arm.com>,
+        Sven Van Asbroeck <TheSven73@gmail.com>,
+        Takashi Iwai <tiwai@suse.com>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thorsten Scherer <t.scherer@eckelmann.de>,
+        Tomas Winkler <tomas.winkler@intel.com>,
+        Tom Rix <trix@redhat.com>,
+        Tyrel Datwyler <tyreld@linux.ibm.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vasily Gorbik <gor@linux.ibm.com>,
+        Vineeth Vijayan <vneethv@linux.ibm.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Vishal Verma <vishal.l.verma@intel.com>,
+        Wei Liu <wei.liu@kernel.org>,
+        William Breathitt Gray <vilhelm.gray@gmail.com>,
+        Wolfram Sang <wsa@kernel.org>, Wu Hao <hao.wu@intel.com>,
+        Yehezkel Bernat <YehezkelShB@gmail.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        YueHaibing <yuehaibing@huawei.com>,
+        Yufen Yu <yuyufen@huawei.com>, alsa-devel@alsa-project.org,
+        dmaengine@vger.kernel.org, greybus-dev@lists.linaro.org,
+        industrypack-devel@lists.sourceforge.net, kvm@vger.kernel.org,
+        linux1394-devel@lists.sourceforge.net, linux-acpi@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-cxl@vger.kernel.org,
+        linux-fpga@vger.kernel.org, linux-hyperv@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-i3c@lists.infradead.org,
+        linux-input@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-m68k@lists.linux-m68k.org, linux-media@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-ntb@googlegroups.com, linux-parisc@vger.kernel.org,
+        linux-pci@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        linux-remoteproc@vger.kernel.org, linux-s390@vger.kernel.org,
+        linux-scsi@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-sh@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-sunxi@lists.linux.dev,
+        linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org, nvdimm@lists.linux.dev,
+        platform-driver-x86@vger.kernel.org, sparclinux@vger.kernel.org,
+        target-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        xen-devel@lists.xenproject.org
+Subject: Re: [PATCH v4 0/5] bus: Make remove callback return void
+Message-ID: <YPkwQwf0dUKnGA7L@kroah.com>
+References: <20210713193522.1770306-1-u.kleine-koenig@pengutronix.de>
+ <YPfyZen4Y0uDKqDT@kroah.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <YPfyZen4Y0uDKqDT@kroah.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Summary
-=======
-In these patches we focus on uhs2 side to address Ulf's suggestion which
-was mentioned in patch [mmc: core: Preparations to support SD UHS-II cards].
+On Wed, Jul 21, 2021 at 12:09:41PM +0200, Greg Kroah-Hartman wrote:
+> On Tue, Jul 13, 2021 at 09:35:17PM +0200, Uwe Kleine-König wrote:
+> > Hello,
+> > 
+> > this is v4 of the final patch set for my effort to make struct
+> > bus_type::remove return void.
+> > 
+> > The first four patches contain cleanups that make some of these
+> > callbacks (more obviously) always return 0. They are acked by the
+> > respective maintainers. Bjorn Helgaas explicitly asked to include the
+> > pci patch (#1) into this series, so Greg taking this is fine. I assume
+> > the s390 people are fine with Greg taking patches #2 to #4, too, they
+> > didn't explicitly said so though.
+> > 
+> > The last patch actually changes the prototype and so touches quite some
+> > drivers and has the potential to conflict with future developments, so I
+> > consider it beneficial to put these patches into next soon. I expect
+> > that it will be Greg who takes the complete series, he already confirmed
+> > via irc (for v2) to look into this series.
+> > 
+> > The only change compared to v3 is in the fourth patch where I modified a
+> > few more drivers to fix build failures. Some of them were found by build
+> > bots (thanks!), some of them I found myself using a regular expression
+> > search. The newly modified files are:
+> > 
+> >  arch/sparc/kernel/vio.c
+> >  drivers/nubus/bus.c
+> >  drivers/sh/superhyway/superhyway.c
+> >  drivers/vlynq/vlynq.c
+> >  drivers/zorro/zorro-driver.c
+> >  sound/ac97/bus.c
+> > 
+> > Best regards
+> > Uwe
+> 
+> Now queued up.  I can go make a git tag that people can pull from after
+> 0-day is finished testing this to verify all is good, if others need it.
+
+Ok, here's a tag that any other subsystem can pull from if they want
+these changes in their tree before 5.15-rc1 is out.  I might pull it
+into my char-misc-next tree as well just to keep that tree sane as it
+seems to pick up new busses on a regular basis...
+
+thanks,
+
+greg k-h
+
+-----------------------------------
 
 
-I moved codes in uhs2.c to proper functions in sd_uhs2.c, which should meet 
-Ulf's expection.
+The following changes since commit 2734d6c1b1a089fb593ef6a23d4b70903526fe0c:
 
-Please review this series (particularly Patch 29/29).
+  Linux 5.14-rc2 (2021-07-18 14:13:49 -0700)
 
-Thanks.
--Jason Lai
+are available in the Git repository at:
 
------- original cover letter from v3 ------
-This is an interim snapshot of our next version, v4, for enabling
-UHS-II on MMC/SD.
+  git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/driver-core.git tags/bus_remove_return_void-5.15
 
-It is focused on 'sdhci' side to address Adrian's comments regarding
-"modularising" sdhci-uhs2.c.
-The whole aim of this version is to get early feedback from Adrian (and
-others) on this issue. Without any consensus about the code structure,
-it would make little sense to go further ahead on sdhci side.
-(Actually, Adrian has made no comments other than "modularising" so far.)
+for you to fetch changes up to fc7a6209d5710618eb4f72a77cd81b8d694ecf89:
 
-I heavily reworked/refactored sdhci-uhs2.c and re-organised the patch
-set to meet what I believe Adrian expects; no UHS-II related code in
-Legacy (UHS-I) code or sdhci.c.
+  bus: Make remove callback return void (2021-07-21 11:53:42 +0200)
 
-Nevertheless, almost of all changes I made are trivial and straightforward
-in this direction, and I believe that there is no logic changed since v3
-except sdhci_uhs2_irq(), as ops->irq hook, where we must deal with UHS-II
-command sequences in addition to UHS-II errors. So I added extra handlings.
+----------------------------------------------------------------
+Bus: Make remove callback return void tag
 
-I admit that there is plenty of room for improvements (for example,
-handling host->flags), but again the focal point here is how sdhci-uhs2.c
-should be built as a module.
+Tag for other trees/branches to pull from in order to have a stable
+place to build off of if they want to add new busses for 5.15.
 
-Please review this series (particularly Patch#8-#26 and #27) from this
-viewpoint in the first place.
-(Ben is working on 'host' side but there is no change on 'host' side
-in this submission except a minor tweak.)
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-Thanks,
--Takahiro Akashi
+----------------------------------------------------------------
+Uwe Kleine-König (5):
+      PCI: endpoint: Make struct pci_epf_driver::remove return void
+      s390/cio: Make struct css_driver::remove return void
+      s390/ccwgroup: Drop if with an always false condition
+      s390/scm: Make struct scm_driver::remove return void
+      bus: Make remove callback return void
 
------- original cover letter from v3 ------
-Summary
-=======
-These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-
-About UHS-II, roughly deal with the following three parts:
-1) A UHS-II detection and initialization:
-- Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Sequence
-  [2]).
-- Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence[2]).
-- In step(9) of Section 3.13.2 in [2], UHS-II initialization is include Section
-  3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting Register
-  Setup Sequence.
-
-2) Send Legacy SD command through SD-TRAN
-- Encapsulated SD packets are defined in SD-TRAN in order to ensure Legacy SD
-  compatibility and preserve Legacy SD infrastructures (Section 7.1.1 Packet
-  Types and Format Overview[3]).
-- Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-II
-  CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2]).
-
-3) UHS-II Interrupt
-- Except for UHS-II error interrupts, most interrupts share the original
-  interrupt registers.
-
-Patch structure
-===============
-patch#1-#7: for core
-patch#8-#17: for sdhci
-patch#18-#21: for GL9755
-
-Tests
-=====
-Ran 'dd' command to evaluate the performance:
-(SanDisk UHS-II card on GL9755 controller)
-                             Read    Write
-UHS-II disabled (UHS-I): 88.3MB/s 60.7MB/s
-UHS-II enabled         :  206MB/s   80MB/s
-
-TODO
-====
-- replace some define with BIT macro
-
-Reference
-=========
-[1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
-[2] SD Host Controller Simplified Specification 4.20
-[3] UHS-II Simplified Addendum 1.02
-
-Changes in v3 (Jul. 10, 2020)
-* rebased to v5.8-rc4
-* add copyright notice
-* reorganize the patch set and split some commits into smaller ones
-* separate uhs-2 headers from others
-* correct wrong spellings
-* fix most of checkpatch warnings/errors
-* remove all k[cz]alloc() from the code
-* guard sdhci-uhs2 specific code with
-      'if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2))'
-* make sdhci-uhs2.c as a module
-* trivial changes, including
-  - rename back sdhci-core.c to sdhci.c
-  - allow vendor code to disable uhs2 if v4_mode == 0
-      in __sdhci_add_host()
-  - merge uhs2_power_up() into mmc_power_up()
-  - remove flag_uhs2 from mmc_attach_sd()
-  - add function descriptions to EXPORT'ed functions
-  - other minor code optimization
-
-Changes in v2 (Jan. 9, 2020)
-* rebased to v5.5-rc5
-
-AKASHI Takahiro (23):
-  mmc: core: UHS-II support, modify power-up sequence
-  mmc: core: UHS-II support, skip set_chip_select()
-  mmc: core: UHS-II support, skip TMODE setup in some cases
-  mmc: core: UHS-II support, generate UHS-II SD command packet
-  mmc: core: UHS-II support, set APP_CMD bit if necessary
-  mmc: sdhci: add a kernel configuration for enabling UHS-II support
-  mmc: sdhci: add UHS-II related definitions in headers
-  mmc: sdhci: add UHS-II module
-  mmc: sdhci-uhs2: dump UHS-II registers
-  mmc: sdhci-uhs2: add reset function
-  mmc: sdhci-uhs2: add set_power() to support vdd2
-  mmc: sdhci-uhs2: skip signal_voltage_switch()
-  mmc: sdhci-uhs2: add set_timeout()
-  mmc: sdhci-uhs2: add set_ios()
-  mmc: sdhci-uhs2: add detect_init() to detect the interface
-  mmc: sdhci-uhs2: add clock operations
-  mmc: sdhci-uhs2: add set_reg() to initialise the interface
-  mmc: sdhci-uhs2: add request() and others
-  mmc: sdhci-uhs2: add irq() and others
-  mmc: sdhci-uhs2: add add_host() and others to set up the driver
-  mmc: core: add post-mmc_attach_sd hook
-  mmc: sdhci-pci: add UHS-II support framework
-  mmc: sdhci-pci-gli: enable UHS-II mode for GL9755
-
-Ben Chuang (4):
-  mmc: add UHS-II related definitions in public headers
-  mmc: core: UHS-II support, try to select UHS-II interface
-  mmc: sdhci-uhs2: add pre-detect_init hook
-  mmc: sdhci-uhs2: add post-mmc_attach_sd hook
-
- drivers/mmc/core/Makefile         |    2 +-
- drivers/mmc/core/block.c          |    7 +-
- drivers/mmc/core/bus.c            |    5 +-
- drivers/mmc/core/core.c           |  118 +-
- drivers/mmc/core/regulator.c      |   14 +
- drivers/mmc/core/sd.c             |   32 +
- drivers/mmc/core/sd_ops.c         |   12 +
- drivers/mmc/core/uhs2.c           |  883 +++++++++++++++
- drivers/mmc/core/uhs2.h           |   21 +
- drivers/mmc/host/Kconfig          |   10 +
- drivers/mmc/host/Makefile         |    1 +
- drivers/mmc/host/sdhci-pci-core.c |   16 +-
- drivers/mmc/host/sdhci-pci-gli.c  |  318 +++++-
- drivers/mmc/host/sdhci-pci.h      |    3 +
- drivers/mmc/host/sdhci-uhs2.c     | 1697 +++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h     |  224 ++++
- drivers/mmc/host/sdhci.c          |  333 +++---
- drivers/mmc/host/sdhci.h          |  117 +-
- include/linux/mmc/card.h          |    1 +
- include/linux/mmc/core.h          |    6 +
- include/linux/mmc/host.h          |   31 +
- include/linux/mmc/uhs2.h          |  268 +++++
- 22 files changed, 3961 insertions(+), 158 deletions(-)
- create mode 100644 drivers/mmc/core/uhs2.c
- create mode 100644 drivers/mmc/core/uhs2.h
- create mode 100644 drivers/mmc/host/sdhci-uhs2.c
- create mode 100644 drivers/mmc/host/sdhci-uhs2.h
- create mode 100644 include/linux/mmc/uhs2.h
+ arch/arm/common/locomo.c                  | 3 +--
+ arch/arm/common/sa1111.c                  | 4 +---
+ arch/arm/mach-rpc/ecard.c                 | 4 +---
+ arch/mips/sgi-ip22/ip22-gio.c             | 3 +--
+ arch/parisc/kernel/drivers.c              | 5 ++---
+ arch/powerpc/platforms/ps3/system-bus.c   | 3 +--
+ arch/powerpc/platforms/pseries/ibmebus.c  | 3 +--
+ arch/powerpc/platforms/pseries/vio.c      | 3 +--
+ arch/s390/include/asm/eadm.h              | 2 +-
+ arch/sparc/kernel/vio.c                   | 4 +---
+ drivers/acpi/bus.c                        | 3 +--
+ drivers/amba/bus.c                        | 4 +---
+ drivers/base/auxiliary.c                  | 4 +---
+ drivers/base/isa.c                        | 4 +---
+ drivers/base/platform.c                   | 4 +---
+ drivers/bcma/main.c                       | 6 ++----
+ drivers/bus/sunxi-rsb.c                   | 4 +---
+ drivers/cxl/core.c                        | 3 +--
+ drivers/dax/bus.c                         | 4 +---
+ drivers/dma/idxd/sysfs.c                  | 4 +---
+ drivers/firewire/core-device.c            | 4 +---
+ drivers/firmware/arm_scmi/bus.c           | 4 +---
+ drivers/firmware/google/coreboot_table.c  | 4 +---
+ drivers/fpga/dfl.c                        | 4 +---
+ drivers/hid/hid-core.c                    | 4 +---
+ drivers/hid/intel-ish-hid/ishtp/bus.c     | 4 +---
+ drivers/hv/vmbus_drv.c                    | 5 +----
+ drivers/hwtracing/intel_th/core.c         | 4 +---
+ drivers/i2c/i2c-core-base.c               | 5 +----
+ drivers/i3c/master.c                      | 4 +---
+ drivers/input/gameport/gameport.c         | 3 +--
+ drivers/input/serio/serio.c               | 3 +--
+ drivers/ipack/ipack.c                     | 4 +---
+ drivers/macintosh/macio_asic.c            | 4 +---
+ drivers/mcb/mcb-core.c                    | 4 +---
+ drivers/media/pci/bt8xx/bttv-gpio.c       | 3 +--
+ drivers/memstick/core/memstick.c          | 3 +--
+ drivers/mfd/mcp-core.c                    | 3 +--
+ drivers/misc/mei/bus.c                    | 4 +---
+ drivers/misc/tifm_core.c                  | 3 +--
+ drivers/mmc/core/bus.c                    | 4 +---
+ drivers/mmc/core/sdio_bus.c               | 4 +---
+ drivers/net/netdevsim/bus.c               | 3 +--
+ drivers/ntb/core.c                        | 4 +---
+ drivers/ntb/ntb_transport.c               | 4 +---
+ drivers/nubus/bus.c                       | 6 ++----
+ drivers/nvdimm/bus.c                      | 3 +--
+ drivers/pci/endpoint/pci-epf-core.c       | 7 ++-----
+ drivers/pci/pci-driver.c                  | 3 +--
+ drivers/pcmcia/ds.c                       | 4 +---
+ drivers/platform/surface/aggregator/bus.c | 4 +---
+ drivers/platform/x86/wmi.c                | 4 +---
+ drivers/pnp/driver.c                      | 3 +--
+ drivers/rapidio/rio-driver.c              | 4 +---
+ drivers/rpmsg/rpmsg_core.c                | 7 ++-----
+ drivers/s390/block/scm_drv.c              | 4 +---
+ drivers/s390/cio/ccwgroup.c               | 6 +-----
+ drivers/s390/cio/chsc_sch.c               | 3 +--
+ drivers/s390/cio/css.c                    | 7 +++----
+ drivers/s390/cio/css.h                    | 2 +-
+ drivers/s390/cio/device.c                 | 9 +++------
+ drivers/s390/cio/eadm_sch.c               | 4 +---
+ drivers/s390/cio/scm.c                    | 5 +++--
+ drivers/s390/cio/vfio_ccw_drv.c           | 3 +--
+ drivers/s390/crypto/ap_bus.c              | 4 +---
+ drivers/scsi/scsi_debug.c                 | 3 +--
+ drivers/sh/superhyway/superhyway.c        | 8 ++------
+ drivers/siox/siox-core.c                  | 4 +---
+ drivers/slimbus/core.c                    | 4 +---
+ drivers/soc/qcom/apr.c                    | 4 +---
+ drivers/spi/spi.c                         | 4 +---
+ drivers/spmi/spmi.c                       | 3 +--
+ drivers/ssb/main.c                        | 4 +---
+ drivers/staging/fieldbus/anybuss/host.c   | 4 +---
+ drivers/staging/greybus/gbphy.c           | 4 +---
+ drivers/target/loopback/tcm_loop.c        | 5 ++---
+ drivers/thunderbolt/domain.c              | 4 +---
+ drivers/tty/serdev/core.c                 | 4 +---
+ drivers/usb/common/ulpi.c                 | 4 +---
+ drivers/usb/serial/bus.c                  | 4 +---
+ drivers/usb/typec/bus.c                   | 4 +---
+ drivers/vdpa/vdpa.c                       | 4 +---
+ drivers/vfio/mdev/mdev_driver.c           | 4 +---
+ drivers/virtio/virtio.c                   | 3 +--
+ drivers/vlynq/vlynq.c                     | 4 +---
+ drivers/vme/vme.c                         | 4 +---
+ drivers/xen/xenbus/xenbus.h               | 2 +-
+ drivers/xen/xenbus/xenbus_probe.c         | 4 +---
+ drivers/zorro/zorro-driver.c              | 3 +--
+ include/linux/device/bus.h                | 2 +-
+ include/linux/pci-epf.h                   | 2 +-
+ sound/ac97/bus.c                          | 6 ++----
+ sound/aoa/soundbus/core.c                 | 4 +---
+ 93 files changed, 107 insertions(+), 263 deletions(-)
