@@ -8,63 +8,63 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 00793C6377E
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1EB7C6377D
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE8C461222
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CB9D1608FC
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230268AbhGVDWB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 23:22:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43826 "EHLO
+        id S229890AbhGVDWA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 23:22:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43800 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230201AbhGVDVq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 23:21:46 -0400
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57AD2C0613C1;
-        Wed, 21 Jul 2021 21:02:21 -0700 (PDT)
-Received: by mail-pl1-x630.google.com with SMTP id y3so3013123plp.4;
-        Wed, 21 Jul 2021 21:02:21 -0700 (PDT)
+        with ESMTP id S230136AbhGVDVo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 23:21:44 -0400
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A485C061575;
+        Wed, 21 Jul 2021 21:02:19 -0700 (PDT)
+Received: by mail-pj1-x1031.google.com with SMTP id gx2so4343514pjb.5;
+        Wed, 21 Jul 2021 21:02:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=CQfXFdO5AEIdfPufawPvgOpW6II+HeJ1KkO9+iMXy5s=;
-        b=IdlQMfton5ZPJks2yC6JdkJWks1ukLPO7xQFbAEzBKz/VRo3YhyBC4zb5xF7jMrSzB
-         LhcyVlUckRU0G9MQ9RMwvckGShxysJCqGV7XPBTVkaojMNSzr/V54+T+pA/iVT8lXcD+
-         kNmW44RqdhfOJUsHxH/S7O6xp6RDlxzKebO4Z0bULyr5jXEqUH1mxuucLU2j4fGCsGr3
-         2Mvze2hNG/OeEc2zIZqGFWxsBwotRE4e83E0WA+r4TLiyDe9Sht1LgWldiAHMZIRRY/M
-         79GGfCUxR9bD0DOfauxGqAmJ21D9r/QuTouAEqzwVQdnIwatJGIggQZ2fPv0uikMLQ4a
-         7HHA==
+        bh=p64ymEfbWIOXlBU2XpyW8YH+kA6dtacSu0XJepOqP6o=;
+        b=o36SZHRyhDW8cRhM8Kb/a2tz61RRancNXporAGJjhwLEnOvRF/4dYJZZyE8KoT4qrI
+         BkDM2eT+QOXHswKseFyID6tPjcDhHFEOogh6VBRHaj63Xg/5H5oQu8F47C/9nKaqE3Lm
+         bXfqz2TlEp/JHOYHqLCDTqxWY5iMDeo4cgJPGXjI45Q/9lO7yHm9LuE/yLKYf/TcDbU4
+         Kc3ePo1lUgmjnI5itPw9Je2ipZ1agayVH1PR4mCcXxibP/mS5ysf3A/UcyBgsq7OgY61
+         CqtmylDwaQCGBbhzXxEXIOqxpKB04zb5XJjvzn4Z96vReDbi5kJmL0loPextW4nup9w8
+         5KQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=CQfXFdO5AEIdfPufawPvgOpW6II+HeJ1KkO9+iMXy5s=;
-        b=UknSLOFzgN0WEZcM4JRmIMV4W8CZ8a6LusGfAgcDLIpUKsriW5/ZeLzAqKK+JbOKcH
-         dpw54nAurI30Y1d2wVv+g1WvzsKGt0EDtqu51UKJLpYLQ1lg97rdk2NqGdwuPIekx2xG
-         Ccb8emTXX8NMNNDcanZU5BT+tm8Cdh7XmCiEhgPvtri2clfNwOLT3+BWfqZjK8b1Do3l
-         G/VywuwfMP1UsChKRcjRd7RuREPRoxm6gYg/Q2pRDRBGuJGVnb+oO7k0sO2NDOUFZ3we
-         pU0He9xZsf/a/GDiPSb1OeUC3ABglG0quVwbNZ1LYG/YIsLQB8Vad/15WZPqw87juGTK
-         5+9g==
-X-Gm-Message-State: AOAM532WqCwm2c3izlqYppz7ADnS9gn4tDdppQr0a1de6+ZWiErEDQmE
-        m+idPewyFzRJl4LmxuE9nbk=
-X-Google-Smtp-Source: ABdhPJzMe7vGkNEmv+sRfdgqQ9q9YzeTSh7yKMJWvS426JSLU13gVa+/4EopqHpAl60tHOmzNjS1ww==
-X-Received: by 2002:a63:dd46:: with SMTP id g6mr15211013pgj.347.1626926540968;
-        Wed, 21 Jul 2021 21:02:20 -0700 (PDT)
+        bh=p64ymEfbWIOXlBU2XpyW8YH+kA6dtacSu0XJepOqP6o=;
+        b=bpPFjq33jJQgLHlmUPJA+rF/jtE3GnQzJQdO9XGJDZbdJtFjqa9xAM9iPzZAVCMWj9
+         HYzMUIUPtClOwvDndmaScqjWJBYJMcuRs+g+hx61Y3Tppgnp0Vh7MSlLsNhvGe+b894S
+         VMmwpoA6akzE6a9xK3eceMF8MC7dFeoRKp1klUkx7CuT+Ra8IB+P3+Wc+EcjzRIjjMOg
+         GWvRCrejoyDLEQtekIBPA/KX7bHo+d0sGmfOuu/1bYrjIFhTz62I2+EVgdtouofg4Fo+
+         1EAHTHUs41UZLRDoPNnA9IbB0bPilqP5ulLu8GaiAxury9pXrTMsxyYCUc8leSUyyF9c
+         TjhQ==
+X-Gm-Message-State: AOAM533UwrjkTPstc9l/dSsddmpM1b1VuMR3RwyuMg+1qCbhN3k71WXZ
+        fItTpBURY8EOk8RtTX9cfaA=
+X-Google-Smtp-Source: ABdhPJysyTXxFH//02lY03MLSMoI5M1YP/Pc54A3QNv3ZGjmC0Sja2Gc9rjf/cgboqftYxDM5yeXug==
+X-Received: by 2002:a62:3344:0:b029:25e:a0a8:1c51 with SMTP id z65-20020a6233440000b029025ea0a81c51mr39851727pfz.58.1626926539031;
+        Wed, 21 Jul 2021 21:02:19 -0700 (PDT)
 Received: from jason-z170xgaming7.mshome.net (218-35-143-223.cm.dynamic.apol.com.tw. [218.35.143.223])
-        by smtp.gmail.com with ESMTPSA id c19sm1663479pfp.184.2021.07.21.21.02.19
+        by smtp.gmail.com with ESMTPSA id c19sm1663479pfp.184.2021.07.21.21.02.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Jul 2021 21:02:20 -0700 (PDT)
+        Wed, 21 Jul 2021 21:02:18 -0700 (PDT)
 From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         jason.lai@genesyslogiv.com.tw,
         AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: [RFC PATCH v3.2 15/29] mmc: sdhci-uhs2: add set_timeout()
-Date:   Thu, 22 Jul 2021 12:01:10 +0800
-Message-Id: <20210722040124.7573-15-jasonlai.genesyslogic@gmail.com>
+Subject: [RFC PATCH v3.2 14/29] mmc: sdhci-uhs2: skip signal_voltage_switch()
+Date:   Thu, 22 Jul 2021 12:01:09 +0800
+Message-Id: <20210722040124.7573-14-jasonlai.genesyslogic@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210722040124.7573-1-jasonlai.genesyslogic@gmail.com>
 References: <20210722040124.7573-1-jasonlai.genesyslogic@gmail.com>
@@ -74,122 +74,59 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This is a UHS-II version of sdhci's set_timeout() operation.
+For UHS2, the signal voltage is supplied by vdd2 which is already 1.8v,
+so no voltage switch required.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 ---
- drivers/mmc/host/sdhci-uhs2.c | 85 +++++++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h |  1 +
- 2 files changed, 86 insertions(+)
+ drivers/mmc/host/sdhci-uhs2.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 1eca89359351..d9e98c097bfe 100644
+index 2bf78cc4e9ed..1eca89359351 100644
 --- a/drivers/mmc/host/sdhci-uhs2.c
 +++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -178,6 +178,91 @@ void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode,
+@@ -178,6 +178,29 @@ void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode,
  }
  EXPORT_SYMBOL_GPL(sdhci_uhs2_set_power);
 
-+static u8 sdhci_calc_timeout_uhs2(struct sdhci_host *host, u8 *cmd_res,
-+				  u8 *dead_lock)
++/*****************************************************************************\
++ *                                                                           *
++ * MMC callbacks                                                             *
++ *                                                                           *
++\*****************************************************************************/
++
++static int sdhci_uhs2_start_signal_voltage_switch(struct mmc_host *mmc,
++						  struct mmc_ios *ios)
 +{
-+	u8 count;
-+	unsigned int cmd_res_timeout, dead_lock_timeout, current_timeout;
++	struct sdhci_host *host = mmc_priv(mmc);
 +
 +	/*
-+	 * If the host controller provides us with an incorrect timeout
-+	 * value, just skip the check and use 0xE.  The hardware may take
-+	 * longer to time out, but that's much better than having a too-short
-+	 * timeout value.
++	 * For UHS2, the signal voltage is supplied by vdd2 which is
++	 * already 1.8v so no voltage switch required.
 +	 */
-+	if (host->quirks & SDHCI_QUIRK_BROKEN_TIMEOUT_VAL) {
-+		*cmd_res = 0xE;
-+		*dead_lock = 0xE;
-+		return 0xE;
-+	}
++        if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
++             host->version >= SDHCI_SPEC_400 &&
++             host->mmc->flags & MMC_UHS2_SUPPORT)
++                return 0;
 +
-+	/* timeout in us */
-+	cmd_res_timeout = 5 * 1000;
-+	dead_lock_timeout = 1 * 1000 * 1000;
-+
-+	/*
-+	 * Figure out needed cycles.
-+	 * We do this in steps in order to fit inside a 32 bit int.
-+	 * The first step is the minimum timeout, which will have a
-+	 * minimum resolution of 6 bits:
-+	 * (1) 2^13*1000 > 2^22,
-+	 * (2) host->timeout_clk < 2^16
-+	 *     =>
-+	 *     (1) / (2) > 2^6
-+	 */
-+	count = 0;
-+	current_timeout = (1 << 13) * 1000 / host->timeout_clk;
-+	while (current_timeout < cmd_res_timeout) {
-+		count++;
-+		current_timeout <<= 1;
-+		if (count >= 0xF)
-+			break;
-+	}
-+
-+	if (count >= 0xF) {
-+		DBG("%s: Too large timeout 0x%x requested for CMD_RES!\n",
-+		    mmc_hostname(host->mmc), count);
-+		count = 0xE;
-+	}
-+	*cmd_res = count;
-+
-+	count = 0;
-+	current_timeout = (1 << 13) * 1000 / host->timeout_clk;
-+	while (current_timeout < dead_lock_timeout) {
-+		count++;
-+		current_timeout <<= 1;
-+		if (count >= 0xF)
-+			break;
-+	}
-+
-+	if (count >= 0xF) {
-+		DBG("%s: Too large timeout 0x%x requested for DEADLOCK!\n",
-+		    mmc_hostname(host->mmc), count);
-+		count = 0xE;
-+	}
-+	*dead_lock = count;
-+
-+	return count;
++	return sdhci_start_signal_voltage_switch(mmc, ios);
 +}
-+
-+static void __sdhci_uhs2_set_timeout(struct sdhci_host *host)
-+{
-+	u8 cmd_res, dead_lock;
-+
-+	sdhci_calc_timeout_uhs2(host, &cmd_res, &dead_lock);
-+	cmd_res |= dead_lock << SDHCI_UHS2_TIMER_CTRL_DEADLOCK_SHIFT;
-+	sdhci_writeb(host, cmd_res, SDHCI_UHS2_TIMER_CTRL);
-+}
-+
-+void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-+{
-+	__sdhci_set_timeout(host, cmd);
-+
-+	if (host->mmc->flags & MMC_UHS2_SUPPORT)
-+		__sdhci_uhs2_set_timeout(host);
-+}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_set_timeout);
 +
  /*****************************************************************************\
   *                                                                           *
-  * MMC callbacks                                                             *
-diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-index 3c19d8e44c36..efe70577bc74 100644
---- a/drivers/mmc/host/sdhci-uhs2.h
-+++ b/drivers/mmc/host/sdhci-uhs2.h
-@@ -213,5 +213,6 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host);
- void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
- void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode,
- 			  unsigned short vdd);
-+void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
+  * Driver init/exit                                                          *
+@@ -186,6 +209,9 @@ EXPORT_SYMBOL_GPL(sdhci_uhs2_set_power);
 
- #endif /* __SDHCI_UHS2_H */
+ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+ {
++	host->mmc_host_ops.start_signal_voltage_switch =
++		sdhci_uhs2_start_signal_voltage_switch;
++
+ 	return 0;
+ }
+
 --
 2.32.0
 
