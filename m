@@ -5,66 +5,66 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C35BC6377E
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E55BC63793
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85254608FC
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 188CF61241
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Jul 2021 04:02:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230334AbhGVDV3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Jul 2021 23:21:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43746 "EHLO
+        id S230400AbhGVDVb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Jul 2021 23:21:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43740 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230201AbhGVDV1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 23:21:27 -0400
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B9F9C061757;
-        Wed, 21 Jul 2021 21:02:02 -0700 (PDT)
-Received: by mail-pl1-x62a.google.com with SMTP id e14so3002083plh.8;
-        Wed, 21 Jul 2021 21:02:02 -0700 (PDT)
+        with ESMTP id S230300AbhGVDV3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Jul 2021 23:21:29 -0400
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BCDAC061575;
+        Wed, 21 Jul 2021 21:02:04 -0700 (PDT)
+Received: by mail-pl1-x631.google.com with SMTP id y3so3012491plp.4;
+        Wed, 21 Jul 2021 21:02:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=MlYdZedfzdwEWYsud6KArWcbSXHSw/yPGnBz1xgAeuA=;
-        b=CWhUUvGUikR4GNhQp5D//oZZeD7oHwmvqqG4OyLkktg5JWAGz9CTmJeICFWqsXq8Z+
-         8kKVJiG2DJCUbe1EjtGL/jyCUHRF3sTlkyJRR9iBj1+TjJTchis6XaLEgCsO3biOmt1S
-         6v9a1YuguvgW7k9WkhIv6c69M8QtX0jyiynZ3Ip4fR/+u6kJ1oNnn9/onF3SRuIADdZn
-         l6TzjnVQpfuATSgddatjIMfBYkjH8SxD60H6ZszbluAAtOACdm0KqyDr4eyqCP7OYEt/
-         k9WA29DEsmYdDI3ZQejm2MZyqTVj5nPGk4R/M4W6hGaHJMczsPF/satN0IJURjGDr6mn
-         6AIw==
+        bh=grqvWstToZdU1j24UPoQskvD093nWq2s/JMON7jHKtg=;
+        b=vaO9oiOAtYPhf6+JV5KVEKRwuWPcKfUfhofeZ9Em3FIM2J5JksGrexLpx4Q7WB7YIV
+         HbR0k6gOwdU3ITgJUAU1TAXNnI4L3WLA8urVWPrYPPjWodPfak+6aPcSVrfYfP1k+1PE
+         iGNAt3B4F79n/aMbg7ah2Or1X5kfdmUSuB6sE+t/ERb96zri3yuz0RfE7dd9CRwI9P+c
+         8WPXML6t8d5oT/GneMs7hJJ0t7OrO7t6KyEZ+0qLvoofFI8BYOxzRC7IJlTQecM01mh4
+         25UjZVz+8B8EPDc7JYymaE61lQjzmmwZNA3zkok7JKJmzRktIU6+DmXeT5Fm7ne+EuGc
+         C6ZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=MlYdZedfzdwEWYsud6KArWcbSXHSw/yPGnBz1xgAeuA=;
-        b=EQd7Voh7Rke8epg+mLii1dxp9vPollbd/0XFKBklDknXiXVvfrU5DiFAqLb+caiJmS
-         s2hnoOHQv7EjlSxWj5tH5KGKkcpB5gB2a+ihw94By+CrshNLU4WIADYLw3Wkw9Z7fnmm
-         NdqRkm+6X+c5rF1wOf7DI50QquAFfXfPcDwMpLzFSNwHxzJyXZecvH5ZlJKlsb8ts94B
-         WTrc7wBs7FxNMc21c2JmP110YBIwaR25k0/wQRQn4aOyXT30ScUGI6X/c6jUIM454m8j
-         E0KZA27WOZtFT609eArLxZGg1HTT6ac6DIN/nS8M8APdk9nMLvH1KQdgxeMHc0rK5Fg1
-         DWNQ==
-X-Gm-Message-State: AOAM533LD3j245QbU6mz1eTTYXZH1nUa2VbphMfdCPQ90z2zbzDMlDWL
-        KWS9gMZkg9WGLhEX/Vrm/A0=
-X-Google-Smtp-Source: ABdhPJzzObRrw2bYzX6SUT8P+jtBNpdWlM/kL2o29VHHPjTRQLySETBZeqEZ8Hb4tmuezSXwhcHnJQ==
-X-Received: by 2002:a63:5952:: with SMTP id j18mr21127123pgm.366.1626926522132;
-        Wed, 21 Jul 2021 21:02:02 -0700 (PDT)
+        bh=grqvWstToZdU1j24UPoQskvD093nWq2s/JMON7jHKtg=;
+        b=YOthoKGcucSpWc3xsLjE8QGiHCO8pO2AYpFKtZiJjUjZRhmspxFyiiKKX58rzzkBgD
+         pvJyeC2k161EpWtRPWjojrAdxD9xlSTtxqbTmDt2Hws3rsVmWn+xhOBl1g+vCRk4wYxa
+         SdRCpNPYIh/Q1NRvBjR3E7MrX0mE8yq2CFCB2zUJsXAIrbbPl3DzstGkEC4TV3DIkKht
+         nUHAaEoGXcwIBbi+weQBOmtEMXCk9aipA29AnMxeX1nNmF1FC7RIE2dcVnweBR6uiwy5
+         ENiwUBTmoZ8atVx87Pyho+rD+DJiHbNNBijadISRwyqo6OEMlY/pkGzS4PSreTn+Oc72
+         khJQ==
+X-Gm-Message-State: AOAM531vRiLKaH3BymVKZmyqWghz4rbr9gNdShtjk9EM1CQbREBtGt0l
+        nrbpD5UD44bDgZFtfxuTY1s=
+X-Google-Smtp-Source: ABdhPJy14stfb0YEBrNLc/Qb5dT9yVl22mgg0Dl5ZNMHcncwoxbPYqck1MvmS8IJUAGRN6NLGBIikg==
+X-Received: by 2002:a63:3704:: with SMTP id e4mr39032195pga.310.1626926523940;
+        Wed, 21 Jul 2021 21:02:03 -0700 (PDT)
 Received: from jason-z170xgaming7.mshome.net (218-35-143-223.cm.dynamic.apol.com.tw. [218.35.143.223])
-        by smtp.gmail.com with ESMTPSA id c19sm1663479pfp.184.2021.07.21.21.02.00
+        by smtp.gmail.com with ESMTPSA id c19sm1663479pfp.184.2021.07.21.21.02.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 21 Jul 2021 21:02:01 -0700 (PDT)
+        Wed, 21 Jul 2021 21:02:03 -0700 (PDT)
 From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         ben.chuang@genesyslogic.com.tw, greg.tu@genesyslogic.com.tw,
         jason.lai@genesyslogiv.com.tw,
         AKASHI Takahiro <takahiro.akashi@linaro.org>
-Subject: [RFC PATCH v3.2 05/29] mmc: core: UHS-II support, skip TMODE setup in some cases
-Date:   Thu, 22 Jul 2021 12:01:00 +0800
-Message-Id: <20210722040124.7573-5-jasonlai.genesyslogic@gmail.com>
+Subject: [RFC PATCH v3.2 06/29] mmc: core: UHS-II support, generate UHS-II SD command packet
+Date:   Thu, 22 Jul 2021 12:01:01 +0800
+Message-Id: <20210722040124.7573-6-jasonlai.genesyslogic@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210722040124.7573-1-jasonlai.genesyslogic@gmail.com>
 References: <20210722040124.7573-1-jasonlai.genesyslogic@gmail.com>
@@ -74,86 +74,157 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-UHS-II's data command packet has TMODE fields in which parameters for
-data transaction, like Duplex Mode(DM) and Length Mode(LM), are specified.
-In some cases, we don't need to initialize them and so set uhs2_tmode0_flag
-to 1 in order to skip them in generating a packet.
-(The code will be added in the next commit.)
+In SD-TRAN protocol, legacy SD commands should be "encapsulated" in SD
+packets as described in SD specification.
+Please see section 7.1 and 7.2.1 in "UHS-II Simplified Addendum."
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 ---
- drivers/mmc/core/block.c  | 7 ++++++-
- drivers/mmc/core/sd_ops.c | 3 +++
- 2 files changed, 9 insertions(+), 1 deletion(-)
+ drivers/mmc/core/core.c | 18 +++++++++++
+ drivers/mmc/core/uhs2.c | 70 +++++++++++++++++++++++++++++++++++++++++
+ drivers/mmc/core/uhs2.h |  1 +
+ 3 files changed, 89 insertions(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 689eb9afeeed..d107578cdbff 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -57,6 +57,7 @@
- #include "mmc_ops.h"
- #include "quirks.h"
- #include "sd_ops.h"
-+#include "uhs2.h"
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 300812c69e13..d53722c21f29 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -338,6 +338,8 @@ static int mmc_mrq_prep(struct mmc_host *host, struct mmc_request *mrq)
 
- MODULE_ALIAS("mmc:block");
- #ifdef MODULE_PARAM_PREFIX
-@@ -1538,6 +1539,9 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 	struct request *req = mmc_queue_req_to_req(mqrq);
- 	struct mmc_blk_data *md = mq->blkdata;
- 	bool do_rel_wr, do_data_tag;
-+	bool do_multi;
+ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ {
++	struct uhs2_command uhs2_cmd;
++	u32 payload[4]; /* for maximum size */
+ 	int err;
+
+ 	init_completion(&mrq->cmd_completion);
+@@ -355,6 +357,13 @@ int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		return err;
+
++	if (host->flags & MMC_UHS2_SUPPORT &&
++	    host->flags & MMC_UHS2_INITIALIZED) {
++		uhs2_cmd.payload = payload;
++		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++		uhs2_prepare_sd_cmd(host, mrq);
++	}
 +
-+	do_multi = (card->host->flags & MMC_UHS2_INITIALIZED) ? true : false;
+ 	led_trigger_event(host->led, LED_FULL);
+ 	__mmc_start_request(host, mrq);
 
- 	mmc_blk_data_prep(mq, mqrq, disable_multi, &do_rel_wr, &do_data_tag);
+@@ -434,6 +443,8 @@ EXPORT_SYMBOL(mmc_wait_for_req_done);
+  */
+ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ {
++	struct uhs2_command uhs2_cmd;
++	u32 payload[4]; /* for maximum size */
+ 	int err;
 
-@@ -1548,7 +1552,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 		brq->cmd.arg <<= 9;
- 	brq->cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+ 	/*
+@@ -454,6 +465,13 @@ int mmc_cqe_start_req(struct mmc_host *host, struct mmc_request *mrq)
+ 	if (err)
+ 		goto out_err;
 
--	if (brq->data.blocks > 1 || do_rel_wr) {
-+	if (brq->data.blocks > 1 || do_rel_wr || do_multi) {
- 		/* SPI multiblock writes terminate using a special
- 		 * token, not a STOP_TRANSMISSION request.
- 		 */
-@@ -1561,6 +1565,7 @@ static void mmc_blk_rw_rq_prep(struct mmc_queue_req *mqrq,
- 		brq->mrq.stop = NULL;
- 		readcmd = MMC_READ_SINGLE_BLOCK;
- 		writecmd = MMC_WRITE_BLOCK;
-+		brq->cmd.uhs2_tmode0_flag = 1;
- 	}
- 	brq->cmd.opcode = rq_data_dir(req) == READ ? readcmd : writecmd;
++	if (host->flags & MMC_UHS2_SUPPORT &&
++	    host->flags & MMC_UHS2_INITIALIZED) {
++		uhs2_cmd.payload = payload;
++		mrq->cmd->uhs2_cmd = &uhs2_cmd;
++		uhs2_prepare_sd_cmd(host, mrq);
++	}
++
+ 	err = host->cqe_ops->cqe_request(host, mrq);
+ 	if (err)
+ 		goto out_err;
+diff --git a/drivers/mmc/core/uhs2.c b/drivers/mmc/core/uhs2.c
+index acb46b5b57ef..1f6d0e0cf355 100644
+--- a/drivers/mmc/core/uhs2.c
++++ b/drivers/mmc/core/uhs2.c
+@@ -807,3 +807,73 @@ int mmc_uhs2_rescan_try_freq(struct mmc_host *host, unsigned int freq)
+ 	return err;
+ }
+ EXPORT_SYMBOL_GPL(mmc_uhs2_rescan_try_freq);
++
++/**
++ * uhs2_prepare_sd_cmd - prepare for SD command packet
++ * @host:	MMC host
++ * @mrq:	MMC request
++ *
++ * Initialize and fill in a header and a payload of SD command packet.
++ * The caller should allocate uhs2_command in host->cmd->uhs2_cmd in
++ * advance.
++ *
++ * Return:	0 on success, non-zero error on failure
++ */
++int uhs2_prepare_sd_cmd(struct mmc_host *host, struct mmc_request *mrq)
++{
++	struct mmc_command *cmd;
++	struct uhs2_command *uhs2_cmd;
++	u16 header = 0, arg = 0;
++	u32 *payload;
++	u8 plen = 0;
++
++	cmd = mrq->cmd;
++	header = host->uhs2_dev_prop.node_id;
++	if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC)
++		header |= UHS2_PACKET_TYPE_DCMD;
++	else
++		header |= UHS2_PACKET_TYPE_CCMD;
++
++	arg = cmd->opcode << UHS2_SD_CMD_INDEX_POS;
++
++	uhs2_cmd = cmd->uhs2_cmd;
++	payload = uhs2_cmd->payload;
++	plen = 2; /* at the maximum */
++
++	if ((cmd->flags & MMC_CMD_MASK) == MMC_CMD_ADTC &&
++	    !cmd->uhs2_tmode0_flag) {
++		if (host->flags & MMC_UHS2_2L_HD)
++			arg |= UHS2_DCMD_2L_HD_MODE;
++
++		arg |= UHS2_DCMD_LM_TLEN_EXIST;
++
++		if (cmd->data->blocks == 1 &&
++		    cmd->data->blksz != 512 &&
++		    cmd->opcode != MMC_READ_SINGLE_BLOCK &&
++		    cmd->opcode != MMC_WRITE_BLOCK) {
++			arg |= UHS2_DCMD_TLUM_BYTE_MODE;
++			payload[1] = uhs2_dcmd_convert_msb(cmd->data->blksz);
++		} else {
++			payload[1] = uhs2_dcmd_convert_msb(cmd->data->blocks);
++		}
++
++		if (cmd->opcode == SD_IO_RW_EXTENDED) {
++			arg &= ~(UHS2_DCMD_LM_TLEN_EXIST |
++				UHS2_DCMD_TLUM_BYTE_MODE |
++				UHS2_NATIVE_DCMD_DAM_IO);
++			payload[1] = 0;
++			plen = 1;
++		}
++	} else {
++		plen = 1;
++	}
++
++	payload[0] = uhs2_dcmd_convert_msb(cmd->arg);
++	pr_debug("%s: %s: sd_cmd->arg = 0x%x, payload[0]= 0x%x.\n",
++		 mmc_hostname(host), __func__, cmd->arg, payload[0]);
++
++	uhs2_cmd_assemble(cmd, uhs2_cmd, header, arg, payload, plen, NULL, 0);
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(uhs2_prepare_sd_cmd);
+diff --git a/drivers/mmc/core/uhs2.h b/drivers/mmc/core/uhs2.h
+index e3389d4dda3b..48486ba21062 100644
+--- a/drivers/mmc/core/uhs2.h
++++ b/drivers/mmc/core/uhs2.h
+@@ -16,5 +16,6 @@
+ #define UHS2_PHY_INIT_ERR	1
 
-diff --git a/drivers/mmc/core/sd_ops.c b/drivers/mmc/core/sd_ops.c
-index d61ff811218c..baa05a6a36c4 100644
---- a/drivers/mmc/core/sd_ops.c
-+++ b/drivers/mmc/core/sd_ops.c
-@@ -280,6 +280,7 @@ int mmc_app_send_scr(struct mmc_card *card)
- 	cmd.opcode = SD_APP_SEND_SCR;
- 	cmd.arg = 0;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	cmd.uhs2_tmode0_flag = 1;
+ int mmc_uhs2_rescan_try_freq(struct mmc_host *host, unsigned int freq);
++int uhs2_prepare_sd_cmd(struct mmc_host *host, struct mmc_request *mrq);
 
- 	data.blksz = 8;
- 	data.blocks = 1;
-@@ -327,6 +328,7 @@ int mmc_sd_switch(struct mmc_card *card, int mode, int group,
- 	cmd.arg &= ~(0xF << (group * 4));
- 	cmd.arg |= value << (group * 4);
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	cmd.uhs2_tmode0_flag = 1;
-
- 	data.blksz = 64;
- 	data.blocks = 1;
-@@ -368,6 +370,7 @@ int mmc_app_sd_status(struct mmc_card *card, void *ssr)
- 	cmd.opcode = SD_APP_SD_STATUS;
- 	cmd.arg = 0;
- 	cmd.flags = MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+	cmd.uhs2_tmode0_flag = 1;
-
- 	data.blksz = 64;
- 	data.blocks = 1;
+ #endif /* MMC_UHS2_H */
 --
 2.32.0
 
