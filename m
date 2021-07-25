@@ -2,201 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE9FDC4320A
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jul 2021 21:57:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B657C4338F
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jul 2021 04:32:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A36E560EBA
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Jul 2021 21:57:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37F3660E77
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Jul 2021 04:32:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232234AbhGWVQx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Jul 2021 17:16:53 -0400
-Received: from mail-io1-f50.google.com ([209.85.166.50]:43819 "EHLO
-        mail-io1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231724AbhGWVQx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Jul 2021 17:16:53 -0400
-Received: by mail-io1-f50.google.com with SMTP id 185so4217963iou.10;
-        Fri, 23 Jul 2021 14:57:26 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=JEUqBiM+J1m4N4wn58eOxCBVMhTaLoqag1E8zxGCL2g=;
-        b=eo5Fa2CaarivrlRULRK6GjRjZCuxozVMcNZniq2HYQ5U0idsCdspAHyzMrxICLYR8j
-         Y5kzxu0NQkMj7nw5ox48/+c8T4yCt43aKfPDP0iD4majDPFRaXVYQss9uFPb23EP5kw6
-         griX1o/fRhXnCcTem9Kun3tSlKJFbcffG/ORCBfBrmhMeDFji9IEbbB3UY12q8Nu4ngg
-         FxM+h/JEsQL6f7w6fQdZ869qVW1oKNeO1GQCgOHtT/LAr3jfEYZv/7phT4vmpKjWv0cW
-         4tmTA7FVnVjugn2FpBc+cMNY3FxBMgs+PBGB7Pa61yRyYfdV3q7iPz78nN+I01Nfs+q1
-         wGWw==
-X-Gm-Message-State: AOAM532MhW+mQc+2zODryzOdcr+6S4H9oKpSC6TU0J4wdHWsNqsDylPo
-        MoBTr/JntjRiSZXKA7xDYA==
-X-Google-Smtp-Source: ABdhPJx+fnNzJ+JYB9ZFpqsmcNuQpBMv6W8e/ZeZZxUWJy94HixqyNW+fd80TUFM24EnnpxS1fJCMQ==
-X-Received: by 2002:a6b:1642:: with SMTP id 63mr5543293iow.68.1627077446285;
-        Fri, 23 Jul 2021 14:57:26 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.248])
-        by smtp.gmail.com with ESMTPSA id 204sm18862881ioc.50.2021.07.23.14.57.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Jul 2021 14:57:25 -0700 (PDT)
-Received: (nullmailer pid 2664673 invoked by uid 1000);
-        Fri, 23 Jul 2021 21:57:24 -0000
-Date:   Fri, 23 Jul 2021 15:57:24 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Maxime Ripard <maxime@cerno.tech>
-Cc:     Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@siol.net>,
-        devicetree@vger.kernel.org, Frank Rowand <frowand.list@gmail.com>,
-        linux-arm-kernel@lists.infradead.org, linux-sunxi@googlegroups.com,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 25/54] dt-bindings: mmc: Convert MMC Card binding to a
- schema
-Message-ID: <20210723215724.GA2661499@robh.at.kernel.org>
-References: <20210721140424.725744-1-maxime@cerno.tech>
- <20210721140424.725744-26-maxime@cerno.tech>
+        id S230089AbhGYDvc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 24 Jul 2021 23:51:32 -0400
+Received: from rere.qmqm.pl ([91.227.64.183]:31610 "EHLO rere.qmqm.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230075AbhGYDvb (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 24 Jul 2021 23:51:31 -0400
+Received: from remote.user (localhost [127.0.0.1])
+        by rere.qmqm.pl (Postfix) with ESMTPSA id 4GXVMw5tY7zWx;
+        Sun, 25 Jul 2021 06:25:16 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
+        t=1627187116; bh=heq1Nrofd2BQKP+4WIO5NxEzHqe39kUnYWVEiXv6rW0=;
+        h=Date:In-Reply-To:References:From:Subject:To:Cc:From;
+        b=Y2HEpcdbQreqce7yHTVI3ebiKNVIzLSd9s+J5JhHu3tcvjwdZLY4EvvA0WwK+/+sB
+         qfTG6E+50eN+Ob1RTN3FMADZaRm9/S9ubrKsG9orZXDIZzgaW1jgmn4/XsQSDqMEyz
+         cGAFONr1HY85Ws+inBjEPlmF1ilI4NSBBTZXlS7nZwx1qQLkvmnf1WU0BZeO/TDzHM
+         ENEN+ij5NQZgGvS6Puv8+zYXD4T/I57MHbqZ6tVBTuCOxsufRgHqEbZqM8DggRJDKZ
+         cllyTO325ExBTeNI74PvO95xi/N7gEy3Js2fF3dZvDmuog7VLNr9TW7OJh9OeYBM0W
+         i6QKrRsxdnuKA==
+X-Virus-Status: Clean
+X-Virus-Scanned: clamav-milter 0.103.2 at mail
+Date:   Sun, 25 Jul 2021 06:25:16 +0200
+Message-Id: <c9ab2448700a1ad83ed5288fd36d13a35f393850.1627186831.git.mirq-linux@rere.qmqm.pl>
+In-Reply-To: <cover.1627186831.git.mirq-linux@rere.qmqm.pl>
+References: <cover.1627186831.git.mirq-linux@rere.qmqm.pl>
+From:   =?UTF-8?q?Micha=C5=82=20Miros=C5=82aw?= <mirq-linux@rere.qmqm.pl>
+Subject: [PATCH v3 2/5] mmc: sdhci: always obey programmable clock config in
+ preset value
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210721140424.725744-26-maxime@cerno.tech>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+To:     Kevin Liu <kliu5@marvell.com>,
+        Suneel Garapati <suneel.garapati@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chris Ball <cjb@laptop.org>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Michal Simek <michal.simek@xilinx.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jul 21, 2021 at 04:03:55PM +0200, Maxime Ripard wrote:
-> MMC Cards can have an optional Device Tree binding to add
-> non-discoverable properties.
-> 
-> Now that we have the DT validation in place, let's convert the device
-> tree bindings for that driver over to a YAML schema.
-> 
-> Some of these properties were already described in the MMC controller
-> binding, even though they are not generic and do not apply to any
-> device, so we took the occasion to fix this.
-> 
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Maxime Ripard <maxime@cerno.tech>
-> ---
->  .../devicetree/bindings/mmc/mmc-card.txt      | 30 ------------
->  .../devicetree/bindings/mmc/mmc-card.yaml     | 48 +++++++++++++++++++
->  .../bindings/mmc/mmc-controller.yaml          |  6 ---
->  3 files changed, 48 insertions(+), 36 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/mmc-card.txt
->  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.txt b/Documentation/devicetree/bindings/mmc/mmc-card.txt
-> deleted file mode 100644
-> index 8d2d71758907..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/mmc-card.txt
-> +++ /dev/null
-> @@ -1,30 +0,0 @@
-> -mmc-card / eMMC bindings
-> -------------------------
-> -
-> -This documents describes the devicetree bindings for a mmc-host controller
-> -child node describing a mmc-card / an eMMC, see "Use of Function subnodes"
-> -in mmc.txt
-> -
-> -Required properties:
-> --compatible : Must be "mmc-card"
-> --reg        : Must be <0>
-> -
-> -Optional properties:
-> --broken-hpi : Use this to indicate that the mmc-card has a broken hpi
-> -              implementation, and that hpi should not be used
-> -
-> -Example:
-> -
-> -&mmc2 {
-> -	pinctrl-names = "default";
-> -	pinctrl-0 = <&mmc2_pins_a>;
-> -	vmmc-supply = <&reg_vcc3v3>;
-> -	bus-width = <8>;
-> -	non-removable;
-> -
-> -	mmccard: mmccard@0 {
-> -		reg = <0>;
-> -		compatible = "mmc-card";
-> -		broken-hpi;
-> -	};
-> -};
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> new file mode 100644
-> index 000000000000..aefdd8748b72
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
-> @@ -0,0 +1,48 @@
-> +# SPDX-License-Identifier: GPL-2.0
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/mmc-card.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: MMC Card / eMMC Generic Device Tree Bindings
-> +
-> +maintainers:
-> +  - Ulf Hansson <ulf.hansson@linaro.org>
-> +
-> +description: |
-> +  This documents describes the devicetree bindings for a mmc-host controller
-> +  child node describing a mmc-card / an eMMC.
-> +
-> +properties:
-> +  compatible:
-> +    const: mmc-card
-> +
-> +  reg:
-> +    const: 0
-> +
-> +  broken-hpi:
-> +    $ref: /schemas/types.yaml#/definitions/flag
-> +    description:
-> +      Use this to indicate that the mmc-card has a broken hpi
-> +      implementation, and that hpi should not be used.
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +
-> +additionalProperties: true
+When host controller uses programmable clock presets but doesn't
+advertise programmable clock support, we can only guess what frequency
+it generates. Let's at least return correct SDHCI_PROG_CLOCK_MODE bit
+value in this case.
 
-Like what? If there's other properties, then there should really be a 
-specific compatible.
+Fixes: 52983382c74f ("mmc: sdhci: enhance preset value function")
+Signed-off-by: Michał Mirosław <mirq-linux@rere.qmqm.pl>
+---
+v3: added a comment for this case
+v2: no changes
+---
+ drivers/mmc/host/sdhci.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-> +
-> +examples:
-> +  - |
-> +    mmc {
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +
-> +        card@0 {
-> +            compatible = "mmc-card";
-> +            reg = <0>;
-> +            broken-hpi;
-> +        };
-> +    };
-> +
-> +...
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index 25ac8e200970..513f3c8758aa 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -333,12 +333,6 @@ patternProperties:
->                subnode describes. A value of 0 denotes the memory SD
->                function, values from 1 to 7 denote the SDIO functions.
->  
-> -      broken-hpi:
-> -        $ref: /schemas/types.yaml#/definitions/flag
-> -        description:
-> -          Use this to indicate that the mmc-card has a broken hpi
-> -          implementation, and that hpi should not be used.
-> -
->      required:
->        - reg
->  
-> -- 
-> 2.31.1
-> 
-> 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index c7438dd13e3e..3ab60e7f936b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1859,11 +1859,14 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+ 
+ 			pre_val = sdhci_get_preset_value(host);
+ 			div = FIELD_GET(SDHCI_PRESET_SDCLK_FREQ_MASK, pre_val);
+-			if (host->clk_mul &&
+-				(pre_val & SDHCI_PRESET_CLKGEN_SEL)) {
++			if (pre_val & SDHCI_PRESET_CLKGEN_SEL) {
+ 				clk = SDHCI_PROG_CLOCK_MODE;
+ 				real_div = div + 1;
+ 				clk_mul = host->clk_mul;
++				if (!clk_mul) {
++					/* The clock frequency is unknown. Assume undivided base. */
++					clk_mul = 1;
++				}
+ 			} else {
+ 				real_div = max_t(int, 1, div << 1);
+ 			}
+-- 
+2.30.2
+
