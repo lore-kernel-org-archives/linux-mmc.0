@@ -2,162 +2,264 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 227AEC4338F
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Jul 2021 16:37:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D978C4338F
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Jul 2021 22:03:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E7E960F11
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Jul 2021 16:37:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5545A60F91
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Jul 2021 22:03:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239669AbhGZP5F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Jul 2021 11:57:05 -0400
-Received: from mail-eopbgr60083.outbound.protection.outlook.com ([40.107.6.83]:61927
-        "EHLO EUR04-DB3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S239658AbhGZP5B (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 26 Jul 2021 11:57:01 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=I/b4oikYiMrKaXZb/xdQBy6QrHokWlEYy8E9GkmQkxkHNCjEoWlw8zSM3i4NROC4Yf1+FdecNjFFzsR8q+b3domVYvfU/jgeD5lTgBqh9nQGijyKuU+rA7S6vcOwZ8AK9Df2y8lFihlhdtOYMs3T7q5vZPqjhOtkVAzeAZVsy+L/x+S+h07bbIyoq9vs6+o6GwhqrZcfzUZEeqpLXI9hG7WJDcOnZUiEqzbqQcX1Y8O9VYatD064LapnUzIh8TWHCpXG75SEhTygiYV9vWK4DdK4Imw6al+9pgT4ITzuf7R5qHJCnLhKvZFZu6DPlpnuxKI5vDb2dGR86p3HTKuvRw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=y0xuEiK9hUfYnRGYsrKf/pk8lnC0/zbdqdLg0jiHkEo=;
- b=C/K6tuN7X4yCw1wmCzg3N6+r9yEQXA2HetXdZ3+m0oglYrvfY3asNGuKO1tm1rKw2yjdy1dIZzR7SByfCJcJp84G08pPxrlFuwTyvI0DCXWH0kbGz8cf03cjPwIgVPuMujeiNO/fR5MSqp6KHddaYFflj9RWWBSfJcofLPS0mw5wW0xFKl1PhpR/ET786xWJVIggAyPqr3IIyFHWoGT8Cj5o9neTUpXeVqBE9tgtsi0NzdQhsWHSL920izfOkPWoCGn14YRloWpyQviZvYUpyL454M+iEQ7YRPFzm6jkdNy9MtlqU8Nfo+E7y1zSX7NnvSA3Z864M6xnCYI8wVIGqA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=seco.com; dmarc=pass action=none header.from=seco.com;
- dkim=pass header.d=seco.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=secospa.onmicrosoft.com; s=selector2-secospa-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=y0xuEiK9hUfYnRGYsrKf/pk8lnC0/zbdqdLg0jiHkEo=;
- b=suAfjub1VrdQMp1BQONh+0QSC8KvVcP9ZoWkjzg7N4Q5D3NUnOou6qZXWiaWwXt7Ovf7bQ/0kwkxN2VDlDM27m2Pks+yck9h84guDSwz+PP2dRXQW5nJLjMPWg7ZCfHc2OSRQe/qxsK528b5dUlp5UQQWf5dGinubfNjDRC6HgY=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=seco.com;
-Received: from DB7PR03MB4523.eurprd03.prod.outlook.com (2603:10a6:10:19::27)
- by DB7PR03MB3962.eurprd03.prod.outlook.com (2603:10a6:5:30::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4352.29; Mon, 26 Jul
- 2021 16:37:21 +0000
-Received: from DB7PR03MB4523.eurprd03.prod.outlook.com
- ([fe80::dc6c:815b:2062:d1f1]) by DB7PR03MB4523.eurprd03.prod.outlook.com
- ([fe80::dc6c:815b:2062:d1f1%7]) with mapi id 15.20.4352.031; Mon, 26 Jul 2021
- 16:37:21 +0000
-From:   Sean Anderson <sean.anderson@seco.com>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
-        Sean Anderson <sean.anderson@seco.com>
-Subject: [PATCH 1/2] mmc: sdio: Don't warn about vendor CIS tuples
-Date:   Mon, 26 Jul 2021 12:36:52 -0400
-Message-Id: <20210726163654.1110969-1-sean.anderson@seco.com>
-X-Mailer: git-send-email 2.25.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: MN2PR14CA0023.namprd14.prod.outlook.com
- (2603:10b6:208:23e::28) To DB7PR03MB4523.eurprd03.prod.outlook.com
- (2603:10a6:10:19::27)
+        id S231978AbhGZVWo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Jul 2021 17:22:44 -0400
+Received: from mail.kernel.org ([198.145.29.99]:51460 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231839AbhGZVWn (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 26 Jul 2021 17:22:43 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id AC6A060F37;
+        Mon, 26 Jul 2021 22:03:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1627336992;
+        bh=gZEtpD5ttAyQ52+nu82eAAbPdSUGMQ3iJJ5aYY960/c=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:From;
+        b=nnA/ezjPAOKv/UFOUMRwSMO3qufjx5+Wf9fN1clFcgLZb99yefbdce1x9WrUW79hS
+         48h1JibMF3fLPRR5e6zNxofoL6UWUgIT3RSaUw8Aq8fTyFV1q8gmWBnJL3s2jDGS29
+         oC/99jumoxT4n13QAEAM4pJmPvICFteMjEUnnQ2SCExpT1liu6NmtYvyB/ckeTA/wb
+         g5Xx2mASwoUR+YFu4TUMUsGhNKc/2ghEo8myS+FxNK//GTAo0X00SALHRrTljDPt5z
+         ip7RD4OLnjRitFtqnTwhjlf9dB6cZQyR7l2SBdIBbO1W2NBfbGa+UbQkyKFdkcf5wG
+         hSdUm+xbfG46Q==
+Date:   Mon, 26 Jul 2021 17:03:07 -0500
+From:   Bjorn Helgaas <helgaas@kernel.org>
+To:     Victor Ding <victording@google.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        linux-pci@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>,
+        Kai-Heng Feng <kai.heng.feng@canonical.com>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        "Saheed O. Bolarinwa" <refactormyself@gmail.com>,
+        Vidya Sagar <vidyas@nvidia.com>,
+        Xiongfeng Wang <wangxiongfeng2@huawei.com>
+Subject: Re: [PATCH v2] PCI/ASPM: Disable ASPM when save/restore PCI state
+Message-ID: <20210726220307.GA647936@bjorn-Precision-5520>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from plantagenet.inhand.com (50.195.82.171) by MN2PR14CA0023.namprd14.prod.outlook.com (2603:10b6:208:23e::28) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4352.26 via Frontend Transport; Mon, 26 Jul 2021 16:37:20 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 45f9d9c6-7f01-4a8f-572d-08d95053a3ff
-X-MS-TrafficTypeDiagnostic: DB7PR03MB3962:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <DB7PR03MB39629338FD943D913DBC753B96E89@DB7PR03MB3962.eurprd03.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:295;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: gRdofisrmwlkbyhOTYE5w2cqwOHAz39l5XPc/VZJxMS6qhBWYszbYpkQp1oe8GrCBPxmWav2X1JdZwF8i40YEFaLft02695JqiRuUsxBfMkOFnmZUi0Kk4oPg4rU33Il/QcOet/KBC/VhNMkngQI3IvYB2kcZlyeV8OiZ6HC2dCT3m9aKDbatwBIEiK3kaiajYQS8mrip7suWfRVOIEDwntHU+3+WHIuIq9VDVq+IuuwLMvmHzwLm8llclPsCHpUaCEpevODwBbC8ISaYFtqtUOWZZji8Dgyjuc4ekccgZVRWd0lG3dqxg63reaJV8FSD5m1E0C5N2ADbuqewqHdD/HUadSODqKtc9chl+eC6UsYmRMKfl+H6kOBvJahJVHrsmqF+xCujWJgbgg9nWlaslNcEOKpF6R9Ppi0EUqeoYVXM1IFm57jE9kqbd5jWgo/H5uSoHaT44zl+RN82qRSoYk3f3Yi6DgtjUkjfMnbO9/WPSP3xJH05hTd5CLshu0DgmK8sXpSQjSZCSxSEWLLTAR3JmBKmRlENl246iBupgHIBdWGz1wIySfYNTbzmxnDYSvIW8Dm6fHbsd3+drhGubqx8D7ADKwxvlCnDKT+hMMDuyEfnDu1wxyhgw23JWGY/5FXjNVOvBenECnlhRoJh6mkJ+vxlXR3i2bIgCWGfHPy9z/V7C380jda0xIbSvutWEpQU0ulFut1G2n8FmxpDw==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR03MB4523.eurprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(54906003)(38350700002)(316002)(508600001)(186003)(6512007)(86362001)(36756003)(66946007)(107886003)(66476007)(8676002)(38100700002)(6916009)(8936002)(52116002)(4326008)(6666004)(66556008)(26005)(83380400001)(44832011)(2906002)(5660300002)(956004)(1076003)(6486002)(6506007)(2616005);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?sFbxkPpCpeGc+5E1ofPD/EogW0iu4ZRDAvwZ9ow4kBiZ6X2LvtfgtRBW5O+c?=
- =?us-ascii?Q?mvlaJU163flJnyaaQZJx9QlEmEEiTb8l9ZOXk+Xs6pWW1tFBkWYMDFSsAKZc?=
- =?us-ascii?Q?xGm5HZuTOTTVNMWYcMztU3KJHlLdc9Hr7rzMb6AbCDFqrNRc2ehDglbFZfg3?=
- =?us-ascii?Q?q0KT9lS8UJ4Xo6k4EAZQhBI6xpeEnQgztE0r1HGe6wyXCrHPGuXvRiBzG/yw?=
- =?us-ascii?Q?71eTyVNYICFyaOvST9/IqZ/Lmm0OyHagWQPZG5NyOjqtzLIO0Lz+FuFbkh96?=
- =?us-ascii?Q?OnL0pU5Zveb7ziHS5r7pJy4KIOgzMgYRKA0SqH41W1bp4IWhKajVegSBJO03?=
- =?us-ascii?Q?KzbU20RAlANOnSfS3jufiXHEQwuwynU6dVHJ/cq1mqP/929KnNrMwgpiNiZD?=
- =?us-ascii?Q?Wz7GIL+fweV75HN5HK/sfuFvFA1oPXubhqIIRgMzlQ8ImrQsk7/cspVaSGP9?=
- =?us-ascii?Q?Y75U60e6IlWHJZTdAMDWd7OcgVv2x2rULm9bSLFJvVN28unhcmTAgL7s64vQ?=
- =?us-ascii?Q?U0MvxrFWhuYs+I/qgqyG9ZX99JYtnhCoX4D/ixii93akjSk+SQF7TPASjvV8?=
- =?us-ascii?Q?ff0u41z8xkf3znghY/Xaczfz/HrokK+6ydDyOPL5w5qX5AlgpaKFlDwz2SN8?=
- =?us-ascii?Q?ud9MXacSVyCQjaGn8/UIbCWRrRybEEc3kTmfC/OL5LF4DyBPKW1TK4nrGFHA?=
- =?us-ascii?Q?g74WEDzzaDXTDZwAfuf+daNNtwgIOD6UVJp/XQqvH3eGZOye5/15z0SAQXVK?=
- =?us-ascii?Q?DEDBi7mXkx2tMVUkQxgx3op9TECTIt6Xw8Ajts7PQInsST9OWrpZAZlQM6tp?=
- =?us-ascii?Q?tUtgUJGmEnP/Z0RCGZnnpeMKF6CydvuGXTZNRJ0cESH8HgIbvvdyz+jdoJOO?=
- =?us-ascii?Q?KV1w5cGNX29cJjstHAK6H1tEUh2Gjno8VfkOHoU9oDd8JOWuECi1pITCUmzv?=
- =?us-ascii?Q?aqDG+TpEiTwCRwa3QiZcbCQfdVvV+G3BOV1YsxdCh71LJfa1gzncJ++CEHjx?=
- =?us-ascii?Q?TOZNz6KnKtYwENfUfqFHS/48PIAjQns4DcNIos1J1wUTNr+TbizGuUX2GnCy?=
- =?us-ascii?Q?tBzJZ8pNPqlUBCWW5p831HA2J1hW+GY9C659aSp+s6MAs1yMqmltRKf6H335?=
- =?us-ascii?Q?H19ZMosa0ZKh/tzrOI99NCYCxibjEBhSSW5JFZ4HDJ1DA6XPEIzllYcrs0Gg?=
- =?us-ascii?Q?l0GZGXjGycBjOxLOIBtE/nhSOr4Unp+nkCX5Ia36sNPHTVAIQfWG3PlPmvqO?=
- =?us-ascii?Q?U9P/Kyjm1QO3HeBjT54PL+mjPSD69siUxkv44U+1R5n5tsSLXHPxLlq73PH8?=
- =?us-ascii?Q?S34Wsv7sdaes47Ue8fBdr5kH?=
-X-OriginatorOrg: seco.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 45f9d9c6-7f01-4a8f-572d-08d95053a3ff
-X-MS-Exchange-CrossTenant-AuthSource: DB7PR03MB4523.eurprd03.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Jul 2021 16:37:21.5332
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: bebe97c3-6438-442e-ade3-ff17aa50e733
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 6z+D/d3lzUf2nVylzNpOk9dvgByXuKYAL08irChYOat2IMfSAenxWYi/XW52/kb4dZWmTWpYnf0aFkbW7PFEFA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB7PR03MB3962
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210311173433.GA2071075@bjorn-Precision-5520>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CIS tuples in the range 0x80-0x8F are reserved for vendors. Some devices
-have tuples in this range which get warned about every boot. Since this
-is normal behavior, don't print these tuples unless debug is enabled.
+On Thu, Mar 11, 2021 at 11:34:33AM -0600, Bjorn Helgaas wrote:
+> On Thu, Jan 28, 2021 at 03:52:42PM +0000, Victor Ding wrote:
+> > Certain PCIe devices (e.g. GL9750) have high penalties (e.g. high Port
+> > T_POWER_ON) when exiting L1 but enter L1 aggressively. As a result,
+> > such devices enter and exit L1 frequently during pci_save_state and
+> > pci_restore_state; eventually causing poor suspend/resume performance.
+> > 
+> > Based on the observation that PCI accesses dominance pci_save_state/
+> > pci_restore_state plus these accesses are fairly close to each other, the
+> > actual time the device could stay in low power states is negligible.
+> > Therefore, the little power-saving benefit from ASPM during suspend/resume
+> > does not overweight the performance degradation caused by high L1 exit
+> > penalties.
+> > 
+> > Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=211187
+> 
+> Thanks for this!
+> 
+> This device can tolerate unlimited delay for L1 exit (DevCtl Endpoint
+> L1 Acceptable Latency is unlimited) and it makes no guarantees about
+> how fast it can exit L1 (LnkCap L1 Exit Latency is also unlimited), so
+> I think there's basically no restriction on when it can enter ASPM
+> L1.0.
+> 
+> I have a hard time interpreting the L1.2 entry conditions in PCIe
+> r5.0, sec 5.5.1, but I can believe it enters L1.2 aggressively since
+> the device says it can tolerate any latencies.
+> 
+> If L1.2 exit takes 3100us, it could do ~60 L1 exits in 200ms.  I guess
+> config accesses and code execution can account for some of that, but
+> still seems like a lot of L1 entries/exits during suspend.  I wouldn't
+> think we would touch the device that much and that intermittently.
+> 
+> > Signed-off-by: Victor Ding <victording@google.com>
+> > 
+> > ---
+> > 
+> > Changes in v2:
+> > - Updated commit message to remove unnecessary information
+> > - Fixed a bug reading wrong register in pcie_save_aspm_control
+> > - Updated to reuse existing pcie_config_aspm_dev where possible
+> > - Fixed goto label style
+> > 
+> >  drivers/pci/pci.c       | 18 +++++++++++++++---
+> >  drivers/pci/pci.h       |  6 ++++++
+> >  drivers/pci/pcie/aspm.c | 27 +++++++++++++++++++++++++++
+> >  include/linux/pci.h     |  1 +
+> >  4 files changed, 49 insertions(+), 3 deletions(-)
+> > 
+> > diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
+> > index 32011b7b4c04..9ea88953f90b 100644
+> > --- a/drivers/pci/pci.c
+> > +++ b/drivers/pci/pci.c
+> > @@ -1542,6 +1542,10 @@ static void pci_restore_ltr_state(struct pci_dev *dev)
+> >  int pci_save_state(struct pci_dev *dev)
+> >  {
+> >  	int i;
+> > +
+> > +	pcie_save_aspm_control(dev);
+> > +	pcie_disable_aspm(dev);
+> 
+> If I understand this patch correctly, it basically does this:
+> 
+>     pci_save_state
+>   +   pcie_save_aspm_control
+>   +   pcie_disable_aspm
+>       <save state>
+>   +   pcie_restore_aspm_control
+> 
+> The <save state> part is just a bunch of config reads with very little
+> other code execution.  I'm really surprised that there's enough time
+> between config reads for the link to go to L1.  I guess you've
+> verified that this does speed up suspend significantly, but this just
+> doesn't make sense to me.
+> 
+> In the bugzilla you say the GL9750 can go to L1.2 after ~4us of
+> inactivity.  That's enough time for a lot of code execution.  We must
+> be missing something.  There's so much PCI traffic during save/restore
+> that it should be easy to match up the analyzer trace with the code.
+> Can you get any insight into what's going on that way?
 
-Unfortunately, we cannot use a variable for the format string since it
-gets pasted by pr_*_ratelimited.
+I'm dropping this for now, pending a better understanding of what's
+going on.
 
-Signed-off-by: Sean Anderson <sean.anderson@seco.com>
----
-
- drivers/mmc/core/sdio_cis.c | 20 +++++++++++++++-----
- 1 file changed, 15 insertions(+), 5 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-index b23773583179..7518b27bcef2 100644
---- a/drivers/mmc/core/sdio_cis.c
-+++ b/drivers/mmc/core/sdio_cis.c
-@@ -330,13 +330,23 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
- 			prev = &this->next;
- 
- 			if (ret == -ENOENT) {
-+
- 				if (time_after(jiffies, timeout))
- 					break;
--				/* warn about unknown tuples */
--				pr_warn_ratelimited("%s: queuing unknown"
--				       " CIS tuple 0x%02x (%u bytes)\n",
--				       mmc_hostname(card->host),
--				       tpl_code, tpl_link);
-+
-+#define FMT(type) "%s: queuing " type " CIS tuple 0x%02x (%u bytes)\n"
-+				/*
-+				 * Tuples in this range are reserved for
-+				 * vendors, so don't warn about them
-+				 */
-+				if (tpl_code >= 0x80 && tpl_code <= 0x8f)
-+					pr_debug_ratelimited(FMT("vendor"),
-+						mmc_hostname(card->host),
-+						tpl_code, tpl_link);
-+				else
-+					pr_warn_ratelimited(FMT("unknown"),
-+						mmc_hostname(card->host),
-+						tpl_code, tpl_link);
- 			}
- 
- 			/* keep on analyzing tuples */
--- 
-2.25.1
-
+> >  	/* XXX: 100% dword access ok here? */
+> >  	for (i = 0; i < 16; i++) {
+> >  		pci_read_config_dword(dev, i * 4, &dev->saved_config_space[i]);
+> > @@ -1552,18 +1556,22 @@ int pci_save_state(struct pci_dev *dev)
+> >  
+> >  	i = pci_save_pcie_state(dev);
+> >  	if (i != 0)
+> > -		return i;
+> > +		goto exit;
+> >  
+> >  	i = pci_save_pcix_state(dev);
+> >  	if (i != 0)
+> > -		return i;
+> > +		goto exit;
+> >  
+> >  	pci_save_ltr_state(dev);
+> >  	pci_save_aspm_l1ss_state(dev);
+> >  	pci_save_dpc_state(dev);
+> >  	pci_save_aer_state(dev);
+> >  	pci_save_ptm_state(dev);
+> > -	return pci_save_vc_state(dev);
+> > +	i = pci_save_vc_state(dev);
+> > +
+> > +exit:
+> > +	pcie_restore_aspm_control(dev);
+> > +	return i;
+> >  }
+> >  EXPORT_SYMBOL(pci_save_state);
+> >  
+> > @@ -1661,6 +1669,8 @@ void pci_restore_state(struct pci_dev *dev)
+> >  	if (!dev->state_saved)
+> >  		return;
+> >  
+> > +	pcie_disable_aspm(dev);
+> > +
+> >  	/*
+> >  	 * Restore max latencies (in the LTR capability) before enabling
+> >  	 * LTR itself (in the PCIe capability).
+> > @@ -1689,6 +1699,8 @@ void pci_restore_state(struct pci_dev *dev)
+> >  	pci_enable_acs(dev);
+> >  	pci_restore_iov_state(dev);
+> >  
+> > +	pcie_restore_aspm_control(dev);
+> > +
+> >  	dev->state_saved = false;
+> >  }
+> >  EXPORT_SYMBOL(pci_restore_state);
+> > diff --git a/drivers/pci/pci.h b/drivers/pci/pci.h
+> > index a81459159f6d..e074a0cbe73c 100644
+> > --- a/drivers/pci/pci.h
+> > +++ b/drivers/pci/pci.h
+> > @@ -584,6 +584,9 @@ void pcie_aspm_pm_state_change(struct pci_dev *pdev);
+> >  void pcie_aspm_powersave_config_link(struct pci_dev *pdev);
+> >  void pci_save_aspm_l1ss_state(struct pci_dev *dev);
+> >  void pci_restore_aspm_l1ss_state(struct pci_dev *dev);
+> > +void pcie_save_aspm_control(struct pci_dev *dev);
+> > +void pcie_restore_aspm_control(struct pci_dev *dev);
+> > +void pcie_disable_aspm(struct pci_dev *pdev);
+> >  #else
+> >  static inline void pcie_aspm_init_link_state(struct pci_dev *pdev) { }
+> >  static inline void pcie_aspm_exit_link_state(struct pci_dev *pdev) { }
+> > @@ -591,6 +594,9 @@ static inline void pcie_aspm_pm_state_change(struct pci_dev *pdev) { }
+> >  static inline void pcie_aspm_powersave_config_link(struct pci_dev *pdev) { }
+> >  static inline void pci_save_aspm_l1ss_state(struct pci_dev *dev) { }
+> >  static inline void pci_restore_aspm_l1ss_state(struct pci_dev *dev) { }
+> > +static inline void pcie_save_aspm_control(struct pci_dev *dev) { }
+> > +static inline void pcie_restore_aspm_control(struct pci_dev *dev) { }
+> > +static inline void pcie_disable_aspm(struct pci_dev *pdev) { }
+> >  #endif
+> >  
+> >  #ifdef CONFIG_PCIE_ECRC
+> > diff --git a/drivers/pci/pcie/aspm.c b/drivers/pci/pcie/aspm.c
+> > index a08e7d6dc248..e1e97db32e8b 100644
+> > --- a/drivers/pci/pcie/aspm.c
+> > +++ b/drivers/pci/pcie/aspm.c
+> > @@ -784,6 +784,33 @@ static void pcie_config_aspm_dev(struct pci_dev *pdev, u32 val)
+> >  					   PCI_EXP_LNKCTL_ASPMC, val);
+> >  }
+> >  
+> > +void pcie_disable_aspm(struct pci_dev *pdev)
+> > +{
+> > +	if (!pci_is_pcie(pdev))
+> > +		return;
+> > +
+> > +	pcie_config_aspm_dev(pdev, 0);
+> > +}
+> > +
+> > +void pcie_save_aspm_control(struct pci_dev *pdev)
+> > +{
+> > +	u16 lnkctl;
+> > +
+> > +	if (!pci_is_pcie(pdev))
+> > +		return;
+> > +
+> > +	pcie_capability_read_word(pdev, PCI_EXP_LNKCTL, &lnkctl);
+> > +	pdev->saved_aspm_ctl = lnkctl & PCI_EXP_LNKCTL_ASPMC;
+> > +}
+> > +
+> > +void pcie_restore_aspm_control(struct pci_dev *pdev)
+> > +{
+> > +	if (!pci_is_pcie(pdev))
+> > +		return;
+> > +
+> > +	pcie_config_aspm_dev(pdev, pdev->saved_aspm_ctl);
+> > +}
+> > +
+> >  static void pcie_config_aspm_link(struct pcie_link_state *link, u32 state)
+> >  {
+> >  	u32 upstream = 0, dwstream = 0;
+> > diff --git a/include/linux/pci.h b/include/linux/pci.h
+> > index b32126d26997..a21bfd6e3f89 100644
+> > --- a/include/linux/pci.h
+> > +++ b/include/linux/pci.h
+> > @@ -387,6 +387,7 @@ struct pci_dev {
+> >  	unsigned int	ltr_path:1;	/* Latency Tolerance Reporting
+> >  					   supported from root to here */
+> >  	u16		l1ss;		/* L1SS Capability pointer */
+> > +	u16		saved_aspm_ctl; /* ASPM Control saved at suspend time */
+> >  #endif
+> >  	unsigned int	eetlp_prefix_path:1;	/* End-to-End TLP Prefix */
+> >  
+> > -- 
+> > 2.30.0.280.ga3ce27912f-goog
+> > 
