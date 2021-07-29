@@ -2,62 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53053C43214
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 04:47:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 182D2C4320A
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 04:47:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2E11760E94
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 04:47:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F0E0F61053
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 04:47:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233763AbhG2Era (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Jul 2021 00:47:30 -0400
-Received: from alexa-out.qualcomm.com ([129.46.98.28]:4049 "EHLO
+        id S233832AbhG2Erl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Jul 2021 00:47:41 -0400
+Received: from alexa-out.qualcomm.com ([129.46.98.28]:54973 "EHLO
         alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233679AbhG2Er3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2021 00:47:29 -0400
-Received: from ironmsg07-lv.qualcomm.com ([10.47.202.151])
-  by alexa-out.qualcomm.com with ESMTP; 28 Jul 2021 21:47:27 -0700
+        with ESMTP id S233679AbhG2Erl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2021 00:47:41 -0400
+Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
+  by alexa-out.qualcomm.com with ESMTP; 28 Jul 2021 21:47:38 -0700
 X-QCInternal: smtphost
 Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg07-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 28 Jul 2021 21:47:27 -0700
+  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 28 Jul 2021 21:47:36 -0700
 X-QCInternal: smtphost
 Received: from minint-dvc2thc.qualcomm.com (HELO sartgarg-linux.qualcomm.com) ([10.206.24.245])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 29 Jul 2021 10:16:59 +0530
+  by ironmsg02-blr.qualcomm.com with ESMTP; 29 Jul 2021 10:17:29 +0530
 Received: by sartgarg-linux.qualcomm.com (Postfix, from userid 2339771)
-        id 5DECB35F9; Thu, 29 Jul 2021 10:16:58 +0530 (IST)
+        id 7DF9B35F9; Thu, 29 Jul 2021 10:17:27 +0530 (IST)
 From:   Sarthak Garg <sartgarg@codeaurora.org>
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org,
-        Sarthak Garg <sartgarg@codeaurora.org>
-Subject: [PATCH V2 0/2] Introduce max_timeout_count in sdhci_host for vendor
-Date:   Thu, 29 Jul 2021 10:16:39 +0530
-Message-Id: <1627534001-17256-1-git-send-email-sartgarg@codeaurora.org>
+        Sarthak Garg <sartgarg@codeaurora.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>
+Subject: [PATCH V2 2/2] mmc: sdhci-msm: Use maximum possible data timeout value
+Date:   Thu, 29 Jul 2021 10:16:41 +0530
+Message-Id: <1627534001-17256-3-git-send-email-sartgarg@codeaurora.org>
 X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1626444182-2187-3-git-send-email-sartgarg@codeaurora.org>
+In-Reply-To: <1627534001-17256-1-git-send-email-sartgarg@codeaurora.org>
 References: <1626444182-2187-3-git-send-email-sartgarg@codeaurora.org>
+ <1627534001-17256-1-git-send-email-sartgarg@codeaurora.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Introduce max_timeout_count in sdhci_host_struct to let vendor's modify
-the max timeout value as per their needs.
+From: Sahitya Tummala <stummala@codeaurora.org>
 
-Sahitya Tummala (1):
-  mmc: sdhci-msm: Use maximum possible data timeout value
+The Qcom SD controller defines the usage of 0xF in data
+timeout counter register (0x2E) which is actually a reserved
+bit as per specification. This would result in maximum of 21.26 secs
+timeout value.
 
-Sarthak Garg (1):
-  mmc: sdhci: Introduce max_timeout_count variable in sdhci_host
+Some SDcard taking more time than 2.67secs (timeout value corresponding
+to 0xE) and with that observed data timeout errors.
+So increasing the timeout value to max possible timeout.
 
- drivers/mmc/host/sdhci-msm.c |  3 +++
- drivers/mmc/host/sdhci.c     | 15 +++++++++------
- drivers/mmc/host/sdhci.h     |  1 +
- 3 files changed, 13 insertions(+), 6 deletions(-)
+Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
+Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+---
+ drivers/mmc/host/sdhci-msm.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index e44b7a6..19e4673 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -2696,6 +2696,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+ 
+ 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
+ 
++	/* Set the timeout value to max possible */
++	host->max_timeout_count = 0xF;
++
+ 	pm_runtime_get_noresume(&pdev->dev);
+ 	pm_runtime_set_active(&pdev->dev);
+ 	pm_runtime_enable(&pdev->dev);
 -- 
 2.7.4
 
