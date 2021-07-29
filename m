@@ -7,78 +7,77 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 182D2C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 04:47:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E22DEC4338F
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 07:29:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F0E0F61053
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 04:47:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BBCED60FD7
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 07:29:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233832AbhG2Erl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Jul 2021 00:47:41 -0400
-Received: from alexa-out.qualcomm.com ([129.46.98.28]:54973 "EHLO
-        alexa-out.qualcomm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233679AbhG2Erl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2021 00:47:41 -0400
-Received: from ironmsg09-lv.qualcomm.com ([10.47.202.153])
-  by alexa-out.qualcomm.com with ESMTP; 28 Jul 2021 21:47:38 -0700
-X-QCInternal: smtphost
-Received: from ironmsg02-blr.qualcomm.com ([10.86.208.131])
-  by ironmsg09-lv.qualcomm.com with ESMTP/TLS/AES256-SHA; 28 Jul 2021 21:47:36 -0700
-X-QCInternal: smtphost
-Received: from minint-dvc2thc.qualcomm.com (HELO sartgarg-linux.qualcomm.com) ([10.206.24.245])
-  by ironmsg02-blr.qualcomm.com with ESMTP; 29 Jul 2021 10:17:29 +0530
-Received: by sartgarg-linux.qualcomm.com (Postfix, from userid 2339771)
-        id 7DF9B35F9; Thu, 29 Jul 2021 10:17:27 +0530 (IST)
-From:   Sarthak Garg <sartgarg@codeaurora.org>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        Sarthak Garg <sartgarg@codeaurora.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>
-Subject: [PATCH V2 2/2] mmc: sdhci-msm: Use maximum possible data timeout value
-Date:   Thu, 29 Jul 2021 10:16:41 +0530
-Message-Id: <1627534001-17256-3-git-send-email-sartgarg@codeaurora.org>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1627534001-17256-1-git-send-email-sartgarg@codeaurora.org>
-References: <1626444182-2187-3-git-send-email-sartgarg@codeaurora.org>
- <1627534001-17256-1-git-send-email-sartgarg@codeaurora.org>
+        id S234535AbhG2H3o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Jul 2021 03:29:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45118 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234347AbhG2H3n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2021 03:29:43 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B379C061757
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Jul 2021 00:29:41 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <jbe@pengutronix.de>)
+        id 1m90U7-0000u8-F0; Thu, 29 Jul 2021 09:29:39 +0200
+Received: from [2a0a:edc0:0:900:2e4d:54ff:fe67:bfa5] (helo=ginster)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.92)
+        (envelope-from <jbe@pengutronix.de>)
+        id 1m90U6-0002Iy-F7; Thu, 29 Jul 2021 09:29:38 +0200
+Received: from jbe by ginster with local (Exim 4.92)
+        (envelope-from <jbe@pengutronix.de>)
+        id 1m90U6-0002gi-EC; Thu, 29 Jul 2021 09:29:38 +0200
+From:   Juergen Borleis <jbe@pengutronix.de>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, festevam@gmail.com,
+        wsa+renesas@sang-engineering.com, dianders@chromium.org,
+        ulf.hansson@linaro.org, kernel@pengutronix.de
+Subject: [PATCH 1/2] mmc: mxcmmc: really configure the DMA on demand
+Date:   Thu, 29 Jul 2021 09:29:28 +0200
+Message-Id: <20210729072929.10267-2-jbe@pengutronix.de>
+X-Mailer: git-send-email 2.20.1
+In-Reply-To: <20210729072929.10267-1-jbe@pengutronix.de>
+References: <20210729072929.10267-1-jbe@pengutronix.de>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: jbe@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sahitya Tummala <stummala@codeaurora.org>
+Calling mxcmci_use_dma(host) is intended for the next transfer only, not
+for generic detection if DMA is possible. Without this change, the DMA gets
+never configured and thus, never used.
 
-The Qcom SD controller defines the usage of 0xF in data
-timeout counter register (0x2E) which is actually a reserved
-bit as per specification. This would result in maximum of 21.26 secs
-timeout value.
-
-Some SDcard taking more time than 2.67secs (timeout value corresponding
-to 0xE) and with that observed data timeout errors.
-So increasing the timeout value to max possible timeout.
-
-Signed-off-by: Sahitya Tummala <stummala@codeaurora.org>
-Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
+Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
 ---
- drivers/mmc/host/sdhci-msm.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/mxcmmc.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index e44b7a6..19e4673 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2696,6 +2696,9 @@ static int sdhci_msm_probe(struct platform_device *pdev)
+diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
+index 2fe6fcd..611f827 100644
+--- a/drivers/mmc/host/mxcmmc.c
++++ b/drivers/mmc/host/mxcmmc.c
+@@ -834,7 +834,8 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	else
+ 		burstlen = 4;
  
- 	msm_host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
- 
-+	/* Set the timeout value to max possible */
-+	host->max_timeout_count = 0xF;
-+
- 	pm_runtime_get_noresume(&pdev->dev);
- 	pm_runtime_set_active(&pdev->dev);
- 	pm_runtime_enable(&pdev->dev);
+-	if (mxcmci_use_dma(host) && burstlen != host->burstlen) {
++	if (host->dma != NULL && burstlen != host->burstlen) {
++		/* reconfigure DMA on changes only */
+ 		host->burstlen = burstlen;
+ 		ret = mxcmci_setup_dma(mmc);
+ 		if (ret) {
 -- 
-2.7.4
+2.20.1
 
