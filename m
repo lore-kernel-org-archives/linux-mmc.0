@@ -2,426 +2,207 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D57B2C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 10:32:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A77CC4338F
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jul 2021 05:40:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B8D56601FF
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Jul 2021 10:32:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3D31760F48
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jul 2021 05:40:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235309AbhG2Kcu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Jul 2021 06:32:50 -0400
-Received: from relmlor1.renesas.com ([210.160.252.171]:30386 "EHLO
-        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S235796AbhG2Kcu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Jul 2021 06:32:50 -0400
-X-IronPort-AV: E=Sophos;i="5.84,278,1620658800"; 
-   d="scan'208";a="89151822"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 29 Jul 2021 19:32:45 +0900
-Received: from localhost.localdomain (unknown [10.166.14.185])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id BBC914016D63;
-        Thu, 29 Jul 2021 19:32:45 +0900 (JST)
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH v4] mmc: host: renesas_sdhi: Refactor renesas_sdhi_probe()
-Date:   Thu, 29 Jul 2021 19:32:34 +0900
-Message-Id: <20210729103234.480743-1-yoshihiro.shimoda.uh@renesas.com>
-X-Mailer: git-send-email 2.25.1
+        id S236102AbhG3FkW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Jul 2021 01:40:22 -0400
+Received: from mga17.intel.com ([192.55.52.151]:44901 "EHLO mga17.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S233424AbhG3FkW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 30 Jul 2021 01:40:22 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10060"; a="193313664"
+X-IronPort-AV: E=Sophos;i="5.84,281,1620716400"; 
+   d="scan'208";a="193313664"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2021 22:40:17 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,281,1620716400"; 
+   d="scan'208";a="476848065"
+Received: from fmsmsx604.amr.corp.intel.com ([10.18.126.84])
+  by fmsmga008.fm.intel.com with ESMTP; 29 Jul 2021 22:40:17 -0700
+Received: from fmsmsx603.amr.corp.intel.com (10.18.126.83) by
+ fmsmsx604.amr.corp.intel.com (10.18.126.84) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2242.10; Thu, 29 Jul 2021 22:40:17 -0700
+Received: from FMSEDG603.ED.cps.intel.com (10.1.192.133) by
+ fmsmsx603.amr.corp.intel.com (10.18.126.83) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2242.10 via Frontend Transport; Thu, 29 Jul 2021 22:40:17 -0700
+Received: from NAM11-CO1-obe.outbound.protection.outlook.com (104.47.56.169)
+ by edgegateway.intel.com (192.55.55.68) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.1.2242.10; Thu, 29 Jul 2021 22:40:15 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=fnglyxkHT53BCAuD89KbkN0UcoKs1WNuh1KQDPvDYmgx6xYpStZVjW+bJ3viL3mhfOq0oQAZMxLrQA1Db9Hk6ojtdQFAYRtnbmhEHejQh0VVoaqAN7GOkgluX+ySWbveJoWLM0OWj0ZoBptLCGfWqmxAAe2dLazkPlevYJeFVO22qksUDIhnRIMzK5e7uq/gZ+qyux5bt2DtgZLQidoczAiHgVaPbYiY9GpkXyFsT6bjbmTp1iJvwWP5l0PT8CjB4OtKo2eQc3FbgQ7+v3LTkH69flPgqVKgLJ/F38Xh9KxGT1PkkP14KZuZtfnfM0fUytrOZpgPH3gtzcQ9wA/ZCw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=xE1lQ/BHZQMzclRlyVsoywgzqLsT1Nosc7z4vDKhjMw=;
+ b=UqkPmY7tdf9iu1Usxi6u2nJB0Bx67a1g6WN413bh02Y1ckyQf8r87cJMAJu+o1tLSqp9cPQBEqe6HdtQjgL9dRh1D47fQiq8jgDhQPSUhQlycoHlXxNbyU8eopTCJyOcWIJXJWnQs2qSfX38FkWOUxc5IibXEItkXEdWw6JzWeKnrtjGfMYFWLqdb2l/L3L/dG17mMG9psKDim4Vpy6y39al5MyNQUL7YXH4QHJEtMK6Q0p/nRWSrDD0ICPGJLJp5H+sp34b6OULtkiKsAN357tr7gQui4JAhzls7eO+3vCxok2RCIBfc+EVTBLuTaAYXL+5Ep5APynLFdMgQsXAgA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=intel.com; dmarc=pass action=none header.from=intel.com;
+ dkim=pass header.d=intel.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=intel.onmicrosoft.com;
+ s=selector2-intel-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=xE1lQ/BHZQMzclRlyVsoywgzqLsT1Nosc7z4vDKhjMw=;
+ b=p26t0ljxp22GH01XjMaq5JG9rOqwfsZof3fwURPu9O0Y39xGVRRzzWLTL20dBvSyfE5CFg/NrOWRNNOBSUaRWiCaro0uIg1rSOAMoTH/WaFfyIv7K6sBOUa9RGepXCHTiSU/nusiRyu3XA/NBAziC2zQVBUqv8Sy2zC5vOifVbM=
+Received: from MWHPR11MB1789.namprd11.prod.outlook.com (2603:10b6:300:108::13)
+ by MWHPR11MB1422.namprd11.prod.outlook.com (2603:10b6:300:25::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4373.21; Fri, 30 Jul
+ 2021 05:40:13 +0000
+Received: from MWHPR11MB1789.namprd11.prod.outlook.com
+ ([fe80::b81c:ee06:fc82:5fc3]) by MWHPR11MB1789.namprd11.prod.outlook.com
+ ([fe80::b81c:ee06:fc82:5fc3%7]) with mapi id 15.20.4373.022; Fri, 30 Jul 2021
+ 05:40:13 +0000
+From:   "A, Rashmi" <rashmi.a@intel.com>
+To:     "linux-drivers-review-request@eclists.intel.com" 
+        <linux-drivers-review-request@eclists.intel.com>,
+        "michal.simek@xilinx.com" <michal.simek@xilinx.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "kishon@ti.com" <kishon@ti.com>,
+        "vkoul@kernel.org" <vkoul@kernel.org>,
+        "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>,
+        "linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>
+CC:     "mgross@linux.intel.com" <mgross@linux.intel.com>,
+        "kris.pan@linux.intel.com" <kris.pan@linux.intel.com>,
+        "Zhou, Furong" <furong.zhou@intel.com>,
+        "Sangannavar, Mallikarjunappa" 
+        <mallikarjunappa.sangannavar@intel.com>,
+        "Hunter, Adrian" <adrian.hunter@intel.com>,
+        "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>,
+        "Srikandan, Nandhini" <nandhini.srikandan@intel.com>,
+        "Demakkanavar, Kenchappa" <kenchappa.demakkanavar@intel.com>
+Subject: =?utf-8?B?UkU6R0VOVExFIFJFTUlOREVSOiAgW+KAnFBBVENI4oCdIDAvM10gQWRkIHN1?=
+ =?utf-8?Q?pport_for_eMMC_PHY_on_Intel_Thunder_Bay?=
+Thread-Topic: =?utf-8?B?R0VOVExFIFJFTUlOREVSOiAgW+KAnFBBVENI4oCdIDAvM10gQWRkIHN1cHBv?=
+ =?utf-8?Q?rt_for_eMMC_PHY_on_Intel_Thunder_Bay?=
+Thread-Index: AdeFBQImTV5mCCSVQ/OIdZntC8DKUg==
+Date:   Fri, 30 Jul 2021 05:40:13 +0000
+Message-ID: <MWHPR11MB17896798B8037C835FD98D7D8CEC9@MWHPR11MB1789.namprd11.prod.outlook.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+dlp-reaction: no-action
+dlp-version: 11.5.1.3
+dlp-product: dlpe-windows
+authentication-results: eclists.intel.com; dkim=none (message not signed)
+ header.d=none;eclists.intel.com; dmarc=none action=none
+ header.from=intel.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: d431c225-14e2-471b-d3c9-08d9531c80f2
+x-ms-traffictypediagnostic: MWHPR11MB1422:
+x-ld-processed: 46c98d88-e344-4ed4-8496-4ed7712e255d,ExtAddr
+x-ms-exchange-transport-forked: True
+x-microsoft-antispam-prvs: <MWHPR11MB1422C0B09FA5018FF29762938CEC9@MWHPR11MB1422.namprd11.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8273;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 0idiw+vi/LyxmO0d4HuU3hP6Lnx3JDg7ZF2pPpxUvftD/g2DqOSAJCPd8VapXVn/NjDgADEstfSoa9FjMq68qtCmcWOavKFNnut3t5NTpVMbbL8PUkulKfs3MZ6Wv68PDU7LwXgCJIr1sD3gxU0c8JkaMOlPYC4A+JkugTvfY96M3TQe8QEg2EYK+SWwyNgfgi07kKY+v6p9mzq9BJ3Zf0RfeqxyWozNWosfKE/5yg6Y5913fUbwtyt73nY+9cFPkt47OlpfDtyL8NZuuEPk2G+JZ12WMXVyDsCSd+Ci40iWcCPYwhiKwPu7AWyYe1ffN0P2KbC9iRhHIdCfmDR44V7uNxjPJ+FQ9Zm2PPILRuDPeqjY2mZ04CN/1blVyVqxAJo+6ChRP/fSIwvZT/t/vO/szkUVzy6SEbgnwABnkR66KuRHFVm01sUqAEH9dGJO/I1Fl/4v5raJPuQJ/EXUBM1LtKC0S21rUwYRFghWdc3G6uEpkFI+PaLnn+153Y3js8stKNuHnxCD/Xqh96iu7rwGFmLj3EJXYKpC+jnqi6eVIn08JdnCFS8pVvK+Z5daDvJwZJbYGj7uWbVTpS/OxvaBUiAkPzPeCqXs1+DbWToN1LTdkGez51JREkvp5CATPPzQLo88ONbibetiM0+EIOyE6ldi7N3XPobe1Ja6rPqVCNhHsDEafXYHDOXxksH+bZYctv+aPJzRO8uw/TsvBDgZbCiLO/fd5SzsEMpqQW0=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MWHPR11MB1789.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(136003)(376002)(346002)(396003)(39860400002)(366004)(122000001)(921005)(8936002)(26005)(186003)(52536014)(38070700005)(316002)(9686003)(76116006)(66946007)(83380400001)(6506007)(2906002)(33656002)(110136005)(53546011)(38100700002)(54906003)(4326008)(71200400001)(55236004)(478600001)(7696005)(66446008)(7416002)(64756008)(66556008)(55016002)(66476007)(86362001)(5660300002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?RnlFL3JDZk1tTEtkbHZLdzFzc0VxeU1RZ291cFZBOElaVGVsSUFOWkRyM2ls?=
+ =?utf-8?B?Vy8vb05YajhmOW5wZGhhcnd2QWJzVGtkZlg4aWVBVFFWVnFUaGdBNFBBUCtG?=
+ =?utf-8?B?V2oyaDlacGk5NDluTENTU3VxQ1Vub3piR1JQam1QcGxLbkZLYUYxV3JzMFBJ?=
+ =?utf-8?B?TkRObndMTXpmRldtYzRlcVdnVFZ3N3FZZ0xyYVBuVzg5blRkZWlTU2s4TlJk?=
+ =?utf-8?B?ZFpkM29nYWllbEtBSFRUYXMvbDllUEpHTHV4NUZhYmxOeEpoRjJ0cU1EMEd4?=
+ =?utf-8?B?UXltZ2diVjJPVVRYZEpwV3pyOFlibkFNR1ZHdzViZ1V0MDBDR3BSNVBjSlov?=
+ =?utf-8?B?dDI5ZXlyT3E4N3ZwTExJSXlxTnZFMnoreGJVRWtOSWNwRTdzSG12eUN4UFZR?=
+ =?utf-8?B?Wm9JMmk5cFE1UWRvazh4WGlyWTF2cWRpa0NrTmlrY0pEMnZQNURudlgyOVlh?=
+ =?utf-8?B?aTAzK25xSGpWbmdsMXJIZXo0QytDWmIvaTdoUnlCbmxSMks4SWN6RVcwbWIr?=
+ =?utf-8?B?d2Q2MHN0Z1RJdFJJa3FSR1VoRTY3YVZHWkFWMjN0RnFLQUZWTzV5Qk9iZnAr?=
+ =?utf-8?B?UDlQREFsR1V2bDE4ZFZhVjRPdEU3MmdmY0FETG84UExiYi9WTzV1MjhCam1Z?=
+ =?utf-8?B?Rm5ZSFlCVjBYMjVtcDJSMTRXSEh1czV0cDRkcE9jK1FCbHBzTlB3a0srUVJF?=
+ =?utf-8?B?R1g4M3o3V0U4TTB6YTlhVXNncEJ6MDltcG9uVCtWZzBlMnM2VEY0eHM0cmpK?=
+ =?utf-8?B?Z0hVYm1tZ1dwZnpKMURmUE9uQS95M2JoSG1GYTJEUWhXa3RlOVY3QnY4RWNz?=
+ =?utf-8?B?NElmTWNpQUM0QWxEVE0rNVB5SVg1NCtzWU1iaVc0MHNDZVYvdXJ6T1Mzd25L?=
+ =?utf-8?B?MmFJV1hWNHpzSnZuUGc4bFVtVldMNW5hUkxIR2h4WGJwMzVMaW1sWTVJV2VO?=
+ =?utf-8?B?c0x4L1d2b0ZxY292c0JFNitpSmMzSmNRWThwai9seVFLbE1mN0Vnc3dyTUly?=
+ =?utf-8?B?RVFhT2M2dFpYYlp2TFUyWTNMNExYUHM1TFFlWEFOZzVJYm1oMHQ0b250bFRw?=
+ =?utf-8?B?czcyVzZUaHc3UDVzVWkzaGJ2T2srZ3EyYk5FeDlkUlY0WExydFZkd0tDVy92?=
+ =?utf-8?B?MGdUVjhSK0JheWdyNjFqSnVFN2JyWWxJaGlhcGViOXhzNk1zalY3U0dTdlZa?=
+ =?utf-8?B?S0ZCcDdGSVVMc2RRaGNRU2Q5TkVNcDVZdFRWWkVkYW90MDdOYmNWd2JHT0Nt?=
+ =?utf-8?B?cHhGSnZla0kvR0xxZzUrOHVZQmdxdy9rbW1vL29lM00ycisvQlA1Q29sZkwy?=
+ =?utf-8?B?NTlLbHYwRmNGT1JtK1lpWDZDb2R2UFNzc0VxQjVTcDNSemR6SUN5dEQ4SGNC?=
+ =?utf-8?B?R1FMMG9FcTdzU2k5MmVMbkhBR2wrb1pNaEdMMFFzMHBIRGRKVk5NS0N1RGRY?=
+ =?utf-8?B?a0hjQlAwUkd5SmZwazVxeE9SZ0o4NlJnOVluL1N2SkNXNzFkeUNIMys3Z3kv?=
+ =?utf-8?B?eTRaVlFtL09hdjdMQW1ZMXVwVGVMQzBnN3E3QU5qOGxDU0dYdjEyM1c4YkU0?=
+ =?utf-8?B?T21UV0lUaTVvRnRIUlpZTGdvR0hUOGx1OEE4ZVM1Q0dQWkhEYitGdGVKLzVs?=
+ =?utf-8?B?Z09hYzVGdjJwODg5M0ExZ0pnSTZjY2x2bHo0S0NCR3poTWhsL0M0Zkc0S3dJ?=
+ =?utf-8?B?VkRub1NhUDZoTFBHRGVwVDNEcXhvUFEvQkVhelNhK2FhUldCbVBScmJaY2ZY?=
+ =?utf-8?Q?r+cyKTFQ5WMLFctG+HmW5S8YLDjvOC4LIM4Atso?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: MWHPR11MB1789.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: d431c225-14e2-471b-d3c9-08d9531c80f2
+X-MS-Exchange-CrossTenant-originalarrivaltime: 30 Jul 2021 05:40:13.6093
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 46c98d88-e344-4ed4-8496-4ed7712e255d
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: qDCeoFerp/x+QYK15kFTRQnaIBl7dpLGxu9wD48mcLcyyMerQ16BmmGHl3LNd48Q6q0flbY+j/OgTqR/vbMCIw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR11MB1422
+X-OriginatorOrg: intel.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Refactor renesas_sdhi_probe() to avoid increasing numbers of
-sdhi_quirks_match[] entry when we add other stable SoCs like
-r8a779m*.
-
-Note that the sdhi_quirks_match[] is only needed on
-renesas_sdhi_internal_dmac.c so that of_data of
-renesas_sdhi_sys_dmac.c keeps as-is.
-
-Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- Changes from v3:
- - Add Reviewed-by tag (Geert-san, thanks!)
- - Remove Reported-by tag.
- - Modify renesas_sdhi_internal_dmac_probe() for readability.
- https://lore.kernel.org/linux-mmc/20210702112956.1065875-1-yoshihiro.shimoda.uh@renesas.com/
-
- Changes from RFC v2:
- - Remove "RFC" mark from the subject.
- - Add a comment to the Reported-by tag.
- - Move all quirks to internal_dmac.c so that expands the renesas_sdhi_probe()
-   arguments. So, update the commit subject and description.
- - Don't modify the renesas_sdhi_sys_dmac.c's of_data.
- - Replace tabs with a space in of_data_with_quirks variables.
- https://lore.kernel.org/linux-renesas-soc/20210629102033.847369-1-yoshihiro.shimoda.uh@renesas.com/
-
- Changes from RFC v1:
- - Fix build error in sys_dmac.c, reported by kernel test robot, so that
-   add Reported-by tag.
- - Always set quirks, not using else statement.
- - Fix a NULL dereference if of_device_get_match_data() returns NULL.
- https://lore.kernel.org/linux-renesas-soc/20210625075508.664674-1-yoshihiro.shimoda.uh@renesas.com/
-
- drivers/mmc/host/renesas_sdhi.h               |   9 +-
- drivers/mmc/host/renesas_sdhi_core.c          |  90 +-----------
- drivers/mmc/host/renesas_sdhi_internal_dmac.c | 135 +++++++++++++++++-
- drivers/mmc/host/renesas_sdhi_sys_dmac.c      |   3 +-
- 4 files changed, 141 insertions(+), 96 deletions(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi.h b/drivers/mmc/host/renesas_sdhi.h
-index 53eded81a53e..0c45e82ff0de 100644
---- a/drivers/mmc/host/renesas_sdhi.h
-+++ b/drivers/mmc/host/renesas_sdhi.h
-@@ -42,6 +42,11 @@ struct renesas_sdhi_quirks {
- 	const u8 (*hs400_calib_table)[SDHI_CALIB_TABLE_MAX];
- };
- 
-+struct renesas_sdhi_of_data_with_quirks {
-+	const struct renesas_sdhi_of_data *of_data;
-+	const struct renesas_sdhi_quirks *quirks;
-+};
-+
- struct tmio_mmc_dma {
- 	enum dma_slave_buswidth dma_buswidth;
- 	bool (*filter)(struct dma_chan *chan, void *arg);
-@@ -78,6 +83,8 @@ struct renesas_sdhi {
- 	container_of((host)->pdata, struct renesas_sdhi, mmc_data)
- 
- int renesas_sdhi_probe(struct platform_device *pdev,
--		       const struct tmio_mmc_dma_ops *dma_ops);
-+		       const struct tmio_mmc_dma_ops *dma_ops,
-+		       const struct renesas_sdhi_of_data *of_data,
-+		       const struct renesas_sdhi_quirks *quirks);
- int renesas_sdhi_remove(struct platform_device *pdev);
- #endif
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index e49ca0f7fe9a..6fc4cf3c9dce 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -305,27 +305,6 @@ static int renesas_sdhi_start_signal_voltage_switch(struct mmc_host *mmc,
- #define SH_MOBILE_SDHI_SCC_TMPPORT_CALIB_CODE_MASK	0x1f
- #define SH_MOBILE_SDHI_SCC_TMPPORT_MANUAL_MODE		BIT(7)
- 
--static const u8 r8a7796_es13_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
--	{ 3,  3,  3,  3,  3,  3,  3,  4,  4,  5,  6,  7,  8,  9, 10, 15,
--	 16, 16, 16, 16, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 25 },
--	{ 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  6,  7,  8, 11,
--	 12, 17, 18, 18, 18, 18, 18, 18, 18, 19, 20, 21, 22, 23, 25, 25 }
--};
--
--static const u8 r8a77965_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
--	{ 1,  2,  6,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 15, 15, 16,
--	 17, 18, 19, 20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31 },
--	{ 2,  3,  4,  4,  5,  6,  7,  9, 10, 11, 12, 13, 14, 15, 16, 17,
--	 17, 17, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 31, 31, 31 }
--};
--
--static const u8 r8a77990_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
--	{ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
--	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
--	{ 0,  0,  0,  1,  2,  3,  3,  4,  4,  4,  5,  5,  6,  8,  9, 10,
--	 11, 12, 13, 15, 16, 17, 17, 18, 18, 19, 20, 22, 24, 25, 26, 26 }
--};
--
- static inline u32 sd_scc_read32(struct tmio_mmc_host *host,
- 				struct renesas_sdhi *priv, int addr)
- {
-@@ -895,69 +874,12 @@ static void renesas_sdhi_enable_dma(struct tmio_mmc_host *host, bool enable)
- 	renesas_sdhi_sdbuf_width(host, enable ? width : 16);
- }
- 
--static const struct renesas_sdhi_quirks sdhi_quirks_4tap_nohs400 = {
--	.hs400_disabled = true,
--	.hs400_4taps = true,
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_4tap = {
--	.hs400_4taps = true,
--	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_nohs400 = {
--	.hs400_disabled = true,
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_bad_taps1357 = {
--	.hs400_bad_taps = BIT(1) | BIT(3) | BIT(5) | BIT(7),
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_bad_taps2367 = {
--	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es13 = {
--	.hs400_4taps = true,
--	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
--	.hs400_calib_table = r8a7796_es13_calib_table,
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_r8a77965 = {
--	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
--	.hs400_calib_table = r8a77965_calib_table,
--};
--
--static const struct renesas_sdhi_quirks sdhi_quirks_r8a77990 = {
--	.hs400_calib_table = r8a77990_calib_table,
--};
--
--/*
-- * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
-- * So, we want to treat them equally and only have a match for ES1.2 to enforce
-- * this if there ever will be a way to distinguish ES1.2.
-- */
--static const struct soc_device_attribute sdhi_quirks_match[]  = {
--	{ .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
--	{ .soc_id = "r8a7795", .revision = "ES1.*", .data = &sdhi_quirks_4tap_nohs400 },
--	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
--	{ .soc_id = "r8a7795", .revision = "ES3.*", .data = &sdhi_quirks_bad_taps2367 },
--	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
--	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
--	{ .soc_id = "r8a77961", .data = &sdhi_quirks_bad_taps1357 },
--	{ .soc_id = "r8a77965", .data = &sdhi_quirks_r8a77965 },
--	{ .soc_id = "r8a77980", .data = &sdhi_quirks_nohs400 },
--	{ .soc_id = "r8a77990", .data = &sdhi_quirks_r8a77990 },
--	{ /* Sentinel. */ },
--};
--
- int renesas_sdhi_probe(struct platform_device *pdev,
--		       const struct tmio_mmc_dma_ops *dma_ops)
-+		       const struct tmio_mmc_dma_ops *dma_ops,
-+		       const struct renesas_sdhi_of_data *of_data,
-+		       const struct renesas_sdhi_quirks *quirks)
- {
- 	struct tmio_mmc_data *mmd = pdev->dev.platform_data;
--	const struct renesas_sdhi_quirks *quirks = NULL;
--	const struct renesas_sdhi_of_data *of_data;
--	const struct soc_device_attribute *attr;
- 	struct tmio_mmc_data *mmc_data;
- 	struct tmio_mmc_dma *dma_priv;
- 	struct tmio_mmc_host *host;
-@@ -966,12 +888,6 @@ int renesas_sdhi_probe(struct platform_device *pdev,
- 	struct resource *res;
- 	u16 ver;
- 
--	of_data = of_device_get_match_data(&pdev->dev);
--
--	attr = soc_device_match(sdhi_quirks_match);
--	if (attr)
--		quirks = attr->data;
--
- 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!res)
- 		return -EINVAL;
-diff --git a/drivers/mmc/host/renesas_sdhi_internal_dmac.c b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-index e8f4863d8f1a..7660f7ea74dd 100644
---- a/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_internal_dmac.c
-@@ -15,6 +15,7 @@
- #include <linux/mmc/host.h>
- #include <linux/mod_devicetable.h>
- #include <linux/module.h>
-+#include <linux/of_device.h>
- #include <linux/pagemap.h>
- #include <linux/scatterlist.h>
- #include <linux/sys_soc.h>
-@@ -92,7 +93,7 @@ static struct renesas_sdhi_scc rcar_gen3_scc_taps[] = {
- 	},
- };
- 
--static const struct renesas_sdhi_of_data of_rza2_compatible = {
-+static const struct renesas_sdhi_of_data of_data_rza2 = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY,
- 	.tmio_ocr_mask	= MMC_VDD_32_33,
-@@ -107,7 +108,11 @@ static const struct renesas_sdhi_of_data of_rza2_compatible = {
- 	.max_segs	= 1,
- };
- 
--static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
-+static const struct renesas_sdhi_of_data_with_quirks of_rza2_compatible = {
-+	.of_data	= &of_data_rza2,
-+};
-+
-+static const struct renesas_sdhi_of_data of_data_rcar_gen3 = {
- 	.tmio_flags	= TMIO_MMC_HAS_IDLE_WAIT | TMIO_MMC_CLK_ACTUAL |
- 			  TMIO_MMC_HAVE_CBSY | TMIO_MMC_MIN_RCAR2,
- 	.capabilities	= MMC_CAP_SD_HIGHSPEED | MMC_CAP_SDIO_IRQ |
-@@ -122,11 +127,116 @@ static const struct renesas_sdhi_of_data of_rcar_gen3_compatible = {
- 	.max_segs	= 1,
- };
- 
-+static const u8 r8a7796_es13_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
-+	{ 3,  3,  3,  3,  3,  3,  3,  4,  4,  5,  6,  7,  8,  9, 10, 15,
-+	 16, 16, 16, 16, 16, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 25 },
-+	{ 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  6,  7,  8, 11,
-+	 12, 17, 18, 18, 18, 18, 18, 18, 18, 19, 20, 21, 22, 23, 25, 25 }
-+};
-+
-+static const u8 r8a77965_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
-+	{ 1,  2,  6,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 15, 15, 16,
-+	 17, 18, 19, 20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31 },
-+	{ 2,  3,  4,  4,  5,  6,  7,  9, 10, 11, 12, 13, 14, 15, 16, 17,
-+	 17, 17, 20, 21, 22, 23, 24, 25, 27, 28, 29, 30, 31, 31, 31, 31 }
-+};
-+
-+static const u8 r8a77990_calib_table[2][SDHI_CALIB_TABLE_MAX] = {
-+	{ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
-+	  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 },
-+	{ 0,  0,  0,  1,  2,  3,  3,  4,  4,  4,  5,  5,  6,  8,  9, 10,
-+	 11, 12, 13, 15, 16, 17, 17, 18, 18, 19, 20, 22, 24, 25, 26, 26 }
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_4tap_nohs400 = {
-+	.hs400_disabled = true,
-+	.hs400_4taps = true,
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_4tap = {
-+	.hs400_4taps = true,
-+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_nohs400 = {
-+	.hs400_disabled = true,
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_bad_taps1357 = {
-+	.hs400_bad_taps = BIT(1) | BIT(3) | BIT(5) | BIT(7),
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_bad_taps2367 = {
-+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_r8a7796_es13 = {
-+	.hs400_4taps = true,
-+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
-+	.hs400_calib_table = r8a7796_es13_calib_table,
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_r8a77965 = {
-+	.hs400_bad_taps = BIT(2) | BIT(3) | BIT(6) | BIT(7),
-+	.hs400_calib_table = r8a77965_calib_table,
-+};
-+
-+static const struct renesas_sdhi_quirks sdhi_quirks_r8a77990 = {
-+	.hs400_calib_table = r8a77990_calib_table,
-+};
-+
-+/*
-+ * Note for r8a7796 / r8a774a1: we can't distinguish ES1.1 and 1.2 as of now.
-+ * So, we want to treat them equally and only have a match for ES1.2 to enforce
-+ * this if there ever will be a way to distinguish ES1.2.
-+ */
-+static const struct soc_device_attribute sdhi_quirks_match[]  = {
-+	{ .soc_id = "r8a774a1", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
-+	{ .soc_id = "r8a7795", .revision = "ES1.*", .data = &sdhi_quirks_4tap_nohs400 },
-+	{ .soc_id = "r8a7795", .revision = "ES2.0", .data = &sdhi_quirks_4tap },
-+	{ .soc_id = "r8a7796", .revision = "ES1.[012]", .data = &sdhi_quirks_4tap_nohs400 },
-+	{ .soc_id = "r8a7796", .revision = "ES1.*", .data = &sdhi_quirks_r8a7796_es13 },
-+	{ /* Sentinel. */ },
-+};
-+
-+static const struct renesas_sdhi_of_data_with_quirks of_r8a7795_compatible = {
-+	.of_data = &of_data_rcar_gen3,
-+	.quirks = &sdhi_quirks_bad_taps2367,
-+};
-+
-+static const struct renesas_sdhi_of_data_with_quirks of_r8a77961_compatible = {
-+	.of_data = &of_data_rcar_gen3,
-+	.quirks = &sdhi_quirks_bad_taps1357,
-+};
-+
-+static const struct renesas_sdhi_of_data_with_quirks of_r8a77965_compatible = {
-+	.of_data = &of_data_rcar_gen3,
-+	.quirks = &sdhi_quirks_r8a77965,
-+};
-+
-+static const struct renesas_sdhi_of_data_with_quirks of_r8a77980_compatible = {
-+	.of_data = &of_data_rcar_gen3,
-+	.quirks = &sdhi_quirks_nohs400,
-+};
-+
-+static const struct renesas_sdhi_of_data_with_quirks of_r8a77990_compatible = {
-+	.of_data = &of_data_rcar_gen3,
-+	.quirks = &sdhi_quirks_r8a77990,
-+};
-+
-+static const struct renesas_sdhi_of_data_with_quirks of_rcar_gen3_compatible = {
-+	.of_data = &of_data_rcar_gen3,
-+};
-+
- static const struct of_device_id renesas_sdhi_internal_dmac_of_match[] = {
- 	{ .compatible = "renesas,sdhi-r7s9210", .data = &of_rza2_compatible, },
- 	{ .compatible = "renesas,sdhi-mmc-r8a77470", .data = &of_rcar_gen3_compatible, },
--	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_rcar_gen3_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a7795", .data = &of_r8a7795_compatible, },
- 	{ .compatible = "renesas,sdhi-r8a7796", .data = &of_rcar_gen3_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a77961", .data = &of_r8a77961_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a77965", .data = &of_r8a77965_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a77980", .data = &of_r8a77980_compatible, },
-+	{ .compatible = "renesas,sdhi-r8a77990", .data = &of_r8a77990_compatible, },
- 	{ .compatible = "renesas,rcar-gen3-sdhi", .data = &of_rcar_gen3_compatible, },
- 	{},
- };
-@@ -405,16 +515,27 @@ static const struct soc_device_attribute soc_dma_quirks[] = {
- 
- static int renesas_sdhi_internal_dmac_probe(struct platform_device *pdev)
- {
--	const struct soc_device_attribute *soc = soc_device_match(soc_dma_quirks);
-+	const struct soc_device_attribute *attr;
-+	const struct renesas_sdhi_of_data_with_quirks *of_data_quirks;
-+	const struct renesas_sdhi_quirks *quirks;
- 	struct device *dev = &pdev->dev;
- 
--	if (soc)
--		global_flags |= (unsigned long)soc->data;
-+	of_data_quirks = of_device_get_match_data(&pdev->dev);
-+	quirks = of_data_quirks->quirks;
-+
-+	attr = soc_device_match(soc_dma_quirks);
-+	if (attr)
-+		global_flags |= (unsigned long)attr->data;
-+
-+	attr = soc_device_match(sdhi_quirks_match);
-+	if (attr)
-+		quirks = attr->data;
- 
- 	/* value is max of SD_SECCNT. Confirmed by HW engineers */
- 	dma_set_max_seg_size(dev, 0xffffffff);
- 
--	return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops);
-+	return renesas_sdhi_probe(pdev, &renesas_sdhi_internal_dmac_dma_ops,
-+				  of_data_quirks->of_data, quirks);
- }
- 
- static const struct dev_pm_ops renesas_sdhi_internal_dmac_dev_pm_ops = {
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index 6956b83469c8..99e3426df702 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -451,7 +451,8 @@ static const struct tmio_mmc_dma_ops renesas_sdhi_sys_dmac_dma_ops = {
- 
- static int renesas_sdhi_sys_dmac_probe(struct platform_device *pdev)
- {
--	return renesas_sdhi_probe(pdev, &renesas_sdhi_sys_dmac_dma_ops);
-+	return renesas_sdhi_probe(pdev, &renesas_sdhi_sys_dmac_dma_ops,
-+				  of_device_get_match_data(&pdev->dev), NULL);
- }
- 
- static const struct dev_pm_ops renesas_sdhi_sys_dmac_dev_pm_ops = {
--- 
-2.25.1
-
+SGkgYWxsLA0KCVBsZWFzZSBoZWxwIHRvIHJldmlldyB0aGUgcGF0Y2ggc2V0OiBBZGQgc3VwcG9y
+dCBmb3IgZU1NQyBQSFkgb24gSW50ZWwgVGh1bmRlciBCYXkNCg0KUmVnYXJkcw0KUmFzaG1pDQoN
+Ci0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBBLCBSYXNobWkgPHJhc2htaS5hQGlu
+dGVsLmNvbT4gDQpTZW50OiBUdWVzZGF5LCBKdWx5IDIwLCAyMDIxIDU6MTIgUE0NClRvOiBsaW51
+eC1kcml2ZXJzLXJldmlldy1yZXF1ZXN0QGVjbGlzdHMuaW50ZWwuY29tOyBtaWNoYWwuc2ltZWtA
+eGlsaW54LmNvbTsgdWxmLmhhbnNzb25AbGluYXJvLm9yZzsgbGludXgtbW1jQHZnZXIua2VybmVs
+Lm9yZzsgbGludXgtYXJtLWtlcm5lbEBsaXN0cy5pbmZyYWRlYWQub3JnOyBsaW51eC1rZXJuZWxA
+dmdlci5rZXJuZWwub3JnOyBraXNob25AdGkuY29tOyB2a291bEBrZXJuZWwub3JnOyBhbmRyaXku
+c2hldmNoZW5rb0BsaW51eC5pbnRlbC5jb207IGxpbnV4LXBoeUBsaXN0cy5pbmZyYWRlYWQub3Jn
+DQpDYzogbWdyb3NzQGxpbnV4LmludGVsLmNvbTsga3Jpcy5wYW5AbGludXguaW50ZWwuY29tOyBa
+aG91LCBGdXJvbmcgPGZ1cm9uZy56aG91QGludGVsLmNvbT47IFNhbmdhbm5hdmFyLCBNYWxsaWth
+cmp1bmFwcGEgPG1hbGxpa2FyanVuYXBwYS5zYW5nYW5uYXZhckBpbnRlbC5jb20+OyBIdW50ZXIs
+IEFkcmlhbiA8YWRyaWFuLmh1bnRlckBpbnRlbC5jb20+OyBWYWlkeWEsIE1haGVzaCBSIDxtYWhl
+c2guci52YWlkeWFAaW50ZWwuY29tPjsgU3Jpa2FuZGFuLCBOYW5kaGluaSA8bmFuZGhpbmkuc3Jp
+a2FuZGFuQGludGVsLmNvbT47IERlbWFra2FuYXZhciwgS2VuY2hhcHBhIDxrZW5jaGFwcGEuZGVt
+YWtrYW5hdmFyQGludGVsLmNvbT47IEEsIFJhc2htaSA8cmFzaG1pLmFAaW50ZWwuY29tPg0KU3Vi
+amVjdDogW+KAnFBBVENI4oCdIDAvM10gQWRkIHN1cHBvcnQgZm9yIGVNTUMgUEhZIG9uIEludGVs
+IFRodW5kZXIgQmF5DQoNCkZyb206IFJhc2htaSBBIDxyYXNobWkuYUBpbnRlbC5jb20+DQoNClRo
+aXMgcGF0Y2ggc2V0IGVuYWJsZXMgdGhlIHN1cHBvcnQgZm9yIGVNTUMgUEhZIG9uIHRoZSBJbnRl
+bCBUaHVuZGVyIEJheSBTb0MuDQoNClBhdGNoIDEgSG9sZHMgdGhlIHJlbGV2YW50IERldmljZSBU
+cmVlIGJpbmRpbmdzIGRvY3VtZW50YXRpb24NCiAgICAgICAgYW5kIGxpc3RpbmdzIG9mIG5ldyBm
+aWxlcyBpbiBNQUlOVEFJTkVSUyBmaWxlIFBhdGNoIDIgQWRkcyBzdXBwb3J0IGZvciBlTU1DIElu
+dGVsIFRodW5kZXIgQmF5IFBhdGNoIDMgQWRkcyBUaHVuZGVyIEJheSBlTU1DIFBIWSBzdXBwb3J0
+DQoNClRoZSByZXZpZXcgY29tbWVudHMgZnJvbSBBZHJpYW4gSHVudGVyLCBLcmlzIFBhbiwgRnVy
+b25nIFpob3UgYW5kIE1hcmsgR3Jvc3MgaGF2ZSBiZWVuIGluY29ycG9yYXRlZC4NCg0KUGxlYXNl
+IGhlbHAgdG8gcmV2aWV3IHRoaXMgcGF0Y2ggc2V0DQoNClRoYW5rcw0KDQpSYXNobWkgQSAoMyk6
+DQogIGR0LWJpbmRpbmdzOiBwaHk6IGludGVsOiBBZGQgVGh1bmRlciBCYXkgZU1NQyBQSFkgYmlu
+ZGluZ3MNCiAgbW1jOiBzZGhjaS1vZi1hcmFzYW46IEFkZCBpbnRlbCBUaHVuZGVyIEJheSBTT0Mg
+c3VwcG9ydCB0byB0aGUgYXJhc2FuDQogICAgZU1NQyBkcml2ZXINCiAgcGh5OiBpbnRlbDogQWRk
+IFRodW5kZXIgQmF5IGVNTUMgUEhZIHN1cHBvcnQNCg0KIC4uLi9waHkvaW50ZWwscGh5LXRodW5k
+ZXJiYXktZW1tYy55YW1sICAgICAgICB8ICA0OSArKw0KIE1BSU5UQUlORVJTICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICB8ICAgNyArDQogZHJpdmVycy9tbWMvaG9zdC9zZGhjaS1v
+Zi1hcmFzYW4uYyAgICAgICAgICAgIHwgIDI5ICstDQogZHJpdmVycy9waHkvaW50ZWwvS2NvbmZp
+ZyAgICAgICAgICAgICAgICAgICAgIHwgIDEwICsNCiBkcml2ZXJzL3BoeS9pbnRlbC9NYWtlZmls
+ZSAgICAgICAgICAgICAgICAgICAgfCAgIDEgKw0KIGRyaXZlcnMvcGh5L2ludGVsL3BoeS1pbnRl
+bC10aHVuZGVyYmF5LWVtbWMuYyB8IDUwMCArKysrKysrKysrKysrKysrKysNCiA2IGZpbGVzIGNo
+YW5nZWQsIDU5NSBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pICBjcmVhdGUgbW9kZSAxMDA2
+NDQgRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL3BoeS9pbnRlbCxwaHktdGh1bmRl
+cmJheS1lbW1jLnlhbWwNCiBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9waHkvaW50ZWwvcGh5
+LWludGVsLXRodW5kZXJiYXktZW1tYy5jDQoNCi0tDQoyLjE3LjENCg0K
