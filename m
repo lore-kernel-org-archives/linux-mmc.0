@@ -2,122 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0812FC4320A
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jul 2021 14:02:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C878CC4320A
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jul 2021 15:28:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DE94F60720
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jul 2021 14:02:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id ACB6E6052B
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Jul 2021 15:28:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239020AbhG3OCa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Jul 2021 10:02:30 -0400
-Received: from www.zeus03.de ([194.117.254.33]:57246 "EHLO mail.zeus03.de"
+        id S239674AbhG3P2S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Jul 2021 11:28:18 -0400
+Received: from mail.kernel.org ([198.145.29.99]:33700 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S231247AbhG3OCa (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 30 Jul 2021 10:02:30 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=6xIPYCFVhkRvp/e7wjkgnLIIJQWx
-        cHmoYfQYZUWs6vk=; b=Pq7AzmiCKmZBWHxV4YRen6RawjBkk8DGzqvWe8MPwpxu
-        MpI4oVFGLrQGSlvtA93DScrXZHaw+mT9VJIcnWspOfPRQmrzsRvDsaaoLJr3CHbC
-        H50aMqmfiWEqgQm2nwK3bQtivG8lh2tvxG3PaDKN4qpzg5HrCuIvgtekRsSkDdM=
-Received: (qmail 3019641 invoked from network); 30 Jul 2021 16:02:24 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 30 Jul 2021 16:02:24 +0200
-X-UD-Smtp-Session: l3s3148p1@/Fo+q1fI0LIgAwDPXwtrAFZwfe2Gefyo
-Date:   Fri, 30 Jul 2021 16:02:24 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
+        id S239620AbhG3P2S (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 30 Jul 2021 11:28:18 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 1269A6023E;
+        Fri, 30 Jul 2021 15:28:12 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1627658893;
+        bh=kIAwJDaemvupetIvbkpv8ae8gOlFvu3AZm5atjlJyf0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=p8swqbJCrzZsSWfI7nkxi5tg1U1/IVDeetllIwgsJ5+jtp65HpqFmwBu9YuSYWdjb
+         JCU82wZBjS/J+zeOZwhHdEkuzCz+TJi/2UOilgYmnBmQIW6/hWQUt4IH4D96UcGGkS
+         LZnaTEMLZQUU6GU9izGdc/FNxIdPhoGNNiTfVqBkWwnn2eCNtRBuGEnCJTB0/iCugd
+         9Wy9oU0syo/CwrHWbNKxgjFKHAFfv5Tuw8csmMHT8Lfyf5gPSc0jMiDp7OOqugpsNY
+         dO6w2lXsFsjabpqesNtvYQgcPpIJYdZKOkFUt245XnVVjGDN1hhrss5eeymKfkEUMp
+         UpxYraUfTbCaQ==
+Date:   Fri, 30 Jul 2021 17:28:07 +0200
+From:   Wolfram Sang <wsa@kernel.org>
+To:     Ulrich Hecht <uli+renesas@fpond.eu>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
+Message-ID: <YQQah2Q8qmQPEl7F@ninjato>
+Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
+        Ulrich Hecht <uli+renesas@fpond.eu>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [RFC PATCH] mmc: only print retune error when we don't check for
- card removal
-Message-ID: <YQQGcP8OzROec+pa@ninjato>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-References: <20210630041658.7574-1-wsa+renesas@sang-engineering.com>
+        linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        ulf.hansson@linaro.org
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="9n/TLHDfBd9YNEVC"
+        protocol="application/pgp-signature"; boundary="K581topx12pYoyqW"
 Content-Disposition: inline
-In-Reply-To: <20210630041658.7574-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210514155318.16812-1-uli+renesas@fpond.eu>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---9n/TLHDfBd9YNEVC
+--K581topx12pYoyqW
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Jun 30, 2021 at 06:16:58AM +0200, Wolfram Sang wrote:
-> Skip printing a retune error when we scan for a removed card because we
-> then expect a failed command.
+On Fri, May 14, 2021 at 05:53:18PM +0200, Ulrich Hecht wrote:
+> The TMIO core sets a very low latency limit (100 us), but when using R-Car
+> SDHI hosts with SD cards, I have observed typical latencies of around 20-=
+30
+> ms. This prevents runtime PM from working properly, and the devices remain
+> on continuously.
 >=20
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> This patch sets the default latency limit to 100 ms to avoid that.
+>=20
+> Signed-off-by: Ulrich Hecht <uli+renesas@fpond.eu>
+
+Adding Shimoda-san to CC.
+
+Shimoda-san: can you kindly run your SDHI tests with this patch applied?
+That would be very kind, thank you!
+
 > ---
+>  drivers/mmc/host/renesas_sdhi_core.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 >=20
-> In my tests, detect_change was only set when a card was removed.
-> Inserting a card or resuming from RPM would print an error. Did I
-> overlook somethign or is this good to go?
-
-So, what about this to remove the bogus 'retune failure' command?
-I also think the code is a tad more readable this way.
-
->=20
->  drivers/mmc/core/core.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
->=20
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index b039dcff17f8..b7e6e5640640 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -937,11 +937,13 @@ int mmc_execute_tuning(struct mmc_card *card)
+> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/rene=
+sas_sdhi_core.c
+> index 635bf31a6735..4f41616cc6bb 100644
+> --- a/drivers/mmc/host/renesas_sdhi_core.c
+> +++ b/drivers/mmc/host/renesas_sdhi_core.c
+> @@ -32,6 +32,7 @@
+>  #include <linux/pinctrl/pinctrl-state.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/pm_domain.h>
+> +#include <linux/pm_qos.h>
+>  #include <linux/regulator/consumer.h>
+>  #include <linux/reset.h>
+>  #include <linux/sh_dma.h>
+> @@ -1147,6 +1148,9 @@ int renesas_sdhi_probe(struct platform_device *pdev,
+>  		host->ops.hs400_complete =3D renesas_sdhi_hs400_complete;
+>  	}
 > =20
->  	err =3D host->ops->execute_tuning(host, opcode);
-> =20
-> -	if (err)
-> +	if (!err)
-> +		mmc_retune_enable(host);
+> +	/* keep tmio_mmc_host_probe() from setting latency limit too low */
+> +	dev_pm_qos_expose_latency_limit(&pdev->dev, 100000);
 > +
-> +	/* Only print error when we don't check for card removal */
-> +	if (err && !host->detect_change)
->  		pr_err("%s: tuning execution failed: %d\n",
->  			mmc_hostname(host), err);
-> -	else
-> -		mmc_retune_enable(host);
-> =20
->  	return err;
->  }
+>  	ret =3D tmio_mmc_host_probe(host);
+>  	if (ret < 0)
+>  		goto edisclk;
 > --=20
-> 2.30.2
+> 2.20.1
 >=20
 
---9n/TLHDfBd9YNEVC
+--K581topx12pYoyqW
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmEEBnAACgkQFA3kzBSg
-KbaAMQ/7B32pi+nDFfonsyRSMFEgx/y2cUDAJkPlcVN4SlR7e3zUSXZ3Qd2E8ySK
-8Y8RODdgM9NjsOyZY2FWLyFWUnnKTJfwUOxlxcFeipIwrumufYSNc6iKJ9qya0ef
-7GxPpPP5XIqF4vWmIKgkef2INRU0eHW6QCvpuKDRQGfSjvtGLnzVBeNX1GXuYIPu
-0H3IFp41WoB0A5dIw4VsWR8GXK/MqlekiYMBq5ZBZQhWhIMK6pUW1zHAIEgzxegg
-sU/X8r+v2YlaODOCxbmaXDLjmkIlddq9OPNU2CpBNLIjOvvMZKEmtzM7L9+Lu78Y
-zZOfOCno53f1hmkFkCZjokRdoTPqpYMeNJugEov9Q1V7Mb2KT4y2NhmcvMRIuQgk
-aHX3g3cNR8e+DtPAM8vbHMp2lm7KkdQyCUTRFAwnQAAk6L5co2PXTowUXoVHjADb
-7W5CQpcq3utt2SyPoiK9zl1mfcPBRrlu/x6yeha0GcRM2DHRzG0tt3uEK0lhqpz/
-KjCr7kPT1wHS/UiiwlwPNF8unTUjTCQfKrzKQWBGZQaOXJ5AZYdnJFfqhRbwbRDJ
-EiFVmy0WveH6mjzYoWIb+upjQgIgbTOavai1yYVvIaPuMZOWUZQ4sh1oWgOQ5hgG
-JjXk1ZR7dOSeZIJS5J5+dDJxX4YNB/TOrotQLlGI9cyLdz3d14M=
-=sTNS
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmEEGoIACgkQFA3kzBSg
+KbY6ag/+McfND+KN/KYYW4qjAcqaAF2nOw37frAaOo5kpmgMqLDFg6XDgk54+jyR
+c/QLSUed3HPIK9eQ3G2fIvfOAsP9Epgua1d/DyVfZ1v+F57AyOMYG2qVpacAKBrW
+wtfycDgCZSP/fTsq0hwkXJD2COT0XWLuPJCPGzL+PgB3/gywDQw/TrgiEnEhW5nA
+c5Z1b2DdeylhDMUnzock7PD+NraG5m5mkLCcCCdwyKemfu53yA7+PsqfJUOtWiR6
+qg8Jjly1/ya6bU+pbQDZcYHz/jKbpCmZ9qtqxJlpqlDQQ85vTVQhEY3NV1EDGZkU
+p+OprfSvIT1hL7Tsn21iwGvxnVM+GuLpZBN+AoHBJmKe9EcgqnxwInZbRviD2v47
+uYESsCkg0ujTLqkO+hYCmPW43EANmghLRCQU0Bj3u53XYNopJKOlUYXJ5pkS7mN+
+xEsv5fwhE2XDzAvfhNAS3RsXP5R/XW5WvZVBPfC2rfqBHFW+J7n8RWvvXzkd/LLp
+e7P3ot5XSLi+VPaTVs00qve1jhDU/NQ+ebsZYn/uMdbGMj/CH1YSRHHCXT7lePit
+2tREB/EyeG26WY7nFKNV9af0ocKlELR34TNhat9lHS+1AvgLN2sPu421WrLC9jr+
+Opf2umHR0UvUaEPR/fKs24ywrSVR+xRhdT01lc1gINREDN/Fl+A=
+=khcG
 -----END PGP SIGNATURE-----
 
---9n/TLHDfBd9YNEVC--
+--K581topx12pYoyqW--
