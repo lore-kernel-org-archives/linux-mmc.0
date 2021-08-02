@@ -2,189 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3123BC4338F
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Aug 2021 10:42:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 242B2C4338F
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Aug 2021 11:30:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DBD560FA0
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Aug 2021 10:42:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0791D60FF2
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Aug 2021 11:30:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233218AbhHBKmS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Aug 2021 06:42:18 -0400
-Received: from so254-9.mailgun.net ([198.61.254.9]:12437 "EHLO
-        so254-9.mailgun.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231854AbhHBKmR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2021 06:42:17 -0400
-DKIM-Signature: a=rsa-sha256; v=1; c=relaxed/relaxed; d=mg.codeaurora.org; q=dns/txt;
- s=smtp; t=1627900928; h=Message-ID: References: In-Reply-To: Subject:
- Cc: To: From: Date: Content-Transfer-Encoding: Content-Type:
- MIME-Version: Sender; bh=darOhbQjZjiDGZ9KoG4mUCBwsmYEbyLqHS1GzH5OshY=;
- b=WtKigIDagg/iB+zaUkGbfn6alhG09dGERg7qAjVeSqMrmWdaBTzV1r2viJkTL745GpqMNO7C
- 5/l+LSugRzXJyIc2/Z9aZzJjeevnsEPczwYuxg/FpuyONRfQp3ZF4uGe37/JLCvCCGMZFtzw
- MRi8/KvQscB4tR8j4XSLEsltoyU=
-X-Mailgun-Sending-Ip: 198.61.254.9
-X-Mailgun-Sid: WyJiYTcxMiIsICJsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnIiwgImJlOWU0YSJd
-Received: from smtp.codeaurora.org
- (ec2-35-166-182-171.us-west-2.compute.amazonaws.com [35.166.182.171]) by
- smtp-out-n07.prod.us-east-1.postgun.com with SMTP id
- 6107cbe917c2b4047d403f51 (version=TLS1.2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256); Mon, 02 Aug 2021 10:41:45
- GMT
-Sender: sbhanu=codeaurora.org@mg.codeaurora.org
-Received: by smtp.codeaurora.org (Postfix, from userid 1001)
-        id 85C22C4323A; Mon,  2 Aug 2021 10:41:44 +0000 (UTC)
-Received: from mail.codeaurora.org (localhost.localdomain [127.0.0.1])
-        (using TLSv1 with cipher ECDHE-RSA-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: sbhanu)
-        by smtp.codeaurora.org (Postfix) with ESMTPSA id 7D3AFC433F1;
-        Mon,  2 Aug 2021 10:41:43 +0000 (UTC)
+        id S233255AbhHBLa3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Aug 2021 07:30:29 -0400
+Received: from mo4-p00-ob.smtp.rzone.de ([81.169.146.220]:17572 "EHLO
+        mo4-p00-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232740AbhHBLa3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Aug 2021 07:30:29 -0400
+X-Greylist: delayed 719 seconds by postgrey-1.27 at vger.kernel.org; Mon, 02 Aug 2021 07:30:29 EDT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1627903098;
+    s=strato-dkim-0002; d=fpond.eu;
+    h=Subject:References:In-Reply-To:Message-ID:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=Ucwn6Ack2yVMmcy+MDrXHYsh6wsuWfQk97JEUKaWrMM=;
+    b=KxXmRiXMgBQAI0M8OTBJjbs4X6rBJGJVTg44TjhgNsJ355bKVrjFdQBVnJAZHxnTRr
+    7qoaCyXL3lE8SAcq5k+m0ueHo1Wr4YZswK8ZbX+Sb0kBJ1GVquhnJ8SIFIeymrCYZ8S2
+    VruEDMk7UERUCl7BUqtpgMe3DfNnkzzNl+P6L93eX5pKFZVX3SCoklI+fPir/LEdEKwH
+    yvSDtIOm5OlWO9V0RYDm19xiSTZf869BB1iDbuRWqneU0zH5i5oZw9/E/HCXUjQMa135
+    EcVeV5jOKdluuR3JPy+4DOwKwjlJAJZa+jpzFcdGAuN6ERjnAm/c+bEKa8/iYJAGBwwy
+    48mQ==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":OWANVUa4dPFUgKR/3dpvnYP0Np73amq+g13rqGzvv3qxio1R8fCt/7B6PNk="
+X-RZG-CLASS-ID: mo00
+Received: from oxapp04-01.back.ox.d0m.de
+    by smtp-ox.front (RZmta 47.28.1 AUTH)
+    with ESMTPSA id n07311x72BIIDwY
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Mon, 2 Aug 2021 13:18:18 +0200 (CEST)
+Date:   Mon, 2 Aug 2021 13:18:18 +0200 (CEST)
+From:   Ulrich Hecht <uli@fpond.eu>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa@kernel.org>
+Cc:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Message-ID: <821963380.577567.1627903098435@webmail.strato.com>
+In-Reply-To: <TY2PR01MB3692486033934E1C007EBF6AD8EF9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
+ <YQQah2Q8qmQPEl7F@ninjato>
+ <TY2PR01MB3692486033934E1C007EBF6AD8EF9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+Subject: RE: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency
+ limit
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII;
- format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Date:   Mon, 02 Aug 2021 16:11:43 +0530
-From:   sbhanu@codeaurora.org
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, rampraka@codeaurora.org,
-        sayalil@codeaurora.org, sartgarg@codeaurora.org,
-        rnayak@codeaurora.org, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, robh+dt@kernel.org
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update the software timeout value for
- sdhc
-In-Reply-To: <1626435974-14462-1-git-send-email-sbhanu@codeaurora.org>
-References: <1626435974-14462-1-git-send-email-sbhanu@codeaurora.org>
-Message-ID: <d95ea0583c39b8e73f391502adb39b09@codeaurora.org>
-X-Sender: sbhanu@codeaurora.org
-User-Agent: Roundcube Webmail/1.3.9
+X-Priority: 3
+Importance: Normal
+X-Mailer: Open-Xchange Mailer v7.10.5-Rev17
+X-Originating-Client: open-xchange-appsuite
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Gentle Reminder
 
-Thanks,
-Sajida
+> On 08/02/2021 7:34 AM Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com> wrote:
+> 
+>  
+> Hi Wolfram-san, Ulrich-san,
+> 
+> > From: Wolfram Sang, Sent: Saturday, July 31, 2021 12:28 AM
+> > 
+> > On Fri, May 14, 2021 at 05:53:18PM +0200, Ulrich Hecht wrote:
+> > > The TMIO core sets a very low latency limit (100 us), but when using R-Car
+> > > SDHI hosts with SD cards, I have observed typical latencies of around 20-30
+> > > ms. This prevents runtime PM from working properly, and the devices remain
+> > > on continuously.
+> > >
+> > > This patch sets the default latency limit to 100 ms to avoid that.
+> > >
+> > > Signed-off-by: Ulrich Hecht <uli+renesas@fpond.eu>
+> > 
+> > Adding Shimoda-san to CC.
+> > 
+> > Shimoda-san: can you kindly run your SDHI tests with this patch applied?
+> 
+> Sure!
+> 
+> However, I have a question about this patch.
+> Would you know how to measure the latencies?
 
-On 2021-07-16 17:16, Shaik Sajida Bhanu wrote:
-> Whenever SDHC run at clock rate 50MHZ or below, the hardware data
-> timeout value will be 21.47secs, which is approx. 22secs and we have
-> a current software timeout value as 10secs. We have to set software
-> timeout value more than the hardware data timeout value to avioid 
-> seeing
-> the below register dumps.
-> 
-> [  332.953670] mmc2: Timeout waiting for hardware interrupt.
-> [  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP 
-> ===========
-> [  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  
-> 0x00007202
-> [  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  
-> 0x00000001
-> [  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 
-> 0x00000027
-> [  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 
-> 0x0000001f
-> [  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  
-> 0x00000000
-> [  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    
-> 0x00000007
-> [  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 
-> 0x00000000
-> [  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 
-> 0x03ff100b
-> [  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 
-> 0x00000000
-> [  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   
-> 0x0000808f
-> [  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 
-> 0x00000000
-> [  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
-> 0x00000000
-> [  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
-> 0x00000000
-> [  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
-> [  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
-> 0x0000000ffffff218
-> [  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
-> -----------
-> [  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
-> 0x6000642c | DLL cfg2: 0x0020a000
-> [  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
-> 0x00000000 | DDR cfg: 0x80040873
-> [  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
-> 0xf88218a8 Vndr func3: 0x02626040
-> [  333.102371] mmc2: sdhci: 
-> ============================================
-> 
-> So, set software timeout value more than hardware timeout value.
-> 
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
-> 
-> Changes since V3:
-> 	- Addressed minor comments from Adrain Hunter and retained his
-> 	  Acked-by Signed-off.
-> 
-> Changes since V2:
-> 	- Updated 22 with 22LL to avoid compiler warning as
-> 	  suggested by Adrian Hunter.
-> 	- Added a check to update software data timeout value if its value
-> 	  is less than the calculated hardware data timeout value as suggested
-> 	  by Veerabhadrarao Badiganti.
-> Changes since V1:
-> 	- Moved software data timeout update part to qcom specific file
-> 	  as suggested by Veerabhadrarao Badiganti.
-> ---
->  drivers/mmc/host/sdhci-msm.c | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c 
-> b/drivers/mmc/host/sdhci-msm.c
-> index e44b7a6..290a14c 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2089,6 +2089,23 @@ static void sdhci_msm_cqe_disable(struct
-> mmc_host *mmc, bool recovery)
->  	sdhci_cqe_disable(mmc, recovery);
->  }
-> 
-> +static void sdhci_msm_set_timeout(struct sdhci_host *host, struct
-> mmc_command *cmd)
-> +{
-> +	u32 count, start = 15;
-> +
-> +	__sdhci_set_timeout(host, cmd);
-> +	count = sdhci_readb(host, SDHCI_TIMEOUT_CONTROL);
-> +	/*
-> +	 * Update software timeout value if its value is less than hardware 
-> data
-> +	 * timeout value. Qcom SoC hardware data timeout value was calculated
-> +	 * using 4 * MCLK * 2^(count + 13). where MCLK = 1 / host->clock.
-> +	 */
-> +	if (cmd && cmd->data && host->clock > 400000 &&
-> +	    host->clock <= 50000000 &&
-> +	    ((1 << (count + start)) > (10 * host->clock)))
-> +		host->data_timeout = 22LL * NSEC_PER_SEC;
-> +}
-> +
->  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
->  	.enable		= sdhci_msm_cqe_enable,
->  	.disable	= sdhci_msm_cqe_disable,
-> @@ -2438,6 +2455,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
->  	.irq	= sdhci_msm_cqe_irq,
->  	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
->  	.set_power = sdhci_set_power_noreg,
-> +	.set_timeout = sdhci_msm_set_timeout,
->  };
-> 
->  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+IIRC I simply put a printk() in default_suspend_ok() that dumps td->suspend_latency_ns and td->resume_latency_ns.
+
+> I enabled function trace of rpm and checked the log, but I could not observe
+> any behavior changes with and without applying this patch.
+
+So you are saying that for you, the clock is suspended as expected when removing the card, even without this patch?
+If so, I wonder if there are variations between boards...
+
+CU
+Uli
