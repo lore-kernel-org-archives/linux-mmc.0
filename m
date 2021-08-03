@@ -2,131 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	UNPARSEABLE_RELAY autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76AC2C4338F
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Aug 2021 09:01:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61D37C4338F
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Aug 2021 11:16:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5B6A960F70
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Aug 2021 09:01:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 499EF6109F
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Aug 2021 11:16:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234807AbhHCJBp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Aug 2021 05:01:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33628 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234690AbhHCJBo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Aug 2021 05:01:44 -0400
-Received: from mail-oi1-x232.google.com (mail-oi1-x232.google.com [IPv6:2607:f8b0:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D9F2C0613D5
-        for <linux-mmc@vger.kernel.org>; Tue,  3 Aug 2021 02:01:34 -0700 (PDT)
-Received: by mail-oi1-x232.google.com with SMTP id u10so27392573oiw.4
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Aug 2021 02:01:34 -0700 (PDT)
+        id S235306AbhHCLRF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Aug 2021 07:17:05 -0400
+Received: from mail-eopbgr1410137.outbound.protection.outlook.com ([40.107.141.137]:7632
+        "EHLO JPN01-OS2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S235254AbhHCLRE (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Tue, 3 Aug 2021 07:17:04 -0400
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LvpvCbVSWIyPQVnPGAEewuB7o9PrzuOky1M0qeso0/v/QTRMGy7Aa7u5ko9VCySVUzipT5hQilub/VVM4Mq0BqCJ7fX5SSPk10zeGBhJKSncFpztuq3PaRWYQbbyTlht7H0QNWsZIZD56Wy7Vw7bZwW4qWXHG4K+34Js7YiTQj3OHJVGDB3rWvyAnmKROtu3WZ9UBjgA/bnc75habYlP14BfMEu4xpHSpi4bsVcilwBW6CUhy21VOnZX/GoUim0RfgdIoTUaXmPDehNIUVybARePxgIJinq/LaNQkaWEKsbyH6O/JwV3xheOq8TFg1rrk4ByXY3EKrnymS3fY+Q74w==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=O2cBtxzdoWs+Ihr3r2YFTipID4peN5QFnCaRpLyC5es=;
+ b=MbreePqZYPO2G7jYDWpqIXs75bcQV7X955pTz60JiV6l1SD7UeDFKT/OZXEoidzh2ZtieOB1CnK7xzaE6JAiUH09FWTRozP9QJJisDAx1hzuvaBRiz+xy6q4IChqzJwzAFe9/loNhvwKScv3Lfb0tsuhktB8xVUSrkup0fII0yeNbvsZGUTLj/acZzjBKsGieH30+j0ErU3NZMOjH5p1uuPjlYCaE0GQPzqMr0pSPhPsB3XmqkptQURzEtIShxbifbSpkjgpys7Cya/vJ3KuFuuY9gV7WG+VIjx9aqJY4wDKmVXzJBP1aOdqd/fOOi/UklmNU4mVGmXl4JVuTIhvTA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
+ dkim=pass header.d=renesas.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:in-reply-to:references:from:user-agent:date:message-id
-         :subject:to:cc;
-        bh=xUCQLTJHLMWIwjOk7GbpaIHrEiFMhqmAaVSQLefOhbc=;
-        b=GLArkjtdPgvCSnduTwRmjHH0GAo9b6Zfk37Ca+kYmtHHwq4RS5QnDFBfcMeehY9CEL
-         L7XvbwO2q0Gfa5/gVbzx+rh51yNdz2hqv2L1nvqrLTQeIttnjUrctF6dWXUx3aQ4fqmv
-         hlGdFxf/Ac9K84ELw8cCSCQ4T6mWyzsPFpBLs=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:in-reply-to:references:from
-         :user-agent:date:message-id:subject:to:cc;
-        bh=xUCQLTJHLMWIwjOk7GbpaIHrEiFMhqmAaVSQLefOhbc=;
-        b=tueD4CqQ6I9rLxqSwiVEFOaMAxICN2BOxNbFqfHqUSl+i8R9fDJ8LOBt7gbfYmVbNS
-         Xzz31i/XhU/LcxDgI4U84bTvw5K9K4YQ+I1BaHcIu7w36/xgk+0lLQUMZp3FcHRN7Zmc
-         efsG7YpcUVtr5dCmzfZqpBXlIVCnAXgLKu+skC4TtncekaB3J906IewdJF8Hp6SsOkhM
-         iRl2Bq3uVQ49xEqcc8HoCiiFtGpbwO4ZMaRmrWO9GemfAOrmQusfYllBRYnYNXzsDskx
-         U8XscRE50Y2+ipBmCmyIwrOnQ7tR53aEA7/pI9sb3TBL4hAoeVNTF7tHON1IFzf9kHnM
-         KbRg==
-X-Gm-Message-State: AOAM532SbtCektfJLFSuyNSTL06Y6K+5gonJf2LOnM2/VFHTipCyOa5B
-        X1/n64wqNTRPthGTqqZrARjA7FeNvh6K270H3AG3Yw==
-X-Google-Smtp-Source: ABdhPJzGuEtdB7bf7PJVfXlAaT1Nq8s0bZVsqUmh/GEvGvYp5hC0GqqhWmyijlaI9GXkCG3G08uwk6yRrfKWqP8vaYo=
-X-Received: by 2002:a05:6808:114a:: with SMTP id u10mr13972869oiu.19.1627981292067;
- Tue, 03 Aug 2021 02:01:32 -0700 (PDT)
-Received: from 753933720722 named unknown by gmailapi.google.com with
- HTTPREST; Tue, 3 Aug 2021 02:01:31 -0700
+ d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=O2cBtxzdoWs+Ihr3r2YFTipID4peN5QFnCaRpLyC5es=;
+ b=rKZDFgCH06YTJU54p1zgub9SCTcZavMv3Y8fDFm7T6PhznfdPs7KlXQ4HiAsLGzaT1O0RszDN7fHkjz68NIJm052xWSCtN2gVZNWML2M0aFdM/wSUO8St0/XwTfqcueCc+WPg/LsKweZXig5K5Fc9sNnCW8cn/CKz3Uww3bBOng=
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
+ by TYAPR01MB5340.jpnprd01.prod.outlook.com (2603:1096:404:803b::15) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4373.20; Tue, 3 Aug
+ 2021 11:16:52 +0000
+Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::7db6:310f:a5ed:82f6]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
+ ([fe80::7db6:310f:a5ed:82f6%3]) with mapi id 15.20.4373.026; Tue, 3 Aug 2021
+ 11:16:52 +0000
+From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+To:     Wolfram Sang <wsa@kernel.org>
+CC:     Ulrich Hecht <uli+renesas@fpond.eu>,
+        "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Subject: RE: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
+Thread-Topic: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
+Thread-Index: AQHXSNlLLnK0MeXzxECYWiEeEguOWqtcHUuAgAQPPJCAAHyHgIABdepw
+Date:   Tue, 3 Aug 2021 11:16:52 +0000
+Message-ID: <TY2PR01MB36929B0FD0562E6FE210BB6CD8F09@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
+ <YQQah2Q8qmQPEl7F@ninjato>
+ <TY2PR01MB3692486033934E1C007EBF6AD8EF9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <YQfqwyL4TGoFHisp@kunai>
+In-Reply-To: <YQfqwyL4TGoFHisp@kunai>
+Accept-Language: ja-JP, en-US
+Content-Language: ja-JP
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: kernel.org; dkim=none (message not signed)
+ header.d=none;kernel.org; dmarc=none action=none header.from=renesas.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: 11b3fb78-475d-4ef8-8c10-08d9567031e6
+x-ms-traffictypediagnostic: TYAPR01MB5340:
+x-microsoft-antispam-prvs: <TYAPR01MB53401FB5D332653B5E31DB1BD8F09@TYAPR01MB5340.jpnprd01.prod.outlook.com>
+x-ms-oob-tlc-oobclassifiers: OLM:8273;
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: i49goUNKXJU8EMIIsQ6nkXm6rkfcKD6+q7uDNcrbDdXIrD+PMBcbPqAPibVHEVOCSz2Tzal2AXW/M9OvbTHwAnbMqhs6CPU6VQg+yGrY5O0CjGor7QDfMuS1Ipon07oTv/lHzcOAOYlBnFB8zS4099dBFlhLri3keSdO/jsfKgDSdboZgBCNTCie6XQxj4LT40OHhsfh/xCYN4OG+OblPQQTz5tvOB46yAXBPcJZQ2Hy8Muo2rz8A9rPKh5sotBbiUPVmp10gExBtl0+XByzNPX/esORSgviJqfbzHJoG4YTzpc+nfaLP+dspr6NKIVrHUb/WGPbNKe/G+gsVDiDBfnaYTKRgeOdmlXsos84RTd++2jWn1Sk9b182Xn0Ky+kkDZUD/8nbQs4Qyhf8MtFhHCIB//xQ4ai/o/hHtZj0nlTARYy5Ov3ADW8bl9mb02H6GXl9osTe5+vX3DeSzHLlHEBCXpyidgGeMf7eSMN48Z8AvYDojvjbXJyfSVxl1ci1Yq2K7gePbH/prpTf7c2n5RjdpFMwfltGXyhkJXpJvnF2G4lqMH24wYxfvA9h6r1hg1ELSZ12nauORBPP3hxZbxNUWK31+q/Q3/fBsl5VGE64H4LhPBKm87gBhXhsZ3fo3hNiQCwitgktn+GXL2tngd6p1TaBUWdbLiP48JjUE+GJybsMae0fKEJYZbsx/xNq5bglwKnMga9ufU2kr/A0Q==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(346002)(39860400002)(366004)(136003)(396003)(376002)(6916009)(186003)(15650500001)(478600001)(5660300002)(9686003)(55016002)(71200400001)(52536014)(316002)(7696005)(86362001)(33656002)(64756008)(66556008)(4326008)(2906002)(6506007)(122000001)(83380400001)(54906003)(4744005)(8676002)(66946007)(38070700005)(8936002)(76116006)(38100700002)(66446008)(66476007);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?XTEcU84Ya1L5vgmbG/Qa5PXpIlwx32wrnw26csqbvo85kwwnF3dwcpGuW7Y8?=
+ =?us-ascii?Q?yAsOtEBwqWEWuzLsal8BveJLBDGMrfiz68WWLPDExW2zh2kqf7sbkDqoKqcq?=
+ =?us-ascii?Q?s4emwXu4TYO2rRZgyVMiqd8DxOFMnvlgcwNpVgVDj0HioqbrMreXiD7MCcPH?=
+ =?us-ascii?Q?WiVacnrpJNMEmw8vJzbZ1tXX3QXtUtHw7lSRB3BpVAeOBDacqMX79YBSmEZ6?=
+ =?us-ascii?Q?rVn7TLIEp+ePjRnju1saY0MFHh8wfgumyyKBtVSS4XFtKto4m6Rw7IrurqsD?=
+ =?us-ascii?Q?HamXwoe0ukbxCRvGyEYEtl2D4zwNWOahOPyOgMZHSHKVaIbgX7IWP6huyBjz?=
+ =?us-ascii?Q?7TNxrWqaw0f5RBBG90K9E9J38rabkxI77Avy7yercVo1hj9CIQxfzYk/+Kgk?=
+ =?us-ascii?Q?NKlT7EwOPCSvQCxPxKxP3UMzTrviv645eJh625lO8kfKoJN0tb4jLUYBVs3q?=
+ =?us-ascii?Q?RYOUTzGUGGDJvAkSEVChTfodr3oI0RNue8byrJjjsqekeAHCB1qX3GcR8ehF?=
+ =?us-ascii?Q?UlnawH4wRxsvt8uU89NTr+TXZXCTt+n9eSkzITwEES8i6IX3H0PwTqQPbbC9?=
+ =?us-ascii?Q?iFuSGDFlxUrGQS9UKzhMyD8WYa3rM9l0O/lEWFzI2N0BcpC0sARcme+G3uSG?=
+ =?us-ascii?Q?XOGUUaRYDQbH60Omvs4j3eHpNBARSqrJNWqMT8ovnLIIqI+XG4H9r3XMfByP?=
+ =?us-ascii?Q?XoLjcjA9HSNdMJ94YszGQCewj3geiH8PJv+mIrrzWrkitdCcQ8P7NGq06dxf?=
+ =?us-ascii?Q?rkMnPb9A/LE75FLtBGWyHgoKjMimCgNqQaMZfFNrG13fWfKw5S9UEJd0iON+?=
+ =?us-ascii?Q?JtzV5TGjTq7/FobQpQcl9v1Tr+qMQE1oVM7bFJFM4ryETJ3TDPFmynK3vJ3L?=
+ =?us-ascii?Q?bximwAUgIYXVUZqTsfsda2kk7Ibee8R4J/JcIN3Vf4BCsvt28BWkBuLcJkw+?=
+ =?us-ascii?Q?CRlO86mR0sDEjNtEQ27BkCfItlT4p5YKADJGOjnp2T3y4nTjiUgjCGzUOLyi?=
+ =?us-ascii?Q?jlfE/RVKVFerlL81R7dkCSHt+d98qGH1BFqZRqjOcmhLB9Hdg1zFeIv7xCkG?=
+ =?us-ascii?Q?IS4IZhR1z12l3FuMNoY24SejpA3U2pnb349ODrBnuJoKxTphTqatH0fjFWFE?=
+ =?us-ascii?Q?9eNvxxIK3xehGJF1aFap6emW0awt7fVZ9bqIZsDfLWGueuZFj3rGmsAN0QdM?=
+ =?us-ascii?Q?vGLceGG9uMOziUclqXgXFRc7zRvYbBWOCmPXYY/HZSpEES7l/MtgTveiYKEz?=
+ =?us-ascii?Q?LTHaYbReVts8QRo2TX2BisnbaYhRepFx6nB41c9LIZYs/DcLlePyuPzRqsgM?=
+ =?us-ascii?Q?EHl/I1uy85zyAiQUMdNgs0f0PU/Q/IYS5TUdbu2jwXbDbJbhTa21DMScRJRF?=
+ =?us-ascii?Q?WHQTZac=3D?=
+x-ms-exchange-transport-forked: True
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-In-Reply-To: <1626435974-14462-1-git-send-email-sbhanu@codeaurora.org>
-References: <1626435974-14462-1-git-send-email-sbhanu@codeaurora.org>
-From:   Stephen Boyd <swboyd@chromium.org>
-User-Agent: alot/0.9.1
-Date:   Tue, 3 Aug 2021 02:01:31 -0700
-Message-ID: <CAE-0n53tzuU-1Gb+krJKjJ5k=hmeBex1=qmJO+zLZBCL5DBhWw@mail.gmail.com>
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update the software timeout value for sdhc
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     asutoshd@codeaurora.org, stummala@codeaurora.org,
-        vbadigan@codeaurora.org, rampraka@codeaurora.org,
-        sayalil@codeaurora.org, sartgarg@codeaurora.org,
-        rnayak@codeaurora.org, cang@codeaurora.org,
-        pragalla@codeaurora.org, nitirawa@codeaurora.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org, agross@kernel.org,
-        bjorn.andersson@linaro.org, robh+dt@kernel.org
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: renesas.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 11b3fb78-475d-4ef8-8c10-08d9567031e6
+X-MS-Exchange-CrossTenant-originalarrivaltime: 03 Aug 2021 11:16:52.1665
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: DzwjicmZ8KXqY/wBqz7aeYI/nI+ZHfMjDewzK7u8SKAqAQi7HQdysNPWK44QVhTuo7DyTDg3m+7tO1ATnfqcH0XQC1oAzq9ffJ1bm4o4LGlbiVulGcTpb2Es29luo9eA
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB5340
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Shaik Sajida Bhanu (2021-07-16 04:46:14)
-> Whenever SDHC run at clock rate 50MHZ or below, the hardware data
-> timeout value will be 21.47secs, which is approx. 22secs and we have
-> a current software timeout value as 10secs. We have to set software
-> timeout value more than the hardware data timeout value to avioid seeing
-> the below register dumps.
->
-> [  332.953670] mmc2: Timeout waiting for hardware interrupt.
-> [  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
-> [  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
-> [  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
-> [  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
-> [  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
-> [  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
-> [  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
-> [  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
-> [  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
-> [  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
-> [  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
-> [  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
-> [  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
-> [  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
-> [  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
-> [  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
-> 0x0000000ffffff218
-> [  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
-> -----------
-> [  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
-> 0x6000642c | DLL cfg2: 0x0020a000
-> [  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
-> 0x00000000 | DDR cfg: 0x80040873
-> [  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
-> 0xf88218a8 Vndr func3: 0x02626040
-> [  333.102371] mmc2: sdhci: ============================================
->
-> So, set software timeout value more than hardware timeout value.
->
+Hi Wolfram-san,
 
-Should this be tagged for stable trees?
+> From: Wolfram Sang, Sent: Monday, August 2, 2021 9:53 PM
+>=20
+> > Would you know how to measure the latencies?
+>=20
+> I didn't measure the latencies itself. I just checked 'clk_summary' in
+> debugfs and verified that finally clocks are disabled by RPM. Because
+> only with this patch, clk_enable-cnt goes to zero when SD card is
+> removed or eMMC has no activity.
 
-> Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> ---
->
-> Changes since V3:
->         - Addressed minor comments from Adrain Hunter and retained his
->           Acked-by Signed-off.
->
-> Changes since V2:
->         - Updated 22 with 22LL to avoid compiler warning as
->           suggested by Adrian Hunter.
->         - Added a check to update software data timeout value if its value
->           is less than the calculated hardware data timeout value as suggested
->           by Veerabhadrarao Badiganti.
-> Changes since V1:
->         - Moved software data timeout update part to qcom specific file
->           as suggested by Veerabhadrarao Badiganti.
+Thank you for your comment! Now I understood :)
+So, I'll test this patch with my test environment tomorrow.
+
+Best regards,
+Yoshihiro Shimoda
+
