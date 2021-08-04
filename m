@@ -2,94 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89EF3C4320A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:15:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C192C4320A
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:20:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 637EA61037
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:15:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 21FC260FC4
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:20:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229655AbhHDQPa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 12:15:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:38466 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229648AbhHDQP3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 4 Aug 2021 12:15:29 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 8AC5F60F35;
-        Wed,  4 Aug 2021 16:15:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628093717;
-        bh=SU7iytpCAGzQPHujZgCX1j7w+mEyOgO8m5L4Sfkfong=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=c0iuJnE+Iq2qLARWx2kO/wSRb9gScSFH2nSxE+ddHBNkgc+DefJHN4DSiqejGP2/E
-         4gHjzSW2bJZufF+GODGh0BLiCo8vrStx6Wr2Ikc+kDy/gPKWdX69wjdvTURirYRdQP
-         yCY2AuyK9zN73Zw4glL3i/xCcNy0f80gjzop3EzmqAthLGu/Cz+tnGKkt1eiTrwyRG
-         K8cXR8i87ZRn3/oJtNKkCmeR3IRw5GAE/eGTXrj7z9AZrnuwaaX4hoKsEaLHL6tXQu
-         L67m89axZ3atNglt5rGg0LeIeJMJ97jK3SOy+DmbDdY5sV/RTCrdK40YD4t5iZoxqN
-         wlemh04Wm9Y8g==
-Date:   Wed, 4 Aug 2021 17:15:01 +0100
-From:   Mark Brown <broonie@kernel.org>
-To:     Peter Geis <pgwipeout@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        devicetree@vger.kernel.org
-Subject: Re: [BUG] mmc_regulator_set_ocr can't cope with regulator-fixed
-Message-ID: <20210804161501.GB26252@sirena.org.uk>
-References: <CAMdYzYrx8pgeyK7u=kcopZ+Wae+fQdr_uM4AuVjqWKfZYikgcA@mail.gmail.com>
+        id S236596AbhHDQUk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 12:20:40 -0400
+Received: from mo4-p00-ob.smtp.rzone.de ([81.169.146.162]:17323 "EHLO
+        mo4-p00-ob.smtp.rzone.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234064AbhHDQUj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 12:20:39 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1628093840;
+    s=strato-dkim-0002; d=fpond.eu;
+    h=Subject:References:In-Reply-To:Message-ID:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=g0GYnP3dGz4ruBQtKclIclh6QBiJA0JW+al2ag0oTZY=;
+    b=cuE7JVMb+idPOq9Oukoozu1JgSfdNdGBocyXXXHMq1kWHaGEocr3RiI/UFybAVKhuY
+    mKFTQc5AiR6r8dfSO9/HFVGC+0z/wykExt30AuEEHEvOnJUPM62o7XjpiiHGsJjKEEaV
+    YSEH45bRMqxygtWWI7VDjPCEVyN/94ncDfcFmxHMaa0fS1mMwHed5zD01DrPTHUJvg3m
+    D1tA5NrHE1XmekNn+TQ/aTKTi4uz1wSzXBDTkjPTEzOzQlAuPp1w98oA8+Z0tNBHtKDh
+    YFkBLoBb8qI4WBKzkO9JqUCT4xrQAC4cgrUw2bGvQtN9kb6Ff1D5ncAb+UMw4qBzZapG
+    0s4A==
+Authentication-Results: strato.com;
+    dkim=none
+X-RZG-AUTH: ":OWANVUa4dPFUgKR/3dpvnYP0Np73amq+g13rqGzvv3qxio1R8fCt/7B6PNk="
+X-RZG-CLASS-ID: mo00
+Received: from oxapp04-01.back.ox.d0m.de
+    by smtp-ox.front (RZmta 47.31.0 AUTH)
+    with ESMTPSA id v006c2x74GHJ2G4
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (curve X9_62_prime256v1 with 256 ECDH bits, eq. 3072 bits RSA))
+        (Client did not present a certificate);
+    Wed, 4 Aug 2021 18:17:19 +0200 (CEST)
+Date:   Wed, 4 Aug 2021 18:17:19 +0200 (CEST)
+From:   Ulrich Hecht <uli@fpond.eu>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Wolfram Sang <wsa@kernel.org>
+Cc:     "linux-renesas-soc@vger.kernel.org" 
+        <linux-renesas-soc@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Message-ID: <1091982155.203247.1628093839914@webmail.strato.com>
+In-Reply-To: <TY2PR01MB369279B6F76FD5C3044FCDDDD8F19@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+References: <20210514155318.16812-1-uli+renesas@fpond.eu>
+ <YQQah2Q8qmQPEl7F@ninjato>
+ <TY2PR01MB3692486033934E1C007EBF6AD8EF9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <821963380.577567.1627903098435@webmail.strato.com>
+ <TY2PR01MB369245D958BD9EB77488CB43D8F09@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+ <TY2PR01MB369279B6F76FD5C3044FCDDDD8F19@TY2PR01MB3692.jpnprd01.prod.outlook.com>
+Subject: RE: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency
+ limit
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="i0/AhcQY5QxfSsSZ"
-Content-Disposition: inline
-In-Reply-To: <CAMdYzYrx8pgeyK7u=kcopZ+Wae+fQdr_uM4AuVjqWKfZYikgcA@mail.gmail.com>
-X-Cookie: MOUNT TAPE U1439 ON B3, NO RING
-User-Agent: Mutt/1.10.1 (2018-07-13)
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-Priority: 3
+Importance: Normal
+X-Mailer: Open-Xchange Mailer v7.10.5-Rev17
+X-Originating-Client: open-xchange-appsuite
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---i0/AhcQY5QxfSsSZ
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+> On 08/04/2021 7:29 AM Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com> wrote:
+> > From: Yoshihiro Shimoda, Sent: Tuesday, August 3, 2021 8:17 PM
+> > 
+> > So, I'll test this patch with my test environment tomorrow.
+> 
+> Unfortunately, this patch failed on mmc_test driver.
 
-On Wed, Aug 04, 2021 at 10:32:52AM -0400, Peter Geis wrote:
+Confirmed on Salvator-XS M3-N. :/
 
-> Removing the vmmc phandle from the sdio node is an option, but then it
-> doesn't fully describe the hardware (it's also a non-standard 4.4v).
-> I had considered changing the check in dw-mmc.c [1] to continue in the
-> case of -EINVAL, but there are other places in the regulator framework
-> that can also return that and it doesn't address the underlying issue.
+> I'm not sure, but perhaps we have a potential issue on runtime PM with SDHI driver?
 
-What is the underlying issue that you don't see as being fixed if the
-MMC code is able to cope with not being able to read the voltage?  If we
-don't know what voltage the regulator has then no amount of wishful
-thinking is going to give us that knowledge, if we want to proceed with
-controlling the device then the MMC code is going to need to make some
-decisions about what it's safe to do given the limited information it
-has available to it.  Otherwise there's no option other than providing
-the information about the voltage.
+It sure feels like it.
 
---i0/AhcQY5QxfSsSZ
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmEKvQQACgkQJNaLcl1U
-h9C12Af8DblVDI9WXSmbrPRXViKHLSNZFzqp2ZuGthopEX5957SrGd87e5iV+I/g
-gre6Jo3qS3dGIailxhWX4Tcyd/OztkwsS4V9ep1FBb3Iqo6qBbByMHwD/w2wF7sw
-zYDzwdN0yUltexPHqnPjxatTxrTL09SM8NnIl0018t1hl5UKtM/KU8YN6nFJEPLH
-4Q2ooIe2pPSz7gsg4fW1xsmxJXCqUulFtoyK59mwoHrvfdrLWWIXvvCh87c7LCxk
-kwhYlg3SbIcZlZvLL1lVcMbPnZj6F3lClwHbzhy8jAP/LXF0rtFjbvDjZJZUImq/
-3BOF/lOC6PcaomF/mguPVTzZj2XXoQ==
-=L2o3
------END PGP SIGNATURE-----
-
---i0/AhcQY5QxfSsSZ--
+CU
+Uli
