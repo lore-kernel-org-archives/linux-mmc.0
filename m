@@ -5,27 +5,27 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A71D6C4320A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 07:23:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D3BCC4338F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 09:19:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 800FF60F8F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 07:23:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4D7CE60F41
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 09:19:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235796AbhHDHXZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 03:23:25 -0400
-Received: from relmlor1.renesas.com ([210.160.252.171]:8657 "EHLO
+        id S235606AbhHDJUA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 05:20:00 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:57742 "EHLO
         relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S235736AbhHDHXY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 03:23:24 -0400
+        by vger.kernel.org with ESMTP id S235443AbhHDJUA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 05:20:00 -0400
 X-IronPort-AV: E=Sophos;i="5.84,293,1620658800"; 
-   d="scan'208";a="89787602"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 04 Aug 2021 16:23:11 +0900
+   d="scan'208";a="89801999"
+Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
+  by relmlie5.idc.renesas.com with ESMTP; 04 Aug 2021 18:19:46 +0900
 Received: from localhost.localdomain (unknown [10.226.92.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id E29704010902;
-        Wed,  4 Aug 2021 16:23:07 +0900 (JST)
+        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 1308E42389D2;
+        Wed,  4 Aug 2021 18:19:43 +0900 (JST)
 From:   Biju Das <biju.das.jz@bp.renesas.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>
@@ -37,9 +37,9 @@ Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
         Biju Das <biju.das@bp.renesas.com>,
         Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         linux-renesas-soc@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
-Date:   Wed,  4 Aug 2021 08:23:05 +0100
-Message-Id: <20210804072305.20932-1-biju.das.jz@bp.renesas.com>
+Subject: [PATCH v2] dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
+Date:   Wed,  4 Aug 2021 10:19:40 +0100
+Message-Id: <20210804091940.23983-1-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -50,11 +50,14 @@ Document RZ/G2L SDHI controller bindings.
 Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
 ---
- .../devicetree/bindings/mmc/renesas,sdhi.yaml | 97 ++++++++++++-------
- 1 file changed, 62 insertions(+), 35 deletions(-)
+v1->v2:
+ * Fixed dtbs-check issue for RZ/A{1,2} platforms.
+---
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 95 ++++++++++++-------
+ 1 file changed, 60 insertions(+), 35 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 677989bc5924..ed05e49d61af 100644
+index 677989bc5924..3a90dd447e17 100644
 --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 @@ -9,9 +9,6 @@ title: Renesas SDHI SD/MMC controller
@@ -117,7 +120,7 @@ index 677989bc5924..ed05e49d61af 100644
  
    dmas:
      minItems: 4
-@@ -112,6 +108,52 @@ properties:
+@@ -112,6 +108,50 @@ properties:
  
    max-frequency: true
  
@@ -133,6 +136,8 @@ index 677989bc5924..ed05e49d61af 100644
 +              - renesas,sdhi-r7s9210
 +    then:
 +      properties:
++        clocks:
++          maxItems: 2
 +        clock-names:
 +          items:
 +            - const: core
@@ -162,15 +167,11 @@ index 677989bc5924..ed05e49d61af 100644
 +            - description: ACLK, SDHI channel bus clock.
 +      required:
 +        - resets
-+    else:
-+      properties:
-+        clocks:
-+          maxItems: 1
 +
  required:
    - compatible
    - reg
-@@ -119,21 +161,6 @@ required:
+@@ -119,21 +159,6 @@ required:
    - clocks
    - power-domains
  
