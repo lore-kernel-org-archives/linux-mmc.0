@@ -5,208 +5,186 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 913B3C4320A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0697C4338F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7DB2661037
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4DEA61008
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237799AbhHDLfq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 07:35:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43222 "EHLO
+        id S237768AbhHDLfs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 07:35:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237777AbhHDLfn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 07:35:43 -0400
-Received: from mail-ua1-x92d.google.com (mail-ua1-x92d.google.com [IPv6:2607:f8b0:4864:20::92d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 354EDC0617A3
-        for <linux-mmc@vger.kernel.org>; Wed,  4 Aug 2021 04:35:30 -0700 (PDT)
-Received: by mail-ua1-x92d.google.com with SMTP id d6so731882uav.2
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Aug 2021 04:35:30 -0700 (PDT)
+        with ESMTP id S237592AbhHDLfr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 07:35:47 -0400
+Received: from mail-ua1-x92e.google.com (mail-ua1-x92e.google.com [IPv6:2607:f8b0:4864:20::92e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A5E1C06179A
+        for <linux-mmc@vger.kernel.org>; Wed,  4 Aug 2021 04:35:34 -0700 (PDT)
+Received: by mail-ua1-x92e.google.com with SMTP id 91so716402uas.10
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Aug 2021 04:35:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=K+XPIBdEmBiE3IWUYxG9LKoaZ2lDQ33Dr5Yh21o59y8=;
-        b=ji72+81tL3oN9fkldOo7UUKwYqThUIAp8yuurX3vzylYFFpYopB5IZQgF2GArGEpgd
-         fXlPEv9zrH+KvqSWd+zY1vj5CtZ/PtJgl8Gv5AIETYBBs8uT9HroRFWNpHwhv/GvjKF0
-         ii8UxAzbj/4gdOH//ZFPxq5xEY55O+Cvusj1FiACbAlgCMBQJs37R8ZQ7COXgwjtefuf
-         YZMembJuAN4CJxg2eRLLNOuYxZeylTrngIKus7Nnridjxkzd2NP+Beoq3wzgp8POqEw4
-         o3HZN7YiUyfmMejpJJ82nezWm+YCJZpHIDtNXJH4Ke8ilF/+JdVhloXUuNC+pMr5ixg+
-         71Tw==
+        bh=GJegJFwVm20ORnlkmvxDZfnK1lDL7HuFBtCqp8AL7RI=;
+        b=StgM0cGz0m8s0GyqVZ4fqk32AfonGg+laHvo/013QZDYaAdgWrl3Ww+kRsht6Eu3+8
+         MS7x9O9smW31yWz3qIiVWQDGLonDqCgVRpfqDkArB9FSrED6pKbVFvDa5Vln56dpkBgc
+         Co61/33bqfgQMhNnBP1RVKZ/RgVGx9K23rgtPIsHkb5yDzjj594Zbuzj9fopVkyRJrK9
+         EFaC9r/MI3S+SLTHzsQIojiL2LAPU+Ohn3opcgoR10ctBxFQuhX5m/WRT2lRAMP/5McW
+         S8Yk8m03tqayvNXOeXsaa94JUX7kSvU+QLHG3NqzMPObA9Q3kyxjru+/gev8WPUvfoc9
+         Reig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=K+XPIBdEmBiE3IWUYxG9LKoaZ2lDQ33Dr5Yh21o59y8=;
-        b=PBiha8fgJqFQcyMQq4JhgtktqlSkhX6mex7Ipc7XY3NATS/TrTv630grNe+l7QKYje
-         e2U7ECZ56kepLVoJ4ASLqBfDFXKjsjuodBGaIkxA+Q84xmm3TodGxn2Ehip5AZSTglIU
-         HKGftS/zLB4QSuE9Th5lCCQjlX5krZaDYfUWaq0uePE9woP8VknPdKWpKheYqFfLQQrg
-         fOrhumAi31zdEspTu+TC84ERrGCjSSOoILuhYMzwHQB4cHTg4VRwnnOT9ePsz37IQ+PO
-         9YHE5sesn9Egqe02obx0KSpZOdy4iheRIkLwWbAcwOVWcSN+QRfOLQxLgiZW+BASyAFX
-         KUJQ==
-X-Gm-Message-State: AOAM530pUTgu7ZN8PNFUBWiwYZUbnPVJoPn0kEPkutKMNAaN+bhtZV6+
-        f4S5Z0xdP/14TcwLXyE0VA8Q3iMrwhbzmS2nAi7jrQ==
-X-Google-Smtp-Source: ABdhPJwxHFU3OlHmpSdL0NsTNoSoJrlQpBg8cFrTZ79lrYAsD1hih94K7o8DEMExOnWFiAC79uyc3X/AFM4kjRbEYUI=
-X-Received: by 2002:a9f:25a7:: with SMTP id 36mr9392519uaf.129.1628076929325;
- Wed, 04 Aug 2021 04:35:29 -0700 (PDT)
+        bh=GJegJFwVm20ORnlkmvxDZfnK1lDL7HuFBtCqp8AL7RI=;
+        b=ioJ4gEXJCbga44CWG+DJ50fh6wmDWNAFT5v5f+P0BUu4Ad+7b58xinOoTFVBU9nece
+         t692HTXuhY5I7Cib9hoUPcgHIOQI8ZMZ7bCs8ef+uuNngE0bmnavR2SChwj9k5kxxJ6h
+         ZxUcuIyXxw88gOHlCXyLa0dx5dvr0eJyVPw6b9YidXv7Ik6EjhGYw2fGGbbzQIfoyy8T
+         TMJWcPCoTVnolujPCQFiyVvxv4SUrzGtX+1qZUsak4KByOfHjNSdp/5FsGEukfedMYqR
+         RgTNOpirSS83ijX9V7sRYLo80Xk0r6gx+wrIyjIPbWPOlkhdiWxxd6GMWAUVEp9RIJ7l
+         YhoA==
+X-Gm-Message-State: AOAM5311cqiOnsXlSqxjcr07glgc4ixnz99AQ4zn7RaWIt9DbjslhtO1
+        LyWC4N3D6tR5UMaoUCW2+xaqHOxHYVvKc/PtbGBtew==
+X-Google-Smtp-Source: ABdhPJzvVPzepoJ7BdSwEREjqqV2HJFdMRbbqsDMpncElUpIUZse+posCzzbSGDQC8QwEnEOLPnOeqA3trIUYo8P6Ws=
+X-Received: by 2002:ab0:60c9:: with SMTP id g9mr9854370uam.100.1628076933258;
+ Wed, 04 Aug 2021 04:35:33 -0700 (PDT)
 MIME-Version: 1.0
-References: <1626435974-14462-1-git-send-email-sbhanu@codeaurora.org> <d95ea0583c39b8e73f391502adb39b09@codeaurora.org>
-In-Reply-To: <d95ea0583c39b8e73f391502adb39b09@codeaurora.org>
+References: <20210719193413.3792615-1-festevam@gmail.com>
+In-Reply-To: <20210719193413.3792615-1-festevam@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Aug 2021 13:34:52 +0200
-Message-ID: <CAPDyKFp0O-N79QzHtoaC0+yWvYbTy1mGCjn7wivLvFvJ7_oNiA@mail.gmail.com>
-Subject: Re: [PATCH V4] mmc: sdhci-msm: Update the software timeout value for sdhc
-To:     Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Asutosh Das <asutoshd@codeaurora.org>,
-        Sahitya Tummala <stummala@codeaurora.org>,
-        Veerabhadrarao Badiganti <vbadigan@codeaurora.org>,
-        Ram Prakash Gupta <rampraka@codeaurora.org>,
-        Sayali Lokhande <sayalil@codeaurora.org>,
-        Sarthak Garg <sartgarg@codeaurora.org>,
-        Rajendra Nayak <rnayak@codeaurora.org>, cang@codeaurora.org,
-        Pradeep P V K <pragalla@codeaurora.org>,
-        nitirawa@codeaurora.org, linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Stephen Boyd <swboyd@chromium.org>
+Date:   Wed, 4 Aug 2021 13:34:56 +0200
+Message-ID: <CAPDyKFqa8wDOHOsGp7hD6JYhWfdkwadQkeyJPP4pFWxHMWjP+w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Remove unneeded mmc-esdhc-imx.h header
+To:     Fabio Estevam <festevam@gmail.com>
+Cc:     dl-linux-imx <linux-imx@nxp.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Stephen
+On Mon, 19 Jul 2021 at 21:34, Fabio Estevam <festevam@gmail.com> wrote:
+>
+> After the i.MX conversion to a DT-only platform, the mmc-esdhc-imx.h
+> header file is no longer used outside the driver, so move its content
+> to the sdhci-esdhc-imx driver and remove the header.
+>
+> Signed-off-by: Fabio Estevam <festevam@gmail.com>
 
-On Mon, 2 Aug 2021 at 12:41, <sbhanu@codeaurora.org> wrote:
->
-> Gentle Reminder
->
-> Thanks,
-> Sajida
->
-> On 2021-07-16 17:16, Shaik Sajida Bhanu wrote:
-> > Whenever SDHC run at clock rate 50MHZ or below, the hardware data
-> > timeout value will be 21.47secs, which is approx. 22secs and we have
-> > a current software timeout value as 10secs. We have to set software
-> > timeout value more than the hardware data timeout value to avioid
-> > seeing
-> > the below register dumps.
-> >
-> > [  332.953670] mmc2: Timeout waiting for hardware interrupt.
-> > [  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP
-> > ===========
-> > [  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:
-> > 0x00007202
-> > [  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:
-> > 0x00000001
-> > [  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode:
-> > 0x00000027
-> > [  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl:
-> > 0x0000001f
-> > [  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:
-> > 0x00000000
-> > [  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:
-> > 0x00000007
-> > [  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat:
-> > 0x00000000
-> > [  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab:
-> > 0x03ff100b
-> > [  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int:
-> > 0x00000000
-> > [  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:
-> > 0x0000808f
-> > [  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr:
-> > 0x00000000
-> > [  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:
-> > 0x00000000
-> > [  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:
-> > 0x00000000
-> > [  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
-> > [  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
-> > 0x0000000ffffff218
-> > [  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
-> > -----------
-> > [  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
-> > 0x6000642c | DLL cfg2: 0x0020a000
-> > [  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
-> > 0x00000000 | DDR cfg: 0x80040873
-> > [  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
-> > 0xf88218a8 Vndr func3: 0x02626040
-> > [  333.102371] mmc2: sdhci:
-> > ============================================
-> >
-> > So, set software timeout value more than hardware timeout value.
-> >
-> > Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
-> > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-Applied for fixes and by adding a stable tag, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
-> > ---
-> >
-> > Changes since V3:
-> >       - Addressed minor comments from Adrain Hunter and retained his
-> >         Acked-by Signed-off.
-> >
-> > Changes since V2:
-> >       - Updated 22 with 22LL to avoid compiler warning as
-> >         suggested by Adrian Hunter.
-> >       - Added a check to update software data timeout value if its value
-> >         is less than the calculated hardware data timeout value as suggested
-> >         by Veerabhadrarao Badiganti.
-> > Changes since V1:
-> >       - Moved software data timeout update part to qcom specific file
-> >         as suggested by Veerabhadrarao Badiganti.
-> > ---
-> >  drivers/mmc/host/sdhci-msm.c | 18 ++++++++++++++++++
-> >  1 file changed, 18 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-msm.c
-> > b/drivers/mmc/host/sdhci-msm.c
-> > index e44b7a6..290a14c 100644
-> > --- a/drivers/mmc/host/sdhci-msm.c
-> > +++ b/drivers/mmc/host/sdhci-msm.c
-> > @@ -2089,6 +2089,23 @@ static void sdhci_msm_cqe_disable(struct
-> > mmc_host *mmc, bool recovery)
-> >       sdhci_cqe_disable(mmc, recovery);
-> >  }
-> >
-> > +static void sdhci_msm_set_timeout(struct sdhci_host *host, struct
-> > mmc_command *cmd)
-> > +{
-> > +     u32 count, start = 15;
-> > +
-> > +     __sdhci_set_timeout(host, cmd);
-> > +     count = sdhci_readb(host, SDHCI_TIMEOUT_CONTROL);
-> > +     /*
-> > +      * Update software timeout value if its value is less than hardware
-> > data
-> > +      * timeout value. Qcom SoC hardware data timeout value was calculated
-> > +      * using 4 * MCLK * 2^(count + 13). where MCLK = 1 / host->clock.
-> > +      */
-> > +     if (cmd && cmd->data && host->clock > 400000 &&
-> > +         host->clock <= 50000000 &&
-> > +         ((1 << (count + start)) > (10 * host->clock)))
-> > +             host->data_timeout = 22LL * NSEC_PER_SEC;
-> > +}
-> > +
-> >  static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
-> >       .enable         = sdhci_msm_cqe_enable,
-> >       .disable        = sdhci_msm_cqe_disable,
-> > @@ -2438,6 +2455,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
-> >       .irq    = sdhci_msm_cqe_irq,
-> >       .dump_vendor_regs = sdhci_msm_dump_vendor_regs,
-> >       .set_power = sdhci_set_power_noreg,
-> > +     .set_timeout = sdhci_msm_set_timeout,
-> >  };
-> >
-> >  static const struct sdhci_pltfm_data sdhci_msm_pdata = {
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c          | 33 +++++++++++++++-
+>  include/linux/platform_data/mmc-esdhc-imx.h | 42 ---------------------
+>  2 files changed, 32 insertions(+), 43 deletions(-)
+>  delete mode 100644 include/linux/platform_data/mmc-esdhc-imx.h
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 72c0bf0c1887..57b19ca1ad6d 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -24,7 +24,6 @@
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+>  #include <linux/pinctrl/consumer.h>
+> -#include <linux/platform_data/mmc-esdhc-imx.h>
+>  #include <linux/pm_runtime.h>
+>  #include "sdhci-pltfm.h"
+>  #include "sdhci-esdhc.h"
+> @@ -191,6 +190,38 @@
+>   */
+>  #define ESDHC_FLAG_BROKEN_AUTO_CMD23   BIT(16)
+>
+> +enum wp_types {
+> +       ESDHC_WP_NONE,          /* no WP, neither controller nor gpio */
+> +       ESDHC_WP_CONTROLLER,    /* mmc controller internal WP */
+> +       ESDHC_WP_GPIO,          /* external gpio pin for WP */
+> +};
+> +
+> +enum cd_types {
+> +       ESDHC_CD_NONE,          /* no CD, neither controller nor gpio */
+> +       ESDHC_CD_CONTROLLER,    /* mmc controller internal CD */
+> +       ESDHC_CD_GPIO,          /* external gpio pin for CD */
+> +       ESDHC_CD_PERMANENT,     /* no CD, card permanently wired to host */
+> +};
+> +
+> +/*
+> + * struct esdhc_platform_data - platform data for esdhc on i.MX
+> + *
+> + * ESDHC_WP(CD)_CONTROLLER type is not available on i.MX25/35.
+> + *
+> + * @wp_type:   type of write_protect method (see wp_types enum above)
+> + * @cd_type:   type of card_detect method (see cd_types enum above)
+> + */
+> +
+> +struct esdhc_platform_data {
+> +       enum wp_types wp_type;
+> +       enum cd_types cd_type;
+> +       int max_bus_width;
+> +       unsigned int delay_line;
+> +       unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
+> +       unsigned int tuning_start_tap;  /* The start delay cell point in tuning procedure */
+> +       unsigned int strobe_dll_delay_target;   /* The delay cell for strobe pad (read clock) */
+> +};
+> +
+>  struct esdhc_soc_data {
+>         u32 flags;
+>  };
+> diff --git a/include/linux/platform_data/mmc-esdhc-imx.h b/include/linux/platform_data/mmc-esdhc-imx.h
+> deleted file mode 100644
+> index cba1184b364c..000000000000
+> --- a/include/linux/platform_data/mmc-esdhc-imx.h
+> +++ /dev/null
+> @@ -1,42 +0,0 @@
+> -/* SPDX-License-Identifier: GPL-2.0-only */
+> -/*
+> - * Copyright 2010 Wolfram Sang <kernel@pengutronix.de>
+> - */
+> -
+> -#ifndef __ASM_ARCH_IMX_ESDHC_H
+> -#define __ASM_ARCH_IMX_ESDHC_H
+> -
+> -#include <linux/types.h>
+> -
+> -enum wp_types {
+> -       ESDHC_WP_NONE,          /* no WP, neither controller nor gpio */
+> -       ESDHC_WP_CONTROLLER,    /* mmc controller internal WP */
+> -       ESDHC_WP_GPIO,          /* external gpio pin for WP */
+> -};
+> -
+> -enum cd_types {
+> -       ESDHC_CD_NONE,          /* no CD, neither controller nor gpio */
+> -       ESDHC_CD_CONTROLLER,    /* mmc controller internal CD */
+> -       ESDHC_CD_GPIO,          /* external gpio pin for CD */
+> -       ESDHC_CD_PERMANENT,     /* no CD, card permanently wired to host */
+> -};
+> -
+> -/**
+> - * struct esdhc_platform_data - platform data for esdhc on i.MX
+> - *
+> - * ESDHC_WP(CD)_CONTROLLER type is not available on i.MX25/35.
+> - *
+> - * @wp_type:   type of write_protect method (see wp_types enum above)
+> - * @cd_type:   type of card_detect method (see cd_types enum above)
+> - */
+> -
+> -struct esdhc_platform_data {
+> -       enum wp_types wp_type;
+> -       enum cd_types cd_type;
+> -       int max_bus_width;
+> -       unsigned int delay_line;
+> -       unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
+> -       unsigned int tuning_start_tap;  /* The start delay cell point in tuning procedure */
+> -       unsigned int strobe_dll_delay_target;   /* The delay cell for strobe pad (read clock) */
+> -};
+> -#endif /* __ASM_ARCH_IMX_ESDHC_H */
+> --
+> 2.25.1
+>
