@@ -2,169 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6331AC4320A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 05:29:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ADCAC4338F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 06:27:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 492FB608FC
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 05:29:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 13DDF60F35
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 06:27:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233620AbhHDFaI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 01:30:08 -0400
-Received: from mail-eopbgr1400129.outbound.protection.outlook.com ([40.107.140.129]:41088
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S231611AbhHDFaH (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 4 Aug 2021 01:30:07 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=FrR/P8CMRuqE3P7rQyhbCTlpVxsQQ1UIVer1OopJHQ+MQXUe5PMVuXATe0kaea2rACNPeFHzvZOYN1yLLwzzlZawP5hBrvO9bmC8E9suf497BQiZ6xNxX2Jg2QxAdv9WVtb3gaUih57uCiJlosqR7rztCZKmDRLYDDJizVYJameenjf+0zF1kCtjpPWMedniZ03Vw9SLHtpcXtPeStZ9JmXIMA8zeLmT7oEnUwl6t521+siILLCO4if08aQcqH8ESbVSaBsgaPOeiNNcctrbrsgAD91lbRZ1KayY7e4XjWwPTxC+WmJCiGKkFkUnL52LRqSiqH/1wEcF2k63Ppl+qw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=00Kl0XJSRBB+yVwJk8CAC3qwmn3+Hu8jyaNm+OUMsQc=;
- b=gzHkkXjM84AewaV7xZMSrQfjI0ebPnvqsA3ZLhcGDGRd5aMMlacSyM0ykr+UvohrdskkKJKsbS03e7//BNiDUowq2O9tKP3BumM/eVAalQuZaNuSWlA6DyKqrim/YgNMeBSc+7xp6I+KU5JYKUdSEdwFNf2OQjetZGjhNpQMHGCles2zqz2cGiyEM7P0ALJTmyElvth3XDLd5MXHbnyltbdta8+2vSu8yk69whrIFZqeh5+17XcpP0vzPusiHeGJtZzcvgasTZVRCRU7nusrspaga/XEt6F2xB07EcLSpiCIoAyNLrpYvZQxXfSEOZoYBrNV/HiEpWSKwEkyifsCKg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=renesas.com; dmarc=pass action=none header.from=renesas.com;
- dkim=pass header.d=renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=00Kl0XJSRBB+yVwJk8CAC3qwmn3+Hu8jyaNm+OUMsQc=;
- b=lAQsz16i0py+pHWF1kmQYhMvIFwCQCyIrEQ7r/yQMfrfP/ZlxciGxNraS3TO8nxEdeyDJzGbNicLpXfhahpqNn+JbvbpqnE7FIdQG1kQPsH+/HuLB9ZY7Q36msIV14287KwcVShug0yzcZ0ICEB7fzpqhfrFrDwyNxe9npimOHs=
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com (2603:1096:404:d5::22)
- by TYAPR01MB4221.jpnprd01.prod.outlook.com (2603:1096:404:cc::13) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4373.18; Wed, 4 Aug
- 2021 05:29:54 +0000
-Received: from TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::7db6:310f:a5ed:82f6]) by TY2PR01MB3692.jpnprd01.prod.outlook.com
- ([fe80::7db6:310f:a5ed:82f6%3]) with mapi id 15.20.4373.027; Wed, 4 Aug 2021
- 05:29:54 +0000
-From:   Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-To:     Ulrich Hecht <uli@fpond.eu>, Wolfram Sang <wsa@kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Subject: RE: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
-Thread-Topic: [PATCH] mmc: renesas_sdhi: increase suspend/resume latency limit
-Thread-Index: AQHXSNlLLnK0MeXzxECYWiEeEguOWqtcHUuAgAQPPJCAAGH2AIABkOCwgAEb+YA=
-Date:   Wed, 4 Aug 2021 05:29:53 +0000
-Message-ID: <TY2PR01MB369279B6F76FD5C3044FCDDDD8F19@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-References: <20210514155318.16812-1-uli+renesas@fpond.eu>
- <YQQah2Q8qmQPEl7F@ninjato>
- <TY2PR01MB3692486033934E1C007EBF6AD8EF9@TY2PR01MB3692.jpnprd01.prod.outlook.com>
- <821963380.577567.1627903098435@webmail.strato.com>
- <TY2PR01MB369245D958BD9EB77488CB43D8F09@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-In-Reply-To: <TY2PR01MB369245D958BD9EB77488CB43D8F09@TY2PR01MB3692.jpnprd01.prod.outlook.com>
-Accept-Language: ja-JP, en-US
-Content-Language: ja-JP
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: fpond.eu; dkim=none (message not signed)
- header.d=none;fpond.eu; dmarc=none action=none header.from=renesas.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 9eef8384-e0b5-4215-0ac0-08d95708e3b0
-x-ms-traffictypediagnostic: TYAPR01MB4221:
-x-microsoft-antispam-prvs: <TYAPR01MB422138EEE85393934B2DC9D9D8F19@TYAPR01MB4221.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 1RJVvp0H03tWWnrn2jJj7woHGVhbKlpHWJGLHbRApS79zTBTuCkUNmtZ2LD6vlwa860oQCQXmczFFT/kAlLzi6GsrAQ1Jzgomtjl2UFlAkASOpXu+FUCFzqoygY33yG5II+VcuSfOS5464Gu2p2yg6D4me6zE9GdxcPJ3BkYPQzcHZ0cuhM/+WSM1rkLQxHMJg1VZ6rxyUFSDEwcrLv6B+n65iq37qt+rjKEOsSDG/0SoKjC6VOasgKBozYOlswuaQlVpW/Tfxp5VgFsbpzAKvPU3tsVoqCFKibV17EkBaFIgNHM65ibmzD2yEmuNlY1w3LrQ0jvzZC/zSaGE4h4fbCsuQh5Zufi6+mvuh6uMidY/OkKY5nyGlvvyIUjCIQHUm57WQuBM4YxtlgTrPuYk6y057v7N5rocZ2GhXTAUO4OWDR6+9tPnj5dU3VSG+PA1VNhaMZwWhFI8nJWJwyR118wk+g7aqCBF3oNXqKZ5p46ZSqu57x9bWg8MtdoC4i360MlY07YyXpmGLRxU7MLl1oEGXWpsTvHb5SUSXh91GqM1xCtJI2UvX7YQqdBbUX8yOHY6LukGa1nHrWeWBp0RA86tms/v6KA4CSl/Axbewhb9OpS7Ybap4YQNX2fJWh4Oy0aRTPSu3tCExL3oO1wFfICLzEHgQBEh80eBgFLTJF3zpjJdtIzQAgAUKpym1nIpq3TPBcwf0jQctl0rUVOEw==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TY2PR01MB3692.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(186003)(52536014)(5660300002)(6506007)(55236004)(508600001)(7696005)(26005)(86362001)(8936002)(66476007)(66946007)(66556008)(316002)(64756008)(76116006)(8676002)(2906002)(66446008)(71200400001)(54906003)(4326008)(110136005)(38070700005)(122000001)(38100700002)(83380400001)(9686003)(33656002)(55016002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?NUxna0VQTTMvd1dnS3JqNk5VQktENFlLTVFqM0V5N21rL2dPOFBUTzdhS2RY?=
- =?utf-8?B?b1BjbGdGeHc5cTczbmM1UzNNelVZbFFsWm9FSExIN29NSVlENFhMWVJFL0JZ?=
- =?utf-8?B?TGUxWHYvSHNEc1daNW1WMVpabnV2K0FTNll1aDdudzdFWW9hVDhjRVRybzlr?=
- =?utf-8?B?WlBvZXJhVVdNdnBHNU8yZzk1aU5OMDZSTTJBdVFlZXM2RDZwMGJBZUFPOFVH?=
- =?utf-8?B?bnJ0UmVVTm1JdGlWb2NPOHpxbkNid0F3aHlUVzNwRnJUcHVtcEJvQ2xPM2pu?=
- =?utf-8?B?Vlh5cDc4Z2h2cXd6b1MyK01tSDV3cXhaQjJQQXpJejRCYWJQdWhEM2NDcGVz?=
- =?utf-8?B?SU01aUd4MDZTTXdraytwem9rTGRUZlMyVjR6Mi9odVpiLzRrd1N5c2dCVFlh?=
- =?utf-8?B?RDBlZWxWL2tCNXlzTEFmZmpHblp5V1J0SzJadWVnaWY4NjVDazlGZ3J3Rk9K?=
- =?utf-8?B?ZUYzbjJMd1lwdEN1OEcwOEcyNFVSdjhDYTVUK2xISjlPcG5pN0hmeFRKY3J4?=
- =?utf-8?B?aUllYUw4UGRMOHI0bGYyWS9Zam1zNXl6U2Nac04rdEJFU214Q2lYU1p5TTFj?=
- =?utf-8?B?WE81YnZiWXliSE9CZ3l1NzdWNGZvYmxmeE1ZM216WmVieW1ROG1ER0ZsVHZs?=
- =?utf-8?B?dFQ1d241bVNCVEI0eCtldDRkVTFMamFOR0Q5akw4di9BQTRQVkFTTlQ3VUZQ?=
- =?utf-8?B?bjVDdGxpQ0UwTjhqUkNlcVo1M2lGMWlxLy9EMUVLeC9sMThrYzlHMFRlOGM3?=
- =?utf-8?B?Qm9QRHNzZ2RIdFpGLzliSzVKcTk2UElBeTYxSjRicW5MM3lhYmt6aUFNN2R6?=
- =?utf-8?B?R3JQMUdnZjJVTEJYaUN0RC83ZEMxTVc5bHlNZk1XYTNKREg1cm1acG5xRDk4?=
- =?utf-8?B?OE1vZGxzbFZaNkIrTFhVRUUyTVlpdXNiaEIyTVdlSERUdmwzZFJTUHVSWEM1?=
- =?utf-8?B?MnU1MlhFYnhtVWIvdmZib2FFVkV6dTJkMkxnbVFRWWZQWVVEd1BmRmQ3UlZx?=
- =?utf-8?B?aG5qOVRYQlRidnNjMEc0WTgyOERsZWZTTUZtbnlIRzRrclBnb05zN3JyOTln?=
- =?utf-8?B?YlNoL1FhYm1zSE1lb2VLT2tZN3pET2xSSVRjZ2cyMUxXeldPZnIzajA2K1VR?=
- =?utf-8?B?WFlIZE4vMk4rNkhBZTFJSmJlMHhyTnRQNGhOZkw5aERNN2NiMFpmcnl4MVIv?=
- =?utf-8?B?S2krYk82Ymt4OUpHZjBOL0NjWDFFaS9JMzFHdHV5QjcyblAvS28zL0Vpd2FK?=
- =?utf-8?B?SkFSTTlmYUN0d1lHNDdhTjg3dDV4MWNJM08zbEFveVh0WEQ1MUZ0N2NaYTEx?=
- =?utf-8?B?Rk9uNCtEZmprYlI0U1VCQXJRVEFZeHJONitFdUQ1bkpSeGdWTndrdGVuTFps?=
- =?utf-8?B?VzBuMTQwS1BFd2dYOXJsSm0xMUcwcHcyL251bUhPUXBLUWJRa0h3bWdFL0FV?=
- =?utf-8?B?dVFUTnRLTjVaTnlsQ1RxeWRNRkt2MzNDL3RKSFVTaGsxVVA4ZmEwZ0U5dUFL?=
- =?utf-8?B?aVZSdzdUbjR1d2lqYkw4dTRSMTRUNGZ4VjJzckUrRWhmL1F5SUZCVFd0NXNu?=
- =?utf-8?B?NWFXTlNqdmJOZkg4WnQ4N3ZqUDE1bERySFZMdXlzY0M5U0FET1dreGVIdmk0?=
- =?utf-8?B?TkFNREZURmhodGRiR082UnpFTVE1RFFiMVpqbllXbkEyMksyY1pJQ0gzVVc0?=
- =?utf-8?B?NEVVNlBLK1ZGSE5EdmVNMFJzb2xYZWNTMy9SK1RxWU8wcm9HTld4TUdtVzRq?=
- =?utf-8?Q?at28MjpGZXjOltK0JSWPOYzrzLyOtgUKZgJuS9A?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+        id S235386AbhHDG1K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 02:27:10 -0400
+Received: from mga11.intel.com ([192.55.52.93]:43804 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235303AbhHDG1K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 4 Aug 2021 02:27:10 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10065"; a="210746858"
+X-IronPort-AV: E=Sophos;i="5.84,293,1620716400"; 
+   d="scan'208";a="210746858"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Aug 2021 23:26:58 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,293,1620716400"; 
+   d="scan'208";a="466985968"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
+  by orsmga008.jf.intel.com with ESMTP; 03 Aug 2021 23:26:55 -0700
+Subject: Re: [PATCH] [v2] mmc: sdhci-pci-gli: Improve Random 4K Read
+ Performance of GL9763E
+To:     Renius Chen <reniuschengl@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Ben Chuang <Ben.Chuang@genesyslogic.com.tw>
+References: <20210705090050.15077-1-reniuschengl@gmail.com>
+ <CAPDyKFotmw-HQpZKCOD_8kThEa0_KSPnn36FNFLKRyUHYRHQjQ@mail.gmail.com>
+ <CAJU4x8u8JPBJ3V6MCi1XcO4Qim-COPuxOhTdUnor7JdNCUFb=w@mail.gmail.com>
+ <CAPDyKFqXsn91BvkJXMYSnc7X=RP9DXxXp2nKMmv+aMPoNdK2Tw@mail.gmail.com>
+ <CAJU4x8srB7skGFVcj1SPrzEZSnVkwKiW3OPN0GQxvgtRG7GAAQ@mail.gmail.com>
+ <CAPDyKFq0yHxX7wb4XGeiMiSGGiOf8RKJ5ahhFQ+_vodqnyPV9Q@mail.gmail.com>
+ <CAJU4x8uGxb5VD1WVV5-QeLkVzuuR09-NacL-9nuXe8Zofzb2=w@mail.gmail.com>
+ <CAPDyKFpvCFYQVEp77hiRHY6CVDej-ffF5UE=LH=HSGcqMZA02w@mail.gmail.com>
+ <CAJU4x8t+aOqq82EJMUNDpWiE3GPeyZkjFhy=AkmctcDE3mx6fA@mail.gmail.com>
+ <CAPDyKFoSOk+4pmW60uGzKaYw3XOXshx+NSNqF_po=VLkK1-7Qw@mail.gmail.com>
+ <CAJU4x8sMJSOnfBwDq7tVygRGFRw-SyrM1z8GBsF_Mur64-Y3_g@mail.gmail.com>
+ <CAJU4x8uCAQoozeAqa6icVba61uo_eP+NtOxgnLzsXh6g2HeQdA@mail.gmail.com>
+ <02c26834-f16e-e1c7-9ea9-36414d1c4403@intel.com>
+ <CAJU4x8u+BtU5iUna0tSws9rfUTJWfHZ21jteB5nk8e_2iMJgNg@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <43448d8e-c680-62bf-7414-4620e16de524@intel.com>
+Date:   Wed, 4 Aug 2021 09:27:29 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.12.0
 MIME-Version: 1.0
-X-OriginatorOrg: renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TY2PR01MB3692.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 9eef8384-e0b5-4215-0ac0-08d95708e3b0
-X-MS-Exchange-CrossTenant-originalarrivaltime: 04 Aug 2021 05:29:53.9476
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: JNxS4bLA6aF3d51vJicbss5+cSb7m2duGOlQPE7vXBkvcmh5ZQkdFgcskigMdZL+HstnnGhncPIaYt8Erve72c0wvbk6qmkEE2iNRfCA4uRXH7eqLYI0IWHxahSP0Kc0
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYAPR01MB4221
+In-Reply-To: <CAJU4x8u+BtU5iUna0tSws9rfUTJWfHZ21jteB5nk8e_2iMJgNg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgVWxyaWNoLXNhbiBhZ2FpbiwNCg0KPiBGcm9tOiBZb3NoaWhpcm8gU2hpbW9kYSwgU2VudDog
-VHVlc2RheSwgQXVndXN0IDMsIDIwMjEgODoxNyBQTQ0KPiANCj4gU28sIEknbGwgdGVzdCB0aGlz
-IHBhdGNoIHdpdGggbXkgdGVzdCBlbnZpcm9ubWVudCB0b21vcnJvdy4NCg0KVW5mb3J0dW5hdGVs
-eSwgdGhpcyBwYXRjaCBmYWlsZWQgb24gbW1jX3Rlc3QgZHJpdmVyLg0KSSdtIG5vdCBzdXJlLCBi
-dXQgcGVyaGFwcyB3ZSBoYXZlIGEgcG90ZW50aWFsIGlzc3VlIG9uIHJ1bnRpbWUgUE0gd2l0aCBT
-REhJIGRyaXZlcj8NCg0KPCBNeSBlbnZpcm9ubWVudCA+DQotIEgzIEVTMy4wIFNhbHZhdG9yLVhT
-DQotIGtlcm5lbCB2NS4xNC1yYzINCi0gYnVpbGRyb290IHYyMDIwLjAyLjEwDQoNCjwgSG93IHRv
-IHRlc3QgPg0KIyBtb3VudCAtdCBkZWJ1Z2ZzIG5vbmUgL3N5cy9rZXJuZWwvZGVidWcNCiMgLi9i
-aW5kLnNoIG1tYzA6MDAwMQ0KIyAuL3Rlc3Quc2ggbW1jMCBtbWMwOzAwMDEgMzggMzgNCiMgLi90
-ZXN0LnNoIG1tYzAgbW1jMDswMDAxIDM4IDM4DQoNCkNBVVRJT046IFRoZSBtbWNfdGVzdCBkcml2
-ZXIgd2lsbCBvdmVyd3JpdGUgYW55IGRhdGEgb2YgdGhlIGRldmljZS4uDQoNCjwgUmVzdWx0cyA+
-DQotIFdoZW4gSSB0ZXN0ZWQgb24gYW4gZU1NQywgdGhlIGlzc3VlIGhhcHBlbmVkLg0KLS0gQnV0
-LCB3aGVuIEkgdGVzdGVkIG9uIGEgc2QgY2FyZCwgdGhlIGlzc3VlIGRpZG4ndCBoYXBwZW4uDQoN
-Ci0gVGhlIG1tY190ZXN0IGZhaWxlZCBhZnRlciB0ZXN0IGNhc2UgMzguDQotLSBBZnRlciB0aGF0
-LCBJIGNvdWxkIG5vdCByZWNvdmVyIHRoZSBkZXZpY2UgZXZlbiBpZiBJIGlzc3VlZCB0ZXN0IGNh
-c2UgNDUoUmVzZXQpLg0KLS0gT25jZSB0aGUgdGVzdCBjYXNlIDM4IHdhcyBPSywgYnV0IGFmdGVy
-IHRoYXQsIGFueSB0ZXN0IGNhc2UgZmFpbGVkLg0KDQotIFdoZW4gSSBjaGFuZ2VkIHRoZSBsYXRl
-bmN5IHZhbHVlIHZpYSBzeXNmcyBhcyAxMDAsIHRoZSBpc3N1ZSBkaWRuJ3QgaGFwcGVuLg0KIyBl
-Y2hvIDEwMCA+IC9zeXMvZGV2aWNlcy9wbGF0Zm9ybS9zb2MvZWUxNDAwMDAubW1jL3Bvd2VyL3Bt
-X3Fvc19yZXN1bWVfbGF0ZW5jeV91cw0KDQo8IElzc3VlID4NCiMgLi90ZXN0LnNoIG1tYzAgbW1j
-MDowMDAxIDM4IDM4DQpbICAgOTAuNjg4OTcxXSBtbWMwOiBTdGFydGluZyB0ZXN0cyBvZiBjYXJk
-IG1tYzA6MDAwMS4uLg0KWyAgIDkwLjcxODcwM10gbW1jMDogVGVzdCBjYXNlIDM4LiBXcml0ZSBw
-ZXJmb3JtYW5jZSB3aXRoIG5vbi1ibG9ja2luZyByZXEgNGsgdG8gNE1CLi4uDQpbICAgOTAuNzYy
-MTI3XSBbbW1jX3Rlc3RfcndfbXVsdGlwbGVdIGVycm9yDQpbICAgOTAuNzcwOTY0XSBtbWMwOiBS
-ZXN1bHQ6IEVSUk9SICgtODQpDQpbICAgOTAuNzc5NTUxXSBtbWMwOiBUZXN0cyBjb21wbGV0ZWQu
-DQoNCjwgTXkgc2NyaXB0cyA+DQotLS0gYmluZC5zaCAtLS0NCiMhL2Jpbi9zaA0KaWYgWyAkIyAt
-bmUgMiBdOyB0aGVuDQoJZWNobyAiW2Rldl0gW2JpbmQgb3IgdW5iaW5kXSINCgllY2hvICJkZXYg
-bGlzdCAoZm9yIGJpbmQpIg0KCWxzIC1sYSAvc3lzL2J1cy9tbWMvZHJpdmVycy9tbWNibGsNCgll
-Y2hvICJkZXYgbGlzdCAoZm9yIHVuYmluZCkiDQoJbHMgLWxhIC9zeXMvYnVzL21tYy9kcml2ZXJz
-L21tY190ZXN0DQoJZXhpdA0KZmkNCg0KaWYgWyAkMiA9ICJiaW5kIiBdOyB0aGVuDQoJZWNobyAk
-MSA+IC9zeXMvYnVzL21tYy9kcml2ZXJzL21tY2Jsay91bmJpbmQNCgllY2hvICQxID4gL3N5cy9i
-dXMvbW1jL2RyaXZlcnMvbW1jX3Rlc3QvYmluZA0KZWxpZiBbICQyID0gInVuYmluZCIgXTsgdGhl
-bg0KCWVjaG8gJDEgPiAvc3lzL2J1cy9tbWMvZHJpdmVycy9tbWNfdGVzdC91bmJpbmQNCgllY2hv
-ICQxID4gL3N5cy9idXMvbW1jL2RyaXZlcnMvbW1jYmxrL2JpbmQNCmZpDQotLS0tLS0tLS0tLS0t
-LS0NCg0KLS0tIHRlc3Quc2ggLS0tDQojIS9iaW4vc2gNCg0KaWYgWyAkIyAtbmUgNCBdOyB0aGVu
-DQoJZWNobyAiW2RldiBiYXNlXSBbZGV2XSBbc3RhcnRdIFtlbmRdIg0KCWlmIFsgJCMgLWVxIDIg
-XTsgdGhlbg0KCQllY2hvICJ0ZXN0bGlzdCINCgkJY2F0IC9zeXMva2VybmVsL2RlYnVnLyQxLyQy
-L3Rlc3RsaXN0DQoJZmkNCglleGl0DQpmaQ0KDQpkZXZfYmFzZT0kMQ0KZGV2PSQyDQpzdGFydD0k
-Mw0KZW5kPSQ0DQoNCmk9JHN0YXJ0DQp3aGlsZSBbICRpIC1sZSAkZW5kIF0gOyBkbw0KCWVjaG8g
-JGkgPiAvc3lzL2tlcm5lbC9kZWJ1Zy8kZGV2X2Jhc2UvJGRldi90ZXN0DQoJc2xlZXAgMQ0KCWk9
-YGV4cHIgJGkgKyAxYA0KZG9uZQ0KLS0tLS0tLS0tLS0tLS0tDQoNCkJlc3QgcmVnYXJkcywNCllv
-c2hpaGlybyBTaGltb2RhDQoNCg==
+On 19/07/21 12:26 pm, Renius Chen wrote:
+> Adrian Hunter <adrian.hunter@intel.com> 於 2021年7月16日 週五 下午6:27寫道：
+>>
+>> On 14/07/21 5:15 am, Renius Chen wrote:
+>>> Hi Adrain,
+>>>
+>>> What do you think of this patch?
+>>> Or do you have any ideas or suggestions about the modification for
+>>> Ulf's comments?
+>>
+>> Perhaps try to define your power management requirements in terms of
+>> latencies instead of request size, and then take the issue to the
+>> power management mailing list and power management maintainers for
+>> suggestions.  You will probably need to point out why runtime PM doesn't
+>> met your requirements.
+>>
+> 
+> Hi Adrain,
+> 
+> 
+> Thanks for your advice.
+> 
+> Our purpose is only to improve the performance of 4K reads, and we
+> hope that it doesn't affect any other use cases. If we look into the
+> latencies, it may affect not only 4K reads but also some other use
+> cases.
+
+I just meant that, if you present the problem to people on the power
+management mailing lists,  you probably need to describe the problem at
+an engineering level, instead of describing your solution at a
+programming level.
+
+> 
+> Behaviors of ASPM is controlled by circuits of hardware. Drivers only
+> enable or disable ASPM or set some parameters for ASPM, and are not
+> able to know when the device enters or exits the L0s/L1 state. So the
+> PM part of drivers may not suit this case.
+> 
+> This patch could be simply divided into two parts:
+> 1. Monitor requests.
+> 2. Set a vendor specific register of GL9763e.
+> 
+> The part 2 is no problems we think. And Ulf thinks that the behaviors
+> of part 1 should not be implemented in sdhci-pci-gli.c. Do you have
+> any suggestions on where we can implement the monitoring?
+> 
+> Thank you.
+> 
+> 
+> Best regards,
+> 
+> Renius
+> 
+>>>
+>>> Thank you.
+>>>
+>>>
+>>> Best regards,
+>>>
+>>> Renius
+>>>
+>>> Renius Chen <reniuschengl@gmail.com> 於 2021年7月7日 週三 下午9:49寫道：
+>>>>
+>>>> Ulf Hansson <ulf.hansson@linaro.org> 於 2021年7月7日 週三 下午8:16寫道：
+>>>>>
+>>>>> [...]
+>>>>>
+>>>>>>
+>>>>>> Thanks, I understand what you mean.
+>>>>>>
+>>>>>> I simply searched for the keyword "MMC_READ_MULTIPLE_BLOCK" in the
+>>>>>> drivers/mmc/host folder, and found that in some SD/MMC host controller
+>>>>>> driver codes such as alcor.c, cavium.c, ...etc, there are also
+>>>>>> behaviors for monitoring the request in their driver. What's the
+>>>>>> difference between theirs and ours?
+>>>>>
+>>>>> Those checks are there to allow the HWs to be supported properly.
+>>>>>
+>>>>>>
+>>>>>> And if the code that monitors the requstes does not belong the driver,
+>>>>>> where should I implement the code and how to add some functions only
+>>>>>> for GL9763e in that place, in your opinion?
+>>>>>
+>>>>> Honestly, I am not sure what suits your use case best.
+>>>>>
+>>>>> So far we have used runtime PM with a default auto suspend timeout, in
+>>>>> combination with dev PM Qos. In other words, run as fast as possible
+>>>>> to complete the requests in the queue then go back to idle and enter a
+>>>>> low power state. Clearly, that seems not to be sufficient for your use
+>>>>> case, sorry.
+>>>>>
+>>>> Yes, the runtime PM, auto suspend, and PM Qos are all about the
+>>>> suspend/resume behaviors of the system or related to power states such
+>>>> as D0/D3 of the device. But these are totally different from the ASPM
+>>>> L0s/L1 for link states. Entering/exiting the ASPM is pure hardware
+>>>> behavior on the link layer and is not handled by any codes in
+>>>> drivers/mmc/core or drivers/mmc/host. We'd like to try to modify the
+>>>> patch by your opinions, but we are also confused about what or where
+>>>> suits our use case best. So we wonder how to start the modification
+>>>> and may need some suggestions to deal with the work, sorry.
+>>>>
+>>>> Thank you.
+>>>>
+>>>>
+>>>> Best regards,
+>>>>
+>>>> Renius
+>>>>
+>>>>
+>>>>> Kind regards
+>>>>> Uffe
+>>
+
