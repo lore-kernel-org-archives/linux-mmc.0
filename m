@@ -2,157 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.2 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B230AC4320A
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:13:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89EF3C4320A
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:15:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 92D9461040
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:13:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 637EA61037
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:15:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234533AbhHDQNt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 12:13:49 -0400
-Received: from relmlor2.renesas.com ([210.160.252.172]:61085 "EHLO
-        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S231129AbhHDQNt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 12:13:49 -0400
-X-IronPort-AV: E=Sophos;i="5.84,294,1620658800"; 
-   d="scan'208";a="89812749"
-Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie6.idc.renesas.com with ESMTP; 05 Aug 2021 01:13:34 +0900
-Received: from localhost.localdomain (unknown [10.226.92.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 7EF2D40078C4;
-        Thu,  5 Aug 2021 01:13:32 +0900 (JST)
-From:   Biju Das <biju.das.jz@bp.renesas.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        linux-renesas-soc@vger.kernel.org
-Subject: [PATCH v3 1/2] dt-bindings: mmc: renesas,sdhi: Fix dtbs-check warning
-Date:   Wed,  4 Aug 2021 17:13:24 +0100
-Message-Id: <20210804161325.26996-2-biju.das.jz@bp.renesas.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
-References: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
+        id S229655AbhHDQPa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 12:15:30 -0400
+Received: from mail.kernel.org ([198.145.29.99]:38466 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S229648AbhHDQP3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 4 Aug 2021 12:15:29 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 8AC5F60F35;
+        Wed,  4 Aug 2021 16:15:16 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1628093717;
+        bh=SU7iytpCAGzQPHujZgCX1j7w+mEyOgO8m5L4Sfkfong=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=c0iuJnE+Iq2qLARWx2kO/wSRb9gScSFH2nSxE+ddHBNkgc+DefJHN4DSiqejGP2/E
+         4gHjzSW2bJZufF+GODGh0BLiCo8vrStx6Wr2Ikc+kDy/gPKWdX69wjdvTURirYRdQP
+         yCY2AuyK9zN73Zw4glL3i/xCcNy0f80gjzop3EzmqAthLGu/Cz+tnGKkt1eiTrwyRG
+         K8cXR8i87ZRn3/oJtNKkCmeR3IRw5GAE/eGTXrj7z9AZrnuwaaX4hoKsEaLHL6tXQu
+         L67m89axZ3atNglt5rGg0LeIeJMJ97jK3SOy+DmbDdY5sV/RTCrdK40YD4t5iZoxqN
+         wlemh04Wm9Y8g==
+Date:   Wed, 4 Aug 2021 17:15:01 +0100
+From:   Mark Brown <broonie@kernel.org>
+To:     Peter Geis <pgwipeout@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        devicetree@vger.kernel.org
+Subject: Re: [BUG] mmc_regulator_set_ocr can't cope with regulator-fixed
+Message-ID: <20210804161501.GB26252@sirena.org.uk>
+References: <CAMdYzYrx8pgeyK7u=kcopZ+Wae+fQdr_uM4AuVjqWKfZYikgcA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="i0/AhcQY5QxfSsSZ"
+Content-Disposition: inline
+In-Reply-To: <CAMdYzYrx8pgeyK7u=kcopZ+Wae+fQdr_uM4AuVjqWKfZYikgcA@mail.gmail.com>
+X-Cookie: MOUNT TAPE U1439 ON B3, NO RING
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fix dtbs-check warning pinctrl-names:0:'default' was expected
-for r8a77470-iwg23s-sbc.dts file.
 
-Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
----
-v3:
- * New patch to fix the dtbs-check warnings
- Ref:- https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20210804091940.23983-1-biju.das.jz@bp.renesas.com/
----
- .../devicetree/bindings/mmc/renesas,sdhi.yaml | 65 ++++++++++++-------
- 1 file changed, 42 insertions(+), 23 deletions(-)
+--i0/AhcQY5QxfSsSZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 677989bc5924..543eeb825dc3 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -9,9 +9,6 @@ title: Renesas SDHI SD/MMC controller
- maintainers:
-   - Wolfram Sang <wsa+renesas@sang-engineering.com>
- 
--allOf:
--  - $ref: "mmc-controller.yaml"
--
- properties:
-   compatible:
-     oneOf:
-@@ -104,14 +101,51 @@ properties:
-   pinctrl-1:
-     maxItems: 1
- 
--  pinctrl-names:
--    minItems: 1
--    items:
--      - const: default
--      - const: state_uhs
-+  pinctrl-names: true
- 
-   max-frequency: true
- 
-+allOf:
-+  - $ref: "mmc-controller.yaml"
-+
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: renesas,sdhi-mmc-r8a77470
-+    then:
-+      properties:
-+        pinctrl-names:
-+          items:
-+            - const: state_uhs
-+    else:
-+      properties:
-+        pinctrl-names:
-+          minItems: 1
-+          items:
-+            - const: default
-+            - const: state_uhs
-+
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - renesas,sdhi-r7s72100
-+              - renesas,sdhi-r7s9210
-+    then:
-+      properties:
-+        clock-names:
-+          items:
-+            - const: core
-+            - const: cd
-+      required:
-+        - clock-names
-+      description:
-+        The internal card detection logic that exists in these controllers is
-+        sectioned off to be run by a separate second clock source to allow
-+        the main core clock to be turned off to save power.
-+
- required:
-   - compatible
-   - reg
-@@ -119,21 +153,6 @@ required:
-   - clocks
-   - power-domains
- 
--if:
--  properties:
--    compatible:
--      contains:
--        enum:
--          - renesas,sdhi-r7s72100
--          - renesas,sdhi-r7s9210
--then:
--  required:
--    - clock-names
--  description:
--    The internal card detection logic that exists in these controllers is
--    sectioned off to be run by a separate second clock source to allow
--    the main core clock to be turned off to save power.
--
- unevaluatedProperties: false
- 
- examples:
--- 
-2.17.1
+On Wed, Aug 04, 2021 at 10:32:52AM -0400, Peter Geis wrote:
 
+> Removing the vmmc phandle from the sdio node is an option, but then it
+> doesn't fully describe the hardware (it's also a non-standard 4.4v).
+> I had considered changing the check in dw-mmc.c [1] to continue in the
+> case of -EINVAL, but there are other places in the regulator framework
+> that can also return that and it doesn't address the underlying issue.
+
+What is the underlying issue that you don't see as being fixed if the
+MMC code is able to cope with not being able to read the voltage?  If we
+don't know what voltage the regulator has then no amount of wishful
+thinking is going to give us that knowledge, if we want to proceed with
+controlling the device then the MMC code is going to need to make some
+decisions about what it's safe to do given the limited information it
+has available to it.  Otherwise there's no option other than providing
+the information about the voltage.
+
+--i0/AhcQY5QxfSsSZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmEKvQQACgkQJNaLcl1U
+h9C12Af8DblVDI9WXSmbrPRXViKHLSNZFzqp2ZuGthopEX5957SrGd87e5iV+I/g
+gre6Jo3qS3dGIailxhWX4Tcyd/OztkwsS4V9ep1FBb3Iqo6qBbByMHwD/w2wF7sw
+zYDzwdN0yUltexPHqnPjxatTxrTL09SM8NnIl0018t1hl5UKtM/KU8YN6nFJEPLH
+4Q2ooIe2pPSz7gsg4fW1xsmxJXCqUulFtoyK59mwoHrvfdrLWWIXvvCh87c7LCxk
+kwhYlg3SbIcZlZvLL1lVcMbPnZj6F3lClwHbzhy8jAP/LXF0rtFjbvDjZJZUImq/
+3BOF/lOC6PcaomF/mguPVTzZj2XXoQ==
+=L2o3
+-----END PGP SIGNATURE-----
+
+--i0/AhcQY5QxfSsSZ--
