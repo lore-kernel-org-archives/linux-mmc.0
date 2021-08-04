@@ -2,129 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFBFDC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C50C5C4338F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 974DB60F6F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:25 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A93F160F6F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 11:35:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237655AbhHDLfe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 07:35:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43162 "EHLO
+        id S237780AbhHDLfn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 07:35:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237581AbhHDLfe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 07:35:34 -0400
-Received: from mail-vs1-xe2a.google.com (mail-vs1-xe2a.google.com [IPv6:2607:f8b0:4864:20::e2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2B25C0613D5
-        for <linux-mmc@vger.kernel.org>; Wed,  4 Aug 2021 04:35:21 -0700 (PDT)
-Received: by mail-vs1-xe2a.google.com with SMTP id b138so828162vsd.2
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Aug 2021 04:35:21 -0700 (PDT)
+        with ESMTP id S237746AbhHDLfj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 07:35:39 -0400
+Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27BEDC06179B
+        for <linux-mmc@vger.kernel.org>; Wed,  4 Aug 2021 04:35:26 -0700 (PDT)
+Received: by mail-vs1-xe2e.google.com with SMTP id b138so828258vsd.2
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Aug 2021 04:35:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=zFmNv8bWnnhaUEfEbtd/dIDab8KFB9ZFGv6zOrp9yb4=;
-        b=iu0kyRPpYLdd/jKrXz1byoUVslMvTNXKDP5os4v7jpIA9Q4eZ9ui2ItYYzm14Ep4dl
-         ovQWvTdkAoGV/HM55AZMcYojzijUvBsmwjyLPGu0ajgS9yg+HSdYM/DjDuTE17r2kwku
-         A+KsLof1HDrPTHh9X4WNRSZ47BKMaPTBXgjUPbKDxD5p3F1e9ikCH9SB/1sGkt0AhztT
-         M73vqhZO16i6VffkAeO6/HB5YHRQsL1u+GxNm9q+8l7dx+BQdsx+PgRnG85naHFHwF+S
-         Txfpfm+vz2kG5lnH4z1nUXucc4va+QumoW539vaWHuhUsrmG7osUGfM8sVu4nHtsY2kb
-         9xfw==
+        bh=InP9peXlbtO4mCujwrny7kM0O4CUejd3WqIqrBu9ksc=;
+        b=o68yKhc9ieL+VmBlW63oQ8KmiqHu0FYv9FpbS6zYFsgRfcJQHcACeSJUOl4VAq9YOt
+         YlSDDhs1zO5s9IPU1Fu9n5SZyw1yKJxmGljdQJIV+CJNfy6IcWx+azo2mN/rgB/B8CFI
+         TpJufHSABZZjmLkERZAMy9Va8tjyxbbXpbzDibecxNtw8tmj5QCiNADDpGr1pXxJU0P8
+         2jSNLnPqvadEU9Bk1GJjk8sIZbxiozy9Ic9E4O3um6zvJ2d12wod0bj/Pw/8w2k2HcUn
+         TJf1lVXF3s9gFF8CNH/Uc7uPq5FWPto4cKMvAFpL5M1res+bquhtTUp98b/exyb3ctH+
+         6Cog==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=zFmNv8bWnnhaUEfEbtd/dIDab8KFB9ZFGv6zOrp9yb4=;
-        b=htvBeVbHtby1ECzMRTEqFViPmmYtDSw7pmrGwylFuXxBpj1UfIX527Ir2DNVmsPHkF
-         eneHKmPzknf7QLzyLe9UInbzevbvYMvF3YUvud18y6rviSOY6jMIfRqokuw3GcQzfAlC
-         /dTtR/5zBF5//0V7wUmXSjRe01KMFLHc7mXWqZZFm7MCiTKuxVcIpephUme9clIqXCqA
-         5XCzxCeNulkfJcKfDiPkiXZUsXNYo120t76WsZ2/CAPMtu8M8iYA1HBcIS4207tms3Z7
-         zp+4VFTbAgSvMA4IYj47nJQA6GcifjZnkRxL2nAnJ7P+kIaZecQ423W9htgQ3BNAkYjF
-         //JA==
-X-Gm-Message-State: AOAM531Y/VbNYmoq8Z4NG5FfzDe66YyPQn5dkYkwtuNe1kDqialMhf3B
-        AuD8NFM7YUbN+r3Gn5Xj7/duAB4dvAB3swE1qAu7Mg==
-X-Google-Smtp-Source: ABdhPJyCx3nRY/4KqOLvHiEA42E1G/VVl/48vDkQI4N1BE+4zhkOavjC4jVwnhhJLmbbutkiekBOZaTnqYfqHAut40o=
-X-Received: by 2002:a67:7c14:: with SMTP id x20mr9769573vsc.42.1628076920860;
- Wed, 04 Aug 2021 04:35:20 -0700 (PDT)
+        bh=InP9peXlbtO4mCujwrny7kM0O4CUejd3WqIqrBu9ksc=;
+        b=jwb59ZNJmR7ShmrUsfHKLjVl8HOgPyE4A61rF4UnvSd6BBkWCFWGsypu/7Wgw5Mjr7
+         fDESILF0pvEvN0cX1tq+eUGGhcpsDGFh//UeU0j2wvBWWQRzpDrIpWjMQQnES8qrzz45
+         6A6Q/B6RRh7N49FQrMN7W+3oj2s8z3L6y6A5pmMhyPwsqTBINhdVAdaL69HumVgTf/fa
+         N8vvo13bDLK2Fa0s1RoLdj1kjVG6CPqnGBygSaKf/nYtkvk5IjtaGvcpt8gfOZ/rRAhg
+         ioxRiqmvfZum+3jmw7k9mxjtI3VO5j0aQ0sXZ5NAiL2dAcfaS+DfDYzEodTmZGcbWKVE
+         TIeg==
+X-Gm-Message-State: AOAM533QDAZESnifLM8A/n8thoNIvi+hzdUmW3zIq3UdkrgC6+T5Q4QX
+        bDY6oVnGBJVGcCRJtLUMcAJ4YV34K3IAR2cjxk2yJZ7VuyjFPA==
+X-Google-Smtp-Source: ABdhPJwjxMMu79egWeArYZVYGe8Sfh77udOSKtpAPVikzuZZeFQt/iS4OaDskliFjW1aRgdUNHIkNA27PrDj9G34X/E=
+X-Received: by 2002:a67:7c11:: with SMTP id x17mr5354731vsc.55.1628076924623;
+ Wed, 04 Aug 2021 04:35:24 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210701143353.13188-1-yann.gautier@foss.st.com>
-In-Reply-To: <20210701143353.13188-1-yann.gautier@foss.st.com>
+References: <20210702134229.357717-1-ulf.hansson@linaro.org>
+In-Reply-To: <20210702134229.357717-1-ulf.hansson@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Aug 2021 13:34:44 +0200
-Message-ID: <CAPDyKFoCABbyKaejhzAqM9hv7Emg4WyfbtORoW_XMnmoxKSVAQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: stm32: check when the voltage switch procedure
- should be done
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Christophe Kerello <christophe.kerello@foss.st.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Date:   Wed, 4 Aug 2021 13:34:47 +0200
+Message-ID: <CAPDyKFo78aJgcajxL6fcPb7xB16R_S6VyuwEp7tG84+CPSkKTw@mail.gmail.com>
+Subject: Re: [PATCH 0/3] mmc: core: Avoid hogging the CPU while polling for busy
+To:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Christian Lohle <CLoehle@hyperstone.com>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 1 Jul 2021 at 16:34, Yann Gautier <yann.gautier@foss.st.com> wrote:
+On Fri, 2 Jul 2021 at 15:42, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> From: Christophe Kerello <christophe.kerello@foss.st.com>
+> Step by step, code that have been dealing sending CMD13 to poll the card for
+> busy, have been moved to use the common mmc_poll_for_busy() loop. This helps to
+> avoid hogging the CPU, for example, as it inserts a small delay in between each
+> polling attempt. Additionally, it avoids open coding.
 >
-> If the card has not been power cycled, it may still be using 1.8V
-> signaling. This situation is detected in mmc_sd_init_card function and
-> should be handled in mmci stm32 variant.
-> The host->pwr_reg variable is also correctly protected with spin locks.
+> This series takes the next and final step, by moving the mmc block device layer
+> from its own busy polling loop, into using the common code.
 >
-> Fixes: 94b94a93e355 ("mmc: mmci_sdmmc: Implement signal voltage callbacks")
+> Please test and review!
 >
-> Signed-off-by: Christophe Kerello <christophe.kerello@foss.st.com>
-> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
+> Kind regards
+> Uffe
+>
+> Ulf Hansson (3):
+>   mmc: core: Avoid hogging the CPU while polling for busy in the I/O err
+>     path
+>   mmc: core: Avoid hogging the CPU while polling for busy for mmc ioctls
+>   mmc: core: Avoid hogging the CPU while polling for busy after I/O
+>     writes
+>
+>  drivers/mmc/core/block.c   | 74 +++++++++++++++++---------------------
+>  drivers/mmc/core/mmc_ops.c |  5 ++-
+>  drivers/mmc/core/mmc_ops.h |  1 +
+>  3 files changed, 37 insertions(+), 43 deletions(-)
+>
 
-Applied for fixes and by adding stable tag, thanks!
+This series has been applied for next. If you encounter any
+regressions (performance related as well), please report them!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/mmci_stm32_sdmmc.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci_stm32_sdmmc.c b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> index 51db30acf4dc..fdaa11f92fe6 100644
-> --- a/drivers/mmc/host/mmci_stm32_sdmmc.c
-> +++ b/drivers/mmc/host/mmci_stm32_sdmmc.c
-> @@ -479,8 +479,9 @@ static int sdmmc_post_sig_volt_switch(struct mmci_host *host,
->         u32 status;
->         int ret = 0;
->
-> -       if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180) {
-> -               spin_lock_irqsave(&host->lock, flags);
-> +       spin_lock_irqsave(&host->lock, flags);
-> +       if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_180 &&
-> +           host->pwr_reg & MCI_STM32_VSWITCHEN) {
->                 mmci_write_pwrreg(host, host->pwr_reg | MCI_STM32_VSWITCH);
->                 spin_unlock_irqrestore(&host->lock, flags);
->
-> @@ -492,9 +493,11 @@ static int sdmmc_post_sig_volt_switch(struct mmci_host *host,
->
->                 writel_relaxed(MCI_STM32_VSWENDC | MCI_STM32_CKSTOPC,
->                                host->base + MMCICLEAR);
-> +               spin_lock_irqsave(&host->lock, flags);
->                 mmci_write_pwrreg(host, host->pwr_reg &
->                                   ~(MCI_STM32_VSWITCHEN | MCI_STM32_VSWITCH));
->         }
-> +       spin_unlock_irqrestore(&host->lock, flags);
->
->         return ret;
->  }
-> --
-> 2.17.1
->
