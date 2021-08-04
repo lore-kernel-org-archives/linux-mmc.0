@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A763C4320E
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:13:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8180AC41537
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:13:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E8BA960FC4
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:13:34 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7170760E78
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Aug 2021 16:13:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229820AbhHDQNq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Aug 2021 12:13:46 -0400
-Received: from relmlor1.renesas.com ([210.160.252.171]:16292 "EHLO
-        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S233239AbhHDQNq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 12:13:46 -0400
+        id S232604AbhHDQNv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Aug 2021 12:13:51 -0400
+Received: from relmlor2.renesas.com ([210.160.252.172]:61085 "EHLO
+        relmlie6.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S231129AbhHDQNv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Aug 2021 12:13:51 -0400
 X-IronPort-AV: E=Sophos;i="5.84,294,1620658800"; 
-   d="scan'208";a="89832262"
+   d="scan'208";a="89812757"
 Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
-  by relmlie5.idc.renesas.com with ESMTP; 05 Aug 2021 01:13:31 +0900
+  by relmlie6.idc.renesas.com with ESMTP; 05 Aug 2021 01:13:37 +0900
 Received: from localhost.localdomain (unknown [10.226.92.204])
-        by relmlir5.idc.renesas.com (Postfix) with ESMTP id AA1754010DEA;
-        Thu,  5 Aug 2021 01:13:29 +0900 (JST)
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 570F04010906;
+        Thu,  5 Aug 2021 01:13:35 +0900 (JST)
 From:   Biju Das <biju.das.jz@bp.renesas.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>
@@ -37,33 +37,118 @@ Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
         Biju Das <biju.das@bp.renesas.com>,
         Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
         linux-renesas-soc@vger.kernel.org
-Subject: [PATCH v3 0/2] Document RZ/G2L SDHI controller bindings.
-Date:   Wed,  4 Aug 2021 17:13:23 +0100
-Message-Id: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
+Subject: [PATCH v3 2/2] dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
+Date:   Wed,  4 Aug 2021 17:13:25 +0100
+Message-Id: <20210804161325.26996-3-biju.das.jz@bp.renesas.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
+References: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This patch series aims to document RZ/G2L SDHI controller bindings.
+Document RZ/G2L SDHI controller bindings.
 
+Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+---
 v2->v3:
- * Created a seperate patch to fix the dtbs-warning check reported by [1].
- * RZ/G2L SDHI binding patch depends up on the above the patch.
- [1] https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20210804091940.23983-1-biju.das.jz@bp.renesas.com/
+ * This patch depends up on the previous patch in this series.
 v1->v2:
  * Fixed dtbs-check issue for RZ/A{1,2} platforms.
+---
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 54 +++++++++++++------
+ 1 file changed, 37 insertions(+), 17 deletions(-)
 
-v1->
- * newpatch
-
-Biju Das (2):
-  dt-bindings: mmc: renesas,sdhi: Fix dtbs-check warning
-  dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
-
- .../devicetree/bindings/mmc/renesas,sdhi.yaml | 119 ++++++++++++------
- 1 file changed, 79 insertions(+), 40 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+index 543eeb825dc3..e195ee5c0900 100644
+--- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
++++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+@@ -44,19 +44,20 @@ properties:
+           - const: renesas,sdhi-mmc-r8a77470 # RZ/G1C (SDHI/MMC IP)
+       - items:
+           - enum:
+-              - renesas,sdhi-r8a774a1 # RZ/G2M
+-              - renesas,sdhi-r8a774b1 # RZ/G2N
+-              - renesas,sdhi-r8a774c0 # RZ/G2E
+-              - renesas,sdhi-r8a774e1 # RZ/G2H
+-              - renesas,sdhi-r8a7795  # R-Car H3
+-              - renesas,sdhi-r8a7796  # R-Car M3-W
+-              - renesas,sdhi-r8a77961 # R-Car M3-W+
+-              - renesas,sdhi-r8a77965 # R-Car M3-N
+-              - renesas,sdhi-r8a77970 # R-Car V3M
+-              - renesas,sdhi-r8a77980 # R-Car V3H
+-              - renesas,sdhi-r8a77990 # R-Car E3
+-              - renesas,sdhi-r8a77995 # R-Car D3
+-              - renesas,sdhi-r8a779a0 # R-Car V3U
++              - renesas,sdhi-r8a774a1  # RZ/G2M
++              - renesas,sdhi-r8a774b1  # RZ/G2N
++              - renesas,sdhi-r8a774c0  # RZ/G2E
++              - renesas,sdhi-r8a774e1  # RZ/G2H
++              - renesas,sdhi-r8a7795   # R-Car H3
++              - renesas,sdhi-r8a7796   # R-Car M3-W
++              - renesas,sdhi-r8a77961  # R-Car M3-W+
++              - renesas,sdhi-r8a77965  # R-Car M3-N
++              - renesas,sdhi-r8a77970  # R-Car V3M
++              - renesas,sdhi-r8a77980  # R-Car V3H
++              - renesas,sdhi-r8a77990  # R-Car E3
++              - renesas,sdhi-r8a77995  # R-Car D3
++              - renesas,sdhi-r8a779a0  # R-Car V3U
++              - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
+           - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
+ 
+   reg:
+@@ -68,13 +69,11 @@ properties:
+ 
+   clocks:
+     minItems: 1
+-    maxItems: 2
++    maxItems: 4
+ 
+   clock-names:
+     minItems: 1
+-    items:
+-      - const: core
+-      - const: cd
++    maxItems: 4
+ 
+   dmas:
+     minItems: 4
+@@ -135,6 +134,8 @@ allOf:
+               - renesas,sdhi-r7s9210
+     then:
+       properties:
++        clocks:
++          maxItems: 2
+         clock-names:
+           items:
+             - const: core
+@@ -146,6 +147,25 @@ allOf:
+         sectioned off to be run by a separate second clock source to allow
+         the main core clock to be turned off to save power.
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: renesas,sdhi-r9a07g044
++    then:
++      properties:
++        clocks:
++          items:
++            - description: IMCLK, SDHI channel main clock1.
++            - description: IMCLK2, SDHI channel main clock2. When this clock is
++                           turned off, external SD card detection cannot be
++                           detected.
++            - description: CLK_HS, SDHI channel High speed clock which operates
++                           4 times that of SDHI channel main clock1.
++            - description: ACLK, SDHI channel bus clock.
++      required:
++        - resets
++
+ required:
+   - compatible
+   - reg
 -- 
 2.17.1
 
