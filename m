@@ -2,178 +2,223 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BC08C432BE
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 11:33:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D63D9C4338F
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 12:39:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 45B1361050
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 11:33:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A9BC761164
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 12:39:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245548AbhHFLdX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Aug 2021 07:33:23 -0400
-Received: from esa.microchip.iphmx.com ([68.232.153.233]:1563 "EHLO
-        esa.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245541AbhHFLdW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Aug 2021 07:33:22 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1628249588; x=1659785588;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=uQOYpWS7Qrcgkx+VH2ts2v8g+61j0yRDKNU96qalLg4=;
-  b=Rnm9vVU5D4m8Qf489qC5xnKgVPQshdxz7UuHBE3QzbqHh7BpcQxGsmT/
-   LX0kev5uJVJXtqM130zGBvBOQWqPEQvZX+4eB3Rxwk+6wh5caAlPJ1DLZ
-   HRrn1+OVaFouaCr9z5KK2YUDBKImECLEatD9aIqxYVq6MlmOcdb2goE99
-   QrIyttTcnxdeF6Wf8o3fZT2m5wrKT4I7NllzEyVlrmRG2fEfltnivv6XT
-   94Oy7UCSnUXroBSAwfYOrsUWel4xS5zil3oSMFw+9sQbfZ2ZqwaXi2w/J
-   7+O3QebU6nRwJpkEJpA6VVGKGp4rWGd8UkyBBgF6BBSSrt5q12OegLgYG
-   A==;
-IronPort-SDR: N9C65RxcqZ5RibRA/eC5z1L/pV/gBDNOXlTzOYwpwpNylUaCJ3ylAAuoEdKVouZqPp4Vselt0P
- MJ6I92rqREF/8FpbNcqfE42jxt/mf/g/8SXuASVY0le5hSmWoblXXybnPCXG+IR8FCp8e3aEta
- mu7+SBZssYCxwVfwV/bOnOYuecFjhWjmfMJR3rBUyKFa5EF1StPR42VxSPfA9+qmk4jyC8C2ua
- dfWeoKyUFvVflXXwDZTSYMvTq2r6B8MbWGbZNCUZWcmwJneYD8YaxqoE+xYCXmjfdm3i17Wr49
- ATbysUABDpGKTeuoQyDN7edy
-X-IronPort-AV: E=Sophos;i="5.84,300,1620716400"; 
-   d="scan'208";a="131292938"
-Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 06 Aug 2021 04:33:06 -0700
-Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
- chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2176.2; Fri, 6 Aug 2021 04:33:04 -0700
-Received: from m18063-ThinkPad-T460p.mchp-main.com (10.10.115.15) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server id
- 15.1.2176.2 via Frontend Transport; Fri, 6 Aug 2021 04:32:59 -0700
-From:   Claudiu Beznea <claudiu.beznea@microchip.com>
-To:     <ulf.hansson@linaro.org>, <robh+dt@kernel.org>,
-        <nicolas.ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
-        <ludovic.desroches@microchip.com>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        "Eugen Hristev" <eugen.hristev@microchip.com>,
-        Claudiu Beznea <claudiu.beznea@microchip.com>
-Subject: [PATCH 4/4] ARM: dts: at91: sama5d27_wlsom1: add wifi device
-Date:   Fri, 6 Aug 2021 14:30:01 +0300
-Message-ID: <20210806113001.821660-5-claudiu.beznea@microchip.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20210806113001.821660-1-claudiu.beznea@microchip.com>
-References: <20210806113001.821660-1-claudiu.beznea@microchip.com>
+        id S1343726AbhHFMjl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Aug 2021 08:39:41 -0400
+Received: from mail.kernel.org ([198.145.29.99]:54582 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1343709AbhHFMjj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Aug 2021 08:39:39 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C241461164;
+        Fri,  6 Aug 2021 12:39:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1628253563;
+        bh=6KW4drSBaol116KRRyQDv1cUDRFBcaYb2BiJI3EhakU=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=Yy7mKNHTXWRhJPFaKM3A9lVqTOYnpq3YVbcoDppGlU3OUQsgXDpr2iQtmD6OaEwvE
+         LNE9CRQlQR/QQpsrxPMlmQLm4FVJjNbt5PlJbFheFEHV308/WQPvcyEwkQzfoeGXlr
+         Gv6AwnC/PROvMEwgT4tVm75IlhVp35AiZ6Ebhmel9lowGIQLOQhi/hj3M9K0ntu20B
+         MIm4FfjSh3h+2yRjye9e/XAV9yIk5BRVc8KggJ3+n4vVH9YgdAt87qTjSkmwOpZQt2
+         Uz7hO7LT4ijCb5VGvPLHeEqW1aW3AmeXRq4y7qI39TtRz8tn/pcW5Ea3bovJxhkRkD
+         AedF5WlszXJOw==
+Date:   Fri, 6 Aug 2021 18:09:19 +0530
+From:   Vinod Koul <vkoul@kernel.org>
+To:     rashmi.a@intel.com
+Cc:     linux-drivers-review-request@eclists.intel.com,
+        michal.simek@xilinx.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, kishon@ti.com,
+        andriy.shevchenko@linux.intel.com, linux-phy@lists.infradead.org,
+        mgross@linux.intel.com, kris.pan@linux.intel.com,
+        furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
+        adrian.hunter@intel.com, mahesh.r.vaidya@intel.com,
+        nandhini.srikandan@intel.com, kenchappa.demakkanavar@intel.com
+Subject: Re: [PATCH 3/3] phy: intel: Add Thunder Bay eMMC PHY support
+Message-ID: <YQ0td9y5+RNFxWZs@matsya>
+References: <20210730063309.8194-1-rashmi.a@intel.com>
+ <20210730063309.8194-4-rashmi.a@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210730063309.8194-4-rashmi.a@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Eugen Hristev <eugen.hristev@microchip.com>
+On 30-07-21, 12:03, rashmi.a@intel.com wrote:
 
-SAMA5D27 WLSOM1 boards has a WILC3000 device soldered. Add proper
-device tree nodes for this.
+> diff --git a/drivers/phy/intel/Kconfig b/drivers/phy/intel/Kconfig
+> index ac42bb2fb394..18a3cc5b98c0 100644
+> --- a/drivers/phy/intel/Kconfig
+> +++ b/drivers/phy/intel/Kconfig
+> @@ -46,3 +46,13 @@ config PHY_INTEL_LGM_EMMC
+>  	select GENERIC_PHY
+>  	help
+>  	  Enable this to support the Intel EMMC PHY
+> +
+> +config PHY_INTEL_THUNDERBAY_EMMC
 
-[eugen.hristev: original author of this code]
-Signed-off-by: Eugen Hristev <eugen.hristev@microchip.com>
-[nicolas.ferre: original author of this code]
-Signed-off-by: Nicolas Ferre <nicolas.ferre@microchip.com>
-[claudiu.beznea: adapt for mmc-pwrseq-sd8787, commit message]
-Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
----
- arch/arm/boot/dts/at91-sama5d27_wlsom1.dtsi | 72 +++++++++++++++++++++
- 1 file changed, 72 insertions(+)
+Alphabetical sort please
 
-diff --git a/arch/arm/boot/dts/at91-sama5d27_wlsom1.dtsi b/arch/arm/boot/dts/at91-sama5d27_wlsom1.dtsi
-index 025a78310e3a..de8bb3439aef 100644
---- a/arch/arm/boot/dts/at91-sama5d27_wlsom1.dtsi
-+++ b/arch/arm/boot/dts/at91-sama5d27_wlsom1.dtsi
-@@ -30,6 +30,16 @@ main_xtal {
- 			clock-frequency = <24000000>;
- 		};
- 	};
-+
-+	wifi_pwrseq: wifi_pwrseq {
-+		compatible = "mmc-pwrseq-sd8787";
-+		reset-gpios = <&pioA PIN_PA27 GPIO_ACTIVE_HIGH>;
-+		powerdown-gpios = <&pioA PIN_PA29 GPIO_ACTIVE_HIGH>;
-+		reset-power-delay-ms = <5>;
-+		pinctrl-0 = <&pinctrl_wilc_pwrseq>;
-+		pinctrl-names = "default";
-+		status = "okay";
-+	};
- };
- 
- &flx1 {
-@@ -310,5 +320,67 @@ pinctrl_qspi1_default: qspi1_default {
- 			 <PIN_PB10__QSPI1_IO3>;
- 		bias-pull-up;
- 	};
-+
-+	pinctrl_sdmmc1_default: sdmmc1_default {
-+		cmd-data {
-+			pinmux = <PIN_PA28__SDMMC1_CMD>,
-+				 <PIN_PA18__SDMMC1_DAT0>,
-+				 <PIN_PA19__SDMMC1_DAT1>,
-+				 <PIN_PA20__SDMMC1_DAT2>,
-+				 <PIN_PA21__SDMMC1_DAT3>;
-+			bias-disable;
-+		};
-+
-+		conf-ck {
-+			pinmux = <PIN_PA22__SDMMC1_CK>;
-+			bias-disable;
-+		};
-+	};
-+
-+	pinctrl_wilc_default: wilc_default {
-+		conf-irq {
-+			pinmux = <PIN_PB25__GPIO>;
-+			bias-disable;
-+		};
-+	};
-+
-+	pinctrl_wilc_pwrseq: wilc_pwrseq {
-+		conf-ce-nrst {
-+			pinmux = <PIN_PA27__GPIO>,
-+				 <PIN_PA29__GPIO>;
-+			bias-disable;
-+		};
-+
-+		conf-rtcclk {
-+			pinmux = <PIN_PB13__PCK1>;
-+			bias-disable;
-+		};
-+	};
-+};
-+
-+&sdmmc1 {
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+	bus-width = <4>;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_sdmmc1_default>;
-+	mmc-pwrseq = <&wifi_pwrseq>;
-+	no-1-8-v;
-+	non-removable;
-+	status = "okay";
-+
-+	wilc: wilc@0 {
-+		reg = <0>;
-+		bus-width = <4>;
-+		compatible = "microchip,wilc3000", "microchip,wilc1000";
-+		pinctrl-names = "default";
-+		pinctrl-0 = <&pinctrl_wilc_default>;
-+		irq-gpios = <&pioA PIN_PB25 GPIO_ACTIVE_LOW>;
-+		clocks = <&pmc PMC_TYPE_SYSTEM 9>;
-+		clock-names = "rtc";
-+		assigned-clocks = <&pmc PMC_TYPE_SYSTEM 9>;
-+		assigned-clock-rates = <32768>;
-+		status = "okay";
-+	};
- };
- 
+> +        tristate "Intel Thunder Bay eMMC PHY driver"
+> +        depends on OF && (ARCH_THUNDERBAY || COMPILE_TEST)
+> +        select GENERIC_PHY
+> +        help
+> +	  This option enables support for Intel Thunder Bay SoC eMMC PHY.
+> +
+> +	  To compile this driver as a module, choose M here: the module
+> +	  will be called phy-intel-thunderbay-emmc.ko.
+> diff --git a/drivers/phy/intel/Makefile b/drivers/phy/intel/Makefile
+> index 14550981a707..6a4db3ee7393 100644
+> --- a/drivers/phy/intel/Makefile
+> +++ b/drivers/phy/intel/Makefile
+> @@ -1,5 +1,6 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  obj-$(CONFIG_PHY_INTEL_KEEMBAY_EMMC)	+= phy-intel-keembay-emmc.o
+> +obj-$(CONFIG_PHY_INTEL_THUNDERBAY_EMMC)	+= phy-intel-thunderbay-emmc.o
+
+here as well
+
+> +static int thunderbay_emmc_phy_power(struct phy *phy, bool power_on)
+> +{
+> +	struct thunderbay_emmc_phy *tbh_phy = phy_get_drvdata(phy);
+> +	unsigned int freqsel = FREQSEL_200M_170M;
+> +	unsigned long rate;
+> +	static int lock;
+> +	u32 val;
+> +	int ret;
+> +
+> +	/* Disable DLL */
+> +	rate = clk_get_rate(tbh_phy->emmcclk);
+> +	switch (rate) {
+> +	case 200000000:
+> +	/* lock dll only when it is used, i.e only if SEL_DLY_TXCLK/RXCLK are 0 */
+> +		update_reg(tbh_phy, PHY_CFG_0, DLL_EN_MASK, DLL_EN_SHIFT, 0x0);
+
+pls keep the same indent for comment and code!
+
+> +		break;
+> +	/* dll lock not required for other frequencies */
+> +	case 50000000 ... 52000000:
+> +	case 400000:
+> +	default:
+> +		break;
+> +	}
+> +
+> +	if (!power_on)
+> +		return 0;
+
+should this not be the first thing you check...
+
+> +
+> +	rate = clk_get_rate(tbh_phy->emmcclk);
+> +	switch (rate) {
+> +	case 170000001 ... 200000000:
+> +		freqsel = FREQSEL_200M_170M;
+> +		break;
+> +	case 140000001 ... 170000000:
+> +		freqsel = FREQSEL_170M_140M;
+> +		break;
+> +	case 110000001 ... 140000000:
+> +		freqsel = FREQSEL_140M_110M;
+> +		break;
+> +	case 80000001 ... 110000000:
+> +		freqsel = FREQSEL_110M_80M;
+> +		break;
+> +	case 50000000 ... 80000000:
+> +		freqsel = FREQSEL_80M_50M;
+> +		break;
+> +	case 250000001 ... 275000000:
+> +		freqsel = FREQSEL_275M_250M;
+> +		break;
+> +	case 225000001 ... 250000000:
+> +		freqsel = FREQSEL_250M_225M;
+> +		break;
+> +	case 200000001 ... 225000000:
+> +		freqsel = FREQSEL_225M_200M;
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	if (rate > 200000000)
+> +	/* only the upper limit is considered as the clock rate may fall low during init */
+> +		dev_warn(&phy->dev, "Unsupported rate: %lu\n", rate);
+
+here as well! (checkpatch --strict should have told you so)
+
+> +static int thunderbay_emmc_phy_power_on(struct phy *phy)
+> +{
+> +	struct thunderbay_emmc_phy *tbh_phy = phy_get_drvdata(phy);
+> +	unsigned long rate;
+> +
+> +	/* Overwrite capability bits configurable in bootloader */
+> +	update_reg(tbh_phy, CTRL_CFG_0,
+> +		   SUPPORT_HS_MASK, SUPPORT_HS_SHIFT, 0x1);
+> +	update_reg(tbh_phy, CTRL_CFG_0,
+> +		   SUPPORT_8B_MASK, SUPPORT_8B_SHIFT, 0x1);
+> +	update_reg(tbh_phy, CTRL_CFG_1,
+> +		   SUPPORT_SDR50_MASK, SUPPORT_SDR50_SHIFT, 0x1);
+> +	update_reg(tbh_phy, CTRL_CFG_1,
+> +		   SUPPORT_DDR50_MASK, SUPPORT_DDR50_SHIFT, 0x1);
+> +	update_reg(tbh_phy, CTRL_CFG_1,
+> +		   SUPPORT_SDR104_MASK, SUPPORT_SDR104_SHIFT, 0x1);
+> +	update_reg(tbh_phy, CTRL_CFG_1,
+> +		   SUPPORT_HS400_MASK, SUPPORT_HS400_SHIFT, 0x1);
+> +	update_reg(tbh_phy, CTRL_CFG_1,
+> +		   SUPPORT_64B_MASK, SUPPORT_64B_SHIFT, 0x1);
+> +
+> +	if (tbh_phy->phy_power_sts == PHY_UNINITIALIZED) {
+> +	/* Indicates initialization, so settings to be done for init , same as 400KHZ setting */
+> +		update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_TXCLK_MASK, SEL_DLY_TXCLK_SHIFT, 0x1);
+
+inconsistent indent here too!
+
+> +		update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_RXCLK_MASK, SEL_DLY_RXCLK_SHIFT, 0x1);
+> +		update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_ENA_MASK, ITAP_DLY_ENA_SHIFT, 0x0);
+> +		update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_SEL_MASK, ITAP_DLY_SEL_SHIFT, 0x0);
+> +		update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_ENA_MASK, OTAP_DLY_ENA_SHIFT, 0x0);
+> +		update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_SEL_MASK, OTAP_DLY_SEL_SHIFT, 0);
+> +		update_reg(tbh_phy, PHY_CFG_0, DLL_TRIM_ICP_MASK, DLL_TRIM_ICP_SHIFT, 0);
+> +		update_reg(tbh_phy, PHY_CFG_0, DR_TY_MASK, DR_TY_SHIFT, 0x1);
+> +
+> +	} else if (tbh_phy->phy_power_sts == PHY_INITIALIZED) {
+> +		/* Indicates actual clock setting */
+> +		rate = clk_get_rate(tbh_phy->emmcclk);
+> +		switch (rate) {
+> +		case 200000000:
+> +			update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_TXCLK_MASK,
+> +				   SEL_DLY_TXCLK_SHIFT, 0x0);
+> +			update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_RXCLK_MASK,
+> +				   SEL_DLY_RXCLK_SHIFT, 0x0);
+> +			update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_ENA_MASK,
+> +				   ITAP_DLY_ENA_SHIFT, 0x0);
+> +			update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_SEL_MASK,
+> +				   ITAP_DLY_SEL_SHIFT, 0x0);
+> +			update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_ENA_MASK,
+> +				   OTAP_DLY_ENA_SHIFT, 0x1);
+> +			update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_SEL_MASK,
+> +				   OTAP_DLY_SEL_SHIFT, 2);
+> +			update_reg(tbh_phy, PHY_CFG_0, DLL_TRIM_ICP_MASK,
+> +				   DLL_TRIM_ICP_SHIFT, 0x8);
+> +			update_reg(tbh_phy, PHY_CFG_0, DR_TY_MASK,
+> +				   DR_TY_SHIFT, 0x1);
+> +			/* For HS400 only */
+> +			update_reg(tbh_phy, PHY_CFG_2, SEL_STRB_MASK,
+> +				   SEL_STRB_SHIFT, STRB);
+> +			break;
+
+pls give a empty line after break, helps to read the code
+
 -- 
-2.25.1
-
+~Vinod
