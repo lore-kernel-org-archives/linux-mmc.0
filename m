@@ -2,223 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D63D9C4338F
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 12:39:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19EC1C4338F
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 13:06:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A9BC761164
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 12:39:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EAF7F60EEA
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 13:06:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343726AbhHFMjl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Aug 2021 08:39:41 -0400
-Received: from mail.kernel.org ([198.145.29.99]:54582 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1343709AbhHFMjj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 6 Aug 2021 08:39:39 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C241461164;
-        Fri,  6 Aug 2021 12:39:22 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1628253563;
-        bh=6KW4drSBaol116KRRyQDv1cUDRFBcaYb2BiJI3EhakU=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=Yy7mKNHTXWRhJPFaKM3A9lVqTOYnpq3YVbcoDppGlU3OUQsgXDpr2iQtmD6OaEwvE
-         LNE9CRQlQR/QQpsrxPMlmQLm4FVJjNbt5PlJbFheFEHV308/WQPvcyEwkQzfoeGXlr
-         Gv6AwnC/PROvMEwgT4tVm75IlhVp35AiZ6Ebhmel9lowGIQLOQhi/hj3M9K0ntu20B
-         MIm4FfjSh3h+2yRjye9e/XAV9yIk5BRVc8KggJ3+n4vVH9YgdAt87qTjSkmwOpZQt2
-         Uz7hO7LT4ijCb5VGvPLHeEqW1aW3AmeXRq4y7qI39TtRz8tn/pcW5Ea3bovJxhkRkD
-         AedF5WlszXJOw==
-Date:   Fri, 6 Aug 2021 18:09:19 +0530
-From:   Vinod Koul <vkoul@kernel.org>
+        id S242411AbhHFNGx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Aug 2021 09:06:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39902 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237817AbhHFNGx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Aug 2021 09:06:53 -0400
+Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29D03C061799
+        for <linux-mmc@vger.kernel.org>; Fri,  6 Aug 2021 06:06:37 -0700 (PDT)
+Received: by mail-vs1-xe2d.google.com with SMTP id bg4so5177437vsb.6
+        for <linux-mmc@vger.kernel.org>; Fri, 06 Aug 2021 06:06:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=sNHkxBimwZ6Jh8WXRWXbNnhP/dPnhpFJMNiTGn9qTtg=;
+        b=LYI5PnJT3RUxp9wDoBeVQkNxLzQXFX/cosiPt6l+YdPQlcdBwlQP3ZxmoX0KLHLESH
+         rcHbLlv2mHbUf/5uV9Ir1MD3sXlk3KXNjK49vVrD/pE6xbscxSZ22pWYNQFHV88elTB1
+         4iCjPw6nLaUE8oVVkltpF8WL6Pt3MUEV0+TI8b8qNd6T5EMgnK3kDgY17lnu9MLFs1DA
+         skzELY6JzdOsXJy2/KbXinHkzhWWU70N0TUqeOq/lbEykjvDCZkYzfjOAmaa5RGMKJeq
+         ItFX60cAhggdeFBKMf6k73IKJzPYKLOtdntTBxIinYtVxsNLm4et087M1pKosP/J7hKl
+         preQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=sNHkxBimwZ6Jh8WXRWXbNnhP/dPnhpFJMNiTGn9qTtg=;
+        b=eXhhxrkZxNpja01M2D53a9GQg2WPIh0ZtFoKjruAaN0fNNZd0kPo7xOSRGPFISRPCu
+         1wdnnDz1FMMCt2nQRk5/DZAPjG8eYYS+Z6UYHzDlJ9GvLha947pOvoB/Xt9dY/d7XgvS
+         5vncI7MMMXKCRnD1tE38fV7JewIGdMYh2MKuz9RiePEZ7Wlc0JeRDakVH32GHlCqUcTN
+         tmS7f8g/LHavF+XPyANuug1Z3vYg1cF98lhRpuPDWInA5TCXq5Ze34QKyl6wRq2FLffR
+         9RN2OnXqEe9ME0UViZ/eTXaoQCPGMnNSljp3nlEHdJymNnxVnPitnxJ7FBykyEOMiDbT
+         RL3w==
+X-Gm-Message-State: AOAM531OslJ7/C/PVXL7D3QEoo/y+JIkQnC6bcWqNjv48PMperjEidUV
+        IUt/c1yBwrqKsZiBEYR5gzMh7Gh/p+ISBXWXithCCg==
+X-Google-Smtp-Source: ABdhPJx7LQQ+qPQvXevHz49FTYEayCd9sFB68rW6zgcqcR0ElsNX5LPKVGqHH+cM85lbgA/GVPwxHYheJZhzMzDbZyw=
+X-Received: by 2002:a67:7c14:: with SMTP id x20mr9059463vsc.42.1628255196328;
+ Fri, 06 Aug 2021 06:06:36 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210730063309.8194-1-rashmi.a@intel.com> <20210730063309.8194-3-rashmi.a@intel.com>
+In-Reply-To: <20210730063309.8194-3-rashmi.a@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 6 Aug 2021 15:06:00 +0200
+Message-ID: <CAPDyKFqZ-H3+OnYyyY7y611YrRAAMFq+W65DMfM4wSNvY_fzjA@mail.gmail.com>
+Subject: Re: [PATCH 2/3] mmc: sdhci-of-arasan: Add intel Thunder Bay SOC
+ support to the arasan eMMC driver
 To:     rashmi.a@intel.com
 Cc:     linux-drivers-review-request@eclists.intel.com,
-        michal.simek@xilinx.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, kishon@ti.com,
-        andriy.shevchenko@linux.intel.com, linux-phy@lists.infradead.org,
-        mgross@linux.intel.com, kris.pan@linux.intel.com,
-        furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
-        adrian.hunter@intel.com, mahesh.r.vaidya@intel.com,
-        nandhini.srikandan@intel.com, kenchappa.demakkanavar@intel.com
-Subject: Re: [PATCH 3/3] phy: intel: Add Thunder Bay eMMC PHY support
-Message-ID: <YQ0td9y5+RNFxWZs@matsya>
-References: <20210730063309.8194-1-rashmi.a@intel.com>
- <20210730063309.8194-4-rashmi.a@intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210730063309.8194-4-rashmi.a@intel.com>
+        Michal Simek <michal.simek@xilinx.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Kishon <kishon@ti.com>, Vinod Koul <vkoul@kernel.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        linux-phy@lists.infradead.org, Mark Gross <mgross@linux.intel.com>,
+        kris.pan@linux.intel.com, furong.zhou@intel.com,
+        mallikarjunappa.sangannavar@intel.com,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        mahesh.r.vaidya@intel.com, nandhini.srikandan@intel.com,
+        kenchappa.demakkanavar@intel.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30-07-21, 12:03, rashmi.a@intel.com wrote:
+On Fri, 30 Jul 2021 at 08:33, <rashmi.a@intel.com> wrote:
+>
+> From: Rashmi A <rashmi.a@intel.com>
+>
+> Intel Thunder Bay SoC eMMC controller is based on Arasan
+> eMMC 5.1 host controller IP
+>
+> Signed-off-by: Rashmi A <rashmi.a@intel.com>
+> Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> diff --git a/drivers/phy/intel/Kconfig b/drivers/phy/intel/Kconfig
-> index ac42bb2fb394..18a3cc5b98c0 100644
-> --- a/drivers/phy/intel/Kconfig
-> +++ b/drivers/phy/intel/Kconfig
-> @@ -46,3 +46,13 @@ config PHY_INTEL_LGM_EMMC
->  	select GENERIC_PHY
->  	help
->  	  Enable this to support the Intel EMMC PHY
+Rashmi, is it safe to apply this separately from the phy driver/dt
+changes? Then I can queue this via my mmc tree, if you like.
+
+Kind regards
+Uffe
+
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 29 ++++++++++++++++++++++++++++-
+>  1 file changed, 28 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 839965f7c717..6f202fb7a546 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -185,6 +185,13 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
+>         .hiword_update = false,
+>  };
+>
+> +static const struct sdhci_arasan_soc_ctl_map thunderbay_soc_ctl_map = {
+> +       .baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
+> +       .clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
+> +       .support64b = { .reg = 0x4, .width = 1, .shift = 24 },
+> +       .hiword_update = false,
+> +};
 > +
-> +config PHY_INTEL_THUNDERBAY_EMMC
-
-Alphabetical sort please
-
-> +        tristate "Intel Thunder Bay eMMC PHY driver"
-> +        depends on OF && (ARCH_THUNDERBAY || COMPILE_TEST)
-> +        select GENERIC_PHY
-> +        help
-> +	  This option enables support for Intel Thunder Bay SoC eMMC PHY.
+>  static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
+>         .baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
+>         .clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
+> @@ -430,6 +437,15 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
+>                         SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+>  };
+>
+> +static const struct sdhci_pltfm_data sdhci_arasan_thunderbay_pdata = {
+> +       .ops = &sdhci_arasan_cqe_ops,
+> +       .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN | SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+> +       .quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +               SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +               SDHCI_QUIRK2_STOP_WITH_TC |
+> +               SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+> +};
 > +
-> +	  To compile this driver as a module, choose M here: the module
-> +	  will be called phy-intel-thunderbay-emmc.ko.
-> diff --git a/drivers/phy/intel/Makefile b/drivers/phy/intel/Makefile
-> index 14550981a707..6a4db3ee7393 100644
-> --- a/drivers/phy/intel/Makefile
-> +++ b/drivers/phy/intel/Makefile
-> @@ -1,5 +1,6 @@
->  # SPDX-License-Identifier: GPL-2.0
->  obj-$(CONFIG_PHY_INTEL_KEEMBAY_EMMC)	+= phy-intel-keembay-emmc.o
-> +obj-$(CONFIG_PHY_INTEL_THUNDERBAY_EMMC)	+= phy-intel-thunderbay-emmc.o
-
-here as well
-
-> +static int thunderbay_emmc_phy_power(struct phy *phy, bool power_on)
-> +{
-> +	struct thunderbay_emmc_phy *tbh_phy = phy_get_drvdata(phy);
-> +	unsigned int freqsel = FREQSEL_200M_170M;
-> +	unsigned long rate;
-> +	static int lock;
-> +	u32 val;
-> +	int ret;
+>  #ifdef CONFIG_PM_SLEEP
+>  /**
+>   * sdhci_arasan_suspend - Suspend method for the driver
+> @@ -1098,6 +1114,12 @@ static struct sdhci_arasan_of_data sdhci_arasan_generic_data = {
+>         .clk_ops = &arasan_clk_ops,
+>  };
+>
+> +static const struct sdhci_arasan_of_data sdhci_arasan_thunderbay_data = {
+> +       .soc_ctl_map = &thunderbay_soc_ctl_map,
+> +       .pdata = &sdhci_arasan_thunderbay_pdata,
+> +       .clk_ops = &arasan_clk_ops,
+> +};
 > +
-> +	/* Disable DLL */
-> +	rate = clk_get_rate(tbh_phy->emmcclk);
-> +	switch (rate) {
-> +	case 200000000:
-> +	/* lock dll only when it is used, i.e only if SEL_DLY_TXCLK/RXCLK are 0 */
-> +		update_reg(tbh_phy, PHY_CFG_0, DLL_EN_MASK, DLL_EN_SHIFT, 0x0);
-
-pls keep the same indent for comment and code!
-
-> +		break;
-> +	/* dll lock not required for other frequencies */
-> +	case 50000000 ... 52000000:
-> +	case 400000:
-> +	default:
-> +		break;
-> +	}
-> +
-> +	if (!power_on)
-> +		return 0;
-
-should this not be the first thing you check...
-
-> +
-> +	rate = clk_get_rate(tbh_phy->emmcclk);
-> +	switch (rate) {
-> +	case 170000001 ... 200000000:
-> +		freqsel = FREQSEL_200M_170M;
-> +		break;
-> +	case 140000001 ... 170000000:
-> +		freqsel = FREQSEL_170M_140M;
-> +		break;
-> +	case 110000001 ... 140000000:
-> +		freqsel = FREQSEL_140M_110M;
-> +		break;
-> +	case 80000001 ... 110000000:
-> +		freqsel = FREQSEL_110M_80M;
-> +		break;
-> +	case 50000000 ... 80000000:
-> +		freqsel = FREQSEL_80M_50M;
-> +		break;
-> +	case 250000001 ... 275000000:
-> +		freqsel = FREQSEL_275M_250M;
-> +		break;
-> +	case 225000001 ... 250000000:
-> +		freqsel = FREQSEL_250M_225M;
-> +		break;
-> +	case 200000001 ... 225000000:
-> +		freqsel = FREQSEL_225M_200M;
-> +		break;
-> +	default:
-> +		break;
-> +	}
-> +
-> +	if (rate > 200000000)
-> +	/* only the upper limit is considered as the clock rate may fall low during init */
-> +		dev_warn(&phy->dev, "Unsupported rate: %lu\n", rate);
-
-here as well! (checkpatch --strict should have told you so)
-
-> +static int thunderbay_emmc_phy_power_on(struct phy *phy)
-> +{
-> +	struct thunderbay_emmc_phy *tbh_phy = phy_get_drvdata(phy);
-> +	unsigned long rate;
-> +
-> +	/* Overwrite capability bits configurable in bootloader */
-> +	update_reg(tbh_phy, CTRL_CFG_0,
-> +		   SUPPORT_HS_MASK, SUPPORT_HS_SHIFT, 0x1);
-> +	update_reg(tbh_phy, CTRL_CFG_0,
-> +		   SUPPORT_8B_MASK, SUPPORT_8B_SHIFT, 0x1);
-> +	update_reg(tbh_phy, CTRL_CFG_1,
-> +		   SUPPORT_SDR50_MASK, SUPPORT_SDR50_SHIFT, 0x1);
-> +	update_reg(tbh_phy, CTRL_CFG_1,
-> +		   SUPPORT_DDR50_MASK, SUPPORT_DDR50_SHIFT, 0x1);
-> +	update_reg(tbh_phy, CTRL_CFG_1,
-> +		   SUPPORT_SDR104_MASK, SUPPORT_SDR104_SHIFT, 0x1);
-> +	update_reg(tbh_phy, CTRL_CFG_1,
-> +		   SUPPORT_HS400_MASK, SUPPORT_HS400_SHIFT, 0x1);
-> +	update_reg(tbh_phy, CTRL_CFG_1,
-> +		   SUPPORT_64B_MASK, SUPPORT_64B_SHIFT, 0x1);
-> +
-> +	if (tbh_phy->phy_power_sts == PHY_UNINITIALIZED) {
-> +	/* Indicates initialization, so settings to be done for init , same as 400KHZ setting */
-> +		update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_TXCLK_MASK, SEL_DLY_TXCLK_SHIFT, 0x1);
-
-inconsistent indent here too!
-
-> +		update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_RXCLK_MASK, SEL_DLY_RXCLK_SHIFT, 0x1);
-> +		update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_ENA_MASK, ITAP_DLY_ENA_SHIFT, 0x0);
-> +		update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_SEL_MASK, ITAP_DLY_SEL_SHIFT, 0x0);
-> +		update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_ENA_MASK, OTAP_DLY_ENA_SHIFT, 0x0);
-> +		update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_SEL_MASK, OTAP_DLY_SEL_SHIFT, 0);
-> +		update_reg(tbh_phy, PHY_CFG_0, DLL_TRIM_ICP_MASK, DLL_TRIM_ICP_SHIFT, 0);
-> +		update_reg(tbh_phy, PHY_CFG_0, DR_TY_MASK, DR_TY_SHIFT, 0x1);
-> +
-> +	} else if (tbh_phy->phy_power_sts == PHY_INITIALIZED) {
-> +		/* Indicates actual clock setting */
-> +		rate = clk_get_rate(tbh_phy->emmcclk);
-> +		switch (rate) {
-> +		case 200000000:
-> +			update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_TXCLK_MASK,
-> +				   SEL_DLY_TXCLK_SHIFT, 0x0);
-> +			update_reg(tbh_phy, PHY_CFG_0, SEL_DLY_RXCLK_MASK,
-> +				   SEL_DLY_RXCLK_SHIFT, 0x0);
-> +			update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_ENA_MASK,
-> +				   ITAP_DLY_ENA_SHIFT, 0x0);
-> +			update_reg(tbh_phy, PHY_CFG_0, ITAP_DLY_SEL_MASK,
-> +				   ITAP_DLY_SEL_SHIFT, 0x0);
-> +			update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_ENA_MASK,
-> +				   OTAP_DLY_ENA_SHIFT, 0x1);
-> +			update_reg(tbh_phy, PHY_CFG_0, OTAP_DLY_SEL_MASK,
-> +				   OTAP_DLY_SEL_SHIFT, 2);
-> +			update_reg(tbh_phy, PHY_CFG_0, DLL_TRIM_ICP_MASK,
-> +				   DLL_TRIM_ICP_SHIFT, 0x8);
-> +			update_reg(tbh_phy, PHY_CFG_0, DR_TY_MASK,
-> +				   DR_TY_SHIFT, 0x1);
-> +			/* For HS400 only */
-> +			update_reg(tbh_phy, PHY_CFG_2, SEL_STRB_MASK,
-> +				   SEL_STRB_SHIFT, STRB);
-> +			break;
-
-pls give a empty line after break, helps to read the code
-
--- 
-~Vinod
+>  static const struct sdhci_pltfm_data sdhci_keembay_emmc_pdata = {
+>         .ops = &sdhci_arasan_cqe_ops,
+>         .quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> @@ -1231,6 +1253,10 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+>                 .compatible = "intel,keembay-sdhci-5.1-sdio",
+>                 .data = &intel_keembay_sdio_data,
+>         },
+> +       {
+> +               .compatible = "intel,thunderbay-sdhci-5.1",
+> +               .data = &sdhci_arasan_thunderbay_data,
+> +       },
+>         /* Generic compatible below here */
+>         {
+>                 .compatible = "arasan,sdhci-8.9a",
+> @@ -1582,7 +1608,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>
+>         if (of_device_is_compatible(np, "intel,keembay-sdhci-5.1-emmc") ||
+>             of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sd") ||
+> -           of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio")) {
+> +           of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio") ||
+> +           of_device_is_compatible(np, "intel,thunderbay-sdhci-5.1")) {
+>                 sdhci_arasan_update_clockmultiplier(host, 0x0);
+>                 sdhci_arasan_update_support64b(host, 0x0);
+>
+> --
+> 2.17.1
+>
