@@ -2,119 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 93951C432BE
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 13:08:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10430C4320A
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 14:30:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6D74960EAF
-	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 13:08:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EB2C360F35
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Aug 2021 14:30:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243637AbhHFNIU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 6 Aug 2021 09:08:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40240 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343979AbhHFNIS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 6 Aug 2021 09:08:18 -0400
-Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4DAEFC061798
-        for <linux-mmc@vger.kernel.org>; Fri,  6 Aug 2021 06:08:02 -0700 (PDT)
-Received: by mail-ua1-x92c.google.com with SMTP id o10so3594473uaj.0
-        for <linux-mmc@vger.kernel.org>; Fri, 06 Aug 2021 06:08:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=PmAhQlP9dlSHWsEPz99ylQ58gN43w15UGSNx2NbwKBM=;
-        b=STiSeXyxpRSqICwSQnipskRRbqlRuVPyx1wPjT5UXA5Xw4jWjeiVJTdzhVL6ZdZEHj
-         Hj/gPEaNaiaAEf0Xz+Ra1u8hnM3VbkGyyPlxrZBHvPdK6l3lWYTTFGSNOHeUFfqtTo2v
-         3C3X04BBtKxQzkf6wHv5kHvK92DFMKNUY5jP/f1Vg6FvrljmKTRp4wLe/IBylzW/KBev
-         3gzAg4aI6EjJd9KHZhvckurw7baJBVK+iyFCDKdaIXpvm1pd8E6sAl5dqFDja7tOAbeZ
-         AVRWbU7PRNfP/lLJvhhsmcqHea47GLeXeDcvzZnhV5CaOld5/oGvh0pB2MbF7QxYCk3U
-         zIJw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=PmAhQlP9dlSHWsEPz99ylQ58gN43w15UGSNx2NbwKBM=;
-        b=nAP3bkCQ/t1EfrJvTnq76YR4hwAGv7/suwdfxNHjVpNEf7R2iT594e++4krDU9ZEHT
-         gzJxbhaPQaVz06hnLRwjyHvua5jrmvGUN3u3Fo7hs3FlXeTkG+7il7FCOU7g7XXRAGi1
-         m5xJAS5T0n7v5QbSLbuQS2R3TIlVtPhV28wBhSMW+oVnw7odFsWwnx4Vy/PX5kQGkJnj
-         PPH4XmJiW2WyS9CVF5WWbEbTwTkjEyfQ50loVRb7sTusdOprfK6DX9BixzHgTzRotAcV
-         vMQ3o6DpGjgHSsyXeAYOKT7Mzk0L3k7Y4KYZsIuKYqDkvbYRttP39SlAIIaKZWqdI0s3
-         lcFQ==
-X-Gm-Message-State: AOAM5339Iv6zfcdM02Te0hfDmFLvWENe+REvO1Ees4qqh+qAlBpfbLa/
-        ERR5Kjhhn/CveIg0viIz/40aHeu1D/5Tg0fdktpOtg==
-X-Google-Smtp-Source: ABdhPJzCi2WVGCtxjxLxgPDs1JUFc/moL4qQ/2gBcE3nziv1qLvjqwBf8tD7gGjZHW+4mVHMma7q8WRZIotADvOoY/U=
-X-Received: by 2002:ab0:60c9:: with SMTP id g9mr8326216uam.100.1628255281536;
- Fri, 06 Aug 2021 06:08:01 -0700 (PDT)
+        id S239476AbhHFOag (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 6 Aug 2021 10:30:36 -0400
+Received: from mga05.intel.com ([192.55.52.43]:45009 "EHLO mga05.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232085AbhHFOag (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 6 Aug 2021 10:30:36 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10068"; a="299967299"
+X-IronPort-AV: E=Sophos;i="5.84,300,1620716400"; 
+   d="scan'208";a="299967299"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Aug 2021 07:30:20 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,300,1620716400"; 
+   d="scan'208";a="504038869"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
+  by fmsmga004.fm.intel.com with ESMTP; 06 Aug 2021 07:30:18 -0700
+Subject: Re: [PATCH V3 1/2] mmc: sdhci: Introduce max_timeout_count variable
+ in sdhci_host
+To:     Sarthak Garg <sartgarg@codeaurora.org>, ulf.hansson@linaro.org
+Cc:     vbadigan@codeaurora.org, stummala@codeaurora.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
+References: <1627534001-17256-2-git-send-email-sartgarg@codeaurora.org>
+ <1628232901-30897-1-git-send-email-sartgarg@codeaurora.org>
+ <1628232901-30897-2-git-send-email-sartgarg@codeaurora.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <d0aec4e6-e803-70c0-74a5-8de51e0ffe7e@intel.com>
+Date:   Fri, 6 Aug 2021 17:30:50 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.12.0
 MIME-Version: 1.0
-References: <20210726163654.1110969-1-sean.anderson@seco.com> <20210726163654.1110969-2-sean.anderson@seco.com>
-In-Reply-To: <20210726163654.1110969-2-sean.anderson@seco.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 6 Aug 2021 15:07:25 +0200
-Message-ID: <CAPDyKFq0uS99FD+Dv0EZ766VTkGCYWiA_vEHU4w7P7J2+eFB+g@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: sdio: Print contents of unknown CIS tuples
-To:     Sean Anderson <sean.anderson@seco.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <1628232901-30897-2-git-send-email-sartgarg@codeaurora.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 26 Jul 2021 at 18:37, Sean Anderson <sean.anderson@seco.com> wrote:
->
-> Print out the contents of the offending tuples when we do print them.
-> This can make it easier to debug, since these tuples are not exposed to
-> userspace anywhere else. We are limited to 64 bytes, so keep printing
-> out the full length in case the tuple is truncated.
->
-> Signed-off-by: Sean Anderson <sean.anderson@seco.com>
+On 6/08/21 9:54 am, Sarthak Garg wrote:
+> Introduce max_timeout_count variable in the sdhci_host structure
+> and use in timeout calculation. By default its set to 0xE
+> (max timeout register value as per SDHC spec). But at the same time
+> vendors drivers can update it if they support different max timeout
+> register value than 0xE.
+> 
+> Signed-off-by: Sarthak Garg <sartgarg@codeaurora.org>
 
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->
->  drivers/mmc/core/sdio_cis.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-> index 7518b27bcef2..a705ba6eff5b 100644
-> --- a/drivers/mmc/core/sdio_cis.c
-> +++ b/drivers/mmc/core/sdio_cis.c
-> @@ -334,7 +334,7 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
->                                 if (time_after(jiffies, timeout))
->                                         break;
->
-> -#define FMT(type) "%s: queuing " type " CIS tuple 0x%02x (%u bytes)\n"
-> +#define FMT(type) "%s: queuing " type " CIS tuple 0x%02x [%*ph] (%u bytes)\n"
->                                 /*
->                                  * Tuples in this range are reserved for
->                                  * vendors, so don't warn about them
-> @@ -342,11 +342,13 @@ static int sdio_read_cis(struct mmc_card *card, struct sdio_func *func)
->                                 if (tpl_code >= 0x80 && tpl_code <= 0x8f)
->                                         pr_debug_ratelimited(FMT("vendor"),
->                                                 mmc_hostname(card->host),
-> -                                               tpl_code, tpl_link);
-> +                                               tpl_code, tpl_link, this->data,
-> +                                               tpl_link);
->                                 else
->                                         pr_warn_ratelimited(FMT("unknown"),
->                                                 mmc_hostname(card->host),
-> -                                               tpl_code, tpl_link);
-> +                                               tpl_code, tpl_link, this->data,
-> +                                               tpl_link);
->                         }
->
->                         /* keep on analyzing tuples */
-> --
-> 2.25.1
->
+>  drivers/mmc/host/sdhci.c | 16 +++++++++-------
+>  drivers/mmc/host/sdhci.h |  1 +
+>  2 files changed, 10 insertions(+), 7 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index aba6e10..613e1ab 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -934,21 +934,21 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+>  
+>  	/*
+>  	 * If the host controller provides us with an incorrect timeout
+> -	 * value, just skip the check and use 0xE.  The hardware may take
+> +	 * value, just skip the check and use the maximum. The hardware may take
+>  	 * longer to time out, but that's much better than having a too-short
+>  	 * timeout value.
+>  	 */
+>  	if (host->quirks & SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
+> -		return 0xE;
+> +		return host->max_timeout_count;
+>  
+>  	/* Unspecified command, asume max */
+>  	if (cmd == NULL)
+> -		return 0xE;
+> +		return host->max_timeout_count;
+>  
+>  	data = cmd->data;
+>  	/* Unspecified timeout, assume max */
+>  	if (!data && !cmd->busy_timeout)
+> -		return 0xE;
+> +		return host->max_timeout_count;
+>  
+>  	/* timeout in us */
+>  	target_timeout = sdhci_target_timeout(host, cmd, data);
+> @@ -968,15 +968,15 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
+>  	while (current_timeout < target_timeout) {
+>  		count++;
+>  		current_timeout <<= 1;
+> -		if (count >= 0xF)
+> +		if (count > host->max_timeout_count)
+>  			break;
+>  	}
+>  
+> -	if (count >= 0xF) {
+> +	if (count > host->max_timeout_count) {
+>  		if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
+>  			DBG("Too large timeout 0x%x requested for CMD%d!\n",
+>  			    count, cmd->opcode);
+> -		count = 0xE;
+> +		count = host->max_timeout_count;
+>  	} else {
+>  		*too_big = false;
+>  	}
+> @@ -3940,6 +3940,8 @@ struct sdhci_host *sdhci_alloc_host(struct device *dev,
+>  	 */
+>  	host->adma_table_cnt = SDHCI_MAX_SEGS * 2 + 1;
+>  
+> +	host->max_timeout_count = 0xE;
+> +
+>  	return host;
+>  }
+>  
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index 074dc18..e8d04e4 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -517,6 +517,7 @@ struct sdhci_host {
+>  
+>  	unsigned int max_clk;	/* Max possible freq (MHz) */
+>  	unsigned int timeout_clk;	/* Timeout freq (KHz) */
+> +	u8 max_timeout_count;	/* Vendor specific max timeout count */
+>  	unsigned int clk_mul;	/* Clock Muliplier value */
+>  
+>  	unsigned int clock;	/* Current clock (MHz) */
+> 
+
