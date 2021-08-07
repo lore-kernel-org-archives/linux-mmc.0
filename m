@@ -7,21 +7,21 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B1E2C4338F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D45BFC43214
 	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0228B60F38
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B5E6D6115C
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231995AbhHGLHo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S232036AbhHGLHo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Sat, 7 Aug 2021 07:07:44 -0400
-Received: from mout.kundenserver.de ([212.227.126.130]:46171 "EHLO
+Received: from mout.kundenserver.de ([212.227.126.131]:59681 "EHLO
         mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231922AbhHGLHn (ORCPT
+        with ESMTP id S231953AbhHGLHn (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Aug 2021 07:07:43 -0400
 Received: from localhost.localdomain ([37.4.249.97]) by
  mrelayeu.kundenserver.de (mreue010 [212.227.15.167]) with ESMTPSA (Nemesis)
- id 1MZCvh-1mhJHw20lV-00V8CK; Sat, 07 Aug 2021 13:07:09 +0200
+ id 1MCKSA-1mKXe80AjK-009SLv; Sat, 07 Aug 2021 13:07:10 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Rob Herring <robh+dt@kernel.org>,
         Nicolas Saenz Julienne <nsaenz@kernel.org>,
@@ -34,105 +34,93 @@ Cc:     Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
         devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
         linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 03/10] dt-bindings: display: bcm2835: add optional property power-domains
-Date:   Sat,  7 Aug 2021 13:06:34 +0200
-Message-Id: <1628334401-6577-4-git-send-email-stefan.wahren@i2se.com>
+Subject: [PATCH V2 04/10] mmc: sdhci-iproc: Cap min clock frequency on BCM2711
+Date:   Sat,  7 Aug 2021 13:06:35 +0200
+Message-Id: <1628334401-6577-5-git-send-email-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
 References: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
-X-Provags-ID: V03:K1:fdAi0eW6lkNHxUUv9MAiUpmpsqcYqunqRorRROAxKZe1jnLq6Xo
- AVsERlC42LCsx/Qg5DYKB+dY5EZaNISK8AITwiW/47yAoNQXU5QxIoexcqhXlEnfnbOHbwr
- Uo60f8eUPfoglTt/PTRpHqYTNAANIXfgqzRIHE9ajdhMgI0FoKi239KAeJ9dKrvHgVwMw+U
- DcddPDSfUqSNpFgGDOqpw==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:4qg6qOIprYg=:rXv5yT/7zrwTlvSl44ePry
- BgfAvIS7vckyq4GQMCq2Gee5zYApbvmbLpeTgZ02nnD+TucCfvmgtpmc/C+uWMRvZueBmXSY3
- CbAY58AvHSefspDsSquzm+uefL5crB1x7YscP81Mmo2lf4WSMPh+7OuAdN14Bn7BqMnLKfvVi
- BHEr4606kKjKq4obhIfYuzx5FNVVX4e0VZHnJHhyl0RMlH7dZXmV1lY2y9mlouprfOrFyPzfC
- 8dV9yqYqT0TLht3WeE+PlKuAWvql4NjhjVf2XvxUvDyMtYv2sCEgJRllT/Q0c0LAL/3C7iz6U
- 8+q65z3MrGzLw0PkYz7GCMzklf+puFYPc72I2bCJVY1xa2izOWjGMdSnMGMy5yo3StxZVcbOf
- qEVMxPR11mUbLgLCyh2lEBK8eWU7hlrQPqcSdilTBVCfwN9HajBUaR3UueL/+3T/6TN2lCoGm
- f5aQdJlIk9ufqvzMm5P/MYfmx3FylgoTSvUOC92Do4Uel6E3bY1nv847igpd6NmylpHhvWMnW
- 2UcG9xxfXy78sp62vzFlk5OSwCp9efI0pZWSGJKO833lczFZYS1dlYmckHJR0LDlMrr8KHw4O
- maFjb90n+NGsk6eY1S+mvBgekvAWvO1/SPWAaxsu500sn+zrwri6rILpymJXiYAn9Ylqkl7Ka
- EMVyVAfIXENQFlW5txgPztnUahIoMoKYGG8bF8qgWDDL8l0ItjMusVSjp8ROcvfK0lFnUqQP4
- ELYPv3+54GAQYqIwFclt1fztgkGmxyRDD4T+GwUKShEwodOvVOEF14YUJbw4zADaB254kz1dH
- 1K63epFBNoXogHqBILhbT6VQa2YzrP4sUexqf1P2QkVJb0gHEjznVF3teg+2LZZpS2ryZJidf
- BUxjeCiSClHPrcy2ZjGw==
+X-Provags-ID: V03:K1:gfEVCU1kBksYlVlI36+xhO7/PrdkmSafmJw2daC3ONkAk/TcvWc
+ QbA5BiTWasSzGIKdzbgsBw83id/EB7tV261L3lcQZ+24eD5YKqNY/BD1odPeEO9UOGMi274
+ h8jSBFBwXDRP6dP8cNRty4Hx2F+sLZDFilRGqArfRr+vX/sBPPCBUmp03laUbXzkVrbEDGI
+ R9eKOXXrm5BHsK2uM+1tQ==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:/1+GcGykBLo=:R3f+HlLl9XrJ2GPs6Itt1N
+ WzI7gF2Yc037Lc4d5MYtmwbhbUlIprhpHAAC7r3JIF1+mbhx2f68nDfoCQmRtrfNuMKB42kIf
+ 8engvX2fX2mFzLvtt871yHwPDiB5e8LUi5Ojdi02klTIvpwY22FDlLn0cawZAyIITTETLsRz8
+ iT5Ql0FdlQzM+RTdi4/WpB4b7qZeGGciY467DyS+xA81eKF/iNyLhix4rjcju6Aeq66y08WwN
+ ZJc753VqLIYsBypE/UKQiBkI+7lb4jLaY5ZJHelfx5unkkin86ZeYVJUHoTOHM9OpcjHhjl1l
+ +7eNboTtlJu/DygrpDoleSC8OxJd15kvm/hA8ySKgJeIHnhUDNQFU4dyQxu81HuxpQHlHtS0f
+ +Cf+0wvdYEWRvGuqvJmvUjKm7Mg7692yLTifZCSqplee4xIgUy1or5SSB1494Dilvht3TdLAq
+ /6PlHERi5sAtJgu5EUhvsO7N2kj5+Ee3n3AdCNi2vs6xB3oT3N8yH/TSzZKnczuDkp+NPsVIt
+ yLy97gwFDWwH+TJ+OjiKR8mOEOFeV0wvkgUhdeqBYsZQlyS2OEJb8DPEpY44SpFpWHe+LPF5f
+ wP5f2X5r9fuJgao/fGtFxVQHHkaSahFViAANQSvTIf9oP8oSD1oNKkmdfBT2ncyEHLi1xGWTW
+ uzHlpNWL70UJ/O4T9oBqPd6POwEZkqkHoPQkmDnHCtSYTzBZtQJv+tUaqCwlPIWhPdTRIq0i7
+ XNU8aFXhle8mf7aC85TlcBwH/nVtR+ec6tQr9mhNVuN24mPnVdLp0aBsMZHytK74UucWqdZcU
+ u9XuqFW98sxRmsZSojG4cPBXSohlrYo/j3FyDr9OjN8Qu0BrodXQEUsenlSLHLupFBAUHhz28
+ oO7ARG1ZVhAwofbfKo8Q==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Raspberry Pi boards with BCM283x needs control of the power domains
-to get display components running. DT schema warns us that it's used, but not
-documented as a optional property:
+From: Nicolas Saenz Julienne <nsaenz@kernel.org>
 
-hdmi@7e902000: 'power-domains' does not match any of the regexes: ...
+There is a known bug on BCM2711's SDHCI core integration where the
+controller will hang when the difference between the core clock and the
+bus clock is too great. Specifically this can be reproduced under the
+following conditions:
 
+- No SD card plugged in, polling thread is running, probing cards at
+  100 kHz.
+- BCM2711's core clock configured at 500MHz or more.
+
+So set 200 kHz as the minimum clock frequency available for that board.
+
+For more information on the issue see this:
+https://lore.kernel.org/linux-mmc/20210322185816.27582-1-nsaenz@kernel.org/T/#m11f2783a09b581da6b8a15f302625b43a6ecdeca
+
+Fixes: f84e411c85be ("mmc: sdhci-iproc: Add support for emmc2 of the BCM2711")
+Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
-Acked-by: Rob Herring <robh@kernel.org>
 ---
- Documentation/devicetree/bindings/display/brcm,bcm2835-dsi0.yaml | 3 +++
- Documentation/devicetree/bindings/display/brcm,bcm2835-hdmi.yaml | 3 +++
- Documentation/devicetree/bindings/display/brcm,bcm2835-v3d.yaml  | 3 +++
- Documentation/devicetree/bindings/display/brcm,bcm2835-vec.yaml  | 3 +++
- 4 files changed, 12 insertions(+)
+ drivers/mmc/host/sdhci-iproc.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/display/brcm,bcm2835-dsi0.yaml b/Documentation/devicetree/bindings/display/brcm,bcm2835-dsi0.yaml
-index 3260857..c8b2459 100644
---- a/Documentation/devicetree/bindings/display/brcm,bcm2835-dsi0.yaml
-+++ b/Documentation/devicetree/bindings/display/brcm,bcm2835-dsi0.yaml
-@@ -47,6 +47,9 @@ properties:
-   interrupts:
-     maxItems: 1
+diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+index cce390f..032bf85 100644
+--- a/drivers/mmc/host/sdhci-iproc.c
++++ b/drivers/mmc/host/sdhci-iproc.c
+@@ -173,6 +173,23 @@ static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
+ 		return pltfm_host->clock;
+ }
  
-+  power-domains:
-+    maxItems: 1
++/*
++ * There is a known bug on BCM2711's SDHCI core integration where the
++ * controller will hang when the difference between the core clock and the bus
++ * clock is too great. Specifically this can be reproduced under the following
++ * conditions:
++ *
++ *  - No SD card plugged in, polling thread is running, probing cards at
++ *    100 kHz.
++ *  - BCM2711's core clock configured at 500MHz or more
++ *
++ * So we set 200kHz as the minimum clock frequency available for that SoC.
++ */
++static unsigned int sdhci_iproc_bcm2711_get_min_clock(struct sdhci_host *host)
++{
++	return 200000;
++}
 +
- required:
-   - "#clock-cells"
-   - compatible
-diff --git a/Documentation/devicetree/bindings/display/brcm,bcm2835-hdmi.yaml b/Documentation/devicetree/bindings/display/brcm,bcm2835-hdmi.yaml
-index 031e35e..48c8cad 100644
---- a/Documentation/devicetree/bindings/display/brcm,bcm2835-hdmi.yaml
-+++ b/Documentation/devicetree/bindings/display/brcm,bcm2835-hdmi.yaml
-@@ -51,6 +51,9 @@ properties:
-   dma-names:
-     const: audio-rx
- 
-+  power-domains:
-+    maxItems: 1
-+
- required:
-   - compatible
-   - reg
-diff --git a/Documentation/devicetree/bindings/display/brcm,bcm2835-v3d.yaml b/Documentation/devicetree/bindings/display/brcm,bcm2835-v3d.yaml
-index 8a73780..c55a821 100644
---- a/Documentation/devicetree/bindings/display/brcm,bcm2835-v3d.yaml
-+++ b/Documentation/devicetree/bindings/display/brcm,bcm2835-v3d.yaml
-@@ -24,6 +24,9 @@ properties:
-   interrupts:
-     maxItems: 1
- 
-+  power-domains:
-+    maxItems: 1
-+
- required:
-   - compatible
-   - reg
-diff --git a/Documentation/devicetree/bindings/display/brcm,bcm2835-vec.yaml b/Documentation/devicetree/bindings/display/brcm,bcm2835-vec.yaml
-index 9b24081..5d921e3 100644
---- a/Documentation/devicetree/bindings/display/brcm,bcm2835-vec.yaml
-+++ b/Documentation/devicetree/bindings/display/brcm,bcm2835-vec.yaml
-@@ -24,6 +24,9 @@ properties:
-   interrupts:
-     maxItems: 1
- 
-+  power-domains:
-+    maxItems: 1
-+
- required:
-   - compatible
-   - reg
+ static const struct sdhci_ops sdhci_iproc_ops = {
+ 	.set_clock = sdhci_set_clock,
+ 	.get_max_clock = sdhci_iproc_get_max_clock,
+@@ -271,6 +288,7 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
+ 	.set_clock = sdhci_set_clock,
+ 	.set_power = sdhci_set_power_and_bus_voltage,
+ 	.get_max_clock = sdhci_iproc_get_max_clock,
++	.get_min_clock = sdhci_iproc_bcm2711_get_min_clock,
+ 	.set_bus_width = sdhci_set_bus_width,
+ 	.reset = sdhci_reset,
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
 -- 
 2.7.4
 
