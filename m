@@ -2,96 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A5E3C04FE3
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1433C4338F
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 14:05:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16E2360C51
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 93AD261078
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 14:05:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232116AbhHGLHz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Aug 2021 07:07:55 -0400
-Received: from mout.kundenserver.de ([212.227.126.133]:59179 "EHLO
-        mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232064AbhHGLHq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Aug 2021 07:07:46 -0400
-Received: from localhost.localdomain ([37.4.249.97]) by
- mrelayeu.kundenserver.de (mreue010 [212.227.15.167]) with ESMTPSA (Nemesis)
- id 1McXwD-1mid7U1zRN-00czTE; Sat, 07 Aug 2021 13:07:13 +0200
-From:   Stefan Wahren <stefan.wahren@i2se.com>
-To:     Rob Herring <robh+dt@kernel.org>,
-        Nicolas Saenz Julienne <nsaenz@kernel.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
-        bcm-kernel-feedback-list@broadcom.com,
-        Maxime Ripard <maxime@cerno.tech>, iivanov@suse.de,
-        devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 10/10] arm64: dts: broadcom: Add reference to RPi CM4 IO Board
-Date:   Sat,  7 Aug 2021 13:06:41 +0200
-Message-Id: <1628334401-6577-11-git-send-email-stefan.wahren@i2se.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
-References: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
-X-Provags-ID: V03:K1:rHO+Q0xRykZ6BQicZFKXybShSWbEZeqOxy2nEgkMFgnHmdCHpgN
- pmBjG635/s05Mi1P4UG9MgfiwG7vtkeTGfOGhpdhEC1M39feErxnh5sFMWyheGbegk/lS6S
- mp4FGHeHeZqK+JGmnUUNtNLZJSmlP5zpeLyI8O3nSIkll8tMZaWugNO7ZHIf3p+jp9T0LAx
- 0qSEJxVvTBsVOMQHJev9w==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:F1bWVXoxpWs=:pu7YD8k4Doe16zkcJrUWne
- GB5HtuTbLz++Bsogkny7vFXLKuKLl1I2RqP1UrHYyuwMabdf34Nb25HFmZb2iRjLueV3vo6hX
- 11Hv7IhUuI7MJ+1bR0bYe3DE8wf18O+RfRALvIkywSNuWmLZOCIu8LudrHl1LE5+Vqs0On7zj
- /Kp7Cjs7kJqfGPFfoXoqiA2HtrwXCn5D6TUqGnKCc+DN04jmijVjad1/7b/RGh5HMrVBjXN6n
- qAMAoTkHJu86kOukBLy5dM/v2pTplJU1lG8LdXP4P93YUaIf98Oeahw1o7Ol3XGGrjPpy3JZi
- 1ucEtSIgDg7HO7idWkjOznrln1R7U7Gazpa0t6Vcr1H29KgTq8Ac3gZIw2qDKfCtEq5cKWNOa
- j2pYpT9d/E+1Wn+pao4OcAxzlGhnq372PmUAUocxGg4HpgiFbSEgvXHoPQrTE/46v64Itjem3
- b0n/8/MIBdCumxGGp11rJnc0GcR1OQ0976+xs1ODMUieCbcP6wrxRtCigSZ8+kHFw27WFLKMf
- AnFLXkYdFWS0jfreIj81TQRkS1XJIpQkBUUHvB8a40teO1wGBD8daTABv6Fx4UtotQ89sjmFE
- WRmXOikhoTEXSApVStLv9InEds+x2nhUMLVk0bEhjzna7IUqtXWV5uurGiQEE9lGR3YZWxuVg
- vqTvnHjTERFuVPI9Xe/0g24zS36NfJK189uJsHDjiHugbBBTdhy02v6Qp37SQLqDAt6HxjeQi
- +w7qFbxF+K0/5ymYBJEhZEXdakD/tpptqUr5QqL70xh3KDQZ+oZ4+0xQ3LjqW8958I9U8QgC9
- yXdIC2Gg3Jtb+bTiBfvYJhGC5XCl6KyR0+qSUIbtOWt1Kv60LFfo40ETMeA5cdIuohMpaHS+Y
- Vl4KXx75HYr8989MjdLQ==
+        id S232317AbhHGOF7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 7 Aug 2021 10:05:59 -0400
+Received: from rere.qmqm.pl ([91.227.64.183]:18975 "EHLO rere.qmqm.pl"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232408AbhHGOFj (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 7 Aug 2021 10:05:39 -0400
+Received: from remote.user (localhost [127.0.0.1])
+        by rere.qmqm.pl (Postfix) with ESMTPSA id 4Ghkd15NhXzv0;
+        Sat,  7 Aug 2021 16:05:09 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=rere.qmqm.pl; s=1;
+        t=1628345111; bh=yjEq3HV2DfPBHVHG9IY7O5ScXbWFrd1ZqcOnaYQKWV0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=OANZhYoXnB0pxZk0VWPlKQyIOVxzdHKgKP+u1Of1W71Wsb6O7r+LkIGqm/KGZFXDQ
+         TnnYn38eLB3xzp8FiUAlbszgaoLwVuynjrjoebtUIoZ8gxzBn4In5uPLmQhlNlZTXD
+         6yh+5fH8FdyQZVPLd51yePtL9ceCegcLmI0a9uTdxOnszzwfsZop+KesUdJZKboi1c
+         k3VdDoeBDXsPvvqGJCPftJjhkJ/WhwQPbE7C8mLCqNC77sbBM1fRrBWuxj1VsHc8xj
+         adEqcrmjAwTQCT13H1a4HCB5utjAtdGCD5MT6i33Us0HzP2l9o6Dy3Anb27wswzIoy
+         bIk4PGdOQtc4g==
+X-Virus-Status: Clean
+X-Virus-Scanned: clamav-milter 0.103.2 at mail
+Date:   Sat, 7 Aug 2021 16:05:06 +0200
+From:   =?iso-8859-2?Q?Micha=B3_Miros=B3aw?= <mirq-linux@rere.qmqm.pl>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Kevin Liu <kliu5@marvell.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Suneel Garapati <suneel.garapati@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Al Cooper <alcooperx@gmail.com>
+Subject: Re: [PATCH v4 2/5] mmc: sdhci: always obey programmable clock config
+ in preset value
+Message-ID: <YQ6TEhMLXH/4r4BS@qmqm.qmqm.pl>
+References: <cover.1627204633.git.mirq-linux@rere.qmqm.pl>
+ <e65dc96eb24caf8baa5431a51fe694b969e2d51f.1627204633.git.mirq-linux@rere.qmqm.pl>
+ <fe01b20d-779b-1e2c-7702-5a4702900d84@intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-2
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <fe01b20d-779b-1e2c-7702-5a4702900d84@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This adds a reference to the dts of the Raspberry Pi Compute Module 4
-IO Board, so we don't need to maintain the content in arm64.
+On Wed, Aug 04, 2021 at 01:52:21PM +0300, Adrian Hunter wrote:
+> On 25/07/21 12:20 pm, Micha³ Miros³aw wrote:
+> > When host controller uses programmable clock presets but doesn't
+> > advertise programmable clock support, we can only guess what frequency
+> > it generates. Let's at least return correct SDHCI_PROG_CLOCK_MODE bit
+> > value in this case.
+> If the preset value doesn't make sense, why use it at all?
 
-Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
----
- arch/arm64/boot/dts/broadcom/Makefile               | 1 +
- arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts | 2 ++
- 2 files changed, 3 insertions(+)
- create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts
+If I understand the spec correctly, when the preset value is used the
+values in Clock Control register are ignored by the module and so the
+module can also actually use a different clock source than the ones
+available to the driver directly. So either way the driver can't be
+sure of the exact frequencu used. This is a cleanup to remove a case
+when the code ignores a bit's value based on other unspecified assumptions.
 
-diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
-index 11eae3e..c688203 100644
---- a/arch/arm64/boot/dts/broadcom/Makefile
-+++ b/arch/arm64/boot/dts/broadcom/Makefile
-@@ -1,6 +1,7 @@
- # SPDX-License-Identifier: GPL-2.0
- dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-400.dtb \
- 			      bcm2711-rpi-4-b.dtb \
-+			      bcm2711-rpi-cm4-io.dtb \
- 			      bcm2837-rpi-3-a-plus.dtb \
- 			      bcm2837-rpi-3-b.dtb \
- 			      bcm2837-rpi-3-b-plus.dtb \
-diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts
-new file mode 100644
-index 0000000..e36d395
---- /dev/null
-+++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts
-@@ -0,0 +1,2 @@
-+// SPDX-License-Identifier: GPL-2.0
-+#include "arm/bcm2711-rpi-cm4-io.dts"
--- 
-2.7.4
-
+[...]
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -1859,11 +1859,14 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+> >  
+> >  			pre_val = sdhci_get_preset_value(host);
+> >  			div = FIELD_GET(SDHCI_PRESET_SDCLK_FREQ_MASK, pre_val);
+> > -			if (host->clk_mul &&
+> > -				(pre_val & SDHCI_PRESET_CLKGEN_SEL)) {
+> > +			if (pre_val & SDHCI_PRESET_CLKGEN_SEL) {
+> >  				clk = SDHCI_PROG_CLOCK_MODE;
+> >  				real_div = div + 1;
+> >  				clk_mul = host->clk_mul;
+> > +				if (!clk_mul) {
+> > +					/* The clock frequency is unknown. Assume undivided base. */
+> > +					clk_mul = 1;
+> > +				}
+> >  			} else {
+> >  				real_div = max_t(int, 1, div << 1);
+> >  			}
