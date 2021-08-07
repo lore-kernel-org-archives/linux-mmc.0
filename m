@@ -7,21 +7,21 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D45BFC43214
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA62DC4320E
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B5E6D6115C
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A4A0760C51
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Aug 2021 11:07:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232036AbhHGLHo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Aug 2021 07:07:44 -0400
-Received: from mout.kundenserver.de ([212.227.126.131]:59681 "EHLO
+        id S232057AbhHGLHp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 7 Aug 2021 07:07:45 -0400
+Received: from mout.kundenserver.de ([212.227.126.133]:57967 "EHLO
         mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231953AbhHGLHn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Aug 2021 07:07:43 -0400
+        with ESMTP id S231972AbhHGLHo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Aug 2021 07:07:44 -0400
 Received: from localhost.localdomain ([37.4.249.97]) by
  mrelayeu.kundenserver.de (mreue010 [212.227.15.167]) with ESMTPSA (Nemesis)
- id 1MCKSA-1mKXe80AjK-009SLv; Sat, 07 Aug 2021 13:07:10 +0200
+ id 1MUpCz-1mctRd1GTZ-00QiM0; Sat, 07 Aug 2021 13:07:08 +0200
 From:   Stefan Wahren <stefan.wahren@i2se.com>
 To:     Rob Herring <robh+dt@kernel.org>,
         Nicolas Saenz Julienne <nsaenz@kernel.org>,
@@ -34,93 +34,61 @@ Cc:     Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
         devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
         linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         Stefan Wahren <stefan.wahren@i2se.com>
-Subject: [PATCH V2 04/10] mmc: sdhci-iproc: Cap min clock frequency on BCM2711
-Date:   Sat,  7 Aug 2021 13:06:35 +0200
-Message-Id: <1628334401-6577-5-git-send-email-stefan.wahren@i2se.com>
+Subject: [PATCH V2 01/10] ARM: dts: bcm2711: fix MDIO #address- and #size-cells
+Date:   Sat,  7 Aug 2021 13:06:32 +0200
+Message-Id: <1628334401-6577-2-git-send-email-stefan.wahren@i2se.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
 References: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
-X-Provags-ID: V03:K1:gfEVCU1kBksYlVlI36+xhO7/PrdkmSafmJw2daC3ONkAk/TcvWc
- QbA5BiTWasSzGIKdzbgsBw83id/EB7tV261L3lcQZ+24eD5YKqNY/BD1odPeEO9UOGMi274
- h8jSBFBwXDRP6dP8cNRty4Hx2F+sLZDFilRGqArfRr+vX/sBPPCBUmp03laUbXzkVrbEDGI
- R9eKOXXrm5BHsK2uM+1tQ==
-X-UI-Out-Filterresults: notjunk:1;V03:K0:/1+GcGykBLo=:R3f+HlLl9XrJ2GPs6Itt1N
- WzI7gF2Yc037Lc4d5MYtmwbhbUlIprhpHAAC7r3JIF1+mbhx2f68nDfoCQmRtrfNuMKB42kIf
- 8engvX2fX2mFzLvtt871yHwPDiB5e8LUi5Ojdi02klTIvpwY22FDlLn0cawZAyIITTETLsRz8
- iT5Ql0FdlQzM+RTdi4/WpB4b7qZeGGciY467DyS+xA81eKF/iNyLhix4rjcju6Aeq66y08WwN
- ZJc753VqLIYsBypE/UKQiBkI+7lb4jLaY5ZJHelfx5unkkin86ZeYVJUHoTOHM9OpcjHhjl1l
- +7eNboTtlJu/DygrpDoleSC8OxJd15kvm/hA8ySKgJeIHnhUDNQFU4dyQxu81HuxpQHlHtS0f
- +Cf+0wvdYEWRvGuqvJmvUjKm7Mg7692yLTifZCSqplee4xIgUy1or5SSB1494Dilvht3TdLAq
- /6PlHERi5sAtJgu5EUhvsO7N2kj5+Ee3n3AdCNi2vs6xB3oT3N8yH/TSzZKnczuDkp+NPsVIt
- yLy97gwFDWwH+TJ+OjiKR8mOEOFeV0wvkgUhdeqBYsZQlyS2OEJb8DPEpY44SpFpWHe+LPF5f
- wP5f2X5r9fuJgao/fGtFxVQHHkaSahFViAANQSvTIf9oP8oSD1oNKkmdfBT2ncyEHLi1xGWTW
- uzHlpNWL70UJ/O4T9oBqPd6POwEZkqkHoPQkmDnHCtSYTzBZtQJv+tUaqCwlPIWhPdTRIq0i7
- XNU8aFXhle8mf7aC85TlcBwH/nVtR+ec6tQr9mhNVuN24mPnVdLp0aBsMZHytK74UucWqdZcU
- u9XuqFW98sxRmsZSojG4cPBXSohlrYo/j3FyDr9OjN8Qu0BrodXQEUsenlSLHLupFBAUHhz28
- oO7ARG1ZVhAwofbfKo8Q==
+X-Provags-ID: V03:K1:tqfvKtEzoZCEh33YB92Q1m9qtHEymKKXGP3LyZ4mP61zKuOfW+X
+ B60puBofk7GAfiLTncd/XFZQVwvGNwWzXfR4NnmE0C2f8hLNydKcVoAa0wi3m+2SBw+ZoYj
+ PS/nggas2vA/5NgzpdOTrfUduIo/rqII9AxAfQ5gpquBVpdK7Q5PqIhwJnXiqyZijUydFTy
+ 3EqKxewFa9htrjd2F3w9Q==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:l3vbtDbD13M=:IQbF7pqSLIQFux3euKUThn
+ ZnbXABZGeJD2J8AB0VCNbF/vsKtPRPmej7EvraZDLmYBfDWK96j2m2pdIVtViGMS05CRmzyZm
+ vNRpQd0948CjW9DHgocq1V5g51AvmEBJ4Wld44W3Q5iscbgUggpvpNOY0Vq91Cm2MhSUKTKjW
+ rnVuxfXB9JO4B98bvMJ8CURlUbCb9eBspiMesJ9qZ+Kt48ZbdCy5o50o19sW0Ed2dPNbicEmc
+ cRCPElKLXQ8EQQP9BCggWF/n+TGfdW948bUWBUTfLJg5pixFzu77F10Z2CnYb3YxE7SLpi8yn
+ LeYzsoDAjEZd7S0scWxp1GF+YtliCommSob/xKefgQuhEhTrfBKI3+7fffJ3IuY7WEeNtZ9n+
+ pYkLZbAbZVsZXSQchGFUUHKtUkqYXDMh9HPJiFpkBR5iBkaTUkNKKQJRBYRkOxHe2A4DHXfGw
+ 9Buxm0CNEar9JCaG1ebZ7MnH2ZHaohbMsxS2YQlOHbtyNuKC3KPwb6xo+xPg7FOmr6sf0xqcJ
+ JwmfJkVTAvEFuPn09ybcyXKhvdsW/5z8IKGo98Rf3wxPCqVPXe7ONOb0vslnmUxXHsX1qBLWo
+ ViPFfxVDShxd1qMeUsuYn9s5x6nmb3Bvl/25fvdj4b7Etw7j16T43sDGYLWvK9RDC7rpTqyQV
+ gyHg42mGdvcWk7UqzqA8sfapgzvGagx82f2ES2TUG98PZrRD94dAuYdQqcdTC5ziXGwDAnZ0l
+ At0HvNjQy2IN1PVyzFOXSp9r/uiR/JIjphhAeUcoznIme7BzXNIBapwMRLL3FBpWv1dP319w8
+ w4vGm81Z2Q3ga03e/KfOcTJHrWCIRBAzSoDDybbZC/6BHrO2CuLiLxeAigJuQyFdNWrU++5x9
+ bccT3qK6+Z5+zAS1ufHQ==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Nicolas Saenz Julienne <nsaenz@kernel.org>
+The values of #address-cells and #size-cells are swapped. Fix this
+and avoid the following DT schema warnings for mdio@e14:
 
-There is a known bug on BCM2711's SDHCI core integration where the
-controller will hang when the difference between the core clock and the
-bus clock is too great. Specifically this can be reproduced under the
-following conditions:
+ #address-cells:0:0: 1 was expected
+ #size-cells:0:0: 0 was expected
 
-- No SD card plugged in, polling thread is running, probing cards at
-  100 kHz.
-- BCM2711's core clock configured at 500MHz or more.
-
-So set 200 kHz as the minimum clock frequency available for that board.
-
-For more information on the issue see this:
-https://lore.kernel.org/linux-mmc/20210322185816.27582-1-nsaenz@kernel.org/T/#m11f2783a09b581da6b8a15f302625b43a6ecdeca
-
-Fixes: f84e411c85be ("mmc: sdhci-iproc: Add support for emmc2 of the BCM2711")
-Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+Fixes: be8af7a9e3cc ("ARM: dts: bcm2711-rpi-4: Enable GENET support")
 Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
 ---
- drivers/mmc/host/sdhci-iproc.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ arch/arm/boot/dts/bcm2711.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
-index cce390f..032bf85 100644
---- a/drivers/mmc/host/sdhci-iproc.c
-+++ b/drivers/mmc/host/sdhci-iproc.c
-@@ -173,6 +173,23 @@ static unsigned int sdhci_iproc_get_max_clock(struct sdhci_host *host)
- 		return pltfm_host->clock;
- }
- 
-+/*
-+ * There is a known bug on BCM2711's SDHCI core integration where the
-+ * controller will hang when the difference between the core clock and the bus
-+ * clock is too great. Specifically this can be reproduced under the following
-+ * conditions:
-+ *
-+ *  - No SD card plugged in, polling thread is running, probing cards at
-+ *    100 kHz.
-+ *  - BCM2711's core clock configured at 500MHz or more
-+ *
-+ * So we set 200kHz as the minimum clock frequency available for that SoC.
-+ */
-+static unsigned int sdhci_iproc_bcm2711_get_min_clock(struct sdhci_host *host)
-+{
-+	return 200000;
-+}
-+
- static const struct sdhci_ops sdhci_iproc_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.get_max_clock = sdhci_iproc_get_max_clock,
-@@ -271,6 +288,7 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
- 	.set_clock = sdhci_set_clock,
- 	.set_power = sdhci_set_power_and_bus_voltage,
- 	.get_max_clock = sdhci_iproc_get_max_clock,
-+	.get_min_clock = sdhci_iproc_bcm2711_get_min_clock,
- 	.set_bus_width = sdhci_set_bus_width,
- 	.reset = sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+diff --git a/arch/arm/boot/dts/bcm2711.dtsi b/arch/arm/boot/dts/bcm2711.dtsi
+index b8a4096..a0db9b0 100644
+--- a/arch/arm/boot/dts/bcm2711.dtsi
++++ b/arch/arm/boot/dts/bcm2711.dtsi
+@@ -532,8 +532,8 @@
+ 				compatible = "brcm,genet-mdio-v5";
+ 				reg = <0xe14 0x8>;
+ 				reg-names = "mdio";
+-				#address-cells = <0x0>;
+-				#size-cells = <0x1>;
++				#address-cells = <0x1>;
++				#size-cells = <0x0>;
+ 			};
+ 		};
+ 	};
 -- 
 2.7.4
 
