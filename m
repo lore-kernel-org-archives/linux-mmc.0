@@ -2,172 +2,232 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FA50C4338F
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Aug 2021 15:16:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D3822C4320A
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Aug 2021 15:30:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1799560EBB
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Aug 2021 15:16:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B36A56101E
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Aug 2021 15:30:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233081AbhHIPRS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Aug 2021 11:17:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55804 "EHLO
+        id S235379AbhHIPaU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Aug 2021 11:30:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232865AbhHIPRS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Aug 2021 11:17:18 -0400
-Received: from mail-vs1-xe34.google.com (mail-vs1-xe34.google.com [IPv6:2607:f8b0:4864:20::e34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9AE24C061796
-        for <linux-mmc@vger.kernel.org>; Mon,  9 Aug 2021 08:16:57 -0700 (PDT)
-Received: by mail-vs1-xe34.google.com with SMTP id x144so10263964vsx.3
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Aug 2021 08:16:57 -0700 (PDT)
+        with ESMTP id S234275AbhHIPaR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Aug 2021 11:30:17 -0400
+Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBC16C0613D3
+        for <linux-mmc@vger.kernel.org>; Mon,  9 Aug 2021 08:29:56 -0700 (PDT)
+Received: by mail-vs1-xe2b.google.com with SMTP id t29so10290082vsr.5
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Aug 2021 08:29:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=GOSKNwf05g1MpWg0eVgUOJZSEVXpTZQYh4Rcb2+bib0=;
-        b=BvrSE6y4lB467MecTrmXOiHn24QmAVxtQrtWhbgA+RHrNJDXF6imPTlNPgvrLCYtJ/
-         YbdBjzYcg+FMMuoFOsOCeMTRakMkpW8cNBWGCZg6rCDJvGuxdyeI1d9EqJwHuo3fmyNi
-         ZwFgb3VcTfSnmOW5I6YF0liyVb0COsk7Je0gIDxCLg4XlweTaQ7iMsxTc8P73fCHBX8N
-         ZI823Q+KASuZbAoW+hhmpCyXkeWtcIqyoXf+HRAt7yR1jS2T/dc1wAcb3/BzTwntFOrr
-         8eypaJSwwQhKt1ANqLkwO0j+r3r3F811Ppb0L1Q5Xe1gnmsiDO+bJKhaYU39NrDlxTzk
-         Ps1A==
+        bh=LSR5fX5MkONskCJMW96Wm8zCtyj5ETdID09kfTRxJrc=;
+        b=zyTz+ub9WwKU6tTdhjd6MILC2w+LPsRBARS6EnlP0pYmeYBhFIU90efWlJZmKptxDV
+         XtJY2I1xTA7NVk3z6C2w+8MhX8p9BvrA0xpSehHnPiVoPh4Ty1LWbtBN9uaeV6JjvuP8
+         ujMjqmKZkcoX9CaHDEh4KLYDO77oHIU51ZguUlWU/mRrHCq8kPduXHt8VL6DWVEetHIA
+         RCX3j3oBOTobUJcOm4KGYESRqmWKwT0VqpUEuMJXQMgI/bXI2VHpCKRwwRhfNYCBxar1
+         jSD7mAxRCKvHJBmp9fAWDXcr8Be3mTsU8IkCp3058mElL/jrJZrbYbKeLQwUVdOHAdQf
+         w2YQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=GOSKNwf05g1MpWg0eVgUOJZSEVXpTZQYh4Rcb2+bib0=;
-        b=UIYb492yfRqbDeSYR9ggaNYQgPFwVwHvL4Vn9JV5NwgTuCkpjnOOjwYWeme2Dxh2vO
-         ++HGACRxNJ8MPwH5hPKESBSatND3Wc2QiIG4Iwm8Vsh0aCHVWrEG3vg+J6U+gAFkKGAi
-         YsR6nSMhvCdhGKT+CVnoJnmjdjvYJwe/+HzgYSHsSznSQCtbGUw8BKtC9r35SqX8QzUa
-         mI2WUblG3cgomVamBbBz/gCHOqyn7WnJIGFUmjan7MfGY1I+eUGFSIKIfSZ1JR44mS2u
-         jmKBvVEAOk3zr3pvwRYZO16vMZ7dRDj300FBmUqZO4srCKK+67sQNCM2ni612yb78XFJ
-         Y8oQ==
-X-Gm-Message-State: AOAM532iUqaUeB51e26KjdHCX80cOkqfxYMAycfRgRjhVR8YNCVxdKGE
-        tVYmUCo+H9ZxidSVxTYlHGySz52XPP/uJkjuJsbl8A==
-X-Google-Smtp-Source: ABdhPJxAH+cC7JK8Q80vgqSzfviat/6jY6THJaEgQIvnMBTlRBvDA2nYCofWVX7zDCpLCVIMn2KrVaC7hU08g7copaA=
-X-Received: by 2002:a67:e901:: with SMTP id c1mr980287vso.42.1628522216743;
- Mon, 09 Aug 2021 08:16:56 -0700 (PDT)
+        bh=LSR5fX5MkONskCJMW96Wm8zCtyj5ETdID09kfTRxJrc=;
+        b=GB8MyQyYKzFZoozJ5XN94lf9B7F4l2nrNIg56ex4bjJltNPLC5i5QSSS2SfDkZezd7
+         iWDkVSWWJWUwklTmMQi1AFPEUEjoFgO9HTZXCMa6GEfHtOIOLfnrF3pguc5JTTwzIJv5
+         yiyKUULIZ9/Pwbzcjeq1UG0D1l7c92qD+5aomi013LjHkEcRxfiTczNvCqj7YCWUqrFf
+         vzREPl5qiToJxWFJ2ip3Vwob/sOiEe7WffDcD40iAUQqp8SI+4YW18BhY/uYsMEyeKIt
+         H0MjflPZgUoi5BG2CoN760KeAUvAmKZSDmCVyq597m6ig9aRAORKXl5kLQISRoBBaMFa
+         pdAg==
+X-Gm-Message-State: AOAM53155rxS4IKXy1YHeWCIb0Mu+NsZKjk7KLwh4eIzbnsShBWBxc3f
+        LiteyPbuMTG8Kt5gaG1u2xD35KTp3odvpKvgMUTh/Q==
+X-Google-Smtp-Source: ABdhPJwKclaC5QHUAuw9npFAO890pu8so1G31L3SngEiJz1VNqvICqnwoAN6jL/pL6HD6cHuWAwB+wJvfOwoNO0nypU=
+X-Received: by 2002:a67:f6d8:: with SMTP id v24mr17734403vso.48.1628522995836;
+ Mon, 09 Aug 2021 08:29:55 -0700 (PDT)
 MIME-Version: 1.0
-References: <CWXP265MB268049D9AB181062DA7F6DDBC4009@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
- <CWXP265MB26807AC3C130772D789D0AABC41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
- <CAPDyKFq44ZuXXUDQV34NSW-ixB9GAZfDx+dx-Kb8O7=LQ1TSHQ@mail.gmail.com>
- <CWXP265MB26803EFAC659676EC0914F97C41B9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
- <DM6PR04MB6575B0049B98254E77BA447EFC1A9@DM6PR04MB6575.namprd04.prod.outlook.com>
- <CWXP265MB2680575489E508DC75D84857C41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
- <CAPDyKFrCtRTHZYRjUecvrqr=YyhrTw+HXtdLRHeOTxoK94iSRg@mail.gmail.com> <CWXP265MB26804E1F676F532D08A9BBFBC41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
-In-Reply-To: <CWXP265MB26804E1F676F532D08A9BBFBC41A9@CWXP265MB2680.GBRP265.PROD.OUTLOOK.COM>
+References: <20210414085121.28951-1-peng.zhou@mediatek.com>
+ <20210414085121.28951-2-peng.zhou@mediatek.com> <CAPDyKFpOzmYxstRwSrD6tWKLMwxFPvHNfpDPDCrogzRah5iZtA@mail.gmail.com>
+ <1628219664.14221.7.camel@mbjsdccf07>
+In-Reply-To: <1628219664.14221.7.camel@mbjsdccf07>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 9 Aug 2021 17:16:19 +0200
-Message-ID: <CAPDyKFoU11viht4jbK5OVfW_o2e1shB4DWLT5_Jk0gMSBXwgNg@mail.gmail.com>
-Subject: Re: [PATCHv2] mmc: block: Differentiate busy and PROG state
-To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
-Cc:     Avri Altman <Avri.Altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "hch@infradead.org" <hch@infradead.org>
+Date:   Mon, 9 Aug 2021 17:29:19 +0200
+Message-ID: <CAPDyKFo6r9LX5h2OaW1+2=LvKeXLaRBXGSx89MeZA5QVPJh3rQ@mail.gmail.com>
+Subject: Re: [PATCH RESEND v3 1/3] mmc: Mediatek: add Inline Crypto Engine support
+To:     "Peng.Zhou" <peng.zhou@mediatek.com>
+Cc:     Eric Biggers <ebiggers@kernel.org>,
+        =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
+        <Chaotian.Jing@mediatek.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Satya Tangirala <satyat@google.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        =?UTF-8?B?V3VsaW4gTGkgKOadjuatpuaelyk=?= <Wulin.Li@mediatek.com>,
+        DTML <devicetree@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
-
-> >> +       case MMC_PROGRAM_CID:
-> >> +       case MMC_PROGRAM_CSD:
-> >
-> >Let's discuss these, since they have R1 responses.
-> >
-> >Although, according to the eMMC spec, the card moves to rcv state, not
-> >the prg state as you refer to in the commit message. Normally, we
-> >don't need to poll for busy/tran completion of these commands.
+On Fri, 6 Aug 2021 at 05:16, Peng.Zhou <peng.zhou@mediatek.com> wrote:
 >
-> Why not? Sure they move to rcv first, but if data stops they move to PROG.
-
-Yes, I guess they could.
-
-> >
-> >Have you observed through proper tests that this is actually needed?
+> Hi Ulf,
 >
-> No, seems unlikely to hit this, as PROG will likely be shorter than getting a second command through.
+> Thank you for your advise, I have a question about genpd provider, is it
+> a mandatory DT node for eMMC? Why I confuse it due to I found we only do
+> enable/disable clock during used eMMC in our platforms without any power
+> releated actions....it seems that there is no any "pwner-domain" used
+> for eMMC in our platforms.
 
-Right.
+A power-domain is optional for an eMMC controller to use.
 
-In any case, I wouldn't mind if we start to poll for these, it sure
-sounds a bit more robust.
+It then sounds like you should add it, in cases when you have mmc
+crypto support.
 
-> >
-> >> +       case MMC_SET_WRITE_PROT:
-> >> +       case MMC_CLR_WRITE_PROT:
-> >> +       case MMC_ERASE:
-> >
-> >The three above have R1B, please drop them from here as they are
-> >already supported correctly.
-> >
-> >> +       case MMC_LOCK_UNLOCK:
-> >
-> >Again, this has an R1 response and the card moves to rcv state.
-> >Normally we shouldn't need to poll, but I have to admit that the eMMC
-> >spec isn't really clear on what will happen when using the "forced
-> >erase" argument. The spec mentions a 3 minute timeout....
->
-> Again I don't know why you would not need to poll.
-> The force erase has a good reason to remain in PROG for long, but whatever, a card may decide to just take 5 seconds in unlock PROG. (to prevent bruteforcing passwords lets say)(Not anything I have seen or expect to see)
-
-As I said, the spec is not really clear here. So yes, polling sounds
-more safe/robust.
-
->
-> >
-> >> +       case MMC_SET_TIME: /* Also covers SD_WRITE_EXTR_SINGLE */
-> >> +       case MMC_GEN_CMD:
-> >> +       case SD_WRITE_EXTR_MULTI:
-> >
-> >Are these actually being used? If not, please drop them from being
-> >supported. I don't want to encourage crazy operations being issued
-> >from userspace.
->
-> GEN_CMD is extremly interesting for issuing vendor commands from user-space.
-> Not sure if anyone uses it (yet), but if so it's unlikely to be seen in the wild.
-> SD_WRITE_EXTR_MULTI is simply too new to really say.
-> MMC_SET_TIME probably not used.
->
-
-I am worried that it looks like we encourage doing "crazy" things from
-userspace, when we add explicit checks for these commands.
-
-In any case, if you strongly think we need these, please add polling
-for them (or a subset of them).
-
->
-> >
-> >Overall, it looks like we need to add a check for MMC_LOCK_UNLOCK to
-> >poll for busy, but that's it, I think.
->
-> See above.
->
->
-> >>         } while (!mmc_ready_for_data(status));
-> >
-> >I don't quite understand what we accomplish with polling for TRAN
-> >state in one case and in the other case, both TRAN and READY_FOR_DATA.
-> >Why can't we always poll for TRAN and READY_FOR_DATA? It should work
-> >for all cases, no?
-> >
->
-> Well in theory you're then dropping the buffered writing feature of the SD spec if waiting for TRAN, too.
-> I'm fine with that, especially since it is not desired to be used through ioctl anyway?
-
-Well, I think you are misinterpreting how the buffered writing feature
-is working in practice.
-
-The mmc core doesn't write one block at the time and polls for
-READY_FOR_DATA/TRAN in between each written block. Instead, it's the
-responsibility of the mmc controller HW, to monitor DAT0 during a data
-transmission, to understand whether it can continue to fill and write
-more buffers.
+Hope this helps!
 
 Kind regards
 Uffe
+
+>
+> On Mon, 2021-05-10 at 19:57 +0800, Ulf Hansson wrote:
+> > On Wed, 14 Apr 2021 at 11:12, Peng Zhou <peng.zhou@mediatek.com> wrote:
+> > >
+> > > From: Peng Zhou <Peng.Zhou@mediatek.com>
+> > >
+> > > 1. add crypto clock control and ungate it before CQHCI init
+> > >
+> > > 2. set MMC_CAP2_CRYPTO property of eMMC
+> > >
+> > > Signed-off-by: Peng Zhou <Peng.Zhou@mediatek.com>
+> >
+> > As discussed [1], I think the ARM SMC call should be managed together
+> > with the crypto clock, from a PM domain (a genpd provider).
+> >
+> > These are the steps I think should help to get this supported:
+> >
+> > 1)
+> > Add a new generic mmc DT property for crypto support. Make it being
+> > parsed from mmc_of_parse() and let it set MMC_CAP2_CRYPTO.
+> >
+> > 2)
+> > Start by adding a genpd provider in DT and implement support for it in
+> > drivers/soc/*. See
+> > Documentation/devicetree/bindings/power/power-domain.yaml, for generic
+> > DT bindings.
+> >
+> > If you already have a genpd provider for the device, you may either
+> > extend it to cope with the below or implement a new and model the it
+> > as a child (subdomain) of the existing one.
+> >
+> > 3)
+> > To fetch the crypto clock during probe, the genpd provider should
+> > implement the ->attach|detach_dev() callbacks. The ->attach_dev()
+> > callback is invoked from genpd_add_device(), which is called while
+> > probing the device. Vice verse for the ->detach_dev() callback.
+> >
+> > 4)
+> > Ungating/gating the clock should be implemented from the genpd
+> > provider's ->start|stop() callbacks. These callbacks are called from
+> > genpd_runtime_suspend|resume(), thus when the device gets runtime
+> > suspended/resumed. As the mmc host driver already supports runtime PM,
+> > only a minor update in the driver's ->probe() is needed, which is to
+> > call dev_pm_domain_start(). This turns on the crypto clock and allows
+> > its registers to be accessed.
+> >
+> > 5)
+> > Add also the ARM SMC calls to the genpd provider's ->start|stop()
+> > callbacks. This means those gets called from SoC specific code, which
+> > helps to keep the driver portable.
+> >
+> > 6)
+> > Add the crypto clock DT binding for the mmc host.
+> >
+> > 7)
+> > Wire up the mmc host device node in DT to be attached to the genpd
+> > provider (see power-domains and power-domain-names properties). Make
+> > sure to also specify the crypto clock and the new mmc crypto property
+> > for it.
+> >
+> > Please, just ask if there is anything unclear. I will do my best to help!
+> >
+> > Kind regards
+> > Uffe
+> >
+> > [1]
+> > https://patchwork.kernel.org/project/linux-mmc/patch/20210309015750.6283-1-peng.zhou@mediatek.com/
+> >
+> > > ---
+> > >  drivers/mmc/host/mtk-sd.c | 15 ++++++++++++++-
+> > >  1 file changed, 14 insertions(+), 1 deletion(-)
+> > >
+> > > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > > index 898ed1b023df..1c90360d6cf2 100644
+> > > --- a/drivers/mmc/host/mtk-sd.c
+> > > +++ b/drivers/mmc/host/mtk-sd.c
+> > > @@ -442,6 +442,7 @@ struct msdc_host {
+> > >         struct clk *src_clk_cg; /* msdc source clock control gate */
+> > >         struct clk *sys_clk_cg; /* msdc subsys clock control gate */
+> > >         struct clk_bulk_data bulk_clks[MSDC_NR_CLOCKS];
+> > > +       struct clk *crypto_clk; /* msdc crypto clock */
+> > >         u32 mclk;               /* mmc subsystem clock frequency */
+> > >         u32 src_clk_freq;       /* source clock frequency */
+> > >         unsigned char timing;
+> > > @@ -802,6 +803,7 @@ static void msdc_set_busy_timeout(struct msdc_host *host, u64 ns, u64 clks)
+> > >
+> > >  static void msdc_gate_clock(struct msdc_host *host)
+> > >  {
+> > > +       clk_disable_unprepare(host->crypto_clk);
+> > >         clk_bulk_disable_unprepare(MSDC_NR_CLOCKS, host->bulk_clks);
+> > >         clk_disable_unprepare(host->src_clk_cg);
+> > >         clk_disable_unprepare(host->src_clk);
+> > > @@ -822,6 +824,7 @@ static void msdc_ungate_clock(struct msdc_host *host)
+> > >                 dev_err(host->dev, "Cannot enable pclk/axi/ahb clock gates\n");
+> > >                 return;
+> > >         }
+> > > +       clk_prepare_enable(host->crypto_clk);
+> > >
+> > >         while (!(readl(host->base + MSDC_CFG) & MSDC_CFG_CKSTB))
+> > >                 cpu_relax();
+> > > @@ -2512,6 +2515,15 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> > >                 goto host_free;
+> > >         }
+> > >
+> > > +       /* only eMMC has crypto property */
+> > > +       if ((mmc->caps2 & MMC_CAP2_NO_SD) && (mmc->caps2 & MMC_CAP2_NO_SDIO)) {
+> > > +               host->crypto_clk = devm_clk_get(&pdev->dev, "crypto");
+> > > +               if (IS_ERR(host->crypto_clk))
+> > > +                       host->crypto_clk = NULL;
+> > > +               else
+> > > +                       mmc->caps2 |= MMC_CAP2_CRYPTO;
+> > > +       }
+> > > +
+> > >         host->irq = platform_get_irq(pdev, 0);
+> > >         if (host->irq < 0) {
+> > >                 ret = -EINVAL;
+> > > @@ -2582,6 +2594,8 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> > >                 host->dma_mask = DMA_BIT_MASK(32);
+> > >         mmc_dev(mmc)->dma_mask = &host->dma_mask;
+> > >
+> > > +       /* here ungate due to cqhci init will access registers */
+> > > +       msdc_ungate_clock(host);
+> > >         if (mmc->caps2 & MMC_CAP2_CQE) {
+> > >                 host->cq_host = devm_kzalloc(mmc->parent,
+> > >                                              sizeof(*host->cq_host),
+> > > @@ -2618,7 +2632,6 @@ static int msdc_drv_probe(struct platform_device *pdev)
+> > >         spin_lock_init(&host->lock);
+> > >
+> > >         platform_set_drvdata(pdev, mmc);
+> > > -       msdc_ungate_clock(host);
+> > >         msdc_init_hw(host);
+> > >
+> > >         ret = devm_request_irq(&pdev->dev, host->irq, msdc_irq,
+> > > --
+> > > 2.18.0
+>
