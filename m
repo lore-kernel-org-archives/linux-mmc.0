@@ -2,113 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7F2BC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 11:36:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBC31C4320A
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 13:24:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BB76B601FF
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 11:36:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B07C060EE2
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 13:24:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237397AbhHKLhM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Aug 2021 07:37:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43964 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237385AbhHKLhL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Aug 2021 07:37:11 -0400
-Received: from mail-vk1-xa32.google.com (mail-vk1-xa32.google.com [IPv6:2607:f8b0:4864:20::a32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D97EC0613D3
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Aug 2021 04:36:48 -0700 (PDT)
-Received: by mail-vk1-xa32.google.com with SMTP id 11so558685vku.11
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Aug 2021 04:36:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=amH86pdEpwFZQx5PgrEAT4AyyUP4xmw2x8rvFH0W/ZU=;
-        b=LP7rXoHsIku55aaoTCdqBMCY5LhNQLEr8KFwEo0z68iD2sXWac6MfNhOqOZfEWnB1U
-         HwmxA/UlbkX6CEbPtXe9mtrc9B1ruwI7hSqGqe46n7ETgAly1C1wikXSFEkgDFqoUU//
-         0t+vtvECchw9+6fPL2gzsLS54xjpTLWCzJa8eAwjqzive+F8ge/UVYlUNwgAnh0iN1Uh
-         cafWGJMAiAVnP8MQ2dpSfOMQHIUMXu0w2zQ6nWDHuoI65Z1WdvwCJUiDV4Wh2sovu4JE
-         kkXDavDWTg59gbj/odZ+EX6Fmt3Tg4UEvueFCC4M/9Z/kq9aq2RiIiWAjrcXxUkxswww
-         TThw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=amH86pdEpwFZQx5PgrEAT4AyyUP4xmw2x8rvFH0W/ZU=;
-        b=fzsV2cv/EZ00RAkwTu7NioREXqgfzGtr2jWjP487Wvbzxz5LTJbF9NcfzW4GLV3vGM
-         kCl/CUuqo4HC84R273nedbfmbRONduKu1PghnLm2IWi2IRgDDAJWIUINZpAEz0qhZn4M
-         VH4bvTeTzrbPN199w+rGtC+9DIm7BVWWClojaOGjqW97xAdIdPXfHCLDqWCq4cIuDWYP
-         BQI/yd1CYjE73vH3lMrd7smBcZ4x2Xt6WoQKdQ9j7eS0mrG8WuOOSf1o3YVDepYLnbYk
-         ormOVQy9N6/qPD2iyZWWvDqdR3Jl4AIEMAMM2/CNhZvotntxjzMj7Lfzc/xCpGppeW6Y
-         tz/w==
-X-Gm-Message-State: AOAM533qyuYybqqY+/NNTHk4LikRsUZQqwonM0AFrWzwI2L84zvbnefQ
-        oeiZrUnBUTwzMcjyoq/rptLMuhj4C3QT1jqyQ2dOrg==
-X-Google-Smtp-Source: ABdhPJwRMM9NLVopsXqxxHe/H4ER6vCPdLjvbWhBk3Nsz3qppUrTWQTn2ZFBHah9uqca6IOIH+osC0NhsgjmCz3D/hQ=
-X-Received: by 2002:a1f:a301:: with SMTP id m1mr21755169vke.6.1628681807503;
- Wed, 11 Aug 2021 04:36:47 -0700 (PDT)
+        id S231359AbhHKNYw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Aug 2021 09:24:52 -0400
+Received: from www.zeus03.de ([194.117.254.33]:36448 "EHLO mail.zeus03.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231217AbhHKNYv (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 11 Aug 2021 09:24:51 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=Ob18HouyjEG4yKGxnXe8mW2b9Ubs
+        QmEYQVddNMLg/Tc=; b=vE/Z4umeG8rqyiGlUVPlQGI7s+tAEkpPvEkpLJWYZkyt
+        dE3xHhJx2hi4NM801MAB07HUZ1Ug7h99ZHF2ra3Wmz2nTejsN3S2bOTzvHlByk5e
+        sKD6KoZLVxKpYVcMOqWM40aOkRiHSfVyiM/deFkoqiJI1IKP6KGV3LlW5n4+oEU=
+Received: (qmail 2664356 invoked from network); 11 Aug 2021 15:24:24 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 11 Aug 2021 15:24:24 +0200
+X-UD-Smtp-Session: l3s3148p1@Vm5ziUjJ8J0gARa4RTP4AfHKOCm/nqrR
+Date:   Wed, 11 Aug 2021 15:24:23 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        Codrin Ciubotariu <codrin.ciubotariu@microchip.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 1/7] i2c: at91-master: : use proper DMAENGINE API for
+ termination
+Message-ID: <YRPPh6ucRfL/gGZG@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Codrin Ciubotariu <codrin.ciubotariu@microchip.com>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        linux-i2c@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+References: <20210623095942.3325-1-wsa+renesas@sang-engineering.com>
+ <20210623095942.3325-2-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
-References: <20210729072929.10267-1-jbe@pengutronix.de> <20210729072929.10267-2-jbe@pengutronix.de>
-In-Reply-To: <20210729072929.10267-2-jbe@pengutronix.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 11 Aug 2021 13:36:10 +0200
-Message-ID: <CAPDyKFrkDb0X24F4cTopOF24sKWv4oxYqxv6U3jKbnRLMEF_Qw@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: mxcmmc: really configure the DMA on demand
-To:     Juergen Borleis <jbe@pengutronix.de>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Doug Anderson <dianders@chromium.org>,
-        Sascha Hauer <kernel@pengutronix.de>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="QdmGwop7VZKZW5o7"
+Content-Disposition: inline
+In-Reply-To: <20210623095942.3325-2-wsa+renesas@sang-engineering.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 29 Jul 2021 at 09:29, Juergen Borleis <jbe@pengutronix.de> wrote:
->
-> Calling mxcmci_use_dma(host) is intended for the next transfer only, not
-> for generic detection if DMA is possible. Without this change, the DMA gets
-> never configured and thus, never used.
 
-Wow, that's an old bug you found there.
+--QdmGwop7VZKZW5o7
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
->
-> Signed-off-by: Juergen Borleis <jbe@pengutronix.de>
+On Wed, Jun 23, 2021 at 11:59:35AM +0200, Wolfram Sang wrote:
+> dmaengine_terminate_all() is deprecated in favor of explicitly saying if
+> it should be sync or async. Here, we want dmaengine_terminate_sync()
+> because there is no other synchronization code in the driver to handle
+> an async case.
+>=20
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-It looks like we should add a fixes tag and add a stable tag:
+Applied to for-next, thanks!
 
-Fixes: f53fbde48ef0 ("mmc: mxcmmc: use dmaengine API")
 
-> ---
->  drivers/mmc/host/mxcmmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c
-> index 2fe6fcd..611f827 100644
-> --- a/drivers/mmc/host/mxcmmc.c
-> +++ b/drivers/mmc/host/mxcmmc.c
-> @@ -834,7 +834,8 @@ static void mxcmci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->         else
->                 burstlen = 4;
->
-> -       if (mxcmci_use_dma(host) && burstlen != host->burstlen) {
-> +       if (host->dma != NULL && burstlen != host->burstlen) {
-> +               /* reconfigure DMA on changes only */
->                 host->burstlen = burstlen;
->                 ret = mxcmci_setup_dma(mmc);
->                 if (ret) {
+--QdmGwop7VZKZW5o7
+Content-Type: application/pgp-signature; name="signature.asc"
 
-A few lines below here, you should not clear host->do_dma, as it can't
-be set at this point (thus clearing it just adds confusion).
+-----BEGIN PGP SIGNATURE-----
 
-Also I wonder if patch2 is really needed to fix the bug, or should be
-considered as nice cleanup instead?
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmETz4MACgkQFA3kzBSg
+KbYuUA/+I2bdHPXgGVSkfL9GsxgoG+ReEDCPFZuA6jN4kagY1rmXHVSlSeIMlKyR
+r0x8l4FGpcQiG4gc3KoU1K60t5tTk3AmR8/sFoEwLRD3vZ+XO3SRMLafzPOsUqJ9
+0RrxkH2tRRWGfs6VZdmeD5LzG952rpyRB3DT/rGOahoQkXeVax7hgJQdO9rKfo4E
+Rcl4TBgao4gKooGRZfGPeU9SFZ6DrAS/TK5aEm4eg1vREH6Vw/rXgwJm0L9/5awI
+3bKtbHogDRaqcsm0snS/cpgJ6KoRUMRlsbvx9RM4lENjQOloG6RHFvtTBfOW9+A2
+RetOLeiWe3EHJzA1xqjTx8PtxRU15DUJpK0dZuk6g0YaJZsNoTXb2WFglcjkHgTm
+bnDrZk/r7RTt8NUwPQZUyXarduR7VV3CfrnVvb1POkSBBBqDAfAtUik/L+RJoc7j
+I0TgMzQWvZL+HoG3xnaoCYEoDgEemzi8n6+4Ls5Yj+SjEoQYS1gWfefpoFGJcpIR
+hS2FNzMgZilMcPD9BbtRczqUgBq3Ry+fB7GSJTwNYRkQckMw4FV7OSRMSmuLpXcj
+ox0Z8P3q3rsH9bodav+ljf0mJUQdN3O6LodU+WZuI52wIsIwQ31cG+HvTnbb/56d
+/6BWmVSo1UiVmcOtSDbDXcjWGc0lwAR4j1OYQXKwQlxTY7nmzlE=
+=tkps
+-----END PGP SIGNATURE-----
 
-Kind regards
-Uffe
+--QdmGwop7VZKZW5o7--
