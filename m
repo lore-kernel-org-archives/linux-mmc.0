@@ -4,110 +4,105 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B727CC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 07:38:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B4B1C4338F
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 08:28:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 963FC6056B
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 07:38:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 19468601FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Aug 2021 08:28:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235491AbhHKHjA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Aug 2021 03:39:00 -0400
-Received: from www.zeus03.de ([194.117.254.33]:33638 "EHLO mail.zeus03.de"
+        id S235896AbhHKI3G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Aug 2021 04:29:06 -0400
+Received: from www.zeus03.de ([194.117.254.33]:51810 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235506AbhHKHi7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 11 Aug 2021 03:38:59 -0400
+        id S233112AbhHKI3G (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 11 Aug 2021 04:29:06 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=cJhLM0w8xelHNY+NtuK+XG86hCLr
-        bVL6hhxw6Nkx4uA=; b=N9ZslsZ2frHvx9+9dXFJnWBf3ERHXM+2CMH6CSsTfFPI
-        MqEczSaGo6epHPe+HBpHZT7vQeGWQnjb0m/8zyEECLIMqsKN49oi7XOz9g9HpVAf
-        9Z5rLmspL51SDCPKtZFFxThAaomVH1ftXoBhWtVUeUWaQLYZcXo8rm0HbZvWe7A=
-Received: (qmail 2561430 invoked from network); 11 Aug 2021 09:38:33 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 11 Aug 2021 09:38:33 +0200
-X-UD-Smtp-Session: l3s3148p1@8EFytEPJPMYgAwDPXwY8AL9PxqFiRnVq
-Date:   Wed, 11 Aug 2021 09:38:30 +0200
+        :content-type:in-reply-to; s=k1; bh=8Pm5n4YPSN8Lq7yE16wzJuvY0yXj
+        VPzc3wRo20Iwd80=; b=ckERZSVHy9hLcmJaGvWZFxlm3K4EtuAGvzdOUsauvzJR
+        /Fs36q3YFAMwDtXrFV/Ow2Ojxmx6aPu3zGJqpTqAkQmdNJgWLchGrxE0db7lquyg
+        6QCeHz4XSxiq6JDuVf8FQIPvBI/rdKGYqgi93lh3fV50EVUJxgXMzCxvU9Xxejc=
+Received: (qmail 2577701 invoked from network); 11 Aug 2021 10:28:41 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 11 Aug 2021 10:28:41 +0200
+X-UD-Smtp-Session: l3s3148p1@lSbmZ0TJjsYgAwDPXwY8AL9PxqFiRnVq
+Date:   Wed, 11 Aug 2021 10:28:41 +0200
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-        linux-mmc@vger.kernel.org,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Petr Mladek <pmladek@suse.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Tejun Heo <tj@kernel.org>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dennis Zhou <dennis@kernel.org>,
-        Christoph Lameter <cl@linux.com>,
-        Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH 2/4] bitmap: unify find_bit operations
-Message-ID: <YRN+dmd0lKtYNe5N@ninjato>
+To:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: Re: [PATCH v4] mmc: host: renesas_sdhi: Refactor renesas_sdhi_probe()
+Message-ID: <YROKOTm+EZmta4n0@ninjato>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yury Norov <yury.norov@gmail.com>, linux-kernel@vger.kernel.org,
-        linux-mm@kvack.org, linux-mmc@vger.kernel.org,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Petr Mladek <pmladek@suse.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Tejun Heo <tj@kernel.org>, Steven Rostedt <rostedt@goodmis.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Dennis Zhou <dennis@kernel.org>, Christoph Lameter <cl@linux.com>,
-        Andrew Morton <akpm@linux-foundation.org>
-References: <20210719021755.883182-1-yury.norov@gmail.com>
- <20210719021755.883182-3-yury.norov@gmail.com>
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+References: <20210729103234.480743-1-yoshihiro.shimoda.uh@renesas.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="/b49F6uIw+J2vpAL"
+        protocol="application/pgp-signature"; boundary="aotWwR6XK/29MT2e"
 Content-Disposition: inline
-In-Reply-To: <20210719021755.883182-3-yury.norov@gmail.com>
+In-Reply-To: <20210729103234.480743-1-yoshihiro.shimoda.uh@renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---/b49F6uIw+J2vpAL
+--aotWwR6XK/29MT2e
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sun, Jul 18, 2021 at 07:17:53PM -0700, Yury Norov wrote:
-> bitmap_for_each_{set,clear}_region() are similar to for_each_bit()
-> macros in include/linux/find.h, but interface and implementation
-> of them are different.
+On Thu, Jul 29, 2021 at 07:32:34PM +0900, Yoshihiro Shimoda wrote:
+> Refactor renesas_sdhi_probe() to avoid increasing numbers of
+> sdhi_quirks_match[] entry when we add other stable SoCs like
+> r8a779m*.
 >=20
-> This patch adds for_each_bitrange() macros and drops unused
-> bitmap_*_region() API in sake of unification.
+> Note that the sdhi_quirks_match[] is only needed on
+> renesas_sdhi_internal_dmac.c so that of_data of
+> renesas_sdhi_sys_dmac.c keeps as-is.
 >=20
-> Signed-off-by: Yury Norov <yury.norov@gmail.com>
+> Signed-off-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
-I fetched your bitmap-20210716 branch and tested it on a Renesas
-Salvator-XS board with an R-Car M3-N SoC with some debug output added.
-Still works and values make sense, so:
+I like this change! Not only does it avoid the white listing, but it
+also puts things where they belong! Looks much more sorted to me.
+
+I think we can base even further cleanup on this. Like merging
+soc_dma_quirks into the other quirks. But we can do this incrementally.
+
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+
+I also tested this on H3 ES1.0, M3-W ES1.0, M3-N, and E3 with some debug
+output. It all made sense and SDHI still works:
+
+I also tested H3 ES2.0 without debug output. SDHI still worked.
 
 Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---/b49F6uIw+J2vpAL
+--aotWwR6XK/29MT2e
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmETfnIACgkQFA3kzBSg
-KbaFWQ//RcyowROGCgtdqiVotoOwSBpocOqGVQAqLCl7wsSMcikuIt/D0NiQu37v
-Cv0iGNjYcarcn3AL33EDywMyKAJS8LYXIyW75pH7Gc9tHmPeEZeJXEriKi+gT53Q
-mJWlvngNQhIsPmtt1JMik7b2Qdl1R+S4AkS+lUVY7abj2pF9e7/IOPQ2hWKcaIK/
-wzTfi5415Z4a7bB+JcHefmpkifGzMGu5DCSsaap/jEVVAgzO7WqFD4x9Oueh9ZtT
-d1lHSB6CMMG6Iwb6ftDaG9OtLtmq0flmRqsqIMAhdJ/N7V6sEneNA/y0St6zTrx/
-bE4v4OftO01EsLTqqvT//Gwq/GxEdl8/VoD7uH40phiOmu/w6UIQh3CHStRzbjpw
-B/3jHXUO3llJso0MXr45C6/qHrKTNCZ27HDxcME7BO0LqnC4+nYOyNlGnQsax3Df
-ACHAYTEaq/4VPrH3FKccsx+va0EaK3gdgvv2xTTbnUfOXp+FNaLqKHfC9Yj8duNE
-GiVN9j01H0qNj1uTzgnkOav9xWNo9bErCPC2z6u/zCh44pXUhcOEMtuyxyLH1zgH
-Lif9wOkhyOiCwT3I6wUepOPVfjcusa34Q1gKUOQjt3vpuSvOAK2P8WDDufSbeGMz
-nhHNkASrn0+4ZGPHfqaFZBbPY37z3uiNRPbgyKFEP4UFqWSNR2Q=
-=x/C1
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmETijUACgkQFA3kzBSg
+KbaOFA/+N4fs79obLJDnk1Z7QvhnXXeKWMFhnZ0YrPLEFodY4pzVgI1+UQxKatng
+KgpD57/RJFjAZTA0crRxI+GcM5naIzLw/07GON1MIo6LQpUjrztpfyA5sh2WIyxs
+tDcAVHweU/WFa68L613T8aFiYf8g4bNNAOwCX0uNN/MJ7v/nfLW5KUednyIyD1iK
+bEzykd3wkABK6QIScWDymyvqWXYDOZ8kx51A9Ah+uumn+0H65ZM/hC9BG8+hz6+k
+w71sCHGH0KuWVdmkKXDFinb6bskp+kGUe9y2fFNpnxlOMQxZJce/YX3YI0UuFf8n
+Yd4peM37kuOXAVTmeuzD98gI2zQoPTejIhfFUmuNM4pBMl3DBHpnbRIvG8ZObKcB
+YBxC5IrB4CtXFFiis6PMRNmOPs0RvKPIdPYFQVxLHuxDCj95QcuKqS6XZ0mRwFxD
+8f/xYPqnLh0UYt7eKhXy3XQmZvKjwl4LiUtg6pY8EpMPuwDjJRq3z494ps4tosbb
+MZ1v0H24GWMUsIuc+yHZ89MuQ2RDrrlaNujyjD6HReOX4YC6c3TOyCDVEkKWXlvv
+ymneWp+EFeTIYpG+QV6Msl3v6eP8XbXCr2I7hUsyhCEQtjwd/o26avqqKTMTCmsx
+hliE0fzPHPvuEN+6h42+wGRBfPe4PCRqoIdXYo1gjMxmsP6LeZo=
+=sOfU
 -----END PGP SIGNATURE-----
 
---/b49F6uIw+J2vpAL--
+--aotWwR6XK/29MT2e--
