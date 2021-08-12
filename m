@@ -2,111 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F079FC4338F
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 14:51:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4B51C43214
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 15:48:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C308D6101E
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 14:51:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B648760FC0
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 15:48:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238166AbhHLOvf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Aug 2021 10:51:35 -0400
-Received: from smtp1.axis.com ([195.60.68.17]:52784 "EHLO smtp1.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S236114AbhHLOvf (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 12 Aug 2021 10:51:35 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1628779870;
-  x=1660315870;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=y8NerktKhXY8E3B/F+RMaBVwPBGIQW1kxrEsa+hHLc0=;
-  b=MmWPbKkz0xS4LIDtcgGsaBQIV6WhsjOdgx0MU7IksXtmSaBMymuuABEQ
-   q1MvfHimlxHVl1JjmV+KrfYYWUDS76W8F47wUJp5lB3McUvKmnjOl3/lL
-   7V5kPzAywNVPC92iT59G6wE2yNMnonUqD4A42957SsicPQwffmtJSv9ey
-   1S7H3yMeuGg38hmjPCnJPzOKml/DyvLeUkub4aGuXouUVSFJ28hdWmtHo
-   EfbZdtgBqjByBa6HSDRIFEP7+e0aJ2dBoFe3gC+Fvcvyxr/pNs4lFtyiS
-   2J7PcOUdRBn1092V8W0GE9nHnAGU8KDiFIH2/LA1jtau4RU4+9oYhUbkV
-   A==;
-From:   =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-To:     Jesper Nilsson <jesper.nilsson@axis.com>,
-        Lars Persson <lars.persson@axis.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@axis.com>, <linux-arm-kernel@axis.com>,
-        <linux-mmc@vger.kernel.org>,
-        =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-Subject: [PATCH] mmc: usdhi6rol0: Implement card_busy function
-Date:   Thu, 12 Aug 2021 16:50:56 +0200
-Message-ID: <20210812145056.11916-1-marten.lindahl@axis.com>
-X-Mailer: git-send-email 2.20.1
+        id S238106AbhHLPsi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Aug 2021 11:48:38 -0400
+Received: from smtp-out1.suse.de ([195.135.220.28]:37574 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232854AbhHLPsi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Aug 2021 11:48:38 -0400
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out1.suse.de (Postfix) with ESMTPS id EA35F222A7;
+        Thu, 12 Aug 2021 15:48:11 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1628783291; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=dggFCYfqvDGrc8ufyifdsUWa0iADyaxGU9QqwNJ3pNo=;
+        b=NAfSTEBSkS/9UW2OGRu0KM86uMN88fpuuZtoZ0nyXuJbRTctqKyh0GvWMMiCntTvbWNXpe
+        7sgCRk8h28MJodPKkmk7skNfmgLD4i6itTH+af4ASG70uoioR8IJj8hDd5o7JuWDpt7UIU
+        BEzdCi8FzV/QQVpIGcEGYVUoYbIHqVc=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1628783291;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=dggFCYfqvDGrc8ufyifdsUWa0iADyaxGU9QqwNJ3pNo=;
+        b=jlMXXbviU9zQg6ZGEOseMnWtZOCtL2RjJqg6qLc4keAjYa1QgoS7S/8NawXNXzIrXsnDwt
+        ZGO8Eq2x0gyEi9Ag==
+Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 7E09C13C59;
+        Thu, 12 Aug 2021 15:48:09 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap2.suse-dmz.suse.de with ESMTPSA
+        id f/BwFLlCFWE6HwAAMHmgww
+        (envelope-from <colyli@suse.de>); Thu, 12 Aug 2021 15:48:09 +0000
+Subject: Re: [PATCH 6/8] bcache: add proper error unwinding in
+ bcache_device_init
+To:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
+Cc:     Song Liu <song@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        linux-block@vger.kernel.org, linux-bcache@vger.kernel.org,
+        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-nvme@lists.infradead.org
+References: <20210809064028.1198327-1-hch@lst.de>
+ <20210809064028.1198327-7-hch@lst.de>
+From:   Coly Li <colyli@suse.de>
+Message-ID: <bdec1e0a-e789-19f1-e9b6-d7f99413670d@suse.de>
+Date:   Thu, 12 Aug 2021 23:48:07 +0800
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20210809064028.1198327-7-hch@lst.de>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When switching card voltage to UHS voltage the mmc framework tries to
-check that the card is driving pins CMD, and DAT[0-3] low before the
-switch is made. Drivers that does not implement the card_busy function
-will manage to do the switch anyway, but the framework will print a
-warning about not being able to verify the voltage signal.
+On 8/9/21 2:40 PM, Christoph Hellwig wrote:
+> Except for the IDA none of the allocations in bcache_device_init is
+> unwound on error, fix that.
+>
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-Implement card_busy function. Renesas host interface only exposes pins
-DAT[0] and DAT[3] for reading the busy state, which is why only these
-two pins are checked.
+Acked-by: Coly Li <colyli@suse.de>
 
-Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
----
- drivers/mmc/host/usdhi6rol0.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+Thanks.
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index b9b79b1089a0..e400a646e675 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -77,6 +77,7 @@
- #define USDHI6_SD_INFO1_WP		BIT(7)
- #define USDHI6_SD_INFO1_D3_CARD_OUT	BIT(8)
- #define USDHI6_SD_INFO1_D3_CARD_IN	BIT(9)
-+#define USDHI6_SD_INFO1_SDDAT3		BIT(10)
- 
- #define USDHI6_SD_INFO2_CMD_ERR		BIT(0)
- #define USDHI6_SD_INFO2_CRC_ERR		BIT(1)
-@@ -1186,6 +1187,21 @@ static int usdhi6_sig_volt_switch(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return ret;
- }
- 
-+static int usdhi6_card_busy(struct mmc_host *mmc)
-+{
-+	struct usdhi6_host *host = mmc_priv(mmc);
-+	u32 info1 = usdhi6_read(host, USDHI6_SD_INFO1);
-+	u32 info2 = usdhi6_read(host, USDHI6_SD_INFO2);
-+
-+	/* Check if the SD bus is processing a command */
-+	if (!(info2 & USDHI6_SD_INFO2_SCLKDIVEN))
-+		return 0;
-+
-+	/* Card is busy if it is pulling dat[0] & dat[3] low */
-+	return !(info2 & USDHI6_SD_INFO2_SDDAT0 ||
-+		 info1 & USDHI6_SD_INFO1_SDDAT3);
-+}
-+
- static const struct mmc_host_ops usdhi6_ops = {
- 	.request	= usdhi6_request,
- 	.set_ios	= usdhi6_set_ios,
-@@ -1193,6 +1209,7 @@ static const struct mmc_host_ops usdhi6_ops = {
- 	.get_ro		= usdhi6_get_ro,
- 	.enable_sdio_irq = usdhi6_enable_sdio_irq,
- 	.start_signal_voltage_switch = usdhi6_sig_volt_switch,
-+	.card_busy = usdhi6_card_busy,
- };
- 
- /*			State machine handlers				*/
--- 
-2.20.1
+Coly Li
+
+> ---
+>  drivers/md/bcache/super.c | 16 +++++++++++-----
+>  1 file changed, 11 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/md/bcache/super.c b/drivers/md/bcache/super.c
+> index 185246a0d855..d0f08e946453 100644
+> --- a/drivers/md/bcache/super.c
+> +++ b/drivers/md/bcache/super.c
+> @@ -931,20 +931,20 @@ static int bcache_device_init(struct bcache_device *d, unsigned int block_size,
+>  	n = BITS_TO_LONGS(d->nr_stripes) * sizeof(unsigned long);
+>  	d->full_dirty_stripes = kvzalloc(n, GFP_KERNEL);
+>  	if (!d->full_dirty_stripes)
+> -		return -ENOMEM;
+> +		goto out_free_stripe_sectors_dirty;
+>  
+>  	idx = ida_simple_get(&bcache_device_idx, 0,
+>  				BCACHE_DEVICE_IDX_MAX, GFP_KERNEL);
+>  	if (idx < 0)
+> -		return idx;
+> +		goto out_free_full_dirty_stripes;
+>  
+>  	if (bioset_init(&d->bio_split, 4, offsetof(struct bbio, bio),
+>  			BIOSET_NEED_BVECS|BIOSET_NEED_RESCUER))
+> -		goto err;
+> +		goto out_ida_remove;
+>  
+>  	d->disk = blk_alloc_disk(NUMA_NO_NODE);
+>  	if (!d->disk)
+> -		goto err;
+> +		goto out_bioset_exit;
+>  
+>  	set_capacity(d->disk, sectors);
+>  	snprintf(d->disk->disk_name, DISK_NAME_LEN, "bcache%i", idx);
+> @@ -987,8 +987,14 @@ static int bcache_device_init(struct bcache_device *d, unsigned int block_size,
+>  
+>  	return 0;
+>  
+> -err:
+> +out_bioset_exit:
+> +	bioset_exit(&d->bio_split);
+> +out_ida_remove:
+>  	ida_simple_remove(&bcache_device_idx, idx);
+> +out_free_full_dirty_stripes:
+> +	kvfree(d->full_dirty_stripes);
+> +out_free_stripe_sectors_dirty:
+> +	kvfree(d->stripe_sectors_dirty);
+>  	return -ENOMEM;
+>  
+>  }
 
