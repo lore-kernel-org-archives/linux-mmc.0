@@ -2,135 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E078C4320E
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 08:38:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2044FC4338F
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 09:54:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A8896103A
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 08:38:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA22760EB9
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Aug 2021 09:54:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235337AbhHLIjV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Aug 2021 04:39:21 -0400
-Received: from smtp-out2.suse.de ([195.135.220.29]:56244 "EHLO
-        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235342AbhHLIjE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Aug 2021 04:39:04 -0400
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by smtp-out2.suse.de (Postfix) with ESMTPS id B7B4D1FF27;
-        Thu, 12 Aug 2021 08:38:38 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
-        t=1628757518; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ZPpCgZsZujeHpFjKQKbfSj++xp0YtZ9ihzOrHo+mO84=;
-        b=lqWyC3V0Viit0MCDa2F8x2Cxg+52gkzX0IMmmSaJv9pa1zQRH8Z/Ku01caEw6EVmBIQ3WQ
-        /s8sjdv8HKDjG9kHai/YaHffgeIEfd0GE6C4bnNyrJIt/IB0W8SCbkEYEbIibdvOCs3M2y
-        lerpWfd1yQI8dsFoo3/ZnlO7BF7Qa+o=
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
-        s=susede2_ed25519; t=1628757518;
-        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ZPpCgZsZujeHpFjKQKbfSj++xp0YtZ9ihzOrHo+mO84=;
-        b=9OyYFVp2+osa2ADsUh0iYui0qaiJ2PaF4wA0XkeewrHVcbpFSivlwIpLbFY1jppDHeuWED
-        yV+2yqgKkGJxe8BA==
-Received: from imap2.suse-dmz.suse.de (imap2.suse-dmz.suse.de [192.168.254.74])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
-        (No client certificate requested)
-        by imap2.suse-dmz.suse.de (Postfix) with ESMTPS id 6B17213C3B;
-        Thu, 12 Aug 2021 08:38:36 +0000 (UTC)
-Received: from dovecot-director2.suse.de ([192.168.254.65])
-        by imap2.suse-dmz.suse.de with ESMTPSA
-        id TyTYDQzeFGHMLgAAMHmgww
-        (envelope-from <colyli@suse.de>); Thu, 12 Aug 2021 08:38:36 +0000
-Subject: Re: [PATCH 7/8] bcache: move the del_gendisk call out of
- bcache_device_free
-To:     Christoph Hellwig <hch@lst.de>, Jens Axboe <axboe@kernel.dk>
-Cc:     Song Liu <song@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        linux-block@vger.kernel.org, linux-bcache@vger.kernel.org,
-        linux-raid@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-nvme@lists.infradead.org
-References: <20210809064028.1198327-1-hch@lst.de>
- <20210809064028.1198327-8-hch@lst.de>
-From:   Coly Li <colyli@suse.de>
-Message-ID: <7ec809f8-c3d0-c3ad-8b2f-4b8d34b688ab@suse.de>
-Date:   Thu, 12 Aug 2021 16:38:34 +0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.12.0
+        id S236551AbhHLJyg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Aug 2021 05:54:36 -0400
+Received: from mga18.intel.com ([134.134.136.126]:22918 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S236556AbhHLJy3 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 12 Aug 2021 05:54:29 -0400
+X-IronPort-AV: E=McAfee;i="6200,9189,10073"; a="202481037"
+X-IronPort-AV: E=Sophos;i="5.84,315,1620716400"; 
+   d="scan'208";a="202481037"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Aug 2021 02:53:56 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.84,315,1620716400"; 
+   d="scan'208";a="676707067"
+Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
+  by fmsmga005.fm.intel.com with ESMTP; 12 Aug 2021 02:53:53 -0700
+Subject: Re: [PATCH v4 2/5] mmc: sdhci: always obey programmable clock config
+ in preset value
+To:     =?UTF-8?B?TWljaGHFgiBNaXJvc8WCYXc=?= <mirq-linux@rere.qmqm.pl>
+Cc:     Kevin Liu <kliu5@marvell.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Suneel Garapati <suneel.garapati@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Al Cooper <alcooperx@gmail.com>
+References: <cover.1627204633.git.mirq-linux@rere.qmqm.pl>
+ <e65dc96eb24caf8baa5431a51fe694b969e2d51f.1627204633.git.mirq-linux@rere.qmqm.pl>
+ <fe01b20d-779b-1e2c-7702-5a4702900d84@intel.com>
+ <YQ6TEhMLXH/4r4BS@qmqm.qmqm.pl>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Message-ID: <38e93996-d815-1b62-8d93-8b9bbed384a6@intel.com>
+Date:   Thu, 12 Aug 2021 12:54:23 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Firefox/78.0 Thunderbird/78.12.0
 MIME-Version: 1.0
-In-Reply-To: <20210809064028.1198327-8-hch@lst.de>
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <YQ6TEhMLXH/4r4BS@qmqm.qmqm.pl>
+Content-Type: text/plain; charset=iso-8859-2
 Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/9/21 2:40 PM, Christoph Hellwig wrote:
-> Let the callers call del_gendisk so that we can check if add_disk
-> has been called properly for the cached device case instead of relying
-> on the block layer internal GENHD_FL_UP flag.
->
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
+On 7/08/21 5:05 pm, Micha³ Miros³aw wrote:
+> On Wed, Aug 04, 2021 at 01:52:21PM +0300, Adrian Hunter wrote:
+>> On 25/07/21 12:20 pm, Micha³ Miros³aw wrote:
+>>> When host controller uses programmable clock presets but doesn't
+>>> advertise programmable clock support, we can only guess what frequency
+>>> it generates. Let's at least return correct SDHCI_PROG_CLOCK_MODE bit
+>>> value in this case.
+>> If the preset value doesn't make sense, why use it at all?
+> 
+> If I understand the spec correctly, when the preset value is used the
+> values in Clock Control register are ignored by the module and so the
+> module can also actually use a different clock source than the ones
+> available to the driver directly.
 
-It looks good to me.
+I don't remember, does it say that in the spec?
 
-Reviewed-by: Coly Li <colyli@suse.de>
+>                                   So either way the driver can't be
+> sure of the exact frequencu used. This is a cleanup to remove a case
+> when the code ignores a bit's value based on other unspecified assumptions.
 
-Thanks.
+Is this fixing a real issue?  It seems like switching from one undefined
+scenario to another.  Are either of which known to have ever happened?
 
-Coly Li
+Perhaps we should leave it as is.
 
-> ---
->  drivers/md/bcache/super.c | 10 ++++------
->  1 file changed, 4 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/md/bcache/super.c b/drivers/md/bcache/super.c
-> index d0f08e946453..f2874c77ff79 100644
-> --- a/drivers/md/bcache/super.c
-> +++ b/drivers/md/bcache/super.c
-> @@ -885,11 +885,6 @@ static void bcache_device_free(struct bcache_device *d)
->  		bcache_device_detach(d);
->  
->  	if (disk) {
-> -		bool disk_added = (disk->flags & GENHD_FL_UP) != 0;
-> -
-> -		if (disk_added)
-> -			del_gendisk(disk);
-> -
->  		blk_cleanup_disk(disk);
->  		ida_simple_remove(&bcache_device_idx,
->  				  first_minor_to_idx(disk->first_minor));
-> @@ -1371,8 +1366,10 @@ static void cached_dev_free(struct closure *cl)
->  
->  	mutex_lock(&bch_register_lock);
->  
-> -	if (atomic_read(&dc->running))
-> +	if (atomic_read(&dc->running)) {
->  		bd_unlink_disk_holder(dc->bdev, dc->disk.disk);
-> +		del_gendisk(dc->disk.disk);
-> +	}
->  	bcache_device_free(&dc->disk);
->  	list_del(&dc->list);
->  
-> @@ -1518,6 +1515,7 @@ static void flash_dev_free(struct closure *cl)
->  	mutex_lock(&bch_register_lock);
->  	atomic_long_sub(bcache_dev_sectors_dirty(d),
->  			&d->c->flash_dev_dirty_sectors);
-> +	del_gendisk(d->disk);
->  	bcache_device_free(d);
->  	mutex_unlock(&bch_register_lock);
->  	kobject_put(&d->kobj);
+> 
+> [...]
+>>> --- a/drivers/mmc/host/sdhci.c
+>>> +++ b/drivers/mmc/host/sdhci.c
+>>> @@ -1859,11 +1859,14 @@ u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
+>>>  
+>>>  			pre_val = sdhci_get_preset_value(host);
+>>>  			div = FIELD_GET(SDHCI_PRESET_SDCLK_FREQ_MASK, pre_val);
+>>> -			if (host->clk_mul &&
+>>> -				(pre_val & SDHCI_PRESET_CLKGEN_SEL)) {
+>>> +			if (pre_val & SDHCI_PRESET_CLKGEN_SEL) {
+>>>  				clk = SDHCI_PROG_CLOCK_MODE;
+>>>  				real_div = div + 1;
+>>>  				clk_mul = host->clk_mul;
+>>> +				if (!clk_mul) {
+>>> +					/* The clock frequency is unknown. Assume undivided base. */
+>>> +					clk_mul = 1;
+>>> +				}
+>>>  			} else {
+>>>  				real_div = max_t(int, 1, div << 1);
+>>>  			}
 
