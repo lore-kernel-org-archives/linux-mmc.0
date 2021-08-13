@@ -2,258 +2,272 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89950C4320A
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 18:10:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 020D0C4338F
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 19:31:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60DC3610CC
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 18:10:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D083E60E93
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 19:31:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232099AbhHMSLO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Aug 2021 14:11:14 -0400
-Received: from mail-eopbgr1400111.outbound.protection.outlook.com ([40.107.140.111]:62048
-        "EHLO JPN01-TY1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S229612AbhHMSLO (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Aug 2021 14:11:14 -0400
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=QLZUDvIlBjSMMUTlbGT7o0nggZT3q27OEqz+TWOmGEsYAgvGaaZU/iRGk24DHFBCNiCIVlZGA3xZXUXpF1MScl33CxkMl83mL1bc3QSaDAGWBOBg5wmkXlvb2h4eAVWEYX3xD7Cn0M2esYMxqmZNNjFpFe/x6qlAxDthSoBnkAcu0fafc6Rqw/vkfAkuhmtPkjFmvmHu8cz4ZdPeODCjAel4JPbEXXMtsoSDfGsoZylUkFskefVf104SMLxJgAIzE6QdzcPk1wD9iZYgYRfFrfrAwTN2p1wZQpedOWggefFsAjwq5OmfGeJ7zAKKo+b06OB7/zyLCFXIWxVEc8ET2w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=hN9+aVMETc+WlmQZCwlAiMC7koQdchmuSlQpM7ylgwI=;
- b=An+dhTdkVImsDZIFk/xMBVLmHv3WD98LhqATjk29ho7QA7p3qjbCtQgP434dK6HdpzQkBCxzxK25I33+RgGfxeTP87Ebj/ZDQEH54JJhXZGThIrZRZZVWoLpdnkSE0P5oaN2iKaEhoY4z5ok42rzxnycL7HypIBg+2ENCWt4W8Q9jz2JhLKtk9c+T394PKLRp8l94SSzs6fYb/wYQJAPlGC7F7xET+q6xMOsvs2q10L+4eRIf8M/uvYOVUsselWL2LI4SKEx5VR94/v3SWEsDdaAEI8pg5yk2m5OQw0mPb0Cqx4E72D3IkhE4EoPF4lQBXxUDqvkc8c32nlNgpMlDw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=renesasgroup.onmicrosoft.com; s=selector2-renesasgroup-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=hN9+aVMETc+WlmQZCwlAiMC7koQdchmuSlQpM7ylgwI=;
- b=jMIiEAqX4j4lXSOoxOVDYS/BifxMbzBHCBNaIRxAsoALF70ymU3jrm3F8mi40Dnc+rk/UT/ry3ln9YgKlyRViBGda/ARHykucGQ184T7DOiDweth15tArJkcZXv4Tx7uRhvR6ZWS+PC2fUZO630lsVx6xCfr1xclFOSFabOxAno=
-Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com (2603:1096:604:bb::5)
- by OSAPR01MB2916.jpnprd01.prod.outlook.com (2603:1096:604:6::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4415.16; Fri, 13 Aug
- 2021 18:10:42 +0000
-Received: from OS0PR01MB5922.jpnprd01.prod.outlook.com
- ([fe80::c6f:e31f:eaa9:60fe]) by OS0PR01MB5922.jpnprd01.prod.outlook.com
- ([fe80::c6f:e31f:eaa9:60fe%9]) with mapi id 15.20.4415.020; Fri, 13 Aug 2021
- 18:10:42 +0000
-From:   Biju Das <biju.das.jz@bp.renesas.com>
-To:     Rob Herring <robh@kernel.org>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
-Subject: RE: [PATCH v3 2/2] dt-bindings: mmc: renesas,sdhi: Document RZ/G2L
- bindings
-Thread-Topic: [PATCH v3 2/2] dt-bindings: mmc: renesas,sdhi: Document RZ/G2L
- bindings
-Thread-Index: AQHXiUuw8DvCnkT2NkqFk7HcMcDFmqtxwlAAgAAGJ7A=
-Date:   Fri, 13 Aug 2021 18:10:42 +0000
-Message-ID: <OS0PR01MB59228CA22DBE9A33DF0ADD1E86FA9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-References: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
- <20210804161325.26996-3-biju.das.jz@bp.renesas.com>
- <YRauzGwUUceTmlyG@robh.at.kernel.org>
-In-Reply-To: <YRauzGwUUceTmlyG@robh.at.kernel.org>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: kernel.org; dkim=none (message not signed)
- header.d=none;kernel.org; dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: a36149e0-ae60-4571-640a-08d95e85a9f6
-x-ms-traffictypediagnostic: OSAPR01MB2916:
-x-ms-exchange-transport-forked: True
-x-microsoft-antispam-prvs: <OSAPR01MB2916DEEE6422230A300D225186FA9@OSAPR01MB2916.jpnprd01.prod.outlook.com>
-x-ms-oob-tlc-oobclassifiers: OLM:8882;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: Sit2VkIzYhODU6+s8CFRvH6cmxreDOdmk09/QDYpUm0uSiwGa4VmGkUAe+tLMN2G9cyNEyW35uKTWqVsIznEjNRr3B2r+YJF61K2rj7nt4zKOtgd9Gvx8wnS8vBxtLyZLc8b5dz0Gr7htELN1VDpyjK1+rwwvwivm56f0QyzStGHjozekcKA5m/4+X3oxisVUr06S8Qz/G2cG2UQkfNKJIKD+nGFdg1d9rsl24oJ9te1XHxq3MqMu8ZSWWRQTbmFWzaZfe49Q4mSU+is9fiBUMIKQH1znlLvqZW8iDJ1Kx7wP/TKmzhVhYpznxf9jb5eOUk4BkH6fa/3YWDUrPUz1RO6hPNJvCSB7UAY5fn0bffGL0tB978Tx8ELF/HnzDdoJhOVTr8b0D1OlybGRH4liVxVJ1kx/2gcOijXAMLQP7AEq10VJiqNumIT8ib2zQzVqsxB+qpAeoN8jldCgDij0rxnRClhyZCBP+OZ8KALdEYEYhhdnxJFv8k005RBQaLB60yHanRtMqb+w/qLalgvaVpNTa33wyd2N3+pHiW+q4aj/yarVHpCipB1n/5nLSH+0bugN35BE5t17DrCgXod/SNfNIGh+YvCecQdaOn1q2QQbOdYSDV2qBGwd7Qg8j5wGtyR3n+ujas3MSWUc285m9bzYxHeS8YaGv2OOHlPECRvQR2alJBzGSqvdfH0oox8toiuShQLx1Se4PGsy6WFZA==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:OS0PR01MB5922.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(396003)(366004)(136003)(39850400004)(376002)(346002)(86362001)(83380400001)(316002)(52536014)(478600001)(54906003)(71200400001)(55016002)(9686003)(33656002)(186003)(26005)(6916009)(66446008)(66476007)(66946007)(64756008)(66556008)(8676002)(6506007)(76116006)(8936002)(7696005)(4326008)(122000001)(38100700002)(38070700005)(2906002)(5660300002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?CiR8NmsA99Q3Q7Z1g4r5zV23ebBA8YW/m4h2IHTesMr3dH8BAaNxYMT2sNUj?=
- =?us-ascii?Q?IfQjOBh9Z+3xQNBdFZPpoMq6YAO83MC0LHyTUybSc2LJttPzfH2aO8/UCWYH?=
- =?us-ascii?Q?aeLJpPDxcYpDjTfdXw9I1yrW+HNUSdo8M7quSq0keEIVkqebej19Fs2Mw9SX?=
- =?us-ascii?Q?iC0CEDyAiI2g/dUMSckMsoybjtiZjL1Tog5UMvLz3Fkvrk4OSR67Jaxpmg5J?=
- =?us-ascii?Q?jE3ZaCa1BuUbgHH+PH3wMtqH2WauvYZShPCDVR+bO7ylnUBTjEViZCl56n3B?=
- =?us-ascii?Q?bhXAcX8FgWNZO8ynlhfrlSAoAg+dQKaBDhw6sWJNYY/ksMk8r3gMRh6GJrGp?=
- =?us-ascii?Q?ucHoVZ6U7ACeca0xG0tylNAZRH8W3763nwjDDbXJS7iuY2tCFJDHRHT3dvfy?=
- =?us-ascii?Q?m0xhCTncoHM+w3ZKhFXeMJ49TzaLXg5v5olYJigC9ICAp9+bqkkDu81CYEX5?=
- =?us-ascii?Q?qOVsGsD6Gg++dVaDSWkosXp7Oapf9wK/HOooPWhPC+UyNr+qAmrjOUwVXo/v?=
- =?us-ascii?Q?l9lZHShtQA3bpBcPst+qeg1TCnn4M/RNci3zFJmxx2+2+Fje3Z7VU1EmkNjn?=
- =?us-ascii?Q?H7vNCHPIrrC1NywffMdsTZJHojtyxGj9hrXmfjvQLnpYzHPK5PEXSo6G2D5d?=
- =?us-ascii?Q?2JilUdjzbxk8P1wK9VBMuZO2C3Q5PNm/ndGbXIb6jUkVIez8sH53OjeFGKQD?=
- =?us-ascii?Q?e3vZFBD+qaaV9FyMTEbCR22siPBS+1reOWIpKhsJOPGdSLX6irKn8GS2XUsC?=
- =?us-ascii?Q?h+GB3iAsNyf20QWzBkOT42ji1ScXTMF4HdaeZj4QlmcLCg5vM1tZvDenkCYd?=
- =?us-ascii?Q?Hy/7D9VL8koFvtIs26MLUNrUy6oFJ5ioim4L5O4J1FnOyT5cePwnDPAevj3f?=
- =?us-ascii?Q?yJVZdqcs2onq5p2taLYPyphjWjaUZrtyjcQY4QxQap9sNY1nocUJVfcJg8BU?=
- =?us-ascii?Q?dMOlAmBY2gd5bpAZotESJ4j9xMprs4+wCtu50HCZ+zHgkH6E2uGX1WHmLECl?=
- =?us-ascii?Q?d97qzyTqAAufagZd4+k0eRNg0mzIn7OI8ySnAjVYRhrzOv2U7EaWD72HmIy8?=
- =?us-ascii?Q?qZUvehhMuY+B2TbowP6RJalUTMzlk9uQXFw0pHN8wcm43P27KzCpIUwvB3d4?=
- =?us-ascii?Q?70E5u8sAbr82yRM0rlDw3maTH3DyVLhHaflm/8vU8Us5WkT3YNjRlamRjcS7?=
- =?us-ascii?Q?x4r/nB0XRn9LkGk22hk+TFMded+8DaP9IUX4UAYXBCiTIHKX17necYS6bil9?=
- =?us-ascii?Q?KI59DfHwnNx95JlF+ApIoNnwK+aNJObHHMPdvZmwDk1KjKStlUjUcnF9NFQx?=
- =?us-ascii?Q?0/5b2HIZAKeX1R4GeyViLDnW?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+        id S230440AbhHMTbh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Aug 2021 15:31:37 -0400
+Received: from static-213-198-238-194.adsl.eunet.rs ([213.198.238.194]:60930
+        "EHLO fx.arvanta.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229601AbhHMTbg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Aug 2021 15:31:36 -0400
+X-Greylist: delayed 338 seconds by postgrey-1.27 at vger.kernel.org; Fri, 13 Aug 2021 15:31:36 EDT
+Received: from gru.arvanta.net (gru.arvanta.net [10.5.1.18])
+        by fx.arvanta.net (Postfix) with ESMTP id 6E15A1DF67;
+        Fri, 13 Aug 2021 21:25:26 +0200 (CEST)
+Date:   Fri, 13 Aug 2021 21:25:26 +0200
+From:   Milan =?utf-8?Q?P=2E_Stani=C4=87?= <mps@arvanta.net>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Robin Murphy <robin.murphy@arm.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: Re: PROBLEM: =?utf-8?Q?mmc=5Fselect=5Fhs40?=
+ =?utf-8?B?MGVzIGZhaWxlZCwgZXJyb3IgLTExMOOAkOivt+azqOaEj++8jOmCruS7tg==?=
+ =?utf-8?B?55SxbGludXgtbW1jLW93bmVyQHZnZXIua2VybmVsLm9yZ+S7o+WPkeOAkQ==?=
+Message-ID: <YRbHJqXwH68wMC+0@gru.arvanta.net>
+References: <20200318214917.GA9112@arya.arvanta.net>
+ <5922bbd7-e91b-d144-6d44-2632cbd11c78@rock-chips.com>
+ <158bd6f5-2430-19bd-28ef-e18d67becaf3@arm.com>
+ <20200321204652.GA21002@arya.arvanta.net>
+ <20200327171417.GA4387@arya.arvanta.net>
+ <CAPDyKFotyWVXu+Aj6y-DoAtrbimD7ycg=81bf8zjeSg9mrD-4A@mail.gmail.com>
+ <20200331214031.GA30589@arya.arvanta.net>
+ <20200417193106.GB8457@arya.arvanta.net>
+ <CAPDyKFp2q_=RYVq8T=ReVbyW8tbZs9rvuuWofW6iddheO9aaBw@mail.gmail.com>
+ <20200420151559.GA28824@arya.arvanta.net>
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: OS0PR01MB5922.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a36149e0-ae60-4571-640a-08d95e85a9f6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 13 Aug 2021 18:10:42.3539
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: gWvNrrKNJxY8hc38vDIkql0l7JoJWCKjiOHg6bMNfRyDNFeFVe5kaFALrDQs7b2ZWR25EetwIMr6MPbHBYqpUm99sg3yANtxC11YctAmigE=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: OSAPR01MB2916
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200420151559.GA28824@arya.arvanta.net>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
+Hi,
 
-Thanks for the feedback.
+On Mon, 2020-04-20 at 17:15, Milan P. Stanić wrote:
+> On Mon, 2020-04-20 at 09:17, Ulf Hansson wrote:
+> > On Fri, 17 Apr 2020 at 21:31, Milan P. Stanić <mps@arvanta.net> wrote:
+> > > I built chromeOS kernel 4.4.174 and after three days with few
+> > > suspend-to-ram and resume mmc driver works fine, i.e. no problem
+> > > occured.
+> > >
+> > > Could someone who know programming mmc drivers look at differences
+> > > between this chromeOS kernel (4.4.174) and some of mainline kernels
+> > > to find cause of the problem and maybe to create fix or patch to send
+> > > for testing.
+> > 
+> > That delta is more than 4 years of development. I am not sure
+> > investigating the delta would make sense, however I leave that to
+> > Rock-chips people to decide - or whomever that are willing to help to
+> > debug this.
+>  
+> I think it is not needed to look at full delta from this working
+> chromeOS kernel and current mainline but maybe to 5.0 or 5.1 releases.
+> 
+> But I'm not sure and because I don't know what to look I can only hope
+> that rockchip developers will find what is wrong.
+> 
+> Anyway, I use this rk3399 gru-kevin chromebook with external mmc card
+> and it works fine if I don't 'touch' emmc. But is slower than when emmc
+> is used for root and home filesystem, significantly, and would be nice
+> if someone can find fix or just point me where and what to look.
 
-> Subject: Re: [PATCH v3 2/2] dt-bindings: mmc: renesas,sdhi: Document
-> RZ/G2L bindings
->=20
-> On Wed, Aug 04, 2021 at 05:13:25PM +0100, Biju Das wrote:
-> > Document RZ/G2L SDHI controller bindings.
-> >
-> > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> > Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
-> > ---
-> > v2->v3:
-> >  * This patch depends up on the previous patch in this series.
-> > v1->v2:
-> >  * Fixed dtbs-check issue for RZ/A{1,2} platforms.
-> > ---
-> >  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 54 +++++++++++++------
-> >  1 file changed, 37 insertions(+), 17 deletions(-)
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > index 543eeb825dc3..e195ee5c0900 100644
-> > --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> > @@ -44,19 +44,20 @@ properties:
-> >            - const: renesas,sdhi-mmc-r8a77470 # RZ/G1C (SDHI/MMC IP)
-> >        - items:
-> >            - enum:
-> > -              - renesas,sdhi-r8a774a1 # RZ/G2M
-> > -              - renesas,sdhi-r8a774b1 # RZ/G2N
-> > -              - renesas,sdhi-r8a774c0 # RZ/G2E
-> > -              - renesas,sdhi-r8a774e1 # RZ/G2H
-> > -              - renesas,sdhi-r8a7795  # R-Car H3
-> > -              - renesas,sdhi-r8a7796  # R-Car M3-W
-> > -              - renesas,sdhi-r8a77961 # R-Car M3-W+
-> > -              - renesas,sdhi-r8a77965 # R-Car M3-N
-> > -              - renesas,sdhi-r8a77970 # R-Car V3M
-> > -              - renesas,sdhi-r8a77980 # R-Car V3H
-> > -              - renesas,sdhi-r8a77990 # R-Car E3
-> > -              - renesas,sdhi-r8a77995 # R-Car D3
-> > -              - renesas,sdhi-r8a779a0 # R-Car V3U
-> > +              - renesas,sdhi-r8a774a1  # RZ/G2M
-> > +              - renesas,sdhi-r8a774b1  # RZ/G2N
-> > +              - renesas,sdhi-r8a774c0  # RZ/G2E
-> > +              - renesas,sdhi-r8a774e1  # RZ/G2H
-> > +              - renesas,sdhi-r8a7795   # R-Car H3
-> > +              - renesas,sdhi-r8a7796   # R-Car M3-W
-> > +              - renesas,sdhi-r8a77961  # R-Car M3-W+
-> > +              - renesas,sdhi-r8a77965  # R-Car M3-N
-> > +              - renesas,sdhi-r8a77970  # R-Car V3M
-> > +              - renesas,sdhi-r8a77980  # R-Car V3H
-> > +              - renesas,sdhi-r8a77990  # R-Car E3
-> > +              - renesas,sdhi-r8a77995  # R-Car D3
-> > +              - renesas,sdhi-r8a779a0  # R-Car V3U
-> > +              - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
-> >            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
-> >
-> >    reg:
-> > @@ -68,13 +69,11 @@ properties:
-> >
-> >    clocks:
-> >      minItems: 1
-> > -    maxItems: 2
-> > +    maxItems: 4
-> >
-> >    clock-names:
-> >      minItems: 1
-> > -    items:
-> > -      - const: core
-> > -      - const: cd
-> > +    maxItems: 4
->=20
-> The names need to be defined.
+More than a one year passed but this bug still persist on gru-kevin
+chromebook. I'm testing this with every kernel release in hope it will
+be fixed.
+Now I'm tested it on  5.14.0-rc5
 
-Will do. Here we have 3 cases, single clock-name for majority of SoC's,  Tw=
-o clock-names for sdhi-r7s9210 ("core" and "cd")
-and 4 clock names for sdhi-r9a07g044 ("mainclk1", "mainclk2", "hsclk" and "=
-busclk")
-
-Cheers,
-Biju
-
->=20
-> >
-> >    dmas:
-> >      minItems: 4
-> > @@ -135,6 +134,8 @@ allOf:
-> >                - renesas,sdhi-r7s9210
-> >      then:
-> >        properties:
-> > +        clocks:
-> > +          maxItems: 2
-> >          clock-names:
-> >            items:
-> >              - const: core
-> > @@ -146,6 +147,25 @@ allOf:
-> >          sectioned off to be run by a separate second clock source to
-> allow
-> >          the main core clock to be turned off to save power.
-> >
-> > +  - if:
-> > +      properties:
-> > +        compatible:
-> > +          contains:
-> > +            const: renesas,sdhi-r9a07g044
-> > +    then:
-> > +      properties:
-> > +        clocks:
-> > +          items:
-> > +            - description: IMCLK, SDHI channel main clock1.
-> > +            - description: IMCLK2, SDHI channel main clock2. When this
-> clock is
-> > +                           turned off, external SD card detection
-> cannot be
-> > +                           detected.
-> > +            - description: CLK_HS, SDHI channel High speed clock which
-> operates
-> > +                           4 times that of SDHI channel main clock1.
-> > +            - description: ACLK, SDHI channel bus clock.
-> > +      required:
-> > +        - resets
-> > +
-> >  required:
-> >    - compatible
-> >    - reg
-> > --
-> > 2.17.1
-> >
-> >
+-- 
+Kind regards
+ 
+> -- 
+> Kind regards
+> 
+> > Kind regards
+> > Uffe
+> > 
+> > >
+> > > --
+> > > Regards
+> > >
+> > > On Tue, 2020-03-31 at 23:40, Milan P. Stanić wrote:
+> > > > Hi,
+> > > >
+> > > > On Mon, 2020-03-30 at 20:19, Ulf Hansson wrote:
+> > > > > On Fri, 27 Mar 2020 at 18:14, Milan P. Stanić <mps@arvanta.net> wrote:
+> > > > > > Hi,
+> > > > > > Anyone looked at this problem?
+> > > > > >
+> > > > > > Or, is there better url or mailing list where I should send this bug
+> > > > > > report?
+> > > > >
+> > > > > This is the mmc-list and since the rock-chips list was added by Shawn
+> > > > > - you have directed your question correctly.
+> > > > >
+> > > > > The problem is, this isn't a list where everyone can get free support.
+> > > > > People may be working on other platforms, for example.
+> > > > >
+> > > > > The best option for you, is probably to ping Shawn or to reach out to
+> > > > > some other Rock-chips people, as it seems like these guys needs to
+> > > > > have a closer look.
+> > > > >
+> > > > > >
+> > > > > > Or, could someone tell me what I could try to fix it, which file and
+> > > > > > parameters to change?
+> > > > >
+> > > > > Well, if you can narrow down the problem that is always helpful. So
+> > > > > for example, is there any upstream kernel that works - or is it only
+> > > > > working through the chrome-os tree (which likely contains vendor
+> > > > > specific changes that are not upstream).
+> > > >
+> > > > Problem is in that the in last 5-6 months chrome-os kernels even don't
+> > > > boot, i.e. I only get blank display. I patched it for few releases
+> > > > locally but for about 3-4 months even my patch doesn't work.
+> > > > Maybe I could find chrome-os kernel about year or two old and try, but
+> > > > even then I don't know where to look for this problem.
+> > > >
+> > > > Other option is to try with mainline kernels from 4.20.x and up one by
+> > > > one major release to look on which version this problem started. This
+> > > > will take time because problem occurs irregularly, sometimes in a few
+> > > > hours but sometimes it works fine for a few days until it appears.
+> > > >
+> > > > Thank you for pointing me whom to ask and what to try.
+> > > >
+> > > > --
+> > > > Kind regards
+> > > >
+> > > > > Kind regards
+> > > > > Uff
+> > > > >
+> > > > > >
+> > > > > > On Sat, 2020-03-21 at 21:46, Milan P. Stanić wrote:
+> > > > > > > Hi,
+> > > > > > >
+> > > > > > > On Thu, 2020-03-19 at 12:28, Robin Murphy wrote:
+> > > > > > > > Hi Shawn,
+> > > > > > > >
+> > > > > > > > On 2020-03-19 3:11 am, Shawn Lin wrote:
+> > > > > > > > > Hi Milan
+> > > > > > > > >
+> > > > > > > > > [+linux-rockchip to see if someone has a Samsung chromebook one plus
+> > > > > > > > > and could confirm if it works]
+> > > > > > > >
+> > > > > > > > FWIW I've also tried suspend on my NanoPC-T4 and seen that the eMMC (also
+> > > > > > > > HS400-ES) fails to come back properly on resume (thus resume never completes
+> > > > > > > > due to the missing root filesystem). IIRC it might even have been
+> > > > > > > > reproducible with suspend-to-idle, but I'd have to double-check that.
+> > > > > > >
+> > > > > > > I forgot to tell that emmc worked without problem on this machine with
+> > > > > > > ChromeOS kernel 4.4.xx downloaded from
+> > > > > > > https://chromium.googlesource.com/chromiumos/third_party/kernel/+/chromeos-4.4
+> > > > > > > and with patches from
+> > > > > > > https://github.com/archlinuxarm/PKGBUILDs/tree/master/core/linux-gru
+> > > > > > > for about two years (iirc).
+> > > > > > > Problem started when I switched to mainline kernels, somewhere around
+> > > > > > > 5.1.xx
+> > > > > > >
+> > > > > > > > Robin.
+> > > > > > > >
+> > > > > > > > > On 2020/3/19 5:49, Milan P. Stanić wrote:
+> > > > > > > > > > Hello,
+> > > > > > > > > >
+> > > > > > > > > > Sorry to annoy again, but could you tell me if I sent this bug report
+> > > > > > > > > > to right mail address or I should send it somewhere else.
+> > > > > > > > > >
+> > > > > > > > > > Also, did I sent bug report correctly or I did some mistakes which
+> > > > > > > > > > caused it to be ignored.
+> > > > > > > > > >
+> > > > > > > > > > -- TIA On Sun, 2020-03-01 at 23:02, Milan P. Stanić wrote:
+> > > > > > > > > > > Hello,
+> > > > > > > > > > >
+> > > > > > > > > > > I'm not native English speaker and I'm self taught in English so sorry
+> > > > > > > > > > > if do not write or express correctly. And sorry if I posted bug report
+> > > > > > > > > > > to wrong address.
+> > > > > > > > > > >
+> > > > > > > > > > > I'm running linux 5.6.0-rc3 without any patches on Samsung chromebook
+> > > > > > > > > > > one plus, Arm64 rockchip rk3399 based model name:
+> > > > > > > > > > > Machine model: Google Kevin
+> > > > > > > > > > >
+> > > > > > > > > > > I build kernels from upstream git.kernel.org for this machine for some
+> > > > > > > > > > > time (iirc, from 5.2.1 and up) but I'm getting error messages in kernel
+> > > > > > > > > > > after machine resumes from suspend-to-ram.
+> > > > > > > > >
+> > > > > > > > > It sounds to me suspend-to-ram never works for this machine, at least
+> > > > > > > > > since 5.2.1. Am I right?
+> > > > > > > > >
+> > > > > > > > > > >
+> > > > > > > > > > > excerpt from dmesg output:
+> > > > > > > > > > > -----------------------------------------------------------------------
+> > > > > > > > > > > Restarting tasks ... done.
+> > > > > > > > > > > PM: suspend exit
+> > > > > > > > > > > mmc_host mmc0: Bus speed (slot 0) = 400000Hz (slot req 400000Hz,
+> > > > > > > > > > > actual 400000HZ div = 0)
+> > > > > > > > > > > mmc1: mmc_select_hs400es failed, error -110
+> > > > > > > > > > > mmc1: error -110 doing runtime resume
+> > > > > > > > > > > mmc1: Got data interrupt 0x00000002 even though no data
+> > > > > > > > > > > operation was in progress.
+> > > > > > > > > > > mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> > > > > > > > > > > mmc1: sdhci: Sys addr:  0x00000008 | Version:  0x00001002
+> > > > > > > > > > > mmc1: sdhci: Blk size:  0x00007200 | Blk cnt:  0x00000008
+> > > > > > > > > > > mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000023
+> > > > > > > > > > > mmc1: sdhci: Present:   0x1fff0001 | Host ctl: 0x00000035
+> > > > > > > > > > > mmc1: sdhci: Power:     0x0000000b | Blk gap:  0x00000080
+> > > > > > > > > > > mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x0000bc07
+> > > > > > > > > > > mmc1: sdhci: Timeout:   0x0000000d | Int stat: 0x00000000
+> > > > > > > > > > > mmc1: sdhci: Int enab:  0x03ff000b | Sig enab: 0x03ff000b
+> > > > > > > > > > > mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> > > > > > > > > > > mmc1: sdhci: Caps:      0x44edc880 | Caps_1:   0x801020f7
+> > > > > > > > > > > mmc1: sdhci: Cmd:       0x00000c1a | Max curr: 0x00000000
+> > > > > > > > > > > mmc1: sdhci: Resp[0]:   0x00000000 | Resp[1]:  0x373300bd
+> > > > > > > > > > > mmc1: sdhci: Resp[2]:   0x35303030 | Resp[3]:  0x00000000
+> > > > > > > > > > > mmc1: sdhci: Host ctl2: 0x00000000
+> > > > > > > > > > > mmc1: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 0xed41e200
+> > > > > > > > > > > -----------------------------------------------------------------------
+> > > > > > > > > > >
+> > > > > > > > > > > I invoke suspend-to-ram by `echo mem > /sys/power/state` from ACPI power
+> > > > > > > > > > > and LID button handlers.
+> > > > > > > > > > >
+> > > > > > > > > > > This only happens when I boot and use internal emmc card and never when
+> > > > > > > > > > > boot and use external mmc card.
+> > > > > > > > > > >
+> > > > > > > > > > > If suspend-to-ram is not invoked (machine is always in normal state)
+> > > > > > > > > > > this problem never happen (or I missed it somehow).
+> > > > > > > > > > >
+> > > > > > > > > > > I'm attaching kernel .config (file config-5.6.0-rc3-1-gru.conf) which
+> > > > > > > > > > > use to build kernel, output of the `awk -f scripts/ver_linux` as file
+> > > > > > > > > > > ver_linux.txt and  output of dmesg as file mmc-err.txt (from which I
+> > > > > > > > > > > deleted wifi connection logs).
+> > > > > > > > > > >
+> > > > > > > > > > > Sorry if I did something bad or wrong with this bug report, I don't have
+> > > > > > > > > > > much experience with bug reporting, especially for kernel.
+> > > > > > > > > > >
+> > > > > > > > > > > I'm ready to send you more data, and investigate this more, apply
+> > > > > > > > > > > patches and rebuild kernel or whatever you ask me (of course if my
+> > > > > > > > > > > understanding and knowledge is enough for this job).
+> > > > > > > > > > >
+> > > > > > > > > > > Thank in advance
+> > > > > > > > > > >
+> > > > > > > > > > > --
+> > > > > > > > > > > Kind regards
+> > > > > > > > > > >
+> > > > > > > > > > [...]
+> > > > > > > > > >
+> > > > > > > > > >
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > >
+> > > > > > > > > _______________________________________________
+> > > > > > > > > Linux-rockchip mailing list
+> > > > > > > > > Linux-rockchip@lists.infradead.org
+> > > > > > > > > http://lists.infradead.org/mailman/listinfo/linux-rockchip
