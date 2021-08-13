@@ -2,82 +2,181 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9026C4338F
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 12:55:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2435C432BE
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 17:39:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8DC1860F91
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 12:55:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B7FCC61102
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Aug 2021 17:39:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239983AbhHMM4O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Aug 2021 08:56:14 -0400
-Received: from inva020.nxp.com ([92.121.34.13]:43802 "EHLO inva020.nxp.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239708AbhHMM4O (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 13 Aug 2021 08:56:14 -0400
-Received: from inva020.nxp.com (localhost [127.0.0.1])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 69F931A167B;
-        Fri, 13 Aug 2021 14:55:46 +0200 (CEST)
-Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 31E211A1503;
-        Fri, 13 Aug 2021 14:55:46 +0200 (CEST)
-Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id 1F8DA183AC89;
-        Fri, 13 Aug 2021 20:55:45 +0800 (+08)
-From:   haibo.chen@nxp.com
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-Cc:     linux-imx@nxp.com, haibo.chen@nxp.com
-Subject: [PATCH] mmc: sdhci: correct the tuning command handle for PIO mode
-Date:   Fri, 13 Aug 2021 20:34:01 +0800
-Message-Id: <1628858041-1911-1-git-send-email-haibo.chen@nxp.com>
-X-Mailer: git-send-email 2.7.4
-X-Virus-Scanned: ClamAV using ClamSMTP
+        id S229612AbhHMRkV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Aug 2021 13:40:21 -0400
+Received: from mail-ot1-f53.google.com ([209.85.210.53]:33716 "EHLO
+        mail-ot1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229841AbhHMRkU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Aug 2021 13:40:20 -0400
+Received: by mail-ot1-f53.google.com with SMTP id 61-20020a9d0d430000b02903eabfc221a9so13015682oti.0;
+        Fri, 13 Aug 2021 10:39:53 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=+u03hty9mA7Qza2lp8SVmmlD4ygr03fOgEqWh8ZIeRA=;
+        b=GpSe1uTQR9DTxdh+ZL2L6ddwz+hOnuwsbjQWyIE+Otvx3pZGkpGFo1BGrMtMZWdsOm
+         Af2lJzWQdZ8AkbHeXthBFnjJJ0WUUsYnHg81xH8Ba1eULOAgum5+pPsFs8GCyfD4UNce
+         HoCTKtsm10VHIbrrI5C5y3Z1sYehHCA3rM0+S4N3YlWl5gMYclzNH6+XljdumqH6tpIO
+         vevkX+DoQcSw6P0QMIKH2osxdhnV27BPfYb38af/lMg2+bsajiBPPMT5/Rky2lWWbUWc
+         KQigRVc0Wh7GXEGEgqLA75hiMOjoI7ovptO2eqfdd7Avh2/9tu2X29hjiiog+l+lbZ+/
+         pxvA==
+X-Gm-Message-State: AOAM5302Ie2JztXV8ncxix5+7WJbR473j/CO74VqK/ln3KegyloOKkR5
+        MhiBtwD8D/ajeUAxs9Vrzg==
+X-Google-Smtp-Source: ABdhPJwowsIs1NjLOHD5qUWAyL+DDbQwrOQ5bLg4DWf6jzqyhWJ5lUAoV86QBfapoNRROcG+mhq0Lw==
+X-Received: by 2002:a9d:5e5:: with SMTP id 92mr2952259otd.193.1628876391749;
+        Fri, 13 Aug 2021 10:39:51 -0700 (PDT)
+Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id b20sm427802otl.25.2021.08.13.10.39.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 13 Aug 2021 10:39:51 -0700 (PDT)
+Received: (nullmailer pid 3734567 invoked by uid 1000);
+        Fri, 13 Aug 2021 17:39:50 -0000
+Date:   Fri, 13 Aug 2021 12:39:50 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Biju Das <biju.das.jz@bp.renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        linux-renesas-soc@vger.kernel.org
+Subject: Re: [PATCH v3 1/2] dt-bindings: mmc: renesas,sdhi: Fix dtbs-check
+ warning
+Message-ID: <YRauZkjqGnIi84cf@robh.at.kernel.org>
+References: <20210804161325.26996-1-biju.das.jz@bp.renesas.com>
+ <20210804161325.26996-2-biju.das.jz@bp.renesas.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210804161325.26996-2-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Haibo Chen <haibo.chen@nxp.com>
+On Wed, Aug 04, 2021 at 05:13:24PM +0100, Biju Das wrote:
+> Fix dtbs-check warning pinctrl-names:0:'default' was expected
+> for r8a77470-iwg23s-sbc.dts file.
+> 
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> Reviewed-by: Lad Prabhakar <prabhakar.mahadev-lad.rj@bp.renesas.com>
+> ---
+> v3:
+>  * New patch to fix the dtbs-check warnings
+>  Ref:- https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20210804091940.23983-1-biju.das.jz@bp.renesas.com/
+> ---
+>  .../devicetree/bindings/mmc/renesas,sdhi.yaml | 65 ++++++++++++-------
+>  1 file changed, 42 insertions(+), 23 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> index 677989bc5924..543eeb825dc3 100644
+> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+> @@ -9,9 +9,6 @@ title: Renesas SDHI SD/MMC controller
+>  maintainers:
+>    - Wolfram Sang <wsa+renesas@sang-engineering.com>
+>  
+> -allOf:
+> -  - $ref: "mmc-controller.yaml"
+> -
+>  properties:
+>    compatible:
+>      oneOf:
+> @@ -104,14 +101,51 @@ properties:
+>    pinctrl-1:
+>      maxItems: 1
+>  
+> -  pinctrl-names:
+> -    minItems: 1
+> -    items:
+> -      - const: default
+> -      - const: state_uhs
+> +  pinctrl-names: true
+>  
+>    max-frequency: true
+>  
+> +allOf:
+> +  - $ref: "mmc-controller.yaml"
+> +
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: renesas,sdhi-mmc-r8a77470
+> +    then:
+> +      properties:
+> +        pinctrl-names:
+> +          items:
+> +            - const: state_uhs
+> +    else:
+> +      properties:
+> +        pinctrl-names:
+> +          minItems: 1
+> +          items:
+> +            - const: default
+> +            - const: state_uhs
+> +
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - renesas,sdhi-r7s72100
+> +              - renesas,sdhi-r7s9210
+> +    then:
+> +      properties:
+> +        clock-names:
+> +          items:
+> +            - const: core
+> +            - const: cd
 
-If sdhci use PIO mode, and use mmc_send_tuning() to send the
-tuning command, system will stuck because of the storm irq
-of sdhci. For PIO mode, use mmc_send_tuning(), it will trigger
-buffer_read_ready interrupt and data transfer complete interrupt.
-In current code logic, it will directly return in sdhci_data_irq,
-can not call the sdhci_transfer_pio(). So the buffer_read_ready
-interrupt storm happen. So for standard tuning method, need to
-excluse this case.
+This is already defined in the main section, no need for it here.
 
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
----
- drivers/mmc/host/sdhci.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index aba6e10b8605..acee54b368b0 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -3278,8 +3278,14 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- {
- 	u32 command;
- 
--	/* CMD19 generates _only_ Buffer Read Ready interrupt */
--	if (intmask & SDHCI_INT_DATA_AVAIL) {
-+	/*
-+	 * CMD19 generates _only_ Buffer Read Ready interrupt if
-+	 * use sdhci_send_tuning.
-+	 * Need to exclude this case: PIO mode and use mmc_send_tuning,
-+	 * If not, sdhci_transfer_pio will never be called, make the
-+	 * SDHCI_INT_DATA_AVAIL always there, stuck in irq storm.
-+	 */
-+	if ((intmask & SDHCI_INT_DATA_AVAIL) && (!host->data)) {
- 		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
- 		if (command == MMC_SEND_TUNING_BLOCK ||
- 		    command == MMC_SEND_TUNING_BLOCK_HS200) {
--- 
-2.17.1
-
+> +      required:
+> +        - clock-names
+> +      description:
+> +        The internal card detection logic that exists in these controllers is
+> +        sectioned off to be run by a separate second clock source to allow
+> +        the main core clock to be turned off to save power.
+> +
+>  required:
+>    - compatible
+>    - reg
+> @@ -119,21 +153,6 @@ required:
+>    - clocks
+>    - power-domains
+>  
+> -if:
+> -  properties:
+> -    compatible:
+> -      contains:
+> -        enum:
+> -          - renesas,sdhi-r7s72100
+> -          - renesas,sdhi-r7s9210
+> -then:
+> -  required:
+> -    - clock-names
+> -  description:
+> -    The internal card detection logic that exists in these controllers is
+> -    sectioned off to be run by a separate second clock source to allow
+> -    the main core clock to be turned off to save power.
+> -
+>  unevaluatedProperties: false
+>  
+>  examples:
+> -- 
+> 2.17.1
+> 
+> 
