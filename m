@@ -2,192 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BFBAC4338F
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 20:07:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3901C4320A
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 22:38:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0B11960FC3
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 20:07:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 878DC60F55
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 22:38:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231203AbhHPUHi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 16:07:38 -0400
-Received: from mail-ot1-f51.google.com ([209.85.210.51]:39733 "EHLO
-        mail-ot1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230420AbhHPUHh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 16:07:37 -0400
-Received: by mail-ot1-f51.google.com with SMTP id m7-20020a9d4c87000000b0051875f56b95so5315379otf.6;
-        Mon, 16 Aug 2021 13:07:05 -0700 (PDT)
+        id S232481AbhHPWib (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 18:38:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37240 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232318AbhHPWib (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 18:38:31 -0400
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8ACBC0613CF
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 15:37:58 -0700 (PDT)
+Received: by mail-lj1-x22c.google.com with SMTP id h11so29632498ljo.12
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 15:37:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=39HL+1BSTEP9McF8N5wJpHZqTmDxGof61S5w7T18t2c=;
+        b=PIs+rFO4pY8Mv2zPiP7V6q/9YBvqlbSQNI7cVts9VvV0Hz3CkLMBnig1HrU7GnFYCE
+         O0Q4VRNvYIVl119B7gJPknlTEUx+o0PWLDRPKeaE+JF0RKf6O01d+ztmYDR3LJ/5BZLK
+         7aYlfzKganWO6Zz/nbb5QGdMwAmcFJ7YNW/EFtn8uVSguA0SKqkNu7u1yTFx760GaryM
+         pJugUZKI8rd1dAmUwiCsf1Wm7L2TAcWTw/LSngxpoeua5nKPQoWX0dspsKulFQ0ntlCj
+         QRhfsrxl6bi0Yqc0tXysl1ZoKWnjIEYeZMQHApP5C6ATdIyZ1qR+GBZy/BCrs8N5He8N
+         H69w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
-         :message-id;
-        bh=6VOPws0NSYeiNS4YuPCVxgucGvvQhrDQn05HTfSiBi4=;
-        b=gmeUTr7NuK6x3dA6ijbTJdVOk4zsVVbnUwIohglt7uzWDhdkcfEKRP24zUeOcPZgWi
-         hdq+DQwHXbEN9CgcJxxLHcrVonFUtZ1PTkfxpOxuxfR7lKhUjldzJ8qR2hAKcf0ykc+p
-         uXSqDKfp8F/pbiDSwyyl+O67ke/LHsN8liPOrxoj+nt35AT5DCnp6F5CVEy0qkMt49NA
-         pUzjzFlHMlKnBYWizC/aZGj1agQkn3xf7BLY95GOLScINXN7D2onR0Pnn02IGWO5Dxj0
-         qAjsIR144R6iUvd845+F+1PNczPFI/kiX6FDhei2OthVMdtYBxZ55mH9N6lXzPD7e8jW
-         S9rQ==
-X-Gm-Message-State: AOAM532rTvfRRXUXChgkZbru8oAUTZzekmZyVzgG8+CSURyQuc1F3xeM
-        vBf7QeIeRid+eVXNgB5FoQ==
-X-Google-Smtp-Source: ABdhPJyuh1bpHeI/c8OwEcGGijzGSgY+tSdMoztSLM4aXW9bUBiJeMX5BhftwpQheFofiveHYymA7A==
-X-Received: by 2002:a05:6830:4414:: with SMTP id q20mr336412otv.189.1629144425355;
-        Mon, 16 Aug 2021 13:07:05 -0700 (PDT)
-Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id y33sm57065ota.66.2021.08.16.13.07.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Aug 2021 13:07:04 -0700 (PDT)
-Received: (nullmailer pid 2563332 invoked by uid 1000);
-        Mon, 16 Aug 2021 20:07:03 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Claudiu Beznea <claudiu.beznea@microchip.com>
-Cc:     robh+dt@kernel.org, nicolas.ferre@microchip.com,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
-        ajay.kathat@microchip.com, ludovic.desroches@microchip.com,
-        linux-arm-kernel@lists.infradead.org, alexandre.belloni@bootlin.com
-In-Reply-To: <20210816085530.1723402-2-claudiu.beznea@microchip.com>
-References: <20210816085530.1723402-1-claudiu.beznea@microchip.com> <20210816085530.1723402-2-claudiu.beznea@microchip.com>
-Subject: Re: [PATCH v2 1/4] dt-bindings: pwrseq-sd8787: add binding for wilc1000
-Date:   Mon, 16 Aug 2021 15:07:03 -0500
-Message-Id: <1629144423.378578.2563331.nullmailer@robh.at.kernel.org>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=39HL+1BSTEP9McF8N5wJpHZqTmDxGof61S5w7T18t2c=;
+        b=MYdiRtnnxljw/rarLOacbCf3P7Dc6xwhGzdRpbfFb6DPC2htsqrL6hVlRcREZDLdwl
+         su+rV5thzRdLjEaSYEEMx/vGy/IGUYFVm2Nh1ojr4fqtNgOYR0MfdPviu4ia7LcENNX9
+         vdtTnYEdHm1SixfpXQ576b5i8CGi4gUq8SNj5W+ERosps5ivZkcNUb42A+W80QV/nXSQ
+         x1fJzLSSEMUfoL4OJg01kxoCwvz7amDcpIgZwHRSmH4nuDGLTyzWBHzejdZ0DLxOdcBV
+         2o6sCVKw3ZCtPboHtlVqlpD9+wEMcboJaquaEcvjWf483HAw4W/l6kahNKPfqft3EKek
+         zc6g==
+X-Gm-Message-State: AOAM531Do8pXz9qYYckm6Qbu6l88UXmx0DvWpPhbr5ioMYPT3YllhlTD
+        NwyHE1H7jVzURaXp1kT2LF8WivollLbPff+OZVknxA==
+X-Google-Smtp-Source: ABdhPJxzmodtRFtigSTsXW3Hjcueq6Q1d1XD/3P7zoYrskkwNMcxgNm5kFyqkanm5Fu3lKOWWYYYiaLrR2KTWatt1+Q=
+X-Received: by 2002:a05:651c:1507:: with SMTP id e7mr426852ljf.368.1629153476979;
+ Mon, 16 Aug 2021 15:37:56 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210720144115.1525257-1-linus.walleij@linaro.org> <2f449f6e-bca0-3c70-4255-26619e957d44@foss.st.com>
+In-Reply-To: <2f449f6e-bca0-3c70-4255-26619e957d44@foss.st.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 17 Aug 2021 00:37:46 +0200
+Message-ID: <CACRpkdY2GnqNYqPPctqa_t5ax1SDo7nEc3a1jSncF8N-V-Da-g@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: core: Add a card quirk for non-hw busy detection
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        stable <stable@vger.kernel.org>, phone-devel@vger.kernel.org,
+        Ludovic Barre <ludovic.barre@st.com>,
+        Stephan Gerhold <stephan@gerhold.net>,
+        Stefan Hansson <newbyte@disroot.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 16 Aug 2021 11:55:27 +0300, Claudiu Beznea wrote:
-> Add binding for wilc1000 devices.
-> 
-> Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
+On Mon, Aug 16, 2021 at 4:03 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> I was just testing your patch on top of mmc/next.
+> Whereas mmc/next is fine, with your patch I fail to pass MMC test 5
+> (Multi-block write).
+> I've got this error on STM32MP157C-EV1 board:
+> [  108.956218] mmc0: Starting tests of card mmc0:aaaa...
+> [  108.959862] mmc0: Test case 5. Multi-block write...
+> [  108.995615] mmc0: Warning: Host did not wait for busy state to end.
+> [  109.000483] mmc0: Result: ERROR (-110)
+> Then nothing more happens.
+>
+> The test was done on an SD-card Sandisk Extreme Pro SDXC UHS-I mark 3,
+> in DDR50 mode.
+>
+> I'll try to add more traces to see what happens.
 
-yamllint warnings/errors:
+What I think happens is:
+- You are using the MMCI driver (correct?)
+- My patch augments the driver to not use busydetect until we have
+  determined that the card can do it (after reading extcsd etc)
+- Before this patch, the MMCI would unconditionally use HW
+  busy detect on any card.
 
-dtschema/dtc warnings/errors:
-make[1]: *** Deleting file 'Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.example.dts'
-Traceback (most recent call last):
-  File "/usr/local/bin/dt-extract-example", line 45, in <module>
-    binding = yaml.load(open(args.yamlfile, encoding='utf-8').read())
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/main.py", line 434, in load
-    return constructor.get_single_data()
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 122, in get_single_data
-    return self.construct_document(node)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 132, in construct_document
-    for _dummy in generator:
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 722, in construct_yaml_map
-    value = self.construct_mapping(node)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 446, in construct_mapping
-    return BaseConstructor.construct_mapping(self, node, deep=deep)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 264, in construct_mapping
-    if self.check_mapping_key(node, key_node, mapping, key, value):
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
-    raise DuplicateKeyError(*args)
-ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
-  in "<unicode string>", line 15, column 7
-found duplicate key "const" with value "mmc-pwrseq-wilc1000" (original value: "mmc-pwrseq-sd8787")
-  in "<unicode string>", line 16, column 7
+Either we have managed to wire the MMCI driver so that it doesn't
+work without HW busy detect anymore, you can easily test this
+by doing this:
 
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index 3765e2f4ad98..3a35f65491c8 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -270,10 +270,10 @@ static struct variant_data variant_stm32_sdmmc = {
+        .datactrl_any_blocksz   = true,
+        .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
+        .stm32_idmabsize_mask   = GENMASK(12, 5),
+-       .busy_timeout           = true,
+-       .busy_detect            = true,
+-       .busy_detect_flag       = MCI_STM32_BUSYD0,
+-       .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
++       //.busy_timeout         = true,
++       //.busy_detect          = true,
++       //.busy_detect_flag     = MCI_STM32_BUSYD0,
++       //.busy_detect_mask     = MCI_STM32_BUSYD0ENDMASK,
+        .init                   = sdmmc_variant_init,
+ };
 
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
+@@ -297,10 +297,10 @@ static struct variant_data variant_stm32_sdmmcv2 = {
+        .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
+        .stm32_idmabsize_mask   = GENMASK(16, 5),
+        .dma_lli                = true,
+-       .busy_timeout           = true,
+-       .busy_detect            = true,
+-       .busy_detect_flag       = MCI_STM32_BUSYD0,
+-       .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
++       //.busy_timeout         = true,
++       //.busy_detect          = true,
++       //.busy_detect_flag     = MCI_STM32_BUSYD0,
++       //.busy_detect_mask     = MCI_STM32_BUSYD0ENDMASK,
+        .init                   = sdmmc_variant_init,
 
-make[1]: *** [Documentation/devicetree/bindings/Makefile:20: Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.example.dts] Error 1
-make[1]: *** Waiting for unfinished jobs....
-Traceback (most recent call last):
-  File "/usr/local/bin/dt-doc-validate", line 67, in <module>
-    ret = check_doc(f)
-  File "/usr/local/bin/dt-doc-validate", line 25, in check_doc
-    testtree = dtschema.load(filename, line_number=line_number)
-  File "/usr/local/lib/python3.8/dist-packages/dtschema/lib.py", line 623, in load
-    return yaml.load(f.read())
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/main.py", line 434, in load
-    return constructor.get_single_data()
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 122, in get_single_data
-    return self.construct_document(node)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 132, in construct_document
-    for _dummy in generator:
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 722, in construct_yaml_map
-    value = self.construct_mapping(node)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 446, in construct_mapping
-    return BaseConstructor.construct_mapping(self, node, deep=deep)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 264, in construct_mapping
-    if self.check_mapping_key(node, key_node, mapping, key, value):
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
-    raise DuplicateKeyError(*args)
-ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
-  in "<unicode string>", line 15, column 7
-found duplicate key "const" with value "mmc-pwrseq-wilc1000" (original value: "mmc-pwrseq-sd8787")
-  in "<unicode string>", line 16, column 7
+Or else there is a card that cannot work without busy detect which
+I find unlikely.
 
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
-
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
-
-make[1]: *** Deleting file 'Documentation/devicetree/bindings/processed-schema-examples.json'
-Traceback (most recent call last):
-  File "/usr/local/bin/dt-mk-schema", line 38, in <module>
-    schemas = dtschema.process_schemas(args.schemas, core_schema=(not args.useronly))
-  File "/usr/local/lib/python3.8/dist-packages/dtschema/lib.py", line 585, in process_schemas
-    sch = process_schema(os.path.abspath(filename))
-  File "/usr/local/lib/python3.8/dist-packages/dtschema/lib.py", line 558, in process_schema
-    schema = load_schema(filename)
-  File "/usr/local/lib/python3.8/dist-packages/dtschema/lib.py", line 125, in load_schema
-    return do_load(os.path.join(schema_basedir, schema))
-  File "/usr/local/lib/python3.8/dist-packages/dtschema/lib.py", line 111, in do_load
-    return yaml.load(f.read())
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/main.py", line 434, in load
-    return constructor.get_single_data()
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 122, in get_single_data
-    return self.construct_document(node)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 132, in construct_document
-    for _dummy in generator:
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 722, in construct_yaml_map
-    value = self.construct_mapping(node)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 446, in construct_mapping
-    return BaseConstructor.construct_mapping(self, node, deep=deep)
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 264, in construct_mapping
-    if self.check_mapping_key(node, key_node, mapping, key, value):
-  File "/usr/local/lib/python3.8/dist-packages/ruamel/yaml/constructor.py", line 295, in check_mapping_key
-    raise DuplicateKeyError(*args)
-ruamel.yaml.constructor.DuplicateKeyError: while constructing a mapping
-  in "<unicode string>", line 15, column 7
-found duplicate key "const" with value "mmc-pwrseq-wilc1000" (original value: "mmc-pwrseq-sd8787")
-  in "<unicode string>", line 16, column 7
-
-To suppress this check see:
-    http://yaml.readthedocs.io/en/latest/api.html#duplicate-keys
-
-Duplicate keys will become an error in future releases, and are errors
-by default when using the new API.
-
-make[1]: *** [Documentation/devicetree/bindings/Makefile:62: Documentation/devicetree/bindings/processed-schema-examples.json] Error 1
-make: *** [Makefile:1419: dt_binding_check] Error 2
-
-doc reference errors (make refcheckdocs):
-
-See https://patchwork.ozlabs.org/patch/1517069
-
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit.
-
+Yours,
+Linus Walleij
