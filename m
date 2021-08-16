@@ -7,37 +7,39 @@ X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44911C4320A
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 13:00:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 562D4C43214
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 13:00:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 276C36328B
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 13:00:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 36FFB63292
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 13:00:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231244AbhHPNAy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 09:00:54 -0400
-Received: from inva021.nxp.com ([92.121.34.21]:58256 "EHLO inva021.nxp.com"
+        id S230106AbhHPNAz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 09:00:55 -0400
+Received: from inva020.nxp.com ([92.121.34.13]:58000 "EHLO inva020.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229593AbhHPNAx (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 16 Aug 2021 09:00:53 -0400
-Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 937D52027D2;
-        Mon, 16 Aug 2021 15:00:20 +0200 (CEST)
+        id S230206AbhHPNAz (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 16 Aug 2021 09:00:55 -0400
+Received: from inva020.nxp.com (localhost [127.0.0.1])
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id A0FAF1A2889;
+        Mon, 16 Aug 2021 15:00:21 +0200 (CEST)
 Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 5B5A02027C4;
-        Mon, 16 Aug 2021 15:00:20 +0200 (CEST)
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 684061A287A;
+        Mon, 16 Aug 2021 15:00:21 +0200 (CEST)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id C6650183AC8B;
-        Mon, 16 Aug 2021 21:00:18 +0800 (+08)
+        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id D7E1A183AD05;
+        Mon, 16 Aug 2021 21:00:19 +0800 (+08)
 From:   haibo.chen@nxp.com
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         shawnguo@kernel.org, robh+dt@kernel.org, s.hauer@pengutronix.de
 Cc:     kernel@pengutronix.de, festevam@gmail.com,
         linux-mmc@vger.kernel.org, linux-imx@nxp.com, haibo.chen@nxp.com,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: [PATCH 1/6] mmc: sdhci-esdhc-imx: remove redundant code for manual tuning
-Date:   Mon, 16 Aug 2021 20:38:23 +0800
-Message-Id: <1629117508-4886-1-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH 2/6] mmc: sdhci-eadhc-imx: select the correct mode for auto tuning
+Date:   Mon, 16 Aug 2021 20:38:24 +0800
+Message-Id: <1629117508-4886-2-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1629117508-4886-1-git-send-email-haibo.chen@nxp.com>
+References: <1629117508-4886-1-git-send-email-haibo.chen@nxp.com>
 X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -45,38 +47,89 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-For manual tuning method, already call esdhc_prepare_tuning()
-config the necessary registers, so remove the redundant code
-in esdhc_writew_le() for SDHCI_HOST_CONTROL2.
+USDHC hardware auto tuning circuit support check 1/4/8 data lines
+and cmd line. Out of reset uSDHC, it default select check 4 data
+lines and do not check cmd line. This is incorrect if we use 8 data
+lines. So need to config the auto tuning mode according to current
+bus width.
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 12 +-----------
- 1 file changed, 1 insertion(+), 11 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 33 ++++++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 57b19ca1ad6d..a49fac719fca 100644
+index a49fac719fca..f18d169bc8ff 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -628,17 +628,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 		else
- 			new_val &= ~ESDHC_VENDOR_SPEC_VSELECT;
- 		writel(new_val, host->ioaddr + ESDHC_VENDOR_SPEC);
--		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
--			new_val = readl(host->ioaddr + ESDHC_MIX_CTRL);
--			if (val & SDHCI_CTRL_TUNED_CLK) {
--				new_val |= ESDHC_MIX_CTRL_SMPCLK_SEL;
--				new_val |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
--			} else {
--				new_val &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
--				new_val &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
--			}
--			writel(new_val , host->ioaddr + ESDHC_MIX_CTRL);
--		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-+		if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
- 			u32 v = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
- 			u32 m = readl(host->ioaddr + ESDHC_MIX_CTRL);
- 			if (val & SDHCI_CTRL_TUNED_CLK) {
+@@ -94,6 +94,11 @@
+ 
+ #define ESDHC_VEND_SPEC2		0xc8
+ #define ESDHC_VEND_SPEC2_EN_BUSY_IRQ	(1 << 8)
++#define ESDHC_VEND_SPEC2_AUTO_TUNE_8BIT_EN	(1 << 4)
++#define ESDHC_VEND_SPEC2_AUTO_TUNE_4BIT_EN	(0 << 4)
++#define ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN	(2 << 4)
++#define ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN	(1 << 6)
++#define ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK	(7 << 4)
+ 
+ #define ESDHC_TUNING_CTRL		0xcc
+ #define ESDHC_STD_TUNING_EN		(1 << 24)
+@@ -114,6 +119,7 @@
+ #define ESDHC_CTRL_4BITBUS		(0x1 << 1)
+ #define ESDHC_CTRL_8BITBUS		(0x2 << 1)
+ #define ESDHC_CTRL_BUSWIDTH_MASK	(0x3 << 1)
++#define USDHC_GET_BUSWIDTH(c) (c & ESDHC_CTRL_BUSWIDTH_MASK)
+ 
+ /*
+  * There is an INT DMA ERR mismatch between eSDHC and STD SDHC SPEC:
+@@ -407,6 +413,30 @@ static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
+ 		dev_warn(mmc_dev(host->mmc), "%s: card clock still not gate off in 100us!.\n", __func__);
+ }
+ 
++/* Enable the auto tuning circuit to check the CMD line and BUS line */
++static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
++{
++	u32 buswidth, auto_tune_buswidth;
++
++	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
++
++	switch (buswidth) {
++	case ESDHC_CTRL_8BITBUS:
++		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_8BIT_EN;
++		break;
++	case ESDHC_CTRL_4BITBUS:
++		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_4BIT_EN;
++		break;
++	default:	/* 1BITBUS */
++		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
++		break;
++	}
++
++	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
++			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
++			ESDHC_VEND_SPEC2);
++}
++
+ static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+@@ -643,6 +673,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+ 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
+ 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+ 				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
++				usdhc_auto_tuning_mode_sel(host);
+ 			} else {
+ 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+ 			}
+@@ -1012,6 +1043,8 @@ static void esdhc_post_tuning(struct sdhci_host *host)
+ {
+ 	u32 reg;
+ 
++	usdhc_auto_tuning_mode_sel(host);
++
+ 	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+ 	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+ 	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
 -- 
 2.17.1
 
