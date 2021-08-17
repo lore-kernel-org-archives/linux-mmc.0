@@ -2,122 +2,145 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CACC9C432BE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 15:57:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8714C432BE
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 16:35:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B269D60EE5
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 15:57:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A716A60BD3
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 16:35:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238023AbhHQP5r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Aug 2021 11:57:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47088 "EHLO
+        id S229723AbhHQQgE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Aug 2021 12:36:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241082AbhHQP4M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 11:56:12 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 180FDC061150;
-        Tue, 17 Aug 2021 08:53:14 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id z2so42331377lft.1;
-        Tue, 17 Aug 2021 08:53:14 -0700 (PDT)
+        with ESMTP id S229477AbhHQQgE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 12:36:04 -0400
+Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18002C061764;
+        Tue, 17 Aug 2021 09:35:31 -0700 (PDT)
+Received: by mail-qk1-x72e.google.com with SMTP id 14so23742356qkc.4;
+        Tue, 17 Aug 2021 09:35:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=i1x/HqtgkDsm/ejKQeETrdsQe6dZCILRZB7KrDkPDRw=;
-        b=An4PsjL/Vf5udfyNdAKTCYWd10EU58Kpxe8zKg/t9npZAavumDMU+X9iBgUDO5Z8Zq
-         qLi7UARHs5EBlnNEWrEBaiEyo4AvkdNde23Gx7Ech/+7twOysiNWaNZJNc4c1H9Unsq3
-         EZ9/NC8tZYzsvHiEyEjIq8t7XNVBW4+7jhFenO5mQmYIgRBk+TxgMXr2m4yePVU5ry+F
-         yIAUTR2f68Q14RQm9v+g3T6mw1go0mbvXB6UoQIJuFvpfbNq+pUgeWHg895WJQXEl29h
-         zNHJ3yrbMGXltFkn0e1Yqc4GHFXDR5UTFoNhdaUppdVMQxIsBTVP10kUU2MP/Em1dvWL
-         oObQ==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=X66JXd8TkYUtNgpL3dedMaEApQt+UVVwJJYfA0n1YPg=;
+        b=g4zglayFs+OL2K1Tv5FWDo95NGXXY+tGDfEDov2cEemXLUcWHxppV7kaJhjKlxcOrQ
+         oHuvXm/1NLEueeijcc4k/pdxM6Mcwr6Rl3B3D7wFZy2ccLhUt4vZeoQJfZfhrPomyELx
+         GW+C0UiShHbqj3n/zGjS26Xwp4uQ61Z7LoZVhXIKdcRcj7Sdhe8A3DrLEAc6nInsJUvl
+         dp18hI9oI9+JlQYtUPxQqvz7toBSYsOVPi7y9JftNaV8NSLYZ/DiplGaFcbmP3J6IdzX
+         /fxmtbTG72QjQmjUz5DePLa7WUGZoqPqI4I9C2Rmp2XHKrgJhxvGhIuRvnmdts6lZMbP
+         wyDw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=i1x/HqtgkDsm/ejKQeETrdsQe6dZCILRZB7KrDkPDRw=;
-        b=LMUv3nVDHLln3ypbO19SQ/SppKav30at9ZDJhP0teyzQmIJ+NF1hUGZ/calGUV116v
-         7cTrCqbMmt4nkZn4pzJFaeOmvPQxAXL+vqS8/f9mJNZEFQ4CU/htpUvXKgWH5a5Qh2s4
-         lizBX/CYNk16sxp/gyR2VCbxkZrTRCep94F8/5vuycT7iyIYpiJnj4Wa4WW/MVBzC0Ri
-         /UoKS7dQpLWiTWV1GIeLkjywmSsarj1BnMGO+N8yGMzDgKrzwiYncnpWyNXIrjrtY6lJ
-         wlS8rbUvn1zpL+14YDzf61DZJfzGuZ6IrzBV/QnkmkriIy0CW0ovFlz2xY/hxGTRAkdo
-         6mQg==
-X-Gm-Message-State: AOAM531m9enKkT+isJXgU8tQ1cqHR95ClWgqtVDLh5rPt/+Oj9TaNrao
-        lbFeEo8JIln9P4ppaOFs2NUDmnD3eJo=
-X-Google-Smtp-Source: ABdhPJzKDCfx8XTSv5rLHo+odlu5xNPqb9QF4cuJdpvDud3tFDUajnizSUcMOMnHR+YPCBFb3Bv9Ew==
-X-Received: by 2002:ac2:4f8f:: with SMTP id z15mr2811432lfs.361.1629215591955;
-        Tue, 17 Aug 2021 08:53:11 -0700 (PDT)
-Received: from [192.168.2.145] (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
-        by smtp.googlemail.com with ESMTPSA id r20sm223793lff.93.2021.08.17.08.53.10
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 17 Aug 2021 08:53:11 -0700 (PDT)
-Subject: Re: [PATCH v8 22/34] spi: tegra20-slink: Add OPP support
-To:     Mark Brown <broonie@kernel.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=X66JXd8TkYUtNgpL3dedMaEApQt+UVVwJJYfA0n1YPg=;
+        b=ORjTzeyqPQaBh0uyn/NC4C11EiCihBNYaSnvbWaI3sZQyf9ShRgJVwEjVds14wz3V6
+         bjLG59W9LjVl7sUP2IKiBvfWNyIHGm3/gpLjPOHLUc+qDCIFFxAnsWMJdB++PmU0biqd
+         LKP0CPophlzLhDJQr/NRlmbEkSjU3WqkBxvOD0KmLZy8DsB2edlqEKWIosv86ABN4oKI
+         /C7mH3XPmxATKG3TQFjs7uByl9RaZQMmUVaZHsCIUYspcYq3CN0kOCmxofE6mQKrLeZJ
+         0Cbeows5P4GXGtStvw1AiyaADxyLdDAErZcc1Tvd/f1c7iYpOJwVF+mu8Pvozh1vcw9E
+         jd/w==
+X-Gm-Message-State: AOAM531rb4r/Ekcks2FQRMUOyDUsxUn+jJ+bcvVZ6cFP3WszGxkusO2d
+        w371uGSeD4bH5SavYYwAsHY=
+X-Google-Smtp-Source: ABdhPJy2J9eIa9r5vu8RSDOAqKg1RDnXqD3PiG96WXh1xZ4GPhHRSNuK2PyNoYNfQalFqu4qZofQxQ==
+X-Received: by 2002:a37:d54:: with SMTP id 81mr4580109qkn.103.1629218130100;
+        Tue, 17 Aug 2021 09:35:30 -0700 (PDT)
+Received: from localhost ([12.28.44.171])
+        by smtp.gmail.com with ESMTPSA id k8sm1584346qkk.96.2021.08.17.09.35.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Aug 2021 09:35:29 -0700 (PDT)
+Date:   Tue, 17 Aug 2021 09:35:28 -0700
+From:   Yury Norov <yury.norov@gmail.com>
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mm <linux-mm@kvack.org>,
+        Linux-Arch <linux-arch@vger.kernel.org>,
+        "open list:KERNEL SELFTEST FRAMEWORK" 
+        <linux-kselftest@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-perf-users@vger.kernel.org,
+        "open list:VFIO DRIVER" <kvm@vger.kernel.org>,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Alexander Lobakin <alobakin@pm.me>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        Andrea Merello <andrea.merello@gmail.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>,
+        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Brian Cain <bcain@codeaurora.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph Lameter <cl@linux.com>,
+        Daniel Bristot de Oliveira <bristot@redhat.com>,
+        David Hildenbrand <david@redhat.com>,
+        Dennis Zhou <dennis@kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ian Rogers <irogers@google.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
+        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
+        Leo Yan <leo.yan@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Namhyung Kim <namhyung@kernel.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Peter Xu <peterx@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Petr Mladek <pmladek@suse.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Rich Felker <dalias@libc.org>,
+        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Shuah Khan <shuah@kernel.org>,
+        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Tejun Heo <tj@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20210817012754.8710-1-digetx@gmail.com>
- <20210817012754.8710-23-digetx@gmail.com>
- <20210817122244.GA4290@sirena.org.uk>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <a0e49d91-e812-5b55-e90f-bfba8476faa3@gmail.com>
-Date:   Tue, 17 Aug 2021 18:53:09 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        Will Deacon <will@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: Re: [PATCH 17/17] vsprintf: rework bitmap_list_string
+Message-ID: <YRvlUO87e7czAico@yury-ThinkPad>
+References: <20210814211713.180533-1-yury.norov@gmail.com>
+ <20210814211713.180533-18-yury.norov@gmail.com>
+ <CAHp75Vcjq-XmX-rikawj+wVwG+V+gXzZPishpanZ79-SGFb8rA@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20210817122244.GA4290@sirena.org.uk>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHp75Vcjq-XmX-rikawj+wVwG+V+gXzZPishpanZ79-SGFb8rA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-17.08.2021 15:22, Mark Brown пишет:
-> On Tue, Aug 17, 2021 at 04:27:42AM +0300, Dmitry Osipenko wrote:
->> The SPI on Tegra belongs to the core power domain and we're going to
->> enable GENPD support for the core domain. Now SPI driver must use OPP
->> API for driving the controller's clock rate because OPP API takes care
->> of reconfiguring the domain's performance state in accordance to the
->> rate. Add OPP support to the driver.
+On Sun, Aug 15, 2021 at 02:09:45PM +0300, Andy Shevchenko wrote:
+> On Sun, Aug 15, 2021 at 12:21 AM Yury Norov <yury.norov@gmail.com> wrote:
+> >
+> > bitmap_list_string() is very ineffective when printing bitmaps with long
+> > ranges of set bits because it calls find_next_bit for each bit in the
+> > bitmap.  We can do better by detecting ranges of set bits.
+> >
+> > In my environment, before/after is 943008/31008 ns.
 > 
-> Acked-by: Mark Brown <broonie@kernel.org>
+> I would add a couple of words, maybe in parentheses, to describe what
+> your environment is.
 > 
-> Is there a concrete dependency here or can I merge this separately?
+> ...
+> 
+> > +               buf = number(++buf, end, rtop - 1, default_dec_spec);
+> 
+> ++buf is a bit confusing here. Since you will rewrite the buf value
+> anyway, I would write the parameter as buf + 1.
 
-This patch depends on the new OPP helpers added earlier in this series.
-In particular it depends on these patches:
-
-opp: Add dev_pm_opp_sync() helper
-soc/tegra: Add devm_tegra_core_dev_init_opp_table_simple()
-
-Thank you for the ack!
+Agree, it's sloppy. I'll  send the patch by tomorrow.
