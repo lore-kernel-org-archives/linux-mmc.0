@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6786C25AE9
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F198C19F39
 	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:32:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8CD9360EE5
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:32:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E5E1E60F14
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:32:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238752AbhHQBce (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 21:32:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48042 "EHLO
+        id S238853AbhHQBcf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 21:32:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236860AbhHQBa6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 21:30:58 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D1FEC0617AF;
-        Mon, 16 Aug 2021 18:30:22 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id g13so38107503lfj.12;
-        Mon, 16 Aug 2021 18:30:22 -0700 (PDT)
+        with ESMTP id S236952AbhHQBa7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 21:30:59 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8996C06129D;
+        Mon, 16 Aug 2021 18:30:25 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id g13so38107737lfj.12;
+        Mon, 16 Aug 2021 18:30:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=798UaN2O7BsVLG2b7m1c5jRBaYmhXVVyGNLo4voHgAg=;
-        b=kvVJK68rK2YZFnYH8LrFoceFEfWX8v2ppJhtJN3FQtc/XATIT5s9S++aE6VkEC9DYG
-         pPWSlJsOJO1b8DlywD0Isw2szPQhLAalyo/vn4NIId4qqB70lZRXqyD99GHeDF20S2+e
-         s4FCcdFSP2sZOlaAe1yaHa3/lSK7TBLCfTc1rhYcwZgeWTO0SGJw1L1+hW41irMlRuiO
-         7GyUipnboEW5APuePEelNLTy6r4iWOw3fauB5LOn9xOqBTJzmU+qHr0EiHewqV6In+qF
-         z9UYR5Iz3M/DDK0jPFJUiTaEyXhln+hqNTZk67UhWbAETTV8Q2N46Uq2ruOz+21d/skT
-         2qmg==
+        bh=/lkMe1kfjyl72aACDUoar04Z3kVJXU/K1V2K/vaWhQI=;
+        b=TMnJpzJzzXGpq158U+0IfMSpvwwi/z4KC4LQ/QwbhAdPyykV5omzv0e3JvjHpMG+jm
+         YjYKDXJVQ1JLw2rXknVxP1MQP0poHeFLpr7HGZsxsoU/CuhzelIEIup9ZTenjT1uM38I
+         N/j10YqNOcgRvUbX/Lw6NTygd3q7ZV9vVf6q742bHPl7A8seSzy1RjCKe28HX2D5uLzW
+         CdjwqAU6b8SdLcnpOKDx1hsKgeIrJl2K3HnIkNAldm0zdhar4OARY/MuRL/yT+3e1l4Q
+         gJWVLVsKe3aU7cCfDIidNssk5wE2KSDQli8QJG+FBBckRAXgNsSkHvgXAkUUIHBGDhPW
+         UyxA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=798UaN2O7BsVLG2b7m1c5jRBaYmhXVVyGNLo4voHgAg=;
-        b=lRlZyQF9m7qVgiwRVzN4brkx6ppW5Ww8GDra9h8jqbwThGlmBVnlx8SAB/85Ol5IaO
-         ZPNYob0PBw+PDjl+L7DjJnWLtC61QdZPpmRWqEwH5UeQt+EIXe2/4YzGzWQz4wtb8Ue+
-         716vLB2cj6Yc9rmvR8iWHEoxT86rMk6XEo6+UhUBVujGHo09+yDhOUWsVakDqM764+eW
-         nEq6wJgwZ17NiMVqOb3ryQN1vEW2ELtCl3n2JHAkwtpiHdtf/J6D2JkN5iwM14BcvRb+
-         wZsc/XRHEZj3zram97hjNLySpkifc8xOOfUnLzLGirbtWadyE3b3WwPbBhgzK4XlfIum
-         zDcw==
-X-Gm-Message-State: AOAM531n11piErMvvxWZ/Z7GX2NhB/mLM2N+i/EoYdMT2A08U/p337ys
-        LqMcVqatJX0BA1fDWSClXsI=
-X-Google-Smtp-Source: ABdhPJyYy8hUiWmuOExv2ofTHn5i3TqgWVouaLyBH4QsjrVfyVuz3wXI+GZKIfHGO5W1gt6UIhmJEg==
-X-Received: by 2002:a05:6512:3190:: with SMTP id i16mr508725lfe.340.1629163820646;
-        Mon, 16 Aug 2021 18:30:20 -0700 (PDT)
+        bh=/lkMe1kfjyl72aACDUoar04Z3kVJXU/K1V2K/vaWhQI=;
+        b=CVhnMNhbMSwjMXox4RbgPhcb2xh7KjnELI8XdwdwiJOz0CDagvuKgbh4pju8PpAwxE
+         Zb+N7jQt2pvJf6QGPB2V362ygjwts+H2QYScEvw7yopkELB3eaM479xxmLxq6Ebn4fuT
+         HUl2ebzx0uUEWVm8jY7cfsz32iT3bRn8RxvtP/ihPYXeBZBEk4NB3PQebFG2vq5IwW0g
+         r0rlUL+Sw2KZGXK2LRyPVqRwyK7koleOINVo333vimOy5CM/6Bp4yK+ARB8hrJEoH+ah
+         sGRL07rhc5GJ/P/0Yzqy5SivOpaw7m05vcmpVG8HxtuYgOg2ZbbndzSoVW8t7QxqO1sZ
+         P4Qw==
+X-Gm-Message-State: AOAM531KmmFOq9KWuVxeKKtezuv1vtV2C7DW6aXA8qlb6xBA+4TKVG5N
+        S4xDQGtq/dP0ZwapSQaaSXU=
+X-Google-Smtp-Source: ABdhPJyKm8MUjPwNU/XaPhkpCC07f4s3U0TJC71msPXy5iUJTdJeDCVsEUr34EX+MR86aW6pHwjnsw==
+X-Received: by 2002:a05:6512:3a8b:: with SMTP id q11mr491818lfu.582.1629163824182;
+        Mon, 16 Aug 2021 18:30:24 -0700 (PDT)
 Received: from localhost.localdomain (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
-        by smtp.gmail.com with ESMTPSA id g30sm46607lfj.298.2021.08.16.18.30.19
+        by smtp.gmail.com with ESMTPSA id g30sm46607lfj.298.2021.08.16.18.30.23
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Aug 2021 18:30:20 -0700 (PDT)
+        Mon, 16 Aug 2021 18:30:23 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -84,9 +84,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
         dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
         linux-clk@vger.kernel.org
-Subject: [PATCH v8 16/34] drm/tegra: vic: Support system suspend
-Date:   Tue, 17 Aug 2021 04:27:36 +0300
-Message-Id: <20210817012754.8710-17-digetx@gmail.com>
+Subject: [PATCH v8 19/34] pwm: tegra: Add runtime PM and OPP support
+Date:   Tue, 17 Aug 2021 04:27:39 +0300
+Message-Id: <20210817012754.8710-20-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210817012754.8710-1-digetx@gmail.com>
 References: <20210817012754.8710-1-digetx@gmail.com>
@@ -96,36 +96,230 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hardware must be stopped before system is suspended. Add suspend-resume
-callbacks.
+The PWM on Tegra belongs to the core power domain and we're going to
+enable GENPD support for the core domain. Now PWM must be resumed using
+runtime PM API in order to initialize the PWM power state. The PWM clock
+rate must be changed using OPP API that will reconfigure the power domain
+performance state in accordance to the rate. Add runtime PM and OPP
+support to the PWM driver.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/gpu/drm/tegra/vic.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ drivers/pwm/pwm-tegra.c | 104 ++++++++++++++++++++++++++++++++--------
+ 1 file changed, 85 insertions(+), 19 deletions(-)
 
-diff --git a/drivers/gpu/drm/tegra/vic.c b/drivers/gpu/drm/tegra/vic.c
-index c02010ff2b7f..359dd77f8b85 100644
---- a/drivers/gpu/drm/tegra/vic.c
-+++ b/drivers/gpu/drm/tegra/vic.c
-@@ -315,6 +315,8 @@ static int vic_runtime_suspend(struct device *dev)
- 	struct vic *vic = dev_get_drvdata(dev);
- 	int err;
+diff --git a/drivers/pwm/pwm-tegra.c b/drivers/pwm/pwm-tegra.c
+index 11a10b575ace..bb6d184946b9 100644
+--- a/drivers/pwm/pwm-tegra.c
++++ b/drivers/pwm/pwm-tegra.c
+@@ -42,12 +42,16 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/pm_opp.h>
+ #include <linux/pwm.h>
+ #include <linux/platform_device.h>
+ #include <linux/pinctrl/consumer.h>
++#include <linux/pm_runtime.h>
+ #include <linux/slab.h>
+ #include <linux/reset.h>
  
-+	host1x_channel_stop(vic->channel);
++#include <soc/tegra/common.h>
 +
- 	err = reset_control_assert(vic->rst);
- 	if (err < 0)
- 		return err;
-@@ -517,6 +519,8 @@ static int vic_remove(struct platform_device *pdev)
+ #define PWM_ENABLE	(1 << 31)
+ #define PWM_DUTY_WIDTH	8
+ #define PWM_DUTY_SHIFT	16
+@@ -145,12 +149,25 @@ static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 		required_clk_rate =
+ 			(NSEC_PER_SEC / period_ns) << PWM_DUTY_WIDTH;
  
- static const struct dev_pm_ops vic_pm_ops = {
- 	SET_RUNTIME_PM_OPS(vic_runtime_suspend, vic_runtime_resume, NULL)
+-		err = clk_set_rate(pc->clk, required_clk_rate);
+-		if (err < 0)
++		/*
++		 * GENPD performance state should be changed only for
++		 * the resumed device because GENPD core tracks performance
++		 * state and drops/restores the state on RPM suspend/resume.
++		 */
++		err = pm_runtime_resume_and_get(pc->dev);
++		if (err)
++			return err;
++
++		err = dev_pm_opp_set_rate(pc->dev, required_clk_rate);
++		if (err < 0) {
++			pm_runtime_put(pc->dev);
+ 			return -EINVAL;
++		}
+ 
+ 		/* Store the new rate for further references */
+ 		pc->clk_rate = clk_get_rate(pc->clk);
++
++		pm_runtime_put(pc->dev);
+ 	}
+ 
+ 	rate = pc->clk_rate >> PWM_DUTY_WIDTH;
+@@ -181,8 +198,8 @@ static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 	 * before writing the register. Otherwise, keep it enabled.
+ 	 */
+ 	if (!pwm_is_enabled(pwm)) {
+-		err = clk_prepare_enable(pc->clk);
+-		if (err < 0)
++		err = pm_runtime_resume_and_get(pc->dev);
++		if (err)
+ 			return err;
+ 	} else
+ 		val |= PWM_ENABLE;
+@@ -193,7 +210,7 @@ static int tegra_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
+ 	 * If the PWM is not enabled, turn the clock off again to save power.
+ 	 */
+ 	if (!pwm_is_enabled(pwm))
+-		clk_disable_unprepare(pc->clk);
++		pm_runtime_put(pc->dev);
+ 
+ 	return 0;
+ }
+@@ -204,8 +221,8 @@ static int tegra_pwm_enable(struct pwm_chip *chip, struct pwm_device *pwm)
+ 	int rc = 0;
+ 	u32 val;
+ 
+-	rc = clk_prepare_enable(pc->clk);
+-	if (rc < 0)
++	rc = pm_runtime_resume_and_get(pc->dev);
++	if (rc)
+ 		return rc;
+ 
+ 	val = pwm_readl(pc, pwm->hwpwm);
+@@ -224,7 +241,7 @@ static void tegra_pwm_disable(struct pwm_chip *chip, struct pwm_device *pwm)
+ 	val &= ~PWM_ENABLE;
+ 	pwm_writel(pc, pwm->hwpwm, val);
+ 
+-	clk_disable_unprepare(pc->clk);
++	pm_runtime_put_sync(pc->dev);
+ }
+ 
+ static const struct pwm_ops tegra_pwm_ops = {
+@@ -256,11 +273,21 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwm->clk))
+ 		return PTR_ERR(pwm->clk);
+ 
++	ret = devm_tegra_core_dev_init_opp_table_simple(&pdev->dev);
++	if (ret)
++		return ret;
++
++	pm_runtime_enable(&pdev->dev);
++
++	ret = pm_runtime_resume_and_get(&pdev->dev);
++	if (ret)
++		goto disable_pm;
++
+ 	/* Set maximum frequency of the IP */
+-	ret = clk_set_rate(pwm->clk, pwm->soc->max_frequency);
++	ret = dev_pm_opp_set_rate(pwm->dev, pwm->soc->max_frequency);
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "Failed to set max frequency: %d\n", ret);
+-		return ret;
++		goto put_pm;
+ 	}
+ 
+ 	/*
+@@ -278,7 +305,7 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+ 	if (IS_ERR(pwm->rst)) {
+ 		ret = PTR_ERR(pwm->rst);
+ 		dev_err(&pdev->dev, "Reset control is not found: %d\n", ret);
+-		return ret;
++		goto put_pm;
+ 	}
+ 
+ 	reset_control_deassert(pwm->rst);
+@@ -291,34 +318,70 @@ static int tegra_pwm_probe(struct platform_device *pdev)
+ 	if (ret < 0) {
+ 		dev_err(&pdev->dev, "pwmchip_add() failed: %d\n", ret);
+ 		reset_control_assert(pwm->rst);
+-		return ret;
++		goto put_pm;
+ 	}
+ 
++	pm_runtime_put(&pdev->dev);
++
+ 	return 0;
++put_pm:
++	pm_runtime_put(&pdev->dev);
++disable_pm:
++	pm_runtime_disable(&pdev->dev);
++	return ret;
+ }
+ 
+ static int tegra_pwm_remove(struct platform_device *pdev)
+ {
+ 	struct tegra_pwm_chip *pc = platform_get_drvdata(pdev);
++	int err;
+ 
+ 	pwmchip_remove(&pc->chip);
+ 
++	err = pm_runtime_resume_and_get(pc->dev);
++	if (err)
++		return err;
++
+ 	reset_control_assert(pc->rst);
++	pm_runtime_put(pc->dev);
++	pm_runtime_disable(pc->dev);
+ 
+ 	return 0;
+ }
+ 
+-#ifdef CONFIG_PM_SLEEP
+-static int tegra_pwm_suspend(struct device *dev)
++static int __maybe_unused tegra_pwm_runtime_suspend(struct device *dev)
+ {
+-	return pinctrl_pm_select_sleep_state(dev);
++	struct tegra_pwm_chip *pc = dev_get_drvdata(dev);
++	int err;
++
++	clk_disable_unprepare(pc->clk);
++
++	err = pinctrl_pm_select_sleep_state(dev);
++	if (err) {
++		clk_prepare_enable(pc->clk);
++		return err;
++	}
++
++	return 0;
+ }
+ 
+-static int tegra_pwm_resume(struct device *dev)
++static int __maybe_unused tegra_pwm_runtime_resume(struct device *dev)
+ {
+-	return pinctrl_pm_select_default_state(dev);
++	struct tegra_pwm_chip *pc = dev_get_drvdata(dev);
++	int err;
++
++	err = pinctrl_pm_select_default_state(dev);
++	if (err)
++		return err;
++
++	err = clk_prepare_enable(pc->clk);
++	if (err) {
++		pinctrl_pm_select_sleep_state(dev);
++		return err;
++	}
++
++	return 0;
+ }
+-#endif
+ 
+ static const struct tegra_pwm_soc tegra20_pwm_soc = {
+ 	.num_channels = 4,
+@@ -344,7 +407,10 @@ static const struct of_device_id tegra_pwm_of_match[] = {
+ MODULE_DEVICE_TABLE(of, tegra_pwm_of_match);
+ 
+ static const struct dev_pm_ops tegra_pwm_pm_ops = {
+-	SET_SYSTEM_SLEEP_PM_OPS(tegra_pwm_suspend, tegra_pwm_resume)
++	SET_RUNTIME_PM_OPS(tegra_pwm_runtime_suspend, tegra_pwm_runtime_resume,
++			   NULL)
 +	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
 +				pm_runtime_force_resume)
  };
  
- struct platform_driver tegra_vic_driver = {
+ static struct platform_driver tegra_pwm_driver = {
 -- 
 2.32.0
 
