@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4292AC00144
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:32:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFF2AC43214
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:33:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 261C160241
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:32:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AAB7660F39
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:33:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239240AbhHQBcl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 21:32:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48042 "EHLO
+        id S238856AbhHQBda (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 21:33:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233389AbhHQBbD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 21:31:03 -0400
-Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8803EC0617AD;
-        Mon, 16 Aug 2021 18:30:30 -0700 (PDT)
-Received: by mail-lj1-x233.google.com with SMTP id f2so8518168ljn.1;
-        Mon, 16 Aug 2021 18:30:30 -0700 (PDT)
+        with ESMTP id S236634AbhHQBau (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 21:30:50 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B2A3C0613C1;
+        Mon, 16 Aug 2021 18:30:17 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id i9so17435377lfg.10;
+        Mon, 16 Aug 2021 18:30:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=TFXwxY3TugXoPVIGGZ3aRpVCp34SIBOqU4EyNfHhzs8=;
-        b=Ud7GO1VVuVcjx/4hnJlaBg6hn2WfhB+1JQncjj9NZj7zjBXNRTlx92eycBXUir6v1h
-         1E3D0lyqbooQlenOh7apffRjMRZRuenJzK5+Z+EWYA9hw1Xj1IWAix9WZpZrMJWkO4uC
-         0Wni5oxdO0K3ZSWy3UE1zuyQf7u2BLaY1Op8oUnWF/hywiiOvDAS6zPoQ7wLCWN45MF6
-         e5+FwiBgOEA3DuWiMVYBq+9vHIsT/TtFISYetFHxFey0RTj8bPytSZ6BaIr7MnOEBXk5
-         5HbqkCayswncNwNOPNWC86rXSI3274NuVFVhxGbxxHk2lGA0729zJ3kYgKR7VqCUI9tS
-         ViLA==
+        bh=UPjoO7213ncEQO3had/PKOowLO8AvF8+e1hZH6AGNkg=;
+        b=afXQTrhk1k1C/vh26JvfNmlZszhr6uun1TZF4/jqNovH/TpoAn+pkABdGZYH1o23ZF
+         QiLhxlcxpbGHNMdRG6+NrhIfnOjSkqg84i7jeuesiBMHp8l/6II/0oJ2BQQuBgExDr6Z
+         AzquDpGevLYrYFzYcALbqQcW0FIb5Sbkt/tgEwshtaEtTq0VQg/sqRViZq//NpGkwa87
+         6mb7+8fuLZygA/4yBXZNPunbGUdcLDkhVAaUaNSqCk8ZTZGtyVELJMe/t+HG2x7S2C0J
+         wx3kKdVdPGgckoMQOf5Ehg8qEJ0dijrDGxhbKdhXtv0zPzEaLsLG6e79WQnP/qSSlmm0
+         8HGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=TFXwxY3TugXoPVIGGZ3aRpVCp34SIBOqU4EyNfHhzs8=;
-        b=Ea9x6+svSeIkg6Pen+kJK/zb+UnvufA6RmEaNbpztXOxexZUqwzUXm1PVtWQ8DTM3y
-         B6YCto7kX/mW/YcG7irjtFbCOvyWc3BNiWPcDNiZmu31xchGUMAkdppB2NRDRsdmwkM2
-         Y+GC5PekVV8BNix7AUOZwpWGY3cuvUWocolSPBZbOIb+KbHHc2OZsofj1TZpBsp6jr+H
-         IQ+HlIGkVlaAO87jECbhwyeZsyERnd6b/YWs7iZBJJJmOSCfm/laQSRulrC7yCuoEX3p
-         PGwchnqnmOHoyX9In71xv+io7z9QOZJlV8IsoO+Ccs/aVvzOGTycdbgx7gDNS6h8YWHx
-         xGCg==
-X-Gm-Message-State: AOAM530gB29Ou5vFAJdwhA0vWt+oCeIC/cbCTdhRbeWdMDJsmXGDMb05
-        K4R2ByMjxKEqaQAx4wdWiPE=
-X-Google-Smtp-Source: ABdhPJzFKlEk8pezvTyL9H7NZ9EsIG3ID1+KRIT1aw31Yr0gUTPr1kMEp+2ef/l9rSm0DiRH/QIppg==
-X-Received: by 2002:a2e:4612:: with SMTP id t18mr872435lja.346.1629163828927;
-        Mon, 16 Aug 2021 18:30:28 -0700 (PDT)
+        bh=UPjoO7213ncEQO3had/PKOowLO8AvF8+e1hZH6AGNkg=;
+        b=ekPnPpioRzoR6GRg61dm30vNNQVShRc6ps8asNfzrxCrSwVFDzD/qL3wuIIirho0dT
+         oNiPBqi3tB4q/Tv8EyLvSmbAihzXsiroWLp9njMFJjp4GqZD8SL0isBJh3a06w2d/rAe
+         4yVme21e4KxDlhJmaBl6dfmgxirDkaHMA4lNroNgq7G122OeoT8afywGFfHV8L/2wjTs
+         4Y+myURIZ5mZJwnn+jq71KFbXnLufllt8c9QXdYyeZh+roah6k1RnWKWtVzrH3R0KHv3
+         AQWXDY6OX/NLl0grOiXfKcwZJiU5F3iDIYKxMNYffOPPMU/tj3zumPOMpCy0f2VtnkuK
+         MY2A==
+X-Gm-Message-State: AOAM530LEj2GjuCxkj1n+BqzxP63//2z4fVy+O6jQCGSVOYKY7ASaUqi
+        xM1NeQKWkv2/lBwoj5lhskQ=
+X-Google-Smtp-Source: ABdhPJzo9zkvVO8HLn0YI7esTDIJQaYPt1Tf+SYrjtzJl58XEoAB+Cak+dDOjeUmcJGASHQQ2DghAw==
+X-Received: by 2002:a19:4958:: with SMTP id l24mr499818lfj.48.1629163815838;
+        Mon, 16 Aug 2021 18:30:15 -0700 (PDT)
 Received: from localhost.localdomain (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
-        by smtp.gmail.com with ESMTPSA id g30sm46607lfj.298.2021.08.16.18.30.27
+        by smtp.gmail.com with ESMTPSA id g30sm46607lfj.298.2021.08.16.18.30.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Aug 2021 18:30:28 -0700 (PDT)
+        Mon, 16 Aug 2021 18:30:15 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -84,9 +84,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
         dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
         linux-clk@vger.kernel.org
-Subject: [PATCH v8 23/34] media: dt: bindings: tegra-vde: Convert to schema
-Date:   Tue, 17 Aug 2021 04:27:43 +0300
-Message-Id: <20210817012754.8710-24-digetx@gmail.com>
+Subject: [PATCH v8 12/34] drm/tegra: dc: Support OPP and SoC core voltage scaling
+Date:   Tue, 17 Aug 2021 04:27:32 +0300
+Message-Id: <20210817012754.8710-13-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210817012754.8710-1-digetx@gmail.com>
 References: <20210817012754.8710-1-digetx@gmail.com>
@@ -96,199 +96,156 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert NVIDIA Tegra video decoder binding to schema.
+Add OPP and SoC core voltage scaling support to the display controller
+driver. This is required for enabling system-wide DVFS on pre-Tegra186
+SoCs.
 
+Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
+Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
+Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
+Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- .../bindings/media/nvidia,tegra-vde.txt       |  64 -----------
- .../bindings/media/nvidia,tegra-vde.yaml      | 107 ++++++++++++++++++
- 2 files changed, 107 insertions(+), 64 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
- create mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
+ drivers/gpu/drm/tegra/dc.c | 74 ++++++++++++++++++++++++++++++++++++++
+ drivers/gpu/drm/tegra/dc.h |  2 ++
+ 2 files changed, 76 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
-deleted file mode 100644
-index 602169b8aa19..000000000000
---- a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
-+++ /dev/null
-@@ -1,64 +0,0 @@
--NVIDIA Tegra Video Decoder Engine
--
--Required properties:
--- compatible : Must contain one of the following values:
--   - "nvidia,tegra20-vde"
--   - "nvidia,tegra30-vde"
--   - "nvidia,tegra114-vde"
--   - "nvidia,tegra124-vde"
--   - "nvidia,tegra132-vde"
--- reg : Must contain an entry for each entry in reg-names.
--- reg-names : Must include the following entries:
--  - sxe
--  - bsev
--  - mbe
--  - ppe
--  - mce
--  - tfe
--  - ppb
--  - vdma
--  - frameid
--- iram : Must contain phandle to the mmio-sram device node that represents
--         IRAM region used by VDE.
--- interrupts : Must contain an entry for each entry in interrupt-names.
--- interrupt-names : Must include the following entries:
--  - sync-token
--  - bsev
--  - sxe
--- clocks : Must include the following entries:
--  - vde
--- resets : Must contain an entry for each entry in reset-names.
--- reset-names : Should include the following entries:
--  - vde
--
--Optional properties:
--- resets : Must contain an entry for each entry in reset-names.
--- reset-names : Must include the following entries:
--  - mc
--- iommus: Must contain phandle to the IOMMU device node.
--
--Example:
--
--video-codec@6001a000 {
--	compatible = "nvidia,tegra20-vde";
--	reg = <0x6001a000 0x1000 /* Syntax Engine */
--	       0x6001b000 0x1000 /* Video Bitstream Engine */
--	       0x6001c000  0x100 /* Macroblock Engine */
--	       0x6001c200  0x100 /* Post-processing Engine */
--	       0x6001c400  0x100 /* Motion Compensation Engine */
--	       0x6001c600  0x100 /* Transform Engine */
--	       0x6001c800  0x100 /* Pixel prediction block */
--	       0x6001ca00  0x100 /* Video DMA */
--	       0x6001d800  0x300 /* Video frame controls */>;
--	reg-names = "sxe", "bsev", "mbe", "ppe", "mce",
--		    "tfe", "ppb", "vdma", "frameid";
--	iram = <&vde_pool>; /* IRAM region */
--	interrupts = <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>, /* Sync token interrupt */
--		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>, /* BSE-V interrupt */
--		     <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>; /* SXE interrupt */
--	interrupt-names = "sync-token", "bsev", "sxe";
--	clocks = <&tegra_car TEGRA20_CLK_VDE>;
--	reset-names = "vde", "mc";
--	resets = <&tegra_car 61>, <&mc TEGRA20_MC_RESET_VDE>;
--	iommus = <&mc TEGRA_SWGROUP_VDE>;
--};
-diff --git a/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
-new file mode 100644
-index 000000000000..3b6c1f031e04
---- /dev/null
-+++ b/Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
-@@ -0,0 +1,107 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/media/nvidia,tegra-vde.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/drivers/gpu/drm/tegra/dc.c b/drivers/gpu/drm/tegra/dc.c
+index 16c7aabb94d3..435dd8139c6e 100644
+--- a/drivers/gpu/drm/tegra/dc.c
++++ b/drivers/gpu/drm/tegra/dc.c
+@@ -11,9 +11,12 @@
+ #include <linux/interconnect.h>
+ #include <linux/module.h>
+ #include <linux/of_device.h>
++#include <linux/pm_domain.h>
++#include <linux/pm_opp.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/reset.h>
+ 
++#include <soc/tegra/common.h>
+ #include <soc/tegra/pmc.h>
+ 
+ #include <drm/drm_atomic.h>
+@@ -1762,6 +1765,47 @@ int tegra_dc_state_setup_clock(struct tegra_dc *dc,
+ 	return 0;
+ }
+ 
++static void tegra_dc_update_voltage_state(struct tegra_dc *dc,
++					  struct tegra_dc_state *state)
++{
++	unsigned long rate, pstate;
++	struct dev_pm_opp *opp;
++	int err;
 +
-+title: NVIDIA Tegra Video Decoder Engine
++	if (!dc->has_opp_table)
++		return;
 +
-+maintainers:
-+  - Dmitry Osipenko <digetx@gmail.com>
-+  - Jon Hunter <jonathanh@nvidia.com>
-+  - Thierry Reding <thierry.reding@gmail.com>
++	/* calculate actual pixel clock rate which depends on internal divider */
++	rate = DIV_ROUND_UP(clk_get_rate(dc->clk) * 2, state->div + 2);
 +
-+properties:
-+  compatible:
-+    oneOf:
-+      - items:
-+          - enum:
-+              - nvidia,tegra132-vde
-+              - nvidia,tegra124-vde
-+              - nvidia,tegra114-vde
-+              - nvidia,tegra30-vde
-+          - enum:
-+              - nvidia,tegra20-vde
-+      - items:
-+          - const: nvidia,tegra20-vde
++	/* find suitable OPP for the rate */
++	opp = dev_pm_opp_find_freq_ceil(dc->dev, &rate);
 +
-+  reg:
-+    maxItems: 9
++	if (opp == ERR_PTR(-ERANGE))
++		opp = dev_pm_opp_find_freq_floor(dc->dev, &rate);
 +
-+  reg-names:
-+    items:
-+      - const: sxe
-+      - const: bsev
-+      - const: mbe
-+      - const: ppe
-+      - const: mce
-+      - const: tfe
-+      - const: ppb
-+      - const: vdma
-+      - const: frameid
++	if (IS_ERR(opp)) {
++		dev_err(dc->dev, "failed to find OPP for %luHz: %pe\n",
++			rate, opp);
++		return;
++	}
 +
-+  clocks:
-+    maxItems: 1
++	pstate = dev_pm_opp_get_required_pstate(opp, 0);
++	dev_pm_opp_put(opp);
 +
-+  resets:
-+    maxItems: 2
++	/*
++	 * The minimum core voltage depends on the pixel clock rate (which
++	 * depends on internal clock divider of the CRTC) and not on the
++	 * rate of the display controller clock. This is why we're not using
++	 * dev_pm_opp_set_rate() API and instead controlling the power domain
++	 * directly.
++	 */
++	err = dev_pm_genpd_set_performance_state(dc->dev, pstate);
++	if (err)
++		dev_err(dc->dev, "failed to set power domain state to %lu: %d\n",
++			pstate, err);
++}
 +
-+  reset-names:
-+    items:
-+      - const: vde
-+      - const: mc
+ static void tegra_dc_commit_state(struct tegra_dc *dc,
+ 				  struct tegra_dc_state *state)
+ {
+@@ -1801,6 +1845,8 @@ static void tegra_dc_commit_state(struct tegra_dc *dc,
+ 		value = SHIFT_CLK_DIVIDER(state->div) | PIXEL_CLK_DIVIDER_PCD1;
+ 		tegra_dc_writel(dc, value, DC_DISP_DISP_CLOCK_CONTROL);
+ 	}
 +
-+  interrupts:
-+    maxItems: 3
++	tegra_dc_update_voltage_state(dc, state);
+ }
+ 
+ static void tegra_dc_stop(struct tegra_dc *dc)
+@@ -1994,6 +2040,13 @@ static void tegra_crtc_atomic_disable(struct drm_crtc *crtc,
+ 	err = host1x_client_suspend(&dc->client);
+ 	if (err < 0)
+ 		dev_err(dc->dev, "failed to suspend: %d\n", err);
 +
-+  interrupt-names:
-+    items:
-+      - const: sync-token
-+      - const: bsev
-+      - const: sxe
++	if (dc->has_opp_table) {
++		err = dev_pm_genpd_set_performance_state(dc->dev, 0);
++		if (err)
++			dev_err(dc->dev,
++				"failed to clear power domain state: %d\n", err);
++	}
+ }
+ 
+ static void tegra_crtc_atomic_enable(struct drm_crtc *crtc,
+@@ -2976,6 +3029,23 @@ static int tegra_dc_couple(struct tegra_dc *dc)
+ 	return 0;
+ }
+ 
++static int tegra_dc_init_opp_table(struct tegra_dc *dc)
++{
++	struct tegra_core_opp_params opp_params = {};
++	int err;
 +
-+  iommus:
-+    maxItems: 1
++	err = devm_tegra_core_dev_init_opp_table(dc->dev, &opp_params);
++	if (err && err != -ENODEV)
++		return err;
 +
-+  iram:
-+    $ref: /schemas/types.yaml#/definitions/phandle
-+    description:
-+      Phandle of the SRAM MMIO node.
++	if (err)
++		dc->has_opp_table = false;
++	else
++		dc->has_opp_table = true;
 +
-+required:
-+  - compatible
-+  - reg
-+  - reg-names
-+  - clocks
-+  - resets
-+  - reset-names
-+  - interrupts
-+  - interrupt-names
++	return 0;
++}
 +
-+additionalProperties: false
+ static int tegra_dc_probe(struct platform_device *pdev)
+ {
+ 	u64 dma_mask = dma_get_mask(pdev->dev.parent);
+@@ -3041,6 +3111,10 @@ static int tegra_dc_probe(struct platform_device *pdev)
+ 		tegra_powergate_power_off(dc->powergate);
+ 	}
+ 
++	err = tegra_dc_init_opp_table(dc);
++	if (err < 0)
++		return err;
 +
-+examples:
-+  - |
-+    video-codec@6001a000 {
-+      compatible = "nvidia,tegra20-vde";
-+      reg = <0x6001a000 0x1000>, /* Syntax Engine */
-+            <0x6001b000 0x1000>, /* Video Bitstream Engine */
-+            <0x6001c000  0x100>, /* Macroblock Engine */
-+            <0x6001c200  0x100>, /* Post-processing Engine */
-+            <0x6001c400  0x100>, /* Motion Compensation Engine */
-+            <0x6001c600  0x100>, /* Transform Engine */
-+            <0x6001c800  0x100>, /* Pixel prediction block */
-+            <0x6001ca00  0x100>, /* Video DMA */
-+            <0x6001d800  0x300>; /* Video frame controls */
-+      reg-names = "sxe", "bsev", "mbe", "ppe", "mce",
-+                  "tfe", "ppb", "vdma", "frameid";
-+      iram = <&iram>; /* IRAM MMIO region */
-+      interrupts = <0  9 4>, /* Sync token */
-+                   <0 10 4>, /* BSE-V */
-+                   <0 12 4>; /* SXE */
-+      interrupt-names = "sync-token", "bsev", "sxe";
-+      clocks = <&clk 61>;
-+      reset-names = "vde", "mc";
-+      resets = <&rst 61>, <&mem 13>;
-+      iommus = <&mem 15>;
-+    };
+ 	dc->regs = devm_platform_ioremap_resource(pdev, 0);
+ 	if (IS_ERR(dc->regs))
+ 		return PTR_ERR(dc->regs);
+diff --git a/drivers/gpu/drm/tegra/dc.h b/drivers/gpu/drm/tegra/dc.h
+index f0cb691852a1..26ad1e448c44 100644
+--- a/drivers/gpu/drm/tegra/dc.h
++++ b/drivers/gpu/drm/tegra/dc.h
+@@ -106,6 +106,8 @@ struct tegra_dc {
+ 	struct drm_info_list *debugfs_files;
+ 
+ 	const struct tegra_dc_soc_info *soc;
++
++	bool has_opp_table;
+ };
+ 
+ static inline struct tegra_dc *
 -- 
 2.32.0
 
