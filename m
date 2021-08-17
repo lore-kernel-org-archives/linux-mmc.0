@@ -7,54 +7,54 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
 	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA83AC4320A
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:55:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BAD68C432BE
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:55:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9275160E76
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:55:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A0B2160C40
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:55:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235884AbhHQAzv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 20:55:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40070 "EHLO
+        id S236010AbhHQA4G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 20:56:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40086 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235719AbhHQAzu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 20:55:50 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A9F4C061764
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:17 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id h9so30119018ljq.8
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:17 -0700 (PDT)
+        with ESMTP id S236043AbhHQAzy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 20:55:54 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 705AFC06124C
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:21 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id n7so30226010ljq.0
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=zHW7j8uJ1T5WAhTwDkkfCp9h9wlSajIJoR2TS5WeI4s=;
-        b=M+8JmFaKoyF4Y6sGJg8MksjCPy8KWaLrMoFoU5H/2SMFu13wI0tZayH+k0nGh0OWbx
-         wTjtWcx1quOS5cRy2xvqqRmYvddYA8HJupQ9OTKGLoouVYSG27ky3BLt2PwxHowLqHqm
-         36/rnjAw3GBl9O5C3YC2voq/YPTNQYZSsBWDz+93sPFAwdRc3Ub6BWI/lAQgigJmjz5O
-         lZA0GH8wqBHUmeBfgeAQklXJt62i1xchURucNna7ys6Ol6jpBNdTISUCqeJTXpGRtchh
-         UIfEKvMaMukniWjwHDeeht0jC1S4nB//S1BBEpJHvLeUGnRbdwrhV5/D1PYI75b9IfA7
-         xoEw==
+        bh=7qagkQtaTlZmPxAEgYPi9rpyWnwBJTQJebKsAKhdvfc=;
+        b=bPom6hkXdRt2fzsZMrGQmnn9MtSyxylCOyNHRvgpVhawiJNrQh6QUqc9ih5gcp1PF6
+         x7+c0V9DfcVHe25Z00kgH9T2ng5nSvCBz+o704oipZiwi9g3Q79aomTtYCVE5rKr2XID
+         isIpULaSopsDHVzvsUaGca7+jYh21REPOXKcvjZZGkmiuKDdDMalE24Btv637HBybtde
+         t/oUVFkzkQdO3xkPAa1rKVrvYHSiS5YVlrimA71K0GOp0sLQSWff7XvQCNLH8ZIoI4OM
+         Vibzz8QCOKSRXuoZjssW8pbA1Sg2PRC097Zq5t0AlYgDWr4OE5w7ViGN5v013nB2yfv5
+         yl8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=zHW7j8uJ1T5WAhTwDkkfCp9h9wlSajIJoR2TS5WeI4s=;
-        b=Kh/AN5pYHLe2hDZ+pORPLM3WM8vr5vQMMNj2Uz3qWzsCtaeyxNn4VpqvRaxXC/e9KJ
-         2IvrV4C2ZbZikfpP4Qagl1U+ZMQn4rhVm6TUN/+pX+JIOhigPjvZLR+d8+Ot2qls8CJm
-         9UBmh1D3OMoZYmc8guDIPShqaN7eiVspicFN64I0/94HFGfHNTaFneMrju9BUDfMBYAq
-         6d2mQGZJ2gQoDRnGK6OFT6qpvBp2o8QKFRdLL4OxVMlXdJ35Svu//3FQF5NZ1bwT5KLe
-         ZQu49uSxyw+wo6Vr35PI6bCjMco5Yux5zme/Ijt1D8eXrcffRftExBwnnzw99GneMupi
-         dMVw==
-X-Gm-Message-State: AOAM533we5JKheASisrbVM4UuPc5+555yQoAHcMWykFABMufDHol4MGj
-        mv6sJ8e0YpExrRq5Zl1f+cLPDg==
-X-Google-Smtp-Source: ABdhPJwzl+6gfIV47ZCHmVz5/wqhiY0aSpqI/1a5FDmoJTan/NZyyOCfBI9EfZad5k9e0Yjfqz8dWg==
-X-Received: by 2002:a05:651c:902:: with SMTP id e2mr790319ljq.198.1629161715773;
-        Mon, 16 Aug 2021 17:55:15 -0700 (PDT)
+        bh=7qagkQtaTlZmPxAEgYPi9rpyWnwBJTQJebKsAKhdvfc=;
+        b=Bsq5F/5aAUAUEXszmK7zbj0YtFntFBNW+aagEr09Ic3DrFfQhBQ8QappgPWMX9u/B1
+         AfO/aRxtQzffOxGB9IY0V4hO6rEthInHguTZa+ZN7HJVlkD50n3e6QU1w2qTz+ro5YFE
+         EZtRMGFxw4MJzdmvn7gMpsZ5vL61V6DV/pAnea4dwGr2hfGR7kDjZRcSGhhlhd40+v6/
+         3SBpt8KqTLD8w1keiewYXl1vEXVFdVdmeMnoyLQScYkEmzFcVBE6dXK3sA/5RMj3uF/f
+         k2HbFI5IMXxYZX3tof43BLJJA2Qolk2qYH9u6vl7sRU9RGFBCePsbjmQi6EU0UHJ8sI5
+         68JQ==
+X-Gm-Message-State: AOAM530ZiR0C0VQoCLoRBDd+vbbDIJBk9FNUK0fIVFI0zE0RLRbOmTl6
+        IJIRODI41ZFaAPwtKdUoLp0r4g==
+X-Google-Smtp-Source: ABdhPJy0Vxzbay2lg9uLfmPVEif7TuCf//2e8I2PdIm8X8c7CC97prs3p0qNiSFLC6TRElLB99wqvQ==
+X-Received: by 2002:a2e:9751:: with SMTP id f17mr777675ljj.422.1629161719792;
+        Mon, 16 Aug 2021 17:55:19 -0700 (PDT)
 Received: from eriador.lan ([37.153.55.125])
-        by smtp.gmail.com with ESMTPSA id z6sm40719lfb.251.2021.08.16.17.55.15
+        by smtp.gmail.com with ESMTPSA id z6sm40719lfb.251.2021.08.16.17.55.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Aug 2021 17:55:15 -0700 (PDT)
+        Mon, 16 Aug 2021 17:55:19 -0700 (PDT)
 From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 To:     Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
@@ -70,9 +70,9 @@ Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
         ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
         netdev@vger.kernel.org
-Subject: [RFC PATCH 03/15] mmc: core: switch to new pwrseq subsystem
-Date:   Tue, 17 Aug 2021 03:54:55 +0300
-Message-Id: <20210817005507.1507580-4-dmitry.baryshkov@linaro.org>
+Subject: [RFC PATCH 08/15] Bluetooth: hci_qca: futher rework of power on/off handling
+Date:   Tue, 17 Aug 2021 03:55:00 +0300
+Message-Id: <20210817005507.1507580-9-dmitry.baryshkov@linaro.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
 References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
@@ -82,352 +82,204 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Drop old MMC pwrseq code and use new pwrseq subsystem instead.
-Individual drivers are already ported to new subsystem.
+Further rework of power on/off handling. Move bt_en and sw_ctl handling
+close to regulator enable/disable, so that this code can be easily
+extended with pwrseq support.
 
 Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 ---
- drivers/mmc/core/Makefile |   1 -
- drivers/mmc/core/core.c   |   9 ++-
- drivers/mmc/core/host.c   |   8 ++-
- drivers/mmc/core/mmc.c    |   3 +-
- drivers/mmc/core/pwrseq.c | 117 --------------------------------------
- drivers/mmc/core/pwrseq.h |  58 -------------------
- include/linux/mmc/host.h  |   4 +-
- 7 files changed, 12 insertions(+), 188 deletions(-)
- delete mode 100644 drivers/mmc/core/pwrseq.c
- delete mode 100644 drivers/mmc/core/pwrseq.h
+ drivers/bluetooth/hci_qca.c | 126 +++++++++++++++++++-----------------
+ 1 file changed, 66 insertions(+), 60 deletions(-)
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 322eb69bd00e..a504d873cf8e 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -9,7 +9,6 @@ mmc_core-y			:= core.o bus.o host.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
- 				   sdio_cis.o sdio_io.o sdio_irq.o \
- 				   slot-gpio.o regulator.o
--mmc_core-$(CONFIG_OF)		+= pwrseq.o
- mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
- obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
- mmc_block-objs			:= block.o queue.o
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 95fedcf56e4a..c468af900a45 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -41,7 +41,6 @@
- #include "bus.h"
- #include "host.h"
- #include "sdio_bus.h"
--#include "pwrseq.h"
+diff --git a/drivers/bluetooth/hci_qca.c b/drivers/bluetooth/hci_qca.c
+index ad7e8cdc94f3..2d23e8a3ca14 100644
+--- a/drivers/bluetooth/hci_qca.c
++++ b/drivers/bluetooth/hci_qca.c
+@@ -1590,7 +1590,6 @@ static int qca_power_on(struct hci_dev *hdev)
+ 	struct qca_serdev *qcadev;
+ 	struct qca_data *qca = hu->priv;
+ 	int ret;
+-	bool sw_ctrl_state;
  
- #include "mmc_ops.h"
- #include "sd_ops.h"
-@@ -1321,7 +1320,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
- 	if (host->ios.power_mode == MMC_POWER_ON)
- 		return;
- 
--	mmc_pwrseq_pre_power_on(host);
-+	pwrseq_pre_power_on(host->pwrseq);
- 
- 	host->ios.vdd = fls(ocr) - 1;
- 	host->ios.power_mode = MMC_POWER_UP;
-@@ -1336,7 +1335,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	/* Non-serdev device usually is powered by external power
+ 	 * and don't need additional action in driver for power on
+@@ -1602,29 +1601,15 @@ static int qca_power_on(struct hci_dev *hdev)
+ 	 * off the voltage regulator.
  	 */
- 	mmc_delay(host->ios.power_delay_ms);
- 
--	mmc_pwrseq_post_power_on(host);
-+	pwrseq_power_on(host->pwrseq);
- 
- 	host->ios.clock = host->f_init;
- 
-@@ -1355,7 +1354,7 @@ void mmc_power_off(struct mmc_host *host)
- 	if (host->ios.power_mode == MMC_POWER_OFF)
- 		return;
- 
--	mmc_pwrseq_power_off(host);
-+	pwrseq_power_off(host->pwrseq);
- 
- 	host->ios.clock = 0;
- 	host->ios.vdd = 0;
-@@ -1985,7 +1984,7 @@ EXPORT_SYMBOL(mmc_set_blocklen);
- 
- static void mmc_hw_reset_for_init(struct mmc_host *host)
- {
--	mmc_pwrseq_reset(host);
-+	pwrseq_reset(host->pwrseq);
- 
- 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
- 		return;
-diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-index 0475d96047c4..214b9cfda723 100644
---- a/drivers/mmc/core/host.c
-+++ b/drivers/mmc/core/host.c
-@@ -28,7 +28,6 @@
- #include "crypto.h"
- #include "host.h"
- #include "slot-gpio.h"
--#include "pwrseq.h"
- #include "sdio_ops.h"
- 
- #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host, class_dev)
-@@ -413,7 +412,11 @@ int mmc_of_parse(struct mmc_host *host)
- 	device_property_read_u32(dev, "post-power-on-delay-ms",
- 				 &host->ios.power_delay_ms);
- 
--	return mmc_pwrseq_alloc(host);
-+	host->pwrseq = devm_pwrseq_get_optional(dev, "mmc");
-+	if (IS_ERR(host->pwrseq))
-+		return PTR_ERR(host->pwrseq);
-+
-+	return 0;
- }
- 
- EXPORT_SYMBOL(mmc_of_parse);
-@@ -632,7 +635,6 @@ EXPORT_SYMBOL(mmc_remove_host);
-  */
- void mmc_free_host(struct mmc_host *host)
- {
--	mmc_pwrseq_free(host);
- 	put_device(&host->class_dev);
- }
- 
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 838726b68ff3..59d0d26bb5c0 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -24,7 +24,6 @@
- #include "mmc_ops.h"
- #include "quirks.h"
- #include "sd_ops.h"
--#include "pwrseq.h"
- 
- #define DEFAULT_CMD6_TIMEOUT_MS	500
- #define MIN_CACHE_EN_TIMEOUT_MS 1600
-@@ -2220,7 +2219,7 @@ static int _mmc_hw_reset(struct mmc_host *host)
- 	} else {
- 		/* Do a brute force power cycle */
- 		mmc_power_cycle(host, card->ocr);
--		mmc_pwrseq_reset(host);
-+		pwrseq_reset(host->pwrseq);
- 	}
- 	return mmc_init_card(host, card->ocr, card);
- }
-diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
-deleted file mode 100644
-index ef675f364bf0..000000000000
---- a/drivers/mmc/core/pwrseq.c
-+++ /dev/null
-@@ -1,117 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0-only
--/*
-- *  Copyright (C) 2014 Linaro Ltd
-- *
-- * Author: Ulf Hansson <ulf.hansson@linaro.org>
-- *
-- *  MMC power sequence management
-- */
--#include <linux/kernel.h>
--#include <linux/err.h>
--#include <linux/module.h>
--#include <linux/of.h>
+ 	qcadev = serdev_device_get_drvdata(hu->serdev);
+-	if (!qcadev->vregs_on) {
+-		serdev_device_close(hu->serdev);
+-		ret = qca_regulator_enable(qcadev);
+-		if (ret)
+-			return ret;
 -
--#include <linux/mmc/host.h>
--
--#include "pwrseq.h"
--
--static DEFINE_MUTEX(pwrseq_list_mutex);
--static LIST_HEAD(pwrseq_list);
--
--int mmc_pwrseq_alloc(struct mmc_host *host)
--{
--	struct device_node *np;
--	struct mmc_pwrseq *p;
--
--	np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
--	if (!np)
--		return 0;
--
--	mutex_lock(&pwrseq_list_mutex);
--	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
--		if (p->dev->of_node == np) {
--			if (!try_module_get(p->owner))
--				dev_err(host->parent,
--					"increasing module refcount failed\n");
--			else
--				host->pwrseq = p;
--
--			break;
+-		ret = serdev_device_open(hu->serdev);
+-		if (ret) {
+-			bt_dev_err(hu->hdev, "failed to open port");
+-			return ret;
 -		}
 -	}
--
--	of_node_put(np);
--	mutex_unlock(&pwrseq_list_mutex);
--
--	if (!host->pwrseq)
--		return -EPROBE_DEFER;
--
--	dev_info(host->parent, "allocated mmc-pwrseq\n");
--
--	return 0;
--}
--
--void mmc_pwrseq_pre_power_on(struct mmc_host *host)
--{
--	struct mmc_pwrseq *pwrseq = host->pwrseq;
--
--	if (pwrseq && pwrseq->ops->pre_power_on)
--		pwrseq->ops->pre_power_on(host);
--}
--
--void mmc_pwrseq_post_power_on(struct mmc_host *host)
--{
--	struct mmc_pwrseq *pwrseq = host->pwrseq;
--
--	if (pwrseq && pwrseq->ops->post_power_on)
--		pwrseq->ops->post_power_on(host);
--}
--
--void mmc_pwrseq_power_off(struct mmc_host *host)
--{
--	struct mmc_pwrseq *pwrseq = host->pwrseq;
--
--	if (pwrseq && pwrseq->ops->power_off)
--		pwrseq->ops->power_off(host);
--}
--
--void mmc_pwrseq_reset(struct mmc_host *host)
--{
--	struct mmc_pwrseq *pwrseq = host->pwrseq;
--
--	if (pwrseq && pwrseq->ops->reset)
--		pwrseq->ops->reset(host);
--}
--
--void mmc_pwrseq_free(struct mmc_host *host)
--{
--	struct mmc_pwrseq *pwrseq = host->pwrseq;
--
--	if (pwrseq) {
--		module_put(pwrseq->owner);
--		host->pwrseq = NULL;
++	serdev_device_close(hu->serdev);
++	ret = qca_regulator_enable(qcadev);
++	if (ret)
++		return ret;
+ 
+-	/* For wcn6750 need to enable gpio bt_en */
+-	if (qcadev->bt_en) {
+-		gpiod_set_value_cansleep(qcadev->bt_en, 0);
+-		msleep(50);
+-		gpiod_set_value_cansleep(qcadev->bt_en, 1);
+-		msleep(150);
+-		if (qcadev->sw_ctrl) {
+-			sw_ctrl_state = gpiod_get_value_cansleep(qcadev->sw_ctrl);
+-			bt_dev_dbg(hu->hdev, "SW_CTRL is %d", sw_ctrl_state);
+-		}
++	ret = serdev_device_open(hu->serdev);
++	if (ret) {
++		bt_dev_err(hu->hdev, "failed to open port");
++		return ret;
+ 	}
+ 
+ 	if (qca_is_wcn399x(soc_type)) {
+@@ -1856,7 +1841,6 @@ static void qca_power_shutdown(struct hci_uart *hu)
+ 	struct qca_data *qca = hu->priv;
+ 	unsigned long flags;
+ 	enum qca_btsoc_type soc_type = qca_soc_type(hu);
+-	bool sw_ctrl_state;
+ 
+ 	/* From this point we go into power off state. But serial port is
+ 	 * still open, stop queueing the IBS data and flush all the buffered
+@@ -1878,18 +1862,8 @@ static void qca_power_shutdown(struct hci_uart *hu)
+ 	if (qca_is_wcn399x(soc_type)) {
+ 		host_set_baudrate(hu, 2400);
+ 		qca_send_power_pulse(hu, false);
+-		qca_regulator_disable(qcadev);
+-	} else if (soc_type == QCA_WCN6750) {
+-		gpiod_set_value_cansleep(qcadev->bt_en, 0);
+-		msleep(100);
+-		qca_regulator_disable(qcadev);
+-		if (qcadev->sw_ctrl) {
+-			sw_ctrl_state = gpiod_get_value_cansleep(qcadev->sw_ctrl);
+-			bt_dev_dbg(hu->hdev, "SW_CTRL is %d", sw_ctrl_state);
+-		}
+-	} else if (qcadev->bt_en) {
+-		gpiod_set_value_cansleep(qcadev->bt_en, 0);
+ 	}
++	qca_regulator_disable(qcadev);
+ 
+ 	set_bit(QCA_BT_OFF, &qca->flags);
+ }
+@@ -1919,20 +1893,39 @@ static int qca_regulator_enable(struct qca_serdev *qcadev)
+ 	int ret;
+ 
+ 	/* Already enabled */
+-	if (qcadev->vregs_on)
+-		return 0;
++	if (!qcadev->vregs_on) {
++		BT_DBG("enabling %d regulators)", qcadev->num_vregs);
+ 
+-	BT_DBG("enabling %d regulators)", qcadev->num_vregs);
++		ret = regulator_bulk_enable(qcadev->num_vregs, qcadev->vreg_bulk);
++		if (ret)
++			return ret;
+ 
+-	ret = regulator_bulk_enable(qcadev->num_vregs, qcadev->vreg_bulk);
+-	if (ret)
+-		return ret;
++		qcadev->vregs_on = true;
+ 
+-	qcadev->vregs_on = true;
++		if (qca_is_wcn399x(qcadev->btsoc_type) ||
++		    qca_is_wcn6750(qcadev->btsoc_type)) {
++			ret = clk_prepare_enable(qcadev->susclk);
++			if (ret) {
++				regulator_bulk_disable(qcadev->num_vregs, qcadev->vreg_bulk);
++				return ret;
++			}
++		}
++	}
+ 
+-	ret = clk_prepare_enable(qcadev->susclk);
+-	if (ret)
+-		qca_regulator_disable(qcadev);
++	/* For wcn6750 need to enable gpio bt_en */
++	if (qcadev->bt_en) {
++		gpiod_set_value_cansleep(qcadev->bt_en, 0);
++		msleep(50);
++		gpiod_set_value_cansleep(qcadev->bt_en, 1);
++		msleep(150);
++	}
++
++	if (qcadev->sw_ctrl) {
++		bool sw_ctrl_state;
++
++		sw_ctrl_state = gpiod_get_value_cansleep(qcadev->sw_ctrl);
++		bt_dev_dbg(qcadev->serdev_hu.hdev, "SW_CTRL is %d", sw_ctrl_state);
++	}
+ 
+ 	return ret;
+ }
+@@ -1942,14 +1935,27 @@ static void qca_regulator_disable(struct qca_serdev *qcadev)
+ 	if (!qcadev)
+ 		return;
+ 
++	if (qcadev->bt_en) {
++		gpiod_set_value_cansleep(qcadev->bt_en, 0);
++		msleep(100);
++	}
++
+ 	/* Already disabled? */
+-	if (!qcadev->vregs_on)
+-		return;
++	if (qcadev->vregs_on) {
++		regulator_bulk_disable(qcadev->num_vregs, qcadev->vreg_bulk);
++		qcadev->vregs_on = false;
+ 
+-	regulator_bulk_disable(qcadev->num_vregs, qcadev->vreg_bulk);
+-	qcadev->vregs_on = false;
++		if (qca_is_wcn399x(qcadev->btsoc_type) ||
++		    qca_is_wcn6750(qcadev->btsoc_type))
++			clk_disable_unprepare(qcadev->susclk);
++	}
++
++	if (qcadev->sw_ctrl) {
++		bool sw_ctrl_state;
+ 
+-	clk_disable_unprepare(qcadev->susclk);
++		sw_ctrl_state = gpiod_get_value_cansleep(qcadev->sw_ctrl);
++		bt_dev_dbg(qcadev->serdev_hu.hdev, "SW_CTRL is %d", sw_ctrl_state);
++	}
+ }
+ 
+ static int qca_init_regulators(struct qca_serdev *qcadev, struct device *dev,
+@@ -2018,17 +2024,17 @@ static int qca_serdev_probe(struct serdev_device *serdev)
+ 		}
+ 
+ 		qcadev->vregs_on = false;
 -	}
--}
--
--int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
--{
--	if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
--		return -EINVAL;
--
--	mutex_lock(&pwrseq_list_mutex);
--	list_add(&pwrseq->pwrseq_node, &pwrseq_list);
--	mutex_unlock(&pwrseq_list_mutex);
--
--	return 0;
--}
--EXPORT_SYMBOL_GPL(mmc_pwrseq_register);
--
--void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq)
--{
--	if (pwrseq) {
--		mutex_lock(&pwrseq_list_mutex);
--		list_del(&pwrseq->pwrseq_node);
--		mutex_unlock(&pwrseq_list_mutex);
--	}
--}
--EXPORT_SYMBOL_GPL(mmc_pwrseq_unregister);
-diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
-deleted file mode 100644
-index f3bb103db9ad..000000000000
---- a/drivers/mmc/core/pwrseq.h
-+++ /dev/null
-@@ -1,58 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0-only */
--/*
-- * Copyright (C) 2014 Linaro Ltd
-- *
-- * Author: Ulf Hansson <ulf.hansson@linaro.org>
-- */
--#ifndef _MMC_CORE_PWRSEQ_H
--#define _MMC_CORE_PWRSEQ_H
--
--#include <linux/types.h>
--
--struct mmc_host;
--struct device;
--struct module;
--
--struct mmc_pwrseq_ops {
--	void (*pre_power_on)(struct mmc_host *host);
--	void (*post_power_on)(struct mmc_host *host);
--	void (*power_off)(struct mmc_host *host);
--	void (*reset)(struct mmc_host *host);
--};
--
--struct mmc_pwrseq {
--	const struct mmc_pwrseq_ops *ops;
--	struct device *dev;
--	struct list_head pwrseq_node;
--	struct module *owner;
--};
--
--#ifdef CONFIG_OF
--
--int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq);
--void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq);
--
--int mmc_pwrseq_alloc(struct mmc_host *host);
--void mmc_pwrseq_pre_power_on(struct mmc_host *host);
--void mmc_pwrseq_post_power_on(struct mmc_host *host);
--void mmc_pwrseq_power_off(struct mmc_host *host);
--void mmc_pwrseq_reset(struct mmc_host *host);
--void mmc_pwrseq_free(struct mmc_host *host);
--
--#else
--
--static inline int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
--{
--	return -ENOSYS;
--}
--static inline void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq) {}
--static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
--static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
--static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
--static inline void mmc_pwrseq_power_off(struct mmc_host *host) {}
--static inline void mmc_pwrseq_reset(struct mmc_host *host) {}
--static inline void mmc_pwrseq_free(struct mmc_host *host) {}
--
--#endif
--
--#endif
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 0abd47e9ef9b..1673e37f6028 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -16,6 +16,7 @@
- #include <linux/mmc/pm.h>
- #include <linux/dma-direction.h>
- #include <linux/keyslot-manager.h>
-+#include <linux/pwrseq/consumer.h>
  
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
-@@ -278,7 +279,6 @@ struct mmc_context_info {
- };
+-	qcadev->bt_en = devm_gpiod_get_optional(&serdev->dev, "enable",
+-			GPIOD_OUT_LOW);
+-	if (!qcadev->bt_en) {
+-		if (qca_is_wcn6750(data->soc_type)) {
+-			dev_err(&serdev->dev, "failed to acquire BT_EN gpio\n");
+-			power_ctrl_enabled = false;
+-		} else if (!qca_is_wcn399x(data->soc_type)) {
+-			dev_warn(&serdev->dev, "failed to acquire enable gpio\n");
+-			power_ctrl_enabled = false;
++		qcadev->bt_en = devm_gpiod_get_optional(&serdev->dev, "enable",
++				GPIOD_OUT_LOW);
++		if (!qcadev->bt_en) {
++			if (qca_is_wcn6750(data->soc_type)) {
++				dev_err(&serdev->dev, "failed to acquire BT_EN gpio\n");
++				power_ctrl_enabled = false;
++			} else if (!qca_is_wcn399x(data->soc_type)) {
++				dev_warn(&serdev->dev, "failed to acquire enable gpio\n");
++				power_ctrl_enabled = false;
++			}
+ 		}
+ 	}
  
- struct regulator;
--struct mmc_pwrseq;
- 
- struct mmc_supply {
- 	struct regulator *vmmc;		/* Card power supply */
-@@ -294,7 +294,7 @@ struct mmc_host {
- 	struct device		class_dev;
- 	int			index;
- 	const struct mmc_host_ops *ops;
--	struct mmc_pwrseq	*pwrseq;
-+	struct pwrseq		*pwrseq;
- 	unsigned int		f_min;
- 	unsigned int		f_max;
- 	unsigned int		f_init;
 -- 
 2.30.2
 
