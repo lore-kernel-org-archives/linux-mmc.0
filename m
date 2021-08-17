@@ -2,192 +2,182 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36915C4338F
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 07:37:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E72D7C432BE
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 07:55:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 181E060EB5
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 07:37:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CEAD86023B
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 07:55:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238512AbhHQHiL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Aug 2021 03:38:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45752 "EHLO
+        id S238667AbhHQHzw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Aug 2021 03:55:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234402AbhHQHiL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 03:38:11 -0400
-Received: from mail-vk1-xa35.google.com (mail-vk1-xa35.google.com [IPv6:2607:f8b0:4864:20::a35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D2F4C061764
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 00:37:38 -0700 (PDT)
-Received: by mail-vk1-xa35.google.com with SMTP id j26so3214458vkn.4
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 00:37:38 -0700 (PDT)
+        with ESMTP id S234581AbhHQHzv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 03:55:51 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5ACEEC0613CF
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 00:55:19 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id n5so10357032pjt.4
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 00:55:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=XVb/6r0UvvwsiAdMhUIlNLmTGfl4MxPdzSqrEHYP2EU=;
-        b=Gh8m1IDuiDqiRng7TWN0EEbBdzHYZRHi/BPtICkDzyed59fEAFIK3MrSdvbItqAdAa
-         LU9DurtK8cLSNOD9utsg+giNFoO0oool+POHMgtEn0sUAeRw6Giau0WC1Y7ntpYkMC5m
-         BLEXfneVpEhbR+m22PVFusfFbj6yXwUz0DritbcO2LBOJAnw8UUdETe2KCtPfd2RM/Pa
-         Y56xGr5Mfaa5SrfJkIT3sOMGeglhujzFdd9qobpbWtiLs8DmctYYaivxm7sFsQUt3Kzv
-         lRBRKgavr348UEKhUp5tQpbXf3hSdKASd6m8S8XYUk3I6b2n3PINS5wtZK3C8RNA5lA+
-         GdPQ==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=6syxEk4ci6YIB/Nq5OYMmva/mb8yTCwuOVtI6kBv8o4=;
+        b=ACQXwBJ7OYjyZRVhhS/c9nneyhB/7GFHh3dEptJSMrZINFg36aQMQ7Gt7s7mEUBpCw
+         zQlnh/X4OgBYC+KUUJhyCLfP1qSGXkpJPWAGfJpM/INHjdAZ8/L1JkEYsFztN3Yjcf8Y
+         CLx5rb8MRnnLnlOw941FjpRCL/gP5pp6YSMCeI+89Jy/Rd1+N1g4DWNkDQt5p2lrVfbf
+         /2f4gxbIqWPYLcL72Mw6S4MUH55MP9SVIVTvv1bjke3ugxDHQALvD0J7WbGxZqFUjEZx
+         7P1AM3kpvDdhJRiWVIeigZKSst/k+rzUIj9Law8crvuO6T67AGjOgt6Tme7gr0jaocjL
+         3BQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=XVb/6r0UvvwsiAdMhUIlNLmTGfl4MxPdzSqrEHYP2EU=;
-        b=guz4PNVggLf9jvWa0GpOqp5cAyKViJjK4Mbc1DiDdftHHsGoFCBoD5pbDx+Hrj8609
-         97SaMB5ijZiCbpJePa+jbzHyvujQzilVY3quQAiaseKb098eyZRuB/nzfITDY81GxtCO
-         7/nVgEu6an28AzYExX0+Ppu4yQ3bfDWliD6SH+ZKSIEJEgk07WUDA3mWCu6fgYLQ8xfV
-         48S8vEBBS8sFAtqbntxpUIpZIa9uyx1eQU46WMRkJqtUxqjSv52JQC7a2hQWPjUQ6C/u
-         1dIVqIGDIz2cReHxEr3L10RMaL79LGgk0lCMaKjYvtEuTKU1beK7ROQb8UJ4B2CvvX9C
-         Y6eQ==
-X-Gm-Message-State: AOAM532dkITXfRRwapl9/hnxKFemst2L70Ymbjfvs+XYx/2L/tT2hy/d
-        hPKk25cziuxFhRE4A6Jr5hf/9Bvl22NzIYmUUUANYw==
-X-Google-Smtp-Source: ABdhPJywh2CZFLOB7ZzACQksK0ZiO+cpPq0ioKnhklOoEihoKroCYeFYMiOJhL7T0ptPyIYWSpKpC0dptNRWDZYXmc4=
-X-Received: by 2002:a1f:a555:: with SMTP id o82mr1598874vke.8.1629185857318;
- Tue, 17 Aug 2021 00:37:37 -0700 (PDT)
-MIME-Version: 1.0
-References: <1629117508-4886-1-git-send-email-haibo.chen@nxp.com>
- <1629117508-4886-3-git-send-email-haibo.chen@nxp.com> <CAPDyKFqagBkbnxxh+KWbV2=sjkj3mGrKXUweOL5TrMJ1-Hmnww@mail.gmail.com>
- <VI1PR04MB529432136DB9F5FEB5F5E98090FE9@VI1PR04MB5294.eurprd04.prod.outlook.com>
-In-Reply-To: <VI1PR04MB529432136DB9F5FEB5F5E98090FE9@VI1PR04MB5294.eurprd04.prod.outlook.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 17 Aug 2021 09:37:00 +0200
-Message-ID: <CAPDyKFqv9R4R8u9vQLkDMFQy3C-+=B-_g4drktq9ncHhzX3pSw@mail.gmail.com>
-Subject: Re: [PATCH 3/6] dt-bindings: mmc: fsl-imx-esdhc: add
- fsl,sdio-async-interrupt-enabled binding
-To:     Bough Chen <haibo.chen@nxp.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Guo <shawnguo@kernel.org>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=6syxEk4ci6YIB/Nq5OYMmva/mb8yTCwuOVtI6kBv8o4=;
+        b=aghFvgKQPONhdLCJ13LjLZKHfG0RSE6AYXmjyk1ZGIb32MUXA1n7XKEEkfiB0ySjS6
+         c79r3GD5qLqt1tYhaj11OL8elXXhEm3v++G7VxRu/tGr4adYG1+dkA+qlfxj+OKnprvi
+         OwJ95XunR42vzQ/ZU/URCAXkrkmP7q7Uzt4GRWLsCgFyzvjJI9z6bBqLq7hMM0V/fIIu
+         W/3mE03NCcKLgNbYdp3XkFZuWpt3tpuTT8XQfj843hg2z1mG1znIjonxw81IXrxeqxAG
+         AUEau5H4PSpe9EAY+fEkEp8ohUmqGrQaQA+YuzC33bjZDIHdyMVZyqQnYzhncDbA4A5i
+         wESg==
+X-Gm-Message-State: AOAM530jfL7uf1b4XGJKJtj6TmpBqm2qZN3pqGFC4DDctQuirmrmmSqe
+        iYlL0Wvmj1dXvbKaqhKjFlhMXw==
+X-Google-Smtp-Source: ABdhPJy9z80wO3ZS4ZOBoRu271xrntCgw/Td4lOHD9BJvY7rOCcDAdlvae5dCy1DGcWdIK214rqywQ==
+X-Received: by 2002:a17:90b:4a09:: with SMTP id kk9mr2300035pjb.163.1629186918789;
+        Tue, 17 Aug 2021 00:55:18 -0700 (PDT)
+Received: from localhost ([122.172.201.85])
+        by smtp.gmail.com with ESMTPSA id c12sm1471425pfl.56.2021.08.17.00.55.18
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Aug 2021 00:55:18 -0700 (PDT)
+Date:   Tue, 17 Aug 2021 13:25:15 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Sascha Hauer <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        DTML <devicetree@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-clk@vger.kernel.org
+Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
+Message-ID: <20210817075515.vyyv7z37e6jcrhsl@vireshk-i7>
+References: <20210817012754.8710-1-digetx@gmail.com>
+ <20210817012754.8710-2-digetx@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210817012754.8710-2-digetx@gmail.com>
+User-Agent: NeoMutt/20180716-391-311a52
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 17 Aug 2021 at 08:41, Bough Chen <haibo.chen@nxp.com> wrote:
->
-> > -----Original Message-----
-> > From: Ulf Hansson [mailto:ulf.hansson@linaro.org]
-> > Sent: 2021=E5=B9=B48=E6=9C=8816=E6=97=A5 21:43
-> > To: Bough Chen <haibo.chen@nxp.com>
-> > Cc: Adrian Hunter <adrian.hunter@intel.com>; Shawn Guo
-> > <shawnguo@kernel.org>; Rob Herring <robh+dt@kernel.org>; Sascha Hauer
-> > <s.hauer@pengutronix.de>; Sascha Hauer <kernel@pengutronix.de>; Fabio
-> > Estevam <festevam@gmail.com>; linux-mmc <linux-mmc@vger.kernel.org>;
-> > dl-linux-imx <linux-imx@nxp.com>; DTML <devicetree@vger.kernel.org>; Li=
-nux
-> > ARM <linux-arm-kernel@lists.infradead.org>
-> > Subject: Re: [PATCH 3/6] dt-bindings: mmc: fsl-imx-esdhc: add
-> > fsl,sdio-async-interrupt-enabled binding
-> >
-> > On Mon, 16 Aug 2021 at 15:00, <haibo.chen@nxp.com> wrote:
-> > >
-> > > From: Haibo Chen <haibo.chen@nxp.com>
-> > >
-> > > Add a new fsl,sdio-async-interrupt-enabled binding for sdio devices
-> > > which enable the async interrupt function. When get this property,
-> > > driver will avoid to use DAT[1] for hardware auto tuning check.
-> > >
-> > > Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> > > ---
-> > >  .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml         | 10
-> > ++++++++++
-> > >  1 file changed, 10 insertions(+)
-> > >
-> > > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > > b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > > index b5baf439fbac..8a9f1775b0e2 100644
-> > > --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> > > @@ -122,6 +122,16 @@ properties:
-> > >        - const: state_200mhz
-> > >        - const: sleep
-> > >
-> > > +  fsl,sdio-async-interrupt-enabled:
-> > > +    description: |
-> > > +      Recommend for SDIO cards that enables SDIO async interrupt for
-> > SDR104 and SDR50
-> > > +      operating modes. SDIO async interrupt uses DAT[1] to signal th=
-e
-> > card's interrupt.
-> > > +      uSDHC tuning mechanism must use DAT[0] and CMD signals to avoi=
-d
-> > a possible
-> > > +      conflict and incorrect delay line calculated by the uSDHC auto=
- tuning
-> > mechanism.
-> > > +      Enabling this device tree property is only recommended for lay=
-outs
-> > that are
-> > > +      matching the SD interface length.
-> > > +    type: boolean
-> >
-> > We already have a common mmc property, "cap-sdio-irq", that tells wheth=
-er
-> > the controller supports SDIO irqs (which is delivered on DAT1).
-> >
-> > Can't you use this instead?
-> >
-> Hi Ulf,
->
-> Thanks for your quick reply!
->
-> According to our WiFi team reply, the sdio-irq has two types. Sync interr=
-upt and Async interrupt.
-> When WiFi send out the interrupt signal during the interrupt period, if i=
-t sync with clock pad(just as
-> when send out data), then this is sync interrupt. When this interrupt not=
- sync with clock, it is async
-> interrupt. Async interrupt has a better overall performance than sync int=
-errupt.
+On 17-08-21, 04:27, Dmitry Osipenko wrote:
+> Add dev_pm_opp_sync() helper which syncs OPP table with hardware state
+> and vice versa.
+> 
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  drivers/opp/core.c     | 42 +++++++++++++++++++++++++++++++++++++++---
+>  include/linux/pm_opp.h |  6 ++++++
+>  2 files changed, 45 insertions(+), 3 deletions(-)
+> 
+> diff --git a/drivers/opp/core.c b/drivers/opp/core.c
+> index 5543c54dacc5..18016e49605f 100644
+> --- a/drivers/opp/core.c
+> +++ b/drivers/opp/core.c
+> @@ -939,7 +939,8 @@ static int _set_required_opps(struct device *dev,
+>  	return ret;
+>  }
+>  
+> -static void _find_current_opp(struct device *dev, struct opp_table *opp_table)
+> +static struct dev_pm_opp *
+> +_find_current_opp(struct device *dev, struct opp_table *opp_table)
+>  {
+>  	struct dev_pm_opp *opp = ERR_PTR(-ENODEV);
+>  	unsigned long freq;
+> @@ -961,7 +962,7 @@ static void _find_current_opp(struct device *dev, struct opp_table *opp_table)
+>  		mutex_unlock(&opp_table->lock);
+>  	}
+>  
+> -	opp_table->current_opp = opp;
+> +	return opp;
+>  }
+>  
+>  static int _disable_opp_table(struct device *dev, struct opp_table *opp_table)
+> @@ -1003,7 +1004,7 @@ static int _set_opp(struct device *dev, struct opp_table *opp_table,
+>  
+>  	/* Find the currently set OPP if we don't know already */
+>  	if (unlikely(!opp_table->current_opp))
+> -		_find_current_opp(dev, opp_table);
+> +		opp_table->current_opp = _find_current_opp(dev, opp_table);
+>  
+>  	old_opp = opp_table->current_opp;
+>  
+> @@ -2931,3 +2932,38 @@ int dev_pm_opp_sync_regulators(struct device *dev)
+>  	return ret;
+>  }
+>  EXPORT_SYMBOL_GPL(dev_pm_opp_sync_regulators);
+> +
+> +/**
+> + * dev_pm_opp_sync() - Sync OPP state
+> + * @dev:	device for which we do this operation
+> + *
+> + * Initialize OPP table accordingly to current clock rate or
+> + * first available OPP if clock not available for this device.
+> + *
+> + * Return: 0 on success or a negative error value.
+> + */
+> +int dev_pm_opp_sync(struct device *dev)
+> +{
+> +	struct opp_table *opp_table;
+> +	struct dev_pm_opp *opp;
+> +	int ret = 0;
+> +
+> +	/* Device may not have OPP table */
+> +	opp_table = _find_opp_table(dev);
+> +	if (IS_ERR(opp_table))
+> +		return 0;
+> +
+> +	if (!_get_opp_count(opp_table))
+> +		goto put_table;
+> +
+> +	opp = _find_current_opp(dev, opp_table);
+> +	ret = _set_opp(dev, opp_table, opp, opp->rate);
 
-The async interrupt is what we refer to as SDIO irqs, which is being
-delivered on DAT1.
+And I am not sure how this will end up working, since new OPP will be
+equal to old one. Since I see you call this from resume() at many
+places.
 
->
-> Logically, auto tuning circuit should only take care of the data and cmd =
-line, and ignore interrupt signal.
-> But unfortunately current i.mx-usdhc IP do not ignore interrupt signal. S=
-o it detect the interrupt signal,
-> and take this signal as a data signal, and adjust the delay cell accordin=
-gly. For sync interrupt, due to it
-> sync with clock, so no affect, but for async interrupt, it will involve w=
-rong delay cell change randomly.
+what exactly are you trying to do here ? Those details would be good
+to have in commit log as well, I haven't really followed V7 of your
+series.
 
-Okay.
-
->
-> I involve a new property here, because in sdhci.c, we default use this "c=
-ap-sdio-irq" for all sdio/sd/mmc.
-
-I guess it's the similar variant of the controller for all slots then.
-
-It can be debated whether the proper thing is to set "cap-sdio-irq"
-only for the SDIO card slot. I think so, (and it's already being used
-like that) if there is an embedded SDIO card attached, because
-cap-sdio-irq would not make sense otherwise.
-
-> I need one property which can use only for sdio device, and only when sdi=
-o device enable async-interrupt.
-
-If you really need a new DT property (let's discuss that more in patch
-4/6), I suggest you add something along the lines of a
-"broken-auto-tuning" DT property instead, because that is in principle
-what this should be about, isn't it?
-
-Kind regards
-Uffe
+-- 
+viresh
