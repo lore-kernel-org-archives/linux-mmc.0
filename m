@@ -2,227 +2,224 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05132C43216
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:56:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CE0CC4320A
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:30:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DCAE360EE0
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:56:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 54EC960F35
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 01:30:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237706AbhHQA46 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 20:56:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40080 "EHLO
+        id S233389AbhHQBag (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 21:30:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47896 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235784AbhHQAzu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 20:55:50 -0400
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 509BDC0613CF
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:18 -0700 (PDT)
-Received: by mail-lj1-x22f.google.com with SMTP id d16so11985964ljq.4
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:18 -0700 (PDT)
+        with ESMTP id S230304AbhHQBaf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 21:30:35 -0400
+Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EA49C061764;
+        Mon, 16 Aug 2021 18:30:03 -0700 (PDT)
+Received: by mail-lj1-x233.google.com with SMTP id f2so8516229ljn.1;
+        Mon, 16 Aug 2021 18:30:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=wdu5a/cMDbATqqiF4Vpee9GEfvuO3Zi0W+N+1NhGvAs=;
-        b=KadqBNUFvId8+sROkIoWW2FnIiISPA/xpZWhqmtLgHDQHk5ltVM9Jgu60gY6RHkhhU
-         LxZfK3sQvb2jKcgpbunWaDbUXqzuuNAoBiRd/+aZ6ZlKUbctO+qgDzwoU8spR3DMw9/R
-         2ErU12GwvauMTdGSM+eBF1gUNlVHdg+JTKJ6WJ6UIq9jrevyeoLYCbT8n83RcBz5AgPA
-         7ITGMU2aIZBqx+9cPVoj5uPuPEyFDbj3EsmIoCMwaCeme7ugesPolg0LvwnnyEYGVBd0
-         HQkA6lOYvqUppAIJVQdlmtl51ODC6UeKWmNnXFk6X9c90iuFUn3oHF9d1QqEl3AV1jCG
-         13Gg==
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bO5VmfaNpjVVREGufhEjpS0RVmiy0+tDrVzrBmR/Klk=;
+        b=DGL5unFzfWW6yGqVG2gtuY8Y7AYqNgW1kYmTAFI1UmotEReGMPQ7+/nurfdNtSw6kX
+         7t41EQ68yYpDkvs9bN8NZdDPqTqVXnPDOJyXnEBa7RaAsCXrib6QePdF4vbI2GIqUGJ/
+         MPRdlcA74ujsVmtLo3Swnwn/AAas5jW+pCF/Ln6WWt5EGHFoZNs+CovnkzUBoMWGJbOR
+         l3cHhI403t5GFk3fPzqdH+uHeSvXbH+QSIOscqju5HtKqtPZlgeiwTgbYFuVwhYOAlz0
+         uy0kJNeVrbzHlxDgJz3intJg8+X3fA1Hn7KHJHdpqaD4aGtti/w8DsC5NTsZ+HxU3PfJ
+         E64Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=wdu5a/cMDbATqqiF4Vpee9GEfvuO3Zi0W+N+1NhGvAs=;
-        b=P+cQV4QPSBvJhBMrkpHYkVj2JTl1nWpQHom0WxB2cLHD9p+GMbrkt9DKKDlFzxyTlb
-         TmzD9zI9G59B77HOiebP3PB0Ew8kUXEk2C/zzeqKG4HkjHgS+LECmy4IA3GxvNnP+EFz
-         bnTWqHGS/SSj8RsFy99cFNR/Fc5XBb+8FFitCA36nSonMN4t6hfGjLAQX7XETAfB0iQB
-         39O0bJiFxL5+3Ja1OyRTrP77T63pE1HY7hZpYHORU2HBhbCdfYbDGRUD8ISxiS3+DuO7
-         zM31iVUpLlmZVdnNgC5QTI3MT5lprpy1olFB+eG5hsRrgHGonKVmANNwaL07tXXMSk1Y
-         8j4Q==
-X-Gm-Message-State: AOAM531ji4twGcuovFHesNEyOJ6szkrZ1v+kJATWPRg/bEL7QT/aHSZ4
-        cFkcVCrf3OAAjp6nxaVLsj3G6g==
-X-Google-Smtp-Source: ABdhPJyykVmUp2+uL524zpEVpdzv1pv0gVNB4w0uBgg1/3eS2V8TRDR8U1hnV+vjiLEctppv61IqLQ==
-X-Received: by 2002:a05:651c:1257:: with SMTP id h23mr769675ljh.49.1629161716645;
-        Mon, 16 Aug 2021 17:55:16 -0700 (PDT)
-Received: from eriador.lan ([37.153.55.125])
-        by smtp.gmail.com with ESMTPSA id z6sm40719lfb.251.2021.08.16.17.55.15
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=bO5VmfaNpjVVREGufhEjpS0RVmiy0+tDrVzrBmR/Klk=;
+        b=hZfvOIsgGrS9H6em1OWnLBGH/l4VYAjafHwT1tRLj6ZvLRqnB2tGIF2m2oyqZxQUsB
+         pG5b7lUbuRrRwQsMOk/EQzuWMQZCb3/U74SrOEDVmPyIrSOD4mXj5LNuB3+vJiTGMNJI
+         DQ5xPdbDHjUl4VHUZArdy0Xe5TZooq/1hPtRWXnfWcjapUtWc0/sgSYYXobv9HWUA3GU
+         0MAQTl0tEoJg5XUacOUQ5BWa0vj7jI54LYZqvx1KC4jE1OjdZhLUtHlS59g/USTuM++v
+         vW9xqEQc2Y9Tho8VXN4STlbE9/+iAarP55Um/OpJfhjpkqdOJueTBMyuPvVtSy6o694A
+         F5FQ==
+X-Gm-Message-State: AOAM532MHNzYZXluzHCdyWthUixU265yXTKOpV86E/QEVs2/dt4WXXD8
+        ii4Z1NAWK50xuxAbysUZMwo=
+X-Google-Smtp-Source: ABdhPJzfD+REHIwuiGYg1fuxQjjlpDVZHYlge+vtvAZqlGgG4tIZ0Of68hupSFQ0Tvw+LsNO5cfhqA==
+X-Received: by 2002:a05:651c:985:: with SMTP id b5mr890013ljq.78.1629163801449;
+        Mon, 16 Aug 2021 18:30:01 -0700 (PDT)
+Received: from localhost.localdomain (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
+        by smtp.gmail.com with ESMTPSA id g30sm46607lfj.298.2021.08.16.18.30.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Aug 2021 17:55:16 -0700 (PDT)
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-To:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Mon, 16 Aug 2021 18:30:01 -0700 (PDT)
+From:   Dmitry Osipenko <digetx@gmail.com>
+To:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>
-Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
-Subject: [RFC PATCH 04/15] ath10k: add support for pwrseq sequencing
-Date:   Tue, 17 Aug 2021 03:54:56 +0300
-Message-Id: <20210817005507.1507580-5-dmitry.baryshkov@linaro.org>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
-References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>
+Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-clk@vger.kernel.org
+Subject: [PATCH v8 00/34] NVIDIA Tegra power management patches for 5.16
+Date:   Tue, 17 Aug 2021 04:27:20 +0300
+Message-Id: <20210817012754.8710-1-digetx@gmail.com>
+X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Power sequencing for Qualcomm WiFi+BT chipsets are being reworked to use
-pwrseq rather than individually handling all the regulators. Add support
-for pwrseq to ath10k SNOC driver.
+This series adds runtime PM support to Tegra drivers and enables core
+voltage scaling for Tegra20/30 SoCs, resolving overheating troubles.
 
-Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
----
- drivers/net/wireless/ath/ath10k/snoc.c | 63 ++++++++++++++++++++------
- drivers/net/wireless/ath/ath10k/snoc.h |  2 +
- 2 files changed, 52 insertions(+), 13 deletions(-)
+All patches should go via Tegra tree because they are interdependent,
+please review and ack.
 
-diff --git a/drivers/net/wireless/ath/ath10k/snoc.c b/drivers/net/wireless/ath/ath10k/snoc.c
-index ea00fbb15601..870ed28d01a6 100644
---- a/drivers/net/wireless/ath/ath10k/snoc.c
-+++ b/drivers/net/wireless/ath/ath10k/snoc.c
-@@ -14,6 +14,7 @@
- #include <linux/regulator/consumer.h>
- #include <linux/of_address.h>
- #include <linux/iommu.h>
-+#include <linux/pwrseq/consumer.h>
- 
- #include "ce.h"
- #include "coredump.h"
-@@ -42,7 +43,6 @@ static char *const ce_name[] = {
- };
- 
- static const char * const ath10k_regulators[] = {
--	"vdd-0.8-cx-mx",
- 	"vdd-1.8-xo",
- 	"vdd-1.3-rfa",
- 	"vdd-3.3-ch0",
-@@ -1010,10 +1010,17 @@ static int ath10k_hw_power_on(struct ath10k *ar)
- 
- 	ath10k_dbg(ar, ATH10K_DBG_SNOC, "soc power on\n");
- 
--	ret = regulator_bulk_enable(ar_snoc->num_vregs, ar_snoc->vregs);
-+	if (ar_snoc->pwrseq)
-+		ret = pwrseq_full_power_on(ar_snoc->pwrseq);
-+	else
-+		ret = regulator_bulk_enable(ar_snoc->num_vregs, ar_snoc->vregs);
- 	if (ret)
- 		return ret;
- 
-+	ret = regulator_enable(ar_snoc->vreg_cx_mx);
-+	if (ret)
-+		goto vreg_bulk_off;
-+
- 	ret = clk_bulk_prepare_enable(ar_snoc->num_clks, ar_snoc->clks);
- 	if (ret)
- 		goto vreg_off;
-@@ -1021,7 +1028,13 @@ static int ath10k_hw_power_on(struct ath10k *ar)
- 	return ret;
- 
- vreg_off:
--	regulator_bulk_disable(ar_snoc->num_vregs, ar_snoc->vregs);
-+	regulator_disable(ar_snoc->vreg_cx_mx);
-+vreg_bulk_off:
-+	if (ar_snoc->pwrseq)
-+		pwrseq_power_off(ar_snoc->pwrseq);
-+	else
-+		regulator_bulk_disable(ar_snoc->num_vregs, ar_snoc->vregs);
-+
- 	return ret;
- }
- 
-@@ -1033,6 +1046,14 @@ static int ath10k_hw_power_off(struct ath10k *ar)
- 
- 	clk_bulk_disable_unprepare(ar_snoc->num_clks, ar_snoc->clks);
- 
-+	regulator_disable(ar_snoc->vreg_cx_mx);
-+
-+	if (ar_snoc->pwrseq) {
-+		pwrseq_power_off(ar_snoc->pwrseq);
-+
-+		return 0;
-+	}
-+
- 	return regulator_bulk_disable(ar_snoc->num_vregs, ar_snoc->vregs);
- }
- 
-@@ -1691,20 +1712,36 @@ static int ath10k_snoc_probe(struct platform_device *pdev)
- 		goto err_release_resource;
- 	}
- 
--	ar_snoc->num_vregs = ARRAY_SIZE(ath10k_regulators);
--	ar_snoc->vregs = devm_kcalloc(&pdev->dev, ar_snoc->num_vregs,
--				      sizeof(*ar_snoc->vregs), GFP_KERNEL);
--	if (!ar_snoc->vregs) {
--		ret = -ENOMEM;
-+	ar_snoc->pwrseq = devm_pwrseq_get_optional(&pdev->dev, "wifi");
-+	if (IS_ERR(ar_snoc->pwrseq)) {
-+		ret = PTR_ERR(ar_snoc->pwrseq);
-+		if (ret != -EPROBE_DEFER)
-+			ath10k_warn(ar, "failed to acquire pwrseq: %d\n", ret);
- 		goto err_free_irq;
- 	}
--	for (i = 0; i < ar_snoc->num_vregs; i++)
--		ar_snoc->vregs[i].supply = ath10k_regulators[i];
- 
--	ret = devm_regulator_bulk_get(&pdev->dev, ar_snoc->num_vregs,
--				      ar_snoc->vregs);
--	if (ret < 0)
-+	if (!ar_snoc->pwrseq) {
-+		ar_snoc->num_vregs = ARRAY_SIZE(ath10k_regulators);
-+		ar_snoc->vregs = devm_kcalloc(&pdev->dev, ar_snoc->num_vregs,
-+				sizeof(*ar_snoc->vregs), GFP_KERNEL);
-+		if (!ar_snoc->vregs) {
-+			ret = -ENOMEM;
-+			goto err_free_irq;
-+		}
-+		for (i = 0; i < ar_snoc->num_vregs; i++)
-+			ar_snoc->vregs[i].supply = ath10k_regulators[i];
-+
-+		ret = devm_regulator_bulk_get(&pdev->dev, ar_snoc->num_vregs,
-+				ar_snoc->vregs);
-+		if (ret < 0)
-+			goto err_free_irq;
-+	}
-+
-+	ar_snoc->vreg_cx_mx = devm_regulator_get(&pdev->dev, "vdd-0.8-cx-mx");
-+	if (IS_ERR(ar_snoc->vreg_cx_mx)) {
-+		ret = PTR_ERR(ar_snoc->vreg_cx_mx);
- 		goto err_free_irq;
-+	}
- 
- 	ar_snoc->num_clks = ARRAY_SIZE(ath10k_clocks);
- 	ar_snoc->clks = devm_kcalloc(&pdev->dev, ar_snoc->num_clks,
-diff --git a/drivers/net/wireless/ath/ath10k/snoc.h b/drivers/net/wireless/ath/ath10k/snoc.h
-index 5095d1893681..16cfd72180cd 100644
---- a/drivers/net/wireless/ath/ath10k/snoc.h
-+++ b/drivers/net/wireless/ath/ath10k/snoc.h
-@@ -72,8 +72,10 @@ struct ath10k_snoc {
- 	struct timer_list rx_post_retry;
- 	struct regulator_bulk_data *vregs;
- 	size_t num_vregs;
-+	struct regulator *vreg_cx_mx;
- 	struct clk_bulk_data *clks;
- 	size_t num_clks;
-+	struct pwrseq *pwrseq;
- 	struct ath10k_qmi *qmi;
- 	unsigned long flags;
- 	bool xo_cal_supported;
+If you haven't seen this series before, that's because I wanted to
+finalize the GENPD part at first and didn't bother you previously.
+
+Changelog:
+
+v8: - Added new generic dev_pm_opp_sync() helper that syncs OPP state with
+      hardware. All drivers changed to use it. This replaces GENPD attach_dev
+      callback hacks that were used in v7.
+
+    - Added new patch patch "soc/tegra: regulators: Prepare for suspend"
+      that fixes dying Tegra20 SoC after enabling VENC power domain during
+      resume from suspend. It matches to what downstream kernel does on
+      suspend/resume.
+
+    - After a second thought, I dropped patches which added RPM to memory
+      drivers since hardware is always-on and RPM not needed.
+
+    - Replaced the "dummy host1x driver" patch with new "Disable unused
+      host1x hardware" patch, since it's a cleaner solution.
+
+Dmitry Osipenko (34):
+  opp: Add dev_pm_opp_sync() helper
+  soc/tegra: pmc: Disable PMC state syncing
+  soc/tegra: Don't print error message when OPPs not available
+  soc/tegra: Add devm_tegra_core_dev_init_opp_table_simple()
+  soc/tegra: Use dev_pm_opp_sync()
+  dt-bindings: clock: tegra-car: Document new tegra-clocks sub-node
+  clk: tegra: Support runtime PM and power domain
+  dt-bindings: host1x: Document OPP and power domain properties
+  dt-bindings: host1x: Document Memory Client resets of Host1x, GR2D and
+    GR3D
+  gpu: host1x: Add host1x_channel_stop()
+  gpu: host1x: Add runtime PM and OPP support
+  drm/tegra: dc: Support OPP and SoC core voltage scaling
+  drm/tegra: hdmi: Add OPP support
+  drm/tegra: gr2d: Support power management
+  drm/tegra: gr3d: Support power management
+  drm/tegra: vic: Support system suspend
+  usb: chipidea: tegra: Add runtime PM and OPP support
+  bus: tegra-gmi: Add runtime PM and OPP support
+  pwm: tegra: Add runtime PM and OPP support
+  mmc: sdhci-tegra: Add runtime PM and OPP support
+  mtd: rawnand: tegra: Add runtime PM and OPP support
+  spi: tegra20-slink: Add OPP support
+  media: dt: bindings: tegra-vde: Convert to schema
+  media: dt: bindings: tegra-vde: Document OPP and power domain
+  media: staging: tegra-vde: Support generic power domain and OPP
+  soc/tegra: fuse: Add OPP support
+  soc/tegra: fuse: Reset hardware
+  soc/tegra: regulators: Prepare for suspend
+  soc/tegra: pmc: Enable core domain support for Tegra20 and Tegra30
+  ARM: tegra: Add OPP tables and power domains to Tegra20 device-trees
+  ARM: tegra: Add OPP tables and power domains to Tegra30 device-trees
+  ARM: tegra: Add Memory Client resets to Tegra20 GR2D, GR3D and Host1x
+  ARM: tegra: Add Memory Client resets to Tegra30 GR2D, GR3D and Host1x
+  ARM: tegra20/30: Disable unused host1x hardware
+
+ .../bindings/clock/nvidia,tegra20-car.yaml    |   51 +
+ .../display/tegra/nvidia,tegra20-host1x.txt   |   53 +
+ .../bindings/media/nvidia,tegra-vde.txt       |   64 -
+ .../bindings/media/nvidia,tegra-vde.yaml      |  119 ++
+ .../boot/dts/tegra20-acer-a500-picasso.dts    |    1 +
+ arch/arm/boot/dts/tegra20-colibri.dtsi        |    3 +-
+ arch/arm/boot/dts/tegra20-harmony.dts         |    3 +-
+ arch/arm/boot/dts/tegra20-paz00.dts           |    1 +
+ .../arm/boot/dts/tegra20-peripherals-opp.dtsi |  941 +++++++++++
+ arch/arm/boot/dts/tegra20-seaboard.dts        |    3 +-
+ arch/arm/boot/dts/tegra20-tamonten.dtsi       |    3 +-
+ arch/arm/boot/dts/tegra20-trimslice.dts       |    9 +
+ arch/arm/boot/dts/tegra20-ventana.dts         |    1 +
+ arch/arm/boot/dts/tegra20.dtsi                |  119 +-
+ .../tegra30-asus-nexus7-grouper-common.dtsi   |    1 +
+ arch/arm/boot/dts/tegra30-beaver.dts          |    1 +
+ arch/arm/boot/dts/tegra30-cardhu.dtsi         |    1 +
+ arch/arm/boot/dts/tegra30-colibri.dtsi        |   17 +-
+ arch/arm/boot/dts/tegra30-ouya.dts            |    1 +
+ .../arm/boot/dts/tegra30-peripherals-opp.dtsi | 1412 +++++++++++++++++
+ arch/arm/boot/dts/tegra30.dtsi                |  181 ++-
+ drivers/bus/tegra-gmi.c                       |   92 +-
+ drivers/clk/tegra/Makefile                    |    1 +
+ drivers/clk/tegra/clk-device.c                |  222 +++
+ drivers/clk/tegra/clk-pll.c                   |    2 +-
+ drivers/clk/tegra/clk-super.c                 |    2 +-
+ drivers/clk/tegra/clk-tegra20.c               |   39 +-
+ drivers/clk/tegra/clk-tegra30.c               |   70 +-
+ drivers/clk/tegra/clk.c                       |   64 +
+ drivers/clk/tegra/clk.h                       |    2 +
+ drivers/gpu/drm/tegra/dc.c                    |   74 +
+ drivers/gpu/drm/tegra/dc.h                    |    2 +
+ drivers/gpu/drm/tegra/gr2d.c                  |  154 +-
+ drivers/gpu/drm/tegra/gr3d.c                  |  393 ++++-
+ drivers/gpu/drm/tegra/hdmi.c                  |   15 +-
+ drivers/gpu/drm/tegra/vic.c                   |    4 +
+ drivers/gpu/host1x/channel.c                  |    8 +
+ drivers/gpu/host1x/debug.c                    |   15 +
+ drivers/gpu/host1x/dev.c                      |  157 +-
+ drivers/gpu/host1x/dev.h                      |    3 +-
+ drivers/gpu/host1x/hw/channel_hw.c            |   44 +-
+ drivers/gpu/host1x/intr.c                     |    3 -
+ drivers/gpu/host1x/syncpt.c                   |    5 +-
+ drivers/mmc/host/sdhci-tegra.c                |  146 +-
+ drivers/mtd/nand/raw/tegra_nand.c             |   62 +-
+ drivers/opp/core.c                            |   42 +-
+ drivers/pwm/pwm-tegra.c                       |  104 +-
+ drivers/soc/tegra/common.c                    |   34 +-
+ drivers/soc/tegra/fuse/fuse-tegra.c           |   36 +
+ drivers/soc/tegra/fuse/fuse.h                 |    1 +
+ drivers/soc/tegra/pmc.c                       |   17 +
+ drivers/soc/tegra/regulators-tegra20.c        |   99 ++
+ drivers/soc/tegra/regulators-tegra30.c        |  122 ++
+ drivers/spi/spi-tegra20-slink.c               |   15 +-
+ drivers/staging/media/tegra-vde/vde.c         |   65 +-
+ drivers/usb/chipidea/ci_hdrc_tegra.c          |   61 +-
+ include/linux/host1x.h                        |    1 +
+ include/linux/pm_opp.h                        |    6 +
+ include/soc/tegra/common.h                    |   13 +
+ 59 files changed, 4796 insertions(+), 384 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.txt
+ create mode 100644 Documentation/devicetree/bindings/media/nvidia,tegra-vde.yaml
+ create mode 100644 drivers/clk/tegra/clk-device.c
+
 -- 
-2.30.2
+2.32.0
 
