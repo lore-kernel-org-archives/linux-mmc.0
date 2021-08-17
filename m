@@ -2,137 +2,181 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3901C4320A
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 22:38:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8E82C4338F
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:55:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 878DC60F55
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Aug 2021 22:38:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8445960184
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 00:55:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232481AbhHPWib (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Aug 2021 18:38:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37240 "EHLO
+        id S235367AbhHQAzs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Aug 2021 20:55:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232318AbhHPWib (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 18:38:31 -0400
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8ACBC0613CF
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 15:37:58 -0700 (PDT)
-Received: by mail-lj1-x22c.google.com with SMTP id h11so29632498ljo.12
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 15:37:58 -0700 (PDT)
+        with ESMTP id S235139AbhHQAzr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Aug 2021 20:55:47 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14E9DC061796
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:15 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id f2so8412171ljn.1
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Aug 2021 17:55:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=39HL+1BSTEP9McF8N5wJpHZqTmDxGof61S5w7T18t2c=;
-        b=PIs+rFO4pY8Mv2zPiP7V6q/9YBvqlbSQNI7cVts9VvV0Hz3CkLMBnig1HrU7GnFYCE
-         O0Q4VRNvYIVl119B7gJPknlTEUx+o0PWLDRPKeaE+JF0RKf6O01d+ztmYDR3LJ/5BZLK
-         7aYlfzKganWO6Zz/nbb5QGdMwAmcFJ7YNW/EFtn8uVSguA0SKqkNu7u1yTFx760GaryM
-         pJugUZKI8rd1dAmUwiCsf1Wm7L2TAcWTw/LSngxpoeua5nKPQoWX0dspsKulFQ0ntlCj
-         QRhfsrxl6bi0Yqc0tXysl1ZoKWnjIEYeZMQHApP5C6ATdIyZ1qR+GBZy/BCrs8N5He8N
-         H69w==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=C/jXyVM8A6IIIf73CUW3opic/WD75vfkmRvuKQWW4Jo=;
+        b=Ilqv4TYrhWro5ne/pyK8Z8uNieTgQV6uYOzuf7BRghGmB8vnlhfGvOr/0/e/S1IwQs
+         7hQf66rKkZbN2FzNg/lAkY8kGf8968Opho/WF3Oda7z3Bq5zGkHWUDeKdTIMK9vnpdcr
+         Q21Q+ebQypHAX5SMsmdNk0shvXZpPmldQV8JkAnN+rTBj1EPUQqbI161vTAsodd2SjvZ
+         MCqb1O1Ze+1fb4BtL/U3gENTSpiIzkKkc+t3xLBPezJesXnuxw+T6kn1KhGum0t21LcO
+         jMIXT/hfLcwRdk65I9OuXZg0sgiZ+Ph1sisDURKJYN/RBaSvnazEEt1aLfLUFDVTen6Z
+         an+Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=39HL+1BSTEP9McF8N5wJpHZqTmDxGof61S5w7T18t2c=;
-        b=MYdiRtnnxljw/rarLOacbCf3P7Dc6xwhGzdRpbfFb6DPC2htsqrL6hVlRcREZDLdwl
-         su+rV5thzRdLjEaSYEEMx/vGy/IGUYFVm2Nh1ojr4fqtNgOYR0MfdPviu4ia7LcENNX9
-         vdtTnYEdHm1SixfpXQ576b5i8CGi4gUq8SNj5W+ERosps5ivZkcNUb42A+W80QV/nXSQ
-         x1fJzLSSEMUfoL4OJg01kxoCwvz7amDcpIgZwHRSmH4nuDGLTyzWBHzejdZ0DLxOdcBV
-         2o6sCVKw3ZCtPboHtlVqlpD9+wEMcboJaquaEcvjWf483HAw4W/l6kahNKPfqft3EKek
-         zc6g==
-X-Gm-Message-State: AOAM531Do8pXz9qYYckm6Qbu6l88UXmx0DvWpPhbr5ioMYPT3YllhlTD
-        NwyHE1H7jVzURaXp1kT2LF8WivollLbPff+OZVknxA==
-X-Google-Smtp-Source: ABdhPJxzmodtRFtigSTsXW3Hjcueq6Q1d1XD/3P7zoYrskkwNMcxgNm5kFyqkanm5Fu3lKOWWYYYiaLrR2KTWatt1+Q=
-X-Received: by 2002:a05:651c:1507:: with SMTP id e7mr426852ljf.368.1629153476979;
- Mon, 16 Aug 2021 15:37:56 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210720144115.1525257-1-linus.walleij@linaro.org> <2f449f6e-bca0-3c70-4255-26619e957d44@foss.st.com>
-In-Reply-To: <2f449f6e-bca0-3c70-4255-26619e957d44@foss.st.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Tue, 17 Aug 2021 00:37:46 +0200
-Message-ID: <CACRpkdY2GnqNYqPPctqa_t5ax1SDo7nEc3a1jSncF8N-V-Da-g@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: core: Add a card quirk for non-hw busy detection
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=C/jXyVM8A6IIIf73CUW3opic/WD75vfkmRvuKQWW4Jo=;
+        b=PwsGdMjbOuTSE5uSqC+N1jRI6DI4Jnrb/ELaQrCn/avvCIQ6K9ZL0VRSFkMpRRMRW1
+         mTkppiD5RWSBqn/lVViVANvmE5ItVc2W5g7CXS9FGYERd0mPLeS3vjpyFVcUvKGmgIaV
+         34pIEOWYZSmw+CyFfu3mNUCVOXP+KGNBcmMfi73U+s0iFC2JSVEdm6EUZwVmESAWCI59
+         hAMVJi99Yz/cfA6hHsYI1TqV/edvQqrwRYfycyENLbaMWAOeFMmjETZyrUYc8MaN+AmZ
+         Kt1YQ8F3UPfwVCS7vtqPeAUqUwBXcxXK/NLyFeq08FGU9MpojCS2Pp9uhovZTPHYMec4
+         jjmw==
+X-Gm-Message-State: AOAM532PYotIGUcMZ++VbxNw/OpQJXJK9RO1VRRyhXLuTXseFxn+taVO
+        xq66W6bKky8jlwpDX6H5MvYR/w==
+X-Google-Smtp-Source: ABdhPJxgPqsyxqeCXBI3IsVJLkcFyXipmzYz3hTJEmurF1pvQfTvThKjXBvusty3YDmk6qnRjBkDxQ==
+X-Received: by 2002:a05:651c:118f:: with SMTP id w15mr779302ljo.47.1629161713357;
+        Mon, 16 Aug 2021 17:55:13 -0700 (PDT)
+Received: from eriador.lan ([37.153.55.125])
+        by smtp.gmail.com with ESMTPSA id z6sm40719lfb.251.2021.08.16.17.55.12
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Aug 2021 17:55:12 -0700 (PDT)
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        stable <stable@vger.kernel.org>, phone-devel@vger.kernel.org,
-        Ludovic Barre <ludovic.barre@st.com>,
-        Stephan Gerhold <stephan@gerhold.net>,
-        Stefan Hansson <newbyte@disroot.org>
-Content-Type: text/plain; charset="UTF-8"
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>
+Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: [RFC PATCH 00/15] create power sequencing subsystem
+Date:   Tue, 17 Aug 2021 03:54:52 +0300
+Message-Id: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+X-Mailer: git-send-email 2.30.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 16, 2021 at 4:03 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
+This is an RFC of the proposed power sequencer subsystem. This is a
+generification of the MMC pwrseq code. The subsystem tries to abstract
+the idea of complex power-up/power-down/reset of the devices.
 
-> I was just testing your patch on top of mmc/next.
-> Whereas mmc/next is fine, with your patch I fail to pass MMC test 5
-> (Multi-block write).
-> I've got this error on STM32MP157C-EV1 board:
-> [  108.956218] mmc0: Starting tests of card mmc0:aaaa...
-> [  108.959862] mmc0: Test case 5. Multi-block write...
-> [  108.995615] mmc0: Warning: Host did not wait for busy state to end.
-> [  109.000483] mmc0: Result: ERROR (-110)
-> Then nothing more happens.
->
-> The test was done on an SD-card Sandisk Extreme Pro SDXC UHS-I mark 3,
-> in DDR50 mode.
->
-> I'll try to add more traces to see what happens.
+The primary set of devices that promted me to create this patchset is
+the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+interfaces (older generations) or on serial+PCIe (newer generations).
+They require a set of external voltage regulators to be powered on and
+(some of them) have separate WiFi and Bluetooth enable GPIOs.
 
-What I think happens is:
-- You are using the MMCI driver (correct?)
-- My patch augments the driver to not use busydetect until we have
-  determined that the card can do it (after reading extcsd etc)
-- Before this patch, the MMCI would unconditionally use HW
-  busy detect on any card.
+This patchset being an RFC tries to demonstrate the approach, design and
+usage of the pwrseq subsystem. Following issues are present in the RFC
+at this moment but will be fixed later if the overall approach would be
+viewed as acceptable:
 
-Either we have managed to wire the MMCI driver so that it doesn't
-work without HW busy detect anymore, you can easily test this
-by doing this:
+ - No documentation
+   While the code tries to be self-documenting proper documentation
+   would be required.
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 3765e2f4ad98..3a35f65491c8 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -270,10 +270,10 @@ static struct variant_data variant_stm32_sdmmc = {
-        .datactrl_any_blocksz   = true,
-        .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
-        .stm32_idmabsize_mask   = GENMASK(12, 5),
--       .busy_timeout           = true,
--       .busy_detect            = true,
--       .busy_detect_flag       = MCI_STM32_BUSYD0,
--       .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
-+       //.busy_timeout         = true,
-+       //.busy_detect          = true,
-+       //.busy_detect_flag     = MCI_STM32_BUSYD0,
-+       //.busy_detect_mask     = MCI_STM32_BUSYD0ENDMASK,
-        .init                   = sdmmc_variant_init,
- };
+ - Minimal device tree bindings changes
+   There are no proper updates for the DT bindings (thus neither Rob
+   Herring nor devicetree are included in the To/Cc lists). The dt
+   schema changes would be a part of v1.
 
-@@ -297,10 +297,10 @@ static struct variant_data variant_stm32_sdmmcv2 = {
-        .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
-        .stm32_idmabsize_mask   = GENMASK(16, 5),
-        .dma_lli                = true,
--       .busy_timeout           = true,
--       .busy_detect            = true,
--       .busy_detect_flag       = MCI_STM32_BUSYD0,
--       .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
-+       //.busy_timeout         = true,
-+       //.busy_detect          = true,
-+       //.busy_detect_flag     = MCI_STM32_BUSYD0,
-+       //.busy_detect_mask     = MCI_STM32_BUSYD0ENDMASK,
-        .init                   = sdmmc_variant_init,
+ - Lack of proper PCIe integration
+   At this moment support for PCIe is hacked up to be able to test the
+   PCIe part of qca6390. Proper PCIe support would require automatically
+   powering up the devices before the scan basing on the proper device
+   structure in the device tree.
 
-Or else there is a card that cannot work without busy detect which
-I find unlikely.
+----------------------------------------------------------------
+Dmitry Baryshkov (15):
+      power: add power sequencer subsystem
+      pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
+      mmc: core: switch to new pwrseq subsystem
+      ath10k: add support for pwrseq sequencing
+      Bluetooth: hci_qca: merge qca_power into qca_serdev
+      Bluetooth: hci_qca: merge init paths
+      Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
+      Bluetooth: hci_qca: futher rework of power on/off handling
+      Bluetooth: hci_qca: add support for pwrseq
+      pwrseq: add support for QCA BT+WiFi power sequencer
+      arm64: dts: qcom: sdm845-db845c: switch bt+wifi to qca power sequencer
+      arm64: dts: qcom: qrb5165-rb5: add bluetooth support
+      arm64: dts: qcom: sdm845-db845c: add second channel support to qca power sequencer
+      WIP: PCI: qcom: use pwrseq to power up bus devices
+      WIP: arm64: dts: qcom: qrb5165-rb5: add bus-pwrseq property to pcie0
 
-Yours,
-Linus Walleij
+ .../{mmc => power/pwrseq}/mmc-pwrseq-emmc.yaml     |   0
+ .../{mmc => power/pwrseq}/mmc-pwrseq-sd8787.yaml   |   0
+ .../{mmc => power/pwrseq}/mmc-pwrseq-simple.yaml   |   0
+ arch/arm64/boot/dts/qcom/qrb5165-rb5.dts           |  51 +++
+ arch/arm64/boot/dts/qcom/sdm845-db845c.dts         |  28 +-
+ arch/arm64/boot/dts/qcom/sdm845.dtsi               |   6 +
+ drivers/bluetooth/hci_qca.c                        | 286 +++++++-------
+ drivers/mmc/core/Kconfig                           |  32 --
+ drivers/mmc/core/Makefile                          |   4 -
+ drivers/mmc/core/core.c                            |   9 +-
+ drivers/mmc/core/host.c                            |   8 +-
+ drivers/mmc/core/mmc.c                             |   3 +-
+ drivers/mmc/core/pwrseq.c                          | 117 ------
+ drivers/mmc/core/pwrseq.h                          |  58 ---
+ drivers/mmc/core/pwrseq_emmc.c                     | 120 ------
+ drivers/mmc/core/pwrseq_sd8787.c                   | 107 ------
+ drivers/mmc/core/pwrseq_simple.c                   | 164 --------
+ drivers/net/wireless/ath/ath10k/snoc.c             |  63 +++-
+ drivers/net/wireless/ath/ath10k/snoc.h             |   2 +
+ drivers/pci/controller/dwc/pcie-qcom.c             |  13 +
+ drivers/power/Kconfig                              |   1 +
+ drivers/power/Makefile                             |   1 +
+ drivers/power/pwrseq/Kconfig                       |  57 +++
+ drivers/power/pwrseq/Makefile                      |  11 +
+ drivers/power/pwrseq/core.c                        | 411 +++++++++++++++++++++
+ drivers/power/pwrseq/pwrseq_emmc.c                 | 118 ++++++
+ drivers/power/pwrseq/pwrseq_qca.c                  | 291 +++++++++++++++
+ drivers/power/pwrseq/pwrseq_sd8787.c               |  97 +++++
+ drivers/power/pwrseq/pwrseq_simple.c               | 160 ++++++++
+ include/linux/mmc/host.h                           |   4 +-
+ include/linux/pwrseq/consumer.h                    |  88 +++++
+ include/linux/pwrseq/driver.h                      |  71 ++++
+ 32 files changed, 1592 insertions(+), 789 deletions(-)
+ rename Documentation/devicetree/bindings/{mmc => power/pwrseq}/mmc-pwrseq-emmc.yaml (100%)
+ rename Documentation/devicetree/bindings/{mmc => power/pwrseq}/mmc-pwrseq-sd8787.yaml (100%)
+ rename Documentation/devicetree/bindings/{mmc => power/pwrseq}/mmc-pwrseq-simple.yaml (100%)
+ delete mode 100644 drivers/mmc/core/pwrseq.c
+ delete mode 100644 drivers/mmc/core/pwrseq.h
+ delete mode 100644 drivers/mmc/core/pwrseq_emmc.c
+ delete mode 100644 drivers/mmc/core/pwrseq_sd8787.c
+ delete mode 100644 drivers/mmc/core/pwrseq_simple.c
+ create mode 100644 drivers/power/pwrseq/Kconfig
+ create mode 100644 drivers/power/pwrseq/Makefile
+ create mode 100644 drivers/power/pwrseq/core.c
+ create mode 100644 drivers/power/pwrseq/pwrseq_emmc.c
+ create mode 100644 drivers/power/pwrseq/pwrseq_qca.c
+ create mode 100644 drivers/power/pwrseq/pwrseq_sd8787.c
+ create mode 100644 drivers/power/pwrseq/pwrseq_simple.c
+ create mode 100644 include/linux/pwrseq/consumer.h
+ create mode 100644 include/linux/pwrseq/driver.h
+
+
