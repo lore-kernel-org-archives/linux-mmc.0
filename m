@@ -2,88 +2,71 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.2 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_2
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7A41C432BE
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 08:41:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AF20C4320A
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 09:03:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CB43560F39
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 08:41:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40D2460FBF
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Aug 2021 09:03:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239179AbhHQImI convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Aug 2021 04:42:08 -0400
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:49169 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235100AbhHQImH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 04:42:07 -0400
-Received: (Authenticated sender: miquel.raynal@bootlin.com)
-        by relay5-d.mail.gandi.net (Postfix) with ESMTPSA id B00621C0014;
-        Tue, 17 Aug 2021 08:41:24 +0000 (UTC)
-Date:   Tue, 17 Aug 2021 10:41:23 +0200
-From:   Miquel Raynal <miquel.raynal@bootlin.com>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Uwe =?UTF-8?B?S2xlaW5lLUvDtm5pZw==?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-        linux-clk@vger.kernel.org
-Subject: Re: [PATCH v8 21/34] mtd: rawnand: tegra: Add runtime PM and OPP
- support
-Message-ID: <20210817104123.1854cf17@xps13>
-In-Reply-To: <20210817012754.8710-22-digetx@gmail.com>
-References: <20210817012754.8710-1-digetx@gmail.com>
-        <20210817012754.8710-22-digetx@gmail.com>
-Organization: Bootlin
-X-Mailer: Claws Mail 3.17.7 (GTK+ 2.24.32; x86_64-pc-linux-gnu)
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+        id S236014AbhHQJDy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Aug 2021 05:03:54 -0400
+Received: from relmlor1.renesas.com ([210.160.252.171]:43734 "EHLO
+        relmlie5.idc.renesas.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S235119AbhHQJDx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 05:03:53 -0400
+X-IronPort-AV: E=Sophos;i="5.84,328,1620658800"; 
+   d="scan'208";a="90881988"
+Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
+  by relmlie5.idc.renesas.com with ESMTP; 17 Aug 2021 18:03:18 +0900
+Received: from localhost.localdomain (unknown [10.226.93.29])
+        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 4605F4249EEF;
+        Tue, 17 Aug 2021 18:03:16 +0900 (JST)
+From:   Biju Das <biju.das.jz@bp.renesas.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>
+Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
+        linux-renesas-soc@vger.kernel.org
+Subject: [PATCH v4 0/2] Document RZ/G2L SDHI controller bindings
+Date:   Tue, 17 Aug 2021 10:03:11 +0100
+Message-Id: <20210817090313.31858-1-biju.das.jz@bp.renesas.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Dmitry,
+This patch series aims to document RZ/G2L SDHI controller bindings.
 
-Dmitry Osipenko <digetx@gmail.com> wrote on Tue, 17 Aug 2021 04:27:41
-+0300:
+v3->v4:
+ * Removed duplicate clock-names for sdhi-r7sxxxx SoC's
+ * Defined clock-names for RZ/G2L SoC and made this as required property.
+v2->v3:
+ * Created a separate patch to fix the dtbs-warning check reported by [1].
+ * RZ/G2L SDHI binding patch depends up on the above the patch.
+ [1] https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20210804091940.23983-1-biju.das.jz@bp.renesas.com/
+v1->v2:
+ * Fixed dtbs-check issue for RZ/A{1,2} platforms.
 
-> The NAND on Tegra belongs to the core power domain and we're going to
-> enable GENPD support for the core domain. Now NAND must be resumed using
-> runtime PM API in order to initialize the NAND power state. Add runtime PM
-> and OPP support to the NAND driver.
-> 
-> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
-> ---
->  drivers/mtd/nand/raw/tegra_nand.c | 62 +++++++++++++++++++++++++++----
->  1 file changed, 54 insertions(+), 8 deletions(-)
-> 
+v1->
+ * newpatch
 
-Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+Biju Das (2):
+  dt-bindings: mmc: renesas,sdhi: Fix dtbs-check warning
+  dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
 
-Thanks,
-Miquèl
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml | 133 ++++++++++++------
+ 1 file changed, 89 insertions(+), 44 deletions(-)
+
+-- 
+2.17.1
+
