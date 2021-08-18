@@ -6,107 +6,94 @@ X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 166FCC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 18:33:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F741C4338F
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 18:49:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EA15360E90
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 18:33:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 20AAD610FF
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 18:49:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229808AbhHRSeE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Aug 2021 14:34:04 -0400
-Received: from mail-oo1-f52.google.com ([209.85.161.52]:43746 "EHLO
-        mail-oo1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229448AbhHRSeD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 14:34:03 -0400
-Received: by mail-oo1-f52.google.com with SMTP id y16-20020a4ad6500000b0290258a7ff4058so979308oos.10;
-        Wed, 18 Aug 2021 11:33:28 -0700 (PDT)
+        id S232375AbhHRSth (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Aug 2021 14:49:37 -0400
+Received: from mail-ot1-f54.google.com ([209.85.210.54]:33784 "EHLO
+        mail-ot1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229952AbhHRStd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 14:49:33 -0400
+Received: by mail-ot1-f54.google.com with SMTP id 61-20020a9d0d430000b02903eabfc221a9so5369752oti.0;
+        Wed, 18 Aug 2021 11:48:54 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=vMo+8CpaZowa487/3sqLBnwPwXf0K3aLC0kkTt3bcrU=;
-        b=abaHx482Zh8HU/0sWiza7JKdQhnTwX86KhHmjdG1Oq8zNCu2uabAqyBX+a0hUN1ZPR
-         9smABWc8nHIap3I3v+AbbGEK6LTd9l9QlXuN/SUE0pPG5+FDYr83OvtHsyndL0PnDjpJ
-         oqaCldE6GHHQsum8+Kf0dMVJ1LK6oNtHkb25L1LMVA9LNb7Cs7r8VR+nGX2e85yRCNI6
-         L34wMWIODHMoN6fijU/elZLl6rCbByqayGoX9BYr6p9Pgo7PUmpjUynp0lHaOD4ehLbF
-         3mBcFkn6pHYqXCjxsCsRx1ctA9eilbE5RcMaMVNVYV5yRqQug7at36knszGPqlvM6pg8
-         zZHg==
-X-Gm-Message-State: AOAM531cCpD31EuB/nPls3oUI7/pT4vodcl2jSmfuGJAMAx8RjGBKhz7
-        2hHGTSZgCWKi5ah5Nm1Atg==
-X-Google-Smtp-Source: ABdhPJyyuODPJXGoyWMb6MBkpVANV0aA7zh7to3bVrP2cYuiZr85uz6iHDgDlTBDfFjisMLIS4v5ew==
-X-Received: by 2002:a4a:8d97:: with SMTP id i23mr7780375ook.4.1629311608153;
-        Wed, 18 Aug 2021 11:33:28 -0700 (PDT)
+        bh=mFM10FkKUqKwfO9MnVHXIsn1wrjSk6OwROs1K7AMqrE=;
+        b=Y41fRhxhCxqSEISNnnrIBTZ0vTmxbVCQrvQqTw+9XXBxWrCm8TVXyo0Ay3C8C09TMq
+         CRMIryDbtu51v1xwBVS1Xsag4NqDThGmRB4NsYO+FpK6XaaoFDadxOp7GwgrAmGrWNsZ
+         OMSrdp2fhbyQC+mKhAp42AHdlj0Dd+MXpKaKiVlrdoCD+NA4Jbh3qYnpO1f3aS9XGytb
+         jLgmSzBHwGburc+452deL9yB+Wl9sV5A+AHwOZptcVV8PolVMxElfIOc9o9Wbs0ML5G5
+         s0UXjUNzg0eX/OC47VzRlnkKQ9NFjF8CpyLNfNhLozV7aVjGf3PSI8kPT+egtAcKbdEq
+         0mwA==
+X-Gm-Message-State: AOAM532aalgn+eqzRATPlf8z6CCW51VOI50oKzLZs3TWb5kVCnXTSdUA
+        J+cIS47lBc1TxwTVN8ffHA==
+X-Google-Smtp-Source: ABdhPJwNqWe9L4q1pV8YiVvQEWr2wvPBzy6QVVut+3EmfxypdzCijfLr3sz1yBEajCTLBSX3AX+ySQ==
+X-Received: by 2002:a05:6830:1bc1:: with SMTP id v1mr7980785ota.246.1629312534574;
+        Wed, 18 Aug 2021 11:48:54 -0700 (PDT)
 Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
-        by smtp.gmail.com with ESMTPSA id m6sm157969otf.52.2021.08.18.11.33.26
+        by smtp.gmail.com with ESMTPSA id n73sm217973oig.9.2021.08.18.11.48.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Aug 2021 11:33:27 -0700 (PDT)
-Received: (nullmailer pid 2879568 invoked by uid 1000);
-        Wed, 18 Aug 2021 18:33:26 -0000
-Date:   Wed, 18 Aug 2021 13:33:26 -0500
+        Wed, 18 Aug 2021 11:48:53 -0700 (PDT)
+Received: (nullmailer pid 2901547 invoked by uid 1000);
+        Wed, 18 Aug 2021 18:48:52 -0000
+Date:   Wed, 18 Aug 2021 13:48:52 -0500
 From:   Rob Herring <robh@kernel.org>
 To:     haibo.chen@nxp.com
-Cc:     shawnguo@kernel.org, s.hauer@pengutronix.de,
-        ulf.hansson@linaro.org, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, aisheng.dong@nxp.com,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: change the
- pinctrl-names rule
-Message-ID: <YR1SdhfM344Ii7BQ@robh.at.kernel.org>
-References: <1629279984-7397-1-git-send-email-haibo.chen@nxp.com>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-mmc@vger.kernel.org, linux-imx@nxp.com,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH v2 3/6] dt-bindings: mmc: fsl-imx-esdhc: add
+ fsl,broken-auto-tuning binding
+Message-ID: <YR1WFGUGS3pERnOD@robh.at.kernel.org>
+References: <1629285415-7495-1-git-send-email-haibo.chen@nxp.com>
+ <1629285415-7495-3-git-send-email-haibo.chen@nxp.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1629279984-7397-1-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <1629285415-7495-3-git-send-email-haibo.chen@nxp.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Aug 18, 2021 at 05:46:24PM +0800, haibo.chen@nxp.com wrote:
+On Wed, Aug 18, 2021 at 07:16:52PM +0800, haibo.chen@nxp.com wrote:
 > From: Haibo Chen <haibo.chen@nxp.com>
 > 
-> Change the pinctrl-names rule to cover all cases.
+> Add a new fsl,broken-auto-tuning binding for sdio devices. When sdio
+> device support sdio interrupt, need to use this property to disable
+> auto-tuning. Auto-tuning circuit is conflict with sdio interrupt.
 > 
 > Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 > ---
->  .../bindings/mmc/fsl-imx-esdhc.yaml           | 21 +++++++++++++------
->  1 file changed, 15 insertions(+), 6 deletions(-)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 9 +++++++++
+>  1 file changed, 9 insertions(+)
 > 
 > diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index 17086f60f8a3..d324606a4f0a 100644
+> index b5baf439fbac..d7c8e5880473 100644
 > --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
 > +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -116,12 +116,21 @@ properties:
->        - const: per
+> @@ -93,6 +93,15 @@ properties:
+>        tuning step can't find the proper delay window within limited tuning retries.
+>      default: 0
 >  
->    pinctrl-names:
-> -    minItems: 1
-> -    items:
-> -      - const: default
-> -      - const: state_100mhz
-> -      - const: state_200mhz
-> -      - const: sleep
-> +    oneOf:
-> +      - items:
-> +          - const: default
-> +          - const: state_100mhz
-> +          - const: state_200mhz
-> +          - const: sleep
-> +      - items:
-> +          - const: default
-> +          - const: state_100mhz
-> +          - const: state_200mhz
+> +  fsl,broken-auto-tuning:
+> +    description: |
+> +      Recommend for SDIO cards that enables SDIO interrupt for SDR104 and SDR50 mode.
+> +      SDIO interrupt uses DAT[1] to signal the card's interrupt. Auto-tuning circuit
+> +      will detect this interrupt on DAT[1] when in 4Bit bus mode, and take it just
+> +      as normal data, wrongly adjust the delay cell. This property is used to disable
+> +      the auto-tuning function.
+> +    type: boolean
 
-You can drop this one and add 'minItems: 3' to the first case.
+Seems like something that could be broken on a variety of hosts and 
+should be common?
 
-> +      - items:
-> +          - const: default
-> +          - const: sleep
-> +      - items:
-> +          - const: default
-
-Similar here too with the prior case. Or use 'minItems: 1' in the first 
-case. That additional allows the 2 entry case, but why isn't that valid? 
-Couldn't a board only support default+state_100mhz?
+If auto tuning is broken, shouldn't that speed be disabled?
 
 Rob
