@@ -5,38 +5,38 @@ X-Spam-Level:
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 178BDC432BE
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 370FAC4320A
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EE026610A7
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1FDC86102A
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233798AbhHRLjX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Aug 2021 07:39:23 -0400
-Received: from inva021.nxp.com ([92.121.34.21]:41152 "EHLO inva021.nxp.com"
+        id S235658AbhHRLja (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Aug 2021 07:39:30 -0400
+Received: from inva021.nxp.com ([92.121.34.21]:41230 "EHLO inva021.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235627AbhHRLjW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 18 Aug 2021 07:39:22 -0400
+        id S235627AbhHRLjY (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Aug 2021 07:39:24 -0400
 Received: from inva021.nxp.com (localhost [127.0.0.1])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 90887205147;
-        Wed, 18 Aug 2021 13:38:47 +0200 (CEST)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id A1C49201500;
+        Wed, 18 Aug 2021 13:38:48 +0200 (CEST)
 Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
-        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 58A1C201500;
-        Wed, 18 Aug 2021 13:38:47 +0200 (CEST)
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 68B1420514F;
+        Wed, 18 Aug 2021 13:38:48 +0200 (CEST)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id C9841183AD05;
-        Wed, 18 Aug 2021 19:38:45 +0800 (+08)
+        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id D8EE3183ACDC;
+        Wed, 18 Aug 2021 19:38:46 +0800 (+08)
 From:   haibo.chen@nxp.com
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         shawnguo@kernel.org, robh+dt@kernel.org, s.hauer@pengutronix.de
 Cc:     kernel@pengutronix.de, festevam@gmail.com,
         linux-mmc@vger.kernel.org, linux-imx@nxp.com, haibo.chen@nxp.com,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: [PATCH v2 4/6] mmc: host: sdhci-esdhc-imx.c: disable auto-tuning when necessary
-Date:   Wed, 18 Aug 2021 19:16:53 +0800
-Message-Id: <1629285415-7495-4-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH v2 5/6] arm64: dts: imx8mm-evk: add sdio wifi support
+Date:   Wed, 18 Aug 2021 19:16:54 +0800
+Message-Id: <1629285415-7495-5-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1629285415-7495-1-git-send-email-haibo.chen@nxp.com>
 References: <1629285415-7495-1-git-send-email-haibo.chen@nxp.com>
@@ -47,70 +47,104 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-Add a method to enable/disable auto-tuning function. auto-tuning function
-is conflict with sdio interrupt. For sdio device with sdio interrupt,
-need to disable auto-tuning function.
+Add the sdio wifi support on imx8mm-evk board.
+Disable auto tuning for this sdio wifi since it support sdio
+interrupt.
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
+ arch/arm64/boot/dts/freescale/imx8mm-evk.dts  | 20 ++++++++++
+ arch/arm64/boot/dts/freescale/imx8mm-evk.dtsi | 39 +++++++++++++++++++
+ 2 files changed, 59 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index f18d169bc8ff..3af6519c561b 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -226,6 +226,7 @@ struct esdhc_platform_data {
- 	unsigned int tuning_step;       /* The delay cell steps in tuning procedure */
- 	unsigned int tuning_start_tap;	/* The start delay cell point in tuning procedure */
- 	unsigned int strobe_dll_delay_target;	/* The delay cell for strobe pad (read clock) */
-+	bool broken_auto_tuning;	/* Disable the auto tuning circuit */
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk.dts b/arch/arm64/boot/dts/freescale/imx8mm-evk.dts
+index 4e2820d19244..07a28b6e00be 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mm-evk.dts
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk.dts
+@@ -15,6 +15,13 @@
+ 	aliases {
+ 		spi0 = &flexspi;
+ 	};
++
++	usdhc1_pwrseq: usdhc1_pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_usdhc1_gpio>;
++		reset-gpios = <&gpio2 10 GPIO_ACTIVE_LOW>;
++	};
  };
  
- struct esdhc_soc_data {
-@@ -672,8 +673,10 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 			if (val & SDHCI_CTRL_EXEC_TUNING) {
- 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
--				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
--				usdhc_auto_tuning_mode_sel(host);
-+				if (!imx_data->boarddata.broken_auto_tuning) {
-+					usdhc_auto_tuning_mode_sel(host);
-+					m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-+				}
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 			}
-@@ -1041,13 +1044,16 @@ static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+ &ddrc {
+@@ -53,6 +60,19 @@
+ 	};
+ };
  
- static void esdhc_post_tuning(struct sdhci_host *host)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u32 reg;
++&usdhc1 {
++	pinctrl-names = "default", "state_100mhz", "state_200mhz";
++	pinctrl-0 = <&pinctrl_usdhc1>;
++	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
++	pinctrl-2 = <&pinctrl_usdhc1_200mhz>;
++	bus-width = <4>;
++	keep-power-in-suspend;
++	mmc-pwrseq = <&usdhc1_pwrseq>;
++	fsl,broken-auto-tuning;
++	non-removable;
++	status = "okay";
++};
++
+ &usdhc3 {
+ 	assigned-clocks = <&clk IMX8MM_CLK_USDHC3_ROOT>;
+ 	assigned-clock-rates = <400000000>;
+diff --git a/arch/arm64/boot/dts/freescale/imx8mm-evk.dtsi b/arch/arm64/boot/dts/freescale/imx8mm-evk.dtsi
+index e033d0257b5a..ca623078d937 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mm-evk.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mm-evk.dtsi
+@@ -440,6 +440,45 @@
+ 		>;
+ 	};
  
--	usdhc_auto_tuning_mode_sel(host);
--
- 	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
- 	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
--	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-+	if (!imx_data->boarddata.broken_auto_tuning) {
-+		usdhc_auto_tuning_mode_sel(host);
-+		reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-+	}
- 	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
- }
- 
-@@ -1522,7 +1528,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 	of_property_read_u32(np, "fsl,tuning-step", &boarddata->tuning_step);
- 	of_property_read_u32(np, "fsl,tuning-start-tap",
- 			     &boarddata->tuning_start_tap);
--
-+	if (of_property_read_bool(np, "fsl,broken-auto-tuning"))
-+		boarddata->broken_auto_tuning = true;
- 	of_property_read_u32(np, "fsl,strobe-dll-delay-target",
- 				&boarddata->strobe_dll_delay_target);
- 	if (of_find_property(np, "no-1-8-v", NULL))
++	pinctrl_usdhc1_gpio: usdhc1grpgpiogrp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD1_RESET_B_GPIO2_IO10	0x41
++		>;
++	};
++
++	pinctrl_usdhc1: usdhc1grp {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD1_CLK_USDHC1_CLK		0x190
++			MX8MM_IOMUXC_SD1_CMD_USDHC1_CMD		0x1d0
++			MX8MM_IOMUXC_SD1_DATA0_USDHC1_DATA0	0x1d0
++			MX8MM_IOMUXC_SD1_DATA1_USDHC1_DATA1	0x1d0
++			MX8MM_IOMUXC_SD1_DATA2_USDHC1_DATA2	0x1d0
++			MX8MM_IOMUXC_SD1_DATA3_USDHC1_DATA3	0x1d0
++		>;
++	};
++
++	pinctrl_usdhc1_100mhz: usdhc1grp100mhz {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD1_CLK_USDHC1_CLK		0x194
++			MX8MM_IOMUXC_SD1_CMD_USDHC1_CMD		0x1d4
++			MX8MM_IOMUXC_SD1_DATA0_USDHC1_DATA0	0x1d4
++			MX8MM_IOMUXC_SD1_DATA1_USDHC1_DATA1	0x1d4
++			MX8MM_IOMUXC_SD1_DATA2_USDHC1_DATA2	0x1d4
++			MX8MM_IOMUXC_SD1_DATA3_USDHC1_DATA3	0x1d4
++		>;
++	};
++
++	pinctrl_usdhc1_200mhz: usdhc1grp200mhz {
++		fsl,pins = <
++			MX8MM_IOMUXC_SD1_CLK_USDHC1_CLK		0x196
++			MX8MM_IOMUXC_SD1_CMD_USDHC1_CMD		0x1d6
++			MX8MM_IOMUXC_SD1_DATA0_USDHC1_DATA0	0x1d6
++			MX8MM_IOMUXC_SD1_DATA1_USDHC1_DATA1	0x1d6
++			MX8MM_IOMUXC_SD1_DATA2_USDHC1_DATA2	0x1d6
++			MX8MM_IOMUXC_SD1_DATA3_USDHC1_DATA3	0x1d6
++		>;
++	};
++
+ 	pinctrl_usdhc2_gpio: usdhc2grpgpiogrp {
+ 		fsl,pins = <
+ 			MX8MM_IOMUXC_GPIO1_IO15_GPIO1_IO15	0x1c4
 -- 
 2.17.1
 
