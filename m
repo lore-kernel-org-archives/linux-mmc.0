@@ -7,55 +7,55 @@ X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47FE4C4320A
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 05:58:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F998C4320E
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 06:00:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24C3E61076
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 05:58:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5D1A8610CE
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 06:00:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238005AbhHRF71 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Aug 2021 01:59:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42654 "EHLO
+        id S238034AbhHRGBZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Aug 2021 02:01:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237967AbhHRF70 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 01:59:26 -0400
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDF77C0613CF
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 22:58:51 -0700 (PDT)
-Received: by mail-pj1-x102e.google.com with SMTP id w13-20020a17090aea0db029017897a5f7bcso1583510pjy.5
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 22:58:51 -0700 (PDT)
+        with ESMTP id S237984AbhHRGBT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 02:01:19 -0400
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6395DC0613A3
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 23:00:37 -0700 (PDT)
+Received: by mail-pj1-x1036.google.com with SMTP id om1-20020a17090b3a8100b0017941c44ce4so8184263pjb.3
+        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 23:00:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to:user-agent;
-        bh=/oqvyX1+fZTz+wtMw2AZVqGvrykbTQj8oIvIXJk4fnQ=;
-        b=BiNyX/6IYojCpnpyPGFzrgnh8ilV1S48JvAdE+mM4BuP7CRu2FKtWLmHb+6pMAnjSh
-         /wfP9QCG/Q2Ukj1ZByvNzYSCb76F2+QCOquffMB7/VgJzMfI6biDam1D93oJFOcKLxY5
-         r0ui6XTLNwvZZ2QgeJ+nHG0xrCIvTYYP76CrkUOXqGHCkZrCx8j9IwfpGrJOMhMeq8y0
-         k2mkEWBfMzJhbTlNZAz6IL2S8V/0dB0U3qYFm8ylkevVbHpEgfdJ2weIyvMA0dAHIkMr
-         BJ+3m2Wz3q/+kbkLCXBH7Ci4zKCVmfsRmjz+f2zh3gygpbMTckDnXDsC8v0GIrUYRu/5
-         PVGA==
+        bh=jSLfXbs59mtRstzo4Hk2BNosvMcxHU6QjHDYVbvhF94=;
+        b=IZiDZuRS1dgbax2OIM0qBL1zjf9wYlmKLTEfzJy5RuUwQu4eQ6Cqmnd2ZfQ9EnnS5E
+         Jr1fAcgL/JdFgkFZ89xjBuBPSORKqFiw+3e1WhRfjnkRI6XhhARyc2h+l5KPSXucToC1
+         5NtBgghBSCisOGicrsb9AX3gqpRGgB9wryJPh6wD220SUglcmvJcuJFjUggtI/Et9Qhq
+         yJL8iRXbbCgl4lZdUfxZejEJadW6CurxesAMbeYQ33LbfTu1KA1dNxOq6HMfw0FLGwDr
+         OcBg18AVZFD7ZTL3PphKIXIDGtjeF3qBwk12Pxl3ByoW3VLzL+hvaHjyLcAcizZ3cE8S
+         xzgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=/oqvyX1+fZTz+wtMw2AZVqGvrykbTQj8oIvIXJk4fnQ=;
-        b=KPvSll77ZFoQI6xC9MW8etzMb1tgjq0lHkjhp2H78MdNRz759sugG29mYgBXgIH1p9
-         8icL8nYoV8gOst/5F7qYwj6jpsARYrOXP6TndHDyHqYCBsM4vmnVZpWrRjUSmKw9EJiP
-         9pwqSnOeeeKhmUYPtBatAZRPegXyj5e76SOmEh6VjbaNgKmFH6HKIKmuDf6APCcqPjZ1
-         MB4Bvs4pPNfZaqVbRnGbat0GysfKjyysWzx45TdnVZZxAE+EM7aQbnDKFYbFwItor6hq
-         dDtL6/5PtzKF6AHCb+Mx9eIu3/nS3IaXobtoC0SndKHFHayIt/ChWDODdyr6lQzggtw2
-         noow==
-X-Gm-Message-State: AOAM530Adtn6uFdMXR+pnyPZ6QqYcYzKffBzNc6mKd5ZhhDhtRlhqrAR
-        BXOiOFmG5VQuZ8Cr4iFnZRtq8w==
-X-Google-Smtp-Source: ABdhPJxmfawJmjScyveR+qRjue44WOBbTuswMGRMZAcW5NbsgTVLKIK8N3zHMPdQxwr8K+gezRoAzQ==
-X-Received: by 2002:a17:90a:db89:: with SMTP id h9mr7820049pjv.214.1629266331439;
-        Tue, 17 Aug 2021 22:58:51 -0700 (PDT)
+        bh=jSLfXbs59mtRstzo4Hk2BNosvMcxHU6QjHDYVbvhF94=;
+        b=GpQZZZ0poQvJPglvW3i3VEt8yTZnTVyS+XTGypTByDJ6X36zLBhC5XIutHe6b6/brV
+         kxeYpBSeJtW2H9Mu7qoLs+DaJr/fcrwWmh3eXksIufPC7r+igcGSpFFE14F691OlkIPx
+         fALjAuriPPO0SsBlio0sh/b4tmnXAnZsDYhaR8PlSfk99i/y8cMco9LXGeHCLWabUm4y
+         hovMcnCGbXVZkf27cw/pu5plMgK9RJV2sOoP7Ql0vJRPqX5716b40mbYElHnoMA1dP5Y
+         b7KJ73Ev1MbCiWDS01rj4F0puL1jAC8MWSO/ie7KVDaFj/DR4oKPgUsAxlvRequZmsFu
+         ti/Q==
+X-Gm-Message-State: AOAM530XfdGRJMH5kfWS3wGQnc2vDeOlfKLo8lBahvk01qVf4MXlYwAX
+        /6NI1LsEptcHY/GQ4mNgxZfPdw==
+X-Google-Smtp-Source: ABdhPJz6nHvt8tLhRUxNLQv5z93Dx/TL1iQrf7p3Xot0rNlhIhtJA6nFhb5bwd/3tPACvE5mJ3aZJA==
+X-Received: by 2002:a17:902:edc8:b029:12d:4a06:1c25 with SMTP id q8-20020a170902edc8b029012d4a061c25mr5874222plk.61.1629266436958;
+        Tue, 17 Aug 2021 23:00:36 -0700 (PDT)
 Received: from localhost ([122.172.201.85])
-        by smtp.gmail.com with ESMTPSA id g14sm4668532pfr.31.2021.08.17.22.58.50
+        by smtp.gmail.com with ESMTPSA id 136sm6020660pge.77.2021.08.17.23.00.36
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Aug 2021 22:58:51 -0700 (PDT)
-Date:   Wed, 18 Aug 2021 11:28:49 +0530
+        Tue, 17 Aug 2021 23:00:36 -0700 (PDT)
+Date:   Wed, 18 Aug 2021 11:30:34 +0530
 From:   Viresh Kumar <viresh.kumar@linaro.org>
 To:     Dmitry Osipenko <digetx@gmail.com>
 Cc:     Thierry Reding <thierry.reding@gmail.com>,
@@ -86,9 +86,8 @@ Cc:     Thierry Reding <thierry.reding@gmail.com>,
         dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
         linux-clk@vger.kernel.org
 Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-Message-ID: <20210818055849.ybfajzu75ecpdrbn@vireshk-i7>
-References: <20210817012754.8710-1-digetx@gmail.com>
- <20210817012754.8710-2-digetx@gmail.com>
+Message-ID: <20210818060034.tdu3ocbqlnao336u@vireshk-i7>
+References: <20210817012754.8710-2-digetx@gmail.com>
  <20210817075515.vyyv7z37e6jcrhsl@vireshk-i7>
  <710261d9-7ae3-5155-c0a2-f8aed2408d0b@gmail.com>
  <20210818035533.ieqkexltfvvf2p4n@vireshk-i7>
@@ -97,62 +96,59 @@ References: <20210817012754.8710-1-digetx@gmail.com>
  <a2a3c41f-c5e4-ee7e-7d48-03af8bac8863@gmail.com>
  <20210818045307.4brb6cafkh3adjth@vireshk-i7>
  <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
+ <20210818055849.ybfajzu75ecpdrbn@vireshk-i7>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
+In-Reply-To: <20210818055849.ybfajzu75ecpdrbn@vireshk-i7>
 User-Agent: NeoMutt/20180716-391-311a52
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18-08-21, 08:21, Dmitry Osipenko wrote:
-> Yes, GENPD will cache the perf state across suspend/resume and initially
-> cached value is out of sync with h/w.
+On 18-08-21, 11:28, Viresh Kumar wrote:
+> On 18-08-21, 08:21, Dmitry Osipenko wrote:
+> > Yes, GENPD will cache the perf state across suspend/resume and initially
+> > cached value is out of sync with h/w.
+> > 
+> > Nothing else. But let me clarify it all again.
 > 
-> Nothing else. But let me clarify it all again.
-
-Thanks for your explanation.
-
-> Initially the performance state of all GENPDs is 0 for all devices.
+> Thanks for your explanation.
 > 
-> The clock rate is preinitialized for all devices to a some default rate
-> by clk driver, or by bootloader or by assigned-clocks in DT.
+> > Initially the performance state of all GENPDs is 0 for all devices.
+> > 
+> > The clock rate is preinitialized for all devices to a some default rate
+> > by clk driver, or by bootloader or by assigned-clocks in DT.
+> > 
+> > When device is rpm-resumed, the resume callback of a device driver
+> > enables the clock.
+> > 
+> > Before clock is enabled, the voltage needs to be configured in
+> > accordance to the clk rate.
+> > 
+> > So now we have a GENPD with pstate=0 on a first rpm-resume, which
+> > doesn't match the h/w configuration. Calling dev_pm_opp_sync() sets the
+> > pstate in accordance to the h/w config.
 > 
-> When device is rpm-resumed, the resume callback of a device driver
-> enables the clock.
+> What about calling dev_pm_opp_set_rate(dev, clk_get_rate(dev)) here
+> instead ? That will work, right ? The advantage is it works without
+> any special routine to do so.
 > 
-> Before clock is enabled, the voltage needs to be configured in
-> accordance to the clk rate.
+> I also wonder looking at your gr3d.c changes, you set a set-opp
+> helper, but the driver doesn't call set_opp_rate at all. Who calls it
+> ?
 > 
-> So now we have a GENPD with pstate=0 on a first rpm-resume, which
-> doesn't match the h/w configuration. Calling dev_pm_opp_sync() sets the
-> pstate in accordance to the h/w config.
+> And if it is all about just syncing the genpd core, then can the genpd
+> core do something like what clk framework does? i.e. allow a new
+> optional genpd callback, get_performance_state() (just like
+> set_performance_state()), which can be called initially by the core to
+> get the performance to something other than zero. opp-set-rate is
+> there to set the performance state and enable the stuff as well.
+> That's why it looks incorrect in your case, where the function was
+> only required to be called once, and you are ending up calling it on
+> each resume. Limiting that with another local variable is bad as well.
 
-What about calling dev_pm_opp_set_rate(dev, clk_get_rate(dev)) here
-instead ? That will work, right ? The advantage is it works without
-any special routine to do so.
-
-I also wonder looking at your gr3d.c changes, you set a set-opp
-helper, but the driver doesn't call set_opp_rate at all. Who calls it
-?
-
-And if it is all about just syncing the genpd core, then can the genpd
-core do something like what clk framework does? i.e. allow a new
-optional genpd callback, get_performance_state() (just like
-set_performance_state()), which can be called initially by the core to
-get the performance to something other than zero. opp-set-rate is
-there to set the performance state and enable the stuff as well.
-That's why it looks incorrect in your case, where the function was
-only required to be called once, and you are ending up calling it on
-each resume. Limiting that with another local variable is bad as well.
-
-> In a previous v7 I proposed to preset the rpm_pstate of GENPD (perf
-> level that is restored before device is rpm-resumed) from PD's
-> attach_dev callback, but Ulf didn't like that because it requires to use
-> and modify GENPD 'private' variables from a PD driver. We decided that
-> will be better to make device drivers to explicitly sync the perf state,
-> which I implemented in this v8.
+Ulf, this last part is for you :)
 
 -- 
 viresh
