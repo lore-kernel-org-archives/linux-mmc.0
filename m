@@ -4,39 +4,39 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07A5EC4320E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA399C41537
 	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E34106102A
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9927A6109E
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 11:38:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235588AbhHRLjV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Aug 2021 07:39:21 -0400
-Received: from inva020.nxp.com ([92.121.34.13]:45680 "EHLO inva020.nxp.com"
+        id S235622AbhHRLjW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Aug 2021 07:39:22 -0400
+Received: from inva020.nxp.com ([92.121.34.13]:45710 "EHLO inva020.nxp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235557AbhHRLjV (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 18 Aug 2021 07:39:21 -0400
+        id S233798AbhHRLjW (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 18 Aug 2021 07:39:22 -0400
 Received: from inva020.nxp.com (localhost [127.0.0.1])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 718DC1A50DD;
-        Wed, 18 Aug 2021 13:38:45 +0200 (CEST)
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 803B31A50E2;
+        Wed, 18 Aug 2021 13:38:46 +0200 (CEST)
 Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 3969D1A50DE;
-        Wed, 18 Aug 2021 13:38:45 +0200 (CEST)
+        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 487AE1A50DE;
+        Wed, 18 Aug 2021 13:38:46 +0200 (CEST)
 Received: from localhost.localdomain (shlinux2.ap.freescale.net [10.192.224.44])
-        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id AA5FA183ACDC;
-        Wed, 18 Aug 2021 19:38:43 +0800 (+08)
+        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id BA07C183ACDE;
+        Wed, 18 Aug 2021 19:38:44 +0800 (+08)
 From:   haibo.chen@nxp.com
 To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         shawnguo@kernel.org, robh+dt@kernel.org, s.hauer@pengutronix.de
 Cc:     kernel@pengutronix.de, festevam@gmail.com,
         linux-mmc@vger.kernel.org, linux-imx@nxp.com, haibo.chen@nxp.com,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Subject: [PATCH v2 2/6] mmc: sdhci-eadhc-imx: select the correct mode for auto tuning
-Date:   Wed, 18 Aug 2021 19:16:51 +0800
-Message-Id: <1629285415-7495-2-git-send-email-haibo.chen@nxp.com>
+Subject: [PATCH v2 3/6] dt-bindings: mmc: fsl-imx-esdhc: add fsl,broken-auto-tuning binding
+Date:   Wed, 18 Aug 2021 19:16:52 +0800
+Message-Id: <1629285415-7495-3-git-send-email-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1629285415-7495-1-git-send-email-haibo.chen@nxp.com>
 References: <1629285415-7495-1-git-send-email-haibo.chen@nxp.com>
@@ -47,89 +47,35 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-USDHC hardware auto tuning circuit support check 1/4/8 data lines
-and cmd line. Out of reset uSDHC, it default select check 4 data
-lines and do not check cmd line. This is incorrect if we use 8 data
-lines. So need to config the auto tuning mode according to current
-bus width.
+Add a new fsl,broken-auto-tuning binding for sdio devices. When sdio
+device support sdio interrupt, need to use this property to disable
+auto-tuning. Auto-tuning circuit is conflict with sdio interrupt.
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 33 ++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index a49fac719fca..f18d169bc8ff 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -94,6 +94,11 @@
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index b5baf439fbac..d7c8e5880473 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -93,6 +93,15 @@ properties:
+       tuning step can't find the proper delay window within limited tuning retries.
+     default: 0
  
- #define ESDHC_VEND_SPEC2		0xc8
- #define ESDHC_VEND_SPEC2_EN_BUSY_IRQ	(1 << 8)
-+#define ESDHC_VEND_SPEC2_AUTO_TUNE_8BIT_EN	(1 << 4)
-+#define ESDHC_VEND_SPEC2_AUTO_TUNE_4BIT_EN	(0 << 4)
-+#define ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN	(2 << 4)
-+#define ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN	(1 << 6)
-+#define ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK	(7 << 4)
- 
- #define ESDHC_TUNING_CTRL		0xcc
- #define ESDHC_STD_TUNING_EN		(1 << 24)
-@@ -114,6 +119,7 @@
- #define ESDHC_CTRL_4BITBUS		(0x1 << 1)
- #define ESDHC_CTRL_8BITBUS		(0x2 << 1)
- #define ESDHC_CTRL_BUSWIDTH_MASK	(0x3 << 1)
-+#define USDHC_GET_BUSWIDTH(c) (c & ESDHC_CTRL_BUSWIDTH_MASK)
- 
- /*
-  * There is an INT DMA ERR mismatch between eSDHC and STD SDHC SPEC:
-@@ -407,6 +413,30 @@ static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
- 		dev_warn(mmc_dev(host->mmc), "%s: card clock still not gate off in 100us!.\n", __func__);
- }
- 
-+/* Enable the auto tuning circuit to check the CMD line and BUS line */
-+static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
-+{
-+	u32 buswidth, auto_tune_buswidth;
++  fsl,broken-auto-tuning:
++    description: |
++      Recommend for SDIO cards that enables SDIO interrupt for SDR104 and SDR50 mode.
++      SDIO interrupt uses DAT[1] to signal the card's interrupt. Auto-tuning circuit
++      will detect this interrupt on DAT[1] when in 4Bit bus mode, and take it just
++      as normal data, wrongly adjust the delay cell. This property is used to disable
++      the auto-tuning function.
++    type: boolean
 +
-+	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
-+
-+	switch (buswidth) {
-+	case ESDHC_CTRL_8BITBUS:
-+		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_8BIT_EN;
-+		break;
-+	case ESDHC_CTRL_4BITBUS:
-+		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_4BIT_EN;
-+		break;
-+	default:	/* 1BITBUS */
-+		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
-+		break;
-+	}
-+
-+	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
-+			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
-+			ESDHC_VEND_SPEC2);
-+}
-+
- static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-@@ -643,6 +673,7 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
- 				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-+				usdhc_auto_tuning_mode_sel(host);
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 			}
-@@ -1012,6 +1043,8 @@ static void esdhc_post_tuning(struct sdhci_host *host)
- {
- 	u32 reg;
- 
-+	usdhc_auto_tuning_mode_sel(host);
-+
- 	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
- 	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+   fsl,strobe-dll-delay-target:
+     $ref: /schemas/types.yaml#/definitions/uint32
+     description: |
 -- 
 2.17.1
 
