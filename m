@@ -2,152 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7180C4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 16:57:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A055C4320E
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 17:02:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9C35C610F9
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 16:57:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 15A5B6102A
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 17:02:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232741AbhHRQ5s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Aug 2021 12:57:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56926 "EHLO
+        id S232741AbhHRRDK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Aug 2021 13:03:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232577AbhHRQ5n (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 12:57:43 -0400
+        with ESMTP id S233040AbhHRRDI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 13:03:08 -0400
 Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20CE7C061764;
-        Wed, 18 Aug 2021 09:57:08 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id p38so6111546lfa.0;
-        Wed, 18 Aug 2021 09:57:08 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFF6AC061292
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Aug 2021 10:02:30 -0700 (PDT)
+Received: by mail-lf1-x131.google.com with SMTP id k5so6063733lfu.4
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Aug 2021 10:02:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=9afXLHEiBRvQw+FqKQqGWY2brD9XGx9hPAmFRANM6E0=;
-        b=SkFjeie1BejmJMUfsJJa7cdKxHWnbIqV6yEx50leCh45/lOA2mtYHIhF2YuT+/qxMT
-         Kz4yDrQ39Ns52bpJRJ1nvYNdeOrbzSvGNVDSFXOIEZy/5g8lF1kLMJksTgXPJ8QmjHcg
-         iB+julVaTc7z/7axFMQXOnE7a569YrihqMFwkdkfwrYA1Olh6EVmg/hGR1JfF7Bo+IzT
-         5pn2hximEzVhmBcizH/3kj9vKvVTct62o0rKSGlLwd0/7BGb0XQ+by7ZLMa2P8L4PJg+
-         efMjguZzhJdMSLcJQv1Pv0yiP3TQGVx4otwdNVArVuo1hHYq6zxbh/irwSRReTHHDhIg
-         HoAA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=2vHOG5+qPJN8jmWLiJvDNQKkDjgqpU1H4dy3yeyIjso=;
+        b=Au8n84a7JWvuJ14AHkyWo/qNfD59revNzR2qD63XW35WEP23EtB498lh6OxNd16Z9b
+         eOOOnNkZJxrwS+fEe9rkwSt23kqnEQiD6xQkPNbbMQACK/9OXDyuJvj7HfdgtxExn/D0
+         ZITZmkSJru5ziMeIFuPVBcBt3pomvA4KfGuuTE3UbGOsbekOq1magbc3mgtUhUJSlyQJ
+         pltChhGjfm8sgG404j8K4MI2ivd/JD9MgujF5CfifN4wmLw3c86Y+W7BiM1GU2JD+hbu
+         EOjt6tEIAZ4M6cNLDk6LZ/oP/Gb79KZOwlt/bmXPivgHrP49JxyifWXizQpnVc/BAMui
+         /E3g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=9afXLHEiBRvQw+FqKQqGWY2brD9XGx9hPAmFRANM6E0=;
-        b=tD/Umr9dTSkop2zTtRdV7TcHbWWlaXs4KlMb7g8Vib1GLiIjZ7INO8VFnRT9o3oill
-         mMteg4ycFSzW1AhgTx+gXlTbtYmiQhDN4B1EUSqaVkhuCiNpId2g20uyxiJm93ZU7Js6
-         pUlSjaPzKFc49zNHsrt5DJ2ZE9+EvGGyuRG+8N+H3ixJdnAwEV3SFc7REMQ8RmMrHs4d
-         tVMnRrcquIPCtHf64kp+Zs/OZfm7IiOl6tC1d6iTpxpovkKOYFLWvT9euT/gimBsGJfk
-         upyP1ndZi/0flC2Rs7Sqv+RilIVJkS8rbZWRmcN/WHZ0BNSSfovgdApxlnYZqNaY089e
-         oenw==
-X-Gm-Message-State: AOAM5326V9bgmzHehg2E+0mByYDSFx807PjfcEJ8OgywcYtObjZKFhwk
-        LxWfC1g3wq816+FUIWRU02x4qPwQ6bA=
-X-Google-Smtp-Source: ABdhPJwoN3TrpzatYdR/vf/doNTOb6j8sY8QLs5kbR7gHEbbr6h18EW7bx2EM9tVNh0BF01dlvfX6g==
-X-Received: by 2002:a19:701a:: with SMTP id h26mr6902287lfc.443.1629305825693;
-        Wed, 18 Aug 2021 09:57:05 -0700 (PDT)
-Received: from [192.168.2.145] (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
-        by smtp.googlemail.com with ESMTPSA id f19sm24809lfu.100.2021.08.18.09.57.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 18 Aug 2021 09:57:05 -0700 (PDT)
-Subject: Re: [PATCH v8 06/34] dt-bindings: clock: tegra-car: Document new
- tegra-clocks sub-node
-To:     Thierry Reding <thierry.reding@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20210817012754.8710-1-digetx@gmail.com>
- <20210817012754.8710-7-digetx@gmail.com> <YR0SSz7KMh7TwaFW@orome.fritz.box>
- <eff5ef47-e6e0-3e03-cf1a-d931b0f2dc2a@gmail.com>
- <YR033zuYWWLCeYpM@orome.fritz.box>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <a5b942cb-1611-9ae1-6e89-4b68fdaf03e3@gmail.com>
-Date:   Wed, 18 Aug 2021 19:57:04 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=2vHOG5+qPJN8jmWLiJvDNQKkDjgqpU1H4dy3yeyIjso=;
+        b=UcRcDNrrok8+mMeApAwaR2nAZjIMhVxCfGAUFIL2roKI90k0nuGIW4UZ8M29VsSNdd
+         J097uB/31ZddSSSJOnkPYCX8LLpA0mpWKQu2ekGIHyKKeQ/EufQe0ux4A/u4YMTqVh7M
+         5TK+7+I/uiaw1NTGQLzYTNR5EsvY2e7QbKyeutJFDtvbl4Eszz15KiBXZRexMKOlWt1E
+         bEHA9Jdb6RU8M+vbvlD1/vNPTpqDodD3QqQemd6YiBQuS07OK9QnAvwwPks+JAphBMjP
+         7/8XbTNzMObVljLf53+mO9v088pjOw/pdM3mxTqbHtwAuEz/hUwqbFzMdEiqGu552UM6
+         hzNg==
+X-Gm-Message-State: AOAM530aNQ6dT7fHc3C7fuDNNIJjDkZMm27y/b3DtzxIajrnPvsPPpx4
+        R4doCp7Kb/rp67bgg1rTFRomEmYNfWMhkuIibx0=
+X-Google-Smtp-Source: ABdhPJwMMcgiCQIM7qBkrZFh0rLz5MlcL1MzYBiSx/0c6BTFu8uu916TrnDAm+3gTNz24ay/ysQ1Kw4UNFbTkbUt69w=
+X-Received: by 2002:a19:701a:: with SMTP id h26mr6917592lfc.443.1629306149104;
+ Wed, 18 Aug 2021 10:02:29 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <YR033zuYWWLCeYpM@orome.fritz.box>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <CAOMZO5AAvZic-NFbYYSVfOxY-27QukXMX68f9eDmhbqAkBRKRw@mail.gmail.com>
+ <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1> <CAOMZO5A7drx9yXWXKTh4VfV4QHNGCPbH_vxeb=NGDghAm98CXA@mail.gmail.com>
+In-Reply-To: <CAOMZO5A7drx9yXWXKTh4VfV4QHNGCPbH_vxeb=NGDghAm98CXA@mail.gmail.com>
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Wed, 18 Aug 2021 14:02:17 -0300
+Message-ID: <CAOMZO5BY7JeFQJkU--KGRfNLTUnUVjnfar+37SvReXyBt9QJfA@mail.gmail.com>
+Subject: Re: NOHZ tick-stop error with ath10k SDIO
+To:     "Paul E . McKenney" <paulmck@kernel.org>
+Cc:     Kalle Valo <kvalo@codeaurora.org>, ath10k@lists.infradead.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marek Vasut <marex@denx.de>, qais.yousef@arm.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-18.08.2021 19:39, Thierry Reding пишет:
->> We don't have a platform device for CaR. I don't see how it's going to
->> work. We need to create a platform device for each RPM-capable clock
->> because that's how RPM works. The compatible string is required for
->> instantiating OF-devices from a node, otherwise we will have to
->> re-invent the OF core.
-> I think we do have a platform device for CAR. It's just not bound
-> against by the driver because these clock drivers are "special". But
-> from other parts of the series you're already trying to fix that, at
-> least partially.
-> 
-> But it doesn't seem right to create a platform device for each RPM-
-> capable clock. Why do they need to be devices? They aren't, so why
-> pretend? Is it that some API that we want to use here requires the
-> struct device?
+Hi Paul,
 
-The "device" representation is internal to the kernel. It's okay to me
-to have PLLs represented by a device, it's a distinct h/w by itself.
+On Wed, Aug 18, 2021 at 1:29 PM Fabio Estevam <festevam@gmail.com> wrote:
+>
+> Hi Paul,
+>
+> On Wed, Aug 18, 2021 at 12:43 PM Paul E. McKenney <paulmck@kernel.org> wrote:
+>
+> > I believe that you need this commit (and possibly some prerequsites):
+> >
+> > 47c218dcae65 ("tick/sched: Prevent false positive softirq pending warnings on RT")
+> >
+> > Adding Qais on CC for his thoughts.
+>
+> Thanks for the suggestion, but I am running 5.13.11, which already
+> contains this commit.
+>
+> Any extra logs I should capture to help us understand the problem?
 
-CCF supports managing of clock's RPM and it requires to have clock to be
-backed by a device. That's what we are using here.
+In case it helps, I followed your suggestion from:
+https://lkml.org/lkml/2020/12/10/676
 
-Please see
-https://elixir.bootlin.com/linux/v5.14-rc6/source/drivers/clk/clk.c#L109
+With the debug patch and suggested command line, I get the following log:
+https://pastebin.com/raw/X96zKw7i
 
->>> Also, I don't think the tegra- prefix is necessary here. The parent node
->>> is already identified as Tegra via the compatible string.
->>>
->>> In the case of CAR, I'd imagine something like:
->>>
->>> 	clocks {
->>> 		sclk {
->>> 			operating-points-v2 = <&opp_table>;
->>> 			power-domains = <&domain>;
->>> 		};
->>> 	};
->>>
->>> Now you've only got the bare minimum in here that you actually add. All
->>> the other data that you used to have is simply derived from the parent.
->> 'clocks' is already a generic keyword in DT. It's probably not okay to
->> redefine it.
-> "clocks" is not a generic keyword. It's the name of a property and given
-> that we're talking about the clock provider here, it doesn't need a
-> clocks property of its own, so it should be fine to use that for the
-> node.
-
-I'm curious what Rob thinks about it. Rob, does this sound okay to you?
+Thanks
