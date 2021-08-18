@@ -2,155 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 171B0C43216
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 15:55:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2B55C4338F
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 16:29:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EF4E9610CB
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 15:55:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9627C610A3
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 16:29:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239990AbhHRP4F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Aug 2021 11:56:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42588 "EHLO
+        id S229517AbhHRQa3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Aug 2021 12:30:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50574 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239944AbhHRP4A (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 11:56:00 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD7EDC061764;
-        Wed, 18 Aug 2021 08:55:25 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id c12so5966908ljr.5;
-        Wed, 18 Aug 2021 08:55:25 -0700 (PDT)
+        with ESMTP id S229953AbhHRQaW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Aug 2021 12:30:22 -0400
+Received: from mail-lj1-x235.google.com (mail-lj1-x235.google.com [IPv6:2a00:1450:4864:20::235])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53769C06179A
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Aug 2021 09:29:47 -0700 (PDT)
+Received: by mail-lj1-x235.google.com with SMTP id n6so6115089ljp.9
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Aug 2021 09:29:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=FDEHOwK/tV+p4BwibJ2eZxjOpc4MiqVcjf+8RCPnl/I=;
-        b=H0RQfIKG86hjucXIS4WiNewr/HEa0soca6FW/SoC/rnEEopBHfFKy8EBd0pGQounk/
-         Oq9/0nUk373C3fZI609KQfoxLIlCX33VL4jD/UoSCTP1jNz94LT73hGlRg0OGe2pZPMl
-         Oibirrv4BUfG5Z6A9XvafJxus+f47S5hMtsDMR0PfSid8tbadkJELX8svkntbABSkpcD
-         RimCcpLAmvdux+9g7Wlco/fYko0MP+hTZL/CMoVJHvmpnxNhBGRdHEtQ4ME9XbOrtsOg
-         Ou9Bf0Prbo4kHm9SvJmQDHot8vFIRpjN5c2/oXbQGbbtlY4/TvTgQHm5WSs8SXzEzrL/
-         q0pw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=qgqSa92OM+F5OADrmwBCMMd9VmhpaXpJwL3HpzM4S6E=;
+        b=MOed0Y72enm2pahFEHaeZQdzaAwi9bPKNlbd08GQmNE/Jcl2NRGCQAJJCpfnUE9WZF
+         82j2Vlb/q6cPSh64eZeQQG+/y+TDwA65trtwadRcs+cl2ezo6gKP+DcyV+77M4pyEACm
+         66r+7YNnoNqia3CWnfS0tHFhbZYlYq+k3S+6QBMnbxo/5QctqyK3Ha+ka3hufIC2ZWc2
+         Y/EnpAqcRZh7Hve5DRU58dS+uQmEwnoU/nI99XD85w8pZ98mOf3E66+/l3HbRDpH3ig1
+         zbgN6T6tJ/FIQCLawvZ2aVU2HNT8BCoIKcBMVK28V4xNspqdqX5dhx8e61O1oWMjZ80S
+         kcdw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=FDEHOwK/tV+p4BwibJ2eZxjOpc4MiqVcjf+8RCPnl/I=;
-        b=qIEojt5AjO1DBQW4Ighx74dbqHTjCmaXzeCd9DHsabHSFaQ7QFNlDy7v0t9NTINotE
-         O/cw3SEp+CX+9+nxE/YijQ41RRYCPe905VV/rK7Ck3n8BYlifB3437OCISKNawClcElg
-         2okE5kGBj33dZAxzxvPppTG+KPk5UzC5vnq05lbDa1edW/nUFIMTR9/XUCOYHaFWJTc+
-         wvU/T/GENQtiJiJDVA353iERXt8REkMzS3YvO4Av0LXRWcDt+xorNpYmWmQl1dWfs74b
-         +fdjlRTvn/HKOFpPeOjAuqnGnXVG+xJ9UmnDORXfBrqqOxD+BkWrDtamwErbGcmiqM1t
-         m+dg==
-X-Gm-Message-State: AOAM531nFi1Ww7pB1o+krdO6pafeLIX6mfj/OWLgg+TVbY/ZseZqEina
-        agLHafcpm+hTRIg9Xrr+0GTr1m2bo64=
-X-Google-Smtp-Source: ABdhPJwH2B3VgRzJIvI+pIkKDsVXz6Nb3IHX68qBDgW7hPMqkLurd3vlILu0yEDQld58r5qYiUr6VQ==
-X-Received: by 2002:a2e:300a:: with SMTP id w10mr8608460ljw.510.1629302124200;
-        Wed, 18 Aug 2021 08:55:24 -0700 (PDT)
-Received: from [192.168.2.145] (46-138-85-91.dynamic.spd-mgts.ru. [46.138.85.91])
-        by smtp.googlemail.com with ESMTPSA id y8sm7917lfh.249.2021.08.18.08.55.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 18 Aug 2021 08:55:23 -0700 (PDT)
-Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
-References: <20210818035533.ieqkexltfvvf2p4n@vireshk-i7>
- <5b2a80c1-9743-e633-6257-ede94c8a274c@gmail.com>
- <20210818043131.7klajx6drvvkftoc@vireshk-i7>
- <a2a3c41f-c5e4-ee7e-7d48-03af8bac8863@gmail.com>
- <20210818045307.4brb6cafkh3adjth@vireshk-i7>
- <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
- <20210818055849.ybfajzu75ecpdrbn@vireshk-i7>
- <f1c76f23-086d-ef36-54ea-0511b0ebe0e1@gmail.com>
- <20210818062723.dqamssfkf7lf7cf7@vireshk-i7>
- <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
- <20210818091417.dvlnsxlgybdsn76x@vireshk-i7>
- <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com>
-Date:   Wed, 18 Aug 2021 18:55:22 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=qgqSa92OM+F5OADrmwBCMMd9VmhpaXpJwL3HpzM4S6E=;
+        b=EslQTHwixdULzvgEh+ytkJC+zp3mHukAQpyMaA+vD2YRD+xyoatauNOWuFe0ToNQp1
+         VaC3Ef6i2D4h0Bp+nHpLBg3x1tcKWcc38t89IAAB6fJFvhKxQwnx1SruOwhKnhDAIOlH
+         1RFfWyBBQB0pEebMp4NbvwKzy0AHN3gd41FNPvT6SjudYIOAj1F8XpYstHvMBT0wyZ9a
+         p5KB+QM5mEirDwkqQzS2h9V5krOEDMiTATgIA6CJv4Iil4CyV77EQrTZldT6aHfcB4Mu
+         gnKjnO/OkXUAcqeQlFnL+NLi4TR5k/noYT1ajBijQOcmmexjROK0jKK6rRaHFBqtnqmK
+         3rvg==
+X-Gm-Message-State: AOAM532DfOX9tsNF102meulysmKqpP8xecBMa6qBC436RJxKJDhZku96
+        dS1A+vM1BN+wmg3M51qdqxVYCIJqaGPeeBPGvzM=
+X-Google-Smtp-Source: ABdhPJx1g+saCOWCOfM5NYU4DJ7Dt4ExVh7bSSUiW4HstWXEbNYWkZEW0t+h6D338zqAa32vUsyF9EmlRmqauZ478pQ=
+X-Received: by 2002:a2e:a370:: with SMTP id i16mr8765849ljn.444.1629304185737;
+ Wed, 18 Aug 2021 09:29:45 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+References: <CAOMZO5AAvZic-NFbYYSVfOxY-27QukXMX68f9eDmhbqAkBRKRw@mail.gmail.com>
+ <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1>
+In-Reply-To: <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1>
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Wed, 18 Aug 2021 13:29:34 -0300
+Message-ID: <CAOMZO5A7drx9yXWXKTh4VfV4QHNGCPbH_vxeb=NGDghAm98CXA@mail.gmail.com>
+Subject: Re: NOHZ tick-stop error with ath10k SDIO
+To:     "Paul E . McKenney" <paulmck@kernel.org>
+Cc:     Kalle Valo <kvalo@codeaurora.org>, ath10k@lists.infradead.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marek Vasut <marex@denx.de>, qais.yousef@arm.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-18.08.2021 12:41, Ulf Hansson пишет:
-> On Wed, 18 Aug 2021 at 11:14, Viresh Kumar <viresh.kumar@linaro.org> wrote:
->>
->> On 18-08-21, 10:29, Ulf Hansson wrote:
->>> Me and Dmitry discussed adding a new genpd callback for this. I agreed
->>> that it seems like a reasonable thing to add, if he insists.
+Hi Paul,
 
-Either way gives the equal result. The new callback allows to remove the
-boilerplate dev_pm_opp_set_rate(clk_get_rate() code from the rpm-resume
-of consumer devices, that's it.
+On Wed, Aug 18, 2021 at 12:43 PM Paul E. McKenney <paulmck@kernel.org> wrote:
 
->>> The intent was to invoke the new callback from __genpd_dev_pm_attach()
->>> when the device has been attached to its genpd. This allows the
->>> callback, to invoke clk_get_rate() and then dev_pm_opp_set_rate(), to
->>> update the vote according to the current state of the HW.
->>
->> I wouldn't call dev_pm_opp_set_rate() from there, since it means
->> configure and enable (both) for different resources, clk, regulator,
->> genpd, etc..
-> 
-> Right, good point!
-> 
-> dev_pm_opp_set_rate() is best called from consumer drivers, as they
-> need to be in control.
->> What we need here is just configure. So something like this then:
-The intent wasn't to use dev_pm_opp_set_rate() from
-__genpd_dev_pm_attach(), but to set genpd->rpm_pstate in accordance to
-the h/w configuration.
+> I believe that you need this commit (and possibly some prerequsites):
+>
+> 47c218dcae65 ("tick/sched: Prevent false positive softirq pending warnings on RT")
+>
+> Adding Qais on CC for his thoughts.
 
-On Tegra we have a chain of PDs and it's not trivial to convert the
-device's OPP into pstate because only the parent domain can translate
-the required OPP.
+Thanks for the suggestion, but I am running 5.13.11, which already
+contains this commit.
 
-Viresh, please take a look at what I did in [1]. Maybe it could be done
-in another way.
+Any extra logs I should capture to help us understand the problem?
 
-[1]
-https://patchwork.ozlabs.org/project/linux-tegra/patch/20210701232728.23591-3-digetx@gmail.com/
+Thanks
