@@ -2,117 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D403DC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 00:23:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 880BBC43214
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 01:15:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A66826102A
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 00:23:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 652E560F39
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Aug 2021 01:15:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234754AbhHRAYN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Aug 2021 20:24:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51776 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234302AbhHRAYM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 20:24:12 -0400
-Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9CD9C061764
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 17:23:38 -0700 (PDT)
-Received: by mail-lj1-x232.google.com with SMTP id h11so1742861ljo.12
-        for <linux-mmc@vger.kernel.org>; Tue, 17 Aug 2021 17:23:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=Wj7ZYl1WoMaaA1oaw8rVm+2w7aPP8H9UvMYaCDtbsQE=;
-        b=Gk1864OUM428zVHNihF4AqEnIOUcy+1NSIzauz5TxGEg12H6IWI0K73NKzlsWLnLWN
-         U1+Igg+O4O3VGZbJGnkR00GU9vI8VE3iasEMHktKubRejZEnfOVsaeFfa0d6uOXDj81T
-         5ITIkIaefZS7EUxUOsJMiahXPXPSPSDFRYDebVwYLXBT8Iigi5VrqNKA/jA85w9VvgM+
-         VynZe4v1pdz94k4ACcGHnatWcEw5mL4wvyRZ1dRa+XJQ66e97wE6pcr71DSzky8rGJsf
-         gBKy5jH2ODdVlhhBAF+LStFKlCgDWDmLLhsRCmRjqzcoGR3o2lo97DjS6703JOOswAyQ
-         6ZYA==
+        id S236079AbhHRBPq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Aug 2021 21:15:46 -0400
+Received: from mail-ot1-f45.google.com ([209.85.210.45]:35374 "EHLO
+        mail-ot1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232294AbhHRBPo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Aug 2021 21:15:44 -0400
+Received: by mail-ot1-f45.google.com with SMTP id f16-20020a056830205000b00519b99d3dcbso807650otp.2;
+        Tue, 17 Aug 2021 18:15:10 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=Wj7ZYl1WoMaaA1oaw8rVm+2w7aPP8H9UvMYaCDtbsQE=;
-        b=Oll2i5RaX2SuYNV21IWywK7AimaNXGJ/nyz5HoS4owltix94qULdWdmK2Scby65prT
-         DzV6cPWniytUsiDL/c6qB6kCSJkrtP/TicGC+slyHrEG1H6tNdYs87C/g2hXENN0sdVT
-         0h/THLgJhIwYKH9kdBoB3yE6urZo/+GuW9QTsiC6KG2fCFauRpBis3Y0xgnu7Cj1+WXn
-         4VVH1to2lgghEk7IGpbxaKF7gye5CRe1Bcc1lH0VDcUUIkRQJjrECQbIek2M9TyDjlBE
-         VeWdBcqfppSKbG2/caTd9NBUmfBEGJBp0ERh3701UZzylN/ghwpEirhzLgeAfTdIoAgo
-         zgvQ==
-X-Gm-Message-State: AOAM531ipNwkKr0pkeYbfgv4NlqiKsu08abBixm6KZnUVgjhoRgIWhtt
-        7wzi8oirq/w/uwJLjAQcaTeU6Izfo8Lc9AQv9ag=
-X-Google-Smtp-Source: ABdhPJz9/MVuNT4Q8zJcJCaVC+5ltwIfLIIqxpjCUl7tU3h72qBjSHQb6WPWxjTGTWlNrwG61VYCmq//YlVOOKQ1aNA=
-X-Received: by 2002:a2e:8816:: with SMTP id x22mr5399473ljh.264.1629246217149;
- Tue, 17 Aug 2021 17:23:37 -0700 (PDT)
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=RM2dmchpI6KmQKuD+RgubJedkIA6WkX9t/jyVLdUt3Q=;
+        b=M/yPllpnPj3TZCZVEA18tJCv0QVZrZggPomFdRAhNbq9gQbXUAUdvRZNHsSF36y72M
+         0l1ky8wIehQvPxVmUQRU9qtc15Emjy/xV5oExxJN66WqBw0GJHEApsYlg5dBzBXk3NDs
+         KFowaVVlsWeFxBGveWZxOTvUPIF+0zd9DRshAjtDwKgO8jjOLAVmpE5HYZbxh/GHDsci
+         uxBh9TDdsVuK2eDptDSYiQZZ5W1mHQbxUiCcE/oCOvl8DOpn5zBIr/cT3C6WO+wsYlbs
+         FUhROK8iZ8pRq5hIUrvs+0glR2sNsSqhERk9gMQ5GLqjPqZYPpO2OsdkKD7smxvOolln
+         435A==
+X-Gm-Message-State: AOAM531fxHcv2v3ead0V9UchaMijLKVLlDYc6XB9tIO2P4CvC7scT/mX
+        I1AzhmDBH5bmBm25+PiehQ==
+X-Google-Smtp-Source: ABdhPJydb95sxSyCE8JTQ37Yp3+d+zCUT2I4Mgdlk82Qz5QqNFm3xA06SoTPwD6X93TSb4zbZLUInw==
+X-Received: by 2002:a05:6830:1f54:: with SMTP id u20mr4796930oth.320.1629249309809;
+        Tue, 17 Aug 2021 18:15:09 -0700 (PDT)
+Received: from robh.at.kernel.org (24-155-109-49.dyn.grandenetworks.net. [24.155.109.49])
+        by smtp.gmail.com with ESMTPSA id o7sm662196oih.34.2021.08.17.18.15.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 17 Aug 2021 18:15:08 -0700 (PDT)
+Received: (nullmailer pid 1174643 invoked by uid 1000);
+        Wed, 18 Aug 2021 01:15:06 -0000
+Date:   Tue, 17 Aug 2021 20:15:06 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-clk@vger.kernel.org
+Subject: Re: [PATCH v8 06/34] dt-bindings: clock: tegra-car: Document new
+ tegra-clocks sub-node
+Message-ID: <YRxfGtWPXeSQXuHo@robh.at.kernel.org>
+References: <20210817012754.8710-1-digetx@gmail.com>
+ <20210817012754.8710-7-digetx@gmail.com>
 MIME-Version: 1.0
-From:   Fabio Estevam <festevam@gmail.com>
-Date:   Tue, 17 Aug 2021 21:23:26 -0300
-Message-ID: <CAOMZO5DEAMMKHwDkXxqWxg6uj_GQjBUQ5jV+4AzxAr2DCrgTVg@mail.gmail.com>
-Subject: imx7: dev->coherent_dma_mask NULL warning
-To:     Kalle Valo <kvalo@codeaurora.org>
-Cc:     ath10k@lists.infradead.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Bough Chen <haibo.chen@nxp.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Christoph Hellwig <hch@lst.de>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210817012754.8710-7-digetx@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Tue, Aug 17, 2021 at 04:27:26AM +0300, Dmitry Osipenko wrote:
+> Document tegra-clocks sub-node which describes Tegra SoC clocks that
+> require a higher voltage of the core power domain in order to operate
+> properly on a higher clock rates.  Each node contains a phandle to OPP
+> table and power domain.
+> 
+> The root PLLs and system clocks don't have any specific device dedicated
+> to them, clock controller is in charge of managing power for them.
+> 
+> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> ---
+>  .../bindings/clock/nvidia,tegra20-car.yaml    | 51 +++++++++++++++++++
+>  1 file changed, 51 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml b/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+> index 459d2a525393..7f5cd27e4ce0 100644
+> --- a/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+> +++ b/Documentation/devicetree/bindings/clock/nvidia,tegra20-car.yaml
+> @@ -42,6 +42,48 @@ properties:
+>    "#reset-cells":
+>      const: 1
+>  
+> +  tegra-clocks:
+> +    description: child nodes are the output clocks from the CAR
+> +    type: object
+> +
+> +    patternProperties:
+> +      "^[a-z]+[0-9]+$":
+> +        type: object
+> +        properties:
+> +          compatible:
+> +            allOf:
+> +              - items:
+> +                  - enum:
+> +                      - nvidia,tegra20-sclk
+> +                      - nvidia,tegra30-sclk
+> +                      - nvidia,tegra30-pllc
+> +                      - nvidia,tegra30-plle
+> +                      - nvidia,tegra30-pllm
+> +              - const: nvidia,tegra-clock
 
-Launching the hostapd application on an imx7d based board with an
-ath10k Wifi chip leads to the following warning:
+You are saying the first string must be both one of the enums and 
+'nvidia,tegra-clock'. You don't get an error because your pattern 
+doesn't match 'sclk'.
 
- ------------[ cut here ]------------
- WARNING: CPU: 0 PID: 489 at kernel/dma/mapping.c:427 dma_alloc_attrs+0xd0/0x114
- Modules linked in: ath10k_sdio ath10k_core ath
- CPU: 0 PID: 489 Comm: hostapd Not tainted 5.10.48-stable-standard #1
- Hardware name: Freescale i.MX7 Dual (Device Tree)
- [<c0111378>] (unwind_backtrace) from [<c010bc04>] (show_stack+0x10/0x14)
- [<c010bc04>] (show_stack) from [<c0e26094>] (dump_stack+0xdc/0x104)
- [<c0e26094>] (dump_stack) from [<c0125574>] (__warn+0xd8/0x114)
- [<c0125574>] (__warn) from [<c0e20ecc>] (warn_slowpath_fmt+0x60/0xbc)
- [<c0e20ecc>] (warn_slowpath_fmt) from [<c01b9eac>] (dma_alloc_attrs+0xd0/0x114)
- [<c01b9eac>] (dma_alloc_attrs) from [<bf01373c>]
-(ath10k_add_interface+0x2f0/0x1094 [ath10k_core])
- [<bf01373c>] (ath10k_add_interface [ath10k_core]) from [<c0d94470>]
-(drv_add_interface+0x88/0x2fc)
- [<c0d94470>] (drv_add_interface) from [<c0db6c58>]
-(ieee80211_do_open+0x4c8/0xc70)
- [<c0db6c58>] (ieee80211_do_open) from [<c0b12b7c>] (__dev_open+0xf0/0x170)
- [<c0b12b7c>] (__dev_open) from [<c0b12f40>] (__dev_change_flags+0x164/0x1d0)
- [<c0b12f40>] (__dev_change_flags) from [<c0b12fc4>]
-(dev_change_flags+0x18/0x48)
- [<c0b12fc4>] (dev_change_flags) from [<c0bcf968>] (devinet_ioctl+0x6d4/0x868)
- [<c0bcf968>] (devinet_ioctl) from [<c0bd2684>] (inet_ioctl+0x210/0x3b0)
- [<c0bd2684>] (inet_ioctl) from [<c0ae44d4>] (sock_ioctl+0x56c/0x718)
- [<c0ae44d4>] (sock_ioctl) from [<c02ccfb8>] (sys_ioctl+0xf0/0xbf0)
- [<c02ccfb8>] (sys_ioctl) from [<c0100080>] (ret_fast_syscall+0x0/0x28)
- Exception stack(0xc3293fa8 to 0xc3293ff0)
- 3fa0:                   bea0190c 00000000 00000008 00008914 bea0190c 00001003
- 3fc0: bea0190c 00000000 00000008 00000036 00eeef10 00eeedb8 00000000 000186a0
- 3fe0: 0051dbcc bea018fc 004ba26d b6c49fb8
- irq event stamp: 145521
- hardirqs last  enabled at (145531): [<c01949f4>] console_unlock+0x434/0x654
- hardirqs last disabled at (145540): [<c01949ec>] console_unlock+0x42c/0x654
- softirqs last  enabled at (145472): [<c0101604>] __do_softirq+0x324/0x5c4
- softirqs last disabled at (145415): [<c012e1bc>] irq_exit+0x17c/0x1dc
- ---[ end trace 37715f05492d4493 ]---
+> +
+> +          operating-points-v2:
+> +            $ref: /schemas/types.yaml#/definitions/phandle
+> +            description:
+> +              Phandle to OPP table that contains frequencies, voltages and
+> +              opp-supported-hw property, which is a bitfield indicating
+> +              SoC process or speedo ID mask.
 
-which comes from:
+Just 'operating-points-v2: true' is enough.
 
-void *dma_alloc_attrs(struct device *dev, size_t size, dma_addr_t *dma_handle,
-....
-WARN_ON_ONCE(!dev->coherent_dma_mask);
-
-Where should the coherent_dma_mask be set to avoid this problem?
-
-Thanks,
-
-Fabio Estevam
+> +
+> +          clocks:
+> +            items:
+> +              - description: node's clock
+> +
+> +          power-domains:
+> +            maxItems: 1
+> +            description: phandle to the core SoC power domain
+> +
+> +        required:
+> +          - compatible
+> +          - operating-points-v2
+> +          - clocks
+> +          - power-domains
+> +
+> +        additionalProperties: false
+> +
+>  required:
+>    - compatible
+>    - reg
+> @@ -59,6 +101,15 @@ examples:
+>          reg = <0x60006000 0x1000>;
+>          #clock-cells = <1>;
+>          #reset-cells = <1>;
+> +
+> +        tegra-clocks {
+> +            sclk {
+> +                compatible = "nvidia,tegra20-sclk", "nvidia,tegra-clock";
+> +                operating-points-v2 = <&opp_table>;
+> +                clocks = <&tegra_car TEGRA20_CLK_SCLK>;
+> +                power-domains = <&domain>;
+> +            };
+> +        };
+>      };
+>  
+>      usb-controller@c5004000 {
+> -- 
+> 2.32.0
+> 
+> 
