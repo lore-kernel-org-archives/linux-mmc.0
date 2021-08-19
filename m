@@ -2,111 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11F75C4320E
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 15:23:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A742C4338F
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 15:45:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E65E361075
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 15:23:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6BA4A610A6
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 15:45:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240272AbhHSPYV convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Aug 2021 11:24:21 -0400
-Received: from coyote.holtmann.net ([212.227.132.17]:59363 "EHLO
-        mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240159AbhHSPYR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 11:24:17 -0400
-Received: from smtpclient.apple (p5b3d23f8.dip0.t-ipconnect.de [91.61.35.248])
-        by mail.holtmann.org (Postfix) with ESMTPSA id 04B76CED17;
-        Thu, 19 Aug 2021 17:23:37 +0200 (CEST)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 14.0 \(3654.120.0.1.13\))
-Subject: Re: [RFC PATCH 00/15] create power sequencing subsystem
-From:   Marcel Holtmann <marcel@holtmann.org>
-In-Reply-To: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
-Date:   Thu, 19 Aug 2021 17:23:36 +0200
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        MSM <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
-Content-Transfer-Encoding: 8BIT
-Message-Id: <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
-References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
-To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-X-Mailer: Apple Mail (2.3654.120.0.1.13)
+        id S240315AbhHSPpx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Aug 2021 11:45:53 -0400
+Received: from smtp-relay-canonical-0.canonical.com ([185.125.188.120]:52712
+        "EHLO smtp-relay-canonical-0.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S240269AbhHSPpx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 11:45:53 -0400
+Received: from mail-ed1-f70.google.com (mail-ed1-f70.google.com [209.85.208.70])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-canonical-0.canonical.com (Postfix) with ESMTPS id E68AA411BC
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 15:45:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1629387915;
+        bh=oQMiOvmPhv/1z2rOKVbJqGE7XkhSX2/8Th51kVa/d5I=;
+        h=From:To:Subject:Date:Message-Id:MIME-Version;
+        b=htBWlaaLdGvz0lxlml1X0CluvdqZon2zJK2DEszSZd8usVuPWLphcSYUz5nULn6Cr
+         caG/2Bd58qi+51NOO307um2X+C+uN21A5UN+/GNGUkW8gtUAaHvp4BVIU+YIPUX4Mh
+         Qj74/I5o9DBiw0b2l94eCK/Q3KKFJfuNgE2Pk6K+V5G4++on7CcD75VhiibpeJdNeC
+         dhv2+PfEZBDFP8yO/Ps5rzDH7lhkX/CJoobeJLNnJd3UJPwqrhmjRfJmr9jsj8pb7w
+         lASn3N9Ek2seiAJU3cei78cBUw0tXuglKgS/jeeOABDwu6Yr5lTUPvG7Rx+rwpnpnV
+         BC5wQUbcvCBoQ==
+Received: by mail-ed1-f70.google.com with SMTP id b25-20020a05640202d9b02903be7281a80cso3028955edx.3
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 08:45:15 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=oQMiOvmPhv/1z2rOKVbJqGE7XkhSX2/8Th51kVa/d5I=;
+        b=BVUzibbFrTJF07aHGF8lIX2875iezMkHJUM+oqq4MvquP2uoJ10PoyxOZ4IAV56Eyb
+         cgrpbUMRXZYFZwpXWLP6oXTSzU+gtr/URYPrMIn2COl7O246D3pmlK45o64vsxXdd4yW
+         dM5bJYzsxxA1GZPT9wGfziziN7W6Y5P4tYQbE9uUQUCOEDdNG3anLMoxLQd/X7jxXrd0
+         TsS3veJWvHNpIoTkjn7DpH/xf1VZQo9egJrfpNfd0iytPuPDv//hzaCFZfGqYOeWzo9E
+         1ezk+3SCu/MFVIXjoOaYcLfOcVFDwXLqkJSlOkbuyiHoH3cRdVTo0L8wA6D2vs0ppCoJ
+         MMkA==
+X-Gm-Message-State: AOAM533AWwAGFJAsT+69uCnEh9/w5feFD8pTJWATFXAE81XVoCweRMh0
+        eC5V6n3DXyFtajL81X/M3+lcLiufu11BB2+AYw+56qBKbjAII60ONahaACsF3Ts532neF32YQ5O
+        w1NiVGxMq1tVT40Drj4faitV3BbE7BbIk/wu1aA==
+X-Received: by 2002:a05:6402:22ab:: with SMTP id cx11mr16901479edb.240.1629387915594;
+        Thu, 19 Aug 2021 08:45:15 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJwAEWiZz1c1r34QEyTMCWKIodNsdb2JaUuRv2nhyWDs0CmReup5t8cL3kDjjf8lf3M4RXzjlw==
+X-Received: by 2002:a05:6402:22ab:: with SMTP id cx11mr16901463edb.240.1629387915485;
+        Thu, 19 Aug 2021 08:45:15 -0700 (PDT)
+Received: from localhost.localdomain ([86.32.42.198])
+        by smtp.gmail.com with ESMTPSA id f16sm1925373edw.79.2021.08.19.08.45.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Aug 2021 08:45:15 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Atish Patra <atish.patra@wdc.com>,
+        Yash Shah <yash.shah@sifive.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Piotr Sroka <piotrs@cadence.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
+Subject: [PATCH 1/6] dt-bindings: riscv: correct e51 and u54-mc CPU bindings
+Date:   Thu, 19 Aug 2021 17:44:31 +0200
+Message-Id: <20210819154436.117798-1-krzysztof.kozlowski@canonical.com>
+X-Mailer: git-send-email 2.30.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Dmitry,
+All existing boards with sifive,e51 and sifive,u54-mc use it on top of
+sifive,rocket0 compatible:
 
-> This is an RFC of the proposed power sequencer subsystem. This is a
-> generification of the MMC pwrseq code. The subsystem tries to abstract
-> the idea of complex power-up/power-down/reset of the devices.
-> 
-> The primary set of devices that promted me to create this patchset is
-> the Qualcomm BT+WiFi family of chips. They reside on serial+platform
-> interfaces (older generations) or on serial+PCIe (newer generations).
-> They require a set of external voltage regulators to be powered on and
-> (some of them) have separate WiFi and Bluetooth enable GPIOs.
-> 
-> This patchset being an RFC tries to demonstrate the approach, design and
-> usage of the pwrseq subsystem. Following issues are present in the RFC
-> at this moment but will be fixed later if the overall approach would be
-> viewed as acceptable:
-> 
-> - No documentation
->   While the code tries to be self-documenting proper documentation
->   would be required.
-> 
-> - Minimal device tree bindings changes
->   There are no proper updates for the DT bindings (thus neither Rob
->   Herring nor devicetree are included in the To/Cc lists). The dt
->   schema changes would be a part of v1.
-> 
-> - Lack of proper PCIe integration
->   At this moment support for PCIe is hacked up to be able to test the
->   PCIe part of qca6390. Proper PCIe support would require automatically
->   powering up the devices before the scan basing on the proper device
->   structure in the device tree.
-> 
-> ----------------------------------------------------------------
-> Dmitry Baryshkov (15):
->      power: add power sequencer subsystem
->      pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
->      mmc: core: switch to new pwrseq subsystem
->      ath10k: add support for pwrseq sequencing
->      Bluetooth: hci_qca: merge qca_power into qca_serdev
->      Bluetooth: hci_qca: merge init paths
->      Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
->      Bluetooth: hci_qca: futher rework of power on/off handling
->      Bluetooth: hci_qca: add support for pwrseq
+  arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: cpu@0: compatible: 'oneOf' conditional failed, one must be fixed:
+    ['sifive,e51', 'sifive,rocket0', 'riscv'] is too long
+    Additional items are not allowed ('riscv' was unexpected)
+    Additional items are not allowed ('sifive,rocket0', 'riscv' were unexpected)
+    'riscv' was expected
 
-any chance you can try to abandon patching hci_qca. The serdev support in hci_uart is rather hacking into old line discipline code and it is not aging well. It is really becoming a mess.
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+---
+ Documentation/devicetree/bindings/riscv/cpus.yaml | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-I would say that the Qualcomm serial devices could use a separate standalone serdev driver. A while I send an RFC for a new serdev driver.
-
-https://www.spinics.net/lists/linux-bluetooth/msg74918.html
-
-There I had the idea that simple vendor specifics can be in that driver (like the Broadcom part I added there), but frankly the QCA specifics are a bit too specific and it should be a separate driver. However I think this would be a good starting point.
-
-In general a H:4 based Bluetooth driver is dead simple with the help of h4_recv.h helper we have in the kernel. The complicated part is the power management pieces or any vendor specific low-power protocol they are running on that serial line. And since you are touching this anyway, doing a driver from scratch might be lot simpler and cleaner. It would surely help all the new QCA device showing up in the future.
-
-Regards
-
-Marcel
+diff --git a/Documentation/devicetree/bindings/riscv/cpus.yaml b/Documentation/devicetree/bindings/riscv/cpus.yaml
+index e534f6a7cfa1..aa5fb64d57eb 100644
+--- a/Documentation/devicetree/bindings/riscv/cpus.yaml
++++ b/Documentation/devicetree/bindings/riscv/cpus.yaml
+@@ -31,9 +31,7 @@ properties:
+               - sifive,bullet0
+               - sifive,e5
+               - sifive,e7
+-              - sifive,e51
+               - sifive,e71
+-              - sifive,u54-mc
+               - sifive,u74-mc
+               - sifive,u54
+               - sifive,u74
+@@ -41,6 +39,12 @@ properties:
+               - sifive,u7
+               - canaan,k210
+           - const: riscv
++      - items:
++          - enum:
++              - sifive,e51
++              - sifive,u54-mc
++          - const: sifive,rocket0
++          - const: riscv
+       - const: riscv    # Simulator only
+     description:
+       Identifies that the hart uses the RISC-V instruction set
+-- 
+2.30.2
 
