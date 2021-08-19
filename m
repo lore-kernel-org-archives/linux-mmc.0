@@ -2,108 +2,215 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E883C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 16:21:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2545AC43214
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 16:31:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4D21361101
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 16:21:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0C7EC60F5E
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 16:31:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229521AbhHSQWY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Aug 2021 12:22:24 -0400
-Received: from smtp-relay-canonical-1.canonical.com ([185.125.188.121]:44510
-        "EHLO smtp-relay-canonical-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S229497AbhHSQWY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 12:22:24 -0400
-Received: from mail-ej1-f71.google.com (mail-ej1-f71.google.com [209.85.218.71])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by smtp-relay-canonical-1.canonical.com (Postfix) with ESMTPS id 8BAE8411F4
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 16:21:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1629390106;
-        bh=+cZtuR9o2k87pvi0rgBoRi8/bFI7YeJU/qox3v5ZI5U=;
-        h=Subject:To:References:From:Message-ID:Date:MIME-Version:
-         In-Reply-To:Content-Type;
-        b=pcRb9JvReJSBc1KYUMrzYYjLBZ0qErR5GBZ/AeJYEQl68pbJ9hTL358hC0QTr5hLm
-         Xs4RbJIEckpzQwqL5OAliLhSfh2rZELGniA7N9R8YBz+8aaBpvl2jZIouAaKsja7T6
-         7gvT20t24i+T5+ivh93fBXHOXCP3FgJ+M55WJ4mFRjOIrGN33qNAr4Qj4udSD5NlwL
-         6YjnlPynMzLo4JDQGNT6QokYwlVjqDcbLPIbRIKvGF0+QksvhBvwEotx4ttxENPnUt
-         7vpb4e3zdyvx1I/PJ/LPBJ9l++TJWC5MfIs7ovl4wdKS5RZMSsB3dCtPzn9AM80hxl
-         jp/8uGyufjYKw==
-Received: by mail-ej1-f71.google.com with SMTP id r21-20020a1709067055b02904be5f536463so2477510ejj.0
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 09:21:46 -0700 (PDT)
+        id S230331AbhHSQcC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Aug 2021 12:32:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44194 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230416AbhHSQcB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 12:32:01 -0400
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E93C2C061575;
+        Thu, 19 Aug 2021 09:31:24 -0700 (PDT)
+Received: by mail-wr1-x429.google.com with SMTP id k8so10005658wrn.3;
+        Thu, 19 Aug 2021 09:31:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=xdfmGh23k0aNDX33xwOdlnspLCgiV2qSptJyQT4CArg=;
+        b=TqvsyYuIzPTFNISEaUDmY0h791HLIf4qH1WXS1GxVOvTPNRDVQWqqcXQlxGoSmEhYq
+         hmHtTmIeKTi83VzFGyYEcVObXx+9sz/n5eRC4i5PoGxDQ5FuJyqmzwZC3DZsTYvcC7lj
+         Pr/Hk6ZGcay72lFauB5YyEIy1wE9tdSBx7LT+U3/P67mkfLEUFIanjAo3tpK1Of8NDws
+         BwdnJJRNFFFrUFU5DylX11cauyAcPLYzFuHfmvb7prU10HBcx3ThlIFERG8TGHBfHyo4
+         yySdwCCzMSuAkV9jh3xYDU+0sLNNdvXISoBFguTvMb8H+aD1MJ35euCxfdXOs3xfCmJt
+         nByA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=+cZtuR9o2k87pvi0rgBoRi8/bFI7YeJU/qox3v5ZI5U=;
-        b=TXvWuoxbcl9tDWzr+NODZdbGz/x/3bJ3x1SPJ4oY0h+Y0FWDC/rpKBnH04lU9Q7ba2
-         cvjoZ8NSPU1xCfkzIJIhbbLOi6pTCJieolKAv8111JQlBEh/GJ/i2oATJTNQ8UKq0W4g
-         zBZYfyaNQGIeU8SnF9tiebtIsq2ae8TqhaIwpIE1QD+iwY4w9updnT8rsP33TrlMaVDp
-         qpLuluMwPRrNIPi7UrX4zGBe0ktZbFtyrC1yKsCkqqYP0k1fJMZLWqAq+peutWu43G7t
-         CC3lhULvMNvBZzHqirTp85JkURWPziAk+XbXdYuc7nxVHcDJyh9eNc1a0E1vDbrXMSw0
-         i5WA==
-X-Gm-Message-State: AOAM5314dFgtj7aYzI5xhsJQcKAwZ3mOOLZ/FIOZ62fnUdpwtIHJ6zEH
-        yxSJR1rT0Gjtp0+7GggXZuThgP9wsNdrYwDqUSr7R2I4VatvLp38lTwROq8oRf+GnT0Zby/3GqG
-        e+F1zCW2ET9Mo9uLQ1aH/8owYGMivEqxgySld9w==
-X-Received: by 2002:a17:906:87c2:: with SMTP id zb2mr16503220ejb.322.1629390106277;
-        Thu, 19 Aug 2021 09:21:46 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJxuaQqSj/y3QMWrvKAdgV8r7CJmiTSZ6zuwkSNkqhhy0AKGNuqM3cQONHkLBZcKm5Sw3vridg==
-X-Received: by 2002:a17:906:87c2:: with SMTP id zb2mr16503202ejb.322.1629390106161;
-        Thu, 19 Aug 2021 09:21:46 -0700 (PDT)
-Received: from [192.168.8.102] ([86.32.42.198])
-        by smtp.gmail.com with ESMTPSA id j11sm1478832ejy.112.2021.08.19.09.21.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 19 Aug 2021 09:21:45 -0700 (PDT)
-Subject: Re: [PATCH 3/6] riscv: microchip: mpfs: drop duplicated nodes
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Atish Patra <atish.patra@wdc.com>,
-        Yash Shah <yash.shah@sifive.com>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Piotr Sroka <piotrs@cadence.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org
-References: <20210819154436.117798-1-krzysztof.kozlowski@canonical.com>
- <20210819154436.117798-3-krzysztof.kozlowski@canonical.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Message-ID: <4d0d6290-8341-56d8-7902-5a8c36bc7bb5@canonical.com>
-Date:   Thu, 19 Aug 2021 18:21:44 +0200
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=xdfmGh23k0aNDX33xwOdlnspLCgiV2qSptJyQT4CArg=;
+        b=mOZXduuE9bVwOCymxoqTm0O+CBy9fgiSmr0eIcat6+XSqs6xscM2EgCEQPWDDLlKTr
+         6UKjFFqIQGgpj+BrY5Dy+A+RTCUiZb2AQEseHdsqp7Fq2LKKGliJ8PeKXTBDdn08aUyF
+         K58k8wuSy+aPet8EXNYjlCNBfVRD40DmCLBgbZUoDrE44XCjyGn01nS9OcN5HAH3xcYu
+         sIjzHiSrCVRdZfV6aoT8OIXIsUaWOKXIcIS8fkDrZznpuTT3zoult23JDzQdveOlVT6D
+         yJTNiQMrVI1qVEkB+694QN2pnkYebeCKPUEdkgz2t3Oi2zRkd5df618QXxLnFmD++m5A
+         pqrA==
+X-Gm-Message-State: AOAM531aPwJhRjMZLO66z+Qsfv7BAAVOplA0JVb08FFWhDPyrPay55dR
+        0OolyrbbsiYe2E8q5aWCqpc=
+X-Google-Smtp-Source: ABdhPJw+layCx1zXDlaPhdMiFy7BJcVfdPSGx4BZzhnHtq808ns6k0cMS2cwB3t84/EUctnSBTQSPg==
+X-Received: by 2002:adf:f541:: with SMTP id j1mr4794858wrp.180.1629390683554;
+        Thu, 19 Aug 2021 09:31:23 -0700 (PDT)
+Received: from localhost ([217.111.27.204])
+        by smtp.gmail.com with ESMTPSA id p8sm7766709wme.22.2021.08.19.09.31.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Aug 2021 09:31:21 -0700 (PDT)
+Date:   Thu, 19 Aug 2021 18:31:20 +0200
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-clk@vger.kernel.org
+Subject: Re: [PATCH v8 06/34] dt-bindings: clock: tegra-car: Document new
+ tegra-clocks sub-node
+Message-ID: <YR6HWMuYcF6NIepi@orome.fritz.box>
+References: <20210817012754.8710-1-digetx@gmail.com>
+ <20210817012754.8710-7-digetx@gmail.com>
+ <YR0SSz7KMh7TwaFW@orome.fritz.box>
+ <eff5ef47-e6e0-3e03-cf1a-d931b0f2dc2a@gmail.com>
+ <YR033zuYWWLCeYpM@orome.fritz.box>
+ <a5b942cb-1611-9ae1-6e89-4b68fdaf03e3@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20210819154436.117798-3-krzysztof.kozlowski@canonical.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="rcVyDzt3QNLnQ9/o"
+Content-Disposition: inline
+In-Reply-To: <a5b942cb-1611-9ae1-6e89-4b68fdaf03e3@gmail.com>
+User-Agent: Mutt/2.1.1 (e2a89abc) (2021-07-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/08/2021 17:44, Krzysztof Kozlowski wrote:
-> The DTSI file defines soc node and address/size cells, so there is no
-> point in duplicating it in DTS file.
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-> ---
->  arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts | 5 -----
->  1 file changed, 5 deletions(-)
-> 
 
-Now I wonder whether the subject prefix should be "riscv: dts:
-microchip:" instead?
+--rcVyDzt3QNLnQ9/o
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+On Wed, Aug 18, 2021 at 07:57:04PM +0300, Dmitry Osipenko wrote:
+> 18.08.2021 19:39, Thierry Reding =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >> We don't have a platform device for CaR. I don't see how it's going to
+> >> work. We need to create a platform device for each RPM-capable clock
+> >> because that's how RPM works. The compatible string is required for
+> >> instantiating OF-devices from a node, otherwise we will have to
+> >> re-invent the OF core.
+> > I think we do have a platform device for CAR. It's just not bound
+> > against by the driver because these clock drivers are "special". But
+> > from other parts of the series you're already trying to fix that, at
+> > least partially.
+> >=20
+> > But it doesn't seem right to create a platform device for each RPM-
+> > capable clock. Why do they need to be devices? They aren't, so why
+> > pretend? Is it that some API that we want to use here requires the
+> > struct device?
+>=20
+> The "device" representation is internal to the kernel. It's okay to me
+> to have PLLs represented by a device, it's a distinct h/w by itself.
+>=20
+> CCF supports managing of clock's RPM and it requires to have clock to be
+> backed by a device. That's what we are using here.
+>=20
+> Please see
+> https://elixir.bootlin.com/linux/v5.14-rc6/source/drivers/clk/clk.c#L109
 
-Best regards,
-Krzysztof
+Looking at the implementation of __clk_register() and where that device
+pointer typically comes from, I don't think the way this is used here is
+what was intended. The way I interpret the code is that a clock is
+registered with a parent device (i.e. its provider) and
+clk_pm_runtime_get() is then used internally as a way to make sure that
+when a clock is prepared, it's parent device is runtime resumed. This is
+presumably to ensure that any registers that the driver might need to
+access in order to prepare and enable the clock are accessible (i.e. the
+CAR is not powered off or in reset).
+
+So the struct device that is passed to __clk_register() (or its callers)
+should be that of the CAR rather than virtual struct devices created by
+the CAR.
+
+And it's a bit debatable whether or not PLLs represent distinct
+hardware. Ultimately every transistor on a chip could be considered
+distinct hardware. But a platform device is a device on a platform bus,
+which is really just another way of saying it's a hardware block that's
+accessible from the CPU via a memory-mapped address. A PLL (just like
+other clocks) is merely a resource exposed by means of access to these
+registers. So I don't think they should be platform devices. Even making
+them struct device:s seems a bit of a stretch.
+
+Is there any reason why struct clk can't be used for this? I mean, the
+whole purpose of that structure is to represent clocks. Why do we need
+to make them special?
+
+> >>> Also, I don't think the tegra- prefix is necessary here. The parent n=
+ode
+> >>> is already identified as Tegra via the compatible string.
+> >>>
+> >>> In the case of CAR, I'd imagine something like:
+> >>>
+> >>> 	clocks {
+> >>> 		sclk {
+> >>> 			operating-points-v2 =3D <&opp_table>;
+> >>> 			power-domains =3D <&domain>;
+> >>> 		};
+> >>> 	};
+> >>>
+> >>> Now you've only got the bare minimum in here that you actually add. A=
+ll
+> >>> the other data that you used to have is simply derived from the paren=
+t.
+> >> 'clocks' is already a generic keyword in DT. It's probably not okay to
+> >> redefine it.
+> > "clocks" is not a generic keyword. It's the name of a property and given
+> > that we're talking about the clock provider here, it doesn't need a
+> > clocks property of its own, so it should be fine to use that for the
+> > node.
+>=20
+> I'm curious what Rob thinks about it. Rob, does this sound okay to you?
+
+Another alternative would be to omit that level altogether and just make
+sclk and siblings direct children of the CAR node.
+
+Thierry
+
+--rcVyDzt3QNLnQ9/o
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmEeh1YACgkQ3SOs138+
+s6H2hw/9FHQE4gIC68lVuteJusivX3to+lSemB8K8zjRkcxT7nURgxWEiaqizxEC
+HdNxAuNdVDpD1v34JC2ZGJgnnYdMSrk9k4BhykGgn1+QhdgEQGSTAEXUhcxfK2Yg
+5Slk4jnHH9HF0GPYfbJ5SP6k3NgkeL8h0fCa2JviaoCOhzyRBJK71IG1cIOlj7Ud
+3nxcd1/NzHcPZnsGivm5Qd8saf1nyLrZghmyUsuaZp5tsH8Ct/x5HWiShOTVB6UT
++uRefYWMbuaJp/mCa+6N0gK2827S84iSRzO5sxI3nYZbRJsgLgD766fzdC/EDZ9G
+Zg5AZgzH67GoEicbdCQMgx6zVV6Y1LQF1+5mrHjpomm2OWRVZELLEfGa1pqVNIGu
+VJjQuIX618IKU5jBYUw18+vr2HiJNDEFCXX0PrBYXp/cc64fiq4I3M30clqQQoxr
+puehYCuiVtD9v6lr8tnEA79qUnn0XsWIpzzHbeLtwclpaqN5lTZUo6eXXFIGid+3
+ZauSDJzqa4qTX1fvwH23kMnkA91nI2A00rPQWtER0uhJGq8TjXFPeJ4JHsvTyXxg
+Xr77eogUzKs15p0Eh3BBBYCu5CLnaePC+kK5pcVnJLDmbmRW/gaS/RvCuw/YfIhE
+Q5nj2KNqZny4RL9VKn0X77bP0ngrfjlFjFsEDt+9MYgNMX3kjj8=
+=ibYp
+-----END PGP SIGNATURE-----
+
+--rcVyDzt3QNLnQ9/o--
