@@ -2,96 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3A0AC432BE
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 14:11:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 077E0C4320A
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 14:55:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9EFDD610D2
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 14:11:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E6E8860551
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 14:55:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240533AbhHSOLv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Aug 2021 10:11:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39300 "EHLO
+        id S240655AbhHSO4b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Aug 2021 10:56:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240547AbhHSOLu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 10:11:50 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 464C8C061575
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 07:11:14 -0700 (PDT)
-Received: from gallifrey.ext.pengutronix.de ([2001:67c:670:201:5054:ff:fe8d:eefb] helo=[IPv6:::1])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <l.stach@pengutronix.de>)
-        id 1mGil6-0002Bo-5p; Thu, 19 Aug 2021 16:11:04 +0200
-Message-ID: <bb658c8013e2e8e38c21b83d59eec7046d939097.camel@pengutronix.de>
-Subject: Re: [PATCH v2 3/6] dt-bindings: mmc: fsl-imx-esdhc: add fsl,
- broken-auto-tuning binding
-From:   Lucas Stach <l.stach@pengutronix.de>
-To:     haibo.chen@nxp.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, shawnguo@kernel.org, robh+dt@kernel.org,
-        s.hauer@pengutronix.de
-Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-imx@nxp.com, kernel@pengutronix.de, festevam@gmail.com,
-        linux-arm-kernel@lists.infradead.org
-Date:   Thu, 19 Aug 2021 16:11:01 +0200
-In-Reply-To: <1629285415-7495-3-git-send-email-haibo.chen@nxp.com>
-References: <1629285415-7495-1-git-send-email-haibo.chen@nxp.com>
-         <1629285415-7495-3-git-send-email-haibo.chen@nxp.com>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.40.3 (3.40.3-1.fc34) 
+        with ESMTP id S240583AbhHSO4a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 10:56:30 -0400
+Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84480C061575
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 07:55:54 -0700 (PDT)
+Received: by mail-vs1-xe2d.google.com with SMTP id s19so4174009vsl.11
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 07:55:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=mm8paTdT0zaztfhC5Y4WPaOBPl8kLHQHgl7pXYxX3h4=;
+        b=qeDfX1TvtXFpaue7XSJcQGoXvoEPk6keQ3SefhHQYD/RQYSwXL/h7/nJ1tE1n2ZgGf
+         hgNQdBuev8q9YdqAn31QqEn+hl0Fw8o/I7j+pKewMg7BSKDExUMcgAG5ffW6TnVBaweA
+         awPBlmbVNdD0YyJLl/fecYVhU7UH2GjQaH+G3BKTeEFH67xcFXuuVoODzKyHu4OljnuW
+         y3YyyagNQ7/VVdr8UoQMvH7lyjCnnH9zaDfJmZrMJYrsb5yu8bZTEWP6ZCkq4ndYtqKT
+         KiXhZrvSOf9kLkVqOyobXMYfdScN3zuV6Y2fafpateAUvd8nG8k5/FLAhRgrUffP4ZSX
+         UqPQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=mm8paTdT0zaztfhC5Y4WPaOBPl8kLHQHgl7pXYxX3h4=;
+        b=sxKdlrUEONmf4cSNBXLRug34SvZvufx/gxAI3SvN6Z40rjmeJSmf+QPN4OsKu4EK/g
+         RHfELqCM+9E7LATjdQs8krAgyYFqHU0jjk1zm4EVhozK4mrosbjTgaWSP8b7GcOWsBN+
+         UWxgAPx0M67CFiwgO4ca2KOhG/kC7z5Q8BLFTUMeiXaKKyI5qFYe+jlO4dbvDo/mOG+u
+         6z5wFzyOmobcCZ7Cg9hOEuUx7F3SUWfwFldlc9N9T5Vnx3PAJvmcTHrY0YkJ2mcLsS1y
+         ONqeRAnDYkjABTFCgxA/Rif93+lH2DbUUhiQjsq2I3/X1oZnVdQvPdzpDA81ngHY5WQA
+         ERwQ==
+X-Gm-Message-State: AOAM5336xUUkWYxQfYmjIR0WNfPz/yMi/Y7WnJZbkwj8P9WU2iCYsiip
+        bN86+QeMFsWFQ1EhtPtc6AuE8OFiHrwR6TiP/giCvQ==
+X-Google-Smtp-Source: ABdhPJy9lhlHe3ZkjkK69gRHTqfsYZUpyU/u1QO9GNutRCvh27kC0oDOl0UN2vIh0G0BbPGuh3RFsxVqGIQ9yFmBme8=
+X-Received: by 2002:a67:f6d8:: with SMTP id v24mr12929204vso.48.1629384953702;
+ Thu, 19 Aug 2021 07:55:53 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-SA-Exim-Connect-IP: 2001:67c:670:201:5054:ff:fe8d:eefb
-X-SA-Exim-Mail-From: l.stach@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+References: <a2a3c41f-c5e4-ee7e-7d48-03af8bac8863@gmail.com>
+ <20210818045307.4brb6cafkh3adjth@vireshk-i7> <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
+ <20210818055849.ybfajzu75ecpdrbn@vireshk-i7> <f1c76f23-086d-ef36-54ea-0511b0ebe0e1@gmail.com>
+ <20210818062723.dqamssfkf7lf7cf7@vireshk-i7> <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
+ <20210818091417.dvlnsxlgybdsn76x@vireshk-i7> <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
+ <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com> <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
+In-Reply-To: <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 19 Aug 2021 16:55:16 +0200
+Message-ID: <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com>
+Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
+To:     Viresh Kumar <viresh.kumar@linaro.org>
+Cc:     Dmitry Osipenko <digetx@gmail.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Haibo,
+On Thu, 19 Aug 2021 at 08:17, Viresh Kumar <viresh.kumar@linaro.org> wrote:
+>
+> On 18-08-21, 18:55, Dmitry Osipenko wrote:
+> > 18.08.2021 12:41, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> >
+> > Either way gives the equal result. The new callback allows to remove th=
+e
+> > boilerplate dev_pm_opp_set_rate(clk_get_rate() code from the rpm-resume
+> > of consumer devices, that's it.
+>
+> It may not be equal, as dev_pm_opp_set_rate() may do additional stuff,
+> now or in a later implementation. Currently it only does
+> regulator_enable() as a special case, but it can be clk_enable() as
+> well. Also, this tries to solve the problem in a tricky/hacky way,
+> while all you wanted was to make the genpd aware of what the
+> performance state should be.
+>
+> Your driver can break tomorrow if we started to do more stuff from
+> this API at another time.
+>
+> > > dev_pm_opp_set_rate() is best called from consumer drivers, as they
+> > > need to be in control.
+> > >> What we need here is just configure. So something like this then:
+> > The intent wasn't to use dev_pm_opp_set_rate() from
+> > __genpd_dev_pm_attach(), but to set genpd->rpm_pstate in accordance to
+> > the h/w configuration.
+>
+> Right.
+>
+> > On Tegra we have a chain of PDs and it's not trivial to convert the
+> > device's OPP into pstate because only the parent domain can translate
+> > the required OPP.
+>
+> The driver should just be required to make a call, and OPP/genpd core
+> should return it a value. This is already done today while setting the
+> pstate for a device. The same frameworks must be able to supply a
+> value to be used for the device.
 
-Am Mittwoch, dem 18.08.2021 um 19:16 +0800 schrieb haibo.chen@nxp.com:
-> From: Haibo Chen <haibo.chen@nxp.com>
-> 
-> Add a new fsl,broken-auto-tuning binding for sdio devices. When sdio
-> device support sdio interrupt, need to use this property to disable
-> auto-tuning. Auto-tuning circuit is conflict with sdio interrupt.
-> 
-Wouldn't it be possible to do this automatically by the driver without
-a DT property when a SDIO card is detected?
+Right, that sounds reasonable.
 
-Regards,
-Lucas
+We already have pm_genpd_opp_to_performance_state() which translates
+an OPP to a performance state. This function invokes the
+->opp_to_performance_state() for a genpd. Maybe we need to allow a
+genpd to not have ->opp_to_performance_state() callback assigned
+though, but continue up in the hierarchy to see if the parent has the
+callback assigned, to make this work for Tegra?
 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> ---
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index b5baf439fbac..d7c8e5880473 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -93,6 +93,15 @@ properties:
->        tuning step can't find the proper delay window within limited tuning retries.
->      default: 0
->  
-> +  fsl,broken-auto-tuning:
-> +    description: |
-> +      Recommend for SDIO cards that enables SDIO interrupt for SDR104 and SDR50 mode.
-> +      SDIO interrupt uses DAT[1] to signal the card's interrupt. Auto-tuning circuit
-> +      will detect this interrupt on DAT[1] when in 4Bit bus mode, and take it just
-> +      as normal data, wrongly adjust the delay cell. This property is used to disable
-> +      the auto-tuning function.
-> +    type: boolean
-> +
->    fsl,strobe-dll-delay-target:
->      $ref: /schemas/types.yaml#/definitions/uint32
->      description: |
+Perhaps we should add an API dev_pm_genpd_opp_to_performance_state(),
+allowing us to pass the device instead of the genpd. But that's a
+minor thing.
 
+Finally, the precondition to use the above, is to first get a handle
+to an OPP table. This is where I am struggling to find a generic
+solution, because I guess that would be platform or even consumer
+driver specific for how to do this. And at what point should we do
+this?
 
+>
+> > Viresh, please take a look at what I did in [1]. Maybe it could be done
+> > in another way.
+>
+> I looked into this and looked like too much trouble. The
+> implementation needs to be simple. I am not sure I understand all the
+> problems you faced while doing that, would be better to start with a
+> simpler implementation of get_performance_state() kind of API for
+> genpd, after the domain is attached and its OPP table is initialized.
+>
+> Note, that the OPP table isn't required to be fully initialized for
+> the device at this point, we can parse the DT as well if needed be.
+
+Sure, but as I indicated above, you need some kind of input data to
+figure out what OPP table to pick, before you can translate that into
+a performance state. Is that always the clock rate, for example?
+
+Perhaps, we should start with adding a dev_pm_opp_get_from_rate() or
+what do you think? Do you have other suggestions?
+
+>
+> --
+> viresh
+
+Kind regards
+Uffe
