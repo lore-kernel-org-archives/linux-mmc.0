@@ -2,167 +2,239 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF2BDC4320E
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 22:37:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94360C43216
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 23:17:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CFF3A60462
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 22:37:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 85ADF610A3
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 23:17:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236566AbhHSWh7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Aug 2021 18:37:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44164 "EHLO
+        id S236444AbhHSXSP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Aug 2021 19:18:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236420AbhHSWhx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 18:37:53 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D45A7C061575;
-        Thu, 19 Aug 2021 15:37:16 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id d4so16130573lfk.9;
-        Thu, 19 Aug 2021 15:37:16 -0700 (PDT)
+        with ESMTP id S236814AbhHSXSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 19:18:14 -0400
+Received: from mail-ot1-x32f.google.com (mail-ot1-x32f.google.com [IPv6:2607:f8b0:4864:20::32f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79F67C061756
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 16:17:37 -0700 (PDT)
+Received: by mail-ot1-x32f.google.com with SMTP id g66-20020a9d12c8000000b0051aeba607f1so2286365otg.11
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 16:17:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=nAS9qcnivKqgeAIIut8h1WFAVA13oxF52QRobcHq7Xc=;
-        b=a4XV4VjRWxo1kHnGEwcEOxFKRCM6deOw4lOM9Uon818SGJgn0YPFw4DdKti64wBV9H
-         ZocBdzpcFtuEYqk3Wa8+HUMj2ko6agOMxjv09whIIThddMbYROGGAAS4Plcpv1Z18cgY
-         5sKTsW0BmphWVrS/Tiinzv52JEwYHnlvjz/kC/ONQmk2H2QZrW0O70369IiptcK6UmEd
-         XneH4My93CRKDRkqsBmuCdSoAuWcBI3J8xEuCJKQTSLx7Jnn2Qku3bl3B0b4iwQ7W5+X
-         bMdlKDDR1RyjIOyTN2oZCz5u+iQg+iw/06K9i+IzAB7AjGsFZejlDhk+M4jSdmwerMgk
-         ecRA==
+        d=linaro.org; s=google;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=dqgoJAQz3Mv7B0ZEGRvtaCqkcK4kqu5N3VSB9Do7xY4=;
+        b=BMf23iSlOWarU9fDcULweKVfxlosd41Wfztfxi8DOr0ErrJ2WhFuCCJdroa4O3U6Y4
+         Ornh+yHcbZUTjYugKoCBoMvCuzIam6M+JCV2WGHWTCt5Q87DYpGvI7XiogoqjDWvdBJq
+         ndpRW8alwfoz9eRtKWAiyOOYuHxpm070gdIkFjgkcZQRsAYJhwuC10wddFnkpuuDXvId
+         SdgUNgerTBW5jnZEmujJEh18/L85559JS7Mgk3us3PqXvJEoQFq08GdIqS/f1/cl8knE
+         ZpLOcgtVLfQjQa1B0gpCqgHYebtUQqbo4TIy1POmSREhzGqokLYnjGXFMZKWIgQ4FXh5
+         C37Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=nAS9qcnivKqgeAIIut8h1WFAVA13oxF52QRobcHq7Xc=;
-        b=DwiSUa9a4uiiaLqygFuoMgS+IfwNjh4DFWc/E9l+eJnH6ahXnqx2hPvZsxUUoqBRYy
-         MuEK0niGgUgmgC2jyzU1CZvSEW/zgJidGUDFrc67pGb2wt8X2wKRlUC4yVWoJR0eXgee
-         yaAdHbXydQTyywGt+9jP+64bosQlr0+ss61atdmEHjYjj5wxqBPSgCRc3G4juqiWa67j
-         cZEfDrthqICCJoWd25/S/EEH76hKFeE5Tr5/IaYoRfF/BZ/IOTqUYE6HRdT7Sk7L7mQQ
-         Wi6O71sgcip9ACyvC5hUtA2ojdR/dnSjPj3MfMSTUXW9rgzPHd78Yb0LUILIz8UWp5IC
-         ZMBg==
-X-Gm-Message-State: AOAM533j7150g+DhauoY2PMMStGz1biw+CuoZj02oBeERMRt5bOXc9e3
-        PoufT5sJiO7R6hCt1B1LOVOa8FFW1yU=
-X-Google-Smtp-Source: ABdhPJwuMIWgok5xoSqa52pUigQi/FuENEcCid7QFl2xNGsNEC360zffkjPyNHa+eJldf8U6/MOiRQ==
-X-Received: by 2002:a05:6512:b8e:: with SMTP id b14mr12930460lfv.449.1629412634809;
-        Thu, 19 Aug 2021 15:37:14 -0700 (PDT)
-Received: from [192.168.2.145] (46-138-120-72.dynamic.spd-mgts.ru. [46.138.120.72])
-        by smtp.googlemail.com with ESMTPSA id b19sm437171lff.121.2021.08.19.15.37.13
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 19 Aug 2021 15:37:14 -0700 (PDT)
-Subject: Re: [PATCH v8 20/34] mmc: sdhci-tegra: Add runtime PM and OPP support
-To:     Thierry Reding <thierry.reding@gmail.com>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=dqgoJAQz3Mv7B0ZEGRvtaCqkcK4kqu5N3VSB9Do7xY4=;
+        b=adR4JA/cHeRmnaYNBV6bEjxhpV4/wlcWaDvyeqK7HhEKd+hn9BsIZ8CmxnKhpfH7BY
+         TUTjKpalum8i+KnlbRllj+e45dT212a2ypuPFkQV7a3Rpmq2+D7sSSEqvu/XcWOb1JZ6
+         X91SRhWRIF35MBpTu/e8MOYpCyK92mPOssTSgdg8UgQaskOFyzpUxpVpXkpMeqdi1Brv
+         aPwbGG8RQKxJ9zR951bhJ90dN5MGijexi3TRJUVDcChDG/sOtj+rPoV9aMiKp2JB4z+S
+         O4AGFFpoWW3PBFwEI/hvxF1vi75jS+XHvVCcgQLAR2xZX6g5dDA0qbAWnhy5L5o3Ygzz
+         Gl8w==
+X-Gm-Message-State: AOAM531RlFbzQNeGdxG+/VckDtjkjoRNFwUO63rEOf2T4tmMnBaca1SW
+        HVgK7oh8gy8uE8OnZkJDPksRUA==
+X-Google-Smtp-Source: ABdhPJyW/PO0aRB2JhV3QSCv+CbV97dGiXbm6pwAyuaGcZ90eIfRAKlNSig9OcjkDtMHhlGDTPhK9g==
+X-Received: by 2002:a9d:bec:: with SMTP id 99mr13825165oth.187.1629415056421;
+        Thu, 19 Aug 2021 16:17:36 -0700 (PDT)
+Received: from ripper (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
+        by smtp.gmail.com with ESMTPSA id z26sm971827oih.3.2021.08.19.16.17.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 19 Aug 2021 16:17:36 -0700 (PDT)
+Date:   Thu, 19 Aug 2021 16:18:59 -0700
+From:   Bjorn Andersson <bjorn.andersson@linaro.org>
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Cc:     Andy Gross <agross@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20210817012754.8710-1-digetx@gmail.com>
- <20210817012754.8710-21-digetx@gmail.com> <YR6O9Om+HzMMG8AR@orome.fritz.box>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <05b7ff28-4c01-fb56-deeb-595a5797394b@gmail.com>
-Date:   Fri, 20 Aug 2021 01:37:13 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: Re: [RFC PATCH 10/15] pwrseq: add support for QCA BT+WiFi power
+ sequencer
+Message-ID: <YR7m43mURVJ8YufC@ripper>
+References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+ <20210817005507.1507580-11-dmitry.baryshkov@linaro.org>
 MIME-Version: 1.0
-In-Reply-To: <YR6O9Om+HzMMG8AR@orome.fritz.box>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210817005507.1507580-11-dmitry.baryshkov@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-19.08.2021 20:03, Thierry Reding пишет:
-> On Tue, Aug 17, 2021 at 04:27:40AM +0300, Dmitry Osipenko wrote:
->> The SDHCI on Tegra belongs to the core power domain and we're going to
->> enable GENPD support for the core domain. Now SDHCI must be resumed using
->> runtime PM API in order to initialize the SDHCI power state. The SDHCI
->> clock rate must be changed using OPP API that will reconfigure the power
->> domain performance state in accordance to the rate. Add runtime PM and OPP
->> support to the SDHCI driver.
->>
->> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
->> ---
->>  drivers/mmc/host/sdhci-tegra.c | 146 ++++++++++++++++++++++++---------
->>  1 file changed, 105 insertions(+), 41 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
->> index 387ce9cdbd7c..a3583359c972 100644
->> --- a/drivers/mmc/host/sdhci-tegra.c
->> +++ b/drivers/mmc/host/sdhci-tegra.c
->> @@ -15,6 +15,8 @@
->>  #include <linux/of.h>
->>  #include <linux/of_device.h>
->>  #include <linux/pinctrl/consumer.h>
->> +#include <linux/pm_opp.h>
->> +#include <linux/pm_runtime.h>
->>  #include <linux/regulator/consumer.h>
->>  #include <linux/reset.h>
->>  #include <linux/mmc/card.h>
->> @@ -24,6 +26,8 @@
->>  #include <linux/gpio/consumer.h>
->>  #include <linux/ktime.h>
->>  
->> +#include <soc/tegra/common.h>
->> +
->>  #include "sdhci-pltfm.h"
->>  #include "cqhci.h"
->>  
->> @@ -123,6 +127,12 @@
->>  					 SDHCI_TRNS_BLK_CNT_EN | \
->>  					 SDHCI_TRNS_DMA)
->>  
->> +enum {
->> +	TEGRA_CLK_BULK_SDHCI,
->> +	TEGRA_CLK_BULK_TMCLK,
->> +	TEGRA_CLK_BULK_NUM,
->> +};
->> +
->>  struct sdhci_tegra_soc_data {
->>  	const struct sdhci_pltfm_data *pdata;
->>  	u64 dma_mask;
->> @@ -171,6 +181,8 @@ struct sdhci_tegra {
->>  	bool enable_hwcq;
->>  	unsigned long curr_clk_rate;
->>  	u8 tuned_tap_delay;
->> +
->> +	struct clk_bulk_data clocks[TEGRA_CLK_BULK_NUM];
-> 
-> This doesn't seem worth it to me. There's a lot of churn in this driver
-> that's only needed to convert this to the clk_bulk API and it makes the
-> code a lot more difficult to read, in my opinion.
-> 
-> It looks like the only benefit that this gives us is that runtime
-> suspend and resume become a few lines shorter.
+On Mon 16 Aug 17:55 PDT 2021, Dmitry Baryshkov wrote:
+[..]
+> diff --git a/drivers/power/pwrseq/pwrseq_qca.c b/drivers/power/pwrseq/pwrseq_qca.c
+> new file mode 100644
+> index 000000000000..3421a4821126
+> --- /dev/null
+> +++ b/drivers/power/pwrseq/pwrseq_qca.c
+> @@ -0,0 +1,290 @@
+> +// SPDX-License-Identifier: GPL-2.0-only
+> +/*
+> + * Copyright (c) 2021, Linaro Ltd.
+> + *
+> + * Author: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+> + *
+> + * Power Sequencer for Qualcomm WiFi + BT SoCs
+> + */
+> +
+> +#include <linux/delay.h>
+> +#include <linux/gpio/consumer.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/pwrseq/driver.h>
+> +#include <linux/regulator/consumer.h>
+> +
+> +/*
+> + * Voltage regulator information required for configuring the
+> + * QCA WiFi+Bluetooth chipset
+> + */
+> +struct qca_vreg {
+> +	const char *name;
+> +	unsigned int load_uA;
+> +};
+> +
+> +struct qca_device_data {
+> +	struct qca_vreg vddio;
 
-The driver probe code looks cleaner with that. You should be looking at
-the final result and not at the patch to see it.
+Any particular reason why this isn't just the first entry in vregs and
+operated as part of the bulk API?
+
+> +	struct qca_vreg *vregs;
+> +	size_t num_vregs;
+> +	bool has_bt_en;
+> +	bool has_wifi_en;
+> +};
+> +
+> +struct pwrseq_qca;
+> +struct pwrseq_qca_one {
+> +	struct pwrseq_qca *common;
+> +	struct gpio_desc *enable;
+> +};
+> +
+> +#define PWRSEQ_QCA_WIFI 0
+> +#define PWRSEQ_QCA_BT 1
+> +
+> +#define PWRSEQ_QCA_MAX 2
+> +
+> +struct pwrseq_qca {
+> +	struct regulator *vddio;
+> +	struct gpio_desc *sw_ctrl;
+> +	struct pwrseq_qca_one pwrseq_qcas[PWRSEQ_QCA_MAX];
+> +	int num_vregs;
+> +	struct regulator_bulk_data vregs[];
+> +};
+> +
+> +static int pwrseq_qca_power_on(struct pwrseq *pwrseq)
+> +{
+> +	struct pwrseq_qca_one *qca_one = pwrseq_get_data(pwrseq);
+> +	int ret;
+> +
+> +	if (qca_one->common->vddio) {
+
+devm_regulator_get() doesn't return NULL, so this is always true.
+
+> +		ret = regulator_enable(qca_one->common->vddio);
+> +		if (ret)
+> +			return ret;
+> +	}
+> +
+> +	ret = regulator_bulk_enable(qca_one->common->num_vregs, qca_one->common->vregs);
+> +	if (ret)
+> +		goto vddio_off;
+> +
+> +	if (qca_one->enable) {
+> +		gpiod_set_value_cansleep(qca_one->enable, 0);
+> +		msleep(50);
+> +		gpiod_set_value_cansleep(qca_one->enable, 1);
+> +		msleep(150);
+> +	}
+> +
+> +	if (qca_one->common->sw_ctrl) {
+> +		bool sw_ctrl_state = gpiod_get_value_cansleep(qca_one->common->sw_ctrl);
+> +		dev_dbg(&pwrseq->dev, "SW_CTRL is %d", sw_ctrl_state);
+> +	}
+> +
+> +	return 0;
+> +
+> +vddio_off:
+> +	regulator_disable(qca_one->common->vddio);
+> +
+> +	return ret;
+> +}
+[..]
+> +static int pwrseq_qca_probe(struct platform_device *pdev)
+> +{
+> +	struct pwrseq_qca *pwrseq_qca;
+> +	struct pwrseq *pwrseq;
+> +	struct pwrseq_provider *provider;
+> +	struct device *dev = &pdev->dev;
+> +	struct pwrseq_onecell_data *onecell;
+> +	const struct qca_device_data *data;
+> +	int ret, i;
+> +
+> +	data = device_get_match_data(dev);
+> +	if (!data)
+> +		return -EINVAL;
+> +
+> +	pwrseq_qca = devm_kzalloc(dev, struct_size(pwrseq_qca, vregs, data->num_vregs), GFP_KERNEL);
+> +	if (!pwrseq_qca)
+> +		return -ENOMEM;
+> +
+> +	onecell = devm_kzalloc(dev, struct_size(onecell, pwrseqs, PWRSEQ_QCA_MAX), GFP_KERNEL);
+> +	if (!onecell)
+> +		return -ENOMEM;
+> +
+> +	ret = pwrseq_qca_regulators_init(dev, pwrseq_qca, data);
+> +	if (ret)
+> +		return ret;
+> +
+> +	if (data->has_wifi_en) {
+> +		pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_WIFI].enable = devm_gpiod_get(dev, "wifi-enable", GPIOD_OUT_LOW);
+> +		if (IS_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_WIFI].enable)) {
+> +			return dev_err_probe(dev, PTR_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_WIFI].enable),
+> +					"failed to acquire WIFI enable GPIO\n");
+> +		}
+> +	}
+> +
+> +	if (data->has_bt_en) {
+> +		pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_BT].enable = devm_gpiod_get(dev, "bt-enable", GPIOD_OUT_LOW);
+> +		if (IS_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_BT].enable)) {
+> +			return dev_err_probe(dev, PTR_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_BT].enable),
+> +					"failed to acquire BT enable GPIO\n");
+> +		}
+> +	}
+> +
+> +	pwrseq_qca->sw_ctrl = devm_gpiod_get_optional(dev, "swctrl", GPIOD_IN);
+> +	if (IS_ERR(pwrseq_qca->sw_ctrl)) {
+> +		return dev_err_probe(dev, PTR_ERR(pwrseq_qca->sw_ctrl),
+> +				"failed to acquire SW_CTRL gpio\n");
+> +	} else if (!pwrseq_qca->sw_ctrl)
+> +		dev_info(dev, "No SW_CTRL gpio\n");
+
+Some {} around the else as well please.
+
+Regards,
+Bjorn
