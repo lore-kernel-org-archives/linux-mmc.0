@@ -2,184 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 077E0C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 14:55:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11F75C4320E
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 15:23:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E6E8860551
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 14:55:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E65E361075
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 15:23:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240655AbhHSO4b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Aug 2021 10:56:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49540 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240583AbhHSO4a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 10:56:30 -0400
-Received: from mail-vs1-xe2d.google.com (mail-vs1-xe2d.google.com [IPv6:2607:f8b0:4864:20::e2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84480C061575
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 07:55:54 -0700 (PDT)
-Received: by mail-vs1-xe2d.google.com with SMTP id s19so4174009vsl.11
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 07:55:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=mm8paTdT0zaztfhC5Y4WPaOBPl8kLHQHgl7pXYxX3h4=;
-        b=qeDfX1TvtXFpaue7XSJcQGoXvoEPk6keQ3SefhHQYD/RQYSwXL/h7/nJ1tE1n2ZgGf
-         hgNQdBuev8q9YdqAn31QqEn+hl0Fw8o/I7j+pKewMg7BSKDExUMcgAG5ffW6TnVBaweA
-         awPBlmbVNdD0YyJLl/fecYVhU7UH2GjQaH+G3BKTeEFH67xcFXuuVoODzKyHu4OljnuW
-         y3YyyagNQ7/VVdr8UoQMvH7lyjCnnH9zaDfJmZrMJYrsb5yu8bZTEWP6ZCkq4ndYtqKT
-         KiXhZrvSOf9kLkVqOyobXMYfdScN3zuV6Y2fafpateAUvd8nG8k5/FLAhRgrUffP4ZSX
-         UqPQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=mm8paTdT0zaztfhC5Y4WPaOBPl8kLHQHgl7pXYxX3h4=;
-        b=sxKdlrUEONmf4cSNBXLRug34SvZvufx/gxAI3SvN6Z40rjmeJSmf+QPN4OsKu4EK/g
-         RHfELqCM+9E7LATjdQs8krAgyYFqHU0jjk1zm4EVhozK4mrosbjTgaWSP8b7GcOWsBN+
-         UWxgAPx0M67CFiwgO4ca2KOhG/kC7z5Q8BLFTUMeiXaKKyI5qFYe+jlO4dbvDo/mOG+u
-         6z5wFzyOmobcCZ7Cg9hOEuUx7F3SUWfwFldlc9N9T5Vnx3PAJvmcTHrY0YkJ2mcLsS1y
-         ONqeRAnDYkjABTFCgxA/Rif93+lH2DbUUhiQjsq2I3/X1oZnVdQvPdzpDA81ngHY5WQA
-         ERwQ==
-X-Gm-Message-State: AOAM5336xUUkWYxQfYmjIR0WNfPz/yMi/Y7WnJZbkwj8P9WU2iCYsiip
-        bN86+QeMFsWFQ1EhtPtc6AuE8OFiHrwR6TiP/giCvQ==
-X-Google-Smtp-Source: ABdhPJy9lhlHe3ZkjkK69gRHTqfsYZUpyU/u1QO9GNutRCvh27kC0oDOl0UN2vIh0G0BbPGuh3RFsxVqGIQ9yFmBme8=
-X-Received: by 2002:a67:f6d8:: with SMTP id v24mr12929204vso.48.1629384953702;
- Thu, 19 Aug 2021 07:55:53 -0700 (PDT)
-MIME-Version: 1.0
-References: <a2a3c41f-c5e4-ee7e-7d48-03af8bac8863@gmail.com>
- <20210818045307.4brb6cafkh3adjth@vireshk-i7> <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
- <20210818055849.ybfajzu75ecpdrbn@vireshk-i7> <f1c76f23-086d-ef36-54ea-0511b0ebe0e1@gmail.com>
- <20210818062723.dqamssfkf7lf7cf7@vireshk-i7> <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
- <20210818091417.dvlnsxlgybdsn76x@vireshk-i7> <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
- <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com> <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
-In-Reply-To: <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 19 Aug 2021 16:55:16 +0200
-Message-ID: <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com>
-Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-To:     Viresh Kumar <viresh.kumar@linaro.org>
-Cc:     Dmitry Osipenko <digetx@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        id S240272AbhHSPYV convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Aug 2021 11:24:21 -0400
+Received: from coyote.holtmann.net ([212.227.132.17]:59363 "EHLO
+        mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S240159AbhHSPYR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 11:24:17 -0400
+Received: from smtpclient.apple (p5b3d23f8.dip0.t-ipconnect.de [91.61.35.248])
+        by mail.holtmann.org (Postfix) with ESMTPSA id 04B76CED17;
+        Thu, 19 Aug 2021 17:23:37 +0200 (CEST)
+Content-Type: text/plain;
+        charset=us-ascii
+Mime-Version: 1.0 (Mac OS X Mail 14.0 \(3654.120.0.1.13\))
+Subject: Re: [RFC PATCH 00/15] create power sequencing subsystem
+From:   Marcel Holtmann <marcel@holtmann.org>
+In-Reply-To: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+Date:   Thu, 19 Aug 2021 17:23:36 +0200
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        MSM <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Message-Id: <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
+References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+X-Mailer: Apple Mail (2.3654.120.0.1.13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 19 Aug 2021 at 08:17, Viresh Kumar <viresh.kumar@linaro.org> wrote:
->
-> On 18-08-21, 18:55, Dmitry Osipenko wrote:
-> > 18.08.2021 12:41, Ulf Hansson =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
-> >
-> > Either way gives the equal result. The new callback allows to remove th=
-e
-> > boilerplate dev_pm_opp_set_rate(clk_get_rate() code from the rpm-resume
-> > of consumer devices, that's it.
->
-> It may not be equal, as dev_pm_opp_set_rate() may do additional stuff,
-> now or in a later implementation. Currently it only does
-> regulator_enable() as a special case, but it can be clk_enable() as
-> well. Also, this tries to solve the problem in a tricky/hacky way,
-> while all you wanted was to make the genpd aware of what the
-> performance state should be.
->
-> Your driver can break tomorrow if we started to do more stuff from
-> this API at another time.
->
-> > > dev_pm_opp_set_rate() is best called from consumer drivers, as they
-> > > need to be in control.
-> > >> What we need here is just configure. So something like this then:
-> > The intent wasn't to use dev_pm_opp_set_rate() from
-> > __genpd_dev_pm_attach(), but to set genpd->rpm_pstate in accordance to
-> > the h/w configuration.
->
-> Right.
->
-> > On Tegra we have a chain of PDs and it's not trivial to convert the
-> > device's OPP into pstate because only the parent domain can translate
-> > the required OPP.
->
-> The driver should just be required to make a call, and OPP/genpd core
-> should return it a value. This is already done today while setting the
-> pstate for a device. The same frameworks must be able to supply a
-> value to be used for the device.
+Hi Dmitry,
 
-Right, that sounds reasonable.
+> This is an RFC of the proposed power sequencer subsystem. This is a
+> generification of the MMC pwrseq code. The subsystem tries to abstract
+> the idea of complex power-up/power-down/reset of the devices.
+> 
+> The primary set of devices that promted me to create this patchset is
+> the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+> interfaces (older generations) or on serial+PCIe (newer generations).
+> They require a set of external voltage regulators to be powered on and
+> (some of them) have separate WiFi and Bluetooth enable GPIOs.
+> 
+> This patchset being an RFC tries to demonstrate the approach, design and
+> usage of the pwrseq subsystem. Following issues are present in the RFC
+> at this moment but will be fixed later if the overall approach would be
+> viewed as acceptable:
+> 
+> - No documentation
+>   While the code tries to be self-documenting proper documentation
+>   would be required.
+> 
+> - Minimal device tree bindings changes
+>   There are no proper updates for the DT bindings (thus neither Rob
+>   Herring nor devicetree are included in the To/Cc lists). The dt
+>   schema changes would be a part of v1.
+> 
+> - Lack of proper PCIe integration
+>   At this moment support for PCIe is hacked up to be able to test the
+>   PCIe part of qca6390. Proper PCIe support would require automatically
+>   powering up the devices before the scan basing on the proper device
+>   structure in the device tree.
+> 
+> ----------------------------------------------------------------
+> Dmitry Baryshkov (15):
+>      power: add power sequencer subsystem
+>      pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
+>      mmc: core: switch to new pwrseq subsystem
+>      ath10k: add support for pwrseq sequencing
+>      Bluetooth: hci_qca: merge qca_power into qca_serdev
+>      Bluetooth: hci_qca: merge init paths
+>      Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
+>      Bluetooth: hci_qca: futher rework of power on/off handling
+>      Bluetooth: hci_qca: add support for pwrseq
 
-We already have pm_genpd_opp_to_performance_state() which translates
-an OPP to a performance state. This function invokes the
-->opp_to_performance_state() for a genpd. Maybe we need to allow a
-genpd to not have ->opp_to_performance_state() callback assigned
-though, but continue up in the hierarchy to see if the parent has the
-callback assigned, to make this work for Tegra?
+any chance you can try to abandon patching hci_qca. The serdev support in hci_uart is rather hacking into old line discipline code and it is not aging well. It is really becoming a mess.
 
-Perhaps we should add an API dev_pm_genpd_opp_to_performance_state(),
-allowing us to pass the device instead of the genpd. But that's a
-minor thing.
+I would say that the Qualcomm serial devices could use a separate standalone serdev driver. A while I send an RFC for a new serdev driver.
 
-Finally, the precondition to use the above, is to first get a handle
-to an OPP table. This is where I am struggling to find a generic
-solution, because I guess that would be platform or even consumer
-driver specific for how to do this. And at what point should we do
-this?
+https://www.spinics.net/lists/linux-bluetooth/msg74918.html
 
->
-> > Viresh, please take a look at what I did in [1]. Maybe it could be done
-> > in another way.
->
-> I looked into this and looked like too much trouble. The
-> implementation needs to be simple. I am not sure I understand all the
-> problems you faced while doing that, would be better to start with a
-> simpler implementation of get_performance_state() kind of API for
-> genpd, after the domain is attached and its OPP table is initialized.
->
-> Note, that the OPP table isn't required to be fully initialized for
-> the device at this point, we can parse the DT as well if needed be.
+There I had the idea that simple vendor specifics can be in that driver (like the Broadcom part I added there), but frankly the QCA specifics are a bit too specific and it should be a separate driver. However I think this would be a good starting point.
 
-Sure, but as I indicated above, you need some kind of input data to
-figure out what OPP table to pick, before you can translate that into
-a performance state. Is that always the clock rate, for example?
+In general a H:4 based Bluetooth driver is dead simple with the help of h4_recv.h helper we have in the kernel. The complicated part is the power management pieces or any vendor specific low-power protocol they are running on that serial line. And since you are touching this anyway, doing a driver from scratch might be lot simpler and cleaner. It would surely help all the new QCA device showing up in the future.
 
-Perhaps, we should start with adding a dev_pm_opp_get_from_rate() or
-what do you think? Do you have other suggestions?
+Regards
 
->
-> --
-> viresh
+Marcel
 
-Kind regards
-Uffe
