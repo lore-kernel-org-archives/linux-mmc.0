@@ -2,171 +2,260 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FE73C00143
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 05:18:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BA0CC432BE
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 08:10:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1B17861037
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 05:18:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 03CAD610E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 08:10:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235243AbhHTFT0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 01:19:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49248 "EHLO
+        id S230036AbhHTILT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Aug 2021 04:11:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235390AbhHTFTX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 01:19:23 -0400
-Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96658C061796
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 22:18:46 -0700 (PDT)
-Received: by mail-pg1-x52f.google.com with SMTP id o2so8044492pgr.9
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 22:18:46 -0700 (PDT)
+        with ESMTP id S230395AbhHTILS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 04:11:18 -0400
+Received: from mail-qt1-x82e.google.com (mail-qt1-x82e.google.com [IPv6:2607:f8b0:4864:20::82e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4FA74C061764
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 01:10:41 -0700 (PDT)
+Received: by mail-qt1-x82e.google.com with SMTP id b1so6895345qtx.0
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 01:10:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=chAct3ipnxxeeUzw3hiYvmSC99rC9KHQnQdo3Qo5wI0=;
-        b=PAK0FwHpNruccQOMJcEETGgiuehcBfGqSXwbOalixpfWmC8iUPHKv0ZRFhT4USGW3L
-         s3ikZix1CXYk8w3jX5LaxfyZfb40GBiPWSjG9bWn3gJp9a9Md0FR48UGizRgXzY9ODgl
-         10gDNc8YxX4abwwur3/2Ib4tR0HK4fxAVz95jdn0g5Bjm1f+zlmZUdf0J4uOmNCA+73o
-         QmFwB0uLKerpVDInoO9o15o02ie64XpCaCSsIImcFb/KjT6Us0KvUWI0KV441DGxP1Gb
-         Qjx6eoerfkbM7U/RrGe2d3xgWfRJJ6PVyX/2MvEkhvBiHXfKbkbdOk6b4KB2LrxPQeQV
-         fLzw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=g5IS6e3Hnyb2jRAb6f1KMnSZamwQJcSDoTsblYNlRlY=;
+        b=AZ9hPtV94XSFU7TEKvhcU+et+rJ+GpExWH9lrUhoqWoy0ewHu2M34a/uO6l9DjkV3W
+         f0oJk7nxCalOBi4OJVItLOhpuaLrPNMPtOlhahFsCqEnDmrPKqvI4ExcusqN0kmf2dmm
+         X6aVP3hh5uVmOusZVgIhxqBCEvpuDtGXIU0bCJxnBEYFye8qFaFZb0rRPDeTD4tGclZw
+         r6C1JJE68Lj5FmT8KeHnhA7VE0yN5hMhHlb84zbNqFmbhPEbOEPv33O68IOJr/4+cmXs
+         8UuTDZzFcGnR83wrcms+xf3UQTABzatiaTOhd2YkS23GfoR9Q7lX2ajxwnwJ0ubC8bl1
+         XkYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=chAct3ipnxxeeUzw3hiYvmSC99rC9KHQnQdo3Qo5wI0=;
-        b=dZqDoeTxQix0FPX8mfjcnp/Gk6Ty+nB+pQ0nnwVwKskb6lGGNC4feqH76zkFxE4cnl
-         fz8pwiE0ifIk8HvJlR3ANmBYyfiSLECdjL+0r3xgk6+CJLkzMDGMuu3pI33Jtg4qSBId
-         p2vWd8h7IWIs5mH13uXUC46M8C2ofNYMW8G/vGdJz9XbTKuX8KI//YWOkv8JbYXG7brH
-         FLNWg+Uzn3ESU0PtHExtBg8SucIrtUuvEZMm0BDYBp+rUjyi1k8zYHEAZjMsmFhuFYZs
-         a9EytNsLHpcNFG1GEnYT8xsA4SrOKu9E8WM+YcLeSdi6zdLfnSMUaYic+xSfoJkleiUI
-         Hhyw==
-X-Gm-Message-State: AOAM533p9iI/rkVPaxSApzi/RgPSHfxHa9MxxCNeKl6D8G+m9IGm/7z7
-        XVXKAaeuBGIoiYv6LmXhp5IsIA==
-X-Google-Smtp-Source: ABdhPJwH30rFrNGt2fTNK9Na7wrgKwgjGw7543RwntMIs+dfy9PTWNVMu53RFGAQHLSof48YBaglZA==
-X-Received: by 2002:a62:8283:0:b0:3e0:f3f3:839d with SMTP id w125-20020a628283000000b003e0f3f3839dmr17811980pfd.37.1629436725848;
-        Thu, 19 Aug 2021 22:18:45 -0700 (PDT)
-Received: from localhost ([122.172.201.85])
-        by smtp.gmail.com with ESMTPSA id i26sm5582209pfu.6.2021.08.19.22.18.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Aug 2021 22:18:45 -0700 (PDT)
-Date:   Fri, 20 Aug 2021 10:48:43 +0530
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Dmitry Osipenko <digetx@gmail.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
-Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-Message-ID: <20210820051843.5mueqpnjbqt3zdzc@vireshk-i7>
-References: <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
- <20210818055849.ybfajzu75ecpdrbn@vireshk-i7>
- <f1c76f23-086d-ef36-54ea-0511b0ebe0e1@gmail.com>
- <20210818062723.dqamssfkf7lf7cf7@vireshk-i7>
- <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
- <20210818091417.dvlnsxlgybdsn76x@vireshk-i7>
- <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
- <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com>
- <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
- <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=g5IS6e3Hnyb2jRAb6f1KMnSZamwQJcSDoTsblYNlRlY=;
+        b=Laiye+LfCO7fGtpFCw9OITst1/OdaMSaY2BHFDdMywVyX/GHaNMaQFQ1A5TnIrXrcM
+         eJR/AqWjQbY78bHgMCAZR157+rjCN4RiqXyPpRfW33FuwCOClmF9iHEC35FxjmYJdFm7
+         P7iO/nXSsoodYcbwvbyoJx8ZyiQ3MsOBJv1AkmJIhRXA49WrRk3OOxjKKuja3jSfIoCV
+         Hw0o+gaB3bg7E1bHF/19TmSbGhoSbhonCQRnD+7JXu/LfpNV46mBYZBr/dAkZpPikD+o
+         GeHTSO03CmwAQlsJMSHXZuQoViyj3zX/igFvp7raMqYw68zX7Ud613oJuaxy4YEuwCRb
+         qxlQ==
+X-Gm-Message-State: AOAM531G5Gl1zU9SHRTNjaoyFTd4TgEdnTEfjO5rgf9KFPKr8cTTrA49
+        kMHCLtADD4XKIx0cBu2B6rWmaZgp4GshANBqZrI2ag==
+X-Google-Smtp-Source: ABdhPJykvHLGPJLrte3XmQ+2fZnjn7MpEKijpvU45xzTfUuHaBNaF5vvWd95j2y77Xi7ngLBiT0SX8r507FJf1UymdA=
+X-Received: by 2002:a05:622a:13c8:: with SMTP id p8mr16634457qtk.238.1629447040101;
+ Fri, 20 Aug 2021 01:10:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com>
-User-Agent: NeoMutt/20180716-391-311a52
+References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+ <20210817005507.1507580-11-dmitry.baryshkov@linaro.org> <YR7m43mURVJ8YufC@ripper>
+In-Reply-To: <YR7m43mURVJ8YufC@ripper>
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Date:   Fri, 20 Aug 2021 11:10:29 +0300
+Message-ID: <CAA8EJpr+=Yg2B_DzQWntW0GgvBfaSpAu0K+UD3NowdkusiYxrQ@mail.gmail.com>
+Subject: Re: [RFC PATCH 10/15] pwrseq: add support for QCA BT+WiFi power sequencer
+To:     Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        "open list:DRM DRIVER FOR MSM ADRENO GPU" 
+        <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
+        open list <linux-kernel@vger.kernel.org>,
+        linux-bluetooth@vger.kernel.org, ath10k@lists.infradead.org,
+        linux-wireless@vger.kernel.org, netdev@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19-08-21, 16:55, Ulf Hansson wrote:
-> Right, that sounds reasonable.
-> 
-> We already have pm_genpd_opp_to_performance_state() which translates
-> an OPP to a performance state. This function invokes the
-> ->opp_to_performance_state() for a genpd. Maybe we need to allow a
-> genpd to not have ->opp_to_performance_state() callback assigned
-> though, but continue up in the hierarchy to see if the parent has the
-> callback assigned, to make this work for Tegra?
-> 
-> Perhaps we should add an API dev_pm_genpd_opp_to_performance_state(),
-> allowing us to pass the device instead of the genpd. But that's a
-> minor thing.
+Hi,
 
-I am not concerned a lot about how it gets implemented, and am not
-sure as well, as I haven't looked into these details since sometime.
-Any reasonable thing will be accepted, as simple as that.
+On Fri, 20 Aug 2021 at 02:17, Bjorn Andersson
+<bjorn.andersson@linaro.org> wrote:
+>
+> On Mon 16 Aug 17:55 PDT 2021, Dmitry Baryshkov wrote:
+> [..]
+> > diff --git a/drivers/power/pwrseq/pwrseq_qca.c b/drivers/power/pwrseq/pwrseq_qca.c
+> > new file mode 100644
+> > index 000000000000..3421a4821126
+> > --- /dev/null
+> > +++ b/drivers/power/pwrseq/pwrseq_qca.c
+> > @@ -0,0 +1,290 @@
+> > +// SPDX-License-Identifier: GPL-2.0-only
+> > +/*
+> > + * Copyright (c) 2021, Linaro Ltd.
+> > + *
+> > + * Author: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+> > + *
+> > + * Power Sequencer for Qualcomm WiFi + BT SoCs
+> > + */
+> > +
+> > +#include <linux/delay.h>
+> > +#include <linux/gpio/consumer.h>
+> > +#include <linux/platform_device.h>
+> > +#include <linux/pwrseq/driver.h>
+> > +#include <linux/regulator/consumer.h>
+> > +
+> > +/*
+> > + * Voltage regulator information required for configuring the
+> > + * QCA WiFi+Bluetooth chipset
+> > + */
+> > +struct qca_vreg {
+> > +     const char *name;
+> > +     unsigned int load_uA;
+> > +};
+> > +
+> > +struct qca_device_data {
+> > +     struct qca_vreg vddio;
+>
+> Any particular reason why this isn't just the first entry in vregs and
+> operated as part of the bulk API?
 
-> Finally, the precondition to use the above, is to first get a handle
-> to an OPP table. This is where I am struggling to find a generic
-> solution, because I guess that would be platform or even consumer
-> driver specific for how to do this. And at what point should we do
-> this?
+Because VDDIO should be up before bringing the rest of the power
+sources (at least for wcn39xx). This is usually the case since VDDIO
+is S4A, but I'd still prefer to express this in the code.
+And register_bulk_enable powers up all the supplies asynchronously,
+thus it can not guarantee that the first entry would be powered up
+first.
 
-Hmm, I am not very clear with the whole picture at this point of time.
+>
+> > +     struct qca_vreg *vregs;
+> > +     size_t num_vregs;
+> > +     bool has_bt_en;
+> > +     bool has_wifi_en;
+> > +};
+> > +
+> > +struct pwrseq_qca;
+> > +struct pwrseq_qca_one {
+> > +     struct pwrseq_qca *common;
+> > +     struct gpio_desc *enable;
+> > +};
+> > +
+> > +#define PWRSEQ_QCA_WIFI 0
+> > +#define PWRSEQ_QCA_BT 1
+> > +
+> > +#define PWRSEQ_QCA_MAX 2
+> > +
+> > +struct pwrseq_qca {
+> > +     struct regulator *vddio;
+> > +     struct gpio_desc *sw_ctrl;
+> > +     struct pwrseq_qca_one pwrseq_qcas[PWRSEQ_QCA_MAX];
+> > +     int num_vregs;
+> > +     struct regulator_bulk_data vregs[];
+> > +};
+> > +
+> > +static int pwrseq_qca_power_on(struct pwrseq *pwrseq)
+> > +{
+> > +     struct pwrseq_qca_one *qca_one = pwrseq_get_data(pwrseq);
+> > +     int ret;
+> > +
+> > +     if (qca_one->common->vddio) {
+>
+> devm_regulator_get() doesn't return NULL, so this is always true.
 
-Dmitry, can you try to frame a sequence of events/calls/etc that will
-define what kind of devices we are looking at here, and how this can
-be made to work ?
+This is more of the safety guard for the cases when the qca doesn't
+have the special vddio supply.
 
-> > > Viresh, please take a look at what I did in [1]. Maybe it could be done
-> > > in another way.
-> >
-> > I looked into this and looked like too much trouble. The
-> > implementation needs to be simple. I am not sure I understand all the
-> > problems you faced while doing that, would be better to start with a
-> > simpler implementation of get_performance_state() kind of API for
-> > genpd, after the domain is attached and its OPP table is initialized.
-> >
-> > Note, that the OPP table isn't required to be fully initialized for
-> > the device at this point, we can parse the DT as well if needed be.
-> 
-> Sure, but as I indicated above, you need some kind of input data to
-> figure out what OPP table to pick, before you can translate that into
-> a performance state. Is that always the clock rate, for example?
+>
+> > +             ret = regulator_enable(qca_one->common->vddio);
+> > +             if (ret)
+> > +                     return ret;
+> > +     }
+> > +
+> > +     ret = regulator_bulk_enable(qca_one->common->num_vregs, qca_one->common->vregs);
+> > +     if (ret)
+> > +             goto vddio_off;
+> > +
+> > +     if (qca_one->enable) {
+> > +             gpiod_set_value_cansleep(qca_one->enable, 0);
+> > +             msleep(50);
+> > +             gpiod_set_value_cansleep(qca_one->enable, 1);
+> > +             msleep(150);
+> > +     }
+> > +
+> > +     if (qca_one->common->sw_ctrl) {
+> > +             bool sw_ctrl_state = gpiod_get_value_cansleep(qca_one->common->sw_ctrl);
+> > +             dev_dbg(&pwrseq->dev, "SW_CTRL is %d", sw_ctrl_state);
+> > +     }
+> > +
+> > +     return 0;
+> > +
+> > +vddio_off:
+> > +     regulator_disable(qca_one->common->vddio);
+> > +
+> > +     return ret;
+> > +}
+> [..]
+> > +static int pwrseq_qca_probe(struct platform_device *pdev)
+> > +{
+> > +     struct pwrseq_qca *pwrseq_qca;
+> > +     struct pwrseq *pwrseq;
+> > +     struct pwrseq_provider *provider;
+> > +     struct device *dev = &pdev->dev;
+> > +     struct pwrseq_onecell_data *onecell;
+> > +     const struct qca_device_data *data;
+> > +     int ret, i;
+> > +
+> > +     data = device_get_match_data(dev);
+> > +     if (!data)
+> > +             return -EINVAL;
+> > +
+> > +     pwrseq_qca = devm_kzalloc(dev, struct_size(pwrseq_qca, vregs, data->num_vregs), GFP_KERNEL);
+> > +     if (!pwrseq_qca)
+> > +             return -ENOMEM;
+> > +
+> > +     onecell = devm_kzalloc(dev, struct_size(onecell, pwrseqs, PWRSEQ_QCA_MAX), GFP_KERNEL);
+> > +     if (!onecell)
+> > +             return -ENOMEM;
+> > +
+> > +     ret = pwrseq_qca_regulators_init(dev, pwrseq_qca, data);
+> > +     if (ret)
+> > +             return ret;
+> > +
+> > +     if (data->has_wifi_en) {
+> > +             pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_WIFI].enable = devm_gpiod_get(dev, "wifi-enable", GPIOD_OUT_LOW);
+> > +             if (IS_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_WIFI].enable)) {
+> > +                     return dev_err_probe(dev, PTR_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_WIFI].enable),
+> > +                                     "failed to acquire WIFI enable GPIO\n");
+> > +             }
+> > +     }
+> > +
+> > +     if (data->has_bt_en) {
+> > +             pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_BT].enable = devm_gpiod_get(dev, "bt-enable", GPIOD_OUT_LOW);
+> > +             if (IS_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_BT].enable)) {
+> > +                     return dev_err_probe(dev, PTR_ERR(pwrseq_qca->pwrseq_qcas[PWRSEQ_QCA_BT].enable),
+> > +                                     "failed to acquire BT enable GPIO\n");
+> > +             }
+> > +     }
+> > +
+> > +     pwrseq_qca->sw_ctrl = devm_gpiod_get_optional(dev, "swctrl", GPIOD_IN);
+> > +     if (IS_ERR(pwrseq_qca->sw_ctrl)) {
+> > +             return dev_err_probe(dev, PTR_ERR(pwrseq_qca->sw_ctrl),
+> > +                             "failed to acquire SW_CTRL gpio\n");
+> > +     } else if (!pwrseq_qca->sw_ctrl)
+> > +             dev_info(dev, "No SW_CTRL gpio\n");
+>
+> Some {} around the else as well please.
 
-Eventually it can be clock, bandwidth, or pstate of anther genpd, not
-sure what all we are looking for now. It should be just clock right
-now as far as I can imagine :)
+ack
 
-> Perhaps, we should start with adding a dev_pm_opp_get_from_rate() or
-> what do you think? Do you have other suggestions?
+>
+> Regards,
+> Bjorn
 
-We already have similar APIs, so that won't be a problem. We also have
-a mechanism inside the OPP core, frequency based, which is used to
-guess the current OPP. Maybe we can enhance and use that directly
-here.
+
 
 -- 
-viresh
+With best wishes
+Dmitry
