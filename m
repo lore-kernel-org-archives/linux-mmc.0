@@ -2,163 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
+	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED0D1C4320A
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C252C4338F
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:22:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D727761053
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 56115610E6
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:22:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240586AbhHTNJ1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 09:09:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44322 "EHLO
+        id S240633AbhHTNXP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Aug 2021 09:23:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47572 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240677AbhHTNJZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 09:09:25 -0400
-Received: from mail-ua1-x930.google.com (mail-ua1-x930.google.com [IPv6:2607:f8b0:4864:20::930])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA941C061575
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:47 -0700 (PDT)
-Received: by mail-ua1-x930.google.com with SMTP id u39so4077810uad.10
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:47 -0700 (PDT)
+        with ESMTP id S240260AbhHTNXP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 09:23:15 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82DE4C061575
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:22:37 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id l18so9763641lji.12
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:22:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=1jeLsd0F5nu8VxBSxWPjs9ij/vCzMSfR5Tmv5iuwd6s=;
-        b=WC/dbJiZXZbYao7JhIntQY4TZ71VEiAo3x28NE7fEM5kyH3E5QMkrYaKxo+tOHuBq2
-         4fOoN/8kF20QYOvTlDeczofK7BcIqjasNY7CBq53XfqL9k8ztpMQHfVcSzVO71rO64Zq
-         McT44tin8yfog5Tj3F9uEcMm8s9RXuEY0am/zJIYxZIPBOSKQ0gPSUGTqV2fLnNdUMyA
-         Udra5icYrRXmu3Bub8tb1oL++vAVtV4op8H5c4RaKOsboeh/aX+gQt/xKF7m6+TffsNV
-         KpFsGCqib0Qpb9uD4iaINA3IeiJAs50v1pCyq6JF3tpma3/8Ou1apbdGh5FgySUdxEte
-         6zRw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=9daWYLrvyCEPIRa2dVBzTdNpv/SvOVQvlNtTBsH9LDc=;
+        b=EK3YmDgaFYDy+RtR0bv9/QfQeugAs0xb6gQE8YDwiD++YukMu81HQdCQmqv/H67BU4
+         VSZveOXFEb2BppOPvmqVq8jSAvcloilP1UGQ1CZwaPS7hrjiBm3IL1P06Hr5IjnXvIIw
+         saqvsGUA6A/cQ5N/HJQ+4UiZbKnpLlBulLPAGaRACAbxkoHXL6zZPCyELNpFFeF+oapF
+         QdYdhNhQf6ithKWlSgnoSJL15JuT8I4ml2X0ztxHZhOKrnv1KtpMrv5fGQCj8aAL4JUy
+         rwSbtZuJYR3BwqB6xzRWjPgR4zCzPikDMLjvfGtdvrqNH7YCGb0SmM64WrtwG7zDP0n0
+         ZTtQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=1jeLsd0F5nu8VxBSxWPjs9ij/vCzMSfR5Tmv5iuwd6s=;
-        b=e39Mkg4q68QXoD1+IfuqQd2y3Sl7J8DHRA1+5QP5nJ/5/XmjRjlbf83d7imqovZkrY
-         y04SMrBnS1OJBERlf+giUlRu4In8kQu64znTdeeHMv0rn+nbONA72iPtMpB/WjnDlbJF
-         bjJ43cu9Grhg8H3zN1GsAsge4TZVbSwYZgH8YQDQAojyIidbrDFEeuacDO/suHCaxCdL
-         GCsLGEUDdPg1MyooFNlLDTQkydSHrGM1AhUxnW51F9/U9Is1UC8AQLPN8x7BK6sPpUOK
-         /R1+UamV7o+J3cNbpcr9u0RbyFcn1jOyKDnMNoOHHwH3EXFV9nwTpmiFe5eLI/tGo2Cz
-         4Sqg==
-X-Gm-Message-State: AOAM532fJSvHrESKoR6FCSBTuMYww9w9KjlWEpYfcuJLPzAv2V9uh40N
-        rDkTH4zFqtovHBQOMBrGD2/FEB3M19SSOAO5ZTi56A==
-X-Google-Smtp-Source: ABdhPJyudXWst0uOFOvLTh4dvpAObwIHCZFQbOR7Ax2SinJKzLNlpYWdAnSEO7YQ/BLnbTZWMq48nnebeaOpVOjUigE=
-X-Received: by 2002:ab0:60a9:: with SMTP id f9mr15039087uam.19.1629464926939;
- Fri, 20 Aug 2021 06:08:46 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210817012754.8710-1-digetx@gmail.com> <20210817012754.8710-8-digetx@gmail.com>
- <YR0UBi/ejy+oF4Hm@orome.fritz.box> <da7356cb-05ee-ba84-8a7c-6e69d853a805@gmail.com>
- <YR04YHGEluqLIZeo@orome.fritz.box> <ad99db08-4696-1636-5829-5260f93dc681@gmail.com>
- <YR6Mvips3HAntDy0@orome.fritz.box> <e17bbe8d-7c0f-fc3d-03c7-d75c54c24a43@gmail.com>
- <YR+VDZzTihmpENp6@orome.fritz.box>
-In-Reply-To: <YR+VDZzTihmpENp6@orome.fritz.box>
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=9daWYLrvyCEPIRa2dVBzTdNpv/SvOVQvlNtTBsH9LDc=;
+        b=IUQhcWjgqTJG9vwjxYuytHXNbcR/gFBLzbbD3+Hf5jMj/GkDi6SFnauP0LEdi6az5r
+         i3ndtN7kkmqfWsyseRFbT75HAREFGtb5j/9FJpNXAkk9wEfoqfHn6DXz6PgBbrsxdCkP
+         yY4yZuyVOqfFqTTHhlYKzPpPqz0uZC5HP3UfDlQpgryb7pgJoWDpCJuHcDz1wyQJ1Nul
+         lf0ZuMq5BI+NEZreiZHrJvkX2snhNNVCGjqir8rTCp2a50ESvQkGMDouK5bsSe5eXwWU
+         ULAJkX+BJkeleK9C1T0J1YFN6cLm7v2qTm4r2FM8njIFyMECI/w9y9PzkLUlt3g5wXd8
+         uu0Q==
+X-Gm-Message-State: AOAM532SVq601qIwcdWi0EiRqbALwj0Idp/vVngZ5goOTr/fR9D5mqDz
+        7Z9llP8758HiZcYQwqpe2Jc5Rg==
+X-Google-Smtp-Source: ABdhPJxlGO9sBInp8sdwlVhPydINe4iAEeAaahADA5SwpJucjNr7C06No6wviogCq/HHzmvH/KvZVw==
+X-Received: by 2002:a05:651c:54e:: with SMTP id q14mr16303607ljp.426.1629465755872;
+        Fri, 20 Aug 2021 06:22:35 -0700 (PDT)
+Received: from localhost.localdomain (h-155-4-129-146.NA.cust.bahnhof.se. [155.4.129.146])
+        by smtp.gmail.com with ESMTPSA id d5sm320753ljc.101.2021.08.20.06.22.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Aug 2021 06:22:34 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 20 Aug 2021 15:08:10 +0200
-Message-ID: <CAPDyKFpJ+TK0w1GZEA7G=rtAjq5ipmVR4P0wy7uHiEGVWRk5yA@mail.gmail.com>
-Subject: Re: [PATCH v8 07/34] clk: tegra: Support runtime PM and power domain
-To:     Thierry Reding <thierry.reding@gmail.com>
-Cc:     Dmitry Osipenko <digetx@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v5.14-rc7
+Date:   Fri, 20 Aug 2021 15:22:34 +0200
+Message-Id: <20210820132234.318026-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+Hi Linus,
 
-> >
-> > I'm creating platform device for the clocks that require DVFS. These
-> > clocks don't use regulator, they are attached to the CORE domain.
-> > GENPD framework manages the performance state, aggregating perf votes
-> > from each device, i.e. from each clock individually.
-> >
-> > You want to reinvent another layer of aggregation on top of GENPD.
-> > This doesn't worth the effort, we won't get anything from it, it
-> > should be a lot of extra complexity for nothing. We will also lose
-> > from it because pm_genpd_summary won't show you a per-device info.
-> >
-> > domain                          status          children                           performance
-> >     /device                                             runtime status
-> > ----------------------------------------------------------------------------------------------
-> > heg                             on                                                 1000000
-> >     /devices/soc0/50000000.host1x                       active                     1000000
-> >     /devices/soc0/50000000.host1x/54140000.gr2d         suspended                  0
-> > mpe                             off-0                                              0
-> > vdec                            off-0                                              0
-> >     /devices/soc0/6001a000.vde                          suspended                  0
-> > venc                            off-0                                              0
-> > 3d1                             off-0                                              0
-> >     /devices/genpd:1:54180000.gr3d                      suspended                  0
-> > 3d0                             off-0                                              0
-> >     /devices/genpd:0:54180000.gr3d                      suspended                  0
-> > core-domain                     on                                                 1000000
-> >                                                 3d0, 3d1, venc, vdec, mpe, heg
-> >     /devices/soc0/7d000000.usb                          active                     1000000
-> >     /devices/soc0/78000400.mmc                          active                     950000
-> >     /devices/soc0/7000f400.memory-controller            unsupported                1000000
-> >     /devices/soc0/7000a000.pwm                          active                     1000000
-> >     /devices/soc0/60006000.clock/tegra_clk_pll_c        active                     1000000
-> >     /devices/soc0/60006000.clock/tegra_clk_pll_e        suspended                  0
-> >     /devices/soc0/60006000.clock/tegra_clk_pll_m        active                     1000000
-> >     /devices/soc0/60006000.clock/tegra_clk_sclk         active                     1000000
-> >
->
-> I suppose if there's really no good way of doing this other than
-> providing a struct device, then so be it. I think the cleaned up sysfs
-> shown in the summary above looks much better than what the original
-> would've looked like.
->
-> Perhaps an additional tweak to that would be to not create platform
-> devices. Instead, just create struct device. Those really have
-> everything you need (.of_node, and can be used with RPM and GENPD). As I
-> mentioned earlier, platform device implies a CPU-memory-mapped bus,
-> which this clearly isn't. It's kind of a separate "bus" if you want, so
-> just using struct device directly seems more appropriate.
+Here's a PR with a couple of MMC fixes intended for v5.14-rc7. Details about the
+highlights are as usual found in the signed tag.
 
-Just a heads up. If you don't use a platform device or have a driver
-associated with it for probing, you need to manage the attachment to
-genpd yourself. That means calling one of the dev_pm_domain_attach*()
-APIs, but that's perfectly fine, ofcourse.
-
->
-> We did something similar for XUSB pads, see drivers/phy/tegra/xusb.[ch]
-> for an example of how that was done. I think you can do something
-> similar here.
->
-> Thierry
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
+
+
+The following changes since commit c500bee1c5b2f1d59b1081ac879d73268ab0ff17:
+
+  Linux 5.14-rc4 (2021-08-01 17:04:17 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14-rc4
+
+for you to fetch changes up to 419dd626e357e89fc9c4e3863592c8b38cfe1571:
+
+  mmc: sdhci-iproc: Set SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN on BCM2711 (2021-08-16 12:12:05 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - dw_mmc: Fix hang on data CRC error
+ - mmci: Fix voltage switch procedure for the stm32 variant
+ - sdhci-iproc: Fix some clock issues for BCM2711
+ - sdhci-msm: Fixup software timeout value
+
+----------------------------------------------------------------
+Christophe Kerello (1):
+      mmc: mmci: stm32: Check when the voltage switch procedure should be done
+
+Nicolas Saenz Julienne (2):
+      mmc: sdhci-iproc: Cap min clock frequency on BCM2711
+      mmc: sdhci-iproc: Set SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN on BCM2711
+
+Shaik Sajida Bhanu (1):
+      mmc: sdhci-msm: Update the software timeout value for sdhc
+
+Vincent Whitchurch (1):
+      mmc: dw_mmc: Fix hang on data CRC error
+
+ drivers/mmc/host/dw_mmc.c           |  6 +++---
+ drivers/mmc/host/mmci_stm32_sdmmc.c |  7 +++++--
+ drivers/mmc/host/sdhci-iproc.c      | 21 ++++++++++++++++++++-
+ drivers/mmc/host/sdhci-msm.c        | 18 ++++++++++++++++++
+ 4 files changed, 46 insertions(+), 6 deletions(-)
