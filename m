@@ -2,148 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D32B3C432BE
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 18:07:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05CCBC4338F
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 20:09:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B5FD06115A
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 18:07:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E122261178
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 20:09:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230089AbhHTSHp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 14:07:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57976 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235273AbhHTSHo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 14:07:44 -0400
-Received: from mail-qk1-x732.google.com (mail-qk1-x732.google.com [IPv6:2607:f8b0:4864:20::732])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AAC5CC061764
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 11:07:05 -0700 (PDT)
-Received: by mail-qk1-x732.google.com with SMTP id bj38so11705947qkb.9
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 11:07:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=2P/6ZDosW5/PVcVOFh8CyCIBugd9jmsRIXNI9frVp7k=;
-        b=eKlYoSg3dyAbESo+fqg+WE15YLNT8pnJoLbLlt4p3gPHdJcPfp3zxOG3s4YPxNRYRA
-         wA/+17Kcf4OTu6WSv5rvKqFSNJjVgyZil/Aa+dRjpq1fyJs7xT7HCyWE5Lez19Fctvpn
-         fnt8zYEUB6XDJTwGrbo+cxtaQ8xBfy2lhSw/pUcTUjHq3SYmL42O7NATxxGUxx/p6PSR
-         X9CvVNLLR5FUVuHZUm2uMHxa9qn0/npIpTtFzrf84CoEsU3pVNpAkQHFSKrI4BjqhFYk
-         jKjg6TogdUzt0VlXmNMV8Hk+zLDxDpdka2jmr+B9Uk7If6pBiWAdgmz88s0DbRPoFKJU
-         sMnQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=2P/6ZDosW5/PVcVOFh8CyCIBugd9jmsRIXNI9frVp7k=;
-        b=IocmbpZXNynkl5Vuj6OSfygUBT/bdlh3WxYoGvOAKtpZYlVdlu1dgLttk2fNJHVExU
-         ceRDuLMNUEMQC1YdlLsn/trnEqd3b2i+9PyqyN/KqZ7ex/f2tv7TT0hD5Ad219Td/sJI
-         ZdjXvMiCEuvTHmWarN+PlxYtb5UxtGgQLDImAng/jjA74EmTzvMT0FrVeHFhjZpX6X17
-         1RE13GhUc3TXUWvfu0nNCtHMJwXbFhpOkp5J2Yw7Xwf81bp+ckYEu6UXEiBOmlz3FXfS
-         oeewg9OwNn7Ypg0w4qssNast6uVIg3hcpGtVUHJGN1tYTj+oFGE80wjhx7Z603kaIPen
-         //MA==
-X-Gm-Message-State: AOAM532CYAKfKf+bbbSxqhgRx+FGJfZc+TYj6PXxfyDj4jdJLeA44cP6
-        xKNmOiCTa05SPX9KwRnva3Grxvl38WotdkUgNyygVA==
-X-Google-Smtp-Source: ABdhPJy0huyrDFkZklcWqufreDpJu2i+J+NGLsKEiT3nXZbNTjdURslsF8xR7EyStcydsSHXMEetryziZu3Y6KGLCVk=
-X-Received: by 2002:a37:7801:: with SMTP id t1mr10378336qkc.162.1629482824676;
- Fri, 20 Aug 2021 11:07:04 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
- <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org> <CAA8EJpoOxerwmwQozL3gp1nX-+oxLMFUFjVPvRy-MoVfPuvqrw@mail.gmail.com>
- <YR/gQ0K9MjddBVwY@ripper>
-In-Reply-To: <YR/gQ0K9MjddBVwY@ripper>
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Date:   Fri, 20 Aug 2021 21:06:53 +0300
-Message-ID: <CAA8EJpo7R4azxybBmKC4uzAm_dvP4tpm4g9VoDMTdw6XZCxzTg@mail.gmail.com>
-Subject: Re: [RFC PATCH 00/15] create power sequencing subsystem
-To:     Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc:     Marcel Holtmann <marcel@holtmann.org>,
-        Andy Gross <agross@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        MSM <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        id S239115AbhHTUKD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Aug 2021 16:10:03 -0400
+Received: from mail.kernel.org ([198.145.29.99]:39000 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239281AbhHTUJ6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 20 Aug 2021 16:09:58 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPS id EC8856115C;
+        Fri, 20 Aug 2021 20:09:18 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629490159;
+        bh=ge24DmoJYW30k2kXJzTVKBOQkhKfNge/n2Wphj+L7cU=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=LWSqjQBnp8hvSuWgDd4birELGCoK/GTJjC1mKyAlmWz1sIYfVITjarM/+74pd4bT0
+         Ts2hOAY7eBL6OL/paOfXDKoXstSQ37QH+kwd7I+UO/yNkdyRiSJJyOm+bTTkz+bTiR
+         WZgBFuyXx2gE1MwQNmdz0SVX9nUmGsuhuXFnlouNqFADZbR1yuXBPZWcptTPWmwFND
+         bygTG5DEeu7i7RYfJvQ9G0LGEXmO+PUN4izw2a4u7kqtjooHUpvnskLAn0bvHlU0+m
+         y2GeSo2EKswrJeADcQfsoEeRM5xw95ScgGNyjcV7LmZTf1uiWhgEfBdlcSnuPW01yA
+         02WZjBjhoDkEw==
+Subject: Re: [GIT PULL] MMC fixes for v5.14-rc7
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20210820132234.318026-1-ulf.hansson@linaro.org>
+References: <20210820132234.318026-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20210820132234.318026-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14-rc4
+X-PR-Tracked-Commit-Id: 419dd626e357e89fc9c4e3863592c8b38cfe1571
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: a27c75e554feb63a0e72b9479bab0b49600d1410
+Message-Id: <162949015893.21370.12178974282322515078.pr-tracker-bot@kernel.org>
+Date:   Fri, 20 Aug 2021 20:09:18 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 20 Aug 2021 at 20:01, Bjorn Andersson
-<bjorn.andersson@linaro.org> wrote:
->
-> On Fri 20 Aug 06:08 PDT 2021, Dmitry Baryshkov wrote:
->
-> > Hi,
-> >
-> > On Thu, 19 Aug 2021 at 18:23, Marcel Holtmann <marcel@holtmann.org> wrote:
-> > > > This is an RFC of the proposed power sequencer subsystem. This is a
-> > > > generification of the MMC pwrseq code. The subsystem tries to abstract
-> > > > the idea of complex power-up/power-down/reset of the devices.
-> > > >
-> > > > The primary set of devices that promted me to create this patchset is
-> > > > the Qualcomm BT+WiFi family of chips. They reside on serial+platform
-> > > > interfaces (older generations) or on serial+PCIe (newer generations).
-> > > > They require a set of external voltage regulators to be powered on and
-> > > > (some of them) have separate WiFi and Bluetooth enable GPIOs.
-> > > >
-> > > > This patchset being an RFC tries to demonstrate the approach, design and
-> > > > usage of the pwrseq subsystem. Following issues are present in the RFC
-> > > > at this moment but will be fixed later if the overall approach would be
-> > > > viewed as acceptable:
-> > > >
-> > > > - No documentation
-> > > >   While the code tries to be self-documenting proper documentation
-> > > >   would be required.
-> > > >
-> > > > - Minimal device tree bindings changes
-> > > >   There are no proper updates for the DT bindings (thus neither Rob
-> > > >   Herring nor devicetree are included in the To/Cc lists). The dt
-> > > >   schema changes would be a part of v1.
-> > > >
-> > > > - Lack of proper PCIe integration
-> > > >   At this moment support for PCIe is hacked up to be able to test the
-> > > >   PCIe part of qca6390. Proper PCIe support would require automatically
-> > > >   powering up the devices before the scan basing on the proper device
-> > > >   structure in the device tree.
-> > > >
-> > > > ----------------------------------------------------------------
-> > > > Dmitry Baryshkov (15):
-> > > >      power: add power sequencer subsystem
-> > > >      pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
-> > > >      mmc: core: switch to new pwrseq subsystem
-> > > >      ath10k: add support for pwrseq sequencing
-> > > >      Bluetooth: hci_qca: merge qca_power into qca_serdev
-> > > >      Bluetooth: hci_qca: merge init paths
-> > > >      Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
-> > > >      Bluetooth: hci_qca: futher rework of power on/off handling
-> > > >      Bluetooth: hci_qca: add support for pwrseq
-> > >
-> > > any chance you can try to abandon patching hci_qca. The serdev support in hci_uart is rather hacking into old line discipline code and it is not aging well. It is really becoming a mess.
-> >
-> > I wanted to stay away from rewriting the BT code. But... New driver
-> > would have a bonus point that I don't have to be compatible with old
-> > bindings.
->
-> It would be preferable if this was a implementation-only change and that
-> we kept the existing binding and existing dtb continued to work.
+The pull request you sent on Fri, 20 Aug 2021 15:22:34 +0200:
 
-This would require setting up the pwrseq from within the bt driver. I
-did not have that in mind. However that'd ease the bt code, since we
-won't have to handle the fallback/back-compatibility. Let me think
-about it.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14-rc4
+
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/a27c75e554feb63a0e72b9479bab0b49600d1410
+
+Thank you!
 
 -- 
-With best wishes
-Dmitry
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
