@@ -2,101 +2,204 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-14.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73749C4338F
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 11:06:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E89AC4320E
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 11:35:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5B44160231
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 11:06:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 52F1261051
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 11:35:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240106AbhHTLHO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 07:07:14 -0400
-Received: from mga14.intel.com ([192.55.52.115]:29562 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S240410AbhHTLGr (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Aug 2021 07:06:47 -0400
-X-IronPort-AV: E=McAfee;i="6200,9189,10081"; a="216484032"
-X-IronPort-AV: E=Sophos;i="5.84,337,1620716400"; 
-   d="scan'208";a="216484032"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 20 Aug 2021 04:06:09 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.84,337,1620716400"; 
-   d="scan'208";a="680060478"
-Received: from ahunter-desktop.fi.intel.com (HELO [10.237.72.174]) ([10.237.72.174])
-  by fmsmga006.fm.intel.com with ESMTP; 20 Aug 2021 04:06:07 -0700
-Subject: Re: [PATCH] mmc: sdhci: correct the tuning command handle for PIO
- mode
-From:   Adrian Hunter <adrian.hunter@intel.com>
-To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-Cc:     linux-imx@nxp.com
-References: <1628858041-1911-1-git-send-email-haibo.chen@nxp.com>
- <76af88e2-d068-dafc-9b17-cd590b3f8953@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-Message-ID: <c368ffc9-4752-500b-edd9-676d7f73e2ad@intel.com>
-Date:   Fri, 20 Aug 2021 14:06:42 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Firefox/78.0 Thunderbird/78.13.0
+        id S240027AbhHTLgL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Aug 2021 07:36:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51018 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239271AbhHTLgL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 07:36:11 -0400
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3ADDEC061575;
+        Fri, 20 Aug 2021 04:35:33 -0700 (PDT)
+Received: by mail-wr1-x42f.google.com with SMTP id r7so13893248wrs.0;
+        Fri, 20 Aug 2021 04:35:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to:user-agent;
+        bh=7qGosWaKh11oWOcCgshsG0Nfcb0R2B68Vc9n9Xrsm7o=;
+        b=pJjkJuRqNuBvbQzTgFslCt3bj10J1IWor4AsVtpaHryDZh2aS0KtjoeN2q3T2+IC25
+         afss3YxWjFlcGp6XVHPDhYk62bYEaRZ4E8J+/AwL8jpqTF9q4jeKk0xrbQASAZ96DQz/
+         S/8gO27exThFcPxQtb2GgaSudPkLKDYrD84z8GW7Mp1SkVvdmWft5mCcYbSQiRvusErQ
+         O4M8HCwNaG/WrT3xxYSVKrmyn8yGmsqvSW6+kUZwfH+Ouov+dsa1Fmh4TMxWwBUJB6lH
+         i+HWwBn/8gm3sqEU0a+93UZObWzbCavx0NzYXCTsKJXXY6jxZeQOfng13uaaOrgKioZZ
+         /iww==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to:user-agent;
+        bh=7qGosWaKh11oWOcCgshsG0Nfcb0R2B68Vc9n9Xrsm7o=;
+        b=OcoI4w7gSsaoqjULf/NwPDIKxk6mJ2hKC0AaX9M8/8OxQXANt5vdPnZ9u3OmzP/Pk+
+         /xwKL71KLePSxwHR3e2HjqxhT/i27PJWjSXYN5Cp0AUtsJqv3DAykD7TH0QN6XtX8sy0
+         olY/Iii3CeB7LXYkMqXi00YDJQzkexPTm1K4Efd8LO40omPjOyoGW4tkVUAgQ08lwin1
+         NXTNSHvf5Rxx5yGyQ5G2EY0yO0EcdB5jUlRiw2iYRH+up7TbcsMY9h04VWcA44iZL/63
+         10HwqOhiEa/KeU9JP0zbZSiBBdF3PhaSk5gaxny8JJcXLXYtrt9qYAZxtxRSTwSO7UF9
+         xedQ==
+X-Gm-Message-State: AOAM533utRjKd5OBY7ayq+d/XfiNbJj8mTKz+SkSDCWPOwyxIiOiOXiY
+        4xzRyowisjOzi6QnqiDxgJ4=
+X-Google-Smtp-Source: ABdhPJyoN3WSjSwctvMCy+aqbczA8zLxDdXIzPcCL2jhFI6NlzE0Pft0oWicQD5+trN05vwGyG8E3w==
+X-Received: by 2002:a5d:6301:: with SMTP id i1mr9302053wru.423.1629459331771;
+        Fri, 20 Aug 2021 04:35:31 -0700 (PDT)
+Received: from localhost ([217.111.27.204])
+        by smtp.gmail.com with ESMTPSA id h16sm5827669wre.52.2021.08.20.04.35.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Aug 2021 04:35:30 -0700 (PDT)
+Date:   Fri, 20 Aug 2021 13:35:29 +0200
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Dmitry Osipenko <digetx@gmail.com>
+Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-clk@vger.kernel.org
+Subject: Re: [PATCH v8 20/34] mmc: sdhci-tegra: Add runtime PM and OPP support
+Message-ID: <YR+TgfCHKOPS3Ng8@orome.fritz.box>
+References: <20210817012754.8710-1-digetx@gmail.com>
+ <20210817012754.8710-21-digetx@gmail.com>
+ <YR6O9Om+HzMMG8AR@orome.fritz.box>
+ <05b7ff28-4c01-fb56-deeb-595a5797394b@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <76af88e2-d068-dafc-9b17-cd590b3f8953@intel.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="h9ktlEsLda++zsG1"
+Content-Disposition: inline
+In-Reply-To: <05b7ff28-4c01-fb56-deeb-595a5797394b@gmail.com>
+User-Agent: Mutt/2.1.1 (e2a89abc) (2021-07-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/08/21 2:04 pm, Adrian Hunter wrote:
-> On 13/08/21 3:34 pm, haibo.chen@nxp.com wrote:
->> From: Haibo Chen <haibo.chen@nxp.com>
->>
->> If sdhci use PIO mode, and use mmc_send_tuning() to send the
->> tuning command, system will stuck because of the storm irq
->> of sdhci. For PIO mode, use mmc_send_tuning(), it will trigger
->> buffer_read_ready interrupt and data transfer complete interrupt.
->> In current code logic, it will directly return in sdhci_data_irq,
->> can not call the sdhci_transfer_pio(). So the buffer_read_ready
->> interrupt storm happen. So for standard tuning method, need to
->> excluse this case.
->>
->> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> 
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Although there are unnecessary parenthesis around !host->data
+--h9ktlEsLda++zsG1
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> 
->> ---
->>  drivers/mmc/host/sdhci.c | 10 ++++++++--
->>  1 file changed, 8 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->> index aba6e10b8605..acee54b368b0 100644
->> --- a/drivers/mmc/host/sdhci.c
->> +++ b/drivers/mmc/host/sdhci.c
->> @@ -3278,8 +3278,14 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->>  {
->>  	u32 command;
->>  
->> -	/* CMD19 generates _only_ Buffer Read Ready interrupt */
->> -	if (intmask & SDHCI_INT_DATA_AVAIL) {
->> +	/*
->> +	 * CMD19 generates _only_ Buffer Read Ready interrupt if
->> +	 * use sdhci_send_tuning.
->> +	 * Need to exclude this case: PIO mode and use mmc_send_tuning,
->> +	 * If not, sdhci_transfer_pio will never be called, make the
->> +	 * SDHCI_INT_DATA_AVAIL always there, stuck in irq storm.
->> +	 */
->> +	if ((intmask & SDHCI_INT_DATA_AVAIL) && (!host->data)) {
->>  		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
->>  		if (command == MMC_SEND_TUNING_BLOCK ||
->>  		    command == MMC_SEND_TUNING_BLOCK_HS200) {
->>
-> 
+On Fri, Aug 20, 2021 at 01:37:13AM +0300, Dmitry Osipenko wrote:
+> 19.08.2021 20:03, Thierry Reding =D0=BF=D0=B8=D1=88=D0=B5=D1=82:
+> > On Tue, Aug 17, 2021 at 04:27:40AM +0300, Dmitry Osipenko wrote:
+> >> The SDHCI on Tegra belongs to the core power domain and we're going to
+> >> enable GENPD support for the core domain. Now SDHCI must be resumed us=
+ing
+> >> runtime PM API in order to initialize the SDHCI power state. The SDHCI
+> >> clock rate must be changed using OPP API that will reconfigure the pow=
+er
+> >> domain performance state in accordance to the rate. Add runtime PM and=
+ OPP
+> >> support to the SDHCI driver.
+> >>
+> >> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
+> >> ---
+> >>  drivers/mmc/host/sdhci-tegra.c | 146 ++++++++++++++++++++++++---------
+> >>  1 file changed, 105 insertions(+), 41 deletions(-)
+> >>
+> >> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-t=
+egra.c
+> >> index 387ce9cdbd7c..a3583359c972 100644
+> >> --- a/drivers/mmc/host/sdhci-tegra.c
+> >> +++ b/drivers/mmc/host/sdhci-tegra.c
+> >> @@ -15,6 +15,8 @@
+> >>  #include <linux/of.h>
+> >>  #include <linux/of_device.h>
+> >>  #include <linux/pinctrl/consumer.h>
+> >> +#include <linux/pm_opp.h>
+> >> +#include <linux/pm_runtime.h>
+> >>  #include <linux/regulator/consumer.h>
+> >>  #include <linux/reset.h>
+> >>  #include <linux/mmc/card.h>
+> >> @@ -24,6 +26,8 @@
+> >>  #include <linux/gpio/consumer.h>
+> >>  #include <linux/ktime.h>
+> >> =20
+> >> +#include <soc/tegra/common.h>
+> >> +
+> >>  #include "sdhci-pltfm.h"
+> >>  #include "cqhci.h"
+> >> =20
+> >> @@ -123,6 +127,12 @@
+> >>  					 SDHCI_TRNS_BLK_CNT_EN | \
+> >>  					 SDHCI_TRNS_DMA)
+> >> =20
+> >> +enum {
+> >> +	TEGRA_CLK_BULK_SDHCI,
+> >> +	TEGRA_CLK_BULK_TMCLK,
+> >> +	TEGRA_CLK_BULK_NUM,
+> >> +};
+> >> +
+> >>  struct sdhci_tegra_soc_data {
+> >>  	const struct sdhci_pltfm_data *pdata;
+> >>  	u64 dma_mask;
+> >> @@ -171,6 +181,8 @@ struct sdhci_tegra {
+> >>  	bool enable_hwcq;
+> >>  	unsigned long curr_clk_rate;
+> >>  	u8 tuned_tap_delay;
+> >> +
+> >> +	struct clk_bulk_data clocks[TEGRA_CLK_BULK_NUM];
+> >=20
+> > This doesn't seem worth it to me. There's a lot of churn in this driver
+> > that's only needed to convert this to the clk_bulk API and it makes the
+> > code a lot more difficult to read, in my opinion.
+> >=20
+> > It looks like the only benefit that this gives us is that runtime
+> > suspend and resume become a few lines shorter.
+>=20
+> The driver probe code looks cleaner with that. You should be looking at
+> the final result and not at the patch to see it.
 
+I did look at the final result and didn't find it cleaner at all. =3D)
+
+Thierry
+
+--h9ktlEsLda++zsG1
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmEfk4EACgkQ3SOs138+
+s6F3jw//bCxA9hEPesNMHKw4DuCcMLkDCrPDepqzmAtYTxYXAZ84Ew/eL3dNAgWN
+c38Br+txYTqqwVdvXCcgbNBNlXVZNYe1sQuA5Z2QV+jV5THuPndcg9KR5YEVqXY7
+pkwghsThOI6NO0FRptkWaXygT5nY92FqrHtbNHRC6RBtHIeKFuGD8bfMbuGJ5TNA
+B4YzO+xQ466F7X8sqOBzi11Z/PtJSRWJLyX9kf7T93vLOVMmeKfFWnXsC8nWAaxV
+NOaOpqnQYhfDA/8F7a5ORuNdgs1/i/XPSysh7WwZNskzUdtD2sUKfd9CVjHFrI5F
+L5qpwssH4E0j7M0nrPK4glvergJ0TfYU65/QsNZMED9S/qqYk+1R/J3o1bzvu6Xi
+wcRoOKIC4AhCyb9Oy/A/wnf5crMWzb3lx+mLhFgjTaSRnJcnoEAeS5GM8m3KwxP4
+zViWmXApMhHLKBOatf3Qg64/IpNUTP6vPxRaLmyNbOzJGas8p37VAp+J0E3Riacr
+gDFpfs+lQMc+jJtYN/Ra2P/TXbFtM+zsf2HtmZUMWAy1LRAjkF6o7TUxmHN3YJ9H
+A15xryC+kyleZd9ejlwSDtieIKXVP23syOMcx/k5kUpGOTUth7MHJ1zFAB2fUUMv
+NwSM8zDAH6Og9fNK4dVJYj2PpNoFx7zTe2kwvkuyYsLYwehYp2c=
+=LzE6
+-----END PGP SIGNATURE-----
+
+--h9ktlEsLda++zsG1--
