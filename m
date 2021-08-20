@@ -2,155 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41090C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 23:43:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2340EC4320E
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 02:51:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 27C91610E5
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Aug 2021 23:43:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id F3092610D2
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 02:51:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236732AbhHSXnl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Aug 2021 19:43:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59030 "EHLO
+        id S237806AbhHTCwQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Aug 2021 22:52:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44780 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233370AbhHSXnk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 19:43:40 -0400
-Received: from mail-oi1-x234.google.com (mail-oi1-x234.google.com [IPv6:2607:f8b0:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 258C2C061757
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 16:43:04 -0700 (PDT)
-Received: by mail-oi1-x234.google.com with SMTP id o20so10717656oiw.12
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Aug 2021 16:43:04 -0700 (PDT)
+        with ESMTP id S237636AbhHTCwQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Aug 2021 22:52:16 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9915FC061575;
+        Thu, 19 Aug 2021 19:51:38 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id w20so17265865lfu.7;
+        Thu, 19 Aug 2021 19:51:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=8LHZxCEWR5/C4vnwOrp7U43kFfte1OHNOyXMODVHA5A=;
-        b=eElLfnhKFd3yW9Uwfwg4ay/PWquxMgQp7A3/vCvgyeg+XrrSjsvEM1fvDeQ6ftAim6
-         8+ntIVwMzPYywiaGr/seW2o4K+wIinmrS0eHMHyszkSDtqcpnlzpTPiapaoE/U17o7rU
-         yO4YU7xRue4Vtzvvg4bq3iNNHFPdCE762BxVmGuSoJno/QV3EEhly0VHleUjEojGJaDN
-         dTun/wU4p3/n5/+OkIYIFQNTsuyTK9OZ+uJ14qe0k2CwQRc1Bj4XJEXlNdn5yeAXxgCs
-         Q+/WXhEBjdWiXi/qQHavSWMrMZ9OUUiUqa4BO7xZJzc9KQpFYVDqTX7emoc0ycEU6b7c
-         wa/w==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=zboB1Q6i9oYgbkK+DWfMo5HokGy8eox3TcOGLTI8/TQ=;
+        b=MSPObL9gtIfvXhGm8vmuM1WlsX8S9aqUcJKehk6hQXt2kTc0FpmAMpCNdosprR8DEi
+         /yWFr3UlXiFd2ptrMNopWEd4mvb/K8eNekkIVvnlp6AKdEAvU+jGXH5uVDxvGcdGZoGg
+         7d0zSU30Fr03L6Jyi08Us+ikNmam6soR3xc9TnEUbHxYKYK/+DxyeuIlb2H/R67utUeG
+         f8Hx0eRqtRpuLlOkbbDR3VqVNtgKs+C8IJnFlLq0D7i7HgCycFYmI+7YKNlKYZOsIZqi
+         M8cceb7ZJ2VG2spCfJmWhEcSNn6fxBgRnLJwFtl+p9dAcHXGqIRgt1IqsRHAMWfqn/Mz
+         6mnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=8LHZxCEWR5/C4vnwOrp7U43kFfte1OHNOyXMODVHA5A=;
-        b=XOVGcaV26W0WgDVoxIIP5tCd5H1EBG02JW423qAGtBdgneSTwe2ZVRIPLsWHq2gNCX
-         /JxA/4aWDSI4z/RcSWEZLE/yQQDDVwWaLh8X8Hd7OIgzBEJPpKNfBcefpRCsH9+QX85s
-         MQZ1I8NxrG1QJUICIeD9ZqLmdzww8VE+XYyMpVtlFlnWK5OTx4Gu5aafZsWtOeAJi37v
-         3fvoAgs6fxoGzgVQ50319NAsOmNH4z2Mq8bFnrhVF63w+DpJcXatJTCy0JKI7B8JEUIq
-         FMLcV8woZuHZB+Xw6wgwcEO/O/9LHR8rXvQqSYKw6thie9L8JKTQQK3M5OcDq9Mjgnjv
-         EmfA==
-X-Gm-Message-State: AOAM533CqFT2eVuVAe5SJTQiRcz510FThuytefuaYKyfBF6qNfldYJdh
-        YQ1CLDy27H1dg9et2bJI0Ix73w==
-X-Google-Smtp-Source: ABdhPJw1Q4apWWBHVYYvewNXXvqK3Xr2GzQSAu+2VXBrcwCXMXMTH9UZhRAI49Wn+01q1dGlrCzfkA==
-X-Received: by 2002:aca:1308:: with SMTP id e8mr926649oii.15.1629416583563;
-        Thu, 19 Aug 2021 16:43:03 -0700 (PDT)
-Received: from ripper (104-57-184-186.lightspeed.austtx.sbcglobal.net. [104.57.184.186])
-        by smtp.gmail.com with ESMTPSA id w14sm1040972otl.58.2021.08.19.16.43.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 19 Aug 2021 16:43:03 -0700 (PDT)
-Date:   Thu, 19 Aug 2021 16:44:26 -0700
-From:   Bjorn Andersson <bjorn.andersson@linaro.org>
-To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Cc:     Andy Gross <agross@kernel.org>,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=zboB1Q6i9oYgbkK+DWfMo5HokGy8eox3TcOGLTI8/TQ=;
+        b=Fte0SRty0Uxt3DppV1yP+tZesHgOhbSKOlOlG8XOO4C7v4bn6eRSmMIYCcPFIjQx4Y
+         m9+LEH06oTnnPBpy4iCQ9CihyfKJQ5hKM+y/Yv6DZT6hKzLuU1hR89T0F/KjiI+bHHe+
+         UCKLw8TyX/REKdwNGQ1yZbCjLn8EdsYvg8tiIx2JxUKDoBojSER7AZtFeBkIpXRGQcrD
+         Tp7LffUKVdqVtMgjVQkNl54jE/nNIuum/zFppghEjq3ITApPIL6xZZBpZ7jplj0hHSTJ
+         ipBoU41s8N3k5luR1SZXKyhT1RiDbKfg2g0ljP64isLZ4GYWFjX+qgBJtgduOVBc1oG8
+         o7Iw==
+X-Gm-Message-State: AOAM533Tq8igYXOdZTPeWdpW7U7elfm3hAcEu/JYAyWryyzWbSoavb7T
+        SdUhkP0PPyOoI2gWPzN0HF00eNjcRDk=
+X-Google-Smtp-Source: ABdhPJxyaLUy3vFiucIY3S77FtdQqbUhTA2/WSHmXMHR7V1HqPjJvW4kwuD0WLGfg5N30COber68xA==
+X-Received: by 2002:ac2:4c94:: with SMTP id d20mr12622519lfl.640.1629427896895;
+        Thu, 19 Aug 2021 19:51:36 -0700 (PDT)
+Received: from [192.168.2.145] (46-138-120-72.dynamic.spd-mgts.ru. [46.138.120.72])
+        by smtp.googlemail.com with ESMTPSA id w9sm2965ljo.36.2021.08.19.19.51.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 19 Aug 2021 19:51:36 -0700 (PDT)
+Subject: Re: [PATCH v8 06/34] dt-bindings: clock: tegra-car: Document new
+ tegra-clocks sub-node
+To:     Thierry Reding <thierry.reding@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
-Subject: Re: [RFC PATCH 14/15] WIP: PCI: qcom: use pwrseq to power up bus
- devices
-Message-ID: <YR7s2vK7jdUssx+A@ripper>
-References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
- <20210817005507.1507580-15-dmitry.baryshkov@linaro.org>
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
+        linux-clk@vger.kernel.org
+References: <20210817012754.8710-1-digetx@gmail.com>
+ <20210817012754.8710-7-digetx@gmail.com> <YR0SSz7KMh7TwaFW@orome.fritz.box>
+ <eff5ef47-e6e0-3e03-cf1a-d931b0f2dc2a@gmail.com>
+ <YR033zuYWWLCeYpM@orome.fritz.box>
+ <a5b942cb-1611-9ae1-6e89-4b68fdaf03e3@gmail.com>
+ <YR6HWMuYcF6NIepi@orome.fritz.box>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <cad7c578-f533-12f8-3dc0-d2854344148c@gmail.com>
+Date:   Fri, 20 Aug 2021 05:51:35 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210817005507.1507580-15-dmitry.baryshkov@linaro.org>
+In-Reply-To: <YR6HWMuYcF6NIepi@orome.fritz.box>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon 16 Aug 17:55 PDT 2021, Dmitry Baryshkov wrote:
-
-> Use bus-pwrseq device tree node to power up the devices on the bus. This
-> is to be rewritten with the proper code parsing the device tree and
-> powering up individual devices.
+19.08.2021 19:31, Thierry Reding пишет:
+>> The "device" representation is internal to the kernel. It's okay to me
+>> to have PLLs represented by a device, it's a distinct h/w by itself.
+>>
+>> CCF supports managing of clock's RPM and it requires to have clock to be
+>> backed by a device. That's what we are using here.
+>>
+>> Please see
+>> https://elixir.bootlin.com/linux/v5.14-rc6/source/drivers/clk/clk.c#L109
+> Looking at the implementation of __clk_register() and where that device
+> pointer typically comes from, I don't think the way this is used here is
+> what was intended. The way I interpret the code is that a clock is
+> registered with a parent device (i.e. its provider) and
+> clk_pm_runtime_get() is then used internally as a way to make sure that
+> when a clock is prepared, it's parent device is runtime resumed. This is
+> presumably to ensure that any registers that the driver might need to
+> access in order to prepare and enable the clock are accessible (i.e. the
+> CAR is not powered off or in reset).
 > 
-
-How about describing the PCI device in DT and having the PCIe controller
-dig it up up from there? Although we won't have a struct device until
-later, so perhaps we need the of-based pwrseq_get() for that.
-
-Regards,
-Bjorn
-
-> Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-> ---
->  drivers/pci/controller/dwc/pcie-qcom.c | 13 +++++++++++++
->  drivers/power/pwrseq/pwrseq_qca.c      |  1 +
->  2 files changed, 14 insertions(+)
+> So the struct device that is passed to __clk_register() (or its callers)
+> should be that of the CAR rather than virtual struct devices created by
+> the CAR.
 > 
-> diff --git a/drivers/pci/controller/dwc/pcie-qcom.c b/drivers/pci/controller/dwc/pcie-qcom.c
-> index 8a7a300163e5..a60d41fbcd6f 100644
-> --- a/drivers/pci/controller/dwc/pcie-qcom.c
-> +++ b/drivers/pci/controller/dwc/pcie-qcom.c
-> @@ -23,6 +23,7 @@
->  #include <linux/pm_runtime.h>
->  #include <linux/platform_device.h>
->  #include <linux/phy/phy.h>
-> +#include <linux/pwrseq/consumer.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/reset.h>
->  #include <linux/slab.h>
-> @@ -1467,6 +1468,7 @@ static int qcom_pcie_probe(struct platform_device *pdev)
->  	struct pcie_port *pp;
->  	struct dw_pcie *pci;
->  	struct qcom_pcie *pcie;
-> +	struct pwrseq *pwrseq;
->  	int ret;
->  
->  	pcie = devm_kzalloc(dev, sizeof(*pcie), GFP_KERNEL);
-> @@ -1520,6 +1522,17 @@ static int qcom_pcie_probe(struct platform_device *pdev)
->  
->  	pp->ops = &qcom_pcie_dw_ops;
->  
-> +	pwrseq = devm_pwrseq_get_optional(dev, "bus");
-> +	if (IS_ERR(pwrseq)) {
-> +		ret = PTR_ERR(pwrseq);
-> +		goto err_pm_runtime_put;
-> +	}
-> +	if (pwrseq) {
-> +		ret = pwrseq_full_power_on(pwrseq);
-> +		if (ret)
-> +			goto err_pm_runtime_put;
-> +	}
-> +
->  	ret = phy_init(pcie->phy);
->  	if (ret) {
->  		pm_runtime_disable(&pdev->dev);
-> diff --git a/drivers/power/pwrseq/pwrseq_qca.c b/drivers/power/pwrseq/pwrseq_qca.c
-> index 3421a4821126..4107f0a9c05d 100644
-> --- a/drivers/power/pwrseq/pwrseq_qca.c
-> +++ b/drivers/power/pwrseq/pwrseq_qca.c
-> @@ -1,3 +1,4 @@
-> +#define DEBUG
->  // SPDX-License-Identifier: GPL-2.0-only
->  /*
->   * Copyright (c) 2021, Linaro Ltd.
-> -- 
-> 2.30.2
+> And it's a bit debatable whether or not PLLs represent distinct
+> hardware. Ultimately every transistor on a chip could be considered
+> distinct hardware. But a platform device is a device on a platform bus,
+> which is really just another way of saying it's a hardware block that's
+> accessible from the CPU via a memory-mapped address. A PLL (just like
+> other clocks) is merely a resource exposed by means of access to these
+> registers. So I don't think they should be platform devices. Even making
+> them struct device:s seems a bit of a stretch.
 > 
+> Is there any reason why struct clk can't be used for this? I mean, the
+> whole purpose of that structure is to represent clocks. Why do we need
+> to make them special?
+
+Because we need to perform DVFS for PLLs. The only way to do it without
+having to reinvent existing frameworks is to use these frameworks and
+they require a device.
