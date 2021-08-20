@@ -7,168 +7,155 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19EC5C00143
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 12:58:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B819C4338F
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0192C6101A
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 12:58:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 10F88610CA
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240600AbhHTM6r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 08:58:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41800 "EHLO
+        id S240684AbhHTNJR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Aug 2021 09:09:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240547AbhHTM6q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 08:58:46 -0400
-Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D3A5C061796
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 05:58:08 -0700 (PDT)
-Received: by mail-vs1-xe30.google.com with SMTP id i1so6110749vsk.8
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 05:58:08 -0700 (PDT)
+        with ESMTP id S240677AbhHTNJQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 09:09:16 -0400
+Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B407AC061756
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:38 -0700 (PDT)
+Received: by mail-qt1-x82b.google.com with SMTP id d2so7408875qto.6
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=VSaFeBdX4kWGJjrK0LDIdAG7HMHyEVXfRCzRhlCm2Vc=;
-        b=DnhQLGM/mJBYM14dOuxq+G21zQDLVubpP7oZsUxJRpqY3uVOSAs9B5niS+x3uyTre7
-         OY65Ox4XCQkPwIIGObNgixcuUbaA0/pd1FB1Qo2ODsYfIBziSCun36IE9isJ3506pXpF
-         1ecf2r9wVgXbr/9QFjwW0VOiK0pGJUOmyNQXonlOuHCAOSpdd8cj85h6sjjS6N0HUfRU
-         JG2biriboTkHUtYnQwws5fcglapOqHqn2aq4ItDnRLAMkRsQbfB5v6w1xfxzn4Mat3vo
-         rreigmWF3PCK6SScj/XbW99E8SMa2IrssaqGiq9CflV2XUtvkisBvF3/Z2VuEfCmGOrP
-         jh6Q==
+         :cc:content-transfer-encoding;
+        bh=TUaFXYR3HgX7rq/VVrgPte+1/jUiDRhyGavFeUWW8ns=;
+        b=qyykdYkmfS+sozWV6prsKemkogSdt6dw3JI6xplGBEyTZrCLVw/V2WrXps+vMYETkc
+         8Te8E/naVt9sCYftHN+RQWgeipXTUxRrtvWgldkYCu2Cbe9g6ADwtRoynUE5z+qBzTjG
+         54yO9pPGaOTEYQUVc1FEW/T8RQKm7EsP8D7GtvNgk4bFWoxEOLRtHkxavfl9A0+APfke
+         fUSP5CH+beQOqMRPOpWAxyXQpPSp8NBKx7ZcRxpsbapjzzBlp12z8K73a7u/zLR3Yi/5
+         /eO+ssNjqZxgkZLIbtO1QrlN47VLwXpLqfNwD+gSTbQel6v8qOEG9qHA3WYS7WzopQpP
+         XncQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=VSaFeBdX4kWGJjrK0LDIdAG7HMHyEVXfRCzRhlCm2Vc=;
-        b=NmPIltiegw3ec3zL9l0qBF8/Yt7Nff80lpWSg13BQo6fKernLPLIrVCAkbKV5zCkV3
-         SyHu/25F1kexfFU7JanQ0yhIdD8YLTA153N8x99Y223Ja8ycHXpKcpjHSWUYnFxHe3T/
-         FSGvnbHyl0irn9gu09HXC3IzQJ72+rbyQywm7Y5FZpWmr+qvEwiEQawyZ+BmwUnOPKl1
-         MmrL6SMPDdKhU9YY/VKu3/f0RjfSk78oq2b9dsoeVX9vdB0sGzceQrsk8Cf4GCyluRMw
-         4+AG0aGedgRHm94Js4dJ+8ABWVbXqkiRQinXGNN88MwCJiO2zVYDpmKyUKuUBfN+nwlH
-         4VvA==
-X-Gm-Message-State: AOAM532ehCY1AiAA58HXPMSf1cPM2eD9h3V1FRK1biJW7H/Sx+r4lQl2
-        4LW12iEwPWMOUi3ggNyHMkuk8kU/aRmboe+fk6xrpw==
-X-Google-Smtp-Source: ABdhPJyCu5OoKXB/ZnU0BhDnI9FQ/nriFA8C9gxuFpc66zGzEUSQ7NZWEdQGpN5i65y/ydiL4YG1C5HABdRFQK6zhTY=
-X-Received: by 2002:a67:3212:: with SMTP id y18mr16683598vsy.19.1629464287428;
- Fri, 20 Aug 2021 05:58:07 -0700 (PDT)
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=TUaFXYR3HgX7rq/VVrgPte+1/jUiDRhyGavFeUWW8ns=;
+        b=Ty7e20bHQauxDxBXL/IyPzXkXXilyUInQyUBXmYD9ImuUaY/YXLKqzyOuXrhRhfgjr
+         84N3G558AzMStQUrSZw1Xub2f0Uzep5ZMM5gmWuz75xUvx1gRpksivcuNOBOHqbHJL95
+         paXMSi5eRrCBePpovrCODjiYL4sujM92Zc+WfFCsKWP8I4gZyaz8UupDGpRApiT/SgNb
+         1e+olxq0Jy6o1LUEvp725qU9MXqmZGoDXWsdiTKTvRowRQ4Kju02bGwuTeZNqU/rKgOg
+         HHzH3mDt644u9yEXi69iRQ0Vbr0S7jft1sagr4DezPiNBnUMJoFFtue1SB324VpNUQnd
+         OCoQ==
+X-Gm-Message-State: AOAM532tJzDPGbMl5i0Bhl9iv4DfDwiLo429TCHGX8SNcaBmqUCh5mLz
+        1MvhsrUSx8ZxaChEawcUVnQjbA3osC6vAAhsm9nk3A==
+X-Google-Smtp-Source: ABdhPJyHXvzqFdkh92xFSl2Tfgr6Wq+GnxyuqFmSQJ3g0FPjwxN9S26JOc0IArVq879EP1YIZ1goBTULRA693ce45J8=
+X-Received: by 2002:a05:622a:13c8:: with SMTP id p8mr17705841qtk.238.1629464912762;
+ Fri, 20 Aug 2021 06:08:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
- <20210818055849.ybfajzu75ecpdrbn@vireshk-i7> <f1c76f23-086d-ef36-54ea-0511b0ebe0e1@gmail.com>
- <20210818062723.dqamssfkf7lf7cf7@vireshk-i7> <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
- <20210818091417.dvlnsxlgybdsn76x@vireshk-i7> <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
- <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com> <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
- <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com> <20210820051843.5mueqpnjbqt3zdzc@vireshk-i7>
-In-Reply-To: <20210820051843.5mueqpnjbqt3zdzc@vireshk-i7>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 20 Aug 2021 14:57:31 +0200
-Message-ID: <CAPDyKFo0rzHT4AhueWjyz9k2ZqUy8N6Od5pbr8sL_m0Jf2AwUg@mail.gmail.com>
-Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-To:     Viresh Kumar <viresh.kumar@linaro.org>,
-        Dmitry Osipenko <digetx@gmail.com>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
+References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org> <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
+In-Reply-To: <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Date:   Fri, 20 Aug 2021 16:08:21 +0300
+Message-ID: <CAA8EJpoOxerwmwQozL3gp1nX-+oxLMFUFjVPvRy-MoVfPuvqrw@mail.gmail.com>
+Subject: Re: [RFC PATCH 00/15] create power sequencing subsystem
+To:     Marcel Holtmann <marcel@holtmann.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        MSM <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 20 Aug 2021 at 07:18, Viresh Kumar <viresh.kumar@linaro.org> wrote:
->
-> On 19-08-21, 16:55, Ulf Hansson wrote:
-> > Right, that sounds reasonable.
+Hi,
+
+On Thu, 19 Aug 2021 at 18:23, Marcel Holtmann <marcel@holtmann.org> wrote:
+> > This is an RFC of the proposed power sequencer subsystem. This is a
+> > generification of the MMC pwrseq code. The subsystem tries to abstract
+> > the idea of complex power-up/power-down/reset of the devices.
 > >
-> > We already have pm_genpd_opp_to_performance_state() which translates
-> > an OPP to a performance state. This function invokes the
-> > ->opp_to_performance_state() for a genpd. Maybe we need to allow a
-> > genpd to not have ->opp_to_performance_state() callback assigned
-> > though, but continue up in the hierarchy to see if the parent has the
-> > callback assigned, to make this work for Tegra?
+> > The primary set of devices that promted me to create this patchset is
+> > the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+> > interfaces (older generations) or on serial+PCIe (newer generations).
+> > They require a set of external voltage regulators to be powered on and
+> > (some of them) have separate WiFi and Bluetooth enable GPIOs.
 > >
-> > Perhaps we should add an API dev_pm_genpd_opp_to_performance_state(),
-> > allowing us to pass the device instead of the genpd. But that's a
-> > minor thing.
->
-> I am not concerned a lot about how it gets implemented, and am not
-> sure as well, as I haven't looked into these details since sometime.
-> Any reasonable thing will be accepted, as simple as that.
->
-> > Finally, the precondition to use the above, is to first get a handle
-> > to an OPP table. This is where I am struggling to find a generic
-> > solution, because I guess that would be platform or even consumer
-> > driver specific for how to do this. And at what point should we do
-> > this?
->
-> Hmm, I am not very clear with the whole picture at this point of time.
->
-> Dmitry, can you try to frame a sequence of events/calls/etc that will
-> define what kind of devices we are looking at here, and how this can
-> be made to work ?
->
-> > > > Viresh, please take a look at what I did in [1]. Maybe it could be done
-> > > > in another way.
-> > >
-> > > I looked into this and looked like too much trouble. The
-> > > implementation needs to be simple. I am not sure I understand all the
-> > > problems you faced while doing that, would be better to start with a
-> > > simpler implementation of get_performance_state() kind of API for
-> > > genpd, after the domain is attached and its OPP table is initialized.
-> > >
-> > > Note, that the OPP table isn't required to be fully initialized for
-> > > the device at this point, we can parse the DT as well if needed be.
+> > This patchset being an RFC tries to demonstrate the approach, design an=
+d
+> > usage of the pwrseq subsystem. Following issues are present in the RFC
+> > at this moment but will be fixed later if the overall approach would be
+> > viewed as acceptable:
 > >
-> > Sure, but as I indicated above, you need some kind of input data to
-> > figure out what OPP table to pick, before you can translate that into
-> > a performance state. Is that always the clock rate, for example?
+> > - No documentation
+> >   While the code tries to be self-documenting proper documentation
+> >   would be required.
+> >
+> > - Minimal device tree bindings changes
+> >   There are no proper updates for the DT bindings (thus neither Rob
+> >   Herring nor devicetree are included in the To/Cc lists). The dt
+> >   schema changes would be a part of v1.
+> >
+> > - Lack of proper PCIe integration
+> >   At this moment support for PCIe is hacked up to be able to test the
+> >   PCIe part of qca6390. Proper PCIe support would require automatically
+> >   powering up the devices before the scan basing on the proper device
+> >   structure in the device tree.
+> >
+> > ----------------------------------------------------------------
+> > Dmitry Baryshkov (15):
+> >      power: add power sequencer subsystem
+> >      pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
+> >      mmc: core: switch to new pwrseq subsystem
+> >      ath10k: add support for pwrseq sequencing
+> >      Bluetooth: hci_qca: merge qca_power into qca_serdev
+> >      Bluetooth: hci_qca: merge init paths
+> >      Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
+> >      Bluetooth: hci_qca: futher rework of power on/off handling
+> >      Bluetooth: hci_qca: add support for pwrseq
 >
-> Eventually it can be clock, bandwidth, or pstate of anther genpd, not
-> sure what all we are looking for now. It should be just clock right
-> now as far as I can imagine :)
+> any chance you can try to abandon patching hci_qca. The serdev support in=
+ hci_uart is rather hacking into old line discipline code and it is not agi=
+ng well. It is really becoming a mess.
+
+I wanted to stay away from rewriting the BT code. But... New driver
+would have a bonus point that I don't have to be compatible with old
+bindings. In fact we can even make it the other way around: let the
+old driver always use regulators and make the new driver support only
+the pwrseq. Then it should be possible to drop the old hci_qca driver
+together with dropping the old bindings.
+
+> I would say that the Qualcomm serial devices could use a separate standal=
+one serdev driver. A while I send an RFC for a new serdev driver.
 >
-> > Perhaps, we should start with adding a dev_pm_opp_get_from_rate() or
-> > what do you think? Do you have other suggestions?
+> https://www.spinics.net/lists/linux-bluetooth/msg74918.html
+
+Any reason why your driver stayed as an RFC and never made it into the
+kernel? Do you plan to revive your old RFCs on H:4 and H:5?
+
+> There I had the idea that simple vendor specifics can be in that driver (=
+like the Broadcom part I added there), but frankly the QCA specifics are a =
+bit too specific and it should be a separate driver. However I think this w=
+ould be a good starting point.
 >
-> We already have similar APIs, so that won't be a problem. We also have
-> a mechanism inside the OPP core, frequency based, which is used to
-> guess the current OPP. Maybe we can enhance and use that directly
-> here.
+> In general a H:4 based Bluetooth driver is dead simple with the help of h=
+4_recv.h helper we have in the kernel. The complicated part is the power ma=
+nagement pieces or any vendor specific low-power protocol they are running =
+on that serial line. And since you are touching this anyway, doing a driver=
+ from scratch might be lot simpler and cleaner. It would surely help all th=
+e new QCA device showing up in the future.
 
-After reading the last reply from Dmitry, I am starting to think that
-the problem he is facing can be described and solved in a much easier
-way.
-
-If I am correct, it looks like we don't need to add APIs to get OPPs
-for a clock rate or set initial performance state values according to
-the HW in genpd.
-
-See my other response to Dmitry, let's see where that leads us.
-
-Kind regards
-Uffe
+--=20
+With best wishes
+Dmitry
