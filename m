@@ -4,158 +4,161 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B819C4338F
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED0D1C4320A
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 10F88610CA
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D727761053
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 13:08:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240684AbhHTNJR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 09:09:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44278 "EHLO
+        id S240586AbhHTNJ1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Aug 2021 09:09:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240677AbhHTNJQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 09:09:16 -0400
-Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B407AC061756
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:38 -0700 (PDT)
-Received: by mail-qt1-x82b.google.com with SMTP id d2so7408875qto.6
-        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:38 -0700 (PDT)
+        with ESMTP id S240677AbhHTNJZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Aug 2021 09:09:25 -0400
+Received: from mail-ua1-x930.google.com (mail-ua1-x930.google.com [IPv6:2607:f8b0:4864:20::930])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA941C061575
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:47 -0700 (PDT)
+Received: by mail-ua1-x930.google.com with SMTP id u39so4077810uad.10
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Aug 2021 06:08:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=TUaFXYR3HgX7rq/VVrgPte+1/jUiDRhyGavFeUWW8ns=;
-        b=qyykdYkmfS+sozWV6prsKemkogSdt6dw3JI6xplGBEyTZrCLVw/V2WrXps+vMYETkc
-         8Te8E/naVt9sCYftHN+RQWgeipXTUxRrtvWgldkYCu2Cbe9g6ADwtRoynUE5z+qBzTjG
-         54yO9pPGaOTEYQUVc1FEW/T8RQKm7EsP8D7GtvNgk4bFWoxEOLRtHkxavfl9A0+APfke
-         fUSP5CH+beQOqMRPOpWAxyXQpPSp8NBKx7ZcRxpsbapjzzBlp12z8K73a7u/zLR3Yi/5
-         /eO+ssNjqZxgkZLIbtO1QrlN47VLwXpLqfNwD+gSTbQel6v8qOEG9qHA3WYS7WzopQpP
-         XncQ==
+         :cc;
+        bh=1jeLsd0F5nu8VxBSxWPjs9ij/vCzMSfR5Tmv5iuwd6s=;
+        b=WC/dbJiZXZbYao7JhIntQY4TZ71VEiAo3x28NE7fEM5kyH3E5QMkrYaKxo+tOHuBq2
+         4fOoN/8kF20QYOvTlDeczofK7BcIqjasNY7CBq53XfqL9k8ztpMQHfVcSzVO71rO64Zq
+         McT44tin8yfog5Tj3F9uEcMm8s9RXuEY0am/zJIYxZIPBOSKQ0gPSUGTqV2fLnNdUMyA
+         Udra5icYrRXmu3Bub8tb1oL++vAVtV4op8H5c4RaKOsboeh/aX+gQt/xKF7m6+TffsNV
+         KpFsGCqib0Qpb9uD4iaINA3IeiJAs50v1pCyq6JF3tpma3/8Ou1apbdGh5FgySUdxEte
+         6zRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=TUaFXYR3HgX7rq/VVrgPte+1/jUiDRhyGavFeUWW8ns=;
-        b=Ty7e20bHQauxDxBXL/IyPzXkXXilyUInQyUBXmYD9ImuUaY/YXLKqzyOuXrhRhfgjr
-         84N3G558AzMStQUrSZw1Xub2f0Uzep5ZMM5gmWuz75xUvx1gRpksivcuNOBOHqbHJL95
-         paXMSi5eRrCBePpovrCODjiYL4sujM92Zc+WfFCsKWP8I4gZyaz8UupDGpRApiT/SgNb
-         1e+olxq0Jy6o1LUEvp725qU9MXqmZGoDXWsdiTKTvRowRQ4Kju02bGwuTeZNqU/rKgOg
-         HHzH3mDt644u9yEXi69iRQ0Vbr0S7jft1sagr4DezPiNBnUMJoFFtue1SB324VpNUQnd
-         OCoQ==
-X-Gm-Message-State: AOAM532tJzDPGbMl5i0Bhl9iv4DfDwiLo429TCHGX8SNcaBmqUCh5mLz
-        1MvhsrUSx8ZxaChEawcUVnQjbA3osC6vAAhsm9nk3A==
-X-Google-Smtp-Source: ABdhPJyHXvzqFdkh92xFSl2Tfgr6Wq+GnxyuqFmSQJ3g0FPjwxN9S26JOc0IArVq879EP1YIZ1goBTULRA693ce45J8=
-X-Received: by 2002:a05:622a:13c8:: with SMTP id p8mr17705841qtk.238.1629464912762;
- Fri, 20 Aug 2021 06:08:32 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=1jeLsd0F5nu8VxBSxWPjs9ij/vCzMSfR5Tmv5iuwd6s=;
+        b=e39Mkg4q68QXoD1+IfuqQd2y3Sl7J8DHRA1+5QP5nJ/5/XmjRjlbf83d7imqovZkrY
+         y04SMrBnS1OJBERlf+giUlRu4In8kQu64znTdeeHMv0rn+nbONA72iPtMpB/WjnDlbJF
+         bjJ43cu9Grhg8H3zN1GsAsge4TZVbSwYZgH8YQDQAojyIidbrDFEeuacDO/suHCaxCdL
+         GCsLGEUDdPg1MyooFNlLDTQkydSHrGM1AhUxnW51F9/U9Is1UC8AQLPN8x7BK6sPpUOK
+         /R1+UamV7o+J3cNbpcr9u0RbyFcn1jOyKDnMNoOHHwH3EXFV9nwTpmiFe5eLI/tGo2Cz
+         4Sqg==
+X-Gm-Message-State: AOAM532fJSvHrESKoR6FCSBTuMYww9w9KjlWEpYfcuJLPzAv2V9uh40N
+        rDkTH4zFqtovHBQOMBrGD2/FEB3M19SSOAO5ZTi56A==
+X-Google-Smtp-Source: ABdhPJyudXWst0uOFOvLTh4dvpAObwIHCZFQbOR7Ax2SinJKzLNlpYWdAnSEO7YQ/BLnbTZWMq48nnebeaOpVOjUigE=
+X-Received: by 2002:ab0:60a9:: with SMTP id f9mr15039087uam.19.1629464926939;
+ Fri, 20 Aug 2021 06:08:46 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org> <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
-In-Reply-To: <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Date:   Fri, 20 Aug 2021 16:08:21 +0300
-Message-ID: <CAA8EJpoOxerwmwQozL3gp1nX-+oxLMFUFjVPvRy-MoVfPuvqrw@mail.gmail.com>
-Subject: Re: [RFC PATCH 00/15] create power sequencing subsystem
-To:     Marcel Holtmann <marcel@holtmann.org>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        MSM <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
-        open list <linux-kernel@vger.kernel.org>,
-        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
+References: <20210817012754.8710-1-digetx@gmail.com> <20210817012754.8710-8-digetx@gmail.com>
+ <YR0UBi/ejy+oF4Hm@orome.fritz.box> <da7356cb-05ee-ba84-8a7c-6e69d853a805@gmail.com>
+ <YR04YHGEluqLIZeo@orome.fritz.box> <ad99db08-4696-1636-5829-5260f93dc681@gmail.com>
+ <YR6Mvips3HAntDy0@orome.fritz.box> <e17bbe8d-7c0f-fc3d-03c7-d75c54c24a43@gmail.com>
+ <YR+VDZzTihmpENp6@orome.fritz.box>
+In-Reply-To: <YR+VDZzTihmpENp6@orome.fritz.box>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 20 Aug 2021 15:08:10 +0200
+Message-ID: <CAPDyKFpJ+TK0w1GZEA7G=rtAjq5ipmVR4P0wy7uHiEGVWRk5yA@mail.gmail.com>
+Subject: Re: [PATCH v8 07/34] clk: tegra: Support runtime PM and power domain
+To:     Thierry Reding <thierry.reding@gmail.com>
+Cc:     Dmitry Osipenko <digetx@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
+        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+[...]
 
-On Thu, 19 Aug 2021 at 18:23, Marcel Holtmann <marcel@holtmann.org> wrote:
-> > This is an RFC of the proposed power sequencer subsystem. This is a
-> > generification of the MMC pwrseq code. The subsystem tries to abstract
-> > the idea of complex power-up/power-down/reset of the devices.
 > >
-> > The primary set of devices that promted me to create this patchset is
-> > the Qualcomm BT+WiFi family of chips. They reside on serial+platform
-> > interfaces (older generations) or on serial+PCIe (newer generations).
-> > They require a set of external voltage regulators to be powered on and
-> > (some of them) have separate WiFi and Bluetooth enable GPIOs.
+> > I'm creating platform device for the clocks that require DVFS. These
+> > clocks don't use regulator, they are attached to the CORE domain.
+> > GENPD framework manages the performance state, aggregating perf votes
+> > from each device, i.e. from each clock individually.
 > >
-> > This patchset being an RFC tries to demonstrate the approach, design an=
-d
-> > usage of the pwrseq subsystem. Following issues are present in the RFC
-> > at this moment but will be fixed later if the overall approach would be
-> > viewed as acceptable:
+> > You want to reinvent another layer of aggregation on top of GENPD.
+> > This doesn't worth the effort, we won't get anything from it, it
+> > should be a lot of extra complexity for nothing. We will also lose
+> > from it because pm_genpd_summary won't show you a per-device info.
 > >
-> > - No documentation
-> >   While the code tries to be self-documenting proper documentation
-> >   would be required.
+> > domain                          status          children                           performance
+> >     /device                                             runtime status
+> > ----------------------------------------------------------------------------------------------
+> > heg                             on                                                 1000000
+> >     /devices/soc0/50000000.host1x                       active                     1000000
+> >     /devices/soc0/50000000.host1x/54140000.gr2d         suspended                  0
+> > mpe                             off-0                                              0
+> > vdec                            off-0                                              0
+> >     /devices/soc0/6001a000.vde                          suspended                  0
+> > venc                            off-0                                              0
+> > 3d1                             off-0                                              0
+> >     /devices/genpd:1:54180000.gr3d                      suspended                  0
+> > 3d0                             off-0                                              0
+> >     /devices/genpd:0:54180000.gr3d                      suspended                  0
+> > core-domain                     on                                                 1000000
+> >                                                 3d0, 3d1, venc, vdec, mpe, heg
+> >     /devices/soc0/7d000000.usb                          active                     1000000
+> >     /devices/soc0/78000400.mmc                          active                     950000
+> >     /devices/soc0/7000f400.memory-controller            unsupported                1000000
+> >     /devices/soc0/7000a000.pwm                          active                     1000000
+> >     /devices/soc0/60006000.clock/tegra_clk_pll_c        active                     1000000
+> >     /devices/soc0/60006000.clock/tegra_clk_pll_e        suspended                  0
+> >     /devices/soc0/60006000.clock/tegra_clk_pll_m        active                     1000000
+> >     /devices/soc0/60006000.clock/tegra_clk_sclk         active                     1000000
 > >
-> > - Minimal device tree bindings changes
-> >   There are no proper updates for the DT bindings (thus neither Rob
-> >   Herring nor devicetree are included in the To/Cc lists). The dt
-> >   schema changes would be a part of v1.
-> >
-> > - Lack of proper PCIe integration
-> >   At this moment support for PCIe is hacked up to be able to test the
-> >   PCIe part of qca6390. Proper PCIe support would require automatically
-> >   powering up the devices before the scan basing on the proper device
-> >   structure in the device tree.
-> >
-> > ----------------------------------------------------------------
-> > Dmitry Baryshkov (15):
-> >      power: add power sequencer subsystem
-> >      pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
-> >      mmc: core: switch to new pwrseq subsystem
-> >      ath10k: add support for pwrseq sequencing
-> >      Bluetooth: hci_qca: merge qca_power into qca_serdev
-> >      Bluetooth: hci_qca: merge init paths
-> >      Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
-> >      Bluetooth: hci_qca: futher rework of power on/off handling
-> >      Bluetooth: hci_qca: add support for pwrseq
 >
-> any chance you can try to abandon patching hci_qca. The serdev support in=
- hci_uart is rather hacking into old line discipline code and it is not agi=
-ng well. It is really becoming a mess.
-
-I wanted to stay away from rewriting the BT code. But... New driver
-would have a bonus point that I don't have to be compatible with old
-bindings. In fact we can even make it the other way around: let the
-old driver always use regulators and make the new driver support only
-the pwrseq. Then it should be possible to drop the old hci_qca driver
-together with dropping the old bindings.
-
-> I would say that the Qualcomm serial devices could use a separate standal=
-one serdev driver. A while I send an RFC for a new serdev driver.
+> I suppose if there's really no good way of doing this other than
+> providing a struct device, then so be it. I think the cleaned up sysfs
+> shown in the summary above looks much better than what the original
+> would've looked like.
 >
-> https://www.spinics.net/lists/linux-bluetooth/msg74918.html
+> Perhaps an additional tweak to that would be to not create platform
+> devices. Instead, just create struct device. Those really have
+> everything you need (.of_node, and can be used with RPM and GENPD). As I
+> mentioned earlier, platform device implies a CPU-memory-mapped bus,
+> which this clearly isn't. It's kind of a separate "bus" if you want, so
+> just using struct device directly seems more appropriate.
 
-Any reason why your driver stayed as an RFC and never made it into the
-kernel? Do you plan to revive your old RFCs on H:4 and H:5?
+Just a heads up. If you don't use a platform device or have a driver
+associated with it for probing, you need to manage the attachment to
+genpd yourself. That means calling one of the dev_pm_domain_attach*()
+APIs, but that's perfectly fine, ofcourse.
 
-> There I had the idea that simple vendor specifics can be in that driver (=
-like the Broadcom part I added there), but frankly the QCA specifics are a =
-bit too specific and it should be a separate driver. However I think this w=
-ould be a good starting point.
 >
-> In general a H:4 based Bluetooth driver is dead simple with the help of h=
-4_recv.h helper we have in the kernel. The complicated part is the power ma=
-nagement pieces or any vendor specific low-power protocol they are running =
-on that serial line. And since you are touching this anyway, doing a driver=
- from scratch might be lot simpler and cleaner. It would surely help all th=
-e new QCA device showing up in the future.
+> We did something similar for XUSB pads, see drivers/phy/tegra/xusb.[ch]
+> for an example of how that was done. I think you can do something
+> similar here.
+>
+> Thierry
 
---=20
-With best wishes
-Dmitry
+Kind regards
+Uffe
