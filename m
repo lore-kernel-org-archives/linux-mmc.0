@@ -2,63 +2,123 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-11.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05CCBC4338F
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 20:09:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A28EBC432BE
+	for <linux-mmc@archiver.kernel.org>; Sat, 21 Aug 2021 06:50:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E122261178
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Aug 2021 20:09:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B793611CE
+	for <linux-mmc@archiver.kernel.org>; Sat, 21 Aug 2021 06:50:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239115AbhHTUKD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Aug 2021 16:10:03 -0400
-Received: from mail.kernel.org ([198.145.29.99]:39000 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239281AbhHTUJ6 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 20 Aug 2021 16:09:58 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPS id EC8856115C;
-        Fri, 20 Aug 2021 20:09:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629490159;
-        bh=ge24DmoJYW30k2kXJzTVKBOQkhKfNge/n2Wphj+L7cU=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=LWSqjQBnp8hvSuWgDd4birELGCoK/GTJjC1mKyAlmWz1sIYfVITjarM/+74pd4bT0
-         Ts2hOAY7eBL6OL/paOfXDKoXstSQ37QH+kwd7I+UO/yNkdyRiSJJyOm+bTTkz+bTiR
-         WZgBFuyXx2gE1MwQNmdz0SVX9nUmGsuhuXFnlouNqFADZbR1yuXBPZWcptTPWmwFND
-         bygTG5DEeu7i7RYfJvQ9G0LGEXmO+PUN4izw2a4u7kqtjooHUpvnskLAn0bvHlU0+m
-         y2GeSo2EKswrJeADcQfsoEeRM5xw95ScgGNyjcV7LmZTf1uiWhgEfBdlcSnuPW01yA
-         02WZjBjhoDkEw==
-Subject: Re: [GIT PULL] MMC fixes for v5.14-rc7
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20210820132234.318026-1-ulf.hansson@linaro.org>
-References: <20210820132234.318026-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20210820132234.318026-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14-rc4
-X-PR-Tracked-Commit-Id: 419dd626e357e89fc9c4e3863592c8b38cfe1571
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: a27c75e554feb63a0e72b9479bab0b49600d1410
-Message-Id: <162949015893.21370.12178974282322515078.pr-tracker-bot@kernel.org>
-Date:   Fri, 20 Aug 2021 20:09:18 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        id S232231AbhHUGvY convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 21 Aug 2021 02:51:24 -0400
+Received: from coyote.holtmann.net ([212.227.132.17]:54252 "EHLO
+        mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231738AbhHUGvX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 21 Aug 2021 02:51:23 -0400
+Received: from smtpclient.apple (p5b3d23f8.dip0.t-ipconnect.de [91.61.35.248])
+        by mail.holtmann.org (Postfix) with ESMTPSA id D102DCED43;
+        Sat, 21 Aug 2021 08:50:40 +0200 (CEST)
+Content-Type: text/plain;
+        charset=utf-8
+Mime-Version: 1.0 (Mac OS X Mail 14.0 \(3654.100.0.2.22\))
+Subject: Re: [RFC PATCH 00/15] create power sequencing subsystem
+From:   Marcel Holtmann <marcel@holtmann.org>
+In-Reply-To: <CAA8EJpoOxerwmwQozL3gp1nX-+oxLMFUFjVPvRy-MoVfPuvqrw@mail.gmail.com>
+Date:   Sat, 21 Aug 2021 08:50:40 +0200
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        MSM <linux-arm-msm@vger.kernel.org>, linux-mmc@vger.kernel.org,
+        open list <linux-kernel@vger.kernel.org>,
+        "open list:BLUETOOTH SUBSYSTEM" <linux-bluetooth@vger.kernel.org>,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Content-Transfer-Encoding: 8BIT
+Message-Id: <551758F2-0B00-4DEB-92C9-37472E46B75D@holtmann.org>
+References: <20210817005507.1507580-1-dmitry.baryshkov@linaro.org>
+ <1CA665D1-86F0-45A1-862D-17DAB3ABA974@holtmann.org>
+ <CAA8EJpoOxerwmwQozL3gp1nX-+oxLMFUFjVPvRy-MoVfPuvqrw@mail.gmail.com>
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+X-Mailer: Apple Mail (2.3654.100.0.2.22)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 20 Aug 2021 15:22:34 +0200:
+Hi Dmitry,
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.14-rc4
+>>> This is an RFC of the proposed power sequencer subsystem. This is a
+>>> generification of the MMC pwrseq code. The subsystem tries to abstract
+>>> the idea of complex power-up/power-down/reset of the devices.
+>>> 
+>>> The primary set of devices that promted me to create this patchset is
+>>> the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+>>> interfaces (older generations) or on serial+PCIe (newer generations).
+>>> They require a set of external voltage regulators to be powered on and
+>>> (some of them) have separate WiFi and Bluetooth enable GPIOs.
+>>> 
+>>> This patchset being an RFC tries to demonstrate the approach, design and
+>>> usage of the pwrseq subsystem. Following issues are present in the RFC
+>>> at this moment but will be fixed later if the overall approach would be
+>>> viewed as acceptable:
+>>> 
+>>> - No documentation
+>>> While the code tries to be self-documenting proper documentation
+>>> would be required.
+>>> 
+>>> - Minimal device tree bindings changes
+>>> There are no proper updates for the DT bindings (thus neither Rob
+>>> Herring nor devicetree are included in the To/Cc lists). The dt
+>>> schema changes would be a part of v1.
+>>> 
+>>> - Lack of proper PCIe integration
+>>> At this moment support for PCIe is hacked up to be able to test the
+>>> PCIe part of qca6390. Proper PCIe support would require automatically
+>>> powering up the devices before the scan basing on the proper device
+>>> structure in the device tree.
+>>> 
+>>> ----------------------------------------------------------------
+>>> Dmitry Baryshkov (15):
+>>>    power: add power sequencer subsystem
+>>>    pwrseq: port MMC's pwrseq drivers to new pwrseq subsystem
+>>>    mmc: core: switch to new pwrseq subsystem
+>>>    ath10k: add support for pwrseq sequencing
+>>>    Bluetooth: hci_qca: merge qca_power into qca_serdev
+>>>    Bluetooth: hci_qca: merge init paths
+>>>    Bluetooth: hci_qca: merge qca_power_on with qca_regulators_init
+>>>    Bluetooth: hci_qca: futher rework of power on/off handling
+>>>    Bluetooth: hci_qca: add support for pwrseq
+>> 
+>> any chance you can try to abandon patching hci_qca. The serdev support in hci_uart is rather hacking into old line discipline code and it is not aging well. It is really becoming a mess.
+> 
+> I wanted to stay away from rewriting the BT code. But... New driver
+> would have a bonus point that I don't have to be compatible with old
+> bindings. In fact we can even make it the other way around: let the
+> old driver always use regulators and make the new driver support only
+> the pwrseq. Then it should be possible to drop the old hci_qca driver
+> together with dropping the old bindings.
+> 
+>> I would say that the Qualcomm serial devices could use a separate standalone serdev driver. A while I send an RFC for a new serdev driver.
+>> 
+>> https://www.spinics.net/lists/linux-bluetooth/msg74918.html
+> 
+> Any reason why your driver stayed as an RFC and never made it into the
+> kernel? Do you plan to revive your old RFCs on H:4 and H:5?
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/a27c75e554feb63a0e72b9479bab0b49600d1410
+I was missing enough hardware to test it on and frankly I hoped that someone would pick up this work. The HCI line discipline “hack” needs to be removed soon. It is complicated, cumbersome and has a bunch of issues with locking. Mind you that originated in 2.4.6 kernel and is at its core bit-rotting.
 
-Thank you!
+If you manage to put QCA support into a separate btqcauart driver, that would be awesome. The btmtkuart driver is another example where Mediatek got its own serdev based driver.
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Regards
+
+Marcel
+
