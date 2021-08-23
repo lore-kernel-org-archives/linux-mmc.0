@@ -6,64 +6,65 @@ X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
 	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
 	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 98118C4320E
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:05:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BF4DC432BE
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:06:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7F9826135E
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:05:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6EB1561042
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:06:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234383AbhHWBF7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 22 Aug 2021 21:05:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44344 "EHLO
+        id S234471AbhHWBGq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 22 Aug 2021 21:06:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233096AbhHWBF7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Aug 2021 21:05:59 -0400
-Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29FF2C061760
-        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:05:17 -0700 (PDT)
-Received: by mail-ed1-x52d.google.com with SMTP id cq23so23582638edb.12
-        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:05:17 -0700 (PDT)
+        with ESMTP id S232005AbhHWBGq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Aug 2021 21:06:46 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 650C5C061757
+        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:06:04 -0700 (PDT)
+Received: by mail-ej1-x62f.google.com with SMTP id bt14so33447384ejb.3
+        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:06:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=9I+jvIuGkrYC7w12Jy77CUvwauedMrIdRwXtD/swi0U=;
-        b=PJ2lRFHHDJGTdGZgqkx8nm0C86/LsPvaA1plQiLWFsazUABz8Yc1GKrNB1BQebP/Rm
-         PZOTpqcjJA3c63TrlvEaSd9Nl4IAAmXXx22NUFr+a1YUH4v/xU8kJS3YhojZFgciqq6c
-         3pF3A5e3/flNGz5+xe0wFzOD8qTt9bGjHTA5wa1Fvx0NjEcMhjV1lOqg+y5AZpMs8uRO
-         UL8MO/ANO9YNVs/zhJP5dQVnCSFKf/lKw7h+zDwmT/AUdweiArEVhlAbseZHAVwKbAqR
-         Gxm//N0qMKiEZdmqBeDtkOLbvh1vfHMW8t3PCN9jiSrZYrm7JleLO/JDGMNpXYlaCBj2
-         WZ7w==
+        bh=DiGtvvH8NkIVd4hqCUiszMleyUhfYfWw1b6ZDZbLUkE=;
+        b=uhWvv9wnJvdEuINozK+RdVuTibj+UvYVWqnvk3DidpO+D6vtOAXbizZtIoU+1RzTmr
+         neD6qgJ86ggq3V1tinDW/48juLqA91oBDkn/NB65JOJLHe8ghFOwkQ1zgaxlQMH9WODi
+         rt9SNazJrbwjf3VFwt6U5hKEGhpmSs7w4dXX8sSJt472vdiwC3vAF5s/p3iinYjxtwBl
+         a9cj3j653TZKo2jXSHjebMJ7KoKkwr3MDOz9cwalouCmaCPDQmETbtb4GGf4v7OOCExP
+         B2zmwqQPZYp77TN2JzvGf7JzCIuJYxdNvTcTfjBdZOlLi5LS1YiO9oc0f/v1VUpM86FM
+         Bj+w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=9I+jvIuGkrYC7w12Jy77CUvwauedMrIdRwXtD/swi0U=;
-        b=Wxkz2uYGbAcbDWwRKWUH/CxQARxkDX3v9X5CtZ9F1fG4nGC5W8oOc3q00EMNRk6NXZ
-         +DVpeHo4lcAu8iqwSHW6Rl1yR8aFK/qAkasktbL00ylZHzRPzPp2vbHgKkCENTv+xdRd
-         HLMLENZn2usAT8xqNLPOIBmHRL9/XFKDGoPkOAOY+qFp4L8yJRGSzpcmtv5uJuRzqhQi
-         6etiueAKKY9TzrnU/FPauk4FhT793rImXyjHCQt5I5UhPjW7mjN1iY3HhsiUTveaqf8s
-         9cjAc5ChYzg207VPVpMPqiv7xT6mcuNfAE3V6pHeuvzRG2cB6V/qyrEyNrCqX9oo65+T
-         oz/w==
-X-Gm-Message-State: AOAM533DDKVa98sSxl5I80h+cy7V1R4ZhnTMLWpGmkrOd6VES/3W6OSc
-        BSXaxbASlgXvE8Uu+DH3adyl6s9fn92bvRDmzi+dWw==
-X-Google-Smtp-Source: ABdhPJykJY1zWrWHmNv1qhh0XGc9mZHysTgRPPx0BaMujb9Mx9dYhMjPxl8GGwLIWVx58MUoIp0bAc7SpECJwSg9rjk=
-X-Received: by 2002:aa7:c894:: with SMTP id p20mr34410895eds.42.1629680715488;
- Sun, 22 Aug 2021 18:05:15 -0700 (PDT)
+        bh=DiGtvvH8NkIVd4hqCUiszMleyUhfYfWw1b6ZDZbLUkE=;
+        b=cl3ngVHvo5vABlb7WTS0+NcVq3OcKp1iW0ph9uMFExDTmwspL7KpotlXXpzCM10eHA
+         aSHeeS90hxL3+y5H/eue4sz+AO1rKoXeKR2RMGgDUsu6N+w9Mz6M4F+ult4T0fp24iBO
+         UdzxvJ9kA1lRRZRqbqciYpo8GPlF29xqM59IuMoUDELRB8v2zAVNnn4/PWxgX6EikLcI
+         aFkJnAW9ziWeOaVjpJSqvopYOvxZXHseo0/gC9tzSiDrCjHMMf9ghae9Gy1ld73ypf3G
+         3hGZ6nf5E4BTyUMGI0tEkytJa3BJ4GzVjlINgJaljIdKgS77VAkQDK3jEu6JcDxiGkJ+
+         4uQA==
+X-Gm-Message-State: AOAM5320k3eSpmUSMxldJ5a4Wt0Ev059+YiC8kAP7oHFOs4xtgNxicAv
+        vDJX37s4auNXpHoy35OqYIWIK8hbjhjjGHBVtsJBOQ==
+X-Google-Smtp-Source: ABdhPJw9eEJEPtVIYbe2803vRNA11NSXlz157yzpl7w09FqgV8tkGsFwFNzMcmgt5u7Zt114aJklS9Z5BHq/3A2TpJA=
+X-Received: by 2002:a17:906:2f15:: with SMTP id v21mr21088372eji.444.1629680763004;
+ Sun, 22 Aug 2021 18:06:03 -0700 (PDT)
 MIME-Version: 1.0
 References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
  <CACRpkdbQD6p7fbGtuu1c92uXfSFDCTwqjqsXHpgnD5Lg4v0Okw@mail.gmail.com>
-In-Reply-To: <CACRpkdbQD6p7fbGtuu1c92uXfSFDCTwqjqsXHpgnD5Lg4v0Okw@mail.gmail.com>
+ <20210304091025.ny52qjm7wbfvmjgl@mobilestation> <CACRpkdZroi+_oHqipS71MAGif190y7jWU5Myf55vz=_um4w5cQ@mail.gmail.com>
+In-Reply-To: <CACRpkdZroi+_oHqipS71MAGif190y7jWU5Myf55vz=_um4w5cQ@mail.gmail.com>
 From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 22 Aug 2021 18:05:04 -0700
-Message-ID: <CAK9rFnyf3WLSPe8A=WWCBUqs3htkAmhDQq0ftcEOq_fnenWQPA@mail.gmail.com>
+Date:   Sun, 22 Aug 2021 18:05:52 -0700
+Message-ID: <CAK9rFnzDZ4MNm68AJ75g7zegLD-7UMHyoVR-4ssitYTTEeQm5g@mail.gmail.com>
 Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
 To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+Cc:     Serge Semin <fancer.lancer@gmail.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
         Arnd Bergmann <arnd@arndb.de>,
         Bartosz Golaszewski <bgolaszewski@baylibre.com>,
         Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Olof Johansson <olof@lixom.net>,
@@ -80,66 +81,45 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Linus,
 
-On Thu, Mar 4, 2021 at 12:29 AM Linus Walleij <linus.walleij@linaro.org> wrote:
-> On Thu, Mar 4, 2021 at 4:42 AM Brad Larson <brad@pensando.io> wrote:
+On Thu, Mar 4, 2021 at 5:38 AM Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> > This GPIO driver is for the Pensando Elba SoC which
-> > provides control of four chip selects on two SPI busses.
-[...]
-> > +#include <linux/gpio.h>
+> On Thu, Mar 4, 2021 at 10:10 AM Serge Semin <fancer.lancer@gmail.com> wrote:
+> > On Thu, Mar 04, 2021 at 09:29:33AM +0100, Linus Walleij wrote:
 >
-> Use this in new drivers:
-> #include <linux/gpio/driver.h>
-
-The updated patchset will use linux/gpio/driver.h
-
-> > + * pin:             3            2        |       1            0
-> > + * bit:         7------6------5------4----|---3------2------1------0
-> > + *     cs1  cs1_ovr  cs0  cs0_ovr |  cs1  cs1_ovr  cs0  cs0_ovr
-> > + *                ssi1            |             ssi0
-> > + */
-> > +#define SPICS_PIN_SHIFT(pin)   (2 * (pin))
-> > +#define SPICS_MASK(pin)                (0x3 << SPICS_PIN_SHIFT(pin))
-> > +#define SPICS_SET(pin, val)    ((((val) << 1) | 0x1) << SPICS_PIN_SHIFT(pin))
+> > > > + * pin:             3            2        |       1            0
+> > > > + * bit:         7------6------5------4----|---3------2------1------0
+> > > > + *             cs1  cs1_ovr  cs0  cs0_ovr |  cs1  cs1_ovr  cs0  cs0_ovr
+> > > > + *                        ssi1            |             ssi0
+> > > > + */
+> > > > +#define SPICS_PIN_SHIFT(pin)   (2 * (pin))
+> > > > +#define SPICS_MASK(pin)                (0x3 << SPICS_PIN_SHIFT(pin))
+> > > > +#define SPICS_SET(pin, val)    ((((val) << 1) | 0x1) << SPICS_PIN_SHIFT(pin))
+> > >
+> >
+> > > So 2 bits per GPIO line in one register? (Nice doc!)
+> >
+> > I suppose the first bit is the CS-pin-override flag. So when it's set
+> > the output is directly driven by the second bit, otherwise the
+> > corresponding DW APB SPI controller drives it. That's how the
+> > multiplexing is implemented here.
 >
-> So 2 bits per GPIO line in one register? (Nice doc!)
+> If these output lines are so tightly coupled to the SPI block
+> and will not be used for any other GPO (general purpose output)
+> I think it makes more sense to bundle the handling into the
+> DW SPI driver, and activate it based on the Elba compatible
+> string (if of_is_compatible(...)).
 >
-> > +struct elba_spics_priv {
-> > +       void __iomem *base;
-> > +       spinlock_t lock;
-> > +       struct gpio_chip chip;
-> > +};
-> > +
-> > +static int elba_spics_get_value(struct gpio_chip *chip, unsigned int pin)
-> > +{
-> > +       return -ENXIO;
-> > +}
->
-> Write a comment that the chip only supports output mode,
-> because it repurposes SPI CS pins as generic GPIO out,
-> maybe at the top of the file?
+> I am a bit cautious because it has happened in the past that
+> people repurpose CS lines who were originally for SPI CS
+> to all kind of other purposes, such as a power-on LED and
+> in that case it needs to be a separate GPIO driver. So the
+> author needs to have a good idea about what is a realistic
+> use case here.
 
-The top of the file will look like this in the updated patchset.
-
- * Pensando Elba ASIC SPI chip select driver.  The SoC supports output
- * direction only as it uses a generic GPIO pin for SPI CS.
-
-> I suppose these systems also actually (ab)use the SPI cs
-> for things that are not really SPI CS? Because otherwise
-> this could just be part of the SPI driver (native chip select).
-
-The SPI cs are not used for any other purpose, we needed four chip
-selects and native DW supports two.
-
-> > +static const struct of_device_id ebla_spics_of_match[] = {
-> > +       { .compatible = "pensando,elba-spics" },
->
-> Have you documented this?
-
-Yes as part of patchset v2: [PATCH v2 11/13] dt-bindings: gpio: Add
-Pensando Elba SoC support
-which documents "pensando,elba-spics" in new file
-bindings/gpio/pensando,elba-spics.yaml.
+The gpio pins being used for the Elba SoC SPI CS are dedicated to this
+function.  Are you recommending that the code in
+drivers/gpio/gpio-elba-spics.c be integrated into
+drivers/spi/spi-dw-mmio.c?
 
 Regards,
 Brad
