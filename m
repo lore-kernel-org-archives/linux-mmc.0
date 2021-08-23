@@ -2,124 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1CCEFC432BE
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 16:31:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2D08C4320E
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 18:54:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F24DD61371
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 16:31:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BA827613A7
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 18:54:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229823AbhHWQbn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Aug 2021 12:31:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58344 "EHLO
+        id S230332AbhHWSz3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Aug 2021 14:55:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229477AbhHWQbn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 12:31:43 -0400
-Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42ACCC061757
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Aug 2021 09:31:00 -0700 (PDT)
-Received: by mail-ed1-x52e.google.com with SMTP id q17so5202968edv.2
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Aug 2021 09:31:00 -0700 (PDT)
+        with ESMTP id S230192AbhHWSz2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 14:55:28 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2937DC061575;
+        Mon, 23 Aug 2021 11:54:45 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id f10so25142951lfv.6;
+        Mon, 23 Aug 2021 11:54:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=3UJqarI9sJh/SEzyJatryVnyGRWftRgbiqbTe8APv5I=;
-        b=FsrV/vjP9FwD6+gGUwE7brUSey8SYKVwpEPyJQ0ZE91a3dyKjLFv4giwo7QDacAyFw
-         egWdkhxhj9NUwi0HHZgK6yGJwJqJ9HDb4qRQTaVMnHGO8gG3ZeKZZnYYlrfNm693Fy0Y
-         oQ7hh6DOM1oB/BYhyFoBA7veyoZ+c37euu8VuV+OZ6P//3RXOx3M7EEGpEYyTjgd2uYE
-         MuUNLxBrhnc9SLBdXN+ef9CFeC33EpLfc4dt8uuN0PDzFbh3LbEJ8k/+9p+0HmJfgQdQ
-         CnTT/UROf8/CFKl03Gou5JKZcVBU8MPgFGcCZmh4qpB9Vjhu1UYXY1utX6FUrmozWZgV
-         tXbw==
+        d=gmail.com; s=20161025;
+        h=subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=LLLBnniN0Lx+Mumrz5skT0TPVp1ZGUNcrTmYMEWefMQ=;
+        b=bRXypa0kMDufIBAltELnod4/f5LKxu08gHYATptf+EI6+VVuqGZtQc9IaQGjvFFCgq
+         vbFbH2SdazqvcCAMYk3J4GuHj0e5I7zku8Oa9NfAxUikDOx7zn3pX1WDsTh6UdD8qIGa
+         3eprpmmrxRJAoaM7Gu3ZdgZoGar9lSRCs5JDzMxdRNpVQ+gLcrYDdO8oxckRN909UcKX
+         YtPVujPIzOZGW53g9o6QT7ES0CxEZ1zsz/t/TQNQmOc6LtFG124QbMp5K98LUEYst25J
+         DiyXxjAzvYYQpznD15TTlrtQK87XzYXH/DXwNlvN8BApenm8QR23KvoRjr4Lypahasp2
+         +t8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=3UJqarI9sJh/SEzyJatryVnyGRWftRgbiqbTe8APv5I=;
-        b=JneWLFYUK6RcRz0vQ0j6vLs0j0Zg1iFmNySLuxU7p2x0LY4b/JC4lb7gvpMB/QR8ji
-         qpdLcIlzP244g7ArVWl2yt36K4miK6e0HIIYmsQAPkycWuz8oP8FmbRUatG9efkLxerV
-         7uZgGiJJrfv2kWs3Vj/fUk0taEqEJYL+dykHbfVXVkDEcpk4tmuSQ7dGRgLpX4rU/17V
-         /rB30aEcuQh5b4lbY8foZGDK6Dog9orB1/diG7+gz3BXoMaIcdnQgHGtC3rIvZwlFm0m
-         luyll11InDghfJxfl07UFXrB90Q0kC2ZLqhwUWYYsIC0LZ92hFdfm4K6D54+1YB85OsA
-         g5TA==
-X-Gm-Message-State: AOAM530xjnHy3JqL+8/uUIwjXgq9H8l8UHoXyDCAzwWpTdKBGQwVo+1g
-        RpSGQePCZIOibl75Yhl5HQ2V1GssWVWe4V1DMbCfwQ==
-X-Google-Smtp-Source: ABdhPJwCkyepKnYLjaro8KpvCFMhXySyvI2odnfjv7k323shjYJULMJoXC1kqfT5uu34xj4dmG7LvzhRZ/0V8efQvKs=
-X-Received: by 2002:a05:6402:5208:: with SMTP id s8mr38656411edd.222.1629736258724;
- Mon, 23 Aug 2021 09:30:58 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
- <CAHp75VcG9KajNpDbewDq7QzotB6t7MfwiGk15FaobX+cmMVSzg@mail.gmail.com>
- <CAK9rFnwrA=W2Vk5yFwG4N_WS=eBXXnhtexA+tqgAYb6xOAO4oQ@mail.gmail.com>
- <CAHp75VdfrJ3JV_gL3xCLHOiw6Tj-5Ep7z5JKWUFKFbUt8gobcw@mail.gmail.com>
- <CAK9rFnx--z_pr_yR6CqGsH04ddwUtx4rxc7MxNNmy7ZSF86+Mg@mail.gmail.com> <CAMuHMdUz4vUQzXBHA9AiT3w6L20yBpgd0emVZJb=v_qw70qiJQ@mail.gmail.com>
-In-Reply-To: <CAMuHMdUz4vUQzXBHA9AiT3w6L20yBpgd0emVZJb=v_qw70qiJQ@mail.gmail.com>
-From:   Brad Larson <brad@pensando.io>
-Date:   Mon, 23 Aug 2021 09:30:47 -0700
-Message-ID: <CAK9rFnw-j8whcsK-NQ4w4+sCdrumCk7Bb=J+KfsF9ZO2Tf5r5g@mail.gmail.com>
-Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=LLLBnniN0Lx+Mumrz5skT0TPVp1ZGUNcrTmYMEWefMQ=;
+        b=tXflJOg0+VzMxn6y2k6Y1r5v87Nob0OemaHlYb+2euBDg7Rv0DSAexmmxngb03UawW
+         MIFRJsA+ejpCrUcXd/H1I9K2YjkjcNKjd+u0I+Ppt+JDaTqwhy3IOKI0UE3cKF8Rb8ch
+         Sgpgw4SLhVk2ay7U4SynA8ebW/BpCZx+HMq55ABfUqyQw0ic18DZQumST7RZbKLeCJSp
+         SrvvQrQCrfq2JOd+dvrK6+BpVJnYCfnxxdGag3k+HVHec7IiKwiaZUxdfwKY2tgrA8I7
+         7ew8FgaY2io+YFVaGlgqrpbGP6+I1DdVD2/Ji/Ur7/uO569pbt8gTGX9P3o6+pmvDXwG
+         Z6AQ==
+X-Gm-Message-State: AOAM531+Tf38LLd3cpfi6D2629+Hvmi6bBhDr4UuJNtPZxtrQoNIrTBQ
+        emb4iz6ou9Z/ZjY6r67AMCXtYBBWxxg=
+X-Google-Smtp-Source: ABdhPJzROMmO2gjb4vwtC02vW+yxH5GZycPshNAf3U2uJx1Cn7HyzCyTxuzs4nwkiF2FdwTHg0lTpw==
+X-Received: by 2002:a05:6512:3d22:: with SMTP id d34mr26136115lfv.326.1629744883418;
+        Mon, 23 Aug 2021 11:54:43 -0700 (PDT)
+Received: from [192.168.2.145] (46-138-120-72.dynamic.spd-mgts.ru. [46.138.120.72])
+        by smtp.googlemail.com with ESMTPSA id u18sm1664954lfo.280.2021.08.23.11.54.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 23 Aug 2021 11:54:42 -0700 (PDT)
+Subject: Re: [PATCH v8 07/34] clk: tegra: Support runtime PM and power domain
+To:     Thierry Reding <thierry.reding@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Peter De Schrijver <pdeschrijver@nvidia.com>,
+        Mikko Perttunen <mperttunen@nvidia.com>,
+        Peter Chen <peter.chen@kernel.org>,
         Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
+        Lee Jones <lee.jones@linaro.org>,
+        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
+        Nishanth Menon <nm@ti.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Richard Weinberger <richard@nod.at>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-tegra <linux-tegra@vger.kernel.org>,
+        Linux PM <linux-pm@vger.kernel.org>,
+        Linux USB List <linux-usb@vger.kernel.org>,
+        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        Linux Media Mailing List <linux-media@vger.kernel.org>,
+        dri-devel <dri-devel@lists.freedesktop.org>,
+        DTML <devicetree@vger.kernel.org>,
+        linux-clk <linux-clk@vger.kernel.org>
+References: <20210817012754.8710-8-digetx@gmail.com>
+ <YR0UBi/ejy+oF4Hm@orome.fritz.box>
+ <da7356cb-05ee-ba84-8a7c-6e69d853a805@gmail.com>
+ <YR04YHGEluqLIZeo@orome.fritz.box>
+ <ad99db08-4696-1636-5829-5260f93dc681@gmail.com>
+ <YR6Mvips3HAntDy0@orome.fritz.box>
+ <e17bbe8d-7c0f-fc3d-03c7-d75c54c24a43@gmail.com>
+ <YR+VDZzTihmpENp6@orome.fritz.box>
+ <CAPDyKFpJ+TK0w1GZEA7G=rtAjq5ipmVR4P0wy7uHiEGVWRk5yA@mail.gmail.com>
+ <89ea1694-be9e-7654-abeb-22de0ca5255a@gmail.com>
+ <YSOxnqiia+FqfOX6@orome.fritz.box>
+From:   Dmitry Osipenko <digetx@gmail.com>
+Message-ID: <acd25387-3d2b-460d-3280-eedd064b174b@gmail.com>
+Date:   Mon, 23 Aug 2021 21:54:41 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
+MIME-Version: 1.0
+In-Reply-To: <YSOxnqiia+FqfOX6@orome.fritz.box>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Geert,
+23.08.2021 17:33, Thierry Reding пишет:
+> On Sat, Aug 21, 2021 at 08:45:54PM +0300, Dmitry Osipenko wrote:
+>> 20.08.2021 16:08, Ulf Hansson пишет:
+>> ...
+>>>> I suppose if there's really no good way of doing this other than
+>>>> providing a struct device, then so be it. I think the cleaned up sysfs
+>>>> shown in the summary above looks much better than what the original
+>>>> would've looked like.
+>>>>
+>>>> Perhaps an additional tweak to that would be to not create platform
+>>>> devices. Instead, just create struct device. Those really have
+>>>> everything you need (.of_node, and can be used with RPM and GENPD). As I
+>>>> mentioned earlier, platform device implies a CPU-memory-mapped bus,
+>>>> which this clearly isn't. It's kind of a separate "bus" if you want, so
+>>>> just using struct device directly seems more appropriate.
+>>>
+>>> Just a heads up. If you don't use a platform device or have a driver
+>>> associated with it for probing, you need to manage the attachment to
+>>> genpd yourself. That means calling one of the dev_pm_domain_attach*()
+>>> APIs, but that's perfectly fine, ofcourse.
+>>>
+>>>>
+>>>> We did something similar for XUSB pads, see drivers/phy/tegra/xusb.[ch]
+>>>> for an example of how that was done. I think you can do something
+>>>> similar here.
+>>
+>> We need a platform device because we have a platform device driver that
+>> must be bound to the device, otherwise PMC driver state won't be synced
+>> since it it's synced after all drivers of devices that reference PMC
+>> node in DT are probed.
+> 
+> I think the causality is the wrong way around. It's more likely that you
+> added the platform driver because you have a platform device that you
+> want to bind against.
+> 
+> You can have drivers bind to other types of devices, although it's a bit
+> more work than abusing platform devices for it.
+> 
+> There's the "auxiliary" bus that seems like it would be a somewhat
+> better fit (see Documentation/driver-api/auxiliary_bus.rst), though it
+> doesn't look like this fits the purpose exactly. I think a custom bus
+> (or perhaps something that could be deployed more broadly across CCF)
+> would be more appropriate.
+> 
+> Looking around, it seems like clk/imx and clk/samsung abuse the platform
+> bus in a similar way, so they would benefit from a "clk" bus as well.
 
-On Mon, Aug 23, 2021 at 12:50 AM Geert Uytterhoeven
-<geert@linux-m68k.org> wrote:
->
-> Hi Brad,
->
-> On Mon, Aug 23, 2021 at 3:14 AM Brad Larson <brad@pensando.io> wrote:
-> > On Mon, Mar 29, 2021 at 3:40 AM Andy Shevchenko
-[...]
-> > Regarding the above module question and Kconfig definition, since I
-> > first looked at this and reviewed the comments I realized I should be
-> > using builtin.  The file gpio/Kconfig is currently this
-> >
-> > config GPIO_ELBA_SPICS
-> >         def_bool y
-> >         depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
->
-> That means the driver will default to yes by merely enabling
-> COMPILE_TEST, which is a no-go.
->
->     config GPIO_ELBA_SPICS
->             bool "one-line summary"
->             depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
->             default y if ARCH_PENSANDO_ELBA_SOC
-
-Thanks Geert, changed to this
-
---- a/drivers/gpio/Kconfig
-+++ b/drivers/gpio/Kconfig
-@@ -241,8 +241,9 @@ config GPIO_EIC_SPRD
-          Say yes here to support Spreadtrum EIC device.
-
- config GPIO_ELBA_SPICS
-+       bool "Pensando Elba SoC SPI Chip Select as GPIO support"
-+       depends on ARCH_PENSANDO_ELBA_SOC
-        def_bool y
--       depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
-
-Regards,
-Brad
+It may be nice to have a dedicated clk bus, but this is too much effort
+for nearly nothing in our case. It shouldn't be a problem to convert
+drivers to use clk bus once it will be implemented. It shouldn't be a
+part of this series, IMO.
