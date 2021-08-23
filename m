@@ -2,135 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA758C4338F
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 07:51:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AAB1DC4338F
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 07:53:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9503B6127B
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 07:51:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9104661371
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 07:53:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235243AbhHWHvs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Aug 2021 03:51:48 -0400
-Received: from mail-vs1-f44.google.com ([209.85.217.44]:39760 "EHLO
-        mail-vs1-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235247AbhHWHvS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 03:51:18 -0400
-Received: by mail-vs1-f44.google.com with SMTP id e9so10495974vst.6;
-        Mon, 23 Aug 2021 00:50:28 -0700 (PDT)
+        id S235329AbhHWHyE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Aug 2021 03:54:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50436 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235316AbhHWHyE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 03:54:04 -0400
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBC19C061575;
+        Mon, 23 Aug 2021 00:53:21 -0700 (PDT)
+Received: by mail-wr1-x436.google.com with SMTP id d26so4537078wrc.0;
+        Mon, 23 Aug 2021 00:53:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=fc41RHpGSLm7yZNljm3ipeJe276/QT9sJLIfnCrAz/8=;
+        b=T5ke9boWANF+x+UIfGqhhEo+T+Z/yAw7CV0N9f9NkXIL72U8yygob0hClxrxw9B2HO
+         JcxsvXwaX4k6uN0FUPJv8Bg9HrSuInm8bU58jSsBYYTsQhlIzgk90PrJt1WepprP9h0R
+         7cLYeEs8EKzk1qtXHZNbRc0o964yAbPuNw5IaYDvEGzOkv3vcO+SlaO2twAyUcHO2isU
+         GikLOA9Uvo+Q8op9kJSoFt2t3s4w3mtTghADf08g5w/0if7j+gIwYAv7zDzpT2KWecaX
+         qX2DPzumWqDWtTw5SGU1ZeoHtVPkWMLMzdiVAvB7EBX7dAF9XZHZ+UUBWETwNMfyP9Eq
+         s/eA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=ho3P9pBdgd42CBBqO6PTExhHf40DO+XVUYi0PLvvDcU=;
-        b=Tnr5p0YBYnazRD2Ux+8Z2KBq+evjNl1zJuA/CLqhtId2E1EsGsU53PVzpnbCmJuQ8g
-         G7UmJR4V+rAxpuSPB9HbIKLj00kLPtTgYX0Dldm09OzfxQso8IhZP4wwon19QEgrrEcS
-         IrrkkAskDUNn+ACgpzJBitW0Ln4f2w+XvGyA8ow70mHdRZe1JkiClOI1kN/nTDdkjQcy
-         RPTh/jlT2CSKe/Yfp9SGZ5Lln92NW8H5kIuckj4oVt/1MOSDx3+lazEtLHztSvDtp6c8
-         WBySiYp+1xryhz1DdwyI3OmauFZE1JuthS8J//8XBwFDk67S+biRlgcpkHI/IMCECuu6
-         Pmxg==
-X-Gm-Message-State: AOAM530kFAY5SquwExfPqv87d8vYJlvHiOrUOm7UNGxkoBpAUK/l76Jt
-        DR6KoY5T7w+8+m/rP1w/TUwBjwZQOcTXKlY3WbQ=
-X-Google-Smtp-Source: ABdhPJwnddl0CNzxKVNjXlZCRb2Igz6ludKlJHQ+IsyXtT1SETsb4n8hdAEokGACKnU9D507Yh2RQoDqVqVaLusqNtA=
-X-Received: by 2002:a67:c789:: with SMTP id t9mr23194381vsk.60.1629705028211;
- Mon, 23 Aug 2021 00:50:28 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
- <CAHp75VcG9KajNpDbewDq7QzotB6t7MfwiGk15FaobX+cmMVSzg@mail.gmail.com>
- <CAK9rFnwrA=W2Vk5yFwG4N_WS=eBXXnhtexA+tqgAYb6xOAO4oQ@mail.gmail.com>
- <CAHp75VdfrJ3JV_gL3xCLHOiw6Tj-5Ep7z5JKWUFKFbUt8gobcw@mail.gmail.com> <CAK9rFnx--z_pr_yR6CqGsH04ddwUtx4rxc7MxNNmy7ZSF86+Mg@mail.gmail.com>
-In-Reply-To: <CAK9rFnx--z_pr_yR6CqGsH04ddwUtx4rxc7MxNNmy7ZSF86+Mg@mail.gmail.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 23 Aug 2021 09:50:16 +0200
-Message-ID: <CAMuHMdUz4vUQzXBHA9AiT3w6L20yBpgd0emVZJb=v_qw70qiJQ@mail.gmail.com>
-Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
-To:     Brad Larson <brad@pensando.io>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        linux-arm Mailing List <linux-arm-kernel@lists.infradead.org>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
-        Mark Brown <broonie@kernel.org>,
-        Serge Semin <fancer.lancer@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Olof Johansson <olof@lixom.net>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-spi <linux-spi@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=fc41RHpGSLm7yZNljm3ipeJe276/QT9sJLIfnCrAz/8=;
+        b=NlMBeO2+BqNP0R5ANW2H+dDLAhkCv6ZUPwZle9bLIzk3XN9PEFdyD27IAwI/NEBxD2
+         7SlXhIuIDR/hwebmZC7kXx0SzSWshbsmeSj3a2S1D84bmADO/Gqvhk924XzsgdGo1sGA
+         rW6rfPMMtZSUJ4cgMI9nzJw8JrVyiMSpNGzro58S3IsLIyMsZ/gKw5xKu9nh8I2ODm9k
+         t/zaz91yGJgLd+m83eSalmrvFBewKkj8B+KPhob0jMK6W3GSwRscB1yLPyfskTnC59ii
+         X432yHSiwACWnmUWfIZnzOLzthTR4Te1nJnSGtysSFhBDZ5fJv/EgAUu1PTNLXf2oHGQ
+         /4dg==
+X-Gm-Message-State: AOAM531SsIYkVpUcxjkXpMYVlLFQQJQPdb1jD6J7ilPSXXXkqrOxl9Fi
+        Fv58d2ZcanorZFF7uM2G34e0VSOrRlo=
+X-Google-Smtp-Source: ABdhPJy/aZvrCWzb0mgkhM+8dV3YqaZAFm72/ieH7QHNukzNYi5tHbMbvd6/lUizWivDE47PYqYFKQ==
+X-Received: by 2002:a5d:4c4e:: with SMTP id n14mr11756957wrt.226.1629705200488;
+        Mon, 23 Aug 2021 00:53:20 -0700 (PDT)
+Received: from ubuntu-laptop (ip5f5bec31.dynamic.kabel-deutschland.de. [95.91.236.49])
+        by smtp.googlemail.com with ESMTPSA id t14sm2711270wrw.59.2021.08.23.00.53.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 23 Aug 2021 00:53:20 -0700 (PDT)
+Message-ID: <c2beac013060b64d94664d0ee9bd06dd68138386.camel@gmail.com>
+Subject: Re: [PATCH v1 0/2] two minor changes of eMMC BKOPS
+From:   Bean Huo <huobean@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Bean Huo <beanhuo@micron.com>
+Date:   Mon, 23 Aug 2021 09:53:19 +0200
+In-Reply-To: <20210817224208.153652-1-huobean@gmail.com>
+References: <20210817224208.153652-1-huobean@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brad,
+Hi Ullf,
+Any thought about this patch?
 
-On Mon, Aug 23, 2021 at 3:14 AM Brad Larson <brad@pensando.io> wrote:
-> On Mon, Mar 29, 2021 at 3:40 AM Andy Shevchenko
-> <andy.shevchenko@gmail.com> wrote:
-> >
-> > On Mon, Mar 29, 2021 at 4:19 AM Brad Larson <brad@pensando.io> wrote:
-> > > On Sun, Mar 7, 2021 at 11:21 AM Andy Shevchenko
-> > > <andy.shevchenko@gmail.com> wrote:
-> > > > On Thu, Mar 4, 2021 at 4:40 PM Brad Larson <brad@pensando.io> wrote:
-> >
-> > ...
-> >
-> > > > > +config GPIO_ELBA_SPICS
-> > > > > +       bool "Pensando Elba SPI chip-select"
-> > > >
-> > > > Can't it be a module? Why?
-> > >
-> > > All Elba SoC based platforms require this driver to be built-in to boot and
-> > > removing the module would result in a variety of exceptions/errors.
-> >
-> > Needs to be at least in the commit message.
-> >
-> > > > > +       depends on ARCH_PENSANDO_ELBA_SOC
-> > > > > +       help
-> > > > > +         Say yes here to support the Pensndo Elba SoC SPI chip-select driver
+Thanks
+Bean
 
-Pensando
+On Wed, 2021-08-18 at 00:42 +0200, Bean Huo wrote:
+> From: Bean Huo <beanhuo@micron.com>
+> 
+> 
+> Bean Huo (2):
+>   mmc: core: Issue HPI in case the BKOPS timed out
+>   mmc: core: Let BKOPS timeout readable/writable via sysfs
+> 
+>  drivers/mmc/core/mmc.c     | 32 ++++++++++++++++++++++++++++++++
+>  drivers/mmc/core/mmc_ops.c | 14 ++++++++++----
+>  include/linux/mmc/card.h   |  1 +
+>  3 files changed, 43 insertions(+), 4 deletions(-)
+> 
 
-> > > >
-> > > > Please give more explanation what it is and why users might need it,
-> > > > and also tell users how the module will be named (if there is no
-> > > > strong argument why it can't be a  module).
-> > > >
-> > > Fixed the typo.
-> >
-> > Yeah, according to the above, you better elaborate what this module is
-> > and why people would need it.
-> > Also can be a good hint to add
-> > default ARCH_MY_COOL_PLATFORM
->
-> Regarding the above module question and Kconfig definition, since I
-> first looked at this and reviewed the comments I realized I should be
-> using builtin.  The file gpio/Kconfig is currently this
->
-> config GPIO_ELBA_SPICS
->         def_bool y
->         depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
-
-That means the driver will default to yes by merely enabling
-COMPILE_TEST, which is a no-go.
-
-    config GPIO_ELBA_SPICS
-            bool "one-line summary"
-            depends on ARCH_PENSANDO_ELBA_SOC || COMPILE_TEST
-            default y if ARCH_PENSANDO_ELBA_SOC
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
