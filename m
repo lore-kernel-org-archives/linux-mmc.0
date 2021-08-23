@@ -2,171 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6172C4320A
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 20:24:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E4E5C4320E
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 20:30:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BAE1D613E6
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 20:24:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0CC6D613D5
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 20:30:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232152AbhHWUYu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Aug 2021 16:24:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55894 "EHLO
+        id S232660AbhHWUaz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Aug 2021 16:30:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231773AbhHWUYt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 16:24:49 -0400
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36D14C061575;
-        Mon, 23 Aug 2021 13:24:06 -0700 (PDT)
-Received: by mail-lj1-x22e.google.com with SMTP id l18so26085801lji.12;
-        Mon, 23 Aug 2021 13:24:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=J41x529VlTspZMrpThFHJLBr2g65jbs1WO5P40LCen4=;
-        b=okYdM6r/OEM+GpVMmndUDSUnFuATe7k+UqV9Xd6SnEB6FCQnedxeMEPVsABonqs4N4
-         bW0CUVBYgP/wVgNhvKRjjJZHkQWqjAfdAXHaWOprlSkmDVUGTjWH0QHqHe/JDzPhBYMW
-         VS78dI9TbqWyfxbPdEd9M68PCp/85z5U4mMqUTiCNVQcQnpHeloJ5A8DDCAgG+UndNk2
-         4AMRro0QimKicKoXkXK7fx6Xlty7DPO0Rz/T7e7AYrMNjr1lsW8oLXtit6l5wdRItw9Y
-         0sCrelfgm2KgdesCrJhygLOJ6k4XDHAPdBtXpSk4O9XXGH416S+WsJAn5UMZlTogyo6e
-         LVmw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=J41x529VlTspZMrpThFHJLBr2g65jbs1WO5P40LCen4=;
-        b=c+Ki09WAWpKNHn30pEOohRcuBryKZ0oCZWnRlMYsf/BXv1d1PQ7vY5h1oBC5GOEkx1
-         +LcEp8GxfNVQvcGut3e77LMHJE703NvsNAc7n7308uonXnsMrGbcsyp+GVVDjoumUtzJ
-         UeBb12Zviuj0fEt1oY9K635IndZgO/Alj/sfjZ+ogj4P5koJvkfFttQT1SN2/ppjU2lB
-         i9fJz1FrDzvxU3FxVE5V0imh8JlsFHX24toC2WdyeHg/mGPDn+XuKkeEe79B+CIf5cKI
-         OypbQ7a6cyk5mNg/8e0NueNILDiJVq0f2S46SuwL/Tr5qKWScbeKvG7D7uJdFH/YWPiw
-         ZwCA==
-X-Gm-Message-State: AOAM532YQShkJEaZg1Jyr68J2f0ggt4AyDAnUDX7sD222MIs27Y8LN4S
-        EXWB12X/GIhvyqCFa1uXdmNNgp+ym84=
-X-Google-Smtp-Source: ABdhPJwqnW4H12JkFByYZki5F25wX7CFl/4OxdrLQBKSJLK7Hp+HrjfGNLOpxwFObeZey6c6a7G84A==
-X-Received: by 2002:a2e:a4db:: with SMTP id p27mr29314648ljm.161.1629750244353;
-        Mon, 23 Aug 2021 13:24:04 -0700 (PDT)
-Received: from [192.168.2.145] (46-138-120-72.dynamic.spd-mgts.ru. [46.138.120.72])
-        by smtp.googlemail.com with ESMTPSA id r2sm854722ljj.14.2021.08.23.13.24.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 23 Aug 2021 13:24:03 -0700 (PDT)
-Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <viresh.kumar@linaro.org>
-Cc:     Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
-References: <080469b3-612b-3a34-86e5-7037a64de2fe@gmail.com>
- <20210818055849.ybfajzu75ecpdrbn@vireshk-i7>
- <f1c76f23-086d-ef36-54ea-0511b0ebe0e1@gmail.com>
- <20210818062723.dqamssfkf7lf7cf7@vireshk-i7>
- <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
- <20210818091417.dvlnsxlgybdsn76x@vireshk-i7>
- <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
- <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com>
- <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
- <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com>
- <20210820051843.5mueqpnjbqt3zdzc@vireshk-i7>
- <CAPDyKFo0rzHT4AhueWjyz9k2ZqUy8N6Od5pbr8sL_m0Jf2AwUg@mail.gmail.com>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <085d1a2e-57b0-222e-c569-12f3c6bc8161@gmail.com>
-Date:   Mon, 23 Aug 2021 23:24:02 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+        with ESMTP id S232577AbhHWUas (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 16:30:48 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 199ABC061757;
+        Mon, 23 Aug 2021 13:30:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
+        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
+        Reply-To:Content-Type:Content-ID:Content-Description;
+        bh=tBgxszXJVE3wD+DPKaKiBalHK54CRKsYwj1PqeCiYBI=; b=X51iNcfbrjsh9zw8hQIvkBv0+h
+        sjY5R1ERbqKv55YUOBYlpIhDxy8ZjM1qU+bDsC6pIVw4BHJZs6gHKGJfHyh0Qps+80/KALHr/SY0g
+        BDDRFL45dDYI8t+/x6ysYf1JyT7VCdLot+PGhA4dc+mlTzbp3NzI34LEgXHVzArHgMjbkUb8b3x/F
+        oUqYB+YYH5UA79OXmIgx1KoPPNh2XUja5D+5dtwW7OIu/T560+Rq7HgLcMVNTz0Gd3aYGbuBLICEB
+        /EOrd10yViJZGkM50qd+4XUcQhtNdWlFwL5V3RoOk9uRR10HcVcQjMHu1REx9J5c5VYJEkKFj0c1S
+        zG+NnczA==;
+Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1mIGZa-000Zja-EG; Mon, 23 Aug 2021 20:29:34 +0000
+From:   Luis Chamberlain <mcgrof@kernel.org>
+To:     axboe@kernel.dk, martin.petersen@oracle.com, jejb@linux.ibm.com,
+        kbusch@kernel.org, sagi@grimberg.me, adrian.hunter@intel.com,
+        beanhuo@micron.com, ulf.hansson@linaro.org, avri.altman@wdc.com,
+        swboyd@chromium.org, agk@redhat.com, snitzer@redhat.com,
+        josef@toxicpanda.com
+Cc:     hch@infradead.org, hare@suse.de, bvanassche@acm.org,
+        ming.lei@redhat.com, linux-scsi@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-mmc@vger.kernel.org,
+        dm-devel@redhat.com, nbd@other.debian.org,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Christoph Hellwig <hch@lst.de>
+Subject: [PATCH 09/10] loop: add error handling support for add_disk()
+Date:   Mon, 23 Aug 2021 13:29:29 -0700
+Message-Id: <20210823202930.137278-10-mcgrof@kernel.org>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <20210823202930.137278-1-mcgrof@kernel.org>
+References: <20210823202930.137278-1-mcgrof@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFo0rzHT4AhueWjyz9k2ZqUy8N6Od5pbr8sL_m0Jf2AwUg@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
+Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-20.08.2021 15:57, Ulf Hansson пишет:
-...
->> We already have similar APIs, so that won't be a problem. We also have
->> a mechanism inside the OPP core, frequency based, which is used to
->> guess the current OPP. Maybe we can enhance and use that directly
->> here.
-> 
-> After reading the last reply from Dmitry, I am starting to think that
-> the problem he is facing can be described and solved in a much easier
-> way.
-> 
-> If I am correct, it looks like we don't need to add APIs to get OPPs
-> for a clock rate or set initial performance state values according to
-> the HW in genpd.
-> 
-> See my other response to Dmitry, let's see where that leads us.
+We never checked for errors on add_disk() as this function
+returned void. Now that this is fixed, use the shiny new
+error handling.
 
-I'm going to start preparing v9 with GENPD performance state syncing moved into driver's probe where appropriate.
+Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ drivers/block/loop.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-It's not clear to me whether it will be okay to add a generic OPP syncing by clock rate or should it be a Tegra-specific helper. Viresh, what do you think about this generic OPP helper:
+diff --git a/drivers/block/loop.c b/drivers/block/loop.c
+index fa1c298a8cfb..b8b9e2349e77 100644
+--- a/drivers/block/loop.c
++++ b/drivers/block/loop.c
+@@ -2393,10 +2393,17 @@ static int loop_add(int i)
+ 	disk->events		= DISK_EVENT_MEDIA_CHANGE;
+ 	disk->event_flags	= DISK_EVENT_FLAG_UEVENT;
+ 	sprintf(disk->disk_name, "loop%d", i);
+-	add_disk(disk);
++
++	err = add_disk(disk);
++	if (err)
++		goto out_cleanup_disk;
++
+ 	mutex_unlock(&loop_ctl_mutex);
++
+ 	return i;
+ 
++out_cleanup_disk:
++	blk_cleanup_disk(disk);
+ out_cleanup_tags:
+ 	blk_mq_free_tag_set(&lo->tag_set);
+ out_free_idr:
+-- 
+2.30.2
 
-/**
- * dev_pm_opp_sync_with_clk_rate() - Sync OPP state with clock rate
- * @dev:	device for which we do this operation
- *
- * Sync OPP table state with the current clock rate of device.
- *
- * Return: 0 on success or a negative error value.
- */
-int dev_pm_opp_sync_with_clk_rate(struct device *dev)
-{
-	struct opp_table *opp_table;
-	int ret = 0;
-
-	/* Device may not have OPP table */
-	opp_table = _find_opp_table(dev);
-	if (IS_ERR(opp_table))
-		return 0;
-
-	/* Device may not use clock */
-	if (IS_ERR(opp_table->clk))
-		goto put_table;
-
-	/* Device may have empty OPP table */
-	if (!_get_opp_count(opp_table))
-		goto put_table;
-
-	ret = dev_pm_opp_set_rate(dev, clk_get_rate(opp_table->clk));
-put_table:
-	/* Drop reference taken by _find_opp_table() */
-	dev_pm_opp_put_opp_table(opp_table);
-
-	return ret;
-}
-EXPORT_SYMBOL_GPL(dev_pm_opp_sync_with_clk_rate);
