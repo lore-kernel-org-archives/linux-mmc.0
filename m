@@ -2,121 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 618D8C432BE
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:07:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBA69C4338F
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:08:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4846061262
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:07:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B14D46135A
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 01:08:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234519AbhHWBHp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 22 Aug 2021 21:07:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44796 "EHLO
+        id S234525AbhHWBIn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 22 Aug 2021 21:08:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232908AbhHWBHo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Aug 2021 21:07:44 -0400
-Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 154A8C061760
-        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:07:03 -0700 (PDT)
-Received: by mail-ed1-x52e.google.com with SMTP id g21so23636397edw.4
-        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:07:03 -0700 (PDT)
+        with ESMTP id S231807AbhHWBIm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 22 Aug 2021 21:08:42 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0122C061575
+        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:08:00 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id e21so17503268ejz.12
+        for <linux-mmc@vger.kernel.org>; Sun, 22 Aug 2021 18:08:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=pjckf6bfV/IeJNN9n6MQVl/LTL3lu1yq7lS4IYzu/QM=;
-        b=YXvUInxkTo+QS04+RTXnvdY5Tut9xBKcT9moQ79TGp2GjLkU/lF29770JsA6UY+UOn
-         yjlARSI3QSab1F39xGyUm9LqcHKPE++VUejnLyKwbHAVdhKJnDNssxuQqlmSJhbAj2OT
-         YxqGNv5II7hqHyRemXMsdL1BA/qgC6MEvPlCNcoHEhp6bZw3rOvoOzKVrjATtwfU9zue
-         R0esUcu67bVhSd0ErcQC/7zaqVKqAAK4SPfsJQ+wsgTJKwMXBkS1CDhRG2++ClbJLMg2
-         f77F2jBXBEzMMA7p3ZzlFd9ahFPEAgnqx1ZNVe670GdAp6aOQ7bP8biCveNS+9nuRpn+
-         Dhfw==
+        bh=T5y7wVd3UOjVoEbI5ONgdC3uXVDViTEHAaSeTJ0ja4U=;
+        b=h0t9/9UfiLyNfrXy6i0QXamegtgkKo10OoklxRz3R26HLZl3qSFetS66GnthOrWnFf
+         8PykNkBM5JtaKkf7uWyRaN89t138vt/k5ZFqskLgc2pFLnrMvajgV8sWsKyLI7CVyw5L
+         FOtjL9mWdRKC/LfK7HLFayYeNxmQBONc909smYGw0rf7A1TC/wLwEkixK7SVhue9ER5r
+         XVkPy8Bm3BSgyC+Ela1I18JEE0ZGtFWcBI0tKH5q7eqCZ1U9D9pnxZ259b4JW2pwBMPD
+         xetYuva9J0p3LJ+wLpd7LmG3bj1jYwgCb7iUpo1GhKG/y4d4XZxJJbI1yAX1LnIn1uT9
+         dTyQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=pjckf6bfV/IeJNN9n6MQVl/LTL3lu1yq7lS4IYzu/QM=;
-        b=Nq2n2fEVPsSmoz4RibNRDIcSRly/5fYLV7f83GokPARVKKt24ecfAYtvhFo+p3DVBl
-         OVINW/7CaVF0ODp6kcCBML/LO99BFdS55kUA5C2Qvwj51MZiVYoNli4XoXfbC7YSolel
-         et28HgaUP//ikKhfm/LGI7kgB2YTJgNMCypKCKOG3NxBQUhRws/auC6SbTCCkdYctqPB
-         CMXZ7mX619oKlxrYMbMV3c+GoRACqF9OTeJtHx8S6iu05vF8hcPXEmkaZdEE8uh+0NSX
-         dICpgfzAVZ8eXCO7CetQMj3ZMinECdWnVLFfPLnrAej64jXB6mUcq4CQrKuHBZlHk1AE
-         0lxw==
-X-Gm-Message-State: AOAM531fHCI38zGvQ9QS5+j8tSGtDzbEslCNhbqJw5DfhZf0sOOaItRM
-        vhV4kQIeZTIi5VCDQhRuq0R6DIVODZ7s2j+ouCFCVg==
-X-Google-Smtp-Source: ABdhPJxLjyDYm7QVxm1dvdfIEw9t3Et/mk1X0dx98a7+Jgg205IWLNBlgQOSRuBoYLny9Mb7LfeCW8J2s/qhMUfMTOY=
-X-Received: by 2002:a05:6402:5208:: with SMTP id s8mr35097217edd.222.1629680821623;
- Sun, 22 Aug 2021 18:07:01 -0700 (PDT)
+        bh=T5y7wVd3UOjVoEbI5ONgdC3uXVDViTEHAaSeTJ0ja4U=;
+        b=gRTMcgtlFcPcgrakZv/3ihYEnP90YLjdzsFluNbMlpNcf5FdxKZPY5dNTQPDdJl6e3
+         5wu/1vb8FavU5FX2EBjY/MdDtHaOGc7CjoOhJftBmA38PahiYcmEE2W/Qq7RQIRCdYX8
+         V3Lrv4yBH6hjcphSaQ4Yf1lvQoiRGX1HzYl0bFysgC5kv680sqxUqeiqk4W8B8Rjgg6L
+         C9gK72myhr7jRl3/9ydqjawte3X/bYDFMKxVAzD8w0WJfxuc8NGVyE85hQrHHjyAYBRT
+         whWBonDJjI5AjmZ/T/Da1KW1o9flvZR9oRCwD+xTup/ghk5nFZc1y9agvr3GJLs8sd87
+         x5cg==
+X-Gm-Message-State: AOAM532MsynC8WrZV5l9Gg6w8kwhQFfIhr7iYcCr4QZ/GBddSTDDIfPZ
+        m9TKYvGI66f7Qd+ca05l2ExNORHvk6FBJCYVE8blaw==
+X-Google-Smtp-Source: ABdhPJz0StLU+fjdzYTuDDRKxp8saXqBpf1ETE1pQ01x6B/7KvW0AELfBnJQYQyaNAKcNTY+WEiB0NIW5O91SEGzLTA=
+X-Received: by 2002:a17:906:2305:: with SMTP id l5mr33404768eja.72.1629680879402;
+ Sun, 22 Aug 2021 18:07:59 -0700 (PDT)
 MIME-Version: 1.0
 References: <20210304034141.7062-1-brad@pensando.io> <20210304034141.7062-2-brad@pensando.io>
- <TU4PR8401MB1055D51E8D1B48DC7D7294E3AB979@TU4PR8401MB1055.NAMPRD84.PROD.OUTLOOK.COM>
-In-Reply-To: <TU4PR8401MB1055D51E8D1B48DC7D7294E3AB979@TU4PR8401MB1055.NAMPRD84.PROD.OUTLOOK.COM>
+ <605880ad-6c12-bf1d-45f8-ef70181e4eec@canonical.com>
+In-Reply-To: <605880ad-6c12-bf1d-45f8-ef70181e4eec@canonical.com>
 From:   Brad Larson <brad@pensando.io>
-Date:   Sun, 22 Aug 2021 18:06:51 -0700
-Message-ID: <CAK9rFnz+PksEFjUh5ZpRLyvk21ZpVTxtwDYn_OhOEBJWjEYe7w@mail.gmail.com>
+Date:   Sun, 22 Aug 2021 18:07:48 -0700
+Message-ID: <CAK9rFnxhv88Bc9A_ksFUaKgFp7acxnxM7ujR1GrTCPNLLEwHBw@mail.gmail.com>
 Subject: Re: [PATCH 1/8] gpio: Add Elba SoC gpio driver for spi cs control
-To:     "Elliott, Robert (Servers)" <elliott@hpe.com>
-Cc:     "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "linus.walleij@linaro.org" <linus.walleij@linaro.org>,
-        "bgolaszewski@baylibre.com" <bgolaszewski@baylibre.com>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "olof@lixom.net" <olof@lixom.net>,
-        "linux-gpio@vger.kernel.org" <linux-gpio@vger.kernel.org>,
-        "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+Cc:     Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Bartosz Golaszewski <bgolaszewski@baylibre.com>,
+        Mark Brown <broonie@kernel.org>,
+        Serge Semin <fancer.lancer@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Olof Johansson <olof@lixom.net>,
+        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
+        linux-spi <linux-spi@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Elliott,
+Hi Krzysztof,
 
-On Thu, Mar 4, 2021 at 12:44 PM Elliott, Robert (Servers)
-<elliott@hpe.com> wrote:
+On Fri, Mar 5, 2021 at 3:25 AM Krzysztof Kozlowski
+<krzysztof.kozlowski@canonical.com> wrote:
+>
+> On 04/03/2021 04:41, Brad Larson wrote:
+> > This GPIO driver is for the Pensando Elba SoC which
+> > provides control of four chip selects on two SPI busses.
 [...]
-> > +config GPIO_ELBA_SPICS
-> > +     bool "Pensando Elba SPI chip-select"
-> > +     depends on ARCH_PENSANDO_ELBA_SOC
-> > +     help
-> > +       Say yes here to support the Pensndo Elba SoC SPI chip-select
-> > driver
+> > +     ret = devm_gpiochip_add_data(&pdev->dev, &p->chip, p);
+> > +     if (ret) {
+> > +             dev_err(&pdev->dev, "unable to add gpio chip\n");
+> > +             return ret;
+> > +     }
+> > +
+> > +     dev_info(&pdev->dev, "elba spics registered\n");
 >
-> Pensndo should be Pensando
+> Don't print trivial probe results, unless you print here something
+> useful. If you need it for debugging, keep it dev_dbg.
 
-Fixed the typo, thanks.
-
-> > diff --git a/drivers/gpio/gpio-elba-spics.c b/drivers/gpio/gpio-elba-spics.c
-> > + * Pensando Elba ASIC SPI chip select driver
-> ...
-> > +MODULE_LICENSE("GPL v2");
-> > +MODULE_DESCRIPTION("Elba SPI chip-select driver");
->
-> I think it's conventional to include the company name there, so
-> start that with "Pensando Elba"
-
-Ok, thanks.  BTW I deleted these lines as I should have used
-builtin_platform_driver() and not a loadable module.
-
-> Also, "SoC" and "ASIC" are sometimes included after Elba, but sometimes
-> are not. Consistency might be helpful.
->
-> > +static const struct of_device_id ebla_spics_of_match[] = {
-> ...
-> > +             .of_match_table = ebla_spics_of_match,
->
-> ebla should be elba
-
-Fixed the typo and using SoC which is more accurate.
+Removed that extraneous logging
 
 Regards,
 Brad
