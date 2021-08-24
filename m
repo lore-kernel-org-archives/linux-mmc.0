@@ -2,93 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91554C4338F
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 19:07:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F4EAC4338F
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 19:10:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A34D613A7
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 19:07:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 160D26138B
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 19:10:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234222AbhHXTID (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Aug 2021 15:08:03 -0400
-Received: from smtp-relay-internal-0.canonical.com ([185.125.188.122]:35248
-        "EHLO smtp-relay-internal-0.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S234096AbhHXTIC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Aug 2021 15:08:02 -0400
+        id S234249AbhHXTLc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Aug 2021 15:11:32 -0400
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:58496
+        "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232710AbhHXTLc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Aug 2021 15:11:32 -0400
+X-Greylist: delayed 474 seconds by postgrey-1.27 at vger.kernel.org; Tue, 24 Aug 2021 15:11:31 EDT
 Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 6EAC84079C
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2021 19:07:17 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id 498FA40770
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2021 19:02:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1629832037;
-        bh=JpRp0VKOepmJFb28VmqG/rgWxsh/ZZpFinNf4XIR7QM=;
+        s=20210705; t=1629831772;
+        bh=tXo6FALvM7TQ/HZAw0MdLp6mungZZc7pCeMeJQgnDkk=;
         h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
          In-Reply-To:Content-Type;
-        b=PlqLQpyZ7073uQZpTapVqkLdCFa65K863R/NL52Wom0vvsNNfJXYjiPQVmCnxDw8e
-         SQbL3bdh4RAX5zvzaXTCsWRjbeMVAECleeNV3B966Ju+HbphX/JJM68o3Fx/ToYnlj
-         fpLi8J7VMS+UuU47mgqZp1QrjYKbmEJsX1niivL+3oiBq2c4BGAaPRNIOTF/Xmo4PI
-         n5xQJf7VEnnM/u29D0Epv6aTvbuLw3e3mx9Xtu1jE3LvSMxUivuo5bEBdIe/CjI/VU
-         RW4PEnQvuIzVDk3ksvcJJYW7FJtG2wJSiuvbL9Z4GRdvVJUTB/t2NJLZJFvB6fxBJE
-         S4M4yMu6jAMOg==
-Received: by mail-wm1-f72.google.com with SMTP id m33-20020a05600c3b2100b002e87a0542efso624088wms.2
-        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2021 12:07:17 -0700 (PDT)
+        b=g3i5l2M92xF6rlKhhhjhEw20C2jPprR6TPI92Mavqcu1r6qpmsBWswxwDJVsCybM/
+         67IuDWKL4ZOMHEQFB4fctTnWVwbvpHDoz9oudzfyEobjvhseHx9rVMWhLp5elMb29N
+         naO+cqV92Mol7JLt58FHyEr4fuMXvWjf30GkEP3LFQz1Xo7zTvrM7KGjyK/wSR+8rO
+         Mo7eATR6WHWJA51E7CbH+EivZlJmLdKSVmW7Xo+e+cn+K1xR61Ihz8D66xiREerVMY
+         LPGDgGHPwUvXvqYhl4E3v7fYXSLWeedWjY6bpSgQivjBjNwjFIchXjUNngi/CEkbmd
+         MaWg5SlmB8vAA==
+Received: by mail-wm1-f72.google.com with SMTP id z186-20020a1c7ec30000b02902e6a27a9962so1641925wmc.3
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2021 12:02:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:subject:to:cc:references:from:message-id:date
          :user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=JpRp0VKOepmJFb28VmqG/rgWxsh/ZZpFinNf4XIR7QM=;
-        b=lXAGO1dvqQi/L3nvV2ABvmuDSF/cxPyENgy9Hpw5k8QwxOqnhOxoDXCqDdjHqXSpB7
-         VRDb8dcnSxZiLLUp0kWlFG1LXxQgtxoZVdvWKW0qt3z2DUBP2wcfm+BhgFrnt1AyWmUc
-         r+91quV2n7KmA85zkp5ZMa5xzmWyHdYQ/FgF13g6EBVVrsE9pvCc+rBBFd7wIYIFkJ5u
-         Yi63iHJdFoOQH9RAx+XbRY6KHQuHBUJph8KfDv0YPRWDRAtH06araQ88PTwoLMpQWMXa
-         xTvhVBlACUh+3DXQKxl0qGs7ZYJghvky0hYs3pC1utH9EKbsNLSxbUhBTDwqhJbDS9EF
-         ywuA==
-X-Gm-Message-State: AOAM531xMP0+4BmHfPOzbtYIHEFGUp32sadUa3xQdX34GxRnqS+B6Rn0
-        KAuiv1itJrpIMscd2LqJ0nAdks+6YPiTKEpBx0zbNU/mB3k/avHvJPa0N84mIIuPoIEGmnNFlSL
-        h++ls6E5PgVELhu/18xsUxk/QV2AIeZ9OJJq6UQ==
-X-Received: by 2002:a5d:4fc7:: with SMTP id h7mr19839334wrw.333.1629832037024;
-        Tue, 24 Aug 2021 12:07:17 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJyeoMUDqGDEYSbaq1nM+F0db0NK2Q1pZrBBRtGCTmNXFAADL4Ln6NrT8uwtmhR4uFIDABktKQ==
-X-Received: by 2002:a5d:4fc7:: with SMTP id h7mr19839314wrw.333.1629832036855;
-        Tue, 24 Aug 2021 12:07:16 -0700 (PDT)
-Received: from [192.168.0.103] ([79.98.113.249])
-        by smtp.gmail.com with ESMTPSA id t8sm22065855wrx.27.2021.08.24.12.07.15
+        bh=tXo6FALvM7TQ/HZAw0MdLp6mungZZc7pCeMeJQgnDkk=;
+        b=U/uK3xx6z4dZy9MBx2AXZT3vClEqiZuiDhI6M2LEigkHH2dUkzTQaiTPmAvVKfpwIx
+         03GbuzmMsFbiA1Wd8aYx9pYw+ST3kNX6kMs8jHHqlinzaVmgppoCG7eVsWVVHnnz1ROF
+         e4pMD8nFVVB0v0XNtrSxh3CBg5L8EPFvr+6TAr6nfFAV2BD+AQp84ePqmYKTyyhiTQFd
+         KAhNO94M9lV6tW5LZBUnnZg/EVEKmhCKtM4JeAD1J4SNwobJoPRRQ4FAE0Y3tJvq7jX5
+         iLM9o9vthVWO5tc8RYa+BykA4ZkZseNYPX9oj3bvoToku7GUud94ZDuUz6TPA7h/gekP
+         nDzw==
+X-Gm-Message-State: AOAM532HKIA475yWbOiGRbCqeKV+Z6UEQGmk3PHmK2pz1QfazCwNECC2
+        zQuXbAFgSHpaUn+cUdPgdXaZ7/tW5DsM2AoTSa/rOlrGiAkznLHQBGUPfS5Gge7rNzcQaX0LJT/
+        OaM91KwV68lwlZi3Xxb9q84Hu5B0nn86DnOAz6Q==
+X-Received: by 2002:a05:6000:1081:: with SMTP id y1mr19755882wrw.415.1629831771809;
+        Tue, 24 Aug 2021 12:02:51 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJx/Nq9ck+jffd623Tc7f2vLQxJV7O8vjvKSyxvbiu6imcb5omWNkifvBcdaBd6SM5xESLiGyg==
+X-Received: by 2002:a05:6000:1081:: with SMTP id y1mr19755866wrw.415.1629831771683;
+        Tue, 24 Aug 2021 12:02:51 -0700 (PDT)
+Received: from [192.168.0.103] ([79.98.113.31])
+        by smtp.gmail.com with ESMTPSA id t14sm7449255wrw.59.2021.08.24.12.02.49
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 24 Aug 2021 12:07:16 -0700 (PDT)
-Subject: Re: [PATCH 5/6] riscv: microchip: mpfs: drop duplicated MMC/SDHC node
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
+        Tue, 24 Aug 2021 12:02:51 -0700 (PDT)
+Subject: Re: [PATCH 2/6] dt-bindings: mmc: cdns: match MPFS MMC/SDHCI
+ controller
+To:     Rob Herring <robh@kernel.org>, Atish Patra <atish.patra@wdc.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
         Paul Walmsley <paul.walmsley@sifive.com>,
         Palmer Dabbelt <palmer@dabbelt.com>,
         Albert Ou <aou@eecs.berkeley.edu>,
         Geert Uytterhoeven <geert+renesas@glider.be>,
-        Atish Patra <atish.patra@wdc.com>,
         Yash Shah <yash.shah@sifive.com>,
         Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Piotr Sroka <piotrs@cadence.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
-        <devicetree@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-riscv <linux-riscv@lists.infradead.org>
+        Piotr Sroka <piotrs@cadence.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-riscv@lists.infradead.org
 References: <20210819154436.117798-1-krzysztof.kozlowski@canonical.com>
- <20210819154436.117798-5-krzysztof.kozlowski@canonical.com>
- <CAMuHMdWN3Y9Ca9J-iJFpmDAYKpNH5GQuf3yFdyyb2rem8z_spg@mail.gmail.com>
+ <20210819154436.117798-2-krzysztof.kozlowski@canonical.com>
+ <YSUDTSuNlsOmu/G+@robh.at.kernel.org>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Message-ID: <feb9b49b-9e5d-1459-f177-21b3c2ae4add@canonical.com>
-Date:   Tue, 24 Aug 2021 21:07:14 +0200
+Message-ID: <9423ddab-4635-ea15-7a9d-dbcf1bc215dc@canonical.com>
+Date:   Tue, 24 Aug 2021 21:02:42 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.11.0
 MIME-Version: 1.0
-In-Reply-To: <CAMuHMdWN3Y9Ca9J-iJFpmDAYKpNH5GQuf3yFdyyb2rem8z_spg@mail.gmail.com>
+In-Reply-To: <YSUDTSuNlsOmu/G+@robh.at.kernel.org>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -96,92 +93,23 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/08/2021 17:37, Geert Uytterhoeven wrote:
-> Hi Krzysztof,
+On 24/08/2021 16:33, Rob Herring wrote:
+> On Thu, Aug 19, 2021 at 05:44:32PM +0200, Krzysztof Kozlowski wrote:
+>> The Microchip MPFS Icicle Kit uses Cadence SD/SDIO/eMMC Host Controller
+>> without any additional vendor compatible:
 > 
-> On Thu, Aug 19, 2021 at 5:45 PM Krzysztof Kozlowski
-> <krzysztof.kozlowski@canonical.com> wrote:
->> Devicetree source is a description of hardware and hardware has only one
->> block @20008000 which can be configured either as eMMC or SDHC.  Having
->> two node for different modes is an obscure, unusual and confusing way to
->> configure it.  Instead the board file is supposed to customize the block
->> to its needs, e.g. to SDHC mode.
->>
->> This fixes dtbs_check warning:
->>   arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: sdhc@20008000: $nodename:0: 'sdhc@20008000' does not match '^mmc(@.*)?$'
->>
->> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+> I think the lack of vendor compatible is the error here. Experience has 
+> shown that vendor specific compatibles are needed for licensed IP.
 > 
-> Thanks for your patch!
-> 
->> --- a/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
->> +++ b/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
->> @@ -43,8 +43,16 @@ &serial3 {
->>         status = "okay";
->>  };
->>
->> -&sdcard {
->> +&mmc {
->>         status = "okay";
->> +
->> +       disable-wp;
->> +       cap-sd-highspeed;
->> +       card-detect-delay = <200>;
->> +       sd-uhs-sdr12;
->> +       sd-uhs-sdr25;
->> +       sd-uhs-sdr50;
->> +       sd-uhs-sdr104;
->>  };
->>
->>  &emac0 {
->> diff --git a/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi b/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
->> index cb54da0cc3c4..c4ccd7e4d3eb 100644
->> --- a/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
->> +++ b/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
->> @@ -262,25 +262,7 @@ serial3: serial@20104000 {
->>                         status = "disabled";
->>                 };
->>
->> -               emmc: mmc@20008000 {
->> -                       compatible = "cdns,sd4hc";
->> -                       reg = <0x0 0x20008000 0x0 0x1000>;
->> -                       interrupt-parent = <&plic>;
->> -                       interrupts = <88 89>;
-> 
-> Note that the other node has only a single interrupt.
-> Which one is correct?
 
-I assume the one put there initially, since it was tested (sdcard wsas
-enabled, emmc was disabled).
+In such case this could be:
+1. a specific "microchip,mpfs250t-sd4hc", which
+seems to be on MPFS Icicle Kit:
+https://www.digikey.co.uk/en/product-highlight/m/microchip-technology/mpfs-icicle-kit-es--polarfire-soc-fpga-icicle-kit
 
-> 
->> -                       pinctrl-names = "default";
->> -                       clocks = <&clkcfg 6>;
->> -                       bus-width = <4>;
->> -                       cap-mmc-highspeed;
->> -                       mmc-ddr-3_3v;
->> -                       max-frequency = <200000000>;
->> -                       non-removable;
->> -                       no-sd;
->> -                       no-sdio;
->> -                       voltage-ranges = <3300 3300>;
->> -                       status = "disabled";
->> -               };
->> -
->> -               sdcard: sdhc@20008000 {
->> +               mmc: mmc@20008000 {
->>                         compatible = "cdns,sd4hc";
->>                         reg = <0x0 0x20008000 0x0 0x1000>;
->>                         interrupt-parent = <&plic>;
->> @@ -288,13 +270,6 @@ sdcard: sdhc@20008000 {
->>                         pinctrl-names = "default";
->>                         clocks = <&clkcfg 6>;
->>                         bus-width = <4>;
-> 
-> I think bus-width should be moved to the board .dts, too.
+2. or a generic "microchip,mpfs-sd4hc"
 
-Makes sense. Thanks for review!
-
+Any hints here?
 
 Best regards,
 Krzysztof
