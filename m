@@ -7,39 +7,39 @@ X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7EF2C00143
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 02:58:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5B12C4320A
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 02:59:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CA84D61181
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 02:58:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 885E961178
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 02:59:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234583AbhHXC7Y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Aug 2021 22:59:24 -0400
+        id S234715AbhHXC7x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Aug 2021 22:59:53 -0400
 Received: from mail.kernel.org ([198.145.29.99]:55044 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S234520AbhHXC7L (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 23 Aug 2021 22:59:11 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 30F2161184;
-        Tue, 24 Aug 2021 02:58:26 +0000 (UTC)
+        id S234400AbhHXC7W (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 23 Aug 2021 22:59:22 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id CE1F961178;
+        Tue, 24 Aug 2021 02:58:38 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1629773907;
-        bh=gKurH+KeBYVhYz2EoyubMQTzKpZjKzN+c5EXeVZcaZg=;
+        s=k20201202; t=1629773919;
+        bh=ldZzDnpl2aK+mqHK2ob75dzTqLXqICBEeenwmpoXhvM=;
         h=From:To:Cc:Subject:Date:From;
-        b=at++BlpAnYZ3y4umaVyjph1bZmot1hgU5td6ZVabyqwyV8lbxbl4QReavegqb4mmw
-         wTsELCKJMYyCe2YTuXeOHMDjajgAme3ekB32vCPlnBH2fJetfGXu8S5hL9u+sFNhQZ
-         5VwntQaDH2sMdYD53+hSytypgTJOTJatQJxB0jk9q/RFsdO28Sgd+5B4DgdH5Y0X+U
-         qWc9I66eG8fwGh52GYBpbGvPfMrJ3kWZ2zPG9wddCWyrbV7Stqivr9igaRpAf8SC8U
-         iETz6/Jh91GEeLlhCX7nyUpaGa1iiE6uxt9//YcC/pHbdXZr1Vm4JBzrYCIaPoLCQT
-         Q+ci26cTn+pZw==
+        b=WYF08vd1qU1vUv3gnAjnwdqtJKsgiN+VE0iezJRhJUA9voE7nmS+MyHomOd6DQv36
+         ltfGgDsfo3Qu8liH8AeRDP/oHRic4sxaKUTg2chogbPUx+q4jlUXwi+tRbrJrbi04f
+         yOX72KjI6xvdJnBKphw0LmWagWczIOK5ixioy0E+X1IpeVR/FRpH7LNuZqA+tCzEUk
+         X3cQVmlXI8yC/AA4oRaecCMSXilyIGIqK2BViqFDOFcaY1tJT5cMjrt0zFBDYIiHBh
+         fi/xxMcve9+CTtngaLV3u2Z1GADrYOrmt0LzJHY4agU3prVNGqdZhlaKCKBMKwQfFk
+         Vnm/0OMpRrByQ==
 From:   Sasha Levin <sashal@kernel.org>
 To:     stable@vger.kernel.org, sbhanu@codeaurora.org
 Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: FAILED: Patch "mmc: sdhci-msm: Update the software timeout value for sdhc" failed to apply to 4.14-stable tree
-Date:   Mon, 23 Aug 2021 22:58:24 -0400
-Message-Id: <20210824025825.659265-1-sashal@kernel.org>
+Subject: FAILED: Patch "mmc: sdhci-msm: Update the software timeout value for sdhc" failed to apply to 4.9-stable tree
+Date:   Mon, 23 Aug 2021 22:58:37 -0400
+Message-Id: <20210824025837.659653-1-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
 X-Patchwork-Hint: ignore
@@ -49,7 +49,7 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The patch below does not apply to the 4.14-stable tree.
+The patch below does not apply to the 4.9-stable tree.
 If someone wants it applied there, or to any other stable or longterm
 tree, then please email the backport, including the original git commit
 id to <stable@vger.kernel.org>.
