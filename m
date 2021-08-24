@@ -2,205 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C157C432BE
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 15:50:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91554C4338F
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 19:07:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1E23B61357
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 15:50:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A34D613A7
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 19:07:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238428AbhHXPv3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Aug 2021 11:51:29 -0400
-Received: from mx07-00178001.pphosted.com ([185.132.182.106]:60608 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S238287AbhHXPv3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Aug 2021 11:51:29 -0400
-Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.0.43) with SMTP id 17OEY4h3024948;
-        Tue, 24 Aug 2021 17:50:39 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=VUg5CyG2p0On/1rhTFMvWxFwJqU9eMLANRit4xI0Kvk=;
- b=tWxcgaw9smj99JjxJ8sonnOERR5TXhtHSpyVmhOkMw78SVyU9AL2Dc0q5jJ5x/RjRHW5
- EgVzkhM47kxhTBbMyBcZQ42GvQRQQmQk5J8zVvzbtXDqwKUAhBtoED2jrZaVxUfrYWlQ
- oYppZwPnMwBT3s++3rApq3vK+RqtNmQimKHFHi6qpRYyBlA0Qj4keDDD6hoZpxV0tPnc
- g4Epr0TbmWG61E5bDX/qYKfm0a6E4AH7hE1kg//84vrcED8UegCGNOxiY1gKbDUmH1A3
- YAJzB9yqS3u2N5mRiTExRrvzaFNOHAm1duly/zNxuWS+Qgvt//8Tx6kw+5tcBw10vAcy gw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 3ampcvcg65-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 24 Aug 2021 17:50:39 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 794FD10002A;
-        Tue, 24 Aug 2021 17:50:37 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 32DB622A6D6;
-        Tue, 24 Aug 2021 17:50:37 +0200 (CEST)
-Received: from lmecxl0504.lme.st.com (10.75.127.48) by SFHDAG2NODE3.st.com
- (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Tue, 24 Aug
- 2021 17:50:36 +0200
-Subject: Re: [PATCH v3] mmc: core: Add a card quirk for non-hw busy detection
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     linux-mmc <linux-mmc@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        stable <stable@vger.kernel.org>, <phone-devel@vger.kernel.org>,
-        Ludovic Barre <ludovic.barre@st.com>,
-        "Stephan Gerhold" <stephan@gerhold.net>,
-        Stefan Hansson <newbyte@disroot.org>
-References: <20210720144115.1525257-1-linus.walleij@linaro.org>
- <2f449f6e-bca0-3c70-4255-26619e957d44@foss.st.com>
- <CACRpkdY2GnqNYqPPctqa_t5ax1SDo7nEc3a1jSncF8N-V-Da-g@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-Message-ID: <1c458c1e-8730-ae74-de93-45d2d634beb4@foss.st.com>
-Date:   Tue, 24 Aug 2021 17:50:36 +0200
+        id S234222AbhHXTID (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Aug 2021 15:08:03 -0400
+Received: from smtp-relay-internal-0.canonical.com ([185.125.188.122]:35248
+        "EHLO smtp-relay-internal-0.canonical.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S234096AbhHXTIC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Aug 2021 15:08:02 -0400
+Received: from mail-wm1-f72.google.com (mail-wm1-f72.google.com [209.85.128.72])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id 6EAC84079C
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2021 19:07:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1629832037;
+        bh=JpRp0VKOepmJFb28VmqG/rgWxsh/ZZpFinNf4XIR7QM=;
+        h=Subject:To:Cc:References:From:Message-ID:Date:MIME-Version:
+         In-Reply-To:Content-Type;
+        b=PlqLQpyZ7073uQZpTapVqkLdCFa65K863R/NL52Wom0vvsNNfJXYjiPQVmCnxDw8e
+         SQbL3bdh4RAX5zvzaXTCsWRjbeMVAECleeNV3B966Ju+HbphX/JJM68o3Fx/ToYnlj
+         fpLi8J7VMS+UuU47mgqZp1QrjYKbmEJsX1niivL+3oiBq2c4BGAaPRNIOTF/Xmo4PI
+         n5xQJf7VEnnM/u29D0Epv6aTvbuLw3e3mx9Xtu1jE3LvSMxUivuo5bEBdIe/CjI/VU
+         RW4PEnQvuIzVDk3ksvcJJYW7FJtG2wJSiuvbL9Z4GRdvVJUTB/t2NJLZJFvB6fxBJE
+         S4M4yMu6jAMOg==
+Received: by mail-wm1-f72.google.com with SMTP id m33-20020a05600c3b2100b002e87a0542efso624088wms.2
+        for <linux-mmc@vger.kernel.org>; Tue, 24 Aug 2021 12:07:17 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
+         :user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=JpRp0VKOepmJFb28VmqG/rgWxsh/ZZpFinNf4XIR7QM=;
+        b=lXAGO1dvqQi/L3nvV2ABvmuDSF/cxPyENgy9Hpw5k8QwxOqnhOxoDXCqDdjHqXSpB7
+         VRDb8dcnSxZiLLUp0kWlFG1LXxQgtxoZVdvWKW0qt3z2DUBP2wcfm+BhgFrnt1AyWmUc
+         r+91quV2n7KmA85zkp5ZMa5xzmWyHdYQ/FgF13g6EBVVrsE9pvCc+rBBFd7wIYIFkJ5u
+         Yi63iHJdFoOQH9RAx+XbRY6KHQuHBUJph8KfDv0YPRWDRAtH06araQ88PTwoLMpQWMXa
+         xTvhVBlACUh+3DXQKxl0qGs7ZYJghvky0hYs3pC1utH9EKbsNLSxbUhBTDwqhJbDS9EF
+         ywuA==
+X-Gm-Message-State: AOAM531xMP0+4BmHfPOzbtYIHEFGUp32sadUa3xQdX34GxRnqS+B6Rn0
+        KAuiv1itJrpIMscd2LqJ0nAdks+6YPiTKEpBx0zbNU/mB3k/avHvJPa0N84mIIuPoIEGmnNFlSL
+        h++ls6E5PgVELhu/18xsUxk/QV2AIeZ9OJJq6UQ==
+X-Received: by 2002:a5d:4fc7:: with SMTP id h7mr19839334wrw.333.1629832037024;
+        Tue, 24 Aug 2021 12:07:17 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJyeoMUDqGDEYSbaq1nM+F0db0NK2Q1pZrBBRtGCTmNXFAADL4Ln6NrT8uwtmhR4uFIDABktKQ==
+X-Received: by 2002:a5d:4fc7:: with SMTP id h7mr19839314wrw.333.1629832036855;
+        Tue, 24 Aug 2021 12:07:16 -0700 (PDT)
+Received: from [192.168.0.103] ([79.98.113.249])
+        by smtp.gmail.com with ESMTPSA id t8sm22065855wrx.27.2021.08.24.12.07.15
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 24 Aug 2021 12:07:16 -0700 (PDT)
+Subject: Re: [PATCH 5/6] riscv: microchip: mpfs: drop duplicated MMC/SDHC node
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Atish Patra <atish.patra@wdc.com>,
+        Yash Shah <yash.shah@sifive.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Piotr Sroka <piotrs@cadence.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-riscv <linux-riscv@lists.infradead.org>
+References: <20210819154436.117798-1-krzysztof.kozlowski@canonical.com>
+ <20210819154436.117798-5-krzysztof.kozlowski@canonical.com>
+ <CAMuHMdWN3Y9Ca9J-iJFpmDAYKpNH5GQuf3yFdyyb2rem8z_spg@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+Message-ID: <feb9b49b-9e5d-1459-f177-21b3c2ae4add@canonical.com>
+Date:   Tue, 24 Aug 2021 21:07:14 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.11.0
 MIME-Version: 1.0
-In-Reply-To: <CACRpkdY2GnqNYqPPctqa_t5ax1SDo7nEc3a1jSncF8N-V-Da-g@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
+In-Reply-To: <CAMuHMdWN3Y9Ca9J-iJFpmDAYKpNH5GQuf3yFdyyb2rem8z_spg@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.48]
-X-ClientProxiedBy: SFHDAG2NODE1.st.com (10.75.127.4) To SFHDAG2NODE3.st.com
- (10.75.127.6)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.391,FMLib:17.0.607.475
- definitions=2021-08-24_05,2021-08-24_01,2020-04-07_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/17/21 12:37 AM, Linus Walleij wrote:
-> On Mon, Aug 16, 2021 at 4:03 PM Yann Gautier <yann.gautier@foss.st.com> wrote:
+On 24/08/2021 17:37, Geert Uytterhoeven wrote:
+> Hi Krzysztof,
 > 
->> I was just testing your patch on top of mmc/next.
->> Whereas mmc/next is fine, with your patch I fail to pass MMC test 5
->> (Multi-block write).
->> I've got this error on STM32MP157C-EV1 board:
->> [  108.956218] mmc0: Starting tests of card mmc0:aaaa...
->> [  108.959862] mmc0: Test case 5. Multi-block write...
->> [  108.995615] mmc0: Warning: Host did not wait for busy state to end.
->> [  109.000483] mmc0: Result: ERROR (-110)
->> Then nothing more happens.
+> On Thu, Aug 19, 2021 at 5:45 PM Krzysztof Kozlowski
+> <krzysztof.kozlowski@canonical.com> wrote:
+>> Devicetree source is a description of hardware and hardware has only one
+>> block @20008000 which can be configured either as eMMC or SDHC.  Having
+>> two node for different modes is an obscure, unusual and confusing way to
+>> configure it.  Instead the board file is supposed to customize the block
+>> to its needs, e.g. to SDHC mode.
 >>
->> The test was done on an SD-card Sandisk Extreme Pro SDXC UHS-I mark 3,
->> in DDR50 mode.
+>> This fixes dtbs_check warning:
+>>   arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: sdhc@20008000: $nodename:0: 'sdhc@20008000' does not match '^mmc(@.*)?$'
 >>
->> I'll try to add more traces to see what happens.
+>> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 > 
+> Thanks for your patch!
+> 
+>> --- a/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
+>> +++ b/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
+>> @@ -43,8 +43,16 @@ &serial3 {
+>>         status = "okay";
+>>  };
+>>
+>> -&sdcard {
+>> +&mmc {
+>>         status = "okay";
+>> +
+>> +       disable-wp;
+>> +       cap-sd-highspeed;
+>> +       card-detect-delay = <200>;
+>> +       sd-uhs-sdr12;
+>> +       sd-uhs-sdr25;
+>> +       sd-uhs-sdr50;
+>> +       sd-uhs-sdr104;
+>>  };
+>>
+>>  &emac0 {
+>> diff --git a/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi b/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
+>> index cb54da0cc3c4..c4ccd7e4d3eb 100644
+>> --- a/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
+>> +++ b/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
+>> @@ -262,25 +262,7 @@ serial3: serial@20104000 {
+>>                         status = "disabled";
+>>                 };
+>>
+>> -               emmc: mmc@20008000 {
+>> -                       compatible = "cdns,sd4hc";
+>> -                       reg = <0x0 0x20008000 0x0 0x1000>;
+>> -                       interrupt-parent = <&plic>;
+>> -                       interrupts = <88 89>;
+> 
+> Note that the other node has only a single interrupt.
+> Which one is correct?
 
-Hi Linus
-
-> What I think happens is:
-> - You are using the MMCI driver (correct?)
-Yes
-
-> - My patch augments the driver to not use busydetect until we have
->    determined that the card can do it (after reading extcsd etc)
-> - Before this patch, the MMCI would unconditionally use HW
->    busy detect on any card.
-I finally found the problem.
-The assignment of host->card is done at the end of mmc_sd_init_card().
-But mmci_set_max_busy_timeout() is called in mmc_sd_init_card() before 
-that, and card is then NULL at that time. This let me a 
-mmc->max_busy_timeout = 0. And this value is no more updated.
-mmci_start_command() will then have a unexpected behavior with that 0 value.
-
-Maybe we should not use mmci_use_busy_detect() in 
-mmci_set_max_busy_timeout()?
-
-If I use this patch on top of yours (reverting the 
-mmci_set_max_busy_timeout() change), all the mmc tests pass on the 
-SD-card I was testing:
-
-@@ -1741,11 +1741,11 @@ static void mmci_request(struct mmc_host *mmc, 
-struct mmc_request *mrq)
-  static void mmci_set_max_busy_timeout(struct mmc_host *mmc)
-  {
-  	struct mmci_host *host = mmc_priv(mmc);
-  	u32 max_busy_timeout = 0;
-
--	if (!mmci_use_busy_detect(host))
-+	if (!host->variant->busy_detect)
-  		return;
-
-  	if (host->variant->busy_timeout && mmc->actual_clock)
-  		max_busy_timeout = ~0UL / (mmc->actual_clock / MSEC_PER_SEC);
-
+I assume the one put there initially, since it was tested (sdcard wsas
+enabled, emmc was disabled).
 
 > 
-> Either we have managed to wire the MMCI driver so that it doesn't
-> work without HW busy detect anymore, you can easily test this
-> by doing this:
+>> -                       pinctrl-names = "default";
+>> -                       clocks = <&clkcfg 6>;
+>> -                       bus-width = <4>;
+>> -                       cap-mmc-highspeed;
+>> -                       mmc-ddr-3_3v;
+>> -                       max-frequency = <200000000>;
+>> -                       non-removable;
+>> -                       no-sd;
+>> -                       no-sdio;
+>> -                       voltage-ranges = <3300 3300>;
+>> -                       status = "disabled";
+>> -               };
+>> -
+>> -               sdcard: sdhc@20008000 {
+>> +               mmc: mmc@20008000 {
+>>                         compatible = "cdns,sd4hc";
+>>                         reg = <0x0 0x20008000 0x0 0x1000>;
+>>                         interrupt-parent = <&plic>;
+>> @@ -288,13 +270,6 @@ sdcard: sdhc@20008000 {
+>>                         pinctrl-names = "default";
+>>                         clocks = <&clkcfg 6>;
+>>                         bus-width = <4>;
 > 
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 3765e2f4ad98..3a35f65491c8 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -270,10 +270,10 @@ static struct variant_data variant_stm32_sdmmc = {
->          .datactrl_any_blocksz   = true,
->          .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
->          .stm32_idmabsize_mask   = GENMASK(12, 5),
-> -       .busy_timeout           = true,
-> -       .busy_detect            = true,
-> -       .busy_detect_flag       = MCI_STM32_BUSYD0,
-> -       .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
-> +       //.busy_timeout         = true,
-> +       //.busy_detect          = true,
-> +       //.busy_detect_flag     = MCI_STM32_BUSYD0,
-> +       //.busy_detect_mask     = MCI_STM32_BUSYD0ENDMASK,
->          .init                   = sdmmc_variant_init,
->   };
-> 
-> @@ -297,10 +297,10 @@ static struct variant_data variant_stm32_sdmmcv2 = {
->          .datactrl_mask_sdio     = MCI_DPSM_ST_SDIOEN,
->          .stm32_idmabsize_mask   = GENMASK(16, 5),
->          .dma_lli                = true,
-> -       .busy_timeout           = true,
-> -       .busy_detect            = true,
-> -       .busy_detect_flag       = MCI_STM32_BUSYD0,
-> -       .busy_detect_mask       = MCI_STM32_BUSYD0ENDMASK,
-> +       //.busy_timeout         = true,
-> +       //.busy_detect          = true,
-> +       //.busy_detect_flag     = MCI_STM32_BUSYD0,
-> +       //.busy_detect_mask     = MCI_STM32_BUSYD0ENDMASK,
+> I think bus-width should be moved to the board .dts, too.
 
-This was working, but disabling HW busy detection is not really what we 
-want.
-
->          .init                   = sdmmc_variant_init,
-> 
-> Or else there is a card that cannot work without busy detect which
-> I find unlikely.
-> 
-> Yours,
-> Linus Walleij >
-
-
-I have the same kind of issues with the eMMC on the STM32MP157C-EV1 
-board. But here it fails at boot when trying to enable HPI, in mmc_switch().
-
-
-I then updated the patch like this:
-@@ -357,7 +357,7 @@ static bool mmci_use_busy_detect(struct mmci_host *host)
-
-         /* We don't allow this until we know that the card can handle it */
-         if (!card)
--               return false;
-+               return true;
-
-
-And it then works for all my use-cases, but I suppose that's not what 
-you wanted to do.
-
-So I guess we need to have the mmc_card structure, to determine if we 
-have the quirk, but not from the mmc_host. Through some new callback?
+Makes sense. Thanks for review!
 
 
 Best regards,
-Yann
+Krzysztof
