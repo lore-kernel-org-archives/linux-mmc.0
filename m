@@ -2,94 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB8E7C4320E
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 20:30:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 21293C4320E
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 02:58:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9BE5760E97
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Aug 2021 20:30:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 035DE61373
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Aug 2021 02:58:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232939AbhHWUbR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Aug 2021 16:31:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57420 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232627AbhHWUa7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Aug 2021 16:30:59 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38582C061757;
-        Mon, 23 Aug 2021 13:30:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:
-        Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=FjHYiJcoMRUSOg8mXjovmoG4YYRib0Dd4tpy9VAVPrM=; b=hkHkWpB6ezJIMqnl+yvYHudFX0
-        KnNgmD/FTenq3X7xrHQXRsABnQKwgg/eDx7kD3RFpSZWUmTtlc+Fdufz8qgOhQQcoL15xaZ7MJieu
-        SUBv8DGDhp/kNOBDFMAUo+LEreTcbXrt5Z9ZqoBuxshCH1XAW1HHsTCrX598/J17imHBONknSSmEJ
-        1WtF9exW246DnTlPbNeHGfRpLBRxHS2H7I2rF9HvM8Zs+ioSxRu3EvDTNC+U5YEDSxQbNxt9zuelk
-        9PGFI2bGRt8zRan8ZuxrL3qSKPrvXiKUbSvCURZRp50A59RcYQabNse/nc9hPEFYLAtESKYmx/4mu
-        rwG28cww==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mIGZa-000Zjc-Fg; Mon, 23 Aug 2021 20:29:34 +0000
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     axboe@kernel.dk, martin.petersen@oracle.com, jejb@linux.ibm.com,
-        kbusch@kernel.org, sagi@grimberg.me, adrian.hunter@intel.com,
-        beanhuo@micron.com, ulf.hansson@linaro.org, avri.altman@wdc.com,
-        swboyd@chromium.org, agk@redhat.com, snitzer@redhat.com,
-        josef@toxicpanda.com
-Cc:     hch@infradead.org, hare@suse.de, bvanassche@acm.org,
-        ming.lei@redhat.com, linux-scsi@vger.kernel.org,
-        linux-nvme@lists.infradead.org, linux-mmc@vger.kernel.org,
-        dm-devel@redhat.com, nbd@other.debian.org,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 10/10] nbd: add error handling support for add_disk()
-Date:   Mon, 23 Aug 2021 13:29:30 -0700
-Message-Id: <20210823202930.137278-11-mcgrof@kernel.org>
-X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210823202930.137278-1-mcgrof@kernel.org>
-References: <20210823202930.137278-1-mcgrof@kernel.org>
+        id S234239AbhHXC6p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Aug 2021 22:58:45 -0400
+Received: from mail.kernel.org ([198.145.29.99]:53300 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234088AbhHXC6k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 23 Aug 2021 22:58:40 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id F330261248;
+        Tue, 24 Aug 2021 02:57:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1629773876;
+        bh=xM4JblUs/mm/H3ihkqTOkso+KEG7Fu8qdKIRqTXjSK0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=MUsx8ezw8txYnEK/+tfYyJXcpMaalrXkw5+ytHs7UtjzrHbY8T/tPqizpimVFBhKY
+         MgP+ZKZfCmD5xGT1mLr20c8QtOxSqZL8GAxcqxty08xDN0CFUTqpNyIulpjH7wnJLP
+         el/L98m16bEKbUj03uQcAFteLrQQG9gbzCGqos5CpdY4W9EEUZDlSCHP+gULLhopCe
+         uHYIQgk2rqNwMQaE3pbUAAiRwDRA1hFmpysDheVSs9YdRdB7pHXs9Dw0Y2zhNKHivG
+         lgmy7e4wBa8kCYYLNR54QqAV/BvW9oYIuu/bgMB48O7GP+gd0j/CcIP7Mua6fqe1ME
+         LrjhdH4xzj+AQ==
+From:   Sasha Levin <sashal@kernel.org>
+To:     stable@vger.kernel.org, sbhanu@codeaurora.org
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: FAILED: Patch "mmc: sdhci-msm: Update the software timeout value for sdhc" failed to apply to 5.4-stable tree
+Date:   Mon, 23 Aug 2021 22:57:54 -0400
+Message-Id: <20210824025754.658394-1-sashal@kernel.org>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
+X-Patchwork-Hint: ignore
+X-stable: review
 Content-Transfer-Encoding: 8bit
-Sender: Luis Chamberlain <mcgrof@infradead.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-We never checked for errors on add_disk() as this function
-returned void. Now that this is fixed, use the shiny new
-error handling.
+The patch below does not apply to the 5.4-stable tree.
+If someone wants it applied there, or to any other stable or longterm
+tree, then please email the backport, including the original git commit
+id to <stable@vger.kernel.org>.
 
-Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Thanks,
+Sasha
+
+------------------ original commit in Linus's tree ------------------
+
+From 67b13f3e221ed81b46a657e2b499bf8b20162476 Mon Sep 17 00:00:00 2001
+From: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Date: Fri, 16 Jul 2021 17:16:14 +0530
+Subject: [PATCH] mmc: sdhci-msm: Update the software timeout value for sdhc
+
+Whenever SDHC run at clock rate 50MHZ or below, the hardware data
+timeout value will be 21.47secs, which is approx. 22secs and we have
+a current software timeout value as 10secs. We have to set software
+timeout value more than the hardware data timeout value to avioid seeing
+the below register dumps.
+
+[  332.953670] mmc2: Timeout waiting for hardware interrupt.
+[  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+[  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
+[  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+[  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
+[  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
+[  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
+[  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+[  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+[  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
+[  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+[  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
+[  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
+[  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
+[  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+[  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
+[  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
+0x0000000ffffff218
+[  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
+-----------
+[  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+0x6000642c | DLL cfg2: 0x0020a000
+[  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+0x00000000 | DDR cfg: 0x80040873
+[  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
+0xf88218a8 Vndr func3: 0x02626040
+[  333.102371] mmc2: sdhci: ============================================
+
+So, set software timeout value more than hardware timeout value.
+
+Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Cc: stable@vger.kernel.org
+Link: https://lore.kernel.org/r/1626435974-14462-1-git-send-email-sbhanu@codeaurora.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/block/nbd.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-msm.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/drivers/block/nbd.c b/drivers/block/nbd.c
-index c38317979f74..95f84c9b31f2 100644
---- a/drivers/block/nbd.c
-+++ b/drivers/block/nbd.c
-@@ -1730,10 +1730,14 @@ static int nbd_dev_add(int index)
- 	disk->fops = &nbd_fops;
- 	disk->private_data = nbd;
- 	sprintf(disk->disk_name, "nbd%d", index);
--	add_disk(disk);
-+	err = add_disk(disk);
-+	if (err)
-+		goto out_err_disk;
- 	nbd_total_devices++;
- 	return index;
+diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+index e44b7a66b73c..290a14cdc1cf 100644
+--- a/drivers/mmc/host/sdhci-msm.c
++++ b/drivers/mmc/host/sdhci-msm.c
+@@ -2089,6 +2089,23 @@ static void sdhci_msm_cqe_disable(struct mmc_host *mmc, bool recovery)
+ 	sdhci_cqe_disable(mmc, recovery);
+ }
  
-+out_err_disk:
-+	blk_cleanup_disk(disk);
- out_free_idr:
- 	idr_remove(&nbd_index_idr, index);
- out_free_tags:
++static void sdhci_msm_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
++{
++	u32 count, start = 15;
++
++	__sdhci_set_timeout(host, cmd);
++	count = sdhci_readb(host, SDHCI_TIMEOUT_CONTROL);
++	/*
++	 * Update software timeout value if its value is less than hardware data
++	 * timeout value. Qcom SoC hardware data timeout value was calculated
++	 * using 4 * MCLK * 2^(count + 13). where MCLK = 1 / host->clock.
++	 */
++	if (cmd && cmd->data && host->clock > 400000 &&
++	    host->clock <= 50000000 &&
++	    ((1 << (count + start)) > (10 * host->clock)))
++		host->data_timeout = 22LL * NSEC_PER_SEC;
++}
++
+ static const struct cqhci_host_ops sdhci_msm_cqhci_ops = {
+ 	.enable		= sdhci_msm_cqe_enable,
+ 	.disable	= sdhci_msm_cqe_disable,
+@@ -2438,6 +2455,7 @@ static const struct sdhci_ops sdhci_msm_ops = {
+ 	.irq	= sdhci_msm_cqe_irq,
+ 	.dump_vendor_regs = sdhci_msm_dump_vendor_regs,
+ 	.set_power = sdhci_set_power_noreg,
++	.set_timeout = sdhci_msm_set_timeout,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_msm_pdata = {
 -- 
 2.30.2
+
+
+
 
