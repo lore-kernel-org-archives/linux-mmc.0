@@ -2,108 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AA6EC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 08:21:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C0428C432BE
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 08:43:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E042A61247
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 08:21:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A8BE861222
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 08:43:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229962AbhHYIW0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Aug 2021 04:22:26 -0400
-Received: from esa.microchip.iphmx.com ([68.232.153.233]:5489 "EHLO
-        esa.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229780AbhHYIW0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 04:22:26 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1629879702; x=1661415702;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=igfSvgjpM/C/zVr0wQV00L4OB0xMED/drnFhbg6ckWk=;
-  b=E1F5LYB6x/NTz9Xdt99Hm1wt3SROVOe5mG4qb3zKPi+Irpl26rCOvPdu
-   38+WMDrRVBOgRNRj6tap+7fp2oy7/XbJhG4FZULJae5QeFm9wAaJZnjrz
-   jSCqSdDu+Lykn5nvvUbfQWW8ATqYOimq1dO+Lmgixwfm5sZo/xspx4I66
-   r102pnNAeCk9VqbqDZ13pquvV0iZVaH8U66yXKgDfMb8E6LAqoitccfry
-   LWAoXTaIy4J5DqBm28JTKMwZdJ0Sv46LGLo+CiyQc9rFRuczGVzaNdwlY
-   CUGhaONn/OIjzhjhihfwLMW2lYkOTMvkOR79TitHAW70YEs7pTrj3/Pn1
-   w==;
-IronPort-SDR: jT4aWIwQ9QuqQaptXXMxCF7sKsB6G49hf6FB1Huw+BBM/cPlX1nPqG3VCn71AJTVesGfU0caEc
- mkUobKh2ZpQSTj4ljFFQOV4KNmf5duUuEGal6kyrLSROYZhY9lBy3At5Vxw1ZetMUTom0yPoNd
- gYDDHhS0vhDYJ36155ibBspuGUsS6VRjMG4YpqO38Q0W9jLjV+aNvOicfW+m1zIt+bJR9iUUil
- UI01OGCt8++etKng/ZxAqOBFx33578ObPTd3UommAUfSGKge77Vsi2irIcnbnC+Y/NWqJT90Tk
- ZYZl9I/LlNhMpZGtj7NUH0fF
-X-IronPort-AV: E=Sophos;i="5.84,349,1620716400"; 
-   d="scan'208";a="133549470"
-Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
-  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 25 Aug 2021 01:21:41 -0700
-Received: from chn-vm-ex02.mchp-main.com (10.10.85.144) by
- chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2176.14; Wed, 25 Aug 2021 01:21:39 -0700
-Received: from m18063-ThinkPad-T460p.mchp-main.com (10.10.115.15) by
- chn-vm-ex02.mchp-main.com (10.10.85.144) with Microsoft SMTP Server id
- 15.1.2176.14 via Frontend Transport; Wed, 25 Aug 2021 01:21:34 -0700
-From:   Claudiu Beznea <claudiu.beznea@microchip.com>
-To:     <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        "Claudiu Beznea" <claudiu.beznea@microchip.com>,
-        kernel test robot <lkp@intel.com>,
-        Stephen Rothwell <sfr@canb.auug.org.au>
-Subject: [PATCH] mmc: pwrseq: sd8787: fix compilation warning
-Date:   Wed, 25 Aug 2021 11:19:31 +0300
-Message-ID: <20210825081931.598934-1-claudiu.beznea@microchip.com>
-X-Mailer: git-send-email 2.25.1
+        id S239344AbhHYIoT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Aug 2021 04:44:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44700 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S239358AbhHYIoT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 04:44:19 -0400
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73B96C061757;
+        Wed, 25 Aug 2021 01:43:33 -0700 (PDT)
+Received: by mail-wr1-x42f.google.com with SMTP id z9so35116684wrh.10;
+        Wed, 25 Aug 2021 01:43:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=zUmFDHqZ0Q3WxpEfUpWX476kiHcEeInO7lHUzdflDWo=;
+        b=k8PzlGsAphn4WEDJKn65ujM/HNNd3Dxr6uq8S+7YcKg8sBFwOO1fQnr0Frhmj2ql9f
+         Yvz6hgvoCWhSMSiU1jXSV68oI+IOqWX3ccfm4Oe462e0xEhiDtFQUM9NyBBdQ5tHDWqc
+         uz//uLqfzrESsQY3ImHQYxRcjohE5t7vMY4tv9JxEMHNBOjo0v0942QCJVY30xKQ45Wl
+         THjNgUSebonsNLu8w2aPHdregLzQL2UKRgh3+8k8AtSX1ULMwfeerYUYdqrq60ZRusSU
+         ZPvLffD7hHe6Kn3KJ1dHRqN+b/ueyJx0s6yH4lfKefKeqNi0F3BXGE0392WTDp7c6jkH
+         bXTQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=zUmFDHqZ0Q3WxpEfUpWX476kiHcEeInO7lHUzdflDWo=;
+        b=lpHJAhTDOaAiU7RjjLXnadOtuoMYk4l8ue903TJF6/sVYXCYPrAG92qUv0JxpTSWDM
+         PnKeG7kmrDb7H81WcqHzgaJyd6LHLtYh4k8kcmXeWUWokZSPhbeUw/CPLtIFEmWK3EWI
+         aa1liWDUqypG0Bf4T9TPstrgSCnIumzbKtk8d76vIolwB5bLP95QzViBvWhbzT8TRzEf
+         bW6/efwOmA+Y+pqcjz+Zyy2YFQoAJ7o+2Z2qhITwgUHGuCTfk2u3Gm6CF2Fkt5GUhPuk
+         0G72XCJpYKtkX6KawEGpKv0vQdEeQBqieEz3zaDBBsFvncq5qjwFgH5pJuEErc4Oh0e4
+         SMGQ==
+X-Gm-Message-State: AOAM533+nCqoI5CP9E+ypkY/JF6g1EBtABjOMkunSkYei68DCLWcOZbR
+        7x8Oqky2X6cVZYVoW6wRlkQ=
+X-Google-Smtp-Source: ABdhPJwJKck/zWbcc1t+3q/jJstxA2vTfT+n1VmldE3E29GY5UytssOrLIACln0YeIdwgsJuIe4IJQ==
+X-Received: by 2002:a5d:40c9:: with SMTP id b9mr6646225wrq.212.1629881012172;
+        Wed, 25 Aug 2021 01:43:32 -0700 (PDT)
+Received: from ubuntu-laptop (ip5f5bec31.dynamic.kabel-deutschland.de. [95.91.236.49])
+        by smtp.googlemail.com with ESMTPSA id a3sm20232294wrx.38.2021.08.25.01.43.31
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 25 Aug 2021 01:43:32 -0700 (PDT)
+Message-ID: <9e78ecd5b79ed7f0ca91021799e6e7396c458094.camel@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: core: Let BKOPS timeout readable/writable
+ via sysfs
+From:   Bean Huo <huobean@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Bean Huo <beanhuo@micron.com>
+Date:   Wed, 25 Aug 2021 10:43:31 +0200
+In-Reply-To: <CAPDyKFrQLDiamWZGzDDoA0EeRhR+VaeWuUHiu9EAMqDrQT-5CA@mail.gmail.com>
+References: <20210817224208.153652-1-huobean@gmail.com>
+         <20210817224208.153652-3-huobean@gmail.com>
+         <CAPDyKFrQLDiamWZGzDDoA0EeRhR+VaeWuUHiu9EAMqDrQT-5CA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fixed compilation warning "cast from pointer to integer of
-different size [-Wpointer-to-int-cast]"
+On Tue, 2021-08-24 at 16:33 +0200, Ulf Hansson wrote:
+> On Wed, 18 Aug 2021 at 00:42, Bean Huo <huobean@gmail.com> wrote:
+> > From: Bean Huo <beanhuo@micron.com>
+> > 
+> > For special cases, the application in the userspace wants to change
+> > BKOPS operation timeout value, also, wants eMMC back to
+> > R1_STATE_TRAN
+> > after BKOPS timeouts. A fixed BKOPS timeout value(120s) is no
+> > longer
+> > feasible, therefore, it is better to let the user controls its
+> > timeout
+> > value.
+> 
+> I am not fond of exporting tweakable timeout values through sysfs.
+> Primarily because it's ABI and it becomes difficult to change.
+> 
+> Can you perhaps explain in more detail when you want to have a
+> different timeout?
+> 
+> Perhaps we can do something similar as we currently do for
+> mmc_santize(), where we allow userspace to pass the cmd-timeout?
+> 
+> Kind regards
+> Uffe
+> 
+> > Signed-off-by: Bean Huo <beanhuo@micron.com>
+> > 
 
-Fixes: b2832b96fcf5 ("mmc: pwrseq: sd8787: add support for wilc1000")
-Reported-by: kernel test robot <lkp@intel.com>
-Reported-by: Stephen Rothwell <sfr@canb.auug.org.au>
-Signed-off-by: Claudiu Beznea <claudiu.beznea@microchip.com>
----
- drivers/mmc/core/pwrseq_sd8787.c | 9 ++++++---
- 1 file changed, 6 insertions(+), 3 deletions(-)
+Hi Ullf,
+Thanks for your review. 
 
-diff --git a/drivers/mmc/core/pwrseq_sd8787.c b/drivers/mmc/core/pwrseq_sd8787.c
-index 264e48067af2..2e120ad83020 100644
---- a/drivers/mmc/core/pwrseq_sd8787.c
-+++ b/drivers/mmc/core/pwrseq_sd8787.c
-@@ -56,9 +56,12 @@ static const struct mmc_pwrseq_ops mmc_pwrseq_sd8787_ops = {
- 	.power_off = mmc_pwrseq_sd8787_power_off,
- };
- 
-+static const u32 sd8787_delay_ms = 300;
-+static const u32 wilc1000_delay_ms = 5;
-+
- static const struct of_device_id mmc_pwrseq_sd8787_of_match[] = {
--	{ .compatible = "mmc-pwrseq-sd8787", .data = (void *)300 },
--	{ .compatible = "mmc-pwrseq-wilc1000", .data = (void *)5 },
-+	{ .compatible = "mmc-pwrseq-sd8787", .data = &sd8787_delay_ms },
-+	{ .compatible = "mmc-pwrseq-wilc1000", .data = &wilc1000_delay_ms },
- 	{/* sentinel */},
- };
- MODULE_DEVICE_TABLE(of, mmc_pwrseq_sd8787_of_match);
-@@ -74,7 +77,7 @@ static int mmc_pwrseq_sd8787_probe(struct platform_device *pdev)
- 		return -ENOMEM;
- 
- 	match = of_match_node(mmc_pwrseq_sd8787_of_match, pdev->dev.of_node);
--	pwrseq->reset_pwrdwn_delay_ms = (u32)match->data;
-+	pwrseq->reset_pwrdwn_delay_ms = *(u32 *)match->data;
- 
- 	pwrseq->pwrdn_gpio = devm_gpiod_get(dev, "powerdown", GPIOD_OUT_LOW);
- 	if (IS_ERR(pwrseq->pwrdn_gpio))
--- 
-2.25.1
+Actually, taking the first patch "MMC: core: Issue HPI in case the
+BKOPS timed out" is good enough in the most of cases. And the current
+120s timeout for the manual BKOPS is also enough, we don't need to
+change this timeout value through sysfs.
+
+Kind regards,
+Bean
 
