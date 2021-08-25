@@ -2,161 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D0BBC4320A
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 09:25:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8410BC4338F
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 09:41:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 44A73610E9
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 09:25:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6578261153
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 09:41:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232774AbhHYJ0N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Aug 2021 05:26:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53912 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239636AbhHYJYN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 05:24:13 -0400
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BE4DC0613C1
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Aug 2021 02:23:28 -0700 (PDT)
-Received: by mail-lj1-x22b.google.com with SMTP id f2so42491597ljn.1
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Aug 2021 02:23:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=kJ3IRgkWrnbEBgK8GKbfb9hriWmM8713CJTXI0Prmzs=;
-        b=NmbKoUY+Ii3vbCq7K4YkwFAmGH3DPkkiCuNXGSh7R/6F/2uMM1gEln0n9STY6mHt7+
-         QdwY3g8gRcAD9O1yPdBkfaE8HsHk32YaFSGdsnmcY2RLI9EOVluFdptDR+OM/JSqmd7B
-         aCgMkag/20lw9XkhZOJx4FCUHIaLmDhFviY7y4xiLXoRlA2mu+PMBRK0Xq1PPiXAANUm
-         87qFZLlsRpOxBLnjSttWSgaKLU8/GFgKlpR6IDfvLLgOWUoTImPbi6lYw2wgb209EFXR
-         //gWznw7Zkhn3UDbiiFrRxWw+u7iTyKa4O+AZd81YHTVfr+Wn2XZ3KM5MwRVQjXL1UU7
-         rZGQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=kJ3IRgkWrnbEBgK8GKbfb9hriWmM8713CJTXI0Prmzs=;
-        b=p4/vP/qRs0SZqRL+q5g/0rvYrSlflLl2QoIh6ze/aGZZeZ8Hxi/DGu1NiOvf0I17Ev
-         vsZyxvjQ3HMsbpRbCwksMO/zL4pmK3sMDzf4dHXv3//YYXTisGMl2DaM9pC5rneYPMfb
-         uEy1c9+yGwv7rpe8ykSu8WMzYWgkG5/R/Iew4TEuf/uVzyfmmx/qx8Uzj9iyW9um9JKB
-         nUB+gkBxoYVrt7JSuX1y1IWsRovUZSi+gxe8ayYSpknkh6Ixn/C7tAIWs4mABruHsC29
-         kteubzx0lBBqXcUaN5WeV1fDMMtqSzRkuDjhWMuKjsvVy306C9eY6AHqH/xtlSm3hQff
-         CN/w==
-X-Gm-Message-State: AOAM533jsUPobfOOZxUJ8s5+M4PTxLHb2vvzYzmldaa+jgYz050ddphU
-        ZsPJigxygV8B8BirOaFak+7aYb8d2jQLZ0zDPVsveA==
-X-Google-Smtp-Source: ABdhPJy68y5drwgRG638DefaX+hbJVUsTJhIxTNnagsH1Inp/3VQYaIo3xhtDp91sKKBhPkHrUyt3qSxkUCbb/03dH8=
-X-Received: by 2002:a2e:a410:: with SMTP id p16mr33667752ljn.364.1629883406536;
- Wed, 25 Aug 2021 02:23:26 -0700 (PDT)
+        id S236215AbhHYJmT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Aug 2021 05:42:19 -0400
+Received: from mailout4.samsung.com ([203.254.224.34]:50410 "EHLO
+        mailout4.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235088AbhHYJmR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 05:42:17 -0400
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20210825094130epoutp0456bb88d74047ede4edb7a4565d7f695d~eg08PjhMR1535115351epoutp04b
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Aug 2021 09:41:30 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20210825094130epoutp0456bb88d74047ede4edb7a4565d7f695d~eg08PjhMR1535115351epoutp04b
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1629884490;
+        bh=MoAIQyz5Uf3JAXIkjW5sCnnu4uLDJbsFqG6pBajtU84=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=MtBehLR36EIGtkdL9P6oa8f/to2IdCcS1OdmPlbHsKWWcCi/EbQF96zjqvQP2jmiQ
+         9HcDtwQRUTM81HSiqGQTtJTjTEfSQ2WGMGaGFVKkIjhs3A4SN549stzNlDlvAekKbE
+         ovd6kzOrPLw4ZLunkuWPNM18L6fTI3bOkFHq5CDU=
+Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
+        epcas1p1.samsung.com (KnoxPortal) with ESMTP id
+        20210825094129epcas1p14475b00c984ba51d380facc39254020d~eg07fyhPS1578315783epcas1p1M;
+        Wed, 25 Aug 2021 09:41:29 +0000 (GMT)
+Received: from epsmges1p4.samsung.com (unknown [182.195.38.247]) by
+        epsnrtp3.localdomain (Postfix) with ESMTP id 4GvgwS0X2Pz4x9Pr; Wed, 25 Aug
+        2021 09:41:28 +0000 (GMT)
+Received: from epcas1p4.samsung.com ( [182.195.41.48]) by
+        epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
+        0D.84.10095.74016216; Wed, 25 Aug 2021 18:41:27 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20210825094127epcas1p26709a5004dacdb2066e7f21dc1c997f5~eg05FrfOx0977909779epcas1p2W;
+        Wed, 25 Aug 2021 09:41:27 +0000 (GMT)
+Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20210825094127epsmtrp1b1154e31dd3c5edb330c4fa29d1727b9~eg05ErpSd2830628306epsmtrp1v;
+        Wed, 25 Aug 2021 09:41:27 +0000 (GMT)
+X-AuditID: b6c32a38-c27d1a800000276f-c7-61261047ef6a
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
+        04.BE.09091.74016216; Wed, 25 Aug 2021 18:41:27 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.253.100.232]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20210825094127epsmtip2dae0e5cf002c2519f18236f036136716~eg043Ol2g0151701517epsmtip2X;
+        Wed, 25 Aug 2021 09:41:27 +0000 (GMT)
+From:   Chanwoo Lee <cw9316.lee@samsung.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     grant.jung@samsung.com, jt77.jang@samsung.com,
+        dh0421.hwang@samsung.com, sh043.lee@samsung.com,
+        ChanWoo Lee <cw9316.lee@samsung.com>
+Subject: [PATCH] mmc: sdhci: Change the code to check auto_cmd23
+Date:   Wed, 25 Aug 2021 18:33:45 +0900
+Message-Id: <20210825093345.14706-1-cw9316.lee@samsung.com>
+X-Mailer: git-send-email 2.29.0
 MIME-Version: 1.0
-References: <CGME20210825075311epcas1p4b64d6a5a824983c91f7d5d1dc24a4cc2@epcas1p4.samsung.com>
- <20210825074601.8881-1-cw9316.lee@samsung.com>
-In-Reply-To: <20210825074601.8881-1-cw9316.lee@samsung.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 25 Aug 2021 11:22:50 +0200
-Message-ID: <CAPDyKFqCTYq9MDJ0_7xo_-Qwj80Giuc2M0ueYNHonNVO8+4q2A@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: queue: Remove unused parameters(request_queue)
-To:     Chanwoo Lee <cw9316.lee@samsung.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, Coly Li <colyli@suse.de>,
-        Jens Axboe <axboe@kernel.dk>,
-        Eric Biggers <ebiggers@google.com>,
-        Peter Collingbourne <pcc@google.com>,
-        Luca Porzio <porzio@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        grant.jung@samsung.com, jt77.jang@samsung.com,
-        DooHyun Hwang <dh0421.hwang@samsung.com>,
-        Seunghui Lee <sh043.lee@samsung.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFmpjk+LIzCtJLcpLzFFi42LZdljTQNddQC3RYMdGG4uTT9awWcw41cZq
+        se/aSXaLX3/Xs1vseH6G3eLyrjlsFkf+9zNaNP3Zx2JxfG24A6fH4j0vmTzuXNvD5tG3ZRWj
+        x+dNcgEsUdk2GamJKalFCql5yfkpmXnptkrewfHO8aZmBoa6hpYW5koKeYm5qbZKLj4Bum6Z
+        OUCnKCmUJeaUAoUCEouLlfTtbIryS0tSFTLyi0tslVILUnIKzAr0ihNzi0vz0vXyUkusDA0M
+        jEyBChOyM963b2ApuMZWcXTZC+YGxgOsXYycHBICJhKrOq4ydTFycQgJ7GCUmLXyACOE84lR
+        YlFHE5TzjVHi+NQGNpiWl3cfsUEk9jJKHFw0gxnC+cIosfzeU6BhHBxsAloSt495gzSICORJ
+        HDq7EmwSs0AXo8Svg10sIAlhAQeJGTsOg9ksAqoSV16vYgaxeQWsJRq6vkMdKC/x534PVFxQ
+        4uTMJ2D1zEDx5q2zwRZLCFxil3j++SATRIOLROuslVCnCku8Or6FHcKWknjZ38YO0dDMKHFq
+        9jkop4VR4vWVG1BVxhKfPn9mBHmBWUBTYv0ufYiwosTO33MZITbzSbz72sMKUiIhwCvR0SYE
+        UaIiMafrHBvMro83HkM94CFxctFCsAeEBGIlXr1ezzKBUX4Wkn9mIflnFsLiBYzMqxjFUguK
+        c9NTiw0LTODxmpyfu4kRnCC1LHYwzn37Qe8QIxMH4yFGCQ5mJRHev0zKiUK8KYmVValF+fFF
+        pTmpxYcYTYEhPJFZSjQ5H5ii80riDU0sDUzMjEwsjC2NzZTEeRlfySQKCaQnlqRmp6YWpBbB
+        9DFxcEo1MIlflteafXNl5eQHlSmVS78c9rE6fkiIk23ZnIDIyws3HDfd42xwYFHo9FN/Jk1q
+        OMqgm1fwZnHJ45OyoSdus9+5vP3x55D1Ms3WH/IVDnoGZ7Pt5gr5d+7E7CNR6zub+7Yw6v3e
+        9uFp2v5pWd73+jf/5bPlzin4P/dHq4GDVkNmyJvT2sdmNvLP9f9VXsVxY5vHr13X75WsYrlR
+        e8IzS4wp4CZfzoyQpGkrT3V6uFgaTBD6+OZqC3fNx3a2ved7/i/ZtK65QVX/q5IIl8c0b9ab
+        kySZvmnPWmfMfIFB/7b9la7Oo+5XdvAbT3u8tyDKxEGt9bzu2UkuE32cU//euMqyXO/4yTXr
+        Oi89fOH+SXKPEktxRqKhFnNRcSIABS4PERkEAAA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrALMWRmVeSWpSXmKPExsWy7bCSvK67gFqiQetufouTT9awWcw41cZq
+        se/aSXaLX3/Xs1vseH6G3eLyrjlsFkf+9zNaNP3Zx2JxfG24A6fH4j0vmTzuXNvD5tG3ZRWj
+        x+dNcgEsUVw2Kak5mWWpRfp2CVwZ79s3sBRcY6s4uuwFcwPjAdYuRk4OCQETiZd3H7GB2EIC
+        uxklbv3TgIhLSezefx4ozgFkC0scPlzcxcgFVPKJUeLi22dMIHE2AS2J28e8QUwRgSKJE0fL
+        QEqYBSYwSiy+8pYZZIywgIPEjB2HWUBsFgFViSuvV4HFeQWsJRq6vkOdIC/x534PVFxQ4uTM
+        J2D1zEDx5q2zmScw8s1CkpqFJLWAkWkVo2RqQXFuem6xYYFhXmq5XnFibnFpXrpecn7uJkZw
+        oGpp7mDcvuqD3iFGJg7GQ4wSHMxKIrx/mZQThXhTEiurUovy44tKc1KLDzFKc7AoifNe6DoZ
+        LySQnliSmp2aWpBaBJNl4uCUamC66HG1yF4pqClq7epf2S0pQYtfP+qZKxrac/K4tYvd9Edy
+        9h+8vzroVuaUpvbeWcv0InNuIvthmeR//9rX+2V+utGpz2hWsayj4cHJHqMDwpPcVwUfl9Hj
+        Ef/w9fj9+IqpN/NXyG6NLZukUHHyrVnCSpkFOf7nbwUeeraU2bXdasG+Xw+rPb+8joyf/C/8
+        2FnhZx26pxt+aiom//1Rd8LuGpf8icYY24ufP370djRnWMPL+UcutSXTdYJP4SrVjTEsMzQn
+        lyes3Hx1k8268N/9mw4HMghqNnvf6nhlyLD/CPd90zQzdqeFzFu+vFcLW55+P/uoEV/dmfpb
+        rWlGz5t1n259lf/F88J9zvojIX5KLMUZiYZazEXFiQB5SsVHwwIAAA==
+X-CMS-MailID: 20210825094127epcas1p26709a5004dacdb2066e7f21dc1c997f5
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20210825094127epcas1p26709a5004dacdb2066e7f21dc1c997f5
+References: <CGME20210825094127epcas1p26709a5004dacdb2066e7f21dc1c997f5@epcas1p2.samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 25 Aug 2021 at 09:53, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
->
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
->
-> In function mmc_exit_request, the request_queue structure(*q) is not used.
-> I remove the unnecessary code related to the request_queue structure.
->
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+From: ChanWoo Lee <cw9316.lee@samsung.com>
 
-Applied for next, thanks!
+It is replaced with a function that is already declared.
+//[1/5] mmc: sdhci: Add helpers for the auto-CMD23 flag
+//20200412090349.1607-2-adrian.hunter@intel.com
 
-Kind regards
-Uffe
+Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 36f15f81a6af..5782650ddf7d 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -3232,7 +3232,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+ 			  -ETIMEDOUT :
+ 			  -EILSEQ;
+ 
+-		if (mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
++		if (sdhci_auto_cmd23(host, mrq)) {
+ 			mrq->sbc->error = err;
+ 			__sdhci_finish_mrq(host, mrq);
+ 			return;
+-- 
+2.29.0
 
->
-> ---
-> v1->v2:
->  * Put the code directly into mmc_mq_init_reuqest()/mmc_mq_exit_request().
-> ---
->  drivers/mmc/core/queue.c | 30 ++++++------------------------
->  1 file changed, 6 insertions(+), 24 deletions(-)
->
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index cc3261777637..5526e4ca2834 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -199,27 +199,23 @@ static unsigned int mmc_get_max_segments(struct mmc_host *host)
->                                          host->max_segs;
->  }
->
-> -/**
-> - * mmc_init_request() - initialize the MMC-specific per-request data
-> - * @mq: the request queue
-> - * @req: the request
-> - * @gfp: memory allocation policy
-> - */
-> -static int __mmc_init_request(struct mmc_queue *mq, struct request *req,
-> -                             gfp_t gfp)
-> +static int mmc_mq_init_request(struct blk_mq_tag_set *set, struct request *req,
-> +                              unsigned int hctx_idx, unsigned int numa_node)
->  {
->         struct mmc_queue_req *mq_rq = req_to_mmc_queue_req(req);
-> +       struct mmc_queue *mq = set->driver_data;
->         struct mmc_card *card = mq->card;
->         struct mmc_host *host = card->host;
->
-> -       mq_rq->sg = mmc_alloc_sg(mmc_get_max_segments(host), gfp);
-> +       mq_rq->sg = mmc_alloc_sg(mmc_get_max_segments(host), GFP_KERNEL);
->         if (!mq_rq->sg)
->                 return -ENOMEM;
->
->         return 0;
->  }
->
-> -static void mmc_exit_request(struct request_queue *q, struct request *req)
-> +static void mmc_mq_exit_request(struct blk_mq_tag_set *set, struct request *req,
-> +                               unsigned int hctx_idx)
->  {
->         struct mmc_queue_req *mq_rq = req_to_mmc_queue_req(req);
->
-> @@ -227,20 +223,6 @@ static void mmc_exit_request(struct request_queue *q, struct request *req)
->         mq_rq->sg = NULL;
->  }
->
-> -static int mmc_mq_init_request(struct blk_mq_tag_set *set, struct request *req,
-> -                              unsigned int hctx_idx, unsigned int numa_node)
-> -{
-> -       return __mmc_init_request(set->driver_data, req, GFP_KERNEL);
-> -}
-> -
-> -static void mmc_mq_exit_request(struct blk_mq_tag_set *set, struct request *req,
-> -                               unsigned int hctx_idx)
-> -{
-> -       struct mmc_queue *mq = set->driver_data;
-> -
-> -       mmc_exit_request(mq->queue, req);
-> -}
-> -
->  static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
->                                     const struct blk_mq_queue_data *bd)
->  {
-> --
-> 2.29.0
->
