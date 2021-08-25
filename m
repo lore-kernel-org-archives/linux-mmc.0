@@ -2,108 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81B4BC4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 11:42:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FEDAC4320E
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 14:34:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 633A2610CD
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 11:42:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 318BF610C7
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 14:34:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239099AbhHYLnU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Aug 2021 07:43:20 -0400
-Received: from smtp1.axis.com ([195.60.68.17]:58774 "EHLO smtp1.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232199AbhHYLnT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Wed, 25 Aug 2021 07:43:19 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1629891754;
-  x=1661427754;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=pnDCS9LO85um9r3L/+JpcPWish798PmLV+vnNCGgXic=;
-  b=mUIa2K0Jl0Z4cUsvZl8fHoC45nZ3XSRzRIBb5JcAtHhfkbOXfOMfyOH/
-   GgAmo7sIfa2BILaTqCvH7xq6yM/YoqSue6lyropsyUbL0xfcPES1oESi2
-   hf4CiNaid2qgN9MgWK+UCt+JueJ7WQ7rYccUzVSoDFOJUZ1WXbpZm9acQ
-   o7e+PEjKuZIq1QE/6HE2et4ezRhRYI5EqtAapc3e8ZAEMwn2z6IZGty19
-   +HJHHYXs08kClvpR7JaA+V3MENqTdLMosCbnkILXFHgPvoAOXwVZwsjKX
-   OAYLzbqBNbxs+CVkR+vkiYlCoZ4Ya7OUMjuPUhpDW19IbXLk58ck2N1uf
-   w==;
-From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
-To:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@axis.com>,
-        Vincent Whitchurch <vincent.whitchurch@axis.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-Subject: [PATCH] mmc: dw_mmc: Only inject fault before done/error
-Date:   Wed, 25 Aug 2021 13:42:13 +0200
-Message-ID: <20210825114213.7429-1-vincent.whitchurch@axis.com>
-X-Mailer: git-send-email 2.28.0
+        id S240883AbhHYOfU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Aug 2021 10:35:20 -0400
+Received: from mx08-00178001.pphosted.com ([91.207.212.93]:7362 "EHLO
+        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S232168AbhHYOfT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 10:35:19 -0400
+Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.16.1.2/8.16.0.43) with SMTP id 17PDhOum003655;
+        Wed, 25 Aug 2021 16:34:13 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=from : subject : to
+ : cc : message-id : date : mime-version : content-type :
+ content-transfer-encoding; s=selector1;
+ bh=uB5VgDvAvQ72i1SM94ZVMnpWG1uPhE/nxCUf1gUKsDM=;
+ b=J8/nsnlyrDt5jpFg+8ufKUpDe6dVqgJmzghbCCt+7/M/+I3kVGJCgbzgdP3TQZCjIOTe
+ iWbxcWomfrrB10/SNyFZTN1CM6gGvvVUDK5QtgRueMmhZnJIedm+5AVnYPd+Nlv1kono
+ MUbyH1DR3gCN6eP+mU/cbblmM8l5F+Oxg1IUTlE7N8wi+DTA6ewIA+82kIMzO4+KKv76
+ 9dxXrNsvU+WNHO0uqnXDhqyRYxo6MeCE+1ObFqDjvqAleK0tWd86Y5U7APjKMOvX3Xhn
+ C3f7JdvJgVPaALaIESNwEYpJClgEYYakEtGyDlmOAtlDSPv7nhgLs/3HfZnrhOe61voI Hg== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com with ESMTP id 3ana52vvwe-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 25 Aug 2021 16:34:13 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 00AD910002A;
+        Wed, 25 Aug 2021 16:34:11 +0200 (CEST)
+Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id C47FC25F3F3;
+        Wed, 25 Aug 2021 16:34:11 +0200 (CEST)
+Received: from lmecxl0504.lme.st.com (10.75.127.48) by SFHDAG2NODE3.st.com
+ (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 25 Aug
+ 2021 16:34:10 +0200
+From:   Yann Gautier <yann.gautier@foss.st.com>
+Subject: Question about MMC_PM_KEEP_POWER in MMCI driver
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     Linus Walleij <linus.walleij@linaro.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Rob Herring <robh+dt@kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-arm-msm@vger.kernel.org>,
+        "linux-stm32@st-md-mailman.stormreply.com" 
+        <linux-stm32@st-md-mailman.stormreply.com>,
+        <devicetree@vger.kernel.org>
+Message-ID: <ccb2dad1-c8c1-9f19-92c4-7faf2b787e6d@foss.st.com>
+Date:   Wed, 25 Aug 2021 16:34:10 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.48]
+X-ClientProxiedBy: SFHDAG1NODE2.st.com (10.75.127.2) To SFHDAG2NODE3.st.com
+ (10.75.127.6)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.391,FMLib:17.0.607.475
+ definitions=2021-08-25_06,2021-08-25_02,2020-04-07_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The fault injection function can set EVENT_DATA_ERROR but skip the
-setting of ->data_status to an error status if it hits just after a data
-over interrupt.  This confuses the tasklet which can later end up
-triggering the WARN_ON(host->cmd || ..) in dw_mci_request_end() since
-dw_mci_data_complete() would return success.
+Hi,
 
-Prevent the fault injection function from doing this since this is not a
-real case, and ensure that the fault injection doesn't race with a real
-error either.
+In drivers/mmc/host/mmci.c, MMC_PM_KEEP_POWER is unconditionally enabled.
+This prevents correct low-power sequence on STM32MP157C-DK2 board which 
+embeds a Wifi chip brcm,bcm4329-fmac (this wifi part has not yet been 
+sent upstream).
 
-Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
----
- drivers/mmc/host/dw_mmc.c | 15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
+This MMC_PM_KEEP_POWER can be taken from DT with the property 
+keep-power-in-suspend. This is what is done for other MMC drivers.
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 6578cc64ae9e..380f9aa56eb2 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1802,10 +1802,15 @@ static enum hrtimer_restart dw_mci_fault_timer(struct hrtimer *t)
- 
- 	spin_lock_irqsave(&host->irq_lock, flags);
- 
--	if (!host->data_status)
-+	/*
-+	 * Only inject an error if we haven't already got an error or data over
-+	 * interrupt.
-+	 */
-+	if (!host->data_status) {
- 		host->data_status = SDMMC_INT_DCRC;
--	set_bit(EVENT_DATA_ERROR, &host->pending_events);
--	tasklet_schedule(&host->tasklet);
-+		set_bit(EVENT_DATA_ERROR, &host->pending_events);
-+		tasklet_schedule(&host->tasklet);
-+	}
- 
- 	spin_unlock_irqrestore(&host->irq_lock, flags);
- 
-@@ -2721,12 +2726,16 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		}
- 
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
-+			spin_lock(&host->irq_lock);
-+
- 			/* if there is an error report DATA_ERROR */
- 			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
- 			host->data_status = pending;
- 			smp_wmb(); /* drain writebuffer */
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
- 			tasklet_schedule(&host->tasklet);
-+
-+			spin_unlock(&host->irq_lock);
- 		}
- 
- 		if (pending & SDMMC_INT_DATA_OVER) {
--- 
-2.28.0
+I wonder what should be the best solution for this.
 
+1) Remove MMC_PM_KEEP_POWER from the driver, and modify all SoC device 
+tree files embedding a arm,pl18x with adding keep-power-in-suspend; 
+property (except stm32mp151.dtsi file).
+This can be easy to do (~10 files to modify). But that could be more 
+board dependent, if an SDIO chip is plugged on this MMC IP.
+And the name keep-power-in-suspend can be misleading as it only applies 
+to SDIO.
+
+2) Remove MMC_PM_KEEP_POWER from the driver, and modify board DT files 
+with the property. This could be a difficult task to find all those 
+boards. And this should be applied only for SDIO configs.
+
+3) Just modify the driver to apply this capability for all MMCI chips 
+but STM32. This could be done in the dedicated file, in 
+sdmmc_variant_init() function. But some boards based on STM32MP15 chip 
+might want to keep this capability.
+
+All advice is welcome.
+
+
+Thanks,
+Yann
