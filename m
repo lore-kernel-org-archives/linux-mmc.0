@@ -2,178 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.5 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88BF7C4338F
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 09:45:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81B4BC4338F
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 11:42:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 699A061153
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 09:45:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 633A2610CD
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Aug 2021 11:42:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239638AbhHYJpw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Aug 2021 05:45:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59134 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236314AbhHYJpu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 05:45:50 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74419C0613C1;
-        Wed, 25 Aug 2021 02:45:04 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id g13so51592399lfj.12;
-        Wed, 25 Aug 2021 02:45:04 -0700 (PDT)
+        id S239099AbhHYLnU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Aug 2021 07:43:20 -0400
+Received: from smtp1.axis.com ([195.60.68.17]:58774 "EHLO smtp1.axis.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232199AbhHYLnT (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Wed, 25 Aug 2021 07:43:19 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=E7cNoLLVAVafjNCc4brMRUN01zZAHm0abXpnMpPuTt4=;
-        b=XcByKSJRdga/HRYU9DdYIrJkJ5aCKCn6sFPQhJpp+zqLBFptssdthmbwTTqrJU2O1y
-         Fh9T4cOSANuA0NBWqKrxyE6rpE3VUg9YurSVTT9N3ewKp/QELYAgj+C6HkBCJMlVTiOb
-         M7DocgSIXf8gWx7DP6hz+XSoX32UueKJZitZdD1fhIKA/N5U6YwHLEpd41Qt4bCHL0G4
-         ZtJc+vpaJ07T3DdXx/qHSdSN5QI3+K4IqS5ki+/rdR5v1sPFOYpfj0rw4qkKgMj2ioo3
-         hQKDnoVXbW3M/+9DGxJ8r4dLnR6TG4RgZNyl3L7PnWj5GlgkD82og3xcltkjAKoMzhav
-         ZUNg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:subject:to:cc:references:from:message-id:date
-         :user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=E7cNoLLVAVafjNCc4brMRUN01zZAHm0abXpnMpPuTt4=;
-        b=kX4mhi2MEArMqlWwXAvwxKRSEGu+orZ+Tb20DbE0/SOUaNzKWrsE/Cfehguc/rRhAx
-         5wg+NHNHglmQxJ/xrBtTAa6NKP6vSBhpeOYYAna1nYPg8RJPLP9VwIFWyfByBDZ8bWT1
-         qIGnMJpK/7dNAliMmJWJ4MjLjoc/dCHFg9i2BEwNUjkL45XqirzVQXiFLAnybxVFBbE0
-         BtuMCnZ9i+BhxsXFlDe2MmFHhaaBT8ShJQP23ucacRTknPY93RcwHNL1j4lLNbWRLFDp
-         DpY5qorjFG/sdu3Yjd3mYpe4j+WqkBHXrHibLHIOiXEuChK8vvobOqMiMSIjiX7t6NCr
-         dcQA==
-X-Gm-Message-State: AOAM531C/U/yonuXTKSRver+ew/62xRu4iNGbFSP/+qgAQLozoW8b3KW
-        Cv2O9UMmJdQ27ENyPf+g4NIBuVpHmus=
-X-Google-Smtp-Source: ABdhPJxxgQwWKc4KlfaiaB2F9L+jo3PpEaZtT5gXKDmMvuZmO5i5+f3TfZJ4xZuLO6DnWagwNOSZkQ==
-X-Received: by 2002:a05:6512:3190:: with SMTP id i16mr32170681lfe.340.1629884702691;
-        Wed, 25 Aug 2021 02:45:02 -0700 (PDT)
-Received: from [192.168.2.145] (94-29-17-251.dynamic.spd-mgts.ru. [94.29.17.251])
-        by smtp.googlemail.com with ESMTPSA id z13sm2103349ljj.43.2021.08.25.02.45.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 25 Aug 2021 02:45:02 -0700 (PDT)
-Subject: Re: [PATCH v8 20/34] mmc: sdhci-tegra: Add runtime PM and OPP support
-To:     Thierry Reding <thierry.reding@gmail.com>
-Cc:     Jonathan Hunter <jonathanh@nvidia.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <u.kleine-koenig@pengutronix.de>,
-        Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20210817012754.8710-1-digetx@gmail.com>
- <20210817012754.8710-21-digetx@gmail.com> <YR6O9Om+HzMMG8AR@orome.fritz.box>
- <05b7ff28-4c01-fb56-deeb-595a5797394b@gmail.com>
- <YR+TgfCHKOPS3Ng8@orome.fritz.box>
-From:   Dmitry Osipenko <digetx@gmail.com>
-Message-ID: <5a15647c-bc6a-294d-61c8-91efa33c681e@gmail.com>
-Date:   Wed, 25 Aug 2021 12:45:01 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.11.0
+  d=axis.com; q=dns/txt; s=axis-central1; t=1629891754;
+  x=1661427754;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=pnDCS9LO85um9r3L/+JpcPWish798PmLV+vnNCGgXic=;
+  b=mUIa2K0Jl0Z4cUsvZl8fHoC45nZ3XSRzRIBb5JcAtHhfkbOXfOMfyOH/
+   GgAmo7sIfa2BILaTqCvH7xq6yM/YoqSue6lyropsyUbL0xfcPES1oESi2
+   hf4CiNaid2qgN9MgWK+UCt+JueJ7WQ7rYccUzVSoDFOJUZ1WXbpZm9acQ
+   o7e+PEjKuZIq1QE/6HE2et4ezRhRYI5EqtAapc3e8ZAEMwn2z6IZGty19
+   +HJHHYXs08kClvpR7JaA+V3MENqTdLMosCbnkILXFHgPvoAOXwVZwsjKX
+   OAYLzbqBNbxs+CVkR+vkiYlCoZ4Ya7OUMjuPUhpDW19IbXLk58ck2N1uf
+   w==;
+From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
+To:     Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <kernel@axis.com>,
+        Vincent Whitchurch <vincent.whitchurch@axis.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: dw_mmc: Only inject fault before done/error
+Date:   Wed, 25 Aug 2021 13:42:13 +0200
+Message-ID: <20210825114213.7429-1-vincent.whitchurch@axis.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-In-Reply-To: <YR+TgfCHKOPS3Ng8@orome.fritz.box>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
 Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-20.08.2021 14:35, Thierry Reding пишет:
-> On Fri, Aug 20, 2021 at 01:37:13AM +0300, Dmitry Osipenko wrote:
->> 19.08.2021 20:03, Thierry Reding пишет:
->>> On Tue, Aug 17, 2021 at 04:27:40AM +0300, Dmitry Osipenko wrote:
->>>> The SDHCI on Tegra belongs to the core power domain and we're going to
->>>> enable GENPD support for the core domain. Now SDHCI must be resumed using
->>>> runtime PM API in order to initialize the SDHCI power state. The SDHCI
->>>> clock rate must be changed using OPP API that will reconfigure the power
->>>> domain performance state in accordance to the rate. Add runtime PM and OPP
->>>> support to the SDHCI driver.
->>>>
->>>> Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
->>>> ---
->>>>  drivers/mmc/host/sdhci-tegra.c | 146 ++++++++++++++++++++++++---------
->>>>  1 file changed, 105 insertions(+), 41 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
->>>> index 387ce9cdbd7c..a3583359c972 100644
->>>> --- a/drivers/mmc/host/sdhci-tegra.c
->>>> +++ b/drivers/mmc/host/sdhci-tegra.c
->>>> @@ -15,6 +15,8 @@
->>>>  #include <linux/of.h>
->>>>  #include <linux/of_device.h>
->>>>  #include <linux/pinctrl/consumer.h>
->>>> +#include <linux/pm_opp.h>
->>>> +#include <linux/pm_runtime.h>
->>>>  #include <linux/regulator/consumer.h>
->>>>  #include <linux/reset.h>
->>>>  #include <linux/mmc/card.h>
->>>> @@ -24,6 +26,8 @@
->>>>  #include <linux/gpio/consumer.h>
->>>>  #include <linux/ktime.h>
->>>>  
->>>> +#include <soc/tegra/common.h>
->>>> +
->>>>  #include "sdhci-pltfm.h"
->>>>  #include "cqhci.h"
->>>>  
->>>> @@ -123,6 +127,12 @@
->>>>  					 SDHCI_TRNS_BLK_CNT_EN | \
->>>>  					 SDHCI_TRNS_DMA)
->>>>  
->>>> +enum {
->>>> +	TEGRA_CLK_BULK_SDHCI,
->>>> +	TEGRA_CLK_BULK_TMCLK,
->>>> +	TEGRA_CLK_BULK_NUM,
->>>> +};
->>>> +
->>>>  struct sdhci_tegra_soc_data {
->>>>  	const struct sdhci_pltfm_data *pdata;
->>>>  	u64 dma_mask;
->>>> @@ -171,6 +181,8 @@ struct sdhci_tegra {
->>>>  	bool enable_hwcq;
->>>>  	unsigned long curr_clk_rate;
->>>>  	u8 tuned_tap_delay;
->>>> +
->>>> +	struct clk_bulk_data clocks[TEGRA_CLK_BULK_NUM];
->>>
->>> This doesn't seem worth it to me. There's a lot of churn in this driver
->>> that's only needed to convert this to the clk_bulk API and it makes the
->>> code a lot more difficult to read, in my opinion.
->>>
->>> It looks like the only benefit that this gives us is that runtime
->>> suspend and resume become a few lines shorter.
->>
->> The driver probe code looks cleaner with that. You should be looking at
->> the final result and not at the patch to see it.
-> 
-> I did look at the final result and didn't find it cleaner at all. =)
+The fault injection function can set EVENT_DATA_ERROR but skip the
+setting of ->data_status to an error status if it hits just after a data
+over interrupt.  This confuses the tasklet which can later end up
+triggering the WARN_ON(host->cmd || ..) in dw_mci_request_end() since
+dw_mci_data_complete() would return success.
 
-There is UAF bug in this patch that was spotted by kasan. The
-sdhci_tegra_soc_data isn't resource-managed, but clk_bulk_data is. I'm
-now thinking that it should be okay to keep tmclk always-on, so I'll
-replace the bulk clks back with the sdhci clk in v9.
+Prevent the fault injection function from doing this since this is not a
+real case, and ensure that the fault injection doesn't race with a real
+error either.
+
+Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+---
+ drivers/mmc/host/dw_mmc.c | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 6578cc64ae9e..380f9aa56eb2 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1802,10 +1802,15 @@ static enum hrtimer_restart dw_mci_fault_timer(struct hrtimer *t)
+ 
+ 	spin_lock_irqsave(&host->irq_lock, flags);
+ 
+-	if (!host->data_status)
++	/*
++	 * Only inject an error if we haven't already got an error or data over
++	 * interrupt.
++	 */
++	if (!host->data_status) {
+ 		host->data_status = SDMMC_INT_DCRC;
+-	set_bit(EVENT_DATA_ERROR, &host->pending_events);
+-	tasklet_schedule(&host->tasklet);
++		set_bit(EVENT_DATA_ERROR, &host->pending_events);
++		tasklet_schedule(&host->tasklet);
++	}
+ 
+ 	spin_unlock_irqrestore(&host->irq_lock, flags);
+ 
+@@ -2721,12 +2726,16 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+ 		}
+ 
+ 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
++			spin_lock(&host->irq_lock);
++
+ 			/* if there is an error report DATA_ERROR */
+ 			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
+ 			host->data_status = pending;
+ 			smp_wmb(); /* drain writebuffer */
+ 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
+ 			tasklet_schedule(&host->tasklet);
++
++			spin_unlock(&host->irq_lock);
+ 		}
+ 
+ 		if (pending & SDMMC_INT_DATA_OVER) {
+-- 
+2.28.0
+
