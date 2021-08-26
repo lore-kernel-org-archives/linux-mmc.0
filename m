@@ -2,121 +2,145 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	UNPARSEABLE_RELAY,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E8A6C4320A
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 13:44:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26ED3C4320A
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 19:02:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EF4CF60F44
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 13:44:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 05AA261052
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 19:02:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236839AbhH3NpK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Aug 2021 09:45:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37996 "EHLO
+        id S243360AbhHZTCu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Aug 2021 15:02:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231669AbhH3NpK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2021 09:45:10 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 328FCC061575
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2021 06:44:16 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id f2so26042819ljn.1
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2021 06:44:16 -0700 (PDT)
+        with ESMTP id S243338AbhHZTCt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2021 15:02:49 -0400
+Received: from mail-ot1-x32d.google.com (mail-ot1-x32d.google.com [IPv6:2607:f8b0:4864:20::32d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28A6AC061757
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Aug 2021 12:02:02 -0700 (PDT)
+Received: by mail-ot1-x32d.google.com with SMTP id o16-20020a9d2210000000b0051b1e56c98fso4828227ota.8
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Aug 2021 12:02:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=kOYXhGaqQ6MRJEfF+E0ER+xBLRcBgZV7cWZXRVeFtj4=;
-        b=oSzgQNH2PwxCqBTmQ00Scj9XVNl4PjTfZ++xtN2IEitrBIFKHRNOL0Nw67BOqqLDXc
-         ActdqjZTwLU+LZHafZglw2/Ka0Otxu1mSTzy+f7Iy3+t336Rl1FhjMz2TVigE0AiEfMe
-         sJwAOqAQwp9MrtcdCua2tE/O2fbPeJIJfuZ5yIh6gTpYFU8ZYLHM96NUBCjy6ffwMpVb
-         uT2td0pEGA0MAXd9lc/rMbDlvrPemi+GAcO1VH4u67DOlWf4posmy4rjN9xZEewHg12T
-         9cfnXrYjqrFceBAQli3kRcG6SJrpB64dhbVykWoa0BUH1uuNw3Xod+WsHj2D6vQZ4dTs
-         W+jw==
+        d=chromium.org; s=google;
+        h=mime-version:in-reply-to:references:jubject:from:user-agent:date
+         :message-id:subject:to:cc;
+        bh=+iVPuEHGBickynSlN/aspzgM+vCXS1pxLKvIBYzPHaY=;
+        b=m1Qh8c1JI8bJtMbx2zXs3H9EO3V3B24CTfDZ0E0MweKP5VXvP8ajaNkOgqAv29OW/F
+         xjby+KYB85j/qh0w1BGUe1u8LtcQThDspoEcg6Ho/K9SiquHynat2V84AQwXD9k8D+AX
+         lUHCf/zIj2pOkXaqiiOBJBZ//d85EfeL9KDEo=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=kOYXhGaqQ6MRJEfF+E0ER+xBLRcBgZV7cWZXRVeFtj4=;
-        b=LpxN6tYuVvOzj7QiMo708YBLxCNOuP+1mQZ8Xr2mZuLYLnHfFFxJxUQjD3EgcZoRqS
-         QKz4V2/bUC8+a+DLN6YZT/AfLv98yRsCeXP5CaDzFT362fyWirt8366Z1vqxFmwAU790
-         LhswZOpFJ3TBtPKAKvsrhWa1bOhJl6qD3g0vOLAJhjy2dEbsyuGqG8fZkFtpH+I/hN1s
-         kUFIq+QJ+abLyQK6KNsDCoBdz4Ll3uUb/sLVGzJ6wZ4Z9n4LxRf3zrf90s5v76m7kR4/
-         eVa3vIEZwuqGU2g0heSKnUjYCpBEXqfQu8DdOuB3/piel6HCUljmAW4dsx6MYetlvj85
-         wlRg==
-X-Gm-Message-State: AOAM532S2Ma55vS9K+xJvFDYF0dUtIkTdlaHAHEnwDp/NS22nosLiVPd
-        gk8r/jYpHgpG3InbkdTCp95ZWzDAq+UszbgmOPOT0w==
-X-Google-Smtp-Source: ABdhPJzSbjrfR6nWoj1MvF5PjDjLKW0SfuR+5h1BG6O5DQ4hi8nvSRGwK/6dSx4oy0x4iF+t9nGT3L28hehyyLhGsjQ=
-X-Received: by 2002:a2e:bd09:: with SMTP id n9mr20595594ljq.76.1630331054549;
- Mon, 30 Aug 2021 06:44:14 -0700 (PDT)
+        h=x-gm-message-state:mime-version:in-reply-to:references:jubject:from
+         :user-agent:date:message-id:subject:to:cc;
+        bh=+iVPuEHGBickynSlN/aspzgM+vCXS1pxLKvIBYzPHaY=;
+        b=Q+CtSmfVyWDDXB9DHZtccz4f8tk5Y/8NPEWK8ayEuRezdJKgW5xR5SMzToaERAjpr0
+         a4C3+bIaVRapYpYa6Drp83xJC8seL2VR77WO030hqBgd2IWQSjZcHhYUPx2MDpEM/WYw
+         RUHl/+LXpy03+G1LYo4FjTSTqtoD4A1cU0cWirXZLu8L3TrgFerHSgXRERZc0JQgat1D
+         pWuoXKuxogmIlvK/UdUzxtJJ+K0BG25rRylpKKfClxaEUntZXmiSsUesqaLr+hqJnI6n
+         D00TUkbPfHDHFSaLS28gJR14C9tgYb9jOZwl2nl1H3EtIn8QnBkZwxS+dWBTIMN8iong
+         CgRg==
+X-Gm-Message-State: AOAM532aUWj6w5X+hvaF6ufstpR3rbrMc5VfMstr25K918mHzfaw53KH
+        OVkrbntlvvC0W0p7AiA2Crs68Ywh+tJiNgtIa+49L3mccRk=
+X-Google-Smtp-Source: ABdhPJzdZYXAXrUOl9mGtjohncFB+oGrYX4mON9av982YMT3gjRIDsaw7nD/2scpYTZBlBNfwQfReCj7diwhE7RBlNg=
+X-Received: by 2002:a05:6830:88:: with SMTP id a8mr4600325oto.233.1630004521512;
+ Thu, 26 Aug 2021 12:02:01 -0700 (PDT)
+Received: from 753933720722 named unknown by gmailapi.google.com with
+ HTTPREST; Thu, 26 Aug 2021 19:02:00 +0000
 MIME-Version: 1.0
-References: <ccb2dad1-c8c1-9f19-92c4-7faf2b787e6d@foss.st.com>
-In-Reply-To: <ccb2dad1-c8c1-9f19-92c4-7faf2b787e6d@foss.st.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 30 Aug 2021 15:43:38 +0200
-Message-ID: <CAPDyKFqMJmJRLNYF=gWvAEH8wtJzrxrZ9KLz62t4XNsD84vr=Q@mail.gmail.com>
-Subject: Re: Question about MMC_PM_KEEP_POWER in MMCI driver
-To:     Yann Gautier <yann.gautier@foss.st.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Rob Herring <robh+dt@kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "linux-stm32@st-md-mailman.stormreply.com" 
-        <linux-stm32@st-md-mailman.stormreply.com>,
-        DTML <devicetree@vger.kernel.org>
+In-Reply-To: <YSfioM5cEnvD3pGb@sashalap>
+References: <20210824025754.658394-1-sashal@kernel.org> <CAE-0n53zk0ogf=TUknMoCAPDd97=jq3Czpp6b1c9E29ormuCSQ@mail.gmail.com>
+ <YSfioM5cEnvD3pGb@sashalap>
+jubject: Re: FAILED: Patch "mmc: sdhci-msm: Update the software timeout value
+ for sdhc" failed to apply to 5.4-stable tree
+From:   Stephen Boyd <swboyd@chromium.org>
+User-Agent: alot/0.9.1
+Date:   Thu, 26 Aug 2021 19:02:00 +0000
+Message-ID: <CAE-0n50brNnTASH8xR_jSCr0=OAQohcA4cG3HFAeDmt=4U-4Uw@mail.gmail.com>
+Subject: 
+To:     Sasha Levin <sashal@kernel.org>
+Cc:     sbhanu@codeaurora.org, stable@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 25 Aug 2021 at 16:34, Yann Gautier <yann.gautier@foss.st.com> wrote:
+Quoting Sasha Levin (2021-08-26 11:51:12)
+> On Thu, Aug 26, 2021 at 07:51:45AM +0000, Stephen Boyd wrote:
+> >From cd5d41c802f7b3e20c0c0ebd6bf0cb335954fd89 Mon Sep 17 00:00:00 2001
+> >From: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> >Date: Fri, 16 Jul 2021 17:16:14 +0530
+> >Subject: [PATCH] mmc: sdhci-msm: Update the software timeout value for sdhc
+> >
+> >commit 67b13f3e221ed81b46a657e2b499bf8b20162476 upstream.
+> >
+> >Whenever SDHC run at clock rate 50MHZ or below, the hardware data
+> >timeout value will be 21.47secs, which is approx. 22secs and we have
+> >a current software timeout value as 10secs. We have to set software
+> >timeout value more than the hardware data timeout value to avioid seeing
+> >the below register dumps.
+> >
+> >[  332.953670] mmc2: Timeout waiting for hardware interrupt.
+> >[  332.959608] mmc2: sdhci: ============ SDHCI REGISTER DUMP ===========
+> >[  332.966450] mmc2: sdhci: Sys addr:  0x00000000 | Version:  0x00007202
+> >[  332.973256] mmc2: sdhci: Blk size:  0x00000200 | Blk cnt:  0x00000001
+> >[  332.980054] mmc2: sdhci: Argument:  0x00000000 | Trn mode: 0x00000027
+> >[  332.986864] mmc2: sdhci: Present:   0x01f801f6 | Host ctl: 0x0000001f
+> >[  332.993671] mmc2: sdhci: Power:     0x00000001 | Blk gap:  0x00000000
+> >[  333.000583] mmc2: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> >[  333.007386] mmc2: sdhci: Timeout:   0x0000000e | Int stat: 0x00000000
+> >[  333.014182] mmc2: sdhci: Int enab:  0x03ff100b | Sig enab: 0x03ff100b
+> >[  333.020976] mmc2: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> >[  333.027771] mmc2: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x0000808f
+> >[  333.034561] mmc2: sdhci: Cmd:       0x0000183a | Max curr: 0x00000000
+> >[  333.041359] mmc2: sdhci: Resp[0]:   0x00000900 | Resp[1]:  0x00000000
+> >[  333.048157] mmc2: sdhci: Resp[2]:   0x00000000 | Resp[3]:  0x00000000
+> >[  333.054945] mmc2: sdhci: Host ctl2: 0x00000000
+> >[  333.059657] mmc2: sdhci: ADMA Err:  0x00000000 | ADMA Ptr:
+> >0x0000000ffffff218
+> >[  333.067178] mmc2: sdhci_msm: ----------- VENDOR REGISTER DUMP
+> >-----------
+> >[  333.074343] mmc2: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:
+> >0x6000642c | DLL cfg2: 0x0020a000
+> >[  333.083417] mmc2: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:
+> >0x00000000 | DDR cfg: 0x80040873
+> >[  333.092850] mmc2: sdhci_msm: Vndr func: 0x00008a9c | Vndr func2 :
+> >0xf88218a8 Vndr func3: 0x02626040
+> >[  333.102371] mmc2: sdhci: ============================================
+> >
+> >So, set software timeout value more than hardware timeout value.
+> >
+> >Signed-off-by: Shaik Sajida Bhanu <sbhanu@codeaurora.org>
+> >Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> >Cc: stable@vger.kernel.org
+> >Link: https://lore.kernel.org/r/1626435974-14462-1-git-send-email-sbhanu@codeaurora.org
+> >Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >Signed-off-by: Stephen Boyd <swboyd@chromium.org>
+> >---
+> > drivers/mmc/host/sdhci-msm.c | 18 ++++++++++++++++++
+> > 1 file changed, 18 insertions(+)
+> >
+> >diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> >index 8bed81cf03ad..8ab963055238 100644
+> >--- a/drivers/mmc/host/sdhci-msm.c
+> >+++ b/drivers/mmc/host/sdhci-msm.c
+> >@@ -1589,6 +1589,23 @@ static void sdhci_msm_set_clock(struct
+> >sdhci_host *host, unsigned int clock)
 >
-> Hi,
->
-> In drivers/mmc/host/mmci.c, MMC_PM_KEEP_POWER is unconditionally enabled.
-> This prevents correct low-power sequence on STM32MP157C-DK2 board which
-> embeds a Wifi chip brcm,bcm4329-fmac (this wifi part has not yet been
-> sent upstream).
+> I've queued this up, thanks!
 
-Exactly why doesn't this work with the STM32MP157C-DK2 board?
+Thanks!
 
 >
-> This MMC_PM_KEEP_POWER can be taken from DT with the property
-> keep-power-in-suspend. This is what is done for other MMC drivers.
+> Note that the patch was linewrapped (see above).
 
-The DT property is what should have been used for mmci as well.
-
->
-> I wonder what should be the best solution for this.
->
-> 1) Remove MMC_PM_KEEP_POWER from the driver, and modify all SoC device
-> tree files embedding a arm,pl18x with adding keep-power-in-suspend;
-> property (except stm32mp151.dtsi file).
-> This can be easy to do (~10 files to modify). But that could be more
-> board dependent, if an SDIO chip is plugged on this MMC IP.
-> And the name keep-power-in-suspend can be misleading as it only applies
-> to SDIO.
->
-> 2) Remove MMC_PM_KEEP_POWER from the driver, and modify board DT files
-> with the property. This could be a difficult task to find all those
-> boards. And this should be applied only for SDIO configs.
->
-> 3) Just modify the driver to apply this capability for all MMCI chips
-> but STM32. This could be done in the dedicated file, in
-> sdmmc_variant_init() function. But some boards based on STM32MP15 chip
-> might want to keep this capability.
-
-I would suggest option 3).
-
-As a matter of fact, we also allow MMC_PM_KEEP_POWER to become set
-when parsing the DTB via calling mmc_of_parse(). So just changing the
-default value (don't set MMC_PM_KEEP_POWER) for the stm32 variant,
-would do the trick I think.
-
-Kind regards
-Uffe
+Indeed. Must be something wrong with my mailer setup. I'll look into
+fixing it. Thanks.
