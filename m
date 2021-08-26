@@ -2,116 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B60F4C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 14:15:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3DDFC4320E
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 14:25:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 974E560F25
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 14:15:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A958760F91
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 14:25:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242755AbhHZOQA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Aug 2021 10:16:00 -0400
-Received: from smtp-out1.suse.de ([195.135.220.28]:39980 "EHLO
-        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229451AbhHZOQA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2021 10:16:00 -0400
-Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
-        by smtp-out1.suse.de (Postfix) with ESMTP id C701B22311;
-        Thu, 26 Aug 2021 14:15:11 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
-        t=1629987311; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
-         mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=YK6hm9tLw/593E7arpJG5Cuje5/kJDaClSGQye4BMq0=;
-        b=axKtHoOTWlqihCIBRmbzGqm3o+VJALKGxrUEMLKbMEBSMTO55ouryeDauQanVIuJyJi7C1
-        w3ElGK9fmjmrGn4I842luAOMdD28IUDVgNal3rP2b9RVVRu09yDGoqw0QqwBexTPwbsliu
-        d7BtlagVchv8XGnwZ2Cwt8tgzMD3Gtg=
-Received: from suse.cz (unknown [10.100.224.162])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by relay2.suse.de (Postfix) with ESMTPS id 2409BA3B8B;
-        Thu, 26 Aug 2021 14:15:11 +0000 (UTC)
-Date:   Thu, 26 Aug 2021 16:15:09 +0200
-From:   Petr Mladek <pmladek@suse.com>
-To:     Yury Norov <yury.norov@gmail.com>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
-        kvm@vger.kernel.org,
-        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Alexander Lobakin <alobakin@pm.me>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        Andrea Merello <andrea.merello@gmail.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Arnaldo Carvalho de Melo <acme@redhat.com>,
-        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Brian Cain <bcain@codeaurora.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph Lameter <cl@linux.com>,
-        Daniel Bristot de Oliveira <bristot@redhat.com>,
-        David Hildenbrand <david@redhat.com>,
-        Dennis Zhou <dennis@kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Ian Rogers <irogers@google.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
-        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
-        Leo Yan <leo.yan@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Namhyung Kim <namhyung@kernel.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Peter Xu <peterx@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Rich Felker <dalias@libc.org>,
-        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Shuah Khan <shuah@kernel.org>,
-        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Tejun Heo <tj@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>
-Subject: Re: [PATCH 17/17] vsprintf: rework bitmap_list_string
-Message-ID: <YSeh7SrwoMhWb8CO@alley>
-References: <20210814211713.180533-1-yury.norov@gmail.com>
- <20210814211713.180533-18-yury.norov@gmail.com>
+        id S242820AbhHZO0U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Aug 2021 10:26:20 -0400
+Received: from mail-vs1-f51.google.com ([209.85.217.51]:44583 "EHLO
+        mail-vs1-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242819AbhHZO0T (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2021 10:26:19 -0400
+Received: by mail-vs1-f51.google.com with SMTP id s19so2143624vsl.11;
+        Thu, 26 Aug 2021 07:25:32 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jprPXM4sChkG8ooptncY1YgExnlJ1w+XBvLzYryUV6g=;
+        b=IwLg0AN2IlM7Q9mEDeh94jpbdRnz2phfR7lg4b9NnEbTaQzGM/BPtE6so5ekV1Yoe9
+         r22Yd2pDnT3zNjv+TmNOcgK7JUMKGWmGXuXqPhgse1NYr+yhBnEoHsuDl785auRLe4F1
+         ssiMXt3hpfwic8G/npyzMykRnGhhD3a/Vm2L2QZgAoJ2Ftb6ryHH4vwv3iYiqwHSN76D
+         QgqhpE+1NNAiH5GtieNPJ57IpXQbWkjJ5MD76BM67t3Iwsri8mVMr0leazafGL/NWHDP
+         u5mq6IWwz+RFyfsElm4miQoN1qTnN49ftD7YeLvcG681EuQp4484AYDACeZzXVljwX5N
+         XGIQ==
+X-Gm-Message-State: AOAM533D2qP8iyFxhefvOaBrk77Avo9y+rdK9hTV03xBMtoZOt+73Vzi
+        gSHX1OtSXoWbdKZg6+lEogIKkHXBnveEZPUiIE7xtnz2
+X-Google-Smtp-Source: ABdhPJzKtJ9ealj/wVf+bGA+b+hX+/EFS4KRqodTE5/viVbTHk9dSZbfX2dDw2vBjRx8x7fEhwZP3yDXX4ZFXnnHmFs=
+X-Received: by 2002:a67:c789:: with SMTP id t9mr2871736vsk.60.1629987931998;
+ Thu, 26 Aug 2021 07:25:31 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210814211713.180533-18-yury.norov@gmail.com>
+References: <20210826082107.47299-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210826082107.47299-1-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 26 Aug 2021 16:25:20 +0200
+Message-ID: <CAMuHMdUXc0oSCXJ-5QmPJz0VkX1Aib+ZAv8K2LN_fT1+5mocqw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old SDHIs
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat 2021-08-14 14:17:13, Yury Norov wrote:
-> bitmap_list_string() is very ineffective when printing bitmaps with long
-> ranges of set bits because it calls find_next_bit for each bit in the
-> bitmap.  We can do better by detecting ranges of set bits.
-> 
-> In my environment, before/after is 943008/31008 ns.
-> 
-> Signed-off-by: Yury Norov <yury.norov@gmail.com>
-> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Hi Wolfram,
 
-I like the patch. The new code is much easier to follow.
-Feel free to use:
+On Thu, Aug 26, 2021 at 10:21 AM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> Old SDHI instances have a default value for the reset register which
+> keeps it in reset state by default. So, when applying a hard reset we
+> need to manually leave the soft reset state as well. Later SDHI
+> instances have a different default value, the one we write manually now.
+>
+> Fixes: b4d86f37eacb ("mmc: renesas_sdhi: do hard reset if possible")
+> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> ---
+>
+> Geez, typical SDHI nastiness here...
+>
+> Geert: I think this fixes the issue you saw on Koelsch. It works fine on
+> my Lager now at least. Can you please test and tag if all goes well?
+> It would be great to have this in 5.14 but it definately needs Geert's
+> confirmation first.
 
-Reviewed-by: Petr Mladek <pmladek@suse.com>
+Thanks, fixes the SD Card issue is was seeing on Koelsch, and still
+works on Salvator-XS.
 
-Best Regards,
-Petr
+Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
