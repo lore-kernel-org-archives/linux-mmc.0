@@ -2,138 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
+	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 651D8C4320A
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 02:55:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62267C4320A
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 06:36:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3FD70600AA
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 02:55:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 44745610CB
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 06:36:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238028AbhHZC4m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Aug 2021 22:56:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42530 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234193AbhHZC4m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Aug 2021 22:56:42 -0400
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD25DC061757
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Aug 2021 19:55:55 -0700 (PDT)
-Received: by mail-pl1-x630.google.com with SMTP id e15so864844plh.8
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Aug 2021 19:55:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to:user-agent;
-        bh=XZJy3B7m2q1WQYxMFNJqVt+qoddOU66BMzkNgwutOWg=;
-        b=BqMyQF/pRrF5xvz5gMLvg1PjbQE0frktW1h8fThSOxAyiiCfj3dL0xTey26htEbkAU
-         qVk4YC/4pxXxGHnr1GTo9bAoMJ4eX1tti5O7V1wnRrIafIwyVqmUZ2m6I0wxB2W1enrU
-         HYOhVAex2Ke6zlvt61UNmgKkPh0dFb29lz983ZdH0aQ73RTHtAt7M1/VCP+x5TO9AjAI
-         IJ3QFiGrCxXaLSKuBsbiYJZ42RDh74ChanCbedOwOUd6kuh7jO/uAx7AqCUeER3jlnSQ
-         JtlHN1LIH4ywCIyB5pTCzFG5gUqpfLooaOTxS3rQYlWnLCOQf96ZEpwgb/6YUmVVCCWa
-         uEzw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to:user-agent;
-        bh=XZJy3B7m2q1WQYxMFNJqVt+qoddOU66BMzkNgwutOWg=;
-        b=GReJ/UbGjmAYNZGKMCXhVavodOeNKK6CFj67RJU5zc7EPNyvzCIkZhEzw+e04DSIif
-         G4Q9ywfMqWky+7ynoNXhXNzXUuuSqVXRnje44FgpIQIF7qdHVf2nf86zrNLWB42R9Y+h
-         VBCeIk7rJk7F97W+3VIL7loirHdxHYzO7Tw/+fxgXHFJHM/zFaMMiGFf/ya7OLT7zjA9
-         DukH7wN0KzyDosYDHGopoo/HPNo7rJUEmAnYaOLMGdDkol0P3wBnjA0hmtHj+Fx30g/L
-         vwxf2+RdOeLuIaiDxEUFm8l41iptH5yDci02VuAAG1fMM5rZZMev0m8jklSj6c2Q7xDe
-         RRvg==
-X-Gm-Message-State: AOAM532hpn1MUUfFI4WN5a2CL527ls6h/IQc+mqHBIePDr/oi+xp/PHm
-        3Tp54sBry1oU1zAJbcSj491j0Q==
-X-Google-Smtp-Source: ABdhPJxp/UrPyXCwFMVDb4P8xsIyAd9gtXZ72kFLG9qw2YDutl/4rgLBxJGBT6WkpyrCaGfD2F0KiA==
-X-Received: by 2002:a17:90b:3144:: with SMTP id ip4mr14265346pjb.22.1629946555282;
-        Wed, 25 Aug 2021 19:55:55 -0700 (PDT)
-Received: from localhost ([122.172.201.85])
-        by smtp.gmail.com with ESMTPSA id 22sm1308517pgn.88.2021.08.25.19.55.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Aug 2021 19:55:54 -0700 (PDT)
-Date:   Thu, 26 Aug 2021 08:25:50 +0530
-From:   Viresh Kumar <viresh.kumar@linaro.org>
-To:     Dmitry Osipenko <digetx@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Peter De Schrijver <pdeschrijver@nvidia.com>,
-        Mikko Perttunen <mperttunen@nvidia.com>,
-        Peter Chen <peter.chen@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Lee Jones <lee.jones@linaro.org>,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>, Nishanth Menon <nm@ti.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Richard Weinberger <richard@nod.at>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        id S238082AbhHZGgt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Aug 2021 02:36:49 -0400
+Received: from foss.arm.com ([217.140.110.172]:39666 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234415AbhHZGgt (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 26 Aug 2021 02:36:49 -0400
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 3543FD6E;
+        Wed, 25 Aug 2021 23:36:02 -0700 (PDT)
+Received: from [192.168.122.166] (unknown [172.31.20.19])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 354913F766;
+        Wed, 25 Aug 2021 23:36:01 -0700 (PDT)
+Subject: Re: [PATCH V2 05/10] mmc: sdhci-iproc: Set
+ SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN on BCM2711
+To:     Stefan Wahren <stefan.wahren@i2se.com>,
         Rob Herring <robh+dt@kernel.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-tegra <linux-tegra@vger.kernel.org>,
-        Linux PM <linux-pm@vger.kernel.org>,
-        Linux USB List <linux-usb@vger.kernel.org>,
-        linux-staging@lists.linux.dev, linux-spi@vger.kernel.org,
-        linux-pwm@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Media Mailing List <linux-media@vger.kernel.org>,
-        dri-devel <dri-devel@lists.freedesktop.org>,
-        DTML <devicetree@vger.kernel.org>,
-        linux-clk <linux-clk@vger.kernel.org>
-Subject: Re: [PATCH v8 01/34] opp: Add dev_pm_opp_sync() helper
-Message-ID: <20210826025550.sshd7xl3gsuendoi@vireshk-i7>
-References: <CAPDyKFrZqWtZOp4MwDN6fShoLLbw5NM039bpE3-shB+fCEZOog@mail.gmail.com>
- <20210818091417.dvlnsxlgybdsn76x@vireshk-i7>
- <CAPDyKFrVxhrWGr2pKduehshpLFd_db2NTPGuD7fSqvuHeyzT4w@mail.gmail.com>
- <f1314a47-9e8b-58e1-7c3f-0afb1ec8e70a@gmail.com>
- <20210819061617.r4kuqxafjstrv3kt@vireshk-i7>
- <CAPDyKFpg8ixT4AEjzVLTwQR7Nn9CctjnLCDS5GwkOrAERquyxw@mail.gmail.com>
- <20210820051843.5mueqpnjbqt3zdzc@vireshk-i7>
- <b887de8c-a40b-a62e-8abf-698e67cdb70c@gmail.com>
- <ed70e422-e0e9-8c2a-7ce6-e39cb6fd8108@gmail.com>
- <20210826025427.exdinwkuavyfcp3f@vireshk-i7>
+        Nicolas Saenz Julienne <nsaenz@kernel.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Maxime Ripard <maxime@cerno.tech>, iivanov@suse.de,
+        devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+References: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
+ <1628334401-6577-6-git-send-email-stefan.wahren@i2se.com>
+From:   Jeremy Linton <jeremy.linton@arm.com>
+Message-ID: <3e8bfa67-e3fe-bcfd-1941-90cae7ed0176@arm.com>
+Date:   Thu, 26 Aug 2021 01:36:00 -0500
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.10.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210826025427.exdinwkuavyfcp3f@vireshk-i7>
-User-Agent: NeoMutt/20180716-391-311a52
+In-Reply-To: <1628334401-6577-6-git-send-email-stefan.wahren@i2se.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26-08-21, 08:24, Viresh Kumar wrote:
-> On 25-08-21, 18:41, Dmitry Osipenko wrote:
-> > Thinking a bit more about this, I got a nicer variant which actually works in all cases for Tegra.
-> > 
-> > Viresh / Ulf, what do you think about this:
-> 
-> This is what I have been suggesting from day 1 :)
-> 
-> https://lore.kernel.org/linux-staging/20210818055849.ybfajzu75ecpdrbn@vireshk-i7/
-> 
->  "
->   And if it is all about just syncing the genpd core, then can the
->   genpd core do something like what clk framework does? i.e. allow a
->   new optional genpd callback, get_performance_state() (just like
->   set_performance_state()), which can be called initially by the core
->   to get the performance to something other than zero.
->  "
-> 
-> Looks good to me :)
+Hi,
 
-When you refresh this stuff, please send only 3-4 patches to update
-the core stuff and show an example. Once we finalize with the
-interface, you can update all the users. Else this is just noise for
-everyone else.
 
--- 
-viresh
+On 8/7/21 6:06 AM, Stefan Wahren wrote:
+> From: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> 
+> The controller doesn't seem to pick-up on clock changes, so set the
+> SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN flag to query the clock frequency
+> directly from the clock.
+> 
+> Fixes: f84e411c85be ("mmc: sdhci-iproc: Add support for emmc2 of the BCM2711")
+> Signed-off-by: Nicolas Saenz Julienne <nsaenz@kernel.org>
+> Signed-off-by: Stefan Wahren <stefan.wahren@i2se.com>
+> ---
+>   drivers/mmc/host/sdhci-iproc.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-iproc.c b/drivers/mmc/host/sdhci-iproc.c
+> index 032bf85..e7565c6 100644
+> --- a/drivers/mmc/host/sdhci-iproc.c
+> +++ b/drivers/mmc/host/sdhci-iproc.c
+> @@ -295,7 +295,8 @@ static const struct sdhci_ops sdhci_iproc_bcm2711_ops = {
+>   };
+>   
+>   static const struct sdhci_pltfm_data sdhci_bcm2711_pltfm_data = {
+> -	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12,
+> +	.quirks = SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12 |
+> +		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+>   	.ops = &sdhci_iproc_bcm2711_ops,
+>   };
+
+I just noticed that this got merged to rc7, and it breaks the ACPI based 
+rpi's because it causes the 100Mhz max clock to be overridden to the 
+return from sdhci_iproc_get_max_clock() which is 0 because there isn't a 
+OF/DT based clock device.
+
+
