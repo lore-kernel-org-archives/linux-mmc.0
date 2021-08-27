@@ -2,172 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9847BC4320E
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 21:10:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5089CC432BE
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Aug 2021 07:15:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7710F61040
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Aug 2021 21:10:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 27B9D60F92
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Aug 2021 07:15:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243620AbhHZVKr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Aug 2021 17:10:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39658 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243577AbhHZVKq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Aug 2021 17:10:46 -0400
-Received: from mail-qk1-x72d.google.com (mail-qk1-x72d.google.com [IPv6:2607:f8b0:4864:20::72d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97356C061757;
-        Thu, 26 Aug 2021 14:09:58 -0700 (PDT)
-Received: by mail-qk1-x72d.google.com with SMTP id 22so5027623qkg.2;
-        Thu, 26 Aug 2021 14:09:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=ndtmO1/QxMT8WfX0l7kvhRXiSBeQRVJld2PoPckI1O0=;
-        b=rXkpoN+AxZC8JOkn4R8K9c+mS84OMQ1t83JbZhfjYcI75ANkLuquiypDrnp6s06y4I
-         NPluMkYca+r77CJWNzrc6f9U4ud4kyXphYA+f1Z5i3sj5A67I2KVW7XMYbANrSrvNeug
-         AXEO1RvjRD9vlxYBKA66P+G1lIN48rj840wiRhKemSqTzWsckMEASoZJXD1f/rAaSq+q
-         4EwzIgRtp08+jezv5v4uFoI2T4EFS19SAExLi8M3OLwn0bNz8oPOwq/p73iAAEyEo2/9
-         NFstchfvGDpACwhniUvMd14JxputDzfRaHh8vadNNfyRCFm09A2zMbDHXzY48P6KZLGQ
-         euLA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=ndtmO1/QxMT8WfX0l7kvhRXiSBeQRVJld2PoPckI1O0=;
-        b=HMbCouOVtu2xaoA5Zhl/F7PHiJjgy0S0Ut4CFVm+qVWZySI4o1OY4w2sj1oaWvcU9o
-         VjjdDD5MaCB1Y+VDzw4JRgzp7DMi5bDP36ALVL1FBWRhBWMLy1EFw4/27UNlglEr15gB
-         2z7K06LAGUDEB8z7wyna0HbAPRqDC3tvn54ylwJYTfFtHM/A0XkWgEsXZcwL6qULrdQB
-         y2pHAa0Bew3JfLcqVMFJNep1ZAYZIiI0fxbT3b5yCt/Jv6eNgueyt4KUGKl+l1u/mGeG
-         qMcRRGoEAU7GZ2WV1eoS2s2qlRhKrkqdTV1OPv1vfdUPUK8Q8ZAO6WzltvO4xkegmDQr
-         9RBA==
-X-Gm-Message-State: AOAM530Rpjl3s7ehPbdfR8LW+nhDcIIu0aiWxaaxEcfKRc6OTvX2GWMp
-        YmOd5WngB+RdM+LzhI9ngmM=
-X-Google-Smtp-Source: ABdhPJyNBmR/3pzA2dXFXq9JJ0G8eGCHjShTKLd/3ctVIJ403sMS9vArXoGYUj4XusUtSX1cbXxkww==
-X-Received: by 2002:a37:de15:: with SMTP id h21mr5971229qkj.124.1630012197581;
-        Thu, 26 Aug 2021 14:09:57 -0700 (PDT)
-Received: from localhost ([12.28.44.171])
-        by smtp.gmail.com with ESMTPSA id r128sm3373281qke.98.2021.08.26.14.09.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 26 Aug 2021 14:09:56 -0700 (PDT)
-Date:   Thu, 26 Aug 2021 14:09:55 -0700
-From:   Yury Norov <yury.norov@gmail.com>
-To:     Petr Mladek <pmladek@suse.com>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
-        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
-        kvm@vger.kernel.org,
-        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Alexander Lobakin <alobakin@pm.me>,
-        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
-        Alexey Klimov <aklimov@redhat.com>,
-        Andrea Merello <andrea.merello@gmail.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Arnaldo Carvalho de Melo <acme@redhat.com>,
-        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
-        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
-        Brian Cain <bcain@codeaurora.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph Lameter <cl@linux.com>,
-        Daniel Bristot de Oliveira <bristot@redhat.com>,
-        David Hildenbrand <david@redhat.com>,
-        Dennis Zhou <dennis@kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Ian Rogers <irogers@google.com>,
-        Ingo Molnar <mingo@redhat.com>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
-        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
-        Leo Yan <leo.yan@linaro.org>,
-        Mark Rutland <mark.rutland@arm.com>,
-        Namhyung Kim <namhyung@kernel.org>,
-        Palmer Dabbelt <palmer@dabbelt.com>,
-        Paolo Bonzini <pbonzini@redhat.com>,
-        Peter Xu <peterx@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        Rich Felker <dalias@libc.org>,
-        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
-        Sean Christopherson <seanjc@google.com>,
-        Sergey Senozhatsky <senozhatsky@chromium.org>,
-        Shuah Khan <shuah@kernel.org>,
-        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
-        Steven Rostedt <rostedt@goodmis.org>,
-        Tejun Heo <tj@kernel.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        id S244287AbhH0HQc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Aug 2021 03:16:32 -0400
+Received: from mailgw02.mediatek.com ([210.61.82.184]:41216 "EHLO
+        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S244274AbhH0HQc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2021 03:16:32 -0400
+X-UUID: 32bfc58617334ef286f85314b60c1b0a-20210827
+X-UUID: 32bfc58617334ef286f85314b60c1b0a-20210827
+Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw02.mediatek.com
+        (envelope-from <derong.liu@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 366452259; Fri, 27 Aug 2021 15:15:41 +0800
+Received: from MTKCAS06.mediatek.inc (172.21.101.30) by
+ mtkmbs02n2.mediatek.inc (172.21.101.101) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.2; Fri, 27 Aug 2021 15:15:40 +0800
+Received: from localhost.localdomain (10.15.20.246) by MTKCAS06.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
+ Transport; Fri, 27 Aug 2021 15:15:39 +0800
+From:   Derong Liu <derong.liu@mediatek.com>
+To:     Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Will Deacon <will@kernel.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>
-Subject: Re: [PATCH 11/17] find: micro-optimize for_each_{set,clear}_bit()
-Message-ID: <YSgDI9NpC51GhB/2@yury-ThinkPad>
-References: <20210814211713.180533-1-yury.norov@gmail.com>
- <20210814211713.180533-12-yury.norov@gmail.com>
- <YSeduU41Ef568xhS@alley>
+        Matthias Brugger <matthias.bgg@gmail.com>
+CC:     <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <wsp_upstream@mediatek.com>,
+        Peng Zhou <peng.zhou@mediatek.com>,
+        Derong Liu <derong.liu@mediatek.com>
+Subject: [PATCH v3] mmc: mediatek: add wait dma stop done flow
+Date:   Fri, 27 Aug 2021 15:15:37 +0800
+Message-ID: <20210827071537.1034-1-derong.liu@mediatek.com>
+X-Mailer: git-send-email 2.18.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YSeduU41Ef568xhS@alley>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Aug 26, 2021 at 03:57:13PM +0200, Petr Mladek wrote:
-> On Sat 2021-08-14 14:17:07, Yury Norov wrote:
-> > The macros iterate thru all set/clear bits in a bitmap. They search a
-> > first bit using find_first_bit(), and the rest bits using find_next_bit().
-> > 
-> > Since find_next_bit() is called shortly after find_first_bit(), we can
-> > save few lines of I-cache by not using find_first_bit().
-> 
-> Is this only a speculation or does it fix a real performance problem?
-> 
-> The macro is used like:
-> 
-> 	for_each_set_bit(bit, addr, size) {
-> 		fn(bit);
-> 	}
-> 
-> IMHO, the micro-opimization does not help when fn() is non-trivial.
+We found this issue on a 5G platform, during CMDQ error handling, if DMA status is active when it call msdc_reset_hw, it means mmc host hw reset and DMA transfer will be parallel, mmc host may access sram region unexpectedly.
+According to the programming guide of mtk mmc host, it needs to wait for dma stop done after set dma stop.
+This change should be applied to all SoCs.
+
+Change-Id: I9b87523f19b24ca73958bbcb83bb418413c5a180
+Signed-off-by: Derong Liu <derong.liu@mediatek.com>
+---
+ drivers/mmc/host/mtk-sd.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 4dfc246c5f95..b99330bad6a5 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -8,6 +8,7 @@
+ #include <linux/clk.h>
+ #include <linux/delay.h>
+ #include <linux/dma-mapping.h>
++#include <linux/iopoll.h>
+ #include <linux/ioport.h>
+ #include <linux/irq.h>
+ #include <linux/of_address.h>
+@@ -2330,6 +2331,7 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
+ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
+ {
+ 	struct msdc_host *host = mmc_priv(mmc);
++	unsigned int val = 0;
  
-The effect is measurable:
+ 	/* disable cmdq irq */
+ 	sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INT_CMDQ);
+@@ -2339,6 +2341,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
+ 	if (recovery) {
+ 		sdr_set_field(host->base + MSDC_DMA_CTRL,
+ 			      MSDC_DMA_CTRL_STOP, 1);
++		if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
++			!(val & MSDC_DMA_CFG_STS), 1, 3000)))
++			return;
+ 		msdc_reset_hw(host);
+ 	}
+ }
+-- 
+2.18.0
 
-Start testing for_each_bit()
-for_each_set_bit:                15296 ns,   1000 iterations
-for_each_set_bit_from:           15225 ns,   1000 iterations
-
-Start testing for_each_bit() with cash flushing
-for_each_set_bit:               547626 ns,   1000 iterations
-for_each_set_bit_from:          497899 ns,   1000 iterations
-
-Refer this:
-
-https://www.mail-archive.com/dri-devel@lists.freedesktop.org/msg356151.html
-
-Thanks,
-Yury
- 
-> > --- a/include/linux/find.h
-> > +++ b/include/linux/find.h
-> > @@ -280,7 +280,7 @@ unsigned long find_next_bit_le(const void *addr, unsigned
-> >  #endif
-> >  
-> >  #define for_each_set_bit(bit, addr, size) \
-> > -	for ((bit) = find_first_bit((addr), (size));		\
-> > +	for ((bit) = find_next_bit((addr), (size), 0);		\
-> >  	     (bit) < (size);					\
-> >  	     (bit) = find_next_bit((addr), (size), (bit) + 1))
-> >  
-> 
-> It is not a big deal. I just think that the original code is slightly
-> more self-explaining.
-> 
-> Best Regards,
-> Petr
