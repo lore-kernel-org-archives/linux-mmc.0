@@ -2,275 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CE9CC432BE
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Aug 2021 08:56:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B69CC43214
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Aug 2021 09:39:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6629A60FDA
-	for <linux-mmc@archiver.kernel.org>; Fri, 27 Aug 2021 08:56:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 83AD46109E
+	for <linux-mmc@archiver.kernel.org>; Fri, 27 Aug 2021 09:39:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244604AbhH0I5k (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 27 Aug 2021 04:57:40 -0400
-Received: from smtp1.axis.com ([195.60.68.17]:22599 "EHLO smtp1.axis.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S244601AbhH0I5k (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Fri, 27 Aug 2021 04:57:40 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1630054612;
-  x=1661590612;
-  h=from:to:cc:subject:date:message-id:mime-version:
-   content-transfer-encoding;
-  bh=wVWL1w1t4PoKqWdPakWlOklY52sCjhhBMT6cuVIypEw=;
-  b=qA6m14npdYFdxj+kjlPluLVVZuhaNAKkx/lIWI+EfPlxltAGZFwErlxZ
-   ylqGXecFIozEwfbzEDB/lCXOp0PZr43bI2qfJ9knPIC/7AEog7+1d6/u5
-   8PTkVB98Uhm8KpYRC7FugGVbizwEqUCMFZ+hkeO0BdCIHNhkWpjyTQ2bs
-   tyYz673ZtXc06kcg4j0RJW6vlAdnbG+M1r3G1e06aQUJOj7RGi9lTDQRq
-   9T82O2FPIlFJpVLTSyX/RNSaHFjuPYTQhxG0ix1+xsSxLK8nD263lRXsW
-   qpXxoGbEURn7uEjsh9Ic6R93tfLHvXKatbL04KGbl9WMGSHkvtspqgYQg
-   Q==;
-From:   =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-To:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <kernel@axis.com>, <linux-mmc@vger.kernel.org>,
-        =?UTF-8?q?M=C3=A5rten=20Lindahl?= <marten.lindahl@axis.com>
-Subject: [PATCH] mmc: dw_mmc: Support more time for data read timeouts
-Date:   Fri, 27 Aug 2021 10:56:34 +0200
-Message-ID: <20210827085634.21225-1-marten.lindahl@axis.com>
-X-Mailer: git-send-email 2.20.1
+        id S244714AbhH0Jjy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 27 Aug 2021 05:39:54 -0400
+Received: from mailout2.samsung.com ([203.254.224.25]:32907 "EHLO
+        mailout2.samsung.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244820AbhH0Jjt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 27 Aug 2021 05:39:49 -0400
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+        by mailout2.samsung.com (KnoxPortal) with ESMTP id 20210827093858epoutp029a92efe24148eb39a8ff316c562bb0fc~fIFS5oF5x3086730867epoutp02b
+        for <linux-mmc@vger.kernel.org>; Fri, 27 Aug 2021 09:38:58 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.samsung.com 20210827093858epoutp029a92efe24148eb39a8ff316c562bb0fc~fIFS5oF5x3086730867epoutp02b
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1630057138;
+        bh=bF2FPIkqfoDCrBEfXOkuYTk7alY50X8qdPwe7039LkA=;
+        h=From:To:Cc:Subject:Date:References:From;
+        b=Bhm2uh3VRPC9v/h0gPZDHq/qHxsmSXzFXQSA1F3SJ1NEwb8yTZ8GQbwwnJR7NLxlN
+         iCGAchVBtzr+qtpgHRLFkmtAmqKKEGaVnXzvvf/SW+tYVi5In7uhpIXqjjAlj2sk3K
+         rfKklF+QOu+NG8FMIhwt1eh0EXh4VwhzphwUGJQQ=
+Received: from epsnrtp2.localdomain (unknown [182.195.42.163]) by
+        epcas1p1.samsung.com (KnoxPortal) with ESMTP id
+        20210827093857epcas1p12370a4e0ff321d51f97153be5e7cffeb~fIFSVDFBq0892308923epcas1p1Z;
+        Fri, 27 Aug 2021 09:38:57 +0000 (GMT)
+Received: from epsmges1p4.samsung.com (unknown [182.195.38.250]) by
+        epsnrtp2.localdomain (Postfix) with ESMTP id 4Gwvmc1Rgtz4x9Q6; Fri, 27 Aug
+        2021 09:38:56 +0000 (GMT)
+Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
+        epsmges1p4.samsung.com (Symantec Messaging Gateway) with SMTP id
+        93.EA.10095.FA2B8216; Fri, 27 Aug 2021 18:38:56 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas1p4.samsung.com (KnoxPortal) with ESMTPA id
+        20210827093855epcas1p4ac8e34d779fe30de3e03bcadedcb66c8~fIFQUmXm72033020330epcas1p4X;
+        Fri, 27 Aug 2021 09:38:55 +0000 (GMT)
+Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20210827093855epsmtrp11f948ee91b7456004d861dffc77570cb~fIFQT30RY2278822788epsmtrp18;
+        Fri, 27 Aug 2021 09:38:55 +0000 (GMT)
+X-AuditID: b6c32a38-691ff7000000276f-df-6128b2afcefc
+Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
+        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        98.03.08750.FA2B8216; Fri, 27 Aug 2021 18:38:55 +0900 (KST)
+Received: from localhost.localdomain (unknown [10.253.100.232]) by
+        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
+        20210827093855epsmtip244f62cb1f6d68bdfc64d05250cc868ff~fIFQFBXqe1769117691epsmtip2g;
+        Fri, 27 Aug 2021 09:38:55 +0000 (GMT)
+From:   Chanwoo Lee <cw9316.lee@samsung.com>
+To:     chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        matthias.bgg@gmail.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+Cc:     grant.jung@samsung.com, jt77.jang@samsung.com,
+        dh0421.hwang@samsung.com, sh043.lee@samsung.com,
+        ChanWoo Lee <cw9316.lee@samsung.com>
+Subject: [PATCH] mmc: mtk-sd: Remove unused parameters(mrq)
+Date:   Fri, 27 Aug 2021 18:31:19 +0900
+Message-Id: <20210827093119.32481-1-cw9316.lee@samsung.com>
+X-Mailer: git-send-email 2.29.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprLJsWRmVeSWpSXmKPExsWy7bCmvu6GTRqJBu8WMVlcuzWfzWLGqTZW
+        i33XTrJb/Pq7nt1ix/Mz7BabHl9jtbi8aw6bxeXmi4wWR/73M1o0tRhbNP3Zx2JxfG24A4/H
+        zll32T3uXNvD5rF5Sb1Hy8n9LB59W1YxenzeJBfAFpVtk5GamJJapJCal5yfkpmXbqvkHRzv
+        HG9qZmCoa2hpYa6kkJeYm2qr5OIToOuWmQN0oZJCWWJOKVAoILG4WEnfzqYov7QkVSEjv7jE
+        Vim1ICWnwKxArzgxt7g0L10vL7XEytDAwMgUqDAhO+NJz332gqmcFR+v/WBrYNzD3sXIySEh
+        YCJxYcIEpi5GLg4hgR2MEttmPGSGcD4xSly6c5QVpEpI4DOjxOoTTjAda1duhiraxSixbsoC
+        KOcLo8S5xzcZuxg5ONgEtCRuH/MGiYsIXGeUaNuwkwXEYRboYpT4dbCLBWSUsIC1xMympWCH
+        sAioSvx5cBVsHS9QfN7HRUwQ6+Ql/tzvYYaIC0qcnPkErJcZKN68dTbYZgmBn+wS/zrusEA0
+        uEhs+nKHEcIWlnh1fAvUp1ISL/vb2CEamhklTs0+B+W0MEq8vnIDqspY4tPnz2A/MAtoSqzf
+        pQ8RVpTY+XsuI8RmPol3X3tYQUokBHglOtqEIEpUJOZ0nWOD2fXxxmNWCNtD4uzDK+yQcIyV
+        aH49jXUCo/wsJP/MQvLPLITFCxiZVzGKpRYU56anFhsWmMDjNTk/dxMjOJ1qWexgnPv2g94h
+        RiYOxkOMEhzMSiK8C76rJQrxpiRWVqUW5ccXleakFh9iNAWG8ERmKdHkfGBCzyuJNzSxNDAx
+        MzKxMLY0NlMS52V8JZMoJJCeWJKanZpakFoE08fEwSnVwGS99HL81IfbJ95xSlkTMvebANs5
+        s4dxN4WOXNbRU5qe6/Vh+c1dZ751XVY0qe/jMuK27X3lcfKqcXtZwXNmx9CIRi2bh+de/N8c
+        9urueh+7iElVDDM5A6da96YZliecC32/yNmXPX/NM6sPN7ONH1/5Izhf/9jVuZuONiz7Ee2+
+        9KS+/WztlX/vmU9X1T8uek5i1YVPzLt/ti3689FRX8BGclNIk1wJj1sA0xuJQ8suC21L8Hf/
+        c6U6r/HFFGGp/8GRFr5yKRHrrH7aLnfs2fZRYtvWwyL5BQvLe661GS2dYRU+575rXMma278u
+        /ela6GXbIL9AM9Bd9M+HgBTbwOPHzBvSroUIirgIGUwwvqbEUpyRaKjFXFScCACSkIZSMAQA
+        AA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrFLMWRmVeSWpSXmKPExsWy7bCSvO76TRqJBi8+y1tcuzWfzWLGqTZW
+        i33XTrJb/Pq7nt1ix/Mz7BabHl9jtbi8aw6bxeXmi4wWR/73M1o0tRhbNP3Zx2JxfG24A4/H
+        zll32T3uXNvD5rF5Sb1Hy8n9LB59W1YxenzeJBfAFsVlk5Kak1mWWqRvl8CV8aTnPnvBVM6K
+        j9d+sDUw7mHvYuTkkBAwkVi7cjNzFyMXh5DADkaJrv8ToRJSErv3n2frYuQAsoUlDh8uhqj5
+        xChx+8ghVpA4m4CWxO1j3iBxEYG7jBJL5uxhBXGYBSYwSiy+8pYZZJCwgLXEzKalYENZBFQl
+        /jy4ygpi8wLF531cxASxTF7iz/0eZoi4oMTJmU9YQGxmoHjz1tnMExj5ZiFJzUKSWsDItIpR
+        MrWgODc9t9iwwCgvtVyvODG3uDQvXS85P3cTIzi4tbR2MO5Z9UHvECMTB+MhRgkOZiUR3gXf
+        1RKFeFMSK6tSi/Lji0pzUosPMUpzsCiJ817oOhkvJJCeWJKanZpakFoEk2Xi4JRqYJrFZOZ+
+        9nHUUul/T3hdr5U9mMLymr1ePPrl2c/v6vOmR7/rnXQuqVM3/1fzzsoPvInS785yzpvkZmW8
+        vnzykbj9jx9d95hk+zXEJ47FIZL74BNRiVPzdDZqzn/97uD6sK3dt/YfnRCarXvhcraLaetN
+        VjHuqezz+Y5ruF2Wz/dvzMjbNz/u4NRX5teduzn3fuHLrlO0U5m840ikiGjl55lyU7U/flAN
+        TpR2bRDQDA2WO9BXZVixUvVT4DReFYW/35ctsppYfoVF9PwDs99FP7R3/X92+kK+n5Amb4tn
+        hkCreIBLbktIlWzIF34zH6+9th/XHAxorr14lNn4rr1yHPebKOdbYav3FIZMUZr5WImlOCPR
+        UIu5qDgRAGikdwzdAgAA
+X-CMS-MailID: 20210827093855epcas1p4ac8e34d779fe30de3e03bcadedcb66c8
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20210827093855epcas1p4ac8e34d779fe30de3e03bcadedcb66c8
+References: <CGME20210827093855epcas1p4ac8e34d779fe30de3e03bcadedcb66c8@epcas1p4.samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-For data read transfers a data transfer over timer (dto_timer) is
-started to make sure the data command can be completed in cases the Data
-Transfer Over (DTO) interrupt does not come. This timer was originally
-introduced as a quirk in commit 57e104864bc48 ("mmc: dw_mmc: add quirk
-for broken data transfer over scheme"), but is since a while back part
-of the running code.
+From: ChanWoo Lee <cw9316.lee@samsung.com>
 
-The dto timer picks the DATA_TIMEOUT value in the TMOUT register for its
-timeout, which will give a max timeout of approximately 84 + (10 spare)
-milliseconds on a 200MHz clock. But this register is not intended to be
-used like that, since it is a counter for data read timeouts (DRTO) and
-response timeouts (RTO), which will result in error interrupts in case
-of data read and response delays.
+The mmc_request structure(*mrq) is not used. //msdc_cmd_find_resp
+I remove the unnecessary code related to the mmc_request structure.
 
-The TMOUT register is always set with a full value for every transfer,
-which according to the manual (and with 200MHz clock) will give a full
-DRTO of:
-((TMOUT[10:8] -1) * 0xFFFFFF + TMOUT[31:11] * 8) / 200000000 => ~587 ms
-
-But as the same register is used for the dto_timer, the dto_timer will
-always have a fixed timeout.
-
-Instead of always setting a fixed value in TMOUT register, we can use
-data->timeout_ns for the DRTO interrupts that actually matches what was
-provided per requested command. Likewise we can also use timeout_ns for
-the dto_timer, which will allow a max timeout of 587 ms, instead of the
-fixed 94 ms. Furthermore, if a data error interrupt comes, it shouldn't
-be necessary to wait for the dto_timer before we finish the command, but
-instead we can handle it in the interrupt handler.
-
-Lets fix this. In most cases data->timeout_ns values are given, but in
-case it is not given, the maximum (default) timeout for the dto_timer,
-and the DRTO, is set to approximately 587 ms.
-
-Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
 ---
- drivers/mmc/host/dw_mmc.c | 108 ++++++++++++++++++++++----------------
- 1 file changed, 63 insertions(+), 45 deletions(-)
+ drivers/mmc/host/mtk-sd.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index c3229d8c7041..0762d95293d4 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -52,6 +52,7 @@
- 
- #define DW_MCI_FREQ_MAX	200000000	/* unit: HZ */
- #define DW_MCI_FREQ_MIN	100000		/* unit: HZ */
-+#define DW_MCI_DATA_TMOUT_NS_MAX	587202490
- 
- #define IDMAC_INT_CLR		(SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
- 				 SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
-@@ -390,6 +391,23 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
- 	spin_unlock_irqrestore(&host->irq_lock, irqflags);
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 4dfc246c5f95..813f57f6d9cc 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -961,7 +961,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
  }
  
-+static void dw_mci_set_dto(struct dw_mci *host, u32 timeout_ns)
-+{
-+	unsigned int dto_ns;
-+	unsigned long irqflags;
-+
-+	if (!timeout_ns || timeout_ns > DW_MCI_DATA_TMOUT_NS_MAX)
-+		dto_ns = DW_MCI_DATA_TMOUT_NS_MAX;
-+	else
-+		dto_ns = timeout_ns;
-+
-+	spin_lock_irqsave(&host->irq_lock, irqflags);
-+	if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
-+		mod_timer(&host->dto_timer,
-+			  jiffies + nsecs_to_jiffies(dto_ns));
-+	spin_unlock_irqrestore(&host->irq_lock, irqflags);
-+}
-+
- static void dw_mci_start_command(struct dw_mci *host,
- 				 struct mmc_command *cmd, u32 cmd_flags)
+ static inline u32 msdc_cmd_find_resp(struct msdc_host *host,
+-		struct mmc_request *mrq, struct mmc_command *cmd)
++		struct mmc_command *cmd)
  {
-@@ -1144,9 +1162,10 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
- 	host->sg = NULL;
- 	host->data = data;
+ 	u32 resp;
  
--	if (data->flags & MMC_DATA_READ)
-+	if (data->flags & MMC_DATA_READ) {
- 		host->dir_status = DW_MCI_RECV_STATUS;
--	else
-+		dw_mci_set_dto(host, data->timeout_ns);
-+	} else
- 		host->dir_status = DW_MCI_SEND_STATUS;
+@@ -997,7 +997,7 @@ static inline u32 msdc_cmd_prepare_raw_cmd(struct msdc_host *host,
+ 	 * stop << 14 | rw << 13 | dtype << 11 | rsptyp << 7 | brk << 6 | opcode
+ 	 */
+ 	u32 opcode = cmd->opcode;
+-	u32 resp = msdc_cmd_find_resp(host, mrq, cmd);
++	u32 resp = msdc_cmd_find_resp(host, cmd);
+ 	u32 rawcmd = (opcode & 0x3f) | ((resp & 0x7) << 7);
  
- 	dw_mci_ctrl_thld(host, data);
-@@ -1277,6 +1296,36 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
- 	mci_writel(host, CTYPE, (slot->ctype << slot->id));
- }
- 
-+static void dw_mci_set_data_timeout(struct dw_mci *host, u32 timeout_ns)
-+{
-+	u32 timeout, freq_mhz, tmp, tmout;
-+
-+	if (!timeout_ns || timeout_ns > DW_MCI_DATA_TMOUT_NS_MAX) {
-+		/* Timeout (maximum) */
-+		mci_writel(host, TMOUT, 0xFFFFFFFF);
-+		return;
-+	}
-+
-+	timeout = timeout_ns / NSEC_PER_USEC;
-+	freq_mhz = host->bus_hz / NSEC_PER_MSEC;
-+
-+	/* TMOUT[7:0] (RESPONSE_TIMEOUT) */
-+	tmout = 0xFF;
-+
-+	/* TMOUT[10:8] (DATA_TIMEOUT) */
-+	tmp = ((timeout * freq_mhz) / 0xFFFFFF) + 1;
-+	tmout |= (tmp & 0x7) << 8;
-+
-+	/* TMOUT[31:11] (DATA_TIMEOUT) */
-+	tmp = ((tmp - 1) * 0xFFFFFF) / freq_mhz;
-+	tmp = (timeout - tmp) * freq_mhz / 8;
-+	tmout |= (tmp & 0x1FFFFF) << 11;
-+
-+	mci_writel(host, TMOUT, tmout);
-+	dev_dbg(host->dev, "timeout_ns: %u => TMOUT[31:8]: 0x%08x",
-+		timeout_ns, tmout);
-+}
-+
- static void __dw_mci_start_request(struct dw_mci *host,
- 				   struct dw_mci_slot *slot,
- 				   struct mmc_command *cmd)
-@@ -1297,7 +1346,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 
- 	data = cmd->data;
- 	if (data) {
--		mci_writel(host, TMOUT, 0xFFFFFFFF);
-+		dw_mci_set_data_timeout(host, data->timeout_ns);
- 		mci_writel(host, BYTCNT, data->blksz*data->blocks);
- 		mci_writel(host, BLKSIZ, data->blksz);
- 	}
-@@ -1897,31 +1946,6 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
- 	return data->error;
- }
- 
--static void dw_mci_set_drto(struct dw_mci *host)
--{
--	unsigned int drto_clks;
--	unsigned int drto_div;
--	unsigned int drto_ms;
--	unsigned long irqflags;
--
--	drto_clks = mci_readl(host, TMOUT) >> 8;
--	drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
--	if (drto_div == 0)
--		drto_div = 1;
--
--	drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
--				   host->bus_hz);
--
--	/* add a bit spare time */
--	drto_ms += 10;
--
--	spin_lock_irqsave(&host->irq_lock, irqflags);
--	if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
--		mod_timer(&host->dto_timer,
--			  jiffies + msecs_to_jiffies(drto_ms));
--	spin_unlock_irqrestore(&host->irq_lock, irqflags);
--}
--
- static bool dw_mci_clear_pending_cmd_complete(struct dw_mci *host)
- {
- 	if (!test_bit(EVENT_CMD_COMPLETE, &host->pending_events))
-@@ -2052,15 +2076,8 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
- 			}
- 
- 			if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
--						&host->pending_events)) {
--				/*
--				 * If all data-related interrupts don't come
--				 * within the given time in reading data state.
--				 */
--				if (host->dir_status == DW_MCI_RECV_STATUS)
--					dw_mci_set_drto(host);
-+						&host->pending_events))
- 				break;
--			}
- 
- 			set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
- 
-@@ -2091,16 +2108,8 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
- 			fallthrough;
- 
- 		case STATE_DATA_BUSY:
--			if (!dw_mci_clear_pending_data_complete(host)) {
--				/*
--				 * If data error interrupt comes but data over
--				 * interrupt doesn't come within the given time.
--				 * in reading data state.
--				 */
--				if (host->dir_status == DW_MCI_RECV_STATUS)
--					dw_mci_set_drto(host);
-+			if (!dw_mci_clear_pending_data_complete(host))
- 				break;
--			}
- 
- 			host->data = NULL;
- 			set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
-@@ -2649,12 +2658,21 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
- 		}
- 
- 		if (pending & DW_MCI_DATA_ERROR_FLAGS) {
-+			spin_lock(&host->irq_lock);
-+
-+			del_timer(&host->dto_timer);
-+
- 			/* if there is an error report DATA_ERROR */
- 			mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
- 			host->data_status = pending;
- 			smp_wmb(); /* drain writebuffer */
- 			set_bit(EVENT_DATA_ERROR, &host->pending_events);
-+
-+			/* In case of error, we cannot expect a DTO */
-+			set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
- 			tasklet_schedule(&host->tasklet);
-+
-+			spin_unlock(&host->irq_lock);
- 		}
- 
- 		if (pending & SDMMC_INT_DATA_OVER) {
+ 	host->cmd_rsp = resp;
 -- 
-2.20.1
+2.29.0
 
