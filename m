@@ -2,76 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9B59C4320E
-	for <linux-mmc@archiver.kernel.org>; Sat, 28 Aug 2021 08:55:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49938C432BE
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Aug 2021 13:13:13 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AB3BA60E78
-	for <linux-mmc@archiver.kernel.org>; Sat, 28 Aug 2021 08:55:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 297FB60F3A
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Aug 2021 13:13:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233494AbhH1I4R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 28 Aug 2021 04:56:17 -0400
-Received: from mx21.baidu.com ([220.181.3.85]:51374 "EHLO baidu.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S233446AbhH1I4R (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 28 Aug 2021 04:56:17 -0400
-Received: from BC-Mail-Ex06.internal.baidu.com (unknown [172.31.51.46])
-        by Forcepoint Email with ESMTPS id 3D7B5594B4CA4834E692;
-        Sat, 28 Aug 2021 16:55:11 +0800 (CST)
-Received: from BJHW-MAIL-EX27.internal.baidu.com (10.127.64.42) by
- BC-Mail-Ex06.internal.baidu.com (172.31.51.46) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2242.12; Sat, 28 Aug 2021 16:55:11 +0800
-Received: from LAPTOP-UKSR4ENP.internal.baidu.com (172.31.62.16) by
- BJHW-MAIL-EX27.internal.baidu.com (10.127.64.42) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
- 15.1.2308.14; Sat, 28 Aug 2021 16:55:10 +0800
-From:   Cai Huoqing <caihuoqing@baidu.com>
-To:     <ulf.hansson@linaro.org>, <dianders@chromium.org>
-CC:     <linux-mmc@vger.kernel.org>, <linux-omap@vger.kernel.org>,
-        Cai Huoqing <caihuoqing@baidu.com>
-Subject: [PATCH] mmc: omap_hsmmc: Make use of the helper macro SET_RUNTIME_PM_OPS()
-Date:   Sat, 28 Aug 2021 16:54:46 +0800
-Message-ID: <20210828085446.1878-1-caihuoqing@baidu.com>
-X-Mailer: git-send-email 2.32.0.windows.2
+        id S235376AbhH2NOE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 29 Aug 2021 09:14:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46952 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235343AbhH2NOD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2021 09:14:03 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 706C6C061575
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2021 06:13:11 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id j4so25260490lfg.9
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2021 06:13:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=VaIELk3aejG928b4attVmLHeHooVAXSsVOw7u++6ic8=;
+        b=NBuVmcUEZj+2izFzWo7km7GIur/VKIWIdCygLu4Gtd5j+RVmNsWMrgh04N2TZuSMfU
+         qOCfcwDEjE8ZtdKrslnPtXszndze+62w2XWwb6xGVsH1q3jBWtuTLCb9KuSLNbPPRhlK
+         IbpDOICgqNbLc24No+PMG8DhLUM2mN/elJS0GRGV4rFr6iSEdeGZxaI/ykar8IBYY9uy
+         Mctoi0prxcBGI+UT9DvbqIAUUP2Iz4yWSGuhWEeXcrakwQ1fy45teTG3uj0aqnye2YP6
+         lXtLTZX24wvaqQuWHyNbc/msMLpxxBuORKzKEUoSATLWOgQ2fAAvsiPWesmAzPXBNpqI
+         WsVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=VaIELk3aejG928b4attVmLHeHooVAXSsVOw7u++6ic8=;
+        b=brpz4v6BEXKTMALPK9vW336e2eDyZfqkFLUpP0Y0BlGRpTZakRdVIRE4wGrekkTAKW
+         F/S0M1H6L+mJ6pUgTYhXsDuFA4Gckp8kRuRL62CY1F6Jpdp2FhGUJQNaljtw+/zjL67B
+         TWQzKfsTxaOOGdmQrkiW7SuoRWdeoRQTh7RX196moRWGdH6lyv2FLnIX9+Bn3pBG+w7+
+         ZvUUkl3UxLCRLUwg0/9MwC7RdcF4KjK0qrELqA1qb2iMKYojgxg15mE9iby9AanJE3jq
+         Jt3nUczbaMBRWnHZuchHVmAEh1lTs5236JMpFi+Vv5X0LX/5e0oy9gECus7zZLUUku+E
+         A8hA==
+X-Gm-Message-State: AOAM533iI7+DD9BqKmXNO5aphC38HyMXDYgrC3naazHqEiY1pXFJ6EAd
+        AZKLw4+Qvc9m7+9qZfqH4mglnw==
+X-Google-Smtp-Source: ABdhPJxoTTCTULxN0AI0ux6Ox/vGsWyAWulCZNHRsyc3AM9WfbWCnshA9YjeDZK67Cxvk0WaVZLaHA==
+X-Received: by 2002:a05:6512:6cd:: with SMTP id u13mr13935373lff.184.1630242789821;
+        Sun, 29 Aug 2021 06:13:09 -0700 (PDT)
+Received: from eriador.lan ([37.153.55.125])
+        by smtp.gmail.com with ESMTPSA id x13sm712503lfq.262.2021.08.29.06.13.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 29 Aug 2021 06:13:09 -0700 (PDT)
+From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+To:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>
+Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: [RFC v2 00/13] create power sequencing subsystem
+Date:   Sun, 29 Aug 2021 16:12:52 +0300
+Message-Id: <20210829131305.534417-1-dmitry.baryshkov@linaro.org>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [172.31.62.16]
-X-ClientProxiedBy: BC-Mail-Ex18.internal.baidu.com (172.31.51.12) To
- BJHW-MAIL-EX27.internal.baidu.com (10.127.64.42)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use the helper macro SET_RUNTIME_PM_OPS() instead of the verbose
-operators ".runtime_suspend/.runtime_resume", because the
-SET_RUNTIME_PM_OPS() is a nice helper macro that could be brought
-in to make code a little clearer, a little more concise.
+This is the second RFC on the proposed power sequencer subsystem. This
+is a generification of the MMC pwrseq code. The subsystem tries to
+abstract the idea of complex power-up/power-down/reset of the devices.
 
-Signed-off-by: Cai Huoqing <caihuoqing@baidu.com>
----
- drivers/mmc/host/omap_hsmmc.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+To ease migration to pwrseq and to provide compatibility with older
+device trees, while keeping drivers simple, this iteration of RFC
+introduces pwrseq fallback support: pwrseq driver can register fallback
+providers. If another device driver requests pwrseq instance and none
+was declared, the pwrseq fallback code would go through the list of
+fallback providers and if the match is found, driver would return a
+crafted pwrseq instance. For now this mechanism is limited to the OF
+device matching, but it can be extended further to use any combination
+of device IDs.
 
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 2f8038d69f67..748303e14841 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -2156,8 +2156,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
- 
- static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
- 	SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
--	.runtime_suspend = omap_hsmmc_runtime_suspend,
--	.runtime_resume = omap_hsmmc_runtime_resume,
-+	SET_RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
- };
- 
- static struct platform_driver omap_hsmmc_driver = {
--- 
-2.25.1
+The primary set of devices that promted me to create this patchset is
+the Qualcomm BT+WiFi family of chips. They reside on serial+platform or
+serial + SDIO interfaces (older generations) or on serial+PCIe (newer
+generations).  They require a set of external voltage regulators to be
+powered on and (some of them) have separate WiFi and Bluetooth enable
+GPIOs.
+
+This patchset being an RFC tries to demonstrate the approach, design and
+usage of the pwrseq subsystem. Following issues are present in the RFC
+at this moment but will be fixed later if the overall approach would be
+viewed as acceptable:
+
+ - No documentation
+   While the code tries to be self-documenting proper documentation
+   would be required.
+
+ - Minimal device tree bindings changes
+   There are no proper updates for the DT bindings (thus neither Rob
+   Herring nor devicetree are included in the To/Cc lists). The dt
+   schema changes would be a part of v1.
+
+ - Lack of proper PCIe integration
+   At this moment support for PCIe is hacked up to be able to test the
+   PCIe part of qca6390. Proper PCIe support would require automatically
+   powering up the devices before the bus scan depending on the proper
+   device structure in the device tree.
+
+Changes since RFC v1:
+ - Provider pwrseq fallback support
+ - Implement fallback support in pwrseq_qca.
+ - Mmove susclk handling to pwrseq_qca.
+ - Significantly simplify hci_qca.c changes, by dropping all legacy
+   code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
+   parts of the chip.
+
 
