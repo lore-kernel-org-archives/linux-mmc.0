@@ -7,54 +7,54 @@ X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 742F6C432BE
-	for <linux-mmc@archiver.kernel.org>; Sun, 29 Aug 2021 13:14:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83879C4320E
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Aug 2021 13:14:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60FB36023E
-	for <linux-mmc@archiver.kernel.org>; Sun, 29 Aug 2021 13:14:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 70B4B60F46
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Aug 2021 13:14:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235548AbhH2NPN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 29 Aug 2021 09:15:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47008 "EHLO
+        id S235708AbhH2NPP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 29 Aug 2021 09:15:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235467AbhH2NOI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2021 09:14:08 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A525C06175F
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2021 06:13:16 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id s10so424850lfr.11
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2021 06:13:16 -0700 (PDT)
+        with ESMTP id S235438AbhH2NOH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Aug 2021 09:14:07 -0400
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1ADEDC061760
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2021 06:13:14 -0700 (PDT)
+Received: by mail-lj1-x236.google.com with SMTP id m4so20683068ljq.8
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Aug 2021 06:13:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=W90zCRw/gyIjKh5bN6AdA5a45jbpL+6W+rmSnj/xdRc=;
-        b=MGtT4oebKOHyJUzHFk/GStnDRBlucvXQUdsvl3KqvG83GLCtg/sscD7aUZINgsWWxR
-         mry9SHUjRz6j/EVknFswB9UJeqJc+HnyQYofSptX+47CH9Ql58haBaYJs90uxm4l2ATF
-         HZVJLqaBdi40E8oRdmm2DKIQwzwImyoA5skuvtj15Bv9dhyyYqaJ9LbM8Eh6md+hckVJ
-         ktYNRzdmui0t6n855ydf+ooRalLokWct1cGpCbqeYE3xHBu6sbMZC+6WmTmouvLOH/DQ
-         VsHIFmJZWcKV4tYEZ1LMdwxFFSQaDPf3/4zqG4nB9OBSNwV1dkGh3RLs9xXTAFUsHS79
-         Styg==
+        bh=4xtF3jBUrt7ZTpBJaeyPH2CUpsN1C702DcJajugGScI=;
+        b=W+ZLKlNo+LKW3r7IoatmvpqysASE8wgZqna4tJKa45LI5MDL9EEsxAZxAngtIUDYrP
+         D5SHJhqQn5KqvGzO0+exkiZnn2FKojQna7MMbnIR8m2/pMGVbE9QoEpFBtwjPaAWUC+C
+         unAkGXC6JX6gyHn/jv/O5rlxd4h9+XRLukkuRn3tuZS6A5fUIy80gZb6co5TapJWJzFh
+         dC5+3x+r8X0k47MuWYMVcR8Z3klHILZrVHC7ivciXuURyPAfSrlXdQLrZ0FMgPZ+YsyJ
+         +SXqGKv6D+4JPpQkT8PCO6Ft4nE7EdDltTBH6TLjWL1BkL8Y4QK13mSAz9xuytjAbWoL
+         hCcw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=W90zCRw/gyIjKh5bN6AdA5a45jbpL+6W+rmSnj/xdRc=;
-        b=KJzFUoQ87y6m3pdEwry9LKWzt3n3A5FS3GKf9lxCxkqtd82wv7Wq6TFwL8GVJptpT4
-         73iac41Sd0wLgcvR9vDrpIQTxE1OltwcBDRpAUtD5w8bUvqP0b58M54dnUqmxa9OWAH1
-         EJr8P9qSSXslJjJwkW3ozB41SSOhwPZGe7Fqq7E51kny4/WUeGkdC6MtK8uqeRoJHOWS
-         nNO0DwnGucDSypOezcFt/YUL9XICGuvY1HpL5jp0bLtvQi7xbYM9deXJSiUhNf2K7v0+
-         8MWDHvl/aDo4jR5xtdSQjz+cW569j/0t/5V2emXHY+/0uNSD8MwWE5HF5GjRQ8w1N6ID
-         hj+A==
-X-Gm-Message-State: AOAM530g2xp/XjGL8IfOmoFBDmxMDoXqOar/OnZDoXFQAmPnsnqcnuW+
-        N4egObuXLgRfmYG157W6u4QdVw==
-X-Google-Smtp-Source: ABdhPJz8ss1hZf/h7XEdWNe+VXrVLZ8dFiYzYa9JHOoN8i2WkbHCSfq9a7aQ5moet2JaOib5Pq53hA==
-X-Received: by 2002:a05:6512:21d1:: with SMTP id d17mr14594374lft.588.1630242794541;
-        Sun, 29 Aug 2021 06:13:14 -0700 (PDT)
+        bh=4xtF3jBUrt7ZTpBJaeyPH2CUpsN1C702DcJajugGScI=;
+        b=dHFXGGS6KJrIgc+TOJMOkIu4BWqscxkfX/rPIp1bZPDP00OEu2Cv0Gh0zSFY9HK53A
+         VYjiRd5DgCgaJ0IFghOrwzwLeEChtu4iU1bOEuO2+SLFFL3twZB3Rb1Nx9vso/7aKD8w
+         giaL/dY5J4IThlMit73d3ovIJppZk/TOGmvqToqPllwR3OWkXDJDwvbgUTKpdrkBhnw/
+         3Yomi+/hsqLTagz8tlcBi8uxz5b2HSiQJb6jkKQNbZQpNziIJBLKeVKGseUtQUlzf/g4
+         m4W0cUuThypBM6SB2rh38QhJMp85FPHRTmY1PCoxzqkOsQ1rqxMKwQbBP37R7hmyoElG
+         guDQ==
+X-Gm-Message-State: AOAM531fzVWle6KFsPKvFkBUcK+/XOV097wyUSiBaY6m3Cp/DWES9LRK
+        j3b7DGVRqbS3H9Oq5sFr5Z8ykA==
+X-Google-Smtp-Source: ABdhPJyvf/99XcUDsEw2Aer4vOGtXSSZGBPNTT+ao4IdSzEJviVRKvi50ArrxLO2Lr5jpz51HTbDwg==
+X-Received: by 2002:a2e:94d0:: with SMTP id r16mr16663957ljh.403.1630242792281;
+        Sun, 29 Aug 2021 06:13:12 -0700 (PDT)
 Received: from eriador.lan ([37.153.55.125])
-        by smtp.gmail.com with ESMTPSA id x13sm712503lfq.262.2021.08.29.06.13.13
+        by smtp.gmail.com with ESMTPSA id x13sm712503lfq.262.2021.08.29.06.13.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Aug 2021 06:13:14 -0700 (PDT)
+        Sun, 29 Aug 2021 06:13:11 -0700 (PDT)
 From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 To:     Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
@@ -70,9 +70,9 @@ Cc:     linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
         ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
         netdev@vger.kernel.org
-Subject: [RFC v2 06/13] pwrseq: pwrseq_qca: implement fallback support
-Date:   Sun, 29 Aug 2021 16:12:58 +0300
-Message-Id: <20210829131305.534417-7-dmitry.baryshkov@linaro.org>
+Subject: [RFC v2 03/13] mmc: core: switch to new pwrseq subsystem
+Date:   Sun, 29 Aug 2021 16:12:55 +0300
+Message-Id: <20210829131305.534417-4-dmitry.baryshkov@linaro.org>
 X-Mailer: git-send-email 2.33.0
 In-Reply-To: <20210829131305.534417-1-dmitry.baryshkov@linaro.org>
 References: <20210829131305.534417-1-dmitry.baryshkov@linaro.org>
@@ -82,184 +82,352 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-While we are waiting for all users of wcn399x-bt to be converted to the
-pwrseq declaration in the device tree, provide support for the pwrseq
-fallback: if the regulators are declared in the device itself, create
-pwrseq instance. This way the hci_qca driver doesn't have to cope with
-old and new dts bindings.
+Drop old MMC pwrseq code and use new pwrseq subsystem instead.
+Individual drivers are already ported to new subsystem.
 
 Signed-off-by: Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
 ---
- drivers/power/pwrseq/pwrseq_qca.c | 148 +++++++++++++++++++++++++++++-
- 1 file changed, 147 insertions(+), 1 deletion(-)
+ drivers/mmc/core/Makefile |   1 -
+ drivers/mmc/core/core.c   |   9 ++-
+ drivers/mmc/core/host.c   |   8 ++-
+ drivers/mmc/core/mmc.c    |   3 +-
+ drivers/mmc/core/pwrseq.c | 117 --------------------------------------
+ drivers/mmc/core/pwrseq.h |  58 -------------------
+ include/linux/mmc/host.h  |   4 +-
+ 7 files changed, 12 insertions(+), 188 deletions(-)
+ delete mode 100644 drivers/mmc/core/pwrseq.c
+ delete mode 100644 drivers/mmc/core/pwrseq.h
 
-diff --git a/drivers/power/pwrseq/pwrseq_qca.c b/drivers/power/pwrseq/pwrseq_qca.c
-index 7aa5f2d94039..d01f1ef4626b 100644
---- a/drivers/power/pwrseq/pwrseq_qca.c
-+++ b/drivers/power/pwrseq/pwrseq_qca.c
-@@ -11,9 +11,11 @@
- #include <linux/delay.h>
- #include <linux/gpio/consumer.h>
- #include <linux/mod_devicetable.h>
-+#include <linux/of_device.h>
- #include <linux/platform_device.h>
- #include <linux/property.h>
- #include <linux/pwrseq/driver.h>
-+#include <linux/pwrseq/fallback.h>
- #include <linux/regulator/consumer.h>
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 322eb69bd00e..a504d873cf8e 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -9,7 +9,6 @@ mmc_core-y			:= core.o bus.o host.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+ 				   sdio_cis.o sdio_io.o sdio_irq.o \
+ 				   slot-gpio.o regulator.o
+-mmc_core-$(CONFIG_OF)		+= pwrseq.o
+ mmc_core-$(CONFIG_DEBUG_FS)	+= debugfs.o
+ obj-$(CONFIG_MMC_BLOCK)		+= mmc_block.o
+ mmc_block-objs			:= block.o queue.o
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 95fedcf56e4a..c468af900a45 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -41,7 +41,6 @@
+ #include "bus.h"
+ #include "host.h"
+ #include "sdio_bus.h"
+-#include "pwrseq.h"
  
- /* susclk rate */
-@@ -367,5 +369,149 @@ static struct platform_driver pwrseq_qca_driver = {
- 	},
- };
+ #include "mmc_ops.h"
+ #include "sd_ops.h"
+@@ -1321,7 +1320,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	if (host->ios.power_mode == MMC_POWER_ON)
+ 		return;
  
--module_platform_driver(pwrseq_qca_driver);
-+struct pwrseq_qca_fallback {
-+	struct pwrseq_qca_one qca_one;
-+	struct pwrseq_qca_common common;
-+};
-+
-+static const struct of_device_id pwrseq_qca_bt_of_match[] = {
-+	{ .compatible = "qcom,qca6174-bt" },
-+	{ .compatible = "qcom,qca6390-bt", .data = &qca_soc_data_qca6390},
-+	{ .compatible = "qcom,qca9377-bt" },
-+	{ .compatible = "qcom,wcn3990-bt", .data = &qca_soc_data_wcn3990 },
-+	{ .compatible = "qcom,wcn3991-bt", .data = &qca_soc_data_wcn3990 },
-+	{ .compatible = "qcom,wcn3998-bt", .data = &qca_soc_data_wcn3998 },
-+	{ .compatible = "qcom,wcn6750-bt", .data = &qca_soc_data_wcn6750 },
-+	{ /* sentinel */ },
-+};
-+
-+static const struct qca_device_data qca_soc_data_wifi = {
-+	.vregs = {
-+		{ "vdd-1.8-xo", 80000  },
-+		{ "vdd-1.3-rfa", 300000 },
-+		{ "vdd-3.3-ch0", 450000 },
-+		{ "vdd-3.3-ch1", 450000 },
-+	},
-+	.num_vregs = 4,
-+};
-+
-+static const struct of_device_id pwrseq_qca_wifi_of_match[] = {
-+	{ .compatible = "qcom,wcn3990-wifi", .data = &qca_soc_data_wifi },
-+	{ /* sentinel */ }
-+};
-+
-+static struct pwrseq * pwrseq_qca_fallback_get(struct device *dev)
-+{
-+	struct pwrseq_qca_fallback *fallback;
-+	const struct of_device_id *match;
-+	const struct qca_device_data *data;
-+	struct gpio_desc *gpiod;
-+	int ret;
-+
-+	match = of_match_device(pwrseq_qca_bt_of_match, dev);
-+	if (!match)
-+		return ERR_PTR(-ENODEV);
-+
-+	data = match->data;
-+	if (!data)
-+		data = &qca_soc_data_default;
-+
-+	fallback = devm_kzalloc(dev, struct_size(fallback, common.vregs, data->num_vregs), GFP_KERNEL);
-+	if (!data)
-+		return ERR_PTR(-ENOMEM);
-+
-+	fallback->qca_one.common = &fallback->common;
-+
-+	ret = pwrseq_qca_common_init(dev, &fallback->common, data);
-+	if (ret)
-+		return ERR_PTR(ret);
-+
-+	if (data->has_enable_gpios) {
-+		gpiod = devm_gpiod_get(dev, "enable", GPIOD_OUT_LOW);
-+		if (IS_ERR(gpiod))
-+			return ERR_PTR(dev_err_probe(dev, PTR_ERR(gpiod), "failed to acquire enable GPIO\n"));
-+		fallback->qca_one.enable = gpiod;
-+	}
-+
-+	/* If we have no control over device's enablement, make sure that sleep clock is always running */
-+	if (!fallback->common.vddio ||
-+	    !fallback->common.num_vregs ||
-+	    !fallback->qca_one.enable) {
-+		ret = clk_set_rate(fallback->common.susclk, SUSCLK_RATE_32KHZ);
-+		if (ret)
-+			return ERR_PTR(ret);
-+
-+		ret = clk_prepare_enable(fallback->common.susclk);
-+		if (ret)
-+			return ERR_PTR(ret);
-+
-+		ret = devm_add_action_or_reset(dev, pwrseq_qca_unprepare_susclk, &fallback->common);
-+		if (ret)
-+			return ERR_PTR(ret);
-+	}
-+
-+	return devm_pwrseq_create(dev, &pwrseq_qca_ops, &fallback->qca_one);
-+}
-+
-+static struct pwrseq * pwrseq_qca_fallback_get_bt(struct device *dev, const char *id)
-+{
-+	if (strcmp(id, "bt"))
-+		return ERR_PTR(-ENODEV);
-+
-+	return pwrseq_qca_fallback_get(dev);
-+}
-+
-+static struct pwrseq * pwrseq_qca_fallback_get_wifi(struct device *dev, const char *id)
-+{
-+	if (strcmp(id, "wifi"))
-+		return ERR_PTR(-ENODEV);
-+
-+	return pwrseq_qca_fallback_get(dev);
-+}
-+
-+static struct pwrseq_fallback pwrseq_qca_fallback_bt = {
-+	.get = pwrseq_qca_fallback_get_bt,
-+	.of_match_table = pwrseq_qca_bt_of_match,
-+};
-+
-+static struct pwrseq_fallback pwrseq_qca_fallback_wifi = {
-+	.get = pwrseq_qca_fallback_get_wifi,
-+	.of_match_table = pwrseq_qca_wifi_of_match,
-+};
-+
-+static int __init pwrseq_qca_init(void)
-+{
-+	int ret;
-+
-+	ret = platform_driver_register(&pwrseq_qca_driver);
-+	if (ret)
-+		return ret;
-+
-+	ret = pwrseq_fallback_register(&pwrseq_qca_fallback_bt);
-+	if (ret)
-+		goto err_bt;
-+
-+	ret = pwrseq_fallback_register(&pwrseq_qca_fallback_wifi);
-+	if (ret)
-+		goto err_wifi;
+-	mmc_pwrseq_pre_power_on(host);
++	pwrseq_pre_power_on(host->pwrseq);
+ 
+ 	host->ios.vdd = fls(ocr) - 1;
+ 	host->ios.power_mode = MMC_POWER_UP;
+@@ -1336,7 +1335,7 @@ void mmc_power_up(struct mmc_host *host, u32 ocr)
+ 	 */
+ 	mmc_delay(host->ios.power_delay_ms);
+ 
+-	mmc_pwrseq_post_power_on(host);
++	pwrseq_power_on(host->pwrseq);
+ 
+ 	host->ios.clock = host->f_init;
+ 
+@@ -1355,7 +1354,7 @@ void mmc_power_off(struct mmc_host *host)
+ 	if (host->ios.power_mode == MMC_POWER_OFF)
+ 		return;
+ 
+-	mmc_pwrseq_power_off(host);
++	pwrseq_power_off(host->pwrseq);
+ 
+ 	host->ios.clock = 0;
+ 	host->ios.vdd = 0;
+@@ -1985,7 +1984,7 @@ EXPORT_SYMBOL(mmc_set_blocklen);
+ 
+ static void mmc_hw_reset_for_init(struct mmc_host *host)
+ {
+-	mmc_pwrseq_reset(host);
++	pwrseq_reset(host->pwrseq);
+ 
+ 	if (!(host->caps & MMC_CAP_HW_RESET) || !host->ops->hw_reset)
+ 		return;
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 0475d96047c4..214b9cfda723 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -28,7 +28,6 @@
+ #include "crypto.h"
+ #include "host.h"
+ #include "slot-gpio.h"
+-#include "pwrseq.h"
+ #include "sdio_ops.h"
+ 
+ #define cls_dev_to_mmc_host(d)	container_of(d, struct mmc_host, class_dev)
+@@ -413,7 +412,11 @@ int mmc_of_parse(struct mmc_host *host)
+ 	device_property_read_u32(dev, "post-power-on-delay-ms",
+ 				 &host->ios.power_delay_ms);
+ 
+-	return mmc_pwrseq_alloc(host);
++	host->pwrseq = devm_pwrseq_get_optional(dev, "mmc");
++	if (IS_ERR(host->pwrseq))
++		return PTR_ERR(host->pwrseq);
 +
 +	return 0;
-+
-+err_wifi:
-+	pwrseq_fallback_unregister(&pwrseq_qca_fallback_bt);
-+err_bt:
-+	platform_driver_unregister(&pwrseq_qca_driver);
-+
-+	return ret;
-+}
-+module_init(pwrseq_qca_init);
-+
-+static void __exit pwrseq_qca_exit(void)
-+{
-+	pwrseq_fallback_unregister(&pwrseq_qca_fallback_wifi);
-+	pwrseq_fallback_unregister(&pwrseq_qca_fallback_bt);
-+	platform_driver_unregister(&pwrseq_qca_driver);
-+}
-+module_exit(pwrseq_qca_exit);
-+
- MODULE_LICENSE("GPL v2");
+ }
+ 
+ EXPORT_SYMBOL(mmc_of_parse);
+@@ -632,7 +635,6 @@ EXPORT_SYMBOL(mmc_remove_host);
+  */
+ void mmc_free_host(struct mmc_host *host)
+ {
+-	mmc_pwrseq_free(host);
+ 	put_device(&host->class_dev);
+ }
+ 
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 838726b68ff3..59d0d26bb5c0 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -24,7 +24,6 @@
+ #include "mmc_ops.h"
+ #include "quirks.h"
+ #include "sd_ops.h"
+-#include "pwrseq.h"
+ 
+ #define DEFAULT_CMD6_TIMEOUT_MS	500
+ #define MIN_CACHE_EN_TIMEOUT_MS 1600
+@@ -2220,7 +2219,7 @@ static int _mmc_hw_reset(struct mmc_host *host)
+ 	} else {
+ 		/* Do a brute force power cycle */
+ 		mmc_power_cycle(host, card->ocr);
+-		mmc_pwrseq_reset(host);
++		pwrseq_reset(host->pwrseq);
+ 	}
+ 	return mmc_init_card(host, card->ocr, card);
+ }
+diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+deleted file mode 100644
+index ef675f364bf0..000000000000
+--- a/drivers/mmc/core/pwrseq.c
++++ /dev/null
+@@ -1,117 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only
+-/*
+- *  Copyright (C) 2014 Linaro Ltd
+- *
+- * Author: Ulf Hansson <ulf.hansson@linaro.org>
+- *
+- *  MMC power sequence management
+- */
+-#include <linux/kernel.h>
+-#include <linux/err.h>
+-#include <linux/module.h>
+-#include <linux/of.h>
+-
+-#include <linux/mmc/host.h>
+-
+-#include "pwrseq.h"
+-
+-static DEFINE_MUTEX(pwrseq_list_mutex);
+-static LIST_HEAD(pwrseq_list);
+-
+-int mmc_pwrseq_alloc(struct mmc_host *host)
+-{
+-	struct device_node *np;
+-	struct mmc_pwrseq *p;
+-
+-	np = of_parse_phandle(host->parent->of_node, "mmc-pwrseq", 0);
+-	if (!np)
+-		return 0;
+-
+-	mutex_lock(&pwrseq_list_mutex);
+-	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
+-		if (p->dev->of_node == np) {
+-			if (!try_module_get(p->owner))
+-				dev_err(host->parent,
+-					"increasing module refcount failed\n");
+-			else
+-				host->pwrseq = p;
+-
+-			break;
+-		}
+-	}
+-
+-	of_node_put(np);
+-	mutex_unlock(&pwrseq_list_mutex);
+-
+-	if (!host->pwrseq)
+-		return -EPROBE_DEFER;
+-
+-	dev_info(host->parent, "allocated mmc-pwrseq\n");
+-
+-	return 0;
+-}
+-
+-void mmc_pwrseq_pre_power_on(struct mmc_host *host)
+-{
+-	struct mmc_pwrseq *pwrseq = host->pwrseq;
+-
+-	if (pwrseq && pwrseq->ops->pre_power_on)
+-		pwrseq->ops->pre_power_on(host);
+-}
+-
+-void mmc_pwrseq_post_power_on(struct mmc_host *host)
+-{
+-	struct mmc_pwrseq *pwrseq = host->pwrseq;
+-
+-	if (pwrseq && pwrseq->ops->post_power_on)
+-		pwrseq->ops->post_power_on(host);
+-}
+-
+-void mmc_pwrseq_power_off(struct mmc_host *host)
+-{
+-	struct mmc_pwrseq *pwrseq = host->pwrseq;
+-
+-	if (pwrseq && pwrseq->ops->power_off)
+-		pwrseq->ops->power_off(host);
+-}
+-
+-void mmc_pwrseq_reset(struct mmc_host *host)
+-{
+-	struct mmc_pwrseq *pwrseq = host->pwrseq;
+-
+-	if (pwrseq && pwrseq->ops->reset)
+-		pwrseq->ops->reset(host);
+-}
+-
+-void mmc_pwrseq_free(struct mmc_host *host)
+-{
+-	struct mmc_pwrseq *pwrseq = host->pwrseq;
+-
+-	if (pwrseq) {
+-		module_put(pwrseq->owner);
+-		host->pwrseq = NULL;
+-	}
+-}
+-
+-int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
+-{
+-	if (!pwrseq || !pwrseq->ops || !pwrseq->dev)
+-		return -EINVAL;
+-
+-	mutex_lock(&pwrseq_list_mutex);
+-	list_add(&pwrseq->pwrseq_node, &pwrseq_list);
+-	mutex_unlock(&pwrseq_list_mutex);
+-
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(mmc_pwrseq_register);
+-
+-void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq)
+-{
+-	if (pwrseq) {
+-		mutex_lock(&pwrseq_list_mutex);
+-		list_del(&pwrseq->pwrseq_node);
+-		mutex_unlock(&pwrseq_list_mutex);
+-	}
+-}
+-EXPORT_SYMBOL_GPL(mmc_pwrseq_unregister);
+diff --git a/drivers/mmc/core/pwrseq.h b/drivers/mmc/core/pwrseq.h
+deleted file mode 100644
+index f3bb103db9ad..000000000000
+--- a/drivers/mmc/core/pwrseq.h
++++ /dev/null
+@@ -1,58 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0-only */
+-/*
+- * Copyright (C) 2014 Linaro Ltd
+- *
+- * Author: Ulf Hansson <ulf.hansson@linaro.org>
+- */
+-#ifndef _MMC_CORE_PWRSEQ_H
+-#define _MMC_CORE_PWRSEQ_H
+-
+-#include <linux/types.h>
+-
+-struct mmc_host;
+-struct device;
+-struct module;
+-
+-struct mmc_pwrseq_ops {
+-	void (*pre_power_on)(struct mmc_host *host);
+-	void (*post_power_on)(struct mmc_host *host);
+-	void (*power_off)(struct mmc_host *host);
+-	void (*reset)(struct mmc_host *host);
+-};
+-
+-struct mmc_pwrseq {
+-	const struct mmc_pwrseq_ops *ops;
+-	struct device *dev;
+-	struct list_head pwrseq_node;
+-	struct module *owner;
+-};
+-
+-#ifdef CONFIG_OF
+-
+-int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq);
+-void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq);
+-
+-int mmc_pwrseq_alloc(struct mmc_host *host);
+-void mmc_pwrseq_pre_power_on(struct mmc_host *host);
+-void mmc_pwrseq_post_power_on(struct mmc_host *host);
+-void mmc_pwrseq_power_off(struct mmc_host *host);
+-void mmc_pwrseq_reset(struct mmc_host *host);
+-void mmc_pwrseq_free(struct mmc_host *host);
+-
+-#else
+-
+-static inline int mmc_pwrseq_register(struct mmc_pwrseq *pwrseq)
+-{
+-	return -ENOSYS;
+-}
+-static inline void mmc_pwrseq_unregister(struct mmc_pwrseq *pwrseq) {}
+-static inline int mmc_pwrseq_alloc(struct mmc_host *host) { return 0; }
+-static inline void mmc_pwrseq_pre_power_on(struct mmc_host *host) {}
+-static inline void mmc_pwrseq_post_power_on(struct mmc_host *host) {}
+-static inline void mmc_pwrseq_power_off(struct mmc_host *host) {}
+-static inline void mmc_pwrseq_reset(struct mmc_host *host) {}
+-static inline void mmc_pwrseq_free(struct mmc_host *host) {}
+-
+-#endif
+-
+-#endif
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 0abd47e9ef9b..1673e37f6028 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -16,6 +16,7 @@
+ #include <linux/mmc/pm.h>
+ #include <linux/dma-direction.h>
+ #include <linux/keyslot-manager.h>
++#include <linux/pwrseq/consumer.h>
+ 
+ struct mmc_ios {
+ 	unsigned int	clock;			/* clock rate */
+@@ -278,7 +279,6 @@ struct mmc_context_info {
+ };
+ 
+ struct regulator;
+-struct mmc_pwrseq;
+ 
+ struct mmc_supply {
+ 	struct regulator *vmmc;		/* Card power supply */
+@@ -294,7 +294,7 @@ struct mmc_host {
+ 	struct device		class_dev;
+ 	int			index;
+ 	const struct mmc_host_ops *ops;
+-	struct mmc_pwrseq	*pwrseq;
++	struct pwrseq		*pwrseq;
+ 	unsigned int		f_min;
+ 	unsigned int		f_max;
+ 	unsigned int		f_init;
 -- 
 2.33.0
 
