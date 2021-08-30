@@ -2,93 +2,230 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5167BC432BE
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 15:09:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6158C43216
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 16:15:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4019460E77
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 15:09:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9B9F060F92
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 16:15:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237266AbhH3PKk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Aug 2021 11:10:40 -0400
-Received: from mail.kernel.org ([198.145.29.99]:50900 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237323AbhH3PKg (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Mon, 30 Aug 2021 11:10:36 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id CAFD960F6C;
-        Mon, 30 Aug 2021 15:09:42 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1630336182;
-        bh=wsc9RNKxQkmls5vCsAO7AtLZpw0ffp68hvKWafxByBE=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=e4zlaCA0cxDDd7LNEjQhW9oaIXMt1Rq1/MRUI6P3+IL4hHs48K2mV2/KpVaxIKDyl
-         L+d+x3N/ivB9QXcgKliqQzo0yM0RDi76df4LOaKUHU+QI8msERS5s8ydMVn3NaRwty
-         TxF3v1OQ8p5SrzbgAH9UsBiDwMcFhJtqBzPzJ/tgC040AYu7nujLA3ExeWtdshzpQF
-         wiV2AS5CkUjIydDK0uFsUsnE6mv91t+L7w7uW9rv3RmuM/UXnexT8QOb+hzjlVxVb8
-         TY6+U0dObG2m9NNYBT6IO1qhNicEjh8Yz8gTyw2e8fOwH3kMDFjmvv4m/I7og/LGXw
-         aYRFzvlGdKBLA==
-Received: by mail-ej1-f42.google.com with SMTP id mf2so31841641ejb.9;
-        Mon, 30 Aug 2021 08:09:42 -0700 (PDT)
-X-Gm-Message-State: AOAM532PV175H3cqSYwxtcbfsAosEJb3p3tXYgoOvT5cAdGBJ8vH5Yvz
-        i48/5CaGke4JjrhIQp7f/BxNm2/UWkCJNi52/g==
-X-Google-Smtp-Source: ABdhPJzl1EsqiJCWv1IXdEPt9qKg22NWFB0gUwARdXlndzryzwnHbKAOddbGyjkT62uyPXgbclcQa3gbHOE5Lt6TpME=
-X-Received: by 2002:a17:906:b4d:: with SMTP id v13mr26171264ejg.468.1630336181386;
- Mon, 30 Aug 2021 08:09:41 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210819154436.117798-1-krzysztof.kozlowski@canonical.com>
- <20210819154436.117798-2-krzysztof.kozlowski@canonical.com>
- <YSUDTSuNlsOmu/G+@robh.at.kernel.org> <9423ddab-4635-ea15-7a9d-dbcf1bc215dc@canonical.com>
-In-Reply-To: <9423ddab-4635-ea15-7a9d-dbcf1bc215dc@canonical.com>
-From:   Rob Herring <robh@kernel.org>
-Date:   Mon, 30 Aug 2021 10:09:29 -0500
-X-Gmail-Original-Message-ID: <CAL_JsqKU4opYerjxXTnAuouLc5-GQQKnPX+qZEMBuzYV-inmJw@mail.gmail.com>
-Message-ID: <CAL_JsqKU4opYerjxXTnAuouLc5-GQQKnPX+qZEMBuzYV-inmJw@mail.gmail.com>
-Subject: Re: [PATCH 2/6] dt-bindings: mmc: cdns: match MPFS MMC/SDHCI controller
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
-Cc:     Atish Patra <atish.patra@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Paul Walmsley <paul.walmsley@sifive.com>,
+        id S237741AbhH3QQC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Aug 2021 12:16:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45768 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S237684AbhH3QQB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2021 12:16:01 -0400
+Received: from mail-il1-x134.google.com (mail-il1-x134.google.com [IPv6:2607:f8b0:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F38C1C061575;
+        Mon, 30 Aug 2021 09:15:07 -0700 (PDT)
+Received: by mail-il1-x134.google.com with SMTP id y3so16671165ilm.6;
+        Mon, 30 Aug 2021 09:15:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=GhKUe4sY5cAgiX1Wxl3GBHv3n5YxRNpzvVmXtwnuGY4=;
+        b=lZ5JIDAIvMH1bn0GyyIwGJzjkKJly2L1NnX7D03RF5pWTooEsBq35Rwz2vDXePVYxV
+         ySrNPRN1A85RbqzGt2hnt9ebYCHdZ8dRFmITuOygDl0nR/FiHp9Osw8JXTHzSbWoiRvf
+         mq/yeCc4uLU1N0KwCF87Zk0ABXOK82p4zfov8FzE8WiYgx3RcO1Wo4rY9oMQyoE2PejT
+         kfu8hy0Jd4fcm3VPyrUIPuP7AUGeSnhN3C3mUd8+6ZfMYzLEYxDXMjc6QHc/Gbp087p+
+         sm0ktT40qSU7fbxjZHqlC3UE3V44VhLnM5Aj3jMnyc4jRD6C4Z1xDAbJTemyB2iano1O
+         QLAA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=GhKUe4sY5cAgiX1Wxl3GBHv3n5YxRNpzvVmXtwnuGY4=;
+        b=SlpTobIzprQ/7avnKA5EZp7hmeBQ6Qgv4F4qKXQAnh3VRmDx1sN9rCZ41cCd9/Sz7L
+         Oc427/GW6c+w5ShGYa/3U+8MBwWJkyzOW5KKBoeS6JETNhagcrwNK9a/MVUj4+U4VczU
+         eLJun5EGjgZt0kL9Vm8wGGDchILnG28nIpsPdVazuStJHvLW6ZjGe5G3GBb/AYKPd0C1
+         KbhFE6Ndm/KTot3JxBd363TRyxM4wAfhLGPQ60e1O4PeC7ov3pxLCZYffXRgBgRzWbVn
+         W8DsaDa7O0kWSHAfKB5krV3hwomRin5R7wQCVFkXG/y+Eubx91SQ6VTiSca36KbReYNY
+         2bLg==
+X-Gm-Message-State: AOAM530AWYfnl5kw7ZQpZO9JnL+kLUCfDPvSte1evM+bYFwPV7PQTIaC
+        MaI+WNV3JfHa1Aql4RI7zwA=
+X-Google-Smtp-Source: ABdhPJwxkbCyha7cYpvLZzKHL2Lfna1L4W4YWJVKcyWABsDUOERWY9jkBV1Blkt6UoLPnMuuz4Q21w==
+X-Received: by 2002:a92:c8c4:: with SMTP id c4mr13278453ilq.137.1630340107235;
+        Mon, 30 Aug 2021 09:15:07 -0700 (PDT)
+Received: from localhost ([12.28.44.171])
+        by smtp.gmail.com with ESMTPSA id f17sm8267384ion.51.2021.08.30.09.15.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 30 Aug 2021 09:15:06 -0700 (PDT)
+Date:   Mon, 30 Aug 2021 09:15:05 -0700
+From:   Yury Norov <yury.norov@gmail.com>
+To:     Petr Mladek <pmladek@suse.com>
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
+        kvm@vger.kernel.org,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Alexander Lobakin <alobakin@pm.me>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        Andrea Merello <andrea.merello@gmail.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>,
+        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Brian Cain <bcain@codeaurora.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph Lameter <cl@linux.com>,
+        Daniel Bristot de Oliveira <bristot@redhat.com>,
+        David Hildenbrand <david@redhat.com>,
+        Dennis Zhou <dennis@kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ian Rogers <irogers@google.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
+        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
+        Leo Yan <leo.yan@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Namhyung Kim <namhyung@kernel.org>,
         Palmer Dabbelt <palmer@dabbelt.com>,
-        Albert Ou <aou@eecs.berkeley.edu>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Yash Shah <yash.shah@sifive.com>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Piotr Sroka <piotrs@cadence.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        devicetree@vger.kernel.org,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        linux-riscv <linux-riscv@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Peter Xu <peterx@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Rich Felker <dalias@libc.org>,
+        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Shuah Khan <shuah@kernel.org>,
+        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Tejun Heo <tj@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: Re: [PATCH 11/17] find: micro-optimize for_each_{set,clear}_bit()
+Message-ID: <YS0ECS2Lb4rwqJ4b@yury-ThinkPad>
+References: <20210814211713.180533-1-yury.norov@gmail.com>
+ <20210814211713.180533-12-yury.norov@gmail.com>
+ <YSeduU41Ef568xhS@alley>
+ <YSgDI9NpC51GhB/2@yury-ThinkPad>
+ <20210830121249.2fgyvf47py2tz5s5@pathway.suse.cz>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210830121249.2fgyvf47py2tz5s5@pathway.suse.cz>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Aug 24, 2021 at 2:02 PM Krzysztof Kozlowski
-<krzysztof.kozlowski@canonical.com> wrote:
->
-> On 24/08/2021 16:33, Rob Herring wrote:
-> > On Thu, Aug 19, 2021 at 05:44:32PM +0200, Krzysztof Kozlowski wrote:
-> >> The Microchip MPFS Icicle Kit uses Cadence SD/SDIO/eMMC Host Controller
-> >> without any additional vendor compatible:
-> >
-> > I think the lack of vendor compatible is the error here. Experience has
-> > shown that vendor specific compatibles are needed for licensed IP.
-> >
->
-> In such case this could be:
-> 1. a specific "microchip,mpfs250t-sd4hc", which
-> seems to be on MPFS Icicle Kit:
-> https://www.digikey.co.uk/en/product-highlight/m/microchip-technology/mpfs-icicle-kit-es--polarfire-soc-fpga-icicle-kit
->
-> 2. or a generic "microchip,mpfs-sd4hc"
->
-> Any hints here?
+On Mon, Aug 30, 2021 at 02:12:49PM +0200, Petr Mladek wrote:
+> On Thu 2021-08-26 14:09:55, Yury Norov wrote:
+> > On Thu, Aug 26, 2021 at 03:57:13PM +0200, Petr Mladek wrote:
+> > > On Sat 2021-08-14 14:17:07, Yury Norov wrote:
+> > > > The macros iterate thru all set/clear bits in a bitmap. They search a
+> > > > first bit using find_first_bit(), and the rest bits using find_next_bit().
+> > > > 
+> > > > Since find_next_bit() is called shortly after find_first_bit(), we can
+> > > > save few lines of I-cache by not using find_first_bit().
+> > > 
+> > > Is this only a speculation or does it fix a real performance problem?
+> > > 
+> > > The macro is used like:
+> > > 
+> > > 	for_each_set_bit(bit, addr, size) {
+> > > 		fn(bit);
+> > > 	}
+> > > 
+> > > IMHO, the micro-opimization does not help when fn() is non-trivial.
+> >  
+> > The effect is measurable:
+> > 
+> > Start testing for_each_bit()
+> > for_each_set_bit:                15296 ns,   1000 iterations
+> > for_each_set_bit_from:           15225 ns,   1000 iterations
+> > 
+> > Start testing for_each_bit() with cash flushing
+> > for_each_set_bit:               547626 ns,   1000 iterations
+> > for_each_set_bit_from:          497899 ns,   1000 iterations
+> > 
+> > Refer this:
+> > 
+> > https://www.mail-archive.com/dri-devel@lists.freedesktop.org/msg356151.html
+> 
+> I see. The results look convincing on the first look.
+> 
+> But I am still not sure. This patch is basically contradicting many
+> other patches from this patchset:
+> 
+>   + 5th patch optimizes find_first_and_bit() and proves that it is
+>     much faster:
+> 
+>     Before (#define find_first_and_bit(...) find_next_and_bit(..., 0):
+>     Start testing find_bit() with random-filled bitmap
+>     [  140.291468] find_first_and_bit:           46890919 ns,  32671 iterations
+>     Start testing find_bit() with sparse bitmap
+>     [  140.295028] find_first_and_bit:               7103 ns,      1 iterations
+> 
+>     After:
+>     Start testing find_bit() with random-filled bitmap
+>     [  162.574907] find_first_and_bit:           25045813 ns,  32846 iterations
+>     Start testing find_bit() with sparse bitmap
+>     [  162.578458] find_first_and_bit:               4900 ns,      1 iterations
+> 
+>        => saves 46% in random bitmap
+> 	  saves 31% in sparse bitmap
+> 
+> 
+>   + 6th, 7th, and 9th patch makes the code use find_first_bit()
+>     because it is faster than find_next_bit(mask, size, 0);
+> 
+>   + Now, 11th (this) patch replaces find_first_bit() with
+>     find_next_bit(mask, size, 0) because find_first_bit()
+>     makes things slower. It is suspicious at minimum.
+> 
+> 
+> By other words. The I-cache could safe 10% in one case.
+> But find_first_bit() might safe 46% in random case.
 
-Best for a Microchip person to answer, but sure there's some existing
-compatible strings for other blocks on this chip to follow the same
-pattern.
+Those are different cases. find_first_bit() is approximately twice
+faster than find_next_bit, and much smaller. The conclusion is simple:
+use 'first' version whenever possible if there's no other considerations.
 
-Rob
+In case of for_each_bit() macros, however, we have such a consideration.
+In contrast to regular pattern, where user calls either first, or next
+versions N times, here we call find_first_bit once, and then find_next_bit
+N-1 times.
+
+Because we know for sure that we'll call find_next_bit shortly, we can
+benefit from locality under heavy pressure on I-cache, if replace 'first'
+with 'next'. Consider it as a prefetch mechanism for the following calls
+to find_next_bit().
+
+> Does I-cache cost more than the faster code?
+ 
+In this case cache miss is more expensive.
+
+> Or was for_each_set_bit() tested only with a bitmap
+> where find_first_bit() optimization did not help much?
+
+I tried to ensure that the effect of I-cache is real and in this case
+more important than code performance, so in the test I called 'first'
+once and 'next' twice.
+
+> How would for_each_set_bit() work with random bitmap?
+
+It would work for all bitmaps.
+
+> How does it work with larger bitmaps?
+
+Percentage gain (but not absolute) will decrease proportionally to the
+number of calls of find_next_bit() for big N.
+
+Thanks,
+Yury
+
+> Best Regards,
+> Petr
