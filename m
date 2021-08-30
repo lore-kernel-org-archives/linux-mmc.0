@@ -2,265 +2,180 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-23.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	INCLUDES_PULL_REQUEST,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74F71C432BE
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 10:09:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E811C432BE
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 12:12:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5525F610A2
-	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 10:09:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 558C561131
+	for <linux-mmc@archiver.kernel.org>; Mon, 30 Aug 2021 12:12:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236263AbhH3KJy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 30 Aug 2021 06:09:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43792 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236068AbhH3KJy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2021 06:09:54 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8968CC061575
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2021 03:09:00 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id l2so22025844lfp.2
-        for <linux-mmc@vger.kernel.org>; Mon, 30 Aug 2021 03:09:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=YnGp5XaY7ZHqLVWmH/snqm4N1oXNH1vIvABIY33EwNg=;
-        b=lTtd+mi0DHlkFG5JfYWhv9jduG36oLneKzLl09Li4JQEpFXiBPLrq1oV/flmcWoGnT
-         H7pZeFC/2K7P9RfRtR6GA2eWQD/K0Ku4F/WLRaH+ykO+FJXMqwGAhWpbwJJtu09ipBFG
-         b5Eu3Tn/tyrha244Da35tnnaqa27oEdZEyXzawi6rSGjMQXxnf/Uv9z4sdYJ1OIEHF4J
-         RVG+/tXF0afQOOgU3ziEgqkQANdlTZVSyemRWfgCsLncpX9ZBz2Pm0X/JX8NS+CmRSDi
-         20/nB6yQfn49rDiFvZc5T3gEVlLcIRaLHCQgVCocQUB01/ppB1tw09UiEszl1a+LPHsH
-         KXEg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=YnGp5XaY7ZHqLVWmH/snqm4N1oXNH1vIvABIY33EwNg=;
-        b=SEm7M+TrVMoIy/CCkc0j6jyxYhCz3skIdspJqlVDq5JppW8K4VPB5dIDKEyPXZFaes
-         4D3JgwdSu6yO/Ze0ZSPlCgTsNhH/xhkNZK7ca56rZDmot/aOO6uNMJwK9Ok+DJmJeCct
-         qIoMo3AWYo+zkOvYZhq98GZ4Dp/KoiIlfl+T6Ef57Hg9MDHY0Y8mvDCHvAHw3Y0qZcDi
-         ymqcqwHlfqvwIiRad+MXuwZxVdlX0g0FAr3DgNKNwNCzDz5h9/Kju/9drwUSkkFwN9fs
-         dwmx8CcBmiiQJHgxiIiKecNHl9RvQ7H9ir0HaXo6sfh6vQi5VXJz+SB61o9lJzvCYady
-         9ADg==
-X-Gm-Message-State: AOAM532lpWWhEieziIom70dAr6KLKt2ihVMJpv3Pp5EoL2zXQqIfAriG
-        I/nHwXgcWoTrZz0h4dDFlxeSJQ==
-X-Google-Smtp-Source: ABdhPJw8LIk+z1MqKCusb5z2r0Vwg6tbPsWSyvYUD42tmMVGQ3Tm9s25ysh/QsUI+idnEiSAt2Ur2A==
-X-Received: by 2002:ac2:4e0f:: with SMTP id e15mr12439517lfr.262.1630318138031;
-        Mon, 30 Aug 2021 03:08:58 -0700 (PDT)
-Received: from localhost.localdomain (h-155-4-129-146.NA.cust.bahnhof.se. [155.4.129.146])
-        by smtp.gmail.com with ESMTPSA id f29sm1348429lfj.119.2021.08.30.03.08.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 30 Aug 2021 03:08:57 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK updates for v5.15
-Date:   Mon, 30 Aug 2021 12:08:56 +0200
-Message-Id: <20210830100856.512711-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.25.1
+        id S236689AbhH3MNs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 30 Aug 2021 08:13:48 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:57296 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229828AbhH3MNq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 30 Aug 2021 08:13:46 -0400
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out2.suse.de (Postfix) with ESMTP id EC26D1FE07;
+        Mon, 30 Aug 2021 12:12:51 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.com; s=susede1;
+        t=1630325571; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=2hWoCd86FOkOw7A98E1hRLN7RLXNnAR31E/MeyrKApg=;
+        b=Y1gMMOSG4Lbl6n6EPJf1XND9hTBA55SaCavADAkaMhKtcCo/fdtC90kY49WhTWrpd2I2Qw
+        ihSEer7fh+GydVOL5lgJ+x54xNtaI/DzPJNEfiUsx3J1/ggxYMTOuH0fO1Tzf0qlIEFEpO
+        Ao6FdqbDH28DfZ6nb62XRrXvVEsIYJg=
+Received: from suse.cz (pathway.suse.cz [10.100.12.24])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by relay2.suse.de (Postfix) with ESMTPS id C0204A3B8C;
+        Mon, 30 Aug 2021 12:12:49 +0000 (UTC)
+Date:   Mon, 30 Aug 2021 14:12:49 +0200
+From:   Petr Mladek <pmladek@suse.com>
+To:     Yury Norov <yury.norov@gmail.com>
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        linux-kernel@vger.kernel.org, linux-mm@kvack.org,
+        linux-arch@vger.kernel.org, linux-kselftest@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-perf-users@vger.kernel.org,
+        kvm@vger.kernel.org,
+        "James E.J. Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Alexander Lobakin <alobakin@pm.me>,
+        Alexander Shishkin <alexander.shishkin@linux.intel.com>,
+        Alexey Klimov <aklimov@redhat.com>,
+        Andrea Merello <andrea.merello@gmail.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Arnaldo Carvalho de Melo <acme@redhat.com>,
+        Arnd Bergmann <arnd@arndb.de>, Ben Gardon <bgardon@google.com>,
+        Benjamin Herrenschmidt <benh@kernel.crashing.org>,
+        Brian Cain <bcain@codeaurora.org>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph Lameter <cl@linux.com>,
+        Daniel Bristot de Oliveira <bristot@redhat.com>,
+        David Hildenbrand <david@redhat.com>,
+        Dennis Zhou <dennis@kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Ian Rogers <irogers@google.com>,
+        Ingo Molnar <mingo@redhat.com>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Jakub Kicinski <kuba@kernel.org>, Jiri Olsa <jolsa@redhat.com>,
+        Joe Perches <joe@perches.com>, Jonas Bonn <jonas@southpole.se>,
+        Leo Yan <leo.yan@linaro.org>,
+        Mark Rutland <mark.rutland@arm.com>,
+        Namhyung Kim <namhyung@kernel.org>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Paolo Bonzini <pbonzini@redhat.com>,
+        Peter Xu <peterx@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        Rich Felker <dalias@libc.org>,
+        Samuel Mendoza-Jonas <sam@mendozajonas.com>,
+        Sean Christopherson <seanjc@google.com>,
+        Sergey Senozhatsky <senozhatsky@chromium.org>,
+        Shuah Khan <shuah@kernel.org>,
+        Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Tejun Heo <tj@kernel.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>
+Subject: Re: [PATCH 11/17] find: micro-optimize for_each_{set,clear}_bit()
+Message-ID: <20210830121249.2fgyvf47py2tz5s5@pathway.suse.cz>
+References: <20210814211713.180533-1-yury.norov@gmail.com>
+ <20210814211713.180533-12-yury.norov@gmail.com>
+ <YSeduU41Ef568xhS@alley>
+ <YSgDI9NpC51GhB/2@yury-ThinkPad>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <YSgDI9NpC51GhB/2@yury-ThinkPad>
+User-Agent: NeoMutt/20170912 (1.9.0)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Thu 2021-08-26 14:09:55, Yury Norov wrote:
+> On Thu, Aug 26, 2021 at 03:57:13PM +0200, Petr Mladek wrote:
+> > On Sat 2021-08-14 14:17:07, Yury Norov wrote:
+> > > The macros iterate thru all set/clear bits in a bitmap. They search a
+> > > first bit using find_first_bit(), and the rest bits using find_next_bit().
+> > > 
+> > > Since find_next_bit() is called shortly after find_first_bit(), we can
+> > > save few lines of I-cache by not using find_first_bit().
+> > 
+> > Is this only a speculation or does it fix a real performance problem?
+> > 
+> > The macro is used like:
+> > 
+> > 	for_each_set_bit(bit, addr, size) {
+> > 		fn(bit);
+> > 	}
+> > 
+> > IMHO, the micro-opimization does not help when fn() is non-trivial.
+>  
+> The effect is measurable:
+> 
+> Start testing for_each_bit()
+> for_each_set_bit:                15296 ns,   1000 iterations
+> for_each_set_bit_from:           15225 ns,   1000 iterations
+> 
+> Start testing for_each_bit() with cash flushing
+> for_each_set_bit:               547626 ns,   1000 iterations
+> for_each_set_bit_from:          497899 ns,   1000 iterations
+> 
+> Refer this:
+> 
+> https://www.mail-archive.com/dri-devel@lists.freedesktop.org/msg356151.html
 
-Here's the pull-request with updates for MMC and MEMSTICK for v5.15. Details
-about the highlights are as usual found in the signed tag.
+I see. The results look convincing on the first look.
 
-Please pull this in!
+But I am still not sure. This patch is basically contradicting many
+other patches from this patchset:
 
-Kind regards
-Ulf Hansson
+  + 5th patch optimizes find_first_and_bit() and proves that it is
+    much faster:
+
+    Before (#define find_first_and_bit(...) find_next_and_bit(..., 0):
+    Start testing find_bit() with random-filled bitmap
+    [  140.291468] find_first_and_bit:           46890919 ns,  32671 iterations
+    Start testing find_bit() with sparse bitmap
+    [  140.295028] find_first_and_bit:               7103 ns,      1 iterations
+
+    After:
+    Start testing find_bit() with random-filled bitmap
+    [  162.574907] find_first_and_bit:           25045813 ns,  32846 iterations
+    Start testing find_bit() with sparse bitmap
+    [  162.578458] find_first_and_bit:               4900 ns,      1 iterations
+
+       => saves 46% in random bitmap
+	  saves 31% in sparse bitmap
 
 
-The following changes since commit 885814a97f5a1a2daf66bde5f2076f0bf632c174:
+  + 6th, 7th, and 9th patch makes the code use find_first_bit()
+    because it is faster than find_next_bit(mask, size, 0);
 
-  Revert "mmc: sdhci-iproc: Set SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN on BCM2711" (2021-08-27 16:30:36 +0200)
+  + Now, 11th (this) patch replaces find_first_bit() with
+    find_next_bit(mask, size, 0) because find_first_bit()
+    makes things slower. It is suspicious at minimum.
 
-are available in the Git repository at:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.15
+By other words. The I-cache could safe 10% in one case.
+But find_first_bit() might safe 46% in random case.
 
-for you to fetch changes up to a75c956162978097c0a60d95971c97ae486a68d7:
+Does I-cache cost more than the faster code?
 
-  Merge branch 'fixes' into next (2021-08-27 16:35:55 +0200)
+Or was for_each_set_bit() tested only with a bitmap
+where find_first_bit() optimization did not help much?
 
-----------------------------------------------------------------
-MMC core:
- - Return a proper response in case of an ioctl error
- - Issue HPI to interrupt BKOPS for eMMC if it timed out
- - Avoid hogging the CPU while polling for busy
- - Extend sd8787 pwrseq to support the wilc1000 SDIO
- - Remove a couple of confusing warning messages
- - Clarify comment for ->card_busy() host ops
+How would for_each_set_bit() work with random bitmap?
+How does it work with larger bitmaps?
 
-MMC host:
- - dw_mmc: Add data CRC error injection
- - mmci: De-assert reset during ->probe()
- - rtsx_pci: Fix long reads when clock is pre-scaled
- - sdhci: Correct the tuning command handle for PIO mode
- - sdhci-esdhc-imx: Improve support for auto tuning
- - sdhci-msm: Add support for the sc7280
- - sdhci-of-arasan: Don't auto tune for DDR50 mode for ZynqMP
- - sdhci-of-arasan: Enable support for auto cmd12
- - sdhci-of-arasan: Use 19MHz for SD default speed for ZynqMP for level shifter
- - usdhi6rol0: Implement the ->card_busy() host ops
-
-MEMSTICK:
- - A couple of minor cleanups.
-
-----------------------------------------------------------------
-Andy Shevchenko (1):
-      mmc: mmc_spi: Simplify busy loop in mmc_spi_skip()
-
-Bean Huo (1):
-      mmc: core: Issue HPI in case the BKOPS timed out
-
-Biju Das (2):
-      dt-bindings: mmc: renesas,sdhi: Fix dtbs-check warning
-      dt-bindings: mmc: renesas,sdhi: Document RZ/G2L bindings
-
-ChanWoo Lee (2):
-      mmc: queue: Match the data type of max_segments
-      mmc: queue: Remove unused parameters(request_queue)
-
-Christophe JAILLET (3):
-      memstick: r592: Change the name of the 'pci_driver' structure to be consistent
-      memstick: switch from 'pci_' to 'dma_' API
-      mmc: switch from 'pci_' to 'dma_' API
-
-Claudiu Beznea (4):
-      dt-bindings: mmc: Extend pwrseq-sd8787 binding for wilc1000
-      mmc: pwrseq: sd8787: add support for wilc1000
-      mmc: pwrseq: add wilc1000_sdio dependency for pwrseq_sd8787
-      mmc: pwrseq: sd8787: fix compilation warning
-
-Colin Ian King (1):
-      memstick: ms_block: Fix spelling contraction "cant" -> "can't"
-
-Eric Biggers (1):
-      mmc: core: Store pointer to bio_crypt_ctx in mmc_request
-
-Fabio Estevam (1):
-      mmc: sdhci-esdhc-imx: Remove unneeded mmc-esdhc-imx.h header
-
-Haibo Chen (5):
-      mmc: sdhci: Correct the tuning command handle for PIO mode
-      dt-bindings: mmc: fsl-imx-esdhc: add a new compatible string
-      dt-bindings: mmc: fsl-imx-esdhc: change the pinctrl-names rule
-      mmc: sdhci-esdhc-imx: Remove redundant code for manual tuning
-      mmc: sdhci-esdhc-imx: Select the correct mode for auto tuning
-
-Linus Walleij (1):
-      mmc: mmci: De-assert reset on probe
-
-Manish Narani (6):
-      mmc: sdhci-of-arasan: Modified SD default speed to 19MHz for ZynqMP
-      mmc: sdhci-of-arasan: Add "SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12" quirk.
-      mmc: sdhci-of-arasan: Skip Auto tuning for DDR50 mode in ZynqMP platform
-      mmc: sdhci-of-arasan: Check return value of non-void funtions
-      mmc: sdhci-of-arasan: Use appropriate type of division macro
-      mmc: sdhci-of-arasan: Modify data type of the clk_phase array
-
-Mårten Lindahl (2):
-      mmc: usdhi6rol0: Implement card_busy function
-      mmc: core: Update ->card_busy() callback comment
-
-Nishad Kamdar (1):
-      mmc: core: Return correct emmc response in case of ioctl error
-
-Sahitya Tummala (1):
-      mmc: sdhci-msm: Use maximum possible data timeout value
-
-Sai Krishna Potthuri (1):
-      mmc: arasan: Fix the issue in reading tap values from DT
-
-Sarthak Garg (1):
-      mmc: sdhci: Introduce max_timeout_count variable in sdhci_host
-
-Sean Anderson (2):
-      mmc: sdio: Don't warn about vendor CIS tuples
-      mmc: sdio: Print contents of unknown CIS tuples
-
-Shaik Sajida Bhanu (1):
-      dt-bindings: mmc: sdhci-msm: Add compatible string for sc7280
-
-Thomas Hebb (1):
-      mmc: rtsx_pci: Fix long reads when clock is prescaled
-
-Tony Lindgren (3):
-      mmc: sdhci: Fix issue with uninitialized dma_slave_config
-      mmc: dw_mmc: Fix issue with uninitialized dma_slave_config
-      mmc: moxart: Fix issue with uninitialized dma_slave_config
-
-Ulf Hansson (4):
-      mmc: core: Avoid hogging the CPU while polling for busy in the I/O err path
-      mmc: core: Avoid hogging the CPU while polling for busy for mmc ioctls
-      mmc: core: Avoid hogging the CPU while polling for busy after I/O writes
-      Merge branch 'fixes' into next
-
-Vincent Whitchurch (1):
-      mmc: dw_mmc: Add data CRC error injection
-
-Wolfram Sang (6):
-      mmc: host: add kdoc for mmc_retune_{en|dis}able
-      mmc: host: factor out clearing the retune state
-      mmc: renesas_sdhi_sys_dmac: use proper DMAENGINE API for termination
-      mmc: sh_mmcif: use proper DMAENGINE API for termination
-      mmc: usdhi6rol0: use proper DMAENGINE API for termination
-      mmc: core: Only print retune error when we don't check for card removal
-
-Yoshihiro Shimoda (1):
-      mmc: renesas_sdhi: Refactor renesas_sdhi_probe()
-
- .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |  18 ++-
- .../devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml |   4 +-
- .../devicetree/bindings/mmc/renesas,sdhi.yaml      | 133 +++++++++++++-------
- .../devicetree/bindings/mmc/sdhci-msm.txt          |   1 +
- drivers/memstick/core/ms_block.c                   |   2 +-
- drivers/memstick/host/r592.c                       |   9 +-
- drivers/memstick/host/tifm_ms.c                    |  12 +-
- drivers/mmc/core/Kconfig                           |   2 +-
- drivers/mmc/core/block.c                           |  77 +++++-------
- drivers/mmc/core/core.c                            |  13 +-
- drivers/mmc/core/crypto.c                          |  15 +--
- drivers/mmc/core/host.c                            |  13 +-
- drivers/mmc/core/host.h                            |   6 +
- drivers/mmc/core/mmc_ops.c                         |  16 ++-
- drivers/mmc/core/mmc_ops.h                         |   1 +
- drivers/mmc/core/pwrseq_sd8787.c                   |  14 ++-
- drivers/mmc/core/queue.c                           |  34 ++----
- drivers/mmc/core/sdio_cis.c                        |  22 +++-
- drivers/mmc/host/cqhci-crypto.h                    |   7 +-
- drivers/mmc/host/dw_mmc.c                          |  74 +++++++++++
- drivers/mmc/host/dw_mmc.h                          |   7 ++
- drivers/mmc/host/mmc_spi.c                         |  15 +--
- drivers/mmc/host/mmci.c                            |   3 +
- drivers/mmc/host/moxart-mmc.c                      |   1 +
- drivers/mmc/host/renesas_sdhi.h                    |   9 +-
- drivers/mmc/host/renesas_sdhi_core.c               |  90 +-------------
- drivers/mmc/host/renesas_sdhi_internal_dmac.c      | 135 +++++++++++++++++++--
- drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   7 +-
- drivers/mmc/host/rtsx_pci_sdmmc.c                  |  36 ++++--
- drivers/mmc/host/sdhci-esdhc-imx.c                 |  78 ++++++++++--
- drivers/mmc/host/sdhci-msm.c                       |   3 +
- drivers/mmc/host/sdhci-of-arasan.c                 |  51 ++++++--
- drivers/mmc/host/sdhci.c                           |  27 +++--
- drivers/mmc/host/sdhci.h                           |   1 +
- drivers/mmc/host/sh_mmcif.c                        |   4 +-
- drivers/mmc/host/tifm_sd.c                         |  16 +--
- drivers/mmc/host/usdhi6rol0.c                      |  14 ++-
- drivers/mmc/host/via-sdmmc.c                       |   4 +-
- include/linux/mmc/core.h                           |   3 +-
- include/linux/mmc/host.h                           |   2 +-
- include/linux/platform_data/mmc-esdhc-imx.h        |  42 -------
- 41 files changed, 647 insertions(+), 374 deletions(-)
- delete mode 100644 include/linux/platform_data/mmc-esdhc-imx.h
+Best Regards,
+Petr
