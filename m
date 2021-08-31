@@ -8,63 +8,63 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D3DAC432BE
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 11:02:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78B52C432BE
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 11:02:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 62DD660F6B
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 11:02:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 57D7A60F6B
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 11:02:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241148AbhHaLC4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 Aug 2021 07:02:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44480 "EHLO
+        id S241124AbhHaLDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 Aug 2021 07:03:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44512 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231304AbhHaLCz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Aug 2021 07:02:55 -0400
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49AE0C061575
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Aug 2021 04:02:00 -0700 (PDT)
-Received: by mail-pg1-x52e.google.com with SMTP id w7so15127324pgk.13
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Aug 2021 04:02:00 -0700 (PDT)
+        with ESMTP id S231304AbhHaLDD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Aug 2021 07:03:03 -0400
+Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E63BC061575
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Aug 2021 04:02:08 -0700 (PDT)
+Received: by mail-pj1-x102d.google.com with SMTP id w19-20020a17090aaf9300b00191e6d10a19so2099106pjq.1
+        for <linux-mmc@vger.kernel.org>; Tue, 31 Aug 2021 04:02:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=J7ZX5cWq/OCrI2PmtgCFKZxObJ0fq4sVzKxoaxZ4qkM=;
-        b=fm+zE4KE1BdrQqK4f7m5nRZ6LSOroWDywcddzD650TFEJr0mA1x4lZsD2R7vfkbK/J
-         LQVQyKixt8ZWBbyWuHeJ9knnSDam3kiubwDPWYozIG8+MLJJ2LVEwGpQ70jUHzxoMcIe
-         d4Q/pYIRg30OBdTxZjzIhx2L7kggkjEgq67DdZotj48bJB+P6VfeVFWES49RkKd1Bbkp
-         OZp4Ov6H3mEQ14ogrcwHjtTyy0hjP7YywSJr2/rN83WI9ORbKufbA6cKXEsLb/MYWwd1
-         adz587T5tQwuqHKwnapePuLM8x322i0IYPtWmy0n2qJ/WG6shR7xuf9bSXp8LBBz7HEn
-         zoLA==
+        bh=+xjZYk6uNy4ZGkIZN40uDZFqPEfdCLB0M2J0sE1v5D8=;
+        b=DQIGWZo1EJekke7YkCqnCmJgFYrQNxZdr2/VJPB9onVNUpoqPffHqM4CE7vxAPjb7C
+         WIGpFvemdaE8C8LS+/qoQDn0bviPUKO72VYxmJ6kNpnacnH8GYg3f1/L8y5bCW1PWXQZ
+         P9YOLBttomkctSGAStWoV84q8vmctXwu9YN7K5V+2aKVgJbI2KdjvnIjLfBHh1gT5SnO
+         n5+BYVnlHXgKzf+kXWf2OoIHf11pKTLwiuyguwsU8w9fyBGWecamiznzQu+LB6wpqED0
+         VaikWcsqQ6XXGQFfRgxZjdCCggVxtoE4Rkg6kjmT6Awhf4mLYlE6ByiRkS083Z/+Ksyc
+         yDXA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=J7ZX5cWq/OCrI2PmtgCFKZxObJ0fq4sVzKxoaxZ4qkM=;
-        b=qJahVxy/aOUr48dytLSsO2KusNWbGa3boxXHBNE3HENZtu1WyXiI5nYCo3HkkyIKXw
-         +vzXZFMbpmRcV+gsknsb8Phbtg1V04VajRPmnMQ3OE2qA8ncQyKDqnYaWa5ISsFXPJgR
-         +DeOrWlMgILVh7beSWmLOJQWxs2P5YjHls2NqBG0vdsVXW9U5kEA6EJwYa7hHNm1t3iV
-         wQEtGAjoH2aPIHGst8v9LR7MiT+e2v9yG/CMFZoGdUuqueErDVgUHd9ntO6fK1jS/Rce
-         rTMY8fvRSqhHMlNOZMM9I2X2D2AVd/xVwweWdsBv2B49sNNY1BdQDIkWEvJEBOvd9drc
-         GL/Q==
-X-Gm-Message-State: AOAM533Td31Hza6Fj0R0SnBBQeMYIZWU7/u4tyuTPzYUf2CaLeVsKea5
-        HIxrOoFq+DWwWGRvNnbH0ubrqHc1Qp/Lhw==
-X-Google-Smtp-Source: ABdhPJwvDklBXdh3+8G67E5fLrSsRN1qdtFEG1eM0+ZZNaYgLRyEr3YMTmJ2be3oAcdo4MSpquBL8A==
-X-Received: by 2002:a63:f94c:: with SMTP id q12mr25892581pgk.171.1630407719853;
-        Tue, 31 Aug 2021 04:01:59 -0700 (PDT)
+        bh=+xjZYk6uNy4ZGkIZN40uDZFqPEfdCLB0M2J0sE1v5D8=;
+        b=pfbqXe8v+CaDKL/1+mJt0iaaavy3RoYi/1EeUAy0FKvPBe+x2Qa9T9Yz7i3o8zswPA
+         VSnN5snP5p45opdmKbdNQUqlW/zcWpEHQm2qQLj33S3WIAGTQZNk/zAuDPKgPfSsBHP1
+         8HyaLtEu/4sfNw4/YNBL8UOWSfxKUWIhB9zS6xDvrzLD3opTk+naXxdPMpWjt7iZVS6r
+         CJUjFkuDtL0iM8B6sRAAzSYeq+1a/38ZLJXtQiRSyfBxfo9YPWhmkxoRIMmRGaAlbtw8
+         zdB3al45cK72bqeAmJDmOsd+SKeEsOh7u8n2JKqe8LK0yyWbAr9uHSFdcNv7jY/8hOll
+         irqQ==
+X-Gm-Message-State: AOAM531UsXL3k+8qRYYlBDAE7CZsfvwjyeThNdv+l6oduJA/ec/mvlYD
+        WP3h+FXAX2sz7OTfH7hB1jg=
+X-Google-Smtp-Source: ABdhPJzJcfMxOoECu9db+pX8n9YjQPO8uZIlHLww17KcYvoAzsO7dmyupJLqx68/vMjiQMNLMvmVtg==
+X-Received: by 2002:a17:90a:4285:: with SMTP id p5mr4833238pjg.162.1630407727800;
+        Tue, 31 Aug 2021 04:02:07 -0700 (PDT)
 Received: from localhost.localdomain (60-251-58-169.HINET-IP.hinet.net. [60.251.58.169])
-        by smtp.gmail.com with ESMTPSA id i20sm5952653pfa.185.2021.08.31.04.01.58
+        by smtp.gmail.com with ESMTPSA id q4sm2429546pjd.52.2021.08.31.04.02.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 31 Aug 2021 04:01:59 -0700 (PDT)
+        Tue, 31 Aug 2021 04:02:07 -0700 (PDT)
 From:   Jason Lai <jasonlai.genesyslogic@gmail.com>
 To:     ulf.hansson@linaro.org, takahiro.akashi@linaro.org,
         adrian.hunter@intel.com
 Cc:     Jason Lai <jason.lai@genesyslogic.com.tw>,
         linux-mmc@vger.kernel.org, ben.chuang@genesyslogic.com.tw,
         greg.tu@genesyslogic.com.tw
-Subject: [PATCH 3/7] mmc: core: Announce successful insertion of an SD
-Date:   Tue, 31 Aug 2021 19:01:55 +0800
-Message-Id: <20210831110155.50616-1-jasonlai.genesyslogic@gmail.com>
+Subject: [PATCH 4/7] mmc: core: Extend support for mmc regulators with a
+Date:   Tue, 31 Aug 2021 19:02:03 +0800
+Message-Id: <20210831110203.50669-1-jasonlai.genesyslogic@gmail.com>
 X-Mailer: git-send-email 2.32.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -76,50 +76,116 @@ From: Jason Lai <jason.lai@genesyslogic.com.tw>
 
 From: Ulf Hansson <ulf.hansson@linaro.org>
 
-To inform the users about SD UHS-II cards, let's extend the print at card
-insertion with a "UHS-II" substring. Within this change, it seems
-reasonable to convert from using "ultra high speed" into "UHS-I speed", for
-the UHS-I type, as it should makes it more clear.
+To allow an additional external regulator to be controlled by an mmc host
+driver, let's add support for a vqmmc2 regulator to the mmc core.
 
-Note that, the new print for UHS-II cards doesn't include the actual
-selected speed mode. Instead, this is going to be added from subsequent
-change.
+For an SD UHS-II interface the vqmmc2 regulator may correspond to the so
+called vdd2 supply, as described by the SD spec. Initially, only 1.8V is
+needed, hence limit the new helper function, mmc_regulator_set_vqmmc2() to
+this too.
+
+Note that, to allow for flexibility mmc host drivers need to manage the
+enable/disable of the vqmmc2 regulator themselves, while the regulator is
+looked up through the common mmc_regulator_get_supply().
 
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/core/bus.c  | 4 +++-
- drivers/mmc/core/host.h | 4 ++++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ drivers/mmc/core/regulator.c | 33 +++++++++++++++++++++++++++++++++
+ include/linux/mmc/host.h     |  8 ++++++++
+ 2 files changed, 41 insertions(+)
 
-diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
-index 27ba3c749..8fd46b5f5 100644
---- a/drivers/mmc/core/bus.c
-+++ b/drivers/mmc/core/bus.c
-@@ -353,7 +353,9 @@ int mmc_add_card(struct mmc_card *card)
- 	if (mmc_card_hs(card))
- 		speed_mode = "high speed ";
- 	else if (mmc_card_uhs(card))
--		speed_mode = "ultra high speed ";
-+		speed_mode = "UHS-I speed ";
-+	else if (mmc_card_uhs2(card))
-+		speed_mode = "UHS-II speed ";
- 	else if	(mmc_card_ddr52(card))
- 		speed_mode = "high speed DDR ";
- 	else if (mmc_card_hs200(card))
-diff --git a/drivers/mmc/core/host.h b/drivers/mmc/core/host.h
-index ba407617e..c243d3096 100644
---- a/drivers/mmc/core/host.h
-+++ b/drivers/mmc/core/host.h
-@@ -83,5 +83,9 @@ static inline bool mmc_card_sd_express(struct mmc_host *host)
- 		host->ios.timing == MMC_TIMING_SD_EXP_1_2V;
+diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
+index 609201a46..640eb46e8 100644
+--- a/drivers/mmc/core/regulator.c
++++ b/drivers/mmc/core/regulator.c
+@@ -223,6 +223,32 @@ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios)
  }
+ EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc);
  
-+static inline bool mmc_card_uhs2(struct mmc_card *card)
++/**
++ * mmc_regulator_set_vqmmc2 - Set vqmmc2 as per the ios->vqmmc2_voltage
++ * @mmc: The mmc host to regulate
++ * @ios: The io bus settings
++ *
++ * Sets a new voltage level for the vqmmc2 regulator, which may correspond to
++ * the vdd2 regulator for an SD UHS-II interface. This function is expected to
++ * be called by mmc host drivers.
++ *
++ * Returns a negative error code on failure, zero if the voltage level was
++ * changed successfully or a positive value if the level didn't need to change.
++ */
++int mmc_regulator_set_vqmmc2(struct mmc_host *mmc, struct mmc_ios *ios)
 +{
-+	return card->host->ios.timing == MMC_TIMING_SD_UHS2;
++	if (IS_ERR(mmc->supply.vqmmc2))
++		return -EINVAL;
++
++	switch (ios->vqmmc2_voltage) {
++	case MMC_VQMMC2_VOLTAGE_180:
++		return mmc_regulator_set_voltage_if_supported(
++			mmc->supply.vqmmc2, 1700000, 1800000, 1950000);
++	default:
++		return -EINVAL;
++	}
++}
++EXPORT_SYMBOL_GPL(mmc_regulator_set_vqmmc2);
++
+ #else
+ 
+ static inline int mmc_regulator_get_ocrmask(struct regulator *supply)
+@@ -249,6 +275,7 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 
+ 	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
+ 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
++	mmc->supply.vqmmc2 = devm_regulator_get_optional(dev, "vqmmc2");
+ 
+ 	if (IS_ERR(mmc->supply.vmmc)) {
+ 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
+@@ -268,6 +295,12 @@ int mmc_regulator_get_supply(struct mmc_host *mmc)
+ 		dev_dbg(dev, "No vqmmc regulator found\n");
+ 	}
+ 
++	if (IS_ERR(mmc->supply.vqmmc2)) {
++		if (PTR_ERR(mmc->supply.vqmmc2) == -EPROBE_DEFER)
++			return -EPROBE_DEFER;
++		dev_dbg(dev, "No vqmmc2 regulator found\n");
++	}
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(mmc_regulator_get_supply);
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 91065ab7f..69f8c8a8f 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -303,6 +303,7 @@ struct mmc_pwrseq;
+ struct mmc_supply {
+ 	struct regulator *vmmc;		/* Card power supply */
+ 	struct regulator *vqmmc;	/* Optional Vccq supply */
++	struct regulator *vqmmc2;	/* Optional supply for phy */
+ };
+ 
+ struct mmc_ctx {
+@@ -580,6 +581,7 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 			struct regulator *supply,
+ 			unsigned short vdd_bit);
+ int mmc_regulator_set_vqmmc(struct mmc_host *mmc, struct mmc_ios *ios);
++int mmc_regulator_set_vqmmc2(struct mmc_host *mmc, struct mmc_ios *ios);
+ #else
+ static inline int mmc_regulator_set_ocr(struct mmc_host *mmc,
+ 				 struct regulator *supply,
+@@ -593,6 +595,12 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
+ {
+ 	return -EINVAL;
+ }
++
++static inline int mmc_regulator_set_vqmmc2(struct mmc_host *mmc,
++					   struct mmc_ios *ios)
++{
++	return -EINVAL;
 +}
  #endif
  
+ int mmc_regulator_get_supply(struct mmc_host *mmc);
 -- 
 2.32.0
 
