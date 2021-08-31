@@ -2,99 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
+X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8487C4320E
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 13:34:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A9C6C4320E
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 20:22:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A052460249
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 13:34:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E16646109D
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 Aug 2021 20:22:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232909AbhHaNfA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 Aug 2021 09:35:00 -0400
-Received: from www.zeus03.de ([194.117.254.33]:42308 "EHLO mail.zeus03.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S230385AbhHaNfA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 31 Aug 2021 09:35:00 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=CD21AsswF3LGAHdmViZKHobiAwU
-        n1LFzkJV/KSOwL3o=; b=olHZ9iRxQEs4jrnFAbzlqmsyZwt98Z+RhR3XeYZ1Zea
-        mmsNRRn9javnZrzNd9vm3JjNhZ8vSD8+PYSoKhzeKPPaylr/7wxdBI3fdZPeSkID
-        k9PcnJPU6sop+ZoYl0Qxl04t7jM4V4zGm0EWrUpbebcORguTpfgcKL6lPGJPuPRc
-        =
-Received: (qmail 2717121 invoked from network); 31 Aug 2021 15:34:02 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Aug 2021 15:34:02 +0200
-X-UD-Smtp-Session: l3s3148p1@SFaFANvKatwgARa4RTxnAQOT/3kqwktG
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        id S241124AbhHaUXV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 Aug 2021 16:23:21 -0400
+Received: from mail-oo1-f47.google.com ([209.85.161.47]:39445 "EHLO
+        mail-oo1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S241212AbhHaUXE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Aug 2021 16:23:04 -0400
+Received: by mail-oo1-f47.google.com with SMTP id t2-20020a4ae9a2000000b0028c7144f106so128220ood.6;
+        Tue, 31 Aug 2021 13:22:08 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=4SF/gjz3ryW3XgAL+26S9/LDHdM8zEpUjI5UG3UHGQg=;
+        b=tGQtaEg4mEBX6Oa1tmR7BGCCdcy0t2iEbjcbsE34Cg4aoqppj37iPjxh9Zhv//A9yt
+         eHulMnufDFh+/32dBTQEhMICfgL15iFkHh2VFQUp7p1mk9/ee0teeZgJY0CxX03SmeLi
+         Dg+/S4GoqAKnsCQcXKINyYBVI+wwasiLhpeAcQ18RCDW3YZFXyZ9RoTQII3vBaMCobDX
+         Jxe4s6ev2gYAnG2ZvW8vgF5272vios2UBkTvshc1cfpsO+OeJkx0bOe0zdJEL7S36FXo
+         slm/zV4tVSb0cRSvDNhqnv6eADwlKURCHV6M3kEcKKvcW7HL+l6Hm5Lc3RjySxDKlE2+
+         OUWQ==
+X-Gm-Message-State: AOAM531whJpux6HUWKgQHk9AEpugc/YEJKNaLVL8HWE6Ozo2WhJ3PACA
+        HsTeXhvcsVa4pEKsy43Vyg==
+X-Google-Smtp-Source: ABdhPJxD0mW53nIn3ShPl3hu4xOaQP0bjv3KNsWQaD3rF/HgEfZvYrr/wZJnxy/xPtWr40T6SszGMQ==
+X-Received: by 2002:a4a:a509:: with SMTP id v9mr15987260ook.73.1630441328317;
+        Tue, 31 Aug 2021 13:22:08 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
+        by smtp.gmail.com with ESMTPSA id s10sm4105457otq.61.2021.08.31.13.22.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 31 Aug 2021 13:22:07 -0700 (PDT)
+Received: (nullmailer pid 589602 invoked by uid 1000);
+        Tue, 31 Aug 2021 20:22:06 -0000
+Date:   Tue, 31 Aug 2021 15:22:06 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        linux-mediatek@lists.infradead.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH RFC] HACK: mmc: core: also abort tuning with CMD12 for SD
-Date:   Tue, 31 Aug 2021 15:33:49 +0200
-Message-Id: <20210831133349.18203-1-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.30.2
+        linux-arm-kernel@lists.infradead.org,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        Avri Altman <avri.altman@wdc.com>, Yue Hu <huyue2@yulong.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bean Huo <beanhuo@micron.com>
+Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: mtk-sd: add hs400 dly3 setting
+Message-ID: <YS6PbrCTIZJwe1cX@robh.at.kernel.org>
+References: <1630065205-7618-1-git-send-email-wenbin.mei@mediatek.com>
+ <1630065205-7618-2-git-send-email-wenbin.mei@mediatek.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1630065205-7618-2-git-send-email-wenbin.mei@mediatek.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-We have various SanDisk cards which fail tuning to SDR104 unless we
-allow a CMD12 also to be sent to abort a broken tuning. It is true that
-the SD specs do not mention that CMD12 is allowed, but they also don't
-say it is forbidden. And now reality tells that it is needed to make
-some cards work. Other cards I tried did not regress.
+On Fri, 27 Aug 2021 19:53:24 +0800, Wenbin Mei wrote:
+> Add hs400 dly3 setting for mtk-sd yaml
+> 
+> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 7 +++++++
+>  1 file changed, 7 insertions(+)
+> 
 
-If we can agree to allow this for SD, then the problem is now SDIO which
-does not support CMD12. mmc_card_sdio() does not work at this stage
-because host->card is still NULL. Is there any other way to distinguish
-SD and SDIO here?
-
-Not-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
-
-Hey guys,
-
-so, there are two questions here:
-1) despite not being mentioned in the spec, do we want to allow CMD12 to
-   abort tuning for SD as well?
-
-2) If so, how to make sure not apply it to SDIO but SD only?
-
-Thanks for your input! Kind regards,
-
-   Wolfram
-
-
- drivers/mmc/core/mmc_ops.c | 8 --------
- 1 file changed, 8 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 973756ed4016..02d378255895 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -704,14 +704,6 @@ int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode)
- {
- 	struct mmc_command cmd = {};
- 
--	/*
--	 * eMMC specification specifies that CMD12 can be used to stop a tuning
--	 * command, but SD specification does not, so do nothing unless it is
--	 * eMMC.
--	 */
--	if (opcode != MMC_SEND_TUNING_BLOCK_HS200)
--		return 0;
--
- 	cmd.opcode = MMC_STOP_TRANSMISSION;
- 	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
- 
--- 
-2.30.2
-
+Acked-by: Rob Herring <robh@kernel.org>
