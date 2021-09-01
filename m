@@ -2,144 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+X-Spam-Status: No, score=-11.1 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 770BAC432BE
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Sep 2021 07:33:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8637C432BE
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Sep 2021 08:08:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 494BA61053
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Sep 2021 07:33:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CF82060238
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Sep 2021 08:08:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242579AbhIAHeD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Sep 2021 03:34:03 -0400
-Received: from mx08-00178001.pphosted.com ([91.207.212.93]:14508 "EHLO
-        mx07-00178001.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S242536AbhIAHeD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2021 03:34:03 -0400
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.16.1.2/8.16.0.43) with SMTP id 1813nd5a002907;
-        Wed, 1 Sep 2021 09:32:48 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=subject : to : cc :
- references : from : message-id : date : mime-version : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=3jRYf6kgi/Y3vs9PQibwlh0dqREUThB8xo5tLdQ+5rs=;
- b=LIbGaAv+MLdeGDQftd4OlnQ7hYD+9he6Cz85BVjwK0+ZtVaLtAqOjkbryvDMVeyzRDYL
- uAQIW1fyKXIvhHQwbjfGSL4JYyygTTrPlMAWlUxHTGo0Vl9UDPZqIFOyOd5gHyUvzRVL
- CgQm3xXh1B3Xy8qcjBzVhYCdsizFX+P6L5u+810pnToGLcTNYTRuIefUVlYoRZ6edocP
- FIMeUmQC/lZuh8+rcKAoHiuLVKA+csMCU7wFtgoZ2eBWLoeh0Ty90PVVENnz6RKVDKEj
- JYAziuE3pjyZQcrxwDI61Hrhr3m4/x3ClwGqwdfWaVTNDv2WRBzhbIKxzWygiENinKTh nw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com with ESMTP id 3aspy4byqe-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 01 Sep 2021 09:32:48 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 8A03F10002A;
-        Wed,  1 Sep 2021 09:32:47 +0200 (CEST)
-Received: from Webmail-eu.st.com (sfhdag2node3.st.com [10.75.127.6])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 589282128DE;
-        Wed,  1 Sep 2021 09:32:47 +0200 (CEST)
-Received: from lmecxl0504.lme.st.com (10.75.127.46) by SFHDAG2NODE3.st.com
- (10.75.127.6) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 1 Sep
- 2021 09:32:46 +0200
-Subject: Re: Question about MMC_PM_KEEP_POWER in MMCI driver
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Rob Herring <robh+dt@kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        "linux-stm32@st-md-mailman.stormreply.com" 
-        <linux-stm32@st-md-mailman.stormreply.com>,
+        id S242926AbhIAIJL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Sep 2021 04:09:11 -0400
+Received: from esa.microchip.iphmx.com ([68.232.153.233]:28751 "EHLO
+        esa.microchip.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242944AbhIAIJK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2021 04:09:10 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1630483694; x=1662019694;
+  h=subject:to:cc:references:from:message-id:date:
+   mime-version:in-reply-to:content-transfer-encoding;
+  bh=acPplmh0ZzLic81uLKmpts3O5q+lr1KahcYPlLs7V4k=;
+  b=DE+K/oK2jQzSGAimWE4+Xwq1MXpdIckGAx3srXcCxf2vHl0UHB8O8yiA
+   4R9CWPXdcpUBMIfyAIvGLNm/zeWTpaInDoEpA6lJ3baSaZ9PwkaTC+daG
+   TPLSLXsiMJf3yawVxRlylmLJHyS+ysUBnaLTkoJOPL9bFOIDpeZefeq1s
+   n/ALQ2afiIKb1xsfMSMlcZt5PYf5HgtZbJTfY3DiWnXxuJZ/lSB2IwS4V
+   xNIcUM+6HrfKzZuRp9Fxpl1VEd1XiKJ+inIcAswzaZm9T86wcRs4rfrwc
+   z4sDw3QgNmUUE3CxDdPGvQNIo8sqx8RjeDO5YB4Q0kWmO5NhE6rZeVqIw
+   w==;
+IronPort-SDR: kWMl6HsB5SgWyvu2N3W+ufhxksxZyoFQ8axuwNcDjIUF7M+7kjrnMO0jxZgjLoZefFOyl9B7lY
+ tkg7wh0DO52PljrkzAYUZZYuIigt6lhoCE83LCF09X799GS+351+bVZqAdm1XJEjF+8fM6pxJX
+ JgF1hAOFhGiyzzZFxSh9t3Ps76TMXFxHip3WO38/eJVaj0XHvLAjNi5J4twgY99TV0ZR/EN3L/
+ TWPQ8lDCXchCRdMVC/OGCZGO2Ru0kM7VhsVj8VrsqEEfQTOryhOMZamENN3x/XOe+2ouMQGgch
+ 8lxOziPK4PkpJqJPkAkHkwCg
+X-IronPort-AV: E=Sophos;i="5.84,368,1620716400"; 
+   d="scan'208";a="134402103"
+Received: from smtpout.microchip.com (HELO email.microchip.com) ([198.175.253.82])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 01 Sep 2021 01:08:13 -0700
+Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2176.14; Wed, 1 Sep 2021 01:08:12 -0700
+Received: from [10.12.72.234] (10.10.115.15) by chn-vm-ex01.mchp-main.com
+ (10.10.85.143) with Microsoft SMTP Server id 15.1.2176.14 via Frontend
+ Transport; Wed, 1 Sep 2021 01:08:10 -0700
+Subject: Re: [PATCH v3 0/4] mmc: pwrseq: sd8787: add support wilc1000 devices
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Ludovic Desroches <ludovic.desroches@microchip.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
         DTML <devicetree@vger.kernel.org>,
-        Ludovic BARRE - foss <ludovic.barre@foss.st.com>,
-        Christophe ROULLIER-SCND-02 <christophe.roullier@foss.st.com>
-References: <ccb2dad1-c8c1-9f19-92c4-7faf2b787e6d@foss.st.com>
- <CAPDyKFqMJmJRLNYF=gWvAEH8wtJzrxrZ9KLz62t4XNsD84vr=Q@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-Message-ID: <8b2f3a6a-150d-4e78-7bbc-6d1de9fae000@foss.st.com>
-Date:   Wed, 1 Sep 2021 09:32:46 +0200
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+References: <20210820092803.78523-1-claudiu.beznea@microchip.com>
+ <CAPDyKFrcBS2tf32H9+wsy7=TsHkaqtw0cZcSAgZc3XjnLzJ__w@mail.gmail.com>
+From:   Nicolas Ferre <nicolas.ferre@microchip.com>
+Organization: microchip
+Message-ID: <d8bf8840-4b13-7f95-8fe3-243c3d27a2e4@microchip.com>
+Date:   Wed, 1 Sep 2021 10:08:10 +0200
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.11.0
 MIME-Version: 1.0
-In-Reply-To: <CAPDyKFqMJmJRLNYF=gWvAEH8wtJzrxrZ9KLz62t4XNsD84vr=Q@mail.gmail.com>
+In-Reply-To: <CAPDyKFrcBS2tf32H9+wsy7=TsHkaqtw0cZcSAgZc3XjnLzJ__w@mail.gmail.com>
 Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG1NODE3.st.com (10.75.127.3) To SFHDAG2NODE3.st.com
- (10.75.127.6)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.182.1,Aquarius:18.0.790,Hydra:6.0.391,FMLib:17.0.607.475
- definitions=2021-09-01_02,2021-08-31_01,2020-04-07_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/30/21 3:43 PM, Ulf Hansson wrote:
-> On Wed, 25 Aug 2021 at 16:34, Yann Gautier <yann.gautier@foss.st.com> wrote:
+On 24/08/2021 at 16:56, Ulf Hansson wrote:
+> EXTERNAL EMAIL: Do not click links or open attachments unless you know the content is safe
+> 
+> On Fri, 20 Aug 2021 at 11:30, Claudiu Beznea
+> <claudiu.beznea@microchip.com> wrote:
 >>
 >> Hi,
 >>
-
-Hi Linus,
-
-Thanks for the advice.
-
->> In drivers/mmc/host/mmci.c, MMC_PM_KEEP_POWER is unconditionally enabled.
->> This prevents correct low-power sequence on STM32MP157C-DK2 board which
->> embeds a Wifi chip brcm,bcm4329-fmac (this wifi part has not yet been
->> sent upstream).
-> 
-> Exactly why doesn't this work with the STM32MP157C-DK2 board?
-> 
-It is more the opposite.
-We had that patch in our downstream for a while, and this was possible 
-due to changes in wifi driver.
-But I'll check all that precisely, and make some more tests.
-
+>> This series adds support for WILC1000 devices on pwrseq-sd8787 driver.
+>> WILC1000 devices needs a minimum delay of 5ms b/w reset and power lines.
+>> Adapt the sd8787 driver for this by adding a new compatible for WILC1000
+>> devices and specify the delay on .data field of struct of_device_id.
 >>
->> This MMC_PM_KEEP_POWER can be taken from DT with the property
->> keep-power-in-suspend. This is what is done for other MMC drivers.
-> 
-> The DT property is what should have been used for mmci as well.
-> 
+>> Thank you,
+>> Claudiu Beznea
 >>
->> I wonder what should be the best solution for this.
+>> Changes in v3:
+>> - fixed dt binding compilation
 >>
->> 1) Remove MMC_PM_KEEP_POWER from the driver, and modify all SoC device
->> tree files embedding a arm,pl18x with adding keep-power-in-suspend;
->> property (except stm32mp151.dtsi file).
->> This can be easy to do (~10 files to modify). But that could be more
->> board dependent, if an SDIO chip is plugged on this MMC IP.
->> And the name keep-power-in-suspend can be misleading as it only applies
->> to SDIO.
+>> Changes in v2:
+>> - changed cover letter title (it was: mmc: pwrseq: sd8787: add support
+>>    for selectable)
+>> - use new compatible in pwrseq-sd8787 driver instead of adding a new
+>>    binding for specifying the delay; with this, the patch 1/1 from v1 is
+>>    not necessary
+>> - adapt patch 3/3 from this version with the new compatible
 >>
->> 2) Remove MMC_PM_KEEP_POWER from the driver, and modify board DT files
->> with the property. This could be a difficult task to find all those
->> boards. And this should be applied only for SDIO configs.
 >>
->> 3) Just modify the driver to apply this capability for all MMCI chips
->> but STM32. This could be done in the dedicated file, in
->> sdmmc_variant_init() function. But some boards based on STM32MP15 chip
->> might want to keep this capability.
+>> Claudiu Beznea (3):
+>>    dt-bindings: pwrseq-sd8787: add binding for wilc1000
+>>    mmc: pwrseq: sd8787: add support for wilc1000
+>>    mmc: pwrseq: add wilc1000_sdio dependency for pwrseq_sd8787
+>>
+>> Eugen Hristev (1):
+>>    ARM: dts: at91: sama5d27_wlsom1: add wifi device
+>>
+>>   .../bindings/mmc/mmc-pwrseq-sd8787.yaml       |  4 +-
+>>   arch/arm/boot/dts/at91-sama5d27_wlsom1.dtsi   | 71 +++++++++++++++++++
+>>   drivers/mmc/core/Kconfig                      |  2 +-
+>>   drivers/mmc/core/pwrseq_sd8787.c              | 11 ++-
+>>   4 files changed, 84 insertions(+), 4 deletions(-)
+>>
 > 
-> I would suggest option 3).
-> 
-> As a matter of fact, we also allow MMC_PM_KEEP_POWER to become set
-> when parsing the DTB via calling mmc_of_parse(). So just changing the
-> default value (don't set MMC_PM_KEEP_POWER) for the stm32 variant,
-> would do the trick I think.
-> 
-OK, I'll do that, in mmci.c file, keeping the possibility to have the DT 
-property set even for stm32 variant.
+> Applied patch1 -> patch3, thanks! I leave patch 4 for soc maintainers.
 
-> Kind regards
-> Uffe
-> 
+Perfect, we take care of patch 4 through at91 -> arm-soc trees for 5.16 
+kernel timeframe.
+
 Best regards,
-Yann
+   Nicolas
+
+
+-- 
+Nicolas Ferre
