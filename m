@@ -2,45 +2,49 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-17.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,
+	USER_AGENT_SANE_2 autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 09BE2C43214
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Sep 2021 01:52:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8117C4320E
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Sep 2021 06:07:26 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E7BAA610A4
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Sep 2021 01:52:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C2BC1610C9
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Sep 2021 06:07:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234980AbhIBBxr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Sep 2021 21:53:47 -0400
-Received: from mailgw02.mediatek.com ([210.61.82.184]:33012 "EHLO
-        mailgw02.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S233755AbhIBBxp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Sep 2021 21:53:45 -0400
-X-UUID: 7db8505e0de54beea61015562d39c19d-20210902
-X-UUID: 7db8505e0de54beea61015562d39c19d-20210902
-Received: from mtkcas07.mediatek.inc [(172.21.101.84)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
+        id S236791AbhIBGIX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Sep 2021 02:08:23 -0400
+Received: from mailgw01.mediatek.com ([60.244.123.138]:47892 "EHLO
+        mailgw01.mediatek.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S230215AbhIBGIX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Sep 2021 02:08:23 -0400
+X-UUID: 73807e1085034257ba8180ee51c40d8c-20210902
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Transfer-Encoding:MIME-Version:Content-Type:References:In-Reply-To:Date:CC:To:From:Subject:Message-ID; bh=Sauw7Ff3VCsBfO7Xjltt8yo8oYzrSGE/ZQoS3qooMFE=;
+        b=PsPv4aMmiD3NmlRoH3X5BPiXzs1kodvn2ddSQeVRwXUPZ1DJw0n5wuJ6vap/zbCJ3Cm+lRPOsD39Kod/ceX2wmvual2/1Ys9w2MC5e96rXCNi5KgGCIwG0DFyMB1+3mnOJtby3mi5xv3PI+E4PS0aTiuhlZtVzP8akeWuNF6H2g=;
+X-UUID: 73807e1085034257ba8180ee51c40d8c-20210902
+Received: from mtkcas07.mediatek.inc [(172.21.101.84)] by mailgw01.mediatek.com
+        (envelope-from <chaotian.jing@mediatek.com>)
         (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1864463650; Thu, 02 Sep 2021 09:52:43 +0800
-Received: from mtkcas07.mediatek.inc (172.21.101.84) by
- mtkmbs05n1.mediatek.inc (172.21.101.15) with Microsoft SMTP Server (TLS) id
- 15.0.1497.2; Thu, 2 Sep 2021 09:52:42 +0800
-Received: from mtkcas07.mediatek.inc (172.21.101.84) by mtkcas07.mediatek.inc
+        with ESMTP id 1182683467; Thu, 02 Sep 2021 14:07:21 +0800
+Received: from mtkcas07.mediatek.inc (172.21.101.84) by mtkexhb01.mediatek.inc
+ (172.21.101.102) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 2 Sep
+ 2021 14:07:19 +0800
+Received: from MTKCAS06.mediatek.inc (172.21.101.30) by mtkcas07.mediatek.inc
  (172.21.101.84) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Thu, 2 Sep
- 2021 09:52:41 +0800
-Received: from localhost.localdomain (10.17.3.153) by mtkcas07.mediatek.inc
+ 2021 14:07:19 +0800
+Received: from mhfsdcap04 (10.17.3.154) by MTKCAS06.mediatek.inc
  (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Thu, 2 Sep 2021 09:52:41 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+ Transport; Thu, 2 Sep 2021 14:07:18 +0800
+Message-ID: <6d6dd9a7ae090ad4601938261de120e6dba6ac11.camel@mediatek.com>
+Subject: Re: [PATCH v2 2/2] mmc: mediatek: Add HS400 online tuning support
+From:   Chaotian Jing <chaotian.jing@mediatek.com>
+To:     Wenbin Mei <wenbin.mei@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>
-CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
+        "Matthias Brugger" <matthias.bgg@gmail.com>
+CC:     Avri Altman <avri.altman@wdc.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Linus Walleij <linus.walleij@linaro.org>,
@@ -50,246 +54,162 @@ CC:     Chaotian Jing <chaotian.jing@mediatek.com>,
         <linux-arm-kernel@lists.infradead.org>,
         <linux-mediatek@lists.infradead.org>,
         <linux-kernel@vger.kernel.org>
-Subject: [PATCH v2 2/2] mmc: mediatek: Add HS400 online tuning support
-Date:   Thu, 2 Sep 2021 09:52:37 +0800
-Message-ID: <1630547557-1573-3-git-send-email-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 1.9.1
-In-Reply-To: <1630547557-1573-1-git-send-email-wenbin.mei@mediatek.com>
+Date:   Thu, 2 Sep 2021 14:07:19 +0800
+In-Reply-To: <1630547557-1573-3-git-send-email-wenbin.mei@mediatek.com>
 References: <1630547557-1573-1-git-send-email-wenbin.mei@mediatek.com>
+         <1630547557-1573-3-git-send-email-wenbin.mei@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
+X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
 MIME-Version: 1.0
-Content-Type: text/plain
 X-MTK:  N
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Due to the influence of the corner IC and vcore voltage, for the stability
-of HS400 mode, we Add HS400 mode online tuning support for mediatek mmc
-host.
-
-Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
----
- drivers/mmc/core/mmc.c    |   8 ++++
- drivers/mmc/host/mtk-sd.c | 118 +++++++++++++++++++++++++++++++++++++++++++++-
- include/linux/mmc/host.h  |   3 ++
- 3 files changed, 127 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
-index 838726b..0aa72ac 100644
---- a/drivers/mmc/core/mmc.c
-+++ b/drivers/mmc/core/mmc.c
-@@ -1222,6 +1222,14 @@ static int mmc_select_hs400(struct mmc_card *card)
- 	mmc_set_timing(host, MMC_TIMING_MMC_HS400);
- 	mmc_set_bus_speed(card);
- 
-+	if (host->ops->execute_hs400_tuning) {
-+		mmc_retune_disable(host);
-+		err = host->ops->execute_hs400_tuning(host, card);
-+		mmc_retune_enable(host);
-+		if (err)
-+			goto out_err;
-+	}
-+
- 	if (host->ops->hs400_complete)
- 		host->ops->hs400_complete(host);
- 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 4dfc246..484f5c3 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -258,6 +258,7 @@
- #define MSDC_PAD_TUNE_RD_SEL	  (0x1 << 13)   /* RW */
- #define MSDC_PAD_TUNE_CMD_SEL	  (0x1 << 21)   /* RW */
- 
-+#define PAD_DS_TUNE_DLY_SEL       (0x1 << 0)	/* RW */
- #define PAD_DS_TUNE_DLY1	  (0x1f << 2)   /* RW */
- #define PAD_DS_TUNE_DLY2	  (0x1f << 7)   /* RW */
- #define PAD_DS_TUNE_DLY3	  (0x1f << 12)  /* RW */
-@@ -301,6 +302,11 @@
- #define PAD_CMD_RD_RXDLY_SEL    (0x1 << 11)     /* RW */
- #define PAD_CMD_TX_DLY          (0x1f << 12)    /* RW */
- 
-+/* EMMC50_PAD_DS_TUNE mask */
-+#define PAD_DS_DLY_SEL		(0x1 << 16)	/* RW */
-+#define PAD_DS_DLY1		(0x1f << 10)	/* RW */
-+#define PAD_DS_DLY3		(0x1f << 0)	/* RW */
-+
- #define REQ_CMD_EIO  (0x1 << 0)
- #define REQ_CMD_TMO  (0x1 << 1)
- #define REQ_DAT_ERR  (0x1 << 2)
-@@ -448,11 +454,13 @@ struct msdc_host {
- 	bool vqmmc_enabled;
- 	u32 latch_ck;
- 	u32 hs400_ds_delay;
-+	u32 hs400_ds_dly3;
- 	u32 hs200_cmd_int_delay; /* cmd internal delay for HS200/SDR104 */
- 	u32 hs400_cmd_int_delay; /* cmd internal delay for HS400 */
- 	bool hs400_cmd_resp_sel_rising;
- 				 /* cmd response sample selection for HS400 */
- 	bool hs400_mode;	/* current eMMC will run at hs400 mode */
-+	bool hs400_tuning;	/* hs400 mode online tuning */
- 	bool internal_cd;	/* Use internal card-detect logic */
- 	bool cqhci;		/* support eMMC hw cmdq */
- 	struct msdc_save_para save_para; /* used when gate HCLK */
-@@ -1190,7 +1198,8 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 	if (!sbc_error && !(events & MSDC_INT_CMDRDY)) {
- 		if (events & MSDC_INT_CMDTMO ||
- 		    (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
--		     cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200))
-+		     cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-+		     !host->hs400_tuning))
- 			/*
- 			 * should not clear fifo/interrupt as the tune data
- 			 * may have alreay come when cmd19/cmd21 gets response
-@@ -1287,7 +1296,8 @@ static void msdc_cmd_next(struct msdc_host *host,
- 	if ((cmd->error &&
- 	    !(cmd->error == -EILSEQ &&
- 	      (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
--	       cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200))) ||
-+	       cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200 ||
-+	       host->hs400_tuning))) ||
- 	    (mrq->sbc && mrq->sbc->error))
- 		msdc_request_done(host, mrq);
- 	else if (cmd == mrq->sbc)
-@@ -2251,6 +2261,106 @@ static int msdc_prepare_hs400_tuning(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return 0;
- }
- 
-+static int msdc_send_cxd_data(struct mmc_card *card, struct mmc_host *host)
-+{
-+	struct mmc_request mrq = {};
-+	struct mmc_command cmd = {};
-+	struct mmc_data data = {};
-+	unsigned int len = 512;
-+	struct scatterlist sg;
-+	u8 *ext_csd;
-+
-+	ext_csd = kzalloc(len, GFP_KERNEL);
-+	if (!ext_csd)
-+		return -ENOMEM;
-+
-+	mrq.cmd = &cmd;
-+	mrq.data = &data;
-+
-+	cmd.opcode = MMC_SEND_EXT_CSD;
-+	cmd.arg = 0;
-+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-+
-+	data.blksz = len;
-+	data.blocks = 1;
-+	data.flags = MMC_DATA_READ;
-+	data.sg = &sg;
-+	data.sg_len = 1;
-+
-+	sg_init_one(&sg, ext_csd, len);
-+	mmc_set_data_timeout(&data, card);
-+	mmc_wait_for_req(host, &mrq);
-+
-+	kfree(ext_csd);
-+
-+	if (cmd.error)
-+		return cmd.error;
-+	if (data.error)
-+		return data.error;
-+
-+	return 0;
-+}
-+
-+static int msdc_execute_hs400_tuning(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct msdc_host *host = mmc_priv(mmc);
-+	struct msdc_delay_phase dly1_delay;
-+	u32 val, result_dly1 = 0;
-+	int i, ret;
-+
-+	if (host->top_base) {
-+		sdr_set_bits(host->top_base + EMMC50_PAD_DS_TUNE,
-+			     PAD_DS_DLY_SEL);
-+		if (host->hs400_ds_dly3)
-+			sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
-+				      PAD_DS_DLY3, host->hs400_ds_dly3);
-+	} else {
-+		sdr_set_bits(host->base + PAD_DS_TUNE, PAD_DS_TUNE_DLY_SEL);
-+		if (host->hs400_ds_dly3)
-+			sdr_set_field(host->base + PAD_DS_TUNE,
-+				      PAD_DS_TUNE_DLY3, host->hs400_ds_dly3);
-+	}
-+
-+	host->hs400_tuning = true;
-+	for (i = 0; i < PAD_DELAY_MAX; i++) {
-+		if (host->top_base)
-+			sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
-+				      PAD_DS_DLY1, i);
-+		else
-+			sdr_set_field(host->base + PAD_DS_TUNE,
-+				      PAD_DS_TUNE_DLY1, i);
-+		ret = msdc_send_cxd_data(card, mmc);
-+		if (!ret)
-+			result_dly1 |= (1 << i);
-+	}
-+	host->hs400_tuning = false;
-+
-+	dly1_delay = get_best_delay(host, result_dly1);
-+	if (dly1_delay.maxlen == 0) {
-+		dev_err(host->dev, "Failed to get DLY1 delay!\n");
-+		goto fail;
-+	}
-+	if (host->top_base)
-+		sdr_set_field(host->top_base + EMMC50_PAD_DS_TUNE,
-+			      PAD_DS_DLY1, dly1_delay.final_phase);
-+	else
-+		sdr_set_field(host->base + PAD_DS_TUNE,
-+			      PAD_DS_TUNE_DLY1, dly1_delay.final_phase);
-+
-+	if (host->top_base)
-+		val = readl(host->top_base + EMMC50_PAD_DS_TUNE);
-+	else
-+		val = readl(host->base + PAD_DS_TUNE);
-+
-+	dev_info(host->dev, "Fianl PAD_DS_TUNE: 0x%x\n", val);
-+
-+	return 0;
-+
-+fail:
-+	dev_err(host->dev, "Failed to tuning DS pin delay!\n");
-+	return -EIO;
-+}
-+
- static void msdc_hw_reset(struct mmc_host *mmc)
- {
- 	struct msdc_host *host = mmc_priv(mmc);
-@@ -2377,6 +2487,7 @@ static void msdc_cqe_post_disable(struct mmc_host *mmc)
- 	.card_busy = msdc_card_busy,
- 	.execute_tuning = msdc_execute_tuning,
- 	.prepare_hs400_tuning = msdc_prepare_hs400_tuning,
-+	.execute_hs400_tuning = msdc_execute_hs400_tuning,
- 	.hw_reset = msdc_hw_reset,
- };
- 
-@@ -2396,6 +2507,9 @@ static void msdc_of_property_parse(struct platform_device *pdev,
- 	of_property_read_u32(pdev->dev.of_node, "hs400-ds-delay",
- 			     &host->hs400_ds_delay);
- 
-+	of_property_read_u32(pdev->dev.of_node, "mediatek,hs400-ds-dly3",
-+			     &host->hs400_ds_dly3);
-+
- 	of_property_read_u32(pdev->dev.of_node, "mediatek,hs200-cmd-int-delay",
- 			     &host->hs200_cmd_int_delay);
- 
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index ff1a251..7552d5e 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -162,6 +162,9 @@ struct mmc_host_ops {
- 	/* Prepare HS400 target operating frequency depending host driver */
- 	int	(*prepare_hs400_tuning)(struct mmc_host *host, struct mmc_ios *ios);
- 
-+	/* Execute HS400 tuning depending host driver */
-+	int	(*execute_hs400_tuning)(struct mmc_host *host, struct mmc_card *card);
-+
- 	/* Prepare switch to DDR during the HS400 init sequence */
- 	int	(*hs400_prepare_ddr)(struct mmc_host *host);
- 
--- 
-1.9.1
+T24gVGh1LCAyMDIxLTA5LTAyIGF0IDA5OjUyICswODAwLCBXZW5iaW4gTWVpIHdyb3RlOg0KPiBE
+dWUgdG8gdGhlIGluZmx1ZW5jZSBvZiB0aGUgY29ybmVyIElDIGFuZCB2Y29yZSB2b2x0YWdlLCBm
+b3IgdGhlDQo+IHN0YWJpbGl0eQ0KPiBvZiBIUzQwMCBtb2RlLCB3ZSBBZGQgSFM0MDAgbW9kZSBv
+bmxpbmUgdHVuaW5nIHN1cHBvcnQgZm9yIG1lZGlhdGVrDQo+IG1tYw0KPiBob3N0Lg0KPiANCj4g
+U2lnbmVkLW9mZi1ieTogV2VuYmluIE1laSA8d2VuYmluLm1laUBtZWRpYXRlay5jb20+DQogIFJl
+dmlld2VkLWJ5OiBDaGFvdGlhbiBKaW5nIDxjaGFvdGlhbi5qaW5nQG1lZGlhdGVrLmNvbT4NCj4g
+LS0tDQo+ICBkcml2ZXJzL21tYy9jb3JlL21tYy5jICAgIHwgICA4ICsrKysNCj4gIGRyaXZlcnMv
+bW1jL2hvc3QvbXRrLXNkLmMgfCAxMTgNCj4gKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrLQ0KPiAgaW5jbHVkZS9saW51eC9tbWMvaG9zdC5oICB8ICAgMyArKw0K
+PiAgMyBmaWxlcyBjaGFuZ2VkLCAxMjcgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkNCj4g
+DQo+IGRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9jb3JlL21tYy5jIGIvZHJpdmVycy9tbWMvY29y
+ZS9tbWMuYw0KPiBpbmRleCA4Mzg3MjZiLi4wYWE3MmFjIDEwMDY0NA0KPiAtLS0gYS9kcml2ZXJz
+L21tYy9jb3JlL21tYy5jDQo+ICsrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMNCj4gQEAgLTEy
+MjIsNiArMTIyMiwxNCBAQCBzdGF0aWMgaW50IG1tY19zZWxlY3RfaHM0MDAoc3RydWN0IG1tY19j
+YXJkDQo+ICpjYXJkKQ0KPiAgCW1tY19zZXRfdGltaW5nKGhvc3QsIE1NQ19USU1JTkdfTU1DX0hT
+NDAwKTsNCj4gIAltbWNfc2V0X2J1c19zcGVlZChjYXJkKTsNCj4gIA0KPiArCWlmIChob3N0LT5v
+cHMtPmV4ZWN1dGVfaHM0MDBfdHVuaW5nKSB7DQo+ICsJCW1tY19yZXR1bmVfZGlzYWJsZShob3N0
+KTsNCj4gKwkJZXJyID0gaG9zdC0+b3BzLT5leGVjdXRlX2hzNDAwX3R1bmluZyhob3N0LCBjYXJk
+KTsNCj4gKwkJbW1jX3JldHVuZV9lbmFibGUoaG9zdCk7DQo+ICsJCWlmIChlcnIpDQo+ICsJCQln
+b3RvIG91dF9lcnI7DQo+ICsJfQ0KPiArDQo+ICAJaWYgKGhvc3QtPm9wcy0+aHM0MDBfY29tcGxl
+dGUpDQo+ICAJCWhvc3QtPm9wcy0+aHM0MDBfY29tcGxldGUoaG9zdCk7DQo+ICANCj4gZGlmZiAt
+LWdpdCBhL2RyaXZlcnMvbW1jL2hvc3QvbXRrLXNkLmMgYi9kcml2ZXJzL21tYy9ob3N0L210ay1z
+ZC5jDQo+IGluZGV4IDRkZmMyNDYuLjQ4NGY1YzMgMTAwNjQ0DQo+IC0tLSBhL2RyaXZlcnMvbW1j
+L2hvc3QvbXRrLXNkLmMNCj4gKysrIGIvZHJpdmVycy9tbWMvaG9zdC9tdGstc2QuYw0KPiBAQCAt
+MjU4LDYgKzI1OCw3IEBADQo+ICAjZGVmaW5lIE1TRENfUEFEX1RVTkVfUkRfU0VMCSAgKDB4MSA8
+PCAxMykgICAvKiBSVyAqLw0KPiAgI2RlZmluZSBNU0RDX1BBRF9UVU5FX0NNRF9TRUwJICAoMHgx
+IDw8IDIxKSAgIC8qIFJXICovDQo+ICANCj4gKyNkZWZpbmUgUEFEX0RTX1RVTkVfRExZX1NFTCAg
+ICAgICAoMHgxIDw8IDApCS8qIFJXICovDQo+ICAjZGVmaW5lIFBBRF9EU19UVU5FX0RMWTEJICAo
+MHgxZiA8PCAyKSAgIC8qIFJXICovDQo+ICAjZGVmaW5lIFBBRF9EU19UVU5FX0RMWTIJICAoMHgx
+ZiA8PCA3KSAgIC8qIFJXICovDQo+ICAjZGVmaW5lIFBBRF9EU19UVU5FX0RMWTMJICAoMHgxZiA8
+PCAxMikgIC8qIFJXICovDQo+IEBAIC0zMDEsNiArMzAyLDExIEBADQo+ICAjZGVmaW5lIFBBRF9D
+TURfUkRfUlhETFlfU0VMICAgICgweDEgPDwgMTEpICAgICAvKiBSVyAqLw0KPiAgI2RlZmluZSBQ
+QURfQ01EX1RYX0RMWSAgICAgICAgICAoMHgxZiA8PCAxMikgICAgLyogUlcgKi8NCj4gIA0KPiAr
+LyogRU1NQzUwX1BBRF9EU19UVU5FIG1hc2sgKi8NCj4gKyNkZWZpbmUgUEFEX0RTX0RMWV9TRUwJ
+CSgweDEgPDwgMTYpCS8qIFJXICovDQo+ICsjZGVmaW5lIFBBRF9EU19ETFkxCQkoMHgxZiA8PCAx
+MCkJLyogUlcgKi8NCj4gKyNkZWZpbmUgUEFEX0RTX0RMWTMJCSgweDFmIDw8IDApCS8qIFJXICov
+DQo+ICsNCj4gICNkZWZpbmUgUkVRX0NNRF9FSU8gICgweDEgPDwgMCkNCj4gICNkZWZpbmUgUkVR
+X0NNRF9UTU8gICgweDEgPDwgMSkNCj4gICNkZWZpbmUgUkVRX0RBVF9FUlIgICgweDEgPDwgMikN
+Cj4gQEAgLTQ0OCwxMSArNDU0LDEzIEBAIHN0cnVjdCBtc2RjX2hvc3Qgew0KPiAgCWJvb2wgdnFt
+bWNfZW5hYmxlZDsNCj4gIAl1MzIgbGF0Y2hfY2s7DQo+ICAJdTMyIGhzNDAwX2RzX2RlbGF5Ow0K
+PiArCXUzMiBoczQwMF9kc19kbHkzOw0KPiAgCXUzMiBoczIwMF9jbWRfaW50X2RlbGF5OyAvKiBj
+bWQgaW50ZXJuYWwgZGVsYXkgZm9yIEhTMjAwL1NEUjEwNA0KPiAqLw0KPiAgCXUzMiBoczQwMF9j
+bWRfaW50X2RlbGF5OyAvKiBjbWQgaW50ZXJuYWwgZGVsYXkgZm9yIEhTNDAwICovDQo+ICAJYm9v
+bCBoczQwMF9jbWRfcmVzcF9zZWxfcmlzaW5nOw0KPiAgCQkJCSAvKiBjbWQgcmVzcG9uc2Ugc2Ft
+cGxlIHNlbGVjdGlvbiBmb3INCj4gSFM0MDAgKi8NCj4gIAlib29sIGhzNDAwX21vZGU7CS8qIGN1
+cnJlbnQgZU1NQyB3aWxsIHJ1biBhdCBoczQwMCBtb2RlICovDQo+ICsJYm9vbCBoczQwMF90dW5p
+bmc7CS8qIGhzNDAwIG1vZGUgb25saW5lIHR1bmluZyAqLw0KPiAgCWJvb2wgaW50ZXJuYWxfY2Q7
+CS8qIFVzZSBpbnRlcm5hbCBjYXJkLWRldGVjdCBsb2dpYyAqLw0KPiAgCWJvb2wgY3FoY2k7CQkv
+KiBzdXBwb3J0IGVNTUMgaHcgY21kcSAqLw0KPiAgCXN0cnVjdCBtc2RjX3NhdmVfcGFyYSBzYXZl
+X3BhcmE7IC8qIHVzZWQgd2hlbiBnYXRlIEhDTEsgKi8NCj4gQEAgLTExOTAsNyArMTE5OCw4IEBA
+IHN0YXRpYyBib29sIG1zZGNfY21kX2RvbmUoc3RydWN0IG1zZGNfaG9zdA0KPiAqaG9zdCwgaW50
+IGV2ZW50cywNCj4gIAlpZiAoIXNiY19lcnJvciAmJiAhKGV2ZW50cyAmIE1TRENfSU5UX0NNRFJE
+WSkpIHsNCj4gIAkJaWYgKGV2ZW50cyAmIE1TRENfSU5UX0NNRFRNTyB8fA0KPiAgCQkgICAgKGNt
+ZC0+b3Bjb2RlICE9IE1NQ19TRU5EX1RVTklOR19CTE9DSyAmJg0KPiAtCQkgICAgIGNtZC0+b3Bj
+b2RlICE9IE1NQ19TRU5EX1RVTklOR19CTE9DS19IUzIwMCkpDQo+ICsJCSAgICAgY21kLT5vcGNv
+ZGUgIT0gTU1DX1NFTkRfVFVOSU5HX0JMT0NLX0hTMjAwICYmDQo+ICsJCSAgICAgIWhvc3QtPmhz
+NDAwX3R1bmluZykpDQo+ICAJCQkvKg0KPiAgCQkJICogc2hvdWxkIG5vdCBjbGVhciBmaWZvL2lu
+dGVycnVwdCBhcyB0aGUgdHVuZQ0KPiBkYXRhDQo+ICAJCQkgKiBtYXkgaGF2ZSBhbHJlYXkgY29t
+ZSB3aGVuIGNtZDE5L2NtZDIxIGdldHMNCj4gcmVzcG9uc2UNCj4gQEAgLTEyODcsNyArMTI5Niw4
+IEBAIHN0YXRpYyB2b2lkIG1zZGNfY21kX25leHQoc3RydWN0IG1zZGNfaG9zdA0KPiAqaG9zdCwN
+Cj4gIAlpZiAoKGNtZC0+ZXJyb3IgJiYNCj4gIAkgICAgIShjbWQtPmVycm9yID09IC1FSUxTRVEg
+JiYNCj4gIAkgICAgICAoY21kLT5vcGNvZGUgPT0gTU1DX1NFTkRfVFVOSU5HX0JMT0NLIHx8DQo+
+IC0JICAgICAgIGNtZC0+b3Bjb2RlID09IE1NQ19TRU5EX1RVTklOR19CTE9DS19IUzIwMCkpKSB8
+fA0KPiArCSAgICAgICBjbWQtPm9wY29kZSA9PSBNTUNfU0VORF9UVU5JTkdfQkxPQ0tfSFMyMDAg
+fHwNCj4gKwkgICAgICAgaG9zdC0+aHM0MDBfdHVuaW5nKSkpIHx8DQo+ICAJICAgIChtcnEtPnNi
+YyAmJiBtcnEtPnNiYy0+ZXJyb3IpKQ0KPiAgCQltc2RjX3JlcXVlc3RfZG9uZShob3N0LCBtcnEp
+Ow0KPiAgCWVsc2UgaWYgKGNtZCA9PSBtcnEtPnNiYykNCj4gQEAgLTIyNTEsNiArMjI2MSwxMDYg
+QEAgc3RhdGljIGludCBtc2RjX3ByZXBhcmVfaHM0MDBfdHVuaW5nKHN0cnVjdA0KPiBtbWNfaG9z
+dCAqbW1jLCBzdHJ1Y3QgbW1jX2lvcyAqaW9zKQ0KPiAgCXJldHVybiAwOw0KPiAgfQ0KPiAgDQo+
+ICtzdGF0aWMgaW50IG1zZGNfc2VuZF9jeGRfZGF0YShzdHJ1Y3QgbW1jX2NhcmQgKmNhcmQsIHN0
+cnVjdCBtbWNfaG9zdA0KPiAqaG9zdCkNCj4gK3sNCj4gKwlzdHJ1Y3QgbW1jX3JlcXVlc3QgbXJx
+ID0ge307DQo+ICsJc3RydWN0IG1tY19jb21tYW5kIGNtZCA9IHt9Ow0KPiArCXN0cnVjdCBtbWNf
+ZGF0YSBkYXRhID0ge307DQo+ICsJdW5zaWduZWQgaW50IGxlbiA9IDUxMjsNCj4gKwlzdHJ1Y3Qg
+c2NhdHRlcmxpc3Qgc2c7DQo+ICsJdTggKmV4dF9jc2Q7DQo+ICsNCj4gKwlleHRfY3NkID0ga3ph
+bGxvYyhsZW4sIEdGUF9LRVJORUwpOw0KPiArCWlmICghZXh0X2NzZCkNCj4gKwkJcmV0dXJuIC1F
+Tk9NRU07DQo+ICsNCj4gKwltcnEuY21kID0gJmNtZDsNCj4gKwltcnEuZGF0YSA9ICZkYXRhOw0K
+PiArDQo+ICsJY21kLm9wY29kZSA9IE1NQ19TRU5EX0VYVF9DU0Q7DQo+ICsJY21kLmFyZyA9IDA7
+DQo+ICsJY21kLmZsYWdzID0gTU1DX1JTUF9TUElfUjEgfCBNTUNfUlNQX1IxIHwgTU1DX0NNRF9B
+RFRDOw0KPiArDQo+ICsJZGF0YS5ibGtzeiA9IGxlbjsNCj4gKwlkYXRhLmJsb2NrcyA9IDE7DQo+
+ICsJZGF0YS5mbGFncyA9IE1NQ19EQVRBX1JFQUQ7DQo+ICsJZGF0YS5zZyA9ICZzZzsNCj4gKwlk
+YXRhLnNnX2xlbiA9IDE7DQo+ICsNCj4gKwlzZ19pbml0X29uZSgmc2csIGV4dF9jc2QsIGxlbik7
+DQo+ICsJbW1jX3NldF9kYXRhX3RpbWVvdXQoJmRhdGEsIGNhcmQpOw0KPiArCW1tY193YWl0X2Zv
+cl9yZXEoaG9zdCwgJm1ycSk7DQo+ICsNCj4gKwlrZnJlZShleHRfY3NkKTsNCj4gKw0KPiArCWlm
+IChjbWQuZXJyb3IpDQo+ICsJCXJldHVybiBjbWQuZXJyb3I7DQo+ICsJaWYgKGRhdGEuZXJyb3Ip
+DQo+ICsJCXJldHVybiBkYXRhLmVycm9yOw0KPiArDQo+ICsJcmV0dXJuIDA7DQo+ICt9DQo+ICsN
+Cj4gK3N0YXRpYyBpbnQgbXNkY19leGVjdXRlX2hzNDAwX3R1bmluZyhzdHJ1Y3QgbW1jX2hvc3Qg
+Km1tYywgc3RydWN0DQo+IG1tY19jYXJkICpjYXJkKQ0KPiArew0KPiArCXN0cnVjdCBtc2RjX2hv
+c3QgKmhvc3QgPSBtbWNfcHJpdihtbWMpOw0KPiArCXN0cnVjdCBtc2RjX2RlbGF5X3BoYXNlIGRs
+eTFfZGVsYXk7DQo+ICsJdTMyIHZhbCwgcmVzdWx0X2RseTEgPSAwOw0KPiArCWludCBpLCByZXQ7
+DQo+ICsNCj4gKwlpZiAoaG9zdC0+dG9wX2Jhc2UpIHsNCj4gKwkJc2RyX3NldF9iaXRzKGhvc3Qt
+PnRvcF9iYXNlICsgRU1NQzUwX1BBRF9EU19UVU5FLA0KPiArCQkJICAgICBQQURfRFNfRExZX1NF
+TCk7DQo+ICsJCWlmIChob3N0LT5oczQwMF9kc19kbHkzKQ0KPiArCQkJc2RyX3NldF9maWVsZCho
+b3N0LT50b3BfYmFzZSArDQo+IEVNTUM1MF9QQURfRFNfVFVORSwNCj4gKwkJCQkgICAgICBQQURf
+RFNfRExZMywgaG9zdC0NCj4gPmhzNDAwX2RzX2RseTMpOw0KPiArCX0gZWxzZSB7DQo+ICsJCXNk
+cl9zZXRfYml0cyhob3N0LT5iYXNlICsgUEFEX0RTX1RVTkUsDQo+IFBBRF9EU19UVU5FX0RMWV9T
+RUwpOw0KPiArCQlpZiAoaG9zdC0+aHM0MDBfZHNfZGx5MykNCj4gKwkJCXNkcl9zZXRfZmllbGQo
+aG9zdC0+YmFzZSArIFBBRF9EU19UVU5FLA0KPiArCQkJCSAgICAgIFBBRF9EU19UVU5FX0RMWTMs
+IGhvc3QtDQo+ID5oczQwMF9kc19kbHkzKTsNCj4gKwl9DQo+ICsNCj4gKwlob3N0LT5oczQwMF90
+dW5pbmcgPSB0cnVlOw0KPiArCWZvciAoaSA9IDA7IGkgPCBQQURfREVMQVlfTUFYOyBpKyspIHsN
+Cj4gKwkJaWYgKGhvc3QtPnRvcF9iYXNlKQ0KPiArCQkJc2RyX3NldF9maWVsZChob3N0LT50b3Bf
+YmFzZSArDQo+IEVNTUM1MF9QQURfRFNfVFVORSwNCj4gKwkJCQkgICAgICBQQURfRFNfRExZMSwg
+aSk7DQo+ICsJCWVsc2UNCj4gKwkJCXNkcl9zZXRfZmllbGQoaG9zdC0+YmFzZSArIFBBRF9EU19U
+VU5FLA0KPiArCQkJCSAgICAgIFBBRF9EU19UVU5FX0RMWTEsIGkpOw0KPiArCQlyZXQgPSBtc2Rj
+X3NlbmRfY3hkX2RhdGEoY2FyZCwgbW1jKTsNCj4gKwkJaWYgKCFyZXQpDQo+ICsJCQlyZXN1bHRf
+ZGx5MSB8PSAoMSA8PCBpKTsNCj4gKwl9DQo+ICsJaG9zdC0+aHM0MDBfdHVuaW5nID0gZmFsc2U7
+DQo+ICsNCj4gKwlkbHkxX2RlbGF5ID0gZ2V0X2Jlc3RfZGVsYXkoaG9zdCwgcmVzdWx0X2RseTEp
+Ow0KPiArCWlmIChkbHkxX2RlbGF5Lm1heGxlbiA9PSAwKSB7DQo+ICsJCWRldl9lcnIoaG9zdC0+
+ZGV2LCAiRmFpbGVkIHRvIGdldCBETFkxIGRlbGF5IVxuIik7DQo+ICsJCWdvdG8gZmFpbDsNCj4g
+Kwl9DQo+ICsJaWYgKGhvc3QtPnRvcF9iYXNlKQ0KPiArCQlzZHJfc2V0X2ZpZWxkKGhvc3QtPnRv
+cF9iYXNlICsgRU1NQzUwX1BBRF9EU19UVU5FLA0KPiArCQkJICAgICAgUEFEX0RTX0RMWTEsIGRs
+eTFfZGVsYXkuZmluYWxfcGhhc2UpOw0KPiArCWVsc2UNCj4gKwkJc2RyX3NldF9maWVsZChob3N0
+LT5iYXNlICsgUEFEX0RTX1RVTkUsDQo+ICsJCQkgICAgICBQQURfRFNfVFVORV9ETFkxLA0KPiBk
+bHkxX2RlbGF5LmZpbmFsX3BoYXNlKTsNCj4gKw0KPiArCWlmIChob3N0LT50b3BfYmFzZSkNCj4g
+KwkJdmFsID0gcmVhZGwoaG9zdC0+dG9wX2Jhc2UgKyBFTU1DNTBfUEFEX0RTX1RVTkUpOw0KPiAr
+CWVsc2UNCj4gKwkJdmFsID0gcmVhZGwoaG9zdC0+YmFzZSArIFBBRF9EU19UVU5FKTsNCj4gKw0K
+PiArCWRldl9pbmZvKGhvc3QtPmRldiwgIkZpYW5sIFBBRF9EU19UVU5FOiAweCV4XG4iLCB2YWwp
+Ow0KPiArDQo+ICsJcmV0dXJuIDA7DQo+ICsNCj4gK2ZhaWw6DQo+ICsJZGV2X2Vycihob3N0LT5k
+ZXYsICJGYWlsZWQgdG8gdHVuaW5nIERTIHBpbiBkZWxheSFcbiIpOw0KPiArCXJldHVybiAtRUlP
+Ow0KPiArfQ0KPiArDQo+ICBzdGF0aWMgdm9pZCBtc2RjX2h3X3Jlc2V0KHN0cnVjdCBtbWNfaG9z
+dCAqbW1jKQ0KPiAgew0KPiAgCXN0cnVjdCBtc2RjX2hvc3QgKmhvc3QgPSBtbWNfcHJpdihtbWMp
+Ow0KPiBAQCAtMjM3Nyw2ICsyNDg3LDcgQEAgc3RhdGljIHZvaWQgbXNkY19jcWVfcG9zdF9kaXNh
+YmxlKHN0cnVjdA0KPiBtbWNfaG9zdCAqbW1jKQ0KPiAgCS5jYXJkX2J1c3kgPSBtc2RjX2NhcmRf
+YnVzeSwNCj4gIAkuZXhlY3V0ZV90dW5pbmcgPSBtc2RjX2V4ZWN1dGVfdHVuaW5nLA0KPiAgCS5w
+cmVwYXJlX2hzNDAwX3R1bmluZyA9IG1zZGNfcHJlcGFyZV9oczQwMF90dW5pbmcsDQo+ICsJLmV4
+ZWN1dGVfaHM0MDBfdHVuaW5nID0gbXNkY19leGVjdXRlX2hzNDAwX3R1bmluZywNCj4gIAkuaHdf
+cmVzZXQgPSBtc2RjX2h3X3Jlc2V0LA0KPiAgfTsNCj4gIA0KPiBAQCAtMjM5Niw2ICsyNTA3LDkg
+QEAgc3RhdGljIHZvaWQgbXNkY19vZl9wcm9wZXJ0eV9wYXJzZShzdHJ1Y3QNCj4gcGxhdGZvcm1f
+ZGV2aWNlICpwZGV2LA0KPiAgCW9mX3Byb3BlcnR5X3JlYWRfdTMyKHBkZXYtPmRldi5vZl9ub2Rl
+LCAiaHM0MDAtZHMtZGVsYXkiLA0KPiAgCQkJICAgICAmaG9zdC0+aHM0MDBfZHNfZGVsYXkpOw0K
+PiAgDQo+ICsJb2ZfcHJvcGVydHlfcmVhZF91MzIocGRldi0+ZGV2Lm9mX25vZGUsICJtZWRpYXRl
+ayxoczQwMC1kcy0NCj4gZGx5MyIsDQo+ICsJCQkgICAgICZob3N0LT5oczQwMF9kc19kbHkzKTsN
+Cj4gKw0KPiAgCW9mX3Byb3BlcnR5X3JlYWRfdTMyKHBkZXYtPmRldi5vZl9ub2RlLCAibWVkaWF0
+ZWssaHMyMDAtY21kLQ0KPiBpbnQtZGVsYXkiLA0KPiAgCQkJICAgICAmaG9zdC0+aHMyMDBfY21k
+X2ludF9kZWxheSk7DQo+ICANCj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvbW1jL2hvc3Qu
+aCBiL2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaA0KPiBpbmRleCBmZjFhMjUxLi43NTUyZDVlIDEw
+MDY0NA0KPiAtLS0gYS9pbmNsdWRlL2xpbnV4L21tYy9ob3N0LmgNCj4gKysrIGIvaW5jbHVkZS9s
+aW51eC9tbWMvaG9zdC5oDQo+IEBAIC0xNjIsNiArMTYyLDkgQEAgc3RydWN0IG1tY19ob3N0X29w
+cyB7DQo+ICAJLyogUHJlcGFyZSBIUzQwMCB0YXJnZXQgb3BlcmF0aW5nIGZyZXF1ZW5jeSBkZXBl
+bmRpbmcgaG9zdA0KPiBkcml2ZXIgKi8NCj4gIAlpbnQJKCpwcmVwYXJlX2hzNDAwX3R1bmluZyko
+c3RydWN0IG1tY19ob3N0ICpob3N0LCBzdHJ1Y3QNCj4gbW1jX2lvcyAqaW9zKTsNCj4gIA0KPiAr
+CS8qIEV4ZWN1dGUgSFM0MDAgdHVuaW5nIGRlcGVuZGluZyBob3N0IGRyaXZlciAqLw0KPiArCWlu
+dAkoKmV4ZWN1dGVfaHM0MDBfdHVuaW5nKShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHN0cnVjdA0K
+PiBtbWNfY2FyZCAqY2FyZCk7DQo+ICsNCj4gIAkvKiBQcmVwYXJlIHN3aXRjaCB0byBERFIgZHVy
+aW5nIHRoZSBIUzQwMCBpbml0IHNlcXVlbmNlICovDQo+ICAJaW50CSgqaHM0MDBfcHJlcGFyZV9k
+ZHIpKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCk7DQo+ICANCg==
 
