@@ -2,97 +2,118 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,
+X-Spam-Status: No, score=-11.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
 	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 956A5C433F5
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Sep 2021 01:46:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20520C433EF
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Sep 2021 14:46:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A93260F58
-	for <linux-mmc@archiver.kernel.org>; Sat,  4 Sep 2021 01:46:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EF972610C8
+	for <linux-mmc@archiver.kernel.org>; Sat,  4 Sep 2021 14:46:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351198AbhIDBre (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Sep 2021 21:47:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52090 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231389AbhIDBre (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Sep 2021 21:47:34 -0400
-Received: from bombadil.infradead.org (unknown [IPv6:2607:7c80:54:e::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F1F6C061575;
-        Fri,  3 Sep 2021 18:46:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=emXHCsSESDsYXgDCyO6guaMlmVA/Vr3ZoS3mPS968XI=; b=c5XTnTtIW70QIk/iVIvzb87JqI
-        tcT6qmY0efhEByu3yHG3p3VkkNGOyvSC3Qzi3Rn531DUP7oflNexg74DFSPZhSkjAQgPmwewphC/6
-        15RYnx5OSbnGFML3VcF08GO6poVHJBYxEXOeQKreYYZ9NeTiNb0KI81iI/KO1cvzX8bvKgRKPlNKI
-        Mmmxhy4Zk6EV2DJEWS7sgmKTDPA5PFD17EJj3P3ozicrR5I23lkS3YoDhGa7fDEYz73HOICanJRmR
-        OupJiQBNOPTq+2llAsgwuYjfz/JGKwLDBGSA+iLKuFjUFPnkEexHGj/Rb7QY1jlzJDg/fXmzl6DtQ
-        AVXG3Iag==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mMKlG-00DMId-9g; Sat, 04 Sep 2021 01:46:26 +0000
-Date:   Fri, 3 Sep 2021 18:46:26 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Heiko Carstens <hca@linux.ibm.com>
-Cc:     axboe@kernel.dk, gregkh@linuxfoundation.org,
-        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
-        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
-        colin.king@canonical.com, shubhankarvk@gmail.com,
-        baijiaju1990@gmail.com, trix@redhat.com,
-        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
-        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
-        sth@linux.ibm.com, hoeppner@linux.ibm.com, gor@linux.ibm.com,
-        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
-        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-Subject: Re: [PATCH 7/9] s390/block/dcssblk: add error handling support for
- add_disk()
-Message-ID: <YTLP8mYBX37R++9E@bombadil.infradead.org>
-References: <20210902174105.2418771-1-mcgrof@kernel.org>
- <20210902174105.2418771-8-mcgrof@kernel.org>
- <YTIscKy+jg5L/TMh@osiris>
+        id S230514AbhIDOrB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 4 Sep 2021 10:47:01 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56922 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S230039AbhIDOrA (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 4 Sep 2021 10:47:00 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id E10F460F4C;
+        Sat,  4 Sep 2021 14:45:55 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1630766758;
+        bh=02xpBFyuzgwp7S6L0Iqal/dDd/DT6q3WHYxs8cFwA6w=;
+        h=Subject:From:To:Cc:Date:In-Reply-To:References:From;
+        b=NIxuckaQIAiDthSzpKV/N2kDEkuJs5//k/eivUHgjZJROAZ8noZe70hJtAhoFRf02
+         pmAzMcKBuJbsnMFz7s34vO6qQdxnIK63d1WU95TTCKHe0X0+by2FaGwuGjqIGs8QAM
+         u1OIdlHORpkSQmTkjKu71rbi1Pro8cBUp/bQpPwA80tb4OtMGxJBUnUfdSUqGjI0R9
+         ENjeYLWWFAes7RVJkYvSHnOp7DUvtoZN5Yzl4qX9kqVI2+U7fr6Z4TL/LrjVbn2XKK
+         mGyHdSzZvTY+zjJ98dWDV1/qMzBCBpxkvm4f9uxHPYT+Bz8Lz31oXbrGtlY6aWMZ+t
+         uaMmGxgTyoWzA==
+Message-ID: <5e204d7a3c915f9e1308928e908f058c2a522c14.camel@kernel.org>
+Subject: Re: [PATCH V2 00/10] ARM: dts: Add Raspberry Pi CM4 & CM4 IO Board
+ support
+From:   nicolas saenz julienne <nsaenz@kernel.org>
+To:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Ray Jui <rjui@broadcom.com>, Scott Branden <sbranden@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com,
+        Maxime Ripard <maxime@cerno.tech>, iivanov@suse.de,
+        devicetree@vger.kernel.org, linux-rpi-kernel@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Date:   Sat, 04 Sep 2021 16:45:53 +0200
+In-Reply-To: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
+References: <1628334401-6577-1-git-send-email-stefan.wahren@i2se.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.40.4 (3.40.4-1.fc34) 
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YTIscKy+jg5L/TMh@osiris>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Sep 03, 2021 at 04:08:48PM +0200, Heiko Carstens wrote:
-> On Thu, Sep 02, 2021 at 10:41:03AM -0700, Luis Chamberlain wrote:
-> > We never checked for errors on add_disk() as this function
-> > returned void. Now that this is fixed, use the shiny new
-> > error handling.
-> > 
-> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> > ---
-> >  drivers/s390/block/dcssblk.c | 4 +++-
-> >  1 file changed, 3 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/drivers/s390/block/dcssblk.c b/drivers/s390/block/dcssblk.c
-> > index 5be3d1c39a78..b0fd5009a12e 100644
-> > --- a/drivers/s390/block/dcssblk.c
-> > +++ b/drivers/s390/block/dcssblk.c
-> > @@ -696,7 +696,9 @@ dcssblk_add_store(struct device *dev, struct device_attribute *attr, const char
-> >  	}
-> >  
-> >  	get_device(&dev_info->dev);
-> > -	device_add_disk(&dev_info->dev, dev_info->gd, NULL);
-> > +	rc = device_add_disk(&dev_info->dev, dev_info->gd, NULL);
-> > +	if (rc)
-> > +		goto put_dev;
-> 
-> This looks not correct to me. We seem to have now in case of an error:
-> 
-> - reference count imbalance (= memory leak)
-> - dax cleanup is missing
+Hi Stefan,
 
-Care to provide an alternative?
+On Sat, 2021-08-07 at 13:06 +0200, Stefan Wahren wrote:
+> This series add support for the Raspberry Pi Compute Module 4 and its
+> IO board.
 
-  Luis
+Sorry for the late review. I finally got some time to review/test this
+properly. The devicetree patches look really good, dtbs_check's shows no new
+errors, and all peripherals work. The only thing I can't verify is PCIe as I
+have nothing to plug into it, but it should work.
+
+I'll apply the series (modulo the mmc patches) for-next soon.
+
+Thanks!
+
+> Changes in V2:
+> - drop emmc2bus patch as it affects userspace (thanks to Marc Zyngier)
+> - tested with CM4 and integrate sdhci patches from Nicolas (just include kHz fixups)
+> - add Rob's Acked-by
+> - add HS200 property to emmc2 node for a slight performance gain
+> - move antenna comment to the proper position
+> 
+> Nicolas Saenz Julienne (2):
+>   mmc: sdhci-iproc: Cap min clock frequency on BCM2711
+>   mmc: sdhci-iproc: Set SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN on BCM2711
+> 
+> Stefan Wahren (8):
+>   ARM: dts: bcm2711: fix MDIO #address- and #size-cells
+>   ARM: dts: bcm2711-rpi-4-b: fix sd_io_1v8_reg regulator states
+>   dt-bindings: display: bcm2835: add optional property power-domains
+>   ARM: dts: bcm283x-rpi: Move Wifi/BT into separate dtsi
+>   dt-bindings: arm: bcm2835: Add Raspberry Pi Compute Module 4
+>   ARM: dts: Add Raspberry Pi Compute Module 4
+>   ARM: dts: Add Raspberry Pi Compute Module 4 IO Board
+>   arm64: dts: broadcom: Add reference to RPi CM4 IO Board
+> 
+>  .../devicetree/bindings/arm/bcm/bcm2835.yaml       |   1 +
+>  .../bindings/display/brcm,bcm2835-dsi0.yaml        |   3 +
+>  .../bindings/display/brcm,bcm2835-hdmi.yaml        |   3 +
+>  .../bindings/display/brcm,bcm2835-v3d.yaml         |   3 +
+>  .../bindings/display/brcm,bcm2835-vec.yaml         |   3 +
+>  arch/arm/boot/dts/Makefile                         |   1 +
+>  arch/arm/boot/dts/bcm2711-rpi-4-b.dts              |  42 ++-----
+>  arch/arm/boot/dts/bcm2711-rpi-cm4-io.dts           | 138 +++++++++++++++++++++
+>  arch/arm/boot/dts/bcm2711-rpi-cm4.dtsi             | 113 +++++++++++++++++
+>  arch/arm/boot/dts/bcm2711.dtsi                     |   4 +-
+>  arch/arm/boot/dts/bcm2835-rpi-zero-w.dts           |  31 ++---
+>  arch/arm/boot/dts/bcm2837-rpi-3-a-plus.dts         |  36 ++----
+>  arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts         |  36 ++----
+>  arch/arm/boot/dts/bcm2837-rpi-3-b.dts              |  36 ++----
+>  arch/arm/boot/dts/bcm283x-rpi-wifi-bt.dtsi         |  34 +++++
+>  arch/arm64/boot/dts/broadcom/Makefile              |   1 +
+>  .../arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts |   2 +
+>  drivers/mmc/host/sdhci-iproc.c                     |  21 +++-
+>  18 files changed, 366 insertions(+), 142 deletions(-)
+>  create mode 100644 arch/arm/boot/dts/bcm2711-rpi-cm4-io.dts
+>  create mode 100644 arch/arm/boot/dts/bcm2711-rpi-cm4.dtsi
+>  create mode 100644 arch/arm/boot/dts/bcm283x-rpi-wifi-bt.dtsi
+>  create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-io.dts
+> 
+
+
