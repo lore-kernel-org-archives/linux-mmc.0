@@ -2,118 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 376F1C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Sep 2021 13:00:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75061C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun,  5 Sep 2021 13:07:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0E4AB60F4A
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Sep 2021 13:00:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 56E1A6054F
+	for <linux-mmc@archiver.kernel.org>; Sun,  5 Sep 2021 13:07:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232804AbhIENBk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 5 Sep 2021 09:01:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59214 "EHLO
+        id S232105AbhIENIk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 5 Sep 2021 09:08:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231628AbhIENBj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Sep 2021 09:01:39 -0400
-Received: from galois.linutronix.de (Galois.linutronix.de [IPv6:2a0a:51c0:0:12e:550::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47F99C061575
-        for <linux-mmc@vger.kernel.org>; Sun,  5 Sep 2021 06:00:36 -0700 (PDT)
-From:   Thomas Gleixner <tglx@linutronix.de>
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020; t=1630846833;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=5mrjGVFiOPqsdbJhlmm1IqiKCCQIVhCAj521c6QgqVM=;
-        b=2Ssmz/nGTLxDypQ09h+gv3v+WyQtYzIIP94e/m9VP8G5jMRLmV99WbksWatpe7ei2611Tj
-        ukf8q6vUbx1hIyG9i3AkQkn+8BYFkLhtJRlojjamC+rfBCUO7eYs/J0EBoRBNusSNLAVRM
-        iryzslyn117MImHzeDQO6OZEsHLJYOUM2s8jF6GVCnfXOfASQie60mxgGPmglQ6R2ihHcC
-        j0uOD4raeXKhmwPoMOY/yeSxlUTSWiAWhOjRe0sj9ogyVuqrI9gwCIVZd9PRNmwGqZw1dE
-        O2rNrRaH4KLIam2o6W0LsTwr/HE6JmdPWnnN+5pYtsQbb9tKQuCuH1+Qk4s9jg==
-DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
-        s=2020e; t=1630846833;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=5mrjGVFiOPqsdbJhlmm1IqiKCCQIVhCAj521c6QgqVM=;
-        b=uib9f4Z1JO1xwyZA8nqZ763uwURP/23thAsyE9yMPj5VN/yfDK1Tq663JHaGVc43I5tE6X
-        vLlqa8qKC/dRHQAA==
-To:     Fabio Estevam <festevam@gmail.com>
+        with ESMTP id S229759AbhIENIk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Sep 2021 09:08:40 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D303CC061575
+        for <linux-mmc@vger.kernel.org>; Sun,  5 Sep 2021 06:07:36 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id w4so6446475ljh.13
+        for <linux-mmc@vger.kernel.org>; Sun, 05 Sep 2021 06:07:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=FmzPpA+dcUgjZbxr1DCt/GuWMKRkFPIG7aUqTWmahn4=;
+        b=hu6t/NPo+ndw6lu/D1S0qScqVt+TFIVdciS9z92uMh4Sd+JNV+RR/FXTXVditvrjXo
+         7YKgCBYPV4U72+0hNVLkIIiGCMiQKkdQmDj91/1wPR0ysy3AluGpLolxwZ2T8rKsOygV
+         U/ICerfrzU17COY9WGGUMwK2qso8D/gNXo+ClPG5hZ2e7d3J2rNWQJ0/HsM33Rb8Hol2
+         DZ7BMs49GLb1hrFrLZRko3jGEwQh1h2OgP0bL+igQHykpSz1rdr9YkmF3uN9EieCsW4r
+         zo7peyCCpAbx1Lhbp6eoEg8vSfqpT8ieOx6ywpTmmEUgKqO69FhRR3HOaDwBsVMOeV5K
+         GVwA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=FmzPpA+dcUgjZbxr1DCt/GuWMKRkFPIG7aUqTWmahn4=;
+        b=tcnlhaAaDZH5qu7FMQV8dbahs7vyQFE+yo2XQrurDhDThVPBFZjxq/2dbm9ExHWAwa
+         TJ1g29UA0JpSVYqmCA+SQ5PbfC27YnDUy7EPtn0dvoSsQoLQ4jOE3FJCBGJpA15kFABW
+         etIw12n+g4Coz4gWG0rENw5CMBRaMAdSzzALzUvUAuEd2cLfl7NwRcfFm/EE2E6TwRe6
+         Vb1JGXOP7VHNUYMMARdpQn6Ws0GH+oiN2iooebx6Rz5fr0yXH0kDl151cNS3UtDvqlCD
+         rIiRegX3MuzbrDvgFOUot7h+ms2DY8Ce6ZKkuk1PKEN51J/iyla2lqTALqaMmAVyH+BA
+         y7IA==
+X-Gm-Message-State: AOAM530hRU3CfEjGfL/3OqsP66RnHm1qEFD33EeIVTgeUOInoXL4Rb64
+        rNVXYJamH546v5WRXYXmN3lbHyEP2KUHIQdGxdU=
+X-Google-Smtp-Source: ABdhPJyd1NjeaO8/hR94rUQYh/Ok0eOzyvASBMNvgaN3v8pqiVt34WooRsQnseUNz2CQTNmsQiozvZ/Vp5OXOX6RMLM=
+X-Received: by 2002:a05:651c:4d4:: with SMTP id e20mr6577481lji.402.1630847255093;
+ Sun, 05 Sep 2021 06:07:35 -0700 (PDT)
+MIME-Version: 1.0
+References: <CAOMZO5AAvZic-NFbYYSVfOxY-27QukXMX68f9eDmhbqAkBRKRw@mail.gmail.com>
+ <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1> <CAOMZO5A7drx9yXWXKTh4VfV4QHNGCPbH_vxeb=NGDghAm98CXA@mail.gmail.com>
+ <CAOMZO5BY7JeFQJkU--KGRfNLTUnUVjnfar+37SvReXyBt9QJfA@mail.gmail.com>
+ <20210818175604.GX4126399@paulmck-ThinkPad-P17-Gen-1> <87czpqbq98.ffs@tglx>
+ <877dfyaxpx.ffs@tglx> <CAOMZO5BnPEnF-HNM7vCzeUrRW7BsQ-hhm4fcVmO_QieKf6oJsw@mail.gmail.com>
+ <87y28b9nyn.ffs@tglx>
+In-Reply-To: <87y28b9nyn.ffs@tglx>
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Sun, 5 Sep 2021 10:07:24 -0300
+Message-ID: <CAOMZO5D7wejn3CvGEvFyRLeOqpdxBOD+-9dTV3xVoPQgWpqUzA@mail.gmail.com>
+Subject: Re: NOHZ tick-stop error with ath10k SDIO
+To:     Thomas Gleixner <tglx@linutronix.de>
 Cc:     "Paul E . McKenney" <paulmck@kernel.org>,
         Kalle Valo <kvalo@codeaurora.org>, ath10k@lists.infradead.org,
         linux-mmc <linux-mmc@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Marek Vasut <marex@denx.de>, qais.yousef@arm.com,
         Frederic Weisbecker <frederic@kernel.org>
-Subject: Re: NOHZ tick-stop error with ath10k SDIO
-In-Reply-To: <CAOMZO5BnPEnF-HNM7vCzeUrRW7BsQ-hhm4fcVmO_QieKf6oJsw@mail.gmail.com>
-References: <CAOMZO5AAvZic-NFbYYSVfOxY-27QukXMX68f9eDmhbqAkBRKRw@mail.gmail.com>
- <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1>
- <CAOMZO5A7drx9yXWXKTh4VfV4QHNGCPbH_vxeb=NGDghAm98CXA@mail.gmail.com>
- <CAOMZO5BY7JeFQJkU--KGRfNLTUnUVjnfar+37SvReXyBt9QJfA@mail.gmail.com>
- <20210818175604.GX4126399@paulmck-ThinkPad-P17-Gen-1>
- <87czpqbq98.ffs@tglx> <877dfyaxpx.ffs@tglx>
- <CAOMZO5BnPEnF-HNM7vCzeUrRW7BsQ-hhm4fcVmO_QieKf6oJsw@mail.gmail.com>
-Date:   Sun, 05 Sep 2021 15:00:32 +0200
-Message-ID: <87y28b9nyn.ffs@tglx>
-MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fabio,
+Hi Thomas,
 
-On Sat, Sep 04 2021 at 18:10, Fabio Estevam wrote:
-> On Fri, Sep 3, 2021 at 5:07 AM Thomas Gleixner <tglx@linutronix.de> wrote:
-> I did as suggested and here is trace.txt:
-> https://pastebin.com/VUfLRJ8a
+On Sun, Sep 5, 2021 at 10:00 AM Thomas Gleixner <tglx@linutronix.de> wrote:
 
-Lacks a stack trace, but yes this one is the culprit:
+> Yes. This is correct. See above.
 
-kworker/u4:2-70      [000] d..1    87.940929: softirq_raise: vec=3 [action=NET_RX]
-
-It has only interrupts and preemption disabled and it's in task
-context. So if there is no interrupt raised and no local_bh_disable /
-enable() pair invoked before the CPU goes idle nothing will handle the
-softirq and the raised bit stays pending which makes the NOHZ idle code
-complain.
-
-> Also, while investigating this problem I saw a commit that fixed a
-> similar issue:
-> e63052a5dd3c ("mlx5e: add add missing BH locking around napi_schdule()").
->
-> I then tried the same approach on the ath10k sdio driver:
->
-> diff --git a/drivers/net/wireless/ath/ath10k/sdio.c
-> b/drivers/net/wireless/ath/ath10k/sdio.c
-> index b746052737e0..eb705214f3f0 100644
-> --- a/drivers/net/wireless/ath/ath10k/sdio.c
-> +++ b/drivers/net/wireless/ath/ath10k/sdio.c
-> @@ -1363,8 +1363,11 @@ static void
-> ath10k_rx_indication_async_work(struct work_struct *work)
->          ep->ep_ops.ep_rx_complete(ar, skb);
->      }
->
-> -    if (test_bit(ATH10K_FLAG_CORE_REGISTERED, &ar->dev_flags))
-> +    if (test_bit(ATH10K_FLAG_CORE_REGISTERED, &ar->dev_flags)) {
-> +        local_bh_disable();
->          napi_schedule(&ar->napi);
-> +        local_bh_enable();
-> +    }
->  }
->
-> and no longer get the "NOHZ tick-stop error: Non-RCU local softirq work is
-> pending, handler #08!!!" error messages after launching hostapd.
->
-> Is this a proper fix?
-
-Yes. This is correct. See above.
-
-Thanks,
-
-        tglx
+Thanks for your help. Appreciated.
