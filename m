@@ -2,131 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD8BBC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 14:36:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53415C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 16:36:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B76E860232
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 14:36:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3567761039
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 16:36:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243421AbhIFOhe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 10:37:34 -0400
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:7922 "EHLO
-        mx0b-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S236950AbhIFOh2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 10:37:28 -0400
-Received: from pps.filterd (m0098421.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.43/8.16.0.43) with SMTP id 186EB0cd093954;
-        Mon, 6 Sep 2021 10:34:04 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=date : from : to : cc :
- subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pp1; bh=K9YoRjs+OVJTZWwE3aqGWgWmXGlfnLRk4vE6zXW/7MI=;
- b=pr6D7d1d18e9uwZlU0Ty8GzNce4SEulx18mGcF9L1kEJ+zwvsOlx2ic4beSbSKw26JXq
- +wabtQ6fpEzwdqEUSQHic1lITg/cwVqj2Q9qvwIMCxTPnmi7I9/KTvTxJIpE4M3WM14v
- HYDFATUechLGhhqevTYTmAG5IXFY/tsxIuKqHi3m4r5SPjgAoEk5be+4X9Ttpy82h96g
- fh5avbZFBx/ShTM0cCfRkPrxAMtwX+VSP+LliZEDjWMy+NMGkZhRKG+NSJI4ZCJCUQV+
- gebnm3jalueksIc+cPWp9KV8M6hqjwyRk4edwR6GL+1FQWUA2fUN0+1R8Cr9CPFKM6e2 Nw== 
-Received: from pps.reinject (localhost [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3awhbyn14m-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 06 Sep 2021 10:34:04 -0400
-Received: from m0098421.ppops.net (m0098421.ppops.net [127.0.0.1])
-        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 186EB02d093867;
-        Mon, 6 Sep 2021 10:34:03 -0400
-Received: from ppma01fra.de.ibm.com (46.49.7a9f.ip4.static.sl-reverse.com [159.122.73.70])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 3awhbyn13w-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 06 Sep 2021 10:34:03 -0400
-Received: from pps.filterd (ppma01fra.de.ibm.com [127.0.0.1])
-        by ppma01fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 186EX2rL017980;
-        Mon, 6 Sep 2021 14:34:01 GMT
-Received: from b06cxnps4076.portsmouth.uk.ibm.com (d06relay13.portsmouth.uk.ibm.com [9.149.109.198])
-        by ppma01fra.de.ibm.com with ESMTP id 3av0e9chec-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 06 Sep 2021 14:34:01 +0000
-Received: from d06av26.portsmouth.uk.ibm.com (d06av26.portsmouth.uk.ibm.com [9.149.105.62])
-        by b06cxnps4076.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 186EXwhM54198718
-        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Mon, 6 Sep 2021 14:33:58 GMT
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 4F4D3AE058;
-        Mon,  6 Sep 2021 14:33:58 +0000 (GMT)
-Received: from d06av26.portsmouth.uk.ibm.com (unknown [127.0.0.1])
-        by IMSVA (Postfix) with ESMTP id 49EFEAE05D;
-        Mon,  6 Sep 2021 14:33:57 +0000 (GMT)
-Received: from osiris (unknown [9.145.3.161])
-        by d06av26.portsmouth.uk.ibm.com (Postfix) with ESMTPS;
-        Mon,  6 Sep 2021 14:33:57 +0000 (GMT)
-Date:   Mon, 6 Sep 2021 16:33:55 +0200
-From:   Heiko Carstens <hca@linux.ibm.com>
-To:     Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-Cc:     Luis Chamberlain <mcgrof@kernel.org>, axboe@kernel.dk,
-        gregkh@linuxfoundation.org, chaitanya.kulkarni@wdc.com,
-        atulgopinathan@gmail.com, hare@suse.de, maximlevitsky@gmail.com,
-        oakad@yahoo.com, ulf.hansson@linaro.org, colin.king@canonical.com,
-        shubhankarvk@gmail.com, baijiaju1990@gmail.com, trix@redhat.com,
-        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
-        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
-        sth@linux.ibm.com, hoeppner@linux.ibm.com, gor@linux.ibm.com,
-        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
-        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 7/9] s390/block/dcssblk: add error handling support for
- add_disk()
-Message-ID: <YTYm09U6jZUDtB9l@osiris>
-References: <20210902174105.2418771-1-mcgrof@kernel.org>
- <20210902174105.2418771-8-mcgrof@kernel.org>
- <YTIscKy+jg5L/TMh@osiris>
- <YTLP8mYBX37R++9E@bombadil.infradead.org>
- <20210906134346.19c14246@thinkpad>
+        id S243509AbhIFQho (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 12:37:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33446 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232662AbhIFQhm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 12:37:42 -0400
+Received: from mail-lj1-x236.google.com (mail-lj1-x236.google.com [IPv6:2a00:1450:4864:20::236])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B95CC061757
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 09:36:37 -0700 (PDT)
+Received: by mail-lj1-x236.google.com with SMTP id f2so12213215ljn.1
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 09:36:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=Cgr6Jz+lrB7D42Igr6LQ2k0LOWT6QRl6Zo2ea56U1/0=;
+        b=qFue/ctcVup2ZBYh+V2vDeXGYUQlqSSTr0F0rtwg3ihQG1N3E0nkPHz7F4S1cPA36X
+         XX6ajt0l5e6WRc1OnNJ88Rpm6B8Pvq4fIq15S2eNWK19rSp8lbBhRTGNaOs+d/6T9JNg
+         KMMQ66achlkth81CmiYymoqErBfB5qgnbMzMsGnIUh7ybdTBdGBNFO0xsZrShGCerYp5
+         NjEQZn2gTzmLOrPHL/UKB5lXjoC3v6bB936WCcMPL/Jb2F7yiCALaOj5JiWVREyTtXV4
+         QA6oo/C8cZj+rIGHtw7QNIHz/16i4xnpriV+1DjH0V88DESYATAWCmLrhb84m+Z0mohL
+         hgFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=Cgr6Jz+lrB7D42Igr6LQ2k0LOWT6QRl6Zo2ea56U1/0=;
+        b=fYl7o90cVsBa1YQF9DTQOUYof3hcDlPEvFd0aIL8ZKjQ7pxIq7l/RDk4mpCCgjDQA5
+         nr0onxL8kwBb0bZ7p+u/i98KcOAm4NIkSwugbzsYKv6BESq4Ymw7yT/3fw3rLEXZW8h1
+         kInleMg6n1cz5USiXUpJY7xibMj6QUh4dcJi2+KPw47CTGpNJ1vRf8tfa5R8XzQihr0k
+         zfAz2yWD9P2XwHS7hD6uwawMxHpTgHsl66k5vxojvcXPBbXrKWzLxroD/0nqAY4gPr6e
+         vbkr6Ti6xR/F1aRAA1031521PUUTpT7SJ5VsOx235EC5T5iaW6UXx3r0GqOSN3lPvHdY
+         qx6A==
+X-Gm-Message-State: AOAM532a1hmBBMEwaSqHpIlUcjLzpdcqWTLwwoFU6NbUIoMljx8gySFh
+        18tG0v5ulCKNsxXqS3nLXIGK8vNbz7Np90fqxRjaiQ==
+X-Google-Smtp-Source: ABdhPJzT5LiGUegKEZsMvc5nNqo2qWbWBytqyjX8rsodVuGLIyP1vHsR6WA8ikEELHPTINM6V/ky1ojVSaj1bOIzF8M=
+X-Received: by 2002:a2e:960c:: with SMTP id v12mr12032538ljh.300.1630946195528;
+ Mon, 06 Sep 2021 09:36:35 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210906134346.19c14246@thinkpad>
-X-TM-AS-GCONF: 00
-X-Proofpoint-GUID: oSOWQOHMJCB8KRa2gHe6rtDES0-9leq3
-X-Proofpoint-ORIG-GUID: uWvV3nnx5hIse_lWekuNz15Kr0UNPFaR
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.391,18.0.790
- definitions=2021-09-06_06:2021-09-03,2021-09-06 signatures=0
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 suspectscore=0
- mlxscore=0 impostorscore=0 phishscore=0 lowpriorityscore=0 clxscore=1015
- mlxlogscore=999 priorityscore=1501 spamscore=0 adultscore=0 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2108310000
- definitions=main-2109060090
+References: <20210828085446.1878-1-caihuoqing@baidu.com>
+In-Reply-To: <20210828085446.1878-1-caihuoqing@baidu.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 6 Sep 2021 18:35:58 +0200
+Message-ID: <CAPDyKFqz-Go=gCYpzsN6Np3SnfKm_iCWnhORidj1PTHm_ftx7w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: omap_hsmmc: Make use of the helper macro SET_RUNTIME_PM_OPS()
+To:     Cai Huoqing <caihuoqing@baidu.com>
+Cc:     Doug Anderson <dianders@chromium.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Sep 06, 2021 at 01:43:46PM +0200, Gerald Schaefer wrote:
-> On Fri, 3 Sep 2021 18:46:26 -0700
-> Luis Chamberlain <mcgrof@kernel.org> wrote:
-> > > > +	rc = device_add_disk(&dev_info->dev, dev_info->gd, NULL);
-> > > > +	if (rc)
-> > > > +		goto put_dev;
-> > > 
-> > > This looks not correct to me. We seem to have now in case of an error:
-> > > 
-> > > - reference count imbalance (= memory leak)
-> > > - dax cleanup is missing
-> > 
-> > Care to provide an alternative?
-> 
-> See patch below:
-> 
-> From 7053b5f8c0a126c3ef450de3668d9963bd68ceaa Mon Sep 17 00:00:00 2001
-> From: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-> Date: Mon, 6 Sep 2021 13:18:53 +0200
-> Subject: [PATCH] s390/block/dcssblk: add error handling support for add_disk()
-> 
-> Signed-off-by: Gerald Schaefer <gerald.schaefer@linux.ibm.com>
-> ---
->  drivers/s390/block/dcssblk.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
+On Sat, 28 Aug 2021 at 10:55, Cai Huoqing <caihuoqing@baidu.com> wrote:
+>
+> Use the helper macro SET_RUNTIME_PM_OPS() instead of the verbose
+> operators ".runtime_suspend/.runtime_resume", because the
+> SET_RUNTIME_PM_OPS() is a nice helper macro that could be brought
+> in to make code a little clearer, a little more concise.
 
-Thanks Gerald! FWIW:
-Acked-by: Heiko Carstens <hca@linux.ibm.com>
+That makes sense to me.
+
+>
+> Signed-off-by: Cai Huoqing <caihuoqing@baidu.com>
+> ---
+>  drivers/mmc/host/omap_hsmmc.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 2f8038d69f67..748303e14841 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -2156,8 +2156,7 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+>
+>  static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+>         SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
+> -       .runtime_suspend = omap_hsmmc_runtime_suspend,
+> -       .runtime_resume = omap_hsmmc_runtime_resume,
+> +       SET_RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
+>  };
+
+When building this driver with CONFIG_PM being unset, the compiler
+will complain about unused functions. Please add "#ifdef CONFIG_PM"
+around the implementation of omap_hsmmc_runtime_suspend|resume() to
+address that.
+
+>
+>  static struct platform_driver omap_hsmmc_driver = {
+> --
+> 2.25.1
+>
+
+Kind regards
+Uffe
