@@ -2,83 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75061C433EF
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Sep 2021 13:07:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 795F7C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 06:13:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 56E1A6054F
-	for <linux-mmc@archiver.kernel.org>; Sun,  5 Sep 2021 13:07:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5196360EC0
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 06:13:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232105AbhIENIk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 5 Sep 2021 09:08:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60752 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229759AbhIENIk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Sep 2021 09:08:40 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D303CC061575
-        for <linux-mmc@vger.kernel.org>; Sun,  5 Sep 2021 06:07:36 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id w4so6446475ljh.13
-        for <linux-mmc@vger.kernel.org>; Sun, 05 Sep 2021 06:07:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=FmzPpA+dcUgjZbxr1DCt/GuWMKRkFPIG7aUqTWmahn4=;
-        b=hu6t/NPo+ndw6lu/D1S0qScqVt+TFIVdciS9z92uMh4Sd+JNV+RR/FXTXVditvrjXo
-         7YKgCBYPV4U72+0hNVLkIIiGCMiQKkdQmDj91/1wPR0ysy3AluGpLolxwZ2T8rKsOygV
-         U/ICerfrzU17COY9WGGUMwK2qso8D/gNXo+ClPG5hZ2e7d3J2rNWQJ0/HsM33Rb8Hol2
-         DZ7BMs49GLb1hrFrLZRko3jGEwQh1h2OgP0bL+igQHykpSz1rdr9YkmF3uN9EieCsW4r
-         zo7peyCCpAbx1Lhbp6eoEg8vSfqpT8ieOx6ywpTmmEUgKqO69FhRR3HOaDwBsVMOeV5K
-         GVwA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=FmzPpA+dcUgjZbxr1DCt/GuWMKRkFPIG7aUqTWmahn4=;
-        b=tcnlhaAaDZH5qu7FMQV8dbahs7vyQFE+yo2XQrurDhDThVPBFZjxq/2dbm9ExHWAwa
-         TJ1g29UA0JpSVYqmCA+SQ5PbfC27YnDUy7EPtn0dvoSsQoLQ4jOE3FJCBGJpA15kFABW
-         etIw12n+g4Coz4gWG0rENw5CMBRaMAdSzzALzUvUAuEd2cLfl7NwRcfFm/EE2E6TwRe6
-         Vb1JGXOP7VHNUYMMARdpQn6Ws0GH+oiN2iooebx6Rz5fr0yXH0kDl151cNS3UtDvqlCD
-         rIiRegX3MuzbrDvgFOUot7h+ms2DY8Ce6ZKkuk1PKEN51J/iyla2lqTALqaMmAVyH+BA
-         y7IA==
-X-Gm-Message-State: AOAM530hRU3CfEjGfL/3OqsP66RnHm1qEFD33EeIVTgeUOInoXL4Rb64
-        rNVXYJamH546v5WRXYXmN3lbHyEP2KUHIQdGxdU=
-X-Google-Smtp-Source: ABdhPJyd1NjeaO8/hR94rUQYh/Ok0eOzyvASBMNvgaN3v8pqiVt34WooRsQnseUNz2CQTNmsQiozvZ/Vp5OXOX6RMLM=
-X-Received: by 2002:a05:651c:4d4:: with SMTP id e20mr6577481lji.402.1630847255093;
- Sun, 05 Sep 2021 06:07:35 -0700 (PDT)
+        id S239202AbhIFGOG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 02:14:06 -0400
+Received: from smtp-out2.suse.de ([195.135.220.29]:51802 "EHLO
+        smtp-out2.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231271AbhIFGOG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 02:14:06 -0400
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by smtp-out2.suse.de (Postfix) with ESMTPS id 6DBEA2007A;
+        Mon,  6 Sep 2021 06:13:00 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1630908780; h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=IW2wXTx3q9w67ADlEVFXdIL/3i+IwIgYXJEPTjHUFLE=;
+        b=cdu5Kcxe5T45mIwBh0hw5uWrJPqfhaqUy5AHnSDVpWr1VK0bTyeuKnb89d220mhGRehvQW
+        WgVnj92lYOZLF1AnZwORbLX3ndF3hIZDm6+JpSQAsQrIiN2KtbNFQE+CpuJYDhxwP8JLlN
+        yAYZwubaK7d4XijvWC+NBBJgEaO76CQ=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1630908780;
+        h=from:from:reply-to:date:date:message-id:message-id:to:to:cc:cc:
+         mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=IW2wXTx3q9w67ADlEVFXdIL/3i+IwIgYXJEPTjHUFLE=;
+        b=Haxu3h4FqB2gptSDa9nivWLj+aYZ7FbLfzRJIqR39E3EULT0+f8Kcko3XuIE76ycB1eNXX
+        XqOcs6STyIW2LQBg==
+Received: from imap1.suse-dmz.suse.de (imap1.suse-dmz.suse.de [192.168.254.73])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature ECDSA (P-521) server-digest SHA512)
+        (No client certificate requested)
+        by imap1.suse-dmz.suse.de (Postfix) with ESMTPS id C1BE713299;
+        Mon,  6 Sep 2021 06:12:56 +0000 (UTC)
+Received: from dovecot-director2.suse.de ([192.168.254.65])
+        by imap1.suse-dmz.suse.de with ESMTPSA
+        id EQ1rLGixNWGdTgAAGKfGzw
+        (envelope-from <hare@suse.de>); Mon, 06 Sep 2021 06:12:56 +0000
+Subject: Re: [PATCH v3 1/8] scsi/sd: add error handling support for add_disk()
+To:     Luis Chamberlain <mcgrof@kernel.org>, axboe@kernel.dk,
+        martin.petersen@oracle.com, jejb@linux.ibm.com, kbusch@kernel.org,
+        sagi@grimberg.me, adrian.hunter@intel.com, beanhuo@micron.com,
+        ulf.hansson@linaro.org, avri.altman@wdc.com, swboyd@chromium.org,
+        agk@redhat.com, snitzer@redhat.com, josef@toxicpanda.com
+Cc:     hch@infradead.org, bvanassche@acm.org, ming.lei@redhat.com,
+        linux-scsi@vger.kernel.org, linux-nvme@lists.infradead.org,
+        linux-mmc@vger.kernel.org, dm-devel@redhat.com,
+        nbd@other.debian.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+References: <20210830212538.148729-1-mcgrof@kernel.org>
+ <20210830212538.148729-2-mcgrof@kernel.org>
+From:   Hannes Reinecke <hare@suse.de>
+Message-ID: <10e3756d-09fb-7c5b-83d8-b1c527880b6c@suse.de>
+Date:   Mon, 6 Sep 2021 08:13:00 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.12.0
 MIME-Version: 1.0
-References: <CAOMZO5AAvZic-NFbYYSVfOxY-27QukXMX68f9eDmhbqAkBRKRw@mail.gmail.com>
- <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1> <CAOMZO5A7drx9yXWXKTh4VfV4QHNGCPbH_vxeb=NGDghAm98CXA@mail.gmail.com>
- <CAOMZO5BY7JeFQJkU--KGRfNLTUnUVjnfar+37SvReXyBt9QJfA@mail.gmail.com>
- <20210818175604.GX4126399@paulmck-ThinkPad-P17-Gen-1> <87czpqbq98.ffs@tglx>
- <877dfyaxpx.ffs@tglx> <CAOMZO5BnPEnF-HNM7vCzeUrRW7BsQ-hhm4fcVmO_QieKf6oJsw@mail.gmail.com>
- <87y28b9nyn.ffs@tglx>
-In-Reply-To: <87y28b9nyn.ffs@tglx>
-From:   Fabio Estevam <festevam@gmail.com>
-Date:   Sun, 5 Sep 2021 10:07:24 -0300
-Message-ID: <CAOMZO5D7wejn3CvGEvFyRLeOqpdxBOD+-9dTV3xVoPQgWpqUzA@mail.gmail.com>
-Subject: Re: NOHZ tick-stop error with ath10k SDIO
-To:     Thomas Gleixner <tglx@linutronix.de>
-Cc:     "Paul E . McKenney" <paulmck@kernel.org>,
-        Kalle Valo <kvalo@codeaurora.org>, ath10k@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Marek Vasut <marex@denx.de>, qais.yousef@arm.com,
-        Frederic Weisbecker <frederic@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20210830212538.148729-2-mcgrof@kernel.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Thomas,
+On 8/30/21 11:25 PM, Luis Chamberlain wrote:
+> We never checked for errors on add_disk() as this function
+> returned void. Now that this is fixed, use the shiny new
+> error handling.
+> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> ---
+>   drivers/scsi/sd.c | 6 +++++-
+>   1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+Reviewed-by: Hannes Reinecke <hare@suse.de>
 
-On Sun, Sep 5, 2021 at 10:00 AM Thomas Gleixner <tglx@linutronix.de> wrote:
+Cheers,
 
-> Yes. This is correct. See above.
-
-Thanks for your help. Appreciated.
+Hannes
+-- 
+Dr. Hannes Reinecke                Kernel Storage Architect
+hare@suse.de                              +49 911 74053 688
+SUSE Software Solutions GmbH, Maxfeldstr. 5, 90409 Nürnberg
+HRB 36809 (AG Nürnberg), Geschäftsführer: Felix Imendörffer
