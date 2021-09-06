@@ -4,95 +4,90 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46214C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 386A7C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 35B3860F70
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 20E9260FBF
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243958AbhIFRLy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 13:11:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41358 "EHLO
+        id S243942AbhIFRL6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 13:11:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41384 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243972AbhIFRLx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:11:53 -0400
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0100C061757
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:10:48 -0700 (PDT)
-Received: by mail-lj1-x230.google.com with SMTP id i28so12304202ljm.7
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:10:48 -0700 (PDT)
+        with ESMTP id S243931AbhIFRL6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:11:58 -0400
+Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F94CC06175F
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:10:53 -0700 (PDT)
+Received: by mail-lj1-x22d.google.com with SMTP id m4so12307540ljq.8
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:10:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=eBV6xJO0OJaH8jzRZsLqKsR9gePhFCKXaYbJlTL1SK0=;
-        b=LFms5S3j0LvWEYimyPf3cb4Aisdn+Fk0RcpOrMN+ZdxUItBFt03MZgAJyCUWWC62gA
-         xL6pVj/R4056hMSTJXWaAAW0XJxWY95ANL2inlfc7gjmf6BFW8UdEkjBN6OfL9igtewV
-         2JgY9QMy4BbUAgVA1jm1THz+5T5uS585jDOW2nVtjNTStboUZCsKHDlx3pvPga5s2Aea
-         dvtTuh0M4AIM0YiFHE2rv2jMoWzeXBDMGduAbcmjYKzTNfr7wM1AzhSBU6ieiQ9XTDvy
-         XQyK9QeN2IRddAghms+zRMV1up63wzN38bLJRWblvnD5e2vOcie3vnIumG6eir16lfbi
-         jm5g==
+        bh=4mmRqWH9FmfPYxUKvRbn5V1v9mP3NzsGHd5mH5mhOcM=;
+        b=csHzkOvc+wtXwzCLGIGf5fcuc8ANBD823C9xk5KWC5dK+FbKg8vk83BWBEeSrxrllI
+         jzOL5RfckAvDaToS2aF019YLAXyGWQwc2eym1nc0JvJyPoHhWiiZ0md5USZXavRrtT1c
+         awnroW8kr+zHdfkoJ6LW/asKjprklqV+FZyuZDG8we6hQaP1NtJrIFWI2Iz14aHFRPq2
+         srfx4UDITI1QgOu2GJQG6APK4ex6BM7dmLG+o44Ri8cl18Y7Dxy23u6+IK3tYTGMYoJd
+         mLtsoLdLM3W0ZwhVMB+/dIG6nF/CqRyR1BRGPCAY17gJc3/iHBYuWPrYAiuhd6dCDW/n
+         uxPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=eBV6xJO0OJaH8jzRZsLqKsR9gePhFCKXaYbJlTL1SK0=;
-        b=DSVusEOPVBh6jCuNJB/IsFiXGDCcmOE1B7TbfzUpWcwwoZbCMhTjfYcxMb1Juv4V9h
-         +BAe1W7yhMbCP/x959XokfLo2jUj3u2uyre8JJROkiNOOo0DDk4FqmHbJ5OxjHQydwzE
-         CthopeqGUOU0+IIIwmMV1F+jZS4PhVyyHMNgw8jknTJAGZwS47vsgJ6nuvRza8NGtril
-         RU3Q8OZ2Cv+p7PMRSg9Ucs95PgCPjg6oEQ1daYyzqXqYbZ4QEf7KnqCkRiWsWiTTGay2
-         GK9GwDybtmZEY6RYPOhs6Ux2rjv4shivbtfsl1gY2N55jUt+tJzGZiiISecIN0DLE0QM
-         pPDw==
-X-Gm-Message-State: AOAM530615yy4Pem5X/UqHTSFqFernVv3E+SYTfep+dSGBNmsO2XKtIv
-        EhTKoBVO8smLu6Xdm4wprWcQ8dLKsYWJ6Jnm6tJmEw==
-X-Google-Smtp-Source: ABdhPJxhSEFI8wMN4u5XHazx2hzbbCQEPxdsCfALNn+wlwsdQueMDsoHtriqduJghpS67u2M98pG6gst9sXWJqwHE5o=
-X-Received: by 2002:a05:651c:1b3:: with SMTP id c19mr11757010ljn.16.1630948247165;
- Mon, 06 Sep 2021 10:10:47 -0700 (PDT)
+        bh=4mmRqWH9FmfPYxUKvRbn5V1v9mP3NzsGHd5mH5mhOcM=;
+        b=oZF9hBhm4N5nsejLP5SCNno2ovX9riPwD3HoThh+kiDjGyT/BjLdNGyKjn4xSs/V6N
+         7e/GNv6AQiJ6omup2atxuIf0hQ+hSKGyTe2HEKa738hSZBQczV5lPQv1UvjP7Wj/a5kP
+         B6dtnoJb+CpJNzRDTeB91xmWF2F6lZfXLhThedH84vGub1CKcFyqe8U0Gga6HzuvcCxF
+         Twgi9wf9TxwcArtBCSCo7atMwIETNOyK28UM1ql6lPU/ksjj0aAEaYCSgozHpiw2pAWV
+         a/Fir/9iF+trXVYXr+fJXXyIuGXCAU5uAjtE44VxjKzodeafb6MpGtqMKzOKOkyDjZ7c
+         Q38A==
+X-Gm-Message-State: AOAM533PjHaeb9NQK6QpQOO4NKEe2ztzt+67gjFcdTx0rOH3taAwYdAC
+        5haNtUagKq7aAXaSoTQVo/x7p5Vp5GbuqDV00M6cew==
+X-Google-Smtp-Source: ABdhPJysVoEfhX4+GoPgW0jucP/iP8OeiLdfs2kPS3Ae8x/doisyNjE0me2SwVWUxd5suoycyqfgomRweBFiACxh0lk=
+X-Received: by 2002:a2e:b610:: with SMTP id r16mr11493045ljn.367.1630948251396;
+ Mon, 06 Sep 2021 10:10:51 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210830212538.148729-1-mcgrof@kernel.org> <20210830212538.148729-5-mcgrof@kernel.org>
-In-Reply-To: <20210830212538.148729-5-mcgrof@kernel.org>
+References: <20210901091852.479202-1-maxime@cerno.tech> <20210901091852.479202-31-maxime@cerno.tech>
+In-Reply-To: <20210901091852.479202-31-maxime@cerno.tech>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 6 Sep 2021 19:10:10 +0200
-Message-ID: <CAPDyKFp9HTjQ_6c2tHuPhhixfcnFa8XQBrPO2PqoB113BszLJw@mail.gmail.com>
-Subject: Re: [PATCH v3 4/8] mmc/core/block: add error handling support for add_disk()
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        "James E.J. Bottomley" <jejb@linux.ibm.com>, kbusch@kernel.org,
-        sagi@grimberg.me, Adrian Hunter <adrian.hunter@intel.com>,
-        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Stephen Boyd <swboyd@chromium.org>, agk@redhat.com,
-        Mike Snitzer <snitzer@redhat.com>,
-        Josef Bacik <josef@toxicpanda.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        Hannes Reinecke <hare@suse.de>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Ming Lei <ming.lei@redhat.com>,
-        linux-scsi <linux-scsi@vger.kernel.org>,
-        linux-nvme@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>, dm-devel@redhat.com,
-        nbd@other.debian.org, linux-block <linux-block@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Date:   Mon, 6 Sep 2021 19:10:15 +0200
+Message-ID: <CAPDyKFrZr-+QeVE7DtZqVWDLFgLi1wYOzTMngD9JYXJBQ-ZtLA@mail.gmail.com>
+Subject: Re: [PATCH v2 30/52] dt-bindings: mmc: Convert MMC Card binding to a schema
+To:     Maxime Ripard <maxime@cerno.tech>
+Cc:     DTML <devicetree@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Frank Rowand <frowand.list@gmail.com>,
+        Chen-Yu Tsai <wens@csie.org>,
+        =?UTF-8?Q?Jernej_=C5=A0krabec?= <jernej.skrabec@gmail.com>,
+        Linux ARM <linux-arm-kernel@lists.infradead.org>,
+        linux-sunxi <linux-sunxi@googlegroups.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 30 Aug 2021 at 23:26, Luis Chamberlain <mcgrof@kernel.org> wrote:
+On Wed, 1 Sept 2021 at 11:19, Maxime Ripard <maxime@cerno.tech> wrote:
 >
-> We never checked for errors on add_disk() as this function
-> returned void. Now that this is fixed, use the shiny new
-> error handling.
+> MMC Cards can have an optional Device Tree binding to add
+> non-discoverable properties.
 >
-> The caller only cleanups the disk if we pass on an allocated md
-> but on error we return return ERR_PTR(ret), and so we must do all
-> the unwinding ourselves.
+> Now that we have the DT validation in place, let's convert the device
+> tree bindings for that driver over to a YAML schema.
 >
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> Some of these properties were already described in the MMC controller
+> binding, even though they are not generic and do not apply to any
+> device, so we took the occasion to fix this.
+>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Maxime Ripard <maxime@cerno.tech>
+>
 
 Queued for v5.16 on the temporary devel branch, thanks!
 
@@ -101,29 +96,124 @@ Uffe
 
 
 > ---
->  drivers/mmc/core/block.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 6a15fdf6e5f2..9b2856aa6231 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2453,9 +2453,14 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
->         /* used in ->open, must be set before add_disk: */
->         if (area_type == MMC_BLK_DATA_AREA_MAIN)
->                 dev_set_drvdata(&card->dev, md);
-> -       device_add_disk(md->parent, md->disk, mmc_disk_attr_groups);
-> +       ret = device_add_disk(md->parent, md->disk, mmc_disk_attr_groups);
-> +       if (ret)
-> +               goto err_cleanup_queue;
->         return md;
+> Changes from v1:
+>   - Fixed additionalProperties
+> ---
+>  .../devicetree/bindings/mmc/mmc-card.txt      | 30 ------------
+>  .../devicetree/bindings/mmc/mmc-card.yaml     | 48 +++++++++++++++++++
+>  .../bindings/mmc/mmc-controller.yaml          |  6 ---
+>  3 files changed, 48 insertions(+), 36 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/mmc-card.txt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/mmc-card.yaml
 >
-> + err_cleanup_queue:
-> +       blk_cleanup_queue(md->disk->queue);
-> +       blk_mq_free_tag_set(&md->queue.tag_set);
->   err_kfree:
->         kfree(md);
->   out:
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.txt b/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> deleted file mode 100644
+> index 8d2d71758907..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/mmc-card.txt
+> +++ /dev/null
+> @@ -1,30 +0,0 @@
+> -mmc-card / eMMC bindings
+> -------------------------
+> -
+> -This documents describes the devicetree bindings for a mmc-host controller
+> -child node describing a mmc-card / an eMMC, see "Use of Function subnodes"
+> -in mmc.txt
+> -
+> -Required properties:
+> --compatible : Must be "mmc-card"
+> --reg        : Must be <0>
+> -
+> -Optional properties:
+> --broken-hpi : Use this to indicate that the mmc-card has a broken hpi
+> -              implementation, and that hpi should not be used
+> -
+> -Example:
+> -
+> -&mmc2 {
+> -       pinctrl-names = "default";
+> -       pinctrl-0 = <&mmc2_pins_a>;
+> -       vmmc-supply = <&reg_vcc3v3>;
+> -       bus-width = <8>;
+> -       non-removable;
+> -
+> -       mmccard: mmccard@0 {
+> -               reg = <0>;
+> -               compatible = "mmc-card";
+> -               broken-hpi;
+> -       };
+> -};
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-card.yaml b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+> new file mode 100644
+> index 000000000000..b17d454442b3
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-card.yaml
+> @@ -0,0 +1,48 @@
+> +# SPDX-License-Identifier: GPL-2.0
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/mmc-card.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: MMC Card / eMMC Generic Device Tree Bindings
+> +
+> +maintainers:
+> +  - Ulf Hansson <ulf.hansson@linaro.org>
+> +
+> +description: |
+> +  This documents describes the devicetree bindings for a mmc-host controller
+> +  child node describing a mmc-card / an eMMC.
+> +
+> +properties:
+> +  compatible:
+> +    const: mmc-card
+> +
+> +  reg:
+> +    const: 0
+> +
+> +  broken-hpi:
+> +    $ref: /schemas/types.yaml#/definitions/flag
+> +    description:
+> +      Use this to indicate that the mmc-card has a broken hpi
+> +      implementation, and that hpi should not be used.
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +
+> +additionalProperties: false
+> +
+> +examples:
+> +  - |
+> +    mmc {
+> +        #address-cells = <1>;
+> +        #size-cells = <0>;
+> +
+> +        card@0 {
+> +            compatible = "mmc-card";
+> +            reg = <0>;
+> +            broken-hpi;
+> +        };
+> +    };
+> +
+> +...
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index 25ac8e200970..513f3c8758aa 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -333,12 +333,6 @@ patternProperties:
+>                subnode describes. A value of 0 denotes the memory SD
+>                function, values from 1 to 7 denote the SDIO functions.
+>
+> -      broken-hpi:
+> -        $ref: /schemas/types.yaml#/definitions/flag
+> -        description:
+> -          Use this to indicate that the mmc-card has a broken hpi
+> -          implementation, and that hpi should not be used.
+> -
+>      required:
+>        - reg
+>
 > --
-> 2.30.2
+> 2.31.1
 >
