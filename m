@@ -7,131 +7,103 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48E2BC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:09:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 355A6C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:09:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2B4A161004
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:09:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1310A60FBF
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:09:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231419AbhIFRKw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 13:10:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41028 "EHLO
+        id S243718AbhIFRLA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 13:11:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231274AbhIFRKv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:10:51 -0400
-Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3B9BC061757
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:09:46 -0700 (PDT)
-Received: by mail-lj1-x232.google.com with SMTP id h1so12305458ljl.9
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:09:46 -0700 (PDT)
+        with ESMTP id S242561AbhIFRK7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:10:59 -0400
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEDD7C061575
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:09:52 -0700 (PDT)
+Received: by mail-lj1-x22c.google.com with SMTP id l18so12267658lji.12
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:09:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=kPdYFCV+vKZ4TQdTslv8+T4RJlQzhCm6iqn6XOsBv64=;
-        b=OYSxCqfRQPO7YuRvad5pqw6YM1aCXkOGH8vEqm3zzlUUAU6NsJUK5b5gq5ejQ5/eEn
-         LcVxLUm0M/11/KBEKvZbSRZEZkSlKo1jaGCG9Z+q+wbRqGtMoyXd2/LpHRy5nzsZ/2Ml
-         eYwVEJtMxKWdHXGyRtmVNf5VCWPfrJxUNyVQsjroF/cji+mg10DUjsIFM6Yto0/xssKM
-         b2CVQZIej6IHmGIRd0kSqSKUGtLPNt54K88fw7Rtywt6KSDPVOXY3UF/nR6MGcwKLgox
-         ZvYpLTKC3rPcxA5VdYKCPjin+sRYe2b5tGq5a9u3ZHLf4dd3qexhXSJRrF2Ub5qdVPRY
-         diGQ==
+        bh=wwOCuprYbkSUA/THtMMV9PKpk9+aKaQeh1R3zOdVG40=;
+        b=GzKiYy6zYtAnV54IqbOjO7YFzn9kKGQhm6jYExiS0MBAr6pyq82hfVQkFCa0eYPvPc
+         H2tDkG+3wOiGQOBGFbgdeKLH302ysm8XRWIK+cRXhcJi0tV3C47gAEXKqmNSMLdxX9w8
+         hHur20XkQtjtpG5GbT6Tv4U859Y+byyjBzUsvZessBqI8xpuV3FfAgNMDaKXqmLZ8aVh
+         OmklfKxshBDIqbOKCS388omEIUdWdo396Yqwo1tYqOApmjJbe/jvOU8w8A9BgfJGxNEe
+         gnMSjZCn00V9bIL31Bmb6v0W7UUh39Dx1ZB0d9+I5RwyMmJyO9ZkEf0MdltFqXeXAieM
+         pNyA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=kPdYFCV+vKZ4TQdTslv8+T4RJlQzhCm6iqn6XOsBv64=;
-        b=okhHUbrahjN9HYtsvJHEkRoKBvoPuasMl7Q/bDFw/W0JVwai08AMOUeVYmV/4/mWRD
-         T1szdZ6czI5H+pZsaspGd0pn564wyS2v5wiGCExAr4y/Q/OgnIy/HibigUBcds4d3w1x
-         aKAdA7PIAmw1Pacd3IRGWXkRp4xB789NgfdTMtxoOt+LDkHW8aIID2o1zBxyvCUVIKRJ
-         2bWXabgdLL3qisEqxAXJHTef2CWZGuR3+b3UkJwHvQMnq96QcTx9pvFBxs6SkTs0Q999
-         WzqkVMwlq7/SYbELPPZnbVWOLeAriqA3f5vOWGPagb3ZwvdBoG6px57DPILNv6yS+gYf
-         ZR3g==
-X-Gm-Message-State: AOAM531FvZyi+yAgIrhXMitDcbvcAjTW+aGhBC/Y4RbBRJ5ZHdTEc4Tm
-        AoG5e+IqClL0dDL/SdYBLXe6twgKF4tEreyJl2X79w==
-X-Google-Smtp-Source: ABdhPJxTqhtkITmJ60nRns4IhVDTNDmefm183BbXddBdDA/nr63HA1HZQdqxWgvL3m3cIO8VbILVZRFtNrwur6Yjk4o=
-X-Received: by 2002:a05:651c:1b3:: with SMTP id c19mr11753747ljn.16.1630948185017;
- Mon, 06 Sep 2021 10:09:45 -0700 (PDT)
+        bh=wwOCuprYbkSUA/THtMMV9PKpk9+aKaQeh1R3zOdVG40=;
+        b=WQHUJXDFEHmDqNxIbMasmOLeGv6P8jyXlc49mQtPgC7PQGHXsXskg+ZEdBEHhxFpfA
+         2OQFM9NeDI+M84puCGOc+yVeLMr9OpTCgFdwj1+rN+kggFKjqpVU8D0N9NcItSmABxM/
+         zrHLOq5Dr2PxX92mYz3krlUsg56VIXHsPYcH1q71V5c7egTPazrc9D3heaRicyMfcM+E
+         4U7nEaS0l6Rlb5f1O3oErGgvDDFYaT6SBC9vFHY5GtJXVtVIlCm8gtI58ia3d7xgqLGj
+         Fo+OktltbjLugoznWZ9QwSbECFhTd2PIY4S8PZhKkYDkCRtwA4CaFgXKZjkEz0/XuL03
+         KyOA==
+X-Gm-Message-State: AOAM532U+jMNgvBh7LbPDAGONEtCrUj1HCS76mHxTCMGBC0gLRIiElyy
+        +HYy0FR8AwO5JYJp+khcLRhgRgQhnG696fVAe0JLpw==
+X-Google-Smtp-Source: ABdhPJzCI49eG9K/iE8OK4dQtWJnh1Tnn8OnZUgGLomJ8+WLB6GQmHxbUYfXxjiGBLr/LB0uY/5LxPuox/I20BKPjDk=
+X-Received: by 2002:a2e:b610:: with SMTP id r16mr11489966ljn.367.1630948191250;
+ Mon, 06 Sep 2021 10:09:51 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210825114213.7429-1-vincent.whitchurch@axis.com>
-In-Reply-To: <20210825114213.7429-1-vincent.whitchurch@axis.com>
+References: <CGME20210825094127epcas1p26709a5004dacdb2066e7f21dc1c997f5@epcas1p2.samsung.com>
+ <20210825093345.14706-1-cw9316.lee@samsung.com>
+In-Reply-To: <20210825093345.14706-1-cw9316.lee@samsung.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 6 Sep 2021 19:09:08 +0200
-Message-ID: <CAPDyKFoF1ghyRb+GsAcuHnCWVZx_TW7+XD4cSJ8GYPLffQqkmA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Only inject fault before done/error
-To:     Vincent Whitchurch <vincent.whitchurch@axis.com>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>, kernel <kernel@axis.com>,
+Date:   Mon, 6 Sep 2021 19:09:15 +0200
+Message-ID: <CAPDyKFomfnik==x5FtJeALr-9oZmjDNAXJiRft8-fXqPU8m0Dw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: Change the code to check auto_cmd23
+To:     Chanwoo Lee <cw9316.lee@samsung.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        grant.jung@samsung.com, jt77.jang@samsung.com,
+        DooHyun Hwang <dh0421.hwang@samsung.com>,
+        Seunghui Lee <sh043.lee@samsung.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 25 Aug 2021 at 13:42, Vincent Whitchurch
-<vincent.whitchurch@axis.com> wrote:
+On Wed, 25 Aug 2021 at 11:41, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
 >
-> The fault injection function can set EVENT_DATA_ERROR but skip the
-> setting of ->data_status to an error status if it hits just after a data
-> over interrupt.  This confuses the tasklet which can later end up
-> triggering the WARN_ON(host->cmd || ..) in dw_mci_request_end() since
-> dw_mci_data_complete() would return success.
+> From: ChanWoo Lee <cw9316.lee@samsung.com>
 >
-> Prevent the fault injection function from doing this since this is not a
-> real case, and ensure that the fault injection doesn't race with a real
-> error either.
+> It is replaced with a function that is already declared.
+> //[1/5] mmc: sdhci: Add helpers for the auto-CMD23 flag
+> //20200412090349.1607-2-adrian.hunter@intel.com
 >
-> Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
 
-Applied for fixes and by adding a fixes tag, thanks!
+Queued for v5.16 on the temporary devel branch, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/dw_mmc.c | 15 ++++++++++++---
->  1 file changed, 12 insertions(+), 3 deletions(-)
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index 6578cc64ae9e..380f9aa56eb2 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -1802,10 +1802,15 @@ static enum hrtimer_restart dw_mci_fault_timer(struct hrtimer *t)
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 36f15f81a6af..5782650ddf7d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -3232,7 +3232,7 @@ static void sdhci_cmd_irq(struct sdhci_host *host, u32 intmask, u32 *intmask_p)
+>                           -ETIMEDOUT :
+>                           -EILSEQ;
 >
->         spin_lock_irqsave(&host->irq_lock, flags);
->
-> -       if (!host->data_status)
-> +       /*
-> +        * Only inject an error if we haven't already got an error or data over
-> +        * interrupt.
-> +        */
-> +       if (!host->data_status) {
->                 host->data_status = SDMMC_INT_DCRC;
-> -       set_bit(EVENT_DATA_ERROR, &host->pending_events);
-> -       tasklet_schedule(&host->tasklet);
-> +               set_bit(EVENT_DATA_ERROR, &host->pending_events);
-> +               tasklet_schedule(&host->tasklet);
-> +       }
->
->         spin_unlock_irqrestore(&host->irq_lock, flags);
->
-> @@ -2721,12 +2726,16 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
->                 }
->
->                 if (pending & DW_MCI_DATA_ERROR_FLAGS) {
-> +                       spin_lock(&host->irq_lock);
-> +
->                         /* if there is an error report DATA_ERROR */
->                         mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
->                         host->data_status = pending;
->                         smp_wmb(); /* drain writebuffer */
->                         set_bit(EVENT_DATA_ERROR, &host->pending_events);
->                         tasklet_schedule(&host->tasklet);
-> +
-> +                       spin_unlock(&host->irq_lock);
->                 }
->
->                 if (pending & SDMMC_INT_DATA_OVER) {
+> -               if (mrq->sbc && (host->flags & SDHCI_AUTO_CMD23)) {
+> +               if (sdhci_auto_cmd23(host, mrq)) {
+>                         mrq->sbc->error = err;
+>                         __sdhci_finish_mrq(host, mrq);
+>                         return;
 > --
-> 2.28.0
+> 2.29.0
 >
