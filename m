@@ -7,58 +7,59 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 542ECC433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F4136C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4247760FBF
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD19660FBF
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243874AbhIFRLj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 13:11:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41254 "EHLO
+        id S243884AbhIFRLn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 13:11:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243840AbhIFRLh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:11:37 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE5B5C061757
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:10:32 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id c8so14548779lfi.3
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:10:32 -0700 (PDT)
+        with ESMTP id S243861AbhIFRLn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:11:43 -0400
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41F5DC061575
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:10:38 -0700 (PDT)
+Received: by mail-lj1-x230.google.com with SMTP id q21so12303684ljj.6
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:10:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=noINKmz3hzTGqq034jTZ5E+LdSOi2uYpC/Rle/66Vl4=;
-        b=iYuhyd4uCzT8/2bOYiqWul/nZlbxsr1/PhzUk73eDC6N2l4dLguCZl2MbY01uzkgRA
-         RbG+L1yM5kQiLZ3pmvpdIhRjJBRqnBNohvQRqQT5f/4IxftO5212RnLbyNyxomeQl1r4
-         CY7+Y360ktzEFLIeLa4nSSw+fMsv8wixGi6JYB2AwTsc7yjcHeBazmWagk7Sd+oqZxn9
-         7xxvydbz7tR3J+hjS3d9gRdPT9RbxBce8cRBPn1kkEL2cU4C3WlUjvgTiIbgrzWRV7Qx
-         4NPpu9hltTXmywS3o97zRq+1YeB8PUdWLZKz4w0/MZR2JiX7yjgZk8jDSkxu7+AaJt8P
-         hkDg==
+        bh=3NzOsAcij7qkGRYYRF+Gk9quH4ScOJdJCPVo4O4v2Iw=;
+        b=GHRGp+FUEkuHWw+ma0xVKQKa3h0umQo2tZK29UHxYju0b6ue16Kq14o9Umrg1V2MzP
+         OQQXLK8KNB+v/BxOIbCyTw0czVpMCwn+5JzpnXPuLMl7EWNQ7sHs3zh9WjxrvQpPpYiZ
+         8LWWFMoMXZzjIgD/LiK4RPs8rIKwXYvFnw1MxOfktunYrvXWKxEQi+cNLd54jz/QxD82
+         q5LZAvOaV1YZcbxrnCO9UXixRhXWa0Bb2CxeCigV01UXcy2uhxYVs602hEfUK+25gyzr
+         O5FHrFpdUDfVO+z3EN+pb5IA++Pltvth3nAlf/Z4d1qU3iaIikLXoUvP/g8bceHOwcf6
+         WvIw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=noINKmz3hzTGqq034jTZ5E+LdSOi2uYpC/Rle/66Vl4=;
-        b=QCOi/zFjWGIqDf3xC1/VKAnBdmvTm1MGwMxVUKSWXwDuP9W4JnWsaYB0De9eXfx1oQ
-         FquQOLcXrySKGVWsUJSityVMOdUjbZY1Twr3GdYMexN/O8F7DpgcvijlsI1m5yrbUOsb
-         jQbComM9/FKg1C1w2WeBriCV6UhWOQ+iB4kDC2LYS3uLJcxZRaj6EPwTOvU0lAi0BoVy
-         PC9uJPylPToGMxBZYbK5hwhvrsJmi4FA2o9DWh2hi7sJyQz5yXD1jzrgY3SQ4beSEZE6
-         kcoUBQO6GT9Unc3UdZ6y1g/y79vlU5/ltvliS0VbYrXnxsWV6H3VN5qgTswtFsOyc3Sw
-         Yhsg==
-X-Gm-Message-State: AOAM530y5iE4LIRPI5ilKe2KRHico66W95mjCAAFMZBKMwMPL6JwFE7d
-        B9uVYsYmcFtFVu9SRsJ7JKUARTWQTSN04pW+7gEpgg==
-X-Google-Smtp-Source: ABdhPJxlhFOEzJRlkJCRsUZZ2Q4TuaOmHRL8uGNY7RMU3fpBcQJG/A6CDs3tVr/JkHXbcvF9vj/fRKk5UtWSuPkrEEo=
-X-Received: by 2002:a05:6512:3ca5:: with SMTP id h37mr10177779lfv.254.1630948230961;
- Mon, 06 Sep 2021 10:10:30 -0700 (PDT)
+        bh=3NzOsAcij7qkGRYYRF+Gk9quH4ScOJdJCPVo4O4v2Iw=;
+        b=chzwYJeNX6dntit5KAEzQd6FUKFSZmth2LjeCKDQXlnz8XsDTspirnmviQ4bIrYy6T
+         4DplU0MJ/EVeSlHYyvV+9dew4FiXrNCRAibM6zKWT3LegHGrj+7fo5kcwlJ40HOxecIM
+         Cp7Wu+zptePHDRse7tyg0Q2GU7LhZjoOvs+EatiBwmZBn9mnoxeeiMtMUCyZXnNzmo4G
+         dO8lkjy+kVFVrl/3iMMFN25Rb+I5fZor9r8PN3VBMpK3H5+KaL8cMhUJFTAyeV8ccXwJ
+         wVZoG+EJgnzplYK4QG++QSSF/ovlzrh3tgTwrd+SMrXPq+61ODRQgY8vOjDJZZsIEQuN
+         uAgg==
+X-Gm-Message-State: AOAM532PtCoDigyfGbFTghP2l41IrsgMVVXJA5rPzvNwltRcieuG5Eom
+        9FeKsxvoolCCDs/9npJ2NtURyIxaLpn/Xoq+/PzM4A==
+X-Google-Smtp-Source: ABdhPJz02lZ2+/F+0r9vZ7g0b7LkWahcgAWP9qXLtKcaYaug81bz1fYecfyuvbPq62onmDQwmmLi7+yTxyKqBDnGYbQ=
+X-Received: by 2002:a2e:7303:: with SMTP id o3mr11093870ljc.273.1630948236659;
+ Mon, 06 Sep 2021 10:10:36 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210827071537.1034-1-derong.liu@mediatek.com>
-In-Reply-To: <20210827071537.1034-1-derong.liu@mediatek.com>
+References: <CGME20210827093855epcas1p4ac8e34d779fe30de3e03bcadedcb66c8@epcas1p4.samsung.com>
+ <20210827093119.32481-1-cw9316.lee@samsung.com>
+In-Reply-To: <20210827093119.32481-1-cw9316.lee@samsung.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 6 Sep 2021 19:09:54 +0200
-Message-ID: <CAPDyKFpubTas6HMe=uzqJyQuQS9TRnDGuGjaS80ymjevN_CFMQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: mediatek: add wait dma stop done flow
-To:     Derong Liu <derong.liu@mediatek.com>
+Date:   Mon, 6 Sep 2021 19:10:00 +0200
+Message-ID: <CAPDyKFoXtep02GTFgKZmAoa7cN6CMBErf4UukWhrk5jU10Lj_g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: Remove unused parameters(mrq)
+To:     Chanwoo Lee <cw9316.lee@samsung.com>
 Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         linux-mmc <linux-mmc@vger.kernel.org>,
@@ -66,64 +67,55 @@ Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
         "moderated list:ARM/Mediatek SoC support" 
         <linux-mediatek@lists.infradead.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        wsp_upstream@mediatek.com, Peng Zhou <peng.zhou@mediatek.com>
+        grant.jung@samsung.com, jt77.jang@samsung.com,
+        DooHyun Hwang <dh0421.hwang@samsung.com>,
+        Seunghui Lee <sh043.lee@samsung.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 27 Aug 2021 at 09:15, Derong Liu <derong.liu@mediatek.com> wrote:
+On Fri, 27 Aug 2021 at 11:39, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
 >
-> We found this issue on a 5G platform, during CMDQ error handling, if DMA status is active when it call msdc_reset_hw, it means mmc host hw reset and DMA transfer will be parallel, mmc host may access sram region unexpectedly.
-> According to the programming guide of mtk mmc host, it needs to wait for dma stop done after set dma stop.
-> This change should be applied to all SoCs.
+> From: ChanWoo Lee <cw9316.lee@samsung.com>
 >
-> Change-Id: I9b87523f19b24ca73958bbcb83bb418413c5a180
+> The mmc_request structure(*mrq) is not used. //msdc_cmd_find_resp
+> I remove the unnecessary code related to the mmc_request structure.
+>
+> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
 
-I am dropping this tag.
-
-> Signed-off-by: Derong Liu <derong.liu@mediatek.com>
-
-Applied for next, thanks! I guess we should also tag this for stable
-kernels, right?
+Queued for v5.16 on the temporary devel branch, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/mtk-sd.c | 5 +++++
->  1 file changed, 5 insertions(+)
+>  drivers/mmc/host/mtk-sd.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
 > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 4dfc246c5f95..b99330bad6a5 100644
+> index 4dfc246c5f95..813f57f6d9cc 100644
 > --- a/drivers/mmc/host/mtk-sd.c
 > +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -8,6 +8,7 @@
->  #include <linux/clk.h>
->  #include <linux/delay.h>
->  #include <linux/dma-mapping.h>
-> +#include <linux/iopoll.h>
->  #include <linux/ioport.h>
->  #include <linux/irq.h>
->  #include <linux/of_address.h>
-> @@ -2330,6 +2331,7 @@ static void msdc_cqe_enable(struct mmc_host *mmc)
->  static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
->  {
->         struct msdc_host *host = mmc_priv(mmc);
-> +       unsigned int val = 0;
->
->         /* disable cmdq irq */
->         sdr_clr_bits(host->base + MSDC_INTEN, MSDC_INT_CMDQ);
-> @@ -2339,6 +2341,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
->         if (recovery) {
->                 sdr_set_field(host->base + MSDC_DMA_CTRL,
->                               MSDC_DMA_CTRL_STOP, 1);
-> +               if (WARN_ON(readl_poll_timeout(host->base + MSDC_DMA_CFG, val,
-> +                       !(val & MSDC_DMA_CFG_STS), 1, 3000)))
-> +                       return;
->                 msdc_reset_hw(host);
->         }
+> @@ -961,7 +961,7 @@ static void msdc_set_mclk(struct msdc_host *host, unsigned char timing, u32 hz)
 >  }
+>
+>  static inline u32 msdc_cmd_find_resp(struct msdc_host *host,
+> -               struct mmc_request *mrq, struct mmc_command *cmd)
+> +               struct mmc_command *cmd)
+>  {
+>         u32 resp;
+>
+> @@ -997,7 +997,7 @@ static inline u32 msdc_cmd_prepare_raw_cmd(struct msdc_host *host,
+>          * stop << 14 | rw << 13 | dtype << 11 | rsptyp << 7 | brk << 6 | opcode
+>          */
+>         u32 opcode = cmd->opcode;
+> -       u32 resp = msdc_cmd_find_resp(host, mrq, cmd);
+> +       u32 resp = msdc_cmd_find_resp(host, cmd);
+>         u32 rawcmd = (opcode & 0x3f) | ((resp & 0x7) << 7);
+>
+>         host->cmd_rsp = resp;
 > --
-> 2.18.0
+> 2.29.0
+>
