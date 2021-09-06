@@ -7,82 +7,92 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24130C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46214C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0CD7B60F70
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 35B3860F70
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:10:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S243910AbhIFRLr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 13:11:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41310 "EHLO
+        id S243958AbhIFRLy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 13:11:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41358 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243850AbhIFRLr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:11:47 -0400
-Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 690C7C061575
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:10:42 -0700 (PDT)
-Received: by mail-lj1-x229.google.com with SMTP id p15so12344535ljn.3
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:10:42 -0700 (PDT)
+        with ESMTP id S243972AbhIFRLx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:11:53 -0400
+Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0100C061757
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:10:48 -0700 (PDT)
+Received: by mail-lj1-x230.google.com with SMTP id i28so12304202ljm.7
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:10:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=g2B76iGb/MvAFL/fqwBXAafaG+ZhGIUwhCY1ak7fyyI=;
-        b=Qaq6D5JS3cWjYVjgYxZRkOoXeNX5pjffsV5NAIqydMEoigzxhzJ4Psue87vIspCszS
-         vrE7rn4XVI7WeVDTBUKL2E9EGT0rAzkMRfX9MBTDtjNHx2oHkiOp4bkKDsFSY6arpP7g
-         OpblIA7orJmsnURtExNxKBU1zFn3oHv24AssgtwnHadNO+TL8tciL0JFnnG6sinH00sN
-         +WEIxJsTH+P2AxxT+4XWRzGz6nG+Zno0TLgZ+t/51s6buvrDUYG3npElUi6YcN+aFfHh
-         yrItNVsgOaeECRcj51OfDMbJXaX7kqvWseeLswVkpFNl1BvgUkrrF+OhXgQblXWlll8s
-         4TfA==
+        bh=eBV6xJO0OJaH8jzRZsLqKsR9gePhFCKXaYbJlTL1SK0=;
+        b=LFms5S3j0LvWEYimyPf3cb4Aisdn+Fk0RcpOrMN+ZdxUItBFt03MZgAJyCUWWC62gA
+         xL6pVj/R4056hMSTJXWaAAW0XJxWY95ANL2inlfc7gjmf6BFW8UdEkjBN6OfL9igtewV
+         2JgY9QMy4BbUAgVA1jm1THz+5T5uS585jDOW2nVtjNTStboUZCsKHDlx3pvPga5s2Aea
+         dvtTuh0M4AIM0YiFHE2rv2jMoWzeXBDMGduAbcmjYKzTNfr7wM1AzhSBU6ieiQ9XTDvy
+         XQyK9QeN2IRddAghms+zRMV1up63wzN38bLJRWblvnD5e2vOcie3vnIumG6eir16lfbi
+         jm5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=g2B76iGb/MvAFL/fqwBXAafaG+ZhGIUwhCY1ak7fyyI=;
-        b=C44uS/bl9Xb2K9ZZe4Lypb1pys4mLet7irGnOkxXIR0i5YviQbmC2W9evjzqViMatD
-         54+tA0RAdLSKWr3hPr5x7useiHZJ0sppyWGvOFGmdWKQFI+JE0/mqeccNFwB5tY353Js
-         C4k3GIh3MBT7USCcII5sQqNFJqLG0CdH9jg5Lx5Rt4RJTL+aOQ6zu95y2ss9TRbG1S8R
-         MscA3DyYqmwVbJGEmt9/d1PGPaLLGt/m25CQb0Bpj860V7II67XxB50wu3NqPBRssIdz
-         2HLZPgg3DJMO9WmL90CX5IQufMbNWRwzCfXFZkUrGOtcMACgzLOlHwZIGesV6y6RI5Yj
-         YGZA==
-X-Gm-Message-State: AOAM532KWr6cFpMVLcAbP8dpoCanX521jDPDPKvzei0j+MZ5Y3xV/sRi
-        vOL9vOwqOkGY+cEm7EX6Ye4T5bnc+xId+bfni0qqbOt3FM8=
-X-Google-Smtp-Source: ABdhPJw2WazDx6ltshqgFzZJ15YF3sOJrKyyamAfpMdAE96du0/LoDwinquUUOD4VsO/nUFaNHGbVxIZB0fhs8JEymI=
-X-Received: by 2002:a2e:8495:: with SMTP id b21mr11848281ljh.4.1630948240811;
- Mon, 06 Sep 2021 10:10:40 -0700 (PDT)
+        bh=eBV6xJO0OJaH8jzRZsLqKsR9gePhFCKXaYbJlTL1SK0=;
+        b=DSVusEOPVBh6jCuNJB/IsFiXGDCcmOE1B7TbfzUpWcwwoZbCMhTjfYcxMb1Juv4V9h
+         +BAe1W7yhMbCP/x959XokfLo2jUj3u2uyre8JJROkiNOOo0DDk4FqmHbJ5OxjHQydwzE
+         CthopeqGUOU0+IIIwmMV1F+jZS4PhVyyHMNgw8jknTJAGZwS47vsgJ6nuvRza8NGtril
+         RU3Q8OZ2Cv+p7PMRSg9Ucs95PgCPjg6oEQ1daYyzqXqYbZ4QEf7KnqCkRiWsWiTTGay2
+         GK9GwDybtmZEY6RYPOhs6Ux2rjv4shivbtfsl1gY2N55jUt+tJzGZiiISecIN0DLE0QM
+         pPDw==
+X-Gm-Message-State: AOAM530615yy4Pem5X/UqHTSFqFernVv3E+SYTfep+dSGBNmsO2XKtIv
+        EhTKoBVO8smLu6Xdm4wprWcQ8dLKsYWJ6Jnm6tJmEw==
+X-Google-Smtp-Source: ABdhPJxhSEFI8wMN4u5XHazx2hzbbCQEPxdsCfALNn+wlwsdQueMDsoHtriqduJghpS67u2M98pG6gst9sXWJqwHE5o=
+X-Received: by 2002:a05:651c:1b3:: with SMTP id c19mr11757010ljn.16.1630948247165;
+ Mon, 06 Sep 2021 10:10:47 -0700 (PDT)
 MIME-Version: 1.0
-References: <CGME20210830022507epcas1p43b45563c6e36bd00e3b6160bb42605bf@epcas1p4.samsung.com>
- <20210830021749.5947-1-cw9316.lee@samsung.com>
-In-Reply-To: <20210830021749.5947-1-cw9316.lee@samsung.com>
+References: <20210830212538.148729-1-mcgrof@kernel.org> <20210830212538.148729-5-mcgrof@kernel.org>
+In-Reply-To: <20210830212538.148729-5-mcgrof@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 6 Sep 2021 19:10:05 +0200
-Message-ID: <CAPDyKFot9rL3Vs1g4ZH3QYnqrHL29Or362Ga_nZD3DBBtM+NFw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mtk-sd: Remove unused parameters
-To:     Chanwoo Lee <cw9316.lee@samsung.com>
-Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linux ARM <linux-arm-kernel@lists.infradead.org>,
-        "moderated list:ARM/Mediatek SoC support" 
-        <linux-mediatek@lists.infradead.org>, grant.jung@samsung.com,
-        jt77.jang@samsung.com, DooHyun Hwang <dh0421.hwang@samsung.com>,
-        Seunghui Lee <sh043.lee@samsung.com>
+Date:   Mon, 6 Sep 2021 19:10:10 +0200
+Message-ID: <CAPDyKFp9HTjQ_6c2tHuPhhixfcnFa8XQBrPO2PqoB113BszLJw@mail.gmail.com>
+Subject: Re: [PATCH v3 4/8] mmc/core/block: add error handling support for add_disk()
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     Jens Axboe <axboe@kernel.dk>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        "James E.J. Bottomley" <jejb@linux.ibm.com>, kbusch@kernel.org,
+        sagi@grimberg.me, Adrian Hunter <adrian.hunter@intel.com>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Stephen Boyd <swboyd@chromium.org>, agk@redhat.com,
+        Mike Snitzer <snitzer@redhat.com>,
+        Josef Bacik <josef@toxicpanda.com>,
+        Christoph Hellwig <hch@infradead.org>,
+        Hannes Reinecke <hare@suse.de>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Ming Lei <ming.lei@redhat.com>,
+        linux-scsi <linux-scsi@vger.kernel.org>,
+        linux-nvme@lists.infradead.org,
+        linux-mmc <linux-mmc@vger.kernel.org>, dm-devel@redhat.com,
+        nbd@other.debian.org, linux-block <linux-block@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 30 Aug 2021 at 04:25, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
+On Mon, 30 Aug 2021 at 23:26, Luis Chamberlain <mcgrof@kernel.org> wrote:
 >
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
+> We never checked for errors on add_disk() as this function
+> returned void. Now that this is fixed, use the shiny new
+> error handling.
 >
-> Remove unused parameters
-> 1. msdc_start_data() - struct mmc_request *mrq
-> 2. msdc_track_cmd_data() - struct mmc_data *data
+> The caller only cleanups the disk if we pass on an allocated md
+> but on error we return return ERR_PTR(ret), and so we must do all
+> the unwinding ourselves.
 >
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
 
 Queued for v5.16 on the temporary devel branch, thanks!
 
@@ -91,52 +101,29 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/mtk-sd.c | 11 +++++------
->  1 file changed, 5 insertions(+), 6 deletions(-)
+>  drivers/mmc/core/block.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 4dfc246c5f95..a8736067c409 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1043,8 +1043,8 @@ static inline u32 msdc_cmd_prepare_raw_cmd(struct msdc_host *host,
->         return rawcmd;
->  }
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 6a15fdf6e5f2..9b2856aa6231 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2453,9 +2453,14 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>         /* used in ->open, must be set before add_disk: */
+>         if (area_type == MMC_BLK_DATA_AREA_MAIN)
+>                 dev_set_drvdata(&card->dev, md);
+> -       device_add_disk(md->parent, md->disk, mmc_disk_attr_groups);
+> +       ret = device_add_disk(md->parent, md->disk, mmc_disk_attr_groups);
+> +       if (ret)
+> +               goto err_cleanup_queue;
+>         return md;
 >
-> -static void msdc_start_data(struct msdc_host *host, struct mmc_request *mrq,
-> -                           struct mmc_command *cmd, struct mmc_data *data)
-> +static void msdc_start_data(struct msdc_host *host, struct mmc_command *cmd,
-> +               struct mmc_data *data)
->  {
->         bool read;
->
-> @@ -1112,8 +1112,7 @@ static void msdc_recheck_sdio_irq(struct msdc_host *host)
->         }
->  }
->
-> -static void msdc_track_cmd_data(struct msdc_host *host,
-> -                               struct mmc_command *cmd, struct mmc_data *data)
-> +static void msdc_track_cmd_data(struct msdc_host *host, struct mmc_command *cmd)
->  {
->         if (host->error)
->                 dev_dbg(host->dev, "%s: cmd=%d arg=%08X; host->error=0x%08X\n",
-> @@ -1134,7 +1133,7 @@ static void msdc_request_done(struct msdc_host *host, struct mmc_request *mrq)
->         host->mrq = NULL;
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> -       msdc_track_cmd_data(host, mrq->cmd, mrq->data);
-> +       msdc_track_cmd_data(host, mrq->cmd);
->         if (mrq->data)
->                 msdc_unprepare_data(host, mrq->data);
->         if (host->error)
-> @@ -1295,7 +1294,7 @@ static void msdc_cmd_next(struct msdc_host *host,
->         else if (!cmd->data)
->                 msdc_request_done(host, mrq);
->         else
-> -               msdc_start_data(host, mrq, cmd, cmd->data);
-> +               msdc_start_data(host, cmd, cmd->data);
->  }
->
->  static void msdc_ops_request(struct mmc_host *mmc, struct mmc_request *mrq)
+> + err_cleanup_queue:
+> +       blk_cleanup_queue(md->disk->queue);
+> +       blk_mq_free_tag_set(&md->queue.tag_set);
+>   err_kfree:
+>         kfree(md);
+>   out:
 > --
-> 2.29.0
+> 2.30.2
 >
