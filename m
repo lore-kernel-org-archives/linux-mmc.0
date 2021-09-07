@@ -2,132 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2264C43219
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:11:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C72AC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Sep 2021 01:29:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E138E61051
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Sep 2021 17:11:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6BE276108F
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Sep 2021 01:29:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244027AbhIFRMN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 13:12:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41448 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243965AbhIFRML (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 13:12:11 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED86DC061575
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Sep 2021 10:11:05 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id c8so14550970lfi.3
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Sep 2021 10:11:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=Cu2xJTqozk4xsbaxL8H9BoFzyGhonAhAaycqLOW0ec8=;
-        b=OlLhUgbAfIRcaQBkm3ucc7CkjQAA3BY3foo15moLBOuI3bnD2Kus4MNZyf0QsYgIYo
-         nYbwNGvkReFol2qerrmiIPhJwlB8yfL4VS7xERe6PQW1ZAkPROcukdDIAppf1FTAiEtW
-         y+1oyCqSnc3RJ5wKu+lHo6J8Hhxb89KqfMf2R86r38NWDbRsmOlMpqbHkNHi7bCFiSqW
-         cl3lahlfSxznPdky39hR5eu7x7LzmxY6PmVuGHoR2GG6KV3mnQh2ksxW1J/2m2kjXAZA
-         AXoTX3K6GFv1heJQ79c2pUmD74HsC98NaYlHdj2R9LB8Mw6mkN6Kj8B5D6ZJn7udld5B
-         OXKg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=Cu2xJTqozk4xsbaxL8H9BoFzyGhonAhAaycqLOW0ec8=;
-        b=PmEwOfwTLFPiUJrFUR9pVaTsYTImewXa/ZIoN6WJ2kKjxps504TaWgbxynSdWzrOxk
-         By/D2m5ekmaPnNAtuiCBvEguWliSKG5z9gsKBtFWs2lNeRrd5/cZAgdjXSmqrIfmvx0m
-         ZOFwin/P8H7/dISvBIVxTvG0z5qWaAdga8rxD9n7h5+90r3e8S2E/tVaGHp90MXkrlQY
-         gvVIfyXQXLjnSE4O8RCwNkePyf6WImFEYkyZsl8OlbFIULhENBLO8Iu6yNywK0ypmBFq
-         MvZU1j6ea/P5+PYrXPOWvYMUajFNpOT9PipYzk4zY4NFlh5GOi488YRrg3L8uURPNHZ2
-         ac7Q==
-X-Gm-Message-State: AOAM531/kyebJWQYq2umJt9najwst5SkErOVtiE1YD7zrlFraxP680Gf
-        annkaBs08hu5I0yInzBBKnZwb+qFyFRtGTgRqSZqyQ==
-X-Google-Smtp-Source: ABdhPJySjVy/4t45uf+nwvNhsrs7H6NHiflWPlp7zgQ9bQXGTclgeFZjH9Q4gk7PApD5uzg0A1VOJOtWwiyVL3oaHNk=
-X-Received: by 2002:a05:6512:1043:: with SMTP id c3mr9631426lfb.358.1630948263963;
- Mon, 06 Sep 2021 10:11:03 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210902174105.2418771-1-mcgrof@kernel.org> <20210902174105.2418771-4-mcgrof@kernel.org>
-In-Reply-To: <20210902174105.2418771-4-mcgrof@kernel.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 6 Sep 2021 19:10:27 +0200
-Message-ID: <CAPDyKFrwjJyLXfr48+Jujfp7VvxPu5JCGJAhZJn3-GzDb1Kh5A@mail.gmail.com>
-Subject: Re: [PATCH 3/9] mspro_block: add error handling support for add_disk()
+        id S234468AbhIGBaj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 21:30:39 -0400
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:23094 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232867AbhIGBaj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 21:30:39 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1630978173;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=TKgDvqKCjC/sEBRel6+SL/8u4J2HhIt06zHYphh9H0o=;
+        b=X70lgC/0/cpzFAuP7TSbx34A0SIAYhPSCifCICENEDI+AD3ZRJtYWC7llRutiSJcvn5l9x
+        Cyz9/uIUpi0wsB+AZqlOiWI5XMqxGCYmQBefclwC3XuYs/XqnIoTodhzhdNemvRcT5/Bh8
+        AGZtzv+msqfDeYKx/xdXKdH5f0Wpp18=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-34-E4mwGRf4NEamNRpPjMFLvQ-1; Mon, 06 Sep 2021 21:29:32 -0400
+X-MC-Unique: E4mwGRf4NEamNRpPjMFLvQ-1
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 0326A80124F;
+        Tue,  7 Sep 2021 01:29:29 +0000 (UTC)
+Received: from T590 (ovpn-8-23.pek2.redhat.com [10.72.8.23])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id 1B103271B3;
+        Tue,  7 Sep 2021 01:29:06 +0000 (UTC)
+Date:   Tue, 7 Sep 2021 09:29:07 +0800
+From:   Ming Lei <ming.lei@redhat.com>
 To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     Jens Axboe <axboe@kernel.dk>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com,
-        Hannes Reinecke <hare@suse.de>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Colin King <colin.king@canonical.com>,
-        Shubhankar Kuranagatti <shubhankarvk@gmail.com>,
-        Jia-Ju Bai <baijiaju1990@gmail.com>, Tom Rix <trix@redhat.com>,
-        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh R <vigneshr@ti.com>, sth@linux.ibm.com,
-        hoeppner@linux.ibm.com, Heiko Carstens <hca@linux.ibm.com>,
-        Vasily Gorbik <gor@linux.ibm.com>,
-        Christian Borntraeger <borntraeger@de.ibm.com>,
-        oberpar@linux.ibm.com, Tejun Heo <tj@kernel.org>,
-        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-block <linux-block@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Cc:     axboe@kernel.dk, martin.petersen@oracle.com, jejb@linux.ibm.com,
+        kbusch@kernel.org, sagi@grimberg.me, adrian.hunter@intel.com,
+        beanhuo@micron.com, ulf.hansson@linaro.org, avri.altman@wdc.com,
+        swboyd@chromium.org, agk@redhat.com, snitzer@redhat.com,
+        josef@toxicpanda.com, hch@infradead.org, hare@suse.de,
+        bvanassche@acm.org, linux-scsi@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-mmc@vger.kernel.org,
+        dm-devel@redhat.com, nbd@other.debian.org,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Christoph Hellwig <hch@lst.de>
+Subject: Re: [PATCH v3 1/8] scsi/sd: add error handling support for add_disk()
+Message-ID: <YTbAYyo0+rqUZ+L0@T590>
+References: <20210830212538.148729-1-mcgrof@kernel.org>
+ <20210830212538.148729-2-mcgrof@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20210830212538.148729-2-mcgrof@kernel.org>
+X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2 Sept 2021 at 19:41, Luis Chamberlain <mcgrof@kernel.org> wrote:
->
+On Mon, Aug 30, 2021 at 02:25:31PM -0700, Luis Chamberlain wrote:
 > We never checked for errors on add_disk() as this function
 > returned void. Now that this is fixed, use the shiny new
 > error handling.
->
-> Contrary to the typical removal which delays the put_disk()
-> until later, since we are failing on a probe we immediately
-> put the disk on failure from add_disk by using
-> blk_cleanup_disk().
->
+> 
+> Reviewed-by: Christoph Hellwig <hch@lst.de>
 > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-
-Queued for v5.16 on the temporary devel branch, thanks!
-
-Kind regards
-Uffe
-
-
 > ---
->  drivers/memstick/core/mspro_block.c | 6 +++++-
+>  drivers/scsi/sd.c | 6 +++++-
 >  1 file changed, 5 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/memstick/core/mspro_block.c b/drivers/memstick/core/mspro_block.c
-> index 22778d0e24f5..c0450397b673 100644
-> --- a/drivers/memstick/core/mspro_block.c
-> +++ b/drivers/memstick/core/mspro_block.c
-> @@ -1239,10 +1239,14 @@ static int mspro_block_init_disk(struct memstick_dev *card)
->         set_capacity(msb->disk, capacity);
->         dev_dbg(&card->dev, "capacity set %ld\n", capacity);
->
-> -       device_add_disk(&card->dev, msb->disk, NULL);
-> +       rc = device_add_disk(&card->dev, msb->disk, NULL);
-> +       if (rc)
-> +               goto out_cleanup_disk;
->         msb->active = 1;
->         return 0;
->
-> +out_cleanup_disk:
-> +       blk_cleanup_disk(msb->disk);
->  out_free_tag_set:
->         blk_mq_free_tag_set(&msb->tag_set);
->  out_release_id:
-> --
-> 2.30.2
->
+> 
+> diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
+> index 610ebba0d66e..8c1273fff23e 100644
+> --- a/drivers/scsi/sd.c
+> +++ b/drivers/scsi/sd.c
+> @@ -3487,7 +3487,11 @@ static int sd_probe(struct device *dev)
+>  		pm_runtime_set_autosuspend_delay(dev,
+>  			sdp->host->hostt->rpm_autosuspend_delay);
+>  	}
+> -	device_add_disk(dev, gd, NULL);
+> +
+> +	error = device_add_disk(dev, gd, NULL);
+> +	if (error)
+> +		goto out_free_index;
+> +
+
+The error handling is actually wrong, see 
+
+	https://lore.kernel.org/linux-scsi/c93f3010-13c9-e07f-1458-b6b47a27057b@acm.org/T/#t
+
+Maybe you can base on that patch.
+
+
+Thanks,
+Ming
+
