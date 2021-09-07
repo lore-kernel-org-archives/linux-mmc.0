@@ -2,99 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A591C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Sep 2021 01:37:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E86D2C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Sep 2021 02:59:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 27E126108D
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Sep 2021 01:37:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C72456103E
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Sep 2021 02:59:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230133AbhIGBil (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Sep 2021 21:38:41 -0400
-Received: from us-smtp-delivery-124.mimecast.com ([170.10.133.124]:20635 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S232490AbhIGBih (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Sep 2021 21:38:37 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1630978651;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=LD4HmvA+6ng2SFaOBQkrpmMcYGijXFYTWjOibY469rU=;
-        b=ISTAn5P9n39d7GuCDuOY4asIMwFWPgLAz4ZrINnaCg1IlPBAPlUueKOLgTi+LRwwlrNAhh
-        yapk5fak0VtdRpE4mM70FVHc0i2XI668Q4UpkiPXICbvbDiIO0nKucKdW7o3SKHGQfhgCX
-        GHkhcKRBkUvMv+BrBAuKEr/kZ9ilnDs=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-420-jemrBUYpPzmuqg88LXk5sw-1; Mon, 06 Sep 2021 21:37:30 -0400
-X-MC-Unique: jemrBUYpPzmuqg88LXk5sw-1
-Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id CFBFF10054F6;
-        Tue,  7 Sep 2021 01:37:27 +0000 (UTC)
-Received: from T590 (ovpn-8-23.pek2.redhat.com [10.72.8.23])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 8619927097;
-        Tue,  7 Sep 2021 01:37:04 +0000 (UTC)
-Date:   Tue, 7 Sep 2021 09:37:05 +0800
-From:   Ming Lei <ming.lei@redhat.com>
-To:     Luis Chamberlain <mcgrof@kernel.org>
-Cc:     axboe@kernel.dk, martin.petersen@oracle.com, jejb@linux.ibm.com,
-        kbusch@kernel.org, sagi@grimberg.me, adrian.hunter@intel.com,
-        beanhuo@micron.com, ulf.hansson@linaro.org, avri.altman@wdc.com,
-        swboyd@chromium.org, agk@redhat.com, snitzer@redhat.com,
-        josef@toxicpanda.com, hch@infradead.org, hare@suse.de,
-        bvanassche@acm.org, linux-scsi@vger.kernel.org,
-        linux-nvme@lists.infradead.org, linux-mmc@vger.kernel.org,
-        dm-devel@redhat.com, nbd@other.debian.org,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Christoph Hellwig <hch@lst.de>
-Subject: Re: [PATCH v3 2/8] scsi/sr: add error handling support for add_disk()
-Message-ID: <YTbCQdieHG07Bz8W@T590>
-References: <20210830212538.148729-1-mcgrof@kernel.org>
- <20210830212538.148729-3-mcgrof@kernel.org>
+        id S229971AbhIGDA7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Sep 2021 23:00:59 -0400
+Received: from mx21.baidu.com ([220.181.3.85]:51274 "EHLO baidu.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S229797AbhIGDA7 (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Mon, 6 Sep 2021 23:00:59 -0400
+Received: from BC-Mail-Ex26.internal.baidu.com (unknown [172.31.51.20])
+        by Forcepoint Email with ESMTPS id 3E33AB42EBB3FAE4749A;
+        Tue,  7 Sep 2021 10:59:46 +0800 (CST)
+Received: from BJHW-MAIL-EX27.internal.baidu.com (10.127.64.42) by
+ BC-Mail-Ex26.internal.baidu.com (172.31.51.20) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.2176.2; Tue, 7 Sep 2021 10:59:46 +0800
+Received: from LAPTOP-UKSR4ENP.internal.baidu.com (172.31.63.8) by
+ BJHW-MAIL-EX27.internal.baidu.com (10.127.64.42) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id
+ 15.1.2308.14; Tue, 7 Sep 2021 10:59:45 +0800
+From:   Cai Huoqing <caihuoqing@baidu.com>
+To:     <caihuoqing@baidu.com>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-omap@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH v2] mmc: omap_hsmmc: Make use of the helper macro SET_RUNTIME_PM_OPS()
+Date:   Tue, 7 Sep 2021 10:59:39 +0800
+Message-ID: <20210907025940.1535-1-caihuoqing@baidu.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210830212538.148729-3-mcgrof@kernel.org>
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.23
+Content-Type: text/plain
+X-Originating-IP: [172.31.63.8]
+X-ClientProxiedBy: BC-Mail-Ex30.internal.baidu.com (172.31.51.24) To
+ BJHW-MAIL-EX27.internal.baidu.com (10.127.64.42)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Aug 30, 2021 at 02:25:32PM -0700, Luis Chamberlain wrote:
-> We never checked for errors on add_disk() as this function
-> returned void. Now that this is fixed, use the shiny new
-> error handling.
-> 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
-> ---
->  drivers/scsi/sr.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/scsi/sr.c b/drivers/scsi/sr.c
-> index 2942a4ec9bdd..72fd21844367 100644
-> --- a/drivers/scsi/sr.c
-> +++ b/drivers/scsi/sr.c
-> @@ -779,7 +779,10 @@ static int sr_probe(struct device *dev)
->  	dev_set_drvdata(dev, cd);
->  	disk->flags |= GENHD_FL_REMOVABLE;
->  	sr_revalidate_disk(cd);
-> -	device_add_disk(&sdev->sdev_gendev, disk, NULL);
-> +
-> +	error = device_add_disk(&sdev->sdev_gendev, disk, NULL);
-> +	if (error)
-> +		goto fail_minor;
+Use the helper macro SET_RUNTIME_PM_OPS() instead of the verbose
+operators ".runtime_suspend/.runtime_resume", because the
+SET_RUNTIME_PM_OPS() is a nice helper macro that could be brought
+in to make code a little more concise.
 
-You don't undo register_cdrom(), maybe you can use kref_put(&cd->kref, sr_kref_release);
-to simplify the error handling.
+Signed-off-by: Cai Huoqing <caihuoqing@baidu.com>
+---
+v1->v2:	*Add "#ifdef CONFIG_PM" around runtime_suspend|resume().
+	*Remove the unused implementation of omap_hsmmc_context_restore()
 
+ drivers/mmc/host/omap_hsmmc.c | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
 
-Thanks,
-Ming
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 2f8038d69f67..7a29ad542e4a 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -702,11 +702,6 @@ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
+ 
+ #else
+ 
+-static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+-{
+-	return 0;
+-}
+-
+ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
+ {
+ }
+@@ -2086,6 +2081,7 @@ static int omap_hsmmc_resume(struct device *dev)
+ }
+ #endif
+ 
++#ifdef CONFIG_PM
+ static int omap_hsmmc_runtime_suspend(struct device *dev)
+ {
+ 	struct omap_hsmmc_host *host;
+@@ -2153,11 +2149,11 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+ 	spin_unlock_irqrestore(&host->irq_lock, flags);
+ 	return 0;
+ }
++#endif
+ 
+ static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+ 	SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
+-	.runtime_suspend = omap_hsmmc_runtime_suspend,
+-	.runtime_resume = omap_hsmmc_runtime_resume,
++	SET_RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
+ };
+ 
+ static struct platform_driver omap_hsmmc_driver = {
+-- 
+2.25.1
 
