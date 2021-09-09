@@ -7,38 +7,39 @@ X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97C80C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 12:24:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D1ABC4167B
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 12:36:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7C2D160FE3
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 12:24:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 59ACE6115B
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 12:36:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242598AbhIIMYL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 08:24:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:57780 "EHLO mail.kernel.org"
+        id S1352623AbhIIMhM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Sep 2021 08:37:12 -0400
+Received: from mail.kernel.org ([198.145.29.99]:58740 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1353060AbhIIMUM (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 9 Sep 2021 08:20:12 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id A6FBD61268;
-        Thu,  9 Sep 2021 11:50:30 +0000 (UTC)
+        id S1353294AbhIIMUm (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 9 Sep 2021 08:20:42 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id B1B7761AA2;
+        Thu,  9 Sep 2021 11:50:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631188231;
-        bh=YK12GWAxZTbr0JzIwxzmGeiwWHiDJ0ouZj/3THpaviI=;
+        s=k20201202; t=1631188235;
+        bh=9FtpahGr9AGk+NCfYFtP6I3wLpCqDy1mxReJ2rVjrPU=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=oXjOzB/qkFtLxMvii7fk/j3THXARcDFTVVa+dPI0Of/YVmGQ885juUASLwPemUGcS
-         TyjHyyQhhutV+ir1ko/h56V0qtn43zPj/G6qAGdKsvqkfn8BmiAUIgDPHOChdK7R3t
-         6vCHmYkTh9e3FEg+gevSKfe2ZuJAKIE1arQHTj+u33KGT87uGCQ2DVF5b96pXMtHb0
-         lghqBeGQMwQ/6sPAB4FUdjAhXtaqsxnlOF2q2QNsjMugbuNrq8tIap84fJeURzy1kK
-         YYmNaZx2h0+++VZXuVrom/2RqslD9rpmi2YLZe3Ci9ZmoqhUHDjciB6u5dCRWm64r/
-         88t/n/5yc0OVw==
+        b=e6IMc2DLRuoNTNXCZC8BJRXZ8pf2tzYJ1Kw+944i0fYluWj7msb4st/L0ku66Y/Sp
+         uPmYsOC4RFNf3X71Y61vLb8ttD9KXYSyLcD2lQDLWvd+7wkE56kWpLPMX9Yjrb46Pq
+         /SPOPIhsev5QSsrX1mnb8snBRG5SNZpWrdDKtQkAlWMkB8bQb1Yh1NxxGk7D35eFx7
+         FWY6y7EwDn5b+2jrs+STze25+8a4fWtRnPU7K0zWFjrDG4YrPBIMfsnoCkQHZ4vyPM
+         WCKEJeIXYoPRN7sbXOsOT4UEhQ13aVz7fclxKEI/VnyoBGq8eXP+igvqP46wJBsdw8
+         /yWjaLFiOlW4w==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Thomas Hebb <tommyhebb@gmail.com>,
+Cc:     Nishad Kamdar <nishadkamdar@gmail.com>,
+        Avri Altman <avri.altman@wdc.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.13 183/219] mmc: rtsx_pci: Fix long reads when clock is prescaled
-Date:   Thu,  9 Sep 2021 07:45:59 -0400
-Message-Id: <20210909114635.143983-183-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.13 186/219] mmc: core: Return correct emmc response in case of ioctl error
+Date:   Thu,  9 Sep 2021 07:46:02 -0400
+Message-Id: <20210909114635.143983-186-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210909114635.143983-1-sashal@kernel.org>
 References: <20210909114635.143983-1-sashal@kernel.org>
@@ -50,104 +51,111 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Thomas Hebb <tommyhebb@gmail.com>
+From: Nishad Kamdar <nishadkamdar@gmail.com>
 
-[ Upstream commit 3ac5e45291f3f0d699a721357380d4593bc2dcb3 ]
+[ Upstream commit e72a55f2e5ddcfb3dce0701caf925ce435b87682 ]
 
-For unexplained reasons, the prescaler register for this device needs to
-be cleared (set to 1) while performing a data read or else the command
-will hang. This does not appear to affect the real clock rate sent out
-on the bus, so I assume it's purely to work around a hardware bug.
+When a read/write command is sent via ioctl to the kernel,
+and the command fails, the actual error response of the emmc
+is not sent to the user.
 
-During normal operation, the prescaler is already set to 1, so nothing
-needs to be done. However, in "initial mode" (which is used for sub-MHz
-clock speeds, like the core sets while enumerating cards), it's set to
-128 and so we need to reset it during data reads. We currently fail to
-do this for long reads.
+IOCTL read/write tests are carried out using commands
+17 (Single BLock Read), 24 (Single Block Write),
+18 (Multi Block Read), 25 (Multi Block Write)
 
-This has no functional affect on the driver's operation currently
-written, as the MMC core always sets a clock above 1MHz before
-attempting any long reads. However, the core could conceivably set any
-clock speed at any time and the driver should still work, so I think
-this fix is worthwhile.
+The tests are carried out on a 64Gb emmc device. All of these
+tests try to access an "out of range" sector address (0x09B2FFFF).
 
-I personally encountered this issue while performing data recovery on an
-external chip. My connections had poor signal integrity, so I modified
-the core code to reduce the clock speed. Without this change, I saw the
-card enumerate but was unable to actually read any data.
+It is seen that without the patch the response received by the user
+is not OUT_OF_RANGE error (R1 response 31st bit is not set) as per
+JEDEC specification. After applying the patch proper response is seen.
+This is because the function returns without copying the response to
+the user in case of failure. This patch fixes the issue.
 
-Writes don't seem to work in the situation described above even with
-this change (and even if the workaround is extended to encompass data
-write commands). I was not able to find a way to get them working.
+Hence, this memcpy is required whether we get an error response or not.
+Therefor it is moved up from the current position up to immediately
+after we have called mmc_wait_for_req().
 
-Signed-off-by: Thomas Hebb <tommyhebb@gmail.com>
-Link: https://lore.kernel.org/r/2fef280d8409ab0100c26c6ac7050227defd098d.1627818365.git.tommyhebb@gmail.com
+The test code and the output of only the CMD17 is included in the
+commit to limit the message length.
+
+CMD17 (Test Code Snippet):
+==========================
+        printf("Forming CMD%d\n", opt_idx);
+        /*  single block read */
+        cmd.blksz = 512;
+        cmd.blocks = 1;
+        cmd.write_flag = 0;
+        cmd.opcode = 17;
+        //cmd.arg = atoi(argv[3]);
+        cmd.arg = 0x09B2FFFF;
+        /* Expecting response R1B */
+        cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+
+        memset(data, 0, sizeof(__u8) * 512);
+        mmc_ioc_cmd_set_data(cmd, data);
+
+        printf("Sending CMD%d: ARG[0x%08x]\n", opt_idx, cmd.arg);
+        if(ioctl(fd, MMC_IOC_CMD, &cmd))
+                perror("Error");
+
+        printf("\nResponse: %08x\n", cmd.response[0]);
+
+CMD17 (Output without patch):
+=============================
+test@test-LIVA-Z:~$ sudo ./mmc cmd_test /dev/mmcblk0 17
+Entering the do_mmc_commands:Device: /dev/mmcblk0 nargs:4
+Entering the do_mmc_commands:Device: /dev/mmcblk0 options[17, 0x09B2FFF]
+Forming CMD17
+Sending CMD17: ARG[0x09b2ffff]
+Error: Connection timed out
+
+Response: 00000000
+(Incorrect response)
+
+CMD17 (Output with patch):
+==========================
+test@test-LIVA-Z:~$ sudo ./mmc cmd_test /dev/mmcblk0 17
+[sudo] password for test:
+Entering the do_mmc_commands:Device: /dev/mmcblk0 nargs:4
+Entering the do_mmc_commands:Device: /dev/mmcblk0 options[17, 09B2FFFF]
+Forming CMD17
+Sending CMD17: ARG[0x09b2ffff]
+Error: Connection timed out
+
+Response: 80000900
+(Correct OUT_OF_ERROR response as per JEDEC specification)
+
+Signed-off-by: Nishad Kamdar <nishadkamdar@gmail.com>
+Reviewed-by: Avri Altman <avri.altman@wdc.com>
+Link: https://lore.kernel.org/r/20210824191726.8296-1-nishadkamdar@gmail.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/rtsx_pci_sdmmc.c | 36 ++++++++++++++++++++-----------
- 1 file changed, 23 insertions(+), 13 deletions(-)
+ drivers/mmc/core/block.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 4ca937415734..58cfaffa3c2d 100644
---- a/drivers/mmc/host/rtsx_pci_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -542,9 +542,22 @@ static int sd_write_long_data(struct realtek_pci_sdmmc *host,
- 	return 0;
- }
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 2518bc085659..d47829b9fc0f 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -542,6 +542,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 		return mmc_sanitize(card, idata->ic.cmd_timeout_ms);
  
-+static inline void sd_enable_initial_mode(struct realtek_pci_sdmmc *host)
-+{
-+	rtsx_pci_write_register(host->pcr, SD_CFG1,
-+			SD_CLK_DIVIDE_MASK, SD_CLK_DIVIDE_128);
-+}
-+
-+static inline void sd_disable_initial_mode(struct realtek_pci_sdmmc *host)
-+{
-+	rtsx_pci_write_register(host->pcr, SD_CFG1,
-+			SD_CLK_DIVIDE_MASK, SD_CLK_DIVIDE_0);
-+}
-+
- static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
- {
- 	struct mmc_data *data = mrq->data;
-+	int err;
+ 	mmc_wait_for_req(card->host, &mrq);
++	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
  
- 	if (host->sg_count < 0) {
- 		data->error = host->sg_count;
-@@ -553,22 +566,19 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
- 		return data->error;
- 	}
+ 	if (cmd.error) {
+ 		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
+@@ -591,8 +592,6 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	if (idata->ic.postsleep_min_us)
+ 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
  
--	if (data->flags & MMC_DATA_READ)
--		return sd_read_long_data(host, mrq);
-+	if (data->flags & MMC_DATA_READ) {
-+		if (host->initial_mode)
-+			sd_disable_initial_mode(host);
- 
--	return sd_write_long_data(host, mrq);
--}
-+		err = sd_read_long_data(host, mrq);
- 
--static inline void sd_enable_initial_mode(struct realtek_pci_sdmmc *host)
--{
--	rtsx_pci_write_register(host->pcr, SD_CFG1,
--			SD_CLK_DIVIDE_MASK, SD_CLK_DIVIDE_128);
--}
-+		if (host->initial_mode)
-+			sd_enable_initial_mode(host);
- 
--static inline void sd_disable_initial_mode(struct realtek_pci_sdmmc *host)
--{
--	rtsx_pci_write_register(host->pcr, SD_CFG1,
--			SD_CLK_DIVIDE_MASK, SD_CLK_DIVIDE_0);
-+		return err;
-+	}
-+
-+	return sd_write_long_data(host, mrq);
- }
- 
- static void sd_normal_rw(struct realtek_pci_sdmmc *host,
+-	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
+-
+ 	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
+ 		/*
+ 		 * Ensure RPMB/R1B command has completed by polling CMD13
 -- 
 2.30.2
 
