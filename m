@@ -2,114 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2046AC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 14:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BAFEC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 14:51:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 08CAC61222
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 14:46:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5284F611C4
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 14:51:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236201AbhIIOr2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 10:47:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48318 "EHLO
+        id S236701AbhIIOwS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Sep 2021 10:52:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1344359AbhIIOrG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2021 10:47:06 -0400
-Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 454D7C04E204
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Sep 2021 07:36:07 -0700 (PDT)
-Received: by mail-lf1-x133.google.com with SMTP id t19so4111154lfe.13
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Sep 2021 07:36:07 -0700 (PDT)
+        with ESMTP id S236344AbhIIOwR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2021 10:52:17 -0400
+Received: from mail-ot1-x32e.google.com (mail-ot1-x32e.google.com [IPv6:2607:f8b0:4864:20::32e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D29AC061574
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Sep 2021 07:51:08 -0700 (PDT)
+Received: by mail-ot1-x32e.google.com with SMTP id i3-20020a056830210300b0051af5666070so2800105otc.4
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Sep 2021 07:51:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
-        bh=nfWuSYzOTRC59I6qOR1SYjFia3S5j3gRmLTCIne6P4w=;
-        b=gv1filuwoj0quZ94cE+P7k2HrzlA86DLQyp/KFSQcMddUY50QDF5PXQo4FKTrN+E1k
-         2oeIzYOsMUCIEGPP5DLfBk7GLfGmxF5arlIos/kVpbwIbokkO5H9JGrMGyfjbRrag+7b
-         GL4htI7Zup5tJ5I/oZwE8xpxRfWikWjh7G0Imo1V6rCvtO/F291ATBkUqqvNEeNWJYSt
-         jZiEZBfAXRTFGKAm7KH7JnTB7iTCHVN7xpoZCsDUmcixxPx3KAUlK+yE3bFXqsatW6kU
-         e5m8bkUZac7uz/zFTSrOmpEgYZXcse/3Z6deYhACYniCrX6oTmoJpMrD9q6sWpUWsVnl
-         nYcw==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=JHiuE2OiEXe434H1xcWuo0fgF0pvMhHeANpuYRG86uk=;
+        b=TJZR5fyjjKCP6sE6kBKth3oqDI5bvePDlzAtu3WZ/DUz8oxFyLNKUc+8ldEWbsB20m
+         VjMZNdVvacpdvJtxqP5++lHldHQVQjqaNyR+YXw0b1DFKtQcSQE3JKNs/sZLX3sWNp7k
+         FCyYZVkz37NfwGvmi0J19R1aK4CUzn9QKipk6gVo14kDzhPmIGm66ElWNyDUrazoPfsN
+         Pag04bnAIk0i4fBikT79Z5WJTSQrYkB+LaLHNg6hvKgX45T/Wy5r2jBp26huJcbpR5g5
+         /YXT8PsaW6C/RenNWjhbfMrYQON/pu8onVPkQoy8S7LGrcN7P6cHEBiUyFtLuftedf1E
+         k4YQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to;
-        bh=nfWuSYzOTRC59I6qOR1SYjFia3S5j3gRmLTCIne6P4w=;
-        b=WOm9REPQj1+pp7ynNGYZFzXP4rdmPKSxymnKE5NSrQrLdxlglNZZ/pjuxPPo7O2nqP
-         /Ee31sBQ9T3dJz/pORps1sqj3AZ2SdZLFd7uZOnGjwPfgw1VwK4n+OZkkU8Tym7VfSsC
-         ncjMw1a0W9KAxfyzcZ2yxk2rFhK+6kgYNR+Ff5pCji02IwnDGk9iYuybbCWLSMOt90hh
-         3u7Mutq5Ac6IwVsgmDeq3YQ9Yl5aZWmigi1QfVQymrkbNC6Jbunhe+KJlG9toMLug5rl
-         BqWOqORAijUTAeSGZBs9R8zffo2DoOnPZznp4t9jRa0ykWy6TfP6PFrxKt2i60yBwGq3
-         sPhQ==
-X-Gm-Message-State: AOAM533yFjP9NGNr93Ea4N16hlZLzFwhob8p/gm1Wd83Fb8SqQ84oeLR
-        zuCl9hC40OvM/y3bS14tkeHBH+Abb9dU8lhdnVBMzA==
-X-Google-Smtp-Source: ABdhPJz72X997WnFW2qZfhlhkH7As4zPBZKYQUMqXXBf92uIDZfUoMxjzPK3+3Lgd8EFuR5giPXv2D7+L/O6lKYQcrQ=
-X-Received: by 2002:a05:6512:1043:: with SMTP id c3mr149496lfb.358.1631198165457;
- Thu, 09 Sep 2021 07:36:05 -0700 (PDT)
+         :message-id:subject:to:cc;
+        bh=JHiuE2OiEXe434H1xcWuo0fgF0pvMhHeANpuYRG86uk=;
+        b=s+a8htkBRMEGxO6cOYmIkbo3qtDPE2/9ppExZRkOyMNlWKVDzehAqMnOaVlteyRdp6
+         XcBURq8VMXZF5HBNHBfIOypQCfNKp4AVeQ7Jte4t0XF/kelyxkZJfzxVzntxiMpDmwbR
+         GLRQDyIy/A8IjDdz2L6/LppFcjPskhzg+KvOPVumzRvd77Cf9c92uHdzB42XoXV6EoOf
+         RBFN0Qc40wNCogLCBOUTRdTbIzZsLqHHenQe8XRfLIoNhmCjHluNjcBbKI1cppWmoTkD
+         uOXwGJBDkLkS28uvjKBbwWMlkDJAT/PVNg5W0bAgfgnvj1G9+cQ8UbRQzBGskm1ugyRR
+         3v9w==
+X-Gm-Message-State: AOAM531KrjDDQMvJRkJH7oeVTVJlQHAjuL+w/7OrDGhjCyLyGNkUYzmy
+        coBierFsw5srh00sNZXmQMw1yo4+CDfSSNLMzDPfGw==
+X-Google-Smtp-Source: ABdhPJweezDPGeY3ZyJBi0eplFeYrpL4I+fJ1nvgj7GoFMZNLvwoyIoq/QtEUcmQvRXlPHkn02d9XTMwWqoUV8oZEIg=
+X-Received: by 2002:a9d:17c5:: with SMTP id j63mr231177otj.208.1631199067794;
+ Thu, 09 Sep 2021 07:51:07 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210831133349.18203-1-wsa+renesas@sang-engineering.com>
- <CAPDyKFptgZgDsKyHt-sO6yyRBm+LqeWkwOSoB9ED+b3QTPqD-w@mail.gmail.com> <YToGHbgakZdrY/4R@shikoro>
-In-Reply-To: <YToGHbgakZdrY/4R@shikoro>
+References: <20210907025940.1535-1-caihuoqing@baidu.com>
+In-Reply-To: <20210907025940.1535-1-caihuoqing@baidu.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Sep 2021 16:35:28 +0200
-Message-ID: <CAPDyKFpRA79THAEsuuNj36UY5KtsMJRP4suUDJwQNjwTkfo+vw@mail.gmail.com>
-Subject: Re: [PATCH RFC] HACK: mmc: core: also abort tuning with CMD12 for SD
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Date:   Thu, 9 Sep 2021 16:50:31 +0200
+Message-ID: <CAPDyKFrWdXBc8WncS=8AeoAGLeEUjbnOsG0cmimTz46GCn2C5Q@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: omap_hsmmc: Make use of the helper macro SET_RUNTIME_PM_OPS()
+To:     Cai Huoqing <caihuoqing@baidu.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 9 Sept 2021 at 15:03, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Tue, 7 Sept 2021 at 04:59, Cai Huoqing <caihuoqing@baidu.com> wrote:
 >
-> Hi Ulf,
+> Use the helper macro SET_RUNTIME_PM_OPS() instead of the verbose
+> operators ".runtime_suspend/.runtime_resume", because the
+> SET_RUNTIME_PM_OPS() is a nice helper macro that could be brought
+> in to make code a little more concise.
 >
-> > > 1) despite not being mentioned in the spec, do we want to allow CMD12 to
-> > >    abort tuning for SD as well?
-> >
-> > It sounds like we should give it a try with the CMD12 command for SD
-> > cards as well.
->
-> I think so.
->
-> > > 2) If so, how to make sure not apply it to SDIO but SD only?
-> >
-> > For now, I am fine with adding a new bus_ops callback
-> > (->abort_tuning()) and then let mmc_send_abort_tuning() to call it.
->
-> Cool, I like that approach.
->
-> > I have some additional plans to improve life cycle issues for the
-> > bus_ops, but let's ignore that for now. I can deal with that later.
->
-> Ok, good.
->
-> > That said, mmc_send_abort_tuning() should no longer need to take the
-> > opcode as an in-parameter, thus some additional cleanup should be
-> > needed in a few host drivers because of that.
-> >
-> > Would that work?
->
-> I think that would work nicely. I will have a go with the above approach
-> and come back then. Or do you want to implement it?
+> Signed-off-by: Cai Huoqing <caihuoqing@baidu.com>
 
-Please go ahead, I can review it.
-
->
-> Thanks and happy hacking,
->
->    Wolfram
->
+Queued for v5.16 on the temporary devel branch, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+> v1->v2: *Add "#ifdef CONFIG_PM" around runtime_suspend|resume().
+>         *Remove the unused implementation of omap_hsmmc_context_restore()
+>
+>  drivers/mmc/host/omap_hsmmc.c | 10 +++-------
+>  1 file changed, 3 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 2f8038d69f67..7a29ad542e4a 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -702,11 +702,6 @@ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
+>
+>  #else
+>
+> -static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
+> -{
+> -       return 0;
+> -}
+> -
+>  static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
+>  {
+>  }
+> @@ -2086,6 +2081,7 @@ static int omap_hsmmc_resume(struct device *dev)
+>  }
+>  #endif
+>
+> +#ifdef CONFIG_PM
+>  static int omap_hsmmc_runtime_suspend(struct device *dev)
+>  {
+>         struct omap_hsmmc_host *host;
+> @@ -2153,11 +2149,11 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
+>         spin_unlock_irqrestore(&host->irq_lock, flags);
+>         return 0;
+>  }
+> +#endif
+>
+>  static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
+>         SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
+> -       .runtime_suspend = omap_hsmmc_runtime_suspend,
+> -       .runtime_resume = omap_hsmmc_runtime_resume,
+> +       SET_RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
+>  };
+>
+>  static struct platform_driver omap_hsmmc_driver = {
+> --
+> 2.25.1
+>
