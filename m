@@ -5,44 +5,45 @@ X-Spam-Level:
 X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18564C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 11:59:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61EBAC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 12:23:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F077663283
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 11:59:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4CBA66115A
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 12:23:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242572AbhIIMAn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 08:00:43 -0400
-Received: from mail.kernel.org ([198.145.29.99]:34380 "EHLO mail.kernel.org"
+        id S1345112AbhIIMYE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Sep 2021 08:24:04 -0400
+Received: from mail.kernel.org ([198.145.29.99]:57710 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S235604AbhIIL6c (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 9 Sep 2021 07:58:32 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 93745611C4;
-        Thu,  9 Sep 2021 11:45:40 +0000 (UTC)
+        id S1353052AbhIIMUL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 9 Sep 2021 08:20:11 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 13A0D6128B;
+        Thu,  9 Sep 2021 11:50:27 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631187941;
-        bh=2KRvm6aTvUu4pu1QHXu6z4YnVYGYLqDrbklMn0PN8Vg=;
+        s=k20201202; t=1631188228;
+        bh=Q5XMrTSI9DyeV30QZ8sULXpxduy3HPeYCnQmNk1zuRE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=NkIQo9qvxiQEImbnsAGSP4FInYJmkwgMi19rTrr37Pfqqb/uNd3JSn1jpDQ9tSMfu
-         FQlr6tXENX8h2Xo9EDe836FQz3GfdTqlSKbxVM/JCrXlDbCIc2+RdbkzxH0kQRBF3p
-         v4SXNOAXYT/6VEqd02Fj7RU/UCZ2+MNlnEYaV1vwOT+4JTbhEsgUXV750HS/ShV96o
-         lUMmNYz7VkBVvM+t6C8pNflPQhHIw7vvDLdGZJodDYkmf1b1jZKDZ//hIGWnXhxktC
-         sv+6vBN+P23iOZTBKGYmOaurMiKE38imfa71VoBblgw7P1Y//pm+akyBTtL4RPQPlI
-         fo5fEVXU17yiA==
+        b=E4vQc4wnn1kFIkMS2UqxsNhkk7OLYS/Wm9GIkMgCoKCB+Ubn2o0JbuY/Sliw28mxd
+         M05QZ1qy8WNHa0nu2a3mARKbPNhMDD0ekV+xpb++SWuCnALhF1C4984WAPxpiD02z5
+         FJZ4nOo6wgNjmyRMe9WLB3lCac8atMttkYK8LIZV7NIrcxonBwwfXHIDTPFd1K8dvm
+         3jjqh9iCzsVeYLBcIRHhFcUH1RSC2kPdA0omquuCDk0neXv9XzPD2p05SnE2q2DKUb
+         LMMqpEdQ0nXmXNQ3loSM6OpvqDsEbGcXB6iP228n2A/oPkIv0X6ZT2L7bLYPSGvjKT
+         DiY6K8v64HRfA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Nishad Kamdar <nishadkamdar@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
+Cc:     Manish Narani <manish.narani@xilinx.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.14 211/252] mmc: core: Return correct emmc response in case of ioctl error
-Date:   Thu,  9 Sep 2021 07:40:25 -0400
-Message-Id: <20210909114106.141462-211-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.13 181/219] mmc: sdhci-of-arasan: Modified SD default speed to 19MHz for ZynqMP
+Date:   Thu,  9 Sep 2021 07:45:57 -0400
+Message-Id: <20210909114635.143983-181-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210909114106.141462-1-sashal@kernel.org>
-References: <20210909114106.141462-1-sashal@kernel.org>
+In-Reply-To: <20210909114635.143983-1-sashal@kernel.org>
+References: <20210909114635.143983-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -51,111 +52,68 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Nishad Kamdar <nishadkamdar@gmail.com>
+From: Manish Narani <manish.narani@xilinx.com>
 
-[ Upstream commit e72a55f2e5ddcfb3dce0701caf925ce435b87682 ]
+[ Upstream commit c0b4e411a9b09748466ee06d2ae6772effa64dfb ]
 
-When a read/write command is sent via ioctl to the kernel,
-and the command fails, the actual error response of the emmc
-is not sent to the user.
+SD standard speed timing was met only at 19MHz and not 25 MHz, that's
+why changing driver to 19MHz. The reason for this is when a level shifter
+is used on the board, timing was met for standard speed only at 19MHz.
+Since this level shifter is commonly required for high speed modes,
+the driver is modified to use standard speed of 19Mhz.
 
-IOCTL read/write tests are carried out using commands
-17 (Single BLock Read), 24 (Single Block Write),
-18 (Multi Block Read), 25 (Multi Block Write)
-
-The tests are carried out on a 64Gb emmc device. All of these
-tests try to access an "out of range" sector address (0x09B2FFFF).
-
-It is seen that without the patch the response received by the user
-is not OUT_OF_RANGE error (R1 response 31st bit is not set) as per
-JEDEC specification. After applying the patch proper response is seen.
-This is because the function returns without copying the response to
-the user in case of failure. This patch fixes the issue.
-
-Hence, this memcpy is required whether we get an error response or not.
-Therefor it is moved up from the current position up to immediately
-after we have called mmc_wait_for_req().
-
-The test code and the output of only the CMD17 is included in the
-commit to limit the message length.
-
-CMD17 (Test Code Snippet):
-==========================
-        printf("Forming CMD%d\n", opt_idx);
-        /*  single block read */
-        cmd.blksz = 512;
-        cmd.blocks = 1;
-        cmd.write_flag = 0;
-        cmd.opcode = 17;
-        //cmd.arg = atoi(argv[3]);
-        cmd.arg = 0x09B2FFFF;
-        /* Expecting response R1B */
-        cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
-
-        memset(data, 0, sizeof(__u8) * 512);
-        mmc_ioc_cmd_set_data(cmd, data);
-
-        printf("Sending CMD%d: ARG[0x%08x]\n", opt_idx, cmd.arg);
-        if(ioctl(fd, MMC_IOC_CMD, &cmd))
-                perror("Error");
-
-        printf("\nResponse: %08x\n", cmd.response[0]);
-
-CMD17 (Output without patch):
-=============================
-test@test-LIVA-Z:~$ sudo ./mmc cmd_test /dev/mmcblk0 17
-Entering the do_mmc_commands:Device: /dev/mmcblk0 nargs:4
-Entering the do_mmc_commands:Device: /dev/mmcblk0 options[17, 0x09B2FFF]
-Forming CMD17
-Sending CMD17: ARG[0x09b2ffff]
-Error: Connection timed out
-
-Response: 00000000
-(Incorrect response)
-
-CMD17 (Output with patch):
-==========================
-test@test-LIVA-Z:~$ sudo ./mmc cmd_test /dev/mmcblk0 17
-[sudo] password for test:
-Entering the do_mmc_commands:Device: /dev/mmcblk0 nargs:4
-Entering the do_mmc_commands:Device: /dev/mmcblk0 options[17, 09B2FFFF]
-Forming CMD17
-Sending CMD17: ARG[0x09b2ffff]
-Error: Connection timed out
-
-Response: 80000900
-(Correct OUT_OF_ERROR response as per JEDEC specification)
-
-Signed-off-by: Nishad Kamdar <nishadkamdar@gmail.com>
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
-Link: https://lore.kernel.org/r/20210824191726.8296-1-nishadkamdar@gmail.com
+Signed-off-by: Manish Narani <manish.narani@xilinx.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Link: https://lore.kernel.org/r/1623753837-21035-2-git-send-email-manish.narani@xilinx.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/core/block.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index a9ad9f5fa949..c3ecec3f6ddc 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -518,6 +518,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 		return mmc_sanitize(card, idata->ic.cmd_timeout_ms);
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 839965f7c717..fc3e41c76ab4 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -159,6 +159,12 @@ struct sdhci_arasan_data {
+ /* Controller immediately reports SDHCI_CLOCK_INT_STABLE after enabling the
+  * internal clock even when the clock isn't stable */
+ #define SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE BIT(1)
++/*
++ * Some of the Arasan variations might not have timing requirements
++ * met at 25MHz for Default Speed mode, those controllers work at
++ * 19MHz instead
++ */
++#define SDHCI_ARASAN_QUIRK_CLOCK_25_BROKEN BIT(2)
+ };
  
- 	mmc_wait_for_req(card->host, &mrq);
-+	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
+ struct sdhci_arasan_of_data {
+@@ -290,6 +296,16 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+ 		sdhci_arasan->is_phy_on = false;
+ 	}
  
- 	if (cmd.error) {
- 		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
-@@ -567,8 +568,6 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	if (idata->ic.postsleep_min_us)
- 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
++	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_25_BROKEN) {
++		/*
++		 * Some of the Arasan variations might not have timing
++		 * requirements met at 25MHz for Default Speed mode,
++		 * those controllers work at 19MHz instead.
++		 */
++		if (clock == DEFAULT_SPEED_MAX_DTR)
++			clock = (DEFAULT_SPEED_MAX_DTR * 19) / 25;
++	}
++
+ 	/* Set the Input and Output Clock Phase Delays */
+ 	if (clk_data->set_clk_delays)
+ 		clk_data->set_clk_delays(host);
+@@ -1598,6 +1614,8 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	if (of_device_is_compatible(np, "xlnx,zynqmp-8.9a")) {
+ 		host->mmc_host_ops.execute_tuning =
+ 			arasan_zynqmp_execute_tuning;
++
++		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_CLOCK_25_BROKEN;
+ 	}
  
--	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
--
- 	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
- 		/*
- 		 * Ensure RPMB/R1B command has completed by polling CMD13
+ 	arasan_dt_parse_clk_phases(dev, &sdhci_arasan->clk_data);
 -- 
 2.30.2
 
