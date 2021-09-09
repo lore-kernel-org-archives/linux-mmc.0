@@ -2,145 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EC26C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 08:54:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DC2BC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 09:33:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4E6296109E
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 08:54:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EB374611C0
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 09:33:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232129AbhIIIzr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 04:55:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54388 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231825AbhIIIzr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2021 04:55:47 -0400
-Received: from mail-ot1-x332.google.com (mail-ot1-x332.google.com [IPv6:2607:f8b0:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7A2AC061575
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Sep 2021 01:54:37 -0700 (PDT)
-Received: by mail-ot1-x332.google.com with SMTP id k12-20020a056830150c00b0051abe7f680bso1604164otp.1
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Sep 2021 01:54:37 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=nUwxPK2qnu6YfMpPqLgyWf8PKUvt9ipGKjT6xs3uR2U=;
-        b=S3x8mkSe0GgTbDfxfxP0HaYii2BexzY72c8nSwNgE+CgK8uQ8haJWuL212g8B7Tf7p
-         HiiDZRW0Rf29a3+MIgSjFWFu/GYxDHYVmHnW/Stx/cbnYej8wMbiUo8wO/pUaGcTIJYR
-         2bCxft7WlwUg8778/PwAHIPW7PdVGiWhGzhc5gluLIQDT97nTZ2se/NgLcO+H83TIOgZ
-         fY+iuBE7fcnGLYjT+zo7PSahRd0tprNUG+JmbnON86vk5XkQZBKy8Qxva9xrx6XfMviA
-         etHYgjwOBAgUWoH2NNyJOjqBoM3YsqtmcKbXgmvQx2JNIlWkS/JJ0EPMUwUMpP/wg2a/
-         ldkw==
+        id S233024AbhIIJe3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Sep 2021 05:34:29 -0400
+Received: from mail-vs1-f53.google.com ([209.85.217.53]:43652 "EHLO
+        mail-vs1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229927AbhIIJe1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2021 05:34:27 -0400
+Received: by mail-vs1-f53.google.com with SMTP id u1so965795vsq.10;
+        Thu, 09 Sep 2021 02:33:17 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=nUwxPK2qnu6YfMpPqLgyWf8PKUvt9ipGKjT6xs3uR2U=;
-        b=ck9MeJ6EYK07lIMS+Vk+BFVI+bxo9rDIoBrOiAmj0nQbc+R2E3KbhmIFeDUSybWtXR
-         sLHMHaJowYxIEL1W3Z4KMGBFtpyCX3vSgldOUBSDQKB/UFnmRz9DnoO4g8y1Azn1/Zak
-         0HoCJ5wCzm4hW87on9ewQNfrUinUrDYeddZ4i3m3b2hToVmBUfgqVp2OC/yNU4/41T/E
-         bmvvt1HEvM4IN36QsAOUmLSjTg9OqfkAH/g3lXSAOKiHSnOhwRue+NUE2tlsiaiVJ1eY
-         0r5mOw7i+shI6TNLo86xZhCXX+gYKHGTJqagRwZXRNu0o8ZLLSFufs3aVHSVVQVa74ZR
-         Zo3g==
-X-Gm-Message-State: AOAM532YvjJ85tbUKuCbo3qAVK90eb0Mp5Vls9gVrmmDddV764Zb/Joc
-        f3gW7A0DavLPA3e3zildPT1twP85BhxFWRxOl0Vh3wBIZQQ=
-X-Google-Smtp-Source: ABdhPJy42YR/0tp9VhUslFmgSrIGKuKfDSEyPCb+BFSIwUmZSTBWxpIHxsdk8F1KXqlbkHkBdibH2a+Rng6rpxHR1g4=
-X-Received: by 2002:a9d:4e97:: with SMTP id v23mr1504061otk.236.1631177676988;
- Thu, 09 Sep 2021 01:54:36 -0700 (PDT)
+        bh=2wO4uEOZXmVlM7tblOFCNyxQE4NE3jdr5EX9nhntYSw=;
+        b=r1tW64eg6LsjwMbCUcVxgMe3YKz+RfM62YPbREeOCeuFtCLAq6LJZfY3g1KrHkdkPE
+         Wfu6k38TtNZwkTg5xkb20ODtPwXByiHnpEKwJGBk9Cx9M6WO0k3uv4GYAMfqRpzqIME6
+         TgB7cSJPXH66tIeuBgc07/v7beUR27707VX2wBCxqKjKZc3lNsL7iHgru3afQrXjjMyn
+         ZVHR8UOldd9CBmFZznOZ6NGTsS5upabvz6lXT9L92I/bMY/r6klQsOSRRRxzi/bbTVUU
+         03x8shrHd/pYmNCT1BPXaNVoxdViTtrovApcD3bJjGuNloRd/FZKqQuRGhTdcsiV/c1e
+         WCJg==
+X-Gm-Message-State: AOAM530qCZXBb24bPpvJoTbg9P3et0gxa49NNTvVrOTro7sj/mq+ALgz
+        vR5c7mSJxwDogCpOvD0SXIwzcrVZe033S8x8Jf6yFObSBzQ=
+X-Google-Smtp-Source: ABdhPJyNzYMZuvTWyBAZ9WNd97bQOyiOpnPdfUr/BYXbgHyWsV/408RCaXJEAZVcPmNu9IDmP2IDoZlj/+z0oImJXyU=
+X-Received: by 2002:a05:6102:2417:: with SMTP id j23mr669655vsi.35.1631179992938;
+ Thu, 09 Sep 2021 02:33:12 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210831133349.18203-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210831133349.18203-1-wsa+renesas@sang-engineering.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Sep 2021 10:54:00 +0200
-Message-ID: <CAPDyKFptgZgDsKyHt-sO6yyRBm+LqeWkwOSoB9ED+b3QTPqD-w@mail.gmail.com>
-Subject: Re: [PATCH RFC] HACK: mmc: core: also abort tuning with CMD12 for SD
+References: <20210826082107.47299-1-wsa+renesas@sang-engineering.com> <CAMuHMdUXc0oSCXJ-5QmPJz0VkX1Aib+ZAv8K2LN_fT1+5mocqw@mail.gmail.com>
+In-Reply-To: <CAMuHMdUXc0oSCXJ-5QmPJz0VkX1Aib+ZAv8K2LN_fT1+5mocqw@mail.gmail.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Thu, 9 Sep 2021 11:33:01 +0200
+Message-ID: <CAMuHMdUuqQe6cM-Zt1GWq6xgydv1po8FOOW9qWe+5hK=ZRqE+w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old SDHIs
 To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
         Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 31 Aug 2021 at 15:34, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
->
-> We have various SanDisk cards which fail tuning to SDR104 unless we
-> allow a CMD12 also to be sent to abort a broken tuning. It is true that
-> the SD specs do not mention that CMD12 is allowed, but they also don't
-> say it is forbidden. And now reality tells that it is needed to make
-> some cards work. Other cards I tried did not regress.
->
-> If we can agree to allow this for SD, then the problem is now SDIO which
-> does not support CMD12. mmc_card_sdio() does not work at this stage
-> because host->card is still NULL. Is there any other way to distinguish
-> SD and SDIO here?
->
-> Not-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> ---
->
-> Hey guys,
->
-> so, there are two questions here:
-> 1) despite not being mentioned in the spec, do we want to allow CMD12 to
->    abort tuning for SD as well?
+Hi Wolfram,
 
-It sounds like we should give it a try with the CMD12 command for SD
-cards as well.
+On Thu, Aug 26, 2021 at 4:25 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> On Thu, Aug 26, 2021 at 10:21 AM Wolfram Sang
+> <wsa+renesas@sang-engineering.com> wrote:
+> > Old SDHI instances have a default value for the reset register which
+> > keeps it in reset state by default. So, when applying a hard reset we
+> > need to manually leave the soft reset state as well. Later SDHI
+> > instances have a different default value, the one we write manually now.
+> >
+> > Fixes: b4d86f37eacb ("mmc: renesas_sdhi: do hard reset if possible")
+> > Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> > ---
+> >
+> > Geez, typical SDHI nastiness here...
+> >
+> > Geert: I think this fixes the issue you saw on Koelsch. It works fine on
+> > my Lager now at least. Can you please test and tag if all goes well?
+> > It would be great to have this in 5.14 but it definately needs Geert's
+> > confirmation first.
+>
+> Thanks, fixes the SD Card issue is was seeing on Koelsch, and still
+> works on Salvator-XS.
+>
+> Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
->
-> 2) If so, how to make sure not apply it to SDIO but SD only?
+Note that this does not fix the issues on gose and alt in Magnus'
+farm, but they may have failed before b4d86f37eacb too.
 
-For now, I am fine with adding a new bus_ops callback
-(->abort_tuning()) and then let mmc_send_abort_tuning() to call it.
+gose:
 
-I have some additional plans to improve life cycle issues for the
-bus_ops, but let's ignore that for now. I can deal with that later.
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD51)
+    mmc0: error -110 whilst initialising SD card
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    ------------[ cut here ]------------
+    WARNING: CPU: 1 PID: 35 at kernel/dma/debug.c:498 add_dma_entry+0x134/0x178
+    DMA-API: exceeded 7 overlapping mappings of cacheline 0x0000000001099f61
 
-That said, mmc_send_abort_tuning() should no longer need to take the
-opcode as an in-parameter, thus some additional cleanup should be
-needed in a few host drivers because of that.
+alt:
 
-Would that work?
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    DMA-API: cacheline tracking EEXIST, overlapping mappings aren't supported
+    sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
+    ------------[ cut here ]------------
+    WARNING: CPU: 1 PID: 49 at kernel/dma/debug.c:498 add_dma_entry+0x134/0x178
+    DMA-API: exceeded 7 overlapping mappings of cacheline 0x0000000001082b42
 
->
-> Thanks for your input! Kind regards,
->
->    Wolfram
+Other MMC instances on gose and alt seem to work.
 
-Kind regards
-Uffe
+From my limited collection of logs of booting on these boards, ee100000.mmc on
+  - gose worked in v4.15, and is broken since at least v4.17,
+  - alt worked in v5.1-rc6, and is broken now.
+SD cards might have been changed in the meantime, though.
 
->
->
->  drivers/mmc/core/mmc_ops.c | 8 --------
->  1 file changed, 8 deletions(-)
->
-> diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-> index 973756ed4016..02d378255895 100644
-> --- a/drivers/mmc/core/mmc_ops.c
-> +++ b/drivers/mmc/core/mmc_ops.c
-> @@ -704,14 +704,6 @@ int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode)
->  {
->         struct mmc_command cmd = {};
->
-> -       /*
-> -        * eMMC specification specifies that CMD12 can be used to stop a tuning
-> -        * command, but SD specification does not, so do nothing unless it is
-> -        * eMMC.
-> -        */
-> -       if (opcode != MMC_SEND_TUNING_BLOCK_HS200)
-> -               return 0;
-> -
->         cmd.opcode = MMC_STOP_TRANSMISSION;
->         cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_AC;
->
-> --
-> 2.30.2
->
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
