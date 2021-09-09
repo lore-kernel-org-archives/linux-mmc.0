@@ -7,41 +7,41 @@ X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51CBDC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:16:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D3C5C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:16:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C6DA60F93
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:16:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37A206108B
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:16:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1354704AbhIINRN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 09:17:13 -0400
-Received: from mail.kernel.org ([198.145.29.99]:53472 "EHLO mail.kernel.org"
+        id S1354087AbhIINRQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Sep 2021 09:17:16 -0400
+Received: from mail.kernel.org ([198.145.29.99]:35406 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1358655AbhIINJN (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 9 Sep 2021 09:09:13 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 11165632BA;
-        Thu,  9 Sep 2021 12:01:04 +0000 (UTC)
+        id S1355365AbhIINNS (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 9 Sep 2021 09:13:18 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 35BAE632D8;
+        Thu,  9 Sep 2021 12:01:53 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631188865;
-        bh=DDKw6eXX6/jUoop7J/yyf2zQ+aVc75RaP/tP26YJafg=;
+        s=k20201202; t=1631188913;
+        bh=3aoe/YoOU1sRjQ8Os9P9/b5GuVMlXzYaF6tz5eVLXz4=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=t8ywQyuudTz+RopV97WOozAnL+0t76Yse10t+uEEw0M+cztjPy9xFAXc77PHuCyTi
-         tErGz5jIbI+p6XwMWXbaNnfLkLPkVV0ixkPoMOkKAfvgHU2SyjwF+wVwM8XBP9g1IG
-         9H0Q/iQX36iHwW62+0uc0VySCTfD0DHS3WsL9zMCOS4z9eQuzDyeolj+qhBdAJRBnS
-         czKwuXnbhb+WuhYuUcSgHD+OvppQQND14hEk+PjFnd0GYHk/wXspjp1oGSgcYEzNWP
-         gcp1OoxX5fm9MkVNrUwmSk9uW9cZEe/oqpwJgueaiwKBKvZctlxw2691UwQfXw+SkD
-         iBy4qMRO1bvJg==
+        b=A8MJFPZPAhEwqvODqoi1oMQjvwbG+WOOJm/xuJgdJqoQHEo9A5oHCTOxvbPSo1QAm
+         5Arzti8Hn3a3cgkF0MMMMl54pYE4FgimzrKhuqi2h+MgcS45z5wRYGt82QK+XzFarh
+         fqQuTHfhG+lzNJ47h9vVPlLof9GQfOZVV1JECsAr0tW8HLHFyVsSGzNrgsRU0JqtMB
+         y2xebOdIal1FbNPd4A6K7VvGjIdLOyVn+vWfMzaUPaHOYuseKbAT66zqdYFXe5VH8N
+         Tck3/cwB1UtDJzN7e51arqAHIlnHSfqjvOO9EH4zlsqBb9L1iX2SpeJGNzmEX/TBJ6
+         Waq21jSESt6YA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Thomas Hebb <tommyhebb@gmail.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 40/48] mmc: rtsx_pci: Fix long reads when clock is prescaled
-Date:   Thu,  9 Sep 2021 08:00:07 -0400
-Message-Id: <20210909120015.150411-40-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 30/35] mmc: rtsx_pci: Fix long reads when clock is prescaled
+Date:   Thu,  9 Sep 2021 08:01:11 -0400
+Message-Id: <20210909120116.150912-30-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210909120015.150411-1-sashal@kernel.org>
-References: <20210909120015.150411-1-sashal@kernel.org>
+In-Reply-To: <20210909120116.150912-1-sashal@kernel.org>
+References: <20210909120116.150912-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -89,10 +89,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 23 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
-index 3ccaa1415f33..efd995e3cb0b 100644
+index 93137483ecde..10ec88833889 100644
 --- a/drivers/mmc/host/rtsx_pci_sdmmc.c
 +++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
-@@ -552,9 +552,22 @@ static int sd_write_long_data(struct realtek_pci_sdmmc *host,
+@@ -553,9 +553,22 @@ static int sd_write_long_data(struct realtek_pci_sdmmc *host,
  	return 0;
  }
  
@@ -115,7 +115,7 @@ index 3ccaa1415f33..efd995e3cb0b 100644
  
  	if (host->sg_count < 0) {
  		data->error = host->sg_count;
-@@ -563,22 +576,19 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
+@@ -564,22 +577,19 @@ static int sd_rw_multi(struct realtek_pci_sdmmc *host, struct mmc_request *mrq)
  		return data->error;
  	}
  
