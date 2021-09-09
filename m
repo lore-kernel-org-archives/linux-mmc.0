@@ -2,160 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.5 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D3D5FC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:32:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEE3BC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:37:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B4DAF60F6C
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:32:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C778161206
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 13:37:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1358460AbhIINdW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 09:33:22 -0400
-Received: from mail.kernel.org ([198.145.29.99]:42430 "EHLO mail.kernel.org"
+        id S1354314AbhIINiw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Sep 2021 09:38:52 -0400
+Received: from www.zeus03.de ([194.117.254.33]:38714 "EHLO mail.zeus03.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1353807AbhIIM7A (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Thu, 9 Sep 2021 08:59:00 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 283EE63263;
-        Thu,  9 Sep 2021 11:58:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1631188723;
-        bh=MkRrwpA1NkbgaRmTQtUIZgPFnFVbhsKD2oo50eySxws=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=r1N9H+h04PHzGdIeg4hzCdCPzqhaMrPQ/mOdkGa7sFecKhvecOe5TTjOaFAOjEEK5
-         W1gGbRreyNS7PnisSKZh9tHh/rfXBRzoq4mzIculI8ppcyJXZAyijd0HMezKBi0XIv
-         khaMC4YmFjYZQECRBWW5eh4MD0myHRKksFmE+6e+MamLiOeUJHq0iPkskKgT/Plwhg
-         eomCJhXP2JDTGmbfT7DUTgILdbSkNsRnGAVEYv8FR726WvYQ3AX/v/ezyV1hbcPIG2
-         SNe39J3x2v9UFqjatJboth2AFFdHvGhI3xWN3DULPUjBRKOJOPoRJLKxhIypVmIjes
-         iJzKY3QwFjvVg==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Nishad Kamdar <nishadkamdar@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.19 62/74] mmc: core: Return correct emmc response in case of ioctl error
-Date:   Thu,  9 Sep 2021 07:57:14 -0400
-Message-Id: <20210909115726.149004-62-sashal@kernel.org>
-X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210909115726.149004-1-sashal@kernel.org>
-References: <20210909115726.149004-1-sashal@kernel.org>
+        id S1353511AbhIIM4d (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 9 Sep 2021 08:56:33 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=XqAtNsBZ4C4DiXhT9Zk6+YP3jU9K
+        i13XAZDm4rf8Go0=; b=c/+UU55eCtaagTybWycgcVSuTsFl7N/ZsFJ05Aw9C/KZ
+        oJ/+ur41e2w8+WVVstzqgWO2QMSs1qlW3SHtVAEHHnIczIsUBKA0ltihmJ++4N+e
+        tNaXbnE0aGuHSFPe8Ao/wU1P303NKnUzBkxta8OA0N1yCgTYYC8Ox+N1qJVCMg0=
+Received: (qmail 1570580 invoked from network); 9 Sep 2021 14:55:21 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 9 Sep 2021 14:55:21 +0200
+X-UD-Smtp-Session: l3s3148p1@Zf7Sgo/L5skgARa4Rc+IAenyySDM4eeF
+Date:   Thu, 9 Sep 2021 14:55:18 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Subject: Re: [PATCH] mmc: renesas_sdhi: fix regression with hard reset on old
+ SDHIs
+Message-ID: <YToENjbbb2cJFJnF@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+References: <20210826082107.47299-1-wsa+renesas@sang-engineering.com>
+ <CAMuHMdUXc0oSCXJ-5QmPJz0VkX1Aib+ZAv8K2LN_fT1+5mocqw@mail.gmail.com>
+ <CAMuHMdUuqQe6cM-Zt1GWq6xgydv1po8FOOW9qWe+5hK=ZRqE+w@mail.gmail.com>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="Z/PAnSo1uqyldHPW"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdUuqQe6cM-Zt1GWq6xgydv1po8FOOW9qWe+5hK=ZRqE+w@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Nishad Kamdar <nishadkamdar@gmail.com>
 
-[ Upstream commit e72a55f2e5ddcfb3dce0701caf925ce435b87682 ]
+--Z/PAnSo1uqyldHPW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-When a read/write command is sent via ioctl to the kernel,
-and the command fails, the actual error response of the emmc
-is not sent to the user.
+Hi Geert,
 
-IOCTL read/write tests are carried out using commands
-17 (Single BLock Read), 24 (Single Block Write),
-18 (Multi Block Read), 25 (Multi Block Write)
+> From my limited collection of logs of booting on these boards, ee100000.mmc on
+>   - gose worked in v4.15, and is broken since at least v4.17,
 
-The tests are carried out on a 64Gb emmc device. All of these
-tests try to access an "out of range" sector address (0x09B2FFFF).
+Okay, so this is clearly not related to b4d86f37eacb. I don't have a
+Gose but there might be one in a remote lab. I will test when time
+permits.
 
-It is seen that without the patch the response received by the user
-is not OUT_OF_RANGE error (R1 response 31st bit is not set) as per
-JEDEC specification. After applying the patch proper response is seen.
-This is because the function returns without copying the response to
-the user in case of failure. This patch fixes the issue.
+>   - alt worked in v5.1-rc6, and is broken now.
 
-Hence, this memcpy is required whether we get an error response or not.
-Therefor it is moved up from the current position up to immediately
-after we have called mmc_wait_for_req().
+So, this is also not related to b4d86f37eacb. I have an Alt board here
+and will double check. IIRC it worked for me(tm).
 
-The test code and the output of only the CMD17 is included in the
-commit to limit the message length.
+> SD cards might have been changed in the meantime, though.
 
-CMD17 (Test Code Snippet):
-==========================
-        printf("Forming CMD%d\n", opt_idx);
-        /*  single block read */
-        cmd.blksz = 512;
-        cmd.blocks = 1;
-        cmd.write_flag = 0;
-        cmd.opcode = 17;
-        //cmd.arg = atoi(argv[3]);
-        cmd.arg = 0x09B2FFFF;
-        /* Expecting response R1B */
-        cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+Hmm, that might make a difference.
 
-        memset(data, 0, sizeof(__u8) * 512);
-        mmc_ioc_cmd_set_data(cmd, data);
+Thanks for the report. Still, the patch Ulf applied is good to have.
 
-        printf("Sending CMD%d: ARG[0x%08x]\n", opt_idx, cmd.arg);
-        if(ioctl(fd, MMC_IOC_CMD, &cmd))
-                perror("Error");
+Happy hacking,
 
-        printf("\nResponse: %08x\n", cmd.response[0]);
+   Wolfram
 
-CMD17 (Output without patch):
-=============================
-test@test-LIVA-Z:~$ sudo ./mmc cmd_test /dev/mmcblk0 17
-Entering the do_mmc_commands:Device: /dev/mmcblk0 nargs:4
-Entering the do_mmc_commands:Device: /dev/mmcblk0 options[17, 0x09B2FFF]
-Forming CMD17
-Sending CMD17: ARG[0x09b2ffff]
-Error: Connection timed out
 
-Response: 00000000
-(Incorrect response)
+--Z/PAnSo1uqyldHPW
+Content-Type: application/pgp-signature; name="signature.asc"
 
-CMD17 (Output with patch):
-==========================
-test@test-LIVA-Z:~$ sudo ./mmc cmd_test /dev/mmcblk0 17
-[sudo] password for test:
-Entering the do_mmc_commands:Device: /dev/mmcblk0 nargs:4
-Entering the do_mmc_commands:Device: /dev/mmcblk0 options[17, 09B2FFFF]
-Forming CMD17
-Sending CMD17: ARG[0x09b2ffff]
-Error: Connection timed out
+-----BEGIN PGP SIGNATURE-----
 
-Response: 80000900
-(Correct OUT_OF_ERROR response as per JEDEC specification)
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmE6BDIACgkQFA3kzBSg
+KbY0Ig/9Hgok3GkkeW7zUzHztYu8Y/m7eYkuqlPDQ4rpMQBh31H1F9xOqM6P0a7s
+oXFUWy4+eDZOyLjtlUozhV3lpcBnzIuEQkb0lS43hlnmX4PMjcrBexhPhxWPzNRq
+tCtxiRf8uslqkFdaPe2fiF+ZHQ5khl4T6FYzS1yQbqh6AlU0U2NiGpm40WGd/X1D
+rqcbFhA92RNuSlwB/D/az7V6JEvki+NmgkZxvEr/YRLJ3cHvp5IScOQuE+jR2WbD
+/bdkMK0mlW10I9o/ZF1gCwgxrXo+1YdRqIvQv1HHhlt6ypVr5Fp3s6Zx7TSj4el2
+qAswNntfQpVmUaJmnE3IMvSEy96Z6d5d8HJXm5vHNOsxFLEH2hASBM3MIh4ZIyut
+j2nNbaPNaP6qROmleZtDtCAEi/X/6gog+e6KXWWAI49pvGATejS7tw97uwJwgdf4
+50Bt7ZM7YG/Py5jvkvYU0ZNe9fwGCWMR7rhMXRcCdM5pMSfoe+B9VfzW/w32KTjv
+toLZKctobu8YQJmcRcNk1DJ92Hsa3VIVtWdG9vU+3kzyaBO5HK1pKnAHa/juNNM1
+IXRjy1bv8o6sfHstaLGo9RkFcgGMQ8ZRP/7AiSzvMllo0hIwpw8pShCBoYv0OJz1
+ZgjszTelhACm9wIpVx5KtIurEYZvSyINd0Xx9CiDsIK9LGGfdl8=
+=Ln7H
+-----END PGP SIGNATURE-----
 
-Signed-off-by: Nishad Kamdar <nishadkamdar@gmail.com>
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
-Link: https://lore.kernel.org/r/20210824191726.8296-1-nishadkamdar@gmail.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/core/block.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 7b2bb32e3555..d1cc0fdbc51c 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -592,6 +592,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	}
- 
- 	mmc_wait_for_req(card->host, &mrq);
-+	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
- 
- 	if (cmd.error) {
- 		dev_err(mmc_dev(card->host), "%s: cmd error %d\n",
-@@ -641,8 +642,6 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	if (idata->ic.postsleep_min_us)
- 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
- 
--	memcpy(&(idata->ic.response), cmd.resp, sizeof(cmd.resp));
--
- 	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
- 		/*
- 		 * Ensure RPMB/R1B command has completed by polling CMD13
--- 
-2.30.2
-
+--Z/PAnSo1uqyldHPW--
