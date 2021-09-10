@@ -2,131 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.2 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BAFEC433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 14:51:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 422AAC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Sep 2021 09:28:11 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5284F611C4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Sep 2021 14:51:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1AB396109F
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Sep 2021 09:28:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236701AbhIIOwS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Sep 2021 10:52:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49546 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236344AbhIIOwR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Sep 2021 10:52:17 -0400
-Received: from mail-ot1-x32e.google.com (mail-ot1-x32e.google.com [IPv6:2607:f8b0:4864:20::32e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D29AC061574
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Sep 2021 07:51:08 -0700 (PDT)
-Received: by mail-ot1-x32e.google.com with SMTP id i3-20020a056830210300b0051af5666070so2800105otc.4
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Sep 2021 07:51:08 -0700 (PDT)
+        id S231916AbhIJJ3U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Sep 2021 05:29:20 -0400
+Received: from smtp2.axis.com ([195.60.68.18]:36060 "EHLO smtp2.axis.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231818AbhIJJ3U (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 10 Sep 2021 05:29:20 -0400
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=JHiuE2OiEXe434H1xcWuo0fgF0pvMhHeANpuYRG86uk=;
-        b=TJZR5fyjjKCP6sE6kBKth3oqDI5bvePDlzAtu3WZ/DUz8oxFyLNKUc+8ldEWbsB20m
-         VjMZNdVvacpdvJtxqP5++lHldHQVQjqaNyR+YXw0b1DFKtQcSQE3JKNs/sZLX3sWNp7k
-         FCyYZVkz37NfwGvmi0J19R1aK4CUzn9QKipk6gVo14kDzhPmIGm66ElWNyDUrazoPfsN
-         Pag04bnAIk0i4fBikT79Z5WJTSQrYkB+LaLHNg6hvKgX45T/Wy5r2jBp26huJcbpR5g5
-         /YXT8PsaW6C/RenNWjhbfMrYQON/pu8onVPkQoy8S7LGrcN7P6cHEBiUyFtLuftedf1E
-         k4YQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=JHiuE2OiEXe434H1xcWuo0fgF0pvMhHeANpuYRG86uk=;
-        b=s+a8htkBRMEGxO6cOYmIkbo3qtDPE2/9ppExZRkOyMNlWKVDzehAqMnOaVlteyRdp6
-         XcBURq8VMXZF5HBNHBfIOypQCfNKp4AVeQ7Jte4t0XF/kelyxkZJfzxVzntxiMpDmwbR
-         GLRQDyIy/A8IjDdz2L6/LppFcjPskhzg+KvOPVumzRvd77Cf9c92uHdzB42XoXV6EoOf
-         RBFN0Qc40wNCogLCBOUTRdTbIzZsLqHHenQe8XRfLIoNhmCjHluNjcBbKI1cppWmoTkD
-         uOXwGJBDkLkS28uvjKBbwWMlkDJAT/PVNg5W0bAgfgnvj1G9+cQ8UbRQzBGskm1ugyRR
-         3v9w==
-X-Gm-Message-State: AOAM531KrjDDQMvJRkJH7oeVTVJlQHAjuL+w/7OrDGhjCyLyGNkUYzmy
-        coBierFsw5srh00sNZXmQMw1yo4+CDfSSNLMzDPfGw==
-X-Google-Smtp-Source: ABdhPJweezDPGeY3ZyJBi0eplFeYrpL4I+fJ1nvgj7GoFMZNLvwoyIoq/QtEUcmQvRXlPHkn02d9XTMwWqoUV8oZEIg=
-X-Received: by 2002:a9d:17c5:: with SMTP id j63mr231177otj.208.1631199067794;
- Thu, 09 Sep 2021 07:51:07 -0700 (PDT)
+  d=axis.com; q=dns/txt; s=axis-central1; t=1631266090;
+  x=1662802090;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:content-transfer-encoding:in-reply-to;
+  bh=oFkeBzeWHDGsbkBsv/xxJlmdXpsni/5087Oboj1aZeE=;
+  b=GV9bFw0sqHXOr2nUOP+/lBFhAqY8Y6VknwFd4gn+Rn52g8ERg2n95r6n
+   3MeMK3oF+eluuNoQWtsw+Rsrm8dgLAiZZOTwfMs6SlUBVPDvrS68MayDs
+   FWx20QuVQ7pqnks0bVemnfpOEBWLl4RO+Qjt0DODWfvfKzRxmt0rDy/tl
+   AbVhwQylzI3iVV8KQ7t9+E583wJIjr1b0bFBPMcVvRjOZtWHNsxqX4+fw
+   eZ24BEGAoP1Kz4BoSISjWBKhFRFWBJfb/DDYOLGBra8ohPJyLrBey4ser
+   XLw9r9glF/O9UKryTI8CdAVm0VSCKRqlN/zJri7HUoP2J6kDS3JmUHxkr
+   A==;
+Date:   Fri, 10 Sep 2021 11:28:08 +0200
+From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     =?iso-8859-1?Q?M=E5rten?= Lindahl <Marten.Lindahl@axis.com>,
+        Doug Anderson <dianders@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        kernel <kernel@axis.com>, linux-mmc <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] mmc: dw_mmc: Support more time for data read timeouts
+Message-ID: <20210910092808.GA6893@axis.com>
+References: <20210827085634.21225-1-marten.lindahl@axis.com>
+ <CAPDyKFr7rFKhCcg56zhUDn+BSnKd-y93wJLFX20zXYFZwH2jnQ@mail.gmail.com>
 MIME-Version: 1.0
-References: <20210907025940.1535-1-caihuoqing@baidu.com>
-In-Reply-To: <20210907025940.1535-1-caihuoqing@baidu.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Sep 2021 16:50:31 +0200
-Message-ID: <CAPDyKFrWdXBc8WncS=8AeoAGLeEUjbnOsG0cmimTz46GCn2C5Q@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: omap_hsmmc: Make use of the helper macro SET_RUNTIME_PM_OPS()
-To:     Cai Huoqing <caihuoqing@baidu.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-omap <linux-omap@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPDyKFr7rFKhCcg56zhUDn+BSnKd-y93wJLFX20zXYFZwH2jnQ@mail.gmail.com>
+User-Agent: Mutt/1.10.1 (2018-07-13)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 7 Sept 2021 at 04:59, Cai Huoqing <caihuoqing@baidu.com> wrote:
+On Mon, Sep 06, 2021 at 06:36:33PM +0200, Ulf Hansson wrote:
+> On Fri, 27 Aug 2021 at 10:56, Mårten Lindahl <marten.lindahl@axis.com> wrote:
+> > For data read transfers a data transfer over timer (dto_timer) is
+> > started to make sure the data command can be completed in cases the Data
+> > Transfer Over (DTO) interrupt does not come. This timer was originally
+> > introduced as a quirk in commit 57e104864bc48 ("mmc: dw_mmc: add quirk
+> > for broken data transfer over scheme"), but is since a while back part
+> > of the running code.
+> >
+> > The dto timer picks the DATA_TIMEOUT value in the TMOUT register for its
+> > timeout, which will give a max timeout of approximately 84 + (10 spare)
+> > milliseconds on a 200MHz clock. But this register is not intended to be
+> > used like that, since it is a counter for data read timeouts (DRTO) and
+> > response timeouts (RTO), which will result in error interrupts in case
+> > of data read and response delays.
+> >
+> > The TMOUT register is always set with a full value for every transfer,
+> > which according to the manual (and with 200MHz clock) will give a full
+> > DRTO of:
+> > ((TMOUT[10:8] -1) * 0xFFFFFF + TMOUT[31:11] * 8) / 200000000 => ~587 ms
+> >
+> > But as the same register is used for the dto_timer, the dto_timer will
+> > always have a fixed timeout.
+> >
+> > Instead of always setting a fixed value in TMOUT register, we can use
+> > data->timeout_ns for the DRTO interrupts that actually matches what was
+> > provided per requested command. Likewise we can also use timeout_ns for
+> > the dto_timer, which will allow a max timeout of 587 ms, instead of the
+> > fixed 94 ms. Furthermore, if a data error interrupt comes, it shouldn't
+> > be necessary to wait for the dto_timer before we finish the command, but
+> > instead we can handle it in the interrupt handler.
+> >
+> > Lets fix this. In most cases data->timeout_ns values are given, but in
+> > case it is not given, the maximum (default) timeout for the dto_timer,
+> > and the DRTO, is set to approximately 587 ms.
+> >
+> > Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+> 
+> As this touches common dw_mmc code, I would appreciate some
+> tests/reviews to be done before I apply this. Therefore I looped in
+> some of the people who have been involved with dw_mmc lately.
 >
-> Use the helper macro SET_RUNTIME_PM_OPS() instead of the verbose
-> operators ".runtime_suspend/.runtime_resume", because the
-> SET_RUNTIME_PM_OPS() is a nice helper macro that could be brought
-> in to make code a little more concise.
->
-> Signed-off-by: Cai Huoqing <caihuoqing@baidu.com>
+> + Doug, Shawn and Vincent (maybe they can also help to review/test this change). 
 
-Queued for v5.16 on the temporary devel branch, thanks!
+I have the same hardware as Mårten (ARTPEC-8) so I don't think my
+testing would add much.  We'd ideally need someone with a different
+platform to help to test this.
 
-Kind regards
-Uffe
+As for the patch itself, it would perhaps be helpful if it were broken
+down into three separate patches (not necessarily in the order listed
+below) since it's doing three different things:
 
+(1) Increasing the length of the software timeout.
 
-> ---
-> v1->v2: *Add "#ifdef CONFIG_PM" around runtime_suspend|resume().
->         *Remove the unused implementation of omap_hsmmc_context_restore()
->
->  drivers/mmc/host/omap_hsmmc.c | 10 +++-------
->  1 file changed, 3 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-> index 2f8038d69f67..7a29ad542e4a 100644
-> --- a/drivers/mmc/host/omap_hsmmc.c
-> +++ b/drivers/mmc/host/omap_hsmmc.c
-> @@ -702,11 +702,6 @@ static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
->
->  #else
->
-> -static int omap_hsmmc_context_restore(struct omap_hsmmc_host *host)
-> -{
-> -       return 0;
-> -}
-> -
->  static void omap_hsmmc_context_save(struct omap_hsmmc_host *host)
->  {
->  }
-> @@ -2086,6 +2081,7 @@ static int omap_hsmmc_resume(struct device *dev)
->  }
->  #endif
->
-> +#ifdef CONFIG_PM
->  static int omap_hsmmc_runtime_suspend(struct device *dev)
->  {
->         struct omap_hsmmc_host *host;
-> @@ -2153,11 +2149,11 @@ static int omap_hsmmc_runtime_resume(struct device *dev)
->         spin_unlock_irqrestore(&host->irq_lock, flags);
->         return 0;
->  }
-> +#endif
->
->  static const struct dev_pm_ops omap_hsmmc_dev_pm_ops = {
->         SET_SYSTEM_SLEEP_PM_OPS(omap_hsmmc_suspend, omap_hsmmc_resume)
-> -       .runtime_suspend = omap_hsmmc_runtime_suspend,
-> -       .runtime_resume = omap_hsmmc_runtime_resume,
-> +       SET_RUNTIME_PM_OPS(omap_hsmmc_runtime_suspend, omap_hsmmc_runtime_resume, NULL)
->  };
->
->  static struct platform_driver omap_hsmmc_driver = {
-> --
-> 2.25.1
->
+This is the primary reason for the patch since the driver is clearly
+using a wrong value for the software timeout for the entire transfer
+which is lower than the timeouts required by eMMC chips' TAAC/NSAC and
+the controller's timeout for (IIUC) one block.
+
+We haven't seen any problems in practice (yet) though.
+
+(As an aside, if I'm reading the eMMC specs correctly, the TAAC/NSAC
+ applies to each block of a multi-block transfer.  If that's the case,
+ then the entire transfer could, at least in theory, take several
+ seconds.
+
+ Is the data->timeout_ns calculated by mmc_set_data_timeout() supposed
+ to be a per-block timeout or a timeout for the entire transfer?)
+
+(2) Not waiting for DRTO on errors.
+
+When attempting to increase the length of the software timeout as in (1)
+or to remove it entirely, one realizes that the driver actually depends
+on the software timeout to prevent hanging indefinitely when CRC errors
+are received during tuning.  It's unclear if this is something specific
+to our version of the IP or if this is an old regression in the driver
+(given that the driver apparently used to work fine without a software
+timeout at some point of time on some platforms.)
+
+So increasing the software timeout length will make each failing step in
+tuning take half a second which would increase boot time significantly,
+so that's why I think the early exit is needed.
+
+(3) Reducing the length of the hardware timeout.
+
+I *think* this is also to reduce initialization time if there are some
+transfers which are meant to time out (without any other errors) which
+would now take longer to time out after (1), but this part of the change
+could use a bit more rationale.
