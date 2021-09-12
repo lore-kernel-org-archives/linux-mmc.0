@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7209CC433EF
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Sep 2021 20:10:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36B43C4321E
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Sep 2021 20:10:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DB8461056
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Sep 2021 20:10:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 20A6761076
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Sep 2021 20:10:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236385AbhILUMA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Sep 2021 16:12:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53916 "EHLO
+        id S236880AbhILUMB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Sep 2021 16:12:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236424AbhILULG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Sep 2021 16:11:06 -0400
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51EDFC061574;
-        Sun, 12 Sep 2021 13:09:51 -0700 (PDT)
-Received: by mail-wr1-x42f.google.com with SMTP id q11so11296212wrr.9;
-        Sun, 12 Sep 2021 13:09:51 -0700 (PDT)
+        with ESMTP id S236534AbhILULL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Sep 2021 16:11:11 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B19CC061574;
+        Sun, 12 Sep 2021 13:09:56 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id l7-20020a1c2507000000b002e6be5d86b3so5125982wml.3;
+        Sun, 12 Sep 2021 13:09:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=+TXI1PsD2CP95PVSZQdBoUU6aVsve75rwezr3hbKqQc=;
-        b=gszyN4Ob1/oTX3YH7MjCAHMRrfD1D08CcHDvg+2Eaba3Hp18pl+snY9UTTj6XI8Fii
-         QSsiZRyR4VSgcsD7hvV8fmhFMmrFvE9OEEgfeB4Xsj2buu6U0PISTrd78ArRWV9lpAfv
-         +FlU38BkxMhEXM9QxQ9cJOQ6R14gReIDdA1CQWajhzrJPWrExvibMAC1JDUqgjCNfrXO
-         qChnqFGlsNDY7x74H+CyYFkiGZh+VXJx6bipF8ZjhilCppzsc2MAgubfU3wNNfqs8sqG
-         hf0KrBfB2RFomn2QT0xLpz+snJWWUJuGxxsjUe6oXZM2S8IgVgLOL83n+0capBaigXIC
-         ew1A==
+        bh=OcjaPyxUOcH+Po9iWB7z9kNYrbD1HMHOoC8A400eowg=;
+        b=hZ6mhOpW6ZMCIlIYYs7623zTzCA9+zMQ1YvhpHUvEOYrBBAldkxDD12MjXEWD0p+m2
+         IObEwSRbFmzcguJ783eeDGYq9FZY0qUVB1xpEFLvFPNxiq51o1zbvKOHINoUT71KXslM
+         Zxae4RI7Xv5pQUAcZsmFXa58NgbdMNTZbMg6NmnK1T+4+BzpgdSHlhF2+IDyvSAMpl4B
+         UiJtZ2lFPRkGv0vl52EuZrgMKBAhL62hcjGOr8D1FMnRMdOaeTOc1Mi73Flh3iSD94SK
+         YdB98iSTVpTi2dVnRa/ZFnlbpdvujv/+YmAWr+zi8KDRm7nw4bivZNaVBga960s6z7HG
+         x1gg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=+TXI1PsD2CP95PVSZQdBoUU6aVsve75rwezr3hbKqQc=;
-        b=Y5gpex6W/e9p/9/rygTPA/3Z+e/+AbGPFLwrzx6ne1Zrf9SGvA1Qt/PCsO+I7BY5Kv
-         ZJAAMEzviG1047bEiEiNZtC/9Ub2x+y8I5HhoKGrIKjb90RlpZVPUkemsMmZ6r5ranir
-         RpwVVZVYuMAgQ/Th22YplLP2ipQvXVAO5JEfOT+2dAfk2bXi7u8aq+wmzPrmjO9oM5d4
-         Dnq90oVeoLZy8LTSgr0k1IXFwRq+7M+5+IawVuRTFfgD6WDYPWQj3gzvOPB64fbePnh1
-         ZxJwWI6wza3Q3UsPqE9+HqIccLHTidsksSDbEcGfN4YBXfbhauO5qIzK1KZvQx+90r0J
-         cp3g==
-X-Gm-Message-State: AOAM531FkO+gmjI0Q49kbThcjxKg5qg11b6h0vA4CSXDgGtYFQZf6D8A
-        svF0oUOPFe5W3pbQNjA8WfI=
-X-Google-Smtp-Source: ABdhPJxrC7UvXeGBzJzc3ULNujz5pyNgDGwAX1heJBjx3fkEqLqFO8sByFpQCLZ8KKKBKtScaKoZ5Q==
-X-Received: by 2002:adf:e5c2:: with SMTP id a2mr8786552wrn.251.1631477389947;
-        Sun, 12 Sep 2021 13:09:49 -0700 (PDT)
+        bh=OcjaPyxUOcH+Po9iWB7z9kNYrbD1HMHOoC8A400eowg=;
+        b=pAphNbaPOcstBPjm5QI7hPIkNCHxVP+1UXA5dL5dLOd7yabqXwehtsvjBuODyGQJpI
+         m+f0J3JJybMBOivTL2S/ynlRdO42RvpHv3u020I1KdPO49mm35SObUKfZ9cJ7twt41qy
+         yYbUUH3/zCpMZF5U+g99qDsLMCH0eodnUMNhayob+9FLG85M8Qb+xhaFiN+W++8VknuZ
+         5v8dfA2wG4FO9Irhc7spYcoFUEQ0yxVpE0Qgf+T1sh5Zmz0uH6KV67N12ADX4emV3yr8
+         VgGn3m18vRGb7IRKl4ZznMdlhu7zQlR+EGDZ73/ZWaFL08ZuAHHQzXYBlk9E+kKieA+v
+         ft5A==
+X-Gm-Message-State: AOAM531a0fXQRtDCG+Hjb+N5jch4LYyPCQKi53vWDfngTwmMPxcvwDHR
+        Jzz/rbS9M1wJGyr1i6dsttw=
+X-Google-Smtp-Source: ABdhPJyePYBeVeS01GMXMHoSvKLC7DaOb88Uq9XikFgDrOjxADKwfq/8+u7qxdocmwEKl4uSPakgrg==
+X-Received: by 2002:a05:600c:20c:: with SMTP id 12mr5855354wmi.90.1631477394896;
+        Sun, 12 Sep 2021 13:09:54 -0700 (PDT)
 Received: from localhost.localdomain (46-138-83-36.dynamic.spd-mgts.ru. [46.138.83.36])
-        by smtp.gmail.com with ESMTPSA id v10sm5463476wrg.15.2021.09.12.13.09.47
+        by smtp.gmail.com with ESMTPSA id v10sm5463476wrg.15.2021.09.12.13.09.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 12 Sep 2021 13:09:49 -0700 (PDT)
+        Sun, 12 Sep 2021 13:09:54 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -84,9 +84,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-media@vger.kernel.org,
         dri-devel@lists.freedesktop.org, devicetree@vger.kernel.org,
         linux-clk@vger.kernel.org
-Subject: [PATCH v11 07/34] dt-bindings: host1x: Document OPP and power domain properties
-Date:   Sun, 12 Sep 2021 23:08:05 +0300
-Message-Id: <20210912200832.12312-8-digetx@gmail.com>
+Subject: [PATCH v11 09/34] gpu: host1x: Add runtime PM and OPP support
+Date:   Sun, 12 Sep 2021 23:08:07 +0300
+Message-Id: <20210912200832.12312-10-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210912200832.12312-1-digetx@gmail.com>
 References: <20210912200832.12312-1-digetx@gmail.com>
@@ -96,222 +96,452 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document new DVFS OPP table and power domain properties of the Host1x bus
-and devices sitting on the bus.
+Add runtime PM and OPP support to the Host1x driver. For the starter we
+will keep host1x always-on because dynamic power management require a major
+refactoring of the driver code since lot's of code paths are missing the
+RPM handling and we're going to remove some of these paths in the future.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Tested-by: Peter Geis <pgwipeout@gmail.com> # Ouya T30
+Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
+Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20 and TK1 T124
+Tested-by: Matt Merhar <mattmerhar@protonmail.com> # Ouya T30
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- .../display/tegra/nvidia,tegra20-host1x.txt   | 49 +++++++++++++++++++
- 1 file changed, 49 insertions(+)
+ drivers/gpu/host1x/debug.c         |  15 +++
+ drivers/gpu/host1x/dev.c           | 151 +++++++++++++++++++++++------
+ drivers/gpu/host1x/dev.h           |   3 +-
+ drivers/gpu/host1x/hw/channel_hw.c |  44 ++++-----
+ drivers/gpu/host1x/intr.c          |   3 -
+ drivers/gpu/host1x/syncpt.c        |   5 +-
+ 6 files changed, 165 insertions(+), 56 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt b/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
-index 8a6d3e1ee306..62861a8fb5c6 100644
---- a/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
-+++ b/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
-@@ -20,6 +20,18 @@ Required properties:
- - reset-names: Must include the following entries:
-   - host1x
+diff --git a/drivers/gpu/host1x/debug.c b/drivers/gpu/host1x/debug.c
+index 8a14880c61bb..18d9c8d206e3 100644
+--- a/drivers/gpu/host1x/debug.c
++++ b/drivers/gpu/host1x/debug.c
+@@ -7,6 +7,7 @@
+  */
  
-+Optional properties:
-+- operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to HEG or core power domain.
+ #include <linux/debugfs.h>
++#include <linux/pm_runtime.h>
+ #include <linux/seq_file.h>
+ #include <linux/uaccess.h>
+ 
+@@ -52,6 +53,11 @@ static int show_channel(struct host1x_channel *ch, void *data, bool show_fifo)
+ {
+ 	struct host1x *m = dev_get_drvdata(ch->dev->parent);
+ 	struct output *o = data;
++	int err;
 +
-+For each opp entry in 'operating-points-v2' table of host1x and its modules:
-+- opp-supported-hw: One bitfield indicating:
-+	On Tegra20: SoC process ID mask
-+	On Tegra30+: SoC speedo ID mask
++	err = pm_runtime_resume_and_get(m->dev);
++	if (err < 0)
++		return err;
+ 
+ 	mutex_lock(&ch->cdma.lock);
+ 	mutex_lock(&debug_lock);
+@@ -64,6 +70,8 @@ static int show_channel(struct host1x_channel *ch, void *data, bool show_fifo)
+ 	mutex_unlock(&debug_lock);
+ 	mutex_unlock(&ch->cdma.lock);
+ 
++	pm_runtime_put(m->dev);
 +
-+	A bitwise AND is performed against the value and if any bit
-+	matches, the OPP gets enabled.
+ 	return 0;
+ }
+ 
+@@ -71,9 +79,14 @@ static void show_syncpts(struct host1x *m, struct output *o)
+ {
+ 	struct list_head *pos;
+ 	unsigned int i;
++	int err;
+ 
+ 	host1x_debug_output(o, "---- syncpts ----\n");
+ 
++	err = pm_runtime_resume_and_get(m->dev);
++	if (err < 0)
++		return;
 +
- Each host1x client module having to perform DMA through the Memory Controller
- should have the interconnect endpoints set to the Memory Client and External
- Memory respectively.
-@@ -45,6 +57,8 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to MPE power domain.
+ 	for (i = 0; i < host1x_syncpt_nb_pts(m); i++) {
+ 		u32 max = host1x_syncpt_read_max(m->syncpt + i);
+ 		u32 min = host1x_syncpt_load(m->syncpt + i);
+@@ -101,6 +114,8 @@ static void show_syncpts(struct host1x *m, struct output *o)
+ 					    base_val);
+ 	}
  
- - vi: video input
- 
-@@ -128,6 +142,8 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to VENC power domain.
- 
- - epp: encoder pre-processor
- 
-@@ -147,6 +163,8 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to HEG or core power domain.
- 
- - isp: image signal processor
- 
-@@ -166,6 +184,7 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - power-domains: Phandle to VENC or core power domain.
- 
- - gr2d: 2D graphics engine
- 
-@@ -185,6 +204,8 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to HEG or core power domain.
- 
- - gr3d: 3D graphics engine
- 
-@@ -209,6 +230,8 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandles to 3D or core power domain.
- 
- - dc: display controller
- 
-@@ -241,6 +264,8 @@ of the following host1x client modules:
-   - interconnect-names: Must include name of the interconnect path for each
-     interconnect entry. Consult TRM documentation for information about
-     available memory clients, see MEMORY CONTROLLER section.
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to core power domain.
- 
- - hdmi: High Definition Multimedia Interface
- 
-@@ -267,6 +292,7 @@ of the following host1x client modules:
-   - nvidia,hpd-gpio: specifies a GPIO used for hotplug detection
-   - nvidia,edid: supplies a binary EDID blob
-   - nvidia,panel: phandle of a display panel
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
- 
- - tvo: TV encoder output
- 
-@@ -277,6 +303,10 @@ of the following host1x client modules:
-   - clocks: Must contain one entry, for the module clock.
-     See ../clocks/clock-bindings.txt for details.
- 
-+  Optional properties:
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
-+  - power-domains: Phandle to core power domain.
++	pm_runtime_put(m->dev);
 +
- - dsi: display serial interface
+ 	host1x_debug_output(o, "\n");
+ }
  
-   Required properties:
-@@ -305,6 +335,7 @@ of the following host1x client modules:
-   - nvidia,panel: phandle of a display panel
-   - nvidia,ganged-mode: contains a phandle to a second DSI controller to gang
-     up with in order to support up to 8 data lanes
-+  - operating-points-v2: See ../bindings/opp/opp.txt for details.
+diff --git a/drivers/gpu/host1x/dev.c b/drivers/gpu/host1x/dev.c
+index fbb6447b8659..595b91099e3e 100644
+--- a/drivers/gpu/host1x/dev.c
++++ b/drivers/gpu/host1x/dev.c
+@@ -6,14 +6,18 @@
+  */
  
- - sor: serial output resource
+ #include <linux/clk.h>
++#include <linux/delay.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/io.h>
+ #include <linux/list.h>
+ #include <linux/module.h>
+ #include <linux/of_device.h>
+ #include <linux/of.h>
++#include <linux/pm_runtime.h>
+ #include <linux/slab.h>
  
-@@ -408,6 +439,8 @@ Example:
- 		clocks = <&tegra_car TEGRA20_CLK_HOST1X>;
- 		resets = <&tegra_car 28>;
- 		reset-names = "host1x";
-+		operating-points-v2 = <&dvfs_opp_table>;
-+		power-domains = <&domain>;
++#include <soc/tegra/common.h>
++
+ #define CREATE_TRACE_POINTS
+ #include <trace/events/host1x.h>
+ #undef CREATE_TRACE_POINTS
+@@ -190,6 +194,9 @@ static void host1x_setup_sid_table(struct host1x *host)
+ 	const struct host1x_info *info = host->info;
+ 	unsigned int i;
  
- 		#address-cells = <1>;
- 		#size-cells = <1>;
-@@ -421,6 +454,8 @@ Example:
- 			clocks = <&tegra_car TEGRA20_CLK_MPE>;
- 			resets = <&tegra_car 60>;
- 			reset-names = "mpe";
-+			operating-points-v2 = <&dvfs_opp_table>;
-+			power-domains = <&domain>;
- 		};
++	if (!info->has_hypervisor)
++		return;
++
+ 	for (i = 0; i < info->num_sid_entries; i++) {
+ 		const struct host1x_sid_entry *entry = &info->sid_table[i];
  
- 		vi@54080000 {
-@@ -429,6 +464,7 @@ Example:
- 			interrupts = <GIC_SPI 69 IRQ_TYPE_LEVEL_HIGH>;
- 			assigned-clocks = <&tegra_car TEGRA210_CLK_VI>;
- 			assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
-+			operating-points-v2 = <&dvfs_opp_table>;
+@@ -347,6 +354,27 @@ static void host1x_iommu_exit(struct host1x *host)
+ 	}
+ }
  
- 			clocks = <&tegra_car TEGRA210_CLK_VI>;
- 			power-domains = <&pd_venc>;
-@@ -510,6 +546,8 @@ Example:
- 			clocks = <&tegra_car TEGRA20_CLK_EPP>;
- 			resets = <&tegra_car 19>;
- 			reset-names = "epp";
-+			operating-points-v2 = <&dvfs_opp_table>;
-+			power-domains = <&domain>;
- 		};
++static int host1x_get_resets(struct host1x *host)
++{
++	int err;
++
++	host->resets[0].id = "mc";
++	host->resets[1].id = "host1x";
++	host->nresets = ARRAY_SIZE(host->resets);
++
++	err = devm_reset_control_bulk_get_optional_exclusive_released(
++				host->dev, host->nresets, host->resets);
++	if (err) {
++		dev_err(host->dev, "failed to get reset: %d\n", err);
++		return err;
++	}
++
++	if (WARN_ON(!host->resets[1].rstc))
++		return -ENOENT;
++
++	return 0;
++}
++
+ static int host1x_probe(struct platform_device *pdev)
+ {
+ 	struct host1x *host;
+@@ -423,12 +451,9 @@ static int host1x_probe(struct platform_device *pdev)
+ 		return err;
+ 	}
  
- 		isp {
-@@ -528,6 +566,8 @@ Example:
- 			clocks = <&tegra_car TEGRA20_CLK_GR2D>;
- 			resets = <&tegra_car 21>;
- 			reset-names = "2d";
-+			operating-points-v2 = <&dvfs_opp_table>;
-+			power-domains = <&domain>;
- 		};
+-	host->rst = devm_reset_control_get(&pdev->dev, "host1x");
+-	if (IS_ERR(host->rst)) {
+-		err = PTR_ERR(host->rst);
+-		dev_err(&pdev->dev, "failed to get reset: %d\n", err);
++	err = host1x_get_resets(host);
++	if (err)
+ 		return err;
+-	}
  
- 		gr3d {
-@@ -536,6 +576,8 @@ Example:
- 			clocks = <&tegra_car TEGRA20_CLK_GR3D>;
- 			resets = <&tegra_car 24>;
- 			reset-names = "3d";
-+			operating-points-v2 = <&dvfs_opp_table>;
-+			power-domains = <&domain>;
- 		};
+ 	err = host1x_iommu_init(host);
+ 	if (err < 0) {
+@@ -443,22 +468,10 @@ static int host1x_probe(struct platform_device *pdev)
+ 		goto iommu_exit;
+ 	}
  
- 		dc@54200000 {
-@@ -547,6 +589,8 @@ Example:
- 			clock-names = "dc", "parent";
- 			resets = <&tegra_car 27>;
- 			reset-names = "dc";
-+			operating-points-v2 = <&dvfs_opp_table>;
-+			power-domains = <&domain>;
+-	err = clk_prepare_enable(host->clk);
+-	if (err < 0) {
+-		dev_err(&pdev->dev, "failed to enable clock\n");
+-		goto free_channels;
+-	}
+-
+-	err = reset_control_deassert(host->rst);
+-	if (err < 0) {
+-		dev_err(&pdev->dev, "failed to deassert reset: %d\n", err);
+-		goto unprepare_disable;
+-	}
+-
+ 	err = host1x_syncpt_init(host);
+ 	if (err) {
+ 		dev_err(&pdev->dev, "failed to initialize syncpts\n");
+-		goto reset_assert;
++		goto free_channels;
+ 	}
  
- 			interconnects = <&mc TEGRA20_MC_DISPLAY0A &emc>,
- 					<&mc TEGRA20_MC_DISPLAY0B &emc>,
-@@ -571,6 +615,8 @@ Example:
- 			clock-names = "dc", "parent";
- 			resets = <&tegra_car 26>;
- 			reset-names = "dc";
-+			operating-points-v2 = <&dvfs_opp_table>;
-+			power-domains = <&domain>;
+ 	err = host1x_intr_init(host, syncpt_irq);
+@@ -467,10 +480,18 @@ static int host1x_probe(struct platform_device *pdev)
+ 		goto deinit_syncpt;
+ 	}
  
- 			interconnects = <&mc TEGRA20_MC_DISPLAY0AB &emc>,
- 					<&mc TEGRA20_MC_DISPLAY0BB &emc>,
-@@ -596,6 +642,7 @@ Example:
- 			resets = <&tegra_car 51>;
- 			reset-names = "hdmi";
- 			status = "disabled";
-+			operating-points-v2 = <&dvfs_opp_table>;
- 		};
+-	host1x_debug_init(host);
++	pm_runtime_enable(&pdev->dev);
++
++	err = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
++	if (err)
++		goto pm_disable;
  
- 		tvo {
-@@ -604,6 +651,7 @@ Example:
- 			interrupts = <0 76 0x04>;
- 			clocks = <&tegra_car TEGRA20_CLK_TVO>;
- 			status = "disabled";
-+			operating-points-v2 = <&dvfs_opp_table>;
- 		};
+-	if (host->info->has_hypervisor)
+-		host1x_setup_sid_table(host);
++	/* the driver's code isn't ready yet for the dynamic RPM */
++	err = pm_runtime_resume_and_get(&pdev->dev);
++	if (err)
++		goto pm_disable;
++
++	host1x_debug_init(host);
  
- 		dsi {
-@@ -615,6 +663,7 @@ Example:
- 			resets = <&tegra_car 48>;
- 			reset-names = "dsi";
- 			status = "disabled";
-+			operating-points-v2 = <&dvfs_opp_table>;
- 		};
- 	};
+ 	err = host1x_register(host);
+ 	if (err < 0)
+@@ -486,13 +507,14 @@ static int host1x_probe(struct platform_device *pdev)
+ 	host1x_unregister(host);
+ deinit_debugfs:
+ 	host1x_debug_deinit(host);
++
++	pm_runtime_put(&pdev->dev);
++pm_disable:
++	pm_runtime_disable(&pdev->dev);
++
+ 	host1x_intr_deinit(host);
+ deinit_syncpt:
+ 	host1x_syncpt_deinit(host);
+-reset_assert:
+-	reset_control_assert(host->rst);
+-unprepare_disable:
+-	clk_disable_unprepare(host->clk);
+ free_channels:
+ 	host1x_channel_list_free(&host->channel_list);
+ iommu_exit:
+@@ -507,19 +529,94 @@ static int host1x_remove(struct platform_device *pdev)
  
+ 	host1x_unregister(host);
+ 	host1x_debug_deinit(host);
++
++	pm_runtime_put(&pdev->dev);
++	pm_runtime_disable(&pdev->dev);
++
+ 	host1x_intr_deinit(host);
+ 	host1x_syncpt_deinit(host);
+-	reset_control_assert(host->rst);
+-	clk_disable_unprepare(host->clk);
+ 	host1x_iommu_exit(host);
+ 
+ 	return 0;
+ }
+ 
++static int __maybe_unused host1x_runtime_suspend(struct device *dev)
++{
++	struct host1x *host = dev_get_drvdata(dev);
++	int err;
++
++	host1x_intr_stop(host);
++	host1x_syncpt_save(host);
++
++	err = reset_control_bulk_assert(host->nresets, host->resets);
++	if (err) {
++		dev_err(dev, "failed to assert reset: %d\n", err);
++		goto resume_host1x;
++	}
++
++	usleep_range(1000, 2000);
++
++	clk_disable_unprepare(host->clk);
++	reset_control_bulk_release(host->nresets, host->resets);
++
++	return 0;
++
++resume_host1x:
++	host1x_setup_sid_table(host);
++	host1x_syncpt_restore(host);
++	host1x_intr_start(host);
++
++	return err;
++}
++
++static int __maybe_unused host1x_runtime_resume(struct device *dev)
++{
++	struct host1x *host = dev_get_drvdata(dev);
++	int err;
++
++	err = reset_control_bulk_acquire(host->nresets, host->resets);
++	if (err) {
++		dev_err(dev, "failed to acquire reset: %d\n", err);
++		return err;
++	}
++
++	err = clk_prepare_enable(host->clk);
++	if (err) {
++		dev_err(dev, "failed to enable clock: %d\n", err);
++		goto release_reset;
++	}
++
++	err = reset_control_bulk_deassert(host->nresets, host->resets);
++	if (err < 0) {
++		dev_err(dev, "failed to deassert reset: %d\n", err);
++		goto disable_clk;
++	}
++
++	host1x_setup_sid_table(host);
++	host1x_syncpt_restore(host);
++	host1x_intr_start(host);
++
++	return 0;
++
++disable_clk:
++	clk_disable_unprepare(host->clk);
++release_reset:
++	reset_control_bulk_release(host->nresets, host->resets);
++
++	return err;
++}
++
++static const struct dev_pm_ops host1x_pm = {
++	SET_RUNTIME_PM_OPS(host1x_runtime_suspend, host1x_runtime_resume,
++			   NULL)
++	/* TODO: add system suspend-resume once driver will be ready for that */
++};
++
+ static struct platform_driver tegra_host1x_driver = {
+ 	.driver = {
+ 		.name = "tegra-host1x",
+ 		.of_match_table = host1x_of_match,
++		.pm = &host1x_pm,
+ 	},
+ 	.probe = host1x_probe,
+ 	.remove = host1x_remove,
+diff --git a/drivers/gpu/host1x/dev.h b/drivers/gpu/host1x/dev.h
+index fa6d4bc46e98..41a7a63514c4 100644
+--- a/drivers/gpu/host1x/dev.h
++++ b/drivers/gpu/host1x/dev.h
+@@ -118,7 +118,8 @@ struct host1x {
+ 	struct host1x_syncpt_base *bases;
+ 	struct device *dev;
+ 	struct clk *clk;
+-	struct reset_control *rst;
++	struct reset_control_bulk_data resets[2];
++	unsigned int nresets;
+ 
+ 	struct iommu_group *group;
+ 	struct iommu_domain *domain;
+diff --git a/drivers/gpu/host1x/hw/channel_hw.c b/drivers/gpu/host1x/hw/channel_hw.c
+index 1999780a7203..6b40e9af1e88 100644
+--- a/drivers/gpu/host1x/hw/channel_hw.c
++++ b/drivers/gpu/host1x/hw/channel_hw.c
+@@ -159,6 +159,27 @@ static void host1x_channel_set_streamid(struct host1x_channel *channel)
+ #endif
+ }
+ 
++static void host1x_enable_gather_filter(struct host1x_channel *ch)
++{
++#if HOST1X_HW >= 6
++	struct host1x *host = dev_get_drvdata(ch->dev->parent);
++	u32 val;
++
++	if (!host->hv_regs)
++		return;
++
++	val = host1x_hypervisor_readl(
++		host, HOST1X_HV_CH_KERNEL_FILTER_GBUFFER(ch->id / 32));
++	val |= BIT(ch->id % 32);
++	host1x_hypervisor_writel(
++		host, val, HOST1X_HV_CH_KERNEL_FILTER_GBUFFER(ch->id / 32));
++#elif HOST1X_HW >= 4
++	host1x_ch_writel(ch,
++			 HOST1X_CHANNEL_CHANNELCTRL_KERNEL_FILTER_GBUFFER(1),
++			 HOST1X_CHANNEL_CHANNELCTRL);
++#endif
++}
++
+ static int channel_submit(struct host1x_job *job)
+ {
+ 	struct host1x_channel *ch = job->channel;
+@@ -190,6 +211,7 @@ static int channel_submit(struct host1x_job *job)
+ 	}
+ 
+ 	host1x_channel_set_streamid(ch);
++	host1x_enable_gather_filter(ch);
+ 
+ 	/* begin a CDMA submit */
+ 	err = host1x_cdma_begin(&ch->cdma, job);
+@@ -249,27 +271,6 @@ static int channel_submit(struct host1x_job *job)
+ 	return err;
+ }
+ 
+-static void enable_gather_filter(struct host1x *host,
+-				 struct host1x_channel *ch)
+-{
+-#if HOST1X_HW >= 6
+-	u32 val;
+-
+-	if (!host->hv_regs)
+-		return;
+-
+-	val = host1x_hypervisor_readl(
+-		host, HOST1X_HV_CH_KERNEL_FILTER_GBUFFER(ch->id / 32));
+-	val |= BIT(ch->id % 32);
+-	host1x_hypervisor_writel(
+-		host, val, HOST1X_HV_CH_KERNEL_FILTER_GBUFFER(ch->id / 32));
+-#elif HOST1X_HW >= 4
+-	host1x_ch_writel(ch,
+-			 HOST1X_CHANNEL_CHANNELCTRL_KERNEL_FILTER_GBUFFER(1),
+-			 HOST1X_CHANNEL_CHANNELCTRL);
+-#endif
+-}
+-
+ static int host1x_channel_init(struct host1x_channel *ch, struct host1x *dev,
+ 			       unsigned int index)
+ {
+@@ -278,7 +279,6 @@ static int host1x_channel_init(struct host1x_channel *ch, struct host1x *dev,
+ #else
+ 	ch->regs = dev->regs + index * 0x100;
+ #endif
+-	enable_gather_filter(dev, ch);
+ 	return 0;
+ }
+ 
+diff --git a/drivers/gpu/host1x/intr.c b/drivers/gpu/host1x/intr.c
+index 45b6be927ec4..965ba21818b1 100644
+--- a/drivers/gpu/host1x/intr.c
++++ b/drivers/gpu/host1x/intr.c
+@@ -297,14 +297,11 @@ int host1x_intr_init(struct host1x *host, unsigned int irq_sync)
+ 			 "host1x_sp_%02u", id);
+ 	}
+ 
+-	host1x_intr_start(host);
+-
+ 	return 0;
+ }
+ 
+ void host1x_intr_deinit(struct host1x *host)
+ {
+-	host1x_intr_stop(host);
+ }
+ 
+ void host1x_intr_start(struct host1x *host)
+diff --git a/drivers/gpu/host1x/syncpt.c b/drivers/gpu/host1x/syncpt.c
+index d198a10848c6..e08e331e46ae 100644
+--- a/drivers/gpu/host1x/syncpt.c
++++ b/drivers/gpu/host1x/syncpt.c
+@@ -143,6 +143,8 @@ void host1x_syncpt_restore(struct host1x *host)
+ 	for (i = 0; i < host1x_syncpt_nb_bases(host); i++)
+ 		host1x_hw_syncpt_restore_wait_base(host, sp_base + i);
+ 
++	host1x_hw_syncpt_enable_protection(host);
++
+ 	wmb();
+ }
+ 
+@@ -366,9 +368,6 @@ int host1x_syncpt_init(struct host1x *host)
+ 	host->syncpt = syncpt;
+ 	host->bases = bases;
+ 
+-	host1x_syncpt_restore(host);
+-	host1x_hw_syncpt_enable_protection(host);
+-
+ 	/* Allocate sync point to use for clearing waits for expired fences */
+ 	host->nop_sp = host1x_syncpt_alloc(host, 0, "reserved-nop");
+ 	if (!host->nop_sp)
 -- 
 2.32.0
 
