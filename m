@@ -2,129 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69841C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Sep 2021 15:06:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 00BC4C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Sep 2021 15:12:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4DB5460E74
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Sep 2021 15:06:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DA92460FE6
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Sep 2021 15:12:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1345824AbhIMPHx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Sep 2021 11:07:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53602 "EHLO
+        id S1345127AbhIMPNz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Sep 2021 11:13:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54674 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1345113AbhIMPHu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Sep 2021 11:07:50 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B54C1C00874F
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Sep 2021 06:43:09 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id g1so9758468lfj.12
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Sep 2021 06:43:09 -0700 (PDT)
+        with ESMTP id S242132AbhIMPNt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Sep 2021 11:13:49 -0400
+Received: from mail-ot1-x333.google.com (mail-ot1-x333.google.com [IPv6:2607:f8b0:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00F37C0C7015
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Sep 2021 07:02:56 -0700 (PDT)
+Received: by mail-ot1-x333.google.com with SMTP id a20-20020a0568300b9400b0051b8ca82dfcso13426926otv.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Sep 2021 07:02:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=tQAMjy8VRvJI6lW4tYB0PDHpx0tw8jGULSmN/FaNG+g=;
-        b=Bbb/S9bUWOBSsQ3pUMTVPvPM3mELyvG1d1Lp39NxhVgmVk+79l6sqgb6LzWCOb4L0G
-         4xOUKFakiyAC6nrltsn+MB6bUBos4WlUB0nm7FHkp2RF21NdRLUEm4sunjTSdshoRv4K
-         eNLAmdHSnHkdwraYqYyvKCPiIaApFzA0oCxB65b4ONd9T/nu22W+N71E6gYzBiva34CW
-         IgswZYwE132B2XWdZPaLFJFxywQZsw2cZ4gmU7fM6bSCADjsWz2QqrQNXrytfyNxu0Ed
-         QWM6q7ZowPchznXUFAyvgGnmTOZr9Qu57dB5+Rp0N50r+t46TxzQtEkrBzX3RfDkuaUN
-         gsXA==
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=3xvNWywI97T4tWFgzxwRssL/X08dlRk9g/Y8iCoCYDQ=;
+        b=P/L+slfGYvd26hdMp0Y/CSmadKyMlS3h6DMan0rYpjL4lDuewmqrlQNRopj+ozCgj+
+         lsM+ZPRfP/O0n1WuTCBx340GD1ZcRF0jgGJD5DhU17g+VsUxq0eu3D3oydRxdPmMURKg
+         2Qpa9hyVmbEiIaf3ANBqQCswXZR8EU6PXOnakXNO5c8y1TdP2Xez+GJ9hoW9d7dAEutK
+         5sPEbmWg4NHx+D2TdWUH+aYCjCLYuR1Ptx7IQIIRbrLCf3ZTJsAZcuwDg/i7Qyt5mhTm
+         7FaUQ/De72DOrf/bHoDzBtRv1HI5n3+VFdATkr7O6D11WSVzx2xDYZKis+SVZQOpkyUL
+         9sgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=tQAMjy8VRvJI6lW4tYB0PDHpx0tw8jGULSmN/FaNG+g=;
-        b=i6LdHGAmxSIyxo9ODgJmdnihU6/qnkhswkruVadHXogW8OHYy1zUOrzyMN7kNHf17w
-         FwJAs/JpGzAHa/ydISBdmX1nEdZcEX/D7Q7ynTaBY5k6OBS/SluFtDfS3MPrqI7VsZzD
-         hvkohHHPL/kupG+p5KrNabxCRSB4ezDKfMQyrddagE+k/6LjWrV9XBS4E9HAZRCnJjQx
-         /AQ+/fg/w8NZWovH8c1ayvKmbCJOEbYH/d5msMY8nkl2ZcEbMX1uJ0Vu7kDlxgHMS5rE
-         f34tlYimw0WSiy4ym44gDZbSpwkpOskkzpEpn2JMgTNsY+9rnrb3m+s+kNQa5dZgF9DB
-         9uHA==
-X-Gm-Message-State: AOAM532vDM+/Y8HnhCE6VQ5ISFtIg6cqV+L1GslMqRR2fP2GNvfTsCy1
-        iFKv+1MInpG1neOWBg/faG3PNh5HHg539M84ME14jA==
-X-Google-Smtp-Source: ABdhPJy07GBvfOdosgOPOaGQzsGX2CjzdZ3iQjt2WHHbgd+CW+rDXGN21SD5O2GYnEG/e8C/opszahQX3cMDMdCSpjk=
-X-Received: by 2002:a05:6512:6cd:: with SMTP id u13mr8847405lff.184.1631540588087;
- Mon, 13 Sep 2021 06:43:08 -0700 (PDT)
+         :message-id:subject:to;
+        bh=3xvNWywI97T4tWFgzxwRssL/X08dlRk9g/Y8iCoCYDQ=;
+        b=DNC7L1kN2kdkg9zT2nuewOSFEjMLOicoOvqILWxrWp2WcHwTxPkrZNMvjfMYsZtIW8
+         9dUO/2kiT+4ehYNn3EawJqoCZd76T1uOGXSkhby5ndp5U4BAs4Gmsq0apZDc0FuXzZPj
+         GGBFkTUrkJCnXitJQtLQCm6E0Q/MPradFHoinW4u5d7gkYjHa1n3AQnOROtM17S8hUec
+         BPax9+IdFBccsk9qFzUnDtr1zAbvGL76zpPrIQbow1Ez7Gym+tLDMNOrUq2+LManDdzA
+         6rGigXwMG2wXTBPrdHO2n3d8ODYuhPNXaYLu7cpmESPYr646jJqfMMKeWxyLng6y1sEB
+         Fx5A==
+X-Gm-Message-State: AOAM532Z34ZFUZoTCcr0nzB7GbH9EHMc+3AP25HzO40BJTBvji50MPX0
+        bckbr8+b1EqL/GkCTIWQcSj3cWuw9KACMov+yi5S35DL
+X-Google-Smtp-Source: ABdhPJw6B+ADdHrI0v2l9YUhSmMkHi6e/RmCUYhA9Q4rP5TKra6nFstMWnobd78qf6G+X3DtelGZXixa3F5BrTuieZ0=
+X-Received: by 2002:a9d:3e09:: with SMTP id a9mr10200108otd.87.1631541775337;
+ Mon, 13 Sep 2021 07:02:55 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210829131305.534417-1-dmitry.baryshkov@linaro.org>
- <20210829131305.534417-2-dmitry.baryshkov@linaro.org> <CAPDyKFp9CM+x505URK=hcO0QFqcZrpqzQ6uJQ=ZLR6uq-_d5Ew@mail.gmail.com>
- <a0f8766a-7810-0ca5-229a-a40f73041dd9@linaro.org>
-In-Reply-To: <a0f8766a-7810-0ca5-229a-a40f73041dd9@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 13 Sep 2021 15:42:31 +0200
-Message-ID: <CAPDyKFrfEQr0czXeNeJbKSfP0toKuowwOX7yb89c723BORRqCA@mail.gmail.com>
-Subject: Re: [RFC v2 01/13] power: add power sequencer subsystem
-To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-bluetooth@vger.kernel.org, ath10k@lists.infradead.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>
+References: <CAMeyCbgzrbt_A_e=YGKdFyFexX0q7D15KMdL3jTKGw-YKzLA8Q@mail.gmail.com>
+In-Reply-To: <CAMeyCbgzrbt_A_e=YGKdFyFexX0q7D15KMdL3jTKGw-YKzLA8Q@mail.gmail.com>
+From:   Kegl Rohit <keglrohit@gmail.com>
+Date:   Mon, 13 Sep 2021 16:02:45 +0200
+Message-ID: <CAMeyCbjBeuqUknNKzLhBrjTVch23nShO+eCK80kcJs36uKdWLA@mail.gmail.com>
+Subject: mmc host: abort pending mmc requests
+To:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[...]
+Hello!
 
-> >> +
-> >> +struct pwrseq *of_pwrseq_xlate_onecell(void *data, struct of_phandle_args *args)
-> >> +{
-> >> +       struct pwrseq_onecell_data *pwrseq_data = data;
-> >> +       unsigned int idx;
-> >> +
-> >> +       if (args->args_count != 1)
-> >> +               return ERR_PTR(-EINVAL);
-> >> +
-> >> +       idx = args->args[0];
-> >> +       if (idx >= pwrseq_data->num) {
-> >> +               pr_err("%s: invalid index %u\n", __func__, idx);
-> >> +               return ERR_PTR(-EINVAL);
-> >> +       }
-> >
-> > In many cases it's reasonable to leave room for future extensions, so
-> > that a provider could serve with more than one power-sequencer. I
-> > guess that is what you intend to do here, right?
-> >
-> > In my opinion, I don't think what would happen, especially since a
-> > power-sequence is something that should be specific to one particular
-> > device (a Qcom WiFi/Blutooth chip, for example).
-> >
-> > That said, I suggest limiting this to a 1:1 mapping between the device
-> > node and power-sequencer. I think that should simplify the code a bit.
->
-> In fact the WiFi/BT example itself provides a non 1:1 mapping. In my
-> current design the power sequencer provides two instances (one for WiFi,
-> one for BT). This allows us to move the knowledge about "enable" pins to
-> the pwrseq. Once the QCA BT driver acquires and powers up the pwrseq,
-> the BT part is ready. No need to toggle any additional pins. Once the
-> WiFi pwrseq is powered up, the WiFi part is present on the bus and
-> ready, without any additional pin toggling.
+I am trying to implement some special use-case.
+On our platform the CPU will be notified with an interrupt if the
+power fails. After that the system has ~100ms time to do some
+tear-down tasks.
+One important step is to store some information (~512KB) on some non
+volatile storage.
+EMMC seems to be a good choice because of the high throughput. But the
+drawbacks are the non deterministic latencies caused by the EMMC
+itself, the complex sdhci mmc host driver, the blocklayer, ...
 
-Aha, that seems reasonable.
+Because time is critical I tried to implement this in the kernel space.
 
->
-> I can move onecell support to the separate patch if you think this might
-> simplify the code review.
+Most likely EMMC hardware latencies can be reduced by execution of a
+block discard during boot-up. So in case of a power-fail no sectors
+have to be erased, because they are pre-erased.
 
-It doesn't matter, both options work for me.
+I looked at the mmc_test.c kernel module to execute raw mmc block writes.
+For 512KB the write take ~60ms => looks promising
 
-[...]
+But the biggest concern is the influence of other tasks. The emmc has
+multiple partitions.
+So if i start a benchmark on another partition the write could also
+take longer, because the mmc host driver has a lot of requests in its
+queue.
+I measured up to 6s. This is caused by the blocking call to
+mmc_claim_host which waits for the queues to drain.
 
-Kind regards
-Uffe
+So i looked for a way to stop all queued mmc requests on the mmc host
+before calling claim_host.
+
+There exists some pstore implementations which have a similar use-case.
+=> store data in block before panic reboot.
+
+pstore_blk is mainline and can configured in two ways:
+1. call block->panic_write if the block driver supports it. (Currently
+only some mtd drivers and no emmc?)
+2. Use "best_effort" and write to /dev/mmcblk via kernel_write() =>
+possible with emmc
+
+https://github.com/torvalds/linux/commit/f8feafeaeedbf0a324c373c5fa29a2098a69c458#diff-d3fb8bf94c21d538c62beccd243ca6266b4dec19c6d60a581aa6d71ba9874a53
+
+This second option is also heavily influenced by other io, because it
+uses the same system io scheduler like userspace?
+
+
+But there exists also some more raw patch sets:
+https://patchwork.kernel.org/project/linux-mmc/patch/1425015219-19849-1-git-send-email-jh80.chung@samsung.com/
+https://patchwork.kernel.org/project/linux-mmc/patch/20201207115753.21728-2-bbudiredla@marvell.com/#23849559
+
+And even some which tap into the sdhci driver to abort all ongoing
+emmc requests:
+https://lkml.org/lkml/2012/10/23/335
+
+
+Because I want to keep it simple I started with some more basic commands:
+
+The first try was to call
+_mmc_blk_suspend(mmc_card);
+before mmc_claim_host() => also slow
+
+Next
+blk_mq_freeze_queue(mmc_card->queue.queue)
+before mmc_claim_host() => also slow
+
+Next
+mmc_blk_hw_queue_stop(mmc_card->queue.queue);
+before mmc_claim_host() => better
+By changing the scheduler to none and reducing max_sectors_kb. The
+writes take up to ~100ms with parallel userspace write test running.
+Without the write test it only takes ~60ms. So the scheduling of
+userpace io still has some influence.
+
+Do you know any way to forcefully stop all pending mmc host requests
+to improve this further? I think mmc_blk_hw_queue_stop still waits for
+the pending requests to be finished.
+Or is there a way to queue my mmc block requests before all other
+pending requests?
+
+Thanks in advance!
