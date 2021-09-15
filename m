@@ -2,60 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F01DBC433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 07:46:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F426C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 08:28:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D198661247
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 07:46:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1E67A61185
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 08:28:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236705AbhIOHrU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Sep 2021 03:47:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51100 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236686AbhIOHrT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2021 03:47:19 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7925FC061574;
-        Wed, 15 Sep 2021 00:46:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=nnSa7P336VGGk9Limvd7GwXLYg/oH4OMYdyuRmtulc8=; b=OcNA9ZWLwCEof9xZCbhUvoMnkr
-        duiUXizcvSczod/ZrpCDZOnMqML6D9zTBnPEY+x6+BBoZHR3q8KhW6KuapOOkHci9Wvi30pbbBbOy
-        puvS87zCM3I7qfProzjufEvKI/TPRHtdJZ8iOxLVGFqiL9y9S2FwcNNDuHJDrCoLPKJ8jKyhLu1u0
-        J+TUXDkJj4rKkx4qcqNr2DYgW0M+wkBIwS+JjCSfIAJ9G3+R9nNypr1Kex3P0vqiQEBEtawncssji
-        iA/dqH9tFEpzaaV95QvecIxhCpINzNwBdRszxFZzsAERSKYFlWFuEikkg12qH2lGDzNhoHgdDASiA
-        G2/jTzrA==;
-Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mQPbI-00FTEv-Dl; Wed, 15 Sep 2021 07:45:24 +0000
-Date:   Wed, 15 Sep 2021 08:45:00 +0100
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-block@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-scsi@vger.kernel.org, dm-devel@redhat.com,
-        Satya Tangirala <satyaprateek2357@gmail.com>
-Subject: Re: [PATCH 3/5] blk-crypto: rename keyslot-manager files to
- blk-crypto-profile
-Message-ID: <YUGkfDmGa3WKz8cD@infradead.org>
-References: <20210913013135.102404-1-ebiggers@kernel.org>
- <20210913013135.102404-4-ebiggers@kernel.org>
+        id S236955AbhIOI3R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Sep 2021 04:29:17 -0400
+Received: from mail-vs1-f43.google.com ([209.85.217.43]:41480 "EHLO
+        mail-vs1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236869AbhIOI3K (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2021 04:29:10 -0400
+Received: by mail-vs1-f43.google.com with SMTP id az15so739992vsb.8;
+        Wed, 15 Sep 2021 01:27:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=kVcfd09K/pu9DIuy5I9phfjdDjuWdayUGLcOlhCsr88=;
+        b=PPYg63V86eW3QBkupgZu9KczTzcojK0wWwsS0uKqSHurb4lJZd8oMfx4Zt+6hT1PdJ
+         HzE87oPYC1Um/4AnD852hu1C4ajgNa8bD4mqMHDmtJSqz7M+McD43EhM71Miih7ch2R8
+         Uv9elY8E7RTEgpkwIFn8Pohcp4/LVmlem9MmHWI+Ulmu2iUCOteO+sM+rRU1SUHoSNT+
+         s3f4ecKxU6/f6toEOyQnd4SbPp0sChYu4/We8aq7SMEg4/CeeTok+/XiAwc5Q35pOWme
+         Q2lzKUDXh83xgUh4f4vokHiD9UqfM47MTvIcmB0LrV4gSfsNIHIuJWBdh8hP13PXdnv1
+         gHUA==
+X-Gm-Message-State: AOAM531BQWd9Sr6OFEb1ttEOyup7W9jbmcZxl0j4Iz+W5RsVjZrD9/uG
+        3I+BI3AIq/WU0ofAvzg1JcHkunt7mFVmFQreTDM=
+X-Google-Smtp-Source: ABdhPJzGnrwBDhZfwC7yq05wMPQSPxejA8axVLfyZ96yNQ6nxhTPrFWtcONJR0WzcHwjxErye9qGFOMNWfaz6MHjVzc=
+X-Received: by 2002:a05:6102:2417:: with SMTP id j23mr2364133vsi.35.1631694471070;
+ Wed, 15 Sep 2021 01:27:51 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20210913013135.102404-4-ebiggers@kernel.org>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+References: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 15 Sep 2021 10:27:39 +0200
+Message-ID: <CAMuHMdWGwncmt0V4V6mXtpU1jSb2VO4Bfe5yMsyiN+=KCkEuNA@mail.gmail.com>
+Subject: Re: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
+        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Looks good:
+Hi Wolfram,
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+On Tue, Sep 14, 2021 at 8:22 PM Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+> After my hackish RFC patch, here is a small series implementing
+> (hopefully) the solution we discussed. It will make
+> mmc_send_abort_tuning() also send CMD12 for SD cards which makes more SD
+> cards work for us. Details are in the patch descriptions.
+>
+> Please let me know what you think.
+>
+> Thanks, and happy hacking!
+>
+>
+> Wolfram Sang (3):
+>   mmc: core: add helper to send STOP
+>   mmc: core: also abort tuning with CMD12 for SD
+>   mmc: core: remove obsolete parameter from mmc_send_abort_tuning
 
-It would be nice to keep the blk-crypto* includes together, though.
+Thanks for your series!
+
+I gave this a quick boot test on the Gose and ALT in Magnus' farm, but
+the issues are still there.
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
