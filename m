@@ -2,146 +2,193 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-16.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96BE1C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 12:49:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D3DFC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 14:58:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7A72160F70
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 12:49:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2E38561212
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 14:58:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233194AbhIOMux (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Sep 2021 08:50:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36414 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229670AbhIOMut (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2021 08:50:49 -0400
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC546C061575
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Sep 2021 05:49:29 -0700 (PDT)
-Received: by mail-lj1-x231.google.com with SMTP id j12so854199ljg.10
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Sep 2021 05:49:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=FH30O377gCgchXls+ioHq2bH2D59xWo/oWbpx95frec=;
-        b=xhGX94MOrFx2mzp0j5ncdCZ5dCT2mazIZkr1mviCJiS80EUNFleKKreZXEUnGsEl0B
-         vdN+VClwwMuI5dnoKmKvq4UNj2/oJxVlEyn5C0n8l8Puc3X7ibjl6pZGyGxcwT3RxBKL
-         eDv1dSIhf7lLE32JWtVSrCw0BxUaAa2D48EpV68hyd95LRyF0jM+sH5eUjuYIFRCR+0r
-         c57uJqRiiZeLKfn8DLEX/VIUFzgxjK+LMxrXuMzdIU7nd46ENNBN86hbww3SsONQEUjV
-         Qa7flzcShVlQ7GpM2WBEhWUAN0dzXr43jcNn5rK8pjf2z/+kLnnRAFkpSai0+z8MUDTq
-         3l1w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=FH30O377gCgchXls+ioHq2bH2D59xWo/oWbpx95frec=;
-        b=xO+qQD94KeZJpaKg/wFOwjIi6ZO3JHWHndc7JEqIDp+8Z+13gEcW36X27A0XeeaAt6
-         cHkRYV5la5zfU9FNPRDPitXWI1lvZwKHOWoNoW+YJWwC3Gjo2alKj88JJk0TGxPf/PQy
-         Wm7Rq7//fGL5wGCel9j3tkEocn8chm43qnDU5Wwuot0uNLR+Ob/aSzFbOOxdNIFC6p80
-         ftdwGryFzX6hKZNc2oUeSdQCGPo+fM62m6/BxqRrBELJrpge7bLQmMUmxjZobHwJnGuF
-         HiV4xeVmeTzFKQnJWcVuDkTfhFnRJxmYhaOtQ1+jEKxiN8pv8sYFiwj0YWiCvsAk4fdR
-         2tdw==
-X-Gm-Message-State: AOAM5325lvjiNB9HTxp4WNPpAMclSbkOs92GD6+/7xalFWBh+6sDDlS3
-        CTIiqbmUsJcv5PyBFyWplZaFKB7mZO4v1bwC/BTtQQ==
-X-Google-Smtp-Source: ABdhPJxP1J4tkSukc7gi2W/9LCeNDw8Ayv/w9QtLVPeRLbYGByFQWKBMzIZ4psjS0KnFHCwO/fP+RwSFcc86TxobHa4=
-X-Received: by 2002:a05:651c:102d:: with SMTP id w13mr20050344ljm.229.1631710168105;
- Wed, 15 Sep 2021 05:49:28 -0700 (PDT)
+        id S233711AbhIOO7l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Sep 2021 10:59:41 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:33414 "EHLO
+        mx0b-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S232242AbhIOO7l (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2021 10:59:41 -0400
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.1.2/8.16.0.43) with SMTP id 18FEUr3n028559;
+        Wed, 15 Sep 2021 10:57:56 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ibm.com; h=subject : to : cc :
+ references : from : message-id : date : mime-version : in-reply-to :
+ content-type : content-transfer-encoding; s=pp1;
+ bh=XZCB86uPKuV/GzpbaX8+VV3hy7G2w+54Yd25UoQjYiA=;
+ b=p0hUCf/0qQPWDba9bizX/010a1RbKLZmp7dMoG7zsai0bIliEwc+zkgdLGOeV/5721JT
+ tZjWfCp0cgVzr2CxY9Ca3vzq6tDiuo2x9/gRQ/N+Jg625dNmKwXzhX+2em0gf3S0nRvi
+ /rkG2qsBFbyuYlCPWyWa1VMAgVFh6PaSPQik1D0qiS4sxkVECz/9gDB53mgW/5CdRPF7
+ GfBEiuvdp/zKvNOzQngxOvA1HH7h5EYwZE8ya7sYmaHzzPGqA12GJJBncZlSF+YzftOS
+ oyEoHdjXsJlbB9SWqwmnh3FYwYAqXnkU3wOw69hIcMZk3JWdcq9GGHDQO1T9iBOaiuqv kw== 
+Received: from pps.reinject (localhost [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3b3jnc8t77-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 15 Sep 2021 10:57:56 -0400
+Received: from m0098417.ppops.net (m0098417.ppops.net [127.0.0.1])
+        by pps.reinject (8.16.0.43/8.16.0.43) with SMTP id 18FEVhPI002814;
+        Wed, 15 Sep 2021 10:57:55 -0400
+Received: from ppma04fra.de.ibm.com (6a.4a.5195.ip4.static.sl-reverse.com [149.81.74.106])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 3b3jnc8t6c-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 15 Sep 2021 10:57:55 -0400
+Received: from pps.filterd (ppma04fra.de.ibm.com [127.0.0.1])
+        by ppma04fra.de.ibm.com (8.16.1.2/8.16.1.2) with SMTP id 18FEqw1j024866;
+        Wed, 15 Sep 2021 14:57:53 GMT
+Received: from b06cxnps4074.portsmouth.uk.ibm.com (d06relay11.portsmouth.uk.ibm.com [9.149.109.196])
+        by ppma04fra.de.ibm.com with ESMTP id 3b0m3a72ns-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 15 Sep 2021 14:57:53 +0000
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (b06wcsmtp001.portsmouth.uk.ibm.com [9.149.105.160])
+        by b06cxnps4074.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id 18FEvnm248824578
+        (version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Wed, 15 Sep 2021 14:57:49 GMT
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id AA8ECA405C;
+        Wed, 15 Sep 2021 14:57:49 +0000 (GMT)
+Received: from b06wcsmtp001.portsmouth.uk.ibm.com (unknown [127.0.0.1])
+        by IMSVA (Postfix) with ESMTP id B0BD8A4054;
+        Wed, 15 Sep 2021 14:57:48 +0000 (GMT)
+Received: from [9.145.14.74] (unknown [9.145.14.74])
+        by b06wcsmtp001.portsmouth.uk.ibm.com (Postfix) with ESMTP;
+        Wed, 15 Sep 2021 14:57:48 +0000 (GMT)
+Subject: Re: [PATCH 6/9] s390/block/dasd_genhd: add error handling support for
+ add_disk()
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     axboe@kernel.dk, gregkh@linuxfoundation.org,
+        chaitanya.kulkarni@wdc.com, atulgopinathan@gmail.com, hare@suse.de,
+        maximlevitsky@gmail.com, oakad@yahoo.com, ulf.hansson@linaro.org,
+        colin.king@canonical.com, shubhankarvk@gmail.com,
+        baijiaju1990@gmail.com, trix@redhat.com,
+        dongsheng.yang@easystack.cn, ceph-devel@vger.kernel.org,
+        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
+        sth@linux.ibm.com, hca@linux.ibm.com, gor@linux.ibm.com,
+        borntraeger@de.ibm.com, oberpar@linux.ibm.com, tj@kernel.org,
+        linux-s390@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20210902174105.2418771-1-mcgrof@kernel.org>
+ <20210902174105.2418771-7-mcgrof@kernel.org>
+ <d6140e40-a472-e732-9893-99e1839b717e@linux.ibm.com>
+ <f24da7d5-0b67-fa24-862f-0b27a2ab502c@linux.ibm.com>
+ <YT+Bmvv3yXbuBddi@bombadil.infradead.org>
+From:   =?UTF-8?Q?Jan_H=c3=b6ppner?= <hoeppner@linux.ibm.com>
+Message-ID: <417cf368-6821-442b-0a14-006b27690591@linux.ibm.com>
+Date:   Wed, 15 Sep 2021 16:57:48 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
 MIME-Version: 1.0
-References: <20210907151204.118861-1-huobean@gmail.com> <20210907151204.118861-3-huobean@gmail.com>
- <CAPDyKFpC6iei96n-UcRTNrxTaHeejzfQX+rka7GSwSZjXN7-4g@mail.gmail.com> <92123c0398e154334cc947ce8f16e89ce0c3c9af.camel@gmail.com>
-In-Reply-To: <92123c0398e154334cc947ce8f16e89ce0c3c9af.camel@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Sep 2021 14:48:51 +0200
-Message-ID: <CAPDyKFpAjMwPbxew0FyHH9mLOTaPw01AL0fCCLDjSP0N=xQcaA@mail.gmail.com>
-Subject: Re: [PATCH v1 2/2] mmc: core: No need to calculate the timeout value
- for CQE data transmission
-To:     Bean Huo <huobean@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Avri Altman <avri.altman@wdc.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        "Bean Huo (beanhuo)" <beanhuo@micron.com>
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <YT+Bmvv3yXbuBddi@bombadil.infradead.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
+X-TM-AS-GCONF: 00
+X-Proofpoint-ORIG-GUID: 9TnzlmD7Tr-lHTTUHflItAjPnDnMN64G
+X-Proofpoint-GUID: ehalCfQDBnMyMC6p5nCgsPYP3FossWSO
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.182.1,Aquarius:18.0.687,Hydra:6.0.235,FMLib:17.0.607.475
+ definitions=2020-10-13_15,2020-10-13_02,2020-04-07_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 spamscore=0
+ mlxlogscore=999 mlxscore=0 suspectscore=0 malwarescore=0 impostorscore=0
+ clxscore=1015 phishscore=0 bulkscore=0 lowpriorityscore=0
+ priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2109030001 definitions=main-2109150090
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Sept 2021 at 11:54, Bean Huo <huobean@gmail.com> wrote:
->
-> On Tue, 2021-09-14 at 10:13 +0200, Ulf Hansson wrote:
-> > >          }
-> > > +       /*
-> > > +        * In case CQE is enabled, the timeout will be set a
-> > > maximum timeout in
-> > > +        * sdhci_cqe_enable(), so, no need to go through the below
-> > > algorithm.
-> > > +        */
-> > > +       if (host->cqe_enabled)
-> >
-> >
-> >  I don't think this is a good idea. For example, host->cqe_enabled is
-> >
-> > set for the hsq case well.
->
-> Uffe,
->
-> My apologies for this, I forgot to check hsq, hsq will call
-> sdhci_send_command() as well.
->
->
-> How about changing it to this?
->
->
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 240c5af793dc..7235e398ef93 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -649,6 +649,7 @@ EXPORT_SYMBOL(mmc_wait_for_cmd);
->  void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card
-> *card)
->  {
->         unsigned int mult;
-> +       struct mmc_host *host = card->host;
->
->         /*
->          * SDIO cards only define an upper 1 s limit on access.
-> @@ -659,6 +660,13 @@ void mmc_set_data_timeout(struct mmc_data *data,
-> const struct mmc_card *card)
->                 return;
->         }
->
-> +       /*
-> +        * For the CQE use case, the data transfer timeout will be set
-> a maximum
-> +        * timeout value in HW timer in function sdhci_cqe_enable(),
-> so, no need
-> +        * to go through the below algorithm.
-> +        */
-> +       if (host->cqe_enabled && !host->hsq_enabled)
-> +               return;
+On 13/09/2021 18:51, Luis Chamberlain wrote:
+> On Mon, Sep 13, 2021 at 02:19:38PM +0200, Jan Höppner wrote:
+>> On 13/09/2021 10:17, Jan Höppner wrote:
+>>> On 02/09/2021 19:41, Luis Chamberlain wrote:
+>>>> We never checked for errors on add_disk() as this function
+>>>> returned void. Now that this is fixed, use the shiny new
+>>>> error handling.
+>>>>
+>>>> Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+>>>> ---
+>>>>  drivers/s390/block/dasd_genhd.c | 8 ++++++--
+>>>>  1 file changed, 6 insertions(+), 2 deletions(-)
+>>>>
+>>>> diff --git a/drivers/s390/block/dasd_genhd.c b/drivers/s390/block/dasd_genhd.c
+>>>> index fa966e0db6ca..ba07022283bc 100644
+>>>> --- a/drivers/s390/block/dasd_genhd.c
+>>>> +++ b/drivers/s390/block/dasd_genhd.c
+>>>> @@ -33,7 +33,7 @@ int dasd_gendisk_alloc(struct dasd_block *block)
+>>>>  {
+>>>>  	struct gendisk *gdp;
+>>>>  	struct dasd_device *base;
+>>>> -	int len;
+>>>> +	int len, rc;
+>>>>  
+>>>>  	/* Make sure the minor for this device exists. */
+>>>>  	base = block->base;
+>>>> @@ -79,7 +79,11 @@ int dasd_gendisk_alloc(struct dasd_block *block)
+>>>>  	dasd_add_link_to_gendisk(gdp, base);
+>>>>  	block->gdp = gdp;
+>>>>  	set_capacity(block->gdp, 0);
+>>>> -	device_add_disk(&base->cdev->dev, block->gdp, NULL);
+>>>> +
+>>>> +	rc = device_add_disk(&base->cdev->dev, block->gdp, NULL);
+>>>> +	if (rc)
+>>>> +		return rc;
+>>>> +
+>>>
+>>> I think, just like with some of the other changes, there is some
+>>> cleanup required before returning. I'll prepare a patch and
+>>> come back to you.
+>>>
+>>
+>> It's actually just one call that is required. The patch should
+>> look like this:
+>>
+>> diff --git a/drivers/s390/block/dasd_genhd.c b/drivers/s390/block/dasd_genhd.c
+>> index fa966e0db6ca..80673dbfb1f9 100644
+>> --- a/drivers/s390/block/dasd_genhd.c
+>> +++ b/drivers/s390/block/dasd_genhd.c
+>> @@ -33,7 +33,7 @@ int dasd_gendisk_alloc(struct dasd_block *block)
+>>  {
+>>         struct gendisk *gdp;
+>>         struct dasd_device *base;
+>> -       int len;
+>> +       int len, rc;
+>>  
+>>         /* Make sure the minor for this device exists. */
+>>         base = block->base;
+>> @@ -79,7 +79,13 @@ int dasd_gendisk_alloc(struct dasd_block *block)
+>>         dasd_add_link_to_gendisk(gdp, base);
+>>         block->gdp = gdp;
+>>         set_capacity(block->gdp, 0);
+>> -       device_add_disk(&base->cdev->dev, block->gdp, NULL);
+>> +
+>> +       rc = device_add_disk(&base->cdev->dev, block->gdp, NULL);
+>> +       if (rc) {
+>> +               dasd_gendisk_free(block);
+>> +               return rc;
+>> +       }
+>> +
+> 
+> Thanks!
+> 
+> Would you like to to fold this fix into my patch and resend eventually?
+> Or will you send a replacement?
+> 
+>   Luis
+> 
 
-Are you really sure the timeout isn't used (or could make sense to be
-used for new cases)?
+I'd be fine with you just taking the changes for your patchset.
+Once you've resent the whole patchset I'll review it and send
+the usual ack or r-b.
 
-For example, we also have mtk-sd, which doesn't make use of sdhci_cqe_enable().
-
->         /*
->          * SD cards use a 100 multiplier rather than 10
->          */
->
-> I have another timeout change associated with data transfer as well, if
-> this change is acceptible, I will submit it with that together.
->
-> Kind regards,
-> Bean
->
-
-Kind regards
-Uffe
+regards,
+Jan
