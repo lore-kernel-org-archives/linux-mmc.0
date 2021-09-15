@@ -2,148 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no version=3.4.0
+	SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E505C433F5
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 08:59:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EDC3FC433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 09:54:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 36A4560527
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 08:59:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C44B761214
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Sep 2021 09:54:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237185AbhIOJBJ convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Sep 2021 05:01:09 -0400
-Received: from mail3.swissbit.com ([176.95.1.57]:52248 "EHLO
-        mail3.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237103AbhIOJBD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2021 05:01:03 -0400
-X-Greylist: delayed 561 seconds by postgrey-1.27 at vger.kernel.org; Wed, 15 Sep 2021 05:01:02 EDT
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id EFBDD4629F1;
-        Wed, 15 Sep 2021 10:50:21 +0200 (CEST)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id D83DA462576;
-        Wed, 15 Sep 2021 10:50:21 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.84-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
-        by mail3.swissbit.com (Postfix) with ESMTPS;
-        Wed, 15 Sep 2021 10:50:21 +0200 (CEST)
-Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
- (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.15; Wed, 15 Sep
- 2021 10:50:21 +0200
-Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
- sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
- 15.02.0792.015; Wed, 15 Sep 2021 10:50:21 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        "doug.anderson@chromium.org" <doug.anderson@chromium.org>
-Subject: Re: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
-Thread-Topic: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
-Thread-Index: AQHXqZVDftXqhrVI8EiMtFMWw6jtYaukxmKP
-Date:   Wed, 15 Sep 2021 08:50:21 +0000
-Message-ID: <bfe5e22fa30344f480b176f5e96afa66@hyperstone.com>
-References: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.154.1.4]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        id S232046AbhIOJz5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Sep 2021 05:55:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52876 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231860AbhIOJz5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Sep 2021 05:55:57 -0400
+Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3813DC061574;
+        Wed, 15 Sep 2021 02:54:38 -0700 (PDT)
+Received: by mail-ej1-x631.google.com with SMTP id bt14so4910907ejb.3;
+        Wed, 15 Sep 2021 02:54:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:subject:from:to:cc:date:in-reply-to:references
+         :user-agent:mime-version:content-transfer-encoding;
+        bh=C0cbjXlxhi/IJX0ZL0bzzsNP2N3UaUFrpqoamrREuVM=;
+        b=dmKwRqsVoY/mgSzV4I7aWm1Qo/Ao+VYMqo2VCxA3+yoqsvycJLGdSRQmIl8O9NLYao
+         AlCc/OJPOtw+ee6zHGFT2VYrZKyynvYrsHWWVAArRLRzVBEoj02fvCI1hpAt4IonXgGV
+         QlxNE1dGEeMzfgzVjNFFyiAu563OdL+YYIXzWrLRERTioqAC7/joBKB3BRZmlXBR2MMu
+         2CgwTPItgTuN5u2i6BPtYo64i8oiT0DGukLjzSrcfNUH6KAv38Zn/xzIyzZY3+njpy2/
+         lrCviuLYZ9L8jPf5THmfen4oLEY1ZuHBqJ6ld9EVpKW5D9Nk3mI5IjVcAXq3KY8AdrqD
+         tzNg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:subject:from:to:cc:date:in-reply-to
+         :references:user-agent:mime-version:content-transfer-encoding;
+        bh=C0cbjXlxhi/IJX0ZL0bzzsNP2N3UaUFrpqoamrREuVM=;
+        b=PShx59ZtGgCEfn7VDbJ014En/b/V/1e6Yh60iPmG1iYV7/ehcP3n08Y0pZgj30b7+8
+         yHjxasJQkRP+7aVv9oQuOrt7w/WSLl7+dgGlKPU64z8LXJ3PwgA9LLYFD0r5JwjRgdLy
+         gWyz8HT0TGDmwhh9VJxvKLEp3Lz696NVO/BhDmc31fNu0E946BM8yjbWASM+23mjaJYL
+         MstI0u/ly+nV6YaYys7NUvU6mJ3ACbLOjRc/i302SR9g839BlRQFO3Z0MpFwxYJnWnjL
+         Ic/b8SeQVODriNN2EtSAT/AU6ssQmBRsZwjNNEpYXjr/Yte4XCCUvN+7Yp+vUtalPCH1
+         +gPA==
+X-Gm-Message-State: AOAM531lfzLXjQLF1a6QUG80XfRNs79Q6gr9jQ+gCsTp8hAmfjZc8ZkC
+        KNqAyYbxv2/kyUtDM6WsFpE=
+X-Google-Smtp-Source: ABdhPJxvlj7F7ixjasXkN5qo7dsDG1qROcpX+3+I5JQYqZF3AILJ6azwzHYrJTPhhUDCSkt+4SrbAQ==
+X-Received: by 2002:a17:906:dfe3:: with SMTP id lc3mr12487415ejc.478.1631699676829;
+        Wed, 15 Sep 2021 02:54:36 -0700 (PDT)
+Received: from ubuntu-laptop ([165.225.203.49])
+        by smtp.googlemail.com with ESMTPSA id v25sm5977872eja.83.2021.09.15.02.54.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 15 Sep 2021 02:54:36 -0700 (PDT)
+Message-ID: <92123c0398e154334cc947ce8f16e89ce0c3c9af.camel@gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: core: No need to calculate the timeout
+ value for CQE data transmission
+From:   Bean Huo <huobean@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Avri Altman <avri.altman@wdc.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        "Bean Huo (beanhuo)" <beanhuo@micron.com>
+Date:   Wed, 15 Sep 2021 11:54:35 +0200
+In-Reply-To: <CAPDyKFpC6iei96n-UcRTNrxTaHeejzfQX+rka7GSwSZjXN7-4g@mail.gmail.com>
+References: <20210907151204.118861-1-huobean@gmail.com>
+         <20210907151204.118861-3-huobean@gmail.com>
+         <CAPDyKFpC6iei96n-UcRTNrxTaHeejzfQX+rka7GSwSZjXN7-4g@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5-0ubuntu1 
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-8.6.1018-26408.006
-X-TMASE-Result: 10-0.047000-10.000000
-X-TMASE-MatchedRID: yxAmdCLMIs3UL3YCMmnG4qqHmm/V4M/PAPiR4btCEeZ1D3qk2LfE7x8a
-        RhKglPt8UWixuWgL6KhfaFBgmyIFpWrCMAFDPKUmzNIobH2DzGEBGSO+Oopk6iATiLvsSv4cHB8
-        dBttPBAZ06g90LjJRaNzEiNfPesLd9v1YvKhgkvkkp7iSXiinhG0tJ9ZqJpFsWnG8Krv6kzKTrr
-        +C1WNmxUGv3d/tCdGJJM5m27St9RrPvZCJ3jmZYZVRzPxemJL0yeUl7aCTy8hTbQ95zRbWVlhLR
-        OZy4c8OmAIgl32WEOud1cJ+ghnpuEzOmjZzSvazF+qQpCWTUjkiJN3aXuV/obcIt210bWgIFbbp
-        rMc1hSO3IAm6OhmFjUk+8jV4IoVXVdgv/fqHkl6cVWc2a+/ju1XgGeVUh3WdiTb+rJjwRo+jxYy
-        RBa/qJc3XmA2J2nVzfJ5/bZ6npdjiRhduhvElsvJT+hf62k2YrW1bpbgtvwBCSwwTaAVGm6ZFc2
-        mMv1qlIycJt175te5inh43K2COxePlwCWV27Nr
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-12:0,22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 604d3e44-2e65-4a48-9e2e-e9baf7ee4393-0-0-200-0
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-I did not test the patch but want to make you aware of the comment in dw_mmc:
-/*
-* During UHS tuning sequence, sending the stop
-* command after the response CRC error would
-* throw the system into a confused state
-* causing all future tuning phases to report
-* failure.
-*
-* In such case controller will move into a data
-* transfer state after a response error or
-* response CRC error. Let's let that finish
-* before trying to send a stop, so we'll go to
-* STATE_SENDING_DATA.
-*
-* Although letting the data transfer take place
-* will waste a bit of time (we already know
-* the command was bad), it can't cause any
-* errors since it's possible it would have
-* taken place anyway if this tasklet got
-* delayed. Allowing the transfer to take place
-* avoids races and keeps things simple.
-*/
-The message in 46d179525a1f6d16957dcb4624517bc04142b3e7
-does not mention which card was causing problem, unfortunately.
+On Tue, 2021-09-14 at 10:13 +0200, Ulf Hansson wrote:
+> >          }
+> > +       /*
+> > +        * In case CQE is enabled, the timeout will be set a
+> > maximum timeout in
+> > +        * sdhci_cqe_enable(), so, no need to go through the below
+> > algorithm.
+> > +        */
+> > +       if (host->cqe_enabled)
+> 
+> 
+>  I don't think this is a good idea. For example, host->cqe_enabled is
+> 
+> set for the hsq case well.
+
+Uffe,
+
+My apologies for this, I forgot to check hsq, hsq will call
+sdhci_send_command() as well.
 
 
+How about changing it to this?
 
+ 
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 240c5af793dc..7235e398ef93 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -649,6 +649,7 @@ EXPORT_SYMBOL(mmc_wait_for_cmd);
+ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card
+*card)
+ {
+        unsigned int mult;
++       struct mmc_host *host = card->host;
+ 
+        /*
+         * SDIO cards only define an upper 1 s limit on access.
+@@ -659,6 +660,13 @@ void mmc_set_data_timeout(struct mmc_data *data,
+const struct mmc_card *card)
+                return;
+        }
+ 
++       /*
++        * For the CQE use case, the data transfer timeout will be set
+a maximum
++        * timeout value in HW timer in function sdhci_cqe_enable(),
+so, no need
++        * to go through the below algorithm.
++        */
++       if (host->cqe_enabled && !host->hsq_enabled)
++               return;
+        /*
+         * SD cards use a 100 multiplier rather than 10
+         */
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Sent: Tuesday, September 14, 2021 8:20 PM
-To: linux-mmc@vger.kernel.org
-Cc: linux-renesas-soc@vger.kernel.org; Yoshihiro Shimoda; Wolfram Sang
-Subject: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
-    
-After my hackish RFC patch, here is a small series implementing
-(hopefully) the solution we discussed. It will make
-mmc_send_abort_tuning() also send CMD12 for SD cards which makes more SD
-cards work for us. Details are in the patch descriptions.
+I have another timeout change associated with data transfer as well, if
+this change is acceptible, I will submit it with that together.
 
-Please let me know what you think.
-
-Thanks, and happy hacking!
-
-
-Wolfram Sang (3):
-  mmc: core: add helper to send STOP
-  mmc: core: also abort tuning with CMD12 for SD
-  mmc: core: remove obsolete parameter from mmc_send_abort_tuning
-
- drivers/mmc/core/block.c             | 14 +-------------
- drivers/mmc/core/core.h              |  1 +
- drivers/mmc/core/mmc.c               |  6 ++++++
- drivers/mmc/core/mmc_ops.c           | 23 ++++-------------------
- drivers/mmc/core/mmc_ops.h           | 14 ++++++++++++++
- drivers/mmc/core/sd.c                |  6 ++++++
- drivers/mmc/host/renesas_sdhi_core.c |  2 +-
- drivers/mmc/host/sdhci.c             |  2 +-
- include/linux/mmc/host.h             |  2 +-
- 9 files changed, 35 insertions(+), 35 deletions(-)
-
--- 
-2.30.2
-
-    =
-Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
-Managing Directors: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+Kind regards,
+Bean
 
