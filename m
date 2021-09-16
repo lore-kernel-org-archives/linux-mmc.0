@@ -2,64 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-19.4 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF0FBC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Sep 2021 07:43:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75FF9C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Sep 2021 09:14:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D0E3B611C6
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Sep 2021 07:43:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5438E6124D
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Sep 2021 09:14:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234826AbhIPHpH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Sep 2021 03:45:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38602 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231548AbhIPHpG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Sep 2021 03:45:06 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71679C061574;
-        Thu, 16 Sep 2021 00:43:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=In-Reply-To:Content-Type:MIME-Version:
-        References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=iB+Zk3mFqQHH5xwrFAdw0mDZFkOrBeEQEyO72oyvNCk=; b=VebekZr9eGezA0nIGfC96Vtufh
-        IPgDUow8F7/VjosUcxCX7FIveg2IR8jglwoI0fUuizQ/LV2XyvMwOZ1TBNKUh41QA7boA1p8/ZXNk
-        NbsdFFELMYHH5KNH8ohkM5f+Bx8vJ0huLMabfOdbyQsYBHYaCm9wcwlT3AOHq0oWJFALunIl9eUhF
-        tU9dUjjK9IunqSCbM2sCJaN021EdKlhKU43EwPbjmK5ihcGeLZ8v08loUmyJaN473b7ldh9kxrtdx
-        3/r19fjvCe2aLmhEbg3EbJAf3CcfWDVDXiWhDBvY2e054/5Sq5Ikm0aNNF/viKIW1zYy2XDt5XgOz
-        qXNNSyCg==;
-Received: from hch by casper.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1mQm2T-00GQXX-84; Thu, 16 Sep 2021 07:42:46 +0000
-Date:   Thu, 16 Sep 2021 08:42:33 +0100
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Christoph Hellwig <hch@infradead.org>, linux-block@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org,
-        dm-devel@redhat.com, Satya Tangirala <satyaprateek2357@gmail.com>
-Subject: Re: [PATCH 3/5] blk-crypto: rename keyslot-manager files to
- blk-crypto-profile
-Message-ID: <YUL1afofaCblwRg5@infradead.org>
-References: <20210913013135.102404-1-ebiggers@kernel.org>
- <20210913013135.102404-4-ebiggers@kernel.org>
- <YUGkfDmGa3WKz8cD@infradead.org>
- <YUIwJQT9CnIoT7WO@sol.localdomain>
+        id S235470AbhIPJPm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Sep 2021 05:15:42 -0400
+Received: from mail.kernel.org ([198.145.29.99]:40776 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S235243AbhIPJPl (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Thu, 16 Sep 2021 05:15:41 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 4A8AE611C8;
+        Thu, 16 Sep 2021 09:14:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1631783661;
+        bh=JwWCjmG96CZuiWgSlG9dyPmxEM9GvaJcEKBMYRMsB90=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=h+l3xVhrI7zt21b+ioX8SbwwGExRKlakRD4WElIq+yjA1P3EhyxfM9Umri1Um4q5W
+         ODLyWgFwxvJltlcWhcKl8mmrUVoCDDeY7Hoh0vlftiK9Vj+Oc+XoaO4Bwp5vQUbEzp
+         camz4FsSyoxvKTBWmwIChphQzZG5dQr8vzueaZqwy5FAhhJvY5UyVo8DUyHN/z9xs/
+         c0CGdsD7JoEDcMgLghH16PJJo7OlDhsCcS+v1z4fru7qcpTf8Hh4nvyzqchD2uynAG
+         8bzUkXMn5IxQYaivNN9JgLjQGg1juBNfNsRQm0P0KuMn75CPiNzsTAtS9orz9oLIL2
+         rkUOhF6TYUmhQ==
+Received: by mail.kernel.org with local (Exim 4.94.2)
+        (envelope-from <mchehab@kernel.org>)
+        id 1mQnTH-001sKt-EJ; Thu, 16 Sep 2021 11:14:19 +0200
+From:   Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+To:     Linux Doc Mailing List <linux-doc@vger.kernel.org>,
+        Jonathan Corbet <corbet@lwn.net>
+Cc:     Mauro Carvalho Chehab <mchehab+huawei@kernel.org>,
+        Cai Huoqing <caihuoqing@baidu.com>,
+        Maxime Ripard <maxime@cerno.tech>,
+        Rob Herring <robh@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Yang Li <abaci-bugfix@linux.alibaba.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-omap@vger.kernel.org
+Subject: [PATCH 05/24] dt-bindings: mmc: update mmc-card.yaml reference
+Date:   Thu, 16 Sep 2021 11:13:58 +0200
+Message-Id: <865336184bbf2306b5f185cd11d39ed69fddeca6.1631783482.git.mchehab+huawei@kernel.org>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <cover.1631783482.git.mchehab+huawei@kernel.org>
+References: <cover.1631783482.git.mchehab+huawei@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YUIwJQT9CnIoT7WO@sol.localdomain>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by casper.infradead.org. See http://www.infradead.org/rpr.html
+Content-Transfer-Encoding: 8bit
+Sender: Mauro Carvalho Chehab <mchehab@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 15, 2021 at 10:40:53AM -0700, Eric Biggers wrote:
-> > It would be nice to keep the blk-crypto* includes together, though.
-> 
-> I don't see any case in which they aren't together.  Unless you're talking about
-> blk-crypto-internal.h, which is a directory-local header so it doesn't get
-> grouped with the <linux/*.h> headers.
+Changeset 922eefdafc80 ("dt-bindings: mmc: Convert MMC Card binding to a schema")
+renamed: Documentation/devicetree/bindings/mmc/mmc-card.txt
+to: Documentation/devicetree/bindings/mmc/mmc-card.yaml.
 
-You're right.   I skimmed over the patch too quickly.
+Update its cross-reference accordingly.
+
+Fixes: 922eefdafc80 ("dt-bindings: mmc: Convert MMC Card binding to a schema")
+Signed-off-by: Mauro Carvalho Chehab <mchehab+huawei@kernel.org>
+---
+ drivers/mmc/host/omap_hsmmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 7a29ad542e4a..9dafcbf969d9 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1510,7 +1510,7 @@ static void omap_hsmmc_init_card(struct mmc_host *mmc, struct mmc_card *card)
+ 		 * REVISIT: should be moved to sdio core and made more
+ 		 * general e.g. by expanding the DT bindings of child nodes
+ 		 * to provide a mechanism to provide this information:
+-		 * Documentation/devicetree/bindings/mmc/mmc-card.txt
++		 * Documentation/devicetree/bindings/mmc/mmc-card.yaml
+ 		 */
+ 
+ 		np = of_get_compatible_child(np, "ti,wl1251");
+-- 
+2.31.1
+
