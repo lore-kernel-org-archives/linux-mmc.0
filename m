@@ -8,58 +8,59 @@ X-Spam-Status: No, score=-26.2 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
 	URIBL_BLOCKED,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48E6EC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 06:11:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98B46C433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 06:11:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 31485611F2
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 06:11:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 81DC360F13
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 06:11:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245179AbhIQGNE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Sep 2021 02:13:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35072 "EHLO
+        id S245186AbhIQGNF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Sep 2021 02:13:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35024 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S244998AbhIQGM5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 02:12:57 -0400
-Received: from mail-qt1-x84a.google.com (mail-qt1-x84a.google.com [IPv6:2607:f8b0:4864:20::84a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A02BAC0613E6
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2021 23:11:35 -0700 (PDT)
-Received: by mail-qt1-x84a.google.com with SMTP id z16-20020ac86b90000000b0029eec160182so86361273qts.9
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2021 23:11:35 -0700 (PDT)
+        with ESMTP id S245071AbhIQGM7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 02:12:59 -0400
+Received: from mail-qt1-x849.google.com (mail-qt1-x849.google.com [IPv6:2607:f8b0:4864:20::849])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9AA0C0613D9
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2021 23:11:37 -0700 (PDT)
+Received: by mail-qt1-x849.google.com with SMTP id d20-20020ac81194000000b002a53ffbd04dso47999902qtj.12
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Sep 2021 23:11:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=google.com; s=20210112;
         h=date:in-reply-to:message-id:mime-version:references:subject:from:to
          :cc;
-        bh=a16EJJC8qIqgq8caJJ9rZnk5BIeQcHgz6nBaZlUahJ4=;
-        b=mRZGnePzs2y6KqAQfe6Ck+DkP+Foa3blX6juarQJ18Sqvw6BFn2gA7pydsaxOjMZqc
-         HRlb/vKtIhygpXSgaHB409dpz9AhJrphfamLZU1gG4ObG+Rmk3RUc5SRgd4y3wPc6+Ov
-         89W5x13jsc5jfnYljnXFxChRd/2j1bM7BfbH66pnCquAayMNq9LOb2+cxkEtbzLxvDTl
-         0bn5yMg6sIYTVEUeGE7mezPVGCVAOAvv4bBjedRlVspT8EhMbB3w9RYNzHV/yRxBbUHi
-         WToToCFsOIDqWxXvvM2ABw/iKXuTenyu46QkdzOXRU+sp4UGv+vROZ3Q5AGnAFYKsd3B
-         kl5A==
+        bh=zwfeLGWcGDafTQfqNliurZp8teU/yYhkf3GW28JYz+0=;
+        b=XM1DlrAUXX2ajvUBnMZhB99NjvFhfz+ZGq/7y3SKrZpGYit5SzYCLoZx+1fd1Pg2OM
+         CE/DbVbB2zZOnd5RWwlYnvAIN/0FZuFvCYMAI3FUkH9+/WHs5czJ0XzDCRQOpbNttkDV
+         rzNjCdkEp3wvo4sWkksIcRpcsW3Lpa4/N4OeJL02V5hrqG39IyQJLBkSwhLLcjvNJf1P
+         J33Z8VNQpjjPrqBYeac07pb5MmLB0B8MJ5t+DBo6UEAJOnLuMozpyMAijqsFw2f6JbS1
+         kjf8/RoduSl/18uPTMCiFBlHPGodsfgn0U2c6pVB8BmGNGic9LVrNxfbRPmKqI20Z1nX
+         qACA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:date:in-reply-to:message-id:mime-version
          :references:subject:from:to:cc;
-        bh=a16EJJC8qIqgq8caJJ9rZnk5BIeQcHgz6nBaZlUahJ4=;
-        b=z9p4zH7Cp4Z/xcPOG+p484ar8rQ6YvoQzxXxEM52cWhg4s5bA+kN4f5+AxSkhYQLe4
-         Pfr9o2wzzyXsvTBzdKBKLvRv5EzWIYp8zTJraH3skOVJhYerzyioOG0lbakLMkSWZZ8I
-         BhpFy4hfzwPD+RhGIJ2BRJ3VxrGGW0MXVJNSrBfiJIHeVx2gYGCHrvptAobxTgVqIjS7
-         K7zJQ/POS2NYQBsYQqcPfRSvE3N6uzzq7neae0dM9aDLkfZm33lAkzF+TAhEevAgsxcd
-         XvqFEwdCbRL2Q6i4tiz0/zJZlI7wWfadVMc59wIfI/AxUcSiYcJYoEVTEu7RpB2I8Ne6
-         hNUQ==
-X-Gm-Message-State: AOAM530D8RblVY5sFn863+xSJpxAKmHSllvcpi8oEi/OBCCLfKfjqmlz
-        WC9tWuzPNDmzzHddiu9TLuPqPI2LHjki+ld+5q2yjw==
-X-Google-Smtp-Source: ABdhPJx2QRnWG7xa+kh2z4MTN26rfm570JnuU75BFe3uCQj9UmSttAn5ZQMcMCpcxKfx8N8gvMCYdb0nOiaf4ooLmBmZeA==
+        bh=zwfeLGWcGDafTQfqNliurZp8teU/yYhkf3GW28JYz+0=;
+        b=Oder+NFj8zUFEfr+++dxDOB5vSjZ3zBS7z8ilvsYrtPFwCi2ir/9tNsXQ+8hIB/qeD
+         rzzHu2rwPZpQUf0iDFeS/wlZdae0+4CP9ETFzd3/zdUbegqKSS/D79QN4uBGchGk36lr
+         xLsskHhLEF5b3mFWqGTau4yidMet47JwkEIFNfuG8v+e36YW+un1D8C2350dMU68DftT
+         LZfoqF84NBXVXEGWeg07OH3msWfQ19pAT4yOtOJf2EPE53JXVfkNjWB36qTk4P0Ty3WL
+         3S0U9/+/Nm9mROi0Q3qOCuOagpSaXSWLMhePoZ5uOqusYzMRfI3kgyubSbcSGfLWLHu5
+         4pyw==
+X-Gm-Message-State: AOAM533FXJdg4RAv3xtjcvqEySA/ORoCKCBkd1XPcqnjz7TVhY8Kcut2
+        gSriW8uWZhtpJV5o1oJBIH3k6Le13YSXSglyEPYVkA==
+X-Google-Smtp-Source: ABdhPJx6RzYNzo1jNBe3N3oA2ojvmyemjqyjcW1MLw7H9/OVIjCsIqeL5PNY5fZLW55/k0Aj9lw0rd78dTvNRFgK+Smr+Q==
 X-Received: from mactruck.svl.corp.google.com ([2620:15c:2cb:201:4845:43ba:3ff5:2de1])
- (user=brendanhiggins job=sendgmr) by 2002:a05:6214:2e4:: with SMTP id
- h4mr9633253qvu.3.1631859094676; Thu, 16 Sep 2021 23:11:34 -0700 (PDT)
-Date:   Thu, 16 Sep 2021 23:11:02 -0700
+ (user=brendanhiggins job=sendgmr) by 2002:a25:4655:: with SMTP id
+ t82mr11189168yba.289.1631859096878; Thu, 16 Sep 2021 23:11:36 -0700 (PDT)
+Date:   Thu, 16 Sep 2021 23:11:03 -0700
 In-Reply-To: <20210917061104.2680133-1-brendanhiggins@google.com>
-Message-Id: <20210917061104.2680133-5-brendanhiggins@google.com>
+Message-Id: <20210917061104.2680133-6-brendanhiggins@google.com>
 Mime-Version: 1.0
 References: <20210917061104.2680133-1-brendanhiggins@google.com>
 X-Mailer: git-send-email 2.33.0.464.g1972c5931b-goog
-Subject: [PATCH v1 4/6] thunderbolt: build kunit tests without structleak plugin
+Subject: [PATCH v1 5/6] mmc: sdhci-of-aspeed: build kunit tests without
+ structleak plugin
 From:   Brendan Higgins <brendanhiggins@google.com>
 To:     shuah@kernel.org, davidgow@google.com, arnd@arndb.de,
         keescook@chromium.org, rafael@kernel.org, jic23@kernel.org,
@@ -79,34 +80,28 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 The structleak plugin causes the stack frame size to grow immensely when
-used with KUnit:
+used with KUnit.
 
-drivers/thunderbolt/test.c:1529:1: error: the frame size of 1176 bytes is larger than 1024 bytes [-Werror=frame-larger-than=]
-
-Turn it off in this file.
-
-Linus already split up tests in this file, so this change *should* be
-redundant now.
+Turn it off.
 
 Co-developed-by: Arnd Bergmann <arnd@arndb.de>
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
 ---
- drivers/thunderbolt/Makefile | 1 +
+ drivers/mmc/host/Makefile | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/drivers/thunderbolt/Makefile b/drivers/thunderbolt/Makefile
-index da19d7987d005..78fd365893c13 100644
---- a/drivers/thunderbolt/Makefile
-+++ b/drivers/thunderbolt/Makefile
-@@ -7,6 +7,7 @@ thunderbolt-objs += usb4_port.o nvm.o retimer.o quirks.o
- thunderbolt-${CONFIG_ACPI} += acpi.o
- thunderbolt-$(CONFIG_DEBUG_FS) += debugfs.o
- thunderbolt-${CONFIG_USB4_KUNIT_TEST} += test.o
-+CFLAGS_test.o += $(DISABLE_STRUCTLEAK_PLUGIN)
- 
- thunderbolt_dma_test-${CONFIG_USB4_DMA_TEST} += dma_test.o
- obj-$(CONFIG_USB4_DMA_TEST) += thunderbolt_dma_test.o
+diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+index 14004cc09aaad..2ab083931f8fd 100644
+--- a/drivers/mmc/host/Makefile
++++ b/drivers/mmc/host/Makefile
+@@ -85,6 +85,7 @@ obj-$(CONFIG_MMC_SDHCI_DOVE)		+= sdhci-dove.o
+ obj-$(CONFIG_MMC_SDHCI_TEGRA)		+= sdhci-tegra.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ARASAN)	+= sdhci-of-arasan.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ASPEED)	+= sdhci-of-aspeed.o
++CFLAGS_sdhci-of-aspeed.o		+= $(DISABLE_STRUCTLEAK_PLUGIN)
+ obj-$(CONFIG_MMC_SDHCI_OF_AT91)		+= sdhci-of-at91.o
+ obj-$(CONFIG_MMC_SDHCI_OF_ESDHC)	+= sdhci-of-esdhc.o
+ obj-$(CONFIG_MMC_SDHCI_OF_HLWD)		+= sdhci-of-hlwd.o
 -- 
 2.33.0.464.g1972c5931b-goog
 
