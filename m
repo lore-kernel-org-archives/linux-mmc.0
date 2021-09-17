@@ -2,135 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8695CC433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 15:58:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AFD3C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 16:32:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 62B1960F43
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 15:58:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 629CF61108
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 16:32:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235210AbhIQQAK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Sep 2021 12:00:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57612 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243142AbhIQP7N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 11:59:13 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 848C8C061768
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Sep 2021 08:57:51 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id o8so6489422pll.1
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Sep 2021 08:57:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=r6MdFPfPUAZH3+HZlPktkkcgyhh/J6s1d9EKnLc8sLI=;
-        b=cVRmNTsiGusduzzBZ0I0VDwRsgxPiX0DIHlnWw6Se7sfNbDpGRiSTLvTlZtIThSTQO
-         8Iq2NwZoaHIDpechq2RhvvyJvdrbKPHw1+n+7wPIlBMrVoDW3PXN++ki6UAMxgRCzQMe
-         1l//5Z7Px9GtWSlr/+iGzFDVVYKKNPnCzniEM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=r6MdFPfPUAZH3+HZlPktkkcgyhh/J6s1d9EKnLc8sLI=;
-        b=FhpXnsXX0FjSysxeG+s6z86KdoW4YjEhgJa6GUxS8/R8SCBicChxe5EnTBa9jAQDDY
-         AtXuLhsLWAf78CTYv0ZRUOJnR6m+XXWfR2o8afc7374loiRF3oea3nr/1N3pF4w5MFra
-         IA2y3QnL+X+l1sJpFn1OGsh7/KaE1uodz+NYNc8bbZSvfaTlIiaDhphETdNRtoxDNSbY
-         MHIje3NmRteP+w13YCJoVJMBV6720BRaR/n7DJoSgmib4GYVxfcdXRvaeKBNhK1JJh6A
-         OgAAon1ij8ZE6uCKR9GbYbY3wR7jUQx31rxMq/cazgp78aQ2PXNcK6/CM9cnpKVtnHFK
-         Jo3g==
-X-Gm-Message-State: AOAM532JF55aFf2rp1Z626fLNJFlWRQh1fq0DzLD8Hj7vOtCxO55XpC4
-        g9QWfNWcoCrvJTy3iI/UDKdMMw==
-X-Google-Smtp-Source: ABdhPJz9vij1VDEQP6wMABN1KinAsDThb7qqcjn08XngLn0itqVa2eHpdQK0v808VVyWyogNtOKZyw==
-X-Received: by 2002:a17:902:c411:b0:13c:9748:badf with SMTP id k17-20020a170902c41100b0013c9748badfmr10322686plk.18.1631894271017;
-        Fri, 17 Sep 2021 08:57:51 -0700 (PDT)
-Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
-        by smtp.gmail.com with ESMTPSA id k3sm10981540pjg.43.2021.09.17.08.57.50
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Sep 2021 08:57:50 -0700 (PDT)
-Date:   Fri, 17 Sep 2021 08:57:49 -0700
-From:   Kees Cook <keescook@chromium.org>
-To:     Arnd Bergmann <arnd@arndb.de>
-Cc:     Brendan Higgins <brendanhiggins@google.com>,
-        Shuah Khan <shuah@kernel.org>, David Gow <davidgow@google.com>,
-        Rafael Wysocki <rafael@kernel.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>, andreas.noever@gmail.com,
-        michael.jamet@intel.com,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        YehezkelShB@gmail.com, Masahiro Yamada <masahiroy@kernel.org>,
-        Michal Marek <michal.lkml@markovi.net>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        "open list:KERNEL SELFTEST FRAMEWORK" 
-        <linux-kselftest@vger.kernel.org>,
-        KUnit Development <kunit-dev@googlegroups.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        gregkh <gregkh@linuxfoundation.org>, linux-iio@vger.kernel.org,
+        id S233029AbhIQQeL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Sep 2021 12:34:11 -0400
+Received: from foss.arm.com ([217.140.110.172]:55128 "EHLO foss.arm.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S231351AbhIQQeL (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Fri, 17 Sep 2021 12:34:11 -0400
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E3E62101E;
+        Fri, 17 Sep 2021 09:32:48 -0700 (PDT)
+Received: from e107158-lin (e107158-lin.cambridge.arm.com [10.1.194.47])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id E116D3F59C;
+        Fri, 17 Sep 2021 09:32:47 -0700 (PDT)
+Date:   Fri, 17 Sep 2021 17:32:45 +0100
+From:   Qais Yousef <qais.yousef@arm.com>
+To:     "Paul E. McKenney" <paulmck@kernel.org>
+Cc:     Fabio Estevam <festevam@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>, ath10k@lists.infradead.org,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        USB list <linux-usb@vger.kernel.org>,
-        linux-hardening@vger.kernel.org,
-        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>
-Subject: Re: [PATCH v1 6/6] bitfield: build kunit tests without structleak
- plugin
-Message-ID: <202109170857.80F9B319@keescook>
-References: <20210917061104.2680133-1-brendanhiggins@google.com>
- <20210917061104.2680133-7-brendanhiggins@google.com>
- <CAK8P3a21j9yJe_X=kU6v2YgOnrhunRbPv+O6STSH71qTb7xnfg@mail.gmail.com>
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marek Vasut <marex@denx.de>
+Subject: Re: NOHZ tick-stop error with ath10k SDIO
+Message-ID: <20210917163245.f53fh2nuswqlkwgw@e107158-lin>
+References: <CAOMZO5AAvZic-NFbYYSVfOxY-27QukXMX68f9eDmhbqAkBRKRw@mail.gmail.com>
+ <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAK8P3a21j9yJe_X=kU6v2YgOnrhunRbPv+O6STSH71qTb7xnfg@mail.gmail.com>
+In-Reply-To: <20210818154358.GS4126399@paulmck-ThinkPad-P17-Gen-1>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Sep 17, 2021 at 09:22:08AM +0200, Arnd Bergmann wrote:
-> On Fri, Sep 17, 2021 at 8:11 AM Brendan Higgins
-> <brendanhiggins@google.com> wrote:
-> >
-> > From: Arnd Bergmann <arnd@arndb.de>
-> >
-> > The structleak plugin causes the stack frame size to grow immensely:
-> >
-> > lib/bitfield_kunit.c: In function 'test_bitfields_constants':
-> > lib/bitfield_kunit.c:93:1: error: the frame size of 7440 bytes is larger than 2048 bytes [-Werror=frame-larger-than=]
-> >
-> > Turn it off in this file.
-> >
-> > Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-> > Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
-> > ---
-> >  lib/Makefile | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/lib/Makefile b/lib/Makefile
-> > index 5efd1b435a37c..c93c4b59af969 100644
-> > --- a/lib/Makefile
-> > +++ b/lib/Makefile
-> > @@ -351,7 +351,7 @@ obj-$(CONFIG_OBJAGG) += objagg.o
-> >  obj-$(CONFIG_PLDMFW) += pldmfw/
-> >
-> >  # KUnit tests
-> > -CFLAGS_bitfield_kunit.o := $(call cc-option,-Wframe-larger-than=10240)
-> > +CFLAGS_bitfield_kunit.o := $(call cc-option,-Wframe-larger-than=10240) $(DISABLE_STRUCTLEAK_PLUGIN)
+Hi Paul
+
+On 08/18/21 08:43, Paul E. McKenney wrote:
+> On Wed, Aug 18, 2021 at 12:18:25PM -0300, Fabio Estevam wrote:
+> > Hi,
+> > 
+> > When launching the hostapd application on a i.MX7 based board with an
+> > ath10k device connected via SDIO, the following "NOHZ tick-stop error"
+> > messages are seen:
+> > 
+> > # hostapd /etc/wifi.conf
+> > Configuration file: /etc/wifi.conf
+> > wlan0: interface state UNINITIALIZED->COUNTRY_UPDATE
+> > [   63.021149] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > Using interface wlan0 with hwaddr 00:1f:7b:31:04:a0 and ssid "thessid"
+> > [   67.332470] IPv6: ADDRCONF(NETDEV_CHANGE): wlan0: link becomes ready
+> > wlan0: interface state COUNTRY_UPDATE->ENABLED
+> > wlan0: AP-ENABLED
+> > [   68.025845] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   69.025973] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   69.607432] cfg80211: failed to load regulatory.db
+> > [   72.026748] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   73.027039] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   74.027159] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   75.027109] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   76.027461] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   77.027391] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > [   78.027560] NOHZ tick-stop error: Non-RCU local softirq work is
+> > pending, handler #08!!!
+> > 
+> > This happens on all kernel versions from 5.10  to 5.13.
+> > 
+> > Any ideas on how to fix this problem?
 > 
-> I think the  $(call cc-option,-Wframe-larger-than=10240) needs to be dropped
-> here. This was not in my original patch and it is definitely broken on
-> all architectures
-> with 8KB stack size or less if the function needs that much. What is the amount
-> of actual stack usage you observe without this? If we still get a warning, then
-> I think this needs to be fixed in the code.
+> I believe that you need this commit (and possibly some prerequsites):
+> 
+> 47c218dcae65 ("tick/sched: Prevent false positive softirq pending warnings on RT")
+> 
+> Adding Qais on CC for his thoughts.
 
-With the frame-larger-than dropped:
+Sorry for the late response. A combination of holidays and sickness kept me
+away from email for a while.
 
-Reviewed-by: Kees Cook <keescook@chromium.org>
+I did see an issue on 5.10 recently but I was running android kernel. I thought
+initially the problem is similar to the upstream one we were seeing on mainline
+for a while in the past but it turned out a genuine bug due to a patch that
+tries to 'fix' softirq interference with RT. Reverting that patch fixed the
+issue for me. It turned out later that it was specific to the platform I was
+running on and it's not reproducible by others on other platforms.
 
+Upstream 5.10-LTS was fine for me.
 
--- 
-Kees Cook
+HTH.
+
+Thanks
+
+--
+Qais Yousef
