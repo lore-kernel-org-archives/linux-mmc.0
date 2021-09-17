@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 717E8C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 17:27:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EB6CEC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 17:27:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 573A860F21
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 17:27:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D4A8D60F21
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 17:27:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1343934AbhIQR3C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Sep 2021 13:29:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49920 "EHLO
+        id S1343926AbhIQR3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Sep 2021 13:29:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49928 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343936AbhIQR3C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 13:29:02 -0400
-Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6C13C061574;
-        Fri, 17 Sep 2021 10:27:39 -0700 (PDT)
-Received: by mail-wm1-x336.google.com with SMTP id s24so7911769wmh.4;
-        Fri, 17 Sep 2021 10:27:39 -0700 (PDT)
+        with ESMTP id S1343988AbhIQR3D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 13:29:03 -0400
+Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE759C061764;
+        Fri, 17 Sep 2021 10:27:40 -0700 (PDT)
+Received: by mail-wm1-x329.google.com with SMTP id s24so7911791wmh.4;
+        Fri, 17 Sep 2021 10:27:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=JIDuOpli6Tm6uAgMYJxGWn19bIwu9o76mZlI5FTH9oc=;
-        b=czug9s0DxI5GlPg92K+1xRO9pOADDVD9NVcAxQoMZ+Li6odATspbD0BcJlUhJ9T3hG
-         JvFArDAejsSsunerzLTG1d3IdohLKbWF2AQd9m25wck/Rw2i3PIUPWfTG7bWTS/pbypH
-         m25WLI9jR0WnNIFDYgh52pRDxshmWxJbbsWLq0FY3KWV5zjxDsjKchm1X162Kmnu412J
-         8rfMXYDHxDkfHCfSkl9R7V1Vbqp8iUTlLctef1kxvcIqV9So66a62CEG8XbBTBWGM2oy
-         6GWXljUAFr9qYzSbqTMuM62U/XNHyKp7lQ4W1AtemIkAyXG6dovwUR0z0HDswIf9jHYC
-         /wyw==
+        bh=ALoBWaWV7jtCqRbGUVPAv75PEetKCqXCAn6SGuf3CPQ=;
+        b=hfmZa6o3msrRRDWRzDSGlKKb3/zofRhELYAB7KdW63iFI1KBlxsYXJ2RrSfCf1pA3i
+         SwaolNQ+1oENric+GAhhKBHvS5ihJ90k04MLmhro9OqUDkhGXyjDwgvp728ZtGofTKvW
+         TeppU87f++S0Fbfhbo8gCWnMcTecI8h5nv5cCTt2xu8330bZHKgF6xEnaVGlhANFVcRH
+         jeqskdwMjYgb7Pc0bjc1jDe1iqF18e40jLmhU6Woxh6vxDQt8RFobF6z+EuVv+5HZSv2
+         V8judbdkMUP/OaQWZWndJjonLJJYooi7KIQhlzmV5GM2sfsb7NNqgImAhPLXX2iWmgWx
+         06jg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=JIDuOpli6Tm6uAgMYJxGWn19bIwu9o76mZlI5FTH9oc=;
-        b=Sl/Qo51MB2ybOiY0juhXvWz9Q1sM5SieC6hJU+JQRJyp6bHLEv6mN+5IbVXw6QhCxR
-         ZA/7ySYJDLKLY/qalJamJx0Y6Nw38hKVi45mHgbMMDWEvm67yVDOoBDtotrMVZHvkIEU
-         0w9dwI/D7nRBrxNBDF9r2etw7PvbMq3iEcAiZZWfG0wMEPwF3/WBe9xdH+xbteKxTGK5
-         /BN8oj5p42KvMNq6CXA9FKrKqk1svLPGEknfZfYDVkWCzdD+mEPQfabZDTNo3JU0XDPq
-         nvGf9R6NLTWiCiLpfpaeBdmlfu9CrqjW6dQ1GWjy9rY7CFR7C2p5hfDfHv1GCGegHQzC
-         4T9g==
-X-Gm-Message-State: AOAM533XIt85yRglTo69INjpLP7AakvhLZd+dpQ9p4gjR1cYgYLqXhFS
-        2X67P2tEwaI44psO40wAKBc=
-X-Google-Smtp-Source: ABdhPJwbXAtYjb4wuhQfkD6R6RBTyGA/mPa4/hArXdaZHYJZ81c6UOfdoJJdEfOPsoESZQH8TsvRBw==
-X-Received: by 2002:a1c:2705:: with SMTP id n5mr16136176wmn.176.1631899658467;
-        Fri, 17 Sep 2021 10:27:38 -0700 (PDT)
+        bh=ALoBWaWV7jtCqRbGUVPAv75PEetKCqXCAn6SGuf3CPQ=;
+        b=JVGTk+UrkHtrA3uHy2c2D7WpHmYrUNcOt4hMdhfTje+U15vp2pSIEO6ZUpDdHdDezR
+         p45Rz/c0vACO/PN14nZRrbrmSw+ck8QN9poxeTt9CkJ7Di2JO2gi8ZcfioWA3jfBf8MF
+         74CWs7i0MgOkmo0XfF7VWWEiz7+g8amUcmSZks1GUy3KJANek658tm4+Gtn1cfRJrnks
+         temn0J8tiwjwjHTuNmWt8bKWedwX0zjjFDIfc4OohHFRmfF4Rt1Psv1Xln4rEut1dHcQ
+         O/NI8/0tvkCoi6f9ATouH3nKxxOWmxh4ySk3k8qV3UWrD2ToeMnP09lKs+veiLs349BU
+         vjKw==
+X-Gm-Message-State: AOAM530DDaTsQ1ZU+gKcLQSrrA7zfuWvegx9jm2pFV/e4VzWXm1viUHu
+        zKMu+BtPV/8P5Vg90Z5qUv8=
+X-Google-Smtp-Source: ABdhPJzpFCTOT3+hvrV+KLsGUNUODYFMtpIVIXJqH4rfY50hNbvyWQTNBDZquyANgC2MKWKqQ4eTig==
+X-Received: by 2002:a7b:c213:: with SMTP id x19mr16177279wmi.148.1631899659530;
+        Fri, 17 Sep 2021 10:27:39 -0700 (PDT)
 Received: from ubuntu-laptop.speedport.ip (p200300e94717cf050f860509a8ecdb17.dip0.t-ipconnect.de. [2003:e9:4717:cf05:f86:509:a8ec:db17])
-        by smtp.gmail.com with ESMTPSA id 135sm2901947wma.32.2021.09.17.10.27.37
+        by smtp.gmail.com with ESMTPSA id 135sm2901947wma.32.2021.09.17.10.27.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Sep 2021 10:27:38 -0700 (PDT)
+        Fri, 17 Sep 2021 10:27:39 -0700 (PDT)
 From:   Bean Huo <huobean@gmail.com>
 To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Bean Huo <beanhuo@micron.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: [PATCH v1 1/2] mmc: sdhci: Return true only when timeout exceeds capacity of the HW timer
-Date:   Fri, 17 Sep 2021 19:27:26 +0200
-Message-Id: <20210917172727.26834-2-huobean@gmail.com>
+Subject: [PATCH v1 2/2] mmc: sdhci: Use the SW timer when the HW timer cannot meet the timeout value required by the device
+Date:   Fri, 17 Sep 2021 19:27:27 +0200
+Message-Id: <20210917172727.26834-3-huobean@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20210917172727.26834-1-huobean@gmail.com>
 References: <20210917172727.26834-1-huobean@gmail.com>
@@ -75,62 +75,48 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Bean Huo <beanhuo@micron.com>
 
-Clean up sdhci_calc_timeout() a bit,  and let it set too_big to be true only
-when the timeout value required by the eMMC device exceeds the capability of
-the host hardware timer.
+If the data transmission timeout value required by the device exceeds
+the maximum timeout value of the host HW timer, we still use the HW
+timer with the maximum timeout value of the HW timer. This setting is
+suitable for most R/W situations. But sometimes, the device will complete
+the R/W task within its required timeout value (greater than the HW timer).
+In this case, the HW timer for data transmission will time out.
+
+Currently, in this condition, we  disable the HW timer and use the SW
+timer only when the SDHCI_QUIRK2_DISABLE_HW_TIMEOUT quirk is set by the
+host driver. The patch is to remove this if statement restriction and
+allow data transmission to use the SW timer when the hardware timer cannot
+meet the required timeout value.
 
 Signed-off-by: Bean Huo <beanhuo@micron.com>
 ---
- drivers/mmc/host/sdhci.c | 21 +++++++++------------
- 1 file changed, 9 insertions(+), 12 deletions(-)
+ drivers/mmc/host/sdhci.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
 diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 7ae398f8d4d3..357b365bf0ec 100644
+index 357b365bf0ec..463517fd9886 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
-@@ -930,7 +930,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 	struct mmc_data *data;
- 	unsigned target_timeout, current_timeout;
- 
--	*too_big = true;
-+	*too_big = false;
- 
- 	/*
- 	 * If the host controller provides us with an incorrect timeout
-@@ -941,7 +941,7 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 	if (host->quirks & SDHCI_QUIRK_BROKEN_TIMEOUT_VAL)
- 		return host->max_timeout_count;
- 
--	/* Unspecified command, asume max */
-+	/* Unspecified command, assume max */
- 	if (cmd == NULL)
- 		return host->max_timeout_count;
- 
-@@ -968,17 +968,14 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
- 	while (current_timeout < target_timeout) {
+@@ -969,9 +969,6 @@ static u8 sdhci_calc_timeout(struct sdhci_host *host, struct mmc_command *cmd,
  		count++;
  		current_timeout <<= 1;
--		if (count > host->max_timeout_count)
-+		if (count > host->max_timeout_count) {
-+			if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
-+				DBG("Too large timeout 0x%x requested for CMD%d!\n",
-+				    count, cmd->opcode);
-+			count = host->max_timeout_count;
-+			*too_big = true;
+ 		if (count > host->max_timeout_count) {
+-			if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
+-				DBG("Too large timeout 0x%x requested for CMD%d!\n",
+-				    count, cmd->opcode);
+ 			count = host->max_timeout_count;
+ 			*too_big = true;
  			break;
--	}
--
--	if (count > host->max_timeout_count) {
--		if (!(host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT))
--			DBG("Too large timeout 0x%x requested for CMD%d!\n",
--			    count, cmd->opcode);
--		count = host->max_timeout_count;
--	} else {
--		*too_big = false;
-+		}
- 	}
+@@ -1016,8 +1013,7 @@ void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+ 	bool too_big = false;
+ 	u8 count = sdhci_calc_timeout(host, cmd, &too_big);
  
- 	return count;
+-	if (too_big &&
+-	    host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
++	if (too_big) {
+ 		sdhci_calc_sw_timeout(host, cmd);
+ 		sdhci_set_data_timeout_irq(host, false);
+ 	} else if (!(host->ier & SDHCI_INT_DATA_TIMEOUT)) {
 -- 
 2.25.1
 
