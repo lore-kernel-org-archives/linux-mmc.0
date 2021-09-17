@@ -2,195 +2,379 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52078C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 06:12:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6EEB2C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 07:13:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3EB5F61152
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 06:12:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 46D5061152
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 07:13:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245185AbhIQGNa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Sep 2021 02:13:30 -0400
-Received: from esa2.hgst.iphmx.com ([68.232.143.124]:50361 "EHLO
-        esa2.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245205AbhIQGNH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 02:13:07 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1631859106; x=1663395106;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=4pwWIwym7o98wXHBmduIUjhkIFwtYaqjscxaJlcptsc=;
-  b=ZtfJofsDgkTu1BPztGLiabuI7VcAa64KlzjFUTID/M7o1haJVqv2KRPg
-   G4Bg3wD+iSD05py3112vADjKagL0NvSSxI15EOvcHlfZ/0kfT2RQvMutC
-   bNOBTxJ0DEkoKG1wrwsy0NJzmSbar7fIIJKFVZn8yzz7wtMVfvRSMIXUs
-   v/qcvAUxfpGeQpUDMABLqnX7jw/XyNL+szkyfLcfL58BSBb3dzm8ag29S
-   vhUd+JKLirGio6/jip/a8WI4KXji45m25Rp4/scyjUV/rP2ovnbUWMg9V
-   0TMJLX8h+lMgn6CMzB+oF7EcugKAuL6gJ1Eus537mDuQoJnoRh75OG0V4
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.85,300,1624291200"; 
-   d="scan'208";a="284038584"
-Received: from mail-bn7nam10lp2103.outbound.protection.outlook.com (HELO NAM10-BN7-obe.outbound.protection.outlook.com) ([104.47.70.103])
-  by ob1.hgst.iphmx.com with ESMTP; 17 Sep 2021 14:11:45 +0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=A1ogYCQlkzvnJ0YeYdb4Iu5Fmhvecsbwg3NGHrFJPYeFByCGvt9ZixLjqriOcSRlyaW7szxCrINkg8X0iQuo0b3jdJJG9epKOa6y7cX/Uxa+kjsMIOg0I80rkNzjtPfPn4Rmc8ff+JamUyBQQKgQYC5E088D05L3KR0t/UVmlUwmuCgTUUftyiocRZsIr9Y+UbGFqUD5y0+pDK5BkIdpuKRtLnDMibJkBwk20MIwbEsCLZPH2FIwudSDOU3K62TH9etC4joEx2z8XnNIjJ91qjg1JU9co+vRqRbEi16CKfsOt0z9RUoGKwiNrzvRDErpMNhgtau+1kRmGX1d6D7ycQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901; h=From:Date:Subject:Message-ID:Content-Type:MIME-Version;
- bh=44u8o2+TBrKK6y0FcDz0Mcqe+zbPBcrQXk6RzYX3TBQ=;
- b=jrP58N+f2kU68Katpnn6n+N4hAoJ1BkYBCPfIRUyeGk2RbupVyZoCd0cO64i6oS0TdnRAIrXuPSjPcrgBryrMO3GH/mm+O7TSrqvrLw4YMHqP3lFWTvIVg7whQalu8RxR5IAvKYLtNxS8B+bRcdTh8HnqiCxZL0mB01n3Cswu1/+q8kuktzuQDhIQSzPgdEtc9hN1lcPJ9YnDZXsv4SJvPV8kRXP+vJwYAq5Z6HLf4iNsKpLH+Cd+tdwS+9WvyaChpEQPlOVj192J/JeHXuAz8A38zADSFMKCleSIlnV/XeR9lPz1r9lir8BUy7n5Wea6ogIk7RG7HrToDNLhN1E4A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=44u8o2+TBrKK6y0FcDz0Mcqe+zbPBcrQXk6RzYX3TBQ=;
- b=zXuUsegY4AzNNrv67j5qDmChoh91zpDBpw4+Tl/WbOm5sKchnQxXhgoYCGWE/cdlblWMIq7ZEZnGVuRkHzHbQmF5kME27CYuuqyk5DvcLGlRiBmPjktHOXygZNaLFHf0zgsOrk+I1VtxGCzyxD6ZJfCarkbpcLsgLi0W0bzSIe0=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM6PR04MB4427.namprd04.prod.outlook.com (2603:10b6:5:a5::19) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4523.14; Fri, 17 Sep 2021 06:11:43 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::edbe:4c5:6ee8:fc59]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::edbe:4c5:6ee8:fc59%3]) with mapi id 15.20.4523.016; Fri, 17 Sep 2021
- 06:11:43 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        id S234244AbhIQHPP convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Sep 2021 03:15:15 -0400
+Received: from mail3.swissbit.com ([176.95.1.57]:43636 "EHLO
+        mail3.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S234142AbhIQHPO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 03:15:14 -0400
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 731A1462824;
+        Fri, 17 Sep 2021 09:13:51 +0200 (CEST)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 42750462823;
+        Fri, 17 Sep 2021 09:13:51 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Fri, 17 Sep 2021 09:13:51 +0200 (CEST)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.15; Fri, 17 Sep
+ 2021 09:13:50 +0200
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0792.015; Fri, 17 Sep 2021 09:13:50 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     =?iso-8859-1?Q?M=E5rten_Lindahl?= <marten.lindahl@axis.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     "kernel@axis.com" <kernel@axis.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-CC:     "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Subject: RE: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
-Thread-Topic: [PATCH 0/3] mmc: also abort tuning with CMD12 for SD
-Thread-Index: AQHXqZVG8Oh7FORawU+mBqRxlXkhWKunvkbQ
-Date:   Fri, 17 Sep 2021 06:11:43 +0000
-Message-ID: <DM6PR04MB65756FA165B1263AFCE45B2AFCDD9@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20210914182023.8103-1-wsa+renesas@sang-engineering.com>
-Accept-Language: en-US
+Subject: Re: [PATCH] mmc: dw_mmc: Support more time for data read timeouts
+Thread-Topic: [PATCH] mmc: dw_mmc: Support more time for data read timeouts
+Thread-Index: AQHXmyGJEdFbNAnwc0S6TM4fCxk95aun7N9x
+Date:   Fri, 17 Sep 2021 07:13:50 +0000
+Message-ID: <35064dfafab0419384b95a9800cf2c4e@hyperstone.com>
+References: <20210827085634.21225-1-marten.lindahl@axis.com>
+In-Reply-To: <20210827085634.21225-1-marten.lindahl@axis.com>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
-authentication-results: sang-engineering.com; dkim=none (message not signed)
- header.d=none;sang-engineering.com; dmarc=none action=none
- header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 149dff86-e4c3-4173-6238-08d979a205a6
-x-ms-traffictypediagnostic: DM6PR04MB4427:
-x-microsoft-antispam-prvs: <DM6PR04MB442781F41BDEC5387DA7829AFCDD9@DM6PR04MB4427.namprd04.prod.outlook.com>
-wdcipoutbound: EOP-TRUE
-x-ms-oob-tlc-oobclassifiers: OLM:9508;
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: xQg4+9iBZcPfD58/t+hfs1CElI/pTJCx7gugk1LXZm2cEbzrzAPCee3gySSBV9z3ccOTFTNEqOl4PqJv9fTzdyVJf2CJC+eTtKFvE7MK+r0nv200hDlO2JslME66eO89tg0+h9TqGp6ZErb2QTD53VWxIsYlEHdQPSAqxOFCBKk8/9c0klEdazyWhQ0e9xLVZAasCRUIklLTOErA/5BjRDALrcz4/lUPnWTflHcH0c8fN5zD9xeDQZ/J+WXY2jqKktBGkSL5dEgWaLCH03KB5kHrxR3yk8/tBSRnNMrbiOw9TKHdE7t0HeF3m0YKjyxju3wXWiim8ARXao5xMW2xLPRxRjwk/OH51TwN+9dMY2kJCPWz73XydNV9z9hhY6yahC3RFE0aIhtRy0LXb1vwUKHjpwnPOr4XIqHa5iY5LnpbL9au3qWIwqbkAoQAzh76UXFoJhVCPjGLsQB8iGbrSjNJbxlOStlSWcajGvAYHvcUxGydGwa566AAL/3F6fe0bMVENtaYnIu9CnXjIr3nJEm7jMEI3M8BbXssHGcLDdjGSACTdmzcAwCG27/Bz5kTUpwpIJ5PODgHeiSXYWt+iUEekQOHbVcOlwx/9oyusvDyJzD52qZuSeI5dqqf3QC00GumfwPaUYCQVq9uS5i8nLSbGxa6J0rOWwPZ3rG5es0thbLe5QZ4/an8ssfgjGjMUbQBKQahzPJayx1K0TZRhw==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(4636009)(366004)(396003)(376002)(136003)(39860400002)(346002)(9686003)(86362001)(55016002)(2906002)(4326008)(38070700005)(33656002)(122000001)(26005)(71200400001)(83380400001)(38100700002)(8936002)(8676002)(110136005)(64756008)(7696005)(6506007)(66476007)(316002)(54906003)(76116006)(478600001)(186003)(66556008)(66446008)(66946007)(52536014)(5660300002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?e3hi9gslsN1GpjXhqy8KO2rgebLDMv+smGWHt+YnIvodRu4E2eCthQoaf8Ry?=
- =?us-ascii?Q?r8iXdAjo25U1Aew3wULr/wb1iHNWivl8/yU3i48YiAOANkWTLOdq1/Y/IkyY?=
- =?us-ascii?Q?DaJ7FR0ysl1wvBZcsCpycKUuQi/O/39AajGi5743pQW31o9A6inXbopMkyzJ?=
- =?us-ascii?Q?owhsKe0eOqwy5KtZr3ym2h7fWSikb6e2Atwevlg+L62wl4iuQZzKOiBd2O2+?=
- =?us-ascii?Q?dENrRCnvfQBDm6cgGiVLCPjNuvG553c8waSobhD2BOLs2JnM+kAscw17kBrt?=
- =?us-ascii?Q?cu1rrQES3G5Ee/P/Gh2bbMuGMzrw6Psgb+W3YOp0PfZrDgXNsVJqG+3qpnTT?=
- =?us-ascii?Q?BOvDPLVg+0fbwfQeF2pVugVvoBW+8usVAUHOkMp8LelAq6yIHxjU2WA1d2S6?=
- =?us-ascii?Q?Fx+yjOUqn4zekT+CCphBAFiRzBMiYxos9yoBAdd6tWK9p/i9yNWxk+tBCSrk?=
- =?us-ascii?Q?bz2UQ8EunvduI5m35bkiU54ZB/t97938P+nPNbjdKeWoOr0y68Ezdo//N4iA?=
- =?us-ascii?Q?pMwXjNzb9cndvC/yX/azVnq5RTBVWlg4UgUG82iZ7NYJSqyQugt5TJefotXf?=
- =?us-ascii?Q?N0TUe98lGSJ0Kzqat9gLSr1XBhpjq9ijT98uHnwHjW1VaBlCkSG2uqs+JmYb?=
- =?us-ascii?Q?ZBiD1J1HotDUvcVJDhTocWt+kgcNXf4r9iP5Q/t5BR5b64mJg4ejqvjX3zUh?=
- =?us-ascii?Q?RUJPLIU47gf1E6ydVgUshLULNLh72C5vjySQ/3FEHBVRaSu+rUVghS55L1g5?=
- =?us-ascii?Q?qfy9Ut9lTDXKYpGKxjwEo6ShyjjXMpr/23/YUpFJ5yUd31l6NSp51cY5VMqy?=
- =?us-ascii?Q?8oIy8e36g/ltAj9o43J4lpDujF5Y8ylzHFm0IAJbBapbArzVokcGMn6Mm1Td?=
- =?us-ascii?Q?iUR15By0LE19SvTeZifcSg5BJDb7gBrYn1SHOkyZanQOayXLD0dhjZ5NrRdi?=
- =?us-ascii?Q?ESwS5FJAaSngRzzlGnHSbTI6JOiJoepqxvP+BqjZeuiNUJZtTlWPSt1uvWp9?=
- =?us-ascii?Q?Tb0pLfKzymzEm3mAJ6+B+bl1968zxanFxI5CoZ59JcubmxMr2KEc/xm33hjo?=
- =?us-ascii?Q?bdmseiDSyaHUMYU9h2JWnDsqS9w3YiWdDZHFZbOOYdyZ9aK4V7Is2Va3drDc?=
- =?us-ascii?Q?z8prDg3OFToxlSin97FbYMcrcA7zRvAVSW52YAJ4KM7cMDz//vbd8Pw5SKDc?=
- =?us-ascii?Q?RCX4O8hGR19DDSxTJthlkIJ7aTBrKTNGSB48//gObXHkcoocq047XGZ0lwrh?=
- =?us-ascii?Q?LMRQ9JAKV4CnguLlJ8q4Yrq6ACVlrHudKo5CZB1gah5yGv9t0paq4kZJaNil?=
- =?us-ascii?Q?fUTobUP9UecLd4H/cVzQMWIA?=
-x-ms-exchange-transport-forked: True
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+x-originating-ip: [10.154.1.4]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 149dff86-e4c3-4173-6238-08d979a205a6
-X-MS-Exchange-CrossTenant-originalarrivaltime: 17 Sep 2021 06:11:43.4734
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Tacho0AcTw5BcXMZEcIA+PeGOdzM+WP0AO9F/7P/UzEnaEcxmVA4VrHyTqeaYTNCwGzmLlBoLs52mWBnvU4vZQ==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB4427
+X-TMASE-Version: DDEI-5.1-8.6.1018-26412.006
+X-TMASE-Result: 10--5.151800-10.000000
+X-TMASE-MatchedRID: Eqw74mxM7XXUL3YCMmnG4qJVTu7sjgg1DibuessoYDZm3JRfoPI9scwM
+        TBTkNfIjF3uQYtPkNr6vj5H7qV3MygScyU4SO7bFf+uRK1dZrq9I5IKBmueVWjVnQMQE4iIl/vz
+        iKpflyKX6SY/N1J2k2yLuZAk1qAxOgp82HbRpnMzVsW2YGqoUtJKLNrbpy/A0zP9LEqj2YngZ1G
+        fA6BFBC+7y3cKtcypIjY1J/WyyVZuMKc5FAaJl6pr5ykm9NtIcP7uiVpnmLFjBDqAtpW0v84nO/
+        I/i7S2AlUkoMluWRitdQO/9ABX3u0xg8KZsB8KvVZ54ioe2Ewu/m13BpxkSel33rgHQQnWVfjcd
+        X7WMS/A0mpdbUFhhsxFCuSA0AK/rQY6eLE365oblvSeYSYEULCILdc+InEErL++JA985eCezu34
+        v/cyxLCrKPE0EtCuv+Bb1Wo7XcLafJKoJNVF/JJMIKPXbrloXrOCEGIPhtwjDOS0FhcAXSmjJRm
+        VgWl9cz8Lcx42EyZhqrgtzev+ggZr/5QhTM8mCrfwvtt71iU83ljUklwm/buJiUqjHevI0Tx9jh
+        If/nmxKp2trhZa6PI9CL1e45ag4BR65NXYd9CsaPMGCcVm9DuBefETzWLKxjhBDYLFALmIzn85L
+        9kDJDEB3Wnq8f0aKM9VlGvdZFucjsdTXcZiIKJciNJzaqUX1S3sNHVAxomx32Xz6cV3Ps5c1qCk
+        ooZMTOjLTSH5MW5mu0znGjE0042peo4CgsnKMb056mCmF00Z9LQinZ4QefJxSu1RP8S9J+gtHj7
+        OwNO0kshYUTZcZE1Bt6XHZn0yUbZW26P/ISRVJsd1bLu+CDXkVa8FklWB9Vlxr1FJij9s=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-12:0,22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: bc694a48-4a24-4f98-a51d-311dead70881-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-=20
-> After my hackish RFC patch, here is a small series implementing
-> (hopefully) the solution we discussed. It will make
-> mmc_send_abort_tuning() also send CMD12 for SD cards which makes more
-> SD
-> cards work for us. Details are in the patch descriptions.
->=20
-> Please let me know what you think.
->=20
-> Thanks, and happy hacking!
-I made note of your patch series to our SD (hw) guys, and here is what they=
- say:
+So I'm in favor in reworking the DRTO timeout calculation to something more meaningful.
+(Maybe we should keep the R though as it currently only affects reads, but more on that later).
 
-"We are ok with host sending CMD12 to abort data transfer when they discove=
-r failure with response / incoming data.=20
-In both SD/eMMC spec, stop transmission command is allowed during data tran=
-sfer phase ('data' state).
-Sometimes, the CMD12 would have been received by card while in 'tran' state=
-. As long host is able to handle the 'illegal command' error indication for=
- this situation, we don't see any other problem.=20
+After playing around with dw_mmc (on the rk3399) Ive seen 3 issues with the current driver.
+Lets look at the traces (format: timestamp,type(1=cmd,2=rsp48, 3=rsp136, 4=dataover),cmdopcode,arg)
 
-Per SD Spec, CMD12 is allowed in 'tran' state only for SDUC card. In non SD=
-UC cards, CMD12 received while in 'tran' state will be treated as illegal c=
-ommand.
+-The worst of them Id say is this one:
+32611.175228177,1,25,059f5000
+32611.175247135,2,25,00000080
+32611.175265218,0,RESP TO CMD 25 : 80 CONTAINED AN ERROR -84
+--- hang --- tasklet never getting scheduled again
+I send a patch for that yesterday.
 
-However we could not understand how aborting the data transfer is helping h=
-ost to complete the tuning scheme and have successful read / write operatio=
-ns."
+-Then there's the case where the register is at reset value and the timeout is about 167 seconds
+1547.207376888,1,55,00000000
+1547.207986555,2,55,00000120
+1547.208669638,2,41,80ff8000
+1547.208064638,1,41,41040000
+1547.208736055,1,02,00000000
+1547.209899513,1,03,00000000
+1547.209786721,3,02,00000000000000000000000000000001
+1547.210519680,2,03,00010520
+1547.210577638,1,09,00010000
+1547.211636471,3,09,007f00321b5980f26ebb7fff1640009b
+1547.211717763,1,07,00010000
+1547.212334721,2,07,00000700
+1547.212402305,1,55,00010000
+1547.213022180,2,55,00000920
+1547.213096471,1,51,00000000
+1547.213718680,2,51,00000920
+1547.214967596,4,51,0,8
+1547.214971096,5,51,00a5000000000000
+1547.215036930,1,55,00010000
+1547.215660013,2,55,00000920
+1547.215747721,1,13,00000000
+1547.216369930,2,13,00000920
+1631.102136318,0,Sending stop abort due data ERROR: data status: 208
+Note the long gap between the last two lines, I can send a simple fix for that today.
 
-They also think that :
-" we believe this hack was added to avoid the data transfer after response =
-crc error...
-Receiving CRC error with the tuning pattern would be normal as long as the =
-tuning was not complete."
+-The last one I'm not sure why it occurs but I can also see something like this
+77769.308526825,1,23,0000000c
+77769.308550158,2,23,00000900
+77769.308598575,1,25,08ac7800
+77769.308614908,2,25,00000900
+-- hang -- tasklet never getting scheduled again
 
-My 5 cents are, maybe you should try retries > 0 in sd_send_abort_tuning,
-If indeed it's a crc while tuning is not complete.
+To my understanding there should not be a state where we don't receive an interrupt
+when a data write times out, but apparently this can happen.
 
-Thanks,
-Avri=20
+This patch would fix the second issue.
+Can we extend it to catch a dtwo timeout, too?
+I'd just add a flag in dw_mci_set_dto for writes and give it some extra slack.
+The case happened rarely enough for me that I'd say anything that is not a complete hang of the driver
+is a good enough improvement.
 
->=20
->=20
-> Wolfram Sang (3):
->   mmc: core: add helper to send STOP
->   mmc: core: also abort tuning with CMD12 for SD
->   mmc: core: remove obsolete parameter from mmc_send_abort_tuning
->=20
->  drivers/mmc/core/block.c             | 14 +-------------
->  drivers/mmc/core/core.h              |  1 +
->  drivers/mmc/core/mmc.c               |  6 ++++++
->  drivers/mmc/core/mmc_ops.c           | 23 ++++-------------------
->  drivers/mmc/core/mmc_ops.h           | 14 ++++++++++++++
->  drivers/mmc/core/sd.c                |  6 ++++++
->  drivers/mmc/host/renesas_sdhi_core.c |  2 +-
->  drivers/mmc/host/sdhci.c             |  2 +-
->  include/linux/mmc/host.h             |  2 +-
->  9 files changed, 35 insertions(+), 35 deletions(-)
->=20
-> --
-> 2.30.2
+Regards,
+Christian
+
+
+From: Mårten Lindahl <marten.lindahl@axis.com>
+Sent: Friday, August 27, 2021 10:56 AM
+To: Jaehoon Chung; Ulf Hansson
+Cc: kernel@axis.com; linux-mmc@vger.kernel.org; Mårten Lindahl
+Subject: [PATCH] mmc: dw_mmc: Support more time for data read timeouts
+    
+For data read transfers a data transfer over timer (dto_timer) is
+started to make sure the data command can be completed in cases the Data
+Transfer Over (DTO) interrupt does not come. This timer was originally
+introduced as a quirk in commit 57e104864bc48 ("mmc: dw_mmc: add quirk
+for broken data transfer over scheme"), but is since a while back part
+of the running code.
+
+The dto timer picks the DATA_TIMEOUT value in the TMOUT register for its
+timeout, which will give a max timeout of approximately 84 + (10 spare)
+milliseconds on a 200MHz clock. But this register is not intended to be
+used like that, since it is a counter for data read timeouts (DRTO) and
+response timeouts (RTO), which will result in error interrupts in case
+of data read and response delays.
+
+The TMOUT register is always set with a full value for every transfer,
+which according to the manual (and with 200MHz clock) will give a full
+DRTO of:
+((TMOUT[10:8] -1) * 0xFFFFFF + TMOUT[31:11] * 8) / 200000000 => ~587 ms
+
+But as the same register is used for the dto_timer, the dto_timer will
+always have a fixed timeout.
+
+Instead of always setting a fixed value in TMOUT register, we can use
+data->timeout_ns for the DRTO interrupts that actually matches what was
+provided per requested command. Likewise we can also use timeout_ns for
+the dto_timer, which will allow a max timeout of 587 ms, instead of the
+fixed 94 ms. Furthermore, if a data error interrupt comes, it shouldn't
+be necessary to wait for the dto_timer before we finish the command, but
+instead we can handle it in the interrupt handler.
+
+Lets fix this. In most cases data->timeout_ns values are given, but in
+case it is not given, the maximum (default) timeout for the dto_timer,
+and the DRTO, is set to approximately 587 ms.
+
+Signed-off-by: Mårten Lindahl <marten.lindahl@axis.com>
+---
+ drivers/mmc/host/dw_mmc.c | 108 ++++++++++++++++++++++----------------
+ 1 file changed, 63 insertions(+), 45 deletions(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index c3229d8c7041..0762d95293d4 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -52,6 +52,7 @@
+ 
+ #define DW_MCI_FREQ_MAX 200000000       /* unit: HZ */
+ #define DW_MCI_FREQ_MIN 100000          /* unit: HZ */
++#define DW_MCI_DATA_TMOUT_NS_MAX       587202490
+ 
+ #define IDMAC_INT_CLR           (SDMMC_IDMAC_INT_AI | SDMMC_IDMAC_INT_NI | \
+                                  SDMMC_IDMAC_INT_CES | SDMMC_IDMAC_INT_DU | \
+@@ -390,6 +391,23 @@ static inline void dw_mci_set_cto(struct dw_mci *host)
+         spin_unlock_irqrestore(&host->irq_lock, irqflags);
+ }
+ 
++static void dw_mci_set_dto(struct dw_mci *host, u32 timeout_ns)
++{
++       unsigned int dto_ns;
++       unsigned long irqflags;
++
++       if (!timeout_ns || timeout_ns > DW_MCI_DATA_TMOUT_NS_MAX)
++               dto_ns = DW_MCI_DATA_TMOUT_NS_MAX;
++       else
++               dto_ns = timeout_ns;
++
++       spin_lock_irqsave(&host->irq_lock, irqflags);
++       if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
++               mod_timer(&host->dto_timer,
++                         jiffies + nsecs_to_jiffies(dto_ns));
++       spin_unlock_irqrestore(&host->irq_lock, irqflags);
++}
++
+ static void dw_mci_start_command(struct dw_mci *host,
+                                  struct mmc_command *cmd, u32 cmd_flags)
+ {
+@@ -1144,9 +1162,10 @@ static void dw_mci_submit_data(struct dw_mci *host, struct mmc_data *data)
+         host->sg = NULL;
+         host->data = data;
+ 
+-       if (data->flags & MMC_DATA_READ)
++       if (data->flags & MMC_DATA_READ) {
+                 host->dir_status = DW_MCI_RECV_STATUS;
+-       else
++               dw_mci_set_dto(host, data->timeout_ns);
++       } else
+                 host->dir_status = DW_MCI_SEND_STATUS;
+ 
+         dw_mci_ctrl_thld(host, data);
+@@ -1277,6 +1296,36 @@ static void dw_mci_setup_bus(struct dw_mci_slot *slot, bool force_clkinit)
+         mci_writel(host, CTYPE, (slot->ctype << slot->id));
+ }
+ 
++static void dw_mci_set_data_timeout(struct dw_mci *host, u32 timeout_ns)
++{
++       u32 timeout, freq_mhz, tmp, tmout;
++
++       if (!timeout_ns || timeout_ns > DW_MCI_DATA_TMOUT_NS_MAX) {
++               /* Timeout (maximum) */
++               mci_writel(host, TMOUT, 0xFFFFFFFF);
++               return;
++       }
++
++       timeout = timeout_ns / NSEC_PER_USEC;
++       freq_mhz = host->bus_hz / NSEC_PER_MSEC;
++
++       /* TMOUT[7:0] (RESPONSE_TIMEOUT) */
++       tmout = 0xFF;
++
++       /* TMOUT[10:8] (DATA_TIMEOUT) */
++       tmp = ((timeout * freq_mhz) / 0xFFFFFF) + 1;
++       tmout |= (tmp & 0x7) << 8;
++
++       /* TMOUT[31:11] (DATA_TIMEOUT) */
++       tmp = ((tmp - 1) * 0xFFFFFF) / freq_mhz;
++       tmp = (timeout - tmp) * freq_mhz / 8;
++       tmout |= (tmp & 0x1FFFFF) << 11;
++
++       mci_writel(host, TMOUT, tmout);
++       dev_dbg(host->dev, "timeout_ns: %u => TMOUT[31:8]: 0x%08x",
++               timeout_ns, tmout);
++}
++
+ static void __dw_mci_start_request(struct dw_mci *host,
+                                    struct dw_mci_slot *slot,
+                                    struct mmc_command *cmd)
+@@ -1297,7 +1346,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 
+         data = cmd->data;
+         if (data) {
+-               mci_writel(host, TMOUT, 0xFFFFFFFF);
++               dw_mci_set_data_timeout(host, data->timeout_ns);
+                 mci_writel(host, BYTCNT, data->blksz*data->blocks);
+                 mci_writel(host, BLKSIZ, data->blksz);
+         }
+@@ -1897,31 +1946,6 @@ static int dw_mci_data_complete(struct dw_mci *host, struct mmc_data *data)
+         return data->error;
+ }
+ 
+-static void dw_mci_set_drto(struct dw_mci *host)
+-{
+-       unsigned int drto_clks;
+-       unsigned int drto_div;
+-       unsigned int drto_ms;
+-       unsigned long irqflags;
+-
+-       drto_clks = mci_readl(host, TMOUT) >> 8;
+-       drto_div = (mci_readl(host, CLKDIV) & 0xff) * 2;
+-       if (drto_div == 0)
+-               drto_div = 1;
+-
+-       drto_ms = DIV_ROUND_UP_ULL((u64)MSEC_PER_SEC * drto_clks * drto_div,
+-                                  host->bus_hz);
+-
+-       /* add a bit spare time */
+-       drto_ms += 10;
+-
+-       spin_lock_irqsave(&host->irq_lock, irqflags);
+-       if (!test_bit(EVENT_DATA_COMPLETE, &host->pending_events))
+-               mod_timer(&host->dto_timer,
+-                         jiffies + msecs_to_jiffies(drto_ms));
+-       spin_unlock_irqrestore(&host->irq_lock, irqflags);
+-}
+-
+ static bool dw_mci_clear_pending_cmd_complete(struct dw_mci *host)
+ {
+         if (!test_bit(EVENT_CMD_COMPLETE, &host->pending_events))
+@@ -2052,15 +2076,8 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
+                         }
+ 
+                         if (!test_and_clear_bit(EVENT_XFER_COMPLETE,
+-                                               &host->pending_events)) {
+-                               /*
+-                                * If all data-related interrupts don't come
+-                                * within the given time in reading data state.
+-                                */
+-                               if (host->dir_status == DW_MCI_RECV_STATUS)
+-                                       dw_mci_set_drto(host);
++                                               &host->pending_events))
+                                 break;
+-                       }
+ 
+                         set_bit(EVENT_XFER_COMPLETE, &host->completed_events);
+ 
+@@ -2091,16 +2108,8 @@ static void dw_mci_tasklet_func(struct tasklet_struct *t)
+                         fallthrough;
+ 
+                 case STATE_DATA_BUSY:
+-                       if (!dw_mci_clear_pending_data_complete(host)) {
+-                               /*
+-                                * If data error interrupt comes but data over
+-                                * interrupt doesn't come within the given time.
+-                                * in reading data state.
+-                                */
+-                               if (host->dir_status == DW_MCI_RECV_STATUS)
+-                                       dw_mci_set_drto(host);
++                       if (!dw_mci_clear_pending_data_complete(host))
+                                 break;
+-                       }
+ 
+                         host->data = NULL;
+                         set_bit(EVENT_DATA_COMPLETE, &host->completed_events);
+@@ -2649,12 +2658,21 @@ static irqreturn_t dw_mci_interrupt(int irq, void *dev_id)
+                 }
+ 
+                 if (pending & DW_MCI_DATA_ERROR_FLAGS) {
++                       spin_lock(&host->irq_lock);
++
++                       del_timer(&host->dto_timer);
++
+                         /* if there is an error report DATA_ERROR */
+                         mci_writel(host, RINTSTS, DW_MCI_DATA_ERROR_FLAGS);
+                         host->data_status = pending;
+                         smp_wmb(); /* drain writebuffer */
+                         set_bit(EVENT_DATA_ERROR, &host->pending_events);
++
++                       /* In case of error, we cannot expect a DTO */
++                       set_bit(EVENT_DATA_COMPLETE, &host->pending_events);
+                         tasklet_schedule(&host->tasklet);
++
++                       spin_unlock(&host->irq_lock);
+                 }
+ 
+                 if (pending & SDMMC_INT_DATA_OVER) {
+-- 
+2.20.1
+
+    =
+Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+Managing Directors: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
