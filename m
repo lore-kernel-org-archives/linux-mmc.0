@@ -2,100 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
+X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A10D9C433F5
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 19:50:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE379C4321E
+	for <linux-mmc@archiver.kernel.org>; Sat, 18 Sep 2021 15:54:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8937E60F43
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Sep 2021 19:50:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9AC5661284
+	for <linux-mmc@archiver.kernel.org>; Sat, 18 Sep 2021 15:54:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241886AbhIQTvt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Sep 2021 15:51:49 -0400
-Received: from mail-oo1-f49.google.com ([209.85.161.49]:35532 "EHLO
-        mail-oo1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242818AbhIQTu3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Sep 2021 15:50:29 -0400
-Received: by mail-oo1-f49.google.com with SMTP id y3-20020a4ab403000000b00290e2a52c71so3573728oon.2;
-        Fri, 17 Sep 2021 12:49:06 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:in-reply-to:references:subject:date
-         :message-id;
-        bh=lIqQeQXnK4cjptHyGskWDQAslLOSJliGOSjwEw/Um2w=;
-        b=Brr7/osIWtBSectNOwa3Tgwe2h5niCj8QpU/mMKAIaCfIUuIRohOLM0H7VflsZBnB2
-         EBNFb0pr3sXGlrgALxWItEViWJk97ybVnD5Wr5Vnj2AxGrHGnwlt/jaE8wT4HFV+Ijxu
-         ZhgnTeaVviK1fUZm1tJKJYcmKIIwhUZSkd3/uxbY5rtQyV0Vo8cyrJ6HS8FjI4tBUzSB
-         whVhvrVMmhAJKr8usgu/103h3I6sC+B3rumGlIL1A1aXEXQJTwEfyX1DCJHBlr9HZQdo
-         vxlWe+cteOQUF7XR7bAdGCgnmuHmah0k5rG6EAEWTK28ZQEsJWBrcNw+XhC/Mn0Mi3R5
-         +krg==
-X-Gm-Message-State: AOAM531ZvNkxdgXqrZNKl2fbzE98dox0qRaUxXl6/PgxNt6brBCrSlVY
-        wG5VgtZ+adZAVkhP9EzOFA==
-X-Google-Smtp-Source: ABdhPJxjY1Cr2X0gISlUEjpmrUwwPiPDDmYHTOQoeNCD+4D0iRzlv5pQ4zTOB4Md3k7uJKuLJjPi6Q==
-X-Received: by 2002:a4a:dcd0:: with SMTP id h16mr10363770oou.44.1631908144964;
-        Fri, 17 Sep 2021 12:49:04 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id z7sm1766832oti.65.2021.09.17.12.49.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Sep 2021 12:49:03 -0700 (PDT)
-Received: (nullmailer pid 2025337 invoked by uid 1000);
-        Fri, 17 Sep 2021 19:48:54 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        "David S . Miller" <davem@davemloft.net>,
-        devel@driverdev.osuosl.org, devicetree@vger.kernel.org,
-        =?utf-8?b?SsOpcsO0bWUgUG91aWxsZXI=?= <jerome.pouiller@silabs.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-wireless@vger.kernel.org,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        =?utf-8?q?Pali_Roh=C3=A1r?= <pali@kernel.org>,
-        netdev@vger.kernel.org, linux-kernel@vger.kernel.org
-In-Reply-To: <20210917151401.2274772-3-Jerome.Pouiller@silabs.com>
-References: <20210917151401.2274772-1-Jerome.Pouiller@silabs.com> <20210917151401.2274772-3-Jerome.Pouiller@silabs.com>
-Subject: Re: [PATCH v6 02/24] dt-bindings: introduce silabs,wfx.yaml
-Date:   Fri, 17 Sep 2021 14:48:54 -0500
-Message-Id: <1631908134.353915.2025336.nullmailer@robh.at.kernel.org>
+        id S239917AbhIRP4L convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 18 Sep 2021 11:56:11 -0400
+Received: from mail.kernel.org ([198.145.29.99]:44186 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S237245AbhIRP4K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
+        Sat, 18 Sep 2021 11:56:10 -0400
+Received: from jic23-huawei (cpc108967-cmbg20-2-0-cust86.5-4.cable.virginm.net [81.101.6.87])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id CB92261244;
+        Sat, 18 Sep 2021 15:54:40 +0000 (UTC)
+Date:   Sat, 18 Sep 2021 16:58:20 +0100
+From:   Jonathan Cameron <jic23@kernel.org>
+To:     Brendan Higgins <brendanhiggins@google.com>
+Cc:     shuah@kernel.org, davidgow@google.com, arnd@arndb.de,
+        keescook@chromium.org, rafael@kernel.org, lars@metafoo.de,
+        ulf.hansson@linaro.org, andreas.noever@gmail.com,
+        michael.jamet@intel.com, mika.westerberg@linux.intel.com,
+        YehezkelShB@gmail.com, masahiroy@kernel.org,
+        michal.lkml@markovi.net, ndesaulniers@google.com,
+        linux-kselftest@vger.kernel.org, kunit-dev@googlegroups.com,
+        linux-kernel@vger.kernel.org, torvalds@linux-foundation.org,
+        gregkh@linuxfoundation.org, linux-iio@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-hardening@vger.kernel.org, linux-kbuild@vger.kernel.org
+Subject: Re: [PATCH v1 2/6] iio/test-format: build kunit tests without
+ structleak plugin
+Message-ID: <20210918165820.076237b4@jic23-huawei>
+In-Reply-To: <20210917061104.2680133-3-brendanhiggins@google.com>
+References: <20210917061104.2680133-1-brendanhiggins@google.com>
+        <20210917061104.2680133-3-brendanhiggins@google.com>
+X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.30; x86_64-pc-linux-gnu)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 17 Sep 2021 17:13:38 +0200, Jerome Pouiller wrote:
-> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
+On Thu, 16 Sep 2021 23:11:00 -0700
+Brendan Higgins <brendanhiggins@google.com> wrote:
+
+> The structleak plugin causes the stack frame size to grow immensely when
+> used with KUnit:
 > 
-> Prepare the inclusion of the wfx driver in the kernel.
+> ../drivers/iio/test/iio-test-format.c: In function ‘iio_test_iio_format_value_fixedpoint’:
+> ../drivers/iio/test/iio-test-format.c:98:1: warning: the frame size of 2336 bytes is larger than 2048 bytes [-Wframe-larger-than=]
 > 
-> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
+> Turn it off in this file.
+> 
+> Co-developed-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
+
+Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+
 > ---
->  .../bindings/net/wireless/silabs,wfx.yaml     | 133 ++++++++++++++++++
->  1 file changed, 133 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
+>  drivers/iio/test/Makefile | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
-
-yamllint warnings/errors:
-
-dtschema/dtc warnings/errors:
-
-
-doc reference errors (make refcheckdocs):
-Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml: Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.txt
-
-See https://patchwork.ozlabs.org/patch/1529457
-
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit.
+> diff --git a/drivers/iio/test/Makefile b/drivers/iio/test/Makefile
+> index f1099b4953014..467519a2027e5 100644
+> --- a/drivers/iio/test/Makefile
+> +++ b/drivers/iio/test/Makefile
+> @@ -5,3 +5,4 @@
+>  
+>  # Keep in alphabetical order
+>  obj-$(CONFIG_IIO_TEST_FORMAT) += iio-test-format.o
+> +CFLAGS_iio-test-format.o += $(DISABLE_STRUCTLEAK_PLUGIN)
 
