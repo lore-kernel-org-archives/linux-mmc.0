@@ -2,83 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.5 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE379C4321E
-	for <linux-mmc@archiver.kernel.org>; Sat, 18 Sep 2021 15:54:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B744C433F5
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Sep 2021 20:04:20 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9AC5661284
-	for <linux-mmc@archiver.kernel.org>; Sat, 18 Sep 2021 15:54:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1A5C161052
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Sep 2021 20:04:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239917AbhIRP4L convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 18 Sep 2021 11:56:11 -0400
-Received: from mail.kernel.org ([198.145.29.99]:44186 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S237245AbhIRP4K (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Sat, 18 Sep 2021 11:56:10 -0400
-Received: from jic23-huawei (cpc108967-cmbg20-2-0-cust86.5-4.cable.virginm.net [81.101.6.87])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id CB92261244;
-        Sat, 18 Sep 2021 15:54:40 +0000 (UTC)
-Date:   Sat, 18 Sep 2021 16:58:20 +0100
-From:   Jonathan Cameron <jic23@kernel.org>
-To:     Brendan Higgins <brendanhiggins@google.com>
-Cc:     shuah@kernel.org, davidgow@google.com, arnd@arndb.de,
-        keescook@chromium.org, rafael@kernel.org, lars@metafoo.de,
-        ulf.hansson@linaro.org, andreas.noever@gmail.com,
-        michael.jamet@intel.com, mika.westerberg@linux.intel.com,
-        YehezkelShB@gmail.com, masahiroy@kernel.org,
-        michal.lkml@markovi.net, ndesaulniers@google.com,
-        linux-kselftest@vger.kernel.org, kunit-dev@googlegroups.com,
-        linux-kernel@vger.kernel.org, torvalds@linux-foundation.org,
-        gregkh@linuxfoundation.org, linux-iio@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-hardening@vger.kernel.org, linux-kbuild@vger.kernel.org
-Subject: Re: [PATCH v1 2/6] iio/test-format: build kunit tests without
- structleak plugin
-Message-ID: <20210918165820.076237b4@jic23-huawei>
-In-Reply-To: <20210917061104.2680133-3-brendanhiggins@google.com>
-References: <20210917061104.2680133-1-brendanhiggins@google.com>
-        <20210917061104.2680133-3-brendanhiggins@google.com>
-X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.30; x86_64-pc-linux-gnu)
+        id S230366AbhISUFn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 19 Sep 2021 16:05:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60770 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230168AbhISUFn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Sep 2021 16:05:43 -0400
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E690C061574;
+        Sun, 19 Sep 2021 13:04:17 -0700 (PDT)
+Received: by mail-ed1-x533.google.com with SMTP id t6so52399260edi.9;
+        Sun, 19 Sep 2021 13:04:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=j6dcfeSU/NOsGSKbPe3yVGjy+BHxzeNlCvBUbxrUC+I=;
+        b=eIEUGJFpKqwaqe/BM2ipxcvnehHrJDzjyAepeocNa9a/QbsroK3efi7YIiCyEGTRZf
+         JrqYvugCXMPfdCMBpi9t5NJlq8DIO0SQSKhEsv2i7upHyblhsEhfE4lIpLTkzVM5am59
+         36cZWoLGQn6wkEzu4V2W4y6ZqDGKOK8xVmY++3TgAaoQeTVEVbKzWvEMv/6r1/IYKaIS
+         J9qVEC7P6etYjyeAQ6v2LB0ENIK2Ymy2abnCx7fqoYFvqJ8XmIDMhfm+N4WGDj7/Kjkv
+         /wp+Ea0sY38dBMYHWDFWbo6P0X6DFz8sZ5KdSWvCqs64nosGKDh9DGxFzyplY/W8DEwq
+         Hvwg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=j6dcfeSU/NOsGSKbPe3yVGjy+BHxzeNlCvBUbxrUC+I=;
+        b=Akrp2AtWNmKPlfu2EeWB8er5lg4t+yoBtX3hzopycAj+1YFx4JicjqcClFc5O+sM3K
+         NkhuaNRmQA7ZoAd7AZHBKa6wBFhGj3+cPFy+7qpXUFpwzIS2aPVmgM0TUsC7E7fodgBM
+         WzJbV6E0R9ruBeWNRLgaTmlLPxjGm9xm3J2XJeet2DfWGHYHrztGKoUsyAsFbz0EbMY1
+         SEBhwNEj5E8Q94wDw4OWiqmX0r0lR+072uhBD8uWhgqqg8qGd0I5uM6npNrjM8dwhOZT
+         s4YX2USwqxuALwOP/l+fZiTyUyuaN8m1imUlEBMcVHiF3hB5WDxXzCTOoHMn9LLxESeR
+         aK2w==
+X-Gm-Message-State: AOAM532YXG5sWayRFA/GtpMEhhhvnOFzPYQs0jZzI4EicFjHEBzKaY8V
+        4J+V/WCWsJs/2/278AL+TT9QMaE6yImBVWNuSK6XfOrwYwc=
+X-Google-Smtp-Source: ABdhPJzZSSqwoRRH6yf/ElrPT7c/a1ILbXHOxkd8n5v3y1fDg0NwwQK4OJUrZKHLvrxDjZ6AhRLPnIn3fFBxaKR+Sng=
+X-Received: by 2002:a17:906:e105:: with SMTP id gj5mr24161655ejb.408.1632081855922;
+ Sun, 19 Sep 2021 13:04:15 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+References: <20210913080504.832521-1-narmstrong@baylibre.com>
+In-Reply-To: <20210913080504.832521-1-narmstrong@baylibre.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Sun, 19 Sep 2021 22:04:05 +0200
+Message-ID: <CAFBinCDbxTo9B5nfP=etv+DBwwf3_L7PaRr2Fck2pELwwLQnLg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
+To:     Neil Armstrong <narmstrong@baylibre.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Christian Hewitt <christianshewitt@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 16 Sep 2021 23:11:00 -0700
-Brendan Higgins <brendanhiggins@google.com> wrote:
-
-> The structleak plugin causes the stack frame size to grow immensely when
-> used with KUnit:
-> 
-> ../drivers/iio/test/iio-test-format.c: In function ‘iio_test_iio_format_value_fixedpoint’:
-> ../drivers/iio/test/iio-test-format.c:98:1: warning: the frame size of 2336 bytes is larger than 2048 bytes [-Wframe-larger-than=]
-> 
-> Turn it off in this file.
-> 
-> Co-developed-by: Arnd Bergmann <arnd@arndb.de>
-> Signed-off-by: Brendan Higgins <brendanhiggins@google.com>
-
-Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
-
-> ---
->  drivers/iio/test/Makefile | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/iio/test/Makefile b/drivers/iio/test/Makefile
-> index f1099b4953014..467519a2027e5 100644
-> --- a/drivers/iio/test/Makefile
-> +++ b/drivers/iio/test/Makefile
-> @@ -5,3 +5,4 @@
->  
->  # Keep in alphabetical order
->  obj-$(CONFIG_IIO_TEST_FORMAT) += iio-test-format.o
-> +CFLAGS_iio-test-format.o += $(DISABLE_STRUCTLEAK_PLUGIN)
-
+On Mon, Sep 13, 2021 at 10:05 AM Neil Armstrong <narmstrong@baylibre.com> wrote:
+>
+> The memory at the end of the controller only accepts 32bit read/write
+> accesses, but the arm64 memcpy_to/fromio implementation only uses 64bit
+> (which will be split into two 32bit access) and 8bit leading to incomplete
+> copies to/from this memory when the buffer is not multiple of 8bytes.
+>
+> Add a local copy using writel/readl accesses to make sure we use the right
+> memory access width.
+>
+> The switch to memcpy_to/fromio was done because of 285133040e6c
+> ("arm64: Import latest memcpy()/memmove() implementation"), but using memcpy
+> worked before since it mainly used 32bit memory acceses.
+>
+> Fixes: 103a5348c22c ("mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk")
+> Reported-by: Christian Hewitt <christianshewitt@gmail.com>
+> Suggested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
+Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
