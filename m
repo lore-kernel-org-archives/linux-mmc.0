@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 415E7C433FE
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3415C433F5
 	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:43 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D02E6044F
+	by mail.kernel.org (Postfix) with ESMTP id DEAFA6044F
 	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242135AbhIUCnJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S231392AbhIUCnJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Mon, 20 Sep 2021 22:43:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35290 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238087AbhIUCCb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 22:02:31 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC11CC140094;
-        Mon, 20 Sep 2021 11:12:01 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id g1so71794003lfj.12;
-        Mon, 20 Sep 2021 11:12:01 -0700 (PDT)
+        with ESMTP id S241608AbhIUCCe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 22:02:34 -0400
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CC84C14009D;
+        Mon, 20 Sep 2021 11:12:05 -0700 (PDT)
+Received: by mail-lf1-x131.google.com with SMTP id m3so68769260lfu.2;
+        Mon, 20 Sep 2021 11:12:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=b3yXsdmsWJbu2CaukGByuPBPrpPUHlzf8e1vIPRsAi8=;
-        b=mSz7uU/bRRInYFwuM8f6B84EvUoksh7ddPhtlASBvZ85dgMc6wSlwy9SyUr71eh6Fl
-         8aF/ejqZiLi8ozfYp9/gUV4vYRxtIvgQjgPnZXtQL7Y+v9G9Y+cAaoQ21eYKgU3RZGA1
-         UOWbjyklkTrEUyaLSLrxbDkrvqYVMR0YBcW59uTVr7/Ot83fYGy4c+QiJj/Xy92xKSgB
-         EfV5X85nt0Citt1qMKvG2qkwPH6VuQN5kOywq4zIlYwPZtXGr+a27VopPVnjFYxmMedy
-         4bzfzsT9EaigD80tFXxFOEytgM+rMwHIS7FkhnwqO0rdhVONYqcKyeIkWnAmXAWihsxB
-         g4eQ==
+        bh=azJO16PBS0aaEX5vOfJpmf9jn1x1mJqiJpQpMZ0azY4=;
+        b=JWg3p713BIkRQCTRGaoUEi5JC50MDq8wqQyGmvOxgt/Gx0+uRrbbGTC6klgxI0l8Jg
+         9ky4dBsBvVte/Nm5TTUfutW8bf/X9pvsJRx1XEfGFMrhKtHcGMxeT1uKrrZkMnMWhJmV
+         BLZOPJt87+eOSbKmvhmCbBjQvdmqbKHsCaGwHUegBIYlZ8yZAAUIu+39rodNLIXUk+8X
+         G83TV+DyIfbW9xWEVYXLbkZIRJ19L5fjcOLNsIC1WnVrdwL4nOfnENybYCKOw3JM80ep
+         XivsGBWZxIyD/VSF+sgY622lG6h5a63NIzpnyDDEVIvkcP7bU4VCpnwpeKu8QY7Ay0wV
+         fitA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=b3yXsdmsWJbu2CaukGByuPBPrpPUHlzf8e1vIPRsAi8=;
-        b=C44XylXvqNOC/bv8IF712Kxdj+QqjQsDkoc7U2mEz6AzuVktSlswd6pg/C03OzT+67
-         3lxI24zwEM+3+7auIqwpylmtZ3PHD/jL0oj3OmwaPs/tf5bcbMisu2maRvYl7l4AkCMB
-         MPICZrZJD3n/qQBvKZzYw7KAm18YHsZsSiXV2LhRyQeY2JxIgBmlxRt9+IHjA6nZP0Ah
-         G+bFO+GMqcPdPgXhsXa+sUjHFfm67zSG7O+4brsfH/vUvEzcX/g1kLWQJquXCFebZFOS
-         fphQk4pnvAVLuFjPZpcMxexVxuVZJDN1NCt5dDOfcRDHt39YUrRxHcqT3TteYAuYy7Cr
-         XQ1Q==
-X-Gm-Message-State: AOAM530KBJk3CDaC1vt83kxQiQWFi1sMgO+dJL8RpjUBS9Qcvan7KPx5
-        81tX3Hzqmi+Nn8Kv9hebIeU=
-X-Google-Smtp-Source: ABdhPJyyop5T5u9zSJ7UMIl5EYQj77IA6sm5fQ8onwEgRAuSRlsCeH7gqEyvDQr6Gg0QHhoOer317g==
-X-Received: by 2002:a05:6512:3a82:: with SMTP id q2mr20094513lfu.543.1632161520309;
-        Mon, 20 Sep 2021 11:12:00 -0700 (PDT)
+        bh=azJO16PBS0aaEX5vOfJpmf9jn1x1mJqiJpQpMZ0azY4=;
+        b=QPvmg/glwTNhHRT3fcXa0cx6tyAFvIqVX6ZS4FawTrJPkU5GgdeOcyjJCcKUbcKdgB
+         aGQuM4BnhX72aKC8uUOhKZZLUlA1ks6eoK/yX4HxgnOQN/GGRPboSvgDIWp1fDvtvpe4
+         bdYFId+k+E96hhmhMeoylle/xXPm8tQrrKETWYm713HiTNFOgavgD7lttt9KMptCeVzD
+         H5PTU1NfwX4O2VoEzMR+4JpBQ1YIjMUKwnw1XB23TXb9Ldf2FKvAp2FYmHBY0EDWdoYz
+         4buc+VpYmHvYzdLtydRhUBtakmV7be/zaE1prnPHfdAC5sscY7EahQNEVlkVlVia0EZ2
+         hpmQ==
+X-Gm-Message-State: AOAM53138KUIvgGU3DhMkUODhdbAUWKrE4l3NBTcKg8GvgsSxeQV/PpR
+        w32H6xEhCJzVE3HKhBx4LVo=
+X-Google-Smtp-Source: ABdhPJz3P9KrsvRrtZRLBfMiI9cU2UmfIpkQbidKkjFChQc06aWwDZ92cX26PW8bKiuB9zGdNqj9yA==
+X-Received: by 2002:a05:6512:3699:: with SMTP id d25mr19990583lfs.380.1632161523114;
+        Mon, 20 Sep 2021 11:12:03 -0700 (PDT)
 Received: from localhost.localdomain (46-138-151-206.dynamic.spd-mgts.ru. [46.138.151.206])
-        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.11.59
+        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.01
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Sep 2021 11:12:00 -0700 (PDT)
+        Mon, 20 Sep 2021 11:12:02 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -83,9 +83,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v12 02/35] soc/tegra: Add devm_tegra_core_dev_init_opp_table_common()
-Date:   Mon, 20 Sep 2021 21:11:12 +0300
-Message-Id: <20210920181145.19543-3-digetx@gmail.com>
+Subject: [PATCH v12 04/35] soc/tegra: Don't print error message when OPPs not available
+Date:   Mon, 20 Sep 2021 21:11:14 +0300
+Message-Id: <20210920181145.19543-5-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210920181145.19543-1-digetx@gmail.com>
 References: <20210920181145.19543-1-digetx@gmail.com>
@@ -95,48 +95,33 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Only couple drivers need to get the -ENODEV error code and majority of
-drivers need to explicitly initialize the performance state. Add new
-common helper which sets up OPP table for these drivers.
+Previously we assumed that devm_tegra_core_dev_init_opp_table() will
+be used only by drivers that will always have device with OPP table,
+but this is not true anymore. For example now Tegra30 will have OPP table
+for PWM, but Tegra20 not and both use the same driver. Hence let's not
+print the error message about missing OPP table in the common helper,
+we can print it elsewhere.
 
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- include/soc/tegra/common.h | 24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ drivers/soc/tegra/common.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-diff --git a/include/soc/tegra/common.h b/include/soc/tegra/common.h
-index af41ad80ec21..5b4a042f60fb 100644
---- a/include/soc/tegra/common.h
-+++ b/include/soc/tegra/common.h
-@@ -39,4 +39,28 @@ devm_tegra_core_dev_init_opp_table(struct device *dev,
- }
- #endif
+diff --git a/drivers/soc/tegra/common.c b/drivers/soc/tegra/common.c
+index cd33e99249c3..a42d4f98c078 100644
+--- a/drivers/soc/tegra/common.c
++++ b/drivers/soc/tegra/common.c
+@@ -111,9 +111,7 @@ int devm_tegra_core_dev_init_opp_table(struct device *dev,
+ 	 */
+ 	err = devm_pm_opp_of_add_table(dev);
+ 	if (err) {
+-		if (err == -ENODEV)
+-			dev_err_once(dev, "OPP table not found, please update device-tree\n");
+-		else
++		if (err != -ENODEV)
+ 			dev_err(dev, "failed to add OPP table: %d\n", err);
  
-+/*
-+ * This function should be invoked with the enabled runtime PM of the device
-+ * in order to initialize performance state properly. Most of Tegra devices
-+ * are assumed to be suspended at a probe time and GENPD require RPM to be
-+ * enabled to set up the rpm-resume state, otherwise device is active and
-+ * performance state is applied immediately. Note that it will initialize
-+ * OPP bandwidth if it's wired in a device-tree for this device, which is
-+ * undesirable for a suspended device.
-+ */
-+static inline int
-+devm_tegra_core_dev_init_opp_table_common(struct device *dev)
-+{
-+	struct tegra_core_opp_params opp_params = {};
-+	int err;
-+
-+	opp_params.init_state = true;
-+
-+	err = devm_tegra_core_dev_init_opp_table(dev, &opp_params);
-+	if (err != -ENODEV)
-+		return err;
-+
-+	return 0;
-+}
-+
- #endif /* __SOC_TEGRA_COMMON_H__ */
+ 		return err;
 -- 
 2.32.0
 
