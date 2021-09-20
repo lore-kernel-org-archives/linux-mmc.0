@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DEB6C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 064DBC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2922E60ED5
+	by mail.kernel.org (Postfix) with ESMTP id E3DA760F43
 	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1350434AbhIUCnV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Sep 2021 22:43:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35722 "EHLO
+        id S1350435AbhIUCnW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Sep 2021 22:43:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241609AbhIUCDF (ORCPT
+        with ESMTP id S241741AbhIUCDF (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 22:03:05 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4434CC14091B;
-        Mon, 20 Sep 2021 11:12:24 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id u8so19850027lff.9;
-        Mon, 20 Sep 2021 11:12:24 -0700 (PDT)
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44BBEC140921;
+        Mon, 20 Sep 2021 11:12:27 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id b20so12632201lfv.3;
+        Mon, 20 Sep 2021 11:12:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=bHhQzalkL4HJ+6Pj2vchyrjPmLkUiKGrqSO4eo7D4QI=;
-        b=QX2xNvQxTCFlcCP6Bb7nyEQFApx252nqY8XkhXt5afJ7eILF0NjCF5276aoYGDyN/X
-         CoDF9iuNmMvhBtq7X3z7G5x7uGmdkkdae1Osq34IMXvihfWpEsdJ6dsR3EVMYEuC4d21
-         AMXfB+7Ir5NUcPdRcWelpzJi6rcKBGnUwoQW4zBRpDwUmiRoVbpxdoHxd9rx1vd1BRgJ
-         xeDw6QiJE0XZjZcRHYa6y5PO0lUG5N0F2HdMeePLVwtu9Tdb+JOWLrI4UbGzur9p5L4S
-         6/TqbIIxoSz/qzUOR79UswnauYFph5CtUoojh3/I4bbQJGoejmV9p009PJhMR10BpcQ4
-         1U6g==
+        bh=i9QYtupMPLyzQnqOhwfXP4oUoMqt4gxj3ewFZ5B73Ts=;
+        b=FLondlZAByswkCx76NUTut2FKe5HTLd6RMUKRjGcVS5xrGzeF4n55ShR0KiVsRbPKS
+         xAPy+xlX3OUlHnUtXOFxwCN+8d5gJs2a2z0WdqOsIedoGjefZRbmdyux39rTxexL89cO
+         Oajkf7cwNhOKm3ecjfD489L8XHwLcw8uMdMLgeD9tRdTKa0md7Xrvw+UUV66F+XDzklb
+         kg3rGsoaIptbGC7oXHOx3h0d9BWGJ53uW38q7qiKdQ9PH5r0DsKUpkJM0PowNppUniFU
+         p1HEvNelypwSp0k0w0BFnLTWa5S8F1mgxziNA7Ia3Jv1I1/5V6DwYtvbiYnbQuWV2CWf
+         c/yQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=bHhQzalkL4HJ+6Pj2vchyrjPmLkUiKGrqSO4eo7D4QI=;
-        b=567BZ/HC71HwvgD9VJA7kXP6+pKtLVAI8G1cKzy+u6h06b/qptREINAiby3KcL/hNQ
-         PTpdGR1tQaroIteE7c9rUoYRQwNcevfIxq3xwbqHwtxXjs4c9cx/IOwpt+LWWWdRItMU
-         uBgSh3MdVRhD5ZZ2Lg6JlVvr6hNW+UMxFAdFhDPbBhcAjDIgqVEpCOTt8dNrEioSzIdu
-         IXdXrRWnJEU0afgrDEY7lCHtG3vTESuocnN9FhPq0DD2jw/cr4L8ylIDTC7UeXDpPDyM
-         arpVVolycYsOLoSR89j26Efk5JvyzPpEK2Hoj+TXe0gnTu6YXkuNNJhw2mp2TlMr2onV
-         8eKw==
-X-Gm-Message-State: AOAM532O9rF6x5BWrMVZAwvO5ru2vlBlAdgBF2v0v7LGf/3Ok+0+cOLq
-        cfSAvqs3iNvj9ogv066IsKo=
-X-Google-Smtp-Source: ABdhPJxl8ZXALhmfr8D/lOOzfy/DiAFlumABJ3V1PTBrwbfqBGWBRN8X326HimyKQrX9JgL1vOVkPA==
-X-Received: by 2002:ac2:484e:: with SMTP id 14mr21015703lfy.140.1632161543269;
-        Mon, 20 Sep 2021 11:12:23 -0700 (PDT)
+        bh=i9QYtupMPLyzQnqOhwfXP4oUoMqt4gxj3ewFZ5B73Ts=;
+        b=1xv3a8t7vSJnu5POaALyEmnJgaARJlZH5NBrkFWL6D9YpvY13zSUY0ReDGgRcbmIuS
+         zatx6DlejlcmmDji8Fs3qwZQCQ4ygMLhLkUsN9m9Mdrb+bFK1DTK8bcUndgqqQEBgRca
+         zClDo/nw5/uMCxBuosYqmldGyfSKYgCaiCi+1TmFS40qWMe2qF8DPXVdgrpvJqG6qCzc
+         UQ1wLi82OmmLcef0lTIy/RHSMComg/3KLVh/jsPqRYscuMbWzVvzwMbdr4sCTOu5tg5R
+         yg48Mo6iZzP5pdQtGgDSAW2K6wrPR2hbtZ/isNTB8cF6ThHN7iXpALtITBf1YEhMXWlk
+         A5Gw==
+X-Gm-Message-State: AOAM533kq9Hw3OgFvAqZ+ZoG3sdaNNNCYRHGxfKa1xGluQPcI4Z637n5
+        X53iHjDrUDDgOyrpBiFqDhk=
+X-Google-Smtp-Source: ABdhPJx9TGtvBZ/IypK8WLsx2yRQVD/sNzzkimN7hcbYTGAHJuhtbGsTO+/Kb00HqQOXbH0CjLvTpA==
+X-Received: by 2002:a05:651c:206:: with SMTP id y6mr9048284ljn.98.1632161545955;
+        Mon, 20 Sep 2021 11:12:25 -0700 (PDT)
 Received: from localhost.localdomain (46-138-151-206.dynamic.spd-mgts.ru. [46.138.151.206])
-        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.22
+        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Sep 2021 11:12:23 -0700 (PDT)
+        Mon, 20 Sep 2021 11:12:25 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -83,9 +83,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v12 19/35] mmc: sdhci-tegra: Add runtime PM and OPP support
-Date:   Mon, 20 Sep 2021 21:11:29 +0300
-Message-Id: <20210920181145.19543-20-digetx@gmail.com>
+Subject: [PATCH v12 21/35] spi: tegra20-slink: Add OPP support
+Date:   Mon, 20 Sep 2021 21:11:31 +0300
+Message-Id: <20210920181145.19543-22-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210920181145.19543-1-digetx@gmail.com>
 References: <20210920181145.19543-1-digetx@gmail.com>
@@ -95,201 +95,59 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The SDHCI on Tegra belongs to the core power domain and we're going to
-enable GENPD support for the core domain. Now SDHCI must be resumed using
-runtime PM API in order to initialize the SDHCI power state. The SDHCI
-clock rate must be changed using OPP API that will reconfigure the power
-domain performance state in accordance to the rate. Add runtime PM and OPP
-support to the SDHCI driver.
+The SPI on Tegra belongs to the core power domain and we're going to
+enable GENPD support for the core domain. Now SPI driver must use OPP
+API for driving the controller's clock rate because OPP API takes care
+of reconfiguring the domain's performance state in accordance to the
+rate. Add OPP support to the driver.
 
+Acked-by: Mark Brown <broonie@kernel.org>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 80 +++++++++++++++++++++++++++-------
- 1 file changed, 64 insertions(+), 16 deletions(-)
+ drivers/spi/spi-tegra20-slink.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index a5001875876b..71955150dc43 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -15,6 +15,8 @@
+diff --git a/drivers/spi/spi-tegra20-slink.c b/drivers/spi/spi-tegra20-slink.c
+index 8ce840c7ecc8..1a92978d2120 100644
+--- a/drivers/spi/spi-tegra20-slink.c
++++ b/drivers/spi/spi-tegra20-slink.c
+@@ -18,12 +18,15 @@
+ #include <linux/kthread.h>
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
++#include <linux/pm_opp.h>
+ #include <linux/pm_runtime.h>
  #include <linux/of.h>
  #include <linux/of_device.h>
- #include <linux/pinctrl/consumer.h>
-+#include <linux/pm_opp.h>
-+#include <linux/pm_runtime.h>
- #include <linux/regulator/consumer.h>
  #include <linux/reset.h>
- #include <linux/mmc/card.h>
-@@ -24,6 +26,8 @@
- #include <linux/gpio/consumer.h>
- #include <linux/ktime.h>
+ #include <linux/spi/spi.h>
  
 +#include <soc/tegra/common.h>
 +
- #include "sdhci-pltfm.h"
- #include "cqhci.h"
- 
-@@ -760,7 +764,9 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- {
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-+	struct device *dev = mmc_dev(host->mmc);
- 	unsigned long host_clk;
-+	int err;
- 
- 	if (!clock)
- 		return sdhci_set_clock(host, clock);
-@@ -778,7 +784,12 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 	 * from clk_get_rate() is used.
- 	 */
- 	host_clk = tegra_host->ddr_signaling ? clock * 2 : clock;
--	clk_set_rate(pltfm_host->clk, host_clk);
-+
-+	err = dev_pm_opp_set_rate(dev, host_clk);
-+	if (err)
-+		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
-+			host_clk, err);
-+
- 	tegra_host->curr_clk_rate = host_clk;
- 	if (tegra_host->ddr_signaling)
- 		host->max_clk = host_clk;
-@@ -1705,7 +1716,6 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 				   "failed to get clock\n");
- 		goto err_clk_get;
- 	}
--	clk_prepare_enable(clk);
- 	pltfm_host->clk = clk;
- 
- 	tegra_host->rst = devm_reset_control_get_exclusive(&pdev->dev,
-@@ -1716,15 +1726,25 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 		goto err_rst_get;
+ #define SLINK_COMMAND			0x000
+ #define SLINK_BIT_LENGTH(x)		(((x) & 0x1f) << 0)
+ #define SLINK_WORD_SIZE(x)		(((x) & 0x1f) << 5)
+@@ -680,7 +683,7 @@ static int tegra_slink_start_transfer_one(struct spi_device *spi,
+ 	bits_per_word = t->bits_per_word;
+ 	speed = t->speed_hz;
+ 	if (speed != tspi->cur_speed) {
+-		clk_set_rate(tspi->clk, speed * 4);
++		dev_pm_opp_set_rate(tspi->dev, speed * 4);
+ 		tspi->cur_speed = speed;
  	}
  
-+	pm_runtime_enable(&pdev->dev);
+@@ -1082,6 +1085,11 @@ static int tegra_slink_probe(struct platform_device *pdev)
+ 	init_completion(&tspi->xfer_completion);
+ 
+ 	pm_runtime_enable(&pdev->dev);
 +
-+	rc = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
-+	if (rc)
-+		goto err_pm_get;
++	ret = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
++	if (ret)
++		goto exit_pm_disable;
 +
-+	rc = pm_runtime_resume_and_get(&pdev->dev);
-+	if (rc)
-+		goto err_pm_get;
-+
- 	rc = reset_control_assert(tegra_host->rst);
- 	if (rc)
--		goto err_rst_get;
-+		goto err_rst_assert;
- 
- 	usleep_range(2000, 4000);
- 
- 	rc = reset_control_deassert(tegra_host->rst);
- 	if (rc)
--		goto err_rst_get;
-+		goto err_rst_assert;
- 
- 	usleep_range(2000, 4000);
- 
-@@ -1736,8 +1756,11 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
- 
- err_add_host:
- 	reset_control_assert(tegra_host->rst);
-+err_rst_assert:
-+	pm_runtime_put(&pdev->dev);
-+err_pm_get:
-+	pm_runtime_disable(&pdev->dev);
- err_rst_get:
--	clk_disable_unprepare(pltfm_host->clk);
- err_clk_get:
- 	clk_disable_unprepare(tegra_host->tmclk);
- err_power_req:
-@@ -1756,19 +1779,37 @@ static int sdhci_tegra_remove(struct platform_device *pdev)
- 
- 	reset_control_assert(tegra_host->rst);
- 	usleep_range(2000, 4000);
--	clk_disable_unprepare(pltfm_host->clk);
--	clk_disable_unprepare(tegra_host->tmclk);
- 
-+	pm_runtime_put(&pdev->dev);
-+	pm_runtime_disable(&pdev->dev);
-+
-+	clk_disable_unprepare(tegra_host->tmclk);
- 	sdhci_pltfm_free(pdev);
- 
- 	return 0;
- }
- 
--#ifdef CONFIG_PM_SLEEP
--static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
-+static int __maybe_unused sdhci_tegra_runtime_suspend(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
- 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	clk_disable_unprepare(pltfm_host->clk);
-+
-+	return 0;
-+}
-+
-+static int __maybe_unused sdhci_tegra_runtime_resume(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return clk_prepare_enable(pltfm_host->clk);
-+}
-+
-+static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
-+{
-+	struct sdhci_host *host = dev_get_drvdata(dev);
- 	int ret;
- 
- 	if (host->mmc->caps2 & MMC_CAP2_CQE) {
-@@ -1783,17 +1824,22 @@ static int __maybe_unused sdhci_tegra_suspend(struct device *dev)
- 		return ret;
- 	}
- 
--	clk_disable_unprepare(pltfm_host->clk);
-+	ret = pm_runtime_force_suspend(dev);
-+	if (ret) {
-+		sdhci_resume_host(host);
-+		cqhci_resume(host->mmc);
-+		return ret;
-+	}
-+
- 	return 0;
- }
- 
- static int __maybe_unused sdhci_tegra_resume(struct device *dev)
- {
- 	struct sdhci_host *host = dev_get_drvdata(dev);
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	int ret;
- 
--	ret = clk_prepare_enable(pltfm_host->clk);
-+	ret = pm_runtime_force_resume(dev);
- 	if (ret)
- 		return ret;
- 
-@@ -1812,13 +1858,15 @@ static int __maybe_unused sdhci_tegra_resume(struct device *dev)
- suspend_host:
- 	sdhci_suspend_host(host);
- disable_clk:
--	clk_disable_unprepare(pltfm_host->clk);
-+	pm_runtime_force_suspend(dev);
- 	return ret;
- }
--#endif
- 
--static SIMPLE_DEV_PM_OPS(sdhci_tegra_dev_pm_ops, sdhci_tegra_suspend,
--			 sdhci_tegra_resume);
-+static const struct dev_pm_ops sdhci_tegra_dev_pm_ops = {
-+	SET_RUNTIME_PM_OPS(sdhci_tegra_runtime_suspend, sdhci_tegra_runtime_resume,
-+			   NULL)
-+	SET_SYSTEM_SLEEP_PM_OPS(sdhci_tegra_suspend, sdhci_tegra_resume)
-+};
- 
- static struct platform_driver sdhci_tegra_driver = {
- 	.driver		= {
+ 	ret = pm_runtime_resume_and_get(&pdev->dev);
+ 	if (ret) {
+ 		dev_err(&pdev->dev, "pm runtime get failed, e = %d\n", ret);
 -- 
 2.32.0
 
