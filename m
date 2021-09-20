@@ -2,89 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B744C433F5
-	for <linux-mmc@archiver.kernel.org>; Sun, 19 Sep 2021 20:04:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 47E81C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Sep 2021 09:34:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1A5C161052
-	for <linux-mmc@archiver.kernel.org>; Sun, 19 Sep 2021 20:04:20 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1F8A260F70
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Sep 2021 09:34:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230366AbhISUFn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 19 Sep 2021 16:05:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60770 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230168AbhISUFn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Sep 2021 16:05:43 -0400
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E690C061574;
-        Sun, 19 Sep 2021 13:04:17 -0700 (PDT)
-Received: by mail-ed1-x533.google.com with SMTP id t6so52399260edi.9;
-        Sun, 19 Sep 2021 13:04:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=j6dcfeSU/NOsGSKbPe3yVGjy+BHxzeNlCvBUbxrUC+I=;
-        b=eIEUGJFpKqwaqe/BM2ipxcvnehHrJDzjyAepeocNa9a/QbsroK3efi7YIiCyEGTRZf
-         JrqYvugCXMPfdCMBpi9t5NJlq8DIO0SQSKhEsv2i7upHyblhsEhfE4lIpLTkzVM5am59
-         36cZWoLGQn6wkEzu4V2W4y6ZqDGKOK8xVmY++3TgAaoQeTVEVbKzWvEMv/6r1/IYKaIS
-         J9qVEC7P6etYjyeAQ6v2LB0ENIK2Ymy2abnCx7fqoYFvqJ8XmIDMhfm+N4WGDj7/Kjkv
-         /wp+Ea0sY38dBMYHWDFWbo6P0X6DFz8sZ5KdSWvCqs64nosGKDh9DGxFzyplY/W8DEwq
-         Hvwg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=j6dcfeSU/NOsGSKbPe3yVGjy+BHxzeNlCvBUbxrUC+I=;
-        b=Akrp2AtWNmKPlfu2EeWB8er5lg4t+yoBtX3hzopycAj+1YFx4JicjqcClFc5O+sM3K
-         NkhuaNRmQA7ZoAd7AZHBKa6wBFhGj3+cPFy+7qpXUFpwzIS2aPVmgM0TUsC7E7fodgBM
-         WzJbV6E0R9ruBeWNRLgaTmlLPxjGm9xm3J2XJeet2DfWGHYHrztGKoUsyAsFbz0EbMY1
-         SEBhwNEj5E8Q94wDw4OWiqmX0r0lR+072uhBD8uWhgqqg8qGd0I5uM6npNrjM8dwhOZT
-         s4YX2USwqxuALwOP/l+fZiTyUyuaN8m1imUlEBMcVHiF3hB5WDxXzCTOoHMn9LLxESeR
-         aK2w==
-X-Gm-Message-State: AOAM532YXG5sWayRFA/GtpMEhhhvnOFzPYQs0jZzI4EicFjHEBzKaY8V
-        4J+V/WCWsJs/2/278AL+TT9QMaE6yImBVWNuSK6XfOrwYwc=
-X-Google-Smtp-Source: ABdhPJzZSSqwoRRH6yf/ElrPT7c/a1ILbXHOxkd8n5v3y1fDg0NwwQK4OJUrZKHLvrxDjZ6AhRLPnIn3fFBxaKR+Sng=
-X-Received: by 2002:a17:906:e105:: with SMTP id gj5mr24161655ejb.408.1632081855922;
- Sun, 19 Sep 2021 13:04:15 -0700 (PDT)
+        id S232966AbhITJgF convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Sep 2021 05:36:05 -0400
+Received: from mail4.swissbit.com ([176.95.1.100]:55294 "EHLO
+        mail4.swissbit.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230266AbhITJgE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 05:36:04 -0400
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id E4AEA1222A6;
+        Mon, 20 Sep 2021 11:34:35 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id CF09B121B6E;
+        Mon, 20 Sep 2021 11:34:35 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.84-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Mon, 20 Sep 2021 11:34:35 +0200 (CEST)
+Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
+ (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.15; Mon, 20 Sep
+ 2021 11:34:35 +0200
+Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
+ sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
+ 15.02.0792.015; Mon, 20 Sep 2021 11:34:35 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Jesper Nilsson <jesper.nilsson@axis.com>
+CC:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "marten.lindahl@axis.com" <marten.lindahl@axis.com>,
+        "jh80.chung@samsung.com" <jh80.chung@samsung.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+Thread-Topic: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+Thread-Index: AQHXq5f2H1xcZooo4kGJdi3JsFt1D6uoGrGAgASR040=
+Date:   Mon, 20 Sep 2021 09:34:34 +0000
+Message-ID: <0c002d216fa44df39fef87001079ca84@hyperstone.com>
+References: <bf19053cf6f547bcbb364975cda84c30@hyperstone.com>,<20210917134123.GL12780@axis.com>
+In-Reply-To: <20210917134123.GL12780@axis.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.154.1.4]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-References: <20210913080504.832521-1-narmstrong@baylibre.com>
-In-Reply-To: <20210913080504.832521-1-narmstrong@baylibre.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 19 Sep 2021 22:04:05 +0200
-Message-ID: <CAFBinCDbxTo9B5nfP=etv+DBwwf3_L7PaRr2Fck2pELwwLQnLg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: do not use memcpy_to/fromio for dram-access-quirk
-To:     Neil Armstrong <narmstrong@baylibre.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Christian Hewitt <christianshewitt@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+X-TMASE-Version: DDEI-5.1-8.6.1018-26418.007
+X-TMASE-Result: 10--1.266600-10.000000
+X-TMASE-MatchedRID: F7tLedRt7ifUL3YCMmnG4vGG8F2k2BBVv5tdwacZEnrfoEW8NyvnbyaC
+        jkFKp/+ebb+wP0Qo+N6TH1CW/TkdqldXhVJKmheR52cbj4/WmPsL8TGleseLPEoMHl9co6FPw9M
+        1TrvkSYercKMJSOLvFZo4ITanr/FwE29kWrNuieBFM72aEhcbjc0b3CgaR62KEcWQUCNHW2ds5J
+        OqCt0EWWQpTLT4bj+xEXcbsy/3gdUYB2fOueQzjxM0JxSxHjFJavP8b9lJtWr6C0ePs7A07V9vM
+        TaVNFNz2tl1Zv77sopJpXzj6uHXhHXaLkIcCRk2nXkRk1EvZ8Q=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-12:0,22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: f2104eb2-9cd3-4d2d-ab0d-d76412f53db1-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Sep 13, 2021 at 10:05 AM Neil Armstrong <narmstrong@baylibre.com> wrote:
+From: Jesper Nilsson <jesper.nilsson@axis.com>
+Sent: Friday, September 17, 2021 3:41 PM
+To: Christian Löhle
+Cc: linux-kernel@vger.kernel.org; linux-mmc@vger.kernel.org; marten.lindahl@axis.com; jh80.chung@samsung.com; ulf.hansson@linaro.org
+Subject: Re: [PATCH] mmc: dw_mmc: avoid long timeout if register invalid
+
+>One second could be to short, we have seen some cards take up
+>to 10s on write operations. Although that was quite a few years ago.
 >
-> The memory at the end of the controller only accepts 32bit read/write
-> accesses, but the arm64 memcpy_to/fromio implementation only uses 64bit
-> (which will be split into two 32bit access) and 8bit leading to incomplete
-> copies to/from this memory when the buffer is not multiple of 8bytes.
+>TMOUT is only used for reads if I understand correctly,
+>so it should be ok anyways.
 >
-> Add a local copy using writel/readl accesses to make sure we use the right
-> memory access width.
->
-> The switch to memcpy_to/fromio was done because of 285133040e6c
-> ("arm64: Import latest memcpy()/memmove() implementation"), but using memcpy
-> worked before since it mainly used 32bit memory acceses.
->
-> Fixes: 103a5348c22c ("mmc: meson-gx: use memcpy_to/fromio for dram-access-quirk")
-> Reported-by: Christian Hewitt <christianshewitt@gmail.com>
-> Suggested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Signed-off-by: Neil Armstrong <narmstrong@baylibre.com>
-Tested-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+>/Jesper
+
+Yes, apart from it only affecting reads, the calculated timeout is only that high if the register still holds the reset value.
+I've only seen and would expect this for initialization 'read' commands, like ACMD13, or ACMD51.
+I have chosen 1s to hit an expectation that I would consider normal, that a card is initialized in a couple of seconds after plugging in, or never.
+
+Regards,
+Christian=
+Hyperstone GmbH | Line-Eid-Strasse 3 | 78467 Konstanz
+Managing Directors: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
