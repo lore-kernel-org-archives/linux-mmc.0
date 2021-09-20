@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3915DC4332F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC3F9C433FE
 	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:42:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 24D246044F
+	by mail.kernel.org (Postfix) with ESMTP id B43CE60ED5
 	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:42:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230309AbhIUCna (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Sep 2021 22:43:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36266 "EHLO
+        id S231207AbhIUCnb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Sep 2021 22:43:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238896AbhIUCDK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 22:03:10 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5F78C140932;
-        Mon, 20 Sep 2021 11:12:38 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id t10so64979380lfd.8;
-        Mon, 20 Sep 2021 11:12:38 -0700 (PDT)
+        with ESMTP id S241800AbhIUCDL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 22:03:11 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A81CC140935;
+        Mon, 20 Sep 2021 11:12:44 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id i25so71958845lfg.6;
+        Mon, 20 Sep 2021 11:12:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=myD2habKvt7RXAHJbtKPfyU4WLnqnb1bLB54hjelw1E=;
-        b=Wwh5Bp61loEgevDUFcsNB1xPMhR1XTpK+N5ivwKy3o+MQreoLkBZiSjBr1jHTPesp/
-         y/RfPU1kIhmHBS4vZnv1ofR8MSrfOTaVskrC+CjJ/iyi3SBAtlMhN/5K8QIbifnjOkuu
-         Dh97HFATcsIjwx7rWqSro8j+RixDozr05vXauDn4codyUtrpkPAL8OacgXCjMiw9sU6H
-         hrJ4bNYPWROFg+PHVRJTKZ6aEWK/3UsIAIkJtdyUrIhQx3KUJx5sHmCOuzEu7Je3Fd8E
-         k+UQaoNQXUCMSbxKpQfnFFK1bid7z+ov06RC5SgaW3u6UB/EwwGVRrTWh9dh9YT+vmxe
-         5cHQ==
+        bh=bHV0bQfFsqKEqBYRxEIpvsDc8HNhAwowLE0FplFjNDU=;
+        b=jhLz4xJJJl3o4CnHV/WWFHveesLRTYHP/y51fodUc6bAFZeehkqTwpgxUWNB/+AkGl
+         NWqpxXlXP79XwEvP+M0FC3+zznHJAC2xsB9laQ9/+dJ7O4zAV+yEDB7HmUHt0FmXNWFw
+         70tr/z8wfOPyuMZIu7Hbi4b/YveaSRil95gm5EhLWrP7iktkDJUkAIBCUyOfF7rP+JOb
+         Wf56BF+S67tVtnVTAGOCvqBBICz8AiqkiQ+f9aisWd9Su93dOwHb/QPr05caXlTE2w5i
+         Tnc+93odYgQjUzp8zpOim0INAF2uVkAeeZl98pTJOu10T5/RiHjv1M5hF0L0we5/cF9D
+         6GdA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=myD2habKvt7RXAHJbtKPfyU4WLnqnb1bLB54hjelw1E=;
-        b=ZE4+6GfUTH6mbtgRxt4yXYK6aLBHQuo1VKcYVWzF5uUy0Pu5qo1I3+QYRB1FKSb4/H
-         ZpmE83fAm+O/v/KnvPVHR6h6c/PB3vRHo+qnQw+YdIttgkfEk7w1xisS/n3gicr1C2VC
-         8P6Xa1XHT0Zv2BLETyff8/feV/3cP8CuBjAkIYvBhAFXlp6yCiSww6e7IryIprfE9Mx3
-         68rjoEBHOI9SkIxcJwPDhaG4rJrxdjXzyOHYb/+AioArkC9utjBkF35nKh1skI2JaJR7
-         +lBeq+s4kMVkaNjTS4Tv4IuFumC9GewvXXsJ2J4EElgJ5JWYJeHQ16xrbcLocYRKgMF4
-         ImIg==
-X-Gm-Message-State: AOAM531u63R2miD1fC3yoLlJVHQi7MEghW/Uba1FSmc0nct3UeZEquAf
-        TvoyOvJiZwnQ/iuLSH/b0Fg=
-X-Google-Smtp-Source: ABdhPJx0jdF0TRfniBGFptMPciVnLNS38vWQMz2X5dyyfZ8CmknMYMYEDaHex2CJkph6/kiivPojgA==
-X-Received: by 2002:a2e:2243:: with SMTP id i64mr16693903lji.333.1632161556519;
-        Mon, 20 Sep 2021 11:12:36 -0700 (PDT)
+        bh=bHV0bQfFsqKEqBYRxEIpvsDc8HNhAwowLE0FplFjNDU=;
+        b=6682plgEvdjIwZh1yiBYXhQSJgrVuJIg48JZ0LMTOacyS7HT7joX2KKVp1nG3dkNLV
+         U/cba2PmmCNtzvNAtp0Kk6o7WSDDdi/N7NIg0rTZ30G0Gb3z+HnljDRc1wQkBsjWj0OL
+         KovIsr1TlrHcuXWmKYwBJAVakQpMMANxtcrTkawUkA8+0Zo6wlbkArctLzTbILlQK0AL
+         /8frT0oTbcUIjuqu0nFnmQOGYxMaS1ZXs1VPwSFXlIOneHVcjVR9s2M6oRFwOR87g4vk
+         9BmrZoDnH/D8limgAGpYYzRNBMOz1F2dFFptb/YfSQFu5RgMKaBqKq8kcm8IvNNoPAuB
+         FEdQ==
+X-Gm-Message-State: AOAM532dkomngMjwJFPDXv0gwBgyjnGH5kA9NF50A1lBlIjRnjHafiVo
+        ZVdvFbTMcb6W8U2KBCwFosE=
+X-Google-Smtp-Source: ABdhPJwTyaGYqlfvaTEz6scN32KAKYSEpXA0rZGM7IsqAJ/oOZlQM/8o9VVgFKeh99CV9X35abqZAw==
+X-Received: by 2002:a05:6512:3d0a:: with SMTP id d10mr19891828lfv.481.1632161562304;
+        Mon, 20 Sep 2021 11:12:42 -0700 (PDT)
 Received: from localhost.localdomain (46-138-151-206.dynamic.spd-mgts.ru. [46.138.151.206])
-        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.35
+        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Sep 2021 11:12:36 -0700 (PDT)
+        Mon, 20 Sep 2021 11:12:41 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -83,9 +83,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v12 29/35] soc/tegra: pmc: Rename core power domain
-Date:   Mon, 20 Sep 2021 21:11:39 +0300
-Message-Id: <20210920181145.19543-30-digetx@gmail.com>
+Subject: [PATCH v12 33/35] ARM: tegra: Add Memory Client resets to Tegra20 GR2D, GR3D and Host1x
+Date:   Mon, 20 Sep 2021 21:11:43 +0300
+Message-Id: <20210920181145.19543-34-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210920181145.19543-1-digetx@gmail.com>
 References: <20210920181145.19543-1-digetx@gmail.com>
@@ -95,27 +95,54 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CORE power domain uses name of device-tree node, which is inconsistent with
-the names of PMC domains. Set the name to "core" to make it consistent.
+Memory access must be blocked before hardware reset is asserted and before
+power is gated, otherwise a serious hardware fault is inevitable. Add
+reset for memory clients to the GR2D, GR3D and Host1x nodes.
 
+Tested-by: Paul Fertser <fercerpav@gmail.com> # PAZ00 T20
+Tested-by: Nicolas Chauvet <kwizart@gmail.com> # PAZ00 T20
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/soc/tegra/pmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm/boot/dts/tegra20.dtsi | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
-index 6759f19b9cd6..3e52ceada60c 100644
---- a/drivers/soc/tegra/pmc.c
-+++ b/drivers/soc/tegra/pmc.c
-@@ -1353,7 +1353,7 @@ static int tegra_pmc_core_pd_add(struct tegra_pmc *pmc, struct device_node *np)
- 	if (!genpd)
- 		return -ENOMEM;
+diff --git a/arch/arm/boot/dts/tegra20.dtsi b/arch/arm/boot/dts/tegra20.dtsi
+index ce38055a8952..eb6e5518fb5f 100644
+--- a/arch/arm/boot/dts/tegra20.dtsi
++++ b/arch/arm/boot/dts/tegra20.dtsi
+@@ -40,8 +40,8 @@ host1x@50000000 {
+ 		interrupt-names = "syncpt", "host1x";
+ 		clocks = <&tegra_car TEGRA20_CLK_HOST1X>;
+ 		clock-names = "host1x";
+-		resets = <&tegra_car 28>;
+-		reset-names = "host1x";
++		resets = <&tegra_car 28>, <&mc TEGRA20_MC_RESET_HC>;
++		reset-names = "host1x", "mc";
+ 		operating-points-v2 = <&host1x_dvfs_opp_table>;
+ 		power-domains = <&pd_core>;
  
--	genpd->name = np->name;
-+	genpd->name = "core";
- 	genpd->set_performance_state = tegra_pmc_core_pd_set_performance_state;
- 	genpd->opp_to_performance_state = tegra_pmc_core_pd_opp_to_performance_state;
- 
+@@ -98,8 +98,8 @@ gr2d@54140000 {
+ 			reg = <0x54140000 0x00040000>;
+ 			interrupts = <GIC_SPI 72 IRQ_TYPE_LEVEL_HIGH>;
+ 			clocks = <&tegra_car TEGRA20_CLK_GR2D>;
+-			resets = <&tegra_car 21>;
+-			reset-names = "2d";
++			resets = <&tegra_car 21>, <&mc TEGRA20_MC_RESET_2D>;
++			reset-names = "2d", "mc";
+ 			operating-points-v2 = <&gr2d_dvfs_opp_table>;
+ 			power-domains = <&pd_core>;
+ 		};
+@@ -108,8 +108,8 @@ gr3d@54180000 {
+ 			compatible = "nvidia,tegra20-gr3d";
+ 			reg = <0x54180000 0x00040000>;
+ 			clocks = <&tegra_car TEGRA20_CLK_GR3D>;
+-			resets = <&tegra_car 24>;
+-			reset-names = "3d";
++			resets = <&tegra_car 24>, <&mc TEGRA20_MC_RESET_3D>;
++			reset-names = "3d", "mc";
+ 			operating-points-v2 = <&gr3d_dvfs_opp_table>;
+ 			power-domains = <&pd_3d>;
+ 		};
 -- 
 2.32.0
 
