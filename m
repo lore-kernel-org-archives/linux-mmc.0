@@ -5,62 +5,62 @@ X-Spam-Level:
 X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
 	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 243B5C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Sep 2021 15:09:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CE06C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Sep 2021 15:09:55 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0A81E61077
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Sep 2021 15:09:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1991760F93
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Sep 2021 15:09:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241286AbhITPLI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Sep 2021 11:11:08 -0400
-Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:40010
+        id S241128AbhITPLU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Sep 2021 11:11:20 -0400
+Received: from smtp-relay-internal-1.canonical.com ([185.125.188.123]:40050
         "EHLO smtp-relay-internal-1.canonical.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S241242AbhITPLG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 11:11:06 -0400
+        by vger.kernel.org with ESMTP id S241234AbhITPLU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 11:11:20 -0400
 Received: from mail-wr1-f71.google.com (mail-wr1-f71.google.com [209.85.221.71])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
         (No client certificate requested)
-        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id C5E3D40292
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2021 15:09:38 +0000 (UTC)
+        by smtp-relay-internal-1.canonical.com (Postfix) with ESMTPS id CC6723FE02
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2021 15:09:52 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
-        s=20210705; t=1632150578;
-        bh=O+npPoECYtJ/ZpzV1HLKddQ+EXO1NtYHdY0Cec4JU10=;
+        s=20210705; t=1632150592;
+        bh=zUv3tXHbbUqWbaVvQkKggzK/iHQTdWabfc1NCBtXKt8=;
         h=From:To:Subject:Date:Message-Id:In-Reply-To:References:
          MIME-Version;
-        b=XIurkENSealZOqZ6bS/XUG279wah9P+Uj8f5pzELO9T1UUJcknaGth809N3jPVkEj
-         y0n+hn55Ni1OJMtOYhyU5jYbQWQkMmqr0SNS0nJ7/X0Xi2o4Aza3TOXjBOgCsbaoea
-         4sJrAd739R/NNjFEROJA0h/XyIjSNqBIUukA6iebdubT0UHwpvaXiDMcgxK3QJ47GE
-         4X5ABGfL1Pe+WlmSM+gFPCqEicaiJIvjkSjnzimeTIGh6kJFbZ4xrjCLErQPvSaRaH
-         ufsxZ7QWxRjhKYUHNMDXbWagmfPvjMm98lItpokxlIfEhzAKipG/DBRCOg0+N1Wwsg
-         DCtq/JU5fQf/A==
-Received: by mail-wr1-f71.google.com with SMTP id r15-20020adfce8f000000b0015df1098ccbso6367584wrn.4
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2021 08:09:38 -0700 (PDT)
+        b=WUx+n0rTL1ND8eemSxyqF+F6WAqsNjGe6ANMG/wlSCu0rnm4EtFrpF4R58yJG0uMy
+         ekB9bU4AIQwysB8Pg0vcjYVlJeqQSQb4M1Sn4BZhzQFZLty1ippUI+N1KUczyEngaV
+         q4+Y7pwW+MamAh0PRfOyNjKNbxVIBFEBJzNjhJ8SS57jhjchB8SoagfkszTgecNpFe
+         /CTH3akQBCOptJfP4enmXCRSF8hGUJiNUw6jyYoYUNNX2L6LgO4ehap8b/bNNFagnb
+         H71nbO8igm4EQ3Qa2xI8Sw+F13roCsROX5YiY79N9sQiRPa/fUGjZt6Q2EIrnJY0K4
+         xHmLrS3+xPe1w==
+Received: by mail-wr1-f71.google.com with SMTP id k2-20020adfc702000000b0016006b2da9bso1316866wrg.1
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Sep 2021 08:09:52 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=O+npPoECYtJ/ZpzV1HLKddQ+EXO1NtYHdY0Cec4JU10=;
-        b=l0o81ScKVhmpx85Pp8GPhw74yv2MDDvhXbgy7HjG+xVshJuqfFAdG2OlL54Q6opa1t
-         4+wAAcXAxlxL98G+xedw0/LiKcx0xgM3tbHgLtWcxq9yU9kkC1N5EpkDFAp1cVQ5MylN
-         uxzP3S5YPuSoR7vNn9FXyO2N7Y6KwnxlitXFte2wNaiUMwoinRgAHlBkWi+KMA3dqL/D
-         eFL6PT2C3aLiiGc3f0WBxPMKpzZfYlxSf9Xu+4zKVXPZEdzH9RKn5EPtDtqJ/KcHUq78
-         tMXkeDSZeIKcyZ0MDU3nIzFhOq/ZHRlkKm9a89sLarZGF6L1XTfO6huZ4cSQUwivHjTi
-         ib+Q==
-X-Gm-Message-State: AOAM532kJUP7aFaF4Bx+50pQRlZtCSfNTHOdbXnmCj6dAK0yuOx4mlOq
-        4ofpSEJLJ79rAR9bxH541v/LMKfh2y8OTsen/eqr+d5XT5ZdpnxRSOq8kFtVDpbhkYS22c7w0eu
-        WTsr0pncurgjIKnLLZ/EdMxYVkqQVIi06yx+iJg==
-X-Received: by 2002:a5d:4d02:: with SMTP id z2mr29713728wrt.8.1632150578305;
-        Mon, 20 Sep 2021 08:09:38 -0700 (PDT)
-X-Google-Smtp-Source: ABdhPJz8gNLJgi/hNpZH57Kj8vpJDclH4stPrZXvZVnMlKWrty7IW354pcwPOMxxaTmGpls2OU0c/g==
-X-Received: by 2002:a5d:4d02:: with SMTP id z2mr29713701wrt.8.1632150578154;
-        Mon, 20 Sep 2021 08:09:38 -0700 (PDT)
+        bh=zUv3tXHbbUqWbaVvQkKggzK/iHQTdWabfc1NCBtXKt8=;
+        b=hcvvHxD77mrj2k6IIWL3Zm+rAvE9CRT0PRt0ICh1TfaO25vyA6RzKw0eZvXWP3dJ2l
+         LfR8o6XiaNcLW044nkU8Ckzizf4zQDujnWZwtY5wAcxQTezOTwNoh/Bo8MTf7d0UKm4g
+         S4jw7zWe8msLYaJvtaTGXoc+UnFyB5B41C1FgupwgTG66/J0g34aLpfAxoncpn8PECc/
+         OeIv2glnbIIyarscSV//au2ZxBb6U+1yhvECi0liyxCPD8s+kO3BF/F+nHMfKvxNaicH
+         F0TI/iRDInhlZbrimRzdJwTsjMdPQ6AIWmXUid+oe02FmZGlxBPMThkuU/+bDJp9yIGW
+         vafg==
+X-Gm-Message-State: AOAM532I281kpAzBfogA3qZKfIJU9xCrFxtJKr19CW9Choin8XHsDgF/
+        vXs3VUlNkHA1YE3Nu+r3hw07Mt9iIUx4wSme3wJFL3hvLfz2S/EhI/v1MwCWzzvn4lCG7bXwtsg
+        iE43vVJlEEEudhv4F8NyQ/Rex1ydxS9sFjiQMmQ==
+X-Received: by 2002:a1c:4d17:: with SMTP id o23mr23908196wmh.125.1632150592342;
+        Mon, 20 Sep 2021 08:09:52 -0700 (PDT)
+X-Google-Smtp-Source: ABdhPJx4go/KWD2wwvaGed5Gp8/j8w76ab4Sbq/2+KvZVoBShQAqdwysUAi7NfERcQWEBk3pzLlFbw==
+X-Received: by 2002:a1c:4d17:: with SMTP id o23mr23908169wmh.125.1632150592140;
+        Mon, 20 Sep 2021 08:09:52 -0700 (PDT)
 Received: from kozik-lap.lan (lk.84.20.244.219.dc.cable.static.lj-kabel.net. [84.20.244.219])
-        by smtp.gmail.com with ESMTPSA id i2sm15803136wrq.78.2021.09.20.08.09.22
+        by smtp.gmail.com with ESMTPSA id i2sm15803136wrq.78.2021.09.20.08.09.38
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Sep 2021 08:09:30 -0700 (PDT)
+        Mon, 20 Sep 2021 08:09:41 -0700 (PDT)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -74,9 +74,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Piotr Sroka <piotrs@cadence.com>, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-riscv@lists.infradead.org
-Subject: [PATCH v3 4/6] riscv: dts: microchip: drop duplicated MMC/SDHC node
-Date:   Mon, 20 Sep 2021 17:08:05 +0200
-Message-Id: <20210920150807.164673-4-krzysztof.kozlowski@canonical.com>
+Subject: [PATCH v3 5/6] riscv: dts: microchip: drop unused pinctrl-names
+Date:   Mon, 20 Sep 2021 17:08:06 +0200
+Message-Id: <20210920150807.164673-5-krzysztof.kozlowski@canonical.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com>
 References: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com>
@@ -86,94 +86,36 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Devicetree source is a description of hardware and hardware has only one
-block @20008000 which can be configured either as eMMC or SDHC.  Having
-two node for different modes is an obscure, unusual and confusing way to
-configure it.  Instead the board file is supposed to customize the block
-to its needs, e.g. to SDHC mode.
+pinctrl-names without pinctrl-0 does not have any sense:
 
-This fixes dtbs_check warning:
-  arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: sdhc@20008000: $nodename:0: 'sdhc@20008000' does not match '^mmc(@.*)?$'
+  arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: sdhc@20008000: 'pinctrl-0' is a dependency of 'pinctrl-names'
 
 Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
 
 ---
+
+Changes since v2:
+1. Drop some patch garbage from rebase, pointed by Geert.
 
 Changes since v1:
-1. Move also bus-width, suggested by Geert.
+1. Add review.
 ---
- .../microchip/microchip-mpfs-icicle-kit.dts   | 11 +++++++-
- .../boot/dts/microchip/microchip-mpfs.dtsi    | 28 +------------------
- 2 files changed, 11 insertions(+), 28 deletions(-)
+ arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts b/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
-index 07f1f3cab686..fc1e5869df1b 100644
---- a/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
-+++ b/arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dts
-@@ -51,8 +51,17 @@ &serial3 {
- 	status = "okay";
- };
- 
--&sdcard {
-+&mmc {
- 	status = "okay";
-+
-+	bus-width = <4>;
-+	disable-wp;
-+	cap-sd-highspeed;
-+	card-detect-delay = <200>;
-+	sd-uhs-sdr12;
-+	sd-uhs-sdr25;
-+	sd-uhs-sdr50;
-+	sd-uhs-sdr104;
- };
- 
- &emac0 {
 diff --git a/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi b/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
-index 5084b93188f0..83bc14860960 100644
+index 83bc14860960..55d86b078c53 100644
 --- a/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
 +++ b/arch/riscv/boot/dts/microchip/microchip-mpfs.dtsi
-@@ -262,39 +262,13 @@ serial3: serial@20104000 {
- 			status = "disabled";
- 		};
- 
--		emmc: mmc@20008000 {
--			compatible = "cdns,sd4hc";
--			reg = <0x0 0x20008000 0x0 0x1000>;
--			interrupt-parent = <&plic>;
--			interrupts = <88 89>;
--			pinctrl-names = "default";
--			clocks = <&clkcfg 6>;
--			bus-width = <4>;
--			cap-mmc-highspeed;
--			mmc-ddr-3_3v;
--			max-frequency = <200000000>;
--			non-removable;
--			no-sd;
--			no-sdio;
--			voltage-ranges = <3300 3300>;
--			status = "disabled";
--		};
--
--		sdcard: sdhc@20008000 {
-+		mmc: mmc@20008000 {
- 			compatible = "cdns,sd4hc";
+@@ -267,7 +267,6 @@ mmc: mmc@20008000 {
  			reg = <0x0 0x20008000 0x0 0x1000>;
  			interrupt-parent = <&plic>;
  			interrupts = <88>;
- 			pinctrl-names = "default";
+-			pinctrl-names = "default";
  			clocks = <&clkcfg 6>;
--			bus-width = <4>;
--			disable-wp;
--			cap-sd-highspeed;
--			card-detect-delay = <200>;
--			sd-uhs-sdr12;
--			sd-uhs-sdr25;
--			sd-uhs-sdr50;
--			sd-uhs-sdr104;
  			max-frequency = <200000000>;
  			status = "disabled";
- 		};
 -- 
 2.30.2
 
