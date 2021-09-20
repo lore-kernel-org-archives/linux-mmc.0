@@ -8,54 +8,54 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
 	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E25CC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 892C8C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8AD4960F43
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 748846044F
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 02:41:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242127AbhIUCnL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Sep 2021 22:43:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36266 "EHLO
+        id S231434AbhIUCnM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Sep 2021 22:43:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241728AbhIUCCf (ORCPT
+        with ESMTP id S241738AbhIUCCf (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Sep 2021 22:02:35 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12F4BC1400A1;
-        Mon, 20 Sep 2021 11:12:07 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id p29so70461884lfa.11;
-        Mon, 20 Sep 2021 11:12:06 -0700 (PDT)
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1FA3C1400A4;
+        Mon, 20 Sep 2021 11:12:09 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id b20so12628153lfv.3;
+        Mon, 20 Sep 2021 11:12:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=+whg/vR1lDDJUCWuilT5Vzp2lbX9lxYPieEOT99+gTQ=;
-        b=a/qXfySr5wgA4w+tyGV7Cd6yjjYVyDUjfCXy3OkQQumZlK+xaznwbHXqtXnrDQ0W+y
-         8A5DTSaLVa+NLa0IRGnfyXOJrEQYVv17xSgrb7F7Ke8DqqmGTmNatrNh/hsIZBvSwZSu
-         L1sUFGr2ldyDuV6Q6rWrhbqx/xwLj1JxYfxmuGx9QmrfEcrbm7apcl3bfRGqQGJ1Mjad
-         fxtvCzG5eMhOL1SZLMNTLXy8fguH2eUl7Ro4DXUryLnlWoV+HWieK38v+DLWTSHZP2i4
-         RPKaxmWcKrSAQ9vKOi8qEbrVVF/wPDVJUqrZoRtFj1lXrCJy9E3azLA9bC2bFfbd8HMd
-         O+ig==
+        bh=+TXI1PsD2CP95PVSZQdBoUU6aVsve75rwezr3hbKqQc=;
+        b=kAaU3STmqnC23neou7MLNrJBTVlA/Jc2cy8k3z60G8qpKd6ZDnHuQH1SpY+WwR6lAX
+         jrqdVnBR1cBTI+Md0u/GARXCltL3YD/Xq2wc4o227CDmyRxGBmfV/bg5BHcdE0wdkqNp
+         PBAye71Hdi4463ZWF8DTicbsGhHH/aYvWQ80Jhsy92jDecS03X3W2GquQl6itpM4lSle
+         /qaS9ZsLFCtFv5U7n/6b8s0hWvAo1OWRLKzLpcTOSq1+l1wmucQcBfrTK5tLuWfzpkqQ
+         NVxn3L0U6LnNMYxebkhueALfT7a5WtPcMBHzmWC7rYuTGcO2pWNajmHyS8Zu7p7I+7Ao
+         azAw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=+whg/vR1lDDJUCWuilT5Vzp2lbX9lxYPieEOT99+gTQ=;
-        b=MxK1o8pWCd+vcl2h59VOliPrXG+VL+SxVjUaejsNING0efUtpvrJRDrO0ePvDSA9nZ
-         HYbouJX7D0peAOhFnLa69JaFAP/g98vjGPpSiPAEoQ5TtP6ZeY3D5grzoKJCWc+ISA+y
-         kiyaeAj6bVurHBsPKTp3JJwGvu5BR7IITUfyMx1fn4p62XivSu9r/azRCCi5HJRbXoW1
-         b4Lc3zv5gpwKMkfXHSs3wISf4fa/7jyLoRXmGKisCl1ZYauzXYGefymZlDDnHX4ZrbmS
-         GqZToRqjbGQY6rJAqV2rxBz7Gw6mEFrxV3cJk30L1FnDif9NhOOMRMM6HCjdp9cqz76C
-         Pmtw==
-X-Gm-Message-State: AOAM532+rXiCXIEmwB3MxEpgbZRfSVaLPlh8KnnJjaIbWv6NOKFDwed7
-        scXOanG8Y6t3MdeZCyNzTLM=
-X-Google-Smtp-Source: ABdhPJx24pELWSIhrH9JQNg/PbatPFdvAEDxhsX/FpmS2QgCUk+yFI3pQvJzv51ELrOPUm2XNsCnEg==
-X-Received: by 2002:a05:6512:33c2:: with SMTP id d2mr17607940lfg.18.1632161521781;
-        Mon, 20 Sep 2021 11:12:01 -0700 (PDT)
+        bh=+TXI1PsD2CP95PVSZQdBoUU6aVsve75rwezr3hbKqQc=;
+        b=GrZpqcRHwZE3iwMKAbB/1BU52zuGo0wQP2k43YwY+Y1ok32mDmXML/uZasjr11QX5b
+         pjXmErCpCWk+UqI2YwCZccP5ApKQ13Y9HklyP4c/oc8x0INIbjdXEEsZOW1AW92ApMQd
+         gTB7CCk5Qme78DrpRieSKx1DMu6ApmPQwdDalomNidI3bOjvTTZm5zHb/FFkzaXsi3PS
+         gU5g3ztSyJtmKEtqXn/Ingprs3Lev844aj3gAt0296i87I1Yezn7u7ObRBErbFjRKfFg
+         zEFpuUzevZduVGrW9XrKRALOAO6kuHQoSnufQ1RReGg/+mBUge3V92GWuJq9awglPmBq
+         N3HA==
+X-Gm-Message-State: AOAM532UbxtleUhFs0huXpeREnwl8Y2NN9uW2tknzuKUtljnPp5etE0j
+        b0MzoPbgqCaVtS5Mv3lIEZM=
+X-Google-Smtp-Source: ABdhPJxgOseYeXLn8P2ck12UkCJ82phTOgeDtawil89n7dF+EKKOvQqpUvXQo2zOqVC6h/L9F4mlYw==
+X-Received: by 2002:a2e:81c4:: with SMTP id s4mr8599737ljg.232.1632161527231;
+        Mon, 20 Sep 2021 11:12:07 -0700 (PDT)
 Received: from localhost.localdomain (46-138-151-206.dynamic.spd-mgts.ru. [46.138.151.206])
-        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.00
+        by smtp.gmail.com with ESMTPSA id u3sm1775677lju.107.2021.09.20.11.12.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 20 Sep 2021 11:12:01 -0700 (PDT)
+        Mon, 20 Sep 2021 11:12:06 -0700 (PDT)
 From:   Dmitry Osipenko <digetx@gmail.com>
 To:     Thierry Reding <thierry.reding@gmail.com>,
         Jonathan Hunter <jonathanh@nvidia.com>,
@@ -83,9 +83,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-tegra@vger.kernel.org,
         Lucas Stach <dev@lynxeye.de>, Stefan Agner <stefan@agner.ch>,
         Mauro Carvalho Chehab <mchehab@kernel.org>,
         David Heidelberg <david@ixit.cz>
-Subject: [PATCH v12 03/35] soc/tegra: pmc: Disable PMC state syncing
-Date:   Mon, 20 Sep 2021 21:11:13 +0300
-Message-Id: <20210920181145.19543-4-digetx@gmail.com>
+Subject: [PATCH v12 07/35] dt-bindings: host1x: Document OPP and power domain properties
+Date:   Mon, 20 Sep 2021 21:11:17 +0300
+Message-Id: <20210920181145.19543-8-digetx@gmail.com>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210920181145.19543-1-digetx@gmail.com>
 References: <20210920181145.19543-1-digetx@gmail.com>
@@ -95,107 +95,222 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Disable PMC state syncing in order to ensure that we won't break older
-kernels once device-trees will be updated with the addition of the power
-domains. This also allows to apply device-tree PM patches independently
-from the driver patches.
+Document new DVFS OPP table and power domain properties of the Host1x bus
+and devices sitting on the bus.
 
+Reviewed-by: Rob Herring <robh@kernel.org>
 Signed-off-by: Dmitry Osipenko <digetx@gmail.com>
 ---
- drivers/soc/tegra/pmc.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ .../display/tegra/nvidia,tegra20-host1x.txt   | 49 +++++++++++++++++++
+ 1 file changed, 49 insertions(+)
 
-diff --git a/drivers/soc/tegra/pmc.c b/drivers/soc/tegra/pmc.c
-index 50091c4ec948..fb8faf7b226a 100644
---- a/drivers/soc/tegra/pmc.c
-+++ b/drivers/soc/tegra/pmc.c
-@@ -360,6 +360,7 @@ struct tegra_pmc_soc {
- 	unsigned int num_pmc_clks;
- 	bool has_blink_output;
- 	bool has_usb_sleepwalk;
-+	bool supports_core_domain;
- };
+diff --git a/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt b/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
+index 8a6d3e1ee306..62861a8fb5c6 100644
+--- a/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
++++ b/Documentation/devicetree/bindings/display/tegra/nvidia,tegra20-host1x.txt
+@@ -20,6 +20,18 @@ Required properties:
+ - reset-names: Must include the following entries:
+   - host1x
  
- /**
-@@ -3041,6 +3042,7 @@ static void tegra20_pmc_setup_irq_polarity(struct tegra_pmc *pmc,
- }
- 
- static const struct tegra_pmc_soc tegra20_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra20_powergates),
- 	.powergates = tegra20_powergates,
- 	.num_cpu_powergates = 0,
-@@ -3101,6 +3103,7 @@ static const char * const tegra30_reset_sources[] = {
- };
- 
- static const struct tegra_pmc_soc tegra30_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra30_powergates),
- 	.powergates = tegra30_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra30_cpu_powergates),
-@@ -3157,6 +3160,7 @@ static const u8 tegra114_cpu_powergates[] = {
- };
- 
- static const struct tegra_pmc_soc tegra114_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra114_powergates),
- 	.powergates = tegra114_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra114_cpu_powergates),
-@@ -3273,6 +3277,7 @@ static const struct pinctrl_pin_desc tegra124_pin_descs[] = {
- };
- 
- static const struct tegra_pmc_soc tegra124_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra124_powergates),
- 	.powergates = tegra124_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra124_cpu_powergates),
-@@ -3398,6 +3403,7 @@ static const struct tegra_wake_event tegra210_wake_events[] = {
- };
- 
- static const struct tegra_pmc_soc tegra210_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = ARRAY_SIZE(tegra210_powergates),
- 	.powergates = tegra210_powergates,
- 	.num_cpu_powergates = ARRAY_SIZE(tegra210_cpu_powergates),
-@@ -3555,6 +3561,7 @@ static const struct tegra_wake_event tegra186_wake_events[] = {
- };
- 
- static const struct tegra_pmc_soc tegra186_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = 0,
- 	.powergates = NULL,
- 	.num_cpu_powergates = 0,
-@@ -3689,6 +3696,7 @@ static const struct tegra_wake_event tegra194_wake_events[] = {
- };
- 
- static const struct tegra_pmc_soc tegra194_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = 0,
- 	.powergates = NULL,
- 	.num_cpu_powergates = 0,
-@@ -3757,6 +3765,7 @@ static const char * const tegra234_reset_sources[] = {
- };
- 
- static const struct tegra_pmc_soc tegra234_pmc_soc = {
-+	.supports_core_domain = false,
- 	.num_powergates = 0,
- 	.powergates = NULL,
- 	.num_cpu_powergates = 0,
-@@ -3803,6 +3812,14 @@ static void tegra_pmc_sync_state(struct device *dev)
- {
- 	int err;
- 
-+	/*
-+	 * Newer device-trees have power domains, but we need to prepare all
-+	 * device drivers with runtime PM and OPP support first, otherwise
-+	 * state syncing is unsafe.
-+	 */
-+	if (!pmc->soc->supports_core_domain)
-+		return;
++Optional properties:
++- operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to HEG or core power domain.
 +
- 	/*
- 	 * Older device-trees don't have core PD, and thus, there are
- 	 * no dependencies that will block the state syncing. We shouldn't
++For each opp entry in 'operating-points-v2' table of host1x and its modules:
++- opp-supported-hw: One bitfield indicating:
++	On Tegra20: SoC process ID mask
++	On Tegra30+: SoC speedo ID mask
++
++	A bitwise AND is performed against the value and if any bit
++	matches, the OPP gets enabled.
++
+ Each host1x client module having to perform DMA through the Memory Controller
+ should have the interconnect endpoints set to the Memory Client and External
+ Memory respectively.
+@@ -45,6 +57,8 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to MPE power domain.
+ 
+ - vi: video input
+ 
+@@ -128,6 +142,8 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to VENC power domain.
+ 
+ - epp: encoder pre-processor
+ 
+@@ -147,6 +163,8 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to HEG or core power domain.
+ 
+ - isp: image signal processor
+ 
+@@ -166,6 +184,7 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - power-domains: Phandle to VENC or core power domain.
+ 
+ - gr2d: 2D graphics engine
+ 
+@@ -185,6 +204,8 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to HEG or core power domain.
+ 
+ - gr3d: 3D graphics engine
+ 
+@@ -209,6 +230,8 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandles to 3D or core power domain.
+ 
+ - dc: display controller
+ 
+@@ -241,6 +264,8 @@ of the following host1x client modules:
+   - interconnect-names: Must include name of the interconnect path for each
+     interconnect entry. Consult TRM documentation for information about
+     available memory clients, see MEMORY CONTROLLER section.
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to core power domain.
+ 
+ - hdmi: High Definition Multimedia Interface
+ 
+@@ -267,6 +292,7 @@ of the following host1x client modules:
+   - nvidia,hpd-gpio: specifies a GPIO used for hotplug detection
+   - nvidia,edid: supplies a binary EDID blob
+   - nvidia,panel: phandle of a display panel
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
+ 
+ - tvo: TV encoder output
+ 
+@@ -277,6 +303,10 @@ of the following host1x client modules:
+   - clocks: Must contain one entry, for the module clock.
+     See ../clocks/clock-bindings.txt for details.
+ 
++  Optional properties:
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
++  - power-domains: Phandle to core power domain.
++
+ - dsi: display serial interface
+ 
+   Required properties:
+@@ -305,6 +335,7 @@ of the following host1x client modules:
+   - nvidia,panel: phandle of a display panel
+   - nvidia,ganged-mode: contains a phandle to a second DSI controller to gang
+     up with in order to support up to 8 data lanes
++  - operating-points-v2: See ../bindings/opp/opp.txt for details.
+ 
+ - sor: serial output resource
+ 
+@@ -408,6 +439,8 @@ Example:
+ 		clocks = <&tegra_car TEGRA20_CLK_HOST1X>;
+ 		resets = <&tegra_car 28>;
+ 		reset-names = "host1x";
++		operating-points-v2 = <&dvfs_opp_table>;
++		power-domains = <&domain>;
+ 
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
+@@ -421,6 +454,8 @@ Example:
+ 			clocks = <&tegra_car TEGRA20_CLK_MPE>;
+ 			resets = <&tegra_car 60>;
+ 			reset-names = "mpe";
++			operating-points-v2 = <&dvfs_opp_table>;
++			power-domains = <&domain>;
+ 		};
+ 
+ 		vi@54080000 {
+@@ -429,6 +464,7 @@ Example:
+ 			interrupts = <GIC_SPI 69 IRQ_TYPE_LEVEL_HIGH>;
+ 			assigned-clocks = <&tegra_car TEGRA210_CLK_VI>;
+ 			assigned-clock-parents = <&tegra_car TEGRA210_CLK_PLL_C4_OUT0>;
++			operating-points-v2 = <&dvfs_opp_table>;
+ 
+ 			clocks = <&tegra_car TEGRA210_CLK_VI>;
+ 			power-domains = <&pd_venc>;
+@@ -510,6 +546,8 @@ Example:
+ 			clocks = <&tegra_car TEGRA20_CLK_EPP>;
+ 			resets = <&tegra_car 19>;
+ 			reset-names = "epp";
++			operating-points-v2 = <&dvfs_opp_table>;
++			power-domains = <&domain>;
+ 		};
+ 
+ 		isp {
+@@ -528,6 +566,8 @@ Example:
+ 			clocks = <&tegra_car TEGRA20_CLK_GR2D>;
+ 			resets = <&tegra_car 21>;
+ 			reset-names = "2d";
++			operating-points-v2 = <&dvfs_opp_table>;
++			power-domains = <&domain>;
+ 		};
+ 
+ 		gr3d {
+@@ -536,6 +576,8 @@ Example:
+ 			clocks = <&tegra_car TEGRA20_CLK_GR3D>;
+ 			resets = <&tegra_car 24>;
+ 			reset-names = "3d";
++			operating-points-v2 = <&dvfs_opp_table>;
++			power-domains = <&domain>;
+ 		};
+ 
+ 		dc@54200000 {
+@@ -547,6 +589,8 @@ Example:
+ 			clock-names = "dc", "parent";
+ 			resets = <&tegra_car 27>;
+ 			reset-names = "dc";
++			operating-points-v2 = <&dvfs_opp_table>;
++			power-domains = <&domain>;
+ 
+ 			interconnects = <&mc TEGRA20_MC_DISPLAY0A &emc>,
+ 					<&mc TEGRA20_MC_DISPLAY0B &emc>,
+@@ -571,6 +615,8 @@ Example:
+ 			clock-names = "dc", "parent";
+ 			resets = <&tegra_car 26>;
+ 			reset-names = "dc";
++			operating-points-v2 = <&dvfs_opp_table>;
++			power-domains = <&domain>;
+ 
+ 			interconnects = <&mc TEGRA20_MC_DISPLAY0AB &emc>,
+ 					<&mc TEGRA20_MC_DISPLAY0BB &emc>,
+@@ -596,6 +642,7 @@ Example:
+ 			resets = <&tegra_car 51>;
+ 			reset-names = "hdmi";
+ 			status = "disabled";
++			operating-points-v2 = <&dvfs_opp_table>;
+ 		};
+ 
+ 		tvo {
+@@ -604,6 +651,7 @@ Example:
+ 			interrupts = <0 76 0x04>;
+ 			clocks = <&tegra_car TEGRA20_CLK_TVO>;
+ 			status = "disabled";
++			operating-points-v2 = <&dvfs_opp_table>;
+ 		};
+ 
+ 		dsi {
+@@ -615,6 +663,7 @@ Example:
+ 			resets = <&tegra_car 48>;
+ 			reset-names = "dsi";
+ 			status = "disabled";
++			operating-points-v2 = <&dvfs_opp_table>;
+ 		};
+ 	};
+ 
 -- 
 2.32.0
 
