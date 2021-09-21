@@ -2,106 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ACFB9C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:16:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48154C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:40:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 93ACF61166
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:16:26 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 266A9611CE
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:40:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232384AbhIULRt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Sep 2021 07:17:49 -0400
-Received: from muru.com ([72.249.23.125]:35732 "EHLO muru.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232394AbhIULRq (ORCPT <rfc822;linux-mmc@vger.kernel.org>);
-        Tue, 21 Sep 2021 07:17:46 -0400
-Received: from hillo.muru.com (localhost [127.0.0.1])
-        by muru.com (Postfix) with ESMTP id 732E48127;
-        Tue, 21 Sep 2021 11:16:44 +0000 (UTC)
-From:   Tony Lindgren <tony@atomide.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org
-Subject: [PATCH 5/5] mmc: sdhci-omap: Configure optional wakeirq
-Date:   Tue, 21 Sep 2021 14:16:00 +0300
-Message-Id: <20210921111600.24577-6-tony@atomide.com>
-X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20210921111600.24577-1-tony@atomide.com>
-References: <20210921111600.24577-1-tony@atomide.com>
+        id S232148AbhIULmY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Sep 2021 07:42:24 -0400
+Received: from mail-vs1-f54.google.com ([209.85.217.54]:43969 "EHLO
+        mail-vs1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232386AbhIULmW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2021 07:42:22 -0400
+Received: by mail-vs1-f54.google.com with SMTP id n17so19204386vsr.10;
+        Tue, 21 Sep 2021 04:40:47 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=bOlfZTrSii7Nb14rl9dZd76xYIBrclWvgXtZcJh0XvM=;
+        b=oXivQnx3c3N7ZaGmzhlOGE+RN4ji6nIuRM1zJaGRXlBpVWeGk2wjJkwAhUjezUhe0D
+         n8M6mjXFZ2C64eWvnT63QZA1ccwZas7vyJ00DPDLFAHuPLtZLwTl4jT2irtxrgsqMgJP
+         H0ncqJTeHlkFy0Z/D5OwYk2yfepdwGlNbAR2Rcr8YFAc0CT9Nb1f6qYO+VuBz4gUXXCu
+         t31gnft4C6iMWwhnE5gq23FhOc4jbuANtJhHJvKyteh4OJ5bbouhqhVfuXGlhKZFE23N
+         5xLeoTBThieRPc8m6/CSEngZVKYOtP5RWIqpm7p+k7JeMvu3M5a3A3AWJ9b8rjvwm0tB
+         lG2Q==
+X-Gm-Message-State: AOAM531yGCOYYjR0ZmJdls7sCKrBlGhG0ZwH8Z2dLvwo8iIKiw4MM3fn
+        SKXIO/+qwRqdsRtMezxB2QhU1DdheibyGNIl3Yk=
+X-Google-Smtp-Source: ABdhPJwiN7fv8zkCxGRdSiJIiixTxoRHMRXiLr8T19X9+fGqcKipwyfkQQaXHbvVsTR6Cg4anMFHRjlYU50G8LO/Lys=
+X-Received: by 2002:a67:f147:: with SMTP id t7mr13834174vsm.41.1632224444687;
+ Tue, 21 Sep 2021 04:40:44 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com>
+In-Reply-To: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Tue, 21 Sep 2021 13:40:33 +0200
+Message-ID: <CAMuHMdU7HHEHAcn=vPqAPYPkgeywKqb-rL6YmDRH0+4XNw8CuA@mail.gmail.com>
+Subject: Re: [PATCH v3 1/6] dt-bindings: mmc: cdns: document Microchip MPFS
+ MMC/SDHCI controller
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Paul Walmsley <paul.walmsley@sifive.com>,
+        Palmer Dabbelt <palmer@dabbelt.com>,
+        Albert Ou <aou@eecs.berkeley.edu>,
+        Conor Dooley <conor.dooley@microchip.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Piotr Sroka <piotrs@cadence.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-riscv <linux-riscv@lists.infradead.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Configure optional wakeirq. This may be optionally configured for SDIO
-dat1 pin for wake-up events for SoCs that support deeper idle states.
+Hi Krzysztof,
 
-Signed-off-by: Tony Lindgren <tony@atomide.com>
----
- drivers/mmc/host/sdhci-omap.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+Thanks for your patch!
 
-diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
---- a/drivers/mmc/host/sdhci-omap.c
-+++ b/drivers/mmc/host/sdhci-omap.c
-@@ -12,8 +12,10 @@
- #include <linux/module.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
-+#include <linux/of_irq.h>
- #include <linux/platform_device.h>
- #include <linux/pm_runtime.h>
-+#include <linux/pm_wakeirq.h>
- #include <linux/regulator/consumer.h>
- #include <linux/pinctrl/consumer.h>
- #include <linux/sys_soc.h>
-@@ -117,6 +119,7 @@ struct sdhci_omap_host {
- 
- 	struct pinctrl		*pinctrl;
- 	struct pinctrl_state	**pinctrl_state;
-+	int			wakeirq;
- 	unsigned long		context_valid:1;
- 	unsigned long		is_runtime_suspended:1;
- 	unsigned long		needs_resume:1;
-@@ -1360,6 +1363,21 @@ static int sdhci_omap_probe(struct platform_device *pdev)
- 	sdhci_omap_context_save(omap_host);
- 	omap_host->context_valid = 1;
- 
-+	of_irq_get_byname(dev->of_node, "wakeup");
-+	if (omap_host->wakeirq == -EPROBE_DEFER) {
-+		ret = -EPROBE_DEFER;
-+		goto err_cleanup_host;
-+	}
-+	if (omap_host->wakeirq > 0) {
-+		device_init_wakeup(dev, true);
-+		ret = dev_pm_set_dedicated_wake_irq(dev, omap_host->wakeirq);
-+		if (ret) {
-+			device_init_wakeup(dev, false);
-+			goto err_cleanup_host;
-+		}
-+		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-+	}
-+
- 	pm_runtime_put_sync(dev);
- 
- 	return 0;
-@@ -1385,6 +1403,7 @@ static int sdhci_omap_remove(struct platform_device *pdev)
- 
- 	pm_runtime_get_sync(dev);
- 	sdhci_remove_host(host, true);
-+	dev_pm_clear_wake_irq(dev);
- 	pm_runtime_put_sync(dev);
- 	pm_runtime_disable(dev);
- 	sdhci_pltfm_free(pdev);
+On Mon, Sep 20, 2021 at 5:09 PM Krzysztof Kozlowski
+<krzysztof.kozlowski@canonical.com> wrote:
+> The Microchip MPFS Icicle Kit uses Cadence SD/SDIO/eMMC Host Controller
+
+Actually it's the SoC .dtsi
+
+> without any additional vendor compatible:
+>
+>   arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: mmc@20008000: compatible:0: 'cdns,sd4hc' is not one of ['socionext,uniphier-sd4hc']
+>   arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: mmc@20008000: compatible: ['cdns,sd4hc'] is too short
+>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
+
+With the above fixed:
+Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
 -- 
-2.33.0
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
