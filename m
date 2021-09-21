@@ -4,47 +4,46 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.7 required=3.0 tests=BAYES_00,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48154C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:40:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D028C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:42:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 266A9611CE
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:40:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4F6E361166
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Sep 2021 11:42:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232148AbhIULmY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Sep 2021 07:42:24 -0400
-Received: from mail-vs1-f54.google.com ([209.85.217.54]:43969 "EHLO
-        mail-vs1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232386AbhIULmW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2021 07:42:22 -0400
-Received: by mail-vs1-f54.google.com with SMTP id n17so19204386vsr.10;
-        Tue, 21 Sep 2021 04:40:47 -0700 (PDT)
+        id S232504AbhIULn7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Sep 2021 07:43:59 -0400
+Received: from mail-ua1-f41.google.com ([209.85.222.41]:40637 "EHLO
+        mail-ua1-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232439AbhIULn6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Sep 2021 07:43:58 -0400
+Received: by mail-ua1-f41.google.com with SMTP id g16so13237607uam.7;
+        Tue, 21 Sep 2021 04:42:30 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=bOlfZTrSii7Nb14rl9dZd76xYIBrclWvgXtZcJh0XvM=;
-        b=oXivQnx3c3N7ZaGmzhlOGE+RN4ji6nIuRM1zJaGRXlBpVWeGk2wjJkwAhUjezUhe0D
-         n8M6mjXFZ2C64eWvnT63QZA1ccwZas7vyJ00DPDLFAHuPLtZLwTl4jT2irtxrgsqMgJP
-         H0ncqJTeHlkFy0Z/D5OwYk2yfepdwGlNbAR2Rcr8YFAc0CT9Nb1f6qYO+VuBz4gUXXCu
-         t31gnft4C6iMWwhnE5gq23FhOc4jbuANtJhHJvKyteh4OJ5bbouhqhVfuXGlhKZFE23N
-         5xLeoTBThieRPc8m6/CSEngZVKYOtP5RWIqpm7p+k7JeMvu3M5a3A3AWJ9b8rjvwm0tB
-         lG2Q==
-X-Gm-Message-State: AOAM531yGCOYYjR0ZmJdls7sCKrBlGhG0ZwH8Z2dLvwo8iIKiw4MM3fn
-        SKXIO/+qwRqdsRtMezxB2QhU1DdheibyGNIl3Yk=
-X-Google-Smtp-Source: ABdhPJwiN7fv8zkCxGRdSiJIiixTxoRHMRXiLr8T19X9+fGqcKipwyfkQQaXHbvVsTR6Cg4anMFHRjlYU50G8LO/Lys=
-X-Received: by 2002:a67:f147:: with SMTP id t7mr13834174vsm.41.1632224444687;
- Tue, 21 Sep 2021 04:40:44 -0700 (PDT)
+        bh=bdpYVMEOAHnNRkmR0T8flhT/zcYkeLeqbkwxnc5Ce/A=;
+        b=oRkMxyNiOKJz/dUK8vJW0vJcSacEbuX+ErqIwShI94tkzWHf1awEwAEqKHlFQTzIkU
+         GlmTKTDgQa35/tDzYLHr8BjeAOg2FhGIM9jqaIVg/9xfr1EVdX5+CtYHE+U0ODzPRR4B
+         Mqzxq9NJ3LiujK2E1avfzmaYO6IuCvn1f6NqUfnzcTb4RxgLvrZ5VXskNLa3gYkvDzWu
+         G/v9gLz2aHUzQvh++BgHX4gRGHPSNPBM7qO2qhXi7CkefldgClbaWFAFgKSOf/motX/o
+         ue6SsLZv1SWyKtMfG4ipvmzu/H/cnQVue+R0CjgfoXegxW7gquWqhOnw/LptcEv3PVcW
+         Zhzw==
+X-Gm-Message-State: AOAM531yvUP5eQvhFzQMY3hmFqbfZKFOxaByRtHEzh4va+5C1+TAoc+3
+        PpT/wQwSkrCVe93NPrtRhIbkGTZT8CnAzAemeO4V767w
+X-Google-Smtp-Source: ABdhPJz660eJ8xFUWw21pLpoUoGUDUdkLS+vBfnrRwGe4YQC/sE0pLYK6sPltWQcEv22OrTdq3COoRkKQwR/vpyKOic=
+X-Received: by 2002:ab0:6ec9:: with SMTP id c9mr17013019uav.114.1632224550054;
+ Tue, 21 Sep 2021 04:42:30 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com>
-In-Reply-To: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com>
+References: <20210920150807.164673-1-krzysztof.kozlowski@canonical.com> <20210920150807.164673-2-krzysztof.kozlowski@canonical.com>
+In-Reply-To: <20210920150807.164673-2-krzysztof.kozlowski@canonical.com>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Tue, 21 Sep 2021 13:40:33 +0200
-Message-ID: <CAMuHMdU7HHEHAcn=vPqAPYPkgeywKqb-rL6YmDRH0+4XNw8CuA@mail.gmail.com>
-Subject: Re: [PATCH v3 1/6] dt-bindings: mmc: cdns: document Microchip MPFS
- MMC/SDHCI controller
+Date:   Tue, 21 Sep 2021 13:42:19 +0200
+Message-ID: <CAMuHMdXH2rKKWmMF9PT3V54kiyO9qOJXEUwYYm9UunXdG3Vbjw@mail.gmail.com>
+Subject: Re: [PATCH v3 2/6] riscv: dts: microchip: drop duplicated nodes
 To:     Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -64,24 +63,14 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Krzysztof,
-
-Thanks for your patch!
-
 On Mon, Sep 20, 2021 at 5:09 PM Krzysztof Kozlowski
 <krzysztof.kozlowski@canonical.com> wrote:
-> The Microchip MPFS Icicle Kit uses Cadence SD/SDIO/eMMC Host Controller
-
-Actually it's the SoC .dtsi
-
-> without any additional vendor compatible:
->
->   arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: mmc@20008000: compatible:0: 'cdns,sd4hc' is not one of ['socionext,uniphier-sd4hc']
->   arch/riscv/boot/dts/microchip/microchip-mpfs-icicle-kit.dt.yaml: mmc@20008000: compatible: ['cdns,sd4hc'] is too short
+> The DTSI file defines soc node and address/size cells, so there is no
+> point in duplicating it in DTS file.
 >
 > Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@canonical.com>
 
-With the above fixed:
+(from v1)
 Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
 
 Gr{oetje,eeting}s,
