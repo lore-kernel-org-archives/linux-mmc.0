@@ -2,126 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ACBB9C433EF
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 10:32:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48E20C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 15:23:21 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8B42B61214
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 10:32:49 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3193561181
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 15:23:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235070AbhIVKeR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Sep 2021 06:34:17 -0400
-Received: from twspam01.aspeedtech.com ([211.20.114.71]:35879 "EHLO
-        twspam01.aspeedtech.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235113AbhIVKeO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Sep 2021 06:34:14 -0400
-Received: from mail.aspeedtech.com ([192.168.0.24])
-        by twspam01.aspeedtech.com with ESMTP id 18MAB9Cp012570;
-        Wed, 22 Sep 2021 18:11:09 +0800 (GMT-8)
-        (envelope-from chin-ting_kuo@aspeedtech.com)
-Received: from localhost.localdomain (192.168.10.9) by TWMBX02.aspeed.com
- (192.168.0.24) with Microsoft SMTP Server (TLS) id 15.0.1497.2; Wed, 22 Sep
- 2021 18:31:27 +0800
-From:   Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
-To:     <robh+dt@kernel.org>, <joel@jms.id.au>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <adrian.hunter@intel.com>,
-        <linux-aspeed@lists.ozlabs.org>, <openbmc@lists.ozlabs.org>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-clk@vger.kernel.org>,
-        <andrew@aj.id.au>
-CC:     <BMC-SW@aspeedtech.com>, <steven_lee@aspeedtech.com>
-Subject: [PATCH 08/10] arm: dts: ibm: Adjust clock phase parameter
-Date:   Wed, 22 Sep 2021 18:31:14 +0800
-Message-ID: <20210922103116.30652-9-chin-ting_kuo@aspeedtech.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20210922103116.30652-1-chin-ting_kuo@aspeedtech.com>
-References: <20210922103116.30652-1-chin-ting_kuo@aspeedtech.com>
+        id S236388AbhIVPYu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Sep 2021 11:24:50 -0400
+Received: from fllv0015.ext.ti.com ([198.47.19.141]:53728 "EHLO
+        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232318AbhIVPYt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Sep 2021 11:24:49 -0400
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 18MFNFhR038602;
+        Wed, 22 Sep 2021 10:23:15 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1632324195;
+        bh=gIbemJ+kywr0NJwH0hZD9O0Ys2noMM7/Eq9Bx7iJ8QM=;
+        h=Subject:To:CC:References:From:Date:In-Reply-To;
+        b=xM99oYcYNdc28qoQpm8sht76OjTnlscceA4FzroL5d/DA+kt0v7vpfIXYBs6ohrYq
+         QU4MdOXIUAX1n4s5ufrmefRn/AsELv2y1F20PlRHKeKM9qfsyswiI1ZMKLJq6i3ob3
+         nU5aYfPIy2KEY2Crq93RiYWUs7KgFC2hOWnnflWY=
+Received: from DFLE105.ent.ti.com (dfle105.ent.ti.com [10.64.6.26])
+        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 18MFNFSe038491
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Wed, 22 Sep 2021 10:23:15 -0500
+Received: from DFLE103.ent.ti.com (10.64.6.24) by DFLE105.ent.ti.com
+ (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Wed, 22
+ Sep 2021 10:23:14 -0500
+Received: from fllv0040.itg.ti.com (10.64.41.20) by DFLE103.ent.ti.com
+ (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
+ Frontend Transport; Wed, 22 Sep 2021 10:23:14 -0500
+Received: from [10.250.100.73] (ileax41-snat.itg.ti.com [10.172.224.153])
+        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 18MFNAIq028062;
+        Wed, 22 Sep 2021 10:23:11 -0500
+Subject: Re: [PATCH 5/5] mmc: sdhci-omap: Configure optional wakeirq
+To:     Tony Lindgren <tony@atomide.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        <linux-mmc@vger.kernel.org>, <linux-omap@vger.kernel.org>,
+        Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>
+References: <20210921111600.24577-1-tony@atomide.com>
+ <20210921111600.24577-6-tony@atomide.com>
+From:   Grygorii Strashko <grygorii.strashko@ti.com>
+Message-ID: <eafa3743-1f73-8a6e-bcb4-d97405dcdb11@ti.com>
+Date:   Wed, 22 Sep 2021 18:23:10 +0300
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [192.168.10.9]
-X-ClientProxiedBy: TWMBX02.aspeed.com (192.168.0.24) To TWMBX02.aspeed.com
- (192.168.0.24)
-X-DNSRBL: 
-X-MAIL: twspam01.aspeedtech.com 18MAB9Cp012570
+In-Reply-To: <20210921111600.24577-6-tony@atomide.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-- Add max-tap-delay property for eMMC controller.
-- Change clock phase degree for AST2600 on IBM platforms.
 
-Signed-off-by: Chin-Ting Kuo <chin-ting_kuo@aspeedtech.com>
----
- arch/arm/boot/dts/aspeed-bmc-ibm-everest.dts | 3 ++-
- arch/arm/boot/dts/aspeed-bmc-ibm-rainier.dts | 3 ++-
- arch/arm/boot/dts/aspeed-bmc-opp-tacoma.dts  | 3 ++-
- 3 files changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm/boot/dts/aspeed-bmc-ibm-everest.dts b/arch/arm/boot/dts/aspeed-bmc-ibm-everest.dts
-index 2efd70666738..eccb4749755a 100644
---- a/arch/arm/boot/dts/aspeed-bmc-ibm-everest.dts
-+++ b/arch/arm/boot/dts/aspeed-bmc-ibm-everest.dts
-@@ -2824,6 +2824,7 @@
- 
- &emmc_controller {
- 	status = "okay";
-+	max-tap-delay = <1253>;
- };
- 
- &pinctrl_emmc_default {
-@@ -2832,7 +2833,7 @@
- 
- &emmc {
- 	status = "okay";
--	clk-phase-mmc-hs200 = <210>, <228>;
-+	clk-phase-mmc-hs200 = <1 124>, <1 141>;
- };
- 
- &fsim0 {
-diff --git a/arch/arm/boot/dts/aspeed-bmc-ibm-rainier.dts b/arch/arm/boot/dts/aspeed-bmc-ibm-rainier.dts
-index 6419c9762c0b..2138a8a10d6e 100644
---- a/arch/arm/boot/dts/aspeed-bmc-ibm-rainier.dts
-+++ b/arch/arm/boot/dts/aspeed-bmc-ibm-rainier.dts
-@@ -299,6 +299,7 @@
- 
- &emmc_controller {
- 	status = "okay";
-+	max-tap-delay = <1253>;
- };
- 
- &pinctrl_emmc_default {
-@@ -307,7 +308,7 @@
- 
- &emmc {
- 	status = "okay";
--	clk-phase-mmc-hs200 = <180>, <180>;
-+	clk-phase-mmc-hs200 = <1 90>, <1 90>;
- };
- 
- &fsim0 {
-diff --git a/arch/arm/boot/dts/aspeed-bmc-opp-tacoma.dts b/arch/arm/boot/dts/aspeed-bmc-opp-tacoma.dts
-index e39f310d55eb..7427809354cc 100644
---- a/arch/arm/boot/dts/aspeed-bmc-opp-tacoma.dts
-+++ b/arch/arm/boot/dts/aspeed-bmc-opp-tacoma.dts
-@@ -182,11 +182,12 @@
- 
- &emmc_controller {
- 	status = "okay";
-+	max-tap-delay = <1253>;
- };
- 
- &emmc {
- 	status = "okay";
--	clk-phase-mmc-hs200 = <36>, <270>;
-+	clk-phase-mmc-hs200 = <0 40>, <1 181>;
- };
- 
- &fsim0 {
+On 21/09/2021 14:16, Tony Lindgren wrote:
+> Configure optional wakeirq. This may be optionally configured for SDIO
+> dat1 pin for wake-up events for SoCs that support deeper idle states.
+> 
+> Signed-off-by: Tony Lindgren <tony@atomide.com>
+> ---
+>   drivers/mmc/host/sdhci-omap.c | 19 +++++++++++++++++++
+>   1 file changed, 19 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
+> --- a/drivers/mmc/host/sdhci-omap.c
+> +++ b/drivers/mmc/host/sdhci-omap.c
+> @@ -12,8 +12,10 @@
+>   #include <linux/module.h>
+>   #include <linux/of.h>
+>   #include <linux/of_device.h>
+> +#include <linux/of_irq.h>
+>   #include <linux/platform_device.h>
+>   #include <linux/pm_runtime.h>
+> +#include <linux/pm_wakeirq.h>
+>   #include <linux/regulator/consumer.h>
+>   #include <linux/pinctrl/consumer.h>
+>   #include <linux/sys_soc.h>
+> @@ -117,6 +119,7 @@ struct sdhci_omap_host {
+>   
+>   	struct pinctrl		*pinctrl;
+>   	struct pinctrl_state	**pinctrl_state;
+> +	int			wakeirq;
+>   	unsigned long		context_valid:1;
+>   	unsigned long		is_runtime_suspended:1;
+>   	unsigned long		needs_resume:1;
+> @@ -1360,6 +1363,21 @@ static int sdhci_omap_probe(struct platform_device *pdev)
+>   	sdhci_omap_context_save(omap_host);
+>   	omap_host->context_valid = 1;
+>   
+> +	of_irq_get_byname(dev->of_node, "wakeup");
+
+No assign to omap_host->wakeirq
+
+> +	if (omap_host->wakeirq == -EPROBE_DEFER) {
+> +		ret = -EPROBE_DEFER;
+> +		goto err_cleanup_host;
+> +	}
+> +	if (omap_host->wakeirq > 0) {
+> +		device_init_wakeup(dev, true);
+> +		ret = dev_pm_set_dedicated_wake_irq(dev, omap_host->wakeirq);
+> +		if (ret) {
+> +			device_init_wakeup(dev, false);
+> +			goto err_cleanup_host;
+> +		}
+> +		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
+> +	}
+> +
+>   	pm_runtime_put_sync(dev);
+>   
+>   	return 0;
+> @@ -1385,6 +1403,7 @@ static int sdhci_omap_remove(struct platform_device *pdev)
+>   
+>   	pm_runtime_get_sync(dev);
+>   	sdhci_remove_host(host, true);
+> +	dev_pm_clear_wake_irq(dev);
+>   	pm_runtime_put_sync(dev);
+>   	pm_runtime_disable(dev);
+>   	sdhci_pltfm_free(pdev);
+> 
+
 -- 
-2.17.1
-
+Best regards,
+grygorii
