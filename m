@@ -2,144 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48E20C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 15:23:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64BD0C433F5
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 17:47:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3193561181
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 15:23:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 40B5D61156
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Sep 2021 17:47:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236388AbhIVPYu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Sep 2021 11:24:50 -0400
-Received: from fllv0015.ext.ti.com ([198.47.19.141]:53728 "EHLO
-        fllv0015.ext.ti.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232318AbhIVPYt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Sep 2021 11:24:49 -0400
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 18MFNFhR038602;
-        Wed, 22 Sep 2021 10:23:15 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1632324195;
-        bh=gIbemJ+kywr0NJwH0hZD9O0Ys2noMM7/Eq9Bx7iJ8QM=;
-        h=Subject:To:CC:References:From:Date:In-Reply-To;
-        b=xM99oYcYNdc28qoQpm8sht76OjTnlscceA4FzroL5d/DA+kt0v7vpfIXYBs6ohrYq
-         QU4MdOXIUAX1n4s5ufrmefRn/AsELv2y1F20PlRHKeKM9qfsyswiI1ZMKLJq6i3ob3
-         nU5aYfPIy2KEY2Crq93RiYWUs7KgFC2hOWnnflWY=
-Received: from DFLE105.ent.ti.com (dfle105.ent.ti.com [10.64.6.26])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 18MFNFSe038491
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Wed, 22 Sep 2021 10:23:15 -0500
-Received: from DFLE103.ent.ti.com (10.64.6.24) by DFLE105.ent.ti.com
- (10.64.6.26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14; Wed, 22
- Sep 2021 10:23:14 -0500
-Received: from fllv0040.itg.ti.com (10.64.41.20) by DFLE103.ent.ti.com
- (10.64.6.24) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2308.14 via
- Frontend Transport; Wed, 22 Sep 2021 10:23:14 -0500
-Received: from [10.250.100.73] (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0040.itg.ti.com (8.15.2/8.15.2) with ESMTP id 18MFNAIq028062;
-        Wed, 22 Sep 2021 10:23:11 -0500
-Subject: Re: [PATCH 5/5] mmc: sdhci-omap: Configure optional wakeirq
-To:     Tony Lindgren <tony@atomide.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
-        Chunyan Zhang <zhang.chunyan@linaro.org>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Kishon Vijay Abraham I <kishon@ti.com>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-omap@vger.kernel.org>,
-        Rob Herring <robh+dt@kernel.org>, <devicetree@vger.kernel.org>
-References: <20210921111600.24577-1-tony@atomide.com>
- <20210921111600.24577-6-tony@atomide.com>
-From:   Grygorii Strashko <grygorii.strashko@ti.com>
-Message-ID: <eafa3743-1f73-8a6e-bcb4-d97405dcdb11@ti.com>
-Date:   Wed, 22 Sep 2021 18:23:10 +0300
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
+        id S236706AbhIVRtW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Sep 2021 13:49:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47364 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S233552AbhIVRtW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Sep 2021 13:49:22 -0400
+Received: from mail-oi1-x232.google.com (mail-oi1-x232.google.com [IPv6:2607:f8b0:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 298BBC061574
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Sep 2021 10:47:52 -0700 (PDT)
+Received: by mail-oi1-x232.google.com with SMTP id t189so5632278oie.7
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Sep 2021 10:47:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:from:date:message-id:subject:to;
+        bh=v7LJlSltaGEJUA4QcSw4axWM6tAbHHqLFLsNxJ1eSUg=;
+        b=aLtiIIZJzyibMfdJVE1sMoR3yGDncXHcVsBsgOuhCXPf5Hwg38h4IJJmG4GrQtvvMd
+         HPJ7th9Z9BkSxtWOzgNKmxxOF9dejSvBFycnZ/GNzb1JeCFBx4aZotX/R3fNJ1LQy5gR
+         TUbcwMjBsBlGa6v69bb++0THAi6crv7d6jMeHw8cMmyt2d5rXLIpjtWXUSS0C5HYpMI/
+         3MW9kcCK6SoVD7tRk83C5e8XUh203bWhLIwuBvf0EGtJfaKUq8AdHUi2xgy7qYqNc/7g
+         tqFi6vufQm7yWdw6ZYpNBLOm4EbMDjq9DZFnsjRKSS86ZgIM+1wX8MvEju6Jgp8P8o4i
+         hv0w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:from:date:message-id:subject:to;
+        bh=v7LJlSltaGEJUA4QcSw4axWM6tAbHHqLFLsNxJ1eSUg=;
+        b=P4Rez9RvVnGQDdzgKbIIeTONFq4hyN3VAHuSz1/tFU6kpxofeLPZ3FI2gy2LY8990l
+         GTPaL0ovtIrtMnJ16vw2lkmc50BSlTFEBQkQLoF7yufv+xSeCR4XR0V81KMvEi6maJR+
+         N19cy5IOzBjrZg5cxkOQ9xlabRaxEonIn1My5rLtteLcXtYYKi0Pr/l7/FubjYLxVf0Z
+         y/oD9foa1tSeuECLZxp7u8hRNcO8PHtNT1DGWTZWo6+hQ6mvkI8AYxpFQFfCzJzVwKyf
+         Y5/X2J0AKYQzxF+ATKtz8cA3cHUgZZwO/T4+T99nRbjUJLQLj498KH/2uFh6QH7/2vyS
+         mAGg==
+X-Gm-Message-State: AOAM530vlGkKVs1Vsd+pxpwIy0pRtt0fncGIXX0fsRVBTQSkHMWA+SRi
+        7VV45POXqZ0Fzu1qIl015VccUWFCv0RbFmprRXcDE1/bwaA=
+X-Google-Smtp-Source: ABdhPJwAn1bjRGz49R6RprxXYnkd8gQJ3dvFMVP0IlXgI71VzLT7FJnN4jytdhItJx1ompk/Q9b5o7T0YOsbWe0rn2s=
+X-Received: by 2002:a05:6808:64f:: with SMTP id z15mr5058831oih.65.1632332871575;
+ Wed, 22 Sep 2021 10:47:51 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20210921111600.24577-6-tony@atomide.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+From:   Kegl Rohit <keglrohit@gmail.com>
+Date:   Wed, 22 Sep 2021 19:47:41 +0200
+Message-ID: <CAMeyCbhTcwcksdNC-1r5487oX-rmfmcdGiBiVng6E338hWzbEA@mail.gmail.com>
+Subject: CM23: Reliable Write Request / Forced Programming Bits
+To:     linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hello!
 
+I have a question about the transfer of CM23 (SET_BLOCK_COUNT),
+before starting a multiple block write CMD25.
+I want to set some of this CMD23 bits:
+BIT(31) stands for Reliable Write Request
+BIT(24) stands for Forced Programming
 
-On 21/09/2021 14:16, Tony Lindgren wrote:
-> Configure optional wakeirq. This may be optionally configured for SDIO
-> dat1 pin for wake-up events for SoCs that support deeper idle states.
-> 
-> Signed-off-by: Tony Lindgren <tony@atomide.com>
-> ---
->   drivers/mmc/host/sdhci-omap.c | 19 +++++++++++++++++++
->   1 file changed, 19 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -12,8 +12,10 @@
->   #include <linux/module.h>
->   #include <linux/of.h>
->   #include <linux/of_device.h>
-> +#include <linux/of_irq.h>
->   #include <linux/platform_device.h>
->   #include <linux/pm_runtime.h>
-> +#include <linux/pm_wakeirq.h>
->   #include <linux/regulator/consumer.h>
->   #include <linux/pinctrl/consumer.h>
->   #include <linux/sys_soc.h>
-> @@ -117,6 +119,7 @@ struct sdhci_omap_host {
->   
->   	struct pinctrl		*pinctrl;
->   	struct pinctrl_state	**pinctrl_state;
-> +	int			wakeirq;
->   	unsigned long		context_valid:1;
->   	unsigned long		is_runtime_suspended:1;
->   	unsigned long		needs_resume:1;
-> @@ -1360,6 +1363,21 @@ static int sdhci_omap_probe(struct platform_device *pdev)
->   	sdhci_omap_context_save(omap_host);
->   	omap_host->context_valid = 1;
->   
-> +	of_irq_get_byname(dev->of_node, "wakeup");
+I could only see usage of the Reliable Write Request for some rpmb ioctl:
+https://github.com/torvalds/linux/blob/master/include/uapi/linux/mmc/ioctl.h#L13
+https://github.com/torvalds/linux/blob/master/drivers/mmc/core/block.c#L550
+sbc.arg = data.blocks | (idata->ic.write_flag & BIT(31));
 
-No assign to omap_host->wakeirq
+But there are also BITS MMC_DATA_REL_WR, MMC_DATA_FORCED_PRG
+https://github.com/torvalds/linux/blob/master/include/linux/mmc/core.h#L128
+Used here:
+https://github.com/torvalds/linux/blob/master/drivers/mmc/core/block.c#L1301
+Which confuses me.
 
-> +	if (omap_host->wakeirq == -EPROBE_DEFER) {
-> +		ret = -EPROBE_DEFER;
-> +		goto err_cleanup_host;
-> +	}
-> +	if (omap_host->wakeirq > 0) {
-> +		device_init_wakeup(dev, true);
-> +		ret = dev_pm_set_dedicated_wake_irq(dev, omap_host->wakeirq);
-> +		if (ret) {
-> +			device_init_wakeup(dev, false);
-> +			goto err_cleanup_host;
-> +		}
-> +		host->mmc->pm_caps |= MMC_PM_WAKE_SDIO_IRQ;
-> +	}
-> +
->   	pm_runtime_put_sync(dev);
->   
->   	return 0;
-> @@ -1385,6 +1403,7 @@ static int sdhci_omap_remove(struct platform_device *pdev)
->   
->   	pm_runtime_get_sync(dev);
->   	sdhci_remove_host(host, true);
-> +	dev_pm_clear_wake_irq(dev);
->   	pm_runtime_put_sync(dev);
->   	pm_runtime_disable(dev);
->   	sdhci_pltfm_free(pdev);
-> 
+I am using the mmc_test code as example to execute a mmc block write.
+https://github.com/torvalds/linux/blob/master/drivers/mmc/core/mmc_test.c#L190
+So i set the BIT(24):
+mrq->sbc->arg = blocks | BIT(24);
+But then i realized that the sdhci mmc host uses SDHCI_AUTO_CMD23 and
+mmc_test_prepare_sbc simply returns doing nothing.
 
--- 
-Best regards,
-grygorii
+What would be the correct way to set the BIT(24) with CMD23 in the
+mmc_test example with a host which does SDHCI_AUTO_CMD23?
