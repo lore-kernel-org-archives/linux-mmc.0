@@ -2,82 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-14.0 required=3.0 tests=BAYES_00,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E11DDC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 17:10:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 90EDFC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 17:28:47 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CAF5D610C9
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 17:10:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6879061090
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Sep 2021 17:28:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242423AbhIWRLb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Sep 2021 13:11:31 -0400
-Received: from mail-oo1-f49.google.com ([209.85.161.49]:42722 "EHLO
-        mail-oo1-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242239AbhIWRLa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 13:11:30 -0400
-Received: by mail-oo1-f49.google.com with SMTP id u15-20020a4a970f000000b0029aed4b0e4eso2352158ooi.9;
-        Thu, 23 Sep 2021 10:09:58 -0700 (PDT)
+        id S242402AbhIWRaS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Sep 2021 13:30:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34006 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S242288AbhIWRaR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Sep 2021 13:30:17 -0400
+Received: from mail-ot1-x332.google.com (mail-ot1-x332.google.com [IPv6:2607:f8b0:4864:20::332])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13CD8C061574
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 10:28:46 -0700 (PDT)
+Received: by mail-ot1-x332.google.com with SMTP id c42-20020a05683034aa00b0051f4b99c40cso9643758otu.0
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Sep 2021 10:28:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to;
+        bh=me26Oy2bP1WcgB+1yQNQe62vTZKCBt44QwycMSyu6SA=;
+        b=EYmfeZqap+g0hMzms/BQeCI3hL31eCi+I9M/TYufev4DZlLKYd9RdrXRLsTPeG86Ac
+         +lOdBBM2pxrIzI/Rqy8skyFzgjlEqEig/4EMS+Uuxue93Q5H3+me+2YEsjuQsBPd+tp1
+         56V7X/Hr7YZj9fP9M36bdHuTsCcgRRFSygniw34cH3Oq5XjD3xr7E1Zlk4QANa+n9l3U
+         cnhTuPkWDjDZghs08FmeBkA9aamCQ9/Wbx1Sq4YH04xPRimcUE1rK2czrWrhU4RKFijj
+         Gs+Uo9Sj61KpCu+9USxDdNel+opXkC7bn/aWiPn8QmBTLuJwF3sn8gqjg28kaSvclC1B
+         3r5g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=aRKOgb/IptW6U1Mvub3XjCFxU2/8lUJIfk6QZum3jmM=;
-        b=4xCLeJ6u/hLAL6mGgnQMNNJpk6UEZQLEISjlJIButE+VmzNpVaH9OVId7sz1weaeo4
-         rWD5crJ0kL7tERIu0GxyERejOnkD/T6+AnOXz76ufqdUv5JCHCIP38UAME9lxwgj3D9X
-         Jnihg3t40LB+acQq1j/mMPRjxWRmEuv/2+0DwsXkXHGvmE5aVL5/fOVJX4vKmM5LY0gZ
-         byf4ykttEuY2f4TvSlMgBTqAgcikekw3yMJjIvXL48XsoLIGt3dI7N1hTjVAYtQ4fRdC
-         Gi08CBKtcl++6wQQt7GaWu2RQu4T1QZoeowT0hUEB4e9MOvN/WFEIjsJp8Q97dnD8eCh
-         +6kA==
-X-Gm-Message-State: AOAM532ho7mnee1TxBDl5gBeZF/tZBTyFqG/cRzifOvcrt1kAJWPQ45a
-        Z5XiVXL88BEAJL+8oM16Z//3ztFioQ==
-X-Google-Smtp-Source: ABdhPJw676lPJ7r9WEiBbldf9ALqBQhp0Wdivqz9FvDU+aldnL2DEOFeYcGq580EGuIyBGC7VXj2ZA==
-X-Received: by 2002:a4a:ba90:: with SMTP id d16mr2406809oop.31.1632416998498;
-        Thu, 23 Sep 2021 10:09:58 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-148-213.dyn.grandenetworks.net. [66.90.148.213])
-        by smtp.gmail.com with ESMTPSA id v16sm1453551oiv.23.2021.09.23.10.09.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Sep 2021 10:09:57 -0700 (PDT)
-Received: (nullmailer pid 3183978 invoked by uid 1000);
-        Thu, 23 Sep 2021 17:09:56 -0000
-Date:   Thu, 23 Sep 2021 12:09:56 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Jerome Pouiller <Jerome.Pouiller@silabs.com>
-Cc:     "David S . Miller" <davem@davemloft.net>,
-        Kalle Valo <kvalo@codeaurora.org>, netdev@vger.kernel.org,
-        =?iso-8859-1?B?Suly9G1l?= Pouiller <jerome.pouiller@silabs.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>,
-        devel@driverdev.osuosl.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        linux-wireless@vger.kernel.org, devicetree@vger.kernel.org
-Subject: Re: [PATCH v7 02/24] dt-bindings: introduce silabs,wfx.yaml
-Message-ID: <YUy05Kn2iCCBC6AF@robh.at.kernel.org>
-References: <20210920161136.2398632-1-Jerome.Pouiller@silabs.com>
- <20210920161136.2398632-3-Jerome.Pouiller@silabs.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to;
+        bh=me26Oy2bP1WcgB+1yQNQe62vTZKCBt44QwycMSyu6SA=;
+        b=N1SJvFSks5B5q5AynyuJvItGsejdN6Ie6Vuk/y+yiRGDhJGdAuvfY4EY6tEF+04nnb
+         W+E/KPWoy3Y8C1E6/9RAW8iPPH+FBYLpbuFc7V8iAzTjSGRQ8wheWSBnfDmg+T745Kx2
+         hOhqJgXJzt075s+2H+90vPEiVtHScCWqJLVS82BfHBPpchabI8TI0nZFKc6ymjJ+guPp
+         TwOBe70KzITnGprVurL3t+qoifnSXG6MFae1atr4cD8eAUOLtgOpz2jiaPrm7O6+W0aF
+         5s0is1m5VPBj5IlX5ZgoiP1+GKuztB1d8OLIu6UzcQ184+2xDlGMI/Hgo+At56YRpr/J
+         TcDw==
+X-Gm-Message-State: AOAM531e1wo5GtBUTsTsoGsxecG/Ax4GqQrAMi4dJxRfN3z/kB0Nfpac
+        xhLwAE9VnBj2SovVXV6lg8lMvLn2wtFLqJVLr7/Jy90mwlo=
+X-Google-Smtp-Source: ABdhPJy6tO1OMq/NyfSGTbVdee+K2ilPZo+GUWPcv9w3UdyMBz9Io04zBfvqTM8j9rTDU9iIlWmWxdV1Z+c5tVaigtY=
+X-Received: by 2002:a05:6830:18e1:: with SMTP id d1mr5676150otf.87.1632418125474;
+ Thu, 23 Sep 2021 10:28:45 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210920161136.2398632-3-Jerome.Pouiller@silabs.com>
+References: <CAMeyCbhTcwcksdNC-1r5487oX-rmfmcdGiBiVng6E338hWzbEA@mail.gmail.com>
+In-Reply-To: <CAMeyCbhTcwcksdNC-1r5487oX-rmfmcdGiBiVng6E338hWzbEA@mail.gmail.com>
+From:   Kegl Rohit <keglrohit@gmail.com>
+Date:   Thu, 23 Sep 2021 19:28:34 +0200
+Message-ID: <CAMeyCbibWwjpiQa5oneLxuPyzH33OCUGaAz3++uzDvPH0oa8Bg@mail.gmail.com>
+Subject: Re: CM23: Reliable Write Request / Forced Programming Bits
+To:     linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 20 Sep 2021 18:11:14 +0200, Jerome Pouiller wrote:
-> From: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> 
-> Prepare the inclusion of the wfx driver in the kernel.
-> 
-> Signed-off-by: Jérôme Pouiller <jerome.pouiller@silabs.com>
-> ---
->  .../bindings/net/wireless/silabs,wfx.yaml     | 133 ++++++++++++++++++
->  1 file changed, 133 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/net/wireless/silabs,wfx.yaml
-> 
+I looked over the main use in the mmc block queue:
+This hardcoded (1 << 31), (1 << 29) ...
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+if ((md->flags & MMC_BLK_CMD23) && mmc_op_multi(brq->cmd.opcode) &&
+(do_rel_wr || !(card->quirks & MMC_QUIRK_BLK_NO_CMD23) ||
+do_data_tag)) {
+brq->sbc.opcode = MMC_SET_BLOCK_COUNT;
+brq->sbc.arg = brq->data.blocks |
+(do_rel_wr ? (1 << 31) : 0) |
+(do_data_tag ? (1 << 29) : 0);
+brq->sbc.flags = MMC_RSP_R1 | MMC_CMD_AC;
+brq->mrq.sbc = &brq->sbc;
+}
+
+https://github.com/torvalds/linux/blob/master/drivers/mmc/core/block.c#L1629
+
+I think this clears things up.
+=> I need to adapt my mmc_test sample code and simply set the request member:
+
+struct mmc_command sbc = {};
+mrq->sbc = &sbc;
+
+before calling mmc_test_prepare_sbc. Then the sbc opcode will be initialized.
+And if the MMC host and card supports CMD23 the host driver will
+execute the previously set mrq->sbc and disable auto CMD23 for this
+request.
+Am I right?
